@@ -57,7 +57,7 @@ class NetComputer
          * Sends a packet to this computer.
          * 
          * Note: When we'd want to allow communication through UDP, we could
-         *  introduce the reliable argument, which would could a UDP message
+         *  introduce the reliable argument, which would cause a UDP message
          *  to be sent when set to false.
          */
         void send(Packet *p);

@@ -25,6 +25,7 @@
 
 #include "netcomputer.h"
 #include "connectionhandler.h"
+#include <SDL.h>
 
 /**
  * This class represents a network session. It implements listening for
@@ -47,17 +48,17 @@ class NetSession
          * Start listening for connections and notify the given connection
          * handler about events.
          */
-        void startListen(ConnectionHandler *handler, int port);
+        void startListen(ConnectionHandler *handler, Uint16 port);
 
         /**
          * Stop listening for connections and disconnect any connected clients.
          */
-        void stopListen(int port);
+        void stopListen(Uint16 port);
 
         /**
          * Connect to another network session.
          */
-        NetComputer *connect(const std::string &ip, int port);
+        NetComputer *connect(const std::string &ip, Uint16 port);
 
     private:
         //  This class probably needs to keep information about:

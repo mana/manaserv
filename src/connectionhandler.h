@@ -36,6 +36,11 @@ class ConnectionHandler
 {
     public:
         /**
+         * Constructor.
+         */
+        ConnectionHandler();
+
+        /**
          * Called when a computer connects to a network session.
          */
         void computerConnected(NetComputer *computer);
