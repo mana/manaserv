@@ -41,23 +41,8 @@ class MessageHandler
          * to an ID this message handler registered to handle.
          */
         virtual void receiveMessage(
-                NetComputer *computer, MessageIn &message) = 0;
+                NetComputer &computer, MessageIn &message) = 0;
 
-        // To be moved to "AccountHandler"
-        /**
-         * Accepts a login message and interprets it, assigning the proper
-         * login
-         * Preconditions: The requested handle is not logged in already. 
-         *                The requested handle exists. 
-         *                The requested handle is not banned or restricted. 
-         *                The character profile is valid
-         * Postconditions: The player recieves access through a character in
-         *                 the world.
-         * Return Value: SUCCESS if the player was successfully assigned the
-         *               requested char, ERROR on early termination of the
-         *               routine.
-         */ 
-        int loginMessage(NetComputer *computer, MessageIn &message);
 };
 
 #endif

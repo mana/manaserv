@@ -25,7 +25,7 @@
 #include "debug.h"
 
 /*
-void AccountHandler::receiveMessage(NetComputer *computer, MessageIn &message)
+void MessageHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     int result = 0;
     
@@ -40,22 +40,3 @@ void AccountHandler::receiveMessage(NetComputer *computer, MessageIn &message)
     debugCatch(result);
 }
 */
-
-int MessageHandler::loginMessage(NetComputer *computer, MessageIn &message)
-{
-    // Get the handle (account) the player is requesting
-    // RETURN TMW_ACCOUNTERROR_NOEXIST if: requested does not handle exist
-    // RETURN TMW_ACCOUNTERROR_BANNED if: the handle status is
-    // HANDLE_STATUS_BANNED
-    // RETURN TMW_ACCOUNTERROR_ALREADYASSIGNED if: the handle is already
-    // assigned
-    
-    // Get the character within that handle that the player is requesting
-    // RETURN TMW_ACCOUNTERROR_CHARNOTFOUND if: character not found
-    
-    // Assign the player to that character
-    // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: assignment not successful
-    
-    // return TMW_SUCCESS -- successful exit
-    return TMW_SUCCESS;
-}
