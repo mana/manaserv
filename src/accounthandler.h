@@ -19,36 +19,43 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  
+ *  $Id$
  */
 
-// INCLUDES
-#include "debug.h"
+#ifndef _TMW_SERVER_ACCOUNTHANDLER_
+#define _TMW_SERVER_ACCOUNTHANDLER_
+
 #include "messagehandler.h"
-#include <string>
+#include "netcomputer.h"
+#include "messagein.h"
 #include "defines.h"
  
-/* Account Handler Class
- * 
+/**
  * Manages the data stored in user accounts and provides a reliable interface
  * for working with an account. The account handler class can be used as a link
  * to a working account handle, and can be assigned to a user persistently as 
  * an interface between the computer and account. (Messages from the user can 
  * be traced to this account through the NetComputer structure, then processed
  * here with the persistent stored data).
- *
  */
- 
-class AccountHandler public: MessageHandler
+class AccountHandler : public MessageHandler
 {
-    public: // functions
-        // generic message handling
+    public:
+        /**
+         * Receives account related messages.
+         */
         void receiveMessage(NetComputer &computer, MessageIn &message);
-        // message interpretation subroutine
+
+    private:
+        /**
+         * Handles the login message.
+         */
         int loginMessage(NetComputer &computer, MessageIn &message);
-    
-    private: // functions
-        // account assignment
-        int assignAccount(NetComputer &computer, accountData *account);
-    
-}
+
+        /**
+         * Account assignment.
+         */
+        int assignAccount(NetComputer &computer, AccountData *account);
+};
+
+#endif

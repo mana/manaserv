@@ -18,12 +18,13 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  
+ *  $Id$
  */
 
+#include "accounthandler.h"
+#include "debug.h"
 
-
-/* ----Receive Message----
+/**
  * Generic interface convention for getting a message and sending it to the
  * correct subroutines. Account handler takes care of determining the
  * current step in the account process, be it creation, setup, or login.
@@ -33,12 +34,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
     int result = 0;
     
     // determine message type
+    /*
     switch(message.type)
     {
         case TYPE_LOGIN:
             result = loginMessage(computer, message);
             break;
     }
+    */
 
     debugCatch(result);
 }
@@ -76,7 +79,7 @@ int AccountHandler::loginMessage(NetComputer &computer, MessageIn &message)
 }
 
 /* ----Account Assignment----
- * Assigns the computer to this accout, and allows it to make account
+ * Assigns the computer to this account, and allows it to make account
  * changes using this structure.
  * Preconditions: This structure already contains a valid accountHandle
  * Postconditions: The player is connected to the account through this handle
@@ -84,7 +87,7 @@ int AccountHandler::loginMessage(NetComputer &computer, MessageIn &message)
  *               requested handle, ERROR on early termination of the
  *               routine.
  */ 
-int AccountHandler::accountAssign(NetComputer &computer, accountData *account)
+int AccountHandler::assignAccount(NetComputer &computer, AccountData *account)
 {
     // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: the account was accessed before
     //                                          being initalized.
@@ -93,5 +96,4 @@ int AccountHandler::accountAssign(NetComputer &computer, accountData *account)
     
     
     return TMW_SUCCESS;
-    
 }

@@ -29,8 +29,6 @@
 #include "packet.h"
 #include <map>
 
-#include "accounthandler.h" // acount handling interface for the connection
-
 /**
  * This class represents the connection handler interface. The connection
  * handler will respond to connect/reconnect/disconnect events and handle

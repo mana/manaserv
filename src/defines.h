@@ -18,46 +18,53 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *  $Id$
  */
+
+#ifndef _TMW_SERVER_DEFINES_
+#define _TMW_SERVER_DEFINES_
+
+#include <string>
  
- // this file holds the global definitions and constants to be included
- // in multiple places throughout the server
+// this file holds the global definitions and constants to be included
+// in multiple places throughout the server
  
- // debug and error definitions go in debug.h, not here
- 
+// debug and error definitions go in debug.h, not here
+
+
 // I. ACCOUNT DEFINITIONS
-   // A. Account Types
-      #define STATUS_NORMAL     0 // denotes normal account status
-      #define STATUS_ADMIN      1 // denotes admin acount status
-      #define STATUS_GM         2 // denotes GM account status
-      #define STATUS_BANNED     3 // denotes a temporarily banned account
-      #define STATUS_RESTRICTED 4 // denotes a restricted access account
-      
-      
-      
+
+// A. Account Types
+
+#define STATUS_NORMAL     0 // denotes normal account status
+#define STATUS_ADMIN      1 // denotes admin acount status
+#define STATUS_GM         2 // denotes GM account status
+#define STATUS_BANNED     3 // denotes a temporarily banned account
+#define STATUS_RESTRICTED 4 // denotes a restricted access account
+
       
       
 // DATA STRUCTURES DEFINITIONS
 
 // persistent character data
-struct charData
+struct CharData
 {
-    string charName;         // character's name
+    std::string charName;         // character's name
     //equipData charEquip;   // structure of equipped items
     //estateData charEstate; // character's estate data
     //petData charPet[3];    // character's pets
     //itemData charItem;     // character's inventory
     //graphicData charGraphic; // character's appearance
-}
+};
 
 // Account Data Structure
-struct accountData
+struct AccountData
 {
-    string accountID;        // the account's ID
-    string accountEMail;     // the email of the account's owner
-    string accountPass;      // the account's password
-    int accountStatus;       // the account's status: normal, gm, banned, etc.
-    charData accountChar[5]; // the characters stored in the account.
-}
- 
+    std::string accountID;    // the account's ID
+    std::string accountEMail; // the email of the account's owner
+    std::string accountPass;  // the account's password
+    int accountStatus;        // the account's status: normal, gm, banned, etc.
+    CharData accountChar[5];  // the characters stored in the account.
+};
 
+#endif

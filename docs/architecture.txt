@@ -64,7 +64,7 @@ melt togheter.
         C - L - M
           /   \
         C       M
-        
+
 The login server manages new connections and stores all the informations about
 the player. The map server is pretty the same as the eAthena one. The login
 server manages also connections to a new map server when changing map. Having 
@@ -72,10 +72,9 @@ only one server (L) to manage all the connections between clients and map
 servers is a bad point: if the login server crashes players won't be able to
 play anymore. In fact new connecting players won't be able to connect to login
 server, while map server will disconnect every player, since they can't save
-their infos.
-The solutions are:
+their infos. Some solutions are:
     
-    - implementing a distributed login server which can manage crashes and
+    - Implementing a distributed login server which can manage crashes and
       redirect new connections to another login server. This way means a more
       complex implementation and probably the need to other computers since we
       want the login servers to be independent from each other crashes at all.
@@ -95,10 +94,19 @@ The solutions are:
       if some of the data was already stored before the crash, what if both of
       them crash?
       
-    - waiting it's the only solution! Let's design the login server as much
+    - Waiting it's the only solution! Let's design the login server as much
       simple and stable as possible and create a smart restarting system.
       This way we will have less frequent crashes and a very low restarting
-      time. Obiouvlsy this is the easiest and less expensive solution.    
+      time. Obviously this is the easiest and less expensive solution.    
+
+    - Make the server completely distributed and replicating data to all of
+      them. This is the way Hammerbear would like to try.
+
+        C ----- S
+              / | \           C = client
+        C ---/  S |           S = server (login, char, map, database)
+                | /
+        C ----- S
 
 
 5. Network protocol: TCP
@@ -107,7 +115,7 @@ RO is TCP based, mainly because you use the mouse to move the player. When you
 want to reach a point on the map, you click on it and the client send a packet
 to the server with destination coordinates. The server replies with an
 agreement if there's a path to that way. Using this way you don't need high
-speed nor a lot of packets, so TCP it's enough.
+speed nor a lot of packets, so TCP is enough.
 
 With our custom server we want to achieve pixel movements, by that we mean that
 the player is not always positioned in the center of the tile, but will have

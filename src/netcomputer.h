@@ -66,7 +66,6 @@ class NetComputer
          */
         void send(Packet *p);
         //void send(Packet *p, bool reliable = true);
-        
 };
 
 #endif

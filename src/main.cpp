@@ -22,6 +22,8 @@
  */
 
 #include "netsession.h"
+#include "connectionhandler.h"
+#include "accounthandler.h"
 #include <SDL.h>
 #include <SDL_net.h>
 
@@ -89,6 +91,13 @@ int main(int argc, char *argv[])
     // Ready for server work...
     ConnectionHandler *connectionHandler = new ConnectionHandler();
     NetSession *session = new NetSession();
+
+    // Note: This is just an idea, we could also pass the connection handler
+    // to the constructor of the account handler, upon which is would register
+    // itself for the messages it handles.
+    //
+    //AccountHandler *accountHandler = new AccountHandler();
+    //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
     session->startListen(connectionHandler, SERVER_PORT);
 
