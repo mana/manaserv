@@ -1,0 +1,222 @@
+-------------------
+SERVER ARCHITECTURE
+-------------------
+
+1. INTRODUCTION
+2. RO REVIEW
+3. EATHENA MODEL
+4. TMW SERVER
+5. TCP - UDP
+6. SECURITY
+7. DATABASE
+8. REGISTRATION
+9. SERVER CONTROL
+10. OPERATING SYSTEM
+11. ADVANCED DATA TRANSMISSION
+
+
+1. INTRODUCTION
+
+One of the most important thing in a online game is the architecture of the
+server system, which reflects in performances (lag and denial of service),
+scalability, fault tolerance. In this article we will examine the pre-existing
+model and we will evaluate a way to improve it and to add custom features.
+
+
+2. RO REVIEW
+
+Let's start by taking as reference the current server system used to play
+Ragnarok Online on the euRO server. (www.euro-ro.net)
+RO works by using 4 kinds of server:
+
+ - Login Server (L): takes care of verifying accounts with username-password
+   system, allows also encrypted login.
+
+ - Char Server (C): saves every player status (stats, items, equipment, skills
+   and so on.
+
+ - Map Server (M): the real game server, work as interconnection between
+   clients, manage chat, monster AI, damage calculations and everything you can
+   see in game.
+
+ - Inter Server (I): probably manages the messages between the other type of
+   servers.
+
+In euRO there are 1 login server, 1 char server, 1 inter server and 14 map
+servers.
+
+
+3. EATHENA MODEL
+
+The eAthena system mirrors the way used by official RO servers. eAthena
+implements 3 servers: login, char and map. It is allowed to have more than one
+map server at a time. Every server communicates with all the others.
+
+
+4. TMW SERVER
+
+The basic idea of TMW server architecture mainly is the same as the one used by
+eAthena. Since the login and char server don't have heavy traffic they could be
+melt togheter.
+
+        C       M
+          \   /
+        C - L - M
+          /   \
+        C       M
+        
+The login server manages new connections and stores all the informations about
+the player. The map server is pretty the same as the eAthena one. The login
+server manages also connections to a new map server when changing map. Having 
+only one server (L) to manage all the connections between clients and map
+servers is a bad point: if the login server crashes players won't be able to
+play anymore. In fact new connecting players won't be able to connect to login
+server, while map server will disconnect every player, since they can't save
+their infos.
+The solutions are:
+    
+    - implementing a distributed login server which can manage crashes and
+      redirect new connections to another login server. This way means a more
+      complex implementation and probably the need to other computers since we
+      want the login servers to be independent from each other crashes at all.
+      (Remember this is a free project so we should limit the number of
+      computers to act as servers)
+      
+    - RALS (Redundant Array of Login Servers): we can have two login servers,
+      only one of them is active at a time and they share the same database
+      where to store infos about players. If one of the map servers loose the
+      connection with the login server enables the other, while the crashed one
+      restarts. Even if it restarted is it now considered disabled. The new
+      active login server will send messages to every map server to inform them.
+      Every time a client connects check both of the login server and connect to
+      the active one. The bad points of this system are that will imply a lot of
+      data consistency checks: map servers should resend last data since it 
+      was lost when the login server crashed, the new login server should check
+      if some of the data was already stored before the crash, what if both of
+      them crash?
+      
+    - waiting it's the only solution! Let's design the login server as much
+      simple and stable as possible and create a smart restarting system.
+      This way we will have less frequent crashes and a very low restarting
+      time. Obiouvlsy this is the easiest and less expensive solution.    
+
+
+5. Network protocol: TCP
+
+RO is TCP based, mainly because you use the mouse to move the player. When you
+want to reach a point on the map, you click on it and the client send a packet
+to the server with destination coordinates. The server replies with an
+agreement if there's a path to that way. Using this way you don't need high
+speed nor a lot of packets, so TCP it's enough.
+
+With our custom server we want to achieve pixel movements, by that we mean that
+the player is not always positioned in the center of the tile, but will have
+fine coordinates.
+
+Asking the server if every destination coordinates is walkable means a lot of
+traffic from and to the server and probably will result in lag. Using UDP will
+probably help avoiding this problem, but having a reliable protocol such as TCP
+will make things easier and more stable. We just need to design an efficient
+prediction system (probably also a linear one will suffice).
+
+An idea could be using the system I used for a racing game where speed was
+fundamental. When you press a key to move, the client sends a packet with
+starting coordinates, direction and client time. When you release the key (or
+change direction) the client sends another packet with current coordinates and
+client time. According to the player speed and the difference of client times
+the server check if the coordinates sent by the client are right, if not reply
+with a packet with the correct position. The server also check if the time
+interval sent by the client is right: if not it means that the values have been
+hacked or the lag corrupted them. We can set a tolerance value: if the time
+interval exceeds the tolerance then the whole movement is discarded and the
+server send a packet to tell the client to place the player at starting coords.
+
+
+6. SECURITY
+
+To certificate authenticity of the player we can use a system based on digital
+signature and hash (encrypted login).
+
+Better security can be provided by encrypting payload of packets using RSA
+algorytm. When logging in the client generates both its public and private key
+and will send the public one to the server. The server acts the same: when it
+starts it creates both the key and replies to login with its public key.
+Using encryption will reduce client/server performances because this will need
+a lot more calculations.
+Furthermore if using digital signature will introduce a lot of overhead.
+So there's still the need to discuss if we need to use encryption not only in
+the login part.
+
+Solutions to keep the server working and avoid unfair players:
+
+ - DoS attack:
+        * Account activation.
+        * Limit number of accounts to 1 per email address.
+        
+ - Cheating/Botting:
+        * First of all just keep every calculation done by the server.
+        
+Also we need the possibility to warn/kick/ban players/accounts/ip addresses.
+
+
+7. DATABASE
+
+Player data should be stored using databases, probably MySQL. This way player
+infos could be easily accessed trough web and used to show stats or required
+infos on the website/forum.
+
+
+8. REGISTRATION
+
+Still to decide if we want to use a dialog (client registration) or to use a
+web based interface (web registration).
+Registration should ask for less details as possible. This way it will be less
+annoying. Required infos will be:
+    
+    - username
+    - password
+    - email (to limit account number and to be used to activate account)
+    
+More infos could be added later for security problem (such as activation codes
+and so on).
+In RO you also have to choose the sex of your player. It will be better to let
+the user choose the sex when creating the player: this way he can delete is male
+player and create a female one.
+
+
+9. SERVER CONTROL
+
+The server can be controlled in two ways:
+    
+    - In game control: server admins or GMs sending particular commands or a
+      trough a GUI (the way it is used in Ultima Online).
+    
+    - A graphical interface which connects to the server trough an open port.
+    
+The prefferred way is the first one.
+
+ 
+10. OPERATING SYSTEM
+
+We have two choices about this: the former is to follow as for the client the
+cross-compatibility philosophy. This means that the server will compile on every
+windows, unix, macos based system. The latter is to choose the best performance
+system (probably linux) and implement a unique os server.
+Just remember that the current game server run on linux.
+
+
+11. ADVANCED DATA TRANSMISSION
+
+Other ways to reduce bandwidth can be considered such as:
+    
+    - Using bitstreams instead of bytestreams: this way if you need to send a
+      boolean values only 1 bit will be required instead of 1 byte (compression
+      8:1), item types (4 different types) can be represented sending 2 bits
+      instead of 1 byte (compression 8:2), player coordinates can be represented
+      using 20 bits instead of 4 bytes (compression 24:20)
+      
+    - Compressing data following packet id could help reducing bandwidth usage
+      as well. RLE compression or more advanced statistical techniques can be
+      used. Compression can be disabled in very slow systems (If using
+      compression is declared to the server when the client connects to map
+      server.

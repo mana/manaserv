@@ -1,0 +1,105 @@
+-------------------------
+MESSAGE PASSING MECHANISM
+-------------------------
+
+1. INTRODUCTION
+2. MESSAGE
+3. ROUTING
+4. SERIALIZING PRIMITIVES
+5. SERIALIZING CUSTOM DATA TYPES
+
+
+1. INTRODUCTION
+
+In server.txt we describe the datatypes involved at both client and server, and
+the related messages that are passed from client to server and back. In this
+file we will describe how the actual messages are composed and how they are
+routed from where they come from to where they are taken care of.
+
+ PLEASE NOTE: Everything in this file is open for discussion. This file is
+ meant to get ideas acros, find flaws in the reasoning and generally get
+ comments on the system before somebody sets out to implement it.
+
+
+2. MESSAGE
+
+The protocol is described in terms of messages. Each message has a certain
+type, a length, and a certain number of values in primitive data types:
+
+   { C msgId, S length, ... }
+
+The length stores the length of the remaining data. We need this so that the
+message can be cut off from the incoming stream of bytes and be encapsulated
+on its own to be further processed.
+
+The primitive data types are the same as those described in server.txt. The
+first thing that is done to the incoming message in to put it in an instance
+of the Message class. Below we outline the Message interface:
+
+  class Message
+  {
+    public:
+      Message(int length, void* data);
+      ~Message();
+
+      int getChar();
+      int getShort();
+      int getLong();
+      std::string getString();
+
+    private:
+      int length, readPointer;
+      void* data;
+  }
+
+
+3. ROUTING
+
+After the Message instance has been constructed, it is routed to the message
+handler that has registered itself to handle this message type. If no handler
+has been registered a warning should probably be issued. A message handler
+implements the following interface:
+
+  class MessageHandler
+  {
+    public:
+      void receiveMessage(int msgId, Message *msg) = 0;
+  }
+
+A mapping is made from message types to message handlers. One handler could
+be registered to handle a group of message types. This mapping can be stored
+in a std::map as follows:
+
+  std::map<int, MessageHandler*> messageHandlers;
+
+This will be a member of the class that processes the incoming byte stream,
+which will implement an interface to allow registration of message handlers,
+for example:
+
+  void registerHandler(int msgId, MessageHandler *handler);
+
+
+4. SERIALIZING PRIMITIVES
+
+Here we will describe for each primitive data type how it is serialized in
+bytes.
+
+  char:    1 byte  (direct copy)
+  short:   2 bytes (now need to keep in mind endian order)
+  long:    4 bytes (see short)
+  string:  2 bytes for length (short) + X bytes (characters)
+
+
+5. SERIALIZING CUSTOM DATA TYPES
+
+Custom data types will be serialized using a composition of the primitive data
+types, or other custom data types. They will need to implement the following
+interface:
+
+  class Serializable
+  {
+    public:
+      void serialize(Message *msg);
+      static Serializable *unserialize(Message *msg);
+  }
+
