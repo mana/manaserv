@@ -1,7 +1,12 @@
 [Project]
 FileName=tmwserv.dev
-Name=Project1
+<<<<<<< tmwserv.dev
+Name=tmwserv
+UnitCount=17
+=======
+Name=tmwserv
 UnitCount=20
+>>>>>>> 1.2
 Type=1
 Ver=1
 ObjFiles=
@@ -12,13 +17,13 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=
 CppCompiler=
-Linker=
+Linker=-lmingw32_@@_-lSDLmain_@@_-lSDL_@@_-lSDL_net_@@_
 IsCpp=1
 Icon=
 ExeOutput=
 ObjectOutput=
 OverrideOutput=0
-OverrideOutputName=
+OverrideOutputName=tmwserv.exe
 HostApplication=
 Folders=header,source
 CommandLine=
@@ -27,7 +32,7 @@ CustomMakefile=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=
+CompilerSettings=0000000000000000000100
 
 [Unit1]
 FileName=src\connectionhandler.cpp
