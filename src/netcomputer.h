@@ -22,6 +22,7 @@
  */
 
 #ifndef _TMW_SERVER_NETCOMPUTER_
+#define _TMW_SERVER_NETCOMPUTER_
 
 // Forward declaration
 class NetSession;

@@ -21,6 +21,9 @@
  *  $Id$
  */
 
+#ifndef _TMW_SERVER_PACKET_
+#define _TMW_SERVER_PACKET_
+
 /**
  * A packet wraps a certain amount of bytes for sending and receiving.
  */
@@ -40,3 +43,5 @@ class Packet
         char *data;                  /**< Packet data */
         unsigned int length;         /**< Length of data in bytes */
 };
+
+#endif

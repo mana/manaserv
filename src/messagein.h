@@ -21,6 +21,9 @@
  *  $Id$
  */
 
+#ifndef _TMW_SERVER_MESSAGEIN_
+#define _TMW_SERVER_MESSAGEIN_
+
 #include "packet.h"
 
 /**
@@ -49,3 +52,5 @@ class MessageIn
         Packet *packet;
         unsigned int pos;
 };
+
+#endif

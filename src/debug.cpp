@@ -25,25 +25,17 @@
 #include "debug.h"
 
 // global debugging flag (set to false in release version)
-int debugflag=false;
+int debugflag = false;
 
-
-
-/* debugCatch
- * returns a message on function failure if the debug flag is set to true
- * Execution: O(1) -- Linear 
- * Preconditions: TRUE
- * Postconditions: TRUE
- * --- by Kyokai
- */ 
 
 void debugCatch(int result)
 {
-    if(!debugflag)
+    if (!debugflag) {
         return; // break out if we are not debugging    
+    }
               
                    
-    switch(result)
+    switch (result)
     {
         case TMW_SUCCESS: // function successful
             return;
@@ -64,5 +56,4 @@ void debugCatch(int result)
             // show a message
             break;
     }
-                  
 }

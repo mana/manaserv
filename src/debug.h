@@ -19,13 +19,16 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
- 
- // This file defines the return types for debugging
 
-// (PASTE THE LINE BELOW to include debug support in your file)
-//
-// extern void debugCatch(int result);
-// 
+#ifndef _TMW_SERVER_DEBUG_
+#define _TMW_SERVER_DEBUG_
+ 
+// This file defines the return types for debugging
+
+/**
+ * Returns a message on function failure if the debug flag is set to true.
+ */ 
+extern void debugCatch(int result);
 
 
 // message handler definitions
@@ -40,4 +43,6 @@
 #define TMW_ACCOUNTERROR_BANNED                101
 #define TMW_ACCOUNTERROR_ALREADYASSIGNED       102
 #define TMW_ACCOUNTERROR_CHARNOTFOUND          103
-#defire TMW_ACCOUNTERROR_ASSIGNFAILED          104
+#define TMW_ACCOUNTERROR_ASSIGNFAILED          104
+
+#endif

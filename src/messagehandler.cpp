@@ -22,22 +22,16 @@
  */
 
 #include "messagehandler.h"
-
-extern void debugCatch(int result)
+#include "debug.h"
 
 /* recieveMessage
  * This function recieves a message, then sends it to the appropriate handler
  * sub-routine for processing.
- * Execution: O(x) -- Variable
  * Preconditions: valid parameters, queue initialized, etc.
  * Postconditions: message successfully processed.
- * --- by Kyokai
  */ 
 void MessageHandler::receiveMessage(NetComputer *computer, MessageIn &message)
 {
-    // ASSERT: valid computer
-    // ASSERT: valid message
-    
     int result = 0;
     
     // determine message type
@@ -53,10 +47,8 @@ void MessageHandler::receiveMessage(NetComputer *computer, MessageIn &message)
 }
 
 
-
 /* loginMessage
  * Accepts a login message and interprets it, assigning the proper login
- * Execution: O(n) -- Linear by (number of accounts)
  * Preconditions: The requested handle is not logged in already. 
  *                The requested handle exists. 
  *                The requested handle is not banned or restricted. 
@@ -64,11 +56,9 @@ void MessageHandler::receiveMessage(NetComputer *computer, MessageIn &message)
  * Postconditions: the player recieves access through a character in the world.
  * Return Value: SUCCESS if the player was successfully assigned the requested char
  *               ERROR on early termination of the routine.
- * --- by Kyokai
  */ 
 int MessageHandler::loginMessage(NetComputer *computer, MessageIn &message)
 {
-    
     // Get the handle (account) the player is requesting
     // RETURN TMW_ACCOUNTERROR_NOEXIST if: requested does not handle exist
     // RETURN TMW_ACCOUNTERROR_BANNED if: the handle status is HANDLE_STATUS_BANNED
@@ -81,6 +71,4 @@ int MessageHandler::loginMessage(NetComputer *computer, MessageIn &message)
     // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: assignment not successful
     
     // return TMW_SUCCESS -- successful exit
- 
 }
-

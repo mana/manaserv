@@ -30,7 +30,7 @@ CompilerSet=0
 CompilerSettings=
 
 [Unit1]
-FileName=connectionhandler.cpp
+FileName=src\connectionhandler.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -40,7 +40,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit2]
-FileName=connectionhandler.h
+FileName=src\connectionhandler.h
 CompileCpp=1
 Folder=header
 Compile=1
@@ -50,7 +50,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit3]
-FileName=main.cpp
+FileName=src\main.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -60,7 +60,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit4]
-FileName=messagehandler.cpp
+FileName=src\messagehandler.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -70,7 +70,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit5]
-FileName=messagehandler.h
+FileName=src\messagehandler.h
 CompileCpp=1
 Folder=header
 Compile=1
@@ -80,7 +80,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit6]
-FileName=messagein.cpp
+FileName=src\messagein.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -90,7 +90,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit7]
-FileName=messagein.h
+FileName=src\messagein.h
 CompileCpp=1
 Folder=header
 Compile=1
@@ -100,7 +100,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit8]
-FileName=messageout.cpp
+FileName=src\messageout.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -110,7 +110,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit9]
-FileName=messageout.h
+FileName=src\messageout.h
 CompileCpp=1
 Folder=header
 Compile=1
@@ -120,7 +120,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit10]
-FileName=netcomputer.cpp
+FileName=src\netcomputer.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -130,7 +130,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit11]
-FileName=netcomputer.h
+FileName=src\netcomputer.h
 CompileCpp=1
 Folder=header
 Compile=1
@@ -140,7 +140,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit12]
-FileName=netsession.cpp
+FileName=src\netsession.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -150,7 +150,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit13]
-FileName=netsession.h
+FileName=src\netsession.h
 CompileCpp=1
 Folder=header
 Compile=1
@@ -160,7 +160,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit14]
-FileName=packet.cpp
+FileName=src\packet.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -170,7 +170,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit15]
-FileName=packet.h
+FileName=src\packet.h
 CompileCpp=1
 Folder=header
 Compile=1
@@ -198,7 +198,7 @@ ProductVersion=
 AutoIncBuildNr=0
 
 [Unit16]
-FileName=debug.cpp
+FileName=src\debug.cpp
 CompileCpp=1
 Folder=source
 Compile=1
@@ -208,7 +208,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit17]
-FileName=debug.h
+FileName=src\debug.h
 CompileCpp=1
 Folder=header
 Compile=1

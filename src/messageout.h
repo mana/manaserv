@@ -21,6 +21,9 @@
  *  $Id$
  */
 
+#ifndef _TMW_SERVER_MESSAGEOUT_
+#define _TMW_SERVER_MESSAGEOUT_
+
 #include "packet.h"
 
 class MessageOut
@@ -55,3 +58,5 @@ class MessageOut
     private:
         Packet *packet;                      /**< Created packet. */
 };
+
+#endif

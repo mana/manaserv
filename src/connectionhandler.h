@@ -22,6 +22,7 @@
  */
 
 #ifndef _TMW_SERVER_CONNECTIONHANDLER_
+#define _TMW_SERVER_CONNECTIONHANDLER_
 
 #include "netcomputer.h"
 #include "packet.h"

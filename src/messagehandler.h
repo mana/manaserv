@@ -22,11 +22,10 @@
  */
 
 #ifndef _TMW_SERVER_MESSAGEHANDLER_
+#define _TMW_SERVER_MESSAGEHANDLER_
 
 #include "netcomputer.h"
 #include "messagein.h"
-
-#include "debug.h"
 
 /**
  * This class represents the message handler interface. This interface is
@@ -47,6 +46,7 @@ class MessageHandler
          *  methods to convenient parse and build packets transparently.
          */
         void receiveMessage(NetComputer *computer, MessageIn &message);
+
         void loginMessage(NetComputer *computer, MessageIn &message);
 };
 

@@ -22,6 +22,7 @@
  */
 
 #ifndef _TMW_SERVER_NETSESSION_
+#define _TMW_SERVER_NETSESSION_
 
 #include "netcomputer.h"
 #include "connectionhandler.h"
