@@ -21,10 +21,19 @@
  *  $Id$
  */
 
-#include "connectionhandler.h"
+#include "packet.h"
+#include <string.h>
 
-
-ConnectionHandler::registerHandler(unsigned int msgId, MessageHandler *handler)
+Packet::Packet(const char *data, int length):
+    length(length)
 {
-    handlers[msgId] = handler;
+    // Create a copy of the data
+    this->data = new char[length];
+    memcpy(this->data, data, length);
+}
+
+Packet::~Packet()
+{
+    // Clean up the data
+    delete[] data;
 }

@@ -21,10 +21,31 @@
  *  $Id$
  */
 
-#include "connectionhandler.h"
+#include "packet.h"
 
-
-ConnectionHandler::registerHandler(unsigned int msgId, MessageHandler *handler)
+/**
+ * A helper class to 
+ */
+class MessageIn
 {
-    handlers[msgId] = handler;
-}
+    public:
+        /**
+         * Constructor.
+         */
+        MessageIn(Packet *p);
+
+        char readByte();              /**< Reads a byte. */
+        int readShort();              /**< Reads a short. */
+        int readLong();               /**< Reads a long. */
+
+        /**
+         * Reads a string. If a length is not given (-1), it is assumed
+         * that the length of the string is stored in a short at the
+         * start of the string.
+         */
+        std::string readString(int length = -1);
+
+    private:
+        Packet *packet;
+        unsigned int pos;
+};

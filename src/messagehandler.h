@@ -23,6 +23,9 @@
 
 #ifndef _TMW_SERVER_MESSAGEHANDLER_
 
+#include "netcomputer.h"
+#include "messagein.h"
+
 /**
  * This class represents the message handler interface. This interface is
  * implemented by classes that mean to handle a certain subset of the incoming
@@ -41,7 +44,7 @@ class MessageHandler
          *  by both a MessageIn and a MessageOut class that would implement
          *  methods to convenient parse and build packets transparently.
          */
-        void receiveMessage(Computer *computer, MessageIn *message);
+        void receiveMessage(NetComputer *computer, MessageIn &message);
 };
 
 #endif

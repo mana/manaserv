@@ -21,10 +21,37 @@
  *  $Id$
  */
 
-#include "connectionhandler.h"
+#include "packet.h"
 
-
-ConnectionHandler::registerHandler(unsigned int msgId, MessageHandler *handler)
+class MessageOut
 {
-    handlers[msgId] = handler;
-}
+    public:
+        /**
+         * Constructor.
+         */
+        MessageOut();
+
+        /**
+         * Destructor.
+         */
+        ~MessageOut();
+
+        void writeByte(char value);          /**< Reads a byte. */
+        void writeShort(short value);        /**< Reads a short. */
+        void writeLong(long value);          /**< Reads a long. */
+
+        /**
+         * Writes a string. If a fixed length is not given (-1), it is stored
+         * as a short at the start of the string.
+         */
+        void writeString(int length = -1);
+
+        /**
+         * Returns an instance of Packet derived from the written data. Use for
+         * sending the packet.
+         */
+        const Packet *getPacket();
+
+    private:
+        Packet *packet;                      /**< Created packet. */
+};

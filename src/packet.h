@@ -21,10 +21,22 @@
  *  $Id$
  */
 
-#include "connectionhandler.h"
-
-
-ConnectionHandler::registerHandler(unsigned int msgId, MessageHandler *handler)
+/**
+ * A packet wraps a certain amount of bytes for sending and receiving.
+ */
+class Packet
 {
-    handlers[msgId] = handler;
-}
+    public:
+        /**
+         * Constructor.
+         */
+        Packet(const char *data, int length);
+
+        /**
+         * Destructor.
+         */
+        ~Packet();
+
+        char *data;                  /**< Packet data */
+        unsigned int length;         /**< Length of data in bytes */
+};

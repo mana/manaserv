@@ -21,10 +21,5 @@
  *  $Id$
  */
 
-#include "connectionhandler.h"
+#include "messagein.h"
 
-
-ConnectionHandler::registerHandler(unsigned int msgId, MessageHandler *handler)
-{
-    handlers[msgId] = handler;
-}

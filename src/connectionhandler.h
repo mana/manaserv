@@ -25,6 +25,7 @@
 
 #include "netcomputer.h"
 #include "packet.h"
+#include <map>
 
 /**
  * This class represents the connection handler interface. The connection
@@ -56,6 +57,14 @@ class ConnectionHandler
          * Called when a computer sends a packet to the network session.
          */
         void receivePacket(NetComputer *computer, Packet *packet);
+
+        /**
+         * Registers a message handler to handle a certain message type.
+         */
+        void registerHandler(unsigned int msgId, MessageHandler *handler);
+
+    private:
+        std::map<unsigned int, MessageHandler*> handlers;
 };
 
 #endif

@@ -21,10 +21,16 @@
  *  $Id$
  */
 
-#include "connectionhandler.h"
+#include "messageout.h"
 
-
-ConnectionHandler::registerHandler(unsigned int msgId, MessageHandler *handler)
+MessageOut::MessageOut():
+    packet(NULL)
 {
-    handlers[msgId] = handler;
+}
+
+MessageOut::~MessageOut()
+{
+    if (packet) {
+        delete packet;
+    }
 }
