@@ -2,6 +2,8 @@ bin_PROGRAMS = tmwserv
 tmwserv_SOURCES = main.cpp \
 		  connectionhandler.h \
 		  connectionhandler.cpp \
+		  debug.h \
+		  debug.cpp \
 		  messagehandler.h \
 		  messagehandler.cpp \
 		  messagein.h \
@@ -19,7 +21,7 @@ tmwserv_SOURCES = main.cpp \
 INCLUDES= $(all_includes)
 
 # the library search path.
-tmwserv_LDFLAGS = $(all_libraries) $(LIBSDL_RPATH) `pkg-config --libs libxml-2.0`
-tmwserv_CXXFLAGS = -g -Wall $(LIBSDL_CFLAGS) `pkg-config --cflags libxml-2.0` -fno-inline
-tmwserv_LDADD = $(LIBSDL_LIBS) -lphysfs
+tmwserv_LDFLAGS = $(all_libraries) -lSDL_net `sdl-config --libs` `pkg-config --libs libxml-2.0` -lphysfs
+tmwserv_CXXFLAGS = -g -Wall `sdl-config --cflags` `pkg-config --cflags libxml-2.0` -fno-inline
+#tmwserv_LDADD = $(LIBSDL_LIBS) -lphysfs
 tmwserv_TARGET = ../tmwserv

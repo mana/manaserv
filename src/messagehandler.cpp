@@ -24,45 +24,31 @@
 #include "messagehandler.h"
 #include "debug.h"
 
-/* recieveMessage
- * This function recieves a message, then sends it to the appropriate handler
- * sub-routine for processing.
- * Preconditions: valid parameters, queue initialized, etc.
- * Postconditions: message successfully processed.
- */ 
-void MessageHandler::receiveMessage(NetComputer *computer, MessageIn &message)
+/*
+void AccountHandler::receiveMessage(NetComputer *computer, MessageIn &message)
 {
     int result = 0;
     
     // determine message type
-    /* switch(message.type)
-     * {
-     *     case: TYPE_LOGIN
-     *         result = loginMessage(computer, message);
-     *         break;
-     * }
-     */ 
-     
-     debugCatch(result);
+    switch(message.type)
+    {
+        case TYPE_LOGIN:
+            result = loginMessage(computer, message);
+            break;
+    }
+
+    debugCatch(result);
 }
+*/
 
-
-/* loginMessage
- * Accepts a login message and interprets it, assigning the proper login
- * Preconditions: The requested handle is not logged in already. 
- *                The requested handle exists. 
- *                The requested handle is not banned or restricted. 
- *                The character profile is valid
- * Postconditions: the player recieves access through a character in the world.
- * Return Value: SUCCESS if the player was successfully assigned the requested char
- *               ERROR on early termination of the routine.
- */ 
 int MessageHandler::loginMessage(NetComputer *computer, MessageIn &message)
 {
     // Get the handle (account) the player is requesting
     // RETURN TMW_ACCOUNTERROR_NOEXIST if: requested does not handle exist
-    // RETURN TMW_ACCOUNTERROR_BANNED if: the handle status is HANDLE_STATUS_BANNED
-    // RETURN TMW_ACCOUNTERROR_ALREADYASSIGNED if: the handle is already assigned
+    // RETURN TMW_ACCOUNTERROR_BANNED if: the handle status is
+    // HANDLE_STATUS_BANNED
+    // RETURN TMW_ACCOUNTERROR_ALREADYASSIGNED if: the handle is already
+    // assigned
     
     // Get the character within that handle that the player is requesting
     // RETURN TMW_ACCOUNTERROR_CHARNOTFOUND if: character not found
@@ -71,4 +57,5 @@ int MessageHandler::loginMessage(NetComputer *computer, MessageIn &message)
     // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: assignment not successful
     
     // return TMW_SUCCESS -- successful exit
+    return TMW_SUCCESS;
 }

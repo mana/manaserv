@@ -39,15 +39,25 @@ class MessageHandler
         /**
          * Called when a message is received with a message ID that corresponds
          * to an ID this message handler registered to handle.
-         *
-         * Note: A MessageIn is used here which hasn't been defined yet, but
-         *  I imagine that Packet instances would be very simple, and wrapped
-         *  by both a MessageIn and a MessageOut class that would implement
-         *  methods to convenient parse and build packets transparently.
          */
-        void receiveMessage(NetComputer *computer, MessageIn &message);
+        virtual void receiveMessage(
+                NetComputer *computer, MessageIn &message) = 0;
 
-        void loginMessage(NetComputer *computer, MessageIn &message);
+        // To be moved to "AccountHandler"
+        /**
+         * Accepts a login message and interprets it, assigning the proper
+         * login
+         * Preconditions: The requested handle is not logged in already. 
+         *                The requested handle exists. 
+         *                The requested handle is not banned or restricted. 
+         *                The character profile is valid
+         * Postconditions: The player recieves access through a character in
+         *                 the world.
+         * Return Value: SUCCESS if the player was successfully assigned the
+         *               requested char, ERROR on early termination of the
+         *               routine.
+         */ 
+        int loginMessage(NetComputer *computer, MessageIn &message);
 };
 
 #endif

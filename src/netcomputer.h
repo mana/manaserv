@@ -24,6 +24,9 @@
 #ifndef _TMW_SERVER_NETCOMPUTER_
 #define _TMW_SERVER_NETCOMPUTER_
 
+#include "packet.h"
+#include <string>
+
 // Forward declaration
 class NetSession;
 

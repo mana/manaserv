@@ -24,6 +24,7 @@
 #ifndef _TMW_SERVER_CONNECTIONHANDLER_
 #define _TMW_SERVER_CONNECTIONHANDLER_
 
+#include "messagehandler.h"
 #include "netcomputer.h"
 #include "packet.h"
 #include <map>

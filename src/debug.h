@@ -39,7 +39,7 @@ extern void debugCatch(int result);
 #define TMW_SUCCESS                              1 // the function completed successfully
  
  // ACCOUNT
-#define TMW_ACCOUNTERROR_NOEXIST               101
+#define TMW_ACCOUNTERROR_NOEXIST               100
 #define TMW_ACCOUNTERROR_BANNED                101
 #define TMW_ACCOUNTERROR_ALREADYASSIGNED       102
 #define TMW_ACCOUNTERROR_CHARNOTFOUND          103

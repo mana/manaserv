@@ -22,7 +22,14 @@
  */
 
 #include "netsession.h"
-#include <SDL_net.h>
+
+
+int startListenThread(void *data)
+{
+    // So who will do the actual listening now?
+    return 0;
+}
+
 
 NetSession::NetSession()
 {
@@ -39,23 +46,51 @@ void NetSession::startListen(ConnectionHandler *handler, Uint16 port)
     // will call connect/disconnect events on the given ConnectionHandler and
     // will cut incoming data into Packets and send them there too.
 
-    IPaddress address;
-    address.host = INADDR_ANY;
-    address.port = port;
+    ListenThreadData *data = new ListenThreadData;
 
-    TCPsocket tcpsock = SDLNet_TCP_Open(address);
-    if (!tcpsock) {
-       printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-       exit(3);
+    data->address.host = INADDR_ANY;
+    data->address.port = port;
+    data->handler = handler;
+    data->running = true;
+    data->socket = SDLNet_TCP_Open(&data->address);
+
+    if (!data->socket) {
+        printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+        exit(3);
     }
+
+    data->thread = SDL_CreateThread(startListenThread, data);
+
+    if (data->thread == NULL) {
+        printf("SDL_CreateThread: %s\n", SDL_GetError());
+        exit(5);
+    }
+
+    listeners[port] = data;
 }
 
 void NetSession::stopListen(Uint16 port)
 {
-    // Here all open connections on this port will be closed, and listening
-    // thread is stopped.
+    std::map<Uint16, ListenThreadData*>::iterator threadDataI;
+    threadDataI = listeners.find(port);
 
-    // void SDLNet_TCP_Close(TCPsocket sock);
+    if (threadDataI != listeners.end())
+    {
+        ListenThreadData *data = (*threadDataI).second;
+
+        // Tell listen thread to stop running
+        data->running = false;
+
+        // Wait for listen thread to stop and close socket
+        // Note: Somewhere in this process the ConnectionHandler should receive
+        //       disconnect notifications about all the connected clients.
+        SDL_WaitThread(data->thread, NULL);
+        SDLNet_TCP_Close(data->socket);
+    }
+    else
+    {
+        printf("NetSession::stopListen() not listening to port %d!\n", port);
+    }
 }
 
 NetComputer *NetSession::connect(const std::string &host, Uint16 port)
@@ -69,14 +104,18 @@ NetComputer *NetSession::connect(const std::string &host, Uint16 port)
     
     if (!SDLNet_ResolveHost(&address, host.c_str(), port))
     {
-        TCPsocket tcpsock = SDLNet_TCP_Open(IPaddress *ip);
+        TCPsocket tcpsock = SDLNet_TCP_Open(&address);
         if (!tcpsock) {
             printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
             exit(3);
         }
+
+        // return computer;
     }
     else {
         printf("SDLNet_ResolveHost: Could not resolve %s\n", host.c_str());
         exit(4);
     }
+
+    return NULL;
 }

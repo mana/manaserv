@@ -25,6 +25,7 @@
 #define _TMW_SERVER_MESSAGEIN_
 
 #include "packet.h"
+#include <string>
 
 /**
  * A helper class to 

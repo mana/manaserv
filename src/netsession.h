@@ -27,6 +27,22 @@
 #include "netcomputer.h"
 #include "connectionhandler.h"
 #include <SDL.h>
+#include <SDL_thread.h>
+#include <SDL_net.h>
+#include <map>
+
+/**
+ * Data communicated to a new listen thread. The <code>running</code> member is
+ * set to <code>false</code> to tell the thread to stop listening.
+ */
+struct ListenThreadData
+{
+    IPaddress address;           /**< Includes the port to listen to. */
+    TCPsocket socket;            /**< The socket that's been opened. */
+    SDL_Thread *thread;          /**< The thread, ignored by thread itself. */
+    ConnectionHandler *handler;  /**< Handler for events. */
+    bool running;                /**< Wether to keep listening. */
+};
 
 /**
  * This class represents a network session. It implements listening for
@@ -48,11 +64,17 @@ class NetSession
         /**
          * Start listening for connections and notify the given connection
          * handler about events.
+         *
+         * This method opens a socket on the given port and starts a new thread
+         * that will handle listening for new connections and incoming data
+         * over this port. The connection handler will need to be thread safe.
          */
         void startListen(ConnectionHandler *handler, Uint16 port);
 
         /**
          * Stop listening for connections and disconnect any connected clients.
+         * This is done by signalling the listening thread to stop running, and
+         * closing the socket when it stopped. 
          */
         void stopListen(Uint16 port);
 
@@ -62,10 +84,14 @@ class NetSession
         NetComputer *connect(const std::string &ip, Uint16 port);
 
     private:
-        //  This class probably needs to keep information about:
+        /**
+         * The list of ports we're listening to and their associated thread
+         * data, including the connection handler and wether to keep listening.
+         */
+        std::map<Uint16, ListenThreadData*> listeners;
+
+        //  Other information we need to keep:
         //
-        //  - The list of ports we're listening to and their associated
-        //    connection handlers.
         //  - The list of clients that connected and their associated net
         //    computers.
         //  - The list of servers we connected to and their associated net

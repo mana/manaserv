@@ -23,8 +23,12 @@
 
 #include "connectionhandler.h"
 
+ConnectionHandler::ConnectionHandler()
+{
+}
 
-ConnectionHandler::registerHandler(unsigned int msgId, MessageHandler *handler)
+void ConnectionHandler::registerHandler(
+        unsigned int msgId, MessageHandler *handler)
 {
     handlers[msgId] = handler;
 }

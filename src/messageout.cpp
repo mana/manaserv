@@ -24,7 +24,7 @@
 #include "messageout.h"
 
 MessageOut::MessageOut():
-    packet(NULL)
+    packet(0)
 {
 }
 

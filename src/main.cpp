@@ -64,7 +64,7 @@ void initialize()
     }
 
     // Initialize world timer at 10 times per second
-    worldTimerID = SDL_AddTimer(100, world_tick, NULL);
+    worldTimerID = SDL_AddTimer(100, worldTick, NULL);
 }
 
 /**
