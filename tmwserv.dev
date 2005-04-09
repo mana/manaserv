@@ -5,7 +5,7 @@ Name=tmwserv
 UnitCount=17
 =======
 Name=tmwserv
-UnitCount=20
+UnitCount=21
 >>>>>>> 1.2
 Type=1
 Ver=1
@@ -16,8 +16,8 @@ PrivateResource=
 ResourceIncludes=
 MakeIncludes=
 Compiler=
-CppCompiler=
-Linker=-lmingw32_@@_-lSDLmain_@@_-lSDL_@@_-lSDL_net_@@_
+CppCompiler=_@@_
+Linker=-lmingw32_@@_-lSDL_@@_-lSDL_net_@@_-s_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -246,6 +246,16 @@ BuildCmd=
 FileName=src\defines.h
 CompileCpp=1
 Folder=header
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit21]
+FileName=src\SDL_win32_main.c
+CompileCpp=1
+Folder=source
 Compile=1
 Link=1
 Priority=1000

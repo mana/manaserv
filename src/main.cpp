@@ -99,6 +99,8 @@ int main(int argc, char *argv[])
     //AccountHandler *accountHandler = new AccountHandler();
     //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
+    printf("The Mana World Server v0.0.1\n");
+    printf("Starting...\n");
     session->startListen(connectionHandler, SERVER_PORT);
 
     SDL_Event event;
