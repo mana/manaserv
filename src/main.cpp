@@ -31,6 +31,7 @@
 #define SERVER_PORT     9601
 
 SDL_TimerID worldTimerID;          /**< Timer ID of world timer */
+int worldTime = 0;                 /**< Current world time in 100ms ticks */
 bool running = true;               /**< Determines if server keeps running */
 
 /**
@@ -41,7 +42,9 @@ Uint32 worldTick(Uint32 interval, void *param)
     // Push the custom world tick event
     SDL_Event event;
     event.type = TMW_WORLD_TICK;
-    SDL_PushEvent(&event);
+    if (SDL_PushEvent(&event)) {
+        printf("Warning: couldn't push world tick into event queue!\n");
+    }
     return interval;
 }
 
@@ -51,7 +54,7 @@ Uint32 worldTick(Uint32 interval, void *param)
 void initialize()
 {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_TIMER) == -1) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
         printf("SDL_Init: %s\n", SDL_GetError());
         exit(1);
     }
@@ -100,7 +103,7 @@ int main(int argc, char *argv[])
     //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
     printf("The Mana World Server v0.0.1\n");
-    printf("Starting...\n");
+    printf("Listening...\n");
     session->startListen(connectionHandler, SERVER_PORT);
 
     SDL_Event event;
@@ -111,6 +114,14 @@ int main(int argc, char *argv[])
         {
             if (event.type == TMW_WORLD_TICK)
             {
+                // Move the world forward in time
+                worldTime++;
+
+                // Print world time at 10 second intervals to show we're alive
+                if (worldTime % 100 == 0) {
+                    printf("World time: %d\n", worldTime);
+                }
+
                 // - Handle all messages that are in the message queue
                 // - Update all active objects/beings
             }
@@ -119,8 +130,13 @@ int main(int argc, char *argv[])
                 running = false;
             }
         }
+
+        // We know about only about 10 events will happen per second, so give
+        // the CPU a break for a while.
+        SDL_Delay(100);
     }
 
+    printf("Recieved Quit signal, closing down...\n");
     session->stopListen(SERVER_PORT);
 
     deinitialize();
