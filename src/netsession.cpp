@@ -23,10 +23,35 @@
 
 #include "netsession.h"
 
+#define MAX_CLIENTS 1024
+
 
 int startListenThread(void *data)
 {
-    // So who will do the actual listening now?
+    ListenThreadData *ltd = (ListenThreadData*)data;
+
+    // Allocate a socket set
+    SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
+    if (!set) {
+        printf("SDLNet_AllocSocketSet: %s\n", SDLNet_GetError());
+        exit(1);
+    }
+
+    // Add the server socket to the socket set
+    if (SDLNet_TCP_AddSocket(set, ltd->socket) < 0) {
+        printf("SDLNet_AddSocket: %s\n", SDLNet_GetError());
+        exit(1);
+    }
+
+    // Keep checking for socket activity while running
+    while (ltd->running)
+    {
+        int numready = SDLNet_CheckSockets(set, 1000);
+        printf("numready: %d\n", numready);
+    }
+
+    SDLNet_FreeSocketSet(set);
+
     return 0;
 }
 
@@ -46,7 +71,7 @@ void NetSession::startListen(ConnectionHandler *handler, Uint16 port)
     // will call connect/disconnect events on the given ConnectionHandler and
     // will cut incoming data into Packets and send them there too.
 
-    ListenThreadData *data = new ListenThreadData;
+    ListenThreadData *data = new ListenThreadData();
 
     data->address.host = INADDR_ANY;
     data->address.port = port;
@@ -86,6 +111,8 @@ void NetSession::stopListen(Uint16 port)
         //       disconnect notifications about all the connected clients.
         SDL_WaitThread(data->thread, NULL);
         SDLNet_TCP_Close(data->socket);
+        delete data;
+        listeners.erase(threadDataI);
     }
     else
     {

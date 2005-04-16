@@ -103,8 +103,8 @@ int main(int argc, char *argv[])
     //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
     printf("The Mana World Server v0.0.1\n");
-    printf("Listening...\n");
     session->startListen(connectionHandler, SERVER_PORT);
+    printf("Listening on port %d...\n", SERVER_PORT);
 
     SDL_Event event;
 
@@ -131,8 +131,8 @@ int main(int argc, char *argv[])
             }
         }
 
-        // We know about only about 10 events will happen per second, so give
-        // the CPU a break for a while.
+        // We know only about 10 events will happen per second,
+        // so give the CPU a break for a while.
         SDL_Delay(100);
     }
 
