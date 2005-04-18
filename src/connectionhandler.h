@@ -28,6 +28,10 @@
 #include "netcomputer.h"
 #include "packet.h"
 #include <map>
+#include <SDL_net.h>
+
+// Forward declaration
+class ListenThreadData;
 
 /**
  * This class represents the connection handler interface. The connection
@@ -41,6 +45,13 @@ class ConnectionHandler
          * Constructor.
          */
         ConnectionHandler();
+
+        /**
+         * Starts listening to the server socket. It accepts new connections
+         * and receives data from connected clients. All computers are
+         * disconnected when listening stops.
+         */
+        void startListen(ListenThreadData *ltd);
 
         /**
          * Called when a computer connects to a network session.
@@ -72,6 +83,7 @@ class ConnectionHandler
 
     private:
         std::map<unsigned int, MessageHandler*> handlers;
+        std::map<NetComputer*, TCPsocket> clients;
 };
 
 #endif

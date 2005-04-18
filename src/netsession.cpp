@@ -23,35 +23,16 @@
 
 #include "netsession.h"
 
-#define MAX_CLIENTS 1024
 
-
+/**
+ * This function is the new thread created to listen to a server socket. It
+ * immediately passes control over to the connection handler instance that will
+ * deal with incoming connections and data.
+ */
 int startListenThread(void *data)
 {
     ListenThreadData *ltd = (ListenThreadData*)data;
-
-    // Allocate a socket set
-    SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
-    if (!set) {
-        printf("SDLNet_AllocSocketSet: %s\n", SDLNet_GetError());
-        exit(1);
-    }
-
-    // Add the server socket to the socket set
-    if (SDLNet_TCP_AddSocket(set, ltd->socket) < 0) {
-        printf("SDLNet_AddSocket: %s\n", SDLNet_GetError());
-        exit(1);
-    }
-
-    // Keep checking for socket activity while running
-    while (ltd->running)
-    {
-        int numready = SDLNet_CheckSockets(set, 1000);
-        printf("numready: %d\n", numready);
-    }
-
-    SDLNet_FreeSocketSet(set);
-
+    ltd->handler->startListen(ltd);
     return 0;
 }
 
@@ -73,10 +54,16 @@ void NetSession::startListen(ConnectionHandler *handler, Uint16 port)
 
     ListenThreadData *data = new ListenThreadData();
 
-    data->address.host = INADDR_ANY;
-    data->address.port = port;
     data->handler = handler;
     data->running = true;
+
+    // Fill in IPaddress for opening local server socket
+    if (SDLNet_ResolveHost(&data->address, NULL, port) == -1) {
+        printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
+        exit(6);
+    }
+
+    // Attempt to open the local server socket
     data->socket = SDLNet_TCP_Open(&data->address);
 
     if (!data->socket) {
@@ -84,6 +71,7 @@ void NetSession::startListen(ConnectionHandler *handler, Uint16 port)
         exit(3);
     }
 
+    // Start the listening thread
     data->thread = SDL_CreateThread(startListenThread, data);
 
     if (data->thread == NULL) {

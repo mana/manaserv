@@ -22,9 +22,116 @@
  */
 
 #include "connectionhandler.h"
+#include "netsession.h"
+
+#define MAX_CLIENTS 1024
 
 ConnectionHandler::ConnectionHandler()
 {
+}
+
+void ConnectionHandler::startListen(ListenThreadData *ltd)
+{
+    // Allocate a socket set
+    SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
+    if (!set) {
+        printf("SDLNet_AllocSocketSet: %s\n", SDLNet_GetError());
+        exit(1);
+    }
+
+    // Add the server socket to the socket set
+    if (SDLNet_TCP_AddSocket(set, ltd->socket) < 0) {
+        printf("SDLNet_AddSocket: %s\n", SDLNet_GetError());
+        exit(1);
+    }
+
+    // Keep checking for socket activity while running
+    while (ltd->running)
+    {
+        int numready = SDLNet_CheckSockets(set, 100);
+
+        if (numready == -1)
+        {
+            printf("SDLNet_CheckSockets: %s\n", SDLNet_GetError());
+            // When this is a system error, perror may help us
+            perror("SDLNet_CheckSockets");
+        }
+        else if (numready > 0)
+        {
+            printf("%d sockets with activity!\n", numready);
+
+            // Check server socket
+            if (SDLNet_SocketReady(ltd->socket))
+            {
+                TCPsocket client = SDLNet_TCP_Accept(ltd->socket);
+                if (client)
+                {
+                    // Add the client socket to the socket set
+                    if (SDLNet_TCP_AddSocket(set, client) < 0) {
+                        printf("SDLNet_AddSocket: %s\n", SDLNet_GetError());
+                    }
+                    else {
+                        NetComputer *comp = new NetComputer(this);
+                        clients[comp] = client;
+                        computerConnected(comp);
+                        printf("%d clients connected\n", clients.size());
+                    }
+                }
+            }
+
+            // Check client sockets
+            std::map<NetComputer*, TCPsocket>::iterator i;
+            for (i = clients.begin(); i != clients.end(); )
+            {
+                NetComputer *comp = (*i).first;
+                TCPsocket s = (*i).second;
+
+                if (SDLNet_SocketReady(s))
+                {
+                    char buffer[1024];
+                    int result = SDLNet_TCP_Recv(s, buffer, 1024);
+                    if (result <= 0)
+                    {
+                        SDLNet_TCP_DelSocket(set, s);
+                        SDLNet_TCP_Close(s);
+                        computerDisconnected(comp);
+                        delete comp;
+                        comp = NULL;
+                    }
+                    else
+                    {
+                        buffer[result] = 0;
+                        printf("Received %s\n", buffer);
+                    }
+                }
+
+                // Traverse to next client, possibly deleting current
+                if (comp == NULL) {
+                    std::map<NetComputer*, TCPsocket>::iterator ii = i;
+                    ii++;
+                    clients.erase(i);
+                    i = ii;
+                }
+                else {
+                    i++;
+                }
+            }
+        }
+    }
+
+    // - Disconnect all clients (close sockets)
+
+    SDLNet_FreeSocketSet(set);
+}
+
+void ConnectionHandler::computerConnected(NetComputer *comp)
+{
+    printf("A client connected!\n");
+}
+
+void ConnectionHandler::computerDisconnected(NetComputer *comp)
+{
+    printf("A client disconnected!\n");
 }
 
 void ConnectionHandler::registerHandler(

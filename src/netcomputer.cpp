@@ -23,3 +23,14 @@
 
 #include "netcomputer.h"
 
+
+NetComputer::NetComputer(ConnectionHandler *handler):
+    handler(handler)
+{
+}
+
+void NetComputer::disconnect(const std::string &reason)
+{
+    // Somehow notify the netsession listener about the disconnect after
+    // sending this computer a disconnect message containing the reason.
+}

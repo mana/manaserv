@@ -25,10 +25,11 @@
 #define _TMW_SERVER_NETCOMPUTER_
 
 #include "packet.h"
+#include <SDL_net.h>
 #include <string>
 
 // Forward declaration
-class NetSession;
+class ConnectionHandler;
 
 /**
  * This class represents a known computer on the network. For example a
@@ -40,12 +41,7 @@ class NetComputer
         /**
          * Constructor.
          */
-        NetComputer(NetSession *session);
-
-        /**
-         * Returns the netsession that the computer is attached to.
-         */
-        NetSession *getSession();
+        NetComputer(ConnectionHandler *handler);
 
         /**
          * Returns <code>true</code> if this computer is disconnected.
@@ -66,6 +62,9 @@ class NetComputer
          */
         void send(Packet *p);
         //void send(Packet *p, bool reliable = true);
+
+    private:
+        ConnectionHandler *handler;
 };
 
 #endif
