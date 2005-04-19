@@ -27,6 +27,12 @@
 #include <SDL.h>
 #include <SDL_net.h>
 
+#ifdef SCRIPT_SUPPORT
+#define SCRIPT_SQUIRREL
+#include "script.h"
+#include "script-sq.h"
+#endif
+
 #define TMW_WORLD_TICK  SDL_USEREVENT
 #define SERVER_PORT     9601
 
@@ -70,6 +76,16 @@ void initialize()
 
     // Initialize world timer at 10 times per second
     worldTimerID = SDL_AddTimer(100, worldTick, NULL);
+
+    // Initialize scripting subsystem
+#ifdef SCRIPT_SUPPORT
+#ifdef SCRIPT_SQUIRREL
+    script = new ScriptSquirrel();
+#else
+#error Scripting enabled, but no language defined.
+#endif
+    script->init();
+#endif
 }
 
 /**
@@ -82,6 +98,11 @@ void deinitialize()
 
     // Quit SDL_net
     SDLNet_Quit();
+
+    // Destroy scripting subsystem
+#ifdef SCRIPT_SUPPORT
+    delete script;
+#endif
 }
 
 /**
@@ -124,6 +145,9 @@ int main(int argc, char *argv[])
 
                 // - Handle all messages that are in the message queue
                 // - Update all active objects/beings
+#ifdef SCRIPT_SUPPORT
+		script->update();
+#endif
             }
             else if (event.type == SDL_QUIT)
             {

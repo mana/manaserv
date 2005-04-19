@@ -24,6 +24,10 @@
 #include "connectionhandler.h"
 #include "netsession.h"
 
+#ifdef SCRIPT_SUPPORT
+#include "script.h"
+#endif
+
 #define MAX_CLIENTS 1024
 
 ConnectionHandler::ConnectionHandler()
@@ -102,6 +106,9 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                     {
                         buffer[result] = 0;
                         printf("Received %s\n", buffer);
+#ifdef SCRIPT_SUPPORT
+			script->message(buffer);
+#endif
                     }
                 }
 
