@@ -21,39 +21,43 @@
  *  $Id$
  */
 
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#include "account.h"
 
-#include <iostream>
-#include "object.h"
-
-#define ACC_MAX_CHARS 4
-
-//Account definition
-class Account
+Account::Account()
 {
-    //Account name (username)
-    std::string name;
-    //Account password (MD5 hash)
-    std::string password;
-    //Account email adress
-    std::string email;
+}
 
-    //Player data
-    Player player[ACC_MAX_CHARS];
+Account::~Account()
+{
+}
 
-  public:
-    Account();
-    ~Account()
-;
-    void setName(const std::string&);
-    const std::string& getName();
+void Account::setName(const std::string& n)
+{
+    name = n;
+}
 
-    void setPassword(const std::string&);
-    const std::string& getPassword();
+const std::string& Account::getName()
+{
+    return name;
+}
 
-    void setEmail(const std::string&);
-    const std::string& getEmail();
-};
+void Account::setPassword(const std::string& p)
+{
+    //A hash of p needs to be made then hash stored in password
+    password = p;
+}
 
-#endif
+const std::string& Account::getPassword()
+{
+    return password;
+}
+
+void Account::setEmail(const std::string& e)
+{
+    email = e;
+}
+
+const std::string& Account::getEmail()
+{
+    return email;
+}
