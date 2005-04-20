@@ -1,0 +1,136 @@
+-------------------------
+PACKET REFERENCE
+-------------------------
+
+1. INTRODUCTION
+2. MESSAGE LIST
+3. LOGIN PROTOCOL
+
+1. INTRODUCTION
+
+This is an attempt to define the protocol. The syntax of packet definition is
+the following:
+
+MESSAGE_IDENTIFIER 0xID
+Description.
+{
+    [
+    FIELDTYPE fieldName
+        [
+        * value = value info
+        ]
+    ]
+}
+
+NOTE: In this representation square brackets mean their content can be repeated
+0 to n times.
+
+- "MESSAGE_IDENTIFIER" should follow this structure:
+    CMSG|SMSG[_ATTRIBUTE]_ACTION[_INFO]
+
+    CMSG is a message sent by the client
+    SMSG is a message sent by the server
+    | means exclusive or
+
+- "0xID" is hexadecimal representation of a short: from 0x0000 to 0xFFFF.
+
+- "FIELDTYPE" is one of the following (as described in server.txt):
+    A - char array (null terminated)
+    C - char (1 byte)
+    S - short (2 bytes)
+    L - long (4 bytes)
+        
+- "fieldName" is the name of the field (choose a meaningful name).
+
+- "value" is a list of every possible for the field.
+
+- "value info" is a small description of the meaning related to a certain value.
+
+2. MESSAGE LIST
+
+Message IDs are represented by a short, that means we can have 2^16 different 
+packets. We will start from ID 0x0050. This way we will have 80 packets
+available for future use.
+
+3. LOGIN PROTOCOL
+
+CMSG_REGISTRATION 0x0050
+Request to register a new account.
+{
+    A username
+    A password
+    A emailAddress
+    C sex
+        * 0 = male
+        * 1 = female
+}
+
+CMSG_ENCRYPTED_REGISTRATION 0x0051
+Request to register a new account encrypting user data. payload contains
+username, password and emailAddress encrypted using server's public key.
+{
+    A payload
+    C sex
+}
+
+SMSG_REGISTRATION_ERROR 0x0052
+The registration process failed. ErrorCodes 0-3 shouldn't happen because syntax
+is checked client side, otherwise it means a client hack. Every error not in
+this list is considered unknown error.
+{
+    C errorCode
+        * 0 = invalid username
+        * 1 = invalid password
+        * 2 = invalid email address
+        * 3 = invalid sex
+        * 4 = existing username
+        * 5 = existing email address
+}
+
+SMSG_REGISTRATION_CONFIRM 0x0053
+This packet means the registration process was successful. This packet could be
+merged with previous one using errorCode 0 or 255.
+{
+}
+
+CMSG_LOGIN 0x0054
+Sends info about player login data: username and password.
+{
+    A username
+    A password
+    L clientVersion
+}
+
+CMSG_ENCRYPTED_LOGIN 0x0055
+Attempts an encrypted login. payload contains username and password
+encrypted using server's public key.
+{
+    A payload
+    L clientVersion
+}
+
+SMSG_LOGIN_ERROR 0x0056
+The login process failed.
+{
+    C errorCode
+        * 0 = invalid username
+        * 1 = invalid password
+        * 2 = invalid version (client is sending a version number > than current
+                               one)
+        * 2 = non existing username
+        * 3 = incorrect password
+        * 4 = old version (the client is outdated)
+        * 5 = server down for maintenance
+        * 6 = server full
+        * 7 = account definitely banned
+        * 8 = account under review
+}
+
+SMSG_LOGIN_CONFIRM 0x0057
+The login process succeded. The content of  this packet depends on account and
+player implementation. Still to be developed.
+{
+    L accounId
+    ... characterData        
+}
+
