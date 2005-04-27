@@ -21,6 +21,7 @@
  *  $Id$
  */
 
+#include <iostream>
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
@@ -28,9 +29,17 @@
 #include <SDL_net.h>
 
 #ifdef SCRIPT_SUPPORT
-#define SCRIPT_SQUIRREL
+
 #include "script.h"
-#include "script-sq.h"
+#define SCRIPT_SQUIRREL_SUPPORT
+
+#ifdef SCRIPT_SQUIRREL_SUPPORT
+#include "script-squirrel.h"
+#endif
+#ifdef SCRIPT_RUBY_SUPPORT
+#include "script-ruby.h"
+#endif
+std::string scriptLanguage = "squirrel";
 #endif
 
 #define TMW_WORLD_TICK  SDL_USEREVENT
@@ -79,12 +88,11 @@ void initialize()
 
     // Initialize scripting subsystem
 #ifdef SCRIPT_SUPPORT
-#ifdef SCRIPT_SQUIRREL
-    script = new ScriptSquirrel();
-#else
-#error Scripting enabled, but no language defined.
-#endif
-    script->init();
+    if (scriptLanguage == "squirrel")
+    {
+        script = new ScriptSquirrel();
+        script->init();
+    }
 #endif
 }
 

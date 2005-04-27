@@ -36,9 +36,9 @@ class Object
 };
 
 /*
- * Generic Living Object
+ * Generic Being (Living Object)
  */
-class LivingObject : public Object
+class Being : public Object
 {
     //Object name
     std::string name;
@@ -62,16 +62,17 @@ class LivingObject : public Object
     //Equipment equipment;
 
   public:
-    ~LivingObject() { };
+    virtual ~Being() { };
     void update() { };
 };
 
 /*
  * Player object
  */
-class Player : public LivingObject
+class Player : public Being
 {
     //Player gender (male = true, female = false)
     bool gender;
   public:
 };
+
