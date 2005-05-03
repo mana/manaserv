@@ -21,10 +21,15 @@
  *  $Id$
  */
 
+
+#ifndef OBJECT_H
+#define OBJECT_H
+
 #include <iostream>
 
 /*
  * Generic In-Game Object Definition
+ * Base class for in-game objects
  */
 class Object
 {
@@ -37,19 +42,24 @@ class Object
 
 /*
  * Generic Being (Living Object)
+ * Used for Player & Monster (all animate objects)
  */
 class Being : public Object
 {
-    //Object name
+  public:
+    //Being name
     std::string name;
 
-    //Object level
+    //Being gender
+    unsigned int gender;
+
+    //Being level
     unsigned int level;
 
-    //Object money
+    //Being money
     unsigned int money;
 
-    //Object statistics
+    //Being statistics
     unsigned int strength;
     unsigned int agility;
     unsigned int vitality;
@@ -57,22 +67,12 @@ class Being : public Object
     unsigned int dexterity;
     unsigned int luck;
 
-    //Object inventory/equiped items
+    //Being inventory/equiped items
     //Inventory inventory;
     //Equipment equipment;
 
-  public:
-    virtual ~Being() { };
-    void update() { };
+    ~Being() { } //empty definition
+    void update() { } //empty definition
 };
 
-/*
- * Player object
- */
-class Player : public Being
-{
-    //Player gender (male = true, female = false)
-    bool gender;
-  public:
-};
-
+#endif

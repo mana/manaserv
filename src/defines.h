@@ -25,6 +25,7 @@
 #define _TMW_SERVER_DEFINES_
 
 #include <string>
+#include "object.h"
  
 // this file holds the global definitions and constants to be included
 // in multiple places throughout the server
@@ -42,19 +43,24 @@
 #define STATUS_BANNED     3 // denotes a temporarily banned account
 #define STATUS_RESTRICTED 4 // denotes a restricted access account
 
-      
+// Player Gender
+#define GENDER_MALE       0 // denotes male gender
+#define GENDER_FEMALE     1 // denotes female gender
+#define GENDER_UNKNOWN    2 // denotes unkown gender (possibly for some monsters?)
       
 // DATA STRUCTURES DEFINITIONS
 
 // persistent character data
 struct CharData
 {
-    std::string charName;         // character's name
-    //equipData charEquip;   // structure of equipped items
-    //estateData charEstate; // character's estate data
-    //petData charPet[3];    // character's pets
-    //itemData charItem;     // character's inventory
-    //graphicData charGraphic; // character's appearance
+    Being player;           // player information
+    //std::string charName;         // (depreciated :) now in player.name
+    //equipData charEquip;   // structure of equipped items (check Being)
+    //estateData charEstate; // character's estate data (check Being)
+    Being charPet[3];       // character's pets (using generic being object)
+    //petData charPet[3];    // character's pets (depreciated :)
+    //itemData charItem;     // character's inventory (check Being)
+    //graphicData charGraphic; // character's appearance (should be in Being)
 };
 
 // Account Data Structure
