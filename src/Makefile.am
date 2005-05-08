@@ -18,10 +18,13 @@ tmwserv_SOURCES = main.cpp \
 		  netsession.h \
 		  netsession.cpp \
 		  packet.h \
-		  packet.cpp
+		  packet.cpp \
+		  sqlite/SQLiteWrapper.cpp \
+		  sqlite/SQLiteWrapper.h
 
 # set the include path found by configure
-INCLUDES= $(all_includes)
+INCLUDES= $(all_includes) $(SQLITE_CFLAGS)
+LIBS = $(SQLITE_LIBS)
 
 # the library search path.
 tmwserv_LDFLAGS = $(all_libraries) -lSDL_net `sdl-config --libs` `pkg-config --libs libxml-2.0` -lphysfs
