@@ -22,6 +22,7 @@
  */
 
 #include "skill.h"
+#include "log.h"
 
 Skill::~Skill() {
     //cleanup
@@ -50,6 +51,7 @@ bool Skill::deleteSkill(const std::string &ident, bool delTree) {
     //prevent deletion of self
     if (ident == id) {
 	std::cerr << "Error: Skill: Attempt to delete self." << std::endl;
+    logger->log("Error: Skill: Attempt to delete self.");
 	return false;
     }
 

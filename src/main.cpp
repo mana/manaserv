@@ -21,6 +21,8 @@
  *  $Id$
  */
 
+#define TMWSERV_VERSION "0.0.1"
+
 #include <iostream>
 #include "netsession.h"
 #include "connectionhandler.h"
@@ -61,7 +63,7 @@ Uint32 worldTick(Uint32 interval, void *param)
     SDL_Event event;
     event.type = TMW_WORLD_TICK;
     if (SDL_PushEvent(&event)) {
-        printf("Warning: couldn't push world tick into event queue!\n");
+        logger->log("Warning: couldn't push world tick into event queue!");
     }
     return interval;
 }
@@ -71,9 +73,12 @@ Uint32 worldTick(Uint32 interval, void *param)
  */
 void initialize()
 {
+    // Initialize the logger
+    logger = new Logger(LOG_FILE);
+
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
-        printf("SDL_Init: %s\n", SDL_GetError());
+        logger->log("SDL_Init: %s", SDL_GetError());
         exit(1);
     }
 
@@ -82,7 +87,7 @@ void initialize()
 
     // Initialize SDL_net
     if (SDLNet_Init() == -1) {
-        printf("SDLNet_Init: %s\n", SDLNet_GetError());
+        logger->log("SDLNet_Init: %s", SDLNet_GetError());
         exit(2);
     }
 
@@ -91,15 +96,15 @@ void initialize()
 
     // Initialize scripting subsystem
 #ifdef SCRIPT_SUPPORT
+
+    logger->log("Script Language %s", scriptLanguage.c_str());
+
     if (scriptLanguage == "squirrel")
     {
         script = new ScriptSquirrel();
         script->init();
     }
 #endif
-
-    // Initialize the logger
-    logger = new Logger(LOG_FILE);
 }
 
 /**
@@ -138,7 +143,7 @@ int main(int argc, char *argv[])
     //AccountHandler *accountHandler = new AccountHandler();
     //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
-    logger->log("The Mana World Server v0.0.1");
+    logger->log("The Mana World Server v%s", TMWSERV_VERSION);
     session->startListen(connectionHandler, SERVER_PORT);
     logger->log("Listening on port %d...", SERVER_PORT);
 

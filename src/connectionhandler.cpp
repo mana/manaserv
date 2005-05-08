@@ -23,6 +23,7 @@
 
 #include "connectionhandler.h"
 #include "netsession.h"
+#include "log.h"
 
 #ifdef SCRIPT_SUPPORT
 #include "script.h"
@@ -39,13 +40,13 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
     // Allocate a socket set
     SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
     if (!set) {
-        printf("SDLNet_AllocSocketSet: %s\n", SDLNet_GetError());
+        logger->log("SDLNet_AllocSocketSet: %s", SDLNet_GetError());
         exit(1);
     }
 
     // Add the server socket to the socket set
     if (SDLNet_TCP_AddSocket(set, ltd->socket) < 0) {
-        printf("SDLNet_AddSocket: %s\n", SDLNet_GetError());
+        logger->log("SDLNet_AddSocket: %s", SDLNet_GetError());
         exit(1);
     }
 
@@ -57,12 +58,13 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
         if (numready == -1)
         {
             printf("SDLNet_CheckSockets: %s\n", SDLNet_GetError());
+            logger->log("SDLNet_CheckSockets: %s", SDLNet_GetError());
             // When this is a system error, perror may help us
             perror("SDLNet_CheckSockets");
         }
         else if (numready > 0)
         {
-            printf("%d sockets with activity!\n", numready);
+            logger->log("%d sockets with activity!\n", numready);
 
             // Check server socket
             if (SDLNet_SocketReady(ltd->socket))
@@ -72,13 +74,13 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                 {
                     // Add the client socket to the socket set
                     if (SDLNet_TCP_AddSocket(set, client) < 0) {
-                        printf("SDLNet_AddSocket: %s\n", SDLNet_GetError());
+                        logger->log("SDLNet_AddSocket: %s", SDLNet_GetError());
                     }
                     else {
                         NetComputer *comp = new NetComputer(this);
                         clients[comp] = client;
                         computerConnected(comp);
-                        printf("%d clients connected\n", clients.size());
+                        logger->log("%d clients connected", clients.size());
                     }
                 }
             }
@@ -105,9 +107,9 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                     else
                     {
                         buffer[result] = 0;
-                        printf("Received %s\n", buffer);
+                        logger->log("Received %s", buffer);
 #ifdef SCRIPT_SUPPORT
-			script->message(buffer);
+                        script->message(buffer);
 #endif
                     }
                 }
@@ -133,12 +135,12 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
 
 void ConnectionHandler::computerConnected(NetComputer *comp)
 {
-    printf("A client connected!\n");
+    logger->log("A client connected!");
 }
 
 void ConnectionHandler::computerDisconnected(NetComputer *comp)
 {
-    printf("A client disconnected!\n");
+    logger->log("A client disconnected!");
 }
 
 void ConnectionHandler::registerHandler(
