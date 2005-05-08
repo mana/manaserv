@@ -28,6 +28,9 @@
 #include <SDL.h>
 #include <SDL_net.h>
 
+#include "log.h"
+#define LOG_FILE "tmwserv.log"
+
 #ifdef SCRIPT_SUPPORT
 
 #include "script.h"
@@ -94,6 +97,9 @@ void initialize()
         script->init();
     }
 #endif
+
+    // Initialize the logger
+    logger = new Logger(LOG_FILE);
 }
 
 /**
@@ -111,6 +117,7 @@ void deinitialize()
 #ifdef SCRIPT_SUPPORT
     delete script;
 #endif
+    delete logger;
 }
 
 /**
@@ -131,9 +138,9 @@ int main(int argc, char *argv[])
     //AccountHandler *accountHandler = new AccountHandler();
     //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
-    printf("The Mana World Server v0.0.1\n");
+    logger->log("The Mana World Server v0.0.1");
     session->startListen(connectionHandler, SERVER_PORT);
-    printf("Listening on port %d...\n", SERVER_PORT);
+    logger->log("Listening on port %d...", SERVER_PORT);
 
     SDL_Event event;
 
@@ -149,6 +156,7 @@ int main(int argc, char *argv[])
                 // Print world time at 10 second intervals to show we're alive
                 if (worldTime % 100 == 0) {
                     printf("World time: %d\n", worldTime);
+                    logger->log("World time: %d", worldTime);
                 }
 
                 // - Handle all messages that are in the message queue
@@ -168,7 +176,7 @@ int main(int argc, char *argv[])
         SDL_Delay(100);
     }
 
-    printf("Recieved Quit signal, closing down...\n");
+    logger->log("Recieved Quit signal, closing down...");
     session->stopListen(SERVER_PORT);
 
     deinitialize();

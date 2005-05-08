@@ -60,4 +60,6 @@ class Logger
         std::ofstream logFile;
 };
 
+extern Logger *logger;
+
 #endif

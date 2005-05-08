@@ -92,3 +92,8 @@ void Logger::error(const std::string &error_text)
 #endif
     exit(1);
 }
+
+/**
+ * And the instance used in the server
+ */
+Logger *logger;
