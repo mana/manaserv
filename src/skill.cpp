@@ -24,6 +24,14 @@
 #include "skill.h"
 #include "log.h"
 
+Skill::Skill(const std::string &ident) :
+	id(ident),
+	light(0.0),
+	dark(0.0)
+{
+    //
+}
+
 Skill::~Skill() {
     //cleanup
     for (int i = 0; i < children.size(); i++) {
@@ -47,11 +55,23 @@ bool Skill::addSkill(const std::string &ident, Skill *skill) {
     return false;
 }
 
+bool Skill::useSkill() {
+#ifdef SCRIPT_SUPPORT
+    //run skill script
+    logger->log("Error: Skill: Skills not implemented.");
+#else
+    logger->log("Error: Skill: Could not use skill; scripting disabled.");
+#endif
+}
+
+bool Skill::setScript(const std::string &scriptName)
+{
+}
+
 bool Skill::deleteSkill(const std::string &ident, bool delTree) {
     //prevent deletion of self
     if (ident == id) {
-	std::cerr << "Error: Skill: Attempt to delete self." << std::endl;
-    logger->log("Error: Skill: Attempt to delete self.");
+        logger->log("Error: Skill: Attempt to delete self.");
 	return false;
     }
 
@@ -75,3 +95,4 @@ bool Skill::deleteSkill(const std::string &ident, bool delTree) {
     }
     return false;
 }
+

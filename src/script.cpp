@@ -1,4 +1,4 @@
 #include "script.h"
 
-ScriptingInterface *script;
+Script *script;
 

@@ -30,9 +30,12 @@
 #include <SDL.h>
 #include <SDL_net.h>
 
+#include "skill.h"
+
 #include "log.h"
 #define LOG_FILE "tmwserv.log"
 
+// Scripting
 #ifdef SCRIPT_SUPPORT
 
 #include "script.h"
@@ -44,8 +47,13 @@
 #ifdef SCRIPT_RUBY_SUPPORT
 #include "script-ruby.h"
 #endif
+#ifdef SCRIPT_LUA_SUPPORT
+#include "script-lua.h"
+#endif
+
 std::string scriptLanguage = "squirrel";
 #endif
+//
 
 #define TMW_WORLD_TICK  SDL_USEREVENT
 #define SERVER_PORT     9601
@@ -53,6 +61,8 @@ std::string scriptLanguage = "squirrel";
 SDL_TimerID worldTimerID;          /**< Timer ID of world timer */
 int worldTime = 0;                 /**< Current world time in 100ms ticks */
 bool running = true;               /**< Determines if server keeps running */
+
+Skill skillTree("base");           /**< Skill tree */
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -101,7 +111,7 @@ void initialize()
 
     if (scriptLanguage == "squirrel")
     {
-        script = new ScriptSquirrel();
+        script = new ScriptSquirrel("main.nut");
         script->init();
     }
 #endif
@@ -123,6 +133,17 @@ void deinitialize()
     delete script;
 #endif
     delete logger;
+}
+
+
+/**
+ * Update game world
+ */
+void updateWorld()
+{
+#ifdef SCRIPT_SUPPORT
+    script->update();
+#endif
 }
 
 /**
@@ -166,9 +187,8 @@ int main(int argc, char *argv[])
 
                 // - Handle all messages that are in the message queue
                 // - Update all active objects/beings
-#ifdef SCRIPT_SUPPORT
-		script->update();
-#endif
+                updateWorld();
+
             }
             else if (event.type == SDL_QUIT)
             {

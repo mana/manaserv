@@ -27,6 +27,10 @@
 #include <iostream>
 #include <vector>
 
+#ifdef SCRIPT_SUPPORT
+#include "script.h"
+#endif
+
 class Skill
 {
     /*
@@ -43,9 +47,25 @@ class Skill
      * Children skills
      */
     std::vector<Skill*> children;
+
+    /*
+     * Skill properties/weighting
+     */
+    float light;
+    float dark;
+    float life;
+    float death;
+
+    /*
+     * Skill script
+     */
+#ifdef SCRIPT_SUPPORT
+    Script *script;
+#endif
+
   public:
-    Skill(const std::string &ident) : id(ident) { }
-    ~Skill();
+    Skill(const std::string &ident);
+    virtual ~Skill();
 
     /*
      * addSkill
@@ -58,6 +78,19 @@ class Skill
      * Delete skill from tree with id
      */
     bool deleteSkill(const std::string &, bool delTree = false);
+
+    /*
+     * useSkill
+     * Uses skill (runs skill script). Returns true upon successful
+     * skill completion, false otherwise.
+     */
+    bool useSkill();
+
+    /*
+     * setScript
+     * Set script for the skill to execute when used.
+     */
+    bool setScript(const std::string &);
 
     /*
      * printTree

@@ -1,4 +1,4 @@
-#include "script-sq.h"
+#include "script-squirrel.h"
 #include <cstring>
 
 /*
@@ -68,6 +68,11 @@ void functionCall(HSQUIRRELVM v, char *fn, char *args, ...)
     va_end(arglist);
 }
 
+ScriptSquirrel::ScriptSquirrel(const std::string &file) :
+    Script(file)
+{
+}
+
 ScriptSquirrel::~ScriptSquirrel()
 {
     sq_pop(vm, 1);
@@ -81,7 +86,7 @@ void ScriptSquirrel::init()
     sq_setprintfunc(vm, printfunc);
 
     sq_pushroottable(vm);
-    sqstd_dofile(vm, _SC("test.nut"), 0, 1);
+    sqstd_dofile(vm, _SC(scriptName.c_str()), 0, 1);
     if (SQ_SUCCEEDED(sqstd_dofile(vm, _SC("test.nut"), 0, 1)))
 	functionCall(vm, "init", NULL);
 }

@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#ifndef SCRIPT_SQ_H
-#define SCRIPT_SQ_H
+#ifndef SCRIPT_SQUIRREL_H
+#define SCRIPT_SQUIRREL_H
 
 #include "script.h"
 #include <cstdio>
@@ -32,11 +32,12 @@
 #include <sqstdio.h>
 #include <sqstdaux.h>
 
-class ScriptSquirrel : public ScriptingInterface
+class ScriptSquirrel : public Script
 {
     HSQUIRRELVM vm;
 
   public:
+    ScriptSquirrel(const std::string &);
     ~ScriptSquirrel();
     void init();
     void destroy();

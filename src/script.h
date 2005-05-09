@@ -24,14 +24,24 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+#include <iostream>
+
 /*
- * ScriptingInterface provides a simple class which is a simple interface
+ * Script provides a simple class which is a simple interface
  * for defining a scripting backend.
  */
-class ScriptingInterface
+class Script
 {
+  protected:
+    std::string scriptName;
+
   public:
-    virtual ~ScriptingInterface() { };
+    Script(const std::string &file) :
+        scriptName(file)
+    {
+    }
+
+    virtual ~Script() { }
     //Initialization
     virtual void init() = 0;
     //Destruction
@@ -42,6 +52,6 @@ class ScriptingInterface
     virtual void message(char *) = 0;
 };
 
-extern ScriptingInterface *script;
+extern Script *script;
 
 #endif
