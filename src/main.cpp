@@ -106,14 +106,10 @@ void initialize()
 
     // Initialize scripting subsystem
 #ifdef SCRIPT_SUPPORT
-
     logger->log("Script Language %s", scriptLanguage.c_str());
 
     if (scriptLanguage == "squirrel")
-    {
         script = new ScriptSquirrel("main.nut");
-        script->init();
-    }
 #endif
 }
 

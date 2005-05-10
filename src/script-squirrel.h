@@ -39,9 +39,8 @@ class ScriptSquirrel : public Script
   public:
     ScriptSquirrel(const std::string &);
     ~ScriptSquirrel();
-    void init();
-    void destroy();
     void update();
+    bool execute(const std::string &);
     void message(char *);
 };
 

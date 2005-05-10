@@ -27,31 +27,41 @@
 #include <iostream>
 
 /*
+ * Script
  * Script provides a simple class which is a simple interface
- * for defining a scripting backend.
+ * for defining a scripting backend. Each Script object consists
+ * of an independant scripting environment.
+ *
+ * Requirements of Script Object:
+ * - Each script object is independant from any other script object.
+ * - A script is to be executed upon instantiation.
+ * - A initialization and destruction function should be executed in
+ *   the script if such a function is defined (the interface should
+ *   provide default methods in case they are missing or not needed.)
  */
 class Script
 {
   protected:
+    // Filename of the script corresponding to the script object
     std::string scriptName;
 
   public:
-    Script(const std::string &file) :
-        scriptName(file)
-    {
-    }
+    Script(const std::string &file)
+	: scriptName(file)
+    { }
 
     virtual ~Script() { }
-    //Initialization
-    virtual void init() = 0;
-    //Destruction
-    virtual void destroy() = 0;
+
     //State update
     virtual void update() = 0;
+
+    //Execute specified function
+    virtual bool execute(const std::string &) = 0;
+
     //Script sent raw message
     virtual void message(char *) = 0;
 };
 
-extern Script *script;
+extern Script *script;                  // Global script (temporary?
 
 #endif
