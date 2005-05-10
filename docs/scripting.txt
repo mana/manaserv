@@ -1,0 +1,46 @@
+The Mana World Scripting Specification - DRAFT
+
+Generic scripting interfaces for various in-game objects.
+
+SUBTOPIC DESCRIPTIONS:
+  Interface Functions
+    Interface functions are functions provided by the script
+    handler. These could range from getting information about
+     a player to increasing a players health.
+
+  Functions:
+    Functions provided by the script for the game to call.
+
+
+Item Scripting:
+  Interface Functions:
+  Functions:
+    use()	- Called when player uses the item.
+
+  Variables:
+    int type	- Type of item (weapon, armor, usable, etc.)
+
+    *Special Properties*
+    int attack	- Attack addition.
+    int defense	- Defense addition.
+    int luck	- Luck addition.
+    int vitality- Vitality addition.
+    (These will add to the players statistical properties when equipped)
+    ...
+
+
+Skill Scripting:
+  Interface Functions:
+  Functions:
+    use()	- Called when player uses skill.
+
+  Variables:
+
+
+Being Scripting:
+  Interface Functions:
+  Functions:
+  Variables:
+
+
+- nym
