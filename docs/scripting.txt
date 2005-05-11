@@ -1,23 +1,39 @@
-The Mana World Scripting Specification - DRAFT
+The Mana World Scripting Specification - DRAFT v0.2
 
 Generic scripting interfaces for various in-game objects.
 
-SUBTOPIC DESCRIPTIONS:
-  Interface Functions
-    Interface functions are functions provided by the script
-    handler. These could range from getting information about
-     a player to increasing a players health.
+Functions Library - provided by server scripting bindings.
+Public Interface  - public interface provided by script.
+Public Variables   - public variables provided by script.
+Persistent Variabls - Variables which persist.
 
-  Functions:
-    Functions provided by the script for the game to call.
+All prototypes are in a C like syntax.
+
+Global Function Library (accessible by all script types):
+  string getName(void)	- Get name of player.
+  uint getX(void)	- Get X position of player.
+  uint getY(void)	- Get Y position of player.
+  string getMap(void)	- Get map name.
+  uint getLevel(void)	- Get player level.
+  uint getHealth(void)	- Get current health of player using item.
+  uint getMaxHealth(void)	- Get maximum health player can have.
+  uint getAttack(void)	- Get attack stats of player.
+  uint getDefense(void)	- Get defense stats of player.
+  uint getLuck(void)	- Get luck stats of player.
+  uint getVitality(void)	- Get vitality stats of player.
+
+  void setHealth(uint hp)	- Set player health points.
+
+  void createItem(uint id)	- Spawn/create item at player position.
+  void createBeing(uint id)	- Spawn/create being at player position.
 
 
 Item Scripting:
-  Interface Functions:
-  Functions:
-    use()	- Called when player uses the item.
+  Function Library:
+  Public Interface:
+    void use(void)	- Called when player uses the item.
 
-  Variables:
+  Public Variables:
     int type	- Type of item (weapon, armor, usable, etc.)
 
     *Special Properties*
@@ -25,22 +41,28 @@ Item Scripting:
     int defense	- Defense addition.
     int luck	- Luck addition.
     int vitality- Vitality addition.
-    (These will add to the players statistical properties when equipped)
+    (These will add to the players statistical properties when equipped.
+    Note that they are not unsigned allowing negative properties.)
     ...
+
+  Persistent Variables:
 
 
 Skill Scripting:
-  Interface Functions:
-  Functions:
-    use()	- Called when player uses skill.
+  Function Library:
+    uint getSkillLevel(void)	- Get level of skill.
 
-  Variables:
+  Public Interface:
+    void use(void)	- Called when player uses skill.
 
+  Public Variables:
+  Persistent Variables:
 
 Being Scripting:
-  Interface Functions:
-  Functions:
-  Variables:
+  Function Library:
+  Public Interface:
+  Public Variables:
+  Persistent Variables:
 
 
 - nym

@@ -1,0 +1,24 @@
+The Mana World Statistics Specification - DRAFT v0.1
+
+Currently this work is derived from work done on Wiki. This system
+is simplified. Each being has core statistics which are used to
+calculate the actual statistics which will be used when performing
+actions in-game.
+
+Core Being Statistics:
+  level		- 
+  strength	- 
+  vitality	- 
+  dexterity	- 
+  intelligence  - 
+  luck		- 
+
+Being Derived Statistics:
+  health   - 20 + (20 * vitality)
+  attack   - 10 + strength + equipped weapon skill
+  defense  - 10 + strength + equipped weapon skill + equipment defense bonuses
+  magic	   - 10 + intelligence + magic skill level + equipment magic bonuses
+  accuracy - 50 + dexterity
+  speed	   - dexterity + running skill
+
+-nym
