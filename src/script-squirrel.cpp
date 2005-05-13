@@ -1,6 +1,8 @@
 #include "script-squirrel.h"
 #include <cstring>
 
+void registerStdLib(HSQUIRRELVM);
+
 /*
  * printfunc - Print function for Squirrel
  */
@@ -137,15 +139,6 @@ int testFunc(HSQUIRRELVM v)
     return 1;
 }
 
-/*
- *  Another test function
- */
-int worldTime(HSQUIRRELVM v)
-{
-    sq_pushinteger(v, 10);
-    return 1;
-}
-
 /******/
 
 ScriptSquirrel::ScriptSquirrel(const std::string &file) :
@@ -160,8 +153,7 @@ ScriptSquirrel::ScriptSquirrel(const std::string &file) :
 	std::cerr << "Error: ScriptSquirrel: could not execute " <<
 	    scriptName << std::endl;
     } else {
-	functionRegister(vm, testFunc, "printargs");
-	functionRegister(vm, worldTime, "worldtime");
+        registerStdLib(vm);
 
 	functionCall(vm, "", NULL);
 	functionCall(vm, "init", NULL);
@@ -189,5 +181,93 @@ bool ScriptSquirrel::execute(const std::string &functionName)
 void ScriptSquirrel::message(char *msg)
 {
     functionCall(vm, "message", "s", msg);
+}
+
+/******************************/
+/*
+ * Standard Library Functions
+ */
+int getName(HSQUIRRELVM v)
+{
+    sq_pushstring(v, "no name", -1);
+    return 1;
+}
+
+int getX(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getY(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getMap(HSQUIRRELVM v)
+{
+    sq_pushstring(v, "map1.map", -1);
+    return 1;
+}
+
+int getLevel(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getHealth(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getMaxHealth(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getAttack(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getDefense(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getLuck(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+int getVitality(HSQUIRRELVM v)
+{
+    sq_pushinteger(v, 0);
+    return 1;
+}
+
+/*
+ *  Register standard functions for game script
+ */
+void registerStdLib(HSQUIRRELVM v)
+{
+    functionRegister(v, getName, "getName");
+    functionRegister(v, getX, "getX");
+    functionRegister(v, getY, "getY");
+    functionRegister(v, getMap, "getMap");
+    functionRegister(v, getLevel, "getLevel");
+    functionRegister(v, getHealth, "getHealth");
+    functionRegister(v, getMaxHealth, "getMaxHealth");
+    functionRegister(v, getAttack, "getAttack");
+    functionRegister(v, getDefense, "getDefense");
+    functionRegister(v, getLuck, "getLuck");
+    functionRegister(v, getVitality, "getVitality");
 }
 
