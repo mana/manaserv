@@ -26,6 +26,19 @@
 #define OBJECT_H
 
 #include <iostream>
+#include "script.h"
+
+//Usable Statistics Definition (not unsigned to allow for negative; used for
+//summative statistics)
+struct Statistics
+{
+    int health;
+    int attack;
+    int defense;
+    int magic;
+    int accuracy;
+    int speed;
+};
 
 /*
  * Generic In-Game Object Definition
@@ -46,7 +59,6 @@ class Object
  */
 class Being : public Object
 {
-  public:
     //Being name
     std::string name;
 
@@ -67,12 +79,40 @@ class Being : public Object
     unsigned int dexterity;
     unsigned int luck;
 
+    //Derived statistics (derived from above)
+    Statistics stats;
+
     //Being inventory/equiped items
     //Inventory inventory;
     //Equipment equipment;
 
+    Script *script;
+
+  public:
     ~Being() { } //empty definition
-    void update() { } //empty definition
+
+    //update 
+    void update() {
+	//Generate statistics
+	stats.health = 20 + (20 * vitality);
+	stats.attack = 10 + strength;
+	stats.defense = 10 + strength;
+	stats.magic = 10 + intelligence;
+	stats.accuracy = 50 + dexterity;
+	stats.speed = dexterity;
+
+	//Update scipt
+	script->update();
+    }
+
+    //accessors
+    const std::string& getName() { return name; }
+    unsigned int getGender() { return gender; }
+    unsigned int getLevel() { return level; }
+    unsigned int getMoney() { return money; }
+
+    //Get statistics information
+    const Statistics& getStatistics() { return stats; }
 };
 
 #endif

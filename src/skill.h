@@ -49,7 +49,7 @@ class Skill
     std::vector<Skill*> children;
 
     /*
-     * Skill properties/weighting
+     * Skill properties/weighting (used when calculating player class)
      */
     float light;
     float dark;
