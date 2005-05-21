@@ -74,8 +74,9 @@ void Logger::log(const char *log_text, ...)
         timeStr << ((t % 60 < 10) ? "0" : "");
         timeStr << (int)(t % 60);
         timeStr << "] ";
-        
+
         logFile << timeStr.str() << buf << std::endl;
+        std::cout << timeStr.str() << buf << std::endl;
 
         // Delete temporary buffer
         delete[] buf;

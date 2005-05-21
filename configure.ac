@@ -8,10 +8,10 @@ PKG_CHECK_MODULES(SQLITE, [sqlite3 >= 3.0.6],
     [],
     [AC_MSG_ERROR([Cannot find SQLite 3])]
 )
-		  
+
 AC_SUBST(SQLITE_CFLAGS)
 AC_SUBST(SQLITE_LIBS)
-		  
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -23,7 +23,8 @@ AC_CHECK_LIB([SDL_net], [SDLNet_Init])
 
 AC_ARG_WITH(scripting,[  --with-scripting       Build with scripting])
 if test "x$with_scripting" == "xyes"; then
-    AC_CHECK_LIB([squirrel], [sq_open])
+    AC_CHECK_LIB([squirrel], [sq_open], ,
+      AC_MSG_ERROR([Cannot find Squirrel library (squirrel.sf.net)]))
 
     with_scripting=yes
     SCRIPT_CFLAGS=' -DSCRIPT_SUPPORT'
