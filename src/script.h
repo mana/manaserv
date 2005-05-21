@@ -24,6 +24,8 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
+#ifdef SCRIPT_SUPPORT
+
 #include <iostream>
 
 /*
@@ -63,5 +65,7 @@ class Script
 };
 
 extern Script *script;                  // Global script (temporary?
+
+#endif
 
 #endif

@@ -24,6 +24,8 @@
 #ifndef SCRIPT_SQUIRREL_H
 #define SCRIPT_SQUIRREL_H
 
+#ifdef SCRIPT_SUPPORT
+
 #include "script.h"
 #include <cstdio>
 #include <cstdlib>
@@ -43,5 +45,7 @@ class ScriptSquirrel : public Script
     bool execute(const std::string &);
     void message(char *);
 };
+
+#endif
 
 #endif

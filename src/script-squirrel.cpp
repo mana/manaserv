@@ -1,6 +1,8 @@
 #include "script-squirrel.h"
 #include <cstring>
 
+#ifdef SCRIPT_SUPPORT
+
 void registerStdLib(HSQUIRRELVM);
 
 /*
@@ -271,3 +273,4 @@ void registerStdLib(HSQUIRRELVM v)
     functionRegister(v, getVitality, "getVitality");
 }
 
+#endif

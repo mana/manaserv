@@ -86,7 +86,9 @@ class Being : public Object
     //Inventory inventory;
     //Equipment equipment;
 
+#ifdef SCRIPT_SUPPORT
     Script *script;
+#endif
 
   public:
     ~Being() { } //empty definition
@@ -102,7 +104,9 @@ class Being : public Object
 	stats.speed = dexterity;
 
 	//Update scipt
+#ifdef SCRIPT_SUPPORT
 	script->update();
+#endif
     }
 
     //accessors
