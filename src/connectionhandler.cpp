@@ -109,7 +109,7 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                         buffer[result] = 0;
                         logger->log("Received %s", buffer);
 #ifdef SCRIPT_SUPPORT
-                        script->message(buffer);
+                        //script->message(buffer);
 #endif
                     }
                 }

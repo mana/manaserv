@@ -22,7 +22,9 @@ tmwserv_SOURCES = main.cpp \
 		  sqlite/SQLiteWrapper.cpp \
 		  sqlite/SQLiteWrapper.h \
 		  log.h \
-		  log.cpp
+		  log.cpp \
+		  skill.h \
+		  skill.cpp
 
 # set the include path found by configure
 INCLUDES= $(all_includes) $(SQLITE_CFLAGS)
