@@ -20,6 +20,7 @@ AC_PROG_RANLIB
 # Checks for libraries.
 AC_CHECK_LIB([physfs], [PHYSFS_init])
 AC_CHECK_LIB([SDL_net], [SDLNet_Init])
+AC_CHECK_LIB([squirrel], [sq_open])
 
 # Checks for header files.
 AC_HEADER_STDC

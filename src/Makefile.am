@@ -24,7 +24,11 @@ tmwserv_SOURCES = main.cpp \
 		  log.h \
 		  log.cpp \
 		  skill.h \
-		  skill.cpp
+		  skill.cpp \
+		  script.h \
+		  script.cpp \
+		  script-squirrel.h \
+		  script-squirrel.cpp
 
 # set the include path found by configure
 INCLUDES= $(all_includes) $(SQLITE_CFLAGS)
@@ -32,6 +36,7 @@ LIBS = $(SQLITE_LIBS)
 
 # the library search path.
 tmwserv_LDFLAGS = $(all_libraries) -lSDL_net `sdl-config --libs` `pkg-config --libs libxml-2.0` -lphysfs
-tmwserv_CXXFLAGS = -g -Wall `sdl-config --cflags` `pkg-config --cflags libxml-2.0` -fno-inline
+tmwserv_CXXFLAGS = -g -Wall `sdl-config --cflags` `pkg-config --cflags libxml-2.0` -fno-inline -DSCRIPT_SUPPORT
 #tmwserv_LDADD = $(LIBSDL_LIBS) -lphysfs
+tmwserv_LDADD = -lsquirrel -lsqstdlib
 tmwserv_TARGET = ../tmwserv
