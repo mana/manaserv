@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include "object.h"
-#include "sqlite/SQLiteWrapper.h"
+#include "main.h"
 
 #define ACC_MAX_CHARS 4
 

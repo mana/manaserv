@@ -67,6 +67,30 @@ Skill skillTree("base");           /**< Skill tree */
 SQLiteWrapper sqlite;              /**< Database */
 
 /**
+ * Create tables if necessary
+ */
+void create_tables_if_necessary()
+{
+    SQLiteWrapper::ResultTable r;
+
+    if (!sqlite.SelectStmt("select count(*) from sqlite_master where tbl_name='topics' and type='table'", r)) {
+        std::cout << "Error with select count(*) [create_tables_if_necessary]" << sqlite.LastError().c_str() << std::endl;
+    }
+    
+    if (r.records_[0].fields_[0] != "0")
+      return;
+    
+    sqlite.Begin();
+    if (sqlite.DirectStatement("create table tmw_accounts(user TEXT, password TEXT, email TEXT)")) {
+        std::cout << "Database: table tmw_accounts created" << std::endl;
+    }
+    else {
+        std::cout << "Database: table exist" << std::endl;
+    }
+    sqlite.Commit();
+}
+
+/**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
  */
 Uint32 worldTick(Uint32 interval, void *param)
@@ -116,11 +140,14 @@ void initialize()
 
     // Open database
     if (sqlite.Open("tmw.db")) {
-        std::cout << "tmw.db created or opened" << std::endl;
+        std::cout << "Database: tmw.db created or opened" << std::endl;
     }
     else {
-        std::cout << "couldn't open tmw.db" << std::endl;
+        std::cout << "Database: couldn't open tmw.db" << std::endl;
     }
+    
+    //Create tables
+    create_tables_if_necessary();
 }
 
 /**
@@ -142,13 +169,12 @@ void deinitialize()
 
     // Close database
     if (sqlite.Close()) {
-        std::cout << "tmw.db closed" << std::endl;
+        std::cout << "Database: tmw.db closed" << std::endl;
     }
     else {
-        std::cout << "couldn't close tmw.db" << std::endl;
+        std::cout << "Database: couldn't close tmw.db" << std::endl;
     }
 }
-
 
 /**
  * Update game world
