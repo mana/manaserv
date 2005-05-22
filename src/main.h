@@ -1,5 +1,5 @@
 /*
- *  The Mana World Server
+ *  The Mana World
  *  Copyright 2004 The Mana World Development Team
  *
  *  This file is part of The Mana World.
@@ -21,40 +21,11 @@
  *  $Id$
  */
 
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#ifndef _TMW_MAIN_H
+#define _TMW_MAIN_H
 
-#include <iostream>
-#include "object.h"
 #include "sqlite/SQLiteWrapper.h"
 
-#define ACC_MAX_CHARS 4
-
-//Account definition
-class Account
-{
-    //Account name (username)
-    std::string name;
-    //Account password (MD5 hash)
-    std::string password;
-    //Account email adress
-    std::string email;
-
-    //Player data
-    Player player[ACC_MAX_CHARS];
-
-  public:
-    Account();
-    ~Account()
-;
-    void setName(const std::string&);
-    const std::string& getName();
-
-    void setPassword(const std::string&);
-    const std::string& getPassword();
-
-    void setEmail(const std::string&);
-    const std::string& getEmail();
-};
+extern SQLiteWrapper sqlite;
 
 #endif

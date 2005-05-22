@@ -22,6 +22,7 @@
    3. This notice may not be removed or altered from any source distribution.
 
    René Nyffenegger rene.nyffenegger@adp-gmbh.ch
+   Modified by Mateusz Kaduk mateusz.kaduk@gmail.com
 
 */
 
@@ -36,6 +37,13 @@ bool SQLiteWrapper::Open(std::string const& db_file) {
   }
   return true;
 } 
+
+bool SQLiteWrapper::Close() {
+    if (sqlite3_close(db_) != SQLITE_OK) {
+    return false;
+  }
+  return true;
+}
 
 bool SQLiteWrapper::SelectStmt(std::string const& stmt, ResultTable& res) {
   char *errmsg;

@@ -22,6 +22,7 @@
    3. This notice may not be removed or altered from any source distribution.
 
    René Nyffenegger rene.nyffenegger@adp-gmbh.ch
+   Modified by Mateusz Kaduk mateusz.kaduk@gmail.com
 */
 
 #ifndef SQLITE_WRAPPER_H__
@@ -86,6 +87,7 @@ class SQLiteWrapper {
     SQLiteWrapper();
 
     bool Open(std::string const& db_file);
+    bool Close();
 
     class ResultRecord {
       public:

@@ -1,5 +1,6 @@
 bin_PROGRAMS = tmwserv
 tmwserv_SOURCES = main.cpp \
+		  main.h \
 		  accounthandler.h \
 		  accounthandler.cpp \
 		  connectionhandler.h \

@@ -24,6 +24,7 @@
 #define TMWSERV_VERSION "0.0.1"
 
 #include <iostream>
+#include "main.h"
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
@@ -63,6 +64,7 @@ int worldTime = 0;                 /**< Current world time in 100ms ticks */
 bool running = true;               /**< Determines if server keeps running */
 
 Skill skillTree("base");           /**< Skill tree */
+SQLiteWrapper sqlite;              /**< Database */
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -111,6 +113,14 @@ void initialize()
     if (scriptLanguage == "squirrel")
         script = new ScriptSquirrel("main.nut");
 #endif
+
+    // Open database
+    if (sqlite.Open("tmw.db")) {
+        std::cout << "tmw.db created or opened" << std::endl;
+    }
+    else {
+        std::cout << "couldn't open tmw.db" << std::endl;
+    }
 }
 
 /**
@@ -129,6 +139,14 @@ void deinitialize()
     delete script;
 #endif
     delete logger;
+
+    // Close database
+    if (sqlite.Close()) {
+        std::cout << "tmw.db closed" << std::endl;
+    }
+    else {
+        std::cout << "couldn't close tmw.db" << std::endl;
+    }
 }
 
 
