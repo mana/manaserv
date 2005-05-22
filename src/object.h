@@ -49,7 +49,7 @@ class Object
     int x;
     int y;
   public:
-    ~Object() { }
+    virtual ~Object() { }
     virtual void update() = 0;
 };
 
@@ -91,7 +91,7 @@ class Being : public Object
 #endif
 
   public:
-    ~Being() { } //empty definition
+    virtual ~Being() { } //empty definition
 
     //update 
     void update() {

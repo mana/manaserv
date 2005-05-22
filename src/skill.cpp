@@ -34,7 +34,7 @@ Skill::Skill(const std::string &ident) :
 
 Skill::~Skill() {
     //cleanup
-    for (int i = 0; i < children.size(); i++) {
+    for (unsigned int i = 0; i < children.size(); i++) {
 	if (children[i])
 	    delete children[i];
     }
@@ -47,7 +47,7 @@ bool Skill::addSkill(const std::string &ident, Skill *skill) {
 	return true;
     }
 
-    for (int i = 0; i < children.size(); i++) {
+    for (unsigned int i = 0; i < children.size(); i++) {
 	//recurse
 	if (children[i]->addSkill(ident, skill))
 	    return true;
@@ -62,10 +62,12 @@ bool Skill::useSkill() {
 #else
     logger->log("Error: Skill: Could not use skill; scripting disabled.");
 #endif
+    return true;
 }
 
 bool Skill::setScript(const std::string &scriptName)
 {
+    return true;
 }
 
 bool Skill::deleteSkill(const std::string &ident, bool delTree) {
@@ -75,7 +77,7 @@ bool Skill::deleteSkill(const std::string &ident, bool delTree) {
 	return false;
     }
 
-    for (int i = 0; i < children.size(); i++) {
+    for (unsigned int i = 0; i < children.size(); i++) {
 	if (children[i]->id == ident) {
 	    if (children[i]->children.size() > 0 && delTree)
 		return false;

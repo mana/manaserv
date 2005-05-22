@@ -98,7 +98,7 @@ class Skill
      */
     void printTree(const std::string &indent) {
 	std::cerr << indent << id << std::endl;
-	for (int i = 0; i < children.size(); i++) {
+	for (unsigned int i = 0; i < children.size(); i++) {
 	    children[i]->printTree(indent + "  ");
 	}
     }
