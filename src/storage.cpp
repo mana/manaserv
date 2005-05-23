@@ -22,6 +22,7 @@
  */
 #include "storage.h"
 #include <iostream>
+#include <sstream>
 
 Storage::Storage()
 {
@@ -72,13 +73,93 @@ void Storage::create_tables_if_necessary()
       return;
     
     sqlite.Begin();
-    if (sqlite.DirectStatement("create table tmw_accounts(user TEXT, password TEXT, email TEXT)")) {
+    // Accounts table
+    if (sqlite.DirectStatement("create table tmw_accounts ("
+                               //username
+                               "  user varchar(32) unique primary key not null,"
+                               //password hash
+                               "  password varchar(32) not null,"
+                               //email address
+                               "  email varchar(128) not null,"
+                               //account type
+                               "  type int not null"
+                               ")")) {
         std::cout << "Database: table tmw_accounts created" << std::endl;
     }
     else {
-        std::cout << "Database: table exist" << std::endl;
+        std::cout << "Database: table tmw_accounts exists" << std::endl;
     }
+
+    // Characters table
+    if (sqlite.DirectStatement("create table tmw_characters ("
+                               //character name
+                               "  name varchar(32) unique primary key not null,"
+                               //user name
+                               "  user varchar(32) not null,"
+                               //player information
+                               "  gender int not null,"
+                               "  level int not null,"
+                               "  money int not null,"
+                               //coordinates
+                               "  x int not null,"
+                               "  y int not null,"
+                               //map name
+                               "  map text not null,"
+                               //statistics
+                               "  strength int not null,"
+                               "  agility int not null,"
+                               "  vitality int not null,"
+                               "  intelligence int not null,"
+                               "  dexterity int not null,"
+                               "  luck int not null,"
+                               //player equipment
+                               "  inventory blob not null," // TODO: blob bad
+                               "  equipment blob not null," // TODO: blob bad
+                               //table relationship
+                               "  foreign key(user) references tmw_accounts(user)"
+                               ")")) {
+        std::cout << "Database: table tmw_characters created" << std::endl;
+    }
+    else {
+        std::cout << "Database: table tmw_characters exists" << std::endl;
+    }
+
+    //populate table for the hell of it ;)
+    sqlite.DirectStatement("insert into tmw_accounts values ('nym', 'tHiSiSHaShEd', 'nym@test', 0)");
+    sqlite.DirectStatement("insert into tmw_accounts values ('Bjorn', 'tHiSiSHaShEd', 'bjorn@test', 0)");
+    sqlite.DirectStatement("insert into tmw_accounts values ('Usiu', 'tHiSiSHaShEd', 'usiu@test', 0)");
+    sqlite.DirectStatement("insert into tmw_accounts values ('ElvenProgrammer', 'tHiSiSHaShEd', 'elven@test', 0)");
+
     sqlite.Commit();
 #endif
 }
+
+void Storage::save()
+{
+#ifdef SQLITE_SUPPORT
+    sqlite.Commit();
+#endif
+}
+
+unsigned int Storage::accountCount()
+{
+#ifdef SQLITE_SUPPORT
+    SQLiteWrapper::ResultTable r;
+    std::stringstream s;
+    unsigned int v;
+    sqlite.SelectStmt("select count(*) from tmw_accounts", r);
+    s << r.records_[0].fields_[0];
+    s >> v;
+    return v;
+#else
+    return 0;
+#endif
+}
+
+/*
+Account& getAccount(const std::string &username)
+{
+    //give caller a initialized AccountData structure
+}
+*/
 

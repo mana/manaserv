@@ -65,7 +65,7 @@ bool running = true;               /**< Determines if server keeps running */
 
 Skill skillTree("base");           /**< Skill tree */
 
-Storage *store;
+Storage store;
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -115,7 +115,6 @@ void initialize()
         script = new ScriptSquirrel("main.nut");
 #endif
 
-    store = new Storage();
 }
 
 /**
@@ -163,8 +162,6 @@ int main(int argc, char *argv[])
     delete script;
 #endif
     delete logger;
-
-    delete store;
 }
 
 /**
@@ -198,6 +195,8 @@ int main(int argc, char *argv[])
     logger->log("The Mana World Server v%s", TMWSERV_VERSION);
     session->startListen(connectionHandler, SERVER_PORT);
     logger->log("Listening on port %d...", SERVER_PORT);
+
+    std::cout << "Number of accounts on server: " << store.accountCount() << std::endl;
 
     SDL_Event event;
 

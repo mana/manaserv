@@ -90,24 +90,21 @@ class Being : public Object
     Script *script;
 #endif
 
+    // disable default constructor (we don't want uninitialized Being's)
+
   public:
+    Being() { };
+
+    Being(const std::string &bName, unsigned int bGender,
+          unsigned int bLevel, unsigned int bMoney,
+          unsigned int bStrength, unsigned int bAgility,
+          unsigned int bVitality, unsigned int bDexterity,
+          unsigned int bLuck);
+
     virtual ~Being() { } //empty definition
 
     //update 
-    void update() {
-	//Generate statistics
-	stats.health = 20 + (20 * vitality);
-	stats.attack = 10 + strength;
-	stats.defense = 10 + strength;
-	stats.magic = 10 + intelligence;
-	stats.accuracy = 50 + dexterity;
-	stats.speed = dexterity;
-
-	//Update scipt
-#ifdef SCRIPT_SUPPORT
-	script->update();
-#endif
-    }
+    void update();
 
     //accessors
     const std::string& getName() { return name; }

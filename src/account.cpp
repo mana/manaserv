@@ -23,7 +23,11 @@
 
 #include "account.h"
 
-Account::Account()
+Account(const std::string &aName, const std::string aPassword,
+        const std::string &aEmail, Being aPlayer[ACC_MAX_CHARS])
+    : name(aName),
+    password(aPassword),
+    email(aEmail)
 {
 }
 

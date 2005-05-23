@@ -27,7 +27,17 @@
 #include "sqlite/SQLiteWrapper.h"
 #endif
 
+#include "object.h"
+#include "account.h"
+
+/*
+ * Storage
+ * Storage is the resource manager
+ */ 
 class Storage {
+    private:
+        //make storage singleton
+        Storage(const Storage &n) { }
     public:
         /**
          * Constructor.
@@ -43,6 +53,21 @@ class Storage {
          * Create tables if master is empty
          */
         void create_tables_if_necessary();
+
+        /**
+         * Save changes to database
+         */
+        void save();
+
+        /**
+         * Account count (test function)
+         */
+        unsigned int accountCount();
+
+        /**
+         * Get account & associated data
+         */
+        //Account& getAccount(const std::string &username);
 
     private:
 #ifdef SQLITE_SUPPORT

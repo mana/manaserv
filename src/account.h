@@ -26,7 +26,6 @@
 
 #include <iostream>
 #include "object.h"
-#include "main.h"
 
 #define ACC_MAX_CHARS 4
 
@@ -41,12 +40,15 @@ class Account
     std::string email;
 
     //Player data
-    Player player[ACC_MAX_CHARS];
+    Being player[ACC_MAX_CHARS];
+
+    Account() { };
 
   public:
-    Account();
-    ~Account()
-;
+    Account(const std::string &aName, const std::string aPassword,
+            const std::string &email, Being aPlayer[ACC_MAX_CHARS]);
+    ~Account();
+
     void setName(const std::string&);
     const std::string& getName();
 

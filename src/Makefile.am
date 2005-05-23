@@ -27,7 +27,11 @@ tmwserv_SOURCES = main.cpp \
 		  script.cpp \
 		  script-squirrel.h \
 		  script-squirrel.cpp \
-		  storage.cpp storage.h
+		  storage.cpp storage.h \
+		  account.h \
+		  account.cpp \
+		  object.h \
+		  object.cpp
 
 
 if BUILD_SQLITE
