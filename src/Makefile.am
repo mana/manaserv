@@ -1,6 +1,5 @@
 bin_PROGRAMS = tmwserv
 tmwserv_SOURCES = main.cpp \
-		  main.h \
 		  accounthandler.h \
 		  accounthandler.cpp \
 		  connectionhandler.h \
@@ -29,7 +28,8 @@ tmwserv_SOURCES = main.cpp \
 		  script.h \
 		  script.cpp \
 		  script-squirrel.h \
-		  script-squirrel.cpp
+		  script-squirrel.cpp \
+		  storage.cpp storage.h
 
 # set the include path found by configure
 INCLUDES= $(all_includes) $(SQLITE_CFLAGS)

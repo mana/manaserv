@@ -24,7 +24,7 @@
 #define TMWSERV_VERSION "0.0.1"
 
 #include <iostream>
-#include "main.h"
+#include "storage.h"
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
@@ -64,31 +64,8 @@ int worldTime = 0;                 /**< Current world time in 100ms ticks */
 bool running = true;               /**< Determines if server keeps running */
 
 Skill skillTree("base");           /**< Skill tree */
-SQLiteWrapper sqlite;              /**< Database */
 
-/**
- * Create tables if necessary
- */
-void create_tables_if_necessary()
-{
-    SQLiteWrapper::ResultTable r;
-
-    if (!sqlite.SelectStmt("select count(*) from sqlite_master where tbl_name='topics' and type='table'", r)) {
-        std::cout << "Error with select count(*) [create_tables_if_necessary]" << sqlite.LastError().c_str() << std::endl;
-    }
-    
-    if (r.records_[0].fields_[0] != "0")
-      return;
-    
-    sqlite.Begin();
-    if (sqlite.DirectStatement("create table tmw_accounts(user TEXT, password TEXT, email TEXT)")) {
-        std::cout << "Database: table tmw_accounts created" << std::endl;
-    }
-    else {
-        std::cout << "Database: table exist" << std::endl;
-    }
-    sqlite.Commit();
-}
+Storage *store;
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -138,16 +115,7 @@ void initialize()
         script = new ScriptSquirrel("main.nut");
 #endif
 
-    // Open database
-    if (sqlite.Open("tmw.db")) {
-        std::cout << "Database: tmw.db created or opened" << std::endl;
-    }
-    else {
-        std::cout << "Database: couldn't open tmw.db" << std::endl;
-    }
-    
-    //Create tables
-    create_tables_if_necessary();
+    store = new Storage();
 }
 
 /**
@@ -163,17 +131,40 @@ void deinitialize()
 
     // Destroy scripting subsystem
 #ifdef SCRIPT_SUPPORT
+#ifdef SCRIPT_SUPPORT
+    script->update();
+#endif
+}
+
+/**
+ * Main function, initializes and runs server.
+ */
+int main(int argc, char *argv[])
+{
+    initialize();
+
+    // Ready for server work...
+    ConnectionHandler *connectionHandler = new ConnectionHandler();
+    NetSession *session = new NetSession();
+
+    // Note: This is just an idea, we could also pass the connection handler
+    // to the constructor of the account handler, upon which is would register
+    // itself for the messages it handles.
+    //
+    //AccountHandler *accountHandler = new AccountHandler();
+    //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
+
+    logger->log("The Mana World Server v%s", TMWSERV_VERSION);
+    session->startListen(connectionHandler, SERVER_PORT);
+    logger->log("Listening on port %d...", SERVER_PORT);
+
+    SDL_Event event;
+
     delete script;
 #endif
     delete logger;
 
-    // Close database
-    if (sqlite.Close()) {
-        std::cout << "Database: tmw.db closed" << std::endl;
-    }
-    else {
-        std::cout << "Database: couldn't close tmw.db" << std::endl;
-    }
+    delete store;
 }
 
 /**

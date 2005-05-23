@@ -1,5 +1,5 @@
 /*
- *  The Mana World
+ *  The Mana World Server
  *  Copyright 2004 The Mana World Development Team
  *
  *  This file is part of The Mana World.
@@ -20,12 +20,37 @@
  *
  *  $Id$
  */
+#ifndef STORAGE_H
+#define STORAGE_H
 
-#ifndef _TMW_MAIN_H
-#define _TMW_MAIN_H
+#define SQLITE_SUPPORT  // For now
 
+#ifdef SQLITE_SUPPORT
 #include "sqlite/SQLiteWrapper.h"
-
-extern SQLiteWrapper sqlite;
-
 #endif
+
+class Storage {
+    public:
+        /**
+         * Constructor.
+         */
+        Storage();
+
+        /**
+         * Destructor.
+         */
+        ~Storage();
+
+        /**
+         * Create tables if master is empty
+         */
+        void create_tables_if_necessary();
+
+    private:
+#ifdef SQLITE_SUPPORT
+        SQLiteWrapper sqlite;              /**< Database */
+#endif
+};
+
+#endif /* STORAGE_H */
+
