@@ -23,8 +23,6 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-#define SQLITE_SUPPORT  // For now
-
 #ifdef SQLITE_SUPPORT
 #include "sqlite/SQLiteWrapper.h"
 #endif

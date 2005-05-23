@@ -263,4 +263,3 @@ bool SQLiteWrapper::Commit() {
 bool SQLiteWrapper::Rollback() {
   return DirectStatement("rollback");
 }
-

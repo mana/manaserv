@@ -3,14 +3,27 @@ AC_INIT([TMW Server], [0.0.1], [b_lindeijer@users.sourceforge.net])
 AC_CONFIG_HEADERS([config.h:config.h.in])
 AM_INIT_AUTOMAKE
 
-# Check with pkg-config
-PKG_CHECK_MODULES(SQLITE, [sqlite3 >= 3.0.6], 
+# Check if with sqlite
+AC_ARG_WITH(sqlite,[  --with-sqlite           support SQLite ] )
+if test "x$with_sqlite" == "xyes"; then
+    with_sqlite=yes
+    
+    # Check with pkg-config
+    PKG_CHECK_MODULES(SQLITE, [sqlite3 >= 3.0.6], 
     [],
     [AC_MSG_ERROR([Cannot find SQLite 3])]
-)
+    )
+    
+    # Add define
+    SQLITE_CFLAGS=" -DSQLITE_SUPPORT $SQLITE_SUPPORT"
+    
+    AC_SUBST(SQLITE_CFLAGS)
+    AC_SUBST(SQLITE_LIBS)
+else
+    with_sqlite=no
+fi
 
-AC_SUBST(SQLITE_CFLAGS)
-AC_SUBST(SQLITE_LIBS)
+AM_CONDITIONAL(BUILD_SQLITE, test x$with_sqlite = xyes)
 
 # Checks for programs.
 AC_PROG_CXX
@@ -35,7 +48,6 @@ else
     with_scripting=no
 fi
 
-
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([string.h])
@@ -53,3 +65,5 @@ AC_OUTPUT
 
 echo
 echo "Building with scripting support: $with_scripting"
+echo "Building with SQLite support: $with_sqlite"
+echo

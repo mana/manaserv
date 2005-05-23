@@ -19,8 +19,6 @@ tmwserv_SOURCES = main.cpp \
 		  netsession.cpp \
 		  packet.h \
 		  packet.cpp \
-		  sqlite/SQLiteWrapper.cpp \
-		  sqlite/SQLiteWrapper.h \
 		  log.h \
 		  log.cpp \
 		  skill.h \
@@ -30,6 +28,12 @@ tmwserv_SOURCES = main.cpp \
 		  script-squirrel.h \
 		  script-squirrel.cpp \
 		  storage.cpp storage.h
+
+
+if BUILD_SQLITE
+tmwserv_SOURCES += sqlite/SQLiteWrapper.cpp \
+	           sqlite/SQLiteWrapper.h
+endif
 
 # set the include path found by configure
 INCLUDES= $(all_includes) $(SQLITE_CFLAGS)
