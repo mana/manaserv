@@ -21,47 +21,42 @@
  *  $Id$
  */
 
-#include "account.h"
+#include "object.h"
 
-Account::Account(const std::string &aName, const std::string aPassword,
-        const std::string &aEmail, Being aPlayer[ACC_MAX_CHARS])
-    : name(aName),
-    password(aPassword),
-    email(aEmail)
+Being::Being(const std::string &bName, unsigned int bGender,
+      unsigned int bLevel, unsigned int bMoney,
+      unsigned int bStrength, unsigned int bAgility,
+      unsigned int bVitality, unsigned int bDexterity,
+      unsigned int bLuck)
+    : name(bName),
+    gender(bGender),
+    level(bLevel),
+    money(bMoney),
+    strength(bStrength),
+    agility(bAgility),
+    vitality(bVitality),
+    dexterity(bDexterity),
+    luck(bLuck)
 {
+    //
 }
 
-Account::~Account()
+void Being::update()
 {
+    //Generate statistics
+    stats.health = 20 + (20 * vitality);
+    stats.attack = 10 + strength;
+    stats.defense = 10 + strength;
+    stats.magic = 10 + intelligence;
+    stats.accuracy = 50 + dexterity;
+    stats.speed = dexterity;
+
+    //Update scipt
+#ifdef SCRIPT_SUPPORT
+    script->update();
+#endif
 }
 
-void Account::setName(const std::string& n)
-{
-    name = n;
-}
 
-const std::string& Account::getName()
-{
-    return name;
-}
 
-void Account::setPassword(const std::string& p)
-{
-    //A hash of p needs to be made then hash stored in password
-    password = p;
-}
 
-const std::string& Account::getPassword()
-{
-    return password;
-}
-
-void Account::setEmail(const std::string& e)
-{
-    email = e;
-}
-
-const std::string& Account::getEmail()
-{
-    return email;
-}
