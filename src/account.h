@@ -42,9 +42,9 @@ class Account
     //Player data
     Being player[ACC_MAX_CHARS];
 
-    Account() { };
 
   public:
+    Account() { };
     Account(const std::string &aName, const std::string aPassword,
             const std::string &email, Being aPlayer[ACC_MAX_CHARS]);
     ~Account();

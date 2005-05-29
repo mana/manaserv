@@ -35,9 +35,15 @@
  * Storage is the resource manager
  */ 
 class Storage {
-    private:
         //make storage singleton
         Storage(const Storage &n) { }
+
+#ifdef SQLITE_SUPPORT
+        SQLiteWrapper sqlite;              /**< Database */
+#endif
+        std::vector<Account*> accounts;    /**< Loaded account data */
+        std::vector<Being*> characters;    /**< Loaded account data */
+
     public:
         /**
          * Constructor.
@@ -67,12 +73,12 @@ class Storage {
         /**
          * Get account & associated data
          */
-        //Account& getAccount(const std::string &username);
+        Account* getAccount(const std::string &username);
 
-    private:
-#ifdef SQLITE_SUPPORT
-        SQLiteWrapper sqlite;              /**< Database */
-#endif
+        /**
+         * Get character of username
+         */
+        Being* getCharacter(const std::string &username);
 };
 
 #endif /* STORAGE_H */

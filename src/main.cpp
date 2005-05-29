@@ -198,6 +198,28 @@ int main(int argc, char *argv[])
 
     std::cout << "Number of accounts on server: " << store.accountCount() << std::endl;
 
+    // Test the database retrieval code
+    std::cout << "Attempting to retrieve account with username 'nym'" << std::endl;
+    Account* acc = store.getAccount("nym");
+    if (acc)
+    {
+        std::cout << "Account name: " << acc->getName() << std::endl
+                  << "Account email: " << acc->getEmail() << std::endl;
+
+        std::cout << "Attempting to get character of 'nym'" << std::endl;
+        Being* character = store.getCharacter("nym");
+        if (character)
+        {
+            std::cout << "Character name: " << character->getName() << std::endl;
+        } else
+        {
+            std::cout << "No characters found" << std::endl;
+        }
+    } else
+    {
+        std::cout << "Account 'nym' not found" << std::endl;
+    }
+
     SDL_Event event;
 
     while (running)
@@ -211,7 +233,7 @@ int main(int argc, char *argv[])
 
                 // Print world time at 10 second intervals to show we're alive
                 if (worldTime % 100 == 0) {
-                    printf("World time: %d\n", worldTime);
+                    //printf("World time: %d\n", worldTime);
                     logger->log("World time: %d", worldTime);
                 }
 
