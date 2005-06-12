@@ -44,10 +44,12 @@ class Account
         void setName(const std::string &name);
         void setPassword(const std::string &password);
         void setEmail(const std::string &email);
+        void setCharacters(const std::vector<Being*> &beings);
 
         const std::string& getEmail();
         const std::string& getPassword();
         const std::string& getName();
+        Being* getCharacter(const std::string &name);
 
     private:
         std::string name;              /**< Username */

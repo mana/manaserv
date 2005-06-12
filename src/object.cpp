@@ -24,11 +24,11 @@
 #include "object.h"
 
 Being::Being(const std::string &bName, unsigned int bGender,
-      unsigned int bLevel, unsigned int bMoney,
-      unsigned int bStrength, unsigned int bAgility,
-      unsigned int bVitality, unsigned int bDexterity,
-      unsigned int bLuck)
-    : name(bName),
+        unsigned int bLevel, unsigned int bMoney,
+        unsigned int bStrength, unsigned int bAgility,
+        unsigned int bVitality, unsigned int bDexterity,
+        unsigned int bLuck):
+    name(bName),
     gender(bGender),
     level(bLevel),
     money(bMoney),
@@ -38,7 +38,7 @@ Being::Being(const std::string &bName, unsigned int bGender,
     dexterity(bDexterity),
     luck(bLuck)
 {
-    //
+    std::cout << "New being create with name \"" + name + "\"" << std::endl;
 }
 
 void Being::update()

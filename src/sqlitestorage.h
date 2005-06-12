@@ -20,49 +20,53 @@
  *
  *  $Id$
  */
-#ifndef TMWSERV_STORAGE_H
-#define TMWSERV_STORAGE_H
 
-#include "object.h"
-#include "account.h"
+#ifndef TMWSERV_SQLITESTORAGE_H
+#define TMWSERV_SQLITESTORAGE_H
+
+#include "sqlite/SQLiteWrapper.h"
+#include "storage.h"
 
 /**
- * A storage of persistent dynamic data.
+ * SQLite implemention of persistent dynamic data storage.
  */
-class Storage
+class SQLiteStorage : public Storage
 {
     public:
-        static Storage *getInstance();
-        static void deleteInstance();
-
-        /**
-         * Make sure any changes are saved.
-         */
-        virtual void flush() = 0;
-
-        /**
-         * Account count (test function).
-         */
-        virtual unsigned int getAccountCount() = 0;
-
-        /**
-         * Get account by username.
-         */
-        virtual Account *getAccount(const std::string &username) = 0;
-
-    protected:
         /**
          * Constructor.
          */
-        Storage();
+        SQLiteStorage();
 
         /**
          * Destructor.
          */
-        virtual ~Storage();
+        ~SQLiteStorage();
 
-    private:
-        static Storage *instance;
+        /**
+         * Save changes to database.
+         */
+        void flush();
+
+        /**
+         * Account count (test function)
+         */
+        unsigned int getAccountCount();
+
+        /**
+         * Get account & associated data
+         */
+        Account* getAccount(const std::string &username);
+
+    protected:
+        SQLiteWrapper sqlite;              /**< Database */
+        std::vector<Account*> accounts;    /**< Loaded accounts */
+        std::vector<Being*> characters;    /**< Loaded characters */
+
+        /**
+         * Create tables if master is empty.
+         */
+        void createTablesIfNecessary();
 };
 
-#endif /* TMWSERV_STORAGE_H */
+#endif /* TMWSERV_SQLITESTORAGE_H */

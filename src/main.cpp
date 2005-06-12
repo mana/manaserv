@@ -24,15 +24,14 @@
 #define TMWSERV_VERSION "0.0.1"
 
 #include <iostream>
-#include "storage.h"
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
+#include "storage.h"
 #include <SDL.h>
 #include <SDL_net.h>
 
 #include "skill.h"
-
 #include "log.h"
 #define LOG_FILE "tmwserv.log"
 
@@ -65,7 +64,6 @@ bool running = true;               /**< Determines if server keeps running */
 
 Skill skillTree("base");           /**< Skill tree */
 
-Storage store;
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -90,7 +88,8 @@ void initialize()
     logger = new Logger(LOG_FILE);
 
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1)
+    {
         logger->log("SDL_Init: %s", SDL_GetError());
         exit(1);
     }
@@ -99,7 +98,8 @@ void initialize()
     atexit(SDL_Quit);
 
     // Initialize SDL_net
-    if (SDLNet_Init() == -1) {
+    if (SDLNet_Init() == -1)
+    {
         logger->log("SDLNet_Init: %s", SDLNet_GetError());
         exit(2);
     }
@@ -112,9 +112,10 @@ void initialize()
     logger->log("Script Language %s", scriptLanguage.c_str());
 
     if (scriptLanguage == "squirrel")
+    {
         script = new ScriptSquirrel("main.nut");
+    }
 #endif
-
 }
 
 /**
@@ -128,39 +129,14 @@ void deinitialize()
     // Quit SDL_net
     SDLNet_Quit();
 
+#ifdef SCRIPT_SUPPORT
     // Destroy scripting subsystem
-#ifdef SCRIPT_SUPPORT
-#ifdef SCRIPT_SUPPORT
-    script->update();
-#endif
-}
-
-/**
- * Main function, initializes and runs server.
- */
-int main(int argc, char *argv[])
-{
-    initialize();
-
-    // Ready for server work...
-    ConnectionHandler *connectionHandler = new ConnectionHandler();
-    NetSession *session = new NetSession();
-
-    // Note: This is just an idea, we could also pass the connection handler
-    // to the constructor of the account handler, upon which is would register
-    // itself for the messages it handles.
-    //
-    //AccountHandler *accountHandler = new AccountHandler();
-    //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
-
-    logger->log("The Mana World Server v%s", TMWSERV_VERSION);
-    session->startListen(connectionHandler, SERVER_PORT);
-    logger->log("Listening on port %d...", SERVER_PORT);
-
-    SDL_Event event;
-
     delete script;
 #endif
+
+    // Get rid of persistent data storage
+    Storage::deleteInstance();
+
     delete logger;
 }
 
@@ -196,26 +172,30 @@ int main(int argc, char *argv[])
     session->startListen(connectionHandler, SERVER_PORT);
     logger->log("Listening on port %d...", SERVER_PORT);
 
-    std::cout << "Number of accounts on server: " << store.accountCount() << std::endl;
+    Storage *store = Storage::getInstance();
+
+    std::cout << "Number of accounts on server: " << store->getAccountCount() << std::endl;
 
     // Test the database retrieval code
     std::cout << "Attempting to retrieve account with username 'nym'" << std::endl;
-    Account* acc = store.getAccount("nym");
+    Account* acc = store->getAccount("nym");
     if (acc)
     {
         std::cout << "Account name: " << acc->getName() << std::endl
                   << "Account email: " << acc->getEmail() << std::endl;
 
-        std::cout << "Attempting to get character of 'nym'" << std::endl;
-        Being* character = store.getCharacter("nym");
+        std::cout << "Attempting to get character 'Nym the Great'" << std::endl;
+        Being* character = acc->getCharacter("Nym the Great");
         if (character)
         {
             std::cout << "Character name: " << character->getName() << std::endl;
-        } else
+        }
+        else
         {
             std::cout << "No characters found" << std::endl;
         }
-    } else
+    }
+    else
     {
         std::cout << "Account 'nym' not found" << std::endl;
     }

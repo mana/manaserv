@@ -36,7 +36,9 @@ tmwserv_SOURCES = main.cpp \
 
 if BUILD_SQLITE
 tmwserv_SOURCES += sqlite/SQLiteWrapper.cpp \
-	           sqlite/SQLiteWrapper.h
+	           sqlite/SQLiteWrapper.h \
+		   sqlitestorage.cpp \
+		   sqlitestorage.h
 endif
 
 # set the include path found by configure

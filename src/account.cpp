@@ -55,18 +55,36 @@ const std::string& Account::getEmail()
     return email;
 }
 
-void Account::setName(const std::string &n)
+Being* Account::getCharacter(const std::string &name)
 {
-    name = n;
+    for (unsigned int i = 0; i < beings.size(); i++)
+    {
+        if (beings[i]->getName() == name)
+        {
+            return beings[i];
+        }
+    }
+
+    return NULL;
 }
 
-void Account::setPassword(const std::string &p)
+void Account::setName(const std::string &name)
+{
+    this->name = name;
+}
+
+void Account::setPassword(const std::string &password)
 {
     // A hash of p needs to be made then hash stored in password
-    password = p;
+    this->password = password;
 }
 
-void Account::setEmail(const std::string &e)
+void Account::setEmail(const std::string &email)
 {
-    email = e;
+    this->email = email;
+}
+
+void Account::setCharacters(const std::vector<Being*> &beings)
+{
+    this->beings = beings;
 }
