@@ -23,11 +23,16 @@
 
 #include "account.h"
 
-Account::Account(const std::string &aName, const std::string aPassword,
-        const std::string &aEmail, Being aPlayer[ACC_MAX_CHARS])
-    : name(aName),
-    password(aPassword),
-    email(aEmail)
+Account::Account()
+{
+}
+
+Account::Account(const std::string &name, const std::string &password,
+        const std::string &email, const std::vector<Being*> &beings):
+    name(name),
+    password(password),
+    email(email),
+    beings(beings)
 {
 }
 
@@ -35,20 +40,9 @@ Account::~Account()
 {
 }
 
-void Account::setName(const std::string& n)
-{
-    name = n;
-}
-
 const std::string& Account::getName()
 {
     return name;
-}
-
-void Account::setPassword(const std::string& p)
-{
-    //A hash of p needs to be made then hash stored in password
-    password = p;
 }
 
 const std::string& Account::getPassword()
@@ -56,12 +50,23 @@ const std::string& Account::getPassword()
     return password;
 }
 
-void Account::setEmail(const std::string& e)
-{
-    email = e;
-}
-
 const std::string& Account::getEmail()
 {
     return email;
+}
+
+void Account::setName(const std::string &n)
+{
+    name = n;
+}
+
+void Account::setPassword(const std::string &p)
+{
+    // A hash of p needs to be made then hash stored in password
+    password = p;
+}
+
+void Account::setEmail(const std::string &e)
+{
+    email = e;
 }

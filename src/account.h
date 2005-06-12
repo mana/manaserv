@@ -24,39 +24,36 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-#include <iostream>
+#include <string>
+#include <vector>
 #include "object.h"
 
 #define ACC_MAX_CHARS 4
 
-//Account definition
+/**
+ * A player account.
+ */
 class Account
 {
-    //Account name (username)
-    std::string name;
-    //Account password (MD5 hash)
-    std::string password;
-    //Account email adress
-    std::string email;
+    public:
+        Account();
+        Account(const std::string &name, const std::string &password,
+                const std::string &email, const std::vector<Being*> &beings);
+        ~Account();
 
-    //Player data
-    Being player[ACC_MAX_CHARS];
+        void setName(const std::string &name);
+        void setPassword(const std::string &password);
+        void setEmail(const std::string &email);
 
+        const std::string& getEmail();
+        const std::string& getPassword();
+        const std::string& getName();
 
-  public:
-    Account() { };
-    Account(const std::string &aName, const std::string aPassword,
-            const std::string &email, Being aPlayer[ACC_MAX_CHARS]);
-    ~Account();
-
-    void setName(const std::string&);
-    const std::string& getName();
-
-    void setPassword(const std::string&);
-    const std::string& getPassword();
-
-    void setEmail(const std::string&);
-    const std::string& getEmail();
+    private:
+        std::string name;              /**< Username */
+        std::string password;          /**< Password (md5 hash) */
+        std::string email;             /**< Email address */
+        std::vector<Being*> beings;    /**< Player data */
 };
 
 #endif

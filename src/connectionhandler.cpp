@@ -31,6 +31,11 @@
 
 #define MAX_CLIENTS 1024
 
+ClientData::ClientData():
+    inp(0)
+{
+}
+
 ConnectionHandler::ConnectionHandler()
 {
 }
@@ -106,6 +111,8 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                     }
                     else
                     {
+                        // Copy the incoming data to the in buffer of this
+                        // client
                         buffer[result] = 0;
                         logger->log("Received %s", buffer);
 #ifdef SCRIPT_SUPPORT

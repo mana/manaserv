@@ -32,7 +32,7 @@
 void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     int result = 0;
-    
+
     // determine message type
     /*
     switch(message.type)
@@ -58,7 +58,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
  * Return Value: SUCCESS if the player was successfully assigned the
  *               requested char, ERROR on early termination of the
  *               routine.
- */ 
+ */
 int AccountHandler::loginMessage(NetComputer &computer, MessageIn &message)
 {
     // Get the handle (account) the player is requesting
@@ -86,7 +86,7 @@ int AccountHandler::loginMessage(NetComputer &computer, MessageIn &message)
  * Return Value: SUCCESS if the player was successfully assigned the
  *               requested handle, ERROR on early termination of the
  *               routine.
- */ 
+ */
 int AccountHandler::assignAccount(NetComputer &computer, AccountData *account)
 {
     // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: the account was accessed before

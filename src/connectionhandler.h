@@ -30,8 +30,26 @@
 #include <map>
 #include <SDL_net.h>
 
+#define IN_BUFFER_SIZE   8192
+
+
 // Forward declaration
 class ListenThreadData;
+
+/**
+ * Data related to a connected client. This includes the buffer for incoming
+ * messages and the related socket.
+ */
+class ClientData
+{
+    public:
+        ClientData();
+
+        TCPsocket sock;           /**< The socket used for communication */
+
+        int inp;                  /**< The amount of data in the in buffer */
+        char in[IN_BUFFER_SIZE];  /**< The in buffer for incoming messages */
+};
 
 /**
  * This class represents the connection handler interface. The connection

@@ -39,7 +39,7 @@ NOTE: In this representation square brackets mean their content can be repeated
     C - char (1 byte)
     S - short (2 bytes)
     L - long (4 bytes)
-        
+
 - "fieldName" is the name of the field (choose a meaningful name).
 
 - "value" is a list of every possible for the field.

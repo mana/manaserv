@@ -29,7 +29,7 @@
 #include "netcomputer.h"
 #include "messagein.h"
 #include "defines.h"
- 
+
 /**
  * Manages the data stored in user accounts and provides a reliable interface
  * for working with an account. The account handler class can be used as a link
