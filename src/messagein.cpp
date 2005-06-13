@@ -46,10 +46,9 @@ char MessageIn::readByte()
 {
     if (packet) // if Packet exists
     {
-        if ( pos < (packet->length - 1) ) // if there is enough to read
+        if ( pos < packet->length ) // if there is enough to read
         {
-            pos++;
-            return packet->data[pos - 1];
+            return packet->data[pos++];
         }
         else
         {
@@ -65,7 +64,7 @@ short MessageIn::readShort()
 {
     if (packet) // if Packet exists
     {
-        if ( (pos + sizeof(short)) <= (packet->length - 1) )
+        if ( (pos + sizeof(short)) <= packet->length )
         {
             pos += sizeof(short);
             return (short) SDLNet_Read16(&(packet->data[pos - sizeof(short)]));
@@ -84,7 +83,7 @@ long MessageIn::readLong()
 {
     if (packet) // if Packet exists
     {
-        if ( (pos + sizeof(long)) <= (packet->length - 1) )
+        if ( (pos + sizeof(long)) <= packet->length )
         {
             pos += sizeof(long);
             return (long) SDLNet_Read32(&(packet->data[pos - sizeof(long)]));
@@ -113,7 +112,7 @@ std::string MessageIn::readString(int length)
         if ( length != -1 ) // if the length isn't specified, read it in the packet
         {
             // If the length of the packet is sufficient for us to read the length of the string
-            if ( (pos + sizeof(short)) <= (packet->length - 1) )
+            if ( (pos + sizeof(short)) <= packet->length )
             {
                 // We first read the length of the string given by the short before it.
                 stringLength = (short)SDLNet_Read16(&(packet->data[pos]));
@@ -122,7 +121,7 @@ std::string MessageIn::readString(int length)
             else
             {
                 // Place us to the end as the size is a short
-                pos = packet->length - 1;
+                pos = packet->length;
             }
         }
         else // if the length is specified
@@ -132,7 +131,7 @@ std::string MessageIn::readString(int length)
 
         if ( stringLength > 0 )
         {
-            if ( (pos + stringLength) <= (packet->length - 1) ) // If there's enough length to copy
+            if ( (pos + stringLength) <= packet->length ) // If there's enough length to copy
             {
                 char tempChar[stringLength+1];
                 memcpy(&tempChar, packet->data, stringLength);
