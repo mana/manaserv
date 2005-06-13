@@ -24,24 +24,17 @@
 #include "messagein.h"
 #include <SDL_net.h>
 
-/**
- * Constructor.
- */
 MessageIn::MessageIn(Packet *p)
 {
     pos = 0;
     packet = p;
 }
 
-/**
- * Destructor.
- */
 MessageIn::~MessageIn()
 {
     delete packet; // To be removed if the packet is deleted elsewhere.
 }
 
-/**< Reads a byte. */
 char MessageIn::readByte()
 {
     if (packet) // if Packet exists
@@ -59,7 +52,6 @@ char MessageIn::readByte()
     return -1;
 }
 
-/**< Reads a short. */
 short MessageIn::readShort()
 {
     if (packet) // if Packet exists
@@ -78,7 +70,6 @@ short MessageIn::readShort()
     return -1;
 }
 
-/**< Reads a long. */
 long MessageIn::readLong()
 {
     if (packet) // if Packet exists
@@ -97,11 +88,6 @@ long MessageIn::readLong()
     return -1;
 }
 
-/**
- * Reads a string. If a length is not given (-1), it is assumed
- * that the length of the string is stored in a short at the
- * start of the string.
- */
 std::string MessageIn::readString(int length)
 {
     if (packet) // If there a good packet
