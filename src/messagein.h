@@ -38,9 +38,15 @@ class MessageIn
          */
         MessageIn(Packet *p);
 
+        /**
+         * Destructor.
+         */
+        ~MessageIn();
+
+
         char readByte();              /**< Reads a byte. */
-        int readShort();              /**< Reads a short. */
-        int readLong();               /**< Reads a long. */
+        short readShort();              /**< Reads a short. */
+        long readLong();               /**< Reads a long. */
 
         /**
          * Reads a string. If a length is not given (-1), it is assumed
@@ -51,7 +57,12 @@ class MessageIn
 
     private:
         Packet *packet;
-        unsigned int pos;
+        
+        /**
+         * Actual Position in the packet
+         * From 0 to p->length - 1.
+         */
+        unsigned int pos; 
 };
 
 #endif
