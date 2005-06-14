@@ -36,7 +36,7 @@ namespace dal
 DataProvider::DataProvider(void)
     throw()
         : mIsConnected(false),
-          mRecordSet(RecordSet())
+          mRecordSet()
 {
     // NOOP
 }

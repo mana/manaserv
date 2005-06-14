@@ -35,102 +35,6 @@ namespace dal
 /**
  * Default constructor.
  */
-Record::Record(void)
-    throw()
-{
-    // NOOP
-}
-
-
-/**
- * Destructor.
- */
-Record::~Record(void)
-    throw()
-{
-    // NOOP
-}
-
-
-/**
- * Add a new field.
- */
-void
-Record::addField(const std::string& name,
-                 const std::string& value)
-    throw()
-{
-    mFields.insert(Fields::value_type(name, value));
-}
-
-
-/**
- * Add a new field.
- */
-void
-Record::addField(const std::string& name,
-                 const double value)
-    throw()
-{
-    // convert the number into a string.
-    std::ostringstream os;
-    os << value << std::ends;
-
-    mFields.insert(Fields::value_type(name, os.str()));
-}
-
-
-/**
- * Get the field value.
- */
-const std::string&
-Record::get(const std::string& name) const
-    throw(std::invalid_argument)
-{
-    return getAsString(name);
-}
-
-
-/**
- * Get the field value as string.
- */
-const std::string&
-Record::getAsString(const std::string& name) const
-    throw(std::invalid_argument)
-{
-    Fields::const_iterator it = mFields.find(name);
-
-    if (it == mFields.end()) {
-        std::ostringstream msg;
-        msg << "unknown field name: " << name << std::ends;
-
-        throw std::invalid_argument(msg.str());
-    }
-
-    return it->second;
-}
-
-
-/**
- * Get the field value as a number.
- */
-const double
-Record::getAsNumber(const std::string& name) const
-    throw(std::invalid_argument)
-{
-    std::istringstream is(getAsString(name));
-    double doubleValue;
-
-    // convert the string to a number.
-    is >> doubleValue;
-
-    return doubleValue;
-}
-
-
-/**
- * Default constructor.
- */
 RecordSet::RecordSet(void)
     throw()
 {
@@ -144,53 +48,174 @@ RecordSet::RecordSet(void)
 RecordSet::~RecordSet(void)
     throw()
 {
-    Rows::iterator it = mRows.begin();
-    Rows::iterator it_end = mRows.end();
-
-    for(; it != it_end; ++it) {
-        delete *it;
-    }
+    // NOOP
 }
 
 
 /**
- * Add a new Record.
+ * Remove all the Records.
  */
 void
-RecordSet::addRecord(const Record* record)
+RecordSet::clear(void)
     throw()
 {
-    mRows.push_back(record);
+    mHeaders.clear();
+    mRows.clear();
 }
 
 
 /**
- * Get all the rows.
+ * Get the number of rows.
+ *
+ * @return the number of rows.
  */
-const Rows&
-RecordSet::getRows(void) const
+unsigned int
+RecordSet::rows(void)
     throw()
 {
-    return mRows;
+    return mRows.size();
 }
 
 
 /**
- * Get a particular row.
+ * Get the number of columns.
+ *
+ * @return the number of columns.
  */
-const Record&
-RecordSet::getRow(const unsigned int row) const
-    throw(std::out_of_range)
+unsigned int
+RecordSet::cols(void)
+    throw()
 {
-    if (row >= mRows.size()) {
-        std::ostringstream msg;
-        msg << "index out of range: " << row << "; "
-            << "num. of records: " << mRows.size() << std::ends;
+    return mHeaders.size();
+}
 
-        throw std::out_of_range(msg.str());
+
+/**
+ * Set the column headers.
+ */
+void
+RecordSet::setColumnHeaders(const Row& headers)
+    throw(AlreadySetException)
+{
+    if (mHeaders.size() > 0) {
+        throw AlreadySetException();
     }
 
-    return *(mRows[row]);
+    mHeaders = headers;
+}
+
+
+/**
+ * Add a new row.
+ */
+void
+RecordSet::add(const Row& row)
+    throw(std::invalid_argument)
+{
+    if (row.size() != mHeaders.size()) {
+        throw std::invalid_argument(
+            "the new row does not have the required number of columns.");
+    }
+
+    mRows.push_back(row);
+}
+
+
+/**
+ * Operator()
+ */
+const std::string&
+RecordSet::operator()(const unsigned int row,
+                      const unsigned int col) const
+    throw(std::out_of_range)
+{
+    if ((row >= mRows.size()) || (col >= mHeaders.size())) {
+        std::ostringstream os;
+        os << "(" << row << ", " << col << ") is out of range; "
+           << "max rows: " << mRows.size()
+           << ", max cols: " << mHeaders.size() << std::ends;
+
+        throw std::out_of_range(os.str());
+    }
+
+    return mRows[row][col];
+}
+
+
+/**
+ * Operator()
+ */
+const std::string&
+RecordSet::operator()(const unsigned int row,
+                      const std::string& name) const
+    throw(std::out_of_range,
+          std::invalid_argument)
+{
+    if (row >= mRows.size()) {
+        std::ostringstream os;
+        os << "row " << row << " is out of range; "
+           << "max rows: " << mRows.size() << std::ends;
+
+        throw std::out_of_range(os.str());
+    }
+
+    Row::const_iterator it = std::find(mHeaders.begin(),
+                                       mHeaders.end(),
+                                       name);
+    if (it == mHeaders.end()) {
+        std::ostringstream os;
+        os << "field " << name << " does not exist." << std::ends;
+
+        throw std::invalid_argument(os.str());
+    }
+
+    // find the field index.
+    const int nCols = mHeaders.size();
+    int i;
+    for (i = 0; i < nCols; ++i) {
+        if (mHeaders[i] == name) {
+            break;
+        }
+    }
+
+    return mRows[row][i];
+}
+
+
+/**
+ * Operator<<
+ */
+std::ostream&
+operator<<(std::ostream& out, const RecordSet& rhs)
+{
+    using namespace tmw::dal;
+
+    // print the field names first.
+    if (rhs.mHeaders.size() > 0) {
+        Row::const_iterator it = rhs.mHeaders.begin();
+        out << "[ " << (*it);
+        it++;
+        for (; it != rhs.mHeaders.end(); ++it) {
+            out << " | " << (*it);
+        }
+        out << " ]" << std::endl;
+    }
+
+    // and then print every line.
+    for (RecordSet::Rows::const_iterator it = rhs.mRows.begin();
+         it != rhs.mRows.end();
+         ++it)
+    {
+        Row::const_iterator it2 = (*it).begin();
+        out << "[ " << (*it2);
+        it2++;
+        for (; it2 != (*it).end(); ++it2) {
+            out << " | " << (*it2);
+        }
+        out << " ]" << std::endl;
+    }
+
+    return out;
 }
 
 

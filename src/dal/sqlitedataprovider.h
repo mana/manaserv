@@ -27,6 +27,8 @@
 
 #include <string>
 
+#include "sqlite3.h"
+
 #include "dataprovider.h"
 
 
@@ -101,9 +103,30 @@ class SqLiteDataProvider: public DataProvider
 
 
         /**
+         * Create a connection to the database.
+         *
+         * @param dbName the database name.
+         * @param dbPath the database file path.
+         * @param userName the user name.
+         * @param password the user password.
+         *
+         * @exception DbConnectionFailure if unsuccessful connection.
+         * @exception std::exception if unexpected exception.
+         */
+        void
+        connect(const std::string& dbName,
+                const std::string& dbPath,
+                const std::string& userName,
+                const std::string& password)
+            throw(DbConnectionFailure,
+                  std::exception);
+
+
+        /**
          * Execute a SQL query.
          *
          * @param sql the SQL query.
+         * @param refresh if true, refresh the cache (optional)
          *
          * @return a recordset.
          *
@@ -111,7 +134,8 @@ class SqLiteDataProvider: public DataProvider
          * @exception std::exception if unexpected exception.
          */
         const RecordSet&
-        execSql(const std::string& sql)
+        execSql(const std::string& sql,
+                const bool refresh = false)
             throw(DbSqlQueryExecFailure,
                   std::exception);
 
@@ -126,6 +150,13 @@ class SqLiteDataProvider: public DataProvider
         disconnect(void)
             throw(DbDisconnectionFailure,
                   std::exception);
+
+
+    private:
+        /**
+         * The database.
+         */
+        sqlite3* mDb;
 };
 
 

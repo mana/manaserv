@@ -205,6 +205,14 @@ class DbSqlQueryExecFailure: public DbException
 };
 
 
+/**
+ * Already set exception.
+ */
+class AlreadySetException: public std::exception
+{
+};
+
+
 } // namespace dal
 } // namespace tmw
 

@@ -84,6 +84,21 @@ MySqlDataProvider::connect(const std::string& dbName,
     throw(DbConnectionFailure,
           std::exception)
 {
+    connect(dbName, "", userName, password);
+}
+
+
+/**
+ * Create a connection to the database.
+ */
+void
+MySqlDataProvider::connect(const std::string& dbName,
+                           const std::string& dbPath,
+                           const std::string& userName,
+                           const std::string& password)
+    throw(DbConnectionFailure,
+          std::exception)
+{
     // TODO
 }
 
@@ -92,13 +107,15 @@ MySqlDataProvider::connect(const std::string& dbName,
  * Execute a SQL query.
  */
 const RecordSet&
-MySqlDataProvider::execSql(const std::string& sql)
+MySqlDataProvider::execSql(const std::string& sql,
+                           const bool refresh)
     throw(DbSqlQueryExecFailure,
           std::exception)
 {
     // do something only if the query is different from the previous
+    // or if the cache must be refreshed
     // otherwise just return the recordset from cache.
-    if (sql != mSql) {
+    if (refresh || (sql != mSql)) {
         // TODO
     }
 

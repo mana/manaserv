@@ -25,9 +25,11 @@
 #define _TMW_RECORDSET_H_
 
 
-#include <map>
+#include <iostream>
 #include <vector>
 #include <stdexcept>
+
+#include "dalexcept.h"
 
 
 namespace tmw
@@ -37,110 +39,16 @@ namespace dal
 
 
 /**
- * A Record.
+ * A record from the RecordSet.
  */
-class Record
-{
-    public:
-        /**
-         * Default constructor.
-         */
-        Record(void)
-            throw();
-
-
-        /**
-         * Destructor.
-         */
-        ~Record(void)
-            throw();
-
-
-        /**
-         * Add a new field.
-         *
-         * @param name the field name.
-         * @param value the field value
-         */
-        void
-        addField(const std::string& name,
-                 const std::string& value)
-            throw();
-
-
-        /**
-         * Add a new field.
-         *
-         * @param name the field name.
-         * @param value the field value
-         */
-        void
-        addField(const std::string& name,
-                 const double value)
-            throw();
-
-
-        /**
-         * Get the field value.
-         *
-         * This method is an alias of getAsString().
-         *
-         * @param name the field name.
-         *
-         * @return the value as string.
-         *
-         * @exception std::invalid_argument if the field is not found.
-         */
-        const std::string&
-        get(const std::string& name) const
-            throw(std::invalid_argument);
-
-
-        /**
-         * Get the field value as string.
-         *
-         * @param name the field name.
-         *
-         * @return the value as string.
-         *
-         * @exception std::invalid_argument if the field is not found.
-         */
-        const std::string&
-        getAsString(const std::string& name) const
-            throw(std::invalid_argument);
-
-
-        /**
-         * Get the field value as a number.
-         *
-         * @param name the field name.
-         *
-         * @return the value as float.
-         *
-         * @exception std::invalid_argument if the field is not found.
-         */
-        const double
-        getAsNumber(const std::string& name) const
-            throw(std::invalid_argument);
-
-
-    private:
-        /**
-         * A map to hold the field names and their associated values.
-         */
-        typedef std::map<std::string, std::string> Fields;
-        Fields mFields;
-};
-
-
-/**
- * A list of Records.
- */
-typedef std::vector<const Record*> Rows;
+typedef std::vector<std::string> Row;
 
 
 /**
  * A RecordSet to store the result of a SQL query.
+ *
+ * Limitations: the field values are stored and returned as string,
+ * no information about the field data types are stored.
  */
 class RecordSet
 {
@@ -160,43 +68,139 @@ class RecordSet
 
 
         /**
-         * Add a new Record.
-         *
-         * @param record the new record.
+         * Remove all the Records.
          */
         void
-        addRecord(const Record*)
+        clear(void)
             throw();
 
 
         /**
-         * Get all the rows.
+         * Get the number of rows.
          *
-         * @return all the rows of the RecordSet.
+         * @return the number of rows.
          */
-        const Rows&
-        getRows(void) const
+        unsigned int
+        rows(void)
             throw();
 
 
         /**
-         * Get a particular row.
+         * Get the number of columns.
+         *
+         * @return the number of columns.
+         */
+        unsigned int
+        cols(void)
+            throw();
+
+
+        /**
+         * Set the column headers.
+         *
+         * @param headers the column headers.
+         *
+         * @exception AlreadySetException if the column headers
+         *            are already set.
+         */
+        void
+        setColumnHeaders(const Row& headers)
+            throw(AlreadySetException);
+
+
+        /**
+         * Add a new row.
+         *
+         * This method does not check the field data types, only the number
+         * of columns is checked.
+         *
+         * @param row the new row.
+         *
+         * @exception std::invalid_argument if the number of columns in the
+         *            new row is not equal to the number of column headers.
+         */
+        void
+        add(const Row& row)
+            throw(std::invalid_argument);
+
+
+        /**
+         * Operator()
+         * Get the value of a particular field of a particular row
+         * by field index.
          *
          * @param row the row index.
+         * @param col the field index.
          *
-         * @return the Record at the specified row index.
+         * @return the field value.
          *
-         * @exception std::out_of_range
+         * @exception std::out_of_range if row or col are out of range.
          */
-        const Record&
-        getRow(const unsigned int row) const
+        const std::string&
+        operator()(const unsigned int row,
+                   const unsigned int col) const
             throw(std::out_of_range);
+
+
+        /**
+         * Operator()
+         * Get the value of a particular field of a particular row
+         * by field name (slower than by field index).
+         *
+         * @param row the row index.
+         * @param name the field name.
+         *
+         * @return the field value.
+         *
+         * @exception std::out_of_range if the row index is out of range.
+         * @exception std::invalid_argument if the field name is not found.
+         */
+        const std::string&
+        operator()(const unsigned int row,
+                   const std::string& name) const
+            throw(std::out_of_range,
+                  std::invalid_argument);
+
+
+        /**
+         * Operator<<
+         * Append the stringified RecordSet to the output stream.
+         *
+         * @param out the output stream.
+         * @param rhs the right hand side.
+         *
+         * @return the output stream for chaining.
+         */
+        friend std::ostream&
+        operator<<(std::ostream& out, const RecordSet& rhs);
 
 
     private:
         /**
-         * A list of Records.
+         * Copy constructor.
          */
+        RecordSet(const RecordSet& rhs)
+            throw();
+
+
+        /**
+         * Operator=
+         */
+        RecordSet&
+        operator=(const RecordSet& rhs)
+            throw();
+
+
+        /**
+         * A list of field names.
+         */
+        Row mHeaders;
+
+
+        /**
+         * A list of records.
+         */
+        typedef std::vector<Row> Rows;
         Rows mRows;
 };
 
