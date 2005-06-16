@@ -66,22 +66,42 @@ const char sqlCharacterTable[] =
     "foreign key(user_id) references tmw_accounts(id)"
   ")";
 
-/* Note: Below the table for storing active items in the world. Maybe it would
- *  be better to make a difference between inventory items and items on the
- *  floor somewhere, cause either the location or the owner id isn't used.
+/*
+ * All items in the game world are stored in this table.
  */
 const char sqlItemTable[] =
   "create table tmw_items ("
     "id        int          unique primary key not null,"
-    "char_id   int,"                    // Owner character (null for unowned)
-    "x         int,"                    // Location (null when in inventory)
-    "y         int,"
-    "map       text,"
     "amount    int          not null,"  // Items of same kind can stack
     "type      int          not null,"  // Type as defined in item database
-    "state     text,"                   // Optional item state saved by script
-    "foreign key(char_id) references tmw_characters(id)"
+    "state     text"                    // Optional item state saved by script
   ")";
+
+/*
+ * Items on the ground in the game world.
+ */
+const char sqlWorldItemTable[] =
+  "create table tmw_world_items ("
+    "id        int          not null,"
+    "map       text,"
+    "x         int          not null,"  // Location of item on map
+    "y         int          not null,"
+    "deathtime int          not null,"  // Time to die (UNIX time)
+    "primary key(id, map),"
+    "foreign key(id) references tmw_items(id)"
+  ")";
+
+/*
+ * Character Inventory
+ */
+const char sqlInventoryTable[] =
+  "create table tmw_inventory ("
+    "id        int          primary key not null," // Item ID
+    "owner_id  int          not null," // Owner character ID
+    "foreign key(id) references tmw_items(id),"
+    "foreign key(owner_id) references tmw_characters(id)"
+  ")";
+
 
 SQLiteStorage::SQLiteStorage()
 {
@@ -162,6 +182,22 @@ void SQLiteStorage::createTablesIfNecessary()
         std::cout << "Database: table tmw_items exists" << std::endl;
     }
 
+    // World Items table
+    if (sqlite.DirectStatement(sqlWorldItemTable)) {
+        std::cout << "Database: table tmw_world_items created" << std::endl;
+    }
+    else {
+        std::cout << "Database: table tmw_world_items exists" << std::endl;
+    }
+
+    // Character Inventory
+    if (sqlite.DirectStatement(sqlInventoryTable)) {
+        std::cout << "Database: table tmw_inventory created" << std::endl;
+    }
+    else {
+        std::cout << "Database: table tmw_inventory exists" << std::endl;
+    }
+
     // Populate table for the hell of it ;)
     sqlite.DirectStatement("insert into tmw_accounts values (0, 'nym', 'tHiSiSHaShEd', 'nym@test', 1, 0)");
     sqlite.DirectStatement("insert into tmw_accounts values (1, 'Bjorn', 'tHiSiSHaShEd', 'bjorn@test', 1, 0)");
@@ -231,7 +267,7 @@ Account* SQLiteStorage::getAccount(const std::string &username)
 
     std::vector<Being*> beings;
 
-    for (int i = 0; i < r.records_.size(); i++)
+    for (unsigned int i = 0; i < r.records_.size(); i++)
     {
         Being *being = new Being(
                 r.records_[i].fields_[2], 1, 1, 1, 1, 1, 1, 1, 1);
