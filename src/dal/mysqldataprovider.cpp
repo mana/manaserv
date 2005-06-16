@@ -21,10 +21,12 @@
  */
 
 
+#include "dalexcept.h"
+
 #include "mysqldataprovider.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -46,7 +48,12 @@ MySqlDataProvider::MySqlDataProvider(void)
 MySqlDataProvider::~MySqlDataProvider(void)
     throw()
 {
-    // NOOP
+    // we are using the MySQL C API, there are no exceptions to catch.
+
+    // make sure that the database is closed.
+    // disconnect() calls mysql_close() which takes care of freeing
+    // the memory allocated for the handle.
+    disconnect();
 }
 
 
@@ -57,20 +64,7 @@ DbBackends
 MySqlDataProvider::getDbBackend(void) const
     throw()
 {
-    return MYSQL;
-}
-
-
-/**
- * Create a new database.
- */
-void
-MySqlDataProvider::createDb(const std::string& dbName,
-                            const std::string& dbPath)
-    throw(DbCreationFailure,
-          std::exception)
-{
-    // TODO
+    return DB_BKEND_MYSQL;
 }
 
 
@@ -81,25 +75,32 @@ void
 MySqlDataProvider::connect(const std::string& dbName,
                            const std::string& userName,
                            const std::string& password)
-    throw(DbConnectionFailure,
-          std::exception)
 {
-    connect(dbName, "", userName, password);
-}
+    // allocate and initialize a new MySQL object suitable
+    // for mysql_real_connect().
+    mDb = mysql_init(NULL);
 
+    if (!mDb) {
+        throw DbConnectionFailure(
+            "unable to initialize the MySQL library: no memory");
+    }
 
-/**
- * Create a connection to the database.
- */
-void
-MySqlDataProvider::connect(const std::string& dbName,
-                           const std::string& dbPath,
-                           const std::string& userName,
-                           const std::string& password)
-    throw(DbConnectionFailure,
-          std::exception)
-{
-    // TODO
+    // insert connection options here.
+
+    // actually establish the connection.
+    if (!mysql_real_connect(mDb,              // handle to the connection
+                            NULL,             // localhost
+                            userName.c_str(), // user name
+                            password.c_str(), // user password
+                            dbName.c_str(),   // database name
+                            0,                // use default TCP port
+                            NULL,             // use defaut socket
+                            0))               // client flags
+    {
+        throw DbConnectionFailure(mysql_error(mDb));
+    }
+
+    mIsConnected = true;
 }
 
 
@@ -109,14 +110,54 @@ MySqlDataProvider::connect(const std::string& dbName,
 const RecordSet&
 MySqlDataProvider::execSql(const std::string& sql,
                            const bool refresh)
-    throw(DbSqlQueryExecFailure,
-          std::exception)
 {
+    if (!mIsConnected) {
+        throw std::runtime_error("not connected to database");
+    }
+
     // do something only if the query is different from the previous
     // or if the cache must be refreshed
     // otherwise just return the recordset from cache.
     if (refresh || (sql != mSql)) {
-        // TODO
+        mRecordSet.clear();
+
+        // actually execute the query.
+        if (mysql_query(mDb, sql.c_str()) != 0) {
+            throw DbSqlQueryExecFailure(mysql_error(mDb));
+        }
+
+        if (mysql_field_count(mDb) > 0) {
+            MYSQL_RES* res;
+
+            // get the result of the query.
+            if (!(res = mysql_store_result(mDb))) {
+                throw DbSqlQueryExecFailure(mysql_error(mDb));
+            }
+
+            // set the field names.
+            unsigned int nFields = mysql_num_fields(res);
+            MYSQL_FIELD* fields = mysql_fetch_fields(res);
+            Row fieldNames;
+            for (unsigned int i = 0; i < nFields; ++i) {
+                fieldNames.push_back(fields[i].name);
+            }
+            mRecordSet.setColumnHeaders(fieldNames);
+
+            // populate the RecordSet.
+            MYSQL_ROW row;
+            while ((row = mysql_fetch_row(res))) {
+                Row r;
+
+                for (unsigned int i = 0; i < nFields; ++i) {
+                    r.push_back(static_cast<char *>(row[i]));
+                }
+
+                mRecordSet.add(r);
+            }
+
+            // free memory
+            mysql_free_result(res);
+        }
     }
 
     return mRecordSet;
@@ -128,12 +169,21 @@ MySqlDataProvider::execSql(const std::string& sql,
  */
 void
 MySqlDataProvider::disconnect(void)
-    throw(DbDisconnectionFailure,
-          std::exception)
 {
-    // TODO
+    if (!isConnected()) {
+        return;
+    }
+
+    // mysql_close() closes the connection and deallocates the connection
+    // handle as it was allocated by mysql_init().
+    mysql_close(mDb);
+
+    // deinitialize the MySQL client library.
+    mysql_library_end();
+
+    mIsConnected = false;
 }
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv

@@ -21,25 +21,25 @@
  */
 
 
-#ifndef _TMW_RECORDSET_H_
-#define _TMW_RECORDSET_H_
+#ifndef _TMWSERV_RECORDSET_H_
+#define _TMWSERV_RECORDSET_H_
 
 
 #include <iostream>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 #include "dalexcept.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
 
 
 /**
- * A record from the RecordSet.
+ * Data type for a row in a RecordSet.
  */
 typedef std::vector<std::string> Row;
 
@@ -47,8 +47,10 @@ typedef std::vector<std::string> Row;
 /**
  * A RecordSet to store the result of a SQL query.
  *
- * Limitations: the field values are stored and returned as string,
- * no information about the field data types are stored.
+ * Limitations:
+ *     - the field values are stored and returned as string,
+ *     - no information about the field data types are stored.
+ *     - not thread-safe.
  */
 class RecordSet
 {
@@ -68,11 +70,19 @@ class RecordSet
 
 
         /**
-         * Remove all the Records.
+         * Remove all the records.
          */
         void
-        clear(void)
-            throw();
+        clear(void);
+
+
+        /**
+         * Check if the RecordSet is empty.
+         *
+         * @return true if empty.
+         */
+        bool
+        isEmpty(void) const;
 
 
         /**
@@ -81,8 +91,7 @@ class RecordSet
          * @return the number of rows.
          */
         unsigned int
-        rows(void) const
-            throw();
+        rows(void) const;
 
 
         /**
@@ -91,8 +100,7 @@ class RecordSet
          * @return the number of columns.
          */
         unsigned int
-        cols(void) const
-            throw();
+        cols(void) const;
 
 
         /**
@@ -104,8 +112,7 @@ class RecordSet
          *            are already set.
          */
         void
-        setColumnHeaders(const Row& headers)
-            throw(AlreadySetException);
+        setColumnHeaders(const Row& headers);
 
 
         /**
@@ -116,12 +123,13 @@ class RecordSet
          *
          * @param row the new row.
          *
+         * @exception RsColumnHeadersNotSet if the row is being added before
+         *            the column headers.
          * @exception std::invalid_argument if the number of columns in the
          *            new row is not equal to the number of column headers.
          */
         void
-        add(const Row& row)
-            throw(std::invalid_argument);
+        add(const Row& row);
 
 
         /**
@@ -135,11 +143,11 @@ class RecordSet
          * @return the field value.
          *
          * @exception std::out_of_range if row or col are out of range.
+         * @exception std::invalid_argument if the recordset is empty.
          */
         const std::string&
         operator()(const unsigned int row,
-                   const unsigned int col) const
-            throw(std::out_of_range);
+                   const unsigned int col) const;
 
 
         /**
@@ -153,13 +161,12 @@ class RecordSet
          * @return the field value.
          *
          * @exception std::out_of_range if the row index is out of range.
-         * @exception std::invalid_argument if the field name is not found.
+         * @exception std::invalid_argument if the field name is not found or
+         *            the recordset is empty.
          */
         const std::string&
         operator()(const unsigned int row,
-                   const std::string& name) const
-            throw(std::out_of_range,
-                  std::invalid_argument);
+                   const std::string& name) const;
 
 
         /**
@@ -179,34 +186,25 @@ class RecordSet
         /**
          * Copy constructor.
          */
-        RecordSet(const RecordSet& rhs)
-            throw();
+        RecordSet(const RecordSet& rhs);
 
 
         /**
-         * Operator=
+         * Assignment operator.
          */
         RecordSet&
-        operator=(const RecordSet& rhs)
-            throw();
+        operator=(const RecordSet& rhs);
 
 
-        /**
-         * A list of field names.
-         */
-        Row mHeaders;
-
-
-        /**
-         * A list of records.
-         */
+    private:
+        Row mHeaders; /**< a list of field names */
         typedef std::vector<Row> Rows;
-        Rows mRows;
+        Rows mRows;   /**< a list of records */
 };
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv
 
 
-#endif // _TMW_RECORDSET_H_
+#endif // _TMWSERV_RECORDSET_H_

@@ -21,47 +21,24 @@
  */
 
 
-#include "dataprovider.h"
+#include <cppunit/extensions/TestFactoryRegistry.h>
+#include <cppunit/ui/text/TextTestRunner.h>
 
 
-namespace tmwserv
+int main(int argc, char* argv[])
 {
-namespace dal
-{
+    using namespace CppUnit;
 
+    // get the top level suite from the registry.
+    Test* suite = TestFactoryRegistry::getRegistry().makeTest();
 
-/**
- * Constructor.
- */
-DataProvider::DataProvider(void)
-    throw()
-        : mIsConnected(false),
-          mRecordSet()
-{
-    // NOOP
+    // add the test to the list of test to run.
+    TextTestRunner runner;
+    runner.addTest(suite);
+
+    // run the tests.
+    bool wasSucessful = runner.run();
+
+    // return error code 1 if the one of test failed.
+    return wasSucessful ? 0 : 1;
 }
-
-
-/**
- * Destructor.
- */
-DataProvider::~DataProvider(void)
-    throw()
-{
-    // NOOP
-}
-
-
-/**
- * Get the connection status.
- */
-bool
-DataProvider::isConnected(void) const
-    throw()
-{
-    return mIsConnected;
-}
-
-
-} // namespace dal
-} // namespace tmwserv

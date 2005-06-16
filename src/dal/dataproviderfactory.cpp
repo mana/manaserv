@@ -27,7 +27,7 @@
 #include "sqlitedataprovider.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -58,23 +58,22 @@ DataProviderFactory::~DataProviderFactory(void)
  */
 DataProvider*
 DataProviderFactory::createDataProvider(void)
-    throw(std::runtime_error)
 {
-#ifdef USE_MYSQL
+#ifdef MYSQL_SUPPORT
     MySqlDataProvider* provider = new MySqlDataProvider;
     return provider;
 #endif
 
-#ifdef USE_SQLITE
+#ifdef SQLITE_SUPPORT
     SqLiteDataProvider* provider = new SqLiteDataProvider;
     return provider;
 #endif
 
     // a data provider cannot be created as the server has been compiled
-    // without support for any databases.
-    throw std::runtime_error("missing database backend support");
+    // without support for any database.
+    throw std::runtime_error("missing database backend support.");
 }
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv

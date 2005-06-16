@@ -21,14 +21,14 @@
  */
 
 
-#ifndef _TMW_DAL_EXCEPT_H_
-#define _TMW_DAL_EXCEPT_H_
+#ifndef _TMWSERV_DAL_EXCEPT_H_
+#define _TMWSERV_DAL_EXCEPT_H_
 
 
 #include <string>
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -69,7 +69,7 @@ class DbException: public std::exception
          * @return the error message.
          */
         virtual const char*
-        what(void)
+        what(void) const
             throw()
         {
             return mMsg.c_str();
@@ -78,37 +78,6 @@ class DbException: public std::exception
 
     private:
         std::string mMsg;
-};
-
-
-/**
- * Database creation failure.
- */
-class DbCreationFailure: public DbException
-{
-    public:
-        /**
-         * Default constructor.
-         */
-        DbCreationFailure(void)
-            throw()
-                : DbException("")
-        {
-            // NOOP
-        }
-
-
-        /**
-         * Constructor.
-         *
-         * @param msg the error message.
-         */
-        DbCreationFailure(const std::string& msg)
-            throw()
-                : DbException(msg)
-        {
-            // NOOP
-        }
 };
 
 
@@ -213,8 +182,16 @@ class AlreadySetException: public std::exception
 };
 
 
+/**
+ * Missing column headers exception.
+ */
+class RsColumnHeadersNotSet: public std::exception
+{
+};
+
+
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv
 
 
-#endif // _TMW_DAL_EXCEPT_H_
+#endif // _TMWSERV_DAL_EXCEPT_H_

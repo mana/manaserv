@@ -26,7 +26,7 @@
 #include "recordset.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -57,10 +57,22 @@ RecordSet::~RecordSet(void)
  */
 void
 RecordSet::clear(void)
-    throw()
 {
     mHeaders.clear();
     mRows.clear();
+}
+
+
+/**
+ * Check if the RecordSet is empty.
+ */
+bool
+RecordSet::isEmpty(void) const
+{
+    // we just need to check the size of the list of column headers
+    // as it is not possible to insert a new record if the column
+    // headers are not defined.
+    return (mHeaders.size() == 0);
 }
 
 
@@ -71,7 +83,6 @@ RecordSet::clear(void)
  */
 unsigned int
 RecordSet::rows(void) const
-    throw()
 {
     return mRows.size();
 }
@@ -84,7 +95,6 @@ RecordSet::rows(void) const
  */
 unsigned int
 RecordSet::cols(void) const
-    throw()
 {
     return mHeaders.size();
 }
@@ -95,7 +105,6 @@ RecordSet::cols(void) const
  */
 void
 RecordSet::setColumnHeaders(const Row& headers)
-    throw(AlreadySetException)
 {
     if (mHeaders.size() > 0) {
         throw AlreadySetException();
@@ -110,11 +119,19 @@ RecordSet::setColumnHeaders(const Row& headers)
  */
 void
 RecordSet::add(const Row& row)
-    throw(std::invalid_argument)
 {
-    if (row.size() != mHeaders.size()) {
-        throw std::invalid_argument(
-            "the new row does not have the required number of columns.");
+    const unsigned int nCols = mHeaders.size();
+
+    if (nCols == 0) {
+        throw RsColumnHeadersNotSet();
+    }
+
+    if (row.size() != nCols) {
+        std::ostringstream msg;
+        msg << "row has " << row.size() << " columns; "
+            << "expected: " << nCols << std::ends;
+
+        throw std::invalid_argument(msg.str());
     }
 
     mRows.push_back(row);
@@ -127,8 +144,12 @@ RecordSet::add(const Row& row)
 const std::string&
 RecordSet::operator()(const unsigned int row,
                       const unsigned int col) const
-    throw(std::out_of_range)
 {
+    if (mHeaders.size() == 0) {
+        throw std::invalid_argument(
+            "nothing to return as the recordset is empty.");
+    }
+
     if ((row >= mRows.size()) || (col >= mHeaders.size())) {
         std::ostringstream os;
         os << "(" << row << ", " << col << ") is out of range; "
@@ -148,9 +169,12 @@ RecordSet::operator()(const unsigned int row,
 const std::string&
 RecordSet::operator()(const unsigned int row,
                       const std::string& name) const
-    throw(std::out_of_range,
-          std::invalid_argument)
 {
+    if (mHeaders.size() == 0) {
+        throw std::invalid_argument(
+            "nothing to return as the recordset is empty.");
+    }
+
     if (row >= mRows.size()) {
         std::ostringstream os;
         os << "row " << row << " is out of range; "
@@ -170,8 +194,8 @@ RecordSet::operator()(const unsigned int row,
     }
 
     // find the field index.
-    const int nCols = mHeaders.size();
-    int i;
+    const unsigned int nCols = mHeaders.size();
+    unsigned int i;
     for (i = 0; i < nCols; ++i) {
         if (mHeaders[i] == name) {
             break;
@@ -188,17 +212,18 @@ RecordSet::operator()(const unsigned int row,
 std::ostream&
 operator<<(std::ostream& out, const RecordSet& rhs)
 {
-    using namespace tmw::dal;
+    using namespace tmwserv::dal;
 
     // print the field names first.
     if (rhs.mHeaders.size() > 0) {
-        Row::const_iterator it = rhs.mHeaders.begin();
-        out << "[ " << (*it);
-        it++;
-        for (; it != rhs.mHeaders.end(); ++it) {
-            out << " | " << (*it);
+        out << "|";
+        for (Row::const_iterator it = rhs.mHeaders.begin();
+             it != rhs.mHeaders.end();
+             ++it)
+        {
+            out << (*it) << "|";
         }
-        out << " ]" << std::endl;
+        out << std::endl << std::endl;
     }
 
     // and then print every line.
@@ -206,13 +231,14 @@ operator<<(std::ostream& out, const RecordSet& rhs)
          it != rhs.mRows.end();
          ++it)
     {
-        Row::const_iterator it2 = (*it).begin();
-        out << "[ " << (*it2);
-        it2++;
-        for (; it2 != (*it).end(); ++it2) {
-            out << " | " << (*it2);
+        out << "|";
+        for (Row::const_iterator it2 = (*it).begin();
+             it2 != (*it).end();
+             ++it2)
+        {
+            out << (*it2) << "|";
         }
-        out << " ]" << std::endl;
+        out << std::endl;
     }
 
     return out;
@@ -220,4 +246,4 @@ operator<<(std::ostream& out, const RecordSet& rhs)
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv

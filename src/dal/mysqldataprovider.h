@@ -21,16 +21,18 @@
  */
 
 
-#ifndef _TMW_MYSQL_DATA_PROVIDER_H_
-#define _TMW_MYSQL_DATA_PROVIDER_H_
+#ifndef _TMWSERV_MYSQL_DATA_PROVIDER_H_
+#define _TMWSERV_MYSQL_DATA_PROVIDER_H_
 
 
 #include <string>
 
+#include <mysql/mysql.h>
+
 #include "dataprovider.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -57,7 +59,7 @@ class MySqlDataProvider: public DataProvider
 
 
         /**
-         * Get the database backend name.
+         * Get the name of the database backend.
          *
          * @return the database backend name.
          */
@@ -67,22 +69,6 @@ class MySqlDataProvider: public DataProvider
 
 
         /**
-         * Create a new database.
-         *
-         * @param dbName the database name.
-         * @param dbPath the database file path (optional)
-         *
-         * @exception DbCreationFailure if unsuccessful creation.
-         * @exception std::exception if unexpected exception.
-         */
-        void
-        createDb(const std::string& dbName,
-                 const std::string& dbPath = "")
-            throw(DbCreationFailure,
-                  std::exception);
-
-
-        /**
          * Create a connection to the database.
          *
          * @param dbName the database name.
@@ -90,69 +76,45 @@ class MySqlDataProvider: public DataProvider
          * @param password the user password.
          *
          * @exception DbConnectionFailure if unsuccessful connection.
-         * @exception std::exception if unexpected exception.
          */
         void
         connect(const std::string& dbName,
                 const std::string& userName,
-                const std::string& password)
-            throw(DbConnectionFailure,
-                  std::exception);
-
-
-        /**
-         * Create a connection to the database.
-         *
-         * @param dbName the database name.
-         * @param dbPath the database file path.
-         * @param userName the user name.
-         * @param password the user password.
-         *
-         * @exception DbConnectionFailure if unsuccessful connection.
-         * @exception std::exception if unexpected exception.
-         */
-        void
-        connect(const std::string& dbName,
-                const std::string& dbPath,
-                const std::string& userName,
-                const std::string& password)
-            throw(DbConnectionFailure,
-                  std::exception);
+                const std::string& password);
 
 
         /**
          * Execute a SQL query.
          *
          * @param sql the SQL query.
-         * @param refresh if true, refresh the cache (optional)
+         * @param refresh if true, refresh the cache (default = false).
          *
          * @return a recordset.
          *
          * @exception DbSqlQueryExecFailure if unsuccessful execution.
-         * @exception std::exception if unexpected exception.
+         * @exception std::runtime_error if trying to query a closed database.
          */
         const RecordSet&
         execSql(const std::string& sql,
-                const bool refresh = false)
-            throw(DbSqlQueryExecFailure,
-                  std::exception);
+                const bool refresh = false);
 
 
         /**
          * Close the connection to the database.
          *
          * @exception DbDisconnectionFailure if unsuccessful disconnection.
-         * @exception std::exception if unexpected exception.
          */
         void
-        disconnect(void)
-            throw(DbDisconnectionFailure,
-                  std::exception);
+        disconnect(void);
+
+
+    private:
+        MYSQL* mDb; /**< the handle to the database connection */
 };
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv
 
 
-#endif // _TMW_MYSQL_DATA_PROVIDER_H_
+#endif // _TMWSERV_MYSQL_DATA_PROVIDER_H_

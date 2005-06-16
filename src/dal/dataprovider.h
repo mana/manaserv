@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _TMW_DATA_PROVIDER_H_
-#define _TMW_DATA_PROVIDER_H_
+#ifndef _TMWSERV_DATA_PROVIDER_H_
+#define _TMWSERV_DATA_PROVIDER_H_
 
 
 #include <string>
@@ -31,7 +31,7 @@
 #include "recordset.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -41,13 +41,23 @@ namespace dal
  * Enumeration type for the database backends.
  */
 typedef enum {
-    MYSQL,
-    SQLITE
+    DB_BKEND_MYSQL,
+    DB_BKEND_SQLITE
 } DbBackends;
 
 
 /**
  * An abstract data provider.
+ *
+ * Notes:
+ *     - depending on the database backend, the connection to an unexisting
+ *       database may actually create it as a side-effect (e.g. SQLite).
+ *
+ * Limitations:
+ *     - this class does not provide APIs for:
+ *         - remote connections,
+ *         - creating new databases,
+ *         - dropping existing databases.
  */
 class DataProvider
 {
@@ -67,100 +77,6 @@ class DataProvider
 
 
         /**
-         * Get the database backend name.
-         *
-         * @return the database backend name.
-         */
-        virtual DbBackends
-        getDbBackend(void) const
-            throw() = 0;
-
-
-        /**
-         * Create a new database.
-         *
-         * @param dbName the database name.
-         * @param dbPath the database file path (optional)
-         *
-         * @exception DbCreationFailure if unsuccessful creation.
-         * @exception std::exception if unexpected exception.
-         */
-        virtual void
-        createDb(const std::string& dbName,
-                 const std::string& dbPath = "")
-            throw(DbCreationFailure,
-                  std::exception) = 0;
-
-
-        /**
-         * Create a connection to the database.
-         *
-         * @param dbName the database name.
-         * @param userName the user name.
-         * @param password the user password.
-         *
-         * @exception DbConnectionFailure if unsuccessful connection.
-         * @exception std::exception if unexpected exception.
-         */
-        virtual void
-        connect(const std::string& dbName,
-                const std::string& userName,
-                const std::string& password)
-            throw(DbConnectionFailure,
-                  std::exception) = 0;
-
-
-        /**
-         * Create a connection to the database.
-         *
-         * @param dbName the database name.
-         * @param dbPath the database file path.
-         * @param userName the user name.
-         * @param password the user password.
-         *
-         * @exception DbConnectionFailure if unsuccessful connection.
-         * @exception std::exception if unexpected exception.
-         */
-        virtual void
-        connect(const std::string& dbName,
-                const std::string& dbPath,
-                const std::string& userName,
-                const std::string& password)
-            throw(DbConnectionFailure,
-                  std::exception) = 0;
-
-
-        /**
-         * Execute a SQL query.
-         *
-         * @param sql the SQL query.
-         * @param refresh if true, refresh the cache (optional)
-         *
-         * @return a recordset.
-         *
-         * @exception DbSqlQueryExecFailure if unsuccessful execution.
-         * @exception std::exception if unexpected exception.
-         */
-        virtual const RecordSet&
-        execSql(const std::string& sql,
-                const bool refresh = false)
-            throw(DbSqlQueryExecFailure,
-                  std::exception) = 0;
-
-
-        /**
-         * Close the connection to the database.
-         *
-         * @exception DbDisconnectionFailure if unsuccessful disconnection.
-         * @exception std::exception if unexpected exception.
-         */
-        virtual void
-        disconnect(void)
-            throw(DbDisconnectionFailure,
-                  std::exception) = 0;
-
-
-        /**
          * Get the connection status.
          *
          * @return true if connected.
@@ -170,40 +86,66 @@ class DataProvider
             throw();
 
 
+        /**
+         * Get the name of the database backend.
+         *
+         * @return the database backend name.
+         */
+        virtual DbBackends
+        getDbBackend(void) const
+            throw() = 0;
+
+
+        /**
+         * Create a connection to the database.
+         *
+         * @param dbName the database name.
+         * @param userName the user name.
+         * @param password the user password.
+         *
+         * @exception DbConnectionFailure if unsuccessful connection.
+         */
+        virtual void
+        connect(const std::string& dbName,
+                const std::string& userName,
+                const std::string& password) = 0;
+
+
+        /**
+         * Execute a SQL query.
+         *
+         * @param sql the SQL query.
+         * @param refresh if true, refresh the cache (default = false).
+         *
+         * @return a recordset.
+         *
+         * @exception DbSqlQueryExecFailure if unsuccessful execution.
+         * @exception std::runtime_error if trying to query a closed database.
+         */
+        virtual const RecordSet&
+        execSql(const std::string& sql,
+                const bool refresh = false) = 0;
+
+
+        /**
+         * Close the connection to the database.
+         *
+         * @exception DbDisconnectionFailure if unsuccessful disconnection.
+         */
+        virtual void
+        disconnect(void) = 0;
+
+
     protected:
-        /**
-         * The database name.
-         */
-        std::string mDbName;
-
-
-        /**
-         * The database path.
-         */
-        std::string mDbPath;
-
-
-        /**
-         * The connection status.
-         */
-        bool mIsConnected;
-
-
-        /**
-         * Cache the last SQL query.
-         */
-        std::string mSql;
-
-
-        /**
-         * Cache the result of the last SQL query.
-         */
-        RecordSet mRecordSet;
+        std::string mDbName;  /**< the database name */
+        bool mIsConnected;    /**< the connection status */
+        std::string mSql;     /**< cache the last SQL query */
+        RecordSet mRecordSet; /**< cache the result of the last SQL query */
 };
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv
 
 
-#endif // _TMW_DATA_PROVIDER_H_
+#endif // _TMWSERV_DATA_PROVIDER_H_

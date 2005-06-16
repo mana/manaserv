@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _TMW_DATA_PROVIDER_FACTORY_H_
-#define _TMW_DATA_PROVIDER_FACTORY_H_
+#ifndef _TMWSERV_DATA_PROVIDER_FACTORY_H_
+#define _TMWSERV_DATA_PROVIDER_FACTORY_H_
 
 
 #include <stdexcept>
@@ -30,7 +30,7 @@
 #include "dataprovider.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -38,6 +38,11 @@ namespace dal
 
 /**
  * A factory to create data providers.
+ *
+ * Note:
+ *     - this class does not assume the ownership of the pointers returned
+ *       by createDataProvider().
+ *     - this class is a singleton.
  */
 class DataProviderFactory
 {
@@ -46,8 +51,7 @@ class DataProviderFactory
          * Create a new data provider.
          */
         static DataProvider*
-        createDataProvider(void)
-            throw(std::runtime_error);
+        createDataProvider(void);
 
 
     private:
@@ -80,7 +84,7 @@ class DataProviderFactory
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv
 
 
-#endif // _TMW_DATA_PROVIDER_FACTORY_H_
+#endif // _TMWSERV_DATA_PROVIDER_FACTORY_H_

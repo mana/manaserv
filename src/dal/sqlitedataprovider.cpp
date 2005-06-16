@@ -21,12 +21,10 @@
  */
 
 
-#include <iostream>
-
 #include "sqlitedataprovider.h"
 
 
-namespace tmw
+namespace tmwserv
 {
 namespace dal
 {
@@ -52,84 +50,46 @@ SqLiteDataProvider::~SqLiteDataProvider(void)
     try {
         // make sure that the database is closed.
         // disconnect() calls sqlite3_close() which takes care of freeing
-        // the memory held by the class attribute mDb.
+        // the memory allocated for the handle.
         disconnect();
     }
-    catch (const DbDisconnectionFailure& e) {
-        // TODO
+    catch (...) {
+        // ignore
     }
 }
 
 
 /**
- * Get the database backend name.
+ * Get the name of the database backend.
  */
 DbBackends
 SqLiteDataProvider::getDbBackend(void) const
     throw()
 {
-    return SQLITE;
+    return DB_BKEND_SQLITE;
 }
 
 
 /**
- * Create a new database.
+ * Create a connection to the database.
  */
 void
-SqLiteDataProvider::createDb(const std::string& dbName,
-                             const std::string& dbPath)
-    throw(DbCreationFailure,
-          std::exception)
+SqLiteDataProvider::connect(const std::string& dbName,
+                            const std::string& userName,
+                            const std::string& password)
 {
-    // TODO: handle dbPath
-
     // sqlite3_open creates the database file if it does not exist
-    // and hence createDb is not very useful here.
+    // as a side-effect.
     if (sqlite3_open(dbName.c_str(), &mDb) != SQLITE_OK) {
-        throw DbCreationFailure(sqlite3_errmsg(mDb));
-    }
+        // save the error message thrown by sqlite3_open()
+        // as we may lose it when sqlite3_close() runs.
+        std::string msg(sqlite3_errmsg(mDb));
 
-    // nothing else to do, close the database.
-    if (sqlite3_close(mDb) != SQLITE_OK) {
-        throw DbCreationFailure(sqlite3_errmsg(mDb));
-    }
-}
-
-
-/**
- * Create a connection to the database.
- */
-void
-SqLiteDataProvider::connect(const std::string& dbName,
-                            const std::string& userName,
-                            const std::string& password)
-    throw(DbConnectionFailure,
-          std::exception)
-{
-    connect(dbName, "", userName, password);
-}
-
-
-/**
- * Create a connection to the database.
- */
-void
-SqLiteDataProvider::connect(const std::string& dbName,
-                            const std::string& dbPath,
-                            const std::string& userName,
-                            const std::string& password)
-    throw(DbConnectionFailure,
-          std::exception)
-{
-    // TODO: handle dbPath
-
-    // sqlite3_open creates the database file if it does not exist.
-    if (sqlite3_open(dbName.c_str(), &mDb) != SQLITE_OK) {
-        // there is no need to check for the error code returned by
-        // sqlite3_close() as we are going to throw an exception anyway
+        // the SQLite3 documentation suggests that we try to close
+        // the database after an unsuccessful call to sqlite3_open().
         sqlite3_close(mDb);
 
-        throw DbConnectionFailure(sqlite3_errmsg(mDb));
+        throw DbConnectionFailure(msg);
     }
 
     mIsConnected = true;
@@ -142,9 +102,11 @@ SqLiteDataProvider::connect(const std::string& dbName,
 const RecordSet&
 SqLiteDataProvider::execSql(const std::string& sql,
                             const bool refresh)
-    throw(DbSqlQueryExecFailure,
-          std::exception)
 {
+    if (!mIsConnected) {
+        throw std::runtime_error("not connected to database");
+    }
+
     // do something only if the query is different from the previous
     // or if the cache must be refreshed
     // otherwise just return the recordset from cache.
@@ -153,6 +115,8 @@ SqLiteDataProvider::execSql(const std::string& sql,
         int nRows;
         int nCols;
         char* errMsg;
+
+        mRecordSet.clear();
 
         int errCode = sqlite3_get_table(
   			              mDb,          // an open database
@@ -164,11 +128,8 @@ SqLiteDataProvider::execSql(const std::string& sql,
                       );
 
         if (errCode != SQLITE_OK) {
-            std::cout << sqlite3_errmsg(mDb) << std::endl;
-            throw DbSqlQueryExecFailure();
+            throw DbSqlQueryExecFailure(sqlite3_errmsg(mDb));
         }
-
-        mRecordSet.clear();
 
         // the first row of result[] contains the field names.
         Row fieldNames;
@@ -203,8 +164,6 @@ SqLiteDataProvider::execSql(const std::string& sql,
  */
 void
 SqLiteDataProvider::disconnect(void)
-    throw(DbDisconnectionFailure,
-          std::exception)
 {
     if (!isConnected()) {
         return;
@@ -219,4 +178,4 @@ SqLiteDataProvider::disconnect(void)
 
 
 } // namespace dal
-} // namespace tmw
+} // namespace tmwserv
