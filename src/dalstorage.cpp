@@ -4,25 +4,47 @@
  *
  *  This file is part of The Mana World.
  *
- *  The Mana World is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  any later version.
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
  *
- *  The Mana World is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with The Mana World; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  *  $Id$
  */
 
-#include "dalstorage.h"
+
+#include <functional>
 #include <sstream>
+
+#include "dalstorage.h"
+
+
+namespace
+{
+
+
+/**
+ * Functor used for the search of an Account by name.
+ */
+template <typename T>
+struct account_name_equals_to
+    : public std::binary_function<T, std::string, bool>
+{
+    bool
+    operator()(const T& account, const std::string& name) const
+    {
+        return account->getName() == name;
+    }
+};
+
 
 /* Values for user level could be:
  *  0: Normal user
@@ -102,115 +124,219 @@ const char sqlInventoryTable[] =
   ");";
 
 
+} // anonymous namespace
+
+
+namespace tmwserv
+{
+
+
+/**
+ * Constructor.
+ */
 DALStorage::DALStorage()
+        : mDb(dal::DataProviderFactory::createDataProvider())
 {
-    db = tmw::dal::DataProviderFactory::createDataProvider();
-    std::string dbName = "tmw";
-    // Try connection to database
-    try {
-	db->connect("tmw.db", "", "");
-    } catch (tmw::dal::DbConnectionFailure f) {
-	std::cout << "Database connection failed." << std::endl;
-	// Try creating database
-	try {
-	    db->createDb("tmw.db");
-	    db->connect("tmw.db", "", "");
-	    // Create tables
-	    db->execSql(sqlAccountTable);
-	    db->execSql(sqlCharacterTable);
-	    db->execSql(sqlItemTable);
-	    db->execSql(sqlWorldItemTable);
-	    db->execSql(sqlInventoryTable);
-	    // Example data :)
-	    db->execSql("insert into tmw_accounts values (0, 'nym', 'tHiSiSHaShEd', 'nym@test', 1, 0);");
-	    db->execSql("insert into tmw_accounts values (1, 'Bjorn', 'tHiSiSHaShEd', 'bjorn@test', 1, 0);");
-	    db->execSql("insert into tmw_accounts values (2, 'Usiu', 'tHiSiSHaShEd', 'usiu@test', 1, 0);");
-	    db->execSql("insert into tmw_accounts values (3, 'ElvenProgrammer', 'tHiSiSHaShEd', 'elven@test', 1, 0);");
-	    db->execSql("insert into tmw_characters values (0, 0, 'Nym the Great', 0, 99, 1000000, 0, 0, 'main.map', 1, 2, 3, 4, 5, 6);");
-	    //
-	} catch (tmw::dal::DbCreationFailure f) {
-	    std::cout << "Database creation failed." << std::endl;
-	} catch (tmw::dal::DbSqlQueryExecFailure f) {
-	    std::cout << "Database table creation failed" << std::endl;
-	}
-    }
+    // the connection to the database will be made on the first request
+    // to the database.
 }
 
+
+/**
+ * Destructor.
+ */
 DALStorage::~DALStorage()
+    throw()
 {
-    db->disconnect();
-    delete db;
+    mDb->disconnect();
 
-    // clean up loaded accounts
-    for (unsigned int i = 0; i < accounts.size(); i++)
-	delete accounts[i];
-}
-
-void DALStorage::flush()
-{
-    // this isn't required for DAL
-}
-
-unsigned int DALStorage::getAccountCount()
-{
-    try {
-	const tmw::dal::RecordSet &r = db->execSql("select count(*) from tmw_accounts;");
-	std::stringstream s;
-	unsigned int tmp;
-
-	s << r(0, 0);
-	s >> tmp;
-	return tmp;
-    } catch (tmw::dal::DbSqlQueryExecFailure f) {
-	std::cout << "Get accounts count failed :'(" << std::endl;
+    // clean up loaded accounts.
+    for (Accounts::iterator it = mAccounts.begin();
+         it != mAccounts.end();
+         ++it)
+    {
+        delete (*it);
     }
-    return 0;
-}
 
-Account *DALStorage::getAccount(const std::string &username)
-{
-    for (unsigned int i = 0; i < accounts.size(); i++)
-	if (accounts[i]->getName() == username)
-	    return accounts[i];
-
-    std::string selectStatement = "select * from tmw_accounts where username = '"
-	+ username + "';";
-
-    try {
-	const tmw::dal::RecordSet &r = db->execSql(selectStatement);
-
-	// Create account
-	Account *acc = new Account();
-	acc->setName(r(0, 1));
-	acc->setPassword(r(0, 2));
-	acc->setEmail(r(0, 4));
-	accounts.push_back(acc);
-	
-	// Load character associated with the account
-	std::string user_id = r(0, 0);
-	selectStatement = "select * from tmw_characters where id = '" + user_id + "';";
-	try {
-	    const tmw::dal::RecordSet &r2 = db->execSql(selectStatement);
-
-	    std::vector<Being*> beings;
-	    
-	    for (unsigned int i = 0; i < r2.rows(); i++)
-	    {
-		Being *being = new Being(
-					 r2(i, 2), 1, 1, 1, 1, 1, 1, 1, 1);
-		characters.push_back(being);
-		beings.push_back(being);
-	    }
-	    
-	    acc->setCharacters(beings);
-	    //
-	} catch (tmw::dal::DbSqlQueryExecFailure f) {
-	    return NULL; // TODO: Throw exception here
-	}
-	
-	return acc;
-	//
-    } catch (tmw::dal::DbSqlQueryExecFailure f) {
-	return NULL; // TODO: Throw exception here
+    // clean up loaded characters.
+    for (Beings::iterator it = mCharacters.begin();
+         it != mCharacters.end();
+         ++it)
+    {
+        delete (*it);
     }
 }
+
+
+/**
+ * Save changes to the database permanently.
+ */
+void
+DALStorage::flush(void)
+{
+    // this feature is not currently provided by DAL.
+}
+
+
+/**
+ * Get the number of Accounts saved in database.
+ */
+unsigned int
+DALStorage::getAccountCount(void)
+{
+    // connect to the database (if not connected yet).
+    connect();
+
+    using namespace dal;
+
+    try {
+        // query the database.
+        const std::string sql = "select count(*) from tmw_accounts;";
+        const RecordSet& rs = mDb->execSql(sql);
+
+        // convert the result into a number.
+        std::istringstream s(rs(0, 0));
+        unsigned int value;
+        s >> value;
+
+        return value;
+    } catch (const DbSqlQueryExecFailure& f) {
+        std::cout << "Get accounts count failed :'(" << std::endl;
+    }
+}
+
+
+/**
+ * Get an account by user name.
+ */
+Account*
+DALStorage::getAccount(const std::string& userName)
+{
+    // connect to the database (if not connected yet).
+    connect();
+
+    // look for the account in the list first.
+    Accounts::iterator it =
+        std::find_if(
+            mAccounts.begin(),
+            mAccounts.end(),
+            std::bind2nd(account_name_equals_to<Account*>(), userName)
+        );
+
+    if (it != mAccounts.end()) {
+        return (*it);
+    }
+
+
+    using namespace dal;
+
+    // the account was not in the list, look for it in the database.
+    try {
+        std::string sql("select * from tmw_accounts where username = '");
+        sql += userName;
+        sql += "';";
+        const RecordSet& accountInfo = mDb->execSql(sql);
+
+        // if the account is not even in the database then
+        // we have no choice but to return nothing.
+        if (accountInfo.isEmpty()) {
+            return NULL;
+        }
+
+        // create an Account instance
+        // and initialize it with information about the user.
+        Account* account = new Account();
+        account->setName(accountInfo(0, 1));
+        account->setPassword(accountInfo(0, 2));
+        account->setEmail(accountInfo(0, 3));
+
+        // add the new Account to the list.
+        mAccounts.push_back(account);
+
+        // load the characters associated with the account.
+        sql = "select * from tmw_characters where id = '";
+        sql += accountInfo(0, 0);
+        sql += "';";
+        const RecordSet& charInfo = mDb->execSql(sql);
+
+        if (!charInfo.isEmpty()) {
+            Beings beings;
+
+            for (unsigned int i = 0; i < charInfo.rows(); ++i) {
+                Being* being =
+                    new Being(charInfo(i, 2),   // name
+                              charInfo(i, 3),   // gender
+                              charInfo(i, 4),   // level
+                              charInfo(i, 5),   // money
+                              charInfo(i, 9),   // strength
+                              charInfo(i, 10),  // agility
+                              charInfo(i, 11),  // vitality
+                              charInfo(i, 13),  // dexterity
+                              charInfo(i, 14)); // luck
+
+                mCharacters.push_back(being);
+                beings.push_back(being);
+            }
+
+            account->setCharacters(beings);
+        }
+
+        return account;
+    }
+    catch (const DbSqlQueryExecFailure& e) {
+        return NULL; // TODO: Throw exception here
+    }
+}
+
+
+/**
+ * Connect to the database and initialize it if necessary.
+ */
+void
+DALStorage::connect(void)
+{
+    // do nothing if already connected.
+    if (mDb->isConnected()) {
+        return;
+    }
+
+    using namespace dal;
+
+    try {
+        // open a connection to the database.
+        // TODO: get the database name, the user name and the user password
+        // from a configuration manager.
+        mDb->connect("tmw", "", "");
+
+        bool doInitDb = true;
+
+        // TODO: check the existence of the tables first and
+        // create only those that are missing.
+
+        if (doInitDb) {
+            // create the tables.
+            mDb->execSql(sqlAccountTable);
+            mDb->execSql(sqlCharacterTable);
+            mDb->execSql(sqlItemTable);
+            mDb->execSql(sqlWorldItemTable);
+            mDb->execSql(sqlInventoryTable);
+
+            // Example data :)
+            mDb->execSql("insert into tmw_accounts values (0, 'nym', 'tHiSiSHaShEd', 'nym@test', 1, 0);");
+            mDb->execSql("insert into tmw_accounts values (1, 'Bjorn', 'tHiSiSHaShEd', 'bjorn@test', 1, 0);");
+            mDb->execSql("insert into tmw_accounts values (2, 'Usiu', 'tHiSiSHaShEd', 'usiu@test', 1, 0);");
+            mDb->execSql("insert into tmw_accounts values (3, 'ElvenProgrammer', 'tHiSiSHaShEd', 'elven@test', 1, 0);");
+            mDb->execSql("insert into tmw_characters values (0, 0, 'Nym the Great', 0, 99, 1000000, 0, 0, 'main.map', 1, 2, 3, 4, 5, 6);");
+        }
+    }
+    catch (const DbConnectionFailure& e) {
+        std::cout << "unable to connect to the database: "
+                  << e.what() << std::endl;
+    }
+    catch (const DbSqlQueryExecFailure& e) {
+        std::cout << e.what() << std::endl;
+    }
+}
+
+
+} // namespace tmwserv
