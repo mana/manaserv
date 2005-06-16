@@ -70,7 +70,7 @@ RecordSet::clear(void)
  * @return the number of rows.
  */
 unsigned int
-RecordSet::rows(void)
+RecordSet::rows(void) const
     throw()
 {
     return mRows.size();
@@ -83,7 +83,7 @@ RecordSet::rows(void)
  * @return the number of columns.
  */
 unsigned int
-RecordSet::cols(void)
+RecordSet::cols(void) const
     throw()
 {
     return mHeaders.size();

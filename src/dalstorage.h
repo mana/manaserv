@@ -21,35 +21,46 @@
  *  $Id$
  */
 
+#ifndef DALSTORAGE_H
+#define DALSTORAGE_H
+
+#include <vector>
 #include "storage.h"
-#include "dalstorage.h"
-//#include "sqlitestorage.h"
+#include "dal/dataproviderfactory.h"
+#include "dal/dataprovider.h"
 
-Storage *Storage::instance = NULL;
-
-
-Storage::Storage()
+class DALStorage : public Storage
 {
-}
+    tmw::dal::DataProvider *db;            /**< Database provider */
 
-Storage::~Storage()
-{
-}
+    std::vector<Account*> accounts;        /**< Loaded accounts */
+    std::vector<Being*> characters;        /**< Loaded characters */
 
-Storage *Storage::getInstance()
-{
-    if (instance == NULL)
-    {
-        instance = new DALStorage(); //SQLiteStorage();
-    }
+ public:
+    /**
+     * Constructor.
+     */
+    DALStorage();
 
-    return instance;
-}
+    /**
+     * Destructor.
+     */
+    ~DALStorage();
 
-void Storage::deleteInstance()
-{
-    if (instance != NULL)
-    {
-        delete instance;
-    }
-}
+    /**
+     * Save changes to database
+     */
+    void flush();
+
+    /**
+     * Account count (test function)
+     */
+    unsigned int getAccountCount();
+
+    /**
+     * Get account & associated data
+     */
+    Account *getAccount(const std::string &username);
+};
+
+#endif

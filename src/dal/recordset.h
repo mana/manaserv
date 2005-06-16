@@ -81,7 +81,7 @@ class RecordSet
          * @return the number of rows.
          */
         unsigned int
-        rows(void)
+        rows(void) const
             throw();
 
 
@@ -91,7 +91,7 @@ class RecordSet
          * @return the number of columns.
          */
         unsigned int
-        cols(void)
+        cols(void) const
             throw();
 
 

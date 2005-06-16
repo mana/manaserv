@@ -31,7 +31,20 @@ tmwserv_SOURCES = main.cpp \
 		  account.h \
 		  account.cpp \
 		  object.h \
-		  object.cpp
+		  object.cpp \
+		  dal/dataprovider.h \
+		  dal/dataprovider.cpp \
+		  dal/dataproviderfactory.h \
+		  dal/dataproviderfactory.cpp \
+		  dal/mysqldataprovider.h \
+		  dal/mysqldataprovider.cpp \
+		  dal/sqlitedataprovider.h \
+		  dal/sqlitedataprovider.cpp \
+		  dal/recordset.h \
+		  dal/recordset.cpp \
+		  dal/dalexcept.h \
+		  dalstorage.h \
+		  dalstorage.cpp
 
 
 if BUILD_SQLITE
