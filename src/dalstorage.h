@@ -37,23 +37,18 @@ namespace tmwserv
 
 /**
  * A storage class that relies on DAL.
+ *
+ * Notes:
+ *     - this class cannot be instanciated nor duplicated in order to force
+ *       a user class to use the Storage singleton.
  */
 class DALStorage: public Storage
 {
+    // friend so that Storage can call the constructor.
+    friend class Storage;
+
+
     public:
-        /**
-         * Constructor.
-         */
-        DALStorage(void);
-
-
-        /**
-         * Destructor.
-         */
-        ~DALStorage(void)
-            throw();
-
-
         /**
          * Save changes to the database permanently.
          */
@@ -82,6 +77,32 @@ class DALStorage: public Storage
 
 
     private:
+        /**
+         * Constructor.
+         */
+        DALStorage(void);
+
+
+        /**
+         * Destructor.
+         */
+        ~DALStorage(void)
+            throw();
+
+
+        /**
+         * Copy constructor.
+         */
+        DALStorage(const DALStorage& rhs);
+
+
+        /**
+         * Assignment operator.
+         */
+        DALStorage&
+        operator=(const DALStorage& rhs);
+
+
         /**
          * Connect to the database and initialize it if necessary.
          */
