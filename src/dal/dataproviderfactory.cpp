@@ -23,8 +23,15 @@
 
 #include "dataproviderfactory.h"
 
+#ifdef MYSQL_SUPPORT
 #include "mysqldataprovider.h"
+#else
+#ifdef SQLITE_SUPPORT
 #include "sqlitedataprovider.h"
+#else
+#error "Database not specified"
+#endif
+#endif
 
 
 namespace tmwserv

@@ -36,8 +36,6 @@ tmwserv_SOURCES = main.cpp \
 		  dal/dataprovider.cpp \
 		  dal/dataproviderfactory.h \
 		  dal/dataproviderfactory.cpp \
-		  dal/mysqldataprovider.h \
-		  dal/mysqldataprovider.cpp \
 		  dal/sqlitedataprovider.h \
 		  dal/sqlitedataprovider.cpp \
 		  dal/recordset.h \
@@ -45,6 +43,9 @@ tmwserv_SOURCES = main.cpp \
 		  dal/dalexcept.h \
 		  dalstorage.h \
 		  dalstorage.cpp
+
+#		  dal/mysqldataprovider.h
+#		  dal/mysqldataprovider.cpp
 
 
 if BUILD_SQLITE

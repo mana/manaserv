@@ -40,7 +40,7 @@ Storage *Storage::getInstance()
 {
     if (instance == NULL)
     {
-        instance = new DALStorage(); //SQLiteStorage();
+        instance = new tmwserv::DALStorage(); //SQLiteStorage();
     }
 
     return instance;
