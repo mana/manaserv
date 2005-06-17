@@ -21,7 +21,6 @@
  */
 
 
-#include <functional>
 #include <sstream>
 
 #include "dalstorage.h"
@@ -34,14 +33,33 @@ namespace
 /**
  * Functor used for the search of an Account by name.
  */
-template <typename T>
 struct account_name_equals_to
-    : public std::binary_function<T, std::string, bool>
+    : public std::binary_function<Account*, std::string, bool>
 {
     bool
-    operator()(const T& account, const std::string& name) const
+    operator()(Account* account,
+               const std::string& name) const
     {
         return account->getName() == name;
+    }
+};
+
+
+/**
+ * Functor to convert a string into another type using
+ * std::istringstream.operator>>().
+ */
+template <typename T>
+struct string_to: public std::unary_function<std::string, T>
+{
+    T
+    operator()(const std::string& s) const
+    {
+        std::istringstream is(s);
+        T value;
+        is >> value;
+
+        return value;
     }
 };
 
@@ -220,13 +238,12 @@ DALStorage::getAccount(const std::string& userName)
         std::find_if(
             mAccounts.begin(),
             mAccounts.end(),
-            std::bind2nd(account_name_equals_to<Account*>(), userName)
+            std::bind2nd(account_name_equals_to(), userName)
         );
 
     if (it != mAccounts.end()) {
         return (*it);
     }
-
 
     using namespace dal;
 
@@ -262,17 +279,22 @@ DALStorage::getAccount(const std::string& userName)
         if (!charInfo.isEmpty()) {
             Beings beings;
 
+            // specialize the string_to functor to convert
+            // a string to an unsigned int.
+            string_to<unsigned int> toUint;
+
             for (unsigned int i = 0; i < charInfo.rows(); ++i) {
                 Being* being =
-                    new Being(charInfo(i, 2),   // name
-                              charInfo(i, 3),   // gender
-                              charInfo(i, 4),   // level
-                              charInfo(i, 5),   // money
-                              charInfo(i, 9),   // strength
-                              charInfo(i, 10),  // agility
-                              charInfo(i, 11),  // vitality
-                              charInfo(i, 13),  // dexterity
-                              charInfo(i, 14)); // luck
+                    new Being(charInfo(i, 2),          // name
+                              toUint(charInfo(i, 3)),  // gender
+                              toUint(charInfo(i, 4)),  // level
+                              toUint(charInfo(i, 5)),  // money
+                              toUint(charInfo(i, 9)),  // strength
+                              toUint(charInfo(i, 10)), // agility
+                              toUint(charInfo(i, 11)), // vitality
+                              toUint(charInfo(i, 13)), // dexterity
+                              toUint(charInfo(i, 14))  // luck
+                             );
 
                 mCharacters.push_back(being);
                 beings.push_back(being);
