@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "dalstorage.h"
+#include "dalstoragesql.h"
 
 
 namespace
@@ -62,84 +63,6 @@ struct string_to: public std::unary_function<std::string, T>
         return value;
     }
 };
-
-
-/* Values for user level could be:
- *  0: Normal user
- *  1: Moderator (has medium level rights)
- *  2: Administrator (can do basically anything)
- */
-const char sqlAccountTable[] =
-  "create table tmw_accounts ("
-    "id        int          unique primary key not null,"
-    "username  varchar(32)  not null,"
-    "password  varchar(32)  not null,"
-    "email     varchar(128) not null,"
-    "level     int          not null,"  // User level (normal, admin, etc.)
-    "banned    int          not null"   // The UNIX time of unban (0 default)
-  ");";
-
-/* Note: The stats will need to be thought over, as we'll be implementing a
- *  much more elaborate skill based system. We should probably have a separate
- *  table for storing the skill levels.
- *
- * Gender is 0 for male, 1 for female.
- */
-const char sqlCharacterTable[] =
-  "create table tmw_characters ("
-    "id        int          unique primary key not null,"
-    "user_id   int          not null,"
-    "name      varchar(32)  not null,"
-    "gender    int          not null,"  // Player information
-    "level     int          not null,"
-    "money     int          not null,"
-    "x         int          not null,"  // Location
-    "y         int          not null,"
-    "map       text         not null,"
-    "str       int          not null,"  // Stats
-    "agi       int          not null,"
-    "vit       int          not null,"
-    "int       int          not null,"
-    "dex       int          not null,"
-    "luck      int          not null,"
-    "foreign key(user_id) references tmw_accounts(id)"
-  ");";
-
-/*
- * All items in the game world are stored in this table.
- */
-const char sqlItemTable[] =
-  "create table tmw_items ("
-    "id        int          unique primary key not null,"
-    "amount    int          not null,"  // Items of same kind can stack
-    "type      int          not null,"  // Type as defined in item database
-    "state     text"                    // Optional item state saved by script
-  ");";
-
-/*
- * Items on the ground in the game world.
- */
-const char sqlWorldItemTable[] =
-  "create table tmw_world_items ("
-    "id        int          not null,"
-    "map       text,"
-    "x         int          not null,"  // Location of item on map
-    "y         int          not null,"
-    "deathtime int          not null,"  // Time to die (UNIX time)
-    "primary key(id, map),"
-    "foreign key(id) references tmw_items(id)"
-  ");";
-
-/*
- * Character Inventory
- */
-const char sqlInventoryTable[] =
-  "create table tmw_inventory ("
-    "id        int          primary key not null," // Item ID
-    "owner_id  int          not null," // Owner character ID
-    "foreign key(id) references tmw_items(id),"
-    "foreign key(owner_id) references tmw_characters(id)"
-  ");";
 
 
 } // anonymous namespace
@@ -209,15 +132,16 @@ DALStorage::getAccountCount(void)
 
     try {
         // query the database.
-        const std::string sql = "select count(*) from tmw_accounts;";
+        std::string sql("select count(*) from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql += ";";
         const RecordSet& rs = mDb->execSql(sql);
 
-        // convert the result into a number.
-        std::istringstream s(rs(0, 0));
-        unsigned int value;
-        s >> value;
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to<unsigned int> toUint;
 
-        return value;
+        return toUint(rs(0, 0));
     } catch (const DbSqlQueryExecFailure& f) {
         std::cout << "Get accounts count failed :'(" << std::endl;
     }
@@ -249,7 +173,9 @@ DALStorage::getAccount(const std::string& userName)
 
     // the account was not in the list, look for it in the database.
     try {
-        std::string sql("select * from tmw_accounts where username = '");
+        std::string sql("select * from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql + " where username = '";
         sql += userName;
         sql += "';";
         const RecordSet& accountInfo = mDb->execSql(sql);
@@ -271,7 +197,9 @@ DALStorage::getAccount(const std::string& userName)
         mAccounts.push_back(account);
 
         // load the characters associated with the account.
-        sql = "select * from tmw_characters where id = '";
+        sql = "select * from ";
+        sql += CHARACTERS_TBL_NAME;
+        sql += " where id = '";
         sql += accountInfo(0, 0);
         sql += "';";
         const RecordSet& charInfo = mDb->execSql(sql);
@@ -330,26 +258,47 @@ DALStorage::connect(void)
         // from a configuration manager.
         mDb->connect("tmw", "", "");
 
-        bool doInitDb = true;
+        // ensure that the required tables are created.
+        //
+        // strategy1: find a way to obtain the list of tables from the
+        //            underlying database and create the tables that are
+        //            missing.
+        //
+        // strategy2: try to create the tables and check the exceptions
+        //            thrown.
+        //
+        // comments:
+        //     - strategy1 is easy to achieve if we are using MysQL as
+        //       executing the request "show tables;" returns the list of
+        //       tables. However, there is not such a query for SQLite3.
+        //       When using SQLite3 from the interactive shell or the
+        //       command line, the command ".tables" returns the list of
+        //       tables but sqlite3_exec() does not validate this statement
+        //       and fails.
+        //       The cost of this strategy is:
+        //           (num. tables to create + 1) queries at most and
+        //           1 at minimum.
+        //
+        //     - strategy2 will work with probably most databases.
+        //       The cost of this strategy is:
+        //           (num. tables to create) queries.
 
-        // TODO: check the existence of the tables first and
-        // create only those that are missing.
+        // we will stick with strategy2 for the moment as we are focusing
+        // on SQLite.
 
-        if (doInitDb) {
-            // create the tables.
-            mDb->execSql(sqlAccountTable);
-            mDb->execSql(sqlCharacterTable);
-            mDb->execSql(sqlItemTable);
-            mDb->execSql(sqlWorldItemTable);
-            mDb->execSql(sqlInventoryTable);
+        createTable(MAPS_TBL_NAME, SQL_MAPS_TABLE);
+        createTable(ACCOUNTS_TBL_NAME, SQL_ACCOUNTS_TABLE);
+        createTable(CHARACTERS_TBL_NAME, SQL_CHARACTERS_TABLE);
+        createTable(ITEMS_TBL_NAME, SQL_ITEMS_TABLE);
+        createTable(WORLD_ITEMS_TBL_NAME, SQL_WORLD_ITEMS_TABLE);
+        createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
 
-            // Example data :)
-            mDb->execSql("insert into tmw_accounts values (0, 'nym', 'tHiSiSHaShEd', 'nym@test', 1, 0);");
-            mDb->execSql("insert into tmw_accounts values (1, 'Bjorn', 'tHiSiSHaShEd', 'bjorn@test', 1, 0);");
-            mDb->execSql("insert into tmw_accounts values (2, 'Usiu', 'tHiSiSHaShEd', 'usiu@test', 1, 0);");
-            mDb->execSql("insert into tmw_accounts values (3, 'ElvenProgrammer', 'tHiSiSHaShEd', 'elven@test', 1, 0);");
-            mDb->execSql("insert into tmw_characters values (0, 0, 'Nym the Great', 0, 99, 1000000, 0, 0, 'main.map', 1, 2, 3, 4, 5, 6);");
-        }
+        // Example data :)
+        mDb->execSql("insert into tmw_accounts values (0, 'nym', 'tHiSiSHaShEd', 'nym@test', 1, 0);");
+        mDb->execSql("insert into tmw_accounts values (1, 'Bjorn', 'tHiSiSHaShEd', 'bjorn@test', 1, 0);");
+        mDb->execSql("insert into tmw_accounts values (2, 'Usiu', 'tHiSiSHaShEd', 'usiu@test', 1, 0);");
+        mDb->execSql("insert into tmw_accounts values (3, 'ElvenProgrammer', 'tHiSiSHaShEd', 'elven@test', 1, 0);");
+        mDb->execSql("insert into tmw_characters values (0, 0, 'Nym the Great', 0, 99, 1000000, 0, 0, 'main.map', 1, 2, 3, 4, 5, 6);");
     }
     catch (const DbConnectionFailure& e) {
         std::cout << "unable to connect to the database: "
@@ -357,6 +306,33 @@ DALStorage::connect(void)
     }
     catch (const DbSqlQueryExecFailure& e) {
         std::cout << e.what() << std::endl;
+    }
+}
+
+
+/**
+ * Create the specified table.
+ */
+void
+DALStorage::createTable(const std::string& tblName,
+                        const std::string& sql)
+{
+    try {
+        mDb->execSql(sql);
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
+        // error message to check against.
+        std::string alreadyExists("table ");
+        alreadyExists += tblName;
+        alreadyExists += " already exists";
+
+        const std::string msg(e.what());
+
+        // oops, another problem occurred.
+        if (msg != alreadyExists) {
+            // rethrow to let other error handlers manage the problem.
+            throw;
+        }
     }
 }
 

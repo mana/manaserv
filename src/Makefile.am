@@ -42,18 +42,21 @@ tmwserv_SOURCES = main.cpp \
 		  dal/recordset.cpp \
 		  dal/dalexcept.h \
 		  dalstorage.h \
+		  dalstoragesql.h \
 		  dalstorage.cpp
 
 #		  dal/mysqldataprovider.h
 #		  dal/mysqldataprovider.cpp
 
 
-if BUILD_SQLITE
-tmwserv_SOURCES += sqlite/SQLiteWrapper.cpp \
-	           sqlite/SQLiteWrapper.h \
-		   sqlitestorage.cpp \
-		   sqlitestorage.h
-endif
+# Obsoleted by DAL.
+#
+#if BUILD_SQLITE
+#tmwserv_SOURCES += sqlite/SQLiteWrapper.cpp \
+#	           sqlite/SQLiteWrapper.h \
+#		   sqlitestorage.cpp \
+#		   sqlitestorage.h
+#endif
 
 # set the include path found by configure
 INCLUDES= $(all_includes) $(SQLITE_CFLAGS)

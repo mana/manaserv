@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "dal/dataproviderfactory.h"
+#include "dalstoragesql.h"
 #include "storage.h"
 
 
@@ -108,6 +109,19 @@ class DALStorage: public Storage
          */
         void
         connect(void);
+
+
+        /**
+         * Create the specified table.
+         *
+         * @param tblName the table name.
+         * @param sql the SQL query to execute.
+         *
+         * @exception tmwserv::dal::DbSqlQueryExecFailure.
+         */
+        void
+        createTable(const std::string& tblName,
+                    const std::string& sql);
 
 
     private:
