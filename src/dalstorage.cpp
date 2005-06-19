@@ -130,6 +130,8 @@ DALStorage::getAccountCount(void)
 
     using namespace dal;
 
+    unsigned int value = 0;
+
     try {
         // query the database.
         std::string sql("select count(*) from ");
@@ -141,10 +143,12 @@ DALStorage::getAccountCount(void)
         // a string to an unsigned int.
         string_to<unsigned int> toUint;
 
-        return toUint(rs(0, 0));
+        value = toUint(rs(0, 0));
     } catch (const DbSqlQueryExecFailure& f) {
         std::cout << "Get accounts count failed :'(" << std::endl;
     }
+
+    return value;
 }
 
 
