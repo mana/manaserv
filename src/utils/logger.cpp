@@ -100,12 +100,32 @@ Logger::setTimestamp(bool flag)
 
 
 /**
+ * Set tee mode.
+ */
+void
+Logger::setTeeMode(bool flag)
+    throw()
+{
+    mTeeMode = flag;
+}
+
+
+/**
  * Log a generic message.
  */
 void
 Logger::log(const std::string& msg)
 {
-    log((mLogFile.is_open() ? mLogFile : std::cout), msg);
+    if (mTeeMode) {
+        log(std::cout, msg);
+
+        if (mLogFile.is_open()) {
+            log(mLogFile, msg);
+        }
+    }
+    else {
+        log((mLogFile.is_open() ? mLogFile : std::cout), msg);
+    }
 }
 
 
@@ -115,7 +135,16 @@ Logger::log(const std::string& msg)
 void
 Logger::debug(const std::string& msg)
 {
-    log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[DBG]");
+    if (mTeeMode) {
+        log(std::cout, msg, "[DBG]");
+
+        if (mLogFile.is_open()) {
+            log(mLogFile, msg, "[DBG]");
+        }
+    }
+    else {
+        log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[DBG]");
+    }
 }
 
 
@@ -125,7 +154,16 @@ Logger::debug(const std::string& msg)
 void
 Logger::info(const std::string& msg)
 {
-    log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[INF]");
+    if (mTeeMode) {
+        log(std::cout, msg, "[INF]");
+
+        if (mLogFile.is_open()) {
+            log(mLogFile, msg, "[INF]");
+        }
+    }
+    else {
+        log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[INF]");
+    }
 }
 
 
@@ -135,7 +173,16 @@ Logger::info(const std::string& msg)
 void
 Logger::warn(const std::string& msg)
 {
-    log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[WRN]");
+    if (mTeeMode) {
+        log(std::cerr, msg, "[WRN]");
+
+        if (mLogFile.is_open()) {
+            log(mLogFile, msg, "[WRN]");
+        }
+    }
+    else {
+        log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[WRN]");
+    }
 }
 
 
@@ -145,7 +192,16 @@ Logger::warn(const std::string& msg)
 void
 Logger::error(const std::string& msg)
 {
-    log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[ERR]");
+    if (mTeeMode) {
+        log(std::cerr, msg, "[ERR]");
+
+        if (mLogFile.is_open()) {
+            log(mLogFile, msg, "[ERR]");
+        }
+    }
+    else {
+        log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[ERR]");
+    }
 }
 
 
@@ -155,7 +211,16 @@ Logger::error(const std::string& msg)
 void
 Logger::fatal(const std::string& msg)
 {
-    log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[FTL]");
+    if (mTeeMode) {
+        log(std::cerr, msg, "[FTL]");
+
+        if (mLogFile.is_open()) {
+            log(mLogFile, msg, "[FTL]");
+        }
+    }
+    else {
+        log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[FTL]");
+    }
 
 #ifdef WIN32
     MessageBox(NULL, msg.c_str(), "Fatal error", MB_ICONERROR | MB_OK);

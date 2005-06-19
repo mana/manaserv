@@ -120,6 +120,17 @@ class Logger: public Singleton<Logger>
 
 
         /**
+         * Set tee mode.
+         *
+         * @param flag if true, write messages to both the standard (or error)
+         *        output and the log file (if set) (default = false).
+         */
+        void
+        setTeeMode(bool flag = false)
+            throw();
+
+
+        /**
          * Log a generic message.
          *
          * @param msg the message to log.
@@ -240,6 +251,7 @@ class Logger: public Singleton<Logger>
     private:
         std::ofstream mLogFile; /**< the log file */
         bool mHasTimestamp;     /**< the timestamp flag */
+        bool mTeeMode;          /**< the tee mode flag */
 };
 
 
