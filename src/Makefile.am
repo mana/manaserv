@@ -34,8 +34,6 @@ tmwserv_SOURCES = main.cpp \
 		  dal/dataprovider.cpp \
 		  dal/dataproviderfactory.h \
 		  dal/dataproviderfactory.cpp \
-		  dal/sqlitedataprovider.h \
-		  dal/sqlitedataprovider.cpp \
 		  dal/recordset.h \
 		  dal/recordset.cpp \
 		  dal/dalexcept.h \
@@ -48,26 +46,24 @@ tmwserv_SOURCES = main.cpp \
 		  utils/logger.h \
 		  utils/logger.cpp
 
-#		  dal/mysqldataprovider.h
-#		  dal/mysqldataprovider.cpp
+if BUILD_SQLITE
+tmwserv_SOURCES += dal/sqlitedataprovider.h \
+		   dal/sqlitedataprovider.cpp
+endif
 
-# Obsoleted by utils/logger.*
-#
-#		  log.h
-#		  log.cpp
+if BUILD_POSTGRE
+tmwserv_SOURCES += dal/pqdataprovider.h \
+		   dal/pqdataprovider.cpp
+endif
 
-# Obsoleted by DAL.
-#
-#if BUILD_SQLITE
-#tmwserv_SOURCES += sqlite/SQLiteWrapper.cpp \
-#	           sqlite/SQLiteWrapper.h \
-#		   sqlitestorage.cpp \
-#		   sqlitestorage.h
-#endif
+if BUILD_MYSQL
+tmwserv_SOURCES += dal/mysqldataprovider.h \
+		   dal/mysqldataprovider.cpp
+endif
 
 # set the include path found by configure
-INCLUDES= $(all_includes) $(SQLITE_CFLAGS)
-LIBS = $(SQLITE_LIBS)
+INCLUDES= $(all_includes) 
+LIBS = $(SQLITE_LIBS) $(MYSQL_LIBS) $(POSTGRE_LIBS)
 
 # the library search path.
 tmwserv_LDFLAGS = $(all_libraries) \
@@ -75,7 +71,9 @@ tmwserv_LDFLAGS = $(all_libraries) \
 				  `pkg-config --libs libxml-2.0` \
 				  -lphysfs \
 				  -lcrypto
-tmwserv_CXXFLAGS = -g -Wall `sdl-config --cflags` `pkg-config --cflags libxml-2.0` -fno-inline $(SCRIPT_CFLAGS)
+tmwserv_CXXFLAGS = -g -Wall `sdl-config --cflags` `pkg-config --cflags libxml-2.0` -fno-inline $(SCRIPT_CFLAGS) $(POSTGRE_CFLAGS) $(SQLITE_CFLAGS)
+
 #tmwserv_LDADD = $(LIBSDL_LIBS) -lphysfs
 tmwserv_LDADD = $(SCRIPT_LIBS)
 tmwserv_TARGET = ../tmwserv
+

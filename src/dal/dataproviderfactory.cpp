@@ -26,10 +26,18 @@
 #ifdef MYSQL_SUPPORT
 #include "mysqldataprovider.h"
 #else
+
 #ifdef SQLITE_SUPPORT
 #include "sqlitedataprovider.h"
 #else
+
+#ifdef POSTGRE_SUPPORT
+#include "pqdataprovider.h"
+#else
+
 #error "Database not specified"
+
+#endif
 #endif
 #endif
 
@@ -73,6 +81,11 @@ DataProviderFactory::createDataProvider(void)
 
 #ifdef SQLITE_SUPPORT
     SqLiteDataProvider* provider = new SqLiteDataProvider;
+    return provider;
+#endif
+
+#ifdef POSTGRE_SUPPORT
+    PqDataProvider *provider = new PqDataProvider;
     return provider;
 #endif
 

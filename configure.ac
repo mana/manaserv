@@ -15,7 +15,7 @@ if test "x$with_sqlite" == "xyes"; then
     )
     
     # Add define
-    SQLITE_CFLAGS=" -DSQLITE_SUPPORT $SQLITE_SUPPORT -DUSE_SQLITE"
+    SQLITE_CFLAGS=" -DSQLITE_SUPPORT -DUSER_SQLITE"
     
     AC_SUBST(SQLITE_CFLAGS)
     AC_SUBST(SQLITE_LIBS)
@@ -24,6 +24,49 @@ else
 fi
 
 AM_CONDITIONAL(BUILD_SQLITE, test x$with_sqlite = xyes)
+
+# Check if with Postgre
+AC_ARG_WITH(postgre,[  --with-postgre          support PostgreSQL ] )
+if test "x$with_postgre" == "xyes"; then
+    with_postgre=yes
+    
+    # Check with pkg-config
+    AC_CHECK_LIB([pq], [PQconnectdb], ,
+                 AC_MSG_ERROR([Cannot find PostgreSQL]))
+
+    # Add define
+    POSTGRE_CFLAGS=" -DPOSTGRE_SUPPORT"
+    POSTGRE_LIBS=" -lpq"
+    
+    AC_SUBST(POSTGRE_CFLAGS)
+    AC_SUBST(POSTGRE_LIBS)
+else
+    with_postgre=no
+fi
+
+AM_CONDITIONAL(BUILD_POSTGRE, test x$with_postgre = xyes)
+
+# Check if with Postgre
+AC_ARG_WITH(mysql,[  --with-mysql            support MySQL ] )
+if test "x$with_mysql" == "xyes"; then
+    with_mysql=yes
+    
+    # TODO: Fix this up! (the lib might not be in the LD path)
+    # Check with pkg-config
+    AC_CHECK_LIB([mysqlclient], [mysql_init], ,
+                 AC_MSG_ERROR([Cannot find MySQL]))
+
+    # Add define
+    MYSQL_CFLAGS=" -DMYSQL_SUPPORT `mysql_config --libs`"
+    MYSQL_LIBS=" `mysql_config --libs`"
+    
+    AC_SUBST(MYSQL_CFLAGS)
+    AC_SUBST(MYSQL_LIBS)
+else
+    with_mysql=no
+fi
+
+AM_CONDITIONAL(BUILD_MYSQL, test x$with_mysql = xyes)
 
 # Checks for programs.
 AC_PROG_CXX
@@ -36,7 +79,7 @@ AC_CHECK_LIB([SDL_net], [SDLNet_Init])
 AC_CHECK_LIB([crypto], [EVP_Digest])
 AC_CHECK_LIB([crypto], [EVP_md5])
 
-AC_ARG_WITH(scripting,[  --with-scripting       Build with scripting])
+AC_ARG_WITH(scripting,[  --with-scripting        Build with scripting])
 if test "x$with_scripting" == "xyes"; then
     AC_CHECK_LIB([squirrel], [sq_open], ,
       AC_MSG_ERROR([Cannot find Squirrel library (squirrel.sf.net)]))
@@ -63,9 +106,14 @@ AC_CHECK_FUNCS([atexit])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
+
 AC_OUTPUT
+
+AMDEP=AMDEP_TRUE
 
 echo
 echo "Building with scripting support: $with_scripting"
 echo "Building with SQLite support: $with_sqlite"
+echo "Building with PostgreSQL support: $with_postgre"
+echo "Building with MySQL support: $with_mysql"
 echo

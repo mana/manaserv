@@ -42,7 +42,8 @@ namespace dal
  */
 typedef enum {
     DB_BKEND_MYSQL,
-    DB_BKEND_SQLITE
+    DB_BKEND_SQLITE,
+    DB_BKEND_POSTGRESQL
 } DbBackends;
 
 

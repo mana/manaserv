@@ -25,8 +25,8 @@
 #define _TMWSERV_DALSTORAGE_SQL_H_
 
 
-#if !defined (MYSQL_SUPPORT) && !defined (SQLITE_SUPPORT)
-#error "no database backend defined"
+#if !defined (MYSQL_SUPPORT) && !defined (SQLITE_SUPPORT) && !defined (POSTGRE_SUPPORT)
+#error "(dalstorage.h) no database backend defined"
 #endif
 
 
