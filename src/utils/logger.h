@@ -123,10 +123,10 @@ class Logger: public Singleton<Logger>
          * Set tee mode.
          *
          * @param flag if true, write messages to both the standard (or error)
-         *        output and the log file (if set) (default = false).
+         *        output and the log file (if set) (default = true).
          */
         void
-        setTeeMode(bool flag = false)
+        setTeeMode(bool flag = true)
             throw();
 
 

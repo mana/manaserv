@@ -43,6 +43,8 @@ namespace utils
  */
 Logger::Logger(void)
     throw()
+        : mHasTimestamp(true),
+          mTeeMode(false)
 {
     // NOOP
 }
