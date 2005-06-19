@@ -180,7 +180,9 @@ int main(int argc, char *argv[])
     session->startListen(connectionHandler, SERVER_PORT);
     LOG_INFO("Listening on port " << SERVER_PORT << "...")
 
-    tmwserv::Storage& store = tmwserv::Storage::instance();
+    using namespace tmwserv;
+
+    Storage& store = Storage::instance();
 
     LOG_INFO("Number of accounts on server: " << store.getAccountCount())
 

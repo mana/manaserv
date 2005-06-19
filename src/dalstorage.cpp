@@ -23,49 +23,10 @@
 
 #include <sstream>
 
+#include "utils/functors.h"
+
 #include "dalstorage.h"
 #include "dalstoragesql.h"
-
-
-namespace
-{
-
-
-/**
- * Functor used for the search of an Account by name.
- */
-struct account_name_equals_to
-    : public std::binary_function<Account*, std::string, bool>
-{
-    bool
-    operator()(Account* account,
-               const std::string& name) const
-    {
-        return account->getName() == name;
-    }
-};
-
-
-/**
- * Functor to convert a string into another type using
- * std::istringstream.operator>>().
- */
-template <typename T>
-struct string_to: public std::unary_function<std::string, T>
-{
-    T
-    operator()(const std::string& s) const
-    {
-        std::istringstream is(s);
-        T value;
-        is >> value;
-
-        return value;
-    }
-};
-
-
-} // anonymous namespace
 
 
 namespace tmwserv
@@ -123,7 +84,7 @@ DALStorage::getAccount(const std::string& userName)
         std::find_if(
             mAccounts.begin(),
             mAccounts.end(),
-            std::bind2nd(account_name_equals_to(), userName)
+            std::bind2nd(obj_name_is<Account*>(), userName)
         );
 
     if (it != mAccounts.end()) {

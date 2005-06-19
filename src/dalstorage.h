@@ -137,7 +137,6 @@ class DALStorage: public Storage
         std::auto_ptr<dal::DataProvider> mDb; /**< the data provider */
         typedef std::vector<Account*> Accounts;
         Accounts mAccounts;                   /**< the loaded accounts */
-        typedef std::vector<Being*> Beings;
         Beings mCharacters;                   /**< the loaded characters */
 };
 

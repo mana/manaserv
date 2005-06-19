@@ -26,6 +26,7 @@
 #define OBJECT_H
 
 #include <iostream>
+#include <vector>
 #include "script.h"
 
 //Usable Statistics Definition (not unsigned to allow for negative; used for
@@ -115,5 +116,9 @@ class Being : public Object
     //Get statistics information
     const Statistics& getStatistics() { return stats; }
 };
+
+
+typedef std::vector<Being*> Beings;
+
 
 #endif
