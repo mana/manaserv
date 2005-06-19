@@ -136,7 +136,7 @@ DALStorage::getAccount(const std::string& userName)
     try {
         std::string sql("select * from ");
         sql += ACCOUNTS_TBL_NAME;
-        sql + " where username = '";
+        sql += " where username = '";
         sql += userName;
         sql += "';";
         const RecordSet& accountInfo = mDb->execSql(sql);
