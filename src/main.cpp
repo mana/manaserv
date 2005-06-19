@@ -4,65 +4,69 @@
  *
  *  This file is part of The Mana World.
  *
- *  The Mana World is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  any later version.
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
  *
- *  The Mana World is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with The Mana World; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  *  $Id$
  */
 
+
 #define TMWSERV_VERSION "0.0.1"
 
 #include <iostream>
+
+#include <SDL.h>
+#include <SDL_net.h>
+
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
 #include "storage.h"
-#include <SDL.h>
-#include <SDL_net.h>
 
 #include "skill.h"
-#include "log.h"
-#define LOG_FILE "tmwserv.log"
+
+#include "utils/logger.h"
 
 // Scripting
 #ifdef SCRIPT_SUPPORT
 
 #include "script.h"
+
 #define SCRIPT_SQUIRREL_SUPPORT
 
-#ifdef SCRIPT_SQUIRREL_SUPPORT
+#if define (SCRIPT_SQUIRREL_SUPPORT)
 #include "script-squirrel.h"
-#endif
-#ifdef SCRIPT_RUBY_SUPPORT
+#elif define (SCRIPT_RUBY_SUPPORT)
 #include "script-ruby.h"
-#endif
-#ifdef SCRIPT_LUA_SUPPORT
+#elif define (SCRIPT_LUA_SUPPORT)
 #include "script-lua.h"
 #endif
 
 std::string scriptLanguage = "squirrel";
-#endif
-//
+
+#endif // SCRIPT_SUPPORT
+
+#define LOG_FILE        "tmwserv.log"
 
 #define TMW_WORLD_TICK  SDL_USEREVENT
 #define SERVER_PORT     9601
 
-SDL_TimerID worldTimerID;          /**< Timer ID of world timer */
-int worldTime = 0;                 /**< Current world time in 100ms ticks */
-bool running = true;               /**< Determines if server keeps running */
 
-Skill skillTree("base");           /**< Skill tree */
+SDL_TimerID worldTimerID; /**< Timer ID of world timer */
+int worldTime = 0;        /**< Current world time in 100ms ticks */
+bool running = true;      /**< Determines if server keeps running */
+
+Skill skillTree("base");  /**< Skill tree */
 
 
 /**
@@ -73,50 +77,54 @@ Uint32 worldTick(Uint32 interval, void *param)
     // Push the custom world tick event
     SDL_Event event;
     event.type = TMW_WORLD_TICK;
+
     if (SDL_PushEvent(&event)) {
-        logger->log("Warning: couldn't push world tick into event queue!");
+        LOG_WARN("couldn't push world tick into event queue!")
     }
+
     return interval;
 }
+
 
 /**
  * Initializes the server.
  */
 void initialize()
 {
-    // Initialize the logger
-    logger = new Logger(LOG_FILE);
+    // initialize the logger.
+    using namespace tmwserv::utils;
+    Logger::instance().setLogFile(LOG_FILE);
+    // write the messages to both the screen and the log file.
+    Logger::instance().setTeeMode(true);
 
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1)
-    {
-        logger->log("SDL_Init: %s", SDL_GetError());
+    // initialize SDL.
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
+        LOG_FATAL("SDL_Init: " << SDL_GetError())
         exit(1);
     }
 
-    // Set SDL to quit on exit
+    // set SDL to quit on exit.
     atexit(SDL_Quit);
 
-    // Initialize SDL_net
-    if (SDLNet_Init() == -1)
-    {
-        logger->log("SDLNet_Init: %s", SDLNet_GetError());
+    // initialize SDL_net.
+    if (SDLNet_Init() == -1) {
+        LOG_FATAL("SDLNet_Init: " << SDLNet_GetError())
         exit(2);
     }
 
-    // Initialize world timer at 10 times per second
+    // initialize world timer at 10 times per second.
     worldTimerID = SDL_AddTimer(100, worldTick, NULL);
 
-    // Initialize scripting subsystem
+    // initialize scripting subsystem.
 #ifdef SCRIPT_SUPPORT
-    logger->log("Script Language %s", scriptLanguage.c_str());
+    LOG_INFO("Script Language " << scriptLanguage)
 
-    if (scriptLanguage == "squirrel")
-    {
+    if (scriptLanguage == "squirrel") {
         script = new ScriptSquirrel("main.nut");
     }
 #endif
 }
+
 
 /**
  * Deinitializes the server.
@@ -136,9 +144,8 @@ void deinitialize()
 
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();
-
-    delete logger;
 }
+
 
 /**
  * Update game world
@@ -149,6 +156,7 @@ void updateWorld()
     script->update();
 #endif
 }
+
 
 /**
  * Main function, initializes and runs server.
@@ -168,53 +176,46 @@ int main(int argc, char *argv[])
     //AccountHandler *accountHandler = new AccountHandler();
     //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
-    logger->log("The Mana World Server v%s", TMWSERV_VERSION);
+    LOG_INFO("The Mana World Server v" << TMWSERV_VERSION)
     session->startListen(connectionHandler, SERVER_PORT);
-    logger->log("Listening on port %d...", SERVER_PORT);
+    LOG_INFO("Listening on port " << SERVER_PORT << "...")
 
     tmwserv::Storage& store = tmwserv::Storage::instance();
 
-    std::cout << "Number of accounts on server: " << store.getAccountCount() << std::endl;
+    LOG_INFO("Number of accounts on server: " << store.getAccountCount())
 
     // Test the database retrieval code
-    std::cout << "Attempting to retrieve account with username 'nym'" << std::endl;
+    LOG_INFO("Attempting to retrieve account with username 'nym'")
     Account* acc = store.getAccount("nym");
     if (acc)
     {
-        std::cout << "Account name: " << acc->getName() << std::endl
-                  << "Account email: " << acc->getEmail() << std::endl;
+        LOG_INFO("Account name: " << acc->getName())
+        LOG_INFO("Account email: " << acc->getEmail())
 
-        std::cout << "Attempting to get character 'Nym the Great'" << std::endl;
+        LOG_INFO("Attempting to get character 'Nym the Great'")
         Being* character = acc->getCharacter("Nym the Great");
-        if (character)
-        {
-            std::cout << "Character name: " << character->getName() << std::endl;
+        if (character) {
+            LOG_INFO("Character name: " << character->getName())
         }
-        else
-        {
-            std::cout << "No characters found" << std::endl;
+        else {
+            LOG_WARN("No characters found")
         }
     }
-    else
-    {
-        std::cout << "Account 'nym' not found" << std::endl;
+    else {
+        LOG_WARN("Account 'nym' not found")
     }
 
     SDL_Event event;
 
-    while (running)
-    {
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == TMW_WORLD_TICK)
-            {
+    while (running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == TMW_WORLD_TICK) {
                 // Move the world forward in time
                 worldTime++;
 
                 // Print world time at 10 second intervals to show we're alive
                 if (worldTime % 100 == 0) {
-                    //printf("World time: %d\n", worldTime);
-                    logger->log("World time: %d", worldTime);
+                    LOG_INFO("World time: " << worldTime);
                 }
 
                 // - Handle all messages that are in the message queue
@@ -222,8 +223,7 @@ int main(int argc, char *argv[])
                 updateWorld();
 
             }
-            else if (event.type == SDL_QUIT)
-            {
+            else if (event.type == SDL_QUIT) {
                 running = false;
             }
         }
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
         SDL_Delay(100);
     }
 
-    logger->log("Recieved Quit signal, closing down...");
+    LOG_INFO("Recieved Quit signal, closing down...")
     session->stopListen(SERVER_PORT);
 
     deinitialize();

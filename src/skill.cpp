@@ -4,25 +4,26 @@
  *
  *  This file is part of The Mana World.
  *
- *  The Mana World is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  any later version.
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
  *
- *  The Mana World is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with The Mana World; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  *  $Id$
  */
 
+
 #include "skill.h"
-#include "log.h"
+#include "utils/logger.h"
+
 
 Skill::Skill(const std::string &ident) :
 	id(ident),
@@ -58,9 +59,9 @@ bool Skill::addSkill(const std::string &ident, Skill *skill) {
 bool Skill::useSkill() {
 #ifdef SCRIPT_SUPPORT
     //run skill script
-    logger->log("Error: Skill: Skills not implemented.");
+    LOG_ERROR("Skill: Skills not implemented.")
 #else
-    logger->log("Error: Skill: Could not use skill; scripting disabled.");
+    LOG_ERROR("Skill: Could not use skill; scripting disabled.")
 #endif
     return true;
 }
@@ -73,7 +74,7 @@ bool Skill::setScript(const std::string &scriptName)
 bool Skill::deleteSkill(const std::string &ident, bool delTree) {
     //prevent deletion of self
     if (ident == id) {
-        logger->log("Error: Skill: Attempt to delete self.");
+        LOG_ERROR("Skill: Attempt to delete self.")
 	return false;
     }
 

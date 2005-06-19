@@ -19,8 +19,6 @@ tmwserv_SOURCES = main.cpp \
 		  netsession.cpp \
 		  packet.h \
 		  packet.cpp \
-		  log.h \
-		  log.cpp \
 		  skill.h \
 		  skill.cpp \
 		  script.h \
@@ -43,11 +41,20 @@ tmwserv_SOURCES = main.cpp \
 		  dal/dalexcept.h \
 		  dalstorage.h \
 		  dalstoragesql.h \
-		  dalstorage.cpp
+		  dalstorage.cpp \
+		  utils/singleton.h \
+		  utils/cipher.h \
+		  utils/cipher.cpp \
+		  utils/logger.h \
+		  utils/logger.cpp
 
 #		  dal/mysqldataprovider.h
 #		  dal/mysqldataprovider.cpp
 
+# Obsoleted by utils/logger.*
+#
+#		  log.h
+#		  log.cpp
 
 # Obsoleted by DAL.
 #
@@ -63,7 +70,11 @@ INCLUDES= $(all_includes) $(SQLITE_CFLAGS)
 LIBS = $(SQLITE_LIBS)
 
 # the library search path.
-tmwserv_LDFLAGS = $(all_libraries) -lSDL_net `sdl-config --libs` `pkg-config --libs libxml-2.0` -lphysfs
+tmwserv_LDFLAGS = $(all_libraries) \
+				  -lSDL_net `sdl-config --libs` \
+				  `pkg-config --libs libxml-2.0` \
+				  -lphysfs \
+				  -lcrypto
 tmwserv_CXXFLAGS = -g -Wall `sdl-config --cflags` `pkg-config --cflags libxml-2.0` -fno-inline $(SCRIPT_CFLAGS)
 #tmwserv_LDADD = $(LIBSDL_LIBS) -lphysfs
 tmwserv_LDADD = $(SCRIPT_LIBS)

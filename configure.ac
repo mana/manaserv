@@ -33,6 +33,8 @@ AC_PROG_RANLIB
 # Checks for libraries.
 AC_CHECK_LIB([physfs], [PHYSFS_init])
 AC_CHECK_LIB([SDL_net], [SDLNet_Init])
+AC_CHECK_LIB([crypto], [EVP_Digest])
+AC_CHECK_LIB([crypto], [EVP_md5])
 
 AC_ARG_WITH(scripting,[  --with-scripting       Build with scripting])
 if test "x$with_scripting" == "xyes"; then

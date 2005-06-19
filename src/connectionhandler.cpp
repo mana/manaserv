@@ -4,26 +4,26 @@
  *
  *  This file is part of The Mana World.
  *
- *  The Mana World is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  any later version.
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
  *
- *  The Mana World is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with The Mana World; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  *  $Id$
  */
 
+
 #include "connectionhandler.h"
 #include "netsession.h"
-#include "log.h"
+#include "utils/logger.h"
 
 #ifdef SCRIPT_SUPPORT
 #include "script.h"
@@ -45,76 +45,67 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
     // Allocate a socket set
     SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
     if (!set) {
-        logger->log("SDLNet_AllocSocketSet: %s", SDLNet_GetError());
+        LOG_FATAL("SDLNet_AllocSocketSet: " << SDLNet_GetError())
         exit(1);
     }
 
     // Add the server socket to the socket set
     if (SDLNet_TCP_AddSocket(set, ltd->socket) < 0) {
-        logger->log("SDLNet_AddSocket: %s", SDLNet_GetError());
+        LOG_FATAL("SDLNet_AddSocket: " << SDLNet_GetError())
         exit(1);
     }
 
     // Keep checking for socket activity while running
-    while (ltd->running)
-    {
+    while (ltd->running) {
         int numready = SDLNet_CheckSockets(set, 100);
 
-        if (numready == -1)
-        {
-            printf("SDLNet_CheckSockets: %s\n", SDLNet_GetError());
-            logger->log("SDLNet_CheckSockets: %s", SDLNet_GetError());
+        if (numready == -1) {
+            LOG_ERROR("SDLNet_CheckSockets: " << SDLNet_GetError())
             // When this is a system error, perror may help us
             perror("SDLNet_CheckSockets");
         }
-        else if (numready > 0)
-        {
-            logger->log("%d sockets with activity!\n", numready);
+        else if (numready > 0) {
+            LOG_INFO(numready << " sockets with activity!")
 
             // Check server socket
-            if (SDLNet_SocketReady(ltd->socket))
-            {
+            if (SDLNet_SocketReady(ltd->socket)) {
                 TCPsocket client = SDLNet_TCP_Accept(ltd->socket);
-                if (client)
-                {
+
+                if (client) {
                     // Add the client socket to the socket set
                     if (SDLNet_TCP_AddSocket(set, client) < 0) {
-                        logger->log("SDLNet_AddSocket: %s", SDLNet_GetError());
+                        LOG_ERROR("SDLNet_AddSocket: " << SDLNet_GetError())
                     }
                     else {
                         NetComputer *comp = new NetComputer(this);
                         clients[comp] = client;
                         computerConnected(comp);
-                        logger->log("%d clients connected", clients.size());
+                        LOG_INFO(clients.size() << " clients connected")
                     }
                 }
             }
 
             // Check client sockets
             std::map<NetComputer*, TCPsocket>::iterator i;
-            for (i = clients.begin(); i != clients.end(); )
-            {
+            for (i = clients.begin(); i != clients.end(); ) {
                 NetComputer *comp = (*i).first;
                 TCPsocket s = (*i).second;
 
-                if (SDLNet_SocketReady(s))
-                {
+                if (SDLNet_SocketReady(s)) {
                     char buffer[1024];
                     int result = SDLNet_TCP_Recv(s, buffer, 1024);
-                    if (result <= 0)
-                    {
+                    if (result <= 0) {
                         SDLNet_TCP_DelSocket(set, s);
                         SDLNet_TCP_Close(s);
                         computerDisconnected(comp);
                         delete comp;
                         comp = NULL;
                     }
-                    else
-                    {
+                    else {
                         // Copy the incoming data to the in buffer of this
                         // client
                         buffer[result] = 0;
-                        logger->log("Received %s", buffer);
+                        LOG_INFO("Received " << buffer);
 #ifdef SCRIPT_SUPPORT
                         //script->message(buffer);
 #endif
@@ -142,12 +133,12 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
 
 void ConnectionHandler::computerConnected(NetComputer *comp)
 {
-    logger->log("A client connected!");
+    LOG_INFO("A client connected!")
 }
 
 void ConnectionHandler::computerDisconnected(NetComputer *comp)
 {
-    logger->log("A client disconnected!");
+    LOG_INFO("A client disconnected!")
 }
 
 void ConnectionHandler::registerHandler(
