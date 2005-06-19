@@ -110,49 +110,6 @@ DALStorage::~DALStorage()
 
 
 /**
- * Save changes to the database permanently.
- */
-void
-DALStorage::flush(void)
-{
-    // this feature is not currently provided by DAL.
-}
-
-
-/**
- * Get the number of Accounts saved in database.
- */
-unsigned int
-DALStorage::getAccountCount(void)
-{
-    // connect to the database (if not connected yet).
-    connect();
-
-    using namespace dal;
-
-    unsigned int value = 0;
-
-    try {
-        // query the database.
-        std::string sql("select count(*) from ");
-        sql += ACCOUNTS_TBL_NAME;
-        sql += ";";
-        const RecordSet& rs = mDb->execSql(sql);
-
-        // specialize the string_to functor to convert
-        // a string to an unsigned int.
-        string_to<unsigned int> toUint;
-
-        value = toUint(rs(0, 0));
-    } catch (const DbSqlQueryExecFailure& f) {
-        std::cout << "Get accounts count failed :'(" << std::endl;
-    }
-
-    return value;
-}
-
-
-/**
  * Get an account by user name.
  */
 Account*
@@ -240,6 +197,59 @@ DALStorage::getAccount(const std::string& userName)
     catch (const DbSqlQueryExecFailure& e) {
         return NULL; // TODO: Throw exception here
     }
+}
+
+
+/**
+ * Add a new account.
+ */
+void
+DALStorage::addAccount(const Account* account)
+{
+    // TODO
+}
+
+
+/**
+ * Save changes to the database permanently.
+ */
+void
+DALStorage::flush(void)
+{
+    // this feature is not currently provided by DAL.
+}
+
+
+/**
+ * Get the number of Accounts saved in database.
+ */
+unsigned int
+DALStorage::getAccountCount(void)
+{
+    // connect to the database (if not connected yet).
+    connect();
+
+    using namespace dal;
+
+    unsigned int value = 0;
+
+    try {
+        // query the database.
+        std::string sql("select count(*) from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql += ";";
+        const RecordSet& rs = mDb->execSql(sql);
+
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to<unsigned int> toUint;
+
+        value = toUint(rs(0, 0));
+    } catch (const DbSqlQueryExecFailure& f) {
+        std::cout << "Get accounts count failed :'(" << std::endl;
+    }
+
+    return value;
 }
 
 

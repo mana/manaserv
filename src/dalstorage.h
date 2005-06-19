@@ -51,6 +51,26 @@ class DALStorage: public Storage
 
     public:
         /**
+         * Get an account by user name.
+         *
+         * @param userName the owner of the account.
+         *
+         * @return the account associated to the user name.
+         */
+        Account*
+        getAccount(const std::string& userName);
+
+
+        /**
+         * Add a new account.
+         *
+         * @param account the new account.
+         */
+        void
+        addAccount(const Account* account);
+
+
+        /**
          * Save changes to the database permanently.
          */
         void
@@ -64,17 +84,6 @@ class DALStorage: public Storage
          */
         unsigned int
         getAccountCount(void);
-
-
-        /**
-         * Get an account by user name.
-         *
-         * @param userName the owner of the account.
-         *
-         * @return the account associated to the user name.
-         */
-        Account*
-        getAccount(const std::string& userName);
 
 
     private:

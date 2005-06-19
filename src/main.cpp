@@ -135,7 +135,7 @@ void deinitialize()
 #endif
 
     // Get rid of persistent data storage
-    Storage::deleteInstance();
+    tmwserv::Storage::destroy();
 
     delete logger;
 }
@@ -172,13 +172,13 @@ int main(int argc, char *argv[])
     session->startListen(connectionHandler, SERVER_PORT);
     logger->log("Listening on port %d...", SERVER_PORT);
 
-    Storage *store = Storage::getInstance();
+    tmwserv::Storage& store = tmwserv::Storage::instance();
 
-    std::cout << "Number of accounts on server: " << store->getAccountCount() << std::endl;
+    std::cout << "Number of accounts on server: " << store.getAccountCount() << std::endl;
 
     // Test the database retrieval code
     std::cout << "Attempting to retrieve account with username 'nym'" << std::endl;
-    Account* acc = store->getAccount("nym");
+    Account* acc = store.getAccount("nym");
     if (acc)
     {
         std::cout << "Account name: " << acc->getName() << std::endl
