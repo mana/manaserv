@@ -5,7 +5,7 @@ Name=tmwserv
 UnitCount=17
 =======
 Name=tmwserv
-UnitCount=50
+UnitCount=51
 >>>>>>> 1.2
 Type=1
 Ver=1
@@ -453,9 +453,9 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit51]
-FileName=src\skill.cpp
+FileName=src\utils\cipher.cpp
 CompileCpp=1
-Folder=tmwserv
+Folder=utils
 Compile=1
 Link=1
 Priority=1000

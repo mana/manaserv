@@ -15,7 +15,7 @@ if test "x$with_sqlite" == "xyes"; then
     )
     
     # Add define
-    SQLITE_CFLAGS=" -DSQLITE_SUPPORT -DUSER_SQLITE"
+    SQLITE_CFLAGS=" -DSQLITE_SUPPORT -DUSE_SQLITE"
     
     AC_SUBST(SQLITE_CFLAGS)
     AC_SUBST(SQLITE_LIBS)
