@@ -119,8 +119,8 @@ SqLiteDataProvider::execSql(const std::string& sql,
         mRecordSet.clear();
 
         int errCode = sqlite3_get_table(
-  			              mDb,          // an open database
-  			              sql.c_str(),  // SQL to be executed
+                          mDb,          // an open database
+                          sql.c_str(),  // SQL to be executed
                           &result,      // result of the query
                           &nRows,       // number of result rows
                           &nCols,       // number of result columns

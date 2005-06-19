@@ -59,24 +59,24 @@ PqDataProvider::getDbBackend(void) const
  */
 void
 PqDataProvider::connect(const std::string& dbName,
-			const std::string& userName,
-			const std::string& password)
+                        const std::string& userName,
+                        const std::string& password)
 {
     // Create string to pass to PQconnectdb
     std::string connStr = "dbname = " + dbName + " "; // database name
     if (userName != "")
-	connStr += "user = " + userName + " "; // username
+        connStr += "user = " + userName + " "; // username
     if (password != "")
-	connStr += "password = " + password; // password
+        connStr += "password = " + password; // password
 
     // Connect to database
     mDb = PQconnectdb(connStr.c_str());
 
     if (PQstatus(mDb) != CONNECTION_OK)
     {
-	std::string error = PQerrorMessage(mDb);
-	PQfinish(mDb);
-	throw DbConnectionFailure(error);
+        std::string error = PQerrorMessage(mDb);
+        PQfinish(mDb);
+        throw DbConnectionFailure(error);
     }
 
     mIsConnected = true;
@@ -87,58 +87,58 @@ PqDataProvider::connect(const std::string& dbName,
  */
 const RecordSet&
 PqDataProvider::execSql(const std::string& sql,
-			const bool refresh)
+                        const bool refresh)
 {
     if (!mIsConnected) {
-	throw std::runtime_error("not connected to database");
+        throw std::runtime_error("not connected to database");
     }
 
     if (refresh || (sql != mSql)) {
-	mRecordSet.clear();
+        mRecordSet.clear();
 
-	// execute the query
-	PGresult *res;
+        // execute the query
+        PGresult *res;
 
-	res = PQexec(mDb, sql.c_str());
-	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-	    PQclear(res);
-	    throw DbSqlQueryExecFailure(PQerrorMessage(mDb));
-	}
+        res = PQexec(mDb, sql.c_str());
+        if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+            PQclear(res);
+            throw DbSqlQueryExecFailure(PQerrorMessage(mDb));
+        }
 
-	// get field count
-	unsigned int nFields = PQnfields(res);
+        // get field count
+        unsigned int nFields = PQnfields(res);
 
-	// fill column names
-	Row fieldNames;
-	for (unsigned int i = 0; i < nFields; i++) {
-	    fieldNames.push_back(PQfname(res, i));
-	}
-	mRecordSet.setColumnHeaders(fieldNames);
+        // fill column names
+        Row fieldNames;
+        for (unsigned int i = 0; i < nFields; i++) {
+            fieldNames.push_back(PQfname(res, i));
+        }
+        mRecordSet.setColumnHeaders(fieldNames);
 
-	// fill rows
-	for (unsigned int r = 0; r < PQntuples(res); r++) {
-	    Row row;
+        // fill rows
+        for (unsigned int r = 0; r < PQntuples(res); r++) {
+            Row row;
 
-	    for (unsigned int i = 0; i < nFields; i++) {
-		row.push_back(PQgetvalue(res, r, i));
-	    }
+            for (unsigned int i = 0; i < nFields; i++) {
+                row.push_back(PQgetvalue(res, r, i));
+            }
 
-	    mRecordSet.add(row);
-	}
+            mRecordSet.add(row);
+        }
 
-	// clear results
-	PQclear(res);
+        // clear results
+        PQclear(res);
     }
 }
 
 /**
- * Close connection to databse.
+ * Close connection to database.
  */
 void
 PqDataProvider::disconnect(void)
 {
     if (!mIsConnected) {
-	return;
+        return;
     }
 
     // finish up with Postgre

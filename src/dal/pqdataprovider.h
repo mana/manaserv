@@ -39,14 +39,14 @@ class PqDataProvider : public DataProvider
      * Constructor
      */
     PqDataProvider()
-	throw();
-    
+        throw();
+
     /**
      * Destructor
      */
     ~PqDataProvider()
-	throw();
-    
+        throw();
+
     /**
      * Get name of the database backend
      *
@@ -54,8 +54,8 @@ class PqDataProvider : public DataProvider
      */
     DbBackends
     getDbBackend(void) const
-	throw();
-    
+        throw();
+
     /**
      * Create a connection to the database.
      *
@@ -67,10 +67,10 @@ class PqDataProvider : public DataProvider
      */
     void
     connect(const std::string& dbName,
-	    const std::string& userName,
-	    const std::string& password);
-    
-    
+            const std::string& userName,
+            const std::string& password);
+
+
     /**
      * Execute a SQL query.
      *
@@ -84,9 +84,9 @@ class PqDataProvider : public DataProvider
      */
     const RecordSet&
     execSql(const std::string& sql,
-	    const bool refresh = false);
-    
-    
+            const bool refresh = false);
+
+
     /**
      * Close the connection to the database.
      *

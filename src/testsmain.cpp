@@ -37,8 +37,8 @@ int main(int argc, char* argv[])
     runner.addTest(suite);
 
     // run the tests.
-    bool wasSucessful = runner.run();
+    bool wasSuccessful = runner.run();
 
     // return error code 1 if the one of test failed.
-    return wasSucessful ? 0 : 1;
+    return wasSuccessful ? 0 : 1;
 }
