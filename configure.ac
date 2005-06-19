@@ -15,7 +15,7 @@ if test "x$with_sqlite" == "xyes"; then
     )
     
     # Add define
-    SQLITE_CFLAGS=" -DSQLITE_SUPPORT -DUSE_SQLITE"
+    SQLITE_CFLAGS=" -DSQLITE_SUPPORT"
     
     AC_SUBST(SQLITE_CFLAGS)
     AC_SUBST(SQLITE_LIBS)
@@ -108,8 +108,6 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile])
 
 AC_OUTPUT
-
-AMDEP=AMDEP_TRUE
 
 echo
 echo "Building with scripting support: $with_scripting"

@@ -74,9 +74,9 @@ PqDataProvider::connect(const std::string& dbName,
 
     if (PQstatus(mDb) != CONNECTION_OK)
     {
-	// TODO: Postge needs to be cleaned up after throwing the exception
-	// PQfinish(mDb);
-	throw DbConnectionFailure(PQerrorMessage(mDb));
+	std::string error = PQerrorMessage(mDb);
+	PQfinish(mDb);
+	throw DbConnectionFailure(error);
     }
 
     mIsConnected = true;
