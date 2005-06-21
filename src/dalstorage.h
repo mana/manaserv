@@ -51,6 +51,20 @@ class DALStorage: public Storage
 
     public:
         /**
+         * Connect to the database and initialize it if necessary.
+         */
+        void
+        open(void);
+
+
+        /**
+         * Disconnect from the database.
+         */
+        void
+        close(void);
+
+
+        /**
          * Get an account by user name.
          *
          * @param userName the owner of the account.
@@ -67,7 +81,16 @@ class DALStorage: public Storage
          * @param account the new account.
          */
         void
-        addAccount(const Account* account);
+        addAccount(Account* account);
+
+
+        /**
+         * Delete an account.
+         *
+         * @param userName the owner of the account.
+         */
+        void
+        delAccount(const std::string& userName);
 
 
         /**
@@ -75,15 +98,6 @@ class DALStorage: public Storage
          */
         void
         flush(void);
-
-
-        /**
-         * Get the number of Accounts saved in database (test function).
-         *
-         * @return the number of Accounts.
-         */
-        unsigned int
-        getAccountCount(void);
 
 
     private:
@@ -114,13 +128,6 @@ class DALStorage: public Storage
 
 
         /**
-         * Connect to the database and initialize it if necessary.
-         */
-        void
-        connect(void);
-
-
-        /**
          * Create the specified table.
          *
          * @param tblName the table name.
@@ -135,9 +142,6 @@ class DALStorage: public Storage
 
     private:
         std::auto_ptr<dal::DataProvider> mDb; /**< the data provider */
-        typedef std::vector<Account*> Accounts;
-        Accounts mAccounts;                   /**< the loaded accounts */
-        Beings mCharacters;                   /**< the loaded characters */
 };
 
 

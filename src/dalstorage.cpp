@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "utils/functors.h"
+#include "utils/logger.h"
 
 #include "dalstorage.h"
 #include "dalstoragesql.h"
@@ -50,17 +51,19 @@ DALStorage::DALStorage()
 DALStorage::~DALStorage()
     throw()
 {
-    mDb->disconnect();
+    if (mDb->isConnected()) {
+        close();
+    }
 
-    // clean up loaded accounts.
+    // clean up accounts.
     for (Accounts::iterator it = mAccounts.begin();
          it != mAccounts.end();
          ++it)
     {
-        delete (*it);
+        delete it->first;
     }
 
-    // clean up loaded characters.
+    // clean up characters.
     for (Beings::iterator it = mCharacters.begin();
          it != mCharacters.end();
          ++it)
@@ -71,24 +74,105 @@ DALStorage::~DALStorage()
 
 
 /**
+ * Connect to the database and initialize it if necessary.
+ */
+void
+DALStorage::open(void)
+{
+    // do nothing if already connected.
+    if (mDb->isConnected()) {
+        return;
+    }
+
+    using namespace dal;
+
+    try {
+        // open a connection to the database.
+#if defined (MYSQL_SUPPORT) || defined (POSTGRE_SUPPORT)
+        mDb->connect(getName(), getUser(), getPassword());
+#else // SQLITE_SUPPORT
+        // create the database file name.
+        std::string dbFile(getName());
+        dbFile += ".db";
+        mDb->connect(dbFile, "", "");
+#endif
+
+        // ensure that the required tables are created.
+        //
+        // strategy1: find a way to obtain the list of tables from the
+        //            underlying database and create the tables that are
+        //            missing.
+        //
+        // strategy2: try to create the tables and check the exceptions
+        //            thrown.
+        //
+        // comments:
+        //     - strategy1 is easy to achieve if we are using MysQL as
+        //       executing the request "show tables;" returns the list of
+        //       tables. However, there is not such a query for SQLite3.
+        //       When using SQLite3 from the interactive shell or the
+        //       command line, the command ".tables" returns the list of
+        //       tables but sqlite3_exec() does not validate this statement
+        //       and fails.
+        //       The cost of this strategy is:
+        //           (num. tables to create + 1) queries at most and
+        //           1 at minimum.
+        //
+        //     - strategy2 will work with probably most databases.
+        //       The cost of this strategy is:
+        //           (num. tables to create) queries.
+
+        // we will stick with strategy2 for the moment as we are focusing
+        // on SQLite.
+
+        createTable(MAPS_TBL_NAME, SQL_MAPS_TABLE);
+        createTable(ACCOUNTS_TBL_NAME, SQL_ACCOUNTS_TABLE);
+        createTable(CHARACTERS_TBL_NAME, SQL_CHARACTERS_TABLE);
+        createTable(ITEMS_TBL_NAME, SQL_ITEMS_TABLE);
+        createTable(WORLD_ITEMS_TBL_NAME, SQL_WORLD_ITEMS_TABLE);
+        createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
+    }
+    catch (const DbConnectionFailure& e) {
+        LOG_ERROR("unable to connect to the database: " << e.what())
+    }
+    catch (const DbSqlQueryExecFailure& e) {
+        LOG_ERROR("SQL query failure: " << e.what())
+    }
+
+    mIsOpen = mDb->isConnected();
+}
+
+
+/**
+ * Disconnect from the database.
+ */
+void
+DALStorage::close(void)
+{
+    mDb->disconnect();
+    mIsOpen = mDb->isConnected();
+}
+
+
+/**
  * Get an account by user name.
  */
 Account*
 DALStorage::getAccount(const std::string& userName)
 {
     // connect to the database (if not connected yet).
-    connect();
+    open();
 
     // look for the account in the list first.
     Accounts::iterator it =
         std::find_if(
             mAccounts.begin(),
             mAccounts.end(),
-            std::bind2nd(obj_name_is<Account*>(), userName)
+            account_by_name(userName)
         );
 
     if (it != mAccounts.end()) {
-        return (*it);
+        return it->first;
     }
 
     using namespace dal;
@@ -116,7 +200,7 @@ DALStorage::getAccount(const std::string& userName)
         account->setEmail(accountInfo(0, 3));
 
         // add the new Account to the list.
-        mAccounts.push_back(account);
+        mAccounts.insert(std::make_pair(account, AS_ACC_TO_UPDATE));
 
         // load the characters associated with the account.
         sql = "select * from ";
@@ -165,9 +249,80 @@ DALStorage::getAccount(const std::string& userName)
  * Add a new account.
  */
 void
-DALStorage::addAccount(const Account* account)
+DALStorage::addAccount(Account* account)
 {
-    // TODO
+    if (account == 0) {
+        // maybe we should throw an exception instead
+        return;
+    }
+
+    // mark this account as new so that the next flush will execute a SQL
+    // insert query instead of a SQL update query.
+    mAccounts.insert(std::make_pair(account, AS_NEW_ACCOUNT));
+}
+
+
+/**
+ * Delete an account.
+ */
+void
+DALStorage::delAccount(const std::string& userName)
+{
+    // look for the account in memory first.
+    Accounts::iterator it =
+        std::find_if(
+            mAccounts.begin(),
+            mAccounts.end(),
+            account_by_name(userName)
+        );
+
+    if (it != mAccounts.end()) {
+        switch (it->second) {
+            case AS_NEW_ACCOUNT:
+                // this is a newly added account and it has not even been
+                // saved into the database: remove it immediately.
+                delete it->first;
+                break;
+
+            case AS_ACC_TO_UPDATE:
+                // change the status to AS_ACC_TO_DELETE so that it will be
+                // deleted at the next flush.
+                it->second = AS_ACC_TO_DELETE;
+                break;
+
+            default:
+                break;
+        }
+
+        // nothing else to do.
+        return;
+    }
+
+    using namespace dal;
+
+    try {
+        std::string sql("select id from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql += " where username = '";
+        sql += userName;
+        sql += "';";
+        const RecordSet& accountInfo = mDb->execSql(sql);
+
+        // the account does not even exist in the database,
+        // there is nothing to do then.
+        if (accountInfo.isEmpty()) {
+            return;
+        }
+
+        // TODO: actually deleting the account from the database.
+        // order of deletion:
+        //     1. inventories of all the characters of the account,
+        //     2. all the characters,
+        //     3. the account itself.
+    }
+    catch (const DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+    }
 }
 
 
@@ -177,111 +332,15 @@ DALStorage::addAccount(const Account* account)
 void
 DALStorage::flush(void)
 {
-    // this feature is not currently provided by DAL.
-}
-
-
-/**
- * Get the number of Accounts saved in database.
- */
-unsigned int
-DALStorage::getAccountCount(void)
-{
-    // connect to the database (if not connected yet).
-    connect();
-
-    using namespace dal;
-
-    unsigned int value = 0;
-
-    try {
-        // query the database.
-        std::string sql("select count(*) from ");
-        sql += ACCOUNTS_TBL_NAME;
-        sql += ";";
-        const RecordSet& rs = mDb->execSql(sql);
-
-        // specialize the string_to functor to convert
-        // a string to an unsigned int.
-        string_to<unsigned int> toUint;
-
-        value = toUint(rs(0, 0));
-    } catch (const DbSqlQueryExecFailure& f) {
-        std::cout << "Get accounts count failed :'(" << std::endl;
-    }
-
-    return value;
-}
-
-
-/**
- * Connect to the database and initialize it if necessary.
- */
-void
-DALStorage::connect(void)
-{
-    // do nothing if already connected.
-    if (mDb->isConnected()) {
-        return;
-    }
-
-    using namespace dal;
-
-    try {
-        // open a connection to the database.
-        // TODO: get the database name, the user name and the user password
-        // from a configuration manager.
-        mDb->connect("tmw", "", "");
-
-        // ensure that the required tables are created.
-        //
-        // strategy1: find a way to obtain the list of tables from the
-        //            underlying database and create the tables that are
-        //            missing.
-        //
-        // strategy2: try to create the tables and check the exceptions
-        //            thrown.
-        //
-        // comments:
-        //     - strategy1 is easy to achieve if we are using MysQL as
-        //       executing the request "show tables;" returns the list of
-        //       tables. However, there is not such a query for SQLite3.
-        //       When using SQLite3 from the interactive shell or the
-        //       command line, the command ".tables" returns the list of
-        //       tables but sqlite3_exec() does not validate this statement
-        //       and fails.
-        //       The cost of this strategy is:
-        //           (num. tables to create + 1) queries at most and
-        //           1 at minimum.
-        //
-        //     - strategy2 will work with probably most databases.
-        //       The cost of this strategy is:
-        //           (num. tables to create) queries.
-
-        // we will stick with strategy2 for the moment as we are focusing
-        // on SQLite.
-
-        createTable(MAPS_TBL_NAME, SQL_MAPS_TABLE);
-        createTable(ACCOUNTS_TBL_NAME, SQL_ACCOUNTS_TABLE);
-        createTable(CHARACTERS_TBL_NAME, SQL_CHARACTERS_TABLE);
-        createTable(ITEMS_TBL_NAME, SQL_ITEMS_TABLE);
-        createTable(WORLD_ITEMS_TBL_NAME, SQL_WORLD_ITEMS_TABLE);
-        createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
-
-        // Example data :)
-        mDb->execSql("insert into tmw_accounts values (0, 'nym', 'tHiSiSHaShEd', 'nym@test', 1, 0);");
-        mDb->execSql("insert into tmw_accounts values (1, 'Bjorn', 'tHiSiSHaShEd', 'bjorn@test', 1, 0);");
-        mDb->execSql("insert into tmw_accounts values (2, 'Usiu', 'tHiSiSHaShEd', 'usiu@test', 1, 0);");
-        mDb->execSql("insert into tmw_accounts values (3, 'ElvenProgrammer', 'tHiSiSHaShEd', 'elven@test', 1, 0);");
-        mDb->execSql("insert into tmw_characters values (0, 0, 'Nym the Great', 0, 99, 1000000, 0, 0, 'main.map', 1, 2, 3, 4, 5, 6);");
-    }
-    catch (const DbConnectionFailure& e) {
-        std::cout << "unable to connect to the database: "
-                  << e.what() << std::endl;
-    }
-    catch (const DbSqlQueryExecFailure& e) {
-        std::cout << e.what() << std::endl;
-    }
+    // TODO
+    // For each account in memory:
+    //     - get the status
+    //     - if AS_NEW_ACCOUNT then insert into database;
+    //     - if AS_ACC_TO_UPDATE then update values from the database
+    //     - if AS_ACC_TO_DELETE then delete from database
+    // Notes:
+    //     - this will probably involve more than one table as the account may
+    //       have characters associated to it.
 }
 
 

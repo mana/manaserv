@@ -182,9 +182,7 @@ int main(int argc, char *argv[])
 
     using namespace tmwserv;
 
-    Storage& store = Storage::instance();
-
-    LOG_INFO("Number of accounts on server: " << store.getAccountCount())
+    Storage& store = Storage::instance("tmw");
 
     // Test the database retrieval code
     LOG_INFO("Attempting to retrieve account with username 'nym'")

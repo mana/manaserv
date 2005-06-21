@@ -31,8 +31,11 @@ namespace tmwserv
 {
 
 
-// initialize the static attribute.
+// initialize the static attributes.
 Storage* Storage::mInstance = 0;
+std::string Storage::mName("");
+std::string Storage::mUser("");
+std::string Storage::mPassword("");
 
 
 /**
@@ -59,10 +62,13 @@ Storage::~Storage(void)
  * Create an instance of Storage.
  */
 Storage&
-Storage::instance(void)
+Storage::instance(const std::string& name)
 {
     if (mInstance == 0) {
         mInstance = new DALStorage();
+
+        // set the name of the storage.
+        mName = name;
     }
 
     // check that the instance has been created.
@@ -82,7 +88,73 @@ Storage::destroy(void)
 {
     if (mInstance != 0) {
         delete mInstance;
+        mInstance = 0;
     }
+
+    // reset the attributes.
+    mName = "";
+    mUser = "";
+    mPassword = "";
+}
+
+
+/**
+ * Check if the storage is open.
+ */
+bool
+Storage::isOpen(void) const
+{
+    return mIsOpen;
+}
+
+
+/**
+ * Get the storage name.
+ */
+const std::string&
+Storage::getName(void) const
+{
+    return mName;
+}
+
+
+/**
+ * Set a user name for the storage.
+ */
+void
+Storage::setUser(const std::string& userName)
+{
+    mUser = userName;
+}
+
+
+/**
+ * Get the user name.
+ */
+const std::string&
+Storage::getUser(void) const
+{
+    return mUser;
+}
+
+
+/**
+ * Set a user password for the storage.
+ */
+void
+Storage::setPassword(const std::string& password)
+{
+    mPassword = password;
+}
+
+
+/**
+ * Get the user password.
+ */
+const std::string&
+Storage::getPassword(void) const
+{
+    return mPassword;
 }
 
 
