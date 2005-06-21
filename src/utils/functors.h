@@ -25,6 +25,11 @@
 #define _TMWSERV_FUNCTORS_H_
 
 
+#include <functional>
+#include <sstream>
+#include <string>
+
+
 namespace
 {
 
