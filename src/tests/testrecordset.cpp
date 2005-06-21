@@ -23,7 +23,6 @@
 
 #include <sstream>
 
-#include "recordset.h"
 #include "testrecordset.h"
 
 

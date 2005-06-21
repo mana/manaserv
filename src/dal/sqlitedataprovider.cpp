@@ -91,6 +91,10 @@ SqLiteDataProvider::connect(const std::string& dbName,
         // the database after an unsuccessful call to sqlite3_open().
         sqlite3_close(mDb);
 
+        // FIXME
+        // 21-Jun-2005: although we did invoke sqlite3_close(), there
+        // seems to be still a leak of 136 bytes here.
+
         throw DbConnectionFailure(msg);
     }
 

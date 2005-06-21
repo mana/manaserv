@@ -27,7 +27,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "account.h"
+#include "../account.h"
 
 
 /**

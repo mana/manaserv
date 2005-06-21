@@ -65,6 +65,7 @@ AccountTest::tearDown(void)
     }
 
     delete mAccount;
+    mAccount = 0;
 }
 
 

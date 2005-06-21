@@ -21,12 +21,36 @@
  */
 
 
-#include "dataproviderfactory.h"
+#include <physfs.h>
+
+#if defined (MYSQL_SUPPORT)
+#include <mysql/mysql.h>
+#elif defined (POSTGRE_SUPPORT)
+#include <libpq-fe.h>
+#endif
+
+#include "../dal/dataproviderfactory.h"
+
 #include "testdataprovider.h"
 
 
 // register the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION(DataProviderTest);
+
+
+// initialize the static variables.
+std::string DataProviderTest::mDbName("tmwteststorage");
+std::string DataProviderTest::mDbUser("guest");
+std::string DataProviderTest::mDbPassword("guest");
+std::string DataProviderTest::mSqlCreateTable(
+    "create table employees ("
+    "    id integer primary key, "
+    "    name varchar(32) not null);"
+);
+std::string DataProviderTest::mSqlInsertRow(
+    "insert into employees values (1, 'john');"
+);
+std::string DataProviderTest::mSqlFetchRow("select * from employees;");
 
 
 using namespace tmwserv::dal;
@@ -38,6 +62,9 @@ using namespace tmwserv::dal;
 void
 DataProviderTest::setUp(void)
 {
+    // reinitialize the database before each test.
+    reinitDb();
+
     // obtain a data provider.
     try {
         mDb = DataProviderFactory::createDataProvider();
@@ -45,24 +72,6 @@ DataProviderTest::setUp(void)
     catch (const std::runtime_error& e) {
         CPPUNIT_FAIL(e.what());
     }
-
-    // init db info and account.
-#ifdef SQLITE_SUPPORT
-    mDbName = "mydb.db";
-#else
-    mDbName = "mydb";
-#endif
-    mDbUser = "guest";
-    mDbPassword = "guest";
-
-    // init SQL queries.
-    mSqlCreateTable  = "create table employees (";
-    mSqlCreateTable += "    id int primary key, ";
-    mSqlCreateTable += "    name varchar(32) not null);";
-
-    mSqlInsertRow = "insert into employees values (1, 'john');";
-
-    mSqlFetchRow = "select * from employees;";
 }
 
 
@@ -72,7 +81,13 @@ DataProviderTest::setUp(void)
 void
 DataProviderTest::tearDown(void)
 {
+    mDb->disconnect();
+
     delete mDb;
+    mDb = 0;
+
+    // clean the database after each test.
+    reinitDb();
 }
 
 
@@ -82,7 +97,15 @@ DataProviderTest::tearDown(void)
 void
 DataProviderTest::testConnection1(void)
 {
+#ifdef SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    mDb->connect(dbFile, mDbUser, mDbPassword);
+#else
     mDb->connect(mDbName, mDbUser, mDbPassword);
+#endif
+
     CPPUNIT_ASSERT(mDb->isConnected());
 }
 
@@ -93,7 +116,15 @@ DataProviderTest::testConnection1(void)
 void
 DataProviderTest::testCreateTable1(void)
 {
+#ifdef SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    mDb->connect(dbFile, mDbUser, mDbPassword);
+#else
     mDb->connect(mDbName, mDbUser, mDbPassword);
+#endif
+
     CPPUNIT_ASSERT(mDb->isConnected());
 
     const RecordSet& rs = mDb->execSql(mSqlCreateTable);
@@ -110,11 +141,20 @@ DataProviderTest::testCreateTable1(void)
 void
 DataProviderTest::testCreateTable2(void)
 {
+#ifdef SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    mDb->connect(dbFile, mDbUser, mDbPassword);
+#else
     mDb->connect(mDbName, mDbUser, mDbPassword);
+#endif
+
     CPPUNIT_ASSERT(mDb->isConnected());
 
+    mDb->execSql(mSqlCreateTable);
     // this should throw tmwserv::dal::DbSqlQueryExecFailure.
-    const RecordSet& rs = mDb->execSql(mSqlCreateTable);
+    mDb->execSql(mSqlCreateTable);
 }
 
 
@@ -124,8 +164,18 @@ DataProviderTest::testCreateTable2(void)
 void
 DataProviderTest::testInsert1(void)
 {
+#ifdef SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    mDb->connect(dbFile, mDbUser, mDbPassword);
+#else
     mDb->connect(mDbName, mDbUser, mDbPassword);
+#endif
+
     CPPUNIT_ASSERT(mDb->isConnected());
+
+    mDb->execSql(mSqlCreateTable);
 
     const RecordSet& rs = mDb->execSql(mSqlInsertRow);
     // an insert query does not return any records
@@ -143,7 +193,15 @@ DataProviderTest::testInsert1(void)
 void
 DataProviderTest::testInsert2(void)
 {
+#ifdef SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    mDb->connect(dbFile, mDbUser, mDbPassword);
+#else
     mDb->connect(mDbName, mDbUser, mDbPassword);
+#endif
+
     CPPUNIT_ASSERT(mDb->isConnected());
 
     // this should throw tmwserv::dal::DbSqlQueryExecFailure
@@ -158,8 +216,19 @@ DataProviderTest::testInsert2(void)
 void
 DataProviderTest::testFetch1(void)
 {
+#ifdef SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    mDb->connect(dbFile, mDbUser, mDbPassword);
+#else
     mDb->connect(mDbName, mDbUser, mDbPassword);
+#endif
+
     CPPUNIT_ASSERT(mDb->isConnected());
+
+    mDb->execSql(mSqlCreateTable);
+    mDb->execSql(mSqlInsertRow);
 
     const RecordSet& rs = mDb->execSql(mSqlFetchRow);
     CPPUNIT_ASSERT(!rs.isEmpty());
@@ -180,7 +249,15 @@ DataProviderTest::testFetch1(void)
 void
 DataProviderTest::testDisconnection1(void)
 {
+#ifdef SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    mDb->connect(dbFile, mDbUser, mDbPassword);
+#else
     mDb->connect(mDbName, mDbUser, mDbPassword);
+#endif
+
     CPPUNIT_ASSERT(mDb->isConnected());
 
     mDb->disconnect();
@@ -196,4 +273,62 @@ DataProviderTest::testDisconnection2(void)
 {
     mDb->disconnect();
     CPPUNIT_ASSERT(!mDb->isConnected());
+}
+
+
+/**
+ * Reinitialize the database.
+ */
+void
+DataProviderTest::reinitDb(void)
+{
+    // we are not using DataProvider::execSql() to execute the SQL queries
+    // here as the class is the purpose of these tests.
+
+#if defined (MYSQL_SUPPORT)
+    {
+        // initialize the MySQL library.
+        MYSQL* db = mysql_init(NULL);
+
+        if (!db) {
+            CPPUNIT_FAIL("unable to initialize the MySQL library: no memory");
+        }
+
+        // connect to the database.
+        if (!mysql_real_connect(db,
+                                NULL,
+                                mDbUser.c_str(),
+                                mDbPassword.c_str(),
+                                mDbName.c_str(),
+                                0,
+                                NULL,
+                                0))
+        {
+            CPPUNIT_FAIL(mysql_error(db));
+        }
+
+        // drop the table.
+        std::string sql("drop table employees;");
+        if (mysql_query(db, sql.c_str()) != 0) {
+            // ignore, the table may not exist.
+        }
+
+        // close the connection and free memory.
+        mysql_close(db);
+        mysql_library_end();
+        db = 0;
+    }
+#elif defined (POSTGRE_SUPPORT)
+    // TODO: drop tables.
+#else // SQLITE_SUPPORT
+    std::string dbFile(mDbName);
+    dbFile += ".db";
+
+    // ensure that the database file does not exist.
+    if (PHYSFS_exists(dbFile.c_str())) {
+        if (PHYSFS_delete(dbFile.c_str()) == 0) {
+            CPPUNIT_FAIL(PHYSFS_getLastError());
+        }
+    }
+#endif
 }

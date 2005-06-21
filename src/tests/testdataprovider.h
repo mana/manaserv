@@ -21,14 +21,26 @@
  */
 
 
-
 #ifndef _TMWSERV_TEST_DATA_PROVIDER_H_
 #define _TMWSERV_TEST_DATA_PROVIDER_H_
 
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "dalexcept.h"
+#include "../dal/dalexcept.h"
+#include "../dal/dataprovider.h"
+
+
+/**
+ * Requirements:
+ *     - if using MySQL or PostgreSQL as backends, then make sure that a user
+ *       named 'guest' with the password 'guest' has enough privileges to
+ *       create tables and populate them in a database named 'tmwteststorage'
+ *       prior to running the teststorage unit tests.
+ */
+
+
+using namespace tmwserv::dal;
 
 
 /**
@@ -41,10 +53,9 @@ class DataProviderTest: public CppUnit::TestFixture
     // add tests to the test suite.
     CPPUNIT_TEST(testConnection1);
     CPPUNIT_TEST(testCreateTable1);
-    CPPUNIT_TEST_EXCEPTION(testCreateTable2,
-                           tmwserv::dal::DbSqlQueryExecFailure);
+    CPPUNIT_TEST_EXCEPTION(testCreateTable2, DbSqlQueryExecFailure);
     CPPUNIT_TEST(testInsert1);
-    CPPUNIT_TEST_EXCEPTION(testInsert2, tmwserv::dal::DbSqlQueryExecFailure);
+    CPPUNIT_TEST_EXCEPTION(testInsert2, DbSqlQueryExecFailure);
     CPPUNIT_TEST(testFetch1);
     CPPUNIT_TEST(testDisconnection1);
     CPPUNIT_TEST(testDisconnection2);
@@ -124,14 +135,21 @@ class DataProviderTest: public CppUnit::TestFixture
 
 
     private:
-        tmwserv::dal::DataProvider* mDb; /**< the data provider */
-        std::string mDbName;             /**< the database name */
-        std::string mDbPath;             /**< the database path */
-        std::string mDbUser;             /**< the database user */
-        std::string mDbPassword;         /**< the database password */
-        std::string mSqlCreateTable;     /**< SQL query to create table */
-        std::string mSqlInsertRow;       /**< SQL query to delete table */
-        std::string mSqlFetchRow;        /**< SQL query to fetch data */
+        /**
+         * Reinitialize the database.
+         */
+        void
+        reinitDb(void);
+
+
+    private:
+        DataProvider* mDb;                  /**< the data provider */
+        static std::string mDbName;         /**< the database name */
+        static std::string mDbUser;         /**< the database user */
+        static std::string mDbPassword;     /**< the database password */
+        static std::string mSqlCreateTable; /**< SQL query to create table */
+        static std::string mSqlInsertRow;   /**< SQL query to delete table */
+        static std::string mSqlFetchRow;    /**< SQL query to fetch data */
 };
 
 

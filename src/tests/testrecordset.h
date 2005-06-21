@@ -27,7 +27,13 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "dalexcept.h"
+#include <stdexcept>
+
+#include "../dal/dalexcept.h"
+#include "../dal/recordset.h"
+
+
+using namespace tmwserv::dal;
 
 
 /**
@@ -54,7 +60,7 @@ class RecordSetTest: public CppUnit::TestFixture
     CPPUNIT_TEST(testOutputStream2);
     CPPUNIT_TEST(testAdd1);
     CPPUNIT_TEST_EXCEPTION(testAdd2, std::invalid_argument);
-    CPPUNIT_TEST_EXCEPTION(testAdd3, tmwserv::dal::RsColumnHeadersNotSet);
+    CPPUNIT_TEST_EXCEPTION(testAdd3, RsColumnHeadersNotSet);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -201,8 +207,8 @@ class RecordSetTest: public CppUnit::TestFixture
 
 
     private:
-        tmwserv::dal::RecordSet mEmptyRs;    /**< empty recordset */
-        tmwserv::dal::RecordSet mNonEmptyRs; /**< recordset with some data */
+        RecordSet mEmptyRs;    /**< empty recordset */
+        RecordSet mNonEmptyRs; /**< recordset with some data */
 };
 
 

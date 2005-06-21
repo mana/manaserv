@@ -24,9 +24,27 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TextTestRunner.h>
 
+#include <physfs.h>
+
+
+/**
+ * Notes:
+ *     - if the unit test application is linked to libsqlite3, there will
+ *       be a memory leak (8 bytes) while no leaks are detected when linked
+ *       to libmysqlclient. the leak was detected using Valgrind, an
+ *       excellent memory debugger.
+ *
+ * TODO: check memory leak when linked to libpq (PostgreSQL).
+ */
+
 
 int main(int argc, char* argv[])
 {
+    // initialize the PhysicsFS library.
+    PHYSFS_init(argv[0]);
+    PHYSFS_addToSearchPath(".", 1);
+    PHYSFS_setWriteDir(".");
+
     using namespace CppUnit;
 
     // get the top level suite from the registry.
@@ -38,6 +56,9 @@ int main(int argc, char* argv[])
 
     // run the tests.
     bool wasSuccessful = runner.run();
+
+    // denitialize the PhysicsFS library.
+    PHYSFS_deinit();
 
     // return error code 1 if the one of test failed.
     return wasSuccessful ? 0 : 1;
