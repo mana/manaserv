@@ -130,7 +130,13 @@ SqLiteDataProvider::execSql(const std::string& sql,
                       );
 
         if (errCode != SQLITE_OK) {
-            throw DbSqlQueryExecFailure(sqlite3_errmsg(mDb));
+            std::string msg(sqlite3_errmsg(mDb));
+
+            // free memory
+            sqlite3_free_table(result);
+            delete errMsg;
+
+            throw DbSqlQueryExecFailure(msg);
         }
 
         // the first row of result[] contains the field names.
