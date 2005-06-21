@@ -92,7 +92,7 @@ const std::string SQL_ACCOUNTS_TABLE(
     "CREATE TABLE tmw_accounts ("
 #if defined (MYSQL_SUPPORT)
         "id       INTEGER     PRIMARY KEY AUTO_INCREMENT,"
-        "username VARCHAR(32) NOT NULL,"
+        "username VARCHAR(32) NOT NULL UNIQUE,"
         "password VARCHAR(32) NOT NULL,"
         "email    VARCHAR(64) NOT NULL,"
         "level    TINYINT     UNSIGNED NOT NULL,"
@@ -100,7 +100,7 @@ const std::string SQL_ACCOUNTS_TABLE(
         "INDEX (id)"
 #elif defined (SQLITE_SUPPORT)
         "id       INTEGER     PRIMARY KEY,"
-        "username TEXT        NOT NULL,"
+        "username TEXT        NOT NULL UNIQUE,"
         "password TEXT        NOT NULL,"
         "email    TEXT        NOT NULL,"
         "level    INTEGER     NOT NULL,"
@@ -125,7 +125,7 @@ const std::string SQL_CHARACTERS_TABLE(
 #if defined (MYSQL_SUPPORT)
         "id      INTEGER     PRIMARY KEY AUTO_INCREMENT,"
         "user_id INTEGER     UNSIGNED NOT NULL,"
-        "name    VARCHAR(32) NOT NULL,"
+        "name    VARCHAR(32) NOT NULL UNIQUE,"
         // general information about the character
         "gender  TINYINT     UNSIGNED NOT NULL,"
         "level   TINYINT     UNSIGNED NOT NULL,"
@@ -148,7 +148,7 @@ const std::string SQL_CHARACTERS_TABLE(
 #elif defined (SQLITE_SUPPORT)
         "id      INTEGER     PRIMARY KEY,"
         "user_id INTEGER     NOT NULL,"
-        "name    TEXT        NOT NULL,"
+        "name    TEXT        NOT NULL UNIQUE,"
         // general information about the character
         "gender  INTEGER     NOT NULL,"
         "level   INTEGER     NOT NULL,"
@@ -230,7 +230,7 @@ const std::string SQL_WORLD_ITEMS_TABLE(
 
 
 /**
- * TABLE: tmw_inventory.
+ * TABLE: tmw_inventories.
  */
 const std::string INVENTORIES_TBL_NAME("tmw_inventories");
 const std::string SQL_INVENTORIES_TABLE(
