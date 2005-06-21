@@ -37,6 +37,7 @@ namespace dal
  */
 MySqlDataProvider::MySqlDataProvider(void)
     throw()
+        : mDb(0)
 {
     // NOOP
 }
@@ -53,7 +54,9 @@ MySqlDataProvider::~MySqlDataProvider(void)
     // make sure that the database is closed.
     // disconnect() calls mysql_close() which takes care of freeing
     // the memory allocated for the handle.
-    disconnect();
+    if (mIsConnected) {
+        disconnect();
+    }
 }
 
 
@@ -76,6 +79,10 @@ MySqlDataProvider::connect(const std::string& dbName,
                            const std::string& userName,
                            const std::string& password)
 {
+    if (mIsConnected) {
+        return;
+    }
+
     // allocate and initialize a new MySQL object suitable
     // for mysql_real_connect().
     mDb = mysql_init(NULL);
@@ -170,17 +177,18 @@ MySqlDataProvider::execSql(const std::string& sql,
 void
 MySqlDataProvider::disconnect(void)
 {
-    if (!isConnected()) {
+    if (!mIsConnected) {
         return;
     }
 
     // mysql_close() closes the connection and deallocates the connection
-    // handle as it was allocated by mysql_init().
+    // handle allocated by mysql_init().
     mysql_close(mDb);
 
     // deinitialize the MySQL client library.
     mysql_library_end();
 
+    mDb = 0;
     mIsConnected = false;
 }
 

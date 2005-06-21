@@ -73,7 +73,8 @@ class DataProvider
         /**
          * Destructor.
          */
-        virtual ~DataProvider(void)
+        virtual
+        ~DataProvider(void)
             throw();
 
 

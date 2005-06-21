@@ -20,20 +20,26 @@
  *  $Id$
  */
 
+
 #include "pqdataprovider.h"
+
 
 namespace tmwserv
 {
 namespace dal
 {
 
+
 /**
  * Constructor
  */
 PqDataProvider::PqDataProvider(void)
     throw()
+        : mDb(0)
 {
+    // NOOP
 }
+
 
 /**
  * Destructor
@@ -41,8 +47,11 @@ PqDataProvider::PqDataProvider(void)
 PqDataProvider::~PqDataProvider(void)
     throw()
 {
-    disconnect();
+    if (mIsConnected) {
+        disconnect();
+    }
 }
+
 
 /**
  * Get the database backend name.
@@ -53,6 +62,7 @@ PqDataProvider::getDbBackend(void) const
 {
     return DB_BKEND_POSTGRESQL;
 }
+
 
 /**
  * Create a connection to the database.
@@ -81,6 +91,7 @@ PqDataProvider::connect(const std::string& dbName,
 
     mIsConnected = true;
 }
+
 
 /**
  * Execute a SQL query.
@@ -131,6 +142,7 @@ PqDataProvider::execSql(const std::string& sql,
     }
 }
 
+
 /**
  * Close connection to database.
  */
@@ -141,11 +153,13 @@ PqDataProvider::disconnect(void)
         return;
     }
 
-    // finish up with Postgre
+    // finish up with Postgre.
     PQfinish(mDb);
 
+    mDb = 0;
     mIsConnected = false;
 }
+
 
 } // namespace dal
 } // namespace tmwserv

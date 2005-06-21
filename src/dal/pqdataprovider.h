@@ -20,88 +20,101 @@
  *  $Id$
  */
 
-#ifndef PQDATAPROVIDER_H
-#define PQDATAPROVIDER_H
+
+#ifndef _TMWSERV_PQDATAPROVIDER_H_
+#define _TMWSERV_PQDATAPROVIDER_H_
+
 
 #include <string>
+
+#include <libpq-fe.h>
+
 #include "dataprovider.h"
-#include "libpq-fe.h"
+
 
 namespace tmwserv
 {
 namespace dal
 {
 
-class PqDataProvider : public DataProvider
+
+/**
+ * A PostgreSQL Data Provider.
+ */
+class PqDataProvider: public DataProvider
 {
- public:
-    /**
-     * Constructor
-     */
-    PqDataProvider()
-        throw();
-
-    /**
-     * Destructor
-     */
-    ~PqDataProvider()
-        throw();
-
-    /**
-     * Get name of the database backend
-     *
-     * @return the database backend name
-     */
-    DbBackends
-    getDbBackend(void) const
-        throw();
-
-    /**
-     * Create a connection to the database.
-     *
-     * @param dbName the database name.
-     * @param userName the user name.
-     * @param password the user password.
-     *
-     * @exception DbConnectionFailure if unsuccessful connection.
-     */
-    void
-    connect(const std::string& dbName,
-            const std::string& userName,
-            const std::string& password);
+    public:
+        /**
+         * Constructor
+         */
+        PqDataProvider(void)
+            throw();
 
 
-    /**
-     * Execute a SQL query.
-     *
-     * @param sql the SQL query.
-     * @param refresh if true, refresh the cache (default = false).
-     *
-     * @return a recordset.
-     *
-     * @exception DbSqlQueryExecFailure if unsuccessful execution.
-     * @exception std::runtime_error if trying to query a closed database.
-     */
-    const RecordSet&
-    execSql(const std::string& sql,
-            const bool refresh = false);
+        /**
+         * Destructor
+         */
+        ~PqDataProvider(void)
+            throw();
 
 
-    /**
-     * Close the connection to the database.
-     *
-     * @exception DbDisconnectionFailure if unsuccessful disconnection.
-     */
-    void
-    disconnect(void);
+        /**
+         * Get name of the database backend
+         *
+         * @return the database backend name
+         */
+        DbBackends
+        getDbBackend(void) const
+            throw();
 
- protected:
-    PGconn *mDb; /**<  Database connection handle */
 
+        /**
+         * Create a connection to the database.
+         *
+         * @param dbName the database name.
+         * @param userName the user name.
+         * @param password the user password.
+         *
+         * @exception DbConnectionFailure if unsuccessful connection.
+         */
+        void
+        connect(const std::string& dbName,
+                const std::string& userName,
+                const std::string& password);
+
+
+        /**
+         * Execute a SQL query.
+         *
+         * @param sql the SQL query.
+         * @param refresh if true, refresh the cache (default = false).
+         *
+         * @return a recordset.
+         *
+         * @exception DbSqlQueryExecFailure if unsuccessful execution.
+         * @exception std::runtime_error if trying to query a closed database.
+         */
+        const RecordSet&
+        execSql(const std::string& sql,
+                const bool refresh = false);
+
+
+        /**
+         * Close the connection to the database.
+         *
+         * @exception DbDisconnectionFailure if unsuccessful disconnection.
+         */
+        void
+        disconnect(void);
+
+
+    private:
+        PGconn *mDb; /**<  Database connection handle */
 };
 
 
-}
-}
+} // namespace dal
+} // namespace tmwserv
 
-#endif
+
+#endif // _TMWSERV_PQDATAPROVIDER_H_

@@ -51,7 +51,9 @@ SqLiteDataProvider::~SqLiteDataProvider(void)
         // make sure that the database is closed.
         // disconnect() calls sqlite3_close() which takes care of freeing
         // the memory allocated for the handle.
-        disconnect();
+        if (mIsConnected) {
+            disconnect();
+        }
     }
     catch (...) {
         // ignore
@@ -169,10 +171,13 @@ SqLiteDataProvider::disconnect(void)
         return;
     }
 
+    // sqlite3_close() closes the connection and deallocates the connection
+    // handle.
     if (sqlite3_close(mDb) != SQLITE_OK) {
         throw DbDisconnectionFailure(sqlite3_errmsg(mDb));
     }
 
+    mDb = 0;
     mIsConnected = false;
 }
 

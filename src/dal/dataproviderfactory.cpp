@@ -23,22 +23,14 @@
 
 #include "dataproviderfactory.h"
 
-#ifdef MYSQL_SUPPORT
+#if defined (MYSQL_SUPPORT)
 #include "mysqldataprovider.h"
-#else
-
-#ifdef SQLITE_SUPPORT
+#elif defined (POSTGRE_SUPPORT)
+#include "pqdataprovider.h"
+#elif defined (SQLITE_SUPPORT)
 #include "sqlitedataprovider.h"
 #else
-
-#ifdef POSTGRE_SUPPORT
-#include "pqdataprovider.h"
-#else
-
-#error "Database not specified"
-
-#endif
-#endif
+#error "no database backend defined"
 #endif
 
 
@@ -74,24 +66,16 @@ DataProviderFactory::~DataProviderFactory(void)
 DataProvider*
 DataProviderFactory::createDataProvider(void)
 {
-#ifdef MYSQL_SUPPORT
+#if defined (MYSQL_SUPPORT)
     MySqlDataProvider* provider = new MySqlDataProvider;
     return provider;
-#endif
-
-#ifdef SQLITE_SUPPORT
+#elif defined (POSTGRE_SUPPORT)
+    PqDataProvider *provider = new PqDataProvider;
+    return provider;
+#else // SQLITE_SUPPORT
     SqLiteDataProvider* provider = new SqLiteDataProvider;
     return provider;
 #endif
-
-#ifdef POSTGRE_SUPPORT
-    PqDataProvider *provider = new PqDataProvider;
-    return provider;
-#endif
-
-    // a data provider cannot be created as the server has been compiled
-    // without support for any database.
-    throw std::runtime_error("missing database backend support.");
 }
 
 
