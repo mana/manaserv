@@ -31,10 +31,6 @@
 #include "object.h"
 
 
-// kindjal: are we actually using this?
-#define ACC_MAX_CHARS 4
-
-
 namespace tmwserv
 {
 

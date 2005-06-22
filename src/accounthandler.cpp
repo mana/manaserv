@@ -87,7 +87,8 @@ int AccountHandler::loginMessage(NetComputer &computer, MessageIn &message)
  *               requested handle, ERROR on early termination of the
  *               routine.
  */
-int AccountHandler::assignAccount(NetComputer &computer, AccountData *account)
+int
+AccountHandler::assignAccount(NetComputer &computer, tmwserv::Account *account)
 {
     // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: the account was accessed before
     //                                          being initalized.

@@ -24,6 +24,8 @@
 #ifndef _TMW_SERVER_MESSAGEOUT_
 #define _TMW_SERVER_MESSAGEOUT_
 
+#include <string>
+
 #include "packet.h"
 
 class MessageOut
@@ -47,7 +49,7 @@ class MessageOut
          * Writes a string. If a fixed length is not given (-1), it is stored
          * as a short at the start of the string.
          */
-        void writeString(int length = -1);
+        void writeString(const std::string &string, int length = -1);
 
         /**
          * Returns an instance of Packet derived from the written data. Use for

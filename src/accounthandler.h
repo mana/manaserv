@@ -28,7 +28,7 @@
 #include "messagehandler.h"
 #include "netcomputer.h"
 #include "messagein.h"
-#include "defines.h"
+#include "account.h"
 
 /**
  * Manages the data stored in user accounts and provides a reliable interface
@@ -55,7 +55,7 @@ class AccountHandler : public MessageHandler
         /**
          * Account assignment.
          */
-        int assignAccount(NetComputer &computer, AccountData *account);
+        int assignAccount(NetComputer &computer, tmwserv::Account *account);
 };
 
 #endif
