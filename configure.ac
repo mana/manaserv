@@ -1,11 +1,6 @@
 dnl $Id$
 
 
-# TODO: write an M4 PKG_CHECK_MODULES-like for the external libraries that
-#       provide an executable <lib>-config (e.g. SDL, MySQL, PostgreSQL) to
-#       make this file shorter, more readable and easier to maintain.
-
-
 AC_PREREQ(2.59)
 AC_INIT([TMW Server], [0.0.1], [b_lindeijer@users.sourceforge.net], [tmwserv])
 AC_CONFIG_HEADER([config.h])
@@ -24,23 +19,11 @@ AC_PROG_INSTALL
 AC_CHECK_LIB([crypto], [EVP_md5])
 AC_CHECK_LIB([physfs], [PHYSFS_init])
 
-# libSDL
-AC_PATH_PROG(SDL_CONFIG, [sdl-config], [no])
-if test "$SDL_CONFIG" = "no"; then
-    AC_MSG_ERROR([The sdl-config could not be found. Please check your path.])
-else
-    AC_MSG_CHECKING(SDL_CFLAGS)
-    SDL_CFLAGS=`$SDL_CONFIG --cflags`
-    AC_MSG_RESULT($SDL_CFLAGS)
-
-    AC_MSG_CHECKING(SDL_LIBS)
-    SDL_LIBS=`$SDL_CONFIG --libs`
-    AC_MSG_RESULT($SDL_LIBS)
-
-    # update CXXFLAGS and LIBS.
-    CXXFLAGS="$CXXFLAGS $SDL_CFLAGS"
-    LIBS="$LIBS $SDL_LIBS"
-fi
+AC_CHECK_LIB_TMW([SDL], [1.2.0])
+# update CXXFLAGS and LIBS.
+# SDL_CFLAGS and SDL_LIBS are set by AC_CHECK_LIB_TMW.
+CXXFLAGS="$CXXFLAGS $SDL_CFLAGS"
+LIBS="$LIBS $SDL_LIBS"
 
 AC_CHECK_LIB([SDL_net], [SDLNet_Init])
 
@@ -73,56 +56,36 @@ AC_ARG_WITH(
         [use storage backend [[ARG=mysql,postgresql,sqlite]]
         [(default=sqlite)]]
     ),
-    [],
+    [if test "$withval" = "yes"; then
+         # default is sqlite.
+         with_storage_backend="sqlite"
+     elif test "$withval" = "no"; then
+         AC_MSG_ERROR([$PACKAGE_NAME cannot run without a storage backend.])
+     else
+         with_storage_backend="$withval"
+     fi],
     [with_storage_backend="sqlite"]
 )
 
 if test "$with_storage_backend" = "mysql"; then
-    # use mysql_config to get the CFLAGS and LIBS values.
-    AC_PATH_PROG(MYSQL_CONFIG, [mysql_config], [no])
+    # use mysql_config to check libmysqlclient.
+    # MYSQLCLIENT_CFLAGS and MYSQLCLIENT_LIBS are set by AC_CHECK_LIB_TMW.
+    AC_CHECK_LIB_TMW([mysqlclient], [4.1.0], [mysql_config])
 
-    if test "$MYSQL_CONFIG" = "no"; then
-        AC_MSG_ERROR(
-            [The mysql_config could not be found. Please check your path.]
-        )
-    else
-        AC_MSG_CHECKING(MYSQL_CFLAGS)
-        MYSQL_CFLAGS=`$MYSQL_CONFIG --cflags`
-        AC_MSG_RESULT($MYSQL_CFLAGS)
-
-        AC_MSG_CHECKING(MYSQL_LIBS)
-        MYSQL_LIBS=`$MYSQL_CONFIG --libs`
-        AC_MSG_RESULT($MYSQL_LIBS)
-
-        # update CXXFLAGS and LIBS.
-        CXXFLAGS="$CXXFLAGS -DMYSQL_SUPPORT $MYSQL_CFLAGS"
-        LIBS="$LIBS $MYSQL_LIBS"
-    fi
+    # update CXXFLAGS and LIBS.
+    CXXFLAGS="$CXXFLAGS -DMYSQL_SUPPORT $MYSQLCLIENT_CFLAGS"
+    LIBS="$LIBS $MYSQLCLIENT_LIBS"
 elif test "$with_storage_backend" = "postgresql"; then
-    # use mysql_config to get the CFLAGS and LIBS values.
-    AC_PATH_PROG(POSTGRESQL_CONFIG, [pg_config], [no])
+    # use pg_config to check libpq.
+    # PQ_CFLAGS and PQ_LIBS are set by AC_CHECK_LIB_TMW.
+    AC_CHECK_LIB_TMW([pq], [7.0.0], [pg_config])
 
-    if test "$POSTGRESQL_CONFIG" = "no"; then
-        AC_MSG_ERROR(
-            [The pg_config could not be found. Please check your path.]
-        )
-    else
-        AC_MSG_CHECKING(POSTGRESQL_CFLAGS)
-        POSTGRESQL_CFLAGS=`$POSTGRESQL_CONFIG --cflags`
-        AC_MSG_RESULT($POSTGRESQL_CFLAGS)
-
-        AC_MSG_CHECKING(POSTGRESQL_LIBS)
-        POSTGRESQL_LIBS=`$POSTGRESQL_CONFIG --libs`
-        AC_MSG_RESULT($POSTGRESQL_LIBS)
-
-        # update CXXFLAGS and LIBS.
-        CXXFLAGS="$CXXFLAGS -DPOSTGRESQL_SUPPORT $POSTGRESQL_CFLAGS"
-        LIBS="$LIBS $POSTGRESQL_LIBS"
-    fi
+    # update CXXFLAGS and LIBS.
+    CXXFLAGS="$CXXFLAGS -DPOSTGRESQL_SUPPORT $PQ_CFLAGS"
+    LIBS="$LIBS $PQ_LIBS"
 elif test "$with_storage_backend" = "sqlite"; then
     # use pkg-config to check libsqlite3.
-    # SQLITE_CFLAGS and SQLITE_LIBS are set by PKG_CHECK_MODULES
-    # so nothing much to do here :)
+    # SQLITE_CFLAGS and SQLITE_LIBS are set by PKG_CHECK_MODULES.
     PKG_CHECK_MODULES(SQLITE,[sqlite3 >= 3.0.6])
 
     # update CXXFLAGS and LIBS.
@@ -152,8 +115,10 @@ elif test "$with_scripting_engine" = "squirrel"; then
 
     # update CXXFLAGS and LIBS
     CXXFLAGS="$CXXFLAGS -DSCRIPT_SUPPORT -DSQUIRREL_SUPPORT"
+    # there is no need to append -lsquirrel as it is already done by
+    # AC_CHECK_LIB
     LIBS="$LIBS -lsqstdlib"
-elif test ! "$with_scripting_engine" = "no"; then
+elif test "$with_scripting_engine" != "no"; then
     AC_MSG_ERROR([unknown scripting engine: $with_scripting_engine])
 fi
 
