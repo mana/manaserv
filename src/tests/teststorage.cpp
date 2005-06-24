@@ -301,9 +301,8 @@ StorageTest::insertAccount(std::auto_ptr<DataProvider>& db,
 
     // the password will be identical to the name.
 
-    sql << "insert into " << ACCOUNTS_TBL_NAME
-        << "(username, password, email, level, banned) values "
-        << "('" << name << "', '" << name << "', '"
+    sql << "insert into " << ACCOUNTS_TBL_NAME << " values "
+        << "(null, '" << name << "', '" << name << "', '"
         << name << "@domain', 1, 0);";
 
     db->execSql(sql.str());

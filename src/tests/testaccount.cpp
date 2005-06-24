@@ -96,7 +96,7 @@ AccountTest::testCreate1(void)
 
     Beings& characters = account.getCharacters();
 
-    for (int i = 0; i < mCharacters.size(); ++i) {
+    for (size_t i = 0; i < mCharacters.size(); ++i) {
         CPPUNIT_ASSERT_EQUAL(characters[i]->getName(),
                              mCharacters[i]->getName());
     }
@@ -126,7 +126,7 @@ AccountTest::testCreate2(void)
 
     Beings& characters = account.getCharacters();
 
-    for (int i = 0; i < mCharacters.size(); ++i) {
+    for (size_t i = 0; i < mCharacters.size(); ++i) {
         CPPUNIT_ASSERT_EQUAL(characters[i]->getName(),
                              mCharacters[i]->getName());
     }
@@ -151,7 +151,7 @@ AccountTest::testAddCharacter1(void)
     names.push_back("pippin");
     names.push_back("bilbo");
 
-    for (int i = 0; i < mCharacters.size(); ++i) {
+    for (size_t i = 0; i < mCharacters.size(); ++i) {
         CPPUNIT_ASSERT_EQUAL(mCharacters[i]->getName(), names[i]);
     }
 
@@ -174,7 +174,7 @@ AccountTest::testAddCharacter2(void)
     names.push_back("merry");
     names.push_back("pippin");
 
-    for (int i = 0; i < mCharacters.size(); ++i) {
+    for (size_t i = 0; i < mCharacters.size(); ++i) {
         CPPUNIT_ASSERT_EQUAL(mCharacters[i]->getName(), names[i]);
     }
 }

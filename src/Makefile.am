@@ -71,4 +71,8 @@ tmwserv_SOURCES += script.h \
 endif
 
 tmwserv_CXXFLAGS = -Wall -fno-inline
-tmwserv_TARGET = tmwserv
+
+
+# do not remove the 'dot', it is a hint for Automake.
+# it causes a prefix ordering of directories.
+SUBDIRS = . tests
