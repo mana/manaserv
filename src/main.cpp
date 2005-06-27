@@ -21,7 +21,7 @@
  */
 
 
-#define TMWSERV_VERSION "0.0.1"
+#include <../config.h>
 
 #include <iostream>
 
@@ -166,8 +166,9 @@ int main(int argc, char *argv[])
     initialize();
 
     // Ready for server work...
-    ConnectionHandler *connectionHandler = new ConnectionHandler();
-    NetSession *session = new NetSession();
+    std::auto_ptr<ConnectionHandler>
+        connectionHandler(new ConnectionHandler());
+    std::auto_ptr<NetSession> session(new NetSession());
 
     // Note: This is just an idea, we could also pass the connection handler
     // to the constructor of the account handler, upon which is would register
@@ -176,34 +177,13 @@ int main(int argc, char *argv[])
     //AccountHandler *accountHandler = new AccountHandler();
     //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
 
-    LOG_INFO("The Mana World Server v" << TMWSERV_VERSION)
-    session->startListen(connectionHandler, SERVER_PORT);
+    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION)
+    session->startListen(connectionHandler.get(), SERVER_PORT);
     LOG_INFO("Listening on port " << SERVER_PORT << "...")
 
     using namespace tmwserv;
 
-    Storage& store = Storage::instance("tmw");
-
-    // Test the database retrieval code
-    LOG_INFO("Attempting to retrieve account with username 'nym'")
-    Account* acc = store.getAccount("nym");
-    if (acc)
-    {
-        LOG_INFO("Account name: " << acc->getName())
-        LOG_INFO("Account email: " << acc->getEmail())
-
-        LOG_INFO("Attempting to get character 'Nym the Great'")
-        Being* character = acc->getCharacter("Nym the Great");
-        if (character) {
-            LOG_INFO("Character name: " << character->getName())
-        }
-        else {
-            LOG_WARN("No characters found")
-        }
-    }
-    else {
-        LOG_WARN("Account 'nym' not found")
-    }
+    //Storage& store = Storage::instance("tmw");
 
     SDL_Event event;
 
