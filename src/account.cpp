@@ -32,10 +32,16 @@ namespace tmwserv
 
 
 /**
- * Default constructor.
+ * Constructor with initial account info.
  */
-Account::Account(void)
-    throw()
+Account::Account(const std::string& name,
+                 const std::string& password,
+                 const std::string& email)
+        : mName(name),
+          mPassword(password),
+          mEmail(email),
+          mCharacters(),
+          mLevel(AL_NORMAL)
 {
     // NOOP
 }
@@ -49,11 +55,12 @@ Account::Account(const std::string& name,
                  const std::string& email,
                  const Beings& characters)
         : mName(name),
+          mPassword(password),
           mEmail(email),
-          mCharacters(characters)
+          mCharacters(characters),
+          mLevel(AL_NORMAL)
 {
-    // password must be encrypted.
-    setPassword(password);
+    // NOOP
 }
 
 
@@ -104,15 +111,14 @@ Account::getName(void) const
 void
 Account::setPassword(const std::string& password)
 {
-    // use MD5 digest algorithm to cipher the password.
-    mPassword = utils::Cipher::instance().md5(password);
+    mPassword = password;
 }
 
 
 /**
  * Get the user password.
  */
-const std::string&
+const std::string
 Account::getPassword(void) const
 {
     return mPassword;
@@ -137,6 +143,26 @@ const std::string&
 Account::getEmail(void) const
 {
     return mEmail;
+}
+
+
+/**
+ * Set the account level.
+ */
+void
+Account::setLevel(const AccountLevels level)
+{
+    mLevel = level;
+}
+
+
+/**
+ * Get the account level.
+ */
+AccountLevels
+Account::getLevel(void) const
+{
+    return mLevel;
 }
 
 

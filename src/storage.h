@@ -62,6 +62,15 @@ typedef enum {
 
 
 /**
+ * Structure type for the account info.
+ */
+typedef struct {
+    AccountStatus status;
+    unsigned int id;
+} AccountInfo;
+
+
+/**
  * Functor to be used as the sorting criterion of the map defined below.
  */
 struct account_sort_by_name
@@ -77,8 +86,13 @@ struct account_sort_by_name
 
 /**
  * Data type for the list of accounts.
+ *
+ * Notes:
+ *     - the account id is not attribute of Account but AccountInfo because
+ *       only the storage should modify this value, this attribute is for
+ *       internal use.
  */
-typedef std::map<Account*, AccountStatus, account_sort_by_name> Accounts;
+typedef std::map<Account*, AccountInfo, account_sort_by_name> Accounts;
 
 
 /**
@@ -101,7 +115,7 @@ class account_by_name
          * Operator().
          */
         bool
-        operator()(std::pair<Account*, AccountStatus> elem) const
+        operator()(std::pair<Account*, AccountInfo> elem) const
         {
             return (elem.first)->getName() == mName;
         }
@@ -255,7 +269,7 @@ class Storage
          * @param account the new account.
          */
         virtual void
-        addAccount(Account* account) = 0;
+        addAccount(const Account* account) = 0;
 
 
         /**

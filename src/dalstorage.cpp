@@ -22,7 +22,9 @@
 
 
 #include <sstream>
+#include <vector>
 
+#include "utils/cipher.h"
 #include "utils/functors.h"
 #include "utils/logger.h"
 
@@ -194,13 +196,19 @@ DALStorage::getAccount(const std::string& userName)
 
         // create an Account instance
         // and initialize it with information about the user.
-        Account* account = new Account();
-        account->setName(accountInfo(0, 1));
-        account->setPassword(accountInfo(0, 2));
-        account->setEmail(accountInfo(0, 3));
+        Account* account = new Account(accountInfo(0, 1),
+                                       accountInfo(0, 2),
+                                       accountInfo(0, 3));
+
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to<unsigned int> toUint;
 
         // add the new Account to the list.
-        mAccounts.insert(std::make_pair(account, AS_ACC_TO_UPDATE));
+        AccountInfo ai;
+        ai.status = AS_ACC_TO_UPDATE;
+        ai.id = toUint(accountInfo(0, 0));
+        mAccounts.insert(std::make_pair(account, ai));
 
         // load the characters associated with the account.
         sql = "select * from ";
@@ -212,10 +220,6 @@ DALStorage::getAccount(const std::string& userName)
 
         if (!charInfo.isEmpty()) {
             Beings beings;
-
-            // specialize the string_to functor to convert
-            // a string to an unsigned int.
-            string_to<unsigned int> toUint;
 
             for (unsigned int i = 0; i < charInfo.rows(); ++i) {
                 Being* being =
@@ -249,7 +253,7 @@ DALStorage::getAccount(const std::string& userName)
  * Add a new account.
  */
 void
-DALStorage::addAccount(Account* account)
+DALStorage::addAccount(const Account* account)
 {
     if (account == 0) {
         // maybe we should throw an exception instead
@@ -258,7 +262,12 @@ DALStorage::addAccount(Account* account)
 
     // mark this account as new so that the next flush will execute a SQL
     // insert query instead of a SQL update query.
-    mAccounts.insert(std::make_pair(account, AS_NEW_ACCOUNT));
+    AccountInfo ai;
+    ai.status = AS_NEW_ACCOUNT;
+    // the account id is set to 0 because we know nothing about it at the
+    // moment, it will be updated once saved into the database.
+    ai.id = 0;
+    mAccounts.insert(std::make_pair(const_cast<Account*>(account), ai));
 }
 
 
@@ -277,17 +286,24 @@ DALStorage::delAccount(const std::string& userName)
         );
 
     if (it != mAccounts.end()) {
-        switch (it->second) {
+        switch ((it->second).status) {
             case AS_NEW_ACCOUNT:
-                // this is a newly added account and it has not even been
-                // saved into the database: remove it immediately.
-                delete it->first;
+                {
+                    // this is a newly added account and it has not even been
+                    // saved into the database: remove it immediately.
+
+                    // TODO: delete the associated characters.
+
+                    delete it->first;
+
+                    // TODO: remove from the map.
+                }
                 break;
 
             case AS_ACC_TO_UPDATE:
                 // change the status to AS_ACC_TO_DELETE so that it will be
                 // deleted at the next flush.
-                it->second = AS_ACC_TO_DELETE;
+                (it->second).status = AS_ACC_TO_DELETE;
                 break;
 
             default:
@@ -301,26 +317,10 @@ DALStorage::delAccount(const std::string& userName)
     using namespace dal;
 
     try {
-        std::string sql("select id from ");
-        sql += ACCOUNTS_TBL_NAME;
-        sql += " where username = '";
-        sql += userName;
-        sql += "';";
-        const RecordSet& accountInfo = mDb->execSql(sql);
-
-        // the account does not even exist in the database,
-        // there is nothing to do then.
-        if (accountInfo.isEmpty()) {
-            return;
-        }
-
-        // TODO: actually deleting the account from the database.
-        // order of deletion:
-        //     1. inventories of all the characters of the account,
-        //     2. all the characters,
-        //     3. the account itself.
+        // look for the account directly into the database.
+        _delAccount(userName);
     }
-    catch (const DbSqlQueryExecFailure& e) {
+    catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
     }
 }
@@ -332,15 +332,27 @@ DALStorage::delAccount(const std::string& userName)
 void
 DALStorage::flush(void)
 {
-    // TODO
-    // For each account in memory:
-    //     - get the status
-    //     - if AS_NEW_ACCOUNT then insert into database;
-    //     - if AS_ACC_TO_UPDATE then update values from the database
-    //     - if AS_ACC_TO_DELETE then delete from database
-    // Notes:
-    //     - this will probably involve more than one table as the account may
-    //       have characters associated to it.
+    Accounts::const_iterator it = mAccounts.begin();
+    Accounts::const_iterator it_end = mAccounts.end();
+    for (; it != it_end; ++it) {
+        switch ((it->second).status) {
+            case AS_NEW_ACCOUNT:
+                _addAccount(it->first);
+                break;
+
+            case AS_ACC_TO_UPDATE:
+                _updAccount(it->first);
+                break;
+
+            case AS_ACC_TO_DELETE:
+                // TODO: accounts to be deleted must be handled differently
+                // as mAccounts will be altered once the accounts are deleted.
+                break;
+
+            default:
+                break;
+        }
+    }
 }
 
 
@@ -368,6 +380,210 @@ DALStorage::createTable(const std::string& tblName,
             throw;
         }
     }
+}
+
+
+/**
+ * Add an account to the database.
+ */
+void
+DALStorage::_addAccount(const Account* account)
+{
+    if (account == 0) {
+        return;
+    }
+
+    // assume that account is an element of mAccounts as this method is
+    // private and only called by flush().
+
+    using namespace dal;
+
+    // TODO: we should start a transaction here so that in case of problem
+    // the lost of data would be minimized.
+
+    // insert the account.
+    std::ostringstream sql1;
+    sql1 << "insert into " << ACCOUNTS_TBL_NAME << " values (null, '"
+         << account->getName() << "', '"
+         << utils::Cipher::instance().md5(account->getPassword()) << "', '"
+         << account->getEmail() << "', "
+         << account->getLevel() << ", 0);";
+    mDb->execSql(sql1.str());
+
+    // get the account id.
+    std::ostringstream sql2;
+    sql2 << "select id from " << ACCOUNTS_TBL_NAME
+         << " where username = '" << account->getName() << "';";
+    const RecordSet& accountInfo = mDb->execSql(sql2.str());
+    string_to<unsigned int> toUint;
+
+    Accounts::iterator account_it =
+        std::find_if(
+            mAccounts.begin(),
+            mAccounts.end(),
+            account_by_name(account->getName())
+        );
+
+    // update the info of the account.
+    (account_it->second).status = AS_ACC_TO_UPDATE;
+    (account_it->second).id = toUint(accountInfo(0, 0));
+
+    // insert the characters.
+    Beings& characters = (const_cast<Account*>(account))->getCharacters();
+
+    Beings::const_iterator it = characters.begin();
+    Beings::const_iterator it_end = characters.end();
+    for (; it != it_end; ++it) {
+        // TODO: location on the map & statistics & inventories.
+        std::ostringstream sql3;
+        sql3 << "insert into " << CHARACTERS_TBL_NAME << " values (null, '"
+             << account->getName() << "', '"
+             << (*it)->getName() << "', '"
+             << (*it)->getGender() << "', "
+             << (*it)->getLevel() << ", "
+             << (*it)->getMoney() << ", "
+             << "0, 0, 0, 0, 0, 0, 0, 0, 0"
+             << ");";
+        mDb->execSql(sql3.str());
+    }
+}
+
+
+/**
+ * Update an account from the database.
+ */
+void
+DALStorage::_updAccount(const Account* account)
+{
+    if (account == 0) {
+        return;
+    }
+
+    // assume that account is an element of mAccounts as this method is
+    // private and only called by flush().
+
+    using namespace dal;
+
+    // TODO: we should start a transaction here so that in case of problem
+    // the lost of data would be minimized.
+
+    Accounts::iterator account_it =
+        std::find_if(
+            mAccounts.begin(),
+            mAccounts.end(),
+            account_by_name(account->getName())
+        );
+
+    // doublecheck that this account already exists in the database
+    // and therefore its status must be AS_ACC_TO_UPDATE.
+    if ((account_it->second).status != AS_ACC_TO_UPDATE) {
+        return; // should we throw an exception here instead?
+    }
+
+    // update the account.
+    std::ostringstream sql1;
+    sql1 << "update " << ACCOUNTS_TBL_NAME
+         << " set username = '" << account->getName() << "', "
+         << "password = '" << account->getPassword() << "', "
+         << "email = '" << account->getEmail() << "', "
+         << "level = '" << account->getLevel() << "' "
+         << "where id = '" << (account_it->second).id << "';";
+    mDb->execSql(sql1.str());
+
+    // insert the characters.
+    Beings& characters = (const_cast<Account*>(account))->getCharacters();
+
+    Beings::const_iterator it = characters.begin();
+    Beings::const_iterator it_end = characters.end();
+    for (; it != it_end; ++it) {
+        // TODO: location on the map & statistics & inventories.
+        std::ostringstream sql2;
+        sql2 << "update " << CHARACTERS_TBL_NAME
+             << "(user_id, name, gender, level, money) values ("
+             << " set name = '" << (*it)->getName() << "', "
+             << " gender = '" << (*it)->getGender() << "', "
+             << " level = '" << (*it)->getLevel() << "', "
+             << " money = '" << (*it)->getMoney() << "' "
+             << "where user_id = '" << (account_it->second).id << "';";
+        mDb->execSql(sql2.str());
+    }
+}
+
+
+/**
+ * Delete an account and its associated data from the database.
+ */
+void
+DALStorage::_delAccount(const std::string& userName)
+{
+    using namespace dal;
+
+    // TODO: optimize, we may be doing too much SQL queries here but this
+    // code should work with any database :(
+
+    // get the account id.
+    std::string sql("select id from ");
+    sql += ACCOUNTS_TBL_NAME;
+    sql += " where username = '";
+    sql += userName;
+    sql += "';";
+    const RecordSet& accountInfo = mDb->execSql(sql);
+
+    // the account does not even exist in the database,
+    // there is nothing to do then.
+    if (accountInfo.isEmpty()) {
+        return;
+    }
+
+    // save the account id.
+    std::string accountId(accountInfo(0, 0));
+
+    // get the characters that belong to the account.
+    sql = "select id from ";
+    sql += CHARACTERS_TBL_NAME;
+    sql += " where user_id = '";
+    sql += accountId;
+    sql += "';";
+    const RecordSet& charsInfo = mDb->execSql(sql);
+
+    // save the character ids.
+    using namespace std;
+    vector<string> charIds;
+    for (unsigned int i = 0; i < charsInfo.rows(); ++i) {
+        charIds.push_back(charsInfo(i, 0));
+    }
+
+    // TODO: we should start a transaction here so that in case of problem
+    // the lost of data would be minimized.
+
+    // actually removing data.
+    vector<string>::const_iterator it = charIds.begin();
+    vector<string>::const_iterator it_end = charIds.end();
+    for (; it != it_end; ++it) {
+        // delete the inventory.
+        sql = "delete from ";
+        sql += INVENTORIES_TBL_NAME;
+        sql += " where owner_id = '";
+        sql += (*it);
+        sql += "';";
+        mDb->execSql(sql);
+
+        // now delete the character.
+        sql = "delete from ";
+        sql += CHARACTERS_TBL_NAME;
+        sql += " where id = '";
+        sql += (*it);
+        sql += "';";
+        mDb->execSql(sql);
+    }
+
+    // delete the account.
+    sql = "delete from ";
+    sql += ACCOUNTS_TBL_NAME;
+    sql += " where id = '";
+    sql += accountId;
+    sql += "';";
+    mDb->execSql(sql);
 }
 
 

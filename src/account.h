@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include "object.h"
+#include "defines.h"
 
 
 namespace tmwserv
@@ -42,10 +42,15 @@ class Account
 {
     public:
         /**
-         * Default constructor.
+         * Constructor with initial account info.
+         *
+         * @param name the user name.
+         * @param password the user password.
+         * @param email the user email.
          */
-        Account(void)
-            throw();
+        Account(const std::string& name,
+                const std::string& password,
+                const std::string& email);
 
 
         /**
@@ -102,7 +107,7 @@ class Account
          *
          * @return the user password.
          */
-        const std::string&
+        const std::string
         getPassword(void) const;
 
 
@@ -122,6 +127,24 @@ class Account
          */
         const std::string&
         getEmail(void) const;
+
+
+        /**
+         * Set the account level.
+         *
+         * @param level the new level.
+         */
+        void
+        setLevel(const AccountLevels level);
+
+
+        /**
+         * Get the account level.
+         *
+         * @return the account level.
+         */
+        AccountLevels
+        getLevel(void) const;
 
 
         /**
@@ -162,6 +185,13 @@ class Account
 
     private:
         /**
+         * Default constructor.
+         */
+        Account(void)
+            throw();
+
+
+        /**
          * Copy constructor.
          */
         Account(const Account& rhs);
@@ -179,6 +209,7 @@ class Account
         std::string mPassword; /**< user password (encrypted) */
         std::string mEmail;    /**< user email address */
         Beings mCharacters;    /**< player data */
+        AccountLevels mLevel;  /**< account level */
 };
 
 

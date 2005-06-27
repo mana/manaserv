@@ -64,8 +64,8 @@ class AccountTest: public CppUnit::TestFixture
 
 
         /**
-         * Test creating an Account using the default constructor
-         * and setting the account info using the mutators.
+         * Test creating an Account passing the initial account info
+         * to the constructor.
          */
         void
         testCreate1(void);

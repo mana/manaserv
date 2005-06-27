@@ -81,7 +81,7 @@ class DALStorage: public Storage
          * @param account the new account.
          */
         void
-        addAccount(Account* account);
+        addAccount(const Account* account);
 
 
         /**
@@ -95,6 +95,8 @@ class DALStorage: public Storage
 
         /**
          * Save changes to the database permanently.
+         *
+         * @exception tmwserv::dal::DbSqlQueryExecFailure.
          */
         void
         flush(void);
@@ -138,6 +140,39 @@ class DALStorage: public Storage
         void
         createTable(const std::string& tblName,
                     const std::string& sql);
+
+
+        /**
+         * Add an account to the database.
+         *
+         * @param account the account to add.
+         *
+         * @exeception tmwserv::dal::DbSqlQueryExecFailure.
+         */
+        void
+        _addAccount(const Account* account);
+
+
+        /**
+         * Update an account from the database.
+         *
+         * @param account the account to update.
+         *
+         * @exception tmwserv::dal::DbSqlQueryExecFailure.
+         */
+        void
+        _updAccount(const Account* account);
+
+
+        /**
+         * Delete an account and its associated data from the database.
+         *
+         * @param userName the owner of the account.
+         *
+         * @exeception tmwserv::dal::DbSqlQueryExecFailure.
+         */
+        void
+        _delAccount(const std::string& userName);
 
 
     private:

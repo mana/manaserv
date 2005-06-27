@@ -52,6 +52,9 @@ class StorageTest: public CppUnit::TestFixture
     // add tests to the test suite.
     CPPUNIT_TEST(testGetAccount1);
     CPPUNIT_TEST(testGetAccount2);
+    CPPUNIT_TEST(testAddAccount1);
+    CPPUNIT_TEST(testAddAccount2);
+    CPPUNIT_TEST(testUpdAccount1);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -83,6 +86,27 @@ class StorageTest: public CppUnit::TestFixture
          */
         void
         testGetAccount2(void);
+
+
+        /**
+         * Test passing a null pointer to addAcccount().
+         */
+        void
+        testAddAccount1(void);
+
+
+        /**
+         * Test adding a new account.
+         */
+        void
+        testAddAccount2(void);
+
+
+        /**
+         * Test updating an existing account.
+         */
+        void
+        testUpdAccount1(void);
 
 
     private:

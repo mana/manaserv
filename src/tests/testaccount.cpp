@@ -70,36 +70,22 @@ AccountTest::tearDown(void)
 
 
 /**
- * Test creating an Account using the default constructor
- * and setting the account info using the mutators.
+ * Test creating an Account passing the initial account info
+ * to the constructor.
  */
 void
 AccountTest::testCreate1(void)
 {
     const std::string name("frodo");
     const std::string password("baggins");
-    const std::string encrypted("d70d266f4c276b5706881a46f43a88b0");
     const std::string email("frodo@theshire.com");
 
-    Account account;
-    account.setName(name);
-    account.setPassword(password);
-    account.setEmail(email);
-    account.setCharacters(mCharacters);
+    Account account(name, password, email);
 
-    CPPUNIT_ASSERT_EQUAL(account.getName(), name);
-    CPPUNIT_ASSERT_EQUAL(account.getPassword(), encrypted);
-    CPPUNIT_ASSERT_EQUAL(account.getEmail(), email);
-
-    CPPUNIT_ASSERT_EQUAL(mAccount->getCharacters().size(),
-                         mCharacters.size());
-
-    Beings& characters = account.getCharacters();
-
-    for (size_t i = 0; i < mCharacters.size(); ++i) {
-        CPPUNIT_ASSERT_EQUAL(characters[i]->getName(),
-                             mCharacters[i]->getName());
-    }
+    CPPUNIT_ASSERT_EQUAL(name, account.getName());
+    CPPUNIT_ASSERT_EQUAL(password, account.getPassword());
+    CPPUNIT_ASSERT_EQUAL(email, account.getEmail());
+    CPPUNIT_ASSERT_EQUAL((size_t) 0, account.getCharacters().size());
 }
 
 
@@ -112,17 +98,16 @@ AccountTest::testCreate2(void)
 {
     const std::string name("frodo");
     const std::string password("baggins");
-    const std::string encrypted("d70d266f4c276b5706881a46f43a88b0");
     const std::string email("frodo@theshire.com");
 
     Account account(name, password, email, mCharacters);
 
-    CPPUNIT_ASSERT_EQUAL(account.getName(), name);
-    CPPUNIT_ASSERT_EQUAL(account.getPassword(), encrypted);
-    CPPUNIT_ASSERT_EQUAL(account.getEmail(), email);
+    CPPUNIT_ASSERT_EQUAL(name, account.getName());
+    CPPUNIT_ASSERT_EQUAL(password, account.getPassword());
+    CPPUNIT_ASSERT_EQUAL(email, account.getEmail());
 
-    CPPUNIT_ASSERT_EQUAL(mAccount->getCharacters().size(),
-                         mCharacters.size());
+    CPPUNIT_ASSERT_EQUAL(mCharacters.size(),
+                         mAccount->getCharacters().size());
 
     Beings& characters = account.getCharacters();
 
@@ -143,7 +128,7 @@ AccountTest::testAddCharacter1(void)
 
     mAccount->addCharacter(bilbo);
 
-    CPPUNIT_ASSERT_EQUAL(mAccount->getCharacters().size(), (size_t) 4);
+    CPPUNIT_ASSERT_EQUAL((size_t) 4, mAccount->getCharacters().size());
 
     std::vector<std::string> names;
     names.push_back("sam");
@@ -152,7 +137,7 @@ AccountTest::testAddCharacter1(void)
     names.push_back("bilbo");
 
     for (size_t i = 0; i < mCharacters.size(); ++i) {
-        CPPUNIT_ASSERT_EQUAL(mCharacters[i]->getName(), names[i]);
+        CPPUNIT_ASSERT_EQUAL(names[i], mCharacters[i]->getName());
     }
 
     delete bilbo;
@@ -167,7 +152,7 @@ AccountTest::testAddCharacter2(void)
 {
     mAccount->addCharacter(NULL);
 
-    CPPUNIT_ASSERT_EQUAL(mAccount->getCharacters().size(), (size_t) 3);
+    CPPUNIT_ASSERT_EQUAL((size_t) 3, mAccount->getCharacters().size());
 
     std::vector<std::string> names;
     names.push_back("sam");
@@ -175,7 +160,7 @@ AccountTest::testAddCharacter2(void)
     names.push_back("pippin");
 
     for (size_t i = 0; i < mCharacters.size(); ++i) {
-        CPPUNIT_ASSERT_EQUAL(mCharacters[i]->getName(), names[i]);
+        CPPUNIT_ASSERT_EQUAL(names[i], mCharacters[i]->getName());
     }
 }
 
@@ -191,7 +176,7 @@ AccountTest::testGetCharacter1(void)
     Being* merry = mAccount->getCharacter(name);
 
     CPPUNIT_ASSERT(merry != 0);
-    CPPUNIT_ASSERT_EQUAL(merry->getName(), name);
+    CPPUNIT_ASSERT_EQUAL(name, merry->getName());
 }
 
 

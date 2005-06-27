@@ -26,7 +26,6 @@
 #include <physfs.h>
 
 #include "../utils/cipher.h"
-
 #include "../dalstoragesql.h"
 #include "../storage.h"
 #include "teststorage.h"
@@ -92,13 +91,13 @@ StorageTest::testGetAccount1(void)
 
     CPPUNIT_ASSERT(myStorage.isOpen());
 
-    Account* account = myStorage.getAccount("kindjal");
+    std::string name("frodo");
+    Account* account = myStorage.getAccount(name);
 
     using namespace tmwserv::utils;
 
-    std::string name("kindjal");
-    std::string password(Cipher::instance().md5("kindjal"));
-    std::string email("kindjal@domain");
+    std::string password(Cipher::instance().md5(name));
+    std::string email("frodo@domain");
 
     CPPUNIT_ASSERT(account != 0);
     CPPUNIT_ASSERT_EQUAL(account->getName(), name);
@@ -126,12 +125,199 @@ StorageTest::testGetAccount2(void)
 
 
 /**
+ * Test passing a null pointer to addAcccount().
+ */
+void
+StorageTest::testAddAccount1(void)
+{
+    Storage& myStorage = Storage::instance(mStorageName);
+
+    if (!myStorage.isOpen()) {
+        CPPUNIT_FAIL("the storage is not opened.");
+    }
+
+    // TODO: when addAccount will throw exceptions, test the exceptions
+    // thrown.
+    // nothing should happen at the moment.
+    myStorage.addAccount(NULL);
+    myStorage.flush();
+
+#if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT) || \
+    defined (SQLITE_SUPPORT)
+
+    using namespace tmwserv::dal;
+
+    std::auto_ptr<DataProvider> db(DataProviderFactory::createDataProvider());
+
+    try {
+#ifdef SQLITE_SUPPORT
+        std::string dbFile(mStorageName);
+        dbFile += ".db";
+        db->connect(dbFile, mStorageUser, mStorageUserPassword);
+#else
+        db->connect(mStorageName, mStorageUser, mStorageUserPassword);
+#endif
+
+        std::string sql("select * from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql += ";";
+        const RecordSet& rs = db->execSql(sql);
+
+        CPPUNIT_ASSERT(rs.rows() == 3);
+
+        std::string frodo("frodo");
+        std::string merry("merry");
+        std::string pippin("pippin");
+
+        CPPUNIT_ASSERT_EQUAL(rs(0, "username"), frodo);
+        CPPUNIT_ASSERT_EQUAL(rs(1, "username"), merry);
+        CPPUNIT_ASSERT_EQUAL(rs(2, "username"), pippin);
+
+        db->disconnect();
+    }
+    catch (const DbConnectionFailure& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (const DbSqlQueryExecFailure& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (const DbDisconnectionFailure& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (const std::exception& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (...) {
+        CPPUNIT_FAIL("unexpected exception");
+    }
+#else
+    // if we are in this block it means that we are not using a database
+    // to persist the data from the storage.
+    // at the moment, Storage assume that the data are persisted in a database
+    // so let's raise a preprocessing error.
+#error "no database backend defined"
+#endif
+}
+
+
+/**
+ * Test adding a new account.
+ */
+void
+StorageTest::testAddAccount2(void)
+{
+    Storage& myStorage = Storage::instance(mStorageName);
+
+    if (!myStorage.isOpen()) {
+        CPPUNIT_FAIL("the storage is not opened.");
+    }
+
+    // prepare new account.
+    std::string sam1("sam1");
+    std::string sam2("sam2");
+    Being* b1 = new Being(sam1, 1, 1, 1, 1, 1, 1, 1, 1);
+    Being* b2 = new Being(sam2, 1, 1, 1, 1, 1, 1, 1, 1);
+    Beings characters;
+    characters.push_back(b1);
+    characters.push_back(b2);
+
+    std::string sam("sam");
+    Account* acc = new Account(sam, sam, "sam@domain", characters);
+
+    // TODO: when addAccount will throw exceptions, test the exceptions
+    // thrown.
+    myStorage.addAccount(acc);
+    myStorage.flush();
+
+#if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT) || \
+    defined (SQLITE_SUPPORT)
+
+    using namespace tmwserv::dal;
+
+    std::auto_ptr<DataProvider> db(DataProviderFactory::createDataProvider());
+
+    try {
+#ifdef SQLITE_SUPPORT
+        std::string dbFile(mStorageName);
+        dbFile += ".db";
+        db->connect(dbFile, mStorageUser, mStorageUserPassword);
+#else
+        db->connect(mStorageName, mStorageUser, mStorageUserPassword);
+#endif
+
+        std::string sql("select * from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql += ";";
+        const RecordSet& rs = db->execSql(sql);
+
+        CPPUNIT_ASSERT(rs.rows() == 4);
+
+        std::string frodo("frodo");
+        std::string merry("merry");
+        std::string pippin("pippin");
+
+        CPPUNIT_ASSERT_EQUAL(rs(0, "username"), frodo);
+        CPPUNIT_ASSERT_EQUAL(rs(1, "username"), merry);
+        CPPUNIT_ASSERT_EQUAL(rs(2, "username"), pippin);
+        CPPUNIT_ASSERT_EQUAL(rs(3, "username"), sam);
+
+        sql = "select * from ";
+        sql += CHARACTERS_TBL_NAME;
+        sql += " where user_id = '";
+        sql += sam;
+        sql += "';";
+
+        db->execSql(sql);
+
+        CPPUNIT_ASSERT(rs.rows() == 2);
+
+        CPPUNIT_ASSERT_EQUAL(rs(0, "name"), sam1);
+        CPPUNIT_ASSERT_EQUAL(rs(1, "name"), sam2);
+
+        db->disconnect();
+    }
+    catch (const DbConnectionFailure& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (const DbSqlQueryExecFailure& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (const DbDisconnectionFailure& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (const std::exception& e) {
+        CPPUNIT_FAIL(e.what());
+    }
+    catch (...) {
+        CPPUNIT_FAIL("unexpected exception");
+    }
+#else
+    // if we are in this block it means that we are not using a database
+    // to persist the data from the storage.
+    // at the moment, Storage assume that the data are persisted in a database
+    // so let's raise a preprocessing error.
+#error "no database backend defined"
+#endif
+}
+
+
+/**
+ * Test updating an existing account.
+ */
+void
+StorageTest::testUpdAccount1(void)
+{
+    // TODO
+}
+
+
+/**
  * Initialize the storage.
  */
 void
 StorageTest::initStorage(void)
 {
-#if defined (MYSQL_SUPPORT) || defined (POSTGRE_SUPPORT) || \
+#if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT) || \
     defined (SQLITE_SUPPORT)
 
     // we are using a database to persist the data from the storage.
@@ -177,7 +363,9 @@ StorageTest::initStorage(void)
         db->execSql(SQL_INVENTORIES_TABLE);
 
         // populate the tables.
-        insertAccount(db, "kindjal");
+        insertAccount(db, "frodo");
+        insertAccount(db, "merry");
+        insertAccount(db, "pippin");
 
         db->disconnect();
     }
@@ -212,7 +400,7 @@ StorageTest::initStorage(void)
 void
 StorageTest::cleanStorage(void)
 {
-#if defined (MYSQL_SUPPORT) || defined (POSTGRE_SUPPORT) || \
+#if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT) || \
     defined (SQLITE_SUPPORT)
 
     // we are using a database to persist the data from the storage.
@@ -302,8 +490,9 @@ StorageTest::insertAccount(std::auto_ptr<DataProvider>& db,
     // the password will be identical to the name.
 
     sql << "insert into " << ACCOUNTS_TBL_NAME << " values "
-        << "(null, '" << name << "', '" << name << "', '"
-        << name << "@domain', 1, 0);";
+        << "(null, '" << name << "', '"
+        << tmwserv::utils::Cipher::instance().md5(name) << "', '"
+        << name << "@domain', 0, 0);";
 
     db->execSql(sql.str());
 }

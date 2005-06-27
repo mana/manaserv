@@ -38,7 +38,7 @@ Being::Being(const std::string &bName, unsigned int bGender,
     dexterity(bDexterity),
     luck(bLuck)
 {
-    std::cout << "New being create with name \"" + name + "\"" << std::endl;
+    //std::cout << "New being create with name \"" + name + "\"" << std::endl;
 }
 
 void Being::update()

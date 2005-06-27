@@ -63,7 +63,7 @@ CipherTest::testMd5_1(void)
     const std::string expected("d41d8cd98f00b204e9800998ecf8427e");
     std::string actual(Cipher::instance().md5(""));
 
-    CPPUNIT_ASSERT_EQUAL(actual, expected);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 
@@ -76,7 +76,7 @@ CipherTest::testMd5_2(void)
     const std::string expected("0cc175b9c0f1b6a831c399e269772661");
     std::string actual(Cipher::instance().md5("a"));
 
-    CPPUNIT_ASSERT_EQUAL(actual, expected);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 
@@ -89,7 +89,7 @@ CipherTest::testMd5_3(void)
     const std::string expected("900150983cd24fb0d6963f7d28e17f72");
     std::string actual(Cipher::instance().md5("abc"));
 
-    CPPUNIT_ASSERT_EQUAL(actual, expected);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 
@@ -102,7 +102,7 @@ CipherTest::testMd5_4(void)
     const std::string expected("f96b697d7cb7938d525a2f31aaf161d0");
     std::string actual(Cipher::instance().md5("message digest"));
 
-    CPPUNIT_ASSERT_EQUAL(actual, expected);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 
@@ -115,7 +115,7 @@ CipherTest::testMd5_5(void)
     const std::string expected("c3fcd3d76192e4007dfb496cca67e13b");
     std::string actual(Cipher::instance().md5("abcdefghijklmnopqrstuvwxyz"));
 
-    CPPUNIT_ASSERT_EQUAL(actual, expected);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 
@@ -132,7 +132,7 @@ CipherTest::testMd5_6(void)
     s += "0123456789";
     std::string actual(Cipher::instance().md5(s));
 
-    CPPUNIT_ASSERT_EQUAL(actual, expected);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
 
 
@@ -150,5 +150,5 @@ CipherTest::testMd5_7(void)
     }
     std::string actual(Cipher::instance().md5(s));
 
-    CPPUNIT_ASSERT_EQUAL(actual, expected);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
 }
