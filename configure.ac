@@ -19,6 +19,10 @@ AC_PROG_INSTALL
 AC_CHECK_LIB([crypto], [EVP_md5])
 AC_CHECK_LIB([physfs], [PHYSFS_init])
 
+PKG_CHECK_MODULES(XML2,[libxml-2.0])
+CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
+LIBS="$LIBS $XML2_LIBS"
+
 AC_CHECK_LIB_TMW([SDL], [1.2.0])
 # update CXXFLAGS and LIBS.
 # SDL_CFLAGS and SDL_LIBS are set by AC_CHECK_LIB_TMW.
@@ -78,10 +82,12 @@ if test "$with_storage_backend" = "mysql"; then
 elif test "$with_storage_backend" = "postgresql"; then
     # use pg_config to check libpq.
     # PQ_CFLAGS and PQ_LIBS are set by AC_CHECK_LIB_TMW.
+    # NOTE: PQ_LIBS not set correctly
     AC_CHECK_LIB_TMW([pq], [7.0.0], [pg_config])
 
     # update CXXFLAGS and LIBS.
     CXXFLAGS="$CXXFLAGS -DPOSTGRESQL_SUPPORT $PQ_CFLAGS"
+    PQ_LIBS="$PQ_LIBS -lpq"
     LIBS="$LIBS $PQ_LIBS"
 elif test "$with_storage_backend" = "sqlite"; then
     # use pkg-config to check libsqlite3.

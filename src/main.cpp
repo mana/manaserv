@@ -28,14 +28,18 @@
 #include <SDL.h>
 #include <SDL_net.h>
 
+#include <cstdlib>
+
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
 #include "storage.h"
+#include "configuration.h"
 
 #include "skill.h"
 
 #include "utils/logger.h"
+
 
 // Scripting
 #ifdef SCRIPT_SUPPORT
@@ -68,6 +72,7 @@ bool running = true;      /**< Determines if server keeps running */
 
 Skill skillTree("base");  /**< Skill tree */
 
+Configuration config;     /**< XML config reader */
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -123,6 +128,17 @@ void initialize()
         script = new ScriptSquirrel("main.nut");
     }
 #endif
+
+    // initialize configuration
+    // initialize configuration defaults
+    config.setValue("dbuser", "");
+    config.setValue("dbpass", "");
+    config.setValue("dbhost", "");
+
+    char *home = getenv("HOME");
+    std::string configPath = home;
+    configPath += "/.tmwserv.xml";
+    config.init(configPath);
 }
 
 
@@ -131,6 +147,9 @@ void initialize()
  */
 void deinitialize()
 {
+    // Write configuration file
+    config.write();
+
     // Stop world timer
     SDL_RemoveTimer(worldTimerID);
 
@@ -183,7 +202,13 @@ int main(int argc, char *argv[])
 
     using namespace tmwserv;
 
-    //Storage& store = Storage::instance("tmw");
+    // create storage wrapper
+    Storage& store = Storage::instance("tmw");
+    store.setUser(config.getValue("dbuser", ""));
+    store.setPassword(config.getValue("dbpass", ""));
+    store.close();
+    store.open();
+    //
 
     SDL_Event event;
 

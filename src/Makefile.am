@@ -46,7 +46,9 @@ tmwserv_SOURCES = main.cpp \
 				  utils/cipher.h \
 				  utils/cipher.cpp \
 				  utils/logger.h \
-				  utils/logger.cpp
+				  utils/logger.cpp \
+				  configuration.h \
+				  configuration.cpp
 
 if BUILD_MYSQL
 tmwserv_SOURCES += dal/mysqldataprovider.h \

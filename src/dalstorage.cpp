@@ -90,7 +90,7 @@ DALStorage::open(void)
 
     try {
         // open a connection to the database.
-#if defined (MYSQL_SUPPORT) || defined (POSTGRE_SUPPORT)
+#if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT)
         mDb->connect(getName(), getUser(), getPassword());
 #else // SQLITE_SUPPORT
         // create the database file name.
