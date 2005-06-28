@@ -25,7 +25,7 @@
 
 #if defined (MYSQL_SUPPORT)
 #include "mysqldataprovider.h"
-#elif defined (POSTGRE_SUPPORT)
+#elif defined (POSTGRESQL_SUPPORT)
 #include "pqdataprovider.h"
 #elif defined (SQLITE_SUPPORT)
 #include "sqlitedataprovider.h"
@@ -69,7 +69,7 @@ DataProviderFactory::createDataProvider(void)
 #if defined (MYSQL_SUPPORT)
     MySqlDataProvider* provider = new MySqlDataProvider;
     return provider;
-#elif defined (POSTGRE_SUPPORT)
+#elif defined (POSTGRESQL_SUPPORT)
     PqDataProvider *provider = new PqDataProvider;
     return provider;
 #else // SQLITE_SUPPORT
