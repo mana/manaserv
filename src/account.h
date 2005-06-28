@@ -36,6 +36,19 @@ namespace tmwserv
 
 
 /**
+ * Notes:
+ *     - change from the previous implementation: this class does not encrypt
+ *       passwords anymore and will just store the passwords as they are
+ *       passed to setPassword().
+ *     - the encryption should and must be performed externally from this
+ *       class or else we would end up with the password being encrypted many
+ *       times (e.g setPassword(getPassword()) would encrypt the password
+ *       twice or setPassword(encrypted_password_from_database) would also
+ *       encrypt the password twice).
+ */
+
+
+/**
  * A player account.
  */
 class Account
@@ -94,7 +107,6 @@ class Account
 
         /**
          * Set the user password.
-         * The password will be encrypted before saved into the storage.
          *
          * @param password the user password.
          */

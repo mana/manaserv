@@ -69,10 +69,7 @@ RecordSet::clear(void)
 bool
 RecordSet::isEmpty(void) const
 {
-    // we just need to check the size of the list of column headers
-    // as it is not possible to insert a new record if the column
-    // headers are not defined.
-    return (mHeaders.size() == 0);
+    return (mRows.size() == 0);
 }
 
 

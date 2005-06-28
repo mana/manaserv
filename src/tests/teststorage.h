@@ -25,6 +25,8 @@
 #define _TMWSERV_TEST_STORAGE_H_
 
 
+#include <vector>
+
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "../dal/dataproviderfactory.h"
@@ -55,6 +57,8 @@ class StorageTest: public CppUnit::TestFixture
     CPPUNIT_TEST(testAddAccount1);
     CPPUNIT_TEST(testAddAccount2);
     CPPUNIT_TEST(testUpdAccount1);
+    CPPUNIT_TEST(testUpdAccount2);
+    CPPUNIT_TEST(testDelAccount1);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -103,10 +107,26 @@ class StorageTest: public CppUnit::TestFixture
 
 
         /**
-         * Test updating an existing account.
+         * Test updating an existing account with new characters.
          */
         void
         testUpdAccount1(void);
+
+
+        /**
+         * Test updating an existing account with a new password and new
+         * character stats.
+         */
+        void
+        testUpdAccount2(void);
+
+
+        /**
+         * Test deleting an account that exists in the database but not
+         * loaded yet in memory.
+         */
+        void
+        testDelAccount1(void);
 
 
     private:
@@ -147,9 +167,9 @@ class StorageTest: public CppUnit::TestFixture
 
 
     private:
-        static std::string mStorageName;
-        static std::string mStorageUser;
-        static std::string mStorageUserPassword;
+        static std::string mStorageName;         /**< name of the storage */
+        static std::string mStorageUser;         /**< storage user */
+        static std::string mStorageUserPassword; /**< user password */
 };
 
 

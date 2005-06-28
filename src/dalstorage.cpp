@@ -368,9 +368,17 @@ DALStorage::createTable(const std::string& tblName,
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // error message to check against.
+#if defined (MYSQL_SUPPORT)
+        std::string alreadyExists("Table '");
+        alreadyExists += tblName;
+        alreadyExists += "' already exists";
+#elif defined (POSTGRESQL_SUPPORT)
+        // TODO
+#else // SQLITE_SUPPORT
         std::string alreadyExists("table ");
         alreadyExists += tblName;
         alreadyExists += " already exists";
+#endif
 
         const std::string msg(e.what());
 
@@ -405,7 +413,7 @@ DALStorage::_addAccount(const Account* account)
     std::ostringstream sql1;
     sql1 << "insert into " << ACCOUNTS_TBL_NAME << " values (null, '"
          << account->getName() << "', '"
-         << utils::Cipher::instance().md5(account->getPassword()) << "', '"
+         << account->getPassword() << "', '"
          << account->getEmail() << "', "
          << account->getLevel() << ", 0);";
     mDb->execSql(sql1.str());
@@ -490,22 +498,45 @@ DALStorage::_updAccount(const Account* account)
          << "where id = '" << (account_it->second).id << "';";
     mDb->execSql(sql1.str());
 
-    // insert the characters.
+    // get the list of characters that belong to this account.
     Beings& characters = (const_cast<Account*>(account))->getCharacters();
 
+    // insert or update the characters.
     Beings::const_iterator it = characters.begin();
     Beings::const_iterator it_end = characters.end();
+    using namespace dal;
+
     for (; it != it_end; ++it) {
-        // TODO: location on the map & statistics & inventories.
+        // check if the character already exists in the database
+        // (reminder: the character names are unique in the database).
         std::ostringstream sql2;
-        sql2 << "update " << CHARACTERS_TBL_NAME
-             << "(user_id, name, gender, level, money) values ("
-             << " set name = '" << (*it)->getName() << "', "
-             << " gender = '" << (*it)->getGender() << "', "
-             << " level = '" << (*it)->getLevel() << "', "
-             << " money = '" << (*it)->getMoney() << "' "
-             << "where user_id = '" << (account_it->second).id << "';";
-        mDb->execSql(sql2.str());
+        sql2 << "select id from " << CHARACTERS_TBL_NAME
+             << " where name = '" << (*it)->getName() << "';";
+        const RecordSet& charInfo = mDb->execSql(sql2.str());
+
+        // TODO: location on the map & statistics & inventories.
+        std::ostringstream sql3;
+        if (charInfo.rows() == 0) {
+            sql3 << "insert into " << CHARACTERS_TBL_NAME
+                 << " values (null, '"
+                 << account->getName() << "', '"
+                 << (*it)->getName() << "', '"
+                 << (*it)->getGender() << "', "
+                 << (*it)->getLevel() << ", "
+                 << (*it)->getMoney() << ", "
+                 << "0, 0, 0, 0, 0, 0, 0, 0, 0"
+                 << ");";
+        }
+        else {
+            sql3 << "update " << CHARACTERS_TBL_NAME
+                << " set name = '" << (*it)->getName() << "', "
+                << " gender = '" << (*it)->getGender() << "', "
+                << " level = '" << (*it)->getLevel() << "', "
+                << " money = '" << (*it)->getMoney() << "' "
+                << "where user_id = '" << (account_it->second).id
+                << "';";
+        }
+        mDb->execSql(sql3.str());
     }
 }
 
