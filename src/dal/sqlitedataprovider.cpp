@@ -138,7 +138,7 @@ SqLiteDataProvider::execSql(const std::string& sql,
 
             // free memory
             sqlite3_free_table(result);
-            delete errMsg;
+            sqlite3_free(errMsg);
 
             throw DbSqlQueryExecFailure(msg);
         }
@@ -164,7 +164,7 @@ SqLiteDataProvider::execSql(const std::string& sql,
 
         // free memory
         sqlite3_free_table(result);
-        delete errMsg;
+        sqlite3_free(errMsg);
     }
 
     return mRecordSet;
