@@ -33,7 +33,8 @@ namespace tmwserv
  */
 Object::Object(void)
         : mX(0),
-          mY(0)
+          mY(0),
+          mNeedUpdate(false)
 {
     mStats.health = 0;
     mStats.attack = 0;
@@ -110,6 +111,10 @@ Object::setStatistics(const Statistics& stats)
 Statistics&
 Object::getStatistics(void)
 {
+    if (mNeedUpdate) {
+        update();
+    }
+
     return mStats;
 }
 

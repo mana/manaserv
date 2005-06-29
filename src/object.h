@@ -133,11 +133,12 @@ class Object
 
     protected:
         Statistics mStats; /**< stats modifiers or computed stats */
+        bool mNeedUpdate;  /**< update() must be invoked if true */
 
 
     private:
-        unsigned int mX;   /**< x coordinate */
-        unsigned int mY;   /**< y coordinate */
+        unsigned int mX; /**< x coordinate */
+        unsigned int mY; /**< y coordinate */
 };
 
 

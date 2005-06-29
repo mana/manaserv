@@ -123,6 +123,7 @@ void
 Being::setStrength(const unsigned short strength)
 {
     mRawStats.strength = strength;
+    mNeedUpdate = true;
 }
 
 
@@ -143,6 +144,7 @@ void
 Being::setAgility(const unsigned short agility)
 {
     mRawStats.agility = agility;
+    mNeedUpdate = true;
 }
 
 
@@ -163,6 +165,7 @@ void
 Being::setVitality(const unsigned short vitality)
 {
     mRawStats.vitality = vitality;
+    mNeedUpdate = true;
 }
 
 
@@ -183,6 +186,7 @@ void
 Being::setIntelligence(const unsigned short intelligence)
 {
     mRawStats.intelligence = intelligence;
+    mNeedUpdate = true;
 }
 
 
@@ -205,6 +209,7 @@ void
 Being::setDexterity(const unsigned short dexterity)
 {
     mRawStats.dexterity = dexterity;
+    mNeedUpdate = true;
 }
 
 
@@ -225,6 +230,7 @@ void
 Being::setLuck(const unsigned short luck)
 {
     mRawStats.luck = luck;
+    mNeedUpdate = true;
 }
 
 
@@ -245,6 +251,7 @@ void
 Being::setRawStatistics(const RawStatistics& stats)
 {
     mRawStats = stats;
+    mNeedUpdate = true;
 }
 
 
@@ -271,6 +278,8 @@ Being::update(void)
     mStats.magic = 10 + mRawStats.intelligence;
     mStats.accuracy = 50 + mRawStats.dexterity;
     mStats.speed = mRawStats.dexterity;
+
+    mNeedUpdate = false;
 }
 
 

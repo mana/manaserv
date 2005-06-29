@@ -62,7 +62,9 @@ DALStorage::~DALStorage()
          it != mAccounts.end();
          ++it)
     {
-        delete it->first;
+        if (it->first != 0) {
+            delete it->first;
+        }
     }
 
     // clean up characters.
@@ -70,7 +72,10 @@ DALStorage::~DALStorage()
          it != mCharacters.end();
          ++it)
     {
-        delete (*it);
+        if (*it != 0) {
+            delete (*it);
+            *it = 0;
+        }
     }
 }
 

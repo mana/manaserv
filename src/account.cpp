@@ -70,18 +70,15 @@ Account::Account(const std::string& name,
 Account::~Account(void)
     throw()
 {
-    // we do not delete the Beings here because Storage keeps
-    // a list of Beings as well and the destructor of Storage
-    // takes care about it.
-
-    /*
-     *for (Beings::iterator it = mCharacters.begin();
-     *     it != mCharacters.end();
-     *     ++it)
-     *{
-     *    delete (*it);
-     *}
-     */
+    for (Beings::iterator it = mCharacters.begin();
+         it != mCharacters.end();
+         ++it)
+    {
+        if (*it != 0) {
+            delete (*it);
+            *it = 0;
+        }
+    }
 }
 
 
