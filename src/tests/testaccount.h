@@ -109,7 +109,7 @@ class AccountTest: public CppUnit::TestFixture
 
     private:
         tmwserv::Account* mAccount;  /**< the default account */
-        Beings mCharacters; /**< a list of beings */
+        tmwserv::Beings mCharacters; /**< a list of beings */
 };
 
 

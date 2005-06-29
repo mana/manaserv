@@ -4,6 +4,8 @@
 bin_PROGRAMS = tmwserv
 
 tmwserv_SOURCES = main.cpp \
+				  configuration.h \
+				  configuration.cpp \
 				  accounthandler.h \
 				  accounthandler.cpp \
 				  connectionhandler.h \
@@ -32,6 +34,8 @@ tmwserv_SOURCES = main.cpp \
 				  account.cpp \
 				  object.h \
 				  object.cpp \
+				  being.h \
+				  being.cpp \
 				  dalstorage.h \
 				  dalstorage.cpp \
 				  dal/dalexcept.h \
@@ -46,9 +50,7 @@ tmwserv_SOURCES = main.cpp \
 				  utils/cipher.h \
 				  utils/cipher.cpp \
 				  utils/logger.h \
-				  utils/logger.cpp \
-				  configuration.h \
-				  configuration.cpp
+				  utils/logger.cpp
 
 if BUILD_MYSQL
 tmwserv_SOURCES += dal/mysqldataprovider.h \

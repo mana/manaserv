@@ -1,0 +1,277 @@
+/*
+ *  The Mana World Server
+ *  Copyright 2004 The Mana World Development Team
+ *
+ *  This file is part of The Mana World.
+ *
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
+ *
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ *  $Id$
+ */
+
+
+#include "being.h"
+
+
+namespace tmwserv
+{
+
+
+/**
+ * Constructor.
+ */
+Being::Being(const std::string& name,
+             const Genders gender,
+             const unsigned short level,
+             const unsigned int money,
+             const RawStatistics& stats)
+        : mName(name),
+          mGender(gender),
+          mLevel(level),
+          mMoney(money),
+          mRawStats(stats)
+{
+    // NOOP
+}
+
+
+/**
+ * Destructor.
+ */
+Being::~Being(void)
+    throw()
+{
+    // NOOP
+}
+
+
+/**
+ * Get the name.
+ */
+const std::string&
+Being::getName(void) const
+{
+    return mName;
+}
+
+
+/**
+ * Get the gender.
+ */
+Genders
+Being::getGender(void) const
+{
+    return mGender;
+}
+
+
+/**
+ * Set the level.
+ */
+void
+Being::setLevel(const unsigned short level)
+{
+    mLevel = level;
+}
+
+
+/**
+ * Get the level.
+ */
+unsigned short
+Being::getLevel(void) const
+{
+    return mLevel;
+}
+
+
+/**
+ * Set the money.
+ */
+void
+Being::setMoney(const unsigned int amount)
+{
+    mMoney = amount;
+}
+
+
+/**
+ * Get the amount of money.
+ */
+unsigned int
+Being::getMoney(void) const
+{
+    return mMoney;
+}
+
+
+/**
+ * Set the strength.
+ */
+void
+Being::setStrength(const unsigned short strength)
+{
+    mRawStats.strength = strength;
+}
+
+
+/**
+ * Get the strength.
+ */
+unsigned short
+Being::getStrength(void) const
+{
+    return mRawStats.strength;
+}
+
+
+/**
+ * Set the agility.
+ */
+void
+Being::setAgility(const unsigned short agility)
+{
+    mRawStats.agility = agility;
+}
+
+
+/**
+ * Get the agility.
+ */
+unsigned short
+Being::getAgility(void) const
+{
+    return mRawStats.agility;
+}
+
+
+/**
+ * Set the vitality.
+ */
+void
+Being::setVitality(const unsigned short vitality)
+{
+    mRawStats.vitality = vitality;
+}
+
+
+/**
+ * Get the vitality.
+ */
+unsigned short
+Being::getVitality(void) const
+{
+    return mRawStats.vitality;
+}
+
+
+/**
+ * Set the intelligence.
+ */
+void
+Being::setIntelligence(const unsigned short intelligence)
+{
+    mRawStats.intelligence = intelligence;
+}
+
+
+/**
+* Get the intelligence.
+*
+* @return the intelligence.
+*/
+unsigned short
+Being::getIntelligence(void) const
+{
+    return mRawStats.intelligence;
+}
+
+
+/**
+ * Set the dexterity.
+ */
+void
+Being::setDexterity(const unsigned short dexterity)
+{
+    mRawStats.dexterity = dexterity;
+}
+
+
+/**
+ * Get the dexterity.
+ */
+unsigned short
+Being::getDexterity(void) const
+{
+    return mRawStats.dexterity;
+}
+
+
+/**
+ * Set the luck.
+ */
+void
+Being::setLuck(const unsigned short luck)
+{
+    mRawStats.luck = luck;
+}
+
+
+/**
+ * Get the luck.
+ */
+unsigned short
+Being::getLuck(void) const
+{
+    return mRawStats.luck;
+}
+
+
+/**
+ * Set the raw statistics.
+ */
+void
+Being::setRawStatistics(const RawStatistics& stats)
+{
+    mRawStats = stats;
+}
+
+
+/**
+ * Get the raw statistics.
+ */
+RawStatistics&
+Being::getRawStatistics(void)
+{
+    return mRawStats;
+}
+
+
+/**
+ * Update the internal status.
+ */
+void
+Being::update(void)
+{
+    // computed stats.
+    mStats.health = 20 + (20 * mRawStats.vitality);
+    mStats.attack = 10 + mRawStats.strength;
+    mStats.defense = 10 + mRawStats.strength;
+    mStats.magic = 10 + mRawStats.intelligence;
+    mStats.accuracy = 50 + mRawStats.dexterity;
+    mStats.speed = mRawStats.dexterity;
+}
+
+
+} // namespace tmwserv

@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include "defines.h"
+#include "being.h"
 
 
 namespace tmwserv

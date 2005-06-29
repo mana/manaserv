@@ -37,6 +37,7 @@
 #include <physfs.h>
 
 #include "../utils/cipher.h"
+#include "../utils/functors.h"
 #include "../dalstoragesql.h"
 #include "../storage.h"
 #include "teststorage.h"
@@ -218,10 +219,18 @@ StorageTest::testAddAccount2(void)
     }
 
     // prepare new account.
+    RawStatistics stats;
+    stats.strength = 1;
+    stats.agility = 1;
+    stats.vitality = 1;
+    stats.intelligence = 1;
+    stats.dexterity = 1;
+    stats.luck = 1;
+
     const std::string sam1("sam1");
     const std::string sam2("sam2");
-    Being* b1 = new Being(sam1, 1, 1, 1, 1, 1, 1, 1, 1);
-    Being* b2 = new Being(sam2, 1, 1, 1, 1, 1, 1, 1, 1);
+    Being* b1 = new Being(sam1, GENDER_MALE, 0, 0, stats);
+    Being* b2 = new Being(sam2, GENDER_MALE, 0, 0, stats);
     Beings characters;
     characters.push_back(b1);
     characters.push_back(b2);
@@ -268,9 +277,7 @@ StorageTest::testAddAccount2(void)
 
         sql = "select * from ";
         sql += CHARACTERS_TBL_NAME;
-        sql += " where user_id = '";
-        sql += sam;
-        sql += "';";
+        sql += " where user_id = 4;";
 
         db->execSql(sql);
 
@@ -315,10 +322,18 @@ StorageTest::testUpdAccount1(void)
     Account* account = myStorage.getAccount(name);
 
     // create new characters.
+    RawStatistics stats;
+    stats.strength = 1;
+    stats.agility = 1;
+    stats.vitality = 1;
+    stats.intelligence = 1;
+    stats.dexterity = 1;
+    stats.luck = 1;
+
     const std::string sam1("sam1");
     const std::string sam2("sam2");
-    Being* b1 = new Being(sam1, 1, 1, 1, 1, 1, 1, 1, 1);
-    Being* b2 = new Being(sam2, 1, 1, 1, 1, 1, 1, 1, 1);
+    Being* b1 = new Being(sam1, GENDER_MALE, 0, 0, stats);
+    Being* b2 = new Being(sam2, GENDER_MALE, 0, 0, stats);
 
     // add the characters to the account.
     account->addCharacter(b1);
@@ -360,9 +375,7 @@ StorageTest::testUpdAccount1(void)
 
         sql = "select * from ";
         sql += CHARACTERS_TBL_NAME;
-        sql += " where user_id = '";
-        sql += frodo;
-        sql += "';";
+        sql += " where user_id = 1;";
 
         db->execSql(sql);
 
@@ -408,10 +421,18 @@ StorageTest::testUpdAccount2(void)
     Account* account = myStorage.getAccount(name);
 
     // create new characters.
+    RawStatistics stats;
+    stats.strength = 1;
+    stats.agility = 1;
+    stats.vitality = 1;
+    stats.intelligence = 1;
+    stats.dexterity = 1;
+    stats.luck = 1;
+
     const std::string sam1("sam1");
     const std::string sam2("sam2");
-    Being* b1 = new Being(sam1, 1, 1, 1, 1, 1, 1, 1, 1);
-    Being* b2 = new Being(sam2, 1, 1, 1, 1, 1, 1, 1, 1);
+    Being* b1 = new Being(sam1, GENDER_MALE, 0, 0, stats);
+    Being* b2 = new Being(sam2, GENDER_MALE, 0, 0, stats);
 
     // add the characters to the account.
     account->addCharacter(b1);
@@ -426,7 +447,7 @@ StorageTest::testUpdAccount2(void)
     account->setPassword(newPassword);
 
     // change the strength of the first character.
-    // TODO: at the moment, there are no mutators defined for the Being class.
+    b1->setStrength(10);
 
     // update the database.
     myStorage.flush();
@@ -467,9 +488,7 @@ StorageTest::testUpdAccount2(void)
 
         sql = "select * from ";
         sql += CHARACTERS_TBL_NAME;
-        sql += " where user_id = '";
-        sql += frodo;
-        sql += "';";
+        sql += " where user_id = 1;";
 
         db->execSql(sql);
 
@@ -478,8 +497,8 @@ StorageTest::testUpdAccount2(void)
         CPPUNIT_ASSERT_EQUAL(sam1, rs(0, "name"));
         CPPUNIT_ASSERT_EQUAL(sam2, rs(1, "name"));
 
-        // TODO: when the mutators are implemented for the Being class,
-        // check the strength of the first character.
+        string_to<unsigned short> toUshort;
+        CPPUNIT_ASSERT_EQUAL((unsigned short) 10, toUshort(rs(0, "str")));
 
         db->disconnect();
     }

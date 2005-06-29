@@ -202,7 +202,11 @@ DALStorage::getAccount(const std::string& userName)
 
         // specialize the string_to functor to convert
         // a string to an unsigned int.
-        string_to<unsigned int> toUint;
+        string_to<unsigned short> toUint;
+
+        // specialize the string_to functor to convert
+        // a string to an unsigned short.
+        string_to<unsigned short> toUshort;
 
         // add the new Account to the list.
         AccountInfo ai;
@@ -222,16 +226,41 @@ DALStorage::getAccount(const std::string& userName)
             Beings beings;
 
             for (unsigned int i = 0; i < charInfo.rows(); ++i) {
+                RawStatistics stats = {
+                    toUshort(charInfo(i, 9)),  // strength
+                    toUshort(charInfo(i, 10)), // agility
+                    toUshort(charInfo(i, 11)), // vitality
+                    toUshort(charInfo(i, 12)), // intelligence
+                    toUshort(charInfo(i, 13)), // dexterity
+                    toUshort(charInfo(i, 14))  // luck
+                };
+
+                // convert the integer value read from database
+                // to an enum because C++ does not allow implicit
+                // conversion from an integer to an enum.
+                unsigned short value = toUshort(charInfo(i, 3));
+                Genders gender;
+                switch (value)
+                {
+                    case 0:
+                        gender = GENDER_MALE;
+                        break;
+
+                    case 1:
+                        gender = GENDER_FEMALE;
+                        break;
+
+                    default:
+                        gender = GENDER_UNKNOWN;
+                        break;
+                };
+
                 Being* being =
-                    new Being(charInfo(i, 2),          // name
-                              toUint(charInfo(i, 3)),  // gender
-                              toUint(charInfo(i, 4)),  // level
-                              toUint(charInfo(i, 5)),  // money
-                              toUint(charInfo(i, 9)),  // strength
-                              toUint(charInfo(i, 10)), // agility
-                              toUint(charInfo(i, 11)), // vitality
-                              toUint(charInfo(i, 13)), // dexterity
-                              toUint(charInfo(i, 14))  // luck
+                    new Being(charInfo(i, 2),           // name
+                              gender,                   // gender
+                              toUshort(charInfo(i, 4)), // level
+                              toUint(charInfo(i, 5)),   // money
+                              stats
                              );
 
                 mCharacters.push_back(being);
@@ -442,17 +471,27 @@ DALStorage::_addAccount(const Account* account)
     Beings::const_iterator it = characters.begin();
     Beings::const_iterator it_end = characters.end();
     for (; it != it_end; ++it) {
-        // TODO: location on the map & statistics & inventories.
+        RawStatistics& stats = (*it)->getRawStatistics();
         std::ostringstream sql3;
-        sql3 << "insert into " << CHARACTERS_TBL_NAME << " values (null, '"
-             << account->getName() << "', '"
+        sql3 << "insert into " << CHARACTERS_TBL_NAME << " values (null, "
+             << (account_it->second).id << ", '"
              << (*it)->getName() << "', '"
              << (*it)->getGender() << "', "
              << (*it)->getLevel() << ", "
              << (*it)->getMoney() << ", "
-             << "0, 0, 0, 0, 0, 0, 0, 0, 0"
+             << (*it)->getX() << ", "
+             << (*it)->getY() << ", "
+             << "0, " // TODO: map id
+             << stats.strength << ", "
+             << stats.agility << ", "
+             << stats.vitality << ", "
+             << stats.intelligence << ", "
+             << stats.dexterity << ", "
+             << stats.luck
              << ");";
         mDb->execSql(sql3.str());
+
+        // TODO: inventories.
     }
 }
 
@@ -514,29 +553,51 @@ DALStorage::_updAccount(const Account* account)
              << " where name = '" << (*it)->getName() << "';";
         const RecordSet& charInfo = mDb->execSql(sql2.str());
 
-        // TODO: location on the map & statistics & inventories.
+        RawStatistics& stats = (*it)->getRawStatistics();
+
         std::ostringstream sql3;
         if (charInfo.rows() == 0) {
             sql3 << "insert into " << CHARACTERS_TBL_NAME
-                 << " values (null, '"
-                 << account->getName() << "', '"
-                 << (*it)->getName() << "', '"
-                 << (*it)->getGender() << "', "
+                 << " values (null, "
+                 << (account_it->second).id << ", '"
+                 << (*it)->getName() << "', "
+                 << (*it)->getGender() << ", "
                  << (*it)->getLevel() << ", "
                  << (*it)->getMoney() << ", "
-                 << "0, 0, 0, 0, 0, 0, 0, 0, 0"
-                 << ");";
+                 << (*it)->getX() << ", "
+                 << (*it)->getY() << ", "
+                 << "0, " // TODO: map id
+                 << stats.strength << ", "
+                 << stats.agility << ", "
+                 << stats.vitality << ", "
+                 << stats.intelligence << ", "
+                 << stats.dexterity << ", "
+                 << stats.luck << ");";
         }
         else {
             sql3 << "update " << CHARACTERS_TBL_NAME
                 << " set name = '" << (*it)->getName() << "', "
-                << " gender = '" << (*it)->getGender() << "', "
-                << " level = '" << (*it)->getLevel() << "', "
-                << " money = '" << (*it)->getMoney() << "' "
-                << "where user_id = '" << (account_it->second).id
-                << "';";
+                << " gender = " << (*it)->getGender() << ", "
+                << " level = " << (*it)->getLevel() << ", "
+                << " money = " << (*it)->getMoney() << ", "
+                << " x = " << (*it)->getX() << ", "
+                << " y = " << (*it)->getY() << ", "
+                << " map_id = 0, " // TODO: map id
+                << " str = " << stats.strength << ", "
+                << " agi = " << stats.agility << ", "
+                << " vit = " << stats.vitality << ", "
+#ifdef MYSQL_SUPPORT
+                << " `int` = " << stats.intelligence << ", "
+#else
+                << " int = " << stats.intelligence << ", "
+#endif
+                << " dex = " << stats.dexterity << ", "
+                << " luck = " << stats.luck
+                << " where id = " << charInfo(0, 0) << ";";
         }
         mDb->execSql(sql3.str());
+
+        // TODO: inventories.
     }
 }
 

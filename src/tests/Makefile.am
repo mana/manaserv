@@ -28,6 +28,7 @@ tmwserv_test_LDADD = ../tmwserv-account.o \
 					 ../tmwserv-dataproviderfactory.o \
 					 ../tmwserv-logger.o \
 					 ../tmwserv-object.o \
+					 ../tmwserv-being.o \
 					 ../tmwserv-recordset.o \
 					 ../tmwserv-storage.o
 

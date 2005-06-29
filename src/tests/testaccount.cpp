@@ -37,9 +37,18 @@ using namespace tmwserv;
 void
 AccountTest::setUp(void)
 {
-    Being* sam = new Being("sam", 1, 1, 1, 1, 1, 1, 1, 1);
-    Being* merry = new Being("merry", 1, 1, 1, 1, 1, 1, 1, 1);
-    Being* pippin = new Being("pippin", 1, 1, 1, 1, 1, 1, 1, 1);
+    //RawStatistics stats;
+    //stats.strength = 1;
+    //stats.agility = 1;
+    //stats.vitality = 1;
+    //stats.intelligence = 1;
+    //stats.dexterity = 1;
+    //stats.luck = 1;
+    const RawStatistics stats = {1, 1, 1, 1, 1, 1};
+
+    Being* sam = new Being("sam", GENDER_MALE, 0, 0, stats);
+    Being* merry = new Being("merry", GENDER_MALE, 0, 0, stats);
+    Being* pippin = new Being("pippin", GENDER_MALE, 0, 0, stats);
     mCharacters.push_back(sam);
     mCharacters.push_back(merry);
     mCharacters.push_back(pippin);
@@ -124,7 +133,15 @@ AccountTest::testCreate2(void)
 void
 AccountTest::testAddCharacter1(void)
 {
-    Being* bilbo = new Being("bilbo", 1, 1, 1, 1, 1, 1, 1, 1);
+    RawStatistics stats;
+    stats.strength = 1;
+    stats.agility = 1;
+    stats.vitality = 1;
+    stats.intelligence = 1;
+    stats.dexterity = 1;
+    stats.luck = 1;
+
+    Being* bilbo = new Being("bilbo", GENDER_MALE, 0, 0, stats);
 
     mAccount->addCharacter(bilbo);
 
