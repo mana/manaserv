@@ -81,7 +81,7 @@ class DALStorage: public Storage
          * @param account the new account.
          */
         void
-        addAccount(const Account* account);
+        addAccount(const AccountPtr& account);
 
 
         /**
@@ -150,7 +150,7 @@ class DALStorage: public Storage
          * @exeception tmwserv::dal::DbSqlQueryExecFailure.
          */
         void
-        _addAccount(const Account* account);
+        _addAccount(const AccountPtr& account);
 
 
         /**
@@ -161,7 +161,18 @@ class DALStorage: public Storage
          * @exception tmwserv::dal::DbSqlQueryExecFailure.
          */
         void
-        _updAccount(const Account* account);
+        _updAccount(const AccountPtr& account);
+
+
+        /**
+         * Delete an account and its associated data from the database.
+         *
+         * @param account the account to update.
+         *
+         * @exception tmwserv::dal::DbSqlQueryExecFailure.
+         */
+        void
+        _delAccount(const AccountPtr& account);
 
 
         /**

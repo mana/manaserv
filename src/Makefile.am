@@ -45,6 +45,7 @@ tmwserv_SOURCES = main.cpp \
 				  dal/dataproviderfactory.cpp \
 				  dal/recordset.h \
 				  dal/recordset.cpp \
+				  utils/countedptr.h \
 				  utils/functors.h \
 				  utils/singleton.h \
 				  utils/cipher.h \

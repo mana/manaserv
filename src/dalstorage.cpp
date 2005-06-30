@@ -57,26 +57,8 @@ DALStorage::~DALStorage()
         close();
     }
 
-    // clean up accounts.
-    for (Accounts::iterator it = mAccounts.begin();
-         it != mAccounts.end();
-         ++it)
-    {
-        if (it->first != 0) {
-            delete it->first;
-        }
-    }
-
-    // clean up characters.
-    for (Beings::iterator it = mCharacters.begin();
-         it != mCharacters.end();
-         ++it)
-    {
-        if (*it != 0) {
-            delete (*it);
-            *it = 0;
-        }
-    }
+    // mAccounts and mCharacters contain smart pointers that will deallocate
+    // the memory so nothing else to do here :)
 }
 
 
@@ -179,7 +161,7 @@ DALStorage::getAccount(const std::string& userName)
         );
 
     if (it != mAccounts.end()) {
-        return it->first;
+        return (it->first).get();
     }
 
     using namespace dal;
@@ -201,9 +183,9 @@ DALStorage::getAccount(const std::string& userName)
 
         // create an Account instance
         // and initialize it with information about the user.
-        Account* account = new Account(accountInfo(0, 1),
+        AccountPtr account(new Account(accountInfo(0, 1),
                                        accountInfo(0, 2),
-                                       accountInfo(0, 3));
+                                       accountInfo(0, 3)));
 
         // specialize the string_to functor to convert
         // a string to an unsigned int.
@@ -247,11 +229,11 @@ DALStorage::getAccount(const std::string& userName)
                 Genders gender;
                 switch (value)
                 {
-                    case 0:
+                    case GENDER_MALE:
                         gender = GENDER_MALE;
                         break;
 
-                    case 1:
+                    case GENDER_FEMALE:
                         gender = GENDER_FEMALE;
                         break;
 
@@ -260,13 +242,13 @@ DALStorage::getAccount(const std::string& userName)
                         break;
                 };
 
-                Being* being =
+                BeingPtr being(
                     new Being(charInfo(i, 2),           // name
                               gender,                   // gender
                               toUshort(charInfo(i, 4)), // level
                               toUint(charInfo(i, 5)),   // money
                               stats
-                             );
+                ));
 
                 mCharacters.push_back(being);
                 beings.push_back(being);
@@ -275,7 +257,7 @@ DALStorage::getAccount(const std::string& userName)
             account->setCharacters(beings);
         }
 
-        return account;
+        return account.get();
     }
     catch (const DbSqlQueryExecFailure& e) {
         return NULL; // TODO: Throw exception here
@@ -287,9 +269,9 @@ DALStorage::getAccount(const std::string& userName)
  * Add a new account.
  */
 void
-DALStorage::addAccount(const Account* account)
+DALStorage::addAccount(const AccountPtr& account)
 {
-    if (account == 0) {
+    if (account.get() == 0) {
         // maybe we should throw an exception instead
         return;
     }
@@ -301,7 +283,7 @@ DALStorage::addAccount(const Account* account)
     // the account id is set to 0 because we know nothing about it at the
     // moment, it will be updated once saved into the database.
     ai.id = 0;
-    mAccounts.insert(std::make_pair(const_cast<Account*>(account), ai));
+    mAccounts.insert(std::make_pair(account, ai));
 }
 
 
@@ -325,12 +307,7 @@ DALStorage::delAccount(const std::string& userName)
                 {
                     // this is a newly added account and it has not even been
                     // saved into the database: remove it immediately.
-
-                    // TODO: delete the associated characters.
-
-                    delete it->first;
-
-                    // TODO: remove from the map.
+                    mAccounts.erase(it);
                 }
                 break;
 
@@ -356,6 +333,7 @@ DALStorage::delAccount(const std::string& userName)
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what())
     }
 }
 
@@ -366,9 +344,9 @@ DALStorage::delAccount(const std::string& userName)
 void
 DALStorage::flush(void)
 {
-    Accounts::const_iterator it = mAccounts.begin();
-    Accounts::const_iterator it_end = mAccounts.end();
-    for (; it != it_end; ++it) {
+    Accounts::iterator it = mAccounts.begin();
+    Accounts::iterator it_end = mAccounts.end();
+    for (; it != it_end; ) {
         switch ((it->second).status) {
             case AS_NEW_ACCOUNT:
                 _addAccount(it->first);
@@ -379,13 +357,15 @@ DALStorage::flush(void)
                 break;
 
             case AS_ACC_TO_DELETE:
-                // TODO: accounts to be deleted must be handled differently
-                // as mAccounts will be altered once the accounts are deleted.
+                _delAccount(it->first);
+                mAccounts.erase(it);
                 break;
 
             default:
                 break;
         }
+
+        ++it;
     }
 }
 
@@ -429,9 +409,9 @@ DALStorage::createTable(const std::string& tblName,
  * Add an account to the database.
  */
 void
-DALStorage::_addAccount(const Account* account)
+DALStorage::_addAccount(const AccountPtr& account)
 {
-    if (account == 0) {
+    if (account.get() == 0) {
         return;
     }
 
@@ -471,7 +451,7 @@ DALStorage::_addAccount(const Account* account)
     (account_it->second).id = toUint(accountInfo(0, 0));
 
     // insert the characters.
-    Beings& characters = (const_cast<Account*>(account))->getCharacters();
+    Beings& characters = account->getCharacters();
 
     Beings::const_iterator it = characters.begin();
     Beings::const_iterator it_end = characters.end();
@@ -505,9 +485,9 @@ DALStorage::_addAccount(const Account* account)
  * Update an account from the database.
  */
 void
-DALStorage::_updAccount(const Account* account)
+DALStorage::_updAccount(const AccountPtr& account)
 {
-    if (account == 0) {
+    if (account.get() == 0) {
         return;
     }
 
@@ -543,7 +523,7 @@ DALStorage::_updAccount(const Account* account)
     mDb->execSql(sql1.str());
 
     // get the list of characters that belong to this account.
-    Beings& characters = (const_cast<Account*>(account))->getCharacters();
+    Beings& characters = account->getCharacters();
 
     // insert or update the characters.
     Beings::const_iterator it = characters.begin();
@@ -603,6 +583,18 @@ DALStorage::_updAccount(const Account* account)
         mDb->execSql(sql3.str());
 
         // TODO: inventories.
+    }
+}
+
+
+/**
+ * Delete an account and its associated data from the database.
+ */
+void
+DALStorage::_delAccount(const AccountPtr& account)
+{
+    if (account.get() != 0) {
+        _delAccount(account->getName());
     }
 }
 

@@ -23,6 +23,7 @@
 
 #include <sstream>
 
+#include "../utils/logger.h"
 #include "testrecordset.h"
 
 
@@ -73,6 +74,8 @@ RecordSetTest::tearDown(void)
 void
 RecordSetTest::testRows1(void)
 {
+    LOG("RecordSetTest::testRows1()");
+
     CPPUNIT_ASSERT_EQUAL((unsigned int) 0, mEmptyRs.rows());
 }
 
@@ -83,6 +86,8 @@ RecordSetTest::testRows1(void)
 void
 RecordSetTest::testRows2(void)
 {
+    LOG("RecordSetTest::testRows2()");
+
     CPPUNIT_ASSERT_EQUAL((unsigned int) 2, mNonEmptyRs.rows());
 }
 
@@ -93,6 +98,8 @@ RecordSetTest::testRows2(void)
 void
 RecordSetTest::testCols1(void)
 {
+    LOG("RecordSetTest::testCols1()");
+
     CPPUNIT_ASSERT_EQUAL((unsigned int) 0, mEmptyRs.cols());
 }
 
@@ -103,6 +110,8 @@ RecordSetTest::testCols1(void)
 void
 RecordSetTest::testCols2(void)
 {
+    LOG("RecordSetTest::testCols2()");
+
     CPPUNIT_ASSERT_EQUAL((unsigned int) 2, mNonEmptyRs.cols());
 }
 
@@ -113,6 +122,8 @@ RecordSetTest::testCols2(void)
 void
 RecordSetTest::testIsEmpty1(void)
 {
+    LOG("RecordSetTest::testIsEmpty1()");
+
     CPPUNIT_ASSERT(mEmptyRs.isEmpty());
 }
 
@@ -123,6 +134,8 @@ RecordSetTest::testIsEmpty1(void)
 void
 RecordSetTest::testIsEmpty2(void)
 {
+    LOG("RecordSetTest::testIsEmpty2()");
+
     CPPUNIT_ASSERT(!mNonEmptyRs.isEmpty());
 }
 
@@ -133,6 +146,8 @@ RecordSetTest::testIsEmpty2(void)
 void
 RecordSetTest::testOperator1(void)
 {
+    LOG("RecordSetTest::testOperator1()");
+
     // this should throw std::invalid_argument.
     mEmptyRs(0, 0);
 }
@@ -145,7 +160,9 @@ RecordSetTest::testOperator1(void)
 void
 RecordSetTest::testOperator2(void)
 {
-    std::string value("mike");
+    LOG("RecordSetTest::testRows1()");
+
+    const std::string value("mike");
 
     CPPUNIT_ASSERT_EQUAL(value, mNonEmptyRs(1, 1));
 }
@@ -159,6 +176,8 @@ RecordSetTest::testOperator2(void)
 void
 RecordSetTest::testOperator3(void)
 {
+    LOG("RecordSetTest::testOperator3()");
+
     // this should throw std::out_of_range.
     mNonEmptyRs(2, 2);
 }
@@ -171,7 +190,9 @@ RecordSetTest::testOperator3(void)
 void
 RecordSetTest::testOperator4(void)
 {
-    std::string value("1");
+    LOG("RecordSetTest::testOperator4()");
+
+    const std::string value("1");
 
     CPPUNIT_ASSERT_EQUAL(value, mNonEmptyRs(0, "id"));
 }
@@ -184,6 +205,8 @@ RecordSetTest::testOperator4(void)
 void
 RecordSetTest::testOperator5(void)
 {
+    LOG("RecordSetTest::testOperator5()");
+
     // this should throw std::out_of_range.
     mNonEmptyRs(3, "id");
 }
@@ -196,6 +219,8 @@ RecordSetTest::testOperator5(void)
 void
 RecordSetTest::testOperator6(void)
 {
+    LOG("RecordSetTest::testOperator6()");
+
     // this should throw std::invalid_argument.
     mNonEmptyRs(1, "noname");
 }
@@ -207,7 +232,9 @@ RecordSetTest::testOperator6(void)
 void
 RecordSetTest::testOutputStream1(void)
 {
-    std::string emptyStr;
+    LOG("RecordSetTest::testOutputStream1()");
+
+    const std::string emptyStr;
 
     std::ostringstream os;
     os << mEmptyRs;
@@ -222,6 +249,8 @@ RecordSetTest::testOutputStream1(void)
 void
 RecordSetTest::testOutputStream2(void)
 {
+    LOG("RecordSetTest::testOutputStream2()");
+
     std::ostringstream os1;
     os1 << "|id|name|" << std::endl << std::endl
         << "|1|john|" << std::endl
@@ -240,8 +269,10 @@ RecordSetTest::testOutputStream2(void)
 void
 RecordSetTest::testAdd1(void)
 {
-    std::string id("3");
-    std::string name("elena");
+    LOG("RecordSetTest::testAdd1()");
+
+    const std::string id("3");
+    const std::string name("elena");
 
     Row r;
     r.push_back(id);
@@ -262,6 +293,8 @@ RecordSetTest::testAdd1(void)
 void
 RecordSetTest::testAdd2(void)
 {
+    LOG("RecordSetTest::testAdd2()");
+
     Row r;
     r.push_back("4");
 
@@ -277,6 +310,8 @@ RecordSetTest::testAdd2(void)
 void
 RecordSetTest::testAdd3(void)
 {
+    LOG("RecordSetTest::testAdd3()");
+
     Row r;
     r.push_back("5");
 

@@ -25,6 +25,7 @@
 #define _TMWSERV_TEST_STORAGE_H_
 
 
+#include <bitset>
 #include <vector>
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -59,6 +60,10 @@ class StorageTest: public CppUnit::TestFixture
     CPPUNIT_TEST(testUpdAccount1);
     CPPUNIT_TEST(testUpdAccount2);
     CPPUNIT_TEST(testDelAccount1);
+    CPPUNIT_TEST(testDelAccount2);
+    CPPUNIT_TEST(testDelAccount3);
+    CPPUNIT_TEST(testDelAccount4);
+    CPPUNIT_TEST(testDelAccount5);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -129,6 +134,37 @@ class StorageTest: public CppUnit::TestFixture
         testDelAccount1(void);
 
 
+        /**
+         * Test deleting an account that was added to the storage but not
+         * yet persisted.
+         */
+        void
+        testDelAccount2(void);
+
+
+        /**
+         * Test deleting an account that exists in the database and loaded
+         * in memory.
+         */
+        void
+        testDelAccount3(void);
+
+
+        /**
+         * Test deleting an account that does not exist.
+         */
+        void
+        testDelAccount4(void);
+
+
+        /**
+         * Test deleting twice an account that exists in the database and
+         * loaded in memory.
+         */
+        void
+        testDelAccount5(void);
+
+
     private:
         /**
          * Initialize the storage.
@@ -164,6 +200,35 @@ class StorageTest: public CppUnit::TestFixture
         void
         insertAccount(std::auto_ptr<DataProvider>&,
                       const std::string& name);
+
+
+        /**
+         * Enumeration type for the bits.
+         * Each bit represents a particular check.
+         */
+        enum CheckValues {
+            CHK_DEFAULT_ACCOUNTS,
+            CHK_1ST_ACCOUNT_DELETED,
+            CHK_NEW_ADDED_ACCOUNT,
+            CHK_CHARACTERS_1,
+            CHK_CHARACTERS_4,
+            NUM_CHECKS
+        };
+
+
+        /**
+         * Type definition for the checks.
+         */
+        typedef std::bitset<NUM_CHECKS> Checks;
+
+
+        /**
+         * Check the state of the database.
+         *
+         * @param what bitmask that contains information about what to check.
+         */
+        void
+        checkDb(const Checks& what);
 
 
     private:

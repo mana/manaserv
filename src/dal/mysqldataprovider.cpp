@@ -104,7 +104,10 @@ MySqlDataProvider::connect(const std::string& dbName,
                             NULL,             // use defaut socket
                             0))               // client flags
     {
-        throw DbConnectionFailure(mysql_error(mDb));
+        std::string msg(mysql_error(mDb));
+        mysql_close(mDb);
+
+        throw DbConnectionFailure(msg);
     }
 
     mIsConnected = true;

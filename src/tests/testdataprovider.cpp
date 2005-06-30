@@ -30,6 +30,7 @@
 #endif
 
 #include "../dal/dataproviderfactory.h"
+#include "../utils/logger.h"
 
 #include "testdataprovider.h"
 
@@ -97,6 +98,8 @@ DataProviderTest::tearDown(void)
 void
 DataProviderTest::testConnection1(void)
 {
+    LOG("DataProviderTest::testConnection1()");
+
 #ifdef SQLITE_SUPPORT
     std::string dbFile(mDbName);
     dbFile += ".db";
@@ -116,6 +119,8 @@ DataProviderTest::testConnection1(void)
 void
 DataProviderTest::testCreateTable1(void)
 {
+    LOG("DataProviderTest::testCreateTable1()");
+
 #ifdef SQLITE_SUPPORT
     std::string dbFile(mDbName);
     dbFile += ".db";
@@ -141,6 +146,8 @@ DataProviderTest::testCreateTable1(void)
 void
 DataProviderTest::testCreateTable2(void)
 {
+    LOG("DataProviderTest::testCreateTable2()");
+
 #ifdef SQLITE_SUPPORT
     std::string dbFile(mDbName);
     dbFile += ".db";
@@ -164,6 +171,8 @@ DataProviderTest::testCreateTable2(void)
 void
 DataProviderTest::testInsert1(void)
 {
+    LOG("DataProviderTest::testInsert1()");
+
 #ifdef SQLITE_SUPPORT
     std::string dbFile(mDbName);
     dbFile += ".db";
@@ -193,6 +202,8 @@ DataProviderTest::testInsert1(void)
 void
 DataProviderTest::testInsert2(void)
 {
+    LOG("DataProviderTest::testInsert2()");
+
 #ifdef SQLITE_SUPPORT
     std::string dbFile(mDbName);
     dbFile += ".db";
@@ -216,6 +227,8 @@ DataProviderTest::testInsert2(void)
 void
 DataProviderTest::testFetch1(void)
 {
+    LOG("DataProviderTest::testFetch1()");
+
 #ifdef SQLITE_SUPPORT
     std::string dbFile(mDbName);
     dbFile += ".db";
@@ -249,6 +262,8 @@ DataProviderTest::testFetch1(void)
 void
 DataProviderTest::testDisconnection1(void)
 {
+    LOG("DataProviderTest::testDisconnection1()");
+
 #ifdef SQLITE_SUPPORT
     std::string dbFile(mDbName);
     dbFile += ".db";
@@ -271,6 +286,8 @@ DataProviderTest::testDisconnection1(void)
 void
 DataProviderTest::testDisconnection2(void)
 {
+    LOG("DataProviderTest::testDisconnection2()");
+
     mDb->disconnect();
     CPPUNIT_ASSERT(!mDb->isConnected());
 }

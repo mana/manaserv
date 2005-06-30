@@ -70,15 +70,8 @@ Account::Account(const std::string& name,
 Account::~Account(void)
     throw()
 {
-    for (Beings::iterator it = mCharacters.begin();
-         it != mCharacters.end();
-         ++it)
-    {
-        if (*it != 0) {
-            delete (*it);
-            *it = 0;
-        }
-    }
+    // mCharacters is a list of smart pointers which will take care about
+    // deallocating the memory so nothing to deallocate here :)
 }
 
 
@@ -177,9 +170,9 @@ Account::setCharacters(const Beings& characters)
  * Add a new character.
  */
 void
-Account::addCharacter(Being* character)
+Account::addCharacter(BeingPtr character)
 {
-    if (character) {
+    if (character.get() != 0) {
         mCharacters.push_back(character);
     }
 }
@@ -204,11 +197,11 @@ Account::getCharacter(const std::string& name)
     Beings::iterator it =
         std::find_if(mCharacters.begin(),
                      mCharacters.end(),
-                     std::bind2nd(obj_name_is<Being*>(), name)
+                     std::bind2nd(obj_name_is<BeingPtr>(), name)
                     );
 
     if (it != mCharacters.end()) {
-        return (*it);
+        return (*it).get();
     }
 
     return 0;

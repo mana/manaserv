@@ -21,6 +21,7 @@
  */
 
 
+#include "../utils/logger.h"
 #include "testaccount.h"
 
 
@@ -37,18 +38,11 @@ using namespace tmwserv;
 void
 AccountTest::setUp(void)
 {
-    //RawStatistics stats;
-    //stats.strength = 1;
-    //stats.agility = 1;
-    //stats.vitality = 1;
-    //stats.intelligence = 1;
-    //stats.dexterity = 1;
-    //stats.luck = 1;
     const RawStatistics stats = {1, 1, 1, 1, 1, 1};
 
-    Being* sam = new Being("sam", GENDER_MALE, 0, 0, stats);
-    Being* merry = new Being("merry", GENDER_MALE, 0, 0, stats);
-    Being* pippin = new Being("pippin", GENDER_MALE, 0, 0, stats);
+    BeingPtr sam(new Being("sam", GENDER_MALE, 0, 0, stats));
+    BeingPtr merry(new Being("merry", GENDER_MALE, 0, 0, stats));
+    BeingPtr pippin(new Being("pippin", GENDER_MALE, 0, 0, stats));
     mCharacters.push_back(sam);
     mCharacters.push_back(merry);
     mCharacters.push_back(pippin);
@@ -66,13 +60,6 @@ AccountTest::setUp(void)
 void
 AccountTest::tearDown(void)
 {
-    for (Beings::iterator it = mCharacters.begin();
-         it != mCharacters.end();
-         ++it)
-    {
-        delete (*it);
-    }
-
     delete mAccount;
     mAccount = 0;
 }
@@ -85,6 +72,8 @@ AccountTest::tearDown(void)
 void
 AccountTest::testCreate1(void)
 {
+    LOG("AccountTest::testCreate1()");
+
     const std::string name("frodo");
     const std::string password("baggins");
     const std::string email("frodo@theshire.com");
@@ -105,6 +94,8 @@ AccountTest::testCreate1(void)
 void
 AccountTest::testCreate2(void)
 {
+    LOG("AccountTest::testCreate2()");
+
     const std::string name("frodo");
     const std::string password("baggins");
     const std::string email("frodo@theshire.com");
@@ -118,7 +109,7 @@ AccountTest::testCreate2(void)
     CPPUNIT_ASSERT_EQUAL(mCharacters.size(),
                          mAccount->getCharacters().size());
 
-    Beings& characters = account.getCharacters();
+    const Beings& characters = account.getCharacters();
 
     for (size_t i = 0; i < mCharacters.size(); ++i) {
         CPPUNIT_ASSERT_EQUAL(characters[i]->getName(),
@@ -133,15 +124,11 @@ AccountTest::testCreate2(void)
 void
 AccountTest::testAddCharacter1(void)
 {
-    RawStatistics stats;
-    stats.strength = 1;
-    stats.agility = 1;
-    stats.vitality = 1;
-    stats.intelligence = 1;
-    stats.dexterity = 1;
-    stats.luck = 1;
+    LOG("AccountTest::testAddCharacter1()");
 
-    Being* bilbo = new Being("bilbo", GENDER_MALE, 0, 0, stats);
+    RawStatistics stats = {1, 1, 1, 1, 1, 1};
+
+    BeingPtr bilbo(new Being("bilbo", GENDER_MALE, 0, 0, stats));
 
     mAccount->addCharacter(bilbo);
 
@@ -156,8 +143,6 @@ AccountTest::testAddCharacter1(void)
     for (size_t i = 0; i < mCharacters.size(); ++i) {
         CPPUNIT_ASSERT_EQUAL(names[i], mCharacters[i]->getName());
     }
-
-    delete bilbo;
 }
 
 
@@ -167,7 +152,11 @@ AccountTest::testAddCharacter1(void)
 void
 AccountTest::testAddCharacter2(void)
 {
-    mAccount->addCharacter(NULL);
+    LOG("AccountTest::testAddCharacter2()");
+
+    BeingPtr nullBeing(0);
+
+    mAccount->addCharacter(nullBeing);
 
     CPPUNIT_ASSERT_EQUAL((size_t) 3, mAccount->getCharacters().size());
 
@@ -188,9 +177,11 @@ AccountTest::testAddCharacter2(void)
 void
 AccountTest::testGetCharacter1(void)
 {
+    LOG("AccountTest::testGetCharacter1()");
+
     const std::string name("merry");
 
-    Being* merry = mAccount->getCharacter(name);
+    const Being* merry = mAccount->getCharacter(name);
 
     CPPUNIT_ASSERT(merry != 0);
     CPPUNIT_ASSERT_EQUAL(name, merry->getName());
@@ -203,7 +194,9 @@ AccountTest::testGetCharacter1(void)
 void
 AccountTest::testGetCharacter2(void)
 {
-    Being* nobody = mAccount->getCharacter("johndoe");
+    LOG("AccountTest::testGetCharacter2()");
+
+    const Being* nobody = mAccount->getCharacter("johndoe");
 
     CPPUNIT_ASSERT(nobody == 0);
 }

@@ -73,10 +73,10 @@ typedef struct {
  * Functor to be used as the sorting criterion of the map defined below.
  */
 struct account_sort_by_name
-    : public std::binary_function<Account*, Account*, bool>
+    : public std::binary_function<AccountPtr, AccountPtr, bool>
 {
     bool
-    operator()(Account* acc1, Account* acc2) const
+    operator()(const AccountPtr& acc1, const AccountPtr& acc2) const
     {
         return (acc1->getName() < acc2->getName());
     }
@@ -91,7 +91,7 @@ struct account_sort_by_name
  *       only the storage should modify this value, this attribute is for
  *       internal use.
  */
-typedef std::map<Account*, AccountInfo, account_sort_by_name> Accounts;
+typedef std::map<AccountPtr, AccountInfo, account_sort_by_name> Accounts;
 
 
 /**
@@ -114,7 +114,7 @@ class account_by_name
          * Operator().
          */
         bool
-        operator()(std::pair<Account*, AccountInfo> elem) const
+        operator()(std::pair<AccountPtr, AccountInfo> elem) const
         {
             return (elem.first)->getName() == mName;
         }
@@ -268,7 +268,7 @@ class Storage
          * @param account the new account.
          */
         virtual void
-        addAccount(const Account* account) = 0;
+        addAccount(const AccountPtr& account) = 0;
 
 
         /**

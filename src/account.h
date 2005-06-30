@@ -174,7 +174,7 @@ class Account
          * @param character the new character.
          */
         void
-        addCharacter(Being* character);
+        addCharacter(BeingPtr character);
 
 
         /**
@@ -223,6 +223,12 @@ class Account
         Beings mCharacters;    /**< player data */
         AccountLevels mLevel;  /**< account level */
 };
+
+
+/**
+ * Type definition for a smart pointer to Account.
+ */
+typedef utils::CountedPtr<Account> AccountPtr;
 
 
 } // namespace tmwserv

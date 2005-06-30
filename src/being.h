@@ -30,6 +30,7 @@
 
 #include "defines.h"
 #include "object.h"
+#include "utils/countedptr.h"
 
 
 namespace tmwserv
@@ -285,9 +286,15 @@ class Being: public Object
 
 
 /**
+ * Type definition for a smart pointer to Being.
+ */
+typedef utils::CountedPtr<Being> BeingPtr;
+
+
+/**
  * Type definition for a list of Beings.
  */
-typedef std::vector<Being*> Beings;
+typedef std::vector<BeingPtr> Beings;
 
 
 } // namespace tmwserv

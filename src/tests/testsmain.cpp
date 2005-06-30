@@ -26,6 +26,8 @@
 
 #include <physfs.h>
 
+#include "../utils/logger.h"
+
 
 /**
  * Notes:
@@ -44,6 +46,9 @@ int main(int argc, char* argv[])
     PHYSFS_init(argv[0]);
     PHYSFS_addToSearchPath(".", 1);
     PHYSFS_setWriteDir(".");
+
+    // initialize the logger.
+    tmwserv::utils::Logger::instance().setTimestamp(false);
 
     using namespace CppUnit;
 
