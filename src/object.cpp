@@ -32,9 +32,9 @@ namespace tmwserv
  * Default constructor.
  */
 Object::Object(void)
-        : mX(0),
-          mY(0),
-          mNeedUpdate(false)
+        : mNeedUpdate(false),
+          mX(0),
+          mY(0)
 {
     mStats.health = 0;
     mStats.attack = 0;
@@ -92,6 +92,27 @@ unsigned int
 Object::getY(void) const
 {
     return mY;
+}
+
+
+/**
+ * Set the coordinates.
+ */
+void
+Object::setXY(unsigned int x, unsigned int y)
+{
+    mX = x;
+    mY = y;
+}
+
+
+/**
+ * Get the coordinates.
+ */
+std::pair<unsigned int, unsigned int>
+Object::getXY(void) const
+{
+    return std::make_pair(mX, mY);
 }
 
 

@@ -131,9 +131,7 @@ StorageTest::testGetAccount2(void)
 
     Storage& myStorage = Storage::instance(mStorageName);
 
-    if (!myStorage.isOpen()) {
-        CPPUNIT_FAIL("the storage is not opened.");
-    }
+    CPPUNIT_ASSERT(myStorage.isOpen());
 
     Account* account = myStorage.getAccount("xxx");
 
@@ -151,9 +149,7 @@ StorageTest::testAddAccount1(void)
 
     Storage& myStorage = Storage::instance(mStorageName);
 
-    if (!myStorage.isOpen()) {
-        CPPUNIT_FAIL("the storage is not opened.");
-    }
+    CPPUNIT_ASSERT(myStorage.isOpen());
 
     // TODO: when addAccount will throw exceptions, test the exceptions
     // thrown.
@@ -179,17 +175,13 @@ StorageTest::testAddAccount2(void)
 
     Storage& myStorage = Storage::instance(mStorageName);
 
-    if (!myStorage.isOpen()) {
-        CPPUNIT_FAIL("the storage is not opened.");
-    }
+    CPPUNIT_ASSERT(myStorage.isOpen());
 
     // prepare new account.
     RawStatistics stats = {1, 1, 1, 1, 1, 1};
 
-    const std::string sam1("sam1");
-    const std::string sam2("sam2");
-    BeingPtr b1(new Being(sam1, GENDER_MALE, 0, 0, stats));
-    BeingPtr b2(new Being(sam2, GENDER_MALE, 0, 0, stats));
+    BeingPtr b1(new Being("sam1", GENDER_MALE, 0, 0, stats));
+    BeingPtr b2(new Being("sam2", GENDER_MALE, 0, 0, stats));
     Beings characters;
     characters.push_back(b1);
     characters.push_back(b2);
@@ -229,10 +221,8 @@ StorageTest::testUpdAccount1(void)
     // create new characters.
     RawStatistics stats = {1, 1, 1, 1, 1, 1};
 
-    const std::string sam1("sam1");
-    const std::string sam2("sam2");
-    BeingPtr b1(new Being(sam1, GENDER_MALE, 0, 0, stats));
-    BeingPtr b2(new Being(sam2, GENDER_MALE, 0, 0, stats));
+    BeingPtr b1(new Being("sam1", GENDER_MALE, 0, 0, stats));
+    BeingPtr b2(new Being("sam2", GENDER_MALE, 0, 0, stats));
 
     // add the characters to the account.
     account->addCharacter(b1);
@@ -269,10 +259,8 @@ StorageTest::testUpdAccount2(void)
     // create new characters.
     RawStatistics stats = {1, 1, 1, 1, 1, 1};
 
-    const std::string sam1("sam1");
-    const std::string sam2("sam2");
-    BeingPtr b1(new Being(sam1, GENDER_MALE, 0, 0, stats));
-    BeingPtr b2(new Being(sam2, GENDER_MALE, 0, 0, stats));
+    BeingPtr b1(new Being("sam1", GENDER_MALE, 0, 0, stats));
+    BeingPtr b2(new Being("sam2", GENDER_MALE, 0, 0, stats));
 
     // add the characters to the account.
     account->addCharacter(b1);
@@ -292,72 +280,11 @@ StorageTest::testUpdAccount2(void)
     // update the database.
     myStorage.flush();
 
-#if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT) || \
-    defined (SQLITE_SUPPORT)
-
-    using namespace tmwserv::dal;
-
-    std::auto_ptr<DataProvider> db(DataProviderFactory::createDataProvider());
-
-    try {
-#ifdef SQLITE_SUPPORT
-        std::string dbFile(mStorageName);
-        dbFile += ".db";
-        db->connect(dbFile, mStorageUser, mStorageUserPassword);
-#else
-        db->connect(mStorageName, mStorageUser, mStorageUserPassword);
-#endif
-
-        std::string sql("select * from ");
-        sql += ACCOUNTS_TBL_NAME;
-        sql += ";";
-        const RecordSet& rs = db->execSql(sql);
-
-        CPPUNIT_ASSERT(rs.rows() == 3);
-
-        const std::string frodo("frodo");
-        const std::string merry("merry");
-        const std::string pippin("pippin");
-
-
-        CPPUNIT_ASSERT_EQUAL(frodo, rs(0, "username"));
-        CPPUNIT_ASSERT_EQUAL(merry, rs(1, "username"));
-        CPPUNIT_ASSERT_EQUAL(pippin, rs(2, "username"));
-
-        CPPUNIT_ASSERT_EQUAL(newPassword, rs(0, "password"));
-
-        sql = "select * from ";
-        sql += CHARACTERS_TBL_NAME;
-        sql += " where user_id = 1;";
-
-        db->execSql(sql);
-
-        CPPUNIT_ASSERT(rs.rows() == 2);
-
-        CPPUNIT_ASSERT_EQUAL(sam1, rs(0, "name"));
-        CPPUNIT_ASSERT_EQUAL(sam2, rs(1, "name"));
-
-        string_to<unsigned short> toUshort;
-        CPPUNIT_ASSERT_EQUAL((unsigned short) 10, toUshort(rs(0, "str")));
-
-        db->disconnect();
-    }
-    catch (const DbConnectionFailure& e) {
-        CPPUNIT_FAIL(e.what());
-    }
-    catch (const DbSqlQueryExecFailure& e) {
-        CPPUNIT_FAIL(e.what());
-    }
-    catch (const DbDisconnectionFailure& e) {
-        CPPUNIT_FAIL(e.what());
-    }
-    catch (const std::exception& e) {
-        CPPUNIT_FAIL(e.what());
-    }
-    catch (...) {
-        CPPUNIT_FAIL("unexpected exception");
-    }
-#endif
+    // check the database.
+    Checks checks;
+    checks.set(CHK_DEFAULT_ACCOUNTS);
+    checks.set(CHK_CHARACTERS_UPDATE_1);
+    checkDb(checks);
 }
 
 
@@ -394,17 +321,13 @@ StorageTest::testDelAccount2(void)
 
     Storage& myStorage = Storage::instance(mStorageName);
 
-    if (!myStorage.isOpen()) {
-        CPPUNIT_FAIL("the storage is not opened.");
-    }
+    CPPUNIT_ASSERT(myStorage.isOpen());
 
     // prepare new account.
     RawStatistics stats = {1, 1, 1, 1, 1, 1};
 
-    const std::string sam1("sam1");
-    const std::string sam2("sam2");
-    BeingPtr b1(new Being(sam1, GENDER_MALE, 0, 0, stats));
-    BeingPtr b2(new Being(sam2, GENDER_MALE, 0, 0, stats));
+    BeingPtr b1(new Being("sam1", GENDER_MALE, 0, 0, stats));
+    BeingPtr b2(new Being("sam2", GENDER_MALE, 0, 0, stats));
     Beings characters;
     characters.push_back(b1);
     characters.push_back(b2);
@@ -436,9 +359,7 @@ StorageTest::testDelAccount3(void)
 
     Storage& myStorage = Storage::instance(mStorageName);
 
-    if (!myStorage.isOpen()) {
-        CPPUNIT_FAIL("the storage is not opened.");
-    }
+    CPPUNIT_ASSERT(myStorage.isOpen());
 
     // get an existing account.
     const std::string name("frodo");
@@ -446,12 +367,30 @@ StorageTest::testDelAccount3(void)
 
     CPPUNIT_ASSERT_EQUAL(name, account->getName());
 
+    // update the account with new characters so that we can check
+    // that delAccount() is doing more than just deleting the tmw_accounts
+    // table.
+    RawStatistics stats = {1, 1, 1, 1, 1, 1};
+    BeingPtr b1(new Being("sam1", GENDER_MALE, 0, 0, stats));
+    BeingPtr b2(new Being("sam2", GENDER_MALE, 0, 0, stats));
+    account->addCharacter(b1);
+    account->addCharacter(b2);
+
+    // flush() so that the new characters are stored in the database
+    // before we delete the account.
+    myStorage.flush();
+
+    // we won't check if the tmw_characters contains the newly added
+    // characters as it has been tested in testUpdAccount2().
+
+    // finally, we are ready to delete the account.
     myStorage.delAccount(name);
     myStorage.flush();
 
     // check the database.
     Checks checks;
     checks.set(CHK_1ST_ACCOUNT_DELETED);
+    checks.set(CHK_NO_CHARACTERS_1);
     checkDb(checks);
 }
 
@@ -466,9 +405,7 @@ StorageTest::testDelAccount4(void)
 
     Storage& myStorage = Storage::instance(mStorageName);
 
-    if (!myStorage.isOpen()) {
-        CPPUNIT_FAIL("the storage is not opened.");
-    }
+    CPPUNIT_ASSERT(myStorage.isOpen());
 
     // nothing should happen nor modified in the database.
     myStorage.delAccount("xxx");
@@ -492,9 +429,7 @@ StorageTest::testDelAccount5(void)
 
     Storage& myStorage = Storage::instance(mStorageName);
 
-    if (!myStorage.isOpen()) {
-        CPPUNIT_FAIL("the storage is not opened.");
-    }
+    CPPUNIT_ASSERT(myStorage.isOpen());
 
     // get an existing account.
     const std::string name("frodo");
@@ -505,7 +440,7 @@ StorageTest::testDelAccount5(void)
     myStorage.delAccount(name);
     myStorage.flush();
 
-    // delete it again.
+    // delete it again, no error should occur.
     myStorage.delAccount(name);
     myStorage.flush();
 
@@ -754,7 +689,9 @@ StorageTest::checkDb(const Checks& what)
             CPPUNIT_ASSERT_EQUAL(sam, rs(3, "username"));
         }
 
-        if (what[CHK_CHARACTERS_1]) {
+        if (what[CHK_CHARACTERS_1] || what[CHK_CHARACTERS_UPDATE_1] ||
+            what[CHK_NO_CHARACTERS_1])
+        {
             sql = "select * from ";
             sql += CHARACTERS_TBL_NAME;
             sql += " where user_id = 1;";
@@ -765,9 +702,11 @@ StorageTest::checkDb(const Checks& what)
             sql += " where user_id = 4;";
         }
 
-        if (what[CHK_CHARACTERS_1] || what[CHK_CHARACTERS_4]) {
-            db->execSql(sql);
+        db->execSql(sql);
 
+        if (what[CHK_CHARACTERS_1] || what[CHK_CHARACTERS_4] ||
+            what[CHK_CHARACTERS_UPDATE_1])
+        {
             CPPUNIT_ASSERT(rs.rows() == 2);
 
             const std::string sam1("sam1");
@@ -775,6 +714,15 @@ StorageTest::checkDb(const Checks& what)
 
             CPPUNIT_ASSERT_EQUAL(sam1, rs(0, "name"));
             CPPUNIT_ASSERT_EQUAL(sam2, rs(1, "name"));
+
+            if (what[CHK_CHARACTERS_UPDATE_1]) {
+                string_to<unsigned short> toUshort;
+                CPPUNIT_ASSERT_EQUAL((unsigned short) 10,
+                                     toUshort(rs(0, "str")));
+            }
+        }
+        else if (what[CHK_NO_CHARACTERS_1]) {
+            CPPUNIT_ASSERT(rs.rows() == 0);
         }
 
         db->disconnect();

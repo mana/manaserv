@@ -25,6 +25,9 @@
 #define _TMWSERV_OBJECT_H_
 
 
+#include <utility>
+
+
 namespace tmwserv
 {
 
@@ -104,6 +107,25 @@ class Object
          */
         unsigned int
         getY(void) const;
+
+
+        /**
+         * Set the coordinates.
+         *
+         * @param x the x coordinate.
+         * @param y the y coordinate.
+         */
+        void
+        setXY(unsigned int x, unsigned int y);
+
+
+        /**
+         * Get the coordinates.
+         *
+         * @return the coordinates as a pair.
+         */
+        std::pair<unsigned int, unsigned int>
+        getXY(void) const;
 
 
         /**

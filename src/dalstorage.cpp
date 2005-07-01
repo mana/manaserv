@@ -222,31 +222,14 @@ DALStorage::getAccount(const std::string& userName)
                     toUshort(charInfo(i, 14))  // luck
                 };
 
-                // convert the integer value read from database
-                // to an enum because C++ does not allow implicit
-                // conversion from an integer to an enum.
-                unsigned short value = toUshort(charInfo(i, 3));
-                Genders gender;
-                switch (value)
-                {
-                    case GENDER_MALE:
-                        gender = GENDER_MALE;
-                        break;
-
-                    case GENDER_FEMALE:
-                        gender = GENDER_FEMALE;
-                        break;
-
-                    default:
-                        gender = GENDER_UNKNOWN;
-                        break;
-                };
-
                 BeingPtr being(
-                    new Being(charInfo(i, 2),           // name
-                              gender,                   // gender
-                              toUshort(charInfo(i, 4)), // level
-                              toUint(charInfo(i, 5)),   // money
+                    new Being(charInfo(i, 2),                     // name
+                              // while the implicit type conversion from
+                              // a short to an enum is invalid, the explicit
+                              // type cast works :D
+                              (Genders) toUshort(charInfo(i, 3)), // gender
+                              toUshort(charInfo(i, 4)),           // level
+                              toUint(charInfo(i, 5)),             // money
                               stats
                 ));
 

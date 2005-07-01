@@ -212,6 +212,8 @@ class StorageTest: public CppUnit::TestFixture
             CHK_NEW_ADDED_ACCOUNT,
             CHK_CHARACTERS_1,
             CHK_CHARACTERS_4,
+            CHK_CHARACTERS_UPDATE_1,
+            CHK_NO_CHARACTERS_1,
             NUM_CHECKS
         };
 
