@@ -350,22 +350,22 @@ DALStorage::flush(void)
         switch ((it->second).status) {
             case AS_NEW_ACCOUNT:
                 _addAccount(it->first);
+                ++it;
                 break;
 
             case AS_ACC_TO_UPDATE:
                 _updAccount(it->first);
+                ++it;
                 break;
 
             case AS_ACC_TO_DELETE:
                 _delAccount(it->first);
-                mAccounts.erase(it);
+                mAccounts.erase(it++);
                 break;
 
             default:
                 break;
         }
-
-        ++it;
     }
 }
 
