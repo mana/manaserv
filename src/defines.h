@@ -54,5 +54,35 @@ typedef enum {
     GENDER_UNKNOWN
 } Genders;
 
+/**
+ * Enumerated type for received server messages
+ */
+enum {
+    MSG_LOGIN = 0,
+    MSG_MOVE,
+    MSG_ATTACK,
+    MSG_PICKUP,
+    MSG_DROP,
+    MSG_TRADE,
+    MSG_CHAT
+};
+
+// NOTE: Maybe it would be better to reuse some enumerated types with both
+// server and client?
+
+/**
+ * Enumerated type for messages sent to client
+ */
+enum {
+    CMSG_SPAWN = 0, // spawn object
+    CMSG_DESTROY,   // destroy object
+    CMSG_MOVE,      // move object
+    CMSG_ATTACK,    // Player attacked/got attacked by object
+    CMSG_PICKUP,    // Player picked up object
+    CMSG_DROP,      // Player dropped object
+    CMSG_CHAT,      // Another player chatted
+    CMSG_DIALOG     // Message dialog
+};
+
 
 #endif // _TMWSERV_DEFINES_H_

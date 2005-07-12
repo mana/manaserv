@@ -21,6 +21,10 @@
  */
 
 
+#include <iostream>
+#include <vector>
+#include <sstream>
+
 #include "connectionhandler.h"
 #include "netsession.h"
 #include "utils/logger.h"
@@ -30,6 +34,54 @@
 #endif
 
 #define MAX_CLIENTS 1024
+
+/**
+ * TEMPORARY
+ * Split a string into a std::vector delimiting elements by 'split'. This
+ * function could be used for ASCII message handling (as we do not have
+ * a working client yet, using ASCII allows tools like Netcat to be used
+ * to test server functionality).
+ *
+ * This function may seem unoptimized, except it is this way to allow for
+ * thread safety.
+ */
+std::vector<std::string> stringSplit(const std::string &str,
+				     const std::string &split)
+{
+    std::vector<std::string> result; // temporary result
+    unsigned int i;
+    unsigned int last = 0;
+
+    // iterate through string
+    for (i = 0; i < str.length(); i++) {
+	if (str.compare(i, split.length(), split.c_str(), split.length()) == 0) {
+	    result.push_back(str.substr(last, i - last));
+	    last = i + 1;
+	}
+    }
+    
+    // add remainder of string
+    if (last < str.length()) {
+	result.push_back(str.substr(last, str.length()));
+    }
+
+    return result;
+}
+
+/**
+ * Convert a IP4 address into its string representation
+ */
+std::string ip4ToString(unsigned int ip4addr)
+{
+    std::stringstream ss;
+    ss << (ip4addr & 0x000000ff) << "."
+       << ((ip4addr & 0x0000ff00) >> 8) << "."
+       << ((ip4addr & 0x00ff0000) >> 16) << "."
+       << ((ip4addr & 0xff000000) >> 24);
+    return ss.str();
+}
+
+////////////////
 
 ClientData::ClientData():
     inp(0)
@@ -106,9 +158,41 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                         // client
                         buffer[result] = 0;
                         LOG_INFO("Received " << buffer);
+
 #ifdef SCRIPT_SUPPORT
+			// this could be good if you wanted to extend the
+			// server protocol using a scripting language. This
+			// could be attained by using allowing scripts to
+			// "hook" certain messages.
+
                         //script->message(buffer);
 #endif
+
+			// if the scripting subsystem didn't hook the message
+			// it will be handled by the default message handler.
+
+			// convert the client IP address to string representation
+			std::string ipaddr = ip4ToString(SDLNet_TCP_GetPeerAddress(s)->host);
+
+			// generate packet
+			Packet *packet = new Packet(buffer, strlen(buffer));
+			MessageIn msg(packet); // (MessageIn frees packet)
+
+			// make sure that the packet is big enough
+			if (strlen(buffer) >= 4) {
+			    unsigned int messageType = (unsigned int)*packet->data;
+			    if (handlers.find(messageType) != handlers.end()) {
+				// send message to appropriate handler
+				handlers[messageType]->receiveMessage(*comp, msg);
+			    } else {
+				// bad message (no registered handler)
+				LOG_ERROR("Unhandled message received from "
+					  << ipaddr);
+			    }
+			} else {
+			    LOG_ERROR("Message too short from " << ipaddr);
+			}
+			//
                     }
                 }
 

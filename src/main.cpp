@@ -73,6 +73,7 @@ bool running = true;      /**< Determines if server keeps running */
 Skill skillTree("base");  /**< Skill tree */
 
 Configuration config;     /**< XML config reader */
+AccountHandler *accountHandler = new AccountHandler(); /**< Account message handler */
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -161,6 +162,9 @@ void deinitialize()
     delete script;
 #endif
 
+    // destro account handler
+    delete accountHandler;
+
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();
 }
@@ -193,8 +197,9 @@ int main(int argc, char *argv[])
     // to the constructor of the account handler, upon which is would register
     // itself for the messages it handles.
     //
-    //AccountHandler *accountHandler = new AccountHandler();
-    //connectionHandler->registerHandler(C2S_LOGIN, accountHandler);
+
+    // Register message handlers
+    connectionHandler->registerHandler(MSG_LOGIN, accountHandler);
 
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION)
     session->startListen(connectionHandler.get(), SERVER_PORT);
