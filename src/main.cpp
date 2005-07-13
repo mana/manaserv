@@ -21,8 +21,6 @@
  */
 
 
-#include <../config.h>
-
 #include <iostream>
 
 #include <SDL.h>
@@ -201,7 +199,7 @@ int main(int argc, char *argv[])
     // Register message handlers
     connectionHandler->registerHandler(MSG_LOGIN, accountHandler);
 
-    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION)
+    //LOG_INFO("The Mana World Server v" << PACKAGE_VERSION) PACKAGE_VERSION undeclared
     session->startListen(connectionHandler.get(), SERVER_PORT);
     LOG_INFO("Listening on port " << SERVER_PORT << "...")
 

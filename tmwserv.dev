@@ -5,19 +5,19 @@ Name=tmwserv
 UnitCount=17
 =======
 Name=tmwserv
-UnitCount=51
+UnitCount=57
 >>>>>>> 1.2
 Type=1
 Ver=1
 ObjFiles=
 Includes=
 Libs=
-PrivateResource=
+PrivateResource=tmwserv_private.rc
 ResourceIncludes=
 MakeIncludes=
-Compiler=
+Compiler=_@@_
 CppCompiler=-DSQLITE_SUPPORT_@@_
-Linker=-lmingw32_@@_-lSDL_@@_-lSDL_net_@@_-lsqlite3_@@_-lcrypto_@@_-mconsole_@@_-mwindows_@@__@@_
+Linker=-lSDL_@@_-lSDL_net_@@_-lsqlite3_@@_-lcrypto_@@_-llibxml2_@@_-mconsole_@@_-mwindows_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -29,7 +29,7 @@ Folders=dal,utils
 CommandLine=
 UseCustomMakefile=0
 CustomMakefile=
-IncludeVersionInfo=0
+IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000100
@@ -66,33 +66,23 @@ BuildCmd=
 
 [VersionInfo]
 Major=0
-Minor=1
+Minor=0
 Release=1
-Build=1
-LanguageID=1033
+Build=0
+LanguageID=2057
 CharsetID=1252
-CompanyName=
+CompanyName=The Mana World Development Team
 FileVersion=
-FileDescription=Developed using the Dev-C++ IDE
-InternalName=
-LegalCopyright=
+FileDescription=The Mana World Server
+InternalName=tmwserv
+LegalCopyright=(C) 2004-2005
 LegalTrademarks=
-OriginalFilename=
-ProductName=
+OriginalFilename=tmwserv.exe
+ProductName=tmwserv
 ProductVersion=
 AutoIncBuildNr=0
 
 [Unit24]
-FileName=src\main.cpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit26]
 FileName=src\messagehandler.h
 CompileCpp=1
 Folder=
@@ -102,17 +92,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit27]
-FileName=src\messagein.cpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit28]
+[Unit26]
 FileName=src\messagein.h
 CompileCpp=1
 Folder=
@@ -122,7 +102,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit29]
+[Unit27]
 FileName=src\messageout.cpp
 CompileCpp=1
 Folder=
@@ -132,17 +112,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit31]
-FileName=src\netcomputer.cpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit30]
+[Unit28]
 FileName=src\messageout.h
 CompileCpp=1
 Folder=
@@ -152,8 +122,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit34]
-FileName=src\netsession.h
+[Unit29]
+FileName=src\netcomputer.cpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -162,27 +132,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit36]
-FileName=src\object.h
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit32]
-FileName=src\netcomputer.h
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit33]
+[Unit31]
 FileName=src\netsession.cpp
 CompileCpp=1
 Folder=
@@ -192,8 +142,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit37]
-FileName=src\packet.cpp
+[Unit30]
+FileName=src\netcomputer.h
 CompileCpp=1
 Folder=
 Compile=1
@@ -202,7 +152,17 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit38]
+[Unit34]
+FileName=src\object.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit36]
 FileName=src\packet.h
 CompileCpp=1
 Folder=
@@ -212,7 +172,27 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit39]
+[Unit32]
+FileName=src\netsession.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit33]
+FileName=src\object.cpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit37]
 FileName=src\script.cpp
 CompileCpp=1
 Folder=
@@ -222,7 +202,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit40]
+[Unit38]
 FileName=src\script.h
 CompileCpp=1
 Folder=
@@ -232,8 +212,28 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit41]
+[Unit39]
 FileName=src\script-squirrel.cpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit40]
+FileName=src\script-squirrel.h
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit41]
+FileName=src\skill.cpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -363,7 +363,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit35]
-FileName=src\object.cpp
+FileName=src\packet.cpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -373,7 +373,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit42]
-FileName=src\script-squirrel.h
+FileName=src\skill.h
 CompileCpp=1
 Folder=
 Compile=1
@@ -383,7 +383,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit43]
-FileName=src\skill.cpp
+FileName=src\storage.cpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -393,7 +393,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit44]
-FileName=src\skill.h
+FileName=src\storage.h
 CompileCpp=1
 Folder=
 Compile=1
@@ -403,16 +403,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit45]
-FileName=src\storage.cpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit47]
 FileName=src\dalstorage.h
 CompileCpp=1
 Folder=tmwserv
@@ -422,17 +412,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit48]
-FileName=src\account.h
-CompileCpp=1
-Folder=tmwserv
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit49]
+[Unit47]
 FileName=src\account.cpp
 CompileCpp=1
 Folder=tmwserv
@@ -442,18 +422,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit50]
-FileName=src\SDL_win32_main.c
-CompileCpp=1
-Folder=tmwserv
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit51]
-FileName=src\utils\cipher.cpp
+[Unit49]
+FileName=src\utils\countedptr.h
 CompileCpp=1
 Folder=utils
 Compile=1
@@ -462,28 +432,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit52]
-FileName=src\skill.h
-CompileCpp=1
-Folder=tmwserv
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit53]
-FileName=src\sqlitestorage.cpp
-CompileCpp=1
-Folder=tmwserv
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
 [Unit54]
-FileName=src\sqlitestorage.h
+FileName=src\configuration.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -493,7 +443,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit55]
-FileName=src\storage.cpp
+FileName=src\dalstoragesql.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -503,7 +453,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit56]
-FileName=src\storage.h
+FileName=src\items.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -513,7 +463,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit57]
-FileName=src\storage.cpp
+FileName=src\SDL_win32_main.c
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -523,7 +473,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit58]
-FileName=src\storage.h
+FileName=src\SDL_win32_main.c
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -533,17 +483,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit59]
-FileName=src\sqlitestorage.cpp
-CompileCpp=1
-Folder=tmwserv
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit60]
-FileName=src\sqlitestorage.h
+FileName=src\items.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -553,7 +493,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit61]
-FileName=src\storage.cpp
+FileName=src\configuration.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -563,7 +503,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit62]
-FileName=src\storage.h
+FileName=src\dalstoragesql.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -573,7 +513,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit64]
-FileName=src\storage.h
+FileName=src\sqlitestorage.cpp
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -643,7 +583,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit22]
-FileName=src\log.cpp
+FileName=src\main.cpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -653,16 +593,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit23]
-FileName=src\log.h
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit25]
 FileName=src\messagehandler.cpp
 CompileCpp=1
 Folder=
@@ -672,10 +602,20 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit46]
-FileName=src\storage.h
+[Unit25]
+FileName=src\messagein.cpp
 CompileCpp=1
 Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit46]
+FileName=src\account.h
+CompileCpp=1
+Folder=tmwserv
 Compile=1
 Link=1
 Priority=1000
@@ -686,6 +626,66 @@ BuildCmd=
 FileName=src\connectionhandler.cpp
 CompileCpp=1
 Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit63]
+FileName=src\items.h
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit50]
+FileName=src\utils\functors.h
+CompileCpp=1
+Folder=utils
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit51]
+FileName=src\being.cpp
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit52]
+FileName=src\being.h
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit48]
+FileName=src\utils\cipher.cpp
+CompileCpp=1
+Folder=utils
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit53]
+FileName=src\configuration.cpp
+CompileCpp=1
+Folder=tmwserv
 Compile=1
 Link=1
 Priority=1000
