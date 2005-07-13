@@ -23,6 +23,7 @@
 
 #include "packet.h"
 #include <string.h>
+#include <cstdlib>
 
 Packet::Packet(const char *data, int length):
     length(length)
@@ -30,10 +31,17 @@ Packet::Packet(const char *data, int length):
     // Create a copy of the data
     this->data = new char[length];
     memcpy(this->data, data, length);
+    size = length;
 }
 
 Packet::~Packet()
 {
     // Clean up the data
     delete[] data;
+}
+
+void Packet::expand(unsigned int bytes)
+{
+    realloc(data, length + bytes);
+    size += bytes;
 }

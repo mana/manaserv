@@ -90,58 +90,29 @@ long MessageIn::readLong()
 
 std::string MessageIn::readString(int length)
 {
-    if (packet) // If there a good packet
-    {
-        int stringLength = 0;
-        std::string readString = "";
+    int stringLength = 0;
+    std::string readString = "";
 
-        if ( length != -1 ) // if the length isn't specified, read it in the packet
-        {
-            // If the length of the packet is sufficient for us to read the length of the string
-            if ( (pos + sizeof(short)) <= packet->length )
-            {
-                // We first read the length of the string given by the short before it.
-                stringLength = (short)SDLNet_Read16(&(packet->data[pos]));
-                pos += sizeof(short);
-            }
-            else
-            {
-                // Place us to the end as the size is a short
-                pos = packet->length;
-            }
-        }
-        else // if the length is specified
-        {
-                stringLength = length;
-        }
+    if (packet) {
+	// get string length
+	if (length < 0) {
+	    stringLength = (short) packet->data[pos];
+	    pos += sizeof(short);
+	} else {
+	    stringLength = length;
+	}
 
-        if ( stringLength > 0 )
-        {
-            if ( (pos + stringLength) <= packet->length ) // If there's enough length to copy
-            {
-                char tempChar[stringLength+1];
-                memcpy(&tempChar, packet->data, stringLength);
-                readString = tempChar; // We first copy the entire char array
-                // And then, we copy from the pos
-                // to the stringLength.
-                readString = readString.substr(pos,stringLength);
-                pos += stringLength;
-            }
-            else // if there isn't, copy till the end
-            {
-                char tempChar[packet->length +1];
-                memcpy(&tempChar, packet->data, packet->length - 1);
-                readString = tempChar; // We first copy the entire char array
-                // And then, we copy from the pos
-                // to the length - 1 of the string.
-                readString = readString.substr(pos,packet->length - 1 - pos);
-                pos = packet->length - 1;
-            }
-        }
-        else
-        {
-            // The length of the string is zero ?
-        }
-    } // End if there is a packet
-    return "";
+	// read the string
+	char *tmpString = new char[stringLength + 1];
+	memcpy(tmpString, (void*)&packet->data[pos], stringLength);
+	tmpString[stringLength] = 0;
+	pos += stringLength;
+
+	readString = tmpString;
+	delete tmpString;
+    } else {
+	return "";
+    }
+
+    return readString;
 }

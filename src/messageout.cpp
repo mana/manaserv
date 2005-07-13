@@ -22,10 +22,14 @@
  */
 
 #include "messageout.h"
+#include <iostream>
+#include <cstdlib>
 
 MessageOut::MessageOut():
-    packet(0)
+    packet(0),
+    pos(0)
 {
+    packet = new Packet(NULL, 0);
 }
 
 MessageOut::~MessageOut()
@@ -33,4 +37,45 @@ MessageOut::~MessageOut()
     if (packet) {
         delete packet;
     }
+}
+
+void MessageOut::writeByte(char value)
+{
+    packet->expand(sizeof(char));
+    packet->data[packet->length] = value;
+    packet->length += sizeof(char);
+}
+
+void MessageOut::writeShort(unsigned short value)
+{
+    packet->expand(sizeof(unsigned short));
+    memcpy(&packet->data[packet->length], (void*)&value, sizeof(unsigned short));
+    packet->length += sizeof(unsigned short);
+}
+
+void MessageOut::writeLong(unsigned long value)
+{
+    packet->expand(sizeof(unsigned long));
+    memcpy(&packet->data[packet->length], (void*)&value, sizeof(unsigned long));
+    packet->length += sizeof(unsigned long);
+}
+
+void MessageOut::writeString(const std::string &string, int length)
+{
+    if (length < 0)
+	length = string.length();
+
+    packet->expand(length + sizeof(unsigned short));
+
+    // length prefix
+    memcpy(&packet->data[packet->length], (void*)&length, sizeof(unsigned short));
+    // actual string
+    memcpy(&packet->data[packet->length + sizeof(unsigned short)],
+	   (void*)string.c_str(), length);
+    packet->length += length + sizeof(unsigned short);
+}
+
+const Packet *MessageOut::getPacket()
+{
+    return packet;
 }

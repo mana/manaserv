@@ -156,8 +156,13 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                     else {
                         // Copy the incoming data to the in buffer of this
                         // client
-                        buffer[result] = 0;
-                        LOG_INFO("Received " << buffer);
+                        //buffer[result] = 0;
+                        //LOG_INFO("Received: " << buffer << ", Length: "
+			//	 << result);
+
+
+			LOG_INFO("Received length: "
+				 << result);
 
 #ifdef SCRIPT_SUPPORT
 			// this could be good if you wanted to extend the
@@ -175,11 +180,11 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
 			std::string ipaddr = ip4ToString(SDLNet_TCP_GetPeerAddress(s)->host);
 
 			// generate packet
-			Packet *packet = new Packet(buffer, strlen(buffer));
+			Packet *packet = new Packet(buffer, result);
 			MessageIn msg(packet); // (MessageIn frees packet)
 
 			// make sure that the packet is big enough
-			if (strlen(buffer) >= 4) {
+			if (result >= 4) {
 			    unsigned int messageType = (unsigned int)*packet->data;
 			    if (handlers.find(messageType) != handlers.end()) {
 				// send message to appropriate handler

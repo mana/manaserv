@@ -1,6 +1,8 @@
 #include <SDL.h>
 #include <SDL_net.h>
 #include <stdlib.h>
+#include "defines.h"
+#include "messageout.h"
 
 int main(int argc, char *argv[])
 {
@@ -35,6 +37,15 @@ int main(int argc, char *argv[])
     }
 
     printf("Succesfully connected!\n");
+
+    // Send a login message
+    MessageOut msg;
+    msg.writeByte(MSG_LOGIN);
+    msg.writeString("nym");
+    msg.writeString("password");
+
+    SDLNet_TCP_Send(tcpsock, msg.getPacket()->data, msg.getPacket()->length);
+
     SDLNet_TCP_Close(tcpsock);
 
     return 0;

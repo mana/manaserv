@@ -26,6 +26,9 @@
 
 /**
  * A packet wraps a certain amount of bytes for sending and receiving.
+ *
+ * NOTE: For performance enhancements this class could allocate extra memory
+ * in advance instead of expanding size every time more data is added.
  */
 class Packet
 {
@@ -40,8 +43,16 @@ class Packet
          */
         ~Packet();
 
+	/**
+	 * Expand the packet size
+	 */
+	void expand(unsigned int bytes);
+
         char *data;                  /**< Packet data */
         unsigned int length;         /**< Length of data in bytes */
+
+    private:
+	unsigned int size;           /**< Size of data */
 };
 
 #endif

@@ -23,6 +23,7 @@
 
 #include "accounthandler.h"
 #include "debug.h"
+#include <iostream>
 
 /**
  * Generic interface convention for getting a message and sending it to the
@@ -33,7 +34,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     int result = 0;
 
-    // determine message type
+    // strip message type
+    message.readByte();
+
     /*
     switch(message.type)
     {
@@ -42,6 +45,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             break;
     }
     */
+
+    /*
+    std::cout << "Username: " << message.readString() << ", Password: "
+	      << message.readString() << std::endl;
+    */
+    std::cout << "Data: " << message.readString() << std::endl;
+    std::cout << "Data: " << message.readString() << std::endl;
 
     debugCatch(result);
 }
