@@ -5,7 +5,7 @@ Name=tmwserv
 UnitCount=17
 =======
 Name=tmwserv
-UnitCount=57
+UnitCount=59
 >>>>>>> 1.2
 Type=1
 Ver=1
@@ -463,7 +463,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit58]
-FileName=src\SDL_win32_main.c
+FileName=src\chathandler.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -473,7 +473,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit59]
-FileName=src\items.h
+FileName=src\chathandler.cpp
 CompileCpp=1
 Folder=tmwserv
 Compile=1
