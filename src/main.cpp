@@ -136,8 +136,11 @@ void initialize()
     config.setValue("dbpass", "");
     config.setValue("dbhost", "");
 
-    char *home = getenv("HOME");
-    std::string configPath = home;
+#ifdef WIN32
+    std::string configPath = "";
+#else
+    std::string configPath = getenv("HOME");
+#endif
     configPath += "/.tmwserv.xml";
     config.init(configPath);
 }

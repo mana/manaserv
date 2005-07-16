@@ -17,7 +17,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=_@@_
 CppCompiler=-DSQLITE_SUPPORT_@@_
-Linker=-lSDL_@@_-lSDL_net_@@_-lsqlite3_@@_-lcrypto_@@_-llibxml2_@@_-mconsole_@@_-mwindows_@@_
+Linker=-lmingw32_@@_-lSDL_@@_-lSDL_net_@@_-lsqlite3_@@_-lcrypto_@@_-llibxml2_@@_-mconsole_@@_-mwindows_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -32,7 +32,7 @@ CustomMakefile=
 IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=0000000000000000000100
+CompilerSettings=0000000000000001000000
 
 [Unit3]
 FileName=src\dal\dataprovider.h
@@ -462,16 +462,6 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit57]
-FileName=src\SDL_win32_main.c
-CompileCpp=1
-Folder=tmwserv
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
 [Unit58]
 FileName=src\SDL_win32_main.c
 CompileCpp=1
@@ -684,6 +674,16 @@ BuildCmd=
 
 [Unit53]
 FileName=src\configuration.cpp
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit57]
+FileName=src\SDL_win32_main.c
 CompileCpp=1
 Folder=tmwserv
 Compile=1
