@@ -58,13 +58,18 @@ typedef enum {
  * Enumerated type for received server messages
  */
 enum {
-    MSG_LOGIN = 0,
+    MSG_ACCOUNT = 0,
     MSG_MOVE,
     MSG_ATTACK,
     MSG_PICKUP,
     MSG_DROP,
     MSG_TRADE,
     MSG_CHAT
+};
+
+enum {
+    MSG_ACCOUNT_LOGIN = 0,
+    MSG_ACCOUNT_REGISTER
 };
 
 // NOTE: Maybe it would be better to reuse some enumerated types with both

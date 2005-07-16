@@ -37,11 +37,15 @@ Packet::Packet(const char *data, int length):
 Packet::~Packet()
 {
     // Clean up the data
-    delete[] data;
+    if (data)
+	delete[] data;
 }
 
 void Packet::expand(unsigned int bytes)
 {
-    realloc(data, length + bytes);
+    char *newData = (char*)malloc(length + bytes);
+    memcpy(newData, (void*)data, length);
+    delete []data;
+    data = newData;
     size += bytes;
 }

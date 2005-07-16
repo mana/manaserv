@@ -26,8 +26,7 @@
 #include <cstdlib>
 
 MessageOut::MessageOut():
-    packet(0),
-    pos(0)
+    packet(0)
 {
     packet = new Packet(NULL, 0);
 }
@@ -72,6 +71,7 @@ void MessageOut::writeString(const std::string &string, int length)
     // actual string
     memcpy(&packet->data[packet->length + sizeof(unsigned short)],
 	   (void*)string.c_str(), length);
+
     packet->length += length + sizeof(unsigned short);
 }
 

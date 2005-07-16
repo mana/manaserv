@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
     //
 
     // Register message handlers
-    connectionHandler->registerHandler(MSG_LOGIN, accountHandler);
+    connectionHandler->registerHandler(MSG_ACCOUNT, accountHandler);
 
     //LOG_INFO("The Mana World Server v" << PACKAGE_VERSION) PACKAGE_VERSION undeclared
     session->startListen(connectionHandler.get(), SERVER_PORT);

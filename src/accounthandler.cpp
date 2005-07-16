@@ -23,7 +23,13 @@
 
 #include "accounthandler.h"
 #include "debug.h"
+#include "storage.h"
+#include "account.h"
 #include <iostream>
+
+using tmwserv::Account;
+using tmwserv::AccountPtr;
+using tmwserv::Storage;
 
 /**
  * Generic interface convention for getting a message and sending it to the
@@ -34,24 +40,57 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     int result = 0;
 
-    // strip message type
+    // strip message type byte
     message.readByte();
 
-    /*
-    switch(message.type)
-    {
-        case TYPE_LOGIN:
-            result = loginMessage(computer, message);
-            break;
-    }
-    */
+    Storage &store = Storage::instance("tmw");
 
-    /*
-    std::cout << "Username: " << message.readString() << ", Password: "
-	      << message.readString() << std::endl;
-    */
-    std::cout << "Data: " << message.readString() << std::endl;
-    std::cout << "Data: " << message.readString() << std::endl;
+    // get message type
+    char type = message.readByte();
+
+    switch(type)
+    {
+        case MSG_ACCOUNT_LOGIN:
+	{
+	    std::string username = message.readString();
+	    std::string password = message.readString();
+
+	    // see if the account exists
+	    Account *acc = store.getAccount(username);
+	    if (!acc) {
+		// account doesn't exist -- send error to client
+		std::cout << "Account does not exist " << username << std::endl;
+		return;
+	    }
+	    
+	    if (acc->getPassword() != password) {
+		// bad password -- send error to client
+		std::cout << "Bad password for " << username << std::endl;
+		return;
+	    }
+	    
+	    // Login OK! (send an OK message or something)
+	    std::cout << "Login OK by " << username << std::endl;
+        } break;
+
+        case MSG_ACCOUNT_REGISTER:
+	{
+	    std::string username = message.readString();
+	    std::string password = message.readString();
+	    std::string email = message.readString();
+
+	    AccountPtr acc(new Account(username, password, email));
+	    store.addAccount(acc);
+
+	    std::cout << "Account registered" << std::endl;
+	    store.flush(); // flush changes
+	} break;
+
+        default:
+	    std::cout << "Invalid message type" << std::endl;
+	    break;
+    }
+
 
     debugCatch(result);
 }

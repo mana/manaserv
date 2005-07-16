@@ -59,7 +59,6 @@ class MessageOut
 
     private:
         Packet *packet;                      /**< Created packet. */
-	unsigned int pos;                    /**< Current position in packet */
 };
 
 #endif

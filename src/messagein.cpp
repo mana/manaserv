@@ -52,7 +52,7 @@ char MessageIn::readByte()
     return -1;
 }
 
-short MessageIn::readShort()
+unsigned short MessageIn::readShort()
 {
     if (packet) // if Packet exists
     {
@@ -70,7 +70,7 @@ short MessageIn::readShort()
     return -1;
 }
 
-long MessageIn::readLong()
+unsigned long MessageIn::readLong()
 {
     if (packet) // if Packet exists
     {
@@ -100,6 +100,11 @@ std::string MessageIn::readString(int length)
 	    pos += sizeof(short);
 	} else {
 	    stringLength = length;
+	}
+
+	// make sure the string isn't erroneus
+	if (pos + length > packet->length) {
+	    return "";
 	}
 
 	// read the string
