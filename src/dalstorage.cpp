@@ -370,10 +370,9 @@ DALStorage::createTable(const std::string& tblName,
         alreadyExists += tblName;
         alreadyExists += "' already exists";
 #elif defined (POSTGRESQL_SUPPORT)
-	std::string alreadyExists("table ");
+        std::string alreadyExists("table ");
         alreadyExists += tblName;
         alreadyExists += " already exists";
-
 #else // SQLITE_SUPPORT
         std::string alreadyExists("table ");
         alreadyExists += tblName;

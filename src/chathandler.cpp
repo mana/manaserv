@@ -27,24 +27,26 @@
 
 void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
-    char type = message.readByte();
+    int type = message.readShort();
 
     switch (type) {
         case CMSG_SAY:
-        {
-	    std::string text = message.readString();
-	    short channel = message.readShort();
-	    std::cout << "Say (" << channel << "): " << text << std::endl;
-	} break;
+            {
+                std::string text = message.readString();
+                short channel = message.readShort();
+                std::cout << "Say (" << channel << "): " << text << std::endl;
+            }
+            break;
 
         case CMSG_ANNOUNCE:
-        {
-	    std::string text = message.readString();
-	    std::cout << "Announce: " << text << std::endl;
-	} break;
+            {
+                std::string text = message.readString();
+                std::cout << "Announce: " << text << std::endl;
+            }
+            break;
 
         default:
-	    std::cout << "Invalid message type" << std::endl;
-	    break;
+            std::cout << "Invalid message type" << std::endl;
+            break;
     }
 }

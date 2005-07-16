@@ -42,56 +42,57 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
     Storage &store = Storage::instance("tmw");
 
-    char type = message.readByte();
+    int type = message.readByte();
 
     switch(type)
     {
         case CMSG_LOGIN:
-	{
-	    std::string username = message.readString();
-	    std::string password = message.readString();
+            {
+                std::string username = message.readString();
+                std::string password = message.readString();
 
-	    // see if the account exists
-	    Account *acc = store.getAccount(username);
-	    if (!acc) {
-		// account doesn't exist -- send error to client
-		std::cout << "Account does not exist " << username << std::endl;
-		return;
-	    }
-	    
-	    if (acc->getPassword() != password) {
-		// bad password -- send error to client
-		std::cout << "Bad password for " << username << std::endl;
-		return;
-	    }
-	    
-	    // Login OK! (send an OK message or something)
-	    std::cout << "Login OK by " << username << std::endl;
-        } break;
+                // see if the account exists
+                Account *acc = store.getAccount(username);
+                if (!acc) {
+                    // account doesn't exist -- send error to client
+                    std::cout << "Account does not exist " << username
+                        << std::endl;
+                    return;
+                }
+
+                if (acc->getPassword() != password) {
+                    // bad password -- send error to client
+                    std::cout << "Bad password for " << username << std::endl;
+                    return;
+                }
+
+                // Login OK! (send an OK message or something)
+                std::cout << "Login OK by " << username << std::endl;
+            } break;
 
         case CMSG_REGISTER:
-	{
-	    std::string username = message.readString();
-	    std::string password = message.readString();
-	    std::string email = message.readString();
+            {
+                std::string username = message.readString();
+                std::string password = message.readString();
+                std::string email = message.readString();
 
-	    AccountPtr acc(new Account(username, password, email));
-	    store.addAccount(acc);
+                AccountPtr acc(new Account(username, password, email));
+                store.addAccount(acc);
 
-	    std::cout << "Account registered" << std::endl;
-	    store.flush(); // flush changes
-	} break;
+                std::cout << "Account registered" << std::endl;
+                store.flush(); // flush changes
+            } break;
 
         case CMSG_CHAR_CREATE:
-	{
-	    std::string name = message.readString();
-	    // TODO: Finish this message type (should a player customize stats
-	    // slightly?)
-	} break;
+            {
+                std::string name = message.readString();
+                // TODO: Finish this message type (should a player customize
+                //  stats slightly?)
+            } break;
 
         default:
-	    std::cout << "Invalid message type" << std::endl;
-	    break;
+            std::cout << "Invalid message type" << std::endl;
+            break;
     }
 
     debugCatch(result);
@@ -118,13 +119,13 @@ int AccountHandler::loginMessage(NetComputer &computer, MessageIn &message)
     // HANDLE_STATUS_BANNED
     // RETURN TMW_ACCOUNTERROR_ALREADYASSIGNED if: the handle is already
     // assigned
-    
+
     // Get the character within that handle that the player is requesting
     // RETURN TMW_ACCOUNTERROR_CHARNOTFOUND if: character not found
-    
+
     // Assign the player to that character
     // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: assignment not successful
-    
+
     // return TMW_SUCCESS -- successful exit
     return TMW_SUCCESS;
 }
@@ -143,9 +144,9 @@ AccountHandler::assignAccount(NetComputer &computer, tmwserv::Account *account)
 {
     // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: the account was accessed before
     //                                          being initalized.
-    
+
     // Assign the handle
-    
-    
+
+
     return TMW_SUCCESS;
 }

@@ -28,6 +28,9 @@
 
 #include "packet.h"
 
+/**
+ * Used for building an outgoing message.
+ */
 class MessageOut
 {
     public:
@@ -53,12 +56,25 @@ class MessageOut
 
         /**
          * Returns an instance of Packet derived from the written data. Use for
-         * sending the packet.
+         * sending the packet. No more writing to the packet may be done after
+         * a call to this method.
          */
         const Packet *getPacket();
 
     private:
-        Packet *packet;                      /**< Created packet. */
+        /**
+         * Expand the packet data to be able to hold more data.
+         *
+         * NOTE: For performance enhancements this method could allocate extra
+         * memory in advance instead of expanding size every time more data is
+         * added.
+         */
+        void expand(unsigned int size);
+
+        Packet *mPacket;                     /**< Created packet. */
+        char *mData;                         /**< Data building up. */
+        unsigned int mDataSize;              /**< Size of data. */
+        unsigned int mPos;                   /**< Position in the data. */
 };
 
 #endif

@@ -37,6 +37,11 @@ class MessageHandler
 {
     public:
         /**
+         * Destructor.
+         */
+        virtual ~MessageHandler() {};
+
+        /**
          * Called when a message is received with a message ID that corresponds
          * to an ID this message handler registered to handle.
          */

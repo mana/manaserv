@@ -45,24 +45,27 @@
  * This function may seem unoptimized, except it is this way to allow for
  * thread safety.
  */
-std::vector<std::string> stringSplit(const std::string &str,
-				     const std::string &split)
+std::vector<std::string>
+stringSplit(const std::string &str,
+            const std::string &split)
 {
     std::vector<std::string> result; // temporary result
     unsigned int i;
     unsigned int last = 0;
 
     // iterate through string
-    for (i = 0; i < str.length(); i++) {
-	if (str.compare(i, split.length(), split.c_str(), split.length()) == 0) {
-	    result.push_back(str.substr(last, i - last));
-	    last = i + 1;
-	}
+    for (i = 0; i < str.length(); i++)
+    {
+        if (str.compare(i, split.length(), split.c_str(), split.length()) == 0)
+        {
+            result.push_back(str.substr(last, i - last));
+            last = i + 1;
+        }
     }
-    
+
     // add remainder of string
     if (last < str.length()) {
-	result.push_back(str.substr(last, str.length()));
+        result.push_back(str.substr(last, str.length()));
     }
 
     return result;
@@ -71,7 +74,8 @@ std::vector<std::string> stringSplit(const std::string &str,
 /**
  * Convert a IP4 address into its string representation
  */
-std::string ip4ToString(unsigned int ip4addr)
+std::string
+ip4ToString(unsigned int ip4addr)
 {
     std::stringstream ss;
     ss << (ip4addr & 0x000000ff) << "."
@@ -92,7 +96,8 @@ ConnectionHandler::ConnectionHandler()
 {
 }
 
-void ConnectionHandler::startListen(ListenThreadData *ltd)
+void
+ConnectionHandler::startListen(ListenThreadData *ltd)
 {
     // Allocate a socket set
     SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
@@ -158,46 +163,50 @@ void ConnectionHandler::startListen(ListenThreadData *ltd)
                         // client
                         //buffer[result] = 0;
                         //LOG_INFO("Received: " << buffer << ", Length: "
-			//	 << result);
+                        //  << result);
 
 
-			LOG_INFO("Received length: "
-				 << result);
+                        LOG_INFO("Received length: "
+                                << result);
 
 #ifdef SCRIPT_SUPPORT
-			// this could be good if you wanted to extend the
-			// server protocol using a scripting language. This
-			// could be attained by using allowing scripts to
-			// "hook" certain messages.
+                        // this could be good if you wanted to extend the
+                        // server protocol using a scripting language. This
+                        // could be attained by using allowing scripts to
+                        // "hook" certain messages.
 
                         //script->message(buffer);
 #endif
 
-			// if the scripting subsystem didn't hook the message
-			// it will be handled by the default message handler.
+                        // if the scripting subsystem didn't hook the message
+                        // it will be handled by the default message handler.
 
-			// convert the client IP address to string representation
-			std::string ipaddr = ip4ToString(SDLNet_TCP_GetPeerAddress(s)->host);
+                        // convert the client IP address to string
+                        // representation
+                        std::string ipaddr = ip4ToString(
+                                SDLNet_TCP_GetPeerAddress(s)->host);
 
-			// generate packet
-			Packet *packet = new Packet(buffer, result);
-			MessageIn msg(packet); // (MessageIn frees packet)
+                        // generate packet
+                        Packet *packet = new Packet(buffer, result);
+                        MessageIn msg(packet); // (MessageIn frees packet)
 
-			// make sure that the packet is big enough
-			if (result >= 4) {
-			    unsigned int messageType = (unsigned int)*packet->data;
-			    if (handlers.find(messageType) != handlers.end()) {
-				// send message to appropriate handler
-				handlers[messageType]->receiveMessage(*comp, msg);
-			    } else {
-				// bad message (no registered handler)
-				LOG_ERROR("Unhandled message received from "
-					  << ipaddr);
-			    }
-			} else {
-			    LOG_ERROR("Message too short from " << ipaddr);
-			}
-			//
+                        // make sure that the packet is big enough
+                        if (result >= 4) {
+                            unsigned int messageType =
+                                (unsigned int)*packet->data;
+                            if (handlers.find(messageType) != handlers.end())
+                            {
+                                // send message to appropriate handler
+                                handlers[messageType]->receiveMessage(
+                                        *comp, msg);
+                            } else {
+                                // bad message (no registered handler)
+                                LOG_ERROR("Unhandled message received from "
+                                        << ipaddr);
+                            }
+                        } else {
+                            LOG_ERROR("Message too short from " << ipaddr);
+                        }
                     }
                 }
 

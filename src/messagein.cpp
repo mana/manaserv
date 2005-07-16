@@ -24,28 +24,28 @@
 #include "messagein.h"
 #include <SDL_net.h>
 
-MessageIn::MessageIn(Packet *p)
+MessageIn::MessageIn(Packet *packet):
+    mPacket(packet),
+    mPos(0)
 {
-    pos = 0;
-    packet = p;
 }
 
 MessageIn::~MessageIn()
 {
-    delete packet; // To be removed if the packet is deleted elsewhere.
+    delete mPacket; // To be removed if the packet is deleted elsewhere.
 }
 
 char MessageIn::readByte()
 {
-    if (packet) // if Packet exists
+    if (mPacket)
     {
-        if ( pos < packet->length ) // if there is enough to read
+        if ( mPos < mPacket->length ) // if there is enough to read
         {
-            return packet->data[pos++];
+            return mPacket->data[mPos++];
         }
         else
         {
-            pos = packet->length - 1;
+            mPos = mPacket->length - 1;
             return 0;
         }
     }
@@ -54,12 +54,12 @@ char MessageIn::readByte()
 
 short MessageIn::readShort()
 {
-    if (packet) // if Packet exists
+    if (mPacket)
     {
-        if ( (pos + sizeof(short)) <= packet->length )
+        if ( (mPos + sizeof(short)) <= mPacket->length )
         {
-            pos += sizeof(short);
-            return (short) SDLNet_Read16(&(packet->data[pos - sizeof(short)]));
+            mPos += sizeof(short);
+            return (short) SDLNet_Read16(&(mPacket->data[mPos - sizeof(short)]));
         }
         else
         {
@@ -72,12 +72,12 @@ short MessageIn::readShort()
 
 long MessageIn::readLong()
 {
-    if (packet) // if Packet exists
+    if (mPacket)
     {
-        if ( (pos + sizeof(long)) <= packet->length )
+        if ( (mPos + sizeof(long)) <= mPacket->length )
         {
-            pos += sizeof(long);
-            return (long) SDLNet_Read32(&(packet->data[pos - sizeof(long)]));
+            mPos += sizeof(long);
+            return (long) SDLNet_Read32(&(mPacket->data[mPos - sizeof(long)]));
         }
         else
         {
@@ -93,30 +93,28 @@ std::string MessageIn::readString(int length)
     int stringLength = 0;
     std::string readString = "";
 
-    if (packet) {
-	// get string length
-	if (length < 0) {
-	    stringLength = (short) packet->data[pos];
-	    pos += sizeof(short);
-	} else {
-	    stringLength = length;
-	}
+    if (mPacket)
+    {
+        // Get string length
+        if (length < 0) {
+            stringLength = readShort();
+        } else {
+            stringLength = length;
+        }
 
-	// make sure the string isn't erroneus
-	if (pos + length > packet->length) {
-	    return "";
-	}
+        // Make sure the string isn't erroneus
+        if (mPos + length > mPacket->length) {
+            return "";
+        }
 
-	// read the string
-	char *tmpString = new char[stringLength + 1];
-	memcpy(tmpString, (void*)&packet->data[pos], stringLength);
-	tmpString[stringLength] = 0;
-	pos += stringLength;
+        // Read the string
+        char *tmpString = new char[stringLength + 1];
+        memcpy(tmpString, (void*)&mPacket->data[mPos], stringLength);
+        tmpString[stringLength] = 0;
+        mPos += stringLength;
 
-	readString = tmpString;
-	delete tmpString;
-    } else {
-	return "";
+        readString = tmpString;
+        delete tmpString;
     }
 
     return readString;

@@ -62,11 +62,11 @@ int main(int argc, char *argv[])
     msg.writeString("Hello World!");
     msg.writeShort(0);
     */
-    
+
     // message hex
     /*
     for (unsigned int i = 0; i < msg.getPacket()->length; i++) {
-	    printf("%x ", msg.getPacket()->data[i]);
+        printf("%x ", msg.getPacket()->data[i]);
     }
     printf("\n");
     */

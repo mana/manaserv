@@ -28,7 +28,7 @@
 #include <string>
 
 /**
- * A helper class to 
+ * Used for parsing an incoming message.
  */
 class MessageIn
 {
@@ -36,7 +36,7 @@ class MessageIn
         /**
          * Constructor.
          */
-        MessageIn(Packet *p);
+        MessageIn(Packet *packet);
 
         /**
          * Destructor.
@@ -56,13 +56,12 @@ class MessageIn
         std::string readString(int length = -1);
 
     private:
-        Packet *packet;
-        
+        Packet *mPacket;
+
         /**
-         * Actual Position in the packet
-         * From 0 to p->length - 1.
+         * Actual Position in the packet. From 0 to packet->length - 1.
          */
-        unsigned int pos; 
+        unsigned int mPos;
 };
 
 #endif

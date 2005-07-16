@@ -31,21 +31,10 @@ Packet::Packet(const char *data, int length):
     // Create a copy of the data
     this->data = new char[length];
     memcpy(this->data, data, length);
-    size = length;
 }
 
 Packet::~Packet()
 {
     // Clean up the data
-    if (data)
-	delete[] data;
-}
-
-void Packet::expand(unsigned int bytes)
-{
-    char *newData = (char*)malloc(length + bytes);
-    memcpy(newData, (void*)data, length);
-    delete []data;
-    data = newData;
-    size += bytes;
+    delete[] data;
 }

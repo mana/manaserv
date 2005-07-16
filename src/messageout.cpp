@@ -23,59 +23,92 @@
 
 #include "messageout.h"
 #include <iostream>
-#include <cstdlib>
+#include <SDL_net.h>
 
 MessageOut::MessageOut():
-    packet(0)
+    mPacket(0),
+    mData(0),
+    mDataSize(0),
+    mPos(0)
 {
-    packet = new Packet(NULL, 0);
 }
 
 MessageOut::~MessageOut()
 {
-    if (packet) {
-        delete packet;
+    if (mPacket) {
+        delete mPacket;
     }
+
+    if (mData) {
+        free(mData);
+    }
+}
+
+void MessageOut::expand(size_t bytes)
+{
+    mData = (char*)realloc(mData, bytes);
+    mDataSize = bytes;
 }
 
 void MessageOut::writeByte(char value)
 {
-    packet->expand(sizeof(char));
-    packet->data[packet->length] = value;
-    packet->length += sizeof(char);
+    expand(mPos + sizeof(char));
+    mData[mPos] = value;
+    mPos += sizeof(char);
 }
 
 void MessageOut::writeShort(short value)
 {
-    packet->expand(sizeof(short));
-    memcpy(&packet->data[packet->length], (void*)&value, sizeof(short));
-    packet->length += sizeof(short);
+    expand(mPos + sizeof(short));
+    SDLNet_Write16(value, &mData[mPos]);
+    mPos += sizeof(short);
 }
 
 void MessageOut::writeLong(long value)
 {
-    packet->expand(sizeof(long));
-    memcpy(&packet->data[packet->length], (void*)&value, sizeof(long));
-    packet->length += sizeof(long);
+    expand(mPos + sizeof(long));
+    SDLNet_Write32(value, &mData[mPos]);
+    mPos += sizeof(long);
 }
 
 void MessageOut::writeString(const std::string &string, int length)
 {
+    std::string toWrite = string;
+
     if (length < 0)
-	length = string.length();
+    {
+        // Write the length at the start if not fixed
+        writeShort(string.length());
+        std::string toWrite = string;
 
-    packet->expand(length + sizeof(unsigned short));
+        expand(mPos + string.length());
+    }
+    else if (length < (int)string.length())
+    {
+        // Make sure the length of the string is no longer than specified
+        toWrite = string.substr(0, length);
 
-    // length prefix
-    memcpy(&packet->data[packet->length], (void*)&length, sizeof(unsigned short));
-    // actual string
-    memcpy(&packet->data[packet->length + sizeof(unsigned short)],
-	   (void*)string.c_str(), length);
+        expand(mPos + length);
+    }
 
-    packet->length += length + sizeof(unsigned short);
+    // Write the actual string
+    memcpy(&mData[mPos], (void*)toWrite.c_str(), toWrite.length());
+    mPos += toWrite.length();
+
+    // Pad remaining space with zeros
+    if (length > (int)toWrite.length())
+    {
+        memset(&mData[mPos], '\0', length - toWrite.length());
+        mPos += length - toWrite.length();
+    }
 }
 
 const Packet *MessageOut::getPacket()
 {
-    return packet;
+    if (!mPacket)
+    {
+        mPacket = new Packet(mData, mDataSize);
+    }
+
+    return mPacket;
 }

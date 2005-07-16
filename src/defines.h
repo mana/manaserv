@@ -59,46 +59,47 @@ typedef enum {
  */
 enum {
     // Login/Register
-    CMSG_REGISTER = 0,
-    CMSG_ENCRYPTED_REGISTER,
-    SMSG_REGISTER_RESPONSE,
-    CMSG_LOGIN,
-    CMSG_ENCRYPTED_LOGIN,
-    SMSG_LOGIN_ERROR,
-    SMSG_LOGIN_CONFIRM,
-    CMSG_CHAR_CREATE,
-    SMSG_CHAR_CREATE_RESPONSE,
+    CMSG_REGISTER                = 0x0000,
+    CMSG_ENCRYPTED_REGISTER      = 0x0001,
+    SMSG_REGISTER_RESPONSE       = 0x0002,
+    CMSG_LOGIN                   = 0x0010,
+    CMSG_ENCRYPTED_LOGIN         = 0x0011,
+    SMSG_LOGIN_ERROR             = 0x0012,
+    SMSG_LOGIN_CONFIRM           = 0x0013,
+    CMSG_CHAR_CREATE             = 0x0020,
+    SMSG_CHAR_CREATE_RESPONSE    = 0x0021,
 
     // Objects
-    SMSG_NEW_OBJECT = 20,
-    SMSG_REMOVE_OBJECT,
-    SMSG_CHANGE_OBJECT,
-    CMSG_PICKUP,
-    CMSG_USER_OBJECT,
+    SMSG_NEW_OBJECT              = 0x0100,
+    SMSG_REMOVE_OBJECT           = 0x0101,
+    SMSG_CHANGE_OBJECT           = 0x0102,
+    CMSG_PICKUP                  = 0x0110,
+    CMSG_USE_OBJECT              = 0x0120,
 
     // Beings
-    SMSG_NEW_BEING = 30,
-    SMSG_REMOVE_BEING,
-    SMSG_INVENTORY_UPD,
-    SMSG_EQUIPMENT_UPD,
-    SMSG_ATTACK,
-    SMSG_PATH,
-    CMSG_TARGET,
-    CMSG_WALK,
-    CMSG_START_TRADE,
-    CMSG_START_TALK,
-    CMSG_REQ_TRADE,
+    SMSG_NEW_BEING               = 0x0200,
+    SMSG_REMOVE_BEING            = 0x0201,
+
+    SMSG_INVENTORY_UPD           = 0x0210,
+    SMSG_EQUIPMENT_UPD           = 0x0220,
+    SMSG_ATTACK                  = 0x0230,
+    SMSG_PATH                    = 0x0240,
+    CMSG_TARGET                  = 0x0250,
+    CMSG_WALK                    = 0x0260,
+    CMSG_START_TRADE             = 0x0270,
+    CMSG_START_TALK              = 0x0280,
+    CMSG_REQ_TRADE               = 0x0290,
 
     // Items
-    CMSG_USE_ITEM = 40,
-    CMSG_EQUIP,
+    CMSG_USE_ITEM                = 0x0300,
+    CMSG_EQUIP                   = 0x0301,
 
     // Chat
-    SMSG_CHAT = 60,
-    SMSG_SYSTEM,
-    SMSG_ANNOUNCEMENT,
-    CMSG_SAY,
-    CMSG_ANNOUNCE,
+    SMSG_CHAT                    = 0x0400,
+    SMSG_SYSTEM                  = 0x0401,
+    SMSG_ANNOUNCEMENT            = 0x0402,
+    CMSG_SAY                     = 0x0410,
+    CMSG_ANNOUNCE                = 0x0411,
 };
 
 
