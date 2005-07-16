@@ -52,7 +52,7 @@ char MessageIn::readByte()
     return -1;
 }
 
-unsigned short MessageIn::readShort()
+short MessageIn::readShort()
 {
     if (packet) // if Packet exists
     {
@@ -70,7 +70,7 @@ unsigned short MessageIn::readShort()
     return -1;
 }
 
-unsigned long MessageIn::readLong()
+long MessageIn::readLong()
 {
     if (packet) // if Packet exists
     {

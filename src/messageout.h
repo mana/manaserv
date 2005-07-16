@@ -42,8 +42,8 @@ class MessageOut
         ~MessageOut();
 
         void writeByte(char value);          /**< Reads a byte. */
-        void writeShort(unsigned short value);/**< Reads a short. */
-        void writeLong(unsigned long value); /**< Reads a long. */
+        void writeShort(short value);        /**< Reads a short. */
+        void writeLong(long value);          /**< Reads a long. */
 
         /**
          * Writes a string. If a fixed length is not given (-1), it is stored

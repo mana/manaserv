@@ -40,17 +40,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     int result = 0;
 
-    // strip message type byte
-    message.readByte();
-
     Storage &store = Storage::instance("tmw");
 
-    // get message type
     char type = message.readByte();
 
     switch(type)
     {
-        case MSG_ACCOUNT_LOGIN:
+        case CMSG_LOGIN:
 	{
 	    std::string username = message.readString();
 	    std::string password = message.readString();
@@ -73,7 +69,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 	    std::cout << "Login OK by " << username << std::endl;
         } break;
 
-        case MSG_ACCOUNT_REGISTER:
+        case CMSG_REGISTER:
 	{
 	    std::string username = message.readString();
 	    std::string password = message.readString();
@@ -86,11 +82,17 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 	    store.flush(); // flush changes
 	} break;
 
+        case CMSG_CHAR_CREATE:
+	{
+	    std::string name = message.readString();
+	    // TODO: Finish this message type (should a player customize stats
+	    // slightly?)
+	} break;
+
         default:
 	    std::cout << "Invalid message type" << std::endl;
 	    break;
     }
-
 
     debugCatch(result);
 }

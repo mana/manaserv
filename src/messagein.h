@@ -45,8 +45,8 @@ class MessageIn
 
 
         char readByte();              /**< Reads a byte. */
-        unsigned short readShort();   /**< Reads a short. */
-        unsigned long readLong();     /**< Reads a long. */
+        short readShort();            /**< Reads a short. */
+        long readLong();              /**< Reads a long. */
 
         /**
          * Reads a string. If a length is not given (-1), it is assumed

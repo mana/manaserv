@@ -41,27 +41,35 @@ int main(int argc, char *argv[])
     // Send a login message
     MessageOut msg;
 
-    // Login
-    ///*
-    msg.writeByte(MSG_ACCOUNT);
-    msg.writeByte(MSG_ACCOUNT_LOGIN);
-    msg.writeString("test");
-    msg.writeString("password");
-    //*/
-
     // Register
     /*
-    msg.writeByte(MSG_ACCOUNT);
-    msg.writeByte(MSG_ACCOUNT_REGISTER);
+    msg.writeByte(CMSG_REGISTER);
     msg.writeString("test");
     msg.writeString("password");
     msg.writeString("test@email.addr");
     */
+
+    // Login
+    ///*
+    msg.writeByte(CMSG_LOGIN);
+    msg.writeString("test");
+    msg.writeString("password");
+    //*/
+
+    // Chat
+    /*
+    msg.writeByte(CMSG_SAY);
+    msg.writeString("Hello World!");
+    msg.writeShort(0);
+    */
     
+    // message hex
+    /*
     for (unsigned int i = 0; i < msg.getPacket()->length; i++) {
 	    printf("%x ", msg.getPacket()->data[i]);
     }
     printf("\n");
+    */
 
     SDLNet_TCP_Send(tcpsock, msg.getPacket()->data, msg.getPacket()->length);
 

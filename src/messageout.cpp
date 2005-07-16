@@ -45,18 +45,18 @@ void MessageOut::writeByte(char value)
     packet->length += sizeof(char);
 }
 
-void MessageOut::writeShort(unsigned short value)
+void MessageOut::writeShort(short value)
 {
-    packet->expand(sizeof(unsigned short));
-    memcpy(&packet->data[packet->length], (void*)&value, sizeof(unsigned short));
-    packet->length += sizeof(unsigned short);
+    packet->expand(sizeof(short));
+    memcpy(&packet->data[packet->length], (void*)&value, sizeof(short));
+    packet->length += sizeof(short);
 }
 
-void MessageOut::writeLong(unsigned long value)
+void MessageOut::writeLong(long value)
 {
-    packet->expand(sizeof(unsigned long));
-    memcpy(&packet->data[packet->length], (void*)&value, sizeof(unsigned long));
-    packet->length += sizeof(unsigned long);
+    packet->expand(sizeof(long));
+    memcpy(&packet->data[packet->length], (void*)&value, sizeof(long));
+    packet->length += sizeof(long);
 }
 
 void MessageOut::writeString(const std::string &string, int length)

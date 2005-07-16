@@ -34,6 +34,7 @@
 
 #include <string>
 
+// TODO: Fix problem with PostgreSQL null primary key's.
 
 /**
  * MySQL specificities:
@@ -74,6 +75,9 @@ const std::string SQL_MAPS_TABLE(
 #elif defined (SQLITE_SUPPORT)
         "id  INTEGER PRIMARY KEY,"
         "map TEXT    NOT NULL"
+#elif defined (POSTGRESQL_SUPPORT)
+        "id  INTEGER PRIMARY KEY,"
+        "map TEXT    NOT NULL"
 #endif
     ");"
 );
@@ -101,6 +105,13 @@ const std::string SQL_ACCOUNTS_TABLE(
         "banned   TINYINT     UNSIGNED NOT NULL,"
         "INDEX (id)"
 #elif defined (SQLITE_SUPPORT)
+        "id       INTEGER     PRIMARY KEY,"
+        "username TEXT        NOT NULL UNIQUE,"
+        "password TEXT        NOT NULL,"
+        "email    TEXT        NOT NULL,"
+        "level    INTEGER     NOT NULL,"
+        "banned   INTEGER     NOT NULL"
+#elif defined (POSTGRESQL_SUPPORT)
         "id       INTEGER     PRIMARY KEY,"
         "username TEXT        NOT NULL UNIQUE,"
         "password TEXT        NOT NULL,"
@@ -165,7 +176,30 @@ const std::string SQL_CHARACTERS_TABLE(
         "vit     INTEGER     NOT NULL,"
         "int     INTEGER     NOT NULL,"
         "dex     INTEGER     NOT NULL,"
-        "luck    INTEGER     NOT NULL"
+        "luck    INTEGER     NOT NULL,"
+        "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
+        "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
+#elif defined (POSTGRESQL_SUPPORT)
+        "id      INTEGER     PRIMARY KEY,"
+        "user_id INTEGER     NOT NULL,"
+        "name    TEXT        NOT NULL UNIQUE,"
+        // general information about the character
+        "gender  INTEGER     NOT NULL,"
+        "level   INTEGER     NOT NULL,"
+        "money   INTEGER     NOT NULL,"
+        // location on the map
+        "x       INTEGER     NOT NULL,"
+        "y       INTEGER     NOT NULL,"
+        "map_id  INTEGER     NOT NULL,"
+        // stats
+        "str     INTEGER     NOT NULL,"
+        "agi     INTEGER     NOT NULL,"
+        "vit     INTEGER     NOT NULL,"
+        "int     INTEGER     NOT NULL,"
+        "dex     INTEGER     NOT NULL,"
+        "luck    INTEGER     NOT NULL,"
+        "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
+        "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
 #endif
     ");"
 );
@@ -188,6 +222,11 @@ const std::string SQL_ITEMS_TABLE(
         "state  TEXT,"
         "INDEX (id)"
 #elif defined (SQLITE_SUPPORT)
+        "id     INTEGER  PRIMARY KEY,"
+        "amount INTEGER  NOT NULL,"
+        "type   INTEGER  NOT NULL,"
+        "state  TEXT"
+#elif defined (POSTGRESQL_SUPPORT)
         "id     INTEGER  PRIMARY KEY,"
         "amount INTEGER  NOT NULL,"
         "type   INTEGER  NOT NULL,"
@@ -225,7 +264,20 @@ const std::string SQL_WORLD_ITEMS_TABLE(
         "map_id    INTEGER  NOT NULL,"
         // time to die (UNIX time)
         "deathtime INTEGER  NOT NULL,"
-        "PRIMARY KEY (id, map_id)"
+        "PRIMARY KEY (id, map_id),"
+        "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
+        "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
+#elif defined (POSTGRESQL_SUPPORT)
+        "id        INTEGER  NOT NULL,"
+        // location on the map
+        "x         INTEGER  NOT NULL,"
+        "y         INTEGER  NOT NULL,"
+        "map_id    INTEGER  NOT NULL,"
+        // time to die (UNIX time)
+        "deathtime INTEGER  NOT NULL,"
+        "PRIMARY KEY (id, map_id),"
+        "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
+        "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
 #endif
     ");"
 );
@@ -244,7 +296,14 @@ const std::string SQL_INVENTORIES_TABLE(
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #elif defined (SQLITE_SUPPORT)
         "id       INTEGER  NOT NULL,"
-        "owner_id INTEGER  NOT NULL"
+        "owner_id INTEGER  NOT NULL,"
+        "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
+        "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
+#elif defined (POSTGRESQL_SUPPORT)
+        "id       INTEGER  NOT NULL,"
+        "owner_id INTEGER  NOT NULL,"
+        "FOREIGN KEY (id)       REFERENCES tmw_items(id),"
+        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #endif
     ");"
 );

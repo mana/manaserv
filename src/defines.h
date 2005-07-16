@@ -55,39 +55,52 @@ typedef enum {
 } Genders;
 
 /**
- * Enumerated type for received server messages
+ * Enumerated type for communicated messages
  */
 enum {
-    MSG_ACCOUNT = 0,
-    MSG_MOVE,
-    MSG_ATTACK,
-    MSG_PICKUP,
-    MSG_DROP,
-    MSG_TRADE,
-    MSG_CHAT
+    // Login/Register
+    CMSG_REGISTER = 0,
+    CMSG_ENCRYPTED_REGISTER,
+    SMSG_REGISTER_RESPONSE,
+    CMSG_LOGIN,
+    CMSG_ENCRYPTED_LOGIN,
+    SMSG_LOGIN_ERROR,
+    SMSG_LOGIN_CONFIRM,
+    CMSG_CHAR_CREATE,
+    SMSG_CHAR_CREATE_RESPONSE,
+
+    // Objects
+    SMSG_NEW_OBJECT = 20,
+    SMSG_REMOVE_OBJECT,
+    SMSG_CHANGE_OBJECT,
+    CMSG_PICKUP,
+    CMSG_USER_OBJECT,
+
+    // Beings
+    SMSG_NEW_BEING = 30,
+    SMSG_REMOVE_BEING,
+    SMSG_INVENTORY_UPD,
+    SMSG_EQUIPMENT_UPD,
+    SMSG_ATTACK,
+    SMSG_PATH,
+    CMSG_TARGET,
+    CMSG_WALK,
+    CMSG_START_TRADE,
+    CMSG_START_TALK,
+    CMSG_REQ_TRADE,
+
+    // Items
+    CMSG_USE_ITEM = 40,
+    CMSG_EQUIP,
+
+    // Chat
+    SMSG_CHAT = 60,
+    SMSG_SYSTEM,
+    SMSG_ANNOUNCEMENT,
+    CMSG_SAY,
+    CMSG_ANNOUNCE,
 };
 
-enum {
-    MSG_ACCOUNT_LOGIN = 0,
-    MSG_ACCOUNT_REGISTER
-};
-
-// NOTE: Maybe it would be better to reuse some enumerated types with both
-// server and client?
-
-/**
- * Enumerated type for messages sent to client
- */
-enum {
-    CMSG_SPAWN = 0, // spawn object
-    CMSG_DESTROY,   // destroy object
-    CMSG_MOVE,      // move object
-    CMSG_ATTACK,    // Player attacked/got attacked by object
-    CMSG_PICKUP,    // Player picked up object
-    CMSG_DROP,      // Player dropped object
-    CMSG_CHAT,      // Another player chatted
-    CMSG_DIALOG     // Message dialog
-};
 
 
 #endif // _TMWSERV_DEFINES_H_

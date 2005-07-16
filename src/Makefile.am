@@ -8,6 +8,8 @@ tmwserv_SOURCES = main.cpp \
 				  configuration.cpp \
 				  accounthandler.h \
 				  accounthandler.cpp \
+				  chathandler.h \
+				  chathandler.cpp \
 				  connectionhandler.h \
 				  connectionhandler.cpp \
 				  debug.h \

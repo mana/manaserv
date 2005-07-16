@@ -31,6 +31,7 @@
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
+#include "chathandler.h"
 #include "storage.h"
 #include "configuration.h"
 
@@ -72,6 +73,7 @@ Skill skillTree("base");  /**< Skill tree */
 
 Configuration config;     /**< XML config reader */
 AccountHandler *accountHandler = new AccountHandler(); /**< Account message handler */
+ChatHandler *chatHandler = new ChatHandler();
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -160,8 +162,9 @@ void deinitialize()
     delete script;
 #endif
 
-    // destro account handler
+    // destroy message handlers
     delete accountHandler;
+    delete chatHandler;
 
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();
@@ -197,7 +200,10 @@ int main(int argc, char *argv[])
     //
 
     // Register message handlers
-    connectionHandler->registerHandler(MSG_ACCOUNT, accountHandler);
+    connectionHandler->registerHandler(CMSG_LOGIN, accountHandler);
+    connectionHandler->registerHandler(CMSG_REGISTER, accountHandler);
+    connectionHandler->registerHandler(CMSG_SAY, chatHandler);
+    connectionHandler->registerHandler(CMSG_ANNOUNCE, chatHandler);
 
     //LOG_INFO("The Mana World Server v" << PACKAGE_VERSION) PACKAGE_VERSION undeclared
     session->startListen(connectionHandler.get(), SERVER_PORT);
