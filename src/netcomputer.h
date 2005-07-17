@@ -27,6 +27,8 @@
 #include "packet.h"
 #include <SDL_net.h>
 #include <string>
+#include <queue>
+#include <list>
 
 // Forward declaration
 class ConnectionHandler;
@@ -44,6 +46,11 @@ class NetComputer
         NetComputer(ConnectionHandler *handler);
 
         /**
+         * Destructor
+         */
+        ~NetComputer();
+
+        /**
          * Returns <code>true</code> if this computer is disconnected.
          */
         bool isDisconnected();
@@ -54,17 +61,29 @@ class NetComputer
         void disconnect(const std::string &reason);
 
         /**
-         * Sends a packet to this computer.
-         * 
+         * Queues (FIFO) a packet for sending to a client.
+         *
          * Note: When we'd want to allow communication through UDP, we could
          *  introduce the reliable argument, which would cause a UDP message
          *  to be sent when set to false.
          */
-        void send(Packet *p);
+        void send(const Packet *p);
         //void send(Packet *p, bool reliable = true);
+
+        /**
+         * Get next message
+         */
+        Packet *front();
+
+        /**
+         * Number of messages in queue
+         */
+        unsigned int size() { return queue.size(); }
 
     private:
         ConnectionHandler *handler;
+
+        std::queue<Packet*> queue; /**< Message Queue (FIFO) */
 };
 
 #endif

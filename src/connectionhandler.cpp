@@ -24,6 +24,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <SDL_net.h>
 
 #include "connectionhandler.h"
 #include "netsession.h"
@@ -192,8 +193,8 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
 
                         // make sure that the packet is big enough
                         if (result >= 4) {
-                            unsigned int messageType =
-                                (unsigned int)*packet->data;
+                            unsigned short messageType =
+                                SDLNet_Read16((void*)packet->data);
                             if (handlers.find(messageType) != handlers.end())
                             {
                                 // send message to appropriate handler
@@ -201,8 +202,8 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                                         *comp, msg);
                             } else {
                                 // bad message (no registered handler)
-                                LOG_ERROR("Unhandled message received from "
-                                        << ipaddr);
+                                LOG_ERROR("Unhandled message (" << messageType
+                                          << ") received from " << ipaddr);
                             }
                         } else {
                             LOG_ERROR("Message too short from " << ipaddr);
@@ -243,4 +244,19 @@ void ConnectionHandler::registerHandler(
         unsigned int msgId, MessageHandler *handler)
 {
     handlers[msgId] = handler;
+}
+
+void ConnectionHandler::sendPackets()
+{
+    for (std::map<NetComputer*, TCPsocket>::iterator i = clients.begin();
+         i != clients.end(); i++) {
+        NetComputer *computer = i->first;
+
+        while (computer->size() > 0) {
+            // Send queued packet
+            Packet *packet = computer->front();
+            SDLNet_TCP_Send(i->second, packet->data, packet->length);
+            delete packet;
+        }
+    }
 }

@@ -25,6 +25,7 @@
 #include "debug.h"
 #include "storage.h"
 #include "account.h"
+#include "messageout.h"
 #include <iostream>
 
 using tmwserv::Account;
@@ -38,11 +39,11 @@ using tmwserv::Storage;
  */
 void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
-    int result = 0;
-
     Storage &store = Storage::instance("tmw");
 
-    int type = message.readByte();
+    int type = message.readShort();
+
+    MessageOut result;
 
     switch(type)
     {
@@ -50,52 +51,63 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 std::string username = message.readString();
                 std::string password = message.readString();
-
+                
                 // see if the account exists
                 Account *acc = store.getAccount(username);
                 if (!acc) {
                     // account doesn't exist -- send error to client
-                    std::cout << "Account does not exist " << username
-                        << std::endl;
-                    return;
-                }
-
-                if (acc->getPassword() != password) {
+                    std::cout << "Account does not exist " << username << std::endl;
+                    
+                    result.writeShort(SMSG_LOGIN_ERROR);
+                    result.writeByte(LOGIN_INVALID_USERNAME);
+                } else if (acc->getPassword() != password) {
                     // bad password -- send error to client
                     std::cout << "Bad password for " << username << std::endl;
-                    return;
+                    
+                    result.writeShort(SMSG_LOGIN_ERROR);
+                    result.writeByte(LOGIN_INVALID_PASSWORD);
+                } else {
+                    // Login OK! (send an OK message or something)
+                    std::cout << "Login OK by " << username << std::endl;
+                    
+                    result.writeShort(SMSG_LOGIN_CONFIRM);
+                    // TODO: Return information about available characters
                 }
-
-                // Login OK! (send an OK message or something)
-                std::cout << "Login OK by " << username << std::endl;
             } break;
-
+            
         case CMSG_REGISTER:
             {
                 std::string username = message.readString();
                 std::string password = message.readString();
                 std::string email = message.readString();
-
+                
                 AccountPtr acc(new Account(username, password, email));
                 store.addAccount(acc);
-
+                
+                result.writeShort(SMSG_REGISTER_RESPONSE);
+                result.writeByte(REGISTER_OK);
+                
                 std::cout << "Account registered" << std::endl;
                 store.flush(); // flush changes
             } break;
-
+            
         case CMSG_CHAR_CREATE:
             {
                 std::string name = message.readString();
-                // TODO: Finish this message type (should a player customize
-                //  stats slightly?)
+                // TODO: Finish this message type (should a player customize stats
+                // slightly?)
+                result.writeShort(LOGIN_UNKNOWN);
             } break;
-
+            
         default:
             std::cout << "Invalid message type" << std::endl;
+            result.writeShort(SMSG_LOGIN_ERROR);
+            result.writeByte(LOGIN_UNKNOWN);
             break;
     }
 
-    debugCatch(result);
+    // return result
+    computer.send(result.getPacket());
 }
 
 /* ----Login Message----

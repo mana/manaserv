@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     // Register
     /*
-    msg.writeByte(CMSG_REGISTER);
+    msg.writeShort(CMSG_REGISTER);
     msg.writeString("test");
     msg.writeString("password");
     msg.writeString("test@email.addr");
@@ -51,27 +51,39 @@ int main(int argc, char *argv[])
 
     // Login
     ///*
-    msg.writeByte(CMSG_LOGIN);
+    msg.writeShort(CMSG_LOGIN);
     msg.writeString("test");
     msg.writeString("password");
     //*/
 
     // Chat
     /*
-    msg.writeByte(CMSG_SAY);
+    msg.writeShort(CMSG_SAY);
     msg.writeString("Hello World!");
     msg.writeShort(0);
     */
 
     // message hex
-    /*
+    ///*
     for (unsigned int i = 0; i < msg.getPacket()->length; i++) {
         printf("%x ", msg.getPacket()->data[i]);
     }
     printf("\n");
-    */
+    //*/
 
     SDLNet_TCP_Send(tcpsock, msg.getPacket()->data, msg.getPacket()->length);
+
+    char data[1024];
+    int recvLength = SDLNet_TCP_Recv(tcpsock, data, 1024);
+    printf("Received:\n");
+    if (recvLength != -1)
+        for (unsigned int i = 0; i < recvLength; i++) {
+            printf("%x ", data[i]);
+        }
+    else
+        printf("ERROR!");
+    printf("\n");
+    
 
     SDLNet_TCP_Close(tcpsock);
 

@@ -79,7 +79,6 @@ enum {
     // Beings
     SMSG_NEW_BEING               = 0x0200,
     SMSG_REMOVE_BEING            = 0x0201,
-
     SMSG_INVENTORY_UPD           = 0x0210,
     SMSG_EQUIPMENT_UPD           = 0x0220,
     SMSG_ATTACK                  = 0x0230,
@@ -102,6 +101,35 @@ enum {
     CMSG_ANNOUNCE                = 0x0411,
 };
 
+// Login return values
+enum {
+    LOGIN_OK = 0,
+    LOGIN_INVALID_USERNAME,
+    LOGIN_INVALID_PASSWORD,
+    LOGIN_INVALID_VERSION,
+    LOGIN_SERVER_FULL,
+    LOGIN_ACCOUNT_BANNED,
+    LOGIN_ACCOUNT_REVIEW,
+    LOGIN_UNKNOWN
+};
+
+enum {
+    REGISTER_OK = 0,
+    REGISTER_INVALID_USERNAME,
+    REGISTER_INVALID_PASSWORD,
+    REGISTER_INVALID_EMAIL,
+    REGISTER_EXISTS_USERNAME,
+    REGISTER_EXISTS_EMAIL
+};
+
+// Character creation return values
+enum {
+    CREATE_INVALID_NAME = 0,
+    CREATE_INVALID_HAIR,
+    CREATE_INVALID_SEX,
+    CREATE_EXISTS_USERNAME,
+    CREATE_EXISTS_EMAIL
+};
 
 
 #endif // _TMWSERV_DEFINES_H_

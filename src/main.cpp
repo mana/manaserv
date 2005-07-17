@@ -239,6 +239,8 @@ int main(int argc, char *argv[])
                 // - Update all active objects/beings
                 updateWorld();
 
+                // Send data to client
+                connectionHandler->sendPackets();
             }
             else if (event.type == SDL_QUIT) {
                 running = false;
