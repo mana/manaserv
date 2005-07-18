@@ -25,18 +25,14 @@
 #include <cstdlib>
 #include <iostream>
 
-NetComputer::NetComputer(ConnectionHandler *handler):
-    handler(handler)
+NetComputer::NetComputer(ConnectionHandler *handler, TCPsocket sock):
+    handler(handler),
+    socket(sock)
 {
 }
 
 NetComputer::~NetComputer()
 {
-    // delete unsent messages
-    while (queue.size() > 0) {
-        delete queue.front();
-        queue.pop();
-    }
 }
 
 void NetComputer::disconnect(const std::string &reason)
@@ -47,18 +43,5 @@ void NetComputer::disconnect(const std::string &reason)
 
 void NetComputer::send(const Packet *p)
 {
-    // Copy the packet
-    Packet *newPacket = new Packet(NULL, 0);
-    newPacket->data = new char[p->length];
-    memcpy(newPacket->data, (void*) p->data, p->length);
-    newPacket->length = p->length;
-
-    queue.push(newPacket);
-}
-
-Packet *NetComputer::front()
-{
-    Packet *ret = queue.front();
-    queue.pop();
-    return ret;
+    SDLNet_TCP_Send(socket, p->data, p->length);
 }

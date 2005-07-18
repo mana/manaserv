@@ -43,7 +43,7 @@ class NetComputer
         /**
          * Constructor.
          */
-        NetComputer(ConnectionHandler *handler);
+        NetComputer(ConnectionHandler *handler, TCPsocket sock);
 
         /**
          * Destructor
@@ -69,21 +69,17 @@ class NetComputer
          */
         void send(const Packet *p);
         //void send(Packet *p, bool reliable = true);
-
+      
         /**
-         * Get next message
+         * Return the socket
          */
-        Packet *front();
-
-        /**
-         * Number of messages in queue
-         */
-        unsigned int size() { return queue.size(); }
+        TCPsocket getSocket() { return socket; }
 
     private:
         ConnectionHandler *handler;
 
         std::queue<Packet*> queue; /**< Message Queue (FIFO) */
+        TCPsocket socket;          /**< Client socket */
 };
 
 #endif

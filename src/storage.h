@@ -279,6 +279,11 @@ class Storage
         virtual void
         delAccount(const std::string& userName) = 0;
 
+        /**
+         * Add character to account.
+         */
+        //virtual void
+        //addCharacter(const Being *);
 
         /**
          * Saves the changes permanently.

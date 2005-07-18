@@ -135,8 +135,8 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                         LOG_ERROR("SDLNet_AddSocket: " << SDLNet_GetError())
                     }
                     else {
-                        NetComputer *comp = new NetComputer(this);
-                        clients[comp] = client;
+                        NetComputer *comp = new NetComputer(this, client);
+                        clients.push_back(comp);
                         computerConnected(comp);
                         LOG_INFO(clients.size() << " clients connected")
                     }
@@ -144,10 +144,10 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
             }
 
             // Check client sockets
-            std::map<NetComputer*, TCPsocket>::iterator i;
+            std::list<NetComputer*>::iterator i;
             for (i = clients.begin(); i != clients.end(); ) {
-                NetComputer *comp = (*i).first;
-                TCPsocket s = (*i).second;
+                NetComputer *comp = *i;
+                TCPsocket s = (*i)->getSocket();
 
                 if (SDLNet_SocketReady(s)) {
                     char buffer[1024];
@@ -213,7 +213,7 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
 
                 // Traverse to next client, possibly deleting current
                 if (comp == NULL) {
-                    std::map<NetComputer*, TCPsocket>::iterator ii = i;
+                    std::list<NetComputer*>::iterator ii = i;
                     ii++;
                     clients.erase(i);
                     i = ii;
@@ -244,19 +244,4 @@ void ConnectionHandler::registerHandler(
         unsigned int msgId, MessageHandler *handler)
 {
     handlers[msgId] = handler;
-}
-
-void ConnectionHandler::sendPackets()
-{
-    for (std::map<NetComputer*, TCPsocket>::iterator i = clients.begin();
-         i != clients.end(); i++) {
-        NetComputer *computer = i->first;
-
-        while (computer->size() > 0) {
-            // Send queued packet
-            Packet *packet = computer->front();
-            SDLNet_TCP_Send(i->second, packet->data, packet->length);
-            delete packet;
-        }
-    }
 }

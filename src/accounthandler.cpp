@@ -94,11 +94,17 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
         case CMSG_CHAR_CREATE:
             {
                 std::string name = message.readString();
+                char hairStyle = message.readByte();
+                char hairColor = message.readByte();
+                char sex = message.readByte();
+
                 // TODO: Finish this message type (should a player customize stats
                 // slightly?)
-                result.writeShort(LOGIN_UNKNOWN);
+
+                result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
+                result.writeShort(CREATE_OK);
             } break;
-            
+
         default:
             std::cout << "Invalid message type" << std::endl;
             result.writeShort(SMSG_LOGIN_ERROR);

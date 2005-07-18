@@ -238,9 +238,6 @@ int main(int argc, char *argv[])
                 // - Handle all messages that are in the message queue
                 // - Update all active objects/beings
                 updateWorld();
-
-                // Send data to client
-                connectionHandler->sendPackets();
             }
             else if (event.type == SDL_QUIT) {
                 running = false;

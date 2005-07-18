@@ -124,7 +124,8 @@ enum {
 
 // Character creation return values
 enum {
-    CREATE_INVALID_NAME = 0,
+    CREATE_OK = 0,
+    CREATE_INVALID_NAME,
     CREATE_INVALID_HAIR,
     CREATE_INVALID_SEX,
     CREATE_EXISTS_USERNAME,
