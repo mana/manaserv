@@ -41,69 +41,70 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     Storage &store = Storage::instance("tmw");
 
-    int type = message.readShort();
-
     MessageOut result;
 
-    switch(type)
+    switch (message.getId())
     {
         case CMSG_LOGIN:
             {
                 std::string username = message.readString();
                 std::string password = message.readString();
-                
+
                 // see if the account exists
                 Account *acc = store.getAccount(username);
                 if (!acc) {
                     // account doesn't exist -- send error to client
                     std::cout << "Account does not exist " << username << std::endl;
-                    
+
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_USERNAME);
                 } else if (acc->getPassword() != password) {
                     // bad password -- send error to client
                     std::cout << "Bad password for " << username << std::endl;
-                    
+
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_PASSWORD);
                 } else {
                     // Login OK! (send an OK message or something)
                     std::cout << "Login OK by " << username << std::endl;
-                    
+
                     result.writeShort(SMSG_LOGIN_CONFIRM);
                     // TODO: Return information about available characters
                 }
-            } break;
-            
+            }
+            break;
+
         case CMSG_REGISTER:
             {
                 std::string username = message.readString();
                 std::string password = message.readString();
                 std::string email = message.readString();
-                
+
                 AccountPtr acc(new Account(username, password, email));
                 store.addAccount(acc);
-                
+
                 result.writeShort(SMSG_REGISTER_RESPONSE);
                 result.writeByte(REGISTER_OK);
-                
+
                 std::cout << "Account registered" << std::endl;
                 store.flush(); // flush changes
-            } break;
-            
+            }
+            break;
+
         case CMSG_CHAR_CREATE:
             {
                 std::string name = message.readString();
-                char hairStyle = message.readByte();
-                char hairColor = message.readByte();
-                char sex = message.readByte();
+                //char hairStyle = message.readByte();
+                //char hairColor = message.readByte();
+                //char sex = message.readByte();
 
                 // TODO: Finish this message type (should a player customize stats
                 // slightly?)
 
                 result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                 result.writeShort(CREATE_OK);
-            } break;
+            }
+            break;
 
         default:
             std::cout << "Invalid message type" << std::endl;

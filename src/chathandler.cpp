@@ -27,9 +27,8 @@
 
 void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
-    int type = message.readShort();
-
-    switch (type) {
+    switch (message.getId())
+    {
         case CMSG_SAY:
             {
                 std::string text = message.readString();

@@ -69,7 +69,7 @@ class NetComputer
          */
         void send(const Packet *p);
         //void send(Packet *p, bool reliable = true);
-      
+
         /**
          * Return the socket
          */

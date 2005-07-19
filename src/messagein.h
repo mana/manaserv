@@ -43,6 +43,7 @@ class MessageIn
          */
         ~MessageIn();
 
+        short getId() { return mId; } /**< Returns the message ID. */
 
         char readByte();              /**< Reads a byte. */
         short readShort();            /**< Reads a short. */
@@ -56,7 +57,8 @@ class MessageIn
         std::string readString(int length = -1);
 
     private:
-        Packet *mPacket;
+        Packet *mPacket;              /**< The packet being processed. */
+        short mId;                    /**< The message ID. */
 
         /**
          * Actual Position in the packet. From 0 to packet->length - 1.

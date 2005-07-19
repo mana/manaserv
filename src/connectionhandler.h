@@ -106,7 +106,9 @@ class ConnectionHandler
 
     private:
         std::map<unsigned int, MessageHandler*> handlers;
-        std::list<NetComputer*> clients;
+
+        typedef std::list<NetComputer*> NetComputers;
+        NetComputers clients;
 };
 
 #endif

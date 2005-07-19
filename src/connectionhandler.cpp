@@ -149,7 +149,8 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                 NetComputer *comp = *i;
                 TCPsocket s = (*i)->getSocket();
 
-                if (SDLNet_SocketReady(s)) {
+                if (SDLNet_SocketReady(s))
+                {
                     char buffer[1024];
                     int result = SDLNet_TCP_Recv(s, buffer, 1024);
                     if (result <= 0) {
@@ -171,7 +172,7 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                                 << result);
 
 #ifdef SCRIPT_SUPPORT
-                        // this could be good if you wanted to extend the
+                        // This could be good if you wanted to extend the
                         // server protocol using a scripting language. This
                         // could be attained by using allowing scripts to
                         // "hook" certain messages.
@@ -179,33 +180,35 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                         //script->message(buffer);
 #endif
 
-                        // if the scripting subsystem didn't hook the message
+                        // If the scripting subsystem didn't hook the message
                         // it will be handled by the default message handler.
 
-                        // convert the client IP address to string
+                        // Convert the client IP address to string
                         // representation
                         std::string ipaddr = ip4ToString(
                                 SDLNet_TCP_GetPeerAddress(s)->host);
 
-                        // generate packet
-                        Packet *packet = new Packet(buffer, result);
-                        MessageIn msg(packet); // (MessageIn frees packet)
+                        // Make sure that the packet is big enough
+                        if (result >= 4)
+                        {
+                            Packet *packet = new Packet(buffer, result);
+                            MessageIn msg(packet); // (MessageIn frees packet)
 
-                        // make sure that the packet is big enough
-                        if (result >= 4) {
-                            unsigned short messageType =
-                                SDLNet_Read16((void*)packet->data);
-                            if (handlers.find(messageType) != handlers.end())
+                            short messageId = msg.getId();
+
+                            if (handlers.find(messageId) != handlers.end())
                             {
                                 // send message to appropriate handler
-                                handlers[messageType]->receiveMessage(
+                                handlers[messageId]->receiveMessage(
                                         *comp, msg);
-                            } else {
+                            }
+                            else {
                                 // bad message (no registered handler)
-                                LOG_ERROR("Unhandled message (" << messageType
+                                LOG_ERROR("Unhandled message (" << messageId
                                           << ") received from " << ipaddr);
                             }
-                        } else {
+                        }
+                        else {
                             LOG_ERROR("Message too short from " << ipaddr);
                         }
                     }
@@ -213,10 +216,7 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
 
                 // Traverse to next client, possibly deleting current
                 if (comp == NULL) {
-                    std::list<NetComputer*>::iterator ii = i;
-                    ii++;
-                    clients.erase(i);
-                    i = ii;
+                    i = clients.erase(i);
                 }
                 else {
                     i++;

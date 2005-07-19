@@ -28,6 +28,8 @@ MessageIn::MessageIn(Packet *packet):
     mPacket(packet),
     mPos(0)
 {
+    // Read the message ID
+    mId = readShort();
 }
 
 MessageIn::~MessageIn()
