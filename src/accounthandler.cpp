@@ -50,6 +50,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string username = message.readString();
                 std::string password = message.readString();
 
+                if (computer.getAccount() != NULL) {
+                    result.writeShort(SMSG_LOGIN_ERROR);
+                    result.writeShort(LOGIN_UNKNOWN);
+                    break;
+                }
+
                 // see if the account exists
                 Account *acc = store.getAccount(username);
                 if (!acc) {
@@ -65,11 +71,24 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_PASSWORD);
                 } else {
-                    // Login OK! (send an OK message or something)
                     std::cout << "Login OK by " << username << std::endl;
 
+                    // Associate account with connection
+                    computer.setAccount(acc);
+
                     result.writeShort(SMSG_LOGIN_CONFIRM);
-                    // TODO: Return information about available characters
+
+                    // Return information about available characters
+                    tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                    result.writeByte(chars.size());
+
+                    for (unsigned int i = 0; i < chars.size(); i++) {
+                        result.writeString(chars[i]->getName());
+                        result.writeByte(chars[i]->getLevel());
+                        result.writeByte(chars[i]->getMoney());
+                        //result.writeString(chars[i]->getRawStatistics(),
+                        //                   sizeof(tmwserv::RawStatistics));
+                    }
                 }
             }
             break;
@@ -93,16 +112,26 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_CREATE:
             {
+                if (computer.getAccount() == NULL) {
+                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
+                    result.writeByte(CREATE_NOLOGIN);
+                    break;
+                }
+
                 std::string name = message.readString();
                 //char hairStyle = message.readByte();
                 //char hairColor = message.readByte();
-                //char sex = message.readByte();
+                Genders sex = (Genders)message.readByte();
 
                 // TODO: Finish this message type (should a player customize stats
                 // slightly?)
 
+                tmwserv::RawStatistics stats = {10, 10, 10, 10, 10, 10};
+                tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, sex, 1, 0, stats));
+                computer.getAccount()->addCharacter(newCharacter);
+
                 result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
-                result.writeShort(CREATE_OK);
+                result.writeByte(CREATE_OK);
             }
             break;
 

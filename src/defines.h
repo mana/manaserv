@@ -68,6 +68,8 @@ enum {
     SMSG_LOGIN_CONFIRM           = 0x0013,
     CMSG_CHAR_CREATE             = 0x0020,
     SMSG_CHAR_CREATE_RESPONSE    = 0x0021,
+    CMSG_CHAR_LIST               = 0x0022, // this is required after char creation
+    CMSG_CHAR_SELECT             = 0x0023,
 
     // Objects
     SMSG_NEW_OBJECT              = 0x0100,
@@ -129,7 +131,8 @@ enum {
     CREATE_INVALID_HAIR,
     CREATE_INVALID_SEX,
     CREATE_EXISTS_USERNAME,
-    CREATE_EXISTS_EMAIL
+    CREATE_EXISTS_EMAIL,
+    CREATE_NOLOGIN
 };
 
 

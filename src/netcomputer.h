@@ -30,6 +30,8 @@
 #include <queue>
 #include <list>
 
+#include "account.h"
+
 // Forward declaration
 class ConnectionHandler;
 
@@ -75,11 +77,23 @@ class NetComputer
          */
         TCPsocket getSocket() { return socket; }
 
+        /**
+         * Set the account associated with the connection
+         */
+        void setAccount(tmwserv::Account *acc);
+
+        /**
+         * Get account associated with the connection
+         */
+        tmwserv::Account *getAccount() { return account; }
+
     private:
         ConnectionHandler *handler;
 
         std::queue<Packet*> queue; /**< Message Queue (FIFO) */
         TCPsocket socket;          /**< Client socket */
+
+        tmwserv::Account *account; /**< Account associated with connection */
 };
 
 #endif

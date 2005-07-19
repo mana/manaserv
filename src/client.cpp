@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
         printf ("0) Quit\n");
         printf ("1) Register\n");
         printf ("2) Login\n");
+        printf ("4) Create character\n");
         printf ("3) Chat\n\n");
         printf ("Insert your option: ");
         std::cin >> answer;
@@ -90,6 +91,18 @@ int main(int argc, char *argv[])
                 msg.writeString(line);
                 msg.writeShort(0);
                 break;
+            case 4:
+            {
+                // Create character
+                msg.writeShort(CMSG_CHAR_CREATE);
+                printf("\nName: ");
+                std::cin >> line;
+                msg.writeString(line);
+                msg.writeByte(0);
+            } break;
+
+            default:
+                continue;
         }
         printf("\n");
         

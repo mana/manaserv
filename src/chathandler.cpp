@@ -27,6 +27,9 @@
 
 void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
+    if (computer.getAccount() == NULL)
+        return;
+
     switch (message.getId())
     {
         case CMSG_SAY:

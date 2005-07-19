@@ -27,7 +27,8 @@
 
 NetComputer::NetComputer(ConnectionHandler *handler, TCPsocket sock):
     handler(handler),
-    socket(sock)
+    socket(sock),
+    account(NULL)
 {
 }
 
@@ -44,4 +45,9 @@ void NetComputer::disconnect(const std::string &reason)
 void NetComputer::send(const Packet *p)
 {
     SDLNet_TCP_Send(socket, p->data, p->length);
+}
+
+void NetComputer::setAccount(tmwserv::Account *acc)
+{
+    account = acc;
 }

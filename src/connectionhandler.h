@@ -99,11 +99,6 @@ class ConnectionHandler
          */
         void registerHandler(unsigned int msgId, MessageHandler *handler);
 
-        /**
-         * Send queued packets to client
-         */
-        void sendPackets();
-
     private:
         std::map<unsigned int, MessageHandler*> handlers;
 
