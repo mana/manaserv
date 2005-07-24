@@ -1,4 +1,3 @@
-
 /*
  *  The Mana World Server
  *  Copyright 2004 The Mana World Development Team

@@ -54,8 +54,9 @@ int main(int argc, char *argv[])
         printf ("0) Quit\n");
         printf ("1) Register\n");
         printf ("2) Login\n");
+        printf ("3) Chat\n");
         printf ("4) Create character\n");
-        printf ("3) Chat\n\n");
+        printf ("5) Character selecion\n");
         printf ("Insert your option: ");
         std::cin >> answer;
 
@@ -99,6 +100,15 @@ int main(int argc, char *argv[])
                 std::cin >> line;
                 msg.writeString(line);
                 msg.writeByte(0);
+            } break;
+
+            case 5:
+            {
+                // Select character
+                msg.writeShort(CMSG_CHAR_SELECT);
+                printf("\nCharacrer ID: ");
+                std::cin >> line;
+                msg.writeByte(atoi(line));
             } break;
 
             default:

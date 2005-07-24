@@ -135,6 +135,26 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             }
             break;
 
+        case CMSG_CHAR_SELECT:
+            {
+                if (computer.getAccount() == NULL)
+                    break; // not logged in
+                
+                char charNum = message.readByte();
+                
+                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                
+                result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
+                if (charNum >= chars.size()) {
+                    // invalid char selection
+                    result.writeByte(SELECT_INVALID);
+                    break;
+                }
+                
+                result.writeByte(SELECT_OK);
+            }
+            break;
+
         default:
             std::cout << "Invalid message type" << std::endl;
             result.writeShort(SMSG_LOGIN_ERROR);

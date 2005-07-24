@@ -31,6 +31,7 @@
 #include <list>
 
 #include "account.h"
+#include "being.h"
 
 // Forward declaration
 class ConnectionHandler;
@@ -87,6 +88,16 @@ class NetComputer
          */
         tmwserv::Account *getAccount() { return account; }
 
+        /**
+         * Set the selected character associated with connection
+         */
+        void setCharacter(tmwserv::Being *ch);
+
+        /**
+         * Get character associated with the connection
+         */
+        tmwserv::Being *getCharacter() { return character; }
+
     private:
         ConnectionHandler *handler;
 
@@ -94,6 +105,7 @@ class NetComputer
         TCPsocket socket;          /**< Client socket */
 
         tmwserv::Account *account; /**< Account associated with connection */
+        tmwserv::Being *character; /**< Selected character */
 };
 
 #endif

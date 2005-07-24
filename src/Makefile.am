@@ -12,6 +12,8 @@ tmwserv_SOURCES = main.cpp \
 				  chathandler.cpp \
 				  connectionhandler.h \
 				  connectionhandler.cpp \
+				  gamehandler.h \
+				  gamehandler.cpp \
 				  debug.h \
 				  debug.cpp \
 				  defines.h \

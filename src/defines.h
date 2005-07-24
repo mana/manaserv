@@ -70,6 +70,7 @@ enum {
     SMSG_CHAR_CREATE_RESPONSE    = 0x0021,
     CMSG_CHAR_LIST               = 0x0022, // this is required after char creation
     CMSG_CHAR_SELECT             = 0x0023,
+    SMSG_CHAR_SELECT_RESPONSE    = 0x0034,
 
     // Objects
     SMSG_NEW_OBJECT              = 0x0100,
@@ -133,6 +134,12 @@ enum {
     CREATE_EXISTS_USERNAME,
     CREATE_EXISTS_EMAIL,
     CREATE_NOLOGIN
+};
+
+// Character selection return values
+enum {
+    SELECT_OK = 0,
+    SELECT_INVALID
 };
 
 

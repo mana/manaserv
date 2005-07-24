@@ -206,6 +206,7 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_LOGIN, accountHandler);
     connectionHandler->registerHandler(CMSG_REGISTER, accountHandler);
     connectionHandler->registerHandler(CMSG_CHAR_CREATE, accountHandler);
+    connectionHandler->registerHandler(CMSG_CHAR_SELECT, accountHandler);
     connectionHandler->registerHandler(CMSG_SAY, chatHandler);
     connectionHandler->registerHandler(CMSG_ANNOUNCE, chatHandler);
 

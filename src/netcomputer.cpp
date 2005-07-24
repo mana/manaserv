@@ -28,7 +28,8 @@
 NetComputer::NetComputer(ConnectionHandler *handler, TCPsocket sock):
     handler(handler),
     socket(sock),
-    account(NULL)
+    account(NULL),
+    character(NULL)
 {
 }
 
@@ -50,4 +51,9 @@ void NetComputer::send(const Packet *p)
 void NetComputer::setAccount(tmwserv::Account *acc)
 {
     account = acc;
+}
+
+void NetComputer::setCharacter(tmwserv::Being *ch)
+{
+    character = ch;
 }

@@ -188,8 +188,8 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                         std::string ipaddr = ip4ToString(
                                 SDLNet_TCP_GetPeerAddress(s)->host);
 
-                        // Make sure that the packet is big enough
-                        if (result >= 4)
+                        // Make sure that the packet is big enough (> short)
+                        if (result >= 2)
                         {
                             Packet *packet = new Packet(buffer, result);
                             MessageIn msg(packet); // (MessageIn frees packet)

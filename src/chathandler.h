@@ -30,13 +30,12 @@
 
 /**
  * Manages all chat related
- *
  */
 class ChatHandler : public MessageHandler
 {
  public:
     /**
-     * Recieves chat related messages.
+     * Receives chat related messages.
      */
     void receiveMessage(NetComputer &computer, MessageIn &message);
 };
