@@ -4,7 +4,11 @@ PACKET REFERENCE
 
 1. INTRODUCTION
 2. MESSAGE LIST
-3. LOGIN PROTOCOL
+2.1 LOGIN/REGISTER
+2.2 OBJECTS
+2.3 BEINGS
+2.4 ITEMS
+2.5 CHAT PROTOCOL
 
 1. INTRODUCTION
 
@@ -42,19 +46,19 @@ NOTE: In this representation square brackets mean their content can be repeated
 
 - "fieldName" is the name of the field (choose a meaningful name).
 
-- "value" is a list of every possible for the field.
+- "value" is a list of every possible value for the field.
 
-- "value info" is a small description of the meaning related to a certain value.
+- "value info" is a small description of the meaning related to a
+  certain value.
 
 2. MESSAGE LIST
 
-Message IDs are represented by a short, that means we can have 2^16 different 
-packets. We will start from ID 0x0050. This way we will have 80 packets
-available for future use.
+Message IDs are represented by a short, that means we can have 2^16
+different packets. We will start from ID 0x0000.
 
-3. LOGIN PROTOCOL
+2.1 LOGIN/REGISTER
 
-CMSG_REGISTER 0x0050
+CMSG_REGISTER 0x0000
 Request to register a new account. Email verification by activation would
 probably be good to add. Password will be sent only as md5 to hide the actual
 password from both server admins and sniffers. Having the md5 would still allow
@@ -65,7 +69,7 @@ false identification, hence there is also an encrypted variant of this message.
     A emailAddress
 }
 
-CMSG_ENCRYPTED_REGISTER 0x0051
+CMSG_ENCRYPTED_REGISTER 0x0001
 Request to register a new account encrypting user data. The contents of this
 message are encrypted using server's public key and are otherwise the same as
 in a normal register message.
@@ -75,7 +79,7 @@ in a normal register message.
     A emailAddress
 }
 
-SMSG_REGISTER_RESPONSE 0x0052
+SMSG_REGISTER_RESPONSE 0x0002
 Response to register message. Error code 0 means registration was a success.
 Error codes 1-3 shouldn't happen because there are also checked client side,
 otherwise it could mean client is out of date or modified. Every error not in
@@ -90,7 +94,7 @@ this list should be considered unknown error.
         * 5 = existing email address
 }
 
-CMSG_LOGIN 0x0054
+CMSG_LOGIN 0x0010
 Sends info about player login data: username and password.
 {
     A username
@@ -98,7 +102,7 @@ Sends info about player login data: username and password.
     L clientVersion
 }
 
-CMSG_ENCRYPTED_LOGIN 0x0055
+CMSG_ENCRYPTED_LOGIN 0x0011
 Attempts an encrypted login. payload contains username and password encrypted
 using server's public key.
 {
@@ -106,7 +110,7 @@ using server's public key.
     L clientVersion
 }
 
-SMSG_LOGIN_ERROR 0x0056
+SMSG_LOGIN_ERROR 0x0012
 The login process failed.
 {
     C errorCode
@@ -123,7 +127,7 @@ The login process failed.
         * 8 = account under review
 }
 
-SMSG_LOGIN_CONFIRM 0x0057
+SMSG_LOGIN_CONFIRM 0x0013
 The login process succeded. The content of this packet depends on account and
 player implementation. Still to be developed.
 {
@@ -140,20 +144,21 @@ player implementation. Still to be developed.
     ]
 }
 
-CMSG_CHAR_CREATE
+CMSG_CHAR_CREATE 0x0020
 Valid after login, this message sends a request for a new character to the
 server. The message could be extended with region of origin and race.
 {
     A name
     C hairStyle
     C hairColor
+	C faceType
     C sex
         * 0 = male
         * 1 = female
     ...
 }
 
-SMSG_CHAR_CREATE_RESPONSE
+SMSG_CHAR_CREATE_RESPONSE 0x0021
 Response to character create message. Error code 0 means creation was a
 success. Error codes 1-4 should not occur as they are also checked by the
 client. Any not listed error codes are unknown errors.
@@ -166,4 +171,14 @@ client. Any not listed error codes are unknown errors.
         * 4 = invalid sex
         * 5 = existing username
         * 6 = existing email address
+}
+
+
+2.2 OBJECTS
+
+SMSG_NEW_OBJECT 0x0100
+An item was dropped.
+{
+	L itemId
+	S x, y
 }

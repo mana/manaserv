@@ -5,7 +5,7 @@ Name=tmwserv
 UnitCount=17
 =======
 Name=tmwserv
-UnitCount=59
+UnitCount=67
 >>>>>>> 1.2
 Type=1
 Ver=1
@@ -17,7 +17,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=_@@_
 CppCompiler=-DSQLITE_SUPPORT_@@_
-Linker=-lmingw32_@@_-lSDL_@@_-lSDL_net_@@_-lsqlite3_@@_-lcrypto_@@_-llibxml2_@@_-mconsole_@@_-mwindows_@@_
+Linker=-lmingw32_@@_-lSDL_@@_-lSDL_net_@@_-lsqlite3_@@_-lcrypto_@@_-llibxml2_@@_-lphysfs_@@_-lz_@@_-mconsole_@@_-mwindows_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -483,7 +483,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit61]
-FileName=src\configuration.h
+FileName=src\map.cpp
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -493,7 +493,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit62]
-FileName=src\dalstoragesql.h
+FileName=src\map.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -503,7 +503,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit64]
-FileName=src\sqlitestorage.cpp
+FileName=src\mapreader.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -513,7 +513,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit65]
-FileName=src\testsmain.cpp
+FileName=src\resourcemanager.cpp
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -623,7 +623,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit63]
-FileName=src\items.h
+FileName=src\mapreader.cpp
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -686,6 +686,36 @@ BuildCmd=
 FileName=src\SDL_win32_main.c
 CompileCpp=1
 Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit60]
+FileName=src\resourcemanager.h
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit66]
+FileName=src\utils\base64.h
+CompileCpp=1
+Folder=utils
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit67]
+FileName=src\utils\base64.cpp
+CompileCpp=1
+Folder=utils
 Compile=1
 Link=1
 Priority=1000
