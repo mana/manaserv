@@ -28,6 +28,11 @@ namespace tmwserv
 {
 
 
+PATH_NODE::PATH_NODE(unsigned short x, unsigned short y):
+    x(x), y(y)
+{
+}
+
 /**
  * Constructor.
  */

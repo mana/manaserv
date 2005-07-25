@@ -144,8 +144,10 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
             }
 
             // Check client sockets
-            std::list<NetComputer*>::iterator i;
-            for (i = clients.begin(); i != clients.end(); ) {
+            NetComputers::iterator i;
+
+            for (i = clients.begin(); i != clients.end(); )
+            {
                 NetComputer *comp = *i;
                 TCPsocket s = (*i)->getSocket();
 

@@ -37,6 +37,15 @@ namespace tmwserv
 {
 
 
+struct PATH_NODE {
+    /**
+     * Constructor.
+     */
+    PATH_NODE(unsigned short x, unsigned short y);
+
+    unsigned short x, y;
+};
+
 /**
  * Structure type for the raw statistics of a Being.
  */

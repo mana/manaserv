@@ -116,7 +116,7 @@ NetComputer *NetSession::connect(const std::string &host, Uint16 port)
     // An asynchroneous wrapper could be created around this method.
 
     IPaddress address;
-    
+
     if (!SDLNet_ResolveHost(&address, host.c_str(), port))
     {
         TCPsocket tcpsock = SDLNet_TCP_Open(&address);

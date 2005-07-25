@@ -18,6 +18,10 @@ tmwserv_SOURCES = main.cpp \
 				  debug.cpp \
 				  defines.h \
 				  items.h \
+				  map.cpp \
+				  map.h \
+				  mapreader.cpp \
+				  mapreader.h \
 				  messagehandler.h \
 				  messagehandler.cpp \
 				  messagein.h \
@@ -32,6 +36,8 @@ tmwserv_SOURCES = main.cpp \
 				  packet.cpp \
 				  skill.h \
 				  skill.cpp \
+				  resourcemanager.cpp \
+				  resourcemanager.h \
 				  storage.h \
 				  storage.cpp \
 				  account.h \
@@ -49,6 +55,8 @@ tmwserv_SOURCES = main.cpp \
 				  dal/dataproviderfactory.cpp \
 				  dal/recordset.h \
 				  dal/recordset.cpp \
+				  utils/base64.h \
+				  utils/base64.cpp \
 				  utils/countedptr.h \
 				  utils/functors.h \
 				  utils/singleton.h \

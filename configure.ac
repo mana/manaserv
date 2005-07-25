@@ -16,10 +16,14 @@ AC_PROG_INSTALL
 
 
 # Checks for libraries.
-AC_CHECK_LIB([crypto], [EVP_md5])
-AC_CHECK_LIB([physfs], [PHYSFS_init])
 
-PKG_CHECK_MODULES(XML2,[libxml-2.0])
+AC_CHECK_LIB([crypto], [EVP_md5])
+
+AC_CHECK_LIB([physfs], [PHYSFS_init], ,
+AC_MSG_ERROR([ *** Unable to find PhysFS library (icculus.org/physfs/)]))
+
+
+PKG_CHECK_MODULES(XML2, [libxml-2.0 >= 2.4])
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$LIBS $XML2_LIBS"
 
