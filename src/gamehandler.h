@@ -21,45 +21,23 @@
  *  $Id$
  */
 
-#ifndef ITEMS_H
-#define ITEMS_H
+#ifndef _TMW_SERVER_GAMEHANDLER_
+#define _TMW_SERVER_GAMEHANDLER_
 
-#include "script.h"
-#include "object.h"
-
-namespace tmwserv
-{
+#include "messagehandler.h"
+#include "netcomputer.h"
+#include "messagein.h"
 
 /**
- * Class for all types of in-game items.
+ * Manage main game events & server processing.
  */
-class Item : public Object
+class GameHandler : public MessageHandler
 {
-    //Item type
-    unsigned int type;
-
-  public:
+ public:
     /**
-     * Enumeration of available Item types.
+     * Recieve messages related to core game events
      */
-    static enum {
-	Usable,
-	Equipment
-    };
-
-    virtual ~Item() { }
-
-    /**
-     * The function called to use an item
-     */
-    void use();
-
-    /**
-     * Return type of item
-     */
-    unsigned int getType() { return type; }
+    void receiveMessage(NetComputer &computer, MessageIn &message);
 };
-
-} // namespace tmwserv
 
 #endif

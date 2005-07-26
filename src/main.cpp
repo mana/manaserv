@@ -31,6 +31,7 @@
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
+#include "gamehandler.h"
 #include "chathandler.h"
 #include "storage.h"
 #include "configuration.h"
@@ -73,7 +74,8 @@ Skill skillTree("base");  /**< Skill tree */
 
 Configuration config;     /**< XML config reader */
 AccountHandler *accountHandler = new AccountHandler(); /**< Account message handler */
-ChatHandler *chatHandler = new ChatHandler();
+ChatHandler *chatHandler = new ChatHandler(); /**< Communications (chat) messaqge handler */
+GameHandler *gameHandler = new GameHandler(); /**< Core game message handler */
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -168,6 +170,7 @@ void deinitialize()
     // destroy message handlers
     delete accountHandler;
     delete chatHandler;
+    delete gameHandler;
 
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();
@@ -207,8 +210,19 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_REGISTER, accountHandler);
     connectionHandler->registerHandler(CMSG_CHAR_CREATE, accountHandler);
     connectionHandler->registerHandler(CMSG_CHAR_SELECT, accountHandler);
+
     connectionHandler->registerHandler(CMSG_SAY, chatHandler);
     connectionHandler->registerHandler(CMSG_ANNOUNCE, chatHandler);
+
+    connectionHandler->registerHandler(CMSG_PICKUP, gameHandler);
+    connectionHandler->registerHandler(CMSG_USE_OBJECT, gameHandler);
+    connectionHandler->registerHandler(CMSG_TARGET, gameHandler);
+    connectionHandler->registerHandler(CMSG_WALK, gameHandler);
+    connectionHandler->registerHandler(CMSG_START_TRADE, gameHandler);
+    connectionHandler->registerHandler(CMSG_START_TALK, gameHandler);
+    connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
+    connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
+    connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
     //LOG_INFO("The Mana World Server v" << PACKAGE_VERSION) PACKAGE_VERSION undeclared
     session->startListen(connectionHandler.get(), SERVER_PORT);

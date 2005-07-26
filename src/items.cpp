@@ -21,45 +21,9 @@
  *  $Id$
  */
 
-#ifndef ITEMS_H
-#define ITEMS_H
+#include "items.h"
 
-#include "script.h"
-#include "object.h"
-
-namespace tmwserv
+void tmwserv::Item::use()
 {
-
-/**
- * Class for all types of in-game items.
- */
-class Item : public Object
-{
-    //Item type
-    unsigned int type;
-
-  public:
-    /**
-     * Enumeration of available Item types.
-     */
-    static enum {
-	Usable,
-	Equipment
-    };
-
-    virtual ~Item() { }
-
-    /**
-     * The function called to use an item
-     */
-    void use();
-
-    /**
-     * Return type of item
-     */
-    unsigned int getType() { return type; }
-};
-
-} // namespace tmwserv
-
-#endif
+    //
+}

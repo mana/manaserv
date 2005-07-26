@@ -21,45 +21,46 @@
  *  $Id$
  */
 
-#ifndef ITEMS_H
-#define ITEMS_H
+#include "gamehandler.h"
+#include <iostream>
 
-#include "script.h"
-#include "object.h"
-
-namespace tmwserv
+void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
+    if (computer.getAccount() == NULL)
+        return;
 
-/**
- * Class for all types of in-game items.
- */
-class Item : public Object
-{
-    //Item type
-    unsigned int type;
+    switch (message.getId())
+    {
+        case CMSG_PICKUP:
+            break;
 
-  public:
-    /**
-     * Enumeration of available Item types.
-     */
-    static enum {
-	Usable,
-	Equipment
-    };
+        case CMSG_USE_OBJECT:
+            break;
 
-    virtual ~Item() { }
+        case CMSG_TARGET:
+            break;
 
-    /**
-     * The function called to use an item
-     */
-    void use();
+        case CMSG_WALK:
+            break;
 
-    /**
-     * Return type of item
-     */
-    unsigned int getType() { return type; }
-};
+        case CMSG_START_TRADE:
+            break;
 
-} // namespace tmwserv
+        case CMSG_START_TALK:
+            break;
 
-#endif
+        case CMSG_REQ_TRADE:
+            break;
+
+        case CMSG_USE_ITEM:
+            break;
+
+        case CMSG_EQUIP:
+            break;
+
+        default:
+            std::cerr << "Warning: GameHandler received message of unkown type"
+                      << " (" << message.getId() << ")" << std::endl;
+            break;
+    }
+}

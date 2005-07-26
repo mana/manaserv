@@ -50,7 +50,8 @@
  *       (http://www.sqlite.org/datatype3.html)
  *     - the size of TEXT cannot be set, it is just ignored by the engine.
  *     - IMPORTANT: foreign key constraints are not yet supported
- *       (http://www.sqlite.org/omitted.html)
+ *       (http://www.sqlite.org/omitted.html). Included in case of future
+ *       support.
  *
  * Notes:
  *     - the SQL queries will take advantage of the most appropriate data
@@ -76,7 +77,7 @@ const std::string SQL_MAPS_TABLE(
         "id  INTEGER PRIMARY KEY,"
         "map TEXT    NOT NULL"
 #elif defined (POSTGRESQL_SUPPORT)
-        "id  INTEGER PRIMARY KEY,"
+        "id  SERIAL  PRIMARY KEY,"
         "map TEXT    NOT NULL"
 #endif
     ");"
@@ -112,7 +113,7 @@ const std::string SQL_ACCOUNTS_TABLE(
         "level    INTEGER     NOT NULL,"
         "banned   INTEGER     NOT NULL"
 #elif defined (POSTGRESQL_SUPPORT)
-        "id       INTEGER     PRIMARY KEY,"
+        "id       SERIAL      PRIMARY KEY,"
         "username TEXT        NOT NULL UNIQUE,"
         "password TEXT        NOT NULL,"
         "email    TEXT        NOT NULL,"
@@ -180,7 +181,7 @@ const std::string SQL_CHARACTERS_TABLE(
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
 #elif defined (POSTGRESQL_SUPPORT)
-        "id      INTEGER     PRIMARY KEY,"
+        "id      SERIAL      PRIMARY KEY,"
         "user_id INTEGER     NOT NULL,"
         "name    TEXT        NOT NULL UNIQUE,"
         // general information about the character
@@ -227,7 +228,7 @@ const std::string SQL_ITEMS_TABLE(
         "type   INTEGER  NOT NULL,"
         "state  TEXT"
 #elif defined (POSTGRESQL_SUPPORT)
-        "id     INTEGER  PRIMARY KEY,"
+        "id     SERIAL   PRIMARY KEY,"
         "amount INTEGER  NOT NULL,"
         "type   INTEGER  NOT NULL,"
         "state  TEXT"
@@ -298,7 +299,7 @@ const std::string SQL_INVENTORIES_TABLE(
         "id       INTEGER  NOT NULL,"
         "owner_id INTEGER  NOT NULL,"
         "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
-        "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
+        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #elif defined (POSTGRESQL_SUPPORT)
         "id       INTEGER  NOT NULL,"
         "owner_id INTEGER  NOT NULL,"

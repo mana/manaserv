@@ -18,6 +18,7 @@ tmwserv_SOURCES = main.cpp \
 				  debug.cpp \
 				  defines.h \
 				  items.h \
+				  items.cpp \
 				  map.cpp \
 				  map.h \
 				  mapreader.cpp \

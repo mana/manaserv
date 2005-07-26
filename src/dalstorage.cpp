@@ -410,7 +410,9 @@ DALStorage::_addAccount(const AccountPtr& account)
 
     // insert the account.
     std::ostringstream sql1;
-    sql1 << "insert into " << ACCOUNTS_TBL_NAME << " values (null, '"
+    sql1 << "insert into " << ACCOUNTS_TBL_NAME
+         << " (username, password, email, level, banned)"
+         << " values ('"
          << account->getName() << "', '"
          << account->getPassword() << "', '"
          << account->getEmail() << "', "
@@ -443,7 +445,9 @@ DALStorage::_addAccount(const AccountPtr& account)
     for (; it != it_end; ++it) {
         RawStatistics& stats = (*it)->getRawStatistics();
         std::ostringstream sql3;
-        sql3 << "insert into " << CHARACTERS_TBL_NAME << " values (null, "
+        sql3 << "insert into " << CHARACTERS_TBL_NAME
+             << " (name, gender, level, money, x, y, map_id, str, agi, int, dex luck)"
+             << " values ("
              << (account_it->second).id << ", '"
              << (*it)->getName() << "', '"
              << (*it)->getGender() << "', "
@@ -527,8 +531,9 @@ DALStorage::_updAccount(const AccountPtr& account)
 
         std::ostringstream sql3;
         if (charInfo.rows() == 0) {
-            sql3 << "insert into " << CHARACTERS_TBL_NAME
-                 << " values (null, "
+            sql3 << "inpsert into " << CHARACTERS_TBL_NAME
+                 << " (name, gender, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
+                 << " values ("
                  << (account_it->second).id << ", '"
                  << (*it)->getName() << "', "
                  << (*it)->getGender() << ", "

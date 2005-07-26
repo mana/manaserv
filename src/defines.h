@@ -101,7 +101,9 @@ enum {
     SMSG_SYSTEM                  = 0x0401,
     SMSG_ANNOUNCEMENT            = 0x0402,
     CMSG_SAY                     = 0x0410,
-    CMSG_ANNOUNCE                = 0x0411,
+    CMSG_ANNOUNCE                = 0x0411
+
+    // NOTE: We will need more messages for in-game control (eg. moving a client to a new map/position etc.). Currently the protocol only caters for the bare basics.
 };
 
 // Login return values
