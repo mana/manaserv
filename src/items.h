@@ -42,12 +42,12 @@ class Item : public Object
     /**
      * Enumeration of available Item types.
      */
-    static enum {
-	Usable,
-	Equipment
+    enum {
+        Usable,
+        Equipment
     };
 
-    virtual ~Item() { }
+    virtual ~Item() throw () { }
 
     /**
      * The function called to use an item
