@@ -144,5 +144,12 @@ enum {
     SELECT_INVALID
 };
 
+// Object type enumeration
+enum {
+    OBJECT_ITEM = 0,
+    OBJECT_PLAYER,
+    OBJECT_MONSTER
+};
+
 
 #endif // _TMWSERV_DEFINES_H_

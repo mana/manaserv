@@ -35,6 +35,7 @@
 #include "chathandler.h"
 #include "storage.h"
 #include "configuration.h"
+#include "state.h"
 
 #include "skill.h"
 
@@ -178,17 +179,6 @@ void deinitialize()
 
 
 /**
- * Update game world
- */
-void updateWorld()
-{
-#ifdef SCRIPT_SUPPORT
-    script->update();
-#endif
-}
-
-
-/**
  * Main function, initializes and runs server.
  */
 int main(int argc, char *argv[])
@@ -238,6 +228,10 @@ int main(int argc, char *argv[])
     store.open();
     //
 
+    // create state machine
+    State &state = State::instance();
+    //
+
     SDL_Event event;
 
     while (running) {
@@ -253,7 +247,7 @@ int main(int argc, char *argv[])
 
                 // - Handle all messages that are in the message queue
                 // - Update all active objects/beings
-                updateWorld();
+                state.update(*connectionHandler.get());
             }
             else if (event.type == SDL_QUIT) {
                 running = false;

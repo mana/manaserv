@@ -446,7 +446,7 @@ DALStorage::_addAccount(const AccountPtr& account)
         RawStatistics& stats = (*it)->getRawStatistics();
         std::ostringstream sql3;
         sql3 << "insert into " << CHARACTERS_TBL_NAME
-             << " (name, gender, level, money, x, y, map_id, str, agi, int, dex luck)"
+             << " (name, gender, level, money, x, y, map_id, str, agi, vit, int, dex luck)"
              << " values ("
              << (account_it->second).id << ", '"
              << (*it)->getName() << "', '"
@@ -531,10 +531,18 @@ DALStorage::_updAccount(const AccountPtr& account)
 
         std::ostringstream sql3;
         if (charInfo.rows() == 0) {
-            sql3 << "inpsert into " << CHARACTERS_TBL_NAME
-                 << " (name, gender, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
+            sql3 << "insert into " << CHARACTERS_TBL_NAME
+                 << " ("
+#ifdef SQLITE_SUPPORT
+                 << "user_id, "
+#endif
+                 << "name, gender, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
                  << " values ("
+#ifdef SQLITE_SUPPORT
                  << (account_it->second).id << ", '"
+#else
+                 << "'"
+#endif
                  << (*it)->getName() << "', "
                  << (*it)->getGender() << ", "
                  << (*it)->getLevel() << ", "
@@ -561,7 +569,7 @@ DALStorage::_updAccount(const AccountPtr& account)
                 << " str = " << stats.strength << ", "
                 << " agi = " << stats.agility << ", "
                 << " vit = " << stats.vitality << ", "
-#ifdef MYSQL_SUPPORT
+#if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
                 << " `int` = " << stats.intelligence << ", "
 #else
                 << " int = " << stats.intelligence << ", "

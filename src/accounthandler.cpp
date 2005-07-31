@@ -132,6 +132,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                 result.writeByte(CREATE_OK);
+
+                store.flush(); // flush changes
             }
             break;
 
@@ -140,7 +142,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if (computer.getAccount() == NULL)
                     break; // not logged in
                 
-                char charNum = message.readByte();
+                unsigned char charNum = message.readByte();
                 
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
                 
@@ -150,6 +152,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(SELECT_INVALID);
                     break;
                 }
+
+                computer.setCharacter(chars[charNum].get());
                 
                 result.writeByte(SELECT_OK);
             }

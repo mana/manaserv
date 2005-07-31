@@ -34,6 +34,7 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
     {
         case CMSG_SAY:
             {
+                // chat to people around area
                 std::string text = message.readString();
                 short channel = message.readShort();
                 std::cout << "Say (" << channel << "): " << text << std::endl;

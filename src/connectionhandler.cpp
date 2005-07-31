@@ -247,3 +247,15 @@ void ConnectionHandler::registerHandler(
 {
     handlers[msgId] = handler;
 }
+
+void ConnectionHandler::sendTo(tmwserv::Being *being, MessageOut &msg)
+{
+    for (NetComputers::iterator i = clients.begin();
+         i != clients.end();
+         i++) {
+        if ((*i)->getCharacter() == being) {
+            (*i)->send(msg.getPacket());
+            break;
+        }
+    }
+}

@@ -21,43 +21,49 @@
  *  $Id$
  */
 
-#ifndef ITEMS_H
-#define ITEMS_H
+#ifndef _TMW_SERVER_STATE_
+#define _TMW_SERVER_STATE_
 
-#include "script.h"
-#include "object.h"
+#include <string>
+#include <map>
+#include "connectionhandler.h"
+#include "being.h"
+#include "map.h"
+#include "utils/singleton.h"
 
 namespace tmwserv
 {
 
 /**
- * Class for all types of in-game items.
+ * State class contains all information/procedures associated with the game
+ * state.
  */
-class Item : public Object
+class State : public utils::Singleton<State>
 {
-    //Item type
-    unsigned int type;
+    friend class utils::Singleton<State>;
 
-  public:
+    State() throw() { }
+    ~State() throw() { }
+
+ public:
     /**
-     * Enumeration of available Item types.
+     * The key/value pair conforms to:
+     *   First  - map name
+     *   Second - list of beings/players on the map
+     *
+     * NOTE: This could possibly be optimized by making first Being & second string. This will make many operations easier.
      */
-    enum {
-        Usable,
-        Equipment
-    };
-
-    virtual ~Item() throw() { }
-
-    /**
-     * The function called to use an item
-     */
-    void use();
+    std::map<std::string, Beings> beings;
 
     /**
-     * Return type of item
+     * Container for loaded maps.
      */
-    unsigned int getType() { return type; }
+    std::map<std::string, Map*> maps;
+    
+    /**
+     * Update game state (contains core server logic)
+     */
+    void update(ConnectionHandler &);
 };
 
 } // namespace tmwserv

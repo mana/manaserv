@@ -27,6 +27,8 @@
 #include "messagehandler.h"
 #include "netcomputer.h"
 #include "packet.h"
+#include "being.h"
+#include "messageout.h"
 #include <map>
 #include <SDL_net.h>
 
@@ -59,6 +61,8 @@ class ClientData
 class ConnectionHandler
 {
     public:
+        typedef std::list<NetComputer*> NetComputers;
+
         /**
          * Constructor.
          */
@@ -99,10 +103,14 @@ class ConnectionHandler
          */
         void registerHandler(unsigned int msgId, MessageHandler *handler);
 
+        /**
+         * Send packet to client with matching Being*
+         */
+        void sendTo(tmwserv::Being*, MessageOut &);
+
     private:
         std::map<unsigned int, MessageHandler*> handlers;
 
-        typedef std::list<NetComputer*> NetComputers;
         NetComputers clients;
 };
 
