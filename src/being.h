@@ -32,6 +32,7 @@
 #include "object.h"
 #include "utils/countedptr.h"
 
+const unsigned int MAX_EQUIP_SLOTS = 5; /**< Maximum number of equipped slots */
 
 namespace tmwserv
 {
@@ -270,6 +271,24 @@ class Being: public Object
         void
         update(void);
 
+        /**
+         * Set inventory
+         */
+        void setInventory(const std::vector<unsigned int> &inven);
+
+        /**
+         * Add item with ID to inventory
+         *
+         * @return Item add success/failure
+         */
+        bool addInventory(unsigned int itemId);
+
+        /**
+         * Remove item with ID from inventory
+         *
+         * @return Item delete success/failure
+         */
+        bool delInventory(unsigned int itemId);
 
     private:
         /**
@@ -291,6 +310,9 @@ class Being: public Object
         unsigned short mLevel;   /**< level of the being */
         unsigned int mMoney;     /**< wealth of the being */
         RawStatistics mRawStats; /**< raw stats of the being */
+
+        std::vector<unsigned int> inventory;    /**< Player inventory */
+        unsigned int equipped[MAX_EQUIP_SLOTS]; /**< Equipped item ID's (from inventory) */
 };
 
 

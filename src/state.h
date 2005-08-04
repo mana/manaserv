@@ -47,6 +47,8 @@ class State : public utils::Singleton<State>
 
  public:
     /**
+     * Beings on map
+     *
      * The key/value pair conforms to:
      *   First  - map name
      *   Second - list of beings/players on the map
@@ -54,6 +56,15 @@ class State : public utils::Singleton<State>
      * NOTE: This could possibly be optimized by making first Being & second string. This will make many operations easier.
      */
     std::map<std::string, Beings> beings;
+
+    /**
+     * Items on map
+     *
+     * The key/value pair conforms to:
+     *   First  - map name
+     *   Second - Item ID
+     */
+    std::map<std::string, int> items;
 
     /**
      * Container for loaded maps.

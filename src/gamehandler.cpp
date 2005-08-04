@@ -22,20 +22,37 @@
  */
 
 #include "gamehandler.h"
+#include "messageout.h"
 #include <iostream>
 
 void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
-    if (computer.getAccount() == NULL)
+    if (computer.getCharacter() == NULL)
         return;
+
+    MessageOut result;
 
     switch (message.getId())
     {
         case CMSG_PICKUP:
-            break;
+            {
+                // add item to inventory (this is too simplistic atm)
+                unsigned int itemId = message.readLong();
 
+                // remove the item from world map
+
+                // send feedback
+                computer.getCharacter()->addInventory(itemId);
+                result.writeShort(SMSG_PICKUP_RESPONSE);
+                result.writeByte(PICKUP_OK);
+            } break;
+                
         case CMSG_USE_OBJECT:
-            break;
+            {
+                unsigned int itemId = message.readLong();
+                result.writeShort(SMSG_USE_RESPONSE);
+                result.writeByte(USE_OK);
+            } break;
 
         case CMSG_TARGET:
             break;
@@ -63,4 +80,6 @@ void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                       << " (" << message.getId() << ")" << std::endl;
             break;
     }
+
+    computer.send(result.getPacket());
 }

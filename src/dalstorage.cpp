@@ -446,7 +446,7 @@ DALStorage::_addAccount(const AccountPtr& account)
         RawStatistics& stats = (*it)->getRawStatistics();
         std::ostringstream sql3;
         sql3 << "insert into " << CHARACTERS_TBL_NAME
-             << " (name, gender, level, money, x, y, map_id, str, agi, vit, int, dex luck)"
+             << " (name, gender, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
              << " values ("
              << (account_it->second).id << ", '"
              << (*it)->getName() << "', '"

@@ -244,6 +244,7 @@ const std::string SQL_ITEMS_TABLE(
  *     - store items on the ground in the game world.
  */
 const std::string WORLD_ITEMS_TBL_NAME("tmw_world_items");
+// NOTE: Problem here with primary key (only one type of item is allowed on the same map at one time).
 const std::string SQL_WORLD_ITEMS_TABLE(
     "CREATE TABLE tmw_world_items ("
 #if defined (MYSQL_SUPPORT)
@@ -254,7 +255,7 @@ const std::string SQL_WORLD_ITEMS_TABLE(
         "map_id    TINYINT  NOT NULL,"
         // time to die (UNIX time)
         "deathtime INTEGER  UNSIGNED NOT NULL,"
-        "PRIMARY KEY (id, map_id),"
+        "PRIMARY KEY (id, map_id)," 
         "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
         "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
 #elif defined (SQLITE_SUPPORT)

@@ -32,7 +32,7 @@ void State::update(ConnectionHandler &connectionHandler)
 {
     // update game state (update AI, etc.)
 
-    // notify clients about changes in the game world
+    // notify clients about changes in the game world (only on their maps)
     // NOTE: This isn't finished ;)
     for (std::map<std::string,  Beings>::iterator i = beings.begin();
          i != beings.end();

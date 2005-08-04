@@ -273,8 +273,7 @@ Being::getRawStatistics(void)
 /**
  * Update the internal status.
  */
-void
-Being::update(void)
+void Being::update(void)
 {
     // computed stats.
     mStats.health = 20 + (20 * mRawStats.vitality);
@@ -285,6 +284,30 @@ Being::update(void)
     mStats.speed = mRawStats.dexterity;
 
     mNeedUpdate = false;
+}
+
+void Being::setInventory(const std::vector<unsigned int> &inven)
+{
+    inventory = inven;
+}
+
+bool Being::addInventory(unsigned int itemId)
+{
+    // If required weight could be tallied to see if player can pick up more.
+    inventory.push_back(itemId);
+    return true;
+}
+
+bool Being::delInventory(unsigned int itemId)
+{
+    for (std::vector<unsigned int>::iterator i = inventory.begin();
+         i != inventory.end(); i++) {
+        if (*i == itemId) {
+            inventory.erase(i);
+            return true;
+        }
+    }
+    return false;
 }
 
 

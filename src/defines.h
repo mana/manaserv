@@ -77,7 +77,9 @@ enum {
     SMSG_REMOVE_OBJECT           = 0x0101,
     SMSG_CHANGE_OBJECT           = 0x0102,
     CMSG_PICKUP                  = 0x0110,
+    SMSG_PICKUP_RESPONSE         = 0x0111,
     CMSG_USE_OBJECT              = 0x0120,
+    SMSG_USE_RESPONSE            = 0x0121,
 
     // Beings
     SMSG_NEW_BEING               = 0x0200,
@@ -101,7 +103,10 @@ enum {
     SMSG_SYSTEM                  = 0x0401,
     SMSG_ANNOUNCEMENT            = 0x0402,
     CMSG_SAY                     = 0x0410,
-    CMSG_ANNOUNCE                = 0x0411
+    CMSG_ANNOUNCE                = 0x0411,
+
+    // Other
+    SMSG_LOAD_MAP              = 0x0500,
 
     // NOTE: We will need more messages for in-game control (eg. moving a client to a new map/position etc.). Currently the protocol only caters for the bare basics.
 };
@@ -118,6 +123,7 @@ enum {
     LOGIN_UNKNOWN
 };
 
+// Account register return values
 enum {
     REGISTER_OK = 0,
     REGISTER_INVALID_USERNAME,
@@ -149,6 +155,19 @@ enum {
     OBJECT_ITEM = 0,
     OBJECT_PLAYER,
     OBJECT_MONSTER
+};
+
+// Pickup response enumeration
+enum {
+    PICKUP_OK = 0,
+    PICKUP_OVERWEIGHT,
+    PICKUP_FAIL
+};
+
+// Object use response enumeration
+enum {
+    USE_OK = 0,
+    USE_FAIL
 };
 
 

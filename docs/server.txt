@@ -170,3 +170,9 @@ being(s) are to be controlled.
   MSG_CHAR_CREATE    { ... }
 
 The character creation process will need to be thought out.
+
+8. MISCLELLANEOUS
+
+ Server to client:
+
+  SMSG_LOAD_MAP      { A mapName, L x, L y} // Change map & update player X and Y
