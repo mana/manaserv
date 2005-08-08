@@ -47,11 +47,11 @@ void State::update(ConnectionHandler &connectionHandler)
                  b2++) {
                 if (b != b2) {
                     MessageOut msg;
-                    msg.writeShort(SMSG_NEW_OBJECT);
+                    msg.writeShort(SMSG_NEW_OBJECT); // of course this wont be send _all_ the time ;)
                     msg.writeLong(OBJECT_PLAYER);    // type
                     msg.writeLong((int)b2->get());   // id
-                    msg.writeLong(0);                // x
-                    msg.writeLong(0);                // y
+                    msg.writeLong(b2->get()->getX());// x
+                    msg.writeLong(b2->get()->getY());// y
 
                     connectionHandler.sendTo(b->get(), msg);
                 }

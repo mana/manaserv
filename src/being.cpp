@@ -310,5 +310,23 @@ bool Being::delInventory(unsigned int itemId)
     return false;
 }
 
+bool Being::equip(unsigned int itemId, unsigned char slot)
+{
+    // currently this is too simplistic and doesn't check enough
+    // but until further functionality is implemented in the
+    // server it will suffice
+    if (slot < MAX_EQUIP_SLOTS) {
+        equipment[slot] = itemId;
+        return true;
+    } else
+        return false;
+}
+
+bool Being::unequip(unsigned char slot)
+{
+    // NOTE: 0 will be invalid item id (or we could use key/value pairs)
+    equipment[slot] = 0;
+    return true;
+}
 
 } // namespace tmwserv

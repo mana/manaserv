@@ -50,15 +50,31 @@ void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
         case CMSG_USE_OBJECT:
             {
                 unsigned int itemId = message.readLong();
+
+                // use item
+                // this should execute a script which will do the appropriate action
+
+                // respond
                 result.writeShort(SMSG_USE_RESPONSE);
                 result.writeByte(USE_OK);
             } break;
 
         case CMSG_TARGET:
-            break;
+            {
+                
+            } break;
 
         case CMSG_WALK:
-            break;
+            {
+                int x = message.readLong();
+                int y = message.readLong();
+
+                // simplistic "teleport" walk
+                computer.getCharacter()->setX(x);
+                computer.getCharacter()->setY(y);
+
+                // no response should be required
+            } break;
 
         case CMSG_START_TRADE:
             break;
@@ -73,7 +89,14 @@ void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             break;
 
         case CMSG_EQUIP:
-            break;
+            {
+                int itemId = message.readLong();
+                char slot = message.readByte();
+
+                result.writeShort(SMSG_EQUIP_RESPONSE);
+                result.writeByte(computer.getCharacter()->equip(itemId, slot) ?
+                                 EQUIP_OK : EQUIP_FAIL);
+            } break;
 
         default:
             std::cerr << "Warning: GameHandler received message of unkown type"
@@ -81,5 +104,6 @@ void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             break;
     }
 
-    computer.send(result.getPacket());
+    if (result.getPacket()->length > 0)
+        computer.send(result.getPacket());
 }

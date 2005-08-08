@@ -97,6 +97,7 @@ enum {
     // Items
     CMSG_USE_ITEM                = 0x0300,
     CMSG_EQUIP                   = 0x0301,
+    SMSG_EQUIP_RESPONSE          = 0x0302,
 
     // Chat
     SMSG_CHAT                    = 0x0400,
@@ -168,6 +169,12 @@ enum {
 enum {
     USE_OK = 0,
     USE_FAIL
+};
+
+// Equip responses
+enum {
+    EQUIP_OK = 0,
+    EQUIP_FAIL
 };
 
 

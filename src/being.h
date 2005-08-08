@@ -290,6 +290,20 @@ class Being: public Object
          */
         bool delInventory(unsigned int itemId);
 
+        /**
+         * Equip item with ID in equipment slot
+         *
+         * @return Equip success/failure
+         */
+        bool equip(unsigned int itemId, unsigned char slot);
+
+        /**
+         * Un-equip item
+         *
+         * bool Un-equip success/failure
+         */
+        bool unequip(unsigned char slot);
+
     private:
         /**
          * Copy constructor.
@@ -312,7 +326,7 @@ class Being: public Object
         RawStatistics mRawStats; /**< raw stats of the being */
 
         std::vector<unsigned int> inventory;    /**< Player inventory */
-        unsigned int equipped[MAX_EQUIP_SLOTS]; /**< Equipped item ID's (from inventory) */
+        unsigned int equipment[MAX_EQUIP_SLOTS]; /**< Equipped item ID's (from inventory) */
 };
 
 
