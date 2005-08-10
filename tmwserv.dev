@@ -5,7 +5,7 @@ Name=tmwserv
 UnitCount=17
 =======
 Name=tmwserv
-UnitCount=67
+UnitCount=71
 >>>>>>> 1.2
 Type=1
 Ver=1
@@ -21,7 +21,7 @@ Linker=-lmingw32_@@_-lSDL_@@_-lSDL_net_@@_-lsqlite3_@@_-lcrypto_@@_-llibxml2_@@_
 IsCpp=1
 Icon=
 ExeOutput=
-ObjectOutput=
+ObjectOutput=src\obj
 OverrideOutput=0
 OverrideOutputName=tmwserv.exe
 HostApplication=
@@ -32,7 +32,7 @@ CustomMakefile=
 IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=0000000000000001000000
+CompilerSettings=0000000000001001000100
 
 [Unit3]
 FileName=src\dal\dataprovider.h
@@ -503,7 +503,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit64]
-FileName=src\mapreader.h
+FileName=src\resourcemanager.cpp
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -513,9 +513,9 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit65]
-FileName=src\resourcemanager.cpp
+FileName=src\utils\base64.h
 CompileCpp=1
-Folder=tmwserv
+Folder=utils
 Compile=1
 Link=1
 Priority=1000
@@ -623,7 +623,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit63]
-FileName=src\mapreader.cpp
+FileName=src\mapreader.h
 CompileCpp=1
 Folder=tmwserv
 Compile=1
@@ -703,7 +703,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit66]
-FileName=src\utils\base64.h
+FileName=src\utils\base64.cpp
 CompileCpp=1
 Folder=utils
 Compile=1
@@ -713,9 +713,49 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit67]
-FileName=src\utils\base64.cpp
+FileName=src\state.h
 CompileCpp=1
-Folder=utils
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit68]
+FileName=src\state.cpp
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit69]
+FileName=src\gamehandler.h
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit70]
+FileName=src\items.cpp
+CompileCpp=1
+Folder=tmwserv
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit71]
+FileName=src\gamehandler.cpp
+CompileCpp=1
+Folder=tmwserv
 Compile=1
 Link=1
 Priority=1000
