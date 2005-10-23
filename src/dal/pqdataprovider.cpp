@@ -89,6 +89,9 @@ PqDataProvider::connect(const std::string& dbName,
         throw DbConnectionFailure(error);
     }
 
+    // Save the Db Name.
+    mDbName = dbName;
+
     mIsConnected = true;
 }
 

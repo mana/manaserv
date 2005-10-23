@@ -1,0 +1,7 @@
+2005-10-23  Yohann Ferreira  <Bertram@cegetel.net>
+
+	* src/dal/dataprovider.h, src/dal/dataprovider.cpp,
+	src/dal/sqlitedataprovider.cpp, src/dal/mysqldataprovider.cpp,
+	src/dal/pqdataprovider.cpp, src/main.cpp, src/client.cpp:
+	Grammar corrections, and a little bit of work on getting the name
+	of the Db.

@@ -62,6 +62,20 @@ DataProvider::isConnected(void) const
     return mIsConnected;
 }
 
+/**
+ * Get the DataBase Name
+ */
+std::string
+DataProvider::getDbName(void)
+{
+    if (!isConnected())
+    {
+        return "";
+    }
+
+    return mDbName;
+}
+
 
 } // namespace dal
 } // namespace tmwserv

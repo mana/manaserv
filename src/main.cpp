@@ -62,7 +62,7 @@ std::string scriptLanguage = "squirrel";
 #endif // SCRIPT_SUPPORT
 
 #define LOG_FILE        "tmwserv.log"
-
+#define SERVER_VERSION  "Pre-Milestone1"
 #define TMW_WORLD_TICK  SDL_USEREVENT
 #define SERVER_PORT     9601
 
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
     connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
-    //LOG_INFO("The Mana World Server v" << PACKAGE_VERSION) PACKAGE_VERSION undeclared
+    LOG_INFO("The Mana World Server v" << SERVER_VERSION)
     session->startListen(connectionHandler.get(), SERVER_PORT);
     LOG_INFO("Listening on port " << SERVER_PORT << "...")
 
@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
         SDL_Delay(100);
     }
 
-    LOG_INFO("Recieved Quit signal, closing down...")
+    LOG_INFO("Received: Quit signal, closing down...")
     session->stopListen(SERVER_PORT);
 
     deinitialize();

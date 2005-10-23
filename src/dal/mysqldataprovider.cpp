@@ -110,6 +110,9 @@ MySqlDataProvider::connect(const std::string& dbName,
         throw DbConnectionFailure(msg);
     }
 
+    // Save the Db Name.
+    mDbName = dbName;
+
     mIsConnected = true;
 }
 

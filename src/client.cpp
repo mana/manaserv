@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         exit(2);
     }
 
-    printf("Succesfully connected!\n");
+    printf("Successfully connected!\n");
 
     int answer = 1;
     char line[256] = "";
@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
         printf ("2) Login\n");
         printf ("3) Chat\n");
         printf ("4) Create character\n");
-        printf ("5) Character selecion\n");
-        printf ("Insert your option: ");
+        printf ("5) Character selection\n");
+        printf ("Choose your option: ");
         std::cin >> answer;
 
         switch (answer) {
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
             {
                 // Select character
                 msg.writeShort(CMSG_CHAR_SELECT);
-                printf("\nCharacrer ID: ");
+                printf("\nCharacter ID: ");
                 std::cin >> line;
                 msg.writeByte(atoi(line));
             } break;

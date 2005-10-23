@@ -137,6 +137,13 @@ class DataProvider
         virtual void
         disconnect(void) = 0;
 
+        /**
+         * Get the Database Name.
+         */
+        std::string
+        getDbName(void);
+
+
 
     protected:
         std::string mDbName;  /**< the database name */
