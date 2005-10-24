@@ -28,6 +28,10 @@
 
 #include <cstdlib>
 
+#ifdef __USE_UNIX98
+#include "../config.h"
+#endif
+
 #include "netsession.h"
 #include "connectionhandler.h"
 #include "accounthandler.h"
@@ -62,7 +66,7 @@ std::string scriptLanguage = "squirrel";
 #endif // SCRIPT_SUPPORT
 
 #define LOG_FILE        "tmwserv.log"
-#define SERVER_VERSION  "Pre-Milestone1"
+
 #define TMW_WORLD_TICK  SDL_USEREVENT
 #define SERVER_PORT     9601
 
@@ -131,6 +135,18 @@ void initialize()
     if (scriptLanguage == "squirrel") {
         script = new ScriptSquirrel("main.nut");
     }
+#else
+    LOG_WARN("No Scripting Language Support.")
+#endif
+
+#if defined (MYSQL_SUPPORT)
+    LOG_INFO("Using MySQL DB Backend.")
+#elif defined (POSTGRESQL_SUPPORT)
+    LOG_INFO("Using PostGreSQL DB Backend.")
+#elif defined (SQLITE_SUPPORT)
+    LOG_INFO("Using SQLite DB Backend.")
+#else
+    LOG_WARN("No Database Backend Support.")
 #endif
 
     // initialize configuration
@@ -146,6 +162,8 @@ void initialize()
 #endif
     configPath += "/.tmwserv.xml";
     config.init(configPath);
+    LOG_INFO("Using Config File: " << configPath)
+    LOG_INFO("Using Log File: " << LOG_FILE)
 }
 
 
@@ -183,6 +201,9 @@ void deinitialize()
  */
 int main(int argc, char *argv[])
 {
+#ifdef __USE_UNIX98
+    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION)
+#endif
     initialize();
 
     // Ready for server work...
@@ -214,7 +235,6 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
     connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
-    LOG_INFO("The Mana World Server v" << SERVER_VERSION)
     session->startListen(connectionHandler.get(), SERVER_PORT);
     LOG_INFO("Listening on port " << SERVER_PORT << "...")
 

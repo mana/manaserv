@@ -1,5 +1,6 @@
-2005-10-23  Yohann Ferreira  <Bertram@cegetel.net>
+2005-10-24  Yohann Ferreira  <Bertram@cegetel.net>
 
+	* src/main.cpp: Added more useful infos at startup.
 	* src/dal/dataprovider.h, src/dal/dataprovider.cpp,
 	src/dal/sqlitedataprovider.cpp, src/dal/mysqldataprovider.cpp,
 	src/dal/pqdataprovider.cpp, src/main.cpp, src/client.cpp:
