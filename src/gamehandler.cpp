@@ -46,28 +46,33 @@ void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 result.writeShort(SMSG_PICKUP_RESPONSE);
                 result.writeByte(PICKUP_OK);
             } break;
-                
+
+        case CMSG_USE_ITEM:
         case CMSG_USE_OBJECT:
             {
                 unsigned int itemId = message.readLong();
 
-                // use item
-                // this should execute a script which will do the appropriate action
-
-                // respond
                 result.writeShort(SMSG_USE_RESPONSE);
-                result.writeByte(USE_OK);
+
+                if (computer.getCharacter()->hasItem(itemId)) {
+                    // use item
+                    // this should execute a script which will do the appropriate action
+                    // (the script will determine if the item is 1 use only)
+                    result.writeByte(USE_OK);                    
+                } else {
+                    result.writeByte(USE_FAIL);
+                }
             } break;
 
         case CMSG_TARGET:
             {
-                
+                // nothing at the moment
             } break;
 
         case CMSG_WALK:
             {
-                int x = message.readLong();
-                int y = message.readLong();
+                long x = message.readLong();
+                long y = message.readLong();
 
                 // simplistic "teleport" walk
                 computer.getCharacter()->setX(x);
@@ -77,16 +82,19 @@ void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             } break;
 
         case CMSG_START_TRADE:
-            break;
+            {
+                // nothing at the moment
+            } break;
 
         case CMSG_START_TALK:
-            break;
+            {
+                // nothing at the moment
+            } break;
 
         case CMSG_REQ_TRADE:
-            break;
-
-        case CMSG_USE_ITEM:
-            break;
+            {
+                // nothing at the moment
+            } break;
 
         case CMSG_EQUIP:
             {

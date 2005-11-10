@@ -5,11 +5,9 @@
 #include "defines.h"
 #include "messageout.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1)
-    {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
         printf("SDL_Init: %s\n", SDL_GetError());
         exit(1);
     }
@@ -18,8 +16,7 @@ int main(int argc, char *argv[])
     atexit(SDL_Quit);
 
     // Initialize SDL_net
-    if (SDLNet_Init() == -1)
-    {
+    if (SDLNet_Init() == -1) {
         printf("SDLNet_Init: %s\n", SDLNet_GetError());
         exit(2);
     }
@@ -28,15 +25,13 @@ int main(int argc, char *argv[])
     IPaddress ip;
     TCPsocket tcpsock;
 
-    if (SDLNet_ResolveHost(&ip, "localhost", 9601) == -1)
-    {
+    if (SDLNet_ResolveHost(&ip, "localhost", 9601) == -1) {
         printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
         exit(1);
     }
 
     tcpsock = SDLNet_TCP_Open(&ip);
-    if (!tcpsock)
-    {
+    if (!tcpsock) {
         printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
         exit(2);
     }
@@ -46,9 +41,8 @@ int main(int argc, char *argv[])
     int answer = 1;
     char line[256] = "";
     
-    while (answer != 0)
-    {
-
+    while (answer != 0) {
+        bool responseRequired = true;
         MessageOut msg;
         
         printf ("0) Quit\n");
@@ -57,6 +51,8 @@ int main(int argc, char *argv[])
         printf ("3) Chat\n");
         printf ("4) Create character\n");
         printf ("5) Character selection\n");
+        printf ("6) Move character\n");
+        printf ("7) Equip item\n");
         printf ("Choose your option: ");
         std::cin >> answer;
 
@@ -74,6 +70,7 @@ int main(int argc, char *argv[])
                 std::cin >> line;
                 msg.writeString(line);
                 break;
+
             case 2:
                 // Login
                 msg.writeShort(CMSG_LOGIN);
@@ -84,6 +81,7 @@ int main(int argc, char *argv[])
                 std::cin >> line;
                 msg.writeString(line);
                 break;
+
             case 3:
                 // Chat
                 msg.writeShort(CMSG_SAY);
@@ -91,7 +89,9 @@ int main(int argc, char *argv[])
                 std::cin >> line;
                 msg.writeString(line);
                 msg.writeShort(0);
+                responseRequired = false;
                 break;
+
             case 4:
             {
                 // Create character
@@ -111,6 +111,36 @@ int main(int argc, char *argv[])
                 msg.writeByte(atoi(line));
             } break;
 
+            case 6:
+            {
+                // Move character
+                long x, y;
+                std::cout << "X: ";
+                std::cin >> x;
+                std::cout << "Y: ";
+                std::cin >> y;
+
+                msg.writeShort(CMSG_WALK);
+                msg.writeLong(x);
+                msg.writeLong(y);
+
+                responseRequired = false;
+            } break;
+
+            case 7:
+            {
+                // Equip
+                unsigned int itemId;
+                unsigned int slot;
+                std::cout << "Item ID: ";
+                std::cin >> itemId;
+                std::cout << "Slot: ";
+                std::cin >> slot;
+                msg.writeShort(CMSG_EQUIP);
+                msg.writeLong(itemId);
+                msg.writeByte(slot);
+            } break;
+
             default:
                 continue;
         }
@@ -121,21 +151,19 @@ int main(int argc, char *argv[])
             printf("%x ", msg.getPacket()->data[i]);
         }
         printf("\n\n");
-        
+
         SDLNet_TCP_Send(tcpsock, msg.getPacket()->data,
                         msg.getPacket()->length);
-                        
-        if (answer != 3) {
+
+        if (responseRequired) {
             char data[1024];
             int recvLength = SDLNet_TCP_Recv(tcpsock, data, 1024);
             printf("Received:\n");
-            if (recvLength != -1)
-            {
+            if (recvLength != -1) {
                 for (unsigned int i = 0; i < recvLength; i++) {
                     printf("%x ", data[i]);
                 }
-            }
-            else {
+            } else {
                 printf("ERROR!");
             }
             printf("\n\n");

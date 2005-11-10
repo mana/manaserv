@@ -227,12 +227,12 @@ int main(int argc, char *argv[])
 
     connectionHandler->registerHandler(CMSG_PICKUP, gameHandler);
     connectionHandler->registerHandler(CMSG_USE_OBJECT, gameHandler);
+    connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
     connectionHandler->registerHandler(CMSG_TARGET, gameHandler);
     connectionHandler->registerHandler(CMSG_WALK, gameHandler);
     connectionHandler->registerHandler(CMSG_START_TRADE, gameHandler);
     connectionHandler->registerHandler(CMSG_START_TALK, gameHandler);
     connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
-    connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
     connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
     session->startListen(connectionHandler.get(), SERVER_PORT);

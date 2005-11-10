@@ -310,6 +310,15 @@ bool Being::delInventory(unsigned int itemId)
     return false;
 }
 
+bool Being::hasItem(unsigned int itemId) {
+    for (std::vector<unsigned int>::iterator i = inventory.begin();
+         i != inventory.end(); i++) {
+        if (*i == itemId)
+            return true;
+    }
+    return false;
+}
+
 bool Being::equip(unsigned int itemId, unsigned char slot)
 {
     // currently this is too simplistic and doesn't check enough

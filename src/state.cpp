@@ -31,6 +31,15 @@ namespace tmwserv
 void State::update(ConnectionHandler &connectionHandler)
 {
     // update game state (update AI, etc.)
+    for (std::map<std::string, Beings>::iterator i = beings.begin();
+         i != beings.end();
+         i++) {
+        for (Beings::iterator b = i->second.begin();
+             b != i->second.end();
+             b++) {
+            b->get()->update();
+        }
+    }
 
     // notify clients about changes in the game world (only on their maps)
     // NOTE: This isn't finished ;)
@@ -38,11 +47,11 @@ void State::update(ConnectionHandler &connectionHandler)
          i != beings.end();
          i++) {
         //
-        for (std::vector<BeingPtr>::iterator b = i->second.begin();
+        for (Beings::iterator b = i->second.begin();
              b != i->second.end();
              b++) {
             // send info about other players
-            for (std::vector<BeingPtr>::iterator b2 = i->second.begin();
+            for (Beings::iterator b2 = i->second.begin();
                  b2 != i->second.end();
                  b2++) {
                 if (b != b2) {

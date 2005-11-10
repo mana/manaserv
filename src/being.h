@@ -291,6 +291,13 @@ class Being: public Object
         bool delInventory(unsigned int itemId);
 
         /**
+         * Check if character has an item
+         *
+         * @return true if being has item, false otherwise
+         */
+        bool hasItem(unsigned int itemId);
+
+        /**
          * Equip item with ID in equipment slot
          *
          * @return Equip success/failure
