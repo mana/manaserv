@@ -21,14 +21,14 @@
  *  $Id$
  */
 
-#ifndef _TMW_SERVER_DEBUG_
-#define _TMW_SERVER_DEBUG_
- 
+#ifndef _TMWSERV_DEBUG_H_
+#define _TMWSERV_DEBUG_H_
+
 // This file defines the return types for debugging
 
 /**
  * Returns a message on function failure if the debug flag is set to true.
- */ 
+ */
 extern void debugCatch(int result);
 
 
@@ -38,7 +38,7 @@ extern void debugCatch(int result);
 
  // GENERAL
 #define TMW_SUCCESS                              1 // the function completed successfully
- 
+
  // ACCOUNT
 #define TMW_ACCOUNTERROR_NOEXIST               100
 #define TMW_ACCOUNTERROR_BANNED                101

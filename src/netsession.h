@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#ifndef _TMW_SERVER_NETSESSION_
-#define _TMW_SERVER_NETSESSION_
+#ifndef _TMWSERV_NETSESSION_H_
+#define _TMWSERV_NETSESSION_H_
 
 #include "netcomputer.h"
 #include "connectionhandler.h"

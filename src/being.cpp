@@ -273,7 +273,8 @@ Being::getRawStatistics(void)
 /**
  * Update the internal status.
  */
-void Being::update(void)
+void
+Being::update(void)
 {
     // computed stats.
     mStats.health = 20 + (20 * mRawStats.vitality);
@@ -286,19 +287,22 @@ void Being::update(void)
     mNeedUpdate = false;
 }
 
-void Being::setInventory(const std::vector<unsigned int> &inven)
+void
+Being::setInventory(const std::vector<unsigned int> &inven)
 {
     inventory = inven;
 }
 
-bool Being::addInventory(unsigned int itemId)
+bool
+Being::addInventory(unsigned int itemId)
 {
     // If required weight could be tallied to see if player can pick up more.
     inventory.push_back(itemId);
     return true;
 }
 
-bool Being::delInventory(unsigned int itemId)
+bool
+Being::delInventory(unsigned int itemId)
 {
     for (std::vector<unsigned int>::iterator i = inventory.begin();
          i != inventory.end(); i++) {
@@ -310,16 +314,20 @@ bool Being::delInventory(unsigned int itemId)
     return false;
 }
 
-bool Being::hasItem(unsigned int itemId) {
+bool
+Being::hasItem(unsigned int itemId)
+{
     for (std::vector<unsigned int>::iterator i = inventory.begin();
-         i != inventory.end(); i++) {
+         i != inventory.end(); i++)
+    {
         if (*i == itemId)
             return true;
     }
     return false;
 }
 
-bool Being::equip(unsigned int itemId, unsigned char slot)
+bool
+Being::equip(unsigned int itemId, unsigned char slot)
 {
     // currently this is too simplistic and doesn't check enough
     // but until further functionality is implemented in the
@@ -331,7 +339,8 @@ bool Being::equip(unsigned int itemId, unsigned char slot)
         return false;
 }
 
-bool Being::unequip(unsigned char slot)
+bool
+Being::unequip(unsigned char slot)
 {
     // NOTE: 0 will be invalid item id (or we could use key/value pairs)
     equipment[slot] = 0;

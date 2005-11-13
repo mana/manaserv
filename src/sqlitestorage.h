@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#ifndef TMWSERV_SQLITESTORAGE_H
-#define TMWSERV_SQLITESTORAGE_H
+#ifndef _TMWSERV_SQLITESTORAGE_H_
+#define _TMWSERV_SQLITESTORAGE_H_
 
 #include "sqlite/SQLiteWrapper.h"
 #include "storage.h"
@@ -69,4 +69,4 @@ class SQLiteStorage : public Storage
         void createTablesIfNecessary();
 };
 
-#endif /* TMWSERV_SQLITESTORAGE_H */
+#endif // _TMWSERV_SQLITESTORAGE_H_

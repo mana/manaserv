@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#ifndef _TMW_SERVER_MESSAGEIN_
-#define _TMW_SERVER_MESSAGEIN_
+#ifndef _TMWSERV_MESSAGEIN_H_
+#define _TMWSERV_MESSAGEIN_H_
 
 #include "packet.h"
 #include <string>

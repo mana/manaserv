@@ -44,13 +44,15 @@ MessageOut::~MessageOut()
     }
 }
 
-void MessageOut::expand(size_t bytes)
+void
+MessageOut::expand(size_t bytes)
 {
     mData = (char*)realloc(mData, bytes);
     mDataSize = bytes;
 }
 
-void MessageOut::writeByte(char value)
+void
+MessageOut::writeByte(char value)
 {
     expand(mPos + sizeof(char));
     mData[mPos] = value;
@@ -64,14 +66,16 @@ void MessageOut::writeShort(short value)
     mPos += sizeof(short);
 }
 
-void MessageOut::writeLong(long value)
+void
+MessageOut::writeLong(long value)
 {
     expand(mPos + sizeof(long));
     SDLNet_Write32(value, &mData[mPos]);
     mPos += sizeof(long);
 }
 
-void MessageOut::writeString(const std::string &string, int length)
+void
+MessageOut::writeString(const std::string &string, int length)
 {
     std::string toWrite = string;
 
@@ -103,7 +107,8 @@ void MessageOut::writeString(const std::string &string, int length)
     }
 }
 
-const Packet *MessageOut::getPacket()
+const Packet*
+MessageOut::getPacket()
 {
     if (!mPacket)
     {

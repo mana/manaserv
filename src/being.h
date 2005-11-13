@@ -77,239 +77,223 @@ class Being: public Object
               const unsigned int money,
               const RawStatistics& stats);
 
-
         /**
          * Destructor.
          */
         ~Being(void)
             throw();
 
-
         /**
-         * Get the name.
+         * Gets the name.
          *
          * @return the name.
          */
         const std::string&
         getName(void) const;
 
-
         /**
-         * Get the gender.
+         * Gets the gender.
          *
          * @return the gender.
          */
         Genders
         getGender(void) const;
 
-
         /**
-         * Set the level.
+         * Sets the level.
          *
          * @param level the new level.
          */
         void
         setLevel(const unsigned short level);
 
-
         /**
-         * Get the level.
+         * Gets the level.
          *
          * @return the level.
          */
         unsigned short
         getLevel(void) const;
 
-
         /**
-         * Set the money.
+         * Sets the money.
          *
          * @param amount the new amount.
          */
         void
         setMoney(const unsigned int amount);
 
-
         /**
-         * Get the amount of money.
+         * Gets the amount of money.
          *
          * @return the amount of money.
          */
         unsigned int
         getMoney(void) const;
 
-
         /**
-         * Set the strength.
+         * Sets the strength.
          *
          * @param strength the new strength.
          */
         void
         setStrength(const unsigned short strength);
 
-
         /**
-         * Get the strength.
+         * Gets the strength.
          *
          * @return the strength.
          */
         unsigned short
         getStrength(void) const;
 
-
         /**
-         * Set the agility.
+         * Sets the agility.
          *
          * @param agility the new agility.
          */
         void
         setAgility(const unsigned short agility);
 
-
         /**
-         * Get the agility.
+         * Gets the agility.
          *
          * @return the agility.
          */
         unsigned short
         getAgility(void) const;
 
-
         /**
-         * Set the vitality.
+         * Sets the vitality.
          *
          * @param vitality the new vitality.
          */
         void
         setVitality(const unsigned short vitality);
 
-
         /**
-         * Get the vitality.
+         * Gets the vitality.
          *
          * @return the vitality.
          */
         unsigned short
         getVitality(void) const;
 
-
         /**
-         * Set the intelligence.
+         * Sets the intelligence.
          *
          * @param intelligence the new intelligence.
          */
         void
         setIntelligence(const unsigned short intelligence);
 
-
         /**
-         * Get the intelligence.
+         * Gets the intelligence.
          *
          * @return the intelligence.
          */
         unsigned short
         getIntelligence(void) const;
 
-
         /**
-         * Set the dexterity.
+         * Sets the dexterity.
          *
          * @param dexterity the new dexterity.
          */
         void
         setDexterity(const unsigned short dexterity);
 
-
         /**
-         * Get the dexterity.
+         * Gets the dexterity.
          *
          * @return the dexterity.
          */
         unsigned short
         getDexterity(void) const;
 
-
         /**
-         * Set the luck.
+         * Sets the luck.
          *
          * @param luck the new luck.
          */
         void
         setLuck(const unsigned short luck);
 
-
         /**
-         * Get the luck.
+         * Gets the luck.
          *
          * @return the luck.
          */
         unsigned short
         getLuck(void) const;
 
-
         /**
-         * Set the raw statistics.
+         * Sets the raw statistics.
          *
          * @param stats the new raw statistics.
          */
         void
         setRawStatistics(const RawStatistics& stats);
 
-
         /**
-         * Get the raw statistics.
+         * Gets the raw statistics.
          *
          * @return the raw statistics.
          */
         RawStatistics&
         getRawStatistics(void);
 
-
         /**
-         * Update the internal status.
+         * Updates the internal status.
          */
         void
         update(void);
 
         /**
-         * Set inventory
+         * Sets inventory.
          */
-        void setInventory(const std::vector<unsigned int> &inven);
+        void
+        setInventory(const std::vector<unsigned int> &inven);
 
         /**
-         * Add item with ID to inventory
+         * Adds item with ID to inventory.
          *
          * @return Item add success/failure
          */
-        bool addInventory(unsigned int itemId);
+        bool
+        addInventory(unsigned int itemId);
 
         /**
-         * Remove item with ID from inventory
+         * Removes item with ID from inventory.
          *
          * @return Item delete success/failure
          */
-        bool delInventory(unsigned int itemId);
+        bool
+        delInventory(unsigned int itemId);
 
         /**
-         * Check if character has an item
+         * Checks if character has an item.
          *
          * @return true if being has item, false otherwise
          */
-        bool hasItem(unsigned int itemId);
+        bool
+        hasItem(unsigned int itemId);
 
         /**
-         * Equip item with ID in equipment slot
+         * Equips item with ID in equipment slot.
          *
          * @return Equip success/failure
          */
-        bool equip(unsigned int itemId, unsigned char slot);
+        bool
+        equip(unsigned int itemId, unsigned char slot);
 
         /**
-         * Un-equip item
+         * Un-equips item.
          *
          * bool Un-equip success/failure
          */
-        bool unequip(unsigned char slot);
+        bool
+        unequip(unsigned char slot);
 
     private:
         /**
@@ -317,13 +301,11 @@ class Being: public Object
          */
         Being(const Being& rhs);
 
-
         /**
          * Assignment operator.
          */
         Being&
         operator=(const Being& rhs);
-
 
     private:
         std::string mName;       /**< name of the being */

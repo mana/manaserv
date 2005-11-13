@@ -5,7 +5,8 @@
 #include "defines.h"
 #include "messageout.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
         printf("SDL_Init: %s\n", SDL_GetError());
@@ -40,11 +41,12 @@ int main(int argc, char *argv[]) {
 
     int answer = 1;
     char line[256] = "";
-    
-    while (answer != 0) {
+
+    while (answer != 0)
+    {
         bool responseRequired = true;
         MessageOut msg;
-        
+
         printf ("0) Quit\n");
         printf ("1) Register\n");
         printf ("2) Login\n");

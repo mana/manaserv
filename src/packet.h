@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#ifndef _TMW_SERVER_PACKET_
-#define _TMW_SERVER_PACKET_
+#ifndef _TMWSERV_PACKET_H_
+#define _TMWSERV_PACKET_H_
 
 /**
  * A packet wraps a certain amount of bytes for sending and receiving.

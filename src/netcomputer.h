@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#ifndef _TMW_SERVER_NETCOMPUTER_
-#define _TMW_SERVER_NETCOMPUTER_
+#ifndef _TMWSERV_NETCOMPUTER_H_
+#define _TMWSERV_NETCOMPUTER_H_
 
 #include "packet.h"
 #include <SDL_net.h>

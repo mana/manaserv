@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#ifndef _TMW_SERVER_ACCOUNTHANDLER_
-#define _TMW_SERVER_ACCOUNTHANDLER_
+#ifndef _TMWSERV_ACCOUNTHANDLER_H_
+#define _TMWSERV_ACCOUNTHANDLER_H_
 
 #include "messagehandler.h"
 #include "netcomputer.h"
