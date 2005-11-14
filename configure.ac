@@ -119,7 +119,18 @@ AC_ARG_WITH(
 )
 
 if test "$with_scripting_engine" = "ruby"; then
-    AC_MSG_ERROR([sorry, $with_scripting_engine is not supported yet])
+    # AC_MSG_ERROR([sorry, $with_scripting_engine is not supported yet])
+    AC_CHECK_LIB([ruby], [ruby_init])
+    AC_PATH_PROG(swig_path, swig, no)
+    if test "$swig_path" = "no"; then
+       AC_MSG_ERROR(Could not find swig in PATH)
+    fi
+    SWIG="$swig_path"
+    SWIGFLAGS="-c++ -ruby -minherit"
+    AC_SUBST(SWIG)
+    AC_SUBST(SWIGFLAGS)
+    CXXFLAGS="$CXXFLAGS -DSCRIPT_SUPPORT -DRUBY_SUPPORT -I/usr/lib/ruby/1.8/linux/"
+    LIBS="$LIBS -lruby"
 elif test "$with_scripting_engine" = "squirrel"; then
     AC_CHECK_LIB([squirrel], [sq_open])
 

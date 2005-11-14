@@ -46,7 +46,7 @@ class MessageHandler
          * to an ID this message handler registered to handle.
          */
         virtual void
-        receiveMessage(NetComputer &computer, MessageIn &message) = 0;
+            receiveMessage(NetComputer &computer, MessageIn &message); //= 0; no pure virtual
 
 };
 

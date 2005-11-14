@@ -23,20 +23,8 @@
 
 #include "messagehandler.h"
 #include "debug.h"
+#include "utils/logger.h"
 
-/*
-void MessageHandler::receiveMessage(NetComputer &computer, MessageIn &message)
-{
-    int result = 0;
-    
-    // determine message type
-    switch(message.type)
-    {
-        case TYPE_LOGIN:
-            result = loginMessage(computer, message);
-            break;
-    }
-
-    debugCatch(result);
+void MessageHandler::receiveMessage(NetComputer &computer, MessageIn &message) {
+    LOG_WARN("MessageHandler class created without receiveMessage override")
 }
-*/

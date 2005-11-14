@@ -49,20 +49,22 @@
 // Scripting
 #ifdef SCRIPT_SUPPORT
 
-#include "script.h"
+extern "C" void Init_Tmw();
 
-#define SCRIPT_SQUIRREL_SUPPORT
-
-#if define (SCRIPT_SQUIRREL_SUPPORT)
-#include "script-squirrel.h"
-#elif define (SCRIPT_RUBY_SUPPORT)
-#include "script-ruby.h"
-#elif define (SCRIPT_LUA_SUPPORT)
-#include "script-lua.h"
+#if defined (SQUIRREL_SUPPORT)
+std::string scriptLanguage = "squirrel";
+#elif defined (RUBY_SUPPORT)
+#include <ruby.h>
+int rubyStatus;
+std::string scriptLanguage = "ruby";
+#elif defined (LUA_SUPPORT)
+std::string scriptLanguage = "lua";
+#else
+#error "Scripting enabled, but no language selected"
 #endif
 
-std::string scriptLanguage = "squirrel";
-
+#else
+std::string scriptLanugage = "none";
 #endif // SCRIPT_SUPPORT
 
 #define LOG_FILE        "tmwserv.log"
@@ -81,6 +83,8 @@ Configuration config;     /**< XML config reader */
 AccountHandler *accountHandler = new AccountHandler(); /**< Account message handler */
 ChatHandler *chatHandler = new ChatHandler(); /**< Communications (chat) messaqge handler */
 GameHandler *gameHandler = new GameHandler(); /**< Core game message handler */
+
+ConnectionHandler connectionHandler; /**< Primary connection handler */
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -129,12 +133,20 @@ void initialize()
     worldTimerID = SDL_AddTimer(100, worldTick, NULL);
 
     // initialize scripting subsystem.
-#ifdef SCRIPT_SUPPORT
-    LOG_INFO("Script Language " << scriptLanguage)
+#ifdef RUBY_SUPPORT
+    LOG_INFO("Script Language: " << scriptLanguage)
 
-    if (scriptLanguage == "squirrel") {
-        script = new ScriptSquirrel("main.nut");
-    }
+    // initialize ruby
+    ruby_init();
+    ruby_init_loadpath();
+    ruby_script("tmw");
+
+    // initialize bindings
+    Init_Tmw();
+
+    // run test script
+    rb_load_file("scripts/init.rb");
+    rubyStatus = ruby_exec();
 #else
     LOG_WARN("No Scripting Language Support.")
 #endif
@@ -181,9 +193,10 @@ void deinitialize()
     // Quit SDL_net
     SDLNet_Quit();
 
-#ifdef SCRIPT_SUPPORT
-    // Destroy scripting subsystem
-    delete script;
+#ifdef RUBY_SUPPORT
+    // Finish up ruby
+    ruby_finalize();
+    ruby_cleanup(rubyStatus);
 #endif
 
     // destroy message handlers
@@ -204,11 +217,7 @@ int main(int argc, char *argv[])
 #ifdef __USE_UNIX98
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION)
 #endif
-    initialize();
-
     // Ready for server work...
-    std::auto_ptr<ConnectionHandler>
-        connectionHandler(new ConnectionHandler());
     std::auto_ptr<NetSession> session(new NetSession());
 
     // Note: This is just an idea, we could also pass the connection handler
@@ -217,25 +226,27 @@ int main(int argc, char *argv[])
     //
 
     // Register message handlers
-    connectionHandler->registerHandler(CMSG_LOGIN, accountHandler);
-    connectionHandler->registerHandler(CMSG_REGISTER, accountHandler);
-    connectionHandler->registerHandler(CMSG_CHAR_CREATE, accountHandler);
-    connectionHandler->registerHandler(CMSG_CHAR_SELECT, accountHandler);
+    connectionHandler.registerHandler(CMSG_LOGIN, accountHandler);
+    connectionHandler.registerHandler(CMSG_REGISTER, accountHandler);
+    connectionHandler.registerHandler(CMSG_CHAR_CREATE, accountHandler);
+    connectionHandler.registerHandler(CMSG_CHAR_SELECT, accountHandler);
 
-    connectionHandler->registerHandler(CMSG_SAY, chatHandler);
-    connectionHandler->registerHandler(CMSG_ANNOUNCE, chatHandler);
+    connectionHandler.registerHandler(CMSG_SAY, chatHandler);
+    connectionHandler.registerHandler(CMSG_ANNOUNCE, chatHandler);
 
-    connectionHandler->registerHandler(CMSG_PICKUP, gameHandler);
-    connectionHandler->registerHandler(CMSG_USE_OBJECT, gameHandler);
-    connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
-    connectionHandler->registerHandler(CMSG_TARGET, gameHandler);
-    connectionHandler->registerHandler(CMSG_WALK, gameHandler);
-    connectionHandler->registerHandler(CMSG_START_TRADE, gameHandler);
-    connectionHandler->registerHandler(CMSG_START_TALK, gameHandler);
-    connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
-    connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
+    connectionHandler.registerHandler(CMSG_PICKUP, gameHandler);
+    connectionHandler.registerHandler(CMSG_USE_OBJECT, gameHandler);
+    connectionHandler.registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
+    connectionHandler.registerHandler(CMSG_TARGET, gameHandler);
+    connectionHandler.registerHandler(CMSG_WALK, gameHandler);
+    connectionHandler.registerHandler(CMSG_START_TRADE, gameHandler);
+    connectionHandler.registerHandler(CMSG_START_TALK, gameHandler);
+    connectionHandler.registerHandler(CMSG_REQ_TRADE, gameHandler);
+    connectionHandler.registerHandler(CMSG_EQUIP, gameHandler);
 
-    session->startListen(connectionHandler.get(), SERVER_PORT);
+    initialize();
+
+    session->startListen(&connectionHandler, SERVER_PORT);
     LOG_INFO("Listening on port " << SERVER_PORT << "...")
 
     using namespace tmwserv;
@@ -267,7 +278,7 @@ int main(int argc, char *argv[])
 
                 // - Handle all messages that are in the message queue
                 // - Update all active objects/beings
-                state.update(*connectionHandler.get());
+                state.update(connectionHandler);
             }
             else if (event.type == SDL_QUIT) {
                 running = false;

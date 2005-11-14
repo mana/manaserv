@@ -56,7 +56,7 @@ class NetComputer
         /**
          * Returns <code>true</code> if this computer is disconnected.
          */
-        bool isDisconnected();
+        //bool isDisconnected();
 
         /**
          * Disconnects the computer from the server.

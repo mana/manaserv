@@ -90,6 +90,12 @@ tmwserv_SOURCES += script.h \
 				   script-squirrel.cpp
 endif
 
+if BUILD_RUBY
+tmwserv_SOURCES += bindings_wrap.cpp
+bindings_wrap.cpp: bindings.i
+	$(SWIG) $(SWIGFLAGS) -o bindings_wrap.cpp bindings.i
+endif
+
 tmwserv_CXXFLAGS = -Wall -fno-inline
 
 

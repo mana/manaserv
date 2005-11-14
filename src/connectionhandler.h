@@ -83,7 +83,7 @@ class ConnectionHandler
         /**
          * Called when a computer reconnects to a network session.
          */
-        void computerReconnected(NetComputer *computer);
+        //void computerReconnected(NetComputer *computer);
 
         /**
          * Called when a computer disconnects from a network session.
@@ -96,7 +96,7 @@ class ConnectionHandler
         /**
          * Called when a computer sends a packet to the network session.
          */
-        void receivePacket(NetComputer *computer, Packet *packet);
+        //void receivePacket(NetComputer *computer, Packet *packet);
 
         /**
          * Registers a message handler to handle a certain message type.
