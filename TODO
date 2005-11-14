@@ -1,0 +1,5 @@
+$Id$
+
+ * Implement MessageHandler base for scripts which will call script's
+   receiveMessage.
+ * Enhance SWIG bindings to have support for items, objects etc.
