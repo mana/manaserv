@@ -1,3 +1,19 @@
+2005-11-12  Aaron Marks  <nymacro@gmail.com>
+
+	* src/main.cpp: Added scripting with Ruby support
+	* src/bindings.i: Created basic SWIG bindings.
+	* src/Makefile.am: Updated to support Ruby & generate SWIG
+	bindings.
+	* configure.ac: Updated to detect SWIG & Ruby, using them
+	appropriately.
+	* scripts/init.rb: Server initialization test script.
+
+2005-11-10  Aaron Marks  <nymacro@gmail.com>
+
+	* src/client.cpp: Updated client to support moving and equipping.
+	* src/being.h, src/being.cpp: Added "hasItem"
+	* src/state.cpp: Added beings updating.
+	
 2005-10-24  Yohann Ferreira  <Bertram@cegetel.net>
 
 	* src/main.cpp: Added more useful infos at startup.
