@@ -1,5 +1,5 @@
 $Id$
 
- * Implement MessageHandler base for scripts which will call script's
-   receiveMessage.
- * Enhance SWIG bindings to have support for items, objects etc.
+ * Provide interactive Ruby prompt.
+ * Better handling of std::string with SWIG
+ * Error handling for SWIG bindings (currently any problems will crash the server)

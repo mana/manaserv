@@ -26,6 +26,7 @@
 #include "storage.h"
 #include "account.h"
 #include "messageout.h"
+#include "state.h"
 #include <iostream>
 
 using tmwserv::Account;
@@ -153,7 +154,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     break;
                 }
 
+                // set character
                 computer.setCharacter(chars[charNum].get());
+
+                // place in world
+                //tmwserv::State &state = tmwserv::State::instance();
+                //state.beings["start.tmx"].push_back(tmwserv::BeingPtr(computer.getCharacter()));
                 
                 result.writeByte(SELECT_OK);
             }

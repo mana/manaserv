@@ -48,6 +48,12 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             }
             break;
 
+        case CMSG_PRIVMSG:
+            {
+                std::string user = message.readString();
+                std::string text = message.readString();
+            } break;
+
         default:
             std::cout << "Invalid message type" << std::endl;
             break;

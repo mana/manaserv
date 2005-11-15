@@ -24,6 +24,7 @@
 #include "state.h"
 #include <iostream>
 #include "messageout.h"
+#include "utils/logger.h"
 
 namespace tmwserv
 {
@@ -31,32 +32,32 @@ namespace tmwserv
 void State::update(ConnectionHandler &connectionHandler)
 {
     // update game state (update AI, etc.)
-    for (std::map<std::string, Beings>::iterator i = beings.begin();
-         i != beings.end();
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
          i++) {
-        for (Beings::iterator b = i->second.begin();
-             b != i->second.end();
+        for (Beings::iterator b = i->second.beings.begin();
+             b != i->second.beings.end();
              b++) {
             b->get()->update();
         }
     }
 
     // notify clients about changes in the game world (only on their maps)
-    // NOTE: This isn't finished ;)
-    for (std::map<std::string,  Beings>::iterator i = beings.begin();
-         i != beings.end();
+    // NOTE: Should only send differences in the game state.
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
          i++) {
         //
-        for (Beings::iterator b = i->second.begin();
-             b != i->second.end();
+        for (Beings::iterator b = i->second.beings.begin();
+             b != i->second.beings.end();
              b++) {
             // send info about other players
-            for (Beings::iterator b2 = i->second.begin();
-                 b2 != i->second.end();
+            for (Beings::iterator b2 = i->second.beings.begin();
+                 b2 != i->second.beings.end();
                  b2++) {
                 if (b != b2) {
                     MessageOut msg;
-                    msg.writeShort(SMSG_NEW_OBJECT); // of course this wont be send _all_ the time ;)
+                    msg.writeShort(SMSG_NEW_BEING); // 
                     msg.writeLong(OBJECT_PLAYER);    // type
                     msg.writeLong((int)b2->get());   // id
                     msg.writeLong(b2->get()->getX());// x
@@ -67,7 +68,105 @@ void State::update(ConnectionHandler &connectionHandler)
             }
         }
     }
+}
 
+void State::addBeing(Being *being, const std::string &map) {
+    if (!mapExists(map))
+        return;
+
+    if (!beingExists(being))
+        maps[map].beings.push_back(tmwserv::BeingPtr(being));
+}
+
+void State::removeBeing(Being *being) {
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
+         i++) {
+        for (Beings::iterator b = i->second.beings.begin();
+             b != i->second.beings.end();
+             b++) {
+            if (b->get() == being) {
+                i->second.beings.erase(b);
+                return;
+            }
+        }
+    }
+}
+
+bool State::mapExists(const std::string &map) {
+    std::map<std::string, MapComposite>::iterator i = maps.find(map);
+    if (i == maps.end())
+        return false;
+    return true;
+}
+
+bool State::beingExists(Being *being) {
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
+         i++) {
+        for (Beings::iterator b = i->second.beings.begin();
+             b != i->second.beings.end();
+             b++) {
+            if (b->get() == being)
+                return true;
+        }
+    }
+    return false;
+}
+
+void State::loadMap(const std::string &map) {
+    // load map
+    maps[map] = MapComposite();
+}
+
+void State::addObject(Object *object, const std::string &map) {
+    //
+}
+
+void State::removeObject(Object *object) {
+    //
+}
+
+bool State::objectExists(Object *object) {
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
+         i++) {
+        for (std::vector<Object*>::iterator b = i->second.objects.begin();
+             b != i->second.objects.end();
+             b++) {
+            if (*b == object)
+                return true;
+        }
+    }
+    return false;
+}
+
+const std::string State::findPlayer(Being *being) {
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
+         i++) {
+        for (Beings::iterator b = i->second.beings.begin();
+             b != i->second.beings.end();
+             b++) {
+            if (b->get() == being)
+                return i->first;
+        }
+    }
+    return "";
+}
+
+const std::string State::findObject(Object *object) {
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
+         i++) {
+        for (std::vector<Object*>::iterator b = i->second.objects.begin();
+             b != i->second.objects.end();
+             b++) {
+            if (*b == object)
+                return i->first;
+        }
+    }
+    return "";
 }
 
 } // namespace tmwserv

@@ -36,7 +36,7 @@ namespace tmwserv
 
 /**
  * State class contains all information/procedures associated with the game
- * state.
+ * world's state.
  */
 class State : public utils::Singleton<State>
 {
@@ -45,36 +45,92 @@ class State : public utils::Singleton<State>
     State() throw() { }
     ~State() throw() { }
 
+    /**
+     * Combined map/entity structure
+     */
+    struct MapComposite {
+        /**
+         * Default constructor
+         */
+        MapComposite() : map(NULL) { }
+
+        /**
+         * Actual map
+         */
+        Map *map;
+        
+        /**
+         * Beings located on the map
+         */
+        Beings beings;
+        
+        /**
+         * Items located on the map
+         */
+        std::vector<Object*> objects;
+    };
+
+    /**
+     * List of maps
+     */
+    std::map<std::string, MapComposite> maps;
+
  public:
-    /**
-     * Beings on map
-     *
-     * The key/value pair conforms to:
-     *   First  - map name
-     *   Second - list of beings/players on the map
-     *
-     * NOTE: This could possibly be optimized by making first Being & second string. This will make many operations easier.
-     */
-    std::map<std::string, Beings> beings;
 
-    /**
-     * Items on map
-     *
-     * The key/value pair conforms to:
-     *   First  - map name
-     *   Second - Item ID
-     */
-    std::map<std::string, int> items;
-
-    /**
-     * Container for loaded maps.
-     */
-    std::map<std::string, Map*> maps;
-    
     /**
      * Update game state (contains core server logic)
      */
     void update(ConnectionHandler &);
+
+    /**
+     * Add being to game world at specified map
+     */
+    void addBeing(Being *being, const std::string &map);
+
+    /**
+     * Remove being from game world
+     */
+    void removeBeing(Being *being);
+
+    /**
+     * Check to see if a map exists in game world
+     */
+    bool mapExists(const std::string &map);
+
+    /**
+     * Check if being exists in game world already
+     */
+    bool beingExists(Being *being);
+
+    /**
+     * Load map into game world
+     */
+    void loadMap(const std::string &map);
+
+    /**
+     * Add object to the map
+     */
+    void addObject(Object *object, const std::string &map);
+
+    /**
+     * Remove an object from the map
+     */
+    void removeObject(Object *object);
+
+    /**
+     * Find out whether an object exists in the game world or not
+     */
+    bool objectExists(Object *object);
+
+    /**
+     * Find map player in world is on
+     */
+    const std::string findPlayer(Being *being);
+
+    /**
+     * Find map object in world is on
+     */
+    const std::string findObject(Object *object);
 };
 
 } // namespace tmwserv

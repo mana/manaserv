@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
         printf ("5) Character selection\n");
         printf ("6) Move character\n");
         printf ("7) Equip item\n");
+        printf ("9) Ruby expression\n");
         printf ("Choose your option: ");
         std::cin >> answer;
 
@@ -141,6 +142,16 @@ int main(int argc, char *argv[])
                 msg.writeShort(CMSG_EQUIP);
                 msg.writeLong(itemId);
                 msg.writeByte(slot);
+            } break;
+
+            case 9:
+            {
+                std::cout << "Expr: ";
+                std::cin >> line;
+                msg.writeShort(0x800);
+                msg.writeString(line);
+
+                responseRequired = false;
             } break;
 
             default:

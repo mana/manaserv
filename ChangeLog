@@ -1,3 +1,16 @@
+2005-11-15  Aaron Marks  <nymacro@gmail.com>
+
+	* src/state.h, src/state.cpp: Updated world representation, added
+	various methods which provide easy access to the game world.
+	* src/defines.h: Added "private message" message.
+	* src/client.cpp, scripts/init.rb: Added experimental remote access
+	to Ruby's functionality.
+
+2005-11-14  Aaron Marks  <nymacro@gmail.com>
+
+	* src/bindings.i: Enabled "directors", allowing scripting language
+	to override virtual functions.
+
 2005-11-12  Aaron Marks  <nymacro@gmail.com>
 
 	* src/main.cpp: Added scripting with Ruby support

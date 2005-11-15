@@ -19,13 +19,14 @@
  *
  *  $Id$
  */
-%module Tmw
+%module(directors="1") Tmw
 
 %{
 #include "defines.h"
 #include "messagehandler.h"
 #include "packet.h"
 #include "messagein.h"
+#include "messageout.h"
 #include "netcomputer.h"
 #include "connectionhandler.h"
 #include "object.h"
@@ -35,10 +36,16 @@
 extern ConnectionHandler connectionHandler;
 %}
 
+%feature("director") MessageHandler;
+%feature("director") Object;
+%feature("director") Item;
+%feature("director") Being;
+
 %include "defines.h"
 %include "messagehandler.h"
 %include "packet.h"
 %include "messagein.h"
+%include "messageout.h"
 %include "netcomputer.h"
 %include "connectionhandler.h"
 %include "object.h"

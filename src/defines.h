@@ -100,14 +100,16 @@ enum {
     SMSG_EQUIP_RESPONSE          = 0x0302,
 
     // Chat
-    SMSG_CHAT                    = 0x0400,
-    SMSG_SYSTEM                  = 0x0401,
+    SMSG_SYSTEM                  = 0x0400,
+    SMSG_CHAT                    = 0x0401,
     SMSG_ANNOUNCEMENT            = 0x0402,
+    SMSG_PRIVMSG                 = 0x0403,
     CMSG_SAY                     = 0x0410,
     CMSG_ANNOUNCE                = 0x0411,
+    CMSG_PRIVMSG                 = 0x0412,
 
     // Other
-    SMSG_LOAD_MAP              = 0x0500,
+    SMSG_LOAD_MAP                = 0x0500,
 
     // NOTE: We will need more messages for in-game control (eg. moving a client to a new map/position etc.). Currently the protocol only caters for the bare basics.
 };
