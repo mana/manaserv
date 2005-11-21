@@ -26,6 +26,7 @@
 
 
 #include <utility>
+#include <string>
 
 
 namespace tmwserv
@@ -152,6 +153,19 @@ class Object
         virtual void
         update(void) = 0;
 
+        /**
+         * Get map name where being is
+         *
+         * @return Name of map being is located.
+         */
+        const std::string &
+        getMap();
+
+        /**
+         * Set map being is located
+         */
+        void
+        setMap(const std::string &map);
 
     protected:
         Statistics mStats; /**< stats modifiers or computed stats */
@@ -161,6 +175,8 @@ class Object
     private:
         unsigned int mX; /**< x coordinate */
         unsigned int mY; /**< y coordinate */
+
+        std::string mMap;  /**< name of the map being is on */
 };
 
 

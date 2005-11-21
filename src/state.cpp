@@ -25,9 +25,21 @@
 #include <iostream>
 #include "messageout.h"
 #include "utils/logger.h"
+#include "mapreader.h"
 
 namespace tmwserv
 {
+
+State::State() throw() {
+}
+
+State::~State() throw() {
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
+         i++) {
+        delete i->second.map;
+    }
+}
 
 void State::update(ConnectionHandler &connectionHandler)
 {
@@ -71,11 +83,13 @@ void State::update(ConnectionHandler &connectionHandler)
 }
 
 void State::addBeing(Being *being, const std::string &map) {
-    if (!mapExists(map))
-        return;
+    if (!beingExists(being)) {
+        if (!mapExists(map))
+            if (!loadMap(map))
+                return;
 
-    if (!beingExists(being))
         maps[map].beings.push_back(tmwserv::BeingPtr(being));
+    }
 }
 
 void State::removeBeing(Being *being) {
@@ -114,17 +128,42 @@ bool State::beingExists(Being *being) {
     return false;
 }
 
-void State::loadMap(const std::string &map) {
-    // load map
+bool State::loadMap(const std::string &map) {
+    // load map (FAILS)
+    Map *tmp = NULL; //MapReader::readMap("maps/" + map);
+    //if (!tmp)
+    //    return false;
+
     maps[map] = MapComposite();
+    maps[map].map = tmp;
+
+    // will need to load extra map related resources here also
+    
+    return true;
 }
 
 void State::addObject(Object *object, const std::string &map) {
-    //
+    if (!objectExists(object)) {
+        if (!mapExists(map))
+            if (!loadMap(map))
+                return;
+        maps[map].objects.push_back(object);
+    }
 }
 
 void State::removeObject(Object *object) {
-    //
+    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+         i != maps.end();
+         i++) {
+        for (std::vector<Object*>::iterator b = i->second.objects.begin();
+             b != i->second.objects.end();
+             b++) {
+            if (*b == object) {
+                i->second.objects.erase(b);
+                return;
+            }
+        }
+    }
 }
 
 bool State::objectExists(Object *object) {

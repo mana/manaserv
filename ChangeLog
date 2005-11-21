@@ -1,3 +1,17 @@
+2005-11-21  Aaron Marks  <nymacro@gmail.com>
+
+	* src/state.cpp: Re-ordered a few statements to work better.
+	* src/dalstorage.cpp: Now sets being's current map when getting a
+	player's account.
+	
+2005-11-16  Aaron Marks  <nymacro@gmail.com>
+
+	* src/state.h, src/state.cpp: Updated world related functions.
+	* src/accounthandler.cpp: Now adds players who have selected a
+	character to the game world.
+	* src/object.h: Updated to include member variable for current map
+	the object is located.
+
 2005-11-15  Aaron Marks  <nymacro@gmail.com>
 
 	* src/state.h, src/state.cpp: Updated world representation, added

@@ -290,7 +290,7 @@ class Being: public Object
         /**
          * Un-equips item.
          *
-         * bool Un-equip success/failure
+         * @return Un-equip success/failure
          */
         bool
         unequip(unsigned char slot);
@@ -307,7 +307,6 @@ class Being: public Object
         Being&
         operator=(const Being& rhs);
 
-    private:
         std::string mName;       /**< name of the being */
         Genders mGender;         /**< gender of the being */
         unsigned short mLevel;   /**< level of the being */

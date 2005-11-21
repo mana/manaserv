@@ -158,8 +158,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 computer.setCharacter(chars[charNum].get());
 
                 // place in world
-                //tmwserv::State &state = tmwserv::State::instance();
-                //state.beings["start.tmx"].push_back(tmwserv::BeingPtr(computer.getCharacter()));
+                tmwserv::State &state = tmwserv::State::instance();
+                state.addBeing(computer.getCharacter(), computer.getCharacter()->getMap());
                 
                 result.writeByte(SELECT_OK);
             }

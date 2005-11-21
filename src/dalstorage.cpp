@@ -204,7 +204,7 @@ DALStorage::getAccount(const std::string& userName)
         // load the characters associated with the account.
         sql = "select * from ";
         sql += CHARACTERS_TBL_NAME;
-        sql += " where id = '";
+        sql += " where user_id = '";
         sql += accountInfo(0, 0);
         sql += "';";
         const RecordSet& charInfo = mDb->execSql(sql);
@@ -232,6 +232,14 @@ DALStorage::getAccount(const std::string& userName)
                               toUint(charInfo(i, 5)),             // money
                               stats
                 ));
+
+                std::stringstream ss;
+                ss << "select map from " + MAPS_TBL_NAME + " where id = "
+                   << toUint(charInfo(i, 8)) << ";";
+                sql = ss.str();
+                // should be impossible for this to fail due to db referential integrity
+                const RecordSet& mapInfo = mDb->execSql(sql);
+                being.get()->setMap(mapInfo(0, 0));
 
                 mCharacters.push_back(being);
                 beings.push_back(being);

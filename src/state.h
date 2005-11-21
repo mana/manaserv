@@ -35,6 +35,31 @@ namespace tmwserv
 {
 
 /**
+ * Combined map/entity structure
+ */
+struct MapComposite {
+    /**
+     * Default constructor
+     */
+    MapComposite() : map(NULL) { }
+    
+    /**
+     * Actual map
+     */
+    Map *map;
+    
+    /**
+     * Beings located on the map
+     */
+    Beings beings;
+        
+    /**
+     * Items located on the map
+     */
+    std::vector<Object*> objects;
+};
+
+/**
  * State class contains all information/procedures associated with the game
  * world's state.
  */
@@ -42,33 +67,8 @@ class State : public utils::Singleton<State>
 {
     friend class utils::Singleton<State>;
 
-    State() throw() { }
-    ~State() throw() { }
-
-    /**
-     * Combined map/entity structure
-     */
-    struct MapComposite {
-        /**
-         * Default constructor
-         */
-        MapComposite() : map(NULL) { }
-
-        /**
-         * Actual map
-         */
-        Map *map;
-        
-        /**
-         * Beings located on the map
-         */
-        Beings beings;
-        
-        /**
-         * Items located on the map
-         */
-        std::vector<Object*> objects;
-    };
+    State() throw();
+    ~State() throw();
 
     /**
      * List of maps
@@ -105,7 +105,7 @@ class State : public utils::Singleton<State>
     /**
      * Load map into game world
      */
-    void loadMap(const std::string &map);
+    bool loadMap(const std::string &map);
 
     /**
      * Add object to the map

@@ -1,5 +1,7 @@
 $Id$
 
+ * Fix map loading
+ * Extend & fix state handler
  * Provide interactive Ruby prompt.
  * Better handling of std::string with SWIG
  * Error handling for SWIG bindings (currently any problems will crash the server)
