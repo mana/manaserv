@@ -116,4 +116,6 @@ class Configuration
         std::string configPath;          /**< Location of config file */
 };
 
+extern Configuration config;
+
 #endif

@@ -1,51 +1,57 @@
+2005-12-02  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/main.cpp, src/accounthandler.h, src/accounthandler.cpp,
+        src/configuration.h: Made the accounthandler reopen the db for
+        SQLite to enable registering ! Now working.
+
 2005-11-21  Aaron Marks  <nymacro@gmail.com>
 
-	* src/state.cpp: Re-ordered a few statements to work better.
-	* src/dalstorage.cpp: Now sets being's current map when getting a
-	player's account.
-	
+        * src/state.cpp: Re-ordered a few statements to work better.
+        * src/dalstorage.cpp: Now sets being's current map when getting a
+        player's account.
+
 2005-11-16  Aaron Marks  <nymacro@gmail.com>
 
-	* src/state.h, src/state.cpp: Updated world related functions.
-	* src/accounthandler.cpp: Now adds players who have selected a
-	character to the game world.
-	* src/object.h: Updated to include member variable for current map
-	the object is located.
+        * src/state.h, src/state.cpp: Updated world related functions.
+        * src/accounthandler.cpp: Now adds players who have selected a
+        character to the game world.
+        * src/object.h: Updated to include member variable for current map
+        the object is located.
 
 2005-11-15  Aaron Marks  <nymacro@gmail.com>
 
-	* src/state.h, src/state.cpp: Updated world representation, added
-	various methods which provide easy access to the game world.
-	* src/defines.h: Added "private message" message.
-	* src/client.cpp, scripts/init.rb: Added experimental remote access
-	to Ruby's functionality.
+        * src/state.h, src/state.cpp: Updated world representation, added
+        various methods which provide easy access to the game world.
+        * src/defines.h: Added "private message" message.
+        * src/client.cpp, scripts/init.rb: Added experimental remote access
+        to Ruby's functionality.
 
 2005-11-14  Aaron Marks  <nymacro@gmail.com>
 
-	* src/bindings.i: Enabled "directors", allowing scripting language
-	to override virtual functions.
+        * src/bindings.i: Enabled "directors", allowing scripting language
+        to override virtual functions.
 
 2005-11-12  Aaron Marks  <nymacro@gmail.com>
 
-	* src/main.cpp: Added scripting with Ruby support
-	* src/bindings.i: Created basic SWIG bindings.
-	* src/Makefile.am: Updated to support Ruby & generate SWIG
-	bindings.
-	* configure.ac: Updated to detect SWIG & Ruby, using them
-	appropriately.
-	* scripts/init.rb: Server initialization test script.
+        * src/main.cpp: Added scripting with Ruby support
+        * src/bindings.i: Created basic SWIG bindings.
+        * src/Makefile.am: Updated to support Ruby & generate SWIG
+        bindings.
+        * configure.ac: Updated to detect SWIG & Ruby, using them
+        appropriately.
+        * scripts/init.rb: Server initialization test script.
 
 2005-11-10  Aaron Marks  <nymacro@gmail.com>
 
-	* src/client.cpp: Updated client to support moving and equipping.
-	* src/being.h, src/being.cpp: Added "hasItem"
-	* src/state.cpp: Added beings updating.
-	
+        * src/client.cpp: Updated client to support moving and equipping.
+        * src/being.h, src/being.cpp: Added "hasItem"
+        * src/state.cpp: Added beings updating.
+
 2005-10-24  Yohann Ferreira  <Bertram@cegetel.net>
 
-	* src/main.cpp: Added more useful infos at startup.
-	* src/dal/dataprovider.h, src/dal/dataprovider.cpp,
-	src/dal/sqlitedataprovider.cpp, src/dal/mysqldataprovider.cpp,
-	src/dal/pqdataprovider.cpp, src/main.cpp, src/client.cpp:
-	Grammar corrections, and a little bit of work on getting the name
-	of the Db.
+        * src/main.cpp: Added more useful infos at startup.
+        * src/dal/dataprovider.h, src/dal/dataprovider.cpp,
+        src/dal/sqlitedataprovider.cpp, src/dal/mysqldataprovider.cpp,
+        src/dal/pqdataprovider.cpp, src/main.cpp, src/client.cpp:
+        Grammar corrections, and a little bit of work on getting the name
+        of the Db.

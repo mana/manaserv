@@ -168,7 +168,7 @@ void initialize()
     config.setValue("dbhost", "");
 
 #ifdef WIN32
-    std::string configPath = "";
+    std::string configPath = ".";
 #else
     std::string configPath = getenv("HOME");
 #endif

@@ -27,6 +27,7 @@
 #include "account.h"
 #include "messageout.h"
 #include "state.h"
+#include "configuration.h"
 #include <iostream>
 
 using tmwserv::Account;
@@ -40,7 +41,17 @@ using tmwserv::Storage;
  */
 void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
+
     Storage &store = Storage::instance("tmw");
+
+#if defined (SQLITE_SUPPORT)
+    // Reopen the db in this thread for sqlite, to avoid
+    // Library Call out of sequence problem due to thread safe.
+    store.setUser(config.getValue("dbuser", ""));
+    store.setPassword(config.getValue("dbpass", ""));
+    store.close();
+    store.open();
+#endif
 
     MessageOut result;
 
@@ -59,6 +70,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 // see if the account exists
                 Account *acc = store.getAccount(username);
+
                 if (!acc) {
                     // account doesn't exist -- send error to client
                     std::cout << "Account does not exist " << username << std::endl;
