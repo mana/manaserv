@@ -31,7 +31,6 @@
 #include "dalstorage.h"
 #include "dalstoragesql.h"
 
-
 namespace tmwserv
 {
 
@@ -79,7 +78,7 @@ DALStorage::open(void)
         // open a connection to the database.
 #if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT)
         mDb->connect(getName(), getUser(), getPassword());
-#else // SQLITE_SUPPORT
+#elif defined (SQLITE_SUPPORT)
         // create the database file name.
         std::string dbFile(getName());
         dbFile += ".db";
@@ -113,6 +112,10 @@ DALStorage::open(void)
 
         // we will stick with strategy2 for the moment as we are focusing
         // on SQLite.
+
+        // FIXME: The tables should be checked/created at startup in order to avoid
+        // a DbSqlQueryExecFailure assert on sqlite while registering.
+        // Also, this would initialize connection to the database earlier in memory.
 
         createTable(MAPS_TBL_NAME, SQL_MAPS_TABLE);
         createTable(ACCOUNTS_TBL_NAME, SQL_ACCOUNTS_TABLE);
@@ -151,7 +154,7 @@ DALStorage::getAccount(const std::string& userName)
 {
     // connect to the database (if not connected yet).
     open();
-
+std::cout << "trying " << std::endl;
     // look for the account in the list first.
     Accounts::iterator it =
         std::find_if(
@@ -238,8 +241,17 @@ DALStorage::getAccount(const std::string& userName)
                    << toUint(charInfo(i, 8)) << ";";
                 sql = ss.str();
                 // should be impossible for this to fail due to db referential integrity
+
                 const RecordSet& mapInfo = mDb->execSql(sql);
-                being.get()->setMap(mapInfo(0, 0));
+
+                if (!mapInfo.isEmpty())
+                {
+                    being.get()->setMap(mapInfo(0, 0));
+                }
+                else
+                {
+                    // TODO: Set player to default map and one of the default location
+                }
 
                 mCharacters.push_back(being);
                 beings.push_back(being);

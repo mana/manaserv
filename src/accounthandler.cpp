@@ -61,6 +61,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 std::string username = message.readString();
                 std::string password = message.readString();
+                std::cout << username << " is trying to login." << std::endl;
 
                 if (computer.getAccount() != NULL) {
                     result.writeShort(SMSG_LOGIN_ERROR);
@@ -73,7 +74,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 if (!acc) {
                     // account doesn't exist -- send error to client
-                    std::cout << "Account does not exist " << username << std::endl;
+                    std::cout << username << ": Account does not exist." << std::endl;
 
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_USERNAME);
@@ -112,14 +113,49 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string password = message.readString();
                 std::string email = message.readString();
 
-                AccountPtr acc(new Account(username, password, email));
-                store.addAccount(acc);
+                // checking conditions for having a good account.
+                // TODO: Test if the email already exists using:
+                //  REGISTER_EXISTS_EMAIL
+                // The DALstorage will first need to have some getListOf Email function.
+                std::cout << username << " is trying to register." << std::endl;
 
-                result.writeShort(SMSG_REGISTER_RESPONSE);
-                result.writeByte(REGISTER_OK);
+                // see if the account exists
+                Account *accPtr = store.getAccount(username);
+                if ( accPtr ) // Account already exists.
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_EXISTS_USERNAME);
+                    std::cout << username << ": Username already exists." << std::endl;
+                }
+                else if ((username.length() < 4) || (username.length() > 16)) // Username length
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_INVALID_USERNAME);
+                    std::cout << username << ": Username too short or too long." << std::endl;
+                }
+                else if (password.length() < 4)
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_INVALID_PASSWORD);
+                    std::cout << email << ": Password too short." << std::endl;
+                }
+                else if ((email.find_first_of('@') == std::string::npos) || (email.find_first_of('.') == std::string::npos))
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_INVALID_EMAIL);
+                    std::cout << email << ": Email Invalid (misses @ or .)." << std::endl;
+                }
+                else
+                {
+                    AccountPtr acc(new Account(username, password, email));
+                    store.addAccount(acc);
 
-                std::cout << "Account registered" << std::endl;
-                store.flush(); // flush changes
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_OK);
+
+                    std::cout << username << ": Account registered." << std::endl;
+                    store.flush(); // flush changes
+                }
             }
             break;
 
@@ -153,12 +189,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
         case CMSG_CHAR_SELECT:
             {
                 if (computer.getAccount() == NULL)
+                {
+                    std::cout << "Not Logged in. Can't select Character." << std::endl;
                     break; // not logged in
-                
+                }
+
                 unsigned char charNum = message.readByte();
-                
+
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
-                
+
                 result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
                 if (charNum >= chars.size()) {
                     // invalid char selection
@@ -172,7 +211,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // place in world
                 tmwserv::State &state = tmwserv::State::instance();
                 state.addBeing(computer.getCharacter(), computer.getCharacter()->getMap());
-                
+
                 result.writeByte(SELECT_OK);
             }
             break;

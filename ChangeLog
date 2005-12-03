@@ -1,3 +1,11 @@
+2005-12-03  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/accounthandler.cpp: Handling good conditions to register.
+        Still lacks checking if the Email already exists.
+        * src/dalstorage.cpp: Fixed a bug that throwed an exception when
+        logging with an account that had no mapInfo yet.
+        Still has to set these to defaults in such case.
+
 2005-12-02  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/main.cpp, src/accounthandler.h, src/accounthandler.cpp,
