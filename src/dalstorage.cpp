@@ -29,7 +29,6 @@
 #include "utils/logger.h"
 
 #include "dalstorage.h"
-#include "dalstoragesql.h"
 
 namespace tmwserv
 {
@@ -346,15 +345,32 @@ DALStorage::delAccount(const std::string& userName)
 std::list<std::string>
 DALStorage::getEmailList()
 {
+    // If not opened already
+    open();
+
     std::list <std::string> emailList;
-    Accounts::iterator it = mAccounts.begin();
-    Accounts::iterator it_end = mAccounts.end();
-    for (; it != it_end; )
-    {
-        emailList.push_front( ((it->first).get())->getEmail() );
-        std::cout << ((it->first).get())->getEmail() << std::endl;
-        ++it;
-    }
+    try {
+        std::string sql("select email from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql += ";";
+        const dal::RecordSet& accountInfo = mDb->execSql(sql);
+
+        // if the account is not even in the database then
+        // we have no choice but to return nothing.
+        if (accountInfo.isEmpty()) {
+            return emailList;
+        }
+            for (unsigned int i = 0; i < accountInfo.rows(); i++)
+            {
+                // We add all these addresses to the list
+                emailList.push_front(accountInfo(i, 0));
+            }
+        }
+        catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what())
+        }
+
     return emailList;
 }
 

@@ -29,6 +29,7 @@
 #include "state.h"
 #include "configuration.h"
 #include <iostream>
+#include <cctype>
 
 using tmwserv::Account;
 using tmwserv::AccountPtr;
@@ -114,13 +115,32 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string email = message.readString();
 
                 // checking conditions for having a good account.
-                // TODO: Test if the email already exists using:
-                //  REGISTER_EXISTS_EMAIL
-                // The DALstorage will first need to have some getListOf Email function.
                 std::cout << username << " is trying to register." << std::endl;
 
+                bool emailValid = true;
+                // looking the email address already exists.
+                std::list<std::string> emailList = store.getEmailList();
+                std::string upcasedEmail, upcasedIt;
+                for (std::list<std::string>::const_iterator it = emailList.begin(); it != emailList.end(); it++)
+                {
+                    // Upcasing both mails for a good comparison
+                    upcasedEmail = email;
+                    std::transform(upcasedEmail.begin(), upcasedEmail.end(), upcasedEmail.begin(), (int(*)(int))std::toupper);
+                    upcasedIt = *it;
+                    std::transform(upcasedIt.begin(), upcasedIt.end(), upcasedIt.begin(), (int(*)(int))std::toupper);
+                    if ( upcasedEmail == upcasedIt )
+                    {
+                        result.writeShort(SMSG_REGISTER_RESPONSE);
+                        result.writeByte(REGISTER_EXISTS_EMAIL);
+                        std::cout << email << ": Email already exists" << std::endl;
+                        emailValid = false;
+                        break;
+                    }
+                }
+                if (!emailValid) break;
+
                 // Testing Email validity
-                bool emailValid = false;
+                emailValid = false;
                 if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
                 {
                     int atpos = email.find_first_of('@');

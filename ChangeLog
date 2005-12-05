@@ -1,5 +1,7 @@
 2005-12-05  Yohann Ferreira  <bertram@cegetel.net>
 
+        * src/dalstorage.cpp: Added a working getEmailList() function.
+        * src/accounthandler: Now tests if email already exists.
         * src/accounthandler.cpp, src/defines.h: Strengthens the way
         email addresses checked. Added good response for selecting
         a char when not logged.
