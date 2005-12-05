@@ -119,6 +119,20 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // The DALstorage will first need to have some getListOf Email function.
                 std::cout << username << " is trying to register." << std::endl;
 
+                // Testing Email validity
+                bool emailValid = false;
+                if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
+                {
+                    int atpos = email.find_first_of('@');
+                    if (email.find_first_of('.', atpos) != std::string::npos) // Searching for a '.' after the @.
+                    {
+                        if (email.find_first_of(' ') == std::string::npos) // Searching if there's no spaces.
+                        {
+                            emailValid = true;
+                        }
+                    }
+                }
+
                 // see if the account exists
                 Account *accPtr = store.getAccount(username);
                 if ( accPtr ) // Account already exists.
@@ -139,11 +153,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(REGISTER_INVALID_PASSWORD);
                     std::cout << email << ": Password too short." << std::endl;
                 }
-                else if ((email.find_first_of('@') == std::string::npos) || (email.find_first_of('.') == std::string::npos))
+                else if (!emailValid)
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_EMAIL);
-                    std::cout << email << ": Email Invalid (misses @ or .)." << std::endl;
+                    std::cout << email << ": Email Invalid (misses @, or . after the @, or maybe there is a ' '.)." << std::endl;
                 }
                 else
                 {
@@ -164,6 +178,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if (computer.getAccount() == NULL) {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_NOLOGIN);
+                    std::cout << "Not logged in. Can't create a Character." << std::endl;
                     break;
                 }
 
@@ -174,6 +189,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 // TODO: Finish this message type (should a player customize stats
                 // slightly?)
+                // A player shouldn't have more than 3 characters.
 
                 tmwserv::RawStatistics stats = {10, 10, 10, 10, 10, 10};
                 tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, sex, 1, 0, stats));
@@ -190,7 +206,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 if (computer.getAccount() == NULL)
                 {
-                    std::cout << "Not Logged in. Can't select Character." << std::endl;
+                    result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
+                    result.writeByte(SELECT_NOLOGIN);
+                    std::cout << "Not logged in. Can't select a Character." << std::endl;
                     break; // not logged in
                 }
 

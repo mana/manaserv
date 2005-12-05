@@ -154,7 +154,7 @@ DALStorage::getAccount(const std::string& userName)
 {
     // connect to the database (if not connected yet).
     open();
-std::cout << "trying " << std::endl;
+
     // look for the account in the list first.
     Accounts::iterator it =
         std::find_if(
@@ -340,6 +340,23 @@ DALStorage::delAccount(const std::string& userName)
     }
 }
 
+/**
+ * Return the list of all Emails addresses
+ */
+std::list<std::string>
+DALStorage::getEmailList()
+{
+    std::list <std::string> emailList;
+    Accounts::iterator it = mAccounts.begin();
+    Accounts::iterator it_end = mAccounts.end();
+    for (; it != it_end; )
+    {
+        emailList.push_front( ((it->first).get())->getEmail() );
+        std::cout << ((it->first).get())->getEmail() << std::endl;
+        ++it;
+    }
+    return emailList;
+}
 
 /**
  * Save changes to the database permanently.

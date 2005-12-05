@@ -1,3 +1,12 @@
+2005-12-05  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/accounthandler.cpp, src/defines.h: Strengthens the way
+        email addresses checked. Added good response for selecting
+        a char when not logged.
+        * src/storage.h, src/dalstorage.h, src/dalstorage.cpp: Added
+        the getEmailList function, doesn't seem to work, but committed
+        to see why.
+
 2005-12-03  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/accounthandler.cpp: Handling good conditions to register.

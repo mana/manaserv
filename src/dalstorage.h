@@ -92,6 +92,12 @@ class DALStorage: public Storage
         void
         delAccount(const std::string& userName);
 
+        /**
+         * Get the list of Emails in the accounts list.
+         * @return the list of Email's Addresses.
+         */
+        std::list<std::string> getEmailList();
+
 
         /**
          * Save changes to the database permanently.

@@ -26,6 +26,7 @@
 
 
 #include <map>
+#include <list>
 
 #include "account.h"
 
@@ -278,6 +279,13 @@ class Storage
          */
         virtual void
         delAccount(const std::string& userName) = 0;
+
+        /**
+         * Get the list of Emails in the accounts list.
+         * @return the list of Email's Addresses.
+         */
+        virtual
+        std::list<std::string> getEmailList() = 0;
 
         /**
          * Saves the changes permanently.

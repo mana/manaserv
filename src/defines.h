@@ -150,7 +150,8 @@ enum {
 // Character selection return values
 enum {
     SELECT_OK = 0,
-    SELECT_INVALID
+    SELECT_INVALID,
+    SELECT_NOLOGIN
 };
 
 // Object type enumeration
