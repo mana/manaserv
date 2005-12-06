@@ -121,11 +121,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // looking the email address already exists.
                 std::list<std::string> emailList = store.getEmailList();
                 std::string upcasedEmail, upcasedIt;
+                upcasedEmail = email;
+                std::transform(upcasedEmail.begin(), upcasedEmail.end(), upcasedEmail.begin(), (int(*)(int))std::toupper);
                 for (std::list<std::string>::const_iterator it = emailList.begin(); it != emailList.end(); it++)
                 {
                     // Upcasing both mails for a good comparison
-                    upcasedEmail = email;
-                    std::transform(upcasedEmail.begin(), upcasedEmail.end(), upcasedEmail.begin(), (int(*)(int))std::toupper);
                     upcasedIt = *it;
                     std::transform(upcasedIt.begin(), upcasedIt.end(), upcasedIt.begin(), (int(*)(int))std::toupper);
                     if ( upcasedEmail == upcasedIt )
@@ -161,13 +161,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(REGISTER_EXISTS_USERNAME);
                     std::cout << username << ": Username already exists." << std::endl;
                 }
-                else if ((username.length() < 4) || (username.length() > 16)) // Username length
+                else if ((username.length() < MIN_LOGIN_LENGTH) || (username.length() > MAX_LOGIN_LENGTH)) // Username length
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_USERNAME);
                     std::cout << username << ": Username too short or too long." << std::endl;
                 }
-                else if (password.length() < 4)
+                else if (password.length() < MIN_PASSWORD_LENGTH)
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_PASSWORD);
@@ -187,8 +187,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_OK);
 
-                    std::cout << username << ": Account registered." << std::endl;
                     store.flush(); // flush changes
+                    std::cout << username << ": Account registered." << std::endl;
                 }
             }
             break;
@@ -202,23 +202,29 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     break;
                 }
 
+                // A player shouldn't have more than 3 characters.
+                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                if (chars.size() >= MAX_OF_CHARACTERS)
+                {
+                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
+                    result.writeByte(CREATE_TOO_MUCH_CHARACTERS);
+                    std::cout << "Already has 3 characters. Can't create another Character." << std::endl;
+                    break;
+                }
+
                 std::string name = message.readString();
                 //char hairStyle = message.readByte();
                 //char hairColor = message.readByte();
                 Genders sex = (Genders)message.readByte();
 
-                // TODO: Finish this message type (should a player customize stats
-                // slightly?)
-                // A player shouldn't have more than 3 characters.
-
+                // TODO: Customization of player's stats...
                 tmwserv::RawStatistics stats = {10, 10, 10, 10, 10, 10};
                 tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, sex, 1, 0, stats));
                 computer.getAccount()->addCharacter(newCharacter);
 
+                store.flush(); // flush changes
                 result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                 result.writeByte(CREATE_OK);
-
-                store.flush(); // flush changes
             }
             break;
 
@@ -235,11 +241,18 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 unsigned char charNum = message.readByte();
 
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
-
                 result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
+                if ( chars.size() == 0 )
+                {
+                    result.writeByte(SELECT_NOT_YET_CHARACTERS);
+                    std::cout << "Character Selection : Yet no characters created." << std::endl;
+                    break;
+                }
+                // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
                     result.writeByte(SELECT_INVALID);
+                    std::cout << "Character Selection : Selection out of ID range." << std::endl;
                     break;
                 }
 
@@ -251,6 +264,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 state.addBeing(computer.getCharacter(), computer.getCharacter()->getMap());
 
                 result.writeByte(SELECT_OK);
+                std::cout << "Selected Character " << int(charNum)
+                << " : " <<
+                computer.getCharacter()->getName() << std::endl;
+
+                //TODO: Add the character in the database and flush.
             }
             break;
 

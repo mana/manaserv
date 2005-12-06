@@ -73,15 +73,26 @@ DALStorage::open(void)
 
     using namespace dal;
 
+    static bool dbFileShown = false;
+    std::string dbFile(getName());
     try {
         // open a connection to the database.
 #if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT)
         mDb->connect(getName(), getUser(), getPassword());
+        if (!dbFileShown)
+        {
+            LOG_INFO("Using " << dbFile << " as Database Name.")
+            dbFileShown = true;
+        }
 #elif defined (SQLITE_SUPPORT)
         // create the database file name.
-        std::string dbFile(getName());
         dbFile += ".db";
         mDb->connect(dbFile, "", "");
+        if (!dbFileShown)
+        {
+            LOG_INFO("SQLite uses ./" << dbFile << " as DB.")
+            dbFileShown = true;
+        }
 #endif
 
         // ensure that the required tables are created.
@@ -340,7 +351,7 @@ DALStorage::delAccount(const std::string& userName)
 }
 
 /**
- * Return the list of all Emails addresses
+ * Return the list of all Emails addresses.
  */
 std::list<std::string>
 DALStorage::getEmailList()

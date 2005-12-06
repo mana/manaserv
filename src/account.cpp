@@ -26,7 +26,6 @@
 
 #include "account.h"
 
-
 namespace tmwserv
 {
 

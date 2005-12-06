@@ -54,6 +54,26 @@ typedef enum {
     GENDER_UNKNOWN
 } Genders;
 
+enum {
+    // Registering related
+    MIN_LOGIN_LENGTH = 4,
+    MAX_LOGIN_LENGTH = 16,
+    MIN_PASSWORD_LENGTH = 4,
+
+    // Character related
+    MAX_OF_CHARACTERS = 3,
+/** Tells the max difference between the
+ *  less big stat and the biggest one.
+ *  So that players haven't disproportionned
+ *  Raw statistics.
+ */
+    MAX_DIFF_BETWEEN_STATS = 5,
+/**
+ * Points to give to a brand new character
+ */
+    POINTS_TO_DISTRIBUTES_AT_LVL1 = 60
+};
+
 /**
  * Enumerated type for communicated messages
  */
@@ -62,15 +82,19 @@ enum {
     CMSG_REGISTER                = 0x0000,
     CMSG_ENCRYPTED_REGISTER      = 0x0001,
     SMSG_REGISTER_RESPONSE       = 0x0002,
+    CMSG_UNREGISTER              = 0x0003,
+    SMSG_UNREGISTER_RESPONSE     = 0x0004,
     CMSG_LOGIN                   = 0x0010,
     CMSG_ENCRYPTED_LOGIN         = 0x0011,
     SMSG_LOGIN_ERROR             = 0x0012,
     SMSG_LOGIN_CONFIRM           = 0x0013,
     CMSG_CHAR_CREATE             = 0x0020,
     SMSG_CHAR_CREATE_RESPONSE    = 0x0021,
-    CMSG_CHAR_LIST               = 0x0022, // this is required after char creation
-    CMSG_CHAR_SELECT             = 0x0023,
-    SMSG_CHAR_SELECT_RESPONSE    = 0x0034,
+    CMSG_CHAR_DELETE             = 0x0022,
+    SMSG_CHAR_DELETE_RESPONSE    = 0x0023,
+    CMSG_CHAR_LIST               = 0x0024, // this is required after char creation
+    CMSG_CHAR_SELECT             = 0x0030,
+    SMSG_CHAR_SELECT_RESPONSE    = 0x0031,
 
     // Objects
     SMSG_NEW_OBJECT              = 0x0100,
@@ -126,6 +150,13 @@ enum {
     LOGIN_UNKNOWN
 };
 
+// Logout return values
+enum {
+    LOGOUT_OK = 0,
+    LOGOUT_UNSUCCESSFULL,
+    LOGOUT_UNKNOWN
+};
+
 // Account register return values
 enum {
     REGISTER_OK = 0,
@@ -136,6 +167,14 @@ enum {
     REGISTER_EXISTS_EMAIL
 };
 
+// Account deletion return values
+enum {
+    UNREGISTER_OK = 0,
+    UNREGISTER_INVALID_USERNAME,
+    UNREGISTER_INVALID_PASSWORD,
+    UNREGISTER_INVALID_UNSUFFICIENT_RIGHTS
+};
+
 // Character creation return values
 enum {
     CREATE_OK = 0,
@@ -143,14 +182,24 @@ enum {
     CREATE_INVALID_HAIR,
     CREATE_INVALID_SEX,
     CREATE_EXISTS_USERNAME,
-    CREATE_EXISTS_EMAIL,
+    CREATE_TOO_MUCH_CHARACTERS,
     CREATE_NOLOGIN
 };
 
+// Character deletion return values
+enum {
+    DELETE_OK = 0,
+    DELETE_INVALID_NAME,
+    DELETE_NO_MORE_CHARACTERS,
+    DELETE_NOLOGIN
+};
+
 // Character selection return values
+// (When selecting a new one, you deselect the previous.)
 enum {
     SELECT_OK = 0,
     SELECT_INVALID,
+    SELECT_NOT_YET_CHARACTERS,
     SELECT_NOLOGIN
 };
 

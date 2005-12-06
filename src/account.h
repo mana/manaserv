@@ -185,7 +185,6 @@ class Account
         Beings&
         getCharacters(void);
 
-
         /**
          * Get a character by name.
          *

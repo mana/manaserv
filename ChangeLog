@@ -1,3 +1,12 @@
+2005-12-06  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/dalstorage.cpp: Improved the getEmailList() function.
+        Now the file used as db or the db name is shown in log.
+        * src/defines.h: Added some missing messages and values for
+        them. Login, pass min, max length can be changed there now.
+        * src/accounthandler.cpp: Added check and appropriate response
+        when selecting, creating a character.
+
 2005-12-05  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/dalstorage.cpp: Added a working getEmailList() function.
