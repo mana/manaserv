@@ -117,30 +117,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // checking conditions for having a good account.
                 std::cout << username << " is trying to register." << std::endl;
 
-                bool emailValid = true;
-                // looking the email address already exists.
-                std::list<std::string> emailList = store.getEmailList();
-                std::string upcasedEmail, upcasedIt;
-                upcasedEmail = email;
-                std::transform(upcasedEmail.begin(), upcasedEmail.end(), upcasedEmail.begin(), (int(*)(int))std::toupper);
-                for (std::list<std::string>::const_iterator it = emailList.begin(); it != emailList.end(); it++)
-                {
-                    // Upcasing both mails for a good comparison
-                    upcasedIt = *it;
-                    std::transform(upcasedIt.begin(), upcasedIt.end(), upcasedIt.begin(), (int(*)(int))std::toupper);
-                    if ( upcasedEmail == upcasedIt )
-                    {
-                        result.writeShort(SMSG_REGISTER_RESPONSE);
-                        result.writeByte(REGISTER_EXISTS_EMAIL);
-                        std::cout << email << ": Email already exists" << std::endl;
-                        emailValid = false;
-                        break;
-                    }
-                }
-                if (!emailValid) break;
-
+                bool emailValid = false;
                 // Testing Email validity
-                emailValid = false;
+                if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_EXISTS_EMAIL);
+                    std::cout << email << ": Email already exists." << std::endl;
+                    break;
+                }
                 if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
                 {
                     int atpos = email.find_first_of('@');
@@ -177,7 +162,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_EMAIL);
-                    std::cout << email << ": Email Invalid (misses @, or . after the @, or maybe there is a ' '.)." << std::endl;
+                    std::cout << email << ": Email Invalid, only a@b.c format is accepted." << std::endl;
                 }
                 else
                 {

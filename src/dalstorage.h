@@ -96,8 +96,15 @@ class DALStorage: public Storage
          * Get the list of Emails in the accounts list.
          * @return the list of Email's Addresses.
          */
-        std::list<std::string> getEmailList();
+        std::list<std::string>
+        getEmailList();
 
+        /**
+         * Tells if Email already exists.
+         * @return true if Email is already in database
+         */
+        bool
+        doesEmailAlreadyExists(std::string email);
 
         /**
          * Save changes to the database permanently.

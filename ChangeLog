@@ -1,3 +1,11 @@
+2005-12-08  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/dalstorage.cpp, src/dalstorage.h, src/storage.h:
+        Radically improve the getEmailList() again based on
+        MrLindejer's good idea.
+        * src/accounthandler.cpp: Simplify the code of Email check
+        based on the previous improvement.
+
 2005-12-06  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/dalstorage.cpp: Improved the getEmailList() function.

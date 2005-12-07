@@ -288,6 +288,13 @@ class Storage
         std::list<std::string> getEmailList() = 0;
 
         /**
+         * Return if an Email is already in account's table.
+         * @return true if Email already exists.
+         */
+        virtual
+        bool doesEmailAlreadyExists(std::string email) = 0;
+
+        /**
          * Saves the changes permanently.
          */
         virtual void

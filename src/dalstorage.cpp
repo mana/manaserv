@@ -386,6 +386,50 @@ DALStorage::getEmailList()
 }
 
 /**
+ * Tells if Email already exists.
+ */
+bool
+DALStorage::doesEmailAlreadyExists(std::string email)
+{
+    // If not opened already
+    open();
+
+    try {
+            std::string sql("select count(email) from ");
+            sql += ACCOUNTS_TBL_NAME;
+            sql += " where upper(email) = upper('";
+            sql += email;
+            sql += "');";
+            const dal::RecordSet& accountInfo = mDb->execSql(sql);
+    
+            // if the account is empty then
+            // we have no choice but to return false.
+            if (accountInfo.isEmpty()) {
+                return false;
+            }
+    
+            std::stringstream ssStream(accountInfo(0,0));
+            int iReturn = -1;
+            ssStream >> iReturn;
+            if ( iReturn > 0 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what())
+        }
+
+    return false;
+}
+
+
+/**
  * Save changes to the database permanently.
  */
 void
