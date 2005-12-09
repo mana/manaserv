@@ -97,13 +97,17 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     tmwserv::Beings &chars = computer.getAccount()->getCharacters();
                     result.writeByte(chars.size());
 
+                    std::cout << username << "'s account has " << chars.size() << " character(s)." << std::endl;
+
                     for (unsigned int i = 0; i < chars.size(); i++) {
                         result.writeString(chars[i]->getName());
+                        std::cout << chars[i]->getName() << ", ";
                         result.writeByte(chars[i]->getLevel());
                         result.writeByte(chars[i]->getMoney());
                         //result.writeString(chars[i]->getRawStatistics(),
                         //                   sizeof(tmwserv::RawStatistics));
                     }
+                    std::cout << std::endl;
                 }
             }
             break;
@@ -193,7 +197,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_TOO_MUCH_CHARACTERS);
-                    std::cout << "Already has 3 characters. Can't create another Character." << std::endl;
+                    std::cout << "Already has " << MAX_OF_CHARACTERS << " characters. Can't create another Character." << std::endl;
                     break;
                 }
 
@@ -206,6 +210,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 tmwserv::RawStatistics stats = {10, 10, 10, 10, 10, 10};
                 tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, sex, 1, 0, stats));
                 computer.getAccount()->addCharacter(newCharacter);
+
+                std::cout << "Character " << name << " was created for " 
+                    << computer.getAccount()->getName() << "'s account." << std::endl;
 
                 store.flush(); // flush changes
                 result.writeShort(SMSG_CHAR_CREATE_RESPONSE);

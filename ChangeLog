@@ -1,5 +1,12 @@
 2005-12-08  Yohann Ferreira  <bertram@cegetel.net>
 
+        * src/dalstorage.cpp, src/accounthandler.cpp: Temporary
+        made a workaround the character misloading at login.
+        Work is to be made to see why the mapInfo recordset is
+        buggy. Also made the server more verbose about characters.
+
+2005-12-08  Yohann Ferreira  <bertram@cegetel.net>
+
         * src/dalstorage.cpp, src/dalstorage.h, src/storage.h:
         Radically improve the getEmailList() again based on
         MrLindejer's good idea.

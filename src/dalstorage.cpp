@@ -225,6 +225,9 @@ DALStorage::getAccount(const std::string& userName)
         if (!charInfo.isEmpty()) {
             Beings beings;
 
+            std::cout << userName << "'s account has " << charInfo.rows()
+                << " character(s) in database." << std::endl;
+
             for (unsigned int i = 0; i < charInfo.rows(); ++i) {
                 RawStatistics stats = {
                     toUshort(charInfo(i, 9)),  // strength
@@ -252,6 +255,7 @@ DALStorage::getAccount(const std::string& userName)
                 sql = ss.str();
                 // should be impossible for this to fail due to db referential integrity
 
+/* This is buggy for now as the map table is empty.
                 const RecordSet& mapInfo = mDb->execSql(sql);
 
                 if (!mapInfo.isEmpty())
@@ -262,13 +266,13 @@ DALStorage::getAccount(const std::string& userName)
                 {
                     // TODO: Set player to default map and one of the default location
                 }
-
+*/
                 mCharacters.push_back(being);
                 beings.push_back(being);
-            }
+            } // End of for each characters
 
             account->setCharacters(beings);
-        }
+        } // End if there are characters.
 
         return account.get();
     }
