@@ -1,4 +1,11 @@
-2005-12-08  Yohann Ferreira  <bertram@cegetel.net>
+2005-12-10  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/dalstorage.cpp: Fixed the buggy part of getAccount()
+        where the mapInfo() recordSet erased the value of charInfo.
+        Now, characters can be created and selected, with the map
+        they were in, set.
+
+2005-12-09  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/dalstorage.cpp, src/accounthandler.cpp: Temporary
         made a workaround the character misloading at login.

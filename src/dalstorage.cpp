@@ -228,45 +228,60 @@ DALStorage::getAccount(const std::string& userName)
             std::cout << userName << "'s account has " << charInfo.rows()
                 << " character(s) in database." << std::endl;
 
-            for (unsigned int i = 0; i < charInfo.rows(); ++i) {
+            // As the recordset functions are set to be able to get one recordset
+            // at a time, we store charInfo in a temp array of strings
+            // To avoid the problem where values of charInfo were erased by the
+            // values of mapInfo.
+            std::string strCharInfo[charInfo.rows()][charInfo.cols()];
+            for (unsigned int i = 0; i < charInfo.rows(); ++i)
+            {
+                for (unsigned int j = 0; j < charInfo.cols(); ++j)
+                {
+                    strCharInfo[i][j] = charInfo(i,j);
+                }
+            }
+            unsigned int charRows = charInfo.rows();
+
+            for (unsigned int k = 0; k < charRows; ++k) {
                 RawStatistics stats = {
-                    toUshort(charInfo(i, 9)),  // strength
-                    toUshort(charInfo(i, 10)), // agility
-                    toUshort(charInfo(i, 11)), // vitality
-                    toUshort(charInfo(i, 12)), // intelligence
-                    toUshort(charInfo(i, 13)), // dexterity
-                    toUshort(charInfo(i, 14))  // luck
+                    toUshort(strCharInfo[k][9]),  // strength
+                    toUshort(strCharInfo[k][10]), // agility
+                    toUshort(strCharInfo[k][11]), // vitality
+                    toUshort(strCharInfo[k][12]), // intelligence
+                    toUshort(strCharInfo[k][13]), // dexterity
+                    toUshort(strCharInfo[k][14])  // luck
                 };
 
                 BeingPtr being(
-                    new Being(charInfo(i, 2),                     // name
+                    new Being(strCharInfo[k][2],                     // name
                               // while the implicit type conversion from
                               // a short to an enum is invalid, the explicit
                               // type cast works :D
-                              (Genders) toUshort(charInfo(i, 3)), // gender
-                              toUshort(charInfo(i, 4)),           // level
-                              toUint(charInfo(i, 5)),             // money
+                              (Genders) toUshort(strCharInfo[k][3]), // gender
+                              toUshort(strCharInfo[k][4]),           // level
+                              toUint(strCharInfo[k][5]),             // money
                               stats
                 ));
 
                 std::stringstream ss;
-                ss << "select map from " + MAPS_TBL_NAME + " where id = "
-                   << toUint(charInfo(i, 8)) << ";";
+                ss << "select map from " + MAPS_TBL_NAME + " where id = '"
+                   << toUint(strCharInfo[k][8]) << "';";
                 sql = ss.str();
                 // should be impossible for this to fail due to db referential integrity
 
-/* This is buggy for now as the map table is empty.
                 const RecordSet& mapInfo = mDb->execSql(sql);
 
                 if (!mapInfo.isEmpty())
                 {
-                    being.get()->setMap(mapInfo(0, 0));
+                    being.get()->setMap(std::string(mapInfo(0, 0)));
                 }
                 else
                 {
                     // TODO: Set player to default map and one of the default location
+                    ss.str("None");
+                    being.get()->setMap(ss.str());
                 }
-*/
+
                 mCharacters.push_back(being);
                 beings.push_back(being);
             } // End of for each characters
