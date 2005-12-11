@@ -176,6 +176,29 @@ Account::addCharacter(BeingPtr character)
     }
 }
 
+/**
+ * Remove a character.
+ */
+bool
+Account::delCharacter(std::string name)
+{
+    Beings::iterator it =
+        std::find_if(mCharacters.begin(),
+                     mCharacters.end(),
+                     std::bind2nd(obj_name_is<BeingPtr>(), name)
+                    );
+
+    if (it != mCharacters.end()) {
+        // Exists, delete it.
+        mCharacters.erase(it++);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 /**
  * Get all the characters.

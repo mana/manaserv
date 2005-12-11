@@ -625,7 +625,8 @@ DALStorage::_updAccount(const AccountPtr& account)
     // doublecheck that this account already exists in the database
     // and therefore its status must be AS_ACC_TO_UPDATE.
     if ((account_it->second).status != AS_ACC_TO_UPDATE) {
-        return; // should we throw an exception here instead?
+        return; // Should we throw an exception here instead? No, because this can happen
+                // without any bad consequences as long as we return -- Bertram.
     }
 
     // update the account.
@@ -709,6 +710,62 @@ DALStorage::_updAccount(const AccountPtr& account)
 
         // TODO: inventories.
     }
+
+    // Existing characters in memory have been inserted or updated in database.
+    // Now, let's remove those who are no more in memory from database.
+
+    // specialize the string_to functor to convert
+    // a string to an unsigned int.
+    string_to<unsigned short> toUint;
+
+    std::ostringstream sql4;
+    sql4 << "select name, id from " << CHARACTERS_TBL_NAME
+         << " where user_id = '" << (account_it->second).id << "';";
+    const RecordSet& charInMemInfo = mDb->execSql(sql4.str());
+
+    // We compare chars from memory and those existing in db,
+    // And delete those not in mem but existing in db.
+    bool charFound;
+    for ( unsigned int i = 0; i < charInMemInfo.rows(); ++i) // in database
+    {
+        charFound = false;
+        it = characters.begin();
+        for (; it != it_end; ++it) // In memory
+        {
+            if ( charInMemInfo(i, 0) == (*it)->getName() )
+            {
+                charFound = true;
+                break;
+            }
+        }
+        if ( !charFound )
+        {
+            // The char is db but not in memory,
+            // It will be removed from database.
+            // We store the id of the char to delete
+            // Because as deleted, the RecordSet is also emptied
+            // That creates an error.
+            unsigned int charId = toUint(charInMemInfo(i, 1));
+
+                // delete the inventory.
+                std::ostringstream sql5;
+                sql5 << "delete from ";
+                sql5 << INVENTORIES_TBL_NAME;
+                sql5 << " where owner_id = '";
+                sql5 << charId;
+                sql5 << "';";
+                mDb->execSql(sql5.str());
+
+                // now delete the character.
+                std::ostringstream sql6;
+                sql6 << "delete from ";
+                sql6 << CHARACTERS_TBL_NAME;
+                sql6 << " where id = '";
+                sql6 << charId;
+                sql6 << "';";
+                mDb->execSql(sql6.str());
+        }
+    }
 }
 
 
@@ -769,6 +826,8 @@ DALStorage::_delAccount(const std::string& userName)
 
     // TODO: we should start a transaction here so that in case of problem
     // the lost of data would be minimized.
+    // db.set-transaction-type of this-db to db.manual-commit, for instance
+    // Agreed, but will sqlite support this ?
 
     // actually removing data.
     vector<string>::const_iterator it = charIds.begin();

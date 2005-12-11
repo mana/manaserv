@@ -51,12 +51,14 @@ int main(int argc, char *argv[])
         printf ("1) Register\n");
         printf ("2) Unregister\n");
         printf ("3) Login\n");
-        printf ("4) Chat\n");
-        printf ("5) Create character\n");
-        printf ("6) Character selection\n");
-        printf ("7) Move character\n");
-        printf ("8) Equip item\n");
-        printf ("9) Ruby expression\n");
+        printf ("4) Logout\n");
+        printf ("5) Chat\n");
+        printf ("6) Create character\n");
+        printf ("7) Character selection\n");
+        printf ("8) Delete Character\n");
+        printf ("9) Move character\n");
+        printf ("10) Equip item\n");
+        printf ("11) Ruby expression\n");
         printf ("Choose your option: ");
         std::cin >> answer;
 
@@ -98,6 +100,12 @@ int main(int argc, char *argv[])
                 break;
 
             case 4:
+                // Logout
+                msg.writeShort(CMSG_LOGOUT);
+                std::cout << "Logout" << std::endl;
+                break;
+
+            case 5:
                 // Chat
                 msg.writeShort(CMSG_SAY);
                 printf("\nChat: ", line);
@@ -107,7 +115,7 @@ int main(int argc, char *argv[])
                 responseRequired = false;
                 break;
 
-            case 5:
+            case 6:
             {
                 // Create character
                 msg.writeShort(CMSG_CHAR_CREATE);
@@ -117,7 +125,7 @@ int main(int argc, char *argv[])
                 msg.writeByte(0);
             } break;
 
-            case 6:
+            case 7:
             {
                 // Select character
                 msg.writeShort(CMSG_CHAR_SELECT);
@@ -126,7 +134,16 @@ int main(int argc, char *argv[])
                 msg.writeByte(atoi(line));
             } break;
 
-            case 7:
+            case 8:
+            {
+                // Delete character
+                msg.writeShort(CMSG_CHAR_DELETE);
+                printf("\nCharacter ID: ");
+                std::cin >> line;
+                msg.writeByte(atoi(line));
+            } break;
+
+            case 9:
             {
                 // Move character
                 long x, y;
@@ -142,7 +159,7 @@ int main(int argc, char *argv[])
                 responseRequired = false;
             } break;
 
-            case 8:
+            case 10:
             {
                 // Equip
                 unsigned int itemId;
@@ -156,7 +173,7 @@ int main(int argc, char *argv[])
                 msg.writeByte(slot);
             } break;
 
-            case 9:
+            case 11:
             {
                 std::cout << "Expr: ";
                 std::cin >> line;

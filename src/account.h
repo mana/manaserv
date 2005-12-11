@@ -176,6 +176,14 @@ class Account
         void
         addCharacter(BeingPtr character);
 
+        /**
+         * Remove a character.
+         *
+         * @param name The character's name to delete.
+         */
+        bool
+        delCharacter(std::string name);
+
 
         /**
          * Get all the characters.

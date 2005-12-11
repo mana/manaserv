@@ -69,7 +69,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                         << "." << std::endl;
                     std::cout << "Please logout first." << std::endl;
                     result.writeShort(SMSG_LOGIN_ERROR);
-                    result.writeShort(LOGIN_UNKNOWN);
+                    result.writeShort(LOGIN_ALREADY_LOGGED);
                     break;
                 }
 
@@ -111,6 +111,37 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                         //                   sizeof(tmwserv::RawStatistics));
                     }
                     std::cout << std::endl;
+                }
+            }
+            break;
+
+        case CMSG_LOGOUT:
+            {
+                if ( computer.getAccount() == NULL )
+                {
+                    std::cout << "Can't logout. Not even logged in." << std::endl;
+                    result.writeShort(SMSG_LOGOUT_ERROR);
+                    result.writeByte(LOGOUT_UNSUCCESSFULL);
+                }
+                else
+                {
+                    std::string username = computer.getAccount()->getName();
+                    if ( username == "" )
+                    {
+                        std::cout << "Account without name ? Logged out anyway..." << std::endl;
+                        computer.setCharacter(NULL);
+                        computer.setAccount(NULL);
+                        result.writeShort(SMSG_LOGOUT_ERROR);
+                        result.writeByte(LOGOUT_UNKNOWN);
+                    }
+                    else
+                    {
+                        std::cout << computer.getAccount()->getName() << " logs out." << std::endl;
+                        computer.setCharacter(NULL);
+                        computer.setAccount(NULL);
+                        result.writeShort(SMSG_LOGOUT_CONFIRM);
+                        result.writeByte(LOGOUT_OK);
+                    }
                 }
             }
             break;
@@ -319,8 +350,54 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::cout << "Selected Character " << int(charNum)
                 << " : " <<
                 computer.getCharacter()->getName() << std::endl;
+            }
+            break;
 
-                //TODO: Add the character in the database and flush.
+        case CMSG_CHAR_DELETE:
+            {
+                if (computer.getAccount() == NULL)
+                {
+                    result.writeShort(SMSG_CHAR_DELETE_RESPONSE);
+                    result.writeByte(DELETE_NOLOGIN);
+                    std::cout << "Not logged in. Can't delete a Character." << std::endl;
+                    break; // not logged in
+                }
+
+                unsigned char charNum = message.readByte();
+
+                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                result.writeShort(SMSG_CHAR_DELETE_RESPONSE);
+                if ( chars.size() == 0 )
+                {
+                    result.writeByte(DELETE_NO_MORE_CHARACTERS);
+                    std::cout << "Character Deletion : No characters in this account." << std::endl;
+                    break;
+                }
+                // Character ID = 0 to Number of Characters - 1.
+                if (charNum >= chars.size()) {
+                    // invalid char selection
+                    result.writeByte(DELETE_INVALID_NAME);
+                    std::cout << "Character Deletion : Selection out of ID range." << std::endl;
+                    break;
+                }
+
+                // Delete the character
+                // if the character to delete is the current character, get off of it in
+                // memory.
+                if ( computer.getCharacter() != NULL )
+                {
+                    if ( computer.getCharacter()->getName() == chars[charNum].get()->getName() )
+                    {
+                        computer.setCharacter(NULL);
+                    }
+                }
+
+                std::string deletedCharacter = chars[charNum].get()->getName();
+                computer.getAccount()->delCharacter(deletedCharacter);
+                store.flush();
+                std::cout << deletedCharacter << ": Character deleted..." << std::endl;
+                result.writeByte(DELETE_OK);
+
             }
             break;
 

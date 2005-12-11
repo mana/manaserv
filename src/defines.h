@@ -94,7 +94,8 @@ enum {
     SMSG_LOGIN_ERROR             = 0x0012,
     SMSG_LOGIN_CONFIRM           = 0x0013,
     CMSG_LOGOUT                  = 0x0014,
-    SMSG_LOGOUT_CONFIRM          = 0x0015,
+    SMSG_LOGOUT_ERROR            = 0x0015,
+    SMSG_LOGOUT_CONFIRM          = 0x0016,
     CMSG_CHAR_CREATE             = 0x0020,
     SMSG_CHAR_CREATE_RESPONSE    = 0x0021,
     CMSG_CHAR_DELETE             = 0x0022,
@@ -154,6 +155,7 @@ enum {
     LOGIN_SERVER_FULL,
     LOGIN_ACCOUNT_BANNED,
     LOGIN_ACCOUNT_REVIEW,
+    LOGIN_ALREADY_LOGGED,
     LOGIN_UNKNOWN
 };
 
