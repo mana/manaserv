@@ -65,6 +65,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::cout << username << " is trying to login." << std::endl;
 
                 if (computer.getAccount() != NULL) {
+                    std::cout << "Already logged in as " << computer.getAccount()->getName()
+                        << "." << std::endl;
+                    std::cout << "Please logout first." << std::endl;
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeShort(LOGIN_UNKNOWN);
                     break;
@@ -123,6 +126,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 bool emailValid = false;
                 // Testing Email validity
+                if ( (email.length() < MIN_EMAIL_LENGTH) || (email.length() > MAX_EMAIL_LENGTH))
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_INVALID_EMAIL);
+                    std::cout << email << ": Email too short or too long." << std::endl;
+                    break;
+                }
                 if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
@@ -156,11 +166,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(REGISTER_INVALID_USERNAME);
                     std::cout << username << ": Username too short or too long." << std::endl;
                 }
-                else if (password.length() < MIN_PASSWORD_LENGTH)
+                else if ((password.length() < MIN_PASSWORD_LENGTH) || (password.length() > MAX_PASSWORD_LENGTH))
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_PASSWORD);
-                    std::cout << email << ": Password too short." << std::endl;
+                    std::cout << email << ": Password too short or too long." << std::endl;
                 }
                 else if (!emailValid)
                 {
@@ -178,6 +188,49 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                     store.flush(); // flush changes
                     std::cout << username << ": Account registered." << std::endl;
+                }
+            }
+            break;
+
+        case CMSG_UNREGISTER:
+            {
+                std::string username = message.readString();
+                std::string password = message.readString();
+                std::cout << username << " wants to be deleted from our accounts." << std::endl;
+
+                // see if the account exists
+                Account *acc = store.getAccount(username);
+
+                if (!acc) {
+                    // account doesn't exist -- send error to client
+                    std::cout << username << ": Account doesn't exist anyway." << std::endl;
+
+                    result.writeShort(SMSG_UNREGISTER_RESPONSE);
+                    result.writeByte(UNREGISTER_INVALID_USERNAME);
+                } else if (acc->getPassword() != password) {
+                    // bad password -- send error to client
+                    std::cout << "Won't delete it : Bad password for " << username << "." << std::endl;
+
+                    result.writeShort(SMSG_UNREGISTER_RESPONSE);
+                    result.writeByte(UNREGISTER_INVALID_PASSWORD);
+                } else {
+
+                    // If the account to delete is the current account we're logged in.
+                    // Get out of it in memory.
+                    if (computer.getAccount() != NULL )
+                    {
+                        if (computer.getAccount()->getName() == username )
+                        {
+                            computer.setCharacter(NULL);
+                            computer.setAccount(NULL);
+                        }
+                    }
+                    // delete account and associated characters
+                    std::cout << "Farewell " << username << " ..." << std::endl;
+                    store.delAccount(username);
+                    store.flush();
+                    result.writeShort(SMSG_UNREGISTER_RESPONSE);
+                    result.writeByte(UNREGISTER_OK);
                 }
             }
             break;
@@ -202,6 +255,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 std::string name = message.readString();
+                if ((name.length() < MIN_CHARACTER_LENGTH) || (name.length() > MAX_CHARACTER_LENGTH))
+                {
+                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
+                    result.writeByte(CREATE_INVALID_NAME);
+                    std::cout << name << ": Character's name too short or too long." << std::endl;
+                    break;
+                }
                 //char hairStyle = message.readByte();
                 //char hairColor = message.readByte();
                 Genders sex = (Genders)message.readByte();

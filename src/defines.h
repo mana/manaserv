@@ -59,8 +59,13 @@ enum {
     MIN_LOGIN_LENGTH = 4,
     MAX_LOGIN_LENGTH = 16,
     MIN_PASSWORD_LENGTH = 4,
+    MAX_PASSWORD_LENGTH = 25,
+    MIN_EMAIL_LENGTH = 7,
+    MAX_EMAIL_LENGTH = 50,
 
     // Character related
+    MIN_CHARACTER_LENGTH = 4,
+    MAX_CHARACTER_LENGTH = 25,
     MAX_OF_CHARACTERS = 3,
 /** Tells the max difference between the
  *  less big stat and the biggest one.
@@ -88,6 +93,8 @@ enum {
     CMSG_ENCRYPTED_LOGIN         = 0x0011,
     SMSG_LOGIN_ERROR             = 0x0012,
     SMSG_LOGIN_CONFIRM           = 0x0013,
+    CMSG_LOGOUT                  = 0x0014,
+    SMSG_LOGOUT_CONFIRM          = 0x0015,
     CMSG_CHAR_CREATE             = 0x0020,
     SMSG_CHAR_CREATE_RESPONSE    = 0x0021,
     CMSG_CHAR_DELETE             = 0x0022,

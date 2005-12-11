@@ -138,7 +138,7 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                         NetComputer *comp = new NetComputer(this, client);
                         clients.push_back(comp);
                         computerConnected(comp);
-                        LOG_INFO(clients.size() << " clients connected")
+                        LOG_INFO(clients.size() << " client(s) connected")
                     }
                 }
             }

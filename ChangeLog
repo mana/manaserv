@@ -1,3 +1,10 @@
+2005-12-11  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/accounthandler.cpp, src/main.cpp, src/dalstorage.cpp,
+        src/client.cpp, src/connectionhandler.cpp, src/defines.h:
+        Added unregistering, checking on character's name and email
+        length support. Also made some little tweaks.
+
 2005-12-10  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/dalstorage.cpp: Fixed the buggy part of getAccount()

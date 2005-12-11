@@ -49,12 +49,13 @@ int main(int argc, char *argv[])
 
         printf ("0) Quit\n");
         printf ("1) Register\n");
-        printf ("2) Login\n");
-        printf ("3) Chat\n");
-        printf ("4) Create character\n");
-        printf ("5) Character selection\n");
-        printf ("6) Move character\n");
-        printf ("7) Equip item\n");
+        printf ("2) Unregister\n");
+        printf ("3) Login\n");
+        printf ("4) Chat\n");
+        printf ("5) Create character\n");
+        printf ("6) Character selection\n");
+        printf ("7) Move character\n");
+        printf ("8) Equip item\n");
         printf ("9) Ruby expression\n");
         printf ("Choose your option: ");
         std::cin >> answer;
@@ -75,6 +76,17 @@ int main(int argc, char *argv[])
                 break;
 
             case 2:
+                // Unregister (deleting an account)
+                msg.writeShort(CMSG_UNREGISTER);
+                printf("Account name: ", line);
+                std::cin >> line;
+                msg.writeString(line);
+                printf("Password: ", line);
+                std::cin >> line;
+                msg.writeString(line);
+                break;
+
+            case 3:
                 // Login
                 msg.writeShort(CMSG_LOGIN);
                 printf("Account name: ", line);
@@ -85,7 +97,7 @@ int main(int argc, char *argv[])
                 msg.writeString(line);
                 break;
 
-            case 3:
+            case 4:
                 // Chat
                 msg.writeShort(CMSG_SAY);
                 printf("\nChat: ", line);
@@ -95,7 +107,7 @@ int main(int argc, char *argv[])
                 responseRequired = false;
                 break;
 
-            case 4:
+            case 5:
             {
                 // Create character
                 msg.writeShort(CMSG_CHAR_CREATE);
@@ -105,7 +117,7 @@ int main(int argc, char *argv[])
                 msg.writeByte(0);
             } break;
 
-            case 5:
+            case 6:
             {
                 // Select character
                 msg.writeShort(CMSG_CHAR_SELECT);
@@ -114,7 +126,7 @@ int main(int argc, char *argv[])
                 msg.writeByte(atoi(line));
             } break;
 
-            case 6:
+            case 7:
             {
                 // Move character
                 long x, y;
@@ -130,7 +142,7 @@ int main(int argc, char *argv[])
                 responseRequired = false;
             } break;
 
-            case 7:
+            case 8:
             {
                 // Equip
                 unsigned int itemId;
