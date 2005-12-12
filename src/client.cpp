@@ -56,9 +56,10 @@ int main(int argc, char *argv[])
         printf ("6) Create character\n");
         printf ("7) Character selection\n");
         printf ("8) Delete Character\n");
-        printf ("9) Move character\n");
-        printf ("10) Equip item\n");
-        printf ("11) Ruby expression\n");
+        printf ("9) List Characters\n");
+        printf ("10) Move Character\n");
+        printf ("11) Equip Item\n");
+        printf ("12) Ruby Expression\n");
         printf ("Choose your option: ");
         std::cin >> answer;
 
@@ -145,6 +146,13 @@ int main(int argc, char *argv[])
 
             case 9:
             {
+                // List characters
+                msg.writeShort(CMSG_CHAR_LIST);
+                std::cout <<"Character List:" << std::endl;
+            } break;
+
+            case 10:
+            {
                 // Move character
                 long x, y;
                 std::cout << "X: ";
@@ -159,7 +167,7 @@ int main(int argc, char *argv[])
                 responseRequired = false;
             } break;
 
-            case 10:
+            case 11:
             {
                 // Equip
                 unsigned int itemId;
@@ -173,7 +181,7 @@ int main(int argc, char *argv[])
                 msg.writeByte(slot);
             } break;
 
-            case 11:
+            case 12:
             {
                 std::cout << "Expr: ";
                 std::cin >> line;

@@ -22,6 +22,7 @@
  */
 
 #include "netcomputer.h"
+#include "state.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -55,5 +56,27 @@ void NetComputer::setAccount(tmwserv::Account *acc)
 
 void NetComputer::setCharacter(tmwserv::Being *ch)
 {
+    tmwserv::State &state = tmwserv::State::instance();
+    if (character != NULL)
+    {
+        // Remove being from the world : This is buggy for now.
+        //state.removeBeing(character);
+    }
     character = ch;
+    state.addBeing(character, character->getMap());
 }
+
+void NetComputer::unsetAccount()
+{
+    unsetCharacter();
+    account = NULL;
+}
+
+void NetComputer::unsetCharacter()
+{
+    // remove being from world
+    //tmwserv::State &state = tmwserv::State::instance();
+    //state.removeBeing(character);
+    character = NULL;
+}
+

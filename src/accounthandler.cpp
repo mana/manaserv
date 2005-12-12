@@ -26,7 +26,6 @@
 #include "storage.h"
 #include "account.h"
 #include "messageout.h"
-#include "state.h"
 #include "configuration.h"
 #include <iostream>
 #include <cctype>
@@ -102,15 +101,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                     std::cout << username << "'s account has " << chars.size() << " character(s)." << std::endl;
 
-                    for (unsigned int i = 0; i < chars.size(); i++) {
+                    for (unsigned int i = 0; i < chars.size(); i++)
+                    {
                         result.writeString(chars[i]->getName());
-                        std::cout << chars[i]->getName() << ", ";
-                        result.writeByte(chars[i]->getLevel());
-                        result.writeByte(chars[i]->getMoney());
-                        //result.writeString(chars[i]->getRawStatistics(),
-                        //                   sizeof(tmwserv::RawStatistics));
+                        if (i >0) std::cout << ", ";
+                        std::cout << chars[i]->getName();
                     }
-                    std::cout << std::endl;
+                    std::cout << "." << std::endl;
                 }
             }
             break;
@@ -129,16 +126,16 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     if ( username == "" )
                     {
                         std::cout << "Account without name ? Logged out anyway..." << std::endl;
-                        computer.setCharacter(NULL);
-                        computer.setAccount(NULL);
+                        // computer.unsetCharacter(); Done by unsetAccount();
+                        computer.unsetAccount();
                         result.writeShort(SMSG_LOGOUT_ERROR);
                         result.writeByte(LOGOUT_UNKNOWN);
                     }
                     else
                     {
                         std::cout << computer.getAccount()->getName() << " logs out." << std::endl;
-                        computer.setCharacter(NULL);
-                        computer.setAccount(NULL);
+                        // computer.unsetCharacter(); Done by unsetAccount();
+                        computer.unsetAccount();
                         result.writeShort(SMSG_LOGOUT_CONFIRM);
                         result.writeByte(LOGOUT_OK);
                     }
@@ -252,8 +249,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     {
                         if (computer.getAccount()->getName() == username )
                         {
-                            computer.setCharacter(NULL);
-                            computer.setAccount(NULL);
+                            // computer.unsetCharacter(); Done by unsetAccount();
+                            computer.unsetAccount();
                         }
                     }
                     // delete account and associated characters
@@ -286,6 +283,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 std::string name = message.readString();
+                // Check if the character's name already exists
+                if (store.doesCharacterNameExists(name))
+                {
+                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
+                    result.writeByte(CREATE_EXISTS_NAME);
+                    std::cout << name << ": Character's name already exists." << std::endl;
+                    break;
+                }
+                // Check for character's name length
                 if ((name.length() < MIN_CHARACTER_LENGTH) || (name.length() > MAX_CHARACTER_LENGTH))
                 {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
@@ -342,10 +348,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // set character
                 computer.setCharacter(chars[charNum].get());
 
-                // place in world
-                tmwserv::State &state = tmwserv::State::instance();
-                state.addBeing(computer.getCharacter(), computer.getCharacter()->getMap());
-
                 result.writeByte(SELECT_OK);
                 std::cout << "Selected Character " << int(charNum)
                 << " : " <<
@@ -388,7 +390,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     if ( computer.getCharacter()->getName() == chars[charNum].get()->getName() )
                     {
-                        computer.setCharacter(NULL);
+                        computer.unsetCharacter();
                     }
                 }
 
@@ -398,6 +400,44 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::cout << deletedCharacter << ": Character deleted..." << std::endl;
                 result.writeByte(DELETE_OK);
 
+            }
+            break;
+
+        case CMSG_CHAR_LIST:
+            {
+                if (computer.getAccount() == NULL)
+                {
+                    result.writeShort(SMSG_CHAR_LIST_RESPONSE);
+                    result.writeByte(CHAR_LIST_NOLOGIN);
+                    std::cout << "Not logged in. Can't list characters." << std::endl;
+                    break; // not logged in
+                }
+
+                result.writeShort(SMSG_CHAR_LIST_RESPONSE);
+                result.writeByte(CHAR_LIST_OK);
+                // Return information about available characters
+                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                result.writeByte(chars.size());
+
+                std::cout << computer.getAccount()->getName() << "'s account has "
+                << chars.size() << " character(s)." << std::endl;
+
+                for (unsigned int i = 0; i < chars.size(); i++)
+                {
+                    result.writeString(chars[i]->getName());
+                    if (i >0) std::cout << ", ";
+                    std::cout << chars[i]->getName();
+                    result.writeByte(unsigned(short(chars[i]->getGender())));
+                    result.writeByte(chars[i]->getLevel());
+                    result.writeByte(chars[i]->getMoney());
+                    result.writeByte(chars[i]->getStrength());
+                    result.writeByte(chars[i]->getAgility());
+                    result.writeByte(chars[i]->getVitality());
+                    result.writeByte(chars[i]->getIntelligence());
+                    result.writeByte(chars[i]->getDexterity());
+                    result.writeByte(chars[i]->getLuck());
+                }
+                std::cout << "." << std::endl;
             }
             break;
 

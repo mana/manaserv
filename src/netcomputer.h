@@ -84,6 +84,11 @@ class NetComputer
         void setAccount(tmwserv::Account *acc);
 
         /**
+         * Unset the account associated with the connection
+         */
+        void unsetAccount();
+
+        /**
          * Get account associated with the connection
          */
         tmwserv::Account *getAccount() { return account; }
@@ -92,6 +97,12 @@ class NetComputer
          * Set the selected character associated with connection
          */
         void setCharacter(tmwserv::Being *ch);
+
+        /**
+         * Deselect the character associated with connection
+         * and remove it from the world
+         */
+        void unsetCharacter();
 
         /**
          * Get character associated with the connection

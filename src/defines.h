@@ -101,6 +101,7 @@ enum {
     CMSG_CHAR_DELETE             = 0x0022,
     SMSG_CHAR_DELETE_RESPONSE    = 0x0023,
     CMSG_CHAR_LIST               = 0x0024, // this is required after char creation
+    SMSG_CHAR_LIST_RESPONSE      = 0x0025,
     CMSG_CHAR_SELECT             = 0x0030,
     SMSG_CHAR_SELECT_RESPONSE    = 0x0031,
 
@@ -190,7 +191,7 @@ enum {
     CREATE_INVALID_NAME,
     CREATE_INVALID_HAIR,
     CREATE_INVALID_SEX,
-    CREATE_EXISTS_USERNAME,
+    CREATE_EXISTS_NAME,
     CREATE_TOO_MUCH_CHARACTERS,
     CREATE_NOLOGIN
 };
@@ -210,6 +211,12 @@ enum {
     SELECT_INVALID,
     SELECT_NOT_YET_CHARACTERS,
     SELECT_NOLOGIN
+};
+
+// Character's list return values
+enum {
+    CHAR_LIST_OK = 0,
+    CHAR_LIST_NOLOGIN
 };
 
 // Object type enumeration

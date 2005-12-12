@@ -1,3 +1,13 @@
+2005-12-12  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/accounthandler.cpp, src/netcomputer.h,
+        src/netcomputer.cpp, src/defines.h, src/dalstorage.cpp,
+        src/dalstorage.h, src/storage.h, src/client.cpp, src/main.cpp:
+        Now beings are handled in netcomputer when added and removed
+        from the world. addBeing() and removeBeing() are still crashy.
+        Added check if the character's name already exists. Forgot about
+        that. Added CMSG_CHAR_LIST packet support.
+
 2005-12-11  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/accounthandler.cpp, src/main.cpp, src/account.h,

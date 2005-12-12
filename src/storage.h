@@ -295,6 +295,13 @@ class Storage
         bool doesEmailAlreadyExists(std::string email) = 0;
 
         /**
+         * Tells if the character's name already exists
+         * @return true if character's name exists.
+         */
+        virtual
+        bool doesCharacterNameExists(std::string name) = 0;
+
+        /**
          * Saves the changes permanently.
          */
         virtual void

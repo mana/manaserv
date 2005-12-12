@@ -107,6 +107,13 @@ class DALStorage: public Storage
         doesEmailAlreadyExists(std::string email);
 
         /**
+         * Tells if the character's name already exists
+         * @return true if character's name exists.
+         */
+        bool
+        doesCharacterNameExists(std::string name);
+
+        /**
          * Save changes to the database permanently.
          *
          * @exception tmwserv::dal::DbSqlQueryExecFailure.

@@ -447,6 +447,49 @@ DALStorage::doesEmailAlreadyExists(std::string email)
     return false;
 }
 
+/**
+ * Tells if the character's name already exists
+ * @return true if character's name exists.
+ */
+bool
+DALStorage::doesCharacterNameExists(std::string name)
+{
+    // If not opened already
+    open();
+
+    try {
+            std::string sql("select count(name) from ");
+            sql += CHARACTERS_TBL_NAME;
+            sql += " where name = '";
+            sql += name;
+            sql += "';";
+            const dal::RecordSet& accountInfo = mDb->execSql(sql);
+    
+            // if the account is empty then
+            // we have no choice but to return false.
+            if (accountInfo.isEmpty()) {
+                return false;
+            }
+    
+            std::stringstream ssStream(accountInfo(0,0));
+            int iReturn = -1;
+            ssStream >> iReturn;
+            if ( iReturn > 0 )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what())
+        }
+
+    return false;
+}
 
 /**
  * Save changes to the database permanently.
