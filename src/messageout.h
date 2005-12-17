@@ -69,7 +69,7 @@ class MessageOut
          * memory in advance instead of expanding size every time more data is
          * added.
          */
-        void expand(unsigned int size);
+        void expand(size_t size);
 
         Packet *mPacket;                     /**< Created packet. */
         char *mData;                         /**< Data building up. */
