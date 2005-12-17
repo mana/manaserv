@@ -1,3 +1,7 @@
+2005-12-17  Björn Steinbrink  <B.Steinbrink@gmx.de>
+
+	* src/messageout.h: Fixed some 64bit issue.
+
 2005-12-12  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/accounthandler.cpp, src/netcomputer.h,
