@@ -20,28 +20,27 @@
  *  $Id$
  */
 
-
+#include <cstdlib>
 #include <iostream>
-
+#include <physfs.h>
 #include <SDL.h>
 #include <SDL_net.h>
-
-#include <cstdlib>
 
 #ifdef __USE_UNIX98
 #include "../config.h"
 #endif
 
-#include "netsession.h"
-#include "connectionhandler.h"
 #include "accounthandler.h"
-#include "gamehandler.h"
 #include "chathandler.h"
-#include "storage.h"
 #include "configuration.h"
-#include "state.h"
-
+#include "connectionhandler.h"
+#include "gamehandler.h"
+#include "mapmanager.h"
+#include "netsession.h"
+#include "resourcemanager.h"
 #include "skill.h"
+#include "state.h"
+#include "storage.h"
 
 #include "utils/logger.h"
 
@@ -176,6 +175,14 @@ void initialize()
     config.init(configPath);
     LOG_INFO("Using Config File: " << configPath)
     LOG_INFO("Using Log File: " << LOG_FILE)
+    
+    // Initialize PhysicsFS
+    PHYSFS_init("");
+    
+    // TODO: only a test, maps should be loaded as they are needed
+    tmwserv::MapManager::instance().loadMap("tulimshar.tmx.gz");
+    tmwserv::MapManager::instance().reloadMap("tulimshar.tmx.gz");
+    tmwserv::MapManager::instance().unloadMap("tulimshar.tmx.gz");
 }
 
 
@@ -206,6 +213,8 @@ void deinitialize()
 
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();
+    
+    PHYSFS_deinit();
 }
 
 

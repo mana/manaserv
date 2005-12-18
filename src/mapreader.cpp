@@ -38,13 +38,6 @@ namespace tmwserv
 const unsigned int DEFAULT_TILE_WIDTH = 32;
 const unsigned int DEFAULT_TILE_HEIGHT = 32;
 
-// MSVC libxml2 at the moment doesn't work right when using MinGW, missing this
-// function at link time.
-#ifdef WIN32
-#undef xmlFree
-#define xmlFree(x) ;
-#endif
-
 /**
  * Inflates either zlib or gzip deflated memory. The inflated memory is
  * expected to be freed by the caller.
@@ -127,7 +120,7 @@ Map *MapReader::readMap(const std::string &filename)
 
     if (buffer == NULL)
     {
-        LOG_ERROR("Map file not found (" << filename.c_str() << ")");
+        LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")");
         return NULL;
     }
 
@@ -224,7 +217,6 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path)
         }
         else if (xmlStrEqual(node->name, BAD_CAST "layer"))
         {
-            LOG_INFO("- Loading layer " << layerNr);
             readLayer(node, map, layerNr);
             layerNr++;
         }

@@ -1,3 +1,9 @@
+2005-12-18	Eugenio Favalli	<elvenprogrammer@gmail.com>
+
+        * src/main.cpp, src/mapreader.cpp, tmwserv.dev,
+		src/mapmanager.cpp, src/mapmanager.h: Added a map manager to
+		load/unload/relod maps.
+
 2005-12-18  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/accounthandler.cpp, src/netcomputer.h, src/netcomputer.cpp,
