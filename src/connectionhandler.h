@@ -106,7 +106,7 @@ class ConnectionHandler
         /**
          * Send packet to client with matching Being*
          */
-        void sendTo(tmwserv::Being*, MessageOut &);
+        void sendTo(tmwserv::BeingPtr, MessageOut &);
 
     private:
         std::map<unsigned int, MessageHandler*> handlers;

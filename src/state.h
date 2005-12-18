@@ -85,12 +85,12 @@ class State : public utils::Singleton<State>
     /**
      * Add being to game world at specified map
      */
-    void addBeing(Being *being, const std::string &map);
+    void addBeing(BeingPtr beingPtr, const std::string &map);
 
     /**
      * Remove being from game world
      */
-    void removeBeing(Being *being);
+    void removeBeing(BeingPtr beingPtr);
 
     /**
      * Check to see if a map exists in game world
@@ -100,7 +100,7 @@ class State : public utils::Singleton<State>
     /**
      * Check if being exists in game world already
      */
-    bool beingExists(Being *being);
+    bool beingExists(BeingPtr beingPtr);
 
     /**
      * Load map into game world
@@ -120,12 +120,12 @@ class State : public utils::Singleton<State>
     /**
      * Find out whether an object exists in the game world or not
      */
-    bool objectExists(Object *object);
+    bool objectExists(const Object *object);
 
     /**
      * Find map player in world is on
      */
-    const std::string findPlayer(Being *being);
+    const std::string findPlayer(BeingPtr being);
 
     /**
      * Find map object in world is on

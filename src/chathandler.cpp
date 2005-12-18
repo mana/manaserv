@@ -27,7 +27,7 @@
 
 void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
-    if (computer.getCharacter() == NULL)
+    if (computer.getCharacter().get() == NULL)
         return; // character not selected
 
     switch (message.getId())

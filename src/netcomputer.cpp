@@ -54,13 +54,13 @@ void NetComputer::setAccount(tmwserv::Account *acc)
     account = acc;
 }
 
-void NetComputer::setCharacter(tmwserv::Being *ch)
+void NetComputer::setCharacter(tmwserv::BeingPtr ch)
 {
     tmwserv::State &state = tmwserv::State::instance();
-    if (character != NULL)
+    if (character.get() != NULL)
     {
         // Remove being from the world : This is buggy for now.
-        //state.removeBeing(character);
+        state.removeBeing(character);
     }
     character = ch;
     state.addBeing(character, character->getMap());
@@ -75,8 +75,8 @@ void NetComputer::unsetAccount()
 void NetComputer::unsetCharacter()
 {
     // remove being from world
-    //tmwserv::State &state = tmwserv::State::instance();
-    //state.removeBeing(character);
-    character = NULL;
+    tmwserv::State &state = tmwserv::State::instance();
+    state.removeBeing(character);
+    character = tmwserv::BeingPtr(NULL);
 }
 

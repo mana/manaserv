@@ -75,31 +75,33 @@ void State::update(ConnectionHandler &connectionHandler)
                     msg.writeLong(b2->get()->getX());// x
                     msg.writeLong(b2->get()->getY());// y
 
-                    connectionHandler.sendTo(b->get(), msg);
+                    connectionHandler.sendTo(*b, msg);
                 }
             }
         }
     }
 }
 
-void State::addBeing(Being *being, const std::string &map) {
-    if (!beingExists(being)) {
+void State::addBeing(BeingPtr beingPtr, const std::string &map) {
+    if (!beingExists(beingPtr)) {
         if (!mapExists(map))
             if (!loadMap(map))
                 return;
-
-        maps[map].beings.push_back(tmwserv::BeingPtr(being));
+        // WARNING: We should pass a copy there.
+        // Otherwise, remove being will erase one character 
+        // from the account object.
+        maps[map].beings.push_back(beingPtr);
     }
 }
 
-void State::removeBeing(Being *being) {
+void State::removeBeing(BeingPtr beingPtr) {
     for (std::map<std::string, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (Beings::iterator b = i->second.beings.begin();
              b != i->second.beings.end();
              b++) {
-            if (b->get() == being) {
+            if (b->get() == beingPtr.get()) {
                 i->second.beings.erase(b);
                 return;
             }
@@ -114,14 +116,14 @@ bool State::mapExists(const std::string &map) {
     return true;
 }
 
-bool State::beingExists(Being *being) {
+bool State::beingExists(BeingPtr beingPtr) {
     for (std::map<std::string, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (Beings::iterator b = i->second.beings.begin();
              b != i->second.beings.end();
              b++) {
-            if (b->get() == being)
+            if (b->get() == beingPtr.get())
                 return true;
         }
     }
@@ -139,7 +141,7 @@ bool State::loadMap(const std::string &map) {
 
     // will need to load extra map related resources here also
     
-    return true;
+    return true; // We let true for testing on beings
 }
 
 void State::addObject(Object *object, const std::string &map) {
@@ -166,7 +168,7 @@ void State::removeObject(Object *object) {
     }
 }
 
-bool State::objectExists(Object *object) {
+bool State::objectExists(const Object *object) {
     for (std::map<std::string, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
@@ -180,14 +182,14 @@ bool State::objectExists(Object *object) {
     return false;
 }
 
-const std::string State::findPlayer(Being *being) {
+const std::string State::findPlayer(BeingPtr beingPtr) {
     for (std::map<std::string, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (Beings::iterator b = i->second.beings.begin();
              b != i->second.beings.end();
              b++) {
-            if (b->get() == being)
+            if (b->get() == beingPtr.get())
                 return i->first;
         }
     }

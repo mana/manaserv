@@ -346,7 +346,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 // set character
-                computer.setCharacter(chars[charNum].get());
+                computer.setCharacter(chars[charNum]);
 
                 result.writeByte(SELECT_OK);
                 std::cout << "Selected Character " << int(charNum)
@@ -386,7 +386,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // Delete the character
                 // if the character to delete is the current character, get off of it in
                 // memory.
-                if ( computer.getCharacter() != NULL )
+                if ( computer.getCharacter().get() != NULL )
                 {
                     if ( computer.getCharacter()->getName() == chars[charNum].get()->getName() )
                     {

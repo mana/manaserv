@@ -96,7 +96,7 @@ class NetComputer
         /**
          * Set the selected character associated with connection
          */
-        void setCharacter(tmwserv::Being *ch);
+        void setCharacter(tmwserv::BeingPtr ch);
 
         /**
          * Deselect the character associated with connection
@@ -107,7 +107,7 @@ class NetComputer
         /**
          * Get character associated with the connection
          */
-        tmwserv::Being *getCharacter() { return character; }
+        tmwserv::BeingPtr getCharacter() { return character; }
 
     private:
         ConnectionHandler *handler;
@@ -116,7 +116,7 @@ class NetComputer
         TCPsocket socket;          /**< Client socket */
 
         tmwserv::Account *account; /**< Account associated with connection */
-        tmwserv::Being *character; /**< Selected character */
+        tmwserv::BeingPtr character; /**< Selected character */
 };
 
 #endif
