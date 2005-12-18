@@ -1,6 +1,15 @@
-2005-12-17  Björn Steinbrink  <B.Steinbrink@gmx.de>
+2005-12-18  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/messageout.h: Fixed some 64bit issue.
+        * src/accounthandler.cpp, src/netcomputer.h, src/netcomputer.cpp,
+        src/chathandler.cpp, src/connectionhandler.cpp,
+        src/gamehandler.cpp, src/connectionhandler.h, src/state.h,
+        src/state.cpp: Made the handlers use the countedPtr for Beings
+        as they should. Fixed a segfault when removing a being from the
+        world.
+
+2005-12-17  Bjorn Steinbrink  <B.Steinbrink@gmx.de>
+
+        * src/messageout.h: Fixed some 64bit issue.
 
 2005-12-12  Yohann Ferreira  <bertram@cegetel.net>
 
