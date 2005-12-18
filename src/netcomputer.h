@@ -81,7 +81,7 @@ class NetComputer
         /**
          * Set the account associated with the connection
          */
-        void setAccount(tmwserv::Account *acc);
+        void setAccount(tmwserv::AccountPtr acc);
 
         /**
          * Unset the account associated with the connection
@@ -91,7 +91,7 @@ class NetComputer
         /**
          * Get account associated with the connection
          */
-        tmwserv::Account *getAccount() { return account; }
+        tmwserv::AccountPtr getAccount() { return accountPtr; }
 
         /**
          * Set the selected character associated with connection
@@ -107,7 +107,7 @@ class NetComputer
         /**
          * Get character associated with the connection
          */
-        tmwserv::BeingPtr getCharacter() { return character; }
+        tmwserv::BeingPtr getCharacter() { return characterPtr; }
 
     private:
         ConnectionHandler *handler;
@@ -115,8 +115,8 @@ class NetComputer
         std::queue<Packet*> queue; /**< Message Queue (FIFO) */
         TCPsocket socket;          /**< Client socket */
 
-        tmwserv::Account *account; /**< Account associated with connection */
-        tmwserv::BeingPtr character; /**< Selected character */
+        tmwserv::AccountPtr accountPtr; /**< Account associated with connection */
+        tmwserv::BeingPtr characterPtr; /**< Selected character */
 };
 
 #endif

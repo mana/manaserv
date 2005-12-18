@@ -29,13 +29,14 @@
 NetComputer::NetComputer(ConnectionHandler *handler, TCPsocket sock):
     handler(handler),
     socket(sock),
-    account(NULL),
-    character(NULL)
+    accountPtr(NULL),
+    characterPtr(NULL)
 {
 }
 
 NetComputer::~NetComputer()
 {
+    unsetAccount();
 }
 
 void NetComputer::disconnect(const std::string &reason)
@@ -49,34 +50,34 @@ void NetComputer::send(const Packet *p)
     SDLNet_TCP_Send(socket, p->data, p->length);
 }
 
-void NetComputer::setAccount(tmwserv::Account *acc)
+void NetComputer::setAccount(tmwserv::AccountPtr acc)
 {
-    account = acc;
+    accountPtr = acc;
 }
 
 void NetComputer::setCharacter(tmwserv::BeingPtr ch)
 {
     tmwserv::State &state = tmwserv::State::instance();
-    if (character.get() != NULL)
+    if (characterPtr.get() != NULL)
     {
-        // Remove being from the world : This is buggy for now.
-        state.removeBeing(character);
+        // Remove being from the world.
+        state.removeBeing(characterPtr);
     }
-    character = ch;
-    state.addBeing(character, character->getMap());
+    characterPtr = ch;
+    state.addBeing(characterPtr, characterPtr->getMap());
 }
 
 void NetComputer::unsetAccount()
 {
     unsetCharacter();
-    account = NULL;
+    accountPtr = tmwserv::AccountPtr(NULL);
 }
 
 void NetComputer::unsetCharacter()
 {
     // remove being from world
     tmwserv::State &state = tmwserv::State::instance();
-    state.removeBeing(character);
-    character = tmwserv::BeingPtr(NULL);
+    state.removeBeing(characterPtr);
+    characterPtr = tmwserv::BeingPtr(NULL);
 }
 

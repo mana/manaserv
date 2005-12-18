@@ -5,7 +5,8 @@
         src/gamehandler.cpp, src/connectionhandler.h, src/state.h,
         src/state.cpp: Made the handlers use the countedPtr for Beings
         as they should. Fixed a segfault when removing a being from the
-        world.
+        world. Also made use of AccountPtr instead of Account* to fix a
+        not seen but yet present account reselection segfault bug.
 
 2005-12-17  Bjorn Steinbrink  <B.Steinbrink@gmx.de>
 

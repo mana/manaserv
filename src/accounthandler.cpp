@@ -63,7 +63,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string password = message.readString();
                 std::cout << username << " is trying to login." << std::endl;
 
-                if (computer.getAccount() != NULL) {
+                if (computer.getAccount().get() != NULL) {
                     std::cout << "Already logged in as " << computer.getAccount()->getName()
                         << "." << std::endl;
                     std::cout << "Please logout first." << std::endl;
@@ -73,9 +73,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 // see if the account exists
-                Account *acc = store.getAccount(username);
+                tmwserv::AccountPtr acc = tmwserv::AccountPtr(store.getAccount(username));
 
-                if (!acc) {
+                if (!acc.get()) {
                     // account doesn't exist -- send error to client
                     std::cout << username << ": Account does not exist." << std::endl;
 
@@ -114,7 +114,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_LOGOUT:
             {
-                if ( computer.getAccount() == NULL )
+                if ( computer.getAccount().get() == NULL )
                 {
                     std::cout << "Can't logout. Not even logged in." << std::endl;
                     result.writeShort(SMSG_LOGOUT_ERROR);
@@ -245,7 +245,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                     // If the account to delete is the current account we're logged in.
                     // Get out of it in memory.
-                    if (computer.getAccount() != NULL )
+                    if (computer.getAccount().get() != NULL )
                     {
                         if (computer.getAccount()->getName() == username )
                         {
@@ -265,7 +265,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_CREATE:
             {
-                if (computer.getAccount() == NULL) {
+                if (computer.getAccount().get() == NULL) {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_NOLOGIN);
                     std::cout << "Not logged in. Can't create a Character." << std::endl;
@@ -319,7 +319,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_SELECT:
             {
-                if (computer.getAccount() == NULL)
+                if (computer.getAccount().get() == NULL)
                 {
                     result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
                     result.writeByte(SELECT_NOLOGIN);
@@ -357,7 +357,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_DELETE:
             {
-                if (computer.getAccount() == NULL)
+                if (computer.getAccount().get() == NULL)
                 {
                     result.writeShort(SMSG_CHAR_DELETE_RESPONSE);
                     result.writeByte(DELETE_NOLOGIN);
@@ -405,7 +405,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_LIST:
             {
-                if (computer.getAccount() == NULL)
+                if (computer.getAccount().get() == NULL)
                 {
                     result.writeShort(SMSG_CHAR_LIST_RESPONSE);
                     result.writeByte(CHAR_LIST_NOLOGIN);
