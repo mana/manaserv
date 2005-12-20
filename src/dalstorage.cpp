@@ -81,7 +81,7 @@ DALStorage::open(void)
         mDb->connect(getName(), getUser(), getPassword());
         if (!dbFileShown)
         {
-            LOG_INFO("Using " << dbFile << " as Database Name.")
+            LOG_INFO("Using " << dbFile << " as Database Name.", 0)
             dbFileShown = true;
         }
 #elif defined (SQLITE_SUPPORT)
@@ -90,7 +90,7 @@ DALStorage::open(void)
         mDb->connect(dbFile, "", "");
         if (!dbFileShown)
         {
-            LOG_INFO("SQLite uses ./" << dbFile << " as DB.")
+            LOG_INFO("SQLite uses ./" << dbFile << " as DB.", 0)
             dbFileShown = true;
         }
 #endif
@@ -135,10 +135,10 @@ DALStorage::open(void)
         createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
     }
     catch (const DbConnectionFailure& e) {
-        LOG_ERROR("unable to connect to the database: " << e.what())
+        LOG_ERROR("unable to connect to the database: " << e.what(), 0)
     }
     catch (const DbSqlQueryExecFailure& e) {
-        LOG_ERROR("SQL query failure: " << e.what())
+        LOG_ERROR("SQL query failure: " << e.what(), 0)
     }
 
     mIsOpen = mDb->isConnected();
@@ -225,8 +225,8 @@ DALStorage::getAccount(const std::string& userName)
         if (!charInfo.isEmpty()) {
             Beings beings;
 
-            std::cout << userName << "'s account has " << charInfo.rows()
-                << " character(s) in database." << std::endl;
+            LOG_INFO(userName << "'s account has " << charInfo.rows()
+                << " character(s) in database.", 1)
 
             // As the recordset functions are set to be able to get one recordset
             // at a time, we store charInfo in a temp array of strings
@@ -365,7 +365,7 @@ DALStorage::delAccount(const std::string& userName)
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what())
+        LOG_ERROR("SQL query failure: " << e.what(), 0)
     }
 }
 
@@ -398,7 +398,7 @@ DALStorage::getEmailList()
         }
         catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what())
+        LOG_ERROR("SQL query failure: " << e.what(), 0)
         }
 
     return emailList;
@@ -441,7 +441,7 @@ DALStorage::doesEmailAlreadyExists(std::string email)
         }
         catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what())
+        LOG_ERROR("SQL query failure: " << e.what(), 0)
         }
 
     return false;
@@ -485,7 +485,7 @@ DALStorage::doesCharacterNameExists(std::string name)
         }
         catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what())
+        LOG_ERROR("SQL query failure: " << e.what(), 0)
         }
 
     return false;

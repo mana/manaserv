@@ -41,11 +41,11 @@ void MapManager::loadMap(const std::string& mapFile)
     Map *map = MapReader::readMap("maps/" + mapFile);
     if (map == NULL)
     {
-        LOG_ERROR("Error: Unable to load map file (" << mapFile << ")");
+        LOG_ERROR("Error: Unable to load map file (" << mapFile << ")", 0);
     }
     else
     {
-        LOG_INFO("Loaded map " << maps.size() << " (" << mapFile << ")");
+        LOG_INFO("Loaded map " << maps.size() << " (" << mapFile << ")", 0);
         maps[mapFile] = map;
     }
 }
@@ -59,11 +59,11 @@ void MapManager::unloadMap(const std::string& mapFile)
     {
         delete i->second;
         maps.erase(i);
-        LOG_INFO("Unloaded map (" << mapFile << ")");
+        LOG_INFO("Unloaded map (" << mapFile << ")", 0);
     }
     else
     {
-        LOG_WARN("Unable to unload map (" << mapFile << ")");
+        LOG_WARN("Unable to unload map (" << mapFile << ")", 0);
     }
 }
 

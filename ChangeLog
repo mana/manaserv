@@ -1,6 +1,12 @@
 2005-12-20  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/Makefile.am: Adding the MapManager to files list.
+        * src/utils/logger.cpp, src/utils/logger.h, src/main.cpp,
+        src/configuration.cpp, src/connectionhandler.cpp,
+        src/mapmanager.cpp, src/mapreader.cpp, src/messagehandler.cpp,
+        src/skill.cpp, src/resourcemanager.cpp, src/dalstorage.cpp,
+        src/accounthandler.cpp: Adding command line argument parsing and
+        log verbosity level handling.
 
 2005-12-18  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

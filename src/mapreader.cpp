@@ -120,7 +120,7 @@ Map *MapReader::readMap(const std::string &filename)
 
     if (buffer == NULL)
     {
-        LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")");
+        LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")", 0);
         return NULL;
     }
 
@@ -133,22 +133,22 @@ Map *MapReader::readMap(const std::string &filename)
 
     if (ret == Z_MEM_ERROR)
     {
-        LOG_ERROR("Error: Out of memory while decompressing map data!");
+        LOG_ERROR("Error: Out of memory while decompressing map data!", 0);
         return NULL;
     }
     else if (ret == Z_VERSION_ERROR)
     {
-        LOG_ERROR("Error: Incompatible zlib version!");
+        LOG_ERROR("Error: Incompatible zlib version!", 0);
         return NULL;
     }
     else if (ret == Z_DATA_ERROR)
     {
-        LOG_ERROR("Error: Incorrect zlib compressed data!");
+        LOG_ERROR("Error: Incorrect zlib compressed data!", 0);
         return NULL;
     }
     else if (ret != Z_OK || inflated == NULL)
     {
-        LOG_ERROR("Error: Unknown error while decompressing map data!");
+        LOG_ERROR("Error: Unknown error while decompressing map data!", 0);
         return NULL;
     }
 
@@ -160,14 +160,14 @@ Map *MapReader::readMap(const std::string &filename)
         xmlNodePtr node = xmlDocGetRootElement(doc);
 
         if (!node || !xmlStrEqual(node->name, BAD_CAST "map")) {
-            LOG_ERROR("Error: Not a map file (" << filename << ")!");
+            LOG_ERROR("Error: Not a map file (" << filename << ")!", 0);
             return NULL;
         }
 
         return readMap(node, filename);
         xmlFreeDoc(doc);
     } else {
-        LOG_ERROR("Error while parsing map file (" << filename << ")!");
+        LOG_ERROR("Error while parsing map file (" << filename << ")!", 0);
     }
 
     return NULL;
@@ -251,7 +251,7 @@ void MapReader::readLayer(xmlNodePtr node, Map *map, int layer)
                 xmlFree(encoding);
 
                 if (compression) {
-                    LOG_WARN("Warning: no layer compression supported!");
+                    LOG_WARN("Warning: no layer compression supported!", 0);
                     xmlFree(compression);
                     return;
                 }
@@ -329,7 +329,7 @@ Tileset*
 MapReader::readTileset(xmlNodePtr node, const std::string &path, Map *map)
 {
     if (xmlHasProp(node, BAD_CAST "source")) {
-        LOG_WARN("Warning: External tilesets not supported yet.");
+        LOG_WARN("Warning: External tilesets not supported yet.", 0);
         return NULL;
     }
 

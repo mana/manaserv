@@ -37,7 +37,7 @@
 #include <dirent.h>
 #endif
 
-#define TMW_DATADIR ""
+#define TMWSERV_DATADIR ""
 
 ResourceManager *ResourceManager::instance = NULL;
 
@@ -73,7 +73,7 @@ ResourceManager::searchAndAddZipFiles()
 {
     // Add the main data directory to our PhysicsFS search path
     PHYSFS_addToSearchPath("data", 1);
-    PHYSFS_addToSearchPath(TMW_DATADIR "data", 1);
+    PHYSFS_addToSearchPath(TMWSERV_DATADIR "data", 1);
 
 #ifdef _WIN32
     // Define the path in which to search
@@ -93,7 +93,7 @@ ResourceManager::searchAndAddZipFiles()
         std::string filePath = std::string("data/") +
             std::string(findFileInfo.name);
 
-        LOG_INFO("Adding to PhysicsFS: " << findFileInfo.name);
+        LOG_INFO("Adding to PhysicsFS: " << findFileInfo.name, 0);
 
         // Add the zip file to our PhysicsFS search path
         PHYSFS_addToSearchPath(filePath.c_str(), 1);
@@ -129,7 +129,7 @@ ResourceManager::searchAndAddZipFiles()
             std::string filePath = std::string(programPath) +
                 std::string("/") + std::string(direntry->d_name);
 
-            LOG_INFO("Adding to PhysicsFS: " << filePath);
+            LOG_INFO("Adding to PhysicsFS: " << filePath, 0);
 
             // Add the zip file to our PhysicsFS search path
             PHYSFS_addToSearchPath(filePath.c_str(), 1);
@@ -145,7 +145,7 @@ ResourceManager::loadFile(const std::string &fileName, int &fileSize)
 {
     // If the file doesn't exist indicate failure
     if (!PHYSFS_exists(fileName.c_str())) {
-        LOG_WARN("Warning: " << fileName << " not found!");
+        LOG_WARN("Warning: " << fileName << " not found!", 0);
         return NULL;
     }
 
@@ -154,7 +154,7 @@ ResourceManager::loadFile(const std::string &fileName, int &fileSize)
 
     // If the handler is an invalid pointer indicate failure
     if (file == NULL) {
-        LOG_WARN("Warning: " << fileName << " failed to load!");
+        LOG_WARN("Warning: " << fileName << " failed to load!", 0);
         return NULL;
     }
 
@@ -180,7 +180,7 @@ ResourceManager::loadTextFile(const std::string &fileName)
 
     if (!fileContents)
     {
-        LOG_ERROR("Couldn't load text file: " << fileName);
+        LOG_ERROR("Couldn't load text file: " << fileName, 0);
         return lines;
     }
 

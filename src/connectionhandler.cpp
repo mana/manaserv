@@ -103,13 +103,13 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
     // Allocate a socket set
     SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
     if (!set) {
-        LOG_FATAL("SDLNet_AllocSocketSet: " << SDLNet_GetError())
+        LOG_FATAL("SDLNet_AllocSocketSet: " << SDLNet_GetError(), 0)
         exit(1);
     }
 
     // Add the server socket to the socket set
     if (SDLNet_TCP_AddSocket(set, ltd->socket) < 0) {
-        LOG_FATAL("SDLNet_AddSocket: " << SDLNet_GetError())
+        LOG_FATAL("SDLNet_AddSocket: " << SDLNet_GetError(), 0)
         exit(1);
     }
 
@@ -118,12 +118,12 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
         int numready = SDLNet_CheckSockets(set, 100);
 
         if (numready == -1) {
-            LOG_ERROR("SDLNet_CheckSockets: " << SDLNet_GetError())
+            LOG_ERROR("SDLNet_CheckSockets: " << SDLNet_GetError(), 0)
             // When this is a system error, perror may help us
             perror("SDLNet_CheckSockets");
         }
         else if (numready > 0) {
-            LOG_INFO(numready << " sockets with activity!")
+            LOG_INFO(numready << " sockets with activity!", 0)
 
             // Check server socket
             if (SDLNet_SocketReady(ltd->socket)) {
@@ -132,13 +132,13 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                 if (client) {
                     // Add the client socket to the socket set
                     if (SDLNet_TCP_AddSocket(set, client) < 0) {
-                        LOG_ERROR("SDLNet_AddSocket: " << SDLNet_GetError())
+                        LOG_ERROR("SDLNet_AddSocket: " << SDLNet_GetError(), 0)
                     }
                     else {
                         NetComputer *comp = new NetComputer(this, client);
                         clients.push_back(comp);
                         computerConnected(comp);
-                        LOG_INFO(clients.size() << " client(s) connected")
+                        LOG_INFO(clients.size() << " client(s) connected", 0)
                     }
                 }
             }
@@ -168,10 +168,7 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                         //buffer[result] = 0;
                         //LOG_INFO("Received: " << buffer << ", Length: "
                         //  << result);
-
-
-                        LOG_INFO("Received length: "
-                                << result);
+                        LOG_INFO("Received length: " << result, 2);
 
 #ifdef SCRIPT_SUPPORT
                         // This could be good if you wanted to extend the
@@ -207,11 +204,11 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                             else {
                                 // bad message (no registered handler)
                                 LOG_ERROR("Unhandled message (" << messageId
-                                          << ") received from " << ipaddr);
+                                          << ") received from " << ipaddr, 0);
                             }
                         }
                         else {
-                            LOG_ERROR("Message too short from " << ipaddr);
+                            LOG_ERROR("Message too short from " << ipaddr, 0);
                         }
                     }
                 }
@@ -234,12 +231,12 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
 
 void ConnectionHandler::computerConnected(NetComputer *comp)
 {
-    LOG_INFO("A client connected!")
+    LOG_INFO("A client connected!", 0)
 }
 
 void ConnectionHandler::computerDisconnected(NetComputer *comp)
 {
-    LOG_INFO("A client disconnected!")
+    LOG_INFO("A client disconnected!", 0)
 }
 
 void ConnectionHandler::registerHandler(

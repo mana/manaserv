@@ -21,6 +21,7 @@
  */
 
 #include <cstdlib>
+#include <getopt.h>
 #include <iostream>
 #include <physfs.h>
 #include <SDL.h>
@@ -95,7 +96,7 @@ Uint32 worldTick(Uint32 interval, void *param)
     event.type = TMW_WORLD_TICK;
 
     if (SDL_PushEvent(&event)) {
-        LOG_WARN("couldn't push world tick into event queue!")
+        LOG_WARN("couldn't push world tick into event queue!", 0)
     }
 
     return interval;
@@ -115,7 +116,7 @@ void initialize()
 
     // initialize SDL.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
-        LOG_FATAL("SDL_Init: " << SDL_GetError())
+        LOG_FATAL("SDL_Init: " << SDL_GetError(), 0)
         exit(1);
     }
 
@@ -124,7 +125,7 @@ void initialize()
 
     // initialize SDL_net.
     if (SDLNet_Init() == -1) {
-        LOG_FATAL("SDLNet_Init: " << SDLNet_GetError())
+        LOG_FATAL("SDLNet_Init: " << SDLNet_GetError(), 0)
         exit(2);
     }
 
@@ -133,7 +134,7 @@ void initialize()
 
     // initialize scripting subsystem.
 #ifdef RUBY_SUPPORT
-    LOG_INFO("Script Language: " << scriptLanguage)
+    LOG_INFO("Script Language: " << scriptLanguage, 0)
 
     // initialize ruby
     ruby_init();
@@ -147,17 +148,17 @@ void initialize()
     rb_load_file("scripts/init.rb");
     rubyStatus = ruby_exec();
 #else
-    LOG_WARN("No Scripting Language Support.")
+    LOG_WARN("No Scripting Language Support.", 0)
 #endif
 
 #if defined (MYSQL_SUPPORT)
-    LOG_INFO("Using MySQL DB Backend.")
+    LOG_INFO("Using MySQL DB Backend.", 0)
 #elif defined (POSTGRESQL_SUPPORT)
-    LOG_INFO("Using PostGreSQL DB Backend.")
+    LOG_INFO("Using PostGreSQL DB Backend.", 0)
 #elif defined (SQLITE_SUPPORT)
-    LOG_INFO("Using SQLite DB Backend.")
+    LOG_INFO("Using SQLite DB Backend.", 0)
 #else
-    LOG_WARN("No Database Backend Support.")
+    LOG_WARN("No Database Backend Support.", 0)
 #endif
 
     // initialize configuration
@@ -173,12 +174,12 @@ void initialize()
 #endif
     configPath += "/.tmwserv.xml";
     config.init(configPath);
-    LOG_INFO("Using Config File: " << configPath)
-    LOG_INFO("Using Log File: " << LOG_FILE)
-    
+    LOG_INFO("Using Config File: " << configPath, 0)
+    LOG_INFO("Using Log File: " << LOG_FILE, 0)
+
     // Initialize PhysicsFS
     PHYSFS_init("");
-    
+
     // TODO: only a test, maps should be loaded as they are needed
     tmwserv::MapManager::instance().loadMap("tulimshar.tmx.gz");
     tmwserv::MapManager::instance().reloadMap("tulimshar.tmx.gz");
@@ -213,8 +214,57 @@ void deinitialize()
 
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();
-    
+
     PHYSFS_deinit();
+}
+
+
+/**
+ * Show command line arguments
+ */
+void printHelp()
+{
+    std::cout << "tmwserv" << std::endl << std::endl;
+    std::cout << "Options: " << std::endl;
+    std::cout << "  -h --help        : Display this help" << std::endl;
+    std::cout << "     --verbosity n : Set the verbosity level" << std::endl;
+    exit(0);
+}
+
+/**
+ * Parse the command line arguments
+ */
+void parseOptions(int argc, char *argv[])
+{
+    const char *optstring = "h";
+
+    const struct option long_options[] = {
+        { "help",       no_argument, 0, 'h' },
+        { "verbosity",  required_argument, 0, 'v' },
+        0
+    };
+
+    while (optind < argc) {
+        int result = getopt_long(argc, argv, optstring, long_options, NULL);
+
+        if (result == -1) {
+            break;
+        }
+
+        switch (result) {
+            default: // Unknown option
+            case 'h':
+                // Print help
+                printHelp();
+                break;
+            case 'v':
+                // Set Verbosity to level
+                unsigned short verbosityLevel = atoi(optarg);
+                tmwserv::utils::Logger::instance().setVerbosity(verbosityLevel);
+                LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel, 0)
+                break;
+        }
+    }
 }
 
 
@@ -224,8 +274,14 @@ void deinitialize()
 int main(int argc, char *argv[])
 {
 #ifdef __USE_UNIX98
-    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION)
+    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0)
 #endif
+    // General Initialization
+    initialize();
+
+    // Parse Command Line Options
+    parseOptions(argc, argv);
+
     // Ready for server work...
     std::auto_ptr<NetSession> session(new NetSession());
 
@@ -257,10 +313,8 @@ int main(int argc, char *argv[])
     connectionHandler.registerHandler(CMSG_REQ_TRADE, gameHandler);
     connectionHandler.registerHandler(CMSG_EQUIP, gameHandler);
 
-    initialize();
-
     session->startListen(&connectionHandler, SERVER_PORT);
-    LOG_INFO("Listening on port " << SERVER_PORT << "...")
+    LOG_INFO("Listening on port " << SERVER_PORT << "...", 0)
 
     using namespace tmwserv;
 
@@ -286,7 +340,7 @@ int main(int argc, char *argv[])
 
                 // Print world time at 10 second intervals to show we're alive
                 if (worldTime % 100 == 0) {
-                    LOG_INFO("World time: " << worldTime);
+                    LOG_INFO("World time: " << worldTime, 0);
                 }
 
                 // - Handle all messages that are in the message queue
@@ -303,7 +357,7 @@ int main(int argc, char *argv[])
         SDL_Delay(100);
     }
 
-    LOG_INFO("Received: Quit signal, closing down...")
+    LOG_INFO("Received: Quit signal, closing down...", 0)
     session->stopListen(SERVER_PORT);
 
     deinitialize();

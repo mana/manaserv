@@ -59,9 +59,9 @@ bool Skill::addSkill(const std::string &ident, Skill *skill) {
 bool Skill::useSkill() {
 #ifdef SCRIPT_SUPPORT
     //run skill script
-    LOG_ERROR("Skill: Skills not implemented.")
+    LOG_ERROR("Skill: Skills not implemented.", 0)
 #else
-    LOG_ERROR("Skill: Could not use skill; scripting disabled.")
+    LOG_ERROR("Skill: Could not use skill; scripting disabled.", 0)
 #endif
     return true;
 }
@@ -74,7 +74,7 @@ bool Skill::setScript(const std::string &scriptName)
 bool Skill::deleteSkill(const std::string &ident, bool delTree) {
     //prevent deletion of self
     if (ident == id) {
-        LOG_ERROR("Skill: Attempt to delete self.")
+        LOG_ERROR("Skill: Attempt to delete self.", 0)
 	return false;
     }
 

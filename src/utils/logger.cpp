@@ -44,7 +44,8 @@ namespace utils
 Logger::Logger(void)
     throw()
         : mHasTimestamp(true),
-          mTeeMode(false)
+          mTeeMode(false),
+          mVerbosity(0)
 {
     // NOOP
 }
@@ -116,17 +117,20 @@ Logger::setTeeMode(bool flag)
  * Log a generic message.
  */
 void
-Logger::log(const std::string& msg)
+Logger::log(const std::string& msg, unsigned short atVerbosity)
 {
-    if (mTeeMode) {
-        log(std::cout, msg);
+    if ( mVerbosity >= atVerbosity )
+    {
+        if (mTeeMode) {
+            log(std::cout, msg);
 
-        if (mLogFile.is_open()) {
-            log(mLogFile, msg);
+            if (mLogFile.is_open()) {
+                log(mLogFile, msg);
+            }
         }
-    }
-    else {
-        log((mLogFile.is_open() ? mLogFile : std::cout), msg);
+        else {
+            log((mLogFile.is_open() ? mLogFile : std::cout), msg);
+        }
     }
 }
 
@@ -135,17 +139,20 @@ Logger::log(const std::string& msg)
  * Log a debug message.
  */
 void
-Logger::debug(const std::string& msg)
+Logger::debug(const std::string& msg, unsigned short atVerbosity)
 {
-    if (mTeeMode) {
-        log(std::cout, msg, "[DBG]");
+    if ( mVerbosity >= atVerbosity )
+    {
+        if (mTeeMode) {
+            log(std::cout, msg, "[DBG]");
 
-        if (mLogFile.is_open()) {
-            log(mLogFile, msg, "[DBG]");
+            if (mLogFile.is_open()) {
+                log(mLogFile, msg, "[DBG]");
+            }
         }
-    }
-    else {
-        log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[DBG]");
+        else {
+            log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[DBG]");
+        }
     }
 }
 
@@ -154,17 +161,20 @@ Logger::debug(const std::string& msg)
  * Log an info message.
  */
 void
-Logger::info(const std::string& msg)
+Logger::info(const std::string& msg, unsigned short atVerbosity)
 {
-    if (mTeeMode) {
-        log(std::cout, msg, "[INF]");
+    if ( mVerbosity >= atVerbosity )
+    {
+        if (mTeeMode) {
+            log(std::cout, msg, "[INF]");
 
-        if (mLogFile.is_open()) {
-            log(mLogFile, msg, "[INF]");
+            if (mLogFile.is_open()) {
+                log(mLogFile, msg, "[INF]");
+            }
         }
-    }
-    else {
-        log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[INF]");
+        else {
+            log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[INF]");
+        }
     }
 }
 
@@ -173,17 +183,20 @@ Logger::info(const std::string& msg)
  * Log a warn message.
  */
 void
-Logger::warn(const std::string& msg)
+Logger::warn(const std::string& msg, unsigned short atVerbosity)
 {
-    if (mTeeMode) {
-        log(std::cerr, msg, "[WRN]");
+    if ( mVerbosity >= atVerbosity )
+    {
+        if (mTeeMode) {
+            log(std::cerr, msg, "[WRN]");
 
-        if (mLogFile.is_open()) {
-            log(mLogFile, msg, "[WRN]");
+            if (mLogFile.is_open()) {
+                log(mLogFile, msg, "[WRN]");
+            }
         }
-    }
-    else {
-        log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[WRN]");
+        else {
+            log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[WRN]");
+        }
     }
 }
 
@@ -192,17 +205,20 @@ Logger::warn(const std::string& msg)
  * Log an error message.
  */
 void
-Logger::error(const std::string& msg)
+Logger::error(const std::string& msg, unsigned short atVerbosity)
 {
-    if (mTeeMode) {
-        log(std::cerr, msg, "[ERR]");
+    if ( mVerbosity >= atVerbosity )
+    {
+        if (mTeeMode) {
+            log(std::cerr, msg, "[ERR]");
 
-        if (mLogFile.is_open()) {
-            log(mLogFile, msg, "[ERR]");
+            if (mLogFile.is_open()) {
+                log(mLogFile, msg, "[ERR]");
+            }
         }
-    }
-    else {
-        log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[ERR]");
+        else {
+            log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[ERR]");
+        }
     }
 }
 
@@ -211,7 +227,7 @@ Logger::error(const std::string& msg)
  * Log a fatal error message.
  */
 void
-Logger::fatal(const std::string& msg)
+Logger::fatal(const std::string& msg, unsigned short atVerbosity)
 {
     if (mTeeMode) {
         log(std::cerr, msg, "[FTL]");
@@ -223,7 +239,6 @@ Logger::fatal(const std::string& msg)
     else {
         log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[FTL]");
     }
-
 #ifdef WIN32
     MessageBox(NULL, msg.c_str(), "Fatal error", MB_ICONERROR | MB_OK);
 #endif

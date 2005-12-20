@@ -27,7 +27,7 @@
 #include "account.h"
 #include "messageout.h"
 #include "configuration.h"
-#include <iostream>
+#include "utils/logger.h"
 #include <cctype>
 
 using tmwserv::Account;
@@ -61,12 +61,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 std::string username = message.readString();
                 std::string password = message.readString();
-                std::cout << username << " is trying to login." << std::endl;
+                LOG_INFO(username << " is trying to login.", 1)
 
                 if (computer.getAccount().get() != NULL) {
-                    std::cout << "Already logged in as " << computer.getAccount()->getName()
-                        << "." << std::endl;
-                    std::cout << "Please logout first." << std::endl;
+                    LOG_INFO("Already logged in as " << computer.getAccount()->getName()
+                        << ".", 1)
+                    LOG_INFO("Please logout first.", 1)
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeShort(LOGIN_ALREADY_LOGGED);
                     break;
@@ -77,18 +77,18 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 if (!acc.get()) {
                     // account doesn't exist -- send error to client
-                    std::cout << username << ": Account does not exist." << std::endl;
+                    LOG_INFO(username << ": Account does not exist.", 1)
 
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_USERNAME);
                 } else if (acc->getPassword() != password) {
                     // bad password -- send error to client
-                    std::cout << "Bad password for " << username << std::endl;
+                    LOG_INFO("Bad password for " << username, 1)
 
                     result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_PASSWORD);
                 } else {
-                    std::cout << "Login OK by " << username << std::endl;
+                    LOG_INFO("Login OK by " << username, 1)
 
                     // Associate account with connection
                     computer.setAccount(acc);
@@ -99,15 +99,16 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     tmwserv::Beings &chars = computer.getAccount()->getCharacters();
                     result.writeByte(chars.size());
 
-                    std::cout << username << "'s account has " << chars.size() << " character(s)." << std::endl;
-
+                    LOG_INFO(username << "'s account has " << chars.size() << " character(s).", 1)
+                    std::string charNames = "";
                     for (unsigned int i = 0; i < chars.size(); i++)
                     {
                         result.writeString(chars[i]->getName());
-                        if (i >0) std::cout << ", ";
-                        std::cout << chars[i]->getName();
+                        if (i >0) charNames += ", ";
+                        charNames += chars[i]->getName();
                     }
-                    std::cout << "." << std::endl;
+                    charNames += ".";
+                    LOG_INFO(charNames.c_str(), 1)
                 }
             }
             break;
@@ -116,7 +117,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 if ( computer.getAccount().get() == NULL )
                 {
-                    std::cout << "Can't logout. Not even logged in." << std::endl;
+                    LOG_INFO("Can't logout. Not even logged in.", 1)
                     result.writeShort(SMSG_LOGOUT_ERROR);
                     result.writeByte(LOGOUT_UNSUCCESSFULL);
                 }
@@ -125,7 +126,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     std::string username = computer.getAccount()->getName();
                     if ( username == "" )
                     {
-                        std::cout << "Account without name ? Logged out anyway..." << std::endl;
+                        LOG_INFO("Account without name ? Logged out anyway...", 1)
                         // computer.unsetCharacter(); Done by unsetAccount();
                         computer.unsetAccount();
                         result.writeShort(SMSG_LOGOUT_ERROR);
@@ -133,7 +134,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     }
                     else
                     {
-                        std::cout << computer.getAccount()->getName() << " logs out." << std::endl;
+                        LOG_INFO(computer.getAccount()->getName() << " logs out.", 1)
                         // computer.unsetCharacter(); Done by unsetAccount();
                         computer.unsetAccount();
                         result.writeShort(SMSG_LOGOUT_CONFIRM);
@@ -150,7 +151,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string email = message.readString();
 
                 // checking conditions for having a good account.
-                std::cout << username << " is trying to register." << std::endl;
+                LOG_INFO(username << " is trying to register.", 1)
 
                 bool emailValid = false;
                 // Testing Email validity
@@ -158,14 +159,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_EMAIL);
-                    std::cout << email << ": Email too short or too long." << std::endl;
+                    LOG_INFO(email << ": Email too short or too long.", 1)
                     break;
                 }
                 if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_EXISTS_EMAIL);
-                    std::cout << email << ": Email already exists." << std::endl;
+                    LOG_INFO(email << ": Email already exists.", 1)
                     break;
                 }
                 if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
@@ -186,25 +187,25 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_EXISTS_USERNAME);
-                    std::cout << username << ": Username already exists." << std::endl;
+                    LOG_INFO(username << ": Username already exists.", 1)
                 }
                 else if ((username.length() < MIN_LOGIN_LENGTH) || (username.length() > MAX_LOGIN_LENGTH)) // Username length
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_USERNAME);
-                    std::cout << username << ": Username too short or too long." << std::endl;
+                    LOG_INFO(username << ": Username too short or too long.", 1)
                 }
                 else if ((password.length() < MIN_PASSWORD_LENGTH) || (password.length() > MAX_PASSWORD_LENGTH))
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_PASSWORD);
-                    std::cout << email << ": Password too short or too long." << std::endl;
+                    LOG_INFO(email << ": Password too short or too long.", 1)
                 }
                 else if (!emailValid)
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_EMAIL);
-                    std::cout << email << ": Email Invalid, only a@b.c format is accepted." << std::endl;
+                    LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1)
                 }
                 else
                 {
@@ -215,7 +216,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(REGISTER_OK);
 
                     store.flush(); // flush changes
-                    std::cout << username << ": Account registered." << std::endl;
+                    LOG_INFO(username << ": Account registered.", 1)
                 }
             }
             break;
@@ -224,20 +225,20 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 std::string username = message.readString();
                 std::string password = message.readString();
-                std::cout << username << " wants to be deleted from our accounts." << std::endl;
+                LOG_INFO(username << " wants to be deleted from our accounts.", 1)
 
                 // see if the account exists
                 Account *acc = store.getAccount(username);
 
                 if (!acc) {
                     // account doesn't exist -- send error to client
-                    std::cout << username << ": Account doesn't exist anyway." << std::endl;
+                    LOG_INFO(username << ": Account doesn't exist anyway.", 1)
 
                     result.writeShort(SMSG_UNREGISTER_RESPONSE);
                     result.writeByte(UNREGISTER_INVALID_USERNAME);
                 } else if (acc->getPassword() != password) {
                     // bad password -- send error to client
-                    std::cout << "Won't delete it : Bad password for " << username << "." << std::endl;
+                    LOG_INFO("Won't delete it : Bad password for " << username << ".", 1)
 
                     result.writeShort(SMSG_UNREGISTER_RESPONSE);
                     result.writeByte(UNREGISTER_INVALID_PASSWORD);
@@ -254,7 +255,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                         }
                     }
                     // delete account and associated characters
-                    std::cout << "Farewell " << username << " ..." << std::endl;
+                    LOG_INFO("Farewell " << username << " ...", 1)
                     store.delAccount(username);
                     store.flush();
                     result.writeShort(SMSG_UNREGISTER_RESPONSE);
@@ -268,7 +269,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if (computer.getAccount().get() == NULL) {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_NOLOGIN);
-                    std::cout << "Not logged in. Can't create a Character." << std::endl;
+                    LOG_INFO("Not logged in. Can't create a Character.", 1)
                     break;
                 }
 
@@ -278,7 +279,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_TOO_MUCH_CHARACTERS);
-                    std::cout << "Already has " << MAX_OF_CHARACTERS << " characters. Can't create another Character." << std::endl;
+                    LOG_INFO("Already has " << MAX_OF_CHARACTERS
+                    << " characters. Can't create another Character.", 1)
                     break;
                 }
 
@@ -288,7 +290,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_EXISTS_NAME);
-                    std::cout << name << ": Character's name already exists." << std::endl;
+                    LOG_INFO(name << ": Character's name already exists.", 1)
                     break;
                 }
                 // Check for character's name length
@@ -296,7 +298,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_INVALID_NAME);
-                    std::cout << name << ": Character's name too short or too long." << std::endl;
+                    LOG_INFO(name << ": Character's name too short or too long.", 1)
                     break;
                 }
                 //char hairStyle = message.readByte();
@@ -308,8 +310,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, sex, 1, 0, stats));
                 computer.getAccount()->addCharacter(newCharacter);
 
-                std::cout << "Character " << name << " was created for " 
-                    << computer.getAccount()->getName() << "'s account." << std::endl;
+                LOG_INFO("Character " << name << " was created for " 
+                    << computer.getAccount()->getName() << "'s account.", 1)
 
                 store.flush(); // flush changes
                 result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
@@ -323,7 +325,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
                     result.writeByte(SELECT_NOLOGIN);
-                    std::cout << "Not logged in. Can't select a Character." << std::endl;
+                    LOG_INFO("Not logged in. Can't select a Character.", 1)
                     break; // not logged in
                 }
 
@@ -334,14 +336,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if ( chars.size() == 0 )
                 {
                     result.writeByte(SELECT_NOT_YET_CHARACTERS);
-                    std::cout << "Character Selection : Yet no characters created." << std::endl;
+                    LOG_INFO("Character Selection : Yet no characters created.", 1)
                     break;
                 }
                 // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
                     result.writeByte(SELECT_INVALID);
-                    std::cout << "Character Selection : Selection out of ID range." << std::endl;
+                    LOG_INFO("Character Selection : Selection out of ID range.", 1)
                     break;
                 }
 
@@ -349,9 +351,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 computer.setCharacter(chars[charNum]);
 
                 result.writeByte(SELECT_OK);
-                std::cout << "Selected Character " << int(charNum)
+                LOG_INFO("Selected Character " << int(charNum)
                 << " : " <<
-                computer.getCharacter()->getName() << std::endl;
+                computer.getCharacter()->getName(), 1)
             }
             break;
 
@@ -361,7 +363,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_CHAR_DELETE_RESPONSE);
                     result.writeByte(DELETE_NOLOGIN);
-                    std::cout << "Not logged in. Can't delete a Character." << std::endl;
+                    LOG_INFO("Not logged in. Can't delete a Character.", 1)
                     break; // not logged in
                 }
 
@@ -372,14 +374,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if ( chars.size() == 0 )
                 {
                     result.writeByte(DELETE_NO_MORE_CHARACTERS);
-                    std::cout << "Character Deletion : No characters in this account." << std::endl;
+                    LOG_INFO("Character Deletion : No characters in " << computer.getAccount()->getName()
+                             << "'s account.", 1)
                     break;
                 }
                 // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
                     result.writeByte(DELETE_INVALID_NAME);
-                    std::cout << "Character Deletion : Selection out of ID range." << std::endl;
+                    LOG_INFO("Character Deletion : Selection out of ID range.", 1)
                     break;
                 }
 
@@ -397,7 +400,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string deletedCharacter = chars[charNum].get()->getName();
                 computer.getAccount()->delCharacter(deletedCharacter);
                 store.flush();
-                std::cout << deletedCharacter << ": Character deleted..." << std::endl;
+                LOG_INFO(deletedCharacter << ": Character deleted...", 1)
                 result.writeByte(DELETE_OK);
 
             }
@@ -409,7 +412,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeShort(SMSG_CHAR_LIST_RESPONSE);
                     result.writeByte(CHAR_LIST_NOLOGIN);
-                    std::cout << "Not logged in. Can't list characters." << std::endl;
+                    LOG_INFO("Not logged in. Can't list characters.", 1)
                     break; // not logged in
                 }
 
@@ -419,14 +422,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
                 result.writeByte(chars.size());
 
-                std::cout << computer.getAccount()->getName() << "'s account has "
-                << chars.size() << " character(s)." << std::endl;
-
+                LOG_INFO(computer.getAccount()->getName() << "'s account has "
+                << chars.size() << " character(s).", 1)
+                std::string charStats = "";
                 for (unsigned int i = 0; i < chars.size(); i++)
                 {
                     result.writeString(chars[i]->getName());
-                    if (i >0) std::cout << ", ";
-                    std::cout << chars[i]->getName();
+                    if (i >0) charStats += ", ";
+                    charStats += chars[i]->getName();
                     result.writeByte(unsigned(short(chars[i]->getGender())));
                     result.writeByte(chars[i]->getLevel());
                     result.writeByte(chars[i]->getMoney());
@@ -437,12 +440,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(chars[i]->getDexterity());
                     result.writeByte(chars[i]->getLuck());
                 }
-                std::cout << "." << std::endl;
+                charStats += ".";
+                LOG_INFO(charStats.c_str(), 1)
             }
             break;
 
         default:
-            std::cout << "Invalid message type" << std::endl;
+            LOG_WARN("Invalid message type", 0)
             result.writeShort(SMSG_LOGIN_ERROR);
             result.writeByte(LOGIN_UNKNOWN);
             break;
