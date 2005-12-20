@@ -23,6 +23,8 @@ tmwserv_SOURCES = main.cpp \
 				  items.cpp \
 				  map.cpp \
 				  map.h \
+				  mapmanager.h \
+				  mapmanager.cpp \
 				  mapreader.cpp \
 				  mapreader.h \
 				  messagehandler.h \

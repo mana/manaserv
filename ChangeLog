@@ -1,8 +1,12 @@
-2005-12-18	Eugenio Favalli	<elvenprogrammer@gmail.com>
+2005-12-20  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/Makefile.am: Adding the MapManager to files list.
+
+2005-12-18  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
         * src/main.cpp, src/mapreader.cpp, tmwserv.dev,
-		src/mapmanager.cpp, src/mapmanager.h: Added a map manager to
-		load/unload/relod maps.
+        src/mapmanager.cpp, src/mapmanager.h: Added a map manager to
+        load/unload/relod maps.
 
 2005-12-18  Yohann Ferreira  <bertram@cegetel.net>
 
