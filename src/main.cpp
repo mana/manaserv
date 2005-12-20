@@ -228,6 +228,7 @@ void printHelp()
     std::cout << "Options: " << std::endl;
     std::cout << "  -h --help        : Display this help" << std::endl;
     std::cout << "     --verbosity n : Set the verbosity level" << std::endl;
+    deinitialize();
     exit(0);
 }
 
