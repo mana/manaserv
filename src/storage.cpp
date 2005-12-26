@@ -71,11 +71,6 @@ Storage::instance(const std::string& name)
         mName = name;
     }
 
-    // check that the instance has been created.
-    if (mInstance == 0) {
-        throw std::bad_alloc();
-    }
-
     return (*mInstance);
 }
 

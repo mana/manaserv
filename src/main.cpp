@@ -80,9 +80,15 @@ bool running = true;      /**< Determines if server keeps running */
 Skill skillTree("base");  /**< Skill tree */
 
 Configuration config;     /**< XML config reader */
-AccountHandler *accountHandler = new AccountHandler(); /**< Account message handler */
-ChatHandler *chatHandler = new ChatHandler(); /**< Communications (chat) messaqge handler */
-GameHandler *gameHandler = new GameHandler(); /**< Core game message handler */
+
+/** Account message handler */
+AccountHandler *accountHandler = new AccountHandler();
+
+/** Communications (chat) message handler */
+ChatHandler *chatHandler = new ChatHandler();
+
+/** Core game message handler */
+GameHandler *gameHandler = new GameHandler();
 
 ConnectionHandler connectionHandler; /**< Primary connection handler */
 
