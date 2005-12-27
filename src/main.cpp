@@ -90,7 +90,8 @@ ChatHandler *chatHandler = new ChatHandler();
 /** Core game message handler */
 GameHandler *gameHandler = new GameHandler();
 
-ConnectionHandler connectionHandler; /**< Primary connection handler */
+/** Primary connection handler */
+ConnectionHandler *connectionHandler = new ConnectionHandler();
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -217,6 +218,7 @@ void deinitialize()
     delete accountHandler;
     delete chatHandler;
     delete gameHandler;
+    delete connectionHandler;
 
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();
@@ -298,29 +300,29 @@ int main(int argc, char *argv[])
     //
 
     // Register message handlers
-    connectionHandler.registerHandler(CMSG_LOGIN, accountHandler);
-    connectionHandler.registerHandler(CMSG_LOGOUT, accountHandler);
-    connectionHandler.registerHandler(CMSG_REGISTER, accountHandler);
-    connectionHandler.registerHandler(CMSG_UNREGISTER, accountHandler);
-    connectionHandler.registerHandler(CMSG_CHAR_CREATE, accountHandler);
-    connectionHandler.registerHandler(CMSG_CHAR_SELECT, accountHandler);
-    connectionHandler.registerHandler(CMSG_CHAR_DELETE, accountHandler);
-    connectionHandler.registerHandler(CMSG_CHAR_LIST, accountHandler);
+    connectionHandler->registerHandler(CMSG_LOGIN, accountHandler);
+    connectionHandler->registerHandler(CMSG_LOGOUT, accountHandler);
+    connectionHandler->registerHandler(CMSG_REGISTER, accountHandler);
+    connectionHandler->registerHandler(CMSG_UNREGISTER, accountHandler);
+    connectionHandler->registerHandler(CMSG_CHAR_CREATE, accountHandler);
+    connectionHandler->registerHandler(CMSG_CHAR_SELECT, accountHandler);
+    connectionHandler->registerHandler(CMSG_CHAR_DELETE, accountHandler);
+    connectionHandler->registerHandler(CMSG_CHAR_LIST, accountHandler);
 
-    connectionHandler.registerHandler(CMSG_SAY, chatHandler);
-    connectionHandler.registerHandler(CMSG_ANNOUNCE, chatHandler);
+    connectionHandler->registerHandler(CMSG_SAY, chatHandler);
+    connectionHandler->registerHandler(CMSG_ANNOUNCE, chatHandler);
 
-    connectionHandler.registerHandler(CMSG_PICKUP, gameHandler);
-    connectionHandler.registerHandler(CMSG_USE_OBJECT, gameHandler);
-    connectionHandler.registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
-    connectionHandler.registerHandler(CMSG_TARGET, gameHandler);
-    connectionHandler.registerHandler(CMSG_WALK, gameHandler);
-    connectionHandler.registerHandler(CMSG_START_TRADE, gameHandler);
-    connectionHandler.registerHandler(CMSG_START_TALK, gameHandler);
-    connectionHandler.registerHandler(CMSG_REQ_TRADE, gameHandler);
-    connectionHandler.registerHandler(CMSG_EQUIP, gameHandler);
+    connectionHandler->registerHandler(CMSG_PICKUP, gameHandler);
+    connectionHandler->registerHandler(CMSG_USE_OBJECT, gameHandler);
+    connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
+    connectionHandler->registerHandler(CMSG_TARGET, gameHandler);
+    connectionHandler->registerHandler(CMSG_WALK, gameHandler);
+    connectionHandler->registerHandler(CMSG_START_TRADE, gameHandler);
+    connectionHandler->registerHandler(CMSG_START_TALK, gameHandler);
+    connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
+    connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
-    session->startListen(&connectionHandler, SERVER_PORT);
+    session->startListen(connectionHandler, SERVER_PORT);
     LOG_INFO("Listening on port " << SERVER_PORT << "...", 0)
 
     using namespace tmwserv;
@@ -352,7 +354,7 @@ int main(int argc, char *argv[])
 
                 // - Handle all messages that are in the message queue
                 // - Update all active objects/beings
-                state.update(connectionHandler);
+                state.update(*connectionHandler);
             }
             else if (event.type == SDL_QUIT) {
                 running = false;

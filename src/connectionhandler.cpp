@@ -21,7 +21,6 @@
  */
 
 
-#include <iostream>
 #include <vector>
 #include <sstream>
 #include <SDL_net.h>
@@ -256,3 +255,45 @@ void ConnectionHandler::sendTo(tmwserv::BeingPtr beingPtr, MessageOut &msg)
         }
     }
 }
+
+void ConnectionHandler::sendTo(std::string name, MessageOut &msg)
+{
+    for (NetComputers::iterator i = clients.begin();
+         i != clients.end();
+         i++) {
+        if ((*i)->getCharacter().get()->getName() == name) {
+            (*i)->send(msg.getPacket());
+            break;
+        }
+    }
+}
+
+void ConnectionHandler::sendToEveryone(MessageOut &msg)
+{
+    for (NetComputers::iterator i = clients.begin();
+         i != clients.end();
+         i++)
+    {
+            (*i)->send(msg.getPacket());
+            break;
+    }
+}
+
+void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
+{
+    for (NetComputers::iterator i = clients.begin();
+         i != clients.end();
+         i++) {
+        // See if the other being is near enough, then send the message
+        if (abs((*i)->getCharacter().get()->getX() - beingPtr.get()->getX()) <= AROUND_AREA_IN_TILES )
+        {
+            if (abs((*i)->getCharacter().get()->getY() - beingPtr.get()->getY()) <= AROUND_AREA_IN_TILES )
+            {
+            (*i)->send(msg.getPacket());
+            break;
+            }
+        }
+    }
+}
+
+

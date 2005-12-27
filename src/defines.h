@@ -76,7 +76,14 @@ enum {
 /**
  * Points to give to a brand new character
  */
-    POINTS_TO_DISTRIBUTES_AT_LVL1 = 60
+    POINTS_TO_DISTRIBUTES_AT_LVL1 = 60,
+
+    // Screen Related
+/**
+ * Determine the area in which a character
+ * can hear another one speak
+ */
+    AROUND_AREA_IN_TILES = 10
 };
 
 /**
@@ -217,6 +224,13 @@ enum {
 enum {
     CHAR_LIST_OK = 0,
     CHAR_LIST_NOLOGIN
+};
+
+// Chat errors return values
+enum {
+    // CHAT_OK = 0,
+    CHAT_NOLOGIN = 1,
+    CHAT_NO_CHARACTER_SELECTED
 };
 
 // Object type enumeration

@@ -104,14 +104,31 @@ class ConnectionHandler
         void registerHandler(unsigned int msgId, MessageHandler *handler);
 
         /**
-         * Send packet to client with matching Being*
+         * Send packet to client with matching BeingPtr
          */
         void sendTo(tmwserv::BeingPtr, MessageOut &);
+
+        /**
+         * Send packet to client with matching Being name
+         */
+        void sendTo(std::string name, MessageOut &);
+
+        /**
+         * Send packet to every client, used for announcements.
+         */
+        void sendToEveryone(MessageOut &);
+
+        /**
+         * Send packet to every client around the client on screen.
+         */
+        void sendAround(tmwserv::BeingPtr, MessageOut &);
 
     private:
         std::map<unsigned int, MessageHandler*> handlers;
 
         NetComputers clients;
 };
+
+extern ConnectionHandler *connectionHandler;
 
 #endif

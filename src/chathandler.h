@@ -38,6 +38,40 @@ class ChatHandler : public MessageHandler
      * Receives chat related messages.
      */
     void receiveMessage(NetComputer &computer, MessageIn &message);
+
+ private:
+    /**
+     * Deals with command messages
+     */
+    void handleCommand(NetComputer &computer, std::string command);
+
+    /**
+    * Tells the player to be more polite.
+    */
+    void warnPlayerAboutBadWords(NetComputer &computer);
+
+    /**
+    * Announce a message to every being in the default channel.
+    */
+    void announce(NetComputer &computer, std::string text);
+
+    /**
+    * Display a message to every player around one's player
+    * in the default channel.
+    * The tile area has been set to 10 for now.
+    */
+    void sayAround(NetComputer &computer, std::string text);
+
+    /**
+    * Say something private to a player.
+    */
+    void sayToPlayer(NetComputer &computer, std::string playerName, std::string text);
+
+    /**
+    * Say something in a specific channel.
+    */
+    void sayInChannel(NetComputer &computer, short channel, std::string text);
+
 };
 
 #endif

@@ -28,7 +28,7 @@
 #include "messageout.h"
 #include "configuration.h"
 #include "utils/logger.h"
-#include <cctype>
+#include "utils/slangsfilter.h"
 
 using tmwserv::Account;
 using tmwserv::AccountPtr;
@@ -150,7 +150,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string password = message.readString();
                 std::string email = message.readString();
 
-                // checking conditions for having a good account.
+                // Checking if the Name is slang's free.
+                if (!tmwserv::utils::filterContent(username))
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_INVALID_USERNAME);
+                    LOG_INFO(username << ": has got bad words in it.", 1)
+                    break;
+                }
+                // Checking conditions for having a good account.
                 LOG_INFO(username << " is trying to register.", 1)
 
                 bool emailValid = false;

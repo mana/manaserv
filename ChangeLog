@@ -1,4 +1,15 @@
-2005-12-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2005-12-27  Yohann Ferreira  <bertram@cegetel.net>
+
+        * src/chathandler.h, src/chathandler.cpp, src/defines.h,
+        src/utils/slangsfilter.h, src/utils/slangsfilter.cpp,
+        src/Makefile.am, src/main.cpp, src/accounthandler.cpp,
+        src/connectionhandler.h, src/connectionhandler.cpp: Implemented
+        common chat handling, except for chatting in channels. Also the
+        Channel registering/unregistering isn't there yet and the commands
+        needs to be implemented. Added a small slangs filter to reduce bad
+        words in account names and in conversations a little.
+
+2005-12-26  Bjorn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/storage.cpp: Removed manual throwing of std::bad_alloc, which
 	should happen by default unless new(nothrow) is used. Suggested by
