@@ -104,7 +104,7 @@ class DALStorage: public Storage
          * @return true if Email is already in database
          */
         bool
-        doesEmailAlreadyExists(std::string email);
+        doesEmailAlreadyExists(const std::string &email);
 
         /**
          * Tells if the character's name already exists

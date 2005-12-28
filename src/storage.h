@@ -283,6 +283,10 @@ class Storage
         /**
          * Get the list of Emails in the accounts list.
          * @return the list of Email's Addresses.
+         *
+         * @deprecated The only purpose of using this list inside the server is
+         *             for checking for existing email addresses, which is
+         *             covered by Storage::doesEmailAlreadyExists().
          */
         virtual
         std::list<std::string> getEmailList() = 0;
@@ -291,8 +295,8 @@ class Storage
          * Return if an Email is already in account's table.
          * @return true if Email already exists.
          */
-        virtual
-        bool doesEmailAlreadyExists(std::string email) = 0;
+        virtual bool
+        doesEmailAlreadyExists(const std::string &email) = 0;
 
         /**
          * Tells if the character's name already exists

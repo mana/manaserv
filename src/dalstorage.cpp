@@ -20,7 +20,6 @@
  *  $Id$
  */
 
-
 #include <sstream>
 #include <vector>
 
@@ -66,7 +65,7 @@ DALStorage::~DALStorage()
 void
 DALStorage::open(void)
 {
-    // do nothing if already connected.
+    // Do nothing if already connected.
     if (mDb->isConnected()) {
         return;
     }
@@ -379,6 +378,7 @@ DALStorage::getEmailList()
     open();
 
     std::list <std::string> emailList;
+
     try {
         std::string sql("select email from ");
         sql += ACCOUNTS_TBL_NAME;
@@ -390,16 +390,16 @@ DALStorage::getEmailList()
         if (accountInfo.isEmpty()) {
             return emailList;
         }
-            for (unsigned int i = 0; i < accountInfo.rows(); i++)
-            {
-                // We add all these addresses to the list
-                emailList.push_front(accountInfo(i, 0));
-            }
+        for (unsigned int i = 0; i < accountInfo.rows(); i++)
+        {
+            // We add all these addresses to the list
+            emailList.push_front(accountInfo(i, 0));
         }
-        catch (const dal::DbSqlQueryExecFailure& e) {
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0)
-        }
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
+    }
 
     return emailList;
 }
@@ -408,41 +408,39 @@ DALStorage::getEmailList()
  * Tells if Email already exists.
  */
 bool
-DALStorage::doesEmailAlreadyExists(std::string email)
+DALStorage::doesEmailAlreadyExists(const std::string &email)
 {
     // If not opened already
     open();
 
     try {
-            std::string sql("select count(email) from ");
-            sql += ACCOUNTS_TBL_NAME;
-            sql += " where upper(email) = upper('";
-            sql += email;
-            sql += "');";
-            const dal::RecordSet& accountInfo = mDb->execSql(sql);
-    
-            // if the account is empty then
-            // we have no choice but to return false.
-            if (accountInfo.isEmpty()) {
-                return false;
-            }
-    
-            std::stringstream ssStream(accountInfo(0,0));
-            int iReturn = -1;
-            ssStream >> iReturn;
-            if ( iReturn > 0 )
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+        std::string sql("select count(email) from ");
+        sql += ACCOUNTS_TBL_NAME;
+        sql += " where upper(email) = upper('" + email + "');";
+
+        const dal::RecordSet& accountInfo = mDb->execSql(sql);
+
+        // If the account is empty then we have no choice but to return false.
+        if (accountInfo.isEmpty()) {
+            return false;
         }
-        catch (const dal::DbSqlQueryExecFailure& e) {
+
+        std::stringstream ssStream(accountInfo(0,0));
+        int iReturn = -1;
+        ssStream >> iReturn;
+        if ( iReturn > 0 )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0)
-        }
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
+    }
 
     return false;
 }

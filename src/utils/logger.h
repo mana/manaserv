@@ -53,8 +53,8 @@ namespace utils
  *
  * Example of use:
  *
- * <code>
- * #include "logger.h"
+ * <pre>
+ * \#include "logger.h"
  *
  * int main(void)
  * {
@@ -85,7 +85,7 @@ namespace utils
  *
  *     return 0;
  * }
- * </code>
+ * </pre>
  */
 class Logger: public Singleton<Logger>
 {

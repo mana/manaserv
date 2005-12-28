@@ -1,3 +1,8 @@
+2005-12-28  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* makeclient.sh, src/Makefile.am: Integrated the building of tmwclient
+	with the default make command, as contributed by r0nny.
+
 2005-12-27  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/chathandler.h, src/chathandler.cpp, src/defines.h,
@@ -9,7 +14,7 @@
         needs to be implemented. Added a small slangs filter to reduce bad
         words in account names and in conversations a little.
 
-2005-12-26  Bjorn Lindeijer  <bjorn@lindeijer.nl>
+2005-12-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/storage.cpp: Removed manual throwing of std::bad_alloc, which
 	should happen by default unless new(nothrow) is used. Suggested by
@@ -67,6 +72,7 @@
         Added unregistering, checking on character's name and email
         length support. Also made some little tweaks.
 
+>>>>>>> 1.25
 2005-12-10  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/dalstorage.cpp: Fixed the buggy part of getAccount()
@@ -85,7 +91,7 @@
 
         * src/dalstorage.cpp, src/dalstorage.h, src/storage.h:
         Radically improve the getEmailList() again based on
-        MrLindejer's good idea.
+        MrLindeijer's good idea.
         * src/accounthandler.cpp: Simplify the code of Email check
         based on the previous improvement.
 
