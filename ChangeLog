@@ -72,7 +72,6 @@
         Added unregistering, checking on character's name and email
         length support. Also made some little tweaks.
 
->>>>>>> 1.25
 2005-12-10  Yohann Ferreira  <bertram@cegetel.net>
 
         * src/dalstorage.cpp: Fixed the buggy part of getAccount()
