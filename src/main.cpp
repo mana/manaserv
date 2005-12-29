@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 #include <getopt.h>
+#include <signal.h>
 #include <iostream>
 #include <physfs.h>
 #include <SDL.h>
@@ -134,6 +135,8 @@ void initialize()
         LOG_FATAL("SDL_Init: " << SDL_GetError(), 0)
         exit(1);
     }
+
+    signal(SIGSEGV, SIG_DFL);
 
     // set SDL to quit on exit.
     atexit(SDL_Quit);

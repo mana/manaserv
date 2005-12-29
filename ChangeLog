@@ -1,8 +1,16 @@
+2005-12-29  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* configure.ac: Added errors when SDL_net or libcrypto are not found.
+	* src/main.cpp: Reset SEGV signal handling after SDL initialisation to
+	allow cores to be dumped.
+	* runserv.sh: Added script that perpetually runs the server and
+	automatically saves a backtrace and restarts when it crashes.
+
 2005-12-29  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
-        * src/mapmanager.cpp, src/mapmanager.h, tmwserv.dev,: Forgot a way to
-		access maps.
-		* tmwserv.dev: Fixed merge conflict as pointed out by Bjørn.
+	* src/mapmanager.cpp, src/mapmanager.h, tmwserv.dev,: Forgot a way to
+	access maps.
+	* tmwserv.dev: Fixed merge conflict as pointed out by Bjørn.
 
 2005-12-28  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -40,9 +48,9 @@
 
 2005-12-18  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
-        * src/main.cpp, src/mapreader.cpp, tmwserv.dev,
-		src/mapmanager.cpp, src/mapmanager.h: Added a map manager to
-		load/unload/reload maps.
+	* src/main.cpp, src/mapreader.cpp, tmwserv.dev,
+	src/mapmanager.cpp, src/mapmanager.h: Added a map manager to
+	load/unload/reload maps.
 
 2005-12-18  Yohann Ferreira  <bertram@cegetel.net>
 

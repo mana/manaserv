@@ -17,11 +17,14 @@ AC_PROG_INSTALL
 
 # Checks for libraries.
 
-AC_CHECK_LIB([crypto], [EVP_md5])
+AC_CHECK_LIB([crypto], [EVP_md5], ,
+AC_MSG_ERROR([ *** Unable to find libcrypto library]))
 
 AC_CHECK_LIB([physfs], [PHYSFS_init], ,
 AC_MSG_ERROR([ *** Unable to find PhysFS library (icculus.org/physfs/)]))
 
+AC_CHECK_LIB([SDL_net], [SDLNet_Init], ,
+AC_MSG_ERROR([ *** Unable to find SDL_net library]))
 
 PKG_CHECK_MODULES(XML2, [libxml-2.0 >= 2.4])
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
@@ -32,8 +35,6 @@ AC_CHECK_LIB_TMW([SDL], [1.2.0])
 # SDL_CFLAGS and SDL_LIBS are set by AC_CHECK_LIB_TMW.
 CXXFLAGS="$CXXFLAGS $SDL_CFLAGS"
 LIBS="$LIBS $SDL_LIBS"
-
-AC_CHECK_LIB([SDL_net], [SDLNet_Init])
 
 
 # Checks for header files.
