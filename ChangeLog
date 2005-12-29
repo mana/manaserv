@@ -2,6 +2,7 @@
 
         * src/mapmanager.cpp, src/mapmanager.h, tmwserv.dev,: Forgot a way to
 		access maps.
+		* tmwserv.dev: Fixed merge conflict as pointed out by Bjørn.
 
 2005-12-28  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

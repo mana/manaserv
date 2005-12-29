@@ -1,12 +1,7 @@
 [Project]
 FileName=tmwserv.dev
-<<<<<<< tmwserv.dev
-Name=tmwserv
-UnitCount=17
-=======
 Name=tmwserv
 UnitCount=74
->>>>>>> 1.2
 Type=1
 Ver=1
 ObjFiles=
