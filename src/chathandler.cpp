@@ -140,8 +140,7 @@ void ChatHandler::handleCommand(NetComputer &computer, std::string command)
     LOG_INFO("Chat: Recieved unhandled command: " << command, 2)
     MessageOut result;
     result.writeShort(SMSG_CHAT);
-    result.writeShort(0); // The Channel
-    result.writeString("SERVER: Unknown or unhandled command.");
+    result.writeByte(CHATCMD_UNHANDLED_COMMAND);
     computer.send(result.getPacket());
 }
 
@@ -150,8 +149,7 @@ void ChatHandler::warnPlayerAboutBadWords(NetComputer &computer)
     // We could later count if the player is really often unpolite.
     MessageOut result;
     result.writeShort(SMSG_CHAT);
-    result.writeShort(0); // The Channel
-    result.writeString("SERVER: Take care not to use bad words when you speak...");
+    result.writeByte(CHAT_USING_BAD_WORDS); // The Channel
     computer.send(result.getPacket());
 
     LOG_INFO(computer.getCharacter()->getName() << " says bad words.", 2)
@@ -171,8 +169,8 @@ void ChatHandler::announce(NetComputer &computer, std::string text)
     }
     else
     {
-        result.writeShort(SMSG_SYSTEM);
-        result.writeString("Cannot make announcements. You have not enough rights.");
+        result.writeShort(SMSG_CHAT);
+        result.writeByte(CHATCMD_UNSUFFICIENT_RIGHTS);
         computer.send(result.getPacket());
         LOG_INFO(computer.getCharacter()->getName() <<
             " couldn't make an announcement due to insufficient rights.", 2)

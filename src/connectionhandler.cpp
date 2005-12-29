@@ -122,7 +122,7 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
             perror("SDLNet_CheckSockets");
         }
         else if (numready > 0) {
-            LOG_INFO(numready << " sockets with activity!", 0)
+            LOG_INFO(numready << " socket(s) with activity!", 0)
 
             // Check server socket
             if (SDLNet_SocketReady(ltd->socket)) {
@@ -295,5 +295,3 @@ void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
         }
     }
 }
-
-

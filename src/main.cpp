@@ -68,11 +68,18 @@ std::string scriptLanguage = "lua";
 std::string scriptLanugage = "none";
 #endif // SCRIPT_SUPPORT
 
+// Default options that automake should be able to override.
+#ifndef LOG_FILE
 #define LOG_FILE        "tmwserv.log"
+#endif
+#ifndef CONFIG_FILE
+#define CONFIG_FILE     "tmwserv.xml"
+#endif
+#ifndef DEFAULT_SERVER_PORT
+#define DEFAULT_SERVER_PORT     9601
+#endif
 
 #define TMW_WORLD_TICK  SDL_USEREVENT
-#define SERVER_PORT     9601
-
 
 SDL_TimerID worldTimerID; /**< Timer ID of world timer */
 int worldTime = 0;        /**< Current world time in 100ms ticks */
@@ -187,15 +194,20 @@ void initialize()
     config.setValue("dbpass", "");
     config.setValue("dbhost", "");
 
-#ifdef WIN32
-    std::string configPath = ".";
-#else
+#ifdef __USE_UNIX98
     std::string configPath = getenv("HOME");
+    configPath += "/.";
+    configPath += CONFIG_FILE;
+    std::string logPath = getenv("HOME");
+    logPath += "/.";
+    logPath += LOG_FILE;
+#else
+    std::string configPath = CONFIG_FILE;
+    std::string logPath = LOG_FILE;
 #endif
-    configPath += "/.tmwserv.xml";
     config.init(configPath);
     LOG_INFO("Using Config File: " << configPath, 0)
-    LOG_INFO("Using Log File: " << LOG_FILE, 0)
+    LOG_INFO("Using Log File: " << logPath, 0)
 
     // Initialize PhysicsFS
     PHYSFS_init("");
@@ -262,6 +274,7 @@ void parseOptions(int argc, char *argv[])
     const struct option long_options[] = {
         { "help",       no_argument, 0, 'h' },
         { "verbosity",  required_argument, 0, 'v' },
+        { "port",  required_argument, 0, 'p' },
         0
     };
 
@@ -280,9 +293,17 @@ void parseOptions(int argc, char *argv[])
                 break;
             case 'v':
                 // Set Verbosity to level
-                unsigned short verbosityLevel = atoi(optarg);
+                unsigned short verbosityLevel;
+                verbosityLevel = atoi(optarg);
                 tmwserv::utils::Logger::instance().setVerbosity(verbosityLevel);
                 LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel, 0)
+                break;
+            case 'p':
+                // Change the port to listen on.
+                unsigned short portToListenOn;
+                portToListenOn = atoi(optarg);
+                config.setValue("ListenOnPort", portToListenOn);
+                LOG_INFO("Setting Default Port to " << portToListenOn, 0)
                 break;
         }
     }
@@ -335,8 +356,8 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
     connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
-    session->startListen(connectionHandler, SERVER_PORT);
-    LOG_INFO("Listening on port " << SERVER_PORT << "...", 0)
+    session->startListen(connectionHandler, int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)));
+    LOG_INFO("Listening on port " << config.getValue("ListenOnPort", DEFAULT_SERVER_PORT) << "...", 0)
 
     using namespace tmwserv;
 
@@ -380,7 +401,7 @@ int main(int argc, char *argv[])
     }
 
     LOG_INFO("Received: Quit signal, closing down...", 0)
-    session->stopListen(SERVER_PORT);
+    session->stopListen(int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)));
 
     deinitialize();
 }
