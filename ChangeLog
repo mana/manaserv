@@ -2,6 +2,8 @@
 
 	* makeclient.sh, src/Makefile.am: Integrated the building of tmwclient
 	with the default make command, as contributed by r0nny.
+	* src/main.cpp: Applied patch by r0nny that makes main.cpp a bit
+	nicer.
 
 2005-12-27  Yohann Ferreira  <bertram@cegetel.net>
 

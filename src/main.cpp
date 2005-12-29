@@ -82,16 +82,16 @@ Skill skillTree("base");  /**< Skill tree */
 Configuration config;     /**< XML config reader */
 
 /** Account message handler */
-AccountHandler *accountHandler = new AccountHandler();
+AccountHandler *accountHandler;
 
 /** Communications (chat) message handler */
-ChatHandler *chatHandler = new ChatHandler();
+ChatHandler *chatHandler;
 
 /** Core game message handler */
-GameHandler *gameHandler = new GameHandler();
+GameHandler *gameHandler;
 
 /** Primary connection handler */
-ConnectionHandler *connectionHandler = new ConnectionHandler();
+ConnectionHandler *connectionHandler;
 
 /**
  * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
@@ -121,7 +121,15 @@ void initialize()
     // write the messages to both the screen and the log file.
     Logger::instance().setTeeMode(true);
 
-    // initialize SDL.
+    // Initialize the global handlers
+    // FIXME: Make the global handlers global vars or part of a bigger
+    // singleton or a local vatiable in the event-loop
+    accountHandler = new AccountHandler();
+    chatHandler = new ChatHandler();
+    gameHandler = new GameHandler();
+    connectionHandler = new ConnectionHandler();
+
+    // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
         LOG_FATAL("SDL_Init: " << SDL_GetError(), 0)
         exit(1);
@@ -168,7 +176,6 @@ void initialize()
     LOG_WARN("No Database Backend Support.", 0)
 #endif
 
-    // initialize configuration
     // initialize configuration defaults
     config.setValue("dbuser", "");
     config.setValue("dbpass", "");
@@ -232,11 +239,10 @@ void deinitialize()
  */
 void printHelp()
 {
-    std::cout << "tmwserv" << std::endl << std::endl;
-    std::cout << "Options: " << std::endl;
-    std::cout << "  -h --help        : Display this help" << std::endl;
-    std::cout << "     --verbosity n : Set the verbosity level" << std::endl;
-    deinitialize();
+    std::cout << "tmwserv" << std::endl << std::endl
+              << "Options: " << std::endl
+              << "  -h --help          : Display this help" << std::endl
+              << "     --verbosity <n> : Set the verbosity level" << std::endl;
     exit(0);
 }
 
@@ -285,11 +291,12 @@ int main(int argc, char *argv[])
 #ifdef __USE_UNIX98
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0)
 #endif
-    // General Initialization
-    initialize();
 
     // Parse Command Line Options
     parseOptions(argc, argv);
+
+    // General Initialization
+    initialize();
 
     // Ready for server work...
     std::auto_ptr<NetSession> session(new NetSession());
