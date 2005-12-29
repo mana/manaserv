@@ -1,5 +1,4 @@
 #!/bin/bash
-export SDL_VIDEODRIVER=dummy
 ulimit -c 100000000
 while [ true ] ; do
     src/tmwserv

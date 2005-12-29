@@ -130,6 +130,9 @@ void initialize()
     gameHandler = new GameHandler();
     connectionHandler = new ConnectionHandler();
 
+    // Make SDL use a dummy videodriver so that it doesn't require an X server
+    putenv("SDL_VIDEODRIVER=dummy");
+
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
         LOG_FATAL("SDL_Init: " << SDL_GetError(), 0)
