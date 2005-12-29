@@ -73,7 +73,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 // see if the account exists
-                tmwserv::AccountPtr acc = tmwserv::AccountPtr(store.getAccount(username));
+                tmwserv::AccountPtr acc = store.getAccount(username);
 
                 if (!acc.get()) {
                     // account doesn't exist -- send error to client
@@ -190,8 +190,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 // see if the account exists
-                Account *accPtr = store.getAccount(username);
-                if ( accPtr ) // Account already exists.
+                tmwserv::AccountPtr accPtr = store.getAccount(username);
+                if ( accPtr.get() ) // Account already exists.
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_EXISTS_USERNAME);
@@ -236,15 +236,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 LOG_INFO(username << " wants to be deleted from our accounts.", 1)
 
                 // see if the account exists
-                Account *acc = store.getAccount(username);
+                tmwserv::AccountPtr accPtr = store.getAccount(username);
 
-                if (!acc) {
+                if (!accPtr.get()) {
                     // account doesn't exist -- send error to client
                     LOG_INFO(username << ": Account doesn't exist anyway.", 1)
 
                     result.writeShort(SMSG_UNREGISTER_RESPONSE);
                     result.writeByte(UNREGISTER_INVALID_USERNAME);
-                } else if (acc->getPassword() != password) {
+                } else if (accPtr->getPassword() != password) {
                     // bad password -- send error to client
                     LOG_INFO("Won't delete it : Bad password for " << username << ".", 1)
 

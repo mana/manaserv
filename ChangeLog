@@ -1,8 +1,11 @@
-2005-12-29  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2005-12-29  Yohann Ferreira  <bjorn@lindeijer.nl>
 
 	* src/main.cpp, src/connectionhandler.cpp, src/defines.h,
 	src/chathandler.cpp: Adding changes thought by Elven and an option for
 	setting the port to listen on at startup.
+	* src/accounthandler.cpp, src/dalstorage.cpp, src/dalstorage.h,
+	src/storage.h: Fixing a bug in the Storage::getAccount() function that
+	made the server crash when the first login had a bad password.
 
 2005-12-29  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

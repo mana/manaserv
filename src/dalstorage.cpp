@@ -158,7 +158,7 @@ DALStorage::close(void)
 /**
  * Get an account by user name.
  */
-Account*
+AccountPtr
 DALStorage::getAccount(const std::string& userName)
 {
     // connect to the database (if not connected yet).
@@ -173,7 +173,7 @@ DALStorage::getAccount(const std::string& userName)
         );
 
     if (it != mAccounts.end()) {
-        return (it->first).get();
+        return it->first;
     }
 
     using namespace dal;
@@ -190,7 +190,7 @@ DALStorage::getAccount(const std::string& userName)
         // if the account is not even in the database then
         // we have no choice but to return nothing.
         if (accountInfo.isEmpty()) {
-            return NULL;
+            return AccountPtr(NULL);
         }
 
         // create an Account instance
@@ -288,10 +288,10 @@ DALStorage::getAccount(const std::string& userName)
             account->setCharacters(beings);
         } // End if there are characters.
 
-        return account.get();
+        return account;
     }
     catch (const DbSqlQueryExecFailure& e) {
-        return NULL; // TODO: Throw exception here
+        return AccountPtr(NULL); // TODO: Throw exception here
     }
 }
 
@@ -303,6 +303,7 @@ void
 DALStorage::addAccount(const AccountPtr& account)
 {
     if (account.get() == 0) {
+        LOG_WARN("Cannot add a NULL Account.", 0)
         // maybe we should throw an exception instead
         return;
     }

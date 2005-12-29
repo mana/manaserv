@@ -259,7 +259,7 @@ class Storage
          *
          * @return the account associated to the user name.
          */
-        virtual Account*
+        virtual AccountPtr
         getAccount(const std::string& userName) = 0;
 
 

@@ -71,7 +71,7 @@ class DALStorage: public Storage
          *
          * @return the account associated to the user name.
          */
-        Account*
+        AccountPtr
         getAccount(const std::string& userName);
 
 
