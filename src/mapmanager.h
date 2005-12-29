@@ -57,6 +57,11 @@ class MapManager: public utils::Singleton<MapManager>
          * Reload the specified map
          */
         void reloadMap(const std::string& mapFile);
+        
+        /**
+         * Return the requested map
+         */
+        Map *getMap(const std::string& mapFile);
            
     protected:
         /**

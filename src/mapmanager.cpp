@@ -73,5 +73,18 @@ void MapManager::reloadMap(const std::string& mapFile)
     loadMap(mapFile);
 }
 
+Map *MapManager::getMap(const std::string& mapFile)
+{
+    Map *result = NULL;
+    std::map<std::string, Map *>::iterator i;
+
+    i = maps.find(mapFile);
+    if (i != maps.end())
+    {
+        result = i->second;
+    }
+    return result;
+}
+
 
 } // namespace tmwserv

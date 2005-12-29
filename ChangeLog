@@ -1,3 +1,8 @@
+2005-12-29  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+        * src/mapmanager.cpp, src/mapmanager.h, tmwserv.dev,: Forgot a way to
+		access maps.
+
 2005-12-28  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* makeclient.sh, src/Makefile.am: Integrated the building of tmwclient
@@ -35,8 +40,8 @@
 2005-12-18  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
         * src/main.cpp, src/mapreader.cpp, tmwserv.dev,
-        src/mapmanager.cpp, src/mapmanager.h: Added a map manager to
-        load/unload/relod maps.
+		src/mapmanager.cpp, src/mapmanager.h: Added a map manager to
+		load/unload/reload maps.
 
 2005-12-18  Yohann Ferreira  <bertram@cegetel.net>
 
