@@ -1,4 +1,14 @@
-2005-12-29  Yohann Ferreira  <bjorn@lindeijer.nl>
+2005-12-31  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/main.cpp, src/defines.h, src/utils/slangsfilter.h,
+	src/utils/slangsfilter.cpp, src/accounthandler.h,
+	src/accounthandler.cpp, src/chathandler.cpp: Adding the possibility to
+	change Email, and password. Turned Slangs Filter into a class. Use
+	some ifdefs for future configure options handling. Still has to update
+	the client. (It isn't compiled fully with make; Removing makeclient.sh
+	was not a good idea, maybe.)
+
+2005-12-29  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/main.cpp, src/connectionhandler.cpp, src/defines.h,
 	src/chathandler.cpp: Adding changes thought by Elven and an option for

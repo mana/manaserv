@@ -151,7 +151,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string email = message.readString();
 
                 // Checking if the Name is slang's free.
-                if (!tmwserv::utils::filterContent(username))
+                if (!slangsFilter->filterContent(username))
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_USERNAME);
@@ -160,34 +160,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
                 // Checking conditions for having a good account.
                 LOG_INFO(username << " is trying to register.", 1)
-
-                bool emailValid = false;
-                // Testing Email validity
-                if ( (email.length() < MIN_EMAIL_LENGTH) || (email.length() > MAX_EMAIL_LENGTH))
-                {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
-                    result.writeByte(REGISTER_INVALID_EMAIL);
-                    LOG_INFO(email << ": Email too short or too long.", 1)
-                    break;
-                }
-                if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
-                {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
-                    result.writeByte(REGISTER_EXISTS_EMAIL);
-                    LOG_INFO(email << ": Email already exists.", 1)
-                    break;
-                }
-                if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
-                {
-                    int atpos = email.find_first_of('@');
-                    if (email.find_first_of('.', atpos) != std::string::npos) // Searching for a '.' after the @.
-                    {
-                        if (email.find_first_of(' ') == std::string::npos) // Searching if there's no spaces.
-                        {
-                            emailValid = true;
-                        }
-                    }
-                }
 
                 // see if the account exists
                 tmwserv::AccountPtr accPtr = store.getAccount(username);
@@ -209,11 +181,17 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(REGISTER_INVALID_PASSWORD);
                     LOG_INFO(email << ": Password too short or too long.", 1)
                 }
-                else if (!emailValid)
+                else if (!isEmailValid(email))
                 {
                     result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_EMAIL);
                     LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1)
+                }
+                else if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
+                {
+                    result.writeShort(SMSG_REGISTER_RESPONSE);
+                    result.writeByte(REGISTER_EXISTS_EMAIL);
+                    LOG_INFO(email << ": Email already exists.", 1)
                 }
                 else
                 {
@@ -272,6 +250,102 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             }
             break;
 
+        case CMSG_EMAIL_CHANGE:
+            {
+                if (computer.getAccount().get() == NULL) {
+                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
+                    result.writeByte(EMAILCHG_NOLOGIN);
+                    LOG_INFO("Not logged in. Can't change your Account's Email.", 1)
+                    break;
+                }
+
+                std::string email = message.readString();
+                if ( !isEmailValid(email) )
+                {
+                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
+                    result.writeByte(EMAILCHG_INVALID);
+                    LOG_INFO(email << ": Invalid format, cannot change Email for " <<
+                    computer.getAccount()->getName(), 1)
+                }
+                else if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
+                {
+                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
+                    result.writeByte(EMAILCHG_EXISTS_EMAIL);
+                    LOG_INFO(email << ": Email already exists.", 1)
+                }
+                else
+                {
+                    computer.getAccount()->setEmail(email);
+                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
+                    result.writeByte(EMAILCHG_OK);
+                    LOG_INFO(computer.getAccount()->getName() << ": Email changed to: " <<
+                    email, 1)
+                }
+            }
+            break;
+
+        case CMSG_EMAIL_GET:
+            {
+                if (computer.getAccount().get() == NULL) {
+                    result.writeShort(SMSG_EMAIL_GET_RESPONSE);
+                    result.writeByte(EMAILGET_NOLOGIN);
+                    LOG_INFO("Not logged in. Can't get your Account's current Email.", 1)
+                    break;
+                }
+                else
+                {
+                    result.writeShort(SMSG_EMAIL_GET_RESPONSE);
+                    result.writeByte(EMAILGET_OK);
+                    result.writeString(computer.getAccount()->getEmail());
+                }
+            }
+            break;
+
+        case CMSG_PASSWORD_CHANGE:
+            {
+                if (computer.getAccount().get() == NULL)
+                {
+                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
+                    result.writeByte(PASSCHG_NOLOGIN);
+                    LOG_INFO("Not logged in. Can't change your Account's Password.", 1)
+                    break;
+                }
+                std::string oldPassword = message.readString();
+                std::string password1 = message.readString();
+                std::string password2 = message.readString();
+                if ( password1.length() < MIN_PASSWORD_LENGTH ||
+                     password1.length() > MAX_PASSWORD_LENGTH )
+                {
+                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
+                    result.writeByte(PASSCHG_INVALID);
+                    LOG_INFO(computer.getAccount()->getName() << 
+                    ": New password too long or too short.", 1)
+                }
+                else if ( password1 != password2 )
+                {
+                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
+                    result.writeByte(PASSCHG_MISMATCH);
+                    LOG_INFO(computer.getAccount()->getName() << 
+                    ": New password mismatched confirmation password.", 1)
+                }
+                else if ( oldPassword != computer.getAccount()->getPassword() )
+                {
+                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
+                    result.writeByte(PASSCHG_MISMATCH);
+                    LOG_INFO(computer.getAccount()->getName() << 
+                    ": Old password is wrong.", 1)
+                }
+                else
+                {
+                    computer.getAccount()->setPassword(password1);
+                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
+                    result.writeByte(PASSCHG_OK);
+                    LOG_INFO(computer.getAccount()->getName() << 
+                    ": The password was changed.", 1)
+                }
+            }
+            break;
+
         case CMSG_CHAR_CREATE:
             {
                 if (computer.getAccount().get() == NULL) {
@@ -293,6 +367,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 std::string name = message.readString();
+                // Checking if the Name is slang's free.
+                if (!slangsFilter->filterContent(name))
+                {
+                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
+                    result.writeByte(CREATE_INVALID_NAME);
+                    LOG_INFO(name << ": Character has got bad words in it.", 1)
+                    break;
+                }
                 // Check if the character's name already exists
                 if (store.doesCharacterNameExists(name))
                 {
@@ -515,4 +597,27 @@ AccountHandler::assignAccount(NetComputer &computer, tmwserv::Account *account)
 
 
     return TMW_SUCCESS;
+}
+
+bool
+AccountHandler::isEmailValid(std::string& email)
+{
+    // Testing Email validity
+    if ( (email.length() < MIN_EMAIL_LENGTH) || (email.length() > MAX_EMAIL_LENGTH))
+    {
+        LOG_INFO(email << ": Email too short or too long.", 1)
+        return false;
+    }
+    if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
+    {
+        int atpos = email.find_first_of('@');
+        if (email.find_first_of('.', atpos) != std::string::npos) // Searching for a '.' after the @.
+        {
+            if (email.find_first_of(' ') == std::string::npos) // Searching if there's no spaces.
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }

@@ -91,65 +91,73 @@ enum {
  */
 enum {
     // Login/Register
-    CMSG_REGISTER                = 0x0000,
-    CMSG_ENCRYPTED_REGISTER      = 0x0001,
-    SMSG_REGISTER_RESPONSE       = 0x0002,
-    CMSG_UNREGISTER              = 0x0003,
-    SMSG_UNREGISTER_RESPONSE     = 0x0004,
-    CMSG_LOGIN                   = 0x0010,
-    CMSG_ENCRYPTED_LOGIN         = 0x0011,
-    SMSG_LOGIN_ERROR             = 0x0012,
-    SMSG_LOGIN_CONFIRM           = 0x0013,
-    CMSG_LOGOUT                  = 0x0014,
-    SMSG_LOGOUT_ERROR            = 0x0015,
-    SMSG_LOGOUT_CONFIRM          = 0x0016,
-    CMSG_CHAR_CREATE             = 0x0020,
-    SMSG_CHAR_CREATE_RESPONSE    = 0x0021,
-    CMSG_CHAR_DELETE             = 0x0022,
-    SMSG_CHAR_DELETE_RESPONSE    = 0x0023,
-    CMSG_CHAR_LIST               = 0x0024, // this is required after char creation
-    SMSG_CHAR_LIST_RESPONSE      = 0x0025,
-    CMSG_CHAR_SELECT             = 0x0030,
-    SMSG_CHAR_SELECT_RESPONSE    = 0x0031,
+    CMSG_REGISTER                 = 0x0000,
+    CMSG_ENCRYPTED_REGISTER       = 0x0001,
+    SMSG_REGISTER_RESPONSE        = 0x0002,
+    CMSG_UNREGISTER               = 0x0003,
+    SMSG_UNREGISTER_RESPONSE      = 0x0004,
+    CMSG_LOGIN                    = 0x0010,
+    CMSG_ENCRYPTED_LOGIN          = 0x0011,
+    SMSG_LOGIN_ERROR              = 0x0012,
+    SMSG_LOGIN_CONFIRM            = 0x0013,
+    CMSG_LOGOUT                   = 0x0014,
+    SMSG_LOGOUT_ERROR             = 0x0015,
+    SMSG_LOGOUT_CONFIRM           = 0x0016,
+    CMSG_CHAR_CREATE              = 0x0020,
+    SMSG_CHAR_CREATE_RESPONSE     = 0x0021,
+    CMSG_CHAR_DELETE              = 0x0022,
+    SMSG_CHAR_DELETE_RESPONSE     = 0x0023,
+    CMSG_CHAR_LIST                = 0x0024, // this is required after char creation
+    SMSG_CHAR_LIST_RESPONSE       = 0x0025,
+    CMSG_CHAR_SELECT              = 0x0026,
+    SMSG_CHAR_SELECT_RESPONSE     = 0x0027,
+    CMSG_EMAIL_CHANGE             = 0x0030,
+    SMSG_EMAIL_CHANGE_RESPONSE    = 0x0031,
+    CMSG_EMAIL_GET                = 0x0032,
+    SMSG_EMAIL_GET_RESPONSE       = 0x0033,
+    CMSG_FORGOT_PASSWORD          = 0x0040,
+    SMSG_FORGOT_PASSWORD_RESPONSE = 0x0041,
+    CMSG_PASSWORD_CHANGE          = 0x0050,
+    SMSG_PASSWORD_CHANGE_RESPONSE = 0x0051,
 
     // Objects
-    SMSG_NEW_OBJECT              = 0x0100,
-    SMSG_REMOVE_OBJECT           = 0x0101,
-    SMSG_CHANGE_OBJECT           = 0x0102,
-    CMSG_PICKUP                  = 0x0110,
-    SMSG_PICKUP_RESPONSE         = 0x0111,
-    CMSG_USE_OBJECT              = 0x0120,
-    SMSG_USE_RESPONSE            = 0x0121,
+    SMSG_NEW_OBJECT               = 0x0100,
+    SMSG_REMOVE_OBJECT            = 0x0101,
+    SMSG_CHANGE_OBJECT            = 0x0102,
+    CMSG_PICKUP                   = 0x0110,
+    SMSG_PICKUP_RESPONSE          = 0x0111,
+    CMSG_USE_OBJECT               = 0x0120,
+    SMSG_USE_RESPONSE             = 0x0121,
 
     // Beings
-    SMSG_NEW_BEING               = 0x0200,
-    SMSG_REMOVE_BEING            = 0x0201,
-    SMSG_INVENTORY_UPD           = 0x0210,
-    SMSG_EQUIPMENT_UPD           = 0x0220,
-    SMSG_ATTACK                  = 0x0230,
-    SMSG_PATH                    = 0x0240,
-    CMSG_TARGET                  = 0x0250,
-    CMSG_WALK                    = 0x0260,
-    CMSG_START_TRADE             = 0x0270,
-    CMSG_START_TALK              = 0x0280,
-    CMSG_REQ_TRADE               = 0x0290,
+    SMSG_NEW_BEING                = 0x0200,
+    SMSG_REMOVE_BEING             = 0x0201,
+    SMSG_INVENTORY_UPD            = 0x0210,
+    SMSG_EQUIPMENT_UPD            = 0x0220,
+    SMSG_ATTACK                   = 0x0230,
+    SMSG_PATH                     = 0x0240,
+    CMSG_TARGET                   = 0x0250,
+    CMSG_WALK                     = 0x0260,
+    CMSG_START_TRADE              = 0x0270,
+    CMSG_START_TALK               = 0x0280,
+    CMSG_REQ_TRADE                = 0x0290,
 
     // Items
-    CMSG_USE_ITEM                = 0x0300,
-    CMSG_EQUIP                   = 0x0301,
-    SMSG_EQUIP_RESPONSE          = 0x0302,
+    CMSG_USE_ITEM                 = 0x0300,
+    CMSG_EQUIP                    = 0x0301,
+    SMSG_EQUIP_RESPONSE           = 0x0302,
 
     // Chat
-    SMSG_SYSTEM                  = 0x0400,
-    SMSG_CHAT                    = 0x0401,
-    SMSG_ANNOUNCEMENT            = 0x0402,
-    SMSG_PRIVMSG                 = 0x0403,
-    CMSG_SAY                     = 0x0410,
-    CMSG_ANNOUNCE                = 0x0411,
-    CMSG_PRIVMSG                 = 0x0412,
+    SMSG_SYSTEM                   = 0x0400,
+    SMSG_CHAT                     = 0x0401,
+    SMSG_ANNOUNCEMENT             = 0x0402,
+    SMSG_PRIVMSG                  = 0x0403,
+    CMSG_SAY                      = 0x0410,
+    CMSG_ANNOUNCE                 = 0x0411,
+    CMSG_PRIVMSG                  = 0x0412,
 
     // Other
-    SMSG_LOAD_MAP                = 0x0500,
+    SMSG_LOAD_MAP                 = 0x0500,
 
     // NOTE: We will need more messages for in-game control (eg. moving a client to a new map/position etc.). Currently the protocol only caters for the bare basics.
 };
@@ -224,6 +232,28 @@ enum {
 enum {
     CHAR_LIST_OK = 0,
     CHAR_LIST_NOLOGIN
+};
+
+// Email change return values
+enum {
+    EMAILCHG_OK = 0,
+    EMAILCHG_NOLOGIN,
+    EMAILCHG_INVALID,
+    EMAILCHG_EXISTS_EMAIL
+};
+
+// Get Email return values
+enum {
+    EMAILGET_OK = 0,
+    EMAILGET_NOLOGIN
+};
+
+// Password change return values
+enum {
+    PASSCHG_OK = 0,
+    PASSCHG_NOLOGIN,
+    PASSCHG_INVALID,
+    PASSCHG_MISMATCH
 };
 
 // Chat errors return values

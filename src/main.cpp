@@ -45,7 +45,7 @@
 #include "storage.h"
 
 #include "utils/logger.h"
-
+#include "utils/slangsfilter.h"
 
 // Scripting
 #ifdef SCRIPT_SUPPORT
@@ -69,12 +69,8 @@ std::string scriptLanugage = "none";
 #endif // SCRIPT_SUPPORT
 
 // Default options that automake should be able to override.
-#ifndef LOG_FILE
-#define LOG_FILE        "tmwserv.log"
-#endif
-#ifndef CONFIG_FILE
-#define CONFIG_FILE     "tmwserv.xml"
-#endif
+#define DEFAULT_LOG_FILE        "tmwserv.log"
+#define DEFAULT_CONFIG_FILE     "tmwserv.xml"
 #ifndef DEFAULT_SERVER_PORT
 #define DEFAULT_SERVER_PORT     9601
 #endif
@@ -88,6 +84,8 @@ bool running = true;      /**< Determines if server keeps running */
 Skill skillTree("base");  /**< Skill tree */
 
 Configuration config;     /**< XML config reader */
+
+tmwserv::utils::SlangsFilter *slangsFilter; /**< Slang's Filter */
 
 /** Account message handler */
 AccountHandler *accountHandler;
@@ -123,11 +121,54 @@ Uint32 worldTick(Uint32 interval, void *param)
  */
 void initialize()
 {
+
+/**
+ * If the path values aren't defined, we set the default
+ * depending on the platform.
+ */
+// The config path
+#if defined CONFIG_FILE
+    std::string configPath = CONFIG_FILE;
+#else
+
+#ifdef __USE_UNIX98
+    std::string configPath = getenv("HOME");
+    configPath += "/.";
+    configPath += DEFAULT_CONFIG_FILE;
+#else // Win32, ...
+    std::string configPath = DEFAULT_CONFIG_FILE;
+#endif
+
+#endif // defined CONFIG_FILE
+
+// The log path
+#if defined LOG_FILE
+    std::string logPath = LOG_FILE;
+#else
+
+#ifdef __USE_UNIX98
+    std::string logPath = getenv("HOME");
+    logPath += "/.";
+    logPath += DEFAULT_LOG_FILE;
+#else // Win32, ...
+    std::string logPath = DEFAULT_LOG_FILE;
+#endif
+
+#endif // defined LOG_FILE
+
     // initialize the logger.
     using namespace tmwserv::utils;
-    Logger::instance().setLogFile(LOG_FILE);
+    Logger::instance().setLogFile(logPath);
+
     // write the messages to both the screen and the log file.
     Logger::instance().setTeeMode(true);
+
+    config.init(configPath);
+    LOG_INFO("Using Config File: " << configPath, 0)
+    LOG_INFO("Using Log File: " << logPath, 0)
+
+    // Initialize the slang's filter.
+    slangsFilter = new SlangsFilter(&config);
 
     // Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -194,21 +235,6 @@ void initialize()
     config.setValue("dbpass", "");
     config.setValue("dbhost", "");
 
-#ifdef __USE_UNIX98
-    std::string configPath = getenv("HOME");
-    configPath += "/.";
-    configPath += CONFIG_FILE;
-    std::string logPath = getenv("HOME");
-    logPath += "/.";
-    logPath += LOG_FILE;
-#else
-    std::string configPath = CONFIG_FILE;
-    std::string logPath = LOG_FILE;
-#endif
-    config.init(configPath);
-    LOG_INFO("Using Config File: " << configPath, 0)
-    LOG_INFO("Using Log File: " << logPath, 0)
-
     // Initialize PhysicsFS
     PHYSFS_init("");
 
@@ -224,6 +250,7 @@ void initialize()
  */
 void deinitialize()
 {
+    delete slangsFilter;
     // Write configuration file
     config.write();
 
@@ -260,7 +287,8 @@ void printHelp()
     std::cout << "tmwserv" << std::endl << std::endl
               << "Options: " << std::endl
               << "  -h --help          : Display this help" << std::endl
-              << "     --verbosity <n> : Set the verbosity level" << std::endl;
+              << "     --verbosity <n> : Set the verbosity level" << std::endl
+              << "     --port <n>      : Set the default port to listen on" << std::endl;
     exit(0);
 }
 
@@ -274,7 +302,7 @@ void parseOptions(int argc, char *argv[])
     const struct option long_options[] = {
         { "help",       no_argument, 0, 'h' },
         { "verbosity",  required_argument, 0, 'v' },
-        { "port",  required_argument, 0, 'p' },
+        { "port",       required_argument, 0, 'p' },
         0
     };
 

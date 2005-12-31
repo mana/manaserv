@@ -25,19 +25,61 @@
 #define _TMWSERV_SLANGSFILTER_H_
 
 #include <string>
+#include "../configuration.h"
 
 namespace tmwserv
 {
 namespace utils
 {
 
-    /**
-    * Useful to filter slangs automatically, by instance.
-    * @return true if the sentence is slangs clear.
-    */
-    bool filterContent(std::string text);
+/**
+ * Used to filter content containing bad words. Like username, character's names, chat, ...
+ */
+class SlangsFilter
+{
+    public:
+        /**
+         * ctors.
+         */
+        SlangsFilter(Configuration *config);
+
+        ~SlangsFilter();
+
+        /**
+         * Load slang list from the config file.
+         *
+         * @return true is the config is loaded succesfully
+         *
+         */
+        bool
+        loadFilterList();
+
+        /**
+         * Write slang list to the config file.
+         *
+         * @return true is the config is loaded succesfully
+         *
+         */
+        void
+        writeFilterList();
+
+        /**
+        * Useful to filter slangs automatically, by instance.
+        * @return true if the sentence is slangs clear.
+        */
+        bool
+        filterContent(const std::string& text);
+
+
+    private:
+        std::list<std::string> mSlangs;    /**< the formatted Slangs list */
+        bool mInitialized;                 /**< Set if the list is loaded */
+        Configuration *mConfig;            /**< The config instance */
+};
 
 } // ::utils
 } // ::tmwserv
+
+extern tmwserv::utils::SlangsFilter *slangsFilter;
 
 #endif

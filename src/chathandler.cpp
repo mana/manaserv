@@ -62,7 +62,7 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // chat to people around area
                 std::string text = message.readString();
                 // If it's slang clean,
-                if (tmwserv::utils::filterContent(text))
+                if (slangsFilter->filterContent(text))
                 {
                     short channel = message.readShort();
                     LOG_INFO("Say: (Channel " << channel << "): " << text, 2)
@@ -100,7 +100,7 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 std::string text = message.readString();
                 // If it's slang's free.
-                if (tmwserv::utils::filterContent(text))
+                if (slangsFilter->filterContent(text))
                 {
                     // We send the message to every players in the default channel
                     // as it is an annouce.
@@ -117,7 +117,7 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             {
                 std::string user = message.readString();
                 std::string text = message.readString();
-                if (tmwserv::utils::filterContent(text))
+                if (slangsFilter->filterContent(text))
                 {
                     // We seek the player to whom the message is told
                     // and send it to her/him.
