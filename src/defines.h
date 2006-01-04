@@ -55,6 +55,9 @@ typedef enum {
 } Genders;
 
 enum {
+    // Network related
+    MAX_CLIENTS  = 1024,
+
     // Registering related
     MIN_LOGIN_LENGTH = 4,
     MAX_LOGIN_LENGTH = 16,
@@ -176,7 +179,7 @@ enum {
 // Logout return values
 enum {
     LOGOUT_OK = 0,
-    LOGOUT_UNSUCCESSFULL
+    LOGOUT_UNSUCCESSFULL,
 };
 
 // Account register return values
@@ -186,7 +189,8 @@ enum {
     REGISTER_INVALID_PASSWORD,
     REGISTER_INVALID_EMAIL,
     REGISTER_EXISTS_USERNAME,
-    REGISTER_EXISTS_EMAIL
+    REGISTER_EXISTS_EMAIL,
+    REGISTER_UNKNOWN
 };
 
 // Account deletion return values
@@ -194,7 +198,8 @@ enum {
     UNREGISTER_OK = 0,
     UNREGISTER_INVALID_USERNAME,
     UNREGISTER_INVALID_PASSWORD,
-    UNREGISTER_INVALID_UNSUFFICIENT_RIGHTS
+    UNREGISTER_INVALID_UNSUFFICIENT_RIGHTS,
+    UNREGISTER_UNKNOWN
 };
 
 // Character creation return values
@@ -206,7 +211,8 @@ enum {
     CREATE_INVALID_RAW_STATS,
     CREATE_EXISTS_NAME,
     CREATE_TOO_MUCH_CHARACTERS,
-    CREATE_NOLOGIN
+    CREATE_NOLOGIN,
+    CREATE_UNKNOWN
 };
 
 // Character deletion return values
@@ -214,7 +220,8 @@ enum {
     DELETE_OK = 0,
     DELETE_INVALID_NAME,
     DELETE_NO_MORE_CHARACTERS,
-    DELETE_NOLOGIN
+    DELETE_NOLOGIN,
+    DELETE_UNKNOWN
 };
 
 // Character selection return values
@@ -223,13 +230,15 @@ enum {
     SELECT_OK = 0,
     SELECT_INVALID,
     SELECT_NOT_YET_CHARACTERS,
-    SELECT_NOLOGIN
+    SELECT_NOLOGIN,
+    SELECT_UNKNOWN
 };
 
 // Character's list return values
 enum {
     CHAR_LIST_OK = 0,
-    CHAR_LIST_NOLOGIN
+    CHAR_LIST_NOLOGIN,
+    CHAR_LIST_UNKNOWN
 };
 
 // Email change return values
@@ -237,13 +246,15 @@ enum {
     EMAILCHG_OK = 0,
     EMAILCHG_NOLOGIN,
     EMAILCHG_INVALID,
-    EMAILCHG_EXISTS_EMAIL
+    EMAILCHG_EXISTS_EMAIL,
+    EMAILCHG_UNKNOWN
 };
 
 // Get Email return values
 enum {
     EMAILGET_OK = 0,
-    EMAILGET_NOLOGIN
+    EMAILGET_NOLOGIN,
+    EMAILGET_UNKNOWN
 };
 
 // Password change return values
@@ -251,7 +262,8 @@ enum {
     PASSCHG_OK = 0,
     PASSCHG_NOLOGIN,
     PASSCHG_INVALID,
-    PASSCHG_MISMATCH
+    PASSCHG_MISMATCH,
+    PASSCHG_UNKNOWN
 };
 
 // Chat errors return values
@@ -261,7 +273,8 @@ enum {
     CHAT_NO_CHARACTER_SELECTED,
     CHAT_USING_BAD_WORDS,
     CHATCMD_UNHANDLED_COMMAND,
-    CHATCMD_UNSUFFICIENT_RIGHTS
+    CHATCMD_UNSUFFICIENT_RIGHTS,
+    CHATCMD_UNKNOWN
 };
 
 // Object type enumeration

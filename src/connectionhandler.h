@@ -123,6 +123,11 @@ class ConnectionHandler
          */
         void sendAround(tmwserv::BeingPtr, MessageOut &);
 
+        /**
+         * Return the number of connected clients.
+         */
+        unsigned int getClientNumber();
+
     private:
         std::map<unsigned int, MessageHandler*> handlers;
 

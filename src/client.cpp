@@ -1,6 +1,5 @@
 #include <SDL.h>
 #include <SDL_net.h>
-#include <stdlib.h>
 #include <iostream>
 #include "defines.h"
 #include "messageout.h"
@@ -274,6 +273,10 @@ int main(int argc, char *argv[])
                         case REGISTER_EXISTS_EMAIL:
                             std::cout << "Account registering: Email already exists." << std::endl;
                         break;
+                        default:
+                        case REGISTER_UNKNOWN:
+                            std::cout << "Account registering: Unknown error." << std::endl;
+                        break;
                     }
                     break;
 
@@ -292,6 +295,10 @@ int main(int argc, char *argv[])
                         break;
                         case UNREGISTER_INVALID_UNSUFFICIENT_RIGHTS:
                             std::cout << "Account unregistering: unsufficient rights." << std::endl;
+                        break;
+                        default:
+                        case UNREGISTER_UNKNOWN:
+                            std::cout << "Account unregistering: Unknown error." << std::endl;
                         break;
                     }
                     break;
@@ -324,7 +331,7 @@ int main(int argc, char *argv[])
                             std::cout << "Login: Already logged with another account." << std::endl;
                         break;
                         case LOGIN_SERVER_FULL:
-                            std::cout << "TODO:Login: Server has reached maximum of clients." << std::endl;
+                            std::cout << "Login: Server has reached maximum of clients." << std::endl;
                         break;
                         case LOGIN_ACCOUNT_BANNED:
                             std::cout << "Login: Your account has been banned." << std::endl;
@@ -361,7 +368,6 @@ int main(int argc, char *argv[])
                             case PASSCHG_OK:
                                 std::cout << "Password correctly changed." << std::endl;
                             break;
-                            default:
                             case PASSCHG_NOLOGIN:
                                 std::cout << "Password change: Not logged in." << std::endl;
                             break;
@@ -370,6 +376,10 @@ int main(int argc, char *argv[])
                             break;
                             case PASSCHG_INVALID:
                                 std::cout << "Password change: New password is invalid." << std::endl;
+                            break;
+                            default:
+                            case PASSCHG_UNKNOWN:
+                                std::cout << "Password change: Unknown error." << std::endl;
                             break;
                         }
                     }
@@ -382,7 +392,6 @@ int main(int argc, char *argv[])
                             case EMAILCHG_OK:
                                 std::cout << "Email correctly changed." << std::endl;
                             break;
-                            default:
                             case EMAILCHG_NOLOGIN:
                                 std::cout << "Email change: Not logged in." << std::endl;
                             break;
@@ -391,6 +400,10 @@ int main(int argc, char *argv[])
                             break;
                             case EMAILCHG_INVALID:
                                 std::cout << "Email change: New Email is invalid." << std::endl;
+                            break;
+                            default:
+                            case EMAILCHG_UNKNOWN:
+                                std::cout << "Email change: Unknown error." << std::endl;
                             break;
                         }
                     }
@@ -403,9 +416,12 @@ int main(int argc, char *argv[])
                             case EMAILGET_OK:
                                 std::cout << "Current Email: " << msg.readString() << std::endl;
                             break;
-                            default:
                             case EMAILGET_NOLOGIN:
-                                std::cout << "Email change: Not logged in." << std::endl;
+                                std::cout << "Get Email: Not logged in." << std::endl;
+                            break;
+                            default:
+                            case EMAILGET_UNKNOWN:
+                                std::cout << "Get Email: Unknown error." << std::endl;
                             break;
                         }
                     }
@@ -440,6 +456,10 @@ int main(int argc, char *argv[])
                             case CREATE_INVALID_RAW_STATS:
                                 std::cout << "TODO: Character Creation: Invalid Raw Stats." << std::endl;
                             break;
+                            default:
+                            case CREATE_UNKNOWN:
+                                std::cout << "Character Creation: Unknown error." << std::endl;
+                            break;
                         }
                     }
                     break;
@@ -459,7 +479,11 @@ int main(int argc, char *argv[])
                                 std::cout << "Character Deletion: Not logged in." << std::endl;
                             break;
                             case DELETE_NO_MORE_CHARACTERS:
-                                std::cout << "Character Creation: No more characters." << std::endl;
+                                std::cout << "Character Deletion: No more characters." << std::endl;
+                            break;
+                            default:
+                            case DELETE_UNKNOWN:
+                                std::cout << "Character Deletion: Unknown error." << std::endl;
                             break;
                         }
                     }
@@ -481,6 +505,10 @@ int main(int argc, char *argv[])
                             break;
                             case SELECT_NOT_YET_CHARACTERS:
                                 std::cout << "Character Selection: No character to select." << std::endl;
+                            break;
+                            default:
+                            case SELECT_UNKNOWN:
+                                std::cout << "Character Selection: Unknown error." << std::endl;
                             break;
                         }
                     }
@@ -517,6 +545,10 @@ int main(int argc, char *argv[])
                             case CHAR_LIST_NOLOGIN:
                                 std::cout << "Character List: Not logged in."
                                 << std::endl;
+                            break;
+                            default:
+                            case CHAR_LIST_UNKNOWN:
+                                std::cout << "Character List: Unknown error." << std::endl;
                             break;
                         }
                     }

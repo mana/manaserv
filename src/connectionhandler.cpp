@@ -33,8 +33,6 @@
 #include "script.h"
 #endif
 
-#define MAX_CLIENTS 1024
-
 /**
  * TEMPORARY
  * Split a string into a std::vector delimiting elements by 'split'. This
@@ -294,4 +292,9 @@ void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
             }
         }
     }
+}
+
+unsigned int ConnectionHandler::getClientNumber()
+{
+    return clients.size();
 }

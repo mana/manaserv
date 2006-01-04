@@ -1,5 +1,9 @@
 2005-01-04  Yohann Ferreira  <bertram@cegetel.net>
 
+	* src/connectionhandler.h, src.connectionhandler.cpp, src/client.cpp,
+	src/accounthandler.cpp, src/defines.h: Added a check if the maximum
+	number of client is already logged in at login attempt. Added a default
+	behaviour in protocol. Some cleanups.
 	* src/client.cpp, src/storage.h, src/dalstorage.cpp, src/dalstorage.h,
 	src/main.cpp, src/defines.h, src/accounthandler.cpp, src/Makefile.am:
 	Implemented server response handling to the test client. Fixed a bug

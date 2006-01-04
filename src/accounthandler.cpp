@@ -22,6 +22,7 @@
  */
 
 #include "accounthandler.h"
+#include "connectionhandler.h"
 #include "debug.h"
 #include "storage.h"
 #include "account.h"
@@ -69,7 +70,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     LOG_INFO("Already logged in as " << computer.getAccount()->getName()
                         << ".", 1)
                     LOG_INFO("Please logout first.", 1)
-                    result.writeShort(LOGIN_ALREADY_LOGGED);
+                    result.writeByte(LOGIN_ALREADY_LOGGED);
+                    break;
+                }
+                if (connectionHandler->getClientNumber() >= MAX_CLIENTS )
+                {
+                    // Too much clients logged in.
+                    LOG_INFO("Client couldn't log. Already has " << MAX_CLIENTS
+                    << " logged in.", 1)
+                    result.writeByte(LOGIN_SERVER_FULL);
                     break;
                 }
 
