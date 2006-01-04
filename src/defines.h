@@ -98,11 +98,9 @@ enum {
     SMSG_UNREGISTER_RESPONSE      = 0x0004,
     CMSG_LOGIN                    = 0x0010,
     CMSG_ENCRYPTED_LOGIN          = 0x0011,
-    SMSG_LOGIN_ERROR              = 0x0012,
-    SMSG_LOGIN_CONFIRM            = 0x0013,
-    CMSG_LOGOUT                   = 0x0014,
-    SMSG_LOGOUT_ERROR             = 0x0015,
-    SMSG_LOGOUT_CONFIRM           = 0x0016,
+    SMSG_LOGIN_RESPONSE           = 0x0012,
+    CMSG_LOGOUT                   = 0x0013,
+    SMSG_LOGOUT_RESPONSE          = 0x0014,
     CMSG_CHAR_CREATE              = 0x0020,
     SMSG_CHAR_CREATE_RESPONSE     = 0x0021,
     CMSG_CHAR_DELETE              = 0x0022,
@@ -178,8 +176,7 @@ enum {
 // Logout return values
 enum {
     LOGOUT_OK = 0,
-    LOGOUT_UNSUCCESSFULL,
-    LOGOUT_UNKNOWN
+    LOGOUT_UNSUCCESSFULL
 };
 
 // Account register return values
@@ -206,6 +203,7 @@ enum {
     CREATE_INVALID_NAME,
     CREATE_INVALID_HAIR,
     CREATE_INVALID_SEX,
+    CREATE_INVALID_RAW_STATS,
     CREATE_EXISTS_NAME,
     CREATE_TOO_MUCH_CHARACTERS,
     CREATE_NOLOGIN

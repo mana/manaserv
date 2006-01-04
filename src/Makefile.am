@@ -6,6 +6,8 @@ tmwclient_SOURCES = client.cpp \
 		    defines.h \
 		    messageout.h \
 		    messageout.cpp \
+		    messagein.h \
+		    messagein.cpp \
 		    packet.h \
 		    packet.cpp
 

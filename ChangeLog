@@ -1,3 +1,12 @@
+2005-01-04  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/client.cpp, src/storage.h, src/dalstorage.cpp, src/dalstorage.h,
+	src/main.cpp, src/defines.h, src/accounthandler.cpp, src/Makefile.am:
+	Implemented server response handling to the test client. Fixed a bug
+	that made the Email change not possible. Changed some protocol value to
+	have a litte neater client code. Added FreeBSD fix idea from icy to
+	server code.
+
 2005-12-31  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/main.cpp, src/defines.h, src/utils/slangsfilter.h,

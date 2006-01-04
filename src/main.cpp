@@ -28,7 +28,7 @@
 #include <SDL.h>
 #include <SDL_net.h>
 
-#ifdef __USE_UNIX98
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
 #include "../config.h"
 #endif
 
@@ -131,7 +131,7 @@ void initialize()
     std::string configPath = CONFIG_FILE;
 #else
 
-#ifdef __USE_UNIX98
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
     std::string configPath = getenv("HOME");
     configPath += "/.";
     configPath += DEFAULT_CONFIG_FILE;
@@ -146,7 +146,7 @@ void initialize()
     std::string logPath = LOG_FILE;
 #else
 
-#ifdef __USE_UNIX98
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
     std::string logPath = getenv("HOME");
     logPath += "/.";
     logPath += DEFAULT_LOG_FILE;
@@ -343,7 +343,7 @@ void parseOptions(int argc, char *argv[])
  */
 int main(int argc, char *argv[])
 {
-#ifdef __USE_UNIX98
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0)
 #endif
 
@@ -370,6 +370,9 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_CHAR_SELECT, accountHandler);
     connectionHandler->registerHandler(CMSG_CHAR_DELETE, accountHandler);
     connectionHandler->registerHandler(CMSG_CHAR_LIST, accountHandler);
+    connectionHandler->registerHandler(CMSG_EMAIL_GET, accountHandler);
+    connectionHandler->registerHandler(CMSG_PASSWORD_CHANGE, accountHandler);
+    connectionHandler->registerHandler(CMSG_EMAIL_CHANGE, accountHandler);
 
     connectionHandler->registerHandler(CMSG_SAY, chatHandler);
     connectionHandler->registerHandler(CMSG_ANNOUNCE, chatHandler);

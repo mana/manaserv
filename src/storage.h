@@ -292,11 +292,11 @@ class Storage
         std::list<std::string> getEmailList() = 0;
 
         /**
-         * Return if an Email is already in account's table.
-         * @return true if Email already exists.
+         * Return the number of same Emails in account's table.
+         * @return Number of same Email.
          */
-        virtual bool
-        doesEmailAlreadyExists(const std::string &email) = 0;
+        virtual unsigned int
+        getSameEmailNumber(const std::string &email) = 0;
 
         /**
          * Tells if the character's name already exists

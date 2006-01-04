@@ -406,10 +406,11 @@ DALStorage::getEmailList()
 }
 
 /**
- * Tells if Email already exists.
+ * Return the number of same Emails in account's table.
  */
-bool
-DALStorage::doesEmailAlreadyExists(const std::string &email)
+
+unsigned int
+DALStorage::getSameEmailNumber(const std::string &email)
 {
     // If not opened already
     open();
@@ -427,16 +428,9 @@ DALStorage::doesEmailAlreadyExists(const std::string &email)
         }
 
         std::stringstream ssStream(accountInfo(0,0));
-        int iReturn = -1;
+        unsigned int iReturn = 0;
         ssStream >> iReturn;
-        if ( iReturn > 0 )
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return iReturn;
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.

@@ -100,11 +100,11 @@ class DALStorage: public Storage
         getEmailList();
 
         /**
-         * Tells if Email already exists.
-         * @return true if Email is already in database
+         * Return the number of same Emails in account's table.
+         * @return Number of same Email.
          */
-        bool
-        doesEmailAlreadyExists(const std::string &email);
+        unsigned int
+        getSameEmailNumber(const std::string &email);
 
         /**
          * Tells if the character's name already exists

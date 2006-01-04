@@ -63,11 +63,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string password = message.readString();
                 LOG_INFO(username << " is trying to login.", 1)
 
+                result.writeShort(SMSG_LOGIN_RESPONSE);
+
                 if (computer.getAccount().get() != NULL) {
                     LOG_INFO("Already logged in as " << computer.getAccount()->getName()
                         << ".", 1)
                     LOG_INFO("Please logout first.", 1)
-                    result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeShort(LOGIN_ALREADY_LOGGED);
                     break;
                 }
@@ -79,13 +80,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     // account doesn't exist -- send error to client
                     LOG_INFO(username << ": Account does not exist.", 1)
 
-                    result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_USERNAME);
                 } else if (acc->getPassword() != password) {
                     // bad password -- send error to client
                     LOG_INFO("Bad password for " << username, 1)
 
-                    result.writeShort(SMSG_LOGIN_ERROR);
                     result.writeByte(LOGIN_INVALID_PASSWORD);
                 } else {
                     LOG_INFO("Login OK by " << username, 1)
@@ -93,7 +92,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     // Associate account with connection
                     computer.setAccount(acc);
 
-                    result.writeShort(SMSG_LOGIN_CONFIRM);
+                    result.writeByte(LOGIN_OK);
 
                     // Return information about available characters
                     tmwserv::Beings &chars = computer.getAccount()->getCharacters();
@@ -115,10 +114,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_LOGOUT:
             {
+                result.writeShort(SMSG_LOGOUT_RESPONSE);
+
                 if ( computer.getAccount().get() == NULL )
                 {
                     LOG_INFO("Can't logout. Not even logged in.", 1)
-                    result.writeShort(SMSG_LOGOUT_ERROR);
                     result.writeByte(LOGOUT_UNSUCCESSFULL);
                 }
                 else
@@ -129,15 +129,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                         LOG_INFO("Account without name ? Logged out anyway...", 1)
                         // computer.unsetCharacter(); Done by unsetAccount();
                         computer.unsetAccount();
-                        result.writeShort(SMSG_LOGOUT_ERROR);
-                        result.writeByte(LOGOUT_UNKNOWN);
+                        result.writeByte(LOGOUT_UNSUCCESSFULL);
                     }
                     else
                     {
                         LOG_INFO(computer.getAccount()->getName() << " logs out.", 1)
                         // computer.unsetCharacter(); Done by unsetAccount();
                         computer.unsetAccount();
-                        result.writeShort(SMSG_LOGOUT_CONFIRM);
                         result.writeByte(LOGOUT_OK);
                     }
                 }
@@ -149,11 +147,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string username = message.readString();
                 std::string password = message.readString();
                 std::string email = message.readString();
+                result.writeShort(SMSG_REGISTER_RESPONSE);
 
                 // Checking if the Name is slang's free.
                 if (!slangsFilter->filterContent(username))
                 {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_USERNAME);
                     LOG_INFO(username << ": has got bad words in it.", 1)
                     break;
@@ -165,31 +163,26 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 tmwserv::AccountPtr accPtr = store.getAccount(username);
                 if ( accPtr.get() ) // Account already exists.
                 {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_EXISTS_USERNAME);
                     LOG_INFO(username << ": Username already exists.", 1)
                 }
                 else if ((username.length() < MIN_LOGIN_LENGTH) || (username.length() > MAX_LOGIN_LENGTH)) // Username length
                 {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_USERNAME);
                     LOG_INFO(username << ": Username too short or too long.", 1)
                 }
                 else if ((password.length() < MIN_PASSWORD_LENGTH) || (password.length() > MAX_PASSWORD_LENGTH))
                 {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_PASSWORD);
                     LOG_INFO(email << ": Password too short or too long.", 1)
                 }
                 else if (!isEmailValid(email))
                 {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_INVALID_EMAIL);
                     LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1)
                 }
-                else if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
+                else if (store.getSameEmailNumber(email) > 0) // Search if Email already exists.
                 {
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_EXISTS_EMAIL);
                     LOG_INFO(email << ": Email already exists.", 1)
                 }
@@ -198,7 +191,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     AccountPtr acc(new Account(username, password, email));
                     store.addAccount(acc);
 
-                    result.writeShort(SMSG_REGISTER_RESPONSE);
                     result.writeByte(REGISTER_OK);
 
                     store.flush(); // flush changes
@@ -213,6 +205,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string password = message.readString();
                 LOG_INFO(username << " wants to be deleted from our accounts.", 1)
 
+                result.writeShort(SMSG_UNREGISTER_RESPONSE);
+
                 // see if the account exists
                 tmwserv::AccountPtr accPtr = store.getAccount(username);
 
@@ -220,13 +214,11 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     // account doesn't exist -- send error to client
                     LOG_INFO(username << ": Account doesn't exist anyway.", 1)
 
-                    result.writeShort(SMSG_UNREGISTER_RESPONSE);
                     result.writeByte(UNREGISTER_INVALID_USERNAME);
                 } else if (accPtr->getPassword() != password) {
                     // bad password -- send error to client
                     LOG_INFO("Won't delete it : Bad password for " << username << ".", 1)
 
-                    result.writeShort(SMSG_UNREGISTER_RESPONSE);
                     result.writeByte(UNREGISTER_INVALID_PASSWORD);
                 } else {
 
@@ -244,7 +236,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     LOG_INFO("Farewell " << username << " ...", 1)
                     store.delAccount(username);
                     store.flush();
-                    result.writeShort(SMSG_UNREGISTER_RESPONSE);
                     result.writeByte(UNREGISTER_OK);
                 }
             }
@@ -252,8 +243,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_EMAIL_CHANGE:
             {
+                result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
+
                 if (computer.getAccount().get() == NULL) {
-                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
                     result.writeByte(EMAILCHG_NOLOGIN);
                     LOG_INFO("Not logged in. Can't change your Account's Email.", 1)
                     break;
@@ -262,21 +254,18 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string email = message.readString();
                 if ( !isEmailValid(email) )
                 {
-                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
                     result.writeByte(EMAILCHG_INVALID);
                     LOG_INFO(email << ": Invalid format, cannot change Email for " <<
                     computer.getAccount()->getName(), 1)
                 }
-                else if (store.doesEmailAlreadyExists(email)) // Search if Email already exists
-                {
-                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
-                    result.writeByte(EMAILCHG_EXISTS_EMAIL);
-                    LOG_INFO(email << ": Email already exists.", 1)
+                else if (store.getSameEmailNumber(email) > 1) // Search if Email already exists,
+                {                                             // Except for the one already that is to
+                    result.writeByte(EMAILCHG_EXISTS_EMAIL);  // be changed.
+                    LOG_INFO(email << ": New Email already exists.", 1)
                 }
                 else
                 {
                     computer.getAccount()->setEmail(email);
-                    result.writeShort(SMSG_EMAIL_CHANGE_RESPONSE);
                     result.writeByte(EMAILCHG_OK);
                     LOG_INFO(computer.getAccount()->getName() << ": Email changed to: " <<
                     email, 1)
@@ -286,15 +275,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_EMAIL_GET:
             {
+                result.writeShort(SMSG_EMAIL_GET_RESPONSE);
                 if (computer.getAccount().get() == NULL) {
-                    result.writeShort(SMSG_EMAIL_GET_RESPONSE);
                     result.writeByte(EMAILGET_NOLOGIN);
                     LOG_INFO("Not logged in. Can't get your Account's current Email.", 1)
                     break;
                 }
                 else
                 {
-                    result.writeShort(SMSG_EMAIL_GET_RESPONSE);
                     result.writeByte(EMAILGET_OK);
                     result.writeString(computer.getAccount()->getEmail());
                 }
@@ -303,9 +291,10 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_PASSWORD_CHANGE:
             {
+                result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
+
                 if (computer.getAccount().get() == NULL)
                 {
-                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
                     result.writeByte(PASSCHG_NOLOGIN);
                     LOG_INFO("Not logged in. Can't change your Account's Password.", 1)
                     break;
@@ -316,21 +305,18 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if ( password1.length() < MIN_PASSWORD_LENGTH ||
                      password1.length() > MAX_PASSWORD_LENGTH )
                 {
-                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
                     result.writeByte(PASSCHG_INVALID);
                     LOG_INFO(computer.getAccount()->getName() << 
                     ": New password too long or too short.", 1)
                 }
                 else if ( password1 != password2 )
                 {
-                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
                     result.writeByte(PASSCHG_MISMATCH);
                     LOG_INFO(computer.getAccount()->getName() << 
                     ": New password mismatched confirmation password.", 1)
                 }
                 else if ( oldPassword != computer.getAccount()->getPassword() )
                 {
-                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
                     result.writeByte(PASSCHG_MISMATCH);
                     LOG_INFO(computer.getAccount()->getName() << 
                     ": Old password is wrong.", 1)
@@ -338,7 +324,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 else
                 {
                     computer.getAccount()->setPassword(password1);
-                    result.writeShort(SMSG_PASSWORD_CHANGE_RESPONSE);
                     result.writeByte(PASSCHG_OK);
                     LOG_INFO(computer.getAccount()->getName() << 
                     ": The password was changed.", 1)
@@ -348,8 +333,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_CREATE:
             {
+                result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
+
                 if (computer.getAccount().get() == NULL) {
-                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_NOLOGIN);
                     LOG_INFO("Not logged in. Can't create a Character.", 1)
                     break;
@@ -359,7 +345,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
                 if (chars.size() >= MAX_OF_CHARACTERS)
                 {
-                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_TOO_MUCH_CHARACTERS);
                     LOG_INFO("Already has " << MAX_OF_CHARACTERS
                     << " characters. Can't create another Character.", 1)
@@ -370,7 +355,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // Checking if the Name is slang's free.
                 if (!slangsFilter->filterContent(name))
                 {
-                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_INVALID_NAME);
                     LOG_INFO(name << ": Character has got bad words in it.", 1)
                     break;
@@ -378,7 +362,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // Check if the character's name already exists
                 if (store.doesCharacterNameExists(name))
                 {
-                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_EXISTS_NAME);
                     LOG_INFO(name << ": Character's name already exists.", 1)
                     break;
@@ -386,7 +369,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // Check for character's name length
                 if ((name.length() < MIN_CHARACTER_LENGTH) || (name.length() > MAX_CHARACTER_LENGTH))
                 {
-                    result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                     result.writeByte(CREATE_INVALID_NAME);
                     LOG_INFO(name << ": Character's name too short or too long.", 1)
                     break;
@@ -404,16 +386,16 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     << computer.getAccount()->getName() << "'s account.", 1)
 
                 store.flush(); // flush changes
-                result.writeShort(SMSG_CHAR_CREATE_RESPONSE);
                 result.writeByte(CREATE_OK);
             }
             break;
 
         case CMSG_CHAR_SELECT:
             {
+                result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
+
                 if (computer.getAccount().get() == NULL)
                 {
-                    result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
                     result.writeByte(SELECT_NOLOGIN);
                     LOG_INFO("Not logged in. Can't select a Character.", 1)
                     break; // not logged in
@@ -422,7 +404,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 unsigned char charNum = message.readByte();
 
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
-                result.writeShort(SMSG_CHAR_SELECT_RESPONSE);
                 if ( chars.size() == 0 )
                 {
                     result.writeByte(SELECT_NOT_YET_CHARACTERS);
@@ -449,9 +430,10 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_DELETE:
             {
+                result.writeShort(SMSG_CHAR_DELETE_RESPONSE);
+
                 if (computer.getAccount().get() == NULL)
                 {
-                    result.writeShort(SMSG_CHAR_DELETE_RESPONSE);
                     result.writeByte(DELETE_NOLOGIN);
                     LOG_INFO("Not logged in. Can't delete a Character.", 1)
                     break; // not logged in
@@ -460,7 +442,6 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 unsigned char charNum = message.readByte();
 
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
-                result.writeShort(SMSG_CHAR_DELETE_RESPONSE);
                 if ( chars.size() == 0 )
                 {
                     result.writeByte(DELETE_NO_MORE_CHARACTERS);
@@ -498,15 +479,15 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_CHAR_LIST:
             {
+                result.writeShort(SMSG_CHAR_LIST_RESPONSE);
+
                 if (computer.getAccount().get() == NULL)
                 {
-                    result.writeShort(SMSG_CHAR_LIST_RESPONSE);
                     result.writeByte(CHAR_LIST_NOLOGIN);
                     LOG_INFO("Not logged in. Can't list characters.", 1)
                     break; // not logged in
                 }
 
-                result.writeShort(SMSG_CHAR_LIST_RESPONSE);
                 result.writeByte(CHAR_LIST_OK);
                 // Return information about available characters
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
@@ -537,7 +518,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         default:
             LOG_WARN("Invalid message type", 0)
-            result.writeShort(SMSG_LOGIN_ERROR);
+            result.writeShort(SMSG_LOGIN_RESPONSE);
             result.writeByte(LOGIN_UNKNOWN);
             break;
     }
