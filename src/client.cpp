@@ -1,3 +1,25 @@
+/*
+ *  The Mana World Server
+ *  Copyright 2004 The Mana World Development Team
+ *
+ *  This file is part of The Mana World.
+ *
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
+ *
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
+ *
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ *  $Id$
+ */
+
 #include <SDL.h>
 #include <SDL_net.h>
 #include <iostream>
@@ -7,6 +29,16 @@
 
 int main(int argc, char *argv[])
 {
+
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
+#include "../config.h"
+#endif
+#ifdef PACKAGE_VERSION
+    std::cout << "The Mana World Test Client v" << PACKAGE_VERSION << std::endl;
+#else
+    std::cout << "The Mana World Test Client v" << DEFAULT_PACKAGE_VERSION << std::endl;
+#endif
+
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
         std::cout << "SDL_Init: " << SDL_GetError() << std::endl;
@@ -63,6 +95,12 @@ int main(int argc, char *argv[])
             case 1:
                 // Register
                 msg.writeShort(CMSG_REGISTER);
+                // We send the client version
+#ifdef PACKAGE_VERSION
+                msg.writeString(PACKAGE_VERSION);
+#else
+                msg.writeString(DEFAULT_PACKAGE_VERSION);
+#endif
                 std::cout << "Account name: ";
                 std::cin >> line;
                 msg.writeString(line);
@@ -88,6 +126,12 @@ int main(int argc, char *argv[])
             case 3:
                 // Login
                 msg.writeShort(CMSG_LOGIN);
+                // We send the client version
+#ifdef PACKAGE_VERSION
+                msg.writeString(PACKAGE_VERSION);
+#else
+                msg.writeString(DEFAULT_PACKAGE_VERSION);
+#endif
                 std::cout << "Account name: ";
                 std::cin >> line;
                 msg.writeString(line);
@@ -325,7 +369,7 @@ int main(int argc, char *argv[])
                             std::cout << "Login: Invalid Password." << std::endl;
                         break;
                         case LOGIN_INVALID_VERSION:
-                            std::cout << "TODO:Login: Invalid Version." << std::endl;
+                            std::cout << "Login: Invalid Version." << std::endl;
                         break;
                         case LOGIN_ALREADY_LOGGED:
                             std::cout << "Login: Already logged with another account." << std::endl;

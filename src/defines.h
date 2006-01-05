@@ -54,9 +54,13 @@ typedef enum {
     GENDER_UNKNOWN
 } Genders;
 
-enum {
+    // That value will be arithmetically compared
+    // using std::string >= operator.
+const std::string CLIENT_MINIMUM_VERSION = "0",
+      DEFAULT_PACKAGE_VERSION = "0";
+
     // Network related
-    MAX_CLIENTS  = 1024,
+const unsigned int MAX_CLIENTS  = 1024,
 
     // Registering related
     MIN_LOGIN_LENGTH = 4,
@@ -86,8 +90,8 @@ enum {
  * Determine the area in which a character
  * can hear another one speak
  */
-    AROUND_AREA_IN_TILES = 10
-};
+    AROUND_AREA_IN_TILES = 10;
+
 
 /**
  * Enumerated type for communicated messages
@@ -179,7 +183,7 @@ enum {
 // Logout return values
 enum {
     LOGOUT_OK = 0,
-    LOGOUT_UNSUCCESSFULL,
+    LOGOUT_UNSUCCESSFULL
 };
 
 // Account register return values
@@ -188,6 +192,7 @@ enum {
     REGISTER_INVALID_USERNAME,
     REGISTER_INVALID_PASSWORD,
     REGISTER_INVALID_EMAIL,
+    REGISTER_INVALID_VERSION,
     REGISTER_EXISTS_USERNAME,
     REGISTER_EXISTS_EMAIL,
     REGISTER_UNKNOWN

@@ -60,11 +60,23 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
     {
         case CMSG_LOGIN:
             {
+                std::string clientVersion = message.readString();
                 std::string username = message.readString();
                 std::string password = message.readString();
                 LOG_INFO(username << " is trying to login.", 1)
 
                 result.writeShort(SMSG_LOGIN_RESPONSE);
+
+#ifdef PACKAGE_VERSION
+                if (clientVersion <= PACKAGE_VERSION)
+#else
+                if (clientVersion <= DEFAULT_PACKAGE_VERSION)
+#endif
+                {
+                    LOG_INFO("Client has an unsufficient version number to login.", 1)
+                    result.writeByte(LOGIN_INVALID_VERSION);
+                    break;
+                }
 
                 if (computer.getAccount().get() != NULL) {
                     LOG_INFO("Already logged in as " << computer.getAccount()->getName()
@@ -153,10 +165,22 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
         case CMSG_REGISTER:
             {
+                std::string clientVersion = message.readString();
                 std::string username = message.readString();
                 std::string password = message.readString();
                 std::string email = message.readString();
                 result.writeShort(SMSG_REGISTER_RESPONSE);
+
+#ifdef PACKAGE_VERSION
+                if (clientVersion <= PACKAGE_VERSION)
+#else
+                if (clientVersion <= DEFAULT_PACKAGE_VERSION)
+#endif
+                {
+                    LOG_INFO("Client has an unsufficient version number to login.", 1)
+                    result.writeByte(REGISTER_INVALID_VERSION);
+                    break;
+                }
 
                 // Checking if the Name is slang's free.
                 if (!slangsFilter->filterContent(username))

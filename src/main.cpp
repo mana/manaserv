@@ -343,8 +343,10 @@ void parseOptions(int argc, char *argv[])
  */
 int main(int argc, char *argv[])
 {
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
+#ifdef PACKAGE_VERSION
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0)
+#else
+    LOG_INFO("The Mana World Server v" << DEFAULT_PACKAGE_VERSION, 0)
 #endif
 
     // Parse Command Line Options
