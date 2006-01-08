@@ -21,7 +21,6 @@
  *  $Id$
  */
 
-#include <cctype>
 #include "chathandler.h"
 #include "state.h"
 #include "being.h"

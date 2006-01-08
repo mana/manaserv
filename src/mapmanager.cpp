@@ -37,7 +37,6 @@ MapManager::~MapManager()
 
 void MapManager::loadMap(const unsigned int mapId)
 {
-    //TODO: Check if the id exists, then get the string associated.
     Storage &store = Storage::instance("tmw");
     std::string mapFile = store.getMapNameFromId(mapId);
     Map *map = MapReader::readMap("maps/" + mapFile);
