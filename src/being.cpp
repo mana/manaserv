@@ -38,11 +38,15 @@ PATH_NODE::PATH_NODE(unsigned short x, unsigned short y):
  */
 Being::Being(const std::string& name,
              const Genders gender,
+             const unsigned short hairStyle,
+             const unsigned short hairColor,
              const unsigned short level,
              const unsigned int money,
              const RawStatistics& stats)
         : mName(name),
           mGender(gender),
+          mHairStyle(hairStyle),
+          mHairColor(hairColor),
           mLevel(level),
           mMoney(money),
           mRawStats(stats)
@@ -78,6 +82,26 @@ Genders
 Being::getGender(void) const
 {
     return mGender;
+}
+
+
+/**
+ * Get the Hair Style.
+ */
+unsigned short
+Being::getHairStyle(void) const
+{
+    return mHairStyle;
+}
+
+
+/**
+ * Get the Hair Color.
+ */
+unsigned short
+Being::getHairColor(void) const
+{
+    return mHairColor;
 }
 
 

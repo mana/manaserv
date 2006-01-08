@@ -22,9 +22,8 @@
  */
 
 #include "mapmanager.h"
-
 #include "mapreader.h"
-
+#include "storage.h"
 #include "utils/logger.h"
 
 namespace tmwserv
@@ -36,8 +35,11 @@ MapManager::~MapManager()
 {
 }
 
-void MapManager::loadMap(const std::string& mapFile)
+void MapManager::loadMap(const unsigned int mapId)
 {
+    //TODO: Check if the id exists, then get the string associated.
+    Storage &store = Storage::instance("tmw");
+    std::string mapFile = store.getMapNameFromId(mapId);
     Map *map = MapReader::readMap("maps/" + mapFile);
     if (map == NULL)
     {
@@ -46,39 +48,39 @@ void MapManager::loadMap(const std::string& mapFile)
     else
     {
         LOG_INFO("Loaded map " << maps.size() << " (" << mapFile << ")", 0);
-        maps[mapFile] = map;
+        maps[mapId] = map;
     }
 }
 
-void MapManager::unloadMap(const std::string& mapFile)
+void MapManager::unloadMap(const unsigned int mapId)
 {
-    std::map<std::string, Map *>::iterator i;
-    
-    i = maps.find(mapFile);
+    std::map<unsigned int, Map *>::iterator i;
+
+    i = maps.find(mapId);
     if (i != maps.end())
     {
         delete i->second;
         maps.erase(i);
-        LOG_INFO("Unloaded map (" << mapFile << ")", 0);
+        LOG_INFO("Unloaded map (" << mapId << ")", 0);
     }
     else
     {
-        LOG_WARN("Unable to unload map (" << mapFile << ")", 0);
+        LOG_WARN("Unable to unload map (" << mapId << ")", 0);
     }
 }
 
-void MapManager::reloadMap(const std::string& mapFile)
+void MapManager::reloadMap(const unsigned int mapId)
 {
-    unloadMap(mapFile);
-    loadMap(mapFile);
+    unloadMap(mapId);
+    loadMap(mapId);
 }
 
-Map *MapManager::getMap(const std::string& mapFile)
+Map *MapManager::getMap(const unsigned int mapId)
 {
     Map *result = NULL;
-    std::map<std::string, Map *>::iterator i;
+    std::map<unsigned int, Map *>::iterator i;
 
-    i = maps.find(mapFile);
+    i = maps.find(mapId);
     if (i != maps.end())
     {
         result = i->second;

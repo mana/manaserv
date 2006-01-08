@@ -158,14 +158,14 @@ class Object
          *
          * @return Name of map being is located.
          */
-        const std::string &
-        getMap();
+        const unsigned int
+        getMapId();
 
         /**
          * Set map being is located
          */
         void
-        setMap(const std::string &map);
+        setMap(const unsigned int mapId);
 
     protected:
         Statistics mStats; /**< stats modifiers or computed stats */
@@ -176,7 +176,7 @@ class Object
         unsigned int mX; /**< x coordinate */
         unsigned int mY; /**< y coordinate */
 
-        std::string mMap;  /**< name of the map being is on */
+        unsigned int mMapId;  /**< id of the map being is on */
 };
 
 

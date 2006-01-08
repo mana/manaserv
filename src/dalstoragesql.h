@@ -141,7 +141,9 @@ const std::string SQL_CHARACTERS_TABLE(
         "user_id INTEGER     UNSIGNED NOT NULL,"
         "name    VARCHAR(32) NOT NULL UNIQUE,"
         // general information about the character
-        "gender  TINYINT     UNSIGNED NOT NULL,"
+        "gender      TINYINT     UNSIGNED NOT NULL,"
+        "hair_style  TINYINT     UNSIGNED NOT NULL,"
+        "hair_color  TINYINT     UNSIGNED NOT NULL,"
         "level   TINYINT     UNSIGNED NOT NULL,"
         "money   INTEGER     UNSIGNED NOT NULL,"
         // location on the map
@@ -164,7 +166,9 @@ const std::string SQL_CHARACTERS_TABLE(
         "user_id INTEGER     NOT NULL,"
         "name    TEXT        NOT NULL UNIQUE,"
         // general information about the character
-        "gender  INTEGER     NOT NULL,"
+        "gender      INTEGER     NOT NULL,"
+        "hair_style  INTEGER     NOT NULL,"
+        "hair_color  INTEGER     NOT NULL,"
         "level   INTEGER     NOT NULL,"
         "money   INTEGER     NOT NULL,"
         // location on the map
@@ -186,6 +190,8 @@ const std::string SQL_CHARACTERS_TABLE(
         "name    TEXT        NOT NULL UNIQUE,"
         // general information about the character
         "gender  INTEGER     NOT NULL,"
+        "hair_style  INTEGER     NOT NULL,"
+        "hair_color  INTEGER     NOT NULL,"
         "level   INTEGER     NOT NULL,"
         "money   INTEGER     NOT NULL,"
         // location on the map

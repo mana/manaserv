@@ -180,7 +180,42 @@ int main(int argc, char *argv[])
                 std::cout << "Name: ";
                 std::cin >> line;
                 msg.writeString(line);
-                msg.writeByte(0);
+
+                std::cout << "Hair Style ID (0 - " << MAX_HAIRSTYLE_VALUE << "): ";
+                std::cin >> line;
+                msg.writeByte(atoi(line));
+
+                std::cout << "Hair Color ID (0 - " << MAX_HAIRCOLOR_VALUE << "): ";
+                std::cin >> line;
+                msg.writeByte(atoi(line));
+
+                std::cout << "Gender ID (0 - " << MAX_GENDER_VALUE << "): ";
+                std::cin >> line;
+                msg.writeByte(atoi(line));
+
+                std::cout << "Strength: ";
+                std::cin >> line;
+                msg.writeShort(atoi(line));
+
+                std::cout << "Agility: ";
+                std::cin >> line;
+                msg.writeShort(atoi(line));
+
+                std::cout << "Vitality: ";
+                std::cin >> line;
+                msg.writeShort(atoi(line));
+
+                std::cout << "Intelligence: ";
+                std::cin >> line;
+                msg.writeShort(atoi(line));
+
+                std::cout << "Dexterity: ";
+                std::cin >> line;
+                msg.writeShort(atoi(line));
+
+                std::cout << "Luck: ";
+                std::cin >> line;
+                msg.writeShort(atoi(line));
             } break;
 
             case 9:
@@ -488,17 +523,29 @@ int main(int argc, char *argv[])
                             case CREATE_TOO_MUCH_CHARACTERS:
                                 std::cout << "Character Creation: Too much characters." << std::endl;
                             break;
-                            case CREATE_INVALID_HAIR:
-                                std::cout << "Character Creation: Invalid Hair Value." << std::endl;
+                            case CREATE_INVALID_HAIRSTYLE:
+                                std::cout << "Character Creation: Invalid Hair Style Value." << std::endl;
+                            break;
+                            case CREATE_INVALID_HAIRCOLOR:
+                                std::cout << "Character Creation: Invalid Hair Color Value." << std::endl;
+                            break;
+                            case CREATE_INVALID_GENDER:
+                                std::cout << "Character Creation: Invalid Gender Value." << std::endl;
                             break;
                             case CREATE_INVALID_NAME:
                                 std::cout << "Character Creation: Invalid Name." << std::endl;
                             break;
-                            case CREATE_INVALID_SEX:
-                                std::cout << "Character Creation: Invalid Sex value." << std::endl;
+                            case CREATE_RAW_STATS_EQUAL_TO_ZERO:
+                                std::cout << "Character Creation: a Statistic is equal to zero." << std::endl;
                             break;
-                            case CREATE_INVALID_RAW_STATS:
-                                std::cout << "TODO: Character Creation: Invalid Raw Stats." << std::endl;
+                            case CREATE_RAW_STATS_INVALID_DIFF:
+                                std::cout << "Character Creation: Statistics disproportionned." << std::endl;
+                            break;
+                            case CREATE_RAW_STATS_TOO_HIGH:
+                                std::cout << "Character Creation: Statistics too high for level 1." << std::endl;
+                            break;
+                            case CREATE_RAW_STATS_TOO_LOW:
+                                std::cout << "Character Creation: Statistics too low for level 1." << std::endl;
                             break;
                             default:
                             case CREATE_UNKNOWN:
@@ -573,16 +620,19 @@ int main(int argc, char *argv[])
                                 {
                                     std::cout << msg.readString() << ":" << std::endl;
                                     std::cout << "Gender: " << int(msg.readByte()) << ", ";
+                                    std::cout << "Hair Style: " << int(msg.readByte()) << ", ";
+                                    std::cout << "Hair Color: " << int(msg.readByte()) << ", "
+                                    << std::endl;
                                     std::cout << "Level: " << int(msg.readByte()) << ", ";
-                                    std::cout << "Money: " << int(msg.readByte()) << ", "
+                                    std::cout << "Money: " << int(msg.readShort()) << ", "
                                     << std::endl;
-                                    std::cout << "Strength: " << int(msg.readByte()) << ", ";
-                                    std::cout << "Agility: " << int(msg.readByte()) << ", ";
-                                    std::cout << "Vitality: " << int(msg.readByte()) << ", "
+                                    std::cout << "Strength: " << int(msg.readShort()) << ", ";
+                                    std::cout << "Agility: " << int(msg.readShort()) << ", ";
+                                    std::cout << "Vitality: " << int(msg.readShort()) << ", "
                                     << std::endl;
-                                    std::cout << "Intelligence: " << int(msg.readByte()) << ", ";
-                                    std::cout << "Dexterity: " << int(msg.readByte()) << ", ";
-                                    std::cout << "Luck: " << int(msg.readByte()) << ", "
+                                    std::cout << "Intelligence: " << int(msg.readShort()) << ", ";
+                                    std::cout << "Dexterity: " << int(msg.readShort()) << ", ";
+                                    std::cout << "Luck: " << int(msg.readShort()) << ". "
                                     << std::endl << std::endl;
                                 }
                             break;

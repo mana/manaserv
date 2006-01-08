@@ -41,38 +41,38 @@ class MapManager: public utils::Singleton<MapManager>
 {
     // friend so that Singleton can call the constructor.
     friend class utils::Singleton<MapManager>;
-    
+
     public:
         /**
          * Load the specified map
          */
-        void loadMap(const std::string& mapFile);
-        
+        void loadMap(const unsigned int mapId);
+
         /**
          * Unload the specified map
          */
-        void unloadMap(const std::string& mapFile);
-        
+        void unloadMap(const unsigned int mapId);
+
         /**
          * Reload the specified map
          */
-        void reloadMap(const std::string& mapFile);
-        
+        void reloadMap(const unsigned int mapId);
+
         /**
          * Return the requested map
          */
-        Map *getMap(const std::string& mapFile);
-           
+        Map *getMap(const unsigned int mapId);
+
     protected:
         /**
          * Destructor.
          */
         ~MapManager(void)
             throw();
-        
+
     private:
         // Hold all the loaded maps.
-        std::map<std::string, Map *> maps;
+        std::map<unsigned int, Map *> maps;
 };
 
 } // namespace tmwserv

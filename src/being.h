@@ -73,6 +73,8 @@ class Being: public Object
          */
         Being(const std::string& name,
               const Genders gender,
+              const unsigned short hairStyle,
+              const unsigned short hairColor,
               const unsigned short level,
               const unsigned int money,
               const RawStatistics& stats);
@@ -92,12 +94,29 @@ class Being: public Object
         getName(void) const;
 
         /**
+         * Gets the hair Style.
+         *
+         * @return the Hair style value.
+         */
+        unsigned short
+        getHairStyle(void) const;
+
+        /**
+         * Gets the Hair Color.
+         *
+         * @return the Hair Color value.
+         */
+        unsigned short
+        getHairColor(void) const;
+
+        /**
          * Gets the gender.
          *
          * @return the gender.
          */
         Genders
         getGender(void) const;
+
 
         /**
          * Sets the level.
@@ -309,6 +328,8 @@ class Being: public Object
 
         std::string mName;       /**< name of the being */
         Genders mGender;         /**< gender of the being */
+        unsigned short mHairStyle;/**< Hair Style of the being */
+        unsigned short mHairColor;/**< Hair Color of the being */
         unsigned short mLevel;   /**< level of the being */
         unsigned int mMoney;     /**< wealth of the being */
         RawStatistics mRawStats; /**< raw stats of the being */

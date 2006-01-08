@@ -139,14 +139,14 @@ Object::getStatistics(void)
     return mStats;
 }
 
-const std::string &
-Object::getMap() {
-    return mMap;
+const unsigned int
+Object::getMapId() {
+    return mMapId;
 }
 
 void
-Object::setMap(const std::string &map) {
-    mMap = map;
+Object::setMap(const unsigned int mapId) {
+    mMapId = mapId;
 }
 
 } // namespace tmwserv

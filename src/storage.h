@@ -302,8 +302,15 @@ class Storage
          * Tells if the character's name already exists
          * @return true if character's name exists.
          */
-        virtual
-        bool doesCharacterNameExists(std::string name) = 0;
+        virtual bool
+        doesCharacterNameExists(std::string name) = 0;
+
+        /**
+         * Tells the map name from the map id
+         * @return the name of the map
+         */
+        virtual const std::string
+        getMapNameFromId(const unsigned int mapId) = 0;
 
         /**
          * Saves the changes permanently.

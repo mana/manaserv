@@ -114,6 +114,12 @@ class DALStorage: public Storage
         doesCharacterNameExists(std::string name);
 
         /**
+         * Tells the map name from the map id
+         */
+        const std::string
+        getMapNameFromId(const unsigned int mapId);
+
+        /**
          * Save changes to the database permanently.
          *
          * @exception tmwserv::dal::DbSqlQueryExecFailure.

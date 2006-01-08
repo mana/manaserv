@@ -34,7 +34,7 @@ State::State() throw() {
 }
 
 State::~State() throw() {
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         delete i->second.map;
@@ -44,7 +44,7 @@ State::~State() throw() {
 void State::update(ConnectionHandler &connectionHandler)
 {
     // update game state (update AI, etc.)
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (Beings::iterator b = i->second.beings.begin();
@@ -56,7 +56,7 @@ void State::update(ConnectionHandler &connectionHandler)
 
     // notify clients about changes in the game world (only on their maps)
     // NOTE: Should only send differences in the game state.
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         //
@@ -82,20 +82,20 @@ void State::update(ConnectionHandler &connectionHandler)
     }
 }
 
-void State::addBeing(BeingPtr beingPtr, const std::string &map) {
+void State::addBeing(BeingPtr beingPtr, const unsigned int mapId) {
     if (!beingExists(beingPtr)) {
-        if (!mapExists(map))
-            if (!loadMap(map))
+        if (!mapExists(mapId))
+            if (!loadMap(mapId))
                 return;
         // WARNING: We should pass a copy there.
         // Otherwise, remove being will erase one character 
         // from the account object.
-        maps[map].beings.push_back(beingPtr);
+        maps[mapId].beings.push_back(beingPtr);
     }
 }
 
 void State::removeBeing(BeingPtr beingPtr) {
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (Beings::iterator b = i->second.beings.begin();
@@ -109,15 +109,15 @@ void State::removeBeing(BeingPtr beingPtr) {
     }
 }
 
-bool State::mapExists(const std::string &map) {
-    std::map<std::string, MapComposite>::iterator i = maps.find(map);
+bool State::mapExists(const unsigned int mapId) {
+    std::map<unsigned int, MapComposite>::iterator i = maps.find(mapId);
     if (i == maps.end())
         return false;
     return true;
 }
 
 bool State::beingExists(BeingPtr beingPtr) {
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (Beings::iterator b = i->second.beings.begin();
@@ -130,31 +130,31 @@ bool State::beingExists(BeingPtr beingPtr) {
     return false;
 }
 
-bool State::loadMap(const std::string &map) {
+bool State::loadMap(const unsigned int mapId) {
     // load map (FAILS)
     Map *tmp = NULL; //MapReader::readMap("maps/" + map);
     //if (!tmp)
     //    return false;
 
-    maps[map] = MapComposite();
-    maps[map].map = tmp;
+    maps[mapId] = MapComposite();
+    maps[mapId].map = tmp;
 
     // will need to load extra map related resources here also
-    
+
     return true; // We let true for testing on beings
 }
 
-void State::addObject(Object *object, const std::string &map) {
+void State::addObject(Object *object, const unsigned int mapId) {
     if (!objectExists(object)) {
-        if (!mapExists(map))
-            if (!loadMap(map))
+        if (!mapExists(mapId))
+            if (!loadMap(mapId))
                 return;
-        maps[map].objects.push_back(object);
+        maps[mapId].objects.push_back(object);
     }
 }
 
 void State::removeObject(Object *object) {
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (std::vector<Object*>::iterator b = i->second.objects.begin();
@@ -169,7 +169,7 @@ void State::removeObject(Object *object) {
 }
 
 bool State::objectExists(const Object *object) {
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (std::vector<Object*>::iterator b = i->second.objects.begin();
@@ -182,8 +182,8 @@ bool State::objectExists(const Object *object) {
     return false;
 }
 
-const std::string State::findPlayer(BeingPtr beingPtr) {
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+const unsigned int State::findPlayer(BeingPtr beingPtr) {
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (Beings::iterator b = i->second.beings.begin();
@@ -193,11 +193,11 @@ const std::string State::findPlayer(BeingPtr beingPtr) {
                 return i->first;
         }
     }
-    return "";
+    return 0;
 }
 
-const std::string State::findObject(Object *object) {
-    for (std::map<std::string, MapComposite>::iterator i = maps.begin();
+const unsigned int State::findObject(Object *object) {
+    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
         for (std::vector<Object*>::iterator b = i->second.objects.begin();
@@ -207,7 +207,7 @@ const std::string State::findObject(Object *object) {
                 return i->first;
         }
     }
-    return "";
+    return 0;
 }
 
 } // namespace tmwserv

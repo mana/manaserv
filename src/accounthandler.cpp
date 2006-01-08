@@ -406,13 +406,110 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     LOG_INFO(name << ": Character's name too short or too long.", 1)
                     break;
                 }
-                //char hairStyle = message.readByte();
-                //char hairColor = message.readByte();
-                Genders sex = (Genders)message.readByte();
+                char hairStyle = message.readByte();
+                if ((hairStyle < 0) || (hairStyle > (signed)MAX_HAIRSTYLE_VALUE))
+                {
+                    result.writeByte(CREATE_INVALID_HAIRSTYLE);
+                    LOG_INFO(name << ": Character's hair Style is invalid.", 1)
+                    break;
+                }
 
-                // TODO: Customization of player's stats...
-                tmwserv::RawStatistics stats = {10, 10, 10, 10, 10, 10};
-                tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, sex, 1, 0, stats));
+                char hairColor = message.readByte();
+                if ((hairColor < 0) || (hairColor > (signed)MAX_HAIRCOLOR_VALUE))
+                {
+                    result.writeByte(CREATE_INVALID_HAIRCOLOR);
+                    LOG_INFO(name << ": Character's hair Color is invalid.", 1)
+                    break;
+                }
+                Genders gender = (Genders)message.readByte();
+                if ((gender < 0) || (gender > (signed)MAX_GENDER_VALUE))
+                {
+                    result.writeByte(CREATE_INVALID_GENDER);
+                    LOG_INFO(name << ": Character's gender is invalid.", 1)
+                    break;
+                }
+                // LATER_ON: Add race attribute.
+
+                // Customization of player's stats...
+                std::vector<unsigned short> rawStats;
+                rawStats.reserve(6);
+                // strength
+                rawStats.push_back((unsigned short)message.readShort());
+                // agility
+                rawStats.push_back((unsigned short)message.readShort());
+                // vitality
+                rawStats.push_back((unsigned short)message.readShort());
+                // intelligence
+                rawStats.push_back((unsigned short)message.readShort());
+                // dexterity
+                rawStats.push_back((unsigned short)message.readShort());
+                // luck
+                rawStats.push_back((unsigned short)message.readShort());
+
+                // We see if the difference between the lowest stat and the highest isn't too
+                // big.
+                unsigned short lowestStat = 0;
+                unsigned short highestStat = 0;
+                unsigned int totalStats = 0;
+                bool validNonZeroRawStats = true;
+                for ( std::vector<unsigned short>::iterator i = rawStats.begin(); i != rawStats.end();)
+                {
+                    // For good total stat check.
+                    totalStats = totalStats + *i;
+
+                    // For checking if all stats are at least > 0
+                    if (*i <= 0) validNonZeroRawStats = false;
+                    if (lowestStat != 0)
+                    {
+                        if (lowestStat > *i) lowestStat = *i;
+                    }
+                    else
+                    {
+                        // We take the first value
+                        lowestStat = *i;
+                    }
+                    if (highestStat != 0)
+                    {
+                        if (highestStat < *i) highestStat = *i;
+                    }
+                    else
+                    {
+                        // We take the first value
+                        highestStat = *i;
+                    }
+                    ++i;
+                }
+
+                if ( totalStats > POINTS_TO_DISTRIBUTES_AT_LVL1 )
+                {
+                    result.writeByte(CREATE_RAW_STATS_TOO_HIGH);
+                    LOG_INFO(name << ": Character's stats are too high to be of level 1.", 1)
+                    break;
+                }
+                if ( totalStats < POINTS_TO_DISTRIBUTES_AT_LVL1 )
+                {
+                    result.writeByte(CREATE_RAW_STATS_TOO_LOW);
+                    LOG_INFO(name << ": Character's stats are too low to be of level 1.", 1)
+                    break;
+                }
+                if ( (highestStat - lowestStat) > (signed)MAX_DIFF_BETWEEN_STATS )
+                {
+                    result.writeByte(CREATE_RAW_STATS_INVALID_DIFF);
+                    LOG_INFO(name << ": Character's stats difference is too high to be accepted.", 1)
+                    break;
+                }
+                if ( !validNonZeroRawStats )
+                {
+                    result.writeByte(CREATE_RAW_STATS_EQUAL_TO_ZERO);
+                    LOG_INFO(name << ": One stat is equal to zero.", 1)
+                    break;
+                }
+
+                // The reserve(6) method allows us to be sure that rawStats[5] will work.
+                tmwserv::RawStatistics stats = {rawStats[0], rawStats[1], rawStats[2],
+                                                rawStats[3], rawStats[4], rawStats[5]};
+                tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, gender, hairStyle, hairColor,
+                                               1 /* level */, 0 /* Money */, stats));
                 computer.getAccount()->addCharacter(newCharacter);
 
                 LOG_INFO("Character " << name << " was created for " 
@@ -535,14 +632,16 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     if (i >0) charStats += ", ";
                     charStats += chars[i]->getName();
                     result.writeByte(unsigned(short(chars[i]->getGender())));
+                    result.writeByte(chars[i]->getHairStyle());
+                    result.writeByte(chars[i]->getHairColor());
                     result.writeByte(chars[i]->getLevel());
-                    result.writeByte(chars[i]->getMoney());
-                    result.writeByte(chars[i]->getStrength());
-                    result.writeByte(chars[i]->getAgility());
-                    result.writeByte(chars[i]->getVitality());
-                    result.writeByte(chars[i]->getIntelligence());
-                    result.writeByte(chars[i]->getDexterity());
-                    result.writeByte(chars[i]->getLuck());
+                    result.writeShort(chars[i]->getMoney());
+                    result.writeShort(chars[i]->getStrength());
+                    result.writeShort(chars[i]->getAgility());
+                    result.writeShort(chars[i]->getVitality());
+                    result.writeShort(chars[i]->getIntelligence());
+                    result.writeShort(chars[i]->getDexterity());
+                    result.writeShort(chars[i]->getLuck());
                 }
                 charStats += ".";
                 LOG_INFO(charStats.c_str(), 1)

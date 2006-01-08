@@ -1,3 +1,17 @@
+2005-01-08  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/defines.h, src/client.cpp, src/accounthandler.cpp,
+	src/dalstorage.cpp, src/storage.h, src/dalstorage.h,
+	src/dalstoragesql.h, src/being.h, src/object.h, src/netcomputer.cpp,
+	src/object.cpp, src/being.cpp, src/state.h, src/state.cpp,
+	src/mapmanager.h, src/main.cpp, src/mapmanager.cpp: Added
+	customization of created character. (That makes previously created db
+	invalid.) Made list of map indexed by map id, instead of map name.
+	This will prevent unsyncing of player's current map when changing a
+	map name. Remember you have now to add a map filename into db before
+	being able to load it. (Default map id is 1, not ZERO, as zero is the
+	not found return value.
+
 2005-01-04  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/defines.h, src/accounthandler.cpp, src/main.cpp, src/client.cpp:

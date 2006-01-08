@@ -74,6 +74,9 @@ const unsigned int MAX_CLIENTS  = 1024,
     MIN_CHARACTER_LENGTH = 4,
     MAX_CHARACTER_LENGTH = 25,
     MAX_OF_CHARACTERS = 3,
+    MAX_HAIRSTYLE_VALUE = 5,
+    MAX_HAIRCOLOR_VALUE = 10,
+    MAX_GENDER_VALUE = 2,
 /** Tells the max difference between the
  *  less big stat and the biggest one.
  *  So that players haven't disproportionned
@@ -90,7 +93,10 @@ const unsigned int MAX_CLIENTS  = 1024,
  * Determine the area in which a character
  * can hear another one speak
  */
-    AROUND_AREA_IN_TILES = 10;
+    AROUND_AREA_IN_TILES = 10,
+
+    // Maps related
+    DEFAULT_MAP_ID = 1;
 
 
 /**
@@ -211,9 +217,13 @@ enum {
 enum {
     CREATE_OK = 0,
     CREATE_INVALID_NAME,
-    CREATE_INVALID_HAIR,
-    CREATE_INVALID_SEX,
-    CREATE_INVALID_RAW_STATS,
+    CREATE_INVALID_HAIRSTYLE,
+    CREATE_INVALID_HAIRCOLOR,
+    CREATE_INVALID_GENDER,
+    CREATE_RAW_STATS_TOO_HIGH,
+    CREATE_RAW_STATS_TOO_LOW,
+    CREATE_RAW_STATS_INVALID_DIFF,
+    CREATE_RAW_STATS_EQUAL_TO_ZERO,
     CREATE_EXISTS_NAME,
     CREATE_TOO_MUCH_CHARACTERS,
     CREATE_NOLOGIN,

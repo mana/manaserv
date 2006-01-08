@@ -64,7 +64,7 @@ void NetComputer::setCharacter(tmwserv::BeingPtr ch)
         state.removeBeing(characterPtr);
     }
     characterPtr = ch;
-    state.addBeing(characterPtr, characterPtr->getMap());
+    state.addBeing(characterPtr, characterPtr->getMapId());
 }
 
 void NetComputer::unsetAccount()

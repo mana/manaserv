@@ -243,12 +243,12 @@ DALStorage::getAccount(const std::string& userName)
 
             for (unsigned int k = 0; k < charRows; ++k) {
                 RawStatistics stats = {
-                    toUshort(strCharInfo[k][9]),  // strength
-                    toUshort(strCharInfo[k][10]), // agility
-                    toUshort(strCharInfo[k][11]), // vitality
-                    toUshort(strCharInfo[k][12]), // intelligence
-                    toUshort(strCharInfo[k][13]), // dexterity
-                    toUshort(strCharInfo[k][14])  // luck
+                    toUshort(strCharInfo[k][11]),  // strength
+                    toUshort(strCharInfo[k][12]), // agility
+                    toUshort(strCharInfo[k][13]), // vitality
+                    toUshort(strCharInfo[k][14]), // intelligence
+                    toUshort(strCharInfo[k][15]), // dexterity
+                    toUshort(strCharInfo[k][16])  // luck
                 };
 
                 BeingPtr being(
@@ -257,28 +257,25 @@ DALStorage::getAccount(const std::string& userName)
                               // a short to an enum is invalid, the explicit
                               // type cast works :D
                               (Genders) toUshort(strCharInfo[k][3]), // gender
-                              toUshort(strCharInfo[k][4]),           // level
-                              toUint(strCharInfo[k][5]),             // money
+                              toUshort(strCharInfo[k][4]),           // hair style
+                              toUshort(strCharInfo[k][5]),           // hair color
+                              toUshort(strCharInfo[k][6]),           // level
+                              toUint(strCharInfo[k][7]),             // money
                               stats
                 ));
 
-                std::stringstream ss;
-                ss << "select map from " + MAPS_TBL_NAME + " where id = '"
-                   << toUint(strCharInfo[k][8]) << "';";
-                sql = ss.str();
-                // should be impossible for this to fail due to db referential integrity
-
-                const RecordSet& mapInfo = mDb->execSql(sql);
-
-                if (!mapInfo.isEmpty())
+                unsigned int mapId;
+                std::stringstream ssMapId(strCharInfo[k][10]);
+                ssMapId >> mapId;
+                if ( mapId > 0 )
                 {
-                    being.get()->setMap(std::string(mapInfo(0, 0)));
+                    being.get()->setMap(mapId);
                 }
                 else
                 {
-                    // TODO: Set player to default map and one of the default location
-                    ss.str("None");
-                    being.get()->setMap(ss.str());
+                    // Set player to default map and one of the default location
+                    // Default map is to be 1, as not found return value will be 0.
+                    being.get()->setMap(DEFAULT_MAP_ID);
                 }
 
                 mCharacters.push_back(being);
@@ -424,7 +421,7 @@ DALStorage::getSameEmailNumber(const std::string &email)
 
         // If the account is empty then we have no choice but to return false.
         if (accountInfo.isEmpty()) {
-            return false;
+            return 0;
         }
 
         std::stringstream ssStream(accountInfo(0,0));
@@ -437,7 +434,7 @@ DALStorage::getSameEmailNumber(const std::string &email)
         LOG_ERROR("SQL query failure: " << e.what(), 0);
     }
 
-    return false;
+    return 0;
 }
 
 /**
@@ -457,13 +454,13 @@ DALStorage::doesCharacterNameExists(std::string name)
             sql += name;
             sql += "';";
             const dal::RecordSet& accountInfo = mDb->execSql(sql);
-    
+
             // if the account is empty then
             // we have no choice but to return false.
             if (accountInfo.isEmpty()) {
                 return false;
             }
-    
+
             std::stringstream ssStream(accountInfo(0,0));
             int iReturn = -1;
             ssStream >> iReturn;
@@ -482,6 +479,40 @@ DALStorage::doesCharacterNameExists(std::string name)
         }
 
     return false;
+}
+
+/**
+ * Tells the map name from the map id
+ */
+const std::string
+DALStorage::getMapNameFromId(const unsigned int mapId)
+{
+    // If not opened already
+    open();
+
+    try {
+        std::string sql("select map from ");
+        sql += MAPS_TBL_NAME;
+        sql += " where id = '";
+        sql += mapId;
+        sql += "');";
+
+        const dal::RecordSet& mapInfo = mDb->execSql(sql);
+
+        // If the map return is empty then we have no choice but to return false.
+        if (mapInfo.isEmpty()) {
+            return "None";
+        }
+
+        std::string strMap(mapInfo(0,0));
+        return strMap;
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
+    }
+
+    return "None";
 }
 
 /**
@@ -609,16 +640,19 @@ DALStorage::_addAccount(const AccountPtr& account)
         RawStatistics& stats = (*it)->getRawStatistics();
         std::ostringstream sql3;
         sql3 << "insert into " << CHARACTERS_TBL_NAME
-             << " (name, gender, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
+             << " (name, gender, hair_style, hair_color, level, money, x, y, "
+             << "map_id, str, agi, vit, int, dex, luck)"
              << " values ("
              << (account_it->second).id << ", '"
-             << (*it)->getName() << "', '"
-             << (*it)->getGender() << "', "
+             << (*it)->getName() << "', "
+             << (*it)->getGender() << ", "
+             << (int)(*it)->getHairStyle() << ", "
+             << (int)(*it)->getHairColor() << ", "
              << (*it)->getLevel() << ", "
              << (*it)->getMoney() << ", "
              << (*it)->getX() << ", "
              << (*it)->getY() << ", "
-             << "0, " // TODO: map id
+             << (int)(*it)->getMapId() << ", "
              << stats.strength << ", "
              << stats.agility << ", "
              << stats.vitality << ", "
@@ -700,7 +734,7 @@ DALStorage::_updAccount(const AccountPtr& account)
 #ifdef SQLITE_SUPPORT
                  << "user_id, "
 #endif
-                 << "name, gender, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
+                 << "name, gender, hair_style, hair_color, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
                  << " values ("
 #ifdef SQLITE_SUPPORT
                  << (account_it->second).id << ", '"
@@ -709,11 +743,13 @@ DALStorage::_updAccount(const AccountPtr& account)
 #endif
                  << (*it)->getName() << "', "
                  << (*it)->getGender() << ", "
+                 << (*it)->getHairStyle() << ", "
+                 << (*it)->getHairColor() << ", "
                  << (*it)->getLevel() << ", "
                  << (*it)->getMoney() << ", "
                  << (*it)->getX() << ", "
                  << (*it)->getY() << ", "
-                 << "0, " // TODO: map id
+                 << (*it)->getMapId() << ", "
                  << stats.strength << ", "
                  << stats.agility << ", "
                  << stats.vitality << ", "
@@ -725,11 +761,13 @@ DALStorage::_updAccount(const AccountPtr& account)
             sql3 << "update " << CHARACTERS_TBL_NAME
                 << " set name = '" << (*it)->getName() << "', "
                 << " gender = " << (*it)->getGender() << ", "
+                << " hair_style = " << (*it)->getHairStyle() << ", "
+                << " hair_color = " << (*it)->getHairColor() << ", "
                 << " level = " << (*it)->getLevel() << ", "
                 << " money = " << (*it)->getMoney() << ", "
                 << " x = " << (*it)->getX() << ", "
                 << " y = " << (*it)->getY() << ", "
-                << " map_id = 0, " // TODO: map id
+                << " map_id = " << (*it)->getMapId() << ", "
                 << " str = " << stats.strength << ", "
                 << " agi = " << stats.agility << ", "
                 << " vit = " << stats.vitality << ", "

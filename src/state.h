@@ -42,17 +42,17 @@ struct MapComposite {
      * Default constructor
      */
     MapComposite() : map(NULL) { }
-    
+
     /**
      * Actual map
      */
     Map *map;
-    
+
     /**
      * Beings located on the map
      */
     Beings beings;
-        
+
     /**
      * Items located on the map
      */
@@ -73,7 +73,7 @@ class State : public utils::Singleton<State>
     /**
      * List of maps
      */
-    std::map<std::string, MapComposite> maps;
+    std::map<unsigned int, MapComposite> maps;
 
  public:
 
@@ -85,7 +85,7 @@ class State : public utils::Singleton<State>
     /**
      * Add being to game world at specified map
      */
-    void addBeing(BeingPtr beingPtr, const std::string &map);
+    void addBeing(BeingPtr beingPtr, const unsigned int mapId);
 
     /**
      * Remove being from game world
@@ -95,7 +95,7 @@ class State : public utils::Singleton<State>
     /**
      * Check to see if a map exists in game world
      */
-    bool mapExists(const std::string &map);
+    bool mapExists(const unsigned int mapId);
 
     /**
      * Check if being exists in game world already
@@ -105,12 +105,12 @@ class State : public utils::Singleton<State>
     /**
      * Load map into game world
      */
-    bool loadMap(const std::string &map);
+    bool loadMap(const unsigned int mapId);
 
     /**
      * Add object to the map
      */
-    void addObject(Object *object, const std::string &map);
+    void addObject(Object *object, const unsigned int mapId);
 
     /**
      * Remove an object from the map
@@ -125,12 +125,12 @@ class State : public utils::Singleton<State>
     /**
      * Find map player in world is on
      */
-    const std::string findPlayer(BeingPtr being);
+    const unsigned int findPlayer(BeingPtr being);
 
     /**
      * Find map object in world is on
      */
-    const std::string findObject(Object *object);
+    const unsigned int findObject(Object *object);
 };
 
 } // namespace tmwserv

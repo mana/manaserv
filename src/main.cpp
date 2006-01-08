@@ -239,9 +239,9 @@ void initialize()
     PHYSFS_init("");
 
     // TODO: only a test, maps should be loaded as they are needed
-    tmwserv::MapManager::instance().loadMap("tulimshar.tmx.gz");
-    tmwserv::MapManager::instance().reloadMap("tulimshar.tmx.gz");
-    tmwserv::MapManager::instance().unloadMap("tulimshar.tmx.gz");
+    tmwserv::MapManager::instance().loadMap(1);
+    tmwserv::MapManager::instance().reloadMap(1);
+    tmwserv::MapManager::instance().unloadMap(1);
 }
 
 
