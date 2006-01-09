@@ -491,13 +491,14 @@ DALStorage::getMapNameFromId(const unsigned int mapId)
     open();
 
     try {
-        std::string sql("select map from ");
-        sql += MAPS_TBL_NAME;
-        sql += " where id = '";
-        sql += mapId;
-        sql += "');";
-
-        const dal::RecordSet& mapInfo = mDb->execSql(sql);
+        std::stringstream sql;
+        sql << "select map from ";
+        sql << MAPS_TBL_NAME;
+        sql << " where id = ";
+        sql << mapId;
+        sql << ";";
+        
+        const dal::RecordSet& mapInfo = mDb->execSql(sql.str());
 
         // If the map return is empty then we have no choice but to return false.
         if (mapInfo.isEmpty()) {
