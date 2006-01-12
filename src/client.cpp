@@ -346,6 +346,9 @@ int main(int argc, char *argv[])
                         case REGISTER_INVALID_EMAIL:
                             std::cout << "Account registering: Invalid Email." << std::endl;
                         break;
+                        case REGISTER_INVALID_VERSION:
+                            std::cout << "Account registering: Invalid version." << std::endl;
+                        break;
                         case REGISTER_EXISTS_USERNAME:
                             std::cout << "Account registering: Username already exists." << std::endl;
                         break;

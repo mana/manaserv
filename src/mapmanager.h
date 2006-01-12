@@ -46,7 +46,7 @@ class MapManager: public utils::Singleton<MapManager>
         /**
          * Load the specified map
          */
-        void loadMap(const unsigned int mapId);
+        Map *loadMap(const unsigned int mapId);
 
         /**
          * Unload the specified map
@@ -62,6 +62,11 @@ class MapManager: public utils::Singleton<MapManager>
          * Return the requested map
          */
         Map *getMap(const unsigned int mapId);
+        
+        /**
+         * Check if a map was already loaded.
+         */
+        bool isLoaded(const unsigned int mapId);
 
     protected:
         /**

@@ -159,7 +159,7 @@ class Object
          * @return Name of map being is located.
          */
         const unsigned int
-        getMapId();
+        getMap();
 
         /**
          * Set map being is located

@@ -35,7 +35,7 @@ MapManager::~MapManager()
 {
 }
 
-void MapManager::loadMap(const unsigned int mapId)
+Map *MapManager::loadMap(const unsigned int mapId)
 {
     Storage &store = Storage::instance("tmw");
     std::string mapFile = store.getMapNameFromId(mapId);
@@ -46,9 +46,10 @@ void MapManager::loadMap(const unsigned int mapId)
     }
     else
     {
-        LOG_INFO("Loaded map " << maps.size() << " (" << mapFile << ")", 0);
+        LOG_INFO("Loaded map " << mapId << " (" << mapFile << ")", 0);
         maps[mapId] = map;
     }
+    return map;
 }
 
 void MapManager::unloadMap(const unsigned int mapId)
@@ -84,7 +85,24 @@ Map *MapManager::getMap(const unsigned int mapId)
     {
         result = i->second;
     }
+    else
+    {
+        result = loadMap(mapId);
+    }
     return result;
+}
+
+bool MapManager::isLoaded(const unsigned int mapId)
+{
+    bool ret = false;
+    std::map<unsigned int, Map *>::iterator i;
+
+    i = maps.find(mapId);
+    if (i != maps.end())
+    {
+        ret = true;
+    }
+    return ret;    
 }
 
 

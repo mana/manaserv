@@ -37,7 +37,6 @@
 #include "configuration.h"
 #include "connectionhandler.h"
 #include "gamehandler.h"
-#include "mapmanager.h"
 #include "netsession.h"
 #include "resourcemanager.h"
 #include "skill.h"
@@ -237,11 +236,6 @@ void initialize()
 
     // Initialize PhysicsFS
     PHYSFS_init("");
-
-    // TODO: only a test, maps should be loaded as they are needed
-    tmwserv::MapManager::instance().loadMap(1);
-    tmwserv::MapManager::instance().reloadMap(1);
-    tmwserv::MapManager::instance().unloadMap(1);
 }
 
 

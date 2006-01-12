@@ -22,10 +22,13 @@
  */
 
 #include "state.h"
+
 #include <iostream>
+
+#include "mapmanager.h"
 #include "messageout.h"
+
 #include "utils/logger.h"
-#include "mapreader.h"
 
 namespace tmwserv
 {
@@ -131,10 +134,11 @@ bool State::beingExists(BeingPtr beingPtr) {
 }
 
 bool State::loadMap(const unsigned int mapId) {
-    // load map (FAILS)
-    Map *tmp = NULL; //MapReader::readMap("maps/" + map);
-    //if (!tmp)
-    //    return false;
+    Map *tmp = MapManager::instance().loadMap(mapId);
+    if (!tmp)
+    {
+        return false;
+    }
 
     maps[mapId] = MapComposite();
     maps[mapId].map = tmp;

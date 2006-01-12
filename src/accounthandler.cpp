@@ -510,6 +510,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                                                 rawStats[3], rawStats[4], rawStats[5]};
                 tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, gender, hairStyle, hairColor,
                                                1 /* level */, 0 /* Money */, stats));
+                newCharacter->setMap(DEFAULT_MAP_ID);
                 computer.getAccount()->addCharacter(newCharacter);
 
                 LOG_INFO("Character " << name << " was created for " 

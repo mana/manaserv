@@ -140,7 +140,7 @@ Object::getStatistics(void)
 }
 
 const unsigned int
-Object::getMapId() {
+Object::getMap() {
     return mMapId;
 }
 
