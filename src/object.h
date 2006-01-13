@@ -159,13 +159,13 @@ class Object
          * @return Name of map being is located.
          */
         const unsigned int
-        getMap();
+        getMapId();
 
         /**
          * Set map being is located
          */
         void
-        setMap(const unsigned int mapId);
+        setMapId(const unsigned int mapId);
 
     protected:
         Statistics mStats; /**< stats modifiers or computed stats */

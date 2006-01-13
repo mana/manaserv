@@ -140,12 +140,12 @@ Object::getStatistics(void)
 }
 
 const unsigned int
-Object::getMap() {
+Object::getMapId() {
     return mMapId;
 }
 
 void
-Object::setMap(const unsigned int mapId) {
+Object::setMapId(const unsigned int mapId) {
     mMapId = mapId;
 }
 

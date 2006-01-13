@@ -23,11 +23,12 @@
 #include <sstream>
 #include <vector>
 
+#include "configuration.h"
+#include "dalstorage.h"
+
 #include "utils/cipher.h"
 #include "utils/functors.h"
 #include "utils/logger.h"
-
-#include "dalstorage.h"
 
 namespace tmwserv
 {
@@ -269,13 +270,13 @@ DALStorage::getAccount(const std::string& userName)
                 ssMapId >> mapId;
                 if ( mapId > 0 )
                 {
-                    being->setMap(mapId);
+                    being->setMapId(mapId);
                 }
                 else
                 {
                     // Set player to default map and one of the default location
                     // Default map is to be 1, as not found return value will be 0.
-                    being->setMap(DEFAULT_MAP_ID);
+                    being->setMapId((int)config.getValue("defaultMap", 1));
                 }
 
                 mCharacters.push_back(being);
@@ -653,7 +654,7 @@ DALStorage::_addAccount(const AccountPtr& account)
              << (*it)->getMoney() << ", "
              << (*it)->getX() << ", "
              << (*it)->getY() << ", "
-             << (int)(*it)->getMap() << ", "
+             << (int)(*it)->getMapId() << ", "
              << stats.strength << ", "
              << stats.agility << ", "
              << stats.vitality << ", "
@@ -750,7 +751,7 @@ DALStorage::_updAccount(const AccountPtr& account)
                  << (*it)->getMoney() << ", "
                  << (*it)->getX() << ", "
                  << (*it)->getY() << ", "
-                 << (*it)->getMap() << ", "
+                 << (*it)->getMapId() << ", "
                  << stats.strength << ", "
                  << stats.agility << ", "
                  << stats.vitality << ", "
@@ -768,7 +769,7 @@ DALStorage::_updAccount(const AccountPtr& account)
                 << " money = " << (*it)->getMoney() << ", "
                 << " x = " << (*it)->getX() << ", "
                 << " y = " << (*it)->getY() << ", "
-                << " map_id = " << (*it)->getMap() << ", "
+                << " map_id = " << (*it)->getMapId() << ", "
                 << " str = " << stats.strength << ", "
                 << " agi = " << stats.agility << ", "
                 << " vit = " << stats.vitality << ", "

@@ -54,11 +54,6 @@ typedef enum {
     GENDER_UNKNOWN
 } Genders;
 
-    // That value will be arithmetically compared
-    // using std::string >= operator.
-const std::string CLIENT_MINIMUM_VERSION = "0",
-      DEFAULT_PACKAGE_VERSION = "0";
-
     // Network related
 const unsigned int MAX_CLIENTS  = 1024,
 
@@ -93,10 +88,7 @@ const unsigned int MAX_CLIENTS  = 1024,
  * Determine the area in which a character
  * can hear another one speak
  */
-    AROUND_AREA_IN_TILES = 10,
-
-    // Maps related
-    DEFAULT_MAP_ID = 1;
+    AROUND_AREA_IN_TILES = 10;
 
 
 /**
@@ -317,6 +309,5 @@ enum {
     EQUIP_OK = 0,
     EQUIP_FAIL
 };
-
 
 #endif // _TMWSERV_DEFINES_H_

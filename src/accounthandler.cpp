@@ -67,11 +67,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 result.writeShort(SMSG_LOGIN_RESPONSE);
 
-#ifdef PACKAGE_VERSION
-                if (clientVersion <= PACKAGE_VERSION)
-#else
-                if (clientVersion <= DEFAULT_PACKAGE_VERSION)
-#endif
+                if (clientVersion < config.getValue("clientVersion", "0.0.0"))
                 {
                     LOG_INFO("Client has an unsufficient version number to login.", 1)
                     result.writeByte(LOGIN_INVALID_VERSION);
@@ -171,11 +167,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string email = message.readString();
                 result.writeShort(SMSG_REGISTER_RESPONSE);
 
-#ifdef PACKAGE_VERSION
-                if (clientVersion <= PACKAGE_VERSION)
-#else
-                if (clientVersion <= DEFAULT_PACKAGE_VERSION)
-#endif
+                if (clientVersion < config.getValue("clientVersion", "0.0.0"))
                 {
                     LOG_INFO("Client has an unsufficient version number to login.", 1)
                     result.writeByte(REGISTER_INVALID_VERSION);
@@ -510,7 +502,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                                                 rawStats[3], rawStats[4], rawStats[5]};
                 tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, gender, hairStyle, hairColor,
                                                1 /* level */, 0 /* Money */, stats));
-                newCharacter->setMap(DEFAULT_MAP_ID);
+                newCharacter->setMapId((int)config.getValue("defaultMap", 1));
                 computer.getAccount()->addCharacter(newCharacter);
 
                 LOG_INFO("Character " << name << " was created for " 

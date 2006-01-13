@@ -67,14 +67,14 @@ Build=0
 LanguageID=2057
 CharsetID=1252
 CompanyName=The Mana World Development Team
-FileVersion=
+FileVersion=0.0.1
 FileDescription=The Mana World Server
 InternalName=tmwserv
 LegalCopyright=(C) 2004-2005
 LegalTrademarks=
 OriginalFilename=tmwserv.exe
 ProductName=tmwserv
-ProductVersion=
+ProductVersion=1st milestone
 AutoIncBuildNr=0
 
 [Unit24]

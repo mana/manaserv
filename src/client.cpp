@@ -27,17 +27,18 @@
 #include "messageout.h"
 #include "messagein.h"
 
+#if defined WIN32
+#include "../testclient_private.h"
+#define PACKAGE_VERSION PRODUCT_VERSION
+#endif
+
 int main(int argc, char *argv[])
 {
 
 #if (defined __USE_UNIX98 || defined __FreeBSD__)
 #include "../config.h"
 #endif
-#ifdef PACKAGE_VERSION
     std::cout << "The Mana World Test Client v" << PACKAGE_VERSION << std::endl;
-#else
-    std::cout << "The Mana World Test Client v" << DEFAULT_PACKAGE_VERSION << std::endl;
-#endif
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
@@ -96,11 +97,7 @@ int main(int argc, char *argv[])
                 // Register
                 msg.writeShort(CMSG_REGISTER);
                 // We send the client version
-#ifdef PACKAGE_VERSION
                 msg.writeString(PACKAGE_VERSION);
-#else
-                msg.writeString(DEFAULT_PACKAGE_VERSION);
-#endif
                 std::cout << "Account name: ";
                 std::cin >> line;
                 msg.writeString(line);
@@ -127,11 +124,7 @@ int main(int argc, char *argv[])
                 // Login
                 msg.writeShort(CMSG_LOGIN);
                 // We send the client version
-#ifdef PACKAGE_VERSION
                 msg.writeString(PACKAGE_VERSION);
-#else
-                msg.writeString(DEFAULT_PACKAGE_VERSION);
-#endif
                 std::cout << "Account name: ";
                 std::cin >> line;
                 msg.writeString(line);
