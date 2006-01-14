@@ -20,14 +20,6 @@
 	definition for a new created character, enabled loading of map when a
 	character is on it, fixed inconsistency in getter/setter for map id.
 
-2006-01-12  Eugenio Favalli  <elvenprogrammer@gmail.com>
-
-	* src/accounthandler.cpp, src/client.cpp, src/dalstorage.cpp,
-	src/main.cpp, src/mapmanager.cpp, src/mapmanager.h, src/netcomputer.cpp,
-	src/object.cpp, src/object.h, src/state.cpp, tmwserv.dev: Fixed default map
-	definition for a new created character, enabled loading of map when a
-	character is on it, fixed inconsistency in getter/setter for map id.
-
 2006-01-09  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/dalstorage.cpp: Fixed some sql query issues.

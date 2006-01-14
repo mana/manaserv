@@ -83,8 +83,6 @@ MessageOut::writeString(const std::string &string, int length)
     {
         // Write the length at the start if not fixed
         writeShort(string.length());
-        std::string toWrite = string;
-
         expand(mPos + string.length());
     }
     else if (length < (int)string.length())

@@ -581,7 +581,12 @@ int main(int argc, char *argv[])
                         switch (msg.readByte())
                         {
                             case SELECT_OK:
-                                std::cout << "Character selected." << std::endl;
+                                {
+                                std::cout << "Character selected: ";
+                                std::cout << msg.readString() << " (";
+                                std::cout << (int)msg.readShort() << ",";
+                                std::cout << (int)msg.readShort() << ")" << std::endl;
+                                }
                             break;
                             case SELECT_INVALID:
                                 std::cout << "Character Selection: invalid ID."
@@ -590,7 +595,7 @@ int main(int argc, char *argv[])
                             case SELECT_NOLOGIN:
                                 std::cout << "Character Selection: Not logged in." << std::endl;
                             break;
-                            case SELECT_NOT_YET_CHARACTERS:
+                            case SELECT_NO_CHARACTERS:
                                 std::cout << "Character Selection: No character to select." << std::endl;
                             break;
                             default:

@@ -265,9 +265,7 @@ DALStorage::getAccount(const std::string& userName)
                               stats
                 ));
 
-                unsigned int mapId;
-                std::stringstream ssMapId(strCharInfo[k][10]);
-                ssMapId >> mapId;
+                unsigned int mapId = toUint(strCharInfo[k][10]);
                 if ( mapId > 0 )
                 {
                     being->setMapId(mapId);
@@ -278,6 +276,9 @@ DALStorage::getAccount(const std::string& userName)
                     // Default map is to be 1, as not found return value will be 0.
                     being->setMapId((int)config.getValue("defaultMap", 1));
                 }
+                
+                being->setXY(toUshort(strCharInfo[k][8]),
+                             toUshort(strCharInfo[k][9]));
 
                 mCharacters.push_back(being);
                 beings.push_back(being);

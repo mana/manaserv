@@ -503,6 +503,8 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, gender, hairStyle, hairColor,
                                                1 /* level */, 0 /* Money */, stats));
                 newCharacter->setMapId((int)config.getValue("defaultMap", 1));
+                newCharacter->setXY((int)config.getValue("startX", 0),
+                                    (int)config.getValue("startY", 0));
                 computer.getAccount()->addCharacter(newCharacter);
 
                 LOG_INFO("Character " << name << " was created for " 
@@ -527,9 +529,9 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 unsigned char charNum = message.readByte();
 
                 tmwserv::Beings &chars = computer.getAccount()->getCharacters();
-                if ( chars.size() == 0 )
+                if (chars.size() == 0 )
                 {
-                    result.writeByte(SELECT_NOT_YET_CHARACTERS);
+                    result.writeByte(SELECT_NO_CHARACTERS);
                     LOG_INFO("Character Selection : Yet no characters created.", 1)
                     break;
                 }
@@ -543,11 +545,16 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 // set character
                 computer.setCharacter(chars[charNum]);
-
+                tmwserv::BeingPtr selectedChar = computer.getCharacter();
+                int mapId = selectedChar->getMapId();
                 result.writeByte(SELECT_OK);
+                std::string mapName = store.getMapNameFromId(mapId);
+                result.writeString(mapName);
+                result.writeShort(selectedChar->getX());
+                result.writeShort(selectedChar->getY());
                 LOG_INFO("Selected Character " << int(charNum)
                 << " : " <<
-                computer.getCharacter()->getName(), 1)
+                selectedChar->getName(), 1);
             }
             break;
 
