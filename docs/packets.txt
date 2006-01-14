@@ -173,6 +173,25 @@ client. Any not listed error codes are unknown errors.
         * 6 = existing email address
 }
 
+CMSG_CHAR_SELECT 0x0026
+Request to select a character.
+{
+	C characterId
+}
+
+SMSG_CHAR_SELECT_RESPONSE 0x0027
+Response to character selection.
+{
+	C code
+		* 0 = selection succeded
+			A mapName
+			S characterX
+			S characterY
+		* 1 = invalid id
+		* 2 = not logged in
+		* 3 = no characters
+}
+
 
 2.2 OBJECTS
 
