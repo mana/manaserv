@@ -316,6 +316,26 @@ const std::string SQL_INVENTORIES_TABLE(
     ");"
 );
 
+/**
+ * TABLE: tmw_channels.
+ * Keeps opened public Channel list
+ */
+const std::string CHANNELS_TBL_NAME("tmw_channels");
+const std::string SQL_CHANNELS_TABLE(
+    "CREATE TABLE tmw_channels ("
+#if defined (MYSQL_SUPPORT)
+        "id      INTEGER     PRIMARY KEY,"
+        "name    VARCHAR(32) NOT NULL UNIQUE"
+#elif defined (SQLITE_SUPPORT)
+        "id      INTEGER     PRIMARY KEY,"
+        "name    TEXT        NOT NULL UNIQUE"
+#elif defined (POSTGRESQL_SUPPORT)
+        "id      SERIAL      PRIMARY KEY,"
+        "name    TEXT        NOT NULL UNIQUE"
+#endif
+    ");"
+);
+
 
 } // anonymous namespace
 

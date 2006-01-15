@@ -27,6 +27,7 @@
 #include "messagehandler.h"
 #include "netcomputer.h"
 #include "messagein.h"
+#include "chatchannelmanager.h"
 
 /**
  * Manages all chat related
@@ -34,6 +35,12 @@
 class ChatHandler : public MessageHandler
 {
  public:
+
+    /**
+     * Constructor
+     */
+    ChatHandler();
+
     /**
      * Receives chat related messages.
      */
@@ -71,6 +78,11 @@ class ChatHandler : public MessageHandler
     * Say something in a specific channel.
     */
     void sayInChannel(NetComputer &computer, short channel, std::string text);
+
+    /**
+     * The Chat Channels instance
+     */
+    ChatChannelManager mChatChannelManager;
 
 };
 

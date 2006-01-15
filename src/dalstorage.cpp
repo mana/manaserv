@@ -133,6 +133,7 @@ DALStorage::open(void)
         createTable(ITEMS_TBL_NAME, SQL_ITEMS_TABLE);
         createTable(WORLD_ITEMS_TBL_NAME, SQL_WORLD_ITEMS_TABLE);
         createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
+        createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
     }
     catch (const DbConnectionFailure& e) {
         LOG_ERROR("unable to connect to the database: " << e.what(), 0)
@@ -276,7 +277,7 @@ DALStorage::getAccount(const std::string& userName)
                     // Default map is to be 1, as not found return value will be 0.
                     being->setMapId((int)config.getValue("defaultMap", 1));
                 }
-                
+
                 being->setXY(toUshort(strCharInfo[k][8]),
                              toUshort(strCharInfo[k][9]));
 
@@ -499,7 +500,7 @@ DALStorage::getMapNameFromId(const unsigned int mapId)
         sql << " where id = ";
         sql << mapId;
         sql << ";";
-        
+
         const dal::RecordSet& mapInfo = mDb->execSql(sql.str());
 
         // If the map return is empty then we have no choice but to return false.
@@ -516,6 +517,88 @@ DALStorage::getMapNameFromId(const unsigned int mapId)
     }
 
     return "None";
+}
+
+const std::map<short, std::string>
+DALStorage::getChannelList()
+{
+    // If not opened already
+    open();
+
+    // specialize the string_to functor to convert
+    // a string to a short.
+    string_to<short> toShort;
+
+    // The formatted datas
+    std::map<short, std::string> channels;
+
+    try {
+        std::stringstream sql;
+        sql << "select id, name from ";
+        sql << CHANNELS_TBL_NAME;
+        sql << ";";
+
+        const dal::RecordSet& channelInfo = mDb->execSql(sql.str());
+
+        // If the map return is empty then we have no choice but to return false.
+        if (channelInfo.isEmpty()) {
+            return channels;
+        }
+
+        for ( unsigned int i = 0; i < channelInfo.rows(); ++i)
+        {
+            channels.insert(std::make_pair(toShort(channelInfo(0,0)),std::string(channelInfo(0,1))));
+        }
+
+        return channels;
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
+    }
+
+    return channels;
+}
+
+void
+DALStorage::updateChannels(std::map<short, std::string> channelList)
+{
+   // If not opened already
+    open();
+
+    try {
+        // Empties the table
+        std::stringstream sql;
+        sql << "delete from "
+            << CHANNELS_TBL_NAME
+            << ";";
+
+        mDb->execSql(sql.str());
+
+        for ( std::map<short, std::string>::iterator i = channelList.begin();
+                i != channelList.end();)
+        {
+            // insert registered channel if id < MAX_PUBLIC_CHANNELS;
+            if ( i->first < /*MAX_PUBLIC_CHANNELS*/ 1000 )
+            {
+                sql.str("");
+                sql << "insert into "
+                    << CHANNELS_TBL_NAME
+                    << " (id, name)"
+                    << " values ("
+                    << i->first << ", '"
+                    << i->second << "');";
+
+                mDb->execSql(sql.str());
+            }
+            ++i;
+        }
+
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
+    }
 }
 
 /**

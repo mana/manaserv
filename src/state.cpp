@@ -90,9 +90,6 @@ void State::addBeing(BeingPtr beingPtr, const unsigned int mapId) {
         if (!mapExists(mapId))
             if (!loadMap(mapId))
                 return;
-        // WARNING: We should pass a copy there.
-        // Otherwise, remove being will erase one character 
-        // from the account object.
         maps[mapId].beings.push_back(beingPtr);
     }
 }

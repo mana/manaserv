@@ -120,6 +120,20 @@ class DALStorage: public Storage
         getMapNameFromId(const unsigned int mapId);
 
         /**
+         * Gives the list of opened public channels registered in database
+         * @return a map of the public channels
+         */
+        const std::map<short, std::string>
+        getChannelList();
+
+        /**
+         * apply channel differences from the list in memory
+         * to the one in db.
+         */
+        void
+        updateChannels(std::map<short, std::string> channelList);
+
+        /**
          * Save changes to the database permanently.
          *
          * @exception tmwserv::dal::DbSqlQueryExecFailure.

@@ -286,7 +286,8 @@ class Storage
          *
          * @deprecated The only purpose of using this list inside the server is
          *             for checking for existing email addresses, which is
-         *             covered by Storage::doesEmailAlreadyExists().
+         *             covered by Storage::getSameEmailNumber().
+         *             It could later be used for mailing list announcement.
          */
         virtual
         std::list<std::string> getEmailList() = 0;
@@ -311,6 +312,21 @@ class Storage
          */
         virtual const std::string
         getMapNameFromId(const unsigned int mapId) = 0;
+
+        /**
+         * Gives the list of opened public channels registered in database
+         * @return a map of the public channels
+         */
+        virtual const std::map<short, std::string>
+        getChannelList() = 0;
+
+        /**
+         * apply channel differences from the list in memory
+         * to the one in db.
+         */
+        virtual void
+        updateChannels(std::map<short, std::string> channelList) = 0;
+
 
         /**
          * Saves the changes permanently.

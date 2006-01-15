@@ -28,6 +28,12 @@
 #include "utils/logger.h"
 #include "utils/slangsfilter.h"
 
+ChatHandler::ChatHandler()
+{
+    // TODO: Implement loading public chat channels from db.
+    // That require adding a table for that.
+}
+
 void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     // If not logged in...
@@ -216,4 +222,5 @@ void ChatHandler::sayInChannel(NetComputer &computer, short channel, std::string
     say += ": ";
     say += text;
     result.writeString(say);
+
 }

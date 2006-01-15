@@ -18,6 +18,10 @@ tmwserv_SOURCES = main.cpp \
 		  accounthandler.cpp \
 		  chathandler.h \
 		  chathandler.cpp \
+		  chatchannel.h \
+		  chatchannel.cpp \
+		  chatchannelmanager.h \
+		  chatchannelmanager.cpp \
 		  connectionhandler.h \
 		  connectionhandler.cpp \
 		  gamehandler.h \
