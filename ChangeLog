@@ -1,7 +1,7 @@
 2006-01-18  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/mapmanager.cpp, src/mapmanager.h: Some insignificant changes to
-	usage of the const keyword.
+	usage of the const keyword. Also simplified isLoaded method.
 
 2006-01-18  Yohann Ferreira  <bertram@cegetel.net>
 

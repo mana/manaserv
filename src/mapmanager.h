@@ -66,7 +66,8 @@ class MapManager: public utils::Singleton<MapManager>
         /**
          * Check if a map was already loaded.
          */
-        bool isLoaded(unsigned int mapId) const;
+        bool
+        isLoaded(unsigned int mapId) const;
 
     protected:
         /**
