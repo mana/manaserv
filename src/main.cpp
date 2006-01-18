@@ -189,6 +189,7 @@ void initialize()
         exit(1);
     }
 
+    // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
 
     // set SDL to quit on exit.

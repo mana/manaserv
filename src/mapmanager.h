@@ -46,27 +46,27 @@ class MapManager: public utils::Singleton<MapManager>
         /**
          * Load the specified map
          */
-        Map *loadMap(const unsigned int mapId);
+        Map *loadMap(unsigned int mapId);
 
         /**
          * Unload the specified map
          */
-        void unloadMap(const unsigned int mapId);
+        void unloadMap(unsigned int mapId);
 
         /**
          * Reload the specified map
          */
-        void reloadMap(const unsigned int mapId);
+        void reloadMap(unsigned int mapId);
 
         /**
          * Return the requested map
          */
-        Map *getMap(const unsigned int mapId);
-        
+        Map *getMap(unsigned int mapId);
+
         /**
          * Check if a map was already loaded.
          */
-        bool isLoaded(const unsigned int mapId);
+        bool isLoaded(unsigned int mapId) const;
 
     protected:
         /**

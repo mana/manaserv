@@ -1,38 +1,46 @@
+2006-01-18  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/mapmanager.cpp, src/mapmanager.h: Some insignificant changes to
+	usage of the const keyword.
+
 2006-01-18  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/chatchannelmanager.h, src/chatchannelmanager.cpp, src/chatchannel.h,
-	src/chatchannel.cpp, src/storage.h, src/dalstorage.h, src/dalstorage.cpp,
-	src/dalstoragesql.h, src/defines.h: Chat Channeling Commit Part 2.
+	* src/chatchannelmanager.h, src/chatchannelmanager.cpp,
+	src/chatchannel.h, src/chatchannel.cpp, src/storage.h,
+	src/dalstorage.h, src/dalstorage.cpp, src/dalstoragesql.h,
+	src/defines.h: Chat Channeling Commit Part 2.
 
 2006-01-16  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/state.cpp, src/chathandler.h, src/chathandler.cpp,
 	src/Makefile.am, src/chatchannel.h, src/chatchannel.cpp,
-	src/chatchannelmanager.h, src/chatchannelmanager.cpp, src/dalstoragesql.h,
-	src/dalstorage.cpp, src/storage.h, src/dalstorage.h: Chat channeling commit
-	part 1. Useful to get feedback before committing what's next.
+	src/chatchannelmanager.h, src/chatchannelmanager.cpp,
+	src/dalstoragesql.h, src/dalstorage.cpp, src/storage.h,
+	src/dalstorage.h: Chat channeling commit part 1. Useful to get
+	feedback before committing what's next.
 
 2006-01-14  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/accounthandler.cpp, src/client.cpp, src/dalstorage.cpp,
-	src/messageout.cpp, src/defines.h: Server returns infos about position of
-	the selected character (map name, coordinates).
+	src/messageout.cpp, src/defines.h: Server returns infos about position
+	of the selected character (map name, coordinates).
 
 2006-01-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/accounthandler.cpp, src/client.cpp, src/dalstorage.cpp,
 	src/defines.h, src/main.cpp, src/mapmanager.cpp, src/mapmanager.h,
 	src/netcomputer.cpp, src/object.cpp, src/object.h, tmwserv.dev: Made
-	minimum client version and default map id configurable, set/getMapId are 
-	now preferred.
+	minimum client version and default map id configurable, set/getMapId
+	are now preferred.
 
 2006-01-12  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/accounthandler.cpp, src/client.cpp, src/dalstorage.cpp,
-	src/main.cpp, src/mapmanager.cpp, src/mapmanager.h, src/netcomputer.cpp,
-	src/object.cpp, src/object.h, src/state.cpp, tmwserv.dev: Fixed default map
-	definition for a new created character, enabled loading of map when a
-	character is on it, fixed inconsistency in getter/setter for map id.
+	src/main.cpp, src/mapmanager.cpp, src/mapmanager.h,
+	src/netcomputer.cpp, src/object.cpp, src/object.h, src/state.cpp,
+	tmwserv.dev: Fixed default map definition for a new created character,
+	enabled loading of map when a character is on it, fixed inconsistency
+	in getter/setter for map id.
 
 2006-01-09  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
@@ -98,7 +106,7 @@
 
 2005-12-29  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
-	* src/mapmanager.cpp, src/mapmanager.h, tmwserv.dev,: Forgot a way to
+	* src/mapmanager.cpp, src/mapmanager.h, tmwserv.dev: Forgot a way to
 	access maps.
 	* tmwserv.dev: Fixed merge conflict as pointed out by Bjørn.
 

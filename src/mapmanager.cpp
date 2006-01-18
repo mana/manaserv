@@ -92,17 +92,17 @@ Map *MapManager::getMap(const unsigned int mapId)
     return result;
 }
 
-bool MapManager::isLoaded(const unsigned int mapId)
+bool MapManager::isLoaded(const unsigned int mapId) const
 {
     bool ret = false;
-    std::map<unsigned int, Map *>::iterator i;
+    std::map<unsigned int, Map *>::const_iterator i;
 
     i = maps.find(mapId);
     if (i != maps.end())
     {
         ret = true;
     }
-    return ret;    
+    return ret;
 }
 
 
