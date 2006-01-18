@@ -1,3 +1,9 @@
+2006-01-18  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/chatchannelmanager.h, src/chatchannelmanager.cpp, src/chatchannel.h,
+	src/chatchannel.cpp, src/storage.h, src/dalstorage.h, src/dalstorage.cpp,
+	src/dalstoragesql.h, src/defines.h: Chat Channeling Commit Part 2.
+
 2006-01-16  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/state.cpp, src/chathandler.h, src/chathandler.cpp,

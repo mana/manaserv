@@ -23,16 +23,12 @@
 
 #include "chatchannel.h"
 
-ChatChannel::ChatChannel():
-    mChannelId(0),
-    mChannelName("")
-{
-    mRegisteredUsers.clear();
-}
-
-ChatChannel::ChatChannel(short channelId, std::string channelName):
-    mChannelId(channelId),
-    mChannelName(channelName)
+ChatChannel::ChatChannel(const std::string channelName,
+                         const std::string channelAnnouncement = "",
+                         const std::string channelPassword = ""):
+    mChannelName(channelName),
+    mChannelAnnouncement(channelAnnouncement),
+    mChannelPassword(channelPassword)
 {
     mRegisteredUsers.clear();
 }
@@ -43,54 +39,69 @@ ChatChannel::~ChatChannel()
 }
 
 
-const std::string
-ChatChannel::getName()
+const std::string&
+ChatChannel::getName() const
 {
     return mChannelName;
 }
 
+const std::string&
+ChatChannel::getAnnouncement() const
+{
+    return mChannelAnnouncement;
+}
+
+const std::string&
+ChatChannel::getPassword() const
+{
+    return mChannelPassword;
+}
 
 void
-ChatChannel::setName(std::string channelName)
+ChatChannel::setName(const std::string channelName)
 {
     mChannelName = channelName;
 }
 
-
-const short
-ChatChannel::getChannelId()
+void
+ChatChannel::setAnnouncement(const std::string channelAnnouncement)
 {
-    return mChannelId;
+    mChannelAnnouncement = channelAnnouncement;
 }
 
+void
+ChatChannel::setPassword(const std::string channelPassword)
+{
+    mChannelPassword = channelPassword;
+}
 
-const std::list<std::string>
-ChatChannel::getUserList()
+std::vector<tmwserv::BeingPtr>
+ChatChannel::getUserList() const
 {
     return mRegisteredUsers;
 }
 
 
 bool
-ChatChannel::addUserInChannel(std::string playerName)
+ChatChannel::addUserInChannel(tmwserv::BeingPtr beingPtr)
 {
     // Check if the user already exists in the channel
-    for (std::list<std::string>::iterator i = mRegisteredUsers.begin(); i != mRegisteredUsers.end();)
+    for (std::vector<tmwserv::BeingPtr>::iterator i = mRegisteredUsers.begin(); i != mRegisteredUsers.end();)
     {
-        if ( *i == playerName ) return false;
+        if ( i->get() == beingPtr.get() ) return false;
         ++i;
     }
-    mRegisteredUsers.push_back(playerName);
+    mRegisteredUsers.push_back(beingPtr);
     return true;
 }
 
 
 bool
-ChatChannel::removeUserFromChannel(std::string playerName)
+ChatChannel::removeUserFromChannel(tmwserv::BeingPtr beingPtr)
 {
-    for (std::list<std::string>::iterator i = mRegisteredUsers.begin(); i != mRegisteredUsers.end();)
+    for (std::vector<tmwserv::BeingPtr>::iterator i = mRegisteredUsers.begin(); i != mRegisteredUsers.end();)
     {
-        if ( *i == playerName )
+        if ( i->get() == beingPtr.get() )
         {
             mRegisteredUsers.erase(i);
             return true;

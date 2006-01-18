@@ -21,7 +21,6 @@
  */
 
 #include <sstream>
-#include <vector>
 
 #include "configuration.h"
 #include "dalstorage.h"
@@ -503,7 +502,7 @@ DALStorage::getMapNameFromId(const unsigned int mapId)
 
         const dal::RecordSet& mapInfo = mDb->execSql(sql.str());
 
-        // If the map return is empty then we have no choice but to return false.
+        // If the map return is empty then we have no choice but to return None.
         if (mapInfo.isEmpty()) {
             return "None";
         }
@@ -519,7 +518,7 @@ DALStorage::getMapNameFromId(const unsigned int mapId)
     return "None";
 }
 
-const std::map<short, std::string>
+std::map<short, ChatChannel>
 DALStorage::getChannelList()
 {
     // If not opened already
@@ -530,11 +529,11 @@ DALStorage::getChannelList()
     string_to<short> toShort;
 
     // The formatted datas
-    std::map<short, std::string> channels;
+    std::map<short, ChatChannel> channels;
 
     try {
         std::stringstream sql;
-        sql << "select id, name from ";
+        sql << "select id, name, announcement, password from ";
         sql << CHANNELS_TBL_NAME;
         sql << ";";
 
@@ -547,7 +546,13 @@ DALStorage::getChannelList()
 
         for ( unsigned int i = 0; i < channelInfo.rows(); ++i)
         {
-            channels.insert(std::make_pair(toShort(channelInfo(0,0)),std::string(channelInfo(0,1))));
+            channels.insert(std::make_pair(toShort(channelInfo(0,0)),
+                            ChatChannel(channelInfo(0,1),
+                                        channelInfo(0,2),
+                                        channelInfo(0,3))));
+
+            LOG_DEBUG("Channel loaded: " << channelInfo(0,1)
+                    << ":" << channelInfo(0,2), 5)
         }
 
         return channels;
@@ -561,7 +566,7 @@ DALStorage::getChannelList()
 }
 
 void
-DALStorage::updateChannels(std::map<short, std::string> channelList)
+DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
 {
    // If not opened already
     open();
@@ -575,19 +580,24 @@ DALStorage::updateChannels(std::map<short, std::string> channelList)
 
         mDb->execSql(sql.str());
 
-        for ( std::map<short, std::string>::iterator i = channelList.begin();
+        for ( std::map<short, ChatChannel>::iterator i = channelList.begin();
                 i != channelList.end();)
         {
-            // insert registered channel if id < MAX_PUBLIC_CHANNELS;
-            if ( i->first < /*MAX_PUBLIC_CHANNELS*/ 1000 )
+            // insert registered channel if id < MAX_PUBLIC_CHANNELS_RANGE;
+            if ( i->first < (signed)MAX_PUBLIC_CHANNELS_RANGE )
             {
                 sql.str("");
                 sql << "insert into "
                     << CHANNELS_TBL_NAME
-                    << " (id, name)"
+                    << " (id, name, announcement, password)"
                     << " values ("
                     << i->first << ", '"
-                    << i->second << "');";
+                    << i->second.getName() << "', '"
+                    << i->second.getAnnouncement() << "', '"
+                    << i->second.getPassword() << "');";
+
+                    LOG_DEBUG("Channel saved: " << i->second.getName()
+                        << ":" << i->second.getAnnouncement(), 5)
 
                 mDb->execSql(sql.str());
             }

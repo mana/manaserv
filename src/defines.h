@@ -56,6 +56,12 @@ typedef enum {
 
     // Network related
 const unsigned int MAX_CLIENTS  = 1024,
+/**
+ * N.B: Private channels can't have an id less
+ * than MAX_PUBLIC_CHANNELS_RANGE.
+ */
+    MAX_PUBLIC_CHANNELS_RANGE  = 1000,
+    MAX_PRIVATE_CHANNELS_RANGE   = 10000,
 
     // Registering related
     MIN_LOGIN_LENGTH = 4,

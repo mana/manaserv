@@ -123,7 +123,7 @@ class DALStorage: public Storage
          * Gives the list of opened public channels registered in database
          * @return a map of the public channels
          */
-        const std::map<short, std::string>
+        std::map<short, ChatChannel>
         getChannelList();
 
         /**
@@ -131,7 +131,7 @@ class DALStorage: public Storage
          * to the one in db.
          */
         void
-        updateChannels(std::map<short, std::string> channelList);
+        updateChannels(std::map<short, ChatChannel>& channelList);
 
         /**
          * Save changes to the database permanently.

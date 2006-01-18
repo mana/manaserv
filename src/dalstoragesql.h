@@ -324,14 +324,20 @@ const std::string CHANNELS_TBL_NAME("tmw_channels");
 const std::string SQL_CHANNELS_TABLE(
     "CREATE TABLE tmw_channels ("
 #if defined (MYSQL_SUPPORT)
-        "id      INTEGER     PRIMARY KEY,"
-        "name    VARCHAR(32) NOT NULL UNIQUE"
+        "id            INTEGER     PRIMARY KEY,"
+        "name          VARCHAR(32) NOT NULL UNIQUE,"
+        "announcement  VARCHAR(256),"
+        "password      VARCHAR(32)"
 #elif defined (SQLITE_SUPPORT)
         "id      INTEGER     PRIMARY KEY,"
-        "name    TEXT        NOT NULL UNIQUE"
+        "name    TEXT        NOT NULL UNIQUE,"
+        "announcement    TEXT,"
+        "password        TEXT"
 #elif defined (POSTGRESQL_SUPPORT)
         "id      SERIAL      PRIMARY KEY,"
-        "name    TEXT        NOT NULL UNIQUE"
+        "name    TEXT        NOT NULL UNIQUE,"
+        "announcement    TEXT,"
+        "password        TEXT"
 #endif
     ");"
 );

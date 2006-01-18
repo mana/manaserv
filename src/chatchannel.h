@@ -24,8 +24,10 @@
 #ifndef _TMWSERV_CHATCHANNEL_H_
 #define _TMWSERV_CHATCHANNEL_H_
 
-#include <list>
+#include <vector>
 #include <string>
+
+#include "being.h"
 
 class ChatChannel {
 
@@ -34,9 +36,9 @@ class ChatChannel {
     /**
      * Constructors
      */
-    ChatChannel();
-
-    ChatChannel(short channelId, std::string channelName);
+    ChatChannel(const std::string channelName,
+                const std::string ChannelAnnouncement,
+                const std::string ChannelPassword);
 
     /**
      * Destructor
@@ -46,49 +48,68 @@ class ChatChannel {
     /**
      * Get the name of the channel
      */
-    const std::string getName();
+    const std::string& getName() const;
+
+    /**
+     * Get the Announcement string of the channel
+     */
+    const std::string& getAnnouncement() const;
+
+    /**
+     * Get the password of the channel
+     */
+    const std::string& getPassword() const;
 
     /**
      * Set the name of the channel
      */
-    void setName(std::string channelName);
+    void setName(const std::string channelName);
 
     /**
-     * Get the id of the channel
+     * Set the Announcement string of the channel
      */
-    const short getChannelId();
+    void setAnnouncement(const std::string channelAnnouncement);
+
+    /**
+     * Set the password of the channel
+     */
+    void setPassword(const std::string channelPassword);
 
     /**
      * Get the list of the users registered in the channel
      */
-    const std::list<std::string> getUserList();
+    std::vector<tmwserv::BeingPtr> getUserList() const;
 
     /**
      * Add a user in the channel
      */
-    bool addUserInChannel(std::string playerName);
+    bool addUserInChannel(tmwserv::BeingPtr beingPtr);
 
     /**
      * Remove a user from the channel.
      */
-    bool removeUserFromChannel(std::string playerName);
+    bool removeUserFromChannel(tmwserv::BeingPtr beingPtr);
 
  private:
-
-    /**
-     * The channel id which must be unique.
-     */
-    short mChannelId;
-
     /**
      * The Channel's name
      */
     std::string mChannelName;
 
     /**
+     * The Channel's name
+     */
+    std::string mChannelAnnouncement;
+
+    /**
+     * The Channel's name
+     */
+    std::string mChannelPassword;
+
+    /**
      * The registered user list
      */
-    std::list<std::string> mRegisteredUsers;
+    std::vector<tmwserv::BeingPtr> mRegisteredUsers;
 
 };
 

@@ -29,6 +29,7 @@
 #include <list>
 
 #include "account.h"
+#include "chatchannel.h"
 
 
 namespace tmwserv
@@ -317,7 +318,7 @@ class Storage
          * Gives the list of opened public channels registered in database
          * @return a map of the public channels
          */
-        virtual const std::map<short, std::string>
+        virtual std::map<short, ChatChannel>
         getChannelList() = 0;
 
         /**
@@ -325,7 +326,7 @@ class Storage
          * to the one in db.
          */
         virtual void
-        updateChannels(std::map<short, std::string> channelList) = 0;
+        updateChannels(std::map<short, ChatChannel>& channelList) = 0;
 
 
         /**
