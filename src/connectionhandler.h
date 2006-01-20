@@ -124,6 +124,11 @@ class ConnectionHandler
         void sendAround(tmwserv::BeingPtr, MessageOut &);
 
         /**
+         * Send packet to every client in a registered channel.
+         */
+        void sendInChannel(short channelId, MessageOut &);
+
+        /**
          * Return the number of connected clients.
          */
         unsigned int getClientNumber();

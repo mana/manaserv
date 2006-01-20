@@ -57,7 +57,7 @@ ChatChannelManager::registerPublicChannel(const std::string& channelName)
     if ( channelId >= (signed)MAX_PRIVATE_CHANNELS_RANGE ) return 0;
 
     // Register Channel
-    mChatChannels.insert(std::make_pair(channelId,ChatChannel(channelName, "", "")));
+    mChatChannels.insert(std::make_pair(channelId,ChatChannel(channelName, "None", "None")));
     return channelId;
 }
 
@@ -78,7 +78,7 @@ ChatChannelManager::registerPrivateChannel(const std::string& channelName)
     if ( channelId >= (signed)MAX_PUBLIC_CHANNELS_RANGE ) return 0;
 
     // Register Channel
-    mChatChannels.insert(std::make_pair(channelId, ChatChannel(channelName, "", "")));
+    mChatChannels.insert(std::make_pair(channelId, ChatChannel(channelName, "None", "None")));
     return channelId;
 }
 
@@ -130,7 +130,7 @@ ChatChannelManager::getChannelAnnouncement(const short channelId)
         if ( i->first == channelId ) return i->second.getAnnouncement();
         ++i;
     }
-    return "";
+    return "None";
 }
 
 const std::string
@@ -141,7 +141,7 @@ ChatChannelManager::getChannelPassword(const short channelId)
         if ( i->first == channelId ) return i->second.getPassword();
         ++i;
     }
-    return "";
+    return "None";
 }
 
 const ChatChannel
@@ -193,4 +193,19 @@ ChatChannelManager::removeUserFromEveryChannels(tmwserv::BeingPtr beingPtr)
         i->second.removeUserFromChannel(beingPtr);
         ++i;
     }
+}
+
+std::vector<tmwserv::BeingPtr>
+ChatChannelManager::getUserListInChannel(const short channelId)
+{
+    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
+    {
+        if ( i->first == channelId )
+        {
+            return i->second.getUserList();
+        }
+        ++i;
+    }
+    std::vector<tmwserv::BeingPtr> emptyList;
+    return emptyList;
 }

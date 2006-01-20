@@ -118,6 +118,11 @@ public:
      */
     void removeUserFromEveryChannels(tmwserv::BeingPtr beingPtr);
 
+    /**
+     * Get the list of the users registered in a channel
+     */
+    std::vector<tmwserv::BeingPtr> getUserListInChannel(const short channelId);
+
 private:
 
     /**
@@ -128,5 +133,7 @@ private:
     std::map<short, ChatChannel> mChatChannels;
 
 };
+
+extern ChatChannelManager *chatChannelManager;
 
 #endif

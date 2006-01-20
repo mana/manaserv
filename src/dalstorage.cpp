@@ -444,7 +444,7 @@ DALStorage::getSameEmailNumber(const std::string &email)
  * @return true if character's name exists.
  */
 bool
-DALStorage::doesCharacterNameExists(std::string name)
+DALStorage::doesCharacterNameExists(const std::string& name)
 {
     // If not opened already
     open();
@@ -544,6 +544,10 @@ DALStorage::getChannelList()
             return channels;
         }
 
+        // We use this to handle correctly empty lines
+        std::string channelName;
+        std::string channelAnnouncement;
+        std::string channelPassword;
         for ( unsigned int i = 0; i < channelInfo.rows(); ++i)
         {
             channels.insert(std::make_pair(toShort(channelInfo(0,0)),
@@ -551,8 +555,8 @@ DALStorage::getChannelList()
                                         channelInfo(0,2),
                                         channelInfo(0,3))));
 
-            LOG_DEBUG("Channel loaded: " << channelInfo(0,1)
-                    << ":" << channelInfo(0,2), 5)
+            LOG_DEBUG("Channel (" << channelInfo(0,0) << ") loaded: " << channelInfo(0,1)
+                    << ": " << channelInfo(0,2), 5)
         }
 
         return channels;
@@ -568,7 +572,11 @@ DALStorage::getChannelList()
 void
 DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
 {
-   // If not opened already
+#if defined (SQLITE_SUPPORT)
+    // Reopen the db in this thread for sqlite, to avoid
+    // Library Call out of sequence problem due to thread safe.
+    close();
+#endif
     open();
 
     try {
@@ -580,24 +588,28 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
 
         mDb->execSql(sql.str());
 
+        // TODO: See if ' don't make the SQL query fail.
         for ( std::map<short, ChatChannel>::iterator i = channelList.begin();
                 i != channelList.end();)
         {
             // insert registered channel if id < MAX_PUBLIC_CHANNELS_RANGE;
             if ( i->first < (signed)MAX_PUBLIC_CHANNELS_RANGE )
             {
-                sql.str("");
-                sql << "insert into "
-                    << CHANNELS_TBL_NAME
-                    << " (id, name, announcement, password)"
-                    << " values ("
-                    << i->first << ", '"
-                    << i->second.getName() << "', '"
-                    << i->second.getAnnouncement() << "', '"
-                    << i->second.getPassword() << "');";
+                if (i->second.getName() != "")
+                {
+                    sql.str("");
+                    sql << "insert into "
+                        << CHANNELS_TBL_NAME
+                        << " (id, name, announcement, password)"
+                        << " values ("
+                        << i->first << ", '"
+                        << i->second.getName() << "', '"
+                        << i->second.getAnnouncement() << "', '"
+                        << i->second.getPassword() << "');";
 
-                    LOG_DEBUG("Channel saved: " << i->second.getName()
-                        << ":" << i->second.getAnnouncement(), 5)
+                        LOG_DEBUG("Channel (" << i->first << ") saved: " << i->second.getName()
+                            << ": " << i->second.getAnnouncement(), 5)
+                }
 
                 mDb->execSql(sql.str());
             }

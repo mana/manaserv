@@ -22,15 +22,14 @@
  */
 
 #include "netcomputer.h"
+#include "chatchannelmanager.h"
 #include "state.h"
-#include <cstdlib>
-#include <iostream>
 
 NetComputer::NetComputer(ConnectionHandler *handler, TCPsocket sock):
     handler(handler),
     socket(sock),
-    accountPtr(NULL),
-    characterPtr(NULL)
+    mAccountPtr(NULL),
+    mCharacterPtr(NULL)
 {
 }
 
@@ -52,32 +51,33 @@ void NetComputer::send(const Packet *p)
 
 void NetComputer::setAccount(tmwserv::AccountPtr acc)
 {
-    accountPtr = acc;
+    mAccountPtr = acc;
 }
 
 void NetComputer::setCharacter(tmwserv::BeingPtr ch)
 {
     tmwserv::State &state = tmwserv::State::instance();
-    if (characterPtr.get() != NULL)
+    if (mCharacterPtr.get() != NULL)
     {
         // Remove being from the world.
-        state.removeBeing(characterPtr);
+        unsetCharacter();
     }
-    characterPtr = ch;
-    state.addBeing(characterPtr, characterPtr->getMapId());
+    mCharacterPtr = ch;
+    state.addBeing(mCharacterPtr, mCharacterPtr->getMapId());
 }
 
 void NetComputer::unsetAccount()
 {
     unsetCharacter();
-    accountPtr = tmwserv::AccountPtr(NULL);
+    mAccountPtr = tmwserv::AccountPtr(NULL);
 }
 
 void NetComputer::unsetCharacter()
 {
     // remove being from world
     tmwserv::State &state = tmwserv::State::instance();
-    state.removeBeing(characterPtr);
-    characterPtr = tmwserv::BeingPtr(NULL);
+    state.removeBeing(mCharacterPtr);
+    chatChannelManager->removeUserFromEveryChannels(mCharacterPtr);
+    mCharacterPtr = tmwserv::BeingPtr(NULL);
 }
 

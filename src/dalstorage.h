@@ -111,7 +111,7 @@ class DALStorage: public Storage
          * @return true if character's name exists.
          */
         bool
-        doesCharacterNameExists(std::string name);
+        doesCharacterNameExists(const std::string &name);
 
         /**
          * Tells the map name from the map id

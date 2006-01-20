@@ -1,3 +1,14 @@
+2006-01-21  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/chatchannelmanager.h, src/chatchannelmanager.cpp,
+	src/chatchannel.h, src/chatchannel.cpp, src/dalstorage.cpp,
+	src/dalstorage.h, src/storage.h, src/chathandler.cpp,
+	src/netcomputer.h, src/netcomputer.cpp, src/main.cpp,
+	src/connectionhandler.h, src/connectionhandler.cpp: Chat channeling
+	commit part 3. Is now linked with the connection handler to chat in a
+	specific channel. Also made some fixes on the chat channeling and in
+	the channels load/save functions.
+
 2006-01-18  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/mapmanager.cpp, src/mapmanager.h: Some insignificant changes to

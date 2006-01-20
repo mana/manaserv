@@ -23,13 +23,17 @@
 
 #include "chatchannel.h"
 
-ChatChannel::ChatChannel(const std::string channelName,
-                         const std::string channelAnnouncement = "",
-                         const std::string channelPassword = ""):
+ChatChannel::ChatChannel(const std::string &channelName,
+                         const std::string &channelAnnouncement = "None",
+                         const std::string &channelPassword = "None"):
     mChannelName(channelName),
     mChannelAnnouncement(channelAnnouncement),
     mChannelPassword(channelPassword)
 {
+    if (channelAnnouncement == "")
+        mChannelAnnouncement = "None";
+    if (channelPassword == "")
+        mChannelPassword = "None";
     mRegisteredUsers.clear();
 }
 
@@ -58,21 +62,27 @@ ChatChannel::getPassword() const
 }
 
 void
-ChatChannel::setName(const std::string channelName)
+ChatChannel::setName(const std::string &channelName)
 {
     mChannelName = channelName;
 }
 
 void
-ChatChannel::setAnnouncement(const std::string channelAnnouncement)
+ChatChannel::setAnnouncement(const std::string &channelAnnouncement)
 {
-    mChannelAnnouncement = channelAnnouncement;
+    if (channelAnnouncement == "")
+        mChannelAnnouncement = "None";
+    else
+        mChannelAnnouncement = channelAnnouncement;
 }
 
 void
-ChatChannel::setPassword(const std::string channelPassword)
+ChatChannel::setPassword(const std::string &channelPassword)
 {
-    mChannelPassword = channelPassword;
+    if (channelPassword == "")
+        mChannelPassword = "None";
+    else
+        mChannelPassword = channelPassword;
 }
 
 std::vector<tmwserv::BeingPtr>

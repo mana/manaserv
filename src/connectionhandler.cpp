@@ -27,6 +27,7 @@
 
 #include "connectionhandler.h"
 #include "netsession.h"
+#include "chatchannelmanager.h"
 #include "utils/logger.h"
 
 #ifdef SCRIPT_SUPPORT
@@ -289,6 +290,24 @@ void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
             {
             (*i)->send(msg.getPacket());
             break;
+            }
+        }
+    }
+}
+
+void ConnectionHandler::sendInChannel(short channelId, MessageOut &msg)
+{
+    for (NetComputers::iterator i = clients.begin(); i != clients.end();i++)
+    {
+        const std::vector<tmwserv::BeingPtr> beingList =
+            chatChannelManager->getUserListInChannel(channelId);
+        // If the being is in the channel, send it
+        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin();
+             j != beingList.end(); j++)
+        {
+            if ((*i)->getCharacter().get() == (*j).get() )
+            {
+                (*i)->send(msg.getPacket());
             }
         }
     }

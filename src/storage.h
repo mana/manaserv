@@ -305,7 +305,7 @@ class Storage
          * @return true if character's name exists.
          */
         virtual bool
-        doesCharacterNameExists(std::string name) = 0;
+        doesCharacterNameExists(const std::string &name) = 0;
 
         /**
          * Tells the map name from the map id

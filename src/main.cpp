@@ -36,6 +36,7 @@
 #endif
 
 #include "accounthandler.h"
+#include "chatchannelmanager.h"
 #include "chathandler.h"
 #include "configuration.h"
 #include "connectionhandler.h"
@@ -94,6 +95,8 @@ AccountHandler *accountHandler;
 
 /** Communications (chat) message handler */
 ChatHandler *chatHandler;
+/** Chat Channels Manager */
+ChatChannelManager *chatChannelManager;
 
 /** Core game message handler */
 GameHandler *gameHandler;
@@ -175,8 +178,10 @@ void initialize()
     // Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
     // singleton or a local vatiable in the event-loop
-    accountHandler = new AccountHandler();
+    chatChannelManager = new ChatChannelManager();
+
     chatHandler = new ChatHandler();
+    accountHandler = new AccountHandler();
     gameHandler = new GameHandler();
     connectionHandler = new ConnectionHandler();
 
@@ -269,6 +274,8 @@ void deinitialize()
     delete chatHandler;
     delete gameHandler;
     delete connectionHandler;
+
+    delete chatChannelManager;
 
     // Get rid of persistent data storage
     tmwserv::Storage::destroy();

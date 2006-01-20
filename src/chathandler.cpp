@@ -28,12 +28,6 @@
 #include "utils/logger.h"
 #include "utils/slangsfilter.h"
 
-ChatHandler::ChatHandler()
-{
-    // TODO: Implement loading public chat channels from db.
-    // That require adding a table for that.
-}
-
 void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {
     // If not logged in...
@@ -84,7 +78,7 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                             // to the characters around him in the map.
                             // We, then, look for every characters around him and
                             // send the message to them.
-                            // By 'around', let's say 10 tiles square wide for now.
+                            // By 'around', let's say AROUND_AREA_IN_TILES tiles square wide.
                             sayAround(computer, text);
                         }
                     }
@@ -215,12 +209,13 @@ void ChatHandler::sayInChannel(NetComputer &computer, short channel, std::string
     MessageOut result;
     LOG_INFO( computer.getCharacter()->getName() << " says in channel " << channel
             << ": " << text, 2)
-    // TODO: Send it to every beings in channel
+    // Send it to every beings in channel
     result.writeShort(SMSG_CHAT);
     result.writeShort(channel);
     std::string say = computer.getCharacter()->getName();
     say += ": ";
     say += text;
     result.writeString(say);
+    connectionHandler->sendInChannel(channel, result);
 
 }

@@ -36,9 +36,9 @@ class ChatChannel {
     /**
      * Constructors
      */
-    ChatChannel(const std::string channelName,
-                const std::string ChannelAnnouncement,
-                const std::string ChannelPassword);
+    ChatChannel(const std::string &channelName,
+                const std::string &channelAnnouncement,
+                const std::string &channelPassword);
 
     /**
      * Destructor
@@ -63,17 +63,17 @@ class ChatChannel {
     /**
      * Set the name of the channel
      */
-    void setName(const std::string channelName);
+    void setName(const std::string &channelName);
 
     /**
      * Set the Announcement string of the channel
      */
-    void setAnnouncement(const std::string channelAnnouncement);
+    void setAnnouncement(const std::string &channelAnnouncement);
 
     /**
      * Set the password of the channel
      */
-    void setPassword(const std::string channelPassword);
+    void setPassword(const std::string &channelPassword);
 
     /**
      * Get the list of the users registered in the channel
