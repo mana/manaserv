@@ -35,6 +35,16 @@ using tmwserv::Account;
 using tmwserv::AccountPtr;
 using tmwserv::Storage;
 
+// Useful to avoid failing SQL queries cause of " in strings.
+bool findDoubleQuotes(const std::string& text)
+{
+    for (unsigned int i = 0; i < text.length(); i++)
+    {
+        if (text[i] == '\"') return true;
+    }
+    return false;
+}
+
 /**
  * Generic interface convention for getting a message and sending it to the
  * correct subroutines. Account handler takes care of determining the
@@ -84,7 +94,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if (connectionHandler->getClientNumber() >= MAX_CLIENTS )
                 {
                     // Too much clients logged in.
-                    LOG_INFO("Client couldn't log. Already has " << MAX_CLIENTS
+                    LOG_INFO("Client couldn't login. Already has " << MAX_CLIENTS
                     << " logged in.", 1)
                     result.writeByte(LOGIN_SERVER_FULL);
                     break;
@@ -175,12 +185,22 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 // Checking if the Name is slang's free.
+
                 if (!slangsFilter->filterContent(username))
                 {
                     result.writeByte(REGISTER_INVALID_USERNAME);
                     LOG_INFO(username << ": has got bad words in it.", 1)
                     break;
                 }
+
+                // Checking if there are double quotes in it.
+                if (findDoubleQuotes(username))
+                {
+                    result.writeByte(REGISTER_INVALID_USERNAME);
+                    LOG_INFO(username << ": has got double quotes in it.", 1)
+                    break;
+                }
+
                 // Checking conditions for having a good account.
                 LOG_INFO(username << " is trying to register.", 1)
 
@@ -205,6 +225,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeByte(REGISTER_INVALID_EMAIL);
                     LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1)
+                }
+                if (findDoubleQuotes(email))
+                {
+                    result.writeByte(REGISTER_INVALID_EMAIL);
+                    LOG_INFO(email << ": has got double quotes in it.", 1)
+                    break;
                 }
                 else if (store.getSameEmailNumber(email) > 0) // Search if Email already exists.
                 {
@@ -283,6 +309,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     LOG_INFO(email << ": Invalid format, cannot change Email for " <<
                     computer.getAccount()->getName(), 1)
                 }
+                if (findDoubleQuotes(email))
+                {
+                    result.writeByte(EMAILCHG_INVALID);
+                    LOG_INFO(email << ": has got double quotes in it.", 1)
+                    break;
+                }
                 else if (store.getSameEmailNumber(email) > 1) // Search if Email already exists,
                 {                                             // Except for the one already that is to
                     result.writeByte(EMAILCHG_EXISTS_EMAIL);  // be changed.
@@ -334,6 +366,18 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     LOG_INFO(computer.getAccount()->getName() << 
                     ": New password too long or too short.", 1)
                 }
+                else if (findDoubleQuotes(password1))
+                {
+                    result.writeByte(PASSCHG_INVALID);
+                    LOG_INFO(password1 << ": has got double quotes in it.", 1)
+                    break;
+                }
+                else if (findDoubleQuotes(password2))
+                {
+                    result.writeByte(PASSCHG_INVALID);
+                    LOG_INFO(password2 << ": has got double quotes in it.", 1)
+                    break;
+                }
                 else if ( password1 != password2 )
                 {
                     result.writeByte(PASSCHG_MISMATCH);
@@ -382,6 +426,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 {
                     result.writeByte(CREATE_INVALID_NAME);
                     LOG_INFO(name << ": Character has got bad words in it.", 1)
+                    break;
+                }
+                // Checking if the Name has got double quotes.
+                if (findDoubleQuotes(name))
+                {
+                    result.writeByte(CREATE_INVALID_NAME);
+                    LOG_INFO(name << ": has got double quotes in it.", 1)
                     break;
                 }
                 // Check if the character's name already exists
@@ -628,6 +679,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 LOG_INFO(computer.getAccount()->getName() << "'s account has "
                 << chars.size() << " character(s).", 1)
                 std::string charStats = "";
+                std::string mapName = "";
                 for (unsigned int i = 0; i < chars.size(); i++)
                 {
                     result.writeByte(i);
@@ -645,6 +697,10 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeShort(chars[i]->getIntelligence());
                     result.writeShort(chars[i]->getDexterity());
                     result.writeShort(chars[i]->getLuck());
+                    mapName = store.getMapNameFromId(chars[i]->getMapId());
+                    result.writeString(mapName);
+                    result.writeShort(chars[i]->getX());
+                    result.writeShort(chars[i]->getY());
                 }
                 charStats += ".";
                 LOG_INFO(charStats.c_str(), 1)

@@ -1,7 +1,9 @@
 2006-01-21  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/accounthandler.cpp, src/client.cpp, src/defines.h,
-	src/dalstorage.cpp: Very little corrections.
+	src/dalstorage.cpp: Very little corrections. Corrected a little
+	mistake in the channels loading. Made a simple function to test
+	for double quotes. We could see how to improve that.
 	* src/chatchannelmanager.h, src/chatchannelmanager.cpp,
 	src/chatchannel.h, src/chatchannel.cpp, src/dalstorage.cpp,
 	src/dalstorage.h, src/storage.h, src/chathandler.cpp,

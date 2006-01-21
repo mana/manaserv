@@ -643,6 +643,9 @@ int main(int argc, char *argv[])
                                     std::cout << "Intelligence: " << int(msg.readShort()) << ", ";
                                     std::cout << "Dexterity: " << int(msg.readShort()) << ", ";
                                     std::cout << "Luck: " << int(msg.readShort()) << ". "
+                                    << std::endl;
+                                    std::cout << "Current Map: " << msg.readString() << " (X:";
+                                    std::cout << int(msg.readShort()) << ", Y:" << int(msg.readShort()) << ")."
                                     << std::endl << std::endl;
                                 }
                             break;

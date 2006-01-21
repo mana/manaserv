@@ -183,9 +183,9 @@ DALStorage::getAccount(const std::string& userName)
     try {
         std::string sql("select * from ");
         sql += ACCOUNTS_TBL_NAME;
-        sql += " where username = '";
+        sql += " where username = \"";
         sql += userName;
-        sql += "';";
+        sql += "\";";
         const RecordSet& accountInfo = mDb->execSql(sql);
 
         // if the account is not even in the database then
@@ -417,7 +417,7 @@ DALStorage::getSameEmailNumber(const std::string &email)
     try {
         std::string sql("select count(email) from ");
         sql += ACCOUNTS_TBL_NAME;
-        sql += " where upper(email) = upper('" + email + "');";
+        sql += " where upper(email) = upper(\"" + email + "\");";
 
         const dal::RecordSet& accountInfo = mDb->execSql(sql);
 
@@ -452,9 +452,9 @@ DALStorage::doesCharacterNameExists(const std::string& name)
     try {
             std::string sql("select count(name) from ");
             sql += CHARACTERS_TBL_NAME;
-            sql += " where name = '";
+            sql += " where name = \"";
             sql += name;
-            sql += "';";
+            sql += "\";";
             const dal::RecordSet& accountInfo = mDb->execSql(sql);
 
             // if the account is empty then
@@ -546,13 +546,13 @@ DALStorage::getChannelList()
 
         for ( unsigned int i = 0; i < channelInfo.rows(); ++i)
         {
-            channels.insert(std::make_pair(toShort(channelInfo(0,0)),
-                            ChatChannel(channelInfo(0,1),
-                                        channelInfo(0,2),
-                                        channelInfo(0,3))));
+            channels.insert(std::make_pair(toShort(channelInfo(i,0)),
+                            ChatChannel(channelInfo(i,1),
+                                        channelInfo(i,2),
+                                        channelInfo(i,3))));
 
-            LOG_DEBUG("Channel (" << channelInfo(0,0) << ") loaded: " << channelInfo(0,1)
-                    << ": " << channelInfo(0,2), 5)
+            LOG_DEBUG("Channel (" << channelInfo(i,0) << ") loaded: " << channelInfo(i,1)
+                    << ": " << channelInfo(i,2), 5)
         }
 
         return channels;
@@ -584,7 +584,6 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
 
         mDb->execSql(sql.str());
 
-        //TODO: See if the ' don't make the SQL queries fail.
         for (std::map<short, ChatChannel>::iterator i = channelList.begin();
                 i != channelList.end();)
         {
@@ -598,10 +597,10 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
                         << CHANNELS_TBL_NAME
                         << " (id, name, announcement, password)"
                         << " values ("
-                        << i->first << ", '"
-                        << i->second.getName() << "', '"
-                        << i->second.getAnnouncement() << "', '"
-                        << i->second.getPassword() << "');";
+                        << i->first << ", \""
+                        << i->second.getName() << "\", \""
+                        << i->second.getAnnouncement() << "\", \""
+                        << i->second.getPassword() << "\");";
 
                         LOG_DEBUG("Channel (" << i->first << ") saved: " << i->second.getName()
                             << ": " << i->second.getAnnouncement(), 5)
@@ -710,17 +709,17 @@ DALStorage::_addAccount(const AccountPtr& account)
     std::ostringstream sql1;
     sql1 << "insert into " << ACCOUNTS_TBL_NAME
          << " (username, password, email, level, banned)"
-         << " values ('"
-         << account->getName() << "', '"
-         << account->getPassword() << "', '"
-         << account->getEmail() << "', "
+         << " values (\""
+         << account->getName() << "\", \""
+         << account->getPassword() << "\", \""
+         << account->getEmail() << "\", "
          << account->getLevel() << ", 0);";
     mDb->execSql(sql1.str());
 
     // get the account id.
     std::ostringstream sql2;
     sql2 << "select id from " << ACCOUNTS_TBL_NAME
-         << " where username = '" << account->getName() << "';";
+         << " where username = \"" << account->getName() << "\";";
     const RecordSet& accountInfo = mDb->execSql(sql2.str());
     string_to<unsigned int> toUint;
 
@@ -747,8 +746,8 @@ DALStorage::_addAccount(const AccountPtr& account)
              << " (name, gender, hair_style, hair_color, level, money, x, y, "
              << "map_id, str, agi, vit, int, dex, luck)"
              << " values ("
-             << (account_it->second).id << ", '"
-             << (*it)->getName() << "', "
+             << (account_it->second).id << ", \""
+             << (*it)->getName() << "\", "
              << (*it)->getGender() << ", "
              << (int)(*it)->getHairStyle() << ", "
              << (int)(*it)->getHairColor() << ", "
@@ -806,9 +805,9 @@ DALStorage::_updAccount(const AccountPtr& account)
     // update the account.
     std::ostringstream sql1;
     sql1 << "update " << ACCOUNTS_TBL_NAME
-         << " set username = '" << account->getName() << "', "
-         << "password = '" << account->getPassword() << "', "
-         << "email = '" << account->getEmail() << "', "
+         << " set username = \"" << account->getName() << "\", "
+         << "password = \"" << account->getPassword() << "\", "
+         << "email = \"" << account->getEmail() << "\", "
          << "level = '" << account->getLevel() << "' "
          << "where id = '" << (account_it->second).id << "';";
     mDb->execSql(sql1.str());
@@ -826,7 +825,7 @@ DALStorage::_updAccount(const AccountPtr& account)
         // (reminder: the character names are unique in the database).
         std::ostringstream sql2;
         sql2 << "select id from " << CHARACTERS_TBL_NAME
-             << " where name = '" << (*it)->getName() << "';";
+             << " where name = \"" << (*it)->getName() << "\";";
         const RecordSet& charInfo = mDb->execSql(sql2.str());
 
         RawStatistics& stats = (*it)->getRawStatistics();
@@ -841,11 +840,11 @@ DALStorage::_updAccount(const AccountPtr& account)
                  << "name, gender, hair_style, hair_color, level, money, x, y, map_id, str, agi, vit, int, dex, luck)"
                  << " values ("
 #ifdef SQLITE_SUPPORT
-                 << (account_it->second).id << ", '"
+                 << (account_it->second).id << ", \""
 #else
-                 << "'"
+                 << "\""
 #endif
-                 << (*it)->getName() << "', "
+                 << (*it)->getName() << "\", "
                  << (*it)->getGender() << ", "
                  << (*it)->getHairStyle() << ", "
                  << (*it)->getHairColor() << ", "
@@ -863,7 +862,7 @@ DALStorage::_updAccount(const AccountPtr& account)
         }
         else {
             sql3 << "update " << CHARACTERS_TBL_NAME
-                << " set name = '" << (*it)->getName() << "', "
+                << " set name = \"" << (*it)->getName() << "\", "
                 << " gender = " << (*it)->getGender() << ", "
                 << " hair_style = " << (*it)->getHairStyle() << ", "
                 << " hair_color = " << (*it)->getHairColor() << ", "
@@ -973,9 +972,9 @@ DALStorage::_delAccount(const std::string& userName)
     // get the account id.
     std::string sql("select id from ");
     sql += ACCOUNTS_TBL_NAME;
-    sql += " where username = '";
+    sql += " where username = \"";
     sql += userName;
-    sql += "';";
+    sql += "\";";
     const RecordSet& accountInfo = mDb->execSql(sql);
 
     // the account does not even exist in the database,
