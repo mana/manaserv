@@ -582,9 +582,11 @@ int main(int argc, char *argv[])
                         {
                             case SELECT_OK:
                                 {
-                                std::cout << "Character selected: ";
-                                std::cout << msg.readString() << " (";
-                                std::cout << (int)msg.readShort() << ",";
+                                std::cout << "Character selected successfully.";
+                                std::cout << std::endl;
+                                std::cout << "Current Map: ";
+                                std::cout << msg.readString() << " (X:";
+                                std::cout << (int)msg.readShort() << ", Y:";
                                 std::cout << (int)msg.readShort() << ")" << std::endl;
                                 }
                             break;
@@ -597,6 +599,10 @@ int main(int argc, char *argv[])
                             break;
                             case SELECT_NO_CHARACTERS:
                                 std::cout << "Character Selection: No character to select." << std::endl;
+                            break;
+                            case SELECT_NO_MAPS:
+                                std::cout << "Character Selection: Can't load default map for character."
+                                << std::endl;
                             break;
                             default:
                             case SELECT_UNKNOWN:
@@ -615,11 +621,14 @@ int main(int argc, char *argv[])
                                 charNumber = msg.readByte();
                                 std::cout << "Character List:" << std::endl
                                 << "---------------" << std::endl;
-                                std::cout << int(charNumber) << " characters in the account."
+                                std::cout << int(charNumber) << " character(s) in the account."
                                 << std::endl;
+                                char charID;
                                 for (unsigned int i = 0; i < charNumber; i++)
                                 {
-                                    std::cout << msg.readString() << ":" << std::endl;
+                                    charID = msg.readByte();
+                                    std::cout << int(charID) << ". "
+                                    << msg.readString() << ":" << std::endl;
                                     std::cout << "Gender: " << int(msg.readByte()) << ", ";
                                     std::cout << "Hair Style: " << int(msg.readByte()) << ", ";
                                     std::cout << "Hair Color: " << int(msg.readByte()) << ", "

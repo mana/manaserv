@@ -544,16 +544,18 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 // set character
+                // TODO: Handle reset character's map when the server can't load
+                // it. And SELECT_NO_MAPS error return value when the default map couldn't
+                // be loaded in setCharacter(). Not implemented yet for tests purpose...
                 computer.setCharacter(chars[charNum]);
                 tmwserv::BeingPtr selectedChar = computer.getCharacter();
-                int mapId = selectedChar->getMapId();
                 result.writeByte(SELECT_OK);
-                std::string mapName = store.getMapNameFromId(mapId);
+                std::string mapName = store.getMapNameFromId(selectedChar->getMapId());
                 result.writeString(mapName);
                 result.writeShort(selectedChar->getX());
                 result.writeShort(selectedChar->getY());
                 LOG_INFO("Selected Character " << int(charNum)
-                << " : " <<
+                << ": " <<
                 selectedChar->getName(), 1);
             }
             break;
@@ -628,6 +630,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 std::string charStats = "";
                 for (unsigned int i = 0; i < chars.size(); i++)
                 {
+                    result.writeByte(i);
                     result.writeString(chars[i]->getName());
                     if (i >0) charStats += ", ";
                     charStats += chars[i]->getName();

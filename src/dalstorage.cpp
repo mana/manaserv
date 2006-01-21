@@ -544,10 +544,6 @@ DALStorage::getChannelList()
             return channels;
         }
 
-        // We use this to handle correctly empty lines
-        std::string channelName;
-        std::string channelAnnouncement;
-        std::string channelPassword;
         for ( unsigned int i = 0; i < channelInfo.rows(); ++i)
         {
             channels.insert(std::make_pair(toShort(channelInfo(0,0)),
@@ -588,8 +584,8 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
 
         mDb->execSql(sql.str());
 
-        // TODO: See if ' don't make the SQL query fail.
-        for ( std::map<short, ChatChannel>::iterator i = channelList.begin();
+        //TODO: See if the ' don't make the SQL queries fail.
+        for (std::map<short, ChatChannel>::iterator i = channelList.begin();
                 i != channelList.end();)
         {
             // insert registered channel if id < MAX_PUBLIC_CHANNELS_RANGE;
