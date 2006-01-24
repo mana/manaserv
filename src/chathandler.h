@@ -27,7 +27,6 @@
 #include "messagehandler.h"
 #include "netcomputer.h"
 #include "messagein.h"
-#include "chatchannelmanager.h"
 
 /**
  * Manages all chat related
@@ -35,12 +34,6 @@
 class ChatHandler : public MessageHandler
 {
  public:
-
-    /**
-     * Constructor
-     */
-    ChatHandler();
-
     /**
      * Receives chat related messages.
      */
@@ -50,7 +43,7 @@ class ChatHandler : public MessageHandler
     /**
      * Deals with command messages
      */
-    void handleCommand(NetComputer &computer, std::string command);
+    void handleCommand(NetComputer &computer, const std::string& command);
 
     /**
     * Tells the player to be more polite.
@@ -60,30 +53,24 @@ class ChatHandler : public MessageHandler
     /**
     * Announce a message to every being in the default channel.
     */
-    void announce(NetComputer &computer, std::string text);
+    void announce(NetComputer &computer, const std::string& text);
 
     /**
     * Display a message to every player around one's player
     * in the default channel.
     * The tile area has been set to 10 for now.
     */
-    void sayAround(NetComputer &computer, std::string text);
+    void sayAround(NetComputer &computer, const std::string& text);
 
     /**
     * Say something private to a player.
     */
-    void sayToPlayer(NetComputer &computer, std::string playerName, std::string text);
+    void sayToPlayer(NetComputer &computer, const std::string& playerName, const std::string& text);
 
     /**
     * Say something in a specific channel.
     */
-    void sayInChannel(NetComputer &computer, short channel, std::string text);
-
-    /**
-     * The Chat Channels instance
-     */
-    ChatChannelManager mChatChannelManager;
-
+    void sayInChannel(NetComputer &computer, short channel, const std::string& text);
 };
 
 #endif

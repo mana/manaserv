@@ -317,3 +317,24 @@ unsigned int ConnectionHandler::getClientNumber()
 {
     return clients.size();
 }
+
+void ConnectionHandler::makeUsersLeaveChannel(const short channelId)
+{
+    MessageOut result;
+    result.writeShort(SMSG_QUIT_CHANNEL_RESPONSE);
+    result.writeByte(CHATCNL_OUT_OK);
+    for (NetComputers::iterator i = clients.begin(); i != clients.end();i++)
+    {
+        const std::vector<tmwserv::BeingPtr> beingList =
+            chatChannelManager->getUserListInChannel(channelId);
+        // If the being is in the channel, send it the 'leave now' packet
+        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin();
+             j != beingList.end(); j++)
+        {
+            if ((*i)->getCharacter().get() == (*j).get() )
+            {
+                (*i)->send(result.getPacket());
+            }
+        }
+    }
+}

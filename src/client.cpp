@@ -558,8 +558,8 @@ int main(int argc, char *argv[])
                             case DELETE_OK:
                                 std::cout << "Character deleted." << std::endl;
                             break;
-                            case DELETE_INVALID_NAME:
-                                std::cout << "Character Deletion: Character's name doesn't exist."
+                            case DELETE_INVALID_ID:
+                                std::cout << "Character Deletion: Character's ID doesn't exist."
                                 << std::endl;
                             break;
                             case DELETE_NOLOGIN:

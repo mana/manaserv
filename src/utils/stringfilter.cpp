@@ -20,7 +20,8 @@
  *  $Id$
  */
 
-#include "slangsfilter.h"
+#include "../defines.h"
+#include "stringfilter.h"
 #include "logger.h"
 
 namespace tmwserv
@@ -28,21 +29,21 @@ namespace tmwserv
 namespace utils
 {
 
-SlangsFilter::SlangsFilter(Configuration *config)
+StringFilter::StringFilter(Configuration *config)
     : mInitialized(false),
       mConfig(config)
 {
     mSlangs.clear();
-    loadFilterList();
+    loadSlangFilterList();
 }
 
-SlangsFilter::~SlangsFilter()
+StringFilter::~StringFilter()
 {
-    writeFilterList();
+    writeSlangFilterList();
     mSlangs.clear();
 }
 
-bool SlangsFilter::loadFilterList()
+bool StringFilter::loadSlangFilterList()
 {
     mInitialized = false;
     std::string slangsList = mConfig->getValue("SlangsList", "");
@@ -70,7 +71,7 @@ bool SlangsFilter::loadFilterList()
     return false;
 }
 
-void SlangsFilter::writeFilterList()
+void StringFilter::writeSlangFilterList()
 {
     // Write the list to config
     std::string slangsList = "";
@@ -83,7 +84,7 @@ void SlangsFilter::writeFilterList()
     //mConfig->setValue("SlangsList", slangsList);
 }
 
-bool SlangsFilter::filterContent(const std::string& text)
+bool StringFilter::filterContent(const std::string& text)
 {
     if (mInitialized)
     {
@@ -117,6 +118,37 @@ bool SlangsFilter::filterContent(const std::string& text)
         return true;
         LOG_INFO("Slangs List is not initialized.", 2)
     }
+}
+
+bool StringFilter::isEmailValid(const std::string& email)
+{
+    // Testing Email validity
+    if ( (email.length() < MIN_EMAIL_LENGTH) || (email.length() > MAX_EMAIL_LENGTH))
+    {
+        LOG_INFO(email << ": Email too short or too long.", 1)
+        return false;
+    }
+    if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
+    {
+        int atpos = email.find_first_of('@');
+        if (email.find_first_of('.', atpos) != std::string::npos) // Searching for a '.' after the @.
+        {
+            if (email.find_first_of(' ') == std::string::npos) // Searching if there's no spaces.
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool StringFilter::findDoubleQuotes(const std::string& text)
+{
+    for (unsigned int i = 0; i < text.length(); i++)
+    {
+        if (text[i] == '\"') return true;
+    }
+    return false;
 }
 
 } // ::utils

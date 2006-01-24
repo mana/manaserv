@@ -48,7 +48,9 @@ public:
      * @return the number of the channel registered.
      * 0 if the registering was unsuccessful.
      */
-    short registerPublicChannel(const std::string& channelName);
+    short registerPublicChannel(const std::string& channelName,
+                                const std::string& channelAnnouncement,
+                                const std::string& channelPassword);
 
     /**
      * Add a private channel.
@@ -56,7 +58,9 @@ public:
      * @return the number of the channel registered.
      * 0 if the registering was unsuccessful.
      */
-    short registerPrivateChannel(const std::string& channelName);
+    short registerPrivateChannel(const std::string& channelName,
+                                 const std::string& channelAnnouncement,
+                                 const std::string& channelPassword);
 
     /**
      * Remove a channel.
@@ -64,7 +68,7 @@ public:
     bool removeChannel(const short channelId);
 
     /**
-     * get the id of a channel from its name.
+     * Get the id of a channel from its name.
      *
      * @return the id of the channel
      * 0 if it was unsuccessful.
@@ -72,27 +76,43 @@ public:
     short getChannelId(const std::string& channelName);
 
     /**
-     * get the name of a channel from its id.
+     * Get the name of a channel from its id.
      *
      * @return the name of the channel
      */
     const std::string getChannelName(const short channelId);
 
     /**
-     * get the announcement string of a channel from its id.
+     * Get the announcement string of a channel from its id.
      *
      * @return the announcement string of the channel
      */
     const std::string
-    ChatChannelManager::getChannelAnnouncement(const short channelId);
+    getChannelAnnouncement(const short channelId);
 
     /**
-     * get the password of a channel from its id.
+     * Set the announcement string of a channel from its id.
+     *
+     * @return the announcement string of the channel
+     */
+    bool
+    setChannelAnnouncement(const short channelId, const std::string& channelAnnouncement);
+
+    /**
+     * Set the announcement string of a channel from its id.
+     *
+     * @return the announcement string of the channel
+     */
+    bool
+    setChannelPassword(const short channelId, const std::string& channelPassword);
+
+    /**
+     * Get the password of a channel from its id.
      *
      * @return the password of the channel
      */
     const std::string
-    ChatChannelManager::getChannelPassword(const short channelId);
+    getChannelPassword(const short channelId);
 
     /**
      * get the ChatChannel object from its id.
@@ -100,7 +120,7 @@ public:
      * @return the ChatChannel object
      */
     const ChatChannel
-    ChatChannelManager::getChannel(const short channelId);
+    _getChannel(const short channelId);
 
     /**
      * Add a user in a channel
@@ -122,6 +142,11 @@ public:
      * Get the list of the users registered in a channel
      */
     std::vector<tmwserv::BeingPtr> getUserListInChannel(const short channelId);
+
+    /**
+     * tells if a channel exists
+     */
+    bool isChannelRegistered(const short channelId);
 
 private:
 

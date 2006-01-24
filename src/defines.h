@@ -56,12 +56,16 @@ typedef enum {
 
     // Network related
 const unsigned int MAX_CLIENTS  = 1024,
+    // Chat related
 /**
  * N.B: Private channels can't have an id less
  * than MAX_PUBLIC_CHANNELS_RANGE.
  */
     MAX_PUBLIC_CHANNELS_RANGE  = 1000,
-    MAX_PRIVATE_CHANNELS_RANGE   = 10000,
+    MAX_PRIVATE_CHANNELS_RANGE = 10000,
+    MAX_CHANNEL_NAME           = 15,
+    MAX_CHANNEL_ANNOUNCEMENT   = 150,
+    MAX_CHANNEL_PASSWORD       = 12,
 
     // Registering related
     MIN_LOGIN_LENGTH = 4,
@@ -164,6 +168,17 @@ enum {
     CMSG_SAY                      = 0x0410,
     CMSG_ANNOUNCE                 = 0x0411,
     CMSG_PRIVMSG                  = 0x0412,
+    // -- Channeling
+    CMSG_REGISTER_CHANNEL            = 0x0413,
+    SMSG_REGISTER_CHANNEL_RESPONSE   = 0x0414,
+    CMSG_UNREGISTER_CHANNEL          = 0x0415,
+    SMSG_UNREGISTER_CHANNEL_RESPONSE = 0x0416,
+    CMSG_UPDATE_CHANNEL              = 0x0417,
+    SMSG_UPDATE_CHANNEL_RESPONSE     = 0x0418,
+    CMSG_ENTER_CHANNEL               = 0x0419,
+    SMSG_ENTER_CHANNEL_RESPONSE      = 0x0420,
+    CMSG_QUIT_CHANNEL                = 0x0421,
+    SMSG_QUIT_CHANNEL_RESPONSE       = 0x0422,
 
     // Other
     SMSG_LOAD_MAP                 = 0x0500,
@@ -231,7 +246,7 @@ enum {
 // Character deletion return values
 enum {
     DELETE_OK = 0,
-    DELETE_INVALID_NAME,
+    DELETE_INVALID_ID,
     DELETE_NO_MORE_CHARACTERS,
     DELETE_NOLOGIN,
     DELETE_UNKNOWN
@@ -291,11 +306,52 @@ enum {
     CHATCMD_UNKNOWN
 };
 
+// Chat channels creation return values
+enum {
+    CHATCNL_CREATE_OK = 0,
+    CHATCNL_CREATE_UNSUFFICIENT_RIGHTS,
+    CHATCNL_CREATE_INVALID_NAME,
+    CHATCNL_CREATE_INVALID_ANNOUNCEMENT,
+    CHATCNL_CREATE_INVALID_PASSWORD,
+    CHATCNL_CREATE_UNKNOWN
+};
+
+// Chat channels update return values
+enum {
+    CHATCNL_UPD_OK = 0,
+    CHATCNL_UPD_UNSUFFICIENT_RIGHTS,
+    CHATCNL_UPD_UNKNOWN
+};
+
+// Chat channels deletion return values
+enum {
+    CHATCNL_DEL_OK = 0,
+    CHATCNL_DEL_UNSUFFICIENT_RIGHTS,
+    CHATCNL_DEL_INVALID_ID,
+    CHATCNL_DEL_UNKNOWN
+};
+
+// Chat channels entering return values
+enum {
+    CHATCNL_IN_OK = 0,
+    CHATCNL_IN_UNSUFFICIENT_RIGHTS,
+    CHATCNL_IN_BAD_PASSWORD,
+    CHATCNL_IN_UNKNOWN
+};
+
+// Chat channels leaving return values
+enum {
+    CHATCNL_OUT_OK = 0,
+    CHATCNL_OUT_UNKNOWN
+};
+
 // Object type enumeration
 enum {
-    OBJECT_ITEM = 0,
-    OBJECT_PLAYER,
-    OBJECT_MONSTER
+    OBJECT_ITEM = 0, // A simple item
+    OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and to speak (map panels).
+    OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
+    OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
+    OBJECT_PLAYER    // A normal being
 };
 
 // Pickup response enumeration

@@ -133,6 +133,12 @@ class ConnectionHandler
          */
         unsigned int getClientNumber();
 
+        /**
+         * tells a list of user they're leaving a channel.
+         */
+        void makeUsersLeaveChannel(const short channelId);
+
+
     private:
         std::map<unsigned int, MessageHandler*> handlers;
 

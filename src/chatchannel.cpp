@@ -120,3 +120,8 @@ ChatChannel::removeUserFromChannel(tmwserv::BeingPtr beingPtr)
     }
     return false;
 }
+
+void ChatChannel::removeEveryUsersFromChannel()
+{
+    mRegisteredUsers.clear();
+}

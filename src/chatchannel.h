@@ -90,6 +90,11 @@ class ChatChannel {
      */
     bool removeUserFromChannel(tmwserv::BeingPtr beingPtr);
 
+    /**
+     * Empties a channel from its users (admin included).
+     */
+    void removeEveryUsersFromChannel();
+
  private:
     /**
      * The Channel's name

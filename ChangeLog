@@ -1,3 +1,16 @@
+2006-01-24  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/chathandler.cpp, src/chathandler.h, src/accounthandler.cpp,
+	src/dalstoragesql.h, src/defines.h, src/client.cpp, src/Makefile.am,
+	src/utils/slangsfilter.cpp, src/utils/slangsfilter.h,
+	src/utils/stringfilter.h, src/utils/stringfilter.cpp, src/main.cpp,
+	src/accounthandler.h, src/chatchannelmanager.cpp,
+	src/chatchannelmanager.h, src/chatchannel.h, src/chatchannel.cpp,
+	src/connectionhandler.h, src/connectionhandler.cpp: Chat Channeling
+	Commit part 4. Renamed the slang filter into StringFilter and moved
+	some code to it. Added the missing protocol values, and implemented
+	registering/registering of channels; More to come about it.
+
 2006-01-21  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/accounthandler.cpp, src/client.cpp, src/defines.h,

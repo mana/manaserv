@@ -48,7 +48,7 @@
 #include "storage.h"
 
 #include "utils/logger.h"
-#include "utils/slangsfilter.h"
+#include "utils/stringfilter.h"
 
 // Scripting
 #ifdef SCRIPT_SUPPORT
@@ -88,7 +88,7 @@ Skill skillTree("base");  /**< Skill tree */
 
 Configuration config;     /**< XML config reader */
 
-tmwserv::utils::SlangsFilter *slangsFilter; /**< Slang's Filter */
+tmwserv::utils::StringFilter *stringFilter; /**< Slang's Filter */
 
 /** Account message handler */
 AccountHandler *accountHandler;
@@ -173,7 +173,7 @@ void initialize()
     LOG_INFO("Using Log File: " << logPath, 0)
 
     // Initialize the slang's filter.
-    slangsFilter = new SlangsFilter(&config);
+    stringFilter = new StringFilter(&config);
 
     // Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -253,7 +253,7 @@ void initialize()
  */
 void deinitialize()
 {
-    delete slangsFilter;
+    delete stringFilter;
     // Write configuration file
     config.write();
 

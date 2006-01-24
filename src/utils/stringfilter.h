@@ -35,15 +35,15 @@ namespace utils
 /**
  * Used to filter content containing bad words. Like username, character's names, chat, ...
  */
-class SlangsFilter
+class StringFilter
 {
     public:
         /**
          * ctors.
          */
-        SlangsFilter(Configuration *config);
+        StringFilter(Configuration *config);
 
-        ~SlangsFilter();
+        ~StringFilter();
 
         /**
          * Load slang list from the config file.
@@ -52,7 +52,7 @@ class SlangsFilter
          *
          */
         bool
-        loadFilterList();
+        loadSlangFilterList();
 
         /**
          * Write slang list to the config file.
@@ -61,7 +61,7 @@ class SlangsFilter
          *
          */
         void
-        writeFilterList();
+        writeSlangFilterList();
 
         /**
         * Useful to filter slangs automatically, by instance.
@@ -70,6 +70,19 @@ class SlangsFilter
         bool
         filterContent(const std::string& text);
 
+        /**
+         * Tells if an email is valid
+         */
+        bool
+        isEmailValid(const std::string& email);
+
+        /**
+         * find double quotes (") in strings.
+         * Very useful not to make SQL Queries bqsed on names crash
+         * I placed it here cause where you've got " you can have slangs...
+         */
+        bool
+        findDoubleQuotes(const std::string& text);
 
     private:
         std::list<std::string> mSlangs;    /**< the formatted Slangs list */
@@ -80,6 +93,6 @@ class SlangsFilter
 } // ::utils
 } // ::tmwserv
 
-extern tmwserv::utils::SlangsFilter *slangsFilter;
+extern tmwserv::utils::StringFilter *stringFilter;
 
 #endif

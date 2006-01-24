@@ -55,12 +55,6 @@ class AccountHandler : public MessageHandler
          * Account assignment.
          */
         int assignAccount(NetComputer &computer, tmwserv::Account *account);
-
-        /**
-         * Check an Email Validity
-         */
-        bool
-        isEmailValid(std::string& email);
 };
 
 #endif

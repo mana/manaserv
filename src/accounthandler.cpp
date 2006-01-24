@@ -29,21 +29,11 @@
 #include "messageout.h"
 #include "configuration.h"
 #include "utils/logger.h"
-#include "utils/slangsfilter.h"
+#include "utils/stringfilter.h"
 
 using tmwserv::Account;
 using tmwserv::AccountPtr;
 using tmwserv::Storage;
-
-// Useful to avoid failing SQL queries cause of " in strings.
-bool findDoubleQuotes(const std::string& text)
-{
-    for (unsigned int i = 0; i < text.length(); i++)
-    {
-        if (text[i] == '\"') return true;
-    }
-    return false;
-}
 
 /**
  * Generic interface convention for getting a message and sending it to the
@@ -83,7 +73,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(LOGIN_INVALID_VERSION);
                     break;
                 }
-
+                if (stringFilter->findDoubleQuotes(username))
+                {
+                    result.writeByte(LOGIN_INVALID_USERNAME);
+                    LOG_INFO(username << ": has got double quotes in it.", 1)
+                    break;
+                }
                 if (computer.getAccount().get() != NULL) {
                     LOG_INFO("Already logged in as " << computer.getAccount()->getName()
                         << ".", 1)
@@ -185,16 +180,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 // Checking if the Name is slang's free.
-
-                if (!slangsFilter->filterContent(username))
+                if (!stringFilter->filterContent(username))
                 {
                     result.writeByte(REGISTER_INVALID_USERNAME);
                     LOG_INFO(username << ": has got bad words in it.", 1)
                     break;
                 }
-
                 // Checking if there are double quotes in it.
-                if (findDoubleQuotes(username))
+                if (stringFilter->findDoubleQuotes(username))
                 {
                     result.writeByte(REGISTER_INVALID_USERNAME);
                     LOG_INFO(username << ": has got double quotes in it.", 1)
@@ -221,12 +214,12 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(REGISTER_INVALID_PASSWORD);
                     LOG_INFO(email << ": Password too short or too long.", 1)
                 }
-                else if (!isEmailValid(email))
+                else if (!stringFilter->isEmailValid(email))
                 {
                     result.writeByte(REGISTER_INVALID_EMAIL);
                     LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1)
                 }
-                if (findDoubleQuotes(email))
+                if (stringFilter->findDoubleQuotes(email))
                 {
                     result.writeByte(REGISTER_INVALID_EMAIL);
                     LOG_INFO(email << ": has got double quotes in it.", 1)
@@ -257,6 +250,13 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 LOG_INFO(username << " wants to be deleted from our accounts.", 1)
 
                 result.writeShort(SMSG_UNREGISTER_RESPONSE);
+
+                if (stringFilter->findDoubleQuotes(username))
+                {
+                    result.writeByte(UNREGISTER_INVALID_USERNAME);
+                    LOG_INFO(username << ": has got double quotes in it.", 1)
+                    break;
+                }
 
                 // see if the account exists
                 tmwserv::AccountPtr accPtr = store.getAccount(username);
@@ -303,17 +303,16 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 }
 
                 std::string email = message.readString();
-                if ( !isEmailValid(email) )
+                if (!stringFilter->isEmailValid(email))
                 {
                     result.writeByte(EMAILCHG_INVALID);
                     LOG_INFO(email << ": Invalid format, cannot change Email for " <<
                     computer.getAccount()->getName(), 1)
                 }
-                if (findDoubleQuotes(email))
+                else if (stringFilter->findDoubleQuotes(email))
                 {
                     result.writeByte(EMAILCHG_INVALID);
                     LOG_INFO(email << ": has got double quotes in it.", 1)
-                    break;
                 }
                 else if (store.getSameEmailNumber(email) > 1) // Search if Email already exists,
                 {                                             // Except for the one already that is to
@@ -366,17 +365,10 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     LOG_INFO(computer.getAccount()->getName() << 
                     ": New password too long or too short.", 1)
                 }
-                else if (findDoubleQuotes(password1))
+                else if (stringFilter->findDoubleQuotes(password1))
                 {
                     result.writeByte(PASSCHG_INVALID);
                     LOG_INFO(password1 << ": has got double quotes in it.", 1)
-                    break;
-                }
-                else if (findDoubleQuotes(password2))
-                {
-                    result.writeByte(PASSCHG_INVALID);
-                    LOG_INFO(password2 << ": has got double quotes in it.", 1)
-                    break;
                 }
                 else if ( password1 != password2 )
                 {
@@ -422,14 +414,14 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 
                 std::string name = message.readString();
                 // Checking if the Name is slang's free.
-                if (!slangsFilter->filterContent(name))
+                if (!stringFilter->filterContent(name))
                 {
                     result.writeByte(CREATE_INVALID_NAME);
                     LOG_INFO(name << ": Character has got bad words in it.", 1)
                     break;
                 }
                 // Checking if the Name has got double quotes.
-                if (findDoubleQuotes(name))
+                if (stringFilter->findDoubleQuotes(name))
                 {
                     result.writeByte(CREATE_INVALID_NAME);
                     LOG_INFO(name << ": has got double quotes in it.", 1)
@@ -635,7 +627,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
-                    result.writeByte(DELETE_INVALID_NAME);
+                    result.writeByte(DELETE_INVALID_ID);
                     LOG_INFO("Character Deletion : Selection out of ID range.", 1)
                     break;
                 }
@@ -769,27 +761,4 @@ AccountHandler::assignAccount(NetComputer &computer, tmwserv::Account *account)
 
 
     return TMW_SUCCESS;
-}
-
-bool
-AccountHandler::isEmailValid(std::string& email)
-{
-    // Testing Email validity
-    if ( (email.length() < MIN_EMAIL_LENGTH) || (email.length() > MAX_EMAIL_LENGTH))
-    {
-        LOG_INFO(email << ": Email too short or too long.", 1)
-        return false;
-    }
-    if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
-    {
-        int atpos = email.find_first_of('@');
-        if (email.find_first_of('.', atpos) != std::string::npos) // Searching for a '.' after the @.
-        {
-            if (email.find_first_of(' ') == std::string::npos) // Searching if there's no spaces.
-            {
-                return true;
-            }
-        }
-    }
-    return false;
 }

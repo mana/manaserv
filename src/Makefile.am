@@ -81,8 +81,8 @@ tmwserv_SOURCES = main.cpp \
 		  utils/cipher.cpp \
 		  utils/logger.h \
 		  utils/logger.cpp \
-		  utils/slangsfilter.h \
-		  utils/slangsfilter.cpp
+		  utils/stringfilter.h \
+		  utils/stringfilter.cpp
 
 if BUILD_MYSQL
 tmwserv_SOURCES += dal/mysqldataprovider.h \
