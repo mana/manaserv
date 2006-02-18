@@ -463,7 +463,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     LOG_INFO(name << ": Character's gender is invalid.", 1)
                     break;
                 }
-                // LATER_ON: Add race attribute.
+                // LATER_ON: Add race, face and maybe special attributes.
 
                 // Customization of player's stats...
                 std::vector<unsigned short> rawStats;

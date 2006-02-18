@@ -19,9 +19,9 @@ MESSAGE_IDENTIFIER 0xID
 Description.
 {
     [
-    FIELDTYPE fieldName
+    FIELDTYPE fieldName: field role explanation.
         [
-        * value = value info
+        * value = VALUE_CODE: value role explanation.
         ]
     ]
 }
@@ -32,8 +32,8 @@ NOTE: In this representation square brackets mean their content can be repeated
 - "MESSAGE_IDENTIFIER" should follow this structure:
     CMSG|SMSG[_ATTRIBUTE]_ACTION[_INFO]
 
-    CMSG is a message sent by the client
-    SMSG is a message sent by the server
+    CMSG is a message sent by the client and is to be treated by the server.
+    SMSG is a message sent by the server and is to be treated by the client.
     | means exclusive or
 
 - "0xID" is hexadecimal representation of a short: from 0x0000 to 0xFFFF.
@@ -46,9 +46,14 @@ NOTE: In this representation square brackets mean their content can be repeated
 
 - "fieldName" is the name of the field (choose a meaningful name).
 
+- "field role explanation" is a small description of the meaning related to a
+  certain field.
+
 - "value" is a list of every possible value for the field.
 
-- "value info" is a small description of the meaning related to a
+- "VALUE_CODE" is the label linked to the value in the server code.
+
+- "value role explanation" is a small description of the meaning related to a
   certain value.
 
 2. MESSAGE LIST
@@ -64,19 +69,21 @@ probably be good to add. Password will be sent only as md5 to hide the actual
 password from both server admins and sniffers. Having the md5 would still allow
 false identification, hence there is also an encrypted variant of this message.
 {
-    A username
-    A password
-    A emailAddress
+    A client Version: Used to know about the version of the client which is trying to login.
+    A username: New Account's Username
+    A password: New Account's password
+    A emailAddress: New Account's Email address (a@b.c format accepted only.)
 }
 
 CMSG_ENCRYPTED_REGISTER 0x0001
 Request to register a new account encrypting user data. The contents of this
 message are encrypted using server's public key and are otherwise the same as
-in a normal register message.
+in a normal register message. Not yet implemented.
 {
-    A username
-    A password
-    A emailAddress
+    A client Version: Used to know about the version of the client which is trying to login.
+    A username: New Account's Username
+    A password: New Account's password
+    A emailAddress: New Account's Email address (a@b.c format accepted only.)
 }
 
 SMSG_REGISTER_RESPONSE 0x0002
@@ -85,21 +92,42 @@ Error codes 1-3 shouldn't happen because there are also checked client side,
 otherwise it could mean client is out of date or modified. Every error not in
 this list should be considered unknown error.
 {
-    C errorCode
-        * 0 = registration succeeded
-        * 1 = invalid username
-        * 2 = invalid password
-        * 3 = invalid email address
-        * 4 = existing username
-        * 5 = existing email address
+    C Response Code
+        * 0 = REGISTER_OK: The account has been successfully registered.
+        * 1 = REGISTER_INVALID_USERNAME: The account's username is invalid.
+        * 2 = REGISTER_INVALID_PASSWORD: The account's password is invalid.
+        * 3 = REGISTER_INVALID_EMAIL: The account's email is invalid.
+        * 4 = REGISTER_INVALID_VERSION: The client version is unsufficient to login in the current
+                                        server version running.
+        * 5 = REGISTER_EXISTS_USERNAME: Another account is already using this username.
+        * 6 = REGISTER_EXISTS_EMAIL: Another account is already using this email.
+        * 7 = REGISTER_UNKNOWN: Unknown misregistering account error.
+}
+
+CMSG_UNREGISTER 0x0003
+Remove an account, and every related characters.
+{
+    A Account's Username
+    A Account's Password
+}
+
+SMSG_UNREGISTER_RESPONSE 0x0004
+Response to the account unregistering request.
+{
+    C Response Code
+        * 0 = UNREGISTER_OK: Unregistering was successful.
+        * 1 = UNREGISTER_INVALID_USERNAME: The account's username is invalid.
+        * 2 = UNREGISTER_INVALID_PASSWORD: The account's password is invalid.
+        * 3 = UNREGISTER_INVALID_UNSUFFICIENT_RIGHTS: Not enough right to unregister account.
+        * 4 = UNREGISTER_UNKNOWN: Unknown misunregistering error.
 }
 
 CMSG_LOGIN 0x0010
 Sends info about player login data: username and password.
 {
-    A username
-    A password
-    L clientVersion
+    A client Version: The client version
+    A username: The account's username.
+    A password: The account's password.
 }
 
 CMSG_ENCRYPTED_LOGIN 0x0011
@@ -110,94 +138,347 @@ using server's public key.
     L clientVersion
 }
 
-SMSG_LOGIN_ERROR 0x0012
+SMSG_LOGIN_RESPONSE 0x0012
 The login process failed.
 {
-    C errorCode
-        * 0 = invalid username
-        * 1 = invalid password
-        * 2 = invalid version (client is sending a version number > than
-                               current one)
-        * 2 = non existing username
-        * 3 = incorrect password
-        * 4 = old version (the client is outdated)
-        * 5 = server down for maintenance
-        * 6 = server full
-        * 7 = account definitely banned
-        * 8 = account under review
+    C Reponse Code
+        * 0 = LOGIN_OK: Login was successful
+              C Number of character created in the account.
+                And for each created characters:
+              A Characters name.
+        * 1 = LOGIN_INVALID_USERNAME: The username is invalid.
+        * 2 = LOGIN_INVALID_PASSWORD: The password is invalid.
+        * 3 = LOGIN_INVALID_VERSION: The client version is unsufficient to login.
+        * 4 = LOGIN_SERVER_FULL: The current server has too many active connections.
+        * 5 = LOGIN_ACCOUNT_BANNED: This account has been banned and isn't allowed to login anymore.
+        * 6 = LOGIN_ACCOUNT_REVIEW: This account is being reviewed. Not yet handled.
+        * 7 = LOGIN_ALREADY_LOGGED: This account is already logged in.
+        * 8 = LOGIN_UNKNOWN: Unknown mislogin error.
 }
 
-SMSG_LOGIN_CONFIRM 0x0013
-The login process succeded. The content of this packet depends on account and
-player implementation. Still to be developed.
+CMSG_LOGOUT 0x0013
+Used to logout a client.
 {
-    L accountId        // What would the client do with this id? - Hammerbear
-    C number of characters
-    [                  // Repeated for each character
-      A name
-      C hairStyle
-      C hairColor
-      C sex
-          * 0 = male
-          * 1 = female
-      ...
-    ]
+    Nothing needed in particular.
+}
+
+SMSG_LOGOUT_RESPONSE 0x0014
+Server response from logout.
+{
+    C Response Code
+        * 0 = LOGOUT_OK: Logout successful.
+        * 1 = LOGOUT_UNSUCCESSFULL: Logout unsuccessful.
 }
 
 CMSG_CHAR_CREATE 0x0020
 Valid after login, this message sends a request for a new character to the
 server. The message could be extended with region of origin and race.
+The stats, and every attribute are checked and the character is valid only if every rule
+is respected.
 {
-    A name
-    C hairStyle
-    C hairColor
-	C faceType
-    C sex
+    A name: New character's name.
+    C hair Style: ID of the character's hair style.
+        * List to be documented.
+    C hair Color: ID of the character's hair color.
+        * List to be documented.
+    C Gender: The character's gender.
         * 0 = male
         * 1 = female
-    ...
+    S Strength: The character's strength.
+    S Agility: The character's agility.
+    S Vitality: The character's vitality.
+    S Intelligence: The character's intelligence.
+    S Dexterity: The character's dexterity.
+    S Luck: The character's luck.
 }
 
 SMSG_CHAR_CREATE_RESPONSE 0x0021
-Response to character create message. Error code 0 means creation was a
-success. Error codes 1-4 should not occur as they are also checked by the
-client. Any not listed error codes are unknown errors.
+Response to character creation message.
 {
-    C errorCode
-        * 0 = character creation succeeded
-        * 1 = invalid name
-        * 2 = invalid hair style
-        * 3 = invalid hair color
-        * 4 = invalid sex
-        * 5 = existing username
-        * 6 = existing email address
+    C Reponse Code
+        * 0 = CREATE_OK: Character's creation was successful.
+        * 1 = CREATE_INVALID_NAME: The character's name is invalid.
+        * 2 = CREATE_INVALID_HAIRSTYLE: The character's hair Style ID is invalid.
+        * 3 = CREATE_INVALID_HAIRCOLOR: The character's hair color ID is invalid.
+        * 4 = CREATE_INVALID_GENDER: The character's gender is invalid.
+        * 5 = CREATE_RAW_STATS_TOO_HIGH: The stats given by the client are too high for a new character.
+        * 6 = CREATE_RAW_STATS_TOO_LOW: The stats given by the client are too low for a new character.
+        * 7 = CREATE_RAW_STATS_INVALID_DIFF: The difference between the highest and the lowest stat
+              is too high.
+        * 8 = CREATE_RAW_STATS_EQUAL_TO_ZERO: One of the given stats is equal to zero.
+        * 9 = CREATE_EXISTS_NAME: The character's name already exists.
+        * 10 = CREATE_TOO_MUCH_CHARACTERS: The account has already the maximum of characters.
+        * 11 = CREATE_NOLOGIN: Not logged in. Won't create any account for a NULL Account.
+        * 12 = CREATE_UNKNOWN: Unknown miscreation error.
+}
+
+CMSG_CHAR_DELETE 0x0022
+An attempt to delete an existing character for an account.
+{
+    C Character's ID to delete.
+}
+
+SMSG_CHAR_DELETE_RESPONSE 0x0023
+Response to the character's deletion request.
+{
+    C Response Code
+        * 0 = DELETE_OK: The character was deleted successfully.
+        * 1 = DELETE_INVALID_ID: The character's id isn't a correct value.
+        * 2 = DELETE_NO_MORE_CHARACTERS: The account has no more characters to delete left.
+        * 3 = DELETE_NOLOGIN: Not logged in. Cannot delete a character.
+        * 4 = DELETE_UNKNOWN: Unknown character misdeletion error.
+}
+
+CMSG_CHAR_LIST 0x0024
+A request has been made to known the general stats of every characters of account.
+It will be used in the client for displaying information when selecting a character.
+{
+    Nothing needed.
+}
+
+SMSG_CHAR_LIST_RESPONSE 0x0025
+The complete list of parameters for each characters, except for the inventories.
+{
+    C Response Code
+        * 0 = CHAR_LIST_OK: Return the list of character's parameters.
+            C Character number.
+            For each character:
+            {
+                C Character ID.
+                A Character's name.
+                C Gender ID.
+                C Hair Style ID.
+                C Hair Color ID.
+                C Character's Level.
+                S Character's Money.
+                S Character's Strength.
+                S Character's Agility.
+                S Character's Vitality.
+                S Character's Intelligence.
+                S Character's Dexterity.
+                S Character's Luck.
+                C Character's Map Name. (Even if we give the map name, that's the ID that is stored in db.)
+                S Character's X coord in map.
+                S Character's Y coord in map.
+            }
+        * 1 = CHAR_LIST_NOLOGIN: Received by the client when it is asking for a list and not logged in.
+        * 2 = CHAR_LIST_UNKNOWN: Received when an unknown char list error has occured.
 }
 
 CMSG_CHAR_SELECT 0x0026
 Request to select a character.
 {
-	C characterId
+    C character ID.
 }
 
 SMSG_CHAR_SELECT_RESPONSE 0x0027
 Response to character selection.
 {
-	C code
-		* 0 = selection succeded
-			A mapName
-			S characterX
-			S characterY
-		* 1 = invalid id
-		* 2 = not logged in
-		* 3 = no characters
+    C Response Code
+        * 0 = SELECT_OK: Selection succeeded
+            A Map Name
+            S X coord on map.
+            S Y coord on map.
+        * 1 = SELECT_INVALID: The ID given is an invalid character ID.
+        * 2 = SELECT_NO_CHARACTERS: No characters in this account. They are to be created first.
+        * 3 = SELECT_NOLOGIN: Not logged in, can't select a character.
+        * 4 = SELECT_NO_MAPS: The server hasn't even any default map for the characters to go in.
+        * 5 = SELECT_UNKNOWN: Unknown character selection error.
 }
 
+CMSG_EMAIL_CHANGE 0x0030
+Used to request change of Email address.
+{
+    A New Email.
+}
+
+SMSG_EMAIL_CHANGE_RESPONSE 0x0031
+Response to the request of Email change.
+{
+    C Response Code
+        0 = EMAILCHG_OK: Email change is done.
+        1 = EMAILCHG_NOLOGIN: Not logged in, can't change one's Email.
+        2 = EMAILCHG_INVALID: The new Email address is invalid.
+        3 = EMAILCHG_EXISTS_EMAIL: The email already exists for another account.
+        4 = EMAILCHG_UNKNOWN: Unknown Email change request error.
+}
+
+CMSG_EMAIL_GET 0x0032
+Request to know the current account's Email address.
+{
+    Nothing needed.
+}
+
+SMSG_EMAIL_GET_RESPONSE 0x0033
+Response to the Get Email Request.
+{
+    C Response code
+        0 = EMAILGET_OK: The email address is returned.
+            A Current email address.
+        1 = EMAILGET_NOLOGIN: Not logged in. Can't give Email address.
+        2 = EMAILGET_UNKNOWN: Unknown Get Email address error.
+}
+
+CMSG_FORGOT_PASSWORD 0x0040
+The client asks for sending its current password using the mail address.
+Not Implemented. (It needs to get connected to some mailing library, or run some mail script.)
+Can be refused if it is asked more than X times in a month.
+{
+    A Account's username
+}
+
+SMSG_FORGOT_PASSWORD_RESPONSE 0x0041
+Response to the 'I forget my pass' request.
+{
+    C Response Code
+        * 0 = FORGOT_PASSWORD_ACCEPTED: The password was sent using the mail address.
+        * 1 = FORGOT_PASSWORD_REFUSED: The request was refused because asked too much times.
+        * 2 = FORGOT_PASSWORD_UNKNOWN: Unknown password to send using mail address error.
+}
+
+CMSG_PASSWORD_CHANGE 0x0050
+Request to change the password.
+{
+    A Old Password.
+    A New password (First Type.)
+    A New password (Second Type.)
+}
+
+SMSG_PASSWORD_CHANGE_RESPONSE 0x0051
+Response to change password request.
+{
+    C Response Code
+        * 0 = PASSCHG_OK: The password was changed successfully.
+        * 1 = PASSCHG_NOLOGIN: Not logged in, can't change password.
+        * 2 = PASSCHG_INVALID: The new password is invalid.
+        * 3 = PASSCHG_MISMATCH: The old password, or one of the new mismatched.
+        * 4 = PASSCHG_UNKNOWN: Unknown password change error.
+}
 
 2.2 OBJECTS
 
 SMSG_NEW_OBJECT 0x0100
 An item was dropped.
 {
-	L itemId
-	S x, y
+    L item ID
+    S X coord in map.
+    S Y coord in map.
 }
+
+2.3 BEINGS
+
+2.4 ITEMS
+
+2.5 CHAT PROTOCOL
+
+SMSG_SYSTEM 0x0400
+Normally used to send system commands to clients. Maybe used to force
+unlogging, or update. Not yet implemented.
+{
+
+}
+
+SMSG_CHAT 0x0401
+A chat message from another character that is 'heard' by the character,
+because he/she is around, or else an error from some text from the chat sent.
+{
+    C code
+        * 0 = CHAT_AROUND: Say around
+            A chat text
+        * 1 = CHAT_NOLOGIN: Not logged in.
+        * 2 = CHAT_NO_CHARACTER_SELECTED: Logged in, but no characters selected yet.
+        * 3 = CHAT_USING_BAD_WORDS: Text with bad words.
+        * 4 = CHATCMD_UNHANDLED_COMMAND: Unhandled chat Command.
+        * 5 = CHATCMD_UNSUFFICIENT_RIGHTS, Unsufficient Rights to execute command
+        * 6 = CHATCMD_UNKNOWN: Unknown chat request.
+}
+
+SMSG_ANNOUNCEMENT 0x0402
+An announcement is sent to every connected players to the world, and placed
+at the top of the main chat window. Used to warn about down time and such.
+{
+    A Announcement text
+}
+
+SMSG_PRIVMSG 0x0403
+Used to send to the targetted player a private message from another one.
+The name of the player is for now in the string sent.
+{
+    A Text sent.
+}
+
+SMSG_CHAT_CNL 0x0404
+Used to send to a player a string from a character which talks in a channel
+the player is registered in.
+{
+    S channel.
+    A Text sent.
+}
+
+CMSG_SAY 0x0410
+A character is talking normally. It can be used to talk to the characters
+around, or to chat in a specific channel.
+{
+    A text
+    S channel
+}
+
+CMSG_ANNOUNCE 0x0411
+A character is trying to change the announcement sentence.
+{
+    A text
+}
+
+CMSG_PRIVMSG 0x0412
+A character is talking directly to another character.
+{
+    A username to whom the character is talking to.
+    A text
+}
+
+CMSG_REGISTER_CHANNEL 0x0413
+A character is trying to register a chat channel, private or public.
+{
+    C Channel Type: Public (0), or Private (1).
+    A Channel Name: The channel Name. Must be valid.
+    A Channel Announcement: Can be nothing, which means the "None" Value.
+    A Channel Password: Can be nothing, which means the "None" Value.
+}
+
+SMSG_REGISTER_CHANNEL_RESPONSE 0x0414
+The server response from an attempt of creating a chat channel.
+{
+    * 0 = CHATCNL_CREATE_OK: The creation was sanely made.
+        S Channel Id: The channel id to be used when dealing with.
+    * 1 = CHATCNL_CREATE_UNSUFFICIENT_RIGHTS: The account hasn't sufficient rights to register the channel.
+    * 2 = CHATCNL_CREATE_INVALID_NAME: The channel name is invalid.
+    * 3 = CHATCNL_CREATE_INVALID_ANNOUNCEMENT: The announcement is invalid.
+    * 4 = CHATCNL_CREATE_INVALID_PASSWORD: The password is invalid.
+    * 5 = CHATCNL_CREATE_UNKNOWN: Unknown miscreation error. Bogus request or too many channels..
+}
+
+CMSG_UNREGISTER_CHANNEL 0x0415
+An account is trying to unregister a channel.
+{
+    S Channel Id: The channel ID of the channel which is to be unregistered.
+}
+
+SMSG_UNREGISTER_CHANNEL_RESPONSE 0x0416
+
+{
+    * 0 = CHATCNL_DEL_OK: The Channel is successfully unregistered. Every users are removed from it before it happens.
+    * 1 = CHATCNL_DEL_UNSUFFICIENT_RIGHTS: Unsufficient rights to unregister the channel.
+    * 2 = CHATCNL_DEL_INVALID_ID: The given ID doesn't match any existing channel.
+    * 3 = CHATCNL_DEL_UNKNOWN: Unknown channel misdeletion error.
+}
+
+// Not yet implemented
+    CMSG_UPDATE_CHANNEL              = 0x0417,
+    SMSG_UPDATE_CHANNEL_RESPONSE     = 0x0418,
+    CMSG_ENTER_CHANNEL               = 0x0419,
+    SMSG_ENTER_CHANNEL_RESPONSE      = 0x0420,
+    CMSG_QUIT_CHANNEL                = 0x0421,
+    SMSG_QUIT_CHANNEL_RESPONSE       = 0x0422,
+
+
+

@@ -1,3 +1,9 @@
+2006-02-19  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/chathandler.cpp, src/accounthandler.cpp, src/client.cpp,
+	docs/packets: Updated tmwserv packets documentation. Some minor other
+	updates.
+
 2006-01-24  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/chathandler.cpp, src/chathandler.h, src/accounthandler.cpp,

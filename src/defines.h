@@ -165,6 +165,7 @@ enum {
     SMSG_CHAT                     = 0x0401,
     SMSG_ANNOUNCEMENT             = 0x0402,
     SMSG_PRIVMSG                  = 0x0403,
+    SMSG_CHAT_CNL                 = 0x0404,
     CMSG_SAY                      = 0x0410,
     CMSG_ANNOUNCE                 = 0x0411,
     CMSG_PRIVMSG                  = 0x0412,
@@ -297,7 +298,7 @@ enum {
 
 // Chat errors return values
 enum {
-    // CHAT_OK = 0,
+    // CHAT_AROUND = 0,
     CHAT_NOLOGIN = 1,
     CHAT_NO_CHARACTER_SELECTED,
     CHAT_USING_BAD_WORDS,

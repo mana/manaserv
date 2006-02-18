@@ -371,7 +371,7 @@ void ChatHandler::sayInChannel(NetComputer &computer, short channel, const std::
     LOG_INFO( computer.getCharacter()->getName() << " says in channel " << channel
             << ": " << text, 2)
     // Send it to every beings in channel
-    result.writeShort(SMSG_CHAT);
+    result.writeShort(SMSG_CHAT_CNL);
     result.writeShort(channel);
     std::string say = computer.getCharacter()->getName();
     say += ": ";
