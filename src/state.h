@@ -56,7 +56,7 @@ struct MapComposite {
     /**
      * Items located on the map
      */
-    std::vector<Object*> objects;
+    Objects objects;
 };
 
 /**
@@ -110,17 +110,17 @@ class State : public utils::Singleton<State>
     /**
      * Add object to the map
      */
-    void addObject(Object *object, const unsigned int mapId);
+    void addObject(ObjectPtr objectPtr, const unsigned int mapId);
 
     /**
      * Remove an object from the map
      */
-    void removeObject(Object *object);
+    void removeObject(ObjectPtr objectPtr);
 
     /**
      * Find out whether an object exists in the game world or not
      */
-    bool objectExists(const Object *object);
+    bool objectExists(const ObjectPtr objectPtr);
 
     /**
      * Find map player in world is on
@@ -130,7 +130,7 @@ class State : public utils::Singleton<State>
     /**
      * Find map object in world is on
      */
-    const unsigned int findObject(Object *object);
+    const unsigned int findObject(ObjectPtr objectPtr);
 };
 
 } // namespace tmwserv

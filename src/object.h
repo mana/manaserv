@@ -24,14 +24,13 @@
 #ifndef _TMWSERV_OBJECT_H_
 #define _TMWSERV_OBJECT_H_
 
-
 #include <utility>
 #include <string>
-
+#include <vector>
+#include "utils/countedptr.h"
 
 namespace tmwserv
 {
-
 
 /**
  * Structure type for the statistics.
@@ -51,7 +50,6 @@ struct Statistics
     int accuracy;
     int speed;
 };
-
 
 /**
  * Generic in-game object definition.
@@ -179,6 +177,16 @@ class Object
         unsigned int mMapId;  /**< id of the map being is on */
 };
 
+/**
+ * Type definition for a smart pointer to Object.
+ */
+typedef utils::CountedPtr<Object> ObjectPtr;
+
+
+/**
+ * Type definition for a list of Objects.
+ */
+typedef std::vector<ObjectPtr> Objects;
 
 } // namespace tmwserv
 

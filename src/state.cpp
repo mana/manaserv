@@ -145,23 +145,23 @@ bool State::loadMap(const unsigned int mapId) {
     return true; // We let true for testing on beings
 }
 
-void State::addObject(Object *object, const unsigned int mapId) {
-    if (!objectExists(object)) {
+void State::addObject(ObjectPtr objectPtr, const unsigned int mapId) {
+    if (!objectExists(objectPtr)) {
         if (!mapExists(mapId))
             if (!loadMap(mapId))
                 return;
-        maps[mapId].objects.push_back(object);
+        maps[mapId].objects.push_back(objectPtr);
     }
 }
 
-void State::removeObject(Object *object) {
+void State::removeObject(ObjectPtr objectPtr) {
     for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
-        for (std::vector<Object*>::iterator b = i->second.objects.begin();
+        for (Objects::iterator b = i->second.objects.begin();
              b != i->second.objects.end();
              b++) {
-            if (*b == object) {
+            if (b->get() == objectPtr.get()) {
                 i->second.objects.erase(b);
                 return;
             }
@@ -169,14 +169,14 @@ void State::removeObject(Object *object) {
     }
 }
 
-bool State::objectExists(const Object *object) {
+bool State::objectExists(const ObjectPtr objectPtr) {
     for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
-        for (std::vector<Object*>::iterator b = i->second.objects.begin();
+        for (Objects::iterator b = i->second.objects.begin();
              b != i->second.objects.end();
              b++) {
-            if (*b == object)
+            if (b->get() == objectPtr.get())
                 return true;
         }
     }
@@ -197,14 +197,14 @@ const unsigned int State::findPlayer(BeingPtr beingPtr) {
     return 0;
 }
 
-const unsigned int State::findObject(Object *object) {
+const unsigned int State::findObject(ObjectPtr objectPtr) {
     for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
-        for (std::vector<Object*>::iterator b = i->second.objects.begin();
+        for (Objects::iterator b = i->second.objects.begin();
              b != i->second.objects.end();
              b++) {
-            if (*b == object)
+            if (b->get() == objectPtr.get())
                 return i->first;
         }
     }
