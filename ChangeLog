@@ -1,7 +1,14 @@
+2006-03-05  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/state.cpp, src/defines.h, src/chathandler.cpp,
+	src/connectionhandler.cpp, src/connectionhandler.h, TODO: Added the
+	server code to enter and leave a channel. Some minor fix to the state
+	code, and completed the TODO a little for later coding.
+
 2006-02-19  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/state.h src/state.cpp src/object.h: Made use of counted pointer
-	for objects, just the way it is for beings.
+	* src/state.h, src/state.cpp, src/object.h: Made use of counted
+	pointers for objects, just the way it is for beings.
 	* src/chathandler.cpp, src/accounthandler.cpp, src/client.cpp,
 	docs/packets: Updated tmwserv packets documentation. Some minor other
 	updates.
