@@ -287,7 +287,85 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 computer.send(result.getPacket());
             } break;
 
+        case CMSG_ENTER_CHANNEL:
+        {
+            MessageOut result;
+            result.writeShort(SMSG_ENTER_CHANNEL_RESPONSE);
+            short channelId = message.readShort();
+            std::string givenPassword = message.readString();
+            if (channelId != 0 && chatChannelManager->isChannelRegistered(channelId))
+            {
+                std::string channelPassword = chatChannelManager->getChannelPassword(channelId);
+                if (channelPassword != "None")
+                {
+                    if (channelPassword != givenPassword)
+                    {
+                        result.writeByte(CHATCNL_IN_BAD_PASSWORD);
+                        computer.send(result.getPacket());
+                        break;
+                    }
+                }
+                if (chatChannelManager->addUserInChannel(computer.getCharacter(), channelId))
+                {
+                    result.writeByte(CHATCNL_IN_OK);
+                    // The user entered the channel, now give him the announcement string
+                    // and the user list.
+                    result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
+                    std::vector<tmwserv::BeingPtr> userList = 
+                    chatChannelManager->getUserListInChannel(channelId);
+                    result.writeShort(userList.size());
+                    for (std::vector<tmwserv::BeingPtr>::iterator i = userList.begin(); i != userList.end();
+                    ++i)
+                    {
+                        result.writeString(i->get()->getName());
+                    }
+                    // Send an SMSG_UPDATE_CHANNEL_RESPONSE to warn other clients a user went
+                    // in the channel.
+                    connectionHandler->warnUsersAboutPlayerEventInChat(channelId,
+                                             computer.getCharacter()->getName(),
+                                             CHATCNL_UPD_NEW_PLAYER);
+                }
+                else
+                {
+                    result.writeByte(CHATCNL_IN_UNKNOWN);
+                }
+            }
+            else
+            {
+                result.writeByte(CHATCNL_IN_INVALID_ID);
+            }
+            computer.send(result.getPacket());
+        }
+        break;
 
+        case CMSG_QUIT_CHANNEL:
+        {
+            MessageOut result;
+            result.writeShort(SMSG_QUIT_CHANNEL_RESPONSE);
+            short channelId = message.readShort();
+            if (channelId != 0 && chatChannelManager->isChannelRegistered(channelId))
+            {
+                if (chatChannelManager->removeUserFromChannel(computer.getCharacter(), channelId))
+                {
+                    result.writeByte(CHATCNL_OUT_OK);
+                    // Send an SMSG_UPDATE_CHANNEL_RESPONSE to warn other clients a user left
+                    // the channel.
+                    connectionHandler->warnUsersAboutPlayerEventInChat(channelId,
+                                             computer.getCharacter()->getName(),
+                                             CHATCNL_UPD_LEAVING_PLAYER);
+                }
+                else
+                {
+                    result.writeByte(CHATCNL_OUT_UNKNOWN);
+                }
+            }
+            else
+            {
+                result.writeByte(CHATCNL_OUT_INVALID_ID);
+            }
+            computer.send(result.getPacket());
+        }
+        break;
 
         default:
             LOG_INFO("Chat: Invalid message type", 2)

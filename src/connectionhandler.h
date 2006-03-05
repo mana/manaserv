@@ -138,6 +138,12 @@ class ConnectionHandler
          */
         void makeUsersLeaveChannel(const short channelId);
 
+        /**
+         * tells a list of user about an event in a chatchannel about a player.
+         */
+        void warnUsersAboutPlayerEventInChat(const short channelId,
+                                             const std::string& userName,
+                                             const char eventId);
 
     private:
         std::map<unsigned int, MessageHandler*> handlers;

@@ -74,7 +74,7 @@ void State::update(ConnectionHandler &connectionHandler)
                     MessageOut msg;
                     msg.writeShort(SMSG_NEW_BEING); // 
                     msg.writeLong(OBJECT_PLAYER);    // type
-                    msg.writeLong((int)b2->get());   // id
+                    msg.writeString(b2->get()->getName()); // Name
                     msg.writeLong(b2->get()->getX());// x
                     msg.writeLong(b2->get()->getY());// y
 

@@ -321,6 +321,11 @@ enum {
 enum {
     CHATCNL_UPD_OK = 0,
     CHATCNL_UPD_UNSUFFICIENT_RIGHTS,
+    CHATCNL_UPD_NEW_PLAYER,
+    CHATCNL_UPD_LEAVING_PLAYER,
+    CHATCNL_UPD_KICKED_PLAYER, // To be implemented.
+    CHATCNL_UPD_CHANGED_ADMIN, // dito
+    CHATCNL_UPD_CHANGED_ANNOUNCEMENT, // dito
     CHATCNL_UPD_UNKNOWN
 };
 
@@ -335,7 +340,7 @@ enum {
 // Chat channels entering return values
 enum {
     CHATCNL_IN_OK = 0,
-    CHATCNL_IN_UNSUFFICIENT_RIGHTS,
+    CHATCNL_IN_INVALID_ID,
     CHATCNL_IN_BAD_PASSWORD,
     CHATCNL_IN_UNKNOWN
 };
@@ -343,13 +348,14 @@ enum {
 // Chat channels leaving return values
 enum {
     CHATCNL_OUT_OK = 0,
+    CHATCNL_OUT_INVALID_ID,
     CHATCNL_OUT_UNKNOWN
 };
 
 // Object type enumeration
 enum {
     OBJECT_ITEM = 0, // A simple item
-    OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and to speak (map panels).
+    OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and can speak (map panels).
     OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
     OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
     OBJECT_PLAYER    // A normal being
