@@ -22,7 +22,7 @@
  */
 
 #include "messagehandler.h"
-#include "debug.h"
+
 #include "utils/logger.h"
 
 void MessageHandler::receiveMessage(NetComputer &computer, MessageIn &message) {

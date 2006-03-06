@@ -1,3 +1,28 @@
+2006-03-06  Björn Steinbrink  <B.Steinbrink@gmx.de>
+
+	* src/connectionhandler.h, src/storage.cpp, src/configuration.cpp,
+	src/script.h, src/messageout.cpp, src/map.cpp, src/messagein.h,
+	src/skill.h, src/messagehandler.h, src/resourcemanager.h,
+	src/netsession.cpp, src/accounthandler.cpp, src/dalstorage.h,
+	src/sqlitestorage.h, src/account.cpp, src/connectionhandler.cpp,
+	src/chatchannelmanager.cpp, src/netcomputer.h, src/messagein.cpp,
+	src/client.cpp, src/messageout.h, src/dalstorage.cpp,
+	src/netsession.h, src/accounthandler.h, src/mapreader.cpp,
+	src/account.h, src/netcomputer.cpp, src/mapmanager.cpp, src/object.h,
+	src/gamehandler.h, src/dal/mysqldataprovider.h, src/dal/recordset.h,
+	src/dal/dataproviderfactory.h, src/dal/sqlitedataprovider.cpp,
+	src/dal/dataprovider.h, src/dal/mysqldataprovider.cpp,
+	src/dal/pqdataprovider.h, src/dal/recordset.cpp,
+	src/dal/sqlitedataprovider.h, src/state.cpp, src/chathandler.h,
+	src/items.h, src/mapreader.h, src/packet.cpp, src/gamehandler.cpp,
+	src/mapmanager.h, src/chathandler.cpp, src/skill.cpp,
+	src/utils/cipher.h, src/utils/logger.cpp, src/utils/stringfilter.h,
+	src/utils/base64.cpp, src/utils/logger.h, src/utils/cipher.cpp,
+	src/utils/stringfilter.cpp, src/resourcemanager.cpp,
+	src/messagehandler.cpp, src/map.h, src/state.h, src/sqlitestorage.cpp:
+	Cleaned up unnecessary header dependencies and fixed some
+	indentations.
+
 2006-03-05  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/state.cpp, src/defines.h, src/chathandler.cpp,

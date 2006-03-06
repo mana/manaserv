@@ -24,12 +24,12 @@
 #ifndef _TMWSERV_NETSESSION_H_
 #define _TMWSERV_NETSESSION_H_
 
-#include "netcomputer.h"
-#include "connectionhandler.h"
-#include <SDL.h>
-#include <SDL_thread.h>
-#include <SDL_net.h>
 #include <map>
+#include <SDL_net.h>
+#include <SDL_thread.h>
+
+class ConnectionHandler;
+class NetComputer;
 
 /**
  * Data communicated to a new listen thread. The <code>running</code> member is

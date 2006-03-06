@@ -20,11 +20,9 @@
  *  $Id$
  */
 
-
-#include "dalexcept.h"
-
 #include "mysqldataprovider.h"
 
+#include "dalexcept.h"
 
 namespace tmwserv
 {

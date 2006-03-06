@@ -24,8 +24,9 @@
 #ifndef _TMWSERV_MESSAGEIN_H_
 #define _TMWSERV_MESSAGEIN_H_
 
-#include "packet.h"
-#include <string>
+#include <iosfwd>
+
+class Packet;
 
 /**
  * Used for parsing an incoming message.

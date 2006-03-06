@@ -23,6 +23,9 @@
 
 #include "sqlitedataprovider.h"
 
+#include <stdexcept>
+
+#include "dalexcept.h"
 
 namespace tmwserv
 {

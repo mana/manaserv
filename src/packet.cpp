@@ -22,8 +22,8 @@
  */
 
 #include "packet.h"
-#include <string.h>
-#include <cstdlib>
+
+#include <cstring>
 
 Packet::Packet(const char *data, int length):
     length(length)

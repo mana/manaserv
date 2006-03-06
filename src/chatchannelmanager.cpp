@@ -21,9 +21,10 @@
  *  $Id$
  */
 
+#include "chatchannelmanager.h"
+
 #include <map>
 
-#include "chatchannelmanager.h"
 #include "storage.h"
 
 ChatChannelManager::ChatChannelManager()

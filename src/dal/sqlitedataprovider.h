@@ -20,13 +20,10 @@
  *  $Id$
  */
 
-
 #ifndef _TMWSERV_SQLITE_DATA_PROVIDER_H_
 #define _TMWSERV_SQLITE_DATA_PROVIDER_H_
 
-
-#include <string>
-
+#include <iosfwd>
 #include <sqlite3.h>
 
 #include "dataprovider.h"

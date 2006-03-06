@@ -21,15 +21,16 @@
  *  $Id$
  */
 
-#include "utils/logger.h"
-#include "utils/base64.h"
 #include "mapreader.h"
-#include "resourcemanager.h"
 
 #include <cassert>
-
 #include <zlib.h>
-#include <iostream>
+
+#include "map.h"
+#include "resourcemanager.h"
+
+#include "utils/base64.h"
+#include "utils/logger.h"
 
 namespace tmwserv
 {

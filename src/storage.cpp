@@ -20,12 +20,9 @@
  *  $Id$
  */
 
-
-#include <stdexcept>
-
 #include "storage.h"
-#include "dalstorage.h"
 
+#include "dalstorage.h"
 
 namespace tmwserv
 {

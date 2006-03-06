@@ -25,8 +25,8 @@
 #define _TMWSERV_OBJECT_H_
 
 #include <utility>
-#include <string>
 #include <vector>
+
 #include "utils/countedptr.h"
 
 namespace tmwserv

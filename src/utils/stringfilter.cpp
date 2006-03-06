@@ -20,9 +20,12 @@
  *  $Id$
  */
 
-#include "../defines.h"
 #include "stringfilter.h"
+
 #include "logger.h"
+
+#include "../configuration.h"
+#include "../defines.h"
 
 namespace tmwserv
 {

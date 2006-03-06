@@ -25,7 +25,7 @@
 #define _TMWSERV_MYSQL_DATA_PROVIDER_H_
 
 
-#include <string>
+#include <iosfwd>
 
 #include <mysql/mysql.h>
 

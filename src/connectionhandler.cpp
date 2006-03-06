@@ -20,14 +20,16 @@
  *  $Id$
  */
 
-
-#include <vector>
-#include <sstream>
-#include <SDL_net.h>
-
 #include "connectionhandler.h"
-#include "netsession.h"
+
 #include "chatchannelmanager.h"
+#include "messagehandler.h"
+#include "messagein.h"
+#include "messageout.h"
+#include "netcomputer.h"
+#include "netsession.h"
+#include "packet.h"
+
 #include "utils/logger.h"
 
 #ifdef SCRIPT_SUPPORT

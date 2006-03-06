@@ -24,17 +24,16 @@
 #ifndef _TMWSERV_NETCOMPUTER_H_
 #define _TMWSERV_NETCOMPUTER_H_
 
-#include "packet.h"
+#include <iosfwd>
 #include <SDL_net.h>
-#include <string>
 #include <queue>
-#include <list>
 
 #include "account.h"
 #include "being.h"
 
 // Forward declaration
 class ConnectionHandler;
+class Packet;
 
 /**
  * This class represents a known computer on the network. For example a

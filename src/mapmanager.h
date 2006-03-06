@@ -26,12 +26,11 @@
 
 #include <map>
 
-#include "map.h"
-
 #include "utils/singleton.h"
 
 namespace tmwserv
 {
+    class Map;
 
 
 /**

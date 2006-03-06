@@ -22,12 +22,15 @@
  */
 
 #include "chathandler.h"
-#include "state.h"
-#include "being.h"
-#include "defines.h"
+
+#include "chatchannelmanager.h"
+#include "connectionhandler.h"
+#include "messagein.h"
+#include "messageout.h"
+#include "netcomputer.h"
+
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
-#include "chatchannelmanager.h"
 
 void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {

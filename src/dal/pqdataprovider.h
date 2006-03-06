@@ -25,8 +25,7 @@
 #define _TMWSERV_PQDATAPROVIDER_H_
 
 
-#include <string>
-
+#include <iosfwd>
 #include <libpq-fe.h>
 
 #include "dataprovider.h"

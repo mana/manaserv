@@ -23,8 +23,8 @@
 
 #include "state.h"
 
-#include <iostream>
-
+#include "connectionhandler.h"
+#include "map.h"
 #include "mapmanager.h"
 #include "messageout.h"
 

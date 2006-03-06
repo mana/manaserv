@@ -24,8 +24,10 @@
 #ifndef _TMWSERV_SLANGSFILTER_H_
 #define _TMWSERV_SLANGSFILTER_H_
 
+#include <list>
 #include <string>
-#include "../configuration.h"
+
+class Configuration;
 
 namespace tmwserv
 {

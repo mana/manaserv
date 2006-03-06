@@ -20,12 +20,13 @@
  *  $Id$
  */
 
-#include <SDL.h>
-#include <SDL_net.h>
 #include <iostream>
+#include <SDL_net.h>
+
 #include "defines.h"
 #include "messageout.h"
 #include "messagein.h"
+#include "packet.h"
 
 #if defined WIN32
 #include "../testclient_private.h"

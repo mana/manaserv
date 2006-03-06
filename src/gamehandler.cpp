@@ -22,8 +22,13 @@
  */
 
 #include "gamehandler.h"
-#include "messageout.h"
+
 #include <iostream>
+
+#include "messagein.h"
+#include "messageout.h"
+#include "netcomputer.h"
+#include "packet.h"
 
 void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
 {

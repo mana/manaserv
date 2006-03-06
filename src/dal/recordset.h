@@ -20,17 +20,11 @@
  *  $Id$
  */
 
-
 #ifndef _TMWSERV_RECORDSET_H_
 #define _TMWSERV_RECORDSET_H_
 
-
 #include <iostream>
-#include <stdexcept>
 #include <vector>
-
-#include "dalexcept.h"
-
 
 namespace tmwserv
 {

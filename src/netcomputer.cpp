@@ -22,7 +22,9 @@
  */
 
 #include "netcomputer.h"
+
 #include "chatchannelmanager.h"
+#include "packet.h"
 #include "state.h"
 
 NetComputer::NetComputer(ConnectionHandler *handler, TCPsocket sock):

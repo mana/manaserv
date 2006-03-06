@@ -23,16 +23,11 @@
 
 
 #include "configuration.h"
-//#include "log.h"
-//#include "main.h"
 
-#include <math.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
+#include <cmath>
+
 #include <libxml/xmlwriter.h>
+
 #include "utils/logger.h"
 
 // MSVC libxml2 at the moment doesn't work right when using MinGW, missing this

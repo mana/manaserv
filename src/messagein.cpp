@@ -22,7 +22,11 @@
  */
 
 #include "messagein.h"
+
 #include <SDL_net.h>
+#include <string>
+
+#include "packet.h"
 
 MessageIn::MessageIn(Packet *packet):
     mPacket(packet),

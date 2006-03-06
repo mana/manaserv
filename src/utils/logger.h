@@ -24,10 +24,9 @@
 #ifndef _TMWSERV_LOGGER_H_
 #define _TMWSERV_LOGGER_H_
 
-
+#include <iosfwd>
 #include <fstream>
 #include <sstream>
-#include <string>
 
 #include "singleton.h"
 

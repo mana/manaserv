@@ -25,9 +25,13 @@
 #define _TMWSERV_ACCOUNTHANDLER_H_
 
 #include "messagehandler.h"
-#include "netcomputer.h"
-#include "messagein.h"
-#include "account.h"
+
+class MessageIn;
+class NetComputer;
+
+namespace tmwserv {
+    class Account;
+}
 
 /**
  * Manages the data stored in user accounts and provides a reliable interface

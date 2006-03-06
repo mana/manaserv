@@ -24,13 +24,9 @@
 #ifndef _TMWSERV_DALSTORAGE_H_
 #define _TMWSERV_DALSTORAGE_H_
 
-
-#include <vector>
-
-#include "dal/dataproviderfactory.h"
-#include "dalstoragesql.h"
 #include "storage.h"
 
+#include "dal/dataprovider.h"
 
 namespace tmwserv
 {

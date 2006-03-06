@@ -24,12 +24,12 @@
 #ifndef _INCLUDED_MAPREADER_H
 #define _INCLUDED_MAPREADER_H
 
-#include "map.h"
 #include <libxml/tree.h>
 #include <vector>
 
 namespace tmwserv
 {
+    class Map;
 
 
 /**

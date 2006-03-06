@@ -24,9 +24,12 @@
 #ifndef _TMWSERV_CHATHANDLER_H_
 #define _TMWSERV_CHATHANDLER_H_
 
+#include <iosfwd>
+
 #include "messagehandler.h"
-#include "netcomputer.h"
-#include "messagein.h"
+
+class MessageIn;
+class NetComputer;
 
 /**
  * Manages all chat related

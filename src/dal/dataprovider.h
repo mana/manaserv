@@ -27,7 +27,6 @@
 
 #include <string>
 
-#include "dalexcept.h"
 #include "recordset.h"
 
 

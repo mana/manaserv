@@ -23,6 +23,7 @@
 
 #include "netsession.h"
 
+#include "connectionhandler.h"
 
 /**
  * This function is the new thread created to listen to a server socket. It

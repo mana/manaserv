@@ -26,7 +26,7 @@
 
 #ifdef SCRIPT_SUPPORT
 
-#include <iostream>
+#include <string>
 
 /*
  * Script
@@ -43,25 +43,23 @@
  */
 class Script
 {
-  protected:
-    // Filename of the script corresponding to the script object
-    std::string scriptName;
+    protected:
+        // Filename of the script corresponding to the script object
+        std::string scriptName;
 
-  public:
-    Script(const std::string &file)
-	: scriptName(file)
-    { }
+    public:
+        Script(const std::string &file):scriptName(file) { }
 
-    virtual ~Script() { }
+        virtual ~Script() { }
 
-    //State update
-    virtual void update() = 0;
+        //State update
+        virtual void update() = 0;
 
-    //Execute specified function
-    virtual bool execute(const std::string &) = 0;
+        //Execute specified function
+        virtual bool execute(const std::string &) = 0;
 
-    //Script sent raw message
-    virtual void message(char *) = 0;
+        //Script sent raw message
+        virtual void message(char *) = 0;
 };
 
 extern Script *script;                  // Global script (temporary?

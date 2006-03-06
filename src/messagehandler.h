@@ -24,8 +24,8 @@
 #ifndef _TMWSERV_MESSAGEHANDLER_H_
 #define _TMWSERV_MESSAGEHANDLER_H_
 
-#include "netcomputer.h"
-#include "messagein.h"
+class MessageIn;
+class NetComputer;
 
 /**
  * This class represents the message handler interface. This interface is

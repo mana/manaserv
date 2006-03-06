@@ -20,15 +20,13 @@
  *  $Id$
  */
 
+#include "cipher.h"
 
 #include <iomanip>
 #include <sstream>
 
 #include <openssl/evp.h>
 #include <openssl/md5.h>
-
-#include "cipher.h"
-
 
 namespace tmwserv
 {

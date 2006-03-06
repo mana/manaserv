@@ -24,8 +24,7 @@
 #ifndef _TMWSERV_CIPHER_H_
 #define _TMWSERV_CIPHER_H_
 
-
-#include <string>
+#include <iosfwd>
 
 #include "singleton.h"
 

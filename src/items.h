@@ -24,7 +24,6 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
-#include "script.h"
 #include "object.h"
 
 namespace tmwserv

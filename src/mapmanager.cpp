@@ -22,8 +22,11 @@
  */
 
 #include "mapmanager.h"
+
+#include "map.h"
 #include "mapreader.h"
 #include "storage.h"
+
 #include "utils/logger.h"
 
 namespace tmwserv

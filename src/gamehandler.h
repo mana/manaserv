@@ -25,8 +25,9 @@
 #define _TMW_SERVER_GAMEHANDLER_
 
 #include "messagehandler.h"
-#include "netcomputer.h"
-#include "messagein.h"
+
+class MessageIn;
+class NetComputer;
 
 /**
  * Manage main game events & server processing.

@@ -25,6 +25,8 @@
 
 #include <queue>
 
+#include "being.h"
+
 namespace tmwserv
 {
 

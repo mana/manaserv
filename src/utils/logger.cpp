@@ -20,6 +20,7 @@
  *  $Id$
  */
 
+#include "logger.h"
 
 #include <ctime>
 #include <iomanip>
@@ -28,8 +29,6 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-
-#include "logger.h"
 
 
 namespace tmwserv

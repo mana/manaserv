@@ -20,11 +20,9 @@
  *  $Id$
  */
 
-
-#include "utils/cipher.h"
-#include "utils/functors.h"
-
 #include "account.h"
+
+#include "utils/functors.h"
 
 namespace tmwserv
 {

@@ -24,15 +24,17 @@
 #ifndef _TMW_SERVER_STATE_
 #define _TMW_SERVER_STATE_
 
-#include <string>
 #include <map>
-#include "connectionhandler.h"
+
 #include "being.h"
-#include "map.h"
+
 #include "utils/singleton.h"
+
+class ConnectionHandler;
 
 namespace tmwserv
 {
+    class Map;
 
 /**
  * Combined map/entity structure

@@ -20,48 +20,50 @@
  *  $Id$
  */
 
-
 #include "skill.h"
+
 #include "utils/logger.h"
 
-
 Skill::Skill(const std::string &ident) :
-	id(ident),
-	light(0.0),
-	dark(0.0)
+    id(ident),
+    light(0.0),
+    dark(0.0)
 {
     //
 }
 
-Skill::~Skill() {
+Skill::~Skill()
+{
     //cleanup
     for (unsigned int i = 0; i < children.size(); i++) {
-	if (children[i])
-	    delete children[i];
+        if (children[i])
+            delete children[i];
     }
 }
 
-bool Skill::addSkill(const std::string &ident, Skill *skill) {
+bool Skill::addSkill(const std::string &ident, Skill *skill)
+{
     if (ident == id) {
-	//add skill to children
-	children.push_back(skill);
-	return true;
+        //add skill to children
+        children.push_back(skill);
+        return true;
     }
 
     for (unsigned int i = 0; i < children.size(); i++) {
-	//recurse
-	if (children[i]->addSkill(ident, skill))
-	    return true;
+        //recurse
+        if (children[i]->addSkill(ident, skill))
+            return true;
     }
     return false;
 }
 
-bool Skill::useSkill() {
+bool Skill::useSkill()
+{
 #ifdef SCRIPT_SUPPORT
     //run skill script
-    LOG_ERROR("Skill: Skills not implemented.", 0)
+    LOG_ERROR("Skill: Skills not implemented.", 0);
 #else
-    LOG_ERROR("Skill: Could not use skill; scripting disabled.", 0)
+    LOG_ERROR("Skill: Could not use skill; scripting disabled.", 0);
 #endif
     return true;
 }
@@ -71,30 +73,31 @@ bool Skill::setScript(const std::string &scriptName)
     return true;
 }
 
-bool Skill::deleteSkill(const std::string &ident, bool delTree) {
+bool Skill::deleteSkill(const std::string &ident, bool delTree)
+{
     //prevent deletion of self
     if (ident == id) {
         LOG_ERROR("Skill: Attempt to delete self.", 0)
-	return false;
+            return false;
     }
 
     for (unsigned int i = 0; i < children.size(); i++) {
-	if (children[i]->id == ident) {
-	    if (children[i]->children.size() > 0 && delTree)
-		return false;
-	    else {
-		//delete skill & remove from children
-		std::vector<Skill*>::iterator tmp = children.begin() + i;
-		delete children[i];
-		children.erase(tmp);
+        if (children[i]->id == ident) {
+            if (children[i]->children.size() > 0 && delTree)
+                return false;
+            else {
+                //delete skill & remove from children
+                std::vector<Skill*>::iterator tmp = children.begin() + i;
+                delete children[i];
+                children.erase(tmp);
 
-		return true;
-	    }
-	} else {
-	    //recurse
-	    if (children[i]->deleteSkill(ident))
-		return true;
-	}
+                return true;
+            }
+        } else {
+            //recurse
+            if (children[i]->deleteSkill(ident))
+                return true;
+        }
     }
     return false;
 }

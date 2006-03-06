@@ -20,10 +20,13 @@
  *  $Id$
  */
 
-#include <sstream>
+#include "dalstorage.h"
 
 #include "configuration.h"
-#include "dalstorage.h"
+#include "dalstoragesql.h"
+
+#include "dal/dalexcept.h"
+#include "dal/dataproviderfactory.h"
 
 #include "utils/cipher.h"
 #include "utils/functors.h"

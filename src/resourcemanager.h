@@ -24,8 +24,7 @@
 #ifndef _TMW_RESOURCE_MANAGER_H
 #define _TMW_RESOURCE_MANAGER_H
 
-#include <map>
-#include <string>
+#include <iosfwd>
 #include <vector>
 
 /**

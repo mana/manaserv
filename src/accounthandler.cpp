@@ -22,12 +22,16 @@
  */
 
 #include "accounthandler.h"
+
+#include "account.h"
+#include "configuration.h"
 #include "connectionhandler.h"
 #include "debug.h"
 #include "storage.h"
-#include "account.h"
+#include "messagein.h"
 #include "messageout.h"
-#include "configuration.h"
+#include "netcomputer.h"
+
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 

@@ -20,20 +20,15 @@
  *  $Id$
  */
 
-
 #ifndef _TMWSERV_DATA_PROVIDER_FACTORY_H_
 #define _TMWSERV_DATA_PROVIDER_FACTORY_H_
-
-
-#include <stdexcept>
-
-#include "dataprovider.h"
 
 
 namespace tmwserv
 {
 namespace dal
 {
+    class DataProvider;
 
 
 /**

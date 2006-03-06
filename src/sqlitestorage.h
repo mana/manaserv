@@ -24,8 +24,9 @@
 #ifndef _TMWSERV_SQLITESTORAGE_H_
 #define _TMWSERV_SQLITESTORAGE_H_
 
-#include "sqlite/SQLiteWrapper.h"
 #include "storage.h"
+
+#include "sqlite/SQLiteWrapper.h"
 
 /**
  * SQLite implemention of persistent dynamic data storage.

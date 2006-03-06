@@ -20,11 +20,12 @@
  *  $Id$
  */
 
-
-#include <sstream>
-
 #include "recordset.h"
 
+#include <sstream>
+#include <stdexcept>
+
+#include "dalexcept.h"
 
 namespace tmwserv
 {

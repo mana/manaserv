@@ -24,16 +24,17 @@
 #ifndef _TMWSERV_CONNECTIONHANDLER_H_
 #define _TMWSERV_CONNECTIONHANDLER_H_
 
-#include "messagehandler.h"
-#include "netcomputer.h"
-#include "packet.h"
-#include "being.h"
-#include "messageout.h"
+#include <list>
 #include <map>
 #include <SDL_net.h>
 
+#include "being.h"
+
 #define IN_BUFFER_SIZE   8192
 
+class MessageHandler;
+class MessageOut;
+class NetComputer;
 
 // Forward declaration
 class ListenThreadData;

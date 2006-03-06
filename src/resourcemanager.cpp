@@ -22,12 +22,10 @@
  */
 
 #include "resourcemanager.h"
-#include "utils/logger.h"
-#include <iostream>
-#include <sstream>
+
 #include <physfs.h>
 
-#include <cassert>
+#include "utils/logger.h"
 
 #ifdef WIN32
 #include <io.h>

@@ -24,7 +24,6 @@
 #ifndef _TMW_MAP_H
 #define _TMW_MAP_H
 
-#include "being.h"
 #include <list>
 #include <map>
 #include <string>

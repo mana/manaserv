@@ -22,6 +22,7 @@
  */
 
 #include "sqlitestorage.h"
+
 #include <iostream>
 #include <sstream>
 
