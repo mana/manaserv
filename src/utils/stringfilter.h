@@ -87,7 +87,9 @@ class StringFilter
         findDoubleQuotes(const std::string& text);
 
     private:
-        std::list<std::string> mSlangs;    /**< the formatted Slangs list */
+        typedef std::list<std::string> Slangs;
+        typedef Slangs::iterator SlangIterator;
+        Slangs mSlangs;    /**< the formatted Slangs list */
         bool mInitialized;                 /**< Set if the list is loaded */
         Configuration *mConfig;            /**< The config instance */
 };

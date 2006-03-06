@@ -32,53 +32,42 @@ namespace tmwserv
 namespace utils
 {
 
-StringFilter::StringFilter(Configuration *config)
-    : mInitialized(false),
-      mConfig(config)
+StringFilter::StringFilter(Configuration *config):
+    mInitialized(false),
+    mConfig(config)
 {
-    mSlangs.clear();
+    mSlangs.clear(); // Does this make any sense here?
     loadSlangFilterList();
 }
 
 StringFilter::~StringFilter()
 {
     writeSlangFilterList();
-    mSlangs.clear();
+    mSlangs.clear(); // Does this make any sense here?
 }
 
 bool StringFilter::loadSlangFilterList()
 {
     mInitialized = false;
-    std::string slangsList = mConfig->getValue("SlangsList", "");
-    if ( slangsList != "")
-    {
-        // Getting the words from the list.
-        unsigned int i = 0; // this is the latest comma position keeper
-        for (unsigned int j = 0; j < slangsList.length(); j++)
-        {
-            if (slangsList[j] == ',')
-            {
-                if (i == 0)
-                    mSlangs.push_back(slangsList.substr(i, j-i));
-                else
-                    mSlangs.push_back(slangsList.substr(i+1, j-i-1));
 
-                i = j;
-            }
+    std::string slangsList = mConfig->getValue("SlangsList", "");
+    if (slangsList != "") {
+        std::istringstream iss(slangsList);
+        std::string tmp;
+        while (getline(iss, tmp, ',')) {
+            mSlangs.push_back(tmp);
         }
-        // Getting the last word
-        mSlangs.push_back(slangsList.substr(i+1, slangsList.length() - 1));
         mInitialized = true;
-        return true;
     }
-    return false;
+
+    return mInitialized;
 }
 
 void StringFilter::writeSlangFilterList()
 {
     // Write the list to config
     std::string slangsList = "";
-    for (std::list<std::string>::iterator i = mSlangs.begin(); i != mSlangs.end(); )
+    for (SlangIterator i = mSlangs.begin(); i != mSlangs.end(); )
     {
         slangsList += *i;
         ++i;
@@ -89,69 +78,54 @@ void StringFilter::writeSlangFilterList()
 
 bool StringFilter::filterContent(const std::string& text)
 {
-    if (mInitialized)
-    {
-        bool isContentClean = true;
-
-        for (std::list<std::string>::iterator i = mSlangs.begin(); i != mSlangs.end(); )
-        {
-            // We look for slangs into the sentence.
-            std::string upcasedText = text;
-            std::string upcasedSlang = *i;
-            std::transform(upcasedText.begin(), upcasedText.end(), upcasedText.begin(),
-                (int(*)(int))std::toupper);
-            std::transform(upcasedSlang.begin(), upcasedSlang.end(), upcasedSlang.begin(),
-                (int(*)(int))std::toupper);
-
-            for ( unsigned int j = 0; j < text.length(); j++)
-            {
-                if ( upcasedText.substr(j, upcasedSlang.length()) == upcasedSlang )
-                {
-                    isContentClean = false;
-                    break;
-                }
-            }
-            if (!isContentClean) break;
-            ++i;
-        }
-        return isContentClean;
-    }
-    else
-    {
-        return true;
+    if (!mInitialized) {
         LOG_INFO("Slangs List is not initialized.", 2)
+        return true;
     }
+
+    bool isContentClean = true;
+    std::string upperCaseText = text;
+
+    std::transform(text.begin(), text.end(), upperCaseText.begin(),
+            (int(*)(int))std::toupper);
+
+    for (SlangIterator i = mSlangs.begin(); i != mSlangs.end(); ++i)
+    {
+        // We look for slangs into the sentence.
+        std::string upperCaseSlang = *i;
+        std::transform(upperCaseSlang.begin(), upperCaseSlang.end(),
+                upperCaseSlang.begin(), (int(*)(int))std::toupper);
+
+        if (upperCaseText.compare(upperCaseSlang)) {
+            isContentClean = false;
+            break;
+        }
+    }
+
+    return isContentClean;
 }
 
 bool StringFilter::isEmailValid(const std::string& email)
 {
     // Testing Email validity
-    if ( (email.length() < MIN_EMAIL_LENGTH) || (email.length() > MAX_EMAIL_LENGTH))
+    if ((email.length() < MIN_EMAIL_LENGTH) ||
+            (email.length() > MAX_EMAIL_LENGTH))
     {
         LOG_INFO(email << ": Email too short or too long.", 1)
         return false;
     }
-    if ((email.find_first_of('@') != std::string::npos)) // Searching for an @.
-    {
-        int atpos = email.find_first_of('@');
-        if (email.find_first_of('.', atpos) != std::string::npos) // Searching for a '.' after the @.
-        {
-            if (email.find_first_of(' ') == std::string::npos) // Searching if there's no spaces.
-            {
-                return true;
-            }
-        }
-    }
-    return false;
+
+    std::string::size_type atpos = email.find_first_of('@');
+
+    // TODO Find some nice regex for this...
+    return (atpos != std::string::npos) &&
+        (email.find_first_of('.', atpos) != std::string::npos) &&
+        (email.find_first_of(' ') == std::string::npos);
 }
 
 bool StringFilter::findDoubleQuotes(const std::string& text)
 {
-    for (unsigned int i = 0; i < text.length(); i++)
-    {
-        if (text[i] == '\"') return true;
-    }
-    return false;
+    return (text.find('"', 0) != std::string::npos);
 }
 
 } // ::utils
