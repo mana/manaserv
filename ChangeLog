@@ -1,3 +1,7 @@
+2006-03-14  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.dev: Updated project file.
+
 2006-03-07  Björn Steinbrink  <B.Steinbrink@gmx.de>
 
 	* src/utils/stringfilter.h, src/utils/stringfilter.cpp: A bunch of
