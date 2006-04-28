@@ -25,7 +25,7 @@
 #define _TMWSERV_NETSESSION_H_
 
 #include <map>
-#include <SDL_thread.h>
+#include <pthread.h>
 
 #include <enet/enet.h>
 
@@ -40,7 +40,7 @@ struct ListenThreadData
 {
     ENetAddress address;         /**< Includes the port to listen to. */
     ENetHost *host;              /**< The host that listen for connections. */
-    SDL_Thread *thread;          /**< The thread, ignored by thread itself. */
+    pthread_t thread;            /**< The thread, ignored by thread itself. */
     ConnectionHandler *handler;  /**< Handler for events. */
     bool running;                /**< Wether to keep listening. */
 };
@@ -70,26 +70,26 @@ class NetSession
          * that will handle listening for new connections and incoming data
          * over this port. The connection handler will need to be thread safe.
          */
-        void startListen(ConnectionHandler *handler, Uint16 port);
+        void startListen(ConnectionHandler *handler, enet_uint16 port);
 
         /**
          * Stop listening for connections and disconnect any connected clients.
          * This is done by signalling the listening thread to stop running, and
          * closing the socket when it stopped. 
          */
-        void stopListen(Uint16 port);
+        void stopListen(unsigned short port);
 
         /**
          * Connect to another network session.
          */
-        NetComputer *connect(const std::string &ip, Uint16 port);
+        NetComputer *connect(const std::string &ip, unsigned short port);
 
     private:
         /**
          * The list of ports we're listening to and their associated thread
          * data, including the connection handler and wether to keep listening.
          */
-        std::map<Uint16, ListenThreadData*> listeners;
+        std::map<unsigned short, ListenThreadData*> listeners;
 
         //  Other information we need to keep:
         //

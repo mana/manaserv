@@ -1,3 +1,8 @@
+2006-04-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* src/netsession.cpp, src/netsession.h, tmwserv.dev: Got rid of SDL
+	threads, now using pthreads.
+
 2006-04-11  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/client.cpp, src/connectionhandler.cpp, tmwserv.dev: Updated some

@@ -23,8 +23,6 @@
 
 #include "netsession.h"
 
-#include <SDL.h>
-
 #include "connectionhandler.h"
 
 #include "utils/logger.h"
@@ -34,11 +32,11 @@
  * immediately passes control over to the connection handler instance that will
  * deal with incoming connections and data.
  */
-int startListenThread(void *data)
+void *startListenThread(void *data)
 {
     ListenThreadData *ltd = (ListenThreadData*)data;
     ltd->handler->startListen(ltd);
-    return 0;
+    pthread_exit(NULL);
 }
 
 
@@ -51,7 +49,7 @@ NetSession::~NetSession()
     // Stop listening to any ports
 }
 
-void NetSession::startListen(ConnectionHandler *handler, Uint16 port)
+void NetSession::startListen(ConnectionHandler *handler, enet_uint16 port)
 {
     // Here we will probably need the creation of a listening thread, which
     // will call connect/disconnect events on the given ConnectionHandler and
@@ -81,19 +79,25 @@ void NetSession::startListen(ConnectionHandler *handler, Uint16 port)
     data->host = server;
     
     // Start the listening thread
-    data->thread = SDL_CreateThread(startListenThread, data);
+    int rc = pthread_create(&data->thread, NULL,
+                            startListenThread, (void *)data);
+    if (rc) {
+        LOG_ERROR("pthread_create: " << rc, 0);
+        exit(4);
+    }
+    /*data->thread = SDL_CreateThread(startListenThread, data);
 
     if (data->thread == NULL) {
         LOG_ERROR("SDL_CreateThread: " << SDL_GetError(), 0);
         exit(4);
-    }
+    }*/
     
     listeners[port] = data;
 }
 
-void NetSession::stopListen(Uint16 port)
+void NetSession::stopListen(enet_uint16 port)
 {
-    std::map<Uint16, ListenThreadData*>::iterator threadDataI;
+    std::map<enet_uint16, ListenThreadData*>::iterator threadDataI;
     threadDataI = listeners.find(port);
 
     if (threadDataI != listeners.end())
@@ -106,7 +110,7 @@ void NetSession::stopListen(Uint16 port)
         // Wait for listen thread to stop and close socket
         // Note: Somewhere in this process the ConnectionHandler should receive
         //       disconnect notifications about all the connected clients.
-        SDL_WaitThread(data->thread, NULL);
+        //SDL_WaitThread(data->thread, NULL);
         enet_host_destroy(data->host);
         delete data;
         listeners.erase(threadDataI);
@@ -117,7 +121,7 @@ void NetSession::stopListen(Uint16 port)
     }
 }
 
-NetComputer *NetSession::connect(const std::string &host, Uint16 port)
+NetComputer *NetSession::connect(const std::string &host, enet_uint16 port)
 {
     // Try to connect to given host:port, and return NetComputer objects that
     // can be used to send messages that way, or NULL when failing to connect.
