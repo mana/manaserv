@@ -27,9 +27,9 @@
 #include "packet.h"
 #include "state.h"
 
-NetComputer::NetComputer(ConnectionHandler *handler, TCPsocket sock):
+NetComputer::NetComputer(ConnectionHandler *handler, ENetPeer *peer):
     handler(handler),
-    socket(sock),
+    peer(peer),
     mAccountPtr(NULL),
     mCharacterPtr(NULL)
 {
@@ -48,7 +48,13 @@ void NetComputer::disconnect(const std::string &reason)
 
 void NetComputer::send(const Packet *p)
 {
-    SDLNet_TCP_Send(socket, p->data, p->length);
+    // Create a reliable packet.
+    ENetPacket *packet = enet_packet_create(p->data,
+                                            p->length + 1,
+                                            ENET_PACKET_FLAG_RELIABLE);
+
+    // Send the packet to the peer over channel id 0.
+    enet_peer_send(peer, 0, packet);
 }
 
 void NetComputer::setAccount(tmwserv::AccountPtr acc)

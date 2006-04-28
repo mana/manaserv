@@ -238,9 +238,6 @@ Logger::fatal(const std::string& msg, unsigned short atVerbosity)
     else {
         log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[FTL]");
     }
-#ifdef WIN32
-    MessageBox(NULL, msg.c_str(), "Fatal error", MB_ICONERROR | MB_OK);
-#endif
 }
 
 

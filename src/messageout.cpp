@@ -23,9 +23,9 @@
 
 #include "messageout.h"
 
-#include <cstdlib>
-#include <SDL_net.h>
 #include <string>
+
+#include <enet/enet.h>
 
 #include "packet.h"
 
@@ -66,7 +66,7 @@ MessageOut::writeByte(char value)
 void MessageOut::writeShort(short value)
 {
     expand(mPos + sizeof(short));
-    SDLNet_Write16(value, &mData[mPos]);
+    (*(short *)&mData[mPos]) = ENET_HOST_TO_NET_16(value);
     mPos += sizeof(short);
 }
 
@@ -74,7 +74,7 @@ void
 MessageOut::writeLong(long value)
 {
     expand(mPos + sizeof(long));
-    SDLNet_Write32(value, &mData[mPos]);
+    (*(long *)&mData[mPos]) = ENET_HOST_TO_NET_32(value);
     mPos += sizeof(long);
 }
 
@@ -118,4 +118,16 @@ MessageOut::getPacket()
     }
 
     return mPacket;
+}
+
+char*
+MessageOut::getData()
+{
+    return mData;
+}
+
+unsigned int
+MessageOut::getDataSize()
+{
+    return mDataSize;
 }

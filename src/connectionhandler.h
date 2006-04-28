@@ -26,7 +26,6 @@
 
 #include <list>
 #include <map>
-#include <SDL_net.h>
 
 #include "being.h"
 
@@ -48,7 +47,7 @@ class ClientData
     public:
         ClientData();
 
-        TCPsocket sock;           /**< The socket used for communication */
+        //TCPsocket sock;           /**< The socket used for communication */
 
         int inp;                  /**< The amount of data in the in buffer */
         char in[IN_BUFFER_SIZE];  /**< The in buffer for incoming messages */

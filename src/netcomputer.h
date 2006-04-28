@@ -25,8 +25,9 @@
 #define _TMWSERV_NETCOMPUTER_H_
 
 #include <iosfwd>
-#include <SDL_net.h>
 #include <queue>
+
+#include <enet/enet.h>
 
 #include "account.h"
 #include "being.h"
@@ -45,7 +46,7 @@ class NetComputer
         /**
          * Constructor.
          */
-        NetComputer(ConnectionHandler *handler, TCPsocket sock);
+        NetComputer(ConnectionHandler *handler, ENetPeer *peer);
 
         /**
          * Destructor
@@ -73,9 +74,9 @@ class NetComputer
         //void send(Packet *p, bool reliable = true);
 
         /**
-         * Return the socket
+         * Return the peer
          */
-        TCPsocket getSocket() { return socket; }
+        ENetPeer *getPeer() { return peer; }
 
         /**
          * Set the account associated with the connection
@@ -112,7 +113,7 @@ class NetComputer
         ConnectionHandler *handler;
 
         std::queue<Packet*> queue; /**< Message Queue (FIFO) */
-        TCPsocket socket;          /**< Client socket */
+        ENetPeer *peer;            /**< Client peer */
 
         tmwserv::AccountPtr mAccountPtr; /**< Account associated with connection */
         tmwserv::BeingPtr mCharacterPtr; /**< Selected character */

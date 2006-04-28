@@ -100,6 +100,7 @@ ConnectionHandler::ConnectionHandler()
 void
 ConnectionHandler::startListen(ListenThreadData *ltd)
 {
+    /*
     // Allocate a socket set
     SDLNet_SocketSet set = SDLNet_AllocSocketSet(MAX_CLIENTS);
     if (!set) {
@@ -226,7 +227,114 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
 
     // - Disconnect all clients (close sockets)
 
-    SDLNet_FreeSocketSet(set);
+    SDLNet_FreeSocketSet(set);*/
+    
+    while (ltd->running)
+    {
+        ENetEvent event;
+        
+        // Wait up to 1000 milliseconds for an event.
+        while (enet_host_service(ltd->host, &event, 1000) > 0)
+        {
+            switch (event.type)
+            {
+                case ENET_EVENT_TYPE_CONNECT:
+                {
+                    LOG_INFO("A new client connected from " <<
+                             ip4ToString(event.peer->address.host) << ":" <<
+                             event.peer->address.port, 0);
+                    NetComputer *comp = new NetComputer(this, event.peer);
+                    clients.push_back(comp);
+                    computerConnected(comp);
+                    /*LOG_INFO(ltd->host->peerCount <<
+                             " client(s) connected", 0);*/
+                    
+                    // Store any relevant client information here.
+                    event.peer->data = (void *)comp;
+                } break;
+                    
+                case ENET_EVENT_TYPE_RECEIVE:
+                {
+                    LOG_INFO("A packet of length " << event.packet->dataLength
+                             << " was received from " << event.peer->address.host,
+                             2);
+                    
+                    NetComputer *comp = (NetComputer *)event.peer->data;
+                    
+#ifdef SCRIPT_SUPPORT
+                    // This could be good if you wanted to extend the
+                    // server protocol using a scripting language. This
+                    // could be attained by using allowing scripts to
+                    // "hook" certain messages.
+
+                    //script->message(buffer);
+#endif
+
+                    // If the scripting subsystem didn't hook the message
+                    // it will be handled by the default message handler.
+
+                    // Convert the client IP address to string
+                    // representation
+                    std::string ipaddr = ip4ToString(event.peer->address.host);
+
+                    // Make sure that the packet is big enough (> short)
+                    if (event.packet->dataLength >= 2)
+                    {
+                        Packet *packet = new Packet((char *)event.packet->data,
+                                                    event.packet->dataLength);
+                        MessageIn msg(packet); // (MessageIn frees packet)
+
+                        short messageId = msg.getId();
+
+                        if (handlers.find(messageId) != handlers.end())
+                        {
+                            // send message to appropriate handler
+                            handlers[messageId]->receiveMessage(*comp, msg);
+                        }
+                        else {
+                            // bad message (no registered handler)
+                            LOG_ERROR("Unhandled message (" << messageId
+                                      << ") received from " << ipaddr, 0);
+                        }
+                    }
+                    else {
+                        LOG_ERROR("Message too short from " << ipaddr, 0);
+                    }
+                    
+                    /* Clean up the packet now that we're done using it. */
+                    enet_packet_destroy(event.packet);
+                } break;
+                    
+                case ENET_EVENT_TYPE_DISCONNECT:
+                {
+                    NetComputer *comp = (NetComputer *)event.peer->data;
+                    /*LOG_INFO(event.peer->address.host
+                             << " disconected.", 0);*/
+                    // Reset the peer's client information.
+                    computerDisconnected(comp);
+                    delete comp;
+                    event.peer->data = NULL;
+                } break;
+            }
+        }
+    }
+    
+    // - Disconnect all clients (close sockets)
+    
+    // TODO: probably there's a better way.
+    ENetPeer *currentPeer;
+
+    for (currentPeer = ltd->host->peers;
+         currentPeer < &ltd->host->peers[ltd->host->peerCount];
+         ++currentPeer)
+    {
+       if (currentPeer->state == ENET_PEER_STATE_CONNECTED)
+       {
+            enet_peer_disconnect(currentPeer, 0);
+            enet_host_flush(ltd->host);
+            enet_peer_reset(currentPeer);
+       }
+    }
 }
 
 void ConnectionHandler::computerConnected(NetComputer *comp)

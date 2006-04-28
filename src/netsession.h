@@ -25,8 +25,9 @@
 #define _TMWSERV_NETSESSION_H_
 
 #include <map>
-#include <SDL_net.h>
 #include <SDL_thread.h>
+
+#include <enet/enet.h>
 
 class ConnectionHandler;
 class NetComputer;
@@ -37,8 +38,8 @@ class NetComputer;
  */
 struct ListenThreadData
 {
-    IPaddress address;           /**< Includes the port to listen to. */
-    TCPsocket socket;            /**< The socket that's been opened. */
+    ENetAddress address;         /**< Includes the port to listen to. */
+    ENetHost *host;              /**< The host that listen for connections. */
     SDL_Thread *thread;          /**< The thread, ignored by thread itself. */
     ConnectionHandler *handler;  /**< Handler for events. */
     bool running;                /**< Wether to keep listening. */

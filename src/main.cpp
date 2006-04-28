@@ -26,7 +26,7 @@
 #include <iostream>
 #include <physfs.h>
 #include <SDL.h>
-#include <SDL_net.h>
+#include <enet/enet.h>
 
 #if (defined __USE_UNIX98 || defined __FreeBSD__)
 #include "../config.h"
@@ -41,6 +41,7 @@
 #include "configuration.h"
 #include "connectionhandler.h"
 #include "gamehandler.h"
+#include "messageout.h"
 #include "netsession.h"
 #include "resourcemanager.h"
 #include "skill.h"
@@ -184,7 +185,7 @@ void initialize()
     accountHandler = new AccountHandler();
     gameHandler = new GameHandler();
     connectionHandler = new ConnectionHandler();
-
+    
     // Make SDL use a dummy videodriver so that it doesn't require an X server
     putenv("SDL_VIDEODRIVER=dummy");
 
@@ -196,13 +197,16 @@ void initialize()
 
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
-
+    
     // set SDL to quit on exit.
     atexit(SDL_Quit);
 
-    // initialize SDL_net.
-    if (SDLNet_Init() == -1) {
-        LOG_FATAL("SDLNet_Init: " << SDLNet_GetError(), 0)
+    // set enet to quit on exit.
+    atexit(enet_deinitialize);
+
+    // initialize enet.
+    if (enet_initialize() != 0) {
+        LOG_FATAL("An error occurred while initializing ENet", 0)
         exit(2);
     }
 
@@ -259,9 +263,12 @@ void deinitialize()
 
     // Stop world timer
     SDL_RemoveTimer(worldTimerID);
+    
+    // Quit SDL
+    SDL_Quit();
 
-    // Quit SDL_net
-    SDLNet_Quit();
+    // Quit ENet
+    enet_deinitialize();
 
 #ifdef RUBY_SUPPORT
     // Finish up ruby
@@ -390,8 +397,10 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
     connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
-    session->startListen(connectionHandler, int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)));
-    LOG_INFO("Listening on port " << config.getValue("ListenOnPort", DEFAULT_SERVER_PORT) << "...", 0)
+    session->startListen(connectionHandler, int(config.getValue("ListenOnPort",
+                         DEFAULT_SERVER_PORT)));
+    LOG_INFO("Listening on port " <<
+             config.getValue("ListenOnPort", DEFAULT_SERVER_PORT) << "...", 0)
 
     using namespace tmwserv;
 
@@ -428,6 +437,53 @@ int main(int argc, char *argv[])
                 running = false;
             }
         }
+        
+        /*ENetEvent netEvent;
+
+        while (enet_host_service(server, &netEvent, 3000) > 0)
+        {
+            switch (netEvent.type)
+            {
+                case ENET_EVENT_TYPE_CONNECT:
+                    printf("A new client connected from %x:%u.\n",
+                           netEvent.peer->address.host,
+                           netEvent.peer->address.port);
+
+                    netEvent.peer->data = (void *)"Client information";
+                    break;
+            
+                case ENET_EVENT_TYPE_RECEIVE:
+                {
+                    printf("A packet of length %u containing %s was received from %s on channel %u.\n",
+                           netEvent.packet->dataLength,
+                           netEvent.packet->data,
+                           netEvent.peer->data,
+                           netEvent.channelID);
+
+                    MessageOut msg;
+                    msg.writeShort(SMSG_REGISTER_RESPONSE);
+                    msg.writeByte(REGISTER_OK);
+                    ENetPacket *packet = enet_packet_create(msg.getData(),
+                                              msg.getDataSize() + 1,
+                                              ENET_PACKET_FLAG_RELIABLE);
+                    // Send the packet to the peer over channel id 0.
+                    enet_peer_send(netEvent.peer, 0, packet);
+                    // Clean up the packet now that we're done using it.
+                    enet_packet_destroy(netEvent.packet);
+                }
+                    break;
+                
+                case ENET_EVENT_TYPE_DISCONNECT:
+                    printf("%s disconected.\n", netEvent.peer->data);
+
+                    netEvent.peer->data = NULL;
+                    break;
+                    
+                default:
+                    printf("Unhandled enet event\n");
+                    break;
+            }
+        }*/
 
         // We know only about 10 events will happen per second,
         // so give the CPU a break for a while.
@@ -435,7 +491,8 @@ int main(int argc, char *argv[])
     }
 
     LOG_INFO("Received: Quit signal, closing down...", 0)
-    session->stopListen(int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)));
+    session->stopListen(int(config.getValue("ListenOnPort",
+                        DEFAULT_SERVER_PORT)));
 
     deinitialize();
 }

@@ -23,7 +23,11 @@
 
 #include "netsession.h"
 
+#include <SDL.h>
+
 #include "connectionhandler.h"
+
+#include "utils/logger.h"
 
 /**
  * This function is the new thread created to listen to a server socket. It
@@ -58,28 +62,32 @@ void NetSession::startListen(ConnectionHandler *handler, Uint16 port)
     data->handler = handler;
     data->running = true;
 
-    // Fill in IPaddress for opening local server socket
-    if (SDLNet_ResolveHost(&data->address, NULL, port) == -1) {
-        printf("SDLNet_ResolveHost: %s\n", SDLNet_GetError());
-        exit(6);
-    }
+    ENetHost *server;
 
-    // Attempt to open the local server socket
-    data->socket = SDLNet_TCP_Open(&data->address);
+    // Bind the server to the default localhost.
+    data->address.host = ENET_HOST_ANY;
+    data->address.port = port;
 
-    if (!data->socket) {
-        printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
+    server = enet_host_create(&data->address /* the address to bind the server host to */,
+                              MAX_CLIENTS    /* allow up to MAX_CLIENTS clients and/or outgoing connections */,
+                              0              /* assume any amount of incoming bandwidth */,
+                              0              /* assume any amount of outgoing bandwidth */);
+    if (server == NULL)
+    {
+        LOG_ERROR("Unable to create an ENet server host.", 0);
         exit(3);
     }
-
+    
+    data->host = server;
+    
     // Start the listening thread
     data->thread = SDL_CreateThread(startListenThread, data);
 
     if (data->thread == NULL) {
-        printf("SDL_CreateThread: %s\n", SDL_GetError());
-        exit(5);
+        LOG_ERROR("SDL_CreateThread: " << SDL_GetError(), 0);
+        exit(4);
     }
-
+    
     listeners[port] = data;
 }
 
@@ -99,13 +107,13 @@ void NetSession::stopListen(Uint16 port)
         // Note: Somewhere in this process the ConnectionHandler should receive
         //       disconnect notifications about all the connected clients.
         SDL_WaitThread(data->thread, NULL);
-        SDLNet_TCP_Close(data->socket);
+        enet_host_destroy(data->host);
         delete data;
         listeners.erase(threadDataI);
     }
     else
     {
-        printf("NetSession::stopListen() not listening to port %d!\n", port);
+        LOG_WARN("NetSession::stopListen() not listening to port %d!\n", port);
     }
 }
 
@@ -115,22 +123,48 @@ NetComputer *NetSession::connect(const std::string &host, Uint16 port)
     // can be used to send messages that way, or NULL when failing to connect.
     //
     // An asynchroneous wrapper could be created around this method.
+    
+    ENetHost *client;
 
-    IPaddress address;
+    client = enet_host_create(NULL, 1, 0, 0);
 
-    if (!SDLNet_ResolveHost(&address, host.c_str(), port))
+    if (client == NULL)
     {
-        TCPsocket tcpsock = SDLNet_TCP_Open(&address);
-        if (!tcpsock) {
-            printf("SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-            exit(3);
-        }
-
-        // return computer;
+        LOG_ERROR("Unable to create an ENet client host.", 0);
+        exit(3);
     }
-    else {
-        printf("SDLNet_ResolveHost: Could not resolve %s\n", host.c_str());
-        exit(4);
+    
+    ENetAddress address;
+    ENetEvent event;
+    ENetPeer *peer;
+
+    // Connect to host:port.
+    enet_address_set_host(&address, host.c_str());
+    address.port = port;
+
+    // Initiate the connection, allocating the channel 0.
+    peer = enet_host_connect(client, &address, 1);
+
+    if (peer == NULL)
+    {
+       LOG_ERROR("No available peer for initiating an ENet connection.", 0);
+       exit(4);
+    }
+
+    // Wait up to 5 seconds for the connection attempt to succeed.
+    if (enet_host_service (client, &event, 5000) > 0 &&
+        event.type == ENET_EVENT_TYPE_CONNECT)
+    {
+        LOG_INFO("Connection succeeded.", 0);
+    }
+    else
+    {
+        /* Either the 5 seconds are up or a disconnect event was */
+        /* received. Reset the peer in the event the 5 seconds   */
+        /* had run out without any significant event.            */
+        enet_peer_reset(peer);
+        LOG_ERROR("Connection failed.", 0);
+        exit(5);
     }
 
     return NULL;

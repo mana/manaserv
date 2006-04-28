@@ -60,6 +60,16 @@ class MessageOut
          * a call to this method.
          */
         const Packet *getPacket();
+        
+        /**
+         * Returns the content of the message.
+         */
+        char *getData();
+        
+        /**
+         * Returns the length of the data.
+         */
+        unsigned int getDataSize();
 
     private:
         /**

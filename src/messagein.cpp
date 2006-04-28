@@ -23,8 +23,9 @@
 
 #include "messagein.h"
 
-#include <SDL_net.h>
 #include <string>
+
+#include <enet/enet.h>
 
 #include "packet.h"
 
@@ -60,12 +61,14 @@ char MessageIn::readByte()
 
 short MessageIn::readShort()
 {
+    short value = -1;
+    
     if (mPacket)
     {
         if ( (mPos + sizeof(short)) <= mPacket->length )
         {
+            value = ENET_NET_TO_HOST_16(*(short *)(mPacket->data + mPos));
             mPos += sizeof(short);
-            return (short) SDLNet_Read16(&(mPacket->data[mPos - sizeof(short)]));
         }
         else
         {
@@ -73,17 +76,19 @@ short MessageIn::readShort()
             // that requires less length.
         }
     }
-    return -1;
+    return value;
 }
 
 long MessageIn::readLong()
 {
+    long value = -1;
+    
     if (mPacket)
     {
         if ( (mPos + sizeof(long)) <= mPacket->length )
         {
+            value = ENET_NET_TO_HOST_32(*(long *)(mPacket->data + mPos));
             mPos += sizeof(long);
-            return (long) SDLNet_Read32(&(mPacket->data[mPos - sizeof(long)]));
         }
         else
         {
@@ -91,7 +96,7 @@ long MessageIn::readLong()
             // that requires less length.
         }
     }
-    return -1;
+    return value;
 }
 
 std::string MessageIn::readString(int length)
