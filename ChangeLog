@@ -6,6 +6,8 @@
 	implementation of the UNIX gettimeofday function.
 	* src/main.cpp: world time doesn't get async anymore when world ticks are
 	skipped. added a warning when tick skip occurs.	
+	* src/util/timer.h, src/util/timer.cpp: made sure every compiler uses a 
+    64bit unsigned integer for getTimeInMillisec.
 
 2006-04-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

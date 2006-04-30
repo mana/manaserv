@@ -24,8 +24,15 @@
 
 #include <sys/time.h>
 
+/* I need a 64-bit unsigned integer */
+#ifdef _MSC_VER
+   typedef __uint64 uint64_t // when using MSVC use its internal type
+#else
+   #include <stdint.h> // on other compilers use the C99 official header
+#endif
+
 #ifdef _WIN32
-#include "wingettimeofday.h"
+    #include "wingettimeofday.h"
 #endif
 
 namespace tmwserv
@@ -35,7 +42,6 @@ namespace utils
 
 /**
  * This class is for timing purpose as a replacement for SDL_TIMER
- * connections from and connecting to other computers.
  */
 
 class Timer
@@ -44,7 +50,7 @@ class Timer
         /**
         * Constructor.
         */
-        Timer(signed int ms, bool createActive = true);
+        Timer(unsigned int ms, bool createActive = true);
 
         /**
         * returns the number of elapsed tics since last call
@@ -64,23 +70,23 @@ class Timer
         /**
         * changes the interval between two pulses
         */
-        void changeInterval (signed int newinterval);
+        void changeInterval (unsigned int newinterval);
 
     private:
         /**
         * calls gettimeofday() and converts it into milliseconds
         */       
-        signed long long int getTimeInMillisec();
+        uint64_t getTimeInMillisec();
 
         /**
         * interval between two pulses
         */
-        signed int interval;
+        unsigned int interval;
 
         /**
         * the time the last pulse occured
         */
-        signed long long int lastpulse;
+        uint64_t lastpulse;
 
         /**
         * activity status of the timer

@@ -26,7 +26,7 @@ namespace tmwserv
 namespace utils
 {
 
-Timer::Timer(signed int ms, bool createActive)
+Timer::Timer(unsigned int ms, bool createActive)
 {
     active = createActive;
     interval = ms;
@@ -55,18 +55,18 @@ void Timer::stop()
     active = false;
 };
 
-void Timer::changeInterval(signed int newinterval)
+void Timer::changeInterval(unsigned int newinterval)
 {
     interval = newinterval;
 };
 
-signed long long int Timer::getTimeInMillisec()
+uint64_t Timer::getTimeInMillisec()
 {
-    signed long long int timeInMillisec;
+    uint64_t timeInMillisec;
     timeval time;
 
     gettimeofday(&time, 0);
-    timeInMillisec = (signed long long int)time.tv_sec * 1000 + time.tv_usec / 1000;
+    timeInMillisec = (uint64_t)time.tv_sec * 1000 + time.tv_usec / 1000;
     return timeInMillisec;
 };
 
