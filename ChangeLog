@@ -1,5 +1,5 @@
 2006-04-30	Philipp Sehmisch  <tmw@crushnet.org>
-	* src/timer.h, src/timer.cpp: added a timer class
+	* src/util/timer.h, src/util/timer.cpp: added a timer class
 	* src/main.cpp: replced SDL timing with the new timer class
 
 2006-04-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
