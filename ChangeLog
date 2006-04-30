@@ -1,6 +1,11 @@
 2006-04-30	Philipp Sehmisch  <tmw@crushnet.org>
-	* src/util/timer.h, src/util/timer.cpp: added a timer class
-	* src/main.cpp: replced SDL timing with the new timer class
+	* src/util/timer.h, src/util/timer.cpp: added a timer class.
+	* src/main.cpp: replced SDL timing with the new timer class.
+	* src/util/timer.h, src/util/timer.cpp: replaced clock with gettimeofday.
+	* src/util/wingettimeofday.h, src/util/wingettimeofday.h windows 
+	implementation of the UNIX gettimeofday function.
+	* src/main.cpp: world time doesn't get async anymore when world ticks are
+	skipped. added a warning when tick skip occurs.	
 
 2006-04-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

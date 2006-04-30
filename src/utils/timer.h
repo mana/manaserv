@@ -22,7 +22,11 @@
 #ifndef _TMWSERV_TIMER_H_
 #define _TMWSERV_TIMER_H_
 
-#include <time.h>
+#include <sys/time.h>
+
+#ifdef _WIN32
+#include "wingettimeofday.h"
+#endif
 
 namespace tmwserv
 {
@@ -43,10 +47,9 @@ class Timer
         Timer(signed int ms, bool createActive = true);
 
         /**
-        * checks if the desired time has passed
-        * returns true if yes and false if not
+        * returns the number of elapsed tics since last call
         */
-        bool poll();
+        int poll();
 
         /**
         * activates the timer
@@ -61,18 +64,23 @@ class Timer
         /**
         * changes the interval between two pulses
         */
-        void changeInterval (signed int ms);
+        void changeInterval (signed int newinterval);
 
     private:
         /**
-        * interval between two pulses
-        */
-        signed int interval;   
+        * calls gettimeofday() and converts it into milliseconds
+        */       
+        signed long long int getTimeInMillisec();
 
         /**
-        * time for next pulse
+        * interval between two pulses
         */
-        signed int nextpulse;
+        signed int interval;
+
+        /**
+        * the time the last pulse occured
+        */
+        signed long long int lastpulse;
 
         /**
         * activity status of the timer

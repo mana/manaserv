@@ -29,29 +29,25 @@ namespace utils
 Timer::Timer(signed int ms, bool createActive)
 {
     active = createActive;
-    interval = (ms * CLOCKS_PER_SEC) / 1000;
-    nextpulse = clock() + interval;
+    interval = ms;
+    lastpulse = getTimeInMillisec();
 };
 
-bool Timer::poll()
+int Timer::poll()
 {
-    if (!active) return false;
-
-    if (nextpulse < clock())
+    int elapsed = 0;
+    if (active)
     {
-        nextpulse += interval;
-        return true;
-    }
-    else {
-        return false;
+        elapsed = (getTimeInMillisec() - lastpulse) / interval;
+        lastpulse += interval * elapsed;
     };
-
+    return elapsed;
 };
 
 void Timer::start()
 {
     active = true;
-    nextpulse = clock() + interval;
+    lastpulse = getTimeInMillisec();
 };
 
 void Timer::stop()
@@ -59,13 +55,20 @@ void Timer::stop()
     active = false;
 };
 
-void Timer::changeInterval(signed int ms)
+void Timer::changeInterval(signed int newinterval)
 {
-    signed int newinterval = ms * CLOCKS_PER_SEC / 1000;
-    nextpulse = nextpulse - interval + newinterval;
     interval = newinterval;
 };
 
+signed long long int Timer::getTimeInMillisec()
+{
+    signed long long int timeInMillisec;
+    timeval time;
+
+    gettimeofday(&time, 0);
+    timeInMillisec = (signed long long int)time.tv_sec * 1000 + time.tv_usec / 1000;
+    return timeInMillisec;
+};
 
 } // ::utils
 } // ::tmwserv

@@ -334,6 +334,8 @@ void parseOptions(int argc, char *argv[])
  */
 int main(int argc, char *argv[])
 {
+    int elapsedWorldTicks;
+    
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0)
 
     // Parse Command Line Options
@@ -398,8 +400,14 @@ int main(int argc, char *argv[])
     worldTimer.start();
 
     while (running) {
-        if (worldTimer.poll()) {
-            worldTime++;
+        elapsedWorldTicks = worldTimer.poll();
+        if (elapsedWorldTicks > 0) {
+            worldTime += elapsedWorldTicks;
+            
+            if (elapsedWorldTicks > 1)
+            {
+                LOG_WARN(elapsedWorldTicks -1 <<" World Tick(s) skipped because of insufficient time. please buy a faster machine ;-)", 0);
+            };
 
             // Print world time at 10 second intervals to show we're alive
             if (worldTime % 100 == 0) {
