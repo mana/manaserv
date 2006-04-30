@@ -50,6 +50,7 @@
 
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
+#include "utils/timer.h"
 
 // Scripting
 #ifdef SCRIPT_SUPPORT
@@ -79,15 +80,13 @@ std::string scriptLanugage = "none";
 #define DEFAULT_SERVER_PORT     9601
 #endif
 
-#define TMW_WORLD_TICK  SDL_USEREVENT
+tmwserv::utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
+int worldTime = 0;              /**< Current world time in 100ms ticks */
+bool running = true;            /**< Determines if server keeps running */
 
-SDL_TimerID worldTimerID; /**< Timer ID of world timer */
-int worldTime = 0;        /**< Current world time in 100ms ticks */
-bool running = true;      /**< Determines if server keeps running */
+Skill skillTree("base");        /**< Skill tree */
 
-Skill skillTree("base");  /**< Skill tree */
-
-Configuration config;     /**< XML config reader */
+Configuration config;           /**< XML config reader */
 
 tmwserv::utils::StringFilter *stringFilter; /**< Slang's Filter */
 
@@ -104,23 +103,6 @@ GameHandler *gameHandler;
 
 /** Primary connection handler */
 ConnectionHandler *connectionHandler;
-
-/**
- * SDL timer callback, sends a <code>TMW_WORLD_TICK</code> event.
- */
-Uint32 worldTick(Uint32 interval, void *param)
-{
-    // Push the custom world tick event
-    SDL_Event event;
-    event.type = TMW_WORLD_TICK;
-
-    if (SDL_PushEvent(&event)) {
-        LOG_WARN("couldn't push world tick into event queue!", 0)
-    }
-
-    return interval;
-}
-
 
 /**
  * Initializes the server.
@@ -187,7 +169,7 @@ void initialize()
     connectionHandler = new ConnectionHandler();
     
     // Make SDL use a dummy videodriver so that it doesn't require an X server
-    putenv("SDL_VIDEODRIVER=dummy");
+    //putenv("SDL_VIDEODRIVER=dummy");
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
@@ -209,9 +191,6 @@ void initialize()
         LOG_FATAL("An error occurred while initializing ENet", 0)
         exit(2);
     }
-
-    // initialize world timer at 10 times per second.
-    worldTimerID = SDL_AddTimer(100, worldTick, NULL);
 
     // initialize scripting subsystem.
 #ifdef RUBY_SUPPORT
@@ -262,7 +241,7 @@ void deinitialize()
     config.write();
 
     // Stop world timer
-    SDL_RemoveTimer(worldTimerID);
+    worldTimer.stop();
     
     // Quit SDL
     SDL_Quit();
@@ -414,28 +393,22 @@ int main(int argc, char *argv[])
 
     // create state machine
     State &state = State::instance();
-    //
 
-    SDL_Event event;
+    // initialize world timer
+    worldTimer.start();
 
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == TMW_WORLD_TICK) {
-                // Move the world forward in time
-                worldTime++;
+        if (worldTimer.poll()) {
+            worldTime++;
 
-                // Print world time at 10 second intervals to show we're alive
-                if (worldTime % 100 == 0) {
-                    LOG_INFO("World time: " << worldTime, 0);
-                }
+            // Print world time at 10 second intervals to show we're alive
+            if (worldTime % 100 == 0) {
+                LOG_INFO("World time: " << worldTime, 0);
+            }
 
-                // - Handle all messages that are in the message queue
-                // - Update all active objects/beings
-                state.update(*connectionHandler);
-            }
-            else if (event.type == SDL_QUIT) {
-                running = false;
-            }
+            // - Handle all messages that are in the message queue
+            // - Update all active objects/beings
+            state.update(*connectionHandler);
         }
         
         /*ENetEvent netEvent;
@@ -486,8 +459,9 @@ int main(int argc, char *argv[])
         }*/
 
         // We know only about 10 events will happen per second,
-        // so give the CPU a break for a while.
-        SDL_Delay(100);
+        // so give the CPU a break for a while with pthreads sched_yield
+        // function
+        sched_yield();
     }
 
     LOG_INFO("Received: Quit signal, closing down...", 0)

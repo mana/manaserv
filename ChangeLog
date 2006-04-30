@@ -1,3 +1,7 @@
+2006-04-30	Philipp Sehmisch  <tmw@crushnet.org>
+	* src/timer.h, src/timer.cpp: added a timer class
+	* src/main.cpp: replced SDL timing with the new timer class
+
 2006-04-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/netsession.cpp, src/netsession.h, tmwserv.dev: Got rid of SDL
@@ -19,7 +23,7 @@
 	* src/client.cpp, src/connectionhandler.cpp, src/connectionhandler.h,
 	src/main.cpp, src/messagein.cpp, src/messageout.cpp,
 	src/netcomputer.cpp, src/netcomputer.h, src/netsession.cpp,
-	src/netsession.h, src/utils/logger.cpp, tmwserv.dev: Got rid of 
+	src/netsession.h, src/utils/logger.cpp, tmwserv.dev: Got rid of
 	SDL_net, now both server and test client use enet.
 
 2006-03-18  Eugenio Favalli  <elvenprogrammer@gmail.com>
