@@ -25,7 +25,6 @@
 #include <signal.h>
 #include <iostream>
 #include <physfs.h>
-#include <SDL.h>
 #include <enet/enet.h>
 
 #if (defined __USE_UNIX98 || defined __FreeBSD__)
@@ -167,21 +166,9 @@ void initialize()
     accountHandler = new AccountHandler();
     gameHandler = new GameHandler();
     connectionHandler = new ConnectionHandler();
-    
-    // Make SDL use a dummy videodriver so that it doesn't require an X server
-    //putenv("SDL_VIDEODRIVER=dummy");
-
-    // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
-        LOG_FATAL("SDL_Init: " << SDL_GetError(), 0)
-        exit(1);
-    }
 
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
-    
-    // set SDL to quit on exit.
-    atexit(SDL_Quit);
 
     // set enet to quit on exit.
     atexit(enet_deinitialize);
@@ -242,9 +229,6 @@ void deinitialize()
 
     // Stop world timer
     worldTimer.stop();
-    
-    // Quit SDL
-    SDL_Quit();
 
     // Quit ENet
     enet_deinitialize();

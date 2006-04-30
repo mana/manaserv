@@ -2,12 +2,14 @@
 	* src/util/timer.h, src/util/timer.cpp: added a timer class.
 	* src/main.cpp: replced SDL timing with the new timer class.
 	* src/util/timer.h, src/util/timer.cpp: replaced clock with gettimeofday.
-	* src/util/wingettimeofday.h, src/util/wingettimeofday.h windows 
+	* src/util/wingettimeofday.h, src/util/wingettimeofday.h windows
 	implementation of the UNIX gettimeofday function.
 	* src/main.cpp: world time doesn't get async anymore when world ticks are
-	skipped. added a warning when tick skip occurs.	
-	* src/util/timer.h, src/util/timer.cpp: made sure every compiler uses a 
+	skipped. added a warning when tick skip occurs.
+	* src/util/timer.h, src/util/timer.cpp: made sure every compiler uses a
     64bit unsigned integer for getTimeInMillisec.
+    * src/main.cpp, src/connectionhandler.cpp, src/netsession.cpp, 
+    src/SDL-win32_main.c: removed the last remains of SDL
 
 2006-04-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

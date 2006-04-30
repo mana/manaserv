@@ -85,12 +85,6 @@ void NetSession::startListen(ConnectionHandler *handler, enet_uint16 port)
         LOG_ERROR("pthread_create: " << rc, 0);
         exit(4);
     }
-    /*data->thread = SDL_CreateThread(startListenThread, data);
-
-    if (data->thread == NULL) {
-        LOG_ERROR("SDL_CreateThread: " << SDL_GetError(), 0);
-        exit(4);
-    }*/
     
     listeners[port] = data;
 }
@@ -110,7 +104,6 @@ void NetSession::stopListen(enet_uint16 port)
         // Wait for listen thread to stop and close socket
         // Note: Somewhere in this process the ConnectionHandler should receive
         //       disconnect notifications about all the connected clients.
-        //SDL_WaitThread(data->thread, NULL);
         enet_host_destroy(data->host);
         delete data;
         listeners.erase(threadDataI);
