@@ -1,3 +1,7 @@
+2006-05-03  Philipp Sehmisch  <tmw@crushnet.org>
+    * src/main.cpp: only yield main thread when there isn't anything
+    to do.
+
 2006-04-30	Philipp Sehmisch  <tmw@crushnet.org>
 	* src/util/timer.h, src/util/timer.cpp: added a timer class.
 	* src/main.cpp: replced SDL timing with the new timer class.

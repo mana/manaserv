@@ -402,6 +402,11 @@ int main(int argc, char *argv[])
             // - Update all active objects/beings
             state.update(*connectionHandler);
         }
+        else {
+            // when there is nothing to do give away some processor time to 
+            // other tasks
+            sched_yield();
+        };
         
         /*ENetEvent netEvent;
 
@@ -449,11 +454,6 @@ int main(int argc, char *argv[])
                     break;
             }
         }*/
-
-        // We know only about 10 events will happen per second,
-        // so give the CPU a break for a while with pthreads sched_yield
-        // function
-        sched_yield();
     }
 
     LOG_INFO("Received: Quit signal, closing down...", 0)
