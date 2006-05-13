@@ -56,12 +56,14 @@ class NetComputer
         /**
          * Returns <code>true</code> if this computer is disconnected.
          */
-        //bool isDisconnected();
+        //bool
+        //isDisconnected();
 
         /**
          * Disconnects the computer from the server.
          */
-        void disconnect(const std::string &reason);
+        void
+        disconnect(const std::string &reason);
 
         /**
          * Queues (FIFO) a packet for sending to a client.
@@ -70,7 +72,8 @@ class NetComputer
          *  introduce the reliable argument, which would cause a UDP message
          *  to be sent when set to false.
          */
-        void send(const Packet *p);
+        void
+        send(const Packet *p);
         //void send(Packet *p, bool reliable = true);
 
         /**
@@ -81,33 +84,39 @@ class NetComputer
         /**
          * Set the account associated with the connection
          */
-        void setAccount(tmwserv::AccountPtr acc);
+        void
+        setAccount(tmwserv::AccountPtr acc);
 
         /**
          * Unset the account associated with the connection
          */
-        void unsetAccount();
+        void
+        unsetAccount();
 
         /**
          * Get account associated with the connection
          */
-        tmwserv::AccountPtr getAccount() { return mAccountPtr; }
+        tmwserv::AccountPtr
+        getAccount() { return mAccountPtr; }
 
         /**
          * Set the selected character associated with connection
          */
-        void setCharacter(tmwserv::BeingPtr ch);
+        void
+        setCharacter(tmwserv::BeingPtr ch);
 
         /**
          * Deselect the character associated with connection
          * and remove it from the world
          */
-        void unsetCharacter();
+        void
+        unsetCharacter();
 
         /**
          * Get character associated with the connection
          */
-        tmwserv::BeingPtr getCharacter() { return mCharacterPtr; }
+        tmwserv::BeingPtr
+        getCharacter() { return mCharacterPtr; }
 
     private:
         ConnectionHandler *handler;
@@ -115,8 +124,11 @@ class NetComputer
         std::queue<Packet*> queue; /**< Message Queue (FIFO) */
         ENetPeer *peer;            /**< Client peer */
 
-        tmwserv::AccountPtr mAccountPtr; /**< Account associated with connection */
-        tmwserv::BeingPtr mCharacterPtr; /**< Selected character */
+        /** Account associated with connection */
+        tmwserv::AccountPtr mAccountPtr;
+
+        /** Selected character */
+        tmwserv::BeingPtr mCharacterPtr;
 };
 
 #endif

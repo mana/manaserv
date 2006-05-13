@@ -82,7 +82,9 @@ tmwserv_SOURCES = main.cpp \
 		  utils/logger.h \
 		  utils/logger.cpp \
 		  utils/stringfilter.h \
-		  utils/stringfilter.cpp
+		  utils/stringfilter.cpp \
+		  utils/timer.h \
+		  utils/timer.cpp
 
 if BUILD_MYSQL
 tmwserv_SOURCES += dal/mysqldataprovider.h \

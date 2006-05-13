@@ -1,19 +1,28 @@
-2006-05-03  Philipp Sehmisch  <tmw@crushnet.org>
-    * src/main.cpp: only yield main thread when there isn't anything
-    to do.
+2006-05-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
-2006-04-30	Philipp Sehmisch  <tmw@crushnet.org>
-	* src/util/timer.h, src/util/timer.cpp: added a timer class.
-	* src/main.cpp: replced SDL timing with the new timer class.
-	* src/util/timer.h, src/util/timer.cpp: replaced clock with gettimeofday.
-	* src/util/wingettimeofday.h, src/util/wingettimeofday.h windows
+	* src/Makefile.am, configure.ac: Applied patch by Guillaume Melquiond
+	which adds ENet check and adds timer.cpp/h to the Makefile.am.
+	* src/connectionhandler.cpp, src/client.cpp, src/defines.h: Fixed some
+	compilation warnings.
+
+2006-05-03  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/main.cpp: only yield main thread when there isn't anything to
+	do.
+
+2006-04-30  Philipp Sehmisch  <tmw@crushnet.org>
+	* src/util/timer.h, src/util/timer.cpp: Added a timer class.
+	* src/main.cpp: Replaced SDL timing with the new timer class.
+	* src/util/timer.h, src/util/timer.cpp: Replaced clock with
+	gettimeofday.
+	* src/util/wingettimeofday.h, src/util/wingettimeofday.h: Windows
 	implementation of the UNIX gettimeofday function.
-	* src/main.cpp: world time doesn't get async anymore when world ticks are
-	skipped. added a warning when tick skip occurs.
-	* src/util/timer.h, src/util/timer.cpp: made sure every compiler uses a
-    64bit unsigned integer for getTimeInMillisec.
-    * src/main.cpp, src/connectionhandler.cpp, src/netsession.cpp, 
-    src/SDL-win32_main.c: removed the last remains of SDL
+	* src/main.cpp: World time doesn't get async anymore when world ticks
+	are skipped. Added a warning when tick skip occurs.
+	* src/util/timer.h, src/util/timer.cpp: Made sure every compiler uses
+	a 64 bit unsigned integer for getTimeInMillisec.
+	* src/main.cpp, src/connectionhandler.cpp, src/netsession.cpp,
+	src/SDL-win32_main.c: Removed the last remains of SDL.
 
 2006-04-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

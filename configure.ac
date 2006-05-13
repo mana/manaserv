@@ -26,6 +26,9 @@ AC_MSG_ERROR([ *** Unable to find PhysFS library (icculus.org/physfs/)]))
 AC_CHECK_LIB([SDL_net], [SDLNet_Init], ,
 AC_MSG_ERROR([ *** Unable to find SDL_net library]))
 
+AC_CHECK_LIB([enet], [enet_initialize], ,
+AC_MSG_ERROR([ *** Unable to find enet library (enet.bespin.org)]))
+
 PKG_CHECK_MODULES(XML2, [libxml-2.0 >= 2.4])
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$LIBS $XML2_LIBS"

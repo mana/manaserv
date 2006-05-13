@@ -182,7 +182,7 @@ enum {
     SMSG_QUIT_CHANNEL_RESPONSE       = 0x0422,
 
     // Other
-    SMSG_LOAD_MAP                 = 0x0500,
+    SMSG_LOAD_MAP                 = 0x0500
 
     // NOTE: We will need more messages for in-game control (eg. moving a client to a new map/position etc.). Currently the protocol only caters for the bare basics.
 };

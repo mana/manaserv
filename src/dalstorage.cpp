@@ -231,10 +231,10 @@ DALStorage::getAccount(const std::string& userName)
             LOG_INFO(userName << "'s account has " << charInfo.rows()
                 << " character(s) in database.", 1)
 
-            // As the recordset functions are set to be able to get one recordset
-            // at a time, we store charInfo in a temp array of strings
-            // To avoid the problem where values of charInfo were erased by the
-            // values of mapInfo.
+            // As the recordset functions are set to be able to get one
+            // recordset at a time, we store charInfo in a temp array of
+            // strings. To avoid the problem where values of charInfo were
+            // erased by the values of mapInfo.
             std::string strCharInfo[charInfo.rows()][charInfo.cols()];
             for (unsigned int i = 0; i < charInfo.rows(); ++i)
             {
@@ -247,7 +247,7 @@ DALStorage::getAccount(const std::string& userName)
 
             for (unsigned int k = 0; k < charRows; ++k) {
                 RawStatistics stats = {
-                    toUshort(strCharInfo[k][11]),  // strength
+                    toUshort(strCharInfo[k][11]), // strength
                     toUshort(strCharInfo[k][12]), // agility
                     toUshort(strCharInfo[k][13]), // vitality
                     toUshort(strCharInfo[k][14]), // intelligence

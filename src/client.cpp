@@ -437,7 +437,7 @@ void parsePacket(char *data, int recvLength) {
                 // Register
                 switch (msg.readByte()) {
                     case LOGIN_OK:
-                        char charNumber;
+                        unsigned char charNumber;
                         charNumber = msg.readByte();
                         std::cout << "Account has " << int(charNumber) << " characters." << std::endl;
                         for (unsigned int i = 0; i < charNumber; i++) {
@@ -654,7 +654,7 @@ void parsePacket(char *data, int recvLength) {
             {
                 switch (msg.readByte()) {
                     case CHAR_LIST_OK:
-                        char charNumber;
+                        unsigned char charNumber;
                         charNumber = msg.readByte();
                         std::cout << "Character List:" << std::endl
                         << "---------------" << std::endl;

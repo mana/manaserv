@@ -103,7 +103,7 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
     while (ltd->running)
     {
         ENetEvent event;
-        
+
         // Wait up to 1000 milliseconds for an event.
         while (enet_host_service(ltd->host, &event, 1000) > 0)
         {
@@ -119,19 +119,19 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                     computerConnected(comp);
                     /*LOG_INFO(ltd->host->peerCount <<
                              " client(s) connected", 0);*/
-                    
+
                     // Store any relevant client information here.
                     event.peer->data = (void *)comp;
                 } break;
-                    
+
                 case ENET_EVENT_TYPE_RECEIVE:
                 {
                     LOG_INFO("A packet of length " << event.packet->dataLength
                              << " was received from " << event.peer->address.host,
                              2);
-                    
+
                     NetComputer *comp = (NetComputer *)event.peer->data;
-                    
+
 #ifdef SCRIPT_SUPPORT
                     // This could be good if you wanted to extend the
                     // server protocol using a scripting language. This
@@ -171,11 +171,11 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                     else {
                         LOG_ERROR("Message too short from " << ipaddr, 0);
                     }
-                    
+
                     /* Clean up the packet now that we're done using it. */
                     enet_packet_destroy(event.packet);
                 } break;
-                    
+
                 case ENET_EVENT_TYPE_DISCONNECT:
                 {
                     NetComputer *comp = (NetComputer *)event.peer->data;
@@ -186,12 +186,14 @@ ConnectionHandler::startListen(ListenThreadData *ltd)
                     delete comp;
                     event.peer->data = NULL;
                 } break;
+
+                default: break;
             }
         }
     }
-    
+
     // - Disconnect all clients (close sockets)
-    
+
     // TODO: probably there's a better way.
     ENetPeer *currentPeer;
 
@@ -265,9 +267,9 @@ void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
          i != clients.end();
          i++) {
         // See if the other being is near enough, then send the message
-        if (abs((*i)->getCharacter().get()->getX() - beingPtr.get()->getX()) <= AROUND_AREA_IN_TILES )
+        if (abs((*i)->getCharacter().get()->getX() - beingPtr.get()->getX()) <= (int)AROUND_AREA_IN_TILES )
         {
-            if (abs((*i)->getCharacter().get()->getY() - beingPtr.get()->getY()) <= AROUND_AREA_IN_TILES )
+            if (abs((*i)->getCharacter().get()->getY() - beingPtr.get()->getY()) <= (int)AROUND_AREA_IN_TILES )
             {
             (*i)->send(msg.getPacket());
             break;
