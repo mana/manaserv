@@ -1,3 +1,8 @@
+2006-05-14  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/messagein.cpp: Replaced strnlen by memchr to avoid GNU
+	extensions.
+
 2006-05-14  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/messageout.cpp, src/messagein.h, src/messagein.cpp: Applied

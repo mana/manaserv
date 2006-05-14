@@ -104,8 +104,9 @@ std::string MessageIn::readString(int length)
         }
 
         // Read the string
-        int stringLength = strnlen(mPacket->data + mPos, length);
-        std::string readString(mPacket->data + mPos, stringLength);
+        char const *stringBeg = mPacket->data + mPos,
+                   *stringEnd = (char const *)memchr(stringBeg, '\0', length);
+        std::string readString(stringBeg, stringEnd ? stringEnd - stringBeg : length);
         mPos += length;
         return readString;
     }
