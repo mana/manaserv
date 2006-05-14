@@ -1,3 +1,11 @@
+2006-05-14  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/accounthandler.cpp: Prevented accounts from being incorrectly
+	created when errors were detected.
+	* src/client.cpp: Prevented input from looping on error, allowed
+	client to read spaces as part of chat messages, added output of chat
+	messages received from server.
+
 2006-05-14  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/utils/timer.cpp, tmwserv.dev: Replaced nanosleep with Sleep in

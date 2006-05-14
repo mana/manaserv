@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
             std::cout << "8) Create character" << std::endl;
             std::cout << "Choose your option: ";
             std::cin >> answer;
+            std::cin.getline(line, 256); // skip the remaining of the line
 
             MessageOut msg;
 
@@ -124,7 +125,7 @@ int main(int argc, char *argv[])
                     std::cout << "Account name: ";
                     std::cin >> line;
                     msg.writeString(line);
-                    std::cout <<"Password: ";
+                    std::cout << "Password: ";
                     std::cin >> line;
                     msg.writeString(line);
                     std::cout << "Email address: ";
@@ -275,14 +276,16 @@ int main(int argc, char *argv[])
                 } break;
 
                 case 13:
+                {
                     // Chat
                     msg.writeShort(CMSG_SAY);
                     std::cout << "Chat: ";
-                    std::cin >> line;
+                    std::cin.getline(line, 256);
+                    line[255] = '\0';
                     msg.writeString(line);
                     msg.writeShort(0);
                     responseRequired = false;
-                    break;
+                }   break;
 
                 case 14:
                 {
@@ -346,7 +349,7 @@ int main(int argc, char *argv[])
                     break;
 
                 case ENET_EVENT_TYPE_DISCONNECT:
-                    printf("Disconected.\n");
+                    printf("Disconnected.\n");
                     connected = false;
                     break;
 
@@ -694,6 +697,12 @@ void parsePacket(char *data, int recvLength) {
                 }
             } break;
 
+            case SMSG_CHAT:
+            {
+                short channel = msg.readShort();
+                std::cout << "Chat on channel " << channel << ':' << std::endl
+                << msg.readString() << std::endl;
+            } break;
 
             default:
                 break;

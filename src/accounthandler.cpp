@@ -223,7 +223,7 @@ void AccountHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                     result.writeByte(REGISTER_INVALID_EMAIL);
                     LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1)
                 }
-                if (stringFilter->findDoubleQuotes(email))
+                else if (stringFilter->findDoubleQuotes(email))
                 {
                     result.writeByte(REGISTER_INVALID_EMAIL);
                     LOG_INFO(email << ": has got double quotes in it.", 1)
