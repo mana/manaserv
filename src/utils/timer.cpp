@@ -39,10 +39,14 @@ void Timer::sleep()
     if (!active) return;
     uint64_t now = getTimeInMillisec();
     if (now - lastpulse >= interval) return;
+#ifndef _WIN32
     struct timespec req;
     req.tv_sec = 0;
     req.tv_nsec = (interval - (now - lastpulse)) * (1000 * 1000);
     nanosleep(&req, 0);
+#else
+    Sleep(interval - (now - lastpulse));
+#endif
 }
 
 int Timer::poll()
