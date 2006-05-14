@@ -263,18 +263,18 @@ void ConnectionHandler::sendToEveryone(MessageOut &msg)
 
 void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
 {
-    for (NetComputers::iterator i = clients.begin();
-         i != clients.end();
-         i++) {
+    unsigned speakerMapId = beingPtr->getMapId();
+    std::pair<unsigned, unsigned> speakerXY = beingPtr->getXY();
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end;
+         ++i) {
         // See if the other being is near enough, then send the message
-        if (abs((*i)->getCharacter().get()->getX() - beingPtr.get()->getX()) <= (int)AROUND_AREA_IN_TILES )
-        {
-            if (abs((*i)->getCharacter().get()->getY() - beingPtr.get()->getY()) <= (int)AROUND_AREA_IN_TILES )
-            {
-            (*i)->send(msg.getPacket());
-            break;
-            }
-        }
+        tmwserv::Being const *listener = (*i)->getCharacter().get();
+        if (listener->getMapId() != speakerMapId) continue;
+        std::pair<unsigned, unsigned> listenerXY = listener->getXY();
+        if (abs(listenerXY.first  - speakerXY.first ) > (int)AROUND_AREA_IN_TILES) continue;
+        if (abs(listenerXY.second - speakerXY.second) > (int)AROUND_AREA_IN_TILES) continue;
+        (*i)->send(msg.getPacket());
     }
 }
 

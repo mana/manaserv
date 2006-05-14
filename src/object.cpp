@@ -139,8 +139,9 @@ Object::getStatistics(void)
     return mStats;
 }
 
-const unsigned int
-Object::getMapId() {
+unsigned int
+Object::getMapId() const
+{
     return mMapId;
 }
 

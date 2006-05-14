@@ -6,6 +6,9 @@
 	* src/main.cpp, src/utils/timer.cpp, src/utils/timer.h: Applied a
 	patch by Guillaume that makes the server sleep between ticks instead
 	of polling for the next one.
+	* src/connectionhandler.cpp, src/object.cpp, src/object.h: Applied a
+	patch by Guillaume that fixes and optimizes
+	ConnectionHandler::sendAround.
 
 2006-05-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
