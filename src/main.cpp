@@ -387,7 +387,7 @@ int main(int argc, char *argv[])
         elapsedWorldTicks = worldTimer.poll();
         if (elapsedWorldTicks > 0) {
             worldTime += elapsedWorldTicks;
-            
+
             if (elapsedWorldTicks > 1)
             {
                 LOG_WARN(elapsedWorldTicks -1 <<" World Tick(s) skipped because of insufficient time. please buy a faster machine ;-)", 0);
@@ -407,7 +407,7 @@ int main(int argc, char *argv[])
             // other tasks
             sched_yield();
         };
-        
+
         /*ENetEvent netEvent;
 
         while (enet_host_service(server, &netEvent, 3000) > 0)
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
 
                     netEvent.peer->data = (void *)"Client information";
                     break;
-            
+
                 case ENET_EVENT_TYPE_RECEIVE:
                 {
                     printf("A packet of length %u containing %s was received from %s on channel %u.\n",

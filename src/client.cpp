@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 #include "../config.h"
 #endif
     std::cout << "The Mana World Test Client v" << PACKAGE_VERSION << std::endl;
-    
+
     if (enet_initialize () != 0)
     {
         printf("An error occurred while initializing ENet.\n");
@@ -104,9 +104,9 @@ int main(int argc, char *argv[])
             std::cout << "8) Create character" << std::endl;
             std::cout << "Choose your option: ";
             std::cin >> answer;
-            
+
             MessageOut msg;
-            
+
             switch (answer) {
                 case 0:
                     // Disconnection
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
                     }
                     exit = true;
                     break;
-                    
+
                 case 1:
                     // Register
                     msg.writeShort(CMSG_REGISTER);
@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
                     continue;
                     break;
             } // end switch
-            
+
             // Send prepared message
             if (!exit && connected) {
                 ENetPacket *packet = enet_packet_create(
@@ -322,7 +322,6 @@ int main(int argc, char *argv[])
                 // Send the packet to the peer over channel id 0.
                 enet_peer_send(peer, 0, packet);
             } // end if
-            
         } // end if
 
         while (enet_host_service(client, &event, 1000)) {
@@ -338,7 +337,7 @@ int main(int argc, char *argv[])
                               << " was received from "
                               << event.peer->address.host
                               << std::endl;
-                            
+
                     parsePacket((char *)event.packet->data,
                                 event.packet->dataLength);
 

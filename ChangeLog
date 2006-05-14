@@ -1,3 +1,9 @@
+2006-05-14  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/messageout.cpp, src/messagein.h, src/messagein.cpp: Applied
+	another patch by Guillaume Melquiond which fixed a number of issues
+	with the message implementation (client side should also be checked).
+
 2006-05-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/Makefile.am, configure.ac: Applied patch by Guillaume Melquiond

@@ -58,55 +58,54 @@ MessageOut::expand(size_t bytes)
 void
 MessageOut::writeByte(char value)
 {
-    expand(mPos + sizeof(char));
+    expand(mPos + 1);
     mData[mPos] = value;
-    mPos += sizeof(char);
+    mPos += 1;
 }
 
 void MessageOut::writeShort(short value)
 {
-    expand(mPos + sizeof(short));
-    (*(short *)&mData[mPos]) = ENET_HOST_TO_NET_16(value);
-    mPos += sizeof(short);
+    expand(mPos + 2);
+    uint16_t t = ENET_HOST_TO_NET_16(value);
+    memcpy(mData + mPos, &t, 2);
+    mPos += 2;
 }
 
 void
 MessageOut::writeLong(long value)
 {
-    expand(mPos + sizeof(long));
-    (*(long *)&mData[mPos]) = ENET_HOST_TO_NET_32(value);
-    mPos += sizeof(long);
+    expand(mPos + 4);
+    uint32_t t = ENET_HOST_TO_NET_32(value);
+    memcpy(mData + mPos, &t, 4);
+    mPos += 4;
 }
 
 void
 MessageOut::writeString(const std::string &string, int length)
 {
-    std::string toWrite = string;
-
+    int stringLength = string.length();
     if (length < 0)
     {
         // Write the length at the start if not fixed
-        writeShort(string.length());
-        expand(mPos + string.length());
+        writeShort(stringLength);
+        length = stringLength;
     }
-    else if (length < (int)string.length())
+    else if (length < stringLength)
     {
         // Make sure the length of the string is no longer than specified
-        toWrite = string.substr(0, length);
-
-        expand(mPos + length);
+        stringLength = length;
     }
+    expand(mPos + length);
 
     // Write the actual string
-    memcpy(&mData[mPos], (void*)toWrite.c_str(), toWrite.length());
-    mPos += toWrite.length();
+    memcpy(mData + mPos, string.c_str(), stringLength);
 
     // Pad remaining space with zeros
-    if (length > (int)toWrite.length())
+    if (length > stringLength)
     {
-        memset(&mData[mPos], '\0', length - toWrite.length());
-        mPos += length - toWrite.length();
+        memset(mData + mPos + stringLength, '\0', length - stringLength);
     }
+    mPos += length;
 }
 
 const Packet*

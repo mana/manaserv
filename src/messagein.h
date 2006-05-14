@@ -62,7 +62,8 @@ class MessageIn
         short mId;                    /**< The message ID. */
 
         /**
-         * Actual Position in the packet. From 0 to packet->length - 1.
+         * Actual position in the packet. From 0 to packet->length.
+         * A value bigger than packet->length means EOP was reached when reading it.
          */
         unsigned int mPos;
 };

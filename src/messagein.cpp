@@ -44,37 +44,30 @@ MessageIn::~MessageIn()
 
 char MessageIn::readByte()
 {
+    char value = -1;
     if (mPacket)
     {
-        if ( mPos < mPacket->length ) // if there is enough to read
+        if (mPos < mPacket->length)
         {
-            return mPacket->data[mPos++];
+            value = mPacket->data[mPos];
         }
-        else
-        {
-            mPos = mPacket->length - 1;
-            return 0;
-        }
+        mPos += 1;
     }
-    return -1;
+    return value;
 }
 
 short MessageIn::readShort()
 {
     short value = -1;
-    
     if (mPacket)
     {
-        if ( (mPos + sizeof(short)) <= mPacket->length )
+        if (mPos + 2 <= mPacket->length)
         {
-            value = ENET_NET_TO_HOST_16(*(short *)(mPacket->data + mPos));
-            mPos += sizeof(short);
+            uint16_t t;
+            memcpy(&t, mPacket->data + mPos, 2);
+            value = ENET_NET_TO_HOST_16(t);
         }
-        else
-        {
-            // We do nothing. And keep what's left to be read by a function 
-            // that requires less length.
-        }
+        mPos += 2;
     }
     return value;
 }
@@ -82,51 +75,40 @@ short MessageIn::readShort()
 long MessageIn::readLong()
 {
     long value = -1;
-    
     if (mPacket)
     {
-        if ( (mPos + sizeof(long)) <= mPacket->length )
+        if (mPos + 4 <= mPacket->length)
         {
-            value = ENET_NET_TO_HOST_32(*(long *)(mPacket->data + mPos));
-            mPos += sizeof(long);
+            uint32_t t;
+            memcpy(&t, mPacket->data + mPos, 4);
+            value = ENET_NET_TO_HOST_32(t);
         }
-        else
-        {
-            // We do nothing. And keep what's left to be read by a function 
-            // that requires less length.
-        }
+        mPos += 4;
     }
     return value;
 }
 
 std::string MessageIn::readString(int length)
 {
-    int stringLength = 0;
-    std::string readString = "";
-
     if (mPacket)
     {
         // Get string length
         if (length < 0) {
-            stringLength = readShort();
-        } else {
-            stringLength = length;
+            length = readShort();
         }
 
         // Make sure the string isn't erroneus
-        if (mPos + length > mPacket->length) {
+        if (length < 0 || mPos + length > mPacket->length) {
+            mPos = mPacket->length + 1;
             return "";
         }
 
         // Read the string
-        char *tmpString = new char[stringLength + 1];
-        memcpy(tmpString, (void*)&mPacket->data[mPos], stringLength);
-        tmpString[stringLength] = 0;
-        mPos += stringLength;
-
-        readString = tmpString;
-        delete[] tmpString;
+        int stringLength = strnlen(mPacket->data + mPos, length);
+        std::string readString(mPacket->data + mPos, stringLength);
+        mPos += length;
+        return readString;
     }
 
-    return readString;
+    return "";
 }
