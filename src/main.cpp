@@ -319,7 +319,7 @@ void parseOptions(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     int elapsedWorldTicks;
-    
+
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0)
 
     // Parse Command Line Options
@@ -402,11 +402,7 @@ int main(int argc, char *argv[])
             // - Update all active objects/beings
             state.update(*connectionHandler);
         }
-        else {
-            // when there is nothing to do give away some processor time to 
-            // other tasks
-            sched_yield();
-        };
+        worldTimer.sleep();
 
         /*ENetEvent netEvent;
 
@@ -442,13 +438,13 @@ int main(int argc, char *argv[])
                     enet_packet_destroy(netEvent.packet);
                 }
                     break;
-                
+
                 case ENET_EVENT_TYPE_DISCONNECT:
                     printf("%s disconected.\n", netEvent.peer->data);
 
                     netEvent.peer->data = NULL;
                     break;
-                    
+
                 default:
                     printf("Unhandled enet event\n");
                     break;

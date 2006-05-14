@@ -43,54 +43,58 @@ namespace utils
 /**
  * This class is for timing purpose as a replacement for SDL_TIMER
  */
-
 class Timer
 {
     public:
         /**
-        * Constructor.
-        */
+         * Constructor.
+         */
         Timer(unsigned int ms, bool createActive = true);
 
         /**
-        * returns the number of elapsed tics since last call
-        */
+         * Returns the number of elapsed ticks since last call.
+         */
         int poll();
 
         /**
-        * activates the timer
-        */
+         * Sleeps till the next tick occurs.
+         */
+        void sleep();
+
+        /**
+         * Activates the timer.
+         */
         void start();
 
         /**
-        * deactivates the timer
-        */
+         * Deactivates the timer.
+         */
         void stop();
 
         /**
-        * changes the interval between two pulses
-        */
+         * Changes the interval between two pulses.
+         */
         void changeInterval (unsigned int newinterval);
 
     private:
         /**
-        * calls gettimeofday() and converts it into milliseconds
-        */       
+         * Calls gettimeofday() and converts it into milliseconds.
+         */
         uint64_t getTimeInMillisec();
 
         /**
-        * interval between two pulses
-        */
+         * Interval between two pulses.
+         */
         unsigned int interval;
 
         /**
-        * the time the last pulse occured
-        */
+         * The time the last pulse occured.
+         */
         uint64_t lastpulse;
 
         /**
-        * activity status of the timer
-        */
+         * Activity status of the timer.
+         */
         bool active;
 };
 

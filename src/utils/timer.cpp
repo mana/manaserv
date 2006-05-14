@@ -19,6 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <time.h>
 #include "timer.h"
 
 namespace tmwserv
@@ -32,6 +33,17 @@ Timer::Timer(unsigned int ms, bool createActive)
     interval = ms;
     lastpulse = getTimeInMillisec();
 };
+
+void Timer::sleep()
+{
+    if (!active) return;
+    uint64_t now = getTimeInMillisec();
+    if (now - lastpulse >= interval) return;
+    struct timespec req;
+    req.tv_sec = 0;
+    req.tv_nsec = (interval - (now - lastpulse)) * (1000 * 1000);
+    nanosleep(&req, 0);
+}
 
 int Timer::poll()
 {

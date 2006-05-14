@@ -3,6 +3,9 @@
 	* src/messageout.cpp, src/messagein.h, src/messagein.cpp: Applied
 	another patch by Guillaume Melquiond which fixed a number of issues
 	with the message implementation (client side should also be checked).
+	* src/main.cpp, src/utils/timer.cpp, src/utils/timer.h: Applied a
+	patch by Guillaume that makes the server sleep between ticks instead
+	of polling for the next one.
 
 2006-05-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
