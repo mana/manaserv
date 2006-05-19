@@ -1,3 +1,12 @@
+2006-05-19  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/connectionhandler.cpp, src/connectionhander.h, src/main.cpp:
+	Copied connection logic from netsession. Removed multithreaded socket
+	access as Enet is non-blocking. Fixed memory corruption on client
+	disconnect.
+	* src/Makefile.am, src/netsession.cpp, src/netsession.h: Removed
+	unused NetSession class.
+
 2006-05-14  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/accounthandler.cpp: Prevented accounts from being incorrectly

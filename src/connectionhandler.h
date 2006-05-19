@@ -26,6 +26,7 @@
 
 #include <list>
 #include <map>
+#include <enet/enet.h>
 
 #include "being.h"
 
@@ -34,9 +35,6 @@
 class MessageHandler;
 class MessageOut;
 class NetComputer;
-
-// Forward declaration
-class ListenThreadData;
 
 /**
  * Data related to a connected client. This includes the buffer for incoming
@@ -61,19 +59,22 @@ class ClientData
 class ConnectionHandler
 {
     public:
-        typedef std::list<NetComputer*> NetComputers;
 
         /**
-         * Constructor.
+         * Open the server socket.
          */
-        ConnectionHandler();
+        bool startListen(enet_uint16 port);
 
         /**
-         * Starts listening to the server socket. It accepts new connections
-         * and receives data from connected clients. All computers are
-         * disconnected when listening stops.
+         * Disconnect all the clients and close the server socket.
          */
-        void startListen(ListenThreadData *ltd);
+        void stopListen();
+
+        /**
+         * Process outgoing messages and listen to the server socket for
+         * incoming messages and new connections.
+         */
+        void process();
 
         /**
          * Called when a computer connects to a network session.
@@ -146,8 +147,13 @@ class ConnectionHandler
                                              const char eventId);
 
     private:
-        std::map<unsigned int, MessageHandler*> handlers;
+        ENetAddress address;         /**< Includes the port to listen to. */
+        ENetHost *host;              /**< The host that listen for connections. */
 
+        typedef std::map< unsigned int, MessageHandler * > HandlerMap;
+        HandlerMap handlers;
+
+        typedef std::list<NetComputer*> NetComputers;
         NetComputers clients;
 };
 

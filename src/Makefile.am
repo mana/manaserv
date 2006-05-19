@@ -47,8 +47,6 @@ tmwserv_SOURCES = main.cpp \
 		  messageout.cpp \
 		  netcomputer.h \
 		  netcomputer.cpp \
-		  netsession.h \
-		  netsession.cpp \
 		  packet.h \
 		  packet.cpp \
 		  skill.h \

@@ -41,7 +41,6 @@
 #include "connectionhandler.h"
 #include "gamehandler.h"
 #include "messageout.h"
-#include "netsession.h"
 #include "resourcemanager.h"
 #include "skill.h"
 #include "state.h"
@@ -278,7 +277,7 @@ void parseOptions(int argc, char *argv[])
         { "help",       no_argument, 0, 'h' },
         { "verbosity",  required_argument, 0, 'v' },
         { "port",       required_argument, 0, 'p' },
-        0
+        { 0 }
     };
 
     while (optind < argc) {
@@ -328,13 +327,9 @@ int main(int argc, char *argv[])
     // General Initialization
     initialize();
 
-    // Ready for server work...
-    std::auto_ptr<NetSession> session(new NetSession());
-
     // Note: This is just an idea, we could also pass the connection handler
-    // to the constructor of the account handler, upon which is would register
+    // to the constructor of the account handler, upon which it would register
     // itself for the messages it handles.
-    //
 
     // Register message handlers
     connectionHandler->registerHandler(CMSG_LOGIN, accountHandler);
@@ -362,10 +357,10 @@ int main(int argc, char *argv[])
     connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
     connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
 
-    session->startListen(connectionHandler, int(config.getValue("ListenOnPort",
-                         DEFAULT_SERVER_PORT)));
-    LOG_INFO("Listening on port " <<
-             config.getValue("ListenOnPort", DEFAULT_SERVER_PORT) << "...", 0)
+    if (!connectionHandler->startListen(int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)))) {
+        LOG_ERROR("Unable to create an ENet server host.", 0);
+        return 3;
+    }
 
     using namespace tmwserv;
 
@@ -400,61 +395,14 @@ int main(int argc, char *argv[])
 
             // - Handle all messages that are in the message queue
             // - Update all active objects/beings
+            connectionHandler->process();
             state.update(*connectionHandler);
+            connectionHandler->process();
         }
         worldTimer.sleep();
-
-        /*ENetEvent netEvent;
-
-        while (enet_host_service(server, &netEvent, 3000) > 0)
-        {
-            switch (netEvent.type)
-            {
-                case ENET_EVENT_TYPE_CONNECT:
-                    printf("A new client connected from %x:%u.\n",
-                           netEvent.peer->address.host,
-                           netEvent.peer->address.port);
-
-                    netEvent.peer->data = (void *)"Client information";
-                    break;
-
-                case ENET_EVENT_TYPE_RECEIVE:
-                {
-                    printf("A packet of length %u containing %s was received from %s on channel %u.\n",
-                           netEvent.packet->dataLength,
-                           netEvent.packet->data,
-                           netEvent.peer->data,
-                           netEvent.channelID);
-
-                    MessageOut msg;
-                    msg.writeShort(SMSG_REGISTER_RESPONSE);
-                    msg.writeByte(REGISTER_OK);
-                    ENetPacket *packet = enet_packet_create(msg.getData(),
-                                              msg.getDataSize() + 1,
-                                              ENET_PACKET_FLAG_RELIABLE);
-                    // Send the packet to the peer over channel id 0.
-                    enet_peer_send(netEvent.peer, 0, packet);
-                    // Clean up the packet now that we're done using it.
-                    enet_packet_destroy(netEvent.packet);
-                }
-                    break;
-
-                case ENET_EVENT_TYPE_DISCONNECT:
-                    printf("%s disconected.\n", netEvent.peer->data);
-
-                    netEvent.peer->data = NULL;
-                    break;
-
-                default:
-                    printf("Unhandled enet event\n");
-                    break;
-            }
-        }*/
     }
 
     LOG_INFO("Received: Quit signal, closing down...", 0)
-    session->stopListen(int(config.getValue("ListenOnPort",
-                        DEFAULT_SERVER_PORT)));
-
+    connectionHandler->stopListen();
     deinitialize();
 }
