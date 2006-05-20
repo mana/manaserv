@@ -77,7 +77,7 @@ bool Skill::deleteSkill(const std::string &ident, bool delTree)
 {
     //prevent deletion of self
     if (ident == id) {
-        LOG_ERROR("Skill: Attempt to delete self.", 0)
+        LOG_ERROR("Skill: Attempt to delete self.", 0);
             return false;
     }
 

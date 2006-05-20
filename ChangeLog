@@ -1,3 +1,18 @@
+2006-05-20  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/connectionhandler.cpp, src/connectionhandler.h,
+	src/netcomputer.cpp, src/netcomputer.h, src/accounthandler.h,
+	src/state.cpp, src/state.h, src/chathandler.h, src/gamehandler.cpp:
+	Split low-level and high-level functionality in network access:
+	NetComputer and ConnectionHandler access the medium while
+	Clientcomputer and ClientConnectionHandler have data on the connected
+	clients. Fixed loops in ClientConnectionHandler; sendToEveryone was
+	sending to only one client. Removed unused stringSplit.
+	* src/configuration.cpp, src/accounthandler.cpp, src/dalstorage.cpp,
+	src/main.cpp, src/chathandler.cpp, src/messagehandler.cpp,
+	src/utils/stringfilter.cpp, src/utils/logger.h, src/skill.cpp: Changed
+	LOG macros to have statement syntax.	
+
 2006-05-19  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/connectionhandler.cpp, src/connectionhander.h, src/main.cpp:

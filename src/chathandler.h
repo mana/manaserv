@@ -30,6 +30,7 @@
 
 class MessageIn;
 class NetComputer;
+class ClientComputer;
 
 /**
  * Manages all chat related
@@ -46,34 +47,34 @@ class ChatHandler : public MessageHandler
     /**
      * Deals with command messages
      */
-    void handleCommand(NetComputer &computer, const std::string& command);
+    void handleCommand(ClientComputer &computer, const std::string& command);
 
     /**
     * Tells the player to be more polite.
     */
-    void warnPlayerAboutBadWords(NetComputer &computer);
+    void warnPlayerAboutBadWords(ClientComputer &computer);
 
     /**
     * Announce a message to every being in the default channel.
     */
-    void announce(NetComputer &computer, const std::string& text);
+    void announce(ClientComputer &computer, const std::string& text);
 
     /**
     * Display a message to every player around one's player
     * in the default channel.
     * The tile area has been set to 10 for now.
     */
-    void sayAround(NetComputer &computer, const std::string& text);
+    void sayAround(ClientComputer &computer, const std::string& text);
 
     /**
     * Say something private to a player.
     */
-    void sayToPlayer(NetComputer &computer, const std::string& playerName, const std::string& text);
+    void sayToPlayer(ClientComputer &computer, const std::string& playerName, const std::string& text);
 
     /**
     * Say something in a specific channel.
     */
-    void sayInChannel(NetComputer &computer, short channel, const std::string& text);
+    void sayInChannel(ClientComputer &computer, short channel, const std::string& text);
 };
 
 #endif

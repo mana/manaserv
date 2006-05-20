@@ -36,42 +36,6 @@
 #endif
 
 /**
- * TEMPORARY
- * Split a string into a std::vector delimiting elements by 'split'. This
- * function could be used for ASCII message handling (as we do not have
- * a working client yet, using ASCII allows tools like Netcat to be used
- * to test server functionality).
- *
- * This function may seem unoptimized, except it is this way to allow for
- * thread safety.
- */
-std::vector<std::string>
-stringSplit(const std::string &str,
-            const std::string &split)
-{
-    std::vector<std::string> result; // temporary result
-    unsigned int i;
-    unsigned int last = 0;
-
-    // iterate through string
-    for (i = 0; i < str.length(); i++)
-    {
-        if (str.compare(i, split.length(), split.c_str(), split.length()) == 0)
-        {
-            result.push_back(str.substr(last, i - last));
-            last = i + 1;
-        }
-    }
-
-    // add remainder of string
-    if (last < str.length()) {
-        result.push_back(str.substr(last, str.length()));
-    }
-
-    return result;
-}
-
-/**
  * Convert a IP4 address into its string representation
  */
 std::string
@@ -142,9 +106,8 @@ ConnectionHandler::process()
                 LOG_INFO("A new client connected from " <<
                          ip4ToString(event.peer->address.host) << ":" <<
                          event.peer->address.port, 0);
-                NetComputer *comp = new NetComputer(this, event.peer);
+                NetComputer *comp = computerConnected(event.peer);
                 clients.push_back(comp);
-                computerConnected(comp);
                 /*LOG_INFO(ltd->host->peerCount <<
                          " client(s) connected", 0);*/
 
@@ -207,7 +170,6 @@ ConnectionHandler::process()
                          << " disconected.", 0);*/
                 // Reset the peer's client information.
                 computerDisconnected(comp);
-                delete comp;
                 clients.erase(std::find(clients.begin(), clients.end(), comp));
                 event.peer->data = NULL;
             } break;
@@ -217,40 +179,28 @@ ConnectionHandler::process()
     }
 }
 
-void ConnectionHandler::computerConnected(NetComputer *comp)
-{
-    LOG_INFO("A client connected!", 0)
-}
-
-void ConnectionHandler::computerDisconnected(NetComputer *comp)
-{
-    LOG_INFO("A client disconnected!", 0)
-}
-
 void ConnectionHandler::registerHandler(
         unsigned int msgId, MessageHandler *handler)
 {
     handlers[msgId] = handler;
 }
 
-void ConnectionHandler::sendTo(tmwserv::BeingPtr beingPtr, MessageOut &msg)
+void ClientConnectionHandler::sendTo(tmwserv::BeingPtr beingPtr, MessageOut &msg)
 {
-    for (NetComputers::iterator i = clients.begin();
-         i != clients.end();
-         i++) {
-        if ((*i)->getCharacter().get() == beingPtr.get()) {
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
+        if (static_cast< ClientComputer * >(*i)->getCharacter().get() == beingPtr.get()) {
             (*i)->send(msg.getPacket());
             break;
         }
     }
 }
 
-void ConnectionHandler::sendTo(std::string name, MessageOut &msg)
+void ClientConnectionHandler::sendTo(std::string name, MessageOut &msg)
 {
-    for (NetComputers::iterator i = clients.begin();
-         i != clients.end();
-         i++) {
-        if ((*i)->getCharacter().get()->getName() == name) {
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
+        if (static_cast< ClientComputer * >(*i)->getCharacter()->getName() == name) {
             (*i)->send(msg.getPacket());
             break;
         }
@@ -259,24 +209,20 @@ void ConnectionHandler::sendTo(std::string name, MessageOut &msg)
 
 void ConnectionHandler::sendToEveryone(MessageOut &msg)
 {
-    for (NetComputers::iterator i = clients.begin();
-         i != clients.end();
-         i++)
-    {
-            (*i)->send(msg.getPacket());
-            break;
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
+        (*i)->send(msg.getPacket());
     }
 }
 
-void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
+void ClientConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
 {
     unsigned speakerMapId = beingPtr->getMapId();
     std::pair<unsigned, unsigned> speakerXY = beingPtr->getXY();
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end;
-         ++i) {
+         i != i_end; ++i) {
         // See if the other being is near enough, then send the message
-        tmwserv::Being const *listener = (*i)->getCharacter().get();
+        tmwserv::Being const *listener = static_cast< ClientComputer * >(*i)->getCharacter().get();
         if (listener->getMapId() != speakerMapId) continue;
         std::pair<unsigned, unsigned> listenerXY = listener->getXY();
         if (abs(listenerXY.first  - speakerXY.first ) > (int)AROUND_AREA_IN_TILES) continue;
@@ -285,17 +231,16 @@ void ConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
     }
 }
 
-void ConnectionHandler::sendInChannel(short channelId, MessageOut &msg)
+void ClientConnectionHandler::sendInChannel(short channelId, MessageOut &msg)
 {
-    for (NetComputers::iterator i = clients.begin(); i != clients.end();i++)
-    {
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
         const std::vector<tmwserv::BeingPtr> beingList =
             chatChannelManager->getUserListInChannel(channelId);
         // If the being is in the channel, send it
-        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin();
-             j != beingList.end(); j++)
-        {
-            if ((*i)->getCharacter().get() == (*j).get() )
+        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin(), j_end = beingList.end();
+             j != j_end; ++j) {
+            if (static_cast< ClientComputer * >(*i)->getCharacter().get() == j->get())
             {
                 (*i)->send(msg.getPacket());
             }
@@ -308,7 +253,7 @@ unsigned int ConnectionHandler::getClientNumber()
     return clients.size();
 }
 
-void ConnectionHandler::makeUsersLeaveChannel(const short channelId)
+void ClientConnectionHandler::makeUsersLeaveChannel(const short channelId)
 {
     MessageOut result;
     result.writeShort(SMSG_QUIT_CHANNEL_RESPONSE);
@@ -316,13 +261,12 @@ void ConnectionHandler::makeUsersLeaveChannel(const short channelId)
 
     const std::vector<tmwserv::BeingPtr> beingList =
             chatChannelManager->getUserListInChannel(channelId);
-    for (NetComputers::iterator i = clients.begin(); i != clients.end();i++)
-    {
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
         // If the being is in the channel, send it the 'leave now' packet
-        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin();
-             j != beingList.end(); j++)
-        {
-            if ((*i)->getCharacter().get() == (*j).get() )
+        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin(), j_end = beingList.end();
+             j != j_end; ++j) {
+            if (static_cast< ClientComputer * >(*i)->getCharacter().get() == j->get())
             {
                 (*i)->send(result.getPacket());
             }
@@ -330,9 +274,9 @@ void ConnectionHandler::makeUsersLeaveChannel(const short channelId)
     }
 }
 
-void ConnectionHandler::warnUsersAboutPlayerEventInChat(const short channelId,
-                                                        const std::string& userName,
-                                                        const char eventId)
+void ClientConnectionHandler::warnUsersAboutPlayerEventInChat(const short channelId,
+                                                              const std::string& userName,
+                                                              const char eventId)
 {
     MessageOut result;
     result.writeShort(SMSG_UPDATE_CHANNEL_RESPONSE);
@@ -341,16 +285,25 @@ void ConnectionHandler::warnUsersAboutPlayerEventInChat(const short channelId,
 
     const std::vector<tmwserv::BeingPtr> beingList =
             chatChannelManager->getUserListInChannel(channelId);
-    for (NetComputers::iterator i = clients.begin(); i != clients.end();i++)
-    {
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
         // If the being is in the channel, send it the 'eventId' packet
-        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin();
-             j != beingList.end(); j++)
-        {
-            if ((*i)->getCharacter().get() == (*j).get() )
+        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin(), j_end = beingList.end();
+             j != j_end; ++j) {
+            if (static_cast< ClientComputer * >(*i)->getCharacter().get() == j->get() )
             {
                 (*i)->send(result.getPacket());
             }
         }
     }
+}
+
+NetComputer *ClientConnectionHandler::computerConnected(ENetPeer *peer) {
+    LOG_INFO("A client connected!", 0);
+    return new ClientComputer(this, peer);
+}
+
+void ClientConnectionHandler::computerDisconnected(NetComputer *comp) {
+    delete comp;
+    LOG_INFO("A client disconnected!", 0);
 }

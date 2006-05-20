@@ -34,6 +34,7 @@
 
 // Forward declaration
 class ConnectionHandler;
+class ClientConnectionHandler;
 class Packet;
 
 /**
@@ -51,7 +52,7 @@ class NetComputer
         /**
          * Destructor
          */
-        ~NetComputer();
+        virtual ~NetComputer() {}
 
         /**
          * Returns <code>true</code> if this computer is disconnected.
@@ -80,6 +81,29 @@ class NetComputer
          * Return the peer
          */
         ENetPeer *getPeer() { return peer; }
+
+    private:
+        ConnectionHandler *handler;
+
+        std::queue<Packet*> queue; /**< Message Queue (FIFO) */
+        ENetPeer *peer;            /**< Client peer */
+};
+
+/**
+ * Temporary placeholder until the connection handlers have been split.
+ */
+class ClientComputer: public NetComputer
+{
+    public:
+        /**
+         * Constructor
+         */
+        ClientComputer(ClientConnectionHandler *handler, ENetPeer *peer);
+
+        /**
+         * Destructor
+         */
+        ~ClientComputer();
 
         /**
          * Set the account associated with the connection
@@ -119,11 +143,6 @@ class NetComputer
         getCharacter() { return mCharacterPtr; }
 
     private:
-        ConnectionHandler *handler;
-
-        std::queue<Packet*> queue; /**< Message Queue (FIFO) */
-        ENetPeer *peer;            /**< Client peer */
-
         /** Account associated with connection */
         tmwserv::AccountPtr mAccountPtr;
 

@@ -24,20 +24,14 @@
 #include "netcomputer.h"
 
 #include "chatchannelmanager.h"
+#include "connectionhandler.h"
 #include "packet.h"
 #include "state.h"
 
 NetComputer::NetComputer(ConnectionHandler *handler, ENetPeer *peer):
     handler(handler),
-    peer(peer),
-    mAccountPtr(NULL),
-    mCharacterPtr(NULL)
+    peer(peer)
 {
-}
-
-NetComputer::~NetComputer()
-{
-    unsetAccount();
 }
 
 void NetComputer::disconnect(const std::string &reason)
@@ -57,12 +51,12 @@ void NetComputer::send(const Packet *p)
     enet_peer_send(peer, 0, packet);
 }
 
-void NetComputer::setAccount(tmwserv::AccountPtr acc)
+void ClientComputer::setAccount(tmwserv::AccountPtr acc)
 {
     mAccountPtr = acc;
 }
 
-void NetComputer::setCharacter(tmwserv::BeingPtr ch)
+void ClientComputer::setCharacter(tmwserv::BeingPtr ch)
 {
     tmwserv::State &state = tmwserv::State::instance();
     if (mCharacterPtr.get() != NULL)
@@ -74,13 +68,13 @@ void NetComputer::setCharacter(tmwserv::BeingPtr ch)
     state.addBeing(mCharacterPtr, mCharacterPtr->getMapId());
 }
 
-void NetComputer::unsetAccount()
+void ClientComputer::unsetAccount()
 {
     unsetCharacter();
     mAccountPtr = tmwserv::AccountPtr(NULL);
 }
 
-void NetComputer::unsetCharacter()
+void ClientComputer::unsetCharacter()
 {
     // remove being from world
     tmwserv::State &state = tmwserv::State::instance();
@@ -89,3 +83,14 @@ void NetComputer::unsetCharacter()
     mCharacterPtr = tmwserv::BeingPtr(NULL);
 }
 
+ClientComputer::ClientComputer(ClientConnectionHandler *handler, ENetPeer *peer):
+    NetComputer(handler, peer),
+    mAccountPtr(NULL),
+    mCharacterPtr(NULL)
+{
+}
+
+ClientComputer::~ClientComputer()
+{
+    unsetAccount();
+}

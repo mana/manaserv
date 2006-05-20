@@ -44,7 +44,7 @@ State::~State() throw() {
     }
 }
 
-void State::update(ConnectionHandler &connectionHandler)
+void State::update()
 {
     // update game state (update AI, etc.)
     for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
@@ -78,7 +78,7 @@ void State::update(ConnectionHandler &connectionHandler)
                     msg.writeLong(b2->get()->getX());// x
                     msg.writeLong(b2->get()->getY());// y
 
-                    connectionHandler.sendTo(*b, msg);
+                    connectionHandler->sendTo(*b, msg);
                 }
             }
         }

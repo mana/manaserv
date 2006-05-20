@@ -300,45 +300,45 @@ class Logger: public Singleton<Logger>
 
 
 #define LOG(msg, atVerbosity)                                            \
-    {                                                                    \
+    do {                                                                 \
         std::ostringstream os;                                           \
         os << msg;                                                       \
         ::tmwserv::utils::Logger::instance().log(os.str(), atVerbosity); \
-    }
+    } while(0)
 
 #define LOG_DEBUG(msg, atVerbosity)                                        \
-    {                                                                      \
+    do {                                                                   \
         std::ostringstream os;                                             \
         os << msg;                                                         \
         ::tmwserv::utils::Logger::instance().debug(os.str(), atVerbosity); \
-    }
+    } while (0)
 
 #define LOG_INFO(msg, atVerbosity)                              \
-    {                                                           \
+    do {                                                        \
         std::ostringstream os;                                  \
         os << msg;                                              \
         ::tmwserv::utils::Logger::instance().info(os.str(), atVerbosity); \
-    }
+    } while (0)
 
 #define LOG_WARN(msg, atVerbosity)                              \
-    {                                                           \
+    do {                                                        \
         std::ostringstream os;                                  \
         os << msg;                                              \
         ::tmwserv::utils::Logger::instance().warn(os.str(), atVerbosity); \
-    }
+    } while (0)
 
 #define LOG_ERROR(msg, atVerbosity)                             \
-    {                                                           \
+    do {                                                        \
         std::ostringstream os;                                  \
         os << msg;                                              \
         ::tmwserv::utils::Logger::instance().error(os.str(), atVerbosity); \
-    }
+    } while (0)
 
 #define LOG_FATAL(msg, atVerbosity)                             \
-    {                                                           \
+    do {                                                        \
         std::ostringstream os;                                  \
         os << msg;                                              \
         ::tmwserv::utils::Logger::instance().fatal(os.str(), atVerbosity); \
-    }
+    } while (0)
 
 #endif // _TMWSERV_LOGGER_H_

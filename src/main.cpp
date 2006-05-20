@@ -100,7 +100,7 @@ ChatChannelManager *chatChannelManager;
 GameHandler *gameHandler;
 
 /** Primary connection handler */
-ConnectionHandler *connectionHandler;
+ClientConnectionHandler *connectionHandler;
 
 /**
  * Initializes the server.
@@ -150,8 +150,8 @@ void initialize()
     Logger::instance().setTeeMode(true);
 
     config.init(configPath);
-    LOG_INFO("Using Config File: " << configPath, 0)
-    LOG_INFO("Using Log File: " << logPath, 0)
+    LOG_INFO("Using Config File: " << configPath, 0);
+    LOG_INFO("Using Log File: " << logPath, 0);
 
     // Initialize the slang's filter.
     stringFilter = new StringFilter(&config);
@@ -164,7 +164,7 @@ void initialize()
     chatHandler = new ChatHandler();
     accountHandler = new AccountHandler();
     gameHandler = new GameHandler();
-    connectionHandler = new ConnectionHandler();
+    connectionHandler = new ClientConnectionHandler();
 
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
@@ -174,13 +174,13 @@ void initialize()
 
     // initialize enet.
     if (enet_initialize() != 0) {
-        LOG_FATAL("An error occurred while initializing ENet", 0)
+        LOG_FATAL("An error occurred while initializing ENet", 0);
         exit(2);
     }
 
     // initialize scripting subsystem.
 #ifdef RUBY_SUPPORT
-    LOG_INFO("Script Language: " << scriptLanguage, 0)
+    LOG_INFO("Script Language: " << scriptLanguage, 0);
 
     // initialize ruby
     ruby_init();
@@ -194,17 +194,17 @@ void initialize()
     rb_load_file("scripts/init.rb");
     rubyStatus = ruby_exec();
 #else
-    LOG_WARN("No Scripting Language Support.", 0)
+    LOG_WARN("No Scripting Language Support.", 0);
 #endif
 
 #if defined (MYSQL_SUPPORT)
-    LOG_INFO("Using MySQL DB Backend.", 0)
+    LOG_INFO("Using MySQL DB Backend.", 0);
 #elif defined (POSTGRESQL_SUPPORT)
-    LOG_INFO("Using PostGreSQL DB Backend.", 0)
+    LOG_INFO("Using PostGreSQL DB Backend.", 0);
 #elif defined (SQLITE_SUPPORT)
-    LOG_INFO("Using SQLite DB Backend.", 0)
+    LOG_INFO("Using SQLite DB Backend.", 0);
 #else
-    LOG_WARN("No Database Backend Support.", 0)
+    LOG_WARN("No Database Backend Support.", 0);
 #endif
 
     // initialize configuration defaults
@@ -298,14 +298,14 @@ void parseOptions(int argc, char *argv[])
                 unsigned short verbosityLevel;
                 verbosityLevel = atoi(optarg);
                 tmwserv::utils::Logger::instance().setVerbosity(verbosityLevel);
-                LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel, 0)
+                LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel, 0);
                 break;
             case 'p':
                 // Change the port to listen on.
                 unsigned short portToListenOn;
                 portToListenOn = atoi(optarg);
                 config.setValue("ListenOnPort", portToListenOn);
-                LOG_INFO("Setting Default Port to " << portToListenOn, 0)
+                LOG_INFO("Setting Default Port to " << portToListenOn, 0);
                 break;
         }
     }
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
 {
     int elapsedWorldTicks;
 
-    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0)
+    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0);
 
     // Parse Command Line Options
     parseOptions(argc, argv);
@@ -396,13 +396,13 @@ int main(int argc, char *argv[])
             // - Handle all messages that are in the message queue
             // - Update all active objects/beings
             connectionHandler->process();
-            state.update(*connectionHandler);
+            state.update();
             connectionHandler->process();
         }
         worldTimer.sleep();
     }
 
-    LOG_INFO("Received: Quit signal, closing down...", 0)
+    LOG_INFO("Received: Quit signal, closing down...", 0);
     connectionHandler->stopListen();
     deinitialize();
 }

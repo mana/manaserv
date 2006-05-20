@@ -26,5 +26,5 @@
 #include "utils/logger.h"
 
 void MessageHandler::receiveMessage(NetComputer &computer, MessageIn &message) {
-    LOG_WARN("MessageHandler class created without receiveMessage override", 0)
+    LOG_WARN("MessageHandler class created without receiveMessage override", 0);
 }

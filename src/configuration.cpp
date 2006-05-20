@@ -61,7 +61,7 @@ void Configuration::init(const std::string &filename)
     xmlNodePtr node = xmlDocGetRootElement(doc);
 
     if (!node || !xmlStrEqual(node->name, BAD_CAST "configuration")) {
-	LOG_WARN("Warning: No configuration file (" << filename.c_str() << ")", 0)
+	LOG_WARN("Warning: No configuration file (" << filename.c_str() << ")", 0);
         return;
     }
 
@@ -126,7 +126,7 @@ void Configuration::write()
 
 void Configuration::setValue(const std::string &key, std::string value)
 {
-    LOG_DEBUG("Configuration::setValue(" << key << ", " << value << ")", 2)
+    LOG_DEBUG("Configuration::setValue(" << key << ", " << value << ")", 2);
 
     options[key] = value;
 

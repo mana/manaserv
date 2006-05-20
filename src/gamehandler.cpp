@@ -30,8 +30,9 @@
 #include "netcomputer.h"
 #include "packet.h"
 
-void GameHandler::receiveMessage(NetComputer &computer, MessageIn &message)
+void GameHandler::receiveMessage(NetComputer &comp, MessageIn &message)
 {
+    ClientComputer &computer = static_cast< ClientComputer & >(comp);
     if (computer.getCharacter().get() == NULL)
         return;
 

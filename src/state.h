@@ -82,7 +82,7 @@ class State : public utils::Singleton<State>
     /**
      * Update game state (contains core server logic)
      */
-    void update(ConnectionHandler &);
+    void update();
 
     /**
      * Add being to game world at specified map

@@ -83,7 +83,7 @@ DALStorage::open(void)
         mDb->connect(getName(), getUser(), getPassword());
         if (!dbFileShown)
         {
-            LOG_INFO("Using " << dbFile << " as Database Name.", 0)
+            LOG_INFO("Using " << dbFile << " as Database Name.", 0);
             dbFileShown = true;
         }
 #elif defined (SQLITE_SUPPORT)
@@ -92,7 +92,7 @@ DALStorage::open(void)
         mDb->connect(dbFile, "", "");
         if (!dbFileShown)
         {
-            LOG_INFO("SQLite uses ./" << dbFile << " as DB.", 0)
+            LOG_INFO("SQLite uses ./" << dbFile << " as DB.", 0);
             dbFileShown = true;
         }
 #endif
@@ -138,10 +138,10 @@ DALStorage::open(void)
         createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
     }
     catch (const DbConnectionFailure& e) {
-        LOG_ERROR("unable to connect to the database: " << e.what(), 0)
+        LOG_ERROR("unable to connect to the database: " << e.what(), 0);
     }
     catch (const DbSqlQueryExecFailure& e) {
-        LOG_ERROR("SQL query failure: " << e.what(), 0)
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
     }
 
     mIsOpen = mDb->isConnected();
@@ -229,7 +229,7 @@ DALStorage::getAccount(const std::string& userName)
             Beings beings;
 
             LOG_INFO(userName << "'s account has " << charInfo.rows()
-                << " character(s) in database.", 1)
+                << " character(s) in database.", 1);
 
             // As the recordset functions are set to be able to get one
             // recordset at a time, we store charInfo in a temp array of
@@ -305,7 +305,7 @@ void
 DALStorage::addAccount(const AccountPtr& account)
 {
     if (account.get() == 0) {
-        LOG_WARN("Cannot add a NULL Account.", 0)
+        LOG_WARN("Cannot add a NULL Account.", 0);
         // maybe we should throw an exception instead
         return;
     }
@@ -367,7 +367,7 @@ DALStorage::delAccount(const std::string& userName)
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0)
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
     }
 }
 
@@ -480,7 +480,7 @@ DALStorage::doesCharacterNameExists(const std::string& name)
         }
         catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0)
+        LOG_ERROR("SQL query failure: " << e.what(), 0);
         }
 
     return false;
@@ -555,7 +555,7 @@ DALStorage::getChannelList()
                                         channelInfo(i,3))));
 
             LOG_DEBUG("Channel (" << channelInfo(i,0) << ") loaded: " << channelInfo(i,1)
-                    << ": " << channelInfo(i,2), 5)
+                    << ": " << channelInfo(i,2), 5);
         }
 
         return channels;
@@ -606,7 +606,7 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
                         << i->second.getPassword() << "\");";
 
                         LOG_DEBUG("Channel (" << i->first << ") saved: " << i->second.getName()
-                            << ": " << i->second.getAnnouncement(), 5)
+                            << ": " << i->second.getAnnouncement(), 5);
                 }
 
                 mDb->execSql(sql.str());

@@ -28,6 +28,7 @@
 
 class MessageIn;
 class NetComputer;
+class ClientComputer;
 
 namespace tmwserv {
     class Account;
@@ -53,12 +54,12 @@ class AccountHandler : public MessageHandler
         /**
          * Handles the login message.
          */
-        int loginMessage(NetComputer &computer, MessageIn &message);
+        int loginMessage(ClientComputer &computer, MessageIn &message);
 
         /**
          * Account assignment.
          */
-        int assignAccount(NetComputer &computer, tmwserv::Account *account);
+        int assignAccount(ClientComputer &computer, tmwserv::Account *account);
 };
 
 #endif

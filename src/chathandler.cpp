@@ -32,12 +32,14 @@
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 
-void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
+void ChatHandler::receiveMessage(NetComputer &comp, MessageIn &message)
 {
+    ClientComputer &computer = static_cast< ClientComputer & >(comp);
+
     // If not logged in...
     if (computer.getAccount().get() == NULL)
     {
-        LOG_INFO("Not logged in, can't chat...", 2)
+        LOG_INFO("Not logged in, can't chat...", 2);
         MessageOut result;
         result.writeShort(SMSG_CHAT);
         result.writeByte(CHAT_NOLOGIN);
@@ -53,7 +55,7 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
             result.writeShort(SMSG_CHAT);
             result.writeByte(CHAT_NO_CHARACTER_SELECTED);
             computer.send(result.getPacket());
-            LOG_INFO("No character selected. Can't chat...", 2)
+            LOG_INFO("No character selected. Can't chat...", 2);
             return; // character not selected
         }
     }
@@ -68,7 +70,7 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
                 if (stringFilter->filterContent(text))
                 {
                     short channel = message.readShort();
-                    LOG_INFO("Say: (Channel " << channel << "): " << text, 2)
+                    LOG_INFO("Say: (Channel " << channel << "): " << text, 2);
                     if ( channel == 0 ) // Let's say that is the default channel for now.
                     {
                         if ( text.substr(0, 1) == "@" || text.substr(0, 1) == "#" || text.substr(0, 1) == "/" )
@@ -371,21 +373,21 @@ void ChatHandler::receiveMessage(NetComputer &computer, MessageIn &message)
         break;
 
         default:
-            LOG_INFO("Chat: Invalid message type", 2)
+            LOG_INFO("Chat: Invalid message type", 2);
             break;
     }
 }
 
-void ChatHandler::handleCommand(NetComputer &computer, const std::string& command)
+void ChatHandler::handleCommand(ClientComputer &computer, const std::string& command)
 {
-    LOG_INFO("Chat: Received unhandled command: " << command, 2)
+    LOG_INFO("Chat: Received unhandled command: " << command, 2);
     MessageOut result;
     result.writeShort(SMSG_CHAT);
     result.writeByte(CHATCMD_UNHANDLED_COMMAND);
     computer.send(result.getPacket());
 }
 
-void ChatHandler::warnPlayerAboutBadWords(NetComputer &computer)
+void ChatHandler::warnPlayerAboutBadWords(ClientComputer &computer)
 {
     // We could later count if the player is really often unpolite.
     MessageOut result;
@@ -393,16 +395,16 @@ void ChatHandler::warnPlayerAboutBadWords(NetComputer &computer)
     result.writeByte(CHAT_USING_BAD_WORDS); // The Channel
     computer.send(result.getPacket());
 
-    LOG_INFO(computer.getCharacter()->getName() << " says bad words.", 2)
+    LOG_INFO(computer.getCharacter()->getName() << " says bad words.", 2);
 }
 
-void ChatHandler::announce(NetComputer &computer, const std::string& text)
+void ChatHandler::announce(ClientComputer &computer, const std::string& text)
 {
     MessageOut result;
     if ( computer.getAccount()->getLevel() == (AccountLevels)AL_ADMIN ||
     computer.getAccount()->getLevel() == (AccountLevels)AL_GM )
     {
-        LOG_INFO("ANNOUNCE: " << text, 0)
+        LOG_INFO("ANNOUNCE: " << text, 0);
         // Send it to every beings.
         result.writeShort(SMSG_ANNOUNCEMENT);
         result.writeString(text);
@@ -414,14 +416,14 @@ void ChatHandler::announce(NetComputer &computer, const std::string& text)
         result.writeByte(CHATCMD_UNSUFFICIENT_RIGHTS);
         computer.send(result.getPacket());
         LOG_INFO(computer.getCharacter()->getName() <<
-            " couldn't make an announcement due to insufficient rights.", 2)
+            " couldn't make an announcement due to insufficient rights.", 2);
     }
 }
 
-void ChatHandler::sayAround(NetComputer &computer, const std::string& text)
+void ChatHandler::sayAround(ClientComputer &computer, const std::string& text)
 {
     MessageOut result;
-    LOG_INFO( computer.getCharacter()->getName() << " says: " << text, 2)
+    LOG_INFO( computer.getCharacter()->getName() << " says: " << text, 2);
     // Send it to every beings around
     result.writeShort(SMSG_CHAT);
     result.writeShort(0); // The default channel
@@ -432,11 +434,11 @@ void ChatHandler::sayAround(NetComputer &computer, const std::string& text)
     connectionHandler->sendAround(computer.getCharacter(), result);
 }
 
-void ChatHandler::sayToPlayer(NetComputer &computer, const std::string& playerName, const std::string& text)
+void ChatHandler::sayToPlayer(ClientComputer &computer, const std::string& playerName, const std::string& text)
 {
     MessageOut result;
     LOG_INFO( computer.getCharacter()->getName() << " says to " << playerName
-            << ": " << text, 2)
+            << ": " << text, 2);
     // Send it to the being if the being exists
     result.writeShort(SMSG_PRIVMSG);
     std::string say = computer.getCharacter()->getName();
@@ -446,11 +448,11 @@ void ChatHandler::sayToPlayer(NetComputer &computer, const std::string& playerNa
     connectionHandler->sendTo(playerName, result);
 }
 
-void ChatHandler::sayInChannel(NetComputer &computer, short channel, const std::string& text)
+void ChatHandler::sayInChannel(ClientComputer &computer, short channel, const std::string& text)
 {
     MessageOut result;
     LOG_INFO( computer.getCharacter()->getName() << " says in channel " << channel
-            << ": " << text, 2)
+            << ": " << text, 2);
     // Send it to every beings in channel
     result.writeShort(SMSG_CHAT_CNL);
     result.writeShort(channel);

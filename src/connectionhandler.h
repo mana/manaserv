@@ -59,6 +59,7 @@ class ClientData
 class ConnectionHandler
 {
     public:
+        virtual ~ConnectionHandler() {}
 
         /**
          * Open the server socket.
@@ -77,24 +78,6 @@ class ConnectionHandler
         void process();
 
         /**
-         * Called when a computer connects to a network session.
-         */
-        void computerConnected(NetComputer *computer);
-
-        /**
-         * Called when a computer reconnects to a network session.
-         */
-        //void computerReconnected(NetComputer *computer);
-
-        /**
-         * Called when a computer disconnects from a network session.
-         *
-         * <b>Note:</b> After returning from this method the NetComputer
-         *              reference is no longer guaranteed to be valid.
-         */
-        void computerDisconnected(NetComputer *computer);
-
-        /**
          * Called when a computer sends a packet to the network session.
          */
         //void receivePacket(NetComputer *computer, Packet *packet);
@@ -104,6 +87,57 @@ class ConnectionHandler
          */
         void registerHandler(unsigned int msgId, MessageHandler *handler);
 
+        /**
+         * Send packet to every client, used for announcements.
+         */
+        void sendToEveryone(MessageOut &);
+
+        /**
+         * Return the number of connected clients.
+         */
+        unsigned int getClientNumber();
+
+    private:
+        ENetAddress address;         /**< Includes the port to listen to. */
+        ENetHost *host;              /**< The host that listen for connections. */
+
+        typedef std::map< unsigned int, MessageHandler * > HandlerMap;
+        HandlerMap handlers;
+
+    protected:
+        /**
+         * Called when a computer connects to the server. Initialize
+         * an object derived of NetComputer.
+         */
+        virtual NetComputer *computerConnected(ENetPeer *) = 0;
+
+        /**
+         * Called when a computer reconnects to the server.
+         */
+        //virtual NetComputer *computerReconnected(ENetPeer *) = 0;
+
+        /**
+         * Called when a computer disconnects from the server.
+         *
+         * <b>Note:</b> After returning from this method the NetComputer
+         *              reference is no longer guaranteed to be valid.
+         */
+        virtual void computerDisconnected(NetComputer *) = 0;
+
+        typedef std::list<NetComputer*> NetComputers;
+        /**
+         * A list of pointers to the client structures created by
+         * computerConnected.
+         */
+        NetComputers clients;
+};
+
+/**
+ * Temporary placeholder until the connection handlers have been split.
+ */
+class ClientConnectionHandler: public ConnectionHandler
+{
+    public:
         /**
          * Send packet to client with matching BeingPtr
          */
@@ -115,11 +149,6 @@ class ConnectionHandler
         void sendTo(std::string name, MessageOut &);
 
         /**
-         * Send packet to every client, used for announcements.
-         */
-        void sendToEveryone(MessageOut &);
-
-        /**
          * Send packet to every client around the client on screen.
          */
         void sendAround(tmwserv::BeingPtr, MessageOut &);
@@ -128,11 +157,6 @@ class ConnectionHandler
          * Send packet to every client in a registered channel.
          */
         void sendInChannel(short channelId, MessageOut &);
-
-        /**
-         * Return the number of connected clients.
-         */
-        unsigned int getClientNumber();
 
         /**
          * tells a list of user they're leaving a channel.
@@ -146,17 +170,11 @@ class ConnectionHandler
                                              const std::string& userName,
                                              const char eventId);
 
-    private:
-        ENetAddress address;         /**< Includes the port to listen to. */
-        ENetHost *host;              /**< The host that listen for connections. */
-
-        typedef std::map< unsigned int, MessageHandler * > HandlerMap;
-        HandlerMap handlers;
-
-        typedef std::list<NetComputer*> NetComputers;
-        NetComputers clients;
+    protected:
+        virtual NetComputer *computerConnected(ENetPeer *);
+        virtual void computerDisconnected(NetComputer *);
 };
 
-extern ConnectionHandler *connectionHandler;
+extern ClientConnectionHandler *connectionHandler;
 
 #endif
