@@ -1,3 +1,7 @@
+2006-05-22  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.dev: Updated Dev-C++ project file.
+
 2006-05-20  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/connectionhandler.cpp, src/connectionhandler.h,
