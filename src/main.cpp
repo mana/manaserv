@@ -99,9 +99,6 @@ ChatChannelManager *chatChannelManager;
 /** Core game message handler */
 GameHandler *gameHandler;
 
-/** Primary connection handler */
-ClientConnectionHandler *connectionHandler;
-
 /**
  * Initializes the server.
  */
@@ -164,7 +161,6 @@ void initialize()
     chatHandler = new ChatHandler();
     accountHandler = new AccountHandler();
     gameHandler = new GameHandler();
-    connectionHandler = new ClientConnectionHandler();
 
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
@@ -242,7 +238,6 @@ void deinitialize()
     delete accountHandler;
     delete chatHandler;
     delete gameHandler;
-    delete connectionHandler;
 
     delete chatChannelManager;
 
@@ -327,37 +322,9 @@ int main(int argc, char *argv[])
     // General Initialization
     initialize();
 
-    // Note: This is just an idea, we could also pass the connection handler
-    // to the constructor of the account handler, upon which it would register
-    // itself for the messages it handles.
-
-    // Register message handlers
-    connectionHandler->registerHandler(CMSG_LOGIN, accountHandler);
-    connectionHandler->registerHandler(CMSG_LOGOUT, accountHandler);
-    connectionHandler->registerHandler(CMSG_REGISTER, accountHandler);
-    connectionHandler->registerHandler(CMSG_UNREGISTER, accountHandler);
-    connectionHandler->registerHandler(CMSG_CHAR_CREATE, accountHandler);
-    connectionHandler->registerHandler(CMSG_CHAR_SELECT, accountHandler);
-    connectionHandler->registerHandler(CMSG_CHAR_DELETE, accountHandler);
-    connectionHandler->registerHandler(CMSG_CHAR_LIST, accountHandler);
-    connectionHandler->registerHandler(CMSG_EMAIL_GET, accountHandler);
-    connectionHandler->registerHandler(CMSG_PASSWORD_CHANGE, accountHandler);
-    connectionHandler->registerHandler(CMSG_EMAIL_CHANGE, accountHandler);
-
-    connectionHandler->registerHandler(CMSG_SAY, chatHandler);
-    connectionHandler->registerHandler(CMSG_ANNOUNCE, chatHandler);
-
-    connectionHandler->registerHandler(CMSG_PICKUP, gameHandler);
-    connectionHandler->registerHandler(CMSG_USE_OBJECT, gameHandler);
-    connectionHandler->registerHandler(CMSG_USE_ITEM, gameHandler); // NOTE: this is probably redundant (CMSG_USE_OBJECT)
-    connectionHandler->registerHandler(CMSG_TARGET, gameHandler);
-    connectionHandler->registerHandler(CMSG_WALK, gameHandler);
-    connectionHandler->registerHandler(CMSG_START_TRADE, gameHandler);
-    connectionHandler->registerHandler(CMSG_START_TALK, gameHandler);
-    connectionHandler->registerHandler(CMSG_REQ_TRADE, gameHandler);
-    connectionHandler->registerHandler(CMSG_EQUIP, gameHandler);
-
-    if (!connectionHandler->startListen(int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)))) {
+    if (!accountHandler->startListen(int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT))) ||
+        !chatHandler->startListen(int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)) + 1) ||
+        !gameHandler->startListen(int(config.getValue("ListenOnPort", DEFAULT_SERVER_PORT)) + 2)) {
         LOG_ERROR("Unable to create an ENet server host.", 0);
         return 3;
     }
@@ -393,16 +360,21 @@ int main(int argc, char *argv[])
                 LOG_INFO("World time: " << worldTime, 0);
             }
 
-            // - Handle all messages that are in the message queue
-            // - Update all active objects/beings
-            connectionHandler->process();
+            // Handle all messages that are in the message queues
+            accountHandler->process();
+            chatHandler->process();
+            gameHandler->process();
+            // Update all active objects/beings
             state.update();
-            connectionHandler->process();
+            // Send potentially urgent outgoing messages
+            gameHandler->flush();
         }
         worldTimer.sleep();
     }
 
     LOG_INFO("Received: Quit signal, closing down...", 0);
-    connectionHandler->stopListen();
+    gameHandler->stopListen();
+    chatHandler->stopListen();
+    accountHandler->stopListen();
     deinitialize();
 }

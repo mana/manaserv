@@ -39,8 +39,6 @@ tmwserv_SOURCES = main.cpp \
 		  mapmanager.cpp \
 		  mapreader.cpp \
 		  mapreader.h \
-		  messagehandler.h \
-		  messagehandler.cpp \
 		  messagein.h \
 		  messagein.cpp \
 		  messageout.h \

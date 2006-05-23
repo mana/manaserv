@@ -87,8 +87,7 @@ ChatChannelManager::registerPrivateChannel(const std::string& channelName,
     return channelId;
 }
 
-bool
-ChatChannelManager::removeChannel(const short channelId)
+bool ChatChannelManager::removeChannel(short channelId)
 {
     for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
     {
@@ -107,154 +106,92 @@ ChatChannelManager::removeChannel(const short channelId)
 }
 
 
-short
-ChatChannelManager::getChannelId(const std::string& channelName)
+short ChatChannelManager::getChannelId(std::string const &channelName)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->second.getName() == channelName ) return i->first;
-        ++i;
+    for (std::map<short, ChatChannel>::const_iterator i = mChatChannels.begin(), i_end = mChatChannels.end();
+         i != i_end; ++i) {
+        if (i->second.getName() == channelName) return i->first;
     }
     return 0;
 }
 
 
-const std::string
-ChatChannelManager::getChannelName(const short channelId)
+std::string ChatChannelManager::getChannelName(short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId ) return i->second.getName();
-        ++i;
-    }
-    return "";
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    return (i != mChatChannels.end()) ? i->second.getName() : std::string();
 }
 
-const std::string
-ChatChannelManager::getChannelAnnouncement(const short channelId)
+std::string ChatChannelManager::getChannelAnnouncement(short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId ) return i->second.getAnnouncement();
-        ++i;
-    }
-    return "None";
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    return (i != mChatChannels.end()) ? i->second.getAnnouncement() : std::string();
 }
 
-const std::string
-ChatChannelManager::getChannelPassword(const short channelId)
+std::string ChatChannelManager::getChannelPassword(short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId ) return i->second.getPassword();
-        ++i;
-    }
-    return "None";
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    return (i != mChatChannels.end()) ? i->second.getPassword() : std::string();
 }
 
-bool
-ChatChannelManager::setChannelAnnouncement(const short channelId, const std::string& channelAnnouncement)
+bool ChatChannelManager::setChannelAnnouncement(short channelId, std::string const &channelAnnouncement)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId )
-        {
-            i->second.setAnnouncement(channelAnnouncement);
-            return true;
-        }
-        ++i;
-    }
-    return false;
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    if (i == mChatChannels.end()) return false;
+    i->second.setAnnouncement(channelAnnouncement);
+    return true;
 }
 
-bool
-ChatChannelManager::setChannelPassword(const short channelId, const std::string& channelPassword)
+bool ChatChannelManager::setChannelPassword(short channelId, std::string const &channelPassword)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId )
-        {
-            i->second.setPassword(channelPassword);
-            return true;
-        }
-        ++i;
-    }
-    return false;
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    if (i == mChatChannels.end()) return false;
+    i->second.setPassword(channelPassword);
+    return true;
 }
 
-const ChatChannel
-ChatChannelManager::_getChannel(const short channelId)
+ChatChannel ChatChannelManager::_getChannel(short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId ) return i->second;
-        ++i;
-    }
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    if (i != mChatChannels.end()) return i->second;
     return ChatChannel("", "", "");
 }
 
 
-bool
-ChatChannelManager::addUserInChannel(tmwserv::BeingPtr beingPtr, const short channelId)
+bool ChatChannelManager::addUserInChannel(std::string const &user, short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId )
-        {
-            return i->second.addUserInChannel(beingPtr);
-        }
-        ++i;
-    }
-    return false;
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    if (i == mChatChannels.end()) return false;
+    return i->second.addUserInChannel(user);
 }
 
 
-bool
-ChatChannelManager::removeUserFromChannel(tmwserv::BeingPtr beingPtr, const short channelId)
+bool ChatChannelManager::removeUserFromChannel(std::string const &user, short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId )
-        {
-            return i->second.removeUserFromChannel(beingPtr);
-        }
-        ++i;
-    }
-    return false;
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    if (i == mChatChannels.end()) return false;
+    return i->second.removeUserFromChannel(user);
 }
 
-void
-ChatChannelManager::removeUserFromEveryChannels(tmwserv::BeingPtr beingPtr)
+void ChatChannelManager::removeUserFromEveryChannels(std::string const &user)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        i->second.removeUserFromChannel(beingPtr);
-        ++i;
+    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(), i_end = mChatChannels.end();
+         i != i_end; ++i) {
+        i->second.removeUserFromChannel(user);
     }
 }
 
-std::vector<tmwserv::BeingPtr>
-ChatChannelManager::getUserListInChannel(const short channelId)
+std::vector< std::string > const &
+ChatChannelManager::getUserListInChannel(short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId )
-        {
-            return i->second.getUserList();
-        }
-        ++i;
-    }
-    std::vector<tmwserv::BeingPtr> emptyList;
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    if (i != mChatChannels.end()) return i->second.getUserList();
+    static std::vector< std::string > emptyList;
     return emptyList;
 }
 
-bool
-ChatChannelManager::isChannelRegistered(const short channelId)
+bool ChatChannelManager::isChannelRegistered(short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId ) return true;
-        ++i;
-    }
-    return false;
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    return i != mChatChannels.end();
 }

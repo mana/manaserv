@@ -35,6 +35,12 @@
 
 void parsePacket(char *data, int recvLength);
 
+ENetHost *client;
+ENetAddress addressAccount, addressGame;
+ENetPeer *peerAccount, *peerGame;
+std::string token;
+bool connected = false;
+
 int main(int argc, char *argv[])
 {
 
@@ -51,10 +57,8 @@ int main(int argc, char *argv[])
 
     atexit(enet_deinitialize);
 
-    ENetHost *client;
-
     client = enet_host_create(NULL /* create a client host */,
-                              1 /* only allow 1 outgoing connection */,
+                              3 /* allows 3 outgoing connection */,
                               57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth */,
                               14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth */);
 
@@ -64,49 +68,45 @@ int main(int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
 
-    ENetAddress address;
-    ENetPeer *peer;
-
     /* Connect to localhost:9601. */
-    enet_address_set_host(&address, "localhost");
-    address.port = 9601;
+    enet_address_set_host(&addressAccount, "localhost");
+    addressAccount.port = 9601;
 
     /* Initiate the connection, allocating one channel. */
-    peer = enet_host_connect(client, &address, 1);
+    peerAccount = enet_host_connect(client, &addressAccount, 1);
 
-    if (peer == NULL)
+    if (peerAccount == NULL)
     {
        printf("No available peers for initiating an ENet connection.\n");
        exit (EXIT_FAILURE);
     }
 
     ENetEvent event;
-    bool exit = false;
-    bool connected = false;
-    int answer = 0;
+    bool exit = true;
     char line[256] = "";
-    bool responseRequired = false;
 
     printf("Starting client...\n");
 
     /* Wait up to 1000 milliseconds for an event. */
-    while (!exit) {
+    do {
         if (connected) {
+            int answer = -1;
             std::cout << std::endl;
             std::cout << "0) Quit                9)  Character selection" << std::endl;
             std::cout << "1) Register            10) Delete Character" << std::endl;
             std::cout << "2) Unregister          11) List Characters" << std::endl;
             std::cout << "3) Login               12) Move Character" << std::endl;
-            std::cout << "4) Logout              13) Chat" << std::endl;
+            std::cout << "4) Logout              13) Say around" << std::endl;
             std::cout << "5) Change Password     14) Equip Item" << std::endl;
             std::cout << "6) Change Email        15) Ruby Expression" << std::endl;
-            std::cout << "7) Get Email" << std::endl;
-            std::cout << "8) Create character" << std::endl;
+            std::cout << "7) Get Email           16) Enter world" << std::endl;
+            std::cout << "8) Create character    17) Enter world (GS)" << std::endl;
             std::cout << "Choose your option: ";
             std::cin >> answer;
             std::cin.getline(line, 256); // skip the remaining of the line
 
             MessageOut msg;
+            int msgDestination = 0; // account server
 
             switch (answer) {
                 case 0:
@@ -272,19 +272,19 @@ int main(int argc, char *argv[])
                     msg.writeLong(x);
                     msg.writeLong(y);
 
-                    responseRequired = false;
+                    msgDestination = 1;
                 } break;
 
                 case 13:
                 {
                     // Chat
                     msg.writeShort(CMSG_SAY);
-                    std::cout << "Chat: ";
+                    std::cout << "Say: ";
                     std::cin.getline(line, 256);
                     line[255] = '\0';
                     msg.writeString(line);
-                    msg.writeShort(0);
-                    responseRequired = false;
+
+                    msgDestination = 1;
                 }   break;
 
                 case 14:
@@ -299,6 +299,8 @@ int main(int argc, char *argv[])
                     msg.writeShort(CMSG_EQUIP);
                     msg.writeLong(itemId);
                     msg.writeByte(slot);
+
+                    msgDestination = 1;
                 } break;
 
                 case 15:
@@ -307,13 +309,22 @@ int main(int argc, char *argv[])
                     std::cin >> line;
                     msg.writeShort(0x800);
                     msg.writeString(line);
+                } break;
 
-                    responseRequired = false;
+                case 16:
+                {
+                    msg.writeShort(CMSG_ENTER_WORLD);
+                } break;
+
+                case 17:
+                {
+                    msg.writeShort(CMSG_GAMESRV_CONNECT);
+                    msg.writeString(token, 32);
+                    msgDestination = 1;
                 } break;
 
                 default:
-                    continue;
-                    break;
+                    goto process_enet;
             } // end switch
 
             // Send prepared message
@@ -323,15 +334,17 @@ int main(int argc, char *argv[])
                         msg.getDataSize() + 1,
                         ENET_PACKET_FLAG_RELIABLE);
                 // Send the packet to the peer over channel id 0.
-                enet_peer_send(peer, 0, packet);
+                enet_peer_send(msgDestination == 0 ? peerAccount : peerGame, 0, packet);
             } // end if
         } // end if
 
+        process_enet:
         while (enet_host_service(client, &event, 1000)) {
             switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT:
                     printf("Connected to server\n");
                     connected = true;
+                    exit = false;
                     break;
 
                 case ENET_EVENT_TYPE_RECEIVE:
@@ -351,6 +364,7 @@ int main(int argc, char *argv[])
                 case ENET_EVENT_TYPE_DISCONNECT:
                     printf("Disconnected.\n");
                     connected = false;
+                    exit = true;
                     break;
 
                 default:
@@ -358,11 +372,7 @@ int main(int argc, char *argv[])
                     break;
             } // end switch
         } // end while
-
-        if (!connected) {
-            exit = true;
-        }
-    } // end while
+    } while (!exit);
 
     if (connected) {
         // The disconnection attempt didn't succeed yet. Force disconnection.
@@ -697,11 +707,29 @@ void parsePacket(char *data, int recvLength) {
                 }
             } break;
 
-            case SMSG_CHAT:
+            case SMSG_SAY:
             {
-                short channel = msg.readShort();
-                std::cout << "Chat on channel " << channel << ':' << std::endl
+                std::string who = msg.readString();
+                std::cout << who << " says around:" << std::endl
                 << msg.readString() << std::endl;
+            } break;
+
+            case SMSG_ENTER_WORLD_RESPONSE:
+            {
+                switch (msg.readByte()) {
+                    case ENTER_WORLD_OK:
+                    {
+                        std::string server = msg.readString();
+                        enet_address_set_host(&addressGame, server.c_str());
+                        addressGame.port = msg.readShort();
+                        peerGame = enet_host_connect(client, &addressGame, 1);
+                        token = msg.readString(32);
+                        connected = false;
+                        std::cout << "Connecting to " << server << ':' << addressGame.port << std::endl;
+                    }   break;
+                    default:
+                        std::cout << "Enter world failed." << std::endl;
+                }
             } break;
 
             default:

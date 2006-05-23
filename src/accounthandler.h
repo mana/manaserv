@@ -24,15 +24,7 @@
 #ifndef _TMWSERV_ACCOUNTHANDLER_H_
 #define _TMWSERV_ACCOUNTHANDLER_H_
 
-#include "messagehandler.h"
-
-class MessageIn;
-class NetComputer;
-class ClientComputer;
-
-namespace tmwserv {
-    class Account;
-}
+#include "connectionhandler.h"
 
 /**
  * Manages the data stored in user accounts and provides a reliable interface
@@ -42,24 +34,15 @@ namespace tmwserv {
  * be traced to this account through the NetComputer structure, then processed
  * here with the persistent stored data).
  */
-class AccountHandler : public MessageHandler
+class AccountHandler : public ConnectionHandler
 {
-    public:
+    protected:
         /**
-         * Receives account related messages.
+         * Process account related messages.
          */
-        void receiveMessage(NetComputer &computer, MessageIn &message);
-
-    private:
-        /**
-         * Handles the login message.
-         */
-        int loginMessage(ClientComputer &computer, MessageIn &message);
-
-        /**
-         * Account assignment.
-         */
-        int assignAccount(ClientComputer &computer, tmwserv::Account *account);
+        void processMessage(NetComputer *computer, MessageIn &message);
+        NetComputer *computerConnected(ENetPeer *);
+        void computerDisconnected(NetComputer *);
 };
 
 #endif

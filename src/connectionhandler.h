@@ -25,14 +25,11 @@
 #define _TMWSERV_CONNECTIONHANDLER_H_
 
 #include <list>
-#include <map>
 #include <enet/enet.h>
-
-#include "being.h"
 
 #define IN_BUFFER_SIZE   8192
 
-class MessageHandler;
+class MessageIn;
 class MessageOut;
 class NetComputer;
 
@@ -75,7 +72,12 @@ class ConnectionHandler
          * Process outgoing messages and listen to the server socket for
          * incoming messages and new connections.
          */
-        void process();
+        virtual void process();
+
+        /**
+         * Process outgoing messages.
+         */
+        void flush();
 
         /**
          * Called when a computer sends a packet to the network session.
@@ -83,9 +85,9 @@ class ConnectionHandler
         //void receivePacket(NetComputer *computer, Packet *packet);
 
         /**
-         * Registers a message handler to handle a certain message type.
+         * Force disconnection of target computer.
          */
-        void registerHandler(unsigned int msgId, MessageHandler *handler);
+        void forceDisconnect(NetComputer *);
 
         /**
          * Send packet to every client, used for announcements.
@@ -100,9 +102,6 @@ class ConnectionHandler
     private:
         ENetAddress address;         /**< Includes the port to listen to. */
         ENetHost *host;              /**< The host that listen for connections. */
-
-        typedef std::map< unsigned int, MessageHandler * > HandlerMap;
-        HandlerMap handlers;
 
     protected:
         /**
@@ -124,6 +123,11 @@ class ConnectionHandler
          */
         virtual void computerDisconnected(NetComputer *) = 0;
 
+        /**
+         * Called when a message is received.
+         */
+        virtual void processMessage(NetComputer *, MessageIn &) = 0;
+
         typedef std::list<NetComputer*> NetComputers;
         /**
          * A list of pointers to the client structures created by
@@ -131,50 +135,5 @@ class ConnectionHandler
          */
         NetComputers clients;
 };
-
-/**
- * Temporary placeholder until the connection handlers have been split.
- */
-class ClientConnectionHandler: public ConnectionHandler
-{
-    public:
-        /**
-         * Send packet to client with matching BeingPtr
-         */
-        void sendTo(tmwserv::BeingPtr, MessageOut &);
-
-        /**
-         * Send packet to client with matching Being name
-         */
-        void sendTo(std::string name, MessageOut &);
-
-        /**
-         * Send packet to every client around the client on screen.
-         */
-        void sendAround(tmwserv::BeingPtr, MessageOut &);
-
-        /**
-         * Send packet to every client in a registered channel.
-         */
-        void sendInChannel(short channelId, MessageOut &);
-
-        /**
-         * tells a list of user they're leaving a channel.
-         */
-        void makeUsersLeaveChannel(const short channelId);
-
-        /**
-         * tells a list of user about an event in a chatchannel about a player.
-         */
-        void warnUsersAboutPlayerEventInChat(const short channelId,
-                                             const std::string& userName,
-                                             const char eventId);
-
-    protected:
-        virtual NetComputer *computerConnected(ENetPeer *);
-        virtual void computerDisconnected(NetComputer *);
-};
-
-extern ClientConnectionHandler *connectionHandler;
 
 #endif

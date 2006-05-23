@@ -1,3 +1,20 @@
+2006-05-20  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/chatchannelmanager.cpp, src/chatchannelmanager.h: Removed
+	unwarranted constness. Used binary searches instead of loops.
+	* src/chatchannel.cpp, src/chatchannel.h: Replaced usage of whole Being
+	by character name.
+	* src/client.cpp: Implemented client-side server split.
+	* src/messagehandler.cpp, src/messagehandler.h, src/Makefile.am:
+	Removed unused MessageHandler class.
+	* src/accounthandler.cpp, src/accounthandler.h, src/chathandler.cpp,
+	src/chathandler.h, src/gamehandler.cpp, src/gamehandler.h: Respectively
+	changed into an account server, a chat server, and a game server.
+	* src/main.cpp, src/state.cpp, src/state.h, src/defines.h: Small fixes
+	to cope with server split.
+	* src/connectionhandler.cpp, src/connectionhandler.h,
+	src/netcomputer.cpp, src/netcomputer.h: Removed temporary classes.
+
 2006-05-22  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.dev: Updated Dev-C++ project file.

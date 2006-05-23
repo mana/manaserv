@@ -30,8 +30,8 @@
 #include "being.h"
 
 class ChatChannel {
-
  public:
+    typedef std::vector< std::string > ChannelUsers;
 
     /**
      * Constructors
@@ -78,17 +78,17 @@ class ChatChannel {
     /**
      * Get the list of the users registered in the channel
      */
-    std::vector<tmwserv::BeingPtr> getUserList() const;
+    ChannelUsers const &getUserList() const;
 
     /**
      * Add a user in the channel
      */
-    bool addUserInChannel(tmwserv::BeingPtr beingPtr);
+    bool addUserInChannel(std::string const &);
 
     /**
      * Remove a user from the channel.
      */
-    bool removeUserFromChannel(tmwserv::BeingPtr beingPtr);
+    bool removeUserFromChannel(std::string const &);
 
     /**
      * Empties a channel from its users (admin included).
@@ -114,7 +114,7 @@ class ChatChannel {
     /**
      * The registered user list
      */
-    std::vector<tmwserv::BeingPtr> mRegisteredUsers;
+    ChannelUsers mRegisteredUsers;
 
 };
 

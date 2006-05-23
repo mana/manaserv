@@ -23,7 +23,7 @@
 
 #include "state.h"
 
-#include "connectionhandler.h"
+#include "gamehandler.h"
 #include "map.h"
 #include "mapmanager.h"
 #include "messageout.h"
@@ -78,7 +78,7 @@ void State::update()
                     msg.writeLong(b2->get()->getX());// x
                     msg.writeLong(b2->get()->getY());// y
 
-                    connectionHandler->sendTo(*b, msg);
+                    gameHandler->sendTo(*b, msg);
                 }
             }
         }

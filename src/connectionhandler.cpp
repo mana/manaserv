@@ -23,7 +23,6 @@
 #include "connectionhandler.h"
 
 #include "chatchannelmanager.h"
-#include "messagehandler.h"
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
@@ -56,8 +55,7 @@ ClientData::ClientData():
 {
 }
 
-bool
-ConnectionHandler::startListen(enet_uint16 port)
+bool ConnectionHandler::startListen(enet_uint16 port)
 {
     // Bind the server to the default localhost.
     address.host = ENET_HOST_ANY;
@@ -72,8 +70,7 @@ ConnectionHandler::startListen(enet_uint16 port)
     return host;
 }
 
-void
-ConnectionHandler::stopListen()
+void ConnectionHandler::stopListen()
 {
     // - Disconnect all clients (close sockets)
 
@@ -92,10 +89,20 @@ ConnectionHandler::stopListen()
        }
     }
     enet_host_destroy(host);
+    // FIXME: memory leak on NetComputers
 }
 
-void
-ConnectionHandler::process()
+void ConnectionHandler::forceDisconnect(NetComputer *comp)
+{
+    enet_peer_disconnect(comp->getPeer(), 0); // ENet should generate a disconnect event
+}
+
+void ConnectionHandler::flush()
+{
+    enet_host_flush(host);
+}
+
+void ConnectionHandler::process()
 {
     ENetEvent event;
     // Process Enet events and do not block.
@@ -143,18 +150,7 @@ ConnectionHandler::process()
                     Packet *packet = new Packet((char *)event.packet->data,
                                                 event.packet->dataLength);
                     MessageIn msg(packet); // (MessageIn frees packet)
-
-                    short messageId = msg.getId();
-
-                    HandlerMap::iterator it = handlers.find(messageId);
-                    if (it != handlers.end()) {
-                        // send message to appropriate handler
-                        it->second->receiveMessage(*comp, msg);
-                    } else {
-                        // bad message (no registered handler)
-                        LOG_ERROR("Unhandled message (" << messageId
-                                  << ") received from " << ipaddr, 0);
-                    }
+                    processMessage(comp, msg);
                 } else {
                     LOG_ERROR("Message too short from " << ipaddr, 0);
                 }
@@ -166,8 +162,7 @@ ConnectionHandler::process()
             case ENET_EVENT_TYPE_DISCONNECT:
             {
                 NetComputer *comp = (NetComputer *)event.peer->data;
-                /*LOG_INFO(event.peer->address.host
-                         << " disconected.", 0);*/
+                LOG_INFO(ip4ToString(event.peer->address.host) << " disconnected.", 0);
                 // Reset the peer's client information.
                 computerDisconnected(comp);
                 clients.erase(std::find(clients.begin(), clients.end(), comp));
@@ -175,34 +170,6 @@ ConnectionHandler::process()
             } break;
 
             default: break;
-        }
-    }
-}
-
-void ConnectionHandler::registerHandler(
-        unsigned int msgId, MessageHandler *handler)
-{
-    handlers[msgId] = handler;
-}
-
-void ClientConnectionHandler::sendTo(tmwserv::BeingPtr beingPtr, MessageOut &msg)
-{
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        if (static_cast< ClientComputer * >(*i)->getCharacter().get() == beingPtr.get()) {
-            (*i)->send(msg.getPacket());
-            break;
-        }
-    }
-}
-
-void ClientConnectionHandler::sendTo(std::string name, MessageOut &msg)
-{
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        if (static_cast< ClientComputer * >(*i)->getCharacter()->getName() == name) {
-            (*i)->send(msg.getPacket());
-            break;
         }
     }
 }
@@ -215,95 +182,7 @@ void ConnectionHandler::sendToEveryone(MessageOut &msg)
     }
 }
 
-void ClientConnectionHandler::sendAround(tmwserv::BeingPtr beingPtr, MessageOut &msg)
-{
-    unsigned speakerMapId = beingPtr->getMapId();
-    std::pair<unsigned, unsigned> speakerXY = beingPtr->getXY();
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        // See if the other being is near enough, then send the message
-        tmwserv::Being const *listener = static_cast< ClientComputer * >(*i)->getCharacter().get();
-        if (listener->getMapId() != speakerMapId) continue;
-        std::pair<unsigned, unsigned> listenerXY = listener->getXY();
-        if (abs(listenerXY.first  - speakerXY.first ) > (int)AROUND_AREA_IN_TILES) continue;
-        if (abs(listenerXY.second - speakerXY.second) > (int)AROUND_AREA_IN_TILES) continue;
-        (*i)->send(msg.getPacket());
-    }
-}
-
-void ClientConnectionHandler::sendInChannel(short channelId, MessageOut &msg)
-{
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        const std::vector<tmwserv::BeingPtr> beingList =
-            chatChannelManager->getUserListInChannel(channelId);
-        // If the being is in the channel, send it
-        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin(), j_end = beingList.end();
-             j != j_end; ++j) {
-            if (static_cast< ClientComputer * >(*i)->getCharacter().get() == j->get())
-            {
-                (*i)->send(msg.getPacket());
-            }
-        }
-    }
-}
-
 unsigned int ConnectionHandler::getClientNumber()
 {
     return clients.size();
-}
-
-void ClientConnectionHandler::makeUsersLeaveChannel(const short channelId)
-{
-    MessageOut result;
-    result.writeShort(SMSG_QUIT_CHANNEL_RESPONSE);
-    result.writeByte(CHATCNL_OUT_OK);
-
-    const std::vector<tmwserv::BeingPtr> beingList =
-            chatChannelManager->getUserListInChannel(channelId);
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        // If the being is in the channel, send it the 'leave now' packet
-        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin(), j_end = beingList.end();
-             j != j_end; ++j) {
-            if (static_cast< ClientComputer * >(*i)->getCharacter().get() == j->get())
-            {
-                (*i)->send(result.getPacket());
-            }
-        }
-    }
-}
-
-void ClientConnectionHandler::warnUsersAboutPlayerEventInChat(const short channelId,
-                                                              const std::string& userName,
-                                                              const char eventId)
-{
-    MessageOut result;
-    result.writeShort(SMSG_UPDATE_CHANNEL_RESPONSE);
-    result.writeByte(eventId);
-    result.writeString(userName);
-
-    const std::vector<tmwserv::BeingPtr> beingList =
-            chatChannelManager->getUserListInChannel(channelId);
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        // If the being is in the channel, send it the 'eventId' packet
-        for (std::vector<tmwserv::BeingPtr>::const_iterator j = beingList.begin(), j_end = beingList.end();
-             j != j_end; ++j) {
-            if (static_cast< ClientComputer * >(*i)->getCharacter().get() == j->get() )
-            {
-                (*i)->send(result.getPacket());
-            }
-        }
-    }
-}
-
-NetComputer *ClientConnectionHandler::computerConnected(ENetPeer *peer) {
-    LOG_INFO("A client connected!", 0);
-    return new ClientComputer(this, peer);
-}
-
-void ClientConnectionHandler::computerDisconnected(NetComputer *comp) {
-    delete comp;
-    LOG_INFO("A client disconnected!", 0);
 }

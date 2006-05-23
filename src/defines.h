@@ -116,6 +116,8 @@ enum {
     SMSG_LOGIN_RESPONSE           = 0x0012,
     CMSG_LOGOUT                   = 0x0013,
     SMSG_LOGOUT_RESPONSE          = 0x0014,
+    CMSG_FORGOT_PASSWORD          = 0x0015,
+    SMSG_FORGOT_PASSWORD_RESPONSE = 0x0016,
     CMSG_CHAR_CREATE              = 0x0020,
     SMSG_CHAR_CREATE_RESPONSE     = 0x0021,
     CMSG_CHAR_DELETE              = 0x0022,
@@ -128,10 +130,18 @@ enum {
     SMSG_EMAIL_CHANGE_RESPONSE    = 0x0031,
     CMSG_EMAIL_GET                = 0x0032,
     SMSG_EMAIL_GET_RESPONSE       = 0x0033,
-    CMSG_FORGOT_PASSWORD          = 0x0040,
-    SMSG_FORGOT_PASSWORD_RESPONSE = 0x0041,
-    CMSG_PASSWORD_CHANGE          = 0x0050,
-    SMSG_PASSWORD_CHANGE_RESPONSE = 0x0051,
+    CMSG_PASSWORD_CHANGE          = 0x0034,
+    SMSG_PASSWORD_CHANGE_RESPONSE = 0x0035,
+    CMSG_ENTER_WORLD              = 0x0040,
+    SMSG_ENTER_WORLD_RESPONSE     = 0x0041,
+    CMSG_ENTER_CHAT               = 0x0042,
+    SMSG_ENTER_CHAT_RESPONSE      = 0x0043,
+    CMSG_GAMESRV_CONNECT          = 0x0050,
+    SMSG_GAMESRV_CONNECT_RESPONSE = 0x0051,
+    SMSG_GAMESRV_DISCONNECT       = 0x0052,
+    CMSG_CHATSRV_CONNECT          = 0x0053,
+    SMSG_CHATSRV_CONNECT_RESPONSE = 0x0054,
+    SMSG_CHATSRV_DISCONNECT       = 0x0055,
 
     // Objects
     SMSG_NEW_OBJECT               = 0x0100,
@@ -166,9 +176,11 @@ enum {
     SMSG_ANNOUNCEMENT             = 0x0402,
     SMSG_PRIVMSG                  = 0x0403,
     SMSG_CHAT_CNL                 = 0x0404,
-    CMSG_SAY                      = 0x0410,
+    SMSG_SAY                      = 0x0405,
+    CMSG_CHAT                     = 0x0410,
     CMSG_ANNOUNCE                 = 0x0411,
     CMSG_PRIVMSG                  = 0x0412,
+    CMSG_SAY                      = 0x0413,
     // -- Channeling
     CMSG_REGISTER_CHANNEL            = 0x0413,
     SMSG_REGISTER_CHANNEL_RESPONSE   = 0x0414,
@@ -294,6 +306,30 @@ enum {
     PASSCHG_INVALID,
     PASSCHG_MISMATCH,
     PASSCHG_UNKNOWN
+};
+
+// Enter world return values
+enum {
+    ENTER_WORLD_OK = 0,
+    ENTER_WORLD_NOLOGIN,
+    ENTER_WORLD_NO_CHARACTER_SELECTED
+};
+
+// Enter chat return values
+enum {
+    ENTER_CHAT_OK = 0,
+    ENTER_CHAT_NOLOGIN,
+    ENTER_CHAT_NO_CHARACTER_SELECTED
+};
+
+// Game server connect values
+enum {
+    GSRV_CONNECT_OK = 0
+};
+
+// Chat server connect values
+enum {
+    CSRV_CONNECT_OK = 0
 };
 
 // Chat errors return values

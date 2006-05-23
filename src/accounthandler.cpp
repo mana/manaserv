@@ -24,29 +24,130 @@
 #include "accounthandler.h"
 
 #include "account.h"
+#include "chathandler.h"
 #include "configuration.h"
 #include "connectionhandler.h"
 #include "debug.h"
-#include "storage.h"
+#include "gamehandler.h"
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
+#include "storage.h"
 
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 
 using tmwserv::Account;
 using tmwserv::AccountPtr;
+using tmwserv::BeingPtr;
 using tmwserv::Storage;
+
+class AccountClient: public NetComputer
+{
+    public:
+        /**
+         * Constructor.
+         */
+        AccountClient(AccountHandler *, ENetPeer *);
+
+        /**
+         * Destructor.
+         */
+        ~AccountClient();
+
+        /**
+         * Set the account associated with the connection
+         */
+        void setAccount(AccountPtr acc);
+
+        /**
+         * Unset the account associated with the connection
+         */
+        void unsetAccount();
+
+        /**
+         * Get account associated with the connection.
+         */
+        AccountPtr getAccount() { return mAccountPtr; }
+
+        /**
+         * Set the selected character associated with connection.
+         */
+        void setCharacter(BeingPtr ch);
+
+        /**
+         * Deselect the character associated with connection.
+         */
+        void unsetCharacter();
+
+        /**
+         * Get character associated with the connection
+         */
+        BeingPtr getCharacter() { return mCharacterPtr; }
+
+    private:
+        /** Account associated with connection */
+        AccountPtr mAccountPtr;
+
+        /** Selected character */
+        BeingPtr mCharacterPtr;
+};
+
+AccountClient::AccountClient(AccountHandler *handler, ENetPeer *peer):
+    NetComputer(handler, peer),
+    mAccountPtr(NULL),
+    mCharacterPtr(NULL)
+{
+}
+
+AccountClient::~AccountClient()
+{
+    unsetAccount();
+}
+
+
+void AccountClient::setAccount(AccountPtr acc)
+{
+    unsetAccount();
+    mAccountPtr = acc;
+}
+
+void AccountClient::setCharacter(BeingPtr ch)
+{
+    unsetCharacter();
+    mCharacterPtr = ch;
+}
+
+void AccountClient::unsetAccount()
+{
+    unsetCharacter();
+    mAccountPtr = AccountPtr(NULL);
+}
+
+void AccountClient::unsetCharacter()
+{
+    if (mCharacterPtr.get() == NULL) return;
+    mCharacterPtr = BeingPtr(NULL);
+}
+
+NetComputer *AccountHandler::computerConnected(ENetPeer *peer)
+{
+    return new AccountClient(this, peer);
+}
+
+void AccountHandler::computerDisconnected(NetComputer *comp)
+{
+    delete comp;
+}
 
 /**
  * Generic interface convention for getting a message and sending it to the
  * correct subroutines. Account handler takes care of determining the
  * current step in the account process, be it creation, setup, or login.
  */
-void AccountHandler::receiveMessage(NetComputer &comp, MessageIn &message)
+void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 {
-    ClientComputer &computer = static_cast< ClientComputer & >(comp);
+    AccountClient &computer = *static_cast< AccountClient * >(comp);
 
     Storage &store = Storage::instance("tmw");
 
@@ -91,7 +192,7 @@ void AccountHandler::receiveMessage(NetComputer &comp, MessageIn &message)
                     result.writeByte(LOGIN_ALREADY_LOGGED);
                     break;
                 }
-                if (connectionHandler->getClientNumber() >= MAX_CLIENTS )
+                if (getClientNumber() >= MAX_CLIENTS )
                 {
                     // Too much clients logged in.
                     LOG_INFO("Client couldn't login. Already has " << MAX_CLIENTS
@@ -704,6 +805,59 @@ void AccountHandler::receiveMessage(NetComputer &comp, MessageIn &message)
             }
             break;
 
+        case CMSG_ENTER_WORLD:
+            {
+                result.writeShort(SMSG_ENTER_WORLD_RESPONSE);
+
+                if (computer.getAccount().get() == NULL)
+                {
+                    result.writeByte(ENTER_WORLD_NOLOGIN);
+                    LOG_INFO("Not logged in. Can't enter the world.", 1);
+                    break; // not logged in
+                }
+                if (computer.getCharacter().get() == NULL)
+                {
+                    result.writeByte(ENTER_WORLD_NO_CHARACTER_SELECTED);
+                    LOG_INFO("No character selected. Can't enter the world.", 2);
+                    break; // no character selected
+                }
+                std::string magic_token(32, ' ');
+                for(int i = 0; i < 32; ++i) magic_token[i] = 1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
+                result.writeByte(ENTER_WORLD_OK);
+                result.writeString("localhost");
+                result.writeShort(9603);
+                result.writeString(magic_token, 32);
+                registerGameClient(magic_token, computer.getCharacter());
+            }
+            break;
+
+        case CMSG_ENTER_CHAT:
+            {
+                result.writeShort(SMSG_ENTER_CHAT_RESPONSE);
+
+                if (computer.getAccount().get() == NULL)
+                {
+                    result.writeByte(ENTER_CHAT_NOLOGIN);
+                    LOG_INFO("Not logged in. Can't enter the chat.", 1);
+                    break; // not logged in
+                }
+                if (computer.getCharacter().get() == NULL)
+                {
+                    result.writeByte(ENTER_CHAT_NO_CHARACTER_SELECTED);
+                    LOG_INFO("No character selected. Can't enter the chat.", 2);
+                    break; // no character selected
+                }
+                std::string magic_token(32, ' ');
+                for(int i = 0; i < 32; ++i) magic_token[i] = 1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
+                result.writeByte(ENTER_CHAT_OK);
+                result.writeString("localhost");
+                result.writeShort(9603);
+                result.writeString(magic_token, 32);
+                registerChatClient(magic_token, computer.getCharacter()->getName(),
+                                   computer.getAccount()->getLevel());
+            }
+            break;
+
         default:
             LOG_WARN("Invalid message type", 0);
             result.writeShort(SMSG_LOGIN_RESPONSE);
@@ -713,57 +867,4 @@ void AccountHandler::receiveMessage(NetComputer &comp, MessageIn &message)
 
     // return result
     computer.send(result.getPacket());
-}
-
-/* ----Login Message----
- * Accepts a login message and interprets it, assigning the proper
- * login
- * Preconditions: The requested handle is not logged in already. 
- *                The requested handle exists. 
- *                The requested handle is not banned or restricted. 
- *                The character profile is valid
- * Postconditions: The player recieves access through a character in
- *                 the world.
- * Return Value: SUCCESS if the player was successfully assigned the
- *               requested char, ERROR on early termination of the
- *               routine.
- */
-int AccountHandler::loginMessage(ClientComputer &computer, MessageIn &message)
-{
-    // Get the handle (account) the player is requesting
-    // RETURN TMW_ACCOUNTERROR_NOEXIST if: requested does not handle exist
-    // RETURN TMW_ACCOUNTERROR_BANNED if: the handle status is
-    // HANDLE_STATUS_BANNED
-    // RETURN TMW_ACCOUNTERROR_ALREADYASSIGNED if: the handle is already
-    // assigned
-
-    // Get the character within that handle that the player is requesting
-    // RETURN TMW_ACCOUNTERROR_CHARNOTFOUND if: character not found
-
-    // Assign the player to that character
-    // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: assignment not successful
-
-    // return TMW_SUCCESS -- successful exit
-    return TMW_SUCCESS;
-}
-
-/* ----Account Assignment----
- * Assigns the computer to this account, and allows it to make account
- * changes using this structure.
- * Preconditions: This structure already contains a valid accountHandle
- * Postconditions: The player is connected to the account through this handle
- * Return Value: SUCCESS if the player was successfully assigned the
- *               requested handle, ERROR on early termination of the
- *               routine.
- */
-int
-AccountHandler::assignAccount(ClientComputer &computer, tmwserv::Account *account)
-{
-    // RETURN TMW_ACCOUNTERROR_ASSIGNFAILED if: the account was accessed before
-    //                                          being initalized.
-
-    // Assign the handle
-
-
-    return TMW_SUCCESS;
 }

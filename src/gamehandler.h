@@ -24,21 +24,50 @@
 #ifndef _TMW_SERVER_GAMEHANDLER_
 #define _TMW_SERVER_GAMEHANDLER_
 
-#include "messagehandler.h"
+#include "account.h"
+#include "being.h"
+#include "connectionhandler.h"
 
-class MessageIn;
-class NetComputer;
+class GameClient;
+
+/*
+ * Manage connections to game server.
+ */
+class GameHandler: public ConnectionHandler
+{
+    public:
+        void process();
+
+        /**
+         * Send message to the given being.
+         */
+        void sendTo(tmwserv::BeingPtr beingPtr, MessageOut &msg);
+
+    protected:
+        NetComputer *computerConnected(ENetPeer *);
+        void computerDisconnected(NetComputer *);
+
+        /**
+         * Process messages related to core game events.
+         */
+        void processMessage(NetComputer *computer, MessageIn &message);
+
+    private:
+        /**
+         * Display a message to every player around one's player
+         * in the default channel.
+         * The tile area has been set to 10 for now.
+         */
+        void sayAround(GameClient &computer, std::string const &text);
+
+        void removeOutdatedPending();
+};
 
 /**
- * Manage main game events & server processing.
+ * Register future client attempt. Temporary until physical server split.
  */
-class GameHandler : public MessageHandler
-{
- public:
-    /**
-     * Recieve messages related to core game events
-     */
-    void receiveMessage(NetComputer &computer, MessageIn &message);
-};
+void registerGameClient(std::string const &, tmwserv::BeingPtr);
+
+extern GameHandler *gameHandler;
 
 #endif

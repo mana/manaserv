@@ -65,7 +65,7 @@ public:
     /**
      * Remove a channel.
      */
-    bool removeChannel(const short channelId);
+    bool removeChannel(short channelId);
 
     /**
      * Get the id of a channel from its name.
@@ -80,73 +80,68 @@ public:
      *
      * @return the name of the channel
      */
-    const std::string getChannelName(const short channelId);
+    std::string getChannelName(short channelId);
 
     /**
      * Get the announcement string of a channel from its id.
      *
      * @return the announcement string of the channel
      */
-    const std::string
-    getChannelAnnouncement(const short channelId);
+    std::string getChannelAnnouncement(short channelId);
 
     /**
      * Set the announcement string of a channel from its id.
      *
      * @return the announcement string of the channel
      */
-    bool
-    setChannelAnnouncement(const short channelId, const std::string& channelAnnouncement);
+    bool setChannelAnnouncement(short channelId, std::string const &channelAnnouncement);
 
     /**
      * Set the announcement string of a channel from its id.
      *
      * @return the announcement string of the channel
      */
-    bool
-    setChannelPassword(const short channelId, const std::string& channelPassword);
+    bool setChannelPassword(short channelId, const std::string& channelPassword);
 
     /**
      * Get the password of a channel from its id.
      *
      * @return the password of the channel
      */
-    const std::string
-    getChannelPassword(const short channelId);
+    std::string getChannelPassword(short channelId);
 
     /**
      * get the ChatChannel object from its id.
      *
      * @return the ChatChannel object
      */
-    const ChatChannel
-    _getChannel(const short channelId);
+    ChatChannel _getChannel(short channelId);
 
     /**
      * Add a user in a channel
      */
-    bool addUserInChannel(tmwserv::BeingPtr beingPtr, const short channelId);
+    bool addUserInChannel(std::string const &, short channelId);
 
     /**
      * Remove a user from a channel.
      */
-    bool removeUserFromChannel(tmwserv::BeingPtr beingPtr, const short channelId);
+    bool removeUserFromChannel(std::string const &, short channelId);
 
     /**
      * Remove a user from every channels.
      * Used at logout.
      */
-    void removeUserFromEveryChannels(tmwserv::BeingPtr beingPtr);
+    void removeUserFromEveryChannels(std::string const &);
 
     /**
      * Get the list of the users registered in a channel
      */
-    std::vector<tmwserv::BeingPtr> getUserListInChannel(const short channelId);
+    std::vector< std::string > const &getUserListInChannel(short channelId);
 
     /**
      * tells if a channel exists
      */
-    bool isChannelRegistered(const short channelId);
+    bool isChannelRegistered(short channelId);
 
 private:
 

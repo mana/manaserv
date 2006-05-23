@@ -26,55 +26,73 @@
 
 #include <iosfwd>
 
-#include "messagehandler.h"
+#include "connectionhandler.h"
 
-class MessageIn;
-class NetComputer;
-class ClientComputer;
+class ChatClient;
 
 /**
  * Manages all chat related
  */
-class ChatHandler : public MessageHandler
+class ChatHandler : public ConnectionHandler
 {
- public:
-    /**
-     * Receives chat related messages.
-     */
-    void receiveMessage(NetComputer &computer, MessageIn &message);
+    public:
+        void process();
 
- private:
-    /**
-     * Deals with command messages
-     */
-    void handleCommand(ClientComputer &computer, const std::string& command);
+    protected:
+        /**
+         * Process chat related messages.
+         */
+        void processMessage(NetComputer *computer, MessageIn &message);
+        NetComputer *computerConnected(ENetPeer *);
+        void computerDisconnected(NetComputer *);
 
-    /**
-    * Tells the player to be more polite.
-    */
-    void warnPlayerAboutBadWords(ClientComputer &computer);
+    private:
+        /**
+         * Deal with command messages.
+         */
+        void handleCommand(ChatClient &computer, std::string const &command);
 
-    /**
-    * Announce a message to every being in the default channel.
-    */
-    void announce(ClientComputer &computer, const std::string& text);
+        /**
+         * Tell the player to be more polite.
+         */
+        void warnPlayerAboutBadWords(ChatClient &computer);
 
-    /**
-    * Display a message to every player around one's player
-    * in the default channel.
-    * The tile area has been set to 10 for now.
-    */
-    void sayAround(ClientComputer &computer, const std::string& text);
+        /**
+         * Announce a message to every being in the default channel.
+         */
+        void announce(ChatClient &computer, std::string const &text);
 
-    /**
-    * Say something private to a player.
-    */
-    void sayToPlayer(ClientComputer &computer, const std::string& playerName, const std::string& text);
+        /**
+         * Say something private to a player.
+         */
+        void sayToPlayer(ChatClient &computer, std::string const &playerName, std::string const &text);
 
-    /**
-    * Say something in a specific channel.
-    */
-    void sayInChannel(ClientComputer &computer, short channel, const std::string& text);
+        /**
+         * Say something in a specific channel.
+         */
+        void sayInChannel(ChatClient &computer, short channel, std::string const &);
+
+        /**
+         * Send packet to every client in a registered channel.
+         */
+        void sendInChannel(short channelId, MessageOut &);
+
+        /**
+         * Tell a list of user they are leaving a channel.
+         */
+        void makeUsersLeaveChannel(short channelId);
+
+        /**
+         * Tell a list of user about an event in a chatchannel about a player.
+         */
+        void warnUsersAboutPlayerEventInChat(short channelId, std::string const &userName, char eventId);
+
+        void removeOutdatedPending();
 };
+
+/**
+ * Register future client attempt. Temporary until physical server split.
+ */
+void registerChatClient(std::string const &, std::string const &, int);
 
 #endif
