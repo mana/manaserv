@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
                 case 1:
                     // Register
-                    msg.writeShort(CMSG_REGISTER);
+                    msg.writeShort(PAMSG_REGISTER);
                     // We send the client version
                     msg.writeString(PACKAGE_VERSION);
                     std::cout << "Account name: ";
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
                 case 2:
                     // Unregister (deleting an account)
-                    msg.writeShort(CMSG_UNREGISTER);
+                    msg.writeShort(PAMSG_UNREGISTER);
                     std::cout << "Account name: ";
                     std::cin >> line;
                     msg.writeString(line);
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
                 case 3:
                     // Login
-                    msg.writeShort(CMSG_LOGIN);
+                    msg.writeShort(PAMSG_LOGIN);
                     // We send the client version
                     msg.writeString(PACKAGE_VERSION);
                     std::cout << "Account name: ";
@@ -159,27 +159,33 @@ int main(int argc, char *argv[])
 
                 case 4:
                     // Logout
-                    msg.writeShort(CMSG_LOGOUT);
+                    msg.writeShort(PAMSG_LOGOUT);
                     std::cout << "Logout" << std::endl;
                     break;
 
                 case 5:
+                {
                     // Change Password
-                    msg.writeShort(CMSG_PASSWORD_CHANGE);
+                    msg.writeShort(PAMSG_PASSWORD_CHANGE);
                     std::cout << "Old Password: ";
                     std::cin >> line;
                     msg.writeString(line);
                     std::cout << "New Password: ";
                     std::cin >> line;
                     msg.writeString(line);
+                    std::string line2;
                     std::cout << "Retype new Password: ";
-                    std::cin >> line;
-                    msg.writeString(line);
-                    break;
+                    std::cin >> line2;
+                    if (line != line2)
+                    {
+                        std::cout << "Error: Password mismatch." << std::endl;
+                        goto process_enet;
+                    }
+                } break;
 
                 case 6:
                     // Change Email
-                    msg.writeShort(CMSG_EMAIL_CHANGE);
+                    msg.writeShort(PAMSG_EMAIL_CHANGE);
                     std::cout << "New Email: ";
                     std::cin >> line;
                     msg.writeString(line);
@@ -187,13 +193,13 @@ int main(int argc, char *argv[])
 
                 case 7:
                     // Get current Account's Email value
-                    msg.writeShort(CMSG_EMAIL_GET);
+                    msg.writeShort(PAMSG_EMAIL_GET);
                     break;
 
                 case 8:
                 {
                     // Create character
-                    msg.writeShort(CMSG_CHAR_CREATE);
+                    msg.writeShort(PAMSG_CHAR_CREATE);
                     std::cout << "Name: ";
                     std::cin >> line;
                     msg.writeString(line);
@@ -238,7 +244,7 @@ int main(int argc, char *argv[])
                 case 9:
                 {
                     // Select character
-                    msg.writeShort(CMSG_CHAR_SELECT);
+                    msg.writeShort(PAMSG_CHAR_SELECT);
                     std::cout << "Character ID: ";
                     std::cin >> line;
                     msg.writeByte(atoi(line));
@@ -247,7 +253,7 @@ int main(int argc, char *argv[])
                 case 10:
                 {
                     // Delete character
-                    msg.writeShort(CMSG_CHAR_DELETE);
+                    msg.writeShort(PAMSG_CHAR_DELETE);
                     std::cout << "Character ID: ";
                     std::cin >> line;
                     msg.writeByte(atoi(line));
@@ -256,7 +262,7 @@ int main(int argc, char *argv[])
                 case 11:
                 {
                     // List characters
-                    msg.writeShort(CMSG_CHAR_LIST);
+                    msg.writeShort(PAMSG_CHAR_LIST);
                 } break;
 
                 case 12:
@@ -268,7 +274,7 @@ int main(int argc, char *argv[])
                     std::cout << "Y: ";
                     std::cin >> y;
 
-                    msg.writeShort(CMSG_WALK);
+                    msg.writeShort(PGMSG_WALK);
                     msg.writeLong(x);
                     msg.writeLong(y);
 
@@ -278,7 +284,7 @@ int main(int argc, char *argv[])
                 case 13:
                 {
                     // Chat
-                    msg.writeShort(CMSG_SAY);
+                    msg.writeShort(PGMSG_SAY);
                     std::cout << "Say: ";
                     std::cin.getline(line, 256);
                     line[255] = '\0';
@@ -296,7 +302,7 @@ int main(int argc, char *argv[])
                     std::cin >> itemId;
                     std::cout << "Slot: ";
                     std::cin >> slot;
-                    msg.writeShort(CMSG_EQUIP);
+                    msg.writeShort(PGMSG_EQUIP);
                     msg.writeLong(itemId);
                     msg.writeByte(slot);
 
@@ -313,12 +319,12 @@ int main(int argc, char *argv[])
 
                 case 16:
                 {
-                    msg.writeShort(CMSG_ENTER_WORLD);
+                    msg.writeShort(PAMSG_ENTER_WORLD);
                 } break;
 
                 case 17:
                 {
-                    msg.writeShort(CMSG_GAMESRV_CONNECT);
+                    msg.writeShort(PGMSG_CONNECT);
                     msg.writeString(token, 32);
                     msgDestination = 1;
                 } break;
@@ -392,20 +398,14 @@ void parsePacket(char *data, int recvLength) {
         MessageIn msg(packet); // (MessageIn frees packet)
 
         switch (msg.getId()) {
-            case SMSG_REGISTER_RESPONSE:
+            case APMSG_REGISTER_RESPONSE:
                 // Register
                 switch (msg.readByte()) {
-                    case REGISTER_OK:
+                    case ERRMSG_OK:
                         std::cout << "Account registered." << std::endl;
                         break;
-                    case REGISTER_INVALID_USERNAME:
-                        std::cout << "Account registering: Invalid username." << std::endl;
-                        break;
-                    case REGISTER_INVALID_PASSWORD:
-                        std::cout << "Account registering: Invalid password." << std::endl;
-                        break;
-                    case REGISTER_INVALID_EMAIL:
-                        std::cout << "Account registering: Invalid Email." << std::endl;
+                    case ERRMSG_INVALID_ARGUMENT:
+                        std::cout << "Account registering: Invalid username, password, or email." << std::endl;
                         break;
                     case REGISTER_INVALID_VERSION:
                         std::cout << "Account registering: Invalid version." << std::endl;
@@ -417,38 +417,30 @@ void parsePacket(char *data, int recvLength) {
                         std::cout << "Account registering: Email already exists." << std::endl;
                         break;
                     default:
-                    case REGISTER_UNKNOWN:
                         std::cout << "Account registering: Unknown error." << std::endl;
                         break;
                 }
                 break;
 
-            case SMSG_UNREGISTER_RESPONSE:
+            case APMSG_UNREGISTER_RESPONSE:
                 // Register
                 switch (msg.readByte()) {
-                    case UNREGISTER_OK:
+                    case ERRMSG_OK:
                         std::cout << "Account unregistered." << std::endl;
                         break;
-                    case UNREGISTER_INVALID_PASSWORD:
-                        std::cout << "Account unregistering: Invalid password." << std::endl;
-                        break;
-                    case UNREGISTER_INVALID_USERNAME:
-                        std::cout << "Account unregistering: Invalid username." << std::endl;
-                        break;
-                    case UNREGISTER_INVALID_UNSUFFICIENT_RIGHTS:
-                        std::cout << "Account unregistering: unsufficient rights." << std::endl;
+                    case ERRMSG_INVALID_ARGUMENT:
+                        std::cout << "Account unregistering: Invalid username or password." << std::endl;
                         break;
                      default:
-                     case UNREGISTER_UNKNOWN:
                         std::cout << "Account unregistering: Unknown error." << std::endl;
                         break;
                 }
                 break;
 
-            case SMSG_LOGIN_RESPONSE:
+            case APMSG_LOGIN_RESPONSE:
                 // Register
                 switch (msg.readByte()) {
-                    case LOGIN_OK:
+                    case ERRMSG_OK:
                         unsigned char charNumber;
                         charNumber = msg.readByte();
                         std::cout << "Account has " << int(charNumber) << " characters." << std::endl;
@@ -458,118 +450,103 @@ void parsePacket(char *data, int recvLength) {
                         }
                         std::cout << "." << std::endl;
                         break;
-                    case LOGIN_INVALID_USERNAME:
-                        std::cout << "Login: Invalid Username." << std::endl;
-                        break;
-                    case LOGIN_INVALID_PASSWORD:
-                        std::cout << "Login: Invalid Password." << std::endl;
+                    case ERRMSG_INVALID_ARGUMENT:
+                        std::cout << "Login: Invalid username or password." << std::endl;
                         break;
                     case LOGIN_INVALID_VERSION:
                         std::cout << "Login: Invalid Version." << std::endl;
                         break;
-                    case LOGIN_ALREADY_LOGGED:
+                    case ERRMSG_FAILURE:
                         std::cout << "Login: Already logged with another account." << std::endl;
                         break;
-                    case LOGIN_SERVER_FULL:
-                        std::cout << "Login: Server has reached maximum of clients." << std::endl;
-                        break;
-                    case LOGIN_ACCOUNT_BANNED:
-                        std::cout << "Login: Your account has been banned." << std::endl;
-                        break;
-                    case LOGIN_ACCOUNT_REVIEW:
-                        std::cout << "TODO:Login: Your account is being reviewed." << std::endl;
-                        break;
                     default:
-                    case LOGIN_UNKNOWN:
                         std::cout << "Login: Unknown error." << std::endl;
                         break;
                 }
                 break;
 
-            case SMSG_LOGOUT_RESPONSE:
+            case APMSG_LOGOUT_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case LOGOUT_OK:
+                    case ERRMSG_OK:
                         std::cout << "Logout..." << std::endl;
                         break;
-                    default:
-                    case LOGOUT_UNSUCCESSFULL:
-                        std::cout << "Logout: unsuccessfull." << std::endl;
+                    case ERRMSG_NO_LOGIN:
+                        std::cout << "Logout: Unsuccessful." << std::endl;
                         break;
+                    default:
+                        std::cout << "Logout: Unknown error." << std::endl;
                 }
             } break;
 
-            case SMSG_PASSWORD_CHANGE_RESPONSE:
+            case APMSG_PASSWORD_CHANGE_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case PASSCHG_OK:
+                    case ERRMSG_OK:
                         std::cout << "Password correctly changed." << std::endl;
                         break;
-                    case PASSCHG_NOLOGIN:
+                    case ERRMSG_NO_LOGIN:
                         std::cout << "Password change: Not logged in." << std::endl;
                         break;
-                    case PASSCHG_MISMATCH:
-                        std::cout << "Password change: Passwords mismatch." << std::endl;
-                        break;
-                    case PASSCHG_INVALID:
+                    case ERRMSG_INVALID_ARGUMENT:
                         std::cout << "Password change: New password is invalid." << std::endl;
                         break;
+                    case ERRMSG_FAILURE:
+                        std::cout << "Password change: Old password is invalid." << std::endl;
+                        break;
                     default:
-                    case PASSCHG_UNKNOWN:
                         std::cout << "Password change: Unknown error." << std::endl;
                         break;
                 }
             } break;
 
-            case SMSG_EMAIL_CHANGE_RESPONSE:
+            case APMSG_EMAIL_CHANGE_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case EMAILCHG_OK:
+                    case ERRMSG_OK:
                         std::cout << "Email correctly changed." << std::endl;
                         break;
-                    case EMAILCHG_NOLOGIN:
+                    case ERRMSG_NO_LOGIN:
                         std::cout << "Email change: Not logged in." << std::endl;
                         break;
                     case EMAILCHG_EXISTS_EMAIL:
                         std::cout << "Email change: Email already exists." << std::endl;
                         break;
-                    case EMAILCHG_INVALID:
+                    case ERRMSG_INVALID_ARGUMENT:
                         std::cout << "Email change: New Email is invalid." << std::endl;
                         break;
                     default:
-                    case EMAILCHG_UNKNOWN:
                         std::cout << "Email change: Unknown error." << std::endl;
                         break;
                 }
             } break;
             
-            case SMSG_EMAIL_GET_RESPONSE:
+            case APMSG_EMAIL_GET_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case EMAILGET_OK:
+                    case ERRMSG_OK:
                         std::cout << "Current Email: " << msg.readString() << std::endl;
                         break;
-                    case EMAILGET_NOLOGIN:
+                    case ERRMSG_NO_LOGIN:
                         std::cout << "Get Email: Not logged in." << std::endl;
                         break;
                     default:
-                    case EMAILGET_UNKNOWN:
                         std::cout << "Get Email: Unknown error." << std::endl;
                         break;
                 }
             } break;
 
-            case SMSG_CHAR_CREATE_RESPONSE:
+            case APMSG_CHAR_CREATE_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case CREATE_OK:
+                    case ERRMSG_OK:
                         std::cout << "Character Created successfully." << std::endl;
                         break;
                     case CREATE_EXISTS_NAME:
                         std::cout << "Character Creation: Character's name already exists."
                         << std::endl;
                         break;
-                    case CREATE_NOLOGIN:
+                    case ERRMSG_NO_LOGIN:
                         std::cout << "Character Creation: Not logged in." << std::endl;
                         break;
                     case CREATE_TOO_MUCH_CHARACTERS:
@@ -584,9 +561,6 @@ void parsePacket(char *data, int recvLength) {
                     case CREATE_INVALID_GENDER:
                         std::cout << "Character Creation: Invalid Gender Value." << std::endl;
                         break;
-                    case CREATE_INVALID_NAME:
-                        std::cout << "Character Creation: Invalid Name." << std::endl;
-                        break;
                     case CREATE_RAW_STATS_EQUAL_TO_ZERO:
                         std::cout << "Character Creation: a Statistic is equal to zero." << std::endl;
                         break;
@@ -600,39 +574,34 @@ void parsePacket(char *data, int recvLength) {
                         std::cout << "Character Creation: Statistics too low for level 1." << std::endl;
                         break;
                     default:
-                    case CREATE_UNKNOWN:
                         std::cout << "Character Creation: Unknown error." << std::endl;
                         break;
                 }
             } break;
 
-            case SMSG_CHAR_DELETE_RESPONSE:
+            case APMSG_CHAR_DELETE_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case DELETE_OK:
+                    case ERRMSG_OK:
                         std::cout << "Character deleted." << std::endl;
                         break;
-                    case DELETE_INVALID_ID:
+                    case ERRMSG_INVALID_ARGUMENT:
                         std::cout << "Character Deletion: Character's ID doesn't exist."
                         << std::endl;
                         break;
-                    case DELETE_NOLOGIN:
+                    case ERRMSG_NO_LOGIN:
                         std::cout << "Character Deletion: Not logged in." << std::endl;
                         break;
-                    case DELETE_NO_MORE_CHARACTERS:
-                        std::cout << "Character Deletion: No more characters." << std::endl;
-                        break;
                     default:
-                    case DELETE_UNKNOWN:
                         std::cout << "Character Deletion: Unknown error." << std::endl;
                         break;
                 }
             } break;
 
-            case SMSG_CHAR_SELECT_RESPONSE:
+            case APMSG_CHAR_SELECT_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case SELECT_OK:
+                    case ERRMSG_OK:
                     {
                         std::cout << "Character selected successfully.";
                         std::cout << std::endl;
@@ -641,31 +610,24 @@ void parsePacket(char *data, int recvLength) {
                         std::cout << (int)msg.readShort() << ", Y:";
                         std::cout << (int)msg.readShort() << ")" << std::endl;
                     } break;
-                    case SELECT_INVALID:
+                    case ERRMSG_INVALID_ARGUMENT:
                         std::cout << "Character Selection: invalid ID."
                         << std::endl;
                         break;
-                    case SELECT_NOLOGIN:
+                    case ERRMSG_NO_LOGIN:
                         std::cout << "Character Selection: Not logged in." << std::endl;
                         break;
-                    case SELECT_NO_CHARACTERS:
-                        std::cout << "Character Selection: No character to select." << std::endl;
-                        break;
-                    case SELECT_NO_MAPS:
-                        std::cout << "Character Selection: Can't load default map for character."
-                        << std::endl;
-                        break;
                     default:
-                    case SELECT_UNKNOWN:
                         std::cout << "Character Selection: Unknown error." << std::endl;
                         break;
                 }
             } break;
 
-            case SMSG_CHAR_LIST_RESPONSE:
+            case APMSG_CHAR_LIST_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case CHAR_LIST_OK:
+                    case ERRMSG_OK:
+                    {
                         unsigned char charNumber;
                         charNumber = msg.readByte();
                         std::cout << "Character List:" << std::endl
@@ -695,29 +657,25 @@ void parsePacket(char *data, int recvLength) {
                             std::cout << "Current Map: " << msg.readString() << " (X:";
                             std::cout << int(msg.readShort()) << ", Y:" << int(msg.readShort()) << ")."
                             << std::endl << std::endl;
-                        } break;
-                    case CHAR_LIST_NOLOGIN:
-                        std::cout << "Character List: Not logged in."
-                        << std::endl;
-                        break;
+                        }
+                    } break;
                     default:
-                    case CHAR_LIST_UNKNOWN:
                         std::cout << "Character List: Unknown error." << std::endl;
                         break;
                 }
             } break;
 
-            case SMSG_SAY:
+            case GPMSG_SAY:
             {
                 std::string who = msg.readString();
                 std::cout << who << " says around:" << std::endl
                 << msg.readString() << std::endl;
             } break;
 
-            case SMSG_ENTER_WORLD_RESPONSE:
+            case APMSG_ENTER_WORLD_RESPONSE:
             {
                 switch (msg.readByte()) {
-                    case ENTER_WORLD_OK:
+                    case ERRMSG_OK:
                     {
                         std::string server = msg.readString();
                         enet_address_set_host(&addressGame, server.c_str());
@@ -727,12 +685,23 @@ void parsePacket(char *data, int recvLength) {
                         connected = false;
                         std::cout << "Connecting to " << server << ':' << addressGame.port << std::endl;
                     }   break;
+                    case ERRMSG_NO_LOGIN:
+                        std::cout << "Enter world: Not logged in." << std::endl;
+                        break;
+                    case ERRMSG_NO_CHARACTER_SELECTED:
+                        std::cout << "Enter world: No character selected." << std::endl;
+                        break;
                     default:
-                        std::cout << "Enter world failed." << std::endl;
+                        std::cout << "Enter world: Unknown error." << std::endl;
+                        break;
                 }
             } break;
 
+            case XXMSG_INVALID:
+                std::cout << "The server does not understand our message." << std::endl;
+                break;
             default:
+                std::cout << "Unknown message received. Id: " << msg.getId() << "." << std::endl;
                 break;
         } // end switch MessageId
 

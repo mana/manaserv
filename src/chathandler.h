@@ -78,11 +78,6 @@ class ChatHandler : public ConnectionHandler
         void sendInChannel(short channelId, MessageOut &);
 
         /**
-         * Tell a list of user they are leaving a channel.
-         */
-        void makeUsersLeaveChannel(short channelId);
-
-        /**
          * Tell a list of user about an event in a chatchannel about a player.
          */
         void warnUsersAboutPlayerEventInChat(short channelId, std::string const &userName, char eventId);

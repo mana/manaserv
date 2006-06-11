@@ -32,6 +32,7 @@
 #include "netcomputer.h"
 #include "packet.h"
 #include "state.h"
+#include "utils/logger.h"
 
 using tmwserv::BeingPtr;
 
@@ -118,8 +119,8 @@ void registerGameClient(std::string const &token, tmwserv::BeingPtr ch)
         computer->setCharacter(ch);
         pendingClients.erase(i);
         MessageOut result;
-        result.writeShort(SMSG_GAMESRV_CONNECT_RESPONSE);
-        result.writeByte(GSRV_CONNECT_OK);
+        result.writeShort(GPMSG_CONNECT_RESPONSE);
+        result.writeByte(ERRMSG_OK);
         computer->send(result.getPacket());
     }
     else
@@ -173,7 +174,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
     MessageOut result;
 
     if (computer.getCharacter().get() == NULL) {
-        if (message.getId() != CMSG_GAMESRV_CONNECT) return;
+        if (message.getId() != PGMSG_CONNECT) return;
         std::string magic_token = message.readString(32);
         GamePendingLogins::iterator i = pendingLogins.find(magic_token);
         if (i == pendingLogins.end())
@@ -187,21 +188,21 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         }
         computer.setCharacter(i->second.character);
         pendingLogins.erase(i);
-        result.writeShort(SMSG_GAMESRV_CONNECT_RESPONSE);
-        result.writeByte(GSRV_CONNECT_OK);
+        result.writeShort(GPMSG_CONNECT_RESPONSE);
+        result.writeByte(ERRMSG_OK);
         computer.send(result.getPacket());
         return;
     }
 
     switch (message.getId())
     {
-        case CMSG_SAY:
+        case PGMSG_SAY:
             {
                 std::string say = message.readString();
                 sayAround(computer, say);
             } break;
 
-        case CMSG_PICKUP:
+        case PGMSG_PICKUP:
             {
                 // add item to inventory (this is too simplistic atm)
                 unsigned int itemId = message.readLong();
@@ -210,33 +211,27 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 // send feedback
                 computer.getCharacter()->addInventory(itemId);
-                result.writeShort(SMSG_PICKUP_RESPONSE);
-                result.writeByte(PICKUP_OK);
+                result.writeShort(GPMSG_PICKUP_RESPONSE);
+                result.writeByte(ERRMSG_OK);
             } break;
 
-        case CMSG_USE_ITEM:
-        case CMSG_USE_OBJECT:
+        case PGMSG_USE_ITEM:
             {
                 unsigned int itemId = message.readLong();
 
-                result.writeShort(SMSG_USE_RESPONSE);
+                result.writeShort(GPMSG_USE_RESPONSE);
 
                 if (computer.getCharacter()->hasItem(itemId)) {
                     // use item
                     // this should execute a script which will do the appropriate action
                     // (the script will determine if the item is 1 use only)
-                    result.writeByte(USE_OK);                    
+                    result.writeByte(ERRMSG_OK);                    
                 } else {
-                    result.writeByte(USE_FAIL);
+                    result.writeByte(ERRMSG_FAILURE);
                 }
             } break;
 
-        case CMSG_TARGET:
-            {
-                // nothing at the moment
-            } break;
-
-        case CMSG_WALK:
+        case PGMSG_WALK:
             {
                 long x = message.readLong();
                 long y = message.readLong();
@@ -248,34 +243,19 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 // no response should be required
             } break;
 
-        case CMSG_START_TRADE:
-            {
-                // nothing at the moment
-            } break;
-
-        case CMSG_START_TALK:
-            {
-                // nothing at the moment
-            } break;
-
-        case CMSG_REQ_TRADE:
-            {
-                // nothing at the moment
-            } break;
-
-        case CMSG_EQUIP:
+        case PGMSG_EQUIP:
             {
                 int itemId = message.readLong();
                 char slot = message.readByte();
 
-                result.writeShort(SMSG_EQUIP_RESPONSE);
+                result.writeShort(GPMSG_EQUIP_RESPONSE);
                 result.writeByte(computer.getCharacter()->equip(itemId, slot) ?
-                                 EQUIP_OK : EQUIP_FAIL);
+                                 ERRMSG_OK : ERRMSG_FAILURE);
             } break;
 
         default:
-            std::cerr << "Warning: GameHandler received message of unkown type"
-                      << " (" << message.getId() << ")" << std::endl;
+            LOG_WARN("Invalid message type", 0);
+            result.writeShort(XXMSG_INVALID);
             break;
     }
 
@@ -287,7 +267,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
 {
     BeingPtr beingPtr = computer.getCharacter();
     MessageOut msg;
-    msg.writeShort(SMSG_SAY);
+    msg.writeShort(GPMSG_SAY);
     msg.writeString(beingPtr->getName());
     msg.writeString(text);
     unsigned speakerMapId = beingPtr->getMapId();

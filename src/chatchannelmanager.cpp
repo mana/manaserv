@@ -47,16 +47,16 @@ ChatChannelManager::registerPublicChannel(const std::string& channelName,
     const std::string& channelAnnouncement,  const std::string& channelPassword)
 {
     short channelId = 1;
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
+    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(),
+         end = mChatChannels.end(); i != end; ++i)
     {
         if ( i->second.getName() == channelName ) return 0;
         // We seek the highest channelId in the public range
-        if ( (channelId <= i->first) && (i->first < (signed)MAX_PRIVATE_CHANNELS_RANGE) )
+        if (channelId <= i->first && i->first < (signed)MAX_PUBLIC_CHANNELS_RANGE)
             channelId = i->first + 1;
-        ++i;
     }
     // Too much channels registered
-    if ( channelId >= (signed)MAX_PRIVATE_CHANNELS_RANGE ) return 0;
+    if (channelId >= (signed)MAX_PUBLIC_CHANNELS_RANGE) return 0;
 
     // Register Channel
     mChatChannels.insert(std::make_pair(channelId,ChatChannel(channelName,
@@ -69,17 +69,17 @@ short
 ChatChannelManager::registerPrivateChannel(const std::string& channelName,
     const std::string& channelAnnouncement,  const std::string& channelPassword)
 {
-    short channelId = MAX_PRIVATE_CHANNELS_RANGE;
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
+    short channelId = MAX_PUBLIC_CHANNELS_RANGE;
+    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(),
+         end = mChatChannels.end(); i != end; ++i)
     {
         if ( i->second.getName() == channelName ) return 0;
         // We seek the highest channelId in the private range
-        if ( (channelId <= i->first) && (i->first >= (signed)MAX_PRIVATE_CHANNELS_RANGE) ) 
+        if (channelId <= i->first) 
             channelId = i->first + 1;
-        ++i;
     }
     // Too much channels registered
-    if ( channelId >= (signed)MAX_PUBLIC_CHANNELS_RANGE ) return 0;
+    if (channelId >= (signed)MAX_PRIVATE_CHANNELS_RANGE) return 0;
 
     // Register Channel
     mChatChannels.insert(std::make_pair(channelId,ChatChannel(channelName,
@@ -89,20 +89,11 @@ ChatChannelManager::registerPrivateChannel(const std::string& channelName,
 
 bool ChatChannelManager::removeChannel(short channelId)
 {
-    for (std::map<short, ChatChannel>::iterator i = mChatChannels.begin(); i != mChatChannels.end();)
-    {
-        if ( i->first == channelId )
-        {
-            // Removing every user from the channel
-            i->second.removeEveryUsersFromChannel();
-            // Erasing the channel now it's empty
-            mChatChannels.erase(i);
-            i++;
-            return true;
-        }
-        ++i;
-    }
-    return false;
+    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
+    if (i == mChatChannels.end()) return false;
+    i->second.removeEveryUsersFromChannel();
+    mChatChannels.erase(i);
+    return true;
 }
 
 

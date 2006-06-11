@@ -28,6 +28,7 @@
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
+#include "packet.h"
 
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
@@ -74,8 +75,8 @@ void registerChatClient(std::string const &token, std::string const &name, int l
         computer->accountLevel = (AccountLevels)level;
         pendingClients.erase(i);
         MessageOut result;
-        result.writeShort(SMSG_CHATSRV_CONNECT_RESPONSE);
-        result.writeByte(CSRV_CONNECT_OK);
+        result.writeShort(CPMSG_CONNECT_RESPONSE);
+        result.writeByte(ERRMSG_OK);
         computer->send(result.getPacket());
     }
     else
@@ -127,9 +128,10 @@ void ChatHandler::process()
 void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 {
     ChatClient &computer = *static_cast< ChatClient * >(comp);
+    MessageOut result;
 
     if (computer.characterName.empty()) {
-        if (message.getId() != CMSG_CHATSRV_CONNECT) return;
+        if (message.getId() != PCMSG_CONNECT) return;
         std::string magic_token = message.readString(32);
         ChatPendingLogins::iterator i = pendingLogins.find(magic_token);
         if (i == pendingLogins.end())
@@ -144,16 +146,15 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         computer.characterName = i->second.character;
         computer.accountLevel = i->second.level;
         pendingLogins.erase(i);
-        MessageOut result;
-        result.writeShort(SMSG_CHATSRV_CONNECT_RESPONSE);
-        result.writeByte(CSRV_CONNECT_OK);
+        result.writeShort(CPMSG_CONNECT_RESPONSE);
+        result.writeByte(ERRMSG_OK);
         computer.send(result.getPacket());
         return;
     }
 
     switch (message.getId())
     {
-        case CMSG_CHAT:
+        case PCMSG_CHAT:
             {
                 // chat to people around area
                 std::string text = message.readString();
@@ -183,7 +184,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
             break;
 
-        case CMSG_ANNOUNCE:
+        case PCMSG_ANNOUNCE:
             {
                 std::string text = message.readString();
                 // If it's slang's free.
@@ -200,7 +201,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
             break;
 
-        case CMSG_PRIVMSG:
+        case PCMSG_PRIVMSG:
             {
                 std::string user = message.readString();
                 std::string text = message.readString();
@@ -218,10 +219,9 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         // Channels handling
         // =================
-        case CMSG_REGISTER_CHANNEL:
+        case PCMSG_REGISTER_CHANNEL:
             {
-                MessageOut result;
-                result.writeShort(SMSG_REGISTER_CHANNEL_RESPONSE);
+                result.writeShort(CPMSG_REGISTER_CHANNEL_RESPONSE);
                 // 0 public, 1 private
                 char channelType = message.readByte();
                 if (!channelType)
@@ -229,9 +229,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     if (computer.accountLevel != AL_ADMIN &&
                         computer.accountLevel != AL_GM)
                     {
-                        result.writeByte(CHATCNL_CREATE_UNSUFFICIENT_RIGHTS);
-                        computer.send(result.getPacket());
-                        return;
+                        result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+                        break;
                     }
                 }
                 std::string channelName = message.readString();
@@ -242,23 +241,20 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (channelName.empty() || channelName.length() > MAX_CHANNEL_NAME ||
                 stringFilter->findDoubleQuotes(channelName))
                 {
-                        result.writeByte(CHATCNL_CREATE_INVALID_NAME);
-                        computer.send(result.getPacket());
-                        return;
+                        result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                        break;
                 }
                 if (channelAnnouncement.length() > MAX_CHANNEL_ANNOUNCEMENT ||
                     stringFilter->findDoubleQuotes(channelAnnouncement))
                 {
-                        result.writeByte(CHATCNL_CREATE_INVALID_ANNOUNCEMENT);
-                        computer.send(result.getPacket());
-                        return;
+                        result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                        break;
                 }
                 if (channelPassword.length() > MAX_CHANNEL_PASSWORD ||
                 stringFilter->findDoubleQuotes(channelPassword))
                 {
-                        result.writeByte(CHATCNL_CREATE_INVALID_PASSWORD);
-                        computer.send(result.getPacket());
-                        return;
+                        result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                        break;
                 }
 
                 // If it's slang's free.
@@ -282,16 +278,14 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                         // to update the password and the announcement in it and also to remove it.
                         chatChannelManager->addUserInChannel(computer.characterName, channelId);
 
-                        result.writeByte(CHATCNL_CREATE_OK);
+                        result.writeByte(ERRMSG_OK);
                         result.writeShort(channelId);
-                        computer.send(result.getPacket());
-                        return;
+                        break;
                     }
                     else
                     {
-                        result.writeByte(CHATCNL_CREATE_UNKNOWN);
-                        computer.send(result.getPacket());
-                        return;
+                        result.writeByte(ERRMSG_FAILURE);
+                        break;
                     }
                 }
                 else
@@ -301,83 +295,56 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
             break;
 
-        case CMSG_UNREGISTER_CHANNEL:
+        case PCMSG_UNREGISTER_CHANNEL:
             {
-                MessageOut result;
-                result.writeShort(SMSG_UNREGISTER_CHANNEL_RESPONSE);
+                result.writeShort(CPMSG_UNREGISTER_CHANNEL_RESPONSE);
 
                 short channelId = message.readShort();
-                if (channelId != 0)
+                if (!chatChannelManager->isChannelRegistered(channelId))
                 {
-                    // Public channels
-                    if (channelId < (signed)MAX_PUBLIC_CHANNELS_RANGE)
+                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                }
+                else if (channelId < (signed)MAX_PUBLIC_CHANNELS_RANGE)
+                { // Public channel
+                    if (computer.accountLevel == AL_ADMIN || computer.accountLevel == AL_GM)
                     {
-                        if (computer.accountLevel != AL_ADMIN &&
-                            computer.accountLevel != AL_GM)
-                        {
-                            result.writeByte(CHATCNL_DEL_UNSUFFICIENT_RIGHTS);
-                        }
+                        warnUsersAboutPlayerEventInChat(channelId, "", CHAT_EVENT_LEAVING_PLAYER);
+                        if (chatChannelManager->removeChannel(channelId))
+                            result.writeByte(ERRMSG_OK);
                         else
-                        { // if the channel actually exist
-                            if (chatChannelManager->isChannelRegistered(channelId))
-                            {
-                                // Make every user quit the channel
-                                makeUsersLeaveChannel(channelId);
-                                if (chatChannelManager->removeChannel(channelId))
-                                    result.writeByte(CHATCNL_DEL_OK);
-                                else
-                                    result.writeByte(CHATCNL_DEL_UNKNOWN);
-                            }
-                            else
-                            { // Couldn't remove channel because it doesn't exist
-                                result.writeByte(CHATCNL_DEL_INVALID_ID);
-                            }
-                        }
-                    }
-                    else if (channelId < (signed)MAX_PRIVATE_CHANNELS_RANGE)
-                    { // Private channels
-                        if (chatChannelManager->isChannelRegistered(channelId))
-                        {
-                            // We first see if the user is the admin (first user) of the channel
-                            std::vector< std::string > const &userList =
-                                chatChannelManager->getUserListInChannel(channelId);
-                            std::vector< std::string >::const_iterator i = userList.begin();
-                            // if it's actually the private channel's admin
-                            if (*i == computer.characterName)
-                            {
-                                // Make every user quit the channel
-                                makeUsersLeaveChannel(channelId);
-                                if (chatChannelManager->removeChannel(channelId))
-                                    result.writeByte(CHATCNL_DEL_OK);
-                                else
-                                    result.writeByte(CHATCNL_DEL_UNKNOWN);
-                            }
-                            else
-                            {
-                                result.writeByte(CHATCNL_DEL_UNSUFFICIENT_RIGHTS);
-                            }
-                        }
-                        else
-                        {
-                            result.writeByte(CHATCNL_DEL_INVALID_ID);
-                        }
+                            result.writeByte(ERRMSG_FAILURE);
                     }
                     else
-                    { // Id too high or too low
-                        result.writeByte(CHATCNL_DEL_INVALID_ID);
+                    {
+                        result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
                     }
                 }
                 else
-                {
-                    result.writeByte(CHATCNL_DEL_INVALID_ID);
+                { // Private channel
+                    // We first see if the user is the admin (first user) of the channel
+                    std::vector< std::string > const &userList =
+                        chatChannelManager->getUserListInChannel(channelId);
+                    std::vector< std::string >::const_iterator i = userList.begin();
+                    // if it's actually the private channel's admin
+                    if (*i == computer.characterName)
+                    {
+                        // Make every user quit the channel
+                        warnUsersAboutPlayerEventInChat(channelId, "", CHAT_EVENT_LEAVING_PLAYER);
+                        if (chatChannelManager->removeChannel(channelId))
+                            result.writeByte(ERRMSG_OK);
+                        else
+                            result.writeByte(ERRMSG_FAILURE);
+                    }
+                    else
+                    {
+                        result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+                    }
                 }
-                computer.send(result.getPacket());
             } break;
 
-        case CMSG_ENTER_CHANNEL:
+        case PCMSG_ENTER_CHANNEL:
         {
-            MessageOut result;
-            result.writeShort(SMSG_ENTER_CHANNEL_RESPONSE);
+            result.writeShort(CPMSG_ENTER_CHANNEL_RESPONSE);
             short channelId = message.readShort();
             std::string givenPassword = message.readString();
             if (channelId != 0 && chatChannelManager->isChannelRegistered(channelId))
@@ -387,14 +354,13 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 {
                     if (channelPassword != givenPassword)
                     {
-                        result.writeByte(CHATCNL_IN_BAD_PASSWORD);
-                        computer.send(result.getPacket());
+                        result.writeByte(ERRMSG_INVALID_ARGUMENT);
                         break;
                     }
                 }
                 if (chatChannelManager->addUserInChannel(computer.characterName, channelId))
                 {
-                    result.writeByte(CHATCNL_IN_OK);
+                    result.writeByte(ERRMSG_OK);
                     // The user entered the channel, now give him the announcement string
                     // and the user list.
                     result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
@@ -405,64 +371,65 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                          i != i_end; ++i) {
                         result.writeString(*i);
                     }
-                    // Send an SMSG_UPDATE_CHANNEL_RESPONSE to warn other clients a user went
+                    // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
                     // in the channel.
                     warnUsersAboutPlayerEventInChat(channelId, computer.characterName,
-                                                    CHATCNL_UPD_NEW_PLAYER);
+                                                    CHAT_EVENT_NEW_PLAYER);
                 }
                 else
                 {
-                    result.writeByte(CHATCNL_IN_UNKNOWN);
+                    result.writeByte(ERRMSG_FAILURE);
                 }
             }
             else
             {
-                result.writeByte(CHATCNL_IN_INVALID_ID);
+                result.writeByte(ERRMSG_INVALID_ARGUMENT);
             }
-            computer.send(result.getPacket());
         }
         break;
 
-        case CMSG_QUIT_CHANNEL:
+        case PCMSG_QUIT_CHANNEL:
         {
-            MessageOut result;
-            result.writeShort(SMSG_QUIT_CHANNEL_RESPONSE);
+            result.writeShort(CPMSG_QUIT_CHANNEL_RESPONSE);
             short channelId = message.readShort();
             if (channelId != 0 && chatChannelManager->isChannelRegistered(channelId))
             {
                 if (chatChannelManager->removeUserFromChannel(computer.characterName, channelId))
                 {
-                    result.writeByte(CHATCNL_OUT_OK);
-                    // Send an SMSG_UPDATE_CHANNEL_RESPONSE to warn other clients a user left
+                    result.writeByte(ERRMSG_OK);
+                    // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user left
                     // the channel.
                     warnUsersAboutPlayerEventInChat(channelId, computer.characterName,
-                                                    CHATCNL_UPD_LEAVING_PLAYER);
+                                                    CHAT_EVENT_LEAVING_PLAYER);
                 }
                 else
                 {
-                    result.writeByte(CHATCNL_OUT_UNKNOWN);
+                    result.writeByte(ERRMSG_FAILURE);
                 }
             }
             else
             {
-                result.writeByte(CHATCNL_OUT_INVALID_ID);
+                result.writeByte(ERRMSG_INVALID_ARGUMENT);
             }
-            computer.send(result.getPacket());
         }
         break;
 
         default:
-            LOG_INFO("Chat: Invalid message type", 2);
+            LOG_WARN("Invalid message type", 0);
+            result.writeShort(XXMSG_INVALID);
             break;
     }
+
+    if (result.getPacket()->length > 0)
+        computer.send(result.getPacket());
 }
 
 void ChatHandler::handleCommand(ChatClient &computer, std::string const &command)
 {
     LOG_INFO("Chat: Received unhandled command: " << command, 2);
     MessageOut result;
-    result.writeShort(SMSG_CHAT);
-    result.writeByte(CHATCMD_UNHANDLED_COMMAND);
+    result.writeShort(CPMSG_ERROR);
+    result.writeByte(CHAT_UNHANDLED_COMMAND);
     computer.send(result.getPacket());
 }
 
@@ -470,7 +437,7 @@ void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
 {
     // We could later count if the player is really often unpolite.
     MessageOut result;
-    result.writeShort(SMSG_CHAT);
+    result.writeShort(CPMSG_ERROR);
     result.writeByte(CHAT_USING_BAD_WORDS); // The Channel
     computer.send(result.getPacket());
 
@@ -485,14 +452,14 @@ void ChatHandler::announce(ChatClient &computer, std::string const &text)
     {
         LOG_INFO("ANNOUNCE: " << text, 0);
         // Send it to every beings.
-        result.writeShort(SMSG_ANNOUNCEMENT);
+        result.writeShort(CPMSG_ANNOUNCEMENT);
         result.writeString(text);
         sendToEveryone(result);
     }
     else
     {
-        result.writeShort(SMSG_CHAT);
-        result.writeByte(CHATCMD_UNSUFFICIENT_RIGHTS);
+        result.writeShort(CPMSG_ERROR);
+        result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
         computer.send(result.getPacket());
         LOG_INFO(computer.characterName <<
             " couldn't make an announcement due to insufficient rights.", 2);
@@ -504,7 +471,7 @@ void ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerNam
     MessageOut result;
     LOG_INFO(computer.characterName << " says to " << playerName << ": " << text, 2);
     // Send it to the being if the being exists
-    result.writeShort(SMSG_PRIVMSG);
+    result.writeShort(CPMSG_PRIVMSG);
     result.writeString(computer.characterName);
     result.writeString(text);
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
@@ -522,31 +489,11 @@ void ChatHandler::sayInChannel(ChatClient &computer, short channel, std::string 
     MessageOut result;
     LOG_INFO(computer.characterName << " says in channel " << channel << ": " << text, 2);
     // Send it to every beings in channel
-    result.writeShort(SMSG_CHAT_CNL);
+    result.writeShort(CPMSG_PUBMSG);
     result.writeShort(channel);
     result.writeString(computer.characterName);
     result.writeString(text);
     sendInChannel(channel, result);
-}
-
-void ChatHandler::makeUsersLeaveChannel(short channelId)
-{
-    MessageOut result;
-    result.writeShort(SMSG_QUIT_CHANNEL_RESPONSE);
-    result.writeByte(CHATCNL_OUT_OK);
-
-    std::vector< std::string > const &users =
-            chatChannelManager->getUserListInChannel(channelId);
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        // If the client is in the channel, send it the 'leave now' packet
-        std::vector< std::string >::const_iterator j_end = users.end(),
-            j = std::find(users.begin(), j_end, static_cast< ChatClient * >(*i)->characterName);
-        if (j != j_end)
-        {
-            (*i)->send(result.getPacket());
-        }
-    }
 }
 
 void ChatHandler::warnUsersAboutPlayerEventInChat(short channelId,
@@ -554,22 +501,11 @@ void ChatHandler::warnUsersAboutPlayerEventInChat(short channelId,
                                                   char eventId)
 {
     MessageOut result;
-    result.writeShort(SMSG_UPDATE_CHANNEL_RESPONSE);
+    result.writeShort(CPMSG_CHANNEL_EVENT);
+    result.writeShort(channelId);
     result.writeByte(eventId);
     result.writeString(userName);
-
-    std::vector< std::string > const &users =
-            chatChannelManager->getUserListInChannel(channelId);
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        // If the client is in the channel, send it the 'eventId' packet
-        std::vector< std::string >::const_iterator j_end = users.end(),
-            j = std::find(users.begin(), j_end, static_cast< ChatClient * >(*i)->characterName);
-        if (j != j_end)
-        {
-            (*i)->send(result.getPacket());
-        }
-    }
+    sendInChannel(channelId, result);
 }
 
 void ChatHandler::sendInChannel(short channelId, MessageOut &msg)

@@ -1,5 +1,13 @@
 2006-05-20  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
+	* src/chatchannelmanager.cpp: Fixed public/private ranges.
+	* src/chathandler.h: Removed useless prototype.
+	* src/defines.h, src/accounthandler.cpp, src/chathandler.cpp,
+	src/gamehandler.cpp, src/client.cpp: Sanitized message packets and
+	errors.
+
+2006-05-20  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
 	* src/chatchannelmanager.cpp, src/chatchannelmanager.h: Removed
 	unwarranted constness. Used binary searches instead of loops.
 	* src/chatchannel.cpp, src/chatchannel.h: Replaced usage of whole Being

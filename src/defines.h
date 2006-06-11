@@ -103,147 +103,108 @@ const unsigned int MAX_CLIENTS  = 1024,
 
 /**
  * Enumerated type for communicated messages
+ * - PAMSG_*: from client to account server
+ * - APMSG_*: from account server to client
+ * - PCMSG_*: from client to chat server
+ * - CPMSG_*: from chat server to client
+ * - PGMSG_*: from client to game server
+ * - GPMSG_*: from game server to client
+ * Components: B byte, W word, D double word, S variable-size string
  */
 enum {
     // Login/Register
-    CMSG_REGISTER                 = 0x0000,
-    CMSG_ENCRYPTED_REGISTER       = 0x0001,
-    SMSG_REGISTER_RESPONSE        = 0x0002,
-    CMSG_UNREGISTER               = 0x0003,
-    SMSG_UNREGISTER_RESPONSE      = 0x0004,
-    CMSG_LOGIN                    = 0x0010,
-    CMSG_ENCRYPTED_LOGIN          = 0x0011,
-    SMSG_LOGIN_RESPONSE           = 0x0012,
-    CMSG_LOGOUT                   = 0x0013,
-    SMSG_LOGOUT_RESPONSE          = 0x0014,
-    CMSG_FORGOT_PASSWORD          = 0x0015,
-    SMSG_FORGOT_PASSWORD_RESPONSE = 0x0016,
-    CMSG_CHAR_CREATE              = 0x0020,
-    SMSG_CHAR_CREATE_RESPONSE     = 0x0021,
-    CMSG_CHAR_DELETE              = 0x0022,
-    SMSG_CHAR_DELETE_RESPONSE     = 0x0023,
-    CMSG_CHAR_LIST                = 0x0024, // this is required after char creation
-    SMSG_CHAR_LIST_RESPONSE       = 0x0025,
-    CMSG_CHAR_SELECT              = 0x0026,
-    SMSG_CHAR_SELECT_RESPONSE     = 0x0027,
-    CMSG_EMAIL_CHANGE             = 0x0030,
-    SMSG_EMAIL_CHANGE_RESPONSE    = 0x0031,
-    CMSG_EMAIL_GET                = 0x0032,
-    SMSG_EMAIL_GET_RESPONSE       = 0x0033,
-    CMSG_PASSWORD_CHANGE          = 0x0034,
-    SMSG_PASSWORD_CHANGE_RESPONSE = 0x0035,
-    CMSG_ENTER_WORLD              = 0x0040,
-    SMSG_ENTER_WORLD_RESPONSE     = 0x0041,
-    CMSG_ENTER_CHAT               = 0x0042,
-    SMSG_ENTER_CHAT_RESPONSE      = 0x0043,
-    CMSG_GAMESRV_CONNECT          = 0x0050,
-    SMSG_GAMESRV_CONNECT_RESPONSE = 0x0051,
-    SMSG_GAMESRV_DISCONNECT       = 0x0052,
-    CMSG_CHATSRV_CONNECT          = 0x0053,
-    SMSG_CHATSRV_CONNECT_RESPONSE = 0x0054,
-    SMSG_CHATSRV_DISCONNECT       = 0x0055,
+    PAMSG_REGISTER                 = 0x0000, // S version, S username, S password, S email
+    APMSG_REGISTER_RESPONSE        = 0x0002, // B error
+    PAMSG_UNREGISTER               = 0x0003, // -
+    APMSG_UNREGISTER_RESPONSE      = 0x0004, // B error
+    PAMSG_LOGIN                    = 0x0010, // S version, S username, S password
+    APMSG_LOGIN_RESPONSE           = 0x0012, // B error
+    PAMSG_LOGOUT                   = 0x0013, // -
+    APMSG_LOGOUT_RESPONSE          = 0x0014, // B error
+    PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, W*6 stats
+    APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
+    PAMSG_CHAR_DELETE              = 0x0022, // B index
+    APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
+    PAMSG_CHAR_LIST                = 0x0024, // -
+    APMSG_CHAR_LIST_RESPONSE       = 0x0025, // B number, { B index, S name, B gender, B hair style, B hair color, B level, W money, W*6 stats, S mapname, W*2 position }*
+    PAMSG_CHAR_SELECT              = 0x0026, // B index
+    APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, S mapname, W*2 position
+    PAMSG_EMAIL_CHANGE             = 0x0030, // S email
+    APMSG_EMAIL_CHANGE_RESPONSE    = 0x0031, // B error
+    PAMSG_EMAIL_GET                = 0x0032, // -
+    APMSG_EMAIL_GET_RESPONSE       = 0x0033, // B error, S email
+    PAMSG_PASSWORD_CHANGE          = 0x0034, // S old password, S new password
+    APMSG_PASSWORD_CHANGE_RESPONSE = 0x0035, // B error
+    PAMSG_ENTER_WORLD              = 0x0040, // -
+    APMSG_ENTER_WORLD_RESPONSE     = 0x0041, // B error, S address, W port, B*32 token
+    PAMSG_ENTER_CHAT               = 0x0042, // -
+    APMSG_ENTER_CHAT_RESPONSE      = 0x0043, // B error, S address, W port, B*32 token
+    PGMSG_CONNECT                  = 0x0050, // B*32 token
+    GPMSG_CONNECT_RESPONSE         = 0x0051, // B error
+    PCMSG_CONNECT                  = 0x0053, // B*32 token
+    CPMSG_CONNECT_RESPONSE         = 0x0054, // B error
 
-    // Objects
-    SMSG_NEW_OBJECT               = 0x0100,
-    SMSG_REMOVE_OBJECT            = 0x0101,
-    SMSG_CHANGE_OBJECT            = 0x0102,
-    CMSG_PICKUP                   = 0x0110,
-    SMSG_PICKUP_RESPONSE          = 0x0111,
-    CMSG_USE_OBJECT               = 0x0120,
-    SMSG_USE_RESPONSE             = 0x0121,
-
-    // Beings
-    SMSG_NEW_BEING                = 0x0200,
-    SMSG_REMOVE_BEING             = 0x0201,
-    SMSG_INVENTORY_UPD            = 0x0210,
-    SMSG_EQUIPMENT_UPD            = 0x0220,
-    SMSG_ATTACK                   = 0x0230,
-    SMSG_PATH                     = 0x0240,
-    CMSG_TARGET                   = 0x0250,
-    CMSG_WALK                     = 0x0260,
-    CMSG_START_TRADE              = 0x0270,
-    CMSG_START_TALK               = 0x0280,
-    CMSG_REQ_TRADE                = 0x0290,
-
-    // Items
-    CMSG_USE_ITEM                 = 0x0300,
-    CMSG_EQUIP                    = 0x0301,
-    SMSG_EQUIP_RESPONSE           = 0x0302,
+    // Game
+    PGMSG_PICKUP                   = 0x0110,
+    GPMSG_PICKUP_RESPONSE          = 0x0111,
+    SMSG_NEW_BEING                 = 0x0200,
+    PGMSG_WALK                     = 0x0260, // L*2 destination
+    PGMSG_SAY                      = 0x02A0, // S text
+    GPMSG_SAY                      = 0x02A1, // S being, S text
+    PGMSG_USE_ITEM                 = 0x0300, // L item id
+    GPMSG_USE_RESPONSE             = 0x0301, // B error
+    PGMSG_EQUIP                    = 0x0302, // L item id, B slot
+    GPMSG_EQUIP_RESPONSE           = 0x0303, // B error
 
     // Chat
-    SMSG_SYSTEM                   = 0x0400,
-    SMSG_CHAT                     = 0x0401,
-    SMSG_ANNOUNCEMENT             = 0x0402,
-    SMSG_PRIVMSG                  = 0x0403,
-    SMSG_CHAT_CNL                 = 0x0404,
-    SMSG_SAY                      = 0x0405,
-    CMSG_CHAT                     = 0x0410,
-    CMSG_ANNOUNCE                 = 0x0411,
-    CMSG_PRIVMSG                  = 0x0412,
-    CMSG_SAY                      = 0x0413,
+    CPMSG_ERROR                    = 0x0401, // B error
+    CPMSG_ANNOUNCEMENT             = 0x0402, // S text
+    CPMSG_PRIVMSG                  = 0x0403, // S user, S text
+    CPMSG_PUBMSG                   = 0x0404, // W channel, S user, S text
+    PCMSG_CHAT                     = 0x0410, // S text, W channel
+    PCMSG_ANNOUNCE                 = 0x0411, // S text
+    PCMSG_PRIVMSG                  = 0x0412, // S user, S text
     // -- Channeling
-    CMSG_REGISTER_CHANNEL            = 0x0413,
-    SMSG_REGISTER_CHANNEL_RESPONSE   = 0x0414,
-    CMSG_UNREGISTER_CHANNEL          = 0x0415,
-    SMSG_UNREGISTER_CHANNEL_RESPONSE = 0x0416,
-    CMSG_UPDATE_CHANNEL              = 0x0417,
-    SMSG_UPDATE_CHANNEL_RESPONSE     = 0x0418,
-    CMSG_ENTER_CHANNEL               = 0x0419,
-    SMSG_ENTER_CHANNEL_RESPONSE      = 0x0420,
-    CMSG_QUIT_CHANNEL                = 0x0421,
-    SMSG_QUIT_CHANNEL_RESPONSE       = 0x0422,
+    PCMSG_REGISTER_CHANNEL            = 0x0413, // B pub/priv, S name, S announcement, S password
+    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0414, // B error
+    PCMSG_UNREGISTER_CHANNEL          = 0x0415, // W channel
+    CPMSG_UNREGISTER_CHANNEL_RESPONSE = 0x0416, // B error
+    CPMSG_CHANNEL_EVENT               = 0x0418, // W channel, B event, S user
+    PCMSG_ENTER_CHANNEL               = 0x0419, // W channel, S password
+    CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0420, // B error
+    PCMSG_QUIT_CHANNEL                = 0x0421, // W channel
+    CPMSG_QUIT_CHANNEL_RESPONSE       = 0x0422, // B error
 
-    // Other
-    SMSG_LOAD_MAP                 = 0x0500
-
-    // NOTE: We will need more messages for in-game control (eg. moving a client to a new map/position etc.). Currently the protocol only caters for the bare basics.
+    XXMSG_INVALID = 0x7FFF
 };
 
-// Login return values
+// Generic return values
+
 enum {
-    LOGIN_OK = 0,
-    LOGIN_INVALID_USERNAME,
-    LOGIN_INVALID_PASSWORD,
-    LOGIN_INVALID_VERSION,
-    LOGIN_SERVER_FULL,
-    LOGIN_ACCOUNT_BANNED,
-    LOGIN_ACCOUNT_REVIEW,
-    LOGIN_ALREADY_LOGGED,
-    LOGIN_UNKNOWN
+    ERRMSG_OK = 0,                      // everything is fine
+    ERRMSG_FAILURE,                     // the action failed
+    ERRMSG_NO_LOGIN,                    // the user is not yet logged
+    ERRMSG_NO_CHARACTER_SELECTED,       // the user needs a character
+    ERRMSG_INSUFFICIENT_RIGHTS,         // the user is not privileged
+    ERRMSG_INVALID_ARGUMENT,            // part of the received message was invalid
 };
 
-// Logout return values
+// Login specific return values
 enum {
-    LOGOUT_OK = 0,
-    LOGOUT_UNSUCCESSFULL
+    LOGIN_INVALID_VERSION = 0x40,       // the user is using an incompatible protocol
+    LOGIN_SERVER_FULL                   // the server is overloaded
 };
 
-// Account register return values
+// Account register specific return values
 enum {
-    REGISTER_OK = 0,
-    REGISTER_INVALID_USERNAME,
-    REGISTER_INVALID_PASSWORD,
-    REGISTER_INVALID_EMAIL,
-    REGISTER_INVALID_VERSION,
-    REGISTER_EXISTS_USERNAME,
-    REGISTER_EXISTS_EMAIL,
-    REGISTER_UNKNOWN
+    REGISTER_INVALID_VERSION = 0x40,    // the user is using an incompatible protocol
+    REGISTER_EXISTS_USERNAME,           // there already is an account with this username
+    REGISTER_EXISTS_EMAIL               // there already is an account with this email address
 };
 
-// Account deletion return values
+// Character creation specific return values
 enum {
-    UNREGISTER_OK = 0,
-    UNREGISTER_INVALID_USERNAME,
-    UNREGISTER_INVALID_PASSWORD,
-    UNREGISTER_INVALID_UNSUFFICIENT_RIGHTS,
-    UNREGISTER_UNKNOWN
-};
-
-// Character creation return values
-enum {
-    CREATE_OK = 0,
-    CREATE_INVALID_NAME,
-    CREATE_INVALID_HAIRSTYLE,
+    CREATE_INVALID_HAIRSTYLE = 0x40,
     CREATE_INVALID_HAIRCOLOR,
     CREATE_INVALID_GENDER,
     CREATE_RAW_STATS_TOO_HIGH,
@@ -251,141 +212,24 @@ enum {
     CREATE_RAW_STATS_INVALID_DIFF,
     CREATE_RAW_STATS_EQUAL_TO_ZERO,
     CREATE_EXISTS_NAME,
-    CREATE_TOO_MUCH_CHARACTERS,
-    CREATE_NOLOGIN,
-    CREATE_UNKNOWN
+    CREATE_TOO_MUCH_CHARACTERS
 };
 
-// Character deletion return values
+// Email change specific return values
 enum {
-    DELETE_OK = 0,
-    DELETE_INVALID_ID,
-    DELETE_NO_MORE_CHARACTERS,
-    DELETE_NOLOGIN,
-    DELETE_UNKNOWN
-};
-
-// Character selection return values
-// (When selecting a new one, you deselect the previous.)
-enum {
-    SELECT_OK = 0,
-    SELECT_INVALID,
-    SELECT_NO_CHARACTERS,
-    SELECT_NOLOGIN,
-    SELECT_NO_MAPS,
-    SELECT_UNKNOWN
-};
-
-// Character's list return values
-enum {
-    CHAR_LIST_OK = 0,
-    CHAR_LIST_NOLOGIN,
-    CHAR_LIST_UNKNOWN
-};
-
-// Email change return values
-enum {
-    EMAILCHG_OK = 0,
-    EMAILCHG_NOLOGIN,
-    EMAILCHG_INVALID,
-    EMAILCHG_EXISTS_EMAIL,
-    EMAILCHG_UNKNOWN
-};
-
-// Get Email return values
-enum {
-    EMAILGET_OK = 0,
-    EMAILGET_NOLOGIN,
-    EMAILGET_UNKNOWN
-};
-
-// Password change return values
-enum {
-    PASSCHG_OK = 0,
-    PASSCHG_NOLOGIN,
-    PASSCHG_INVALID,
-    PASSCHG_MISMATCH,
-    PASSCHG_UNKNOWN
-};
-
-// Enter world return values
-enum {
-    ENTER_WORLD_OK = 0,
-    ENTER_WORLD_NOLOGIN,
-    ENTER_WORLD_NO_CHARACTER_SELECTED
-};
-
-// Enter chat return values
-enum {
-    ENTER_CHAT_OK = 0,
-    ENTER_CHAT_NOLOGIN,
-    ENTER_CHAT_NO_CHARACTER_SELECTED
-};
-
-// Game server connect values
-enum {
-    GSRV_CONNECT_OK = 0
-};
-
-// Chat server connect values
-enum {
-    CSRV_CONNECT_OK = 0
+    EMAILCHG_EXISTS_EMAIL = 0x40
 };
 
 // Chat errors return values
 enum {
-    // CHAT_AROUND = 0,
-    CHAT_NOLOGIN = 1,
-    CHAT_NO_CHARACTER_SELECTED,
-    CHAT_USING_BAD_WORDS,
-    CHATCMD_UNHANDLED_COMMAND,
-    CHATCMD_UNSUFFICIENT_RIGHTS,
-    CHATCMD_UNKNOWN
+    CHAT_USING_BAD_WORDS = 0x40,
+    CHAT_UNHANDLED_COMMAND,
 };
 
-// Chat channels creation return values
+// Chat channels event values
 enum {
-    CHATCNL_CREATE_OK = 0,
-    CHATCNL_CREATE_UNSUFFICIENT_RIGHTS,
-    CHATCNL_CREATE_INVALID_NAME,
-    CHATCNL_CREATE_INVALID_ANNOUNCEMENT,
-    CHATCNL_CREATE_INVALID_PASSWORD,
-    CHATCNL_CREATE_UNKNOWN
-};
-
-// Chat channels update return values
-enum {
-    CHATCNL_UPD_OK = 0,
-    CHATCNL_UPD_UNSUFFICIENT_RIGHTS,
-    CHATCNL_UPD_NEW_PLAYER,
-    CHATCNL_UPD_LEAVING_PLAYER,
-    CHATCNL_UPD_KICKED_PLAYER, // To be implemented.
-    CHATCNL_UPD_CHANGED_ADMIN, // dito
-    CHATCNL_UPD_CHANGED_ANNOUNCEMENT, // dito
-    CHATCNL_UPD_UNKNOWN
-};
-
-// Chat channels deletion return values
-enum {
-    CHATCNL_DEL_OK = 0,
-    CHATCNL_DEL_UNSUFFICIENT_RIGHTS,
-    CHATCNL_DEL_INVALID_ID,
-    CHATCNL_DEL_UNKNOWN
-};
-
-// Chat channels entering return values
-enum {
-    CHATCNL_IN_OK = 0,
-    CHATCNL_IN_INVALID_ID,
-    CHATCNL_IN_BAD_PASSWORD,
-    CHATCNL_IN_UNKNOWN
-};
-
-// Chat channels leaving return values
-enum {
-    CHATCNL_OUT_OK = 0,
-    CHATCNL_OUT_INVALID_ID,
-    CHATCNL_OUT_UNKNOWN
+    CHAT_EVENT_NEW_PLAYER = 0,
+    CHAT_EVENT_LEAVING_PLAYER
 };
 
 // Object type enumeration
@@ -395,25 +239,6 @@ enum {
     OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
     OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
     OBJECT_PLAYER    // A normal being
-};
-
-// Pickup response enumeration
-enum {
-    PICKUP_OK = 0,
-    PICKUP_OVERWEIGHT,
-    PICKUP_FAIL
-};
-
-// Object use response enumeration
-enum {
-    USE_OK = 0,
-    USE_FAIL
-};
-
-// Equip responses
-enum {
-    EQUIP_OK = 0,
-    EQUIP_FAIL
 };
 
 #endif // _TMWSERV_DEFINES_H_
