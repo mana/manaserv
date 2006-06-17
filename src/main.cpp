@@ -99,6 +99,9 @@ ChatChannelManager *chatChannelManager;
 /** Core game message handler */
 GameHandler *gameHandler;
 
+/** Global game state */
+tmwserv::State *gameState;
+
 /**
  * Initializes the server.
  */
@@ -340,7 +343,7 @@ int main(int argc, char *argv[])
     //
 
     // create state machine
-    State &state = State::instance();
+    gameState = new State;
 
     // initialize world timer
     worldTimer.start();
@@ -365,7 +368,7 @@ int main(int argc, char *argv[])
             chatHandler->process();
             gameHandler->process();
             // Update all active objects/beings
-            state.update();
+            gameState->update();
             // Send potentially urgent outgoing messages
             gameHandler->flush();
         }
@@ -374,6 +377,7 @@ int main(int argc, char *argv[])
 
     LOG_INFO("Received: Quit signal, closing down...", 0);
     gameHandler->stopListen();
+    delete gameState;
     chatHandler->stopListen();
     accountHandler->stopListen();
     deinitialize();

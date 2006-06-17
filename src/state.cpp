@@ -33,10 +33,10 @@
 namespace tmwserv
 {
 
-State::State() throw() {
+State::State() {
 }
 
-State::~State() throw() {
+State::~State() {
     for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
          i++) {
@@ -56,88 +56,70 @@ void State::update()
             b->get()->update();
         }
     }
-
-    // notify clients about changes in the game world (only on their maps)
-    // NOTE: Should only send differences in the game state.
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++) {
-        //
-        for (Beings::iterator b = i->second.beings.begin();
-             b != i->second.beings.end();
-             b++) {
-            // send info about other players
-            for (Beings::iterator b2 = i->second.beings.begin();
-                 b2 != i->second.beings.end();
-                 b2++) {
-                if (b != b2) {
-                    MessageOut msg;
-                    msg.writeShort(SMSG_NEW_BEING); // 
-                    msg.writeLong(OBJECT_PLAYER);    // type
-                    msg.writeString(b2->get()->getName()); // Name
-                    msg.writeLong(b2->get()->getX());// x
-                    msg.writeLong(b2->get()->getY());// y
-
-                    gameHandler->sendTo(*b, msg);
-                }
-            }
-        }
-    }
 }
 
-void State::addBeing(BeingPtr beingPtr, const unsigned int mapId) {
-    if (!beingExists(beingPtr)) {
-        if (!mapExists(mapId))
-            if (!loadMap(mapId))
-                return;
-        maps[mapId].beings.push_back(beingPtr);
+void State::addBeing(BeingPtr beingPtr) {
+    unsigned mapId = beingPtr->getMapId();
+    if (!loadMap(mapId)) return;
+    Beings &beings = maps[mapId].beings;
+    beings.push_back(beingPtr);
+    MessageOut msg;
+    msg.writeShort(GPMSG_BEING_ENTER);
+    msg.writeByte(OBJECT_PLAYER);
+    msg.writeLong(0); // ID
+    msg.writeString(beingPtr->getName());
+    msg.writeByte(beingPtr->getHairStyle());
+    msg.writeByte(beingPtr->getHairColor());
+    msg.writeByte(beingPtr->getGender());
+    for (Beings::iterator b = beings.begin(), end = beings.end();
+         b != end; ++b) {
+        gameHandler->sendTo(*b, msg);
     }
 }
 
 void State::removeBeing(BeingPtr beingPtr) {
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++) {
-        for (Beings::iterator b = i->second.beings.begin();
-             b != i->second.beings.end();
-             b++) {
-            if (b->get() == beingPtr.get()) {
-                i->second.beings.erase(b);
-                return;
-            }
-        }
+    unsigned mapId = beingPtr->getMapId();
+    std::map<unsigned, MapComposite>::iterator i = maps.find(mapId);
+    if (i == maps.end()) return;
+    Beings &beings = i->second.beings;
+    MessageOut msg;
+    msg.writeShort(GPMSG_BEING_LEAVE);
+    msg.writeByte(OBJECT_PLAYER);
+    msg.writeLong(0); // ID
+    Beings::iterator j = beings.end();
+    for (Beings::iterator b = beings.begin(), end = beings.end();
+         b != end; ++b) {
+        if (b->get() == beingPtr.get())
+            j = b;
+        else
+            gameHandler->sendTo(*b, msg);
     }
+    if (j != beings.end()) beings.erase(j);
 }
 
-bool State::mapExists(const unsigned int mapId) {
-    std::map<unsigned int, MapComposite>::iterator i = maps.find(mapId);
-    if (i == maps.end())
-        return false;
-    return true;
-}
-
-bool State::beingExists(BeingPtr beingPtr) {
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++) {
-        for (Beings::iterator b = i->second.beings.begin();
-             b != i->second.beings.end();
-             b++) {
-            if (b->get() == beingPtr.get())
-                return true;
-        }
+void State::informBeing(BeingPtr beingPtr) {
+    unsigned mapId = beingPtr->getMapId();
+    std::map<unsigned, MapComposite>::iterator i = maps.find(mapId);
+    if (i == maps.end()) return;
+    Beings &beings = i->second.beings;
+    for (Beings::iterator b = beings.begin(), end = beings.end();
+         b != end; ++b) {
+        MessageOut msg;
+        msg.writeShort(GPMSG_BEING_ENTER);
+        msg.writeByte(OBJECT_PLAYER);
+        msg.writeLong(0); // ID
+        msg.writeString((*b)->getName());
+        msg.writeByte((*b)->getHairStyle());
+        msg.writeByte((*b)->getHairColor());
+        msg.writeByte((*b)->getGender());
+        gameHandler->sendTo(beingPtr, msg);
     }
-    return false;
 }
 
 bool State::loadMap(const unsigned int mapId) {
+    if (maps.find(mapId) != maps.end()) return true;
     Map *tmp = MapManager::instance().loadMap(mapId);
-    if (!tmp)
-    {
-        return false;
-    }
-
-    maps[mapId] = MapComposite();
+    if (!tmp) return false;
     maps[mapId].map = tmp;
 
     // will need to load extra map related resources here also
@@ -145,70 +127,23 @@ bool State::loadMap(const unsigned int mapId) {
     return true; // We let true for testing on beings
 }
 
-void State::addObject(ObjectPtr objectPtr, const unsigned int mapId) {
-    if (!objectExists(objectPtr)) {
-        if (!mapExists(mapId))
-            if (!loadMap(mapId))
-                return;
-        maps[mapId].objects.push_back(objectPtr);
-    }
+void State::addObject(ObjectPtr objectPtr) {
+    unsigned mapId = objectPtr->getMapId();
+    if (!loadMap(mapId)) return;
+    maps[mapId].objects.push_back(objectPtr);
 }
 
 void State::removeObject(ObjectPtr objectPtr) {
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++) {
-        for (Objects::iterator b = i->second.objects.begin();
-             b != i->second.objects.end();
-             b++) {
-            if (b->get() == objectPtr.get()) {
-                i->second.objects.erase(b);
-                return;
-            }
+    unsigned mapId = objectPtr->getMapId();
+    std::map<unsigned, MapComposite>::iterator i = maps.find(mapId);
+    if (i == maps.end()) return;
+    for (Objects::iterator b = i->second.objects.begin(), end = i->second.objects.end();
+         b != end; ++b) {
+        if (b->get() == objectPtr.get()) {
+            i->second.objects.erase(b);
+            return;
         }
     }
-}
-
-bool State::objectExists(const ObjectPtr objectPtr) {
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++) {
-        for (Objects::iterator b = i->second.objects.begin();
-             b != i->second.objects.end();
-             b++) {
-            if (b->get() == objectPtr.get())
-                return true;
-        }
-    }
-    return false;
-}
-
-const unsigned int State::findPlayer(BeingPtr beingPtr) {
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++) {
-        for (Beings::iterator b = i->second.beings.begin();
-             b != i->second.beings.end();
-             b++) {
-            if (b->get() == beingPtr.get())
-                return i->first;
-        }
-    }
-    return 0;
-}
-
-const unsigned int State::findObject(ObjectPtr objectPtr) {
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++) {
-        for (Objects::iterator b = i->second.objects.begin();
-             b != i->second.objects.end();
-             b++) {
-            if (b->get() == objectPtr.get())
-                return i->first;
-        }
-    }
-    return 0;
 }
 
 } // namespace tmwserv

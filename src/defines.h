@@ -147,7 +147,9 @@ enum {
     // Game
     PGMSG_PICKUP                   = 0x0110,
     GPMSG_PICKUP_RESPONSE          = 0x0111,
-    SMSG_NEW_BEING                 = 0x0200,
+    GPMSG_BEING_ENTER              = 0x0200, // B type, L being id
+                                             // player: S name, B hair style, B hair color, B gender
+    GPMSG_BEING_LEAVE              = 0x0201, // B type, L being id
     PGMSG_WALK                     = 0x0260, // L*2 destination
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // S being, S text

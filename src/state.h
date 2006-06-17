@@ -28,10 +28,6 @@
 
 #include "being.h"
 
-#include "utils/singleton.h"
-
-class ConnectionHandler;
-
 namespace tmwserv
 {
     class Map;
@@ -65,19 +61,16 @@ struct MapComposite {
  * State class contains all information/procedures associated with the game
  * world's state.
  */
-class State : public utils::Singleton<State>
+class State
 {
-    friend class utils::Singleton<State>;
-
-    State() throw();
-    ~State() throw();
-
     /**
      * List of maps
      */
     std::map<unsigned int, MapComposite> maps;
 
  public:
+    State();
+    ~State();
 
     /**
      * Update game state (contains core server logic)
@@ -87,7 +80,7 @@ class State : public utils::Singleton<State>
     /**
      * Add being to game world at specified map
      */
-    void addBeing(BeingPtr beingPtr, const unsigned int mapId);
+    void addBeing(BeingPtr beingPtr);
 
     /**
      * Remove being from game world
@@ -95,46 +88,28 @@ class State : public utils::Singleton<State>
     void removeBeing(BeingPtr beingPtr);
 
     /**
-     * Check to see if a map exists in game world
+     * Send game state to given being
      */
-    bool mapExists(const unsigned int mapId);
-
-    /**
-     * Check if being exists in game world already
-     */
-    bool beingExists(BeingPtr beingPtr);
+    void informBeing(BeingPtr beingPtr);
 
     /**
      * Load map into game world
      */
-    bool loadMap(const unsigned int mapId);
+    bool loadMap(unsigned mapId);
 
     /**
      * Add object to the map
      */
-    void addObject(ObjectPtr objectPtr, const unsigned int mapId);
+    void addObject(ObjectPtr objectPtr);
 
     /**
      * Remove an object from the map
      */
     void removeObject(ObjectPtr objectPtr);
-
-    /**
-     * Find out whether an object exists in the game world or not
-     */
-    bool objectExists(const ObjectPtr objectPtr);
-
-    /**
-     * Find map player in world is on
-     */
-    const unsigned int findPlayer(BeingPtr being);
-
-    /**
-     * Find map object in world is on
-     */
-    const unsigned int findObject(ObjectPtr objectPtr);
 };
 
 } // namespace tmwserv
+
+extern tmwserv::State * gameState;
 
 #endif

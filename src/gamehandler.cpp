@@ -84,17 +84,16 @@ GameClient::~GameClient()
 void GameClient::setCharacter(tmwserv::BeingPtr ch)
 {
     assert(mCharacterPtr.get() == NULL);
-    tmwserv::State &state = tmwserv::State::instance();
     mCharacterPtr = ch;
-    state.addBeing(mCharacterPtr, mCharacterPtr->getMapId());
+    gameState->addBeing(mCharacterPtr);
+    gameState->informBeing(mCharacterPtr);
 }
 
 void GameClient::unsetCharacter()
 {
     if (mCharacterPtr.get() == NULL) return;
     // remove being from world
-    tmwserv::State &state = tmwserv::State::instance();
-    state.removeBeing(mCharacterPtr);
+    gameState->removeBeing(mCharacterPtr);
     mCharacterPtr = tmwserv::BeingPtr(NULL);
 }
 

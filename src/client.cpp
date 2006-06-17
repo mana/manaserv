@@ -672,6 +672,32 @@ void parsePacket(char *data, int recvLength) {
                 << msg.readString() << std::endl;
             } break;
 
+            case GPMSG_BEING_LEAVE:
+            {
+                switch (msg.readByte()) {
+                case OBJECT_PLAYER:
+                    std::cout << "Player " << msg.readLong() << " left map." << std::endl;
+                    break;
+                default:
+                    std::cout << "Unknown being left map." << std::endl;
+                }
+            } break;
+
+            case GPMSG_BEING_ENTER:
+            {
+                switch (msg.readByte()) {
+                case OBJECT_PLAYER:
+                    std::cout << "Player " << msg.readLong() << " entered map" << std::endl;
+                    std::cout << "  name: " << msg.readString() << std::endl;
+                    std::cout << "  hair style: " << (int)msg.readByte() << std::endl;
+                    std::cout << "  hair color: " << (int)msg.readByte() << std::endl;
+                    std::cout << "  gender: " << (int)msg.readByte() << std::endl;
+                    break;
+                default:
+                    std::cout << "Unknown being entered map." << std::endl;
+                }
+            } break;
+
             case APMSG_ENTER_WORLD_RESPONSE:
             {
                 switch (msg.readByte()) {
