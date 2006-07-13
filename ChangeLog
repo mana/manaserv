@@ -1,3 +1,7 @@
+2006-07-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.dev: Updated Dev-C++ project file.
+
 2006-06-17  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/state.cpp, src/state.h, src/defines.h, src/client.cpp,
