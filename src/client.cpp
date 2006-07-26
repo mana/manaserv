@@ -446,7 +446,13 @@ void parsePacket(char *data, int recvLength) {
                         std::cout << "Account has " << int(charNumber) << " characters." << std::endl;
                         for (unsigned int i = 0; i < charNumber; i++) {
                             if (i >0) std::cout << ", ";
+                            // Write name, ignore other values
                             std::cout << msg.readString();
+                            msg.readByte();
+                            msg.readByte();
+                            msg.readByte();
+                            msg.readByte();
+                            msg.readShort();
                         }
                         std::cout << "." << std::endl;
                         break;
@@ -636,8 +642,7 @@ void parsePacket(char *data, int recvLength) {
                         << std::endl;
                         char charID;
                         for (unsigned int i = 0; i < charNumber; i++) {
-                            charID = msg.readByte();
-                            std::cout << int(charID) << ". "
+                            std::cout << int(i) << ". "
                             << msg.readString() << ":" << std::endl;
                             std::cout << "Gender: " << int(msg.readByte()) << ", ";
                             std::cout << "Hair Style: " << int(msg.readByte()) << ", ";

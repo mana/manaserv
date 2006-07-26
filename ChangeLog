@@ -1,3 +1,9 @@
+2006-07-26  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* src/accounthandler.cpp, src/client.cpp, tmwserv.cbp: Send some
+	character's infos after a successful login, removed a useless byte,
+	added Code::Blocks project file.
+
 2006-07-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.dev: Updated Dev-C++ project file.

@@ -224,15 +224,15 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 result.writeByte(chars.size());
 
                 LOG_INFO(username << "'s account has " << chars.size() << " character(s).", 1);
-                std::string charNames = "";
                 for (unsigned int i = 0; i < chars.size(); i++)
                 {
                     result.writeString(chars[i]->getName());
-                    if (i >0) charNames += ", ";
-                    charNames += chars[i]->getName();
+                    result.writeByte(unsigned(short(chars[i]->getGender())));
+                    result.writeByte(chars[i]->getHairStyle());
+                    result.writeByte(chars[i]->getHairColor());
+                    result.writeByte(chars[i]->getLevel());
+                    result.writeShort(chars[i]->getMoney());
                 }
-                charNames += ".";
-                LOG_INFO(charNames.c_str(), 1);
             }
             break;
 
@@ -445,7 +445,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                      newPassword.length() > MAX_PASSWORD_LENGTH )
                 {
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(computer.getAccount()->getName() << 
+                    LOG_INFO(computer.getAccount()->getName() <<
                     ": New password too long or too short.", 1);
                 }
                 else if (stringFilter->findDoubleQuotes(newPassword))
@@ -456,14 +456,14 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 else if ( oldPassword != computer.getAccount()->getPassword() )
                 {
                     result.writeByte(ERRMSG_FAILURE);
-                    LOG_INFO(computer.getAccount()->getName() << 
+                    LOG_INFO(computer.getAccount()->getName() <<
                     ": Old password is wrong.", 1);
                 }
                 else
                 {
                     computer.getAccount()->setPassword(newPassword);
                     result.writeByte(ERRMSG_OK);
-                    LOG_INFO(computer.getAccount()->getName() << 
+                    LOG_INFO(computer.getAccount()->getName() <<
                     ": The password was changed.", 1);
                 }
             }
@@ -627,7 +627,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                                     (int)config.getValue("startY", 0));
                 computer.getAccount()->addCharacter(newCharacter);
 
-                LOG_INFO("Character " << name << " was created for " 
+                LOG_INFO("Character " << name << " was created for "
                     << computer.getAccount()->getName() << "'s account.", 1);
 
                 store.flush(); // flush changes
@@ -738,7 +738,6 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 std::string mapName;
                 for (unsigned int i = 0; i < chars.size(); i++)
                 {
-                    result.writeByte(i);
                     result.writeString(chars[i]->getName());
                     if (i > 0) charStats += ", ";
                     charStats += chars[i]->getName();
