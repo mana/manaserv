@@ -3,7 +3,8 @@
 	* tmwserv.cbp, tmwserv.dev: Updated project files.
 	* src/accounthandler.cpp, src/client.cpp: Modified client version to be
 	an int.
-	* 
+	* src/accounthandler.cpp, src/defines.h: Client version is being sent
+	also during registration.
 
 2006-07-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
