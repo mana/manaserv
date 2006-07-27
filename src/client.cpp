@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
                     // Login
                     msg.writeShort(PAMSG_LOGIN);
                     // We send the client version
-                    msg.writeString(PACKAGE_VERSION);
+                    msg.writeLong(0);
                     std::cout << "Account name: ";
                     std::cin >> line;
                     msg.writeString(line);
@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
         // The disconnection attempt didn't succeed yet. Force disconnection.
         enet_peer_reset(&client->peers[0]);
     }
-    
+
     enet_host_destroy(client);
 
     return 0;
@@ -526,7 +526,7 @@ void parsePacket(char *data, int recvLength) {
                         break;
                 }
             } break;
-            
+
             case APMSG_EMAIL_GET_RESPONSE:
             {
                 switch (msg.readByte()) {

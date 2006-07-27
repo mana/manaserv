@@ -161,14 +161,14 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
     {
         case PAMSG_LOGIN:
             {
-                std::string clientVersion = message.readString();
+                unsigned long clientVersion = message.readLong();
                 std::string username = message.readString();
                 std::string password = message.readString();
                 LOG_INFO(username << " is trying to login.", 1);
 
                 result.writeShort(APMSG_LOGIN_RESPONSE);
 
-                if (clientVersion < config.getValue("clientVersion", "0.0.0"))
+                if (clientVersion < config.getValue("clientVersion", 0))
                 {
                     LOG_INFO("Client has an unsufficient version number to login.", 1);
                     result.writeByte(LOGIN_INVALID_VERSION);

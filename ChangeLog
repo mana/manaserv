@@ -1,6 +1,8 @@
 2006-07-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.
+	* src/accounthandler.cpp, src/client.cpp: Modified client version to be
+	an int.
 
 2006-07-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
