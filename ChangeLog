@@ -1,3 +1,7 @@
+2006-07-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.cbp, tmwserv.dev: Updated project files.
+
 2006-07-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/storage.cpp, src/map.cpp, src/dalstorage.h, src/mapmanager.h,
