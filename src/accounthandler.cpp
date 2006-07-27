@@ -252,13 +252,13 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PAMSG_REGISTER:
             {
-                std::string clientVersion = message.readString();
+                unsigned long clientVersion = message.readLong();
                 std::string username = message.readString();
                 std::string password = message.readString();
                 std::string email = message.readString();
                 result.writeShort(APMSG_REGISTER_RESPONSE);
 
-                if (clientVersion < config.getValue("clientVersion", "0.0.0"))
+                if (clientVersion < config.getValue("clientVersion", 0))
                 {
                     LOG_INFO("Client has an unsufficient version number to login.", 1);
                     result.writeByte(REGISTER_INVALID_VERSION);

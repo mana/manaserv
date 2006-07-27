@@ -113,11 +113,11 @@ const unsigned int MAX_CLIENTS  = 1024,
  */
 enum {
     // Login/Register
-    PAMSG_REGISTER                 = 0x0000, // S version, S username, S password, S email
+    PAMSG_REGISTER                 = 0x0000, // L version, S username, S password, S email
     APMSG_REGISTER_RESPONSE        = 0x0002, // B error
     PAMSG_UNREGISTER               = 0x0003, // -
     APMSG_UNREGISTER_RESPONSE      = 0x0004, // B error
-    PAMSG_LOGIN                    = 0x0010, // S version, S username, S password
+    PAMSG_LOGIN                    = 0x0010, // L version, S username, S password
     APMSG_LOGIN_RESPONSE           = 0x0012, // B error
     PAMSG_LOGOUT                   = 0x0013, // -
     APMSG_LOGOUT_RESPONSE          = 0x0014, // B error
