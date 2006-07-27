@@ -27,9 +27,6 @@
 
 #include "being.h"
 
-namespace tmwserv
-{
-
 
 MetaTile::MetaTile():
     whichList(0)
@@ -333,5 +330,3 @@ Map::findPath(int startX, int startY, int destX, int destY)
 
     return path;
 }
-
-} // namespace tmwserv

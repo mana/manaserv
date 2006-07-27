@@ -24,10 +24,6 @@
 
 #include "dalstorage.h"
 
-namespace tmwserv
-{
-
-
 // initialize the static attributes.
 Storage* Storage::mInstance = 0;
 std::string Storage::mName("");
@@ -148,6 +144,3 @@ Storage::getPassword(void) const
 {
     return mPassword;
 }
-
-
-} // namespace tmwserv

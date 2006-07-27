@@ -30,14 +30,14 @@
 ChatChannelManager::ChatChannelManager()
 {
     //Load stored public chat channels from db
-    tmwserv::Storage &store = tmwserv::Storage::instance("tmw");
+    Storage &store = Storage::instance("tmw");
     mChatChannels = store.getChannelList();
 }
 
 
 ChatChannelManager::~ChatChannelManager()
 {
-    tmwserv::Storage &store = tmwserv::Storage::instance("tmw");
+    Storage &store = Storage::instance("tmw");
     store.updateChannels(mChatChannels);
     mChatChannels.clear();
 }

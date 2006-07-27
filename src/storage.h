@@ -31,11 +31,6 @@
 #include "account.h"
 #include "chatchannel.h"
 
-
-namespace tmwserv
-{
-
-
 /**
  * Enumeration type for the account status:
  *
@@ -367,7 +362,7 @@ class Storage
 
     protected:
         Accounts mAccounts; /**< list of accounts in memory */
-        Beings mCharacters; /**< the loaded characters */
+        Players mCharacters; /**< the loaded characters */
         bool mIsOpen;       /**< flag is true if the storage is open */
 
 
@@ -377,9 +372,5 @@ class Storage
         static std::string mUser;     /**< the user name */
         static std::string mPassword; /**< the user password */
 };
-
-
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_STORAGE_H_

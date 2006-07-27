@@ -28,10 +28,6 @@
 
 #include "dal/dataprovider.h"
 
-namespace tmwserv
-{
-
-
 /**
  * A storage class that relies on DAL.
  *
@@ -225,9 +221,5 @@ class DALStorage: public Storage
     private:
         std::auto_ptr<dal::DataProvider> mDb; /**< the data provider */
 };
-
-
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_DALSTORAGE_H_

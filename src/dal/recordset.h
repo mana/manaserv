@@ -26,8 +26,6 @@
 #include <iostream>
 #include <vector>
 
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -198,7 +196,5 @@ class RecordSet
 
 
 } // namespace dal
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_RECORDSET_H_

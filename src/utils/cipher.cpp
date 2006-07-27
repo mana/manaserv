@@ -28,8 +28,6 @@
 #include <openssl/evp.h>
 #include <openssl/md5.h>
 
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -95,4 +93,3 @@ Cipher::toHex(const unsigned char* str,
 
 
 } // namespace utils
-} // namespace tmwserv

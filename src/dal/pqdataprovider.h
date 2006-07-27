@@ -30,9 +30,6 @@
 
 #include "dataprovider.h"
 
-
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -113,7 +110,5 @@ class PqDataProvider: public DataProvider
 
 
 } // namespace dal
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_PQDATAPROVIDER_H_

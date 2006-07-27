@@ -31,9 +31,6 @@
 
 #include "dataprovider.h"
 
-
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -114,7 +111,5 @@ class MySqlDataProvider: public DataProvider
 
 
 } // namespace dal
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_MYSQL_DATA_PROVIDER_H_

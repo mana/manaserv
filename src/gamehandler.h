@@ -39,9 +39,9 @@ class GameHandler: public ConnectionHandler
         void process();
 
         /**
-         * Send message to the given being.
+         * Send message to the given player.
          */
-        void sendTo(tmwserv::BeingPtr beingPtr, MessageOut &msg);
+        void sendTo(PlayerPtr playerPtr, MessageOut &msg);
 
     protected:
         NetComputer *computerConnected(ENetPeer *);
@@ -66,7 +66,7 @@ class GameHandler: public ConnectionHandler
 /**
  * Register future client attempt. Temporary until physical server split.
  */
-void registerGameClient(std::string const &, tmwserv::BeingPtr);
+void registerGameClient(std::string const &, PlayerPtr);
 
 extern GameHandler *gameHandler;
 

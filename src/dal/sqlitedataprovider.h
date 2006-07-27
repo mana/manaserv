@@ -28,9 +28,6 @@
 
 #include "dataprovider.h"
 
-
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -111,7 +108,5 @@ class SqLiteDataProvider: public DataProvider
 
 
 } // namespace dal
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_SQLITE_DATA_PROVIDER_H_

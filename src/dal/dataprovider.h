@@ -29,12 +29,8 @@
 
 #include "recordset.h"
 
-
-namespace tmwserv
-{
 namespace dal
 {
-
 
 /**
  * Enumeration type for the database backends.
@@ -153,7 +149,5 @@ class DataProvider
 
 
 } // namespace dal
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_DATA_PROVIDER_H_

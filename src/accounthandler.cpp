@@ -37,11 +37,6 @@
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 
-using tmwserv::Account;
-using tmwserv::AccountPtr;
-using tmwserv::BeingPtr;
-using tmwserv::Storage;
-
 class AccountClient: public NetComputer
 {
     public:
@@ -73,7 +68,7 @@ class AccountClient: public NetComputer
         /**
          * Set the selected character associated with connection.
          */
-        void setCharacter(BeingPtr ch);
+        void setCharacter(PlayerPtr ch);
 
         /**
          * Deselect the character associated with connection.
@@ -83,14 +78,14 @@ class AccountClient: public NetComputer
         /**
          * Get character associated with the connection
          */
-        BeingPtr getCharacter() { return mCharacterPtr; }
+        PlayerPtr getCharacter() { return mCharacterPtr; }
 
     private:
         /** Account associated with connection */
         AccountPtr mAccountPtr;
 
         /** Selected character */
-        BeingPtr mCharacterPtr;
+        PlayerPtr mCharacterPtr;
 };
 
 AccountClient::AccountClient(AccountHandler *handler, ENetPeer *peer):
@@ -112,7 +107,7 @@ void AccountClient::setAccount(AccountPtr acc)
     mAccountPtr = acc;
 }
 
-void AccountClient::setCharacter(BeingPtr ch)
+void AccountClient::setCharacter(PlayerPtr ch)
 {
     unsetCharacter();
     mCharacterPtr = ch;
@@ -127,7 +122,7 @@ void AccountClient::unsetAccount()
 void AccountClient::unsetCharacter()
 {
     if (mCharacterPtr.get() == NULL) return;
-    mCharacterPtr = BeingPtr(NULL);
+    mCharacterPtr = PlayerPtr(NULL);
 }
 
 NetComputer *AccountHandler::computerConnected(ENetPeer *peer)
@@ -202,7 +197,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 }
 
                 // see if the account exists
-                tmwserv::AccountPtr acc = store.getAccount(username);
+                AccountPtr acc = store.getAccount(username);
 
                 if (!acc.get() || acc->getPassword() != password) {
                     // account doesn't exist -- send error to client
@@ -220,7 +215,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 result.writeByte(ERRMSG_OK);
 
                 // Return information about available characters
-                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                Players &chars = computer.getAccount()->getCharacters();
                 result.writeByte(chars.size());
 
                 LOG_INFO(username << "'s account has " << chars.size() << " character(s).", 1);
@@ -282,7 +277,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 LOG_INFO(username << " is trying to register.", 1);
 
                 // see if the account exists
-                tmwserv::AccountPtr accPtr = store.getAccount(username);
+                AccountPtr accPtr = store.getAccount(username);
                 if ( accPtr.get() ) // Account already exists.
                 {
                     result.writeByte(REGISTER_EXISTS_USERNAME);
@@ -349,7 +344,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 }
 
                 // see if the account exists
-                tmwserv::AccountPtr accPtr = store.getAccount(username);
+                AccountPtr accPtr = store.getAccount(username);
 
                 if (!accPtr.get() || accPtr->getPassword() != password) {
                     LOG_INFO("Account does not exist of bad password for " << username << ".", 1);
@@ -480,7 +475,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 }
 
                 // A player shouldn't have more than 3 characters.
-                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                Players &chars = computer.getAccount()->getCharacters();
                 if (chars.size() >= MAX_OF_CHARACTERS)
                 {
                     result.writeByte(CREATE_TOO_MUCH_CHARACTERS);
@@ -543,20 +538,8 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 // LATER_ON: Add race, face and maybe special attributes.
 
                 // Customization of player's stats...
-                std::vector<unsigned short> rawStats;
-                rawStats.reserve(6);
-                // strength
-                rawStats.push_back((unsigned short)message.readShort());
-                // agility
-                rawStats.push_back((unsigned short)message.readShort());
-                // vitality
-                rawStats.push_back((unsigned short)message.readShort());
-                // intelligence
-                rawStats.push_back((unsigned short)message.readShort());
-                // dexterity
-                rawStats.push_back((unsigned short)message.readShort());
-                // luck
-                rawStats.push_back((unsigned short)message.readShort());
+                RawStatistics rawStats;
+                for (int i = 0; i < NB_RSTAT; ++i) rawStats.stats[i] = message.readShort();
 
                 // We see if the difference between the lowest stat and the highest isn't too
                 // big.
@@ -564,32 +547,16 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 unsigned short highestStat = 0;
                 unsigned int totalStats = 0;
                 bool validNonZeroRawStats = true;
-                for ( std::vector<unsigned short>::iterator i = rawStats.begin(); i != rawStats.end();)
+                for (int i = 0; i < NB_RSTAT; ++i)
                 {
+                    unsigned short stat = rawStats.stats[i];
                     // For good total stat check.
-                    totalStats = totalStats + *i;
+                    totalStats = totalStats + stat;
 
                     // For checking if all stats are at least > 0
-                    if (*i <= 0) validNonZeroRawStats = false;
-                    if (lowestStat != 0)
-                    {
-                        if (lowestStat > *i) lowestStat = *i;
-                    }
-                    else
-                    {
-                        // We take the first value
-                        lowestStat = *i;
-                    }
-                    if (highestStat != 0)
-                    {
-                        if (highestStat < *i) highestStat = *i;
-                    }
-                    else
-                    {
-                        // We take the first value
-                        highestStat = *i;
-                    }
-                    ++i;
+                    if (stat <= 0) validNonZeroRawStats = false;
+                    if (lowestStat == 0 || lowestStat > stat) lowestStat = stat;
+                    if (highestStat == 0 || highestStat < stat) highestStat = stat;
                 }
 
                 if ( totalStats > POINTS_TO_DISTRIBUTES_AT_LVL1 )
@@ -617,11 +584,14 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                     break;
                 }
 
-                // The reserve(6) method allows us to be sure that rawStats[5] will work.
-                tmwserv::RawStatistics stats = {rawStats[0], rawStats[1], rawStats[2],
-                                                rawStats[3], rawStats[4], rawStats[5]};
-                tmwserv::BeingPtr newCharacter(new tmwserv::Being(name, gender, hairStyle, hairColor,
-                                               1 /* level */, 0 /* Money */, stats));
+                PlayerPtr newCharacter(new Player(name));
+                for (int i = 0; i < NB_RSTAT; ++i)
+                    newCharacter->setRawStat(i, rawStats.stats[i]);
+                newCharacter->setMoney(0);
+                newCharacter->setLevel(1);
+                newCharacter->setGender(gender);
+                newCharacter->setHairStyle(hairStyle);
+                newCharacter->setHairColor(hairColor);
                 newCharacter->setMapId((int)config.getValue("defaultMap", 1));
                 newCharacter->setXY((int)config.getValue("startX", 0),
                                     (int)config.getValue("startY", 0));
@@ -648,7 +618,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 unsigned char charNum = message.readByte();
 
-                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                Players &chars = computer.getAccount()->getCharacters();
                 // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
@@ -662,7 +632,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 // it. And SELECT_NO_MAPS error return value when the default map couldn't
                 // be loaded in setCharacter(). Not implemented yet for tests purpose...
                 computer.setCharacter(chars[charNum]);
-                tmwserv::BeingPtr selectedChar = computer.getCharacter();
+                PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
                 std::string mapName = store.getMapNameFromId(selectedChar->getMapId());
                 result.writeString(mapName);
@@ -687,7 +657,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 unsigned char charNum = message.readByte();
 
-                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                Players &chars = computer.getAccount()->getCharacters();
                 // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
@@ -729,7 +699,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 result.writeByte(ERRMSG_OK);
                 // Return information about available characters
-                tmwserv::Beings &chars = computer.getAccount()->getCharacters();
+                Players &chars = computer.getAccount()->getCharacters();
                 result.writeByte(chars.size());
 
                 LOG_INFO(computer.getAccount()->getName() << "'s account has "
@@ -745,13 +715,8 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                     result.writeByte(chars[i]->getHairStyle());
                     result.writeByte(chars[i]->getHairColor());
                     result.writeByte(chars[i]->getLevel());
-                    result.writeShort(chars[i]->getMoney());
-                    result.writeShort(chars[i]->getStrength());
-                    result.writeShort(chars[i]->getAgility());
-                    result.writeShort(chars[i]->getVitality());
-                    result.writeShort(chars[i]->getIntelligence());
-                    result.writeShort(chars[i]->getDexterity());
-                    result.writeShort(chars[i]->getLuck());
+                    for (int j = 0; j < NB_RSTAT; ++j)
+                        result.writeShort(chars[i]->getRawStat(j));
                     mapName = store.getMapNameFromId(chars[i]->getMapId());
                     result.writeString(mapName);
                     result.writeShort(chars[i]->getX());

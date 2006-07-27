@@ -27,9 +27,7 @@
 #include <libxml/tree.h>
 #include <vector>
 
-namespace tmwserv
-{
-    class Map;
+class Map;
 
 
 /**
@@ -107,7 +105,5 @@ class MapReader
 
         static std::vector<Tileset*> tilesets;
 };
-
-} // namespace tmwserv
 
 #endif

@@ -32,10 +32,6 @@
 #include "utils/base64.h"
 #include "utils/logger.h"
 
-namespace tmwserv
-{
-
-
 const unsigned int DEFAULT_TILE_WIDTH = 32;
 const unsigned int DEFAULT_TILE_HEIGHT = 32;
 
@@ -382,5 +378,3 @@ void MapReader::setTileWithGid(Map *map, int x, int y, int layer, int gid)
         map->setWalk(x, y, !set || (gid - set->getFirstGid() == 0));
     }
 }
-
-} // namespace tmwserv

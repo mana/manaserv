@@ -34,8 +34,6 @@
 #include "state.h"
 #include "utils/logger.h"
 
-using tmwserv::BeingPtr;
-
 class GameClient: public NetComputer
 {
     public:
@@ -52,7 +50,7 @@ class GameClient: public NetComputer
         /**
          * Set the selected character associated with connection.
          */
-        void setCharacter(BeingPtr ch);
+        void setCharacter(PlayerPtr ch);
 
         /**
          * Deselect the character associated with connection.
@@ -62,11 +60,11 @@ class GameClient: public NetComputer
         /**
          * Get character associated with the connection.
          */
-        BeingPtr getCharacter() { return mCharacterPtr; }
+        PlayerPtr getCharacter() { return mCharacterPtr; }
 
     private:
         /** Character associated with the conneciton. */
-        BeingPtr mCharacterPtr;
+        PlayerPtr mCharacterPtr;
 };
 
 GameClient::GameClient(GameHandler *handler, ENetPeer *peer):
@@ -81,25 +79,25 @@ GameClient::~GameClient()
 }
 
 
-void GameClient::setCharacter(tmwserv::BeingPtr ch)
+void GameClient::setCharacter(PlayerPtr ch)
 {
     assert(mCharacterPtr.get() == NULL);
     mCharacterPtr = ch;
-    gameState->addBeing(mCharacterPtr);
-    gameState->informBeing(mCharacterPtr);
+    gameState->addObject(ObjectPtr(mCharacterPtr));
+    gameState->informPlayer(mCharacterPtr);
 }
 
 void GameClient::unsetCharacter()
 {
     if (mCharacterPtr.get() == NULL) return;
     // remove being from world
-    gameState->removeBeing(mCharacterPtr);
-    mCharacterPtr = tmwserv::BeingPtr(NULL);
+    gameState->removeObject(ObjectPtr(mCharacterPtr));
+    mCharacterPtr = PlayerPtr(NULL);
 }
 
 struct GamePendingLogin
 {
-    tmwserv::BeingPtr character;
+    PlayerPtr character;
     int timeout;
 };
 
@@ -109,7 +107,7 @@ static GamePendingLogins pendingLogins;
 typedef std::map< std::string, GameClient * > GamePendingClients;
 static GamePendingClients pendingClients;
 
-void registerGameClient(std::string const &token, tmwserv::BeingPtr ch)
+void registerGameClient(std::string const &token, PlayerPtr ch)
 {
     GamePendingClients::iterator i = pendingClients.find(token);
     if (i != pendingClients.end())
@@ -264,7 +262,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
 void GameHandler::sayAround(GameClient &computer, std::string const &text)
 {
-    BeingPtr beingPtr = computer.getCharacter();
+    PlayerPtr beingPtr = computer.getCharacter();
     MessageOut msg;
     msg.writeShort(GPMSG_SAY);
     msg.writeString(beingPtr->getName());
@@ -275,7 +273,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
          i != i_end; ++i)
     {
         // See if the other being is near enough, then send the message
-        tmwserv::Being const *listener = static_cast< GameClient * >(*i)->getCharacter().get();
+        Player const *listener = static_cast< GameClient * >(*i)->getCharacter().get();
         if (!listener || listener->getMapId() != speakerMapId) continue;
         std::pair<unsigned, unsigned> listenerXY = listener->getXY();
         if (abs(listenerXY.first  - speakerXY.first ) > (int)AROUND_AREA_IN_TILES) continue;
@@ -284,7 +282,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
     }
 }
 
-void GameHandler::sendTo(BeingPtr beingPtr, MessageOut &msg)
+void GameHandler::sendTo(PlayerPtr beingPtr, MessageOut &msg)
 {
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
          i != i_end; ++i) {

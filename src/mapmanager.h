@@ -28,9 +28,7 @@
 
 #include "utils/singleton.h"
 
-namespace tmwserv
-{
-    class Map;
+class Map;
 
 
 /**
@@ -79,7 +77,5 @@ class MapManager: public utils::Singleton<MapManager>
         // Hold all the loaded maps.
         std::map<unsigned int, Map *> maps;
 };
-
-} // namespace tmwserv
 
 #endif

@@ -1,3 +1,26 @@
+2006-07-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/storage.cpp, src/map.cpp, src/dalstorage.h, src/mapmanager.h,
+	src/chatchannelmanager.cpp, src/mapreader.cpp, src/mapmanager.cpp,
+	src/dal/dalexcept.h, src/dal/mysqldataprovider.h, src/dal/recordset.h,
+	src/dal/dataproviderfactory.h, src/dal/dataprovider.cpp,
+	src/dal/sqlitedataprovider.cpp, src/dal/dataprovider.h,
+	src/dal/mysqldataprovider.cpp, src/dal/pqdataprovider.h,
+	src/dal/recordset.cpp, src/dal/sqlitedataprovider.h, src/map.h,
+	src/dal/dataproviderfactory.cpp, src/main.cpp, src/mapreader.h,
+	src/utils/singleton.h, src/utils/cipher.cpp, src/utils/logger.cpp,
+	src/utils/cipher.h, src/utils/stringfilter.h, src/utils/logger.h:
+	Removed tmwserv namespace.
+
+	* src/utils/countedptr.h: Removed tmwserv namespace. Added conversion
+	constructor.
+
+	* src/accounthandler.cpp, src/account.cpp, src/object.cpp,
+	src/storage.h, src/dalstorage.cpp, src/account.h, src/object.h,
+	src/gamehandler.h, src/state.cpp, src/being.cpp, src/gamehandler.cpp,
+	src/state.h, src/being.h: Removed tmwserv namespace. Added MovingObject
+	and Player classes. Removed exhaustive statistic accessors.
+
 2006-07-26  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/accounthandler.cpp, src/client.cpp, tmwserv.cbp: Send some

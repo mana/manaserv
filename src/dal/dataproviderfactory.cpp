@@ -33,9 +33,6 @@
 #error "no database backend defined"
 #endif
 
-
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -80,4 +77,3 @@ DataProviderFactory::createDataProvider(void)
 
 
 } // namespace dal
-} // namespace tmwserv

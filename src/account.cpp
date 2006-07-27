@@ -24,10 +24,6 @@
 
 #include "utils/functors.h"
 
-namespace tmwserv
-{
-
-
 /**
  * Constructor with initial account info.
  */
@@ -50,7 +46,7 @@ Account::Account(const std::string& name,
 Account::Account(const std::string& name,
                  const std::string& password,
                  const std::string& email,
-                 const Beings& characters)
+                 const Players& characters)
         : mName(name),
           mPassword(password),
           mEmail(email),
@@ -64,8 +60,7 @@ Account::Account(const std::string& name,
 /**
  * Destructor.
  */
-Account::~Account(void)
-    throw()
+Account::~Account()
 {
     // mCharacters is a list of smart pointers which will take care about
     // deallocating the memory so nothing to deallocate here :)
@@ -157,7 +152,7 @@ Account::getLevel(void) const
  * Set the characters.
  */
 void
-Account::setCharacters(const Beings& characters)
+Account::setCharacters(const Players& characters)
 {
     mCharacters = characters;
 }
@@ -167,7 +162,7 @@ Account::setCharacters(const Beings& characters)
  * Add a new character.
  */
 void
-Account::addCharacter(BeingPtr character)
+Account::addCharacter(PlayerPtr character)
 {
     if (character.get() != 0) {
         mCharacters.push_back(character);
@@ -177,32 +172,23 @@ Account::addCharacter(BeingPtr character)
 /**
  * Remove a character.
  */
-bool
-Account::delCharacter(std::string name)
+bool Account::delCharacter(std::string const &name)
 {
-    Beings::iterator it =
-        std::find_if(mCharacters.begin(),
-                     mCharacters.end(),
-                     std::bind2nd(obj_name_is<BeingPtr>(), name)
-                    );
+    Players::iterator
+        end = mCharacters.end(),
+        it = std::find_if(mCharacters.begin(), end,
+                          std::bind2nd(obj_name_is<PlayerPtr>(), name));
 
-    if (it != mCharacters.end()) {
-        // Exists, delete it.
-        mCharacters.erase(it++);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    if (it == end) return false;
+    mCharacters.erase(it);
+    return true;
 }
 
 
 /**
  * Get all the characters.
  */
-Beings&
-Account::getCharacters(void)
+Players &Account::getCharacters()
 {
     return mCharacters;
 }
@@ -211,21 +197,13 @@ Account::getCharacters(void)
 /**
  * Get a character by name.
  */
-Being*
-Account::getCharacter(const std::string& name)
+PlayerPtr Account::getCharacter(const std::string& name)
 {
-    Beings::iterator it =
-        std::find_if(mCharacters.begin(),
-                     mCharacters.end(),
-                     std::bind2nd(obj_name_is<BeingPtr>(), name)
-                    );
+    Players::iterator
+        end = mCharacters.end(),
+        it = std::find_if(mCharacters.begin(), end,
+                          std::bind2nd(obj_name_is<PlayerPtr>(), name));
 
-    if (it != mCharacters.end()) {
-        return (*it).get();
-    }
-
-    return 0;
+    if (it != end) return *it;
+    return PlayerPtr();
 }
-
-
-} // namespace tmwserv

@@ -27,9 +27,6 @@
 
 #include <string>
 
-
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -191,7 +188,5 @@ class RsColumnHeadersNotSet: public std::exception
 
 
 } // namespace dal
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_DAL_EXCEPT_H_

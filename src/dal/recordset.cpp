@@ -27,8 +27,6 @@
 
 #include "dalexcept.h"
 
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -210,8 +208,6 @@ RecordSet::operator()(const unsigned int row,
 std::ostream&
 operator<<(std::ostream& out, const RecordSet& rhs)
 {
-    using namespace tmwserv::dal;
-
     // print the field names first.
     if (rhs.mHeaders.size() > 0) {
         out << "|";
@@ -244,4 +240,3 @@ operator<<(std::ostream& out, const RecordSet& rhs)
 
 
 } // namespace dal
-} // namespace tmwserv

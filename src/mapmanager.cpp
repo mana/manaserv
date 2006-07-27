@@ -29,10 +29,6 @@
 
 #include "utils/logger.h"
 
-namespace tmwserv
-{
-
-
 MapManager::~MapManager()
     throw()
 {
@@ -100,6 +96,3 @@ MapManager::isLoaded(const unsigned int mapId) const
 {
     return maps.find(mapId) != maps.end();
 }
-
-
-} // namespace tmwserv

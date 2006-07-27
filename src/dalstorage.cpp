@@ -32,10 +32,6 @@
 #include "utils/functors.h"
 #include "utils/logger.h"
 
-namespace tmwserv
-{
-
-
 /**
  * Constructor.
  */
@@ -226,7 +222,7 @@ DALStorage::getAccount(const std::string& userName)
         const RecordSet& charInfo = mDb->execSql(sql);
 
         if (!charInfo.isEmpty()) {
-            Beings beings;
+            Players players;
 
             LOG_INFO(userName << "'s account has " << charInfo.rows()
                 << " character(s) in database.", 1);
@@ -246,48 +242,34 @@ DALStorage::getAccount(const std::string& userName)
             unsigned int charRows = charInfo.rows();
 
             for (unsigned int k = 0; k < charRows; ++k) {
-                RawStatistics stats = {
-                    toUshort(strCharInfo[k][11]), // strength
-                    toUshort(strCharInfo[k][12]), // agility
-                    toUshort(strCharInfo[k][13]), // vitality
-                    toUshort(strCharInfo[k][14]), // intelligence
-                    toUshort(strCharInfo[k][15]), // dexterity
-                    toUshort(strCharInfo[k][16])  // luck
-                };
-
-                BeingPtr being(
-                    new Being(strCharInfo[k][2],                     // name
-                              // while the implicit type conversion from
-                              // a short to an enum is invalid, the explicit
-                              // type cast works :D
-                              (Genders) toUshort(strCharInfo[k][3]), // gender
-                              toUshort(strCharInfo[k][4]),           // hair style
-                              toUshort(strCharInfo[k][5]),           // hair color
-                              toUshort(strCharInfo[k][6]),           // level
-                              toUint(strCharInfo[k][7]),             // money
-                              stats
-                ));
+                PlayerPtr player(new Player(strCharInfo[k][2]));
+                player->setGender((Genders)toUshort(strCharInfo[k][3]));
+                player->setHairStyle(toUshort(strCharInfo[k][4]));
+                player->setHairColor(toUshort(strCharInfo[k][5]));
+                player->setLevel(toUshort(strCharInfo[k][6]));
+                player->setMoney(toUint(strCharInfo[k][7]));
+                player->setXY(toUshort(strCharInfo[k][8]),
+                              toUshort(strCharInfo[k][9]));
+                for (int i = 0; i < NB_RSTAT; ++i)
+                    player->setRawStat(i, toUshort(strCharInfo[k][11 + i]));
 
                 unsigned int mapId = toUint(strCharInfo[k][10]);
                 if ( mapId > 0 )
                 {
-                    being->setMapId(mapId);
+                    player->setMapId(mapId);
                 }
                 else
                 {
                     // Set player to default map and one of the default location
                     // Default map is to be 1, as not found return value will be 0.
-                    being->setMapId((int)config.getValue("defaultMap", 1));
+                    player->setMapId((int)config.getValue("defaultMap", 1));
                 }
 
-                being->setXY(toUshort(strCharInfo[k][8]),
-                             toUshort(strCharInfo[k][9]));
-
-                mCharacters.push_back(being);
-                beings.push_back(being);
+                mCharacters.push_back(player);
+                players.push_back(player);
             } // End of for each characters
 
-            account->setCharacters(beings);
+            account->setCharacters(players);
         } // End if there are characters.
 
         return account;
@@ -738,12 +720,10 @@ DALStorage::_addAccount(const AccountPtr& account)
     (account_it->second).id = toUint(accountInfo(0, 0));
 
     // insert the characters.
-    Beings& characters = account->getCharacters();
+    Players &characters = account->getCharacters();
 
-    Beings::const_iterator it = characters.begin();
-    Beings::const_iterator it_end = characters.end();
+    Players::const_iterator it = characters.begin(), it_end = characters.end();
     for (; it != it_end; ++it) {
-        RawStatistics& stats = (*it)->getRawStatistics();
         std::ostringstream sql3;
         sql3 << "insert into " << CHARACTERS_TBL_NAME
              << " (name, gender, hair_style, hair_color, level, money, x, y, "
@@ -754,17 +734,17 @@ DALStorage::_addAccount(const AccountPtr& account)
              << (*it)->getGender() << ", "
              << (int)(*it)->getHairStyle() << ", "
              << (int)(*it)->getHairColor() << ", "
-             << (*it)->getLevel() << ", "
+             << (int)(*it)->getLevel() << ", "
              << (*it)->getMoney() << ", "
              << (*it)->getX() << ", "
              << (*it)->getY() << ", "
              << (int)(*it)->getMapId() << ", "
-             << stats.strength << ", "
-             << stats.agility << ", "
-             << stats.vitality << ", "
-             << stats.intelligence << ", "
-             << stats.dexterity << ", "
-             << stats.luck
+             << (*it)->getRawStat(STAT_STR) << ", "
+             << (*it)->getRawStat(STAT_AGI) << ", "
+             << (*it)->getRawStat(STAT_VIT) << ", "
+             << (*it)->getRawStat(STAT_INT) << ", "
+             << (*it)->getRawStat(STAT_DEX) << ", "
+             << (*it)->getRawStat(STAT_LUK)
              << ");";
         mDb->execSql(sql3.str());
 
@@ -816,11 +796,10 @@ DALStorage::_updAccount(const AccountPtr& account)
     mDb->execSql(sql1.str());
 
     // get the list of characters that belong to this account.
-    Beings& characters = account->getCharacters();
+    Players &characters = account->getCharacters();
 
     // insert or update the characters.
-    Beings::const_iterator it = characters.begin();
-    Beings::const_iterator it_end = characters.end();
+    Players::const_iterator it = characters.begin(), it_end = characters.end();
     using namespace dal;
 
     for (; it != it_end; ++it) {
@@ -830,8 +809,6 @@ DALStorage::_updAccount(const AccountPtr& account)
         sql2 << "select id from " << CHARACTERS_TBL_NAME
              << " where name = \"" << (*it)->getName() << "\";";
         const RecordSet& charInfo = mDb->execSql(sql2.str());
-
-        RawStatistics& stats = (*it)->getRawStatistics();
 
         std::ostringstream sql3;
         if (charInfo.rows() == 0) {
@@ -849,19 +826,19 @@ DALStorage::_updAccount(const AccountPtr& account)
 #endif
                  << (*it)->getName() << "\", "
                  << (*it)->getGender() << ", "
-                 << (*it)->getHairStyle() << ", "
-                 << (*it)->getHairColor() << ", "
-                 << (*it)->getLevel() << ", "
+                 << (int)(*it)->getHairStyle() << ", "
+                 << (int)(*it)->getHairColor() << ", "
+                 << (int)(*it)->getLevel() << ", "
                  << (*it)->getMoney() << ", "
                  << (*it)->getX() << ", "
                  << (*it)->getY() << ", "
                  << (*it)->getMapId() << ", "
-                 << stats.strength << ", "
-                 << stats.agility << ", "
-                 << stats.vitality << ", "
-                 << stats.intelligence << ", "
-                 << stats.dexterity << ", "
-                 << stats.luck << ");";
+                 << (*it)->getRawStat(STAT_STR) << ", "
+                 << (*it)->getRawStat(STAT_AGI) << ", "
+                 << (*it)->getRawStat(STAT_VIT) << ", "
+                 << (*it)->getRawStat(STAT_INT) << ", "
+                 << (*it)->getRawStat(STAT_DEX) << ", "
+                 << (*it)->getRawStat(STAT_LUK) << ");";
         }
         else {
             sql3 << "update " << CHARACTERS_TBL_NAME
@@ -874,16 +851,16 @@ DALStorage::_updAccount(const AccountPtr& account)
                 << " x = " << (*it)->getX() << ", "
                 << " y = " << (*it)->getY() << ", "
                 << " map_id = " << (*it)->getMapId() << ", "
-                << " str = " << stats.strength << ", "
-                << " agi = " << stats.agility << ", "
-                << " vit = " << stats.vitality << ", "
+                << " str = " << (*it)->getRawStat(STAT_STR) << ", "
+                << " agi = " << (*it)->getRawStat(STAT_AGI) << ", "
+                << " vit = " << (*it)->getRawStat(STAT_VIT) << ", "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-                << " `int` = " << stats.intelligence << ", "
+                << " `int` = " << (*it)->getRawStat(STAT_INT) << ", "
 #else
-                << " int = " << stats.intelligence << ", "
+                << " int = " << (*it)->getRawStat(STAT_INT) << ", "
 #endif
-                << " dex = " << stats.dexterity << ", "
-                << " luck = " << stats.luck
+                << " dex = " << (*it)->getRawStat(STAT_DEX) << ", "
+                << " luck = " << (*it)->getRawStat(STAT_LUK)
                 << " where id = " << charInfo(0, 0) << ";";
         }
         mDb->execSql(sql3.str());
@@ -1038,6 +1015,3 @@ DALStorage::_delAccount(const std::string& userName)
     sql += "';";
     mDb->execSql(sql);
 }
-
-
-} // namespace tmwserv

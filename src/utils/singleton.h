@@ -24,9 +24,6 @@
 #ifndef _TMWSERV_SINGLETON_H_
 #define _TMWSERV_SINGLETON_H_
 
-
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -90,7 +87,5 @@ class Singleton
 
 
 } // namespace utils
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_SINGLETON_H_

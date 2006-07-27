@@ -30,9 +30,6 @@
 #include <windows.h>
 #endif
 
-
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -290,4 +287,3 @@ Logger::getCurrentTime(void)
 
 
 } // namespace utils
-} // namespace tmwserv

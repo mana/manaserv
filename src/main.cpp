@@ -86,7 +86,7 @@ Skill skillTree("base");        /**< Skill tree */
 
 Configuration config;           /**< XML config reader */
 
-tmwserv::utils::StringFilter *stringFilter; /**< Slang's Filter */
+utils::StringFilter *stringFilter; /**< Slang's Filter */
 
 /** Account message handler */
 AccountHandler *accountHandler;
@@ -100,7 +100,7 @@ ChatChannelManager *chatChannelManager;
 GameHandler *gameHandler;
 
 /** Global game state */
-tmwserv::State *gameState;
+State *gameState;
 
 /**
  * Initializes the server.
@@ -143,7 +143,7 @@ void initialize()
 #endif // defined LOG_FILE
 
     // initialize the logger.
-    using namespace tmwserv::utils;
+    using namespace utils;
     Logger::instance().setLogFile(logPath);
 
     // write the messages to both the screen and the log file.
@@ -245,7 +245,7 @@ void deinitialize()
     delete chatChannelManager;
 
     // Get rid of persistent data storage
-    tmwserv::Storage::destroy();
+    Storage::destroy();
 
     PHYSFS_deinit();
 }
@@ -295,7 +295,7 @@ void parseOptions(int argc, char *argv[])
                 // Set Verbosity to level
                 unsigned short verbosityLevel;
                 verbosityLevel = atoi(optarg);
-                tmwserv::utils::Logger::instance().setVerbosity(verbosityLevel);
+                utils::Logger::instance().setVerbosity(verbosityLevel);
                 LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel, 0);
                 break;
             case 'p':

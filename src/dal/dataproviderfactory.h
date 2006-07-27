@@ -23,9 +23,6 @@
 #ifndef _TMWSERV_DATA_PROVIDER_FACTORY_H_
 #define _TMWSERV_DATA_PROVIDER_FACTORY_H_
 
-
-namespace tmwserv
-{
 namespace dal
 {
     class DataProvider;
@@ -79,7 +76,5 @@ class DataProviderFactory
 
 
 } // namespace dal
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_DATA_PROVIDER_FACTORY_H_

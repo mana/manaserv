@@ -24,8 +24,6 @@
 
 #include "dalexcept.h"
 
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -198,4 +196,3 @@ MySqlDataProvider::disconnect(void)
 
 
 } // namespace dal
-} // namespace tmwserv

@@ -29,8 +29,6 @@
 
 class Configuration;
 
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -95,8 +93,7 @@ class StringFilter
 };
 
 } // ::utils
-} // ::tmwserv
 
-extern tmwserv::utils::StringFilter *stringFilter;
+extern utils::StringFilter *stringFilter;
 
 #endif

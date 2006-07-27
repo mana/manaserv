@@ -34,10 +34,6 @@
 
 const unsigned int MAX_EQUIP_SLOTS = 5; /**< Maximum number of equipped slots */
 
-namespace tmwserv
-{
-
-
 struct PATH_NODE {
     /**
      * Constructor.
@@ -48,225 +44,192 @@ struct PATH_NODE {
 };
 
 /**
- * Structure type for the raw statistics of a Being.
+ * Raw statistics of a Player
  */
+
+enum { STAT_STR = 0, STAT_AGI, STAT_VIT, STAT_INT, STAT_DEX, STAT_LUK, NB_RSTAT };
+
+/**
+ * Structure types for the raw statistics of a Player
+ */
+
 struct RawStatistics
 {
-    unsigned short strength;
-    unsigned short agility;
-    unsigned short vitality;
-    unsigned short intelligence;
-    unsigned short dexterity;
-    unsigned short luck;
+    unsigned short stats[NB_RSTAT];
 };
 
+/*
+ * Computed statistics of a Being
+ */
+
+enum { STAT_HEA = 0, STAT_ATT, STAT_DEF, STAT_MAG, STAT_ACC, STAT_SPD, NB_CSTAT };
+
+/**
+ * Structure type for the computed statistics of a Being.
+ */
+struct Statistics
+{
+    unsigned short stats[NB_CSTAT];
+};
 
 /**
  * Generic Being (living object).
  * Used for players & monsters (all animated objects).
  */
-class Being: public Object
+class Being: public MovingObject
 {
     public:
         /**
-         * Constructor.
+         * Proxy constructor.
          */
-        Being(const std::string& name,
-              const Genders gender,
-              const unsigned short hairStyle,
-              const unsigned short hairColor,
-              const unsigned short level,
-              const unsigned int money,
-              const RawStatistics& stats);
+        Being(int type)
+          : MovingObject(type)
+        {}
 
         /**
-         * Destructor.
+         * Sets a computed statistic.
+         *
+         * @param numStat the statistic number.
+         * @param value the new value.
          */
-        ~Being(void)
-            throw();
+        void setStat(int numStat, unsigned short value)
+        { mStats.stats[numStat] = value; }
+
+        /**
+         * Gets a computed statistic.
+         *
+         * @param numStat the statistic number.
+         * @return the statistic value.
+         */
+        unsigned short getStat(int numStat)
+        { return mStats.stats[numStat]; }
+
+    private:
+        Being(Being const &rhs);
+        Being &operator=(Being const &rhs);
+
+        Statistics mStats; /**< stats modifiers or computed stats */
+};
+
+class Player: public Being
+{
+    public:
+
+        Player(std::string const &name)
+          : Being(OBJECT_PLAYER),
+            mName(name)
+        {}
 
         /**
          * Gets the name.
          *
          * @return the name.
          */
-        const std::string&
-        getName(void) const;
+        std::string const &getName() const
+        { return mName; }
 
         /**
-         * Gets the hair Style.
+         * Sets the hair style.
          *
-         * @return the Hair style value.
+         * @param style the new hair style.
          */
-        unsigned short
-        getHairStyle(void) const;
+        void setHairStyle(unsigned char style)
+        { mHairStyle = style; }
 
         /**
-         * Gets the Hair Color.
+         * Gets the hair style.
          *
-         * @return the Hair Color value.
+         * @return the hair style value.
          */
-        unsigned short
-        getHairColor(void) const;
+        unsigned char getHairStyle() const
+        { return mHairStyle; }
+
+        /**
+         * Sets the hair color.
+         *
+         * @param color the new hair color.
+         */
+        void setHairColor(unsigned char color)
+        { mHairColor = color; }
+
+        /**
+         * Gets the hair color.
+         *
+         * @return the hair color value.
+         */
+        unsigned char getHairColor() const
+        { return mHairColor; }
+
+        /**
+         * Sets the gender.
+         *
+         * @param gender the new gender.
+         */
+        void setGender(Genders gender)
+        { mGender = gender; }
 
         /**
          * Gets the gender.
          *
          * @return the gender.
          */
-        Genders
-        getGender(void) const;
-
+        Genders getGender() const
+        { return mGender; }
 
         /**
          * Sets the level.
          *
          * @param level the new level.
          */
-        void
-        setLevel(const unsigned short level);
+        void setLevel(unsigned char level)
+        { mLevel = level; }
 
         /**
          * Gets the level.
          *
          * @return the level.
          */
-        unsigned short
-        getLevel(void) const;
+        unsigned char getLevel() const
+        { return mLevel; }
 
         /**
          * Sets the money.
          *
          * @param amount the new amount.
          */
-        void
-        setMoney(const unsigned int amount);
+        void setMoney(unsigned int amount)
+        { mMoney = amount; }
 
         /**
          * Gets the amount of money.
          *
          * @return the amount of money.
          */
-        unsigned int
-        getMoney(void) const;
+        unsigned int getMoney() const
+        { return mMoney; }
 
         /**
-         * Sets the strength.
+         * Sets a raw statistic.
          *
-         * @param strength the new strength.
+         * @param numStat the statistic number.
+         * @param value the new value.
          */
-        void
-        setStrength(const unsigned short strength);
+        void setRawStat(int numStat, unsigned short value)
+        { mRawStats.stats[numStat] = value; }
 
         /**
-         * Gets the strength.
+         * Gets a raw statistic.
          *
-         * @return the strength.
+         * @param numStat the statistic number.
+         * @return the statistic value.
          */
-        unsigned short
-        getStrength(void) const;
-
-        /**
-         * Sets the agility.
-         *
-         * @param agility the new agility.
-         */
-        void
-        setAgility(const unsigned short agility);
-
-        /**
-         * Gets the agility.
-         *
-         * @return the agility.
-         */
-        unsigned short
-        getAgility(void) const;
-
-        /**
-         * Sets the vitality.
-         *
-         * @param vitality the new vitality.
-         */
-        void
-        setVitality(const unsigned short vitality);
-
-        /**
-         * Gets the vitality.
-         *
-         * @return the vitality.
-         */
-        unsigned short
-        getVitality(void) const;
-
-        /**
-         * Sets the intelligence.
-         *
-         * @param intelligence the new intelligence.
-         */
-        void
-        setIntelligence(const unsigned short intelligence);
-
-        /**
-         * Gets the intelligence.
-         *
-         * @return the intelligence.
-         */
-        unsigned short
-        getIntelligence(void) const;
-
-        /**
-         * Sets the dexterity.
-         *
-         * @param dexterity the new dexterity.
-         */
-        void
-        setDexterity(const unsigned short dexterity);
-
-        /**
-         * Gets the dexterity.
-         *
-         * @return the dexterity.
-         */
-        unsigned short
-        getDexterity(void) const;
-
-        /**
-         * Sets the luck.
-         *
-         * @param luck the new luck.
-         */
-        void
-        setLuck(const unsigned short luck);
-
-        /**
-         * Gets the luck.
-         *
-         * @return the luck.
-         */
-        unsigned short
-        getLuck(void) const;
-
-        /**
-         * Sets the raw statistics.
-         *
-         * @param stats the new raw statistics.
-         */
-        void
-        setRawStatistics(const RawStatistics& stats);
-
-        /**
-         * Gets the raw statistics.
-         *
-         * @return the raw statistics.
-         */
-        RawStatistics&
-        getRawStatistics(void);
+        unsigned short getRawStat(int numStat)
+        { return mRawStats.stats[numStat]; }
 
         /**
          * Updates the internal status.
          */
-        void
-        update(void);
+        void update();
 
         /**
          * Sets inventory.
@@ -315,43 +278,39 @@ class Being: public Object
         unequip(unsigned char slot);
 
     private:
-        /**
-         * Copy constructor.
-         */
-        Being(const Being& rhs);
-
-        /**
-         * Assignment operator.
-         */
-        Being&
-        operator=(const Being& rhs);
+        Player(Player const &);
+        Player &operator=(Player const &);
 
         std::string mName;       /**< name of the being */
         Genders mGender;         /**< gender of the being */
-        unsigned short mHairStyle;/**< Hair Style of the being */
-        unsigned short mHairColor;/**< Hair Color of the being */
-        unsigned short mLevel;   /**< level of the being */
+        unsigned char mHairStyle;/**< Hair Style of the being */
+        unsigned char mHairColor;/**< Hair Color of the being */
+        unsigned char mLevel;    /**< level of the being */
         unsigned int mMoney;     /**< wealth of the being */
         RawStatistics mRawStats; /**< raw stats of the being */
 
         std::vector<unsigned int> inventory;    /**< Player inventory */
         unsigned int equipment[MAX_EQUIP_SLOTS]; /**< Equipped item ID's (from inventory) */
-};
-
+}; 
 
 /**
  * Type definition for a smart pointer to Being.
  */
 typedef utils::CountedPtr<Being> BeingPtr;
 
-
 /**
  * Type definition for a list of Beings.
  */
 typedef std::vector<BeingPtr> Beings;
 
+/**
+ * Type definition for a smart pointer to Player.
+ */
+typedef utils::CountedPtr<Player> PlayerPtr;
 
-} // namespace tmwserv
-
+/**
+ * Type definition for a list of Players.
+ */
+typedef std::vector<PlayerPtr> Players;
 
 #endif // _TMWSERV_BEING_H_

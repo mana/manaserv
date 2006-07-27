@@ -27,8 +27,6 @@
 
 #include "dalexcept.h"
 
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -199,4 +197,3 @@ SqLiteDataProvider::disconnect(void)
 
 
 } // namespace dal
-} // namespace tmwserv

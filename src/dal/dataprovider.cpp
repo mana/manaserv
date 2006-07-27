@@ -23,9 +23,6 @@
 
 #include "dataprovider.h"
 
-
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -78,4 +75,3 @@ DataProvider::getDbName(void)
 
 
 } // namespace dal
-} // namespace tmwserv

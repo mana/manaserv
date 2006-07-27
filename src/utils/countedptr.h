@@ -24,9 +24,6 @@
 #ifndef _TMWSERV_COUNTED_PTR_H_
 #define _TMWSERV_COUNTED_PTR_H_
 
-
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -84,6 +81,17 @@ class CountedPtr
             ++*count;
         }
 
+        /**
+         * Copy pointer with static cast (one more owner).
+         */
+        template <typename U>
+        explicit CountedPtr(const CountedPtr<U>& p)
+            throw()
+                : ptr(static_cast<T*>(p.ptr)),
+                  count(p.count)
+        {
+            ++*count;
+        }
 
         /**
          * Assignment (unshare old and share new value).
@@ -101,7 +109,6 @@ class CountedPtr
 
             return *this;
         }
-
 
         /**
          * Access the value to which the pointer refers.
@@ -149,15 +156,12 @@ class CountedPtr
             }
         }
 
-
-    private:
         T* ptr;      /**< pointer to the value */
         long* count; /**< shared number of owners */
+
+        template<typename U> friend class CountedPtr;
 };
 
-
 } // namespace utils
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_COUNTED_PTR_H_

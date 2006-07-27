@@ -27,29 +27,8 @@
 #include <utility>
 #include <vector>
 
+#include "defines.h"
 #include "utils/countedptr.h"
-
-namespace tmwserv
-{
-
-/**
- * Structure type for the statistics.
- *
- * Notes:
- *     - the structure can be used to define stats modifiers (i.e. how an
- *       object would modify the stats of a being when it is equipped) or
- *       computed stats of a being.
- *     - the attributes are not unsigned to allow negative values.
- */
-struct Statistics
-{
-    int health;
-    int attack;
-    int defense;
-    int magic;
-    int accuracy;
-    int speed;
-};
 
 /**
  * Generic in-game object definition.
@@ -59,54 +38,57 @@ class Object
 {
     public:
         /**
-         * Default constructor.
+         * Constructor.
          */
-        Object(void);
-
+        Object(int type)
+          : mType(type),
+            mNeedUpdate(false)
+        {}
 
         /**
-         * Destructor.
+         * Empty virtual destructor.
          */
-        virtual
-        ~Object(void)
-            throw();
+        virtual ~Object() {}
 
+        /**
+         * Get type.
+         *
+         * @return the type.
+         */
+        unsigned int getType() const
+        { return mType; }
 
         /**
          * Set the x coordinate.
          *
          * @param x the new x coordinate.
          */
-        void
-        setX(unsigned int x);
-
+        void setX(unsigned int x)
+        { mX = x; }
 
         /**
          * Get the x coordinate.
          *
          * @return the x coordinate.
          */
-        unsigned int
-        getX(void) const;
-
+        unsigned int getX() const
+        { return mX; }
 
         /**
          * Set the y coordinate.
          *
          * @param y the new y coordinate.
          */
-        void
-        setY(unsigned int y);
-
+        void setY(unsigned int y)
+        { mY = y; }
 
         /**
          * Get the y coordinate.
          *
          * @return the y coordinate.
          */
-        unsigned int
-        getY(void) const;
-
+        unsigned int getY() const
+        { return mY; }
 
         /**
          * Set the coordinates.
@@ -114,67 +96,59 @@ class Object
          * @param x the x coordinate.
          * @param y the y coordinate.
          */
-        void
-        setXY(unsigned int x, unsigned int y);
-
+        void setXY(unsigned int x, unsigned int y)
+        { mX = x; mY = y; }
 
         /**
          * Get the coordinates.
          *
          * @return the coordinates as a pair.
          */
-        std::pair<unsigned int, unsigned int>
-        getXY(void) const;
-
-
-        /**
-         * Set the statistics.
-         *
-         * @param stats the statistics.
-         */
-        void
-        setStatistics(const Statistics& stats);
-
-
-        /**
-         * Get the statistics.
-         *
-         * @return the statistics.
-         */
-        Statistics&
-        getStatistics(void);
-
+        std::pair<unsigned int, unsigned int> getXY() const
+        { return std::make_pair(mX, mY); }
 
         /**
          * Update the internal status.
          */
         virtual void
-        update(void) = 0;
+        update() = 0;
 
         /**
          * Get map name where being is
          *
          * @return Name of map being is located.
          */
-        unsigned int
-        getMapId() const;
+        unsigned int getMapId() const
+        { return mMapId; }
 
         /**
          * Set map being is located
          */
-        void
-        setMapId(const unsigned int mapId);
-
-    protected:
-        Statistics mStats; /**< stats modifiers or computed stats */
-        bool mNeedUpdate;  /**< update() must be invoked if true */
-
+        void setMapId(unsigned int mapId)
+        { mMapId = mapId; }
 
     private:
+        int mType; /**< Object type */
         unsigned int mX; /**< x coordinate */
         unsigned int mY; /**< y coordinate */
-
         unsigned int mMapId;  /**< id of the map being is on */
+
+    protected:
+        bool mNeedUpdate;  /**< update() must be invoked if true */
+};
+
+/**
+ * Base class for in-game moving objects.
+ */
+class MovingObject: public Object
+{
+    public:
+        /**
+         * Proxy constructor.
+         */
+        MovingObject(int type)
+          : Object(type)
+        {}
 };
 
 /**
@@ -187,8 +161,5 @@ typedef utils::CountedPtr<Object> ObjectPtr;
  * Type definition for a list of Objects.
  */
 typedef std::vector<ObjectPtr> Objects;
-
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_OBJECT_H_

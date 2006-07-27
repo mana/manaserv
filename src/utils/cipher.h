@@ -28,9 +28,6 @@
 
 #include "singleton.h"
 
-
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -108,7 +105,5 @@ class Cipher: public Singleton<Cipher>
 
 
 } // namespace utils
-} // namespace tmwserv
-
 
 #endif // _TMWSERV_CIPHER_H_

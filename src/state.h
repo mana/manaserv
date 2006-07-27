@@ -28,9 +28,7 @@
 
 #include "being.h"
 
-namespace tmwserv
-{
-    class Map;
+class Map;
 
 /**
  * Combined map/entity structure
@@ -47,14 +45,14 @@ struct MapComposite {
     Map *map;
 
     /**
-     * Beings located on the map
-     */
-    Beings beings;
-
-    /**
-     * Items located on the map
+     * Objects (items, players, monsters, etc) located on the map
      */
     Objects objects;
+
+    /**
+     * Players located on the map
+     */
+    Players players;
 };
 
 /**
@@ -78,19 +76,9 @@ class State
     void update();
 
     /**
-     * Add being to game world at specified map
+     * Send game state to given player
      */
-    void addBeing(BeingPtr beingPtr);
-
-    /**
-     * Remove being from game world
-     */
-    void removeBeing(BeingPtr beingPtr);
-
-    /**
-     * Send game state to given being
-     */
-    void informBeing(BeingPtr beingPtr);
+    void informPlayer(PlayerPtr playerPtr);
 
     /**
      * Load map into game world
@@ -108,8 +96,6 @@ class State
     void removeObject(ObjectPtr objectPtr);
 };
 
-} // namespace tmwserv
-
-extern tmwserv::State * gameState;
+extern State *gameState;
 
 #endif

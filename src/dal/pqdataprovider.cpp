@@ -23,9 +23,6 @@
 
 #include "pqdataprovider.h"
 
-
-namespace tmwserv
-{
 namespace dal
 {
 
@@ -165,4 +162,3 @@ PqDataProvider::disconnect(void)
 
 
 } // namespace dal
-} // namespace tmwserv

@@ -28,10 +28,6 @@
 #include <map>
 #include <string>
 
-namespace tmwserv
-{
-
-
 struct PATH_NODE;
 
 /**
@@ -189,7 +185,5 @@ class Map
         // Pathfinding members
         int onClosedList, onOpenList;
 };
-
-} // namespace tmwserv
 
 #endif

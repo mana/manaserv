@@ -27,8 +27,6 @@
 #include "../configuration.h"
 #include "../defines.h"
 
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -129,4 +127,3 @@ bool StringFilter::findDoubleQuotes(const std::string& text)
 }
 
 } // ::utils
-} // ::tmwserv

@@ -30,10 +30,6 @@
 #include "being.h"
 
 
-namespace tmwserv
-{
-
-
 /**
  * Notes:
  *     - change from the previous implementation: this class does not encrypt
@@ -76,14 +72,13 @@ class Account
         Account(const std::string& name,
                 const std::string& password,
                 const std::string& email,
-                const Beings& characters);
+                const Players& characters);
 
 
         /**
          * Destructor.
          */
-        ~Account(void)
-            throw();
+        ~Account();
 
 
         /**
@@ -101,7 +96,7 @@ class Account
          * @return the user name.
          */
         const std::string&
-        getName(void) const;
+        getName() const;
 
 
         /**
@@ -155,7 +150,7 @@ class Account
          * @return the account level.
          */
         AccountLevels
-        getLevel(void) const;
+        getLevel() const;
 
 
         /**
@@ -164,7 +159,7 @@ class Account
          * @param characters a list of characters.
          */
         void
-        setCharacters(const Beings& characters);
+        setCharacters(const Players& characters);
 
 
         /**
@@ -173,7 +168,7 @@ class Account
          * @param character the new character.
          */
         void
-        addCharacter(BeingPtr character);
+        addCharacter(PlayerPtr character);
 
         /**
          * Remove a character.
@@ -181,7 +176,7 @@ class Account
          * @param name The character's name to delete.
          */
         bool
-        delCharacter(std::string name);
+        delCharacter(std::string const &name);
 
 
         /**
@@ -189,44 +184,29 @@ class Account
          *
          * @return all the characters.
          */
-        Beings&
-        getCharacters(void);
+        Players&
+        getCharacters();
 
         /**
          * Get a character by name.
          *
          * @return the character if found, NULL otherwise.
          */
-        Being*
+        PlayerPtr
         getCharacter(const std::string& name);
 
 
     private:
-        /**
-         * Default constructor.
-         */
-        Account(void)
-            throw();
-
-
-        /**
-         * Copy constructor.
-         */
-        Account(const Account& rhs);
-
-
-        /**
-         * Assignment operator.
-         */
-        Account&
-        operator=(const Account& rhs);
+        Account();
+        Account(Account const &rhs);
+        Account &operator=(Account const &rhs);
 
 
     private:
         std::string mName;     /**< user name */
         std::string mPassword; /**< user password (encrypted) */
         std::string mEmail;    /**< user email address */
-        Beings mCharacters;    /**< player data */
+        Players mCharacters;   /**< player data */
         AccountLevels mLevel;  /**< account level */
 };
 
@@ -235,9 +215,6 @@ class Account
  * Type definition for a smart pointer to Account.
  */
 typedef utils::CountedPtr<Account> AccountPtr;
-
-
-} // namespace tmwserv
 
 
 #endif // _TMWSERV_ACCOUNT_H_
