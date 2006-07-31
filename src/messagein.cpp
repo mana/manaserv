@@ -97,16 +97,17 @@ std::string MessageIn::readString(int length)
             length = readShort();
         }
 
-        // Make sure the string isn't erroneus
+        // Make sure the string isn't erroneous
         if (length < 0 || mPos + length > mPacket->length) {
             mPos = mPacket->length + 1;
             return "";
         }
 
         // Read the string
-        char const *stringBeg = mPacket->data + mPos,
-                   *stringEnd = (char const *)memchr(stringBeg, '\0', length);
-        std::string readString(stringBeg, stringEnd ? stringEnd - stringBeg : length);
+        char const *stringBeg = mPacket->data + mPos;
+        char const *stringEnd = (char const *)memchr(stringBeg, '\0', length);
+        std::string readString(stringBeg,
+                               stringEnd ? stringEnd - stringBeg : length);
         mPos += length;
         return readString;
     }

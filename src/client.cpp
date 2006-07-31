@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
                     // Register
                     msg.writeShort(PAMSG_REGISTER);
                     // We send the client version
-                    msg.writeString(PACKAGE_VERSION);
+                    msg.writeLong(0);
                     std::cout << "Account name: ";
                     std::cin >> line;
                     msg.writeString(line);
@@ -336,8 +336,7 @@ int main(int argc, char *argv[])
             // Send prepared message
             if (!exit && connected) {
                 ENetPacket *packet = enet_packet_create(
-                        msg.getData(),
-                        msg.getDataSize() + 1,
+                        msg.getData(), msg.getDataSize(),
                         ENET_PACKET_FLAG_RELIABLE);
                 // Send the packet to the peer over channel id 0.
                 enet_peer_send(msgDestination == 0 ? peerAccount : peerGame, 0, packet);
@@ -640,7 +639,6 @@ void parsePacket(char *data, int recvLength) {
                         << "---------------" << std::endl;
                         std::cout << int(charNumber) << " character(s) in the account."
                         << std::endl;
-                        char charID;
                         for (unsigned int i = 0; i < charNumber; i++) {
                             std::cout << int(i) << ". "
                             << msg.readString() << ":" << std::endl;

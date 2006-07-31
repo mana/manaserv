@@ -1,3 +1,8 @@
+2006-07-31  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/client.cpp, src/netcomputer.cpp: Fixed registering (send version
+	as integer) and corrected the off by one packed size.
+
 2006-07-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.

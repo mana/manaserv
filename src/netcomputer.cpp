@@ -43,8 +43,7 @@ void NetComputer::disconnect(const std::string &reason)
 void NetComputer::send(const Packet *p)
 {
     // Create a reliable packet.
-    ENetPacket *packet = enet_packet_create(p->data,
-                                            p->length + 1,
+    ENetPacket *packet = enet_packet_create(p->data, p->length,
                                             ENET_PACKET_FLAG_RELIABLE);
 
     // Send the packet to the peer over channel id 0.
