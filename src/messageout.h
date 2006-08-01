@@ -40,6 +40,11 @@ class MessageOut
         MessageOut();
 
         /**
+         * Constructor that takes a message ID.
+         */
+        MessageOut(short id);
+
+        /**
          * Destructor.
          */
         ~MessageOut();
@@ -60,12 +65,12 @@ class MessageOut
          * a call to this method.
          */
         const Packet *getPacket();
-        
+
         /**
          * Returns the content of the message.
          */
         char *getData();
-        
+
         /**
          * Returns the length of the data.
          */

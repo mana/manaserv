@@ -92,9 +92,9 @@ int main(int argc, char *argv[])
         if (connected) {
             int answer = -1;
             std::cout << std::endl;
-            std::cout << "0) Quit                9)  Character selection" << std::endl;
+            std::cout << "0) Quit                9)  Select Character" << std::endl;
             std::cout << "1) Register            10) Delete Character" << std::endl;
-            std::cout << "2) Unregister          11) List Characters" << std::endl;
+            std::cout << "2) Unregister          " << std::endl;
             std::cout << "3) Login               12) Move Character" << std::endl;
             std::cout << "4) Logout              13) Say around" << std::endl;
             std::cout << "5) Change Password     14) Equip Item" << std::endl;
@@ -257,12 +257,6 @@ int main(int argc, char *argv[])
                     std::cout << "Character ID: ";
                     std::cin >> line;
                     msg.writeByte(atoi(line));
-                } break;
-
-                case 11:
-                {
-                    // List characters
-                    msg.writeShort(PAMSG_CHAR_LIST);
                 } break;
 
                 case 12:

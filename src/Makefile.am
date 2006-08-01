@@ -14,6 +14,8 @@ tmwclient_SOURCES = client.cpp \
 tmwserv_SOURCES = main.cpp \
 		  configuration.h \
 		  configuration.cpp \
+		  accountclient.h \
+		  accountclient.cpp \
 		  accounthandler.h \
 		  accounthandler.cpp \
 		  chathandler.h \

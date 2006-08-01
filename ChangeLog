@@ -1,3 +1,15 @@
+2006-08-01  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/accountclient.h, src/accountclient.cpp, src/Makefile.am: Defined
+	this class in its own module (extracted from accounthandler.cpp).
+	* src/messageout.h, src/messageout.cpp: Added constructor that takes
+	the message ID for convenience.
+	* src/accounthandler.cpp, src/accounthandler.h: Put handling of logins
+	in a separate method. I think it would be better if this was done for
+	all messages.
+	* src/client.cpp: Removed requesting character listing, as this comes
+	with the succesful register/login responses.
+
 2006-07-31  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/client.cpp, src/netcomputer.cpp: Fixed registering (send version

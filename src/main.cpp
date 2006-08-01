@@ -107,12 +107,11 @@ State *gameState;
  */
 void initialize()
 {
-
-/**
- * If the path values aren't defined, we set the default
- * depending on the platform.
- */
-// The config path
+    /*
+     * If the path values aren't defined, we set the default
+     * depending on the platform.
+     */
+    // The config path
 #if defined CONFIG_FILE
     std::string configPath = CONFIG_FILE;
 #else
@@ -127,7 +126,7 @@ void initialize()
 
 #endif // defined CONFIG_FILE
 
-// The log path
+    // The log path
 #if defined LOG_FILE
     std::string logPath = LOG_FILE;
 #else

@@ -26,11 +26,13 @@
 
 #include "connectionhandler.h"
 
+class AccountClient;
+
 /**
  * Manages the data stored in user accounts and provides a reliable interface
  * for working with an account. The account handler class can be used as a link
- * to a working account handle, and can be assigned to a user persistently as 
- * an interface between the computer and account. (Messages from the user can 
+ * to a working account handle, and can be assigned to a user persistently as
+ * an interface between the computer and account. (Messages from the user can
  * be traced to this account through the NetComputer structure, then processed
  * here with the persistent stored data).
  */
@@ -40,9 +42,17 @@ class AccountHandler : public ConnectionHandler
         /**
          * Process account related messages.
          */
-        void processMessage(NetComputer *computer, MessageIn &message);
-        NetComputer *computerConnected(ENetPeer *);
-        void computerDisconnected(NetComputer *);
+        void
+        processMessage(NetComputer *computer, MessageIn &message);
+
+        NetComputer*
+        computerConnected(ENetPeer *peer);
+
+        void
+        computerDisconnected(NetComputer *comp);
+
+        void
+        handleLoginMessage(AccountClient &computer, MessageIn &msg);
 };
 
 #endif

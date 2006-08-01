@@ -24,6 +24,7 @@
 #include "accounthandler.h"
 
 #include "account.h"
+#include "accountclient.h"
 #include "chathandler.h"
 #include "configuration.h"
 #include "connectionhandler.h"
@@ -37,93 +38,6 @@
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 
-class AccountClient: public NetComputer
-{
-    public:
-        /**
-         * Constructor.
-         */
-        AccountClient(AccountHandler *, ENetPeer *);
-
-        /**
-         * Destructor.
-         */
-        ~AccountClient();
-
-        /**
-         * Set the account associated with the connection
-         */
-        void setAccount(AccountPtr acc);
-
-        /**
-         * Unset the account associated with the connection
-         */
-        void unsetAccount();
-
-        /**
-         * Get account associated with the connection.
-         */
-        AccountPtr getAccount() { return mAccountPtr; }
-
-        /**
-         * Set the selected character associated with connection.
-         */
-        void setCharacter(PlayerPtr ch);
-
-        /**
-         * Deselect the character associated with connection.
-         */
-        void unsetCharacter();
-
-        /**
-         * Get character associated with the connection
-         */
-        PlayerPtr getCharacter() { return mCharacterPtr; }
-
-    private:
-        /** Account associated with connection */
-        AccountPtr mAccountPtr;
-
-        /** Selected character */
-        PlayerPtr mCharacterPtr;
-};
-
-AccountClient::AccountClient(AccountHandler *handler, ENetPeer *peer):
-    NetComputer(handler, peer),
-    mAccountPtr(NULL),
-    mCharacterPtr(NULL)
-{
-}
-
-AccountClient::~AccountClient()
-{
-    unsetAccount();
-}
-
-
-void AccountClient::setAccount(AccountPtr acc)
-{
-    unsetAccount();
-    mAccountPtr = acc;
-}
-
-void AccountClient::setCharacter(PlayerPtr ch)
-{
-    unsetCharacter();
-    mCharacterPtr = ch;
-}
-
-void AccountClient::unsetAccount()
-{
-    unsetCharacter();
-    mAccountPtr = AccountPtr(NULL);
-}
-
-void AccountClient::unsetCharacter()
-{
-    if (mCharacterPtr.get() == NULL) return;
-    mCharacterPtr = PlayerPtr(NULL);
-}
 
 NetComputer *AccountHandler::computerConnected(ENetPeer *peer)
 {
@@ -160,75 +74,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
     switch (message.getId())
     {
         case PAMSG_LOGIN:
-            {
-                unsigned long clientVersion = message.readLong();
-                std::string username = message.readString();
-                std::string password = message.readString();
-                LOG_INFO(username << " is trying to login.", 1);
-
-                result.writeShort(APMSG_LOGIN_RESPONSE);
-
-                if (clientVersion < config.getValue("clientVersion", 0))
-                {
-                    LOG_INFO("Client has an unsufficient version number to login.", 1);
-                    result.writeByte(LOGIN_INVALID_VERSION);
-                    break;
-                }
-                if (stringFilter->findDoubleQuotes(username))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(username << ": has got double quotes in it.", 1);
-                    break;
-                }
-                if (computer.getAccount().get() != NULL) {
-                    LOG_INFO("Already logged in as " << computer.getAccount()->getName()
-                        << ".", 1);
-                    LOG_INFO("Please logout first.", 1);
-                    result.writeByte(ERRMSG_FAILURE);
-                    break;
-                }
-                if (getClientNumber() >= MAX_CLIENTS )
-                {
-                    // Too much clients logged in.
-                    LOG_INFO("Client couldn't login. Already has " << MAX_CLIENTS
-                    << " logged in.", 1);
-                    result.writeByte(LOGIN_SERVER_FULL);
-                    break;
-                }
-
-                // see if the account exists
-                AccountPtr acc = store.getAccount(username);
-
-                if (!acc.get() || acc->getPassword() != password) {
-                    // account doesn't exist -- send error to client
-                    LOG_INFO(username << ": Account does not exist or the password is invalid.", 1);
-
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    break;
-                }
-
-                LOG_INFO("Login OK by " << username, 1);
-
-                // Associate account with connection
-                computer.setAccount(acc);
-
-                result.writeByte(ERRMSG_OK);
-
-                // Return information about available characters
-                Players &chars = computer.getAccount()->getCharacters();
-                result.writeByte(chars.size());
-
-                LOG_INFO(username << "'s account has " << chars.size() << " character(s).", 1);
-                for (unsigned int i = 0; i < chars.size(); i++)
-                {
-                    result.writeString(chars[i]->getName());
-                    result.writeByte(unsigned(short(chars[i]->getGender())));
-                    result.writeByte(chars[i]->getHairStyle());
-                    result.writeByte(chars[i]->getHairColor());
-                    result.writeByte(chars[i]->getLevel());
-                    result.writeShort(chars[i]->getMoney());
-                }
-            }
+            handleLoginMessage(computer, message);
             break;
 
         case PAMSG_LOGOUT:
@@ -788,4 +634,80 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
     // return result
     computer.send(result.getPacket());
+}
+
+void
+AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
+{
+    unsigned long clientVersion = msg.readLong();
+    std::string username = msg.readString();
+    std::string password = msg.readString();
+
+    LOG_INFO(username << " is trying to login.", 1);
+
+    MessageOut reply(APMSG_LOGIN_RESPONSE);
+
+    if (clientVersion < config.getValue("clientVersion", 0))
+    {
+        LOG_INFO("Client has an insufficient version number to login.", 1);
+        reply.writeByte(LOGIN_INVALID_VERSION);
+    }
+    if (stringFilter->findDoubleQuotes(username))
+    {
+        LOG_INFO(username << ": has got double quotes in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    if (computer.getAccount().get() != NULL) {
+        LOG_INFO("Already logged in as " << computer.getAccount()->getName()
+                 << ".", 1);
+        LOG_INFO("Please logout first.", 1);
+        reply.writeByte(ERRMSG_FAILURE);
+    }
+    if (getClientNumber() >= MAX_CLIENTS )
+    {
+        LOG_INFO("Client couldn't login. Already has " << MAX_CLIENTS
+                 << " logged in.", 1);
+        reply.writeByte(LOGIN_SERVER_FULL);
+    }
+    else
+    {
+        // Check if the account exists
+        Storage &store = Storage::instance("tmw");
+        AccountPtr acc = store.getAccount(username);
+
+        if (!acc.get() || acc->getPassword() != password)
+        {
+            LOG_INFO(username << ": Account does not exist or the password is "
+                     "invalid.", 1);
+            reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        }
+        else
+        {
+            LOG_INFO("Login OK by " << username, 1);
+
+            // Associate account with connection
+            computer.setAccount(acc);
+
+            reply.writeByte(ERRMSG_OK);
+
+            // Return information about available characters
+            Players &chars = computer.getAccount()->getCharacters();
+            reply.writeByte(chars.size());
+
+            LOG_INFO(username << "'s account has " << chars.size()
+                     << " character(s).", 1);
+
+            for (unsigned int i = 0; i < chars.size(); i++)
+            {
+                reply.writeString(chars[i]->getName());
+                reply.writeByte(unsigned(short(chars[i]->getGender())));
+                reply.writeByte(chars[i]->getHairStyle());
+                reply.writeByte(chars[i]->getHairColor());
+                reply.writeByte(chars[i]->getLevel());
+                reply.writeShort(chars[i]->getMoney());
+            }
+        }
+    }
+
+    computer.send(reply.getPacket());
 }
