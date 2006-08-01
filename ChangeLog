@@ -9,6 +9,8 @@
 	all messages.
 	* src/client.cpp: Removed requesting character listing, as this comes
 	with the succesful register/login responses.
+	* src/accounthandler.cpp, src/accounthandler.h: Put handling of
+	registrations in a separate method and cleaned it up a bit.
 
 2006-07-31  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

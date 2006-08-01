@@ -97,81 +97,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PAMSG_REGISTER:
-            {
-                unsigned long clientVersion = message.readLong();
-                std::string username = message.readString();
-                std::string password = message.readString();
-                std::string email = message.readString();
-                result.writeShort(APMSG_REGISTER_RESPONSE);
-
-                if (clientVersion < config.getValue("clientVersion", 0))
-                {
-                    LOG_INFO("Client has an unsufficient version number to login.", 1);
-                    result.writeByte(REGISTER_INVALID_VERSION);
-                    break;
-                }
-
-                // Checking if there are double quotes in it.
-                if (stringFilter->findDoubleQuotes(username))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(username << ": has got double quotes in it.", 1);
-                    break;
-                }
-
-                // Checking conditions for having a good account.
-                LOG_INFO(username << " is trying to register.", 1);
-
-                // see if the account exists
-                AccountPtr accPtr = store.getAccount(username);
-                if ( accPtr.get() ) // Account already exists.
-                {
-                    result.writeByte(REGISTER_EXISTS_USERNAME);
-                    LOG_INFO(username << ": Username already exists.", 1);
-                }
-                else if ((username.length() < MIN_LOGIN_LENGTH) || (username.length() > MAX_LOGIN_LENGTH)) // Username length
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(username << ": Username too short or too long.", 1);
-                }
-                else if (!stringFilter->filterContent(username)) // Checking if the Name is slang's free.
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(username << ": has got bad words in it.", 1);
-                    break;
-                }
-                else if ((password.length() < MIN_PASSWORD_LENGTH) || (password.length() > MAX_PASSWORD_LENGTH))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(email << ": Password too short or too long.", 1);
-                }
-                else if (!stringFilter->isEmailValid(email))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1);
-                }
-                else if (stringFilter->findDoubleQuotes(email))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(email << ": has got double quotes in it.", 1);
-                    break;
-                }
-                else if (store.getSameEmailNumber(email) > 0) // Search if Email already exists.
-                {
-                    result.writeByte(REGISTER_EXISTS_EMAIL);
-                    LOG_INFO(email << ": Email already exists.", 1);
-                }
-                else
-                {
-                    AccountPtr acc(new Account(username, password, email));
-                    store.addAccount(acc);
-
-                    result.writeByte(ERRMSG_OK);
-
-                    store.flush(); // flush changes
-                    LOG_INFO(username << ": Account registered.", 1);
-                }
-            }
+            handleRegisterMessage(computer, message);
             break;
 
         case PAMSG_UNREGISTER:
@@ -193,7 +119,8 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 AccountPtr accPtr = store.getAccount(username);
 
                 if (!accPtr.get() || accPtr->getPassword() != password) {
-                    LOG_INFO("Account does not exist of bad password for " << username << ".", 1);
+                    LOG_INFO("Account does not exist or bad password for "
+                            << username << ".", 1);
 
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
                 } else {
@@ -706,6 +633,87 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
                 reply.writeByte(chars[i]->getLevel());
                 reply.writeShort(chars[i]->getMoney());
             }
+        }
+    }
+
+    computer.send(reply.getPacket());
+}
+
+void
+AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
+{
+    unsigned long clientVersion = msg.readLong();
+    std::string username = msg.readString();
+    std::string password = msg.readString();
+    std::string email = msg.readString();
+
+    LOG_INFO(username << " is trying to register.", 1);
+
+    MessageOut reply(APMSG_REGISTER_RESPONSE);
+
+    if (clientVersion < config.getValue("clientVersion", 0))
+    {
+        LOG_INFO("Client has an unsufficient version number to login.", 1);
+        reply.writeByte(REGISTER_INVALID_VERSION);
+    }
+    else if (stringFilter->findDoubleQuotes(username))
+    {
+        LOG_INFO(username << ": has got double quotes in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if (stringFilter->findDoubleQuotes(email))
+    {
+        LOG_INFO(email << ": has got double quotes in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if ((username.length() < MIN_LOGIN_LENGTH) ||
+            (username.length() > MAX_LOGIN_LENGTH))
+    {
+        LOG_INFO(username << ": Username too short or too long.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if ((password.length() < MIN_PASSWORD_LENGTH) ||
+            (password.length() > MAX_PASSWORD_LENGTH))
+    {
+        LOG_INFO(email << ": Password too short or too long.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if (!stringFilter->isEmailValid(email))
+    {
+        LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    // Checking if the Name is slang's free.
+    else if (!stringFilter->filterContent(username))
+    {
+        LOG_INFO(username << ": has got bad words in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else
+    {
+        Storage &store = Storage::instance("tmw");
+        AccountPtr accPtr = store.getAccount(username);
+
+        // Check whether the account already exists.
+        if (accPtr.get())
+        {
+            LOG_INFO(username << ": Username already exists.", 1);
+            reply.writeByte(REGISTER_EXISTS_USERNAME);
+        }
+        // Find out whether the email is already in use.
+        else if (store.getSameEmailNumber(email) > 0)
+        {
+            LOG_INFO(email << ": Email already exists.", 1);
+            reply.writeByte(REGISTER_EXISTS_EMAIL);
+        }
+        else
+        {
+            AccountPtr acc(new Account(username, password, email));
+            store.addAccount(acc);
+            store.flush();
+            LOG_INFO(username << ": Account registered.", 1);
+
+            reply.writeByte(ERRMSG_OK);
         }
     }
 

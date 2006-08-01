@@ -51,8 +51,13 @@ class AccountHandler : public ConnectionHandler
         void
         computerDisconnected(NetComputer *comp);
 
+        // --- message handling ---
+
         void
         handleLoginMessage(AccountClient &computer, MessageIn &msg);
+
+        void
+        handleRegisterMessage(AccountClient &computer, MessageIn &msg);
 };
 
 #endif
