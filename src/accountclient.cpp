@@ -18,7 +18,7 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id: accounthandler.cpp 2478 2006-07-27 21:04:04Z umperio $
+ *  $Id$
  */
 
 #include "accountclient.h"
