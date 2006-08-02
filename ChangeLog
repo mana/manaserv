@@ -1,9 +1,14 @@
+2006-08-02  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/accounthandler.cpp, src/accounthandler.h: Put handling of
+	logout, unregister and password change messages into separate methods.
+
 2006-08-02  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/Makefile.am: Put object files in subdirectories. Removed
 	compilation flags.
 
-2006-08-01  Eugenio Favalli  <elvenprogrammer@gmail.com>
+2006-08-02  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.
 

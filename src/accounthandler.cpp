@@ -78,22 +78,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PAMSG_LOGOUT:
-            {
-                result.writeShort(APMSG_LOGOUT_RESPONSE);
-
-                if ( computer.getAccount().get() == NULL )
-                {
-                    LOG_INFO("Can't logout. Not even logged in.", 1);
-                    result.writeByte(ERRMSG_NO_LOGIN);
-                }
-                else
-                {
-                    LOG_INFO(computer.getAccount()->getName() << " logs out.", 1);
-                    // computer.unsetCharacter(); Done by unsetAccount();
-                    computer.unsetAccount();
-                    result.writeByte(ERRMSG_OK);
-                }
-            }
+            handleLogoutMessage(computer, message);
             break;
 
         case PAMSG_REGISTER:
@@ -101,47 +86,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PAMSG_UNREGISTER:
-            {
-                std::string username = message.readString();
-                std::string password = message.readString();
-                LOG_INFO(username << " wants to be deleted from our accounts.", 1);
-
-                result.writeShort(APMSG_UNREGISTER_RESPONSE);
-
-                if (stringFilter->findDoubleQuotes(username))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(username << ": has got double quotes in it.", 1);
-                    break;
-                }
-
-                // see if the account exists
-                AccountPtr accPtr = store.getAccount(username);
-
-                if (!accPtr.get() || accPtr->getPassword() != password) {
-                    LOG_INFO("Account does not exist or bad password for "
-                            << username << ".", 1);
-
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                } else {
-
-                    // If the account to delete is the current account we're logged in.
-                    // Get out of it in memory.
-                    if (computer.getAccount().get() != NULL )
-                    {
-                        if (computer.getAccount()->getName() == username )
-                        {
-                            // computer.unsetCharacter(); Done by unsetAccount();
-                            computer.unsetAccount();
-                        }
-                    }
-                    // delete account and associated characters
-                    LOG_INFO("Farewell " << username << " ...", 1);
-                    store.delAccount(username);
-                    store.flush();
-                    result.writeByte(ERRMSG_OK);
-                }
-            }
+            handleUnregisterMessage(computer, message);
             break;
 
         case PAMSG_EMAIL_CHANGE:
@@ -198,43 +143,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PAMSG_PASSWORD_CHANGE:
-            {
-                result.writeShort(APMSG_PASSWORD_CHANGE_RESPONSE);
-
-                if (computer.getAccount().get() == NULL)
-                {
-                    result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't change your Account's Password.", 1);
-                    break;
-                }
-                std::string oldPassword = message.readString();
-                std::string newPassword = message.readString();
-                if ( newPassword.length() < MIN_PASSWORD_LENGTH ||
-                     newPassword.length() > MAX_PASSWORD_LENGTH )
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(computer.getAccount()->getName() <<
-                    ": New password too long or too short.", 1);
-                }
-                else if (stringFilter->findDoubleQuotes(newPassword))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(newPassword << ": has got double quotes in it.", 1);
-                }
-                else if ( oldPassword != computer.getAccount()->getPassword() )
-                {
-                    result.writeByte(ERRMSG_FAILURE);
-                    LOG_INFO(computer.getAccount()->getName() <<
-                    ": Old password is wrong.", 1);
-                }
-                else
-                {
-                    computer.getAccount()->setPassword(newPassword);
-                    result.writeByte(ERRMSG_OK);
-                    LOG_INFO(computer.getAccount()->getName() <<
-                    ": The password was changed.", 1);
-                }
-            }
+            handlePasswordChangeMessage(computer, message);
             break;
 
         case PAMSG_CHAR_CREATE:
@@ -640,6 +549,26 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
 }
 
 void
+AccountHandler::handleLogoutMessage(AccountClient &computer, MessageIn &msg)
+{
+    MessageOut reply(APMSG_LOGOUT_RESPONSE);
+
+    if (computer.getAccount().get() == NULL)
+    {
+        LOG_INFO("Can't logout. Not even logged in.", 1);
+        reply.writeByte(ERRMSG_NO_LOGIN);
+    }
+    else
+    {
+        LOG_INFO(computer.getAccount()->getName() << " logged out.", 1);
+        computer.unsetAccount();
+        reply.writeByte(ERRMSG_OK);
+    }
+
+    computer.send(reply.getPacket());
+}
+
+void
 AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
 {
     unsigned long clientVersion = msg.readLong();
@@ -715,6 +644,100 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
 
             reply.writeByte(ERRMSG_OK);
         }
+    }
+
+    computer.send(reply.getPacket());
+}
+
+void
+AccountHandler::handleUnregisterMessage(AccountClient &computer,
+                                        MessageIn &msg)
+{
+    std::string username = msg.readString();
+    std::string password = msg.readString();
+
+    LOG_INFO(username << " wants to be deleted from our accounts.", 1);
+
+    MessageOut reply(APMSG_UNREGISTER_RESPONSE);
+
+    if (stringFilter->findDoubleQuotes(username))
+    {
+        LOG_INFO(username << ": has got double quotes in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else
+    {
+        // See if the account exists
+        Storage &store = Storage::instance("tmw");
+        AccountPtr accPtr = store.getAccount(username);
+
+        if (!accPtr.get() || accPtr->getPassword() != password)
+        {
+            LOG_INFO("Account does not exist or bad password for "
+                    << username << ".", 1);
+            reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        }
+        else
+        {
+            // If the account to delete is the current account we're logged in.
+            // Get out of it in memory.
+            if (computer.getAccount().get() != NULL )
+            {
+                if (computer.getAccount()->getName() == username)
+                {
+                    computer.unsetAccount();
+                }
+            }
+
+            // Delete account and associated characters
+            LOG_INFO("Farewell " << username << " ...", 1);
+            store.delAccount(username);
+            store.flush();
+            reply.writeByte(ERRMSG_OK);
+        }
+    }
+
+    computer.send(reply.getPacket());
+}
+
+void
+AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
+                                            MessageIn &msg)
+{
+    std::string oldPassword = msg.readString();
+    std::string newPassword = msg.readString();
+
+    MessageOut reply(APMSG_PASSWORD_CHANGE_RESPONSE);
+
+    if (computer.getAccount().get() == NULL)
+    {
+        LOG_INFO("Not logged in. Can't change your Account's Password.", 1);
+        reply.writeByte(ERRMSG_NO_LOGIN);
+    }
+    else if (newPassword.length() < MIN_PASSWORD_LENGTH ||
+            newPassword.length() > MAX_PASSWORD_LENGTH)
+    {
+        LOG_INFO(computer.getAccount()->getName() <<
+                ": New password too long or too short.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if (stringFilter->findDoubleQuotes(newPassword))
+    {
+        LOG_INFO(newPassword << ": has got double quotes in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if (oldPassword != computer.getAccount()->getPassword())
+    {
+        LOG_INFO(computer.getAccount()->getName() <<
+                ": Old password is wrong.", 1);
+        reply.writeByte(ERRMSG_FAILURE);
+    }
+    else
+    {
+        LOG_INFO(computer.getAccount()->getName() <<
+                ": The password was changed.", 1);
+        computer.getAccount()->setPassword(newPassword);
+        reply.writeByte(ERRMSG_OK);
     }
 
     computer.send(reply.getPacket());
