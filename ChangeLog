@@ -1,3 +1,7 @@
+2006-08-01  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.cbp, tmwserv.dev: Updated project files.
+
 2006-08-01  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/accountclient.h, src/accountclient.cpp, src/Makefile.am: Defined
