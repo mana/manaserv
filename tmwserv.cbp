@@ -39,6 +39,16 @@
 			<Option link="0" />
 			<Option target="default" />
 		</Unit>
+		<Unit filename="src\accountclient.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="default" />
+		</Unit>
+		<Unit filename="src\accountclient.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="default" />
+		</Unit>
 		<Unit filename="src\accounthandler.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="default" />
