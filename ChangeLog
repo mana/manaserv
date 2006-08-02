@@ -1,3 +1,8 @@
+2006-08-03  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/gameclient.cpp, src/gameclient.h, src/gamehandler.cpp,
+	src/Makefile.am: Defined the GameClient class in its own module.
+
 2006-08-02  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/accounthandler.cpp, src/accounthandler.h: Put handling of

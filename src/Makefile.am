@@ -28,6 +28,8 @@ tmwserv_SOURCES = main.cpp \
 		  chatchannelmanager.cpp \
 		  connectionhandler.h \
 		  connectionhandler.cpp \
+		  gameclient.h \
+		  gameclient.cpp \
 		  gamehandler.h \
 		  gamehandler.cpp \
 		  state.h \

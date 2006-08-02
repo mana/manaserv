@@ -23,77 +23,16 @@
 
 #include "gamehandler.h"
 
-#include <cassert>
 #include <iostream>
 #include <map>
 
+#include "gameclient.h"
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
 #include "packet.h"
 #include "state.h"
 #include "utils/logger.h"
-
-class GameClient: public NetComputer
-{
-    public:
-        /**
-         * Constructor.
-         */
-        GameClient(GameHandler *, ENetPeer *);
-
-        /**
-         * Destructor.
-         */
-        ~GameClient();
-
-        /**
-         * Set the selected character associated with connection.
-         */
-        void setCharacter(PlayerPtr ch);
-
-        /**
-         * Deselect the character associated with connection.
-         */
-        void unsetCharacter();
-
-        /**
-         * Get character associated with the connection.
-         */
-        PlayerPtr getCharacter() { return mCharacterPtr; }
-
-    private:
-        /** Character associated with the conneciton. */
-        PlayerPtr mCharacterPtr;
-};
-
-GameClient::GameClient(GameHandler *handler, ENetPeer *peer):
-    NetComputer(handler, peer),
-    mCharacterPtr(NULL)
-{
-}
-
-GameClient::~GameClient()
-{
-    unsetCharacter();
-}
-
-
-void GameClient::setCharacter(PlayerPtr ch)
-{
-    assert(mCharacterPtr.get() == NULL);
-    mCharacterPtr = ch;
-    gameState->addObject(ObjectPtr(mCharacterPtr));
-    gameState->informPlayer(mCharacterPtr);
-}
-
-void GameClient::unsetCharacter()
-{
-    if (mCharacterPtr.get() == NULL) return;
-    // remove being from world
-    gameState->removeObject(ObjectPtr(mCharacterPtr));
-    mCharacterPtr = PlayerPtr(NULL);
-}
 
 struct GamePendingLogin
 {
@@ -222,7 +161,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     // use item
                     // this should execute a script which will do the appropriate action
                     // (the script will determine if the item is 1 use only)
-                    result.writeByte(ERRMSG_OK);                    
+                    result.writeByte(ERRMSG_OK);
                 } else {
                     result.writeByte(ERRMSG_FAILURE);
                 }
