@@ -1,5 +1,7 @@
 # $Id$
 
+AUTOMAKE_OPTIONS = subdir-objects
+
 bin_PROGRAMS = tmwclient tmwserv
 
 tmwclient_SOURCES = client.cpp \
@@ -111,8 +113,6 @@ tmwserv_SOURCES += bindings_wrap.cpp
 bindings_wrap.cpp: bindings.i
 	$(SWIG) $(SWIGFLAGS) -o bindings_wrap.cpp bindings.i
 endif
-
-tmwserv_CXXFLAGS = -Wall -fno-inline
 
 
 # do not remove the 'dot', it is a hint for Automake.
