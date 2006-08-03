@@ -58,7 +58,8 @@ class Account
          */
         Account(const std::string& name,
                 const std::string& password,
-                const std::string& email);
+                const std::string& email,
+                int id = -1);
 
 
         /**
@@ -195,6 +196,19 @@ class Account
         PlayerPtr
         getCharacter(const std::string& name);
 
+        /**
+         * Get account ID.
+         *
+         * @return the unique ID of the account, a negative number if none yet.
+         */
+         int getID() const
+         { return mID; }
+
+        /**
+         * Set account ID.
+         * The account shall not have any ID yet.
+         */
+         void setID(int);
 
     private:
         Account();
@@ -203,6 +217,7 @@ class Account
 
 
     private:
+        int mID;               /**< unique id */
         std::string mName;     /**< user name */
         std::string mPassword; /**< user password (encrypted) */
         std::string mEmail;    /**< user email address */

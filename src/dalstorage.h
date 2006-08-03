@@ -79,10 +79,16 @@ class DALStorage: public Storage
         /**
          * Delete an account.
          *
-         * @param userName the owner of the account.
+         * @param account the account to delete.
          */
-        void
-        delAccount(const std::string& userName);
+        void delAccount(AccountPtr const &account);
+
+        /**
+         * Flush and unload an account.
+         *
+         * @param account the account to unload.
+         */
+        void unloadAccount(AccountPtr const &account);
 
         /**
          * Get the list of Emails in the accounts list.
@@ -130,9 +136,8 @@ class DALStorage: public Storage
          *
          * @exception tmwserv::dal::DbSqlQueryExecFailure.
          */
-        void
-        flush(void);
-
+        void flushAll();
+        void flush(AccountPtr const &);
 
     private:
         /**
@@ -172,50 +177,6 @@ class DALStorage: public Storage
         void
         createTable(const std::string& tblName,
                     const std::string& sql);
-
-
-        /**
-         * Add an account to the database.
-         *
-         * @param account the account to add.
-         *
-         * @exeception tmwserv::dal::DbSqlQueryExecFailure.
-         */
-        void
-        _addAccount(const AccountPtr& account);
-
-
-        /**
-         * Update an account from the database.
-         *
-         * @param account the account to update.
-         *
-         * @exception tmwserv::dal::DbSqlQueryExecFailure.
-         */
-        void
-        _updAccount(const AccountPtr& account);
-
-
-        /**
-         * Delete an account and its associated data from the database.
-         *
-         * @param account the account to update.
-         *
-         * @exception tmwserv::dal::DbSqlQueryExecFailure.
-         */
-        void
-        _delAccount(const AccountPtr& account);
-
-
-        /**
-         * Delete an account and its associated data from the database.
-         *
-         * @param userName the owner of the account.
-         *
-         * @exeception tmwserv::dal::DbSqlQueryExecFailure.
-         */
-        void
-        _delAccount(const std::string& userName);
 
 
     private:

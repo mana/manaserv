@@ -32,94 +32,9 @@
 #include "chatchannel.h"
 
 /**
- * Enumeration type for the account status:
- *
- * AS_NEW_ACCOUNT  : set to an account that is added to the storage and
- *                   hence not yet save to disk (file or database);
- *                   accounts with this status will be saved to disk at
- *                   the next flush.
- * AS_ACC_TO_UPDATE: set to an account that was loaded from disk;
- *                   accounts with this status will be updated at the next
- *                   flush.
- * AS_ACC_TO_DELETE: set to an account that was loaded from disk;
- *                   accounts with this status will be deleted from disk at
- *                   the next flush.
- *
- * Notes: an account that is requested to be deleted and still has the
- *        status AS_NEW_ACCOUNT (and therefore not yet saved to disk) will
- *        be immediately deleted from memory to save useless transactions
- *        to disk.
- */
-typedef enum {
-    AS_NEW_ACCOUNT,
-    AS_ACC_TO_UPDATE,
-    AS_ACC_TO_DELETE
-} AccountStatus;
-
-
-/**
- * Structure type for the account info.
- */
-typedef struct {
-    AccountStatus status;
-    unsigned int id;
-} AccountInfo;
-
-
-/**
- * Functor to be used as the sorting criterion of the map defined below.
- */
-struct account_sort_by_name
-    : public std::binary_function<AccountPtr, AccountPtr, bool>
-{
-    bool
-    operator()(const AccountPtr& acc1, const AccountPtr& acc2) const
-    {
-        return (acc1->getName() < acc2->getName());
-    }
-};
-
-
-/**
  * Data type for the list of accounts.
- *
- * Notes:
- *     - the account id is not attribute of Account but AccountInfo because
- *       only the storage should modify this value, this attribute is for
- *       internal use.
  */
-typedef std::map<AccountPtr, AccountInfo, account_sort_by_name> Accounts;
-
-
-/**
- * Functor used to search an Account by name in the map defined above.
- */
-class account_by_name
-{
-    public:
-        /**
-         * Constructor.
-         */
-        account_by_name(const std::string& name)
-            : mName(name)
-        {
-            // NOP
-        }
-
-
-        /**
-         * Operator().
-         */
-        bool
-        operator()(std::pair<AccountPtr, AccountInfo> elem) const
-        {
-            return (elem.first)->getName() == mName;
-        }
-
-
-    private:
-        std::string mName; /**< the name to look for */
-};
+typedef std::map<unsigned, AccountPtr> Accounts;
 
 
 /**
@@ -258,7 +173,6 @@ class Storage
         virtual AccountPtr
         getAccount(const std::string& userName) = 0;
 
-
         /**
          * Add a new account.
          *
@@ -267,14 +181,21 @@ class Storage
         virtual void
         addAccount(const AccountPtr& account) = 0;
 
-
         /**
          * Delete an account.
          *
-         * @param userName the owner of the account.
+         * @param account the account to delete.
          */
         virtual void
-        delAccount(const std::string& userName) = 0;
+        delAccount(AccountPtr const &account) = 0;
+
+        /**
+         * Flush and unload an account.
+         *
+         * @param account the account to unload.
+         */
+        virtual void
+        unloadAccount(AccountPtr const &account) = 0;
 
         /**
          * Get the list of Emails in the accounts list.
@@ -323,12 +244,15 @@ class Storage
         virtual void
         updateChannels(std::map<short, ChatChannel>& channelList) = 0;
 
+        /**
+         * Saves the changes to all the accounts permanently.
+         */
+        virtual void flushAll() = 0;
 
         /**
-         * Saves the changes permanently.
+         * Saves the changes to one account permanently.
          */
-        virtual void
-        flush(void) = 0;
+        virtual void flush(AccountPtr const &account) = 0;
 
 
     protected:

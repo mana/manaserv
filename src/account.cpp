@@ -20,6 +20,8 @@
  *  $Id$
  */
 
+#include <cassert>
+
 #include "account.h"
 
 #include "utils/functors.h"
@@ -29,8 +31,10 @@
  */
 Account::Account(const std::string& name,
                  const std::string& password,
-                 const std::string& email)
-        : mName(name),
+                 const std::string& email,
+                 int id)
+        : mID(id),
+          mName(name),
           mPassword(password),
           mEmail(email),
           mCharacters(),
@@ -206,4 +210,10 @@ PlayerPtr Account::getCharacter(const std::string& name)
 
     if (it != end) return *it;
     return PlayerPtr();
+}
+
+void Account::setID(int id)
+{
+    assert(mID < 0);
+    mID = id;
 }

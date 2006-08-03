@@ -282,7 +282,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 LOG_INFO("Character " << name << " was created for "
                     << computer.getAccount()->getName() << "'s account.", 1);
 
-                store.flush(); // flush changes
+                store.flush(computer.getAccount()); // flush changes
                 result.writeByte(ERRMSG_OK);
             }
             break;
@@ -361,7 +361,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 std::string deletedCharacter = chars[charNum].get()->getName();
                 computer.getAccount()->delCharacter(deletedCharacter);
-                store.flush();
+                store.flush(computer.getAccount());
                 LOG_INFO(deletedCharacter << ": Character deleted...", 1);
                 result.writeByte(ERRMSG_OK);
 
@@ -639,7 +639,6 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         {
             AccountPtr acc(new Account(username, password, email));
             store.addAccount(acc);
-            store.flush();
             LOG_INFO(username << ": Account registered.", 1);
 
             reply.writeByte(ERRMSG_OK);
@@ -691,8 +690,7 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
 
             // Delete account and associated characters
             LOG_INFO("Farewell " << username << " ...", 1);
-            store.delAccount(username);
-            store.flush();
+            store.delAccount(accPtr);
             reply.writeByte(ERRMSG_OK);
         }
     }

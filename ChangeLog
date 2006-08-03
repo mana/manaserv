@@ -1,3 +1,14 @@
+2006-08-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/storage.h, src/dalstorage.h, src/dalstorage.cpp: Removed
+	AccountInfo. Restricted addAccount to accounts without characters,
+	removed wrong SQL code. Fixed casting in updAccount, promoted member as
+	flush. Added implicit flush to addAccount and delAccount. Fixed user_id
+	for every SQL backend. Added flushAll and unloadAccount members.
+	* src/accounthandler.cpp: Restricted flush to only modified accounts.
+	* src/account.h, src/account.cpp: Added the database primary key to
+	Account.
+
 2006-08-03  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/gameclient.cpp, src/gameclient.h, src/gamehandler.cpp,
