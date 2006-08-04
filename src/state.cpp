@@ -64,7 +64,7 @@ void State::addObject(ObjectPtr objectPtr) {
     MessageOut msg;
     msg.writeShort(GPMSG_BEING_ENTER);
     msg.writeByte(OBJECT_PLAYER);
-    msg.writeLong(0); // ID
+    msg.writeLong(playerPtr->getID());
     msg.writeString(playerPtr->getName());
     msg.writeByte(playerPtr->getHairStyle());
     msg.writeByte(playerPtr->getHairColor());
@@ -93,7 +93,7 @@ void State::removeObject(ObjectPtr objectPtr) {
     MessageOut msg;
     msg.writeShort(GPMSG_BEING_LEAVE);
     msg.writeByte(OBJECT_PLAYER);
-    msg.writeLong(0); // ID
+    msg.writeLong(playerPtr->getID());
     Players::iterator p_end = players.end(), j = p_end;
     for (Players::iterator p = players.begin(); p != p_end; ++p) {
         if (p->get() == playerPtr.get())
@@ -114,7 +114,7 @@ void State::informPlayer(PlayerPtr playerPtr) {
         MessageOut msg;
         msg.writeShort(GPMSG_BEING_ENTER);
         msg.writeByte(OBJECT_PLAYER);
-        msg.writeLong(0); // ID
+        msg.writeLong((*p)->getID());
         msg.writeString((*p)->getName());
         msg.writeByte((*p)->getHairStyle());
         msg.writeByte((*p)->getHairColor());

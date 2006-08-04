@@ -2,6 +2,7 @@
 
 	* src/object.h, src/object.cpp, src/being.h, src/dalstorage.cpp: Added
 	the database primary key to Player.
+	* src/state.cpp: Used Player ID.
 
 2006-08-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
