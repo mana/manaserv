@@ -1,3 +1,16 @@
+2006-08-04  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/properties.h, src/map.cpp, src/map.h, src/Makefile.am:
+	Generalized the properties functionality as was done in the client
+	before.
+	* src/main.cpp, src/items.cpp, src/items.h, src/utils/timer.cpp,
+	src/utils/timer.h, src/utils/logger.h: Removed some more remaining
+	usages of tmwserv namespace.
+	* src/gamehandler.cpp, src/chatchannel.h: Added some documentation and
+	de-complicized the code a bit.
+	* configure.ac: Removed checks for SDL and SDL_net.
+	* INSTALL: Somehow got updated to a newer version.
+
 2006-08-04  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/object.h, src/object.cpp, src/being.h, src/dalstorage.cpp: Added

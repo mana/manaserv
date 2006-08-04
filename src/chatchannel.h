@@ -97,17 +97,17 @@ class ChatChannel {
 
  private:
     /**
-     * The Channel's name
+     * The Channel's name.
      */
     std::string mChannelName;
 
     /**
-     * The Channel's name
+     * The Channel's announcement.
      */
     std::string mChannelAnnouncement;
 
     /**
-     * The Channel's name
+     * The Channel's password.
      */
     std::string mChannelPassword;
 

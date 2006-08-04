@@ -147,31 +147,6 @@ Map::getTileHeight()
     return tileHeight;
 }
 
-std::string
-Map::getProperty(const std::string &name)
-{
-    std::map<std::string,std::string>::iterator i = properties.find(name);
-
-    if (i != properties.end())
-    {
-        return (*i).second;
-    }
-
-    return "";
-}
-
-bool
-Map::hasProperty(const std::string &name)
-{
-    return (properties.find(name) != properties.end());
-}
-
-void
-Map::setProperty(const std::string &name, const std::string &value)
-{
-    properties[name] = value;
-}
-
 std::list<PATH_NODE>
 Map::findPath(int startX, int startY, int destX, int destY)
 {

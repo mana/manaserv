@@ -32,6 +32,7 @@ tmwserv_SOURCES = main.cpp \
 		  gameclient.cpp \
 		  gamehandler.h \
 		  gamehandler.cpp \
+		  properties.h \
 		  state.h \
 		  state.cpp \
 		  debug.h \

@@ -35,8 +35,6 @@
     #include "wingettimeofday.h"
 #endif
 
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -99,6 +97,5 @@ class Timer
 };
 
 } // ::utils
-} // ::tmwserv
 
 #endif

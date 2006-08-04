@@ -22,8 +22,6 @@
 #include <time.h>
 #include "timer.h"
 
-namespace tmwserv
-{
 namespace utils
 {
 
@@ -87,4 +85,3 @@ uint64_t Timer::getTimeInMillisec()
 };
 
 } // ::utils
-} // ::tmwserv

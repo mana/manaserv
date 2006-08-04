@@ -26,9 +26,6 @@
 
 #include "object.h"
 
-namespace tmwserv
-{
-
 /**
  * Class for all types of in-game items.
  */
@@ -58,7 +55,5 @@ class Item : public Object
      */
     unsigned int getType() { return type; }
 };
-
-} // namespace tmwserv
 
 #endif

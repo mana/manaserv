@@ -41,11 +41,29 @@ struct GamePendingLogin
 };
 
 typedef std::map< std::string, GamePendingLogin > GamePendingLogins;
+typedef std::map< std::string, GameClient * > GamePendingClients;
+
+/**
+ * The pending logins represent clients who were given a magic token by the
+ * account server but who have not yet logged in to the game server.
+ */
 static GamePendingLogins pendingLogins;
 
-typedef std::map< std::string, GameClient * > GamePendingClients;
+/**
+ * The pending clients represent clients who tried to login to the game server,
+ * but for which no magic token is available yet. This can happen when the
+ * communication between the account server and client went faster than the
+ * communication between the account server and the game server.
+ */
 static GamePendingClients pendingClients;
 
+/**
+ * Notification that a particular token has been given to allow a certain
+ * player to enter the game.
+ *
+ * This method is currently called directly from the account server. Later on
+ * it should be a message sent from the account server to the game server.
+ */
 void registerGameClient(std::string const &token, PlayerPtr ch)
 {
     GamePendingClients::iterator i = pendingClients.find(token);
@@ -70,11 +88,17 @@ void registerGameClient(std::string const &token, PlayerPtr ch)
 
 void GameHandler::removeOutdatedPending()
 {
-    GamePendingLogins::iterator i = pendingLogins.begin(), next;
+    GamePendingLogins::iterator i = pendingLogins.begin();
+    GamePendingLogins::iterator next;
+
     while (i != pendingLogins.end())
     {
-        next = i; ++next;
-        if (--i->second.timeout <= 0) pendingLogins.erase(i);
+        next = i;
+        ++next;
+        if (--i->second.timeout <= 0)
+        {
+            pendingLogins.erase(i);
+        }
         i = next;
     }
 }
@@ -86,8 +110,8 @@ NetComputer *GameHandler::computerConnected(ENetPeer *peer)
 
 void GameHandler::computerDisconnected(NetComputer *computer)
 {
-    for (GamePendingClients::iterator i = pendingClients.begin(), i_end = pendingClients.end();
-         i != i_end; ++i)
+    GamePendingClients::iterator i;
+    for (i = pendingClients.begin(); i != pendingClients.end(); ++i)
     {
         if (i->second == computer)
         {
@@ -115,8 +139,9 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         GamePendingLogins::iterator i = pendingLogins.find(magic_token);
         if (i == pendingLogins.end())
         {
-            for (GamePendingClients::iterator i = pendingClients.begin(), i_end = pendingClients.end();
-                 i != i_end; ++i) {
+            GamePendingClients::iterator i;
+            for (i = pendingClients.begin(); i != pendingClients.end(); ++i)
+            {
                 if (i->second == &computer) return;
             }
             pendingClients.insert(std::make_pair(magic_token, &computer));
@@ -202,30 +227,44 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 void GameHandler::sayAround(GameClient &computer, std::string const &text)
 {
     PlayerPtr beingPtr = computer.getCharacter();
-    MessageOut msg;
-    msg.writeShort(GPMSG_SAY);
+
+    MessageOut msg(GPMSG_SAY);
     msg.writeString(beingPtr->getName());
     msg.writeString(text);
+
     unsigned speakerMapId = beingPtr->getMapId();
     std::pair<unsigned, unsigned> speakerXY = beingPtr->getXY();
+
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
          i != i_end; ++i)
     {
         // See if the other being is near enough, then send the message
-        Player const *listener = static_cast< GameClient * >(*i)->getCharacter().get();
-        if (!listener || listener->getMapId() != speakerMapId) continue;
+        Player const *listener =
+            static_cast<GameClient *>(*i)->getCharacter().get();
+
+        if (!listener || listener->getMapId() != speakerMapId) {
+            continue;
+        }
+
         std::pair<unsigned, unsigned> listenerXY = listener->getXY();
-        if (abs(listenerXY.first  - speakerXY.first ) > (int)AROUND_AREA_IN_TILES) continue;
-        if (abs(listenerXY.second - speakerXY.second) > (int)AROUND_AREA_IN_TILES) continue;
-        (*i)->send(msg.getPacket());
+
+        if (abs(listenerXY.first - speakerXY.first) <=
+                (int)AROUND_AREA_IN_TILES &&
+            abs(listenerXY.second - speakerXY.second) <=
+                (int)AROUND_AREA_IN_TILES)
+        {
+            (*i)->send(msg.getPacket());
+        }
     }
 }
 
 void GameHandler::sendTo(PlayerPtr beingPtr, MessageOut &msg)
 {
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
-        if (static_cast< GameClient * >(*i)->getCharacter().get() == beingPtr.get()) {
+    for (NetComputers::iterator i = clients.begin(); i != clients.end(); ++i)
+    {
+        PlayerPtr clientChar = static_cast<GameClient *>(*i)->getCharacter();
+        if (clientChar.get() == beingPtr.get())
+        {
             (*i)->send(msg.getPacket());
             break;
         }

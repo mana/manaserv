@@ -426,7 +426,10 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                     break; // no character selected
                 }
                 std::string magic_token(32, ' ');
-                for(int i = 0; i < 32; ++i) magic_token[i] = 1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
+                for (int i = 0; i < 32; ++i) {
+                    magic_token[i] =
+                        1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
+                }
                 result.writeByte(ERRMSG_OK);
                 result.writeString("localhost");
                 result.writeShort(9603);

@@ -23,7 +23,7 @@
 
 #include "items.h"
 
-void tmwserv::Item::use()
+void Item::use()
 {
     //
 }

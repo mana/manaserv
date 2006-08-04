@@ -78,7 +78,7 @@ std::string scriptLanugage = "none";
 #define DEFAULT_SERVER_PORT     9601
 #endif
 
-tmwserv::utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
+utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
 int worldTime = 0;              /**< Current world time in 100ms ticks */
 bool running = true;            /**< Determines if server keeps running */
 
@@ -157,7 +157,7 @@ void initialize()
 
     // Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
-    // singleton or a local vatiable in the event-loop
+    // singleton or a local variable in the event-loop
     chatChannelManager = new ChatChannelManager();
 
     chatHandler = new ChatHandler();
@@ -167,28 +167,28 @@ void initialize()
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
 
-    // set enet to quit on exit.
+    // Set enet to quit on exit.
     atexit(enet_deinitialize);
 
-    // initialize enet.
+    // Initialize enet.
     if (enet_initialize() != 0) {
         LOG_FATAL("An error occurred while initializing ENet", 0);
         exit(2);
     }
 
-    // initialize scripting subsystem.
+    // Initialize scripting subsystem.
 #ifdef RUBY_SUPPORT
     LOG_INFO("Script Language: " << scriptLanguage, 0);
 
-    // initialize ruby
+    // Initialize ruby
     ruby_init();
     ruby_init_loadpath();
     ruby_script("tmw");
 
-    // initialize bindings
+    // Initialize bindings
     Init_Tmw();
 
-    // run test script
+    // Run test script
     rb_load_file("scripts/init.rb");
     rubyStatus = ruby_exec();
 #else
@@ -205,7 +205,7 @@ void initialize()
     LOG_WARN("No Database Backend Support.", 0);
 #endif
 
-    // initialize configuration defaults
+    // Initialize configuration defaults
     config.setValue("dbuser", "");
     config.setValue("dbpass", "");
     config.setValue("dbhost", "");
@@ -236,7 +236,7 @@ void deinitialize()
     ruby_cleanup(rubyStatus);
 #endif
 
-    // destroy message handlers
+    // Destroy message handlers
     delete accountHandler;
     delete chatHandler;
     delete gameHandler;
@@ -331,20 +331,17 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    using namespace tmwserv;
-
-    // create storage wrapper
+    // Create storage wrapper
     Storage& store = Storage::instance("tmw");
     store.setUser(config.getValue("dbuser", ""));
     store.setPassword(config.getValue("dbpass", ""));
     store.close();
     store.open();
-    //
 
-    // create state machine
+    // Create state machine
     gameState = new State;
 
-    // initialize world timer
+    // Initialize world timer
     worldTimer.start();
 
     while (running) {
@@ -354,7 +351,9 @@ int main(int argc, char *argv[])
 
             if (elapsedWorldTicks > 1)
             {
-                LOG_WARN(elapsedWorldTicks -1 <<" World Tick(s) skipped because of insufficient time. please buy a faster machine ;-)", 0);
+                LOG_WARN(elapsedWorldTicks -1 << " World Tick(s) skipped "
+                        "because of insufficient time. please buy a faster "
+                        "machine ;-)", 0);
             };
 
             // Print world time at 10 second intervals to show we're alive

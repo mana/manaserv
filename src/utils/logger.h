@@ -33,7 +33,6 @@
 namespace utils
 {
 
-
 /**
  * A very simple logger that writes messages to a log file.
  * If the log file is not set, the messages are routed to the standard output
@@ -54,7 +53,7 @@ namespace utils
  *
  * int main(void)
  * {
- *     using namespace tmwserv::utils;
+ *     using namespace utils;
  *
  *     Logger& logger = Logger::instance();
  *     logger.setLogFile("/path/to/logfile");
@@ -88,7 +87,6 @@ class Logger: public Singleton<Logger>
     // friend so that Singleton can call the constructor.
     friend class Singleton<Logger>;
 
-
     public:
         /**
          * Set the log file.
@@ -103,7 +101,6 @@ class Logger: public Singleton<Logger>
         void
         setLogFile(const std::string& logFile);
 
-
         /**
          * Add/remove the timestamp.
          *
@@ -113,7 +110,6 @@ class Logger: public Singleton<Logger>
         void
         setTimestamp(bool flag = true)
             throw();
-
 
         /**
          * Set tee mode.
@@ -134,7 +130,7 @@ class Logger: public Singleton<Logger>
          *        2 = + Packets names and messages sent.
          */
         void
-        setVerbosity(unsigned short verbosity = 0) { mVerbosity = verbosity; };
+        setVerbosity(unsigned short verbosity = 0) { mVerbosity = verbosity; }
 
         /**
          * Set tee mode.
@@ -143,7 +139,7 @@ class Logger: public Singleton<Logger>
          *        output and the log file (if set) (default = true).
          */
         unsigned short
-        getVerbosity() { return mVerbosity; };
+        getVerbosity() { return mVerbosity; }
 
         /**
          * Log a generic message.
@@ -156,8 +152,7 @@ class Logger: public Singleton<Logger>
          * @exception std::ios::failure.
          */
         void
-        log(const std::string& msg, unsigned short atVerbosity = 0);
-
+        log(const std::string &msg, unsigned short atVerbosity = 0);
 
         /**
          * Log a debug message.
@@ -170,8 +165,7 @@ class Logger: public Singleton<Logger>
          * @exception std::ios::failure.
          */
         void
-        debug(const std::string& msg, unsigned short atVerbosity = 0);
-
+        debug(const std::string &msg, unsigned short atVerbosity = 0);
 
         /**
          * Log an info message.
@@ -184,8 +178,7 @@ class Logger: public Singleton<Logger>
          * @exception std::ios::failure.
          */
         void
-        info(const std::string& msg, unsigned short atVerbosity = 0);
-
+        info(const std::string &msg, unsigned short atVerbosity = 0);
 
         /**
          * Log a warn message.
@@ -198,8 +191,7 @@ class Logger: public Singleton<Logger>
          * @exception std::ios::failure.
          */
         void
-        warn(const std::string& msg, unsigned short atVerbosity = 0);
-
+        warn(const std::string &msg, unsigned short atVerbosity = 0);
 
         /**
          * Log an error message.
@@ -212,8 +204,7 @@ class Logger: public Singleton<Logger>
          * @exception std::ios::failure.
          */
         void
-        error(const std::string& msg, unsigned short atVerbosity = 0);
-
+        error(const std::string &msg, unsigned short atVerbosity = 0);
 
         /**
          * Log a fatal error message.
@@ -226,8 +217,7 @@ class Logger: public Singleton<Logger>
          * @exception std::ios::failure.
          */
         void
-        fatal(const std::string& msg, unsigned short atVerbosity = 0);
-
+        fatal(const std::string &msg, unsigned short atVerbosity = 0);
 
     private:
         /**
@@ -236,26 +226,22 @@ class Logger: public Singleton<Logger>
         Logger(void)
             throw();
 
-
         /**
          * Destructor.
          */
         ~Logger(void)
             throw();
 
-
         /**
          * Copy constructor.
          */
         Logger(const Logger& rhs);
-
 
         /**
          * Assignment operator.
          */
         Logger&
         operator=(const Logger& rhs);
-
 
         /**
          * Log a generic message.
@@ -271,7 +257,6 @@ class Logger: public Singleton<Logger>
             const std::string& msg,
             const std::string& prefix = "");
 
-
         /**
          * Get the current time.
          *
@@ -281,7 +266,6 @@ class Logger: public Singleton<Logger>
         getCurrentTime(void);
 
 
-    private:
         std::ofstream mLogFile;    /**< the log file */
         bool mHasTimestamp;        /**< the timestamp flag */
         bool mTeeMode;             /**< the tee mode flag */
