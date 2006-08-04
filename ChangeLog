@@ -1,3 +1,8 @@
+2006-08-04  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/object.h, src/object.cpp, src/being.h, src/dalstorage.cpp: Added
+	the database primary key to Player.
+
 2006-08-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/storage.h, src/dalstorage.h, src/dalstorage.cpp: Removed
@@ -68,10 +73,8 @@
 	src/utils/singleton.h, src/utils/cipher.cpp, src/utils/logger.cpp,
 	src/utils/cipher.h, src/utils/stringfilter.h, src/utils/logger.h:
 	Removed tmwserv namespace.
-
 	* src/utils/countedptr.h: Removed tmwserv namespace. Added conversion
 	constructor.
-
 	* src/accounthandler.cpp, src/account.cpp, src/object.cpp,
 	src/storage.h, src/dalstorage.cpp, src/account.h, src/object.h,
 	src/gamehandler.h, src/state.cpp, src/being.cpp, src/gamehandler.cpp,

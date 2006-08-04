@@ -20,5 +20,12 @@
  *  $Id$
  */
 
+#include <cassert>
 
 #include "object.h"
+
+void Object::setID(int id)
+{
+    assert(mID < 0);
+    mID = id;
+}

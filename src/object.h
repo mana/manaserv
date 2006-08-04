@@ -40,8 +40,9 @@ class Object
         /**
          * Constructor.
          */
-        Object(int type)
+        Object(int type, int id)
           : mType(type),
+            mID(id),
             mNeedUpdate(false)
         {}
 
@@ -57,6 +58,20 @@ class Object
          */
         unsigned int getType() const
         { return mType; }
+
+        /**
+         * Get object ID.
+         *
+         * @return the unique ID, a negative number if none yet.
+         */
+        int getID() const
+        { return mID; }
+
+        /**
+         * Set object ID.
+         * The account shall not have any ID yet.
+         */
+        void setID(int id);
 
         /**
          * Set the x coordinate.
@@ -129,6 +144,7 @@ class Object
 
     private:
         int mType; /**< Object type */
+        int mID; /** Object unique ID (wrt its type and its map at least) */
         unsigned int mX; /**< x coordinate */
         unsigned int mY; /**< y coordinate */
         unsigned int mMapId;  /**< id of the map being is on */
@@ -146,8 +162,8 @@ class MovingObject: public Object
         /**
          * Proxy constructor.
          */
-        MovingObject(int type)
-          : Object(type)
+        MovingObject(int type, int id)
+          : Object(type, id)
         {}
 };
 

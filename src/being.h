@@ -82,8 +82,8 @@ class Being: public MovingObject
         /**
          * Proxy constructor.
          */
-        Being(int type)
-          : MovingObject(type)
+        Being(int type, int id)
+          : MovingObject(type, id)
         {}
 
         /**
@@ -115,8 +115,8 @@ class Player: public Being
 {
     public:
 
-        Player(std::string const &name)
-          : Being(OBJECT_PLAYER),
+        Player(std::string const &name, int id = -1)
+          : Being(OBJECT_PLAYER, id),
             mName(name)
         {}
 

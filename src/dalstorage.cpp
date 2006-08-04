@@ -254,7 +254,7 @@ DALStorage::getAccount(const std::string& userName)
             unsigned int charRows = charInfo.rows();
 
             for (unsigned int k = 0; k < charRows; ++k) {
-                PlayerPtr player(new Player(strCharInfo[k][2]));
+                PlayerPtr player(new Player(strCharInfo[k][2], toUint(strCharInfo[k][0])));
                 player->setGender((Genders)toUshort(strCharInfo[k][3]));
                 player->setHairStyle(toUshort(strCharInfo[k][4]));
                 player->setHairColor(toUshort(strCharInfo[k][5]));
@@ -652,15 +652,10 @@ void DALStorage::flush(AccountPtr const &account)
     // insert or update the characters.
     for (Players::const_iterator it = characters.begin(),
          it_end = characters.end(); it != it_end; ++it) {
-        // check if the character already exists in the database
-        // (reminder: the character names are unique in the database).
-        std::ostringstream sql2;
-        sql2 << "select id from " << CHARACTERS_TBL_NAME
-             << " where name = \"" << (*it)->getName() << "\";";
-        const RecordSet& charInfo = mDb->execSql(sql2.str());
 
         std::ostringstream sql3;
-        if (charInfo.rows() == 0) {
+        if ((*it)->getID() < 0) {
+            // insert the character
             sql3 << "insert into " << CHARACTERS_TBL_NAME
                  << " (user_id, name, gender, hair_style, hair_color, level, money,"
                     " x, y, map_id, str, agi, vit, int, dex, luck) values ("
@@ -680,8 +675,15 @@ void DALStorage::flush(AccountPtr const &account)
                  << (*it)->getRawStat(STAT_INT) << ", "
                  << (*it)->getRawStat(STAT_DEX) << ", "
                  << (*it)->getRawStat(STAT_LUK) << ");";
-        }
-        else {
+
+            // get the character id
+            std::ostringstream sql2;
+            sql2 << "select id from " << CHARACTERS_TBL_NAME
+                 << " where name = \"" << (*it)->getName() << "\";";
+            RecordSet const &charInfo = mDb->execSql(sql2.str());
+            string_to<unsigned int> toUint;
+            (*it)->setID(toUint(charInfo(0, 0)));
+        } else {
             sql3 << "update " << CHARACTERS_TBL_NAME
                 << " set name = \"" << (*it)->getName() << "\", "
                 << " gender = " << (*it)->getGender() << ", "
@@ -702,7 +704,7 @@ void DALStorage::flush(AccountPtr const &account)
 #endif
                 << " dex = " << (*it)->getRawStat(STAT_DEX) << ", "
                 << " luck = " << (*it)->getRawStat(STAT_LUK)
-                << " where id = " << charInfo(0, 0) << ";";
+                << " where id = " << (*it)->getID() << ";";
         }
         mDb->execSql(sql3.str());
 
