@@ -98,18 +98,16 @@ class DALStorage: public Storage
         getEmailList();
 
         /**
-         * Return the number of same Emails in account's table.
-         * @return Number of same Email.
+         * Tells if the email address already exists.
+         * @return true if the email address exists.
          */
-        unsigned int
-        getSameEmailNumber(const std::string &email);
+        bool doesEmailAddressExist(std::string const &email);
 
         /**
          * Tells if the character's name already exists
          * @return true if character's name exists.
          */
-        bool
-        doesCharacterNameExists(const std::string &name);
+        bool doesCharacterNameExist(std::string const &name);
 
         /**
          * Tells the map name from the map id

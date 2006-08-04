@@ -141,11 +141,6 @@ const std::string&
 RecordSet::operator()(const unsigned int row,
                       const unsigned int col) const
 {
-    if (mHeaders.size() == 0) {
-        throw std::invalid_argument(
-            "nothing to return as the recordset is empty.");
-    }
-
     if ((row >= mRows.size()) || (col >= mHeaders.size())) {
         std::ostringstream os;
         os << "(" << row << ", " << col << ") is out of range; "
@@ -166,11 +161,6 @@ const std::string&
 RecordSet::operator()(const unsigned int row,
                       const std::string& name) const
 {
-    if (mHeaders.size() == 0) {
-        throw std::invalid_argument(
-            "nothing to return as the recordset is empty.");
-    }
-
     if (row >= mRows.size()) {
         std::ostringstream os;
         os << "row " << row << " is out of range; "

@@ -111,9 +111,9 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
                     LOG_INFO(email << ": has got double quotes in it.", 1);
                 }
-                else if (store.getSameEmailNumber(email) > 1) // Search if Email already exists,
-                {                                             // Except for the one already that is to
-                    result.writeByte(EMAILCHG_EXISTS_EMAIL);  // be changed.
+                else if (store.doesEmailAddressExist(email))
+                {
+                    result.writeByte(EMAILCHG_EXISTS_EMAIL);
                     LOG_INFO(email << ": New Email already exists.", 1);
                 }
                 else
@@ -182,7 +182,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                     break;
                 }
                 // Check if the character's name already exists
-                if (store.doesCharacterNameExists(name))
+                if (store.doesCharacterNameExist(name))
                 {
                     result.writeByte(CREATE_EXISTS_NAME);
                     LOG_INFO(name << ": Character's name already exists.", 1);
@@ -630,7 +630,7 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
             reply.writeByte(REGISTER_EXISTS_USERNAME);
         }
         // Find out whether the email is already in use.
-        else if (store.getSameEmailNumber(email) > 0)
+        else if (store.doesEmailAddressExist(email))
         {
             LOG_INFO(email << ": Email already exists.", 1);
             reply.writeByte(REGISTER_EXISTS_EMAIL);

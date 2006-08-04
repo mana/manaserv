@@ -3,6 +3,11 @@
 	* src/object.h, src/object.cpp, src/being.h, src/dalstorage.cpp: Added
 	the database primary key to Player.
 	* src/state.cpp: Used Player ID.
+	* src/dal/recordset.cpp: Removed redundant checks.
+	* src/dalstorage.cpp, src/dalstorage.h, src/storage.h: Prevented
+	database failure from allowing already existing character name or email
+	address.
+	* src/accounthandler.cpp: Fixed control for changing email address.
 
 2006-08-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

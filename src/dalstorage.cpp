@@ -329,82 +329,57 @@ DALStorage::getEmailList()
 }
 
 /**
- * Return the number of same Emails in account's table.
+ * Tells if the email address already exists
+ * @return true if the email address exists.
  */
-
-unsigned int
-DALStorage::getSameEmailNumber(const std::string &email)
+bool DALStorage::doesEmailAddressExist(std::string const &email)
 {
     // If not opened already
     open();
 
     try {
-        std::string sql("select count(email) from ");
-        sql += ACCOUNTS_TBL_NAME;
-        sql += " where upper(email) = upper(\"" + email + "\");";
+        std::ostringstream sql;
+        sql << "select count(email) from " << ACCOUNTS_TBL_NAME
+            << " where upper(email) = upper(\"" << email << "\");";
+        dal::RecordSet const &accountInfo = mDb->execSql(sql.str());
 
-        const dal::RecordSet& accountInfo = mDb->execSql(sql);
-
-        // If the account is empty then we have no choice but to return false.
-        if (accountInfo.isEmpty()) {
-            return 0;
-        }
-
-        std::stringstream ssStream(accountInfo(0,0));
-        unsigned int iReturn = 0;
+        std::istringstream ssStream(accountInfo(0, 0));
+        unsigned int iReturn = 1;
         ssStream >> iReturn;
-        return iReturn;
-    }
-    catch (const dal::DbSqlQueryExecFailure& e) {
+        return iReturn != 0;
+    } catch (std::exception const &e) {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what(), 0);
     }
 
-    return 0;
+    return true;
 }
 
 /**
  * Tells if the character's name already exists
  * @return true if character's name exists.
  */
-bool
-DALStorage::doesCharacterNameExists(const std::string& name)
+bool DALStorage::doesCharacterNameExist(const std::string& name)
 {
     // If not opened already
     open();
 
     try {
-            std::string sql("select count(name) from ");
-            sql += CHARACTERS_TBL_NAME;
-            sql += " where name = \"";
-            sql += name;
-            sql += "\";";
-            const dal::RecordSet& accountInfo = mDb->execSql(sql);
+        std::ostringstream sql;
+        sql << "select count(name) from " << CHARACTERS_TBL_NAME
+            << " where name = \"" << name << "\";";
+        dal::RecordSet const &accountInfo = mDb->execSql(sql.str());
 
-            // if the account is empty then
-            // we have no choice but to return false.
-            if (accountInfo.isEmpty()) {
-                return false;
-            }
-
-            std::stringstream ssStream(accountInfo(0,0));
-            int iReturn = -1;
-            ssStream >> iReturn;
-            if ( iReturn > 0 )
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        catch (const dal::DbSqlQueryExecFailure& e) {
+        std::istringstream ssStream(accountInfo(0, 0));
+        int iReturn = 1;
+        ssStream >> iReturn;
+        return iReturn != 0;
+    } catch (std::exception const &e) {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what(), 0);
-        }
+    }
 
-    return false;
+    return true;
 }
 
 /**

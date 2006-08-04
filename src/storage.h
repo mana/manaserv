@@ -210,18 +210,16 @@ class Storage
         std::list<std::string> getEmailList() = 0;
 
         /**
-         * Return the number of same Emails in account's table.
-         * @return Number of same Email.
+         * Tells if the email address already exists.
+         * @return true if the email address exists.
          */
-        virtual unsigned int
-        getSameEmailNumber(const std::string &email) = 0;
+        virtual bool doesEmailAddressExist(std::string const &email) = 0;
 
         /**
          * Tells if the character's name already exists
          * @return true if character's name exists.
          */
-        virtual bool
-        doesCharacterNameExists(const std::string &name) = 0;
+        virtual bool doesCharacterNameExist(std::string const &name) = 0;
 
         /**
          * Tells the map name from the map id
