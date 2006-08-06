@@ -9,7 +9,7 @@
 	* src/object.cpp, src.object.h, src/state.cpp: Implemented being
 	movements.
 
-2006-08-04  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-08-04  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/properties.h, src/map.cpp, src/map.h, src/Makefile.am:
 	Generalized the properties functionality as was done in the client
@@ -44,12 +44,12 @@
 	* src/account.h, src/account.cpp: Added the database primary key to
 	Account.
 
-2006-08-03  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-08-03  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/gameclient.cpp, src/gameclient.h, src/gamehandler.cpp,
 	src/Makefile.am: Defined the GameClient class in its own module.
 
-2006-08-02  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-08-02  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/accounthandler.cpp, src/accounthandler.h: Put handling of
 	logout, unregister and password change messages into separate methods.
@@ -63,7 +63,7 @@
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.
 
-2006-08-01  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-08-01  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/accountclient.h, src/accountclient.cpp, src/Makefile.am: Defined
 	this class in its own module (extracted from accounthandler.cpp).
@@ -77,7 +77,7 @@
 	* src/accounthandler.cpp, src/accounthandler.h: Put handling of
 	registrations in a separate method and cleaned it up a bit.
 
-2006-07-31  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-07-31  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/client.cpp, src/netcomputer.cpp: Fixed registering (send version
 	as integer) and corrected the off by one packed size.
@@ -197,7 +197,7 @@
 	* src/messagein.cpp: Replaced strnlen by memchr to avoid GNU
 	extensions.
 
-2006-05-14  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-05-14  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/messageout.cpp, src/messagein.h, src/messagein.cpp: Applied
 	another patch by Guillaume Melquiond which fixed a number of issues
@@ -209,7 +209,7 @@
 	patch by Guillaume that fixes and optimizes
 	ConnectionHandler::sendAround.
 
-2006-05-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-05-13  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/Makefile.am, configure.ac: Applied patch by Guillaume Melquiond
 	which adds ENet check and adds timer.cpp/h to the Makefile.am.
@@ -268,12 +268,12 @@
 
 	* tmwserv.dev: Updated project file.
 
-2006-03-07  Björn Steinbrink  <B.Steinbrink@gmx.de>
+2006-03-07  BjÃ¶rn Steinbrink  <B.Steinbrink@gmx.de>
 
 	* src/utils/stringfilter.h, src/utils/stringfilter.cpp: A bunch of
 	cleanups.
 
-2006-03-06  Björn Steinbrink  <B.Steinbrink@gmx.de>
+2006-03-06  BjÃ¶rn Steinbrink  <B.Steinbrink@gmx.de>
 
 	* src/connectionhandler.h, src/storage.cpp, src/configuration.cpp,
 	src/script.h, src/messageout.cpp, src/map.cpp, src/messagein.h,
@@ -341,7 +341,7 @@
 	specific channel. Also made some fixes on the chat channeling and in
 	the channels load/save functions.
 
-2006-01-18  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2006-01-18  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/mapmanager.cpp, src/mapmanager.h: Some insignificant changes to
 	usage of the const keyword. Also simplified isLoaded method.
@@ -439,7 +439,7 @@
 	src/storage.h: Fixing a bug in the Storage::getAccount() function that
 	made the server crash when the first login had a bad password.
 
-2005-12-29  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2005-12-29  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* configure.ac: Added errors when SDL_net or libcrypto are not found.
 	* src/main.cpp: Reset SEGV signal handling after SDL initialisation to
@@ -451,9 +451,9 @@
 
 	* src/mapmanager.cpp, src/mapmanager.h, tmwserv.dev: Forgot a way to
 	access maps.
-	* tmwserv.dev: Fixed merge conflict as pointed out by Bjørn.
+	* tmwserv.dev: Fixed merge conflict as pointed out by BjÃ¸rn.
 
-2005-12-28  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2005-12-28  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* makeclient.sh, src/Makefile.am: Integrated the building of tmwclient
 	with the default make command, as contributed by r0nny.
@@ -471,7 +471,7 @@
 	needs to be implemented. Added a small slangs filter to reduce bad
 	words in account names and in conversations a little.
 
-2005-12-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2005-12-26  BjÃ¸rn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/storage.cpp: Removed manual throwing of std::bad_alloc, which
 	should happen by default unless new(nothrow) is used. Suggested by
