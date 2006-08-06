@@ -123,30 +123,6 @@ Map::getMetaTile(int x, int y)
     return &metaTiles[x + y * width];
 }
 
-int
-Map::getWidth()
-{
-    return width;
-}
-
-int
-Map::getHeight()
-{
-    return height;
-}
-
-int
-Map::getTileWidth()
-{
-    return tileWidth;
-}
-
-int
-Map::getTileHeight()
-{
-    return tileHeight;
-}
-
 std::list<PATH_NODE>
 Map::findPath(int startX, int startY, int destX, int destY)
 {
@@ -304,4 +280,10 @@ Map::findPath(int startX, int startY, int destX, int destY)
     }
 
     return path;
+}
+
+bool areAround(unsigned x1, unsigned y1, unsigned x2, unsigned y2)
+{
+    return (abs(x1 - x2) <= (int)AROUND_AREA &&
+            abs(y1 - y2) <= (int)AROUND_AREA);
 }

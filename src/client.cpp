@@ -269,8 +269,8 @@ int main(int argc, char *argv[])
                     std::cin >> y;
 
                     msg.writeShort(PGMSG_WALK);
-                    msg.writeLong(x);
-                    msg.writeLong(y);
+                    msg.writeShort(x);
+                    msg.writeShort(y);
 
                     msgDestination = 1;
                 } break;
@@ -717,6 +717,20 @@ void parsePacket(char *data, int recvLength) {
                     default:
                         std::cout << "Enter world: Unknown error." << std::endl;
                         break;
+                }
+            } break;
+
+            case GPMSG_BEINGS_MOVE:
+            {
+                int nb = (recvLength - 2) / (1*4 + 4*2);
+                std::cout << "Beings are moving:" << std::endl;
+                for(; nb > 0; --nb) {
+                    int id = msg.readLong();
+                    int cx = msg.readShort(), cy = msg.readShort();
+                    int dx = msg.readShort(), dy = msg.readShort();
+                    std::cout << "  ID " << id << " at ("
+                              << cx << ", " << cy << ") toward ("
+                              << dx << ", " << dy << ")." << std::endl;
                 }
             } break;
 

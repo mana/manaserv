@@ -46,9 +46,57 @@ void State::update()
     // update game state (update AI, etc.)
     for (std::map<unsigned int, MapComposite>::iterator m = maps.begin(),
          m_end = maps.end(); m != m_end; ++m) {
+
+        typedef std::vector< utils::CountedPtr<MovingObject> > Movings;
+        Movings movings;
+
         for (Objects::iterator o = m->second.objects.begin(),
              o_end = m->second.objects.end(); o != o_end; ++o) {
             (*o)->update();
+            int t = (*o)->getType();
+            if (t == OBJECT_NPC || t == OBJECT_PLAYER || t == OBJECT_MONSTER) {
+                utils::CountedPtr<MovingObject> ptr(*o);
+                ptr->move();
+                movings.push_back(ptr);
+            }
+        }
+
+        
+        Players &players = m->second.players;
+        for (Players::iterator p = players.begin(),
+             p_end = players.end(); p != p_end; ++p) {
+            std::pair<unsigned, unsigned> ps = (*p)->getXY();
+            std::pair<unsigned, unsigned> pn = (*p)->getNextPosition();
+            MessageOut msg;
+            msg.writeShort(GPMSG_BEINGS_MOVE);
+
+            for (Movings::iterator o = movings.begin(),
+                 o_end = movings.end(); o != o_end; ++o) {
+                std::pair<unsigned, unsigned> os = (*o)->getXY();
+                std::pair<unsigned, unsigned> on = (*o)->getNextPosition();
+
+                bool were = areAround(ps.first, ps.second, os.first, os.second);
+                bool will = areAround(pn.first, pn.second, on.first, on.second);
+                bool has_moved = os.first != on.first || os.second != on.second;
+                if (!(will && has_moved) && !(were != will))
+                    continue;
+
+                std::pair<unsigned, unsigned> od = (*o)->getDestination();
+                msg.writeLong((*o)->getID());
+                msg.writeShort(on.first);
+                msg.writeShort(on.second);
+                msg.writeShort(od.first);
+                msg.writeShort(od.second);
+            }
+
+            if (msg.getDataSize() > 2)
+                gameHandler->sendTo(*p, msg);
+        }
+
+        for (Movings::iterator o = movings.begin(),
+             o_end = movings.end(); o != o_end; ++o) {
+            std::pair<unsigned, unsigned> pos = (*o)->getNextPosition();
+            (*o)->setXY(pos.first, pos.second);
         }
     }
 }

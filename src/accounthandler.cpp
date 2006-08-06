@@ -323,6 +323,9 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 LOG_INFO("Selected Character " << int(charNum)
                 << ": " <<
                 selectedChar->getName(), 1);
+
+                selectedChar->setDestination(selectedChar->getX(), selectedChar->getY());
+                selectedChar->setSpeed(10); // TODO
             }
             break;
 
@@ -422,9 +425,10 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (computer.getCharacter().get() == NULL)
                 {
                     result.writeByte(ERRMSG_NO_CHARACTER_SELECTED);
-                    LOG_INFO("No character selected. Can't enter the world.", 2);
+                    LOG_INFO("No character selected. Can't enter the world.", 1);
                     break; // no character selected
                 }
+                LOG_INFO(computer.getCharacter()->getName() << " is trying to enter the world.", 1);
                 std::string magic_token(32, ' ');
                 for (int i = 0; i < 32; ++i) {
                     magic_token[i] =
@@ -451,7 +455,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (computer.getCharacter().get() == NULL)
                 {
                     result.writeByte(ERRMSG_NO_CHARACTER_SELECTED);
-                    LOG_INFO("No character selected. Can't enter the chat.", 2);
+                    LOG_INFO("No character selected. Can't enter the chat.", 1);
                     break; // no character selected
                 }
                 std::string magic_token(32, ' ');
@@ -472,7 +476,8 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
     }
 
     // return result
-    computer.send(result.getPacket());
+    if (result.getDataSize() > 0)
+        computer.send(result.getPacket());
 }
 
 void

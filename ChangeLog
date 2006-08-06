@@ -1,3 +1,14 @@
+2006-08-06  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/map.cpp, src/map.h, src/being.h, src/being.cpp: Changed member
+	constness. Added a proximity tester. Moved path node structure.
+	* src/accounthandler.cpp: Modified logging. Prevented empty packets
+	from being sent and killing ENet. Set destination to current position.
+	* src/defines.h, src/gamehandler.cpp, src/client.cpp: Added support for
+	move messages. Changed sayAround to pixel distance.
+	* src/object.cpp, src.object.h, src/state.cpp: Implemented being
+	movements.
+
 2006-08-04  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/properties.h, src/map.cpp, src/map.h, src/Makefile.am:

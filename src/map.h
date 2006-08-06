@@ -30,7 +30,14 @@
 
 #include "properties.h"
 
-struct PATH_NODE;
+
+struct PATH_NODE {
+    PATH_NODE(unsigned short u, unsigned short v)
+        : x(u), y(v)
+    {}
+
+    unsigned short x, y;
+};
 
 /**
  * A meta tile stores additional information about a location on a tile map.
@@ -129,26 +136,26 @@ class Map : public Properties
         /**
          * Returns the width of this map.
          */
-        int
-        getWidth();
+        int getWidth() const
+        { return width; }
 
         /**
          * Returns the height of this map.
          */
-        int
-        getHeight();
+        int getHeight() const
+        { return height; }
 
         /**
          * Returns the tile width of this map.
          */
-        int
-        getTileWidth();
+        int getTileWidth() const
+        { return tileWidth; }
 
         /**
          * Returns the tile height used by this map.
          */
-        int
-        getTileHeight();
+        int getTileHeight() const
+        { return tileHeight; }
 
         /**
          * Find a path from one location to the next.
@@ -166,5 +173,7 @@ class Map : public Properties
         // Pathfinding members
         int onClosedList, onOpenList;
 };
+
+bool areAround(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
 
 #endif

@@ -34,15 +34,6 @@
 
 const unsigned int MAX_EQUIP_SLOTS = 5; /**< Maximum number of equipped slots */
 
-struct PATH_NODE {
-    /**
-     * Constructor.
-     */
-    PATH_NODE(unsigned short x, unsigned short y);
-
-    unsigned short x, y;
-};
-
 /**
  * Raw statistics of a Player
  */

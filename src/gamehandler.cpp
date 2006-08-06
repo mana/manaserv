@@ -27,6 +27,7 @@
 #include <map>
 
 #include "gameclient.h"
+#include "map.h"
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
@@ -194,12 +195,10 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_WALK:
             {
-                long x = message.readLong();
-                long y = message.readLong();
+                unsigned x = message.readShort();
+                unsigned y = message.readShort();
 
-                // simplistic "teleport" walk
-                computer.getCharacter()->setX(x);
-                computer.getCharacter()->setY(y);
+                computer.getCharacter()->setDestination(x, y);
 
                 // no response should be required
             } break;
@@ -220,7 +219,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
     }
 
-    if (result.getPacket()->length > 0)
+    if (result.getDataSize() > 0)
         computer.send(result.getPacket());
 }
 
@@ -248,10 +247,8 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
 
         std::pair<unsigned, unsigned> listenerXY = listener->getXY();
 
-        if (abs(listenerXY.first - speakerXY.first) <=
-                (int)AROUND_AREA_IN_TILES &&
-            abs(listenerXY.second - speakerXY.second) <=
-                (int)AROUND_AREA_IN_TILES)
+        if (areAround(listenerXY.first, listenerXY.second,
+                      speakerXY.first, speakerXY.second))
         {
             (*i)->send(msg.getPacket());
         }

@@ -165,6 +165,42 @@ class MovingObject: public Object
         MovingObject(int type, int id)
           : Object(type, id)
         {}
+
+        /**
+         * Gets the destination coordinates of the object.
+         */
+        std::pair<unsigned, unsigned> getDestination() const
+        { return std::make_pair(mDstX, mDstY); }
+
+        /**
+         * Sets the destination coordinates of the object.
+         */
+        void setDestination(unsigned x, unsigned y)
+        { mDstX = x; mDstY = y; }
+
+        /**
+         * Gets the next coordinates of the object.
+         */
+        std::pair<unsigned, unsigned> getNextPosition() const
+        { return std::make_pair(mNewX, mNewY); }
+
+        /**
+         * Sets object speed.
+         */
+        void setSpeed(unsigned s)
+        { mSpeed = s; }
+
+        /**
+         * Moves the object toward its destination.
+         */
+        void move();
+
+    private:
+        unsigned mDstX; /**< target x coordinate */
+        unsigned mDstY; /**< target y coordinate */
+        unsigned mNewX; /**< next x coordinate */
+        unsigned mNewY; /**< next y coordinate */
+        unsigned mSpeed; /**< speed */
 };
 
 /**
