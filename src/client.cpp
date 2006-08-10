@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
             std::cout << "4) Logout              13) Say around" << std::endl;
             std::cout << "5) Change Password     14) Equip Item" << std::endl;
             std::cout << "6) Change Email        15) Ruby Expression" << std::endl;
-            std::cout << "7) Get Email           16) Enter world" << std::endl;
+            std::cout << "7) Get Email           16) Request game server token" << std::endl;
             std::cout << "8) Create character    17) Enter world (GS)" << std::endl;
             std::cout << "Choose your option: ";
             std::cin >> answer;

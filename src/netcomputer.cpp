@@ -29,15 +29,20 @@
 #include "state.h"
 
 NetComputer::NetComputer(ConnectionHandler *handler, ENetPeer *peer):
-    handler(handler),
-    peer(peer)
+    mHandler(handler),
+    mPeer(peer)
 {
 }
 
 void NetComputer::disconnect(const std::string &reason)
 {
-    // Somehow notify the netsession listener about the disconnect after
-    // sending this computer a disconnect message containing the reason.
+    // TODO: Send a disconnect message containing the reason, and somehow only
+    // TODO: really disconnect the client after waiting for the client to get
+    // TODO: the message (or likely got it).
+
+    // ENet should generate a disconnect event (notifying the connection
+    // handler)
+    enet_peer_disconnect(mPeer, 0);
 }
 
 void NetComputer::send(const Packet *p)
@@ -47,5 +52,5 @@ void NetComputer::send(const Packet *p)
                                             ENET_PACKET_FLAG_RELIABLE);
 
     // Send the packet to the peer over channel id 0.
-    enet_peer_send(peer, 0, packet);
+    enet_peer_send(mPeer, 0, packet);
 }

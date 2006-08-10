@@ -77,16 +77,9 @@ class NetComputer
         send(const Packet *p);
         //void send(Packet *p, bool reliable = true);
 
-        /**
-         * Return the peer
-         */
-        ENetPeer *getPeer() { return peer; }
-
     private:
-        ConnectionHandler *handler;
-
-        std::queue<Packet*> queue; /**< Message Queue (FIFO) */
-        ENetPeer *peer;            /**< Client peer */
+        ConnectionHandler *mHandler;  /**< Connection handler */
+        ENetPeer *mPeer;              /**< Client peer */
 };
 
 #endif

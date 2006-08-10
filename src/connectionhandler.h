@@ -85,11 +85,6 @@ class ConnectionHandler
         //void receivePacket(NetComputer *computer, Packet *packet);
 
         /**
-         * Force disconnection of target computer.
-         */
-        void forceDisconnect(NetComputer *);
-
-        /**
          * Send packet to every client, used for announcements.
          */
         void sendToEveryone(MessageOut &);

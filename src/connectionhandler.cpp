@@ -92,11 +92,6 @@ void ConnectionHandler::stopListen()
     // FIXME: memory leak on NetComputers
 }
 
-void ConnectionHandler::forceDisconnect(NetComputer *comp)
-{
-    enet_peer_disconnect(comp->getPeer(), 0); // ENet should generate a disconnect event
-}
-
 void ConnectionHandler::flush()
 {
     enet_host_flush(host);

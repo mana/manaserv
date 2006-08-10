@@ -1,3 +1,11 @@
+2006-08-11  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/connectionhandler.h, src/connectionhandler.cpp,
+	src/netcomputer.h, src/netcomputer.cpp: Removed
+	ConnectionHandler::forceDisconnect method and implemented part of the
+	NetComputer::disconnect method instead. Makes NetComputer::getPeer
+	unnecessary.
+
 2006-08-06  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/map.cpp, src/map.h, src/being.h, src/being.cpp: Changed member
