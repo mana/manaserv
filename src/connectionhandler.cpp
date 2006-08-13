@@ -119,8 +119,12 @@ void ConnectionHandler::process()
 
             case ENET_EVENT_TYPE_RECEIVE:
             {
+                // Convert the client IP address to string
+                // representation
+                std::string ipaddr = ip4ToString(event.peer->address.host);
+                
                 LOG_INFO("A packet of length " << event.packet->dataLength <<
-                         " was received from " << event.peer->address.host, 2);
+                         " was received from " << ipaddr, 2);
 
                 NetComputer *comp = (NetComputer *)event.peer->data;
 
@@ -135,10 +139,6 @@ void ConnectionHandler::process()
 
                 // If the scripting subsystem didn't hook the message
                 // it will be handled by the default message handler.
-
-                // Convert the client IP address to string
-                // representation
-                std::string ipaddr = ip4ToString(event.peer->address.host);
 
                 // Make sure that the packet is big enough (> short)
                 if (event.packet->dataLength >= 2) {

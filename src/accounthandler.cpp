@@ -284,6 +284,22 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 store.flush(computer.getAccount()); // flush changes
                 result.writeByte(ERRMSG_OK);
+                computer.send(result.getPacket());
+                
+                // Send new characters infos back to client
+                MessageOut charInfo(APMSG_CHAR_INFO);
+                int slot = chars.size() - 1;
+                charInfo.writeByte(slot);
+                charInfo.writeString(chars[slot]->getName());
+                charInfo.writeByte(unsigned(short(chars[slot]->getGender())));
+                charInfo.writeByte(chars[slot]->getHairStyle());
+                charInfo.writeByte(chars[slot]->getHairColor());
+                charInfo.writeByte(chars[slot]->getLevel());
+                charInfo.writeShort(chars[slot]->getMoney());
+                for (int j = 0; j < NB_RSTAT; ++j)
+                        charInfo.writeShort(chars[slot]->getRawStat(j));
+                computer.send(charInfo.getPacket());
+                return;
             }
             break;
 
@@ -371,7 +387,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
             break;
 
-        case PAMSG_CHAR_LIST:
+        /*case PAMSG_CHAR_LIST:
             {
                 result.writeShort(APMSG_CHAR_LIST_RESPONSE);
 
@@ -410,7 +426,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 charStats += ".";
                 LOG_INFO(charStats.c_str(), 1);
             }
-            break;
+            break;*/
 
         case PAMSG_ENTER_WORLD:
             {
@@ -533,23 +549,30 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
             computer.setAccount(acc);
 
             reply.writeByte(ERRMSG_OK);
+            computer.send(reply.getPacket());
 
             // Return information about available characters
             Players &chars = computer.getAccount()->getCharacters();
-            reply.writeByte(chars.size());
 
             LOG_INFO(username << "'s account has " << chars.size()
                      << " character(s).", 1);
-
+                     
+            // Send characters list
             for (unsigned int i = 0; i < chars.size(); i++)
             {
-                reply.writeString(chars[i]->getName());
-                reply.writeByte(unsigned(short(chars[i]->getGender())));
-                reply.writeByte(chars[i]->getHairStyle());
-                reply.writeByte(chars[i]->getHairColor());
-                reply.writeByte(chars[i]->getLevel());
-                reply.writeShort(chars[i]->getMoney());
+                MessageOut charInfo(APMSG_CHAR_INFO);
+                charInfo.writeByte(i); // Slot
+                charInfo.writeString(chars[i]->getName());
+                charInfo.writeByte(unsigned(short(chars[i]->getGender())));
+                charInfo.writeByte(chars[i]->getHairStyle());
+                charInfo.writeByte(chars[i]->getHairColor());
+                charInfo.writeByte(chars[i]->getLevel());
+                charInfo.writeShort(chars[i]->getMoney());
+                for (int j = 0; j < NB_RSTAT; ++j)
+                        charInfo.writeShort(chars[i]->getRawStat(j));
+                computer.send(charInfo.getPacket());
             }
+            return;
         }
     }
 

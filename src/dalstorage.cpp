@@ -656,8 +656,14 @@ void DALStorage::flush(AccountPtr const &account)
             sql2 << "select id from " << CHARACTERS_TBL_NAME
                  << " where name = \"" << (*it)->getName() << "\";";
             RecordSet const &charInfo = mDb->execSql(sql2.str());
-            string_to<unsigned int> toUint;
-            (*it)->setID(toUint(charInfo(0, 0)));
+            if (charInfo.isEmpty()) {
+                (*it)->setID(1);
+            }
+            else
+            {
+                string_to<unsigned int> toUint;
+                (*it)->setID(toUint(charInfo(0, 0)));
+            }
         } else {
             sql3 << "update " << CHARACTERS_TBL_NAME
                 << " set name = \"" << (*it)->getName() << "\", "
