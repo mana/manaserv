@@ -31,29 +31,34 @@
  */
 class Item : public Object
 {
-    //Item type
-    unsigned int type;
+    public:
+        /**
+         * Enumeration of available Item types.
+         */
+        enum {
+            Usable,
+            Equipment
+        };
 
-  public:
-    /**
-     * Enumeration of available Item types.
-     */
-    enum {
-        Usable,
-        Equipment
-    };
+        Item(int type, int id):
+            Object(type, id)
+        {}
 
-    virtual ~Item() throw() { }
+        virtual ~Item() throw() { }
 
-    /**
-     * The function called to use an item
-     */
-    void use();
+        /**
+         * The function called to use an item
+         */
+        void use();
 
-    /**
-     * Return type of item
-     */
-    unsigned int getType() { return type; }
+        /**
+         * Return type of item
+         */
+        unsigned int getType() const { return type; }
+
+    private:
+        //Item type
+        unsigned int type;
 };
 
 #endif
