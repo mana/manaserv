@@ -1,7 +1,7 @@
 [Project]
 FileName=tmwserv.dev
 Name=tmwserv
-UnitCount=75
+UnitCount=77
 Type=1
 Ver=1
 ObjFiles=
@@ -768,9 +768,9 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit76]
-FileName=src\utils\timer.h
+FileName=src\gameclient.cpp
 CompileCpp=1
-Folder=utils
+Folder=tmwserv
 Compile=1
 Link=1
 Priority=1000
@@ -818,9 +818,9 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit77]
-FileName=src\utils\wingettimeofday.cpp
+FileName=src\gameclient.h
 CompileCpp=1
-Folder=utils
+Folder=tmwserv
 Compile=1
 Link=1
 Priority=1000

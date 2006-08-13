@@ -1,3 +1,7 @@
+2006-08-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.cbp, tmwserv.dev: Updated project files.
+
 2006-08-11  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/connectionhandler.h, src/connectionhandler.cpp,
