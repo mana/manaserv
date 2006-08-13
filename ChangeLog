@@ -2,6 +2,8 @@
 
 	* src/items.h: Fixed missing constructor since there is no default
 	constructor in its superclass Object.
+	* src/netcomputer.cpp: Log sending of messages.
+	* runserv.sh: Include more verbose messages.
 
 2006-08-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

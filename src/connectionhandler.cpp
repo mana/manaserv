@@ -122,7 +122,7 @@ void ConnectionHandler::process()
                 // Convert the client IP address to string
                 // representation
                 std::string ipaddr = ip4ToString(event.peer->address.host);
-                
+
                 LOG_INFO("A packet of length " << event.packet->dataLength <<
                          " was received from " << ipaddr, 2);
 

@@ -28,6 +28,8 @@
 #include "packet.h"
 #include "state.h"
 
+#include "utils/logger.h"
+
 NetComputer::NetComputer(ConnectionHandler *handler, ENetPeer *peer):
     mHandler(handler),
     mPeer(peer)
@@ -47,6 +49,8 @@ void NetComputer::disconnect(const std::string &reason)
 
 void NetComputer::send(const Packet *p)
 {
+    LOG_INFO("Sending packet of length " << p->length, 2);
+
     // Create a reliable packet.
     ENetPacket *packet = enet_packet_create(p->data, p->length,
                                             ENET_PACKET_FLAG_RELIABLE);
