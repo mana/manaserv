@@ -27,10 +27,9 @@
 
 #include <enet/enet.h>
 
-#include "packet.h"
-
-MessageIn::MessageIn(Packet *packet):
-    mPacket(packet),
+MessageIn::MessageIn(const char *data, int length):
+    mData(data),
+    mLength(length),
     mPos(0)
 {
     // Read the message ID
@@ -39,78 +38,64 @@ MessageIn::MessageIn(Packet *packet):
 
 MessageIn::~MessageIn()
 {
-    delete mPacket; // To be removed if the packet is deleted elsewhere.
 }
 
 char MessageIn::readByte()
 {
     char value = -1;
-    if (mPacket)
+    if (mPos < mLength)
     {
-        if (mPos < mPacket->length)
-        {
-            value = mPacket->data[mPos];
-        }
-        mPos += 1;
+        value = mData[mPos];
     }
+    mPos += 1;
     return value;
 }
 
 short MessageIn::readShort()
 {
     short value = -1;
-    if (mPacket)
+    if (mPos + 2 <= mLength)
     {
-        if (mPos + 2 <= mPacket->length)
-        {
-            uint16_t t;
-            memcpy(&t, mPacket->data + mPos, 2);
-            value = ENET_NET_TO_HOST_16(t);
-        }
-        mPos += 2;
+        uint16_t t;
+        memcpy(&t, mData + mPos, 2);
+        value = ENET_NET_TO_HOST_16(t);
     }
+    mPos += 2;
     return value;
 }
 
 long MessageIn::readLong()
 {
     long value = -1;
-    if (mPacket)
+    if (mPos + 4 <= mLength)
     {
-        if (mPos + 4 <= mPacket->length)
-        {
-            uint32_t t;
-            memcpy(&t, mPacket->data + mPos, 4);
-            value = ENET_NET_TO_HOST_32(t);
-        }
-        mPos += 4;
+        uint32_t t;
+        memcpy(&t, mData + mPos, 4);
+        value = ENET_NET_TO_HOST_32(t);
     }
+    mPos += 4;
     return value;
 }
 
 std::string MessageIn::readString(int length)
 {
-    if (mPacket)
-    {
-        // Get string length
-        if (length < 0) {
-            length = readShort();
-        }
-
-        // Make sure the string isn't erroneous
-        if (length < 0 || mPos + length > mPacket->length) {
-            mPos = mPacket->length + 1;
-            return "";
-        }
-
-        // Read the string
-        char const *stringBeg = mPacket->data + mPos;
-        char const *stringEnd = (char const *)memchr(stringBeg, '\0', length);
-        std::string readString(stringBeg,
-                               stringEnd ? stringEnd - stringBeg : length);
-        mPos += length;
-        return readString;
+    // Get string length
+    if (length < 0) {
+        length = readShort();
     }
 
-    return "";
+    // Make sure the string isn't erroneous
+    if (length < 0 || mPos + length > mLength) {
+        mPos = mLength + 1;
+        return "";
+    }
+
+    // Read the string
+    char const *stringBeg = mData + mPos;
+    char const *stringEnd = (char const *)memchr(stringBeg, '\0', length);
+    std::string readString(stringBeg,
+            stringEnd ? stringEnd - stringBeg : length);
+    mPos += length;
+
+    return readString;
 }

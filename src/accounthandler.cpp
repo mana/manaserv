@@ -284,8 +284,8 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 store.flush(computer.getAccount()); // flush changes
                 result.writeByte(ERRMSG_OK);
-                computer.send(result.getPacket());
-                
+                computer.send(result);
+
                 // Send new characters infos back to client
                 MessageOut charInfo(APMSG_CHAR_INFO);
                 int slot = chars.size() - 1;
@@ -298,7 +298,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 charInfo.writeShort(chars[slot]->getMoney());
                 for (int j = 0; j < NB_RSTAT; ++j)
                         charInfo.writeShort(chars[slot]->getRawStat(j));
-                computer.send(charInfo.getPacket());
+                computer.send(charInfo);
                 return;
             }
             break;
@@ -401,7 +401,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
     // return result
     if (result.getDataSize() > 0)
-        computer.send(result.getPacket());
+        computer.send(result);
 }
 
 void
@@ -457,34 +457,34 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
             computer.setAccount(acc);
 
             reply.writeByte(ERRMSG_OK);
-            computer.send(reply.getPacket());
+            computer.send(reply);
 
             // Return information about available characters
             Players &chars = computer.getAccount()->getCharacters();
 
             LOG_INFO(username << "'s account has " << chars.size()
                      << " character(s).", 1);
-                     
+
             // Send characters list
             for (unsigned int i = 0; i < chars.size(); i++)
             {
                 MessageOut charInfo(APMSG_CHAR_INFO);
                 charInfo.writeByte(i); // Slot
                 charInfo.writeString(chars[i]->getName());
-                charInfo.writeByte(unsigned(short(chars[i]->getGender())));
+                charInfo.writeByte((unsigned char) chars[i]->getGender());
                 charInfo.writeByte(chars[i]->getHairStyle());
                 charInfo.writeByte(chars[i]->getHairColor());
                 charInfo.writeByte(chars[i]->getLevel());
                 charInfo.writeShort(chars[i]->getMoney());
                 for (int j = 0; j < NB_RSTAT; ++j)
                         charInfo.writeShort(chars[i]->getRawStat(j));
-                computer.send(charInfo.getPacket());
+                computer.send(charInfo);
             }
             return;
         }
     }
 
-    computer.send(reply.getPacket());
+    computer.send(reply);
 }
 
 void
@@ -504,7 +504,7 @@ AccountHandler::handleLogoutMessage(AccountClient &computer, MessageIn &msg)
         reply.writeByte(ERRMSG_OK);
     }
 
-    computer.send(reply.getPacket());
+    computer.send(reply);
 }
 
 void
@@ -584,7 +584,7 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         }
     }
 
-    computer.send(reply.getPacket());
+    computer.send(reply);
 }
 
 void
@@ -634,7 +634,7 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
         }
     }
 
-    computer.send(reply.getPacket());
+    computer.send(reply);
 }
 
 void
@@ -677,5 +677,5 @@ AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
         reply.writeByte(ERRMSG_OK);
     }
 
-    computer.send(reply.getPacket());
+    computer.send(reply);
 }

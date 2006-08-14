@@ -28,7 +28,6 @@
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
-#include "packet.h"
 
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
@@ -77,7 +76,7 @@ void registerChatClient(std::string const &token, std::string const &name, int l
         MessageOut result;
         result.writeShort(CPMSG_CONNECT_RESPONSE);
         result.writeByte(ERRMSG_OK);
-        computer->send(result.getPacket());
+        computer->send(result);
     }
     else
     {
@@ -148,7 +147,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         pendingLogins.erase(i);
         result.writeShort(CPMSG_CONNECT_RESPONSE);
         result.writeByte(ERRMSG_OK);
-        computer.send(result.getPacket());
+        computer.send(result);
         return;
     }
 
@@ -420,8 +419,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
     }
 
-    if (result.getPacket()->length > 0)
-        computer.send(result.getPacket());
+    if (result.getDataSize() > 0)
+        computer.send(result);
 }
 
 void ChatHandler::handleCommand(ChatClient &computer, std::string const &command)
@@ -430,7 +429,7 @@ void ChatHandler::handleCommand(ChatClient &computer, std::string const &command
     MessageOut result;
     result.writeShort(CPMSG_ERROR);
     result.writeByte(CHAT_UNHANDLED_COMMAND);
-    computer.send(result.getPacket());
+    computer.send(result);
 }
 
 void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
@@ -439,7 +438,7 @@ void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
     MessageOut result;
     result.writeShort(CPMSG_ERROR);
     result.writeByte(CHAT_USING_BAD_WORDS); // The Channel
-    computer.send(result.getPacket());
+    computer.send(result);
 
     LOG_INFO(computer.characterName << " says bad words.", 2);
 }
@@ -460,7 +459,7 @@ void ChatHandler::announce(ChatClient &computer, std::string const &text)
     {
         result.writeShort(CPMSG_ERROR);
         result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-        computer.send(result.getPacket());
+        computer.send(result);
         LOG_INFO(computer.characterName <<
             " couldn't make an announcement due to insufficient rights.", 2);
     }
@@ -478,7 +477,7 @@ void ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerNam
          i != i_end; ++i) {
         if (static_cast< ChatClient * >(*i)->characterName == playerName)
         {
-            (*i)->send(result.getPacket());
+            (*i)->send(result);
             break;
         }
     }
@@ -519,7 +518,7 @@ void ChatHandler::sendInChannel(short channelId, MessageOut &msg)
             j = std::find(users.begin(), j_end, static_cast< ChatClient * >(*i)->characterName);
         if (j != j_end)
         {
-            (*i)->send(msg.getPacket());
+            (*i)->send(msg);
         }
     }
 }

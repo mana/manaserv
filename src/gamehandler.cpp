@@ -31,7 +31,6 @@
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
-#include "packet.h"
 #include "state.h"
 #include "utils/logger.h"
 
@@ -76,7 +75,7 @@ void registerGameClient(std::string const &token, PlayerPtr ch)
         MessageOut result;
         result.writeShort(GPMSG_CONNECT_RESPONSE);
         result.writeByte(ERRMSG_OK);
-        computer->send(result.getPacket());
+        computer->send(result);
     }
     else
     {
@@ -152,7 +151,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         pendingLogins.erase(i);
         result.writeShort(GPMSG_CONNECT_RESPONSE);
         result.writeByte(ERRMSG_OK);
-        computer.send(result.getPacket());
+        computer.send(result);
         return;
     }
 
@@ -220,7 +219,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
     }
 
     if (result.getDataSize() > 0)
-        computer.send(result.getPacket());
+        computer.send(result);
 }
 
 void GameHandler::sayAround(GameClient &computer, std::string const &text)
@@ -250,7 +249,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
         if (areAround(listenerXY.first, listenerXY.second,
                       speakerXY.first, speakerXY.second))
         {
-            (*i)->send(msg.getPacket());
+            (*i)->send(msg);
         }
     }
 }
@@ -262,7 +261,7 @@ void GameHandler::sendTo(PlayerPtr beingPtr, MessageOut &msg)
         PlayerPtr clientChar = static_cast<GameClient *>(*i)->getCharacter();
         if (clientChar.get() == beingPtr.get())
         {
-            (*i)->send(msg.getPacket());
+            (*i)->send(msg);
             break;
         }
     }

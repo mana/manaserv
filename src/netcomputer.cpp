@@ -25,7 +25,7 @@
 
 #include "chatchannelmanager.h"
 #include "connectionhandler.h"
-#include "packet.h"
+#include "messageout.h"
 #include "state.h"
 
 #include "utils/logger.h"
@@ -47,12 +47,12 @@ void NetComputer::disconnect(const std::string &reason)
     enet_peer_disconnect(mPeer, 0);
 }
 
-void NetComputer::send(const Packet *p)
+void NetComputer::send(const MessageOut &msg)
 {
-    LOG_INFO("Sending packet of length " << p->length, 2);
+    LOG_INFO("Sending packet of length " << msg.getDataSize(), 2);
 
     // Create a reliable packet.
-    ENetPacket *packet = enet_packet_create(p->data, p->length,
+    ENetPacket *packet = enet_packet_create(msg.getData(), msg.getDataSize(),
                                             ENET_PACKET_FLAG_RELIABLE);
 
     // Send the packet to the peer over channel id 0.

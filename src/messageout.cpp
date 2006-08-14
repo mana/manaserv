@@ -27,10 +27,7 @@
 
 #include <enet/enet.h>
 
-#include "packet.h"
-
 MessageOut::MessageOut():
-    mPacket(0),
     mData(0),
     mDataSize(0),
     mPos(0)
@@ -38,7 +35,6 @@ MessageOut::MessageOut():
 }
 
 MessageOut::MessageOut(short id):
-    mPacket(0),
     mData(0),
     mDataSize(0),
     mPos(0)
@@ -48,10 +44,6 @@ MessageOut::MessageOut(short id):
 
 MessageOut::~MessageOut()
 {
-    if (mPacket) {
-        delete mPacket;
-    }
-
     if (mData) {
         free(mData);
     }
@@ -115,27 +107,4 @@ MessageOut::writeString(const std::string &string, int length)
         memset(mData + mPos + stringLength, '\0', length - stringLength);
     }
     mPos += length;
-}
-
-const Packet*
-MessageOut::getPacket()
-{
-    if (!mPacket)
-    {
-        mPacket = new Packet(mData, mDataSize);
-    }
-
-    return mPacket;
-}
-
-char*
-MessageOut::getData()
-{
-    return mData;
-}
-
-unsigned int
-MessageOut::getDataSize()
-{
-    return mDataSize;
 }

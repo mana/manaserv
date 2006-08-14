@@ -50,8 +50,7 @@ typedef enum {
  */
 typedef enum {
     GENDER_MALE,
-    GENDER_FEMALE,
-    GENDER_UNKNOWN
+    GENDER_FEMALE
 } Genders;
 
     // Network related

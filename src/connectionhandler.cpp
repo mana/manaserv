@@ -26,7 +26,6 @@
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
-#include "packet.h"
 
 #include "utils/logger.h"
 
@@ -142,9 +141,8 @@ void ConnectionHandler::process()
 
                 // Make sure that the packet is big enough (> short)
                 if (event.packet->dataLength >= 2) {
-                    Packet *packet = new Packet((char *)event.packet->data,
-                                                event.packet->dataLength);
-                    MessageIn msg(packet); // (MessageIn frees packet)
+                    MessageIn msg((char *)event.packet->data,
+                                  event.packet->dataLength);
                     processMessage(comp, msg);
                 } else {
                     LOG_ERROR("Message too short from " << ipaddr, 0);
@@ -169,11 +167,11 @@ void ConnectionHandler::process()
     }
 }
 
-void ConnectionHandler::sendToEveryone(MessageOut &msg)
+void ConnectionHandler::sendToEveryone(const MessageOut &msg)
 {
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
          i != i_end; ++i) {
-        (*i)->send(msg.getPacket());
+        (*i)->send(msg);
     }
 }
 

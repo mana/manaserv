@@ -26,7 +26,6 @@
 #include "defines.h"
 #include "messageout.h"
 #include "messagein.h"
-#include "packet.h"
 
 #if defined WIN32
 #include "../testclient_private.h"
@@ -349,7 +348,7 @@ int main(int argc, char *argv[])
         } // end if
 
         process_enet:
-        while (enet_host_service(client, &event, 1000)) {
+        while (enet_host_service(client, &event, 2000)) {
             switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT:
                     printf("Connected to server\n");
@@ -398,8 +397,7 @@ void parsePacket(char *data, int recvLength) {
     // Response handling
     // Transforming it into a MessageIn object
     if (recvLength >= 2) {
-        Packet *packet = new Packet(data, recvLength);
-        MessageIn msg(packet); // (MessageIn frees packet)
+        MessageIn msg(data, recvLength);
 
         switch (msg.getId()) {
             case APMSG_REGISTER_RESPONSE:

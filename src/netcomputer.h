@@ -34,8 +34,7 @@
 
 // Forward declaration
 class ConnectionHandler;
-class ClientConnectionHandler;
-class Packet;
+class MessageOut;
 
 /**
  * This class represents a known computer on the network. For example a
@@ -67,14 +66,13 @@ class NetComputer
         disconnect(const std::string &reason);
 
         /**
-         * Queues (FIFO) a packet for sending to a client.
+         * Queues a message for sending to a client.
          *
-         * Note: When we'd want to allow communication through UDP, we could
-         *  introduce the reliable argument, which would cause a UDP message
-         *  to be sent when set to false.
+         * TODO: Add support for reliable and maybe also channels now that we
+         * TODO: have ENet.
          */
         void
-        send(const Packet *p);
+        send(const MessageOut &msg);
         //void send(Packet *p, bool reliable = true);
 
     private:

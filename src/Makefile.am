@@ -9,9 +9,7 @@ tmwclient_SOURCES = client.cpp \
 		    messageout.h \
 		    messageout.cpp \
 		    messagein.h \
-		    messagein.cpp \
-		    packet.h \
-		    packet.cpp
+		    messagein.cpp
 
 tmwserv_SOURCES = main.cpp \
 		  configuration.h \
@@ -52,8 +50,6 @@ tmwserv_SOURCES = main.cpp \
 		  messageout.cpp \
 		  netcomputer.h \
 		  netcomputer.cpp \
-		  packet.h \
-		  packet.cpp \
 		  skill.h \
 		  skill.cpp \
 		  resourcemanager.cpp \

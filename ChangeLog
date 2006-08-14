@@ -1,4 +1,17 @@
-2006-08-06  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+2006-08-15  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/connectionhandler.h, src/messageout.cpp, src/messagein.h,
+	src/accounthandler.cpp, src/connectionhandler.cpp, src/netcomputer.h,
+	src/messagein.cpp, src/client.cpp, src/messageout.h,
+	src/netcomputer.cpp, src/packet.h, src/packet.cpp,
+	src/gamehandler.cpp, src/chathandler.cpp, src/Makefile.am: Removed
+	Packet class since MessageIn and MessageOut suffice. MessageIn and
+	MessageOut now no longer copy the message data unnecessarily (used to
+	happen in Packet). On the client side this class was already removed.
+	* src/defines.h: Removed UNKNOWN gender as this should currently not
+	be used.
+
+2006-08-15  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/accounthandler.cpp, src/defines.h: Modified protocol so that
 	server information are sent on character selection.

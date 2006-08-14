@@ -87,7 +87,7 @@ class ConnectionHandler
         /**
          * Send packet to every client, used for announcements.
          */
-        void sendToEveryone(MessageOut &);
+        void sendToEveryone(const MessageOut &msg);
 
         /**
          * Return the number of connected clients.
@@ -95,15 +95,15 @@ class ConnectionHandler
         unsigned int getClientNumber();
 
     private:
-        ENetAddress address;         /**< Includes the port to listen to. */
-        ENetHost *host;              /**< The host that listen for connections. */
+        ENetAddress address;      /**< Includes the port to listen to. */
+        ENetHost *host;           /**< The host that listen for connections. */
 
     protected:
         /**
          * Called when a computer connects to the server. Initialize
          * an object derived of NetComputer.
          */
-        virtual NetComputer *computerConnected(ENetPeer *) = 0;
+        virtual NetComputer *computerConnected(ENetPeer *peer) = 0;
 
         /**
          * Called when a computer reconnects to the server.

@@ -26,8 +26,6 @@
 
 #include <iosfwd>
 
-class Packet;
-
 /**
  * Used for building an outgoing message.
  */
@@ -60,21 +58,16 @@ class MessageOut
         void writeString(const std::string &string, int length = -1);
 
         /**
-         * Returns an instance of Packet derived from the written data. Use for
-         * sending the packet. No more writing to the packet may be done after
-         * a call to this method.
-         */
-        const Packet *getPacket();
-
-        /**
          * Returns the content of the message.
          */
-        char *getData();
+        char*
+        getData() const { return mData; }
 
         /**
          * Returns the length of the data.
          */
-        unsigned int getDataSize();
+        unsigned int
+        getDataSize() const { return mDataSize; }
 
     private:
         /**
@@ -86,7 +79,6 @@ class MessageOut
          */
         void expand(size_t size);
 
-        Packet *mPacket;                     /**< Created packet. */
         char *mData;                         /**< Data building up. */
         unsigned int mDataSize;              /**< Size of data. */
         unsigned int mPos;                   /**< Position in the data. */

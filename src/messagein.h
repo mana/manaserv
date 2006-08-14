@@ -37,7 +37,7 @@ class MessageIn
         /**
          * Constructor.
          */
-        MessageIn(Packet *packet);
+        MessageIn(const char *data, int length);
 
         /**
          * Destructor.
@@ -58,12 +58,13 @@ class MessageIn
         std::string readString(int length = -1);
 
     private:
-        Packet *mPacket;              /**< The packet being processed. */
+        const char *mData;            /**< Packet data */
+        unsigned int mLength;         /**< Length of data in bytes */
         short mId;                    /**< The message ID. */
 
         /**
-         * Actual position in the packet. From 0 to packet->length.
-         * A value bigger than packet->length means EOP was reached when reading it.
+         * Actual position in the packet. From 0 to packet->length. A value
+         * bigger than packet->length means EOP was reached when reading it.
          */
         unsigned int mPos;
 };
