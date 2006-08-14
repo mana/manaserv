@@ -1,3 +1,10 @@
+2006-08-06  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/accounthandler.cpp, src/defines.h: Modified protocol so that
+	server information are sent on character selection.
+	* src/client.cpp: Adapted to new connection protocol and new character
+	information.
+
 2006-08-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/items.h: Fixed missing constructor since there is no default

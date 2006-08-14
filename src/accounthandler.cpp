@@ -326,22 +326,28 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 }
 
                 // set character
-                // TODO: Handle reset character's map when the server can't load
-                // it. And SELECT_NO_MAPS error return value when the default map couldn't
-                // be loaded in setCharacter(). Not implemented yet for tests purpose...
                 computer.setCharacter(chars[charNum]);
                 PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
                 std::string mapName = store.getMapNameFromId(selectedChar->getMapId());
                 result.writeString(mapName);
-                result.writeShort(selectedChar->getX());
-                result.writeShort(selectedChar->getY());
-                LOG_INFO("Selected Character " << int(charNum)
-                << ": " <<
-                selectedChar->getName(), 1);
 
                 selectedChar->setDestination(selectedChar->getX(), selectedChar->getY());
                 selectedChar->setSpeed(10); // TODO
+
+                LOG_INFO(selectedChar->getName() << " is trying to enter the servers.", 1);
+                std::string magic_token(32, ' ');
+                for (int i = 0; i < 32; ++i) {
+                    magic_token[i] =
+                        1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
+                }
+                result.writeString("localhost"); // TODO
+                result.writeShort(9603);
+                result.writeString("localhost");
+                result.writeShort(9602);
+                result.writeString(magic_token, 32);
+                registerGameClient(magic_token, selectedChar);
+                registerChatClient(magic_token, selectedChar->getName(), AL_NORMAL);
             }
             break;
 
@@ -384,104 +390,6 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 LOG_INFO(deletedCharacter << ": Character deleted...", 1);
                 result.writeByte(ERRMSG_OK);
 
-            }
-            break;
-
-        /*case PAMSG_CHAR_LIST:
-            {
-                result.writeShort(APMSG_CHAR_LIST_RESPONSE);
-
-                if (computer.getAccount().get() == NULL)
-                {
-                    result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't list characters.", 1);
-                    break; // not logged in
-                }
-
-                result.writeByte(ERRMSG_OK);
-                // Return information about available characters
-                Players &chars = computer.getAccount()->getCharacters();
-                result.writeByte(chars.size());
-
-                LOG_INFO(computer.getAccount()->getName() << "'s account has "
-                << chars.size() << " character(s).", 1);
-                std::string charStats;
-                std::string mapName;
-                for (unsigned int i = 0; i < chars.size(); i++)
-                {
-                    result.writeString(chars[i]->getName());
-                    if (i > 0) charStats += ", ";
-                    charStats += chars[i]->getName();
-                    result.writeByte(unsigned(short(chars[i]->getGender())));
-                    result.writeByte(chars[i]->getHairStyle());
-                    result.writeByte(chars[i]->getHairColor());
-                    result.writeByte(chars[i]->getLevel());
-                    for (int j = 0; j < NB_RSTAT; ++j)
-                        result.writeShort(chars[i]->getRawStat(j));
-                    mapName = store.getMapNameFromId(chars[i]->getMapId());
-                    result.writeString(mapName);
-                    result.writeShort(chars[i]->getX());
-                    result.writeShort(chars[i]->getY());
-                }
-                charStats += ".";
-                LOG_INFO(charStats.c_str(), 1);
-            }
-            break;*/
-
-        case PAMSG_ENTER_WORLD:
-            {
-                result.writeShort(APMSG_ENTER_WORLD_RESPONSE);
-
-                if (computer.getAccount().get() == NULL)
-                {
-                    result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't enter the world.", 1);
-                    break; // not logged in
-                }
-                if (computer.getCharacter().get() == NULL)
-                {
-                    result.writeByte(ERRMSG_NO_CHARACTER_SELECTED);
-                    LOG_INFO("No character selected. Can't enter the world.", 1);
-                    break; // no character selected
-                }
-                LOG_INFO(computer.getCharacter()->getName() << " is trying to enter the world.", 1);
-                std::string magic_token(32, ' ');
-                for (int i = 0; i < 32; ++i) {
-                    magic_token[i] =
-                        1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
-                }
-                result.writeByte(ERRMSG_OK);
-                result.writeString("localhost");
-                result.writeShort(9603);
-                result.writeString(magic_token, 32);
-                registerGameClient(magic_token, computer.getCharacter());
-            }
-            break;
-
-        case PAMSG_ENTER_CHAT:
-            {
-                result.writeShort(APMSG_ENTER_CHAT_RESPONSE);
-
-                if (computer.getAccount().get() == NULL)
-                {
-                    result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't enter the chat.", 1);
-                    break; // not logged in
-                }
-                if (computer.getCharacter().get() == NULL)
-                {
-                    result.writeByte(ERRMSG_NO_CHARACTER_SELECTED);
-                    LOG_INFO("No character selected. Can't enter the chat.", 1);
-                    break; // no character selected
-                }
-                std::string magic_token(32, ' ');
-                for(int i = 0; i < 32; ++i) magic_token[i] = 1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
-                result.writeByte(ERRMSG_OK);
-                result.writeString("localhost");
-                result.writeShort(9603);
-                result.writeString(magic_token, 32);
-                registerChatClient(magic_token, computer.getCharacter()->getName(),
-                                   computer.getAccount()->getLevel());
             }
             break;
 

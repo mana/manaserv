@@ -36,8 +36,8 @@
 void parsePacket(char *data, int recvLength);
 
 ENetHost *client;
-ENetAddress addressAccount, addressGame;
-ENetPeer *peerAccount, *peerGame;
+ENetAddress addressAccount, addressGame, addressChat;
+ENetPeer *peerAccount, *peerGame, *peerChat;
 std::string token;
 bool connected = false;
 
@@ -94,13 +94,13 @@ int main(int argc, char *argv[])
             std::cout << std::endl;
             std::cout << "0) Quit                9)  Select Character" << std::endl;
             std::cout << "1) Register            10) Delete Character" << std::endl;
-            std::cout << "2) Unregister          " << std::endl;
+            std::cout << "2) Unregister" << std::endl;
             std::cout << "3) Login               12) Move Character" << std::endl;
-            std::cout << "4) Logout              13) Say around" << std::endl;
+            std::cout << "4) Logout              13) Say Around" << std::endl;
             std::cout << "5) Change Password     14) Equip Item" << std::endl;
             std::cout << "6) Change Email        15) Ruby Expression" << std::endl;
-            std::cout << "7) Get Email           16) Request game server token" << std::endl;
-            std::cout << "8) Create character    17) Enter world (GS)" << std::endl;
+            std::cout << "7) Get Email           16) Enter Game Server" << std::endl;
+            std::cout << "8) Create character    17) Enter Chat Server" << std::endl;
             std::cout << "Choose your option: ";
             std::cin >> answer;
             std::cin.getline(line, 256); // skip the remaining of the line
@@ -313,14 +313,18 @@ int main(int argc, char *argv[])
 
                 case 16:
                 {
-                    msg.writeShort(PAMSG_ENTER_WORLD);
+                    // enter game server
+                    msg.writeShort(PGMSG_CONNECT);
+                    msg.writeString(token, 32);
+                    msgDestination = 1;
                 } break;
 
                 case 17:
                 {
-                    msg.writeShort(PGMSG_CONNECT);
+                    // enter chat server
+                    msg.writeShort(PCMSG_CONNECT);
                     msg.writeString(token, 32);
-                    msgDestination = 1;
+                    msgDestination = 2;
                 } break;
 
                 default:
@@ -332,8 +336,15 @@ int main(int argc, char *argv[])
                 ENetPacket *packet = enet_packet_create(
                         msg.getData(), msg.getDataSize(),
                         ENET_PACKET_FLAG_RELIABLE);
-                // Send the packet to the peer over channel id 0.
-                enet_peer_send(msgDestination == 0 ? peerAccount : peerGame, 0, packet);
+                ENetPeer *peer = peerAccount;
+                if (msgDestination == 1) peer = peerGame;
+                else if (msgDestination == 2) peer = peerChat;
+                if (peer) {
+                    // Send the packet to the peer over channel id 0.
+                    enet_peer_send(peer, 0, packet);
+                } else
+                    std::cout << "Peer " << msgDestination << " is not connected. "
+                                 "Cannot send packet." << std::endl;
             } // end if
         } // end if
 
@@ -434,20 +445,7 @@ void parsePacket(char *data, int recvLength) {
                 // Register
                 switch (msg.readByte()) {
                     case ERRMSG_OK:
-                        unsigned char charNumber;
-                        charNumber = msg.readByte();
-                        std::cout << "Account has " << int(charNumber) << " characters." << std::endl;
-                        for (unsigned int i = 0; i < charNumber; i++) {
-                            if (i >0) std::cout << ", ";
-                            // Write name, ignore other values
-                            std::cout << msg.readString();
-                            msg.readByte();
-                            msg.readByte();
-                            msg.readByte();
-                            msg.readByte();
-                            msg.readShort();
-                        }
-                        std::cout << "." << std::endl;
+                        std::cout << "Login successful." << std::endl;
                         break;
                     case ERRMSG_INVALID_ARGUMENT:
                         std::cout << "Login: Invalid username or password." << std::endl;
@@ -602,12 +600,20 @@ void parsePacket(char *data, int recvLength) {
                 switch (msg.readByte()) {
                     case ERRMSG_OK:
                     {
-                        std::cout << "Character selected successfully.";
-                        std::cout << std::endl;
-                        std::cout << "Current Map: ";
-                        std::cout << msg.readString() << " (X:";
-                        std::cout << (int)msg.readShort() << ", Y:";
-                        std::cout << (int)msg.readShort() << ")" << std::endl;
+                        std::cout << "Character selected successfully." << std::endl;
+                        std::cout << "Current Map: " << msg.readString() << std::endl;
+                        std::string server = msg.readString();
+                        enet_address_set_host(&addressGame, server.c_str());
+                        addressGame.port = msg.readShort();
+                        peerGame = enet_host_connect(client, &addressGame, 1);
+                        std::cout << "Connecting to " << server << ':' << addressGame.port;
+                        server = msg.readString();
+                        enet_address_set_host(&addressChat, server.c_str());
+                        addressChat.port = msg.readShort();
+                        peerChat = enet_host_connect(client, &addressChat, 1);
+                        token = msg.readString(32);
+                        connected = false;
+                        std::cout << " and to " << server << ':' << addressChat.port << std::endl;
                     } break;
                     case ERRMSG_INVALID_ARGUMENT:
                         std::cout << "Character Selection: invalid ID."
@@ -622,44 +628,24 @@ void parsePacket(char *data, int recvLength) {
                 }
             } break;
 
-            case APMSG_CHAR_LIST_RESPONSE:
+            case APMSG_CHAR_INFO:
             {
-                switch (msg.readByte()) {
-                    case ERRMSG_OK:
-                    {
-                        unsigned char charNumber;
-                        charNumber = msg.readByte();
-                        std::cout << "Character List:" << std::endl
-                        << "---------------" << std::endl;
-                        std::cout << int(charNumber) << " character(s) in the account."
-                        << std::endl;
-                        for (unsigned int i = 0; i < charNumber; i++) {
-                            std::cout << int(i) << ". "
-                            << msg.readString() << ":" << std::endl;
-                            std::cout << "Gender: " << int(msg.readByte()) << ", ";
-                            std::cout << "Hair Style: " << int(msg.readByte()) << ", ";
-                            std::cout << "Hair Color: " << int(msg.readByte()) << ", "
-                            << std::endl;
-                            std::cout << "Level: " << int(msg.readByte()) << ", ";
-                            std::cout << "Money: " << int(msg.readShort()) << ", "
-                            << std::endl;
-                            std::cout << "Strength: " << int(msg.readShort()) << ", ";
-                            std::cout << "Agility: " << int(msg.readShort()) << ", ";
-                            std::cout << "Vitality: " << int(msg.readShort()) << ", "
-                            << std::endl;
-                            std::cout << "Intelligence: " << int(msg.readShort()) << ", ";
-                            std::cout << "Dexterity: " << int(msg.readShort()) << ", ";
-                            std::cout << "Luck: " << int(msg.readShort()) << ". "
-                            << std::endl;
-                            std::cout << "Current Map: " << msg.readString() << " (X:";
-                            std::cout << int(msg.readShort()) << ", Y:" << int(msg.readShort()) << ")."
-                            << std::endl << std::endl;
-                        }
-                    } break;
-                    default:
-                        std::cout << "Character List: Unknown error." << std::endl;
-                        break;
-                }
+                std::cout << "Information on character " << int(msg.readByte()) << std::endl;
+                std::cout << "  Name: " << msg.readString() << std::endl;
+                std::cout << "  Gender: " << int(msg.readByte()) << ", ";
+                std::cout << "Hair Style: " << int(msg.readByte()) << ", ";
+                std::cout << "Hair Color: " << int(msg.readByte()) << std::endl;
+                std::cout << "  Level: " << int(msg.readByte()) << ", ";
+                std::cout << "Money: " << int(msg.readShort()) << std::endl;
+                std::cout << "  Strength: " << int(msg.readShort()) << ", ";
+                std::cout << "Agility: " << int(msg.readShort()) << ", ";
+                std::cout << "Vitality: " << int(msg.readShort()) << std::endl;
+                std::cout << "  Intelligence: " << int(msg.readShort()) << ", ";
+                std::cout << "Dexterity: " << int(msg.readShort()) << ", ";
+                std::cout << "Luck: " << int(msg.readShort()) << std::endl;
+                //std::cout << "  Current Map: " << msg.readString() << " (X:";
+                //std::cout << int(msg.readShort()) << ", Y:";
+                //std::cout << int(msg.readShort()) << ")" << std::endl;
             } break;
 
             case GPMSG_SAY:
@@ -692,31 +678,6 @@ void parsePacket(char *data, int recvLength) {
                     break;
                 default:
                     std::cout << "Unknown being entered map." << std::endl;
-                }
-            } break;
-
-            case APMSG_ENTER_WORLD_RESPONSE:
-            {
-                switch (msg.readByte()) {
-                    case ERRMSG_OK:
-                    {
-                        std::string server = msg.readString();
-                        enet_address_set_host(&addressGame, server.c_str());
-                        addressGame.port = msg.readShort();
-                        peerGame = enet_host_connect(client, &addressGame, 1);
-                        token = msg.readString(32);
-                        connected = false;
-                        std::cout << "Connecting to " << server << ':' << addressGame.port << std::endl;
-                    }   break;
-                    case ERRMSG_NO_LOGIN:
-                        std::cout << "Enter world: Not logged in." << std::endl;
-                        break;
-                    case ERRMSG_NO_CHARACTER_SELECTED:
-                        std::cout << "Enter world: No character selected." << std::endl;
-                        break;
-                    default:
-                        std::cout << "Enter world: Unknown error." << std::endl;
-                        break;
                 }
             } break;
 
