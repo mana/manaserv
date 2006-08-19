@@ -1,3 +1,9 @@
+2006-08-19  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/accounthandler.cpp, src/account.cpp, src/dalstorage.cpp,
+	src/account.h, src/defines.h, src/chathandler.cpp, src/being.h:
+	Renamed Genders to Gender and AccountLevels to AccountLevel.
+
 2006-08-15  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/connectionhandler.h, src/messageout.cpp, src/messagein.h,

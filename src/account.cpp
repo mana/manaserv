@@ -136,7 +136,7 @@ Account::getEmail(void) const
  * Set the account level.
  */
 void
-Account::setLevel(const AccountLevels level)
+Account::setLevel(AccountLevel level)
 {
     mLevel = level;
 }
@@ -145,7 +145,7 @@ Account::setLevel(const AccountLevels level)
 /**
  * Get the account level.
  */
-AccountLevels
+AccountLevel
 Account::getLevel(void) const
 {
     return mLevel;

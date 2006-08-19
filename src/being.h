@@ -156,7 +156,7 @@ class Player: public Being
          *
          * @param gender the new gender.
          */
-        void setGender(Genders gender)
+        void setGender(Gender gender)
         { mGender = gender; }
 
         /**
@@ -164,7 +164,7 @@ class Player: public Being
          *
          * @return the gender.
          */
-        Genders getGender() const
+        Gender getGender() const
         { return mGender; }
 
         /**
@@ -273,7 +273,7 @@ class Player: public Being
         Player &operator=(Player const &);
 
         std::string mName;       /**< name of the being */
-        Genders mGender;         /**< gender of the being */
+        Gender mGender;          /**< gender of the being */
         unsigned char mHairStyle;/**< Hair Style of the being */
         unsigned char mHairColor;/**< Hair Color of the being */
         unsigned char mLevel;    /**< level of the being */

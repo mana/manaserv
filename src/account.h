@@ -142,7 +142,7 @@ class Account
          * @param level the new level.
          */
         void
-        setLevel(const AccountLevels level);
+        setLevel(AccountLevel level);
 
 
         /**
@@ -150,7 +150,7 @@ class Account
          *
          * @return the account level.
          */
-        AccountLevels
+        AccountLevel
         getLevel() const;
 
 
@@ -222,7 +222,7 @@ class Account
         std::string mPassword; /**< user password (encrypted) */
         std::string mEmail;    /**< user email address */
         Players mCharacters;   /**< player data */
-        AccountLevels mLevel;  /**< account level */
+        AccountLevel mLevel;   /**< account level */
 };
 
 

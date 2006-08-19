@@ -42,7 +42,7 @@ typedef enum {
     AL_GM,          // User can perform a subset of administrator tasks
     AL_BANNED,      // This user is currently banned
     AL_RESTRICTED   // User rights have been restricted
-} AccountLevels;
+} AccountLevel;
 
 
 /**
@@ -51,7 +51,7 @@ typedef enum {
 typedef enum {
     GENDER_MALE,
     GENDER_FEMALE
-} Genders;
+} Gender;
 
     // Network related
 const unsigned int MAX_CLIENTS  = 1024,

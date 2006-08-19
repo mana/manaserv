@@ -255,7 +255,7 @@ DALStorage::getAccount(const std::string& userName)
 
             for (unsigned int k = 0; k < charRows; ++k) {
                 PlayerPtr player(new Player(strCharInfo[k][2], toUint(strCharInfo[k][0])));
-                player->setGender((Genders)toUshort(strCharInfo[k][3]));
+                player->setGender((Gender) toUshort(strCharInfo[k][3]));
                 player->setHairStyle(toUshort(strCharInfo[k][4]));
                 player->setHairColor(toUshort(strCharInfo[k][5]));
                 player->setLevel(toUshort(strCharInfo[k][6]));

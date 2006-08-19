@@ -42,7 +42,7 @@ class ChatClient: public NetComputer
         ChatClient(ChatHandler *, ENetPeer *);
 
         std::string characterName;
-        AccountLevels accountLevel;
+        AccountLevel accountLevel;
 };
 
 ChatClient::ChatClient(ChatHandler *handler, ENetPeer *peer):
@@ -54,7 +54,7 @@ ChatClient::ChatClient(ChatHandler *handler, ENetPeer *peer):
 struct ChatPendingLogin
 {
     std::string character;
-    AccountLevels level;
+    AccountLevel level;
     int timeout;
 };
 
@@ -71,7 +71,7 @@ void registerChatClient(std::string const &token, std::string const &name, int l
     {
         ChatClient *computer = i->second;
         computer->characterName = name;
-        computer->accountLevel = (AccountLevels)level;
+        computer->accountLevel = (AccountLevel) level;
         pendingClients.erase(i);
         MessageOut result;
         result.writeShort(CPMSG_CONNECT_RESPONSE);
@@ -82,7 +82,7 @@ void registerChatClient(std::string const &token, std::string const &name, int l
     {
         ChatPendingLogin p;
         p.character = name;
-        p.level = (AccountLevels)level;
+        p.level = (AccountLevel) level;
         p.timeout = 300; // world ticks
         pendingLogins.insert(std::make_pair(token, p));
     }

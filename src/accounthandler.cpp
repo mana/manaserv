@@ -210,7 +210,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                     LOG_INFO(name << ": Character's hair Color is invalid.", 1);
                     break;
                 }
-                Genders gender = (Genders)message.readByte();
+                Gender gender = (Gender) message.readByte();
                 if ((gender < 0) || (gender > (signed)MAX_GENDER_VALUE))
                 {
                     result.writeByte(CREATE_INVALID_GENDER);
