@@ -329,25 +329,31 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 computer.setCharacter(chars[charNum]);
                 PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
-                std::string mapName = store.getMapNameFromId(selectedChar->getMapId());
-                result.writeString(mapName);
+                //std::string mapName =
+                //    store.getMapNameFromId(selectedChar->getMapId());
+                //result.writeString(mapName);
 
-                selectedChar->setDestination(selectedChar->getX(), selectedChar->getY());
+                selectedChar->setDestination(selectedChar->getX(),
+                                             selectedChar->getY());
                 selectedChar->setSpeed(10); // TODO
 
-                LOG_INFO(selectedChar->getName() << " is trying to enter the servers.", 1);
+                LOG_INFO(selectedChar->getName()
+                        << " is trying to enter the servers.", 1);
+
                 std::string magic_token(32, ' ');
                 for (int i = 0; i < 32; ++i) {
                     magic_token[i] =
                         1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
                 }
+                result.writeString(magic_token, 32);
                 result.writeString("localhost"); // TODO
                 result.writeShort(9603);
                 result.writeString("localhost");
                 result.writeShort(9602);
-                result.writeString(magic_token, 32);
+
                 registerGameClient(magic_token, selectedChar);
-                registerChatClient(magic_token, selectedChar->getName(), AL_NORMAL);
+                registerChatClient(magic_token, selectedChar->getName(),
+                                   AL_NORMAL);
             }
             break;
 
