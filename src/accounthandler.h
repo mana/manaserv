@@ -67,6 +67,9 @@ class AccountHandler : public ConnectionHandler
 
         void
         handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg);
+
+        void
+        handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg);
 };
 
 #endif

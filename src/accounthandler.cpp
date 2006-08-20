@@ -147,160 +147,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PAMSG_CHAR_CREATE:
-            {
-                result.writeShort(APMSG_CHAR_CREATE_RESPONSE);
-
-                if (computer.getAccount().get() == NULL) {
-                    result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't create a Character.", 1);
-                    break;
-                }
-
-                // A player shouldn't have more than 3 characters.
-                Players &chars = computer.getAccount()->getCharacters();
-                if (chars.size() >= MAX_OF_CHARACTERS)
-                {
-                    result.writeByte(CREATE_TOO_MUCH_CHARACTERS);
-                    LOG_INFO("Already has " << MAX_OF_CHARACTERS
-                    << " characters. Can't create another Character.", 1);
-                    break;
-                }
-
-                std::string name = message.readString();
-                // Checking if the Name is slang's free.
-                if (!stringFilter->filterContent(name))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(name << ": Character has got bad words in it.", 1);
-                    break;
-                }
-                // Checking if the Name has got double quotes.
-                if (stringFilter->findDoubleQuotes(name))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(name << ": has got double quotes in it.", 1);
-                    break;
-                }
-                // Check if the character's name already exists
-                if (store.doesCharacterNameExist(name))
-                {
-                    result.writeByte(CREATE_EXISTS_NAME);
-                    LOG_INFO(name << ": Character's name already exists.", 1);
-                    break;
-                }
-                // Check for character's name length
-                if ((name.length() < MIN_CHARACTER_LENGTH) || (name.length() > MAX_CHARACTER_LENGTH))
-                {
-                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(name << ": Character's name too short or too long.", 1);
-                    break;
-                }
-                char hairStyle = message.readByte();
-                if ((hairStyle < 0) || (hairStyle > (signed)MAX_HAIRSTYLE_VALUE))
-                {
-                    result.writeByte(CREATE_INVALID_HAIRSTYLE);
-                    LOG_INFO(name << ": Character's hair Style is invalid.", 1);
-                    break;
-                }
-
-                char hairColor = message.readByte();
-                if ((hairColor < 0) || (hairColor > (signed)MAX_HAIRCOLOR_VALUE))
-                {
-                    result.writeByte(CREATE_INVALID_HAIRCOLOR);
-                    LOG_INFO(name << ": Character's hair Color is invalid.", 1);
-                    break;
-                }
-                Gender gender = (Gender) message.readByte();
-                if ((gender < 0) || (gender > (signed)MAX_GENDER_VALUE))
-                {
-                    result.writeByte(CREATE_INVALID_GENDER);
-                    LOG_INFO(name << ": Character's gender is invalid.", 1);
-                    break;
-                }
-                // LATER_ON: Add race, face and maybe special attributes.
-
-                // Customization of player's stats...
-                RawStatistics rawStats;
-                for (int i = 0; i < NB_RSTAT; ++i) rawStats.stats[i] = message.readShort();
-
-                // We see if the difference between the lowest stat and the highest isn't too
-                // big.
-                unsigned short lowestStat = 0;
-                unsigned short highestStat = 0;
-                unsigned int totalStats = 0;
-                bool validNonZeroRawStats = true;
-                for (int i = 0; i < NB_RSTAT; ++i)
-                {
-                    unsigned short stat = rawStats.stats[i];
-                    // For good total stat check.
-                    totalStats = totalStats + stat;
-
-                    // For checking if all stats are at least > 0
-                    if (stat <= 0) validNonZeroRawStats = false;
-                    if (lowestStat == 0 || lowestStat > stat) lowestStat = stat;
-                    if (highestStat == 0 || highestStat < stat) highestStat = stat;
-                }
-
-                if ( totalStats > POINTS_TO_DISTRIBUTES_AT_LVL1 )
-                {
-                    result.writeByte(CREATE_RAW_STATS_TOO_HIGH);
-                    LOG_INFO(name << ": Character's stats are too high to be of level 1.", 1);
-                    break;
-                }
-                if ( totalStats < POINTS_TO_DISTRIBUTES_AT_LVL1 )
-                {
-                    result.writeByte(CREATE_RAW_STATS_TOO_LOW);
-                    LOG_INFO(name << ": Character's stats are too low to be of level 1.", 1);
-                    break;
-                }
-                if ( (highestStat - lowestStat) > (signed)MAX_DIFF_BETWEEN_STATS )
-                {
-                    result.writeByte(CREATE_RAW_STATS_INVALID_DIFF);
-                    LOG_INFO(name << ": Character's stats difference is too high to be accepted.", 1);
-                    break;
-                }
-                if ( !validNonZeroRawStats )
-                {
-                    result.writeByte(CREATE_RAW_STATS_EQUAL_TO_ZERO);
-                    LOG_INFO(name << ": One stat is equal to zero.", 1);
-                    break;
-                }
-
-                PlayerPtr newCharacter(new Player(name));
-                for (int i = 0; i < NB_RSTAT; ++i)
-                    newCharacter->setRawStat(i, rawStats.stats[i]);
-                newCharacter->setMoney(0);
-                newCharacter->setLevel(1);
-                newCharacter->setGender(gender);
-                newCharacter->setHairStyle(hairStyle);
-                newCharacter->setHairColor(hairColor);
-                newCharacter->setMapId((int)config.getValue("defaultMap", 1));
-                newCharacter->setXY((int)config.getValue("startX", 0),
-                                    (int)config.getValue("startY", 0));
-                computer.getAccount()->addCharacter(newCharacter);
-
-                LOG_INFO("Character " << name << " was created for "
-                    << computer.getAccount()->getName() << "'s account.", 1);
-
-                store.flush(computer.getAccount()); // flush changes
-                result.writeByte(ERRMSG_OK);
-                computer.send(result);
-
-                // Send new characters infos back to client
-                MessageOut charInfo(APMSG_CHAR_INFO);
-                int slot = chars.size() - 1;
-                charInfo.writeByte(slot);
-                charInfo.writeString(chars[slot]->getName());
-                charInfo.writeByte(unsigned(short(chars[slot]->getGender())));
-                charInfo.writeByte(chars[slot]->getHairStyle());
-                charInfo.writeByte(chars[slot]->getHairColor());
-                charInfo.writeByte(chars[slot]->getLevel());
-                charInfo.writeShort(chars[slot]->getMoney());
-                for (int j = 0; j < NB_RSTAT; ++j)
-                        charInfo.writeShort(chars[slot]->getRawStat(j));
-                computer.send(charInfo);
-                return;
-            }
+            handleCharacterCreateMessage(computer, message);
             break;
 
         case PAMSG_CHAR_SELECT:
@@ -346,9 +193,9 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                         1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
                 }
                 result.writeString(magic_token, 32);
-                result.writeString("localhost"); // TODO
+                result.writeString("www.lindeijer.nl"); // TODO
                 result.writeShort(9603);
-                result.writeString("localhost");
+                result.writeString("www.lindeijer.nl");
                 result.writeShort(9602);
 
                 registerGameClient(magic_token, selectedChar);
@@ -681,6 +528,165 @@ AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
                 ": The password was changed.", 1);
         computer.getAccount()->setPassword(newPassword);
         reply.writeByte(ERRMSG_OK);
+    }
+
+    computer.send(reply);
+}
+
+void
+AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
+                                             MessageIn &msg)
+{
+    std::string name = msg.readString();
+    char hairStyle = msg.readByte();
+    char hairColor = msg.readByte();
+    Gender gender = (Gender) msg.readByte();
+
+    MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
+
+    if (computer.getAccount().get() == NULL) {
+        LOG_INFO("Not logged in. Can't create a Character.", 1);
+        reply.writeByte(ERRMSG_NO_LOGIN);
+    }
+    else if (!stringFilter->filterContent(name))
+    {
+        LOG_INFO(name << ": Character has got bad words in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if (stringFilter->findDoubleQuotes(name))
+    {
+        LOG_INFO(name << ": has got double quotes in it.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if ((hairStyle < 0) || (hairStyle > (signed) MAX_HAIRSTYLE_VALUE))
+    {
+        LOG_INFO(name << ": Character's hair Style is invalid.", 1);
+        reply.writeByte(CREATE_INVALID_HAIRSTYLE);
+    }
+    else if ((hairColor < 0) || (hairColor > (signed) MAX_HAIRCOLOR_VALUE))
+    {
+        LOG_INFO(name << ": Character's hair Color is invalid.", 1);
+        reply.writeByte(CREATE_INVALID_HAIRCOLOR);
+    }
+    else if ((gender < 0) || (gender > (signed) MAX_GENDER_VALUE))
+    {
+        LOG_INFO(name << ": Character's gender is invalid.", 1);
+        reply.writeByte(CREATE_INVALID_GENDER);
+    }
+    else if ((name.length() < MIN_CHARACTER_LENGTH) ||
+             (name.length() > MAX_CHARACTER_LENGTH))
+    {
+        LOG_INFO(name << ": Character's name too short or too long.", 1);
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else
+    {
+        Storage &store = Storage::instance("tmw");
+        if (store.doesCharacterNameExist(name))
+        {
+            LOG_INFO(name << ": Character's name already exists.", 1);
+            reply.writeByte(CREATE_EXISTS_NAME);
+            computer.send(reply);
+            return;
+        }
+
+        // A player shouldn't have more than MAX_OF_CHARACTERS characters.
+        Players &chars = computer.getAccount()->getCharacters();
+        if (chars.size() >= MAX_OF_CHARACTERS)
+        {
+            LOG_INFO("Already has " << chars.size()
+                    << " characters. Can't create another Character.", 1);
+            reply.writeByte(CREATE_TOO_MUCH_CHARACTERS);
+            computer.send(reply);
+            return;
+        }
+
+        // LATER_ON: Add race, face and maybe special attributes.
+
+        // Customization of player's stats...
+        RawStatistics rawStats;
+        for (int i = 0; i < NB_RSTAT; ++i)
+            rawStats.stats[i] = msg.readShort();
+
+        // We see if the difference between the lowest stat and the highest
+        // isn't too big.
+        unsigned short lowestStat = 0;
+        unsigned short highestStat = 0;
+        unsigned int totalStats = 0;
+        bool validNonZeroRawStats = true;
+        for (int i = 0; i < NB_RSTAT; ++i)
+        {
+            unsigned short stat = rawStats.stats[i];
+            // For good total stat check.
+            totalStats = totalStats + stat;
+
+            // For checking if all stats are at least > 0
+            if (stat <= 0) validNonZeroRawStats = false;
+            if (lowestStat == 0 || lowestStat > stat) lowestStat = stat;
+            if (highestStat == 0 || highestStat < stat) highestStat = stat;
+        }
+
+        if (totalStats > POINTS_TO_DISTRIBUTES_AT_LVL1)
+        {
+            LOG_INFO(name << ": Character's stats are too high to be of "
+                    "level 1.", 1);
+            reply.writeByte(CREATE_RAW_STATS_TOO_HIGH);
+        }
+        else if (totalStats < POINTS_TO_DISTRIBUTES_AT_LVL1)
+        {
+            LOG_INFO(name << ": Character's stats are too low to be of "
+                    "level 1.", 1);
+            reply.writeByte(CREATE_RAW_STATS_TOO_LOW);
+        }
+        else if ((highestStat - lowestStat) > (signed) MAX_DIFF_BETWEEN_STATS)
+        {
+            LOG_INFO(name << ": Character's stats difference is too high to "
+                    "be accepted.", 1);
+            reply.writeByte(CREATE_RAW_STATS_INVALID_DIFF);
+        }
+        else if (!validNonZeroRawStats)
+        {
+            LOG_INFO(name << ": One stat is equal to zero.", 1);
+            reply.writeByte(CREATE_RAW_STATS_EQUAL_TO_ZERO);
+        }
+        else
+        {
+            PlayerPtr newCharacter(new Player(name));
+            for (int i = 0; i < NB_RSTAT; ++i)
+                newCharacter->setRawStat(i, rawStats.stats[i]);
+            newCharacter->setMoney(0);
+            newCharacter->setLevel(1);
+            newCharacter->setGender(gender);
+            newCharacter->setHairStyle(hairStyle);
+            newCharacter->setHairColor(hairColor);
+            newCharacter->setMapId((int) config.getValue("defaultMap", 1));
+            newCharacter->setXY(
+                    (int) config.getValue("startX", 0),
+                    (int) config.getValue("startY", 0));
+            computer.getAccount()->addCharacter(newCharacter);
+
+            LOG_INFO("Character " << name << " was created for "
+                    << computer.getAccount()->getName() << "'s account.", 1);
+
+            store.flush(computer.getAccount()); // flush changes
+            reply.writeByte(ERRMSG_OK);
+            computer.send(reply);
+
+            // Send new characters infos back to client
+            MessageOut charInfo(APMSG_CHAR_INFO);
+            int slot = chars.size() - 1;
+            charInfo.writeByte(slot);
+            charInfo.writeString(chars[slot]->getName());
+            charInfo.writeByte((unsigned char) chars[slot]->getGender());
+            charInfo.writeByte(chars[slot]->getHairStyle());
+            charInfo.writeByte(chars[slot]->getHairColor());
+            charInfo.writeByte(chars[slot]->getLevel());
+            charInfo.writeShort(chars[slot]->getMoney());
+            for (int j = 0; j < NB_RSTAT; ++j)
+                charInfo.writeShort(chars[slot]->getRawStat(j));
+            computer.send(charInfo);
+            return;
+        }
     }
 
     computer.send(reply);

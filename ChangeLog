@@ -1,3 +1,8 @@
+2006-08-21  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/accounthandler.cpp, src/accounthandler.h: Handle character
+	create message in separate funcion.
+
 2006-08-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/accounthandler.cpp: Do not send map name and send token before
