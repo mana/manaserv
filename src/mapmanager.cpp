@@ -41,11 +41,12 @@ Map *MapManager::loadMap(const unsigned int mapId)
     Map *map = MapReader::readMap("maps/" + mapFile);
     if (map == NULL)
     {
-        LOG_ERROR("Error: Unable to load map file (" << mapFile << ")", 0);
+        LOG_ERROR("Unable to load map \"" << mapFile << "\" (id " << mapId
+                << ")", 0);
     }
     else
     {
-        LOG_INFO("Loaded map " << mapId << " (" << mapFile << ")", 0);
+        LOG_INFO("Loaded map \"" << mapFile << "\" (id " << mapId << ")", 0);
         maps[mapId] = map;
     }
     return map;

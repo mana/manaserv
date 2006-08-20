@@ -33,9 +33,7 @@
 #include "script.h"
 #endif
 
-/**
- * Convert a IP4 address into its string representation
- */
+
 std::string
 ip4ToString(unsigned int ip4addr)
 {
@@ -122,9 +120,6 @@ void ConnectionHandler::process()
                 // representation
                 std::string ipaddr = ip4ToString(event.peer->address.host);
 
-                LOG_INFO("A packet of length " << event.packet->dataLength <<
-                         " was received from " << ipaddr, 2);
-
                 NetComputer *comp = (NetComputer *)event.peer->data;
 
 #ifdef SCRIPT_SUPPORT
@@ -143,6 +138,10 @@ void ConnectionHandler::process()
                 if (event.packet->dataLength >= 2) {
                     MessageIn msg((char *)event.packet->data,
                                   event.packet->dataLength);
+                    LOG_INFO("Received message " << msg.getId() << " ("
+                            << event.packet->dataLength << " B) from "
+                            << ipaddr, 2);
+
                     processMessage(comp, msg);
                 } else {
                     LOG_ERROR("Message too short from " << ipaddr, 0);

@@ -49,7 +49,8 @@ void NetComputer::disconnect(const std::string &reason)
 
 void NetComputer::send(const MessageOut &msg)
 {
-    LOG_INFO("Sending packet of length " << msg.getDataSize(), 2);
+    LOG_INFO("Sending packet of length " << msg.getDataSize() << " to "
+            << ip4ToString(mPeer->address.host), 2);
 
     // Create a reliable packet.
     ENetPacket *packet = enet_packet_create(msg.getData(), msg.getDataSize(),

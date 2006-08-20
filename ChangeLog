@@ -2,6 +2,10 @@
 
 	* src/accounthandler.cpp: Do not send map name and send token before
 	game and chat server information, as per current specification.
+	* src/connectionhandler.h, src/connectionhandler.cpp,
+	src/dalstorage.cpp, src/netcomputer.cpp, src/mapmanager.cpp,
+	src/state.cpp: Some code format changes, logging improvals and
+	commenting.
 
 2006-08-19  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

@@ -388,6 +388,8 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
 const std::string
 DALStorage::getMapNameFromId(const unsigned int mapId)
 {
+    std::string name = "None";
+
     // If not opened already
     open();
 
@@ -399,22 +401,19 @@ DALStorage::getMapNameFromId(const unsigned int mapId)
         sql << mapId;
         sql << ";";
 
-        const dal::RecordSet& mapInfo = mDb->execSql(sql.str());
+        const dal::RecordSet &mapInfo = mDb->execSql(sql.str());
 
         // If the map return is empty then we have no choice but to return None.
-        if (mapInfo.isEmpty()) {
-            return "None";
+        if (!mapInfo.isEmpty()) {
+            name = mapInfo(0, 0);
         }
-
-        std::string strMap(mapInfo(0,0));
-        return strMap;
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what(), 0);
     }
 
-    return "None";
+    return name;
 }
 
 std::map<short, ChatChannel>

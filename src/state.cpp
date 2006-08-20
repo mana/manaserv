@@ -30,28 +30,33 @@
 
 #include "utils/logger.h"
 
-State::State() {
+State::State()
+{
 }
 
-State::~State() {
+State::~State()
+{
     for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
          i != maps.end();
-         i++) {
+         i++)
+    {
         delete i->second.map;
     }
 }
 
-void State::update()
+void
+State::update()
 {
     // update game state (update AI, etc.)
     for (std::map<unsigned int, MapComposite>::iterator m = maps.begin(),
-         m_end = maps.end(); m != m_end; ++m) {
-
+         m_end = maps.end(); m != m_end; ++m)
+    {
         typedef std::vector< utils::CountedPtr<MovingObject> > Movings;
         Movings movings;
 
         for (Objects::iterator o = m->second.objects.begin(),
-             o_end = m->second.objects.end(); o != o_end; ++o) {
+             o_end = m->second.objects.end(); o != o_end; ++o)
+        {
             (*o)->update();
             int t = (*o)->getType();
             if (t == OBJECT_NPC || t == OBJECT_PLAYER || t == OBJECT_MONSTER) {
@@ -61,17 +66,18 @@ void State::update()
             }
         }
 
-        
         Players &players = m->second.players;
         for (Players::iterator p = players.begin(),
-             p_end = players.end(); p != p_end; ++p) {
+             p_end = players.end(); p != p_end; ++p)
+        {
             std::pair<unsigned, unsigned> ps = (*p)->getXY();
             std::pair<unsigned, unsigned> pn = (*p)->getNextPosition();
             MessageOut msg;
             msg.writeShort(GPMSG_BEINGS_MOVE);
 
             for (Movings::iterator o = movings.begin(),
-                 o_end = movings.end(); o != o_end; ++o) {
+                 o_end = movings.end(); o != o_end; ++o)
+            {
                 std::pair<unsigned, unsigned> os = (*o)->getXY();
                 std::pair<unsigned, unsigned> on = (*o)->getNextPosition();
 
@@ -94,14 +100,17 @@ void State::update()
         }
 
         for (Movings::iterator o = movings.begin(),
-             o_end = movings.end(); o != o_end; ++o) {
+             o_end = movings.end(); o != o_end; ++o)
+        {
             std::pair<unsigned, unsigned> pos = (*o)->getNextPosition();
             (*o)->setXY(pos.first, pos.second);
         }
     }
 }
 
-void State::addObject(ObjectPtr objectPtr) {
+void
+State::addObject(ObjectPtr objectPtr)
+{
     unsigned mapId = objectPtr->getMapId();
     if (!loadMap(mapId)) return;
     maps[mapId].objects.push_back(objectPtr);
@@ -109,21 +118,29 @@ void State::addObject(ObjectPtr objectPtr) {
     PlayerPtr playerPtr(objectPtr);
     Players &players = maps[mapId].players;
     players.push_back(playerPtr);
-    MessageOut msg;
-    msg.writeShort(GPMSG_BEING_ENTER);
+
+    /* Currently when a player is added, all existing players are notified
+     * about this. This will need to be modified so that players only know
+     * about players close to them.
+     */
+    MessageOut msg(GPMSG_BEING_ENTER);
     msg.writeByte(OBJECT_PLAYER);
     msg.writeLong(playerPtr->getID());
     msg.writeString(playerPtr->getName());
     msg.writeByte(playerPtr->getHairStyle());
     msg.writeByte(playerPtr->getHairColor());
     msg.writeByte(playerPtr->getGender());
+
     for (Players::iterator p = players.begin(),
-         p_end = players.end(); p != p_end; ++p) {
+         p_end = players.end(); p != p_end; ++p)
+    {
         gameHandler->sendTo(*p, msg);
     }
 }
 
-void State::removeObject(ObjectPtr objectPtr) {
+void
+State::removeObject(ObjectPtr objectPtr)
+{
     unsigned mapId = objectPtr->getMapId();
     std::map<unsigned, MapComposite>::iterator m = maps.find(mapId);
     if (m == maps.end()) return;
@@ -138,12 +155,17 @@ void State::removeObject(ObjectPtr objectPtr) {
     if (objectPtr->getType() != OBJECT_PLAYER) return;
     PlayerPtr playerPtr(objectPtr);
     Players &players = maps[mapId].players;
-    MessageOut msg;
-    msg.writeShort(GPMSG_BEING_LEAVE);
+
+    /* Also see note add addObject. All other players are notified about this
+     * player leaving, but not all of them need to know.
+     */
+    MessageOut msg(GPMSG_BEING_LEAVE);
     msg.writeByte(OBJECT_PLAYER);
     msg.writeLong(playerPtr->getID());
+
     Players::iterator p_end = players.end(), j = p_end;
-    for (Players::iterator p = players.begin(); p != p_end; ++p) {
+    for (Players::iterator p = players.begin(); p != p_end; ++p)
+    {
         if (p->get() == playerPtr.get())
             j = p;
         else
@@ -152,13 +174,17 @@ void State::removeObject(ObjectPtr objectPtr) {
     if (j != players.end()) players.erase(j);
 }
 
-void State::informPlayer(PlayerPtr playerPtr) {
+void
+State::informPlayer(PlayerPtr playerPtr)
+{
     unsigned mapId = playerPtr->getMapId();
     std::map<unsigned, MapComposite>::iterator m = maps.find(mapId);
     if (m == maps.end()) return;
     Players &players = m->second.players;
+
     for (Players::iterator p = players.begin(),
-         p_end = players.end(); p != p_end; ++p) {
+         p_end = players.end(); p != p_end; ++p)
+    {
         MessageOut msg;
         msg.writeShort(GPMSG_BEING_ENTER);
         msg.writeByte(OBJECT_PLAYER);
@@ -171,7 +197,9 @@ void State::informPlayer(PlayerPtr playerPtr) {
     }
 }
 
-bool State::loadMap(const unsigned int mapId) {
+bool
+State::loadMap(const unsigned int mapId)
+{
     if (maps.find(mapId) != maps.end()) return true;
     Map *tmp = MapManager::instance().loadMap(mapId);
     if (!tmp) return false;

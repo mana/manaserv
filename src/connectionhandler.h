@@ -34,6 +34,12 @@ class MessageOut;
 class NetComputer;
 
 /**
+ * Convert a IP4 address into its string representation
+ */
+std::string
+ip4ToString(unsigned int ip4addr);
+
+/**
  * Data related to a connected client. This includes the buffer for incoming
  * messages and the related socket.
  */
