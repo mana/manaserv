@@ -6,6 +6,9 @@
 	src/dalstorage.cpp, src/netcomputer.cpp, src/mapmanager.cpp,
 	src/state.cpp: Some code format changes, logging improvals and
 	commenting.
+	* src/state.cpp, src/defines.h, src/gamehandler.cpp, src/state.h,
+	src/being.h: Added sending of initial GPMSG_PLAYER_MAP_CHANGE message
+	for joining players.
 
 2006-08-19  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

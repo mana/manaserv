@@ -254,8 +254,13 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
     }
 }
 
-void GameHandler::sendTo(PlayerPtr beingPtr, MessageOut &msg)
+void
+GameHandler::sendTo(PlayerPtr beingPtr, MessageOut &msg)
 {
+    /* TODO: This implementation is very inefficient. An alternative would be
+     * store the NetComputer reference with the player class, so that it can
+     * be directly accessed.
+     */
     for (NetComputers::iterator i = clients.begin(); i != clients.end(); ++i)
     {
         PlayerPtr clientChar = static_cast<GameClient *>(*i)->getCharacter();

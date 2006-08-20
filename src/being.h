@@ -32,28 +32,42 @@
 #include "object.h"
 #include "utils/countedptr.h"
 
-const unsigned int MAX_EQUIP_SLOTS = 5; /**< Maximum number of equipped slots */
+/** Maximum number of equipped slots */
+const unsigned int MAX_EQUIP_SLOTS = 5;
 
 /**
  * Raw statistics of a Player
  */
-
-enum { STAT_STR = 0, STAT_AGI, STAT_VIT, STAT_INT, STAT_DEX, STAT_LUK, NB_RSTAT };
+enum {
+    STAT_STR = 0,
+    STAT_AGI,
+    STAT_VIT,
+    STAT_INT,
+    STAT_DEX,
+    STAT_LUK,
+    NB_RSTAT
+};
 
 /**
  * Structure types for the raw statistics of a Player
  */
-
 struct RawStatistics
 {
     unsigned short stats[NB_RSTAT];
 };
 
-/*
+/**
  * Computed statistics of a Being
  */
-
-enum { STAT_HEA = 0, STAT_ATT, STAT_DEF, STAT_MAG, STAT_ACC, STAT_SPD, NB_CSTAT };
+enum {
+    STAT_HEA = 0,
+    STAT_ATT,
+    STAT_DEF,
+    STAT_MAG,
+    STAT_ACC,
+    STAT_SPD,
+    NB_CSTAT
+};
 
 /**
  * Structure type for the computed statistics of a Being.
@@ -67,7 +81,7 @@ struct Statistics
  * Generic Being (living object).
  * Used for players & monsters (all animated objects).
  */
-class Being: public MovingObject
+class Being : public MovingObject
 {
     public:
         /**
@@ -102,7 +116,7 @@ class Being: public MovingObject
         Statistics mStats; /**< stats modifiers or computed stats */
 };
 
-class Player: public Being
+class Player : public Being
 {
     public:
 
@@ -272,17 +286,19 @@ class Player: public Being
         Player(Player const &);
         Player &operator=(Player const &);
 
-        std::string mName;       /**< name of the being */
-        Gender mGender;          /**< gender of the being */
-        unsigned char mHairStyle;/**< Hair Style of the being */
-        unsigned char mHairColor;/**< Hair Color of the being */
-        unsigned char mLevel;    /**< level of the being */
-        unsigned int mMoney;     /**< wealth of the being */
-        RawStatistics mRawStats; /**< raw stats of the being */
+        std::string mName;        /**< name of the being */
+        Gender mGender;           /**< gender of the being */
+        unsigned char mHairStyle; /**< Hair Style of the being */
+        unsigned char mHairColor; /**< Hair Color of the being */
+        unsigned char mLevel;     /**< level of the being */
+        unsigned int mMoney;      /**< wealth of the being */
+        RawStatistics mRawStats;  /**< raw stats of the being */
 
         std::vector<unsigned int> inventory;    /**< Player inventory */
-        unsigned int equipment[MAX_EQUIP_SLOTS]; /**< Equipped item ID's (from inventory) */
-}; 
+
+        /** Equipped item ID's (from inventory) */
+        unsigned int equipment[MAX_EQUIP_SLOTS];
+};
 
 /**
  * Type definition for a smart pointer to Being.

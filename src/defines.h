@@ -139,6 +139,8 @@ enum {
     CPMSG_CONNECT_RESPONSE         = 0x0054, // B error
 
     // Game
+    GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y, B newserv
+                                             // [, S32 token, S server, W port]
     PGMSG_PICKUP                   = 0x0110,
     GPMSG_PICKUP_RESPONSE          = 0x0111,
     GPMSG_BEING_ENTER              = 0x0200, // B type, L being id

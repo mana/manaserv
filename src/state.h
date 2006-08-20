@@ -31,26 +31,26 @@
 class Map;
 
 /**
- * Combined map/entity structure
+ * Combined map/entity structure.
  */
 struct MapComposite {
     /**
-     * Default constructor
+     * Default constructor.
      */
     MapComposite() : map(NULL) { }
 
     /**
-     * Actual map
+     * Actual map.
      */
     Map *map;
 
     /**
-     * Objects (items, players, monsters, etc) located on the map
+     * Objects (items, players, monsters, etc) located on the map.
      */
     Objects objects;
 
     /**
-     * Players located on the map
+     * Players located on the map.
      */
     Players players;
 };
@@ -62,7 +62,7 @@ struct MapComposite {
 class State
 {
     /**
-     * List of maps
+     * List of maps.
      */
     std::map<unsigned int, MapComposite> maps;
 
@@ -71,27 +71,27 @@ class State
     ~State();
 
     /**
-     * Update game state (contains core server logic)
+     * Update game state (contains core server logic).
      */
     void update();
 
     /**
-     * Send game state to given player
+     * Send game state to given player.
      */
     void informPlayer(PlayerPtr playerPtr);
 
     /**
-     * Load map into game world
+     * Load map into game world.
      */
     bool loadMap(unsigned mapId);
 
     /**
-     * Add object to the map
+     * Add object to the map.
      */
     void addObject(ObjectPtr objectPtr);
 
     /**
-     * Remove an object from the map
+     * Remove an object from the map.
      */
     void removeObject(ObjectPtr objectPtr);
 };

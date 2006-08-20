@@ -27,6 +27,7 @@
 #include "map.h"
 #include "mapmanager.h"
 #include "messageout.h"
+#include "storage.h"
 
 #include "utils/logger.h"
 
@@ -115,9 +116,8 @@ State::addObject(ObjectPtr objectPtr)
     if (!loadMap(mapId)) return;
     maps[mapId].objects.push_back(objectPtr);
     if (objectPtr->getType() != OBJECT_PLAYER) return;
-    PlayerPtr playerPtr(objectPtr);
     Players &players = maps[mapId].players;
-    players.push_back(playerPtr);
+    PlayerPtr playerPtr(objectPtr);
 
     /* Currently when a player is added, all existing players are notified
      * about this. This will need to be modified so that players only know
@@ -136,6 +136,20 @@ State::addObject(ObjectPtr objectPtr)
     {
         gameHandler->sendTo(*p, msg);
     }
+
+    // Add the new player to the list
+    players.push_back(playerPtr);
+
+    /* Since the player doesn't know yet where on the world he is after
+     * connecting to the map server, we send him an initial change map message.
+     */
+    Storage &store = Storage::instance("tmw");
+    MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
+    mapChangeMessage.writeString(store.getMapNameFromId(mapId));
+    mapChangeMessage.writeShort(playerPtr->getX());
+    mapChangeMessage.writeShort(playerPtr->getY());
+    mapChangeMessage.writeByte(0);
+    gameHandler->sendTo(playerPtr, mapChangeMessage);
 }
 
 void
@@ -182,11 +196,14 @@ State::informPlayer(PlayerPtr playerPtr)
     if (m == maps.end()) return;
     Players &players = m->second.players;
 
+    /* Here the player is informed about all the other players on the map.
+     * However, the player should only be told about other players within
+     * visual range. See also notes at addObject and removeObject.
+     */
     for (Players::iterator p = players.begin(),
          p_end = players.end(); p != p_end; ++p)
     {
-        MessageOut msg;
-        msg.writeShort(GPMSG_BEING_ENTER);
+        MessageOut msg(GPMSG_BEING_ENTER);
         msg.writeByte(OBJECT_PLAYER);
         msg.writeLong((*p)->getID());
         msg.writeString((*p)->getName());
