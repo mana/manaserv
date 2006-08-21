@@ -1,3 +1,7 @@
+2006-08-21  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.cbp, tmwserv.dev: Updated project files.
+
 2006-08-21  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/accounthandler.cpp, src/accounthandler.h: Handle character
