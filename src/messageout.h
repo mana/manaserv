@@ -47,15 +47,21 @@ class MessageOut
          */
         ~MessageOut();
 
-        void writeByte(char value);          /**< Writes a byte. */
-        void writeShort(short value);        /**< Writes a short. */
-        void writeLong(long value);          /**< Writes a long. */
+        void
+        writeByte(char value);          /**< Writes a byte. */
+
+        void
+        writeShort(short value);        /**< Writes a short. */
+
+        void
+        writeLong(long value);          /**< Writes a long. */
 
         /**
          * Writes a string. If a fixed length is not given (-1), it is stored
          * as a short at the start of the string.
          */
-        void writeString(const std::string &string, int length = -1);
+        void
+        writeString(const std::string &string, int length = -1);
 
         /**
          * Returns the content of the message.
@@ -67,21 +73,19 @@ class MessageOut
          * Returns the length of the data.
          */
         unsigned int
-        getDataSize() const { return mDataSize; }
+        getLength() const { return mPos; }
 
     private:
         /**
-         * Expand the packet data to be able to hold more data.
-         *
-         * NOTE: For performance enhancements this method could allocate extra
-         * memory in advance instead of expanding size every time more data is
-         * added.
+         * Ensures the capacity of the data buffer is large enough to hold the
+         * given amount of bytes.
          */
-        void expand(size_t size);
+        void
+        expand(size_t size);
 
         char *mData;                         /**< Data building up. */
-        unsigned int mDataSize;              /**< Size of data. */
         unsigned int mPos;                   /**< Position in the data. */
+        unsigned int mDataSize;              /**< Allocated datasize. */
 };
 
-#endif
+#endif //_TMWSERV_MESSAGEOUT_H_

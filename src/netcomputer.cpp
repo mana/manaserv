@@ -23,39 +23,65 @@
 
 #include "netcomputer.h"
 
-#include "chatchannelmanager.h"
-#include "connectionhandler.h"
+#include <iosfwd>
+#include <queue>
+#include <iostream>
+
+#include <enet/enet.h>
+
+#include "defines.h"
 #include "messageout.h"
-#include "state.h"
+#include "connectionhandler.h"
 
 #include "utils/logger.h"
 
-NetComputer::NetComputer(ConnectionHandler *handler, ENetPeer *peer):
-    mHandler(handler),
+NetComputer::NetComputer(ENetPeer *peer):
     mPeer(peer)
 {
 }
 
-void NetComputer::disconnect(const std::string &reason)
+bool
+NetComputer::isConnected()
 {
-    // TODO: Send a disconnect message containing the reason, and somehow only
-    // TODO: really disconnect the client after waiting for the client to get
-    // TODO: the message (or likely got it).
-
-    // ENet should generate a disconnect event (notifying the connection
-    // handler)
-    enet_peer_disconnect(mPeer, 0);
+    return (mPeer->state == ENET_PEER_STATE_CONNECTED);
 }
 
-void NetComputer::send(const MessageOut &msg)
+void
+NetComputer::disconnect(const MessageOut &msg)
 {
-    LOG_INFO("Sending packet of length " << msg.getDataSize() << " to "
-            << ip4ToString(mPeer->address.host), 2);
+    if (isConnected())
+    {
+        /* ChannelID 0xFF is the channel used by enet_peer_disconnect.
+         * If a reliable packet is send over this channel ENet guaranties
+         * that the message is recieved before the disconnect request.
+         */
+        send(msg, ENET_PACKET_FLAG_RELIABLE, 0xFF);
 
-    // Create a reliable packet.
-    ENetPacket *packet = enet_packet_create(msg.getData(), msg.getDataSize(),
-                                            ENET_PACKET_FLAG_RELIABLE);
+        /* ENet generates a disconnect event
+         * (notifying the connection handler).
+         */
+        enet_peer_disconnect(mPeer, 0);
+    }
+}
 
-    // Send the packet to the peer over channel id 0.
-    enet_peer_send(mPeer, 0, packet);
+void
+NetComputer::send(const MessageOut &msg, bool reliable,
+                  unsigned int channel)
+{
+    LOG_INFO("Sending packet of length " << msg.getLength() << " to "
+             << ip4ToString(mPeer->address.host), 2);
+
+    ENetPacket *packet;
+    packet = enet_packet_create(msg.getData(),
+                                msg.getLength(),
+                                reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
+
+    if (packet)
+    {
+        enet_peer_send(mPeer, channel, packet);
+    }
+    else
+    {
+        LOG_WARN("Failure to create packet!", 0);
+    }
 }

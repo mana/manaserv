@@ -25,6 +25,7 @@
 #define _TMWSERV_ACCOUNTCLIENT_H_
 
 #include "netcomputer.h"
+#include "account.h"
 
 #include <enet/enet.h>
 
@@ -34,13 +35,13 @@ class AccountHandler;
  * A connected computer that can have an account and character associated with
  * it.
  */
-class AccountClient: public NetComputer
+class AccountClient : public NetComputer
 {
     public:
         /**
          * Constructor.
          */
-        AccountClient(AccountHandler *accountHandler, ENetPeer *peer);
+        AccountClient(ENetPeer *peer);
 
         /**
          * Destructor.
@@ -50,32 +51,38 @@ class AccountClient: public NetComputer
         /**
          * Set the account associated with the connection
          */
-        void setAccount(AccountPtr acc);
+        void
+        setAccount(AccountPtr acc);
 
         /**
          * Unset the account associated with the connection
          */
-        void unsetAccount();
+        void
+        unsetAccount();
 
         /**
          * Get account associated with the connection.
          */
-        AccountPtr getAccount() { return mAccountPtr; }
+        AccountPtr
+        getAccount() const { return mAccountPtr; }
 
         /**
          * Set the selected character associated with connection.
          */
-        void setCharacter(PlayerPtr ch);
+        void
+        setCharacter(PlayerPtr ch);
 
         /**
          * Deselect the character associated with connection.
          */
-        void unsetCharacter();
+        void
+        unsetCharacter();
 
         /**
          * Get character associated with the connection
          */
-        PlayerPtr getCharacter() { return mCharacterPtr; }
+        PlayerPtr
+        getCharacter() const { return mCharacterPtr; }
 
     private:
         /** Account associated with connection */

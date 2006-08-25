@@ -55,6 +55,7 @@ typedef enum {
 
     // Network related
 const unsigned int MAX_CLIENTS  = 1024,
+
     // Chat related
 /**
  * N.B: Private channels can't have an id less

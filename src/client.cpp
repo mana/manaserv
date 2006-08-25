@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
             // Send prepared message
             if (!exit && connected) {
                 ENetPacket *packet = enet_packet_create(
-                        msg.getData(), msg.getDataSize(),
+                        msg.getData(), msg.getLength(),
                         ENET_PACKET_FLAG_RELIABLE);
                 ENetPeer *peer = peerAccount;
                 if (msgDestination == 1) peer = peerGame;

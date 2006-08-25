@@ -96,7 +96,7 @@ State::update()
                 msg.writeShort(od.second);
             }
 
-            if (msg.getDataSize() > 2)
+            if (msg.getLength() > 2)
                 gameHandler->sendTo(*p, msg);
         }
 

@@ -39,14 +39,14 @@ class ChatClient: public NetComputer
         /**
          * Constructor.
          */
-        ChatClient(ChatHandler *, ENetPeer *);
+        ChatClient(ENetPeer *peer);
 
         std::string characterName;
         AccountLevel accountLevel;
 };
 
-ChatClient::ChatClient(ChatHandler *handler, ENetPeer *peer):
-    NetComputer(handler, peer),
+ChatClient::ChatClient(ENetPeer *peer):
+    NetComputer(peer),
     accountLevel(AL_NORMAL)
 {
 }
@@ -101,7 +101,7 @@ void ChatHandler::removeOutdatedPending()
 
 NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
 {
-    return new ChatClient(this, peer);
+    return new ChatClient(peer);
 }
 
 void ChatHandler::computerDisconnected(NetComputer *computer)
@@ -363,7 +363,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     // The user entered the channel, now give him the announcement string
                     // and the user list.
                     result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
-                    std::vector< std::string > const &userList = 
+                    std::vector< std::string > const &userList =
                     chatChannelManager->getUserListInChannel(channelId);
                     result.writeShort(userList.size());
                     for (std::vector< std::string >::const_iterator i = userList.begin(), i_end = userList.end();
@@ -419,7 +419,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
     }
 
-    if (result.getDataSize() > 0)
+    if (result.getLength() > 0)
         computer.send(result);
 }
 

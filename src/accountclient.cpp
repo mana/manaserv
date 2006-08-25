@@ -26,8 +26,8 @@
 #include "account.h"
 #include "accounthandler.h"
 
-AccountClient::AccountClient(AccountHandler *handler, ENetPeer *peer):
-    NetComputer(handler, peer),
+AccountClient::AccountClient(ENetPeer *peer):
+    NetComputer(peer),
     mAccountPtr(NULL),
     mCharacterPtr(NULL)
 {

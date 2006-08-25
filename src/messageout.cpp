@@ -24,36 +24,51 @@
 #include "messageout.h"
 
 #include <string>
+#include <stdlib.h>
+#include <iosfwd>
 
 #include <enet/enet.h>
 
+/** Initial amount of bytes allocated for the messageout data buffer. */
+const unsigned int INITIAL_DATA_CAPACITY = 2;
+
+/** Factor by which the messageout data buffer is increased when too small. */
+const unsigned int CAPACITY_GROW_FACTOR = 2;
+
 MessageOut::MessageOut():
-    mData(0),
-    mDataSize(0),
     mPos(0)
 {
+    mData = (char*) malloc(INITIAL_DATA_CAPACITY);
+    mDataSize = INITIAL_DATA_CAPACITY;
 }
 
 MessageOut::MessageOut(short id):
-    mData(0),
-    mDataSize(0),
     mPos(0)
 {
+    mData = (char*) malloc(INITIAL_DATA_CAPACITY);
+    mDataSize = INITIAL_DATA_CAPACITY;
+
     writeShort(id);
 }
 
 MessageOut::~MessageOut()
 {
-    if (mData) {
-        free(mData);
-    }
+    free(mData);
 }
 
 void
 MessageOut::expand(size_t bytes)
 {
-    mData = (char*)realloc(mData, bytes);
-    mDataSize = bytes;
+    if (bytes > mDataSize)
+    {
+        do
+        {
+            mDataSize *= CAPACITY_GROW_FACTOR;
+        }
+        while (bytes > mDataSize);
+
+        mData = (char*) realloc(mData, mDataSize);
+    }
 }
 
 void
@@ -64,7 +79,8 @@ MessageOut::writeByte(char value)
     mPos += 1;
 }
 
-void MessageOut::writeShort(short value)
+void
+MessageOut::writeShort(short value)
 {
     expand(mPos + 2);
     uint16_t t = ENET_HOST_TO_NET_16(value);
@@ -101,9 +117,9 @@ MessageOut::writeString(const std::string &string, int length)
     // Write the actual string
     memcpy(mData + mPos, string.c_str(), stringLength);
 
-    // Pad remaining space with zeros
     if (length > stringLength)
     {
+        // Pad remaining space with zeros
         memset(mData + mPos + stringLength, '\0', length - stringLength);
     }
     mPos += length;

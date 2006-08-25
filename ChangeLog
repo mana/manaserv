@@ -1,3 +1,15 @@
+2006-08-25  Rogier Polak  <rogier_polak@users.sourceforge.net>
+
+	* src/accountclient.h, src/messageout.cpp, src/accounthandler.cpp,
+	src/accountclient.cpp, src/netcomputer.h, src/client.cpp,
+	src/messageout.h, src/netcomputer.cpp, src/gameclient.cpp,
+	src/state.cpp, src/defines.h, src/gamehandler.cpp,
+	src/chathandler.cpp, src/gameclient.h: MessageOut is now more
+	efficient by preallocating buffer capacity, NetComputer no longer
+	holds a reference to the ConnectionHandler that spawned it and support
+	was added for unreliable packets and channels (patch applied by Bjørn
+	Lindeijer with some modifications).
+
 2006-08-21  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.

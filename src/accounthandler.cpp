@@ -39,12 +39,14 @@
 #include "utils/stringfilter.h"
 
 
-NetComputer *AccountHandler::computerConnected(ENetPeer *peer)
+NetComputer*
+AccountHandler::computerConnected(ENetPeer *peer)
 {
-    return new AccountClient(this, peer);
+    return new AccountClient(peer);
 }
 
-void AccountHandler::computerDisconnected(NetComputer *comp)
+void
+AccountHandler::computerDisconnected(NetComputer *comp)
 {
     delete comp;
 }
@@ -54,7 +56,8 @@ void AccountHandler::computerDisconnected(NetComputer *comp)
  * correct subroutines. Account handler takes care of determining the
  * current step in the account process, be it creation, setup, or login.
  */
-void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
+void
+AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 {
     AccountClient &computer = *static_cast< AccountClient * >(comp);
 
@@ -253,7 +256,7 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
     }
 
     // return result
-    if (result.getDataSize() > 0)
+    if (result.getLength() > 0)
         computer.send(result);
 }
 

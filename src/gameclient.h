@@ -41,7 +41,7 @@ class GameClient: public NetComputer
         /**
          * Constructor.
          */
-        GameClient(GameHandler *handler, ENetPeer *peer);
+        GameClient(ENetPeer *peer);
 
         /**
          * Destructor.

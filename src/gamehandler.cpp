@@ -105,7 +105,7 @@ void GameHandler::removeOutdatedPending()
 
 NetComputer *GameHandler::computerConnected(ENetPeer *peer)
 {
-    return new GameClient(this, peer);
+    return new GameClient(peer);
 }
 
 void GameHandler::computerDisconnected(NetComputer *computer)
@@ -218,7 +218,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
     }
 
-    if (result.getDataSize() > 0)
+    if (result.getLength() > 0)
         computer.send(result);
 }
 

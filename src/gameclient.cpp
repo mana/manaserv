@@ -28,8 +28,8 @@
 #include "state.h"
 #include "gamehandler.h"
 
-GameClient::GameClient(GameHandler *handler, ENetPeer *peer):
-    NetComputer(handler, peer),
+GameClient::GameClient(ENetPeer *peer):
+    NetComputer(peer),
     mCharacterPtr(NULL)
 {
 }

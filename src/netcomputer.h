@@ -24,16 +24,8 @@
 #ifndef _TMWSERV_NETCOMPUTER_H_
 #define _TMWSERV_NETCOMPUTER_H_
 
-#include <iosfwd>
-#include <queue>
-
 #include <enet/enet.h>
 
-#include "account.h"
-#include "being.h"
-
-// Forward declaration
-class ConnectionHandler;
 class MessageOut;
 
 /**
@@ -46,38 +38,51 @@ class NetComputer
         /**
          * Constructor.
          */
-        NetComputer(ConnectionHandler *handler, ENetPeer *peer);
+        NetComputer(ENetPeer *peer);
 
         /**
-         * Destructor
+         * Destructor.
          */
         virtual ~NetComputer() {}
 
         /**
-         * Returns <code>true</code> if this computer is disconnected.
+         * Returns <code>true</code> if this computer is connected.
          */
-        //bool
-        //isDisconnected();
+        bool
+        isConnected();
 
         /**
-         * Disconnects the computer from the server.
+         * Disconnects the computer from the server, after sending a message.
+         *
+         * The caller of this method should prepare the message, because
+         * NetComputer does not know which handler send it
+         * (could have been chat/game/account)
          */
         void
-        disconnect(const std::string &reason);
+        disconnect(const MessageOut &msg);
 
         /**
          * Queues a message for sending to a client.
          *
-         * TODO: Add support for reliable and maybe also channels now that we
-         * TODO: have ENet.
+         * Reliable packets always arrive, if the client stays connected.
+         * Unreliable packets may not arrive, and may not even be send.
+         *
+         * Channels are used to ensure that unrelated reliable packets do not
+         * hold each other up. In essence, each channel represents a different
+         * queque.
+         *
+         * @param msg      The message to be send.
+         * @param reliable Defines if a reliable or an unreliable packet
+         *                 should be send.
+         * @param channel  The channel number of which the packet should
+         *                 be send.
          */
         void
-        send(const MessageOut &msg);
-        //void send(Packet *p, bool reliable = true);
+        send(const MessageOut &msg, bool reliable = true,
+             unsigned int channel = 0);
 
     private:
-        ConnectionHandler *mHandler;  /**< Connection handler */
         ENetPeer *mPeer;              /**< Client peer */
 };
 
-#endif
+#endif // _TMWSERV_NETCOMPUTER_H_
