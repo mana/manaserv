@@ -1,3 +1,8 @@
+2006-08-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/accounthandler.cpp: Read game and chat server addresses to send
+	to the client from the configuration file.
+
 2006-08-25  Rogier Polak  <rogier_polak@users.sourceforge.net>
 
 	* src/accountclient.h, src/messageout.cpp, src/accounthandler.cpp,

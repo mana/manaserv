@@ -196,9 +196,11 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                         1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
                 }
                 result.writeString(magic_token, 32);
-                result.writeString("www.lindeijer.nl"); // TODO
+                result.writeString(config.getValue("clientGameServerAddress",
+                                                   "localhost"));
                 result.writeShort(9603);
-                result.writeString("www.lindeijer.nl");
+                result.writeString(config.getValue("clientChatServerAddress",
+                                                   "localhost"));
                 result.writeShort(9602);
 
                 registerGameClient(magic_token, selectedChar);
