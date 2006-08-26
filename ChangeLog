@@ -10,6 +10,10 @@
 	wall for testing purpose.
 	* src/gamehandler.cpp, src/defines.h: Send being identifier instead of
 	being name when saying around.
+	* src/object.h: Added a field indicating if an object just appeared.
+	* src/state.cpp: Improved update logic by taking into account beings
+	that just appeared. Moved "change map" message from AddObject to
+	InformPlayer.
 
 2006-08-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

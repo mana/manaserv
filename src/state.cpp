@@ -73,19 +73,23 @@ State::update()
         {
             std::pair<unsigned, unsigned> ps = (*p)->getXY();
             std::pair<unsigned, unsigned> pn = (*p)->getNextPosition();
-            MessageOut msg;
-            msg.writeShort(GPMSG_BEINGS_MOVE);
+            bool po = !(*p)->isNew();
+            MessageOut msg(GPMSG_BEINGS_MOVE);
 
             for (Movings::iterator o = movings.begin(),
                  o_end = movings.end(); o != o_end; ++o)
             {
                 std::pair<unsigned, unsigned> os = (*o)->getXY();
                 std::pair<unsigned, unsigned> on = (*o)->getNextPosition();
+                bool oo = po && !(*o)->isNew(); // Are p and o both old?
 
-                bool were = areAround(ps.first, ps.second, os.first, os.second);
+                /* Look whether p and o "were" around the last time and whether
+                   they "will" be around the next time. p has to be informed when
+                   this proximity changes or if o will move in range. */
+                bool were = areAround(ps.first, ps.second, os.first, os.second) && oo;
                 bool will = areAround(pn.first, pn.second, on.first, on.second);
                 bool has_moved = os.first != on.first || os.second != on.second;
-                if (!(will && has_moved) && !(were != will))
+                if (!(will && has_moved) && (were == will))
                     continue;
 
                 std::pair<unsigned, unsigned> od = (*o)->getDestination();
@@ -105,6 +109,7 @@ State::update()
         {
             std::pair<unsigned, unsigned> pos = (*o)->getNextPosition();
             (*o)->setXY(pos.first, pos.second);
+            (*o)->setNew(false);
         }
     }
 }
@@ -115,6 +120,7 @@ State::addObject(ObjectPtr objectPtr)
     unsigned mapId = objectPtr->getMapId();
     if (!loadMap(mapId)) return;
     maps[mapId].objects.push_back(objectPtr);
+    objectPtr->setNew(true);
     if (objectPtr->getType() != OBJECT_PLAYER) return;
     Players &players = maps[mapId].players;
     PlayerPtr playerPtr(objectPtr);
@@ -139,17 +145,6 @@ State::addObject(ObjectPtr objectPtr)
 
     // Add the new player to the list
     players.push_back(playerPtr);
-
-    /* Since the player doesn't know yet where on the world he is after
-     * connecting to the map server, we send him an initial change map message.
-     */
-    Storage &store = Storage::instance("tmw");
-    MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
-    mapChangeMessage.writeString(store.getMapNameFromId(mapId));
-    mapChangeMessage.writeShort(playerPtr->getX());
-    mapChangeMessage.writeShort(playerPtr->getY());
-    mapChangeMessage.writeByte(0);
-    gameHandler->sendTo(playerPtr, mapChangeMessage);
 }
 
 void
@@ -195,6 +190,17 @@ State::informPlayer(PlayerPtr playerPtr)
     std::map<unsigned, MapComposite>::iterator m = maps.find(mapId);
     if (m == maps.end()) return;
     Players &players = m->second.players;
+
+    /* Since the player doesn't know yet where on the world he is after
+     * connecting to the map server, we send him an initial change map message.
+     */
+    Storage &store = Storage::instance("tmw");
+    MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
+    mapChangeMessage.writeString(store.getMapNameFromId(mapId));
+    mapChangeMessage.writeShort(playerPtr->getX());
+    mapChangeMessage.writeShort(playerPtr->getY());
+    mapChangeMessage.writeByte(0);
+    gameHandler->sendTo(playerPtr, mapChangeMessage);
 
     /* Here the player is informed about all the other players on the map.
      * However, the player should only be told about other players within

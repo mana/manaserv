@@ -43,6 +43,7 @@ class Object
         Object(int type, int id)
           : mType(type),
             mID(id),
+            mNew(true),
             mNeedUpdate(false)
         {}
 
@@ -142,12 +143,25 @@ class Object
         void setMapId(unsigned int mapId)
         { mMapId = mapId; }
 
+        /**
+         * Tells if the object just appeared.
+         */
+        bool isNew() const
+        { return mNew; }
+
+        /**
+         * Sets the age of the object.
+         */
+        void setNew(bool n)
+        { mNew = n; }
+
     private:
         int mType; /**< Object type */
         int mID; /** Object unique ID (wrt its type and its map at least) */
         unsigned int mX; /**< x coordinate */
         unsigned int mY; /**< y coordinate */
         unsigned int mMapId;  /**< id of the map being is on */
+        bool mNew; /**< true if the object just appeared */
 
     protected:
         bool mNeedUpdate;  /**< update() must be invoked if true */
