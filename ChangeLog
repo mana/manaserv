@@ -9,6 +9,7 @@
 
 	* src/accounthandler.cpp: Read game and chat server addresses to send
 	to the client from the configuration file.
+	* docs/tmwserv.xml: Added example configuration file.
 
 2006-08-25  Rogier Polak  <rogier_polak@users.sourceforge.net>
 

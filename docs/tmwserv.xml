@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!-- An example configuration file for ~/.tmwserv.xml -->
+<configuration>
+ <option name="dbhost" value=""/>
+ <option name="dbpass" value=""/>
+ <option name="dbuser" value=""/>
+ <option name="defaultMap" value="1"/>
+ <option name="startX" value="720"/>
+ <option name="startY" value="840"/>
+ <option name="clientGameServerAddress" value="localhost"/>
+ <option name="clientChatServerAddress" value="localhost"/>
+</configuration>
