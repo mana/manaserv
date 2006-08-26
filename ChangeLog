@@ -1,3 +1,10 @@
+2006-08-26  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/accounthandler.cpp: Set an arbitrary start position outside any
+	wall for testing purpose.
+	* src/gamehandler.cpp, src/defines.h: Send being identifier instead of
+	being name when saying around.
+
 2006-08-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/accounthandler.cpp: Read game and chat server addresses to send

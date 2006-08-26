@@ -179,9 +179,8 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 computer.setCharacter(chars[charNum]);
                 PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
-                //std::string mapName =
-                //    store.getMapNameFromId(selectedChar->getMapId());
-                //result.writeString(mapName);
+
+                selectedChar->setXY(600, 600); // for testing purpose
 
                 selectedChar->setDestination(selectedChar->getX(),
                                              selectedChar->getY());

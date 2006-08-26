@@ -150,7 +150,7 @@ enum {
     PGMSG_WALK                     = 0x0260, // W*2 destination
     GPMSG_BEINGS_MOVE              = 0x0280, // { L being id, W*2 position, W*2 destination }*
     PGMSG_SAY                      = 0x02A0, // S text
-    GPMSG_SAY                      = 0x02A1, // S being, S text
+    GPMSG_SAY                      = 0x02A1, // L being id, S text
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     PGMSG_EQUIP                    = 0x0302, // L item id, B slot
