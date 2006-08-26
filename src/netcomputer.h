@@ -26,6 +26,8 @@
 
 #include <enet/enet.h>
 
+#include <iostream>
+
 class MessageOut;
 
 /**
@@ -83,6 +85,14 @@ class NetComputer
 
     private:
         ENetPeer *mPeer;              /**< Client peer */
+
+        /**
+         * Converts the ip-address of the peer to a stringstream.
+         * Example:
+         * <code> std::cout << comp </code>
+         */
+        friend std::ostream& operator <<(std::ostream &os,
+                                         const NetComputer &comp);
 };
 
 #endif // _TMWSERV_NETCOMPUTER_H_

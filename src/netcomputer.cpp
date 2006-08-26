@@ -25,13 +25,11 @@
 
 #include <iosfwd>
 #include <queue>
-#include <iostream>
 
 #include <enet/enet.h>
 
 #include "defines.h"
 #include "messageout.h"
-#include "connectionhandler.h"
 
 #include "utils/logger.h"
 
@@ -69,7 +67,7 @@ NetComputer::send(const MessageOut &msg, bool reliable,
                   unsigned int channel)
 {
     LOG_INFO("Sending packet of length " << msg.getLength() << " to "
-             << ip4ToString(mPeer->address.host), 2);
+             << *this, 2);
 
     ENetPacket *packet;
     packet = enet_packet_create(msg.getData(),
@@ -84,4 +82,16 @@ NetComputer::send(const MessageOut &msg, bool reliable,
     {
         LOG_WARN("Failure to create packet!", 0);
     }
+}
+
+std::ostream&
+operator <<(std::ostream &os, const NetComputer &comp)
+{
+    // address.host contains the ip-address in network-byte-order
+
+    os << ((comp.mPeer->address.host & 0xff000000) >> 24) << "."
+       << ((comp.mPeer->address.host & 0x00ff0000) >> 16) << "."
+       << ((comp.mPeer->address.host & 0x0000ff00) >> 8) << "."
+       << ((comp.mPeer->address.host & 0x000000ff) >> 0);
+    return os;
 }

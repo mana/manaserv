@@ -1,3 +1,9 @@
+2006-08-26  Rogier Polak  <rogier_polak@users.sourceforge.net>
+
+	* src/netcomputer.h, src/netcomputer.cpp, src/connectionhandler.cpp:
+	Added private overloaded << operator to NetComputer, for logging of the
+	peers ip-address (patch applied by Bjørn Lindeijer).
+
 2006-08-26  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/accounthandler.cpp: Set an arbitrary start position outside any
@@ -262,7 +268,7 @@
 	* src/configuration.cpp, src/accounthandler.cpp, src/dalstorage.cpp,
 	src/main.cpp, src/chathandler.cpp, src/messagehandler.cpp,
 	src/utils/stringfilter.cpp, src/utils/logger.h, src/skill.cpp: Changed
-	LOG macros to have statement syntax.	
+	LOG macros to have statement syntax.
 
 2006-05-19  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

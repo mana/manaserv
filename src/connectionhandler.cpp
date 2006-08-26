@@ -116,11 +116,7 @@ void ConnectionHandler::process()
 
             case ENET_EVENT_TYPE_RECEIVE:
             {
-                // Convert the client IP address to string
-                // representation
-                std::string ipaddr = ip4ToString(event.peer->address.host);
-
-                NetComputer *comp = (NetComputer *)event.peer->data;
+                NetComputer *comp = (NetComputer*) event.peer->data;
 
 #ifdef SCRIPT_SUPPORT
                 // This could be good if you wanted to extend the
@@ -140,11 +136,11 @@ void ConnectionHandler::process()
                                   event.packet->dataLength);
                     LOG_INFO("Received message " << msg.getId() << " ("
                             << event.packet->dataLength << " B) from "
-                            << ipaddr, 2);
+                            << *comp, 2);
 
                     processMessage(comp, msg);
                 } else {
-                    LOG_ERROR("Message too short from " << ipaddr, 0);
+                    LOG_ERROR("Message too short from " << *comp, 0);
                 }
 
                 /* Clean up the packet now that we're done using it. */
