@@ -20,15 +20,12 @@
  *  $Id$
  */
 
-
 #ifndef _TMWSERV_ACCOUNT_H_
 #define _TMWSERV_ACCOUNT_H_
 
-
 #include <string>
 
-#include "being.h"
-
+#include "player.h"
 
 /**
  * Notes:

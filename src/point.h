@@ -43,7 +43,7 @@ class Point
         {}
 
         /**
-         * Check whether the given point is range of this point. This is
+         * Check whether the given point is within range of this point. This is
          * defined as lying within the distance of client awareness.
          */
         bool inRangeOf(const Point &p) const

@@ -4,6 +4,10 @@
 	src/dalstorage.cpp, src/object.h, src/state.cpp, src/gamehandler.cpp,
 	src/map.h, src/Makefile.am: Introduced Point class to replace the
 	confusing and clumsy usage of std::pair.
+	* src/point.h, src/player.cpp, src/account.h, src/being.cpp,
+	src/player.h, src/gameclient.h, src/state.h, src/Makefile.am,
+	src/being.h: Put Player class in its own module instead of defining it
+	together with Being.
 
 2006-08-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

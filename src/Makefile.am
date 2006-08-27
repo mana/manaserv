@@ -12,8 +12,9 @@ tmwclient_SOURCES = client.cpp \
 		    messagein.cpp
 
 tmwserv_SOURCES = main.cpp \
-		  configuration.h \
-		  configuration.cpp \
+		  being.h \
+		  account.h \
+		  account.cpp \
 		  accountclient.h \
 		  accountclient.cpp \
 		  accounthandler.h \
@@ -24,18 +25,17 @@ tmwserv_SOURCES = main.cpp \
 		  chatchannel.cpp \
 		  chatchannelmanager.h \
 		  chatchannelmanager.cpp \
+		  configuration.h \
+		  configuration.cpp \
 		  connectionhandler.h \
 		  connectionhandler.cpp \
+		  debug.h \
+		  debug.cpp \
+		  defines.h \
 		  gameclient.h \
 		  gameclient.cpp \
 		  gamehandler.h \
 		  gamehandler.cpp \
-		  properties.h \
-		  state.h \
-		  state.cpp \
-		  debug.h \
-		  debug.cpp \
-		  defines.h \
 		  items.h \
 		  items.cpp \
 		  map.cpp \
@@ -50,19 +50,20 @@ tmwserv_SOURCES = main.cpp \
 		  messageout.cpp \
 		  netcomputer.h \
 		  netcomputer.cpp \
-		  point.h \
-		  skill.h \
-		  skill.cpp \
-		  resourcemanager.cpp \
-		  resourcemanager.h \
-		  storage.h \
-		  storage.cpp \
-		  account.h \
-		  account.cpp \
 		  object.h \
 		  object.cpp \
-		  being.h \
-		  being.cpp \
+		  player.h \
+		  player.cpp \
+		  point.h \
+		  properties.h \
+		  resourcemanager.cpp \
+		  resourcemanager.h \
+		  skill.h \
+		  skill.cpp \
+		  state.h \
+		  state.cpp \
+		  storage.h \
+		  storage.cpp \
 		  dalstorage.h \
 		  dalstorage.cpp \
 		  dal/dalexcept.h \

@@ -20,10 +20,8 @@
  *  $Id$
  */
 
-
 #ifndef _TMWSERV_BEING_H_
 #define _TMWSERV_BEING_H_
-
 
 #include <string>
 #include <vector>
@@ -32,11 +30,8 @@
 #include "object.h"
 #include "utils/countedptr.h"
 
-/** Maximum number of equipped slots */
-const unsigned int MAX_EQUIP_SLOTS = 5;
-
 /**
- * Raw statistics of a Player
+ * Raw statistics of a Player.
  */
 enum {
     STAT_STR = 0,
@@ -49,7 +44,7 @@ enum {
 };
 
 /**
- * Structure types for the raw statistics of a Player
+ * Structure types for the raw statistics of a Player.
  */
 struct RawStatistics
 {
@@ -57,7 +52,7 @@ struct RawStatistics
 };
 
 /**
- * Computed statistics of a Being
+ * Computed statistics of a Being.
  */
 enum {
     STAT_HEA = 0,
@@ -116,190 +111,6 @@ class Being : public MovingObject
         Statistics mStats; /**< stats modifiers or computed stats */
 };
 
-class Player : public Being
-{
-    public:
-
-        Player(std::string const &name, int id = -1)
-          : Being(OBJECT_PLAYER, id),
-            mName(name)
-        {}
-
-        /**
-         * Gets the name.
-         *
-         * @return the name.
-         */
-        std::string const &getName() const
-        { return mName; }
-
-        /**
-         * Sets the hair style.
-         *
-         * @param style the new hair style.
-         */
-        void setHairStyle(unsigned char style)
-        { mHairStyle = style; }
-
-        /**
-         * Gets the hair style.
-         *
-         * @return the hair style value.
-         */
-        unsigned char getHairStyle() const
-        { return mHairStyle; }
-
-        /**
-         * Sets the hair color.
-         *
-         * @param color the new hair color.
-         */
-        void setHairColor(unsigned char color)
-        { mHairColor = color; }
-
-        /**
-         * Gets the hair color.
-         *
-         * @return the hair color value.
-         */
-        unsigned char getHairColor() const
-        { return mHairColor; }
-
-        /**
-         * Sets the gender.
-         *
-         * @param gender the new gender.
-         */
-        void setGender(Gender gender)
-        { mGender = gender; }
-
-        /**
-         * Gets the gender.
-         *
-         * @return the gender.
-         */
-        Gender getGender() const
-        { return mGender; }
-
-        /**
-         * Sets the level.
-         *
-         * @param level the new level.
-         */
-        void setLevel(unsigned char level)
-        { mLevel = level; }
-
-        /**
-         * Gets the level.
-         *
-         * @return the level.
-         */
-        unsigned char getLevel() const
-        { return mLevel; }
-
-        /**
-         * Sets the money.
-         *
-         * @param amount the new amount.
-         */
-        void setMoney(unsigned int amount)
-        { mMoney = amount; }
-
-        /**
-         * Gets the amount of money.
-         *
-         * @return the amount of money.
-         */
-        unsigned int getMoney() const
-        { return mMoney; }
-
-        /**
-         * Sets a raw statistic.
-         *
-         * @param numStat the statistic number.
-         * @param value the new value.
-         */
-        void setRawStat(int numStat, unsigned short value)
-        { mRawStats.stats[numStat] = value; }
-
-        /**
-         * Gets a raw statistic.
-         *
-         * @param numStat the statistic number.
-         * @return the statistic value.
-         */
-        unsigned short getRawStat(int numStat)
-        { return mRawStats.stats[numStat]; }
-
-        /**
-         * Updates the internal status.
-         */
-        void update();
-
-        /**
-         * Sets inventory.
-         */
-        void
-        setInventory(const std::vector<unsigned int> &inven);
-
-        /**
-         * Adds item with ID to inventory.
-         *
-         * @return Item add success/failure
-         */
-        bool
-        addInventory(unsigned int itemId);
-
-        /**
-         * Removes item with ID from inventory.
-         *
-         * @return Item delete success/failure
-         */
-        bool
-        delInventory(unsigned int itemId);
-
-        /**
-         * Checks if character has an item.
-         *
-         * @return true if being has item, false otherwise
-         */
-        bool
-        hasItem(unsigned int itemId);
-
-        /**
-         * Equips item with ID in equipment slot.
-         *
-         * @return Equip success/failure
-         */
-        bool
-        equip(unsigned int itemId, unsigned char slot);
-
-        /**
-         * Un-equips item.
-         *
-         * @return Un-equip success/failure
-         */
-        bool
-        unequip(unsigned char slot);
-
-    private:
-        Player(Player const &);
-        Player &operator=(Player const &);
-
-        std::string mName;        /**< name of the being */
-        Gender mGender;           /**< gender of the being */
-        unsigned char mHairStyle; /**< Hair Style of the being */
-        unsigned char mHairColor; /**< Hair Color of the being */
-        unsigned char mLevel;     /**< level of the being */
-        unsigned int mMoney;      /**< wealth of the being */
-        RawStatistics mRawStats;  /**< raw stats of the being */
-
-        std::vector<unsigned int> inventory;    /**< Player inventory */
-
-        /** Equipped item ID's (from inventory) */
-        unsigned int equipment[MAX_EQUIP_SLOTS];
-};
-
 /**
  * Type definition for a smart pointer to Being.
  */
@@ -309,15 +120,5 @@ typedef utils::CountedPtr<Being> BeingPtr;
  * Type definition for a list of Beings.
  */
 typedef std::vector<BeingPtr> Beings;
-
-/**
- * Type definition for a smart pointer to Player.
- */
-typedef utils::CountedPtr<Player> PlayerPtr;
-
-/**
- * Type definition for a list of Players.
- */
-typedef std::vector<PlayerPtr> Players;
 
 #endif // _TMWSERV_BEING_H_

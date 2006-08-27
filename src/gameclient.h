@@ -26,7 +26,7 @@
 
 #include "netcomputer.h"
 
-#include "being.h"
+#include "player.h"
 
 #include <enet/enet.h>
 

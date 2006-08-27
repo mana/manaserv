@@ -20,8 +20,7 @@
  *  $Id$
  */
 
-
-#include "being.h"
+#include "player.h"
 
 /**
  * Update the internal status.

@@ -26,7 +26,7 @@
 
 #include <map>
 
-#include "being.h"
+#include "player.h"
 
 class Map;
 
