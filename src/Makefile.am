@@ -50,6 +50,7 @@ tmwserv_SOURCES = main.cpp \
 		  messageout.cpp \
 		  netcomputer.h \
 		  netcomputer.cpp \
+		  point.h \
 		  skill.h \
 		  skill.cpp \
 		  resourcemanager.cpp \

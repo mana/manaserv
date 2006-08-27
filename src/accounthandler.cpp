@@ -33,6 +33,7 @@
 #include "messagein.h"
 #include "messageout.h"
 #include "netcomputer.h"
+#include "point.h"
 #include "storage.h"
 
 #include "utils/logger.h"
@@ -662,9 +663,9 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
             newCharacter->setMapId((int) config.getValue("defaultMap", 1));
-            newCharacter->setXY(
-                    (int) config.getValue("startX", 0),
-                    (int) config.getValue("startY", 0));
+            newCharacter->setXY(Point(
+                        (int) config.getValue("startX", 0),
+                        (int) config.getValue("startY", 0)));
             computer.getAccount()->addCharacter(newCharacter);
 
             LOG_INFO("Character " << name << " was created for "

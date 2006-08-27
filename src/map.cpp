@@ -41,7 +41,7 @@ Location::Location(int x, int y, MetaTile *tile):
 
 bool Location::operator< (const Location &loc) const
 {
-   return tile->Fcost > loc.tile->Fcost; 
+   return tile->Fcost > loc.tile->Fcost;
 }
 
 
@@ -280,10 +280,4 @@ Map::findPath(int startX, int startY, int destX, int destY)
     }
 
     return path;
-}
-
-bool areAround(unsigned x1, unsigned y1, unsigned x2, unsigned y2)
-{
-    return (abs(x1 - x2) <= (int)AROUND_AREA &&
-            abs(y1 - y2) <= (int)AROUND_AREA);
 }

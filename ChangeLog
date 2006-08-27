@@ -1,3 +1,10 @@
+2006-08-27  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/map.cpp, src/accounthandler.cpp, src/point.h,
+	src/dalstorage.cpp, src/object.h, src/state.cpp, src/gamehandler.cpp,
+	src/map.h, src/Makefile.am: Introduced Point class to replace the
+	confusing and clumsy usage of std::pair.
+
 2006-08-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/object.cpp: Fixed assertion failure on being movements.
@@ -9,7 +16,7 @@
 2006-08-26  Rogier Polak  <rogier_polak@users.sourceforge.net>
 
 	* src/netcomputer.h, src/netcomputer.cpp, src/connectionhandler.cpp:
-	Added private overloaded << operator to NetComputer, for logging of the
+	Added the stream operator << to NetComputer, for logging of the
 	peers ip-address (patch applied by Bjørn Lindeijer).
 
 2006-08-26  Guillaume Melquiond  <guillaume.melquiond@gmail.com>

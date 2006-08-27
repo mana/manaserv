@@ -29,6 +29,7 @@
 #include "map.h"
 #include "mapmanager.h"
 #include "messageout.h"
+#include "point.h"
 #include "storage.h"
 
 #include "utils/logger.h"
@@ -73,27 +74,27 @@ State::update()
         for (Players::iterator p = players.begin(),
              p_end = players.end(); p != p_end; ++p)
         {
-            std::pair<unsigned, unsigned> ps = (*p)->getXY();
-            std::pair<unsigned, unsigned> pn = (*p)->getNextPosition();
+            Point ps = (*p)->getXY();
+            Point pn = (*p)->getNextPosition();
             bool po = !(*p)->isNew(); // Is p old?
             MessageOut msg(GPMSG_BEINGS_MOVE);
 
             for (Movings::iterator o = movings.begin(),
                  o_end = movings.end(); o != o_end; ++o)
             {
-                std::pair<unsigned, unsigned> os = (*o)->getXY();
-                std::pair<unsigned, unsigned> on = (*o)->getNextPosition();
+                Point os = (*o)->getXY();
+                Point on = (*o)->getNextPosition();
                 bool oo = po && !(*o)->isNew(); // Are p and o both old?
 
                 /* Look whether p and o "were" around the last time and whether
                    they "will" be around the next time. */
-                bool were = areAround(ps.first, ps.second, os.first, os.second) && oo;
-                bool will = areAround(pn.first, pn.second, on.first, on.second);
+                bool wereInRange = ps.inRangeOf(os) && oo;
+                bool willBeInRange = pn.inRangeOf(on);
 
-                if (!were)
+                if (!wereInRange)
                 {
                     // o was outside p's range.
-                    if (!will)
+                    if (!willBeInRange)
                     {
                         // Nothing to report: o will not be inside p's range.
                         continue;
@@ -117,7 +118,7 @@ State::update()
                     }
                     gameHandler->sendTo(*p, msg2);
                 }
-                else if (!will)
+                else if (!willBeInRange)
                 {
                     // o is no longer visible from p.
                     MessageOut msg2(GPMSG_BEING_LEAVE);
@@ -126,7 +127,7 @@ State::update()
                     gameHandler->sendTo(*p, msg2);
                     continue;
                 }
-                else if (os.first == on.first && os.second == on.second)
+                else if (os.x == on.x && os.y == on.y)
                 {
                     // o does not move, nothing to report.
                     continue;
@@ -134,12 +135,12 @@ State::update()
 
                 /* At this point, either o has entered p's range, either o is
                    moving inside p's range. Report o's movements. */
-                std::pair<unsigned, unsigned> od = (*o)->getDestination();
+                Point od = (*o)->getDestination();
                 msg.writeLong((*o)->getID());
-                msg.writeShort(on.first);
-                msg.writeShort(on.second);
-                msg.writeShort(od.first);
-                msg.writeShort(od.second);
+                msg.writeShort(on.x);
+                msg.writeShort(on.y);
+                msg.writeShort(od.x);
+                msg.writeShort(od.y);
             }
 
             // Don't send a packet if nothing happed in p's range.
@@ -150,8 +151,7 @@ State::update()
         for (Movings::iterator o = movings.begin(),
              o_end = movings.end(); o != o_end; ++o)
         {
-            std::pair<unsigned, unsigned> pos = (*o)->getNextPosition();
-            (*o)->setXY(pos.first, pos.second);
+            (*o)->setXY((*o)->getNextPosition());
             (*o)->setNew(false);
         }
     }
@@ -184,21 +184,19 @@ State::removeObject(ObjectPtr objectPtr)
     }
     if (objectPtr->getType() != OBJECT_PLAYER) return;
 
-    PlayerPtr playerPtr(objectPtr);
-    std::pair< unsigned, unsigned > pos = playerPtr->getXY();
     MessageOut msg(GPMSG_BEING_LEAVE);
     msg.writeByte(OBJECT_PLAYER);
-    msg.writeLong(playerPtr->getID());
+    msg.writeLong(objectPtr->getID());
 
     Players &players = maps[mapId].players;
     Players::iterator p_end = players.end(), j = p_end;
     for (Players::iterator p = players.begin(); p != p_end; ++p)
     {
-        if (p->get() == playerPtr.get())
+        if (p->get() == objectPtr.get())
         {
             j = p;
         }
-        else if (areAround(pos.first, pos.second, (*p)->getX(), (*p)->getY()))
+        else if (objectPtr->getXY().inRangeOf((*p)->getXY()))
         {
             gameHandler->sendTo(*p, msg);
         }

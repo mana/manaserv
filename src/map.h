@@ -174,6 +174,4 @@ class Map : public Properties
         int onClosedList, onOpenList;
 };
 
-bool areAround(unsigned x1, unsigned y1, unsigned x2, unsigned y2);
-
 #endif

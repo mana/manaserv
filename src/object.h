@@ -24,10 +24,10 @@
 #ifndef _TMWSERV_OBJECT_H_
 #define _TMWSERV_OBJECT_H_
 
-#include <utility>
 #include <vector>
 
 #include "defines.h"
+#include "point.h"
 #include "utils/countedptr.h"
 
 /**
@@ -112,16 +112,16 @@ class Object
          * @param x the x coordinate.
          * @param y the y coordinate.
          */
-        void setXY(unsigned int x, unsigned int y)
-        { mX = x; mY = y; }
+        void setXY(const Point &p)
+        { mX = p.x; mY = p.y; }
 
         /**
          * Get the coordinates.
          *
          * @return the coordinates as a pair.
          */
-        std::pair<unsigned int, unsigned int> getXY() const
-        { return std::make_pair(mX, mY); }
+        Point getXY() const
+        { return Point(mX, mY); }
 
         /**
          * Update the internal status.
@@ -183,8 +183,8 @@ class MovingObject: public Object
         /**
          * Gets the destination coordinates of the object.
          */
-        std::pair<unsigned, unsigned> getDestination() const
-        { return std::make_pair(mDstX, mDstY); }
+        Point getDestination() const
+        { return Point(mDstX, mDstY); }
 
         /**
          * Sets the destination coordinates of the object.
@@ -195,8 +195,8 @@ class MovingObject: public Object
         /**
          * Gets the next coordinates of the object.
          */
-        std::pair<unsigned, unsigned> getNextPosition() const
-        { return std::make_pair(mNewX, mNewY); }
+        Point getNextPosition() const
+        { return Point(mNewX, mNewY); }
 
         /**
          * Sets object speed.

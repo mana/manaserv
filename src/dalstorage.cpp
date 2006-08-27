@@ -26,6 +26,7 @@
 
 #include "configuration.h"
 #include "dalstoragesql.h"
+#include "point.h"
 
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
@@ -260,8 +261,8 @@ DALStorage::getAccount(const std::string& userName)
                 player->setHairColor(toUshort(strCharInfo[k][5]));
                 player->setLevel(toUshort(strCharInfo[k][6]));
                 player->setMoney(toUint(strCharInfo[k][7]));
-                player->setXY(toUshort(strCharInfo[k][8]),
-                              toUshort(strCharInfo[k][9]));
+                player->setXY(Point(toUshort(strCharInfo[k][8]),
+                                    toUshort(strCharInfo[k][9])));
                 for (int i = 0; i < NB_RSTAT; ++i)
                     player->setRawStat(i, toUshort(strCharInfo[k][11 + i]));
 

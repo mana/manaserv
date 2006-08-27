@@ -231,7 +231,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
     msg.writeString(text);
 
     unsigned speakerMapId = beingPtr->getMapId();
-    std::pair<unsigned, unsigned> speakerXY = beingPtr->getXY();
+    Point speakerPosition = beingPtr->getXY();
 
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
          i != i_end; ++i)
@@ -244,10 +244,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
             continue;
         }
 
-        std::pair<unsigned, unsigned> listenerXY = listener->getXY();
-
-        if (areAround(listenerXY.first, listenerXY.second,
-                      speakerXY.first, speakerXY.second))
+        if (speakerPosition.inRangeOf(listener->getXY()))
         {
             (*i)->send(msg);
         }
