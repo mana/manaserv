@@ -180,11 +180,9 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
 
-                selectedChar->setXY(600, 600); // for testing purpose
-
                 selectedChar->setDestination(selectedChar->getX(),
                                              selectedChar->getY());
-                selectedChar->setSpeed(10); // TODO
+                selectedChar->setSpeed(21); // TODO
 
                 LOG_INFO(selectedChar->getName()
                         << " is trying to enter the servers.", 1);

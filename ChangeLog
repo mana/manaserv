@@ -1,6 +1,8 @@
 2006-08-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/object.cpp: Fixed assertion failure on being movements.
+	* src/accounthandler.cpp: Matched server-side speed with client-side
+	speed. Removed position hack.
 
 2006-08-26  Rogier Polak  <rogier_polak@users.sourceforge.net>
 
