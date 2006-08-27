@@ -3,6 +3,8 @@
 	* src/object.cpp: Fixed assertion failure on being movements.
 	* src/accounthandler.cpp: Matched server-side speed with client-side
 	speed. Removed position hack.
+	* src/state.cpp: Changed state handler so that entering and leaving
+	beings are only reported when they are in range.
 
 2006-08-26  Rogier Polak  <rogier_polak@users.sourceforge.net>
 

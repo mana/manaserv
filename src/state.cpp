@@ -21,6 +21,8 @@
  *  $Id$
  */
 
+#include <cassert>
+
 #include "state.h"
 
 #include "gamehandler.h"
@@ -73,7 +75,7 @@ State::update()
         {
             std::pair<unsigned, unsigned> ps = (*p)->getXY();
             std::pair<unsigned, unsigned> pn = (*p)->getNextPosition();
-            bool po = !(*p)->isNew();
+            bool po = !(*p)->isNew(); // Is p old?
             MessageOut msg(GPMSG_BEINGS_MOVE);
 
             for (Movings::iterator o = movings.begin(),
@@ -84,14 +86,54 @@ State::update()
                 bool oo = po && !(*o)->isNew(); // Are p and o both old?
 
                 /* Look whether p and o "were" around the last time and whether
-                   they "will" be around the next time. p has to be informed when
-                   this proximity changes or if o will move in range. */
+                   they "will" be around the next time. */
                 bool were = areAround(ps.first, ps.second, os.first, os.second) && oo;
                 bool will = areAround(pn.first, pn.second, on.first, on.second);
-                bool has_moved = os.first != on.first || os.second != on.second;
-                if (!(will && has_moved) && (were == will))
-                    continue;
 
+                if (!were)
+                {
+                    // o was outside p's range.
+                    if (!will)
+                    {
+                        // Nothing to report: o will not be inside p's range.
+                        continue;
+                    }
+
+                    int type = (*o)->getType();
+                    MessageOut msg2(GPMSG_BEING_ENTER);
+                    msg2.writeByte(type);
+                    msg2.writeLong((*o)->getID());
+                    switch (type) {
+                    case OBJECT_PLAYER:
+                    {
+                        PlayerPtr q(*o);
+                        msg2.writeString(q->getName());
+                        msg2.writeByte(q->getHairStyle());
+                        msg2.writeByte(q->getHairColor());
+                        msg2.writeByte(q->getGender());
+                    } break;
+                    default:
+                        assert(false); // TODO
+                    }
+                    gameHandler->sendTo(*p, msg2);
+                }
+                else if (!will)
+                {
+                    // o is no longer visible from p.
+                    MessageOut msg2(GPMSG_BEING_LEAVE);
+                    msg2.writeByte((*o)->getType());
+                    msg2.writeLong((*o)->getID());
+                    gameHandler->sendTo(*p, msg2);
+                    continue;
+                }
+                else if (os.first == on.first && os.second == on.second)
+                {
+                    // o does not move, nothing to report.
+                    continue;
+                }
+
+                /* At this point, either o has entered p's range, either o is
+                   moving inside p's range. Report o's movements. */
                 std::pair<unsigned, unsigned> od = (*o)->getDestination();
                 msg.writeLong((*o)->getID());
                 msg.writeShort(on.first);
@@ -100,6 +142,7 @@ State::update()
                 msg.writeShort(od.second);
             }
 
+            // Don't send a packet if nothing happed in p's range.
             if (msg.getLength() > 2)
                 gameHandler->sendTo(*p, msg);
         }
@@ -122,29 +165,7 @@ State::addObject(ObjectPtr objectPtr)
     maps[mapId].objects.push_back(objectPtr);
     objectPtr->setNew(true);
     if (objectPtr->getType() != OBJECT_PLAYER) return;
-    Players &players = maps[mapId].players;
-    PlayerPtr playerPtr(objectPtr);
-
-    /* Currently when a player is added, all existing players are notified
-     * about this. This will need to be modified so that players only know
-     * about players close to them.
-     */
-    MessageOut msg(GPMSG_BEING_ENTER);
-    msg.writeByte(OBJECT_PLAYER);
-    msg.writeLong(playerPtr->getID());
-    msg.writeString(playerPtr->getName());
-    msg.writeByte(playerPtr->getHairStyle());
-    msg.writeByte(playerPtr->getHairColor());
-    msg.writeByte(playerPtr->getGender());
-
-    for (Players::iterator p = players.begin(),
-         p_end = players.end(); p != p_end; ++p)
-    {
-        gameHandler->sendTo(*p, msg);
-    }
-
-    // Add the new player to the list
-    players.push_back(playerPtr);
+    maps[mapId].players.push_back(PlayerPtr(objectPtr));
 }
 
 void
@@ -162,25 +183,31 @@ State::removeObject(ObjectPtr objectPtr)
         }
     }
     if (objectPtr->getType() != OBJECT_PLAYER) return;
-    PlayerPtr playerPtr(objectPtr);
-    Players &players = maps[mapId].players;
 
-    /* Also see note add addObject. All other players are notified about this
-     * player leaving, but not all of them need to know.
-     */
+    PlayerPtr playerPtr(objectPtr);
+    std::pair< unsigned, unsigned > pos = playerPtr->getXY();
     MessageOut msg(GPMSG_BEING_LEAVE);
     msg.writeByte(OBJECT_PLAYER);
     msg.writeLong(playerPtr->getID());
 
+    Players &players = maps[mapId].players;
     Players::iterator p_end = players.end(), j = p_end;
     for (Players::iterator p = players.begin(); p != p_end; ++p)
     {
         if (p->get() == playerPtr.get())
+        {
             j = p;
-        else
+        }
+        else if (areAround(pos.first, pos.second, (*p)->getX(), (*p)->getY()))
+        {
             gameHandler->sendTo(*p, msg);
+        }
     }
-    if (j != players.end()) players.erase(j);
+
+    if (j != p_end)
+    {
+        players.erase(j);
+    }
 }
 
 void
@@ -189,7 +216,6 @@ State::informPlayer(PlayerPtr playerPtr)
     unsigned mapId = playerPtr->getMapId();
     std::map<unsigned, MapComposite>::iterator m = maps.find(mapId);
     if (m == maps.end()) return;
-    Players &players = m->second.players;
 
     /* Since the player doesn't know yet where on the world he is after
      * connecting to the map server, we send him an initial change map message.
@@ -201,23 +227,6 @@ State::informPlayer(PlayerPtr playerPtr)
     mapChangeMessage.writeShort(playerPtr->getY());
     mapChangeMessage.writeByte(0);
     gameHandler->sendTo(playerPtr, mapChangeMessage);
-
-    /* Here the player is informed about all the other players on the map.
-     * However, the player should only be told about other players within
-     * visual range. See also notes at addObject and removeObject.
-     */
-    for (Players::iterator p = players.begin(),
-         p_end = players.end(); p != p_end; ++p)
-    {
-        MessageOut msg(GPMSG_BEING_ENTER);
-        msg.writeByte(OBJECT_PLAYER);
-        msg.writeLong((*p)->getID());
-        msg.writeString((*p)->getName());
-        msg.writeByte((*p)->getHairStyle());
-        msg.writeByte((*p)->getHairColor());
-        msg.writeByte((*p)->getGender());
-        gameHandler->sendTo(playerPtr, msg);
-    }
 }
 
 bool
