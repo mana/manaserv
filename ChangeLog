@@ -1,3 +1,7 @@
+2006-08-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/object.cpp: Fixed assertion failure on being movements.
+
 2006-08-26  Rogier Polak  <rogier_polak@users.sourceforge.net>
 
 	* src/netcomputer.h, src/netcomputer.cpp, src/connectionhandler.cpp:

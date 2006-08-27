@@ -59,19 +59,19 @@ void MovingObject::move()
             mNewY = mDstY = mSrcY;
             return;
         }
+        path.pop_back();
     }
 
     int tileCX = tileSX, tileCY = tileSY, fracCX = fracSX, fracCY = fracSY;
-    int tileNX = tileDX, tileNY = tileDY, left = mSpeed;
+    int left = mSpeed;
     int vecX = 0, vecY = 0, cost = 0;
 
     for (std::list<PATH_NODE>::const_iterator it = path.begin(),
          it_end = path.end(); it != it_end; ++it) {
 
-        tileNX = it->x;
-        tileNY = it->y;
-        assert(tileNX != tileCX && tileNY != tileCY &&
-               tileNX != tileDX && tileNY != tileDY);
+        int tileNX = it->x, tileNY = it->y;
+        assert((tileNX != tileCX || tileNY != tileCY) &&
+               (tileNX != tileDX || tileNY != tileDY));
 
         if (fracCX != 0 || fracCY != 0) {
             // not at the tile center, move toward the next tile center
