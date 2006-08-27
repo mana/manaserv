@@ -74,9 +74,6 @@ State::update()
         for (Players::iterator p = players.begin(),
              p_end = players.end(); p != p_end; ++p)
         {
-            Point ps = (*p)->getXY();
-            Point pn = (*p)->getNextPosition();
-            bool po = !(*p)->isNew(); // Is p old?
             MessageOut msg(GPMSG_BEINGS_MOVE);
 
             for (Movings::iterator o = movings.begin(),
@@ -84,12 +81,13 @@ State::update()
             {
                 Point os = (*o)->getXY();
                 Point on = (*o)->getNextPosition();
-                bool oo = po && !(*o)->isNew(); // Are p and o both old?
 
-                /* Look whether p and o "were" around the last time and whether
-                   they "will" be around the next time. */
-                bool wereInRange = ps.inRangeOf(os) && oo;
-                bool willBeInRange = pn.inRangeOf(on);
+                /* Check whether this player and this moving object were around
+                 * the last time and whether they will be around the next time.
+                 */
+                bool wereInRange = (*p)->getXY().inRangeOf(os) &&
+                    !(*p)->isNew() && !(*o)->isNew();
+                bool willBeInRange = (*p)->getNextPosition().inRangeOf(on);
 
                 if (!wereInRange)
                 {
@@ -188,6 +186,7 @@ State::removeObject(ObjectPtr objectPtr)
     msg.writeByte(OBJECT_PLAYER);
     msg.writeLong(objectPtr->getID());
 
+    Point objectPosition = objectPtr->getXY();
     Players &players = maps[mapId].players;
     Players::iterator p_end = players.end(), j = p_end;
     for (Players::iterator p = players.begin(); p != p_end; ++p)
@@ -196,7 +195,7 @@ State::removeObject(ObjectPtr objectPtr)
         {
             j = p;
         }
-        else if (objectPtr->getXY().inRangeOf((*p)->getXY()))
+        else if (objectPosition.inRangeOf((*p)->getXY()))
         {
             gameHandler->sendTo(*p, msg);
         }
