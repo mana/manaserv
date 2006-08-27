@@ -1,3 +1,11 @@
+2006-08-28  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/controller.h, src/object.cpp, src/controller.cpp, src/object.h,
+	src/state.cpp, src/being.cpp, src/Makefile.am, src/being.h: Added a
+	Controller class meant to implement behaviour loosely coupled to the
+	actual being. Used it to control 10 testing maggots that are now
+	randomly walking around.
+
 2006-08-27  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/map.cpp, src/accounthandler.cpp, src/point.h,

@@ -30,6 +30,8 @@
 #include "object.h"
 #include "utils/countedptr.h"
 
+class Controller;
+
 /**
  * Raw statistics of a Player.
  */
@@ -104,11 +106,27 @@ class Being : public MovingObject
         unsigned short getStat(int numStat)
         { return mStats.stats[numStat]; }
 
+        /**
+         * When a controller is set, updates the controller.
+         */
+        void
+        update();
+
+        /**
+         * Notification that this being is now possessed by the given
+         * controller. This means that events regarding what happens to this
+         * being should be send there.
+         */
+        void
+        possessedBy(Controller *controller)
+        { mController = controller; }
+
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
 
         Statistics mStats; /**< stats modifiers or computed stats */
+        Controller *mController;
 };
 
 /**

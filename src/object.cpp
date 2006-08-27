@@ -67,8 +67,8 @@ void MovingObject::move()
     int vecX = 0, vecY = 0, cost = 0;
 
     for (std::list<PATH_NODE>::const_iterator it = path.begin(),
-         it_end = path.end(); it != it_end; ++it) {
-
+         it_end = path.end(); it != it_end; ++it)
+    {
         int tileNX = it->x, tileNY = it->y;
         assert((tileNX != tileCX || tileNY != tileCY) &&
                (tileNX != tileDX || tileNY != tileDY));

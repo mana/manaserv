@@ -25,6 +25,7 @@
 
 #include "state.h"
 
+#include "controller.h"
 #include "gamehandler.h"
 #include "map.h"
 #include "mapmanager.h"
@@ -36,6 +37,18 @@
 
 State::State()
 {
+    // Create 10 maggots for testing purposes
+    for (int i = 0; i < 10; i++)
+    {
+        // TODO: Unique object numbering
+        BeingPtr being = BeingPtr(new Being(OBJECT_MONSTER, 1000 + i));
+        being->setSpeed(21);
+        being->setMapId(1);
+        being->setXY(Point(720, 900));
+        Controller *controller = new Controller();
+        controller->possess(being);
+        addObject(ObjectPtr(being));
+    }
 }
 
 State::~State()
@@ -55,7 +68,7 @@ State::update()
     for (std::map<unsigned int, MapComposite>::iterator m = maps.begin(),
          m_end = maps.end(); m != m_end; ++m)
     {
-        typedef std::vector< utils::CountedPtr<MovingObject> > Movings;
+        typedef std::vector<MovingObjectPtr> Movings;
         Movings movings;
 
         for (Objects::iterator o = m->second.objects.begin(),
@@ -64,7 +77,7 @@ State::update()
             (*o)->update();
             int t = (*o)->getType();
             if (t == OBJECT_NPC || t == OBJECT_PLAYER || t == OBJECT_MONSTER) {
-                utils::CountedPtr<MovingObject> ptr(*o);
+                MovingObjectPtr ptr(*o);
                 ptr->move();
                 movings.push_back(ptr);
             }
@@ -110,6 +123,10 @@ State::update()
                         msg2.writeByte(q->getHairStyle());
                         msg2.writeByte(q->getHairColor());
                         msg2.writeByte(q->getGender());
+                    } break;
+                    case OBJECT_MONSTER:
+                    {
+                        msg2.writeShort(0); // TODO: The monster ID
                     } break;
                     default:
                         assert(false); // TODO

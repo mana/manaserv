@@ -222,6 +222,11 @@ class MovingObject: public Object
  */
 typedef utils::CountedPtr<Object> ObjectPtr;
 
+/**
+ * Type definition for a smart pointer to MovingObject.
+ */
+typedef utils::CountedPtr<MovingObject> MovingObjectPtr;
+
 
 /**
  * Type definition for a list of Objects.

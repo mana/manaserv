@@ -13,6 +13,7 @@ tmwclient_SOURCES = client.cpp \
 
 tmwserv_SOURCES = main.cpp \
 		  being.h \
+		  being.cpp \
 		  account.h \
 		  account.cpp \
 		  accountclient.h \
@@ -29,6 +30,8 @@ tmwserv_SOURCES = main.cpp \
 		  configuration.cpp \
 		  connectionhandler.h \
 		  connectionhandler.cpp \
+		  controller.h \
+		  controller.cpp \
 		  debug.h \
 		  debug.cpp \
 		  defines.h \
