@@ -1,3 +1,7 @@
+2006-08-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* tmwserv.cbp, tmwserv.dev: Updated project files.
+
 2006-08-28  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/controller.h, src/object.cpp, src/controller.cpp, src/object.h,
