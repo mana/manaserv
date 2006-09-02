@@ -155,9 +155,14 @@ State::update()
                    moving inside p's range. Report o's movements. */
 
                 Point od = (*o)->getDestination();
-                if (on.x != od.x || on.y != od.y || on.x != os.x || on.y != os.y)
+                if (on.x != od.x || on.y != od.y)
                 {
                     flags |= MOVING_POSITION;
+                }
+                else
+                {
+                    // no need to synchronize on the very last step
+                    flags |= MOVING_DESTINATION;
                 }
 
                 // TODO: updates destination only on changes.
