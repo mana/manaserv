@@ -31,16 +31,8 @@
 class Point
 {
     public:
-        unsigned int x; /**< x coordinate */
-        unsigned int y; /**< y coordinate */
-
-        /**
-         * Constructor.
-         */
-        Point(unsigned int x, unsigned int y)
-          : x(x),
-            y(y)
-        {}
+        unsigned short x; /**< x coordinate */
+        unsigned short y; /**< y coordinate */
 
         /**
          * Check whether the given point is within range of this point. This is

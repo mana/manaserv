@@ -56,12 +56,12 @@ void Controller::update()
     {
         if (mBeing.get())
         {
-            unsigned int randomX = rand() % 320 + 720;
-            unsigned int randomY = rand() % 320 + 840;
+            Point randomPos = { rand() % 320 + 720,
+                                rand() % 320 + 840 };
 
-            LOG_INFO("Setting new random destination " << randomX << ","
-                    << randomY << " for being " << mBeing->getPublicID(), 2);
-            mBeing->setDestination(randomX, randomY);
+            LOG_INFO("Setting new random destination " << randomPos.x << ","
+                    << randomPos.y << " for being " << mBeing->getPublicID(), 2);
+            mBeing->setDestination(randomPos);
         }
 
         mCountDown = 10 + rand() % 10;

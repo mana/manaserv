@@ -181,9 +181,8 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
 
-                selectedChar->setDestination(selectedChar->getX(),
-                                             selectedChar->getY());
-                selectedChar->setSpeed(21); // TODO
+                selectedChar->setDestination(selectedChar->getPosition());
+                selectedChar->setSpeed(150); // TODO
 
                 LOG_INFO(selectedChar->getName()
                         << " is trying to enter the servers.", 1);
@@ -663,9 +662,9 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
             newCharacter->setMapId((int) config.getValue("defaultMap", 1));
-            newCharacter->setXY(Point(
-                        (int) config.getValue("startX", 0),
-                        (int) config.getValue("startY", 0)));
+            Point startingPos = { (int) config.getValue("startX", 0),
+                                  (int) config.getValue("startY", 0) };
+            newCharacter->setPosition(startingPos);
             computer.getAccount()->addCharacter(newCharacter);
 
             LOG_INFO("Character " << name << " was created for "

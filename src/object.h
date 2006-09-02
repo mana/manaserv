@@ -60,53 +60,20 @@ class Object
         { return mType; }
 
         /**
-         * Set the x coordinate.
+         * Sets the coordinates.
          *
-         * @param x the new x coordinate.
+         * @param p the coordinates.
          */
-        void setX(unsigned int x)
-        { mX = x; }
+        void setPosition(const Point &p)
+        { mPos = p; }
 
         /**
-         * Get the x coordinate.
+         * Gets the coordinates.
          *
-         * @return the x coordinate.
+         * @return the coordinates.
          */
-        unsigned int getX() const
-        { return mX; }
-
-        /**
-         * Set the y coordinate.
-         *
-         * @param y the new y coordinate.
-         */
-        void setY(unsigned int y)
-        { mY = y; }
-
-        /**
-         * Get the y coordinate.
-         *
-         * @return the y coordinate.
-         */
-        unsigned int getY() const
-        { return mY; }
-
-        /**
-         * Set the coordinates.
-         *
-         * @param x the x coordinate.
-         * @param y the y coordinate.
-         */
-        void setXY(const Point &p)
-        { mX = p.x; mY = p.y; }
-
-        /**
-         * Get the coordinates.
-         *
-         * @return the coordinates as a pair.
-         */
-        Point getXY() const
-        { return Point(mX, mY); }
+        Point const &getPosition() const
+        { return mPos; }
 
         /**
          * Update the internal status.
@@ -142,8 +109,7 @@ class Object
 
     private:
         int mType; /**< Object type */
-        unsigned int mX; /**< x coordinate */
-        unsigned int mY; /**< y coordinate */
+        Point mPos; /**< coordinates */
         unsigned int mMapId;  /**< id of the map being is on */
         bool mNew; /**< true if the object just appeared */
 
@@ -161,26 +127,27 @@ class MovingObject: public Object
          * Proxy constructor.
          */
         MovingObject(int type, int id)
-          : Object(type), mPublicID(id)
+          : Object(type), mPublicID(id),
+            mActionTime(0)
         {}
 
         /**
          * Gets the destination coordinates of the object.
          */
-        Point getDestination() const
-        { return Point(mDstX, mDstY); }
+        Point const &getDestination() const
+        { return mDst; }
 
         /**
          * Sets the destination coordinates of the object.
          */
-        void setDestination(unsigned x, unsigned y)
-        { mDstX = x; mDstY = y; }
+        void setDestination(Point dst)
+        { mDst = dst; }
 
         /**
-         * Gets the next coordinates of the object.
+         * Gets the old coordinates of the object.
          */
-        Point getNextPosition() const
-        { return Point(mNewX, mNewY); }
+        Point getOldPosition() const
+        { return mOld; }
 
         /**
          * Sets object speed.
@@ -210,11 +177,10 @@ class MovingObject: public Object
 
     private:
         unsigned short mPublicID; /**< Object ID sent to clients (unique with respect to the map) */
-        unsigned mDstX; /**< target x coordinate */
-        unsigned mDstY; /**< target y coordinate */
-        unsigned mNewX; /**< next x coordinate */
-        unsigned mNewY; /**< next y coordinate */
-        unsigned mSpeed; /**< speed */
+        Point mDst; /**< target coordinates */
+        Point mOld; /**< old coordinates */
+        unsigned short mSpeed; /**< speed */
+        unsigned short mActionTime; /**< delay until next action */
 };
 
 /**

@@ -42,9 +42,10 @@ State::State()
     {
         // TODO: Unique object numbering
         BeingPtr being = BeingPtr(new Being(OBJECT_MONSTER, 1000 + i));
-        being->setSpeed(21);
+        being->setSpeed(150);
         being->setMapId(1);
-        being->setXY(Point(720, 900));
+        Point pos = { 720, 900 };
+        being->setPosition(pos);
         Controller *controller = new Controller();
         controller->possess(being);
         addObject(ObjectPtr(being));
@@ -92,15 +93,15 @@ State::update()
             for (Movings::iterator o = movings.begin(),
                  o_end = movings.end(); o != o_end; ++o)
             {
-                Point os = (*o)->getXY();
-                Point on = (*o)->getNextPosition();
+                Point os = (*o)->getOldPosition();
+                Point on = (*o)->getPosition();
 
                 /* Check whether this player and this moving object were around
                  * the last time and whether they will be around the next time.
                  */
-                bool wereInRange = (*p)->getXY().inRangeOf(os) &&
-                    !(*p)->isNew() && !(*o)->isNew();
-                bool willBeInRange = (*p)->getNextPosition().inRangeOf(on);
+                bool wereInRange = (*p)->getOldPosition().inRangeOf(os) &&
+                                   !(*p)->isNew() && !(*o)->isNew();
+                bool willBeInRange = (*p)->getPosition().inRangeOf(on);
 
                 int flags = 0;
 
@@ -154,13 +155,18 @@ State::update()
                    moving inside p's range. Report o's movements. */
 
                 Point od = (*o)->getDestination();
-                if (on.x != od.x || on.y != od.y)
+                if (on.x != od.x || on.y != od.y || on.x != os.x || on.y != os.y)
                 {
                     flags |= MOVING_POSITION;
                 }
 
                 // TODO: updates destination only on changes.
                 flags |= MOVING_DESTINATION;
+
+                if (!(flags & (MOVING_POSITION | MOVING_DESTINATION)))
+                {
+                    continue;
+                }
 
                 msg.writeShort((*o)->getPublicID());
                 msg.writeByte(flags);
@@ -183,7 +189,6 @@ State::update()
         for (Movings::iterator o = movings.begin(),
              o_end = movings.end(); o != o_end; ++o)
         {
-            (*o)->setXY((*o)->getNextPosition());
             (*o)->setNew(false);
         }
     }
@@ -222,7 +227,7 @@ State::removeObject(ObjectPtr objectPtr)
     MessageOut msg(GPMSG_BEING_LEAVE);
     msg.writeShort(PlayerPtr(objectPtr)->getPublicID());
 
-    Point objectPosition = objectPtr->getXY();
+    Point objectPosition = objectPtr->getPosition();
     Players &players = maps[mapId].players;
     Players::iterator p_end = players.end(), j = p_end;
     for (Players::iterator p = players.begin(); p != p_end; ++p)
@@ -231,7 +236,7 @@ State::removeObject(ObjectPtr objectPtr)
         {
             j = p;
         }
-        else if (objectPosition.inRangeOf((*p)->getXY()))
+        else if (objectPosition.inRangeOf((*p)->getPosition()))
         {
             gameHandler->sendTo(*p, msg);
         }
@@ -256,8 +261,9 @@ State::informPlayer(PlayerPtr playerPtr)
     Storage &store = Storage::instance("tmw");
     MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
     mapChangeMessage.writeString(store.getMapNameFromId(mapId));
-    mapChangeMessage.writeShort(playerPtr->getX());
-    mapChangeMessage.writeShort(playerPtr->getY());
+    Point pos = playerPtr->getPosition();
+    mapChangeMessage.writeShort(pos.x);
+    mapChangeMessage.writeShort(pos.y);
     mapChangeMessage.writeByte(0);
     gameHandler->sendTo(playerPtr, mapChangeMessage);
 }

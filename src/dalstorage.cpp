@@ -261,8 +261,9 @@ DALStorage::getAccount(const std::string& userName)
                 player->setHairColor(toUshort(strCharInfo[k][5]));
                 player->setLevel(toUshort(strCharInfo[k][6]));
                 player->setMoney(toUint(strCharInfo[k][7]));
-                player->setXY(Point(toUshort(strCharInfo[k][8]),
-                                    toUshort(strCharInfo[k][9])));
+                Point pos = { toUshort(strCharInfo[k][8]),
+                              toUshort(strCharInfo[k][9]) };
+                player->setPosition(pos);
                 for (int i = 0; i < NB_RSTAT; ++i)
                     player->setRawStat(i, toUshort(strCharInfo[k][11 + i]));
 
@@ -641,8 +642,8 @@ void DALStorage::flush(AccountPtr const &account)
                  << (int)(*it)->getHairColor() << ", "
                  << (int)(*it)->getLevel() << ", "
                  << (*it)->getMoney() << ", "
-                 << (*it)->getX() << ", "
-                 << (*it)->getY() << ", "
+                 << (*it)->getPosition().x << ", "
+                 << (*it)->getPosition().y << ", "
                  << (*it)->getMapId() << ", "
                  << (*it)->getRawStat(STAT_STR) << ", "
                  << (*it)->getRawStat(STAT_AGI) << ", "
@@ -673,8 +674,8 @@ void DALStorage::flush(AccountPtr const &account)
                 << " hair_color = " << (int)(*it)->getHairColor() << ", "
                 << " level = " << (int)(*it)->getLevel() << ", "
                 << " money = " << (*it)->getMoney() << ", "
-                << " x = " << (*it)->getX() << ", "
-                << " y = " << (*it)->getY() << ", "
+                << " x = " << (*it)->getPosition().x << ", "
+                << " y = " << (*it)->getPosition().y << ", "
                 << " map_id = " << (*it)->getMapId() << ", "
                 << " str = " << (*it)->getRawStat(STAT_STR) << ", "
                 << " agi = " << (*it)->getRawStat(STAT_AGI) << ", "

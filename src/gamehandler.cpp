@@ -196,8 +196,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             {
                 unsigned x = message.readShort();
                 unsigned y = message.readShort();
-
-                computer.getCharacter()->setDestination(x, y);
+                Point dst = {x, y};
+                computer.getCharacter()->setDestination(dst);
 
                 // no response should be required
             } break;
@@ -231,7 +231,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
     msg.writeString(text);
 
     unsigned speakerMapId = beingPtr->getMapId();
-    Point speakerPosition = beingPtr->getXY();
+    Point speakerPosition = beingPtr->getPosition();
 
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
          i != i_end; ++i)
@@ -244,7 +244,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
             continue;
         }
 
-        if (speakerPosition.inRangeOf(listener->getXY()))
+        if (speakerPosition.inRangeOf(listener->getPosition()))
         {
             (*i)->send(msg);
         }
