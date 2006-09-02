@@ -16,6 +16,7 @@
 	src/controller.cpp, src/dalstorage.cpp, src/object.h, src/state.cpp,
 	src/gamehandler.cpp: Made Point a POD type. Simplified server algorithm
 	for moving objects; it now matches the one in the client.
+	
 
 2006-08-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

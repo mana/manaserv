@@ -43,6 +43,8 @@ void GameClient::setCharacter(PlayerPtr ch)
 {
     assert(mCharacterPtr.get() == NULL);
     mCharacterPtr = ch;
+    assert(mCharacterPtr->mClient == NULL);
+    mCharacterPtr->mClient = this;
     gameState->addObject(ObjectPtr(mCharacterPtr));
     gameState->informPlayer(mCharacterPtr);
 }
@@ -52,5 +54,6 @@ void GameClient::unsetCharacter()
     if (mCharacterPtr.get() == NULL) return;
     // remove being from world
     gameState->removeObject(ObjectPtr(mCharacterPtr));
+    mCharacterPtr->mClient = NULL;
     mCharacterPtr = PlayerPtr(NULL);
 }

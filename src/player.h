@@ -33,6 +33,8 @@
 /** Maximum number of equipped slots */
 const unsigned int MAX_EQUIP_SLOTS = 5;
 
+class GameClient;
+
 class Player : public Being
 {
     public:
@@ -40,7 +42,8 @@ class Player : public Being
         Player(std::string const &name, int id = -1)
           : Being(OBJECT_PLAYER, 65535),
             mDatabaseID(id),
-            mName(name)
+            mName(name),
+            mClient(NULL)
         {}
 
         /**
@@ -201,18 +204,24 @@ class Player : public Being
         unequip(unsigned char slot);
 
         /**
-         * Get database ID.
+         * Gets database ID.
          *
-         * @return the database ID, a negative number if none yet, or if not relevant.
+         * @return the database ID, a negative number if none yet.
          */
         int getDatabaseID() const
         { return mDatabaseID; }
 
         /**
-         * Set database ID.
+         * Sets database ID.
          * The object shall not have any ID yet.
          */
         void setDatabaseID(int id);
+
+        /**
+         * Gets client computer.
+         */
+        GameClient *getClient() const
+        { return mClient; }
 
     private:
         Player(Player const &);
@@ -220,6 +229,7 @@ class Player : public Being
 
         int mDatabaseID;          /**< Player database ID (unique with respect to its type) */
         std::string mName;        /**< name of the being */
+        GameClient *mClient;      /**< client computer, directly set by GameClient */
         Gender mGender;           /**< gender of the being */
         unsigned char mHairStyle; /**< Hair Style of the being */
         unsigned char mHairColor; /**< Hair Color of the being */
@@ -231,6 +241,8 @@ class Player : public Being
 
         /** Equipped item ID's (from inventory) */
         unsigned int equipment[MAX_EQUIP_SLOTS];
+
+        friend class GameClient;
 };
 
 /**

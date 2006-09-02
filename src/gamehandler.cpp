@@ -23,7 +23,7 @@
 
 #include "gamehandler.h"
 
-#include <iostream>
+#include <cassert>
 #include <map>
 
 #include "gameclient.h"
@@ -254,17 +254,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
 void
 GameHandler::sendTo(PlayerPtr beingPtr, MessageOut &msg)
 {
-    /* TODO: This implementation is very inefficient. An alternative would be
-     * store the NetComputer reference with the player class, so that it can
-     * be directly accessed.
-     */
-    for (NetComputers::iterator i = clients.begin(); i != clients.end(); ++i)
-    {
-        PlayerPtr clientChar = static_cast<GameClient *>(*i)->getCharacter();
-        if (clientChar.get() == beingPtr.get())
-        {
-            (*i)->send(msg);
-            break;
-        }
-    }
+    GameClient *client = beingPtr->getClient();
+    assert(client != NULL);
+    client->send(msg);
 }
