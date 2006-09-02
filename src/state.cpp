@@ -28,6 +28,7 @@
 #include "controller.h"
 #include "gamehandler.h"
 #include "map.h"
+#include "mapcomposite.h"
 #include "mapmanager.h"
 #include "messageout.h"
 #include "point.h"
@@ -40,8 +41,7 @@ State::State()
     // Create 10 maggots for testing purposes
     for (int i = 0; i < 10; i++)
     {
-        // TODO: Unique object numbering
-        BeingPtr being = BeingPtr(new Being(OBJECT_MONSTER, 1000 + i));
+        BeingPtr being = BeingPtr(new Being(OBJECT_MONSTER, 65535));
         being->setSpeed(150);
         being->setMapId(1);
         Point pos = { 720, 900 };
@@ -54,11 +54,11 @@ State::State()
 
 State::~State()
 {
-    for (std::map<unsigned int, MapComposite>::iterator i = maps.begin();
-         i != maps.end();
-         i++)
+    for (std::map< unsigned, MapComposite * >::iterator i = maps.begin(),
+         i_end = maps.end(); i != i_end; ++i)
     {
-        delete i->second.map;
+        delete i->second->map;
+        delete i->second;
     }
 }
 
@@ -66,27 +66,28 @@ void
 State::update()
 {
     // update game state (update AI, etc.)
-    for (std::map<unsigned int, MapComposite>::iterator m = maps.begin(),
+    for (std::map< unsigned, MapComposite * >::iterator m = maps.begin(),
          m_end = maps.end(); m != m_end; ++m)
     {
-        typedef std::vector<MovingObjectPtr> Movings;
+        MapComposite *map = m->second;
+
+        typedef std::vector< MovingObject * > Movings;
         Movings movings;
 
-        for (Objects::iterator o = m->second.objects.begin(),
-             o_end = m->second.objects.end(); o != o_end; ++o)
+        for (Objects::iterator o = map->objects.begin(),
+             o_end = map->objects.end(); o != o_end; ++o)
         {
             (*o)->update();
             int t = (*o)->getType();
             if (t == OBJECT_NPC || t == OBJECT_PLAYER || t == OBJECT_MONSTER) {
-                MovingObjectPtr ptr(*o);
+                MovingObject *ptr = static_cast< MovingObject * >(o->get());
                 ptr->move();
                 movings.push_back(ptr);
             }
         }
 
-        Players &players = m->second.players;
-        for (Players::iterator p = players.begin(),
-             p_end = players.end(); p != p_end; ++p)
+        for (std::vector< Player * >::iterator p = map->players.begin(),
+             p_end = map->players.end(); p != p_end; ++p)
         {
             MessageOut msg(GPMSG_BEINGS_MOVE);
 
@@ -122,7 +123,7 @@ State::update()
                     switch (type) {
                     case OBJECT_PLAYER:
                     {
-                        PlayerPtr q(*o);
+                        Player *q = static_cast< Player * >(*o);
                         msg2.writeString(q->getName());
                         msg2.writeByte(q->getHairStyle());
                         msg2.writeByte(q->getHairColor());
@@ -203,62 +204,16 @@ void
 State::addObject(ObjectPtr objectPtr)
 {
     unsigned mapId = objectPtr->getMapId();
-    if (!loadMap(mapId)) return;
-    maps[mapId].objects.push_back(objectPtr);
+    MapComposite *map = loadMap(mapId);
+    if (!map) return;
+    map->objects.push_back(objectPtr);
     objectPtr->setNew(true);
-    if (objectPtr->getType() != OBJECT_PLAYER) return;
-    PlayerPtr ptr(objectPtr);
-    // TODO: Unique object numbering
-    ptr->setPublicID(ptr->getDatabaseID());
-    maps[mapId].players.push_back(ptr);
-}
-
-void
-State::removeObject(ObjectPtr objectPtr)
-{
-    unsigned mapId = objectPtr->getMapId();
-    std::map<unsigned, MapComposite>::iterator m = maps.find(mapId);
-    if (m == maps.end()) return;
-    Objects &objects = m->second.objects;
-    for (Objects::iterator o = objects.begin(),
-         o_end = objects.end(); o != o_end; ++o) {
-        if (o->get() == objectPtr.get()) {
-            objects.erase(o);
-            break;
-        }
-    }
-    if (objectPtr->getType() != OBJECT_PLAYER) return;
-
-    MessageOut msg(GPMSG_BEING_LEAVE);
-    msg.writeShort(PlayerPtr(objectPtr)->getPublicID());
-
-    Point objectPosition = objectPtr->getPosition();
-    Players &players = maps[mapId].players;
-    Players::iterator p_end = players.end(), j = p_end;
-    for (Players::iterator p = players.begin(); p != p_end; ++p)
-    {
-        if (p->get() == objectPtr.get())
-        {
-            j = p;
-        }
-        else if (objectPosition.inRangeOf((*p)->getPosition()))
-        {
-            gameHandler->sendTo(*p, msg);
-        }
-    }
-
-    if (j != p_end)
-    {
-        players.erase(j);
-    }
-}
-
-void
-State::informPlayer(PlayerPtr playerPtr)
-{
-    unsigned mapId = playerPtr->getMapId();
-    std::map<unsigned, MapComposite>::iterator m = maps.find(mapId);
-    if (m == maps.end()) return;
+    int type = objectPtr->getType();
+    if (type != OBJECT_MONSTER && type != OBJECT_PLAYER && type != OBJECT_NPC) return;
+    map->allocate(static_cast< MovingObject * >(objectPtr.get()));
+    if (type != OBJECT_PLAYER) return;
+    Player *playerPtr = static_cast< Player * >(objectPtr.get());
+    map->players.push_back(playerPtr);
 
     /* Since the player doesn't know yet where on the world he is after
      * connecting to the map server, we send him an initial change map message.
@@ -273,15 +228,66 @@ State::informPlayer(PlayerPtr playerPtr)
     gameHandler->sendTo(playerPtr, mapChangeMessage);
 }
 
-bool
-State::loadMap(const unsigned int mapId)
+void
+State::removeObject(ObjectPtr objectPtr)
 {
-    if (maps.find(mapId) != maps.end()) return true;
-    Map *tmp = MapManager::instance().loadMap(mapId);
-    if (!tmp) return false;
-    maps[mapId].map = tmp;
+    unsigned mapId = objectPtr->getMapId();
+    std::map< unsigned, MapComposite * >::iterator m = maps.find(mapId);
+    if (m == maps.end()) return;
+    MapComposite *map = m->second;
+
+    int type = objectPtr->getType();
+    if (type == OBJECT_MONSTER || type == OBJECT_PLAYER || type == OBJECT_NPC)
+    {
+        MovingObject *obj = static_cast< MovingObject * >(objectPtr.get());
+        MessageOut msg(GPMSG_BEING_LEAVE);
+        msg.writeShort(obj->getPublicID());
+
+        Point objectPos = obj->getPosition();
+        typedef std::vector< Player * > Players;
+        Players &players = map->players;
+        Players::iterator p_end = players.end(), j = p_end;
+        for (Players::iterator p = players.begin(); p != p_end; ++p)
+        {
+            if (*p == obj)
+            {
+                j = p;
+            }
+            else if (objectPos.inRangeOf((*p)->getPosition()))
+            {
+                gameHandler->sendTo(*p, msg);
+            }
+        }
+
+        if (j != p_end)
+        {
+            players.erase(j);
+        }
+
+        map->deallocate(obj);
+    }
+
+    for (Objects::iterator o = map->objects.begin(),
+         o_end = map->objects.end(); o != o_end; ++o)
+    {
+        if (o->get() == objectPtr.get()) {
+            map->objects.erase(o);
+            break;
+        }
+    }
+}
+
+MapComposite *State::loadMap(unsigned mapId)
+{
+    std::map< unsigned, MapComposite * >::iterator m = maps.find(mapId);
+    if (m != maps.end()) return m->second;
+    Map *map = MapManager::instance().loadMap(mapId);
+    if (!map) return NULL;
+    MapComposite *tmp = new MapComposite;
+    tmp->map = map;
+    maps[mapId] = tmp;
 
     // will need to load extra map related resources here also
 
-    return true; // We let true for testing on beings
+    return tmp;
 }

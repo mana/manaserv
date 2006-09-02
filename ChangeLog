@@ -18,6 +18,11 @@
 	for moving objects; it now matches the one in the client.
 	* src/gameclient.cpp, src/player.h, src/gamehandler.cpp: Added
 	GameClient pointer to Player class for O(1) message sending.
+	* src/mapcomposite.h, src/mapcomposite.cpp, src/Makefile.am: Moved
+	MapComposite class to its own files.
+	* src/gameclient.cpp, src/gamehandler.h, src/state.cpp, src/state.h,
+	src/gamehandler.cpp: Reduced amount of counted pointers. Implemented
+	unique public IDs.
 
 2006-08-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

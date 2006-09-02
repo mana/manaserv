@@ -26,34 +26,9 @@
 
 #include <map>
 
-#include "player.h"
+#include "object.h"
 
-class Map;
-
-/**
- * Combined map/entity structure.
- */
-struct MapComposite {
-    /**
-     * Default constructor.
-     */
-    MapComposite() : map(NULL) { }
-
-    /**
-     * Actual map.
-     */
-    Map *map;
-
-    /**
-     * Objects (items, players, monsters, etc) located on the map.
-     */
-    Objects objects;
-
-    /**
-     * Players located on the map.
-     */
-    Players players;
-};
+class MapComposite;
 
 /**
  * State class contains all information/procedures associated with the game
@@ -64,7 +39,7 @@ class State
     /**
      * List of maps.
      */
-    std::map<unsigned int, MapComposite> maps;
+    std::map<unsigned int, MapComposite *> maps;
 
  public:
     State();
@@ -76,14 +51,9 @@ class State
     void update();
 
     /**
-     * Send game state to given player.
-     */
-    void informPlayer(PlayerPtr playerPtr);
-
-    /**
      * Load map into game world.
      */
-    bool loadMap(unsigned mapId);
+    MapComposite *loadMap(unsigned mapId);
 
     /**
      * Add object to the map.

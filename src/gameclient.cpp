@@ -46,7 +46,6 @@ void GameClient::setCharacter(PlayerPtr ch)
     assert(mCharacterPtr->mClient == NULL);
     mCharacterPtr->mClient = this;
     gameState->addObject(ObjectPtr(mCharacterPtr));
-    gameState->informPlayer(mCharacterPtr);
 }
 
 void GameClient::unsetCharacter()

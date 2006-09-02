@@ -251,8 +251,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
     }
 }
 
-void
-GameHandler::sendTo(PlayerPtr beingPtr, MessageOut &msg)
+void GameHandler::sendTo(Player *beingPtr, MessageOut &msg)
 {
     GameClient *client = beingPtr->getClient();
     assert(client != NULL);

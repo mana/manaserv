@@ -41,8 +41,10 @@ tmwserv_SOURCES = main.cpp \
 		  gamehandler.cpp \
 		  items.h \
 		  items.cpp \
-		  map.cpp \
 		  map.h \
+		  map.cpp \
+		  mapcomposite.h \
+		  mapcomposite.cpp \
 		  mapmanager.h \
 		  mapmanager.cpp \
 		  mapreader.cpp \

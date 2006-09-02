@@ -25,8 +25,8 @@
 #define _TMW_SERVER_GAMEHANDLER_
 
 #include "account.h"
-#include "being.h"
 #include "connectionhandler.h"
+#include "player.h"
 
 class GameClient;
 
@@ -41,7 +41,7 @@ class GameHandler: public ConnectionHandler
         /**
          * Send message to the given player.
          */
-        void sendTo(PlayerPtr playerPtr, MessageOut &msg);
+        void sendTo(Player *, MessageOut &msg);
 
     protected:
         NetComputer *computerConnected(ENetPeer *);
