@@ -45,6 +45,7 @@ void MovingObject::move()
         if (path.empty()) {
             // no path was found
             mDst = mOld;
+            mActionTime = 0;
             return;
         }
         // last tile center is skipped
@@ -58,8 +59,8 @@ void MovingObject::move()
         if (path.empty())
         {
             // skip last tile center
-            setPosition(mDst);
-            return;
+            pos = mDst;
+            break;
         }
         pos.x = path.front().x * 32 + 16;
         pos.y = path.front().y * 32 + 16;
@@ -67,4 +68,6 @@ void MovingObject::move()
     }
     while (mActionTime < 100);
     setPosition(pos);
+
+    mActionTime = mActionTime > 100 ? mActionTime - 100 : 0;
 }
