@@ -144,13 +144,14 @@ enum {
                                              // [, S32 token, S server, W port]
     PGMSG_PICKUP                   = 0x0110,
     GPMSG_PICKUP_RESPONSE          = 0x0111,
-    GPMSG_BEING_ENTER              = 0x0200, // B type, L being id
+    GPMSG_BEING_ENTER              = 0x0200, // B type, W being id
                                              // player: S name, B hair style, B hair color, B gender
-    GPMSG_BEING_LEAVE              = 0x0201, // B type, L being id
+                                             // monster: W type id
+    GPMSG_BEING_LEAVE              = 0x0201, // W being id
     PGMSG_WALK                     = 0x0260, // W*2 destination
-    GPMSG_BEINGS_MOVE              = 0x0280, // { L being id, W*2 position, W*2 destination }*
+    GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, W*2 position, W*2 destination }*
     PGMSG_SAY                      = 0x02A0, // S text
-    GPMSG_SAY                      = 0x02A1, // L being id, S text
+    GPMSG_SAY                      = 0x02A1, // W being id, S text
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     PGMSG_EQUIP                    = 0x0302, // L item id, B slot

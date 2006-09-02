@@ -60,7 +60,7 @@ void Controller::update()
             unsigned int randomY = rand() % 320 + 840;
 
             LOG_INFO("Setting new random destination " << randomX << ","
-                    << randomY << " for being " << mBeing->getID(), 2);
+                    << randomY << " for being " << mBeing->getPublicID(), 2);
             mBeing->setDestination(randomX, randomY);
         }
 

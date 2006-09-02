@@ -40,8 +40,8 @@ class Item : public Object
             Equipment
         };
 
-        Item(int type, int id):
-            Object(type, id)
+        Item(int type):
+            Object(type)
         {}
 
         virtual ~Item() throw() { }

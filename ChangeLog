@@ -1,3 +1,10 @@
+2006-09-02  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/object.cpp, src/controller.cpp, src/dalstorage.cpp, src/items.h,
+	src/player.cpp, src/object.h, src/state.cpp, src/state.cpp,
+	src/defines.h, src/player.h, src/gamehandler.cpp: Decorrelated moving
+	object IDs from character database IDs. Switched to short IDs instead.
+
 2006-08-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.

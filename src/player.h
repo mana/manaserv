@@ -38,7 +38,8 @@ class Player : public Being
     public:
 
         Player(std::string const &name, int id = -1)
-          : Being(OBJECT_PLAYER, id),
+          : Being(OBJECT_PLAYER, 65535),
+            mDatabaseID(id),
             mName(name)
         {}
 
@@ -199,10 +200,25 @@ class Player : public Being
         bool
         unequip(unsigned char slot);
 
+        /**
+         * Get database ID.
+         *
+         * @return the database ID, a negative number if none yet, or if not relevant.
+         */
+        int getDatabaseID() const
+        { return mDatabaseID; }
+
+        /**
+         * Set database ID.
+         * The object shall not have any ID yet.
+         */
+        void setDatabaseID(int id);
+
     private:
         Player(Player const &);
         Player &operator=(Player const &);
 
+        int mDatabaseID;          /**< Player database ID (unique with respect to its type) */
         std::string mName;        /**< name of the being */
         Gender mGender;           /**< gender of the being */
         unsigned char mHairStyle; /**< Hair Style of the being */

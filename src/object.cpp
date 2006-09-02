@@ -28,12 +28,6 @@
 #include "map.h"
 #include "mapmanager.h"
 
-void Object::setID(int id)
-{
-    assert(mID < 0);
-    mID = id;
-}
-
 void MovingObject::move()
 {
     unsigned mSrcX = getX(), mSrcY = getY();

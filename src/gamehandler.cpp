@@ -227,7 +227,7 @@ void GameHandler::sayAround(GameClient &computer, std::string const &text)
     PlayerPtr beingPtr = computer.getCharacter();
 
     MessageOut msg(GPMSG_SAY);
-    msg.writeLong(beingPtr->getID());
+    msg.writeShort(beingPtr->getPublicID());
     msg.writeString(text);
 
     unsigned speakerMapId = beingPtr->getMapId();

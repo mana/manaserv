@@ -22,6 +22,14 @@
 
 #include "player.h"
 
+#include <cassert>
+
+void Player::setDatabaseID(int id)
+{
+    assert(mDatabaseID == -1);
+    mDatabaseID = id;
+}
+
 /**
  * Update the internal status.
  */

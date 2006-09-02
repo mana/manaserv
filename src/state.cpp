@@ -114,7 +114,7 @@ State::update()
                     int type = (*o)->getType();
                     MessageOut msg2(GPMSG_BEING_ENTER);
                     msg2.writeByte(type);
-                    msg2.writeLong((*o)->getID());
+                    msg2.writeShort((*o)->getPublicID());
                     switch (type) {
                     case OBJECT_PLAYER:
                     {
@@ -137,8 +137,7 @@ State::update()
                 {
                     // o is no longer visible from p.
                     MessageOut msg2(GPMSG_BEING_LEAVE);
-                    msg2.writeByte((*o)->getType());
-                    msg2.writeLong((*o)->getID());
+                    msg2.writeShort((*o)->getPublicID());
                     gameHandler->sendTo(*p, msg2);
                     continue;
                 }
@@ -151,14 +150,14 @@ State::update()
                 /* At this point, either o has entered p's range, either o is
                    moving inside p's range. Report o's movements. */
                 Point od = (*o)->getDestination();
-                msg.writeLong((*o)->getID());
+                msg.writeShort((*o)->getPublicID());
                 msg.writeShort(on.x);
                 msg.writeShort(on.y);
                 msg.writeShort(od.x);
                 msg.writeShort(od.y);
             }
 
-            // Don't send a packet if nothing happed in p's range.
+            // Don't send a packet if nothing happened in p's range.
             if (msg.getLength() > 2)
                 gameHandler->sendTo(*p, msg);
         }
@@ -180,7 +179,10 @@ State::addObject(ObjectPtr objectPtr)
     maps[mapId].objects.push_back(objectPtr);
     objectPtr->setNew(true);
     if (objectPtr->getType() != OBJECT_PLAYER) return;
-    maps[mapId].players.push_back(PlayerPtr(objectPtr));
+    PlayerPtr ptr(objectPtr);
+    // TODO: Unique object numbering
+    ptr->setPublicID(ptr->getDatabaseID());
+    maps[mapId].players.push_back(ptr);
 }
 
 void
@@ -200,8 +202,7 @@ State::removeObject(ObjectPtr objectPtr)
     if (objectPtr->getType() != OBJECT_PLAYER) return;
 
     MessageOut msg(GPMSG_BEING_LEAVE);
-    msg.writeByte(OBJECT_PLAYER);
-    msg.writeLong(objectPtr->getID());
+    msg.writeShort(PlayerPtr(objectPtr)->getPublicID());
 
     Point objectPosition = objectPtr->getXY();
     Players &players = maps[mapId].players;

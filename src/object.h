@@ -40,9 +40,8 @@ class Object
         /**
          * Constructor.
          */
-        Object(int type, int id)
+        Object(int type)
           : mType(type),
-            mID(id),
             mNew(true),
             mNeedUpdate(false)
         {}
@@ -59,20 +58,6 @@ class Object
          */
         unsigned int getType() const
         { return mType; }
-
-        /**
-         * Get object ID.
-         *
-         * @return the unique ID, a negative number if none yet.
-         */
-        int getID() const
-        { return mID; }
-
-        /**
-         * Set object ID.
-         * The account shall not have any ID yet.
-         */
-        void setID(int id);
 
         /**
          * Set the x coordinate.
@@ -157,7 +142,6 @@ class Object
 
     private:
         int mType; /**< Object type */
-        int mID; /** Object unique ID (wrt its type and its map at least) */
         unsigned int mX; /**< x coordinate */
         unsigned int mY; /**< y coordinate */
         unsigned int mMapId;  /**< id of the map being is on */
@@ -177,7 +161,7 @@ class MovingObject: public Object
          * Proxy constructor.
          */
         MovingObject(int type, int id)
-          : Object(type, id)
+          : Object(type), mPublicID(id)
         {}
 
         /**
@@ -209,7 +193,23 @@ class MovingObject: public Object
          */
         void move();
 
+        /**
+         * Get public ID.
+         *
+         * @return the public ID, 65535 if none yet.
+         */
+        int getPublicID() const
+        { return mPublicID; }
+
+        /**
+         * Set public ID.
+         * The object shall not have any public ID yet.
+         */
+        void setPublicID(int id)
+        { mPublicID = id; }
+
     private:
+        unsigned short mPublicID; /**< Object ID sent to clients (unique with respect to the map) */
         unsigned mDstX; /**< target x coordinate */
         unsigned mDstY; /**< target y coordinate */
         unsigned mNewX; /**< next x coordinate */

@@ -629,7 +629,7 @@ void DALStorage::flush(AccountPtr const &account)
          it_end = characters.end(); it != it_end; ++it) {
 
         std::ostringstream sql3;
-        if ((*it)->getID() < 0) {
+        if ((*it)->getDatabaseID() < 0) {
             // insert the character
             sql3 << "insert into " << CHARACTERS_TBL_NAME
                  << " (user_id, name, gender, hair_style, hair_color, level, money,"
@@ -657,12 +657,13 @@ void DALStorage::flush(AccountPtr const &account)
                  << " where name = \"" << (*it)->getName() << "\";";
             RecordSet const &charInfo = mDb->execSql(sql2.str());
             if (charInfo.isEmpty()) {
-                (*it)->setID(1);
+                // FIXME: this does not make any sense to me -- silene
+                (*it)->setDatabaseID(1);
             }
             else
             {
                 string_to<unsigned int> toUint;
-                (*it)->setID(toUint(charInfo(0, 0)));
+                (*it)->setDatabaseID(toUint(charInfo(0, 0)));
             }
         } else {
             sql3 << "update " << CHARACTERS_TBL_NAME
@@ -685,7 +686,7 @@ void DALStorage::flush(AccountPtr const &account)
 #endif
                 << " dex = " << (*it)->getRawStat(STAT_DEX) << ", "
                 << " luck = " << (*it)->getRawStat(STAT_LUK)
-                << " where id = " << (*it)->getID() << ";";
+                << " where id = " << (*it)->getDatabaseID() << ";";
         }
         mDb->execSql(sql3.str());
 
