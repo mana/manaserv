@@ -1,3 +1,8 @@
+2006-09-02  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/defines.h: Corrected hair and hair color constants to match
+	those available on the client.
+
 2006-09-02  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/object.cpp, src/controller.cpp, src/dalstorage.cpp, src/items.h,
@@ -7,7 +12,6 @@
 	* src/messageout.cpp, src/messageout.h, src/state.cpp, src/defines.h:
 	Removed pixel-based synchronisation. Added variable length move
 	messages. Changed default buffer size of outgoing packets.
-
 
 2006-08-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

@@ -79,8 +79,8 @@ const unsigned int MAX_CLIENTS  = 1024,
     MIN_CHARACTER_LENGTH = 4,
     MAX_CHARACTER_LENGTH = 25,
     MAX_OF_CHARACTERS = 3,
-    MAX_HAIRSTYLE_VALUE = 5,
-    MAX_HAIRCOLOR_VALUE = 10,
+    MAX_HAIRSTYLE_VALUE = 7,
+    MAX_HAIRCOLOR_VALUE = 9,
     MAX_GENDER_VALUE = 2,
 /** Tells the max difference between the
  *  less big stat and the biggest one.
