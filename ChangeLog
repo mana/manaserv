@@ -16,7 +16,8 @@
 	src/controller.cpp, src/dalstorage.cpp, src/object.h, src/state.cpp,
 	src/gamehandler.cpp: Made Point a POD type. Simplified server algorithm
 	for moving objects; it now matches the one in the client.
-	
+	* src/gameclient.cpp, src/player.h, src/gamehandler.cpp: Added
+	GameClient pointer to Player class for O(1) message sending.
 
 2006-08-28  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
