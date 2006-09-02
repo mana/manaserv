@@ -57,6 +57,11 @@ class MessageOut
         writeLong(long value);          /**< Writes a long. */
 
         /**
+         * Writes a 3-byte block containing tile-based coordinates.
+         */
+        void writeCoordinates(int x, int y);
+
+        /**
          * Writes a string. If a fixed length is not given (-1), it is stored
          * as a short at the start of the string.
          */

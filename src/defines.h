@@ -109,6 +109,7 @@ const unsigned int MAX_CLIENTS  = 1024,
  * - PGMSG_*: from client to game server
  * - GPMSG_*: from game server to client
  * Components: B byte, W word, D double word, S variable-size string
+ *             C tile-based coordinates (B*3)
  */
 enum {
     // Login/Register
@@ -149,7 +150,7 @@ enum {
                                              // monster: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     PGMSG_WALK                     = 0x0260, // W*2 destination
-    GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, W*2 position, W*2 destination }*
+    GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, C position] [, W*2 destination] }*
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // W being id, S text
     PGMSG_USE_ITEM                 = 0x0300, // L item id
@@ -240,6 +241,14 @@ enum {
     OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
     OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
     OBJECT_PLAYER    // A normal being
+};
+
+// Moving object flags
+enum {
+    // Payload contains the current position.
+    MOVING_POSITION = 1,
+    // Payload contains the destination.
+    MOVING_DESTINATION = 2
 };
 
 #endif // _TMWSERV_DEFINES_H_

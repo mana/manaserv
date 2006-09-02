@@ -102,6 +102,8 @@ State::update()
                     !(*p)->isNew() && !(*o)->isNew();
                 bool willBeInRange = (*p)->getNextPosition().inRangeOf(on);
 
+                int flags = 0;
+
                 if (!wereInRange)
                 {
                     // o was outside p's range.
@@ -110,6 +112,7 @@ State::update()
                         // Nothing to report: o will not be inside p's range.
                         continue;
                     }
+                    flags |= MOVING_DESTINATION;
 
                     int type = (*o)->getType();
                     MessageOut msg2(GPMSG_BEING_ENTER);
@@ -149,12 +152,27 @@ State::update()
 
                 /* At this point, either o has entered p's range, either o is
                    moving inside p's range. Report o's movements. */
+
                 Point od = (*o)->getDestination();
+                if (on.x != od.x || on.y != od.y)
+                {
+                    flags |= MOVING_POSITION;
+                }
+
+                // TODO: updates destination only on changes.
+                flags |= MOVING_DESTINATION;
+
                 msg.writeShort((*o)->getPublicID());
-                msg.writeShort(on.x);
-                msg.writeShort(on.y);
-                msg.writeShort(od.x);
-                msg.writeShort(od.y);
+                msg.writeByte(flags);
+                if (flags & MOVING_POSITION)
+                {
+                    msg.writeCoordinates(on.x / 32, on.y / 32);
+                }
+                if (flags & MOVING_DESTINATION)
+                {
+                    msg.writeShort(od.x);
+                    msg.writeShort(od.y);
+                }
             }
 
             // Don't send a packet if nothing happened in p's range.

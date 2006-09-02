@@ -30,7 +30,7 @@
 #include <enet/enet.h>
 
 /** Initial amount of bytes allocated for the messageout data buffer. */
-const unsigned int INITIAL_DATA_CAPACITY = 2;
+const unsigned int INITIAL_DATA_CAPACITY = 16;
 
 /** Factor by which the messageout data buffer is increased when too small. */
 const unsigned int CAPACITY_GROW_FACTOR = 2;
@@ -95,6 +95,16 @@ MessageOut::writeLong(long value)
     uint32_t t = ENET_HOST_TO_NET_32(value);
     memcpy(mData + mPos, &t, 4);
     mPos += 4;
+}
+
+void MessageOut::writeCoordinates(int x, int y)
+{
+    expand(mPos + 3);
+    char *p = mData + mPos;
+    p[0] = x & 0x00FF;
+    p[1] = ((x & 0x0700) >> 8) | ((y & 0x001F) << 3);
+    p[2] = (y & 0x07E0) >> 5;
+    mPos += 3;
 }
 
 void
