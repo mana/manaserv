@@ -1,3 +1,11 @@
+2006-09-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/player.cpp, src/object.h, src/gamehandler.h, src/state.cpp,
+	src/gamehandler.cpp, src/state.h: Removed mNeedUpdate and mNew from
+	Object class; added update flags instead. Reduced size of Object
+	fields. Moved sayAround from GameHandler to State class. Improved
+	handling of flags for move messages.
+
 2006-09-02  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/defines.h: Corrected hair and hair color constants to match

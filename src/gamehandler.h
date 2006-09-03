@@ -53,13 +53,6 @@ class GameHandler: public ConnectionHandler
         void processMessage(NetComputer *computer, MessageIn &message);
 
     private:
-        /**
-         * Display a message to every player around one's player
-         * in the default channel.
-         * The tile area has been set to 10 for now.
-         */
-        void sayAround(GameClient &computer, std::string const &text);
-
         void removeOutdatedPending();
 };
 

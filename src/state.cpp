@@ -101,7 +101,7 @@ State::update()
                  * the last time and whether they will be around the next time.
                  */
                 bool wereInRange = (*p)->getOldPosition().inRangeOf(os) &&
-                                   !(*p)->isNew() && !(*o)->isNew();
+                    !(((*p)->getUpdateFlags() | (*o)->getUpdateFlags()) & NEW_ON_MAP);
                 bool willBeInRange = (*p)->getPosition().inRangeOf(on);
 
                 int flags = 0;
@@ -159,19 +159,15 @@ State::update()
                 if (on.x != od.x || on.y != od.y)
                 {
                     flags |= MOVING_POSITION;
+                    if ((*o)->getUpdateFlags() & NEW_DESTINATION)
+                    {
+                        flags |= MOVING_DESTINATION;
+                    }
                 }
                 else
                 {
                     // no need to synchronize on the very last step
                     flags |= MOVING_DESTINATION;
-                }
-
-                // TODO: updates destination only on changes.
-                flags |= MOVING_DESTINATION;
-
-                if (!(flags & (MOVING_POSITION | MOVING_DESTINATION)))
-                {
-                    continue;
                 }
 
                 msg.writeShort((*o)->getPublicID());
@@ -195,7 +191,7 @@ State::update()
         for (Movings::iterator o = movings.begin(),
              o_end = movings.end(); o != o_end; ++o)
         {
-            (*o)->setNew(false);
+            (*o)->clearUpdateFlags();
         }
     }
 }
@@ -207,7 +203,7 @@ State::addObject(ObjectPtr objectPtr)
     MapComposite *map = loadMap(mapId);
     if (!map) return;
     map->objects.push_back(objectPtr);
-    objectPtr->setNew(true);
+    objectPtr->raiseUpdateFlags(NEW_ON_MAP);
     int type = objectPtr->getType();
     if (type != OBJECT_MONSTER && type != OBJECT_PLAYER && type != OBJECT_NPC) return;
     map->allocate(static_cast< MovingObject * >(objectPtr.get()));
@@ -290,4 +286,31 @@ MapComposite *State::loadMap(unsigned mapId)
     // will need to load extra map related resources here also
 
     return tmp;
+}
+
+void State::sayAround(Object *obj, std::string text)
+{
+    unsigned short id = 65535;
+    int type = obj->getType();
+    if (type == OBJECT_PLAYER || type == OBJECT_NPC || type == OBJECT_MONSTER)
+    {
+        id = static_cast< MovingObject * >(obj)->getPublicID();
+    }
+    MessageOut msg(GPMSG_SAY);
+    msg.writeShort(id);
+    msg.writeString(text);
+
+    std::map< unsigned, MapComposite * >::iterator m = maps.find(obj->getMapId());
+    if (m == maps.end()) return;
+    MapComposite *map = m->second;
+    Point speakerPosition = obj->getPosition();
+
+    for (std::vector< Player * >::iterator i = map->players.begin(),
+         i_end = map->players.end(); i != i_end; ++i)
+    {
+        if (speakerPosition.inRangeOf((*i)->getPosition()))
+        {
+            gameHandler->sendTo(*i, msg);
+        }
+    }
 }

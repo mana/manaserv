@@ -30,6 +30,12 @@
 #include "point.h"
 #include "utils/countedptr.h"
 
+enum
+{
+    NEW_ON_MAP = 1,
+    NEW_DESTINATION = 2
+};
+
 /**
  * Generic in-game object definition.
  * Base class for in-game objects.
@@ -42,8 +48,7 @@ class Object
          */
         Object(int type)
           : mType(type),
-            mNew(true),
-            mNeedUpdate(false)
+            mUpdateFlags(0)
         {}
 
         /**
@@ -82,39 +87,42 @@ class Object
         update() = 0;
 
         /**
-         * Get map name where being is
+         * Gets the map the object is located on.
          *
-         * @return Name of map being is located.
+         * @return ID of map.
          */
-        unsigned int getMapId() const
+        int getMapId() const
         { return mMapId; }
 
         /**
-         * Set map being is located
+         * Sets the map the object is located on.
          */
-        void setMapId(unsigned int mapId)
+        void setMapId(int mapId)
         { mMapId = mapId; }
 
         /**
-         * Tells if the object just appeared.
+         * Gets what changed in the object.
          */
-        bool isNew() const
-        { return mNew; }
+        int getUpdateFlags() const
+        { return mUpdateFlags; }
 
         /**
-         * Sets the age of the object.
+         * Sets some changes in the object.
          */
-        void setNew(bool n)
-        { mNew = n; }
+        void raiseUpdateFlags(int n)
+        { mUpdateFlags |= n; }
+
+        /**
+         * Clears changes in the object.
+         */
+        void clearUpdateFlags()
+        { mUpdateFlags = 0; }
 
     private:
-        int mType; /**< Object type */
+        char mType; /**< Object type */
+        char mUpdateFlags; /**< changes in object status */
+        unsigned short mMapId;  /**< id of the map being is on */
         Point mPos; /**< coordinates */
-        unsigned int mMapId;  /**< id of the map being is on */
-        bool mNew; /**< true if the object just appeared */
-
-    protected:
-        bool mNeedUpdate;  /**< update() must be invoked if true */
 };
 
 /**
@@ -141,7 +149,7 @@ class MovingObject: public Object
          * Sets the destination coordinates of the object.
          */
         void setDestination(Point dst)
-        { mDst = dst; }
+        { mDst = dst; raiseUpdateFlags(NEW_DESTINATION); }
 
         /**
          * Gets the old coordinates of the object.

@@ -42,8 +42,6 @@ void Player::update()
     setStat(STAT_MAG, 10 + mRawStats.stats[STAT_INT]);
     setStat(STAT_ACC, 50 + mRawStats.stats[STAT_DEX]);
     setStat(STAT_SPD, mRawStats.stats[STAT_DEX]);
-
-    mNeedUpdate = false;
 }
 
 void Player::setInventory(const std::vector<unsigned int> &inven)

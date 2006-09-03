@@ -160,7 +160,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_SAY:
             {
                 std::string say = message.readString();
-                sayAround(computer, say);
+                gameState->sayAround(computer.getCharacter().get(), say);
             } break;
 
         case PGMSG_PICKUP:
@@ -220,35 +220,6 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
     if (result.getLength() > 0)
         computer.send(result);
-}
-
-void GameHandler::sayAround(GameClient &computer, std::string const &text)
-{
-    PlayerPtr beingPtr = computer.getCharacter();
-
-    MessageOut msg(GPMSG_SAY);
-    msg.writeShort(beingPtr->getPublicID());
-    msg.writeString(text);
-
-    unsigned speakerMapId = beingPtr->getMapId();
-    Point speakerPosition = beingPtr->getPosition();
-
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i)
-    {
-        // See if the other being is near enough, then send the message
-        Player const *listener =
-            static_cast<GameClient *>(*i)->getCharacter().get();
-
-        if (!listener || listener->getMapId() != speakerMapId) {
-            continue;
-        }
-
-        if (speakerPosition.inRangeOf(listener->getPosition()))
-        {
-            (*i)->send(msg);
-        }
-    }
 }
 
 void GameHandler::sendTo(Player *beingPtr, MessageOut &msg)

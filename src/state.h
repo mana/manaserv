@@ -25,6 +25,7 @@
 #define _TMW_SERVER_STATE_
 
 #include <map>
+#include <string>
 
 #include "object.h"
 
@@ -64,6 +65,11 @@ class State
      * Remove an object from the map.
      */
     void removeObject(ObjectPtr objectPtr);
+
+    /**
+     * Say around an object.
+     */
+    void sayAround(Object *, std::string text);
 };
 
 extern State *gameState;
