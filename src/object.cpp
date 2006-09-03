@@ -48,23 +48,31 @@ void MovingObject::move()
             mActionTime = 0;
             return;
         }
-        // last tile center is skipped
-        path.pop_back();
+    }
+    else
+    {
+        // moving while staying on the same tile is free
+        setPosition(mDst);
+        mActionTime = 0;
+        return;
     }
 
+    PATH_NODE prev(tileSX, tileSY);
     Point pos;
     do
     {
-        mActionTime += mSpeed;
+        PATH_NODE next = path.front();
+        path.pop_front();
+        mActionTime += (prev.x != next.x && prev.y != next.y)
+                       ? mSpeed * 362 / 256 : mSpeed;
         if (path.empty())
         {
             // skip last tile center
             pos = mDst;
             break;
         }
-        pos.x = path.front().x * 32 + 16;
-        pos.y = path.front().y * 32 + 16;
-        path.pop_front();
+        pos.x = next.x * 32 + 16;
+        pos.y = next.y * 32 + 16;
     }
     while (mActionTime < 100);
     setPosition(pos);

@@ -7,6 +7,7 @@
 	handling of flags for move messages.
 	* src/mapcomposite.h, src/state.cpp, src/mapcomposite.cpp: Added map
 	partitioning to reduce quadratic behavior when checking object ranges.
+	* src/object.cpp: Fixed cost of diagonal moves.
 
 2006-09-02  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
