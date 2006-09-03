@@ -41,6 +41,7 @@ void MovingObject::move()
     int tileDX = mDst.x / 32, tileDY = mDst.y / 32;
     if (tileSX != tileDX || tileSY != tileDY)
     {
+        // TODO: cache pathfinding results
         path = map->findPath(tileSX, tileSY, tileDX, tileDY);
         if (path.empty()) {
             // no path was found
