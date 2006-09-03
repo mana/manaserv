@@ -5,6 +5,8 @@
 	Object class; added update flags instead. Reduced size of Object
 	fields. Moved sayAround from GameHandler to State class. Improved
 	handling of flags for move messages.
+	* src/mapcomposite.h, src/state.cpp, src/mapcomposite.cpp: Added map
+	partitioning to reduce quadratic behavior when checking object ranges.
 
 2006-09-02  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

@@ -57,7 +57,6 @@ State::~State()
     for (std::map< unsigned, MapComposite * >::iterator i = maps.begin(),
          i_end = maps.end(); i != i_end; ++i)
     {
-        delete i->second->map;
         delete i->second;
     }
 }
@@ -71,28 +70,23 @@ State::update()
     {
         MapComposite *map = m->second;
 
-        typedef std::vector< MovingObject * > Movings;
-        Movings movings;
-
-        for (Objects::iterator o = map->objects.begin(),
-             o_end = map->objects.end(); o != o_end; ++o)
+        for (ObjectIterator o(map->getWholeMapIterator()); o; ++o)
         {
             (*o)->update();
-            int t = (*o)->getType();
-            if (t == OBJECT_NPC || t == OBJECT_PLAYER || t == OBJECT_MONSTER) {
-                MovingObject *ptr = static_cast< MovingObject * >(o->get());
-                ptr->move();
-                movings.push_back(ptr);
-            }
         }
 
-        for (std::vector< Player * >::iterator p = map->players.begin(),
-             p_end = map->players.end(); p != p_end; ++p)
+        for (MovingObjectIterator o(map->getWholeMapIterator()); o; ++o)
+        {
+            (*o)->move();
+        }
+
+        map->update();
+
+        for (PlayerIterator p(map->getWholeMapIterator()); p; ++p)
         {
             MessageOut msg(GPMSG_BEINGS_MOVE);
 
-            for (Movings::iterator o = movings.begin(),
-                 o_end = movings.end(); o != o_end; ++o)
+            for (MovingObjectIterator o(map->getAroundPlayerIterator(*p)); o; ++o)
             {
                 Point os = (*o)->getOldPosition();
                 Point on = (*o)->getPosition();
@@ -188,8 +182,7 @@ State::update()
                 gameHandler->sendTo(*p, msg);
         }
 
-        for (Movings::iterator o = movings.begin(),
-             o_end = movings.end(); o != o_end; ++o)
+        for (ObjectIterator o(map->getWholeMapIterator()); o; ++o)
         {
             (*o)->clearUpdateFlags();
         }
@@ -202,14 +195,10 @@ State::addObject(ObjectPtr objectPtr)
     unsigned mapId = objectPtr->getMapId();
     MapComposite *map = loadMap(mapId);
     if (!map) return;
-    map->objects.push_back(objectPtr);
+    map->insert(objectPtr);
     objectPtr->raiseUpdateFlags(NEW_ON_MAP);
-    int type = objectPtr->getType();
-    if (type != OBJECT_MONSTER && type != OBJECT_PLAYER && type != OBJECT_NPC) return;
-    map->allocate(static_cast< MovingObject * >(objectPtr.get()));
-    if (type != OBJECT_PLAYER) return;
+    if (objectPtr->getType() != OBJECT_PLAYER) return;
     Player *playerPtr = static_cast< Player * >(objectPtr.get());
-    map->players.push_back(playerPtr);
 
     /* Since the player doesn't know yet where on the world he is after
      * connecting to the map server, we send him an initial change map message.
@@ -238,39 +227,18 @@ State::removeObject(ObjectPtr objectPtr)
         MovingObject *obj = static_cast< MovingObject * >(objectPtr.get());
         MessageOut msg(GPMSG_BEING_LEAVE);
         msg.writeShort(obj->getPublicID());
-
         Point objectPos = obj->getPosition();
-        typedef std::vector< Player * > Players;
-        Players &players = map->players;
-        Players::iterator p_end = players.end(), j = p_end;
-        for (Players::iterator p = players.begin(); p != p_end; ++p)
+
+        for (PlayerIterator p(map->getAroundObjectIterator(obj)); p; ++p)
         {
-            if (*p == obj)
-            {
-                j = p;
-            }
-            else if (objectPos.inRangeOf((*p)->getPosition()))
+            if (*p != obj && objectPos.inRangeOf((*p)->getPosition()))
             {
                 gameHandler->sendTo(*p, msg);
             }
         }
-
-        if (j != p_end)
-        {
-            players.erase(j);
-        }
-
-        map->deallocate(obj);
     }
 
-    for (Objects::iterator o = map->objects.begin(),
-         o_end = map->objects.end(); o != o_end; ++o)
-    {
-        if (o->get() == objectPtr.get()) {
-            map->objects.erase(o);
-            break;
-        }
-    }
+    map->remove(objectPtr);
 }
 
 MapComposite *State::loadMap(unsigned mapId)
@@ -279,8 +247,7 @@ MapComposite *State::loadMap(unsigned mapId)
     if (m != maps.end()) return m->second;
     Map *map = MapManager::instance().loadMap(mapId);
     if (!map) return NULL;
-    MapComposite *tmp = new MapComposite;
-    tmp->map = map;
+    MapComposite *tmp = new MapComposite(map);
     maps[mapId] = tmp;
 
     // will need to load extra map related resources here also
@@ -305,8 +272,7 @@ void State::sayAround(Object *obj, std::string text)
     MapComposite *map = m->second;
     Point speakerPosition = obj->getPosition();
 
-    for (std::vector< Player * >::iterator i = map->players.begin(),
-         i_end = map->players.end(); i != i_end; ++i)
+    for (PlayerIterator i(map->getAroundObjectIterator(obj)); i; ++i)
     {
         if (speakerPosition.inRangeOf((*i)->getPosition()))
         {

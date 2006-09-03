@@ -25,12 +25,104 @@
 #define _TMW_SERVER_MAPCOMPOSITE_
 
 #include "object.h"
+#include "player.h"
 
-class Player;
 class Map;
+class MapComposite;
 
 /**
- * Pool of MovingObject.
+ * Ordered sets of zones of a map.
+ */
+typedef std::vector< unsigned > MapRegion;
+
+/**
+ * Part of the map.
+ */
+struct MapZone
+{
+    unsigned short nbPlayers, nbMovingObjects;
+    /**
+     * Objects present in this zone.
+     * Players are stored first, then the remaining MovingObjects, then the
+     * remaining Objects.
+     */
+    std::vector< Object * > objects;
+
+    /**
+     * Destinations of the objects that left this zone.
+     * This is necessary in order to have an accurate iterator around moving
+     * objects.
+     */
+    MapRegion destinations;
+
+    MapZone(): nbPlayers(0), nbMovingObjects(0) {}
+    void insert(Object *);
+    void remove(Object *);
+};
+
+/**
+ * Iterates through the zones of a region of the map.
+ */
+struct ZoneIterator
+{
+    MapRegion region; /**< Zones to visit. Empty means the entire map. */
+    unsigned pos;
+    MapZone *current;
+    MapComposite const *map;
+
+    ZoneIterator(MapRegion const &, MapComposite const *);
+    void operator++();
+    MapZone *operator*() const { return current; }
+    operator bool() const { return current; }
+};
+
+/**
+ * Iterates through the Players of a region.
+ */
+struct PlayerIterator
+{
+    ZoneIterator iterator;
+    unsigned short pos;
+    Player *current;
+
+    PlayerIterator(ZoneIterator const &);
+    void operator++();
+    Player *operator*() const { return current; }
+    operator bool() const { return iterator; }
+};
+
+/**
+ * Iterates through the MovingObjects of a region.
+ */
+struct MovingObjectIterator
+{
+    ZoneIterator iterator;
+    unsigned short pos;
+    MovingObject *current;
+
+    MovingObjectIterator(ZoneIterator const &);
+    void operator++();
+    MovingObject *operator*() const { return current; }
+    operator bool() const { return iterator; }
+};
+
+/**
+ * Iterates through the Objects of a region.
+ */
+struct ObjectIterator
+{
+    ZoneIterator iterator;
+    unsigned short pos;
+    Object *current;
+
+    ObjectIterator(ZoneIterator const &);
+    void operator++();
+    Object *operator*() const { return current; }
+    operator bool() const { return iterator; }
+};
+
+/**
+ * Pool of public IDs for MovingObjects on a map.
  */
 struct ObjectBucket
 {
@@ -50,23 +142,51 @@ struct ObjectBucket
 class MapComposite {
 
     public:
-        MapComposite();
+        MapComposite(Map *);
         ~MapComposite();
 
-        /**
-         * Actual map.
-         */
-        Map *map;
+        Map *getMap() const
+        { return map; }
 
         /**
-         * Objects (items, players, monsters, etc) located on the map.
+         * Inserts an object on the map and sets a public ID.
          */
-        Objects objects;
+        void insert(ObjectPtr);
 
         /**
-         * Players located on the map. Already owned by the objects field.
+         * Removes an object from the map.
          */
-        std::vector< Player * > players;
+        void remove(ObjectPtr);
+
+        /**
+         * Updates zones of every moving beings.
+         */
+        void update();
+
+        /**
+         * Gets an object given its ID.
+         */
+        MovingObject *getObjectByID(int) const;
+
+        /**
+         * Gets an iterator on the objects of the whole map.
+         */
+        ZoneIterator getWholeMapIterator() const
+        { return ZoneIterator(MapRegion(), this); }
+
+        /**
+         * Gets an iterator on the objects around a given object.
+         */
+        ZoneIterator getAroundObjectIterator(Object *) const;
+
+        /**
+         * Gets an iterator on the objects around the old and new positions of
+         * a player (including the ones that were but are now elsewhere).
+         */
+        ZoneIterator getAroundPlayerIterator(Player *) const;
+
+    private:
+        MapComposite(MapComposite const &);
 
         /**
          * Allocates a unique ID for a moving object on this map.
@@ -79,19 +199,33 @@ class MapComposite {
         void deallocate(MovingObject *);
 
         /**
-         * Gets an object given its ID.
+         * Fills a region of zones with the vision range around a point.
          */
-        MovingObject *getObjectByID(int) const;
+        void fillRegion(MapRegion &, Point const &) const;
 
-    private:
-        MapComposite(MapComposite const &);
+        Map *map; /**< Actual map. */
 
         /**
-         * Buckets of MovingObject located on the map, referenced by ID.
+         * Objects (items, players, monsters, etc) located on the map.
+         */
+        Objects objects;
+
+        /**
+         * Buckets of MovingObjects located on the map, referenced by ID.
          */
         ObjectBucket *buckets[256];
 
         int last_bucket; /**< Last bucket acted upon. */
+
+        /**
+         * Partition of the Objects, depending on their position on the map.
+         */
+        MapZone *zones;
+
+        unsigned short mapWidth; /**< Width with respect to zones. */
+        unsigned short mapHeight; /**< Height with respect to zones. */
+
+        friend class ZoneIterator;
 };
 
 #endif
