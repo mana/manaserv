@@ -1,3 +1,8 @@
+2006-09-04  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/mapcomposite.cpp, src/mapcomposite.h, src/state.cpp: Fixed wrong
+	ID allocation. Improved failure propagation. Simplified code.
+
 2006-09-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/player.cpp, src/object.h, src/gamehandler.h, src/state.cpp,

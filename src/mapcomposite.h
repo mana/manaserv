@@ -126,7 +126,8 @@ struct ObjectIterator
  */
 struct ObjectBucket
 {
-    unsigned bitmap[256 / sizeof(unsigned)]; /**< Bitmap of free locations. */
+    static int const int_bitsize = sizeof(unsigned) * 8;
+    unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
     short free; /**< Number of empty places. */
     short next_object; /**< Next object to look at. */
     MovingObject *objects[256];
@@ -149,9 +150,9 @@ class MapComposite {
         { return map; }
 
         /**
-         * Inserts an object on the map and sets a public ID.
+         * Inserts an object on the map and sets its public ID.
          */
-        void insert(ObjectPtr);
+        bool insert(ObjectPtr);
 
         /**
          * Removes an object from the map.
@@ -191,7 +192,7 @@ class MapComposite {
         /**
          * Allocates a unique ID for a moving object on this map.
          */
-        void allocate(MovingObject *);
+        bool allocate(MovingObject *);
 
         /**
          * Deallocates an ID.

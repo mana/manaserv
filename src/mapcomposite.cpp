@@ -29,6 +29,16 @@
 #include "defines.h"
 #include "map.h"
 
+/* TODO: Implement overlapping map zones instead of strict partitioning.
+   Purpose: to decrease the number of zone changes, as overlapping allows for
+   hysteresis effect and prevents an object from changing zone each server
+   tick. It requires storing the zone in the object since it will not be
+   uniquely defined any longer. */
+
+/* Pixel-based width and height of the squares used in partitioning the map.
+   TODO: Tune for decreasing server load. The higher the value, the closer we
+   regress to quadratic behavior; the lower the value, the more we waste time
+   in dealing with zone changes. */
 static int const zoneDiam = 256;
 
 void MapZone::insert(Object *obj)
@@ -83,73 +93,44 @@ void MapZone::remove(Object *obj)
     {
         case OBJECT_PLAYER:
         {
+            i = i_beg;
             i_end = objects.begin() + nbPlayers;
-            i = std::find(i_beg, i_end, obj);
-            assert(i != i_end);
-            int pos = i - i_beg;
-            if (pos != nbPlayers - 1)
-            {
-                objects[pos] = objects[nbPlayers - 1];
-            }
-            if (nbPlayers != nbMovingObjects)
-            {
-                objects[nbPlayers - 1] = objects[nbMovingObjects - 1];
-            }
-            --nbPlayers;
-            if (nbMovingObjects != objects.size())
-            {
-                objects[nbMovingObjects - 1] = objects[objects.size() - 1];
-            }
-            --nbMovingObjects;
-            objects.pop_back();
         } break;
         case OBJECT_MONSTER:
         case OBJECT_NPC:
         {
+            i = objects.begin() + nbPlayers;
             i_end = objects.begin() + nbMovingObjects;
-            i = std::find(objects.begin() + nbPlayers, i_end, obj);
-            assert(i != i_end);
-            int pos = i - i_beg;
-            if (pos != nbMovingObjects - 1)
-            {
-                objects[pos] = objects[nbMovingObjects - 1];
-            }
-            if (nbMovingObjects != objects.size())
-            {
-                objects[nbMovingObjects - 1] = objects[objects.size() - 1];
-            }
-            --nbMovingObjects;
-            objects.pop_back();
         } break;
         default:
         {
+            i = objects.begin() + nbMovingObjects;
             i_end = objects.end();
-            i = std::find(objects.begin() + nbMovingObjects, i_end, obj);
-            assert(i != i_end);
-            unsigned pos = i - i_beg;
-            if (pos != objects.size() - 1)
-            {
-                objects[pos] = objects[objects.size() - 1];
-            }
-            objects.pop_back();
         }
     }
+    i = std::find(i, i_end, obj);
+    assert(i != i_end);
+    unsigned pos = i - i_beg;
+    if (pos < nbPlayers)
+    {
+        objects[pos] = objects[nbPlayers - 1];
+        pos = nbPlayers - 1;
+        --nbPlayers;
+    }
+    if (pos < nbMovingObjects)
+    {
+        objects[pos] = objects[nbMovingObjects - 1];
+        pos = nbMovingObjects - 1;
+        --nbMovingObjects;
+    }
+    objects[pos] = objects[objects.size() - 1];
+    objects.pop_back();
 }
 
 static void addZone(MapRegion &r, unsigned z)
 {
     MapRegion::iterator i_end = r.end(),
                         i = std::lower_bound(r.begin(), i_end, z);
-    /*
-    if (i == i_end)
-    {
-        r.push_back(z);
-    }
-    else if (*i != z)
-    {
-        r.insert(i, z);
-    }
-    */
     if (i == i_end || *i != z)
     {
         r.insert(i, z);
@@ -253,7 +234,7 @@ void ObjectIterator::operator++()
 ObjectBucket::ObjectBucket()
   : free(256), next_object(0)
 {
-    for (unsigned i = 0; i < 256 / sizeof(unsigned); ++i)
+    for (unsigned i = 0; i < 256 / int_bitsize; ++i)
     {
         bitmap[i] = ~0;
     }
@@ -266,20 +247,19 @@ int ObjectBucket::allocate()
         return -1;
     }
 
-    if (bitmap[next_object / sizeof(unsigned)] & (1 << (next_object % sizeof(unsigned))))
+    if (bitmap[next_object / int_bitsize] & (1 << (next_object % int_bitsize)))
     {
-        bitmap[next_object / sizeof(unsigned)] &= ~(1 << (next_object % sizeof(unsigned)));
+        bitmap[next_object / int_bitsize] &= ~(1 << (next_object % int_bitsize));
         int i = next_object;
         next_object = (i + 1) & 255;
         --free;
         return i;
     }
 
-    for (unsigned i = 0; i < 256 / sizeof(unsigned); ++i)
+    for (unsigned i = 0; i < 256 / int_bitsize; ++i)
     {
-        unsigned &current = bitmap[(i + next_object / sizeof(unsigned)) & 255];
-        unsigned b = current;
-        if (b)
+        int k = (i + next_object / int_bitsize) & 255;
+        if (unsigned b = bitmap[k])
         {
             int j = 0;
             while (!(b & 1))
@@ -287,7 +267,8 @@ int ObjectBucket::allocate()
                 b >>= 1;
                 ++j;
             }
-            current &= ~(1 << j);
+            bitmap[k] &= ~(1 << j);
+            j += k * int_bitsize;
             next_object = (j + 1) & 255;
             --free;
             return j;
@@ -298,7 +279,8 @@ int ObjectBucket::allocate()
 
 void ObjectBucket::deallocate(int i)
 {
-    bitmap[i / sizeof(unsigned)] |= 1 << (i % sizeof(unsigned));
+    assert(!(bitmap[i / int_bitsize] & (1 << (i % int_bitsize))));
+    bitmap[i / int_bitsize] |= 1 << (i % int_bitsize);
     ++free;
 }
 
@@ -325,18 +307,20 @@ MapComposite::~MapComposite()
     delete map;
 }
 
-void MapComposite::allocate(MovingObject *obj)
+bool MapComposite::allocate(MovingObject *obj)
 {
+    // First, try allocating from the last used bucket.
     ObjectBucket *b = buckets[last_bucket];
     int i = b->allocate();
     if (i >= 0)
     {
         b->objects[i] = obj;
-        int id = last_bucket * 256 + i;
-        obj->setPublicID(id);
-        return;
+        obj->setPublicID(last_bucket * 256 + i);
+        return true;
     }
 
+    /* If the last used bucket is already full, scan all the buckets for an
+       empty place. If none is available, create a new bucket. */
     for (i = 0; i < 256; ++i)
     {
         b = buckets[i];
@@ -350,22 +334,18 @@ void MapComposite::allocate(MovingObject *obj)
         {
             last_bucket = i;
             b->objects[j] = obj;
-            int id = i * 256 + j;
-            obj->setPublicID(id);
-            return;
+            obj->setPublicID(last_bucket * 256 + j);
+            return true;
         }
     }
+
+    // All the IDs are currently used, fail.
+    return false;
 }
 
 void MapComposite::deallocate(MovingObject *obj)
 {
-    int id = obj->getPublicID();
-    if (id == 65535)
-    {
-        return;
-    }
-
-    obj->setPublicID(65535);
+    unsigned short id = obj->getPublicID();
     buckets[id / 256]->deallocate(id % 256);
 }
 
@@ -407,6 +387,7 @@ ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj) const
         if (!r4.empty())
         {
             MapRegion r3;
+            r3.reserve(r2.size() + r4.size());
             std::set_union(r2.begin(), r2.end(), r4.begin(), r4.end(),
                            std::back_insert_iterator< MapRegion >(r3));
             r2.swap(r3);
@@ -416,7 +397,7 @@ ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj) const
     return ZoneIterator(r2, this);
 }
 
-void MapComposite::insert(ObjectPtr obj)
+bool MapComposite::insert(ObjectPtr obj)
 {
     Point const &pos = obj->getPosition();
     zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].insert(obj.get());
@@ -424,10 +405,14 @@ void MapComposite::insert(ObjectPtr obj)
     int type = obj->getType();
     if (type == OBJECT_MONSTER || type == OBJECT_PLAYER || type == OBJECT_NPC)
     {
-        allocate(static_cast< MovingObject * >(obj.get()));
+        if (!allocate(static_cast< MovingObject * >(obj.get())))
+        {
+            return false;
+        }
     }
 
     objects.push_back(obj);
+    return true;
 }
 
 void MapComposite::remove(ObjectPtr obj)

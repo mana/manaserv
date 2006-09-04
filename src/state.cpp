@@ -194,8 +194,11 @@ State::addObject(ObjectPtr objectPtr)
 {
     unsigned mapId = objectPtr->getMapId();
     MapComposite *map = loadMap(mapId);
-    if (!map) return;
-    map->insert(objectPtr);
+    if (!map || !map->insert(objectPtr))
+    {
+        // TODO: Deal with failure to place Object on the map.
+        return;
+    }
     objectPtr->raiseUpdateFlags(NEW_ON_MAP);
     if (objectPtr->getType() != OBJECT_PLAYER) return;
     Player *playerPtr = static_cast< Player * >(objectPtr.get());
@@ -248,6 +251,7 @@ MapComposite *State::loadMap(unsigned mapId)
     Map *map = MapManager::instance().loadMap(mapId);
     if (!map) return NULL;
     MapComposite *tmp = new MapComposite(map);
+    if (!tmp) return NULL;
     maps[mapId] = tmp;
 
     // will need to load extra map related resources here also
