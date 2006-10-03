@@ -39,6 +39,12 @@
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 
+bool
+AccountHandler::startListen(enet_uint16 port)
+{
+    LOG_INFO("Account handler started:", 0);
+    ConnectionHandler::startListen(port);
+}
 
 NetComputer*
 AccountHandler::computerConnected(ENetPeer *peer)

@@ -86,6 +86,13 @@ void registerGameClient(std::string const &token, PlayerPtr ch)
     }
 }
 
+bool
+GameHandler::startListen(enet_uint16 port)
+{
+    LOG_INFO("Game handler started:", 0);
+    ConnectionHandler::startListen(port);
+}
+
 void GameHandler::removeOutdatedPending()
 {
     GamePendingLogins::iterator i = pendingLogins.begin();

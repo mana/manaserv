@@ -18,47 +18,17 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id$
+ *  $Id: items.cpp 2512 2006-08-04 16:58:20Z b_lindeijer $
  */
 
-#ifndef ITEMS_H
-#define ITEMS_H
+#include "item.h"
 
-#include "object.h"
-
-/**
- * Class for all types of in-game items.
- */
-class Item : public Object
+void Item::use(BeingPtr itemUser)
 {
-    public:
-        /**
-         * Enumeration of available Item types.
-         */
-        enum {
-            Usable,
-            Equipment
-        };
+    //
+}
 
-        Item(int type):
-            Object(type)
-        {}
-
-        virtual ~Item() throw() { }
-
-        /**
-         * The function called to use an item
-         */
-        void use();
-
-        /**
-         * Return type of item
-         */
-        unsigned int getType() const { return type; }
-
-    private:
-        //Item type
-        unsigned int type;
-};
-
-#endif
+void Item::useWithScript(const std::string scriptFile)
+{
+    //
+}

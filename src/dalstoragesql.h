@@ -300,16 +300,22 @@ const std::string SQL_INVENTORIES_TABLE(
 #if defined (MYSQL_SUPPORT)
         "id       SMALLINT NOT NULL,"
         "owner_id INTEGER  NOT NULL,"
+        "amount   SMALLINT NOT NULL,"
+        "equipped TINYINT  NOT NULL,"
         "FOREIGN KEY (id)       REFERENCES tmw_items(id),"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #elif defined (SQLITE_SUPPORT)
         "id       INTEGER  NOT NULL,"
         "owner_id INTEGER  NOT NULL,"
+        "amount   INTEGER  NOT NULL,"
+        "equipped INTEGER  NOT NULL,"
         "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #elif defined (POSTGRESQL_SUPPORT)
         "id       INTEGER  NOT NULL,"
         "owner_id INTEGER  NOT NULL,"
+        "amount   INTEGER  NOT NULL,"
+        "equipped INTEGER  NOT NULL,"
         "FOREIGN KEY (id)       REFERENCES tmw_items(id),"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #endif

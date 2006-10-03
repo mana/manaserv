@@ -38,6 +38,13 @@ class AccountClient;
  */
 class AccountHandler : public ConnectionHandler
 {
+    public:
+        /**
+         * Start the handler
+         */
+        bool
+        startListen(enet_uint16 port);
+
     protected:
         /**
          * Process account related messages.

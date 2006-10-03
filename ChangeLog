@@ -1,3 +1,12 @@
+2006-10-03  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/item.cpp, src/item.h, src/inventory.h, src.inventory.cpp,
+	src/itemhandler.h, src/itemhandler.cpp, src/dalstoragesql.h,
+	src/Makefile.am: Committed itemhandler structure part rc1.
+	src/accounthandler.cpp, src/accounthandler.h, src/chathandler.h,
+	src/chathandler.cpp, src/gamehandler.h, src/gamehandler.cpp: Made the
+	server tells which server is listening on a port.
+
 2006-09-09  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/map.cpp: Merged client pathfinder changes.

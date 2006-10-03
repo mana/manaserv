@@ -39,8 +39,12 @@ tmwserv_SOURCES = main.cpp \
 		  gameclient.cpp \
 		  gamehandler.h \
 		  gamehandler.cpp \
-		  items.h \
-		  items.cpp \
+		  inventory.h \
+		  inventory.cpp \
+		  item.h \
+		  item.cpp \
+		  itemhandler.h \
+		  itemhandler.cpp \
 		  map.h \
 		  map.cpp \
 		  mapcomposite.h \

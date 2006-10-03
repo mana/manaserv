@@ -1,5 +1,5 @@
 /*
- *  The Mana World Server
+ *  The Mana World
  *  Copyright 2004 The Mana World Development Team
  *
  *  This file is part of The Mana World.
@@ -18,12 +18,12 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id$
+ *  $Id:  $
  */
 
-#include "items.h"
+#include "itemhandler.h"
 
-void Item::use()
-{
-    //
-}
+#include "storage.h"
+
+#include "utils/logger.h"
+

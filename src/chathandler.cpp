@@ -88,6 +88,13 @@ void registerChatClient(std::string const &token, std::string const &name, int l
     }
 }
 
+bool
+ChatHandler::startListen(enet_uint16 port)
+{
+    LOG_INFO("Chat handler started:", 0);
+    ConnectionHandler::startListen(port);
+}
+
 void ChatHandler::removeOutdatedPending()
 {
     ChatPendingLogins::iterator i = pendingLogins.begin(), next;

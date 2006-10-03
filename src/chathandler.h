@@ -38,6 +38,12 @@ class ChatHandler : public ConnectionHandler
     public:
         void process();
 
+        /**
+         * Start the handler
+         */
+        bool
+        startListen(enet_uint16 port);
+
     protected:
         /**
          * Process chat related messages.

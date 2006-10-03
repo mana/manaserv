@@ -39,6 +39,12 @@ class GameHandler: public ConnectionHandler
         void process();
 
         /**
+         * Start the handler
+         */
+        bool
+        startListen(enet_uint16 port);
+
+        /**
          * Send message to the given player.
          */
         void sendTo(Player *, MessageOut &msg);
