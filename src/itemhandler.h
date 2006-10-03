@@ -24,8 +24,8 @@
 #ifndef _TMW_ITEMHANDLER_H
 #define _TMW_ITEMHANDLER_H
 
-#include <item.h>
-#include <mapcomposite.h>
+#include "item.h"
+#include "mapcomposite.h"
 
 /**
  *  The Item Handler loads the item reference database

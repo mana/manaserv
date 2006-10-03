@@ -1,3 +1,8 @@
+2006-10-03  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* src/itemhandler.h, tmwserv.cbp, tmwserv.dev: Updated project files 
+	and fixed a compilation issue.
+
 2006-10-03  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/item.cpp, src/item.h, src/inventory.h, src.inventory.cpp,
