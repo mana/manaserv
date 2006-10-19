@@ -33,15 +33,83 @@
 class Controller;
 
 /**
+ * Element attribute for beings, actors and items.
+ */
+typedef enum {
+    ELEMENT_NEUTRAL = 0,
+    ELEMENT_FIRE,
+    ELEMENT_WATER,
+    ELEMENT_EARTH,
+    ELEMENT_AIR,
+    ELEMENT_SACRED,
+    ELEMENT_DEATH
+} Element;
+
+/**
+ * States attribute for beings, and actors.
+ * States can be multiple for the same being.
+ */
+struct BeingState {
+    bool STATE_NORMAL;
+    bool STATE_POISONED;
+    bool STATE_STONED;
+    bool STATE_STUNNED;
+    bool STATE_SLOWED;
+    bool STATE_TIRED;
+    bool STATE_MAD;
+    bool STATE_BERSERK;
+    bool STATE_HASTED;
+    bool STATE_FLOATING;
+};
+
+/**
+ * Moves enum for beings and actors for others players vision.
+ */
+typedef enum {
+    ACTION_DEFAULT = 0,
+    ACTION_STAND,
+    ACTION_WALK,
+    ACTION_RUN,
+    ACTION_JUMP,
+    ACTION_CRAWL,
+    ACTION_ATTACK,
+    ACTION_ATTACK_SWING,
+    ACTION_ATTACK_STAB,
+    ACTION_ATTACK_BOW,
+    ACTION_ATTACK_THROW,
+    ACTION_CAST_MAGIC,
+    ACTION_USE_ITEM,
+    ACTION_SIT,
+    ACTION_SLEEP,
+    ACTION_HURT,
+    ACTION_DEAD,
+    ACTION_INVALID
+} SpriteAction;
+
+/**
+ * Beings and actors directions
+ */
+typedef enum {
+    DIRECTION_NORTH,
+    DIRECTION_NORTHWEST,
+    DIRECTION_NORTHEAST,
+    DIRECTION_WEST,
+    DIRECTION_EAST,
+    DIRECTION_SOUTH,
+    DIRECTION_SOUTHWEST,
+    DIRECTION_SOUTHEAST
+} SpriteDirection;
+
+/**
  * Raw statistics of a Player.
  */
 enum {
-    STAT_STR = 0,
-    STAT_AGI,
-    STAT_VIT,
-    STAT_INT,
-    STAT_DEX,
-    STAT_LUK,
+    STAT_STRENGTH = 0,
+    STAT_AGILITY,
+    STAT_VITALITY,
+    STAT_INTELLIGENCE,
+    STAT_DEXTERITY,
+    STAT_LUCK,
     NB_RSTAT
 };
 
@@ -57,12 +125,12 @@ struct RawStatistics
  * Computed statistics of a Being.
  */
 enum {
-    STAT_HEA = 0,
-    STAT_ATT,
-    STAT_DEF,
-    STAT_MAG,
-    STAT_ACC,
-    STAT_SPD,
+    STAT_HEAT = 0,
+    STAT_ATTACK,
+    STAT_DEFENCE,
+    STAT_MAGIC,
+    STAT_ACCURACY,
+    STAT_SPEED,
     NB_CSTAT
 };
 

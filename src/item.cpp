@@ -23,12 +23,26 @@
 
 #include "item.h"
 
-void Item::use(BeingPtr itemUser)
+bool Item::use(BeingPtr itemUser)
 {
-    //
+    bool usedSuccessfully = true;
+    // Applying Modifiers for a given lifetime
+    // TODO
+
+    // Calling a script if scriptName != ""
+    if (mScriptName != "")
+    {
+        if(runScript(itemUser) && usedSuccessfully)
+            return true;
+        else
+            return false;
+    }
+    else
+        return usedSuccessfully;
 }
 
-void Item::useWithScript(const std::string scriptFile)
+bool Item::runScript(BeingPtr itemUser)
 {
-    //
+    //TODO
+    return true;
 }

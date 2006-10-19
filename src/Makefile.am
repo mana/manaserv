@@ -43,8 +43,8 @@ tmwserv_SOURCES = main.cpp \
 		  inventory.cpp \
 		  item.h \
 		  item.cpp \
-		  itemhandler.h \
-		  itemhandler.cpp \
+		  itemmanager.h \
+		  itemmanager.cpp \
 		  map.h \
 		  map.cpp \
 		  mapcomposite.h \

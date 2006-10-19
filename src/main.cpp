@@ -42,6 +42,7 @@
 #include "gamehandler.h"
 #include "messageout.h"
 #include "resourcemanager.h"
+#include "itemmanager.h"
 #include "skill.h"
 #include "state.h"
 #include "storage.h"
@@ -74,8 +75,14 @@ std::string scriptLanugage = "none";
 // Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE        "tmwserv.log"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
+#define DEFAULT_ITEMSDB_FILE    "items.xml"
+#define DEFAULT_MAP_FOLDER      "maps"
+#define DEFAULT_DATA_FOLDER     "data"
 #ifndef DEFAULT_SERVER_PORT
 #define DEFAULT_SERVER_PORT     9601
+// Meaning Account Handler Port is 9601
+// Chat Handler Port is 9602 (9601 + 1)
+// and Game Handler Port is 9603...
 #endif
 
 utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
@@ -95,6 +102,8 @@ AccountHandler *accountHandler;
 ChatHandler *chatHandler;
 /** Chat Channels Manager */
 ChatChannelManager *chatChannelManager;
+/** Item Manager */
+ItemManager *itemManager;
 
 /** Core game message handler */
 GameHandler *gameHandler;
@@ -107,6 +116,13 @@ State *gameState;
  */
 void initialize()
 {
+
+    // Reset to default segmentation fault handling for debugging purposes
+    signal(SIGSEGV, SIG_DFL);
+
+    // Set enet to quit on exit.
+    atexit(enet_deinitialize);
+
     /*
      * If the path values aren't defined, we set the default
      * depending on the platform.
@@ -141,7 +157,10 @@ void initialize()
 
 #endif // defined LOG_FILE
 
-    // initialize the logger.
+    // Initialize PhysicsFS
+    PHYSFS_init("");
+
+    // Initialize the logger.
     using namespace utils;
     Logger::instance().setLogFile(logPath);
 
@@ -152,31 +171,28 @@ void initialize()
     LOG_INFO("Using Config File: " << configPath, 0);
     LOG_INFO("Using Log File: " << logPath, 0);
 
-    // Initialize the slang's filter.
+    // --- Initialize the managers
+    // Initialize the slang's and double quotes filter.
     stringFilter = new StringFilter(&config);
+    // Initialize the Chat channels manager
+    chatChannelManager = new ChatChannelManager();
+    // Initialize the Item Manager
+    itemManager = new ItemManager(DEFAULT_DATA_FOLDER"/"DEFAULT_ITEMSDB_FILE);
 
-    // Initialize the global handlers
+    // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
     // singleton or a local variable in the event-loop
-    chatChannelManager = new ChatChannelManager();
-
     chatHandler = new ChatHandler();
     accountHandler = new AccountHandler();
     gameHandler = new GameHandler();
 
-    // Reset to default segmentation fault handling for debugging purposes
-    signal(SIGSEGV, SIG_DFL);
-
-    // Set enet to quit on exit.
-    atexit(enet_deinitialize);
-
-    // Initialize enet.
+    // --- Initialize enet.
     if (enet_initialize() != 0) {
         LOG_FATAL("An error occurred while initializing ENet", 0);
         exit(2);
     }
 
-    // Initialize scripting subsystem.
+    // --- Initialize scripting subsystem.
 #ifdef RUBY_SUPPORT
     LOG_INFO("Script Language: " << scriptLanguage, 0);
 
@@ -209,9 +225,6 @@ void initialize()
     config.setValue("dbuser", "");
     config.setValue("dbpass", "");
     config.setValue("dbhost", "");
-
-    // Initialize PhysicsFS
-    PHYSFS_init("");
 }
 
 
@@ -241,7 +254,9 @@ void deinitialize()
     delete chatHandler;
     delete gameHandler;
 
+    // Destroy Managers
     delete chatChannelManager;
+    delete itemManager;
 
     // Get rid of persistent data storage
     Storage::destroy();

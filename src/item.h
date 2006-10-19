@@ -29,9 +29,12 @@
 /**
  * Enumeration of available Item types.
  */
-enum {
-    ITEM_USABLE = 0,
-    ITEM_EQUIPMENT_WEAPON,
+typedef enum {
+    ITEM_USABLE = 1,
+    ITEM_EQUIPMENT_ONE_HAND_WEAPON,
+    ITEM_EQUIPMENT_TWO_HANDS_WEAPON,
+    ITEM_EQUIPMENT_ONE_HAND_RANGED_WEAPON,
+    ITEM_EQUIPMENT_TWO_HANDS_RANGED_WEAPON,
     ITEM_EQUIPMENT_BREST,
     ITEM_EQUIPMENT_ARMS,
     ITEM_EQUIPMENT_HEAD,
@@ -39,19 +42,57 @@ enum {
     ITEM_EQUIPMENT_SHIELD,
     ITEM_EQUIPMENT_RING,
     ITEM_EQUIPMENT_NECKLACE
+} ItemType;
+
+/**
+ * States attribute effects to beings, and actors.
+ * States can be multiple for the same being.
+ */
+struct BeingStateEffects {
+    bool STATE_NORMAL;
+    bool STATE_POISONED;
+    bool STATE_STONED;
+    bool STATE_STUNNED;
+    bool STATE_SLOWED;
+    bool STATE_TIRED;
+    bool STATE_MAD;
+    bool STATE_BERSERK;
+    bool STATE_HASTED;
+    bool STATE_FLOATING;
+
+    bool STATE_NOT_POISONED;
+    bool STATE_NOT_STONED;
+    bool STATE_NOT_STUNNED;
+    bool STATE_NOT_SLOWED;
+    bool STATE_NOT_TIRED;
+    bool STATE_NOT_MAD;
+    bool STATE_NOT_BERSERK;
+    bool STATE_NOT_HASTED;
+    bool STATE_NOT_FLOATING;
 };
+
 
 /**
  * statistics modifiers.
  * once for usables.
  * Permanent for equipment.
  */
-struct StatisticsModifiers
+struct Modifiers
 {
-    short rawStatsMod[NB_RSTAT]; /**< Raw Stats modifiers */
-    short compStatsMod[NB_CSTAT]; /**< Computed Stats modifiers */
+    // General
+    Element element; /** Item Element */
+    BeingStateEffects beingStateEffects; /** Being State (dis)alteration */
+    unsigned short lifetime; /** Modifiers lifetime in seconds. */
+
+    // Caracteristics Modifiers
+    short rawStats[NB_RSTAT];
+    short computedStats[NB_CSTAT];
+
     int hpMod; /**< HP modifier */
     int mpMod; /**< MP Modifier */
+
+    // Equipment
+    unsigned short range; /** Weapon Item Range */
     /**< More to come */
 };
 
@@ -64,15 +105,16 @@ class Item
 {
     public:
 
-        Item(StatisticsModifiers statsModifiers,
-            unsigned short mItemType = 0,
+        Item(Modifiers modifiers,
+            unsigned short itemType = 0,
             unsigned int weight = 0,
-            unsigned short slot = 0,
-            unsigned int value = 0):
+            unsigned int value = 0,
+            std::string scriptName = ""):
+            mModifiers(modifiers),
+            mItemType(itemType),
             mWeight(weight),
-            mSlot(slot),
             mValue(value),
-            mStatsModifiers(statsModifiers) {}
+            mScriptName(scriptName) {}
 
         virtual ~Item() throw() { }
 
@@ -80,47 +122,43 @@ class Item
          * The function called to use an item applying
          * only the modifiers (for simple items...)
          */
-        void use(BeingPtr itemUser);
-
-        /**
-         * The function called to use an item
-         * using a script (for complex actions)
-         */
-        void useWithScript(const std::string scriptFile);
+        bool use(BeingPtr itemUser);
 
         /**
          * Return item Type
          */
-        unsigned short getItemType() const { return mItemType; }
+        unsigned short getItemType() const { return mItemType; };
 
         /**
          * Return Weight of item
          */
-        unsigned int getWeight() const { return mWeight; }
-
-        /**
-         * Return usual slot of item
-         */
-        unsigned short getSlot() const { return mSlot; }
+        unsigned int getWeight() const { return mWeight; };
 
         /**
          * Return gold value of item
          */
-        unsigned int getGoldValue() const { return mValue; }
+        unsigned int getGoldValue() const { return mValue; };
 
         /**
          * Return item's modifiers
          */
-        StatisticsModifiers
-        getItemStatsModifiers() const { return mStatsModifiers; }
+        Modifiers
+        getItemModifiers() const { return mModifiers; };
 
     private:
-        //Item type
+
+        /**
+         * Runs the associated script when using the item, if any.
+         */
+        bool runScript(BeingPtr itemUser);
+
+        // Item reference information
         unsigned short mItemType; /**< ItemType: Usable, equipment */
         unsigned int mWeight; /**< Weight of the item */
-        unsigned short mSlot; /**< Current slot of the item */
         unsigned int mValue; /**< Gold value of the item */
-        StatisticsModifiers mStatsModifiers; /**< Stats Mod of the items */
+        std::string mScriptName; /**< item's script. None if =="" */
+
+        Modifiers mModifiers; /**< Item's Modifiers */
 };
 
 /**

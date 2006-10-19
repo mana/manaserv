@@ -36,12 +36,12 @@ void Player::setDatabaseID(int id)
 void Player::update()
 {
     // computed stats.
-    setStat(STAT_HEA, 20 + (20 * mRawStats.stats[STAT_VIT]));
-    setStat(STAT_ATT, 10 + mRawStats.stats[STAT_STR]);
-    setStat(STAT_DEF, 10 + mRawStats.stats[STAT_STR]);
-    setStat(STAT_MAG, 10 + mRawStats.stats[STAT_INT]);
-    setStat(STAT_ACC, 50 + mRawStats.stats[STAT_DEX]);
-    setStat(STAT_SPD, mRawStats.stats[STAT_DEX]);
+    setStat(STAT_HEAT, 20 + (20 * mRawStats.stats[STAT_VITALITY]));
+    setStat(STAT_ATTACK, 10 + mRawStats.stats[STAT_STRENGTH]);
+    setStat(STAT_DEFENCE, 10 + mRawStats.stats[STAT_STRENGTH]);
+    setStat(STAT_MAGIC, 10 + mRawStats.stats[STAT_INTELLIGENCE]);
+    setStat(STAT_ACCURACY, 50 + mRawStats.stats[STAT_DEXTERITY]);
+    setStat(STAT_SPEED, mRawStats.stats[STAT_DEXTERITY]);
 }
 
 void Player::setInventory(const std::vector<unsigned int> &inven)

@@ -645,12 +645,12 @@ void DALStorage::flush(AccountPtr const &account)
                  << (*it)->getPosition().x << ", "
                  << (*it)->getPosition().y << ", "
                  << (*it)->getMapId() << ", "
-                 << (*it)->getRawStat(STAT_STR) << ", "
-                 << (*it)->getRawStat(STAT_AGI) << ", "
-                 << (*it)->getRawStat(STAT_VIT) << ", "
-                 << (*it)->getRawStat(STAT_INT) << ", "
-                 << (*it)->getRawStat(STAT_DEX) << ", "
-                 << (*it)->getRawStat(STAT_LUK) << ");";
+                 << (*it)->getRawStat(STAT_STRENGTH) << ", "
+                 << (*it)->getRawStat(STAT_AGILITY) << ", "
+                 << (*it)->getRawStat(STAT_VITALITY) << ", "
+                 << (*it)->getRawStat(STAT_INTELLIGENCE) << ", "
+                 << (*it)->getRawStat(STAT_DEXTERITY) << ", "
+                 << (*it)->getRawStat(STAT_LUCK) << ");";
 
             // get the character id
             std::ostringstream sql2;
@@ -677,16 +677,16 @@ void DALStorage::flush(AccountPtr const &account)
                 << " x = " << (*it)->getPosition().x << ", "
                 << " y = " << (*it)->getPosition().y << ", "
                 << " map_id = " << (*it)->getMapId() << ", "
-                << " str = " << (*it)->getRawStat(STAT_STR) << ", "
-                << " agi = " << (*it)->getRawStat(STAT_AGI) << ", "
-                << " vit = " << (*it)->getRawStat(STAT_VIT) << ", "
+                << " str = " << (*it)->getRawStat(STAT_STRENGTH) << ", "
+                << " agi = " << (*it)->getRawStat(STAT_AGILITY) << ", "
+                << " vit = " << (*it)->getRawStat(STAT_VITALITY) << ", "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-                << " `int` = " << (*it)->getRawStat(STAT_INT) << ", "
+                << " `int` = " << (*it)->getRawStat(STAT_INTELLIGENCE) << ", "
 #else
-                << " int = " << (*it)->getRawStat(STAT_INT) << ", "
+                << " int = " << (*it)->getRawStat(STAT_INTELLIGENCE) << ", "
 #endif
-                << " dex = " << (*it)->getRawStat(STAT_DEX) << ", "
-                << " luck = " << (*it)->getRawStat(STAT_LUK)
+                << " dex = " << (*it)->getRawStat(STAT_DEXTERITY) << ", "
+                << " luck = " << (*it)->getRawStat(STAT_LUCK)
                 << " where id = " << (*it)->getDatabaseID() << ";";
         }
         mDb->execSql(sql3.str());
