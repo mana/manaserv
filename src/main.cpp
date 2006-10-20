@@ -76,8 +76,6 @@ std::string scriptLanugage = "none";
 #define DEFAULT_LOG_FILE        "tmwserv.log"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
-#define DEFAULT_MAP_FOLDER      "maps"
-#define DEFAULT_DATA_FOLDER     "data"
 #ifndef DEFAULT_SERVER_PORT
 #define DEFAULT_SERVER_PORT     9601
 // Meaning Account Handler Port is 9601
@@ -177,7 +175,7 @@ void initialize()
     // Initialize the Chat channels manager
     chatChannelManager = new ChatChannelManager();
     // Initialize the Item Manager
-    itemManager = new ItemManager(DEFAULT_DATA_FOLDER"/"DEFAULT_ITEMSDB_FILE);
+    itemManager = new ItemManager(DEFAULT_ITEMSDB_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger

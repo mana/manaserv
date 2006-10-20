@@ -13,6 +13,7 @@
               <xsd:extension base="xsd:positiveInteger">
                   <!-- General -->
                 <xsd:attribute name="id" type="xsd:positiveInteger" />
+                <xsd:attribute name="type" type="xsd:integer" />
                 <xsd:attribute name="weight" type="xsd:integer" />
                 <xsd:attribute name="value" type="xsd:integer" />
                 <xsd:attribute name="script_name" type="xsd:string" />
@@ -39,26 +40,7 @@
                   <!-- Equipment -->
                 <xsd:attribute name="range" type="xsd:integer" />
                   <!-- Status Effects Addition -->
-                <xsd:attribute name="status_normal" type="xsd:boolean" />
-                <xsd:attribute name="status_poisoned" type="xsd:boolean" />
-                <xsd:attribute name="status_stoned" type="xsd:boolean" />
-                <xsd:attribute name="status_stunned" type="xsd:boolean" />
-                <xsd:attribute name="status_slowed" type="xsd:boolean" />
-                <xsd:attribute name="status_tired" type="xsd:boolean" />
-                <xsd:attribute name="status_mad" type="xsd:boolean" />
-                <xsd:attribute name="status_berserk" type="xsd:boolean" />
-                <xsd:attribute name="status_hasted" type="xsd:boolean" />
-                <xsd:attribute name="status_floating" type="xsd:boolean" />
-                  <!-- Status Effects Deletion -->
-                <xsd:attribute name="status_not_poisoned" type="xsd:boolean" />
-                <xsd:attribute name="status_not_stoned" type="xsd:boolean" />
-                <xsd:attribute name="status_not_stunned" type="xsd:boolean" />
-                <xsd:attribute name="status_not_slowed" type="xsd:boolean" />
-                <xsd:attribute name="status_not_tired" type="xsd:boolean" />
-                <xsd:attribute name="status_not_mad" type="xsd:boolean" />
-                <xsd:attribute name="status_not_berserk" type="xsd:boolean" />
-                <xsd:attribute name="status_not_hasted" type="xsd:boolean" />
-                <xsd:attribute name="status_not_floating" type="xsd:boolean" />
+                <xsd:attribute name="status_effect" type="xsd:integer" />
               </xsd:extension>
             </xsd:simpleContent>
           </xsd:complexType>

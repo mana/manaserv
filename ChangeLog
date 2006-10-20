@@ -1,3 +1,16 @@
+2006-10-19  Yohann Ferreira  <bertram@cegetel.net>
+
+	* data/items.xsd, data/items.xml, src/item.h, src/itemmanager.cpp,
+	src/main.cpp: Simplified item reference a bit and filled the reference
+	items.xml file.
+
+2006-10-19  Yohann Ferreira  <bertram@cegetel.net>
+
+	* data/items.xsd, src/main.cpp, src/Makefile.am, src/item.h,
+	src/item.cpp, itemmanager.cpp, itemmanager.h, being.h, player.cpp,
+	dalstorage.cpp: Added a backend to get item reference information.
+	The xml file isn't ready yet.
+
 2006-10-03  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* src/itemhandler.h, tmwserv.cbp, tmwserv.dev: Updated project files 

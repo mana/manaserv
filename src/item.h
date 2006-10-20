@@ -30,47 +30,46 @@
  * Enumeration of available Item types.
  */
 typedef enum {
-    ITEM_USABLE = 1,
-    ITEM_EQUIPMENT_ONE_HAND_WEAPON,
-    ITEM_EQUIPMENT_TWO_HANDS_WEAPON,
-    ITEM_EQUIPMENT_ONE_HAND_RANGED_WEAPON,
-    ITEM_EQUIPMENT_TWO_HANDS_RANGED_WEAPON,
-    ITEM_EQUIPMENT_BREST,
-    ITEM_EQUIPMENT_ARMS,
-    ITEM_EQUIPMENT_HEAD,
-    ITEM_EQUIPMENT_LEGS,
-    ITEM_EQUIPMENT_SHIELD,
-    ITEM_EQUIPMENT_RING,
-    ITEM_EQUIPMENT_NECKLACE
+    ITEM_UNUSABLE = 0,
+    ITEM_USABLE,                            // 1
+    ITEM_EQUIPMENT_ONE_HAND_WEAPON,         // 2
+    ITEM_EQUIPMENT_TWO_HANDS_WEAPON,        // 3
+    ITEM_EQUIPMENT_BREST,                   // 4
+    ITEM_EQUIPMENT_ARMS,                    // 5
+    ITEM_EQUIPMENT_HEAD,                    // 6
+    ITEM_EQUIPMENT_LEGS,                    // 7
+    ITEM_EQUIPMENT_SHIELD,                  // 8
+    ITEM_EQUIPMENT_RING,                    // 9
+    ITEM_EQUIPMENT_NECKLACE,                // 10
+    ITEM_EQUIPMENT_FEET                     // 11
 } ItemType;
 
 /**
  * States attribute effects to beings, and actors.
  * States can be multiple for the same being.
  */
-struct BeingStateEffects {
-    bool STATE_NORMAL;
-    bool STATE_POISONED;
-    bool STATE_STONED;
-    bool STATE_STUNNED;
-    bool STATE_SLOWED;
-    bool STATE_TIRED;
-    bool STATE_MAD;
-    bool STATE_BERSERK;
-    bool STATE_HASTED;
-    bool STATE_FLOATING;
+typedef enum BeingStateEffect {
+    STATE_NORMAL = 0,
+    STATE_POISONED,
+    STATE_STONED,
+    STATE_STUNNED,
+    STATE_SLOWED,
+    STATE_TIRED,
+    STATE_MAD,
+    STATE_BERSERK,
+    STATE_HASTED,
+    STATE_FLOATING,
 
-    bool STATE_NOT_POISONED;
-    bool STATE_NOT_STONED;
-    bool STATE_NOT_STUNNED;
-    bool STATE_NOT_SLOWED;
-    bool STATE_NOT_TIRED;
-    bool STATE_NOT_MAD;
-    bool STATE_NOT_BERSERK;
-    bool STATE_NOT_HASTED;
-    bool STATE_NOT_FLOATING;
+    STATE_NOT_POISONED,
+    STATE_NOT_STONED,
+    STATE_NOT_STUNNED,
+    STATE_NOT_SLOWED,
+    STATE_NOT_TIRED,
+    STATE_NOT_MAD,
+    STATE_NOT_BERSERK,
+    STATE_NOT_HASTED,
+    STATE_NOT_FLOATING
 };
-
 
 /**
  * statistics modifiers.
@@ -80,20 +79,19 @@ struct BeingStateEffects {
 struct Modifiers
 {
     // General
-    Element element; /** Item Element */
-    BeingStateEffects beingStateEffects; /** Being State (dis)alteration */
-    unsigned short lifetime; /** Modifiers lifetime in seconds. */
+    Element element; /**< Item Element */
+    BeingStateEffect beingStateEffect; /**< Being State (dis)alteration */
+    unsigned short lifetime; /**< Modifiers lifetime in seconds. */
 
     // Caracteristics Modifiers
-    short rawStats[NB_RSTAT];
-    short computedStats[NB_CSTAT];
+    short rawStats[NB_RSTAT]; /**< Raw Stats modifiers */
+    short computedStats[NB_CSTAT]; /**< Computed Stats modifiers */
 
-    int hpMod; /**< HP modifier */
-    int mpMod; /**< MP Modifier */
+    int hp; /**< HP modifier */
+    int mp; /**< MP Modifier */
 
     // Equipment
-    unsigned short range; /** Weapon Item Range */
-    /**< More to come */
+    unsigned short range; /**< Weapon Item Range */
 };
 
 
