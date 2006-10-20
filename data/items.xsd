@@ -16,6 +16,7 @@
                 <xsd:attribute name="type" type="xsd:integer" />
                 <xsd:attribute name="weight" type="xsd:integer" />
                 <xsd:attribute name="value" type="xsd:integer" />
+                <xsd:attribute name="max_per_slot" type="xsd:positiveInteger" />
                 <xsd:attribute name="script_name" type="xsd:string" />
                   <!-- Modifiers -->
                 <xsd:attribute name="element" type="xsd:integer" />
@@ -39,6 +40,7 @@
                 <xsd:attribute name="mp" type="xsd:integer" />
                   <!-- Equipment -->
                 <xsd:attribute name="range" type="xsd:integer" />
+                <xsd:attribute name="weapon_type" type="xsd:integer" />
                   <!-- Status Effects Addition -->
                 <xsd:attribute name="status_effect" type="xsd:integer" />
               </xsd:extension>

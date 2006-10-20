@@ -29,7 +29,7 @@
 /**
  * Enumeration of available Item types.
  */
-typedef enum {
+typedef enum ItemType {
     ITEM_UNUSABLE = 0,
     ITEM_USABLE,                            // 1
     ITEM_EQUIPMENT_ONE_HAND_WEAPON,         // 2
@@ -42,7 +42,30 @@ typedef enum {
     ITEM_EQUIPMENT_RING,                    // 9
     ITEM_EQUIPMENT_NECKLACE,                // 10
     ITEM_EQUIPMENT_FEET                     // 11
-} ItemType;
+};
+
+/**
+ * Enumeration of available weapon's types.
+ */
+typedef enum WeaponType {
+    WPNTYPE_NONE = 0,
+    WPNTYPE_KNIFE,          // 1
+    WPNTYPE_SWORD,          // 2
+    WPNTYPE_SPEAR,          // 3
+    WPNTYPE_JAVELIN,        // 4
+    WPNTYPE_ROD,            // 5
+    WPNTYPE_STAFF,          // 6
+    WPNTYPE_WIPE,           // 7
+    WPNTYPE_PROJECTILE,     // 8
+    WPNTYPE_BOOMERANG,      // 9
+    WPNTYPE_BOW,            // 10
+    WPNTYPE_SICKLE,         // 11
+    WPNTYPE_CROSSBOW,       // 12
+    WPNTYPE_STICK,          // 13
+    WPNTYPE_HAMMER,         // 14
+    WPNTYPE_AXE,            // 15
+    WPNTYPE_HAND_PROECTILE  // 16
+};
 
 /**
  * States attribute effects to beings, and actors.
@@ -90,8 +113,9 @@ struct Modifiers
     int hp; /**< HP modifier */
     int mp; /**< MP Modifier */
 
-    // Equipment
+    // Weapon
     unsigned short range; /**< Weapon Item Range */
+    WeaponType weaponType; /**< Weapon Type enum */
 };
 
 
@@ -107,12 +131,14 @@ class Item
             unsigned short itemType = 0,
             unsigned int weight = 0,
             unsigned int value = 0,
-            std::string scriptName = ""):
+            std::string scriptName = "",
+            unsigned short maxPerSlot = 0):
             mModifiers(modifiers),
             mItemType(itemType),
             mWeight(weight),
             mValue(value),
-            mScriptName(scriptName) {}
+            mScriptName(scriptName),
+            mMaxPerSlot(maxPerSlot) {}
 
         virtual ~Item() throw() { }
 
@@ -138,6 +164,11 @@ class Item
         unsigned int getGoldValue() const { return mValue; };
 
         /**
+         * Return max item per slot
+         */
+        unsigned short getMaxPerSlot() const { return mMaxPerSlot; };
+
+        /**
          * Return item's modifiers
          */
         Modifiers
@@ -155,6 +186,7 @@ class Item
         unsigned int mWeight; /**< Weight of the item */
         unsigned int mValue; /**< Gold value of the item */
         std::string mScriptName; /**< item's script. None if =="" */
+        unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory */
 
         Modifiers mModifiers; /**< Item's Modifiers */
 };

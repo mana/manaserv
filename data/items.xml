@@ -7,122 +7,122 @@
     <!-- heat, attack, defence, magic, accuracy, speed -->
     <!-- hp, mp, range, status_effect -->
 
-    <item id="501" name="Cactus drink" hp="15" type="1" weight="10" />
-    <item id="502" name="Cactus potion" hp="25" mp="10" type="1" weight="10" />
-    <item id="503" name="Casino coins" type="0" weight="10" />
-    <item id="504" name="Decor candy" type="0" weight="10" />
-    <item id="505" name="Maggot slime" type="0" weight="10" />
-    <item id="506" name="Candy cane" hp="10" type="1" weight="10" />
-    <item id="507" name="Scorpion stinger" type="0" weight="10" />
-    <item id="508" name="Xmas cake" hp="10" type="1" weight="10" />
-    <item id="509" name="Chocolate bar" hp="20" type="1" weight="10" />
-    <item id="510" name="Candy" hp="5" type="1" weight="10" />
-    <item id="511" name="Santa hat" defence="2" type="6" weight="10" />
-    <item id="512" name="Ginger bread man" hp="25" type="1" weight="10" />
-    <item id="513" name="Cake" hp="15" type="1" weight="10" />
-    <item id="514" name="Xmas candy cane" hp="10" type="1" weight="10" />
-    <item id="515" name="Purple present box" type="0" weight="10" />
-    <item id="516" name="Blue present box" type="0" weight="10" />
-    <item id="517" name="Red scorpion stinger" type="0" weight="10" />
-    <item id="518" name="Bug leg" type="0" weight="10" />
-    <item id="519" name="Cherry cake" hp="35" type="1" weight="10" />
-    <item id="520" name="Easter egg" hp="100" type="1" weight="10" />
-    <item id="521" name="Dagger" attack="15" range="1" type="2" weight="10" />
-    <item id="522" name="Sharp knife" attack="10" range="1" type="2" weight="10" />
-    <item id="523" name="Leather shirt" defence="4" type="4" weight="10" />
-    <item id="524" name="Fancy hat" defence="5" type="6" weight="10" />
-    <item id="525" name="Miners hat" defence="4" type="6" weight="10" />
-    <item id="526" name="Coin bag" type="0" weight="10" />
-    <item id="527" name="Milk" hp="150" type="1" weight="10" />
-    <item id="528" name="Boots" defense="2" type="11" weight="10" />
-    <item id="529" name="Iron arrow" attack="50" type="0" weight="10" />
-    <item id="530" name="Short bow" attack="50" range="5" type="3" weight="10" />
-    <item id="531" name="Miner gloves" defence="2" type="5" weight="10" />
-    <item id="532" name="Leather gloves" defence="3" type="5" weight="10" />
-    <item id="533" name="Roasted maggot" hp="150" type="1" weight="10" />
-    <item id="534" name="Orange cupcake" hp="100" mp="10" type="1" weight="10" />
-    <item id="535" name="Apple" hp="50" type="1" weight="10" />
-    <item id="536" name="Short sword" attack="100" range="1" type="2" weight="10" />
-    <item id="537" name="Treasure key" type="0" weight="10" script_name="treasureKey.rb" />
-    <item id="538" name="Green present box" type="0" weight="10" />
-    <item id="539" name="Beer" hp="200" type="1" weight="10" />
-    <item id="540" name="Empty bottle" type="0" weight="10" slot="0"/>
-    <item id="541" name="Bottle of water" hp="250" type="1" weight="10" />
-    <item id="542" name="Bottle of sand" type="0" weight="10" />
-    <item id="543" name="Standard headband" defense="1" type="6" weight="10" />
-    <item id="544" name="Silk headband" defense="3" type="6" weight="10" />
-    <item id="545" name="Forest bow" attack="65" range="5" type="3" weight="10" />
-    <item id="546" name="Desert shirt" defense="6" type="4" weight="10" />
-    <item id="547" name="Bardiche" attack="100" type="3" weight="10" />
-    <item id="548" name="Halberd" attack="100" type="3" weight="10" />
-    <item id="549" name="Axe" attack="100" type="2" weight="10" />
-    <item id="550" name="Blacksmith's axe" attack="100" type="2" weight="10" />
-    <item id="551" name="Hint" type="0" weight="10" />
-    <item id="552" name="Hint" type="0" weight="10" />
-    <item id="553" name="Hint" type="0" weight="10" />
-    <item id="554" name="Hint" type="0" weight="10" />
-    <item id="555" name="Hint" type="0" weight="10" />
-    <item id="556" name="Hint" type="0" weight="10" />
-    <item id="557" name="Hint" type="0" weight="10" />
-    <item id="558" name="Hint" type="0" weight="10" />
-    <item id="559" name="Hint" type="0" weight="10" />
-    <item id="560" name="Hint" type="0" weight="10" />
-    <item id="561" name="Sabre" type="0" weight="10" />
-    <item id="562" name="Chicken leg" type="0" weight="10" />
-    <item id="563" name="Winter gloves" type="0" weight="10" />
-    <item id="564" name="Wool sweater" type="0" weight="10" />
-    <item id="565" name="Petal" type="0" weight="10" />
-    <item id="566" name="Small mushroom" type="0" weight="10" />
-    <item id="567" name="Iron potion" strength="5" lifetime="60" type="1" weight="10" />
-    <item id="568" name="Concentration potion" accuracy="20" lifetime="60" type="1" weight="10" />
-    <item id="569" name="Raw log" type="0" weight="10" />
-    <item id="570" name="Bone knife" attack="50" type="2" weight="10" />
-    <item id="571" name="Setzer" attack="50" type="2" weight="10" />
-    <item id="572" name="Scimitar" attack="50" type="2" weight="10" />
-    <item id="573" name="Falcion" attack="50" type="2" weight="10" />
-    <item id="574" name="Scorpion" attack="50" type="2" weight="10" />
-    <item id="575" name="Desert bow" attack="50" type="2" weight="10" />
-    <item id="576" name="Beheader" attack="50" type="2" weight="10" />
-    <item id="577" name="Bone darts" attack="50" type="2" weight="10" />
-    <item id="578" name="Sand cutter" attack="50 " type="2" weight="10" />
-    <item id="579" name="Rock knife" attack="300" type="2" weight="10" />
-    <item id="580" name="Staff of life" attack="50" magic="10" type="2" weight="10" />
-    <item id="581" name="Crescent rod" attack="50" type="2" weight="10" />
-    <item id="582" name="Staff of fire" element="1" attack="50" type="2" weight="10" />
-    <item id="583" name="Staff of ice" element="2" attack="50" type="2" weight="10" />
-    <item id="584" name="Jackal" attack="50" type="2" weight="10" />
-    <item id="585" name="Scarab Armlet" defence="50" type="5" weight="10" />
-    <item id="586" name="Cotton shorts" defense="2" type="7" weight="10" />
-    <item id="587" name="Sword" type="0" weight="10" />
-    <item id="588" name="Bastard Sword" type="0" weight="10" />
-    <item id="589" name="Broad Sword" type="0" weight="10" />
-    <item id="588" name="Baselard" type="0" weight="10" />
-    <item id="591" name="Long Sword" type="0" weight="10" />
-    <item id="592" name="Stiletto" type="0" weight="10" />
-    <item id="593" name="Rapier" type="0" weight="10" />
-    <item id="594" name="Spear" type="0" weight="10" />
-    <item id="595" name="Heavy Spear" type="0" weight="10" />
-    <item id="596" name="Pike" type="0" weight="10" />
-    <item id="597" name="Heavy Pike" type="0" weight="10" />
-    <item id="598" name="Dual Spear" type="0" weight="10" />
-    <item id="599" name="Fire Sword" element="1" type="0" weight="10" />
-    <item id="600" name="Brit Shield" effect="Cooking: -50" type="0" weight="10" />
-    <item id="601" name="Steel Shield" type="0" weight="10" />
-    <item id="602" name="Wooden Shield" type="0" weight="10" />
-    <item id="603" name="Leather Shield" type="0" weight="10" />
-    <item id="604" name="Knight Shield" type="0" weight="10" />
-    <item id="605" name="Meat Cleaver" type="0" weight="10" />
-    <item id="606" name="Hatchet" type="0" weight="10" />
-    <item id="607" name="Trident" type="0" weight="10" />
-    <item id="608" name="A shield made of blades" type="0" weight="10" />
-    <item id="609" name="Club" type="0" weight="10" />
-    <item id="610" name="Jeans shorts" defence="4" type="7" weight="10" />
-    <item id="611" name="White fur" type="0" weight="10" />
-    <item id="612" name="Cave snake lamp" type="0" weight="10" />
-    <item id="613" name="Hard spike" type="0" weight="10" />
-    <item id="614" name="Pink antennae" type="0" weight="10" />
-    <item id="1199" name="Arrow" attack="25" type="0" weight="10" />
-    <item id="1200" name="Bow" attack="15" range="5" type="3" weight="10" />
-    <item id="1201" name="Knife" attack="5" range="1" type="2" weight="10" />
-    <item id="1202" name="Cotton shirt" defence="2" type="7" weight="10" />
+    <item id="501" name="Cactus drink" hp="15" type="1" weight="10" max_per_slot="10" />
+    <item id="502" name="Cactus potion" hp="25" mp="10" type="1" weight="10" max_per_slot="10" />
+    <item id="503" name="Casino coins" type="0" weight="10" max_per_slot="10" />
+    <item id="504" name="Decor candy" type="0" weight="10" max_per_slot="10" />
+    <item id="505" name="Maggot slime" type="0" weight="10" max_per_slot="10" />
+    <item id="506" name="Candy cane" hp="10" type="1" weight="10" max_per_slot="10" />
+    <item id="507" name="Scorpion stinger" type="0" weight="10" max_per_slot="10" />
+    <item id="508" name="Xmas cake" hp="10" type="1" weight="10" max_per_slot="10" />
+    <item id="509" name="Chocolate bar" hp="20" type="1" weight="10" max_per_slot="10" />
+    <item id="510" name="Candy" hp="5" type="1" weight="10" max_per_slot="10" />
+    <item id="511" name="Santa hat" defence="2" type="6" weight="10" max_per_slot="10" />
+    <item id="512" name="Ginger bread man" hp="25" type="1" weight="10" max_per_slot="10" />
+    <item id="513" name="Cake" hp="15" type="1" weight="10" max_per_slot="10" />
+    <item id="514" name="Xmas candy cane" hp="10" type="1" weight="10" max_per_slot="10" />
+    <item id="515" name="Purple present box" type="0" weight="10" max_per_slot="10" />
+    <item id="516" name="Blue present box" type="0" weight="10" max_per_slot="10" />
+    <item id="517" name="Red scorpion stinger" type="0" weight="10" max_per_slot="10" />
+    <item id="518" name="Bug leg" type="0" weight="10" max_per_slot="10" />
+    <item id="519" name="Cherry cake" hp="35" type="1" weight="10" max_per_slot="10" />
+    <item id="520" name="Easter egg" hp="100" type="1" weight="10" max_per_slot="10" />
+    <item id="521" name="Dagger" attack="15" range="1" type="2" weight="10" weapon_type="1" max_per_slot="10" />
+    <item id="522" name="Sharp knife" attack="10" range="1" type="2" weight="10" weapon_type="1" max_per_slot="10" />
+    <item id="523" name="Leather shirt" defence="4" type="4" weight="10" max_per_slot="10" />
+    <item id="524" name="Fancy hat" defence="5" type="6" weight="10" max_per_slot="10" />
+    <item id="525" name="Miners hat" defence="4" type="6" weight="10" max_per_slot="10" />
+    <item id="526" name="Coin bag" type="0" weight="10" max_per_slot="10" />
+    <item id="527" name="Milk" hp="150" type="1" weight="10" max_per_slot="10" />
+    <item id="528" name="Boots" defense="2" type="11" weight="10" max_per_slot="10" />
+    <item id="529" name="Iron arrow" attack="50" type="0" weight="10" weapon_type="8" max_per_slot="10" />
+    <item id="530" name="Short bow" attack="50" range="5" type="3" weight="10" weapon_type="10" max_per_slot="10" />
+    <item id="531" name="Miner gloves" defence="2" type="5" weight="10" max_per_slot="10" />
+    <item id="532" name="Leather gloves" defence="3" type="5" weight="10" max_per_slot="10" />
+    <item id="533" name="Roasted maggot" hp="150" type="1" weight="10" max_per_slot="10" />
+    <item id="534" name="Orange cupcake" hp="100" mp="10" type="1" weight="10" max_per_slot="10" />
+    <item id="535" name="Apple" hp="50" type="1" weight="10" max_per_slot="10" />
+    <item id="536" name="Short sword" attack="100" range="1" type="2" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="537" name="Treasure key" type="0" weight="10" script_name="treasureKey.rb" max_per_slot="10" />
+    <item id="538" name="Green present box" type="0" weight="10" max_per_slot="10" />
+    <item id="539" name="Beer" hp="200" type="1" weight="10" max_per_slot="10" />
+    <item id="540" name="Empty bottle" type="0" weight="10"  max_per_slot="10"/>
+    <item id="541" name="Bottle of water" hp="250" type="1" weight="10" element="2" max_per_slot="10" />
+    <item id="542" name="Bottle of sand" type="0" weight="10" max_per_slot="10" />
+    <item id="543" name="Standard headband" defense="1" type="6" weight="10" max_per_slot="10" />
+    <item id="544" name="Silk headband" defense="3" type="6" weight="10" max_per_slot="10" />
+    <item id="545" name="Forest bow" attack="65" range="5" type="3" weight="10" weapon_type="10" max_per_slot="10" />
+    <item id="546" name="Desert shirt" defense="6" type="4" weight="10" max_per_slot="10" />
+    <item id="547" name="Bardiche" attack="100" type="3" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="548" name="Halberd" attack="100" type="3" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="549" name="Axe" attack="100" type="2" weight="10" weapon_type="15" max_per_slot="10" />
+    <item id="550" name="Blacksmith's axe" attack="100" type="2" weight="10" weapon_type="15" max_per_slot="10" />
+    <item id="551" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="552" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="553" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="554" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="555" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="556" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="557" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="558" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="559" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="560" name="Hint" type="0" weight="10" max_per_slot="10" />
+    <item id="561" name="Sabre" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="562" name="Chicken leg" type="0" weight="10" max_per_slot="10" />
+    <item id="563" name="Winter gloves" type="0" weight="10" max_per_slot="10" />
+    <item id="564" name="Wool sweater" type="0" weight="10" max_per_slot="10" />
+    <item id="565" name="Petal" type="0" weight="10" max_per_slot="10" />
+    <item id="566" name="Small mushroom" type="0" weight="10" max_per_slot="10" />
+    <item id="567" name="Iron potion" strength="5" lifetime="60" type="1" weight="10" max_per_slot="10" />
+    <item id="568" name="Concentration potion" accuracy="20" lifetime="60" type="1" weight="10" max_per_slot="10" />
+    <item id="569" name="Raw log" type="0" weight="10" max_per_slot="10" />
+    <item id="570" name="Bone knife" attack="50" type="2" weight="10" weapon_type="1" max_per_slot="10" />
+    <item id="571" name="Setzer" attack="50" type="2" weight="10" weapon_type="1" max_per_slot="10" />
+    <item id="572" name="Scimitar" attack="50" type="2" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="573" name="Falcion" attack="50" type="2" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="574" name="Scorpion" attack="50" type="2" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="575" name="Desert bow" attack="50" type="2" weight="10" weapon_type="10" max_per_slot="10" />
+    <item id="576" name="Beheader" attack="50" type="2" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="577" name="Bone darts" attack="50" type="2" weight="16" max_per_slot="10" />
+    <item id="578" name="Sand cutter" attack="50 " type="2" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="579" name="Rock knife" attack="300" type="2" weight="10" weapon_type="1" max_per_slot="10" />
+    <item id="580" name="Staff of life" attack="50" element="5" magic="10" type="2" weight="10" weapon_type="6" max_per_slot="10" />
+    <item id="581" name="Crescent rod" attack="50" type="2" weight="10" weapon_type="5" max_per_slot="10" />
+    <item id="582" name="Staff of fire" element="1" attack="50" type="2" weight="10" weapon_type="6" max_per_slot="10" />
+    <item id="583" name="Staff of ice" element="2" attack="50" type="2" weight="10" max_per_slot="10" />
+    <item id="584" name="Jackal" attack="50" type="2" weight="10" max_per_slot="10" />
+    <item id="585" name="Scarab Armlet" defence="50" type="5" weight="10" max_per_slot="10" />
+    <item id="586" name="Cotton shorts" defense="2" type="7" weight="10" max_per_slot="10" />
+    <item id="587" name="Sword" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="588" name="Bastard Sword" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="589" name="Broad Sword" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="588" name="Baselard" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="591" name="Long Sword" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="592" name="Stiletto" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="593" name="Rapier" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="594" name="Spear" type="0" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="595" name="Heavy Spear" type="0" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="596" name="Pike" type="0" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="597" name="Heavy Pike" type="0" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="598" name="Dual Spear" type="0" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="599" name="Fire Sword" element="1" type="0" weight="10" weapon_type="2" max_per_slot="10" />
+    <item id="600" name="Brit Shield" effect="Cooking: -50" type="8" weight="10" max_per_slot="10" />
+    <item id="601" name="Steel Shield" type="8" weight="10" max_per_slot="10" />
+    <item id="602" name="Wooden Shield" type="8" weight="10" max_per_slot="10" />
+    <item id="603" name="Leather Shield" type="8" weight="10" max_per_slot="10" />
+    <item id="604" name="Knight Shield" type="8" weight="10" max_per_slot="10" />
+    <item id="605" name="Meat Cleaver" type="0" weight="10" max_per_slot="10" />
+    <item id="606" name="Hatchet" type="0" weight="10" max_per_slot="10" />
+    <item id="607" name="Trident" type="0" weight="10" weapon_type="3" max_per_slot="10" />
+    <item id="608" name="A shield made of blades" type="8" weight="10" max_per_slot="10" />
+    <item id="609" name="Club" type="0" weight="10" weapon_type="14" max_per_slot="10" />
+    <item id="610" name="Jeans shorts" defence="4" type="7" weight="10" max_per_slot="10" />
+    <item id="611" name="White fur" type="0" weight="10" max_per_slot="10" />
+    <item id="612" name="Cave snake lamp" type="0" weight="10" max_per_slot="10" />
+    <item id="613" name="Hard spike" type="0" weight="10" max_per_slot="10" />
+    <item id="614" name="Pink antennae" type="0" weight="10" max_per_slot="10" />
+    <item id="1199" name="Arrow" attack="25" type="0" weight="10" weapon_type="8" max_per_slot="10" />
+    <item id="1200" name="Bow" attack="15" range="5" type="3" weight="10" weapon_type="10" max_per_slot="10" />
+    <item id="1201" name="Knife" attack="5" range="1" type="2" weight="10" weapon_type="1" max_per_slot="10" />
+    <item id="1202" name="Cotton shirt" defence="2" type="7" weight="10" max_per_slot="10" />
 </items>

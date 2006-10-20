@@ -73,6 +73,7 @@ ItemManager::ItemManager(const std::string &itemReferenceFile)
                     unsigned short itemType = 0;
                     unsigned int weight = 0;
                     unsigned int value = 0;
+                    unsigned short maxPerSlot = 0;
                     std::string scriptName = "";
                     Modifiers modifiers;
 
@@ -86,6 +87,7 @@ ItemManager::ItemManager(const std::string &itemReferenceFile)
                     READ_PROP(node, prop, "type", itemType, atoi);
                     READ_PROP(node, prop, "weight", weight, atoi);
                     READ_PROP(node, prop, "value", value, atoi);
+                    READ_PROP(node, prop, "max_per_slot", maxPerSlot, atoi);
                     READ_PROP(node, prop, "script_name", scriptName, );
 
                     // --- Modifiers
@@ -124,6 +126,8 @@ ItemManager::ItemManager(const std::string &itemReferenceFile)
                     READ_PROP(node, prop, "mp", modifiers.mp, atoi);
                     // Equipment
                     READ_PROP(node, prop, "range", modifiers.range, atoi);
+                    READ_PROP(node, prop, "weapon_type", modifiers.weaponType,
+                      (WeaponType)atoi);
                     // Status effect
                     READ_PROP(node, prop, "status_effect",
                     modifiers.beingStateEffect, (BeingStateEffect)atoi);
@@ -142,6 +146,11 @@ ItemManager::ItemManager(const std::string &itemReferenceFile)
                         LOG_WARN("Item Manager: An (ignored) item has no ID in "
                         << itemReferenceFile << "!", 0);
                     }
+                    if (maxPerSlot == 0)
+                    {
+                        LOG_WARN("Item Manager: Missing max per slot properties for item: "
+                        << id << " in " << itemReferenceFile << ".", 0);
+                    }
                     if (weight == 0)
                     {
                         LOG_WARN("Item Manager: Missing weight for item: "
@@ -150,7 +159,7 @@ ItemManager::ItemManager(const std::string &itemReferenceFile)
 
                     LOG_INFO("Item: ID: " << id << ", itemType: " << itemType
                     << ", weight: " << weight << ", value: " << value <<
-                    ", scriptName: " << scriptName << ".", 3);
+                    ", scriptName: " << scriptName << ", maxPerSlot: " << maxPerSlot << ".", 3);
                     //TODO: Log level 5 with everything
                 }
 
