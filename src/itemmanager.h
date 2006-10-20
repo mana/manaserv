@@ -39,7 +39,7 @@ class ItemManager
         /**
          * Constructor (loads item reference file)
          */
-        ItemManager(std::string itemReferenceFile);
+        ItemManager(const std::string &itemReferenceFile);
 
         /**
          * Destructor
@@ -72,6 +72,12 @@ class ItemManager
          */
         unsigned int getGoldValue(const unsigned int itemId)
         { return mItemReference[itemId].get()->getGoldValue(); };
+
+        /**
+         * Return max item per slot
+         */
+        unsigned short getMaxPerSlot(const unsigned int itemId)
+        { return mItemReference[itemId].get()->getMaxPerSlot(); };
 
         /**
          * Return item's modifiers

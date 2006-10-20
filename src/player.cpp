@@ -44,56 +44,32 @@ void Player::update()
     setStat(STAT_SPEED, mRawStats.stats[STAT_DEXTERITY]);
 }
 
-void Player::setInventory(const std::vector<unsigned int> &inven)
+void Player::setInventory(const Inventory &inven)
 {
     inventory = inven;
 }
 
-bool Player::addInventory(unsigned int itemId)
+bool Player::addItem(unsigned int itemId, unsigned char amount)
 {
-    // If required weight could be tallied to see if player can pick up more.
-    inventory.push_back(itemId);
-    return true;
+    return inventory.addItem(itemId, amount);
 }
 
-bool Player::delInventory(unsigned int itemId)
+bool Player::removeItem(unsigned int itemId, unsigned char amount)
 {
-    for (std::vector<unsigned int>::iterator i = inventory.begin();
-         i != inventory.end(); i++) {
-        if (*i == itemId) {
-            inventory.erase(i);
-            return true;
-        }
-    }
-    return false;
+    return inventory.removeItem(itemId, amount);
 }
 
 bool Player::hasItem(unsigned int itemId)
 {
-    for (std::vector<unsigned int>::iterator i = inventory.begin();
-         i != inventory.end(); i++)
-    {
-        if (*i == itemId)
-            return true;
-    }
-    return false;
+    return inventory.hasItem(itemId);
 }
 
-bool Player::equip(unsigned int itemId, unsigned char slot)
+bool Player::equip(unsigned char slot)
 {
-    // currently this is too simplistic and doesn't check enough
-    // but until further functionality is implemented in the
-    // server it will suffice
-    if (slot < MAX_EQUIP_SLOTS) {
-        equipment[slot] = itemId;
-        return true;
-    } else
-        return false;
+    return true; // TODO
 }
 
 bool Player::unequip(unsigned char slot)
 {
-    // NOTE: 0 will be invalid item id (or we could use key/value pairs)
-    equipment[slot] = 0;
-    return true;
+    return true; // TODO
 }

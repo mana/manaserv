@@ -23,75 +23,154 @@
 
 #include "inventory.h"
 
-unsigned short
-getSlotIndex(const unsigned int itemId)
+Inventory::Inventory()
 {
-    return 0;
+    itemList.reserve(MAX_ITEMS_IN_INVENTORY);
+    itemList.reserve(TOTAL_EQUIPMENT_SLOTS);
+}
+
+unsigned char
+Inventory::getInventoryFreeSlot()
+{
+    for (int a = 0; a < MAX_ITEMS_IN_INVENTORY; a++)
+    {
+        if (itemList.at(a).amount == 0)
+            return a;
+    }
+    return INVENTORY_FULL;
+}
+
+unsigned char
+Inventory::getSlotFromId(const unsigned int itemId)
+{
+    for (int a = 0; a < MAX_ITEMS_IN_INVENTORY; a++)
+    {
+        if (itemList.at(a).itemId == itemId)
+            return a;
+    }
+    return INVENTORY_FULL;
 }
 
 bool
-addItem(unsigned int itemId, unsigned short amount)
+Inventory::hasItem(unsigned int itemId)
 {
+    for (int a = 0; a < MAX_ITEMS_IN_INVENTORY; a++)
+    {
+        if (itemList.at(a).itemId == itemId)
+            return true;
+    }
     return false;
 }
 
-bool
-removeItem(unsigned int itemId, unsigned short amount = 0)
+short
+Inventory::addItem(unsigned int itemId, unsigned char amount)
 {
-    return false;
+    // We get the max number of item we can have in the same slot
+    // for the given item.
+    unsigned char maxPerSlot = itemManager->getMaxPerSlot(itemId);
+    // We'll add items in slots with the item type and in free slots
+    // until it's all done or until the inventory will be all parsed.
+    // Searching for items with the same Id in the inventory, before
+    // seeking a free slot.
+    unsigned char amountToAdd = amount;
+
+    // Parsing inventory
+    unsigned char currentAmountInSlot = 0;
+    for (int a = 0; a < MAX_ITEMS_IN_INVENTORY; a++)
+    {
+        currentAmountInSlot = itemList.at(a).amount;
+        // If a slot a got place for some more of such an item.
+        if (itemList.at(a).itemId == itemId && currentAmountInSlot < maxPerSlot)
+        {
+            // If there isn't enough space to put every item in the slot.
+            // We add the difference.
+            if ((maxPerSlot - currentAmountInSlot) < amountToAdd)
+            {
+                itemList.at(a).amount += (maxPerSlot - currentAmountInSlot);
+                amountToAdd -= (maxPerSlot - currentAmountInSlot);
+            }
+            else // there is enough to add everything.
+            {
+                itemList.at(a).amount += amountToAdd;
+                amountToAdd = 0; // Ok!
+            }
+        }
+        // Or if there is an empty slot.
+        else if (itemList.at(a).amount == 0)
+        {
+            // We add the item in the new slot (setting also the Id.)
+            if (maxPerSlot < amountToAdd)
+            {
+                itemList.at(a).amount = maxPerSlot;
+                amountToAdd -= maxPerSlot;
+            }
+            else
+            {
+                itemList.at(a).amount += amountToAdd;
+                amountToAdd = 0; // Ok!
+            }
+            itemList.at(a).itemId = itemId;
+        }
+    }
+
+    return (short)amount - amountToAdd;
+}
+
+short
+Inventory::removeItem(unsigned int itemId, unsigned char amount)
+{
+    return false; // TODO
+}
+
+short
+Inventory::removeItem(unsigned char slot, unsigned char amount)
+{
+    if (itemList.at(slot).amount < amount)
+    {
+        unsigned char value = itemList.at(slot).amount;
+        itemList.at(slot).amount = 0;
+        return (short)value;
+    }
+    else
+    {
+        itemList.at(slot).amount -= amount;
+        return amount;
+    }
 }
 
 bool
-removeItem(unsigned short index, unsigned short amount = 0)
+Inventory::equipItem(unsigned int itemId)
 {
-    return false;
+    return false; // TODO
 }
 
 bool
-equipItem(unsigned int itemId)
+Inventory::unequipItem(unsigned int itemId)
 {
-    return false;
+    return false; // TODO
 }
 
 bool
-unequipItem(unsigned int itemId)
+Inventory::equipItem(unsigned char slot)
 {
-    return false;
+    return false; // TODO
 }
 
 bool
-equipItem(unsigned short index)
+Inventory::unequipItem(unsigned char slot)
 {
-    return false;
-}
-
-bool
-unequipItem(unsigned short index)
-{
-    return false;
+    return false; // TODO
 }
 
 
 bool
-use(unsigned short index, BeingPtr itemUser)
+Inventory::use(unsigned char slot, BeingPtr itemUser)
 {
-    return false;
+    return false; // TODO
 }
 
 bool
-use(unsigned int itemId, BeingPtr itemUser)
+Inventory::use(unsigned int itemId, BeingPtr itemUser)
 {
-    return false;
-}
-
-bool
-useWithScript(unsigned short index, const std::string scriptFile)
-{
-    return false;
-}
-
-bool
-useWithScript(unsigned int itemId, const std::string scriptFile)
-{
-    return false;
+    return false; // TODO
 }

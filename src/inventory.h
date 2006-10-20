@@ -24,91 +24,124 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include "item.h"
+#include "itemmanager.h"
+
+// items in inventory :
+const unsigned char MAX_ITEMS_IN_INVENTORY = 50, // Max 254.
+// Equipment rules:
+// 1 Brest equipment
+// 1 arms equipment
+// 1 head equipment
+// 1 legs equipment
+// 1 feet equipment
+// 2 rings
+// 1 necklace
+// Fight:
+// 2 one-handed weapons
+// or 1 two-handed weapon
+// or 1 one-handed weapon + 1 shield.
+// = 10 total slots for equipment.
+                    TOTAL_EQUIPMENT_SLOTS = 10,
+                    INVENTORY_FULL = 255;
 
 /**
  * Stored Item only contains id reference to items
  * in the order not to carry every item info for each carried items
  * in the inventory.
- * Also contains amount, and if equipped.
+ * Also contains amount.
  */
 struct StoredItem
 {
     unsigned int itemId;
-    unsigned short amount;
-    bool equipped;
+    unsigned char amount;
+};
+
+/**
+ * Equipped items that keeps which kind of item is in equipment.
+ */
+struct EquippedItem
+{
+    unsigned int itemId;
+    short itemType;
 };
 
 /**
  * Class used to store minimal info on player's inventories
  * to keep it fast.
- * See Item and ItemReference to get more info on an item.
+ * See Item and ItemManager to get more info on an item.
  */
 class Inventory
 {
     public:
         /**
-         * ctor.
+         * ctor. Add slot spaces to MAX_ITEMS_IN_INVENTORY.
          */
-        Inventory() {}
+        Inventory();
 
         /**
-         * Convenience function to get index from ItemId.
+         * Convenience function to get slot from ItemId.
          * If more than one occurence is found, the first is given.
          */
-        unsigned short
-        getSlotIndex(const unsigned int itemId);
+        unsigned char
+        getSlotFromId(const unsigned int itemId);
 
         /**
          * Return StoredItem
          */
         StoredItem
-        getStoredItemAt(unsigned short index) const { return itemList.at(index); };
+        getStoredItemAt(unsigned char slot) const { return itemList.at(slot); };
 
         /**
          * Return Item reference from ItemReference
          */
         //ItemPtr getItem(unsigned short index) const
-        //{ return itemReferencegetItem(itemList.at(index).itemId); };
+        //{ return itemReference.getItem(itemList.at(index).itemId); };
 
         /**
-         * Tells if an item is equipped
+         * Search in inventory only if an item is present.
+         * Don't tell if an item is equipped.
          */
         bool
-        isEquipped(unsigned short index) const { return itemList.at(index).equipped; };
+        hasItem(unsigned int itemId);
 
         /**
          * Tells an item's amount
          */
         unsigned short
-        getItemAmount(unsigned short index) const { return itemList.at(index).amount; };
+        getItemAmount(unsigned char slot) const { return itemList.at(slot).amount; };
 
         /**
          * Return Item reference Id
          */
         unsigned int
-        getItemId(unsigned short index) const { return itemList.at(index).itemId; };
+        getItemId(unsigned char slot) const { return itemList.at(slot).itemId; };
 
         /**
          * add an item with amount 
-         * (creates it non-equipped if amount was 0)
+         * (don't create it if amount was 0)
+         * @return short value: Indicates the number of items added.
          */
-        bool
-        addItem(unsigned int itemId, unsigned short amount);
+        short
+        addItem(unsigned int itemId, unsigned char amount = 1);
 
         /**
          * Remove an item searched by ItemId.
          * Delete if amount = 0.
+         * @return short value: Indicates the number of items removed.
+         * This function removes the given amount using every slots
+         * if necessary.
          */
-        bool
-        removeItem(unsigned int itemId, unsigned short amount = 0);
+        short
+        removeItem(unsigned int itemId, unsigned char amount = 0);
 
         /**
          * Remove an item searched by slot index.
          * Delete if amount = 0.
+         * @return short value: Indicates the number of items removed.
+         * Removes only in the given slot.
          */
-        bool
-        removeItem(unsigned short index, unsigned short amount = 0);
+        short
+        removeItem(unsigned char slot, unsigned char amount = 0);
 
         /**
          * Equip an item searched by its id.
@@ -126,20 +159,20 @@ class Inventory
          * Equip an item searched by its slot index.
          */
         bool
-        equipItem(unsigned short index);
+        equipItem(unsigned char slot);
 
         /**
          * Unequip an item searched by its slot index.
          */
         bool
-        unequipItem(unsigned short index);
+        unequipItem(unsigned char slot);
 
         /**
          * The function called to use an item applying
          * only the modifiers (for simple items...)
          */
         bool
-        use(unsigned short index, BeingPtr itemUser);
+        use(unsigned char slot, BeingPtr itemUser);
 
         /**
          * The function called to use an item applying
@@ -148,23 +181,21 @@ class Inventory
         bool
         use(unsigned int itemId, BeingPtr itemUser);
 
-        /**
-         * The function called to use an item
-         * using a script (for complex actions)
-         */
-        bool
-        useWithScript(unsigned short index, const std::string scriptFile);
-
-        /**
-         * The function called to use an item
-         * using a script (for complex actions)
-         */
-        bool
-        useWithScript(unsigned int itemId, const std::string scriptFile);
-
     private:
-        //Item type
-        std::vector<StoredItem> itemList;
+
+        /**
+         * Give the first free slot number in itemList.
+         */
+        unsigned char getInventoryFreeSlot();
+
+        // Stored items in inventory and equipment
+        std::vector<StoredItem> itemList; /**< Items in inventory */
+        std::vector<EquippedItem> equippedItemList; /**< Equipped Items */
+        /**
+         * Used to know which type of arrow is used with a bow,
+         * for instance
+         */
+        StoredItem equippedProjectiles;
 };
 
 /**

@@ -136,7 +136,7 @@ ItemManager::ItemManager(const std::string &itemReferenceFile)
                     if (id != 0)
                     {
                         ItemPtr item(new Item(modifiers, itemType, weight,
-                                            value, scriptName));
+                                            value, scriptName, maxPerSlot));
                         mItemReference[id] = item;
                         nbItems++;
                     }
@@ -160,7 +160,32 @@ ItemManager::ItemManager(const std::string &itemReferenceFile)
                     LOG_INFO("Item: ID: " << id << ", itemType: " << itemType
                     << ", weight: " << weight << ", value: " << value <<
                     ", scriptName: " << scriptName << ", maxPerSlot: " << maxPerSlot << ".", 3);
-                    //TODO: Log level 5 with everything
+                    // Log level 5
+                    LOG_INFO("Modifiers:: element: " <<  modifiers.element <<
+                    ", lifetime: " << modifiers.lifetime
+                    << std::endl <<
+                    ", strength: " << modifiers.rawStats[STAT_STRENGTH] <<
+                    ", agility: " << modifiers.rawStats[STAT_AGILITY] <<
+                    ", vitality: " << modifiers.rawStats[STAT_VITALITY]
+                    << std::endl <<
+                    ", intelligence: " << modifiers.rawStats[STAT_INTELLIGENCE] <<
+                    ", dexterity: " << modifiers.rawStats[STAT_DEXTERITY] <<
+                    ", luck: " << modifiers.rawStats[STAT_LUCK]
+                    << std::endl <<
+                    ", heat: " << modifiers.computedStats[STAT_HEAT] <<
+                    ",attack: " << modifiers.computedStats[STAT_ATTACK] <<
+                    ", defence: " << modifiers.computedStats[STAT_DEFENCE]
+                    << std::endl <<
+                    ", magic: " << modifiers.computedStats[STAT_MAGIC] <<
+                    ", accuracy: " << modifiers.computedStats[STAT_ACCURACY] <<
+                    ", speed: " << modifiers.computedStats[STAT_SPEED] <<
+                    std::endl <<
+                    ", hp: " << modifiers.hp <<
+                    ", mp: " << modifiers.mp <<
+                    std::endl <<
+                    ", range: " << modifiers.range <<
+                    ", weapon_type: " << modifiers.weaponType <<
+                    ", status_effect: " << modifiers.beingStateEffect, 5);
                 }
 
                 LOG_INFO("Loaded " << nbItems << " items from "

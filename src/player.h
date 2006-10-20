@@ -27,11 +27,10 @@
 #include <vector>
 
 #include "being.h"
+#include "inventory.h"
+
 #include "defines.h"
 #include "utils/countedptr.h"
-
-/** Maximum number of equipped slots */
-const unsigned int MAX_EQUIP_SLOTS = 5;
 
 class GameClient;
 
@@ -161,7 +160,7 @@ class Player : public Being
          * Sets inventory.
          */
         void
-        setInventory(const std::vector<unsigned int> &inven);
+        setInventory(const Inventory &inven);
 
         /**
          * Adds item with ID to inventory.
@@ -169,7 +168,7 @@ class Player : public Being
          * @return Item add success/failure
          */
         bool
-        addInventory(unsigned int itemId);
+        addItem(unsigned int itemId, unsigned char amount = 1);
 
         /**
          * Removes item with ID from inventory.
@@ -177,7 +176,7 @@ class Player : public Being
          * @return Item delete success/failure
          */
         bool
-        delInventory(unsigned int itemId);
+        removeItem(unsigned int itemId, unsigned char amount = 0);
 
         /**
          * Checks if character has an item.
@@ -193,7 +192,7 @@ class Player : public Being
          * @return Equip success/failure
          */
         bool
-        equip(unsigned int itemId, unsigned char slot);
+        equip(unsigned char slot);
 
         /**
          * Un-equips item.
@@ -237,10 +236,7 @@ class Player : public Being
         unsigned int mMoney;      /**< wealth of the being */
         RawStatistics mRawStats;  /**< raw stats of the being */
 
-        std::vector<unsigned int> inventory;    /**< Player inventory */
-
-        /** Equipped item ID's (from inventory) */
-        unsigned int equipment[MAX_EQUIP_SLOTS];
+        Inventory inventory;    /**< Player inventory and Equipment */
 
         friend class GameClient;
 };

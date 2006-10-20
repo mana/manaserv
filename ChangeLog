@@ -1,8 +1,13 @@
-2006-10-19  Yohann Ferreira  <bertram@cegetel.net>
+2006-10-20  Yohann Ferreira  <bertram@cegetel.net>
 
 	* data/items.xsd, data/items.xml, src/item.h, src/itemmanager.cpp,
 	src/main.cpp: Simplified item reference a bit and filled the reference
 	items.xml file.
+	* data/items.xml, data/items.xsd, src/item.h, src/itemmanager.cpp:
+	Added the missing Weapon Type and Max Per Slot item properties.
+	* src/inventory.h, src/inventory.cpp, src/itemmanager.h,
+	src/itemmanager.cpp, src/player.h, src/player.cpp,
+	src/gamehandler.cpp: Adding inventory handling (basics) Part 1.
 
 2006-10-19  Yohann Ferreira  <bertram@cegetel.net>
 
