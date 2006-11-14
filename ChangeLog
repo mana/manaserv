@@ -1,5 +1,10 @@
 2006-10-20  Yohann Ferreira  <bertram@cegetel.net>
 
+	* src/item.h, src/player.cpp, src/inventory.h, src/inventory.cpp:
+	Adding inventory handling basics Part 2.
+
+2006-10-20  Yohann Ferreira  <bertram@cegetel.net>
+
 	* data/items.xsd, data/items.xml, src/item.h, src/itemmanager.cpp,
 	src/main.cpp: Simplified item reference a bit and filled the reference
 	items.xml file.

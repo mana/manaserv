@@ -66,10 +66,10 @@ bool Player::hasItem(unsigned int itemId)
 
 bool Player::equip(unsigned char slot)
 {
-    return true; // TODO
+    return false; // TODO
 }
 
 bool Player::unequip(unsigned char slot)
 {
-    return true; // TODO
+    return false; // TODO
 }

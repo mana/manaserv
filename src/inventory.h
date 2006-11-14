@@ -27,21 +27,36 @@
 #include "itemmanager.h"
 
 // items in inventory :
-const unsigned char MAX_ITEMS_IN_INVENTORY = 50, // Max 254.
+const unsigned char MAX_ITEMS_IN_INVENTORY = 50, // Max 252.
 // Equipment rules:
 // 1 Brest equipment
+                    EQUIP_BREST_SLOT = 0,
 // 1 arms equipment
+                    EQUIP_ARMS_SLOT = 1,
 // 1 head equipment
+                    EQUIP_HEAD_SLOT = 2,
 // 1 legs equipment
+                    EQUIP_LEGS_SLOT = 3,
 // 1 feet equipment
+                    EQUIP_FEET_SLOT = 4,
 // 2 rings
+                    EQUIP_RING1_SLOT = 5,
+                    EQUIP_RING2_SLOT = 6,
 // 1 necklace
+                    EQUIP_NECKLACE_SLOT = 7,
 // Fight:
 // 2 one-handed weapons
+                    EQUIP_FIGHT1_SLOT = 8,
+                    EQUIP_FIGHT2_SLOT = 9,
 // or 1 two-handed weapon
 // or 1 one-handed weapon + 1 shield.
+//  Projectiles
+                    EQUIP_PROJECTILES_SLOT = 10,
 // = 10 total slots for equipment.
-                    TOTAL_EQUIPMENT_SLOTS = 10,
+                    TOTAL_EQUIPMENT_SLOTS = 11,
+// Error codes
+                    NOT_EQUIPPABLE = 253,
+                    NO_ITEM_TO_EQUIP = 254,
                     INVENTORY_FULL = 255;
 
 /**
@@ -92,17 +107,12 @@ class Inventory
         getStoredItemAt(unsigned char slot) const { return itemList.at(slot); };
 
         /**
-         * Return Item reference from ItemReference
-         */
-        //ItemPtr getItem(unsigned short index) const
-        //{ return itemReference.getItem(itemList.at(index).itemId); };
-
-        /**
-         * Search in inventory only if an item is present.
-         * Don't tell if an item is equipped.
+         * Search in inventory and equipment if an item is present.
          */
         bool
-        hasItem(unsigned int itemId);
+        hasItem(unsigned int itemId,
+                bool searchInInventory = true,
+                bool searchInEquipment = true);
 
         /**
          * Tells an item's amount
@@ -145,12 +155,16 @@ class Inventory
 
         /**
          * Equip an item searched by its id.
+         * Can equip more than one item at a time.
+         * @return unsigned char value: Returns the slot if successful
+         * or the error code if not.
          */
-        bool
+        unsigned char
         equipItem(unsigned int itemId);
 
         /**
          * Unequip an item searched by its id.
+         * Can unequip more than one item at a time.
          */
         bool
         unequipItem(unsigned int itemId);
@@ -159,24 +173,24 @@ class Inventory
          * Equip an item searched by its slot index.
          */
         bool
-        equipItem(unsigned char slot);
+        equipItem(unsigned char inventorySlot, unsigned char equipmentSlot);
 
         /**
-         * Unequip an item searched by its slot index.
+         * Unequip an equipped item searched by its slot index.
          */
         bool
-        unequipItem(unsigned char slot);
+        unequipItem(unsigned char inventorySlot, unsigned char equipmentSlot);
 
         /**
          * The function called to use an item applying
-         * only the modifiers (for simple items...)
+         * only the modifiers
          */
         bool
         use(unsigned char slot, BeingPtr itemUser);
 
         /**
          * The function called to use an item applying
-         * only the modifiers (for simple items...)
+         * only the modifiers
          */
         bool
         use(unsigned int itemId, BeingPtr itemUser);
@@ -187,6 +201,26 @@ class Inventory
          * Give the first free slot number in itemList.
          */
         unsigned char getInventoryFreeSlot();
+
+        /**
+         * Quick equip an equipment with a given equipSlot,
+         * an itemId and an itemType.
+         * @return the equipment slot if successful,
+         * the error code, if not.
+         */
+        unsigned char equipItem_(unsigned int itemId,
+                                 unsigned int itemType,
+                                 unsigned char equipmentSlot);
+
+        /**
+         * Quick unequip an equipment with a given equipSlot,
+         * and an itemId.
+         * @return the Equipment slot if successful,
+         * the error code, if not.
+         */
+        unsigned char unequipItem_(unsigned int itemId,
+                                 unsigned char equipmentSlot);
+
 
         // Stored items in inventory and equipment
         std::vector<StoredItem> itemList; /**< Items in inventory */
