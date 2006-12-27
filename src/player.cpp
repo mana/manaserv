@@ -22,6 +22,8 @@
 
 #include "player.h"
 
+#include "defines.h"
+
 #include <cassert>
 
 void Player::setDatabaseID(int id)
@@ -42,6 +44,20 @@ void Player::update()
     setStat(STAT_MAGIC, 10 + mRawStats.stats[STAT_INTELLIGENCE]);
     setStat(STAT_ACCURACY, 50 + mRawStats.stats[STAT_DEXTERITY]);
     setStat(STAT_SPEED, mRawStats.stats[STAT_DEXTERITY]);
+
+    // attacking
+    if (mIsAttacking)
+    {
+        // plausibility check of attack command
+        if (mActionTime <= 0)
+        {
+            // perform attack
+            mActionTime = 1000;
+            mIsAttacking = false;
+            raiseUpdateFlags (ATTACK);
+            //TODO: attack mechanics
+        }
+    }
 }
 
 void Player::setInventory(const Inventory &inven)

@@ -88,8 +88,32 @@ State::update()
 
             for (MovingObjectIterator o(map->getAroundPlayerIterator(*p)); o; ++o)
             {
+
                 Point os = (*o)->getOldPosition();
                 Point on = (*o)->getPosition();
+
+                int flags = 0;
+
+                // Handle attacking
+                if (    (*o)->getUpdateFlags() & ATTACK
+                    &&  (*o)->getPublicID() != (*p)->getPublicID()
+                    &&  (*p)->getPosition().inRangeOf(on)
+                    )
+                {
+                    MessageOut AttackMsg (GPMSG_BEING_ATTACK);
+                    AttackMsg.writeShort((*o)->getPublicID());
+
+                    LOG_DEBUG(  "Sending attack packet from " <<
+                                (*o)->getPublicID() <<
+                                " to " <<
+                                (*p)->getPublicID(),
+                                0
+                            );
+
+                    gameHandler->sendTo(*p, AttackMsg);
+                }
+
+                // Handle moving
 
                 /* Check whether this player and this moving object were around
                  * the last time and whether they will be around the next time.
@@ -97,9 +121,6 @@ State::update()
                 bool wereInRange = (*p)->getOldPosition().inRangeOf(os) &&
                     !(((*p)->getUpdateFlags() | (*o)->getUpdateFlags()) & NEW_ON_MAP);
                 bool willBeInRange = (*p)->getPosition().inRangeOf(on);
-
-                int flags = 0;
-
                 if (!wereInRange)
                 {
                     // o was outside p's range.

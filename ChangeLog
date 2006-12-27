@@ -1,3 +1,9 @@
+2006-12-27  Philipp Sehmisch <tmw@crushnet.org>
+
+    * src/defines.h, src/gamehandler.cpp, src/object.h, src/player.cpp,
+    src/player.h src/state.cpp:
+    Clients are now notified when other clients near them perform attacks.
+
 2006-10-20  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/item.h, src/player.cpp, src/inventory.h, src/inventory.cpp:
@@ -23,7 +29,7 @@
 
 2006-10-03  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
-	* src/itemhandler.h, tmwserv.cbp, tmwserv.dev: Updated project files 
+	* src/itemhandler.h, tmwserv.cbp, tmwserv.dev: Updated project files
 	and fixed a compilation issue.
 
 2006-10-03  Yohann Ferreira  <bertram@cegetel.net>

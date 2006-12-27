@@ -219,6 +219,15 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                                  ERRMSG_OK : ERRMSG_FAILURE);
             } break;
 
+        case PGMSG_ATTACK:
+            {
+                LOG_DEBUG ( "Player " <<
+                            computer.getCharacter()->getPublicID() <<
+                            " attacks",
+                            0);
+                computer.getCharacter()->setAttacking(true);
+            } break;
+
         default:
             LOG_WARN("Invalid message type", 0);
             result.writeShort(XXMSG_INVALID);

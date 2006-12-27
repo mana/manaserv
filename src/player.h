@@ -42,6 +42,7 @@ class Player : public Being
           : Being(OBJECT_PLAYER, 65535),
             mDatabaseID(id),
             mName(name),
+            mIsAttacking(false),
             mClient(NULL)
         {}
 
@@ -203,6 +204,12 @@ class Player : public Being
         unequip(unsigned char slot);
 
         /**
+         * Set attacking state
+         **/
+        void setAttacking(bool isAttacking)
+        { mIsAttacking = isAttacking; }
+
+        /**
          * Gets database ID.
          *
          * @return the database ID, a negative number if none yet.
@@ -237,6 +244,8 @@ class Player : public Being
         RawStatistics mRawStats;  /**< raw stats of the being */
 
         Inventory inventory;    /**< Player inventory and Equipment */
+
+        bool mIsAttacking; /**< attacking state */
 
         friend class GameClient;
 };

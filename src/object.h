@@ -33,7 +33,8 @@
 enum
 {
     NEW_ON_MAP = 1,
-    NEW_DESTINATION = 2
+    NEW_DESTINATION = 2,
+    ATTACK = 4
 };
 
 /**
@@ -183,12 +184,14 @@ class MovingObject: public Object
         void setPublicID(int id)
         { mPublicID = id; }
 
+    protected:
+        unsigned short mActionTime; /**< delay until next action */
+
     private:
         unsigned short mPublicID; /**< Object ID sent to clients (unique with respect to the map) */
         Point mDst; /**< target coordinates */
         Point mOld; /**< old coordinates */
         unsigned short mSpeed; /**< speed */
-        unsigned short mActionTime; /**< delay until next action */
 };
 
 /**
