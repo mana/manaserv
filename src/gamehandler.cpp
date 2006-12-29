@@ -225,6 +225,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                             computer.getCharacter()->getPublicID() <<
                             " attacks",
                             0);
+                computer.getCharacter()->setDirection(message.readByte());
                 computer.getCharacter()->setAttacking(true);
             } break;
 

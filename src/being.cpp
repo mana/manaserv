@@ -30,4 +30,22 @@ void Being::update()
 {
     if (mController)
         mController->update();
+
+    mHitsTaken.clear();
+}
+
+void Being::damage(Damage damage)
+{
+    int HPloss;
+
+    HPloss = damage; // TODO: Implement complex damage calculation here
+
+    mHitpoints -= HPloss;
+    mHitsTaken.push_back(HPloss);
+    LOG_DEBUG("Being " << getPublicID() << " got hit", 0);
+}
+
+void Being::performAttack(MapComposite* map)
+{
+    //Monster attack
 }

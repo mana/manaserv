@@ -27,6 +27,8 @@
 #include "object.h"
 #include "player.h"
 
+#include <list>
+
 class Map;
 class MapComposite;
 
@@ -179,6 +181,11 @@ class MapComposite {
          * Gets an iterator on the objects around a given object.
          */
         ZoneIterator getAroundObjectIterator(Object *) const;
+
+        /**
+         * Gets all objects on a tile
+         */
+        std::list<ObjectPtr>  MapComposite::getObjectsOnTile(const Point &) const;
 
         /**
          * Gets an iterator on the objects around the old and new positions of

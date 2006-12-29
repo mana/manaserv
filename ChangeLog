@@ -1,3 +1,10 @@
+2006-12-29  Philipp Sehmisch  <tmw@crushnet.org>
+
+    src/being.cpp, src/being.h, src/defines.h, src/gamehandler.cpp,
+    src/mapcomposite.cpp, src/mapcomposite.h, src/object.h, src/player.cpp,
+    src/player.h, src/state.cpp:
+    Implemented basic attack hit detection and damage notification.
+
 2006-12-27  Philipp Sehmisch <tmw@crushnet.org>
 
     * src/defines.h, src/gamehandler.cpp, src/object.h, src/player.cpp,

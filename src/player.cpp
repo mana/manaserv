@@ -23,6 +23,7 @@
 #include "player.h"
 
 #include "defines.h"
+#include "mapcomposite.h"
 
 #include <cassert>
 
@@ -51,14 +52,91 @@ void Player::update()
         // plausibility check of attack command
         if (mActionTime <= 0)
         {
-            // perform attack
+            // request perform attack
             mActionTime = 1000;
             mIsAttacking = false;
             raiseUpdateFlags (ATTACK);
-            //TODO: attack mechanics
         }
     }
+
+    Being::update();
 }
+
+void Player::performAttack (MapComposite* map)
+{
+    std::list<ObjectPtr> victimList;
+    std::list<Point> attackZone;
+
+
+    Point attackPoint = getPosition();
+
+    unsigned char direction= getDirection();
+    if (direction & UP)
+    {
+        attackPoint.y -= 32;
+        attackPoint.x -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+    }
+    else if (direction & RIGHT)
+    {
+        attackPoint.x += 32;
+        attackPoint.y -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+    }
+    else if (direction & DOWN)
+    {
+        attackPoint.y += 32;
+        attackPoint.x -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+    }
+    else {
+        attackPoint.x -= 32;
+        attackPoint.y -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+    }
+
+    attackZone.push_back(attackPoint);  //point player is facing
+
+    //get enemies to hurt
+    for (std::list<Point>::iterator i = attackZone.begin(); i != attackZone.end(); ++i)
+    {
+        std::list<ObjectPtr> newVictimList = map->getObjectsOnTile((*i));
+        victimList.splice(victimList.end(), newVictimList);
+    }
+
+    // apply damage to victims
+    Damage damage;
+
+    /* TODO:    calculate real attack power and damage properties based on
+     *          character equipment and stats
+     */
+    damage = 1;
+
+    for (std::list<ObjectPtr>::iterator i = victimList.begin(); i != victimList.end(); ++i)
+    {
+        if ((*i)->getType() == OBJECT_PLAYER || (*i)->getType() == OBJECT_MONSTER)
+        {
+            static_cast<Being*>(&**i)->damage(damage);
+        }
+    }
+
+};
 
 void Player::setInventory(const Inventory &inven)
 {

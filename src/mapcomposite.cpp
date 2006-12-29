@@ -397,6 +397,32 @@ ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj) const
     return ZoneIterator(r2, this);
 }
 
+std::list<ObjectPtr>  MapComposite::getObjectsOnTile(const Point &tile) const
+{
+    std::list<ObjectPtr> objectList;
+
+    Objects::const_iterator i;
+
+    // convert pixel coordinates to tile coordinates
+    int tX = (int)((tile.x) / 32);
+    int tY = (int)((tile.y) / 32);
+
+    for (i = objects.begin(); i != objects.end(); ++i)
+    {
+        // convert object coordinates to tile coordinates
+        Point objectPoint = (*i)->getPosition();
+        int oX = (int)((objectPoint.x) / 32);
+        int oY = (int)((objectPoint.y) / 32);
+
+        if (oX == tX && oY == tY)
+        {
+            objectList.push_back (*i);
+        }
+    }
+
+    return objectList;
+}
+
 bool MapComposite::insert(ObjectPtr obj)
 {
     Point const &pos = obj->getPosition();

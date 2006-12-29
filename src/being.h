@@ -23,6 +23,7 @@
 #ifndef _TMWSERV_BEING_H_
 #define _TMWSERV_BEING_H_
 
+#include <list>
 #include <string>
 #include <vector>
 
@@ -121,6 +122,7 @@ struct RawStatistics
     unsigned short stats[NB_RSTAT];
 };
 
+
 /**
  * Computed statistics of a Being.
  */
@@ -141,6 +143,16 @@ struct Statistics
 {
     unsigned short stats[NB_CSTAT];
 };
+
+/**
+ * Placeholder for a more complex damage structure
+ */
+typedef unsigned short Damage;
+
+/**
+ * Type definition for a list of hits
+ */
+typedef std::list<unsigned int> Hits;
 
 /**
  * Generic Being (living object).
@@ -175,10 +187,27 @@ class Being : public MovingObject
         { return mStats.stats[numStat]; }
 
         /**
+         * Takes a damage structure, computes the real damage based on the
+         * stats, deducts the result from the hitpoints and adds the result to
+         * the HitsTaken list
+         */
+        virtual void damage(Damage);
+
+        /**
+         * Get the damage list
+         */
+        Hits getHitsTaken() const
+        { return mHitsTaken; }
+
+        /**
+         * Clears the hit list.
          * When a controller is set, updates the controller.
          */
-        void
+        virtual void
         update();
+
+        virtual void
+        performAttack(MapComposite*);
 
         /**
          * Notification that this being is now possessed by the given
@@ -195,6 +224,10 @@ class Being : public MovingObject
 
         Statistics mStats; /**< stats modifiers or computed stats */
         Controller *mController;
+
+        int mHitpoints; /**< Hitpoints of the being */
+
+        Hits mHitsTaken; /**< List of punches taken since last update */
 };
 
 /**

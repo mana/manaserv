@@ -30,12 +30,15 @@
 #include "point.h"
 #include "utils/countedptr.h"
 
+class MapComposite;
+
 enum
 {
     NEW_ON_MAP = 1,
     NEW_DESTINATION = 2,
     ATTACK = 4
 };
+
 
 /**
  * Generic in-game object definition.
@@ -133,10 +136,20 @@ class MovingObject: public Object
 {
     public:
         /**
+         * Directions, to be used as bitmask values
+         */
+        static const char DOWN = 1;
+        static const char LEFT = 2;
+        static const char UP = 4;
+        static const char RIGHT = 8;
+
+        /**
          * Proxy constructor.
          */
         MovingObject(int type, int id)
-          : Object(type), mPublicID(id),
+          : Object(type),
+            mDirection(DOWN),
+            mPublicID(id),
             mActionTime(0)
         {}
 
@@ -159,6 +172,19 @@ class MovingObject: public Object
         { return mOld; }
 
         /**
+         * Sete object direction
+         */
+        void setDirection(unsigned char direction)
+        { mDirection = direction; }
+
+        /**
+         * Gets object direction
+         */
+
+        unsigned char getDirection() const
+        { return mDirection; }
+
+        /**
          * Sets object speed.
          */
         void setSpeed(unsigned s)
@@ -168,6 +194,11 @@ class MovingObject: public Object
          * Moves the object toward its destination.
          */
         void move();
+
+        /**
+         * Performs an attack
+         */
+        virtual void performAttack (MapComposite* map) = 0;
 
         /**
          * Get public ID.
@@ -186,6 +217,7 @@ class MovingObject: public Object
 
     protected:
         unsigned short mActionTime; /**< delay until next action */
+        unsigned char mDirection;   /**< Facing direction */
 
     private:
         unsigned short mPublicID; /**< Object ID sent to clients (unique with respect to the map) */

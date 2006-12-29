@@ -158,6 +158,11 @@ class Player : public Being
         void update();
 
         /**
+         * Performs an attack
+         */
+        virtual void performAttack (MapComposite* map);
+
+        /**
          * Sets inventory.
          */
         void
