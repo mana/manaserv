@@ -4,17 +4,31 @@ Setting up a TMW server
 The compilation should produce two binaries: tmwserv-account and
 tmwserv-game.
 
-Run tmwserv-account on one single computer. It will open three
+1. Run tmwserv-account on one single computer. It will open three
 consecutive UDP ports, starting from the one given by the configuration
-option "accountServerPort" (default value: 9601). This first port is the
-one you should give to your users.
+option "accountServerPort". This first port is the one you should
+advertise to your users. The configuration option "accountServerAddress"
+should contain the public address the server runs on, as it will be sent
+to the users as the address of the chat server, which happens to be the
+account server for now.
 
-Run tmwserv-game on multiple computers. Each game server will open one
-UDP port given by the configuration option "gameServerPort" (default
-value: 9604). It will also connect to the account server given by the
-configuration options "accountServerAddress" (default value: localhost)
-and "accountServerPort". The configuration option "gameServerAddress"
-should contain the public address of the computer the server runs on, as
-it will be sent to the users. The file data/maps.xml contains the maps
-the server will load and register on the account server; split it
-across your multiple game servers, in order to balance the load.
+2. Run tmwserv-game on multiple computers. Each game server will open
+one UDP port given by the configuration option "gameServerPort". It will
+also connect to the account server given by the configuration options
+"accountServerAddress" and "accountServerPort". The configuration option
+"gameServerAddress" should contain the public address of the computer
+the server runs on, as it will be sent to the users. The file
+data/maps.xml contains the maps the server will load and register on the
+account server; split it across your multiple game servers, in order to
+balance the load.
+
+Access to port "accountServerPort + 1" of the account server can be
+restricted to connections from game servers only. Users do not need to
+access it.
+
+Default option values:
+
+	accountServerAddress		localhost
+	accountServerPort		9601
+	gameServerAddress		localhost
+	gameServerPort			9604
