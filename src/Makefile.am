@@ -70,8 +70,6 @@ tmwserv_account_SOURCES = \
 	utils/countedptr.h \
 	utils/functors.h \
 	utils/singleton.h \
-	utils/cipher.h \
-	utils/cipher.cpp \
 	utils/logger.h \
 	utils/logger.cpp \
 	utils/stringfilter.h \
@@ -137,8 +135,6 @@ tmwserv_game_SOURCES = \
 	utils/countedptr.h \
 	utils/functors.h \
 	utils/singleton.h \
-	utils/cipher.h \
-	utils/cipher.cpp \
 	utils/logger.h \
 	utils/logger.cpp \
 	utils/stringfilter.h \

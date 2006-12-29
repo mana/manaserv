@@ -28,7 +28,6 @@
 #include "account-server/dalstoragesql.hpp"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
-#include "utils/cipher.h"
 #include "utils/functors.h"
 #include "utils/logger.h"
 
