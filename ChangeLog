@@ -59,6 +59,7 @@
 	* src/itemhandler.h, src/itemhandler.cpp: Removed: useless and unused.
 	* src/Makefile.am, src/account-server/dalstorage.cpp: Removed useless
 	dependency on Cipher + OpenSSL.
+	* README: Added a few words on how to run the split servers.
 
 2006-12-29  Philipp Sehmisch  <tmw@crushnet.org>
 
