@@ -18,7 +18,7 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id: items.h 2636 2006-09-02 12:03:22Z gmelquio $
+ *  $Id$
  */
 
 #ifndef ITEM_H
@@ -134,12 +134,12 @@ class Item
             unsigned int value = 0,
             std::string scriptName = "",
             unsigned short maxPerSlot = 0):
-            mModifiers(modifiers),
             mItemType(itemType),
             mWeight(weight),
             mValue(value),
             mScriptName(scriptName),
-            mMaxPerSlot(maxPerSlot) {}
+            mMaxPerSlot(maxPerSlot),
+            mModifiers(modifiers) {}
 
         virtual ~Item() throw() { }
 

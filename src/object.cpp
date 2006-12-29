@@ -20,10 +20,9 @@
  *  $Id$
  */
 
-#include "object.h"
-
 #include "map.h"
-#include "mapmanager.h"
+#include "object.h"
+#include "game-server/mapmanager.hpp"
 
 void MovingObject::move()
 {
@@ -35,25 +34,23 @@ void MovingObject::move()
         return;
     }
 
-    Map *map = MapManager::instance().getMap(getMapId());
-    std::list<PATH_NODE> path;
     int tileSX = mOld.x / 32, tileSY = mOld.y / 32;
     int tileDX = mDst.x / 32, tileDY = mDst.y / 32;
-    if (tileSX != tileDX || tileSY != tileDY)
-    {
-        // TODO: cache pathfinding results
-        path = map->findPath(tileSX, tileSY, tileDX, tileDY);
-        if (path.empty()) {
-            // no path was found
-            mDst = mOld;
-            mActionTime = 0;
-            return;
-        }
-    }
-    else
+    if (tileSX == tileDX && tileSY == tileDY)
     {
         // moving while staying on the same tile is free
         setPosition(mDst);
+        mActionTime = 0;
+        return;
+    }
+
+    Map *map = mapManager->getMap(getMapId());
+    // TODO: cache pathfinding results
+    std::list<PATH_NODE> path = map->findPath(tileSX, tileSY, tileDX, tileDY);
+    if (path.empty())
+    {
+        // no path was found
+        mDst = mOld;
         mActionTime = 0;
         return;
     }

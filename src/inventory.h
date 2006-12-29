@@ -18,13 +18,13 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id: items.h 2636 2006-09-02 12:03:22Z gmelquio $
+ *  $Id$
  */
 
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include "itemmanager.h"
+#include "being.h"
 
 // items in inventory :
 const unsigned char MAX_ITEMS_IN_INVENTORY = 50, // Max 252.
@@ -89,22 +89,17 @@ class Inventory
 {
     public:
         /**
-         * ctor. Add slot spaces to MAX_ITEMS_IN_INVENTORY.
-         */
-        Inventory();
-
-        /**
          * Convenience function to get slot from ItemId.
          * If more than one occurence is found, the first is given.
          */
         unsigned char
-        getSlotFromId(const unsigned int itemId);
+        getSlotFromId(unsigned int itemId);
 
         /**
          * Return StoredItem
          */
         StoredItem
-        getStoredItemAt(unsigned char slot) const { return itemList.at(slot); };
+        getStoredItemAt(unsigned char slot) const { return itemList[slot]; };
 
         /**
          * Search in inventory and equipment if an item is present.
@@ -118,13 +113,13 @@ class Inventory
          * Tells an item's amount
          */
         unsigned short
-        getItemAmount(unsigned char slot) const { return itemList.at(slot).amount; };
+        getItemAmount(unsigned char slot) const { return itemList[slot].amount; };
 
         /**
          * Return Item reference Id
          */
         unsigned int
-        getItemId(unsigned char slot) const { return itemList.at(slot).itemId; };
+        getItemId(unsigned char slot) const { return itemList[slot].itemId; };
 
         /**
          * add an item with amount 
@@ -219,7 +214,7 @@ class Inventory
          * the error code, if not.
          */
         unsigned char unequipItem_(unsigned int itemId,
-                                 unsigned char equipmentSlot);
+                                   unsigned char equipmentSlot);
 
 
         // Stored items in inventory and equipment
@@ -231,10 +226,5 @@ class Inventory
          */
         StoredItem equippedProjectiles;
 };
-
-/**
- * Type definition for a smart pointer to Being.
- */
-typedef utils::CountedPtr<Inventory> InventoryPtr;
 
 #endif

@@ -1,5 +1,5 @@
 /*
- *  The Mana World
+ *  The Mana World Server
  *  Copyright 2004 The Mana World Development Team
  *
  *  This file is part of The Mana World.
@@ -21,36 +21,46 @@
  *  $Id$
  */
 
-#ifndef _TMW_ITEMHANDLER_H
-#define _TMW_ITEMHANDLER_H
+#ifndef _TMW_SERVER_GAMEHANDLER_
+#define _TMW_SERVER_GAMEHANDLER_
 
-#include "item.h"
-#include "mapcomposite.h"
+#include "player.h"
+#include "net/connectionhandler.hpp"
 
-/**
- *  The Item Handler loads the item reference database
- *  and also manage everyone items interaction with other objects
- *  (including other players) and the world.
+class GameClient;
+
+/*
+ * Manage connections to game server.
  */
-class ItemHandler
+class GameHandler: public ConnectionHandler
 {
     public:
-        ItemHandler(std::string itemReferenceFile);
+        void process();
 
         /**
-         * Drop items on the map.
+         * Start the handler
          */
         bool
-        drop(BeingPtr beingPtr, unsigned int itemId, unsigned short amount);
+        startListen(enet_uint16 port);
 
         /**
-         * Pick an item on the ground
+         * Send message to the given player.
          */
-        bool
-        getItem(BeingPtr beingPtr, ItemPtr itemPtr);
+        void sendTo(Player *, MessageOut &msg);
+
+    protected:
+        NetComputer *computerConnected(ENetPeer *);
+        void computerDisconnected(NetComputer *);
+
+        /**
+         * Process messages related to core game events.
+         */
+        void processMessage(NetComputer *computer, MessageIn &message);
 
     private:
-        std::pair<unsigned int, ItemPtr> ItemReference;
+        void removeOutdatedPending();
 };
+
+extern GameHandler *gameHandler;
 
 #endif

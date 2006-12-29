@@ -28,23 +28,13 @@
 /**
  * A controller can take control of a being.
  */
-class Controller
+class Controlled: public Being
 {
     public:
         /**
          * Constructor.
          */
-        Controller();
-
-        /**
-         * Take possession of the given being.
-         */
-        void possess(BeingPtr being);
-
-        /**
-         * Releave possession of any being.
-         */
-        void unPossess();
+        Controlled(int type): Being(type, 65535), mCountDown(0) {}
 
         /**
          * Performs one step of controller logic.
@@ -52,8 +42,6 @@ class Controller
         void update();
 
     private:
-        BeingPtr mBeing;
-
         /** Count down till next random movement (temporary). */
         unsigned int mCountDown;
 };

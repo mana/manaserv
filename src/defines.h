@@ -125,9 +125,9 @@ enum {
     APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
     PAMSG_CHAR_DELETE              = 0x0022, // B index
     APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
-    APMSG_CHAR_INFO                = 0x0024, // B index, S name, B gender, B hair style, B hair color, B level, W money, W*6 stats, S mapname, W*2 position
+    APMSG_CHAR_INFO                = 0x0024, // B index, S name, B gender, B hair style, B hair color, B level, W money, W*6 stats
     PAMSG_CHAR_SELECT              = 0x0026, // B index
-    APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, S mapname, S game address, W game port, S chat address, W chat port, B*32 token
+    APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, B*32 token, S game address, W game port, S chat address, W chat port
     PAMSG_EMAIL_CHANGE             = 0x0030, // S email
     APMSG_EMAIL_CHANGE_RESPONSE    = 0x0031, // B error
     PAMSG_EMAIL_GET                = 0x0032, // -
@@ -179,6 +179,11 @@ enum {
     CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0420, // B error
     PCMSG_QUIT_CHANNEL                = 0x0421, // W channel
     CPMSG_QUIT_CHANNEL_RESPONSE       = 0x0422, // B error
+
+    // Inter-server
+    GAMSG_REGISTER     = 0x500, // S address, W port, { W map id }*
+    AGMSG_PLAYER_ENTER = 0x510, // L id, S name, B gender, B hair style, B hair color, B level, W money,
+                                // W*6 stats, W x, W y, W map id, B*32 token
 
     XXMSG_INVALID = 0x7FFF
 };

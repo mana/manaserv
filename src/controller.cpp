@@ -24,51 +24,23 @@
 
 #include "utils/logger.h"
 
-Controller::Controller():
-    mCountDown(0)
-{
-}
-
-void Controller::possess(BeingPtr being)
-{
-    unPossess();
-
-    mBeing = being;
-
-    if (mBeing.get())
-        mBeing->possessedBy(this);
-}
-
-void Controller::unPossess()
-{
-    if (mBeing.get())
-        mBeing->possessedBy(NULL);
-
-    mBeing = BeingPtr();
-}
-
-void Controller::update()
+void Controlled::update()
 {
     /* Temporary "AI" behaviour that is purely artificial and not at all
      * intelligent.
      */
     if (mCountDown == 0)
     {
-        if (mBeing.get())
-        {
-            Point randomPos = { rand() % 320 + 720,
-                                rand() % 320 + 840 };
-
-            LOG_INFO("Setting new random destination " << randomPos.x << ","
-                    << randomPos.y << " for being " << mBeing->getPublicID(), 2);
-            mBeing->setDestination(randomPos);
-        }
-
+        Point randomPos = { rand() % 320 + 720,
+                            rand() % 320 + 840 };
+        setDestination(randomPos);
         mCountDown = 10 + rand() % 10;
+
+        LOG_INFO("Setting new random destination " << randomPos.x << ","
+                 << randomPos.y << " for being " << getPublicID(), 2);
     }
     else
     {
         mCountDown--;
     }
 }
-

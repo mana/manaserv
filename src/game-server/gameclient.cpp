@@ -21,28 +21,37 @@
  *  $Id$
  */
 
-#include "item.h"
+#include <cassert>
 
-bool Item::use(BeingPtr itemUser)
+#include "game-server/gameclient.hpp"
+#include "game-server/gamehandler.hpp"
+#include "game-server/state.hpp"
+
+GameClient::GameClient(ENetPeer *peer):
+    NetComputer(peer),
+    mCharacterPtr(NULL)
 {
-    bool usedSuccessfully = true;
-    // Applying Modifiers for a given lifetime
-    // TODO
-
-    // Calling a script if scriptName != ""
-    if (mScriptName != "")
-    {
-        if(runScript(itemUser) && usedSuccessfully)
-            return true;
-        else
-            return false;
-    }
-    else
-        return usedSuccessfully;
 }
 
-bool Item::runScript(BeingPtr itemUser)
+GameClient::~GameClient()
 {
-    //TODO
-    return true;
+    unsetCharacter();
+}
+
+void GameClient::setCharacter(PlayerPtr ch)
+{
+    assert(mCharacterPtr.get() == NULL);
+    mCharacterPtr = ch;
+    assert(mCharacterPtr->mClient == NULL);
+    mCharacterPtr->mClient = this;
+    gameState->addObject(ObjectPtr(mCharacterPtr));
+}
+
+void GameClient::unsetCharacter()
+{
+    if (mCharacterPtr.get() == NULL) return;
+    // remove being from world
+    gameState->removeObject(ObjectPtr(mCharacterPtr));
+    mCharacterPtr->mClient = NULL;
+    mCharacterPtr = PlayerPtr(NULL);
 }

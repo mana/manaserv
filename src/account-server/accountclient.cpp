@@ -21,28 +21,43 @@
  *  $Id$
  */
 
-#include "item.h"
+#include "account-server/account.hpp"
+#include "account-server/accountclient.hpp"
+#include "account-server/accounthandler.hpp"
 
-bool Item::use(BeingPtr itemUser)
+AccountClient::AccountClient(ENetPeer *peer):
+    NetComputer(peer),
+    mAccountPtr(NULL),
+    mCharacterPtr(NULL)
 {
-    bool usedSuccessfully = true;
-    // Applying Modifiers for a given lifetime
-    // TODO
-
-    // Calling a script if scriptName != ""
-    if (mScriptName != "")
-    {
-        if(runScript(itemUser) && usedSuccessfully)
-            return true;
-        else
-            return false;
-    }
-    else
-        return usedSuccessfully;
 }
 
-bool Item::runScript(BeingPtr itemUser)
+AccountClient::~AccountClient()
 {
-    //TODO
-    return true;
+    unsetAccount();
+}
+
+
+void AccountClient::setAccount(AccountPtr acc)
+{
+    unsetAccount();
+    mAccountPtr = acc;
+}
+
+void AccountClient::setCharacter(PlayerPtr ch)
+{
+    unsetCharacter();
+    mCharacterPtr = ch;
+}
+
+void AccountClient::unsetAccount()
+{
+    unsetCharacter();
+    mAccountPtr = AccountPtr(NULL);
+}
+
+void AccountClient::unsetCharacter()
+{
+    if (mCharacterPtr.get() == NULL) return;
+    mCharacterPtr = PlayerPtr(NULL);
 }

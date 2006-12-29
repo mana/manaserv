@@ -21,36 +21,63 @@
  *  $Id$
  */
 
-#ifndef _TMW_ITEMHANDLER_H
-#define _TMW_ITEMHANDLER_H
+#ifndef _TMW_MAPMANAGER_H
+#define _TMW_MAPMANAGER_H
 
-#include "item.h"
-#include "mapcomposite.h"
+#include <map>
+#include <string>
+
+class Map;
+
+struct LoadedMap
+{
+    std::string fileName;
+    Map *map;
+};
 
 /**
- *  The Item Handler loads the item reference database
- *  and also manage everyone items interaction with other objects
- *  (including other players) and the world.
+ * MapManager loads/unloads maps
  */
-class ItemHandler
+class MapManager
 {
     public:
-        ItemHandler(std::string itemReferenceFile);
+        typedef std::map< unsigned, LoadedMap > Maps;
 
         /**
-         * Drop items on the map.
+         * Constructor (loads map reference file).
          */
-        bool
-        drop(BeingPtr beingPtr, unsigned int itemId, unsigned short amount);
+        MapManager(std::string const &);
 
         /**
-         * Pick an item on the ground
+         * Returns the requested map.
          */
-        bool
-        getItem(BeingPtr beingPtr, ItemPtr itemPtr);
+        Map *getMap(unsigned);
+
+        /**
+         * Returns the requested map name.
+         */
+        std::string getMapName(unsigned);
+
+        /**
+         * Returns all the maps.
+         */
+        Maps const &getMaps() { return maps; }
+
+        /**
+         * Destructor.
+         */
+        ~MapManager();
 
     private:
-        std::pair<unsigned int, ItemPtr> ItemReference;
+        /**
+         * Loads the specified map.
+         */
+        void loadMap(unsigned, std::string const &);
+
+        // Hold all the loaded maps.
+        Maps maps;
 };
+
+extern MapManager *mapManager;
 
 #endif

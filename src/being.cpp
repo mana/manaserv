@@ -21,18 +21,8 @@
  */
 
 #include "being.h"
-
-#include "controller.h"
-
+#include "mapcomposite.h"
 #include "utils/logger.h"
-
-void Being::update()
-{
-    if (mController)
-        mController->update();
-
-    mHitsTaken.clear();
-}
 
 void Being::damage(Damage damage)
 {
@@ -47,5 +37,76 @@ void Being::damage(Damage damage)
 
 void Being::performAttack(MapComposite* map)
 {
-    //Monster attack
+    std::list<ObjectPtr> victimList;
+    std::list<Point> attackZone;
+
+    Point attackPoint = getPosition();
+
+    unsigned char direction = getDirection();
+    if (direction & UP)
+    {
+        attackPoint.y -= 32;
+        attackPoint.x -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+    }
+    else if (direction & RIGHT)
+    {
+        attackPoint.x += 32;
+        attackPoint.y -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+    }
+    else if (direction & DOWN)
+    {
+        attackPoint.y += 32;
+        attackPoint.x -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.x += 32;
+        attackZone.push_back(attackPoint);
+    }
+    else {
+        attackPoint.x -= 32;
+        attackPoint.y -= 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+        attackPoint.y += 32;
+        attackZone.push_back(attackPoint);
+    }
+
+    attackZone.push_back(attackPoint);  // point player is facing
+
+    // get enemies to hurt
+    for (std::list<Point>::iterator i = attackZone.begin(),
+         i_end = attackZone.end(); i != i_end; ++i)
+    {
+        std::list<ObjectPtr> newVictimList = map->getObjectsOnTile((*i));
+        victimList.splice(victimList.end(), newVictimList);
+    }
+
+    // apply damage to victims
+    Damage damage;
+
+    /* TODO:    calculate real attack power and damage properties based on
+     *          character equipment and stats
+     */
+    damage = 1;
+
+    for (std::list<ObjectPtr>::iterator i = victimList.begin(),
+         i_end = victimList.end(); i != i_end; ++i)
+    {
+        if ((*i)->getType() == OBJECT_PLAYER || (*i)->getType() == OBJECT_MONSTER)
+        {
+            static_cast<Being*>(&**i)->damage(damage);
+        }
+    }
 }

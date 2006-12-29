@@ -148,8 +148,8 @@ class MovingObject: public Object
          */
         MovingObject(int type, int id)
           : Object(type),
-            mDirection(DOWN),
             mPublicID(id),
+            mDirection(DOWN),
             mActionTime(0)
         {}
 
@@ -196,11 +196,6 @@ class MovingObject: public Object
         void move();
 
         /**
-         * Performs an attack
-         */
-        virtual void performAttack (MapComposite* map) = 0;
-
-        /**
          * Get public ID.
          *
          * @return the public ID, 65535 if none yet.
@@ -215,15 +210,15 @@ class MovingObject: public Object
         void setPublicID(int id)
         { mPublicID = id; }
 
-    protected:
-        unsigned short mActionTime; /**< delay until next action */
-        unsigned char mDirection;   /**< Facing direction */
-
     private:
         unsigned short mPublicID; /**< Object ID sent to clients (unique with respect to the map) */
         Point mDst; /**< target coordinates */
         Point mOld; /**< old coordinates */
         unsigned short mSpeed; /**< speed */
+
+    protected:
+        unsigned char mDirection;   /**< Facing direction */
+        unsigned short mActionTime; /**< delay until next action */
 };
 
 /**

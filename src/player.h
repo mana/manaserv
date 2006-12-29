@@ -27,9 +27,8 @@
 #include <vector>
 
 #include "being.h"
-#include "inventory.h"
-
 #include "defines.h"
+#include "inventory.h"
 #include "utils/countedptr.h"
 
 class GameClient;
@@ -42,8 +41,8 @@ class Player : public Being
           : Being(OBJECT_PLAYER, 65535),
             mDatabaseID(id),
             mName(name),
-            mIsAttacking(false),
-            mClient(NULL)
+            mClient(NULL),
+            mIsAttacking(false)
         {}
 
         /**
@@ -158,11 +157,6 @@ class Player : public Being
         void update();
 
         /**
-         * Performs an attack
-         */
-        virtual void performAttack (MapComposite* map);
-
-        /**
          * Sets inventory.
          */
         void
@@ -226,7 +220,8 @@ class Player : public Being
          * Sets database ID.
          * The object shall not have any ID yet.
          */
-        void setDatabaseID(int id);
+        void setDatabaseID(int id)
+        { mDatabaseID = id; }
 
         /**
          * Gets client computer.

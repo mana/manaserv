@@ -31,7 +31,7 @@
 #include "object.h"
 #include "utils/countedptr.h"
 
-class Controller;
+class MapComposite;
 
 /**
  * Element attribute for beings, actors and items.
@@ -189,41 +189,32 @@ class Being : public MovingObject
         /**
          * Takes a damage structure, computes the real damage based on the
          * stats, deducts the result from the hitpoints and adds the result to
-         * the HitsTaken list
+         * the HitsTaken list.
          */
-        virtual void damage(Damage);
+        void damage(Damage);
 
         /**
-         * Get the damage list
+         * Gets the damage list.
          */
-        Hits getHitsTaken() const
+        Hits const &getHitsTaken() const
         { return mHitsTaken; }
 
         /**
-         * Clears the hit list.
-         * When a controller is set, updates the controller.
+         * Clears the damage list.
          */
-        virtual void
-        update();
-
-        virtual void
-        performAttack(MapComposite*);
+        void clearHitsTaken()
+        { mHitsTaken.clear(); }
 
         /**
-         * Notification that this being is now possessed by the given
-         * controller. This means that events regarding what happens to this
-         * being should be send there.
+         * Performs an attack.
          */
-        void
-        possessedBy(Controller *controller)
-        { mController = controller; }
+        void performAttack(MapComposite *);
 
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
 
         Statistics mStats; /**< stats modifiers or computed stats */
-        Controller *mController;
 
         int mHitpoints; /**< Hitpoints of the being */
 

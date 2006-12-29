@@ -1,6 +1,6 @@
 /*
- *  The Mana World Server
- *  Copyright 2004 The Mana World Development Team
+ *  The Mana World
+ *  Copyright 2006 The Mana World Development Team
  *
  *  This file is part of The Mana World.
  *
@@ -21,28 +21,33 @@
  *  $Id$
  */
 
-#include "item.h"
+#include <cstdlib>
 
-bool Item::use(BeingPtr itemUser)
+#include "utils/xml.hpp"
+
+namespace XML
 {
-    bool usedSuccessfully = true;
-    // Applying Modifiers for a given lifetime
-    // TODO
 
-    // Calling a script if scriptName != ""
-    if (mScriptName != "")
+int getProperty(xmlNodePtr node, char const *name, int def)
+{
+    if (xmlChar *prop = xmlGetProp(node, BAD_CAST name))
     {
-        if(runScript(itemUser) && usedSuccessfully)
-            return true;
-        else
-            return false;
+        int ret = atoi((char*)prop);
+        xmlFree(prop);
+        return ret;
     }
-    else
-        return usedSuccessfully;
+    return def;
 }
 
-bool Item::runScript(BeingPtr itemUser)
+std::string getProperty(xmlNodePtr node, char const *name, std::string const &def)
 {
-    //TODO
-    return true;
+    if (xmlChar *prop = xmlGetProp(node, BAD_CAST name))
+    {
+        std::string val = (char *)prop;
+        xmlFree(prop);
+        return val;
+    }
+    return def;
 }
+
+} // namespace XML

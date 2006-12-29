@@ -118,4 +118,7 @@ class Configuration
 
 extern Configuration config;
 
+#ifndef DEFAULT_SERVER_PORT
+#define DEFAULT_SERVER_PORT 9601
+#endif
 #endif

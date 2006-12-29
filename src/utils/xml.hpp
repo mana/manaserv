@@ -1,5 +1,5 @@
 /*
- *  The Mana World Server
+ *  The Mana World
  *  Copyright 2004 The Mana World Development Team
  *
  *  This file is part of The Mana World.
@@ -21,28 +21,23 @@
  *  $Id$
  */
 
-#include "item.h"
+#ifndef _TMWSERV_XML_H_
+#define _TMWSERV_XML_H_
 
-bool Item::use(BeingPtr itemUser)
+#include <string>
+#include <libxml/tree.h>
+
+namespace XML
 {
-    bool usedSuccessfully = true;
-    // Applying Modifiers for a given lifetime
-    // TODO
+    /**
+     * Gets an integer property from an xmlNodePtr.
+     */
+    int getProperty(xmlNodePtr node, char const *name, int def);
 
-    // Calling a script if scriptName != ""
-    if (mScriptName != "")
-    {
-        if(runScript(itemUser) && usedSuccessfully)
-            return true;
-        else
-            return false;
-    }
-    else
-        return usedSuccessfully;
+    /**
+     * Gets a string property from an xmlNodePtr.
+     */
+    std::string getProperty(xmlNodePtr node, char const *name, std::string const &def);
 }
 
-bool Item::runScript(BeingPtr itemUser)
-{
-    //TODO
-    return true;
-}
+#endif

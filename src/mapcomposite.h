@@ -18,7 +18,7 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id: $
+ *  $Id$
  */
 
 #ifndef _TMW_SERVER_MAPCOMPOSITE_
@@ -185,7 +185,7 @@ class MapComposite {
         /**
          * Gets all objects on a tile
          */
-        std::list<ObjectPtr>  MapComposite::getObjectsOnTile(const Point &) const;
+        std::list<ObjectPtr> getObjectsOnTile(Point const &) const;
 
         /**
          * Gets an iterator on the objects around the old and new positions of

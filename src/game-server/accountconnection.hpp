@@ -1,6 +1,6 @@
 /*
- *  The Mana World Server
- *  Copyright 2004 The Mana World Development Team
+ *  The Mana World
+ *  Copyright 2006 The Mana World Development Team
  *
  *  This file is part of The Mana World.
  *
@@ -21,28 +21,30 @@
  *  $Id$
  */
 
-#include "item.h"
+#ifndef _TMW_ACCOUNTCONNECTION_H_
+#define _TMW_ACCOUNTCONNECTION_H_
 
-bool Item::use(BeingPtr itemUser)
+#include "net/connection.hpp"
+
+/**
+ * A connection to the account server.
+ */
+class AccountConnection: public Connection
 {
-    bool usedSuccessfully = true;
-    // Applying Modifiers for a given lifetime
-    // TODO
+    public:
+        /**
+         * Initializes a connection to the account server described in the
+         * configuration file. Registers the maps known by MapManager.
+         */
+        bool start();
 
-    // Calling a script if scriptName != ""
-    if (mScriptName != "")
-    {
-        if(runScript(itemUser) && usedSuccessfully)
-            return true;
-        else
-            return false;
-    }
-    else
-        return usedSuccessfully;
-}
+    protected:
+        /**
+         * Processes server messages.
+         */
+        virtual void processMessage(MessageIn &);
+};
 
-bool Item::runScript(BeingPtr itemUser)
-{
-    //TODO
-    return true;
-}
+extern AccountConnection *accountHandler;
+
+#endif

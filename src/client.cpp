@@ -24,8 +24,8 @@
 #include <enet/enet.h>
 
 #include "defines.h"
-#include "messageout.h"
-#include "messagein.h"
+#include "net/messagein.hpp"
+#include "net/messageout.hpp"
 
 #if defined WIN32
 #include "../testclient_private.h"

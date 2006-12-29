@@ -1,5 +1,5 @@
 /*
- *  The Mana World
+ *  The Mana World Server
  *  Copyright 2004 The Mana World Development Team
  *
  *  This file is part of The Mana World.
@@ -21,36 +21,50 @@
  *  $Id$
  */
 
-#ifndef _TMW_ITEMHANDLER_H
-#define _TMW_ITEMHANDLER_H
+#ifndef _TMWSERV_GAMECLIENT_H_
+#define _TMWSERV_GAMECLIENT_H_
 
-#include "item.h"
-#include "mapcomposite.h"
+#include <enet/enet.h>
+
+#include "player.h"
+#include "net/netcomputer.hpp"
+
+class GameHandler;
 
 /**
- *  The Item Handler loads the item reference database
- *  and also manage everyone items interaction with other objects
- *  (including other players) and the world.
+ * A connected computer with an associated character.
  */
-class ItemHandler
+class GameClient: public NetComputer
 {
     public:
-        ItemHandler(std::string itemReferenceFile);
+        /**
+         * Constructor.
+         */
+        GameClient(ENetPeer *peer);
 
         /**
-         * Drop items on the map.
+         * Destructor.
          */
-        bool
-        drop(BeingPtr beingPtr, unsigned int itemId, unsigned short amount);
+        ~GameClient();
 
         /**
-         * Pick an item on the ground
+         * Set the selected character associated with connection.
          */
-        bool
-        getItem(BeingPtr beingPtr, ItemPtr itemPtr);
+        void setCharacter(PlayerPtr ch);
+
+        /**
+         * Deselect the character associated with connection.
+         */
+        void unsetCharacter();
+
+        /**
+         * Get character associated with the connection.
+         */
+        PlayerPtr getCharacter() { return mCharacterPtr; }
 
     private:
-        std::pair<unsigned int, ItemPtr> ItemReference;
+        /** Character associated with the conneciton. */
+        PlayerPtr mCharacterPtr;
 };
 
 #endif
