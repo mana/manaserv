@@ -43,6 +43,19 @@ NetComputer *ServerHandler::computerConnected(ENetPeer *peer)
 
 void ServerHandler::computerDisconnected(NetComputer *comp)
 {
+    Servers::iterator i = servers.begin();
+    while (i != servers.end())
+    {
+        if (i->second.server == comp)
+        {
+            LOG_INFO("Unregistering map " << i->first << '.', 0);
+            servers.erase(i++);
+        }
+        else
+        {
+            ++i;
+        }
+    }
     delete comp;
 }
 
@@ -93,9 +106,11 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             LOG_INFO("Game server " << address << ':' << port
                      << " wants to register " << (msg.getUnreadLength() / 2)
                      << " maps.", 0);
+            
             while (msg.getUnreadLength())
             {
                 unsigned id = msg.readShort();
+                LOG_INFO("Registering map " << id << '.', 0);
                 if (!servers.insert(std::make_pair(id, s)).second)
                 {
                     LOG_ERROR("Server Handler: map is already registered.", 0);
