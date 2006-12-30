@@ -25,7 +25,6 @@
 #include <map>
 
 #include "map.h"
-#include "game-server/gameclient.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
@@ -33,9 +32,15 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 
+struct GameClient: NetComputer
+{
+    GameClient(ENetPeer *peer): NetComputer(peer), character(NULL) {}
+    Player *character;
+};
+
 struct GamePendingLogin
 {
-    PlayerPtr character;
+    Player *character;
     int timeout;
 };
 
@@ -60,13 +65,15 @@ static GamePendingClients pendingClients;
  * Notification that a particular token has been given to allow a certain
  * player to enter the game.
  */
-void registerGameClient(std::string const &token, PlayerPtr ch)
+void registerGameClient(std::string const &token, Player *ch)
 {
     GamePendingClients::iterator i = pendingClients.find(token);
     if (i != pendingClients.end())
     {
         GameClient *computer = i->second;
-        computer->setCharacter(ch);
+        computer->character = ch;
+        ch->setClient(computer);
+        gameState->addObject(ch);
         pendingClients.erase(i);
         MessageOut result;
         result.writeShort(GPMSG_CONNECT_RESPONSE);
@@ -92,17 +99,18 @@ GameHandler::startListen(enet_uint16 port)
 void GameHandler::removeOutdatedPending()
 {
     GamePendingLogins::iterator i = pendingLogins.begin();
-    GamePendingLogins::iterator next;
 
     while (i != pendingLogins.end())
     {
-        next = i;
-        ++next;
         if (--i->second.timeout <= 0)
         {
-            pendingLogins.erase(i);
+            delete i->second.character;
+            pendingLogins.erase(i++);
         }
-        i = next;
+        else
+        {
+            ++i;
+        }
     }
 }
 
@@ -113,14 +121,19 @@ NetComputer *GameHandler::computerConnected(ENetPeer *peer)
 
 void GameHandler::computerDisconnected(NetComputer *computer)
 {
-    GamePendingClients::iterator i;
-    for (i = pendingClients.begin(); i != pendingClients.end(); ++i)
+    for (GamePendingClients::iterator i = pendingClients.begin(),
+         i_end = pendingClients.end(); i != i_end; ++i)
     {
         if (i->second == computer)
         {
             pendingClients.erase(i);
             break;
         }
+    }
+    if (Player *ch = static_cast< GameClient * >(computer)->character)
+    {
+        gameState->removeObject(ch);
+        delete ch;
     }
     delete computer;
 }
@@ -136,21 +149,24 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
     GameClient &computer = *static_cast< GameClient * >(comp);
     MessageOut result;
 
-    if (computer.getCharacter().get() == NULL) {
+    if (computer.character == NULL)
+    {
         if (message.getId() != PGMSG_CONNECT) return;
         std::string magic_token = message.readString(32);
         GamePendingLogins::iterator i = pendingLogins.find(magic_token);
         if (i == pendingLogins.end())
         {
-            GamePendingClients::iterator i;
-            for (i = pendingClients.begin(); i != pendingClients.end(); ++i)
+            for (GamePendingClients::iterator j = pendingClients.begin(),
+                 j_end = pendingClients.end(); j != j_end; ++j)
             {
-                if (i->second == &computer) return;
+                if (j->second == &computer) return;
             }
             pendingClients.insert(std::make_pair(magic_token, &computer));
             return;
         }
-        computer.setCharacter(i->second.character);
+        computer.character = i->second.character;
+        computer.character->setClient(&computer);
+        gameState->addObject(computer.character);
         pendingLogins.erase(i);
         result.writeShort(GPMSG_CONNECT_RESPONSE);
         result.writeByte(ERRMSG_OK);
@@ -163,7 +179,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_SAY:
             {
                 std::string say = message.readString();
-                gameState->sayAround(computer.getCharacter().get(), say);
+                gameState->sayAround(computer.character, say);
             } break;
 
         /*
@@ -175,7 +191,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 // remove the item from world map
 
                 // send feedback
-                computer.getCharacter()->addItem(itemId);
+                computer.character->addItem(itemId);
                 result.writeShort(GPMSG_PICKUP_RESPONSE);
                 result.writeByte(ERRMSG_OK);
             } break;
@@ -186,7 +202,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 result.writeShort(GPMSG_USE_RESPONSE);
 
-                if (computer.getCharacter()->hasItem(itemId)) {
+                if (computer.character->hasItem(itemId)) {
                     // use item
                     // this should execute a script which will do the appropriate action
                     // (the script will determine if the item is 1 use only)
@@ -202,7 +218,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 unsigned x = message.readShort();
                 unsigned y = message.readShort();
                 Point dst = {x, y};
-                computer.getCharacter()->setDestination(dst);
+                computer.character->setDestination(dst);
 
                 // no response should be required
             } break;
@@ -214,17 +230,17 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 char slot = message.readByte();
 
                 result.writeShort(GPMSG_EQUIP_RESPONSE);
-                result.writeByte(computer.getCharacter()->equip(slot) ?
+                result.writeByte(computer.character->equip(slot) ?
                                  ERRMSG_OK : ERRMSG_FAILURE);
             } break;
         */
 
         case PGMSG_ATTACK:
             {
-                LOG_DEBUG("Player " << computer.getCharacter()->getPublicID()
+                LOG_DEBUG("Player " << computer.character->getPublicID()
                           << " attacks", 0);
-                computer.getCharacter()->setDirection(message.readByte());
-                computer.getCharacter()->setAttacking(true);
+                computer.character->setDirection(message.readByte());
+                computer.character->setAttacking(true);
             } break;
 
         default:

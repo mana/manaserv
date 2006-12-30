@@ -27,7 +27,6 @@
 #include <vector>
 
 #include "point.h"
-#include "utils/countedptr.h"
 
 class MapComposite;
 
@@ -213,19 +212,8 @@ class MovingObject: public Object
 };
 
 /**
- * Type definition for a smart pointer to Object.
- */
-typedef utils::CountedPtr<Object> ObjectPtr;
-
-/**
- * Type definition for a smart pointer to MovingObject.
- */
-typedef utils::CountedPtr<MovingObject> MovingObjectPtr;
-
-
-/**
  * Type definition for a list of Objects.
  */
-typedef std::vector<ObjectPtr> Objects;
+typedef std::vector< Object * > Objects;
 
 #endif // _TMWSERV_OBJECT_H_

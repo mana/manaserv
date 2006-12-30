@@ -13,6 +13,14 @@
 	inefficient getObjectsOnTile.
 	* src/game-server/state.hpp, src/game-server/state.cpp: Split update
 	function into updateMap and informPlayer. Simplified code a bit.
+	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp,
+	src/object.h, src/game-server/state.hpp, src/game-server/state.cpp,
+	src/game-server/accountconnection.cpp, src/game-server/gamehandler.cpp:
+	Removed reference-counted pointers on Object.
+	* src/game-server/gameclient.hpp, src/game-server/gameclient.cpp,
+	src/player.h, src/game-server/gamehandler.cpp, src/Makefile.am:
+	Embedded a simplified version of GameClient into GameHandler. Removed
+	the original files.
 
 2006-12-29  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

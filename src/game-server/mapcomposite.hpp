@@ -154,12 +154,12 @@ class MapComposite {
         /**
          * Inserts an object on the map and sets its public ID.
          */
-        bool insert(ObjectPtr);
+        bool insert(Object *);
 
         /**
          * Removes an object from the map.
          */
-        void remove(ObjectPtr);
+        void remove(Object *);
 
         /**
          * Updates zones of every moving beings.

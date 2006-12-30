@@ -69,12 +69,12 @@ class State
         /**
          * Adds object to the map.
          */
-        void addObject(ObjectPtr objectPtr);
+        void addObject(Object *);
 
         /**
          * Removes an object from the map.
          */
-        void removeObject(ObjectPtr objectPtr);
+        void removeObject(Object *);
 
         /**
          * Says something around an object.

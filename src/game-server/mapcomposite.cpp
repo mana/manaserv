@@ -396,15 +396,15 @@ ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj, int radius) cons
     return ZoneIterator(r2, this);
 }
 
-bool MapComposite::insert(ObjectPtr obj)
+bool MapComposite::insert(Object *obj)
 {
     Point const &pos = obj->getPosition();
-    zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].insert(obj.get());
+    zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].insert(obj);
 
     int type = obj->getType();
     if (type == OBJECT_MONSTER || type == OBJECT_PLAYER || type == OBJECT_NPC)
     {
-        if (!allocate(static_cast< MovingObject * >(obj.get())))
+        if (!allocate(static_cast< MovingObject * >(obj)))
         {
             return false;
         }
@@ -414,21 +414,21 @@ bool MapComposite::insert(ObjectPtr obj)
     return true;
 }
 
-void MapComposite::remove(ObjectPtr obj)
+void MapComposite::remove(Object *obj)
 {
     Point const &pos = obj->getPosition();
-    zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].remove(obj.get());
+    zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].remove(obj);
 
     int type = obj->getType();
     if (type == OBJECT_MONSTER || type == OBJECT_PLAYER || type == OBJECT_NPC)
     {
-        deallocate(static_cast< MovingObject * >(obj.get()));
+        deallocate(static_cast< MovingObject * >(obj));
     }
 
     for (Objects::iterator o = objects.begin(),
          o_end = objects.end(); o != o_end; ++o)
     {
-        if (o->get() == obj.get())
+        if (*o == obj)
         {
             *o = *(o_end - 1);
             objects.pop_back();
@@ -454,7 +454,7 @@ void MapComposite::update()
         {
             continue;
         }
-        MovingObject *obj = static_cast< MovingObject * >(o->get());
+        MovingObject *obj = static_cast< MovingObject * >(*o);
 
         Point const &pos1 = obj->getOldPosition(),
                     &pos2 = obj->getPosition();

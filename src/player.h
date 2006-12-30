@@ -229,6 +229,12 @@ class Player : public Being
         GameClient *getClient() const
         { return mClient; }
 
+        /**
+         * Sets client computer.
+         */
+        void setClient(GameClient *c)
+        { mClient = c; }
+
     private:
         Player(Player const &);
         Player &operator=(Player const &);
@@ -246,8 +252,6 @@ class Player : public Being
         Inventory inventory;    /**< Player inventory and Equipment */
 
         bool mIsAttacking; /**< attacking state */
-
-        friend class GameClient;
 };
 
 /**

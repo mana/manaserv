@@ -108,8 +108,6 @@ tmwserv_game_SOURCES = \
 	skill.cpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
-	game-server/gameclient.hpp \
-	game-server/gameclient.cpp \
 	game-server/gamehandler.hpp \
 	game-server/gamehandler.cpp \
 	game-server/itemmanager.hpp \

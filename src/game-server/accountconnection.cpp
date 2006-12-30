@@ -18,7 +18,7 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id:$
+ *  $Id$
  */
 
 #include "configuration.h"
@@ -30,7 +30,7 @@
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
-extern void registerGameClient(std::string const &, PlayerPtr);
+extern void registerGameClient(std::string const &, Player *);
 
 bool AccountConnection::start()
 {
@@ -75,7 +75,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             ptr->setMapId(msg.readShort());
             ptr->setSpeed(150); // TODO
             std::string token = msg.readString(32);
-            registerGameClient(token, PlayerPtr(ptr));
+            registerGameClient(token, ptr);
         } break;
 
         default:

@@ -44,7 +44,7 @@ State::State()
         being->setMapId(1);
         Point pos = { 720, 900 };
         being->setPosition(pos);
-        addObject(ObjectPtr(being));
+        addObject(being);
     }
 }
 
@@ -246,7 +246,7 @@ void State::update()
 }
 
 void
-State::addObject(ObjectPtr objectPtr)
+State::addObject(Object *objectPtr)
 {
     unsigned mapId = objectPtr->getMapId();
     MapComposite *map = loadMap(mapId);
@@ -257,7 +257,7 @@ State::addObject(ObjectPtr objectPtr)
     }
     objectPtr->raiseUpdateFlags(NEW_ON_MAP);
     if (objectPtr->getType() != OBJECT_PLAYER) return;
-    Player *playerPtr = static_cast< Player * >(objectPtr.get());
+    Player *playerPtr = static_cast< Player * >(objectPtr);
 
     /* Since the player doesn't know yet where on the world he is after
      * connecting to the map server, we send him an initial change map message.
@@ -272,7 +272,7 @@ State::addObject(ObjectPtr objectPtr)
 }
 
 void
-State::removeObject(ObjectPtr objectPtr)
+State::removeObject(Object *objectPtr)
 {
     unsigned mapId = objectPtr->getMapId();
     std::map< unsigned, MapComposite * >::iterator m = maps.find(mapId);
@@ -282,7 +282,7 @@ State::removeObject(ObjectPtr objectPtr)
     int type = objectPtr->getType();
     if (type == OBJECT_MONSTER || type == OBJECT_PLAYER || type == OBJECT_NPC)
     {
-        MovingObject *obj = static_cast< MovingObject * >(objectPtr.get());
+        MovingObject *obj = static_cast< MovingObject * >(objectPtr);
         MessageOut msg(GPMSG_BEING_LEAVE);
         msg.writeShort(obj->getPublicID());
         Point objectPos = obj->getPosition();
