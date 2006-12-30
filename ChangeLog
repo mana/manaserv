@@ -27,6 +27,12 @@
 	src/account-server/serverhandler.cpp: Controlled map activation from
 	the account server, so that clients are not kept on the wrong server
 	when warped.
+	* src/defines.h, src/game-server/state.hpp, src/game-server/state.cpp,
+	src/account-server/serverhandler.cpp, src/game-server/gamehandler.hpp,
+	src/game-server/gamehandler.cpp, src/game-server/accountconnection.hpp,
+	src/game-server/accountconnection.cpp: Added a queue for delaying
+	intrusive events until update is finished. Partially implemented server
+	communications to update player data and to warp players around.
 
 2006-12-29  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

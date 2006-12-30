@@ -27,6 +27,7 @@
 #include "defines.h"
 #include "map.h"
 #include "point.h"
+#include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
@@ -44,14 +45,14 @@ State::State()
         being->setMapId(1);
         Point pos = { 720, 900 };
         being->setPosition(pos);
-        addObject(being);
+        DelayedEvent e = { EVENT_INSERT };
+        enqueueEvent(being, e);
     }
 }
 
 State::~State()
 {
-    for (std::map< unsigned, MapComposite * >::iterator i = maps.begin(),
-         i_end = maps.end(); i != i_end; ++i)
+    for (Maps::iterator i = maps.begin(), i_end = maps.end(); i != i_end; ++i)
     {
         delete i->second;
     }
@@ -81,6 +82,32 @@ void State::updateMap(MapComposite *map)
         (*i)->move();
     }
     map->update();
+
+    // 4. Just for fun. Should be replaced by a real trigger system.
+    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        Object *o = *i;
+        if (o->getType() != OBJECT_PLAYER) continue;
+        Point pos = o->getPosition();
+        int x = pos.x / 32, y = pos.y / 32;
+        int m = 0;
+        switch (o->getMapId())
+        {
+            case 1:
+                if (x >= 56 && x <= 60 && y == 12)
+                { m = 3; x = 44; y = 80; }
+                break;
+            case 3:
+                if (x >= 42 && x <= 46 && y == 88)
+                { m = 1; x = 58; y = 17; }
+                break;
+        }
+        if (m != 0)
+        {
+            DelayedEvent e = { EVENT_WARP, m, x * 32 + 16, y * 32 + 16 };
+            enqueueEvent(o, e);
+        }
+    }
 }
 
 void State::informPlayer(MapComposite *map, Player *p)
@@ -214,19 +241,12 @@ void State::informPlayer(MapComposite *map, Player *p)
 
 void State::update()
 {
-    /*
-     * Update game state (update AI, etc.)
-     */
-    for (std::map< unsigned, MapComposite * >::iterator m = maps.begin(),
-         m_end = maps.end(); m != m_end; ++m)
+    // Update game state (update AI, etc.)
+    for (Maps::iterator m = maps.begin(), m_end = maps.end(); m != m_end; ++m)
     {
         MapComposite *map = m->second;
-
         updateMap(map);
 
-        /*
-         * Inform clients about changes in the game state
-         */
         for (PlayerIterator p(map->getWholeMapIterator()); p; ++p)
         {
             informPlayer(map, *p);
@@ -242,42 +262,60 @@ void State::update()
                 static_cast< Being * >(o)->clearHitsTaken();
             }
         }
+    }
 
-        // Just for fun. Should be replaced by a real trigger system.
-        for (size_t i = map->getObjects().size(); i-- > 0;)
+    // Take care of events that were delayed because of their side effects.
+    for (DelayedEvents::iterator i = delayedEvents.begin(),
+         i_end = delayedEvents.end(); i != i_end; ++i)
+    {
+        DelayedEvent const &e = i->second;
+        Object *o = i->first;
+        switch (e.type)
         {
-            Object *o = map->getObjects()[i];
-            if (o->getType() != OBJECT_PLAYER) continue;
-            Point pos = o->getPosition();
-            int x = pos.x / 32, y = pos.y / 32;
-            int m = 0;
-            switch (o->getMapId())
-            {
-                case 1:
-                    if (x >= 56 && x <= 60 && y == 12)
-                    { m = 3; x = 44; y = 80; }
-                    break;
-                case 3:
-                    if (x >= 42 && x <= 46 && y == 88)
-                    { m = 1; x = 58; y = 17; }
-                    break;
-            }
-            if (m != 0)
+            case EVENT_REMOVE:
             {
                 removeObject(o);
-                o->setMapId(m);
-                pos.x = x * 32; pos.y = y * 32;
+                if (o->getType() == OBJECT_PLAYER)
+                {
+                    gameHandler->kill(static_cast< Player * >(o));
+                }
+                delete o;
+            } break;
+
+            case EVENT_INSERT:
+            {
+                insertObject(o);
+            } break;
+
+            case EVENT_WARP:
+            {
+                removeObject(o);
+                o->setMapId(e.map);
+                Point pos = { e.x, e.y };
                 o->setPosition(pos);
-                addObject(o);
-            }
+                if (mapManager->isActive(e.map))
+                {
+                    insertObject(o);
+                }
+                else
+                {
+                    assert(o->getType() == OBJECT_PLAYER);
+                    Player *p = static_cast< Player * >(o);
+                    accountHandler->sendPlayerData(p);
+                    MessageOut msg(GAMSG_REDIRECT);
+                    msg.writeLong(p->getDatabaseID());
+                    accountHandler->send(msg);
+                    gameHandler->prepareServerChange(p);
+                }
+            } break;
         }
     }
+    delayedEvents.clear();
 }
 
-void
-State::addObject(Object *objectPtr)
+void State::insertObject(Object *objectPtr)
 {
-    unsigned mapId = objectPtr->getMapId();
+    int mapId = objectPtr->getMapId();
     MapComposite *map = loadMap(mapId);
     if (!map || !map->insert(objectPtr))
     {
@@ -300,11 +338,10 @@ State::addObject(Object *objectPtr)
     gameHandler->sendTo(playerPtr, mapChangeMessage);
 }
 
-void
-State::removeObject(Object *objectPtr)
+void State::removeObject(Object *objectPtr)
 {
-    unsigned mapId = objectPtr->getMapId();
-    std::map< unsigned, MapComposite * >::iterator m = maps.find(mapId);
+    int mapId = objectPtr->getMapId();
+    Maps::iterator m = maps.find(mapId);
     if (m == maps.end()) return;
     MapComposite *map = m->second;
 
@@ -328,9 +365,20 @@ State::removeObject(Object *objectPtr)
     map->remove(objectPtr);
 }
 
-MapComposite *State::loadMap(unsigned mapId)
+void State::enqueueEvent(Object *ptr, DelayedEvent const &e)
 {
-    std::map< unsigned, MapComposite * >::iterator m = maps.find(mapId);
+    std::pair< DelayedEvents::iterator, bool > p =
+        delayedEvents.insert(std::make_pair(ptr, e));
+    // Delete events take precedence over other events.
+    if (!p.second && e.type == EVENT_REMOVE)
+    {
+        p.first->second.type = EVENT_REMOVE;
+    }
+}
+
+MapComposite *State::loadMap(int mapId)
+{
+    Maps::iterator m = maps.find(mapId);
     if (m != maps.end()) return m->second;
     Map *map = mapManager->getMap(mapId);
     assert(map);
@@ -354,7 +402,7 @@ void State::sayAround(Object *obj, std::string text)
     msg.writeShort(id);
     msg.writeString(text);
 
-    std::map< unsigned, MapComposite * >::iterator m = maps.find(obj->getMapId());
+    Maps::iterator m = maps.find(obj->getMapId());
     if (m == maps.end()) return;
     MapComposite *map = m->second;
     Point speakerPosition = obj->getPosition();

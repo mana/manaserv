@@ -141,8 +141,8 @@ enum {
     CPMSG_CONNECT_RESPONSE         = 0x0054, // B error
 
     // Game
-    GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y, B newserv
-                                             // [, S32 token, S server, W port]
+    GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
+    GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
     PGMSG_PICKUP                   = 0x0110,
     GPMSG_PICKUP_RESPONSE          = 0x0111,
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id
@@ -185,6 +185,10 @@ enum {
     AGMSG_ACTIVE_MAP   = 0x501, // W map id
     AGMSG_PLAYER_ENTER = 0x510, // L id, S name, B gender, B hair style, B hair color, B level, W money,
                                 // W*6 stats, W x, W y, W map id, B*32 token
+    GAMSG_PLAYER_DATA  = 0x520, // L id, B gender, B hair style, B hair color, B level, W money,
+                                // W*6 stats, W x, W y, W map id
+    GAMSG_REDIRECT          = 0x530, // L id
+    AGMSG_REDIRECT_RESPONSE = 0x531, // L id, B*32 token, S game address, W game port
 
     XXMSG_INVALID = 0x7FFF
 };

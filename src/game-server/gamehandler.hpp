@@ -27,38 +27,51 @@
 #include "player.h"
 #include "net/connectionhandler.hpp"
 
-class GameClient;
-
-/*
- * Manage connections to game server.
+/**
+ * Manages connections to game client.
  */
 class GameHandler: public ConnectionHandler
 {
     public:
+        /**
+         * Processes messages and cleans outdated characters.
+         */
         void process();
 
         /**
-         * Start the handler
+         * Starts the handler
          */
-        bool
-        startListen(enet_uint16 port);
+        bool startListen(enet_uint16 port);
 
         /**
-         * Send message to the given player.
+         * Sends message to the given player.
          */
         void sendTo(Player *, MessageOut &msg);
+
+        /**
+         * Kills connection with given player.
+         */
+        void kill(Player *);
+
+        /**
+         * Prepares a server change for given player.
+         */
+        void prepareServerChange(Player *);
+
+        /**
+         * Completes a server change for given player ID.
+         */
+        void completeServerChange(int id, std::string const &token,
+                                  std::string const &address, int port);
 
     protected:
         NetComputer *computerConnected(ENetPeer *);
         void computerDisconnected(NetComputer *);
 
         /**
-         * Process messages related to core game events.
+         * Processes messages related to core game events.
          */
         void processMessage(NetComputer *computer, MessageIn &message);
-
-    private:
-        void removeOutdatedPending();
 };
 
 extern GameHandler *gameHandler;

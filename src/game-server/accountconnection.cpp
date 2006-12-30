@@ -25,6 +25,7 @@
 #include "defines.h"
 #include "player.h"
 #include "game-server/accountconnection.hpp"
+#include "game-server/gamehandler.hpp"
 #include "game-server/mapmanager.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -50,6 +51,24 @@ bool AccountConnection::start()
     }
     send(msg);
     return true;
+}
+
+void AccountConnection::sendPlayerData(Player *p)
+{
+    MessageOut msg(GAMSG_PLAYER_DATA);
+    msg.writeLong(p->getDatabaseID());
+    msg.writeByte(p->getGender());
+    msg.writeByte(p->getHairStyle());
+    msg.writeByte(p->getHairColor());
+    msg.writeByte(p->getLevel());
+    msg.writeShort(p->getMoney());
+    for (int j = 0; j < NB_RSTAT; ++j)
+        msg.writeShort(p->getRawStat(j));
+    Point pos = p->getPosition();
+    msg.writeShort(pos.x);
+    msg.writeShort(pos.y);
+    msg.writeShort(p->getMapId());
+    send(msg);
 }
 
 void AccountConnection::processMessage(MessageIn &msg)
@@ -82,6 +101,15 @@ void AccountConnection::processMessage(MessageIn &msg)
         {
             int id = msg.readShort();
             mapManager->raiseActive(id);
+        } break;
+
+        case AGMSG_REDIRECT_RESPONSE:
+        {
+            int id = msg.readLong();
+            std::string token = msg.readString(32);
+            std::string address = msg.readString();
+            int port = msg.readShort();
+            gameHandler->completeServerChange(id, token, address, port);
         } break;
 
         default:

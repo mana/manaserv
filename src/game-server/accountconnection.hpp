@@ -26,6 +26,8 @@
 
 #include "net/connection.hpp"
 
+class Player;
+
 /**
  * A connection to the account server.
  */
@@ -37,6 +39,11 @@ class AccountConnection: public Connection
          * configuration file. Registers the maps known by MapManager.
          */
         bool start();
+
+        /**
+         * Sends data of given player.
+         */
+        void sendPlayerData(Player *);
 
     protected:
         /**

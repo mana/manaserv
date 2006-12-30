@@ -124,6 +124,50 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
         } break;
 
+        case GAMSG_PLAYER_DATA:
+        {
+            int id = msg.readLong();
+            /*
+            // TODO: get correct character and account from database
+            ptr->setGender((Gender)msg.readByte());
+            ptr->setHairStyle(msg.readByte());
+            ptr->setHairColor(msg.readByte());
+            ptr->setLevel(msg.readByte());
+            ptr->setMoney(msg.readShort());
+            for (int j = 0; j < NB_RSTAT; ++j)
+                ptr->setRawStat(j, msg.readShort());
+            int x = msg.readShort();
+            int y = msg.readShort();
+            Point pos = { x, y };
+            ptr->setPosition(pos);
+            ptr->setMapId(msg.readShort());
+            */
+        } break;
+
+        case GAMSG_REDIRECT:
+        {
+            int id = msg.readLong();
+            std::string magic_token(32, ' ');
+            for (int i = 0; i < 32; ++i)
+            {
+                magic_token[i] = 1 + (int)(127 * (rand() / (RAND_MAX + 1.0)));
+            }
+            /*
+            // TODO: get correct character and account from database
+            std::string address;
+            short port;
+            if (serverHandler->getGameServerFromMap(ptr->getMapId(), address, port))
+            {
+                registerGameClient(magic_token, ptr);
+                result.writeShort(AGMSG_REDIRECT_RESPONSE);
+                result.writeLong(ptr->getDatabaseID());
+                result.writeString(magic_token, 32);
+                result.writeString(address);
+                result.writeShort(port);
+            }
+            */
+        } break;
+
         default:
             LOG_WARN("Invalid message type.", 0);
             result.writeShort(XXMSG_INVALID);

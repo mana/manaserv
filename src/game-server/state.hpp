@@ -27,9 +27,20 @@
 #include <map>
 #include <string>
 
-#include "object.h"
-
 class MapComposite;
+class Object;
+
+enum
+{
+    EVENT_REMOVE = 0,
+    EVENT_INSERT,
+    EVENT_WARP
+};
+
+struct DelayedEvent
+{
+    unsigned short type, map, x, y;
+};
 
 /**
  * State class contains all information/procedures associated with the game
@@ -37,10 +48,18 @@ class MapComposite;
  */
 class State
 {
+        typedef std::map< int, MapComposite * > Maps;
+        typedef std::map< Object *, DelayedEvent > DelayedEvents;
+
         /**
          * List of maps.
          */
-        std::map<unsigned int, MapComposite *> maps;
+        Maps maps;
+
+        /**
+         * List of delayed events.
+         */
+        DelayedEvents delayedEvents;
 
         /**
          * Updates object states on the map.
@@ -64,17 +83,22 @@ class State
         /**
          * Loads map into game world.
          */
-        MapComposite *loadMap(unsigned mapId);
+        MapComposite *loadMap(int mapId);
 
         /**
-         * Adds object to the map.
+         * Inserts an object on the map.
          */
-        void addObject(Object *);
+        void insertObject(Object *);
 
         /**
          * Removes an object from the map.
          */
         void removeObject(Object *);
+
+        /**
+         * Enqueues an event. It will be executed at end of update.
+         */
+        void enqueueEvent(Object *, DelayedEvent const &);
 
         /**
          * Says something around an object.
