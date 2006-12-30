@@ -69,12 +69,6 @@ class MapManager
         ~MapManager();
 
     private:
-        /**
-         * Loads the specified map.
-         */
-        void loadMap(unsigned, std::string const &);
-
-        // Hold all the loaded maps.
         Maps maps;
 };
 

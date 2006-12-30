@@ -70,8 +70,11 @@ MapManager::MapManager(std::string const &mapReferenceFile)
 
         unsigned id = XML::getProperty(node, "id", 0);
         std::string name = XML::getProperty(node, "name", std::string());
-        // TODO: load only local maps
-        loadMap(id, name);
+        if (id != 0 && !name.empty())
+        {
+            LoadedMap m = { name, NULL };
+            maps[id] = m;
+        }
     }
 
     xmlFreeDoc(doc);
@@ -85,23 +88,23 @@ MapManager::~MapManager()
     }
 }
 
-void MapManager::loadMap(unsigned mapId, std::string const &mapFile)
-{
-    LoadedMap m = { mapFile, MapReader::readMap("maps/" + mapFile) };
-    if (m.map == NULL)
-    {
-        LOG_ERROR("Unable to load map \"" << mapFile << "\" (id " << mapId << ")", 0);
-        return;
-    }
-    LOG_INFO("Loaded map \"" << mapFile << "\" (id " << mapId << ")", 0);
-    maps[mapId] = m;
-}
-
 Map *MapManager::getMap(unsigned mapId)
 {
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end());
-    return i->second.map;
+    Map *&map = i->second.map;
+    if (!map)
+    {
+        std::string const &file = i->second.fileName;
+        map = MapReader::readMap("maps/" + file);
+        if (!map)
+        {
+            LOG_ERROR("Unable to load map \"" << file << "\" (id " << mapId << ")", 0);
+            return NULL;
+        }
+        LOG_INFO("Loaded map \"" << file << "\" (id " << mapId << ")", 0);
+    }
+    return map;
 }
 
 std::string MapManager::getMapName(unsigned mapId)
