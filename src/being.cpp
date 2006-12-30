@@ -21,7 +21,7 @@
  */
 
 #include "being.h"
-#include "mapcomposite.h"
+#include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
 
 void Being::damage(Damage damage)
@@ -35,78 +35,53 @@ void Being::damage(Damage damage)
     LOG_DEBUG("Being " << getPublicID() << " got hit", 0);
 }
 
-void Being::performAttack(MapComposite* map)
+void Being::performAttack(MapComposite *map)
 {
-    std::list<ObjectPtr> victimList;
-    std::list<Point> attackZone;
+    int SHORT_RANGE = 32;
+    Point ppos = getPosition();
+    int dir = getDirection();
 
-    Point attackPoint = getPosition();
+    /* TODO: calculate real attack power and damage properties based on
+             character equipment and stats. */
+    Damage damage = 1;
 
-    unsigned char direction = getDirection();
-    if (direction & UP)
+    for (MovingObjectIterator i(map->getAroundObjectIterator(this, SHORT_RANGE)); i; ++i)
     {
-        attackPoint.y -= 32;
-        attackPoint.x -= 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.x += 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.x += 32;
-        attackZone.push_back(attackPoint);
-    }
-    else if (direction & RIGHT)
-    {
-        attackPoint.x += 32;
-        attackPoint.y -= 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.y += 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.y += 32;
-        attackZone.push_back(attackPoint);
-    }
-    else if (direction & DOWN)
-    {
-        attackPoint.y += 32;
-        attackPoint.x -= 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.x += 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.x += 32;
-        attackZone.push_back(attackPoint);
-    }
-    else {
-        attackPoint.x -= 32;
-        attackPoint.y -= 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.y += 32;
-        attackZone.push_back(attackPoint);
-        attackPoint.y += 32;
-        attackZone.push_back(attackPoint);
-    }
-
-    attackZone.push_back(attackPoint);  // point player is facing
-
-    // get enemies to hurt
-    for (std::list<Point>::iterator i = attackZone.begin(),
-         i_end = attackZone.end(); i != i_end; ++i)
-    {
-        std::list<ObjectPtr> newVictimList = map->getObjectsOnTile((*i));
-        victimList.splice(victimList.end(), newVictimList);
-    }
-
-    // apply damage to victims
-    Damage damage;
-
-    /* TODO:    calculate real attack power and damage properties based on
-     *          character equipment and stats
-     */
-    damage = 1;
-
-    for (std::list<ObjectPtr>::iterator i = victimList.begin(),
-         i_end = victimList.end(); i != i_end; ++i)
-    {
-        if ((*i)->getType() == OBJECT_PLAYER || (*i)->getType() == OBJECT_MONSTER)
+        MovingObject *o = *i;
+        if (o == this)
         {
-            static_cast<Being*>(&**i)->damage(damage);
+            continue;
         }
+
+        int type = o->getType();
+        Point opos = o->getPosition();
+        int dx = opos.x - ppos.x, dy = opos.y - ppos.y;
+
+        if ((type != OBJECT_PLAYER && type != OBJECT_MONSTER) ||
+            (std::abs(dx) > SHORT_RANGE || std::abs(dy) > SHORT_RANGE))
+        {
+            continue;
+        }
+
+        // basic triangle-shaped damage zone
+        switch (dir)
+        {
+            case DIRECTION_UP:
+                if (!(dy <= dx && dx <= -dy)) continue;
+                break;
+            case DIRECTION_DOWN:
+                if (!(-dy <= dx && dx <= dy)) continue;
+                break;
+            case DIRECTION_LEFT:
+                if (!(dx <= dy && dy <= -dx)) continue;
+                break;
+            case DIRECTION_RIGHT:
+                if (!(-dx <= dy && dy <= dx)) continue;
+                break;
+            default:
+                break;
+        }
+
+        static_cast< Being * >(o)->damage(damage);
     }
 }

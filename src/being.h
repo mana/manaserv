@@ -90,16 +90,12 @@ typedef enum {
 /**
  * Beings and actors directions
  */
-typedef enum {
-    DIRECTION_NORTH,
-    DIRECTION_NORTHWEST,
-    DIRECTION_NORTHEAST,
-    DIRECTION_WEST,
-    DIRECTION_EAST,
-    DIRECTION_SOUTH,
-    DIRECTION_SOUTHWEST,
-    DIRECTION_SOUTHEAST
-} SpriteDirection;
+enum {
+    DIRECTION_DOWN = 1,
+    DIRECTION_UP,
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT
+};
 
 /**
  * Raw statistics of a Player.

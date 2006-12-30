@@ -21,13 +21,11 @@
  *  $Id$
  */
 
-#include "mapcomposite.h"
-
 #include <algorithm>
 #include <cassert>
 
-#include "defines.h"
 #include "map.h"
+#include "game-server/mapcomposite.hpp"
 
 /* TODO: Implement overlapping map zones instead of strict partitioning.
    Purpose: to decrease the number of zone changes, as overlapping allows for
@@ -36,6 +34,8 @@
    uniquely defined any longer. */
 
 /* Pixel-based width and height of the squares used in partitioning the map.
+   Squares should be big enough so that a moving object cannot cross several
+   ones in one world tick.
    TODO: Tune for decreasing server load. The higher the value, the closer we
    regress to quadratic behavior; the lower the value, the more we waste time
    in dealing with zone changes. */
@@ -349,10 +349,9 @@ void MapComposite::deallocate(MovingObject *obj)
     buckets[id / 256]->deallocate(id % 256);
 }
 
-void MapComposite::fillRegion(MapRegion &r, Point const &p) const
+void MapComposite::fillRegion(MapRegion &r, Point const &p, int radius) const
 {
-    int radius = AROUND_AREA,
-        ax = p.x > radius ? (p.x - radius) / zoneDiam : 0,
+    int ax = p.x > radius ? (p.x - radius) / zoneDiam : 0,
         ay = p.y > radius ? (p.y - radius) / zoneDiam : 0,
         bx = std::max((p.x + radius) / zoneDiam, mapWidth - 1),
         by = std::max((p.y + radius) / zoneDiam, mapHeight - 1);
@@ -365,17 +364,17 @@ void MapComposite::fillRegion(MapRegion &r, Point const &p) const
     }
 }
 
-ZoneIterator MapComposite::getAroundObjectIterator(Object *obj) const
+ZoneIterator MapComposite::getAroundObjectIterator(Object *obj, int radius) const
 {
     MapRegion r;
-    fillRegion(r, obj->getPosition());
+    fillRegion(r, obj->getPosition(), radius);
     return ZoneIterator(r, this);
 }
 
-ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj) const
+ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj, int radius) const
 {
     MapRegion r1;
-    fillRegion(r1, obj->getOldPosition());
+    fillRegion(r1, obj->getOldPosition(), radius);
     MapRegion r2 = r1;
     for (MapRegion::iterator i = r1.begin(), i_end = r1.end(); i != i_end; ++i)
     {
@@ -393,34 +392,8 @@ ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj) const
             r2.swap(r3);
         }
     }
-    fillRegion(r2, obj->getPosition());
+    fillRegion(r2, obj->getPosition(), radius);
     return ZoneIterator(r2, this);
-}
-
-std::list<ObjectPtr>  MapComposite::getObjectsOnTile(const Point &tile) const
-{
-    std::list<ObjectPtr> objectList;
-
-    Objects::const_iterator i;
-
-    // convert pixel coordinates to tile coordinates
-    int tX = (int)((tile.x) / 32);
-    int tY = (int)((tile.y) / 32);
-
-    for (i = objects.begin(); i != objects.end(); ++i)
-    {
-        // convert object coordinates to tile coordinates
-        Point objectPoint = (*i)->getPosition();
-        int oX = (int)((objectPoint.x) / 32);
-        int oY = (int)((objectPoint.y) / 32);
-
-        if (oX == tX && oY == tY)
-        {
-            objectList.push_back (*i);
-        }
-    }
-
-    return objectList;
 }
 
 bool MapComposite::insert(ObjectPtr obj)

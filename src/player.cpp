@@ -23,7 +23,6 @@
 #include <cassert>
 
 #include "defines.h"
-#include "mapcomposite.h"
 #include "player.h"
 
 /**

@@ -37,39 +37,49 @@ class MapComposite;
  */
 class State
 {
-    /**
-     * List of maps.
-     */
-    std::map<unsigned int, MapComposite *> maps;
+        /**
+         * List of maps.
+         */
+        std::map<unsigned int, MapComposite *> maps;
 
- public:
-    State();
-    ~State();
+        /**
+         * Updates object states on the map.
+         */
+        void updateMap(MapComposite *);
 
-    /**
-     * Update game state (contains core server logic).
-     */
-    void update();
+        /**
+         * Informs a player of what happened around.
+         */
+        void informPlayer(MapComposite *, Player *);
 
-    /**
-     * Load map into game world.
-     */
-    MapComposite *loadMap(unsigned mapId);
+     public:
+        State();
+        ~State();
 
-    /**
-     * Add object to the map.
-     */
-    void addObject(ObjectPtr objectPtr);
+        /**
+         * Updates game state (contains core server logic).
+         */
+        void update();
 
-    /**
-     * Remove an object from the map.
-     */
-    void removeObject(ObjectPtr objectPtr);
+        /**
+         * Loads map into game world.
+         */
+        MapComposite *loadMap(unsigned mapId);
 
-    /**
-     * Say around an object.
-     */
-    void sayAround(Object *, std::string text);
+        /**
+         * Adds object to the map.
+         */
+        void addObject(ObjectPtr objectPtr);
+
+        /**
+         * Removes an object from the map.
+         */
+        void removeObject(ObjectPtr objectPtr);
+
+        /**
+         * Says something around an object.
+         */
+        void sayAround(Object *, std::string text);
 };
 
 extern State *gameState;

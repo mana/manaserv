@@ -24,10 +24,10 @@
 #ifndef _TMW_SERVER_MAPCOMPOSITE_
 #define _TMW_SERVER_MAPCOMPOSITE_
 
+#include <vector>
+
 #include "object.h"
 #include "player.h"
-
-#include <list>
 
 class Map;
 class MapComposite;
@@ -180,18 +180,13 @@ class MapComposite {
         /**
          * Gets an iterator on the objects around a given object.
          */
-        ZoneIterator getAroundObjectIterator(Object *) const;
-
-        /**
-         * Gets all objects on a tile
-         */
-        std::list<ObjectPtr> getObjectsOnTile(Point const &) const;
+        ZoneIterator getAroundObjectIterator(Object *, int radius) const;
 
         /**
          * Gets an iterator on the objects around the old and new positions of
          * a player (including the ones that were but are now elsewhere).
          */
-        ZoneIterator getAroundPlayerIterator(Player *) const;
+        ZoneIterator getAroundPlayerIterator(Player *, int radius) const;
 
     private:
         MapComposite(MapComposite const &);
@@ -207,9 +202,9 @@ class MapComposite {
         void deallocate(MovingObject *);
 
         /**
-         * Fills a region of zones with the vision range around a point.
+         * Fills a region of zones within the range of a point.
          */
-        void fillRegion(MapRegion &, Point const &) const;
+        void fillRegion(MapRegion &, Point const &, int) const;
 
         Map *map; /**< Actual map. */
 

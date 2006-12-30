@@ -24,10 +24,11 @@
 #include <cassert>
 
 #include "controller.h"
+#include "defines.h"
 #include "map.h"
-#include "mapcomposite.h"
 #include "point.h"
 #include "game-server/gamehandler.hpp"
+#include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/state.hpp"
 #include "net/messageout.hpp"
@@ -56,8 +57,162 @@ State::~State()
     }
 }
 
-void
-State::update()
+void State::updateMap(MapComposite *map)
+{
+    // 1. update object status.
+    for (ObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        (*i)->update();
+    }
+
+    // 2. perform attacks.
+    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        MovingObject *o = *i;
+        if (o->getUpdateFlags() & ATTACK)
+        {
+            static_cast< Being * >(o)->performAttack(map);
+        }
+    }
+
+    // 3. move objects around and update zones.
+    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        (*i)->move();
+    }
+    map->update();
+}
+
+void State::informPlayer(MapComposite *map, Player *p)
+{
+    MessageOut moveMsg(GPMSG_BEINGS_MOVE);
+    MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
+    Point pold = p->getOldPosition(), ppos = p->getPosition();
+    int pid = p->getPublicID(), pflags = p->getUpdateFlags();
+
+    for (MovingObjectIterator i(map->getAroundPlayerIterator(p, AROUND_AREA)); i; ++i)
+    {
+        MovingObject *o = *i;
+
+        Point oold = o->getOldPosition(), opos = o->getPosition();
+        int otype = o->getType();
+        int oid = o->getPublicID(), oflags = o->getUpdateFlags();
+        int flags = 0;
+
+        // Send attack messages.
+        if ((oflags & ATTACK) && oid != pid && ppos.inRangeOf(opos))
+        {
+            MessageOut AttackMsg(GPMSG_BEING_ATTACK);
+            AttackMsg.writeShort(oid);
+            gameHandler->sendTo(p, AttackMsg);
+        }
+
+        // Send damage messages.
+        if (otype == OBJECT_PLAYER || otype == OBJECT_MONSTER)
+        {
+            Being *victim = static_cast< Being * >(o);
+            Hits const &hits = victim->getHitsTaken();
+            for (Hits::const_iterator j = hits.begin(),
+                 j_end = hits.end(); j != j_end; ++j)
+            {
+                damageMsg.writeShort(oid);
+                damageMsg.writeShort(*j);
+            }
+        }
+
+        /* Check whether this player and this moving object were around
+           the last time and whether they will be around the next time. */
+        bool wereInRange = pold.inRangeOf(oold) &&
+                           !((pflags | oflags) & NEW_ON_MAP);
+        bool willBeInRange = ppos.inRangeOf(opos);
+
+        // Send enter/leaver messages.
+        if (!wereInRange)
+        {
+            // o was outside p's range.
+            if (!willBeInRange)
+            {
+                // Nothing to report: o will not be inside p's range.
+                continue;
+            }
+            flags |= MOVING_DESTINATION;
+
+            MessageOut enterMsg(GPMSG_BEING_ENTER);
+            enterMsg.writeByte(otype);
+            enterMsg.writeShort(oid);
+            switch (otype) {
+                case OBJECT_PLAYER:
+                {
+                    Player *q = static_cast< Player * >(o);
+                    enterMsg.writeString(q->getName());
+                    enterMsg.writeByte(q->getHairStyle());
+                    enterMsg.writeByte(q->getHairColor());
+                    enterMsg.writeByte(q->getGender());
+                } break;
+                case OBJECT_MONSTER:
+                {
+                    enterMsg.writeShort(0); // TODO: The monster ID
+                } break;
+                default:
+                    assert(false); // TODO
+            }
+            gameHandler->sendTo(p, enterMsg);
+        }
+        else if (!willBeInRange)
+        {
+            // o is no longer visible from p.
+            MessageOut leaveMsg(GPMSG_BEING_LEAVE);
+            leaveMsg.writeShort(oid);
+            gameHandler->sendTo(p, leaveMsg);
+            continue;
+        }
+        else if (oold.x == opos.x && oold.y == opos.y)
+        {
+            // o does not move, nothing to report.
+            continue;
+        }
+
+        /* At this point, either o has entered p's range, either o is
+           moving inside p's range. Report o's movements. */
+
+        Point odst = o->getDestination();
+        if (opos.x != odst.x || opos.y != odst.y)
+        {
+            flags |= MOVING_POSITION;
+            if (oflags & NEW_DESTINATION)
+            {
+                flags |= MOVING_DESTINATION;
+            }
+        }
+        else
+        {
+            // No need to synchronize on the very last step.
+            flags |= MOVING_DESTINATION;
+        }
+
+        // Send move messages.
+        moveMsg.writeShort(oid);
+        moveMsg.writeByte(flags);
+        if (flags & MOVING_POSITION)
+        {
+            moveMsg.writeCoordinates(opos.x / 32, opos.y / 32);
+        }
+        if (flags & MOVING_DESTINATION)
+        {
+            moveMsg.writeShort(odst.x);
+            moveMsg.writeShort(odst.y);
+        }
+    }
+
+    // Do not send a packet if nothing happened in p's range.
+    if (moveMsg.getLength() > 2)
+        gameHandler->sendTo(p, moveMsg);
+
+    if (damageMsg.getLength() > 2)
+        gameHandler->sendTo(p, damageMsg);
+}
+
+void State::update()
 {
     /*
      * Update game state (update AI, etc.)
@@ -67,171 +222,25 @@ State::update()
     {
         MapComposite *map = m->second;
 
-        for (ObjectIterator o(map->getWholeMapIterator()); o; ++o)
-        {
-            (*o)->update();
-            if ((*o)->getType() == OBJECT_PLAYER || (*o)->getType() == OBJECT_MONSTER)
-            {
-                static_cast< Being * >(*o)->clearHitsTaken();
-            }
-        }
-
-        for (MovingObjectIterator o(map->getWholeMapIterator()); o; ++o)
-        {
-            if ((*o)->getUpdateFlags() & ATTACK)
-            {
-                static_cast< Being * >(*o)->performAttack(m->second);
-            }
-        }
-
-        for (MovingObjectIterator o(map->getWholeMapIterator()); o; ++o)
-        {
-            (*o)->move();
-        }
-
-        map->update();
+        updateMap(map);
 
         /*
          * Inform clients about changes in the game state
          */
         for (PlayerIterator p(map->getWholeMapIterator()); p; ++p)
         {
-            MessageOut moveMsg(GPMSG_BEINGS_MOVE);
-            MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
-
-            for (MovingObjectIterator o(map->getAroundPlayerIterator(*p)); o; ++o)
-            {
-
-                Point os = (*o)->getOldPosition();
-                Point on = (*o)->getPosition();
-
-                int flags = 0;
-
-                // Send attack messages
-                if (    (*o)->getUpdateFlags() & ATTACK
-                    &&  (*o)->getPublicID() != (*p)->getPublicID()
-                    &&  (*p)->getPosition().inRangeOf(on)
-                    )
-                {
-                    MessageOut AttackMsg (GPMSG_BEING_ATTACK);
-                    AttackMsg.writeShort((*o)->getPublicID());
-
-                    LOG_DEBUG("Sending attack packet from " << (*o)->getPublicID()
-                              << " to " << (*p)->getPublicID(), 0);
-
-                    gameHandler->sendTo(*p, AttackMsg);
-                }
-
-                // Send damage messages
-
-                if ((*o)->getType() == OBJECT_PLAYER || (*o)->getType() == OBJECT_MONSTER)
-                {
-                    Being *victim = static_cast< Being * >(*o);
-                    Hits const &hits = victim->getHitsTaken();
-                    for (Hits::const_iterator i = hits.begin(),
-                         i_end = hits.end(); i != i_end; ++i)
-                    {
-                        damageMsg.writeShort(victim->getPublicID());
-                        damageMsg.writeShort((*i));
-                    }
-                }
-
-                // Send move messages
-
-                /* Check whether this player and this moving object were around
-                 * the last time and whether they will be around the next time.
-                 */
-                bool wereInRange = (*p)->getOldPosition().inRangeOf(os) &&
-                    !(((*p)->getUpdateFlags() | (*o)->getUpdateFlags()) & NEW_ON_MAP);
-                bool willBeInRange = (*p)->getPosition().inRangeOf(on);
-                if (!wereInRange)
-                {
-                    // o was outside p's range.
-                    if (!willBeInRange)
-                    {
-                        // Nothing to report: o will not be inside p's range.
-                        continue;
-                    }
-                    flags |= MOVING_DESTINATION;
-
-                    int type = (*o)->getType();
-                    MessageOut enterMsg(GPMSG_BEING_ENTER);
-                    enterMsg.writeByte(type);
-                    enterMsg.writeShort((*o)->getPublicID());
-                    switch (type) {
-                    case OBJECT_PLAYER:
-                    {
-                        Player *q = static_cast< Player * >(*o);
-                        enterMsg.writeString(q->getName());
-                        enterMsg.writeByte(q->getHairStyle());
-                        enterMsg.writeByte(q->getHairColor());
-                        enterMsg.writeByte(q->getGender());
-                    } break;
-                    case OBJECT_MONSTER:
-                    {
-                        enterMsg.writeShort(0); // TODO: The monster ID
-                    } break;
-                    default:
-                        assert(false); // TODO
-                    }
-                    gameHandler->sendTo(*p, enterMsg);
-                }
-                else if (!willBeInRange)
-                {
-                    // o is no longer visible from p.
-                    MessageOut leaveMsg(GPMSG_BEING_LEAVE);
-                    leaveMsg.writeShort((*o)->getPublicID());
-                    gameHandler->sendTo(*p, leaveMsg);
-                    continue;
-                }
-                else if (os.x == on.x && os.y == on.y)
-                {
-                    // o does not move, nothing to report.
-                    continue;
-                }
-
-                /* At this point, either o has entered p's range, either o is
-                   moving inside p's range. Report o's movements. */
-
-                Point od = (*o)->getDestination();
-                if (on.x != od.x || on.y != od.y)
-                {
-                    flags |= MOVING_POSITION;
-                    if ((*o)->getUpdateFlags() & NEW_DESTINATION)
-                    {
-                        flags |= MOVING_DESTINATION;
-                    }
-                }
-                else
-                {
-                    // no need to synchronize on the very last step
-                    flags |= MOVING_DESTINATION;
-                }
-
-                moveMsg.writeShort((*o)->getPublicID());
-                moveMsg.writeByte(flags);
-                if (flags & MOVING_POSITION)
-                {
-                    moveMsg.writeCoordinates(on.x / 32, on.y / 32);
-                }
-                if (flags & MOVING_DESTINATION)
-                {
-                    moveMsg.writeShort(od.x);
-                    moveMsg.writeShort(od.y);
-                }
-            }
-
-            // Don't send a packet if nothing happened in p's range.
-            if (moveMsg.getLength() > 2)
-                gameHandler->sendTo(*p, moveMsg);
-
-            if (damageMsg.getLength() > 2)
-                gameHandler->sendTo(*p, damageMsg);
+            informPlayer(map, *p);
         }
 
-        for (ObjectIterator o(map->getWholeMapIterator()); o; ++o)
+        for (ObjectIterator i(map->getWholeMapIterator()); i; ++i)
         {
-            (*o)->clearUpdateFlags();
+            Object *o = *i;
+            o->clearUpdateFlags();
+            int type = o->getType();
+            if (type == OBJECT_PLAYER || type == OBJECT_MONSTER)
+            {
+                static_cast< Being * >(o)->clearHitsTaken();
+            }
         }
     }
 }
@@ -278,7 +287,7 @@ State::removeObject(ObjectPtr objectPtr)
         msg.writeShort(obj->getPublicID());
         Point objectPos = obj->getPosition();
 
-        for (PlayerIterator p(map->getAroundObjectIterator(obj)); p; ++p)
+        for (PlayerIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
         {
             if (*p != obj && objectPos.inRangeOf((*p)->getPosition()))
             {
@@ -321,7 +330,7 @@ void State::sayAround(Object *obj, std::string text)
     MapComposite *map = m->second;
     Point speakerPosition = obj->getPosition();
 
-    for (PlayerIterator i(map->getAroundObjectIterator(obj)); i; ++i)
+    for (PlayerIterator i(map->getAroundObjectIterator(obj, AROUND_AREA)); i; ++i)
     {
         if (speakerPosition.inRangeOf((*i)->getPosition()))
         {

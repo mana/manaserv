@@ -94,8 +94,6 @@ tmwserv_game_SOURCES = \
 	item.cpp \
 	map.h \
 	map.cpp \
-	mapcomposite.h \
-	mapcomposite.cpp \
 	mapreader.h \
 	mapreader.cpp \
 	object.h \
@@ -116,6 +114,8 @@ tmwserv_game_SOURCES = \
 	game-server/gamehandler.cpp \
 	game-server/itemmanager.hpp \
 	game-server/itemmanager.cpp \
+	game-server/mapcomposite.hpp \
+	game-server/mapcomposite.cpp \
 	game-server/mapmanager.hpp \
 	game-server/mapmanager.cpp \
 	game-server/state.hpp \

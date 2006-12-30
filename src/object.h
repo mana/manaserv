@@ -26,7 +26,6 @@
 
 #include <vector>
 
-#include "defines.h"
 #include "point.h"
 #include "utils/countedptr.h"
 
@@ -136,20 +135,12 @@ class MovingObject: public Object
 {
     public:
         /**
-         * Directions, to be used as bitmask values
-         */
-        static const char DOWN = 1;
-        static const char LEFT = 2;
-        static const char UP = 4;
-        static const char RIGHT = 8;
-
-        /**
          * Proxy constructor.
          */
         MovingObject(int type, int id)
           : Object(type),
             mPublicID(id),
-            mDirection(DOWN),
+            mDirection(0),
             mActionTime(0)
         {}
 
@@ -174,7 +165,7 @@ class MovingObject: public Object
         /**
          * Sete object direction
          */
-        void setDirection(unsigned char direction)
+        void setDirection(int direction)
         { mDirection = direction; }
 
         /**
