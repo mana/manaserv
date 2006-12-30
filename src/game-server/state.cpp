@@ -242,6 +242,35 @@ void State::update()
                 static_cast< Being * >(o)->clearHitsTaken();
             }
         }
+
+        // Just for fun. Should be replaced by a real trigger system.
+        for (size_t i = map->getObjects().size(); i-- > 0;)
+        {
+            Object *o = map->getObjects()[i];
+            if (o->getType() != OBJECT_PLAYER) continue;
+            Point pos = o->getPosition();
+            int x = pos.x / 32, y = pos.y / 32;
+            int m = 0;
+            switch (o->getMapId())
+            {
+                case 1:
+                    if (x >= 56 && x <= 60 && y == 12)
+                    { m = 3; x = 44; y = 80; }
+                    break;
+                case 3:
+                    if (x >= 42 && x <= 46 && y == 88)
+                    { m = 1; x = 58; y = 17; }
+                    break;
+            }
+            if (m != 0)
+            {
+                removeObject(o);
+                o->setMapId(m);
+                pos.x = x * 32; pos.y = y * 32;
+                o->setPosition(pos);
+                addObject(o);
+            }
+        }
     }
 }
 

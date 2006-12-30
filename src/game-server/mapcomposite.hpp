@@ -188,6 +188,12 @@ class MapComposite {
          */
         ZoneIterator getAroundPlayerIterator(Player *, int radius) const;
 
+        /**
+         * Gets all the objects on the map.
+         */
+        Objects const &getObjects() const
+        { return objects; }
+
     private:
         MapComposite(MapComposite const &);
 
