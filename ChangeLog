@@ -23,6 +23,10 @@
 	the original files.
 	* src/game-server/mapmanager.hpp, src/game-server/mapmanager.cpp: Added
 	on-the-fly map loading.
+	* src/defines.h, src/game-server/accountconnection.cpp,
+	src/account-server/serverhandler.cpp: Controlled map activation from
+	the account server, so that clients are not kept on the wrong server
+	when warped.
 
 2006-12-29  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

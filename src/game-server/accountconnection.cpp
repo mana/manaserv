@@ -78,6 +78,12 @@ void AccountConnection::processMessage(MessageIn &msg)
             registerGameClient(token, ptr);
         } break;
 
+        case AGMSG_ACTIVE_MAP:
+        {
+            int id = msg.readShort();
+            mapManager->raiseActive(id);
+        } break;
+
         default:
             LOG_WARN("Invalid message type", 0);
             break;

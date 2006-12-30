@@ -109,9 +109,15 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             
             while (msg.getUnreadLength())
             {
-                unsigned id = msg.readShort();
+                int id = msg.readShort();
                 LOG_INFO("Registering map " << id << '.', 0);
-                if (!servers.insert(std::make_pair(id, s)).second)
+                if (servers.insert(std::make_pair(id, s)).second)
+                {
+                    MessageOut outMsg(AGMSG_ACTIVE_MAP);
+                    outMsg.writeShort(id);
+                    comp->send(outMsg);
+                }
+                else
                 {
                     LOG_ERROR("Server Handler: map is already registered.", 0);
                 }

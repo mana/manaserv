@@ -68,11 +68,11 @@ MapManager::MapManager(std::string const &mapReferenceFile)
             continue;
         }
 
-        unsigned id = XML::getProperty(node, "id", 0);
+        int id = XML::getProperty(node, "id", 0);
         std::string name = XML::getProperty(node, "name", std::string());
         if (id != 0 && !name.empty())
         {
-            LoadedMap m = { name, NULL };
+            LoadedMap m = { false, name, NULL };
             maps[id] = m;
         }
     }
@@ -88,7 +88,7 @@ MapManager::~MapManager()
     }
 }
 
-Map *MapManager::getMap(unsigned mapId)
+Map *MapManager::getMap(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end());
@@ -107,9 +107,24 @@ Map *MapManager::getMap(unsigned mapId)
     return map;
 }
 
-std::string MapManager::getMapName(unsigned mapId)
+std::string MapManager::getMapName(int mapId) const
+{
+    Maps::const_iterator i = maps.find(mapId);
+    assert(i != maps.end());
+    return i->second.fileName;
+}
+
+void MapManager::raiseActive(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end());
-    return i->second.fileName;
+    i->second.isActive = true;
+    LOG_INFO("Activating map \"" << i->second.fileName << "\" (id " << i->first << ")", 0);
+}
+
+bool MapManager::isActive(int mapId) const
+{
+    Maps::const_iterator i = maps.find(mapId);
+    assert(i != maps.end());
+    return i->second.isActive;
 }

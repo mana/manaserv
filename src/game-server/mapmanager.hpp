@@ -31,6 +31,7 @@ class Map;
 
 struct LoadedMap
 {
+    bool isActive;
     std::string fileName;
     Map *map;
 };
@@ -41,7 +42,7 @@ struct LoadedMap
 class MapManager
 {
     public:
-        typedef std::map< unsigned, LoadedMap > Maps;
+        typedef std::map< unsigned short, LoadedMap > Maps;
 
         /**
          * Constructor (loads map reference file).
@@ -51,17 +52,27 @@ class MapManager
         /**
          * Returns the requested map.
          */
-        Map *getMap(unsigned);
+        Map *getMap(int);
 
         /**
          * Returns the requested map name.
          */
-        std::string getMapName(unsigned);
+        std::string getMapName(int) const;
 
         /**
          * Returns all the maps.
          */
-        Maps const &getMaps() { return maps; }
+        Maps const &getMaps() const { return maps; }
+
+        /**
+         * Sets the activity status of the map.
+         */
+        void raiseActive(int);
+
+        /**
+         * Gets the activity status of the map.
+         */
+        bool isActive(int) const;
 
         /**
          * Destructor.
