@@ -65,6 +65,14 @@ class DALStorage: public Storage
         AccountPtr
         getAccount(const std::string& userName);
 
+        /**
+         * Gets a character by database ID.
+         *
+         * @param id the ID of the character.
+         *
+         * @return the character associated to the ID.
+         */
+        PlayerPtr getCharacter(int id);
 
         /**
          * Add a new account.

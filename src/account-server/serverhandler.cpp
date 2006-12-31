@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include "account-server/serverhandler.hpp"
+#include "account-server/storage.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
@@ -127,8 +128,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_PLAYER_DATA:
         {
             int id = msg.readLong();
-            /*
-            // TODO: get correct character and account from database
+            Storage &store = Storage::instance("tmw");
+            PlayerPtr ptr = store.getCharacter(id);
             ptr->setGender((Gender)msg.readByte());
             ptr->setHairStyle(msg.readByte());
             ptr->setHairColor(msg.readByte());
@@ -141,7 +142,6 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             Point pos = { x, y };
             ptr->setPosition(pos);
             ptr->setMapId(msg.readShort());
-            */
         } break;
 
         case GAMSG_REDIRECT:
@@ -152,8 +152,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             {
                 magic_token[i] = 1 + (int)(127 * (rand() / (RAND_MAX + 1.0)));
             }
-            /*
-            // TODO: get correct character and account from database
+            Storage &store = Storage::instance("tmw");
+            PlayerPtr ptr = store.getCharacter(id);
             std::string address;
             short port;
             if (serverHandler->getGameServerFromMap(ptr->getMapId(), address, port))
@@ -165,7 +165,10 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 result.writeString(address);
                 result.writeShort(port);
             }
-            */
+            else
+            {
+                LOG_ERROR("Server Change: No game server for the map.", 0);
+            }
         } break;
 
         default:

@@ -173,6 +173,15 @@ class Storage
         getAccount(const std::string& userName) = 0;
 
         /**
+         * Gets a character by database ID.
+         *
+         * @param id the ID of the character.
+         *
+         * @return the character associated to the ID.
+         */
+        virtual PlayerPtr getCharacter(int id) = 0;
+
+        /**
          * Add a new account.
          *
          * @param account the new account.

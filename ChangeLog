@@ -1,3 +1,11 @@
+2006-12-31  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/account-server/dalstorage.hpp, src/account-server/dalstorage.cpp,
+	src/account-server/storage.hpp: Added function to query a character in
+	the database.
+	* src/account-server/serverhandler.cpp: Finished implementation for
+	warping players around servers.
+
 2006-12-30  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/mapcomposite.h, src/mapcomposite.cpp: Moved to src/game-server

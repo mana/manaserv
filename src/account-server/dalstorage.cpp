@@ -48,6 +48,23 @@ class account_by_name
         std::string mName; /**< the name to look for */
 };
 
+/**
+ * Functor used to search a Player by ID in Players.
+ */
+class character_by_id
+{
+    public:
+        character_by_id(int id)
+            : mID(id)
+        {}
+
+        bool operator()(PlayerPtr const &elem) const
+        { return elem->getDatabaseID() == mID; }
+
+    private:
+        int mID; /**< the ID to look for */
+};
+
 
 /**
  * Constructor.
@@ -191,12 +208,10 @@ DALStorage::getAccount(const std::string& userName)
 
     // the account was not in the list, look for it in the database.
     try {
-        std::string sql("select * from ");
-        sql += ACCOUNTS_TBL_NAME;
-        sql += " where username = \"";
-        sql += userName;
-        sql += "\";";
-        const RecordSet& accountInfo = mDb->execSql(sql);
+        std::ostringstream sql;
+        sql << "select * from " << ACCOUNTS_TBL_NAME << " where username = \""
+            << userName << "\";";
+        const RecordSet& accountInfo = mDb->execSql(sql.str());
 
         // if the account is not even in the database then
         // we have no choice but to return nothing.
@@ -206,7 +221,7 @@ DALStorage::getAccount(const std::string& userName)
 
         // specialize the string_to functor to convert
         // a string to an unsigned int.
-        string_to<unsigned short> toUint;
+        string_to< unsigned > toUint;
         unsigned id = toUint(accountInfo(0, 0));
 
         // create an Account instance
@@ -215,76 +230,117 @@ DALStorage::getAccount(const std::string& userName)
                                        accountInfo(0, 2),
                                        accountInfo(0, 3), id));
 
-        // specialize the string_to functor to convert
-        // a string to an unsigned short.
-        string_to<unsigned short> toUshort;
-
         mAccounts.insert(std::make_pair(id, account));
 
         // load the characters associated with the account.
-        sql = "select * from ";
-        sql += CHARACTERS_TBL_NAME;
-        sql += " where user_id = '";
-        sql += accountInfo(0, 0);
-        sql += "';";
-        const RecordSet& charInfo = mDb->execSql(sql);
+        sql.str(std::string());
+        sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
+            << accountInfo(0, 0) << "';";
+        RecordSet const &charInfo = mDb->execSql(sql.str());
 
-        if (!charInfo.isEmpty()) {
+        if (!charInfo.isEmpty())
+        {
+            int size = charInfo.rows();
             Players players;
 
-            LOG_INFO(userName << "'s account has " << charInfo.rows()
-                << " character(s) in database.", 1);
+            LOG_INFO(userName << "'s account has " << size
+                     << " character(s) in database.", 1);
 
-            // As the recordset functions are set to be able to get one
-            // recordset at a time, we store charInfo in a temp array of
-            // strings. To avoid the problem where values of charInfo were
-            // erased by the values of mapInfo.
-            std::string strCharInfo[charInfo.rows()][charInfo.cols()];
-            for (unsigned int i = 0; i < charInfo.rows(); ++i)
+            // Two steps: it seems like multiple requests cannot be alive at the same time.
+            std::vector< unsigned > playerIDs;
+            for (int k = 0; k < size; ++k)
             {
-                for (unsigned int j = 0; j < charInfo.cols(); ++j)
-                {
-                    strCharInfo[i][j] = charInfo(i,j);
-                }
+                playerIDs.push_back(toUint(charInfo(k, 0)));
             }
-            unsigned int charRows = charInfo.rows();
 
-            for (unsigned int k = 0; k < charRows; ++k) {
-                PlayerPtr player(new Player(strCharInfo[k][2], toUint(strCharInfo[k][0])));
-                player->setGender((Gender) toUshort(strCharInfo[k][3]));
-                player->setHairStyle(toUshort(strCharInfo[k][4]));
-                player->setHairColor(toUshort(strCharInfo[k][5]));
-                player->setLevel(toUshort(strCharInfo[k][6]));
-                player->setMoney(toUint(strCharInfo[k][7]));
-                Point pos = { toUshort(strCharInfo[k][8]),
-                              toUshort(strCharInfo[k][9]) };
-                player->setPosition(pos);
-                for (int i = 0; i < NB_RSTAT; ++i)
-                    player->setRawStat(i, toUshort(strCharInfo[k][11 + i]));
-
-                unsigned int mapId = toUint(strCharInfo[k][10]);
-                if ( mapId > 0 )
-                {
-                    player->setMapId(mapId);
-                }
-                else
-                {
-                    // Set player to default map and one of the default location
-                    // Default map is to be 1, as not found return value will be 0.
-                    player->setMapId((int)config.getValue("defaultMap", 1));
-                }
-
-                mCharacters.push_back(player);
-                players.push_back(player);
-            } // End of for each characters
+            for (int k = 0; k < size; ++k)
+            {
+                players.push_back(getCharacter(playerIDs[k]));
+            }
 
             account->setCharacters(players);
-        } // End if there are characters.
+        }
 
         return account;
     }
-    catch (const DbSqlQueryExecFailure& e) {
+    catch (const DbSqlQueryExecFailure& e)
+    {
         return AccountPtr(NULL); // TODO: Throw exception here
+    }
+}
+
+
+/**
+ * Gets a character by database ID.
+ */
+PlayerPtr DALStorage::getCharacter(int id)
+{
+    // connect to the database (if not connected yet).
+    open();
+
+    // look for the character in the list first.
+    Players::iterator it_end = mCharacters.end(),
+        it = std::find_if(mCharacters.begin(), it_end, character_by_id(id));
+
+    if (it != it_end)
+        return *it;
+
+    using namespace dal;
+
+    // the account was not in the list, look for it in the database.
+    try {
+        std::ostringstream sql;
+        sql << "select * from " << CHARACTERS_TBL_NAME << " where id = '"
+            << id << "';";
+        RecordSet const &charInfo = mDb->execSql(sql.str());
+
+        // if the character is not even in the database then
+        // we have no choice but to return nothing.
+        if (charInfo.isEmpty())
+        {
+            return PlayerPtr(NULL);
+        }
+
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to< unsigned > toUint;
+
+        // specialize the string_to functor to convert
+        // a string to an unsigned short.
+        string_to< unsigned short > toUshort;
+
+        Player *player = new Player(charInfo(0, 2), toUint(charInfo(0, 0)));
+        player->setGender((Gender)toUshort(charInfo(0, 3)));
+        player->setHairStyle(toUshort(charInfo(0, 4)));
+        player->setHairColor(toUshort(charInfo(0, 5)));
+        player->setLevel(toUshort(charInfo(0, 6)));
+        player->setMoney(toUint(charInfo(0, 7)));
+        Point pos = { toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)) };
+        player->setPosition(pos);
+        for (int i = 0; i < NB_RSTAT; ++i)
+        {
+            player->setRawStat(i, toUshort(charInfo(0, 11 + i)));
+        }
+
+        int mapId = toUint(charInfo(0, 10));
+        if (mapId > 0)
+        {
+            player->setMapId(mapId);
+        }
+        else
+        {
+            // Set player to default map and one of the default location
+            // Default map is to be 1, as not found return value will be 0.
+            player->setMapId((int)config.getValue("defaultMap", 1));
+        }
+
+        PlayerPtr ptr(player);
+        mCharacters.push_back(ptr);
+        return ptr;
+    }
+    catch (const DbSqlQueryExecFailure& e)
+    {
+        return PlayerPtr(NULL); // TODO: Throw exception here
     }
 }
 
