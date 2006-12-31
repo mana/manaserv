@@ -9,12 +9,13 @@
 		<Option compiler="0"/>
 		<Build>
 			<Target title="default">
-				<Option output="E:\c++\TMWserv\accountserver.exe"/>
+				<Option output="accountserver.exe"/>
 				<Option working_dir="."/>
 				<Option object_output=".objs"/>
 				<Option deps_output=".deps"/>
 				<Option type="1"/>
 				<Option compiler="0"/>
+				<Option use_console_runner="0"/>
 				<Option projectResourceIncludeDirsRelation="1"/>
 			</Target>
 		</Build>
