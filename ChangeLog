@@ -1,3 +1,8 @@
+2006-12-31  Philipp Sehmisch  <tmw@crushnet.org>
+
+    * accountserver.cbp, gameserver.cbp, runsrv.bat: Added Code::Blocks project
+    files and windows start script.
+
 2006-12-31  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/account-server/dalstorage.hpp, src/account-server/dalstorage.cpp,
