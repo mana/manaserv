@@ -16,6 +16,8 @@
 	trigger mechanism and a warp action.
 	* src/game-server/testing.cpp: Added some hardcoded game objects for
 	testing purpose.
+	* src/sqlitestorage.h, src/sqlitestorage.cpp: Removed obsolete SQLite
+	support.
 
 2006-12-31  Philipp Sehmisch  <tmw@crushnet.org>
 
