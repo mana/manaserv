@@ -18,6 +18,14 @@
 	testing purpose.
 	* src/sqlitestorage.h, src/sqlitestorage.cpp: Removed obsolete SQLite
 	support.
+	* src/utils/zlib.hpp, src/utils/zlib.cpp: Added support for inflating
+	compressed data.
+	* src/mapreader.h, src/mapreader.cpp: Moved to src/game-server
+	directory and changed header extension to hpp. Removed useless
+	declarations. Relied on utils/xml and utils/zlib. Simplified code.
+	Fixed memory leaks on XML document and on Tilesets.
+	* src/properties.h, src/Makefile.am: Removed now useless class
+	Properties.
 
 2006-12-31  Philipp Sehmisch  <tmw@crushnet.org>
 

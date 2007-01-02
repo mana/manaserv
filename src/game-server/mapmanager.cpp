@@ -24,9 +24,9 @@
 #include <cassert>
 
 #include "map.h"
-#include "mapreader.h"
 #include "resourcemanager.h"
 #include "game-server/mapmanager.hpp"
+#include "game-server/mapreader.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 

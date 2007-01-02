@@ -18,7 +18,6 @@ tmwserv_account_SOURCES = \
 	player.h \
 	player.cpp \
 	point.h \
-	properties.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
 	skill.h \
@@ -86,14 +85,11 @@ tmwserv_game_SOURCES = \
 	item.cpp \
 	map.h \
 	map.cpp \
-	mapreader.h \
-	mapreader.cpp \
 	object.h \
 	object.cpp \
 	player.h \
 	player.cpp \
 	point.h \
-	properties.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
 	skill.h \
@@ -108,6 +104,8 @@ tmwserv_game_SOURCES = \
 	game-server/mapcomposite.cpp \
 	game-server/mapmanager.hpp \
 	game-server/mapmanager.cpp \
+	game-server/mapreader.hpp \
+	game-server/mapreader.cpp \
 	game-server/state.hpp \
 	game-server/state.cpp \
 	game-server/testing.cpp \
@@ -134,8 +132,10 @@ tmwserv_game_SOURCES = \
 	utils/stringfilter.cpp \
 	utils/timer.h \
 	utils/timer.cpp \
-	utils/xml.h \
-	utils/xml.cpp
+	utils/xml.hpp \
+	utils/xml.cpp \
+	utils/zlib.hpp \
+	utils/zlib.cpp
 
 if BUILD_MYSQL
 tmwserv_account_SOURCES += \

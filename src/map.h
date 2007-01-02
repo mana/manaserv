@@ -28,8 +28,6 @@
 #include <map>
 #include <string>
 
-#include "properties.h"
-
 
 struct PATH_NODE {
     PATH_NODE(unsigned short u, unsigned short v)
@@ -85,7 +83,7 @@ class Location
 /**
  * A tile map.
  */
-class Map : public Properties
+class Map
 {
     public:
         /**
@@ -168,7 +166,6 @@ class Map : public Properties
         int width, height;
         int tileWidth, tileHeight;
         MetaTile *metaTiles;
-        std::map<std::string, std::string> properties;
 
         // Pathfinding members
         int onClosedList, onOpenList;
