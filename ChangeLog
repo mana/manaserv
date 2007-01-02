@@ -1,7 +1,26 @@
+2007-01-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* tmwserv.cbp, tmwserv.dev, runserv.sh: Removed obsolete project files
+	and shell script.
+	* configure.ac, src/Makefile.am, src/tests, src/client.cpp: Removed
+	obsolete tests and text client.
+	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp,
+	src/point.h: Removed implicit radius for checking range of Point. Added
+	a Rectangle class. Added support for rectangles in MapComposite.
+	* src/object.h, src/defines.h, src/game-server/mapcomposite.hpp,
+	src/game-server/mapcomposite.cpp, src/game-server/state.hpp,
+	src/game-server/state.cpp: Put an ancestor for Object that are not
+	visible to clients. Added simple accessors for object types.
+	* src/game-server/mapmanager.cpp: Prevented loading unactive maps.
+	* src/game-server/trigger.hpp, src/game-server/trigger.cpp: Added a
+	trigger mechanism and a warp action.
+	* src/game-server/testing.cpp: Added some hardcoded game objects for
+	testing purpose.
+
 2006-12-31  Philipp Sehmisch  <tmw@crushnet.org>
 
-    * accountserver.cbp, gameserver.cbp, runsrv.bat: Added Code::Blocks project
-    files and windows start script.
+	* accountserver.cbp, gameserver.cbp, runsrv.bat: Added Code::Blocks
+	project files and windows start script.
 
 2006-12-31  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

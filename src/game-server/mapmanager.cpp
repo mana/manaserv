@@ -91,7 +91,7 @@ MapManager::~MapManager()
 Map *MapManager::getMap(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
-    assert(i != maps.end());
+    assert(i != maps.end() && i->second.isActive);
     Map *&map = i->second.map;
     if (!map)
     {

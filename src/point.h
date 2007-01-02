@@ -23,10 +23,10 @@
 #ifndef _TMWSERV_POINT_H_
 #define _TMWSERV_POINT_H_
 
-#include "defines.h"
+#include <algorithm>
 
 /**
- * A point in positive space. Usually representing pixel coordinates on a map.
+ * A point in positive space. Usually represents pixel coordinates on a map.
  */
 class Point
 {
@@ -35,13 +35,31 @@ class Point
         unsigned short y; /**< y coordinate */
 
         /**
-         * Check whether the given point is within range of this point. This is
-         * defined as lying within the distance of client awareness.
+         * Check whether the given point is within range of this point.
          */
-        bool inRangeOf(const Point &p) const
+        bool inRangeOf(Point const &p, int radius) const
         {
-            return (abs(x - p.x) <= (int) AROUND_AREA &&
-                    abs(y - p.y) <= (int) AROUND_AREA);
+            return std::abs(x - p.x) <= radius &&
+                   std::abs(y - p.y) <= radius;
+        }
+};
+
+/**
+ * A rectangle in positive space. Usually represents a pixel-based zone on a map.
+ */
+
+class Rectangle
+{
+    public:
+        unsigned short x; /**< x coordinate */
+        unsigned short y; /**< y coordinate */
+        unsigned short w; /**< width */
+        unsigned short h; /**< height */
+
+        bool contains(Point const &p) const
+        {
+            return (unsigned short)(p.x - x) < w &&
+                   (unsigned short)(p.y - y) < h;
         }
 };
 

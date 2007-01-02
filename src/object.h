@@ -28,6 +28,16 @@
 
 #include "point.h"
 
+// Object type enumeration
+enum {
+    OBJECT_ITEM = 0, // A simple item
+    OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and can speak (map panels).
+    OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
+    OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
+    OBJECT_PLAYER,   // A normal being
+    OBJECT_OTHER     // Server-only object
+};
+
 class MapComposite;
 
 enum
@@ -37,34 +47,89 @@ enum
     ATTACK = 4
 };
 
-
 /**
- * Generic in-game object definition.
  * Base class for in-game objects.
  */
-class Object
+class Thing
+{
+    public:
+        /**
+         * Constructor.
+         */
+        Thing(int type)
+          : mType(type)
+        {}
+
+        /**
+         * Empty virtual destructor.
+         */
+        virtual ~Thing() {}
+
+        /**
+         * Gets type.
+         *
+         * @return the type.
+         */
+        int getType() const
+        { return mType; }
+
+        /**
+         * Returns whether this thing is visible on the map or not. (Object)
+         */
+        bool isVisible() const
+        { return mType != OBJECT_OTHER; }
+
+        /**
+         * Returns whether this thing can move on the map or not. (MovingObject)
+         */
+        bool canMove() const
+        { return mType == OBJECT_PLAYER || mType == OBJECT_MONSTER ||
+                 mType == OBJECT_NPC; }
+
+        /**
+         * Returns whether this thing can fight or not. (Being)
+         */
+        bool canFight() const
+        { return mType == OBJECT_PLAYER || mType == OBJECT_MONSTER; }
+
+        /**
+         * Updates the internal status.
+         */
+        virtual void
+        update() = 0;
+
+        /**
+         * Gets the map this thing is located on.
+         *
+         * @return ID of map.
+         */
+        int getMapId() const
+        { return mMapId; }
+
+        /**
+         * Sets the map this thing is located on.
+         */
+        void setMapId(int mapId)
+        { mMapId = mapId; }
+
+    private:
+        unsigned short mMapId;  /**< id of the map being is on */
+        char mType; /**< Object type */
+};
+
+/**
+ * Generic client-visible object definition.
+ */
+class Object: public Thing
 {
     public:
         /**
          * Constructor.
          */
         Object(int type)
-          : mType(type),
+          : Thing(type),
             mUpdateFlags(0)
         {}
-
-        /**
-         * Empty virtual destructor.
-         */
-        virtual ~Object() {}
-
-        /**
-         * Get type.
-         *
-         * @return the type.
-         */
-        unsigned int getType() const
-        { return mType; }
 
         /**
          * Sets the coordinates.
@@ -81,26 +146,6 @@ class Object
          */
         Point const &getPosition() const
         { return mPos; }
-
-        /**
-         * Update the internal status.
-         */
-        virtual void
-        update() = 0;
-
-        /**
-         * Gets the map the object is located on.
-         *
-         * @return ID of map.
-         */
-        int getMapId() const
-        { return mMapId; }
-
-        /**
-         * Sets the map the object is located on.
-         */
-        void setMapId(int mapId)
-        { mMapId = mapId; }
 
         /**
          * Gets what changed in the object.
@@ -121,9 +166,7 @@ class Object
         { mUpdateFlags = 0; }
 
     private:
-        char mType; /**< Object type */
         char mUpdateFlags; /**< changes in object status */
-        unsigned short mMapId;  /**< id of the map being is on */
         Point mPos; /**< coordinates */
 };
 
@@ -210,10 +253,5 @@ class MovingObject: public Object
         unsigned char mDirection;   /**< Facing direction */
         unsigned short mActionTime; /**< delay until next action */
 };
-
-/**
- * Type definition for a list of Objects.
- */
-typedef std::vector< Object * > Objects;
 
 #endif // _TMWSERV_OBJECT_H_

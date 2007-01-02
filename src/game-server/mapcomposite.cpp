@@ -364,10 +364,32 @@ void MapComposite::fillRegion(MapRegion &r, Point const &p, int radius) const
     }
 }
 
+void MapComposite::fillRegion(MapRegion &r, Rectangle const &p) const
+{
+    int ax = p.x / zoneDiam,
+        ay = p.y / zoneDiam,
+        bx = std::max((p.x + p.w) / zoneDiam, mapWidth - 1),
+        by = std::max((p.y + p.h) / zoneDiam, mapHeight - 1);
+    for (int y = ay; y <= by; ++y)
+    {
+        for (int x = ax; x <= bx; ++x)
+        {
+            addZone(r, x + y * mapWidth);
+        }
+    }
+}
+
 ZoneIterator MapComposite::getAroundObjectIterator(Object *obj, int radius) const
 {
     MapRegion r;
     fillRegion(r, obj->getPosition(), radius);
+    return ZoneIterator(r, this);
+}
+
+ZoneIterator MapComposite::getInsideRectangleIterator(Rectangle const &p) const
+{
+    MapRegion r;
+    fillRegion(r, p);
     return ZoneIterator(r, this);
 }
 
@@ -396,42 +418,45 @@ ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj, int radius) cons
     return ZoneIterator(r2, this);
 }
 
-bool MapComposite::insert(Object *obj)
+bool MapComposite::insert(Thing *ptr)
 {
-    Point const &pos = obj->getPosition();
-    zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].insert(obj);
-
-    int type = obj->getType();
-    if (type == OBJECT_MONSTER || type == OBJECT_PLAYER || type == OBJECT_NPC)
+    if (ptr->isVisible())
     {
-        if (!allocate(static_cast< MovingObject * >(obj)))
+        if (ptr->canMove() && !allocate(static_cast< MovingObject * >(ptr)))
         {
             return false;
         }
+
+        Object *obj = static_cast< Object * >(ptr);
+        Point const &pos = obj->getPosition();
+        zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].insert(obj);
     }
 
-    objects.push_back(obj);
+    things.push_back(ptr);
     return true;
 }
 
-void MapComposite::remove(Object *obj)
+void MapComposite::remove(Thing *ptr)
 {
-    Point const &pos = obj->getPosition();
-    zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].remove(obj);
-
-    int type = obj->getType();
-    if (type == OBJECT_MONSTER || type == OBJECT_PLAYER || type == OBJECT_NPC)
+    if (ptr->isVisible())
     {
-        deallocate(static_cast< MovingObject * >(obj));
+        Object *obj = static_cast< Object * >(ptr);
+        Point const &pos = obj->getPosition();
+        zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].remove(obj);
+
+        if (ptr->canMove())
+        {
+            deallocate(static_cast< MovingObject * >(ptr));
+        }
     }
 
-    for (Objects::iterator o = objects.begin(),
-         o_end = objects.end(); o != o_end; ++o)
+    for (std::vector< Thing * >::iterator i = things.begin(),
+         i_end = things.end(); i != i_end; ++i)
     {
-        if (*o == obj)
+        if (*i == ptr)
         {
-            *o = *(o_end - 1);
-            objects.pop_back();
+            *i = *(i_end - 1);
+            things.pop_back();
             return;
         }
     }
@@ -446,15 +471,14 @@ void MapComposite::update()
     }
 
     // Cannot use a WholeMap iterator as objects will change zones under its feet.
-    for (Objects::iterator o = objects.begin(),
-         o_end = objects.end(); o != o_end; ++o)
+    for (std::vector< Thing * >::iterator i = things.begin(),
+         i_end = things.end(); i != i_end; ++i)
     {
-        int type = (*o)->getType();
-        if (type != OBJECT_PLAYER && type != OBJECT_MONSTER && type != OBJECT_NPC)
+        if (!(*i)->canMove())
         {
             continue;
         }
-        MovingObject *obj = static_cast< MovingObject * >(*o);
+        MovingObject *obj = static_cast< MovingObject * >(*i);
 
         Point const &pos1 = obj->getOldPosition(),
                     &pos2 = obj->getPosition();

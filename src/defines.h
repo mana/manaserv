@@ -247,15 +247,6 @@ enum {
     CHAT_EVENT_LEAVING_PLAYER
 };
 
-// Object type enumeration
-enum {
-    OBJECT_ITEM = 0, // A simple item
-    OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and can speak (map panels).
-    OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
-    OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
-    OBJECT_PLAYER    // A normal being
-};
-
 // Moving object flags
 enum {
     // Payload contains the current position.

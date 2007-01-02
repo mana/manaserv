@@ -139,23 +139,6 @@ elif test "$with_scripting_engine" != "no"; then
 fi
 
 
-# Checks for the unit tests.
-AC_ARG_ENABLE(
-    [unit-tests],
-    AS_HELP_STRING([--enable-unit-tests], [compile the unit tests]),
-    [if test "$enableval" = "yes"; then
-         enable_unit_tests="$enableval"
-
-         # use cppunit-config to check the libcppunit.
-         # CPPUNIT_CFLAGS and CPPUNIT_LIBS are set by AC_CHECK_LIB_TMW.
-         AC_CHECK_LIB_TMW([cppunit], [1.10.2])
-     else
-         enable_unit_tests="no"
-     fi],
-    [enable_unit_tests="no"]
-)
-
-
 AM_CONDITIONAL(BUILD_MYSQL, test "$with_storage_backend" = "mysql")
 AM_CONDITIONAL(BUILD_POSTGRESQL, test "$with_storage_backend" = "postgresql")
 AM_CONDITIONAL(BUILD_SQLITE, test "$with_storage_backend" = "sqlite")
@@ -163,12 +146,7 @@ AM_CONDITIONAL(BUILD_SQLITE, test "$with_storage_backend" = "sqlite")
 AM_CONDITIONAL(BUILD_RUBY, test "$with_scripting_engine" = "ruby")
 AM_CONDITIONAL(BUILD_SQUIRREL, test "$with_scripting_engine" = "squirrel")
 
-AM_CONDITIONAL(UNIT_TESTS_YES, test "$enable_unit_tests" = "yes")
-
-
-AC_CONFIG_FILES([Makefile
-                 src/Makefile
-                 src/tests/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 
 AC_OUTPUT
 

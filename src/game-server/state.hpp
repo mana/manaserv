@@ -28,7 +28,9 @@
 #include <string>
 
 class MapComposite;
+class Thing;
 class Object;
+class Player;
 
 enum
 {
@@ -71,8 +73,12 @@ class State
          */
         void informPlayer(MapComposite *, Player *);
 
+        /**
+         * Loads map into game world.
+         */
+        MapComposite *loadMap(int mapId);
+
      public:
-        State();
         ~State();
 
         /**
@@ -81,19 +87,18 @@ class State
         void update();
 
         /**
-         * Loads map into game world.
+         * Gets a composite map.
          */
-        MapComposite *loadMap(int mapId);
-
+        MapComposite *getMap(int map);
         /**
          * Inserts an object on the map.
          */
-        void insertObject(Object *);
+        void insert(Thing *);
 
         /**
          * Removes an object from the map.
          */
-        void removeObject(Object *);
+        void remove(Thing *);
 
         /**
          * Enqueues an event. It will be executed at end of update.

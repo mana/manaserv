@@ -152,14 +152,14 @@ class MapComposite {
         { return map; }
 
         /**
-         * Inserts an object on the map and sets its public ID.
+         * Inserts an object on the map. Sets its public ID if relevant.
          */
-        bool insert(Object *);
+        bool insert(Thing *);
 
         /**
          * Removes an object from the map.
          */
-        void remove(Object *);
+        void remove(Thing *);
 
         /**
          * Updates zones of every moving beings.
@@ -178,6 +178,11 @@ class MapComposite {
         { return ZoneIterator(MapRegion(), this); }
 
         /**
+         * Gets an iterator on the objects inside a given rectangle.
+         */
+        ZoneIterator getInsideRectangleIterator(Rectangle const &) const;
+
+        /**
          * Gets an iterator on the objects around a given object.
          */
         ZoneIterator getAroundObjectIterator(Object *, int radius) const;
@@ -189,10 +194,10 @@ class MapComposite {
         ZoneIterator getAroundPlayerIterator(Player *, int radius) const;
 
         /**
-         * Gets all the objects on the map.
+         * Gets everything related to the map.
          */
-        Objects const &getObjects() const
-        { return objects; }
+        std::vector< Thing * > const &getEverything() const
+        { return things; }
 
     private:
         MapComposite(MapComposite const &);
@@ -212,12 +217,17 @@ class MapComposite {
          */
         void fillRegion(MapRegion &, Point const &, int) const;
 
+        /**
+         * Fills a region of zones inside a rectangle.
+         */
+        void fillRegion(MapRegion &, Rectangle const &) const;
+
         Map *map; /**< Actual map. */
 
         /**
-         * Objects (items, players, monsters, etc) located on the map.
+         * Things (items, players, monsters, etc) located on the map.
          */
-        Objects objects;
+        std::vector< Thing * > things;
 
         /**
          * Buckets of MovingObjects located on the map, referenced by ID.

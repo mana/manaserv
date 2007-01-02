@@ -2,15 +2,7 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 
-bin_PROGRAMS = tmwclient tmwserv-account tmwserv-game
-
-tmwclient_SOURCES = \
-	client.cpp \
-	defines.h \
-	net/messagein.hpp \
-	net/messagein.cpp \
-	net/messageout.hpp \
-	net/messageout.cpp
+bin_PROGRAMS = tmwserv-account tmwserv-game
 
 tmwserv_account_SOURCES = \
 	account-server/main-account.cpp \
@@ -118,6 +110,9 @@ tmwserv_game_SOURCES = \
 	game-server/mapmanager.cpp \
 	game-server/state.hpp \
 	game-server/state.cpp \
+	game-server/testing.cpp \
+	game-server/trigger.hpp \
+	game-server/trigger.cpp \
 	net/connection.hpp \
 	net/connection.cpp \
 	net/connectionhandler.hpp \
@@ -174,8 +169,3 @@ bindings_wrap.cpp: bindings.i
 tmwserv_game_SOURCES += \
 	bindings_wrap.cpp
 endif
-
-
-# do not remove the 'dot', it is a hint for Automake.
-# it causes a prefix ordering of directories.
-SUBDIRS = . tests

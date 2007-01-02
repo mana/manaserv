@@ -78,7 +78,7 @@ static void linkCharacter(GameClient *computer, Player *ch)
     computer->character = ch;
     computer->status = CLIENT_CONNECTED;
     ch->setClient(computer);
-    gameState->insertObject(ch);
+    gameState->insert(ch);
     MessageOut result;
     result.writeShort(GPMSG_CONNECT_RESPONSE);
     result.writeByte(ERRMSG_OK);
@@ -130,7 +130,7 @@ void GameHandler::computerDisconnected(NetComputer *computer)
     }
     if (Player *ch = static_cast< GameClient * >(computer)->character)
     {
-        gameState->removeObject(ch);
+        gameState->remove(ch);
         delete ch;
     }
     delete computer;
