@@ -360,6 +360,23 @@ void State::remove(Thing *ptr)
             }
         }
     }
+    else if (ptr->getType() == OBJECT_ITEM)
+    {
+        Item *obj = static_cast< Item * >(ptr);
+        Point pos = obj->getPosition();
+        MessageOut msg(GPMSG_ITEMS);
+        msg.writeShort(0);
+        msg.writeShort(pos.x);
+        msg.writeShort(pos.y);
+
+        for (PlayerIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
+        {
+            if (pos.inRangeOf((*p)->getPosition(), AROUND_AREA))
+            {
+                gameHandler->sendTo(*p, msg);
+            }
+        }
+    }
 
     map->remove(ptr);
 }
