@@ -101,7 +101,7 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         modifiers.weaponType = XML::getProperty(node, "weapon_type", 0);
         modifiers.beingStateEffect = XML::getProperty(node, "status_effect", 0);
 
-        ItemClass *item = new ItemClass(itemType);
+        ItemClass *item = new ItemClass(id, itemType);
         item->setWeight(weight);
         item->setCost(value);
         item->setMaxPerSlot(maxPerSlot);
@@ -156,4 +156,10 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
              << itemReferenceFile << ".", 0);
 
     xmlFreeDoc(doc);
+}
+
+ItemClass *ItemManager::getItem(int itemId) const
+{
+    std::map< int, ItemClass * >::const_iterator i = mItemReference.find(itemId);
+    return i != mItemReference.end() ? i->second : NULL;
 }

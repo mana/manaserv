@@ -43,8 +43,7 @@ class ItemManager
         /**
          * Gives an Item having the demanded information.
          */
-        ItemClass *getItem(int itemId)
-        { return mItemReference[itemId]; };
+        ItemClass *getItem(int itemId) const;
 
     private:
         std::map< int, ItemClass * > mItemReference; /**< Item reference */

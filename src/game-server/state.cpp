@@ -29,6 +29,7 @@
 #include "point.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
+#include "game-server/item.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
@@ -201,6 +202,29 @@ void State::informPlayer(MapComposite *map, Player *p)
 
     if (damageMsg.getLength() > 2)
         gameHandler->sendTo(p, damageMsg);
+
+    MessageOut itemMsg(GPMSG_ITEMS);
+    for (FixedObjectIterator i(map->getAroundPlayerIterator(p, AROUND_AREA)); i; ++i)
+    {
+        assert((*i)->getType() == OBJECT_ITEM);
+        Item *o = static_cast< Item * >(*i);
+        Point opos = o->getPosition();
+        int oflags = o->getUpdateFlags();
+        bool willBeInRange = ppos.inRangeOf(opos, AROUND_AREA);
+        bool wereInRange = pold.inRangeOf(opos, AROUND_AREA) &&
+                           !((pflags | oflags) & NEW_ON_MAP);
+
+        if (willBeInRange ^ wereInRange)
+        {
+            itemMsg.writeShort(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
+            itemMsg.writeShort(opos.x);
+            itemMsg.writeShort(opos.y);
+        }
+    }
+
+    // Do not send a packet if nothing happened in p's range.
+    if (itemMsg.getLength() > 2)
+        gameHandler->sendTo(p, itemMsg);
 }
 
 void State::update()

@@ -210,6 +210,33 @@ void MovingObjectIterator::operator++()
     }
 }
 
+FixedObjectIterator::FixedObjectIterator(ZoneIterator const &it)
+  : iterator(it), pos(0)
+{
+    while (iterator && (*iterator)->nbMovingObjects == (*iterator)->objects.size()) ++iterator;
+    if (iterator)
+    {
+        pos = (*iterator)->nbMovingObjects;
+        current = (*iterator)->objects[pos];
+    }
+}
+
+void FixedObjectIterator::operator++()
+{
+    if (++pos == (*iterator)->objects.size())
+    {
+        do ++iterator; while (iterator && (*iterator)->nbMovingObjects == (*iterator)->objects.size());
+        if (iterator)
+        {
+            pos = (*iterator)->nbMovingObjects;
+        }
+    }
+    if (iterator)
+    {
+        current = (*iterator)->objects[pos];
+    }
+}
+
 ObjectIterator::ObjectIterator(ZoneIterator const &it)
   : iterator(it), pos(0)
 {
@@ -355,8 +382,8 @@ void MapComposite::fillRegion(MapRegion &r, Point const &p, int radius) const
 {
     int ax = p.x > radius ? (p.x - radius) / zoneDiam : 0,
         ay = p.y > radius ? (p.y - radius) / zoneDiam : 0,
-        bx = std::max((p.x + radius) / zoneDiam, mapWidth - 1),
-        by = std::max((p.y + radius) / zoneDiam, mapHeight - 1);
+        bx = std::min((p.x + radius) / zoneDiam, mapWidth - 1),
+        by = std::min((p.y + radius) / zoneDiam, mapHeight - 1);
     for (int y = ay; y <= by; ++y)
     {
         for (int x = ax; x <= bx; ++x)
@@ -370,8 +397,8 @@ void MapComposite::fillRegion(MapRegion &r, Rectangle const &p) const
 {
     int ax = p.x / zoneDiam,
         ay = p.y / zoneDiam,
-        bx = std::max((p.x + p.w) / zoneDiam, mapWidth - 1),
-        by = std::max((p.y + p.h) / zoneDiam, mapHeight - 1);
+        bx = std::min((p.x + p.w) / zoneDiam, mapWidth - 1),
+        by = std::min((p.y + p.h) / zoneDiam, mapHeight - 1);
     for (int y = ay; y <= by; ++y)
     {
         for (int x = ax; x <= bx; ++x)

@@ -144,15 +144,16 @@ enum {
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     PGMSG_WALK                     = 0x0260, // W*2 destination
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, C position] [, W*2 destination] }*
-    PGMSG_SAY                      = 0x02A0, // S text
-    GPMSG_SAY                      = 0x02A1, // W being id, S text
+    GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     PGMSG_ATTACK                   = 0x0290, // B direction
     GPMSG_BEING_ATTACK             = 0x0291, // W being id
+    PGMSG_SAY                      = 0x02A0, // S text
+    GPMSG_SAY                      = 0x02A1, // W being id, S text
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     PGMSG_EQUIP                    = 0x0302, // L item id, B slot
     GPMSG_EQUIP_RESPONSE           = 0x0303, // B error
-    GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W ammount }*
+    GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error

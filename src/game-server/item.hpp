@@ -129,8 +129,8 @@ struct Modifiers
 class ItemClass
 {
     public:
-        ItemClass(int type)
-          : mType(type)
+        ItemClass(int id, int type)
+          : mDatabaseID(id), mType(type)
         {}
 
         /**
@@ -199,6 +199,12 @@ class ItemClass
         void setScriptName(std::string const &name)
         { mScriptName = name; }
 
+        /**
+         * Gets database ID.
+         */
+        int getDatabaseID()
+        { return mDatabaseID; }
+
     private:
 
         /**
@@ -207,6 +213,7 @@ class ItemClass
         bool runScript(Being *itemUser);
 
         // Item reference information
+        unsigned short mDatabaseID;
         unsigned char mType;     /**< Type: usable, equipment. */
         unsigned short mWeight;  /**< Weight of the item. */
         unsigned short mCost;    /**< Unit cost the item. */
@@ -224,6 +231,8 @@ class Item: public Object
 
         ItemClass *getItemClass() const
         { return mType; }
+
+        virtual void update() {}
 
     private:
         ItemClass *mType;

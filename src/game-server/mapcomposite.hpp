@@ -112,6 +112,21 @@ struct MovingObjectIterator
 };
 
 /**
+ * Iterates through the non-moving Objects of a region.
+ */
+struct FixedObjectIterator
+{
+    ZoneIterator iterator;
+    unsigned short pos;
+    Object *current;
+
+    FixedObjectIterator(ZoneIterator const &);
+    void operator++();
+    Object *operator*() const { return current; }
+    operator bool() const { return iterator; }
+};
+
+/**
  * Iterates through the Objects of a region.
  */
 struct ObjectIterator

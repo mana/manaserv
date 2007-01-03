@@ -42,6 +42,12 @@
 	* src/game-server/being.hpp: Removed counted pointers.
 	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp,
 	src/game-server/being.cpp: Fixed end of lines.
+	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp:
+	Fixed pessimistic bounds on region iterators. Added an iterator for
+	non-moving objects.
+	* src/defines.h, src/game-server/state.cpp: Added code to send data on
+	floor items to clients.
+	* src/game-server/testing.cpp: Added a Xmas cake for testing purpose.
 
 2007-01-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

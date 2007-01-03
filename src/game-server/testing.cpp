@@ -2,7 +2,10 @@
    to the game. It should be removed once all the related managers have been
    implemented. There are no headers for this file on purpose. */
 
+#include <cassert>
+
 #include "controller.h"
+#include "game-server/itemmanager.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
 
@@ -27,6 +30,13 @@ void testingMap(int id)
                 being->setPosition(pos);
                 gameState->insert(being);
             }
+            ItemClass *ic = itemManager->getItem(508);
+            assert(ic);
+            Item *i = new Item(ic);
+            i->setMapId(1);
+            Point pos = { 58 * 32 + 16, 20 * 32 + 16 };
+            i->setPosition(pos);
+            gameState->insert(i);
         } break;
 
         case 3:
