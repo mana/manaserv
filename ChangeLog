@@ -1,6 +1,7 @@
 2007-01-03  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp: Updated project files.
+	* src/game-server/state.cpp: Fix to Windows Rectangle redefinition.
 
 2007-01-03  Björn Steinbrink  <B.Steinbrink@gmx.de>
 

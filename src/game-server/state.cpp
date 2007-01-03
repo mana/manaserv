@@ -21,6 +21,8 @@
  *  $Id$
  */
 
+#define NOGDI
+
 #include <cassert>
 
 #include "defines.h"
