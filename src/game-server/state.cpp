@@ -216,9 +216,20 @@ void State::informPlayer(MapComposite *map, Player *p)
 
         if (willBeInRange ^ wereInRange)
         {
-            itemMsg.writeShort(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
-            itemMsg.writeShort(opos.x);
-            itemMsg.writeShort(opos.y);
+            if (oflags & NEW_ON_MAP)
+            {
+                MessageOut appearMsg(GPMSG_ITEM_APPEAR);
+                appearMsg.writeShort(o->getItemClass()->getDatabaseID());
+                appearMsg.writeShort(opos.x);
+                appearMsg.writeShort(opos.y);
+                gameHandler->sendTo(p, appearMsg);
+            }
+            else
+            {
+                itemMsg.writeShort(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
+                itemMsg.writeShort(opos.x);
+                itemMsg.writeShort(opos.y);
+            }
         }
     }
 

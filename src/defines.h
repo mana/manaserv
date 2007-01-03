@@ -142,6 +142,7 @@ enum {
                                              // player: S name, B hair style, B hair color, B gender
                                              // monster: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
+    GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
     PGMSG_WALK                     = 0x0260, // W*2 destination
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, C position] [, W*2 destination] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
