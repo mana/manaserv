@@ -31,6 +31,17 @@
 	* src/defines.h: Fixed enumerations.
 	* src/games-server/gamehandler.cpp, src/game-server/player.cpp:
 	Commented in inventory code back.
+	* src/item.h, src/item.cpp: Moved to src/game-server directory and
+	changed header extension to hpp.
+	* src/game-server/itemmanager.hpp, src/game-server/itemmanager.cpp,
+	src/game-server/inventory.hpp, src/game-server/inventory.cpp,
+	src/game-server/player.hpp, src/game-server/gamehandler.cpp,
+	src/game-server/player.cpp: Simplified Inventory interface a bit.
+	Renamed Item to ItemClass to reflect its role. Added a Item class for
+	Objects lying on the world map.
+	* src/game-server/being.hpp: Removed counted pointers.
+	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp,
+	src/game-server/being.cpp: Fixed end of lines.
 
 2007-01-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

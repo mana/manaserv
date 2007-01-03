@@ -21,38 +21,37 @@
  *  $Id$
  */
 
+#include <cassert>
+
 #include "game-server/inventory.hpp"
 #include "game-server/itemmanager.hpp"
 
 // ---------
 // Items
 // ---------
-unsigned char
-Inventory::getInventoryFreeSlot()
+int Inventory::getInventoryFreeSlot()
 {
     for (int a = 0; a < MAX_ITEMS_IN_INVENTORY; a++)
     {
-        if (itemList.at(a).amount == 0)
+        if (itemList[a].amount == 0)
             return a;
     }
     return INVENTORY_FULL;
 }
 
-unsigned char
-Inventory::getSlotFromId(const unsigned int itemId)
+int Inventory::getSlotFromId(int itemId)
 {
     for (int a = 0; a < MAX_ITEMS_IN_INVENTORY; a++)
     {
-        if (itemList.at(a).itemId == itemId)
+        if (itemList[a].itemId == itemId)
             return a;
     }
     return INVENTORY_FULL;
 }
 
-bool
-Inventory::hasItem(unsigned int itemId,
-                   bool searchInInventory,
-                   bool searchInEquipment)
+bool Inventory::hasItem(int itemId,
+                        bool searchInInventory,
+                        bool searchInEquipment)
 {
     bool hasItem = false;
     // Search in inventory
@@ -82,44 +81,51 @@ Inventory::hasItem(unsigned int itemId,
     return hasItem;
 }
 
-short
-Inventory::addItem(unsigned int itemId, unsigned char amount)
+int Inventory::insertItem(int itemId, int amount)
 {
+    if (amount <= 0)
+    {
+        return 0;
+    }
+
     // We get the max number of item we can have in the same slot
     // for the given item.
-    unsigned char maxPerSlot = itemManager->getMaxPerSlot(itemId);
+    int maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
     // We'll add items in slots with the item type and in free slots
     // until it's all done or until the inventory will be all parsed.
     // Searching for items with the same Id in the inventory, before
     // seeking a free slot.
-    unsigned char amountToAdd = amount;
+    int amountToAdd = amount;
 
     // Parsing inventory
-    unsigned char currentAmountInSlot = 0;
-    std::vector<StoredItem>::iterator iter = itemList.begin();
-    for (iter = itemList.begin(); iter != itemList.end(); ++iter)
+    for (std::vector< StoredItem >::iterator iter = itemList.begin(),
+         iter_end = itemList.end(); iter != iter_end; ++iter)
     {
-        currentAmountInSlot = iter->amount;
+        int currentAmountInSlot = iter->amount;
         // If a slot has got place for some more of such an item.
         if (iter->itemId == itemId && currentAmountInSlot < maxPerSlot)
         {
             // If there isn't enough space to put every item in the slot.
             // We add the difference.
-            if ((maxPerSlot - currentAmountInSlot) < amountToAdd)
+            int possibleAmount = maxPerSlot - currentAmountInSlot;
+            assert(possibleAmount > 0);
+            if (possibleAmount < amountToAdd)
             {
-                iter->amount += (maxPerSlot - currentAmountInSlot);
-                amountToAdd -= (maxPerSlot - currentAmountInSlot);
+                iter->amount += possibleAmount;
+                amountToAdd -= possibleAmount;
             }
             else // there is enough to add everything.
             {
                 iter->amount += amountToAdd;
                 amountToAdd = 0; // Ok!
+                break;
             }
         }
         // Or if there is an empty slot.
         else if (iter->amount == 0)
         {
             // We add the item in the new slot (setting also the Id.)
+            iter->itemId = itemId;
             if (maxPerSlot < amountToAdd)
             {
                 iter->amount = maxPerSlot;
@@ -129,28 +135,31 @@ Inventory::addItem(unsigned int itemId, unsigned char amount)
             {
                 iter->amount += amountToAdd;
                 amountToAdd = 0; // Ok!
+                break;
             }
-            iter->itemId = itemId;
         }
     }
 
-    return (short)(amount - amountToAdd);
+    return amount - amountToAdd;
 }
 
-short
-Inventory::removeItem(unsigned int itemId, unsigned char amount)
+int Inventory::removeItemById(int itemId, int amount)
 {
+    if (amount <= 0)
+    {
+        return 0;
+    }
+
     // We'll remove items in slots with the item type
     // until it's all done or until the inventory will be all parsed.
     // Searching for items with the same Id in the inventory
-    unsigned char amountToRemove = amount;
+    int amountToRemove = amount;
 
     // Parsing inventory
-    unsigned char currentAmountInSlot = 0;
-    std::vector<StoredItem>::iterator iter = itemList.begin();
-    for (iter = itemList.begin(); iter != itemList.end(); ++iter)
+    for (std::vector< StoredItem >::iterator iter = itemList.begin(),
+         iter_end = itemList.end(); iter != iter_end; ++iter)
     {
-        currentAmountInSlot = iter->amount;
+        int currentAmountInSlot = iter->amount;
         // If a slot has got such an item, remove it
         if (iter->itemId == itemId && currentAmountInSlot > 0)
         {
@@ -166,76 +175,68 @@ Inventory::removeItem(unsigned int itemId, unsigned char amount)
             {
                 iter->amount -= amountToRemove;
                 amountToRemove = 0; // Ok!
+                break;
             }
         }
     }
-    return (short)(amount - amountToRemove);
+    return amount - amountToRemove;
 }
 
-short
-Inventory::removeItem(unsigned char slot, unsigned char amount)
+int Inventory::removeItemBySlot(int slot, int amount)
 {
-    if (itemList.at(slot).amount < amount)
+    if (amount <= 0)
     {
-        unsigned char value = itemList.at(slot).amount;
-        itemList.at(slot).amount = 0;
-        return (short)value;
+        return 0;
+    }
+
+    if (itemList[slot].amount < amount)
+    {
+        int value = itemList[slot].amount;
+        itemList[slot].amount = 0;
+        return value;
     }
     else
     {
-        itemList.at(slot).amount -= amount;
+        itemList[slot].amount -= amount;
         return amount;
     }
-}
-
-bool
-Inventory::use(unsigned char slot, BeingPtr itemUser)
-{
-    return false; // TODO
-}
-
-bool
-Inventory::use(unsigned int itemId, BeingPtr itemUser)
-{
-    return false; // TODO
 }
 
 // ---------
 // Equipment
 // ---------
-unsigned char
-Inventory::equipItem(unsigned int itemId)
+int Inventory::equipItem(int itemId)
 {
     // First, we look for the item in the player's inventory.
     if (!hasItem(itemId, true, false))
         return false;
 
-    unsigned char availableSlots = 0, firstSlot = 0, secondSlot = 0;
+    int availableSlots = 0, firstSlot = 0, secondSlot = 0;
 
-    unsigned short itemType = itemManager->getItemType(itemId);
+    int itemType = itemManager->getItem(itemId)->getType();
     switch (itemType)
     {
         case ITEM_EQUIPMENT_TWO_HANDS_WEAPON:
         // Special case 1, the two one-handed weapons are to be placed back
         // in the inventory, if there are any.
-            if (equippedItemList.at(EQUIP_FIGHT1_SLOT).itemId > 0)
+            if (equippedItemList[EQUIP_FIGHT1_SLOT].itemId > 0)
             {   // Slot 1 full
                 // old two-handed weapon case:
-                if (equippedItemList.at(EQUIP_FIGHT1_SLOT).itemType
+                if (equippedItemList[EQUIP_FIGHT1_SLOT].itemType
                     == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
                 {
-                    equippedItemList.at(EQUIP_FIGHT2_SLOT).itemId = 0;
-                    equippedItemList.at(EQUIP_FIGHT2_SLOT).itemType = 0;
+                    equippedItemList[EQUIP_FIGHT2_SLOT].itemId = 0;
+                    equippedItemList[EQUIP_FIGHT2_SLOT].itemType = 0;
                 }
 
-                if (unequipItem_(equippedItemList.at(EQUIP_FIGHT1_SLOT).itemId,
-                EQUIP_FIGHT1_SLOT) == INVENTORY_FULL)
+                if (unequipItem_(equippedItemList[EQUIP_FIGHT1_SLOT].itemId,
+                                 EQUIP_FIGHT1_SLOT) == INVENTORY_FULL)
                     return INVENTORY_FULL;
             }
-            if (equippedItemList.at(EQUIP_FIGHT2_SLOT).itemId > 0)
+            if (equippedItemList[EQUIP_FIGHT2_SLOT].itemId > 0)
             {   // Slot 2 full
-                if (unequipItem_(equippedItemList.at(EQUIP_FIGHT2_SLOT).itemId,
-                EQUIP_FIGHT2_SLOT) == INVENTORY_FULL)
+                if (unequipItem_(equippedItemList[EQUIP_FIGHT2_SLOT].itemId,
+                                 EQUIP_FIGHT2_SLOT) == INVENTORY_FULL)
                     return INVENTORY_FULL;
             }
             // Only the slot 1 needs to be updated.
@@ -248,19 +249,18 @@ Inventory::equipItem(unsigned int itemId)
             // Case 1: Reloading
             if (equippedProjectiles.itemId == itemId)
             {
-                equippedProjectiles.amount += removeItem(itemId,
-                            (255 - equippedProjectiles.amount));
+                equippedProjectiles.amount +=
+                    removeItemById(itemId, 255 - equippedProjectiles.amount);
                 return EQUIP_PROJECTILES_SLOT;
             }
             else // Case 2: Changing projectiles.
             {
-                short added;
-                added = addItem(equippedProjectiles.itemId,
-                                equippedProjectiles.amount);
+                int added = insertItem(equippedProjectiles.itemId,
+                                       equippedProjectiles.amount);
                 if (added == equippedProjectiles.amount)
                 { // Ok, we can equip
                     equippedProjectiles.itemId = itemId;
-                    equippedProjectiles.amount = removeItem(itemId, 255);
+                    equippedProjectiles.amount = removeItemById(itemId, 255);
                     return EQUIP_PROJECTILES_SLOT;
                 }
                 else // Some were unequipped.
@@ -316,10 +316,10 @@ Inventory::equipItem(unsigned int itemId)
     switch (availableSlots)
     {
     case 1:
-        if (equippedItemList.at(firstSlot).itemId > 0)
+        if (equippedItemList[firstSlot].itemId > 0)
         {
-            if (unequipItem_(equippedItemList.at(firstSlot).itemId,
-                firstSlot) != INVENTORY_FULL)
+            if (unequipItem_(equippedItemList[firstSlot].itemId,
+                             firstSlot) != INVENTORY_FULL)
                     return equipItem_(itemId, itemType, firstSlot);
                 else
                     return INVENTORY_FULL;
@@ -331,25 +331,25 @@ Inventory::equipItem(unsigned int itemId)
         break;
 
     case 2:
-        if (equippedItemList.at(firstSlot).itemId > 0)
+        if (equippedItemList[firstSlot].itemId > 0)
         {
             // If old weapon is two-handed one, we can unequip
             // the first slot only, and clean the second.
-            if (equippedItemList.at(firstSlot).itemId ==
+            if (equippedItemList[firstSlot].itemId ==
                 ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
             {
-                if (unequipItem_(equippedItemList.at(firstSlot).itemId,
+                if (unequipItem_(equippedItemList[firstSlot].itemId,
                     firstSlot) != INVENTORY_FULL)
                     return equipItem_(itemId, itemType, firstSlot);
                 else
                     return INVENTORY_FULL;
             }
 
-            if (equippedItemList.at(secondSlot).itemId > 0)
+            if (equippedItemList[secondSlot].itemId > 0)
             { // Both slots are full,
                 // we remove the first one to equip
-                if (unequipItem_(equippedItemList.at(firstSlot).itemId,
-                    firstSlot) != INVENTORY_FULL)
+                if (unequipItem_(equippedItemList[firstSlot].itemId,
+                                 firstSlot) != INVENTORY_FULL)
                     return equipItem_(itemId, itemType, firstSlot);
                 else
                     return INVENTORY_FULL;
@@ -370,48 +370,26 @@ Inventory::equipItem(unsigned int itemId)
     }
 }
 
-bool
-Inventory::equipItem(unsigned char inventorySlot, unsigned char equipmentSlot)
+int Inventory::equipItem_(int itemId,
+                          int itemType,
+                          int equipmentSlot)
 {
-    return false; // TODO
-}
-
-bool
-Inventory::unequipItem(unsigned int itemId)
-{
-    return false; // TODO
-}
-
-bool
-Inventory::unequipItem(unsigned char inventorySlot,
-                       unsigned char equipmentSlot)
-{
-    return false; // TODO
-}
-
-unsigned char
-Inventory::equipItem_(unsigned int itemId,
-                      unsigned int itemType,
-                      unsigned char equipmentSlot)
-{
-    if (removeItem(itemId, 1) == 1)
+    if (removeItemById(itemId, 1) == 1)
     {
-        equippedItemList.at(equipmentSlot).itemId = itemId;
-        equippedItemList.at(equipmentSlot).itemType = itemType;
+        equippedItemList[equipmentSlot].itemId = itemId;
+        equippedItemList[equipmentSlot].itemType = itemType;
         return equipmentSlot;
     }
     else
         return NO_ITEM_TO_EQUIP;
 }
 
-unsigned char
-Inventory::unequipItem_(unsigned int itemId,
-             unsigned char equipmentSlot)
+int Inventory::unequipItem_(int itemId, int equipmentSlot)
 {
-    if (addItem(itemId, 1) == 1)
+    if (insertItem(itemId, 1) == 1)
     {
-        equippedItemList.at(equipmentSlot).itemId = 0;
-        equippedItemList.at(equipmentSlot).itemType = 0;
+        equippedItemList[equipmentSlot].itemId = 0;
+        equippedItemList[equipmentSlot].itemType = 0;
         return equipmentSlot;
     }
     else

@@ -26,12 +26,11 @@
 
 #include <map>
 
-#include "item.h"
+#include "game-server/item.hpp"
 
 /**
  * The Item Manager loads the item reference database
  * and also offers an API to items information, and more.
- * For item objects, see the WorldItem class.
  */
 class ItemManager
 {
@@ -39,50 +38,16 @@ class ItemManager
         /**
          * Constructor (loads item reference file)
          */
-        ItemManager(const std::string &itemReferenceFile);
+        ItemManager(std::string const &itemReferenceFile);
 
         /**
          * Gives an Item having the demanded information.
          */
-        ItemPtr getItem(const unsigned int itemId)
+        ItemClass *getItem(int itemId)
         { return mItemReference[itemId]; };
 
-        bool use(BeingPtr beingPtr, const unsigned int itemId)
-        { return mItemReference[itemId].get()->use(beingPtr); };
-
-        /**
-         * Return item Type
-         */
-        unsigned short getItemType(const unsigned int itemId)
-        { return mItemReference[itemId].get()->getItemType(); };
-
-        /**
-         * Return Weight of item
-         */
-        unsigned int getWeight(const unsigned int itemId)
-        { return mItemReference[itemId].get()->getWeight(); };
-
-        /**
-         * Return gold value of item
-         */
-        unsigned int getGoldValue(const unsigned int itemId)
-        { return mItemReference[itemId].get()->getGoldValue(); };
-
-        /**
-         * Return max item per slot
-         */
-        unsigned short getMaxPerSlot(const unsigned int itemId)
-        { return mItemReference[itemId].get()->getMaxPerSlot(); };
-
-        /**
-         * Return item's modifiers
-         */
-        Modifiers
-        getItemModifiers(const unsigned int itemId)
-        { return mItemReference[itemId].get()->getItemModifiers(); };
-
     private:
-        std::map<unsigned int, ItemPtr> mItemReference; /**< Item reference */
+        std::map< int, ItemClass * > mItemReference; /**< Item reference */
 };
 
 extern ItemManager *itemManager;

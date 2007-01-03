@@ -70,7 +70,7 @@ enum
  */
 struct StoredItem
 {
-    unsigned int itemId;
+    int itemId;
     unsigned char amount;
 };
 
@@ -79,7 +79,7 @@ struct StoredItem
  */
 struct EquippedItem
 {
-    unsigned int itemId;
+    int itemId;
     short itemType;
 };
 
@@ -95,61 +95,50 @@ class Inventory
          * Convenience function to get slot from ItemId.
          * If more than one occurence is found, the first is given.
          */
-        unsigned char
-        getSlotFromId(unsigned int itemId);
+        int getSlotFromId(int itemId);
 
         /**
-         * Return StoredItem
+         * Returns item.
          */
-        StoredItem
-        getStoredItemAt(unsigned char slot) const { return itemList[slot]; };
+        StoredItem const &getStoredItemAt(int slot) const
+        { return itemList[slot]; };
 
         /**
-         * Search in inventory and equipment if an item is present.
+         * Looks in inventory and equipment whether an item is present or not.
          */
-        bool
-        hasItem(unsigned int itemId,
-                bool searchInInventory = true,
-                bool searchInEquipment = true);
+        bool hasItem(int itemId,
+                     bool searchInInventory = true,
+                     bool searchInEquipment = true);
 
         /**
          * Tells an item's amount
          */
-        unsigned short
-        getItemAmount(unsigned char slot) const { return itemList[slot].amount; };
+        int getItemAmount(int slot) const
+        { return itemList[slot].amount; };
 
         /**
-         * Return Item reference Id
+         * Returns item reference ID.
          */
-        unsigned int
-        getItemId(unsigned char slot) const { return itemList[slot].itemId; };
+        int getItemId(int slot) const
+        { return itemList[slot].itemId; };
 
         /**
-         * add an item with amount 
-         * (don't create it if amount was 0)
-         * @return short value: Indicates the number of items added.
+         * Adds a given amount of items.
+         * @return Number of items really added.
          */
-        short
-        addItem(unsigned int itemId, unsigned char amount = 1);
+        int insertItem(int itemId, int amount = 1);
 
         /**
-         * Remove an item searched by ItemId.
-         * Delete if amount = 0.
-         * @return short value: Indicates the number of items removed.
-         * This function removes the given amount using every slots
-         * if necessary.
+         * Removes an item given by ID.
+         * @return Number of items really removed.
          */
-        short
-        removeItem(unsigned int itemId, unsigned char amount = 0);
+        int removeItemById(int itemId, int amount);
 
         /**
-         * Remove an item searched by slot index.
-         * Delete if amount = 0.
-         * @return short value: Indicates the number of items removed.
-         * Removes only in the given slot.
+         * Removes an item given by slot.
+         * @return Number of items really removed.
          */
-        short
-        removeItem(unsigned char slot, unsigned char amount = 0);
+        int removeItemBySlot(int slot, int amount);
 
         /**
          * Equip an item searched by its id.
@@ -157,48 +146,30 @@ class Inventory
          * @return unsigned char value: Returns the slot if successful
          * or the error code if not.
          */
-        unsigned char
-        equipItem(unsigned int itemId);
+        int equipItem(int itemId);
 
         /**
          * Unequip an item searched by its id.
          * Can unequip more than one item at a time.
          */
-        bool
-        unequipItem(unsigned int itemId);
+        bool unequipItem(int itemId);
 
         /**
-         * Equip an item searched by its slot index.
+         * Equips an item searched by its slot index.
          */
-        bool
-        equipItem(unsigned char inventorySlot, unsigned char equipmentSlot);
+        bool equipItem(int inventorySlot, int equipmentSlot);
 
         /**
-         * Unequip an equipped item searched by its slot index.
+         * Unequips an equipped item searched by its slot index.
          */
-        bool
-        unequipItem(unsigned char inventorySlot, unsigned char equipmentSlot);
-
-        /**
-         * The function called to use an item applying
-         * only the modifiers
-         */
-        bool
-        use(unsigned char slot, BeingPtr itemUser);
-
-        /**
-         * The function called to use an item applying
-         * only the modifiers
-         */
-        bool
-        use(unsigned int itemId, BeingPtr itemUser);
+        bool unequipItem(int inventorySlot, int equipmentSlot);
 
     private:
 
         /**
-         * Give the first free slot number in itemList.
+         * Gives the first free slot number in itemList.
          */
-        unsigned char getInventoryFreeSlot();
+        int getInventoryFreeSlot();
 
         /**
          * Quick equip an equipment with a given equipSlot,
@@ -206,9 +177,9 @@ class Inventory
          * @return the equipment slot if successful,
          * the error code, if not.
          */
-        unsigned char equipItem_(unsigned int itemId,
-                                 unsigned int itemType,
-                                 unsigned char equipmentSlot);
+        int equipItem_(int itemId,
+                       int itemType,
+                       int equipmentSlot);
 
         /**
          * Quick unequip an equipment with a given equipSlot,
@@ -216,8 +187,8 @@ class Inventory
          * @return the Equipment slot if successful,
          * the error code, if not.
          */
-        unsigned char unequipItem_(unsigned int itemId,
-                                   unsigned char equipmentSlot);
+        int unequipItem_(int itemId,
+                         int equipmentSlot);
 
 
         // Stored items in inventory and equipment

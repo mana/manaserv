@@ -21,18 +21,18 @@
  *  $Id$
  */
 
-#include "item.h"
+#include "game-server/item.hpp"
 
-bool Item::use(BeingPtr itemUser)
+bool ItemClass::use(Being *itemUser)
 {
     bool usedSuccessfully = true;
     // Applying Modifiers for a given lifetime
     // TODO
 
     // Calling a script if scriptName != ""
-    if (mScriptName != "")
+    if (!mScriptName.empty())
     {
-        if(runScript(itemUser) && usedSuccessfully)
+        if (runScript(itemUser) && usedSuccessfully)
             return true;
         else
             return false;
@@ -41,7 +41,7 @@ bool Item::use(BeingPtr itemUser)
         return usedSuccessfully;
 }
 
-bool Item::runScript(BeingPtr itemUser)
+bool ItemClass::runScript(Being *itemUser)
 {
     //TODO
     return true;

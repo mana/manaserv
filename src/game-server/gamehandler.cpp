@@ -234,19 +234,19 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_PICKUP:
             {
                 // add item to inventory (this is too simplistic atm)
-                unsigned int itemId = message.readLong();
+                int itemId = message.readLong();
 
                 // remove the item from world map
 
                 // send feedback
-                computer.character->addItem(itemId);
+                computer.character->insertItem(itemId, 1);
                 result.writeShort(GPMSG_PICKUP_RESPONSE);
                 result.writeByte(ERRMSG_OK);
             } break;
 
         case PGMSG_USE_ITEM:
             {
-                unsigned int itemId = message.readLong();
+                int itemId = message.readLong();
 
                 result.writeShort(GPMSG_USE_RESPONSE);
 
@@ -273,7 +273,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_EQUIP:
             {
                 message.readLong(); // ItemId: Not useful, the inventory knows it
-                char slot = message.readByte();
+                int slot = message.readByte();
 
                 result.writeShort(GPMSG_EQUIP_RESPONSE);
                 result.writeByte(computer.character->equip(slot) ?

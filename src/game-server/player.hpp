@@ -51,48 +51,43 @@ class Player : public Being, public PlayerData
         /**
          * Sets inventory.
          */
-        void
-        setInventory(const Inventory &inven);
+        void setInventory(Inventory const &inven)
+        { inventory = inven; }
 
         /**
          * Adds item with ID to inventory.
          *
          * @return Item add success/failure
          */
-        bool
-        addItem(unsigned int itemId, unsigned char amount = 1);
+        bool insertItem(int itemId, int amount);
 
         /**
          * Removes item with ID from inventory.
          *
          * @return Item delete success/failure
          */
-        bool
-        removeItem(unsigned int itemId, unsigned char amount = 0);
+        bool removeItem(int itemId, int amount);
 
         /**
          * Checks if character has an item.
          *
          * @return true if being has item, false otherwise
          */
-        bool
-        hasItem(unsigned int itemId);
+        bool hasItem(int itemId);
 
         /**
          * Equips item with ID in equipment slot.
          *
          * @return Equip success/failure
          */
-        bool
-        equip(unsigned char slot);
+        bool equip(int slot);
 
         /**
          * Un-equips item.
          *
          * @return Un-equip success/failure
          */
-        bool
-        unequip(unsigned char slot);
+        bool unequip(int slot);
 
         /**
          * Set attacking state

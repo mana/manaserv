@@ -56,32 +56,27 @@ void Player::update()
     }
 }
 
-void Player::setInventory(const Inventory &inven)
+bool Player::insertItem(int itemId, int amount)
 {
-    inventory = inven;
+    return inventory.insertItem(itemId, amount);
 }
 
-bool Player::addItem(unsigned int itemId, unsigned char amount)
+bool Player::removeItem(int itemId, int amount)
 {
-    return inventory.addItem(itemId, amount);
+    return inventory.removeItemById(itemId, amount);
 }
 
-bool Player::removeItem(unsigned int itemId, unsigned char amount)
-{
-    return inventory.removeItem(itemId, amount);
-}
-
-bool Player::hasItem(unsigned int itemId)
+bool Player::hasItem(int itemId)
 {
     return inventory.hasItem(itemId);
 }
 
-bool Player::equip(unsigned char slot)
+bool Player::equip(int slot)
 {
     return false; // TODO
 }
 
-bool Player::unequip(unsigned char slot)
+bool Player::unequip(int slot)
 {
     return false; // TODO
 }

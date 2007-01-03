@@ -98,13 +98,17 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         modifiers.hp = XML::getProperty(node, "hp", 0);
         modifiers.mp = XML::getProperty(node, "mp", 0);
         modifiers.range = XML::getProperty(node, "range", 0);
-        modifiers.weaponType = (WeaponType)XML::getProperty(node, "weapon_type", 0);
-        modifiers.beingStateEffect = (BeingStateEffect)XML::getProperty(node, "status_effect", 0);
+        modifiers.weaponType = XML::getProperty(node, "weapon_type", 0);
+        modifiers.beingStateEffect = XML::getProperty(node, "status_effect", 0);
 
-        ItemPtr item(new Item(modifiers, itemType, weight,
-                              value, scriptName, maxPerSlot));
+        ItemClass *item = new ItemClass(itemType);
+        item->setWeight(weight);
+        item->setCost(value);
+        item->setMaxPerSlot(maxPerSlot);
+        item->setScriptName(scriptName);
+        item->setModifiers(modifiers);
         mItemReference[id] = item;
-        nbItems++;
+        ++nbItems;
 
         if (maxPerSlot == 0)
         {

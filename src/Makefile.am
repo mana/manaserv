@@ -68,8 +68,6 @@ tmwserv_game_SOURCES = \
 	controller.h \
 	controller.cpp \
 	defines.h \
-	item.h \
-	item.cpp \
 	playerdata.hpp \
 	point.h \
 	resourcemanager.h \
@@ -84,6 +82,8 @@ tmwserv_game_SOURCES = \
 	game-server/gamehandler.cpp \
 	game-server/inventory.hpp \
 	game-server/inventory.cpp \
+	game-server/item.hpp \
+	game-server/item.cpp \
 	game-server/itemmanager.hpp \
 	game-server/itemmanager.cpp \
 	game-server/map.hpp \

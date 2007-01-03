@@ -21,16 +21,16 @@
  *  $Id$
  */
 
-#ifndef ITEM_H
-#define ITEM_H
+#ifndef _TMWSERV_ITEM
+#define _TMWSERV_ITEM
 
-#include "playerdata.hpp"
-#include "game-server/being.hpp"
+#include "game-server/player.hpp"
 
 /**
  * Enumeration of available Item types.
  */
-typedef enum ItemType {
+enum
+{
     ITEM_UNUSABLE = 0,
     ITEM_USABLE,                            // 1
     ITEM_EQUIPMENT_ONE_HAND_WEAPON,         // 2
@@ -49,7 +49,8 @@ typedef enum ItemType {
 /**
  * Enumeration of available weapon's types.
  */
-typedef enum WeaponType {
+enum
+{
     WPNTYPE_NONE = 0,
     WPNTYPE_KNIFE,          // 1
     WPNTYPE_SWORD,          // 2
@@ -73,7 +74,8 @@ typedef enum WeaponType {
  * States attribute effects to beings, and actors.
  * States can be multiple for the same being.
  */
-typedef enum BeingStateEffect {
+enum
+{
     STATE_NORMAL = 0,
     STATE_POISONED,
     STATE_STONED,
@@ -105,102 +107,126 @@ struct Modifiers
 {
     // General
     unsigned char element; /**< Item Element */
-    BeingStateEffect beingStateEffect; /**< Being State (dis)alteration */
+    unsigned char beingStateEffect; /**< Being State (dis)alteration */
     unsigned short lifetime; /**< Modifiers lifetime in seconds. */
 
     // Caracteristics Modifiers
     short rawStats[NB_RSTAT]; /**< Raw Stats modifiers */
     short computedStats[NB_CSTAT]; /**< Computed Stats modifiers */
 
-    int hp; /**< HP modifier */
-    int mp; /**< MP Modifier */
+    short hp; /**< HP modifier */
+    short mp; /**< MP Modifier */
 
     // Weapon
     unsigned short range; /**< Weapon Item Range */
-    WeaponType weaponType; /**< Weapon Type enum */
+    unsigned char weaponType; /**< Weapon Type enum */
 };
 
 
 /**
  * Class for simple reference to item information.
- * See WorldItem to get full featured Item Objects.
  */
-class Item
+class ItemClass
 {
     public:
-
-        Item(Modifiers modifiers,
-            unsigned short itemType = 0,
-            unsigned int weight = 0,
-            unsigned int value = 0,
-            std::string scriptName = "",
-            unsigned short maxPerSlot = 0):
-            mItemType(itemType),
-            mWeight(weight),
-            mValue(value),
-            mScriptName(scriptName),
-            mMaxPerSlot(maxPerSlot),
-            mModifiers(modifiers) {}
-
-        virtual ~Item() throw() { }
+        ItemClass(int type)
+          : mType(type)
+        {}
 
         /**
          * The function called to use an item applying
          * only the modifiers (for simple items...)
          */
-        bool use(BeingPtr itemUser);
+        bool use(Being *itemUser);
 
         /**
-         * Return item Type
+         * Gets item type.
          */
-        unsigned short getItemType() const { return mItemType; };
+        int getType() const
+        { return mType; }
 
         /**
-         * Return Weight of item
+         * Gets item weight.
          */
-        unsigned int getWeight() const { return mWeight; };
+        int getWeight() const
+        { return mWeight; }
 
         /**
-         * Return gold value of item
+         * Sets item weight.
          */
-        unsigned int getGoldValue() const { return mValue; };
+        void setWeight(int weight)
+        { mWeight = weight; }
 
         /**
-         * Return max item per slot
+         * Gets unit cost of these items.
          */
-        unsigned short getMaxPerSlot() const { return mMaxPerSlot; };
+        int getCost() const
+        { return mCost; }
 
         /**
-         * Return item's modifiers
+         * Sets unit cost of these items.
          */
-        Modifiers
-        getItemModifiers() const { return mModifiers; };
+        void setCost(int cost)
+        { mCost = cost; }
+
+        /**
+         * Gets max item per slot.
+         */
+        int getMaxPerSlot() const
+        { return mMaxPerSlot; }
+
+        /**
+         * Sets max item per slot.
+         */
+        void setMaxPerSlot(int perSlot)
+        { mMaxPerSlot = perSlot; }
+
+        /**
+         * Gets item modifiers.
+         */
+        Modifiers const &getModifiers() const
+        { return mModifiers; }
+
+        /**
+         * Sets item modifiers.
+         */
+        void setModifiers(Modifiers const &modifiers)
+        { mModifiers = modifiers; }
+
+        /**
+         * Sets associated script name.
+         */
+        void setScriptName(std::string const &name)
+        { mScriptName = name; }
 
     private:
 
         /**
          * Runs the associated script when using the item, if any.
          */
-        bool runScript(BeingPtr itemUser);
+        bool runScript(Being *itemUser);
 
         // Item reference information
-        unsigned short mItemType; /**< ItemType: Usable, equipment */
-        unsigned int mWeight; /**< Weight of the item */
-        unsigned int mValue; /**< Gold value of the item */
-        std::string mScriptName; /**< item's script. None if =="" */
-        unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory */
-
-        Modifiers mModifiers; /**< Item's Modifiers */
+        unsigned char mType;     /**< Type: usable, equipment. */
+        unsigned short mWeight;  /**< Weight of the item. */
+        unsigned short mCost;    /**< Unit cost the item. */
+        unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory. */
+        std::string mScriptName; /**< Item script. */
+        Modifiers mModifiers; /**< Item modifiers. */
 };
 
-/**
- * Type definition for a smart pointer to Item.
- */
-typedef utils::CountedPtr<Item> ItemPtr;
+class Item: public Object
+{
+    public:
+        Item(ItemClass *type)
+          : Object(OBJECT_ITEM), mType(type)
+        {}
 
-/**
- * Type definition for a list of Items.
- */
-typedef std::vector<ItemPtr> Items;
+        ItemClass *getItemClass() const
+        { return mType; }
+
+    private:
+        ItemClass *mType;
+};
 
 #endif

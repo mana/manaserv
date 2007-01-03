@@ -29,7 +29,6 @@
 
 #include "defines.h"
 #include "game-server/object.hpp"
-#include "utils/countedptr.h"
 
 class MapComposite;
 
@@ -200,15 +199,5 @@ class Being : public MovingObject
 
         Hits mHitsTaken; /**< List of punches taken since last update */
 };
-
-/**
- * Type definition for a smart pointer to Being.
- */
-typedef utils::CountedPtr<Being> BeingPtr;
-
-/**
- * Type definition for a list of Beings.
- */
-typedef std::vector<BeingPtr> Beings;
 
 #endif // _TMWSERV_BEING_H_
