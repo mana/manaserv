@@ -24,7 +24,8 @@
 #ifndef _TMWSERV_TRIGGER
 #define _TMWSERV_TRIGGER
 
-class Object;
+#include "point.h"
+#include "game-server/object.hpp"
 
 class TriggerAction
 {
