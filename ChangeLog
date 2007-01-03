@@ -1,3 +1,8 @@
+2007-01-03  Björn Steinbrink  <B.Steinbrink@gmx.de>
+
+	* src/utils/timer.cpp: Removed extra semicolons that break builds with
+	--pedantic.
+
 2007-01-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/debug.h, src/debug.cpp, src/Makefile.am: Removed obsolete debug
