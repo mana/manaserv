@@ -1,4 +1,8 @@
-2007-01-03  BjÃ¶rn Steinbrink  <B.Steinbrink@gmx.de>
+2007-01-03  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp: Updated project files.
+
+2007-01-03  Björn Steinbrink  <B.Steinbrink@gmx.de>
 
 	* src/utils/timer.cpp: Removed extra semicolons that break builds with
 	--pedantic.

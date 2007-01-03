@@ -23,8 +23,6 @@
 			<Add option="-DSQLITE_SUPPORT"/>
 		</Compiler>
 		<Linker>
-			<Add option="-mconsole"/>
-			<Add option="-mwindows"/>
 			<Add library="mingw32"/>
 			<Add library="enet"/>
 			<Add library="ws2_32"/>
@@ -197,10 +195,6 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\debug.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
 		<Unit filename="src\debug.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -269,10 +263,6 @@
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\player.cpp">
-			<Option compilerVar="CPP"/>
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\player.h">
