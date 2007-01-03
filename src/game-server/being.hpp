@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "defines.h"
-#include "object.h"
+#include "game-server/object.hpp"
 #include "utils/countedptr.h"
 
 class MapComposite;
@@ -36,7 +36,8 @@ class MapComposite;
 /**
  * Element attribute for beings, actors and items.
  */
-typedef enum {
+enum
+{
     ELEMENT_NEUTRAL = 0,
     ELEMENT_FIRE,
     ELEMENT_WATER,
@@ -44,13 +45,14 @@ typedef enum {
     ELEMENT_AIR,
     ELEMENT_SACRED,
     ELEMENT_DEATH
-} Element;
+};
 
 /**
  * States attribute for beings, and actors.
  * States can be multiple for the same being.
  */
-struct BeingState {
+struct BeingState
+{
     bool STATE_NORMAL;
     bool STATE_POISONED;
     bool STATE_STONED;
@@ -66,7 +68,8 @@ struct BeingState {
 /**
  * Moves enum for beings and actors for others players vision.
  */
-typedef enum {
+enum
+{
     ACTION_DEFAULT = 0,
     ACTION_STAND,
     ACTION_WALK,
@@ -85,44 +88,25 @@ typedef enum {
     ACTION_HURT,
     ACTION_DEAD,
     ACTION_INVALID
-} SpriteAction;
+};
 
 /**
  * Beings and actors directions
  */
-enum {
+enum
+{
     DIRECTION_DOWN = 1,
     DIRECTION_UP,
     DIRECTION_LEFT,
     DIRECTION_RIGHT
 };
 
-/**
- * Raw statistics of a Player.
- */
-enum {
-    STAT_STRENGTH = 0,
-    STAT_AGILITY,
-    STAT_VITALITY,
-    STAT_INTELLIGENCE,
-    STAT_DEXTERITY,
-    STAT_LUCK,
-    NB_RSTAT
-};
-
-/**
- * Structure types for the raw statistics of a Player.
- */
-struct RawStatistics
-{
-    unsigned short stats[NB_RSTAT];
-};
-
 
 /**
  * Computed statistics of a Being.
  */
-enum {
+enum
+{
     STAT_HEAT = 0,
     STAT_ATTACK,
     STAT_DEFENCE,

@@ -71,7 +71,7 @@ bool ServerHandler::getGameServerFromMap(unsigned mapId, std::string &address, s
 
 void ServerHandler::registerGameClient(std::string const &token, PlayerPtr ptr)
 {
-    unsigned mapId = ptr->getMapId();
+    unsigned mapId = ptr->getMap();
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeLong(ptr->getDatabaseID());
     msg.writeString(ptr->getName());
@@ -82,7 +82,7 @@ void ServerHandler::registerGameClient(std::string const &token, PlayerPtr ptr)
     msg.writeShort(ptr->getMoney());
     for (int j = 0; j < NB_RSTAT; ++j)
         msg.writeShort(ptr->getRawStat(j));
-    Point pos = ptr->getPosition();
+    Point pos = ptr->getPos();
     msg.writeShort(pos.x);
     msg.writeShort(pos.y);
     msg.writeShort(mapId);
@@ -130,7 +130,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readLong();
             Storage &store = Storage::instance("tmw");
             PlayerPtr ptr = store.getCharacter(id);
-            ptr->setGender((Gender)msg.readByte());
+            ptr->setGender(msg.readByte());
             ptr->setHairStyle(msg.readByte());
             ptr->setHairColor(msg.readByte());
             ptr->setLevel(msg.readByte());
@@ -140,8 +140,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int x = msg.readShort();
             int y = msg.readShort();
             Point pos = { x, y };
-            ptr->setPosition(pos);
-            ptr->setMapId(msg.readShort());
+            ptr->setPos(pos);
+            ptr->setMap(msg.readShort());
         } break;
 
         case GAMSG_REDIRECT:
@@ -156,7 +156,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             PlayerPtr ptr = store.getCharacter(id);
             std::string address;
             short port;
-            if (serverHandler->getGameServerFromMap(ptr->getMapId(), address, port))
+            if (serverHandler->getGameServerFromMap(ptr->getMap(), address, port))
             {
                 registerGameClient(magic_token, ptr);
                 result.writeShort(AGMSG_REDIRECT_RESPONSE);

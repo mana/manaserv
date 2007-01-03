@@ -23,12 +23,11 @@
 
 #include <cassert>
 
-#include "controller.h"
 #include "defines.h"
-#include "map.h"
 #include "point.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
+#include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/state.hpp"

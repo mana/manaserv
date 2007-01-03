@@ -6,17 +6,10 @@ bin_PROGRAMS = tmwserv-account tmwserv-game
 
 tmwserv_account_SOURCES = \
 	account-server/main-account.cpp \
-	being.h \
 	configuration.h \
 	configuration.cpp \
-	debug.h \
-	debug.cpp \
 	defines.h \
-	inventory.h \
-	item.h \
-	object.h \
-	player.h \
-	player.cpp \
+	playerdata.hpp \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
@@ -70,25 +63,14 @@ tmwserv_account_SOURCES = \
 
 tmwserv_game_SOURCES = \
 	game-server/main-game.cpp \
-	being.h \
-	being.cpp \
 	configuration.h \
 	configuration.cpp \
 	controller.h \
 	controller.cpp \
-	debug.h \
-	debug.cpp \
 	defines.h \
-	inventory.h \
-	inventory.cpp \
 	item.h \
 	item.cpp \
-	map.h \
-	map.cpp \
-	object.h \
-	object.cpp \
-	player.h \
-	player.cpp \
+	playerdata.hpp \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
@@ -96,16 +78,26 @@ tmwserv_game_SOURCES = \
 	skill.cpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
+	game-server/being.hpp \
+	game-server/being.cpp \
 	game-server/gamehandler.hpp \
 	game-server/gamehandler.cpp \
+	game-server/inventory.hpp \
+	game-server/inventory.cpp \
 	game-server/itemmanager.hpp \
 	game-server/itemmanager.cpp \
+	game-server/map.hpp \
+	game-server/map.cpp \
 	game-server/mapcomposite.hpp \
 	game-server/mapcomposite.cpp \
 	game-server/mapmanager.hpp \
 	game-server/mapmanager.cpp \
 	game-server/mapreader.hpp \
 	game-server/mapreader.cpp \
+	game-server/object.hpp \
+	game-server/object.cpp \
+	game-server/player.hpp \
+	game-server/player.cpp \
 	game-server/state.hpp \
 	game-server/state.cpp \
 	game-server/testing.cpp \

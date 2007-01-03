@@ -26,7 +26,7 @@
 
 #include "net/connection.hpp"
 
-class Player;
+class PlayerData;
 
 /**
  * A connection to the account server.
@@ -43,7 +43,7 @@ class AccountConnection: public Connection
         /**
          * Sends data of given player.
          */
-        void sendPlayerData(Player *);
+        void sendPlayerData(PlayerData *);
 
     protected:
         /**

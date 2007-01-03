@@ -26,11 +26,14 @@
 
 #include <vector>
 
-#include "object.h"
-#include "player.h"
-
 class Map;
 class MapComposite;
+class MovingObject;
+class Object;
+class Player;
+class Point;
+class Rectangle;
+class Thing;
 
 /**
  * Ordered sets of zones of a map.
@@ -191,7 +194,7 @@ class MapComposite {
          * Gets an iterator on the objects around the old and new positions of
          * a player (including the ones that were but are now elsewhere).
          */
-        ZoneIterator getAroundPlayerIterator(Player *, int radius) const;
+        ZoneIterator getAroundPlayerIterator(MovingObject *, int radius) const;
 
         /**
          * Gets everything related to the map.

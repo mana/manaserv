@@ -23,8 +23,8 @@
 
 #include <cassert>
 
-#include "map.h"
 #include "resourcemanager.h"
+#include "game-server/map.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/mapreader.hpp"
 #include "utils/logger.h"

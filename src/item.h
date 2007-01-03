@@ -24,7 +24,8 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-#include "being.h"
+#include "playerdata.hpp"
+#include "game-server/being.hpp"
 
 /**
  * Enumeration of available Item types.
@@ -103,7 +104,7 @@ typedef enum BeingStateEffect {
 struct Modifiers
 {
     // General
-    Element element; /**< Item Element */
+    unsigned char element; /**< Item Element */
     BeingStateEffect beingStateEffect; /**< Being State (dis)alteration */
     unsigned short lifetime; /**< Modifiers lifetime in seconds. */
 

@@ -309,14 +309,14 @@ PlayerPtr DALStorage::getCharacter(int id)
         // a string to an unsigned short.
         string_to< unsigned short > toUshort;
 
-        Player *player = new Player(charInfo(0, 2), toUint(charInfo(0, 0)));
-        player->setGender((Gender)toUshort(charInfo(0, 3)));
+        PlayerData *player = new PlayerData(charInfo(0, 2), toUint(charInfo(0, 0)));
+        player->setGender(toUshort(charInfo(0, 3)));
         player->setHairStyle(toUshort(charInfo(0, 4)));
         player->setHairColor(toUshort(charInfo(0, 5)));
         player->setLevel(toUshort(charInfo(0, 6)));
         player->setMoney(toUint(charInfo(0, 7)));
         Point pos = { toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)) };
-        player->setPosition(pos);
+        player->setPos(pos);
         for (int i = 0; i < NB_RSTAT; ++i)
         {
             player->setRawStat(i, toUshort(charInfo(0, 11 + i)));
@@ -325,13 +325,13 @@ PlayerPtr DALStorage::getCharacter(int id)
         int mapId = toUint(charInfo(0, 10));
         if (mapId > 0)
         {
-            player->setMapId(mapId);
+            player->setMap(mapId);
         }
         else
         {
             // Set player to default map and one of the default location
             // Default map is to be 1, as not found return value will be 0.
-            player->setMapId((int)config.getValue("defaultMap", 1));
+            player->setMap((int)config.getValue("defaultMap", 1));
         }
 
         PlayerPtr ptr(player);
@@ -659,9 +659,9 @@ void DALStorage::flush(AccountPtr const &account)
                  << (int)(*it)->getHairColor() << ", "
                  << (int)(*it)->getLevel() << ", "
                  << (*it)->getMoney() << ", "
-                 << (*it)->getPosition().x << ", "
-                 << (*it)->getPosition().y << ", "
-                 << (*it)->getMapId() << ", "
+                 << (*it)->getPos().x << ", "
+                 << (*it)->getPos().y << ", "
+                 << (*it)->getMap() << ", "
                  << (*it)->getRawStat(STAT_STRENGTH) << ", "
                  << (*it)->getRawStat(STAT_AGILITY) << ", "
                  << (*it)->getRawStat(STAT_VITALITY) << ", "
@@ -691,9 +691,9 @@ void DALStorage::flush(AccountPtr const &account)
                 << " hair_color = " << (int)(*it)->getHairColor() << ", "
                 << " level = " << (int)(*it)->getLevel() << ", "
                 << " money = " << (*it)->getMoney() << ", "
-                << " x = " << (*it)->getPosition().x << ", "
-                << " y = " << (*it)->getPosition().y << ", "
-                << " map_id = " << (*it)->getMapId() << ", "
+                << " x = " << (*it)->getPos().x << ", "
+                << " y = " << (*it)->getPos().y << ", "
+                << " map_id = " << (*it)->getMap() << ", "
                 << " str = " << (*it)->getRawStat(STAT_STRENGTH) << ", "
                 << " agi = " << (*it)->getRawStat(STAT_AGILITY) << ", "
                 << " vit = " << (*it)->getRawStat(STAT_VITALITY) << ", "

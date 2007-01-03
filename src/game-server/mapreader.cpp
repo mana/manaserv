@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#include "map.h"
 #include "resourcemanager.h"
+#include "game-server/map.hpp"
 #include "game-server/mapreader.hpp"
 #include "utils/base64.h"
 #include "utils/logger.h"

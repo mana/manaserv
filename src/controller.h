@@ -23,7 +23,7 @@
 #ifndef _TMWSERV_CONTROLLER_H_
 #define _TMWSERV_CONTROLLER_H_
 
-#include "being.h"
+#include "game-server/being.hpp"
 
 /**
  * A controller can take control of a being.

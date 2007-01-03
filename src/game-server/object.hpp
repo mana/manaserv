@@ -29,7 +29,8 @@
 #include "point.h"
 
 // Object type enumeration
-enum {
+enum
+{
     OBJECT_ITEM = 0, // A simple item
     OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and can speak (map panels).
     OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions

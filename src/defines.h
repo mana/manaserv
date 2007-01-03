@@ -44,17 +44,10 @@ typedef enum {
     AL_RESTRICTED   // User rights have been restricted
 } AccountLevel;
 
-
-/**
- * Enumeration type for the player genders.
- */
-typedef enum {
-    GENDER_MALE,
-    GENDER_FEMALE
-} Gender;
-
+enum
+{
     // Network related
-const unsigned int MAX_CLIENTS  = 1024,
+    MAX_CLIENTS  = 1024,
 
     // Chat related
 /**
@@ -97,8 +90,8 @@ const unsigned int MAX_CLIENTS  = 1024,
 /**
  * Determine the area in which a character is aware of other beings
  */
-    AROUND_AREA = 320;
-
+    AROUND_AREA = 320
+};
 
 /**
  * Enumerated type for communicated messages
@@ -201,7 +194,7 @@ enum {
     ERRMSG_NO_LOGIN,                    // the user is not yet logged
     ERRMSG_NO_CHARACTER_SELECTED,       // the user needs a character
     ERRMSG_INSUFFICIENT_RIGHTS,         // the user is not privileged
-    ERRMSG_INVALID_ARGUMENT,            // part of the received message was invalid
+    ERRMSG_INVALID_ARGUMENT             // part of the received message was invalid
 };
 
 // Login specific return values
@@ -238,7 +231,7 @@ enum {
 // Chat errors return values
 enum {
     CHAT_USING_BAD_WORDS = 0x40,
-    CHAT_UNHANDLED_COMMAND,
+    CHAT_UNHANDLED_COMMAND
 };
 
 // Chat channels event values

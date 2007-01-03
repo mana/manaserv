@@ -21,6 +21,7 @@
  *  $Id$
  */
 
+#include "defines.h"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chathandler.hpp"
 #include "net/connectionhandler.hpp"

@@ -21,8 +21,8 @@
  *  $Id$
  */
 
-#include "player.h"
 #include "game-server/mapcomposite.hpp"
+#include "game-server/object.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
 

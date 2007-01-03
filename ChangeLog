@@ -1,3 +1,27 @@
+2007-01-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/debug.h, src/debug.cpp, src/Makefile.am: Removed obsolete debug
+	helpers.
+	* src/playerdata.hpp: Taken persistent data out of Player.
+	* src/being.h, src/being.cpp, src/object.h, src/object.cpp, src/map.h,
+	src/player.h, src/player.cpp, src/inventory.h, src/inventory.cpp,
+	src/map.cpp: Moved to src/game-server directory and changed header
+	extension to hpp.
+	* src/controller.h, src/item.h, src/game-server/mapcomposite.cpp,
+	src/game-server/mapreader.cpp, src/game-server/mapcomposite.hpp,
+	src/game-server/trigger.cpp, src/game-server/trigger.hpp,
+	src/game-server/accountconnection.cpp, src/game-server/gamehandler.hpp,
+	src/game-server/state.cpp, src/game-server/accountconnection.hpp,
+	src/game-server/itemmanager.cpp: Updated accordingly.
+	* src/account-server/account.hpp, src/account-server/serverhandler.cpp,
+	src/account-server/dalstorage.cpp, src/chat-server/chatchannel.hpp,
+	src/account-server/serverhandler.hpp, src/chat-server/chathandler.cpp,
+	src/account-server/accounthandler.cpp: Relied on PlayerData to remove
+	dependencies on Thing, Object, MovingObject, etc.
+	* src/defines.h: Fixed enumerations.
+	* src/games-server/gamehandler.cpp, src/game-server/player.cpp:
+	Commented in inventory code back.
+
 2007-01-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev, runserv.sh: Removed obsolete project files

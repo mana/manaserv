@@ -22,7 +22,6 @@
  */
 
 #include "configuration.h"
-#include "debug.h"
 #include "point.h"
 #include "account-server/accounthandler.hpp"
 #include "account-server/account.hpp"
@@ -182,7 +181,7 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 std::string address;
                 short port;
-                if (!serverHandler->getGameServerFromMap(chars[charNum]->getMapId(), address, port))
+                if (!serverHandler->getGameServerFromMap(chars[charNum]->getMap(), address, port))
                 {
                     result.writeByte(ERRMSG_FAILURE);
                     LOG_ERROR("Character Selection: No game server for the map.", 0);
@@ -194,11 +193,8 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
 
-                selectedChar->setDestination(selectedChar->getPosition());
-                selectedChar->setSpeed(150); // TODO
-
                 LOG_INFO(selectedChar->getName()
-                        << " is trying to enter the servers.", 1);
+                         << " is trying to enter the servers.", 1);
 
                 std::string magic_token(32, ' ');
                 for (int i = 0; i < 32; ++i) {
@@ -552,9 +548,9 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
                                              MessageIn &msg)
 {
     std::string name = msg.readString();
-    char hairStyle = msg.readByte();
-    char hairColor = msg.readByte();
-    Gender gender = (Gender) msg.readByte();
+    int hairStyle = msg.readByte();
+    int hairColor = msg.readByte();
+    int gender = msg.readByte();
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
@@ -572,17 +568,17 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         LOG_INFO(name << ": has got double quotes in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if ((hairStyle < 0) || (hairStyle > (signed) MAX_HAIRSTYLE_VALUE))
+    else if (hairStyle < 0 || hairStyle > MAX_HAIRSTYLE_VALUE)
     {
         LOG_INFO(name << ": Character's hair Style is invalid.", 1);
         reply.writeByte(CREATE_INVALID_HAIRSTYLE);
     }
-    else if ((hairColor < 0) || (hairColor > (signed) MAX_HAIRCOLOR_VALUE))
+    else if (hairColor < 0 || hairColor > MAX_HAIRCOLOR_VALUE)
     {
         LOG_INFO(name << ": Character's hair Color is invalid.", 1);
         reply.writeByte(CREATE_INVALID_HAIRCOLOR);
     }
-    else if ((gender < 0) || (gender > (signed) MAX_GENDER_VALUE))
+    else if (gender < 0 || gender > MAX_GENDER_VALUE)
     {
         LOG_INFO(name << ": Character's gender is invalid.", 1);
         reply.writeByte(CREATE_INVALID_GENDER);
@@ -665,7 +661,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         }
         else
         {
-            PlayerPtr newCharacter(new Player(name));
+            PlayerPtr newCharacter(new PlayerData(name));
             for (int i = 0; i < NB_RSTAT; ++i)
                 newCharacter->setRawStat(i, rawStats.stats[i]);
             newCharacter->setMoney(0);
@@ -673,10 +669,10 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
-            newCharacter->setMapId((int) config.getValue("defaultMap", 1));
+            newCharacter->setMap((int) config.getValue("defaultMap", 1));
             Point startingPos = { (int) config.getValue("startX", 0),
                                   (int) config.getValue("startY", 0) };
-            newCharacter->setPosition(startingPos);
+            newCharacter->setPos(startingPos);
             computer.getAccount()->addCharacter(newCharacter);
 
             LOG_INFO("Character " << name << " was created for "

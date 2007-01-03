@@ -24,8 +24,8 @@
 #include <cassert>
 #include <map>
 
-#include "map.h"
 #include "game-server/gamehandler.hpp"
+#include "game-server/map.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -231,7 +231,6 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 gameState->sayAround(computer.character, say);
             } break;
 
-        /*
         case PGMSG_PICKUP:
             {
                 // add item to inventory (this is too simplistic atm)
@@ -260,7 +259,6 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     result.writeByte(ERRMSG_FAILURE);
                 }
             } break;
-        */
 
         case PGMSG_WALK:
             {
@@ -272,7 +270,6 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 // no response should be required
             } break;
 
-        /*
         case PGMSG_EQUIP:
             {
                 message.readLong(); // ItemId: Not useful, the inventory knows it
@@ -282,7 +279,6 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 result.writeByte(computer.character->equip(slot) ?
                                  ERRMSG_OK : ERRMSG_FAILURE);
             } break;
-        */
 
         case PGMSG_ATTACK:
             {

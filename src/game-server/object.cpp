@@ -20,9 +20,9 @@
  *  $Id$
  */
 
-#include "map.h"
-#include "object.h"
+#include "game-server/map.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/object.hpp"
 
 void MovingObject::move()
 {

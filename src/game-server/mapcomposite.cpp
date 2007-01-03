@@ -24,8 +24,10 @@
 #include <algorithm>
 #include <cassert>
 
-#include "map.h"
+#include "point.h"
+#include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
+#include "game-server/player.hpp"
 
 /* TODO: Implement overlapping map zones instead of strict partitioning.
    Purpose: to decrease the number of zone changes, as overlapping allows for
@@ -393,7 +395,7 @@ ZoneIterator MapComposite::getInsideRectangleIterator(Rectangle const &p) const
     return ZoneIterator(r, this);
 }
 
-ZoneIterator MapComposite::getAroundPlayerIterator(Player *obj, int radius) const
+ZoneIterator MapComposite::getAroundPlayerIterator(MovingObject *obj, int radius) const
 {
     MapRegion r1;
     fillRegion(r1, obj->getOldPosition(), radius);

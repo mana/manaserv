@@ -18,7 +18,7 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id:$
+ *  $Id$
  */
 
 #include "resourcemanager.h"
@@ -81,7 +81,7 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         std::string scriptName = XML::getProperty(node, "script_name", std::string());
 
         Modifiers modifiers;
-        modifiers.element = (Element)XML::getProperty(node, "element", 0);
+        modifiers.element = XML::getProperty(node, "element", 0);
         modifiers.lifetime = XML::getProperty(node, "lifetime", 0);
         modifiers.rawStats[STAT_STRENGTH]     = XML::getProperty(node, "strength",     0);
         modifiers.rawStats[STAT_AGILITY]      = XML::getProperty(node, "agility",      0);

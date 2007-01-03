@@ -24,7 +24,7 @@
 #ifndef _TMWSERV_TRIGGER
 #define _TMWSERV_TRIGGER
 
-#include "object.h"
+class Object;
 
 class TriggerAction
 {

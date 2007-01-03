@@ -24,40 +24,43 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include "being.h"
+#include "game-server/being.hpp"
 
+enum
+{
 // items in inventory :
-const unsigned char MAX_ITEMS_IN_INVENTORY = 50, // Max 252.
+    MAX_ITEMS_IN_INVENTORY = 50, // Max 252.
 // Equipment rules:
 // 1 Brest equipment
-                    EQUIP_BREST_SLOT = 0,
+    EQUIP_BREST_SLOT = 0,
 // 1 arms equipment
-                    EQUIP_ARMS_SLOT = 1,
+    EQUIP_ARMS_SLOT = 1,
 // 1 head equipment
-                    EQUIP_HEAD_SLOT = 2,
+    EQUIP_HEAD_SLOT = 2,
 // 1 legs equipment
-                    EQUIP_LEGS_SLOT = 3,
+    EQUIP_LEGS_SLOT = 3,
 // 1 feet equipment
-                    EQUIP_FEET_SLOT = 4,
+    EQUIP_FEET_SLOT = 4,
 // 2 rings
-                    EQUIP_RING1_SLOT = 5,
-                    EQUIP_RING2_SLOT = 6,
+    EQUIP_RING1_SLOT = 5,
+    EQUIP_RING2_SLOT = 6,
 // 1 necklace
-                    EQUIP_NECKLACE_SLOT = 7,
+    EQUIP_NECKLACE_SLOT = 7,
 // Fight:
 // 2 one-handed weapons
-                    EQUIP_FIGHT1_SLOT = 8,
-                    EQUIP_FIGHT2_SLOT = 9,
+    EQUIP_FIGHT1_SLOT = 8,
+    EQUIP_FIGHT2_SLOT = 9,
 // or 1 two-handed weapon
 // or 1 one-handed weapon + 1 shield.
 //  Projectiles
-                    EQUIP_PROJECTILES_SLOT = 10,
+    EQUIP_PROJECTILES_SLOT = 10,
 // = 10 total slots for equipment.
-                    TOTAL_EQUIPMENT_SLOTS = 11,
+    TOTAL_EQUIPMENT_SLOTS = 11,
 // Error codes
-                    NOT_EQUIPPABLE = 253,
-                    NO_ITEM_TO_EQUIP = 254,
-                    INVENTORY_FULL = 255;
+    NOT_EQUIPPABLE = 253,
+    NO_ITEM_TO_EQUIP = 254,
+    INVENTORY_FULL = 255
+};
 
 /**
  * Stored Item only contains id reference to items

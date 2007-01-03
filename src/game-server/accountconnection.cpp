@@ -23,10 +23,10 @@
 
 #include "configuration.h"
 #include "defines.h"
-#include "player.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/player.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
@@ -53,7 +53,7 @@ bool AccountConnection::start()
     return true;
 }
 
-void AccountConnection::sendPlayerData(Player *p)
+void AccountConnection::sendPlayerData(PlayerData *p)
 {
     MessageOut msg(GAMSG_PLAYER_DATA);
     msg.writeLong(p->getDatabaseID());
@@ -64,10 +64,10 @@ void AccountConnection::sendPlayerData(Player *p)
     msg.writeShort(p->getMoney());
     for (int j = 0; j < NB_RSTAT; ++j)
         msg.writeShort(p->getRawStat(j));
-    Point pos = p->getPosition();
+    Point pos = p->getPos();
     msg.writeShort(pos.x);
     msg.writeShort(pos.y);
-    msg.writeShort(p->getMapId());
+    msg.writeShort(p->getMap());
     send(msg);
 }
 
@@ -80,7 +80,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             int id = msg.readLong();
             std::string name = msg.readString();
             Player *ptr = new Player(name, id);
-            ptr->setGender((Gender)msg.readByte());
+            ptr->setGender(msg.readByte());
             ptr->setHairStyle(msg.readByte());
             ptr->setHairColor(msg.readByte());
             ptr->setLevel(msg.readByte());

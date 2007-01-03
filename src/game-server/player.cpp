@@ -23,7 +23,7 @@
 #include <cassert>
 
 #include "defines.h"
-#include "player.h"
+#include "game-server/player.hpp"
 
 /**
  * Update the internal status.
@@ -31,12 +31,16 @@
 void Player::update()
 {
     // computed stats.
-    setStat(STAT_HEAT, 20 + (20 * mRawStats.stats[STAT_VITALITY]));
-    setStat(STAT_ATTACK, 10 + mRawStats.stats[STAT_STRENGTH]);
-    setStat(STAT_DEFENCE, 10 + mRawStats.stats[STAT_STRENGTH]);
-    setStat(STAT_MAGIC, 10 + mRawStats.stats[STAT_INTELLIGENCE]);
-    setStat(STAT_ACCURACY, 50 + mRawStats.stats[STAT_DEXTERITY]);
-    setStat(STAT_SPEED, mRawStats.stats[STAT_DEXTERITY]);
+    setStat(STAT_HEAT, 20 + (20 * getRawStat(STAT_VITALITY)));
+    setStat(STAT_ATTACK, 10 + getRawStat(STAT_STRENGTH));
+    setStat(STAT_DEFENCE, 10 + getRawStat(STAT_STRENGTH));
+    setStat(STAT_MAGIC, 10 + getRawStat(STAT_INTELLIGENCE));
+    setStat(STAT_ACCURACY, 50 + getRawStat(STAT_DEXTERITY));
+    setStat(STAT_SPEED, getRawStat(STAT_DEXTERITY));
+
+    // Update persistent data.
+    setPos(getPosition());
+    setMap(getMapId());
 
     // attacking
     if (mIsAttacking)
@@ -52,7 +56,6 @@ void Player::update()
     }
 }
 
-/*
 void Player::setInventory(const Inventory &inven)
 {
     inventory = inven;
@@ -82,4 +85,3 @@ bool Player::unequip(unsigned char slot)
 {
     return false; // TODO
 }
-*/

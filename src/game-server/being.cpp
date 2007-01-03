@@ -20,7 +20,7 @@
  *  $Id$
  */
 
-#include "being.h"
+#include "game-server/being.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
 

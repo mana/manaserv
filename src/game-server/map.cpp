@@ -21,12 +21,9 @@
  *  $Id$
  */
 
-#include "map.h"
-
 #include <queue>
 
-#include "being.h"
-
+#include "game-server/map.hpp"
 
 MetaTile::MetaTile():
     whichList(0)

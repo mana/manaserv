@@ -25,7 +25,8 @@
 
 #include <string>
 
-#include "player.h"
+#include "defines.h"
+#include "playerdata.hpp"
 
 /**
  * Notes:

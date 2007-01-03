@@ -26,7 +26,7 @@
 
 #include <map>
 
-#include "player.h"
+#include "playerdata.hpp"
 #include "net/connectionhandler.hpp"
 
 /**

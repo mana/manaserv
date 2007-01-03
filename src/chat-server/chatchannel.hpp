@@ -27,8 +27,6 @@
 #include <string>
 #include <vector>
 
-#include "being.h"
-
 class ChatChannel {
  public:
     typedef std::vector< std::string > ChannelUsers;

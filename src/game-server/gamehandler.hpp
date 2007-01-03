@@ -24,7 +24,7 @@
 #ifndef _TMW_SERVER_GAMEHANDLER_
 #define _TMW_SERVER_GAMEHANDLER_
 
-#include "player.h"
+#include "game-server/player.hpp"
 #include "net/connectionhandler.hpp"
 
 /**

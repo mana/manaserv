@@ -21,7 +21,7 @@
  *  $Id$
  */
 
-#include "inventory.h"
+#include "game-server/inventory.hpp"
 #include "game-server/itemmanager.hpp"
 
 // ---------
