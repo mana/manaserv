@@ -251,6 +251,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     Point opos = o->getPosition();
                     if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
                     {
+                        result.writeShort(GPMSG_INVENTORY);
                         ItemClass *item = static_cast< Item * >(o)->getItemClass();
                         Inventory(computer.character, result).insert(item->getDatabaseID(), 1);
                         gameState->remove(o);
