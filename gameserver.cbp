@@ -19,10 +19,12 @@
 				<Option projectResourceIncludeDirsRelation="1"/>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add option="-Wall"/>
+			<Add option="-DPACKAGE_VERSION=&quot;\&quot;2nd milestone\&quot;&quot;"/>
+			<Add option="-DNOGDI"/>
+		</Compiler>
 		<Linker>
-			<Add option="-mconsole"/>
-			<Add option="-mwindows"/>
-			<Add library="mingw32"/>
 			<Add library="enet"/>
 			<Add library="ws2_32"/>
 			<Add library="xml2"/>

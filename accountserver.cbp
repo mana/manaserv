@@ -20,10 +20,11 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wall"/>
+			<Add option="-DPACKAGE_VERSION=&quot;\&quot;1st milestone\&quot;&quot;"/>
 			<Add option="-DSQLITE_SUPPORT"/>
 		</Compiler>
 		<Linker>
-			<Add library="mingw32"/>
 			<Add library="enet"/>
 			<Add library="ws2_32"/>
 			<Add library="xml2"/>
@@ -376,12 +377,6 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\utils\xml.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\winver.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
