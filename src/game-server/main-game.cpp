@@ -29,9 +29,6 @@
 
 #if (defined __USE_UNIX98 || defined __FreeBSD__)
 #include "../config.h"
-#elif defined WIN32
-#include "../tmwserv_private.h"
-#define PACKAGE_VERSION PRODUCT_VERSION
 #endif
 
 #include "configuration.h"

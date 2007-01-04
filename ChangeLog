@@ -1,3 +1,10 @@
+2007-01-04  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp,
+	src/account-server/main-account.cpp, src/game-server/main-game.cpp:
+	Cleaned and updated project files, fixed Win32 PACKAGE_VERSION
+	definition.
+
 2007-01-03  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp: Updated project files.
