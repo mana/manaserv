@@ -136,8 +136,8 @@ enum {
     // Game
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
     GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
-    PGMSG_PICKUP                   = 0x0110,
-    GPMSG_PICKUP_RESPONSE          = 0x0111,
+    PGMSG_PICKUP                   = 0x0110, // W*2 position
+    GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount ] }*
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id
                                              // player: S name, B hair style, B hair color, B gender
                                              // monster: W type id

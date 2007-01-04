@@ -408,6 +408,13 @@ void MapComposite::fillRegion(MapRegion &r, Rectangle const &p) const
     }
 }
 
+ZoneIterator MapComposite::getAroundPointIterator(Point const &p, int radius) const
+{
+    MapRegion r;
+    fillRegion(r, p, radius);
+    return ZoneIterator(r, this);
+}
+
 ZoneIterator MapComposite::getAroundObjectIterator(Object *obj, int radius) const
 {
     MapRegion r;

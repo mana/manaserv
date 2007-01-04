@@ -14,6 +14,11 @@
 	storing empty slots.
 	* src/game-server/player.hpp, src/game-server/player.cpp,
 	src/game-server/gamehandler.cpp: Updated accordingly.
+	* src/net/messagein.hpp, src/net/messagein.cpp: Removed signedness
+	interpretation of received data.
+	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp:
+	Added iterator around a point.
+	* src/defines.h, src/game-server/gamehandler.cpp: Implemented pick-up.
 
 2007-01-04  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

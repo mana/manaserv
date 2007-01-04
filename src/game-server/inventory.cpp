@@ -26,6 +26,7 @@
 
 #include "game-server/inventory.hpp"
 #include "game-server/itemmanager.hpp"
+#include "net/messageout.hpp"
 
 int Inventory::getItem(int slot)
 {
@@ -68,6 +69,17 @@ int Inventory::getIndex(int slot)
     return -1;
 }
 
+int Inventory::getSlot(int index)
+{
+    int slot = 0;
+    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
+         i_end = poss.inventory.begin() + index; i != i_end; ++i)
+    {
+        slot += i->itemId ? 1 : i->amount;
+    }
+    return slot;
+}
+
 int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
 {
     int slot = 0;
@@ -90,7 +102,10 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
                 ++i_end;
             }
 
-            // TODO: fill msg
+            msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+            msg.writeShort(itemId);
+            msg.writeByte(nb);
+
             amount -= nb;
             if (amount == 0)
             {
@@ -106,8 +121,11 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
         amount -= nb;
         InventoryItem it = { itemId, nb };
         poss.inventory.push_back(it);
+
+        msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+        msg.writeShort(itemId);
+        msg.writeByte(nb);
         ++slot;
-        // TODO: fill msg
     }
 
     return amount;
@@ -115,6 +133,7 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
 
 int Inventory::insert(int itemId, int amount)
 {
+    int slot = 0;
     int maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
 
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
@@ -125,11 +144,20 @@ int Inventory::insert(int itemId, int amount)
             int nb = std::min(maxPerSlot - i->amount, amount);
             i->amount += nb;
             amount -= nb;
-            // TODO: fill msg
+
+            msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+            msg.writeShort(itemId);
+            msg.writeByte(nb);
+
             if (amount == 0)
             {
                 return 0;
             }
+            ++slot;
+        }
+        else
+        {
+            slot += i->itemId ? 1 : i->amount;
         }
     }
 
@@ -174,7 +202,10 @@ int Inventory::remove(int itemId, int amount)
             int nb = std::min((int)it.amount, amount);
             it.amount -= nb;
             amount -= nb;
-            // TODO: fill msg
+
+            msg.writeByte(getSlot(i) + EQUIP_CLIENT_INVENTORY);
+            msg.writeShort(itemId);
+            msg.writeByte(nb);
 
             // If the slot is empty, compress the inventory.
             if (it.amount == 0)
@@ -205,31 +236,36 @@ bool Inventory::equip(int slot)
     switch (itemManager->getItem(itemId)->getType())
     {
         case ITEM_EQUIPMENT_TWO_HANDS_WEAPON:
+        {
             // Special case 1, the two one-handed weapons are to be placed back
             // in the inventory, if there are any.
-            if (int id = poss.equipment[EQUIP_FIGHT1_SLOT])
+            int id = poss.equipment[EQUIP_FIGHT1_SLOT];
+            if (id && !insert(id, 1))
             {
-                // Slot 1 full
-                if (!insert(id, 1))
-                {
-                    return false;
-                }
-            }
-            if (int id = poss.equipment[EQUIP_FIGHT2_SLOT])
-            {
-                // Slot 2 full
-                if (!insert(id, 1))
-                {
-                    return false;
-                }
+                return false;
             }
 
+            id = poss.equipment[EQUIP_FIGHT2_SLOT];
+            if (id && !insert(id, 1))
+            {
+                return false;
+            }
+
+            msg.writeByte(EQUIP_FIGHT1_SLOT);
+            msg.writeShort(itemId);
+            msg.writeByte(EQUIP_FIGHT2_SLOT);
+            msg.writeShort(0);
+            msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+            msg.writeShort(0);
             poss.equipment[EQUIP_FIGHT1_SLOT] = itemId;
             poss.equipment[EQUIP_FIGHT2_SLOT] = 0;
             freeIndex(getIndex(slot));
             return true;
+        }
 
         case ITEM_EQUIPMENT_PROJECTILE:
+            msg.writeByte(EQUIP_PROJECTILE_SLOT);
+            msg.writeShort(itemId);
             poss.equipment[EQUIP_PROJECTILE_SLOT] = itemId;
             return true;
 
@@ -285,6 +321,10 @@ bool Inventory::equip(int slot)
                 ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
         {
             // The first slot is full and the second slot is empty.
+            msg.writeByte(secondSlot);
+            msg.writeShort(itemId);
+            msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+            msg.writeShort(0);
             poss.equipment[secondSlot] = itemId;
             freeIndex(getIndex(slot));
             return true;
@@ -296,6 +336,10 @@ bool Inventory::equip(int slot)
         {
             return false;
         }
+        msg.writeByte(firstSlot);
+        msg.writeShort(itemId);
+        msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+        msg.writeShort(0);
         poss.equipment[firstSlot] = itemId;
         freeIndex(getIndex(slot));
         return true;

@@ -39,16 +39,11 @@ class MessageIn
          */
         MessageIn(const char *data, int length);
 
-        /**
-         * Destructor.
-         */
-        ~MessageIn();
+        int getId() { return mId; } /**< Returns the message ID. */
 
-        short getId() { return mId; } /**< Returns the message ID. */
-
-        char readByte();              /**< Reads a byte. */
-        short readShort();            /**< Reads a short. */
-        long readLong();              /**< Reads a long. */
+        int readByte();             /**< Reads a byte. */
+        int readShort();            /**< Reads a short. */
+        int readLong();             /**< Reads a long. */
 
         /**
          * Reads a string. If a length is not given (-1), it is assumed
@@ -60,18 +55,18 @@ class MessageIn
         /**
          * Returns the length of unread data.
          */
-        unsigned getUnreadLength() { return mLength - mPos; }
+        int getUnreadLength() { return mLength - mPos; }
 
     private:
         const char *mData;            /**< Packet data */
-        unsigned int mLength;         /**< Length of data in bytes */
-        short mId;                    /**< The message ID. */
+        unsigned short mLength;         /**< Length of data in bytes */
+        unsigned short mId;           /**< The message ID. */
 
         /**
          * Actual position in the packet. From 0 to packet->length. A value
          * bigger than packet->length means EOP was reached when reading it.
          */
-        unsigned int mPos;
+        unsigned short mPos;
 };
 
 #endif

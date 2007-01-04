@@ -201,6 +201,11 @@ class MapComposite {
         ZoneIterator getInsideRectangleIterator(Rectangle const &) const;
 
         /**
+         * Gets an iterator on the objects around a given point.
+         */
+        ZoneIterator getAroundPointIterator(Point const &, int radius) const;
+
+        /**
          * Gets an iterator on the objects around a given object.
          */
         ZoneIterator getAroundObjectIterator(Object *, int radius) const;

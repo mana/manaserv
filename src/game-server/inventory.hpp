@@ -54,10 +54,7 @@ enum
 //   this item does not amount to one, it only indicates the chosen projectile.
     EQUIP_PROJECTILE_SLOT = 10,
 
-// Error codes
-    NOT_EQUIPPABLE = 253,
-    NO_ITEM_TO_EQUIP = 254,
-    INVENTORY_FULL = 255
+    EQUIP_CLIENT_INVENTORY = 32
 };
 
 class MessageOut;
@@ -107,6 +104,7 @@ class Inventory
         void freeIndex(int index);
         int getItem(int slot);
         int getIndex(int slot);
+        int getSlot(int index);
 };
 
 

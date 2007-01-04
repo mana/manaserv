@@ -25,7 +25,9 @@
 #include <map>
 
 #include "game-server/gamehandler.hpp"
+#include "game-server/item.hpp"
 #include "game-server/map.hpp"
+#include "game-server/mapcomposite.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -226,68 +228,62 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
     switch (message.getId())
     {
         case PGMSG_SAY:
-            {
-                std::string say = message.readString();
-                gameState->sayAround(computer.character, say);
-            } break;
+        {
+            std::string say = message.readString();
+            gameState->sayAround(computer.character, say);
+        } break;
 
         case PGMSG_PICKUP:
+        {
+            int x = message.readShort();
+            int y = message.readShort();
+            Point ppos = computer.character->getPosition();
+
+            // TODO: use a less arbitrary value.
+            if (std::abs(x - ppos.x) + std::abs(y - ppos.y) < 48)
             {
-                /*
-                // add item to inventory (this is too simplistic atm)
-                int itemId = message.readLong();
-
-                // remove the item from world map
-
-                // send feedback
-                computer.character->insertItem(itemId, 1);
-                result.writeShort(GPMSG_PICKUP_RESPONSE);
-                result.writeByte(ERRMSG_OK);
-                */
-            } break;
-
-        case PGMSG_USE_ITEM:
-            {
-                /*
-                int itemId = message.readLong();
-
-                result.writeShort(GPMSG_USE_RESPONSE);
-
-                if (computer.character->hasItem(itemId)) {
-                    // use item
-                    // this should execute a script which will do the appropriate action
-                    // (the script will determine if the item is 1 use only)
-                    result.writeByte(ERRMSG_OK);
-                } else {
-                    result.writeByte(ERRMSG_FAILURE);
+                int mapId = computer.character->getMapId();
+                MapComposite *map = gameState->getMap(mapId);
+                Point ipos = { x, y };
+                for (FixedObjectIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
+                {
+                    Object *o = *i;
+                    Point opos = o->getPosition();
+                    if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
+                    {
+                        ItemClass *item = static_cast< Item * >(o)->getItemClass();
+                        Inventory(computer.character, result).insert(item->getDatabaseID(), 1);
+                        gameState->remove(o);
+                        break;
+                    }
                 }
-                */
-            } break;
+            }
+        } break;
 
         case PGMSG_WALK:
-            {
-                unsigned x = message.readShort();
-                unsigned y = message.readShort();
-                Point dst = {x, y};
-                computer.character->setDestination(dst);
+        {
+            int x = message.readShort();
+            int y = message.readShort();
+            Point dst = {x, y};
+            computer.character->setDestination(dst);
 
-                // no response should be required
-            } break;
+            // no response should be required
+        } break;
 
         case PGMSG_EQUIP:
-            {
-                int slot = message.readByte();
-                result.writeShort(GPMSG_EQUIP_RESPONSE); // TODO: something else
-                Inventory(computer.character, result).equip(slot);
-            } break;
+        {
+            int slot = message.readByte();
+            result.writeShort(GPMSG_INVENTORY);
+            Inventory(computer.character, result).equip(slot);
+        } break;
 
         case PGMSG_ATTACK:
-            {
-                LOG_DEBUG("Player " << computer.character->getPublicID()
-                          << " attacks", 0);
-                computer.character->setDirection(message.readByte());
-                computer.character->setAttacking(true);
-            } break;
+        {
+            LOG_DEBUG("Player " << computer.character->getPublicID()
+                      << " attacks", 0);
+            computer.character->setDirection(message.readByte());
+            computer.character->setAttacking(true);
+        } break;
 
         default:
             LOG_WARN("Invalid message type", 0);
