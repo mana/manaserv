@@ -56,6 +56,7 @@ void Player::update()
     }
 }
 
+/*
 bool Player::insertItem(int itemId, int amount)
 {
     return inventory.insertItem(itemId, amount);
@@ -80,3 +81,4 @@ bool Player::unequip(int slot)
 {
     return false; // TODO
 }
+*/

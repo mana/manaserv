@@ -10,6 +10,7 @@ tmwserv_account_SOURCES = \
 	configuration.cpp \
 	defines.h \
 	playerdata.hpp \
+	playerdata.cpp \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
@@ -69,6 +70,7 @@ tmwserv_game_SOURCES = \
 	controller.cpp \
 	defines.h \
 	playerdata.hpp \
+	playerdata.cpp \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \

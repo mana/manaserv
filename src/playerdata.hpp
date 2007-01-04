@@ -27,7 +27,9 @@
 #include <vector>
 
 #include "point.h"
-#include "utils/countedptr.h"
+
+class MessageIn;
+class MessageOut;
 
 /**
  * Gender of a Player.
@@ -53,22 +55,48 @@ enum
 };
 
 /**
- * Structure types for the raw statistics of a Player.
+ * Structure storing the raw statistics of a Player.
  */
 struct RawStatistics
 {
     unsigned short stats[NB_RSTAT];
 };
 
+/**
+ * Numbers of inventory slots
+ */
+
+enum
+{
+    EQUIPMENT_SLOTS = 11,
+    INVENTORY_SLOTS = 50
+};
+
+/**
+ * Structure storing an item in the inventory.
+ * When the itemId, it represents "amount" consecutive empty slots.
+ */
+
+struct InventoryItem
+{
+    unsigned short itemId;
+    unsigned char amount;
+};
+
+/**
+ * Structure storing the equipment and inventory of a Player.
+ */
+struct Possessions
+{
+    unsigned short equipment[EQUIPMENT_SLOTS];
+    std::vector< InventoryItem > inventory;
+};
 
 class PlayerData
 {
     public:
 
-        PlayerData(std::string const &name, int id = -1)
-          : mDatabaseID(id),
-            mName(name)
-        {}
+        PlayerData(std::string const &name, int id = -1);
 
         /**
          * Gets the name.
@@ -221,6 +249,22 @@ class PlayerData
         Point const &getPos() const
         { return mPos; }
 
+        /**
+         * Gets a reference on the possession.
+         */
+        Possessions &getPossessions()
+        { return mPossessions; }
+
+        /**
+         * Stores data into a packet.
+         */
+        void serialize(MessageOut &) const;
+
+        /**
+         * Restores data from a packet.
+         */
+        void deserialize(MessageIn &);
+
     private:
         PlayerData(PlayerData const &);
         PlayerData &operator=(PlayerData const &);
@@ -235,16 +279,7 @@ class PlayerData
         Point mPos;               /**< Position the being is at. */
         unsigned int mMoney;      /**< Wealth of the being. */
         RawStatistics mRawStats;  /**< Raw statistics of the being. */
+        Possessions mPossessions; /**< Possesssions of the being. */
 };
-
-/**
- * Type definition for a smart pointer to PlayerData.
- */
-typedef utils::CountedPtr< PlayerData > PlayerPtr;
-
-/**
- * Type definition for a list of Players.
- */
-typedef std::vector< PlayerPtr > Players;
 
 #endif

@@ -1,3 +1,20 @@
+2007-01-04  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/playerdata.hpp, src/playerdata.cpp, src/defines.h,
+	src/Makefile.am: Factored serialization of PlayerData into a new file.
+	Added inventory to PlayerData. Removed counted pointers.
+	* src/account-server/serverhandler.hpp, src/account-server/account.hpp:
+	Moved counted pointers here.
+	* src/account-server/serverhandler.cpp,
+	src/game-server/accountconnection.cpp: Simplified by relying on the
+	serialization functionality of PlayerData.
+	* src/game-server/inventory.hpp, src/game-server/inventory.cpp:
+	Transformed Inventory into a strict helper class, as data are now stored
+	inside PlayerData. Reduced memory footprint of inventory by avoiding
+	storing empty slots.
+	* src/game-server/player.hpp, src/game-server/player.cpp,
+	src/game-server/gamehandler.cpp: Updated accordingly.
+
 2007-01-04  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp,

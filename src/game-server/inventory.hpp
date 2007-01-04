@@ -24,12 +24,10 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include "game-server/being.hpp"
+#include "playerdata.hpp"
 
 enum
 {
-// items in inventory :
-    MAX_ITEMS_IN_INVENTORY = 50, // Max 252.
 // Equipment rules:
 // 1 Brest equipment
     EQUIP_BREST_SLOT = 0,
@@ -47,158 +45,69 @@ enum
 // 1 necklace
     EQUIP_NECKLACE_SLOT = 7,
 // Fight:
-// 2 one-handed weapons
+//   2 one-handed weapons
+//   or 1 two-handed weapon
+//   or 1 one-handed weapon + 1 shield.
     EQUIP_FIGHT1_SLOT = 8,
     EQUIP_FIGHT2_SLOT = 9,
-// or 1 two-handed weapon
-// or 1 one-handed weapon + 1 shield.
-//  Projectiles
-    EQUIP_PROJECTILES_SLOT = 10,
-// = 10 total slots for equipment.
-    TOTAL_EQUIPMENT_SLOTS = 11,
+// Projectile:
+//   this item does not amount to one, it only indicates the chosen projectile.
+    EQUIP_PROJECTILE_SLOT = 10,
+
 // Error codes
     NOT_EQUIPPABLE = 253,
     NO_ITEM_TO_EQUIP = 254,
     INVENTORY_FULL = 255
 };
 
-/**
- * Stored Item only contains id reference to items
- * in the order not to carry every item info for each carried items
- * in the inventory.
- * Also contains amount.
- */
-struct StoredItem
-{
-    int itemId;
-    unsigned char amount;
-};
+class MessageOut;
 
 /**
- * Equipped items that keeps which kind of item is in equipment.
- */
-struct EquippedItem
-{
-    int itemId;
-    short itemType;
-};
-
-/**
- * Class used to store minimal info on player's inventories
- * to keep it fast.
- * See Item and ItemManager to get more info on an item.
+ * Class used to handle Player possessions and prepare outgoing messages.
  */
 class Inventory
 {
+        Possessions &poss;
+        MessageOut &msg;
     public:
-        /**
-         * Convenience function to get slot from ItemId.
-         * If more than one occurence is found, the first is given.
-         */
-        int getSlotFromId(int itemId);
+        Inventory(PlayerData *p, MessageOut &m)
+          : poss(p->getPossessions()), msg(m)
+        {}
 
         /**
-         * Returns item.
+         * Equips item from given inventory slot.
          */
-        StoredItem const &getStoredItemAt(int slot) const
-        { return itemList[slot]; };
+        bool equip(int slot);
 
         /**
-         * Looks in inventory and equipment whether an item is present or not.
+         * Gets the ID of projectiles. Removes one of these projectiles from
+         * inventory.
          */
-        bool hasItem(int itemId,
-                     bool searchInInventory = true,
-                     bool searchInEquipment = true);
+        int fireProjectile();
 
         /**
-         * Tells an item's amount
+         * Inserts some items into the inventory.
+         * @return number of items not inserted (to be dropped on floor?).
          */
-        int getItemAmount(int slot) const
-        { return itemList[slot].amount; };
+        int insert(int itemId, int amount);
 
         /**
-         * Returns item reference ID.
+         * Removes some items from inventory.
+         * @return number of items not removed.
          */
-        int getItemId(int slot) const
-        { return itemList[slot].itemId; };
+        int remove(int itemId, int amount);
 
-        /**
-         * Adds a given amount of items.
-         * @return Number of items really added.
-         */
-        int insertItem(int itemId, int amount = 1);
-
-        /**
-         * Removes an item given by ID.
-         * @return Number of items really removed.
-         */
-        int removeItemById(int itemId, int amount);
-
-        /**
-         * Removes an item given by slot.
-         * @return Number of items really removed.
-         */
-        int removeItemBySlot(int slot, int amount);
-
-        /**
-         * Equip an item searched by its id.
-         * Can equip more than one item at a time.
-         * @return unsigned char value: Returns the slot if successful
-         * or the error code if not.
-         */
-        int equipItem(int itemId);
-
-        /**
-         * Unequip an item searched by its id.
-         * Can unequip more than one item at a time.
-         */
-        bool unequipItem(int itemId);
-
-        /**
-         * Equips an item searched by its slot index.
-         */
-        bool equipItem(int inventorySlot, int equipmentSlot);
-
-        /**
-         * Unequips an equipped item searched by its slot index.
-         */
-        bool unequipItem(int inventorySlot, int equipmentSlot);
-
+        int countItem(int itemId);
     private:
-
         /**
-         * Gives the first free slot number in itemList.
+         * Fills some slots with items.
+         * @return number of items not inserted.
          */
-        int getInventoryFreeSlot();
-
-        /**
-         * Quick equip an equipment with a given equipSlot,
-         * an itemId and an itemType.
-         * @return the equipment slot if successful,
-         * the error code, if not.
-         */
-        int equipItem_(int itemId,
-                       int itemType,
-                       int equipmentSlot);
-
-        /**
-         * Quick unequip an equipment with a given equipSlot,
-         * and an itemId.
-         * @return the Equipment slot if successful,
-         * the error code, if not.
-         */
-        int unequipItem_(int itemId,
-                         int equipmentSlot);
-
-
-        // Stored items in inventory and equipment
-        std::vector<StoredItem> itemList; /**< Items in inventory */
-        std::vector<EquippedItem> equippedItemList; /**< Equipped Items */
-        /**
-         * Used to know which type of arrow is used with a bow,
-         * for instance
-         */
-        StoredItem equippedProjectiles;
+        int fillFreeSlot(int itemId, int amount, int MaxPerSlot);
+        void freeIndex(int index);
+        int getItem(int slot);
+        int getIndex(int slot);
 };
+
 
 #endif

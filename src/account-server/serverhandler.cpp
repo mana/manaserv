@@ -75,18 +75,8 @@ void ServerHandler::registerGameClient(std::string const &token, PlayerPtr ptr)
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeLong(ptr->getDatabaseID());
     msg.writeString(ptr->getName());
-    msg.writeByte(ptr->getGender());
-    msg.writeByte(ptr->getHairStyle());
-    msg.writeByte(ptr->getHairColor());
-    msg.writeByte(ptr->getLevel());
-    msg.writeShort(ptr->getMoney());
-    for (int j = 0; j < NB_RSTAT; ++j)
-        msg.writeShort(ptr->getRawStat(j));
-    Point pos = ptr->getPos();
-    msg.writeShort(pos.x);
-    msg.writeShort(pos.y);
-    msg.writeShort(mapId);
     msg.writeString(token, 32);
+    ptr->serialize(msg);
     Servers::const_iterator i = servers.find(mapId);
     assert(i != servers.end());
     i->second.server->send(msg);
@@ -130,18 +120,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readLong();
             Storage &store = Storage::instance("tmw");
             PlayerPtr ptr = store.getCharacter(id);
-            ptr->setGender(msg.readByte());
-            ptr->setHairStyle(msg.readByte());
-            ptr->setHairColor(msg.readByte());
-            ptr->setLevel(msg.readByte());
-            ptr->setMoney(msg.readShort());
-            for (int j = 0; j < NB_RSTAT; ++j)
-                ptr->setRawStat(j, msg.readShort());
-            int x = msg.readShort();
-            int y = msg.readShort();
-            Point pos = { x, y };
-            ptr->setPos(pos);
-            ptr->setMap(msg.readShort());
+            ptr->deserialize(msg);
         } break;
 
         case GAMSG_REDIRECT:

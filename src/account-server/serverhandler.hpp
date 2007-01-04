@@ -28,6 +28,12 @@
 
 #include "playerdata.hpp"
 #include "net/connectionhandler.hpp"
+#include "utils/countedptr.h"
+
+/**
+ * Type definition for a smart pointer to PlayerData.
+ */
+typedef utils::CountedPtr< PlayerData > PlayerPtr;
 
 /**
  * Manages communications with all the game servers. This class also keeps

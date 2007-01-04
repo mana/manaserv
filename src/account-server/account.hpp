@@ -27,6 +27,18 @@
 
 #include "defines.h"
 #include "playerdata.hpp"
+#include "utils/countedptr.h"
+
+/**
+ * Type definition for a smart pointer to PlayerData.
+ */
+typedef utils::CountedPtr< PlayerData > PlayerPtr;
+
+/**
+ * Type definition for a list of Players.
+ */
+typedef std::vector< PlayerPtr > Players;
+
 
 /**
  * Notes:

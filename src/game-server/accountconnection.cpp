@@ -57,17 +57,7 @@ void AccountConnection::sendPlayerData(PlayerData *p)
 {
     MessageOut msg(GAMSG_PLAYER_DATA);
     msg.writeLong(p->getDatabaseID());
-    msg.writeByte(p->getGender());
-    msg.writeByte(p->getHairStyle());
-    msg.writeByte(p->getHairColor());
-    msg.writeByte(p->getLevel());
-    msg.writeShort(p->getMoney());
-    for (int j = 0; j < NB_RSTAT; ++j)
-        msg.writeShort(p->getRawStat(j));
-    Point pos = p->getPos();
-    msg.writeShort(pos.x);
-    msg.writeShort(pos.y);
-    msg.writeShort(p->getMap());
+    p->serialize(msg);
     send(msg);
 }
 
@@ -79,21 +69,12 @@ void AccountConnection::processMessage(MessageIn &msg)
         {
             int id = msg.readLong();
             std::string name = msg.readString();
-            Player *ptr = new Player(name, id);
-            ptr->setGender(msg.readByte());
-            ptr->setHairStyle(msg.readByte());
-            ptr->setHairColor(msg.readByte());
-            ptr->setLevel(msg.readByte());
-            ptr->setMoney(msg.readShort());
-            for (int j = 0; j < NB_RSTAT; ++j)
-                ptr->setRawStat(j, msg.readShort());
-            int x = msg.readShort();
-            int y = msg.readShort();
-            Point pos = { x, y };
-            ptr->setPosition(pos);
-            ptr->setMapId(msg.readShort());
-            ptr->setSpeed(150); // TODO
             std::string token = msg.readString(32);
+            Player *ptr = new Player(name, id);
+            ptr->deserialize(msg);
+            ptr->setMapId(ptr->getMap());
+            ptr->setPosition(ptr->getPos());
+            ptr->setSpeed(150); // TODO
             registerGameClient(token, ptr);
         } break;
 

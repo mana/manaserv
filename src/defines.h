@@ -178,10 +178,8 @@ enum {
     // Inter-server
     GAMSG_REGISTER     = 0x500, // S address, W port, { W map id }*
     AGMSG_ACTIVE_MAP   = 0x501, // W map id
-    AGMSG_PLAYER_ENTER = 0x510, // L id, S name, B gender, B hair style, B hair color, B level, W money,
-                                // W*6 stats, W x, W y, W map id, B*32 token
-    GAMSG_PLAYER_DATA  = 0x520, // L id, B gender, B hair style, B hair color, B level, W money,
-                                // W*6 stats, W x, W y, W map id
+    AGMSG_PLAYER_ENTER = 0x510, // L id, S name, B*32 token, B* player data
+    GAMSG_PLAYER_DATA  = 0x520, // L id, B* player data
     GAMSG_REDIRECT          = 0x530, // L id
     AGMSG_REDIRECT_RESPONSE = 0x531, // L id, B*32 token, S game address, W game port
 

@@ -233,6 +233,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_PICKUP:
             {
+                /*
                 // add item to inventory (this is too simplistic atm)
                 int itemId = message.readLong();
 
@@ -242,10 +243,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 computer.character->insertItem(itemId, 1);
                 result.writeShort(GPMSG_PICKUP_RESPONSE);
                 result.writeByte(ERRMSG_OK);
+                */
             } break;
 
         case PGMSG_USE_ITEM:
             {
+                /*
                 int itemId = message.readLong();
 
                 result.writeShort(GPMSG_USE_RESPONSE);
@@ -258,6 +261,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 } else {
                     result.writeByte(ERRMSG_FAILURE);
                 }
+                */
             } break;
 
         case PGMSG_WALK:
@@ -272,12 +276,9 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_EQUIP:
             {
-                message.readLong(); // ItemId: Not useful, the inventory knows it
                 int slot = message.readByte();
-
-                result.writeShort(GPMSG_EQUIP_RESPONSE);
-                result.writeByte(computer.character->equip(slot) ?
-                                 ERRMSG_OK : ERRMSG_FAILURE);
+                result.writeShort(GPMSG_EQUIP_RESPONSE); // TODO: something else
+                Inventory(computer.character, result).equip(slot);
             } break;
 
         case PGMSG_ATTACK:

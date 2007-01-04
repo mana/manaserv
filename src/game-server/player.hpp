@@ -49,47 +49,6 @@ class Player : public Being, public PlayerData
         void update();
 
         /**
-         * Sets inventory.
-         */
-        void setInventory(Inventory const &inven)
-        { inventory = inven; }
-
-        /**
-         * Adds item with ID to inventory.
-         *
-         * @return Item add success/failure
-         */
-        bool insertItem(int itemId, int amount);
-
-        /**
-         * Removes item with ID from inventory.
-         *
-         * @return Item delete success/failure
-         */
-        bool removeItem(int itemId, int amount);
-
-        /**
-         * Checks if character has an item.
-         *
-         * @return true if being has item, false otherwise
-         */
-        bool hasItem(int itemId);
-
-        /**
-         * Equips item with ID in equipment slot.
-         *
-         * @return Equip success/failure
-         */
-        bool equip(int slot);
-
-        /**
-         * Un-equips item.
-         *
-         * @return Un-equip success/failure
-         */
-        bool unequip(int slot);
-
-        /**
          * Set attacking state
          **/
         void setAttacking(bool isAttacking)
@@ -112,7 +71,6 @@ class Player : public Being, public PlayerData
         Player &operator=(Player const &);
 
         GameClient *mClient;   /**< Client computer. */
-        Inventory inventory;   /**< Player inventory and equipment. */
         bool mIsAttacking;     /**< Attacking state. */
 };
 
