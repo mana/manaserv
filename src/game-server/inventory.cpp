@@ -164,6 +164,22 @@ int Inventory::insert(int itemId, int amount)
     return amount > 0 ? fillFreeSlot(itemId, amount, maxPerSlot) : 0;
 }
 
+int Inventory::count(int itemId)
+{
+    int nb = 0;
+
+    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
+         i_end = poss.inventory.end(); i != i_end; ++i)
+    {
+        if (i->itemId == itemId)
+        {
+            nb += i->amount;
+        }
+    }
+
+    return nb;
+}
+
 void Inventory::freeIndex(int i)
 {
     InventoryItem &it = poss.inventory[i];
@@ -223,6 +239,33 @@ int Inventory::remove(int itemId, int amount)
     return amount;
 }
 
+int Inventory::removeFromSlot(int slot, int amount)
+{
+    int i = getIndex(slot);
+
+    if (i < 0)
+    {
+        return amount;
+    }
+
+    InventoryItem &it = poss.inventory[i];
+    int nb = std::min((int)it.amount, amount);
+    it.amount -= nb;
+    amount -= nb;
+
+    msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+    msg.writeShort(it.itemId);
+    msg.writeByte(nb);
+
+    // If the slot is empty, compress the inventory.
+    if (it.amount == 0)
+    {
+        freeIndex(i);
+    }
+
+    return amount;
+}
+
 bool Inventory::equip(int slot)
 {
     int itemId = getItem(slot);
@@ -255,11 +298,9 @@ bool Inventory::equip(int slot)
             msg.writeShort(itemId);
             msg.writeByte(EQUIP_FIGHT2_SLOT);
             msg.writeShort(0);
-            msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
-            msg.writeShort(0);
             poss.equipment[EQUIP_FIGHT1_SLOT] = itemId;
             poss.equipment[EQUIP_FIGHT2_SLOT] = 0;
-            freeIndex(getIndex(slot));
+            removeFromSlot(slot, 1);
             return true;
         }
 
@@ -323,10 +364,8 @@ bool Inventory::equip(int slot)
             // The first slot is full and the second slot is empty.
             msg.writeByte(secondSlot);
             msg.writeShort(itemId);
-            msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
-            msg.writeShort(0);
             poss.equipment[secondSlot] = itemId;
-            freeIndex(getIndex(slot));
+            removeFromSlot(slot, 1);
             return true;
         }
         // no break!
@@ -338,10 +377,8 @@ bool Inventory::equip(int slot)
         }
         msg.writeByte(firstSlot);
         msg.writeShort(itemId);
-        msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
-        msg.writeShort(0);
         poss.equipment[firstSlot] = itemId;
-        freeIndex(getIndex(slot));
+        removeFromSlot(slot, 1);
         return true;
 
     default:

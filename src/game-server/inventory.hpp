@@ -94,16 +94,42 @@ class Inventory
          */
         int remove(int itemId, int amount);
 
-        int countItem(int itemId);
+        /**
+         * Removes some items from inventory.
+         * @return number of items not removed.
+         */
+        int removeFromSlot(int slot, int amount);
+
+        /**
+         * Counts number of items with given ID.
+         */
+        int count(int itemId);
+
+        /**
+         * Gets the ID of the items in a given slot.
+         */
+        int getItem(int slot);
+
     private:
         /**
          * Fills some slots with items.
          * @return number of items not inserted.
          */
         int fillFreeSlot(int itemId, int amount, int MaxPerSlot);
+
+        /**
+         * Frees an inventory slot given by its real index.
+         */
         void freeIndex(int index);
-        int getItem(int slot);
+
+        /**
+         * Gets the real index associated to a slot.
+         */
         int getIndex(int slot);
+
+        /**
+         * Gets the slot number of an inventory index.
+         */
         int getSlot(int index);
 };
 
