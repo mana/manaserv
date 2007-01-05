@@ -147,7 +147,7 @@ void initialize()
 
     // --- Initialize enet.
     if (enet_initialize() != 0) {
-        LOG_FATAL("An error occurred while initializing ENet", 0);
+        LOG_FATAL("An error occurred while initializing ENet");
         exit(2);
     }
 
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
     if (!accountHandler->startListen(port) ||
         !serverHandler->startListen(port + 1) ||
         !chatHandler->startListen(port + 2)) {
-        LOG_ERROR("Unable to create an ENet server host.", 0);
+        LOG_FATAL("Unable to create an ENet server host.");
         return 3;
     }
 

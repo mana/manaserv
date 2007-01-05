@@ -313,11 +313,11 @@ class Logger: public Singleton<Logger>
         ::utils::Logger::instance().error(os.str(), atVerbosity); \
     } while (0)
 
-#define LOG_FATAL(msg, atVerbosity)                             \
+#define LOG_FATAL(msg)                                          \
     do {                                                        \
         std::ostringstream os;                                  \
         os << msg;                                              \
-        ::utils::Logger::instance().fatal(os.str(), atVerbosity); \
+        ::utils::Logger::instance().fatal(os.str(), 0);         \
     } while (0)
 
 #endif // _TMWSERV_LOGGER_H_

@@ -1,12 +1,30 @@
 <?xml version="1.0"?>
 <!-- An example configuration file for ~/.tmwserv.xml -->
 <configuration>
+ <!--
+ Database configuration (unused by sqlite3).
+ -->
  <option name="dbhost" value=""/>
  <option name="dbpass" value=""/>
  <option name="dbuser" value=""/>
+
+ <!--
+ New player starting location. The map should be defined in data/maps.xml.
+ -->
  <option name="defaultMap" value="1"/>
  <option name="startX" value="720"/>
  <option name="startY" value="840"/>
- <option name="clientGameServerAddress" value="localhost"/>
- <option name="clientChatServerAddress" value="localhost"/>
+
+ <!--
+ The game server uses this address to connect to the account server. Clients
+ will also need to be able to connect to the account server.
+ -->
+ <option name="accountServerAddress" value="localhost"/>
+ <option name="accountServerPort" value="9601"/>
+
+ <!--
+ The clients use this address to connect to a game server on this machine.
+ -->
+ <option name="gameServerAddress" value="localhost"/>
+ <option name="gameServerPort" value="9604"/>
 </configuration>

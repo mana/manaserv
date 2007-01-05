@@ -1,3 +1,13 @@
+2006-01-05  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* AUTHORS: Updated to include all current authors.
+	* src/account-server/main-account.cpp,
+	src/account-server/serverhandler.cpp, src/utils/logger.h,
+	src/game-server/main-game.cpp: Removed log level argument from
+	LOG_FATAL helper macro, with the assumption that fatal messages should
+	always have highest log level.
+	* docs/tmwserv.xml: Added some documentation to example config file.
+
 2007-01-05  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/game-server/player.cpp: Delayed update of persistent position.
@@ -175,7 +185,7 @@
 	src/accounthandler.h, src/accounthandler.cpp: Moved to
 	src/account-server directory and changed header extension to hpp.
 	* src/chathandler.h, src/chathandler.cpp, src/chatchannelmanager.h,
-	src/chatchannel.cpp, src/chatchannel.h,	src/chatchannelmanager.cpp:
+	src/chatchannel.cpp, src/chatchannel.h, src/chatchannelmanager.cpp:
 	Moved to src/chat-server directory and changed header extension to hpp.
 	* src/itemmanger.h, src/itemmanager.cpp, src/state.h, src/state.cpp,
 	src/gamehandler.h, src/gamehandler.cpp, src/gameclient.h,

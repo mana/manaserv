@@ -60,7 +60,8 @@ void ServerHandler::computerDisconnected(NetComputer *comp)
     delete comp;
 }
 
-bool ServerHandler::getGameServerFromMap(unsigned mapId, std::string &address, short &port)
+bool ServerHandler::getGameServerFromMap(unsigned mapId, std::string &address,
+                                         short &port)
 {
     Servers::const_iterator i = servers.find(mapId);
     if (i == servers.end()) return false;
@@ -97,7 +98,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             LOG_INFO("Game server " << address << ':' << port
                      << " wants to register " << (msg.getUnreadLength() / 2)
                      << " maps.", 0);
-            
+
             while (msg.getUnreadLength())
             {
                 int id = msg.readShort();
@@ -135,7 +136,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             PlayerPtr ptr = store.getCharacter(id);
             std::string address;
             short port;
-            if (serverHandler->getGameServerFromMap(ptr->getMap(), address, port))
+            if (serverHandler->getGameServerFromMap(ptr->getMap(), address,
+                                                    port))
             {
                 registerGameClient(magic_token, ptr);
                 result.writeShort(AGMSG_REDIRECT_RESPONSE);
@@ -146,12 +148,13 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
             else
             {
-                LOG_ERROR("Server Change: No game server for the map.", 0);
+                LOG_ERROR("Server Change: No game server for map " <<
+                        ptr->getMap() << ".", 0);
             }
         } break;
 
         default:
-            LOG_WARN("Invalid message type.", 0);
+            LOG_WARN("Invalid message type: " << msg.getId(), 0);
             result.writeShort(XXMSG_INVALID);
             break;
     }

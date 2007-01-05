@@ -102,12 +102,8 @@ State *gameState;
  */
 void initialize()
 {
-
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
-
-    // Set enet to quit on exit.
-    atexit(enet_deinitialize);
 
     /*
      * If the path values aren't defined, we set the default
@@ -150,12 +146,12 @@ void initialize()
     using namespace utils;
     Logger::instance().setLogFile(logPath);
 
-    // write the messages to both the screen and the log file.
+    // Write the messages to both the screen and the log file.
     Logger::instance().setTeeMode(true);
 
     config.init(configPath);
-    LOG_INFO("Using Config File: " << configPath, 0);
-    LOG_INFO("Using Log File: " << logPath, 0);
+    LOG_INFO("Using config file: " << configPath, 0);
+    LOG_INFO("Using log file: " << logPath, 0);
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
@@ -173,13 +169,16 @@ void initialize()
 
     // --- Initialize enet.
     if (enet_initialize() != 0) {
-        LOG_FATAL("An error occurred while initializing ENet", 0);
+        LOG_FATAL("An error occurred while initializing ENet");
         exit(2);
     }
 
+    // Set enet to quit on exit.
+    atexit(enet_deinitialize);
+
     // --- Initialize scripting subsystem.
 #ifdef RUBY_SUPPORT
-    LOG_INFO("Script Language: " << scriptLanguage, 0);
+    LOG_INFO("Script language: " << scriptLanguage, 0);
 
     // Initialize ruby
     ruby_init();
@@ -193,7 +192,7 @@ void initialize()
     rb_load_file("scripts/init.rb");
     rubyStatus = ruby_exec();
 #else
-    LOG_WARN("No Scripting Language Support.", 0);
+    LOG_WARN("No scripting language support.", 0);
 #endif
 }
 
@@ -203,15 +202,11 @@ void initialize()
  */
 void deinitialize()
 {
-    delete stringFilter;
     // Write configuration file
     config.write();
 
     // Stop world timer
     worldTimer.stop();
-
-    // Quit ENet
-    enet_deinitialize();
 
 #ifdef RUBY_SUPPORT
     // Finish up ruby
@@ -224,6 +219,7 @@ void deinitialize()
     delete accountHandler;
 
     // Destroy Managers
+    delete stringFilter;
     delete itemManager;
     delete mapManager;
 
@@ -276,14 +272,14 @@ void parseOptions(int argc, char *argv[])
                 unsigned short verbosityLevel;
                 verbosityLevel = atoi(optarg);
                 utils::Logger::instance().setVerbosity(verbosityLevel);
-                LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel, 0);
+                LOG_INFO("Setting log verbosity level to " << verbosityLevel, 0);
                 break;
             case 'p':
                 // Change the port to listen on.
                 unsigned short portToListenOn;
                 portToListenOn = atoi(optarg);
                 config.setValue("gameServerPort", portToListenOn);
-                LOG_INFO("Setting Default Port to " << portToListenOn, 0);
+                LOG_INFO("Setting default port to " << portToListenOn, 0);
                 break;
         }
     }
@@ -299,19 +295,23 @@ int main(int argc, char *argv[])
 
     LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0);
 
-    // Parse Command Line Options
+    // Parse command line options
     parseOptions(argc, argv);
 
-    // General Initialization
+    // General initialization
     initialize();
 
     if (!accountHandler->start()) {
-        LOG_ERROR("Unable to create a connection to an account server.", 0);
+        LOG_FATAL("Unable to create a connection to an account server.");
         return 3;
     }
 
-    if (!gameHandler->startListen(int(config.getValue("gameServerPort", DEFAULT_SERVER_PORT + 3)))) {
-        LOG_ERROR("Unable to create an ENet server host.", 0);
+    int gameServerPort =
+        (int) config.getValue("gameServerPort", DEFAULT_SERVER_PORT + 3);
+
+    if (!gameHandler->startListen(gameServerPort))
+    {
+        LOG_FATAL("Unable to create an ENet server host.");
         return 3;
     }
 
@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
             if (elapsedWorldTicks > 1)
             {
                 LOG_WARN(elapsedWorldTicks -1 << " World Tick(s) skipped "
-                        "because of insufficient time. please buy a faster "
+                        "because of insufficient time. Please buy a faster "
                         "machine ;-)", 0);
             };
 
