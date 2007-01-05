@@ -28,7 +28,6 @@
 
 #include "playerdata.hpp"
 #include "game-server/being.hpp"
-#include "game-server/inventory.hpp"
 
 class GameClient;
 

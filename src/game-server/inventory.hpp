@@ -25,6 +25,8 @@
 #define INVENTORY_H
 
 #include "playerdata.hpp"
+#include "game-server/player.hpp"
+#include "net/messageout.hpp"
 
 enum
 {
@@ -57,7 +59,7 @@ enum
     EQUIP_CLIENT_INVENTORY = 32
 };
 
-class MessageOut;
+class GameClient;
 
 /**
  * Class used to handle Player possessions and prepare outgoing messages.
@@ -65,11 +67,21 @@ class MessageOut;
 class Inventory
 {
         Possessions &poss;
-        MessageOut &msg;
+        MessageOut msg;
+        Player *client;
+
     public:
-        Inventory(PlayerData *p, MessageOut &m)
-          : poss(p->getPossessions()), msg(m)
-        {}
+        Inventory(Player *);
+
+        /**
+         * Sends the update message to the client.
+         */
+        ~Inventory();
+
+        /**
+         * Sends a complete inventory update to the client.
+         */
+        void sendFull() const;
 
         /**
          * Equips item from given inventory slot.
@@ -103,12 +115,12 @@ class Inventory
         /**
          * Counts number of items with given ID.
          */
-        int count(int itemId);
+        int count(int itemId) const;
 
         /**
          * Gets the ID of the items in a given slot.
          */
-        int getItem(int slot);
+        int getItem(int slot) const;
 
     private:
         /**
@@ -125,12 +137,12 @@ class Inventory
         /**
          * Gets the real index associated to a slot.
          */
-        int getIndex(int slot);
+        int getIndex(int slot) const;
 
         /**
          * Gets the slot number of an inventory index.
          */
-        int getSlot(int index);
+        int getSlot(int index) const;
 };
 
 

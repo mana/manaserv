@@ -25,6 +25,7 @@
 #include <map>
 
 #include "game-server/gamehandler.hpp"
+#include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/map.hpp"
@@ -81,11 +82,11 @@ static void linkCharacter(GameClient *computer, Player *ch)
     computer->character = ch;
     computer->status = CLIENT_CONNECTED;
     ch->setClient(computer);
-    gameState->insert(ch);
-    MessageOut result;
-    result.writeShort(GPMSG_CONNECT_RESPONSE);
+    MessageOut result(GPMSG_CONNECT_RESPONSE);
     result.writeByte(ERRMSG_OK);
     computer->send(result);
+    gameState->insert(ch);
+    Inventory(ch).sendFull();
 }
 
 /**
@@ -252,10 +253,9 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     Point opos = o->getPosition();
                     if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
                     {
-                        result.writeShort(GPMSG_INVENTORY);
                         Item *item = static_cast< Item * >(o);
                         ItemClass *ic = item->getItemClass();
-                        Inventory(computer.character, result)
+                        Inventory(computer.character)
                             .insert(ic->getDatabaseID(), item->getAmount());
                         gameState->remove(item);
                         break;
@@ -268,10 +268,9 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             int slot = message.readByte();
             int amount = message.readByte();
-            Inventory inv(computer.character, result);
+            Inventory inv(computer.character);
             if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
             {
-                result.writeShort(GPMSG_INVENTORY);
                 int nb = inv.removeFromSlot(slot, amount);
                 Item *item = new Item(ic, amount - nb);
                 item->setMapId(computer.character->getMapId());
@@ -293,8 +292,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_EQUIP:
         {
             int slot = message.readByte();
-            result.writeShort(GPMSG_INVENTORY);
-            Inventory(computer.character, result).equip(slot);
+            Inventory(computer.character).equip(slot);
         } break;
 
         case PGMSG_ATTACK:

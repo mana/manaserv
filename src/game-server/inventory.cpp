@@ -24,11 +24,58 @@
 #include <algorithm>
 #include <cassert>
 
+#include "defines.h"
+#include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/itemmanager.hpp"
 #include "net/messageout.hpp"
 
-int Inventory::getItem(int slot)
+Inventory::Inventory(Player *p)
+  : poss(p->getPossessions()), msg(GPMSG_INVENTORY), client(p)
+{}
+
+Inventory::~Inventory()
+{
+    if (msg.getLength() > 2)
+    {
+        gameHandler->sendTo(client, msg);
+    }
+}
+
+void Inventory::sendFull() const
+{
+    MessageOut m(GPMSG_INVENTORY_FULL);
+
+    for (int i = 0; i < EQUIPMENT_SLOTS; ++i)
+    {
+        if (int id = poss.equipment[i])
+        {
+            m.writeByte(i);
+            m.writeShort(id);
+        }
+    }
+
+    int slot = EQUIP_CLIENT_INVENTORY;
+    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
+         i_end = poss.inventory.end(); i != i_end; ++i)
+    {
+        if (i->itemId)
+        {
+            m.writeByte(slot);
+            m.writeShort(i->itemId);
+            m.writeByte(i->amount);
+            ++slot;
+        }
+        else
+        {
+            slot += i->amount;
+        }
+    }
+
+    gameHandler->sendTo(client, m);
+}
+
+int Inventory::getItem(int slot) const
 {
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
          i_end = poss.inventory.end(); i != i_end; ++i)
@@ -48,7 +95,7 @@ int Inventory::getItem(int slot)
     return 0;
 }
 
-int Inventory::getIndex(int slot)
+int Inventory::getIndex(int slot) const
 {
     int index = 0;
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
@@ -69,7 +116,7 @@ int Inventory::getIndex(int slot)
     return -1;
 }
 
-int Inventory::getSlot(int index)
+int Inventory::getSlot(int index) const
 {
     int slot = 0;
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
@@ -164,7 +211,7 @@ int Inventory::insert(int itemId, int amount)
     return amount > 0 ? fillFreeSlot(itemId, amount, maxPerSlot) : 0;
 }
 
-int Inventory::count(int itemId)
+int Inventory::count(int itemId) const
 {
     int nb = 0;
 

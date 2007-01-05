@@ -18,7 +18,11 @@
 	* src/game-server/testing.cpp: Added a piece of equipment.
 	* src/game-server/defines.h, src/game-server/gamehandler.cpp:
 	Implemented item dropping.
-	* src/inventory.cpp: Fixed reported amounts of inventory items.
+	* src/game-server/player.hpp: Removed useless dependency on Inventory.
+	* src/game-server/inventory.cpp: Fixed reported amounts of inventory
+	items. Embeded handling of client message directly into the class.
+	* src/defines.h, src/game-server/gamehandler.cpp: Added full update of
+	Inventory on Player connection.
 
 2007-01-04  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
