@@ -31,6 +31,19 @@
 
 class GameClient;
 
+/**
+ * Actions for a player being.
+ */
+enum
+{
+    PLAYER_STAND = 0,
+    PLAYER_SIT,
+    PLAYER_ATTACK
+};
+
+/**
+ * Stores the data of a remote client.
+ */
 class Player : public Being, public PlayerData
 {
     public:
@@ -39,7 +52,7 @@ class Player : public Being, public PlayerData
           : Being(OBJECT_PLAYER, 65535),
             PlayerData(name, id),
             mClient(NULL),
-            mIsAttacking(false)
+            mAction(PLAYER_STAND)
         {}
 
         /**
@@ -48,10 +61,16 @@ class Player : public Being, public PlayerData
         void update();
 
         /**
-         * Set attacking state
+         * Sets next action.
          **/
-        void setAttacking(bool isAttacking)
-        { mIsAttacking = isAttacking; }
+        void setAction(int s)
+        { mAction = s; }
+
+        /**
+         * Gets next action.
+         **/
+        int getAction() const
+        { return mAction; }
 
         /**
          * Gets client computer.
@@ -70,7 +89,7 @@ class Player : public Being, public PlayerData
         Player &operator=(Player const &);
 
         GameClient *mClient;   /**< Client computer. */
-        bool mIsAttacking;     /**< Attacking state. */
+        unsigned char mAction; /**< Player state. */
 };
 
 #endif // _TMWSERV_PLAYER_H_

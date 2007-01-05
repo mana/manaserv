@@ -23,6 +23,8 @@
 	items. Embeded handling of client message directly into the class.
 	* src/defines.h, src/game-server/gamehandler.cpp: Added full update of
 	Inventory on Player connection.
+	* src/game-server/gamehandler.cpp, src/game-server/player.hpp,
+	src/game-server/player.cpp: Generalized player state.
 
 2007-01-04  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

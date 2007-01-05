@@ -300,7 +300,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             LOG_DEBUG("Player " << computer.character->getPublicID()
                       << " attacks", 0);
             computer.character->setDirection(message.readByte());
-            computer.character->setAttacking(true);
+            computer.character->setAction(PLAYER_ATTACK);
         } break;
 
         default:

@@ -39,14 +39,14 @@ void Player::update()
     setStat(STAT_SPEED, getRawStat(STAT_DEXTERITY));
 
     // attacking
-    if (mIsAttacking)
+    if (mAction == PLAYER_ATTACK)
     {
         // plausibility check of attack command
         if (mActionTime <= 0)
         {
             // request perform attack
             mActionTime = 1000;
-            mIsAttacking = false;
+            mAction = PLAYER_STAND;
             raiseUpdateFlags(ATTACK);
         }
     }
