@@ -38,17 +38,6 @@ void Player::update()
     setStat(STAT_ACCURACY, 50 + getRawStat(STAT_DEXTERITY));
     setStat(STAT_SPEED, getRawStat(STAT_DEXTERITY));
 
-    // Update persistent data.
-    int mapId = getMapId();
-    if (getMap() != mapId)
-    {
-        /* Only update on map change. This is on purpose. It prevents players
-           from respawning/reconnecting at the location they died. They will
-           reappear where they entered the map. */
-        setMap(mapId);
-        setPos(getPosition());
-    }
-
     // attacking
     if (mIsAttacking)
     {

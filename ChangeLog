@@ -1,4 +1,4 @@
-2006-01-05  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2007-01-05  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* AUTHORS: Updated to include all current authors.
 	* src/account-server/main-account.cpp,
@@ -10,7 +10,9 @@
 
 2007-01-05  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
-	* src/game-server/player.cpp: Delayed update of persistent position.
+	* src/game-server/player.cpp, src/game-server/state.cpp: Delayed update
+	of persistent position and put it into state handling, so that the
+	update happens before map change.
 	* src/game-server/item.hpp: Added an amount property to items lying on
 	the ground.
 	* src/game-server/testing.cpp: Added a piece of equipment.

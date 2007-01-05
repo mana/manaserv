@@ -286,18 +286,25 @@ void State::update()
             case EVENT_WARP:
             {
                 remove(o);
-                o->setMapId(e.map);
                 Point pos = { e.x, e.y };
+                o->setMapId(e.map);
                 o->setPosition(pos);
+
+                assert(o->getType() == OBJECT_PLAYER);
+                Player *p = static_cast< Player * >(o);
+                /* Force update of persistent data on map change, so that
+                   players can respawn at the start of the map after a death or
+                   a disconnection. */
+                p->setMap(e.map);
+                p->setPos(pos);
+                accountHandler->sendPlayerData(p);
+
                 if (mapManager->isActive(e.map))
                 {
                     insert(o);
                 }
                 else
                 {
-                    assert(o->getType() == OBJECT_PLAYER);
-                    Player *p = static_cast< Player * >(o);
-                    accountHandler->sendPlayerData(p);
                     MessageOut msg(GAMSG_REDIRECT);
                     msg.writeLong(p->getDatabaseID());
                     accountHandler->send(msg);
