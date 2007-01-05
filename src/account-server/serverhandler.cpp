@@ -33,7 +33,7 @@
 
 bool ServerHandler::startListen(enet_uint16 port)
 {
-    LOG_INFO("Server handler started:", 0);
+    LOG_INFO("Game server handler started:");
     return ConnectionHandler::startListen(port);
 }
 
@@ -49,7 +49,7 @@ void ServerHandler::computerDisconnected(NetComputer *comp)
     {
         if (i->second.server == comp)
         {
-            LOG_INFO("Unregistering map " << i->first << '.', 0);
+            LOG_INFO("Unregistering map " << i->first << '.');
             servers.erase(i++);
         }
         else
@@ -97,12 +97,12 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             Server s = { address, port, comp };
             LOG_INFO("Game server " << address << ':' << port
                      << " wants to register " << (msg.getUnreadLength() / 2)
-                     << " maps.", 0);
+                     << " maps.");
 
             while (msg.getUnreadLength())
             {
                 int id = msg.readShort();
-                LOG_INFO("Registering map " << id << '.', 0);
+                LOG_INFO("Registering map " << id << '.');
                 if (servers.insert(std::make_pair(id, s)).second)
                 {
                     MessageOut outMsg(AGMSG_ACTIVE_MAP);
@@ -111,7 +111,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 }
                 else
                 {
-                    LOG_ERROR("Server Handler: map is already registered.", 0);
+                    LOG_ERROR("Server Handler: map is already registered.");
                 }
             }
         } break;
@@ -149,12 +149,12 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             else
             {
                 LOG_ERROR("Server Change: No game server for map " <<
-                        ptr->getMap() << ".", 0);
+                          ptr->getMap() << ".");
             }
         } break;
 
         default:
-            LOG_WARN("Invalid message type: " << msg.getId(), 0);
+            LOG_WARN("Invalid message type: " << msg.getId());
             result.writeShort(XXMSG_INVALID);
             break;
     }

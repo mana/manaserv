@@ -112,7 +112,7 @@ void registerGameClient(std::string const &token, Player *ch)
 
 bool GameHandler::startListen(enet_uint16 port)
 {
-    LOG_INFO("Game handler started:", 0);
+    LOG_INFO("Game handler started:");
     return ConnectionHandler::startListen(port);
 }
 
@@ -298,13 +298,13 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_ATTACK:
         {
             LOG_DEBUG("Player " << computer.character->getPublicID()
-                      << " attacks", 0);
+                      << " attacks");
             computer.character->setDirection(message.readByte());
             computer.character->setAction(PLAYER_ATTACK);
         } break;
 
         default:
-            LOG_WARN("Invalid message type", 0);
+            LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);
             break;
     }

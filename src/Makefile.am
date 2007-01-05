@@ -50,11 +50,8 @@ tmwserv_account_SOURCES = \
 	net/messageout.cpp \
 	net/netcomputer.hpp \
 	net/netcomputer.cpp \
-	utils/base64.h \
-	utils/base64.cpp \
 	utils/countedptr.h \
 	utils/functors.h \
-	utils/singleton.h \
 	utils/logger.h \
 	utils/logger.cpp \
 	utils/stringfilter.h \
@@ -117,9 +114,6 @@ tmwserv_game_SOURCES = \
 	net/netcomputer.cpp \
 	utils/base64.h \
 	utils/base64.cpp \
-	utils/countedptr.h \
-	utils/functors.h \
-	utils/singleton.h \
 	utils/logger.h \
 	utils/logger.cpp \
 	utils/stringfilter.h \

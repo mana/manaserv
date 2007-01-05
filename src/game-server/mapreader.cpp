@@ -44,7 +44,7 @@ Map *MapReader::readMap(const std::string &filename)
 
     if (buffer == NULL)
     {
-        LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")", 0);
+        LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")");
         return NULL;
     }
 
@@ -64,7 +64,7 @@ Map *MapReader::readMap(const std::string &filename)
 
     if (!doc)
     {
-        LOG_ERROR("Error while parsing map file (" << filename << ")!", 0);
+        LOG_ERROR("Error while parsing map file (" << filename << ")!");
         return NULL;
     }
 
@@ -78,7 +78,7 @@ Map *MapReader::readMap(const std::string &filename)
     }
     else
     {
-        LOG_ERROR("Error: Not a map file (" << filename << ")!", 0);
+        LOG_ERROR("Error: Not a map file (" << filename << ")!");
     }
 
     xmlFreeDoc(doc);
@@ -122,7 +122,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path)
         {
             if (xmlHasProp(node, BAD_CAST "source"))
             {
-                LOG_WARN("Warning: External tilesets not supported yet.", 0);
+                LOG_WARN("Warning: External tilesets not supported yet.");
             }
             else
             {
@@ -163,7 +163,7 @@ static void readLayer(xmlNodePtr node, Map *map)
             {
                 if (xmlHasProp(node, BAD_CAST "compression"))
                 {
-                    LOG_WARN("Warning: no layer compression supported!", 0);
+                    LOG_WARN("Warning: no layer compression supported!");
                     return;
                 }
 

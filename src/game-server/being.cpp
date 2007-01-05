@@ -32,7 +32,7 @@ void Being::damage(Damage damage)
 
     mHitpoints -= HPloss;
     mHitsTaken.push_back(HPloss);
-    LOG_DEBUG("Being " << getPublicID() << " got hit", 0);
+    LOG_DEBUG("Being " << getPublicID() << " got hit");
 }
 
 void Being::performAttack(MapComposite *map)

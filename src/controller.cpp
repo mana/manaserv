@@ -36,8 +36,8 @@ void Controlled::update()
         setDestination(randomPos);
         mCountDown = 10 + rand() % 10;
 
-        LOG_INFO("Setting new random destination " << randomPos.x << ","
-                 << randomPos.y << " for being " << getPublicID(), 2);
+        LOG_DEBUG("Setting new random destination " << randomPos.x << ","
+                  << randomPos.y << " for being " << getPublicID());
     }
     else
     {

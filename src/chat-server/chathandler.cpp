@@ -90,7 +90,7 @@ void registerChatClient(std::string const &token, std::string const &name, int l
 bool
 ChatHandler::startListen(enet_uint16 port)
 {
-    LOG_INFO("Chat handler started:", 0);
+    LOG_INFO("Chat handler started:");
     return ConnectionHandler::startListen(port);
 }
 
@@ -142,7 +142,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         if (i == pendingLogins.end())
         {
             for (ChatPendingClients::iterator i = pendingClients.begin(), i_end = pendingClients.end();
-                 i != i_end; ++i) {
+                 i != i_end; ++i)
+            {
                 if (i->second == &computer) return;
             }
             pendingClients.insert(std::make_pair(magic_token, &computer));
@@ -167,7 +168,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (stringFilter->filterContent(text))
                 {
                     short channel = message.readShort();
-                    LOG_INFO("Say: (Channel " << channel << "): " << text, 2);
+                    LOG_DEBUG("Say: (Channel " << channel << "): " << text);
                     if ( channel == 0 ) // Let's say that is the default channel for now.
                     {
                         if ( text.substr(0, 1) == "@" || text.substr(0, 1) == "#" || text.substr(0, 1) == "/" )
@@ -420,7 +421,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         break;
 
         default:
-            LOG_WARN("Invalid message type", 0);
+            LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);
             break;
     }
@@ -431,7 +432,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
 void ChatHandler::handleCommand(ChatClient &computer, std::string const &command)
 {
-    LOG_INFO("Chat: Received unhandled command: " << command, 2);
+    LOG_INFO("Chat: Received unhandled command: " << command);
     MessageOut result;
     result.writeShort(CPMSG_ERROR);
     result.writeByte(CHAT_UNHANDLED_COMMAND);
@@ -446,7 +447,7 @@ void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
     result.writeByte(CHAT_USING_BAD_WORDS); // The Channel
     computer.send(result);
 
-    LOG_INFO(computer.characterName << " says bad words.", 2);
+    LOG_INFO(computer.characterName << " says bad words.");
 }
 
 void ChatHandler::announce(ChatClient &computer, std::string const &text)
@@ -455,7 +456,7 @@ void ChatHandler::announce(ChatClient &computer, std::string const &text)
     if (computer.accountLevel == AL_ADMIN ||
         computer.accountLevel == AL_GM )
     {
-        LOG_INFO("ANNOUNCE: " << text, 0);
+        LOG_INFO("ANNOUNCE: " << text);
         // Send it to every beings.
         result.writeShort(CPMSG_ANNOUNCEMENT);
         result.writeString(text);
@@ -467,14 +468,14 @@ void ChatHandler::announce(ChatClient &computer, std::string const &text)
         result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
         computer.send(result);
         LOG_INFO(computer.characterName <<
-            " couldn't make an announcement due to insufficient rights.", 2);
+            " couldn't make an announcement due to insufficient rights.");
     }
 }
 
 void ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerName, std::string const &text)
 {
     MessageOut result;
-    LOG_INFO(computer.characterName << " says to " << playerName << ": " << text, 2);
+    LOG_DEBUG(computer.characterName << " says to " << playerName << ": " << text);
     // Send it to the being if the being exists
     result.writeShort(CPMSG_PRIVMSG);
     result.writeString(computer.characterName);
@@ -492,7 +493,7 @@ void ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerNam
 void ChatHandler::sayInChannel(ChatClient &computer, short channel, std::string const &text)
 {
     MessageOut result;
-    LOG_INFO(computer.characterName << " says in channel " << channel << ": " << text, 2);
+    LOG_DEBUG(computer.characterName << " says in channel " << channel << ": " << text);
     // Send it to every beings in channel
     result.writeShort(CPMSG_PUBMSG);
     result.writeShort(channel);
@@ -518,7 +519,8 @@ void ChatHandler::sendInChannel(short channelId, MessageOut &msg)
     std::vector< std::string > const &users =
             chatChannelManager->getUserListInChannel(channelId);
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
+         i != i_end; ++i)
+    {
         // If the being is in the channel, send it
         std::vector< std::string >::const_iterator j_end = users.end(),
             j = std::find(users.begin(), j_end, static_cast< ChatClient * >(*i)->characterName);

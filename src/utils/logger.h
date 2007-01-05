@@ -25,10 +25,7 @@
 #define _TMWSERV_LOGGER_H_
 
 #include <iosfwd>
-#include <fstream>
 #include <sstream>
-
-#include "singleton.h"
 
 namespace utils
 {
@@ -43,9 +40,6 @@ namespace utils
  * Limitations:
  *     - not thread-safe.
  *
- * Notes:
- *     - this class implements the Meyer's singleton design pattern.
- *
  * Example of use:
  *
  * <pre>
@@ -55,11 +49,9 @@ namespace utils
  * {
  *     using namespace utils;
  *
- *     Logger& logger = Logger::instance();
- *     logger.setLogFile("/path/to/logfile");
+ *     Logger::setLogFile("/path/to/logfile");
  *
  *     // log messages using helper macros.
- *     LOG("hello world")
  *     LOG_DEBUG("level: " << 3)
  *     LOG_INFO("init sound")
  *     LOG_WARN("not implemented")
@@ -67,29 +59,33 @@ namespace utils
  *     LOG_FATAL("unable to init graphics")
  *
  *     // log messages using APIs.
- *     logger.log("hello world");
- *
  *     std::ostringstream os;
  *     os << "level: " << 3;
- *     logger.debug(os.str());
+ *     Logger::output(os.str(), Logger::DEBUG);
  *
- *     logger.info("init sound");
- *     logger.warn("not implemented");
- *     logger.error("resource not found");
- *     logger.fatal("unable to init graphics");
+ *     Logger::output("init sound", Logger::INFO);
+ *     Logger::output("not implemented", Logger::WARN);
+ *     Logger::output("resource not found", Logger::ERROR);
+ *     Logger::output("unable to init graphics", Logger::FATAL);
  *
  *     return 0;
  * }
  * </pre>
  */
-class Logger: public Singleton<Logger>
+class Logger
 {
-    // friend so that Singleton can call the constructor.
-    friend class Singleton<Logger>;
-
     public:
+        enum Level
+        {
+            FATAL = 0,
+            ERROR,
+            WARN,
+            INFO,
+            DEBUG
+        };
+
         /**
-         * Set the log file.
+         * Sets the log file.
          *
          * This method will open the log file for writing, the former file
          * contents are removed.
@@ -98,51 +94,36 @@ class Logger: public Singleton<Logger>
          *
          * @exception std::ios::failure if the log file could not be opened.
          */
-        void
-        setLogFile(const std::string& logFile);
+        static void setLogFile(std::string const &logFile);
 
         /**
-         * Add/remove the timestamp.
+         * Add/removes the timestamp.
          *
          * @param flag if true, a log message will always be timestamped
          *             (default = true).
          */
-        void
-        setTimestamp(bool flag = true)
-            throw();
+        static void setTimestamp(bool flag = true)
+        { mHasTimestamp = flag; }
 
         /**
-         * Set tee mode.
+         * Sets tee mode.
          *
          * @param flag if true, write messages to both the standard (or error)
          *        output and the log file (if set) (default = true).
          */
-        void
-        setTeeMode(bool flag = true)
-            throw();
+        static void setTeeMode(bool flag = true)
+        { mTeeMode = flag; }
 
         /**
-         * Set the verbosity level of the logger.
+         * Sets the verbosity level of the logger.
          *
          * @param verbosity is the level of verbosity.
-         *        0 = Standard infos
-         *        1 = + Infos on loading/unloading/reloading resources
-         *        2 = + Packets names and messages sent.
          */
-        void
-        setVerbosity(unsigned short verbosity = 0) { mVerbosity = verbosity; }
+        static void setVerbosity(Level verbosity)
+        { mVerbosity = verbosity; }
 
         /**
-         * Set tee mode.
-         *
-         * @param flag if true, write messages to both the standard (or error)
-         *        output and the log file (if set) (default = true).
-         */
-        unsigned short
-        getVerbosity() { return mVerbosity; }
-
-        /**
-         * Log a generic message.
+         * Logs a generic message.
          *
          * @param msg the message to log.
          *
@@ -151,125 +132,23 @@ class Logger: public Singleton<Logger>
          *
          * @exception std::ios::failure.
          */
-        void
-        log(const std::string &msg, unsigned short atVerbosity = 0);
+        static void output(std::string const &msg, Level atVerbosity);
 
-        /**
-         * Log a debug message.
-         *
-         * @param msg the message to log.
-         *
-         * @param atVerbosity the minimum verbosity level
-         *        to log this
-         *
-         * @exception std::ios::failure.
-         */
-        void
-        debug(const std::string &msg, unsigned short atVerbosity = 0);
-
-        /**
-         * Log an info message.
-         *
-         * @param msg the message to log.
-         *
-         * @param atVerbosity the minimum verbosity level
-         *        to log this
-         *
-         * @exception std::ios::failure.
-         */
-        void
-        info(const std::string &msg, unsigned short atVerbosity = 0);
-
-        /**
-         * Log a warn message.
-         *
-         * @param msg the message to log.
-         *
-         * @param atVerbosity the minimum verbosity level
-         *        to log this
-         *
-         * @exception std::ios::failure.
-         */
-        void
-        warn(const std::string &msg, unsigned short atVerbosity = 0);
-
-        /**
-         * Log an error message.
-         *
-         * @param msg the message to log.
-         *
-         * @param atVerbosity the minimum verbosity level
-         *        to log this
-         *
-         * @exception std::ios::failure.
-         */
-        void
-        error(const std::string &msg, unsigned short atVerbosity = 0);
-
-        /**
-         * Log a fatal error message.
-         *
-         * @param msg the message to log.
-         *
-         * @param atVerbosity the minimum verbosity level
-         *        to log this
-         *
-         * @exception std::ios::failure.
-         */
-        void
-        fatal(const std::string &msg, unsigned short atVerbosity = 0);
-
+        static Level mVerbosity;   /**< Verbosity level. */
     private:
-        /**
-         * Default constructor.
-         */
-        Logger(void)
-            throw();
+        static bool mHasTimestamp; /**< Timestamp flag. */
+        static bool mTeeMode;      /**< Tee mode flag. */
 
         /**
-         * Destructor.
-         */
-        ~Logger(void)
-            throw();
-
-        /**
-         * Copy constructor.
-         */
-        Logger(const Logger& rhs);
-
-        /**
-         * Assignment operator.
-         */
-        Logger&
-        operator=(const Logger& rhs);
-
-        /**
-         * Log a generic message.
+         * Logs a generic message.
          *
          * @param os the output stream.
          * @param msg the message to log.
-         * @param prefix the message prefix (default = "").
+         * @param prefix the message prefix.
          *
          * @exception std::ios::failure.
          */
-        void
-        log(std::ostream& os,
-            const std::string& msg,
-            const std::string& prefix = "");
-
-        /**
-         * Get the current time.
-         *
-         * @return the current time as string.
-         */
-        std::string
-        getCurrentTime(void);
-
-
-        std::ofstream mLogFile;    /**< the log file */
-        bool mHasTimestamp;        /**< the timestamp flag */
-        bool mTeeMode;             /**< the tee mode flag */
-        unsigned short mVerbosity; /**< keeps the verbosity level */
+        static void output(std::ostream &os, std::string const &msg, char const *prefix);
 };
 
 
@@ -277,47 +156,39 @@ class Logger: public Singleton<Logger>
 
 // HELPER MACROS
 
-
-#define LOG(msg, atVerbosity)                                            \
-    do {                                                                 \
-        std::ostringstream os;                                           \
-        os << msg;                                                       \
-        ::utils::Logger::instance().log(os.str(), atVerbosity); \
-    } while(0)
-
-#define LOG_DEBUG(msg, atVerbosity)                                        \
-    do {                                                                   \
-        std::ostringstream os;                                             \
-        os << msg;                                                         \
-        ::utils::Logger::instance().debug(os.str(), atVerbosity); \
+#define LOG_DEBUG(msg)                                                 \
+    do if (::utils::Logger::mVerbosity >= ::utils::Logger::DEBUG) {    \
+        std::ostringstream os;                                         \
+        os << msg;                                                     \
+        ::utils::Logger::output(os.str(), ::utils::Logger::DEBUG);     \
     } while (0)
 
-#define LOG_INFO(msg, atVerbosity)                              \
-    do {                                                        \
-        std::ostringstream os;                                  \
-        os << msg;                                              \
-        ::utils::Logger::instance().info(os.str(), atVerbosity); \
+#define LOG_INFO(msg)                                                  \
+    do if (::utils::Logger::mVerbosity >= ::utils::Logger::INFO) {     \
+        std::ostringstream os;                                         \
+        os << msg;                                                     \
+        ::utils::Logger::output(os.str(), ::utils::Logger::INFO);      \
     } while (0)
 
-#define LOG_WARN(msg, atVerbosity)                              \
-    do {                                                        \
-        std::ostringstream os;                                  \
-        os << msg;                                              \
-        ::utils::Logger::instance().warn(os.str(), atVerbosity); \
+#define LOG_WARN(msg)                                                  \
+    do if (::utils::Logger::mVerbosity >= ::utils::Logger::WARN) {     \
+        std::ostringstream os;                                         \
+        os << msg;                                                     \
+        ::utils::Logger::output(os.str(), ::utils::Logger::WARN);      \
     } while (0)
 
-#define LOG_ERROR(msg, atVerbosity)                             \
-    do {                                                        \
-        std::ostringstream os;                                  \
-        os << msg;                                              \
-        ::utils::Logger::instance().error(os.str(), atVerbosity); \
+#define LOG_ERROR(msg)                                                 \
+    do if (::utils::Logger::mVerbosity >= ::utils::Logger::ERROR) {    \
+        std::ostringstream os;                                         \
+        os << msg;                                                     \
+        ::utils::Logger::output(os.str(), ::utils::Logger::ERROR);     \
     } while (0)
 
-#define LOG_FATAL(msg)                                          \
-    do {                                                        \
-        std::ostringstream os;                                  \
-        os << msg;                                              \
-        ::utils::Logger::instance().fatal(os.str(), 0);         \
+#define LOG_FATAL(msg)                                                 \
+    do if (::utils::Logger::mVerbosity >= ::utils::Logger::FATAL) {    \
+        std::ostringstream os;                                         \
+        os << msg;                                                     \
+        ::utils::Logger::output(os.str(), ::utils::Logger::FATAL);     \
     } while (0)
 
 #endif // _TMWSERV_LOGGER_H_

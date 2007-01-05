@@ -77,7 +77,7 @@ void StringFilter::writeSlangFilterList()
 bool StringFilter::filterContent(const std::string& text)
 {
     if (!mInitialized) {
-        LOG_INFO("Slangs List is not initialized.", 2);
+        LOG_DEBUG("Slangs List is not initialized.");
         return true;
     }
 
@@ -109,7 +109,6 @@ bool StringFilter::isEmailValid(const std::string& email)
     if ((email.length() < MIN_EMAIL_LENGTH) ||
             (email.length() > MAX_EMAIL_LENGTH))
     {
-        LOG_INFO(email << ": Email too short or too long.", 1);
         return false;
     }
 

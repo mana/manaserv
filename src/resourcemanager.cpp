@@ -91,7 +91,7 @@ ResourceManager::searchAndAddZipFiles()
         std::string filePath = std::string("data/") +
             std::string(findFileInfo.name);
 
-        LOG_INFO("Adding to PhysicsFS: " << findFileInfo.name, 0);
+        LOG_INFO("Adding to PhysicsFS: " << findFileInfo.name);
 
         // Add the zip file to our PhysicsFS search path
         PHYSFS_addToSearchPath(filePath.c_str(), 1);
@@ -127,7 +127,7 @@ ResourceManager::searchAndAddZipFiles()
             std::string filePath = std::string(programPath) +
                 std::string("/") + std::string(direntry->d_name);
 
-            LOG_INFO("Adding to PhysicsFS: " << filePath, 0);
+            LOG_INFO("Adding to PhysicsFS: " << filePath);
 
             // Add the zip file to our PhysicsFS search path
             PHYSFS_addToSearchPath(filePath.c_str(), 1);
@@ -143,7 +143,7 @@ ResourceManager::loadFile(const std::string &fileName, int &fileSize)
 {
     // If the file doesn't exist indicate failure
     if (!PHYSFS_exists(fileName.c_str())) {
-        LOG_WARN("Warning: " << fileName << " not found!", 0);
+        LOG_WARN("Warning: " << fileName << " not found!");
         return NULL;
     }
 
@@ -152,7 +152,7 @@ ResourceManager::loadFile(const std::string &fileName, int &fileSize)
 
     // If the handler is an invalid pointer indicate failure
     if (file == NULL) {
-        LOG_WARN("Warning: " << fileName << " failed to load!", 0);
+        LOG_WARN("Warning: " << fileName << " failed to load!");
         return NULL;
     }
 
@@ -178,7 +178,7 @@ ResourceManager::loadTextFile(const std::string &fileName)
 
     if (!fileContents)
     {
-        LOG_ERROR("Couldn't load text file: " << fileName, 0);
+        LOG_ERROR("Couldn't load text file: " << fileName);
         return lines;
     }
 

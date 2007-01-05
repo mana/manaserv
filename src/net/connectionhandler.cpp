@@ -49,7 +49,7 @@ bool ConnectionHandler::startListen(enet_uint16 port)
     address.host = ENET_HOST_ANY;
     address.port = port;
 
-    LOG_INFO("Listening on port " << port << "...", 0);
+    LOG_INFO("Listening on port " << port << "...");
     host = enet_host_create(&address    /* the address to bind the server host to */,
                             MAX_CLIENTS /* allow up to MAX_CLIENTS clients and/or outgoing connections */,
                             0           /* assume any amount of incoming bandwidth */,
@@ -96,7 +96,7 @@ void ConnectionHandler::process()
                 LOG_INFO("A new client connected from " <<
                          ip4ToString(event.peer->address.host) << ":" <<
                          event.peer->address.port << " to port " <<
-                         host->address.port, 0);
+                         host->address.port);
                 NetComputer *comp = computerConnected(event.peer);
                 clients.push_back(comp);
 
@@ -124,13 +124,13 @@ void ConnectionHandler::process()
                 if (event.packet->dataLength >= 2) {
                     MessageIn msg((char *)event.packet->data,
                                   event.packet->dataLength);
-                    LOG_INFO("Received message " << msg.getId() << " ("
-                            << event.packet->dataLength << " B) from "
-                            << *comp, 2);
+                    LOG_DEBUG("Received message " << msg.getId() << " ("
+                              << event.packet->dataLength << " B) from "
+                              << *comp);
 
                     processMessage(comp, msg);
                 } else {
-                    LOG_ERROR("Message too short from " << *comp, 0);
+                    LOG_ERROR("Message too short from " << *comp);
                 }
 
                 /* Clean up the packet now that we're done using it. */
@@ -140,7 +140,7 @@ void ConnectionHandler::process()
             case ENET_EVENT_TYPE_DISCONNECT:
             {
                 NetComputer *comp = (NetComputer *)event.peer->data;
-                LOG_INFO(ip4ToString(event.peer->address.host) << " disconnected.", 0);
+                LOG_INFO(ip4ToString(event.peer->address.host) << " disconnected.");
                 // Reset the peer's client information.
                 computerDisconnected(comp);
                 clients.erase(std::find(clients.begin(), clients.end(), comp));
@@ -155,7 +155,8 @@ void ConnectionHandler::process()
 void ConnectionHandler::sendToEveryone(const MessageOut &msg)
 {
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i) {
+         i != i_end; ++i)
+    {
         (*i)->send(msg);
     }
 }

@@ -63,8 +63,7 @@ void
 NetComputer::send(const MessageOut &msg, bool reliable,
                   unsigned int channel)
 {
-    LOG_INFO("Sending packet of length " << msg.getLength() << " to "
-             << *this, 2);
+    LOG_DEBUG("Sending packet of length " << msg.getLength() << " to " << *this);
 
     ENetPacket *packet;
     packet = enet_packet_create(msg.getData(),
@@ -77,7 +76,7 @@ NetComputer::send(const MessageOut &msg, bool reliable,
     }
     else
     {
-        LOG_WARN("Failure to create packet!", 0);
+        LOG_ERROR("Failure to create packet!");
     }
 }
 

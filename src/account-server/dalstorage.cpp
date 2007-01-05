@@ -113,7 +113,7 @@ DALStorage::open(void)
         mDb->connect(getName(), getUser(), getPassword());
         if (!dbFileShown)
         {
-            LOG_INFO("Using " << dbFile << " as Database Name.", 0);
+            LOG_INFO("Using " << dbFile << " as Database Name.");
             dbFileShown = true;
         }
 #elif defined (SQLITE_SUPPORT)
@@ -122,7 +122,7 @@ DALStorage::open(void)
         mDb->connect(dbFile, "", "");
         if (!dbFileShown)
         {
-            LOG_INFO("SQLite uses ./" << dbFile << " as DB.", 0);
+            LOG_INFO("SQLite uses ./" << dbFile << " as DB.");
             dbFileShown = true;
         }
 #endif
@@ -167,10 +167,10 @@ DALStorage::open(void)
         createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
     }
     catch (const DbConnectionFailure& e) {
-        LOG_ERROR("unable to connect to the database: " << e.what(), 0);
+        LOG_ERROR("unable to connect to the database: " << e.what());
     }
     catch (const DbSqlQueryExecFailure& e) {
-        LOG_ERROR("SQL query failure: " << e.what(), 0);
+        LOG_ERROR("SQL query failure: " << e.what());
     }
 
     mIsOpen = mDb->isConnected();
@@ -243,8 +243,8 @@ DALStorage::getAccount(const std::string& userName)
             int size = charInfo.rows();
             Players players;
 
-            LOG_INFO(userName << "'s account has " << size
-                     << " character(s) in database.", 1);
+            LOG_DEBUG(userName << "'s account has " << size
+                      << " character(s) in database.");
 
             // Two steps: it seems like multiple requests cannot be alive at the same time.
             std::vector< unsigned > playerIDs;
@@ -375,7 +375,7 @@ DALStorage::getEmailList()
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0);
+        LOG_ERROR("SQL query failure: " << e.what());
     }
 
     return emailList;
@@ -402,7 +402,7 @@ bool DALStorage::doesEmailAddressExist(std::string const &email)
         return iReturn != 0;
     } catch (std::exception const &e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0);
+        LOG_ERROR("SQL query failure: " << e.what());
     }
 
     return true;
@@ -429,7 +429,7 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
         return iReturn != 0;
     } catch (std::exception const &e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0);
+        LOG_ERROR("SQL query failure: " << e.what());
     }
 
     return true;
@@ -469,14 +469,14 @@ DALStorage::getChannelList()
                                         channelInfo(i,3))));
 
             LOG_DEBUG("Channel (" << channelInfo(i,0) << ") loaded: " << channelInfo(i,1)
-                    << ": " << channelInfo(i,2), 5);
+                      << ": " << channelInfo(i,2));
         }
 
         return channels;
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0);
+        LOG_ERROR("SQL query failure: " << e.what());
     }
 
     return channels;
@@ -520,7 +520,7 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
                         << i->second.getPassword() << "\");";
 
                         LOG_DEBUG("Channel (" << i->first << ") saved: " << i->second.getName()
-                            << ": " << i->second.getAnnouncement(), 5);
+                                  << ": " << i->second.getAnnouncement());
                 }
 
                 mDb->execSql(sql.str());
@@ -531,7 +531,7 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what(), 0);
+        LOG_ERROR("SQL query failure: " << e.what());
     }
 }
 

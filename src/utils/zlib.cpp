@@ -31,16 +31,16 @@ static void logZlibError(int error)
     switch (error)
     {
         case Z_MEM_ERROR:
-            LOG_ERROR("Out of memory while decompressing data!", 0);
+            LOG_ERROR("Out of memory while decompressing data!");
             break;
         case Z_VERSION_ERROR:
-            LOG_ERROR("Incompatible zlib version!", 0);
+            LOG_ERROR("Incompatible zlib version!");
             break;
         case Z_DATA_ERROR:
-            LOG_ERROR("Incorrect zlib compressed data!", 0);
+            LOG_ERROR("Incorrect zlib compressed data!");
             break;
         default:
-            LOG_ERROR("Unknown error while decompressing data!", 0);
+            LOG_ERROR("Unknown error while decompressing data!");
     }
 }
 

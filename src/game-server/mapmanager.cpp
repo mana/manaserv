@@ -37,7 +37,7 @@ MapManager::MapManager(std::string const &mapReferenceFile)
     char *data = (char *)resman->loadFile(mapReferenceFile, size);
 
     if (!data) {
-        LOG_ERROR("Map Manager: Could not find " << mapReferenceFile << "!", 0);
+        LOG_ERROR("Map Manager: Could not find " << mapReferenceFile << "!");
         free(data);
         return;
     }
@@ -48,7 +48,7 @@ MapManager::MapManager(std::string const &mapReferenceFile)
     if (!doc)
     {
         LOG_ERROR("Map Manager: Error while parsing map database ("
-                  << mapReferenceFile << ")!", 0);
+                  << mapReferenceFile << ")!");
         return;
     }
 
@@ -56,12 +56,12 @@ MapManager::MapManager(std::string const &mapReferenceFile)
     if (!node || !xmlStrEqual(node->name, BAD_CAST "maps"))
     {
         LOG_ERROR("Map Manager: " << mapReferenceFile
-                  << " is not a valid database file!", 0);
+                  << " is not a valid database file!");
         xmlFreeDoc(doc);
         return;
     }
 
-    LOG_INFO("Loading map reference...", 0);
+    LOG_INFO("Loading map reference...");
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
         if (!xmlStrEqual(node->name, BAD_CAST "map")) {
@@ -99,10 +99,10 @@ Map *MapManager::getMap(int mapId)
         map = MapReader::readMap("maps/" + file);
         if (!map)
         {
-            LOG_ERROR("Unable to load map \"" << file << "\" (id " << mapId << ")", 0);
+            LOG_ERROR("Unable to load map \"" << file << "\" (id " << mapId << ")");
             return NULL;
         }
-        LOG_INFO("Loaded map \"" << file << "\" (id " << mapId << ")", 0);
+        LOG_INFO("Loaded map \"" << file << "\" (id " << mapId << ")");
     }
     return map;
 }
@@ -119,7 +119,7 @@ void MapManager::raiseActive(int mapId)
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end());
     i->second.isActive = true;
-    LOG_INFO("Activating map \"" << i->second.fileName << "\" (id " << i->first << ")", 0);
+    LOG_INFO("Activating map \"" << i->second.fileName << "\" (id " << i->first << ")");
 }
 
 bool MapManager::isActive(int mapId) const

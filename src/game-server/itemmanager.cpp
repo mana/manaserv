@@ -33,7 +33,7 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
     char *data = (char *)resman->loadFile(itemReferenceFile, size);
 
     if (!data) {
-        LOG_ERROR("Item Manager: Could not find " << itemReferenceFile << "!", 0);
+        LOG_ERROR("Item Manager: Could not find " << itemReferenceFile << "!");
         free(data);
         return;
     }
@@ -44,7 +44,7 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
     if (!doc)
     {
         LOG_ERROR("Item Manager: Error while parsing item database ("
-                  << itemReferenceFile << ")!", 0);
+                  << itemReferenceFile << ")!");
         return;
     }
 
@@ -52,16 +52,17 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
     if (!node || !xmlStrEqual(node->name, BAD_CAST "items"))
     {
         LOG_ERROR("Item Manager: " << itemReferenceFile
-                  << " is not a valid database file!", 0);
+                  << " is not a valid database file!");
         xmlFreeDoc(doc);
         return;
     }
 
-    LOG_INFO("Loading item reference...", 0);
+    LOG_INFO("Loading item reference...");
     unsigned nbItems = 0;
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
-        if (!xmlStrEqual(node->name, BAD_CAST "item")) {
+        if (!xmlStrEqual(node->name, BAD_CAST "item"))
+        {
             continue;
         }
 
@@ -70,7 +71,7 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         if (id == 0)
         {
             LOG_WARN("Item Manager: An (ignored) item has no ID in "
-                     << itemReferenceFile << "!", 0);
+                     << itemReferenceFile << "!");
             continue;
         }
 
@@ -113,47 +114,21 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         if (maxPerSlot == 0)
         {
             LOG_WARN("Item Manager: Missing max per slot properties for item: "
-                     << id << " in " << itemReferenceFile << ".", 0);
+                     << id << " in " << itemReferenceFile << ".");
         }
         if (weight == 0)
         {
             LOG_WARN("Item Manager: Missing weight for item: "
-                     << id << " in " << itemReferenceFile << ".", 0);
+                     << id << " in " << itemReferenceFile << ".");
         }
 
-        LOG_INFO("Item: ID: " << id << ", itemType: " << itemType
-                 << ", weight: " << weight << ", value: " << value <<
-                 ", scriptName: " << scriptName << ", maxPerSlot: " << maxPerSlot << ".", 3);
-        // Log level 5
-        LOG_INFO("Modifiers:: element: " <<  modifiers.element <<
-                 ", lifetime: " << modifiers.lifetime
-                 << std::endl <<
-                 ", strength: " << modifiers.rawStats[STAT_STRENGTH] <<
-                 ", agility: " << modifiers.rawStats[STAT_AGILITY] <<
-                 ", vitality: " << modifiers.rawStats[STAT_VITALITY]
-                 << std::endl <<
-                 ", intelligence: " << modifiers.rawStats[STAT_INTELLIGENCE] <<
-                 ", dexterity: " << modifiers.rawStats[STAT_DEXTERITY] <<
-                 ", luck: " << modifiers.rawStats[STAT_LUCK]
-                 << std::endl <<
-                 ", heat: " << modifiers.computedStats[STAT_HEAT] <<
-                 ", attack: " << modifiers.computedStats[STAT_ATTACK] <<
-                 ", defence: " << modifiers.computedStats[STAT_DEFENCE]
-                 << std::endl <<
-                 ", magic: " << modifiers.computedStats[STAT_MAGIC] <<
-                 ", accuracy: " << modifiers.computedStats[STAT_ACCURACY] <<
-                 ", speed: " << modifiers.computedStats[STAT_SPEED] <<
-                 std::endl <<
-                 ", hp: " << modifiers.hp <<
-                 ", mp: " << modifiers.mp <<
-                 std::endl <<
-                 ", range: " << modifiers.range <<
-                 ", weapon_type: " << modifiers.weaponType <<
-                 ", status_effect: " << modifiers.beingStateEffect, 5);
+        LOG_DEBUG("Item: ID: " << id << ", itemType: " << itemType
+                  << ", weight: " << weight << ", value: " << value <<
+                  ", scriptName: " << scriptName << ", maxPerSlot: " << maxPerSlot << ".");
     }
 
     LOG_INFO("Loaded " << nbItems << " items from "
-             << itemReferenceFile << ".", 0);
+             << itemReferenceFile << ".");
 
     xmlFreeDoc(doc);
 }

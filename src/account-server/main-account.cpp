@@ -123,14 +123,14 @@ void initialize()
 
     // Initialize the logger.
     using namespace utils;
-    Logger::instance().setLogFile(logPath);
+    Logger::setLogFile(logPath);
 
     // write the messages to both the screen and the log file.
-    Logger::instance().setTeeMode(true);
+    Logger::setTeeMode(true);
 
     config.init(configPath);
-    LOG_INFO("Using Config File: " << configPath, 0);
-    LOG_INFO("Using Log File: " << logPath, 0);
+    LOG_INFO("Using Config File: " << configPath);
+    LOG_INFO("Using Log File: " << logPath);
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
@@ -153,13 +153,13 @@ void initialize()
 
 
 #if defined (MYSQL_SUPPORT)
-    LOG_INFO("Using MySQL DB Backend.", 0);
+    LOG_INFO("Using MySQL DB Backend.");
 #elif defined (POSTGRESQL_SUPPORT)
-    LOG_INFO("Using PostGreSQL DB Backend.", 0);
+    LOG_INFO("Using PostGreSQL DB Backend.");
 #elif defined (SQLITE_SUPPORT)
-    LOG_INFO("Using SQLite DB Backend.", 0);
+    LOG_INFO("Using SQLite DB Backend.");
 #else
-    LOG_WARN("No Database Backend Support.", 0);
+    LOG_WARN("No Database Backend Support.");
 #endif
 
     // Initialize configuration defaults
@@ -243,15 +243,15 @@ void parseOptions(int argc, char *argv[])
                 // Set Verbosity to level
                 unsigned short verbosityLevel;
                 verbosityLevel = atoi(optarg);
-                utils::Logger::instance().setVerbosity(verbosityLevel);
-                LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel, 0);
+                utils::Logger::setVerbosity(utils::Logger::Level(verbosityLevel));
+                LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel);
                 break;
             case 'p':
                 // Change the port to listen on.
                 unsigned short portToListenOn;
                 portToListenOn = atoi(optarg);
                 config.setValue("ListenOnPort", portToListenOn);
-                LOG_INFO("Setting Default Port to " << portToListenOn, 0);
+                LOG_INFO("Setting Default Port to " << portToListenOn);
                 break;
         }
     }
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 {
     int elapsedWorldTicks;
 
-    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0);
+    LOG_INFO("The Mana World Account+Chat Server v" << PACKAGE_VERSION);
 
     // Parse Command Line Options
     parseOptions(argc, argv);
@@ -298,14 +298,14 @@ int main(int argc, char *argv[])
 
             if (elapsedWorldTicks > 1)
             {
-                LOG_WARN(elapsedWorldTicks -1 << " World Tick(s) skipped "
+                LOG_WARN(elapsedWorldTicks - 1 << " World Tick(s) skipped "
                         "because of insufficient time. please buy a faster "
-                        "machine ;-)", 0);
+                        "machine ;-)");
             };
 
             // Print world time at 10 second intervals to show we're alive
             if (worldTime % 100 == 0) {
-                LOG_INFO("World time: " << worldTime, 0);
+                LOG_INFO("World time: " << worldTime);
             }
 
             // Handle all messages that are in the message queues
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
         worldTimer.sleep();
     }
 
-    LOG_INFO("Received: Quit signal, closing down...", 0);
+    LOG_INFO("Received: Quit signal, closing down...");
     serverHandler->stopListen();
     chatHandler->stopListen();
     accountHandler->stopListen();

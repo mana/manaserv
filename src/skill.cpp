@@ -61,9 +61,9 @@ bool Skill::useSkill()
 {
 #ifdef SCRIPT_SUPPORT
     //run skill script
-    LOG_ERROR("Skill: Skills not implemented.", 0);
+    LOG_ERROR("Skill: Skills not implemented.");
 #else
-    LOG_ERROR("Skill: Could not use skill; scripting disabled.", 0);
+    LOG_ERROR("Skill: Could not use skill; scripting disabled.");
 #endif
     return true;
 }
@@ -77,8 +77,8 @@ bool Skill::deleteSkill(const std::string &ident, bool delTree)
 {
     //prevent deletion of self
     if (ident == id) {
-        LOG_ERROR("Skill: Attempt to delete self.", 0);
-            return false;
+        LOG_ERROR("Skill: Attempt to delete self.");
+        return false;
     }
 
     for (unsigned int i = 0; i < children.size(); i++) {

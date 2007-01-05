@@ -25,6 +25,21 @@
 	Inventory on Player connection.
 	* src/game-server/gamehandler.cpp, src/game-server/player.hpp,
 	src/game-server/player.cpp: Generalized player state.
+	* src/utils/logger.h, src/utils/logger.cpp: Simplified handling of
+	verbosity levels: fatal, error, warn, info, debug are now the levels.
+	Optimized code by generating only needed messages.
+	* src/chat-server/chathandler.cpp, src/net/connection.cpp,
+	src/net/netcomputer.cpp, src/net/connectionhandler.cpp, src/skill.cpp,
+	src/configuration.cpp, src/account-server/main-account.cpp,
+	src/account-server/serverhandler.cpp, src/utils/stringfilter.cpp,
+	src/account-server/dalstorage.cpp, src/utils/zlib.cpp,
+	src/account-server/accounthandler.cpp, src/resourcemanager.cpp,
+	src/controller.cpp, src/game-server/mapreader.cpp,
+	src/game-server/gamehandler.cpp, src/game-server/mapmanager.cpp,
+	src/game-server/accountconnection.cpp, src/game-server/being.cpp,
+	src/game-server/itemmanager.cpp, src/game-server/main-game.cpp:
+	Updated accordingly. Removed some unworthy debug messages.
+	* src/Makefile.am: Removed useless dependencies.
 
 2007-01-04  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

@@ -39,7 +39,7 @@
 bool
 AccountHandler::startListen(enet_uint16 port)
 {
-    LOG_INFO("Account handler started:", 0);
+    LOG_INFO("Account handler started:");
     return ConnectionHandler::startListen(port);
 }
 
@@ -102,7 +102,6 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 if (computer.getAccount().get() == NULL) {
                     result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't change your Account's Email.", 1);
                     break;
                 }
 
@@ -110,25 +109,19 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (!stringFilter->isEmailValid(email))
                 {
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(email << ": Invalid format, cannot change Email for " <<
-                    computer.getAccount()->getName(), 1);
                 }
                 else if (stringFilter->findDoubleQuotes(email))
                 {
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO(email << ": has got double quotes in it.", 1);
                 }
                 else if (store.doesEmailAddressExist(email))
                 {
                     result.writeByte(EMAILCHG_EXISTS_EMAIL);
-                    LOG_INFO(email << ": New Email already exists.", 1);
                 }
                 else
                 {
                     computer.getAccount()->setEmail(email);
                     result.writeByte(ERRMSG_OK);
-                    LOG_INFO(computer.getAccount()->getName() << ": Email changed to: " <<
-                    email, 1);
                 }
             }
             break;
@@ -138,7 +131,6 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 result.writeShort(APMSG_EMAIL_GET_RESPONSE);
                 if (computer.getAccount().get() == NULL) {
                     result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't get your Account's current Email.", 1);
                     break;
                 }
                 else
@@ -164,7 +156,6 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (computer.getAccount().get() == NULL)
                 {
                     result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't select a Character.", 1);
                     break; // not logged in
                 }
 
@@ -175,7 +166,6 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (charNum >= chars.size()) {
                     // invalid char selection
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO("Character Selection: Selection out of ID range.", 1);
                     break;
                 }
 
@@ -184,7 +174,7 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (!serverHandler->getGameServerFromMap(chars[charNum]->getMap(), address, port))
                 {
                     result.writeByte(ERRMSG_FAILURE);
-                    LOG_ERROR("Character Selection: No game server for the map.", 0);
+                    LOG_ERROR("Character Selection: No game server for the map.");
                     break;
                 }
 
@@ -193,8 +183,7 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 PlayerPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
 
-                LOG_INFO(selectedChar->getName()
-                         << " is trying to enter the servers.", 1);
+                LOG_DEBUG(selectedChar->getName() << " is trying to enter the servers.");
 
                 std::string magic_token(32, ' ');
                 for (int i = 0; i < 32; ++i) {
@@ -221,7 +210,6 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (computer.getAccount().get() == NULL)
                 {
                     result.writeByte(ERRMSG_NO_LOGIN);
-                    LOG_INFO("Not logged in. Can't delete a Character.", 1);
                     break; // not logged in
                 }
 
@@ -232,7 +220,6 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (charNum >= chars.size()) {
                     // invalid char selection
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
-                    LOG_INFO("Character Deletion : Selection out of ID range.", 1);
                     break;
                 }
 
@@ -250,14 +237,14 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 std::string deletedCharacter = chars[charNum].get()->getName();
                 computer.getAccount()->delCharacter(deletedCharacter);
                 store.flush(computer.getAccount());
-                LOG_INFO(deletedCharacter << ": Character deleted...", 1);
+                LOG_INFO(deletedCharacter << ": Character deleted...");
                 result.writeByte(ERRMSG_OK);
 
             }
             break;
 
         default:
-            LOG_WARN("Invalid message type", 0);
+            LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);
             break;
     }
@@ -274,30 +261,21 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
     std::string username = msg.readString();
     std::string password = msg.readString();
 
-    LOG_INFO(username << " is trying to login.", 1);
-
     MessageOut reply(APMSG_LOGIN_RESPONSE);
 
     if (clientVersion < config.getValue("clientVersion", 0))
     {
-        LOG_INFO("Client has an insufficient version number to login.", 1);
         reply.writeByte(LOGIN_INVALID_VERSION);
     }
     if (stringFilter->findDoubleQuotes(username))
     {
-        LOG_INFO(username << ": has got double quotes in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     if (computer.getAccount().get() != NULL) {
-        LOG_INFO("Already logged in as " << computer.getAccount()->getName()
-                 << ".", 1);
-        LOG_INFO("Please logout first.", 1);
         reply.writeByte(ERRMSG_FAILURE);
     }
     if (getClientNumber() >= MAX_CLIENTS )
     {
-        LOG_INFO("Client couldn't login. Already has " << MAX_CLIENTS
-                 << " logged in.", 1);
         reply.writeByte(LOGIN_SERVER_FULL);
     }
     else
@@ -308,14 +286,10 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
 
         if (!acc.get() || acc->getPassword() != password)
         {
-            LOG_INFO(username << ": Account does not exist or the password is "
-                     "invalid.", 1);
             reply.writeByte(ERRMSG_INVALID_ARGUMENT);
         }
         else
         {
-            LOG_INFO("Login OK by " << username, 1);
-
             // Associate account with connection
             computer.setAccount(acc);
 
@@ -324,9 +298,6 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
 
             // Return information about available characters
             Players &chars = computer.getAccount()->getCharacters();
-
-            LOG_INFO(username << "'s account has " << chars.size()
-                     << " character(s).", 1);
 
             // Send characters list
             for (unsigned int i = 0; i < chars.size(); i++)
@@ -357,12 +328,10 @@ AccountHandler::handleLogoutMessage(AccountClient &computer, MessageIn &msg)
 
     if (computer.getAccount().get() == NULL)
     {
-        LOG_INFO("Can't logout. Not even logged in.", 1);
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
     else
     {
-        LOG_INFO(computer.getAccount()->getName() << " logged out.", 1);
         computer.unsetAccount();
         reply.writeByte(ERRMSG_OK);
     }
@@ -378,46 +347,37 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     std::string password = msg.readString();
     std::string email = msg.readString();
 
-    LOG_INFO(username << " is trying to register.", 1);
-
     MessageOut reply(APMSG_REGISTER_RESPONSE);
 
     if (clientVersion < config.getValue("clientVersion", 0))
     {
-        LOG_INFO("Client has an unsufficient version number to login.", 1);
         reply.writeByte(REGISTER_INVALID_VERSION);
     }
     else if (stringFilter->findDoubleQuotes(username))
     {
-        LOG_INFO(username << ": has got double quotes in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(email))
     {
-        LOG_INFO(email << ": has got double quotes in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if ((username.length() < MIN_LOGIN_LENGTH) ||
             (username.length() > MAX_LOGIN_LENGTH))
     {
-        LOG_INFO(username << ": Username too short or too long.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if ((password.length() < MIN_PASSWORD_LENGTH) ||
             (password.length() > MAX_PASSWORD_LENGTH))
     {
-        LOG_INFO(email << ": Password too short or too long.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (!stringFilter->isEmailValid(email))
     {
-        LOG_INFO(email << ": Email Invalid, only a@b.c format is accepted.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     // Checking if the Name is slang's free.
     else if (!stringFilter->filterContent(username))
     {
-        LOG_INFO(username << ": has got bad words in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else
@@ -428,21 +388,17 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         // Check whether the account already exists.
         if (accPtr.get())
         {
-            LOG_INFO(username << ": Username already exists.", 1);
             reply.writeByte(REGISTER_EXISTS_USERNAME);
         }
         // Find out whether the email is already in use.
         else if (store.doesEmailAddressExist(email))
         {
-            LOG_INFO(email << ": Email already exists.", 1);
             reply.writeByte(REGISTER_EXISTS_EMAIL);
         }
         else
         {
             AccountPtr acc(new Account(username, password, email));
             store.addAccount(acc);
-            LOG_INFO(username << ": Account registered.", 1);
-
             reply.writeByte(ERRMSG_OK);
         }
     }
@@ -457,13 +413,10 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
     std::string username = msg.readString();
     std::string password = msg.readString();
 
-    LOG_INFO(username << " wants to be deleted from our accounts.", 1);
-
     MessageOut reply(APMSG_UNREGISTER_RESPONSE);
 
     if (stringFilter->findDoubleQuotes(username))
     {
-        LOG_INFO(username << ": has got double quotes in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else
@@ -474,8 +427,6 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
 
         if (!accPtr.get() || accPtr->getPassword() != password)
         {
-            LOG_INFO("Account does not exist or bad password for "
-                    << username << ".", 1);
             reply.writeByte(ERRMSG_INVALID_ARGUMENT);
         }
         else
@@ -491,7 +442,7 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
             }
 
             // Delete account and associated characters
-            LOG_INFO("Farewell " << username << " ...", 1);
+            LOG_INFO("Farewell " << username << " ...");
             store.delAccount(accPtr);
             reply.writeByte(ERRMSG_OK);
         }
@@ -511,31 +462,23 @@ AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
 
     if (computer.getAccount().get() == NULL)
     {
-        LOG_INFO("Not logged in. Can't change your Account's Password.", 1);
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
     else if (newPassword.length() < MIN_PASSWORD_LENGTH ||
             newPassword.length() > MAX_PASSWORD_LENGTH)
     {
-        LOG_INFO(computer.getAccount()->getName() <<
-                ": New password too long or too short.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(newPassword))
     {
-        LOG_INFO(newPassword << ": has got double quotes in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (oldPassword != computer.getAccount()->getPassword())
     {
-        LOG_INFO(computer.getAccount()->getName() <<
-                ": Old password is wrong.", 1);
         reply.writeByte(ERRMSG_FAILURE);
     }
     else
     {
-        LOG_INFO(computer.getAccount()->getName() <<
-                ": The password was changed.", 1);
         computer.getAccount()->setPassword(newPassword);
         reply.writeByte(ERRMSG_OK);
     }
@@ -555,38 +498,31 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
     if (computer.getAccount().get() == NULL) {
-        LOG_INFO("Not logged in. Can't create a Character.", 1);
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
     else if (!stringFilter->filterContent(name))
     {
-        LOG_INFO(name << ": Character has got bad words in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(name))
     {
-        LOG_INFO(name << ": has got double quotes in it.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (hairStyle < 0 || hairStyle > MAX_HAIRSTYLE_VALUE)
     {
-        LOG_INFO(name << ": Character's hair Style is invalid.", 1);
         reply.writeByte(CREATE_INVALID_HAIRSTYLE);
     }
     else if (hairColor < 0 || hairColor > MAX_HAIRCOLOR_VALUE)
     {
-        LOG_INFO(name << ": Character's hair Color is invalid.", 1);
         reply.writeByte(CREATE_INVALID_HAIRCOLOR);
     }
     else if (gender < 0 || gender > MAX_GENDER_VALUE)
     {
-        LOG_INFO(name << ": Character's gender is invalid.", 1);
         reply.writeByte(CREATE_INVALID_GENDER);
     }
     else if ((name.length() < MIN_CHARACTER_LENGTH) ||
              (name.length() > MAX_CHARACTER_LENGTH))
     {
-        LOG_INFO(name << ": Character's name too short or too long.", 1);
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else
@@ -594,7 +530,6 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         Storage &store = Storage::instance("tmw");
         if (store.doesCharacterNameExist(name))
         {
-            LOG_INFO(name << ": Character's name already exists.", 1);
             reply.writeByte(CREATE_EXISTS_NAME);
             computer.send(reply);
             return;
@@ -604,8 +539,6 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         Players &chars = computer.getAccount()->getCharacters();
         if (chars.size() >= MAX_OF_CHARACTERS)
         {
-            LOG_INFO("Already has " << chars.size()
-                    << " characters. Can't create another Character.", 1);
             reply.writeByte(CREATE_TOO_MUCH_CHARACTERS);
             computer.send(reply);
             return;
@@ -638,25 +571,18 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
 
         if (totalStats > POINTS_TO_DISTRIBUTES_AT_LVL1)
         {
-            LOG_INFO(name << ": Character's stats are too high to be of "
-                    "level 1.", 1);
             reply.writeByte(CREATE_RAW_STATS_TOO_HIGH);
         }
         else if (totalStats < POINTS_TO_DISTRIBUTES_AT_LVL1)
         {
-            LOG_INFO(name << ": Character's stats are too low to be of "
-                    "level 1.", 1);
             reply.writeByte(CREATE_RAW_STATS_TOO_LOW);
         }
         else if ((highestStat - lowestStat) > (signed) MAX_DIFF_BETWEEN_STATS)
         {
-            LOG_INFO(name << ": Character's stats difference is too high to "
-                    "be accepted.", 1);
             reply.writeByte(CREATE_RAW_STATS_INVALID_DIFF);
         }
         else if (!validNonZeroRawStats)
         {
-            LOG_INFO(name << ": One stat is equal to zero.", 1);
             reply.writeByte(CREATE_RAW_STATS_EQUAL_TO_ZERO);
         }
         else
@@ -676,7 +602,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             computer.getAccount()->addCharacter(newCharacter);
 
             LOG_INFO("Character " << name << " was created for "
-                    << computer.getAccount()->getName() << "'s account.", 1);
+                     << computer.getAccount()->getName() << "'s account.");
 
             store.flush(computer.getAccount()); // flush changes
             reply.writeByte(ERRMSG_OK);

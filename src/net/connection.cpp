@@ -79,7 +79,7 @@ void Connection::send(MessageOut const &msg, bool reliable, unsigned channel)
     }
     else
     {
-        LOG_WARN("Failure to create packet!", 0);
+        LOG_ERROR("Failure to create packet!");
     }
 }
 
@@ -92,12 +92,15 @@ void Connection::process()
         switch (event.type)
         {
             case ENET_EVENT_TYPE_RECEIVE:
-                if (event.packet->dataLength >= 2) {
+                if (event.packet->dataLength >= 2)
+                {
                     MessageIn msg((char *)event.packet->data,
                                   event.packet->dataLength);
                     processMessage(msg);
-                } else {
-                    LOG_ERROR("Message too short.", 0);
+                }
+                else
+                {
+                    LOG_WARN("Message too short.");
                 }
                 // Clean up the packet now that we are done using it.
                 enet_packet_destroy(event.packet);

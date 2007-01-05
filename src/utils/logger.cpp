@@ -23,6 +23,7 @@
 #include "logger.h"
 
 #include <ctime>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 
@@ -33,236 +34,17 @@
 namespace utils
 {
 
+static std::ofstream mLogFile;     /**< Log file. */
+bool Logger::mHasTimestamp = true; /**< Timestamp flag. */
+bool Logger::mTeeMode = false;     /**< Tee mode flag. */
+Logger::Level Logger::mVerbosity = Logger::INFO; /**< Verbosity level. */
 
 /**
- * Default constructor.
- */
-Logger::Logger(void)
-    throw()
-        : mHasTimestamp(true),
-          mTeeMode(false),
-          mVerbosity(0)
-{
-    // NOOP
-}
-
-
-/**
- * Destructor.
- */
-Logger::~Logger(void)
-    throw()
-{
-    // the destructor of std::ofstream takes care of closing the file
-    // if it is still open :)
-}
-
-
-/**
- * Set the log file.
- */
-void
-Logger::setLogFile(const std::string& logFile)
-{
-    // close the current log file.
-    if (mLogFile.is_open()) {
-        mLogFile.close();
-    }
-
-    // open the file for output and remove the former file contents.
-    mLogFile.open(logFile.c_str(), std::ios::trunc);
-
-    if (!mLogFile.is_open()) {
-        std::string msg("unable to open ");
-        msg += logFile;
-        msg += " for writing.";
-
-        throw std::ios::failure(msg);
-    }
-    else {
-        // by default the streams do not throw any exception
-        // let std::ios::failbit and std::ios::badbit throw exceptions.
-        mLogFile.exceptions(std::ios::failbit | std::ios::badbit);
-    }
-}
-
-
-/**
- * Add/remove the timestamp.
- */
-void
-Logger::setTimestamp(bool flag)
-    throw()
-{
-    mHasTimestamp = flag;
-}
-
-
-/**
- * Set tee mode.
- */
-void
-Logger::setTeeMode(bool flag)
-    throw()
-{
-    mTeeMode = flag;
-}
-
-
-/**
- * Log a generic message.
- */
-void
-Logger::log(const std::string& msg, unsigned short atVerbosity)
-{
-    if ( mVerbosity >= atVerbosity )
-    {
-        if (mTeeMode) {
-            log(std::cout, msg);
-
-            if (mLogFile.is_open()) {
-                log(mLogFile, msg);
-            }
-        }
-        else {
-            log((mLogFile.is_open() ? mLogFile : std::cout), msg);
-        }
-    }
-}
-
-
-/**
- * Log a debug message.
- */
-void
-Logger::debug(const std::string& msg, unsigned short atVerbosity)
-{
-    if ( mVerbosity >= atVerbosity )
-    {
-        if (mTeeMode) {
-            log(std::cout, msg, "[DBG]");
-
-            if (mLogFile.is_open()) {
-                log(mLogFile, msg, "[DBG]");
-            }
-        }
-        else {
-            log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[DBG]");
-        }
-    }
-}
-
-
-/**
- * Log an info message.
- */
-void
-Logger::info(const std::string& msg, unsigned short atVerbosity)
-{
-    if ( mVerbosity >= atVerbosity )
-    {
-        if (mTeeMode) {
-            log(std::cout, msg, "[INF]");
-
-            if (mLogFile.is_open()) {
-                log(mLogFile, msg, "[INF]");
-            }
-        }
-        else {
-            log((mLogFile.is_open() ? mLogFile : std::cout), msg, "[INF]");
-        }
-    }
-}
-
-
-/**
- * Log a warn message.
- */
-void
-Logger::warn(const std::string& msg, unsigned short atVerbosity)
-{
-    if ( mVerbosity >= atVerbosity )
-    {
-        if (mTeeMode) {
-            log(std::cerr, msg, "[WRN]");
-
-            if (mLogFile.is_open()) {
-                log(mLogFile, msg, "[WRN]");
-            }
-        }
-        else {
-            log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[WRN]");
-        }
-    }
-}
-
-
-/**
- * Log an error message.
- */
-void
-Logger::error(const std::string& msg, unsigned short atVerbosity)
-{
-    if ( mVerbosity >= atVerbosity )
-    {
-        if (mTeeMode) {
-            log(std::cerr, msg, "[ERR]");
-
-            if (mLogFile.is_open()) {
-                log(mLogFile, msg, "[ERR]");
-            }
-        }
-        else {
-            log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[ERR]");
-        }
-    }
-}
-
-
-/**
- * Log a fatal error message.
- */
-void
-Logger::fatal(const std::string& msg, unsigned short atVerbosity)
-{
-    if (mTeeMode) {
-        log(std::cerr, msg, "[FTL]");
-
-        if (mLogFile.is_open()) {
-            log(mLogFile, msg, "[FTL]");
-        }
-    }
-    else {
-        log((mLogFile.is_open() ? mLogFile : std::cerr), msg, "[FTL]");
-    }
-}
-
-
-/**
- * Log a generic message.
- */
-void
-Logger::log(std::ostream& os,
-            const std::string& msg,
-            const std::string& prefix)
-{
-    if (mHasTimestamp) {
-        os << getCurrentTime() << " ";
-    }
-
-    if (prefix != "") {
-        os << prefix << " ";
-    }
-
-    os << msg << std::endl;
-}
-
-
-/**
- * Get the current time.
- */
-std::string
-Logger::getCurrentTime(void)
+  * Gets the current time.
+  *
+  * @return the current time as string.
+  */
+static std::string getCurrentTime()
 {
     time_t now;
     tm local;
@@ -285,5 +67,64 @@ Logger::getCurrentTime(void)
     return os.str();
 }
 
+void Logger::output(std::ostream &os, std::string const &msg, char const *prefix)
+{
+    if (mHasTimestamp)
+    {
+        os << getCurrentTime() << ' ';
+    }
+
+    if (prefix)
+    {
+        os << prefix << ' ';
+    }
+
+    os << msg << std::endl;
+}
+
+void Logger::setLogFile(std::string const &logFile)
+{
+    // Close the current log file.
+    if (mLogFile.is_open())
+    {
+        mLogFile.close();
+    }
+
+    // Open the file for output and remove the former file contents.
+    mLogFile.open(logFile.c_str(), std::ios::trunc);
+
+    if (!mLogFile.is_open())
+    {
+        throw std::ios::failure("unable to open " + logFile + "for writing");
+    }
+    else
+    {
+        // by default the streams do not throw any exception
+        // let std::ios::failbit and std::ios::badbit throw exceptions.
+        mLogFile.exceptions(std::ios::failbit | std::ios::badbit);
+    }
+}
+
+void Logger::output(std::string const& msg, Level atVerbosity)
+{
+    static char const *prefixes[] =
+        { "[FTL]", "[ERR]", "[WRN]", "[INF]", "[DBG]" };
+
+    if (mVerbosity >= atVerbosity)
+    {
+        bool open = mLogFile.is_open();
+
+        if (open)
+        {
+            output(mLogFile, msg, prefixes[atVerbosity]);
+        }
+
+        if (!open || mTeeMode)
+        {
+            output(atVerbosity <= WARN ? std::cerr : std::cout,
+                   msg, prefixes[atVerbosity]);
+        }
+    }
+}
 
 } // namespace utils

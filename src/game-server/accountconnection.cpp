@@ -40,7 +40,7 @@ bool AccountConnection::start()
     {
         return false;
     }
-    LOG_INFO("Connection established to the account server.", 0);
+    LOG_INFO("Connection established to the account server.");
     MessageOut msg(GAMSG_REGISTER);
     msg.writeString(config.getValue("gameServerAddress", "localhost"));
     msg.writeShort(int(config.getValue("gameServerPort", DEFAULT_SERVER_PORT + 3)));
@@ -94,7 +94,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         } break;
 
         default:
-            LOG_WARN("Invalid message type", 0);
+            LOG_WARN("Invalid message type");
             break;
     }
 }

@@ -144,14 +144,14 @@ void initialize()
 
     // Initialize the logger.
     using namespace utils;
-    Logger::instance().setLogFile(logPath);
+    Logger::setLogFile(logPath);
 
     // Write the messages to both the screen and the log file.
-    Logger::instance().setTeeMode(true);
+    Logger::setTeeMode(true);
 
     config.init(configPath);
-    LOG_INFO("Using config file: " << configPath, 0);
-    LOG_INFO("Using log file: " << logPath, 0);
+    LOG_INFO("Using config file: " << configPath);
+    LOG_INFO("Using log file: " << logPath);
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
@@ -178,7 +178,7 @@ void initialize()
 
     // --- Initialize scripting subsystem.
 #ifdef RUBY_SUPPORT
-    LOG_INFO("Script language: " << scriptLanguage, 0);
+    LOG_INFO("Script language: " << scriptLanguage);
 
     // Initialize ruby
     ruby_init();
@@ -192,7 +192,7 @@ void initialize()
     rb_load_file("scripts/init.rb");
     rubyStatus = ruby_exec();
 #else
-    LOG_WARN("No scripting language support.", 0);
+    LOG_WARN("No scripting language support.");
 #endif
 }
 
@@ -271,15 +271,15 @@ void parseOptions(int argc, char *argv[])
                 // Set Verbosity to level
                 unsigned short verbosityLevel;
                 verbosityLevel = atoi(optarg);
-                utils::Logger::instance().setVerbosity(verbosityLevel);
-                LOG_INFO("Setting log verbosity level to " << verbosityLevel, 0);
+                utils::Logger::setVerbosity(utils::Logger::Level(verbosityLevel));
+                LOG_INFO("Setting log verbosity level to " << verbosityLevel);
                 break;
             case 'p':
                 // Change the port to listen on.
                 unsigned short portToListenOn;
                 portToListenOn = atoi(optarg);
                 config.setValue("gameServerPort", portToListenOn);
-                LOG_INFO("Setting default port to " << portToListenOn, 0);
+                LOG_INFO("Setting default port to " << portToListenOn);
                 break;
         }
     }
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 {
     int elapsedWorldTicks;
 
-    LOG_INFO("The Mana World Server v" << PACKAGE_VERSION, 0);
+    LOG_INFO("The Mana World Game Server v" << PACKAGE_VERSION);
 
     // Parse command line options
     parseOptions(argc, argv);
@@ -330,12 +330,12 @@ int main(int argc, char *argv[])
             {
                 LOG_WARN(elapsedWorldTicks -1 << " World Tick(s) skipped "
                         "because of insufficient time. Please buy a faster "
-                        "machine ;-)", 0);
+                        "machine ;-)");
             };
 
             // Print world time at 10 second intervals to show we're alive
             if (worldTime % 100 == 0) {
-                LOG_INFO("World time: " << worldTime, 0);
+                LOG_INFO("World time: " << worldTime);
             }
 
             // Handle all messages that are in the message queues
@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
         worldTimer.sleep();
     }
 
-    LOG_INFO("Received: Quit signal, closing down...", 0);
+    LOG_INFO("Received: Quit signal, closing down...");
     gameHandler->stopListen();
     accountHandler->stop();
     delete gameState;
