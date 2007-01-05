@@ -147,7 +147,7 @@ int Inventory::insert(int itemId, int amount)
 
             msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
             msg.writeShort(itemId);
-            msg.writeByte(nb);
+            msg.writeByte(i->amount);
 
             if (amount == 0)
             {
@@ -221,7 +221,7 @@ int Inventory::remove(int itemId, int amount)
 
             msg.writeByte(getSlot(i) + EQUIP_CLIENT_INVENTORY);
             msg.writeShort(itemId);
-            msg.writeByte(nb);
+            msg.writeByte(it.amount);
 
             // If the slot is empty, compress the inventory.
             if (it.amount == 0)
@@ -255,7 +255,7 @@ int Inventory::removeFromSlot(int slot, int amount)
 
     msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
     msg.writeShort(it.itemId);
-    msg.writeByte(nb);
+    msg.writeByte(it.amount);
 
     // If the slot is empty, compress the inventory.
     if (it.amount == 0)

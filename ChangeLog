@@ -16,6 +16,7 @@
 	* src/game-server/testing.cpp: Added a piece of equipment.
 	* src/game-server/defines.h, src/game-server/gamehandler.cpp:
 	Implemented item dropping.
+	* src/inventory.cpp: Fixed reported amounts of inventory items.
 
 2007-01-04  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
@@ -53,7 +54,7 @@
 	* accountserver.cbp, gameserver.cbp: Updated project files.
 	* src/game-server/state.cpp: Fix to Windows Rectangle redefinition.
 
-2007-01-03  Björn Steinbrink  <B.Steinbrink@gmx.de>
+2007-01-03  BjÃ¶rn Steinbrink  <B.Steinbrink@gmx.de>
 
 	* src/utils/timer.cpp: Removed extra semicolons that break builds with
 	--pedantic.
