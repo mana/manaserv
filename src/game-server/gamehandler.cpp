@@ -26,6 +26,7 @@
 
 #include "game-server/gamehandler.hpp"
 #include "game-server/item.hpp"
+#include "game-server/itemmanager.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/state.hpp"
@@ -252,12 +253,30 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
                     {
                         result.writeShort(GPMSG_INVENTORY);
-                        ItemClass *item = static_cast< Item * >(o)->getItemClass();
-                        Inventory(computer.character, result).insert(item->getDatabaseID(), 1);
-                        gameState->remove(o);
+                        Item *item = static_cast< Item * >(o);
+                        ItemClass *ic = item->getItemClass();
+                        Inventory(computer.character, result)
+                            .insert(ic->getDatabaseID(), item->getAmount());
+                        gameState->remove(item);
                         break;
                     }
                 }
+            }
+        } break;
+
+        case PGMSG_DROP:
+        {
+            int slot = message.readByte();
+            int amount = message.readByte();
+            Inventory inv(computer.character, result);
+            if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
+            {
+                result.writeShort(GPMSG_INVENTORY);
+                int nb = inv.removeFromSlot(slot, amount);
+                Item *item = new Item(ic, amount - nb);
+                item->setMapId(computer.character->getMapId());
+                item->setPosition(computer.character->getPosition());
+                gameState->insert(item);
             }
         } break;
 

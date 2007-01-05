@@ -225,17 +225,21 @@ class ItemClass
 class Item: public Object
 {
     public:
-        Item(ItemClass *type)
-          : Object(OBJECT_ITEM), mType(type)
+        Item(ItemClass *type, int amount)
+          : Object(OBJECT_ITEM), mType(type), mAmount(amount)
         {}
 
         ItemClass *getItemClass() const
         { return mType; }
 
+        int getAmount() const
+        { return mAmount; }
+
         virtual void update() {}
 
     private:
         ItemClass *mType;
+        unsigned char mAmount;
 };
 
 #endif

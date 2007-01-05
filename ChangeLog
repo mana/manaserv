@@ -1,3 +1,12 @@
+2007-01-05  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/game-server/player.cpp: Delayed update of persistent position.
+	* src/game-server/item.hpp: Added an amount property to items lying on
+	the ground.
+	* src/game-server/testing.cpp: Added a piece of equipment.
+	* src/game-server/defines.h, src/game-server/gamehandler.cpp:
+	Implemented item dropping.
+
 2007-01-04  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/playerdata.hpp, src/playerdata.cpp, src/defines.h,

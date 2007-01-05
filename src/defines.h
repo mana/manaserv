@@ -137,7 +137,9 @@ enum {
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
     GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
     PGMSG_PICKUP                   = 0x0110, // W*2 position
-    GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount ] }*
+    PGMSG_DROP                     = 0x0111, // B slot, B amount
+    PGMSG_EQUIP                    = 0x0112, // B slot
+    GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id
                                              // player: S name, B hair style, B hair color, B gender
                                              // monster: W type id
@@ -152,8 +154,6 @@ enum {
     GPMSG_SAY                      = 0x02A1, // W being id, S text
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
-    PGMSG_EQUIP                    = 0x0302, // L item id, B slot
-    GPMSG_EQUIP_RESPONSE           = 0x0303, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
 
     // Chat

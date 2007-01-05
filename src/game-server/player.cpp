@@ -39,8 +39,15 @@ void Player::update()
     setStat(STAT_SPEED, getRawStat(STAT_DEXTERITY));
 
     // Update persistent data.
-    setPos(getPosition());
-    setMap(getMapId());
+    int mapId = getMapId();
+    if (getMap() != mapId)
+    {
+        /* Only update on map change. This is on purpose. It prevents players
+           from respawning/reconnecting at the location they died. They will
+           reappear where they entered the map. */
+        setMap(mapId);
+        setPos(getPosition());
+    }
 
     // attacking
     if (mIsAttacking)
@@ -55,30 +62,3 @@ void Player::update()
         }
     }
 }
-
-/*
-bool Player::insertItem(int itemId, int amount)
-{
-    return inventory.insertItem(itemId, amount);
-}
-
-bool Player::removeItem(int itemId, int amount)
-{
-    return inventory.removeItemById(itemId, amount);
-}
-
-bool Player::hasItem(int itemId)
-{
-    return inventory.hasItem(itemId);
-}
-
-bool Player::equip(int slot)
-{
-    return false; // TODO
-}
-
-bool Player::unequip(int slot)
-{
-    return false; // TODO
-}
-*/
