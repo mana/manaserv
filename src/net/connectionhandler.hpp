@@ -60,8 +60,11 @@ class ConnectionHandler
         /**
          * Process outgoing messages and listen to the server socket for
          * incoming messages and new connections.
+         *
+         * @timeout an optional timeout in milliseconds to wait for something
+         *          to happen when there is nothing to do
          */
-        virtual void process();
+        virtual void process(enet_uint32 timeout = 0);
 
         /**
          * Process outgoing messages.

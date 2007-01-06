@@ -36,10 +36,16 @@ class ChatClient;
 class ChatHandler : public ConnectionHandler
 {
     public:
-        void process();
+        /**
+         * Overridden from ConnectionHandler to also clean connected clients
+         * that haven't sent in a magic token.
+         *
+         * @see ConnectionHandler::process
+         */
+        void process(enet_uint32 timeout = 0);
 
         /**
-         * Start the handler
+         * Start the handler.
          */
         bool
         startListen(enet_uint16 port);
@@ -71,12 +77,14 @@ class ChatHandler : public ConnectionHandler
         /**
          * Say something private to a player.
          */
-        void sayToPlayer(ChatClient &computer, std::string const &playerName, std::string const &text);
+        void sayToPlayer(ChatClient &computer, std::string const &playerName,
+                         std::string const &text);
 
         /**
          * Say something in a specific channel.
          */
-        void sayInChannel(ChatClient &computer, short channel, std::string const &);
+        void sayInChannel(ChatClient &computer, short channel,
+                          std::string const &);
 
         /**
          * Send packet to every client in a registered channel.
@@ -86,8 +94,14 @@ class ChatHandler : public ConnectionHandler
         /**
          * Tell a list of user about an event in a chatchannel about a player.
          */
-        void warnUsersAboutPlayerEventInChat(short channelId, std::string const &userName, char eventId);
+        void warnUsersAboutPlayerEventInChat(short channelId,
+                                             std::string const &userName,
+                                             char eventId);
 
+        /**
+         * Removes outdated pending logins. These are connected clients that
+         * still haven't sent in their magic token.
+         */
         void removeOutdatedPending();
 };
 

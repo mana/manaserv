@@ -265,7 +265,7 @@ ObjectBucket::ObjectBucket()
 {
     for (unsigned i = 0; i < 256 / int_bitsize; ++i)
     {
-        bitmap[i] = ~0;
+        bitmap[i] = ~0u;
     }
 }
 

@@ -22,17 +22,11 @@
 #ifndef _TMWSERV_TIMER_H_
 #define _TMWSERV_TIMER_H_
 
-#include <sys/time.h>
-
 /* I need a 64-bit unsigned integer */
 #ifdef _MSC_VER
    typedef __uint64 uint64_t // when using MSVC use its internal type
 #else
    #include <stdint.h> // on other compilers use the C99 official header
-#endif
-
-#ifdef _WIN32
-    #include "wingettimeofday.h"
 #endif
 
 namespace utils

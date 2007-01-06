@@ -1,3 +1,16 @@
+2007-01-06  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/game-server/mapcomposite.cpp: Fixed a compiler warning.
+	* src/chat-server/chathandler.hpp, src/chat-server/chathandler.cpp,
+	src/net/connectionhandler.hpp, src/net/connectionhandler.cpp,
+	src/account-server/main-account.cpp, src/game-server/mapcomposite.hpp,
+	src/Makefile.am: Allowed usage of timeout in
+	ConnectionHandler::process in order to reduce CPU usage. Now account
+	and chat servers no longer need to keep track of game time, but simply
+	listen for incoming messages to act on.
+	* src/utils/timer.cpp, src/utils/timer.h: Gracefully handle cases
+	where the computer time is set back.
+
 2007-01-05  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* AUTHORS: Updated to include all current authors.

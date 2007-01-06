@@ -19,8 +19,14 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <time.h>
 #include "timer.h"
+
+#include <time.h>
+#include <sys/time.h>
+
+#ifdef _WIN32
+#include "wingettimeofday.h"
+#endif
 
 namespace utils
 {
@@ -52,8 +58,18 @@ int Timer::poll()
     int elapsed = 0;
     if (active)
     {
-        elapsed = (getTimeInMillisec() - lastpulse) / interval;
-        lastpulse += interval * elapsed;
+        uint64_t now = getTimeInMillisec();
+        if (now > lastpulse)
+        {
+            elapsed = (now - lastpulse) / interval;
+            lastpulse += interval * elapsed;
+        }
+        else
+        {
+            // Time has made a jump to the past. This should be a rare
+            // occurence, so just reset lastpulse to prevent problems.
+            lastpulse = now;
+        }
     };
     return elapsed;
 }

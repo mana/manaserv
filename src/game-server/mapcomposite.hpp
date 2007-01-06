@@ -142,14 +142,16 @@ struct ObjectIterator
 };
 
 /**
- * Pool of public IDs for MovingObjects on a map.
+ * Pool of public IDs for MovingObjects on a map. By maintaining public ID
+ * availability using bits, it can locate an available public ID fast while
+ * using minimal memory access.
  */
 struct ObjectBucket
 {
     static int const int_bitsize = sizeof(unsigned) * 8;
     unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
-    short free; /**< Number of empty places. */
-    short next_object; /**< Next object to look at. */
+    short free;                         /**< Number of empty places. */
+    short next_object;                  /**< Next object to look at. */
     MovingObject *objects[256];
 
     ObjectBucket();
@@ -160,10 +162,17 @@ struct ObjectBucket
 /**
  * Combined map/entity structure.
  */
-class MapComposite {
-
+class MapComposite
+{
     public:
+        /**
+         * Constructor.
+         */
         MapComposite(Map *);
+
+        /**
+         * Destructor.
+         */
         ~MapComposite();
 
         Map *getMap() const
@@ -264,7 +273,7 @@ class MapComposite {
          */
         MapZone *zones;
 
-        unsigned short mapWidth; /**< Width with respect to zones. */
+        unsigned short mapWidth;  /**< Width with respect to zones. */
         unsigned short mapHeight; /**< Height with respect to zones. */
 
         friend class ZoneIterator;

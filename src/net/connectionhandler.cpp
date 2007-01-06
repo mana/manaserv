@@ -85,11 +85,11 @@ void ConnectionHandler::flush()
     enet_host_flush(host);
 }
 
-void ConnectionHandler::process()
+void ConnectionHandler::process(enet_uint32 timeout)
 {
     ENetEvent event;
     // Process Enet events and do not block.
-    while (enet_host_service(host, &event, 0) > 0) {
+    while (enet_host_service(host, &event, timeout) > 0) {
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
             {

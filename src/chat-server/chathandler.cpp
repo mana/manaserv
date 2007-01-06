@@ -112,8 +112,9 @@ NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
 
 void ChatHandler::computerDisconnected(NetComputer *computer)
 {
-    for (ChatPendingClients::iterator i = pendingClients.begin(), i_end = pendingClients.end();
-         i != i_end; ++i)
+    ChatPendingClients::iterator i_end = pendingClients.end();
+    for (ChatPendingClients::iterator i = pendingClients.begin();
+            i != i_end; ++i)
     {
         if (i->second == computer)
         {
@@ -124,9 +125,9 @@ void ChatHandler::computerDisconnected(NetComputer *computer)
     delete computer;
 }
 
-void ChatHandler::process()
+void ChatHandler::process(enet_uint32 timeout)
 {
-    ConnectionHandler::process();
+    ConnectionHandler::process(timeout);
     removeOutdatedPending();
 }
 
@@ -135,13 +136,15 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
     ChatClient &computer = *static_cast< ChatClient * >(comp);
     MessageOut result;
 
-    if (computer.characterName.empty()) {
+    if (computer.characterName.empty())
+    {
         if (message.getId() != PCMSG_CONNECT) return;
         std::string magic_token = message.readString(32);
         ChatPendingLogins::iterator i = pendingLogins.find(magic_token);
         if (i == pendingLogins.end())
         {
-            for (ChatPendingClients::iterator i = pendingClients.begin(), i_end = pendingClients.end();
+            ChatPendingClients::iterator i_end = pendingClients.end();
+            for (ChatPendingClients::iterator i = pendingClients.begin();
                  i != i_end; ++i)
             {
                 if (i->second == &computer) return;
@@ -169,9 +172,13 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 {
                     short channel = message.readShort();
                     LOG_DEBUG("Say: (Channel " << channel << "): " << text);
-                    if ( channel == 0 ) // Let's say that is the default channel for now.
+                    // Let's say that channel 0 is the default channel for now.
+                    if (channel == 0)
                     {
-                        if ( text.substr(0, 1) == "@" || text.substr(0, 1) == "#" || text.substr(0, 1) == "/" )
+                        // TODO: I think commands should be / only - BL
+                        if (text.substr(0, 1) == "@" ||
+                                text.substr(0, 1) == "#" ||
+                                text.substr(0, 1) == "/" )
                         {
                             // The message is a command. Deal with it.
                             handleCommand(computer, text);
@@ -179,7 +186,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     }
                     else
                     {
-                        // We send the message to the players registered in the channel.
+                        // We send the message to the players registered in the
+                        // channel.
                         sayInChannel(computer, channel, text);
                     }
                 }
@@ -196,8 +204,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 // If it's slang's free.
                 if (stringFilter->filterContent(text))
                 {
-                    // We send the message to every players in the default channel
-                    // as it is an annouce.
+                    // We send the message to every players in the default
+                    // channel as it is an annouce.
                     announce(computer, text);
                 }
                 else
@@ -265,24 +273,32 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 // If it's slang's free.
                 if (stringFilter->filterContent(channelName) &&
-                stringFilter->filterContent(channelAnnouncement))
+                        stringFilter->filterContent(channelAnnouncement))
                 {
                     // We attempt to create a new channel
                     short channelId;
-                    if (channelType)
-                        channelId = chatChannelManager->registerPrivateChannel(channelName,
-                                                                            channelAnnouncement,
-                                                                            channelPassword);
+                    if (channelType) {
+                        channelId = chatChannelManager->registerPrivateChannel(
+                                channelName,
+                                channelAnnouncement,
+                                channelPassword);
+                    }
                     else
-                        channelId = chatChannelManager->registerPublicChannel(channelName,
-                                                                            channelAnnouncement,
-                                                                            channelPassword);
+                    {
+                        channelId = chatChannelManager->registerPublicChannel(
+                                channelName,
+                                channelAnnouncement,
+                                channelPassword);
+                    }
+
                     if (channelId != 0)
                     {
-                        // We add the player as admin of this channel as he created it.
-                        // The user registering a private channel is the only one to be able
-                        // to update the password and the announcement in it and also to remove it.
-                        chatChannelManager->addUserInChannel(computer.characterName, channelId);
+                        // We add the player as admin of this channel as he
+                        // created it. The user registering a private channel
+                        // is the only one to be able to update the password
+                        // and the announcement in it and also to remove it.
+                        chatChannelManager->addUserInChannel(
+                                computer.characterName, channelId);
 
                         result.writeByte(ERRMSG_OK);
                         result.writeShort(channelId);
@@ -314,7 +330,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 { // Public channel
                     if (computer.accountLevel == AL_ADMIN || computer.accountLevel == AL_GM)
                     {
-                        warnUsersAboutPlayerEventInChat(channelId, "", CHAT_EVENT_LEAVING_PLAYER);
+                        warnUsersAboutPlayerEventInChat(
+                                channelId, "", CHAT_EVENT_LEAVING_PLAYER);
                         if (chatChannelManager->removeChannel(channelId))
                             result.writeByte(ERRMSG_OK);
                         else
@@ -327,7 +344,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 }
                 else
                 { // Private channel
-                    // We first see if the user is the admin (first user) of the channel
+                    // We first see if the user is the admin (first user) of
+                    // the channel
                     std::vector< std::string > const &userList =
                         chatChannelManager->getUserListInChannel(channelId);
                     std::vector< std::string >::const_iterator i = userList.begin();
@@ -335,11 +353,15 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     if (*i == computer.characterName)
                     {
                         // Make every user quit the channel
-                        warnUsersAboutPlayerEventInChat(channelId, "", CHAT_EVENT_LEAVING_PLAYER);
-                        if (chatChannelManager->removeChannel(channelId))
+                        warnUsersAboutPlayerEventInChat(
+                                channelId, "", CHAT_EVENT_LEAVING_PLAYER);
+                        if (chatChannelManager->removeChannel(channelId)) {
                             result.writeByte(ERRMSG_OK);
+                        }
                         else
+                        {
                             result.writeByte(ERRMSG_FAILURE);
+                        }
                     }
                     else
                     {
@@ -379,7 +401,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     }
                     // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
                     // in the channel.
-                    warnUsersAboutPlayerEventInChat(channelId, computer.characterName,
+                    warnUsersAboutPlayerEventInChat(channelId,
+                                                    computer.characterName,
                                                     CHAT_EVENT_NEW_PLAYER);
                 }
                 else
@@ -403,9 +426,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (chatChannelManager->removeUserFromChannel(computer.characterName, channelId))
                 {
                     result.writeByte(ERRMSG_OK);
-                    // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user left
-                    // the channel.
-                    warnUsersAboutPlayerEventInChat(channelId, computer.characterName,
+                    // Send an CPMSG_UPDATE_CHANNEL to warn other clients a
+                    // user left the channel.
+                    warnUsersAboutPlayerEventInChat(channelId,
+                                                    computer.characterName,
                                                     CHAT_EVENT_LEAVING_PLAYER);
                 }
                 else
@@ -472,7 +496,9 @@ void ChatHandler::announce(ChatClient &computer, std::string const &text)
     }
 }
 
-void ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerName, std::string const &text)
+void
+ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerName,
+                         std::string const &text)
 {
     MessageOut result;
     LOG_DEBUG(computer.characterName << " says to " << playerName << ": " << text);
@@ -490,7 +516,9 @@ void ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerNam
     }
 }
 
-void ChatHandler::sayInChannel(ChatClient &computer, short channel, std::string const &text)
+void
+ChatHandler::sayInChannel(ChatClient &computer, short channel,
+                          std::string const &text)
 {
     MessageOut result;
     LOG_DEBUG(computer.characterName << " says in channel " << channel << ": " << text);

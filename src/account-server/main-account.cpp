@@ -43,15 +43,12 @@
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
-#include "utils/timer.h"
 
 // Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE        "tmwserv.log"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 
-utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
-int worldTime = 0;              /**< Current world time in 100ms ticks */
 bool running = true;            /**< Determines if server keeps running */
 
 Skill skillTree("base");        /**< Skill tree */
@@ -178,9 +175,6 @@ void deinitialize()
     // Write configuration file
     config.write();
 
-    // Stop world timer
-    worldTimer.stop();
-
     // Quit ENet
     enet_deinitialize();
 
@@ -263,8 +257,6 @@ void parseOptions(int argc, char *argv[])
  */
 int main(int argc, char *argv[])
 {
-    int elapsedWorldTicks;
-
     LOG_INFO("The Mana World Account+Chat Server v" << PACKAGE_VERSION);
 
     // Parse Command Line Options
@@ -288,32 +280,10 @@ int main(int argc, char *argv[])
     store.close();
     store.open();
 
-    // Initialize world timer
-    worldTimer.start();
-
     while (running) {
-        elapsedWorldTicks = worldTimer.poll();
-        if (elapsedWorldTicks > 0) {
-            worldTime += elapsedWorldTicks;
-
-            if (elapsedWorldTicks > 1)
-            {
-                LOG_WARN(elapsedWorldTicks - 1 << " World Tick(s) skipped "
-                        "because of insufficient time. please buy a faster "
-                        "machine ;-)");
-            };
-
-            // Print world time at 10 second intervals to show we're alive
-            if (worldTime % 100 == 0) {
-                LOG_INFO("World time: " << worldTime);
-            }
-
-            // Handle all messages that are in the message queues
-            accountHandler->process();
-            chatHandler->process();
-            serverHandler->process();
-        }
-        worldTimer.sleep();
+        accountHandler->process(50);
+        chatHandler->process(50);
+        serverHandler->process(50);
     }
 
     LOG_INFO("Received: Quit signal, closing down...");
