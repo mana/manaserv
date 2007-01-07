@@ -64,7 +64,7 @@ class AccountHandler : public ConnectionHandler
         handleLoginMessage(AccountClient &computer, MessageIn &msg);
 
         void
-        handleLogoutMessage(AccountClient &computer, MessageIn &msg);
+        handleLogoutMessage(AccountClient &computer);
 
         void
         handleRegisterMessage(AccountClient &computer, MessageIn &msg);

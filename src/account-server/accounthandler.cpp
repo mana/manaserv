@@ -85,7 +85,7 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PAMSG_LOGOUT:
-            handleLogoutMessage(computer, message);
+            handleLogoutMessage(computer);
             break;
 
         case PAMSG_REGISTER:
@@ -322,7 +322,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
 }
 
 void
-AccountHandler::handleLogoutMessage(AccountClient &computer, MessageIn &msg)
+AccountHandler::handleLogoutMessage(AccountClient &computer)
 {
     MessageOut reply(APMSG_LOGOUT_RESPONSE);
 
