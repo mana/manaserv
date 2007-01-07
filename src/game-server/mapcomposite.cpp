@@ -265,17 +265,21 @@ ObjectBucket::ObjectBucket()
 {
     for (unsigned i = 0; i < 256 / int_bitsize; ++i)
     {
+        // An occupied ID is represented by zero in the bitmap.
         bitmap[i] = ~0u;
     }
 }
 
 int ObjectBucket::allocate()
 {
+    // Any free ID in the bucket?
     if (!free)
     {
         return -1;
     }
 
+    /* First check if next_object is a free ID. Directly check inside the
+       bitmap, as we have to update it anyway. */
     if (bitmap[next_object / int_bitsize] & (1 << (next_object % int_bitsize)))
     {
         bitmap[next_object / int_bitsize] &= ~(1 << (next_object % int_bitsize));
@@ -285,11 +289,15 @@ int ObjectBucket::allocate()
         return i;
     }
 
+    /* next_object was not free. Check the whole bucket until one ID is found,
+       starting from the IDs around next_object. */
     for (unsigned i = 0; i < 256 / int_bitsize; ++i)
     {
         int k = (i + next_object / int_bitsize) & 255;
+        // Check int_bitsize IDs at once.
         if (unsigned b = bitmap[k])
         {
+            // One of them is free. Find it by looking bit-by-bit.
             int j = 0;
             while (!(b & 1))
             {
@@ -303,6 +311,8 @@ int ObjectBucket::allocate()
             return j;
         }
     }
+
+    // No free ID in the bucket.
     return -1;
 }
 
@@ -355,6 +365,9 @@ bool MapComposite::allocate(MovingObject *obj)
         b = buckets[i];
         if (!b)
         {
+            /* Buckets are created in order. If there is nothing at position i,
+               there will not be anything in the next positions. So create a
+               new bucket. */
             b = new ObjectBucket;
             buckets[i] = b;
         }
