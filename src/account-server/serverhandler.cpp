@@ -121,7 +121,16 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readLong();
             Storage &store = Storage::instance("tmw");
             PlayerPtr ptr = store.getCharacter(id);
-            ptr->deserialize(msg);
+
+            if (ptr.get() != NULL)
+            {
+                ptr->deserialize(msg);
+            }
+            else
+            {
+                LOG_ERROR("Received player data for non-existing player " <<
+                        id << ".");
+            }
         } break;
 
         case GAMSG_REDIRECT:
