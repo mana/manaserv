@@ -1,3 +1,7 @@
+2007-01-14  Björn Steinbrink  <B.Steinbrink@gmx.de>
+
+	* src/utils/logger.h: Unified logging macros.
+
 2007-01-12  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/account-server/serverhandler.cpp: Report problems with finding a

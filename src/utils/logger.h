@@ -156,39 +156,17 @@ class Logger
 
 // HELPER MACROS
 
-#define LOG_DEBUG(msg)                                                 \
-    do if (::utils::Logger::mVerbosity >= ::utils::Logger::DEBUG) {    \
-        std::ostringstream os;                                         \
-        os << msg;                                                     \
-        ::utils::Logger::output(os.str(), ::utils::Logger::DEBUG);     \
+#define LOG(level, msg)                                                \
+    do if (::utils::Logger::mVerbosity >= ::utils::Logger::level) {    \
+        std::ostringstream os;                                          \
+        os << msg;                                                      \
+        ::utils::Logger::output(os.str(), ::utils::Logger::level);     \
     } while (0)
 
-#define LOG_INFO(msg)                                                  \
-    do if (::utils::Logger::mVerbosity >= ::utils::Logger::INFO) {     \
-        std::ostringstream os;                                         \
-        os << msg;                                                     \
-        ::utils::Logger::output(os.str(), ::utils::Logger::INFO);      \
-    } while (0)
-
-#define LOG_WARN(msg)                                                  \
-    do if (::utils::Logger::mVerbosity >= ::utils::Logger::WARN) {     \
-        std::ostringstream os;                                         \
-        os << msg;                                                     \
-        ::utils::Logger::output(os.str(), ::utils::Logger::WARN);      \
-    } while (0)
-
-#define LOG_ERROR(msg)                                                 \
-    do if (::utils::Logger::mVerbosity >= ::utils::Logger::ERROR) {    \
-        std::ostringstream os;                                         \
-        os << msg;                                                     \
-        ::utils::Logger::output(os.str(), ::utils::Logger::ERROR);     \
-    } while (0)
-
-#define LOG_FATAL(msg)                                                 \
-    do if (::utils::Logger::mVerbosity >= ::utils::Logger::FATAL) {    \
-        std::ostringstream os;                                         \
-        os << msg;                                                     \
-        ::utils::Logger::output(os.str(), ::utils::Logger::FATAL);     \
-    } while (0)
+#define LOG_DEBUG(msg)  LOG(DEBUG, msg)
+#define LOG_INFO(msg)   LOG(INFO, msg)
+#define LOG_WARN(msg)   LOG(WARN, msg)
+#define LOG_ERROR(msg)  LOG(ERROR, msg)
+#define LOG_FATAL(msg)  LOG(FATAL, msg)
 
 #endif // _TMWSERV_LOGGER_H_
