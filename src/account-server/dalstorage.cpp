@@ -630,28 +630,31 @@ void DALStorage::flush(AccountPtr const &account)
     // the loss of data would be minimized.
 
     // update the account.
-    std::ostringstream sql1;
-    sql1 << "update " << ACCOUNTS_TBL_NAME
+    std::ostringstream sqlUpdateAccountTable;
+    sqlUpdateAccountTable << "update " << ACCOUNTS_TBL_NAME
          << " set username = \"" << account->getName() << "\", "
          << "password = \"" << account->getPassword() << "\", "
          << "email = \"" << account->getEmail() << "\", "
          << "level = '" << account->getLevel() << "' "
          << "where id = '" << account->getID() << "';";
-    mDb->execSql(sql1.str());
+    mDb->execSql(sqlUpdateAccountTable.str());
 
     // get the list of characters that belong to this account.
     Players &characters = account->getCharacters();
 
     // insert or update the characters.
     for (Players::const_iterator it = characters.begin(),
-         it_end = characters.end(); it != it_end; ++it) {
-
-        std::ostringstream sql3;
+         it_end = characters.end(); it != it_end; ++it)
+    {
         if ((*it)->getDatabaseID() < 0) {
+            std::ostringstream sqlInsertCharactersTable;
             // insert the character
-            sql3 << "insert into " << CHARACTERS_TBL_NAME
+            // This assumes that the characters name has been checked for
+            // uniqueness
+            sqlInsertCharactersTable
+                 << "insert into " << CHARACTERS_TBL_NAME
                  << " (user_id, name, gender, hair_style, hair_color, level, money,"
-                    " x, y, map_id, str, agi, vit, int, dex, luck) values ("
+                 << " x, y, map_id, str, agi, vit, int, dex, luck) values ("
                  << account->getID() << ", \""
                  << (*it)->getName() << "\", "
                  << (*it)->getGender() << ", "
@@ -669,22 +672,11 @@ void DALStorage::flush(AccountPtr const &account)
                  << (*it)->getRawStat(STAT_DEXTERITY) << ", "
                  << (*it)->getRawStat(STAT_LUCK) << ");";
 
-            // get the character id
-            std::ostringstream sql2;
-            sql2 << "select id from " << CHARACTERS_TBL_NAME
-                 << " where name = \"" << (*it)->getName() << "\";";
-            RecordSet const &charInfo = mDb->execSql(sql2.str());
-            if (charInfo.isEmpty()) {
-                // FIXME: this does not make any sense to me -- silene
-                (*it)->setDatabaseID(1);
-            }
-            else
-            {
-                string_to<unsigned int> toUint;
-                (*it)->setDatabaseID(toUint(charInfo(0, 0)));
-            }
+            mDb->execSql(sqlInsertCharactersTable.str());
         } else {
-            sql3 << "update " << CHARACTERS_TBL_NAME
+            std::ostringstream sqlUpdateCharactersTable;
+            sqlUpdateCharactersTable
+                << "update " << CHARACTERS_TBL_NAME
                 << " set name = \"" << (*it)->getName() << "\", "
                 << " gender = " << (*it)->getGender() << ", "
                 << " hair_style = " << (int)(*it)->getHairStyle() << ", "
@@ -705,8 +697,30 @@ void DALStorage::flush(AccountPtr const &account)
                 << " dex = " << (*it)->getRawStat(STAT_DEXTERITY) << ", "
                 << " luck = " << (*it)->getRawStat(STAT_LUCK)
                 << " where id = " << (*it)->getDatabaseID() << ";";
+
+            mDb->execSql(sqlUpdateCharactersTable.str());
         }
-        mDb->execSql(sql3.str());
+
+        if ((*it)->getDatabaseID() < 0)
+        {
+            // get the character's id
+            std::ostringstream sqlSelectIdCharactersTable;
+            sqlSelectIdCharactersTable
+                 << "select id from " << CHARACTERS_TBL_NAME
+                 << " where name = \"" << (*it)->getName() << "\";";
+            RecordSet const &charInfo =
+                mDb->execSql(sqlSelectIdCharactersTable.str());
+
+            if (!charInfo.isEmpty()) {
+                string_to<unsigned int> toUint;
+                (*it)->setDatabaseID(toUint(charInfo(0, 0)));
+            }
+            else
+            {
+                // TODO: The character's name is not unique, or some other
+                // error has occured
+            }
+        }
 
         // TODO: inventories.
     }
@@ -718,27 +732,29 @@ void DALStorage::flush(AccountPtr const &account)
     // a string to an unsigned int.
     string_to<unsigned short> toUint;
 
-    std::ostringstream sql4;
-    sql4 << "select name, id from " << CHARACTERS_TBL_NAME
+    std::ostringstream sqlSelectNameIdCharactersTable;
+    sqlSelectNameIdCharactersTable
+         << "select name, id from " << CHARACTERS_TBL_NAME
          << " where user_id = '" << account->getID() << "';";
-    const RecordSet& charInMemInfo = mDb->execSql(sql4.str());
+    const RecordSet& charInMemInfo =
+        mDb->execSql(sqlSelectNameIdCharactersTable.str());
 
     // We compare chars from memory and those existing in db,
     // And delete those not in mem but existing in db.
     bool charFound;
-    for ( unsigned int i = 0; i < charInMemInfo.rows(); ++i) // in database
+    for (unsigned int i = 0; i < charInMemInfo.rows(); ++i) // in database
     {
         charFound = false;
         for (Players::const_iterator it = characters.begin(),
              it_end = characters.end(); it != it_end; ++it) // In memory
         {
-            if ( charInMemInfo(i, 0) == (*it)->getName() )
+            if (charInMemInfo(i, 0) == (*it)->getName())
             {
                 charFound = true;
                 break;
             }
         }
-        if ( !charFound )
+        if (!charFound)
         {
             // The char is db but not in memory,
             // It will be removed from database.
@@ -748,22 +764,24 @@ void DALStorage::flush(AccountPtr const &account)
             unsigned int charId = toUint(charInMemInfo(i, 1));
 
                 // delete the inventory.
-                std::ostringstream sql5;
-                sql5 << "delete from ";
-                sql5 << INVENTORIES_TBL_NAME;
-                sql5 << " where owner_id = '";
-                sql5 << charId;
-                sql5 << "';";
-                mDb->execSql(sql5.str());
+                std::ostringstream sqlDeleteInventoryTable;
+                sqlDeleteInventoryTable
+                    << "delete from "
+                    << INVENTORIES_TBL_NAME
+                    << " where owner_id = '"
+                    << charId
+                    << "';";
+                mDb->execSql(sqlDeleteInventoryTable.str());
 
                 // now delete the character.
-                std::ostringstream sql6;
-                sql6 << "delete from ";
-                sql6 << CHARACTERS_TBL_NAME;
-                sql6 << " where id = '";
-                sql6 << charId;
-                sql6 << "';";
-                mDb->execSql(sql6.str());
+                std::ostringstream sqlDeleteCharactersTable;
+                sqlDeleteCharactersTable
+                    << "delete from "
+                    << CHARACTERS_TBL_NAME
+                    << " where id = '"
+                    << charId
+                    << "';";
+                mDb->execSql(sqlDeleteCharactersTable.str());
         }
     }
 }

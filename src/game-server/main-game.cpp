@@ -97,6 +97,12 @@ AccountConnection *accountHandler;
 /** Global game state */
 State *gameState;
 
+/** Callback used when SIGQUIT signal is received. */
+void closeGracefully(int dummy)
+{
+    running = false;
+}
+
 /**
  * Initializes the server.
  */
@@ -104,6 +110,10 @@ void initialize()
 {
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
+
+    // Used to close via process signals
+    signal(SIGQUIT, closeGracefully);
+    signal(SIGINT, closeGracefully);
 
     /*
      * If the path values aren't defined, we set the default

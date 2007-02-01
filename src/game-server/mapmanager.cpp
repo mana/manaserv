@@ -88,7 +88,7 @@ MapManager::~MapManager()
     }
 }
 
-Map *MapManager::getMap(int mapId)
+Map* MapManager::getMap(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end() && i->second.isActive);
@@ -99,7 +99,8 @@ Map *MapManager::getMap(int mapId)
         map = MapReader::readMap("maps/" + file);
         if (!map)
         {
-            LOG_ERROR("Unable to load map \"" << file << "\" (id " << mapId << ")");
+            LOG_ERROR("Unable to load map \"" << file << "\" (id "
+                      << mapId << ")");
             return NULL;
         }
         LOG_INFO("Loaded map \"" << file << "\" (id " << mapId << ")");
@@ -119,7 +120,8 @@ void MapManager::raiseActive(int mapId)
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end());
     i->second.isActive = true;
-    LOG_INFO("Activating map \"" << i->second.fileName << "\" (id " << i->first << ")");
+    LOG_INFO("Activating map \"" << i->second.fileName << "\" (id "
+             << i->first << ")");
 }
 
 bool MapManager::isActive(int mapId) const

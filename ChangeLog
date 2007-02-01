@@ -1,3 +1,12 @@
+2007-02-01  Rogier Polak  <rogier_polak@users.sourceforge.net>
+
+	* src/account-server/main-account.cpp,
+	src/account-server/dalstorage.cpp, src/account-server/account.cpp,
+	src/game-server/mapmanager.cpp, src/game-server/main-game.cpp:
+	Added graceful server shutdown, chose some more sane variables names
+	for SQL queries and fixed a possible character collision error (patch
+	applied by Bjørn Lindeijer).
+
 2007-01-14  Björn Steinbrink  <B.Steinbrink@gmx.de>
 
 	* src/utils/logger.h: Unified logging macros.

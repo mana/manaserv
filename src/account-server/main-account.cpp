@@ -69,6 +69,12 @@ ServerHandler *serverHandler;
 /** Chat Channels Manager */
 ChatChannelManager *chatChannelManager;
 
+/** Callback used when SIGQUIT signal is received. */
+void closeGracefully(int dummy)
+{
+    running = false;
+}
+
 /**
  * Initializes the server.
  */
@@ -77,6 +83,10 @@ void initialize()
 
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
+
+    // Used to close via process signals
+    signal(SIGQUIT, closeGracefully);
+    signal(SIGINT, closeGracefully);
 
     // Set enet to quit on exit.
     atexit(enet_deinitialize);
@@ -268,7 +278,8 @@ int main(int argc, char *argv[])
     int port = int(config.getValue("accountServerPort", DEFAULT_SERVER_PORT));
     if (!accountHandler->startListen(port) ||
         !serverHandler->startListen(port + 1) ||
-        !chatHandler->startListen(port + 2)) {
+        !chatHandler->startListen(port + 2))
+    {
         LOG_FATAL("Unable to create an ENet server host.");
         return 3;
     }

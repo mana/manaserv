@@ -116,7 +116,7 @@ Account::getPassword(void) const
 void
 Account::setEmail(const std::string& email)
 {
-    // should we check that the email address is valid first?
+    // Email validity is checked by Accounthandler
     mEmail = email;
 }
 
