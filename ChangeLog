@@ -6,6 +6,8 @@
 	Added graceful server shutdown, chose some more sane variables names
 	for SQL queries and fixed a possible character collision error (patch
 	applied by Bjørn Lindeijer).
+	* src/game-server/object.cpp, src/game-server/object.hpp: Added
+	caching of paths (patch applied by Bjørn Lindeijer).
 
 2007-01-14  Björn Steinbrink  <B.Steinbrink@gmx.de>
 

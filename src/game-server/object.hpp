@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "point.h"
+#include "game-server/map.hpp"
 
 // Object type enumeration
 enum
@@ -197,7 +198,7 @@ class MovingObject: public Object
          * Sets the destination coordinates of the object.
          */
         void setDestination(Point dst)
-        { mDst = dst; raiseUpdateFlags(NEW_DESTINATION); }
+        { mDst = dst; raiseUpdateFlags(NEW_DESTINATION); mPath.clear(); }
 
         /**
          * Gets the old coordinates of the object.
@@ -249,6 +250,7 @@ class MovingObject: public Object
         Point mDst; /**< target coordinates */
         Point mOld; /**< old coordinates */
         unsigned short mSpeed; /**< speed */
+        std::list<PATH_NODE> mPath;
 
     protected:
         unsigned char mDirection;   /**< Facing direction */

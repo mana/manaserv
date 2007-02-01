@@ -29,7 +29,7 @@ void MovingObject::move()
     mOld = getPosition();
     if (mActionTime > 100)
     {
-        // current move has not yet ended
+        // Current move has not yet ended
         mActionTime -= 100;
         return;
     }
@@ -38,16 +38,40 @@ void MovingObject::move()
     int tileDX = mDst.x / 32, tileDY = mDst.y / 32;
     if (tileSX == tileDX && tileSY == tileDY)
     {
-        // moving while staying on the same tile is free
+        // Moving while staying on the same tile is free
         setPosition(mDst);
         mActionTime = 0;
         return;
     }
 
     Map *map = mapManager->getMap(getMapId());
-    // TODO: cache pathfinding results
-    std::list<PATH_NODE> path = map->findPath(tileSX, tileSY, tileDX, tileDY);
-    if (path.empty())
+
+    /* If no path exists, the for-loop won't be entered. Else a path for the
+     * current destination has already been calculated.
+     * The tiles in this path have to be checked for walkability,
+     * in case there have been changes. The 'getWalk' method of the Map
+     * class has been used, because that seems to be the most logical
+     * place extra functionality will be added.
+     */
+    for (std::list<PATH_NODE>::iterator pathIterator = mPath.begin();
+            pathIterator != mPath.end(); pathIterator++)
+    {
+        if (!map->getWalk(pathIterator->x, pathIterator->y))
+        {
+            mPath.clear();
+            break;
+        }
+    }
+
+    if (mPath.empty())
+    {
+        // No path exists: the walkability of cached path has changed, the
+        // destination has changed, or a path was never set.
+        std::list<PATH_NODE> mPath = map->findPath(tileSX, tileSY,
+                                                   tileDX, tileDY);
+    }
+
+    if (mPath.empty())
     {
         // no path was found
         mDst = mOld;
@@ -59,11 +83,11 @@ void MovingObject::move()
     Point pos;
     do
     {
-        PATH_NODE next = path.front();
-        path.pop_front();
+        PATH_NODE next = mPath.front();
+        mPath.pop_front();
         mActionTime += (prev.x != next.x && prev.y != next.y)
                        ? mSpeed * 362 / 256 : mSpeed;
-        if (path.empty())
+        if (mPath.empty())
         {
             // skip last tile center
             pos = mDst;
