@@ -67,8 +67,7 @@ void MovingObject::move()
     {
         // No path exists: the walkability of cached path has changed, the
         // destination has changed, or a path was never set.
-        std::list<PATH_NODE> mPath = map->findPath(tileSX, tileSY,
-                                                   tileDX, tileDY);
+        mPath = map->findPath(tileSX, tileSY, tileDX, tileDY);
     }
 
     if (mPath.empty())
