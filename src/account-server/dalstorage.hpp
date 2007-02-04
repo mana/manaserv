@@ -66,6 +66,16 @@ class DALStorage: public Storage
         getAccount(const std::string& userName);
 
         /**
+         * Get an account by ID.
+         *
+         * @param accountID the ID of the account.
+         *
+         * @return the account associated with the ID.
+         */
+        AccountPtr
+        getAccountByID(int accountID);
+
+        /**
          * Gets a character by database ID.
          *
          * @param id the ID of the character.

@@ -45,6 +45,12 @@ class AccountConnection: public Connection
          */
         void sendPlayerData(PlayerData *);
 
+        /**
+         * Prepares the account server for a reconnecting player
+         */
+        void playerReconnectAccount(int id, const std::string magic_token);
+
+
     protected:
         /**
          * Processes server messages.

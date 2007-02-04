@@ -155,9 +155,10 @@ DALStorage::open(void)
         // we will stick with strategy2 for the moment as we are focusing
         // on SQLite.
 
-        // FIXME: The tables should be checked/created at startup in order to avoid
-        // a DbSqlQueryExecFailure assert on sqlite while registering.
-        // Also, this would initialize connection to the database earlier in memory.
+        // FIXME: The tables should be checked/created at startup in order to
+        // avoid a DbSqlQueryExecFailure assert on sqlite while registering.
+        // Also, this would initialize connection to the database earlier in
+        // memory.
 
         createTable(ACCOUNTS_TBL_NAME, SQL_ACCOUNTS_TABLE);
         createTable(CHARACTERS_TBL_NAME, SQL_CHARACTERS_TABLE);
@@ -167,7 +168,7 @@ DALStorage::open(void)
         createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
     }
     catch (const DbConnectionFailure& e) {
-        LOG_ERROR("unable to connect to the database: " << e.what());
+        LOG_ERROR("Unable to connect to the database: " << e.what());
     }
     catch (const DbSqlQueryExecFailure& e) {
         LOG_ERROR("SQL query failure: " << e.what());
@@ -269,6 +270,85 @@ DALStorage::getAccount(const std::string& userName)
     }
 }
 
+/**
+ * Get an account by ID.
+ */
+AccountPtr
+DALStorage::getAccountByID(int accountID)
+{
+    // connect to the database (if not connected yet).
+    open();
+
+    // look for the account in the list first.
+    Accounts::iterator it = mAccounts.find(accountID);
+
+    if (it != mAccounts.end())
+        return it->second;
+
+    using namespace dal;
+
+    // the account was not in the list, look for it in the database.
+    try {
+        std::ostringstream sql;
+        sql << "select * from " << ACCOUNTS_TBL_NAME << " where id = '"
+            << accountID << "';";
+        const RecordSet& accountInfo = mDb->execSql(sql.str());
+
+        // if the account is not even in the database then
+        // we have no choice but to return nothing.
+        if (accountInfo.isEmpty()) {
+            return AccountPtr(NULL);
+        }
+
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to< unsigned > toUint;
+        unsigned id = toUint(accountInfo(0, 0));
+
+        // create an Account instance
+        // and initialize it with information about the user.
+        AccountPtr account(new Account(accountInfo(0, 1),
+                                       accountInfo(0, 2),
+                                       accountInfo(0, 3), id));
+
+        mAccounts.insert(std::make_pair(id, account));
+
+        // load the characters associated with the account.
+        sql.str(std::string());
+        sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
+            << accountInfo(0, 0) << "';";
+        RecordSet const &charInfo = mDb->execSql(sql.str());
+
+        if (!charInfo.isEmpty())
+        {
+            int size = charInfo.rows();
+            Players players;
+
+            LOG_DEBUG("AccountID: "<< accountID << "; has " << size
+                      << " character(s) in database.");
+
+            // Two steps: it seems like multiple requests cannot be alive at the same time.
+            std::vector< unsigned > playerIDs;
+            for (int k = 0; k < size; ++k)
+            {
+                playerIDs.push_back(toUint(charInfo(k, 0)));
+            }
+
+            for (int k = 0; k < size; ++k)
+            {
+                players.push_back(getCharacter(playerIDs[k]));
+            }
+
+            account->setCharacters(players);
+        }
+
+        return account;
+    }
+    catch (const DbSqlQueryExecFailure& e)
+    {
+        return AccountPtr(NULL); // TODO: Throw exception here
+    }
+}
 
 /**
  * Gets a character by database ID.
@@ -310,6 +390,7 @@ PlayerPtr DALStorage::getCharacter(int id)
         string_to< unsigned short > toUshort;
 
         PlayerData *player = new PlayerData(charInfo(0, 2), toUint(charInfo(0, 0)));
+        player->setAccountID(toUint(charInfo(0, 1)));
         player->setGender(toUshort(charInfo(0, 3)));
         player->setHairStyle(toUshort(charInfo(0, 4)));
         player->setHairColor(toUshort(charInfo(0, 5)));

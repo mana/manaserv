@@ -205,6 +205,20 @@ class PlayerData
         { return mRawStats.stats[numStat]; }
 
         /**
+         * Gets account ID.
+         *
+         * @return the account ID, a negative number if none yet.
+         */
+        int getAccountID() const
+        { return mAccountID; }
+
+        /**
+         * Sets account ID.
+         */
+        void setAccountID(int id)
+        { mAccountID = id; }
+
+        /**
          * Gets database ID.
          *
          * @return the database ID, a negative number if none yet.
@@ -269,6 +283,8 @@ class PlayerData
         PlayerData(PlayerData const &);
         PlayerData &operator=(PlayerData const &);
 
+        int mAccountID;           /**< Account ID of the account the player
+                                       belongs to. */
         int mDatabaseID;          /**< Player database ID. */
         std::string mName;        /**< Name of the being. */
         unsigned char mGender;    /**< Gender of the being. */

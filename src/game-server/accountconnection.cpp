@@ -98,3 +98,13 @@ void AccountConnection::processMessage(MessageIn &msg)
             break;
     }
 }
+
+void AccountConnection::playerReconnectAccount(int id, const std::string magic_token)
+{
+    LOG_INFO("Send GAMSG_PLAYER_RECONNECT.");
+    MessageOut msg(GAMSG_PLAYER_RECONNECT);
+    msg.writeLong(id);
+    msg.writeString(magic_token);
+    send(msg);
+
+}

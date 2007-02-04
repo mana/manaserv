@@ -173,6 +173,16 @@ class Storage
         getAccount(const std::string& userName) = 0;
 
         /**
+         * Get an account by ID.
+         *
+         * @param accountID the ID of the account.
+         *
+         * @return the account associated with the ID.
+         */
+        virtual AccountPtr
+        getAccountByID(int accountID) = 0;
+
+        /**
          * Gets a character by database ID.
          *
          * @param id the ID of the character.

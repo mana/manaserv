@@ -31,6 +31,9 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 
+extern void registerAccountReconnect(int accountID,
+                                     const std::string &magic_token);
+
 bool ServerHandler::startListen(enet_uint16 port)
 {
     LOG_INFO("Game server handler started:");
@@ -91,6 +94,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
     {
         case GAMSG_REGISTER:
         {
+            LOG_DEBUG("GAMSG_REGISTER");
             // TODO: check the credentials of the game server
             std::string address = msg.readString();
             int port = msg.readShort();
@@ -118,6 +122,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
         case GAMSG_PLAYER_DATA:
         {
+            LOG_DEBUG("GAMSG_PLAYER_DATA");
             int id = msg.readLong();
             Storage &store = Storage::instance("tmw");
             PlayerPtr ptr = store.getCharacter(id);
@@ -135,6 +140,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
         case GAMSG_REDIRECT:
         {
+            LOG_DEBUG("GAMSG_REDIRECT");
             int id = msg.readLong();
             std::string magic_token(32, ' ');
             for (int i = 0; i < 32; ++i)
@@ -162,8 +168,23 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
         } break;
 
+        case GAMSG_PLAYER_RECONNECT:
+        {
+            LOG_DEBUG("GAMSG_PLAYER_RECONNECT");
+            int characterID = msg.readLong();
+            std::string magic_token = msg.readString(32);
+
+            Storage &store = Storage::instance("tmw");
+            PlayerPtr ptr = store.getCharacter(characterID);
+
+            int accountID = ptr->getAccountID();
+            registerAccountReconnect(accountID, magic_token);
+
+        } break;
+
         default:
-            LOG_WARN("Invalid message type: " << msg.getId());
+            LOG_WARN("ServerHandler::processMessage, Invalid message type: "
+                     << msg.getId());
             result.writeShort(XXMSG_INVALID);
             break;
     }

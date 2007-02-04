@@ -24,8 +24,9 @@
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 
-PlayerData::PlayerData(std::string const &name, int id)
-  : mDatabaseID(id),
+PlayerData::PlayerData(std::string const &name, int id):
+    mAccountID(-1),
+    mDatabaseID(id),
     mName(name)
 {
     for (int j = 0; j < EQUIPMENT_SLOTS; ++j)

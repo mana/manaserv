@@ -445,7 +445,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         break;
 
         default:
-            LOG_WARN("Invalid message type");
+            LOG_WARN("ChatHandler::processMessage, Invalid message type"
+                     << message.getId());
             result.writeShort(XXMSG_INVALID);
             break;
     }
@@ -454,7 +455,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         computer.send(result);
 }
 
-void ChatHandler::handleCommand(ChatClient &computer, std::string const &command)
+void
+ChatHandler::handleCommand(ChatClient &computer, std::string const &command)
 {
     LOG_INFO("Chat: Received unhandled command: " << command);
     MessageOut result;
@@ -463,7 +465,8 @@ void ChatHandler::handleCommand(ChatClient &computer, std::string const &command
     computer.send(result);
 }
 
-void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
+void
+ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
 {
     // We could later count if the player is really often unpolite.
     MessageOut result;
@@ -474,7 +477,8 @@ void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
     LOG_INFO(computer.characterName << " says bad words.");
 }
 
-void ChatHandler::announce(ChatClient &computer, std::string const &text)
+void
+ChatHandler::announce(ChatClient &computer, std::string const &text)
 {
     MessageOut result;
     if (computer.accountLevel == AL_ADMIN ||
@@ -501,7 +505,8 @@ ChatHandler::sayToPlayer(ChatClient &computer, std::string const &playerName,
                          std::string const &text)
 {
     MessageOut result;
-    LOG_DEBUG(computer.characterName << " says to " << playerName << ": " << text);
+    LOG_DEBUG(computer.characterName << " says to " << playerName << ": "
+              << text);
     // Send it to the being if the being exists
     result.writeShort(CPMSG_PRIVMSG);
     result.writeString(computer.characterName);
@@ -521,7 +526,8 @@ ChatHandler::sayInChannel(ChatClient &computer, short channel,
                           std::string const &text)
 {
     MessageOut result;
-    LOG_DEBUG(computer.characterName << " says in channel " << channel << ": " << text);
+    LOG_DEBUG(computer.characterName << " says in channel " << channel << ": "
+              << text);
     // Send it to every beings in channel
     result.writeShort(CPMSG_PUBMSG);
     result.writeShort(channel);

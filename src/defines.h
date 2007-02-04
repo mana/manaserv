@@ -108,7 +108,7 @@ enum {
     // Login/Register
     PAMSG_REGISTER                 = 0x0000, // L version, S username, S password, S email
     APMSG_REGISTER_RESPONSE        = 0x0002, // B error
-    PAMSG_UNREGISTER               = 0x0003, // -
+    PAMSG_UNREGISTER               = 0x0003, // S username, S password
     APMSG_UNREGISTER_RESPONSE      = 0x0004, // B error
     PAMSG_LOGIN                    = 0x0010, // L version, S username, S password
     APMSG_LOGIN_RESPONSE           = 0x0012, // B error
@@ -132,6 +132,14 @@ enum {
     GPMSG_CONNECT_RESPONSE         = 0x0051, // B error
     PCMSG_CONNECT                  = 0x0053, // B*32 token
     CPMSG_CONNECT_RESPONSE         = 0x0054, // B error
+
+    PGMSG_DISCONNECT               = 0x0060, // B reconnect account
+    GPMSG_DISCONNECT_RESPONSE      = 0x0061, // B error, B*32 token
+    PCMSG_DISCONNECT               = 0x0063, // -
+    CPMSG_DISCONNECT_RESPONSE      = 0x0064, // B error
+
+    PAMSG_RECONNECT                = 0x0065, // B*32 token
+    APMSG_RECONNECT_RESPONSE       = 0x0066, // B error
 
     // Game
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
@@ -183,6 +191,7 @@ enum {
     GAMSG_PLAYER_DATA  = 0x520, // L id, B* player data
     GAMSG_REDIRECT          = 0x530, // L id
     AGMSG_REDIRECT_RESPONSE = 0x531, // L id, B*32 token, S game address, W game port
+    GAMSG_PLAYER_RECONNECT  = 0x532, // L id, B*32 token
 
     XXMSG_INVALID = 0x7FFF
 };

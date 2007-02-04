@@ -24,6 +24,7 @@
 #include <cassert>
 #include <map>
 
+#include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
@@ -303,6 +304,33 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character->setAction(PLAYER_ATTACK);
         } break;
 
+        case PGMSG_DISCONNECT:
+        {
+            bool reconnectAccount = (bool) message.readByte();
+
+            result.writeShort(GPMSG_DISCONNECT_RESPONSE);
+            result.writeShort(ERRMSG_OK); // It is when control reaches here
+
+            if (reconnectAccount)
+            {
+                LOG_INFO("Making a magic_token.");
+                std::string magic_token(32, ' ');
+                for (int i = 0; i < 32; ++i) {
+                    magic_token[i] =
+                        1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
+                }
+                result.writeString(magic_token, 32);
+                //No accountserver data, the client should remember that
+                accountHandler->playerReconnectAccount(
+                                   computer.character->getDatabaseID(),
+                                   magic_token);
+            }
+            // TODO: check if the character's updated info is send to the database
+            gameState->remove(computer.character);
+            delete computer.character;
+            computer.character = NULL;
+            computer.status = CLIENT_LOGIN;
+        } break;
         default:
             LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);
