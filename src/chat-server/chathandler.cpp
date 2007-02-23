@@ -444,6 +444,14 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         }
         break;
 
+        case PCMSG_DISCONNECT:
+        {
+            result.writeShort(CPMSG_DISCONNECT_RESPONSE);
+            result.writeByte(ERRMSG_OK);
+            chatChannelManager->removeUserFromEveryChannels(computer.characterName);
+        }
+        break;
+
         default:
             LOG_WARN("ChatHandler::processMessage, Invalid message type"
                      << message.getId());

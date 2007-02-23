@@ -1,3 +1,10 @@
+2007-02-23  Rogier Polak  <rogier.l.a.polak@gmail.com>
+
+	* src/chat-server/chathandler.cpp: Added disconnect.
+	* src/game-server/gamehandler.cpp,
+	src/game-server/accountconnection.cpp: Bugfixes related to
+	switch_character.
+
 2007-02-04  Rogier Polak  <rogier_polak@users.sourceforge.net>
 
 	* src/chat-server/chathandler.cpp,

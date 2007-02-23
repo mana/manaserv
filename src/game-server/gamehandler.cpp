@@ -309,7 +309,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             bool reconnectAccount = (bool) message.readByte();
 
             result.writeShort(GPMSG_DISCONNECT_RESPONSE);
-            result.writeShort(ERRMSG_OK); // It is when control reaches here
+            result.writeByte(ERRMSG_OK); // It is, when control reaches here
 
             if (reconnectAccount)
             {

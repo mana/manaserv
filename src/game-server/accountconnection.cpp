@@ -104,7 +104,7 @@ void AccountConnection::playerReconnectAccount(int id, const std::string magic_t
     LOG_INFO("Send GAMSG_PLAYER_RECONNECT.");
     MessageOut msg(GAMSG_PLAYER_RECONNECT);
     msg.writeLong(id);
-    msg.writeString(magic_token);
+    msg.writeString(magic_token, 32);
     send(msg);
 
 }
