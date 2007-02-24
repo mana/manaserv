@@ -4,6 +4,8 @@
 	* src/game-server/gamehandler.cpp,
 	src/game-server/accountconnection.cpp: Bugfixes related to
 	switch_character.
+        * src/account-server/main-account.cpp, src/game-server/main-game.cpp:
+        Small modification to accomodate MS-Windows.
 
 2007-02-04  Rogier Polak  <rogier_polak@users.sourceforge.net>
 

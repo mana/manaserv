@@ -112,7 +112,9 @@ void initialize()
     signal(SIGSEGV, SIG_DFL);
 
     // Used to close via process signals
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
     signal(SIGQUIT, closeGracefully);
+#endif
     signal(SIGINT, closeGracefully);
 
     /*
