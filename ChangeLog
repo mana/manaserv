@@ -2,8 +2,8 @@
 
 	* src/game-server/collision.cpp, src/game-server/collision.hpp: Added
 	a function to calculate collisions between circles and circle sectors.
-	* src/being.cpp, src/object.hpp: Improved hit detection by using said
-	function.
+	* src/being.cpp, src/object.hpp, src/testing.cpp: Improved hit detection by
+	using said function.
 
 2007-02-23  Rogier Polak  <rogier.l.a.polak@gmail.com>
 

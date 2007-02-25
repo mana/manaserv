@@ -36,6 +36,7 @@ void testingMap(int id)
             {
                 Being *being = new Controlled(OBJECT_MONSTER);
                 being->setSpeed(150);
+                being->setSize(8);
                 being->setMapId(1);
                 Point pos = { 720, 900 };
                 being->setPosition(pos);
