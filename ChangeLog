@@ -1,7 +1,8 @@
 2007-02-25  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* src/game-server/collision.cpp, src/game-server/collision.hpp: Added
-	a function to calculate collisions between circles and circle sectors.
+	* src/game-server/collision.cpp, src/game-server/collision.hpp,
+	src/utils/fastsqrt.h: Added a function to calculate collisions between
+	circles and circle sectors.
 	* src/being.cpp, src/object.hpp, src/testing.cpp: Improved hit detection by
 	using said function.
 

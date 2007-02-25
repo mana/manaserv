@@ -25,6 +25,7 @@
 #include "point.h"
 
 #include <cmath>
+#include "utils/fastsqrt.h"
 
 bool
 Collision::circleWithCirclesector(  const Point& circlePos, int circleRadius,
@@ -35,7 +36,8 @@ Collision::circleWithCirclesector(  const Point& circlePos, int circleRadius,
     //calculate distance
     int distX = circlePos.x - secPos.x;
     int distY = circlePos.y - secPos.y;
-    float dist = sqrt(distX * distX + distY * distY);
+    float invDist = fastInvSqrt(distX * distX + distY * distY);
+    float dist = 1.0f / invDist;
 
     //if out of range we can't hit it
     if (dist > secRadius + circleRadius) {
@@ -49,13 +51,13 @@ Collision::circleWithCirclesector(  const Point& circlePos, int circleRadius,
     //calculate target angle
     if (distX > 0)
     {
-        targetAngle = asin(-distY / dist);
+        targetAngle = asin(-distY * invDist);
     } else {
         if (distY < 0)
         {
-            targetAngle = M_PI - asin(-distY / dist);
+            targetAngle = M_PI - asin(-distY * invDist);
         } else {
-            targetAngle = -M_PI - asin(-distY / dist);
+            targetAngle = -M_PI - asin(-distY * invDist);
         }
 
     }
@@ -69,7 +71,7 @@ Collision::circleWithCirclesector(  const Point& circlePos, int circleRadius,
 
 
     //Add hit circle
-    secSize += asin(circleRadius/dist) * 2;
+    secSize += asin(circleRadius * invDist) * 2;
 
-    return (targetDiff < secSize / 2.0f);
+    return (targetDiff < secSize * 0.5f);
 }
