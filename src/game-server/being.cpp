@@ -21,8 +21,11 @@
  */
 
 #include "game-server/being.hpp"
+#include "game-server/collisiondetection.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
+
+#include <cmath>
 
 void Being::damage(Damage damage)
 {
@@ -38,6 +41,7 @@ void Being::damage(Damage damage)
 void Being::performAttack(MapComposite *map)
 {
     int SHORT_RANGE = 32;
+    float SMALL_ANGLE = M_PI_2;
     Point ppos = getPosition();
     int dir = getDirection();
 
@@ -54,34 +58,40 @@ void Being::performAttack(MapComposite *map)
         }
 
         int type = o->getType();
-        Point opos = o->getPosition();
-        int dx = opos.x - ppos.x, dy = opos.y - ppos.y;
 
-        if ((type != OBJECT_PLAYER && type != OBJECT_MONSTER) ||
-            (std::abs(dx) > SHORT_RANGE || std::abs(dy) > SHORT_RANGE))
+        if (type != OBJECT_PLAYER && type != OBJECT_MONSTER)
         {
             continue;
         }
 
+        Point opos = o->getPosition();
+
+        float attackAngle = 0.0f;
         // basic triangle-shaped damage zone
         switch (dir)
         {
             case DIRECTION_UP:
-                if (!(dy <= dx && dx <= -dy)) continue;
+                attackAngle = M_PI_2;
                 break;
             case DIRECTION_DOWN:
-                if (!(-dy <= dx && dx <= dy)) continue;
+                attackAngle = - M_PI_2;
                 break;
             case DIRECTION_LEFT:
-                if (!(dx <= dy && dy <= -dx)) continue;
+                attackAngle = M_PI;
                 break;
             case DIRECTION_RIGHT:
-                if (!(-dx <= dy && dy <= dx)) continue;
+                attackAngle = 0.0f;
                 break;
             default:
                 break;
         }
 
-        static_cast< Being * >(o)->damage(damage);
+        if  (Collision::circleWithCirclesector(
+                opos, o->getSize(),
+                ppos, SHORT_RANGE, attackAngle, SMALL_ANGLE)
+            )
+        {
+            static_cast< Being * >(o)->damage(damage);
+        }
     }
 }

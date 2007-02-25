@@ -207,7 +207,7 @@ class MovingObject: public Object
         { return mOld; }
 
         /**
-         * Sete object direction
+         * Sets object direction
          */
         void setDirection(int direction)
         { mDirection = direction; }
@@ -215,7 +215,6 @@ class MovingObject: public Object
         /**
          * Gets object direction
          */
-
         unsigned char getDirection() const
         { return mDirection; }
 
@@ -224,6 +223,18 @@ class MovingObject: public Object
          */
         void setSpeed(unsigned s)
         { mSpeed = s; }
+
+        /**
+         * Sets object bounding circle radius
+         */
+        void setSize(unsigned s)
+        { mSize = s; }
+
+        /**
+         * Gets object bounding circle radius
+         */
+        unsigned getSize()
+        { return mSize; }
 
         /**
          * Moves the object toward its destination.
@@ -250,6 +261,7 @@ class MovingObject: public Object
         Point mDst; /**< target coordinates */
         Point mOld; /**< old coordinates */
         unsigned short mSpeed; /**< speed */
+        unsigned mSize; /**< radius of bounding circle */
         std::list<PATH_NODE> mPath;
 
     protected:
