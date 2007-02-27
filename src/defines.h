@@ -164,6 +164,7 @@ enum {
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
+    GPMSG_BEING_DEAD               = 0xDEAD, // W being id
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error
@@ -175,14 +176,16 @@ enum {
     PCMSG_PRIVMSG                  = 0x0412, // S user, S text
     // -- Channeling
     PCMSG_REGISTER_CHANNEL            = 0x0413, // B pub/priv, S name, S announcement, S password
-    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0414, // B error
+    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0414, // B error, W id
     PCMSG_UNREGISTER_CHANNEL          = 0x0415, // W channel
     CPMSG_UNREGISTER_CHANNEL_RESPONSE = 0x0416, // B error
     CPMSG_CHANNEL_EVENT               = 0x0418, // W channel, B event, S user
-    PCMSG_ENTER_CHANNEL               = 0x0419, // W channel, S password
-    CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0420, // B error
+    PCMSG_ENTER_CHANNEL               = 0x0419, // S channel, S password
+    CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0420, // B error, W channel
     PCMSG_QUIT_CHANNEL                = 0x0421, // W channel
     CPMSG_QUIT_CHANNEL_RESPONSE       = 0x0422, // B error
+    PCMSG_LIST_CHANNELS               = 0x0423, // -
+    CPMSG_LIST_CHANNELS_RESPONSE      = 0x0424, // W number of channels, S channels
 
     // Inter-server
     GAMSG_REGISTER     = 0x500, // S address, W port, { W map id }*

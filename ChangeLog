@@ -1,3 +1,17 @@
+2007-02-27  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstoragesql.hpp,
+	src/chat-server/chatchannel.cpp,
+	src/chat-server/chatchannel.hpp,
+	src/chat-server/chatchannelmanager.cpp,
+	src/chat-server/chatchannelmanager.hpp,
+	src/chat-server/chathandler.cpp,
+	src/dal/mysqldataprovider.cpp,
+	src/dal/pqdataprovider.cpp
+	src/dal/qulitedataprovider.cpp,
+	src/defines.h: Implementation of chat channels by Trapdoor.
+
 2007-02-25  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/collision.cpp, src/game-server/collision.hpp,

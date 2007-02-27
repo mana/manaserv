@@ -25,10 +25,12 @@
 
 ChatChannel::ChatChannel(const std::string &channelName,
                          const std::string &channelAnnouncement = "None",
-                         const std::string &channelPassword = "None"):
+                         const std::string &channelPassword = "None",
+                         bool channelPrivacy = true):
     mChannelName(channelName),
     mChannelAnnouncement(channelAnnouncement),
-    mChannelPassword(channelPassword)
+    mChannelPassword(channelPassword),
+    mChannelPrivate(channelPrivacy)
 {
     if (channelAnnouncement == "")
         mChannelAnnouncement = "None";
@@ -59,6 +61,12 @@ const std::string&
 ChatChannel::getPassword() const
 {
     return mChannelPassword;
+}
+
+bool
+ChatChannel::getPrivacy() const
+{
+	return mChannelPrivate;
 }
 
 void
@@ -96,7 +104,7 @@ bool ChatChannel::addUserInChannel(std::string const &user)
     // Check if the user already exists in the channel
     ChannelUsers::const_iterator i = mRegisteredUsers.begin(),
                                  i_end = mRegisteredUsers.end();
-    if (std::find(i, i_end, user) == i_end) return false;
+    if (std::find(i, i_end, user) != i_end) return false;
     mRegisteredUsers.push_back(user);
     return true;
 }

@@ -36,7 +36,8 @@ class ChatChannel {
      */
     ChatChannel(const std::string &channelName,
                 const std::string &channelAnnouncement,
-                const std::string &channelPassword);
+                const std::string &channelPassword,
+                bool channelPrivacy);
 
     /**
      * Destructor
@@ -57,6 +58,11 @@ class ChatChannel {
      * Get the password of the channel
      */
     const std::string& getPassword() const;
+
+    /**
+     * Get the password of the channel
+     */
+    bool getPrivacy() const;
 
     /**
      * Set the name of the channel
@@ -113,6 +119,11 @@ class ChatChannel {
      * The registered user list
      */
     ChannelUsers mRegisteredUsers;
+
+    /**
+     * Whether the channel is private
+     */
+    bool mChannelPrivate;
 
 };
 

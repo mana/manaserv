@@ -240,7 +240,7 @@ const std::string SQL_WORLD_ITEMS_TABLE(
         "map_id    TINYINT  NOT NULL,"
         // time to die (UNIX time)
         "deathtime INTEGER  UNSIGNED NOT NULL,"
-        "PRIMARY KEY (id, map_id)," 
+        "PRIMARY KEY (id, map_id),"
         "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
         "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
 #elif defined (SQLITE_SUPPORT)
@@ -312,17 +312,20 @@ const std::string SQL_CHANNELS_TABLE(
         "id            INTEGER     PRIMARY KEY,"
         "name          VARCHAR(32) NOT NULL UNIQUE,"
         "announcement  VARCHAR(256) NOT NULL,"
-        "password      VARCHAR(32) NOT NULL"
+        "password      VARCHAR(32) NOT NULL,"
+        "privacy       TINYINT     NOT NULL"
 #elif defined (SQLITE_SUPPORT)
         "id      INTEGER     PRIMARY KEY,"
         "name    TEXT        NOT NULL UNIQUE,"
         "announcement    TEXT NOT NULL,"
-        "password        TEXT NOT NULL"
+        "password        TEXT NOT NULL,"
+        "privacy         INTEGER NOT NULL"
 #elif defined (POSTGRESQL_SUPPORT)
         "id      SERIAL      PRIMARY KEY,"
         "name    TEXT        NOT NULL UNIQUE,"
         "announcement    TEXT NOT NULL,"
-        "password        TEXT NOT NULL"
+        "password        TEXT NOT NULL,"
+        "privacy         INTEGER NOT NULL"
 #endif
     ");"
 );

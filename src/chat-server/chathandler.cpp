@@ -112,6 +112,8 @@ NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
 
 void ChatHandler::computerDisconnected(NetComputer *computer)
 {
+    // Remove user from all channels
+    chatChannelManager->removeUserFromEveryChannels(((ChatClient*)computer)->characterName);
     ChatPendingClients::iterator i_end = pendingClients.end();
     for (ChatPendingClients::iterator i = pendingClients.begin();
             i != i_end; ++i)
@@ -243,8 +245,9 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     if (computer.accountLevel != AL_ADMIN &&
                         computer.accountLevel != AL_GM)
                     {
-                        result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-                        break;
+                    //    Removed the need for admin/gm rights to create public channels
+                    //    result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+                    //    break;
                     }
                 }
                 std::string channelName = message.readString();
@@ -302,6 +305,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                         result.writeByte(ERRMSG_OK);
                         result.writeShort(channelId);
+                        result.writeString(channelName);
                         break;
                     }
                     else
@@ -373,8 +377,9 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PCMSG_ENTER_CHANNEL:
         {
             result.writeShort(CPMSG_ENTER_CHANNEL_RESPONSE);
-            short channelId = message.readShort();
+            std::string channelName = message.readString();
             std::string givenPassword = message.readString();
+            short channelId = chatChannelManager->getChannelId(channelName);
             if (channelId != 0 && chatChannelManager->isChannelRegistered(channelId))
             {
                 std::string channelPassword = chatChannelManager->getChannelPassword(channelId);
@@ -389,12 +394,12 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (chatChannelManager->addUserInChannel(computer.characterName, channelId))
                 {
                     result.writeByte(ERRMSG_OK);
-                    // The user entered the channel, now give him the announcement string
+                    // The user entered the channel, now give him the channel id, the announcement string
                     // and the user list.
+                    result.writeShort(channelId);
+                    result.writeString(channelName);
                     result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
-                    std::vector< std::string > const &userList =
-                    chatChannelManager->getUserListInChannel(channelId);
-                    result.writeShort(userList.size());
+                    std::vector< std::string > const &userList = chatChannelManager->getUserListInChannel(channelId);
                     for (std::vector< std::string >::const_iterator i = userList.begin(), i_end = userList.end();
                          i != i_end; ++i) {
                         result.writeString(*i);
@@ -426,6 +431,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (chatChannelManager->removeUserFromChannel(computer.characterName, channelId))
                 {
                     result.writeByte(ERRMSG_OK);
+                    result.writeShort(channelId);
                     // Send an CPMSG_UPDATE_CHANNEL to warn other clients a
                     // user left the channel.
                     warnUsersAboutPlayerEventInChat(channelId,
@@ -444,11 +450,21 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         }
         break;
 
-        case PCMSG_DISCONNECT:
+        case PCMSG_LIST_CHANNELS:
         {
-            result.writeShort(CPMSG_DISCONNECT_RESPONSE);
-            result.writeByte(ERRMSG_OK);
-            chatChannelManager->removeUserFromEveryChannels(computer.characterName);
+            result.writeShort(CPMSG_LIST_CHANNELS_RESPONSE);
+
+            short numberOfPublicChannels;
+            std::istringstream channels(chatChannelManager->getPublicChannelNames(&numberOfPublicChannels));
+
+            for(int i = 0; i < numberOfPublicChannels; ++i)
+            {
+                std::string channel;
+                channels >> channel;
+                // Send only public channels
+                result.writeString(channel);
+                result.writeShort(chatChannelManager->getNumberOfChannelUsers(channel));
+            }
         }
         break;
 

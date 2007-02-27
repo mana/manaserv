@@ -20,7 +20,7 @@
  *  $Id$
  */
 
-
+#if defined(SQLITE_SUPPORT)
 #include "sqlitedataprovider.h"
 
 #include <stdexcept>
@@ -197,3 +197,6 @@ SqLiteDataProvider::disconnect(void)
 
 
 } // namespace dal
+
+#endif
+

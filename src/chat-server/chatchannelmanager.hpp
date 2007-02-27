@@ -68,6 +68,20 @@ public:
     bool removeChannel(short channelId);
 
     /**
+     * Get all public channels
+     *
+     * @return a list of channel names
+     */
+    std::string getPublicChannelNames(short *numChannels);
+
+    /**
+     * Get the number of channels that have been registered
+     *
+     * @return the number of registered channels
+     */
+    short getNumberOfChannelUsers(const std::string &channelName);
+
+    /**
      * Get the id of a channel from its name.
      *
      * @return the id of the channel
@@ -111,6 +125,13 @@ public:
     std::string getChannelPassword(short channelId);
 
     /**
+     * Get the privacy of the channel from its id.
+     *
+     * @return the privacy of the channel
+     */
+    bool getChannelPrivacy(short channelId);
+
+    /**
      * get the ChatChannel object from its id.
      *
      * @return the ChatChannel object
@@ -146,10 +167,10 @@ public:
 private:
 
     /**
-    * The list keeping all the chat channels.
-    *
-    * The channel id must be unique.
-    */
+     * The list keeping all the chat channels.
+     *
+     * The channel id must be unique.
+     */
     std::map<short, ChatChannel> mChatChannels;
 
 };

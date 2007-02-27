@@ -525,13 +525,14 @@ DALStorage::getChannelList()
     // specialize the string_to functor to convert
     // a string to a short.
     string_to<short> toShort;
+    string_to<bool> toBool;
 
     // The formatted datas
     std::map<short, ChatChannel> channels;
 
     try {
         std::stringstream sql;
-        sql << "select id, name, announcement, password from ";
+        sql << "select id, name, announcement, password, privacy from ";
         sql << CHANNELS_TBL_NAME;
         sql << ";";
 
@@ -547,7 +548,8 @@ DALStorage::getChannelList()
             channels.insert(std::make_pair(toShort(channelInfo(i,0)),
                             ChatChannel(channelInfo(i,1),
                                         channelInfo(i,2),
-                                        channelInfo(i,3))));
+                                        channelInfo(i,3),
+                                        toBool(channelInfo(i,4)))));
 
             LOG_DEBUG("Channel (" << channelInfo(i,0) << ") loaded: " << channelInfo(i,1)
                       << ": " << channelInfo(i,2));
@@ -593,12 +595,13 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
                     sql.str("");
                     sql << "insert into "
                         << CHANNELS_TBL_NAME
-                        << " (id, name, announcement, password)"
+                        << " (id, name, announcement, password, privacy)"
                         << " values ("
                         << i->first << ", \""
                         << i->second.getName() << "\", \""
                         << i->second.getAnnouncement() << "\", \""
-                        << i->second.getPassword() << "\");";
+                        << i->second.getPassword() << "\", \""
+                        << i->second.getPrivacy() << "\");";
 
                         LOG_DEBUG("Channel (" << i->first << ") saved: " << i->second.getName()
                                   << ": " << i->second.getAnnouncement());

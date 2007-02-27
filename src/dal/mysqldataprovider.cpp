@@ -20,6 +20,8 @@
  *  $Id$
  */
 
+#if defined(MYSQL_SUPPORT)
+
 #include "mysqldataprovider.h"
 
 #include "dalexcept.h"
@@ -196,3 +198,5 @@ MySqlDataProvider::disconnect(void)
 
 
 } // namespace dal
+
+#endif

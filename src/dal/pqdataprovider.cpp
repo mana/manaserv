@@ -22,6 +22,7 @@
 
 
 #include "pqdataprovider.h"
+#include "dalexcept.h"
 
 namespace dal
 {
@@ -140,6 +141,7 @@ PqDataProvider::execSql(const std::string& sql,
         // clear results
         PQclear(res);
     }
+    return mRecordSet;
 }
 
 
