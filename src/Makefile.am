@@ -75,6 +75,8 @@ tmwserv_game_SOURCES = \
 	game-server/accountconnection.cpp \
 	game-server/being.hpp \
 	game-server/being.cpp \
+	game-server/collisiondetection.hpp \
+	game-server/collisiondetection.cpp \
 	game-server/gamehandler.hpp \
 	game-server/gamehandler.cpp \
 	game-server/inventory.hpp \
