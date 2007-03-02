@@ -31,16 +31,29 @@ void Controlled::update()
      */
     if (mCountDown == 0)
     {
-        Point randomPos = { rand() % 320 + 720,
-                            rand() % 320 + 840 };
-        setDestination(randomPos);
-        mCountDown = 10 + rand() % 10;
+        if (mAction != DEAD)
+        {
+            Point randomPos = { rand() % 320 + 720,
+                                rand() % 320 + 840 };
+            setDestination(randomPos);
+            mCountDown = 10 + rand() % 10;
 
-        LOG_DEBUG("Setting new random destination " << randomPos.x << ","
-                  << randomPos.y << " for being " << getPublicID());
+            LOG_DEBUG("Setting new random destination " << randomPos.x << ","
+                      << randomPos.y << " for being " << getPublicID());
+        }
+        else
+        {
+            raiseUpdateFlags(UPDATEFLAG_REMOVE);
+        }
     }
     else
     {
         mCountDown--;
     }
+}
+
+void Controlled::die()
+{
+    mCountDown = 600;
+    Being::die();
 }

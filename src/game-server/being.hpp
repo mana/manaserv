@@ -65,31 +65,6 @@ struct BeingState
 };
 
 /**
- * Moves enum for beings and actors for others players vision.
- */
-enum
-{
-    ACTION_DEFAULT = 0,
-    ACTION_STAND,
-    ACTION_WALK,
-    ACTION_RUN,
-    ACTION_JUMP,
-    ACTION_CRAWL,
-    ACTION_ATTACK,
-    ACTION_ATTACK_SWING,
-    ACTION_ATTACK_STAB,
-    ACTION_ATTACK_BOW,
-    ACTION_ATTACK_THROW,
-    ACTION_CAST_MAGIC,
-    ACTION_USE_ITEM,
-    ACTION_SIT,
-    ACTION_SLEEP,
-    ACTION_HURT,
-    ACTION_DEAD,
-    ACTION_INVALID
-};
-
-/**
  * Beings and actors directions
  */
 enum
@@ -141,10 +116,24 @@ class Being : public MovingObject
 {
     public:
         /**
+         * Moves enum for beings and actors for others players vision.
+         * WARNING: Has to be in sync with the same enum in the Being class
+         * of the client!
+         */
+        enum Action {
+            STAND,
+            WALK,
+            ATTACK,
+            SIT,
+            DEAD,
+            HURT
+        };
+        /**
          * Proxy constructor.
          */
         Being(int type, int id)
-          : MovingObject(type, id)
+          : MovingObject(type, id),
+            mAction(STAND)
         {}
 
         /**
@@ -166,11 +155,22 @@ class Being : public MovingObject
         { return mStats.stats[numStat]; }
 
         /**
+         * sets the hit points
+         */
+        void setHitpoints(int hp)
+        { mHitpoints = hp; }
+
+        /**
          * Takes a damage structure, computes the real damage based on the
          * stats, deducts the result from the hitpoints and adds the result to
          * the HitsTaken list.
          */
         void damage(Damage);
+
+        /**
+         * Kills the being
+         */
+        virtual void die();
 
         /**
          * Gets the damage list.
@@ -189,13 +189,28 @@ class Being : public MovingObject
          */
         void performAttack(MapComposite *);
 
+        /**
+         * Sets the current action.
+         */
+        virtual void setAction(Action action);
+
+        virtual Action getAction() const
+        { return mAction; }
+
+        /**
+         * Moves the being toward its destination.
+         */
+        virtual void move();
+
+    protected:
+        int mHitpoints; /**< Hitpoints of the being */
+        Action mAction;
+
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
 
         Statistics mStats; /**< stats modifiers or computed stats */
-
-        int mHitpoints; /**< Hitpoints of the being */
 
         Hits mHitsTaken; /**< List of punches taken since last update */
 };

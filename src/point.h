@@ -42,6 +42,16 @@ class Point
             return std::abs(x - p.x) <= radius &&
                    std::abs(y - p.y) <= radius;
         }
+
+        bool operator== (const Point &other) const
+        {
+            return (x == other.x && y == other.y);
+        }
+
+        bool operator!= (const Point &other) const
+        {
+            return (x != other.x || y != other.y);
+        }
 };
 
 /**

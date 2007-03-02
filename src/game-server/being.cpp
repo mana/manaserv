@@ -29,13 +29,43 @@
 
 void Being::damage(Damage damage)
 {
+    if (mAction == DEAD) return;
+
     int HPloss;
 
     HPloss = damage; // TODO: Implement complex damage calculation here
 
+    if (HPloss > mHitpoints) HPloss = mHitpoints;
+
     mHitpoints -= HPloss;
     mHitsTaken.push_back(HPloss);
-    LOG_DEBUG("Being " << getPublicID() << " got hit");
+    LOG_INFO("Being " << getPublicID() << " got hit");
+
+    if (mHitpoints == 0) die();
+}
+
+void Being::die()
+{
+    LOG_INFO("Being " << getPublicID() << " died");
+    setAction(DEAD);
+    // dead beings stay where they are
+    setDestination(getPosition());
+}
+
+void Being::move()
+{
+    MovingObject::move();
+    if (mAction == WALK || mAction == STAND)
+    {
+        if (mActionTime)
+        {
+            mAction = WALK;
+        }
+        else
+        {
+            mAction = STAND;
+        }
+    }
 }
 
 void Being::performAttack(MapComposite *map)
@@ -93,5 +123,15 @@ void Being::performAttack(MapComposite *map)
         {
             static_cast< Being * >(o)->damage(damage);
         }
+    }
+}
+
+void Being::setAction(Action action)
+{
+    mAction = action;
+    if (action != Being::ATTACK && // The players are informed about these actions
+        action != Being::WALK)     // by other messages
+    {
+        raiseUpdateFlags(UPDATEFLAG_ACTIONCHANGE);
     }
 }

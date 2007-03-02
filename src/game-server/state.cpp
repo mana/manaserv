@@ -57,7 +57,7 @@ void State::updateMap(MapComposite *map)
     for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
     {
         MovingObject *o = *i;
-        if (o->getUpdateFlags() & ATTACK)
+        if (o->getUpdateFlags() & UPDATEFLAG_ATTACK)
         {
             static_cast< Being * >(o)->performAttack(map);
         }
@@ -68,6 +68,17 @@ void State::updateMap(MapComposite *map)
     {
         (*i)->move();
     }
+
+    // 4. remove dead beings
+    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        if ((*i)->getUpdateFlags() & UPDATEFLAG_REMOVE)
+        {
+            DelayedEvent e = { EVENT_REMOVE};
+            enqueueEvent((*i), e);
+        }
+    }
+
     map->update();
 }
 
@@ -91,11 +102,28 @@ void State::informPlayer(MapComposite *map, Player *p)
         if (willBeInRange)
         {
             // Send attack messages.
-            if ((oflags & ATTACK) && oid != pid)
+            if ((oflags & UPDATEFLAG_ATTACK) && oid != pid)
             {
                 MessageOut AttackMsg(GPMSG_BEING_ATTACK);
                 AttackMsg.writeShort(oid);
                 gameHandler->sendTo(p, AttackMsg);
+            }
+
+            // Send state change messages.
+            if ((oflags & UPDATEFLAG_ACTIONCHANGE))
+            {
+                MessageOut ActionMsg(GPMSG_BEING_ACTION_CHANGE);
+                ActionMsg.writeShort(oid);
+                ActionMsg.writeByte(static_cast< Being * >(o)->getAction());
+                gameHandler->sendTo(p, ActionMsg);
+            }
+
+            // Send leave messages of dead beings
+            if ((oflags & UPDATEFLAG_REMOVE))
+            {
+                MessageOut leaveMsg(GPMSG_BEING_LEAVE);
+                leaveMsg.writeShort(oid);
+                gameHandler->sendTo(p, leaveMsg);
             }
 
             // Send damage messages.
@@ -114,7 +142,7 @@ void State::informPlayer(MapComposite *map, Player *p)
 
         // Check if this player and this moving object were around.
         bool wereInRange = pold.inRangeOf(oold, AROUND_AREA) &&
-                           !((pflags | oflags) & NEW_ON_MAP);
+                           !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
 
         // Send enter/leaver messages.
         if (!wereInRange)
@@ -125,11 +153,14 @@ void State::informPlayer(MapComposite *map, Player *p)
                 // Nothing to report: o will not be inside p's range.
                 continue;
             }
-            flags |= MOVING_DESTINATION;
+            flags |= MOVING_POSITION;
 
             MessageOut enterMsg(GPMSG_BEING_ENTER);
             enterMsg.writeByte(otype);
             enterMsg.writeShort(oid);
+            enterMsg.writeByte(static_cast< Being *>(o)->getAction());
+            enterMsg.writeShort(opos.x);
+            enterMsg.writeShort(opos.y);
             switch (otype) {
                 case OBJECT_PLAYER:
                 {
@@ -147,6 +178,7 @@ void State::informPlayer(MapComposite *map, Player *p)
                     assert(false); // TODO
             }
             gameHandler->sendTo(p, enterMsg);
+            continue;
         }
         else if (!willBeInRange)
         {
@@ -156,7 +188,7 @@ void State::informPlayer(MapComposite *map, Player *p)
             gameHandler->sendTo(p, leaveMsg);
             continue;
         }
-        else if (oold.x == opos.x && oold.y == opos.y)
+        else if (oold == opos)
         {
             // o does not move, nothing to report.
             continue;
@@ -166,10 +198,10 @@ void State::informPlayer(MapComposite *map, Player *p)
            moving inside p's range. Report o's movements. */
 
         Point odst = o->getDestination();
-        if (opos.x != odst.x || opos.y != odst.y)
+        if (opos != odst)
         {
             flags |= MOVING_POSITION;
-            if (oflags & NEW_DESTINATION)
+            if (oflags & UPDATEFLAG_NEW_DESTINATION)
             {
                 flags |= MOVING_DESTINATION;
             }
@@ -210,11 +242,11 @@ void State::informPlayer(MapComposite *map, Player *p)
         int oflags = o->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, AROUND_AREA);
         bool wereInRange = pold.inRangeOf(opos, AROUND_AREA) &&
-                           !((pflags | oflags) & NEW_ON_MAP);
+                           !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
 
         if (willBeInRange ^ wereInRange)
         {
-            if (oflags & NEW_ON_MAP)
+            if (oflags & UPDATEFLAG_NEW_ON_MAP)
             {
                 MessageOut appearMsg(GPMSG_ITEM_APPEAR);
                 appearMsg.writeShort(o->getItemClass()->getDatabaseID());
@@ -329,7 +361,7 @@ void State::insert(Thing *ptr)
     if (ptr->isVisible())
     {
         Object *obj = static_cast< Object * >(ptr);
-        obj->raiseUpdateFlags(NEW_ON_MAP);
+        obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
         if (obj->getType() != OBJECT_PLAYER) return;
 
         /* Since the player doesn't know yet where on the world he is after

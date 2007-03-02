@@ -34,12 +34,20 @@ class Controlled: public Being
         /**
          * Constructor.
          */
-        Controlled(int type): Being(type, 65535), mCountDown(0) {}
+        Controlled(int type):
+            Being(type, 65535),
+            mCountDown(0)
+        {}
 
         /**
          * Performs one step of controller logic.
          */
         void update();
+
+        /**
+         * Kills the being
+         */
+        virtual void die();
 
     private:
         /** Count down till next random movement (temporary). */

@@ -301,7 +301,30 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             LOG_DEBUG("Player " << computer.character->getPublicID()
                       << " attacks");
             computer.character->setDirection(message.readByte());
-            computer.character->setAction(PLAYER_ATTACK);
+            computer.character->setAction(Being::ATTACK);
+        } break;
+
+        case PGMSG_ACTION_CHANGE:
+        {
+            Being::Action action = (Being::Action)message.readByte();
+            Being::Action current = (Being::Action)computer.character->getAction();
+
+            switch (action)
+            {
+                case Being::STAND:
+                {
+                    if (current == Being::SIT)
+                        computer.character->setAction(Being::STAND);
+                } break;
+                case Being::SIT:
+                {
+                    if (current == Being::STAND)
+                        computer.character->setAction(Being::SIT);
+                } break;
+                default:
+                    break;
+            }
+
         } break;
 
         case PGMSG_DISCONNECT:

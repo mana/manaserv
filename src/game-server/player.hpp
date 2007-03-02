@@ -51,26 +51,16 @@ class Player : public Being, public PlayerData
         Player(std::string const &name, int id = -1)
           : Being(OBJECT_PLAYER, 65535),
             PlayerData(name, id),
-            mClient(NULL),
-            mAction(PLAYER_STAND)
-        {}
+            mClient(NULL)
+        {
+            mHitpoints=5;
+            mSize = 16;
+        }
 
         /**
          * Updates the internal status.
          */
         void update();
-
-        /**
-         * Sets next action.
-         **/
-        void setAction(int s)
-        { mAction = s; }
-
-        /**
-         * Gets next action.
-         **/
-        int getAction() const
-        { return mAction; }
 
         /**
          * Gets client computer.
@@ -89,7 +79,6 @@ class Player : public Being, public PlayerData
         Player &operator=(Player const &);
 
         GameClient *mClient;   /**< Client computer. */
-        unsigned char mAction; /**< Player state. */
 };
 
 #endif // _TMWSERV_PLAYER_H_

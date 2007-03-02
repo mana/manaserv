@@ -44,9 +44,11 @@ class MapComposite;
 
 enum
 {
-    NEW_ON_MAP = 1,
-    NEW_DESTINATION = 2,
-    ATTACK = 4
+    UPDATEFLAG_NEW_ON_MAP = 1,
+    UPDATEFLAG_NEW_DESTINATION = 2,
+    UPDATEFLAG_ATTACK = 4,
+    UPDATEFLAG_ACTIONCHANGE = 8,
+    UPDATEFLAG_REMOVE = 16
 };
 
 /**
@@ -198,7 +200,7 @@ class MovingObject: public Object
          * Sets the destination coordinates of the object.
          */
         void setDestination(Point dst)
-        { mDst = dst; raiseUpdateFlags(NEW_DESTINATION); mPath.clear(); }
+        { mDst = dst; raiseUpdateFlags(UPDATEFLAG_NEW_DESTINATION); mPath.clear(); }
 
         /**
          * Gets the old coordinates of the object.
@@ -239,7 +241,7 @@ class MovingObject: public Object
         /**
          * Moves the object toward its destination.
          */
-        void move();
+        virtual void move();
 
         /**
          * Get public ID.
@@ -261,12 +263,12 @@ class MovingObject: public Object
         Point mDst; /**< target coordinates */
         Point mOld; /**< old coordinates */
         unsigned short mSpeed; /**< speed */
-        unsigned mSize; /**< radius of bounding circle */
         std::list<PATH_NODE> mPath;
 
     protected:
         unsigned char mDirection;   /**< Facing direction */
         unsigned short mActionTime; /**< delay until next action */
+        unsigned mSize; /**< radius of bounding circle */
 };
 
 #endif // _TMWSERV_OBJECT_H_

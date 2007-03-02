@@ -1,3 +1,12 @@
+2007-03-03  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/controller.cpp, src/controller.h, src/defines.h,
+	src/gameserver/being.cpp, src/gameserver/being.hpp,
+	src/gameserver/gamehandler.cpp, src/gameserver/object.hpp,
+	src/gameserver/player.cpp, src/gameserver/player.hpp,
+	src/gameserver/state.cpp, src/gameserver/testing.cpp,
+	src/point.h: Implemented being death, removal of dead mobs and sitting.
+
 2007-03-01  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/Makefile.am: Updated with new collision related module.

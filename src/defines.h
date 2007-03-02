@@ -149,12 +149,14 @@ enum {
     PGMSG_EQUIP                    = 0x0112, // B slot
     GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
-    GPMSG_BEING_ENTER              = 0x0200, // B type, W being id
+    GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // player: S name, B hair style, B hair color, B gender
                                              // monster: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
     PGMSG_WALK                     = 0x0260, // W*2 destination
+    PGMSG_ACTION_CHANGE            = 0x0270, // B Action
+    GPMSG_BEING_ACTION_CHANGE      = 0x0271, // W being id, B action
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, C position] [, W*2 destination] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     PGMSG_ATTACK                   = 0x0290, // B direction
@@ -164,7 +166,6 @@ enum {
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
-    GPMSG_BEING_DEAD               = 0xDEAD, // W being id
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error
