@@ -20,34 +20,27 @@
  *  $Id: $
  */
 
-#ifndef _TMW_COLLISIONDETECTION_H
-#define _TMW_COLLISIONDETECTION_H
+#ifndef _TMWSERV_MATHUTILS_H_
+#define _TMWSERV_MATHUTILS_H_
 
-class Point;
-
-/**
- * This namespace collects all needed collision detection functions
- */
-namespace Collision
+namespace utils
 {
+    namespace math
+    {
+        float fastInvSqrt(float x);
 
-    bool
-    circleWithCirclesector(const Point &circlePos, int circleRadius,
-                           const Point &secPos, int secRadius,
-                           float secAngle, float secSize);
-    /**
-     * Checks if a disk and a circle-sector collide
-     *
-     * @param halfTopAngle
-     *        The half-top-angle of the circle sector in degrees (0,359).
-     * @param placeAngle
-     *        The placement-angle of the circle sector in degrees (0,359).
-     */
-    bool
-    diskWithCircleSector(const Point &diskCenter, int diskRadius,
-                         const Point &sectorCenter, int sectorRadius,
-                         int halfTopAngle, int placeAngle);
+        float fastSqrt(float x);
 
-};
+        float cachedSin(int angle);
+
+        float cachedCos(int angle);
+
+        float cachedTan(int angle);
+
+        void init();
+
+    } // namespace math
+
+} // namespace utils
 
 #endif

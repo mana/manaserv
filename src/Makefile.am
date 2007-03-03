@@ -114,6 +114,8 @@ tmwserv_game_SOURCES = \
 	net/netcomputer.cpp \
 	utils/base64.h \
 	utils/base64.cpp \
+	utils/mathutils.h \
+	utils/mathutils.cpp \
 	utils/logger.h \
 	utils/logger.cpp \
 	utils/stringfilter.h \

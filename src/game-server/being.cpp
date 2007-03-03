@@ -21,11 +21,11 @@
  */
 
 #include "game-server/being.hpp"
+
 #include "game-server/collisiondetection.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
 
-#include <cmath>
 
 void Being::damage(Damage damage)
 {
@@ -71,54 +71,48 @@ void Being::move()
 void Being::performAttack(MapComposite *map)
 {
     int SHORT_RANGE = 32;
-    float SMALL_ANGLE = M_PI_2;
+    int SMALL_ANGLE = 15;
     Point ppos = getPosition();
     int dir = getDirection();
 
-    /* TODO: calculate real attack power and damage properties based on
+    int attackAngle = 0;
+
+    switch (dir)
+    {
+        case DIRECTION_UP:
+           attackAngle = 90;
+           break;
+        case DIRECTION_DOWN:
+           attackAngle = 270;
+           break;
+        case DIRECTION_LEFT:
+           attackAngle = 180;
+           break;
+        case DIRECTION_RIGHT:
+            attackAngle = 0;
+            break;
+        default:
+            break;
+    }
+
+/* TODO: calculate real attack power and damage properties based on
              character equipment and stats. */
     Damage damage = 1;
 
     for (MovingObjectIterator i(map->getAroundObjectIterator(this, SHORT_RANGE)); i; ++i)
     {
         MovingObject *o = *i;
-        if (o == this)
-        {
-            continue;
-        }
+        if (o == this) continue;
 
         int type = o->getType();
 
-        if (type != OBJECT_PLAYER && type != OBJECT_MONSTER)
-        {
-            continue;
-        }
+        if (type != OBJECT_PLAYER && type != OBJECT_MONSTER) continue;
 
         Point opos = o->getPosition();
 
-        float attackAngle = 0.0f;
-        // basic triangle-shaped damage zone
-        switch (dir)
-        {
-            case DIRECTION_UP:
-                attackAngle = M_PI_2;
-                break;
-            case DIRECTION_DOWN:
-                attackAngle = - M_PI_2;
-                break;
-            case DIRECTION_LEFT:
-                attackAngle = M_PI;
-                break;
-            case DIRECTION_RIGHT:
-                attackAngle = 0.0f;
-                break;
-            default:
-                break;
-        }
-
-        if  (Collision::circleWithCirclesector(
+        if  (Collision::diskWithCircleSector(
                 opos, o->getSize(),
-                ppos, SHORT_RANGE, attackAngle, SMALL_ANGLE)
+                ppos, SHORT_RANGE, SMALL_ANGLE, attackAngle)
             )
         {
             static_cast< Being * >(o)->damage(damage);

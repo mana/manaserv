@@ -44,6 +44,7 @@
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 #include "utils/timer.h"
+#include "utils/mathutils.h"
 
 // Scripting
 #ifdef SCRIPT_SUPPORT
@@ -206,6 +207,9 @@ void initialize()
 #else
     LOG_WARN("No scripting language support.");
 #endif
+
+    // Pre-calulate the needed trigomic function values
+    utils::math::init();
 }
 
 

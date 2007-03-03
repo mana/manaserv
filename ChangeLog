@@ -1,3 +1,13 @@
+2007-03-03  Rogier Polak      <rogier.l.a.polak@gmail.com>
+
+	* src/utils/mathutils.h, src/utils/mathutils.cpp,
+	src/utils/fastsqrt.h, src/Makefile.am, src/game-server/main-game.cpp:
+	Moved math utility functions to the namespace utils::math, added
+	cached trigonomic functions.
+	* src/game-server/collisiondetection.hpp, src/game-server/being.cpp,
+	src/game-server/collisiondetection.cpp: Implemented an alternate
+	collision-detection function, for disks and circle-sectors.
+
 2007-03-03  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/controller.cpp, src/controller.h, src/defines.h,
