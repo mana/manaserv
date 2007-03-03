@@ -47,7 +47,6 @@ namespace Collision
     diskWithCircleSector(const Point &diskCenter, int diskRadius,
                          const Point &sectorCenter, int sectorRadius,
                          int halfTopAngle, int placeAngle);
-
-};
+}
 
 #endif

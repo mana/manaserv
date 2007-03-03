@@ -23,6 +23,7 @@
 #include "mathutils.h"
 
 #include <cmath>
+#include <float.h>
 
 #define MATH_UTILS_MAX_ANGLE 360
 
@@ -30,9 +31,7 @@ float sinList[MATH_UTILS_MAX_ANGLE];
 float cosList[MATH_UTILS_MAX_ANGLE];
 float tanList[MATH_UTILS_MAX_ANGLE];
 
-/**
- * fastInvSqrt:
- *
+/*
  * A very fast function to calculate the approximate inverse square root of a
  * floating point value. For an explanation of the inverse squareroot function
  * read:
@@ -47,46 +46,40 @@ float tanList[MATH_UTILS_MAX_ANGLE];
  */
 float utils::math::fastInvSqrt(float x)
 {
-    float xhalf = 0.5f*x;
-    int i = *(int*)&x;
-    i = 0x5f375a86- (i>>1);
-    x = *(float*)&i;
-    x = x*(1.5f-xhalf*x*x);
+    float xhalf = 0.5f * x;
+    int i = *(int*) &x;
+    i = 0x5f375a86 - (i >> 1);
+    x = *(float*) &i;
+    x = x * (1.5f-xhalf * x * x);
     return x;
 }
 
-/**
- * fastSqrt:
- *
- * A helper function that uses the fastInvSqrt for getting the
- * normal squareroot.
- */
 float utils::math::fastSqrt(float x)
 {
-    return 1.0f/utils::math::fastInvSqrt(x);
+    return 1.0f / utils::math::fastInvSqrt(x);
 }
 
 void utils::math::init()
 {
     // Constant for calculating an angle in radians out of an angle in degrees
-    const float radianAngleRatio = acos(0.0f) / 90.0f; // pi/2 / 90[deg]
+    const float radianAngleRatio = M_PI_2 / 90.0f; // pi/2 / 90[deg]
 
-    for(int i = 0; i < MATH_UTILS_MAX_ANGLE; i++)
+    for (int i = 0; i < MATH_UTILS_MAX_ANGLE; i++)
     {
-        sinList[i] = sin(radianAngleRatio * (float)i);
-        cosList[i] = cos(radianAngleRatio * (float)i);
+        sinList[i] = sin(radianAngleRatio * (float) i);
+        cosList[i] = cos(radianAngleRatio * (float) i);
 
         if (i == 90)
         {
-            tanList[i] = 1.0E40f; //approximately infinity
+            tanList[i] = FLT_MAX; // approximately infinity
             continue;
         }
         if (i == 270)
         {
-            tanList[i] = -1.0E40f; //approximately infinity
+            tanList[i] = -FLT_MAX; // approximately infinity
             continue;
         }
-        tanList[i] = tan(radianAngleRatio * (float)i);
+        tanList[i] = tan(radianAngleRatio * (float) i);
     }
 }
 

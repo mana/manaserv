@@ -27,8 +27,16 @@ namespace utils
 {
     namespace math
     {
+        /**
+         * A very fast function to calculate the approximate inverse square
+         * root of a floating point value.
+         */
         float fastInvSqrt(float x);
 
+        /**
+         * A helper function that uses the fastInvSqrt for getting the
+         * normal squareroot.
+         */
         float fastSqrt(float x);
 
         float cachedSin(int angle);

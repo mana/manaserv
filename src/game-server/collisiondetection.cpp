@@ -28,28 +28,28 @@
 #include "utils/mathutils.h"
 
 bool
-Collision::circleWithCirclesector(  const Point& circlePos, int circleRadius,
-                                    const Point& secPos, int secRadius,
-                                    float secAngle, float secSize)
+Collision::circleWithCirclesector(const Point &circlePos, int circleRadius,
+                                  const Point &secPos, int secRadius,
+                                  float secAngle, float secSize)
 {
     float targetAngle;
 
-    //calculate distance
+    // Calculate distance
     int distX = circlePos.x - secPos.x;
     int distY = circlePos.y - secPos.y;
     float invDist = utils::math::fastInvSqrt(distX * distX + distY * distY);
     float dist = 1.0f / invDist;
 
-    //if out of range we can't hit it
+    // If out of range we can't hit it
     if (dist > secRadius + circleRadius) {
         return false;
     }
-    //if we are standing in it we hit it in any case
+    // If we are standing in it we hit it in any case
     if (dist < circleRadius) {
         return true;
     }
 
-    //calculate target angle
+    // Calculate target angle
     if (distX > 0)
     {
         targetAngle = asin(-distY * invDist);
@@ -63,7 +63,7 @@ Collision::circleWithCirclesector(  const Point& circlePos, int circleRadius,
 
     }
 
-    //calculate difference from segment angle
+    // Calculate difference from segment angle
     float targetDiff = fabs(targetAngle - secAngle);
     if (targetDiff > M_PI)
     {
@@ -71,7 +71,7 @@ Collision::circleWithCirclesector(  const Point& circlePos, int circleRadius,
     }
 
 
-    //Add hit circle
+    // Add hit circle
     secSize += asin(circleRadius * invDist) * 2;
 
     return (targetDiff < secSize * 0.5f);
@@ -88,27 +88,19 @@ Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
                                 const Point &sectorCenter, int sectorRadius,
                                 int halfTopAngle, int placeAngle)
 {
-    //The coordinates of the diskcenter the base coordinate systems and an
-    //alternate coordinate system
-    float Px, Py, Px1, Py1,
-                 distAx, distAy, distBx, distBy;
-
-    //Converting the radii to float
+    // Converting the radii to float
     float R = (float) sectorRadius;
     float Rp = (float) diskRadius;
 
-    //The values of the trigonomic functions (only have to be computed once)
-    float sinAlpha, cosAlpha, sinBeta, cosBeta, tan2Alpha;
+    // Transform to the primary coordinate system
+    float Px = diskCenter.x - sectorCenter.x;
+    float Py = diskCenter.y - sectorCenter.y;
 
-    //Transform to the primary coordinate system
-    Px = diskCenter.x - sectorCenter.x;
-    Py = diskCenter.y - sectorCenter.y;
-
-    //Calculating the values of the trigonomic functions
-    sinAlpha = utils::math::cachedSin(halfTopAngle);
-    cosAlpha = utils::math::cachedCos(halfTopAngle);
-    sinBeta  = utils::math::cachedSin(placeAngle);
-    cosBeta  = utils::math::cachedCos(placeAngle);
+    // The values of the trigonomic functions (only have to be computed once)
+    float sinAlpha = utils::math::cachedSin(halfTopAngle);
+    float cosAlpha = utils::math::cachedCos(halfTopAngle);
+    float sinBeta  = utils::math::cachedSin(placeAngle);
+    float cosBeta  = utils::math::cachedCos(placeAngle);
 
     /**
      * This bounding circle implementation can be used up and until a
@@ -119,81 +111,81 @@ Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
      */
 
     // Calculating the coordinates of the disk's center in coordinate system 4
-    Px1 = Px * cosBeta + Py * sinBeta;
-    Py1 = Py * cosBeta - Px * sinBeta;
+    float Px1 = Px * cosBeta + Py * sinBeta;
+    float Py1 = Py * cosBeta - Px * sinBeta;
 
-    //Check for an intersection with the bounding circle
+    // Check for an intersection with the bounding circle
     // (>) : touching is accepted
     if ((cosAlpha * Px1 * Px1 + cosAlpha * Py1 * Py1 - Px1 * R)
                                 > (Rp * Rp * cosAlpha + Rp * R)) return false;
 
-    //Check for a region 4 collision
+    // Check for a region 4 collision
     if ((Px*Px + Py*Py) <=  (Rp*Rp)) return true;
 
-    //Calculating the coordinates of the disk's center in coordinate system 1
+    // Calculating the coordinates of the disk's center in coordinate system 1
     Px1 = Px * (cosAlpha * cosBeta + sinAlpha * sinBeta)
         + Py * (cosAlpha * sinBeta - sinAlpha * cosBeta);
     Py1 = Py * (cosAlpha * cosBeta + sinAlpha * sinBeta)
         - Px * (cosAlpha * sinBeta - sinAlpha * cosBeta);
 
-    //Check if P is in region 5 (using coordinate system 1)
+    // Check if P is in region 5 (using coordinate system 1)
     if ((Px1 >= 0.0f) && (Px1 <= R) && (Py1 <= 0.0f))
     {
-        //Return true on intersection, false otherwise
+        // Return true on intersection, false otherwise
         // (>=) : touching  is accepted
         return (Py1 >= -1.0f * Rp);
     }
 
-    //Check if P is in region 3 (using coordinate system 1)
+    // Check if P is in region 3 (using coordinate system 1)
     if ((Px1 > R) && (Py1 <= 0.0f))
     {
-        //Calculating the vector from point A to the disk center
-        distAx = Px - R * (cosAlpha*cosBeta + sinAlpha*sinBeta);
-        distAy = Py - R * (cosAlpha*sinBeta - sinAlpha*cosBeta);
+        // Calculating the vector from point A to the disk center
+        float distAx = Px - R * (cosAlpha * cosBeta + sinAlpha * sinBeta);
+        float distAy = Py - R * (cosAlpha * sinBeta - sinAlpha * cosBeta);
 
-        //Check for a region 3 collision
-        return ((distAx*distAx + distAy*distAy) <= Rp*Rp);
+        // Check for a region 3 collision
+        return ((distAx * distAx + distAy * distAy) <= Rp * Rp);
     }
 
-    //Discard, if P is in region 4 (was previously checked)
+    // Discard, if P is in region 4 (was previously checked)
     if ((Px1 < 0.0f) && (Py1 <= 0.0f)) return false;
 
-    tan2Alpha = utils::math::cachedTan(2 * halfTopAngle);
+    float tan2Alpha = utils::math::cachedTan(2 * halfTopAngle);
 
-    //Check if P is in region 1 (using coordinate system 1)
+    // Check if P is in region 1 (using coordinate system 1)
     if ((Px1 >= 0.0f) && (Py1 >= 0.0f) && (Py1 <= Px1 * tan2Alpha))
     {
-        //Return true on intersection, false otherwise
+        // Return true on intersection, false otherwise
         // (<=) : touching  is accepted
-        return ((Px*Px + Py*Py) <= (R*R + Rp*Rp + 2.0f*R*Rp));
+        return ((Px * Px + Py * Py) <= (R * R + Rp * Rp + 2.0f * R * Rp));
     }
 
-    //Calculating the coordinates of the disk's center in coordinate system 3
+    // Calculating the coordinates of the disk's center in coordinate system 3
     Px1 = Px * (cosAlpha * cosBeta - sinAlpha * sinBeta)
         + Py * (sinAlpha * cosBeta + cosAlpha * sinBeta);
     Py1 = Py * (cosAlpha * cosBeta - sinAlpha * sinBeta)
         - Px * (sinAlpha * cosBeta + cosAlpha * sinBeta);
 
-    //Discard, if P is in region 4 (was previously checked)
+    // Discard, if P is in region 4 (was previously checked)
     if ((Px1 < 0.0f) && (Py1 >= 0.0f)) return false;
 
-    //Check if P is in region 6 (using coordinate system 3)
+    // Check if P is in region 6 (using coordinate system 3)
     if ((Px1 >= 0.0f) && (Px1 <= R) && (Py1 >= 0.0f))
     {
-        //Return true on intersection, false otherwise
+        // Return true on intersection, false otherwise
         // (<=) : touching  is accepted
         return (Py1 <= Rp);
     }
 
-    //Check if P is in region 2 (using coordinate system 3)
+    // Check if P is in region 2 (using coordinate system 3)
     if ((Px1 > R) && (Py1 <= 0.0f))
     {
-        //Calculating the vector from point B to the disk center
-        distBx = Px - R * (cosAlpha*cosBeta - sinAlpha*sinBeta);
-        distBy = Py - R * (cosAlpha*sinBeta + sinAlpha*cosBeta);
+        // Calculating the vector from point B to the disk center
+        float distBx = Px - R * (cosAlpha * cosBeta - sinAlpha * sinBeta);
+        float distBy = Py - R * (cosAlpha * sinBeta + sinAlpha * cosBeta);
 
-        //Check for a region 2 collision
-        return ((distBx*distBx + distBy*distBy) <= (Rp*Rp));
+        // Check for a region 2 collision
+        return ((distBx * distBx + distBy * distBy) <= (Rp * Rp));
     }
 
     // The intersection with the bounding circle is in region 4,

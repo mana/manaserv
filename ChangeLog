@@ -1,4 +1,13 @@
-2007-03-03  Rogier Polak      <rogier.l.a.polak@gmail.com>
+2007-03-03  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/utils/mathutils.cpp, src/utils/mathutils.h,
+	src/game-server/collisiondetection.hpp,
+	src/game-server/collisiondetection.cpp: Use M_PI_2 instead of
+	acos(0.0f) and FLT_MAX instead of 1.0E40f (which exceeded the maximum
+	float value). Some cosmetics (whitespace and declaring variables where
+	they are used).
+
+2007-03-03  Rogier Polak  <rogier.l.a.polak@gmail.com>
 
 	* src/utils/mathutils.h, src/utils/mathutils.cpp,
 	src/utils/fastsqrt.h, src/Makefile.am, src/game-server/main-game.cpp:
