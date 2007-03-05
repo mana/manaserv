@@ -33,8 +33,8 @@ void Controlled::update()
     {
         if (mAction != DEAD)
         {
-            Point randomPos = { rand() % 320 + 720,
-                                rand() % 320 + 840 };
+            Point randomPos( rand() % 320 + 720,
+                                rand() % 320 + 840 );
             setDestination(randomPos);
             mCountDown = 10 + rand() % 10;
 

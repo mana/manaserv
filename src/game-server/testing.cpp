@@ -20,7 +20,7 @@ static void dropItem(int map, int x, int y, int type)
     assert(ic);
     Item *i = new Item(ic, 1);
     i->setMapId(map);
-    Point pos = { x, y };
+    Point pos(x, y);
     i->setPosition(pos);
     gameState->insert(i);
 }
@@ -39,7 +39,7 @@ void testingMap(int id)
                 being->setSize(8);
                 being->setHitpoints(3);
                 being->setMapId(1);
-                Point pos = { 720, 900 };
+                Point pos(720, 900);
                 being->setPosition(pos);
                 gameState->insert(being);
             }

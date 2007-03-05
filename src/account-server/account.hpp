@@ -26,19 +26,8 @@
 #include <string>
 
 #include "defines.h"
-#include "playerdata.hpp"
+#include "account-server/characterdata.hpp"
 #include "utils/countedptr.h"
-
-/**
- * Type definition for a smart pointer to PlayerData.
- */
-typedef utils::CountedPtr< PlayerData > PlayerPtr;
-
-/**
- * Type definition for a list of Players.
- */
-typedef std::vector< PlayerPtr > Players;
-
 
 /**
  * Notes:
@@ -52,9 +41,8 @@ typedef std::vector< PlayerPtr > Players;
  *       encrypt the password twice).
  */
 
-
 /**
- * A player account.
+ * A player's account.
  */
 class Account
 {
@@ -83,7 +71,7 @@ class Account
         Account(const std::string& name,
                 const std::string& password,
                 const std::string& email,
-                const Players& characters);
+                const Characters& characters);
 
 
         /**
@@ -170,7 +158,7 @@ class Account
          * @param characters a list of characters.
          */
         void
-        setCharacters(const Players& characters);
+        setCharacters(const Characters& characters);
 
 
         /**
@@ -179,7 +167,7 @@ class Account
          * @param character the new character.
          */
         void
-        addCharacter(PlayerPtr character);
+        addCharacter(CharacterPtr character);
 
         /**
          * Remove a character.
@@ -195,7 +183,7 @@ class Account
          *
          * @return all the characters.
          */
-        Players&
+        Characters&
         getCharacters();
 
         /**
@@ -203,7 +191,7 @@ class Account
          *
          * @return the character if found, NULL otherwise.
          */
-        PlayerPtr
+        CharacterPtr
         getCharacter(const std::string& name);
 
         /**
@@ -231,7 +219,7 @@ class Account
         std::string mName;     /**< user name */
         std::string mPassword; /**< user password (encrypted) */
         std::string mEmail;    /**< user email address */
-        Players mCharacters;   /**< player data */
+        Characters mCharacters;   /**< Character data */
         AccountLevel mLevel;   /**< account level */
 };
 

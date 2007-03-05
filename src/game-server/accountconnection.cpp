@@ -67,9 +67,9 @@ void AccountConnection::processMessage(MessageIn &msg)
     {
         case AGMSG_PLAYER_ENTER:
         {
+            std::string token = msg.readString(32);
             int id = msg.readLong();
             std::string name = msg.readString();
-            std::string token = msg.readString(32);
             Player *ptr = new Player(name, id);
             ptr->deserialize(msg);
             ptr->setMapId(ptr->getMap());

@@ -129,7 +129,7 @@ const std::string SQL_CHARACTERS_TABLE(
         "x       SMALLINT    UNSIGNED NOT NULL,"
         "y       SMALLINT    UNSIGNED NOT NULL,"
         "map_id  TINYINT     NOT NULL,"
-        // stats
+        // attributes
         "str     SMALLINT    UNSIGNED NOT NULL,"
         "agi     SMALLINT    UNSIGNED NOT NULL,"
         "vit     SMALLINT    UNSIGNED NOT NULL,"
@@ -154,7 +154,7 @@ const std::string SQL_CHARACTERS_TABLE(
         "x       INTEGER     NOT NULL,"
         "y       INTEGER     NOT NULL,"
         "map_id  INTEGER     NOT NULL,"
-        // stats
+        // attributes
         "str     INTEGER     NOT NULL,"
         "agi     INTEGER     NOT NULL,"
         "vit     INTEGER     NOT NULL,"
@@ -177,7 +177,7 @@ const std::string SQL_CHARACTERS_TABLE(
         "x       INTEGER     NOT NULL,"
         "y       INTEGER     NOT NULL,"
         "map_id  INTEGER     NOT NULL,"
-        // stats
+        // attributes
         "str     INTEGER     NOT NULL,"
         "agi     INTEGER     NOT NULL,"
         "vit     INTEGER     NOT NULL,"
@@ -277,25 +277,26 @@ const std::string INVENTORIES_TBL_NAME("tmw_inventories");
 const std::string SQL_INVENTORIES_TABLE(
     "CREATE TABLE tmw_inventories ("
 #if defined (MYSQL_SUPPORT)
-        "id       SMALLINT NOT NULL,"
+        "id       INTEGER  PRIMARY KEY AUTO_INCREMENT,"
         "owner_id INTEGER  NOT NULL,"
+        "class_id INTEGER  NOT NULL,"
         "amount   SMALLINT NOT NULL,"
         "equipped TINYINT  NOT NULL,"
-        "FOREIGN KEY (id)       REFERENCES tmw_items(id),"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
+        "INDEX (id)"
 #elif defined (SQLITE_SUPPORT)
-        "id       INTEGER  NOT NULL,"
+        "id       INTEGER  PRIMARY KEY,"
         "owner_id INTEGER  NOT NULL,"
+        "class_id INTEGER  NOT NULL,"
         "amount   INTEGER  NOT NULL,"
         "equipped INTEGER  NOT NULL,"
-        "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #elif defined (POSTGRESQL_SUPPORT)
-        "id       INTEGER  NOT NULL,"
+        "id      SERIAL    PRIMARY KEY,"
         "owner_id INTEGER  NOT NULL,"
+        "class_id INTEGER  NOT NULL,"
         "amount   INTEGER  NOT NULL,"
         "equipped INTEGER  NOT NULL,"
-        "FOREIGN KEY (id)       REFERENCES tmw_items(id),"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #endif
     ");"

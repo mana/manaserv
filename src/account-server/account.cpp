@@ -20,9 +20,11 @@
  *  $Id$
  */
 
+#include "account-server/account.hpp"
+
 #include <cassert>
 
-#include "account-server/account.hpp"
+#include "account-server/accountclient.hpp"
 #include "utils/functors.h"
 
 /**
@@ -49,7 +51,7 @@ Account::Account(const std::string& name,
 Account::Account(const std::string& name,
                  const std::string& password,
                  const std::string& email,
-                 const Players& characters)
+                 const Characters& characters)
         : mName(name),
           mPassword(password),
           mEmail(email),
@@ -155,7 +157,7 @@ Account::getLevel(void) const
  * Set the characters.
  */
 void
-Account::setCharacters(const Players& characters)
+Account::setCharacters(const Characters& characters)
 {
     mCharacters = characters;
 }
@@ -165,7 +167,7 @@ Account::setCharacters(const Players& characters)
  * Add a new character.
  */
 void
-Account::addCharacter(PlayerPtr character)
+Account::addCharacter(CharacterPtr character)
 {
     if (character.get() != 0) {
         mCharacters.push_back(character);
@@ -177,10 +179,10 @@ Account::addCharacter(PlayerPtr character)
  */
 bool Account::delCharacter(std::string const &name)
 {
-    Players::iterator
+    Characters::iterator
         end = mCharacters.end(),
         it = std::find_if(mCharacters.begin(), end,
-                          std::bind2nd(obj_name_is<PlayerPtr>(), name));
+                          std::bind2nd(obj_name_is<CharacterPtr>(), name));
 
     if (it == end) return false;
     mCharacters.erase(it);
@@ -191,7 +193,7 @@ bool Account::delCharacter(std::string const &name)
 /**
  * Get all the characters.
  */
-Players &Account::getCharacters()
+Characters &Account::getCharacters()
 {
     return mCharacters;
 }
@@ -200,15 +202,15 @@ Players &Account::getCharacters()
 /**
  * Get a character by name.
  */
-PlayerPtr Account::getCharacter(const std::string& name)
+CharacterPtr Account::getCharacter(const std::string& name)
 {
-    Players::iterator
+    Characters::iterator
         end = mCharacters.end(),
         it = std::find_if(mCharacters.begin(), end,
-                          std::bind2nd(obj_name_is<PlayerPtr>(), name));
+                          std::bind2nd(obj_name_is<CharacterPtr>(), name));
 
     if (it != end) return *it;
-    return PlayerPtr();
+    return CharacterPtr();
 }
 
 void Account::setID(int id)

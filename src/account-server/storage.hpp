@@ -28,6 +28,7 @@
 #include <map>
 
 #include "account-server/account.hpp"
+#include "account-server/characterdata.hpp"
 #include "chat-server/chatchannel.hpp"
 
 /**
@@ -189,7 +190,7 @@ class Storage
          *
          * @return the character associated to the ID.
          */
-        virtual PlayerPtr getCharacter(int id) = 0;
+        virtual CharacterPtr getCharacter(int id) = 0;
 
         /**
          * Add a new account.
@@ -238,6 +239,16 @@ class Storage
          * @return true if character's name exists.
          */
         virtual bool doesCharacterNameExist(std::string const &name) = 0;
+
+        /**
+         * Updates the data for a single character, does not update the
+         * owning account or the characters name.
+         * Primary usage should be storing characterdata received from a
+         * game server.
+         * returns true if succefull, false otherwise.
+         */
+        virtual bool
+        updateCharacter(CharacterPtr ptr) = 0;
 
         /**
          * Gives the list of opened public channels registered in database
@@ -295,7 +306,7 @@ class Storage
 
     protected:
         Accounts mAccounts; /**< list of accounts in memory */
-        Players mCharacters; /**< the loaded characters */
+        Characters mCharacters; /**< the loaded characters */
         bool mIsOpen;       /**< flag is true if the storage is open */
 
 

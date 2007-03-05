@@ -20,11 +20,13 @@
  *  $Id$
  */
 
+#include "account-server/dalstorage.hpp"
+
 #include <cassert>
 
 #include "configuration.h"
 #include "point.h"
-#include "account-server/dalstorage.hpp"
+#include "account-server/characterdata.hpp"
 #include "account-server/dalstoragesql.hpp"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
@@ -49,7 +51,7 @@ class account_by_name
 };
 
 /**
- * Functor used to search a Player by ID in Players.
+ * Functor used to search a character by ID in Characters.
  */
 class character_by_id
 {
@@ -58,7 +60,7 @@ class character_by_id
             : mID(id)
         {}
 
-        bool operator()(PlayerPtr const &elem) const
+        bool operator()(CharacterPtr const &elem) const
         { return elem->getDatabaseID() == mID; }
 
     private:
@@ -242,24 +244,24 @@ DALStorage::getAccount(const std::string& userName)
         if (!charInfo.isEmpty())
         {
             int size = charInfo.rows();
-            Players players;
+            Characters characters;
 
             LOG_DEBUG(userName << "'s account has " << size
                       << " character(s) in database.");
 
             // Two steps: it seems like multiple requests cannot be alive at the same time.
-            std::vector< unsigned > playerIDs;
+            std::vector< unsigned > characterIDs;
             for (int k = 0; k < size; ++k)
             {
-                playerIDs.push_back(toUint(charInfo(k, 0)));
+                characterIDs.push_back(toUint(charInfo(k, 0)));
             }
 
             for (int k = 0; k < size; ++k)
             {
-                players.push_back(getCharacter(playerIDs[k]));
+                characters.push_back(getCharacter(characterIDs[k]));
             }
 
-            account->setCharacters(players);
+            account->setCharacters(characters);
         }
 
         return account;
@@ -322,24 +324,24 @@ DALStorage::getAccountByID(int accountID)
         if (!charInfo.isEmpty())
         {
             int size = charInfo.rows();
-            Players players;
+            Characters characters;
 
             LOG_DEBUG("AccountID: "<< accountID << "; has " << size
                       << " character(s) in database.");
 
             // Two steps: it seems like multiple requests cannot be alive at the same time.
-            std::vector< unsigned > playerIDs;
+            std::vector< unsigned > characterIDs;
             for (int k = 0; k < size; ++k)
             {
-                playerIDs.push_back(toUint(charInfo(k, 0)));
+                characterIDs.push_back(toUint(charInfo(k, 0)));
             }
 
             for (int k = 0; k < size; ++k)
             {
-                players.push_back(getCharacter(playerIDs[k]));
+                characters.push_back(getCharacter(characterIDs[k]));
             }
 
-            account->setCharacters(players);
+            account->setCharacters(characters);
         }
 
         return account;
@@ -353,13 +355,13 @@ DALStorage::getAccountByID(int accountID)
 /**
  * Gets a character by database ID.
  */
-PlayerPtr DALStorage::getCharacter(int id)
+CharacterPtr DALStorage::getCharacter(int id)
 {
     // connect to the database (if not connected yet).
     open();
 
     // look for the character in the list first.
-    Players::iterator it_end = mCharacters.end(),
+    Characters::iterator it_end = mCharacters.end(),
         it = std::find_if(mCharacters.begin(), it_end, character_by_id(id));
 
     if (it != it_end)
@@ -378,7 +380,7 @@ PlayerPtr DALStorage::getCharacter(int id)
         // we have no choice but to return nothing.
         if (charInfo.isEmpty())
         {
-            return PlayerPtr(NULL);
+            return CharacterPtr(NULL);
         }
 
         // specialize the string_to functor to convert
@@ -389,39 +391,39 @@ PlayerPtr DALStorage::getCharacter(int id)
         // a string to an unsigned short.
         string_to< unsigned short > toUshort;
 
-        PlayerData *player = new PlayerData(charInfo(0, 2), toUint(charInfo(0, 0)));
-        player->setAccountID(toUint(charInfo(0, 1)));
-        player->setGender(toUshort(charInfo(0, 3)));
-        player->setHairStyle(toUshort(charInfo(0, 4)));
-        player->setHairColor(toUshort(charInfo(0, 5)));
-        player->setLevel(toUshort(charInfo(0, 6)));
-        player->setMoney(toUint(charInfo(0, 7)));
-        Point pos = { toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)) };
-        player->setPos(pos);
-        for (int i = 0; i < NB_RSTAT; ++i)
+        CharacterData *character = new CharacterData(charInfo(0, 2), toUint(charInfo(0, 0)));
+        character->setAccountID(toUint(charInfo(0, 1)));
+        character->setGender(toUshort(charInfo(0, 3)));
+        character->setHairStyle(toUshort(charInfo(0, 4)));
+        character->setHairColor(toUshort(charInfo(0, 5)));
+        character->setLevel(toUshort(charInfo(0, 6)));
+        character->setMoney(toUint(charInfo(0, 7)));
+        Point pos(toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)));
+        character->setPos(pos);
+        for (int i = 0; i < NB_ATTRIBUTES; ++i)
         {
-            player->setRawStat(i, toUshort(charInfo(0, 11 + i)));
+            character->setAttribute(i, toUshort(charInfo(0, 11 + i)));
         }
 
         int mapId = toUint(charInfo(0, 10));
         if (mapId > 0)
         {
-            player->setMap(mapId);
+            character->setMapId(mapId);
         }
         else
         {
-            // Set player to default map and one of the default location
+            // Set character to default map and one of the default location
             // Default map is to be 1, as not found return value will be 0.
-            player->setMap((int)config.getValue("defaultMap", 1));
+            character->setMapId((int)config.getValue("defaultMap", 1));
         }
 
-        PlayerPtr ptr(player);
+        CharacterPtr ptr(character);
         mCharacters.push_back(ptr);
         return ptr;
     }
     catch (const DbSqlQueryExecFailure& e)
     {
-        return PlayerPtr(NULL); // TODO: Throw exception here
+        return CharacterPtr(NULL); // TODO: Throw exception here
     }
 }
 
@@ -516,6 +518,122 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
     return true;
 }
 
+bool
+DALStorage::updateCharacter(CharacterPtr character)
+{
+    // If not opened already
+    open();
+
+    //Character data (see CharacterData for details)
+    try
+    {
+        std::ostringstream sqlUpdateCharacterInfo;
+        sqlUpdateCharacterInfo
+            << "update "        << CHARACTERS_TBL_NAME << " "
+            << "set"
+            << "gender = "     << character->getGender()
+                               << ", "
+            << "hair_style = " << (int)character->getHairStyle()
+                               << ", "
+            << "hair_color = " << (int)character->getHairColor()
+                               << ", "
+            << "level = "      << (int)character->getLevel()
+                               << ", "
+            << "money = "      << character->getMoney()
+                               << ", "
+            << "x = "          << character->getPos().x
+                               << ", "
+            << "y = "          << character->getPos().y
+                               << ", "
+            << "map_id = "     << character->getMapId()
+                               << ", "
+            << "str = "        << character->getAttribute(ATT_STRENGTH)
+                               << ", "
+            << "agi = "        << character->getAttribute(ATT_AGILITY)
+                               << ", "
+            << "vit = "        << character->getAttribute(ATT_VITALITY)
+                               << ", "
+#if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
+            << "`int` = "
+#else
+            << "int = "
+#endif
+                               << character->getAttribute(ATT_INTELLIGENCE)
+                               << ", "
+            << "dex = "        << character->getAttribute(ATT_DEXTERITY)
+                               << ", "
+            << "luck = "       << character->getAttribute(ATT_LUCK)
+            << "where id = "   << character->getDatabaseID()
+                               << ";";
+
+        mDb->execSql(sqlUpdateCharacterInfo.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what());
+        return false;
+    }
+
+    /**
+     *  Character's inventory
+     */
+
+    // Delete the old inventory first
+    try
+    {
+        std::ostringstream sqlDeleteCharacterInventory;
+        sqlDeleteCharacterInventory
+            << "delete * from " << INVENTORIES_TBL_NAME
+            << "where owner_id = " << character->getDatabaseID() << ";";
+
+        mDb->execSql(sqlDeleteCharacterInventory.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what());
+        return false;
+    }
+
+    // Insert the new inventory data
+    try
+    {
+        if (character->getNumberOfInventoryItems())
+        {
+            std::ostringstream sqlInsertCharacterInventory;
+            sqlInsertCharacterInventory
+                << "insert into " << INVENTORIES_TBL_NAME
+                << "(owner_id, class_id, amount, equipped) "
+                << "values ";
+
+            for (int j = 0; ; )
+            {
+                sqlInsertCharacterInventory
+                    << "(" << character->getDatabaseID() << ", "
+                    << character->getInventoryItem(j).itemClassId << ", "
+                    << character->getInventoryItem(j).numberOfItemsInSlot
+                    << ", "
+                    << (unsigned short)
+                                      character->getInventoryItem(j).isEquiped
+                    << ")";
+                // Adding the comma only if it's needed
+                if (++j < character->getNumberOfInventoryItems())
+                                          sqlInsertCharacterInventory << ", ";
+            }
+
+            mDb->execSql(sqlInsertCharacterInventory.str());
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what());
+        return false;
+    }
+    return true;
+}
+
 std::map<short, ChatChannel>
 DALStorage::getChannelList()
 {
@@ -603,7 +721,8 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
                         << i->second.getPassword() << "\", \""
                         << i->second.getPrivacy() << "\");";
 
-                        LOG_DEBUG("Channel (" << i->first << ") saved: " << i->second.getName()
+                        LOG_DEBUG("Channel (" << i->first << ") saved: "
+                                  << i->second.getName()
                                   << ": " << i->second.getAnnouncement());
                 }
 
@@ -724,10 +843,10 @@ void DALStorage::flush(AccountPtr const &account)
     mDb->execSql(sqlUpdateAccountTable.str());
 
     // get the list of characters that belong to this account.
-    Players &characters = account->getCharacters();
+    Characters &characters = account->getCharacters();
 
     // insert or update the characters.
-    for (Players::const_iterator it = characters.begin(),
+    for (Characters::const_iterator it = characters.begin(),
          it_end = characters.end(); it != it_end; ++it)
     {
         if ((*it)->getDatabaseID() < 0) {
@@ -748,13 +867,13 @@ void DALStorage::flush(AccountPtr const &account)
                  << (*it)->getMoney() << ", "
                  << (*it)->getPos().x << ", "
                  << (*it)->getPos().y << ", "
-                 << (*it)->getMap() << ", "
-                 << (*it)->getRawStat(STAT_STRENGTH) << ", "
-                 << (*it)->getRawStat(STAT_AGILITY) << ", "
-                 << (*it)->getRawStat(STAT_VITALITY) << ", "
-                 << (*it)->getRawStat(STAT_INTELLIGENCE) << ", "
-                 << (*it)->getRawStat(STAT_DEXTERITY) << ", "
-                 << (*it)->getRawStat(STAT_LUCK) << ");";
+                 << (*it)->getMapId() << ", "
+                 << (*it)->getAttribute(ATT_STRENGTH) << ", "
+                 << (*it)->getAttribute(ATT_AGILITY) << ", "
+                 << (*it)->getAttribute(ATT_VITALITY) << ", "
+                 << (*it)->getAttribute(ATT_INTELLIGENCE) << ", "
+                 << (*it)->getAttribute(ATT_DEXTERITY) << ", "
+                 << (*it)->getAttribute(ATT_LUCK) << ");";
 
             mDb->execSql(sqlInsertCharactersTable.str());
         } else {
@@ -769,17 +888,17 @@ void DALStorage::flush(AccountPtr const &account)
                 << " money = " << (*it)->getMoney() << ", "
                 << " x = " << (*it)->getPos().x << ", "
                 << " y = " << (*it)->getPos().y << ", "
-                << " map_id = " << (*it)->getMap() << ", "
-                << " str = " << (*it)->getRawStat(STAT_STRENGTH) << ", "
-                << " agi = " << (*it)->getRawStat(STAT_AGILITY) << ", "
-                << " vit = " << (*it)->getRawStat(STAT_VITALITY) << ", "
+                << " map_id = " << (*it)->getMapId() << ", "
+                << " str = " << (*it)->getAttribute(ATT_STRENGTH) << ", "
+                << " agi = " << (*it)->getAttribute(ATT_AGILITY) << ", "
+                << " vit = " << (*it)->getAttribute(ATT_VITALITY) << ", "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-                << " `int` = " << (*it)->getRawStat(STAT_INTELLIGENCE) << ", "
+                << " `int` = " << (*it)->getAttribute(ATT_INTELLIGENCE) << ", "
 #else
-                << " int = " << (*it)->getRawStat(STAT_INTELLIGENCE) << ", "
+                << " int = " << (*it)->getAttribute(ATT_INTELLIGENCE) << ", "
 #endif
-                << " dex = " << (*it)->getRawStat(STAT_DEXTERITY) << ", "
-                << " luck = " << (*it)->getRawStat(STAT_LUCK)
+                << " dex = " << (*it)->getAttribute(ATT_DEXTERITY) << ", "
+                << " luck = " << (*it)->getAttribute(ATT_LUCK)
                 << " where id = " << (*it)->getDatabaseID() << ";";
 
             mDb->execSql(sqlUpdateCharactersTable.str());
@@ -829,7 +948,7 @@ void DALStorage::flush(AccountPtr const &account)
     for (unsigned int i = 0; i < charInMemInfo.rows(); ++i) // in database
     {
         charFound = false;
-        for (Players::const_iterator it = characters.begin(),
+        for (Characters::const_iterator it = characters.begin(),
              it_end = characters.end(); it != it_end; ++it) // In memory
         {
             if (charInMemInfo(i, 0) == (*it)->getName())
@@ -878,7 +997,7 @@ void DALStorage::delAccount(AccountPtr const &account)
 {
     using namespace dal;
 
-    account->setCharacters(Players());
+    account->setCharacters(Characters());
     flush(account);
     mAccounts.erase(account->getID());
 

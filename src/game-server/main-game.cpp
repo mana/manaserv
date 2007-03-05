@@ -68,7 +68,7 @@ std::string scriptLanugage = "none";
 #endif // SCRIPT_SUPPORT
 
 // Default options that automake should be able to override.
-#define DEFAULT_LOG_FILE        "tmwserv.log"
+#define DEFAULT_LOG_FILE        "tmwserv-game.log"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 #define DEFAULT_MAPSDB_FILE     "maps.xml"

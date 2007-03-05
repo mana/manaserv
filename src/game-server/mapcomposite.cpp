@@ -343,7 +343,7 @@ MapComposite::~MapComposite()
         delete buckets[i];
     }
     delete[] zones;
-    delete map;
+    // MapManger will delete the maps when necessary.
 }
 
 bool MapComposite::allocate(MovingObject *obj)

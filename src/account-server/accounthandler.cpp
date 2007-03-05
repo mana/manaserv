@@ -28,6 +28,7 @@
 #include "point.h"
 #include "account-server/account.hpp"
 #include "account-server/accountclient.hpp"
+#include "account-server/characterdata.hpp"
 #include "account-server/serverhandler.hpp"
 #include "account-server/storage.hpp"
 #include "chat-server/chathandler.hpp"
@@ -198,7 +199,7 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 unsigned char charNum = message.readByte();
 
-                Players &chars = computer.getAccount()->getCharacters();
+                Characters &chars = computer.getAccount()->getCharacters();
                 // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
@@ -208,19 +209,22 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 std::string address;
                 short port;
-                if (!serverHandler->getGameServerFromMap(chars[charNum]->getMap(), address, port))
+                if (!serverHandler->getGameServerFromMap(
+                                 chars[charNum]->getMapId(), address, port))
                 {
                     result.writeByte(ERRMSG_FAILURE);
-                    LOG_ERROR("Character Selection: No game server for the map.");
+                    LOG_ERROR("Character Selection: "
+                                            << "No game server for the map.");
                     break;
                 }
 
                 // set character
                 computer.setCharacter(chars[charNum]);
-                PlayerPtr selectedChar = computer.getCharacter();
+                CharacterPtr selectedChar = computer.getCharacter();
                 result.writeByte(ERRMSG_OK);
 
-                LOG_DEBUG(selectedChar->getName() << " is trying to enter the servers.");
+                LOG_DEBUG(selectedChar->getName() <<
+                                          " is trying to enter the servers.");
 
                 std::string magic_token(32, ' ');
                 for (int i = 0; i < 32; ++i) {
@@ -231,8 +235,10 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 result.writeString(address);
                 result.writeShort(port);
                 // TODO: get correct address and port for the chat server
-                result.writeString(config.getValue("accountServerAddress", "localhost"));
-                result.writeShort(int(config.getValue("accountServerPort", DEFAULT_SERVER_PORT)) + 2);
+                result.writeString(config.getValue("accountServerAddress",
+                                                                "localhost"));
+                result.writeShort(int(config.getValue("accountServerPort",
+                                                   DEFAULT_SERVER_PORT)) + 2);
 
                 serverHandler->registerGameClient(magic_token, selectedChar);
                 registerChatClient(magic_token, selectedChar->getName(),
@@ -253,7 +259,7 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 unsigned char charNum = message.readByte();
 
-                Players &chars = computer.getAccount()->getCharacters();
+                Characters &chars = computer.getAccount()->getCharacters();
                 // Character ID = 0 to Number of Characters - 1.
                 if (charNum >= chars.size()) {
                     // invalid char selection
@@ -262,11 +268,12 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 }
 
                 // Delete the character
-                // if the character to delete is the current character, get off of it in
-                // memory.
+                // If the character to delete is the current character,
+                // get off of it in memory.
                 if ( computer.getCharacter().get() != NULL )
                 {
-                    if ( computer.getCharacter()->getName() == chars[charNum].get()->getName() )
+                    if ( computer.getCharacter()->getName() ==
+                                             chars[charNum].get()->getName() )
                     {
                         computer.unsetCharacter();
                     }
@@ -336,7 +343,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
             computer.send(reply);
 
             // Return information about available characters
-            Players &chars = computer.getAccount()->getCharacters();
+            Characters &chars = computer.getAccount()->getCharacters();
 
             // Send characters list
             for (unsigned int i = 0; i < chars.size(); i++)
@@ -349,8 +356,8 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
                 charInfo.writeByte(chars[i]->getHairColor());
                 charInfo.writeByte(chars[i]->getLevel());
                 charInfo.writeShort(chars[i]->getMoney());
-                for (int j = 0; j < NB_RSTAT; ++j)
-                        charInfo.writeShort(chars[i]->getRawStat(j));
+                for (int j = 0; j < NB_ATTRIBUTES; ++j)
+                        charInfo.writeShort(chars[i]->getAttribute(j));
                 computer.send(charInfo);
             }
             return;
@@ -384,7 +391,8 @@ AccountHandler::handleReconnectMessage(AccountClient &computer, MessageIn &msg)
     if (computer.getAccount().get() == NULL)
     {
         std::string magic_token = msg.readString(32);
-        AccountPendingReconnects::iterator i = pendingReconnects.find(magic_token);
+        AccountPendingReconnects::iterator i =
+                                          pendingReconnects.find(magic_token);
         if (i == pendingReconnects.end())
         {
             for (AccountPendingClients::iterator j = pendingClients.begin(),
@@ -393,17 +401,15 @@ AccountHandler::handleReconnectMessage(AccountClient &computer, MessageIn &msg)
                 if (j->second == &computer) return; //Allready inserted
             }
             pendingClients.insert(std::make_pair(magic_token, &computer));
-            return; //Waiting for the gameserver, note: using return instead of an else
+            return; //Waiting for the gameserver
         }
         // Gameserver communication was faster, connect the client
         int accountID = i->second;
         pendingReconnects.erase(i);
         handleReconnectedAccount(computer, accountID);
+        return;
     }
-    else
-    {
-        LOG_WARN("Account tried to reconnect, but was allready logged in.");
-    }
+    LOG_WARN("Account tried to reconnect, but was allready logged in.");
 }
 
 void
@@ -495,7 +501,8 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
         // See if the account exists
         Storage &store = Storage::instance("tmw");
         AccountPtr accPtr = store.getAccount(username);
-        LOG_INFO("Unregister for " << username << " with passwords #" << accPtr->getPassword() << "#" << password << "#");
+        LOG_INFO("Unregister for " << username << " with passwords #"
+                 << accPtr->getPassword() << "#" << password << "#");
         if (!accPtr.get() || accPtr->getPassword() != password)
         {
             reply.writeByte(ERRMSG_INVALID_ARGUMENT);
@@ -507,8 +514,8 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
             store.delAccount(accPtr);
             reply.writeByte(ERRMSG_OK);
 
-            // If the account to delete is the current account we're logged in.
-            // Get out of it in memory.
+            // If the account to delete is the current account we're loggedin
+            // on, get out of it in memory.
             if (computer.getAccount().get() != NULL )
             {
                 if (computer.getAccount()->getName() == username)
@@ -606,8 +613,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             return;
         }
 
-        // A player shouldn't have more than MAX_OF_CHARACTERS characters.
-        Players &chars = computer.getAccount()->getCharacters();
+        // An account shouldn't have more than MAX_OF_CHARACTERS characters.
+        Characters &chars = computer.getAccount()->getCharacters();
         if (chars.size() >= MAX_OF_CHARACTERS)
         {
             reply.writeByte(CREATE_TOO_MUCH_CHARACTERS);
@@ -617,58 +624,60 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
 
         // LATER_ON: Add race, face and maybe special attributes.
 
-        // Customization of player's stats...
-        RawStatistics rawStats;
-        for (int i = 0; i < NB_RSTAT; ++i)
-            rawStats.stats[i] = msg.readShort();
+        // Customization of character's attributes...
+        unsigned short attributes[NB_ATTRIBUTES];
+        for (int i = 0; i < NB_ATTRIBUTES; ++i)
+            attributes[i] = msg.readShort();
 
         // We see if the difference between the lowest stat and the highest
         // isn't too big.
-        unsigned short lowestStat = 0;
-        unsigned short highestStat = 0;
-        unsigned int totalStats = 0;
-        bool validNonZeroRawStats = true;
-        for (int i = 0; i < NB_RSTAT; ++i)
+        unsigned short lowestAttribute = POINTS_TO_DISTRIBUTES_AT_LVL1;
+        unsigned short highestAttribute = 0; // start value
+        unsigned int totalAttributes = 0;
+        bool validNonZeroAttributes = true;
+        for (int i = 0; i < NB_ATTRIBUTES; ++i)
         {
-            unsigned short stat = rawStats.stats[i];
-            // For good total stat check.
-            totalStats = totalStats + stat;
+            // For good total attributes check.
+            totalAttributes += attributes[i];
 
             // For checking if all stats are at least > 0
-            if (stat <= 0) validNonZeroRawStats = false;
-            if (lowestStat == 0 || lowestStat > stat) lowestStat = stat;
-            if (highestStat == 0 || highestStat < stat) highestStat = stat;
+            if (attributes[i] <= 0) validNonZeroAttributes = false;
+            if (lowestAttribute > attributes[i])
+                                              lowestAttribute = attributes[i];
+            if (highestAttribute < attributes[i])
+                                             highestAttribute = attributes[i];
         }
 
-        if (totalStats > POINTS_TO_DISTRIBUTES_AT_LVL1)
+        if (totalAttributes > POINTS_TO_DISTRIBUTES_AT_LVL1)
         {
-            reply.writeByte(CREATE_RAW_STATS_TOO_HIGH);
+            reply.writeByte(CREATE_ATTRIBUTES_TOO_HIGH);
         }
-        else if (totalStats < POINTS_TO_DISTRIBUTES_AT_LVL1)
+        else if (totalAttributes < POINTS_TO_DISTRIBUTES_AT_LVL1)
         {
-            reply.writeByte(CREATE_RAW_STATS_TOO_LOW);
+            reply.writeByte(CREATE_ATTRIBUTES_TOO_LOW);
         }
-        else if ((highestStat - lowestStat) > (signed) MAX_DIFF_BETWEEN_STATS)
+        else if ((highestAttribute - lowestAttribute) >
+                                         (signed) MAX_DIFF_BETWEEN_ATTRIBUTES)
         {
-            reply.writeByte(CREATE_RAW_STATS_INVALID_DIFF);
+            reply.writeByte(CREATE_ATTRIBUTES_INVALID_DIFF);
         }
-        else if (!validNonZeroRawStats)
+        else if (!validNonZeroAttributes)
         {
-            reply.writeByte(CREATE_RAW_STATS_EQUAL_TO_ZERO);
+            reply.writeByte(CREATE_ATTRIBUTES_EQUAL_TO_ZERO);
         }
         else
         {
-            PlayerPtr newCharacter(new PlayerData(name));
-            for (int i = 0; i < NB_RSTAT; ++i)
-                newCharacter->setRawStat(i, rawStats.stats[i]);
+            CharacterPtr newCharacter(new CharacterData(name));
+            for (int i = 0; i < NB_ATTRIBUTES; ++i)
+                newCharacter->setAttribute(i, attributes[i]);
             newCharacter->setMoney(0);
             newCharacter->setLevel(1);
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
-            newCharacter->setMap((int) config.getValue("defaultMap", 1));
-            Point startingPos = { (int) config.getValue("startX", 0),
-                                  (int) config.getValue("startY", 0) };
+            newCharacter->setMapId((int) config.getValue("defaultMap", 1));
+            Point startingPos((int) config.getValue("startX", 0),
+                                  (int) config.getValue("startY", 0));
             newCharacter->setPos(startingPos);
             computer.getAccount()->addCharacter(newCharacter);
 
@@ -689,8 +698,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             charInfo.writeByte(chars[slot]->getHairColor());
             charInfo.writeByte(chars[slot]->getLevel());
             charInfo.writeShort(chars[slot]->getMoney());
-            for (int j = 0; j < NB_RSTAT; ++j)
-                charInfo.writeShort(chars[slot]->getRawStat(j));
+            for (int j = 0; j < NB_ATTRIBUTES; ++j)
+                charInfo.writeShort(chars[slot]->getAttribute(j));
             computer.send(charInfo);
             return;
         }
@@ -731,7 +740,7 @@ handleReconnectedAccount(AccountClient &computer, int accountID)
     computer.send(reply);
 
     // Return information about available characters
-    Players &chars = computer.getAccount()->getCharacters();
+    Characters &chars = computer.getAccount()->getCharacters();
 
     // Send characters list
     for (unsigned int i = 0; i < chars.size(); i++)
@@ -745,9 +754,9 @@ handleReconnectedAccount(AccountClient &computer, int accountID)
         charInfo.writeByte(chars[i]->getLevel());
         charInfo.writeShort(chars[i]->getMoney());
 
-        for (int j = 0; j < NB_RSTAT; ++j)
+        for (int j = 0; j < NB_ATTRIBUTES; ++j)
         {
-            charInfo.writeShort(chars[i]->getRawStat(j));
+            charInfo.writeShort(chars[i]->getAttribute(j));
         }
         computer.send(charInfo);
     }

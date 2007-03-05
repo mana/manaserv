@@ -1,3 +1,29 @@
+2007-03-05  Rogier Polak     <rogier.l.a.polak@gmail.com>
+
+	* src/defines.h, src/Makefile.am, src/abstractcharacterdata.hpp,
+	src/abstractcharacterdata.cpp, src/account-server/account.hpp,
+	src/account-server/account.cpp, src/account-server/accountclient.hpp
+	src/account-server/accountclient.cpp,
+	src/account-server/accounthandler.cpp,
+	src/account-server/characterdata.hpp,
+	src/account-server/characterdata.cpp,
+	src/account-server/dalstorage.hpp, src/account-server/dalstorage.cpp
+	src/account-server/dalstoragesql.hpp,
+	src/account-server/serverhandler.hpp,
+	src/account-server/serverhandler.cpp, src/account-server/storage.hpp
+	src/game-server/accountconnection.cpp: Added an abstrart base class
+	for characterdata, in order to use the same serialize and deserialize
+	functions on both the accountserver and the gameserver. Added the
+	CharacterData class to the accountserver, a specialisation of
+	characterdata for the accountserver. Renamed (raw)stats to attributes.
+	* src/point.h, src/controller.cpp, src/game-server/testing.cpp,
+	src/game-server/state.cpp: Added two constructors to the Point class.
+	* src/utils/wingettimeofday.h, src/utils/timer.h: Set svn properties.
+	* src/game-server/mapcomposite.cpp: Cleaned up a double deletion.
+	* src/game-server/item.hpp: Added the member spriteId.
+	* src/account-server/main-account.cpp, src/game-server/main-game.cpp:
+	Modified the default log files (primarily for development purposes).
+
 2007-03-03  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/utils/mathutils.cpp, src/utils/mathutils.h,

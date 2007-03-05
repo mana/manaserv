@@ -24,6 +24,7 @@
 #ifndef _TMWSERV_DALSTORAGE_H_
 #define _TMWSERV_DALSTORAGE_H_
 
+#include "account-server/characterdata.hpp"
 #include "account-server/storage.hpp"
 #include "dal/dataprovider.h"
 
@@ -82,7 +83,7 @@ class DALStorage: public Storage
          *
          * @return the character associated to the ID.
          */
-        PlayerPtr getCharacter(int id);
+        CharacterPtr getCharacter(int id);
 
         /**
          * Add a new account.
@@ -125,6 +126,16 @@ class DALStorage: public Storage
          * @return true if character's name exists.
          */
         bool doesCharacterNameExist(std::string const &name);
+
+        /**
+         * Updates the data for a single character, does not update the
+         * owning account or the characters name.
+         * Primary usage should be storing characterdata received from a
+         * game server.
+         * returns true if succefull, false otherwise.
+         */
+        bool
+        updateCharacter(CharacterPtr ptr);
 
         /**
          * Gives the list of opened public channels registered in database

@@ -31,6 +31,8 @@
 class Point
 {
     public:
+        Point() { x = 0; y = 0; }
+        Point(unsigned short X, unsigned short Y) {x = X; y = Y; }
         unsigned short x; /**< x coordinate */
         unsigned short y; /**< y coordinate */
 

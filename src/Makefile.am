@@ -6,11 +6,11 @@ bin_PROGRAMS = tmwserv-account tmwserv-game
 
 tmwserv_account_SOURCES = \
 	account-server/main-account.cpp \
+	abstractcharacterdata.hpp \
+	abstractcharacterdata.cpp \
 	configuration.h \
 	configuration.cpp \
 	defines.h \
-	playerdata.hpp \
-	playerdata.cpp \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
@@ -22,6 +22,8 @@ tmwserv_account_SOURCES = \
 	account-server/accountclient.cpp \
 	account-server/accounthandler.hpp \
 	account-server/accounthandler.cpp \
+	account-server/characterdata.hpp \
+	account-server/characterdata.cpp \
 	account-server/dalstorage.hpp \
 	account-server/dalstorage.cpp \
 	account-server/dalstoragesql.hpp \

@@ -21,9 +21,11 @@
  *  $Id$
  */
 
-#include "account-server/account.hpp"
 #include "account-server/accountclient.hpp"
+
+#include "account-server/account.hpp"
 #include "account-server/accounthandler.hpp"
+#include "account-server/characterdata.hpp"
 
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),
@@ -44,7 +46,7 @@ void AccountClient::setAccount(AccountPtr acc)
     mAccountPtr = acc;
 }
 
-void AccountClient::setCharacter(PlayerPtr ch)
+void AccountClient::setCharacter(CharacterPtr ch)
 {
     unsetCharacter();
     mCharacterPtr = ch;
@@ -59,5 +61,5 @@ void AccountClient::unsetAccount()
 void AccountClient::unsetCharacter()
 {
     if (mCharacterPtr.get() == NULL) return;
-    mCharacterPtr = PlayerPtr(NULL);
+    mCharacterPtr = CharacterPtr(NULL);
 }

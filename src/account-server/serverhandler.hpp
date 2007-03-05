@@ -26,14 +26,9 @@
 
 #include <map>
 
-#include "playerdata.hpp"
+#include "account-server/characterdata.hpp"
 #include "net/connectionhandler.hpp"
 #include "utils/countedptr.h"
-
-/**
- * Type definition for a smart pointer to PlayerData.
- */
-typedef utils::CountedPtr< PlayerData > PlayerPtr;
 
 /**
  * Manages communications with all the game servers. This class also keeps
@@ -54,9 +49,9 @@ class ServerHandler: public ConnectionHandler
         bool getGameServerFromMap(unsigned, std::string &address, short &port);
 
         /**
-         * Sends a magic token and player data to the relevant game server.
+         * Sends a magic token and character data to the relevant game server.
          */
-        void registerGameClient(std::string const &, PlayerPtr);
+        void registerGameClient(std::string const &, CharacterPtr);
 
     protected:
         /**

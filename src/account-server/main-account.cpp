@@ -45,7 +45,7 @@
 #include "utils/stringfilter.h"
 
 // Default options that automake should be able to override.
-#define DEFAULT_LOG_FILE        "tmwserv.log"
+#define DEFAULT_LOG_FILE        "tmwserv-account.log"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 

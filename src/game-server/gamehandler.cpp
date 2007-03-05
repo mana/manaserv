@@ -247,7 +247,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             {
                 int mapId = computer.character->getMapId();
                 MapComposite *map = gameState->getMap(mapId);
-                Point ipos = { x, y };
+                Point ipos(x, y);
                 for (FixedObjectIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
                 {
                     Object *o = *i;
@@ -284,7 +284,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             int x = message.readShort();
             int y = message.readShort();
-            Point dst = {x, y};
+            Point dst(x, y);
             computer.character->setDestination(dst);
 
             // no response should be required

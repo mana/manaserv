@@ -24,6 +24,7 @@
 #include <cassert>
 #include <sstream>
 
+#include "account-server/characterdata.hpp"
 #include "account-server/serverhandler.hpp"
 #include "account-server/storage.hpp"
 #include "net/messagein.hpp"
@@ -73,14 +74,14 @@ bool ServerHandler::getGameServerFromMap(unsigned mapId, std::string &address,
     return true;
 }
 
-void ServerHandler::registerGameClient(std::string const &token, PlayerPtr ptr)
+void ServerHandler::registerGameClient(std::string const &token, CharacterPtr ptr)
 {
-    unsigned mapId = ptr->getMap();
+    unsigned mapId = ptr->getMapId();
+
     MessageOut msg(AGMSG_PLAYER_ENTER);
-    msg.writeLong(ptr->getDatabaseID());
-    msg.writeString(ptr->getName());
     msg.writeString(token, 32);
-    ptr->serialize(msg);
+    ptr->serialize(msg); //Characterdata
+
     Servers::const_iterator i = servers.find(mapId);
     assert(i != servers.end());
     i->second.server->send(msg);
@@ -123,19 +124,14 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_PLAYER_DATA:
         {
             LOG_DEBUG("GAMSG_PLAYER_DATA");
-            int id = msg.readLong();
-            Storage &store = Storage::instance("tmw");
-            PlayerPtr ptr = store.getCharacter(id);
 
-            if (ptr.get() != NULL)
-            {
-                ptr->deserialize(msg);
-            }
-            else
-            {
-                LOG_ERROR("Received player data for non-existing player " <<
-                        id << ".");
-            }
+            Storage &store = Storage::instance("tmw");
+            CharacterPtr ptr(new CharacterData(msg));
+
+            if (!store.updateCharacter(ptr))
+                        LOG_ERROR("Received character data for non-existing" <<
+                                  " character " << ptr->getDatabaseID() << ".");
+
         } break;
 
         case GAMSG_REDIRECT:
@@ -148,10 +144,10 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 magic_token[i] = 1 + (int)(127 * (rand() / (RAND_MAX + 1.0)));
             }
             Storage &store = Storage::instance("tmw");
-            PlayerPtr ptr = store.getCharacter(id);
+            CharacterPtr ptr = store.getCharacter(id);
             std::string address;
             short port;
-            if (serverHandler->getGameServerFromMap(ptr->getMap(), address,
+            if (serverHandler->getGameServerFromMap(ptr->getMapId(), address,
                                                     port))
             {
                 registerGameClient(magic_token, ptr);
@@ -164,7 +160,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             else
             {
                 LOG_ERROR("Server Change: No game server for map " <<
-                          ptr->getMap() << ".");
+                          ptr->getMapId() << ".");
             }
         } break;
 
@@ -175,7 +171,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             std::string magic_token = msg.readString(32);
 
             Storage &store = Storage::instance("tmw");
-            PlayerPtr ptr = store.getCharacter(characterID);
+            CharacterPtr ptr = store.getCharacter(characterID);
 
             int accountID = ptr->getAccountID();
             registerAccountReconnect(accountID, magic_token);

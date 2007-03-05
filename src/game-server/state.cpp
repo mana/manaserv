@@ -318,7 +318,7 @@ void State::update()
             case EVENT_WARP:
             {
                 remove(o);
-                Point pos = { e.x, e.y };
+                Point pos(e.x, e.y);
                 o->setMapId(e.map);
                 o->setPosition(pos);
 

@@ -67,7 +67,7 @@ enum
     WPNTYPE_STICK,          // 13
     WPNTYPE_HAMMER,         // 14
     WPNTYPE_AXE,            // 15
-    WPNTYPE_HAND_PROECTILE  // 16
+    WPNTYPE_HAND_PROJECTILE  // 16
 };
 
 /**
@@ -205,6 +205,19 @@ class ItemClass
         int getDatabaseID()
         { return mDatabaseID; }
 
+        /**
+         * Sets the sprite ID.
+         */
+        void setSpriteID(unsigned short spriteID)
+        { mSpriteID =  spriteID; }
+
+        /**
+         * Gets the sprite ID.
+         */
+        unsigned short getSpriteID()
+        { return mSpriteID; }
+
+
     private:
 
         /**
@@ -214,6 +227,7 @@ class ItemClass
 
         // Item reference information
         unsigned short mDatabaseID;
+        unsigned short mSpriteID; /**< The sprite that should be shown to the player */
         unsigned char mType;     /**< Type: usable, equipment. */
         unsigned short mWeight;  /**< Weight of the item. */
         unsigned short mCost;    /**< Unit cost the item. */
