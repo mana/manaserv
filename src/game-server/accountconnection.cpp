@@ -30,6 +30,7 @@
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
+#include "utils/tokendispenser.hpp"
 
 extern void registerGameClient(std::string const &, Player *);
 
@@ -67,7 +68,7 @@ void AccountConnection::processMessage(MessageIn &msg)
     {
         case AGMSG_PLAYER_ENTER:
         {
-            std::string token = msg.readString(32);
+            std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             int id = msg.readLong();
             std::string name = msg.readString();
             Player *ptr = new Player(name, id);
@@ -87,7 +88,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_REDIRECT_RESPONSE:
         {
             int id = msg.readLong();
-            std::string token = msg.readString(32);
+            std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             std::string address = msg.readString();
             int port = msg.readShort();
             gameHandler->completeServerChange(id, token, address, port);
@@ -104,7 +105,7 @@ void AccountConnection::playerReconnectAccount(int id, const std::string magic_t
     LOG_INFO("Send GAMSG_PLAYER_RECONNECT.");
     MessageOut msg(GAMSG_PLAYER_RECONNECT);
     msg.writeLong(id);
-    msg.writeString(magic_token, 32);
+    msg.writeString(magic_token, MAGIC_TOKEN_LENGTH);
     send(msg);
 
 }

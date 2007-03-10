@@ -158,8 +158,8 @@ class Logger
 
 #define LOG(level, msg)                                                \
     do if (::utils::Logger::mVerbosity >= ::utils::Logger::level) {    \
-        std::ostringstream os;                                          \
-        os << msg;                                                      \
+        std::ostringstream os;                                         \
+        os << msg;                                                     \
         ::utils::Logger::output(os.str(), ::utils::Logger::level);     \
     } while (0)
 

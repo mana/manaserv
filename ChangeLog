@@ -1,3 +1,13 @@
+2007-03-10  Rogier Polak     <rogier.l.a.polak@gmail.com>
+
+	* src/Makefile.am, src/account-server/accounthandler.cpp,
+	src/account-server/main-account.cpp,
+	src/account-server/serverhandler.cpp, src/chat-server/chathandler.cpp,
+	src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.cpp, src/game-server/main-game.cpp,
+	src/utils/tokendispenser.hpp, src/utils/tokendispenser.cpp: Added a
+	utility function for creating magic_tokens.
+
 2007-03-05  Rogier Polak     <rogier.l.a.polak@gmail.com>
 
 	* src/defines.h, src/Makefile.am, src/abstractcharacterdata.hpp,
@@ -11,7 +21,7 @@
 	src/account-server/dalstoragesql.hpp,
 	src/account-server/serverhandler.hpp,
 	src/account-server/serverhandler.cpp, src/account-server/storage.hpp
-	src/game-server/accountconnection.cpp: Added an abstrart base class
+	src/game-server/accountconnection.cpp: Added an abstract base class
 	for characterdata, in order to use the same serialize and deserialize
 	functions on both the accountserver and the gameserver. Added the
 	CharacterData class to the accountserver, a specialisation of

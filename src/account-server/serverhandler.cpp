@@ -31,6 +31,7 @@
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
+#include "utils/tokendispenser.hpp"
 
 extern void registerAccountReconnect(int accountID,
                                      const std::string &magic_token);
@@ -79,7 +80,7 @@ void ServerHandler::registerGameClient(std::string const &token, CharacterPtr pt
     unsigned mapId = ptr->getMapId();
 
     MessageOut msg(AGMSG_PLAYER_ENTER);
-    msg.writeString(token, 32);
+    msg.writeString(token, MAGIC_TOKEN_LENGTH);
     ptr->serialize(msg); //Characterdata
 
     Servers::const_iterator i = servers.find(mapId);
@@ -138,11 +139,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             LOG_DEBUG("GAMSG_REDIRECT");
             int id = msg.readLong();
-            std::string magic_token(32, ' ');
-            for (int i = 0; i < 32; ++i)
-            {
-                magic_token[i] = 1 + (int)(127 * (rand() / (RAND_MAX + 1.0)));
-            }
+            std::string magic_token(utils::getMagicToken());
             Storage &store = Storage::instance("tmw");
             CharacterPtr ptr = store.getCharacter(id);
             std::string address;
@@ -153,7 +150,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 registerGameClient(magic_token, ptr);
                 result.writeShort(AGMSG_REDIRECT_RESPONSE);
                 result.writeLong(ptr->getDatabaseID());
-                result.writeString(magic_token, 32);
+                result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
                 result.writeString(address);
                 result.writeShort(port);
             }
@@ -168,7 +165,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             LOG_DEBUG("GAMSG_PLAYER_RECONNECT");
             int characterID = msg.readLong();
-            std::string magic_token = msg.readString(32);
+            std::string magic_token = msg.readString(MAGIC_TOKEN_LENGTH);
 
             Storage &store = Storage::instance("tmw");
             CharacterPtr ptr = store.getCharacter(characterID);

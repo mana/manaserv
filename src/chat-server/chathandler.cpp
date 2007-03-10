@@ -30,6 +30,7 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
+#include "utils/tokendispenser.hpp"
 
 
 class ChatClient: public NetComputer
@@ -141,7 +142,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
     if (computer.characterName.empty())
     {
         if (message.getId() != PCMSG_CONNECT) return;
-        std::string magic_token = message.readString(32);
+        std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
         ChatPendingLogins::iterator i = pendingLogins.find(magic_token);
         if (i == pendingLogins.end())
         {

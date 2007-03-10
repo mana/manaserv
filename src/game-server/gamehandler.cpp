@@ -36,6 +36,7 @@
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
+#include "utils/tokendispenser.hpp"
 
 enum
 {
@@ -167,7 +168,7 @@ void GameHandler::completeServerChange(int id, std::string const &token,
             c->character->getDatabaseID() == id)
         {
             MessageOut msg(GPMSG_PLAYER_SERVER_CHANGE);
-            msg.writeString(token, 32);
+            msg.writeString(token, MAGIC_TOKEN_LENGTH);
             msg.writeString(address);
             msg.writeShort(port);
             c->send(msg);
@@ -207,7 +208,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
     if (computer.status == CLIENT_LOGIN)
     {
         if (message.getId() != PGMSG_CONNECT) return;
-        std::string magic_token = message.readString(32);
+        std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
         GamePendingLogins::iterator i = pendingLogins.find(magic_token);
         if (i == pendingLogins.end())
         {
@@ -336,13 +337,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
             if (reconnectAccount)
             {
-                LOG_INFO("Making a magic_token.");
-                std::string magic_token(32, ' ');
-                for (int i = 0; i < 32; ++i) {
-                    magic_token[i] =
-                        1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
-                }
-                result.writeString(magic_token, 32);
+                std::string magic_token(utils::getMagicToken());
+                result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
                 //No accountserver data, the client should remember that
                 accountHandler->playerReconnectAccount(
                                    computer.character->getDatabaseID(),

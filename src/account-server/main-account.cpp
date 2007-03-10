@@ -175,6 +175,9 @@ void initialize()
     config.setValue("dbuser", "");
     config.setValue("dbpass", "");
     config.setValue("dbhost", "");
+
+    //Seed the random number generator
+    std::srand( time(NULL) );
 }
 
 

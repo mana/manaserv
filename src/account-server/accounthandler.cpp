@@ -38,8 +38,7 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
-
-// TODO: Implement a class to handle these tokens more generally
+#include "utils/tokendispenser.hpp"
 
 typedef std::map< std::string, AccountClient* > AccountPendingClients;
 typedef std::map< std::string, int > AccountPendingReconnects;
@@ -226,12 +225,8 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
                 LOG_DEBUG(selectedChar->getName() <<
                                           " is trying to enter the servers.");
 
-                std::string magic_token(32, ' ');
-                for (int i = 0; i < 32; ++i) {
-                    magic_token[i] =
-                        1 + (int) (127 * (rand() / (RAND_MAX + 1.0)));
-                }
-                result.writeString(magic_token, 32);
+                std::string magic_token(utils::getMagicToken());
+                result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
                 result.writeString(address);
                 result.writeShort(port);
                 // TODO: get correct address and port for the chat server
@@ -390,7 +385,7 @@ AccountHandler::handleReconnectMessage(AccountClient &computer, MessageIn &msg)
 {
     if (computer.getAccount().get() == NULL)
     {
-        std::string magic_token = msg.readString(32);
+        std::string magic_token = msg.readString(MAGIC_TOKEN_LENGTH);
         AccountPendingReconnects::iterator i =
                                           pendingReconnects.find(magic_token);
         if (i == pendingReconnects.end())

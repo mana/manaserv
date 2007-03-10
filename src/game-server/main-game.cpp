@@ -210,6 +210,9 @@ void initialize()
 
     // Pre-calulate the needed trigomic function values
     utils::math::init();
+
+    //Seed the random number generator
+    std::srand( time(NULL) );
 }
 
 
