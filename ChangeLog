@@ -7,6 +7,14 @@
 	src/game-server/gamehandler.cpp, src/game-server/main-game.cpp,
 	src/utils/tokendispenser.hpp, src/utils/tokendispenser.cpp: Added a
 	utility function for creating magic_tokens.
+	* src/utils/processorutils.hpp, src/utils/processorutils.cpp,
+	src/Makefile.am, src/account-server/main-account.cpp,
+	src/game-server/main-game.cpp: Added a utils::processor namespace and
+	a function to determine if, the processor the program is running on,
+	is little-endian or big-endian.
+	* src/net/connectionhandler.hpp, src/net/connectionhandler.cpp,
+	src/net/netcomputer.cpp: Corrected the output of the overloaded
+	operator << of the NetComputer class.
 
 2007-03-05  Rogier Polak     <rogier.l.a.polak@gmail.com>
 

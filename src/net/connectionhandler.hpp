@@ -32,12 +32,6 @@ class MessageOut;
 class NetComputer;
 
 /**
- * Convert a IP4 address into its string representation
- */
-std::string
-ip4ToString(unsigned int ip4addr);
-
-/**
  * This class represents the connection handler interface. The connection
  * handler will respond to connect/reconnect/disconnect events and handle
  * incoming messages, passing them on to registered message handlers.

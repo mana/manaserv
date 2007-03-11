@@ -31,18 +31,6 @@
 #include "script.h"
 #endif
 
-
-std::string
-ip4ToString(unsigned int ip4addr)
-{
-    std::stringstream ss;
-    ss << (ip4addr & 0x000000ff) << "."
-       << ((ip4addr & 0x0000ff00) >> 8) << "."
-       << ((ip4addr & 0x00ff0000) >> 16) << "."
-       << ((ip4addr & 0xff000000) >> 24);
-    return ss.str();
-}
-
 bool ConnectionHandler::startListen(enet_uint16 port)
 {
     // Bind the server to the default localhost.
@@ -93,12 +81,11 @@ void ConnectionHandler::process(enet_uint32 timeout)
         switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
             {
-                LOG_INFO("A new client connected from " <<
-                         ip4ToString(event.peer->address.host) << ":" <<
-                         event.peer->address.port << " to port " <<
-                         host->address.port);
                 NetComputer *comp = computerConnected(event.peer);
                 clients.push_back(comp);
+                LOG_INFO("A new client connected from " << *comp << ":"
+                         << event.peer->address.port << " to port "
+                         << host->address.port);
 
                 // Store any relevant client information here.
                 event.peer->data = (void *)comp;
@@ -140,7 +127,7 @@ void ConnectionHandler::process(enet_uint32 timeout)
             case ENET_EVENT_TYPE_DISCONNECT:
             {
                 NetComputer *comp = (NetComputer *)event.peer->data;
-                LOG_INFO(ip4ToString(event.peer->address.host) << " disconnected.");
+                LOG_INFO("" << *comp << " disconnected.");
                 // Reset the peer's client information.
                 computerDisconnected(comp);
                 clients.erase(std::find(clients.begin(), clients.end(), comp));

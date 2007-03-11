@@ -56,6 +56,8 @@ tmwserv_account_SOURCES = \
 	utils/functors.h \
 	utils/logger.h \
 	utils/logger.cpp \
+	utils/processorutils.hpp \
+	utils/processorutils.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
 	utils/tokendispenser.hpp \
@@ -122,6 +124,8 @@ tmwserv_game_SOURCES = \
 	utils/mathutils.cpp \
 	utils/logger.h \
 	utils/logger.cpp \
+	utils/processorutils.hpp \
+	utils/processorutils.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
 	utils/timer.h \

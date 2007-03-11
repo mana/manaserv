@@ -42,6 +42,7 @@
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
+#include "utils/processorutils.hpp"
 #include "utils/stringfilter.h"
 
 // Default options that automake should be able to override.
@@ -176,7 +177,10 @@ void initialize()
     config.setValue("dbpass", "");
     config.setValue("dbhost", "");
 
-    //Seed the random number generator
+    // Initialize the processor utility functions
+    utils::processor::init();
+
+    // Seed the random number generator
     std::srand( time(NULL) );
 }
 

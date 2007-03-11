@@ -42,6 +42,7 @@
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
+#include "utils/processorutils.hpp"
 #include "utils/stringfilter.h"
 #include "utils/timer.h"
 #include "utils/mathutils.h"
@@ -211,7 +212,10 @@ void initialize()
     // Pre-calulate the needed trigomic function values
     utils::math::init();
 
-    //Seed the random number generator
+    // Initialize the processor utility functions
+    utils::processor::init();
+
+    // Seed the random number generator
     std::srand( time(NULL) );
 }
 
