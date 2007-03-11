@@ -34,10 +34,7 @@ class Controlled: public Being
         /**
          * Constructor.
          */
-        Controlled(int type):
-            Being(type, 65535),
-            mCountDown(0)
-        {}
+        Controlled(int type);
 
         /**
          * Performs one step of controller logic.
@@ -48,6 +45,13 @@ class Controlled: public Being
          * Kills the being
          */
         virtual void die();
+
+        /**
+         * Recalculates all stats of the being that are derived from others.
+         * Call whenever you change something that affects a derived stat.
+         * Called automatically when you manipulate a stat using setBaseStat()
+         */
+        virtual void calculateStats();
 
     private:
         /** Count down till next random movement (temporary). */

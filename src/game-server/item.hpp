@@ -111,11 +111,7 @@ struct Modifiers
     unsigned short lifetime; /**< Modifiers lifetime in seconds. */
 
     // Caracteristics Modifiers
-    short rawStats[NB_RSTAT]; /**< Raw Stats modifiers */
-    short computedStats[NB_CSTAT]; /**< Computed Stats modifiers */
-
-    short hp; /**< HP modifier */
-    short mp; /**< MP Modifier */
+    short stat[Player::NB_STATS_PLAYER]; /**< Stat modifiers */
 
     // Weapon
     unsigned short range; /**< Weapon Item Range */

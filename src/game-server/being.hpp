@@ -30,12 +30,14 @@
 #include "defines.h"
 #include "game-server/object.hpp"
 
+class Being;
 class MapComposite;
 
 /**
  * Element attribute for beings, actors and items.
+ * Subject to change until pauan and dabe are finished with the element system.
  */
-enum
+enum Element
 {
     ELEMENT_NEUTRAL = 0,
     ELEMENT_FIRE,
@@ -75,38 +77,43 @@ enum
     DIRECTION_RIGHT
 };
 
-
 /**
- * Computed statistics of a Being.
+ * Methods of damage calculation
  */
-enum
+enum Damagetype
 {
-    STAT_HEAT = 0,
-    STAT_ATTACK,
-    STAT_DEFENCE,
-    STAT_MAGIC,
-    STAT_ACCURACY,
-    STAT_SPEED,
-    NB_CSTAT
+    DAMAGETYPE_PHYSICAL,
+    DAMAGETYPE_MAGICAL,
+    DAMAGETYPE_HAZARD,
+    DAMAGETYPE_OTHER
 };
 
 /**
- * Structure type for the computed statistics of a Being.
+ * Structure describing severity and nature of an attack a being can suffer of
  */
-struct Statistics
+struct Damage
 {
-    unsigned short stats[NB_CSTAT];
+    int value;
+    int penetration;
+    Element element;
+    Damagetype type;
+    Being *source;
 };
-
-/**
- * Placeholder for a more complex damage structure
- */
-typedef unsigned short Damage;
 
 /**
  * Type definition for a list of hits
  */
 typedef std::list<unsigned int> Hits;
+
+/**
+ * Structure type for the stats of a Being.
+ */
+struct Stats
+{
+    std::vector<unsigned short> base;
+    std::vector<short> absoluteModificator;
+    std::vector< std::list<short> > percentModificators;
+};
 
 /**
  * Generic Being (living object).
@@ -115,6 +122,20 @@ typedef std::list<unsigned int> Hits;
 class Being : public MovingObject
 {
     public:
+
+        /**
+         * Computed statistics of a Being.
+         */
+        enum Stat
+        {
+            STAT_HP_MAXIMUM,
+            STAT_PHYSICAL_ATTACK_MINIMUM,
+            STAT_PHYSICAL_ATTACK_FLUCTUATION,
+            STAT_PHYSICAL_DEFENCE,
+            // add new computed statistics on demand
+            NB_STATS_BEING
+        };
+
         /**
          * Moves enum for beings and actors for others players vision.
          * WARNING: Has to be in sync with the same enum in the Being class
@@ -128,6 +149,7 @@ class Being : public MovingObject
             DEAD,
             HURT
         };
+
         /**
          * Proxy constructor.
          */
@@ -137,27 +159,70 @@ class Being : public MovingObject
         {}
 
         /**
-         * Sets a computed statistic.
+         * Sets a being statistic.
          *
          * @param numStat the statistic number.
          * @param value the new value.
          */
-        void setStat(int numStat, unsigned short value)
-        { mStats.stats[numStat] = value; }
+        void setBaseStat(unsigned numStat, unsigned short value)
+        {   mStats.base[numStat] = value;
+            calculateBaseStats();
+        }
 
         /**
-         * Gets a computed statistic.
+         * Adds a fixed value stat modifier
+         */
+        void addAbsoluteStatModifier(unsigned numStat, short value);
+
+        /**
+         * Removes a fixed value stat modifier
+         */
+        void removeAbsoluteStatModifier(unsigned numStat, short value);
+
+        /**
+         * Adds a multiplier stat modificator in percent
+         */
+        void addPercentStatModifier(unsigned numStat, short value);
+
+        /**
+         * Removes a previously added percent stat modifier.
+         * Does nothing and logs a warning when no modifier with the same
+         * value has been added before.
+         */
+        void removePercentStatModifier(unsigned numStat, short value);
+
+        /**
+         * Returns a being statistic without temporary modifiers
          *
          * @param numStat the statistic number.
          * @return the statistic value.
          */
-        unsigned short getStat(int numStat)
-        { return mStats.stats[numStat]; }
+        unsigned short getBaseStat(unsigned  stat)
+        { return mStats.base.at(stat); }
+
+        /**
+         * Returns a being statistic with added temporary modifiers
+         */
+        unsigned short getRealStat(unsigned stat);
+
+        /**
+         * Recalculates all stats of the being that are derived from others.
+         * Call whenever you change something that affects a derived stat.
+         * Called automatically when you manipulate a stat using setBaseStat()
+         */
+        virtual void calculateBaseStats()
+        { /*NOOP*/ };
+
+        /**
+         * Creates a damage structure for a normal melee attack based on the
+         * current being stats and equipment.
+         */
+        Damage getPhysicalAttackDamage();
 
         /**
          * sets the hit points
          */
-        void setHitpoints(int hp)
+        void setHitpoints(unsigned hp)
         { mHitpoints = hp; }
 
         /**
@@ -206,11 +271,11 @@ class Being : public MovingObject
         int mHitpoints; /**< Hitpoints of the being */
         Action mAction;
 
+        Stats mStats;
+
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
-
-        Statistics mStats; /**< stats modifiers or computed stats */
 
         Hits mHitsTaken; /**< List of punches taken since last update */
 };

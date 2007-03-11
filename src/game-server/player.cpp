@@ -25,19 +25,30 @@
 #include "defines.h"
 #include "game-server/player.hpp"
 
+Player::Player(std::string const &name, int id)
+          : Being(OBJECT_PLAYER, 65535),
+            PlayerData(name, id),
+            mClient(NULL)
+{
+    mStats.base.resize(NB_STATS_PLAYER, 1); //TODO: fill with the real values
+    mStats.absoluteModificator.resize(NB_STATS_PLAYER, 0);
+    mStats.percentModificators.resize(NB_STATS_PLAYER);
+
+    // some bogus values for testing purpose
+    mStats.base.at(STRENGTH) = 10;
+    mStats.base.at(SKILL_WEAPON_UNARMED) = 5;
+
+    calculateBaseStats();
+
+    mHitpoints = getRealStat(STAT_HP_MAXIMUM);
+    mSize = 16;
+}
+
 /**
  * Update the internal status.
  */
 void Player::update()
 {
-    // computed stats.
-    setStat(STAT_HEAT, 20 + (20 * getRawStat(STAT_VITALITY)));
-    setStat(STAT_ATTACK, 10 + getRawStat(STAT_STRENGTH));
-    setStat(STAT_DEFENCE, 10 + getRawStat(STAT_STRENGTH));
-    setStat(STAT_MAGIC, 10 + getRawStat(STAT_INTELLIGENCE));
-    setStat(STAT_ACCURACY, 50 + getRawStat(STAT_DEXTERITY));
-    setStat(STAT_SPEED, getRawStat(STAT_DEXTERITY));
-
     // attacking
     if (mAction == ATTACK)
     {
@@ -50,4 +61,20 @@ void Player::update()
             raiseUpdateFlags(UPDATEFLAG_ATTACK);
         }
     }
+}
+
+void Player::calculateBaseStats()
+{
+    mStats.base.at(STAT_HP_MAXIMUM)
+        = getRealStat(VITALITY);
+
+    mStats.base.at(STAT_PHYSICAL_ATTACK_MINIMUM)
+        = getRealStat(STRENGTH) /* + weapon damage fluctuation*/;
+
+    // TODO: get the skill that is skill required for weapon
+    mStats.base.at(STAT_PHYSICAL_ATTACK_FLUCTUATION)
+        = getRealStat(SKILL_WEAPON_UNARMED) /* + weapon damage fluctuation*/;
+
+    mStats.base.at(STAT_PHYSICAL_DEFENCE)
+        = 42 /* + sum of equipment pieces */;
 }

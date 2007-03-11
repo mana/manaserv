@@ -37,7 +37,15 @@ void testingMap(int id)
                 Being *being = new Controlled(OBJECT_MONSTER);
                 being->setSpeed(150);
                 being->setSize(8);
-                being->setHitpoints(3);
+
+                // some bogus stats for testing
+                being->setBaseStat(Being::STAT_HP_MAXIMUM, 42);
+                being->setBaseStat(Being::STAT_PHYSICAL_ATTACK_MINIMUM, 1);
+                being->setBaseStat(Being::STAT_PHYSICAL_ATTACK_FLUCTUATION, 0);
+                being->setBaseStat(Being::STAT_PHYSICAL_DEFENCE, 5);
+
+                being->setHitpoints(being->getRealStat(Being::STAT_HP_MAXIMUM));
+
                 being->setMapId(1);
                 Point pos(720, 900);
                 being->setPosition(pos);

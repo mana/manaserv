@@ -1,4 +1,14 @@
-2007-03-10  Rogier Polak     <rogier.l.a.polak@gmail.com>
+2007-03-11  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/controller.cpp, src/controller.h, src/gameserver/being.cpp,
+	src/gameserver/being.hpp, src/gameserver/item.hpp,
+	src/gameserver/itemmanager.cpp, src/gameserver/player.cpp,
+	src/gameserver/player.hpp, src/gameserver/testing.cpp: Implemented
+	stat handling infrastructure and basic damage calculation.
+	src/gameserver/being.cpp: Increased attack zone (Sorry, I couldn't
+	hit nothing and that annoyed me during testing)
+
+2007-03-10  Rogier Polak  <rogier.l.a.polak@gmail.com>
 
 	* src/Makefile.am, src/account-server/accounthandler.cpp,
 	src/account-server/main-account.cpp,
@@ -16,7 +26,7 @@
 	src/net/netcomputer.cpp: Corrected the output of the overloaded
 	operator << of the NetComputer class.
 
-2007-03-05  Rogier Polak     <rogier.l.a.polak@gmail.com>
+2007-03-05  Rogier Polak  <rogier.l.a.polak@gmail.com>
 
 	* src/defines.h, src/Makefile.am, src/abstractcharacterdata.hpp,
 	src/abstractcharacterdata.cpp, src/account-server/account.hpp,

@@ -31,10 +31,29 @@ void Being::damage(Damage damage)
 {
     if (mAction == DEAD) return;
 
-    int HPloss;
+    // TODO: Implement dodge chance
 
-    HPloss = damage; // TODO: Implement complex damage calculation here
+    int HPloss = damage.value;
 
+    // TODO: Implement elemental modifier
+
+    switch (damage.type)
+    {
+        case DAMAGETYPE_PHYSICAL:
+            HPloss -= getRealStat(STAT_PHYSICAL_DEFENCE) / damage.penetration;
+            break;
+        case DAMAGETYPE_MAGICAL:
+            // NIY
+            break;
+        case DAMAGETYPE_HAZARD:
+            // NIY
+            break;
+        case DAMAGETYPE_OTHER:
+            // nothing to do here
+            break;
+    }
+
+    if (HPloss < 0) HPloss = 0;
     if (HPloss > mHitpoints) HPloss = mHitpoints;
 
     mHitpoints -= HPloss;
@@ -70,8 +89,8 @@ void Being::move()
 
 void Being::performAttack(MapComposite *map)
 {
-    int SHORT_RANGE = 32;
-    int SMALL_ANGLE = 15;
+    int SHORT_RANGE = 64;
+    int SMALL_ANGLE = 45;
     Point ppos = getPosition();
     int dir = getDirection();
 
@@ -95,10 +114,6 @@ void Being::performAttack(MapComposite *map)
             break;
     }
 
-/* TODO: calculate real attack power and damage properties based on
-             character equipment and stats. */
-    Damage damage = 1;
-
     for (MovingObjectIterator i(map->getAroundObjectIterator(this, SHORT_RANGE)); i; ++i)
     {
         MovingObject *o = *i;
@@ -115,7 +130,7 @@ void Being::performAttack(MapComposite *map)
                 ppos, SHORT_RANGE, SMALL_ANGLE, attackAngle)
             )
         {
-            static_cast< Being * >(o)->damage(damage);
+            static_cast< Being * >(o)->damage(getPhysicalAttackDamage());
         }
     }
 }
@@ -128,4 +143,87 @@ void Being::setAction(Action action)
     {
         raiseUpdateFlags(UPDATEFLAG_ACTIONCHANGE);
     }
+}
+
+void Being::addAbsoluteStatModifier(unsigned numStat, short value)
+{
+    mStats.absoluteModificator.at(numStat) = mStats.absoluteModificator.at(numStat) + value;
+}
+
+void Being::removeAbsoluteStatModifier(unsigned numStat, short value)
+{
+    mStats.absoluteModificator.at(numStat) = mStats.absoluteModificator.at(numStat) - value;
+}
+
+void Being::addPercentStatModifier(unsigned numStat, short value)
+{
+    if (value < -100)
+    {
+        LOG_WARN(   "Attempt to add a stat modificator for Being"<<
+                    getPublicID()<<
+                    "that would make the stat negative!"
+                );
+    }
+    else
+    {
+        mStats.percentModificators.at(numStat).push_back(value);
+    }
+}
+
+void Being::removePercentStatModifier(unsigned numStat, short value)
+{
+    std::list<short>::iterator i = mStats.percentModificators.at(numStat).begin();
+
+    while (i != mStats.percentModificators.at(numStat).end())
+    {
+        if ((*i) = value)
+        {
+            mStats.percentModificators.at(numStat).erase(i);
+            return;
+        }
+    }
+    LOG_WARN(   "Attempt to remove a stat modificator for Being"<<
+                getPublicID()<<
+                "that hasn't been added before!"
+            );
+}
+
+unsigned short Being::getRealStat(unsigned numStat)
+{
+    int value = mStats.base.at(numStat) + mStats.absoluteModificator.at(numStat);
+    std::list<short>::iterator i;
+
+    float multiplier = 1.0f;
+    for (   i = mStats.percentModificators.at(numStat).begin();
+            i != mStats.percentModificators.at(numStat).end();
+            i++
+        )
+    {
+        multiplier *= (100.0f + (float)(*i)) / 100.0f;
+    }
+
+    /* Floating point inaccuracies might result in a negative multiplier. That
+     * would result in a stat near 2^16. To make sure that this doesn't happen
+     * we return a value of 0 in that case
+     */
+    if (multiplier < 0.0f)
+    {
+        return 0;
+    }
+    else
+    {
+        return (unsigned short)(value * multiplier);
+    }
+}
+
+Damage Being::getPhysicalAttackDamage()
+{
+    Damage damage;
+    damage.type = DAMAGETYPE_PHYSICAL;
+    damage.value = getRealStat(STAT_PHYSICAL_ATTACK_MINIMUM) + (rand()%getRealStat(STAT_PHYSICAL_ATTACK_FLUCTUATION));
+    damage.penetration = 1; // TODO: get from equipped weapon
+    damage.element = ELEMENT_NEUTRAL; // TODO: get from equipped weapon
+    damage.source = this;
+
+    return damage;
 }

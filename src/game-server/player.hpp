@@ -48,14 +48,58 @@ class Player : public Being, public PlayerData
 {
     public:
 
-        Player(std::string const &name, int id = -1)
-          : Being(OBJECT_PLAYER, 65535),
-            PlayerData(name, id),
-            mClient(NULL)
+        /**
+         * Base attributes of a player character
+         */
+        enum Attributes
         {
-            mHitpoints=5;
-            mSize = 16;
+            STRENGTH = NB_STATS_BEING,
+            AGILITY,
+            DEXTERITY,
+            VITALITY,
+            INTELLIGENCE,
+            WILLPOWER,
+            CHARISMA,
+            NB_ATTRIBUTES
+        };
+
+        enum WeaponSkills
+        {
+            SKILL_WEAPON_UNARMED = NB_ATTRIBUTES,
+            SKILL_WEAPON_SWORD,
+            SKILL_WEAPON_AXE,
+            SKILL_WEAPON_POLEARM,
+            SKILL_WEAPON_JAVELIN,
+            SKILL_WEAPON_WHIP,
+            SKILL_WEAPON_DAGGER,
+            SKILL_WEAPON_STAFF,
+            SKILL_WEAPON_BOW,
+            SKILL_WEAPON_CROSSBOW,
+            SKILL_WEAPON_THROWN,
+            NB_WEAPONSKILLS
+        };
+
+        enum MagicSkills
+        {
+            SKILL_MAGIC_IAMJUSTAPLACEHOLDER = NB_WEAPONSKILLS,
+            NB_MAGICSKILLS
+        };
+
+        enum CraftSkills
+        {
+            SKILL_CRAFT_IAMJUSTAPLACEHOLDER = NB_MAGICSKILLS,
+            NB_CRAFTSKILLS
+        };
+
+        enum OtherSkills
+        {
+            SKILL_IAMJUSTAPLACEHOLDER = NB_CRAFTSKILLS,
+            NB_OTHERSKILLS
         }
+
+        static const NB_STATS_PLAYER = NB_OTHERSKILLS;
+
+        Player(std::string const &name, int id = -1);
 
         /**
          * Updates the internal status.
@@ -73,6 +117,14 @@ class Player : public Being, public PlayerData
          */
         void setClient(GameClient *c)
         { mClient = c; }
+
+        /**
+         * Recalculates all player stats that are derived from others.
+         * Call whenever you change something that affects a derived stat.
+         * Called automatically when you manipulate a stat using setBaseStat()
+         */
+        virtual void calculateBaseStats();
+
 
     private:
         Player(Player const &);
