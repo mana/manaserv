@@ -113,7 +113,7 @@ std::string ChatChannelManager::getPublicChannelNames(short *numChannels)
 short ChatChannelManager::getNumberOfChannelUsers(const std::string &channelName)
 {
     ChatChannel channel = _getChannel(getChannelId(channelName));
-	short size =  channel.getUserList().size();
+    short size =  channel.getUserList().size();
     return size;
 }
 

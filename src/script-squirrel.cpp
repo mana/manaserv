@@ -35,39 +35,39 @@ bool functionCall(HSQUIRRELVM v, const char *fn, const char *args, ...)
     sq_pushstring(v, _SC(fn), -1);
     if (SQ_SUCCEEDED(sq_get(v, -2)))
     {
-	sq_pushroottable(v); //push 'this'
+    sq_pushroottable(v); //push 'this'
 
-	if (args != NULL)
-	{
-	    for (int i = 0; i < strlen(args); i++)
-	    {
-		switch (args[i])
-		{
-		case 'S':
-		case 's':
-		    //string
-		    argCount++;
-		    sq_pushstring(v, va_arg(arglist, char*), -1);
-		    break;
-		case 'I':
-		case 'i':
-		    //integer
-		    argCount++;
-		    sq_pushinteger(v, va_arg(arglist, int));
-		    break;
-		case 'F':
-		case 'f':
-		    //float
-		    argCount++;
-		    sq_pushfloat(v, va_arg(arglist, float));
-		    break;
-		}
-	    }
-	}
-    
-	sq_call(v, argCount + 1, 0);
+    if (args != NULL)
+    {
+        for (int i = 0; i < strlen(args); i++)
+        {
+        switch (args[i])
+        {
+        case 'S':
+        case 's':
+            //string
+            argCount++;
+            sq_pushstring(v, va_arg(arglist, char*), -1);
+            break;
+        case 'I':
+        case 'i':
+            //integer
+            argCount++;
+            sq_pushinteger(v, va_arg(arglist, int));
+            break;
+        case 'F':
+        case 'f':
+            //float
+            argCount++;
+            sq_pushfloat(v, va_arg(arglist, float));
+            break;
+        }
+        }
+    }
+
+    sq_call(v, argCount + 1, 0);
     } else
-	return false;
+    return false;
     sq_settop(v, top);
 
     va_end(arglist);
@@ -96,45 +96,45 @@ int testFunc(HSQUIRRELVM v)
     int nargs = sq_gettop(v);
 
     for (int n = 1; n <= nargs; n++) {
-	printf("arg: %d is ", n);
-	switch (sq_gettype(v, n))
-	{
-	case OT_NULL:
-	    printf("null");
-	    break;
-	case OT_INTEGER:
-	    printf("integer");
-	    break;
-	case OT_FLOAT:
-	    printf("float");
-	    break;
-	case OT_STRING:
-	    printf("string");
-	    break;
-	case OT_TABLE:
-	    printf("table");
-	    break;
-	case OT_ARRAY:
-	    printf("array");
-	    break;
-	case OT_USERDATA:
-	    printf("userdata");
-	    break;
-	case OT_CLOSURE:
-	    printf("closure");
-	    break;
-	case OT_NATIVECLOSURE:
-	    printf("nativeclosure");
-	    break;
-	case OT_GENERATOR:
-	    printf("generator");
-	    break;
-	case OT_USERPOINTER:
-	    printf("userpointer");
-	    break;
-	default:
-	    printf("unknown");
-	}
+    printf("arg: %d is ", n);
+    switch (sq_gettype(v, n))
+    {
+    case OT_NULL:
+        printf("null");
+        break;
+    case OT_INTEGER:
+        printf("integer");
+        break;
+    case OT_FLOAT:
+        printf("float");
+        break;
+    case OT_STRING:
+        printf("string");
+        break;
+    case OT_TABLE:
+        printf("table");
+        break;
+    case OT_ARRAY:
+        printf("array");
+        break;
+    case OT_USERDATA:
+        printf("userdata");
+        break;
+    case OT_CLOSURE:
+        printf("closure");
+        break;
+    case OT_NATIVECLOSURE:
+        printf("nativeclosure");
+        break;
+    case OT_GENERATOR:
+        printf("generator");
+        break;
+    case OT_USERPOINTER:
+        printf("userpointer");
+        break;
+    default:
+        printf("unknown");
+    }
     }
     printf("\n");
     sq_pushinteger(v, nargs);
@@ -152,13 +152,13 @@ ScriptSquirrel::ScriptSquirrel(const std::string &file) :
 
     sq_pushroottable(vm);
     if (!SQ_SUCCEEDED(sqstd_dofile(vm, _SC(scriptName.c_str()), 0, 1))) {
-	std::cerr << "Error: ScriptSquirrel: could not execute " <<
-	    scriptName << std::endl;
+    std::cerr << "Error: ScriptSquirrel: could not execute " <<
+        scriptName << std::endl;
     } else {
         registerStdLib(vm);
 
-	functionCall(vm, "", NULL);
-	functionCall(vm, "init", NULL);
+    functionCall(vm, "", NULL);
+    functionCall(vm, "init", NULL);
     }
 }
 

@@ -66,7 +66,7 @@ ChatChannel::getPassword() const
 bool
 ChatChannel::getPrivacy() const
 {
-	return mChannelPrivate;
+    return mChannelPrivate;
 }
 
 void
