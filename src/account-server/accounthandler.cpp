@@ -393,7 +393,7 @@ AccountHandler::handleReconnectMessage(AccountClient &computer, MessageIn &msg)
             for (AccountPendingClients::iterator j = pendingClients.begin(),
                  j_end = pendingClients.end(); j != j_end; ++j)
             {
-                if (j->second == &computer) return; //Allready inserted
+                if (j->second == &computer) return; // Allready inserted
             }
             pendingClients.insert(std::make_pair(magic_token, &computer));
             return; //Waiting for the gameserver

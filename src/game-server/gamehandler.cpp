@@ -340,7 +340,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             {
                 std::string magic_token(utils::getMagicToken());
                 result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
-                //No accountserver data, the client should remember that
+                // No accountserver data, the client should remember that
                 accountHandler->playerReconnectAccount(
                                    computer.character->getDatabaseID(),
                                    magic_token);

@@ -28,7 +28,7 @@
 
 ChatChannelManager::ChatChannelManager()
 {
-    //Load stored public chat channels from db
+    // Load stored public chat channels from db
     Storage &store = Storage::instance("tmw");
     mChatChannels = store.getChannelList();
 }

@@ -177,7 +177,7 @@ class CharacterData: public AbstractCharacterData
                                                  //!< the character.
 };
 
-//Utility typedefs
+// Utility typedefs
 /**
  * Type definition for a smart pointer to CharacterData.
  */

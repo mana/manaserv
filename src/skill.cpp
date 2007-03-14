@@ -44,7 +44,7 @@ Skill::~Skill()
 bool Skill::addSkill(const std::string &ident, Skill *skill)
 {
     if (ident == id) {
-        //add skill to children
+        // add skill to children
         children.push_back(skill);
         return true;
     }
