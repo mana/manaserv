@@ -17,7 +17,7 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Id$
+ *  $Id$
  */
 
 #ifndef _TMWSERV_ABSTRACTCHARACTERDATA
@@ -39,20 +39,6 @@ enum
 };
 
 /**
- * Attributes of a Character.
- */
-enum
-{
-    ATT_STRENGTH = 0,
-    ATT_AGILITY,
-    ATT_VITALITY,
-    ATT_INTELLIGENCE,
-    ATT_DEXTERITY,
-    ATT_LUCK,
-    NB_ATTRIBUTES
-};
-
-/**
  * Numbers of inventory slots
  */
 enum
@@ -63,11 +49,12 @@ enum
 
 /**
  * Structure representing an item stored in the inventory.
+ * Primarily for the communication between account- and gameserver.
  */
 struct InventoryItem
 {
     unsigned short itemClassId;
-    unsigned char numberOfItemsInSlot;
+    unsigned short numberOfItemsInSlot;
     bool isEquiped;
 };
 
@@ -103,7 +90,7 @@ class AbstractCharacterData
 
         /** Sets the name of the character. */
         virtual void
-        setName(const std::string&) = 0;
+        setName(const std::string& name) = 0;
 
         /** Gets the gender of the character (male or female). */
         virtual int
@@ -145,13 +132,13 @@ class AbstractCharacterData
         virtual void
         setMoney(int amount) = 0;
 
-        /** Gets the value of an attribute of the character. */
+        /** Gets the value of a base attribute of the character. */
         virtual unsigned short
-        getAttribute(int attributeNumber) const = 0;
+        getBaseAttribute(int attributeNumber) const = 0;
 
-        /** Sets the value of an attribute of the character. */
+        /** Sets the value of a base attribute of the character. */
         virtual void
-        setAttribute(int attributeNumber, int value) = 0;
+        setBaseAttribute(int attributeNumber, int value) = 0;
 
         /** Gets the Id of the map that the character is on. */
         virtual int
@@ -163,11 +150,11 @@ class AbstractCharacterData
 
         /** Gets the position of the character on the map. */
         virtual Point const &
-        getPos() const = 0;
+        getPosition() const = 0;
 
         /** Sets the position of the character on the map. */
         virtual void
-        setPos(const Point &p) = 0;
+        setPosition(const Point &p) = 0;
 
         /**
          * The access functions for inventory

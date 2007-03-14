@@ -24,7 +24,7 @@
 #ifndef _TMW_SERVER_GAMEHANDLER_
 #define _TMW_SERVER_GAMEHANDLER_
 
-#include "game-server/player.hpp"
+#include "game-server/character.hpp"
 #include "net/connectionhandler.hpp"
 
 /**
@@ -44,22 +44,22 @@ class GameHandler: public ConnectionHandler
         bool startListen(enet_uint16 port);
 
         /**
-         * Sends message to the given player.
+         * Sends message to the given character.
          */
-        void sendTo(Player *, MessageOut &msg);
+        void sendTo(Character *, MessageOut &msg);
 
         /**
-         * Kills connection with given player.
+         * Kills connection with given character.
          */
-        void kill(Player *);
+        void kill(Character *);
 
         /**
-         * Prepares a server change for given player.
+         * Prepares a server change for given character.
          */
-        void prepareServerChange(Player *);
+        void prepareServerChange(Character *);
 
         /**
-         * Completes a server change for given player ID.
+         * Completes a server change for given character ID.
          */
         void completeServerChange(int id, std::string const &token,
                                   std::string const &address, int port);

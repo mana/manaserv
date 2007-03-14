@@ -5,6 +5,8 @@
 #include <cassert>
 
 #include "controller.h"
+
+#include "defines.h"
 #include "game-server/itemmanager.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
@@ -39,12 +41,12 @@ void testingMap(int id)
                 being->setSize(8);
 
                 // some bogus stats for testing
-                being->setBaseStat(Being::STAT_HP_MAXIMUM, 42);
-                being->setBaseStat(Being::STAT_PHYSICAL_ATTACK_MINIMUM, 1);
-                being->setBaseStat(Being::STAT_PHYSICAL_ATTACK_FLUCTUATION, 0);
-                being->setBaseStat(Being::STAT_PHYSICAL_DEFENCE, 5);
+                being->setCompoundAttribute(ATT_HP_MAXIMUM, 42);
+                being->setCompoundAttribute(ATT_PHYSICAL_ATTACK_MINIMUM, 1);
+                being->setCompoundAttribute(ATT_PHYSICAL_ATTACK_FLUCTUATION, 0);
+                being->setCompoundAttribute(ATT_PHYSICAL_DEFENCE, 5);
 
-                being->setHitpoints(being->getRealStat(Being::STAT_HP_MAXIMUM));
+                being->setHitpoints(42);
 
                 being->setMapId(1);
                 Point pos(720, 900);

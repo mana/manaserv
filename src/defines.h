@@ -75,10 +75,11 @@ enum
     MAX_HAIRSTYLE_VALUE = 7,
     MAX_HAIRCOLOR_VALUE = 9,
     MAX_GENDER_VALUE = 2,
-/** Tells the max difference between the
- *  less big stat and the biggest one.
- *  So that players haven't disproportionned
- *  Raw statistics.
+
+/**
+ * Determines the maximum difference between the largest attribute and the
+ * smallest one. To ensure that characters do not have disproportionned
+ * attributes.
  */
     MAX_DIFF_BETWEEN_ATTRIBUTES = 5,
 /**
@@ -150,7 +151,7 @@ enum {
     GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
-                                             // player: S name, B hair style, B hair color, B gender
+                                             // character: S name, B hair style, B hair color, B gender
                                              // monster: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
@@ -191,8 +192,8 @@ enum {
     // Inter-server
     GAMSG_REGISTER     = 0x500, // S address, W port, { W map id }*
     AGMSG_ACTIVE_MAP   = 0x501, // W map id
-    AGMSG_PLAYER_ENTER = 0x510, // B*32 token, serialised player data
-    GAMSG_PLAYER_DATA  = 0x520, // serialised player data
+    AGMSG_PLAYER_ENTER = 0x510, // B*32 token, serialised character data
+    GAMSG_PLAYER_DATA  = 0x520, // serialised character data
     GAMSG_REDIRECT          = 0x530, // L id
     AGMSG_REDIRECT_RESPONSE = 0x531, // L id, B*32 token, S game address, W game port
     GAMSG_PLAYER_RECONNECT  = 0x532, // L id, B*32 token
@@ -261,5 +262,81 @@ enum {
     // Payload contains the destination.
     MOVING_DESTINATION = 2
 };
+
+/**
+ * Enumerations for the handling of attributes and their modifiers.
+ */
+
+/**
+ * Possible states of beings.
+ * States can be multiple for the same being.
+ * To be used as bitmask values.
+ */
+enum BeingState
+{
+    STATE_POISONED = 1,
+    STATE_STONED   = 2,
+    STATE_STUNNED  = 4,
+    STATE_SLOWED   = 8,
+    STATE_TIRED    = 16,
+    STATE_MAD      = 32,
+    STATE_BERSERK  = 64,
+    STATE_HASTED   = 128,
+    STATE_FLOATING = 256
+};
+
+/**
+ * Base attributes of a Being.
+ */
+enum
+{
+    ATT_STRENGTH = 0,
+    ATT_AGILITY,
+    ATT_VITALITY,
+    ATT_INTELLIGENCE,
+    ATT_DEXTERITY,
+    ATT_LUCK,
+/**    ATT_WILLPOWER,
+    ATT_CHARISMA,*/
+    NB_BASE_ATTRIBUTES
+};
+/**
+ * Character skills
+ */
+enum WeaponSkills
+{
+    SKILL_WEAPON_UNARMED = 0,
+    SKILL_WEAPON_SWORD,
+    SKILL_WEAPON_AXE,
+    SKILL_WEAPON_POLEARM,
+    SKILL_WEAPON_JAVELIN,
+    SKILL_WEAPON_WHIP,
+    SKILL_WEAPON_DAGGER,
+    SKILL_WEAPON_STAFF,
+    SKILL_WEAPON_BOW,
+    SKILL_WEAPON_CROSSBOW,
+    SKILL_WEAPON_THROWN,
+    NB_WEAPONSKILLS
+};
+
+enum MagicSkills
+{
+    SKILL_MAGIC_IAMJUSTAPLACEHOLDER = NB_WEAPONSKILLS,
+    NB_MAGICSKILLS
+};
+
+enum CraftSkills
+{
+    SKILL_CRAFT_IAMJUSTAPLACEHOLDER = NB_MAGICSKILLS,
+    NB_CRAFTSKILLS
+};
+
+enum OtherSkills
+{
+    SKILL_IAMJUSTAPLACEHOLDER = NB_CRAFTSKILLS,
+    NB_OTHERSKILLS
+}
+
+static const NB_CHARACTER_SKILLS = NB_OTHERSKILLS;
 
 #endif // _TMWSERV_DEFINES_H_

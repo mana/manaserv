@@ -30,7 +30,7 @@ class Map;
 class MapComposite;
 class MovingObject;
 class Object;
-class Player;
+class Character;
 class Point;
 class Rectangle;
 class Thing;
@@ -45,10 +45,10 @@ typedef std::vector< unsigned > MapRegion;
  */
 struct MapZone
 {
-    unsigned short nbPlayers, nbMovingObjects;
+    unsigned short nbCharacters, nbMovingObjects;
     /**
      * Objects present in this zone.
-     * Players are stored first, then the remaining MovingObjects, then the
+     * Characters are stored first, then the remaining MovingObjects, then the
      * remaining Objects.
      */
     std::vector< Object * > objects;
@@ -60,7 +60,7 @@ struct MapZone
      */
     MapRegion destinations;
 
-    MapZone(): nbPlayers(0), nbMovingObjects(0) {}
+    MapZone(): nbCharacters(0), nbMovingObjects(0) {}
     void insert(Object *);
     void remove(Object *);
 };
@@ -82,17 +82,17 @@ struct ZoneIterator
 };
 
 /**
- * Iterates through the Players of a region.
+ * Iterates through the Characters of a region.
  */
-struct PlayerIterator
+struct CharacterIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Player *current;
+    Character *current;
 
-    PlayerIterator(ZoneIterator const &);
+    CharacterIterator(ZoneIterator const &);
     void operator++();
-    Player *operator*() const { return current; }
+    Character *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -221,9 +221,9 @@ class MapComposite
 
         /**
          * Gets an iterator on the objects around the old and new positions of
-         * a player (including the ones that were but are now elsewhere).
+         * a character (including the ones that were but are now elsewhere).
          */
-        ZoneIterator getAroundPlayerIterator(MovingObject *, int radius) const;
+        ZoneIterator getAroundCharacterIterator(MovingObject *, int radius) const;
 
         /**
          * Gets everything related to the map.
@@ -257,7 +257,7 @@ class MapComposite
         Map *map; /**< Actual map. */
 
         /**
-         * Things (items, players, monsters, etc) located on the map.
+         * Things (items, characters, monsters, etc) located on the map.
          */
         std::vector< Thing * > things;
 

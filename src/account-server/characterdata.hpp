@@ -17,14 +17,14 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Id$
+ *  $Id$
  */
 
 #ifndef _TMWSERV_CHARACTERDATA
 #define _TMWSERV_CHARACTERDATA
 
 #include "abstractcharacterdata.hpp"
-
+#include "defines.h"
 #include <string>
 #include <vector>
 
@@ -43,7 +43,7 @@ class CharacterData: public AbstractCharacterData
         /**
          * Constructor used for creating a character from a serialised message.
          */
-        CharacterData(MessageIn &);
+        CharacterData(MessageIn & msg);
 
         /**
          * Get and set methods
@@ -113,15 +113,15 @@ class CharacterData: public AbstractCharacterData
         void
         setMoney(int amount) { mMoney = amount; }
 
-        /** Gets the value of an attribute of the character. */
+        /** Gets the value of a base attribute of the character. */
         unsigned short
-        getAttribute(int attributeNumber) const
-        { return mAttributes[attributeNumber]; }
+        getBaseAttribute(int attributeNumber) const
+        { return mBaseAttributes[attributeNumber]; }
 
-        /** Sets the value of an attribute of the character. */
+        /** Sets the value of a base attribute of the character. */
         void
-        setAttribute(int attributeNumber, int value)
-        { mAttributes[attributeNumber] = value; }
+        setBaseAttribute(int attributeNumber, int value)
+        { mBaseAttributes[attributeNumber] = value; }
 
         /** Gets the Id of the map that the character is on. */
         int
@@ -133,11 +133,11 @@ class CharacterData: public AbstractCharacterData
 
         /** Gets the position of the character on the map. */
         Point const &
-        getPos() const { return mPos; }
+        getPosition() const { return mPos; }
 
         /** Sets the position of the character on the map. */
         void
-        setPos(const Point &p) { mPos = p; }
+        setPosition(const Point &p) { mPos = p; }
 
         /** Returns the number of inventory items. */
         int
@@ -169,7 +169,7 @@ class CharacterData: public AbstractCharacterData
         unsigned char mHairColor; //!< Hair Color of the being.
         unsigned char mLevel;     //!< Level of the being.
         unsigned int mMoney;      //!< Wealth of the being.
-        unsigned short mAttributes[NB_ATTRIBUTES]; //!< The attributes of the
+        unsigned short mBaseAttributes[NB_BASE_ATTRIBUTES]; //!< The attributes of the
                                                    //!< character.
         unsigned short mMapId;    //!< Map the being is on.
         Point mPos;               //!< Position the being is at.

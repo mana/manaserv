@@ -31,11 +31,9 @@ bool ItemClass::use(Being *itemUser)
 
     // Calling a script if scriptName != ""
     if (!mScriptName.empty())
-    {
-        return (runScript(itemUser) && usedSuccessfully);
-    }
-    else
-        return usedSuccessfully;
+            return (runScript(itemUser) && usedSuccessfully);
+
+    return usedSuccessfully;
 }
 
 bool ItemClass::runScript(Being *itemUser)

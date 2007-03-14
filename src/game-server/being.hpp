@@ -34,6 +34,21 @@ class Being;
 class MapComposite;
 
 /**
+ * Derived attributes of a Being.
+ */
+enum
+{
+    ATT_HP_MAXIMUM = NB_BASE_ATTRIBUTES,
+    ATT_PHYSICAL_ATTACK_MINIMUM,
+    ATT_PHYSICAL_ATTACK_FLUCTUATION,
+    ATT_PHYSICAL_DEFENCE,
+    ATT_MAGIC,
+    ATT_ACCURACY,
+    ATT_SPEED,
+    NB_COMPOUND_ATTRIBUTES
+};
+
+/**
  * Element attribute for beings, actors and items.
  * Subject to change until pauan and dabe are finished with the element system.
  */
@@ -46,24 +61,6 @@ enum Element
     ELEMENT_AIR,
     ELEMENT_SACRED,
     ELEMENT_DEATH
-};
-
-/**
- * States attribute for beings, and actors.
- * States can be multiple for the same being.
- */
-struct BeingState
-{
-    bool STATE_NORMAL;
-    bool STATE_POISONED;
-    bool STATE_STONED;
-    bool STATE_STUNNED;
-    bool STATE_SLOWED;
-    bool STATE_TIRED;
-    bool STATE_MAD;
-    bool STATE_BERSERK;
-    bool STATE_HASTED;
-    bool STATE_FLOATING;
 };
 
 /**
@@ -89,7 +86,8 @@ enum Damagetype
 };
 
 /**
- * Structure describing severity and nature of an attack a being can suffer of
+ * Structure that describes the severity and nature of an attack a being can
+ * be hit by.
  */
 struct Damage
 {
@@ -106,35 +104,22 @@ struct Damage
 typedef std::list<unsigned int> Hits;
 
 /**
- * Structure type for the stats of a Being.
+ * Structures for storing the attribute modifiers of a Being.
  */
-struct Stats
+struct BeingModificators
 {
-    std::vector<unsigned short> base;
     std::vector<short> absoluteModificator;
     std::vector< std::list<short> > percentModificators;
 };
 
+
 /**
  * Generic Being (living object).
- * Used for players & monsters (all animated objects).
+ * Used for characters & monsters (all animated objects).
  */
 class Being : public MovingObject
 {
     public:
-
-        /**
-         * Computed statistics of a Being.
-         */
-        enum Stat
-        {
-            STAT_HP_MAXIMUM,
-            STAT_PHYSICAL_ATTACK_MINIMUM,
-            STAT_PHYSICAL_ATTACK_FLUCTUATION,
-            STAT_PHYSICAL_DEFENCE,
-            // add new computed statistics on demand
-            NB_STATS_BEING
-        };
 
         /**
          * Moves enum for beings and actors for others players vision.
@@ -153,65 +138,37 @@ class Being : public MovingObject
         /**
          * Proxy constructor.
          */
-        Being(int type, int id)
-          : MovingObject(type, id),
-            mAction(STAND)
-        {}
+        Being(int type, int id);
 
-        /**
-         * Sets a being statistic.
-         *
-         * @param numStat the statistic number.
-         * @param value the new value.
-         */
-        void setBaseStat(unsigned numStat, unsigned short value)
-        {   mStats.base[numStat] = value;
-            calculateBaseStats();
-        }
+        ~Being();
 
         /**
          * Adds a fixed value stat modifier
          */
-        void addAbsoluteStatModifier(unsigned numStat, short value);
+        void addAbsoluteStatModifier(int attributeNumber, short value);
 
         /**
          * Removes a fixed value stat modifier
          */
-        void removeAbsoluteStatModifier(unsigned numStat, short value);
+        void removeAbsoluteStatModifier(int attributeNumber, short value);
 
         /**
          * Adds a multiplier stat modificator in percent
          */
-        void addPercentStatModifier(unsigned numStat, short value);
+        void addPercentStatModifier(int attributeNumber, short value);
 
         /**
          * Removes a previously added percent stat modifier.
          * Does nothing and logs a warning when no modifier with the same
          * value has been added before.
          */
-        void removePercentStatModifier(unsigned numStat, short value);
+        void removePercentStatModifier(int attributeNumber, short value);
 
         /**
-         * Returns a being statistic without temporary modifiers
-         *
-         * @param numStat the statistic number.
-         * @return the statistic value.
+         * Returns a specific compound attribute of a being.
          */
-        unsigned short getBaseStat(unsigned  stat)
-        { return mStats.base.at(stat); }
-
-        /**
-         * Returns a being statistic with added temporary modifiers
-         */
-        unsigned short getRealStat(unsigned stat);
-
-        /**
-         * Recalculates all stats of the being that are derived from others.
-         * Call whenever you change something that affects a derived stat.
-         * Called automatically when you manipulate a stat using setBaseStat()
-         */
-        virtual void calculateBaseStats()
-        { /*NOOP*/ };
+        unsigned short getCompoundAttribute(int attributeNumber)
+        { return mCompoundAttributes[attributeNumber]; }
 
         /**
          * Creates a damage structure for a normal melee attack based on the
@@ -259,6 +216,9 @@ class Being : public MovingObject
          */
         virtual void setAction(Action action);
 
+        /**
+         * Sets the current action.
+         */
         virtual Action getAction() const
         { return mAction; }
 
@@ -267,15 +227,45 @@ class Being : public MovingObject
          */
         virtual void move();
 
+        /**
+         * FOR TESTING PURPOSES ONLY
+         * Sets a compound attribute.
+         * Remember, they're modified after a modifier is added.
+         */
+        void setCompoundAttribute(int attributeNumber, unsigned short value)
+        { mCompoundAttributes[attributeNumber] = value; }
+
     protected:
+
+        /**
+         * Sets a base attribute.
+         */
+        void setBaseAttribute(int attributeNumber, unsigned short value)
+        { mBaseAttributes[attributeNumber] = value; }
+
+        /**
+         * Gets a derived attribute.
+         */
+        unsigned short getBaseAttribute(int attributeNumber) const
+        { return mBaseAttributes[attributeNumber]; }
+
+        /**
+         * Recalculates the compound attributes of a being.
+         */
+        void recalculateAllCompoundAttributes();
+
+        void calculateCompoundAttribute(int attributeNumber);
+
         int mHitpoints; /**< Hitpoints of the being */
         Action mAction;
-
-        Stats mStats;
+        BeingModificators mBeingModificators;
 
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
+
+        unsigned short mBaseAttributes[NB_BASE_ATTRIBUTES];
+        unsigned short mCompoundAttributes[NB_COMPOUND_ATTRIBUTES];
 
         Hits mHitsTaken; /**< List of punches taken since last update */
 };

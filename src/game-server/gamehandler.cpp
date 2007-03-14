@@ -21,11 +21,12 @@
  *  $Id$
  */
 
+#include "game-server/gamehandler.hpp"
+
 #include <cassert>
 #include <map>
 
 #include "game-server/accountconnection.hpp"
-#include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
@@ -49,13 +50,13 @@ struct GameClient: NetComputer
 {
     GameClient(ENetPeer *peer)
       : NetComputer(peer), character(NULL), status(CLIENT_LOGIN) {}
-    Player *character;
+    Character *character;
     int status;
 };
 
 struct GamePendingLogin
 {
-    Player *character;
+    Character *character;
     int timeout;
 };
 
@@ -79,7 +80,7 @@ static GamePendingClients pendingClients;
 /**
  * Links a client to a character.
  */
-static void linkCharacter(GameClient *computer, Player *ch)
+static void linkCharacter(GameClient *computer, Character *ch)
 {
     computer->character = ch;
     computer->status = CLIENT_CONNECTED;
@@ -93,9 +94,9 @@ static void linkCharacter(GameClient *computer, Player *ch)
 
 /**
  * Notification that a particular token has been given to allow a certain
- * player to enter the game.
+ * character to enter the game.
  */
-void registerGameClient(std::string const &token, Player *ch)
+void registerGameClient(std::string const &token, Character *ch)
 {
     GamePendingClients::iterator i = pendingClients.find(token);
     if (i != pendingClients.end())
@@ -134,7 +135,7 @@ void GameHandler::computerDisconnected(NetComputer *computer)
             break;
         }
     }
-    if (Player *ch = static_cast< GameClient * >(computer)->character)
+    if (Character *ch = static_cast< GameClient * >(computer)->character)
     {
         gameState->remove(ch);
         delete ch;
@@ -142,7 +143,7 @@ void GameHandler::computerDisconnected(NetComputer *computer)
     delete computer;
 }
 
-void GameHandler::kill(Player *ch)
+void GameHandler::kill(Character *ch)
 {
     GameClient *client = ch->getClient();
     assert(client != NULL);
@@ -150,7 +151,7 @@ void GameHandler::kill(Player *ch)
     client->status = CLIENT_LOGIN;
 }
 
-void GameHandler::prepareServerChange(Player *ch)
+void GameHandler::prepareServerChange(Character *ch)
 {
     GameClient *client = ch->getClient();
     assert(client != NULL);
@@ -299,7 +300,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_ATTACK:
         {
-            LOG_DEBUG("Player " << computer.character->getPublicID()
+            LOG_DEBUG("Character " << computer.character->getPublicID()
                       << " attacks");
             computer.character->setDirection(message.readByte());
             computer.character->setAction(Being::ATTACK);
@@ -344,8 +345,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                                    computer.character->getDatabaseID(),
                                    magic_token);
             }
-            // TODO: check if the character's updated info is send to the database
+            // TODO: implement a delayed remove
             gameState->remove(computer.character);
+
+            accountHandler->sendCharacterData(computer.character);
+
+            // Done with the character
             delete computer.character;
             computer.character = NULL;
             computer.status = CLIENT_LOGIN;
@@ -360,7 +365,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         computer.send(result);
 }
 
-void GameHandler::sendTo(Player *beingPtr, MessageOut &msg)
+void GameHandler::sendTo(Character *beingPtr, MessageOut &msg)
 {
     GameClient *client = beingPtr->getClient();
     assert(client && client->status == CLIENT_CONNECTED);

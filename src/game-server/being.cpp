@@ -26,6 +26,25 @@
 #include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
 
+Being::Being(int type, int id):
+    MovingObject(type, id),
+    mAction(STAND)
+{
+    for (int i = 0; i < NB_BASE_ATTRIBUTES; i++)
+    {
+        mBaseAttributes[i] = 0;
+    }
+    for (int j = 0; j < NB_COMPOUND_ATTRIBUTES; j++)
+    {
+        mCompoundAttributes[j] = 0;
+    }
+    mBeingModificators.absoluteModificator.resize(NB_COMPOUND_ATTRIBUTES, 0);
+    mBeingModificators.percentModificators.resize(NB_COMPOUND_ATTRIBUTES);
+    //TODO: set the base attributes, calculate the compound attributes
+}
+
+Being::~Being()
+{}
 
 void Being::damage(Damage damage)
 {
@@ -40,7 +59,8 @@ void Being::damage(Damage damage)
     switch (damage.type)
     {
         case DAMAGETYPE_PHYSICAL:
-            HPloss -= getRealStat(STAT_PHYSICAL_DEFENCE) / damage.penetration;
+            HPloss -= getCompoundAttribute(ATT_PHYSICAL_DEFENCE)
+                                                         / damage.penetration;
             break;
         case DAMAGETYPE_MAGICAL:
             // NIY
@@ -121,7 +141,7 @@ void Being::performAttack(MapComposite *map)
 
         int type = o->getType();
 
-        if (type != OBJECT_PLAYER && type != OBJECT_MONSTER) continue;
+        if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER) continue;
 
         Point opos = o->getPosition();
 
@@ -145,17 +165,19 @@ void Being::setAction(Action action)
     }
 }
 
-void Being::addAbsoluteStatModifier(unsigned numStat, short value)
+void Being::addAbsoluteStatModifier(int attributeNumber, short value)
 {
-    mStats.absoluteModificator.at(numStat) = mStats.absoluteModificator.at(numStat) + value;
+    mBeingModificators.absoluteModificator.at(attributeNumber) += value;
+    calculateCompoundAttribute(attributeNumber);
 }
 
-void Being::removeAbsoluteStatModifier(unsigned numStat, short value)
+void Being::removeAbsoluteStatModifier(int attributeNumber, short value)
 {
-    mStats.absoluteModificator.at(numStat) = mStats.absoluteModificator.at(numStat) - value;
+    mBeingModificators.absoluteModificator.at(attributeNumber) -= value;
+    calculateCompoundAttribute(attributeNumber);
 }
 
-void Being::addPercentStatModifier(unsigned numStat, short value)
+void Being::addPercentStatModifier(int attributeNumber, short value)
 {
     if (value < -100)
     {
@@ -163,39 +185,76 @@ void Being::addPercentStatModifier(unsigned numStat, short value)
                     getPublicID()<<
                     "that would make the stat negative!"
                 );
+        return;
     }
-    else
-    {
-        mStats.percentModificators.at(numStat).push_back(value);
-    }
+
+    mBeingModificators.percentModificators.at(attributeNumber).push_back(value);
+    calculateCompoundAttribute(attributeNumber);
 }
 
-void Being::removePercentStatModifier(unsigned numStat, short value)
+void Being::removePercentStatModifier(int attributeNumber, short value)
 {
-    std::list<short>::iterator i = mStats.percentModificators.at(numStat).begin();
-
-    while (i != mStats.percentModificators.at(numStat).end())
+    std::list<short>::iterator
+       i = mBeingModificators.percentModificators.at(attributeNumber).begin(),
+       i_end = mBeingModificators.percentModificators.at(attributeNumber).end();
+    for (; i != i_end; i++)
     {
         if ((*i) = value)
         {
-            mStats.percentModificators.at(numStat).erase(i);
-            return;
+            mBeingModificators.percentModificators.at(attributeNumber).erase(i);
+            break;
         }
     }
-    LOG_WARN(   "Attempt to remove a stat modificator for Being"<<
-                getPublicID()<<
-                "that hasn't been added before!"
-            );
+    if (i == i_end)
+        LOG_WARN("Attempt to remove a stat modificator for Being" <<
+                 getPublicID() <<
+                 "that hasn't been added before!");
+
+    calculateCompoundAttribute(attributeNumber);
+
+    return;
 }
 
-unsigned short Being::getRealStat(unsigned numStat)
+void Being::calculateCompoundAttribute(int attributeNumber)
 {
-    int value = mStats.base.at(numStat) + mStats.absoluteModificator.at(numStat);
+    int value;
+
+    if (attributeNumber < NB_BASE_ATTRIBUTES)
+        value = getBaseAttribute(attributeNumber);
+
+    switch (attributeNumber)
+    {
+        case ATT_HP_MAXIMUM:
+            value = 20 + (20 * getBaseAttribute(ATT_VITALITY));
+            break;
+        case ATT_PHYSICAL_ATTACK_MINIMUM:
+            value = 10 + getBaseAttribute(ATT_STRENGTH);
+            break;
+        case ATT_PHYSICAL_ATTACK_FLUCTUATION:
+            value = 10;
+            break;
+        case ATT_PHYSICAL_DEFENCE:
+            value = 10 + getBaseAttribute(ATT_STRENGTH);
+            break;
+        case ATT_MAGIC:
+            value = 0;
+            break;
+        case ATT_ACCURACY:
+            value = 50 + getBaseAttribute(ATT_DEXTERITY);
+            break;
+        case ATT_SPEED:
+            value = getBaseAttribute(ATT_AGILITY);
+            break;
+    }
+
+    value += mBeingModificators.absoluteModificator.at(attributeNumber);
+
     std::list<short>::iterator i;
 
     float multiplier = 1.0f;
-    for (   i = mStats.percentModificators.at(numStat).begin();
-            i != mStats.percentModificators.at(numStat).end();
+
+    for (   i = mBeingModificators.percentModificators.at(attributeNumber).begin();
+            i != mBeingModificators.percentModificators.at(attributeNumber).end();
             i++
         )
     {
@@ -206,13 +265,15 @@ unsigned short Being::getRealStat(unsigned numStat)
      * would result in a stat near 2^16. To make sure that this doesn't happen
      * we return a value of 0 in that case
      */
-    if (multiplier < 0.0f)
+    mCompoundAttributes[attributeNumber] =
+        (multiplier < 0.0f) ? 0 : (unsigned short)(value * multiplier);
+}
+
+void Being::recalculateAllCompoundAttributes()
+{
+    for (int i = 0; i < (NB_COMPOUND_ATTRIBUTES); i++)
     {
-        return 0;
-    }
-    else
-    {
-        return (unsigned short)(value * multiplier);
+        calculateCompoundAttribute(i);
     }
 }
 
@@ -220,7 +281,8 @@ Damage Being::getPhysicalAttackDamage()
 {
     Damage damage;
     damage.type = DAMAGETYPE_PHYSICAL;
-    damage.value = getRealStat(STAT_PHYSICAL_ATTACK_MINIMUM) + (rand()%getRealStat(STAT_PHYSICAL_ATTACK_FLUCTUATION));
+    damage.value = getCompoundAttribute(ATT_PHYSICAL_ATTACK_MINIMUM)
+                      + (rand()%getCompoundAttribute(ATT_PHYSICAL_ATTACK_FLUCTUATION));
     damage.penetration = 1; // TODO: get from equipped weapon
     damage.element = ELEMENT_NEUTRAL; // TODO: get from equipped weapon
     damage.source = this;

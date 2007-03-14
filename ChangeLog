@@ -1,3 +1,27 @@
+2007-03-14  Rogier Polak     <rogier.l.a.polak@gmail.com>
+
+	* src/abstractcharacterdata.hpp, src/abstractcharacterdata.cpp,
+	src/defines.h, src/Makefile.am, src/playerdata.hpp,
+	src/playerdata.cpp, src/account-server/accounthandler.cpp,
+	src/account-server/characterdata.hpp,
+	src/account-server/characterdata.cpp,
+	src/account-server/dalstorage.cpp,
+	src/account-server/serverhandler.cpp,
+	src/game-server/accountconnection.hpp,
+	src/game-server/accountconnection.cpp, src/game-server/being.hpp,
+	src/game-server/being.cpp, src/game-server/character.hpp,
+	src/game-server/character.cpp, src/game-server/gamehandler.hpp,
+	src/game-server/gamehandler.cpp, src/game-server/inventory.hpp,
+	src/game-server/inventory.cpp, src/game-server/item.hpp,
+	src/game-server/item.cpp, src/game-server/itemmanager.cpp,
+	src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp,
+	src/game-server/object.hpp, src/game-server/player.hpp,
+	src/game-server/player.cpp, src/game-server/state.hpp,
+	src/game-server/state.cpp, src/game-server/trigger.cpp: Renamed the
+	Player class to Character, which now inherits from Being and
+	AbstractCharacterData. (Changed as little as possible of basic damage
+	calculation code)
+
 2007-03-11  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/controller.cpp, src/controller.h, src/gameserver/being.cpp,

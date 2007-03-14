@@ -22,6 +22,7 @@
 
 #include "abstractcharacterdata.hpp"
 
+#include "defines.h"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "point.h"
@@ -36,21 +37,26 @@ void AbstractCharacterData::serialize(MessageOut &msg) const
     msg.writeByte(getLevel());
     msg.writeShort(getMoney());
 
-    for (int i = 0; i < NB_ATTRIBUTES; ++i)
+    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
     {
-        msg.writeByte(getAttribute(i));
+        msg.writeByte(getBaseAttribute(i));
     }
 
     msg.writeShort(getMapId());
-    msg.writeShort(getPos().x);
-    msg.writeShort(getPos().y);
+    msg.writeShort(getPosition().x);
+    msg.writeShort(getPosition().y);
 
+    /**
+     * TODO: uncomment/redesign after Inventory is redesigned/improved
+     * TODO: Test and debug.
+     *
     for (int j = 0; j < getNumberOfInventoryItems(); ++j)
     {
         msg.writeShort(getInventoryItem(j).itemClassId);
-        msg.writeByte(getInventoryItem(j).numberOfItemsInSlot);
-        msg.writeByte((unsigned short)getInventoryItem(j).isEquiped);
+        msg.writeShort(getInventoryItem(j).numberOfItemsInSlot);
+        msg.writeByte((char)getInventoryItem(j).isEquiped);
     }
+    */
 }
 
 void AbstractCharacterData::deserialize(MessageIn &msg)
@@ -63,9 +69,9 @@ void AbstractCharacterData::deserialize(MessageIn &msg)
     setLevel(msg.readByte());
     setMoney(msg.readShort());
 
-    for (int i = 0; i < NB_ATTRIBUTES; ++i)
+    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
     {
-        setAttribute(i, msg.readByte());
+        setBaseAttribute(i, msg.readByte());
     }
 
     setMapId(msg.readShort());
@@ -73,15 +79,23 @@ void AbstractCharacterData::deserialize(MessageIn &msg)
     Point temporaryPoint;
     temporaryPoint.x = msg.readShort();
     temporaryPoint.y = msg.readShort();
-    setPos(temporaryPoint);
+    setPosition(temporaryPoint);
+
+    /**
+     * TODO: uncomment/redesign after Inventory is redesigned/improved
+     * TODO: Test and debug.
+     *
 
     clearInventory();
-    while (msg.getUnreadLength())
+
+    // byte = 1, short = 2
+    while (msg.getUnreadLength() >= 5)
     {
         InventoryItem tempItem;
         tempItem.itemClassId = msg.readShort();
-        tempItem.numberOfItemsInSlot = msg.readByte();
+        tempItem.numberOfItemsInSlot = msg.readShort();
         tempItem.isEquiped = (bool) msg.readByte();
         addItemToInventory(tempItem);
     }
+    */
 }

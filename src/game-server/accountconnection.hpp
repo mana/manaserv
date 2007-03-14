@@ -26,7 +26,7 @@
 
 #include "net/connection.hpp"
 
-class PlayerData;
+class Character;
 
 /**
  * A connection to the account server.
@@ -41,9 +41,9 @@ class AccountConnection: public Connection
         bool start();
 
         /**
-         * Sends data of given player.
+         * Sends data of a given character.
          */
-        void sendPlayerData(PlayerData *);
+        void sendCharacterData(Character *);
 
         /**
          * Prepares the account server for a reconnecting player

@@ -30,7 +30,7 @@
 class MapComposite;
 class Thing;
 class Object;
-class Player;
+class Character;
 
 enum
 {
@@ -69,9 +69,9 @@ class State
         void updateMap(MapComposite *);
 
         /**
-         * Informs a player of what happened around.
+         * Informs a player of what happened around the character.
          */
-        void informPlayer(MapComposite *, Player *);
+        void informPlayer(MapComposite *, Character *);
 
         /**
          * Loads map into game world.

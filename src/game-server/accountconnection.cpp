@@ -26,13 +26,13 @@
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/mapmanager.hpp"
-#include "game-server/player.hpp"
+#include "game-server/character.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
 
-extern void registerGameClient(std::string const &, Player *);
+extern void registerGameClient(std::string const &, Character *);
 
 bool AccountConnection::start()
 {
@@ -54,10 +54,9 @@ bool AccountConnection::start()
     return true;
 }
 
-void AccountConnection::sendPlayerData(PlayerData *p)
+void AccountConnection::sendCharacterData(Character *p)
 {
     MessageOut msg(GAMSG_PLAYER_DATA);
-    msg.writeLong(p->getDatabaseID());
     p->serialize(msg);
     send(msg);
 }
@@ -69,12 +68,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_PLAYER_ENTER:
         {
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
-            int id = msg.readLong();
-            std::string name = msg.readString();
-            Player *ptr = new Player(name, id);
-            ptr->deserialize(msg);
-            ptr->setMapId(ptr->getMap());
-            ptr->setPosition(ptr->getPos());
+            Character *ptr = new Character(msg);
             ptr->setSpeed(150); // TODO
             registerGameClient(token, ptr);
         } break;
@@ -107,5 +101,4 @@ void AccountConnection::playerReconnectAccount(int id, const std::string magic_t
     msg.writeLong(id);
     msg.writeString(magic_token, MAGIC_TOKEN_LENGTH);
     send(msg);
-
 }

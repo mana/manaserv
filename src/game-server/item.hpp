@@ -24,7 +24,10 @@
 #ifndef _TMWSERV_ITEM
 #define _TMWSERV_ITEM
 
-#include "game-server/player.hpp"
+// For NB_BASE_ATTRIBUTES and NB_DERIVED_ATTRIBUTES
+#include "defines.h"
+
+#include "game-server/character.hpp"
 
 /**
  * Enumeration of available Item types.
@@ -71,31 +74,31 @@ enum
 };
 
 /**
- * States attribute effects to beings, and actors.
+ * State effects to beings, and actors.
  * States can be multiple for the same being.
  */
 enum
 {
-    STATE_NORMAL = 0,
-    STATE_POISONED,
-    STATE_STONED,
-    STATE_STUNNED,
-    STATE_SLOWED,
-    STATE_TIRED,
-    STATE_MAD,
-    STATE_BERSERK,
-    STATE_HASTED,
-    STATE_FLOATING,
+    SET_STATE_NORMAL = 0,
+    SET_STATE_POISONED,
+    SET_STATE_STONED,
+    SET_STATE_STUNNED,
+    SET_STATE_SLOWED,
+    SET_STATE_TIRED,
+    SET_STATE_MAD,
+    SET_STATE_BERSERK,
+    SET_STATE_HASTED,
+    SET_STATE_FLOATING,
 
-    STATE_NOT_POISONED,
-    STATE_NOT_STONED,
-    STATE_NOT_STUNNED,
-    STATE_NOT_SLOWED,
-    STATE_NOT_TIRED,
-    STATE_NOT_MAD,
-    STATE_NOT_BERSERK,
-    STATE_NOT_HASTED,
-    STATE_NOT_FLOATING
+    SET_STATE_NOT_POISONED,
+    SET_STATE_NOT_STONED,
+    SET_STATE_NOT_STUNNED,
+    SET_STATE_NOT_SLOWED,
+    SET_STATE_NOT_TIRED,
+    SET_STATE_NOT_MAD,
+    SET_STATE_NOT_BERSERK,
+    SET_STATE_NOT_HASTED,
+    SET_STATE_NOT_FLOATING
 };
 
 /**
@@ -110,8 +113,9 @@ struct Modifiers
     unsigned char beingStateEffect; /**< Being State (dis)alteration */
     unsigned short lifetime; /**< Modifiers lifetime in seconds. */
 
-    // Caracteristics Modifiers
-    short stat[Player::NB_STATS_PLAYER]; /**< Stat modifiers */
+    // Characteristics Modifiers
+    short baseAttributes[NB_BASE_ATTRIBUTES]; /**< Raw Stats modifiers */
+    short derivedAttributes[NB_COMPOUND_ATTRIBUTES - NB_BASE_ATTRIBUTES]; /**< Computed Stats modifiers */
 
     // Weapon
     unsigned short range; /**< Weapon Item Range */
@@ -223,7 +227,7 @@ class ItemClass
 
         // Item reference information
         unsigned short mDatabaseID;
-        unsigned short mSpriteID; /**< The sprite that should be shown to the player */
+        unsigned short mSpriteID; /**< The sprite that should be shown to the character */
         unsigned char mType;     /**< Type: usable, equipment. */
         unsigned short mWeight;  /**< Weight of the item. */
         unsigned short mCost;    /**< Unit cost the item. */

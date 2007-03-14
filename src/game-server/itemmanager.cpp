@@ -21,8 +21,10 @@
  *  $Id$
  */
 
-#include "resourcemanager.h"
 #include "game-server/itemmanager.hpp"
+
+#include "defines.h"
+#include "resourcemanager.h"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
@@ -81,25 +83,29 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         int maxPerSlot = XML::getProperty(node, "max_per_slot", 0);
         std::string scriptName = XML::getProperty(node, "script_name", std::string());
 
+        //TODO: add child nodes for these modifiers (additive and factor)
         Modifiers modifiers;
         modifiers.element = XML::getProperty(node, "element", 0);
         modifiers.lifetime = XML::getProperty(node, "lifetime", 0);
-        modifiers.stat[Player::STRENGTH]     = XML::getProperty(node, "strength",     0);
-        modifiers.stat[Player::AGILITY]      = XML::getProperty(node, "agility",      0);
-        modifiers.stat[Player::VITALITY]     = XML::getProperty(node, "vitality",     0);
-        modifiers.stat[Player::INTELLIGENCE] = XML::getProperty(node, "intelligence", 0);
-        modifiers.stat[Player::DEXTERITY]    = XML::getProperty(node, "dexterity",    0);
-        modifiers.stat[Player::WILLPOWER]    = XML::getProperty(node, "willpower",    0);
-        modifiers.stat[Player::CHARISMA]     = XML::getProperty(node, "charisma",     0);
-
-        modifiers.stat[Being::STAT_HP_MAXIMUM]              = XML::getProperty(node, "hp",     0);
-        modifiers.stat[Being::STAT_PHYSICAL_ATTACK_MINIMUM] = XML::getProperty(node, "attack",     0);
-        modifiers.stat[Being::STAT_PHYSICAL_DEFENCE]        = XML::getProperty(node, "defence",     0);
-
-
+        modifiers.baseAttributes[ATT_STRENGTH]     = XML::getProperty(node, "strength",     0);
+        modifiers.baseAttributes[ATT_AGILITY]      = XML::getProperty(node, "agility",      0);
+        modifiers.baseAttributes[ATT_VITALITY]     = XML::getProperty(node, "vitality",     0);
+        modifiers.baseAttributes[ATT_INTELLIGENCE] = XML::getProperty(node, "intelligence", 0);
+        modifiers.baseAttributes[ATT_DEXTERITY]    = XML::getProperty(node, "dexterity",    0);
+        modifiers.baseAttributes[ATT_LUCK]    = XML::getProperty(node, "luck",    0);
+/**        modifiers.baseAttributes[ATT_WILLPOWER]         = XML::getProperty(node, "willpower",         0);
+        modifiers.baseAttributes[ATT_CHARISMA]         = XML::getProperty(node, "charisma",         0);*/
+        modifiers.derivedAttributes[ATT_HP_MAXIMUM]     = XML::getProperty(node, "hp",     0);
+        modifiers.derivedAttributes[ATT_PHYSICAL_ATTACK_MINIMUM]   = XML::getProperty(node, "attack",   0);
+        modifiers.derivedAttributes[ATT_PHYSICAL_DEFENCE]  = XML::getProperty(node, "defence",  0);
+        modifiers.derivedAttributes[ATT_MAGIC]    = XML::getProperty(node, "magic",    0);
+        modifiers.derivedAttributes[ATT_ACCURACY] = XML::getProperty(node, "accuracy", 0);
+        modifiers.derivedAttributes[ATT_SPEED]    = XML::getProperty(node, "speed",    0);
+/**        modifiers.hp = XML::getProperty(node, "hp", 0);
+        modifiers.mp = XML::getProperty(node, "mp", 0);*/
         modifiers.range = XML::getProperty(node, "range", 0);
         modifiers.weaponType = XML::getProperty(node, "weapon_type", 0);
-        modifiers.beingStateEffect = XML::getProperty(node, "status_effect", 0);
+/**        modifiers.beingStateEffect = XML::getProperty(node, "status_effect", 0);*/
 
         ItemClass *item = new ItemClass(id, itemType);
         item->setWeight(weight);

@@ -24,8 +24,7 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
-#include "playerdata.hpp"
-#include "game-server/player.hpp"
+#include "game-server/character.hpp"
 #include "net/messageout.hpp"
 
 enum
@@ -62,16 +61,16 @@ enum
 class GameClient;
 
 /**
- * Class used to handle Player possessions and prepare outgoing messages.
+ * Class used to handle Character possessions and prepare outgoing messages.
  */
 class Inventory
 {
         Possessions &poss;
         MessageOut msg;
-        Player *client;
+        Character *client;
 
     public:
-        Inventory(Player *);
+        Inventory(Character *);
 
         /**
          * Sends the update message to the client.

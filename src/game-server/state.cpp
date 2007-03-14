@@ -82,14 +82,14 @@ void State::updateMap(MapComposite *map)
     map->update();
 }
 
-void State::informPlayer(MapComposite *map, Player *p)
+void State::informPlayer(MapComposite *map, Character *p)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
     Point pold = p->getOldPosition(), ppos = p->getPosition();
     int pid = p->getPublicID(), pflags = p->getUpdateFlags();
 
-    for (MovingObjectIterator i(map->getAroundPlayerIterator(p, AROUND_AREA)); i; ++i)
+    for (MovingObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
     {
         MovingObject *o = *i;
 
@@ -140,7 +140,7 @@ void State::informPlayer(MapComposite *map, Player *p)
             }
         }
 
-        // Check if this player and this moving object were around.
+        // Check if this character and this moving object were around.
         bool wereInRange = pold.inRangeOf(oold, AROUND_AREA) &&
                            !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
 
@@ -162,9 +162,9 @@ void State::informPlayer(MapComposite *map, Player *p)
             enterMsg.writeShort(opos.x);
             enterMsg.writeShort(opos.y);
             switch (otype) {
-                case OBJECT_PLAYER:
+                case OBJECT_CHARACTER:
                 {
-                    Player *q = static_cast< Player * >(o);
+                    Character *q = static_cast< Character * >(o);
                     enterMsg.writeString(q->getName());
                     enterMsg.writeByte(q->getHairStyle());
                     enterMsg.writeByte(q->getHairColor());
@@ -234,7 +234,7 @@ void State::informPlayer(MapComposite *map, Player *p)
         gameHandler->sendTo(p, damageMsg);
 
     MessageOut itemMsg(GPMSG_ITEMS);
-    for (FixedObjectIterator i(map->getAroundPlayerIterator(p, AROUND_AREA)); i; ++i)
+    for (FixedObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
     {
         assert((*i)->getType() == OBJECT_ITEM);
         Item *o = static_cast< Item * >(*i);
@@ -276,7 +276,7 @@ void State::update()
         MapComposite *map = m->second;
         updateMap(map);
 
-        for (PlayerIterator p(map->getWholeMapIterator()); p; ++p)
+        for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
         {
             informPlayer(map, *p);
         }
@@ -303,9 +303,9 @@ void State::update()
             case EVENT_REMOVE:
             {
                 remove(o);
-                if (o->getType() == OBJECT_PLAYER)
+                if (o->getType() == OBJECT_CHARACTER)
                 {
-                    gameHandler->kill(static_cast< Player * >(o));
+                    gameHandler->kill(static_cast< Character * >(o));
                 }
                 delete o;
             } break;
@@ -322,14 +322,14 @@ void State::update()
                 o->setMapId(e.map);
                 o->setPosition(pos);
 
-                assert(o->getType() == OBJECT_PLAYER);
-                Player *p = static_cast< Player * >(o);
+                assert(o->getType() == OBJECT_CHARACTER);
+                Character *p = static_cast< Character * >(o);
                 /* Force update of persistent data on map change, so that
-                   players can respawn at the start of the map after a death or
+                   characters can respawn at the start of the map after a death or
                    a disconnection. */
-                p->setMap(e.map);
-                p->setPos(pos);
-                accountHandler->sendPlayerData(p);
+                p->setMapId(e.map);
+                p->setPosition(pos);
+                accountHandler->sendCharacterData(p);
 
                 if (mapManager->isActive(e.map))
                 {
@@ -362,16 +362,16 @@ void State::insert(Thing *ptr)
     {
         Object *obj = static_cast< Object * >(ptr);
         obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
-        if (obj->getType() != OBJECT_PLAYER) return;
+        if (obj->getType() != OBJECT_CHARACTER) return;
 
-        /* Since the player doesn't know yet where on the world he is after
+        /* Since the character doesn't know yet where on the world he is after
            connecting to the map server, we send him an initial change map message. */
         MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
         mapChangeMessage.writeString(mapManager->getMapName(mapId));
         Point pos = obj->getPosition();
         mapChangeMessage.writeShort(pos.x);
         mapChangeMessage.writeShort(pos.y);
-        gameHandler->sendTo(static_cast< Player * >(obj), mapChangeMessage);
+        gameHandler->sendTo(static_cast< Character * >(obj), mapChangeMessage);
     }
 }
 
@@ -389,7 +389,7 @@ void State::remove(Thing *ptr)
         msg.writeShort(obj->getPublicID());
         Point objectPos = obj->getPosition();
 
-        for (PlayerIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
+        for (CharacterIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
         {
             if (*p != obj && objectPos.inRangeOf((*p)->getPosition(), AROUND_AREA))
             {
@@ -406,7 +406,7 @@ void State::remove(Thing *ptr)
         msg.writeShort(pos.x);
         msg.writeShort(pos.y);
 
-        for (PlayerIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
+        for (CharacterIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
         {
             if (pos.inRangeOf((*p)->getPosition(), AROUND_AREA))
             {
@@ -462,7 +462,7 @@ void State::sayAround(Object *obj, std::string text)
     MapComposite *map = getMap(obj->getMapId());
     Point speakerPosition = obj->getPosition();
 
-    for (PlayerIterator i(map->getAroundObjectIterator(obj, AROUND_AREA)); i; ++i)
+    for (CharacterIterator i(map->getAroundObjectIterator(obj, AROUND_AREA)); i; ++i)
     {
         if (speakerPosition.inRangeOf((*i)->getPosition(), AROUND_AREA))
         {

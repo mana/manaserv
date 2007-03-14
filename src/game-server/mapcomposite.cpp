@@ -27,7 +27,7 @@
 #include "point.h"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
-#include "game-server/player.hpp"
+#include "game-server/character.hpp"
 
 /* TODO: Implement overlapping map zones instead of strict partitioning.
    Purpose: to decrease the number of zone changes, as overlapping allows for
@@ -48,25 +48,25 @@ void MapZone::insert(Object *obj)
     int type = obj->getType();
     switch (type)
     {
-        case OBJECT_PLAYER:
+        case OBJECT_CHARACTER:
         {
-            if (nbPlayers != nbMovingObjects)
+            if (nbCharacters != nbMovingObjects)
             {
                 if (nbMovingObjects != objects.size())
                 {
                     objects.push_back(objects[nbMovingObjects]);
-                    objects[nbMovingObjects] = objects[nbPlayers];
+                    objects[nbMovingObjects] = objects[nbCharacters];
                 }
                 else
                 {
-                    objects.push_back(objects[nbPlayers]);
+                    objects.push_back(objects[nbCharacters]);
                 }
-                objects[nbPlayers] = obj;
-                ++nbPlayers;
+                objects[nbCharacters] = obj;
+                ++nbCharacters;
                 ++nbMovingObjects;
                 break;
             }
-            ++nbPlayers;
+            ++nbCharacters;
         } // no break!
         case OBJECT_MONSTER:
         case OBJECT_NPC:
@@ -93,15 +93,15 @@ void MapZone::remove(Object *obj)
     int type = obj->getType();
     switch (type)
     {
-        case OBJECT_PLAYER:
+        case OBJECT_CHARACTER:
         {
             i = i_beg;
-            i_end = objects.begin() + nbPlayers;
+            i_end = objects.begin() + nbCharacters;
         } break;
         case OBJECT_MONSTER:
         case OBJECT_NPC:
         {
-            i = objects.begin() + nbPlayers;
+            i = objects.begin() + nbCharacters;
             i_end = objects.begin() + nbMovingObjects;
         } break;
         default:
@@ -113,11 +113,11 @@ void MapZone::remove(Object *obj)
     i = std::find(i, i_end, obj);
     assert(i != i_end);
     unsigned pos = i - i_beg;
-    if (pos < nbPlayers)
+    if (pos < nbCharacters)
     {
-        objects[pos] = objects[nbPlayers - 1];
-        pos = nbPlayers - 1;
-        --nbPlayers;
+        objects[pos] = objects[nbCharacters - 1];
+        pos = nbCharacters - 1;
+        --nbCharacters;
     }
     if (pos < nbMovingObjects)
     {
@@ -164,26 +164,26 @@ void ZoneIterator::operator++()
     }
 }
 
-PlayerIterator::PlayerIterator(ZoneIterator const &it)
+CharacterIterator::CharacterIterator(ZoneIterator const &it)
   : iterator(it), pos(0)
 {
-    while (iterator && (*iterator)->nbPlayers == 0) ++iterator;
+    while (iterator && (*iterator)->nbCharacters == 0) ++iterator;
     if (iterator)
     {
-        current = static_cast< Player * >((*iterator)->objects[pos]);
+        current = static_cast< Character * >((*iterator)->objects[pos]);
     }
 }
 
-void PlayerIterator::operator++()
+void CharacterIterator::operator++()
 {
-    if (++pos == (*iterator)->nbPlayers)
+    if (++pos == (*iterator)->nbCharacters)
     {
-        do ++iterator; while (iterator && (*iterator)->nbPlayers == 0);
+        do ++iterator; while (iterator && (*iterator)->nbCharacters == 0);
         pos = 0;
     }
     if (iterator)
     {
-        current = static_cast< Player * >((*iterator)->objects[pos]);
+        current = static_cast< Character * >((*iterator)->objects[pos]);
     }
 }
 
@@ -442,7 +442,7 @@ ZoneIterator MapComposite::getInsideRectangleIterator(Rectangle const &p) const
     return ZoneIterator(r, this);
 }
 
-ZoneIterator MapComposite::getAroundPlayerIterator(MovingObject *obj, int radius) const
+ZoneIterator MapComposite::getAroundCharacterIterator(MovingObject *obj, int radius) const
 {
     MapRegion r1;
     fillRegion(r1, obj->getOldPosition(), radius);

@@ -125,7 +125,9 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_PLAYER_DATA:
         {
             LOG_DEBUG("GAMSG_PLAYER_DATA");
-
+            // TODO: Store it in memory, only update the database when needed.
+            //       That should get rid of the
+            //       no_update_on_switch_character_bug as well.
             Storage &store = Storage::instance("tmw");
             CharacterPtr ptr(new CharacterData(msg));
 

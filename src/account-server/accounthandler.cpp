@@ -351,8 +351,8 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
                 charInfo.writeByte(chars[i]->getHairColor());
                 charInfo.writeByte(chars[i]->getLevel());
                 charInfo.writeShort(chars[i]->getMoney());
-                for (int j = 0; j < NB_ATTRIBUTES; ++j)
-                        charInfo.writeShort(chars[i]->getAttribute(j));
+                for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
+                        charInfo.writeShort(chars[i]->getBaseAttribute(j));
                 computer.send(charInfo);
             }
             return;
@@ -620,8 +620,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         // LATER_ON: Add race, face and maybe special attributes.
 
         // Customization of character's attributes...
-        unsigned short attributes[NB_ATTRIBUTES];
-        for (int i = 0; i < NB_ATTRIBUTES; ++i)
+        unsigned short attributes[NB_BASE_ATTRIBUTES];
+        for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
             attributes[i] = msg.readShort();
 
         // We see if the difference between the lowest stat and the highest
@@ -630,7 +630,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         unsigned short highestAttribute = 0; // start value
         unsigned int totalAttributes = 0;
         bool validNonZeroAttributes = true;
-        for (int i = 0; i < NB_ATTRIBUTES; ++i)
+        for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
         {
             // For good total attributes check.
             totalAttributes += attributes[i];
@@ -663,8 +663,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         else
         {
             CharacterPtr newCharacter(new CharacterData(name));
-            for (int i = 0; i < NB_ATTRIBUTES; ++i)
-                newCharacter->setAttribute(i, attributes[i]);
+            for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
+                newCharacter->setBaseAttribute(i, attributes[i]);
             newCharacter->setMoney(0);
             newCharacter->setLevel(1);
             newCharacter->setGender(gender);
@@ -673,7 +673,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             newCharacter->setMapId((int) config.getValue("defaultMap", 1));
             Point startingPos((int) config.getValue("startX", 0),
                                   (int) config.getValue("startY", 0));
-            newCharacter->setPos(startingPos);
+            newCharacter->setPosition(startingPos);
             computer.getAccount()->addCharacter(newCharacter);
 
             LOG_INFO("Character " << name << " was created for "
@@ -693,8 +693,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             charInfo.writeByte(chars[slot]->getHairColor());
             charInfo.writeByte(chars[slot]->getLevel());
             charInfo.writeShort(chars[slot]->getMoney());
-            for (int j = 0; j < NB_ATTRIBUTES; ++j)
-                charInfo.writeShort(chars[slot]->getAttribute(j));
+            for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
+                charInfo.writeShort(chars[slot]->getBaseAttribute(j));
             computer.send(charInfo);
             return;
         }
@@ -749,9 +749,9 @@ handleReconnectedAccount(AccountClient &computer, int accountID)
         charInfo.writeByte(chars[i]->getLevel());
         charInfo.writeShort(chars[i]->getMoney());
 
-        for (int j = 0; j < NB_ATTRIBUTES; ++j)
+        for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
         {
-            charInfo.writeShort(chars[i]->getAttribute(j));
+            charInfo.writeShort(chars[i]->getBaseAttribute(j));
         }
         computer.send(charInfo);
     }

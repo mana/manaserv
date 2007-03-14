@@ -65,13 +65,13 @@ tmwserv_account_SOURCES = \
 
 tmwserv_game_SOURCES = \
 	game-server/main-game.cpp \
+	abstractcharacterdata.hpp \
+	abstractcharacterdata.cpp \
 	configuration.h \
 	configuration.cpp \
 	controller.h \
 	controller.cpp \
 	defines.h \
-	playerdata.hpp \
-	playerdata.cpp \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
@@ -81,6 +81,8 @@ tmwserv_game_SOURCES = \
 	game-server/accountconnection.cpp \
 	game-server/being.hpp \
 	game-server/being.cpp \
+	game-server/character.hpp \
+	game-server/character.cpp \
 	game-server/collisiondetection.hpp \
 	game-server/collisiondetection.cpp \
 	game-server/gamehandler.hpp \
@@ -101,8 +103,6 @@ tmwserv_game_SOURCES = \
 	game-server/mapreader.cpp \
 	game-server/object.hpp \
 	game-server/object.cpp \
-	game-server/player.hpp \
-	game-server/player.cpp \
 	game-server/state.hpp \
 	game-server/state.cpp \
 	game-server/testing.cpp \

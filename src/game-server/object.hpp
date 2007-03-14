@@ -36,7 +36,7 @@ enum
     OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and can speak (map panels).
     OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
     OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
-    OBJECT_PLAYER,   // A normal being
+    OBJECT_CHARACTER,// A normal being
     OBJECT_OTHER     // Server-only object
 };
 
@@ -87,14 +87,14 @@ class Thing
          * Returns whether this thing can move on the map or not. (MovingObject)
          */
         bool canMove() const
-        { return mType == OBJECT_PLAYER || mType == OBJECT_MONSTER ||
+        { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER ||
                  mType == OBJECT_NPC; }
 
         /**
          * Returns whether this thing can fight or not. (Being)
          */
         bool canFight() const
-        { return mType == OBJECT_PLAYER || mType == OBJECT_MONSTER; }
+        { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER; }
 
         /**
          * Updates the internal status.

@@ -170,10 +170,11 @@ DALStorage::open(void)
         createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
     }
     catch (const DbConnectionFailure& e) {
-        LOG_ERROR("Unable to connect to the database: " << e.what());
+        LOG_ERROR("(DALStorage::open #1) Unable to connect to the database: "
+                     << e.what());
     }
     catch (const DbSqlQueryExecFailure& e) {
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::open #2) SQL query failure: " << e.what());
     }
 
     mIsOpen = mDb->isConnected();
@@ -391,7 +392,8 @@ CharacterPtr DALStorage::getCharacter(int id)
         // a string to an unsigned short.
         string_to< unsigned short > toUshort;
 
-        CharacterData *character = new CharacterData(charInfo(0, 2), toUint(charInfo(0, 0)));
+        CharacterData *character = new CharacterData(charInfo(0, 2),
+                                                      toUint(charInfo(0, 0)));
         character->setAccountID(toUint(charInfo(0, 1)));
         character->setGender(toUshort(charInfo(0, 3)));
         character->setHairStyle(toUshort(charInfo(0, 4)));
@@ -399,10 +401,10 @@ CharacterPtr DALStorage::getCharacter(int id)
         character->setLevel(toUshort(charInfo(0, 6)));
         character->setMoney(toUint(charInfo(0, 7)));
         Point pos(toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)));
-        character->setPos(pos);
-        for (int i = 0; i < NB_ATTRIBUTES; ++i)
+        character->setPosition(pos);
+        for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
         {
-            character->setAttribute(i, toUshort(charInfo(0, 11 + i)));
+            character->setBaseAttribute(i, toUshort(charInfo(0, 11 + i)));
         }
 
         int mapId = toUint(charInfo(0, 10));
@@ -458,7 +460,7 @@ DALStorage::getEmailList()
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getEmailList) SQL query failure: " << e.what());
     }
 
     return emailList;
@@ -485,7 +487,7 @@ bool DALStorage::doesEmailAddressExist(std::string const &email)
         return iReturn != 0;
     } catch (std::exception const &e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::doesEmailAddressExist) SQL query failure: " << e.what());
     }
 
     return true;
@@ -512,7 +514,8 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
         return iReturn != 0;
     } catch (std::exception const &e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::doesCharacterNameExist) SQL query failure: "
+                << e.what());
     }
 
     return true;
@@ -524,54 +527,55 @@ DALStorage::updateCharacter(CharacterPtr character)
     // If not opened already
     open();
 
-    //Character data (see CharacterData for details)
+    // Update the database Character data (see CharacterData for details)
     try
     {
         std::ostringstream sqlUpdateCharacterInfo;
         sqlUpdateCharacterInfo
             << "update "        << CHARACTERS_TBL_NAME << " "
-            << "set"
-            << "gender = "     << character->getGender()
-                               << ", "
-            << "hair_style = " << (int)character->getHairStyle()
-                               << ", "
-            << "hair_color = " << (int)character->getHairColor()
-                               << ", "
-            << "level = "      << (int)character->getLevel()
-                               << ", "
-            << "money = "      << character->getMoney()
-                               << ", "
-            << "x = "          << character->getPos().x
-                               << ", "
-            << "y = "          << character->getPos().y
-                               << ", "
-            << "map_id = "     << character->getMapId()
-                               << ", "
-            << "str = "        << character->getAttribute(ATT_STRENGTH)
-                               << ", "
-            << "agi = "        << character->getAttribute(ATT_AGILITY)
-                               << ", "
-            << "vit = "        << character->getAttribute(ATT_VITALITY)
-                               << ", "
+            << "set "
+            << "gender = '"     << character->getGender()
+                               << "', "
+            << "hair_style = '" << (int)character->getHairStyle()
+                               << "', "
+            << "hair_color = '" << (int)character->getHairColor()
+                               << "', "
+            << "level = '"      << (int)character->getLevel()
+                               << "', "
+            << "money = '"      << character->getMoney()
+                               << "', "
+            << "x = '"          << character->getPosition().x
+                               << "', "
+            << "y = '"          << character->getPosition().y
+                               << "', "
+            << "map_id = '"     << character->getMapId()
+                               << "', "
+            << "str = '"        << character->getBaseAttribute(ATT_STRENGTH)
+                               << "', "
+            << "agi = '"        << character->getBaseAttribute(ATT_AGILITY)
+                               << "', "
+            << "vit = '"        << character->getBaseAttribute(ATT_VITALITY)
+                               << "', "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-            << "`int` = "
+            << "`int` = '"
 #else
-            << "int = "
+            << "int = '"
 #endif
-                               << character->getAttribute(ATT_INTELLIGENCE)
-                               << ", "
-            << "dex = "        << character->getAttribute(ATT_DEXTERITY)
-                               << ", "
-            << "luck = "       << character->getAttribute(ATT_LUCK)
-            << "where id = "   << character->getDatabaseID()
-                               << ";";
+                               << character->getBaseAttribute(ATT_INTELLIGENCE)
+                               << "', "
+            << "dex = '"        << character->getBaseAttribute(ATT_DEXTERITY)
+                               << "', "
+            << "luck = '"       << character->getBaseAttribute(ATT_LUCK)
+                                << "' "
+            << "where id = '"   << character->getDatabaseID()
+                               << "';";
 
         mDb->execSql(sqlUpdateCharacterInfo.str());
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #1) SQL query failure: " << e.what());
         return false;
     }
 
@@ -584,30 +588,30 @@ DALStorage::updateCharacter(CharacterPtr character)
     {
         std::ostringstream sqlDeleteCharacterInventory;
         sqlDeleteCharacterInventory
-            << "delete * from " << INVENTORIES_TBL_NAME
-            << "where owner_id = " << character->getDatabaseID() << ";";
-
+            << "delete from " << INVENTORIES_TBL_NAME
+            << " where owner_id = '" << character->getDatabaseID() << "';";
         mDb->execSql(sqlDeleteCharacterInventory.str());
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
         return false;
     }
 
     // Insert the new inventory data
-    try
+    if (character->getNumberOfInventoryItems())
     {
-        if (character->getNumberOfInventoryItems())
+        try
         {
             std::ostringstream sqlInsertCharacterInventory;
+
             sqlInsertCharacterInventory
                 << "insert into " << INVENTORIES_TBL_NAME
-                << "(owner_id, class_id, amount, equipped) "
+                << " (owner_id, class_id, amount, equipped) "
                 << "values ";
 
-            for (int j = 0; ; )
+            for (int j = 0; j < character->getNumberOfInventoryItems(); j++)
             {
                 sqlInsertCharacterInventory
                     << "(" << character->getDatabaseID() << ", "
@@ -615,21 +619,23 @@ DALStorage::updateCharacter(CharacterPtr character)
                     << character->getInventoryItem(j).numberOfItemsInSlot
                     << ", "
                     << (unsigned short)
-                                      character->getInventoryItem(j).isEquiped
+                       character->getInventoryItem(j).isEquiped
                     << ")";
+
                 // Adding the comma only if it's needed
-                if (++j < character->getNumberOfInventoryItems())
-                                          sqlInsertCharacterInventory << ", ";
+                if (j < (character->getNumberOfInventoryItems() - 1))
+                        sqlInsertCharacterInventory << ", ";
             }
+            sqlInsertCharacterInventory << ";";
 
             mDb->execSql(sqlInsertCharacterInventory.str());
         }
-    }
-    catch (const dal::DbSqlQueryExecFailure& e)
-    {
-        // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
-        return false;
+        catch (const dal::DbSqlQueryExecFailure& e)
+        {
+            // TODO: throw an exception.
+            LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
+            return false;
+        }
     }
     return true;
 }
@@ -677,7 +683,7 @@ DALStorage::getChannelList()
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getChannelList) SQL query failure: " << e.what());
     }
 
     return channels;
@@ -734,7 +740,7 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateChannels) SQL query failure: " << e.what());
     }
 }
 
@@ -865,15 +871,15 @@ void DALStorage::flush(AccountPtr const &account)
                  << (int)(*it)->getHairColor() << ", "
                  << (int)(*it)->getLevel() << ", "
                  << (*it)->getMoney() << ", "
-                 << (*it)->getPos().x << ", "
-                 << (*it)->getPos().y << ", "
+                 << (*it)->getPosition().x << ", "
+                 << (*it)->getPosition().y << ", "
                  << (*it)->getMapId() << ", "
-                 << (*it)->getAttribute(ATT_STRENGTH) << ", "
-                 << (*it)->getAttribute(ATT_AGILITY) << ", "
-                 << (*it)->getAttribute(ATT_VITALITY) << ", "
-                 << (*it)->getAttribute(ATT_INTELLIGENCE) << ", "
-                 << (*it)->getAttribute(ATT_DEXTERITY) << ", "
-                 << (*it)->getAttribute(ATT_LUCK) << ");";
+                 << (*it)->getBaseAttribute(ATT_STRENGTH) << ", "
+                 << (*it)->getBaseAttribute(ATT_AGILITY) << ", "
+                 << (*it)->getBaseAttribute(ATT_VITALITY) << ", "
+                 << (*it)->getBaseAttribute(ATT_INTELLIGENCE) << ", "
+                 << (*it)->getBaseAttribute(ATT_DEXTERITY) << ", "
+                 << (*it)->getBaseAttribute(ATT_LUCK) << ");";
 
             mDb->execSql(sqlInsertCharactersTable.str());
         } else {
@@ -886,19 +892,20 @@ void DALStorage::flush(AccountPtr const &account)
                 << " hair_color = " << (int)(*it)->getHairColor() << ", "
                 << " level = " << (int)(*it)->getLevel() << ", "
                 << " money = " << (*it)->getMoney() << ", "
-                << " x = " << (*it)->getPos().x << ", "
-                << " y = " << (*it)->getPos().y << ", "
+                << " x = " << (*it)->getPosition().x << ", "
+                << " y = " << (*it)->getPosition().y << ", "
                 << " map_id = " << (*it)->getMapId() << ", "
-                << " str = " << (*it)->getAttribute(ATT_STRENGTH) << ", "
-                << " agi = " << (*it)->getAttribute(ATT_AGILITY) << ", "
-                << " vit = " << (*it)->getAttribute(ATT_VITALITY) << ", "
+                << " str = " << (*it)->getBaseAttribute(ATT_STRENGTH) << ", "
+                << " agi = " << (*it)->getBaseAttribute(ATT_AGILITY) << ", "
+                << " vit = " << (*it)->getBaseAttribute(ATT_VITALITY) << ", "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-                << " `int` = " << (*it)->getAttribute(ATT_INTELLIGENCE) << ", "
+                << " `int` = "
 #else
-                << " int = " << (*it)->getAttribute(ATT_INTELLIGENCE) << ", "
+                << " int = "
 #endif
-                << " dex = " << (*it)->getAttribute(ATT_DEXTERITY) << ", "
-                << " luck = " << (*it)->getAttribute(ATT_LUCK)
+                               << (*it)->getBaseAttribute(ATT_INTELLIGENCE) << ", "
+                << " dex = " << (*it)->getBaseAttribute(ATT_DEXTERITY) << ", "
+                << " luck = " << (*it)->getBaseAttribute(ATT_LUCK)
                 << " where id = " << (*it)->getDatabaseID() << ";";
 
             mDb->execSql(sqlUpdateCharactersTable.str());

@@ -28,9 +28,6 @@ Controlled::Controlled(int type):
     Being(type, 65535),
     mCountDown(0)
 {
-    mStats.base.resize(NB_STATS_BEING, 1); //TODO: fill with the real values
-    mStats.absoluteModificator.resize(NB_STATS_BEING, 0);
-    mStats.percentModificators.resize(NB_STATS_BEING);
 }
 
 void Controlled::update()
@@ -67,9 +64,3 @@ void Controlled::die()
     Being::die();
 }
 
-void Controlled::calculateStats()
-{
-    /* All base stats of a monster should be set directly by the monster
-     * database, so there is nothing we should have to calculate here.
-     */
-}
