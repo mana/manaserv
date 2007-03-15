@@ -114,8 +114,7 @@ struct Modifiers
     unsigned short lifetime; /**< Modifiers lifetime in seconds. */
 
     // Characteristics Modifiers
-    short baseAttributes[NB_BASE_ATTRIBUTES]; /**< Raw Stats modifiers */
-    short derivedAttributes[NB_COMPOUND_ATTRIBUTES - NB_BASE_ATTRIBUTES]; /**< Computed Stats modifiers */
+    short attributes[NB_ATTRIBUTES_CHAR]; /**< Attribute modifiers */
 
     // Weapon
     unsigned short range; /**< Weapon Item Range */

@@ -136,7 +136,8 @@ const std::string SQL_CHARACTERS_TABLE(
         // note: int must be backquoted as it's a MySQL keyword
         "`int`   SMALLINT    UNSIGNED NOT NULL,"
         "dex     SMALLINT    UNSIGNED NOT NULL,"
-        "luck    SMALLINT    UNSIGNED NOT NULL,"
+        "will    SMALLINT    UNSIGNED NOT NULL,"
+        "charisma   SMALLINT    UNSIGNED NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id),"
         "INDEX (id)"
@@ -160,7 +161,8 @@ const std::string SQL_CHARACTERS_TABLE(
         "vit     INTEGER     NOT NULL,"
         "int     INTEGER     NOT NULL,"
         "dex     INTEGER     NOT NULL,"
-        "luck    INTEGER     NOT NULL,"
+        "will    INTEGER     NOT NULL,"
+        "charisma   INTEGER     NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
 #elif defined (POSTGRESQL_SUPPORT)
@@ -183,7 +185,8 @@ const std::string SQL_CHARACTERS_TABLE(
         "vit     INTEGER     NOT NULL,"
         "int     INTEGER     NOT NULL,"
         "dex     INTEGER     NOT NULL,"
-        "luck    INTEGER     NOT NULL,"
+        "will    INTEGER     NOT NULL,"
+        "charisma    INTEGER     NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
 #endif

@@ -550,22 +550,24 @@ DALStorage::updateCharacter(CharacterPtr character)
                                << "', "
             << "map_id = '"     << character->getMapId()
                                << "', "
-            << "str = '"        << character->getBaseAttribute(ATT_STRENGTH)
+            << "str = '"        << character->getBaseAttribute(BASE_ATTR_STRENGTH)
                                << "', "
-            << "agi = '"        << character->getBaseAttribute(ATT_AGILITY)
+            << "agi = '"        << character->getBaseAttribute(BASE_ATTR_AGILITY)
                                << "', "
-            << "vit = '"        << character->getBaseAttribute(ATT_VITALITY)
+            << "vit = '"        << character->getBaseAttribute(BASE_ATTR_VITALITY)
                                << "', "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
             << "`int` = '"
 #else
             << "int = '"
 #endif
-                               << character->getBaseAttribute(ATT_INTELLIGENCE)
+                               << character->getBaseAttribute(BASE_ATTR_INTELLIGENCE)
                                << "', "
-            << "dex = '"        << character->getBaseAttribute(ATT_DEXTERITY)
+            << "dex = '"        << character->getBaseAttribute(BASE_ATTR_DEXTERITY)
                                << "', "
-            << "luck = '"       << character->getBaseAttribute(ATT_LUCK)
+            << "will = '"       << character->getBaseAttribute(BASE_ATTR_WILLPOWER)
+                                << "', "
+            << "charisma = '"   << character->getBaseAttribute(BASE_ATTR_CHARISMA)
                                 << "' "
             << "where id = '"   << character->getDatabaseID()
                                << "';";
@@ -863,7 +865,7 @@ void DALStorage::flush(AccountPtr const &account)
             sqlInsertCharactersTable
                  << "insert into " << CHARACTERS_TBL_NAME
                  << " (user_id, name, gender, hair_style, hair_color, level, money,"
-                 << " x, y, map_id, str, agi, vit, int, dex, luck) values ("
+                 << " x, y, map_id, str, agi, vit, int, dex, will, charisma) values ("
                  << account->getID() << ", \""
                  << (*it)->getName() << "\", "
                  << (*it)->getGender() << ", "
@@ -874,12 +876,13 @@ void DALStorage::flush(AccountPtr const &account)
                  << (*it)->getPosition().x << ", "
                  << (*it)->getPosition().y << ", "
                  << (*it)->getMapId() << ", "
-                 << (*it)->getBaseAttribute(ATT_STRENGTH) << ", "
-                 << (*it)->getBaseAttribute(ATT_AGILITY) << ", "
-                 << (*it)->getBaseAttribute(ATT_VITALITY) << ", "
-                 << (*it)->getBaseAttribute(ATT_INTELLIGENCE) << ", "
-                 << (*it)->getBaseAttribute(ATT_DEXTERITY) << ", "
-                 << (*it)->getBaseAttribute(ATT_LUCK) << ");";
+                 << (*it)->getBaseAttribute(BASE_ATTR_STRENGTH) << ", "
+                 << (*it)->getBaseAttribute(BASE_ATTR_AGILITY) << ", "
+                 << (*it)->getBaseAttribute(BASE_ATTR_VITALITY) << ", "
+                 << (*it)->getBaseAttribute(BASE_ATTR_INTELLIGENCE) << ", "
+                 << (*it)->getBaseAttribute(BASE_ATTR_DEXTERITY) << ", "
+                 << (*it)->getBaseAttribute(BASE_ATTR_WILLPOWER) << ", "
+                 << (*it)->getBaseAttribute(BASE_ATTR_CHARISMA) << ");";
 
             mDb->execSql(sqlInsertCharactersTable.str());
         } else {
@@ -895,17 +898,17 @@ void DALStorage::flush(AccountPtr const &account)
                 << " x = " << (*it)->getPosition().x << ", "
                 << " y = " << (*it)->getPosition().y << ", "
                 << " map_id = " << (*it)->getMapId() << ", "
-                << " str = " << (*it)->getBaseAttribute(ATT_STRENGTH) << ", "
-                << " agi = " << (*it)->getBaseAttribute(ATT_AGILITY) << ", "
-                << " vit = " << (*it)->getBaseAttribute(ATT_VITALITY) << ", "
+                << " str = " << (*it)->getBaseAttribute(BASE_ATTR_STRENGTH) << ", "
+                << " agi = " << (*it)->getBaseAttribute(BASE_ATTR_AGILITY) << ", "
+                << " vit = " << (*it)->getBaseAttribute(BASE_ATTR_VITALITY) << ", "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
                 << " `int` = "
 #else
                 << " int = "
 #endif
-                               << (*it)->getBaseAttribute(ATT_INTELLIGENCE) << ", "
-                << " dex = " << (*it)->getBaseAttribute(ATT_DEXTERITY) << ", "
-                << " luck = " << (*it)->getBaseAttribute(ATT_LUCK)
+                               << (*it)->getBaseAttribute(BASE_ATTR_INTELLIGENCE) << ", "
+                << " will = " << (*it)->getBaseAttribute(BASE_ATTR_WILLPOWER) << ", "
+                << " charisma = " << (*it)->getBaseAttribute(BASE_ATTR_CHARISMA)
                 << " where id = " << (*it)->getDatabaseID() << ";";
 
             mDb->execSql(sqlUpdateCharactersTable.str());

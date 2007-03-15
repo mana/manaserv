@@ -28,6 +28,7 @@ Controlled::Controlled(int type):
     Being(type, 65535),
     mCountDown(0)
 {
+    mAttributes.resize(NB_ATTRIBUTES_CONTROLLED, 1); // TODO: fill with the real attributes
 }
 
 void Controlled::update()
@@ -60,7 +61,29 @@ void Controlled::update()
 
 void Controlled::die()
 {
-    mCountDown = 600;
+    mCountDown = 50; //sets remove time to 5 seconds
     Being::die();
 }
 
+WeaponStats Controlled::getWeaponStats()
+{
+
+    WeaponStats weaponStats;
+
+    /*
+     * TODO: This should all be set by the monster database
+     */
+    weaponStats.piercing = 1;
+    weaponStats.element = ELEMENT_NEUTRAL;
+    weaponStats.skill = MONSTER_SKILL_WEAPON;
+
+    return weaponStats;
+}
+
+void Controlled::calculateDerivedAttributes()
+{
+    Being::calculateDerivedAttributes();
+    /*
+     * Do any monster specific attribute calculation here
+     */
+}

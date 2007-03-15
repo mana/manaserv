@@ -1,4 +1,20 @@
-2007-03-14  Rogier Polak     <rogier.l.a.polak@gmail.com>
+2007-03-15  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/account-server/accounthandler.cpp: Set the default map
+	position of new characters to a value that makes more sense.
+	* src/defines.h, src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp: Implemented new basic attribute
+	system.
+	* src/controller.cpp, src/controller.hpp, src/defines.h,
+	src/game-server/being.cpp, src/game-server/being.hpp,
+	src/game-server/character.cpp, src/game-server/character.hpp,
+	src/gameserver/item.hpp, src/gameserver/itemmanager.hpp,
+	src/gameserver/testing.cpp:
+	Removed attribute modifiers, unified basic and derived attributes,
+	storing attributes in a vector, renamed some attribute identifiers,
+	removed identifiers for derived attributes that aren't needed yet.
+
+2007-03-14  Rogier Polak  <rogier.l.a.polak@gmail.com>
 
 	* src/abstractcharacterdata.hpp, src/abstractcharacterdata.cpp,
 	src/defines.h, src/Makefile.am, src/playerdata.hpp,

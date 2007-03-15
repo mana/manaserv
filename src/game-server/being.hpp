@@ -38,14 +38,7 @@ class MapComposite;
  */
 enum
 {
-    ATT_HP_MAXIMUM = NB_BASE_ATTRIBUTES,
-    ATT_PHYSICAL_ATTACK_MINIMUM,
-    ATT_PHYSICAL_ATTACK_FLUCTUATION,
-    ATT_PHYSICAL_DEFENCE,
-    ATT_MAGIC,
-    ATT_ACCURACY,
-    ATT_SPEED,
-    NB_COMPOUND_ATTRIBUTES
+
 };
 
 /**
@@ -92,25 +85,26 @@ enum Damagetype
 struct Damage
 {
     int value;
-    int penetration;
+    int piercing;
     Element element;
     Damagetype type;
     Being *source;
 };
 
 /**
+ * Structure that holds weapon stats that are relevant for damage calculation
+ */
+struct WeaponStats
+{
+    int piercing;
+    Element element;
+    int skill;
+};
+
+/**
  * Type definition for a list of hits
  */
 typedef std::list<unsigned int> Hits;
-
-/**
- * Structures for storing the attribute modifiers of a Being.
- */
-struct BeingModificators
-{
-    std::vector<short> absoluteModificator;
-    std::vector< std::list<short> > percentModificators;
-};
 
 
 /**
@@ -143,44 +137,16 @@ class Being : public MovingObject
         ~Being();
 
         /**
-         * Adds a fixed value stat modifier
-         */
-        void addAbsoluteStatModifier(int attributeNumber, short value);
-
-        /**
-         * Removes a fixed value stat modifier
-         */
-        void removeAbsoluteStatModifier(int attributeNumber, short value);
-
-        /**
-         * Adds a multiplier stat modificator in percent
-         */
-        void addPercentStatModifier(int attributeNumber, short value);
-
-        /**
-         * Removes a previously added percent stat modifier.
-         * Does nothing and logs a warning when no modifier with the same
-         * value has been added before.
-         */
-        void removePercentStatModifier(int attributeNumber, short value);
-
-        /**
-         * Returns a specific compound attribute of a being.
-         */
-        unsigned short getCompoundAttribute(int attributeNumber)
-        { return mCompoundAttributes[attributeNumber]; }
-
-        /**
          * Creates a damage structure for a normal melee attack based on the
          * current being stats and equipment.
          */
         Damage getPhysicalAttackDamage();
 
         /**
-         * sets the hit points
+         * Sets the hit points to maximum
          */
-        void setHitpoints(unsigned hp)
-        { mHitpoints = hp; }
+        void fillHitpoints()
+        { mHitpoints = getAttribute(DERIVED_ATTR_HP_MAXIMUM); }
 
         /**
          * Takes a damage structure, computes the real damage based on the
@@ -228,44 +194,41 @@ class Being : public MovingObject
         virtual void move();
 
         /**
-         * FOR TESTING PURPOSES ONLY
-         * Sets a compound attribute.
-         * Remember, they're modified after a modifier is added.
+         * Sets an attribute (doesn't work on derived attributes)
          */
-        void setCompoundAttribute(int attributeNumber, unsigned short value)
-        { mCompoundAttributes[attributeNumber] = value; }
+        void setAttribute(int attributeNumber, unsigned short value)
+        {
+            mAttributes.at(attributeNumber) = value;
+            calculateDerivedAttributes();
+        }
+
+        /**
+         * Gets an attribute.
+         */
+        unsigned short getAttribute(int attributeNumber) const
+        { return mAttributes.at(attributeNumber); }
 
     protected:
+        /**
+         * Calculates all derived attributes of a beings
+         */
+        void calculateDerivedAttributes();
 
         /**
-         * Sets a base attribute.
+         * Gets the stats of the currently equipped weapon that are relevant
+         * for damage calculation
          */
-        void setBaseAttribute(int attributeNumber, unsigned short value)
-        { mBaseAttributes[attributeNumber] = value; }
-
-        /**
-         * Gets a derived attribute.
-         */
-        unsigned short getBaseAttribute(int attributeNumber) const
-        { return mBaseAttributes[attributeNumber]; }
-
-        /**
-         * Recalculates the compound attributes of a being.
-         */
-        void recalculateAllCompoundAttributes();
-
-        void calculateCompoundAttribute(int attributeNumber);
+        virtual WeaponStats getWeaponStats();
 
         int mHitpoints; /**< Hitpoints of the being */
         Action mAction;
-        BeingModificators mBeingModificators;
+
+        std::vector<unsigned short> mAttributes;
 
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
 
-        unsigned short mBaseAttributes[NB_BASE_ATTRIBUTES];
-        unsigned short mCompoundAttributes[NB_COMPOUND_ATTRIBUTES];
 
         Hits mHitsTaken; /**< List of punches taken since last update */
 };

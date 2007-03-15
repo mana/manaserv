@@ -46,6 +46,18 @@ class Controlled: public Being
          */
         virtual void die();
 
+    protected:
+        /**
+         * Gets the stats of the currently equipped weapon that are relevant
+         * for damage calculation
+         */
+        virtual WeaponStats getWeaponStats();
+
+        /**
+         * Calculates all derived attributes
+         */
+        void calculateDerivedAttributes();
+
     private:
         /** Count down till next random movement (temporary). */
         unsigned int mCountDown;

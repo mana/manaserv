@@ -41,12 +41,9 @@ void testingMap(int id)
                 being->setSize(8);
 
                 // some bogus stats for testing
-                being->setCompoundAttribute(ATT_HP_MAXIMUM, 42);
-                being->setCompoundAttribute(ATT_PHYSICAL_ATTACK_MINIMUM, 1);
-                being->setCompoundAttribute(ATT_PHYSICAL_ATTACK_FLUCTUATION, 0);
-                being->setCompoundAttribute(ATT_PHYSICAL_DEFENCE, 5);
+                being->setAttribute(BASE_ATTR_VITALITY, 10);
 
-                being->setHitpoints(42);
+                being->fillHitpoints();
 
                 being->setMapId(1);
                 Point pos(720, 900);

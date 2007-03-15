@@ -22,6 +22,7 @@
 
 #include "game-server/being.hpp"
 
+#include "defines.h"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
@@ -30,17 +31,7 @@ Being::Being(int type, int id):
     MovingObject(type, id),
     mAction(STAND)
 {
-    for (int i = 0; i < NB_BASE_ATTRIBUTES; i++)
-    {
-        mBaseAttributes[i] = 0;
-    }
-    for (int j = 0; j < NB_COMPOUND_ATTRIBUTES; j++)
-    {
-        mCompoundAttributes[j] = 0;
-    }
-    mBeingModificators.absoluteModificator.resize(NB_COMPOUND_ATTRIBUTES, 0);
-    mBeingModificators.percentModificators.resize(NB_COMPOUND_ATTRIBUTES);
-    //TODO: set the base attributes, calculate the compound attributes
+    mAttributes.resize(NB_ATTRIBUTES_BEING);
 }
 
 Being::~Being()
@@ -59,14 +50,14 @@ void Being::damage(Damage damage)
     switch (damage.type)
     {
         case DAMAGETYPE_PHYSICAL:
-            HPloss -= getCompoundAttribute(ATT_PHYSICAL_DEFENCE)
-                                                         / damage.penetration;
+            HPloss -= getAttribute(DERIVED_ATTR_PHYSICAL_DEFENCE) / damage.piercing;
+            HPloss -= getAttribute(BASE_ATTR_VITALITY);
             break;
         case DAMAGETYPE_MAGICAL:
-            // NIY
+            HPloss /= getAttribute(BASE_ATTR_WILLPOWER) + 1;
             break;
         case DAMAGETYPE_HAZARD:
-            // NIY
+            HPloss /= getAttribute(BASE_ATTR_VITALITY) + 1;
             break;
         case DAMAGETYPE_OTHER:
             // nothing to do here
@@ -165,127 +156,54 @@ void Being::setAction(Action action)
     }
 }
 
-void Being::addAbsoluteStatModifier(int attributeNumber, short value)
+void Being::calculateDerivedAttributes()
 {
-    mBeingModificators.absoluteModificator.at(attributeNumber) += value;
-    calculateCompoundAttribute(attributeNumber);
-}
-
-void Being::removeAbsoluteStatModifier(int attributeNumber, short value)
-{
-    mBeingModificators.absoluteModificator.at(attributeNumber) -= value;
-    calculateCompoundAttribute(attributeNumber);
-}
-
-void Being::addPercentStatModifier(int attributeNumber, short value)
-{
-    if (value < -100)
+    // effective values for basic attributes
+    for (int i = NB_BASE_ATTRIBUTES; i < NB_EFFECTIVE_ATTRIBUTES; i++)
     {
-        LOG_WARN(   "Attempt to add a stat modificator for Being"<<
-                    getPublicID()<<
-                    "that would make the stat negative!"
-                );
-        return;
+        mAttributes.at(i)
+            = getAttribute(i - NB_BASE_ATTRIBUTES); // TODO: add modifiers
     }
 
-    mBeingModificators.percentModificators.at(attributeNumber).push_back(value);
-    calculateCompoundAttribute(attributeNumber);
-}
+    // combat-related derived stats
+    mAttributes.at(DERIVED_ATTR_HP_MAXIMUM)
+        = getAttribute(ATTR_EFF_VITALITY); // TODO: find a better formula
 
-void Being::removePercentStatModifier(int attributeNumber, short value)
-{
-    std::list<short>::iterator
-       i = mBeingModificators.percentModificators.at(attributeNumber).begin(),
-       i_end = mBeingModificators.percentModificators.at(attributeNumber).end();
-    for (; i != i_end; i++)
-    {
-        if ((*i) = value)
-        {
-            mBeingModificators.percentModificators.at(attributeNumber).erase(i);
-            break;
-        }
-    }
-    if (i == i_end)
-        LOG_WARN("Attempt to remove a stat modificator for Being" <<
-                 getPublicID() <<
-                 "that hasn't been added before!");
+    mAttributes.at(DERIVED_ATTR_PHYSICAL_ATTACK_MINIMUM)
+        = getAttribute(ATTR_EFF_STRENGTH);
 
-    calculateCompoundAttribute(attributeNumber);
+    mAttributes.at(DERIVED_ATTR_PHYSICAL_ATTACK_FLUCTUATION)
+        = getAttribute(getWeaponStats().skill);
 
-    return;
-}
-
-void Being::calculateCompoundAttribute(int attributeNumber)
-{
-    int value;
-
-    if (attributeNumber < NB_BASE_ATTRIBUTES)
-        value = getBaseAttribute(attributeNumber);
-
-    switch (attributeNumber)
-    {
-        case ATT_HP_MAXIMUM:
-            value = 20 + (20 * getBaseAttribute(ATT_VITALITY));
-            break;
-        case ATT_PHYSICAL_ATTACK_MINIMUM:
-            value = 10 + getBaseAttribute(ATT_STRENGTH);
-            break;
-        case ATT_PHYSICAL_ATTACK_FLUCTUATION:
-            value = 10;
-            break;
-        case ATT_PHYSICAL_DEFENCE:
-            value = 10 + getBaseAttribute(ATT_STRENGTH);
-            break;
-        case ATT_MAGIC:
-            value = 0;
-            break;
-        case ATT_ACCURACY:
-            value = 50 + getBaseAttribute(ATT_DEXTERITY);
-            break;
-        case ATT_SPEED:
-            value = getBaseAttribute(ATT_AGILITY);
-            break;
-    }
-
-    value += mBeingModificators.absoluteModificator.at(attributeNumber);
-
-    std::list<short>::iterator i;
-
-    float multiplier = 1.0f;
-
-    for (   i = mBeingModificators.percentModificators.at(attributeNumber).begin();
-            i != mBeingModificators.percentModificators.at(attributeNumber).end();
-            i++
-        )
-    {
-        multiplier *= (100.0f + (float)(*i)) / 100.0f;
-    }
-
-    /* Floating point inaccuracies might result in a negative multiplier. That
-     * would result in a stat near 2^16. To make sure that this doesn't happen
-     * we return a value of 0 in that case
-     */
-    mCompoundAttributes[attributeNumber] =
-        (multiplier < 0.0f) ? 0 : (unsigned short)(value * multiplier);
-}
-
-void Being::recalculateAllCompoundAttributes()
-{
-    for (int i = 0; i < (NB_COMPOUND_ATTRIBUTES); i++)
-    {
-        calculateCompoundAttribute(i);
-    }
+    mAttributes.at(DERIVED_ATTR_PHYSICAL_DEFENCE)
+        = 0 /* + sum of equipment pieces */;
 }
 
 Damage Being::getPhysicalAttackDamage()
 {
     Damage damage;
+    WeaponStats weaponStats = getWeaponStats();
+
     damage.type = DAMAGETYPE_PHYSICAL;
-    damage.value = getCompoundAttribute(ATT_PHYSICAL_ATTACK_MINIMUM)
-                      + (rand()%getCompoundAttribute(ATT_PHYSICAL_ATTACK_FLUCTUATION));
-    damage.penetration = 1; // TODO: get from equipped weapon
-    damage.element = ELEMENT_NEUTRAL; // TODO: get from equipped weapon
+    damage.value = getAttribute(DERIVED_ATTR_PHYSICAL_ATTACK_MINIMUM)
+                + (rand()%getAttribute(DERIVED_ATTR_PHYSICAL_ATTACK_FLUCTUATION));
+    damage.piercing = weaponStats.piercing;
+    damage.element = weaponStats.element;
     damage.source = this;
 
     return damage;
 }
+
+WeaponStats Being::getWeaponStats()
+{
+    /* this function should never be called. it is just here to pacify the
+     * compiler.
+     */
+    WeaponStats weaponStats;
+
+    weaponStats.piercing = 1;
+    weaponStats.element = ELEMENT_NEUTRAL;
+    weaponStats.skill = 0;
+
+    return weaponStats;
+};

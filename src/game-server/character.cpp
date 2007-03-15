@@ -29,30 +29,23 @@
 
 InventoryItem tempItem;
 
-Character::Character():
-    Being(OBJECT_CHARACTER, 65535),
-    mClient(NULL),
-    mDatabaseID(-1), mName(""), mGender(0), mHairStyle(0), mHairColor(0),
-    mLevel(0), mMoney(0)
-{
-    for (int i = 0; i < EQUIPMENT_SLOTS; ++i)
-    {
-        mPossessions.equipment[i] = 0;
-    }
-}
-
 Character::Character(MessageIn & msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL),
     mDatabaseID(-1), mName(""), mGender(0), mHairStyle(0), mHairColor(0),
     mLevel(0), mMoney(0)
 {
+    // clear equipment
     for (int i = 0; i < EQUIPMENT_SLOTS; ++i)
     {
         mPossessions.equipment[i] = 0;
     }
+    // prepare attributes vector
+    mAttributes.resize(NB_ATTRIBUTES_CHAR, 1);
+    // get base attributes
     deserialize(msg);
-    recalculateAllCompoundAttributes();
+    // give the player 10 weapon skill for testing purpose
+    setAttribute(CHAR_SKILL_WEAPON_UNARMED, 10);
 }
 /**
  * Update the internal status.
@@ -105,4 +98,27 @@ Character::addItemToInventory(const InventoryItem& item)
 {
     // TODO: implement after redesign/improvement of Inventory
 }
+
+void Character::calculateDerivedAttributes()
+{
+    Being::calculateDerivedAttributes();
+    /*
+     * Do any player character specific attribute calculation here
+     */
+}
+
+WeaponStats
+Character::getWeaponStats()
+{
+    WeaponStats weaponStats;
+
+    /*
+     * TODO: get all this stuff from the currently equipped weapon
+     */
+    weaponStats.piercing = 1;
+    weaponStats.element = ELEMENT_NEUTRAL;
+    weaponStats.skill = CHAR_SKILL_WEAPON_UNARMED;
+
+    return weaponStats;
+};
 

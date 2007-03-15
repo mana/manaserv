@@ -671,8 +671,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
             newCharacter->setMapId((int) config.getValue("defaultMap", 1));
-            Point startingPos((int) config.getValue("startX", 0),
-                                  (int) config.getValue("startY", 0));
+            Point startingPos((int) config.getValue("startX", 512),
+                                  (int) config.getValue("startY", 512));
             newCharacter->setPosition(startingPos);
             computer.getAccount()->addCharacter(newCharacter);
 

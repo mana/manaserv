@@ -48,11 +48,6 @@ class Character : public Being, public AbstractCharacterData
     public:
 
         /**
-         * Basic constructor
-         */
-        Character();
-
-        /**
          * Utility constructor for creating a Character from a received
          * characterdata message.
          */
@@ -165,7 +160,7 @@ class Character : public Being, public AbstractCharacterData
          */
         unsigned short
         getBaseAttribute(int attributeNumber) const
-        { return Being::getBaseAttribute(attributeNumber); }
+        { return Being::getAttribute(attributeNumber); }
 
         /**
          * Sets the value of an attribute of the character.
@@ -174,7 +169,7 @@ class Character : public Being, public AbstractCharacterData
          */
         void
         setBaseAttribute(int attributeNumber, int value)
-        { Being::setBaseAttribute(attributeNumber, value); }
+        { Being::setAttribute(attributeNumber, value); }
 
         /**
          * Gets the Id of the map that the character is on.
@@ -242,6 +237,17 @@ class Character : public Being, public AbstractCharacterData
         void
         addItemToInventory(const InventoryItem& item);
 
+    protected:
+        /**
+         * Calculates all derived attributes
+         */
+        void calculateDerivedAttributes();
+
+        /**
+         * Gets the stats of the currently equipped weapon that are relevant
+         * for damage calculation
+         */
+        virtual WeaponStats getWeaponStats();
 
     private:
         Character(Character const &);
