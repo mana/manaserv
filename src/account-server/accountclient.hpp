@@ -32,6 +32,13 @@
 
 class AccountHandler;
 
+enum
+{
+    CLIENT_LOGIN = 0,
+    CLIENT_CONNECTED,
+    CLIENT_QUEQUED
+};
+
 /**
  * A connected computer that can have an account and character associated with
  * it.
@@ -84,6 +91,8 @@ class AccountClient : public NetComputer
          */
         CharacterPtr
         getCharacter() const { return mCharacterPtr; }
+
+        int status;
 
     private:
         /** Account associated with connection */

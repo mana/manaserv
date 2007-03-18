@@ -30,7 +30,8 @@
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),
     mAccountPtr(NULL),
-    mCharacterPtr(NULL)
+    mCharacterPtr(NULL),
+    status(CLIENT_LOGIN)
 {
 }
 

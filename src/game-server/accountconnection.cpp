@@ -31,8 +31,7 @@
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
-
-extern void registerGameClient(std::string const &, Character *);
+#include "utils/tokencollector.hpp"
 
 bool AccountConnection::start()
 {
@@ -70,7 +69,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             Character *ptr = new Character(msg);
             ptr->setSpeed(150); // TODO
-            registerGameClient(token, ptr);
+            gameHandler->mTokenCollector.addPendingConnect(token, ptr);
         } break;
 
         case AGMSG_ACTIVE_MAP:

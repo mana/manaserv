@@ -1,3 +1,20 @@
+2007-03-18  Rogier Polak  <rogier.l.a.polak@gmail.com>
+
+	* src/net/netcomputer.cpp: Corrected the debug message for big-endian
+	architectures.
+	* src/defines.h, src/Makefile.am,
+	src/account-server/accountclient.hpp,
+	src/account-server/accountclient.cpp,
+	src/account-server/accounthandler.hpp,
+	src/account-server/accounthandler.cpp,
+	src/account-server/serverhandler.hpp,
+	src/account-server/serverhandler.cpp,
+	src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.hpp, src/game-server/gamehandler.cpp,
+	src/utils/tokencollector.hpp: Added a TokenCollector class, which
+	matches tokens used for moving clients between servers. Improved the
+	handling of connecting clients for the account-server.
+
 2007-03-15  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/account-server/accounthandler.cpp: Set the default map

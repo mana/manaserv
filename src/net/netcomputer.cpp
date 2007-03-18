@@ -92,11 +92,10 @@ operator <<(std::ostream &os, const NetComputer &comp)
            << ((comp.mPeer->address.host & 0xff000000) >> 24);
     else
     // big-endian
-    // TODO: test this
-        os << ((comp.mPeer->address.host & 0x000000ff) << 24) << "."
-           << ((comp.mPeer->address.host & 0x0000ff00) << 16) << "."
-           << ((comp.mPeer->address.host & 0x00ff0000) << 8)  << "."
-           << ((comp.mPeer->address.host & 0xff000000) << 0);
+        os << ((comp.mPeer->address.host & 0xff000000) >> 24)  << "."
+           << ((comp.mPeer->address.host & 0x00ff0000) >> 16)  << "."
+           << ((comp.mPeer->address.host & 0x0000ff00) >> 8)   << "."
+           << ((comp.mPeer->address.host & 0x000000ff) >> 0);
 
     return os;
 }

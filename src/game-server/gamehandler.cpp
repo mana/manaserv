@@ -39,78 +39,9 @@
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
 
-enum
+GameHandler::GameHandler():
+    mTokenCollector(this)
 {
-    CLIENT_LOGIN = 0,
-    CLIENT_CONNECTED,
-    CLIENT_CHANGE_SERVER
-};
-
-struct GameClient: NetComputer
-{
-    GameClient(ENetPeer *peer)
-      : NetComputer(peer), character(NULL), status(CLIENT_LOGIN) {}
-    Character *character;
-    int status;
-};
-
-struct GamePendingLogin
-{
-    Character *character;
-    int timeout;
-};
-
-typedef std::map< std::string, GamePendingLogin > GamePendingLogins;
-typedef std::map< std::string, GameClient * > GamePendingClients;
-
-/**
- * The pending logins represent clients who were given a magic token by the
- * account server but who have not yet logged in to the game server.
- */
-static GamePendingLogins pendingLogins;
-
-/**
- * The pending clients represent clients who tried to login to the game server,
- * but for which no magic token is available yet. This can happen when the
- * communication between the account server and client went faster than the
- * communication between the account server and the game server.
- */
-static GamePendingClients pendingClients;
-
-/**
- * Links a client to a character.
- */
-static void linkCharacter(GameClient *computer, Character *ch)
-{
-    computer->character = ch;
-    computer->status = CLIENT_CONNECTED;
-    ch->setClient(computer);
-    MessageOut result(GPMSG_CONNECT_RESPONSE);
-    result.writeByte(ERRMSG_OK);
-    computer->send(result);
-    gameState->insert(ch);
-    Inventory(ch).sendFull();
-}
-
-/**
- * Notification that a particular token has been given to allow a certain
- * character to enter the game.
- */
-void registerGameClient(std::string const &token, Character *ch)
-{
-    GamePendingClients::iterator i = pendingClients.find(token);
-    if (i != pendingClients.end())
-    {
-        linkCharacter(i->second, ch);
-        pendingClients.erase(i);
-    }
-    else
-    {
-        GamePendingLogin p;
-        p.character = ch;
-        p.timeout = 300; // world ticks
-        pendingLogins.insert(std::make_pair(token, p));
-    }
 }
 
 bool GameHandler::startListen(enet_uint16 port)
@@ -124,23 +55,20 @@ NetComputer *GameHandler::computerConnected(ENetPeer *peer)
     return new GameClient(peer);
 }
 
-void GameHandler::computerDisconnected(NetComputer *computer)
+void GameHandler::computerDisconnected(NetComputer *comp)
 {
-    for (GamePendingClients::iterator i = pendingClients.begin(),
-         i_end = pendingClients.end(); i != i_end; ++i)
+    GameClient &computer = *static_cast< GameClient * >(comp);
+
+    if (computer.status == CLIENT_QUEQUED)
     {
-        if (i->second == computer)
-        {
-            pendingClients.erase(i);
-            break;
-        }
+        mTokenCollector.deletePendingClient(&computer);
     }
-    if (Character *ch = static_cast< GameClient * >(computer)->character)
+    else if (Character *ch = computer.character)
     {
         gameState->remove(ch);
         delete ch;
     }
-    delete computer;
+    delete &computer;
 }
 
 void GameHandler::kill(Character *ch)
@@ -184,21 +112,6 @@ void GameHandler::completeServerChange(int id, std::string const &token,
 void GameHandler::process()
 {
     ConnectionHandler::process();
-
-    // Removes characters that have been left unconnected for too long.
-    GamePendingLogins::iterator i = pendingLogins.begin();
-    while (i != pendingLogins.end())
-    {
-        if (--i->second.timeout <= 0)
-        {
-            delete i->second.character;
-            pendingLogins.erase(i++);
-        }
-        else
-        {
-            ++i;
-        }
-    }
 }
 
 void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
@@ -209,20 +122,10 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
     if (computer.status == CLIENT_LOGIN)
     {
         if (message.getId() != PGMSG_CONNECT) return;
+
         std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
-        GamePendingLogins::iterator i = pendingLogins.find(magic_token);
-        if (i == pendingLogins.end())
-        {
-            for (GamePendingClients::iterator j = pendingClients.begin(),
-                 j_end = pendingClients.end(); j != j_end; ++j)
-            {
-                if (j->second == &computer) return;
-            }
-            pendingClients.insert(std::make_pair(magic_token, &computer));
-            return;
-        }
-        linkCharacter(&computer, i->second.character);
-        pendingLogins.erase(i);
+        mTokenCollector.addPendingClient(magic_token, &computer);
+        computer.status == CLIENT_QUEQUED;
         return;
     }
     else if (computer.status != CLIENT_CONNECTED)
@@ -370,4 +273,39 @@ void GameHandler::sendTo(Character *beingPtr, MessageOut &msg)
     GameClient *client = beingPtr->getClient();
     assert(client && client->status == CLIENT_CONNECTED);
     client->send(msg);
+}
+
+void
+GameHandler::tokenMatched(GameClient* computer, Character* character)
+{
+    computer->character = character;
+    computer->status = CLIENT_CONNECTED;
+
+    character->setClient(computer);
+
+    MessageOut result(GPMSG_CONNECT_RESPONSE);
+    result.writeByte(ERRMSG_OK);
+    computer->send(result);
+
+    gameState->insert(character);
+
+    Inventory(character).sendFull();
+}
+
+void
+GameHandler::deletePendingClient(GameClient* computer)
+{
+    // Something might have changed since it was inserted
+    if (computer->status != CLIENT_QUEQUED) return;
+
+    MessageOut msg(GPMSG_CONNECTION_TIMEDOUT);
+
+    // The computer will be deleted when the disconnect event is processed
+    computer->disconnect(msg);
+}
+
+void
+GameHandler::deletePendingConnect(Character* character)
+{
+    delete character;
 }

@@ -25,6 +25,7 @@
 #define _TMWSERV_ACCOUNTHANDLER_H_
 
 #include "net/connectionhandler.hpp"
+#include "utils/tokencollector.hpp"
 
 class AccountClient;
 
@@ -40,10 +41,43 @@ class AccountHandler : public ConnectionHandler
 {
     public:
         /**
+         * Constructor
+         */
+        AccountHandler();
+
+        /**
          * Start the handler
          */
         bool
         startListen(enet_uint16 port);
+
+        /**
+         * Combines a client with it's account.
+         * (Needed for TokenCollector)
+         */
+        void
+        tokenMatched(AccountClient *computer, int accountID);
+
+        /**
+         * Deletes a pending client's data.
+         * (Needed for TokenCollector)
+         */
+        void
+        deletePendingClient(AccountClient* computer);
+
+        /**
+         * Deletes a pending connection's data.
+         * (Needed for TokenCollector)
+         */
+        void
+        deletePendingConnect(int accountID);
+
+        /**
+         * TokenCollector, used to login a client without the client having to
+         * send username and password a second time.
+         */
+        TokenCollector<AccountHandler, AccountClient*, int>
+        mTokenCollector;
 
     protected:
         /**
@@ -76,10 +110,24 @@ class AccountHandler : public ConnectionHandler
         handleUnregisterMessage(AccountClient &computer, MessageIn &msg);
 
         void
+        handleEmailChangeMessage(AccountClient &computer, MessageIn &msg);
+
+        void
+        handleEmailGetMessage(AccountClient &computer);
+
+        void
         handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg);
 
         void
         handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg);
+
+        void
+        handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg);
+
+        void
+        handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg);
 };
+
+extern AccountHandler * accountHandler;
 
 #endif

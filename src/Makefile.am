@@ -60,6 +60,7 @@ tmwserv_account_SOURCES = \
 	utils/processorutils.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
+	utils/tokencollector.hpp \
 	utils/tokendispenser.hpp \
 	utils/tokendispenser.cpp
 
@@ -130,6 +131,7 @@ tmwserv_game_SOURCES = \
 	utils/stringfilter.cpp \
 	utils/timer.h \
 	utils/timer.cpp \
+	utils/tokencollector.hpp \
 	utils/tokendispenser.hpp \
 	utils/tokendispenser.cpp \
 	utils/xml.hpp \

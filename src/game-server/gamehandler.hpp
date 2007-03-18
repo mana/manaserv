@@ -26,6 +26,24 @@
 
 #include "game-server/character.hpp"
 #include "net/connectionhandler.hpp"
+#include "net/netcomputer.hpp"
+#include "utils/tokencollector.hpp"
+
+enum
+{
+    CLIENT_LOGIN = 0,
+    CLIENT_CONNECTED,
+    CLIENT_CHANGE_SERVER,
+    CLIENT_QUEQUED
+};
+
+struct GameClient: NetComputer
+{
+    GameClient(ENetPeer *peer)
+      : NetComputer(peer), character(NULL), status(CLIENT_LOGIN) {}
+    Character *character;
+    int status;
+};
 
 /**
  * Manages connections to game client.
@@ -33,6 +51,10 @@
 class GameHandler: public ConnectionHandler
 {
     public:
+        /**
+         * Constructor
+         */
+        GameHandler();
         /**
          * Processes messages and cleans outdated characters.
          */
@@ -63,6 +85,34 @@ class GameHandler: public ConnectionHandler
          */
         void completeServerChange(int id, std::string const &token,
                                   std::string const &address, int port);
+
+        /**
+         * Combines a client with it's character.
+         * (Needed for TokenCollector)
+         */
+        void
+        tokenMatched(GameClient* computer, Character* character);
+
+        /**
+         * Deletes a pending client's data.
+         * (Needed for TokenCollector)
+         */
+        void
+        deletePendingClient(GameClient* computer);
+
+        /**
+         * Deletes a pending connection's data.
+         * (Needed for TokenCollector)
+         */
+        void
+        deletePendingConnect(Character* character);
+
+        /**
+         * TokenCollector, used to match a gameclient with the data received
+         * from the accountserver.
+         */
+        TokenCollector<GameHandler, GameClient*, Character*>
+        mTokenCollector;
 
     protected:
         NetComputer *computerConnected(ENetPeer *);

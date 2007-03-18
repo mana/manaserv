@@ -32,9 +32,7 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
-
-extern void registerAccountReconnect(int accountID,
-                                     const std::string &magic_token);
+#include "utils/tokencollector.hpp"
 
 bool ServerHandler::startListen(enet_uint16 port)
 {
@@ -173,7 +171,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             CharacterPtr ptr = store.getCharacter(characterID);
 
             int accountID = ptr->getAccountID();
-            registerAccountReconnect(accountID, magic_token);
+            accountHandler->
+                    mTokenCollector.addPendingConnect(magic_token, accountID);
 
         } break;
 

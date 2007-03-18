@@ -25,7 +25,7 @@
 #define _TMWSERV_SERVERHANDLER_H_
 
 #include <map>
-
+#include "account-server/accounthandler.hpp"
 #include "account-server/characterdata.hpp"
 #include "net/connectionhandler.hpp"
 #include "utils/countedptr.h"

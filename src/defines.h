@@ -142,6 +142,9 @@ enum {
     PAMSG_RECONNECT                = 0x0065, // B*32 token
     APMSG_RECONNECT_RESPONSE       = 0x0066, // B error
 
+    APMSG_CONNECTION_TIMEDOUT      = 0x0070, // -
+    GPMSG_CONNECTION_TIMEDOUT      = 0x0071, // -
+
     // Game
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
     GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
