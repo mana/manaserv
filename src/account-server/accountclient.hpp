@@ -36,7 +36,7 @@ enum
 {
     CLIENT_LOGIN = 0,
     CLIENT_CONNECTED,
-    CLIENT_QUEQUED
+    CLIENT_QUEUED
 };
 
 /**

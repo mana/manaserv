@@ -1,7 +1,9 @@
 2007-03-19  Philipp Sehmisch  <tmw@crushnet.org>
 
-	*
-
+	* src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp,
+	src/utils/tokendispenser.hpp, src/account-server/accountclient.cpp,
+	src/account-server/accounthandler.cpp: Fixed two compiler warnings
+	and corrected a spelling error.
 
 2007-03-18  Rogier Polak  <rogier.l.a.polak@gmail.com>
 

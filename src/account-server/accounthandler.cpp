@@ -64,7 +64,7 @@ AccountHandler::computerDisconnected(NetComputer *comp)
 {
     AccountClient* computer = static_cast< AccountClient * >(comp);
 
-    if (computer->status == CLIENT_QUEQUED)
+    if (computer->status == CLIENT_QUEUED)
         // Delete it from the pendingClient list
         mTokenCollector.deletePendingClient(computer);
 
@@ -252,7 +252,7 @@ AccountHandler::handleLogoutMessage(AccountClient &computer)
         computer.status = CLIENT_LOGIN;
         reply.writeByte(ERRMSG_OK);
     }
-    else if (computer.status == CLIENT_QUEQUED)
+    else if (computer.status == CLIENT_QUEUED)
     {
         // Delete it from the pendingClient list
         mTokenCollector.deletePendingClient(&computer);
@@ -273,7 +273,7 @@ handleReconnectMessage(AccountClient &computer, MessageIn &msg)
     }
 
     std::string magic_token = msg.readString(MAGIC_TOKEN_LENGTH);
-    computer.status = CLIENT_QUEQUED; // Before the addPendingClient
+    computer.status = CLIENT_QUEUED; // Before the addPendingClient
     mTokenCollector.addPendingClient(magic_token, &computer);
 }
 
@@ -788,7 +788,7 @@ void
 AccountHandler::deletePendingClient(AccountClient* computer)
 {
     // Something might have changed since it was inserted
-    if (computer->status != CLIENT_QUEQUED) return;
+    if (computer->status != CLIENT_QUEUED) return;
 
     MessageOut msg(APMSG_CONNECTION_TIMEDOUT);
     computer->disconnect(msg);
