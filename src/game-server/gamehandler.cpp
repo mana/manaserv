@@ -59,7 +59,7 @@ void GameHandler::computerDisconnected(NetComputer *comp)
 {
     GameClient &computer = *static_cast< GameClient * >(comp);
 
-    if (computer.status == CLIENT_QUEQUED)
+    if (computer.status == CLIENT_QUEUED)
     {
         mTokenCollector.deletePendingClient(&computer);
     }
@@ -125,7 +125,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
         mTokenCollector.addPendingClient(magic_token, &computer);
-        computer.status == CLIENT_QUEQUED;
+        computer.status = CLIENT_QUEUED;
         return;
     }
     else if (computer.status != CLIENT_CONNECTED)
@@ -296,7 +296,7 @@ void
 GameHandler::deletePendingClient(GameClient* computer)
 {
     // Something might have changed since it was inserted
-    if (computer->status != CLIENT_QUEQUED) return;
+    if (computer->status != CLIENT_QUEUED) return;
 
     MessageOut msg(GPMSG_CONNECTION_TIMEDOUT);
 

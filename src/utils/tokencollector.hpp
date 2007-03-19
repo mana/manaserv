@@ -149,16 +149,16 @@ class TokenCollector
         int mNumberOfActions;
 
         /**
-         * \brief The number of seconds between the creation of TokenCollector
-         *        and the last removeOutdated.
-         */
-        time_t mTimeNow;
-
-        /**
          * \brief The time that TokenCollector was created, used for keeping
          *        the variable times low numbers.
          */
         time_t mTimeStart;
+
+        /**
+         * \brief The number of seconds between the creation of TokenCollector
+         *        and the last removeOutdated.
+         */
+        time_t mTimeNow;
 
         /**
          * \brief Pointer to the owner of this TokenCollector object.

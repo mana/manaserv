@@ -34,7 +34,7 @@ enum
     CLIENT_LOGIN = 0,
     CLIENT_CONNECTED,
     CLIENT_CHANGE_SERVER,
-    CLIENT_QUEQUED
+    CLIENT_QUEUED
 };
 
 struct GameClient: NetComputer
