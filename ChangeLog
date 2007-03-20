@@ -1,3 +1,10 @@
+2007-03-20  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/account-server/accounthandler.cpp, src/defines.h: Removed check
+	for difference between lowest and highest attribute at char creation.
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
+	Unified order of basic attributes.
+
 2007-03-20  Rogier Polak  <rogier.l.a.polak@gmail.com>
 
 	* src/account-server/accounthandler.cpp, src/utils/tokencollector.hpp,

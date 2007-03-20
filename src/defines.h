@@ -77,12 +77,6 @@ enum
     MAX_GENDER_VALUE = 2,
 
 /**
- * Determines the maximum difference between the largest attribute and the
- * smallest one. To ensure that characters do not have disproportionned
- * attributes.
- */
-    MAX_DIFF_BETWEEN_ATTRIBUTES = 5,
-/**
  * Points to give to a brand new character
  */
     POINTS_TO_DISTRIBUTES_AT_LVL1 = 70,
@@ -235,7 +229,6 @@ enum {
     CREATE_INVALID_GENDER,
     CREATE_ATTRIBUTES_TOO_HIGH,
     CREATE_ATTRIBUTES_TOO_LOW,
-    CREATE_ATTRIBUTES_INVALID_DIFF,
     CREATE_ATTRIBUTES_EQUAL_TO_ZERO,
     CREATE_EXISTS_NAME,
     CREATE_TOO_MUCH_CHARACTERS

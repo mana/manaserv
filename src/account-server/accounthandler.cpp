@@ -565,8 +565,6 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
 
         // We see if the difference between the lowest stat and the highest
         // isn't too big.
-        unsigned short lowestAttribute = POINTS_TO_DISTRIBUTES_AT_LVL1;
-        unsigned short highestAttribute = 0; // start value
         unsigned int totalAttributes = 0;
         bool validNonZeroAttributes = true;
         for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
@@ -576,10 +574,6 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
 
             // For checking if all stats are at least > 0
             if (attributes[i] <= 0) validNonZeroAttributes = false;
-            if (lowestAttribute > attributes[i])
-                                              lowestAttribute = attributes[i];
-            if (highestAttribute < attributes[i])
-                                             highestAttribute = attributes[i];
         }
 
         if (totalAttributes > POINTS_TO_DISTRIBUTES_AT_LVL1)
@@ -589,11 +583,6 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         else if (totalAttributes < POINTS_TO_DISTRIBUTES_AT_LVL1)
         {
             reply.writeByte(CREATE_ATTRIBUTES_TOO_LOW);
-        }
-        else if ((highestAttribute - lowestAttribute) >
-                                         (signed) MAX_DIFF_BETWEEN_ATTRIBUTES)
-        {
-            reply.writeByte(CREATE_ATTRIBUTES_INVALID_DIFF);
         }
         else if (!validNonZeroAttributes)
         {

@@ -132,10 +132,10 @@ const std::string SQL_CHARACTERS_TABLE(
         // attributes
         "str     SMALLINT    UNSIGNED NOT NULL,"
         "agi     SMALLINT    UNSIGNED NOT NULL,"
+        "dex     SMALLINT    UNSIGNED NOT NULL,"
         "vit     SMALLINT    UNSIGNED NOT NULL,"
         // note: int must be backquoted as it's a MySQL keyword
         "`int`   SMALLINT    UNSIGNED NOT NULL,"
-        "dex     SMALLINT    UNSIGNED NOT NULL,"
         "will    SMALLINT    UNSIGNED NOT NULL,"
         "charisma   SMALLINT    UNSIGNED NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
@@ -158,9 +158,9 @@ const std::string SQL_CHARACTERS_TABLE(
         // attributes
         "str     INTEGER     NOT NULL,"
         "agi     INTEGER     NOT NULL,"
+        "dex     INTEGER     NOT NULL,"
         "vit     INTEGER     NOT NULL,"
         "int     INTEGER     NOT NULL,"
-        "dex     INTEGER     NOT NULL,"
         "will    INTEGER     NOT NULL,"
         "charisma   INTEGER     NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
@@ -182,9 +182,9 @@ const std::string SQL_CHARACTERS_TABLE(
         // attributes
         "str     INTEGER     NOT NULL,"
         "agi     INTEGER     NOT NULL,"
+        "dex     INTEGER     NOT NULL,"
         "vit     INTEGER     NOT NULL,"
         "int     INTEGER     NOT NULL,"
-        "dex     INTEGER     NOT NULL,"
         "will    INTEGER     NOT NULL,"
         "charisma    INTEGER     NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"

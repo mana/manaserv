@@ -554,6 +554,8 @@ DALStorage::updateCharacter(CharacterPtr character)
                                << "', "
             << "agi = '"        << character->getBaseAttribute(BASE_ATTR_AGILITY)
                                << "', "
+            << "dex = '"        << character->getBaseAttribute(BASE_ATTR_DEXTERITY)
+                               << "', "
             << "vit = '"        << character->getBaseAttribute(BASE_ATTR_VITALITY)
                                << "', "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
@@ -563,8 +565,7 @@ DALStorage::updateCharacter(CharacterPtr character)
 #endif
                                << character->getBaseAttribute(BASE_ATTR_INTELLIGENCE)
                                << "', "
-            << "dex = '"        << character->getBaseAttribute(BASE_ATTR_DEXTERITY)
-                               << "', "
+
             << "will = '"       << character->getBaseAttribute(BASE_ATTR_WILLPOWER)
                                 << "', "
             << "charisma = '"   << character->getBaseAttribute(BASE_ATTR_CHARISMA)
@@ -878,9 +879,9 @@ void DALStorage::flush(AccountPtr const &account)
                  << (*it)->getMapId() << ", "
                  << (*it)->getBaseAttribute(BASE_ATTR_STRENGTH) << ", "
                  << (*it)->getBaseAttribute(BASE_ATTR_AGILITY) << ", "
+                 << (*it)->getBaseAttribute(BASE_ATTR_DEXTERITY) << ", "
                  << (*it)->getBaseAttribute(BASE_ATTR_VITALITY) << ", "
                  << (*it)->getBaseAttribute(BASE_ATTR_INTELLIGENCE) << ", "
-                 << (*it)->getBaseAttribute(BASE_ATTR_DEXTERITY) << ", "
                  << (*it)->getBaseAttribute(BASE_ATTR_WILLPOWER) << ", "
                  << (*it)->getBaseAttribute(BASE_ATTR_CHARISMA) << ");";
 
@@ -900,6 +901,7 @@ void DALStorage::flush(AccountPtr const &account)
                 << " map_id = " << (*it)->getMapId() << ", "
                 << " str = " << (*it)->getBaseAttribute(BASE_ATTR_STRENGTH) << ", "
                 << " agi = " << (*it)->getBaseAttribute(BASE_ATTR_AGILITY) << ", "
+                << " dex = " << (*it)->getBaseAttribute(BASE_ATTR_DEXTERITY) << ", "
                 << " vit = " << (*it)->getBaseAttribute(BASE_ATTR_VITALITY) << ", "
 #if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
                 << " `int` = "
