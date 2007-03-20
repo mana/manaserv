@@ -211,10 +211,10 @@ addPendingClient(const std::string & token, U clientPayload)
         // ---------------------------------------------
         if (((TC_ListItem< V >*)*it)->token == token) // Found a match
         {
-            mOwner->tokenMatched(clientPayload,
-                                    ((TC_ListItem< V >*)*it)->payload);
-            delete ((TC_ListItem< V >*)*it);
+            TC_ListItem< V >* tempConnect = (TC_ListItem< V >*)*it;
             mPendingConnects.erase(it);
+            mOwner->tokenMatched(clientPayload, tempConnect->payload);
+            delete tempConnect;
             return; // Done
         }
     }
@@ -269,10 +269,10 @@ addPendingConnect(const std::string & token, V connectPayload)
         // ---------------------------------------------
         if (((TC_ListItem< U >*)*it)->token == token) // Found a match
         {
-            mOwner->tokenMatched(((TC_ListItem< U >*)*it)->payload,
-                                                              connectPayload);
-            delete ((TC_ListItem< U >*)*it);
+            TC_ListItem< U >* tempClient = (TC_ListItem< U >*)*it;
             mPendingClients.erase(it);
+            mOwner->tokenMatched(tempClient->payload, connectPayload);
+            delete tempClient;
             return; // Done
         }
     }

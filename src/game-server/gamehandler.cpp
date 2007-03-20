@@ -124,8 +124,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         if (message.getId() != PGMSG_CONNECT) return;
 
         std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
+        computer.status = CLIENT_QUEUED; // Before the addPendingClient
         mTokenCollector.addPendingClient(magic_token, &computer);
-        computer.status = CLIENT_QUEUED;
         return;
     }
     else if (computer.status != CLIENT_CONNECTED)

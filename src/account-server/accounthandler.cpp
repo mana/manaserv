@@ -268,7 +268,7 @@ handleReconnectMessage(AccountClient &computer, MessageIn &msg)
     if (computer.status != CLIENT_LOGIN)
     {
         LOG_DEBUG("Account tried to reconnect, but was allready logged in "
-                 << "or quequed.");
+                 << "or queued.");
         return;
     }
 

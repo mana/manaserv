@@ -1,3 +1,10 @@
+2007-03-20  Rogier Polak  <rogier.l.a.polak@gmail.com>
+
+	* src/account-server/accounthandler.cpp, src/utils/tokencollector.hpp,
+	src/game-server/gamehandler.cpp: Corrected a bug, that occurred when
+	connecting to the game-server. Made member functions of TokenCollector
+	less fragile.
+
 2007-03-19  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp,
