@@ -1,3 +1,8 @@
+2007-03-22  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/account-server/dalstorage.cpp: Fixed a bug that caused the
+	character attributes to become mixed up.
+
 2007-03-20  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/account-server/accounthandler.cpp, src/defines.h: Removed check

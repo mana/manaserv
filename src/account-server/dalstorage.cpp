@@ -866,7 +866,7 @@ void DALStorage::flush(AccountPtr const &account)
             sqlInsertCharactersTable
                  << "insert into " << CHARACTERS_TBL_NAME
                  << " (user_id, name, gender, hair_style, hair_color, level, money,"
-                 << " x, y, map_id, str, agi, vit, int, dex, will, charisma) values ("
+                 << " x, y, map_id, str, agi, dex, vit, int, will, charisma) values ("
                  << account->getID() << ", \""
                  << (*it)->getName() << "\", "
                  << (*it)->getGender() << ", "
