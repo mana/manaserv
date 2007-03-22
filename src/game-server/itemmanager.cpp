@@ -89,9 +89,9 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         modifiers.lifetime = XML::getProperty(node, "lifetime", 0);
         modifiers.attributes[BASE_ATTR_STRENGTH]     = XML::getProperty(node, "strength",     0);
         modifiers.attributes[BASE_ATTR_AGILITY]      = XML::getProperty(node, "agility",      0);
+        modifiers.attributes[BASE_ATTR_DEXTERITY]    = XML::getProperty(node, "dexterity",    0);
         modifiers.attributes[BASE_ATTR_VITALITY]     = XML::getProperty(node, "vitality",     0);
         modifiers.attributes[BASE_ATTR_INTELLIGENCE] = XML::getProperty(node, "intelligence", 0);
-        modifiers.attributes[BASE_ATTR_DEXTERITY]    = XML::getProperty(node, "dexterity",    0);
         modifiers.attributes[BASE_ATTR_WILLPOWER]    = XML::getProperty(node, "willpower",    0);
         modifiers.attributes[BASE_ATTR_CHARISMA]     = XML::getProperty(node, "charisma",     0);
         modifiers.attributes[DERIVED_ATTR_HP_MAXIMUM]         = XML::getProperty(node, "hp",          0);

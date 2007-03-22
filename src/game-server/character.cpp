@@ -26,6 +26,7 @@
 
 #include "defines.h"
 #include "net/messagein.hpp"
+#include "net/messageout.hpp"
 
 InventoryItem tempItem;
 
@@ -42,6 +43,7 @@ Character::Character(MessageIn & msg):
     }
     // prepare attributes vector
     mAttributes.resize(NB_ATTRIBUTES_CHAR, 1);
+    mOldAttributes.resize(NB_ATTRIBUTES_CHAR, 0);
     // get base attributes
     deserialize(msg);
     // give the player 10 weapon skill for testing purpose
@@ -105,6 +107,8 @@ void Character::calculateDerivedAttributes()
     /*
      * Do any player character specific attribute calculation here
      */
+
+    mAttributesChanged = true;
 }
 
 WeaponStats
@@ -122,3 +126,21 @@ Character::getWeaponStats()
     return weaponStats;
 };
 
+void
+Character::writeAttributeUpdateMessage(MessageOut &msg)
+{
+    if (!mAttributesChanged) return;
+
+    for (int i = 0; i<NB_ATTRIBUTES_CHAR; i++)
+    {
+        unsigned short attribute = getAttribute(i);
+        if (attribute != mOldAttributes[i])
+        {
+            msg.writeShort(i);
+            msg.writeShort(attribute);
+            mOldAttributes[i] = attribute;
+        }
+    }
+
+    mAttributesChanged = false;
+}

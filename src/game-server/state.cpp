@@ -89,6 +89,7 @@ void State::informPlayer(MapComposite *map, Character *p)
     Point pold = p->getOldPosition(), ppos = p->getPosition();
     int pid = p->getPublicID(), pflags = p->getUpdateFlags();
 
+    // Inform client about activities of other beings near its character
     for (MovingObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
     {
         MovingObject *o = *i;
@@ -233,6 +234,13 @@ void State::informPlayer(MapComposite *map, Character *p)
     if (damageMsg.getLength() > 2)
         gameHandler->sendTo(p, damageMsg);
 
+    // Inform client about attribute changes of its character
+    MessageOut attributeUpdateMsg(GPMSG_PLAYER_ATTRIBUTE_UPDATE);
+    p->writeAttributeUpdateMessage(attributeUpdateMsg);
+    if (attributeUpdateMsg.getLength() > 2)
+        gameHandler->sendTo(p, attributeUpdateMsg);
+
+    // Inform client about items on the ground around its character
     MessageOut itemMsg(GPMSG_ITEMS);
     for (FixedObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
     {

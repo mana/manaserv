@@ -172,6 +172,13 @@ class Character : public Being, public AbstractCharacterData
         { Being::setAttribute(attributeNumber, value); }
 
         /**
+         * Creates a message that informs the client about the attribute
+         * changes since last call.
+         */
+        void
+        writeAttributeUpdateMessage(MessageOut &msg);
+
+        /**
          * Gets the Id of the map that the character is on.
          * Inherited from Thing through Being, explicitly defined because
          * of double inheritance.
@@ -254,6 +261,9 @@ class Character : public Being, public AbstractCharacterData
         Character &operator=(Character const &);
 
         GameClient *mClient;   /**< Client computer. */
+
+        std::vector<unsigned short> mOldAttributes; /**< Atributes as the client should currently know them */
+        bool attributesChanged; /**< true when one or more attributes might have changed since the client has been updated about them. */
 
         int mDatabaseID;             /**< Character's database ID. */
         std::string mName;           /**< Name of the character. */

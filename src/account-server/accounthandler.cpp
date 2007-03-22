@@ -227,7 +227,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
         charInfo.writeByte(chars[i]->getHairStyle());
         charInfo.writeByte(chars[i]->getHairColor());
         charInfo.writeByte(chars[i]->getLevel());
-        charInfo.writeShort(chars[i]->getMoney());
+        charInfo.writeLong(chars[i]->getMoney());
 
         for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
             charInfo.writeShort(chars[i]->getBaseAttribute(j));

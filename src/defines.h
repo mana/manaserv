@@ -147,6 +147,7 @@ enum {
     PGMSG_EQUIP                    = 0x0112, // B slot
     GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
+    GPMSG_PLAYER_ATTRIBUTE_UPDATE  = 0x0130, // { W attribute, W value }*
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // character: S name, B hair style, B hair color, B gender
                                              // monster: W type id
@@ -302,7 +303,7 @@ enum BeingStats
     ATTR_EFF_INTELLIGENCE,
     ATTR_EFF_WILLPOWER,
     ATTR_EFF_CHARISMA,
-    NB_EFFECTIVE_ATTRIBUTES = ATTR_EFF_CHARISMA,
+    NB_EFFECTIVE_ATTRIBUTES,
 
     DERIVED_ATTR_HP_MAXIMUM = NB_EFFECTIVE_ATTRIBUTES,    // Computed stats
     DERIVED_ATTR_PHYSICAL_ATTACK_MINIMUM,
