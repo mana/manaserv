@@ -51,7 +51,7 @@ class Character : public Being, public AbstractCharacterData
          * Utility constructor for creating a Character from a received
          * characterdata message.
          */
-        Character(MessageIn & msg);
+        Character(MessageIn &msg);
 
         /**
          * Updates the internal status.
@@ -78,7 +78,7 @@ class Character : public Being, public AbstractCharacterData
         { return mPossessions; }
 
 
-        /**
+        /*
          * Character data:
          * Get and set methods
          */
@@ -262,8 +262,14 @@ class Character : public Being, public AbstractCharacterData
 
         GameClient *mClient;   /**< Client computer. */
 
-        std::vector<unsigned short> mOldAttributes; /**< Atributes as the client should currently know them */
-        bool attributesChanged; /**< true when one or more attributes might have changed since the client has been updated about them. */
+        /** Atributes as the client should currently know them. */
+        std::vector<unsigned short> mOldAttributes;
+
+        /**
+         * true when one or more attributes might have changed since the
+         * client has been updated about them.
+         */
+        bool mAttributesChanged;
 
         int mDatabaseID;             /**< Character's database ID. */
         std::string mName;           /**< Name of the character. */

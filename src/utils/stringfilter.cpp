@@ -71,7 +71,7 @@ void StringFilter::writeSlangFilterList()
         ++i;
         if (i != mSlangs.end()) slangsList += ",";
     }
-    // mConfig->setValue("SlangsList", slangsList);
+    //mConfig->setValue("SlangsList", slangsList);
 }
 
 bool StringFilter::filterContent(const std::string& text)

@@ -108,9 +108,6 @@ void Configuration::write()
 
         for (iter = options.begin(); iter != options.end(); iter++)
         {
-	    // logger->log("Configuration::write(%s, \"%s\")",
-	    // iter->first.c_str(), iter->second.c_str());
-
             xmlTextWriterStartElement(writer, BAD_CAST "option");
             xmlTextWriterWriteAttribute(writer,
                     BAD_CAST "name", BAD_CAST iter->first.c_str());

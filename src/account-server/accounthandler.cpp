@@ -267,7 +267,7 @@ handleReconnectMessage(AccountClient &computer, MessageIn &msg)
 {
     if (computer.status != CLIENT_LOGIN)
     {
-        LOG_DEBUG("Account tried to reconnect, but was allready logged in "
+        LOG_DEBUG("Account tried to reconnect, but was already logged in "
                  << "or queued.");
         return;
     }
@@ -563,8 +563,6 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
             attributes[i] = msg.readShort();
 
-        // We see if the difference between the lowest stat and the highest
-        // isn't too big.
         unsigned int totalAttributes = 0;
         bool validNonZeroAttributes = true;
         for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)

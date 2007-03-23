@@ -1,11 +1,20 @@
+2007-03-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/point.h, src/configuration.cpp,
+	src/account-server/accounthandler.cpp,
+	src/account-server/accountclient.cpp, src/utils/stringfilter.cpp,
+	src/abstractcharacterdata.hpp, src/game-server/being.cpp,
+	src/game-server/character.cpp, src/game-server/character.hpp: Mostly
+	fixed some compilation issues.
+
 2007-03-23  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/account-server/accounthandler.cpp, src/defines.h,
 	src/game-server/character.cpp, src/game-server/character.hpp
-	src/game-server/state.cpp: Implemented communication of attribute changes
-	from server to client.
-	* src/game-server/itemmanager.cpp: Another case of inconsistent order of
-	attributes.
+	src/game-server/state.cpp: Implemented communication of attribute
+	changes from server to client.
+	* src/game-server/itemmanager.cpp: Another case of inconsistent order
+	of attributes.
 
 2007-03-22  Philipp Sehmisch  <tmw@crushnet.org>
 

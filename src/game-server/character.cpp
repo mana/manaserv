@@ -124,7 +124,7 @@ Character::getWeaponStats()
     weaponStats.skill = CHAR_SKILL_WEAPON_UNARMED;
 
     return weaponStats;
-};
+}
 
 void
 Character::writeAttributeUpdateMessage(MessageOut &msg)

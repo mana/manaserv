@@ -62,6 +62,11 @@ class AbstractCharacterData
 {
     public:
         /**
+         * Empty virtual destructor.
+         */
+        virtual ~AbstractCharacterData() {}
+
+        /**
          * Stores data into a outgoing message.
          */
         void serialize(MessageOut &) const;
@@ -72,7 +77,7 @@ class AbstractCharacterData
         void deserialize(MessageIn &);
 
     protected:
-        /**
+        /*
          * Get and set methods
          */
 
@@ -156,7 +161,7 @@ class AbstractCharacterData
         virtual void
         setPosition(const Point &p) = 0;
 
-        /**
+        /*
          * The access functions for inventory
          */
 

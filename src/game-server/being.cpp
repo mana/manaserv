@@ -206,4 +206,4 @@ WeaponStats Being::getWeaponStats()
     weaponStats.skill = 0;
 
     return weaponStats;
-};
+}

@@ -29,9 +29,9 @@
 
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),
+    status(CLIENT_LOGIN),
     mAccountPtr(NULL),
-    mCharacterPtr(NULL),
-    status(CLIENT_LOGIN)
+    mCharacterPtr(NULL)
 {
 }
 
