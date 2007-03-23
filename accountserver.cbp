@@ -23,6 +23,7 @@
 			<Add option="-Wall"/>
 			<Add option="-DPACKAGE_VERSION=&quot;\&quot;1st milestone\&quot;&quot;"/>
 			<Add option="-DSQLITE_SUPPORT"/>
+			<Add option="-DNOGDI"/>
 		</Compiler>
 		<Linker>
 			<Add library="enet"/>
@@ -34,6 +35,16 @@
 			<Add library="winmm"/>
 			<Add library="sqlite3"/>
 		</Linker>
+		<Unit filename="src\abstractcharacterdata.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\abstractcharacterdata.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
 		<Unit filename="src\account-server\account.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
@@ -59,6 +70,16 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\account-server\accounthandler.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\account-server\characterdata.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\account-server\characterdata.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -304,16 +325,6 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\utils\base64.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\base64.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
 		<Unit filename="src\utils\countedptr.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -336,7 +347,11 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\utils\singleton.h">
+		<Unit filename="src\utils\processorutils.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\utils\processorutils.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -357,6 +372,16 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\utils\timer.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\utils\tokendispenser.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\utils\tokendispenser.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
