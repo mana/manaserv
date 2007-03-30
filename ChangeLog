@@ -1,9 +1,18 @@
+2007-03-30  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/Makefile.am, src/game-server/thing.hpp,
+	src/game-server/movingobject.cpp, src/game-server/being.hpp,
+	src/game-server/movingobject.hpp, src/game-server/trigger.cpp,
+	src/game-server/object.cpp, src/game-server/trigger.hpp,
+	src/game-server/object.hpp: Separated the Thing and MovingObject
+	classes from the Object module.
+
 2007-03-30  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/controller.cpp, src/controller.h, src/game-server/monster.cpp,
-	src/game-server/monster.hpp, src/game-server/testing.cpp, src/Makefile.am:
-	Renamed "Controlled" to "Monster" and moved it into the game-server
-	directory.
+	src/game-server/monster.hpp, src/game-server/testing.cpp,
+	src/Makefile.am: Renamed "Controlled" to "Monster" and moved it into
+	the game-server directory.
 
 2007-03-23  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
@@ -36,8 +45,8 @@
 
 	* src/account-server/accounthandler.cpp, src/defines.h: Removed check
 	for difference between lowest and highest attribute at char creation.
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
-	Unified order of basic attributes.
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp: Unified order of basic attributes.
 
 2007-03-20  Rogier Polak  <rogier.l.a.polak@gmail.com>
 
@@ -190,7 +199,8 @@
 	src/gameserver/gamehandler.cpp, src/gameserver/object.hpp,
 	src/gameserver/player.cpp, src/gameserver/player.hpp,
 	src/gameserver/state.cpp, src/gameserver/testing.cpp,
-	src/point.h: Implemented being death, removal of dead mobs and sitting.
+	src/point.h: Implemented being death, removal of dead mobs and
+	sitting.
 
 2007-03-01  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -288,9 +298,9 @@
 
 2007-01-05  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
-	* src/game-server/player.cpp, src/game-server/state.cpp: Delayed update
-	of persistent position and put it into state handling, so that the
-	update happens before map change.
+	* src/game-server/player.cpp, src/game-server/state.cpp: Delayed
+	update of persistent position and put it into state handling, so that
+	the update happens before map change.
 	* src/game-server/item.hpp: Added an amount property to items lying on
 	the ground.
 	* src/game-server/testing.cpp: Added a piece of equipment.
@@ -330,9 +340,9 @@
 	src/game-server/accountconnection.cpp: Simplified by relying on the
 	serialization functionality of PlayerData.
 	* src/game-server/inventory.hpp, src/game-server/inventory.cpp:
-	Transformed Inventory into a strict helper class, as data are now stored
-	inside PlayerData. Reduced memory footprint of inventory by avoiding
-	storing empty slots.
+	Transformed Inventory into a strict helper class, as data are now
+	stored inside PlayerData. Reduced memory footprint of inventory by
+	avoiding storing empty slots.
 	* src/game-server/player.hpp, src/game-server/player.cpp,
 	src/game-server/gamehandler.cpp: Updated accordingly.
 	* src/net/messagein.hpp, src/net/messagein.cpp: Removed signedness
@@ -408,8 +418,8 @@
 	* configure.ac, src/Makefile.am, src/tests, src/client.cpp: Removed
 	obsolete tests and text client.
 	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp,
-	src/point.h: Removed implicit radius for checking range of Point. Added
-	a Rectangle class. Added support for rectangles in MapComposite.
+	src/point.h: Removed implicit radius for checking range of Point.
+	Added a Rectangle class. Added support for rectangles in MapComposite.
 	* src/object.h, src/defines.h, src/game-server/mapcomposite.hpp,
 	src/game-server/mapcomposite.cpp, src/game-server/state.hpp,
 	src/game-server/state.cpp: Put an ancestor for Object that are not
@@ -437,9 +447,9 @@
 
 2006-12-31  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
-	* src/account-server/dalstorage.hpp, src/account-server/dalstorage.cpp,
-	src/account-server/storage.hpp: Added function to query a character in
-	the database.
+	* src/account-server/dalstorage.hpp,
+	src/account-server/dalstorage.cpp, src/account-server/storage.hpp:
+	Added function to query a character in the database.
 	* src/account-server/serverhandler.cpp: Finished implementation for
 	warping players around servers.
 
@@ -450,8 +460,9 @@
 	* src/Makefile.am: Updated accordingly.
 	* src/object.h, src/being.h: Changed definition of directions.
 	* src/being.cpp: Relied on MapComposite iterators to scan only beings
-	in the vincinity one time instead of all objects of the map four times.
-	Used a pixel-based zone instead of tile-based zone for damaging.
+	in the vincinity one time instead of all objects of the map four
+	times. Used a pixel-based zone instead of tile-based zone for
+	damaging.
 	* src/player.cpp: Removed useless dependency.
 	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp:
 	Added a radius parameter to iterator creators. Removed unused and
@@ -460,8 +471,9 @@
 	function into updateMap and informPlayer. Simplified code a bit.
 	* src/game-server/mapcomposite.hpp, src/game-server/mapcomposite.cpp,
 	src/object.h, src/game-server/state.hpp, src/game-server/state.cpp,
-	src/game-server/accountconnection.cpp, src/game-server/gamehandler.cpp:
-	Removed reference-counted pointers on Object.
+	src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.cpp: Removed reference-counted pointers on
+	Object.
 	* src/game-server/gameclient.hpp, src/game-server/gameclient.cpp,
 	src/player.h, src/game-server/gamehandler.cpp, src/Makefile.am:
 	Embedded a simplified version of GameClient into GameHandler. Removed
@@ -474,10 +486,12 @@
 	when warped.
 	* src/defines.h, src/game-server/state.hpp, src/game-server/state.cpp,
 	src/account-server/serverhandler.cpp, src/game-server/gamehandler.hpp,
-	src/game-server/gamehandler.cpp, src/game-server/accountconnection.hpp,
+	src/game-server/gamehandler.cpp,
+	src/game-server/accountconnection.hpp,
 	src/game-server/accountconnection.cpp: Added a queue for delaying
-	intrusive events until update is finished. Partially implemented server
-	communications to update player data and to warp players around.
+	intrusive events until update is finished. Partially implemented
+	server communications to update player data and to warp players
+	around.
 
 2006-12-29  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
@@ -494,12 +508,12 @@
 	src/gameclient.cpp, src/mapmanager.h, src/mapmanager.cpp: Moved to
 	src/game-server directory and changed header extension to hpp.
 	* src/messagein.h, src/messagein.cpp, src/messageout.h,
-	src/messageout.cpp, src/connectionhandler.h, src/connectionhandler.cpp,
-	src/netcomputer.h, src/netcomputer.cpp: Moved to src/net directory and
-	changed header extension to hpp.
+	src/messageout.cpp, src/connectionhandler.h,
+	src/connectionhandler.cpp, src/netcomputer.h, src/netcomputer.cpp:
+	Moved to src/net directory and changed header extension to hpp.
 	* src/controller.h, src/controller.cpp, src/game-server/state.cpp,
-	src/being.cpp, src/being.h: Removed knowledge of Controller in Being by
-	deriving a Controlled Being.
+	src/being.cpp, src/being.h: Removed knowledge of Controller in Being
+	by deriving a Controlled Being.
 	* src/game-server/state.cpp, src/game-server/mapmanager.cpp,
 	src/game-server/mapmanager.hpp, src/object.cpp: Simplified by removing
 	Singleton pattern.
@@ -522,8 +536,8 @@
 	* src/player.cpp, src/game-server/gamehandler.cpp: Commented out the
 	currently unused inventory interface.
 	* src/net/messagein.hpp: Updated from tmwclient to add getUnreadLength.
-	* src/net/connectionhandler.hpp, src/net/connectionhandler.cpp: Removed
-	unused ClientData class.
+	* src/net/connectionhandler.hpp, src/net/connectionhandler.cpp:
+	Removed unused ClientData class.
 	* src/inventory.h: Removed "at" accessors, as nobody is ready to catch
 	exceptions. Removed unneeded dependency and unused pointer.
 	* src/net/netcomputer.hpp: Fixed typos.
@@ -545,9 +559,9 @@
 2006-12-29  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/being.cpp, src/being.h, src/defines.h, src/gamehandler.cpp,
-	src/mapcomposite.cpp, src/mapcomposite.h, src/object.h, src/player.cpp,
-	src/player.h, src/state.cpp: Implemented basic attack hit detection and
-	damage notification.
+	src/mapcomposite.cpp, src/mapcomposite.h, src/object.h,
+	src/player.cpp, src/player.h, src/state.cpp: Implemented basic attack
+	hit detection and damage notification.
 
 2006-12-27  Philipp Sehmisch <tmw@crushnet.org>
 
@@ -628,8 +642,8 @@
 	messages. Changed default buffer size of outgoing packets.
 	* src/src/accounthandler.cpp, src/point.h, src/object.cpp,
 	src/controller.cpp, src/dalstorage.cpp, src/object.h, src/state.cpp,
-	src/gamehandler.cpp: Made Point a POD type. Simplified server algorithm
-	for moving objects; it now matches the one in the client.
+	src/gamehandler.cpp: Made Point a POD type. Simplified server
+	algorithm for moving objects; it now matches the one in the client.
 	* src/gameclient.cpp, src/player.h, src/gamehandler.cpp: Added
 	GameClient pointer to Player class for O(1) message sending.
 	* src/mapcomposite.h, src/mapcomposite.cpp, src/Makefile.am: Moved
@@ -762,8 +776,8 @@
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.
 	* src/accounthandler.cpp, src/connectionhandler.cpp,
-	src/dalstorage.cpp, src/defines.h: Changed character list to a sequence
-	of packets and fixed a db issue.
+	src/dalstorage.cpp, src/defines.h: Changed character list to a
+	sequence of packets and fixed a db issue.
 
 2006-08-11  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -779,8 +793,8 @@
 	constness. Added a proximity tester. Moved path node structure.
 	* src/accounthandler.cpp: Modified logging. Prevented empty packets
 	from being sent and killing ENet. Set destination to current position.
-	* src/defines.h, src/gamehandler.cpp, src/client.cpp: Added support for
-	move messages. Changed sayAround to pixel distance.
+	* src/defines.h, src/gamehandler.cpp, src/client.cpp: Added support
+	for move messages. Changed sayAround to pixel distance.
 	* src/object.cpp, src.object.h, src/state.cpp: Implemented being
 	movements.
 
@@ -804,17 +818,18 @@
 	* src/state.cpp: Used Player ID.
 	* src/dal/recordset.cpp: Removed redundant checks.
 	* src/dalstorage.cpp, src/dalstorage.h, src/storage.h: Prevented
-	database failure from allowing already existing character name or email
-	address.
+	database failure from allowing already existing character name or
+	email address.
 	* src/accounthandler.cpp: Fixed control for changing email address.
 
 2006-08-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/storage.h, src/dalstorage.h, src/dalstorage.cpp: Removed
 	AccountInfo. Restricted addAccount to accounts without characters,
-	removed wrong SQL code. Fixed casting in updAccount, promoted member as
-	flush. Added implicit flush to addAccount and delAccount. Fixed user_id
-	for every SQL backend. Added flushAll and unloadAccount members.
+	removed wrong SQL code. Fixed casting in updAccount, promoted member
+	as flush. Added implicit flush to addAccount and delAccount. Fixed
+	user_id for every SQL backend. Added flushAll and unloadAccount
+	members.
 	* src/accounthandler.cpp: Restricted flush to only modified accounts.
 	* src/account.h, src/account.cpp: Added the database primary key to
 	Account.
@@ -860,8 +875,8 @@
 2006-07-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev: Updated project files.
-	* src/accounthandler.cpp, src/client.cpp: Modified client version to be
-	an int.
+	* src/accounthandler.cpp, src/client.cpp: Modified client version to
+	be an int.
 	* src/accounthandler.cpp, src/defines.h: Client version is being sent
 	also during registration.
 
@@ -883,8 +898,9 @@
 	* src/accounthandler.cpp, src/account.cpp, src/object.cpp,
 	src/storage.h, src/dalstorage.cpp, src/account.h, src/object.h,
 	src/gamehandler.h, src/state.cpp, src/being.cpp, src/gamehandler.cpp,
-	src/state.h, src/being.h: Removed tmwserv namespace. Added MovingObject
-	and Player classes. Removed exhaustive statistic accessors.
+	src/state.h, src/being.h: Removed tmwserv namespace. Added
+	MovingObject and Player classes. Removed exhaustive statistic
+	accessors.
 
 2006-07-26  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
@@ -913,14 +929,15 @@
 
 	* src/chatchannelmanager.cpp, src/chatchannelmanager.h: Removed
 	unwarranted constness. Used binary searches instead of loops.
-	* src/chatchannel.cpp, src/chatchannel.h: Replaced usage of whole Being
-	by character name.
+	* src/chatchannel.cpp, src/chatchannel.h: Replaced usage of whole
+	Being by character name.
 	* src/client.cpp: Implemented client-side server split.
 	* src/messagehandler.cpp, src/messagehandler.h, src/Makefile.am:
 	Removed unused MessageHandler class.
 	* src/accounthandler.cpp, src/accounthandler.h, src/chathandler.cpp,
-	src/chathandler.h, src/gamehandler.cpp, src/gamehandler.h: Respectively
-	changed into an account server, a chat server, and a game server.
+	src/chathandler.h, src/gamehandler.cpp, src/gamehandler.h:
+	Respectively changed into an account server, a chat server, and a game
+	server.
 	* src/main.cpp, src/state.cpp, src/state.h, src/defines.h: Small fixes
 	to cope with server split.
 	* src/connectionhandler.cpp, src/connectionhandler.h,
@@ -1187,13 +1204,13 @@
 
 	* src/connectionhandler.h, src.connectionhandler.cpp, src/client.cpp,
 	src/accounthandler.cpp, src/defines.h: Added a check if the maximum
-	number of client is already logged in at login attempt. Added a default
-	behaviour in protocol. Some cleanups.
+	number of client is already logged in at login attempt. Added a
+	default behaviour in protocol. Some cleanups.
 	* src/client.cpp, src/storage.h, src/dalstorage.cpp, src/dalstorage.h,
 	src/main.cpp, src/defines.h, src/accounthandler.cpp, src/Makefile.am:
 	Implemented server response handling to the test client. Fixed a bug
-	that made the Email change not possible. Changed some protocol value to
-	have a litte neater client code. Added FreeBSD fix idea from icy to
+	that made the Email change not possible. Changed some protocol value
+	to have a litte neater client code. Added FreeBSD fix idea from icy to
 	server code.
 
 2005-12-31  Yohann Ferreira  <bertram@cegetel.net>
@@ -1240,11 +1257,11 @@
 	* src/chathandler.h, src/chathandler.cpp, src/defines.h,
 	src/utils/slangsfilter.h, src/utils/slangsfilter.cpp,
 	src/Makefile.am, src/main.cpp, src/accounthandler.cpp,
-	src/connectionhandler.h, src/connectionhandler.cpp: Implemented
-	common chat handling, except for chatting in channels. Also the
-	Channel registering/unregistering isn't there yet and the commands
-	needs to be implemented. Added a small slangs filter to reduce bad
-	words in account names and in conversations a little.
+	src/connectionhandler.h, src/connectionhandler.cpp: Implemented common
+	chat handling, except for chatting in channels. Also the Channel
+	registering/unregistering isn't there yet and the commands needs to be
+	implemented. Added a small slangs filter to reduce bad words in
+	account names and in conversations a little.
 
 2005-12-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -1273,10 +1290,10 @@
 	* src/accounthandler.cpp, src/netcomputer.h, src/netcomputer.cpp,
 	src/chathandler.cpp, src/connectionhandler.cpp,
 	src/gamehandler.cpp, src/connectionhandler.h, src/state.h,
-	src/state.cpp: Made the handlers use the countedPtr for Beings
-	as they should. Fixed a segfault when removing a being from the
-	world. Also made use of AccountPtr instead of Account* to fix a
-	not seen but yet present account reselection segfault bug.
+	src/state.cpp: Made the handlers use the countedPtr for Beings as they
+	should. Fixed a segfault when removing a being from the world. Also
+	made use of AccountPtr instead of Account* to fix a not seen but yet
+	present account reselection segfault bug.
 
 2005-12-17  Bjorn Steinbrink  <B.Steinbrink@gmx.de>
 
@@ -1287,78 +1304,74 @@
 	* src/accounthandler.cpp, src/netcomputer.h,
 	src/netcomputer.cpp, src/defines.h, src/dalstorage.cpp,
 	src/dalstorage.h, src/storage.h, src/client.cpp, src/main.cpp:
-	Now beings are handled in netcomputer when added and removed
-	from the world. addBeing() and removeBeing() are still crashy.
-	Added check if the character's name already exists. Forgot about
-	that. Added CMSG_CHAR_LIST packet support.
+	Now beings are handled in netcomputer when added and removed from the
+	world. addBeing() and removeBeing() are still crashy. Added check if
+	the character's name already exists. Forgot about that. Added
+	CMSG_CHAR_LIST packet support.
 
 2005-12-11  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/accounthandler.cpp, src/main.cpp, src/account.h,
 	src/account.cpp, src/dalstorage.cpp, src/client.cpp,
-	src/defines.h: Added Logout, and character deletion support.
-	Also changed the response code when trying to login when already
-	logged.
+	src/defines.h: Added Logout, and character deletion support. Also
+	changed the response code when trying to login when already logged.
 	* src/accounthandler.cpp, src/main.cpp, src/dalstorage.cpp,
 	src/client.cpp, src/connectionhandler.cpp, src/defines.h:
-	Added unregistering, checking on character's name and email
-	length support. Also made some little tweaks.
+	Added unregistering, checking on character's name and email length
+	support. Also made some little tweaks.
 
 2005-12-10  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/dalstorage.cpp: Fixed the buggy part of getAccount()
-	where the mapInfo() recordSet erased the value of charInfo.
-	Now, characters can be created and selected, with the map
-	they were in, set.
+	* src/dalstorage.cpp: Fixed the buggy part of getAccount() where the
+	mapInfo() recordSet erased the value of charInfo. Now, characters can
+	be created and selected, with the map they were in, set.
 
 2005-12-09  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/dalstorage.cpp, src/accounthandler.cpp: Temporary
-	made a workaround the character misloading at login.
-	Work is to be made to see why the mapInfo recordset is
-	buggy. Also made the server more verbose about characters.
+	* src/dalstorage.cpp, src/accounthandler.cpp: Temporary made a
+	workaround the character misloading at login. Work is to be made to
+	see why the mapInfo recordset is buggy. Also made the server more
+	verbose about characters.
 
 2005-12-08  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/dalstorage.cpp, src/dalstorage.h, src/storage.h:
-	Radically improve the getEmailList() again based on
-	MrLindeijer's good idea.
-	* src/accounthandler.cpp: Simplify the code of Email check
-	based on the previous improvement.
+	* src/dalstorage.cpp, src/dalstorage.h, src/storage.h: Radically
+	improve the getEmailList() again based on MrLindeijer's good idea.
+	* src/accounthandler.cpp: Simplify the code of Email check based on
+	the previous improvement.
 
 2005-12-06  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/dalstorage.cpp: Improved the getEmailList() function.
-	Now the file used as db or the db name is shown in log.
-	* src/defines.h: Added some missing messages and values for
-	them. Login, pass min, max length can be changed there now.
-	* src/accounthandler.cpp: Added check and appropriate response
-	when selecting, creating a character.
+	* src/dalstorage.cpp: Improved the getEmailList() function. Now the
+	file used as db or the db name is shown in log.
+	* src/defines.h: Added some missing messages and values for them.
+	Login, pass min, max length can be changed there now.
+	* src/accounthandler.cpp: Added check and appropriate response when
+	selecting, creating a character.
 
 2005-12-05  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/dalstorage.cpp: Added a working getEmailList() function.
 	* src/accounthandler: Now tests if email already exists.
-	* src/accounthandler.cpp, src/defines.h: Strengthens the way
-	email addresses checked. Added good response for selecting
-	a char when not logged.
-	* src/storage.h, src/dalstorage.h, src/dalstorage.cpp: Added
-	the getEmailList function, doesn't seem to work, but committed
-	to see why.
+	* src/accounthandler.cpp, src/defines.h: Strengthens the way email
+	addresses checked. Added good response for selecting a char when not
+	logged.
+	* src/storage.h, src/dalstorage.h, src/dalstorage.cpp: Added the
+	getEmailList function, doesn't seem to work, but committed to see why.
 
 2005-12-03  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/accounthandler.cpp: Handling good conditions to register.
 	Still lacks checking if the Email already exists.
 	* src/dalstorage.cpp: Fixed a bug that throwed an exception when
-	logging with an account that had no mapInfo yet.
-	Still has to set these to defaults in such case.
+	logging with an account that had no mapInfo yet. Still has to set
+	these to defaults in such case.
 
 2005-12-02  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/main.cpp, src/accounthandler.h, src/accounthandler.cpp,
-	src/configuration.h: Made the accounthandler reopen the db for
-	SQLite to enable registering ! Now working.
+	src/configuration.h: Made the accounthandler reopen the db for SQLite
+	to enable registering! Now working.
 
 2005-11-21  Aaron Marks  <nymacro@gmail.com>
 
@@ -1371,8 +1384,8 @@
 	* src/state.h, src/state.cpp: Updated world related functions.
 	* src/accounthandler.cpp: Now adds players who have selected a
 	character to the game world.
-	* src/object.h: Updated to include member variable for current map
-	the object is located.
+	* src/object.h: Updated to include member variable for current map the
+	object is located.
 
 2005-11-15  Aaron Marks  <nymacro@gmail.com>
 
@@ -1384,15 +1397,14 @@
 
 2005-11-14  Aaron Marks  <nymacro@gmail.com>
 
-        * src/bindings.i: Enabled "directors", allowing scripting language
-        to override virtual functions.
+	* src/bindings.i: Enabled "directors", allowing scripting language
+	to override virtual functions.
 
 2005-11-12  Aaron Marks  <nymacro@gmail.com>
 
 	* src/main.cpp: Added scripting with Ruby support
 	* src/bindings.i: Created basic SWIG bindings.
-	* src/Makefile.am: Updated to support Ruby & generate SWIG
-	bindings.
+	* src/Makefile.am: Updated to support Ruby & generate SWIG bindings.
 	* configure.ac: Updated to detect SWIG & Ruby, using them
 	appropriately.
 	* scripts/init.rb: Server initialization test script.
@@ -1409,5 +1421,5 @@
 	* src/dal/dataprovider.h, src/dal/dataprovider.cpp,
 	src/dal/sqlitedataprovider.cpp, src/dal/mysqldataprovider.cpp,
 	src/dal/pqdataprovider.cpp, src/main.cpp, src/client.cpp:
-	Grammar corrections, and a little bit of work on getting the name
-	of the Db.
+	Grammar corrections, and a little bit of work on getting the name of
+	the Db.

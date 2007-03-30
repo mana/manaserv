@@ -102,11 +102,13 @@ tmwserv_game_SOURCES = \
 	game-server/mapreader.cpp \
 	game-server/monster.hpp \
 	game-server/monster.cpp \
+	game-server/movingobject.hpp \
+	game-server/movingobject.cpp \
 	game-server/object.hpp \
-	game-server/object.cpp \
 	game-server/state.hpp \
 	game-server/state.cpp \
 	game-server/testing.cpp \
+	game-server/thing.hpp \
 	game-server/trigger.hpp \
 	game-server/trigger.cpp \
 	net/connection.hpp \

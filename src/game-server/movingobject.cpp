@@ -22,7 +22,7 @@
 
 #include "game-server/map.hpp"
 #include "game-server/mapmanager.hpp"
-#include "game-server/object.hpp"
+#include "game-server/movingobject.hpp"
 
 void MovingObject::move()
 {

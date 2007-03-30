@@ -20,28 +20,16 @@
  *  $Id$
  */
 
-
 #ifndef _TMWSERV_OBJECT_H_
 #define _TMWSERV_OBJECT_H_
 
-#include <vector>
-
 #include "point.h"
-#include "game-server/map.hpp"
+#include "game-server/thing.hpp"
 
-// Object type enumeration
-enum
-{
-    OBJECT_ITEM = 0, // A simple item
-    OBJECT_ACTOR,    // An item that toggle map/quest actions (doors, switchs, ...) and can speak (map panels).
-    OBJECT_NPC,      // Non-Playable-Character is an actor capable of movement and maybe actions
-    OBJECT_MONSTER,  // A monster (moving actor with AI. Should be able to toggle map/quest actions, too)
-    OBJECT_CHARACTER,// A normal being
-    OBJECT_OTHER     // Server-only object
-};
-
-class MapComposite;
-
+/**
+ * Flags that are raised as necessary. They trigger messages that are sent to
+ * the clients.
+ */
 enum
 {
     UPDATEFLAG_NEW_ON_MAP = 1,
@@ -52,79 +40,10 @@ enum
 };
 
 /**
- * Base class for in-game objects.
+ * Generic client-visible object definition. Keeps track of position and what
+ * to update clients about.
  */
-class Thing
-{
-    public:
-        /**
-         * Constructor.
-         */
-        Thing(int type)
-          : mType(type)
-        {}
-
-        /**
-         * Empty virtual destructor.
-         */
-        virtual ~Thing() {}
-
-        /**
-         * Gets type.
-         *
-         * @return the type.
-         */
-        int getType() const
-        { return mType; }
-
-        /**
-         * Returns whether this thing is visible on the map or not. (Object)
-         */
-        bool isVisible() const
-        { return mType != OBJECT_OTHER; }
-
-        /**
-         * Returns whether this thing can move on the map or not. (MovingObject)
-         */
-        bool canMove() const
-        { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER ||
-                 mType == OBJECT_NPC; }
-
-        /**
-         * Returns whether this thing can fight or not. (Being)
-         */
-        bool canFight() const
-        { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER; }
-
-        /**
-         * Updates the internal status.
-         */
-        virtual void
-        update() = 0;
-
-        /**
-         * Gets the map this thing is located on.
-         *
-         * @return ID of map.
-         */
-        int getMapId() const
-        { return mMapId; }
-
-        /**
-         * Sets the map this thing is located on.
-         */
-        void setMapId(int mapId)
-        { mMapId = mapId; }
-
-    private:
-        unsigned short mMapId;  /**< id of the map being is on */
-        char mType; /**< Object type */
-};
-
-/**
- * Generic client-visible object definition.
- */
-class Object: public Thing
+class Object : public Thing
 {
     public:
         /**
@@ -170,105 +89,8 @@ class Object: public Thing
         { mUpdateFlags = 0; }
 
     private:
-        char mUpdateFlags; /**< changes in object status */
-        Point mPos; /**< coordinates */
-};
-
-/**
- * Base class for in-game moving objects.
- */
-class MovingObject: public Object
-{
-    public:
-        /**
-         * Proxy constructor.
-         */
-        MovingObject(int type, int id)
-          : Object(type),
-            mPublicID(id),
-            mDirection(0),
-            mActionTime(0)
-        {}
-
-        /**
-         * Gets the destination coordinates of the object.
-         */
-        Point const &getDestination() const
-        { return mDst; }
-
-        /**
-         * Sets the destination coordinates of the object.
-         */
-        void setDestination(Point dst)
-        { mDst = dst; raiseUpdateFlags(UPDATEFLAG_NEW_DESTINATION); mPath.clear(); }
-
-        /**
-         * Gets the old coordinates of the object.
-         */
-        Point getOldPosition() const
-        { return mOld; }
-
-        /**
-         * Sets object direction
-         */
-        void setDirection(int direction)
-        { mDirection = direction; }
-
-        /**
-         * Gets object direction
-         */
-        unsigned char getDirection() const
-        { return mDirection; }
-
-        /**
-         * Sets object speed.
-         */
-        void setSpeed(unsigned s)
-        { mSpeed = s; }
-
-        /**
-         * Sets object bounding circle radius
-         */
-        void setSize(unsigned s)
-        { mSize = s; }
-
-        /**
-         * Gets object bounding circle radius
-         */
-        unsigned getSize()
-        { return mSize; }
-
-        /**
-         * Moves the object toward its destination.
-         */
-        virtual void move();
-
-        /**
-         * Get public ID.
-         *
-         * @return the public ID, 65535 if none yet.
-         */
-        int getPublicID() const
-        { return mPublicID; }
-
-        /**
-         * Set public ID.
-         * The object shall not have any public ID yet.
-         */
-        void setPublicID(int id)
-        { mPublicID = id; }
-
-    private:
-        unsigned short mPublicID; /**< Object ID sent to clients (unique with respect to the map) */
-        Point mDst; /**< target coordinates */
-        Point mOld; /**< old coordinates */
-        unsigned short mSpeed; /**< speed */
-        std::list<PATH_NODE> mPath;
-
-    protected:
-        unsigned char mDirection;   /**< Facing direction */
-        unsigned short mActionTime; /**< delay until next action */
-        unsigned mSize; /**< radius of bounding circle */
+        char mUpdateFlags; /**< Changes in object status. */
+        Point mPos;        /**< Coordinates. */
 };
 
 #endif // _TMWSERV_OBJECT_H_

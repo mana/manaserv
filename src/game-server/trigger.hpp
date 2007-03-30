@@ -25,28 +25,30 @@
 #define _TMWSERV_TRIGGER
 
 #include "point.h"
-#include "game-server/object.hpp"
+#include "game-server/thing.hpp"
+
+class Object;
 
 class TriggerAction
 {
     public:
         virtual ~TriggerAction() {}
-        virtual void process(Object *) = 0;
+        virtual void process(Object *obj) = 0;
 };
 
-class WarpAction: public TriggerAction
+class WarpAction : public TriggerAction
 {
     public:
         WarpAction(int m, int x, int y)
           : mMap(m), mX(x), mY(y) {}
 
-        virtual void process(Object *);
+        virtual void process(Object *obj);
 
     private:
         unsigned short mMap, mX, mY;
 };
 
-class TriggerArea: public Thing
+class TriggerArea : public Thing
 {
     public:
         /**

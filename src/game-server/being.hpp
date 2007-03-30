@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "defines.h"
-#include "game-server/object.hpp"
+#include "game-server/movingobject.hpp"
 
 class Being;
 class MapComposite;

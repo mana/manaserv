@@ -21,10 +21,12 @@
  *  $Id$
  */
 
+#include "game-server/trigger.hpp"
+
 #include "game-server/mapcomposite.hpp"
+#include "game-server/movingobject.hpp"
 #include "game-server/object.hpp"
 #include "game-server/state.hpp"
-#include "game-server/trigger.hpp"
 
 void WarpAction::process(Object *obj)
 {
