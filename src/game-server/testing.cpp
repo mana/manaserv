@@ -4,9 +4,8 @@
 
 #include <cassert>
 
-#include "controller.h"
-
 #include "defines.h"
+#include "game-server/monster.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
@@ -36,7 +35,7 @@ void testingMap(int id)
             gameState->insert(new TriggerArea(1, rectA, &warpA));
             for (int i = 0; i < 10; i++)
             {
-                Being *being = new Controlled(OBJECT_MONSTER);
+                Being *being = new Monster();
                 being->setSpeed(150);
                 being->setSize(8);
 

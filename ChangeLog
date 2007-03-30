@@ -1,3 +1,10 @@
+2007-03-30  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/controller.cpp, src/controller.h, src/game-server/monster.cpp,
+	src/game-server/monster.hpp, src/game-server/testing.cpp, src/Makefile.am:
+	Renamed "Controlled" to "Monster" and moved it into the game-server
+	directory.
+
 2007-03-23  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* tmw.cbp: Updated and fixed Code::Blocks project files.

@@ -70,8 +70,6 @@ tmwserv_game_SOURCES = \
 	abstractcharacterdata.cpp \
 	configuration.h \
 	configuration.cpp \
-	controller.h \
-	controller.cpp \
 	defines.h \
 	point.h \
 	resourcemanager.h \
@@ -102,6 +100,8 @@ tmwserv_game_SOURCES = \
 	game-server/mapmanager.cpp \
 	game-server/mapreader.hpp \
 	game-server/mapreader.cpp \
+	game-server/monster.hpp \
+	game-server/monster.cpp \
 	game-server/object.hpp \
 	game-server/object.cpp \
 	game-server/state.hpp \
