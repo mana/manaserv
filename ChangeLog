@@ -17,6 +17,8 @@
 	src/game-server/deathlistener.hpp: Added a DeathListener interface,
 	which the SpawnArea now uses to get notified about dying beings, so
 	that it knows when to spawn more.
+	* src/game-server/spawnarea.cpp, src/game-server/spawnarea.hpp: Took
+	into account spawn rate.
 
 2007-03-30  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

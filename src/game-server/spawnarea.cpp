@@ -29,7 +29,6 @@
 #include "utils/logger.h"
 
 /*
- * TODO: Take into account spawn rate.
  * TODO: Allow specifying being type and use it.
  */
 
@@ -39,7 +38,8 @@ SpawnArea::SpawnArea(int mapId, const Rectangle &zone):
     mMaxBeings(10),
     mBeingType(1),
     mSpawnRate(10),
-    mNumBeings(0)
+    mNumBeings(0),
+    mNextSpawn(0)
 {
     setMapId(mapId);
 }
@@ -47,23 +47,34 @@ SpawnArea::SpawnArea(int mapId, const Rectangle &zone):
 void
 SpawnArea::update()
 {
-    while (mNumBeings < mMaxBeings)
+    if (mNextSpawn > 0)
     {
-        Being *being = new Monster();
-        being->addDeathListener(this);
+        mNextSpawn--;
 
-        // some bogus stats for testing
-        being->setSpeed(150);
-        being->setSize(8);
-        being->setAttribute(BASE_ATTR_VITALITY, 10);
-        being->fillHitpoints();
+        if (mNextSpawn == 0)
+        {
+            Being *being = new Monster();
+            being->addDeathListener(this);
 
-        being->setMapId(1);
-        being->setPosition(Point(mZone.x + rand() % mZone.w,
-                                 mZone.y + rand() % mZone.h));
-        gameState->insert(being);
+            // some bogus stats for testing
+            being->setSpeed(150);
+            being->setSize(8);
+            being->setAttribute(BASE_ATTR_VITALITY, 10);
+            being->fillHitpoints();
 
-        mNumBeings++;
+            being->setMapId(1);
+            being->setPosition(Point(mZone.x + rand() % mZone.w,
+                        mZone.y + rand() % mZone.h));
+            gameState->insert(being);
+
+            mNumBeings++;
+        }
+    }
+
+    if (mNextSpawn == 0 && mNumBeings < mMaxBeings && mSpawnRate > 0)
+    {
+        // Predictable respawn intervals (can be randomized later)
+        mNextSpawn = (10 * 60) / mSpawnRate;
     }
 }
 

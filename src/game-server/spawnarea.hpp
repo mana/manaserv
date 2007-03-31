@@ -51,6 +51,7 @@ class SpawnArea : public Thing, public DeathListener
         int mBeingType;    /**< Type of being that spawns in this area. */
         int mSpawnRate;    /**< Number of beings spawning per minute. */
         int mNumBeings;    /**< Current population of this area. */
+        int mNextSpawn;    /**< The time until next being spawn. */
 };
 
 #endif
