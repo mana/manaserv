@@ -10,6 +10,13 @@
 	src/net/connectionhandler.cpp, src/net/netcomputer.cpp: Moved writing
 	of messages into MessageIn and MessageOut and tweaked the printing of
 	the message ID.
+	* src/Makefile.am, src/game-server/spawnarea.cpp,
+	src/game-server/being.cpp, src/game-server/spawnarea.hpp,
+	src/game-server/monster.cpp, src/game-server/being.hpp,
+	src/game-server/movingobject.hpp, src/game-server/monster.hpp,
+	src/game-server/deathlistener.hpp: Added a DeathListener interface,
+	which the SpawnArea now uses to get notified about dying beings, so
+	that it knows when to spawn more.
 
 2007-03-30  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

@@ -31,6 +31,7 @@
 #include "game-server/movingobject.hpp"
 
 class Being;
+class DeathListener;
 class MapComposite;
 
 /**
@@ -208,6 +209,22 @@ class Being : public MovingObject
         unsigned short getAttribute(int attributeNumber) const
         { return mAttributes.at(attributeNumber); }
 
+        /**
+         * Adds a death listener.
+         */
+        void addDeathListener(DeathListener *listener)
+        {
+            mDeathListeners.push_back(listener);
+        }
+
+        /**
+         * Removes a death listener.
+         */
+        void removeDeathListener(DeathListener *listener)
+        {
+            mDeathListeners.remove(listener);
+        }
+
     protected:
         /**
          * Calculates all derived attributes of a beings
@@ -229,6 +246,7 @@ class Being : public MovingObject
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
 
+        std::list<DeathListener*> mDeathListeners;
 
         Hits mHitsTaken; /**< List of punches taken since last update */
 };

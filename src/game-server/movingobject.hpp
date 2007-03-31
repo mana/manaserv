@@ -131,4 +131,4 @@ class MovingObject : public Object
         unsigned mSize;             /**< Radius of bounding circle. */
 };
 
-#endif // _TMWSERV_OBJECT_H_
+#endif // _TMWSERV_MOVINGOBJECT_H_

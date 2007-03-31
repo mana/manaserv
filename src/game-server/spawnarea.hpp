@@ -25,13 +25,16 @@
 #define _TMWSERV_SPAWNAREA
 
 #include "point.h"
+#include "game-server/deathlistener.hpp"
 #include "game-server/thing.hpp"
+
+class Being;
 
 /**
  * A spawn area, where monsters spawn. The area is a rectangular field and will
  * spawn a certain number of a given monster type.
  */
-class SpawnArea : public Thing
+class SpawnArea : public Thing, public DeathListener
 {
     public:
         SpawnArea(int mapId, const Rectangle &zone);
@@ -39,6 +42,8 @@ class SpawnArea : public Thing
         virtual ~SpawnArea() {}
 
         virtual void update();
+
+        virtual void died(Being *being);
 
     protected:
         Rectangle mZone;

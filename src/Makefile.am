@@ -84,6 +84,7 @@ tmwserv_game_SOURCES = \
 	game-server/character.cpp \
 	game-server/collisiondetection.hpp \
 	game-server/collisiondetection.cpp \
+	game-server/deathlistener.hpp \
 	game-server/gamehandler.hpp \
 	game-server/gamehandler.cpp \
 	game-server/inventory.hpp \

@@ -20,47 +20,31 @@
  *  $Id$
  */
 
-#ifndef _TMWSERV_MONSTER_H_
-#define _TMWSERV_MONSTER_H_
+#ifndef _TMWSERV_DEATHLISTENER
+#define _TMWSERV_DEATHLISTENER
 
-#include "game-server/being.hpp"
+#include <list>
+
+class Being;
 
 /**
- * The class for a fightable monster with its own AI
+ * The listener that's notified when a being dies.
  */
-class Monster : public Being
+class DeathListener
 {
     public:
         /**
-         * Constructor.
+         * The obligatory empty virtual destructor.
          */
-        Monster();
+        virtual ~DeathListener() {}
 
         /**
-         * Performs one step of controller logic.
+         * Called when a being died.
          */
-        void update();
-
-        /**
-         * Kills the being
-         */
-        virtual void die();
-
-    protected:
-        /**
-         * Gets the stats of the currently equipped weapon that are relevant
-         * for damage calculation
-         */
-        virtual WeaponStats getWeaponStats();
-
-        /**
-         * Calculates all derived attributes
-         */
-        void calculateDerivedAttributes();
-
-    private:
-        /** Count down till next random movement (temporary). */
-        unsigned int mCountDown;
+        virtual void died(Being *being) = 0;
 };
 
-#endif // _TMWSERV_MONSTER_H_
+typedef std::list<DeathListener*> DeathListeners;
+
+
+#endif // _TMWSERV_DEATHLISTENER

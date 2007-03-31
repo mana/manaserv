@@ -41,8 +41,8 @@ void Monster::update()
     {
         if (mAction != DEAD)
         {
-            Point randomPos( rand() % 320 + 720,
-                                rand() % 320 + 840 );
+            Point randomPos(rand() % 160 - 80 + getPosition().x,
+                            rand() % 160 - 80 + getPosition().y);
             setDestination(randomPos);
             mCountDown = 10 + rand() % 10;
 

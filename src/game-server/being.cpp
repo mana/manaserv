@@ -24,6 +24,7 @@
 
 #include "defines.h"
 #include "game-server/collisiondetection.hpp"
+#include "game-server/deathlistener.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
 
@@ -80,6 +81,14 @@ void Being::die()
     setAction(DEAD);
     // dead beings stay where they are
     setDestination(getPosition());
+
+    // Notify death listeners
+    DeathListeners::iterator i_end = mDeathListeners.end();
+    DeathListeners::iterator i;
+    for (i = mDeathListeners.begin(); i != i_end; ++i)
+    {
+        (*i)->died(this);
+    }
 }
 
 void Being::move()

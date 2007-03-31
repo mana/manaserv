@@ -30,7 +30,6 @@
 
 /*
  * TODO: Take into account spawn rate.
- * TODO: Be a death listener to spawned monsters, to adjust mNumBeings.
  * TODO: Allow specifying being type and use it.
  */
 
@@ -51,6 +50,7 @@ SpawnArea::update()
     while (mNumBeings < mMaxBeings)
     {
         Being *being = new Monster();
+        being->addDeathListener(this);
 
         // some bogus stats for testing
         being->setSpeed(150);
@@ -65,4 +65,10 @@ SpawnArea::update()
 
         mNumBeings++;
     }
+}
+
+void
+SpawnArea::died(Being *being)
+{
+    mNumBeings--;
 }
