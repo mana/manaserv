@@ -91,6 +91,12 @@ class MessageOut
         char *mData;                         /**< Data building up. */
         unsigned int mPos;                   /**< Position in the data. */
         unsigned int mDataSize;              /**< Allocated datasize. */
+
+        /**
+         * Streams message ID and length to the given output stream.
+         */
+        friend std::ostream& operator <<(std::ostream &os,
+                                         const MessageOut &msg);
 };
 
 #endif //_TMWSERV_MESSAGEOUT_H_

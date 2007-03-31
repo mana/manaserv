@@ -64,7 +64,7 @@ void
 NetComputer::send(const MessageOut &msg, bool reliable,
                   unsigned int channel)
 {
-    LOG_DEBUG("Sending packet of length " << msg.getLength() << " to " << *this);
+    LOG_DEBUG("Sending message " << msg << " to " << *this);
 
     ENetPacket *packet;
     packet = enet_packet_create(msg.getData(),

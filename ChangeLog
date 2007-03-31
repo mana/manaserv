@@ -6,8 +6,10 @@
 	src/game-server/monster.hpp, src/game-server/trigger.hpp: Made a start
 	with having monsters spawn using a SpawnArea.
 	* src/net/messagein.hpp, src/net/messagein.cpp,
-	src/net/connectionhandler.cpp: Moved writing of incoming messages into
-	MessageIn and tweaked the printing of the message ID.
+	src/net/messageout.hpp, src/net/messageout.cpp,
+	src/net/connectionhandler.cpp, src/net/netcomputer.cpp: Moved writing
+	of messages into MessageIn and MessageOut and tweaked the printing of
+	the message ID.
 
 2007-03-30  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

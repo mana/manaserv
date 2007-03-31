@@ -42,7 +42,7 @@ int MessageIn::readByte()
     int value = -1;
     if (mPos < mLength)
     {
-        value = (unsigned char)mData[mPos];
+        value = (unsigned char) mData[mPos];
     }
     mPos += 1;
     return value;
@@ -55,7 +55,7 @@ int MessageIn::readShort()
     {
         uint16_t t;
         memcpy(&t, mData + mPos, 2);
-        value = (unsigned short)ENET_NET_TO_HOST_16(t);
+        value = (unsigned short) ENET_NET_TO_HOST_16(t);
     }
     mPos += 2;
     return value;

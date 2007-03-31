@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <iosfwd>
 #include <string>
+#include <iostream>
+#include <iomanip>
 #include <enet/enet.h>
 
 #include "net/messageout.hpp"
@@ -132,4 +134,22 @@ MessageOut::writeString(const std::string &string, int length)
         memset(mData + mPos + stringLength, '\0', length - stringLength);
     }
     mPos += length;
+}
+
+std::ostream&
+operator <<(std::ostream &os, const MessageOut &msg)
+{
+    if (msg.getLength() >= 2)
+    {
+        unsigned short id = ENET_NET_TO_HOST_16(*(short*) msg.mData);
+        os << std::setw(6) << std::hex << std::showbase << std::internal
+           << std::setfill('0') << id
+           << std::dec << " (" << msg.getLength() << " B)";
+    }
+    else
+    {
+        os << "Unknown"
+           << std::dec << " (" << msg.getLength() << " B)";
+    }
+    return os;
 }
