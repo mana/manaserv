@@ -21,45 +21,31 @@
  *  $Id$
  */
 
-#ifndef _TMWSERV_TRIGGER
-#define _TMWSERV_TRIGGER
+#ifndef _TMWSERV_SPAWNAREA
+#define _TMWSERV_SPAWNAREA
 
 #include "point.h"
 #include "game-server/thing.hpp"
 
-class Object;
-
-class TriggerAction
+/**
+ * A spawn area, where monsters spawn. The area is a rectangular field and will
+ * spawn a certain number of a given monster type.
+ */
+class SpawnArea : public Thing
 {
     public:
-        virtual ~TriggerAction() {}
-        virtual void process(Object *obj) = 0;
-};
+        SpawnArea(int mapId, const Rectangle &zone);
 
-class WarpAction : public TriggerAction
-{
-    public:
-        WarpAction(int m, int x, int y)
-          : mMap(m), mX(x), mY(y) {}
+        virtual ~SpawnArea() {}
 
-        virtual void process(Object *obj);
-
-    private:
-        unsigned short mMap, mX, mY;
-};
-
-class TriggerArea : public Thing
-{
-    public:
-        /**
-         * Creates a rectangular trigger for a given map.
-         */
-        TriggerArea(int map, Rectangle const &, TriggerAction *);
         virtual void update();
 
-    private:
+    protected:
         Rectangle mZone;
-        TriggerAction *mAction;
+        int mMaxBeings;    /**< Maximum population of this area. */
+        int mBeingType;    /**< Type of being that spawns in this area. */
+        int mSpawnRate;    /**< Number of beings spawning per minute. */
+        int mNumBeings;    /**< Current population of this area. */
 };
 
 #endif

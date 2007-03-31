@@ -105,6 +105,8 @@ tmwserv_game_SOURCES = \
 	game-server/movingobject.hpp \
 	game-server/movingobject.cpp \
 	game-server/object.hpp \
+	game-server/spawnarea.hpp \
+	game-server/spawnarea.cpp \
 	game-server/state.hpp \
 	game-server/state.cpp \
 	game-server/testing.cpp \

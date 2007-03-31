@@ -90,6 +90,7 @@ class State
          * Gets a composite map.
          */
         MapComposite *getMap(int map);
+
         /**
          * Inserts an object on the map.
          */

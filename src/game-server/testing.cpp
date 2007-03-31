@@ -5,8 +5,8 @@
 #include <cassert>
 
 #include "defines.h"
-#include "game-server/monster.hpp"
 #include "game-server/itemmanager.hpp"
+#include "game-server/spawnarea.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
 
@@ -32,29 +32,21 @@ void testingMap(int id)
     {
         case 1:
         {
+            // Create maggot spawn area
+            Rectangle maggotSpawnRect = { 720, 900, 320, 320 };
+            gameState->insert(new SpawnArea(1, maggotSpawnRect));
+
+            // Portal to map 3
             gameState->insert(new TriggerArea(1, rectA, &warpA));
-            for (int i = 0; i < 10; i++)
-            {
-                Being *being = new Monster();
-                being->setSpeed(150);
-                being->setSize(8);
 
-                // some bogus stats for testing
-                being->setAttribute(BASE_ATTR_VITALITY, 10);
-
-                being->fillHitpoints();
-
-                being->setMapId(1);
-                Point pos(720, 900);
-                being->setPosition(pos);
-                gameState->insert(being);
-            }
+            // Drop some items
             dropItem(1, 58 * 32 + 16, 20 * 32 + 16, 508);
             dropItem(1, 58 * 32 + 16, 21 * 32 + 16, 524);
         } break;
 
         case 3:
         {
+            // Portal to map 1
             gameState->insert(new TriggerArea(3, rectB, &warpB));
         } break;
     }

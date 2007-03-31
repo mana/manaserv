@@ -17,7 +17,7 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id: controller.cpp 3191 2007-03-15 23:47:13Z crush_tmw $
+ *  $Id$
  */
 
 #include "game-server/monster.hpp"
@@ -28,6 +28,7 @@ Monster::Monster():
     Being(OBJECT_MONSTER, 65535),
     mCountDown(0)
 {
+    LOG_DEBUG("Monster spawned!");
     mAttributes.resize(NB_ATTRIBUTES_CONTROLLED, 1); // TODO: fill with the real attributes
 }
 
