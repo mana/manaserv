@@ -188,13 +188,13 @@ enum {
     CPMSG_LIST_CHANNELS_RESPONSE      = 0x0424, // W number of channels, S channels
 
     // Inter-server
-    GAMSG_REGISTER     = 0x500, // S address, W port, { W map id }*
-    AGMSG_ACTIVE_MAP   = 0x501, // W map id
-    AGMSG_PLAYER_ENTER = 0x510, // B*32 token, serialised character data
-    GAMSG_PLAYER_DATA  = 0x520, // serialised character data
-    GAMSG_REDIRECT          = 0x530, // L id
-    AGMSG_REDIRECT_RESPONSE = 0x531, // L id, B*32 token, S game address, W game port
-    GAMSG_PLAYER_RECONNECT  = 0x532, // L id, B*32 token
+    GAMSG_REGISTER     = 0x0500, // S address, W port, { W map id }*
+    AGMSG_ACTIVE_MAP   = 0x0501, // W map id
+    AGMSG_PLAYER_ENTER = 0x0510, // B*32 token, serialised character data
+    GAMSG_PLAYER_DATA  = 0x0520, // serialised character data
+    GAMSG_REDIRECT          = 0x0530, // L id
+    AGMSG_REDIRECT_RESPONSE = 0x0531, // L id, B*32 token, S game address, W game port
+    GAMSG_PLAYER_RECONNECT  = 0x0532, // L id, B*32 token
 
     XXMSG_INVALID = 0x7FFF
 };

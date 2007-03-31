@@ -38,10 +38,11 @@ bool ConnectionHandler::startListen(enet_uint16 port)
     address.port = port;
 
     LOG_INFO("Listening on port " << port << "...");
-    host = enet_host_create(&address    /* the address to bind the server host to */,
-                            MAX_CLIENTS /* allow up to MAX_CLIENTS clients and/or outgoing connections */,
-                            0           /* assume any amount of incoming bandwidth */,
-                            0           /* assume any amount of outgoing bandwidth */);
+    host = enet_host_create(
+            &address    /* the address to bind the server host to */,
+            MAX_CLIENTS /* allow up to MAX_CLIENTS connections */,
+            0           /* assume any amount of incoming bandwidth */,
+            0           /* assume any amount of outgoing bandwidth */);
 
     return host;
 }
@@ -111,8 +112,7 @@ void ConnectionHandler::process(enet_uint32 timeout)
                 if (event.packet->dataLength >= 2) {
                     MessageIn msg((char *)event.packet->data,
                                   event.packet->dataLength);
-                    LOG_DEBUG("Received message " << msg.getId() << " ("
-                              << event.packet->dataLength << " B) from "
+                    LOG_DEBUG("Received message " << msg << " from "
                               << *comp);
 
                     processMessage(comp, msg);

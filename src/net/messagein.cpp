@@ -22,6 +22,8 @@
  */
 
 #include <string>
+#include <iostream>
+#include <iomanip>
 #include <enet/enet.h>
 
 #include "net/messagein.hpp"
@@ -95,4 +97,13 @@ std::string MessageIn::readString(int length)
     mPos += length;
 
     return readString;
+}
+
+std::ostream&
+operator <<(std::ostream &os, const MessageIn &msg)
+{
+    os << std::setw(6) << std::hex << std::showbase << std::internal
+       << std::setfill('0') << msg.getId()
+       << std::dec << " (" << msg.getLength() << " B)";
+    return os;
 }

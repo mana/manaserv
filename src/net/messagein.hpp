@@ -39,7 +39,17 @@ class MessageIn
          */
         MessageIn(const char *data, int length);
 
-        int getId() { return mId; } /**< Returns the message ID. */
+        /**
+         * Returns the message ID.
+         */
+        int
+        getId() const { return mId; }
+
+        /**
+         * Returns the total length of this message.
+         */
+        int
+        getLength() const { return mLength; }
 
         int readByte();             /**< Reads a byte. */
         int readShort();            /**< Reads a short. */
@@ -50,16 +60,22 @@ class MessageIn
          * that the length of the string is stored in a short at the
          * start of the string.
          */
-        std::string readString(int length = -1);
+        std::string
+        readString(int length = -1);
 
         /**
          * Returns the length of unread data.
          */
-        int getUnreadLength() { return mLength - mPos; }
+        int
+        getUnreadLength() const { return mLength - mPos; }
+
+        /**
+         * Returns
+         */
 
     private:
         const char *mData;            /**< Packet data */
-        unsigned short mLength;         /**< Length of data in bytes */
+        unsigned short mLength;       /**< Length of data in bytes */
         unsigned short mId;           /**< The message ID. */
 
         /**
@@ -67,6 +83,12 @@ class MessageIn
          * bigger than packet->length means EOP was reached when reading it.
          */
         unsigned short mPos;
+
+        /**
+         * Streams message ID and length to the given output stream.
+         */
+        friend std::ostream& operator <<(std::ostream &os,
+                                         const MessageIn &msg);
 };
 
 #endif
