@@ -52,13 +52,13 @@ void Being::damage(Damage damage)
     {
         case DAMAGETYPE_PHYSICAL:
             HPloss -= getAttribute(DERIVED_ATTR_PHYSICAL_DEFENCE) / damage.piercing;
-            HPloss -= getAttribute(BASE_ATTR_VITALITY);
+            HPloss -= getAttribute(ATTR_EFF_VITALITY);
             break;
         case DAMAGETYPE_MAGICAL:
-            HPloss /= getAttribute(BASE_ATTR_WILLPOWER) + 1;
+            HPloss /= getAttribute(ATTR_EFF_WILLPOWER) + 1;
             break;
         case DAMAGETYPE_HAZARD:
-            HPloss /= getAttribute(BASE_ATTR_VITALITY) + 1;
+            HPloss /= getAttribute(ATTR_EFF_VITALITY) + 1;
             break;
         case DAMAGETYPE_OTHER:
             // nothing to do here

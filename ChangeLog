@@ -1,3 +1,8 @@
+2007-04-11  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/being.cpp: Using effective attributes instead of base
+	attributes for damage calculation.
+
 2007-03-31  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/Makefile.am, src/game-server/testing.cpp,
