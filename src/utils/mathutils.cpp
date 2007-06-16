@@ -23,6 +23,8 @@
 #include "mathutils.h"
 
 #include <cmath>
+#include <stdint.h>
+#include <string.h>
 #include <float.h>
 
 #define MATH_UTILS_MAX_ANGLE 360
@@ -39,24 +41,23 @@ float tanList[MATH_UTILS_MAX_ANGLE];
  *
  * Unfortunately the original creator of this function seems to be unknown.
  *
- * TODO: - Make this function run on 64-bit architectures
- *       - Find out and fix why this function fails when compiled with the -O2
- *         optimization flag on
- *         gcc version 4.0.2 20050808 (prerelease) (Ubuntu 4.0.1-4ubuntu9).
+ * I wholeheartedly disagree with the use of this function -- silene
  */
 float utils::math::fastInvSqrt(float x)
 {
+    typedef char float_is_32_bits[(sizeof(float) == 4) - 1];
     float xhalf = 0.5f * x;
-    int i = *(int*) &x;
+    uint32_t i;
+    memcpy(&i, &x, 4);
     i = 0x5f375a86 - (i >> 1);
-    x = *(float*) &i;
+    memcpy(&x, &i, 4);
     x = x * (1.5f-xhalf * x * x);
     return x;
 }
 
 float utils::math::fastSqrt(float x)
 {
-    return 1.0f / utils::math::fastInvSqrt(x);
+    return x * utils::math::fastInvSqrt(x);
 }
 
 void utils::math::init()
