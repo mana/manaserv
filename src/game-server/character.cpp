@@ -33,6 +33,7 @@ InventoryItem tempItem;
 Character::Character(MessageIn & msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL),
+    mAttributesChanged(true),
     mDatabaseID(-1), mName(""), mGender(0), mHairStyle(0), mHairColor(0),
     mLevel(0), mMoney(0)
 {

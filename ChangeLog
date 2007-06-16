@@ -2,6 +2,7 @@
 
 	* src/utils/mathutils.cpp: Fixed miscompilation of rsqrt due to type
 	aliasing and sped up sqrt.
+	* src/game-server/character.cpp: Fixed initial attribute status.
 
 2007-04-11  Philipp Sehmisch  <tmw@crushnet.org>
 
