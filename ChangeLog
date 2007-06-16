@@ -1,3 +1,8 @@
+2007-06-16  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+
+	* src/utils/mathutils.cpp: Fixed miscompilation of rsqrt due to type
+	aliasing and sped up sqrt.
+
 2007-04-11  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.cpp: Using effective attributes instead of base

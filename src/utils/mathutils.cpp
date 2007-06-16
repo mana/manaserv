@@ -45,7 +45,7 @@ float tanList[MATH_UTILS_MAX_ANGLE];
  */
 float utils::math::fastInvSqrt(float x)
 {
-    typedef char float_is_32_bits[(sizeof(float) == 4) - 1];
+    typedef char float_must_be_32_bits[(sizeof(float) == 4) * 2 - 1];
     float xhalf = 0.5f * x;
     uint32_t i;
     memcpy(&i, &x, 4);
