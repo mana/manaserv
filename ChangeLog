@@ -1,3 +1,8 @@
+2007-06-25  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp: Fixed include directories and
+	updated project files.
+
 2007-06-16  Guillaume Melquiond <guillaume.melquiong@gmail.com>
 
 	* src/utils/mathutils.cpp: Fixed miscompilation of rsqrt due to type
@@ -49,7 +54,8 @@
 
 2007-03-23  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
-	* tmw.cbp: Updated and fixed Code::Blocks project files.
+	* accountserver.cbp, gameserver.cbp: Updated and fixed Code::Blocks
+	project files.
 
 2007-03-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

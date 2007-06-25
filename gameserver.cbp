@@ -17,6 +17,9 @@
 				<Option compiler="0"/>
 				<Option use_console_runner="0"/>
 				<Option projectResourceIncludeDirsRelation="1"/>
+				<Compiler>
+					<Add directory="src"/>
+				</Compiler>
 			</Target>
 		</Build>
 		<Compiler>
@@ -48,16 +51,6 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\configuration.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\controller.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\controller.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -183,11 +176,31 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\game-server\object.cpp">
+		<Unit filename="src\game-server\monster.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\game-server\object.hpp">
+		<Unit filename="src\game-server\monster.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\movingobject.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\movingobject.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\spawnarea.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\spawnarea.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

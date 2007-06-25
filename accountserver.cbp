@@ -17,6 +17,9 @@
 				<Option compiler="0"/>
 				<Option use_console_runner="0"/>
 				<Option projectResourceIncludeDirsRelation="1"/>
+				<Compiler>
+					<Add directory="src"/>
+				</Compiler>
 			</Target>
 		</Build>
 		<Compiler>
