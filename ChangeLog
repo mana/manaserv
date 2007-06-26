@@ -9,10 +9,37 @@
 	aliasing and sped up sqrt.
 	* src/game-server/character.cpp: Fixed initial attribute status.
 
+2007-04-28  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.cpp,
+	src/account-server/guildmanager.cpp: Fixed bug where
+	the guild creator was never added to the guild.
+
+2007-04-22  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.cpp,
+	src/account-server/guildmanager.cpp,
+	src/account-server/guildmanager.hpp,
+	src/account-server/serverhandler.cpp,
+	src/account-server/storage.hpp, src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp, src/defines.h,
+	src/game-server/gamehandler.cpp,
+	src/game-server/accountconnection.cpp,
+	src/game-server/accountconnection.hpp: Added quitting guilds.
+
 2007-04-11  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.cpp: Using effective attributes instead of base
 	attributes for damage calculation.
+
+2007-04-05  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.hpp,
+	src/chat-server/chathandler.cpp,
+	src/account-server/guildmanager.cpp,
+	src/account-server/guildmanager.hpp, src/defines.h:
+	Added user joining and leaving, plus stopped non guild members
+	joining guild channels.
 
 2007-03-31  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -52,10 +79,42 @@
 	src/Makefile.am: Renamed "Controlled" to "Monster" and moved it into
 	the game-server directory.
 
+2007-03-30  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.cpp,
+	src/chat-server/chathandler.hpp,
+	src/account-server/accounthandler.hpp,
+	src/account-server/guildmanager.cpp,
+	src/account-server/guildmanager.hpp,
+	src/account-server/guild.cpp, src/account-server/guild.hpp,
+	src/account-server/serverhandler.cpp,
+	src/account-server/serverhandler.hpp,
+	src/account-server/storage.hpp, src/account-server/storage.cpp,
+	src/account-server/characterdata.hpp,
+	src/game-server/accountconnection.cpp,
+	src/defines: Added rejoining guilds the player belongs to.
+	* src/account-server/serverhandler.hpp,
+	src/chat-server/chathandler.cpp: Player now joins guild channels
+	upon connecting to the chat server.
+	* src/acccount-server/dalstorage.cpp: Fixed bug with creating
+	guilds.
+
+2007-03-25  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.cpp,
+	src/chat-server/chathandler.hpp,
+	src/account-server/serverhandler.cpp,
+	src/account-server/serverhandler.hpp,
+	src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp,
+	src/defines.h, src/game-server/gamehandler.cpp,
+	src/game-server/gamehandler.hpp,
+	src/game-server/accountconnection.cpp: Implemented inviting
+	users to guilds.
+
 2007-03-23  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
-	* accountserver.cbp, gameserver.cbp: Updated and fixed Code::Blocks
-	project files.
+	* tmw.cbp: Updated and fixed Code::Blocks project files.
 
 2007-03-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -100,6 +159,26 @@
 	src/utils/tokendispenser.hpp, src/account-server/accountclient.cpp,
 	src/account-server/accounthandler.cpp: Fixed two compiler warnings
 	and corrected a spelling error.
+
+2007-03-19  David Athay  <ko2fan@gmail.com>
+
+	* src/Makefile.am, src/account-server/accounthandler.cpp,
+        src/account-server/characterdata.hpp,
+        src/account-server/dalstorage.cpp,
+        src/account-server/dalstorage.hpp,
+        src/account-server/main-account.cpp,
+        src/account-server/serverhandler.cpp,
+        src/account-server/serverhandler.hpp,
+        src/account-server/storage.hpp, src/chat-server/chathandler.cpp,
+        src/account-server/guild.cpp, src/account-server/guild.h,
+        src/account-server/guildmanager.cpp,
+        src/account-server/guildmanager.hpp,
+        src/chat-server/chathandler.hpp, src/defines.h,
+        src/game-server/accountconnection.cpp,
+        src/game-server/accountconnection.hpp,
+        src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp,
+        src/game-server/mapmanager.cpp, src/game-server/mapmanager.hpp,
+        src/net/netcomputer.cpp : Add first stage of guild system.
 
 2007-03-18  Rogier Polak  <rogier.l.a.polak@gmail.com>
 

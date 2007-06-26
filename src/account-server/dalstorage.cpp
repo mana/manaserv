@@ -27,6 +27,8 @@
 #include "configuration.h"
 #include "point.h"
 #include "account-server/characterdata.hpp"
+#include "account-server/guild.hpp"
+#include "account-server/guildmanager.hpp"
 #include "account-server/dalstoragesql.hpp"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
@@ -67,6 +69,22 @@ class character_by_id
         int mID; /**< the ID to look for */
 };
 
+/**
+* Functor used to search a character by name in Characters.
+ */
+class character_by_name
+{
+public:
+    character_by_name(const std::string &name)
+    : mName(name)
+    {}
+    
+    bool operator()(CharacterPtr const &elem) const
+    { return elem->getName() == mName; }
+    
+private:
+    std::string mName; /**< the name to look for */
+};
 
 /**
  * Constructor.
@@ -168,6 +186,8 @@ DALStorage::open(void)
         createTable(WORLD_ITEMS_TBL_NAME, SQL_WORLD_ITEMS_TABLE);
         createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
         createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
+        createTable(GUILDS_TBL_NAME, SQL_GUILDS_TABLE);
+        createTable(GUILD_MEMBERS_TBL_NAME, SQL_GUILD_MEMBERS_TABLE);
     }
     catch (const DbConnectionFailure& e) {
         LOG_ERROR("(DALStorage::open #1) Unable to connect to the database: "
@@ -429,6 +449,81 @@ CharacterPtr DALStorage::getCharacter(int id)
     }
 }
 
+/**
+* Gets a character by character name.
+ */
+CharacterPtr DALStorage::getCharacter(const std::string &name)
+{
+    // connect to the database (if not connected yet).
+    open();
+    
+    // look for the character in the list first.
+    Characters::iterator it_end = mCharacters.end(),
+    it = std::find_if(mCharacters.begin(), it_end, character_by_name(name));
+    
+    if (it != it_end)
+        return *it;
+    
+    using namespace dal;
+    
+    // the account was not in the list, look for it in the database.
+    try {
+        std::ostringstream sql;
+        sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '"
+            << name << "';";
+        RecordSet const &charInfo = mDb->execSql(sql.str());
+        
+        // if the character is not even in the database then
+        // we have no choice but to return nothing.
+        if (charInfo.isEmpty())
+        {
+            return CharacterPtr(NULL);
+        }
+        
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to< unsigned > toUint;
+        
+        // specialize the string_to functor to convert
+        // a string to an unsigned short.
+        string_to< unsigned short > toUshort;
+        
+        CharacterData *character = new CharacterData(charInfo(0, 2),
+                                                     toUint(charInfo(0, 0)));
+        character->setAccountID(toUint(charInfo(0, 1)));
+        character->setGender(toUshort(charInfo(0, 3)));
+        character->setHairStyle(toUshort(charInfo(0, 4)));
+        character->setHairColor(toUshort(charInfo(0, 5)));
+        character->setLevel(toUshort(charInfo(0, 6)));
+        character->setMoney(toUint(charInfo(0, 7)));
+        Point pos(toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)));
+        character->setPosition(pos);
+        for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
+        {
+            character->setBaseAttribute(i, toUshort(charInfo(0, 11 + i)));
+        }
+        
+        int mapId = toUint(charInfo(0, 10));
+        if (mapId > 0)
+        {
+            character->setMapId(mapId);
+        }
+        else
+        {
+            // Set character to default map and one of the default location
+            // Default map is to be 1, as not found return value will be 0.
+            character->setMapId((int)config.getValue("defaultMap", 1));
+        }
+        
+        CharacterPtr ptr(character);
+        mCharacters.push_back(ptr);
+        return ptr;
+    }
+    catch (const DbSqlQueryExecFailure& e)
+    {
+        return CharacterPtr(NULL); // TODO: Throw exception here
+    }
+}
 
 /**
  * Return the list of all Emails addresses.
@@ -640,6 +735,7 @@ DALStorage::updateCharacter(CharacterPtr character)
             return false;
         }
     }
+    
     return true;
 }
 
@@ -1027,4 +1123,176 @@ void DALStorage::unloadAccount(AccountPtr const &account)
 {
     flush(account);
     mAccounts.erase(account->getID());
+}
+
+/**
+ * Add a guild
+ */
+void DALStorage::addGuild(Guild* guild)
+{
+#if defined (SQLITE_SUPPORT)
+    // Reopen the db in this thread for sqlite, to avoid
+    // Library Call out of sequence problem due to thread safe.
+    close();
+#endif
+    open();
+    
+    std::ostringstream insertSql;
+    insertSql << "insert into " << GUILDS_TBL_NAME
+        << " (name) "
+        << " values (\""
+        << guild->getName() << "\");";
+    mDb->execSql(insertSql.str());
+
+    std::ostringstream selectSql;
+    selectSql << "select id from " << GUILDS_TBL_NAME
+        << " where name = \"" << guild->getName() << "\";";
+    const dal::RecordSet& guildInfo = mDb->execSql(selectSql.str());
+    string_to<unsigned int> toUint;
+    unsigned id = toUint(guildInfo(0, 0));
+    guild->setId(id);
+}
+
+/**
+ * Remove guild
+ */
+void DALStorage::removeGuild(Guild* guild)
+{
+#if defined (SQLITE_SUPPORT)
+    // Reopen the db in this thread for sqlite, to avoid
+    // Library Call out of sequence problem due to thread safe.
+    close();
+#endif
+    open();
+    
+    std::ostringstream sql;
+    sql << "delete from " << GUILDS_TBL_NAME
+        << " where id = '"
+        << guild->getId() << "';";
+    mDb->execSql(sql.str());
+}
+
+/**
+ * add a member to a guild
+ */
+void DALStorage::addGuildMember(int guildId, const std::string &memberName)
+{
+#if defined (SQLITE_SUPPORT)
+    // Reopen the db in this thread for sqlite, to avoid
+    // Library Call out of sequence problem due to thread safe.
+    close();
+#endif
+    open();
+    
+    std::ostringstream sql;
+    
+    try
+    {
+        sql << "insert into " << GUILD_MEMBERS_TBL_NAME
+        << " (guild_id, member_name)"
+        << " values ("
+        << guildId << ", \""
+        << memberName << "\");";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what());
+    }    
+}
+
+/**
+* remove a member from a guild
+ */
+void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
+{
+#if defined (SQLITE_SUPPORT)
+    // Reopen the db in this thread for sqlite, to avoid
+    // Library Call out of sequence problem due to thread safe.
+    close();
+#endif
+    open();
+    
+    std::ostringstream sql;
+    
+    try
+    {
+        sql << "delete from " << GUILD_MEMBERS_TBL_NAME
+        << " where member_name = \""
+        << memberName << "\" and guild_id = '"
+        << guildId << "';";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what());
+    }    
+}
+
+/**
+ * get a list of guilds
+ */
+std::list<Guild*> DALStorage::getGuildList()
+{
+#if defined (SQLITE_SUPPORT)
+    // Reopen the db in this thread for sqlite, to avoid
+    // Library Call out of sequence problem due to thread safe.
+    close();
+#endif
+    open();
+    
+    std::list<Guild*> guilds;
+    std::stringstream sql;
+    string_to<short> toShort;
+
+    /**
+     * Get the guilds stored in the db.
+     */
+    
+    try
+    {
+        sql << "select id, name from " << GUILDS_TBL_NAME << ";";
+        const dal::RecordSet& guildInfo = mDb->execSql(sql.str());
+        
+        // check that at least 1 guild was returned
+        if(guildInfo.isEmpty())
+        {
+            return guilds;
+        }
+        
+        // loop through every row in the table and assign it to a guild
+        for ( unsigned int i = 0; i < guildInfo.rows(); ++i)
+        {
+            Guild* guild = new Guild(guildInfo(i,1));
+            guild->setId(toShort(guildInfo(i,0)));
+            guilds.push_back(guild);
+        }
+        
+        /**
+         * Add the members to the guilds.
+         */
+        
+        for (std::list<Guild*>::iterator itr = guilds.begin();
+             itr != guilds.end();
+             ++itr)
+        {
+            std::ostringstream memberSql;
+            memberSql << "select member_name from " << GUILD_MEMBERS_TBL_NAME
+            << " where guild_id = '" << (*itr)->getId() << "';";
+            const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
+        
+            for (unsigned int j = 0; j < memberInfo.rows(); ++j)
+            {
+                CharacterPtr character = getCharacter(memberInfo(j,0));
+                character->addGuild((*itr)->getName());
+                (*itr)->addMember(character.get());
+            }
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure& e) {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what());
+    }
+    
+    return guilds;
 }

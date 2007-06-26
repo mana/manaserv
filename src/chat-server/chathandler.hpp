@@ -49,6 +49,25 @@ class ChatHandler : public ConnectionHandler
          */
         bool
         startListen(enet_uint16 port);
+        
+        /**
+         * Tell a list of user about an event in a chatchannel about a player.
+         */
+        void warnUsersAboutPlayerEventInChat(short channelId,
+                                             std::string const &userName,
+                                             char eventId);
+
+        /**
+         * Send Chat and Guild Info to chat client, so that they can
+         * join the correct channels.
+         */
+        void sendGuildEnterChannel(const MessageOut &msg, const std::string &name);
+        
+        /**
+         * Send guild invite.
+         */
+        void sendGuildInvite(const std::string &invitedName, const std::string &inviterName,
+                             const std::string &guildName);
 
     protected:
         /**
@@ -57,6 +76,11 @@ class ChatHandler : public ConnectionHandler
         void processMessage(NetComputer *computer, MessageIn &message);
         NetComputer *computerConnected(ENetPeer *);
         void computerDisconnected(NetComputer *);
+        
+        /**
+         * Send messages for each guild the character belongs to.
+         */
+        void sendGuildRejoin(ChatClient &computer);
 
     private:
         /**
@@ -92,22 +116,27 @@ class ChatHandler : public ConnectionHandler
         void sendInChannel(short channelId, MessageOut &);
 
         /**
-         * Tell a list of user about an event in a chatchannel about a player.
-         */
-        void warnUsersAboutPlayerEventInChat(short channelId,
-                                             std::string const &userName,
-                                             char eventId);
-
-        /**
          * Removes outdated pending logins. These are connected clients that
          * still haven't sent in their magic token.
          */
         void removeOutdatedPending();
+        
+        /**
+         * Send user joined message.
+         */
+        void sendUserJoined(short channelId, const std::string &name);
+        
+        /**
+         * Send user left message.
+         */
+        void sendUserLeft(short channelId, const std::string &name);
 };
 
 /**
  * Register future client attempt. Temporary until physical server split.
  */
 void registerChatClient(std::string const &, std::string const &, int);
+
+extern ChatHandler *chatHandler;
 
 #endif

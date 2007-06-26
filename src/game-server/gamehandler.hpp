@@ -85,6 +85,12 @@ class GameHandler: public ConnectionHandler
          */
         void completeServerChange(int id, std::string const &token,
                                   std::string const &address, int port);
+        
+        /**
+         * Map of character's and their id used for getting which character to
+         * forward account server messages back to.
+         */
+        std::map<int, Character*> messageMap;
 
         /**
          * Combines a client with it's character.

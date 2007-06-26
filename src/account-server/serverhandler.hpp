@@ -30,6 +30,8 @@
 #include "net/connectionhandler.hpp"
 #include "utils/countedptr.h"
 
+class AccountClient;
+
 /**
  * Manages communications with all the game servers. This class also keeps
  * track of the maps each game server supports.
@@ -52,6 +54,16 @@ class ServerHandler: public ConnectionHandler
          * Sends a magic token and character data to the relevant game server.
          */
         void registerGameClient(std::string const &, CharacterPtr);
+        
+        /**
+         * Get character (temp used by chat server).
+         */
+        CharacterPtr getCharacter(const std::string &name);
+        
+        /**
+         * Make client join the specified guild channel
+         */
+        void enterChannel(const std::string &guildName, CharacterData *player);
 
     protected:
         /**
@@ -71,6 +83,13 @@ class ServerHandler: public ConnectionHandler
         void computerDisconnected(NetComputer *comp);
 
     private:
+        
+        /**
+         * Send invite to user
+         */
+        void sendInvite(const std::string &invitedName, const std::string &inviterName,
+                        const std::string &guildName);
+
         struct Server
         {
             std::string address;

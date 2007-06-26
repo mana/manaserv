@@ -165,6 +165,23 @@ enum {
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
+    
+    // Guild
+    PGMSG_GUILD_CREATE                  = 0x0350, // S name
+    GPMSG_GUILD_CREATE_RESPONSE         = 0x0351, // B error, W id
+    PGMSG_GUILD_INVITE                  = 0x0352, // W id, S name
+    GPMSG_GUILD_INVITE_RESPONSE         = 0x0353, // B error
+    PGMSG_GUILD_ACCEPT                  = 0x0354, // S name
+    GPMSG_GUILD_ACCEPT_RESPONSE         = 0x0355, // B error
+    PGMSG_GUILD_GET_MEMBERS             = 0x0356, // W id
+    GPMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0357, // S names
+    GPMSG_GUILD_JOINED                  = 0x0358, // W id, S name
+    GPMSG_GUILD_LEFT                    = 0x0359, // W id
+    PGMSG_GUILD_QUIT                    = 0x0360, // W id
+    GPMSG_GUILD_QUIT_RESPONSE           = 0x0361, // B error, W id
+
+    CPMSG_GUILD_INVITED                 = 0x0370, // S name, S name
+    CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W id, W rights
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error
@@ -186,6 +203,10 @@ enum {
     CPMSG_QUIT_CHANNEL_RESPONSE       = 0x0422, // B error
     PCMSG_LIST_CHANNELS               = 0x0423, // -
     CPMSG_LIST_CHANNELS_RESPONSE      = 0x0424, // W number of channels, S channels
+    CPMSG_USERJOINED                  = 0x0425, // W channel, S name
+    CPMSG_USERLEFT                    = 0x0426, // W channel, S name
+    PCMSG_LIST_CHANNELUSERS           = 0x0427, // S channel
+    CPMSG_LIST_CHANNELUSERS_RESPONSE  = 0x0428, // S users
 
     // Inter-server
     GAMSG_REGISTER     = 0x0500, // S address, W port, { W map id }*
@@ -195,6 +216,16 @@ enum {
     GAMSG_REDIRECT          = 0x0530, // L id
     AGMSG_REDIRECT_RESPONSE = 0x0531, // L id, B*32 token, S game address, W game port
     GAMSG_PLAYER_RECONNECT  = 0x0532, // L id, B*32 token
+    GAMSG_GUILD_CREATE                  = 0x0550, // S name
+    AGMSG_GUILD_CREATE_RESPONSE         = 0x0551, // B error, W id
+    GAMSG_GUILD_INVITE                  = 0x0552, // W id, S name
+    AGMSG_GUILD_INVITE_RESPONSE         = 0x0553, // B error
+    GAMSG_GUILD_ACCEPT                  = 0x0554, // S name
+    AGMSG_GUILD_ACCEPT_RESPONSE         = 0x0555, // B error
+    GAMSG_GUILD_GET_MEMBERS             = 0x0556, // W id
+    AGMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0557, // S names
+    GAMSG_GUILD_QUIT                    = 0x0558, // W id
+    AGMSG_GUILD_QUIT_RESPONSE           = 0x0559, // B error
 
     XXMSG_INVALID = 0x7FFF
 };
@@ -207,7 +238,8 @@ enum {
     ERRMSG_NO_LOGIN,                    // the user is not yet logged
     ERRMSG_NO_CHARACTER_SELECTED,       // the user needs a character
     ERRMSG_INSUFFICIENT_RIGHTS,         // the user is not privileged
-    ERRMSG_INVALID_ARGUMENT             // part of the received message was invalid
+    ERRMSG_INVALID_ARGUMENT,            // part of the received message was invalid
+    ERRMSG_ALREADY_TAKEN                // name used was already taken
 };
 
 // Login specific return values

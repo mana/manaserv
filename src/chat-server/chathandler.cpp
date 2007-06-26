@@ -22,6 +22,10 @@
  */
 
 #include "defines.h"
+#include "account-server/characterdata.hpp"
+#include "account-server/guild.hpp"
+#include "account-server/guildmanager.hpp"
+#include "account-server/serverhandler.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chathandler.hpp"
 #include "net/connectionhandler.hpp"
@@ -155,12 +159,14 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             pendingClients.insert(std::make_pair(magic_token, &computer));
             return;
         }
+        
         computer.characterName = i->second.character;
         computer.accountLevel = i->second.level;
         pendingLogins.erase(i);
         result.writeShort(CPMSG_CONNECT_RESPONSE);
         result.writeByte(ERRMSG_OK);
         computer.send(result);
+        sendGuildRejoin(computer);
         return;
     }
 
@@ -274,6 +280,12 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                         result.writeByte(ERRMSG_INVALID_ARGUMENT);
                         break;
                 }
+                
+                if(guildManager->doesExist(channelName))
+                {
+                    result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                    break;
+                }
 
                 // If it's slang's free.
                 if (stringFilter->filterContent(channelName) &&
@@ -327,6 +339,11 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 result.writeShort(CPMSG_UNREGISTER_CHANNEL_RESPONSE);
 
                 short channelId = message.readShort();
+                std::string channelName = chatChannelManager->getChannelName(channelId);
+                
+                // Get character based on name.
+                CharacterPtr character = serverHandler->getCharacter(computer.characterName);
+                
                 if (!chatChannelManager->isChannelRegistered(channelId))
                 {
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
@@ -341,6 +358,16 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                             result.writeByte(ERRMSG_OK);
                         else
                             result.writeByte(ERRMSG_FAILURE);
+                    }
+                    else if (guildManager->doesExist(channelName))
+                    {
+                        Guild *guild = guildManager->findByName(channelName);
+                        if (guild->checkLeader(character.get()))
+                        {
+                            chatChannelManager->removeChannel(channelId);
+                            guildManager->removeGuild(guild->getId());
+                            result.writeByte(ERRMSG_OK);
+                        }
                     }
                     else
                     {
@@ -392,6 +419,17 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                         break;
                     }
                 }
+                
+                if (guildManager->doesExist(channelName))
+                {
+                    Guild *guild = guildManager->findByName(channelName);
+                    if (!guild->checkInGuild(computer.characterName))
+                    {
+                        result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                        break;
+                    }
+                    sendUserJoined(channelId, computer.characterName);
+                }
                 if (chatChannelManager->addUserInChannel(computer.characterName, channelId))
                 {
                     result.writeByte(ERRMSG_OK);
@@ -400,8 +438,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     result.writeShort(channelId);
                     result.writeString(channelName);
                     result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
-                    std::vector< std::string > const &userList = chatChannelManager->getUserListInChannel(channelId);
-                    for (std::vector< std::string >::const_iterator i = userList.begin(), i_end = userList.end();
+                    std::vector< std::string > const &userList = 
+                        chatChannelManager->getUserListInChannel(channelId);
+                    for (std::vector< std::string >::const_iterator i = userList.begin(),
+                         i_end = userList.end();
                          i != i_end; ++i) {
                         result.writeString(*i);
                     }
@@ -427,6 +467,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             result.writeShort(CPMSG_QUIT_CHANNEL_RESPONSE);
             short channelId = message.readShort();
+            std::string channelName = chatChannelManager->getChannelName(channelId);
+            
             if (channelId != 0 && chatChannelManager->isChannelRegistered(channelId))
             {
                 if (chatChannelManager->removeUserFromChannel(computer.characterName, channelId))
@@ -438,6 +480,11 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     warnUsersAboutPlayerEventInChat(channelId,
                                                     computer.characterName,
                                                     CHAT_EVENT_LEAVING_PLAYER);
+                    if(guildManager->doesExist(channelName))
+                    {
+                        // Send a user left message
+                        sendUserLeft(channelId, computer.characterName);
+                    }
                 }
                 else
                 {
@@ -456,7 +503,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             result.writeShort(CPMSG_LIST_CHANNELS_RESPONSE);
 
             short numberOfPublicChannels;
-            std::istringstream channels(chatChannelManager->getPublicChannelNames(&numberOfPublicChannels));
+            std::istringstream channels(chatChannelManager->getPublicChannelNames(
+                                                                &numberOfPublicChannels));
 
             for(int i = 0; i < numberOfPublicChannels; ++i)
             {
@@ -468,6 +516,27 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
         }
         break;
+            
+        case PCMSG_LIST_CHANNELUSERS:
+        {
+            result.writeShort(CPMSG_LIST_CHANNELUSERS_RESPONSE);
+            
+            std::string channelName = message.readString();
+            
+            result.writeString(channelName);
+            
+            // get user list
+            std::vector<std::string> channelList;
+            channelList = chatChannelManager->getUserListInChannel(
+                                chatChannelManager->getChannelId(channelName));
+            
+            // add a user at a time
+            for(int i = 0; i < channelList.size(); ++i)
+            {
+                result.writeString(channelList[i]);
+            }
+            
+        } break;
 
         case PCMSG_DISCONNECT:
         {
@@ -596,4 +665,76 @@ void ChatHandler::sendInChannel(short channelId, MessageOut &msg)
             (*i)->send(msg);
         }
     }
+}
+
+void ChatHandler::sendGuildEnterChannel(const MessageOut &msg, const std::string &name)
+{
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
+        if (static_cast< ChatClient * >(*i)->characterName == name)
+        {
+            (*i)->send(msg);
+            break;
+        }
+    }    
+}
+
+void ChatHandler::sendGuildInvite(const std::string &invitedName, const std::string &inviterName,
+                                  const std::string &guildName)
+{
+    MessageOut msg(CPMSG_GUILD_INVITED);
+    msg.writeString(inviterName);
+    msg.writeString(guildName);
+    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
+         i != i_end; ++i) {
+        if (static_cast< ChatClient * >(*i)->characterName == invitedName)
+        {
+            (*i)->send(msg);
+            break;
+        }
+    }
+}
+
+void ChatHandler::sendGuildRejoin(ChatClient &computer)
+{
+    // Get character based on name.
+    CharacterPtr character = serverHandler->getCharacter(computer.characterName);
+    
+    // Get list of guilds and check what rights they have.
+    std::vector<std::string> guilds = character->getGuilds();
+    for(unsigned int i = 0; i != guilds.size(); ++i)
+    {
+        Guild *guild = guildManager->findByName(guilds[i]);
+        short leader = 0;
+        if(!guild)
+        {
+            return;
+        }
+        if(guild->checkLeader(character.get()))
+        {
+            leader = 1;
+        }
+        MessageOut msg(CPMSG_GUILD_REJOIN);
+        msg.writeString(guild->getName());
+        msg.writeShort(guild->getId());
+        msg.writeShort(leader);
+        computer.send(msg);
+        serverHandler->enterChannel(guild->getName(), character.get());
+    }
+}
+
+void ChatHandler::sendUserJoined(short channelId, const std::string &name)
+{
+    MessageOut msg(CPMSG_USERJOINED);
+    msg.writeShort(channelId);
+    msg.writeString(name);
+    sendInChannel(channelId, msg);
+}
+
+void ChatHandler::sendUserLeft(short channelId, const std::string &name)
+{
+    MessageOut msg(CPMSG_USERLEFT);
+    msg.writeShort(channelId);
+    msg.writeString(name);
+    sendInChannel(channelId, msg);
 }

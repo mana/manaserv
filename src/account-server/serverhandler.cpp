@@ -24,9 +24,13 @@
 #include <cassert>
 #include <sstream>
 
+#include "account-server/accountclient.hpp"
 #include "account-server/characterdata.hpp"
+#include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
 #include "account-server/storage.hpp"
+#include "chat-server/chathandler.hpp"
+#include "chat-server/chatchannelmanager.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
@@ -175,6 +179,167 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     mTokenCollector.addPendingConnect(magic_token, accountID);
 
         } break;
+            
+        case GAMSG_GUILD_CREATE:
+        {
+            LOG_DEBUG("GAMSG_GUILD_CREATE");
+            
+            result.writeShort(AGMSG_GUILD_CREATE_RESPONSE);
+            // Check if the guild name is taken already
+            int playerId = msg.readLong();
+            std::string guildName = msg.readString();
+            if (guildManager->findByName(guildName) != NULL)
+            {
+                result.writeByte(ERRMSG_ALREADY_TAKEN);
+                break;
+            }
+            result.writeByte(ERRMSG_OK);
+            
+            Storage &store = Storage::instance("tmw");
+            CharacterPtr ptr = store.getCharacter(playerId);
+            
+            // Add guild to character data.
+            ptr->addGuild(guildName);
+
+            // Who to send data to at the other end
+            result.writeLong(playerId);
+            
+            short guildId = guildManager->createGuild(guildName, ptr.get());
+            result.writeShort(guildId);
+            result.writeString(guildName);
+            result.writeShort(1);
+            enterChannel(guildName, ptr.get());
+        } break;
+            
+        case GAMSG_GUILD_INVITE:
+        {
+            // Add Inviting member to guild here
+            LOG_DEBUG("Received msg ... GAMSG_GUILD_INVITE");
+            result.writeShort(AGMSG_GUILD_INVITE_RESPONSE);
+            // Check if user can invite users
+            int playerId = msg.readLong();
+            short id = msg.readShort();
+            std::string member = msg.readString();
+            Guild *guild = guildManager->findById(id);
+            
+            Storage &store = Storage::instance("tmw");
+            CharacterPtr ptr = store.getCharacter(playerId);
+            
+            if (!guild->checkLeader(ptr.get()))
+            {
+                // Return that the user doesnt have the rights to invite.
+                result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+                break;
+            }
+            
+            if (guild->checkInGuild(member))
+            {
+                // Return that invited member already in guild.
+                result.writeByte(ERRMSG_ALREADY_TAKEN);
+                break;
+            }
+            
+            // Send invite to player using chat server
+            if (store.doesCharacterNameExist(member))
+            {
+                sendInvite(member, ptr->getName(), guild->getName());
+            }
+
+            guild->addInvited(member);
+            result.writeByte(ERRMSG_OK);
+        } break;
+            
+        case GAMSG_GUILD_ACCEPT:
+        {
+            // Add accepting into guild
+            LOG_DEBUG("Received msg ... GAMSG_GUILD_ACCEPT");
+            result.writeShort(AGMSG_GUILD_ACCEPT_RESPONSE);
+            int playerId = msg.readLong();
+            std::string guildName = msg.readString();
+            Guild *guild = guildManager->findByName(guildName);
+            if (!guild)
+            {
+                // Return the guild does not exist.
+                result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                break;
+            }
+            
+            Storage &store = Storage::instance("tmw");
+            CharacterPtr ptr = store.getCharacter(playerId);
+            
+            if (!guild->checkInvited(ptr->getName()))
+            {
+                // Return the user was not invited.
+                result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+                break;
+            }
+            
+            if (guild->checkInGuild(ptr->getName()))
+            {
+                // Return that the player is already in the guild.
+                result.writeByte(ERRMSG_ALREADY_TAKEN);
+                break;
+            }
+            
+            result.writeByte(ERRMSG_OK);
+            
+            // Who to send data to at the other end
+            result.writeLong(playerId);
+            
+            // The guild id and guild name they have joined
+            result.writeShort(guild->getId());
+            result.writeString(guildName);
+            
+            // Add member to guild
+            guildManager->addGuildMember(guild->getId(), ptr.get());
+            
+            // Add guild to character
+            ptr->addGuild(guildName);
+            
+            // Enter Guild Channel
+            enterChannel(guildName, ptr.get());
+        } break;
+            
+        case GAMSG_GUILD_GET_MEMBERS:
+        {
+            LOG_DEBUG("Received msg ... GAMSG_GUILD_GET_MEMBERS");
+            result.writeShort(AGMSG_GUILD_GET_MEMBERS_RESPONSE);
+            int playerId = msg.readLong();
+            short guildId = msg.readShort();
+            Guild *guild = guildManager->findById(guildId);
+            if (!guild)
+            {
+                result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                break;
+            }
+            result.writeByte(ERRMSG_OK);
+            result.writeLong(playerId);
+            result.writeShort(guildId);
+            for (int i = 0; i < guild->totalMembers(); ++i)
+            {
+                result.writeString(guild->getMember(i));
+            }
+        } break;
+            
+        case GAMSG_GUILD_QUIT:
+        {
+            LOG_DEBUG("Received msg ... GAMSG_GUILD_QUIT");
+            result.writeShort(AGMSG_GUILD_QUIT_RESPONSE);
+            int playerId = msg.readLong();
+            short guildId = msg.readShort();
+            Guild *guild = guildManager->findById(guildId);
+            if (!guild)
+            {
+                result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                break;
+            }
+            Storage &store = Storage::instance("tmw");
+            CharacterPtr ptr = store.getCharacter(playerId);
+            guildManager->removeGuildMember(guildId, ptr.get());
+            result.writeByte(ERRMSG_OK);
+            result.writeLong(playerId);
+            result.writeShort(guildId);
+        } break;
 
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "
@@ -186,4 +351,60 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
     // return result
     if (result.getLength() > 0)
         comp->send(result);
+}
+
+void ServerHandler::enterChannel(const std::string &name, CharacterData *player)
+{
+    MessageOut result(CPMSG_ENTER_CHANNEL_RESPONSE);
+    short channelId = chatChannelManager->getChannelId(name);
+    if (!chatChannelManager->isChannelRegistered(channelId))
+    {
+        // Channel doesnt exist yet so create one
+        channelId = chatChannelManager->registerPrivateChannel(
+                                            name,
+                                            "Guild Channel",
+                                            "");
+    }
+    
+    if (chatChannelManager->addUserInChannel(player->getName(), channelId))
+    {
+        result.writeByte(ERRMSG_OK);
+        
+        // The user entered the channel, now give him the channel id, the announcement string
+        // and the user list.
+        result.writeShort(channelId);
+        result.writeString(name);
+        result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
+        std::vector< std::string > const &userList = 
+            chatChannelManager->getUserListInChannel(channelId);
+        for (std::vector< std::string >::const_iterator i = userList.begin(),
+                i_end = userList.end();
+                i != i_end; ++i)
+        {
+            result.writeString(*i);
+        }
+        
+        // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
+        // in the channel.
+        chatHandler->warnUsersAboutPlayerEventInChat(channelId,
+                                        player->getName(),
+                                        CHAT_EVENT_NEW_PLAYER);
+
+    }
+    
+    chatHandler->sendGuildEnterChannel(result, player->getName());
+}
+
+void ServerHandler::sendInvite(const std::string &invitedName, const std::string &inviterName,
+                               const std::string &guildName)
+{
+    // TODO: Separate account and chat server
+    chatHandler->sendGuildInvite(invitedName, inviterName, guildName);
+}
+
+CharacterPtr ServerHandler::getCharacter(const std::string &name)
+{
+    Storage &store = Storage::instance("tmw");
+    CharacterPtr character = store.getCharacter(name);
+    return character;
 }

@@ -258,6 +258,48 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character = NULL;
             computer.status = CLIENT_LOGIN;
         } break;
+            
+        case PGMSG_GUILD_CREATE:
+        {
+            std::string name = message.readString();
+            int characterId = computer.character->getDatabaseID();
+            messageMap[characterId] = computer.character;
+            accountHandler->playerCreateGuild(characterId, name);
+        } break;
+            
+        case PGMSG_GUILD_INVITE:
+        {
+            short guildId = message.readShort();
+            std::string member = message.readString();
+            int characterId = computer.character->getDatabaseID();
+            messageMap[characterId] = computer.character;
+            accountHandler->playerInviteToGuild(characterId, guildId, member);
+        } break;
+            
+        case PGMSG_GUILD_ACCEPT:
+        {
+            std::string guildName = message.readString();
+            int characterId = computer.character->getDatabaseID();
+            messageMap[characterId] = computer.character;
+            accountHandler->playerAcceptInvite(characterId, guildName);
+        } break;
+            
+        case PGMSG_GUILD_GET_MEMBERS:
+        {
+            short guildId = message.readShort();
+            int characterId = computer.character->getDatabaseID();
+            messageMap[characterId] = computer.character;
+            accountHandler->getGuildMembers(characterId, guildId);
+        } break;
+            
+        case PGMSG_GUILD_QUIT:
+        {
+            short guildId = message.readShort();
+            int characterId = computer.character->getDatabaseID();
+            messageMap[characterId] = computer.character;
+            accountHandler->quitGuild(characterId, guildId);
+        } break;
+
         default:
             LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);

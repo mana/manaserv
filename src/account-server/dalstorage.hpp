@@ -28,6 +28,8 @@
 #include "account-server/storage.hpp"
 #include "dal/dataprovider.h"
 
+class Guild;
+
 /**
  * A storage class that relies on DAL.
  *
@@ -84,6 +86,15 @@ class DALStorage: public Storage
          * @return the character associated to the ID.
          */
         CharacterPtr getCharacter(int id);
+        
+        /**
+         * Gets a character by character name.
+         *
+         * @param name of the character
+         *
+         * @return the character associated to the name
+         */
+        CharacterPtr getCharacter(const std::string &name);
 
         /**
          * Add a new account.
@@ -151,6 +162,41 @@ class DALStorage: public Storage
         void
         updateChannels(std::map<short, ChatChannel>& channelList);
 
+        /**
+         * Add a new guild
+         * 
+         */
+        void
+        addGuild(Guild* guild);
+        
+        /**
+         * Delete a guild
+         *
+         */
+        void
+        removeGuild(Guild* guild);
+        
+        /**
+         * Add member to guild
+         *
+         */
+        void
+        addGuildMember(int guild_id, const std::string &member_name);
+        
+        /*
+         * Remove member from guild
+         */
+        void
+        removeGuildMember(int guildId, const std::string &memberName);
+        
+        /**
+         * Get guild list
+         *@return a list of guilds
+         *
+         */
+        std::list<Guild*>
+        getGuildList();
+        
         /**
          * Save changes to the database permanently.
          *

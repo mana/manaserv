@@ -334,6 +334,55 @@ const std::string SQL_CHANNELS_TABLE(
     ");"
 );
 
+/**
+ * TABLE: tmw_guilds.
+ * Store player guilds
+ */
+const std::string GUILDS_TBL_NAME("tmw_guilds");
+const std::string SQL_GUILDS_TABLE(
+    "CREATE TABLE tmw_guilds ("
+#if defined (MYSQL_SUPPORT)
+        "id            INTEGER     PRIMARY KEY AUTO_INCREMENT,"
+        "name          VARCHAR(32) NOT NULL UNIQUE,"
+        "FOREIGN KEY (name) REFERENCES tmw_characters(name)"
+#elif defined (SQLITE_SUPPORT)
+        "id      INTEGER     PRIMARY KEY,"
+        "name    TEXT        NOT NULL UNIQUE,"
+        "FOREIGN KEY (name) REFERENCES tmw_characters(name)"
+#elif defined (POSTGRESQL_SUPPORT)
+        "id      SERIAL      PRIMARY KEY,"
+        "name    TEXT        NOT NULL UNIQUE,"
+        "FOREIGN KEY (name) REFERENCES tmw_characters(name)"
+#endif
+    ");"
+);
+
+/**
+ * TABLE: tmw_guild_members.
+ * Store guild members
+ */
+const std::string GUILD_MEMBERS_TBL_NAME("tmw_guild_members");
+const std::string SQL_GUILD_MEMBERS_TABLE(
+    "CREATE TABLE tmw_guild_members ("
+#if defined (MYSQL_SUPPORT)
+        "guild_id       INTEGER         NOT NULL,"
+        "member_name    VARCHAR(32)     NOT NULL,"
+        "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
+        "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
+#elif defined (SQLITE_SUPPORT)
+        "guild_id       INTEGER     NOT NULL,"
+        "member_name    TEXT        NOT NULL,"
+        "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
+        "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
+#elif defined (POSTGRESQL_SUPPORT)
+        "guild_id       INTEGER     NOT NULL,"
+        "member_name    TEXT        NOT NULL,"
+        "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
+        "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
+#endif
+    ");"
+);
+
 
 } // anonymous namespace
 

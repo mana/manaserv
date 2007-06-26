@@ -154,6 +154,13 @@ class CharacterData: public AbstractCharacterData
         /** Adds an inventory item to the inventory. */
         void
         addItemToInventory(const InventoryItem& item);
+        
+        /** Add a guild to the character */
+        void addGuild(const std::string &name) { mGuilds.push_back(name); }
+
+        /** Returns a list of guilds the player belongs to */
+        std::vector<std::string>
+        getGuilds() const { return mGuilds; }
 
     private:
         CharacterData(CharacterData const &);
@@ -175,6 +182,8 @@ class CharacterData: public AbstractCharacterData
         Point mPos;               //!< Position the being is at.
         std::vector< InventoryItem > mInventory; //!< All the possesions of
                                                  //!< the character.
+        std::vector<std::string> mGuilds;        //!< All the guilds the player
+                                                 //!< belongs to.
 };
 
 // Utility typedefs

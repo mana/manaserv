@@ -29,6 +29,7 @@
 
 #include "account-server/account.hpp"
 #include "account-server/characterdata.hpp"
+#include "account-server/guild.hpp"
 #include "chat-server/chatchannel.hpp"
 
 /**
@@ -191,6 +192,15 @@ class Storage
          * @return the character associated to the ID.
          */
         virtual CharacterPtr getCharacter(int id) = 0;
+        
+        /**
+         * Gets a character by name.
+         *
+         * @param name the name of the character.
+         *
+         * @return the character associated to the name.
+         */
+        virtual CharacterPtr getCharacter(const std::string &name) = 0;
 
         /**
          * Add a new account.
@@ -264,6 +274,41 @@ class Storage
         virtual void
         updateChannels(std::map<short, ChatChannel>& channelList) = 0;
 
+        /**
+         * Add a new guild
+         * 
+         */
+        virtual void
+        addGuild(Guild* guild) = 0;
+        
+        /**
+         * Delete a guild
+         *
+         */
+        virtual void
+        removeGuild(Guild* guild) = 0;
+        
+        /**
+         * Add member to guild
+         *
+         */
+        virtual void
+        addGuildMember(int guild_id, const std::string &member_name) = 0;
+        
+        /**
+         * Remove member from guild
+         */
+        virtual void
+        removeGuildMember(int guildId, const std::string &memberName) = 0;
+        
+        /**
+         * Get guild list
+         *@return a list of guilds
+         *
+         */
+        virtual std::list<Guild*>
+        getGuildList() = 0;
+        
         /**
          * Saves the changes to all the accounts permanently.
          */

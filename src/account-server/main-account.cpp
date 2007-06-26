@@ -35,6 +35,7 @@
 #include "resourcemanager.h"
 #include "skill.h"
 #include "account-server/accounthandler.hpp"
+#include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
 #include "account-server/storage.hpp"
 #include "chat-server/chatchannelmanager.hpp"
@@ -69,6 +70,9 @@ ServerHandler *serverHandler;
 
 /** Chat Channels Manager */
 ChatChannelManager *chatChannelManager;
+                
+/** Guild Manager */
+GuildManager *guildManager;
 
 /** Callback used when SIGQUIT signal is received. */
 void closeGracefully(int dummy)
@@ -147,6 +151,8 @@ void initialize()
     stringFilter = new StringFilter(&config);
     // Initialize the Chat channels manager
     chatChannelManager = new ChatChannelManager();
+    // Initialise the guild manager
+    guildManager = new GuildManager();
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -204,6 +210,7 @@ void deinitialize()
 
     // Destroy Managers
     delete chatChannelManager;
+    delete guildManager;
 
     // Get rid of persistent data storage
     Storage::destroy();

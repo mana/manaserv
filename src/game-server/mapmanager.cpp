@@ -130,3 +130,8 @@ bool MapManager::isActive(int mapId) const
     assert(i != maps.end());
     return i->second.isActive;
 }
+
+short MapManager::numberOfMaps() const
+{
+    return maps.size();
+}

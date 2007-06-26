@@ -73,6 +73,11 @@ class MapManager
          * Gets the activity status of the map.
          */
         bool isActive(int) const;
+        
+        /**
+         * Gets the number of maps
+         */
+        short numberOfMaps() const;
 
         /**
          * Destructor.

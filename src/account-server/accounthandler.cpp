@@ -29,6 +29,8 @@
 #include "account-server/account.hpp"
 #include "account-server/accountclient.hpp"
 #include "account-server/characterdata.hpp"
+#include "account-server/guild.hpp"
+#include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
 #include "account-server/storage.hpp"
 #include "chat-server/chathandler.hpp"
