@@ -1,3 +1,7 @@
+2007-06-26  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp: Updated project file.
+
 2007-06-25  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp: Fixed include directories and
