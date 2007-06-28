@@ -65,7 +65,8 @@ SpawnArea::update()
             being->setMapId(1);
             being->setPosition(Point(mZone.x + rand() % mZone.w,
                         mZone.y + rand() % mZone.h));
-            gameState->insert(being);
+            DelayedEvent e = { EVENT_INSERT };
+            gameState->enqueueEvent(being, e);
 
             mNumBeings++;
         }

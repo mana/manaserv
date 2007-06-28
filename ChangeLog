@@ -1,3 +1,8 @@
+2007-06-16  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+
+	* src/game-server/spawnarea.cpp: Delegated creature insertion to the
+	State class so that it does not disturb object updating.
+
 2007-06-26  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp: Updated project file.
