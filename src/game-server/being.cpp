@@ -36,11 +36,20 @@ Being::Being(int type, int id):
 }
 
 Being::~Being()
-{}
-
-void Being::damage(Damage damage)
 {
-    if (mAction == DEAD) return;
+    // Notify death listeners
+    DeathListeners::iterator i_end = mDeathListeners.end();
+    DeathListeners::iterator i;
+    for (i = mDeathListeners.begin(); i != i_end; ++i)
+    {
+        (*i)->deleted(this);
+    }
+
+}
+
+int Being::damage(Damage damage)
+{
+    if (mAction == DEAD) return 0;
 
     // TODO: Implement dodge chance
 
@@ -73,6 +82,8 @@ void Being::damage(Damage damage)
     LOG_INFO("Being " << getPublicID() << " got hit");
 
     if (mHitpoints == 0) die();
+
+    return HPloss;
 }
 
 void Being::die()
@@ -109,8 +120,8 @@ void Being::move()
 
 void Being::performAttack(MapComposite *map)
 {
-    int SHORT_RANGE = 64;
-    int SMALL_ANGLE = 45;
+    int SHORT_RANGE = 60;
+    int SMALL_ANGLE = 35;
     Point ppos = getPosition();
     int dir = getDirection();
 

@@ -57,7 +57,8 @@ class MetaTile
         int whichList;          /**< No list, open list or closed list */
         int parentX;            /**< X coordinate of parent tile */
         int parentY;            /**< Y coordinate of parent tile */
-        bool walkable;          /**< Can beings walk on this tile */
+        bool permWalkable;      /**< Can beings normally walk on this tile */
+        bool tempWalkable;      /**< Can beings walk on this tile this tick? */
 };
 
 /**
@@ -114,10 +115,22 @@ class Map
         getMetaTile(int x, int y);
 
         /**
-         * Set walkability flag for a tile
+         * Set permanent walkability flag for a tile
          */
         void
-        setWalk(int x, int y, bool walkable);
+        setPermWalk(int x, int y, bool walkable);
+
+        /**
+         * Set temporary walkability flag for a tile
+         */
+        void
+        setTempWalk(int x, int y, bool walkable);
+
+        /**
+         * Resets the temporary walkable status of all tiles to the permanent
+         * walkable status.
+         */
+        void resetTempWalk();
 
         /**
          * Tell if a tile is walkable or not, includes checking beings.
@@ -159,8 +172,7 @@ class Map
          * Find a path from one location to the next.
          */
         std::list<PATH_NODE>
-        findPath(int startX, int startY,
-                 int destX, int destY);
+        findPath(int startX, int startY, int destX, int destY, int maxCost = 20);
 
     private:
         int width, height;

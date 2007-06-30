@@ -73,33 +73,34 @@ Map::setSize(int width, int height)
 }
 
 void
-Map::setWalk(int x, int y, bool walkable)
+Map::setPermWalk(int x, int y, bool walkable)
 {
-    metaTiles[x + y * width].walkable = walkable;
+    metaTiles[x + y * width].permWalkable = walkable;
+}
+
+void
+Map::setTempWalk(int x, int y, bool walkable)
+{
+    metaTiles[x + y * width].tempWalkable = walkable;
+}
+
+void
+Map::resetTempWalk()
+{
+    for (int i = 0; i < width * height; i++)
+    {
+        metaTiles[i].tempWalkable = metaTiles[i].permWalkable;
+    }
 }
 
 bool
 Map::getWalk(int x, int y)
 {
-    // If walkable, check for colliding into a being
-    if (!tileCollides(x, y))
-    {
-        /*
-        std::list<Being*>::iterator i = beings.begin();
-        while (i != beings.end()) {
-            Being *being = (*i);
-            // Collision when non-portal being is found at this location
-            if (being->x == x && being->y == y && being->job != 45) {
-                return false;
-            }
-            i++;
-        }
-        */
-        return true;
-    }
-    else {
+    // You can't walk outside of the map
+    if (x < 0 || y < 0 || x >= width || y >= height) {
         return false;
     }
+    return metaTiles[x + y * width].tempWalkable;
 }
 
 bool
@@ -111,7 +112,7 @@ Map::tileCollides(int x, int y)
     }
 
     // Check if the tile is walkable
-    return !metaTiles[x + y * width].walkable;
+    return !metaTiles[x + y * width].permWalkable;
 }
 
 MetaTile*
@@ -123,7 +124,7 @@ Map::getMetaTile(int x, int y)
 static int const basicCost = 100;
 
 std::list<PATH_NODE>
-Map::findPath(int startX, int startY, int destX, int destY)
+Map::findPath(int startX, int startY, int destX, int destY, int maxCost)
 {
     // Path to be built up (empty by default)
     std::list<PATH_NODE> path;
@@ -194,7 +195,7 @@ Map::findPath(int startX, int startY, int destX, int destY)
                     MetaTile *t1 = getMetaTile(curr.x, curr.y + dy);
                     MetaTile *t2 = getMetaTile(curr.x + dx, curr.y);
 
-                    if (!(t1->walkable && t2->walkable))
+                    if (!(t1->tempWalkable && t2->tempWalkable))
                     {
                         continue;
                     }
@@ -220,7 +221,7 @@ Map::findPath(int startX, int startY, int destX, int destY)
 
                 // Skip if Gcost becomes too much
                 // Warning: probably not entirely accurate
-                if (Gcost > 20 * basicCost)
+                if (Gcost > maxCost * basicCost)
                 {
                     continue;
                 }

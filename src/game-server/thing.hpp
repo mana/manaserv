@@ -23,6 +23,8 @@
 #ifndef _TMWSERV_THING_H_
 #define _TMWSERV_THING_H_
 
+class MapComposite;
+
 /**
  * Object type enumeration.
  */
@@ -50,7 +52,8 @@ class Thing
          * Constructor.
          */
         Thing(int type)
-          : mType(type)
+          : mMap(NULL),
+            mType(type)
         {}
 
         /**
@@ -100,10 +103,19 @@ class Thing
         { return mMapId; }
 
         /**
-         * Sets the map this thing is located on.
+         * Sets the map ID this thing is located on.
          */
         void setMapId(int mapId)
         { mMapId = mapId; }
+
+        /**
+         * Sets the map this thing is located on.
+         */
+        void setMap(MapComposite *map)
+        { mMap = map; }
+
+    protected:
+        MapComposite *mMap;     /**< Map the thing is on */
 
     private:
         unsigned short mMapId;  /**< ID of the map this thing is on. */

@@ -23,6 +23,7 @@
 
 #include "spawnarea.hpp"
 
+#include "game-server/mapcomposite.hpp"
 #include "game-server/monster.hpp"
 #include "game-server/state.hpp"
 
@@ -53,22 +54,40 @@ SpawnArea::update()
 
         if (mNextSpawn == 0)
         {
-            Being *being = new Monster();
-            being->addDeathListener(this);
+            //find a free spawn location. Give up after 10 tries
+            int c = 10;
+            Point position;
+            do
+            {
+                position = Point(mZone.x + rand() % mZone.w,
+                           mZone.y + rand() % mZone.h);
+                c--;
+            } while (! mMap->getMap()->getWalk(position.x / 32, position.y / 32)
+                     && c);
 
-            // some bogus stats for testing
-            being->setSpeed(150);
-            being->setSize(8);
-            being->setAttribute(BASE_ATTR_VITALITY, 10);
-            being->fillHitpoints();
+            if (c >= 0)
+            {
+                Being *being = new Monster();
+                being->addDeathListener(this);
 
-            being->setMapId(1);
-            being->setPosition(Point(mZone.x + rand() % mZone.w,
-                        mZone.y + rand() % mZone.h));
-            DelayedEvent e = { EVENT_INSERT };
-            gameState->enqueueEvent(being, e);
+                // some bogus stats for testing
+                being->setSpeed(150);
+                being->setSize(8);
+                being->setAttribute(BASE_ATTR_VITALITY, 10);
+                being->fillHitpoints();
 
-            mNumBeings++;
+                being->setMapId(1);
+                being->setPosition(position);
+                DelayedEvent e = { EVENT_INSERT };
+                gameState->enqueueEvent(being, e);
+
+                mNumBeings++;
+            }
+            else {
+                //TODO: This log message should have more information when
+                //      more flexibility is added to the spawn area
+                LOG_WARN("Unable to find a free spawn location for monster");
+            }
         }
     }
 

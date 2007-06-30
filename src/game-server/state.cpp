@@ -69,7 +69,7 @@ void State::updateMap(MapComposite *map)
         (*i)->move();
     }
 
-    // 4. remove dead beings
+    // 4. remove dead beings.
     for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
     {
         if ((*i)->getUpdateFlags() & UPDATEFLAG_REMOVE)
@@ -79,6 +79,7 @@ void State::updateMap(MapComposite *map)
         }
     }
 
+    // 5. update the map itself.
     map->update();
 }
 

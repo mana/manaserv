@@ -29,6 +29,8 @@
 #include "game-server/mapcomposite.hpp"
 #include "game-server/character.hpp"
 
+#include "utils/logger.h"
+
 /* TODO: Implement overlapping map zones instead of strict partitioning.
    Purpose: to decrease the number of zone changes, as overlapping allows for
    hysteresis effect and prevents an object from changing zone each server
@@ -481,6 +483,7 @@ bool MapComposite::insert(Thing *ptr)
         zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].insert(obj);
     }
 
+    ptr->setMap(this);
     things.push_back(ptr);
     return true;
 }
@@ -514,6 +517,8 @@ void MapComposite::remove(Thing *ptr)
 
 void MapComposite::update()
 {
+    map->resetTempWalk();
+
     for (int i = 0; i < mapHeight * mapWidth; ++i)
     {
         zones[i].destinations.clear();
@@ -531,6 +536,9 @@ void MapComposite::update()
 
         Point const &pos1 = obj->getOldPosition(),
                     &pos2 = obj->getPosition();
+
+        map->setTempWalk(pos2.x / 32, pos2.y / 32, false);
+
         int src = (pos1.x / zoneDiam) + (pos1.y / zoneDiam) * mapWidth,
             dst = (pos2.x / zoneDiam) + (pos2.y / zoneDiam) * mapWidth;
         if (src != dst)

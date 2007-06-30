@@ -1,4 +1,31 @@
-2007-06-16  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+﻿﻿2007-06-28  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/defines.h, src/game-server/state.cpp: Attack direction is now 
+	included in being attack messages.
+	* src/game-server/accountconnection.cpp: Player characters are now
+	spawned with full hit points (todo: save current hit points in
+	database when a character logs out so that players can't heal by
+	logging in and out).
+	* src/game-server/being.cpp, src/game-server/deathlistener.hpp,
+	src/game-server/spawnarea.hpp: Death listeners are now informed when
+	a being object is deleted.
+	* src/game-server/being.hpp: Being::damage() now returns the resulting
+	loss of hit points.
+	* src/game-server/character.cpp: Characters hit circle size is now
+	initialized properly.
+	* src/game-server/map.cpp, src/game-server/map.hpp, 
+	src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp,
+	src/game-server/mapreader.cpp, src/state.cpp: Pathfinding now takes 
+	the tiles that are occupied by beings into account. Map::find_path() 
+	now has an optional argument that sets the maximum path cost.
+	* src/game-server/monster.cpp, src/game-server/monster.hpp, 
+	src/game-server/spawnarea.cpp, src/game-server/thing.hpp: Implemented 
+	monster attacking and provisoric monster AI. Monster now chase and
+	attack players that hurt them.
+	* src/game-server/spawnarea.cpp: Monsters are no longer spawned on 
+	unwalkable tiles.
+
+2007-06-28  Guillaume Melquiond <guillaume.melquiong@gmail.com>
 
 	* src/game-server/spawnarea.cpp: Delegated creature insertion to the
 	State class so that it does not disturb object updating.

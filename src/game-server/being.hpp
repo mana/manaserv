@@ -60,7 +60,7 @@ enum Element
 /**
  * Beings and actors directions
  */
-enum
+enum Direction
 {
     DIRECTION_DOWN = 1,
     DIRECTION_UP,
@@ -154,7 +154,7 @@ class Being : public MovingObject
          * stats, deducts the result from the hitpoints and adds the result to
          * the HitsTaken list.
          */
-        void damage(Damage);
+        virtual int damage(Damage damage);
 
         /**
          * Kills the being
@@ -239,14 +239,12 @@ class Being : public MovingObject
 
         int mHitpoints; /**< Hitpoints of the being */
         Action mAction;
-
         std::vector<unsigned short> mAttributes;
+        std::list<DeathListener*> mDeathListeners;
 
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
-
-        std::list<DeathListener*> mDeathListeners;
 
         Hits mHitsTaken; /**< List of punches taken since last update */
 };

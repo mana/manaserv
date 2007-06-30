@@ -49,6 +49,8 @@ Character::Character(MessageIn & msg):
     deserialize(msg);
     // give the player 10 weapon skill for testing purpose
     setAttribute(CHAR_SKILL_WEAPON_UNARMED, 10);
+
+    setSize(16);
 }
 /**
  * Update the internal status.

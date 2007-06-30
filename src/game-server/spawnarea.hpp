@@ -45,6 +45,8 @@ class SpawnArea : public Thing, public DeathListener
 
         virtual void died(Being *being);
 
+        virtual void deleted(Being *being) {};
+
     protected:
         Rectangle mZone;
         int mMaxBeings;    /**< Maximum population of this area. */

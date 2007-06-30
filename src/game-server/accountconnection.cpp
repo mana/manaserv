@@ -72,6 +72,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             Character *ptr = new Character(msg);
             ptr->setSpeed(150); // TODO
+            ptr->fillHitpoints();// TODO: the current hit points should be saved in the database. Otherwise players could heal their characters by logging in and out again.
             gameHandler->mTokenCollector.addPendingConnect(token, ptr);
         } break;
 
