@@ -34,6 +34,7 @@
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
+#include "serialize/characterdata.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
 #include "utils/tokencollector.hpp"
@@ -83,7 +84,7 @@ void ServerHandler::registerGameClient(std::string const &token, CharacterPtr pt
 
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
-    ptr->serialize(msg); //Characterdata
+    serializeCharacterData(*ptr, msg);
 
     Servers::const_iterator i = servers.find(mapId);
     assert(i != servers.end());

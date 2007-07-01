@@ -23,18 +23,17 @@
 #ifndef _TMWSERV_CHARACTERDATA
 #define _TMWSERV_CHARACTERDATA
 
-#include "abstractcharacterdata.hpp"
-#include "defines.h"
 #include <string>
 #include <vector>
 
-#include "utils/countedptr.h"
-
+#include "defines.h"
 #include "point.h"
+#include "common/inventorydata.hpp"
+#include "utils/countedptr.h"
 
 class MessageIn;
 
-class CharacterData: public AbstractCharacterData
+class CharacterData
 {
     public:
 
@@ -139,28 +138,24 @@ class CharacterData: public AbstractCharacterData
         void
         setPosition(const Point &p) { mPos = p; }
 
-        /** Returns the number of inventory items. */
-        int
-        getNumberOfInventoryItems() const { return mInventory.size(); }
-
-        /** Returns a reference to the item in inventory at slot. */
-        InventoryItem const &
-        getInventoryItem(unsigned short slot) const;
-
-        /** Clears the inventory, in preperation for an update. */
-        void
-        clearInventory() { mInventory.clear(); }
-
-        /** Adds an inventory item to the inventory. */
-        void
-        addItemToInventory(const InventoryItem& item);
-        
         /** Add a guild to the character */
         void addGuild(const std::string &name) { mGuilds.push_back(name); }
 
         /** Returns a list of guilds the player belongs to */
         std::vector<std::string>
         getGuilds() const { return mGuilds; }
+
+        /**
+         * Gets a reference on the possessions.
+         */
+        Possessions const &getPossessions() const
+        { return mPossessions; }
+
+        /**
+         * Gets a reference on the possessions.
+         */
+        Possessions &getPossessions()
+        { return mPossessions; }
 
     private:
         CharacterData(CharacterData const &);
@@ -180,8 +175,7 @@ class CharacterData: public AbstractCharacterData
                                                    //!< character.
         unsigned short mMapId;    //!< Map the being is on.
         Point mPos;               //!< Position the being is at.
-        std::vector< InventoryItem > mInventory; //!< All the possesions of
-                                                 //!< the character.
+        Possessions mPossessions; //!< All the possesions of the character.
         std::vector<std::string> mGuilds;        //!< All the guilds the player
                                                  //!< belongs to.
 };

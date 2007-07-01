@@ -681,6 +681,7 @@ DALStorage::updateCharacter(CharacterPtr character)
      *  Character's inventory
      */
 
+    /*
     // Delete the old inventory first
     try
     {
@@ -735,6 +736,7 @@ DALStorage::updateCharacter(CharacterPtr character)
             return false;
         }
     }
+    */
     
     return true;
 }

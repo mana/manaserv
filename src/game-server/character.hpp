@@ -23,27 +23,21 @@
 #ifndef _TMWSERV_CHARACTER_HPP_
 #define _TMWSERV_CHARACTER_HPP_
 
-#include "abstractcharacterdata.hpp"
-#include "game-server/being.hpp"
-
 #include <string>
 #include <vector>
 
+#include "game-server/being.hpp"
+#include "common/inventorydata.hpp"
+
 class GameClient;
 class MessageIn;
+class MessageOut;
 class Point;
-
-
-struct Possessions
-{
-    unsigned short equipment[EQUIPMENT_SLOTS];
-    std::vector< InventoryItem > inventory;
-};
 
 /**
  * The representation of a player's character in the game world.
  */
-class Character : public Being, public AbstractCharacterData
+class Character : public Being
 {
     public:
 
@@ -71,8 +65,13 @@ class Character : public Being, public AbstractCharacterData
         { mClient = c; }
 
         /**
-         * Gets a reference on the possession.
-         * Used in the current Inventory class
+         * Gets a reference on the possessions.
+         */
+        Possessions const &getPossessions() const
+        { return mPossessions; }
+
+        /**
+         * Gets a reference on the possessions.
          */
         Possessions &getPossessions()
         { return mPossessions; }

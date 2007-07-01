@@ -20,28 +20,38 @@
  *  $Id$
  */
 
-#include "account-server/characterdata.hpp"
-#include "net/messagein.hpp"
-#include "serialize/characterdata.hpp"
+#ifndef _TMWSERV_COMMON_INVENTORYDATA_HPP_
+#define _TMWSERV_COMMON_INVENTORYDATA_HPP_
 
-CharacterData::CharacterData(std::string const &name, int id):
-    mDatabaseID(id), mAccountID(-1), mName(name), mGender(0), mHairStyle(0),
-    mHairColor(0), mLevel(0), mMoney(0), mMapId(0), mPos(0,0)
+/**
+ * Numbers of inventory slots
+ */
+
+enum
 {
-    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
-    {
-        mBaseAttributes[i] = 0;
-    }
-}
+    EQUIPMENT_SLOTS = 11,
+    INVENTORY_SLOTS = 50
+};
 
-CharacterData::CharacterData(MessageIn & msg):
-    mDatabaseID(-1), mAccountID(-1), mName(""), mGender(0), mHairStyle(0),
-    mHairColor(0), mLevel(0), mMoney(0), mMapId(0), mPos(0,0)
+/**
+ * Structure storing an item in the inventory.
+ * When the itemId is zero, this item represents "amount" consecutive empty slots.
+ */
+
+struct InventoryItem
 {
-    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
-    {
-        mBaseAttributes[i] = 0;
-    }
-    deserializeCharacterData(*this, msg);
-}
+    unsigned short itemId;
+    unsigned char amount;
+};
 
+/**
+ * Structure storing the equipment and inventory of a Player.
+ */
+struct Possessions
+{
+    unsigned short equipment[EQUIPMENT_SLOTS];
+    std::vector< InventoryItem > inventory;
+    Possessions() { for (int i = 0; i < EQUIPMENT_SLOTS; ++i) equipment[i] = 0; }
+};
+
+#endif

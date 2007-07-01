@@ -6,8 +6,6 @@ bin_PROGRAMS = tmwserv-account tmwserv-game
 
 tmwserv_account_SOURCES = \
 	account-server/main-account.cpp \
-	abstractcharacterdata.hpp \
-	abstractcharacterdata.cpp \
 	configuration.h \
 	configuration.cpp \
 	defines.h \
@@ -41,6 +39,7 @@ tmwserv_account_SOURCES = \
 	chat-server/chatchannel.cpp \
 	chat-server/chatchannelmanager.hpp \
 	chat-server/chatchannelmanager.cpp \
+	common/inventorydata.hpp \
 	dal/dalexcept.h \
 	dal/dataprovider.h \
 	dal/dataprovider.cpp \
@@ -56,6 +55,7 @@ tmwserv_account_SOURCES = \
 	net/messageout.cpp \
 	net/netcomputer.hpp \
 	net/netcomputer.cpp \
+	serialize/characterdata.hpp \
 	utils/countedptr.h \
 	utils/functors.h \
 	utils/logger.h \
@@ -70,8 +70,6 @@ tmwserv_account_SOURCES = \
 
 tmwserv_game_SOURCES = \
 	game-server/main-game.cpp \
-	abstractcharacterdata.hpp \
-	abstractcharacterdata.cpp \
 	configuration.h \
 	configuration.cpp \
 	defines.h \
@@ -80,6 +78,7 @@ tmwserv_game_SOURCES = \
 	resourcemanager.cpp \
 	skill.h \
 	skill.cpp \
+	common/inventorydata.hpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
 	game-server/being.hpp \
@@ -128,6 +127,7 @@ tmwserv_game_SOURCES = \
 	net/messageout.cpp \
 	net/netcomputer.hpp \
 	net/netcomputer.cpp \
+	serialize/characterdata.hpp \
 	utils/base64.h \
 	utils/base64.cpp \
 	utils/mathutils.h \

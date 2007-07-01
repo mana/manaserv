@@ -20,15 +20,13 @@
  *  $Id$
  */
 
-#include "game-server/character.hpp"
-
 #include <cassert>
 
 #include "defines.h"
+#include "game-server/character.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
-
-InventoryItem tempItem;
+#include "serialize/characterdata.hpp"
 
 Character::Character(MessageIn & msg):
     Being(OBJECT_CHARACTER, 65535),
@@ -37,16 +35,11 @@ Character::Character(MessageIn & msg):
     mDatabaseID(-1), mName(""), mGender(0), mHairStyle(0), mHairColor(0),
     mLevel(0), mMoney(0)
 {
-    // clear equipment
-    for (int i = 0; i < EQUIPMENT_SLOTS; ++i)
-    {
-        mPossessions.equipment[i] = 0;
-    }
     // prepare attributes vector
     mAttributes.resize(NB_ATTRIBUTES_CHAR, 1);
     mOldAttributes.resize(NB_ATTRIBUTES_CHAR, 0);
     // get base attributes
-    deserialize(msg);
+    deserializeCharacterData(*this, msg);
     // give the player 10 weapon skill for testing purpose
     setAttribute(CHAR_SKILL_WEAPON_UNARMED, 10);
 
@@ -70,38 +63,6 @@ Character::update()
             raiseUpdateFlags(UPDATEFLAG_ATTACK);
         }
     }
-}
-
-int
-Character::getNumberOfInventoryItems() const
-{
-    // TODO: implement after redesign/improvement of Inventory
-    return 0;
-}
-
-InventoryItem const &
-Character::getInventoryItem(unsigned short slot) const
-{
-    // TODO: implement after redesign/improvement of Inventory
-    //InventoryItem tempItem;
-
-    tempItem.itemClassId = 0;
-    tempItem.numberOfItemsInSlot = 0;
-    tempItem.isEquiped = false;
-
-    return tempItem;
-}
-
-void
-Character::clearInventory()
-{
-    // TODO: implement after redesign/improvement of Inventory
-}
-
-void
-Character::addItemToInventory(const InventoryItem& item)
-{
-    // TODO: implement after redesign/improvement of Inventory
 }
 
 void Character::calculateDerivedAttributes()

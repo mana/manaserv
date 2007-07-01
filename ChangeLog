@@ -1,4 +1,21 @@
-﻿﻿2007-06-28  Philipp Sehmisch  <tmw@crushnet.org>
+﻿﻿2007-07-01  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+
+	* src/abstractcharacterdata.cpp, src/abstractcharacterdata.hpp,
+	src/serialize/characterdata.hpp, src/account-server/serverhandler.cpp,
+	src/game-server/accountconnection.cpp: Removed multiple inheritance
+	mechanism for serialization. Replaced it by a less cumbersome template
+	interface.
+	* src/common/inventorydata.hpp: Set inventory structures in a directory
+	common to both servers.
+	* src/account-server/dalstorage.cpp: Commented out unused code.
+	* src/Makefile.am: Taken new files into account.
+	* src/account-server/characterdata.cpp, src/game-server/character.cpp,
+	src/account-server/characterdata.hpp, src/game-server/character.hpp:
+	Removed new inventory code, as it was not doing anything.
+	* src/inventory.cpp: Reverted to the old code, as it was working just
+	fine.
+
+2007-06-28  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/defines.h, src/game-server/state.cpp: Attack direction is now 
 	included in being attack messages.

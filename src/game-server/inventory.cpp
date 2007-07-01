@@ -30,9 +30,6 @@
 #include "game-server/itemmanager.hpp"
 #include "net/messageout.hpp"
 
-// For the InventoryItem structure
-#include "abstractcharacterdata.hpp"
-
 Inventory::Inventory(Character *p)
   : poss(p->getPossessions()), msg(GPMSG_INVENTORY), client(p)
 {}
@@ -62,16 +59,16 @@ void Inventory::sendFull() const
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
          i_end = poss.inventory.end(); i != i_end; ++i)
     {
-        if (i->itemClassId)
+        if (i->itemId)
         {
             m.writeByte(slot);
-            m.writeShort(i->itemClassId);
-            m.writeByte(i->numberOfItemsInSlot);
+            m.writeShort(i->itemId);
+            m.writeByte(i->amount);
             ++slot;
         }
         else
         {
-            slot += i->numberOfItemsInSlot;
+            slot += i->amount;
         }
     }
 
@@ -85,10 +82,10 @@ int Inventory::getItem(int slot) const
     {
         if (slot == 0)
         {
-            return i->itemClassId;
+            return i->itemId;
         }
 
-        slot -= i->itemClassId ? 1 : i->numberOfItemsInSlot;
+        slot -= i->itemId ? 1 : i->amount;
 
         if (slot < 0)
         {
@@ -109,7 +106,7 @@ int Inventory::getIndex(int slot) const
             return index;
         }
 
-        slot -= i->itemClassId ? 1 : i->numberOfItemsInSlot;
+        slot -= i->itemId ? 1 : i->amount;
 
         if (slot < 0)
         {
@@ -125,7 +122,7 @@ int Inventory::getSlot(int index) const
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
          i_end = poss.inventory.begin() + index; i != i_end; ++i)
     {
-        slot += i->itemClassId ? 1 : i->numberOfItemsInSlot;
+        slot += i->itemId ? 1 : i->amount;
     }
     return slot;
 }
@@ -136,18 +133,18 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
     for (int i = 0, i_end = poss.inventory.size(); i < i_end; ++i)
     {
         InventoryItem &it = poss.inventory[i];
-        if (it.itemClassId == 0)
+        if (it.itemId == 0)
         {
             int nb = std::min(amount, maxPerSlot);
-            if (it.numberOfItemsInSlot <= 1)
+            if (it.amount <= 1)
             {
-                it.itemClassId = itemId;
-                it.numberOfItemsInSlot = nb;
+                it.itemId = itemId;
+                it.amount = nb;
             }
             else
             {
-                --it.numberOfItemsInSlot;
-                InventoryItem iu = { itemId, nb, false };
+                --it.amount;
+                InventoryItem iu = { itemId, nb };
                 poss.inventory.insert(poss.inventory.begin() + i, iu);
                 ++i_end;
             }
@@ -169,7 +166,7 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
     {
         int nb = std::min(amount, maxPerSlot);
         amount -= nb;
-        InventoryItem it = { itemId, nb, false };
+        InventoryItem it = { itemId, nb };
         poss.inventory.push_back(it);
 
         msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
@@ -189,15 +186,15 @@ int Inventory::insert(int itemId, int amount)
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
          i_end = poss.inventory.end(); i != i_end; ++i)
     {
-        if (i->itemClassId == itemId)
+        if (i->itemId == itemId)
         {
-            int nb = std::min(maxPerSlot - i->numberOfItemsInSlot, amount);
-            i->numberOfItemsInSlot += nb;
+            int nb = std::min(maxPerSlot - i->amount, amount);
+            i->amount += nb;
             amount -= nb;
 
             msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
             msg.writeShort(itemId);
-            msg.writeByte(i->numberOfItemsInSlot);
+            msg.writeByte(i->amount);
 
             if (amount == 0)
             {
@@ -207,7 +204,7 @@ int Inventory::insert(int itemId, int amount)
         }
         else
         {
-            slot += i->itemClassId ? 1 : i->numberOfItemsInSlot;
+            slot += i->itemId ? 1 : i->amount;
         }
     }
 
@@ -221,9 +218,9 @@ int Inventory::count(int itemId) const
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
          i_end = poss.inventory.end(); i != i_end; ++i)
     {
-        if (i->itemClassId == itemId)
+        if (i->itemId == itemId)
         {
-            nb += i->numberOfItemsInSlot;
+            nb += i->amount;
         }
     }
 
@@ -238,23 +235,22 @@ void Inventory::freeIndex(int i)
     {
         poss.inventory.pop_back();
     }
-    else if (poss.inventory[i + 1].itemClassId == 0)
+    else if (poss.inventory[i + 1].itemId == 0)
     {
-        it.itemClassId = 0;
-        it.numberOfItemsInSlot = poss.inventory[i + 1].numberOfItemsInSlot + 1;
+        it.itemId = 0;
+        it.amount = poss.inventory[i + 1].amount + 1;
         poss.inventory.erase(poss.inventory.begin() + i + 1);
     }
     else
     {
-        it.itemClassId = 0;
-        it.numberOfItemsInSlot = 1;
+        it.itemId = 0;
+        it.amount = 1;
     }
 
-    if (i > 0 && poss.inventory[i - 1].itemClassId == 0)
+    if (i > 0 && poss.inventory[i - 1].itemId == 0)
     {
         // Note: "it" is no longer a valid iterator.
-        poss.inventory[i - 1].numberOfItemsInSlot
-                                     += poss.inventory[i].numberOfItemsInSlot;
+        poss.inventory[i - 1].amount += poss.inventory[i].amount;
         poss.inventory.erase(poss.inventory.begin() + i);
     }
 }
@@ -264,18 +260,18 @@ int Inventory::remove(int itemId, int amount)
     for (int i = poss.inventory.size() - 1; i >= 0; --i)
     {
         InventoryItem &it = poss.inventory[i];
-        if (it.itemClassId == itemId)
+        if (it.itemId == itemId)
         {
-            int nb = std::min((int)it.numberOfItemsInSlot, amount);
-            it.numberOfItemsInSlot -= nb;
+            int nb = std::min((int)it.amount, amount);
+            it.amount -= nb;
             amount -= nb;
 
             msg.writeByte(getSlot(i) + EQUIP_CLIENT_INVENTORY);
             msg.writeShort(itemId);
-            msg.writeByte(it.numberOfItemsInSlot);
+            msg.writeByte(it.amount);
 
             // If the slot is empty, compress the inventory.
-            if (it.numberOfItemsInSlot == 0)
+            if (it.amount == 0)
             {
                 freeIndex(i);
             }
@@ -300,16 +296,16 @@ int Inventory::removeFromSlot(int slot, int amount)
     }
 
     InventoryItem &it = poss.inventory[i];
-    int nb = std::min((int)it.numberOfItemsInSlot, amount);
-    it.numberOfItemsInSlot -= nb;
+    int nb = std::min((int)it.amount, amount);
+    it.amount -= nb;
     amount -= nb;
 
     msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
-    msg.writeShort(it.itemClassId);
-    msg.writeByte(it.numberOfItemsInSlot);
+    msg.writeShort(it.itemId);
+    msg.writeByte(it.amount);
 
     // If the slot is empty, compress the inventory.
-    if (it.numberOfItemsInSlot == 0)
+    if (it.amount == 0)
     {
         freeIndex(i);
     }

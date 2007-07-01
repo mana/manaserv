@@ -24,14 +24,15 @@
 #include "configuration.h"
 #include "defines.h"
 #include "game-server/accountconnection.hpp"
+#include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
-#include "game-server/character.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
+#include "serialize/characterdata.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
 #include "utils/tokencollector.hpp"
@@ -59,7 +60,7 @@ bool AccountConnection::start()
 void AccountConnection::sendCharacterData(Character *p)
 {
     MessageOut msg(GAMSG_PLAYER_DATA);
-    p->serialize(msg);
+    serializeCharacterData(*p, msg);
     send(msg);
 }
 
