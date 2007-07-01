@@ -16,6 +16,13 @@
 	fine.
 	* src/game-server/state.cpp: Added assertions to detect insertion and
 	removal of objects at updating time.
+	* src/game-server/accountconnection.cpp, src/game-server/character.cpp,
+	src/defines.h, src/account-server/characterdata.hpp,
+	src/account-server/characterdata.cpp, src/serialize/characterdata.hpp:
+	Removed automatic (de)serialization of ID, so that it can be properly
+	used, and of name, so that it does not waste bandwidth.
+	* src/account-server/serverhandler.cpp: Reverted to the scheme based on
+	character ID, so that runtime character data are persistent again.
 
 2007-06-28  Philipp Sehmisch  <tmw@crushnet.org>
 

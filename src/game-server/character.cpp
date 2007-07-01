@@ -32,13 +32,15 @@ Character::Character(MessageIn & msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL),
     mAttributesChanged(true),
-    mDatabaseID(-1), mName(""), mGender(0), mHairStyle(0), mHairColor(0),
+    mDatabaseID(-1), mName(), mGender(0), mHairStyle(0), mHairColor(0),
     mLevel(0), mMoney(0)
 {
     // prepare attributes vector
     mAttributes.resize(NB_ATTRIBUTES_CHAR, 1);
     mOldAttributes.resize(NB_ATTRIBUTES_CHAR, 0);
-    // get base attributes
+    // get character data
+    mDatabaseID = msg.readLong();
+    mName = msg.readString();
     deserializeCharacterData(*this, msg);
     // give the player 10 weapon skill for testing purpose
     setAttribute(CHAR_SKILL_WEAPON_UNARMED, 10);

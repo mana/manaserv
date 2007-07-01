@@ -40,11 +40,6 @@ class CharacterData
         CharacterData(std::string const &name, int id = -1);
 
         /**
-         * Constructor used for creating a character from a serialised message.
-         */
-        CharacterData(MessageIn & msg);
-
-        /**
          * Get and set methods
          */
 

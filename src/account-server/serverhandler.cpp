@@ -84,6 +84,8 @@ void ServerHandler::registerGameClient(std::string const &token, CharacterPtr pt
 
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
+    msg.writeLong(ptr->getDatabaseID());
+    msg.writeString(ptr->getName());
     serializeCharacterData(*ptr, msg);
 
     Servers::const_iterator i = servers.find(mapId);
@@ -128,15 +130,21 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_PLAYER_DATA:
         {
             LOG_DEBUG("GAMSG_PLAYER_DATA");
-            // TODO: Store it in memory, only update the database when needed.
-            //       That should get rid of the
-            //       no_update_on_switch_character_bug as well.
             Storage &store = Storage::instance("tmw");
-            CharacterPtr ptr(new CharacterData(msg));
-
-            if (!store.updateCharacter(ptr))
-                        LOG_ERROR("Received character data for non-existing" <<
-                                  " character " << ptr->getDatabaseID() << ".");
+            int id = msg.readLong();
+            CharacterPtr ptr = store.getCharacter(id);
+            if (ptr.get())
+            {
+                deserializeCharacterData(*ptr, msg);
+                if (!store.updateCharacter(ptr))
+                    LOG_ERROR("Failed to update character " <<
+                              ptr->getDatabaseID() << '.');
+            }
+            else
+            {
+                LOG_ERROR("Received data for non-existing character " <<
+                          ptr->getDatabaseID() << '.');
+            }
 
         } break;
 

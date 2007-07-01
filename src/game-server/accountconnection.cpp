@@ -60,6 +60,7 @@ bool AccountConnection::start()
 void AccountConnection::sendCharacterData(Character *p)
 {
     MessageOut msg(GAMSG_PLAYER_DATA);
+    msg.writeLong(p->getDatabaseID());
     serializeCharacterData(*p, msg);
     send(msg);
 }

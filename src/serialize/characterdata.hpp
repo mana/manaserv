@@ -32,8 +32,6 @@
 template< class T >
 void serializeCharacterData(T const &data, MessageOut &msg)
 {
-    msg.writeLong(data.getDatabaseID());
-    msg.writeString(data.getName());
     msg.writeByte(data.getGender());
     msg.writeByte(data.getHairStyle());
     msg.writeByte(data.getHairColor());
@@ -66,8 +64,6 @@ void serializeCharacterData(T const &data, MessageOut &msg)
 template< class T >
 void deserializeCharacterData(T &data, MessageIn &msg)
 {
-    data.setDatabaseID(msg.readLong());
-    data.setName(msg.readString());
     data.setGender(msg.readByte());
     data.setHairStyle(msg.readByte());
     data.setHairColor(msg.readByte());

@@ -21,8 +21,6 @@
  */
 
 #include "account-server/characterdata.hpp"
-#include "net/messagein.hpp"
-#include "serialize/characterdata.hpp"
 
 CharacterData::CharacterData(std::string const &name, int id):
     mDatabaseID(id), mAccountID(-1), mName(name), mGender(0), mHairStyle(0),
@@ -32,16 +30,5 @@ CharacterData::CharacterData(std::string const &name, int id):
     {
         mBaseAttributes[i] = 0;
     }
-}
-
-CharacterData::CharacterData(MessageIn & msg):
-    mDatabaseID(-1), mAccountID(-1), mName(""), mGender(0), mHairStyle(0),
-    mHairColor(0), mLevel(0), mMoney(0), mMapId(0), mPos(0,0)
-{
-    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
-    {
-        mBaseAttributes[i] = 0;
-    }
-    deserializeCharacterData(*this, msg);
 }
 
