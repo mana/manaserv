@@ -277,8 +277,16 @@ void State::informPlayer(MapComposite *map, Character *p)
         gameHandler->sendTo(p, itemMsg);
 }
 
+#ifndef NDEBUG
+static bool dbgLockObjects;
+#endif
+
 void State::update()
 {
+#   ifndef NDEBUG
+    dbgLockObjects = true;
+#   endif
+
     // Update game state (update AI, etc.)
     for (Maps::iterator m = maps.begin(), m_end = maps.end(); m != m_end; ++m)
     {
@@ -300,6 +308,10 @@ void State::update()
             }
         }
     }
+
+#   ifndef NDEBUG
+    dbgLockObjects = false;
+#   endif
 
     // Take care of events that were delayed because of their side effects.
     for (DelayedEvents::iterator i = delayedEvents.begin(),
@@ -359,6 +371,7 @@ void State::update()
 
 void State::insert(Thing *ptr)
 {
+    assert(!dbgLockObjects);
     int mapId = ptr->getMapId();
     MapComposite *map = loadMap(mapId);
     if (!map || !map->insert(ptr))
@@ -386,6 +399,7 @@ void State::insert(Thing *ptr)
 
 void State::remove(Thing *ptr)
 {
+    assert(!dbgLockObjects);
     int mapId = ptr->getMapId();
     Maps::iterator m = maps.find(mapId);
     assert(m != maps.end());

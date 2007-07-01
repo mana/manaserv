@@ -14,6 +14,8 @@
 	Removed new inventory code, as it was not doing anything.
 	* src/inventory.cpp: Reverted to the old code, as it was working just
 	fine.
+	* src/game-server/state.cpp: Added assertions to detect insertion and
+	removal of objects at updating time.
 
 2007-06-28  Philipp Sehmisch  <tmw@crushnet.org>
 
