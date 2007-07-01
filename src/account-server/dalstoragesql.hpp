@@ -282,24 +282,24 @@ const std::string SQL_INVENTORIES_TABLE(
 #if defined (MYSQL_SUPPORT)
         "id       INTEGER  PRIMARY KEY AUTO_INCREMENT,"
         "owner_id INTEGER  NOT NULL,"
+        "slot     SMALLINT NOT NULL,"
         "class_id INTEGER  NOT NULL,"
         "amount   SMALLINT NOT NULL,"
-        "equipped TINYINT  NOT NULL,"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
         "INDEX (id)"
 #elif defined (SQLITE_SUPPORT)
         "id       INTEGER  PRIMARY KEY,"
         "owner_id INTEGER  NOT NULL,"
+        "slot     INTEGER  NOT NULL,"
         "class_id INTEGER  NOT NULL,"
         "amount   INTEGER  NOT NULL,"
-        "equipped INTEGER  NOT NULL,"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #elif defined (POSTGRESQL_SUPPORT)
         "id      SERIAL    PRIMARY KEY,"
         "owner_id INTEGER  NOT NULL,"
+        "slot     INTEGER  NOT NULL,"
         "class_id INTEGER  NOT NULL,"
         "amount   INTEGER  NOT NULL,"
-        "equipped INTEGER  NOT NULL,"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #endif
     ");"

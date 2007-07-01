@@ -23,6 +23,9 @@
 	used, and of name, so that it does not waste bandwidth.
 	* src/account-server/serverhandler.cpp: Reverted to the scheme based on
 	character ID, so that runtime character data are persistent again.
+	* src/account-server/dalstoragesql.hpp,
+	src/account-server/dalstorage.cpp: Added support for storing inventory
+	in database.
 
 2007-06-28  Philipp Sehmisch  <tmw@crushnet.org>
 

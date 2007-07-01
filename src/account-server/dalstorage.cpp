@@ -681,7 +681,6 @@ DALStorage::updateCharacter(CharacterPtr character)
      *  Character's inventory
      */
 
-    /*
     // Delete the old inventory first
     try
     {
@@ -699,44 +698,57 @@ DALStorage::updateCharacter(CharacterPtr character)
     }
 
     // Insert the new inventory data
-    if (character->getNumberOfInventoryItems())
+    try
     {
-        try
-        {
-            std::ostringstream sqlInsertCharacterInventory;
+        std::ostringstream sqlInsertCharacterInventory;
 
+        sqlInsertCharacterInventory
+            << "insert into " << INVENTORIES_TBL_NAME
+            << " (owner_id, slot, class_id, amount) "
+            << "values ";
+
+        int id = character->getDatabaseID();
+        bool first = true;
+        Possessions const &poss = character->getPossessions();
+
+        for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
+        {
+            int v = poss.equipment[j];
+            if (!v) continue;
+            if (first) first = false;
+            else sqlInsertCharacterInventory << ", ";
             sqlInsertCharacterInventory
-                << "insert into " << INVENTORIES_TBL_NAME
-                << " (owner_id, class_id, amount, equipped) "
-                << "values ";
-
-            for (int j = 0; j < character->getNumberOfInventoryItems(); j++)
-            {
-                sqlInsertCharacterInventory
-                    << "(" << character->getDatabaseID() << ", "
-                    << character->getInventoryItem(j).itemClassId << ", "
-                    << character->getInventoryItem(j).numberOfItemsInSlot
-                    << ", "
-                    << (unsigned short)
-                       character->getInventoryItem(j).isEquiped
-                    << ")";
-
-                // Adding the comma only if it's needed
-                if (j < (character->getNumberOfInventoryItems() - 1))
-                        sqlInsertCharacterInventory << ", ";
-            }
-            sqlInsertCharacterInventory << ";";
-
-            mDb->execSql(sqlInsertCharacterInventory.str());
+                << '(' << id << ", " << j << ", " << v << ", " << 1 << ')';
         }
-        catch (const dal::DbSqlQueryExecFailure& e)
+
+        int slot = 32;
+        for (std::vector< InventoryItem >::const_iterator j = poss.inventory.begin(),
+             j_end = poss.inventory.end(); j != j_end; ++j)
         {
-            // TODO: throw an exception.
-            LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
-            return false;
+            int v = j->itemId;
+            if (!v)
+            {
+                slot += j->amount;
+                continue;
+            }
+            if (first) first = false;
+            else sqlInsertCharacterInventory << ", ";
+            sqlInsertCharacterInventory
+                << '(' << id << ", " << slot << ", " << v << ", " << unsigned(j->amount) << ')';
+            ++slot;
         }
+
+        sqlInsertCharacterInventory << ';';
+
+        if (!first)
+            mDb->execSql(sqlInsertCharacterInventory.str());
     }
-    */
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
+        return false;
+    }
     
     return true;
 }
