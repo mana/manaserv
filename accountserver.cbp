@@ -38,16 +38,6 @@
 			<Add library="winmm"/>
 			<Add library="sqlite3"/>
 		</Linker>
-		<Unit filename="src\abstractcharacterdata.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\abstractcharacterdata.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
 		<Unit filename="src\account-server\account.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>

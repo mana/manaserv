@@ -1,4 +1,8 @@
-﻿﻿2007-07-01  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+﻿2007-07-02  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp: Updated project files.
+
+﻿2007-07-01  Guillaume Melquiond <guillaume.melquiong@gmail.com>
 
 	* src/abstractcharacterdata.cpp, src/abstractcharacterdata.hpp,
 	src/serialize/characterdata.hpp, src/account-server/serverhandler.cpp,
