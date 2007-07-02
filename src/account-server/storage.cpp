@@ -31,26 +31,6 @@ std::string Storage::mPassword("");
 
 
 /**
- * Constructor.
- */
-Storage::Storage(void)
-    throw()
-{
-    // NOOP
-}
-
-
-/**
- * Destructor.
- */
-Storage::~Storage(void)
-    throw()
-{
-    // NOOP
-}
-
-
-/**
  * Create an instance of Storage.
  */
 Storage&
@@ -66,12 +46,11 @@ Storage::instance(const std::string& name)
     return (*mInstance);
 }
 
-
 /**
  * Delete the instance.
  */
 void
-Storage::destroy(void)
+Storage::destroy()
 {
     if (mInstance != 0) {
         delete mInstance;
@@ -84,62 +63,3 @@ Storage::destroy(void)
     mPassword = "";
 }
 
-
-/**
- * Check if the storage is open.
- */
-bool
-Storage::isOpen(void) const
-{
-    return mIsOpen;
-}
-
-
-/**
- * Get the storage name.
- */
-const std::string&
-Storage::getName(void) const
-{
-    return mName;
-}
-
-
-/**
- * Set a user name for the storage.
- */
-void
-Storage::setUser(const std::string& userName)
-{
-    mUser = userName;
-}
-
-
-/**
- * Get the user name.
- */
-const std::string&
-Storage::getUser(void) const
-{
-    return mUser;
-}
-
-
-/**
- * Set a user password for the storage.
- */
-void
-Storage::setPassword(const std::string& password)
-{
-    mPassword = password;
-}
-
-
-/**
- * Get the user password.
- */
-const std::string&
-Storage::getPassword(void) const
-{
-    return mPassword;
-}

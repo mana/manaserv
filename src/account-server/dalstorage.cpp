@@ -101,7 +101,6 @@ DALStorage::DALStorage()
  * Destructor.
  */
 DALStorage::~DALStorage()
-    throw()
 {
     if (mDb->isConnected()) {
         close();
@@ -115,8 +114,7 @@ DALStorage::~DALStorage()
 /**
  * Connect to the database and initialize it if necessary.
  */
-void
-DALStorage::open(void)
+void DALStorage::open()
 {
     // Do nothing if already connected.
     if (mDb->isConnected()) {
@@ -204,11 +202,77 @@ DALStorage::open(void)
 /**
  * Disconnect from the database.
  */
-void
-DALStorage::close(void)
+void DALStorage::close()
 {
     mDb->disconnect();
     mIsOpen = mDb->isConnected();
+}
+
+
+AccountPtr DALStorage::getAccountBySQL(std::string const &query)
+{
+    // connect to the database (if not connected yet).
+    open();
+
+    using namespace dal;
+
+    try {
+        const RecordSet& accountInfo = mDb->execSql(query);
+
+        // if the account is not even in the database then
+        // we have no choice but to return nothing.
+        if (accountInfo.isEmpty())
+        {
+            return AccountPtr(NULL);
+        }
+
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to< unsigned > toUint;
+        unsigned id = toUint(accountInfo(0, 0));
+
+        // create an Account instance
+        // and initialize it with information about the user.
+        AccountPtr account(new Account(accountInfo(0, 1),
+                                       accountInfo(0, 2),
+                                       accountInfo(0, 3), id));
+
+        mAccounts.insert(std::make_pair(id, account));
+
+        // load the characters associated with the account.
+        std::ostringstream sql;
+        sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
+            << id << "';";
+        RecordSet const &charInfo = mDb->execSql(sql.str());
+
+        if (!charInfo.isEmpty())
+        {
+            int size = charInfo.rows();
+            Characters characters;
+
+            LOG_DEBUG("Account "<< id << " has " << size << " character(s) in database.");
+
+            // Two steps: it seems like multiple requests cannot be alive at the same time.
+            std::vector< unsigned > characterIDs;
+            for (int k = 0; k < size; ++k)
+            {
+                characterIDs.push_back(toUint(charInfo(k, 0)));
+            }
+
+            for (int k = 0; k < size; ++k)
+            {
+                characters.push_back(getCharacter(characterIDs[k]));
+            }
+
+            account->setCharacters(characters);
+        }
+
+        return account;
+    }
+    catch (const DbSqlQueryExecFailure& e)
+    {
+        return AccountPtr(NULL); // TODO: Throw exception here
+    }
 }
 
 
@@ -218,9 +282,6 @@ DALStorage::close(void)
 AccountPtr
 DALStorage::getAccount(const std::string& userName)
 {
-    // connect to the database (if not connected yet).
-    open();
-
     // look for the account in the list first.
     Accounts::iterator it_end = mAccounts.end(),
         it = std::find_if(mAccounts.begin(), it_end, account_by_name(userName));
@@ -228,70 +289,12 @@ DALStorage::getAccount(const std::string& userName)
     if (it != it_end)
         return it->second;
 
-    using namespace dal;
-
     // the account was not in the list, look for it in the database.
-    try {
-        std::ostringstream sql;
-        sql << "select * from " << ACCOUNTS_TBL_NAME << " where username = \""
-            << userName << "\";";
-        const RecordSet& accountInfo = mDb->execSql(sql.str());
-
-        // if the account is not even in the database then
-        // we have no choice but to return nothing.
-        if (accountInfo.isEmpty()) {
-            return AccountPtr(NULL);
-        }
-
-        // specialize the string_to functor to convert
-        // a string to an unsigned int.
-        string_to< unsigned > toUint;
-        unsigned id = toUint(accountInfo(0, 0));
-
-        // create an Account instance
-        // and initialize it with information about the user.
-        AccountPtr account(new Account(accountInfo(0, 1),
-                                       accountInfo(0, 2),
-                                       accountInfo(0, 3), id));
-
-        mAccounts.insert(std::make_pair(id, account));
-
-        // load the characters associated with the account.
-        sql.str(std::string());
-        sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
-            << accountInfo(0, 0) << "';";
-        RecordSet const &charInfo = mDb->execSql(sql.str());
-
-        if (!charInfo.isEmpty())
-        {
-            int size = charInfo.rows();
-            Characters characters;
-
-            LOG_DEBUG(userName << "'s account has " << size
-                      << " character(s) in database.");
-
-            // Two steps: it seems like multiple requests cannot be alive at the same time.
-            std::vector< unsigned > characterIDs;
-            for (int k = 0; k < size; ++k)
-            {
-                characterIDs.push_back(toUint(charInfo(k, 0)));
-            }
-
-            for (int k = 0; k < size; ++k)
-            {
-                characters.push_back(getCharacter(characterIDs[k]));
-            }
-
-            account->setCharacters(characters);
-        }
-
-        return account;
-    }
-    catch (const DbSqlQueryExecFailure& e)
-    {
-        return AccountPtr(NULL); // TODO: Throw exception here
-    }
+    std::ostringstream sql;
+    sql << "select * from " << ACCOUNTS_TBL_NAME << " where username = \"" << userName << "\";";
+    return getAccountBySQL(sql.str());
 }
+
 
 /**
  * Get an account by ID.
@@ -299,103 +302,29 @@ DALStorage::getAccount(const std::string& userName)
 AccountPtr
 DALStorage::getAccountByID(int accountID)
 {
-    // connect to the database (if not connected yet).
-    open();
-
     // look for the account in the list first.
     Accounts::iterator it = mAccounts.find(accountID);
 
     if (it != mAccounts.end())
         return it->second;
 
-    using namespace dal;
-
     // the account was not in the list, look for it in the database.
-    try {
-        std::ostringstream sql;
-        sql << "select * from " << ACCOUNTS_TBL_NAME << " where id = '"
-            << accountID << "';";
-        const RecordSet& accountInfo = mDb->execSql(sql.str());
-
-        // if the account is not even in the database then
-        // we have no choice but to return nothing.
-        if (accountInfo.isEmpty()) {
-            return AccountPtr(NULL);
-        }
-
-        // specialize the string_to functor to convert
-        // a string to an unsigned int.
-        string_to< unsigned > toUint;
-        unsigned id = toUint(accountInfo(0, 0));
-
-        // create an Account instance
-        // and initialize it with information about the user.
-        AccountPtr account(new Account(accountInfo(0, 1),
-                                       accountInfo(0, 2),
-                                       accountInfo(0, 3), id));
-
-        mAccounts.insert(std::make_pair(id, account));
-
-        // load the characters associated with the account.
-        sql.str(std::string());
-        sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
-            << accountInfo(0, 0) << "';";
-        RecordSet const &charInfo = mDb->execSql(sql.str());
-
-        if (!charInfo.isEmpty())
-        {
-            int size = charInfo.rows();
-            Characters characters;
-
-            LOG_DEBUG("AccountID: "<< accountID << "; has " << size
-                      << " character(s) in database.");
-
-            // Two steps: it seems like multiple requests cannot be alive at the same time.
-            std::vector< unsigned > characterIDs;
-            for (int k = 0; k < size; ++k)
-            {
-                characterIDs.push_back(toUint(charInfo(k, 0)));
-            }
-
-            for (int k = 0; k < size; ++k)
-            {
-                characters.push_back(getCharacter(characterIDs[k]));
-            }
-
-            account->setCharacters(characters);
-        }
-
-        return account;
-    }
-    catch (const DbSqlQueryExecFailure& e)
-    {
-        return AccountPtr(NULL); // TODO: Throw exception here
-    }
+    std::ostringstream sql;
+    sql << "select * from " << ACCOUNTS_TBL_NAME << " where id = '" << accountID << "';";
+    return getAccountBySQL(sql.str());
 }
 
-/**
- * Gets a character by database ID.
- */
-CharacterPtr DALStorage::getCharacter(int id)
+
+CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
 {
     // connect to the database (if not connected yet).
     open();
 
-    // look for the character in the list first.
-    Characters::iterator it_end = mCharacters.end(),
-        it = std::find_if(mCharacters.begin(), it_end, character_by_id(id));
-
-    if (it != it_end)
-        return *it;
-
     using namespace dal;
 
     // the account was not in the list, look for it in the database.
     try {
-        std::ostringstream sql;
-        sql << "select * from " << CHARACTERS_TBL_NAME << " where id = '"
-            << id << "';";
-        RecordSet const &charInfo = mDb->execSql(sql.str());
+        RecordSet const &charInfo = mDb->execSql(query);
 
         // if the character is not even in the database then
         // we have no choice but to return nothing.
@@ -449,14 +378,30 @@ CharacterPtr DALStorage::getCharacter(int id)
     }
 }
 
+
+/**
+ * Gets a character by database ID.
+ */
+CharacterPtr DALStorage::getCharacter(int id)
+{
+    // look for the character in the list first.
+    Characters::iterator it_end = mCharacters.end(),
+        it = std::find_if(mCharacters.begin(), it_end, character_by_id(id));
+
+    if (it != it_end)
+        return *it;
+
+    // the account was not in the list, look for it in the database.
+    std::ostringstream sql;
+    sql << "select * from " << CHARACTERS_TBL_NAME << " where id = '" << id << "';";
+    return getCharacterBySQL(sql.str());
+}
+
 /**
 * Gets a character by character name.
  */
 CharacterPtr DALStorage::getCharacter(const std::string &name)
 {
-    // connect to the database (if not connected yet).
-    open();
-    
     // look for the character in the list first.
     Characters::iterator it_end = mCharacters.end(),
     it = std::find_if(mCharacters.begin(), it_end, character_by_name(name));
@@ -464,65 +409,10 @@ CharacterPtr DALStorage::getCharacter(const std::string &name)
     if (it != it_end)
         return *it;
     
-    using namespace dal;
-    
     // the account was not in the list, look for it in the database.
-    try {
-        std::ostringstream sql;
-        sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '"
-            << name << "';";
-        RecordSet const &charInfo = mDb->execSql(sql.str());
-        
-        // if the character is not even in the database then
-        // we have no choice but to return nothing.
-        if (charInfo.isEmpty())
-        {
-            return CharacterPtr(NULL);
-        }
-        
-        // specialize the string_to functor to convert
-        // a string to an unsigned int.
-        string_to< unsigned > toUint;
-        
-        // specialize the string_to functor to convert
-        // a string to an unsigned short.
-        string_to< unsigned short > toUshort;
-        
-        CharacterData *character = new CharacterData(charInfo(0, 2),
-                                                     toUint(charInfo(0, 0)));
-        character->setAccountID(toUint(charInfo(0, 1)));
-        character->setGender(toUshort(charInfo(0, 3)));
-        character->setHairStyle(toUshort(charInfo(0, 4)));
-        character->setHairColor(toUshort(charInfo(0, 5)));
-        character->setLevel(toUshort(charInfo(0, 6)));
-        character->setMoney(toUint(charInfo(0, 7)));
-        Point pos(toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)));
-        character->setPosition(pos);
-        for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
-        {
-            character->setBaseAttribute(i, toUshort(charInfo(0, 11 + i)));
-        }
-        
-        int mapId = toUint(charInfo(0, 10));
-        if (mapId > 0)
-        {
-            character->setMapId(mapId);
-        }
-        else
-        {
-            // Set character to default map and one of the default location
-            // Default map is to be 1, as not found return value will be 0.
-            character->setMapId((int)config.getValue("defaultMap", 1));
-        }
-        
-        CharacterPtr ptr(character);
-        mCharacters.push_back(ptr);
-        return ptr;
-    }
-    catch (const DbSqlQueryExecFailure& e)
-    {
-        return CharacterPtr(NULL); // TODO: Throw exception here
-    }
+    std::ostringstream sql;
+    sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '" << name << "';";
+    return getCharacterBySQL(sql.str());
 }
 
 /**

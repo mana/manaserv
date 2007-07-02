@@ -1,4 +1,13 @@
-﻿2007-07-02  Eugenio Favalli  <elvenprogrammer@gmail.com>
+﻿2007-07-02  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+
+	* src/account-server/storage.cpp, src/account-server/storage.hpp: Moved
+	trivial accessors to header file. Removed C-like prototypes and harmful
+	exception specifications.
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
+	Factored duplicate query code. Removed C-like prototypes and harmful
+	exception specifications.
+
+2007-07-02  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp: Updated project files.
 

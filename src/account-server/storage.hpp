@@ -75,7 +75,7 @@ class Storage
          * Delete the storage.
          */
         static void
-        destroy(void);
+        destroy();
 
 
         /**
@@ -86,7 +86,7 @@ class Storage
          * database.
          */
         virtual void
-        open(void) = 0;
+        open() = 0;
 
 
         /**
@@ -105,8 +105,8 @@ class Storage
          *
          * @return true if the storage is open.
          */
-        bool
-        isOpen(void) const;
+        bool isOpen() const
+        { return mIsOpen; }
 
 
         /**
@@ -114,8 +114,8 @@ class Storage
          *
          * @return the storage name.
          */
-        const std::string&
-        getName(void) const;
+        std::string const &getName() const
+        { return mName; }
 
 
         /**
@@ -127,8 +127,8 @@ class Storage
          *
          * @param userName the user name.
          */
-        void
-        setUser(const std::string& userName);
+        void setUser(const std::string& userName)
+        { mUser = userName; }
 
 
         /**
@@ -137,8 +137,8 @@ class Storage
          * @return the user name (it may be an empty string if not set
          *         previously).
          */
-        const std::string&
-        getUser(void) const;
+        std::string const &getUser() const
+        { return mUser; }
 
 
         /**
@@ -150,8 +150,8 @@ class Storage
          *
          * @param password the user password.
          */
-        void
-        setPassword(const std::string& password);
+        void setPassword(const std::string& password)
+        { mPassword = password; }
 
 
         /**
@@ -160,8 +160,8 @@ class Storage
          * @return the user password (it may be an empty string if not set
          *         previously).
          */
-        const std::string&
-        getPassword(void) const;
+        std::string const &getPassword() const
+        { return mPassword; }
 
 
         /**
@@ -324,16 +324,13 @@ class Storage
         /**
          * Default constructor.
          */
-        Storage(void)
-            throw();
+        Storage() {}
 
 
         /**
          * Destructor.
          */
-        virtual
-        ~Storage(void)
-            throw();
+        virtual ~Storage() {}
 
 
         /**

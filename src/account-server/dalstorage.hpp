@@ -47,15 +47,13 @@ class DALStorage: public Storage
         /**
          * Connect to the database and initialize it if necessary.
          */
-        void
-        open(void);
+        void open();
 
 
         /**
          * Disconnect from the database.
          */
-        void
-        close(void);
+        void close();
 
 
         /**
@@ -209,14 +207,13 @@ class DALStorage: public Storage
         /**
          * Constructor.
          */
-        DALStorage(void);
+        DALStorage();
 
 
         /**
          * Destructor.
          */
-        ~DALStorage(void)
-            throw();
+        ~DALStorage();
 
 
         /**
@@ -245,7 +242,26 @@ class DALStorage: public Storage
                     const std::string& sql);
 
 
-    private:
+        /**
+         * Gets an account by using a SQL query string.
+         *
+         * @param query the query for the account
+         *
+         * @return the account found by the query
+         */
+        AccountPtr getAccountBySQL(std::string const &query);
+
+
+        /**
+         * Gets a character by character name.
+         *
+         * @param query the query for the character
+         *
+         * @return the character found by the query
+         */
+        CharacterPtr getCharacterBySQL(const std::string &query);
+
+
         std::auto_ptr<dal::DataProvider> mDb; /**< the data provider */
 };
 
