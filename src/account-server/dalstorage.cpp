@@ -368,6 +368,41 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
             character->setMapId((int)config.getValue("defaultMap", 1));
         }
 
+        std::ostringstream sql;
+        sql << " select * from " << INVENTORIES_TBL_NAME << " where owner_id = '"
+            << character->getDatabaseID() << "' order by slot asc;";
+
+        RecordSet const &itemInfo = mDb->execSql(sql.str());
+        if (!itemInfo.isEmpty())
+        {
+            Possessions &poss = character->getPossessions();
+            int size = itemInfo.rows(), nextSlot = 0;
+
+            for (int k = 0; k < size; ++k)
+            {
+                int slot = toUint(itemInfo(k, 2));
+                if (slot < EQUIPMENT_SLOTS)
+                {
+                    poss.equipment[slot] = toUint(itemInfo(k, 3));
+                }
+                else
+                {
+                    slot -= 32;
+                    InventoryItem item;
+                    if (slot != nextSlot)
+                    {
+                        item.itemId = 0;
+                        item.amount = slot - nextSlot;
+                        poss.inventory.push_back(item);
+                    }
+                    item.itemId = toUint(itemInfo(k, 3));
+                    item.amount = toUint(itemInfo(k, 4));
+                    poss.inventory.push_back(item);
+                    nextSlot = slot + 1;
+                }
+            }
+        }
+
         CharacterPtr ptr(character);
         mCharacters.push_back(ptr);
         return ptr;
@@ -521,11 +556,11 @@ DALStorage::updateCharacter(CharacterPtr character)
             << "set "
             << "gender = '"     << character->getGender()
                                << "', "
-            << "hair_style = '" << (int)character->getHairStyle()
+            << "hair_style = '" << character->getHairStyle()
                                << "', "
-            << "hair_color = '" << (int)character->getHairColor()
+            << "hair_color = '" << character->getHairColor()
                                << "', "
-            << "level = '"      << (int)character->getLevel()
+            << "level = '"      << character->getLevel()
                                << "', "
             << "money = '"      << character->getMoney()
                                << "', "
@@ -590,25 +625,22 @@ DALStorage::updateCharacter(CharacterPtr character)
     // Insert the new inventory data
     try
     {
-        std::ostringstream sqlInsertCharacterInventory;
+        std::ostringstream sql;
 
-        sqlInsertCharacterInventory
-            << "insert into " << INVENTORIES_TBL_NAME
-            << " (owner_id, slot, class_id, amount) "
-            << "values ";
+        sql << "insert into " << INVENTORIES_TBL_NAME
+            << " (owner_id, slot, class_id, amount) values ("
+            << character->getDatabaseID() << ", ";
+        std::string base = sql.str();
 
-        int id = character->getDatabaseID();
-        bool first = true;
         Possessions const &poss = character->getPossessions();
 
         for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
         {
             int v = poss.equipment[j];
             if (!v) continue;
-            if (first) first = false;
-            else sqlInsertCharacterInventory << ", ";
-            sqlInsertCharacterInventory
-                << '(' << id << ", " << j << ", " << v << ", " << 1 << ')';
+            sql.str(std::string());
+            sql << base << j << ", " << v << ", 1);";
+            mDb->execSql(sql.str());
         }
 
         int slot = 32;
@@ -621,17 +653,12 @@ DALStorage::updateCharacter(CharacterPtr character)
                 slot += j->amount;
                 continue;
             }
-            if (first) first = false;
-            else sqlInsertCharacterInventory << ", ";
-            sqlInsertCharacterInventory
-                << '(' << id << ", " << slot << ", " << v << ", " << unsigned(j->amount) << ')';
+            sql.str(std::string());
+            sql << base << slot << ", " << v << ", " << unsigned(j->amount) << ");";
+            mDb->execSql(sql.str());
             ++slot;
         }
 
-        sqlInsertCharacterInventory << ';';
-
-        if (!first)
-            mDb->execSql(sqlInsertCharacterInventory.str());
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {

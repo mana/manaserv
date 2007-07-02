@@ -1,4 +1,4 @@
-﻿2007-07-02  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+﻿2007-07-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/account-server/storage.cpp, src/account-server/storage.hpp: Moved
 	trivial accessors to header file. Removed C-like prototypes and harmful
@@ -6,12 +6,14 @@
 	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
 	Factored duplicate query code. Removed C-like prototypes and harmful
 	exception specifications.
+	* src/account-server/dalstorage.cpp: Added support for loading
+	inventory from database. Fixed mysqlism for multi-insertion.
 
 2007-07-02  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp: Updated project files.
 
-﻿2007-07-01  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+﻿2007-07-01  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/abstractcharacterdata.cpp, src/abstractcharacterdata.hpp,
 	src/serialize/characterdata.hpp, src/account-server/serverhandler.cpp,
@@ -67,7 +69,7 @@
 	* src/game-server/spawnarea.cpp: Monsters are no longer spawned on 
 	unwalkable tiles.
 
-2007-06-28  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+2007-06-28  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/game-server/spawnarea.cpp: Delegated creature insertion to the
 	State class so that it does not disturb object updating.
@@ -81,7 +83,7 @@
 	* accountserver.cbp, gameserver.cbp: Fixed include directories and
 	updated project files.
 
-2007-06-16  Guillaume Melquiond <guillaume.melquiong@gmail.com>
+2007-06-16  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/utils/mathutils.cpp: Fixed miscompilation of rsqrt due to type
 	aliasing and sped up sqrt.
