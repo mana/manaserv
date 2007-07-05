@@ -1,4 +1,10 @@
-﻿2007-07-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+﻿﻿2007-07-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/account-server/dalstorage.cpp: Added error messages for failed
+	SQL requests when retrieving character. Added check for failed
+	character when retrieving account. Added check for corrupted inventory.
+
+2007-07-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/account-server/storage.cpp, src/account-server/storage.hpp: Moved
 	trivial accessors to header file. Removed C-like prototypes and harmful

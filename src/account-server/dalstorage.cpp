@@ -261,7 +261,15 @@ AccountPtr DALStorage::getAccountBySQL(std::string const &query)
 
             for (int k = 0; k < size; ++k)
             {
-                characters.push_back(getCharacter(characterIDs[k]));
+                CharacterPtr ptr = getCharacter(characterIDs[k]);
+                if (ptr.get())
+                {
+	                characters.push_back(getCharacter(characterIDs[k]));
+                }
+                else
+                {
+                	LOG_ERROR("Failed to get character " << characterIDs[k] << " for account " << id << '.');
+                }
             }
 
             account->setCharacters(characters);
@@ -320,9 +328,14 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
     // connect to the database (if not connected yet).
     open();
 
+    CharacterData *character; 
+
+    // specialize the string_to functor to convert
+    // a string to an unsigned int.
+    string_to< unsigned > toUint;
+
     using namespace dal;
 
-    // the account was not in the list, look for it in the database.
     try {
         RecordSet const &charInfo = mDb->execSql(query);
 
@@ -334,15 +347,10 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
         }
 
         // specialize the string_to functor to convert
-        // a string to an unsigned int.
-        string_to< unsigned > toUint;
-
-        // specialize the string_to functor to convert
         // a string to an unsigned short.
         string_to< unsigned short > toUshort;
 
-        CharacterData *character = new CharacterData(charInfo(0, 2),
-                                                      toUint(charInfo(0, 0)));
+        character = new CharacterData(charInfo(0, 2), toUint(charInfo(0, 0)));
         character->setAccountID(toUint(charInfo(0, 1)));
         character->setGender(toUshort(charInfo(0, 3)));
         character->setHairStyle(toUshort(charInfo(0, 4)));
@@ -367,7 +375,15 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
             // Default map is to be 1, as not found return value will be 0.
             character->setMapId((int)config.getValue("defaultMap", 1));
         }
+    }
+    catch (const DbSqlQueryExecFailure& e)
+    {
+        LOG_ERROR("(DALStorage::getCharacter #1) SQL query failure: " << e.what());
+        return CharacterPtr(NULL);
+    }
 
+    try
+    {
         std::ostringstream sql;
         sql << " select * from " << INVENTORIES_TBL_NAME << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot asc;";
@@ -376,11 +392,11 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
         if (!itemInfo.isEmpty())
         {
             Possessions &poss = character->getPossessions();
-            int size = itemInfo.rows(), nextSlot = 0;
+            unsigned nextSlot = 0;
 
-            for (int k = 0; k < size; ++k)
+            for (int k = 0, size = itemInfo.rows(); k < size; ++k)
             {
-                int slot = toUint(itemInfo(k, 2));
+                unsigned slot = toUint(itemInfo(k, 2));
                 if (slot < EQUIPMENT_SLOTS)
                 {
                     poss.equipment[slot] = toUint(itemInfo(k, 3));
@@ -388,6 +404,11 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
                 else
                 {
                     slot -= 32;
+                    if (slot >= INVENTORY_SLOTS || slot < nextSlot)
+                    {
+                        LOG_ERROR("(DALStorage::getCharacter #2) Corrupted inventory.");
+                        break;
+                    }
                     InventoryItem item;
                     if (slot != nextSlot)
                     {
@@ -402,15 +423,15 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
                 }
             }
         }
-
-        CharacterPtr ptr(character);
-        mCharacters.push_back(ptr);
-        return ptr;
     }
     catch (const DbSqlQueryExecFailure& e)
     {
-        return CharacterPtr(NULL); // TODO: Throw exception here
+        LOG_ERROR("(DALStorage::getCharacter #2) SQL query failure: " << e.what());
     }
+
+    CharacterPtr ptr(character);
+    mCharacters.push_back(ptr);
+    return ptr;
 }
 
 
