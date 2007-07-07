@@ -33,7 +33,7 @@ void WarpAction::process(Object *obj)
     if (obj->getType() == OBJECT_CHARACTER)
     {
         DelayedEvent e = { EVENT_WARP, mX, mY, mMap };
-        gameState->enqueueEvent(obj, e);
+        GameState::enqueueEvent(obj, e);
     }
 }
 

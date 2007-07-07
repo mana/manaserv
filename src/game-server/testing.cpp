@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include "defines.h"
+#include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
@@ -14,21 +15,21 @@
 
 static void dropItem(MapComposite *map, int x, int y, int type)
 {
-    ItemClass *ic = itemManager->getItem(type);
+    ItemClass *ic = ItemManager::getItem(type);
     assert(ic);
     Item *i = new Item(ic, 1);
     i->setMap(map);
     Point pos(x, y);
     i->setPosition(pos);
-    gameState->insert(i);
+    GameState::insert(i);
 }
 
 void testingMap(MapComposite *map)
 {
     static Rectangle rectA = { 56 * 32, 12 * 32, 5 * 32, 32 };
-    static WarpAction warpA(mapManager->getMap(3), 44 * 32 + 16, 80 * 32 + 16);
+    static WarpAction warpA(MapManager::getMap(3), 44 * 32 + 16, 80 * 32 + 16);
     static Rectangle rectB = { 42 * 32, 88 * 32, 5 * 32, 32 };
-    static WarpAction warpB(mapManager->getMap(1), 58 * 32 + 16, 17 * 32 + 16);
+    static WarpAction warpB(MapManager::getMap(1), 58 * 32 + 16, 17 * 32 + 16);
 
     switch (map->getID())
     {
@@ -36,10 +37,10 @@ void testingMap(MapComposite *map)
         {
             // Create maggot spawn area
             Rectangle maggotSpawnRect = { 720, 900, 320, 320 };
-            gameState->insert(new SpawnArea(map, maggotSpawnRect));
+            GameState::insert(new SpawnArea(map, maggotSpawnRect));
 
             // Portal to map 3
-            gameState->insert(new TriggerArea(map, rectA, &warpA));
+            GameState::insert(new TriggerArea(map, rectA, &warpA));
 
             // Drop some items
             dropItem(map, 58 * 32 + 16, 20 * 32 + 16, 508);
@@ -49,7 +50,7 @@ void testingMap(MapComposite *map)
         case 3:
         {
             // Portal to map 1
-            gameState->insert(new TriggerArea(map, rectB, &warpB));
+            GameState::insert(new TriggerArea(map, rectB, &warpB));
         } break;
     }
 }

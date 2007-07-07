@@ -79,7 +79,7 @@ SpawnArea::update()
                 being->setMap(map);
                 being->setPosition(position);
                 DelayedEvent e = { EVENT_INSERT };
-                gameState->enqueueEvent(being, e);
+                GameState::enqueueEvent(being, e);
 
                 mNumBeings++;
             }

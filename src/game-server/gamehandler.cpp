@@ -65,7 +65,7 @@ void GameHandler::computerDisconnected(NetComputer *comp)
     }
     else if (Character *ch = computer.character)
     {
-        gameState->remove(ch);
+        GameState::remove(ch);
         delete ch;
     }
     delete &computer;
@@ -138,7 +138,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_SAY:
         {
             std::string say = message.readString();
-            gameState->sayAround(computer.character, say);
+            GameState::sayAround(computer.character, say);
         } break;
 
         case PGMSG_PICKUP:
@@ -162,7 +162,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                         ItemClass *ic = item->getItemClass();
                         Inventory(computer.character)
                             .insert(ic->getDatabaseID(), item->getAmount());
-                        gameState->remove(item);
+                        GameState::remove(item);
                         break;
                     }
                 }
@@ -174,13 +174,13 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             int slot = message.readByte();
             int amount = message.readByte();
             Inventory inv(computer.character);
-            if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
+            if (ItemClass *ic = ItemManager::getItem(inv.getItem(slot)))
             {
                 int nb = inv.removeFromSlot(slot, amount);
                 Item *item = new Item(ic, amount - nb);
                 item->setMap(computer.character->getMap());
                 item->setPosition(computer.character->getPosition());
-                gameState->insert(item);
+                GameState::insert(item);
             }
         } break;
 
@@ -248,7 +248,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                                    magic_token);
             }
             // TODO: implement a delayed remove
-            gameState->remove(computer.character);
+            GameState::remove(computer.character);
 
             accountHandler->sendCharacterData(computer.character);
 
@@ -328,7 +328,7 @@ GameHandler::tokenMatched(GameClient* computer, Character* character)
     result.writeByte(ERRMSG_OK);
     computer->send(result);
 
-    gameState->insert(character);
+    GameState::insert(character);
 
     Inventory(character).sendFull();
 }

@@ -31,7 +31,17 @@
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
-MapManager::MapManager(std::string const &mapReferenceFile)
+/**
+ * List of all the game maps, be they present or not on this server.
+ */
+static MapManager::Maps maps;
+
+MapManager::Maps const &MapManager::getMaps()
+{
+    return maps;
+}
+
+void MapManager::initialize(std::string const &mapReferenceFile)
 {
     ResourceManager *resman = ResourceManager::getInstance();
     int size;
@@ -80,12 +90,13 @@ MapManager::MapManager(std::string const &mapReferenceFile)
     xmlFreeDoc(doc);
 }
 
-MapManager::~MapManager()
+void MapManager::deinitialize()
 {
     for (Maps::iterator i = maps.begin(), i_end = maps.end(); i != i_end; ++i)
     {
         delete i->second;
     }
+    maps.clear();
 }
 
 MapComposite *MapManager::getMap(int mapId)

@@ -29,43 +29,34 @@
 
 class MapComposite;
 
-/**
- * MapManager loads/unloads maps
- */
-class MapManager
+namespace MapManager
 {
-    public:
-        typedef std::map< int, MapComposite * > Maps;
+    typedef std::map< int, MapComposite * > Maps;
 
-        /**
-         * Constructor (loads map reference file).
-         */
-        MapManager(std::string const &);
+    /**
+     * Loads map reference file and prepares maps.
+     */
+    void initialize(std::string const &);
 
-        /**
-         * Returns the requested map.
-         */
-        MapComposite *getMap(int);
+    /**
+     * Destroy loaded maps.
+     */
+    void deinitialize();
 
-        /**
-         * Returns all the maps.
-         */
-        Maps const &getMaps() const { return maps; }
+    /**
+     * Returns the requested map.
+     */
+    MapComposite *getMap(int);
 
-        /**
-         * Sets the activity status of the map.
-         */
-        void raiseActive(int);
+    /**
+     * Returns all the maps.
+     */
+    Maps const &getMaps();
 
-        /**
-         * Destructor.
-         */
-        ~MapManager();
-
-    private:
-        Maps maps;
-};
-
-extern MapManager *mapManager;
+    /**
+     * Sets the activity status of the map.
+     */
+    void raiseActive(int);
+}
 
 #endif

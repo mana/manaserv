@@ -84,20 +84,11 @@ Configuration config;           /**< XML config reader */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
-/** Item manager */
-ItemManager *itemManager;
-
-/** Map manager */
-MapManager *mapManager;
-
 /** Core game message handler */
 GameHandler *gameHandler;
 
 /** Account server message handler */
 AccountConnection *accountHandler;
-
-/** Global game state */
-State *gameState;
 
 /** Callback used when SIGQUIT signal is received. */
 void closeGracefully(int dummy)
@@ -171,9 +162,9 @@ void initialize()
     // Initialize the slang's and double quotes filter.
     stringFilter = new StringFilter(&config);
     // Initialize the map manager
-    mapManager = new MapManager(DEFAULT_MAPSDB_FILE);
+    MapManager::initialize(DEFAULT_MAPSDB_FILE);
     // Initialize the item manager
-    itemManager = new ItemManager(DEFAULT_ITEMSDB_FILE);
+    ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -243,8 +234,8 @@ void deinitialize()
 
     // Destroy Managers
     delete stringFilter;
-    delete itemManager;
-    delete mapManager;
+    ItemManager::deinitialize();
+    MapManager::deinitialize();
 
     PHYSFS_deinit();
 }
@@ -338,9 +329,6 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    // Create state machine
-    gameState = new State;
-
     // Initialize world timer
     worldTimer.start();
 
@@ -365,7 +353,7 @@ int main(int argc, char *argv[])
             accountHandler->process();
             gameHandler->process();
             // Update all active objects/beings
-            gameState->update();
+            GameState::update();
             // Send potentially urgent outgoing messages
             gameHandler->flush();
         }
@@ -375,6 +363,5 @@ int main(int argc, char *argv[])
     LOG_INFO("Received: Quit signal, closing down...");
     gameHandler->stopListen();
     accountHandler->stop();
-    delete gameState;
     deinitialize();
 }

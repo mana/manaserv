@@ -24,13 +24,11 @@
 #ifndef _TMW_SERVER_STATE_
 #define _TMW_SERVER_STATE_
 
-#include <map>
 #include <string>
 
 class MapComposite;
 class Thing;
 class Object;
-class Character;
 
 enum
 {
@@ -45,57 +43,34 @@ struct DelayedEvent
     MapComposite *map;
 };
 
-/**
- * State class contains all information/procedures associated with the game
- * world's state.
- */
-class State
+namespace GameState
 {
-        typedef std::map< Object *, DelayedEvent > DelayedEvents;
+    /**
+     * Updates game state (contains core server logic).
+     */
+    void update();
 
-        /**
-         * List of delayed events.
-         */
-        DelayedEvents delayedEvents;
+    /**
+     * Inserts an object in the game world.
+     * No update may be in progress.
+     */
+    void insert(Thing *);
 
-        /**
-         * Updates object states on the map.
-         */
-        void updateMap(MapComposite *);
+    /**
+     * Removes an object from the game world.
+     * No update may be in progress.
+     */
+    void remove(Thing *);
 
-        /**
-         * Informs a player of what happened around the character.
-         */
-        void informPlayer(MapComposite *, Character *);
+    /**
+     * Enqueues an event. It will be executed at end of update.
+     */
+    void enqueueEvent(Object *, DelayedEvent const &);
 
-     public:
-
-        /**
-         * Updates game state (contains core server logic).
-         */
-        void update();
-
-        /**
-         * Inserts an object on the map.
-         */
-        void insert(Thing *);
-
-        /**
-         * Removes an object from the map.
-         */
-        void remove(Thing *);
-
-        /**
-         * Enqueues an event. It will be executed at end of update.
-         */
-        void enqueueEvent(Object *, DelayedEvent const &);
-
-        /**
-         * Says something around an object.
-         */
-        void sayAround(Object *, std::string text);
-};
-
-extern State *gameState;
+    /**
+     * Says something around an object.
+     */
+    void sayAround(Object *, std::string const &text);
+}
 
 #endif

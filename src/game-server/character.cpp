@@ -120,5 +120,5 @@ int Character::getMapId() const
 
 void Character::setMapId(int id)
 {
-    setMap(mapManager->getMap(id));
+    setMap(MapManager::getMap(id));
 }

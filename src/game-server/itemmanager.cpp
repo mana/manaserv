@@ -21,14 +21,19 @@
  *  $Id$
  */
 
-#include "game-server/itemmanager.hpp"
+#include <map>
 
 #include "defines.h"
 #include "resourcemanager.h"
+#include "game-server/item.hpp"
+#include "game-server/itemmanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
-ItemManager::ItemManager(std::string const &itemReferenceFile)
+typedef std::map< int, ItemClass * > ItemClasses;
+static ItemClasses itemClasses; /**< Item reference */
+
+void ItemManager::initialize(std::string const &itemReferenceFile)
 {
     ResourceManager *resman = ResourceManager::getInstance();
     int size;
@@ -106,7 +111,7 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
         item->setMaxPerSlot(maxPerSlot);
         item->setScriptName(scriptName);
         item->setModifiers(modifiers);
-        mItemReference[id] = item;
+        itemClasses[id] = item;
         ++nbItems;
 
         if (maxPerSlot == 0)
@@ -131,8 +136,17 @@ ItemManager::ItemManager(std::string const &itemReferenceFile)
     xmlFreeDoc(doc);
 }
 
-ItemClass *ItemManager::getItem(int itemId) const
+void ItemManager::deinitialize()
 {
-    std::map< int, ItemClass * >::const_iterator i = mItemReference.find(itemId);
-    return i != mItemReference.end() ? i->second : NULL;
+    for (ItemClasses::iterator i = itemClasses.begin(), i_end = itemClasses.end(); i != i_end; ++i)
+    {
+        delete i->second;
+    }
+    itemClasses.clear();
+}
+
+ItemClass *ItemManager::getItem(int itemId)
+{
+    ItemClasses::const_iterator i = itemClasses.find(itemId);
+    return i != itemClasses.end() ? i->second : NULL;
 }

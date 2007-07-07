@@ -24,31 +24,26 @@
 #ifndef _TMW_ITEMMANAGER_H
 #define _TMW_ITEMMANAGER_H
 
-#include <map>
+#include <string>
 
-#include "game-server/item.hpp"
+class ItemClass;
 
-/**
- * The Item Manager loads the item reference database
- * and also offers an API to items information, and more.
- */
-class ItemManager
+namespace ItemManager
 {
-    public:
-        /**
-         * Constructor (loads item reference file)
-         */
-        ItemManager(std::string const &itemReferenceFile);
+    /**
+     * Loads item reference file.
+     */
+    void initialize(std::string const &);
 
-        /**
-         * Gives an Item having the demanded information.
-         */
-        ItemClass *getItem(int itemId) const;
+    /**
+     * Destroy item classes.
+     */
+    void deinitialize();
 
-    private:
-        std::map< int, ItemClass * > mItemReference; /**< Item reference */
-};
-
-extern ItemManager *itemManager;
+    /**
+     * Gets the ItemClass having the given ID.
+     */
+    ItemClass *getItem(int itemId);
+}
 
 #endif

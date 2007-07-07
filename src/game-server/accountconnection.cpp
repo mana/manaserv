@@ -48,7 +48,7 @@ bool AccountConnection::start()
     MessageOut msg(GAMSG_REGISTER);
     msg.writeString(config.getValue("gameServerAddress", "localhost"));
     msg.writeShort(int(config.getValue("gameServerPort", DEFAULT_SERVER_PORT + 3)));
-    MapManager::Maps const &m = mapManager->getMaps();
+    MapManager::Maps const &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end(); i != i_end; ++i)
     {
         msg.writeShort(i->first);
@@ -81,7 +81,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_ACTIVE_MAP:
         {
             int id = msg.readShort();
-            mapManager->raiseActive(id);
+            MapManager::raiseActive(id);
         } break;
 
         case AGMSG_REDIRECT_RESPONSE:

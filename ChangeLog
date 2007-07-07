@@ -14,6 +14,13 @@
 	src/game-server/trigger.cpp, src/game-server/trigger.hpp,
 	src/gamehandler.cpp: Simplified code by using map pointers only,
 	instead of using both map IDs and map pointers.
+	* src/game-server/main-game.cpp, src/game-server/inventory.cpp,
+	src/game-server/itemmanager.cpp, src/game-server/itemmanager.hpp,
+	src/game-server/mapmanager.cpp, src/game-server/mapmanager.hpp,
+	src/game-server/state.cpp, src/game-server/state.hpp,
+	src/game-server/accountconnection.cpp, src/game-server/gamehandler.cpp:
+	Changed singleton managers from classes to namespace interfaces.
+	Removed global pointers. Moved private members to implementation files.
 
 2007-07-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

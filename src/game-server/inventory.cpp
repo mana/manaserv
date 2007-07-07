@@ -27,6 +27,7 @@
 #include "defines.h"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
+#include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
 #include "net/messageout.hpp"
 
@@ -181,7 +182,7 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
 int Inventory::insert(int itemId, int amount)
 {
     int slot = 0;
-    int maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
+    int maxPerSlot = ItemManager::getItem(itemId)->getMaxPerSlot();
 
     for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
          i_end = poss.inventory.end(); i != i_end; ++i)
@@ -323,7 +324,7 @@ bool Inventory::equip(int slot)
 
     int availableSlots = 0, firstSlot = 0, secondSlot = 0;
 
-    switch (itemManager->getItem(itemId)->getType())
+    switch (ItemManager::getItem(itemId)->getType())
     {
         case ITEM_EQUIPMENT_TWO_HANDS_WEAPON:
         {
@@ -405,7 +406,7 @@ bool Inventory::equip(int slot)
     {
     case 2:
         if (id && !poss.equipment[secondSlot] &&
-            itemManager->getItem(id)->getType() !=
+            ItemManager::getItem(id)->getType() !=
                 ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
         {
             // The first slot is full and the second slot is empty.

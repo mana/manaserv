@@ -35,7 +35,17 @@
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
-void State::updateMap(MapComposite *map)
+typedef std::map< Object *, DelayedEvent > DelayedEvents;
+
+/**
+ * List of delayed events.
+ */
+static DelayedEvents delayedEvents;
+
+/**
+ * Updates object states on the map.
+ */
+static void updateMap(MapComposite *map)
 {
     // 1. update object status.
     std::vector< Thing * > const &things = map->getEverything();
@@ -67,7 +77,7 @@ void State::updateMap(MapComposite *map)
         if ((*i)->getUpdateFlags() & UPDATEFLAG_REMOVE)
         {
             DelayedEvent e = { EVENT_REMOVE};
-            enqueueEvent((*i), e);
+            GameState::enqueueEvent((*i), e);
         }
     }
 
@@ -75,7 +85,10 @@ void State::updateMap(MapComposite *map)
     map->update();
 }
 
-void State::informPlayer(MapComposite *map, Character *p)
+/**
+ * Informs a player of what happened around the character.
+ */
+static void informPlayer(MapComposite *map, Character *p)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
@@ -273,14 +286,14 @@ void State::informPlayer(MapComposite *map, Character *p)
 static bool dbgLockObjects;
 #endif
 
-void State::update()
+void GameState::update()
 {
 #   ifndef NDEBUG
     dbgLockObjects = true;
 #   endif
 
     // Update game state (update AI, etc.)
-    MapManager::Maps const &maps = mapManager->getMaps();
+    MapManager::Maps const &maps = MapManager::getMaps();
     for (MapManager::Maps::const_iterator m = maps.begin(), m_end = maps.end(); m != m_end; ++m)
     {
         MapComposite *map = m->second;
@@ -365,7 +378,7 @@ void State::update()
     delayedEvents.clear();
 }
 
-void State::insert(Thing *ptr)
+void GameState::insert(Thing *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
@@ -392,7 +405,7 @@ void State::insert(Thing *ptr)
     }
 }
 
-void State::remove(Thing *ptr)
+void GameState::remove(Thing *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
@@ -433,7 +446,7 @@ void State::remove(Thing *ptr)
     map->remove(ptr);
 }
 
-void State::enqueueEvent(Object *ptr, DelayedEvent const &e)
+void GameState::enqueueEvent(Object *ptr, DelayedEvent const &e)
 {
     std::pair< DelayedEvents::iterator, bool > p =
         delayedEvents.insert(std::make_pair(ptr, e));
@@ -444,7 +457,7 @@ void State::enqueueEvent(Object *ptr, DelayedEvent const &e)
     }
 }
 
-void State::sayAround(Object *obj, std::string text)
+void GameState::sayAround(Object *obj, std::string const &text)
 {
     MessageOut msg(GPMSG_SAY);
     msg.writeShort(!obj->canMove() ? 65535 :
