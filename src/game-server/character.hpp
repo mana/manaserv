@@ -26,8 +26,8 @@
 #include <string>
 #include <vector>
 
-#include "game-server/being.hpp"
 #include "common/inventorydata.hpp"
+#include "game-server/being.hpp"
 
 class GameClient;
 class MessageIn;
@@ -154,21 +154,15 @@ class Character : public Being
 
         /**
          * Gets the value of an attribute of the character.
-         * Inherited from Being, explicitly defined because
-         * of double inheritance.
          */
-        unsigned short
-        getBaseAttribute(int attributeNumber) const
-        { return Being::getAttribute(attributeNumber); }
+        int getBaseAttribute(int attributeNumber) const
+        { return getAttribute(attributeNumber); }
 
         /**
          * Sets the value of an attribute of the character.
-         * Inherited from Being, explicitly defined because
-         * of double inheritance.
          */
-        void
-        setBaseAttribute(int attributeNumber, int value)
-        { Being::setAttribute(attributeNumber, value); }
+        void setBaseAttribute(int attributeNumber, int value)
+        { setAttribute(attributeNumber, value); }
 
         /**
          * Creates a message that informs the client about the attribute
@@ -178,70 +172,16 @@ class Character : public Being
         writeAttributeUpdateMessage(MessageOut &msg);
 
         /**
-         * Gets the Id of the map that the character is on.
-         * Inherited from Thing through Being, explicitly defined because
-         * of double inheritance.
+         * Gets the ID of the map that the character is on.
+         * For serialization purpose only.
          */
-        int
-        getMapId() const
-        { return Being::getMapId(); }
+        int getMapId() const;
 
         /**
-         * Sets the Id of the map that the character is on.
-         * Inherited from Thing through Being, explicitly defined because
-         * of double inheritance.
+         * Sets the ID of the map that the character is on.
+         * For serialization purpose only.
          */
-        void
-        setMapId(int mapId)
-        { Being::setMapId(mapId); }
-
-        /**
-         * Gets the position of the character on the map.
-         * Inherited from Object through Being, explicitly defined because
-         * of double inheritance.
-         */
-        Point const &
-        getPosition() const
-        { return Being::getPosition(); }
-
-        /**
-         * Sets the position of the character on the map.
-         * Inherited from Object through Being, explicitly defined because
-         * of double inheritance.
-         */
-        void
-        setPosition(const Point &p)
-        { Being::setPosition(p); }
-
-        /**
-         * The access functions for inventory
-         *
-         * Currently not implemented
-         */
-
-        /**
-         * Returns the number of inventory items.
-         * (items don't have to be unique)
-         * TODO: maybe renaming to NumberOfFilledSlots would be better.
-         */
-        int
-        getNumberOfInventoryItems() const;
-
-        /**
-         * Returns a reference to the item in inventory at slot.
-         * TODO: Keep this consistent with whatever is chosen for
-         *       getNumberOfInventoryItems.
-         */
-        InventoryItem const &
-        getInventoryItem(unsigned short slot) const;
-
-        /** Clears the inventory, in preperation for an update. */
-        void
-        clearInventory();
-
-        /** Adds an inventory item to the inventory. */
-        void
-        addItemToInventory(const InventoryItem& item);
+        void setMapId(int);
 
     protected:
         /**

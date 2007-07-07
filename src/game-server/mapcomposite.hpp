@@ -24,6 +24,7 @@
 #ifndef _TMW_SERVER_MAPCOMPOSITE_
 #define _TMW_SERVER_MAPCOMPOSITE_
 
+#include <string>
 #include <vector>
 
 class Map;
@@ -35,35 +36,13 @@ class Point;
 class Rectangle;
 class Thing;
 
+struct MapContent;
+struct MapZone;
+
 /**
  * Ordered sets of zones of a map.
  */
 typedef std::vector< unsigned > MapRegion;
-
-/**
- * Part of the map.
- */
-struct MapZone
-{
-    unsigned short nbCharacters, nbMovingObjects;
-    /**
-     * Objects present in this zone.
-     * Characters are stored first, then the remaining MovingObjects, then the
-     * remaining Objects.
-     */
-    std::vector< Object * > objects;
-
-    /**
-     * Destinations of the objects that left this zone.
-     * This is necessary in order to have an accurate iterator around moving
-     * objects.
-     */
-    MapRegion destinations;
-
-    MapZone(): nbCharacters(0), nbMovingObjects(0) {}
-    void insert(Object *);
-    void remove(Object *);
-};
 
 /**
  * Iterates through the zones of a region of the map.
@@ -73,9 +52,9 @@ struct ZoneIterator
     MapRegion region; /**< Zones to visit. Empty means the entire map. */
     unsigned pos;
     MapZone *current;
-    MapComposite const *map;
+    MapContent const *map;
 
-    ZoneIterator(MapRegion const &, MapComposite const *);
+    ZoneIterator(MapRegion const &, MapContent const *);
     void operator++();
     MapZone *operator*() const { return current; }
     operator bool() const { return current; }
@@ -142,24 +121,6 @@ struct ObjectIterator
 };
 
 /**
- * Pool of public IDs for MovingObjects on a map. By maintaining public ID
- * availability using bits, it can locate an available public ID fast while
- * using minimal memory access.
- */
-struct ObjectBucket
-{
-    static int const int_bitsize = sizeof(unsigned) * 8;
-    unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
-    short free;                         /**< Number of empty places. */
-    short next_object;                  /**< Next object to look at. */
-    MovingObject *objects[256];
-
-    ObjectBucket();
-    int allocate();
-    void deallocate(int);
-};
-
-/**
  * Combined map/entity structure.
  */
 class MapComposite
@@ -168,15 +129,43 @@ class MapComposite
         /**
          * Constructor.
          */
-        MapComposite(Map *);
+        MapComposite(int id, std::string const &name)
+            : mMap(NULL), mContent(NULL), mName(name), mID(id) {}
 
         /**
          * Destructor.
          */
         ~MapComposite();
 
+        /**
+         * Sets the underlying pathfinding map.
+         * Can be done only once.
+         */
+        void setMap(Map *);
+
+        /**
+         * Gets the underlying pathfinding map.
+         */
         Map *getMap() const
-        { return map; }
+        { return mMap; }
+
+        /**
+         * Returns whether the map is active on this server or not.
+         */
+        bool isActive() const
+        { return mMap; }
+
+        /**
+         * Gets the game ID of this map.
+         */
+        int getID() const
+        { return mID; }
+
+        /**
+         * Gets the name of this map.
+         */
+        std::string const &getName() const
+        { return mName; }
 
         /**
          * Inserts an object on the map. Sets its public ID if relevant.
@@ -202,7 +191,7 @@ class MapComposite
          * Gets an iterator on the objects of the whole map.
          */
         ZoneIterator getWholeMapIterator() const
-        { return ZoneIterator(MapRegion(), this); }
+        { return ZoneIterator(MapRegion(), mContent); }
 
         /**
          * Gets an iterator on the objects inside a given rectangle.
@@ -228,55 +217,15 @@ class MapComposite
         /**
          * Gets everything related to the map.
          */
-        std::vector< Thing * > const &getEverything() const
-        { return things; }
+        std::vector< Thing * > const &getEverything() const;
 
     private:
         MapComposite(MapComposite const &);
 
-        /**
-         * Allocates a unique ID for a moving object on this map.
-         */
-        bool allocate(MovingObject *);
-
-        /**
-         * Deallocates an ID.
-         */
-        void deallocate(MovingObject *);
-
-        /**
-         * Fills a region of zones within the range of a point.
-         */
-        void fillRegion(MapRegion &, Point const &, int) const;
-
-        /**
-         * Fills a region of zones inside a rectangle.
-         */
-        void fillRegion(MapRegion &, Rectangle const &) const;
-
-        Map *map; /**< Actual map. */
-
-        /**
-         * Things (items, characters, monsters, etc) located on the map.
-         */
-        std::vector< Thing * > things;
-
-        /**
-         * Buckets of MovingObjects located on the map, referenced by ID.
-         */
-        ObjectBucket *buckets[256];
-
-        int last_bucket; /**< Last bucket acted upon. */
-
-        /**
-         * Partition of the Objects, depending on their position on the map.
-         */
-        MapZone *zones;
-
-        unsigned short mapWidth;  /**< Width with respect to zones. */
-        unsigned short mapHeight; /**< Height with respect to zones. */
-
-        friend class ZoneIterator;
+        Map *mMap; /**< Actual map. */
+        MapContent *mContent; /**< Entities on the map. */
+        std::string mName; /**< Name of the map. */
+        unsigned short mID; /**< ID of the map. */
 };
 
 #endif

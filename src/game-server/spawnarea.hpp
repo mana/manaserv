@@ -37,7 +37,7 @@ class Being;
 class SpawnArea : public Thing, public DeathListener
 {
     public:
-        SpawnArea(int mapId, const Rectangle &zone);
+        SpawnArea(MapComposite *, const Rectangle &zone);
 
         virtual ~SpawnArea() {}
 

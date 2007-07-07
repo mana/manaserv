@@ -39,13 +39,14 @@ class TriggerAction
 class WarpAction : public TriggerAction
 {
     public:
-        WarpAction(int m, int x, int y)
+        WarpAction(MapComposite *m, int x, int y)
           : mMap(m), mX(x), mY(y) {}
 
         virtual void process(Object *obj);
 
     private:
-        unsigned short mMap, mX, mY;
+        MapComposite *mMap;
+        unsigned short mX, mY;
 };
 
 class TriggerArea : public Thing
@@ -54,7 +55,9 @@ class TriggerArea : public Thing
         /**
          * Creates a rectangular trigger for a given map.
          */
-        TriggerArea(int map, Rectangle const &, TriggerAction *);
+        TriggerArea(MapComposite *m, Rectangle const &r, TriggerAction *ptr)
+          : Thing(OBJECT_OTHER, m), mZone(r), mAction(ptr) {}
+
         virtual void update();
 
     private:

@@ -32,22 +32,14 @@ void WarpAction::process(Object *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
     {
-        DelayedEvent e = { EVENT_WARP, mMap, mX, mY };
+        DelayedEvent e = { EVENT_WARP, mX, mY, mMap };
         gameState->enqueueEvent(obj, e);
     }
 }
 
-TriggerArea::TriggerArea(int map, Rectangle const &r, TriggerAction *ptr)
-  : Thing(OBJECT_OTHER), mZone(r), mAction(ptr)
-{
-    setMapId(map);
-}
-
 void TriggerArea::update()
 {
-    MapComposite *map = gameState->getMap(getMapId());
-
-    for (MovingObjectIterator i(map->getInsideRectangleIterator(mZone)); i; ++i)
+    for (MovingObjectIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
     {
         if (mZone.contains((*i)->getPosition()))
         {

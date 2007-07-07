@@ -24,6 +24,8 @@
 
 #include "defines.h"
 #include "game-server/character.hpp"
+#include "game-server/mapcomposite.hpp"
+#include "game-server/mapmanager.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "serialize/characterdata.hpp"
@@ -109,4 +111,14 @@ Character::writeAttributeUpdateMessage(MessageOut &msg)
     }
 
     mAttributesChanged = false;
+}
+
+int Character::getMapId() const
+{
+    return getMap()->getID();
+}
+
+void Character::setMapId(int id)
+{
+    setMap(mapManager->getMap(id));
 }

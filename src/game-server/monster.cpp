@@ -92,7 +92,7 @@ void Monster::update()
     Direction bestAttackDirection = DIRECTION_DOWN;
 
     // iterate through objects nearby
-    for (MovingObjectIterator i(mMap->getAroundCharacterIterator(this, AROUND_AREA)); i; ++i)
+    for (MovingObjectIterator i(getMap()->getAroundCharacterIterator(this, AROUND_AREA)); i; ++i)
     {
         // we only want to attack player characters
         if ((*i)->getType() != OBJECT_CHARACTER) continue;
@@ -185,11 +185,9 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
     }
 
     std::list<PATH_NODE> path;
-    path = mMap->getMap()->findPath(thisPos.x / 32,
-                                    thisPos.y / 32,
-                                    position.x / 32,
-                                    position.y / 32,
-                                    mAgressionRange);
+    path = getMap()->getMap()->findPath(thisPos.x / 32, thisPos.y / 32,
+                                        position.x / 32, position.y / 32,
+                                        mAgressionRange);
 
     if (path.empty() || path.size() >= mAgressionRange)
     {

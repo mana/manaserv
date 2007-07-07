@@ -23,6 +23,8 @@
 #ifndef _TMWSERV_COMMON_INVENTORYDATA_HPP_
 #define _TMWSERV_COMMON_INVENTORYDATA_HPP_
 
+#include <vector>
+
 /**
  * Numbers of inventory slots
  */

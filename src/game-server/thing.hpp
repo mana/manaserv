@@ -51,8 +51,8 @@ class Thing
         /**
          * Constructor.
          */
-        Thing(int type)
-          : mMap(NULL),
+        Thing(int type, MapComposite *map = NULL)
+          : mMap(map),
             mType(type)
         {}
 
@@ -96,17 +96,9 @@ class Thing
 
         /**
          * Gets the map this thing is located on.
-         *
-         * @return ID of map.
          */
-        int getMapId() const
-        { return mMapId; }
-
-        /**
-         * Sets the map ID this thing is located on.
-         */
-        void setMapId(int mapId)
-        { mMapId = mapId; }
+        MapComposite *getMap() const
+        { return mMap; }
 
         /**
          * Sets the map this thing is located on.
@@ -114,11 +106,8 @@ class Thing
         void setMap(MapComposite *map)
         { mMap = map; }
 
-    protected:
-        MapComposite *mMap;     /**< Map the thing is on */
-
     private:
-        unsigned short mMapId;  /**< ID of the map this thing is on. */
+        MapComposite *mMap;     /**< Map the thing is on */
         char mType;             /**< Type of this thing. */
 };
 

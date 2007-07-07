@@ -33,8 +33,8 @@
  * TODO: Allow specifying being type and use it.
  */
 
-SpawnArea::SpawnArea(int mapId, const Rectangle &zone):
-    Thing(OBJECT_OTHER),
+SpawnArea::SpawnArea(MapComposite *map, const Rectangle &zone):
+    Thing(OBJECT_OTHER, map),
     mZone(zone),
     mMaxBeings(10),
     mBeingType(1),
@@ -42,7 +42,6 @@ SpawnArea::SpawnArea(int mapId, const Rectangle &zone):
     mNumBeings(0),
     mNextSpawn(0)
 {
-    setMapId(mapId);
 }
 
 void
@@ -57,15 +56,16 @@ SpawnArea::update()
             //find a free spawn location. Give up after 10 tries
             int c = 10;
             Point position;
+            MapComposite *map = getMap();
+            Map *realMap = map->getMap();
             do
             {
                 position = Point(mZone.x + rand() % mZone.w,
                            mZone.y + rand() % mZone.h);
                 c--;
-            } while (! mMap->getMap()->getWalk(position.x / 32, position.y / 32)
-                     && c);
+            } while (!realMap->getWalk(position.x / 32, position.y / 32) && c);
 
-            if (c >= 0)
+            if (c)
             {
                 Being *being = new Monster();
                 being->addDeathListener(this);
@@ -76,14 +76,15 @@ SpawnArea::update()
                 being->setAttribute(BASE_ATTR_VITALITY, 10);
                 being->fillHitpoints();
 
-                being->setMapId(1);
+                being->setMap(map);
                 being->setPosition(position);
                 DelayedEvent e = { EVENT_INSERT };
                 gameState->enqueueEvent(being, e);
 
                 mNumBeings++;
             }
-            else {
+            else
+            {
                 //TODO: This log message should have more information when
                 //      more flexibility is added to the spawn area
                 LOG_WARN("Unable to find a free spawn location for monster");

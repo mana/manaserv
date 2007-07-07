@@ -25,6 +25,7 @@
 
 #include "resourcemanager.h"
 #include "game-server/map.hpp"
+#include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/mapreader.hpp"
 #include "utils/logger.h"
@@ -72,8 +73,7 @@ MapManager::MapManager(std::string const &mapReferenceFile)
         std::string name = XML::getProperty(node, "name", std::string());
         if (id != 0 && !name.empty())
         {
-            LoadedMap m = { false, name, NULL };
-            maps[id] = m;
+            maps[id] = new MapComposite(id, name);
         }
     }
 
@@ -84,54 +84,40 @@ MapManager::~MapManager()
 {
     for (Maps::iterator i = maps.begin(), i_end = maps.end(); i != i_end; ++i)
     {
-        delete i->second.map;
+        delete i->second;
     }
 }
 
-Map* MapManager::getMap(int mapId)
+MapComposite *MapManager::getMap(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
-    assert(i != maps.end() && i->second.isActive);
-    Map *&map = i->second.map;
-    if (!map)
-    {
-        std::string const &file = i->second.fileName;
-        map = MapReader::readMap("maps/" + file);
-        if (!map)
-        {
-            LOG_ERROR("Unable to load map \"" << file << "\" (id "
-                      << mapId << ")");
-            return NULL;
-        }
-        LOG_INFO("Loaded map \"" << file << "\" (id " << mapId << ")");
-    }
-    return map;
-}
-
-std::string MapManager::getMapName(int mapId) const
-{
-    Maps::const_iterator i = maps.find(mapId);
     assert(i != maps.end());
-    return i->second.fileName;
+    return i->second;
 }
 
 void MapManager::raiseActive(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end());
-    i->second.isActive = true;
-    LOG_INFO("Activating map \"" << i->second.fileName << "\" (id "
-             << i->first << ")");
+    MapComposite *composite = i->second;
+    if (composite->isActive())
+    {
+        return;
+    }
+
+    std::string const &file = composite->getName();
+    Map *map = MapReader::readMap("maps/" + file);
+    if (!map)
+    {
+        LOG_ERROR("Unable to load map \"" << file << "\" (id "
+                  << mapId << ")");
+        return;
+    }
+
+    composite->setMap(map);
+    LOG_INFO("Activated map \"" << file << "\" (id " << mapId << ")");
+    // will need to load extra map related resources here also
+    extern void testingMap(MapComposite *);
+    testingMap(composite);
 }
 
-bool MapManager::isActive(int mapId) const
-{
-    Maps::const_iterator i = maps.find(mapId);
-    assert(i != maps.end());
-    return i->second.isActive;
-}
-
-short MapManager::numberOfMaps() const
-{
-    return maps.size();
-}

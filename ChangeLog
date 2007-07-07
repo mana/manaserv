@@ -1,4 +1,21 @@
-﻿﻿2007-07-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+﻿﻿2007-07-07  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/common/inventorydata.hpp: Fixed missing include.
+	* src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp:
+	Moved implementation details out of the header.
+	* src/game-server/mapmanager.cpp, src/game-server/mapmanager.hpp,
+	src/game-server/state.cpp, src/game-server/state.hpp: Merged LoadedMap
+	and MapComposite classes. Delegated handling of composite maps to the
+	map manager.
+	* src/game-server/testing.cpp, src/game-server/thing.hpp,
+	src/game-server/spawnarea.cpp, src/game-server/spawnarea.hpp,
+	src/game-server/movingobject.cpp, src/game-server/monster.cpp,
+	src/game-server/character.cpp, src/game-server/character.hpp,
+	src/game-server/trigger.cpp, src/game-server/trigger.hpp,
+	src/gamehandler.cpp: Simplified code by using map pointers only,
+	instead of using both map IDs and map pointers.
+
+2007-07-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/account-server/dalstorage.cpp: Added error messages for failed
 	SQL requests when retrieving character. Added check for failed

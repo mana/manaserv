@@ -27,14 +27,7 @@
 #include <map>
 #include <string>
 
-class Map;
-
-struct LoadedMap
-{
-    bool isActive;
-    std::string fileName;
-    Map *map;
-};
+class MapComposite;
 
 /**
  * MapManager loads/unloads maps
@@ -42,7 +35,7 @@ struct LoadedMap
 class MapManager
 {
     public:
-        typedef std::map< unsigned short, LoadedMap > Maps;
+        typedef std::map< int, MapComposite * > Maps;
 
         /**
          * Constructor (loads map reference file).
@@ -52,12 +45,7 @@ class MapManager
         /**
          * Returns the requested map.
          */
-        Map *getMap(int);
-
-        /**
-         * Returns the requested map name.
-         */
-        std::string getMapName(int) const;
+        MapComposite *getMap(int);
 
         /**
          * Returns all the maps.
@@ -68,16 +56,6 @@ class MapManager
          * Sets the activity status of the map.
          */
         void raiseActive(int);
-
-        /**
-         * Gets the activity status of the map.
-         */
-        bool isActive(int) const;
-        
-        /**
-         * Gets the number of maps
-         */
-        short numberOfMaps() const;
 
         /**
          * Destructor.

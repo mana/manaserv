@@ -150,8 +150,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             // TODO: use a less arbitrary value.
             if (std::abs(x - ppos.x) + std::abs(y - ppos.y) < 48)
             {
-                int mapId = computer.character->getMapId();
-                MapComposite *map = gameState->getMap(mapId);
+                MapComposite *map = computer.character->getMap();
                 Point ipos(x, y);
                 for (FixedObjectIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
                 {
@@ -179,7 +178,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             {
                 int nb = inv.removeFromSlot(slot, amount);
                 Item *item = new Item(ic, amount - nb);
-                item->setMapId(computer.character->getMapId());
+                item->setMap(computer.character->getMap());
                 item->setPosition(computer.character->getPosition());
                 gameState->insert(item);
             }

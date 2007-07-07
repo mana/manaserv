@@ -45,6 +45,104 @@
    in dealing with zone changes. */
 static int const zoneDiam = 256;
 
+/**
+ * Part of a map.
+ */
+struct MapZone
+{
+    unsigned short nbCharacters, nbMovingObjects;
+    /**
+     * Objects present in this zone.
+     * Characters are stored first, then the remaining MovingObjects, then the
+     * remaining Objects.
+     */
+    std::vector< Object * > objects;
+
+    /**
+     * Destinations of the objects that left this zone.
+     * This is necessary in order to have an accurate iterator around moving
+     * objects.
+     */
+    MapRegion destinations;
+
+    MapZone(): nbCharacters(0), nbMovingObjects(0) {}
+    void insert(Object *);
+    void remove(Object *);
+};
+
+/**
+ * Pool of public IDs for MovingObjects on a map. By maintaining public ID
+ * availability using bits, it can locate an available public ID fast while
+ * using minimal memory access.
+ */
+struct ObjectBucket
+{
+    static int const int_bitsize = sizeof(unsigned) * 8;
+    unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
+    short free;                         /**< Number of empty places. */
+    short next_object;                  /**< Next object to look at. */
+    MovingObject *objects[256];
+
+    ObjectBucket();
+    int allocate();
+    void deallocate(int);
+};
+
+/**
+ * Entities on a map.
+ */
+struct MapContent
+{
+    MapContent(Map *);
+    ~MapContent();
+
+    /**
+     * Allocates a unique ID for a moving object on this map.
+     */
+    bool allocate(MovingObject *);
+
+    /**
+     * Deallocates an ID.
+     */
+    void deallocate(MovingObject *);
+
+    /**
+     * Fills a region of zones within the range of a point.
+     */
+    void fillRegion(MapRegion &, Point const &, int) const;
+
+    /**
+     * Fills a region of zones inside a rectangle.
+     */
+    void fillRegion(MapRegion &, Rectangle const &) const;
+
+    /**
+     * Gets zone at given position.
+     */
+    MapZone &getZone(Point const &pos) const
+    { return zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth]; }
+
+    /**
+     * Things (items, characters, monsters, etc) located on the map.
+     */
+    std::vector< Thing * > things;
+
+    /**
+     * Buckets of MovingObjects located on the map, referenced by ID.
+     */
+    ObjectBucket *buckets[256];
+
+    int last_bucket; /**< Last bucket acted upon. */
+
+    /**
+     * Partition of the Objects, depending on their position on the map.
+     */
+    MapZone *zones;
+
+    unsigned short mapWidth;  /**< Width with respect to zones. */
+    unsigned short mapHeight; /**< Height with respect to zones. */
+};
+
 void MapZone::insert(Object *obj)
 {
     int type = obj->getType();
@@ -141,7 +239,7 @@ static void addZone(MapRegion &r, unsigned z)
     }
 }
 
-ZoneIterator::ZoneIterator(MapRegion const &r, MapComposite const *m)
+ZoneIterator::ZoneIterator(MapRegion const &r, MapContent const *m)
   : region(r), pos(0), map(m)
 {
     current = &map->zones[r.empty() ? 0 : r[0]];
@@ -325,8 +423,8 @@ void ObjectBucket::deallocate(int i)
     ++free;
 }
 
-MapComposite::MapComposite(Map *m)
-  : map(m), last_bucket(0)
+MapContent::MapContent(Map *map)
+  : last_bucket(0), zones(NULL)
 {
     buckets[0] = new ObjectBucket;
     for (int i = 1; i < 256; ++i)
@@ -338,17 +436,29 @@ MapComposite::MapComposite(Map *m)
     zones = new MapZone[mapWidth * mapHeight];
 }
 
-MapComposite::~MapComposite()
+MapContent::~MapContent()
 {
     for (int i = 0; i < 256; ++i)
     {
         delete buckets[i];
     }
     delete[] zones;
-    // MapManger will delete the maps when necessary.
 }
 
-bool MapComposite::allocate(MovingObject *obj)
+void MapComposite::setMap(Map *m)
+{
+    assert(!mMap && m);
+    mMap = m;
+    mContent = new MapContent(m);
+}
+
+MapComposite::~MapComposite()
+{
+    delete mMap;
+    delete mContent;
+}
+
+bool MapContent::allocate(MovingObject *obj)
 {
     // First, try allocating from the last used bucket.
     ObjectBucket *b = buckets[last_bucket];
@@ -387,13 +497,13 @@ bool MapComposite::allocate(MovingObject *obj)
     return false;
 }
 
-void MapComposite::deallocate(MovingObject *obj)
+void MapContent::deallocate(MovingObject *obj)
 {
     unsigned short id = obj->getPublicID();
     buckets[id / 256]->deallocate(id % 256);
 }
 
-void MapComposite::fillRegion(MapRegion &r, Point const &p, int radius) const
+void MapContent::fillRegion(MapRegion &r, Point const &p, int radius) const
 {
     int ax = p.x > radius ? (p.x - radius) / zoneDiam : 0,
         ay = p.y > radius ? (p.y - radius) / zoneDiam : 0,
@@ -408,7 +518,7 @@ void MapComposite::fillRegion(MapRegion &r, Point const &p, int radius) const
     }
 }
 
-void MapComposite::fillRegion(MapRegion &r, Rectangle const &p) const
+void MapContent::fillRegion(MapRegion &r, Rectangle const &p) const
 {
     int ax = p.x / zoneDiam,
         ay = p.y / zoneDiam,
@@ -426,28 +536,28 @@ void MapComposite::fillRegion(MapRegion &r, Rectangle const &p) const
 ZoneIterator MapComposite::getAroundPointIterator(Point const &p, int radius) const
 {
     MapRegion r;
-    fillRegion(r, p, radius);
-    return ZoneIterator(r, this);
+    mContent->fillRegion(r, p, radius);
+    return ZoneIterator(r, mContent);
 }
 
 ZoneIterator MapComposite::getAroundObjectIterator(Object *obj, int radius) const
 {
     MapRegion r;
-    fillRegion(r, obj->getPosition(), radius);
-    return ZoneIterator(r, this);
+    mContent->fillRegion(r, obj->getPosition(), radius);
+    return ZoneIterator(r, mContent);
 }
 
 ZoneIterator MapComposite::getInsideRectangleIterator(Rectangle const &p) const
 {
     MapRegion r;
-    fillRegion(r, p);
-    return ZoneIterator(r, this);
+    mContent->fillRegion(r, p);
+    return ZoneIterator(r, mContent);
 }
 
 ZoneIterator MapComposite::getAroundCharacterIterator(MovingObject *obj, int radius) const
 {
     MapRegion r1;
-    fillRegion(r1, obj->getOldPosition(), radius);
+    mContent->fillRegion(r1, obj->getOldPosition(), radius);
     MapRegion r2 = r1;
     for (MapRegion::iterator i = r1.begin(), i_end = r1.end(); i != i_end; ++i)
     {
@@ -455,7 +565,7 @@ ZoneIterator MapComposite::getAroundCharacterIterator(MovingObject *obj, int rad
            This is necessary to detect two moving objects changing zones at the
            same time and at the border, and going in opposite directions (or
            more simply to detect teleportations, if any). */
-        MapRegion &r4 = zones[*i].destinations;
+        MapRegion &r4 = mContent->zones[*i].destinations;
         if (!r4.empty())
         {
             MapRegion r3;
@@ -465,26 +575,25 @@ ZoneIterator MapComposite::getAroundCharacterIterator(MovingObject *obj, int rad
             r2.swap(r3);
         }
     }
-    fillRegion(r2, obj->getPosition(), radius);
-    return ZoneIterator(r2, this);
+    mContent->fillRegion(r2, obj->getPosition(), radius);
+    return ZoneIterator(r2, mContent);
 }
 
 bool MapComposite::insert(Thing *ptr)
 {
     if (ptr->isVisible())
     {
-        if (ptr->canMove() && !allocate(static_cast< MovingObject * >(ptr)))
+        if (ptr->canMove() && !mContent->allocate(static_cast< MovingObject * >(ptr)))
         {
             return false;
         }
 
         Object *obj = static_cast< Object * >(ptr);
-        Point const &pos = obj->getPosition();
-        zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].insert(obj);
+        mContent->getZone(obj->getPosition()).insert(obj);
     }
 
     ptr->setMap(this);
-    things.push_back(ptr);
+    mContent->things.push_back(ptr);
     return true;
 }
 
@@ -493,22 +602,21 @@ void MapComposite::remove(Thing *ptr)
     if (ptr->isVisible())
     {
         Object *obj = static_cast< Object * >(ptr);
-        Point const &pos = obj->getPosition();
-        zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth].remove(obj);
+        mContent->getZone(obj->getPosition()).remove(obj);
 
         if (ptr->canMove())
         {
-            deallocate(static_cast< MovingObject * >(ptr));
+            mContent->deallocate(static_cast< MovingObject * >(ptr));
         }
     }
 
-    for (std::vector< Thing * >::iterator i = things.begin(),
-         i_end = things.end(); i != i_end; ++i)
+    for (std::vector< Thing * >::iterator i = mContent->things.begin(),
+         i_end = mContent->things.end(); i != i_end; ++i)
     {
         if (*i == ptr)
         {
             *i = *(i_end - 1);
-            things.pop_back();
+            mContent->things.pop_back();
             return;
         }
     }
@@ -517,16 +625,16 @@ void MapComposite::remove(Thing *ptr)
 
 void MapComposite::update()
 {
-    map->resetTempWalk();
+    mMap->resetTempWalk();
 
-    for (int i = 0; i < mapHeight * mapWidth; ++i)
+    for (int i = 0; i < mContent->mapHeight * mContent->mapWidth; ++i)
     {
-        zones[i].destinations.clear();
+        mContent->zones[i].destinations.clear();
     }
 
     // Cannot use a WholeMap iterator as objects will change zones under its feet.
-    for (std::vector< Thing * >::iterator i = things.begin(),
-         i_end = things.end(); i != i_end; ++i)
+    for (std::vector< Thing * >::iterator i = mContent->things.begin(),
+         i_end = mContent->things.end(); i != i_end; ++i)
     {
         if (!(*i)->canMove())
         {
@@ -537,15 +645,22 @@ void MapComposite::update()
         Point const &pos1 = obj->getOldPosition(),
                     &pos2 = obj->getPosition();
 
-        map->setTempWalk(pos2.x / 32, pos2.y / 32, false);
+        mMap->setTempWalk(pos2.x / 32, pos2.y / 32, false);
 
-        int src = (pos1.x / zoneDiam) + (pos1.y / zoneDiam) * mapWidth,
-            dst = (pos2.x / zoneDiam) + (pos2.y / zoneDiam) * mapWidth;
-        if (src != dst)
+        MapZone &src = mContent->getZone(pos1),
+                &dst = mContent->getZone(pos2);
+        if (&src != &dst)
         {
-            addZone(zones[src].destinations, dst);
-            zones[src].remove(obj);
-            zones[dst].insert(obj);
+            addZone(src.destinations, &dst - mContent->zones);
+            src.remove(obj);
+            dst.insert(obj);
         }
     }
 }
+
+std::vector< Thing * > const &MapComposite::getEverything() const
+{
+    return mContent->things;
+}
+
+

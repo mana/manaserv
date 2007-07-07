@@ -41,7 +41,8 @@ enum
 
 struct DelayedEvent
 {
-    unsigned short type, map, x, y;
+    unsigned short type, x, y;
+    MapComposite *map;
 };
 
 /**
@@ -50,13 +51,7 @@ struct DelayedEvent
  */
 class State
 {
-        typedef std::map< int, MapComposite * > Maps;
         typedef std::map< Object *, DelayedEvent > DelayedEvents;
-
-        /**
-         * List of maps.
-         */
-        Maps maps;
 
         /**
          * List of delayed events.
@@ -73,23 +68,12 @@ class State
          */
         void informPlayer(MapComposite *, Character *);
 
-        /**
-         * Loads map into game world.
-         */
-        MapComposite *loadMap(int mapId);
-
      public:
-        ~State();
 
         /**
          * Updates game state (contains core server logic).
          */
         void update();
-
-        /**
-         * Gets a composite map.
-         */
-        MapComposite *getMap(int map);
 
         /**
          * Inserts an object on the map.

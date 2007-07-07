@@ -35,14 +35,6 @@
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
-State::~State()
-{
-    for (Maps::iterator i = maps.begin(), i_end = maps.end(); i != i_end; ++i)
-    {
-        delete i->second;
-    }
-}
-
 void State::updateMap(MapComposite *map)
 {
     // 1. update object status.
@@ -288,9 +280,15 @@ void State::update()
 #   endif
 
     // Update game state (update AI, etc.)
-    for (Maps::iterator m = maps.begin(), m_end = maps.end(); m != m_end; ++m)
+    MapManager::Maps const &maps = mapManager->getMaps();
+    for (MapManager::Maps::const_iterator m = maps.begin(), m_end = maps.end(); m != m_end; ++m)
     {
         MapComposite *map = m->second;
+        if (!map->isActive())
+        {
+            continue;
+        }
+
         updateMap(map);
 
         for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
@@ -340,7 +338,7 @@ void State::update()
             {
                 remove(o);
                 Point pos(e.x, e.y);
-                o->setMapId(e.map);
+                o->setMap(e.map);
                 o->setPosition(pos);
 
                 assert(o->getType() == OBJECT_CHARACTER);
@@ -348,11 +346,9 @@ void State::update()
                 /* Force update of persistent data on map change, so that
                    characters can respawn at the start of the map after a death or
                    a disconnection. */
-                p->setMapId(e.map);
-                p->setPosition(pos);
                 accountHandler->sendCharacterData(p);
 
-                if (mapManager->isActive(e.map))
+                if (e.map->getMap())
                 {
                     insert(o);
                 }
@@ -372,8 +368,7 @@ void State::update()
 void State::insert(Thing *ptr)
 {
     assert(!dbgLockObjects);
-    int mapId = ptr->getMapId();
-    MapComposite *map = loadMap(mapId);
+    MapComposite *map = ptr->getMap();
     if (!map || !map->insert(ptr))
     {
         // TODO: Deal with failure to place Thing on the map.
@@ -389,7 +384,7 @@ void State::insert(Thing *ptr)
         /* Since the character doesn't know yet where on the world he is after
            connecting to the map server, we send him an initial change map message. */
         MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
-        mapChangeMessage.writeString(mapManager->getMapName(mapId));
+        mapChangeMessage.writeString(map->getName());
         Point pos = obj->getPosition();
         mapChangeMessage.writeShort(pos.x);
         mapChangeMessage.writeShort(pos.y);
@@ -400,10 +395,7 @@ void State::insert(Thing *ptr)
 void State::remove(Thing *ptr)
 {
     assert(!dbgLockObjects);
-    int mapId = ptr->getMapId();
-    Maps::iterator m = maps.find(mapId);
-    assert(m != maps.end());
-    MapComposite *map = m->second;
+    MapComposite *map = ptr->getMap();
 
     if (ptr->canMove())
     {
@@ -452,29 +444,6 @@ void State::enqueueEvent(Object *ptr, DelayedEvent const &e)
     }
 }
 
-MapComposite *State::getMap(int map)
-{
-    Maps::iterator m = maps.find(map);
-    assert(m != maps.end());
-    return m->second;
-}
-
-MapComposite *State::loadMap(int mapId)
-{
-    Maps::iterator m = maps.find(mapId);
-    if (m != maps.end()) return m->second;
-    Map *map = mapManager->getMap(mapId);
-    assert(map);
-    MapComposite *tmp = new MapComposite(map);
-    maps[mapId] = tmp;
-
-    // will need to load extra map related resources here also
-    extern void testingMap(int);
-    testingMap(mapId);
-
-    return tmp;
-}
-
 void State::sayAround(Object *obj, std::string text)
 {
     MessageOut msg(GPMSG_SAY);
@@ -482,10 +451,9 @@ void State::sayAround(Object *obj, std::string text)
                    static_cast< MovingObject * >(obj)->getPublicID());
     msg.writeString(text);
 
-    MapComposite *map = getMap(obj->getMapId());
     Point speakerPosition = obj->getPosition();
 
-    for (CharacterIterator i(map->getAroundObjectIterator(obj, AROUND_AREA)); i; ++i)
+    for (CharacterIterator i(obj->getMap()->getAroundObjectIterator(obj, AROUND_AREA)); i; ++i)
     {
         if (speakerPosition.inRangeOf((*i)->getPosition(), AROUND_AREA))
         {

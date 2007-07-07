@@ -21,7 +21,7 @@
  */
 
 #include "game-server/map.hpp"
-#include "game-server/mapmanager.hpp"
+#include "game-server/mapcomposite.hpp"
 #include "game-server/movingobject.hpp"
 
 void MovingObject::move()
@@ -44,7 +44,7 @@ void MovingObject::move()
         return;
     }
 
-    Map *map = mapManager->getMap(getMapId());
+    Map *map = getMap()->getMap();
 
     /* If no path exists, the for-loop won't be entered. Else a path for the
      * current destination has already been calculated.
