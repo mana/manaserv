@@ -24,6 +24,13 @@
 #include "game-server/mapcomposite.hpp"
 #include "game-server/movingobject.hpp"
 
+void MovingObject::setDestination(Point const &dst)
+{
+    mDst = dst;
+    raiseUpdateFlags(UPDATEFLAG_NEW_DESTINATION);
+    mPath.clear();
+}
+
 void MovingObject::move()
 {
     mOld = getPosition();

@@ -54,12 +54,13 @@ class MovingObject : public Object
         /**
          * Sets the destination coordinates of the object.
          */
-        void setDestination(const Point &dst)
-        {
-            mDst = dst;
-            raiseUpdateFlags(UPDATEFLAG_NEW_DESTINATION);
-            mPath.clear();
-        }
+        void setDestination(const Point &dst);
+
+        /**
+         * Sets the destination coordinates of the object to the current position.
+         */
+        void clearDestination()
+        { setDestination(getPosition()); }
 
         /**
          * Gets the old coordinates of the object.

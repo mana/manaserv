@@ -356,6 +356,7 @@ void GameState::update()
 
                 assert(o->getType() == OBJECT_CHARACTER);
                 Character *p = static_cast< Character * >(o);
+                p->clearDestination();
                 /* Force update of persistent data on map change, so that
                    characters can respawn at the start of the map after a death or
                    a disconnection. */

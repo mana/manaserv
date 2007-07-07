@@ -21,6 +21,9 @@
 	src/game-server/accountconnection.cpp, src/game-server/gamehandler.cpp:
 	Changed singleton managers from classes to namespace interfaces.
 	Removed global pointers. Moved private members to implementation files.
+	* src/game-server/state.cpp, src/game-server/being.cpp,
+	src/game-server/movingobject.cpp, src/game-server/movingobject.hpp:
+	Fixed teleportation hack caused by caching of pathfinder results.
 
 2007-07-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 

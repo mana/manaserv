@@ -91,7 +91,7 @@ void Being::die()
     LOG_INFO("Being " << getPublicID() << " died");
     setAction(DEAD);
     // dead beings stay where they are
-    setDestination(getPosition());
+    clearDestination();
 
     // Notify death listeners
     DeathListeners::iterator i_end = mDeathListeners.end();
