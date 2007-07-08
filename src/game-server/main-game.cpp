@@ -38,6 +38,7 @@
 #include "game-server/gamehandler.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/monstermanager.hpp"
 #include "game-server/state.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
@@ -73,6 +74,7 @@ std::string scriptLanugage = "none";
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 #define DEFAULT_MAPSDB_FILE     "maps.xml"
+#define DEFAULT_MONSTERSDB_FILE "monsters.xml"
 
 utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
 int worldTime = 0;              /**< Current world time in 100ms ticks */
@@ -161,10 +163,10 @@ void initialize()
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
     stringFilter = new StringFilter(&config);
-    // Initialize the map manager
+
     MapManager::initialize(DEFAULT_MAPSDB_FILE);
-    // Initialize the item manager
     ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
+    MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -234,6 +236,7 @@ void deinitialize()
 
     // Destroy Managers
     delete stringFilter;
+    MonsterManager::deinitialize();
     ItemManager::deinitialize();
     MapManager::deinitialize();
 

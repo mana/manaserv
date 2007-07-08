@@ -33,11 +33,11 @@
  * TODO: Allow specifying being type and use it.
  */
 
-SpawnArea::SpawnArea(MapComposite *map, const Rectangle &zone):
+SpawnArea::SpawnArea(MapComposite *map, MonsterClass *specy, const Rectangle &zone):
     Thing(OBJECT_OTHER, map),
+    mSpecy(specy),
     mZone(zone),
     mMaxBeings(10),
-    mBeingType(1),
     mSpawnRate(10),
     mNumBeings(0),
     mNextSpawn(0)
@@ -67,7 +67,7 @@ SpawnArea::update()
 
             if (c)
             {
-                Being *being = new Monster();
+                Being *being = new Monster(mSpecy);
                 being->addDeathListener(this);
 
                 // some bogus stats for testing

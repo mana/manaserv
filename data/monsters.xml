@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<monsters>
+    <monster id="1002">
+        <drop item="505" percent="8"/>
+        <drop item="518" percent="4"/>
+    </monster>
+</monsters>

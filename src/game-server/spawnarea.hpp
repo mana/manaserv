@@ -29,6 +29,7 @@
 #include "game-server/thing.hpp"
 
 class Being;
+class MonsterClass;
 
 /**
  * A spawn area, where monsters spawn. The area is a rectangular field and will
@@ -37,20 +38,16 @@ class Being;
 class SpawnArea : public Thing, public DeathListener
 {
     public:
-        SpawnArea(MapComposite *, const Rectangle &zone);
-
-        virtual ~SpawnArea() {}
+        SpawnArea(MapComposite *, MonsterClass *, Rectangle const &zone);
 
         virtual void update();
 
         virtual void died(Being *being);
 
-        virtual void deleted(Being *being) {};
-
     protected:
+        MonsterClass *mSpecy; /**< Specy of monster that spawns in this area. */
         Rectangle mZone;
         int mMaxBeings;    /**< Maximum population of this area. */
-        int mBeingType;    /**< Type of being that spawns in this area. */
         int mSpawnRate;    /**< Number of beings spawning per minute. */
         int mNumBeings;    /**< Current population of this area. */
         int mNextSpawn;    /**< The time until next being spawn. */

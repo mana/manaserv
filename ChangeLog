@@ -1,4 +1,17 @@
-﻿﻿2007-07-07  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+﻿﻿﻿﻿2007-07-08  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/game-server/being.cpp: Lowered messages to debug level.
+	* src/game-server/deathlistener.hpp: Made members non-abstract, so that
+	inheritors do not have to define them when they do not use them.
+	* data/monsters.xml: Added sample monster database.
+	* src/game-server/monstermanager.cpp, src/game-server/main-game.cpp,
+	src/game-server/monstermanager.hpp: Added manager for monster species.
+	* src/game-server/spawnarea.cpp, src/game-server/spawnarea.hpp,
+	src/game-server/testing.cpp: Specified the monster specy being spawned.
+	* src/game-server/monster.cpp, src/game-server/monster.hpp: Added
+	monster drops.
+
+2007-07-07  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/common/inventorydata.hpp: Fixed missing include.
 	* src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp:

@@ -41,12 +41,12 @@ class DeathListener
         /**
          * Called when a being died.
          */
-        virtual void died(Being *being) = 0;
+        virtual void died(Being *) {}
 
         /**
          * Called when a being is deleted.
          */
-        virtual void deleted(Being *being) = 0;
+        virtual void deleted(Being *) {}
 };
 
 typedef std::list<DeathListener*> DeathListeners;

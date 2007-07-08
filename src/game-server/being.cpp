@@ -79,7 +79,7 @@ int Being::damage(Damage damage)
 
     mHitpoints -= HPloss;
     mHitsTaken.push_back(HPloss);
-    LOG_INFO("Being " << getPublicID() << " got hit");
+    LOG_DEBUG("Being " << getPublicID() << " got hit.");
 
     if (mHitpoints == 0) die();
 
@@ -88,7 +88,7 @@ int Being::damage(Damage damage)
 
 void Being::die()
 {
-    LOG_INFO("Being " << getPublicID() << " died");
+    LOG_DEBUG("Being " << getPublicID() << " died.");
     setAction(DEAD);
     // dead beings stay where they are
     clearDestination();

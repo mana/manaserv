@@ -24,12 +24,49 @@
 #define _TMWSERV_MONSTER_H_
 
 #include <map>
+#include <vector>
 
 #include "game-server/being.hpp"
 #include "game-server/deathlistener.hpp"
 
+class ItemClass;
 class MapComposite;
-class MovingObject;
+
+/**
+ * Structure containing an item class and its probability to be dropped (unit: 1/10000).
+ */
+struct MonsterDrop
+{
+    ItemClass *item;
+    int probability;
+};
+
+typedef std::vector< MonsterDrop > MonsterDrops;
+
+/**
+ * Class describing the characteristics of a generic monster.
+ */
+class MonsterClass
+{
+    public:
+        MonsterClass(int id): mID(id) {}
+
+        /**
+         * Sets monster drops.
+         */
+        void setDrops(MonsterDrops const &v)
+        { mDrops = v; }
+
+        /**
+         * Randomly selects a monster drop (may return NULL).
+         * TODO: pass some luck modifier as an argument.
+         */
+        ItemClass *getRandomDrop() const;
+
+    private:
+        unsigned short mID; /**< ID of the monster class. */
+        MonsterDrops mDrops; /**< Items the monster drops when dying. */
+};
 
 /**
  * Structure holding possible positions relative to the target from which
@@ -57,7 +94,7 @@ class Monster : public Being, public DeathListener
         /**
          * Constructor.
          */
-        Monster();
+        Monster(MonsterClass *);
 
         /**
          * Destructor.
@@ -108,6 +145,7 @@ class Monster : public Being, public DeathListener
     private:
         int calculatePositionPriority(Point position, int targetPriority);
 
+        MonsterClass *mSpecy; /**< Monster specy. */
         int mCountDown; /**< Count down till next random movement (temporary). */
         std::map<Being *, int> mAnger;   /**< Aggression towards other beings */
         int mAttackTime;                       /**< Delay until monster can attack */

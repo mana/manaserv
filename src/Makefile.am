@@ -106,6 +106,8 @@ tmwserv_game_SOURCES = \
 	game-server/mapreader.cpp \
 	game-server/monster.hpp \
 	game-server/monster.cpp \
+	game-server/monstermanager.hpp \
+	game-server/monstermanager.cpp \
 	game-server/movingobject.hpp \
 	game-server/movingobject.cpp \
 	game-server/object.hpp \

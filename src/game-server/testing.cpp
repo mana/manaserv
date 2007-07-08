@@ -9,6 +9,7 @@
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/monstermanager.hpp"
 #include "game-server/spawnarea.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
@@ -37,7 +38,7 @@ void testingMap(MapComposite *map)
         {
             // Create maggot spawn area
             Rectangle maggotSpawnRect = { 720, 900, 320, 320 };
-            GameState::insert(new SpawnArea(map, maggotSpawnRect));
+            GameState::insert(new SpawnArea(map, MonsterManager::getMonster(1002), maggotSpawnRect));
 
             // Portal to map 3
             GameState::insert(new TriggerArea(map, rectA, &warpA));

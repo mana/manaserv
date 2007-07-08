@@ -22,13 +22,29 @@
 
 #include "game-server/monster.hpp"
 
-#include "game-server/collisiondetection.hpp"
+#include "game-server/item.hpp"
 #include "game-server/mapcomposite.hpp"
-
+#include "game-server/state.hpp"
 #include "utils/logger.h"
 
-Monster::Monster():
+ItemClass *MonsterClass::getRandomDrop() const
+{
+    int p = rand() / (RAND_MAX / 10000);
+    for (MonsterDrops::const_iterator i = mDrops.begin(),
+         i_end = mDrops.end(); i != i_end; ++i)
+    {
+        p -= i->probability;
+        if (p < 0)
+        {
+            return i->item;
+        }
+    }
+    return NULL;
+}
+
+Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER, 65535),
+    mSpecy(specy),
     mCountDown(0),
     mAttackTime(0),
     mAttackPreDelay(5),
@@ -230,6 +246,14 @@ void Monster::die()
 {
     mCountDown = 50; // sets remove time to 5 seconds
     Being::die();
+    if (ItemClass *drop = mSpecy->getRandomDrop())
+    {
+        Item *item = new Item(drop, 1);
+        item->setMap(getMap());
+        item->setPosition(getPosition());
+        DelayedEvent e = { EVENT_INSERT };
+        GameState::enqueueEvent(item, e);
+    }
 }
 
 WeaponStats Monster::getWeaponStats()
