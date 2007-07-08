@@ -65,6 +65,7 @@ void GameHandler::computerDisconnected(NetComputer *comp)
     }
     else if (Character *ch = computer.character)
     {
+        accountHandler->sendCharacterData(ch);
         GameState::remove(ch);
         delete ch;
     }

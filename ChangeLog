@@ -10,6 +10,8 @@
 	src/game-server/testing.cpp: Specified the monster specy being spawned.
 	* src/game-server/monster.cpp, src/game-server/monster.hpp: Added
 	monster drops.
+	* src/game-server/gamehandler.cpp: Update account database on
+	unexpected client disconnection.
 
 2007-07-07  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
