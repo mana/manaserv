@@ -369,9 +369,9 @@ bool Inventory::equip(int slot)
             firstSlot = EQUIP_RING1_SLOT;
             secondSlot = EQUIP_RING2_SLOT;
         break;
-        case ITEM_EQUIPMENT_BREST:
+        case ITEM_EQUIPMENT_TORSO:
             availableSlots = 1;
-            firstSlot = EQUIP_BREST_SLOT;
+            firstSlot = EQUIP_TORSO_SLOT;
         break;
         case ITEM_EQUIPMENT_ARMS:
             availableSlots = 1;

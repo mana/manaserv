@@ -86,6 +86,7 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
         int weight = XML::getProperty(node, "weight", 0);
         int value = XML::getProperty(node, "value", 0);
         int maxPerSlot = XML::getProperty(node, "max_per_slot", 0);
+        int sprite = XML::getProperty(node, "sprite_id", 0);
         std::string scriptName = XML::getProperty(node, "script_name", std::string());
 
         //TODO: add child nodes for these modifiers (additive and factor)
@@ -111,6 +112,7 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
         item->setMaxPerSlot(maxPerSlot);
         item->setScriptName(scriptName);
         item->setModifiers(modifiers);
+        item->setSpriteID(sprite ? sprite : id);
         itemClasses[id] = item;
         ++nbItems;
 

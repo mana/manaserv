@@ -31,7 +31,7 @@ enum
 {
 // Equipment rules:
 // 1 Brest equipment
-    EQUIP_BREST_SLOT = 0,
+    EQUIP_TORSO_SLOT = 0,
 // 1 arms equipment
     EQUIP_ARMS_SLOT = 1,
 // 1 head equipment

@@ -1,4 +1,13 @@
-﻿﻿﻿﻿2007-07-08  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+﻿﻿﻿﻿﻿﻿﻿﻿2007-07-12  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/game-server/item.hpp, src/game-server/inventory.cpp,
+	src/game-server/inventory.hpp: Fixed naming of equipment slot.
+	* src/game-server/object.hpp: Added update flag for looks.
+	* src/game-server/itemmanager.cpp: Added field loaded for sprite_id.
+	* src/defines.h, src/game-server/state.cpp: Added support for visible
+	equipment.
+
+2007-07-08  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/game-server/being.cpp: Lowered messages to debug level.
 	* src/game-server/deathlistener.hpp: Made members non-abstract, so that

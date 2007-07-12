@@ -27,7 +27,9 @@
 #include "point.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
+#include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
+#include "game-server/itemmanager.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
@@ -86,6 +88,22 @@ static void updateMap(MapComposite *map)
 }
 
 /**
+ * Sets message fields describing character look.
+ */
+static void serializeLooks(Character *ch, MessageOut &msg)
+{
+    Possessions const &poss = ch->getPossessions();
+    static int const slots[] =
+        { EQUIP_FIGHT1_SLOT, EQUIP_HEAD_SLOT, EQUIP_TORSO_SLOT, EQUIP_LEGS_SLOT };
+    for (int i = 0; i < 4; ++i)
+    {
+        int id = poss.equipment[slots[i]];
+        ItemClass *eq;
+        msg.writeShort(id && (eq = ItemManager::getItem(id)) ? eq->getSpriteID() : 0);
+    }
+}
+
+/**
  * Informs a player of what happened around the character.
  */
 static void informPlayer(MapComposite *map, Character *p)
@@ -116,13 +134,22 @@ static void informPlayer(MapComposite *map, Character *p)
                 gameHandler->sendTo(p, AttackMsg);
             }
 
-            // Send state change messages.
+            // Send action change messages.
             if ((oflags & UPDATEFLAG_ACTIONCHANGE))
             {
                 MessageOut ActionMsg(GPMSG_BEING_ACTION_CHANGE);
                 ActionMsg.writeShort(oid);
                 ActionMsg.writeByte(static_cast< Being * >(o)->getAction());
                 gameHandler->sendTo(p, ActionMsg);
+            }
+
+            // Send looks change messages.
+            if (oflags & UPDATEFLAG_LOOKSCHANGE)
+            {
+                MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
+                LooksMsg.writeShort(oid);
+                serializeLooks(static_cast< Character * >(o), LooksMsg);
+                gameHandler->sendTo(p, LooksMsg);
             }
 
             // Send leave messages of dead beings
@@ -176,6 +203,7 @@ static void informPlayer(MapComposite *map, Character *p)
                     enterMsg.writeByte(q->getHairStyle());
                     enterMsg.writeByte(q->getHairColor());
                     enterMsg.writeByte(q->getGender());
+                    serializeLooks(q, enterMsg);
                 } break;
                 case OBJECT_MONSTER:
                 {

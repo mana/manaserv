@@ -38,7 +38,7 @@ enum
     ITEM_USABLE,                            // 1
     ITEM_EQUIPMENT_ONE_HAND_WEAPON,         // 2
     ITEM_EQUIPMENT_TWO_HANDS_WEAPON,        // 3
-    ITEM_EQUIPMENT_BREST,                   // 4
+    ITEM_EQUIPMENT_TORSO,                   // 4
     ITEM_EQUIPMENT_ARMS,                    // 5
     ITEM_EQUIPMENT_HEAD,                    // 6
     ITEM_EQUIPMENT_LEGS,                    // 7
@@ -207,13 +207,13 @@ class ItemClass
         /**
          * Sets the sprite ID.
          */
-        void setSpriteID(unsigned short spriteID)
-        { mSpriteID =  spriteID; }
+        void setSpriteID(int spriteID)
+        { mSpriteID = spriteID; }
 
         /**
          * Gets the sprite ID.
          */
-        unsigned short getSpriteID()
+        int getSpriteID()
         { return mSpriteID; }
 
 

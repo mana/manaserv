@@ -149,10 +149,11 @@ enum {
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
     GPMSG_PLAYER_ATTRIBUTE_UPDATE  = 0x0130, // { W attribute, W value }*
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
-                                             // character: S name, B hair style, B hair color, B gender
+                                             // character: S name, B hair style, B hair color, B gender, W weapon, W hat, W top clothes, W bottom clothes
                                              // monster: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
+    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // W weapon, W hat, W top clothes, W bottom clothes
     PGMSG_WALK                     = 0x0260, // W*2 destination
     PGMSG_ACTION_CHANGE            = 0x0270, // B Action
     GPMSG_BEING_ACTION_CHANGE      = 0x0271, // W being id, B action
