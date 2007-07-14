@@ -90,16 +90,56 @@ static void updateMap(MapComposite *map)
 /**
  * Sets message fields describing character look.
  */
-static void serializeLooks(Character *ch, MessageOut &msg)
+static void serializeLooks(Character *ch, MessageOut &msg, bool full)
 {
     Possessions const &poss = ch->getPossessions();
-    static int const slots[] =
+    static int const nb_slots = 4;
+    static int const slots[nb_slots] =
         { EQUIP_FIGHT1_SLOT, EQUIP_HEAD_SLOT, EQUIP_TORSO_SLOT, EQUIP_LEGS_SLOT };
-    for (int i = 0; i < 4; ++i)
+
+    // Bitmask describing the changed entries.
+    int changed = (1 << nb_slots) - 1;
+    if (!full)
+    {
+        // TODO: do not assume the whole equipment changed, when an update is asked for.
+        changed = (1 << nb_slots) - 1;
+    }
+
+    int items[nb_slots];
+    // Partially build both kinds of packet, to get their sizes.
+    int mask_full = 0, mask_diff = 0;
+    int nb_full = 0, nb_diff = 0;
+    for (int i = 0; i < nb_slots; ++i)
     {
         int id = poss.equipment[slots[i]];
         ItemClass *eq;
-        msg.writeShort(id && (eq = ItemManager::getItem(id)) ? eq->getSpriteID() : 0);
+        items[i] = id && (eq = ItemManager::getItem(id)) ? eq->getSpriteID() : 0;
+        if (changed & (1 << i))
+        {
+            // Skip slots that have not changed, when sending an update.
+            ++nb_diff;
+            mask_diff |= 1 << i;
+        }
+        if (items[i])
+        {
+            /* If we are sending the whole equipment, only filled slots have to
+               be accounted for, as the other ones will be automatically cleared. */
+            ++nb_full;
+            mask_full |= 1 << i;
+        }
+    }
+
+    // Choose the smaller payload.
+    if (nb_full <= nb_diff) full = true;
+
+    /* Bitmask enumerating the sent slots.
+       Setting the upper bit tells the client to clear the slots beforehand. */
+    int mask = full ? mask_full | (1 << 8) : mask_diff;
+
+    msg.writeByte(mask);
+    for (int i = 0; i < nb_slots; ++i)
+    {
+        if (mask & (1 << i)) msg.writeShort(items[i]);
     }
 }
 
@@ -122,9 +162,20 @@ static void informPlayer(MapComposite *map, Character *p)
         int otype = o->getType();
         int oid = o->getPublicID(), oflags = o->getUpdateFlags();
         int flags = 0;
+
+        // Check if the character p and the moving object o are around.
+        bool wereInRange = pold.inRangeOf(oold, AROUND_AREA) &&
+                           !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
         bool willBeInRange = ppos.inRangeOf(opos, AROUND_AREA);
 
-        if (willBeInRange)
+        if (!wereInRange && !willBeInRange)
+        {
+            // Nothing to report: o and p are far away from each other.
+            continue;
+        }
+
+
+        if (wereInRange && willBeInRange)
         {
             // Send attack messages.
             if ((oflags & UPDATEFLAG_ATTACK) && oid != pid)
@@ -148,7 +199,7 @@ static void informPlayer(MapComposite *map, Character *p)
             {
                 MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
                 LooksMsg.writeShort(oid);
-                serializeLooks(static_cast< Character * >(o), LooksMsg);
+                serializeLooks(static_cast< Character * >(o), LooksMsg, false);
                 gameHandler->sendTo(p, LooksMsg);
             }
 
@@ -172,21 +223,26 @@ static void informPlayer(MapComposite *map, Character *p)
                     damageMsg.writeShort(*j);
                 }
             }
-        }
 
-        // Check if this character and this moving object were around.
-        bool wereInRange = pold.inRangeOf(oold, AROUND_AREA) &&
-                           !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
-
-        // Send enter/leaver messages.
-        if (!wereInRange)
-        {
-            // o was outside p's range.
-            if (!willBeInRange)
+            if (oold == opos)
             {
-                // Nothing to report: o will not be inside p's range.
+                // o does not move, nothing more to report.
                 continue;
             }
+        }
+
+        if (!willBeInRange)
+        {
+            // o is no longer visible from p. Send leave message.
+            MessageOut leaveMsg(GPMSG_BEING_LEAVE);
+            leaveMsg.writeShort(oid);
+            gameHandler->sendTo(p, leaveMsg);
+            continue;
+        }
+
+        if (!wereInRange)
+        {
+            // o is now visible by p. Send enter message.
             flags |= MOVING_POSITION;
 
             MessageOut enterMsg(GPMSG_BEING_ENTER);
@@ -203,7 +259,7 @@ static void informPlayer(MapComposite *map, Character *p)
                     enterMsg.writeByte(q->getHairStyle());
                     enterMsg.writeByte(q->getHairColor());
                     enterMsg.writeByte(q->getGender());
-                    serializeLooks(q, enterMsg);
+                    serializeLooks(q, enterMsg, true);
                 } break;
                 case OBJECT_MONSTER:
                 {
@@ -213,20 +269,6 @@ static void informPlayer(MapComposite *map, Character *p)
                     assert(false); // TODO
             }
             gameHandler->sendTo(p, enterMsg);
-            continue;
-        }
-        else if (!willBeInRange)
-        {
-            // o is no longer visible from p.
-            MessageOut leaveMsg(GPMSG_BEING_LEAVE);
-            leaveMsg.writeShort(oid);
-            gameHandler->sendTo(p, leaveMsg);
-            continue;
-        }
-        else if (oold == opos)
-        {
-            // o does not move, nothing to report.
-            continue;
         }
 
         /* At this point, either o has entered p's range, either o is
@@ -290,6 +332,8 @@ static void informPlayer(MapComposite *map, Character *p)
         {
             if (oflags & UPDATEFLAG_NEW_ON_MAP)
             {
+                /* Send a specific message to the client when an item appears
+                   out of nowhere, so that a sound/animation can be performed. */
                 MessageOut appearMsg(GPMSG_ITEM_APPEAR);
                 appearMsg.writeShort(o->getItemClass()->getDatabaseID());
                 appearMsg.writeShort(opos.x);

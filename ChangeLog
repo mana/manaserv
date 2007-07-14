@@ -1,4 +1,9 @@
-﻿﻿﻿﻿﻿﻿﻿﻿2007-07-12  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿2007-07-14  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+
+	* src/defines.h, src/game-server/state.cpp: Reduced size of equipment
+	packets. Fixed packet sending on object distance change.
+
+2007-07-12  Guillaume Melquiond <guillaume.melquiond@gmail.com>
 
 	* src/game-server/item.hpp, src/game-server/inventory.cpp,
 	src/game-server/inventory.hpp: Fixed naming of equipment slot.
