@@ -51,15 +51,16 @@ Monster::Monster(MonsterClass *specy):
     mAttackAftDelay(10)
 {
     LOG_DEBUG("Monster spawned!");
-    mAgressive = false; // TODO: get from monster database
-    mAgressionRange = 10; // TODO: get from monster database
-    mAttributes.resize(NB_ATTRIBUTES_CONTROLLED, 1); // TODO: fill with the real attributes
+    mAgressive = false;   // TODO: Get from monster database
+    mAgressionRange = 10; // TODO: Get from monster database
+    // TODO: Fill with the real attributes
+    mAttributes.resize(NB_ATTRIBUTES_CONTROLLED, 1);
 
-    // some bogus values for testing monster attacks on players
+    // Some bogus values for testing monster attacks on players
     setAttribute(BASE_ATTR_STRENGTH, 10);
     setAttribute(MONSTER_SKILL_WEAPON, 3);
 
-    // set positions relative to target from which the monster can attack
+    // Set positions relative to target from which the monster can attack
     mAttackPositions.push_back(AttackPosition(+32, 0, DIRECTION_LEFT));
     mAttackPositions.push_back(AttackPosition(-32, 0, DIRECTION_RIGHT));
     mAttackPositions.push_back(AttackPosition(0, +32, DIRECTION_DOWN));
@@ -78,7 +79,7 @@ Monster::~Monster()
 
 void Monster::update()
 {
-    // if dead do nothing but rot
+    // If dead do nothing but rot
     if (mAction == DEAD)
     {
         mCountDown--;
@@ -89,7 +90,7 @@ void Monster::update()
         return;
     }
 
-    // if currently attacking finish attack;
+    // If currently attacking finish attack;
     if (mAttackTime)
     {
         if (mAttackTime == mAttackAftDelay)
@@ -101,24 +102,24 @@ void Monster::update()
         return;
     }
 
-    // check potential attack positions
+    // Check potential attack positions
     Being *bestAttackTarget = NULL;
     int bestTargetPriority = 0;
     Point bestAttackPosition;
     Direction bestAttackDirection = DIRECTION_DOWN;
 
-    // iterate through objects nearby
+    // Iterate through objects nearby
     for (MovingObjectIterator i(getMap()->getAroundCharacterIterator(this, AROUND_AREA)); i; ++i)
     {
-        // we only want to attack player characters
+        // We only want to attack player characters
         if ((*i)->getType() != OBJECT_CHARACTER) continue;
 
         Being *target = static_cast<Being *> (*i);
 
-        // dead characters are ignored
+        // Dead characters are ignored
         if (target->getAction() == DEAD) continue;
 
-        // determine how much we hate the target
+        // Determine how much we hate the target
         int targetPriority = 0;
         std::map<Being *, int, std::greater<Being *> >::iterator angerIterator;
         angerIterator = mAnger.find(target);
@@ -135,7 +136,7 @@ void Monster::update()
             continue;
         }
 
-        // check all attack positions
+        // Check all attack positions
         for (std::list<AttackPosition>::iterator j = mAttackPositions.begin();
              j != mAttackPositions.end();
              j++)
@@ -156,25 +157,25 @@ void Monster::update()
         }
     }
 
-    // check if an attack position has been found
+    // Check if an attack position has been found
     if (bestAttackTarget)
     {
-        // check if we are there
+        // Check if we are there
         if (bestAttackPosition == getPosition())
         {
-            // we are there - let's get ready to beat the crap out of the target
+            // We are there - let's get ready to beat the crap out of the target
             setDirection(bestAttackDirection);
             mAttackTime = mAttackPreDelay + mAttackAftDelay;
         }
         else
         {
-            // we aren't there yet - let's move
+            // We aren't there yet - let's move
             setDestination(bestAttackPosition);
         }
     }
     else
     {
-        // we have no target - let's wander around
+        // We have no target - let's wander around
         mCountDown--;
         if (mCountDown <= 0)
         {
@@ -182,9 +183,6 @@ void Monster::update()
                             rand() % 160 - 80 + getPosition().y);
             setDestination(randomPos);
             mCountDown = 10 + rand() % 10;
-
-            LOG_DEBUG("Setting new random destination " << randomPos.x << ","
-                      << randomPos.y << " for being " << getPublicID());
         }
     }
 }
@@ -193,7 +191,7 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
 {
     Point thisPos = getPosition();
 
-    // check if we already are on this position
+    // Check if we already are on this position
     if (thisPos.x / 32 == position.x / 32 &&
         thisPos.y / 32 == position.y / 32)
     {
@@ -215,7 +213,7 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
     }
 }
 
-void Monster::died (Being *being)
+void Monster::died(Being *being)
 {
     mAnger.erase(being);
     mDeathListeners.remove((DeathListener *)being);
@@ -244,7 +242,7 @@ int Monster::damage(Damage damage)
 
 void Monster::die()
 {
-    mCountDown = 50; // sets remove time to 5 seconds
+    mCountDown = 50; // Sets remove time to 5 seconds
     Being::die();
     if (ItemClass *drop = mSpecy->getRandomDrop())
     {

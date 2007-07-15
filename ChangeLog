@@ -1,9 +1,16 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿2007-07-14  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+﻿2007-07-15  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/chat-server/chatchannelmanager.cpp,
+	src/chat-server/chatchannelmanager.hpp,
+	src/chat-server/chathandler.cpp: Some cleaning up of the chat channel
+	manager code.
+
+2007-07-14  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/defines.h, src/game-server/state.cpp: Reduced size of equipment
 	packets. Fixed packet sending on object distance change.
 
-2007-07-12  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-07-12  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/item.hpp, src/game-server/inventory.cpp,
 	src/game-server/inventory.hpp: Fixed naming of equipment slot.
@@ -12,7 +19,7 @@
 	* src/defines.h, src/game-server/state.cpp: Added support for visible
 	equipment.
 
-2007-07-08  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-07-08  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/being.cpp: Lowered messages to debug level.
 	* src/game-server/deathlistener.hpp: Made members non-abstract, so that
@@ -27,7 +34,7 @@
 	* src/game-server/gamehandler.cpp: Update account database on
 	unexpected client disconnection.
 
-2007-07-07  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-07-07  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/common/inventorydata.hpp: Fixed missing include.
 	* src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp:
@@ -54,13 +61,13 @@
 	src/game-server/movingobject.cpp, src/game-server/movingobject.hpp:
 	Fixed teleportation hack caused by caching of pathfinder results.
 
-2007-07-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-07-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/dalstorage.cpp: Added error messages for failed
 	SQL requests when retrieving character. Added check for failed
 	character when retrieving account. Added check for corrupted inventory.
 
-2007-07-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-07-02  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/storage.cpp, src/account-server/storage.hpp: Moved
 	trivial accessors to header file. Removed C-like prototypes and harmful
@@ -75,7 +82,7 @@
 
 	* accountserver.cbp, gameserver.cbp: Updated project files.
 
-﻿2007-07-01  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-07-01  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/abstractcharacterdata.cpp, src/abstractcharacterdata.hpp,
 	src/serialize/characterdata.hpp, src/account-server/serverhandler.cpp,
@@ -131,7 +138,7 @@
 	* src/game-server/spawnarea.cpp: Monsters are no longer spawned on 
 	unwalkable tiles.
 
-2007-06-28  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-06-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/spawnarea.cpp: Delegated creature insertion to the
 	State class so that it does not disturb object updating.
@@ -145,7 +152,7 @@
 	* accountserver.cbp, gameserver.cbp: Fixed include directories and
 	updated project files.
 
-2007-06-16  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-06-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/utils/mathutils.cpp: Fixed miscompilation of rsqrt due to type
 	aliasing and sped up sqrt.
@@ -556,7 +563,7 @@
 	always have highest log level.
 	* docs/tmwserv.xml: Added some documentation to example config file.
 
-2007-01-05  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-01-05  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/player.cpp, src/game-server/state.cpp: Delayed
 	update of persistent position and put it into state handling, so that
@@ -589,7 +596,7 @@
 	Updated accordingly. Removed some unworthy debug messages.
 	* src/Makefile.am: Removed useless dependencies.
 
-2007-01-04  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-01-04  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/playerdata.hpp, src/playerdata.cpp, src/defines.h,
 	src/Makefile.am: Factored serialization of PlayerData into a new file.
@@ -630,7 +637,7 @@
 	* src/utils/timer.cpp: Removed extra semicolons that break builds with
 	--pedantic.
 
-2007-01-03  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-01-03  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/debug.h, src/debug.cpp, src/Makefile.am: Removed obsolete debug
 	helpers.
@@ -671,7 +678,7 @@
 	floor items to clients.
 	* src/game-server/testing.cpp: Added a Xmas cake for testing purpose.
 
-2007-01-02  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2007-01-02  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* tmwserv.cbp, tmwserv.dev, runserv.sh: Removed obsolete project files
 	and shell script.
@@ -705,7 +712,7 @@
 	* accountserver.cbp, gameserver.cbp, runsrv.bat: Added Code::Blocks
 	project files and windows start script.
 
-2006-12-31  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2006-12-31  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/dalstorage.hpp,
 	src/account-server/dalstorage.cpp, src/account-server/storage.hpp:
@@ -713,7 +720,7 @@
 	* src/account-server/serverhandler.cpp: Finished implementation for
 	warping players around servers.
 
-2006-12-30  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2006-12-30  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/mapcomposite.h, src/mapcomposite.cpp: Moved to src/game-server
 	directory and changed header extension to hpp.
@@ -753,7 +760,7 @@
 	server communications to update player data and to warp players
 	around.
 
-2006-12-29  Guillaume Melquiond <guillaume.melquiond@gmail.com>
+2006-12-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account.h, src/account.cpp, src/accountclient.h,
 	src/accountclient.cpp, src/storage.h, src/storage.cpp,

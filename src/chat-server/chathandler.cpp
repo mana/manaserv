@@ -118,7 +118,7 @@ NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
 void ChatHandler::computerDisconnected(NetComputer *computer)
 {
     // Remove user from all channels
-    chatChannelManager->removeUserFromEveryChannels(((ChatClient*)computer)->characterName);
+    chatChannelManager->removeUserFromAllChannels(((ChatClient*)computer)->characterName);
     ChatPendingClients::iterator i_end = pendingClients.end();
     for (ChatPendingClients::iterator i = pendingClients.begin();
             i != i_end; ++i)
@@ -213,8 +213,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 // If it's slang's free.
                 if (stringFilter->filterContent(text))
                 {
-                    // We send the message to every players in the default
-                    // channel as it is an annouce.
+                    // We send the message to all players in the default
+                    // channel as it is an announce.
                     announce(computer, text);
                 }
                 else
@@ -340,10 +340,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
                 short channelId = message.readShort();
                 std::string channelName = chatChannelManager->getChannelName(channelId);
-                
+
                 // Get character based on name.
                 CharacterPtr character = serverHandler->getCharacter(computer.characterName);
-                
+
                 if (!chatChannelManager->isChannelRegistered(channelId))
                 {
                     result.writeByte(ERRMSG_INVALID_ARGUMENT);
@@ -378,10 +378,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 { // Private channel
                     // We first see if the user is the admin (first user) of
                     // the channel
-                    std::vector< std::string > const &userList =
+                    std::vector<std::string> const &userList =
                         chatChannelManager->getUserListInChannel(channelId);
-                    std::vector< std::string >::const_iterator i = userList.begin();
-                    // if it's actually the private channel's admin
+                    std::vector<std::string>::const_iterator i = userList.begin();
+                    // If it's actually the private channel's admin
                     if (*i == computer.characterName)
                     {
                         // Make every user quit the channel
@@ -419,7 +419,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                         break;
                     }
                 }
-                
+
                 if (guildManager->doesExist(channelName))
                 {
                     Guild *guild = guildManager->findByName(channelName);
@@ -433,8 +433,8 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (chatChannelManager->addUserInChannel(computer.characterName, channelId))
                 {
                     result.writeByte(ERRMSG_OK);
-                    // The user entered the channel, now give him the channel id, the announcement string
-                    // and the user list.
+                    // The user entered the channel, now give him the channel
+                    // id, the announcement string and the user list.
                     result.writeShort(channelId);
                     result.writeString(channelName);
                     result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
@@ -468,7 +468,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             result.writeShort(CPMSG_QUIT_CHANNEL_RESPONSE);
             short channelId = message.readShort();
             std::string channelName = chatChannelManager->getChannelName(channelId);
-            
+
             if (channelId != 0 && chatChannelManager->isChannelRegistered(channelId))
             {
                 if (chatChannelManager->removeUserFromChannel(computer.characterName, channelId))
@@ -480,7 +480,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
                     warnUsersAboutPlayerEventInChat(channelId,
                                                     computer.characterName,
                                                     CHAT_EVENT_LEAVING_PLAYER);
-                    if(guildManager->doesExist(channelName))
+                    if (guildManager->doesExist(channelName))
                     {
                         // Send a user left message
                         sendUserLeft(channelId, computer.characterName);
@@ -503,48 +503,50 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             result.writeShort(CPMSG_LIST_CHANNELS_RESPONSE);
 
             short numberOfPublicChannels;
-            std::istringstream channels(chatChannelManager->getPublicChannelNames(
-                                                                &numberOfPublicChannels));
+            std::istringstream channels(
+                    chatChannelManager->getPublicChannelNames(
+                        numberOfPublicChannels));
 
-            for(int i = 0; i < numberOfPublicChannels; ++i)
+            for (int i = 0; i < numberOfPublicChannels; ++i)
             {
                 std::string channel;
                 channels >> channel;
                 // Send only public channels
                 result.writeString(channel);
-                result.writeShort(chatChannelManager->getNumberOfChannelUsers(channel));
+                result.writeShort(
+                        chatChannelManager->getNumberOfChannelUsers(channel));
             }
         }
         break;
-            
+
         case PCMSG_LIST_CHANNELUSERS:
         {
             result.writeShort(CPMSG_LIST_CHANNELUSERS_RESPONSE);
-            
+
             std::string channelName = message.readString();
-            
+
             result.writeString(channelName);
-            
-            // get user list
+
+            // Get user list
             std::vector<std::string> channelList;
             channelList = chatChannelManager->getUserListInChannel(
                                 chatChannelManager->getChannelId(channelName));
-            
-            // add a user at a time
-            for(int i = 0; i < channelList.size(); ++i)
+
+            // Add a user at a time
+            for (int i = 0; i < channelList.size(); ++i)
             {
                 result.writeString(channelList[i]);
             }
-            
         } break;
 
         case PCMSG_DISCONNECT:
         {
             result.writeShort(CPMSG_DISCONNECT_RESPONSE);
             result.writeByte(ERRMSG_OK);
-            chatChannelManager->removeUserFromEveryChannels(computer.characterName);
-        break;
+            chatChannelManager->removeUserFromAllChannels(
+                    computer.characterName);
         }
+        break;
 
         default:
             LOG_WARN("ChatHandler::processMessage, Invalid message type"
@@ -587,7 +589,7 @@ ChatHandler::announce(ChatClient &computer, std::string const &text)
         computer.accountLevel == AL_GM )
     {
         LOG_INFO("ANNOUNCE: " << text);
-        // Send it to every beings.
+        // Send it to all beings.
         result.writeShort(CPMSG_ANNOUNCEMENT);
         result.writeString(text);
         sendToEveryone(result);
@@ -630,7 +632,7 @@ ChatHandler::sayInChannel(ChatClient &computer, short channel,
     MessageOut result;
     LOG_DEBUG(computer.characterName << " says in channel " << channel << ": "
               << text);
-    // Send it to every beings in channel
+    // Send it to all beings in channel
     result.writeShort(CPMSG_PUBMSG);
     result.writeShort(channel);
     result.writeString(computer.characterName);
