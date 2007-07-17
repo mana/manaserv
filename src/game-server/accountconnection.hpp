@@ -31,7 +31,7 @@ class Character;
 /**
  * A connection to the account server.
  */
-class AccountConnection: public Connection
+class AccountConnection : public Connection
 {
     public:
         /**

@@ -188,11 +188,11 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     mTokenCollector.addPendingConnect(magic_token, accountID);
 
         } break;
-            
+
         case GAMSG_GUILD_CREATE:
         {
             LOG_DEBUG("GAMSG_GUILD_CREATE");
-            
+
             result.writeShort(AGMSG_GUILD_CREATE_RESPONSE);
             // Check if the guild name is taken already
             int playerId = msg.readLong();
@@ -203,23 +203,23 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 break;
             }
             result.writeByte(ERRMSG_OK);
-            
+
             Storage &store = Storage::instance("tmw");
             CharacterPtr ptr = store.getCharacter(playerId);
-            
+
             // Add guild to character data.
             ptr->addGuild(guildName);
 
             // Who to send data to at the other end
             result.writeLong(playerId);
-            
+
             short guildId = guildManager->createGuild(guildName, ptr.get());
             result.writeShort(guildId);
             result.writeString(guildName);
             result.writeShort(1);
             enterChannel(guildName, ptr.get());
         } break;
-            
+
         case GAMSG_GUILD_INVITE:
         {
             // Add Inviting member to guild here
@@ -230,24 +230,24 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             short id = msg.readShort();
             std::string member = msg.readString();
             Guild *guild = guildManager->findById(id);
-            
+
             Storage &store = Storage::instance("tmw");
             CharacterPtr ptr = store.getCharacter(playerId);
-            
+
             if (!guild->checkLeader(ptr.get()))
             {
                 // Return that the user doesnt have the rights to invite.
                 result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
                 break;
             }
-            
+
             if (guild->checkInGuild(member))
             {
                 // Return that invited member already in guild.
                 result.writeByte(ERRMSG_ALREADY_TAKEN);
                 break;
             }
-            
+
             // Send invite to player using chat server
             if (store.doesCharacterNameExist(member))
             {
@@ -257,7 +257,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             guild->addInvited(member);
             result.writeByte(ERRMSG_OK);
         } break;
-            
+
         case GAMSG_GUILD_ACCEPT:
         {
             // Add accepting into guild
@@ -272,43 +272,43 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 result.writeByte(ERRMSG_INVALID_ARGUMENT);
                 break;
             }
-            
+
             Storage &store = Storage::instance("tmw");
             CharacterPtr ptr = store.getCharacter(playerId);
-            
+
             if (!guild->checkInvited(ptr->getName()))
             {
                 // Return the user was not invited.
                 result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
                 break;
             }
-            
+
             if (guild->checkInGuild(ptr->getName()))
             {
                 // Return that the player is already in the guild.
                 result.writeByte(ERRMSG_ALREADY_TAKEN);
                 break;
             }
-            
+
             result.writeByte(ERRMSG_OK);
-            
+
             // Who to send data to at the other end
             result.writeLong(playerId);
-            
+
             // The guild id and guild name they have joined
             result.writeShort(guild->getId());
             result.writeString(guildName);
-            
+
             // Add member to guild
             guildManager->addGuildMember(guild->getId(), ptr.get());
-            
+
             // Add guild to character
             ptr->addGuild(guildName);
-            
+
             // Enter Guild Channel
             enterChannel(guildName, ptr.get());
         } break;
-            
+
         case GAMSG_GUILD_GET_MEMBERS:
         {
             LOG_DEBUG("Received msg ... GAMSG_GUILD_GET_MEMBERS");
@@ -329,7 +329,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 result.writeString(guild->getMember(i));
             }
         } break;
-            
+
         case GAMSG_GUILD_QUIT:
         {
             LOG_DEBUG("Received msg ... GAMSG_GUILD_QUIT");
@@ -366,19 +366,19 @@ void ServerHandler::enterChannel(const std::string &name, CharacterData *player)
 {
     MessageOut result(CPMSG_ENTER_CHANNEL_RESPONSE);
     short channelId = chatChannelManager->getChannelId(name);
-    if (!chatChannelManager->isChannelRegistered(channelId))
+    if (!chatChannelManager->channelExists(channelId))
     {
-        // Channel doesnt exist yet so create one
+        // Channel doesn't exist yet so create one
         channelId = chatChannelManager->registerPrivateChannel(
                                             name,
                                             "Guild Channel",
                                             "");
     }
-    
+
     if (chatChannelManager->addUserInChannel(player->getName(), channelId))
     {
         result.writeByte(ERRMSG_OK);
-        
+
         // The user entered the channel, now give him the channel id, the announcement string
         // and the user list.
         result.writeShort(channelId);
@@ -392,7 +392,7 @@ void ServerHandler::enterChannel(const std::string &name, CharacterData *player)
         {
             result.writeString(*i);
         }
-        
+
         // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
         // in the channel.
         chatHandler->warnUsersAboutPlayerEventInChat(channelId,
@@ -400,7 +400,7 @@ void ServerHandler::enterChannel(const std::string &name, CharacterData *player)
                                         CHAT_EVENT_NEW_PLAYER);
 
     }
-    
+
     chatHandler->sendGuildEnterChannel(result, player->getName());
 }
 

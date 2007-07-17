@@ -27,104 +27,112 @@
 #include <string>
 #include <vector>
 
-class ChatChannel {
- public:
-    typedef std::vector< std::string > ChannelUsers;
+/**
+ * A chat channel. Optionally a channel is private, in which case a password is
+ * required to join it.
+ *
+ * No logic is currently associated with a chat channel except for making sure
+ * that no user joins the channel twice and checking that a user who leaves
+ * actually existed in the channel.
+ *
+ * TODO: b_lindeijer: It would be nicer when some more logic could be placed
+ *        in this class to remove some weight from the ChatHandler. Referencing
+ *        ChatClient instances would also be nicer than to store only the names
+ *        of the characters.
+ */
+class ChatChannel
+{
+    public:
+        typedef std::vector<std::string> ChannelUsers;
 
-    /**
-     * Constructors
-     */
-    ChatChannel(const std::string &channelName,
-                const std::string &channelAnnouncement,
-                const std::string &channelPassword,
-                bool channelPrivacy);
+        /**
+         * Constructor.
+         *
+         * TODO: b_lindeijer: I would say a channel can be defined as private
+         *        when a non-empty password is set, in which case we can get
+         *        rid of the privacy parameter.
+         *
+         * @param name         the name of the channel.
+         * @param announcement a welcome message.
+         * @param password     password (for private channels).
+         * @param privacy      whether this channel is private.
+         */
+        ChatChannel(const std::string &name,
+                    const std::string &announcement = "",
+                    const std::string &password = "",
+                    bool privacy = false);
 
-    /**
-     * Destructor
-     */
-    ~ChatChannel();
+        /**
+         * Get the name of the channel.
+         */
+        const std::string& getName() const
+        { return mName; }
 
-    /**
-     * Get the name of the channel
-     */
-    const std::string& getName() const;
+        /**
+         * Get the announcement string of the channel.
+         */
+        const std::string& getAnnouncement() const
+        { return mAnnouncement; }
 
-    /**
-     * Get the Announcement string of the channel
-     */
-    const std::string& getAnnouncement() const;
+        /**
+         * Get the password of the channel.
+         */
+        const std::string& getPassword() const
+        { return mPassword; }
 
-    /**
-     * Get the password of the channel
-     */
-    const std::string& getPassword() const;
+        /**
+         * Returns whether this channel is private.
+         */
+        bool isPrivate() const
+        { return mPrivate; }
 
-    /**
-     * Get the password of the channel
-     */
-    bool getPrivacy() const;
+        /**
+         * Sets the name of the channel.
+         */
+        void setName(const std::string &channelName);
 
-    /**
-     * Set the name of the channel
-     */
-    void setName(const std::string &channelName);
+        /**
+         * Sets the announcement string of the channel.
+         */
+        void setAnnouncement(const std::string &channelAnnouncement);
 
-    /**
-     * Set the Announcement string of the channel
-     */
-    void setAnnouncement(const std::string &channelAnnouncement);
+        /**
+         * Sets the password of the channel.
+         */
+        void setPassword(const std::string &channelPassword);
 
-    /**
-     * Set the password of the channel
-     */
-    void setPassword(const std::string &channelPassword);
+        /**
+         * Gets the list of the users registered in the channel.
+         */
+        const ChannelUsers& getUserList() const
+        { return mRegisteredUsers; }
 
-    /**
-     * Get the list of the users registered in the channel
-     */
-    ChannelUsers const &getUserList() const;
+        /**
+         * Adds a user in the channel.
+         *
+         * @return whether the user was successfully added
+         */
+        bool addUserInChannel(std::string const &);
 
-    /**
-     * Add a user in the channel
-     */
-    bool addUserInChannel(std::string const &);
+        /**
+         * Removes a user from the channel.
+         *
+         * @return whether the user was successfully removed
+         */
+        bool removeUserFromChannel(std::string const &);
 
-    /**
-     * Remove a user from the channel.
-     */
-    bool removeUserFromChannel(std::string const &);
+        /**
+         * Empties a channel from its users (admin included).
+         */
+        void removeAllUsersFromChannel();
 
-    /**
-     * Empties a channel from its users (admin included).
-     */
-    void removeEveryUsersFromChannel();
+    private:
+        std::string mName;             /**< The name of the channel. */
+        std::string mAnnouncement;     /**< Welcome message. */
+        std::string mPassword;         /**< The channel password. */
+        ChannelUsers mRegisteredUsers; /**< Users in this channel. */
 
- private:
-    /**
-     * The Channel's name.
-     */
-    std::string mChannelName;
-
-    /**
-     * The Channel's announcement.
-     */
-    std::string mChannelAnnouncement;
-
-    /**
-     * The Channel's password.
-     */
-    std::string mChannelPassword;
-
-    /**
-     * The registered user list
-     */
-    ChannelUsers mRegisteredUsers;
-
-    /**
-     * Whether the channel is private
-     */
-    bool mChannelPrivate;
-
+        bool mPrivate;                 /**< Whether the channel is private. */
 };
 
 #endif

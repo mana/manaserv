@@ -28,6 +28,10 @@
 
 #include "chat-server/chatchannel.hpp"
 
+/**
+ * The chat channel manager takes care of registering and removing public and
+ * private chat channels. Every channel gets a unique channel ID.
+ */
 class ChatChannelManager
 {
     public:
@@ -58,9 +62,9 @@ class ChatChannelManager
          * channels has already been reached or when a channel with the same
          * name already exists.
          *
-         * TODO: Pretty much the same as registering public channel. Maybe they
-         *       should be merged and private/public should be passed as a
-         *       boolean?
+         * TODO: b_lindeijer: Pretty much the same as registering public
+         *        channel. Maybe they should be merged and private/public
+         *        should be passed as a boolean?
          *
          * @return the ID of the registered channel, or 0 if the registering
          *         was unsuccessful.
@@ -75,19 +79,17 @@ class ChatChannelManager
         bool removeChannel(short channelId);
 
         /**
-         * Get all public channels.
-         * TODO: Why not return an actual std::list?
+         * Returns a list containing the names of all public channels.
          *
-         * @param numChannels The number of channels returned is stored here
-         * @return a list of channel names
+         * @return a list of public channel names
          */
-        std::string getPublicChannelNames(short &numChannels);
+        std::list<std::string> getPublicChannelNames();
 
         /**
-         * Get the number of channels that have been registered.
-         * TODO: Documentation doesn't match function name, needs fixing.
+         * Get the number of users that have joined a channel.
          *
-         * @return the number of registered channels
+         * @param channelName the name of the channel
+         * @return the number of users in the channel
          */
         short getNumberOfChannelUsers(const std::string &channelName);
 
@@ -100,53 +102,51 @@ class ChatChannelManager
 
         /**
          * Get the name of a channel from its id.
-         * TODO: Can probably return a const std::string&
-         * TODO: Possibly throw exception when id doesn't exist
          *
          * @return the name of the channel
+         * @deprecated Use ChatChannel::getName instead
          */
         std::string getChannelName(short channelId);
 
         /**
          * Get the announcement string of a channel from its id.
-         * TODO: Can probably return a const std::string&
-         * TODO: Possibly throw exception when id doesn't exist
          *
          * @return the announcement string of the channel
+         * @deprecated Use ChatChannel::getAnnouncement instead
          */
         std::string getChannelAnnouncement(short channelId);
 
         /**
          * Set the announcement string of a channel from its id.
-         * TODO: Documentation about returned value is broken
          *
-         * @return the announcement string of the channel
+         * @return whether the channel exists
+         * @deprecated Use ChatChannel::setAnnouncement instead
          */
         bool setChannelAnnouncement(short channelId,
                                     std::string const &channelAnnouncement);
 
         /**
          * Set the password of a channel by its id.
-         * TODO: Documentation about returned value is broken
          *
-         * @return the password of the channel
+         * @return whether the channel exists
+         * @deprecated Use ChatChannel::setPassword instead
          */
         bool setChannelPassword(short channelId,
                                 const std::string &channelPassword);
 
         /**
          * Get the password of a channel from its id.
-         * TODO: Can probably return a const std::string &
          *
          * @return the password of the channel
+         * @deprecated Use ChatChannel::getPassword instead
          */
         std::string getChannelPassword(short channelId);
 
         /**
          * Get the privacy of the channel from its id.
-         * TODO: Rename to isPrivate?
          *
          * @return the privacy of the channel
+         * @deprecated Use ChatChannel::isPrivate instead
          */
         bool getChannelPrivacy(short channelId);
 
@@ -180,9 +180,11 @@ class ChatChannelManager
         std::vector<std::string> const &getUserListInChannel(short channelId);
 
         /**
-         * Tells if a channel exists.
+         * Returns whether a channel exists.
+         *
+         * @param channelId a channel ID
          */
-        bool isChannelRegistered(short channelId);
+        bool channelExists(short channelId);
 
     private:
         typedef std::map<short, ChatChannel> ChatChannels;

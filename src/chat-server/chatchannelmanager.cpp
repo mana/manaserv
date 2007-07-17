@@ -21,7 +21,7 @@
  *  $Id$
  */
 
-#include <map>
+#include <list>
 
 #include "account-server/storage.hpp"
 #include "chat-server/chatchannelmanager.hpp"
@@ -92,25 +92,26 @@ bool ChatChannelManager::removeChannel(short channelId)
 {
     ChatChannelIterator i = mChatChannels.find(channelId);
     if (i == mChatChannels.end()) return false;
-    i->second.removeEveryUsersFromChannel();
+    i->second.removeAllUsersFromChannel();
     mChatChannels.erase(i);
     return true;
 }
 
-std::string ChatChannelManager::getPublicChannelNames(short &numChannels)
+std::list<std::string>
+ChatChannelManager::getPublicChannelNames()
 {
-    std::string channels;
+    std::list<std::string> channels;
+
     for (ChatChannels::const_iterator i = mChatChannels.begin(),
             i_end = mChatChannels.end();
          i != i_end; ++i)
     {
-        if (!i->second.getPrivacy())
+        if (!i->second.isPrivate())
         {
-            channels.append(i->second.getName());
-            channels += " ";
-            numChannels++;
+            channels.push_back(i->second.getName());
         }
     }
+
     return channels;
 }
 
@@ -141,19 +142,19 @@ std::string ChatChannelManager::getChannelName(short channelId)
 std::string ChatChannelManager::getChannelAnnouncement(short channelId)
 {
     ChatChannelIterator i = mChatChannels.find(channelId);
-    return (i != mChatChannels.end()) ? i->second.getAnnouncement() : std::string();
+    return (i != mChatChannels.end()) ? i->second.getAnnouncement() : "";
 }
 
 std::string ChatChannelManager::getChannelPassword(short channelId)
 {
     ChatChannelIterator i = mChatChannels.find(channelId);
-    return (i != mChatChannels.end()) ? i->second.getPassword() : std::string();
+    return (i != mChatChannels.end()) ? i->second.getPassword() : "";
 }
 
 bool ChatChannelManager::getChannelPrivacy(short channelId)
 {
     ChatChannelIterator i = mChatChannels.find(channelId);
-    return (i != mChatChannels.end()) ? i->second.getPrivacy() : true;
+    return (i != mChatChannels.end()) ? i->second.isPrivate() : true;
 }
 
 bool ChatChannelManager::setChannelAnnouncement(short channelId, std::string const &channelAnnouncement)
@@ -214,7 +215,7 @@ ChatChannelManager::getUserListInChannel(short channelId)
     return emptyList;
 }
 
-bool ChatChannelManager::isChannelRegistered(short channelId)
+bool ChatChannelManager::channelExists(short channelId)
 {
     ChatChannelIterator i = mChatChannels.find(channelId);
     return i != mChatChannels.end();

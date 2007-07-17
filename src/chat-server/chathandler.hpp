@@ -31,7 +31,11 @@
 class ChatClient;
 
 /**
- * Manages all chat related
+ * Manages chat related things like private messaging, chat channel handling
+ * as well as guild chat. The only form of chat not handled by this server is
+ * local chat, which is handled by the game server.
+ *
+ * TODO: Extend with handling of team chat once teams are implemented.
  */
 class ChatHandler : public ConnectionHandler
 {
@@ -49,9 +53,9 @@ class ChatHandler : public ConnectionHandler
          */
         bool
         startListen(enet_uint16 port);
-        
+
         /**
-         * Tell a list of user about an event in a chatchannel about a player.
+         * Tell a list of users about an event in a chatchannel about a player.
          */
         void warnUsersAboutPlayerEventInChat(short channelId,
                                              std::string const &userName,
@@ -61,12 +65,14 @@ class ChatHandler : public ConnectionHandler
          * Send Chat and Guild Info to chat client, so that they can
          * join the correct channels.
          */
-        void sendGuildEnterChannel(const MessageOut &msg, const std::string &name);
-        
+        void sendGuildEnterChannel(const MessageOut &msg,
+                                   const std::string &name);
+
         /**
          * Send guild invite.
          */
-        void sendGuildInvite(const std::string &invitedName, const std::string &inviterName,
+        void sendGuildInvite(const std::string &invitedName,
+                             const std::string &inviterName,
                              const std::string &guildName);
 
     protected:
@@ -76,7 +82,7 @@ class ChatHandler : public ConnectionHandler
         void processMessage(NetComputer *computer, MessageIn &message);
         NetComputer *computerConnected(ENetPeer *);
         void computerDisconnected(NetComputer *);
-        
+
         /**
          * Send messages for each guild the character belongs to.
          */
@@ -120,12 +126,12 @@ class ChatHandler : public ConnectionHandler
          * still haven't sent in their magic token.
          */
         void removeOutdatedPending();
-        
+
         /**
          * Send user joined message.
          */
         void sendUserJoined(short channelId, const std::string &name);
-        
+
         /**
          * Send user left message.
          */

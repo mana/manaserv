@@ -70,7 +70,7 @@ class character_by_id
 };
 
 /**
-* Functor used to search a character by name in Characters.
+ * Functor used to search a character by name in Characters.
  */
 class character_by_name
 {
@@ -78,10 +78,10 @@ public:
     character_by_name(const std::string &name)
     : mName(name)
     {}
-    
+
     bool operator()(CharacterPtr const &elem) const
     { return elem->getName() == mName; }
-    
+
 private:
     std::string mName; /**< the name to look for */
 };
@@ -264,11 +264,11 @@ AccountPtr DALStorage::getAccountBySQL(std::string const &query)
                 CharacterPtr ptr = getCharacter(characterIDs[k]);
                 if (ptr.get())
                 {
-	                characters.push_back(getCharacter(characterIDs[k]));
+                    characters.push_back(getCharacter(characterIDs[k]));
                 }
                 else
                 {
-                	LOG_ERROR("Failed to get character " << characterIDs[k] << " for account " << id << '.');
+                    LOG_ERROR("Failed to get character " << characterIDs[k] << " for account " << id << '.');
                 }
             }
 
@@ -461,10 +461,10 @@ CharacterPtr DALStorage::getCharacter(const std::string &name)
     // look for the character in the list first.
     Characters::iterator it_end = mCharacters.end(),
     it = std::find_if(mCharacters.begin(), it_end, character_by_name(name));
-    
+
     if (it != it_end)
         return *it;
-    
+
     // the account was not in the list, look for it in the database.
     std::ostringstream sql;
     sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '" << name << "';";
@@ -687,7 +687,7 @@ DALStorage::updateCharacter(CharacterPtr character)
         LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
         return false;
     }
-    
+
     return true;
 }
 
@@ -776,7 +776,7 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
                         << i->second.getName() << "\", \""
                         << i->second.getAnnouncement() << "\", \""
                         << i->second.getPassword() << "\", \""
-                        << i->second.getPrivacy() << "\");";
+                        << i->second.isPrivate() << "\");";
 
                         LOG_DEBUG("Channel (" << i->first << ") saved: "
                                   << i->second.getName()

@@ -23,81 +23,44 @@
 
 #include "chat-server/chatchannel.hpp"
 
-ChatChannel::ChatChannel(const std::string &channelName,
-                         const std::string &channelAnnouncement = "None",
-                         const std::string &channelPassword = "None",
-                         bool channelPrivacy = true):
-    mChannelName(channelName),
-    mChannelAnnouncement(channelAnnouncement),
-    mChannelPassword(channelPassword),
-    mChannelPrivate(channelPrivacy)
+ChatChannel::ChatChannel(const std::string &name,
+                         const std::string &announcement,
+                         const std::string &password,
+                         bool privacy):
+    mName(name),
+    mAnnouncement(announcement),
+    mPassword(password),
+    mPrivate(privacy)
 {
-    if (channelAnnouncement == "")
-        mChannelAnnouncement = "None";
-    if (channelPassword == "")
-        mChannelPassword = "None";
-    mRegisteredUsers.clear();
-}
-
-ChatChannel::~ChatChannel()
-{
-    mRegisteredUsers.clear();
-}
-
-
-const std::string&
-ChatChannel::getName() const
-{
-    return mChannelName;
-}
-
-const std::string&
-ChatChannel::getAnnouncement() const
-{
-    return mChannelAnnouncement;
-}
-
-const std::string&
-ChatChannel::getPassword() const
-{
-    return mChannelPassword;
-}
-
-bool
-ChatChannel::getPrivacy() const
-{
-    return mChannelPrivate;
+    if (announcement == "")
+        mAnnouncement = "None";
+    if (password == "")
+        mPassword = "None";
 }
 
 void
-ChatChannel::setName(const std::string &channelName)
+ChatChannel::setName(const std::string &name)
 {
-    mChannelName = channelName;
+    mName = name;
 }
 
 void
-ChatChannel::setAnnouncement(const std::string &channelAnnouncement)
+ChatChannel::setAnnouncement(const std::string &announcement)
 {
-    if (channelAnnouncement == "")
-        mChannelAnnouncement = "None";
+    if (announcement == "")
+        mAnnouncement = "None";
     else
-        mChannelAnnouncement = channelAnnouncement;
+        mAnnouncement = announcement;
 }
 
 void
-ChatChannel::setPassword(const std::string &channelPassword)
+ChatChannel::setPassword(const std::string &password)
 {
-    if (channelPassword == "")
-        mChannelPassword = "None";
+    if (password == "")
+        mPassword = "None";
     else
-        mChannelPassword = channelPassword;
+        mPassword = password;
 }
-
-ChatChannel::ChannelUsers const &ChatChannel::getUserList() const
-{
-    return mRegisteredUsers;
-}
-
 
 bool ChatChannel::addUserInChannel(std::string const &user)
 {
@@ -109,7 +72,6 @@ bool ChatChannel::addUserInChannel(std::string const &user)
     return true;
 }
 
-
 bool ChatChannel::removeUserFromChannel(std::string const &user)
 {
     ChannelUsers::iterator i_end = mRegisteredUsers.end(),
@@ -119,7 +81,7 @@ bool ChatChannel::removeUserFromChannel(std::string const &user)
     return true;
 }
 
-void ChatChannel::removeEveryUsersFromChannel()
+void ChatChannel::removeAllUsersFromChannel()
 {
     mRegisteredUsers.clear();
 }
