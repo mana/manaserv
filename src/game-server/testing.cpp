@@ -27,31 +27,13 @@ static void dropItem(MapComposite *map, int x, int y, int type)
 
 void testingMap(MapComposite *map)
 {
-    static Rectangle rectA = { 56 * 32, 12 * 32, 5 * 32, 32 };
-    static WarpAction warpA(MapManager::getMap(3), 44 * 32 + 16, 80 * 32 + 16);
-    static Rectangle rectB = { 42 * 32, 88 * 32, 5 * 32, 32 };
-    static WarpAction warpB(MapManager::getMap(1), 58 * 32 + 16, 17 * 32 + 16);
-
     switch (map->getID())
     {
         case 1:
         {
-            // Create maggot spawn area
-            Rectangle maggotSpawnRect = { 720, 900, 320, 320 };
-            GameState::insert(new SpawnArea(map, MonsterManager::getMonster(1002), maggotSpawnRect));
-
-            // Portal to map 3
-            GameState::insert(new TriggerArea(map, rectA, &warpA));
-
             // Drop some items
             dropItem(map, 58 * 32 + 16, 20 * 32 + 16, 508);
             dropItem(map, 58 * 32 + 16, 21 * 32 + 16, 524);
-        } break;
-
-        case 3:
-        {
-            // Portal to map 1
-            GameState::insert(new TriggerArea(map, rectB, &warpB));
         } break;
     }
 }

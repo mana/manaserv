@@ -176,6 +176,16 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
+		<Unit filename="src\game-server\monstermanager.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\monstermanager.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
 		<Unit filename="src\game-server\movingobject.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
@@ -271,12 +281,6 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\point.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\properties.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

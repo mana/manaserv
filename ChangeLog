@@ -1,4 +1,11 @@
-﻿2007-07-15  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+﻿2007-07-17  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* gameserver.cbp, src/game-server/mapmanager.cpp,
+	src/game-server/mapreader.cpp, src/game-server/mapreader.hpp,
+	src/game-server/testing.cpp, src/utils/xml.hpp: Implemented loading of
+	warp and spawn areas from map files.
+
+2007-07-15  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/chat-server/chatchannelmanager.cpp,
 	src/chat-server/chatchannelmanager.hpp,

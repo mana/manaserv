@@ -23,7 +23,12 @@
 
 #include "resourcemanager.h"
 #include "game-server/map.hpp"
+#include "game-server/mapcomposite.hpp"
+#include "game-server/mapmanager.hpp"
 #include "game-server/mapreader.hpp"
+#include "game-server/monstermanager.hpp"
+#include "game-server/spawnarea.hpp"
+#include "game-server/trigger.hpp"
 #include "utils/base64.h"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
@@ -31,11 +36,11 @@
 
 static std::vector< int > tilesetFirstGids;
 
-static Map* readMap(xmlNodePtr node, std::string const &path);
+static Map* readMap(xmlNodePtr node, std::string const &path, MapComposite *composite, std::vector<Thing *> &things);
 static void readLayer(xmlNodePtr node, Map *map);
 static void setTileWithGid(Map *map, int x, int y, int gid);
 
-Map *MapReader::readMap(const std::string &filename)
+void MapReader::readMap(const std::string &filename, MapComposite *composite)
 {
     // Load the file through resource manager.
     ResourceManager *resman = ResourceManager::getInstance();
@@ -45,7 +50,7 @@ Map *MapReader::readMap(const std::string &filename)
     if (buffer == NULL)
     {
         LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")");
-        return NULL;
+        return;
     }
 
     // Inflate the gzipped map data.
@@ -65,16 +70,18 @@ Map *MapReader::readMap(const std::string &filename)
     if (!doc)
     {
         LOG_ERROR("Error while parsing map file (" << filename << ")!");
-        return NULL;
+        return;
     }
 
     Map *map = NULL;
     xmlNodePtr node = xmlDocGetRootElement(doc);
 
+    std::vector<Thing *> things;
+
     // Parse the inflated map data.
     if (node && xmlStrEqual(node->name, BAD_CAST "map"))
     {
-        map = ::readMap(node, filename);
+        map = ::readMap(node, filename, composite, things);
     }
     else
     {
@@ -82,10 +89,20 @@ Map *MapReader::readMap(const std::string &filename)
     }
 
     xmlFreeDoc(doc);
-    return map;
+
+    if (map != NULL)
+    {
+        composite->setMap(map);
+
+        for (std::vector< Thing * >::const_iterator i = things.begin(),
+             i_end = things.end(); i != i_end; ++i)
+        {
+            composite->insert(*i);
+        }
+    }
 }
 
-static Map *readMap(xmlNodePtr node, std::string const &path)
+static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *composite, std::vector<Thing *> &things)
 {
     // Take the filename off the path
     std::string pathDir = path.substr(0, path.rfind("/") + 1);
@@ -135,6 +152,109 @@ static Map *readMap(xmlNodePtr node, std::string const &path)
             if (layerNr++ == 3)
             {
                 readLayer(node, map);
+            }
+        }
+        else if (xmlStrEqual(node->name, BAD_CAST "objectgroup"))
+        {
+            //readObjectGroup(node, map);
+            for_each_xml_child_node(objectNode, node)
+            {
+                if (!xmlStrEqual(objectNode->name, BAD_CAST "object"))
+                {
+                    continue;
+                }
+
+                std::string objName = XML::getProperty(objectNode, "name", "");
+                std::string objType = XML::getProperty(objectNode, "type", "");
+                int objX = XML::getProperty(objectNode, "x", 0);
+                int objY = XML::getProperty(objectNode, "y", 0);
+                int objW = XML::getProperty(objectNode, "width", 0);
+                int objH = XML::getProperty(objectNode, "height", 0);
+                Rectangle rect = { objX, objY, objW, objH };
+
+
+                if (objType == "WARP")
+                {
+                    for_each_xml_child_node(propertiesNode, objectNode)
+                    {
+                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
+                        {
+                            continue;
+                        }
+
+                        int destMapId = -1;
+                        int destX = -1;
+                        int destY = -1;
+
+                        for_each_xml_child_node(propertyNode, propertiesNode)
+                        {
+                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
+                            {
+                                std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                if (value == "DEST_MAP")
+                                {
+                                    destMapId = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                }
+                                else if (value == "DEST_X")
+                                {
+                                    destX = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                }
+                                else if (value == "DEST_Y")
+                                {
+                                    destY = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                }
+                            }
+                        }
+
+                        if (destMapId != -1 && destX != -1 && destY != -1)
+                        {
+                            MapComposite *destMap = MapManager::getMap(destMapId);
+                            if (destMap)
+                            {
+                                things.push_back(new TriggerArea(
+                                    composite, rect,
+                                    new WarpAction(destMap, destX, destY)));
+                            }
+                        }
+                        else
+                        {
+                            LOG_WARN("Unrecognized warp format");
+                        }
+                    }
+                }
+                else if (objType == "SPAWN")
+                {
+                    for_each_xml_child_node(propertiesNode, objectNode)
+                    {
+                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
+                        {
+                            continue;
+                        }
+
+                        int monsterId = -1;
+
+                        for_each_xml_child_node(propertyNode, propertiesNode)
+                        {
+                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
+                            {
+                                if (XML::getProperty(propertyNode, "name", std::string()) == "MONSTER_ID")
+                                {
+                                    monsterId = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                }
+                            }
+                        }
+
+                        MonsterClass *monster = MonsterManager::getMonster(monsterId);
+                        if (monster != NULL)
+                        {
+                            things.push_back(new SpawnArea(composite, monster, rect));
+                        }
+                        else
+                        {
+                            LOG_WARN("Unrecognized format for spawn area");
+                        }
+                    }
+                }
             }
         }
     }

@@ -117,18 +117,13 @@ void MapManager::raiseActive(int mapId)
     }
 
     std::string const &file = composite->getName();
-    Map *map = MapReader::readMap("maps/" + file);
-    if (!map)
-    {
-        LOG_ERROR("Unable to load map \"" << file << "\" (id "
-                  << mapId << ")");
-        return;
-    }
+    MapReader::readMap("maps/" + file, composite);
 
-    composite->setMap(map);
     LOG_INFO("Activated map \"" << file << "\" (id " << mapId << ")");
-    // will need to load extra map related resources here also
+    // Add some testing stuff
     extern void testingMap(MapComposite *);
     testingMap(composite);
 }
+
+
 

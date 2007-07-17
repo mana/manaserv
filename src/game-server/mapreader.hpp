@@ -27,6 +27,7 @@
 #include <string>
 
 class Map;
+class MapComposite;
 
 /**
  * Reader for XML map files (*.tmx)
@@ -37,7 +38,7 @@ class MapReader
         /**
          * Read an XML map from a file.
          */
-        static Map *readMap(const std::string &filename);
+        static void readMap(const std::string &filename, MapComposite *composite);
 };
 
 #endif
