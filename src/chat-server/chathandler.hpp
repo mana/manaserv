@@ -51,19 +51,18 @@ class ChatHandler : public ConnectionHandler
         /**
          * Start the handler.
          */
-        bool
-        startListen(enet_uint16 port);
+        bool startListen(enet_uint16 port);
 
         /**
          * Tell a list of users about an event in a chatchannel about a player.
          */
         void warnUsersAboutPlayerEventInChat(short channelId,
-                                             std::string const &userName,
+                                             const std::string &userName,
                                              char eventId);
 
         /**
-         * Send Chat and Guild Info to chat client, so that they can
-         * join the correct channels.
+         * Send chat and guild info to chat client, so that they can join the
+         * correct channels.
          */
         void sendGuildEnterChannel(const MessageOut &msg,
                                    const std::string &name);
@@ -80,7 +79,15 @@ class ChatHandler : public ConnectionHandler
          * Process chat related messages.
          */
         void processMessage(NetComputer *computer, MessageIn &message);
+
+        /**
+         * Returns a ChatClient instance.
+         */
         NetComputer *computerConnected(ENetPeer *);
+
+        /**
+         * Cleans up after the disconnected client.
+         */
         void computerDisconnected(NetComputer *);
 
         /**
@@ -92,7 +99,37 @@ class ChatHandler : public ConnectionHandler
         /**
          * Deal with command messages.
          */
-        void handleCommand(ChatClient &computer, std::string const &command);
+        void handleCommand(ChatClient &client, const std::string &command);
+
+        void
+        handleChatMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleAnnounceMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handlePrivMsgMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleRegisterChannelMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleEnterChannelMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleQuitChannelMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleListChannelsMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleListChannelUsersMessage(ChatClient &client, MessageIn &msg);
+
+        void
+        handleDisconnectMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Tell the player to be more polite.
@@ -100,21 +137,10 @@ class ChatHandler : public ConnectionHandler
         void warnPlayerAboutBadWords(ChatClient &computer);
 
         /**
-         * Announce a message to every being in the default channel.
-         */
-        void announce(ChatClient &computer, std::string const &text);
-
-        /**
          * Say something private to a player.
          */
-        void sayToPlayer(ChatClient &computer, std::string const &playerName,
-                         std::string const &text);
-
-        /**
-         * Say something in a specific channel.
-         */
-        void sayInChannel(ChatClient &computer, short channel,
-                          std::string const &);
+        void sayToPlayer(ChatClient &computer, const std::string &playerName,
+                         const std::string &text);
 
         /**
          * Send packet to every client in a registered channel.
@@ -141,7 +167,7 @@ class ChatHandler : public ConnectionHandler
 /**
  * Register future client attempt. Temporary until physical server split.
  */
-void registerChatClient(std::string const &, std::string const &, int);
+void registerChatClient(const std::string &, const std::string &, int);
 
 extern ChatHandler *chatHandler;
 

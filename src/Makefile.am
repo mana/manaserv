@@ -25,16 +25,17 @@ tmwserv_account_SOURCES = \
 	account-server/dalstorage.hpp \
 	account-server/dalstorage.cpp \
 	account-server/dalstoragesql.hpp \
-        account-server/guild.cpp \
-        account-server/guild.h \
-        account-server/guildmanager.cpp \
-        account-server/guildmanager.h \
+	account-server/guild.cpp \
+	account-server/guild.h \
+	account-server/guildmanager.cpp \
+	account-server/guildmanager.h \
 	account-server/serverhandler.hpp \
 	account-server/serverhandler.cpp \
 	account-server/storage.hpp \
 	account-server/storage.cpp \
 	chat-server/chathandler.hpp \
 	chat-server/chathandler.cpp \
+	chat-server/chatclient.hpp \
 	chat-server/chatchannel.hpp \
 	chat-server/chatchannel.cpp \
 	chat-server/chatchannelmanager.hpp \

@@ -28,82 +28,88 @@
 
 class CharacterData;
 
+/**
+ * A guild and its members.
+ */
 class Guild
 {
-public:
-    typedef std::list<CharacterData*> guildMembers;
-    Guild(const std::string &name);
-    ~Guild();
-    
-    /**
-     * Add a member to the guild. 
-     */
-    void addMember(CharacterData* player);
-    
-    /**
-     * Remove a member from the guild. 
-     */
-    void removeMember(CharacterData* player);
-    
-    /**
-     * Check player is the leader of the guild. 
-     */
-    bool checkLeader(CharacterData* player);
-    
-    /**
-     * Set the ID of the guild.
-     */
-    void setId(short id)
-    {
-        mId = id;
-    }
-    
-    /**
-     * Check if player has been invited to the guild. 
-     */
-    bool checkInvited(const std::string &name);
-    
-    /**
-     * Add a player to the invite list.
-     */
-    void addInvited(const std::string &name);
-    
-    /**
-     * Returns the name of the guild.
-     */
-    const std::string& getName() const;
-    
-    /**
-     * Returns the ID of the guild.
-     */
-    short getId() const
-    {
-        return mId;
-    }
-    
-    /**
-     * Returns the total number of members in the guild.
-     */
-    short totalMembers() const
-    {
-        return mMembers.size();
-    }
-    
-    /**
-     * Get a member in the guild
-     */
-    std::string getMember(int i) const;
-    
-    /**
-     * Find member by name
-     */
-    bool checkInGuild(const std::string &name);
-    
-private:
-    short mId;
-    std::string mName;
-    std::list<CharacterData*> mMembers;
-    std::list<std::string> mInvited;
+    public:
+        typedef std::list<CharacterData*> guildMembers;
+
+        /**
+         * Constructor.
+         */
+        Guild(const std::string &name);
+
+        /**
+         * Destructor.
+         */
+        ~Guild();
+
+        /**
+         * Add a member to the guild.
+         */
+        void addMember(CharacterData* player);
+
+        /**
+         * Remove a member from the guild.
+         */
+        void removeMember(CharacterData* player);
+
+        /**
+         * Check player is the leader of the guild.
+         */
+        bool checkLeader(CharacterData* player);
+
+        /**
+         * Set the ID of the guild.
+         */
+        void setId(short id)
+        { mId = id; }
+
+        /**
+         * Check if player has been invited to the guild.
+         */
+        bool checkInvited(const std::string &name);
+
+        /**
+         * Add a player to the invite list.
+         */
+        void addInvited(const std::string &name);
+
+        /**
+         * Returns the name of the guild.
+         */
+        const std::string& getName() const
+        { return mName; }
+
+        /**
+         * Returns the ID of the guild.
+         */
+        short getId() const
+        { return mId; }
+
+        /**
+         * Returns the total number of members in the guild.
+         */
+        short totalMembers() const
+        { return mMembers.size(); }
+
+        /**
+         * Get a member in the guild.
+         */
+        std::string getMember(int i) const;
+
+        /**
+         * Find member by name.
+         */
+        bool checkInGuild(const std::string &name);
+
+    private:
+        short mId;
+        std::string mName;
+        std::list<CharacterData*> mMembers;
+        std::list<std::string> mInvited;
 };
 
 #endif

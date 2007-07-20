@@ -127,9 +127,9 @@ class AccountHandler : public ConnectionHandler
 
         void
         handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg);
-        
+
         /**
-         * Send guild join for each guild the player belongs to
+         * Send guild join for each guild the player belongs to.
          */
         void
         handleGuildJoining(AccountClient &computer, CharacterData *character);

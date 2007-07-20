@@ -1,4 +1,15 @@
-﻿2007-07-17  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+﻿2007-07-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/chat-server/chatclient.hpp, src/chat-server/chathandler.cpp,
+	src/Makefile.am: Separated ChatClient class from chathandler.cpp.
+	* src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp:
+	Cleaned up handling of messages, defining a method for each handled
+	message.
+	* src/account-server/guildmanager.cpp, src/account-server/guild.cpp,
+	src/account-server/guildmanager.hpp, src/account-server/guild.hpp:
+	Some code formatting cleanup and corrected headers.
+
+2007-07-17  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/chat-server/chathandler.hpp,
 	src/chat-server/chatchannelmanager.cpp,

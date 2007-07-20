@@ -1,31 +1,23 @@
 /*
- *  guildmanager.hpp
- *  A file part of The Mana World
+ *  The Mana World Server
+ *  Copyright 2004 The Mana World Development Team
  *
- *  Created by David Athay on 05/03/2007.
- *  
- * Copyright (c) 2007, The Mana World Development Team
- * All rights reserved.
+ *  This file is part of The Mana World.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * My name may not be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
  *
- * $Id$
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ *  $Id$
  */
 
 #include <list>
@@ -33,44 +25,67 @@
 class Guild;
 class CharacterData;
 
+/**
+ * Guild manager takes care of creating, removing and modifying guilds.
+ */
 class GuildManager
 {
-public:
-    /*
-     * Constructor/Destructor
-     */
-    GuildManager();
-    ~GuildManager();
-    
-    /*
-     * Create/Remove guild
-     */
-    short createGuild(const std::string &name, CharacterData *player);
-    void removeGuild(short guildId);
-    
-    /*
-     * Add member to guild
-     */
-    void addGuildMember(short guildId, CharacterData *player);
-    
-    /*
-     * Remove member from guild
-     */
-    void removeGuildMember(short guildId, CharacterData *player);
-    
-    /*
-     * Search for guilds
-     */
-    Guild *findById(short id);
-    Guild *findByName(const std::string &name);
-    
-    /*
-     * Check if guild exists
-     */
-    bool doesExist(const std::string &name);
-    
-private:
-    std::list<Guild*> mGuilds;
+    public:
+        /**
+         * Constructor.
+         */
+        GuildManager();
+
+        /**
+         * Destructor.
+         */
+        ~GuildManager();
+
+        /**
+         * Creates a guild.
+         */
+        short createGuild(const std::string &name, CharacterData *player);
+
+        /**
+         * Removes a guild.
+         */
+        void removeGuild(short guildId);
+
+        /**
+         * Adds a member to a guild.
+         */
+        void addGuildMember(short guildId, CharacterData *player);
+
+        /**
+         * Removes a member from a guild.
+         */
+        void removeGuildMember(short guildId, CharacterData *player);
+
+        /**
+         * Returns the guild with the given id. O(n)
+         *
+         * @todo <b>b_lindeijer:</b> Since this method is used so often, its
+         *       efficiency should be improved, probably by storing the guilds
+         *       in a map<int,Guild*> instead of list<Guild*>.
+         *
+         * @return the guild with the given id, or NULL if it doesn't exist
+         */
+        Guild *findById(short id);
+
+        /**
+         * Returns the guild with the given name. O(n)
+         *
+         * @return the guild with the given name, or NULL if it doesn't exist
+         */
+        Guild *findByName(const std::string &name);
+
+        /**
+         * Returns whether a guild exists.
+         */
+        bool doesExist(const std::string &name);
+
+    private:
+        std::list<Guild*> mGuilds;
 };
 
 extern GuildManager *guildManager;

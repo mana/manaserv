@@ -1,31 +1,23 @@
 /*
- *  guildmanager.cpp
- *  A file part of The Mana World
+ *  The Mana World Server
+ *  Copyright 2004 The Mana World Development Team
  *
- *  Created by David Athay on 01/03/2007.
- *  
- * Copyright (c) 2007, The Mana World Development Team
- * All rights reserved.
+ *  This file is part of The Mana World.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * My name may not be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *  The Mana World  is free software; you can redistribute  it and/or modify it
+ *  under the terms of the GNU General  Public License as published by the Free
+ *  Software Foundation; either version 2 of the License, or any later version.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ *  The Mana  World is  distributed in  the hope  that it  will be  useful, but
+ *  WITHOUT ANY WARRANTY; without even  the implied warranty of MERCHANTABILITY
+ *  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  more details.
  *
- * $Id$
+ *  You should  have received a  copy of the  GNU General Public  License along
+ *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
+ *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ *  $Id$
  */
 
 #include "guildmanager.hpp"
@@ -43,32 +35,32 @@ GuildManager::GuildManager()
 
 GuildManager::~GuildManager()
 {
-    for(std::list<Guild*>::iterator itr = mGuilds.begin(); itr != mGuilds.end(); ++itr)
+    for (std::list<Guild*>::iterator itr = mGuilds.begin();
+            itr != mGuilds.end(); ++itr)
     {
-        Guild *guild = (*itr);
-        delete guild;
+        delete *itr;
     }
 }
 
-short GuildManager::createGuild(const std::string &name, CharacterData* player)
+short GuildManager::createGuild(const std::string &name, CharacterData *player)
 {
     Guild *guild = new Guild(name);
     // Add guild to db
     Storage &store = Storage::instance("tmw");
     store.addGuild(guild);
-    
-    // Make sure to add guild to mGuilds before searching for it
-    // to add the player
+
+    // Make sure to add guild to mGuilds before searching for it to add the
+    // player
     mGuilds.push_back(guild);
     addGuildMember(guild->getId(), player);
-    
+
     return guild->getId();
 }
 
 void GuildManager::removeGuild(short guildId)
 {
     Guild *guild = findById(guildId);
-    if(!guild)
+    if (!guild)
         return;
     Storage &store = Storage::instance("tmw");
     store.removeGuild(guild);
@@ -77,7 +69,7 @@ void GuildManager::removeGuild(short guildId)
 void GuildManager::addGuildMember(short guildId, CharacterData *player)
 {
     Guild *guild = findById(guildId);
-    if(!guild)
+    if (!guild)
         return;
     Storage &store = Storage::instance("tmw");
     store.addGuildMember(guildId, player->getName());
@@ -87,7 +79,7 @@ void GuildManager::addGuildMember(short guildId, CharacterData *player)
 void GuildManager::removeGuildMember(short guildId, CharacterData *player)
 {
     Guild *guild = findById(guildId);
-    if(!guild)
+    if (!guild)
         return;
     Storage &store = Storage::instance("tmw");
     store.removeGuildMember(guildId, player->getName());
@@ -100,10 +92,11 @@ void GuildManager::removeGuildMember(short guildId, CharacterData *player)
 
 Guild *GuildManager::findById(short id)
 {
-    for(std::list<Guild*>::iterator itr = mGuilds.begin(); itr != mGuilds.end(); ++itr)
+    for (std::list<Guild*>::iterator itr = mGuilds.begin();
+            itr != mGuilds.end(); ++itr)
     {
         Guild *guild = (*itr);
-        if(guild->getId() == id)
+        if (guild->getId() == id)
         {
             return guild;
         }
@@ -113,11 +106,11 @@ Guild *GuildManager::findById(short id)
 
 Guild *GuildManager::findByName(const std::string &name)
 {
-    std::list<Guild*>::iterator itr = mGuilds.begin();
-    for(; itr != mGuilds.end(); ++itr)
+    for (std::list<Guild*>::iterator itr = mGuilds.begin();
+            itr != mGuilds.end(); ++itr)
     {
         Guild *guild = (*itr);
-        if(guild->getName() == name)
+        if (guild->getName() == name)
         {
             return guild;
         }
@@ -127,10 +120,5 @@ Guild *GuildManager::findByName(const std::string &name)
 
 bool GuildManager::doesExist(const std::string &name)
 {
-    Guild *guild = findByName(name);
-    if(guild)
-    {
-        return true;
-    }
-    return false;
+    return findByName(name) != NULL;
 }
