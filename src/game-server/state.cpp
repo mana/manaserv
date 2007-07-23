@@ -23,6 +23,8 @@
 
 #include <cassert>
 
+#include "game-server/state.hpp"
+
 #include "defines.h"
 #include "point.h"
 #include "game-server/accountconnection.hpp"
@@ -33,7 +35,7 @@
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
-#include "game-server/state.hpp"
+#include "game-server/monster.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
@@ -252,6 +254,7 @@ static void informPlayer(MapComposite *map, Character *p)
             enterMsg.writeShort(opos.x);
             enterMsg.writeShort(opos.y);
             switch (otype) {
+
                 case OBJECT_CHARACTER:
                 {
                     Character *q = static_cast< Character * >(o);
@@ -261,10 +264,13 @@ static void informPlayer(MapComposite *map, Character *p)
                     enterMsg.writeByte(q->getGender());
                     serializeLooks(q, enterMsg, true);
                 } break;
+
                 case OBJECT_MONSTER:
                 {
-                    enterMsg.writeShort(0); // TODO: The monster ID
+                    Monster *q = static_cast< Monster * >(o);
+                    enterMsg.writeShort(q->getSpecy()->getType());
                 } break;
+
                 default:
                     assert(false); // TODO
             }

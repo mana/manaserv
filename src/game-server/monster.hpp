@@ -52,6 +52,12 @@ class MonsterClass
         MonsterClass(int id): mID(id) {}
 
         /**
+         * Gets monster type.
+         */
+        int getType() const
+        { return mID; }
+
+        /**
          * Sets monster drops.
          */
         void setDrops(MonsterDrops const &v)
@@ -100,6 +106,12 @@ class Monster : public Being, public DeathListener
          * Destructor.
          */
         ~Monster();
+
+        /**
+         * Gets monster specy.
+         */
+        MonsterClass *getSpecy()
+        { return mSpecy; }
 
         /**
          * Performs one step of controller logic.

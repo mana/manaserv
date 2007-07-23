@@ -1,4 +1,9 @@
-﻿2007-07-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+2007-07-23  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/game-server/monster.hpp, src/game-server/state.cpp: Sent proper
+	monster identifiers.
+
+2007-07-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/chat-server/chatclient.hpp, src/chat-server/chathandler.cpp,
 	src/Makefile.am: Separated ChatClient class from chathandler.cpp.
