@@ -50,6 +50,7 @@ class AccountConnection : public Connection
          */
         void playerReconnectAccount(int id, const std::string magic_token);
 
+#if 0
         /**
          * Sends create guild message
          */
@@ -74,6 +75,7 @@ class AccountConnection : public Connection
          * Sends quit guild message.
          */
         void quitGuild(int id, short guildId);
+#endif
 
     protected:
         /**

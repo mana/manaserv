@@ -2,6 +2,17 @@
 
 	* src/game-server/monster.hpp, src/game-server/state.cpp: Sent proper
 	monster identifiers.
+	* src/resourcemanager.cpp: Enabled symlinks to data directory.
+	* src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.hpp, src/game-server/accountconnection.hpp,
+	src/account-server/serverhandler.cpp: Commented out unused guild code.
+	It should not have been handled by the game server anyway.
+	* src/game-server/mapcomposite.cpp: Removed slow member, if it were to
+	be implemented.
+	* src/game-server/gamehandler.cpp, src/game-server/npc.hpp,
+	src/game-server/state.cpp, src/Makerfile.am, src/defines.h: Added NPC
+	support.
+	* src/game-server/testing.cpp: Added a test NPC.
 
 2007-07-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

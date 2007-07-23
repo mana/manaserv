@@ -36,6 +36,7 @@
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/monster.hpp"
+#include "game-server/npc.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
@@ -269,6 +270,12 @@ static void informPlayer(MapComposite *map, Character *p)
                 {
                     Monster *q = static_cast< Monster * >(o);
                     enterMsg.writeShort(q->getSpecy()->getType());
+                } break;
+
+                case OBJECT_NPC:
+                {
+                    NPC *q = static_cast< NPC * >(o);
+                    enterMsg.writeShort(q->getNPC());
                 } break;
 
                 default:

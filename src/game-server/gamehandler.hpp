@@ -90,7 +90,7 @@ class GameHandler: public ConnectionHandler
          * Map of character's and their id used for getting which character to
          * forward account server messages back to.
          */
-        std::map<int, Character*> messageMap;
+        // std::map<int, Character*> messageMap;
 
         /**
          * Combines a client with it's character.

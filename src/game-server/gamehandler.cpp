@@ -32,6 +32,7 @@
 #include "game-server/itemmanager.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
+#include "game-server/npc.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -140,6 +141,36 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             std::string say = message.readString();
             GameState::sayAround(computer.character, say);
+        } break;
+
+        case PGMSG_NPC_TALK:
+        case PGMSG_NPC_TALK_NEXT:
+        case PGMSG_NPC_SELECT:
+        {
+            int id = message.readShort();
+            MapComposite *map = computer.character->getMap();
+            MovingObject *o = NULL;
+            Point ppos = computer.character->getPosition();
+            // TODO: use a less arbitrary value.
+            for (MovingObjectIterator i(map->getAroundPointIterator(ppos, 48)); i; ++i)
+            {
+                if ((*i)->getPublicID() == id)
+                {
+                    o = *i;
+                    break;
+                }
+            }
+            if (!o || o->getType() != OBJECT_NPC) break;
+
+            NPC *q = static_cast< NPC * >(o);
+            if (message.getId() == PGMSG_NPC_SELECT)
+            {
+                q->select(computer.character, message.readByte());
+            }
+            else
+            {
+                q->prompt(computer.character, message.getId() == PGMSG_NPC_TALK);
+            }
         } break;
 
         case PGMSG_PICKUP:
@@ -258,7 +289,11 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character = NULL;
             computer.status = CLIENT_LOGIN;
         } break;
-            
+
+
+// The following messages should be handled by the chat server, not the game server.
+#if 0
+
         case PGMSG_GUILD_CREATE:
         {
             std::string name = message.readString();
@@ -299,6 +334,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             messageMap[characterId] = computer.character;
             accountHandler->quitGuild(characterId, guildId);
         } break;
+#endif
 
         default:
             LOG_WARN("Invalid message type");

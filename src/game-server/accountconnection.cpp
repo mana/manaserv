@@ -92,7 +92,9 @@ void AccountConnection::processMessage(MessageIn &msg)
             int port = msg.readShort();
             gameHandler->completeServerChange(id, token, address, port);
         } break;
-            
+
+// The client should directly talk with the chat server and not go through the game server.
+#if 0
         case AGMSG_GUILD_CREATE_RESPONSE:
         {
             if(msg.readByte() == ERRMSG_OK)
@@ -205,6 +207,7 @@ void AccountConnection::processMessage(MessageIn &msg)
                 gameHandler->sendTo(player, result);
             }
         } break;
+#endif
 
         default:
             LOG_WARN("Invalid message type");
@@ -221,6 +224,7 @@ void AccountConnection::playerReconnectAccount(int id, const std::string magic_t
     send(msg);
 }
 
+#if 0
 void AccountConnection::playerCreateGuild(int id, const std::string &guildName)
 {
     LOG_INFO("Send GAMSG_GUILD_CREATE");
@@ -266,3 +270,4 @@ void AccountConnection::quitGuild(int id, short guildId)
     msg.writeShort(guildId);
     send(msg);
 }
+#endif

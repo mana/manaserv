@@ -111,6 +111,7 @@ tmwserv_game_SOURCES = \
 	game-server/monstermanager.cpp \
 	game-server/movingobject.hpp \
 	game-server/movingobject.cpp \
+	game-server/npc.hpp \
 	game-server/object.hpp \
 	game-server/spawnarea.hpp \
 	game-server/spawnarea.cpp \

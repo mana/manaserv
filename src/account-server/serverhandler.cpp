@@ -189,6 +189,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
         } break;
 
+#if 0
         case GAMSG_GUILD_CREATE:
         {
             LOG_DEBUG("GAMSG_GUILD_CREATE");
@@ -349,6 +350,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             result.writeLong(playerId);
             result.writeShort(guildId);
         } break;
+#endif
 
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "

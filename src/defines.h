@@ -151,6 +151,7 @@ enum {
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
                                              // monster: W type id
+                                             // npc: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
     GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // W weapon, W hat, W top clothes, W bottom clothes
@@ -163,10 +164,16 @@ enum {
     GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // W being id, S text
+    GPMSG_NPC_CHOICE               = 0x02B0, // W being id, B* text
+    GPMSG_NPC_MESSAGE              = 0x02B1, // W being id, B* text
+    PGMSG_NPC_TALK                 = 0x02B2, // W being id
+    PGMSG_NPC_TALK_NEXT            = 0x02B3, // W being id
+    PGMSG_NPC_SELECT               = 0x02B4, // W being id, B choice
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
-    
+
+#if 0
     // Guild
     PGMSG_GUILD_CREATE                  = 0x0350, // S name
     GPMSG_GUILD_CREATE_RESPONSE         = 0x0351, // B error, W id
@@ -180,6 +187,7 @@ enum {
     GPMSG_GUILD_LEFT                    = 0x0359, // W id
     PGMSG_GUILD_QUIT                    = 0x0360, // W id
     GPMSG_GUILD_QUIT_RESPONSE           = 0x0361, // B error, W id
+#endif
 
     CPMSG_GUILD_INVITED                 = 0x0370, // S name, S name
     CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W id, W rights
@@ -217,6 +225,8 @@ enum {
     GAMSG_REDIRECT          = 0x0530, // L id
     AGMSG_REDIRECT_RESPONSE = 0x0531, // L id, B*32 token, S game address, W game port
     GAMSG_PLAYER_RECONNECT  = 0x0532, // L id, B*32 token
+
+#if 0
     GAMSG_GUILD_CREATE                  = 0x0550, // S name
     AGMSG_GUILD_CREATE_RESPONSE         = 0x0551, // B error, W id
     GAMSG_GUILD_INVITE                  = 0x0552, // W id, S name
@@ -227,6 +237,7 @@ enum {
     AGMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0557, // S names
     GAMSG_GUILD_QUIT                    = 0x0558, // W id
     AGMSG_GUILD_QUIT_RESPONSE           = 0x0559, // B error
+#endif
 
     XXMSG_INVALID = 0x7FFF
 };

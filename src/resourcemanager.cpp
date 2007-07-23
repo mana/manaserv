@@ -69,6 +69,7 @@ ResourceManager::deleteInstance()
 void
 ResourceManager::searchAndAddZipFiles()
 {
+    PHYSFS_permitSymbolicLinks(1);
     // Add the main data directory to our PhysicsFS search path
     PHYSFS_addToSearchPath("data", 1);
     PHYSFS_addToSearchPath(TMWSERV_DATADIR "data", 1);

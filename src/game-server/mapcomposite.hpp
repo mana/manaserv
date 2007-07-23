@@ -183,11 +183,6 @@ class MapComposite
         void update();
 
         /**
-         * Gets an object given its ID.
-         */
-        MovingObject *getObjectByID(int) const;
-
-        /**
          * Gets an iterator on the objects of the whole map.
          */
         ZoneIterator getWholeMapIterator() const
