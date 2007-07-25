@@ -50,17 +50,29 @@ ChatChannelManager::registerPublicChannel(const std::string &channelName,
     for (ChatChannelIterator i = mChatChannels.begin(),
          end = mChatChannels.end(); i != end; ++i)
     {
-        if (i->second.getName() == channelName) return 0;
-        // We seek the highest channelId in the public range
-        if (channelId <= i->first && i->first < (signed)MAX_PUBLIC_CHANNELS_RANGE)
-            channelId = i->first + 1;
-    }
-    // Too much channels registered
-    if (channelId >= (signed) MAX_PUBLIC_CHANNELS_RANGE) return 0;
+        // Don't allow channels with the same name
+        if (i->second.getName() == channelName)
+            return 0;
 
-    // Register Channel
-    mChatChannels.insert(std::make_pair(channelId, ChatChannel(channelName,
-                                        channelAnnouncement, channelPassword, false)));
+        // We seek the highest channelId in the public range
+        if (channelId <= i->first &&
+                i->first < (signed) MAX_PUBLIC_CHANNELS_RANGE)
+        {
+            channelId = i->first + 1;
+        }
+    }
+
+    // Too much channels registered
+    if (channelId >= (signed) MAX_PUBLIC_CHANNELS_RANGE)
+        return 0;
+
+    // Register channel
+    mChatChannels.insert(std::make_pair(channelId,
+                                        ChatChannel(channelId,
+                                                    channelName,
+                                                    channelAnnouncement,
+                                                    channelPassword,
+                                                    false)));
     return channelId;
 }
 
@@ -71,20 +83,27 @@ ChatChannelManager::registerPrivateChannel(const std::string &channelName,
         const std::string &channelPassword)
 {
     short channelId = MAX_PUBLIC_CHANNELS_RANGE;
+
     for (ChatChannelIterator i = mChatChannels.begin(),
-         end = mChatChannels.end(); i != end; ++i)
+            end = mChatChannels.end(); i != end; ++i)
     {
         if (i->second.getName() == channelName) return 0;
+
         // We seek the highest channelId in the private range
         if (channelId <= i->first)
             channelId = i->first + 1;
     }
+
     // Too much channels registered
     if (channelId >= (signed) MAX_PRIVATE_CHANNELS_RANGE) return 0;
 
     // Register Channel
-    mChatChannels.insert(std::make_pair(channelId, ChatChannel(channelName,
-                                        channelAnnouncement, channelPassword, true)));
+    mChatChannels.insert(std::make_pair(channelId,
+                                        ChatChannel(channelId,
+                                                    channelName,
+                                                    channelAnnouncement,
+                                                    channelPassword,
+                                                    true)));
     return channelId;
 }
 
@@ -92,15 +111,14 @@ bool ChatChannelManager::removeChannel(short channelId)
 {
     ChatChannelIterator i = mChatChannels.find(channelId);
     if (i == mChatChannels.end()) return false;
-    i->second.removeAllUsersFromChannel();
+    i->second.removeAllUsers();
     mChatChannels.erase(i);
     return true;
 }
 
-std::list<std::string>
-ChatChannelManager::getPublicChannelNames()
+std::list<const ChatChannel*> ChatChannelManager::getPublicChannels()
 {
-    std::list<std::string> channels;
+    std::list<const ChatChannel*> channels;
 
     for (ChatChannels::const_iterator i = mChatChannels.begin(),
             i_end = mChatChannels.end();
@@ -108,18 +126,11 @@ ChatChannelManager::getPublicChannelNames()
     {
         if (!i->second.isPrivate())
         {
-            channels.push_back(i->second.getName());
+            channels.push_back(&i->second);
         }
     }
 
     return channels;
-}
-
-short ChatChannelManager::getNumberOfChannelUsers(const std::string &channelName)
-{
-    ChatChannel channel = _getChannel(getChannelId(channelName));
-    short size =  channel.getUserList().size();
-    return size;
 }
 
 short ChatChannelManager::getChannelId(std::string const &channelName)
@@ -133,90 +144,24 @@ short ChatChannelManager::getChannelId(std::string const &channelName)
     return 0;
 }
 
-std::string ChatChannelManager::getChannelName(short channelId)
+ChatChannel* ChatChannelManager::getChannel(short channelId)
 {
     ChatChannelIterator i = mChatChannels.find(channelId);
-    return (i != mChatChannels.end()) ? i->second.getName() : std::string();
+    if (i != mChatChannels.end()) return &i->second;
+    return NULL;
 }
 
-std::string ChatChannelManager::getChannelAnnouncement(short channelId)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    return (i != mChatChannels.end()) ? i->second.getAnnouncement() : "";
-}
-
-std::string ChatChannelManager::getChannelPassword(short channelId)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    return (i != mChatChannels.end()) ? i->second.getPassword() : "";
-}
-
-bool ChatChannelManager::getChannelPrivacy(short channelId)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    return (i != mChatChannels.end()) ? i->second.isPrivate() : true;
-}
-
-bool ChatChannelManager::setChannelAnnouncement(short channelId, std::string const &channelAnnouncement)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if (i == mChatChannels.end()) return false;
-    i->second.setAnnouncement(channelAnnouncement);
-    return true;
-}
-
-bool ChatChannelManager::setChannelPassword(short channelId, std::string const &channelPassword)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if (i == mChatChannels.end()) return false;
-    i->second.setPassword(channelPassword);
-    return true;
-}
-
-ChatChannel ChatChannelManager::_getChannel(short channelId)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if (i != mChatChannels.end()) return i->second;
-    return ChatChannel("", "", "", true);
-}
-
-
-bool ChatChannelManager::addUserInChannel(std::string const &user, short channelId)
-{
-    std::map<short, ChatChannel>::iterator i = mChatChannels.find(channelId);
-    if (i == mChatChannels.end()) return false;
-    return i->second.addUserInChannel(user);
-}
-
-
-bool ChatChannelManager::removeUserFromChannel(std::string const &user, short channelId)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if (i == mChatChannels.end()) return false;
-    return i->second.removeUserFromChannel(user);
-}
-
-void ChatChannelManager::removeUserFromAllChannels(std::string const &user)
+void ChatChannelManager::removeUserFromAllChannels(const std::string &user)
 {
     for (ChatChannelIterator i = mChatChannels.begin(),
             i_end = mChatChannels.end();
          i != i_end; ++i)
     {
-         i->second.removeUserFromChannel(user);
+         i->second.removeUser(user);
     }
-}
-
-std::vector<std::string> const &
-ChatChannelManager::getUserListInChannel(short channelId)
-{
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if (i != mChatChannels.end()) return i->second.getUserList();
-    static std::vector< std::string > emptyList;
-    return emptyList;
 }
 
 bool ChatChannelManager::channelExists(short channelId)
 {
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    return i != mChatChannels.end();
+    return mChatChannels.find(channelId) != mChatChannels.end();
 }

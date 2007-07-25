@@ -35,7 +35,8 @@ class ChatClient;
  * as well as guild chat. The only form of chat not handled by this server is
  * local chat, which is handled by the game server.
  *
- * TODO: Extend with handling of team chat once teams are implemented.
+ * @todo <b>b_lindeijer:</b> Extend this class with handling of team chat once
+ *       teams are implemented.
  */
 class ChatHandler : public ConnectionHandler
 {
@@ -55,8 +56,11 @@ class ChatHandler : public ConnectionHandler
 
         /**
          * Tell a list of users about an event in a chatchannel about a player.
+         *
+         * @param channel the channel to send the message in, must not be NULL
+         * @param userName the name of the player the event applies to
          */
-        void warnUsersAboutPlayerEventInChat(short channelId,
+        void warnUsersAboutPlayerEventInChat(ChatChannel *channel,
                                              const std::string &userName,
                                              char eventId);
 
@@ -143,9 +147,20 @@ class ChatHandler : public ConnectionHandler
                          const std::string &text);
 
         /**
-         * Send packet to every client in a registered channel.
+         * Sends a message to every client in a registered channel. O(c*u),
+         * where <b>c</b> is the amount of connected clients and <b>u</b> the
+         * number of users in the given channel.
+         *
+         * @param channel the channel to send the message in, must not be NULL
+         * @param msg     the message to be sent
+         *
+         * @todo <b>b_lindeijer:</b> Currently this method is looping through
+         *       the channel users for each connected client in order to
+         *       determine whether it should receive the message. It would be
+         *       much better to directly associate the connected clients with
+         *       the channel.
          */
-        void sendInChannel(short channelId, MessageOut &);
+        void sendInChannel(ChatChannel *channel, MessageOut &msg);
 
         /**
          * Removes outdated pending logins. These are connected clients that
@@ -155,13 +170,19 @@ class ChatHandler : public ConnectionHandler
 
         /**
          * Send user joined message.
+         *
+         * @param channel the channel to send the message in, must not be NULL
+         * @param name    the name of the user who joined
          */
-        void sendUserJoined(short channelId, const std::string &name);
+        void sendUserJoined(ChatChannel *channel, const std::string &name);
 
         /**
          * Send user left message.
+         *
+         * @param channel the channel to send the message in, must not be NULL
+         * @param name    the name of the user who left
          */
-        void sendUserLeft(short channelId, const std::string &name);
+        void sendUserLeft(ChatChannel *channel, const std::string &name);
 };
 
 /**

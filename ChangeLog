@@ -1,3 +1,14 @@
+2007-07-25  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/chat-server/chathandler.hpp,
+	src/chat-server/chatchannelmanager.cpp,
+	src/chat-server/chatchannel.cpp,
+	src/chat-server/chatchannelmanager.hpp,
+	src/chat-server/chatchannel.hpp, src/chat-server/chathandler.cpp,
+	src/account-server/serverhandler.cpp,
+	src/account-server/dalstorage.cpp: Removed a host of unnecessary
+	methods from ChatChannelManager.
+
 2007-07-23  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/monster.hpp, src/game-server/state.cpp: Sent proper

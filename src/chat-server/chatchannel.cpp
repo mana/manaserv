@@ -23,10 +23,12 @@
 
 #include "chat-server/chatchannel.hpp"
 
-ChatChannel::ChatChannel(const std::string &name,
+ChatChannel::ChatChannel(short id,
+                         const std::string &name,
                          const std::string &announcement,
                          const std::string &password,
                          bool privacy):
+    mId(id),
     mName(name),
     mAnnouncement(announcement),
     mPassword(password),
@@ -62,7 +64,7 @@ ChatChannel::setPassword(const std::string &password)
         mPassword = password;
 }
 
-bool ChatChannel::addUserInChannel(std::string const &user)
+bool ChatChannel::addUser(const std::string &user)
 {
     // Check if the user already exists in the channel
     ChannelUsers::const_iterator i = mRegisteredUsers.begin(),
@@ -72,7 +74,7 @@ bool ChatChannel::addUserInChannel(std::string const &user)
     return true;
 }
 
-bool ChatChannel::removeUserFromChannel(std::string const &user)
+bool ChatChannel::removeUser(const std::string &user)
 {
     ChannelUsers::iterator i_end = mRegisteredUsers.end(),
                            i = std::find(mRegisteredUsers.begin(), i_end, user);
@@ -81,7 +83,7 @@ bool ChatChannel::removeUserFromChannel(std::string const &user)
     return true;
 }
 
-void ChatChannel::removeAllUsersFromChannel()
+void ChatChannel::removeAllUsers()
 {
     mRegisteredUsers.clear();
 }

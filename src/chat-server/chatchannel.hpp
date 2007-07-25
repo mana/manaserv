@@ -35,10 +35,10 @@
  * that no user joins the channel twice and checking that a user who leaves
  * actually existed in the channel.
  *
- * TODO: b_lindeijer: It would be nicer when some more logic could be placed
- *        in this class to remove some weight from the ChatHandler. Referencing
- *        ChatClient instances would also be nicer than to store only the names
- *        of the characters.
+ * @todo <b>b_lindeijer:</b> It would be nicer when some more logic could be
+ *       placed in this class to remove some weight from the ChatHandler.
+ *       Referencing ChatClient instances would also be nicer than to store
+ *       only the names of the characters.
  */
 class ChatChannel
 {
@@ -48,19 +48,26 @@ class ChatChannel
         /**
          * Constructor.
          *
-         * TODO: b_lindeijer: I would say a channel can be defined as private
-         *        when a non-empty password is set, in which case we can get
-         *        rid of the privacy parameter.
+         * @todo <b>b_lindeijer:</b> I would say a channel can be defined as
+         *       private when a non-empty password is set, in which case we can
+         *       get rid of the privacy parameter.
          *
          * @param name         the name of the channel.
          * @param announcement a welcome message.
          * @param password     password (for private channels).
          * @param privacy      whether this channel is private.
          */
-        ChatChannel(const std::string &name,
+        ChatChannel(short id,
+                    const std::string &name,
                     const std::string &announcement = "",
                     const std::string &password = "",
                     bool privacy = false);
+
+        /**
+         * Get the ID of the channel.
+         */
+        short getId() const
+        { return mId; }
 
         /**
          * Get the name of the channel.
@@ -108,25 +115,26 @@ class ChatChannel
         { return mRegisteredUsers; }
 
         /**
-         * Adds a user in the channel.
+         * Adds a user to the channel.
          *
          * @return whether the user was successfully added
          */
-        bool addUserInChannel(std::string const &);
+        bool addUser(const std::string &name);
 
         /**
          * Removes a user from the channel.
          *
          * @return whether the user was successfully removed
          */
-        bool removeUserFromChannel(std::string const &);
+        bool removeUser(const std::string &name);
 
         /**
          * Empties a channel from its users (admin included).
          */
-        void removeAllUsersFromChannel();
+        void removeAllUsers();
 
     private:
+        short mId;                     /**< The ID of the channel. */
         std::string mName;             /**< The name of the channel. */
         std::string mAnnouncement;     /**< Welcome message. */
         std::string mPassword;         /**< The channel password. */

@@ -243,18 +243,20 @@ ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
         return;
     }
 
-    short channel = msg.readShort();
+    short channelId = msg.readShort();
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
-    LOG_DEBUG(client.characterName << " says in channel " << channel << ": "
-              << text);
+    if (channel)
+    {
+        LOG_DEBUG(client.characterName << " says in channel " << channelId
+                  << ": " << text);
 
-    MessageOut result(CPMSG_PUBMSG);
-    result.writeShort(channel);
-    result.writeString(client.characterName);
-    result.writeString(text);
-
-    // Send the message to the players registered in the channel.
-    sendInChannel(channel, result);
+        MessageOut result(CPMSG_PUBMSG);
+        result.writeShort(channelId);
+        result.writeString(client.characterName);
+        result.writeString(text);
+        sendInChannel(channel, result);
+    }
 }
 
 void
@@ -377,8 +379,8 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
             // user registering a private channel is the only one to be able to
             // update the password and the announcement in it and also to
             // remove it.
-            chatChannelManager->addUserInChannel(client.characterName,
-                                                 channelId);
+            ChatChannel *channel = chatChannelManager->getChannel(channelId);
+            channel->addUser(client.characterName);
 
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(channelId);
@@ -399,10 +401,10 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
     MessageOut reply(CPMSG_UNREGISTER_CHANNEL_RESPONSE);
 
     short channelId = msg.readShort();
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
-    if (!chatChannelManager->channelExists(channelId))
+    if (!channel)
     {
-        // Channel doesn't exist
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (channelId < (signed) MAX_PUBLIC_CHANNELS_RANGE)
@@ -412,12 +414,12 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
         // Get character based on name
         CharacterPtr character =
             serverHandler->getCharacter(client.characterName);
-        std::string channelName = chatChannelManager->getChannelName(channelId);
+        const std::string &channelName = channel->getName();
 
         if (client.accountLevel == AL_ADMIN || client.accountLevel == AL_GM)
         {
             warnUsersAboutPlayerEventInChat(
-                    channelId, "", CHAT_EVENT_LEAVING_PLAYER);
+                    channel, "", CHAT_EVENT_LEAVING_PLAYER);
             if (chatChannelManager->removeChannel(channelId))
                 reply.writeByte(ERRMSG_OK);
             else
@@ -451,16 +453,21 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
         // Private channel
 
         // We first see if the user is the admin (first user) of the channel
-        const std::vector<std::string> &userList =
-            chatChannelManager->getUserListInChannel(channelId);
-        std::vector<std::string>::const_iterator i = userList.begin();
-        // If it's actually the private channel's admin
-        if (*i == client.characterName)
+        const ChatChannel::ChannelUsers &userList = channel->getUserList();
+        ChatChannel::ChannelUsers::const_iterator i = userList.begin();
+
+        if (*i != client.characterName)
+        {
+            reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+        }
+        else
         {
             // Make every user quit the channel
             warnUsersAboutPlayerEventInChat(
-                    channelId, "", CHAT_EVENT_LEAVING_PLAYER);
-            if (chatChannelManager->removeChannel(channelId)) {
+                    channel, "", CHAT_EVENT_LEAVING_PLAYER);
+
+            if (chatChannelManager->removeChannel(channelId))
+            {
                 reply.writeByte(ERRMSG_OK);
             }
             else
@@ -468,16 +475,12 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
                 reply.writeByte(ERRMSG_FAILURE);
             }
         }
-        else
-        {
-            reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-        }
     }
 
     client.send(reply);
 }
 
-void
+    void
 ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_ENTER_CHANNEL_RESPONSE);
@@ -486,8 +489,7 @@ ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     std::string givenPassword = msg.readString();
 
     short channelId = chatChannelManager->getChannelId(channelName);
-    std::string channelPassword =
-        chatChannelManager->getChannelPassword(channelId);
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
     // TODO: b_lindeijer: Currently, the client has to join its guild channels
     //        explicitly by sending 'enter channel' messages. This should be
@@ -495,11 +497,12 @@ ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     //        login.
     Guild *guild = guildManager->findByName(channelName);
 
-    if (!channelId || !chatChannelManager->channelExists(channelId))
+    if (!channelId || !channel)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (!channelPassword.empty() && channelPassword != givenPassword)
+    else if (!channel->getPassword().empty() &&
+            channel->getPassword() != givenPassword)
     {
         // Incorrect password (should probably have its own return value)
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
@@ -511,34 +514,31 @@ ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     }
     else
     {
-        // In the case of a guild, send user joined message.
-        if (guild)
+        if (channel->addUser(client.characterName))
         {
-            sendUserJoined(channelId, client.characterName);
-        }
+            // In the case of a guild, send user joined message.
+            if (guild)
+            {
+                sendUserJoined(channel, client.characterName);
+            }
 
-        if (chatChannelManager->addUserInChannel(client.characterName,
-                                                 channelId))
-        {
             reply.writeByte(ERRMSG_OK);
             // The user entered the channel, now give him the channel
             // id, the announcement string and the user list.
             reply.writeShort(channelId);
             reply.writeString(channelName);
-            reply.writeString(
-                    chatChannelManager->getChannelAnnouncement(channelId));
-            const std::vector<std::string> &userList =
-                chatChannelManager->getUserListInChannel(channelId);
+            reply.writeString(channel->getAnnouncement());
+            const ChatChannel::ChannelUsers &users = channel->getUserList();
 
-            for (std::vector<std::string>::const_iterator i = userList.begin(),
-                    i_end = userList.end();
+            for (ChatChannel::ChannelUsers::const_iterator i = users.begin(),
+                    i_end = users.end();
                     i != i_end; ++i)
             {
                 reply.writeString(*i);
             }
             // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
             // in the channel.
-            warnUsersAboutPlayerEventInChat(channelId,
+            warnUsersAboutPlayerEventInChat(channel,
                     client.characterName,
                     CHAT_EVENT_NEW_PLAYER);
         }
@@ -557,42 +557,38 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
     MessageOut reply(CPMSG_QUIT_CHANNEL_RESPONSE);
 
     short channelId = msg.readShort();
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
-    if (channelId != 0 && chatChannelManager->channelExists(channelId))
+    if (channelId == 0 || !channel)
     {
-        if (chatChannelManager->removeUserFromChannel(client.characterName,
-                                                      channelId))
-        {
-            reply.writeByte(ERRMSG_OK);
-            reply.writeShort(channelId);
-
-            // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user left
-            // the channel.
-            warnUsersAboutPlayerEventInChat(channelId,
-                                            client.characterName,
-                                            CHAT_EVENT_LEAVING_PLAYER);
-
-            // TODO: b_lindeijer: Clients aren't supposed to quit guild
-            //        channels explicitly, this should rather happen
-            //        implicitly. See similar note at handling 'enter channel'
-            //        messages.
-            std::string channelName =
-                chatChannelManager->getChannelName(channelId);
-
-            if (guildManager->doesExist(channelName))
-            {
-                // Send a user left message
-                sendUserLeft(channelId, client.characterName);
-            }
-        }
-        else
-        {
-            reply.writeByte(ERRMSG_FAILURE);
-        }
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if (!channel->removeUser(client.characterName))
+    {
+        reply.writeByte(ERRMSG_FAILURE);
     }
     else
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeByte(ERRMSG_OK);
+        reply.writeShort(channelId);
+
+        // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user left
+        // the channel.
+        warnUsersAboutPlayerEventInChat(channel,
+                client.characterName,
+                CHAT_EVENT_LEAVING_PLAYER);
+
+        // TODO: b_lindeijer: Clients aren't supposed to quit guild
+        //        channels explicitly, this should rather happen
+        //        implicitly. See similar note at handling 'enter channel'
+        //        messages.
+        const std::string &channelName = channel->getName();
+
+        if (guildManager->doesExist(channelName))
+        {
+            // Send a user left message
+            sendUserLeft(channel, client.characterName);
+        }
     }
 
     client.send(reply);
@@ -603,15 +599,15 @@ ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_LIST_CHANNELS_RESPONSE);
 
-    std::list<std::string> publicChannels =
-        chatChannelManager->getPublicChannelNames();
+    std::list<const ChatChannel*> channels =
+        chatChannelManager->getPublicChannels();
 
-    for (std::list<std::string>::iterator i = publicChannels.begin(),
-            i_end = publicChannels.end();
+    for (std::list<const ChatChannel*>::iterator i = channels.begin(),
+            i_end = channels.end();
             i != i_end; ++i)
     {
-        const std::string &name = *i;
-        short users = chatChannelManager->getNumberOfChannelUsers(name);
+        const std::string &name = (*i)->getName();
+        short users = (*i)->getUserList().size();
         reply.writeString(name);
         reply.writeShort(users);
     }
@@ -629,18 +625,20 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
     //        a channel id instead.
     std::string channelName = msg.readString();
 
+    int channelId = chatChannelManager->getChannelId(channelName);
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+
     reply.writeString(channelName);
 
-    std::vector<std::string> channelUsers =
-        chatChannelManager->getUserListInChannel(
-                chatChannelManager->getChannelId(channelName));
-
-    // TODO: b_lindeijer: This method should check whether the channel exists.
-
-    // Add a user at a time
-    for (unsigned int i = 0; i < channelUsers.size(); ++i)
+    if (channel)
     {
-        reply.writeString(channelUsers[i]);
+        const ChatChannel::ChannelUsers &channelUsers = channel->getUserList();
+
+        // Add a user at a time
+        for (unsigned int i = 0; i < channelUsers.size(); ++i)
+        {
+            reply.writeString(channelUsers[i]);
+        }
     }
 
     client.send(reply);
@@ -676,26 +674,20 @@ ChatHandler::sayToPlayer(ChatClient &computer, const std::string &playerName,
     }
 }
 
-void ChatHandler::warnUsersAboutPlayerEventInChat(short channelId,
+void ChatHandler::warnUsersAboutPlayerEventInChat(ChatChannel *channel,
                                                   const std::string &userName,
                                                   char eventId)
 {
-    MessageOut result;
-    result.writeShort(CPMSG_CHANNEL_EVENT);
-    result.writeShort(channelId);
-    result.writeByte(eventId);
-    result.writeString(userName);
-    sendInChannel(channelId, result);
+    MessageOut msg(CPMSG_CHANNEL_EVENT);
+    msg.writeShort(channel->getId());
+    msg.writeByte(eventId);
+    msg.writeString(userName);
+    sendInChannel(channel, msg);
 }
 
-void ChatHandler::sendInChannel(short channelId, MessageOut &msg)
+void ChatHandler::sendInChannel(ChatChannel *channel, MessageOut &msg)
 {
-    // TODO: b_lindeijer: Instead of looping through the channel users for each
-    //        connected client, it would be much better to directly associate
-    //        the connected clients with the channel.
-
-    const std::vector<std::string> &users =
-            chatChannelManager->getUserListInChannel(channelId);
+    const ChatChannel::ChannelUsers &users = channel->getUserList();
 
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
          i != i_end; ++i)
@@ -776,18 +768,18 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
     }
 }
 
-void ChatHandler::sendUserJoined(short channelId, const std::string &name)
+void ChatHandler::sendUserJoined(ChatChannel *channel, const std::string &name)
 {
     MessageOut msg(CPMSG_USERJOINED);
-    msg.writeShort(channelId);
+    msg.writeShort(channel->getId());
     msg.writeString(name);
-    sendInChannel(channelId, msg);
+    sendInChannel(channel, msg);
 }
 
-void ChatHandler::sendUserLeft(short channelId, const std::string &name)
+void ChatHandler::sendUserLeft(ChatChannel *channel, const std::string &name)
 {
     MessageOut msg(CPMSG_USERLEFT);
-    msg.writeShort(channelId);
+    msg.writeShort(channel->getId());
     msg.writeString(name);
-    sendInChannel(channelId, msg);
+    sendInChannel(channel, msg);
 }

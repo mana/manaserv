@@ -171,8 +171,8 @@ class Map
         /**
          * Find a path from one location to the next.
          */
-        std::list<PATH_NODE>
-        findPath(int startX, int startY, int destX, int destY, int maxCost = 20);
+        std::list<PATH_NODE> findPath(int startX, int startY,
+                                      int destX, int destY, int maxCost = 20);
 
     private:
         int width, height;

@@ -62,9 +62,9 @@ class ChatChannelManager
          * channels has already been reached or when a channel with the same
          * name already exists.
          *
-         * TODO: b_lindeijer: Pretty much the same as registering public
-         *        channel. Maybe they should be merged and private/public
-         *        should be passed as a boolean?
+         * @todo <b>b_lindeijer:</b> Pretty much the same as registering public
+         *       channel. Maybe they should be merged and private/public should
+         *       be passed as a boolean?
          *
          * @return the ID of the registered channel, or 0 if the registering
          *         was unsuccessful.
@@ -79,19 +79,11 @@ class ChatChannelManager
         bool removeChannel(short channelId);
 
         /**
-         * Returns a list containing the names of all public channels.
+         * Returns a list containing all public channels.
          *
-         * @return a list of public channel names
+         * @return a list of all public channels
          */
-        std::list<std::string> getPublicChannelNames();
-
-        /**
-         * Get the number of users that have joined a channel.
-         *
-         * @param channelName the name of the channel
-         * @return the number of users in the channel
-         */
-        short getNumberOfChannelUsers(const std::string &channelName);
+        std::list<const ChatChannel*> getPublicChannels();
 
         /**
          * Get the id of a channel from its name.
@@ -101,83 +93,18 @@ class ChatChannelManager
         short getChannelId(const std::string &channelName);
 
         /**
-         * Get the name of a channel from its id.
+         * Returns the chat channel with the given channel ID.
          *
-         * @return the name of the channel
-         * @deprecated Use ChatChannel::getName instead
+         * @return The chat channel, or NULL when it doesn't exist.
          */
-        std::string getChannelName(short channelId);
-
-        /**
-         * Get the announcement string of a channel from its id.
-         *
-         * @return the announcement string of the channel
-         * @deprecated Use ChatChannel::getAnnouncement instead
-         */
-        std::string getChannelAnnouncement(short channelId);
-
-        /**
-         * Set the announcement string of a channel from its id.
-         *
-         * @return whether the channel exists
-         * @deprecated Use ChatChannel::setAnnouncement instead
-         */
-        bool setChannelAnnouncement(short channelId,
-                                    std::string const &channelAnnouncement);
-
-        /**
-         * Set the password of a channel by its id.
-         *
-         * @return whether the channel exists
-         * @deprecated Use ChatChannel::setPassword instead
-         */
-        bool setChannelPassword(short channelId,
-                                const std::string &channelPassword);
-
-        /**
-         * Get the password of a channel from its id.
-         *
-         * @return the password of the channel
-         * @deprecated Use ChatChannel::getPassword instead
-         */
-        std::string getChannelPassword(short channelId);
-
-        /**
-         * Get the privacy of the channel from its id.
-         *
-         * @return the privacy of the channel
-         * @deprecated Use ChatChannel::isPrivate instead
-         */
-        bool getChannelPrivacy(short channelId);
-
-        /**
-         * Get the ChatChannel object from its id.
-         * TODO: If we have a channel object, why not use that to set
-         *       announcement, password, private status, add/remove users, etc?
-         *
-         * @return the ChatChannel object
-         */
-        ChatChannel _getChannel(short channelId);
-
-        /**
-         * Add a user in a channel.
-         */
-        bool addUserInChannel(std::string const &, short channelId);
-
-        /**
-         * Remove a user from a channel.
-         */
-        bool removeUserFromChannel(std::string const &, short channelId);
+        ChatChannel* getChannel(short channelId);
 
         /**
          * Remove a user from all channels. Used at logout.
+         *
+         * @see ChatChannel::removeUserFromChannel
          */
         void removeUserFromAllChannels(std::string const &userName);
-
-        /**
-         * Get the list of the users registered in a channel.
-         */
-        std::vector<std::string> const &getUserListInChannel(short channelId);
 
         /**
          * Returns whether a channel exists.

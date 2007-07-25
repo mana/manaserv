@@ -364,31 +364,35 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         comp->send(result);
 }
 
-void ServerHandler::enterChannel(const std::string &name, CharacterData *player)
+void ServerHandler::enterChannel(const std::string &name,
+                                 CharacterData *player)
 {
     MessageOut result(CPMSG_ENTER_CHANNEL_RESPONSE);
+
     short channelId = chatChannelManager->getChannelId(name);
-    if (!chatChannelManager->channelExists(channelId))
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+
+    if (!channel)
     {
         // Channel doesn't exist yet so create one
-        channelId = chatChannelManager->registerPrivateChannel(
-                                            name,
-                                            "Guild Channel",
-                                            "");
+        channelId = chatChannelManager->registerPrivateChannel(name,
+                                                               "Guild Channel",
+                                                               "");
+        channel = chatChannelManager->getChannel(channelId);
     }
 
-    if (chatChannelManager->addUserInChannel(player->getName(), channelId))
+    if (channel && channel->addUser(player->getName()))
     {
         result.writeByte(ERRMSG_OK);
 
-        // The user entered the channel, now give him the channel id, the announcement string
-        // and the user list.
+        // The user entered the channel, now give him the channel id, the
+        // announcement string and the user list.
         result.writeShort(channelId);
         result.writeString(name);
-        result.writeString(chatChannelManager->getChannelAnnouncement(channelId));
-        std::vector< std::string > const &userList = 
-            chatChannelManager->getUserListInChannel(channelId);
-        for (std::vector< std::string >::const_iterator i = userList.begin(),
+        result.writeString(channel->getAnnouncement());
+        const ChatChannel::ChannelUsers &userList = channel->getUserList();
+
+        for (ChatChannel::ChannelUsers::const_iterator i = userList.begin(),
                 i_end = userList.end();
                 i != i_end; ++i)
         {
@@ -397,16 +401,17 @@ void ServerHandler::enterChannel(const std::string &name, CharacterData *player)
 
         // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
         // in the channel.
-        chatHandler->warnUsersAboutPlayerEventInChat(channelId,
-                                        player->getName(),
-                                        CHAT_EVENT_NEW_PLAYER);
+        chatHandler->warnUsersAboutPlayerEventInChat(channel,
+                                                     player->getName(),
+                                                     CHAT_EVENT_NEW_PLAYER);
 
     }
 
     chatHandler->sendGuildEnterChannel(result, player->getName());
 }
 
-void ServerHandler::sendInvite(const std::string &invitedName, const std::string &inviterName,
+void ServerHandler::sendInvite(const std::string &invitedName,
+                               const std::string &inviterName,
                                const std::string &guildName)
 {
     // TODO: Separate account and chat server

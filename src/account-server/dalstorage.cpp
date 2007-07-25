@@ -718,16 +718,19 @@ DALStorage::getChannelList()
             return channels;
         }
 
-        for ( unsigned int i = 0; i < channelInfo.rows(); ++i)
+        for (unsigned int i = 0; i < channelInfo.rows(); ++i)
         {
-            channels.insert(std::make_pair(toShort(channelInfo(i,0)),
-                            ChatChannel(channelInfo(i,1),
-                                        channelInfo(i,2),
-                                        channelInfo(i,3),
-                                        toBool(channelInfo(i,4)))));
+            short channelId = toShort(channelInfo(i, 0));
+            channels.insert(
+                    std::make_pair(channelId,
+                                   ChatChannel(channelId,
+                                               channelInfo(i, 1),
+                                               channelInfo(i, 2),
+                                               channelInfo(i, 3),
+                                               toBool(channelInfo(i, 4)))));
 
-            LOG_DEBUG("Channel (" << channelInfo(i,0) << ") loaded: " << channelInfo(i,1)
-                      << ": " << channelInfo(i,2));
+            LOG_DEBUG("Channel (" << channelId << ") loaded: "
+                      << channelInfo(i, 1) << ": " << channelInfo(i, 2));
         }
 
         return channels;
