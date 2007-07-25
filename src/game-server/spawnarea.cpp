@@ -71,7 +71,7 @@ SpawnArea::update()
                 being->addDeathListener(this);
 
                 // some bogus stats for testing
-                being->setSpeed(150);
+                being->setSpeed(300);
                 being->setSize(8);
                 being->setAttribute(BASE_ATTR_VITALITY, 10);
                 being->fillHitpoints();

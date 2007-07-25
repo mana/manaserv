@@ -41,8 +41,8 @@ class MovingObject : public Object
         MovingObject(int type, int id)
           : Object(type),
             mPublicID(id),
-            mDirection(0),
-            mActionTime(0)
+            mActionTime(0),
+            mDirection(0)
         {}
 
         /**
@@ -77,25 +77,31 @@ class MovingObject : public Object
         /**
          * Gets object direction.
          */
-        unsigned char getDirection() const
+        int getDirection() const
         { return mDirection; }
+
+        /**
+         * Gets object speed.
+         */
+        int getSpeed() const
+        { return mSpeed; }
 
         /**
          * Sets object speed.
          */
-        void setSpeed(unsigned s)
+        void setSpeed(int s)
         { mSpeed = s; }
 
         /**
          * Sets object bounding circle radius.
          */
-        void setSize(unsigned s)
+        void setSize(int s)
         { mSize = s; }
 
         /**
          * Gets object bounding circle radius.
          */
-        unsigned getSize()
+        int getSize()
         { return mSize; }
 
         /**
@@ -127,9 +133,9 @@ class MovingObject : public Object
         std::list<PATH_NODE> mPath;
 
     protected:
-        unsigned char mDirection;   /**< Facing direction. */
         unsigned short mActionTime; /**< Delay until next action. */
-        unsigned mSize;             /**< Radius of bounding circle. */
+        unsigned char mDirection;   /**< Facing direction. */
+        unsigned char mSize;        /**< Radius of bounding circle. */
 };
 
 #endif // _TMWSERV_MOVINGOBJECT_H_

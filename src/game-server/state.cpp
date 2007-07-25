@@ -308,6 +308,7 @@ static void informPlayer(MapComposite *map, Character *p)
         if (flags & MOVING_POSITION)
         {
             moveMsg.writeCoordinates(opos.x / 32, opos.y / 32);
+            moveMsg.writeByte(o->getSpeed() / 10);
         }
         if (flags & MOVING_DESTINATION)
         {

@@ -1,3 +1,13 @@
+2007-07-25  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/game-server/movingobject.hpp: Added missing accessor, compacted
+	object, and used generic integer in signatures.
+	* src/defines.h, src/game-server/state.cpp: Added being speed to
+	protocol.
+	* src/game-server/spawnarea.cpp, src/game-server/accountconnection.cpp:
+	Halved speed of maggots. Reduced speed of characters, so that they do
+	not travel much more than one tile per data round-trip.
+
 2007-07-25  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/chat-server/chathandler.hpp,
