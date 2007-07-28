@@ -264,7 +264,7 @@ class Storage
          * Gives the list of opened public channels registered in database
          * @return a map of the public channels
          */
-        virtual std::map<short, ChatChannel>
+        virtual std::map<unsigned short, ChatChannel>
         getChannelList() = 0;
 
         /**
@@ -272,7 +272,7 @@ class Storage
          * to the one in db.
          */
         virtual void
-        updateChannels(std::map<short, ChatChannel>& channelList) = 0;
+        updateChannels(std::map<unsigned short, ChatChannel>& channelList) = 0;
 
         /**
          * Add a new guild

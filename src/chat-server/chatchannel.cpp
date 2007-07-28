@@ -22,68 +22,48 @@
  */
 
 #include "chat-server/chatchannel.hpp"
+#include "chat-server/chatclient.hpp"
 
-ChatChannel::ChatChannel(short id,
+ChatChannel::ChatChannel(int id,
                          const std::string &name,
                          const std::string &announcement,
-                         const std::string &password,
-                         bool privacy):
+                         const std::string &password):
     mId(id),
     mName(name),
     mAnnouncement(announcement),
-    mPassword(password),
-    mPrivate(privacy)
+    mPassword(password)
 {
-    if (announcement == "")
-        mAnnouncement = "None";
-    if (password == "")
-        mPassword = "None";
 }
 
-void
-ChatChannel::setName(const std::string &name)
-{
-    mName = name;
-}
-
-void
-ChatChannel::setAnnouncement(const std::string &announcement)
-{
-    if (announcement == "")
-        mAnnouncement = "None";
-    else
-        mAnnouncement = announcement;
-}
-
-void
-ChatChannel::setPassword(const std::string &password)
-{
-    if (password == "")
-        mPassword = "None";
-    else
-        mPassword = password;
-}
-
-bool ChatChannel::addUser(const std::string &user)
+bool ChatChannel::addUser(ChatClient *user)
 {
     // Check if the user already exists in the channel
     ChannelUsers::const_iterator i = mRegisteredUsers.begin(),
                                  i_end = mRegisteredUsers.end();
     if (std::find(i, i_end, user) != i_end) return false;
     mRegisteredUsers.push_back(user);
+    user->channels.push_back(this);
     return true;
 }
 
-bool ChatChannel::removeUser(const std::string &user)
+bool ChatChannel::removeUser(ChatClient *user)
 {
     ChannelUsers::iterator i_end = mRegisteredUsers.end(),
                            i = std::find(mRegisteredUsers.begin(), i_end, user);
     if (i == i_end) return false;
     mRegisteredUsers.erase(i);
+    std::vector< ChatChannel * > &channels = user->channels;
+    channels.erase(std::find(channels.begin(), channels.end(), this));
     return true;
 }
 
 void ChatChannel::removeAllUsers()
 {
+    for (ChannelUsers::const_iterator i = mRegisteredUsers.begin(),
+         i_end = mRegisteredUsers.end(); i != i_end; ++i)
+    {
+        std::vector< ChatChannel * > &channels = (*i)->channels;
+        channels.erase(std::find(channels.begin(), channels.end(), this));
+    }
     mRegisteredUsers.clear();
 }

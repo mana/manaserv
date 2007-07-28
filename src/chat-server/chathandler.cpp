@@ -104,7 +104,8 @@ NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
 void ChatHandler::computerDisconnected(NetComputer *computer)
 {
     // Remove user from all channels
-    chatChannelManager->removeUserFromAllChannels(((ChatClient*)computer)->characterName);
+    chatChannelManager->
+        removeUserFromAllChannels(static_cast<ChatClient*>(computer));
     ChatPendingClients::iterator i_end = pendingClients.end();
     for (ChatPendingClients::iterator i = pendingClients.begin();
             i != i_end; ++i)
@@ -152,7 +153,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         result.writeShort(CPMSG_CONNECT_RESPONSE);
         result.writeByte(ERRMSG_OK);
         computer.send(result);
-        sendGuildRejoin(computer);
+        // sendGuildRejoin(computer);
         return;
     }
 
@@ -380,7 +381,7 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
             // update the password and the announcement in it and also to
             // remove it.
             ChatChannel *channel = chatChannelManager->getChannel(channelId);
-            channel->addUser(client.characterName);
+            channel->addUser(&client);
 
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(channelId);
@@ -456,7 +457,7 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
         const ChatChannel::ChannelUsers &userList = channel->getUserList();
         ChatChannel::ChannelUsers::const_iterator i = userList.begin();
 
-        if (*i != client.characterName)
+        if (*i != &client)
         {
             reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
         }
@@ -514,7 +515,7 @@ ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     }
     else
     {
-        if (channel->addUser(client.characterName))
+        if (channel->addUser(&client))
         {
             // In the case of a guild, send user joined message.
             if (guild)
@@ -534,7 +535,7 @@ ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
                     i_end = users.end();
                     i != i_end; ++i)
             {
-                reply.writeString(*i);
+                reply.writeString((*i)->characterName);
             }
             // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
             // in the channel.
@@ -563,7 +564,7 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (!channel->removeUser(client.characterName))
+    else if (!channel->removeUser(&client))
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
@@ -632,12 +633,12 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
 
     if (channel)
     {
-        const ChatChannel::ChannelUsers &channelUsers = channel->getUserList();
+        const ChatChannel::ChannelUsers &users = channel->getUserList();
 
-        // Add a user at a time
-        for (unsigned int i = 0; i < channelUsers.size(); ++i)
+        for (ChatChannel::ChannelUsers::const_iterator
+             i = users.begin(), i_end = users.end(); i != i_end; ++i)
         {
-            reply.writeString(channelUsers[i]);
+            reply.writeString((*i)->characterName);
         }
     }
 
@@ -649,7 +650,7 @@ ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_DISCONNECT_RESPONSE);
     reply.writeByte(ERRMSG_OK);
-    chatChannelManager->removeUserFromAllChannels(client.characterName);
+    chatChannelManager->removeUserFromAllChannels(&client);
     client.send(reply);
 }
 
@@ -689,15 +690,10 @@ void ChatHandler::sendInChannel(ChatChannel *channel, MessageOut &msg)
 {
     const ChatChannel::ChannelUsers &users = channel->getUserList();
 
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i)
+    for (ChatChannel::ChannelUsers::const_iterator
+         i = users.begin(), i_end = users.end(); i != i_end; ++i)
     {
-        const std::string &name = static_cast<ChatClient*>(*i)->characterName;
-        std::vector<std::string>::const_iterator j_end = users.end();
-
-        // If the being is in the channel, send it
-        if (std::find(users.begin(), j_end, name) != j_end)
-            (*i)->send(msg);
+        (*i)->send(msg);
     }
 }
 
@@ -740,6 +736,7 @@ void ChatHandler::sendGuildInvite(const std::string &invitedName,
     }
 }
 
+#if 0
 void ChatHandler::sendGuildRejoin(ChatClient &client)
 {
     // Get character based on name.
@@ -767,6 +764,7 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         serverHandler->enterChannel(guild->getName(), character.get());
     }
 }
+#endif
 
 void ChatHandler::sendUserJoined(ChatChannel *channel, const std::string &name)
 {

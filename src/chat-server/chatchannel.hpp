@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+class ChatClient;
+
 /**
  * A chat channel. Optionally a channel is private, in which case a password is
  * required to join it.
@@ -37,36 +39,29 @@
  *
  * @todo <b>b_lindeijer:</b> It would be nicer when some more logic could be
  *       placed in this class to remove some weight from the ChatHandler.
- *       Referencing ChatClient instances would also be nicer than to store
- *       only the names of the characters.
  */
 class ChatChannel
 {
     public:
-        typedef std::vector<std::string> ChannelUsers;
+        typedef std::vector< ChatClient * > ChannelUsers;
 
         /**
          * Constructor.
-         *
-         * @todo <b>b_lindeijer:</b> I would say a channel can be defined as
-         *       private when a non-empty password is set, in which case we can
-         *       get rid of the privacy parameter.
          *
          * @param name         the name of the channel.
          * @param announcement a welcome message.
          * @param password     password (for private channels).
          * @param privacy      whether this channel is private.
          */
-        ChatChannel(short id,
+        ChatChannel(int id,
                     const std::string &name,
-                    const std::string &announcement = "",
-                    const std::string &password = "",
-                    bool privacy = false);
+                    const std::string &announcement = std::string(),
+                    const std::string &password = std::string());
 
         /**
          * Get the ID of the channel.
          */
-        short getId() const
+        int getId() const
         { return mId; }
 
         /**
@@ -91,22 +86,25 @@ class ChatChannel
          * Returns whether this channel is private.
          */
         bool isPrivate() const
-        { return mPrivate; }
+        { return !mPassword.empty(); }
 
         /**
          * Sets the name of the channel.
          */
-        void setName(const std::string &channelName);
+        void setName(const std::string &channelName)
+        { mName = channelName; }
 
         /**
          * Sets the announcement string of the channel.
          */
-        void setAnnouncement(const std::string &channelAnnouncement);
+        void setAnnouncement(const std::string &channelAnnouncement)
+        { mAnnouncement = channelAnnouncement; }
 
         /**
          * Sets the password of the channel.
          */
-        void setPassword(const std::string &channelPassword);
+        void setPassword(const std::string &channelPassword)
+        { mPassword = channelPassword; }
 
         /**
          * Gets the list of the users registered in the channel.
@@ -119,14 +117,14 @@ class ChatChannel
          *
          * @return whether the user was successfully added
          */
-        bool addUser(const std::string &name);
+        bool addUser(ChatClient *);
 
         /**
          * Removes a user from the channel.
          *
          * @return whether the user was successfully removed
          */
-        bool removeUser(const std::string &name);
+        bool removeUser(ChatClient *);
 
         /**
          * Empties a channel from its users (admin included).
@@ -134,13 +132,11 @@ class ChatChannel
         void removeAllUsers();
 
     private:
-        short mId;                     /**< The ID of the channel. */
+        unsigned short mId;            /**< The ID of the channel. */
         std::string mName;             /**< The name of the channel. */
         std::string mAnnouncement;     /**< Welcome message. */
         std::string mPassword;         /**< The channel password. */
         ChannelUsers mRegisteredUsers; /**< Users in this channel. */
-
-        bool mPrivate;                 /**< Whether the channel is private. */
 };
 
 #endif

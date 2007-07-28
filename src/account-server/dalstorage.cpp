@@ -691,7 +691,7 @@ DALStorage::updateCharacter(CharacterPtr character)
     return true;
 }
 
-std::map<short, ChatChannel>
+std::map<unsigned short, ChatChannel>
 DALStorage::getChannelList()
 {
     // If not opened already
@@ -699,15 +699,14 @@ DALStorage::getChannelList()
 
     // specialize the string_to functor to convert
     // a string to a short.
-    string_to<short> toShort;
-    string_to<bool> toBool;
+    string_to<int> toInt;
 
     // The formatted datas
-    std::map<short, ChatChannel> channels;
+    std::map<unsigned short, ChatChannel> channels;
 
     try {
         std::stringstream sql;
-        sql << "select id, name, announcement, password, privacy from ";
+        sql << "select id, name, announcement, password from ";
         sql << CHANNELS_TBL_NAME;
         sql << ";";
 
@@ -720,14 +719,13 @@ DALStorage::getChannelList()
 
         for (unsigned int i = 0; i < channelInfo.rows(); ++i)
         {
-            short channelId = toShort(channelInfo(i, 0));
+            unsigned short channelId = toInt(channelInfo(i, 0));
             channels.insert(
                     std::make_pair(channelId,
                                    ChatChannel(channelId,
                                                channelInfo(i, 1),
                                                channelInfo(i, 2),
-                                               channelInfo(i, 3),
-                                               toBool(channelInfo(i, 4)))));
+                                               channelInfo(i, 3))));
 
             LOG_DEBUG("Channel (" << channelId << ") loaded: "
                       << channelInfo(i, 1) << ": " << channelInfo(i, 2));
@@ -744,7 +742,7 @@ DALStorage::getChannelList()
 }
 
 void
-DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
+DALStorage::updateChannels(std::map<unsigned short, ChatChannel>& channelList)
 {
 #if defined (SQLITE_SUPPORT)
     // Reopen the db in this thread for sqlite, to avoid
@@ -762,11 +760,11 @@ DALStorage::updateChannels(std::map<short, ChatChannel>& channelList)
 
         mDb->execSql(sql.str());
 
-        for (std::map<short, ChatChannel>::iterator i = channelList.begin();
+        for (std::map<unsigned short, ChatChannel>::iterator i = channelList.begin();
                 i != channelList.end();)
         {
             // insert registered channel if id < MAX_PUBLIC_CHANNELS_RANGE;
-            if ( i->first < (signed)MAX_PUBLIC_CHANNELS_RANGE )
+            if (i->first < MAX_PUBLIC_CHANNELS_RANGE)
             {
                 if (i->second.getName() != "")
                 {

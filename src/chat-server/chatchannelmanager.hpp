@@ -53,7 +53,7 @@ class ChatChannelManager
          * @return the ID of the registered channel, or 0 if the registering
          *         was unsuccessful.
          */
-        short registerPublicChannel(const std::string &channelName,
+        int registerPublicChannel(const std::string &channelName,
                                     const std::string &channelAnnouncement,
                                     const std::string &channelPassword);
 
@@ -69,14 +69,14 @@ class ChatChannelManager
          * @return the ID of the registered channel, or 0 if the registering
          *         was unsuccessful.
          */
-        short registerPrivateChannel(const std::string &channelName,
+        int registerPrivateChannel(const std::string &channelName,
                                      const std::string &channelAnnouncement,
                                      const std::string &channelPassword);
 
         /**
          * Remove a channel.
          */
-        bool removeChannel(short channelId);
+        bool removeChannel(int channelId);
 
         /**
          * Returns a list containing all public channels.
@@ -90,31 +90,31 @@ class ChatChannelManager
          *
          * @return the id of the channel, 0 if it was unsuccessful.
          */
-        short getChannelId(const std::string &channelName);
+        int getChannelId(const std::string &channelName);
 
         /**
          * Returns the chat channel with the given channel ID.
          *
          * @return The chat channel, or NULL when it doesn't exist.
          */
-        ChatChannel* getChannel(short channelId);
+        ChatChannel* getChannel(int channelId);
 
         /**
          * Remove a user from all channels. Used at logout.
          *
          * @see ChatChannel::removeUserFromChannel
          */
-        void removeUserFromAllChannels(std::string const &userName);
+        void removeUserFromAllChannels(ChatClient *);
 
         /**
          * Returns whether a channel exists.
          *
          * @param channelId a channel ID
          */
-        bool channelExists(short channelId);
+        bool channelExists(int channelId);
 
     private:
-        typedef std::map<short, ChatChannel> ChatChannels;
+        typedef std::map<unsigned short, ChatChannel> ChatChannels;
         typedef ChatChannels::iterator ChatChannelIterator;
 
         /**

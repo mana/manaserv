@@ -150,7 +150,7 @@ class DALStorage: public Storage
          * Gives the list of opened public channels registered in database
          * @return a map of the public channels
          */
-        std::map<short, ChatChannel>
+        std::map<unsigned short, ChatChannel>
         getChannelList();
 
         /**
@@ -158,7 +158,7 @@ class DALStorage: public Storage
          * to the one in db.
          */
         void
-        updateChannels(std::map<short, ChatChannel>& channelList);
+        updateChannels(std::map<unsigned short, ChatChannel>& channelList);
 
         /**
          * Add a new guild

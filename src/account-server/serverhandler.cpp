@@ -364,6 +364,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         comp->send(result);
 }
 
+#if 0
 void ServerHandler::enterChannel(const std::string &name,
                                  CharacterData *player)
 {
@@ -409,6 +410,7 @@ void ServerHandler::enterChannel(const std::string &name,
 
     chatHandler->sendGuildEnterChannel(result, player->getName());
 }
+#endif
 
 void ServerHandler::sendInvite(const std::string &invitedName,
                                const std::string &inviterName,

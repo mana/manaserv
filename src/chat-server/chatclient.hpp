@@ -24,7 +24,13 @@
 #ifndef _TMWSERV_CHATCLIENT_H_
 #define _TMWSERV_CHATCLIENT_H_
 
+#include <string>
+#include <vector>
+
+#include "defines.h"
 #include "net/netcomputer.hpp"
+
+class ChatChannel;
 
 /**
  * A client connected to the chat server. Via this class, the chat server
@@ -43,6 +49,7 @@ class ChatClient : public NetComputer
         }
 
         std::string characterName;
+        std::vector< ChatChannel * > channels;
         AccountLevel accountLevel;
 };
 
