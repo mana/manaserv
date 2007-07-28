@@ -625,8 +625,6 @@ void MapComposite::remove(Thing *ptr)
 
 void MapComposite::update()
 {
-    mMap->resetTempWalk();
-
     for (int i = 0; i < mContent->mapHeight * mContent->mapWidth; ++i)
     {
         mContent->zones[i].destinations.clear();
@@ -644,8 +642,6 @@ void MapComposite::update()
 
         Point const &pos1 = obj->getOldPosition(),
                     &pos2 = obj->getPosition();
-
-        mMap->setTempWalk(pos2.x / 32, pos2.y / 32, false);
 
         MapZone &src = mContent->getZone(pos1),
                 &dst = mContent->getZone(pos2);

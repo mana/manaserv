@@ -261,7 +261,6 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
 
     // Clean up tilesets
     tilesetFirstGids.clear();
-    map->resetTempWalk();
 
     return map;
 }
@@ -379,5 +378,5 @@ static void setTileWithGid(Map *map, int x, int y, int gid)
         set = *i;
     }
 
-    map->setPermWalk(x, y, gid == set);
+    map->setWalk(x, y, gid == set);
 }

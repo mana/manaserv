@@ -72,47 +72,21 @@ Map::setSize(int width, int height)
     metaTiles = new MetaTile[width * height];
 }
 
-void
-Map::setPermWalk(int x, int y, bool walkable)
+void Map::setWalk(int x, int y, bool walkable)
 {
-    metaTiles[x + y * width].permWalkable = walkable;
+    metaTiles[x + y * width].walkable = walkable;
 }
 
-void
-Map::setTempWalk(int x, int y, bool walkable)
+bool Map::getWalk(int x, int y) const
 {
-    metaTiles[x + y * width].tempWalkable = walkable;
-}
-
-void
-Map::resetTempWalk()
-{
-    for (int i = 0; i < width * height; i++)
+    // You can't walk outside of the map
+    if (x < 0 || y < 0 || x >= width || y >= height)
     {
-        metaTiles[i].tempWalkable = metaTiles[i].permWalkable;
-    }
-}
-
-bool
-Map::getWalk(int x, int y)
-{
-    // You can't walk outside of the map
-    if (x < 0 || y < 0 || x >= width || y >= height) {
         return false;
-    }
-    return metaTiles[x + y * width].tempWalkable;
-}
-
-bool
-Map::tileCollides(int x, int y)
-{
-    // You can't walk outside of the map
-    if (x < 0 || y < 0 || x >= width || y >= height) {
-        return true;
     }
 
     // Check if the tile is walkable
-    return !metaTiles[x + y * width].permWalkable;
+    return metaTiles[x + y * width].walkable;
 }
 
 MetaTile*
@@ -182,7 +156,7 @@ Map::findPath(int startX, int startY, int destX, int destY, int maxCost)
                 MetaTile *newTile = getMetaTile(x, y);
 
                 // Skip if the tile is on the closed list or is not walkable
-                if (newTile->whichList == onClosedList || !getWalk(x, y))
+                if (newTile->whichList == onClosedList || !newTile->walkable)
                 {
                     continue;
                 }
@@ -195,7 +169,7 @@ Map::findPath(int startX, int startY, int destX, int destY, int maxCost)
                     MetaTile *t1 = getMetaTile(curr.x, curr.y + dy);
                     MetaTile *t2 = getMetaTile(curr.x + dx, curr.y);
 
-                    if (!(t1->tempWalkable && t2->tempWalkable))
+                    if (!(t1->walkable && t2->walkable))
                     {
                         continue;
                     }

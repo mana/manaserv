@@ -1,3 +1,10 @@
+2007-07-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/game-server/mapreader.cpp, src/game-server/map.cpp,
+	src/game-server/map.hpp, src/game-server/mapcomposite.cpp: Revert to
+	the old pathfinding system without collision with beings, as the new
+	one is too cpu intensive.
+
 2007-07-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/storage.hpp, src/account-server/dalstorage.cpp,

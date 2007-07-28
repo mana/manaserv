@@ -57,8 +57,7 @@ class MetaTile
         int whichList;          /**< No list, open list or closed list */
         int parentX;            /**< X coordinate of parent tile */
         int parentY;            /**< Y coordinate of parent tile */
-        bool permWalkable;      /**< Can beings normally walk on this tile */
-        bool tempWalkable;      /**< Can beings walk on this tile this tick? */
+        bool walkable;          /**< Can beings normally walk on this tile */
 };
 
 /**
@@ -115,34 +114,14 @@ class Map
         getMetaTile(int x, int y);
 
         /**
-         * Set permanent walkability flag for a tile
+         * Sets walkability for a tile.
          */
-        void
-        setPermWalk(int x, int y, bool walkable);
+        void setWalk(int x, int y, bool walkable);
 
         /**
-         * Set temporary walkability flag for a tile
+         * Gets walkability for a tile.
          */
-        void
-        setTempWalk(int x, int y, bool walkable);
-
-        /**
-         * Resets the temporary walkable status of all tiles to the permanent
-         * walkable status.
-         */
-        void resetTempWalk();
-
-        /**
-         * Tell if a tile is walkable or not, includes checking beings.
-         */
-        bool
-        getWalk(int x, int y);
-
-        /**
-         * Tell if a tile collides, not including a check on beings.
-         */
-        bool
-        tileCollides(int x, int y);
+        bool getWalk(int x, int y) const;
 
         /**
          * Returns the width of this map.
