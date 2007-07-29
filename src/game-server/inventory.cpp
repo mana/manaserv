@@ -31,15 +31,62 @@
 #include "game-server/itemmanager.hpp"
 #include "net/messageout.hpp"
 
-Inventory::Inventory(Character *p)
-  : poss(p->getPossessions()), msg(GPMSG_INVENTORY), client(p)
-{}
+Inventory::Inventory(Character *p, bool d):
+    mPoss(&p->getPossessions()), msg(GPMSG_INVENTORY), mClient(p), mDelayed(d)
+{
+}
 
 Inventory::~Inventory()
 {
     if (msg.getLength() > 2)
     {
-        gameHandler->sendTo(client, msg);
+        if (mDelayed)
+        {
+            Possessions &poss = mClient->getPossessions();
+            if (mPoss != &poss)
+            {
+                poss = *mPoss;
+                delete mPoss;
+            }
+        }
+        gameHandler->sendTo(mClient, msg);
+    }
+}
+
+void Inventory::cancel()
+{
+    msg.clear();
+    msg.writeShort(GPMSG_INVENTORY);
+    mPoss = &mClient->getPossessions();
+}
+
+void Inventory::commit()
+{
+    if (msg.getLength() > 2)
+    {
+        if (mDelayed)
+        {
+            Possessions &poss = mClient->getPossessions();
+            if (mPoss != &poss)
+            {
+                poss = *mPoss;
+                delete mPoss;
+                mPoss = &poss;
+            }
+        }
+        gameHandler->sendTo(mClient, msg);
+        msg.clear();
+        msg.writeShort(GPMSG_INVENTORY);
+    }
+}
+
+void Inventory::prepare()
+{
+    if (!mDelayed) return;
+    Possessions &poss = mClient->getPossessions();
+    if (mPoss == &poss)
+    {
+        mPoss = new Possessions(poss);
     }
 }
 
@@ -49,7 +96,7 @@ void Inventory::sendFull() const
 
     for (int i = 0; i < EQUIPMENT_SLOTS; ++i)
     {
-        if (int id = poss.equipment[i])
+        if (int id = mPoss->equipment[i])
         {
             m.writeByte(i);
             m.writeShort(id);
@@ -57,8 +104,8 @@ void Inventory::sendFull() const
     }
 
     int slot = EQUIP_CLIENT_INVENTORY;
-    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
-         i_end = poss.inventory.end(); i != i_end; ++i)
+    for (std::vector< InventoryItem >::const_iterator i = mPoss->inventory.begin(),
+         i_end = mPoss->inventory.end(); i != i_end; ++i)
     {
         if (i->itemId)
         {
@@ -73,13 +120,13 @@ void Inventory::sendFull() const
         }
     }
 
-    gameHandler->sendTo(client, m);
+    gameHandler->sendTo(mClient, m);
 }
 
 int Inventory::getItem(int slot) const
 {
-    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
-         i_end = poss.inventory.end(); i != i_end; ++i)
+    for (std::vector< InventoryItem >::const_iterator i = mPoss->inventory.begin(),
+         i_end = mPoss->inventory.end(); i != i_end; ++i)
     {
         if (slot == 0)
         {
@@ -99,8 +146,8 @@ int Inventory::getItem(int slot) const
 int Inventory::getIndex(int slot) const
 {
     int index = 0;
-    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
-         i_end = poss.inventory.end(); i != i_end; ++i, ++index)
+    for (std::vector< InventoryItem >::const_iterator i = mPoss->inventory.begin(),
+         i_end = mPoss->inventory.end(); i != i_end; ++i, ++index)
     {
         if (slot == 0)
         {
@@ -120,8 +167,8 @@ int Inventory::getIndex(int slot) const
 int Inventory::getSlot(int index) const
 {
     int slot = 0;
-    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
-         i_end = poss.inventory.begin() + index; i != i_end; ++i)
+    for (std::vector< InventoryItem >::const_iterator i = mPoss->inventory.begin(),
+         i_end = mPoss->inventory.begin() + index; i != i_end; ++i)
     {
         slot += i->itemId ? 1 : i->amount;
     }
@@ -131,9 +178,9 @@ int Inventory::getSlot(int index) const
 int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
 {
     int slot = 0;
-    for (int i = 0, i_end = poss.inventory.size(); i < i_end; ++i)
+    for (int i = 0, i_end = mPoss->inventory.size(); i < i_end; ++i)
     {
-        InventoryItem &it = poss.inventory[i];
+        InventoryItem &it = mPoss->inventory[i];
         if (it.itemId == 0)
         {
             int nb = std::min(amount, maxPerSlot);
@@ -146,7 +193,7 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
             {
                 --it.amount;
                 InventoryItem iu = { itemId, nb };
-                poss.inventory.insert(poss.inventory.begin() + i, iu);
+                mPoss->inventory.insert(mPoss->inventory.begin() + i, iu);
                 ++i_end;
             }
 
@@ -168,7 +215,7 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
         int nb = std::min(amount, maxPerSlot);
         amount -= nb;
         InventoryItem it = { itemId, nb };
-        poss.inventory.push_back(it);
+        mPoss->inventory.push_back(it);
 
         msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
         msg.writeShort(itemId);
@@ -181,11 +228,13 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
 
 int Inventory::insert(int itemId, int amount)
 {
+    prepare();
+
     int slot = 0;
     int maxPerSlot = ItemManager::getItem(itemId)->getMaxPerSlot();
 
-    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
-         i_end = poss.inventory.end(); i != i_end; ++i)
+    for (std::vector< InventoryItem >::iterator i = mPoss->inventory.begin(),
+         i_end = mPoss->inventory.end(); i != i_end; ++i)
     {
         if (i->itemId == itemId)
         {
@@ -216,8 +265,8 @@ int Inventory::count(int itemId) const
 {
     int nb = 0;
 
-    for (std::vector< InventoryItem >::iterator i = poss.inventory.begin(),
-         i_end = poss.inventory.end(); i != i_end; ++i)
+    for (std::vector< InventoryItem >::const_iterator i = mPoss->inventory.begin(),
+         i_end = mPoss->inventory.end(); i != i_end; ++i)
     {
         if (i->itemId == itemId)
         {
@@ -230,17 +279,17 @@ int Inventory::count(int itemId) const
 
 void Inventory::freeIndex(int i)
 {
-    InventoryItem &it = poss.inventory[i];
+    InventoryItem &it = mPoss->inventory[i];
 
-    if (i == (int)poss.inventory.size() - 1)
+    if (i == (int)mPoss->inventory.size() - 1)
     {
-        poss.inventory.pop_back();
+        mPoss->inventory.pop_back();
     }
-    else if (poss.inventory[i + 1].itemId == 0)
+    else if (mPoss->inventory[i + 1].itemId == 0)
     {
         it.itemId = 0;
-        it.amount = poss.inventory[i + 1].amount + 1;
-        poss.inventory.erase(poss.inventory.begin() + i + 1);
+        it.amount = mPoss->inventory[i + 1].amount + 1;
+        mPoss->inventory.erase(mPoss->inventory.begin() + i + 1);
     }
     else
     {
@@ -248,19 +297,21 @@ void Inventory::freeIndex(int i)
         it.amount = 1;
     }
 
-    if (i > 0 && poss.inventory[i - 1].itemId == 0)
+    if (i > 0 && mPoss->inventory[i - 1].itemId == 0)
     {
         // Note: "it" is no longer a valid iterator.
-        poss.inventory[i - 1].amount += poss.inventory[i].amount;
-        poss.inventory.erase(poss.inventory.begin() + i);
+        mPoss->inventory[i - 1].amount += mPoss->inventory[i].amount;
+        mPoss->inventory.erase(mPoss->inventory.begin() + i);
     }
 }
 
 int Inventory::remove(int itemId, int amount)
 {
-    for (int i = poss.inventory.size() - 1; i >= 0; --i)
+    prepare();
+
+    for (int i = mPoss->inventory.size() - 1; i >= 0; --i)
     {
-        InventoryItem &it = poss.inventory[i];
+        InventoryItem &it = mPoss->inventory[i];
         if (it.itemId == itemId)
         {
             int nb = std::min((int)it.amount, amount);
@@ -290,13 +341,14 @@ int Inventory::remove(int itemId, int amount)
 int Inventory::removeFromSlot(int slot, int amount)
 {
     int i = getIndex(slot);
-
     if (i < 0)
     {
         return amount;
     }
 
-    InventoryItem &it = poss.inventory[i];
+    prepare();
+
+    InventoryItem &it = mPoss->inventory[i];
     int nb = std::min((int)it.amount, amount);
     it.amount -= nb;
     amount -= nb;
@@ -322,6 +374,8 @@ bool Inventory::equip(int slot)
         return false;
     }
 
+    prepare();
+
     int availableSlots = 0, firstSlot = 0, secondSlot = 0;
 
     switch (ItemManager::getItem(itemId)->getType())
@@ -330,13 +384,13 @@ bool Inventory::equip(int slot)
         {
             // Special case 1, the two one-handed weapons are to be placed back
             // in the inventory, if there are any.
-            int id = poss.equipment[EQUIP_FIGHT1_SLOT];
+            int id = mPoss->equipment[EQUIP_FIGHT1_SLOT];
             if (id && !insert(id, 1))
             {
                 return false;
             }
 
-            id = poss.equipment[EQUIP_FIGHT2_SLOT];
+            id = mPoss->equipment[EQUIP_FIGHT2_SLOT];
             if (id && !insert(id, 1))
             {
                 return false;
@@ -346,8 +400,8 @@ bool Inventory::equip(int slot)
             msg.writeShort(itemId);
             msg.writeByte(EQUIP_FIGHT2_SLOT);
             msg.writeShort(0);
-            poss.equipment[EQUIP_FIGHT1_SLOT] = itemId;
-            poss.equipment[EQUIP_FIGHT2_SLOT] = 0;
+            mPoss->equipment[EQUIP_FIGHT1_SLOT] = itemId;
+            mPoss->equipment[EQUIP_FIGHT2_SLOT] = 0;
             removeFromSlot(slot, 1);
             return true;
         }
@@ -355,7 +409,7 @@ bool Inventory::equip(int slot)
         case ITEM_EQUIPMENT_PROJECTILE:
             msg.writeByte(EQUIP_PROJECTILE_SLOT);
             msg.writeShort(itemId);
-            poss.equipment[EQUIP_PROJECTILE_SLOT] = itemId;
+            mPoss->equipment[EQUIP_PROJECTILE_SLOT] = itemId;
             return true;
 
         case ITEM_EQUIPMENT_ONE_HAND_WEAPON:
@@ -400,19 +454,19 @@ bool Inventory::equip(int slot)
             return false;
     }
 
-    int id = poss.equipment[firstSlot];
+    int id = mPoss->equipment[firstSlot];
 
     switch (availableSlots)
     {
     case 2:
-        if (id && !poss.equipment[secondSlot] &&
+        if (id && !mPoss->equipment[secondSlot] &&
             ItemManager::getItem(id)->getType() !=
                 ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
         {
             // The first slot is full and the second slot is empty.
             msg.writeByte(secondSlot);
             msg.writeShort(itemId);
-            poss.equipment[secondSlot] = itemId;
+            mPoss->equipment[secondSlot] = itemId;
             removeFromSlot(slot, 1);
             return true;
         }
@@ -425,7 +479,7 @@ bool Inventory::equip(int slot)
         }
         msg.writeByte(firstSlot);
         msg.writeShort(itemId);
-        poss.equipment[firstSlot] = itemId;
+        mPoss->equipment[firstSlot] = itemId;
         removeFromSlot(slot, 1);
         return true;
 

@@ -34,6 +34,7 @@
 #include "game-server/mapcomposite.hpp"
 #include "game-server/npc.hpp"
 #include "game-server/state.hpp"
+#include "game-server/trade.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
@@ -116,6 +117,34 @@ void GameHandler::process()
     ConnectionHandler::process();
 }
 
+static MovingObject *findBeingNear(Object *p, int id)
+{
+    MapComposite *map = p->getMap();
+    Point const &ppos = p->getPosition();
+    // TODO: use a less arbitrary value.
+    for (MovingObjectIterator i(map->getAroundPointIterator(ppos, 48)); i; ++i)
+    {
+        MovingObject *o = *i;
+        if (o->getPublicID() != id) continue;
+        return ppos.inRangeOf(o->getPosition(), 48) ? o : NULL;
+    }
+    return NULL;
+}
+
+static Character *findCharacterNear(Object *p, int id)
+{
+    MapComposite *map = p->getMap();
+    Point const &ppos = p->getPosition();
+    // TODO: use a less arbitrary value.
+    for (CharacterIterator i(map->getAroundPointIterator(ppos, 48)); i; ++i)
+    {
+        Character *o = *i;
+        if (o->getPublicID() != id) continue;
+        return ppos.inRangeOf(o->getPosition(), 48) ? o : NULL;
+    }
+    return NULL;
+}
+
 void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 {
     GameClient &computer = *static_cast< GameClient * >(comp);
@@ -148,18 +177,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_NPC_SELECT:
         {
             int id = message.readShort();
-            MapComposite *map = computer.character->getMap();
-            MovingObject *o = NULL;
-            Point ppos = computer.character->getPosition();
-            // TODO: use a less arbitrary value.
-            for (MovingObjectIterator i(map->getAroundPointIterator(ppos, 48)); i; ++i)
-            {
-                if ((*i)->getPublicID() == id)
-                {
-                    o = *i;
-                    break;
-                }
-            }
+            MovingObject *o = findBeingNear(computer.character, id);
             if (!o || o->getType() != OBJECT_NPC) break;
 
             NPC *q = static_cast< NPC * >(o);
@@ -289,6 +307,48 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character = NULL;
             computer.status = CLIENT_LOGIN;
         } break;
+
+        case PGMSG_TRADE_REQUEST:
+        {
+            int id = message.readShort();
+
+            if (Trade *t = computer.character->getTrading())
+            {
+                if (t->request(computer.character, id)) break;
+            }
+
+            Character *q = findCharacterNear(computer.character, id);
+            if (!q || q->getTrading())
+            {
+                result.writeShort(GPMSG_TRADE_CANCEL);
+                break;
+            }
+
+            new Trade(computer.character, q);
+        } break;
+
+        case PGMSG_TRADE_CANCEL:
+        case PGMSG_TRADE_ACCEPT:
+        case PGMSG_TRADE_ADD_ITEM:
+        {
+            Trade *t = computer.character->getTrading();
+            if (!t) break;
+
+            switch (message.getId())
+            {
+                case PGMSG_TRADE_CANCEL:
+                    t->cancel(computer.character);
+                    break;
+                case PGMSG_TRADE_ACCEPT :
+                    t->accept(computer.character);
+                    break;
+                case PGMSG_TRADE_ADD_ITEM:
+                    int slot = message.readByte();
+                    t->addItem(computer.character, slot, message.readByte());
+                    break;
+            }
+        } break;
+
 
 
 // The following messages should be handled by the chat server, not the game server.

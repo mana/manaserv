@@ -32,10 +32,9 @@
 
 Character::Character(MessageIn & msg):
     Being(OBJECT_CHARACTER, 65535),
-    mClient(NULL),
-    mAttributesChanged(true),
-    mDatabaseID(-1), mName(), mGender(0), mHairStyle(0), mHairColor(0),
-    mLevel(0), mMoney(0)
+    mClient(NULL), mTrading(NULL), mDatabaseID(-1),
+    mMoney(0), mGender(0), mHairStyle(0), mHairColor(0), mLevel(0),
+    mAttributesChanged(true)
 {
     // prepare attributes vector
     mAttributes.resize(NB_ATTRIBUTES_CHAR, 1);

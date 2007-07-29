@@ -65,17 +65,29 @@ class GameClient;
  */
 class Inventory
 {
-        Possessions &poss;
-        MessageOut msg;
-        Character *client;
-
     public:
-        Inventory(Character *);
 
         /**
+         * Creates a view on the possessions of a character.
+         * @param delayed true if changes have to be cancelable.
+         */
+        Inventory(Character *, bool delayed = false);
+
+        /**
+         * Commits delayed changes.
          * Sends the update message to the client.
          */
         ~Inventory();
+
+        /**
+         * Commits delayed changes.
+         */
+        void commit();
+
+        /**
+         * Cancels delayed changes.
+         */
+        void cancel();
 
         /**
          * Sends a complete inventory update to the client.
@@ -122,6 +134,12 @@ class Inventory
         int getItem(int slot) const;
 
     private:
+
+        /**
+         * Ensures we are working on a copy in delayed mode.
+         */
+        void prepare();
+
         /**
          * Fills some slots with items.
          * @return number of items not inserted.
@@ -142,6 +160,11 @@ class Inventory
          * Gets the slot number of an inventory index.
          */
         int getSlot(int index) const;
+
+        Possessions *mPoss; /**< Pointer to the modified possessions. */
+        MessageOut msg;     /**< Update message containing all the changes. */
+        Character *mClient; /**< Character to notify. */
+        bool mDelayed;      /**< Delayed changes. */
 };
 
 

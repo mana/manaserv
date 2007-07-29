@@ -169,6 +169,16 @@ enum {
     PGMSG_NPC_TALK                 = 0x02B2, // W being id
     PGMSG_NPC_TALK_NEXT            = 0x02B3, // W being id
     PGMSG_NPC_SELECT               = 0x02B4, // W being id, B choice
+    PGMSG_TRADE_REQUEST            = 0x02C0, // W being id
+    GPMSG_TRADE_REQUEST            = 0x02C1, // W being id
+    GPMSG_TRADE_START              = 0x02C2, // -
+    GPMSG_TRADE_COMPLETE           = 0x02C3, // -
+    PGMSG_TRADE_CANCEL             = 0x02C4, // -
+    GPMSG_TRADE_CANCEL             = 0x02C5, // -
+    PGMSG_TRADE_ACCEPT             = 0x02C6, // -
+    GPMSG_TRADE_ACCEPT             = 0x02C7, // -
+    PGMSG_TRADE_ADD_ITEM           = 0x02C8, // B slot, B amount
+    GPMSG_TRADE_ADD_ITEM           = 0x02C9, // W item id, B amount
     PGMSG_USE_ITEM                 = 0x0300, // L item id
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*

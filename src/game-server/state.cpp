@@ -37,6 +37,7 @@
 #include "game-server/mapmanager.hpp"
 #include "game-server/monster.hpp"
 #include "game-server/npc.hpp"
+#include "game-server/trade.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
@@ -499,6 +500,12 @@ void GameState::remove(Thing *ptr)
 
     if (ptr->canMove())
     {
+        if (ptr->getType() == OBJECT_CHARACTER)
+        {
+            Character *ch = static_cast< Character * >(ptr);
+            if (Trade *t = ch->getTrading()) t->cancel(ch);
+        }
+
         MovingObject *obj = static_cast< MovingObject * >(ptr);
         MessageOut msg(GPMSG_BEING_LEAVE);
         msg.writeShort(obj->getPublicID());

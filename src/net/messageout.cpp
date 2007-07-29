@@ -57,6 +57,13 @@ MessageOut::~MessageOut()
     free(mData);
 }
 
+void MessageOut::clear()
+{
+    mData = (char *) realloc(mData, INITIAL_DATA_CAPACITY);
+    mDataSize = INITIAL_DATA_CAPACITY;
+    mPos = 0;
+}
+
 void
 MessageOut::expand(size_t bytes)
 {

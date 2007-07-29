@@ -119,6 +119,8 @@ tmwserv_game_SOURCES = \
 	game-server/state.cpp \
 	game-server/testing.cpp \
 	game-server/thing.hpp \
+	game-server/trade.hpp \
+	game-server/trade.cpp \
 	game-server/trigger.hpp \
 	game-server/trigger.cpp \
 	net/connection.hpp \

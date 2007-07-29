@@ -33,6 +33,7 @@ class GameClient;
 class MessageIn;
 class MessageOut;
 class Point;
+class Trade;
 
 /**
  * The representation of a player's character in the game world.
@@ -76,6 +77,17 @@ class Character : public Being
         Possessions &getPossessions()
         { return mPossessions; }
 
+        /**
+         * Gets the trade object the character is involved in.
+         */
+        Trade *getTrading() const
+        { return mTrading; }
+
+        /**
+         * Sets the trade object the character is involved in.
+         */
+        void setTrading(Trade *t)
+        { mTrading = t; }
 
         /*
          * Character data:
@@ -105,7 +117,7 @@ class Character : public Being
         /** Gets the gender of the character (male or female). */
         int
         getGender() const
-        { return mGender;}
+        { return mGender; }
 
         /** Sets the gender of the character (male or female). */
         void
@@ -200,25 +212,26 @@ class Character : public Being
         Character &operator=(Character const &);
 
         GameClient *mClient;   /**< Client computer. */
+        Trade *mTrading;       /**< Trade object the character is involved in. */
 
         /** Atributes as the client should currently know them. */
         std::vector<unsigned short> mOldAttributes;
+
+        Possessions mPossessions;    /**< Possesssions of the character. */
+
+        std::string mName;           /**< Name of the character. */
+        int mDatabaseID;             /**< Character's database ID. */
+        unsigned short mMoney;       /**< Wealth of the character. */
+        unsigned char mGender;       /**< Gender of the character. */
+        unsigned char mHairStyle;    /**< Hair Style of the character. */
+        unsigned char mHairColor;    /**< Hair Color of the character. */
+        unsigned char mLevel;        /**< Level of the character. */
 
         /**
          * true when one or more attributes might have changed since the
          * client has been updated about them.
          */
         bool mAttributesChanged;
-
-        int mDatabaseID;             /**< Character's database ID. */
-        std::string mName;           /**< Name of the character. */
-        unsigned char mGender;       /**< Gender of the character. */
-        unsigned char mHairStyle;    /**< Hair Style of the character. */
-        unsigned char mHairColor;    /**< Hair Color of the character. */
-        unsigned char mLevel;        /**< Level of the character. */
-        unsigned int mMoney;         /**< Wealth of the being. */
-
-        Possessions mPossessions;    /**< Possesssions of the character. */
 };
 
 #endif // _TMWSERV_CHARACTER_HPP_

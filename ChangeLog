@@ -4,6 +4,14 @@
 	src/game-server/map.hpp, src/game-server/mapcomposite.cpp: Revert to
 	the old pathfinding system without collision with beings, as the new
 	one is too cpu intensive.
+	* src/net/messageout.hpp, src/net/messageout.cpp: Allowed cancellation
+	of outgoing messages.
+	* src/game-server/inventory.hpp, src/game-server/inventory.hpp: Allowed
+	delayed changes of inventories.
+	* src/defines.h, src/Makefile.am, src/game-server/trade.cpp,
+	src/game-server/trade.hpp, src/game-server/state.cpp,
+	src/game-server/character.cpp, src/game-server/character.hpp,
+	src/game-server/gamehandler.cpp: Added support for trading.
 
 2007-07-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

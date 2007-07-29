@@ -47,6 +47,11 @@ class MessageOut
          */
         ~MessageOut();
 
+        /**
+         * Clears current message.
+         */
+        void clear();
+
         void
         writeByte(char value);          /**< Writes a byte. */
 
