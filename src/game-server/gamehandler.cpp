@@ -250,6 +250,15 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             Inventory(computer.character).equip(slot);
         } break;
 
+        case PGMSG_UNEQUIP:
+        {
+            int slot = message.readByte();
+            if (slot >= 0 && slot < EQUIP_PROJECTILE_SLOT)
+            {
+                Inventory(computer.character).unequip(slot);
+            }
+        } break;
+
         case PGMSG_ATTACK:
         {
             LOG_DEBUG("Character " << computer.character->getPublicID()

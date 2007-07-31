@@ -1,3 +1,9 @@
+2007-07-31  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/defines.h, src/game-server/inventory.hpp,
+	src/game-server/gamehandler.cpp, src/game-server/inventory.cpp: Added
+	protocol for removing equipment. Compressed inventory message a bit.
+
 2007-07-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/mapreader.cpp, src/game-server/map.cpp,

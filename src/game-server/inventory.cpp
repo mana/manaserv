@@ -230,13 +230,17 @@ int Inventory::insert(int itemId, int amount)
 {
     prepare();
 
-    int slot = 0;
     int maxPerSlot = ItemManager::getItem(itemId)->getMaxPerSlot();
+    if (maxPerSlot == 1)
+    {
+        return fillFreeSlot(itemId, amount, maxPerSlot);
+    }
 
+    int slot = 0;
     for (std::vector< InventoryItem >::iterator i = mPoss->inventory.begin(),
          i_end = mPoss->inventory.end(); i != i_end; ++i)
     {
-        if (i->itemId == itemId)
+        if (i->itemId == itemId && i->amount < maxPerSlot)
         {
             int nb = std::min(maxPerSlot - i->amount, amount);
             i->amount += nb;
@@ -258,7 +262,7 @@ int Inventory::insert(int itemId, int amount)
         }
     }
 
-    return amount > 0 ? fillFreeSlot(itemId, amount, maxPerSlot) : 0;
+    return fillFreeSlot(itemId, amount, maxPerSlot);
 }
 
 int Inventory::count(int itemId) const
@@ -319,13 +323,15 @@ int Inventory::remove(int itemId, int amount)
             amount -= nb;
 
             msg.writeByte(getSlot(i) + EQUIP_CLIENT_INVENTORY);
-            msg.writeShort(itemId);
-            msg.writeByte(it.amount);
-
-            // If the slot is empty, compress the inventory.
             if (it.amount == 0)
             {
+                msg.writeShort(0);
                 freeIndex(i);
+            }
+            else
+            {
+                msg.writeShort(itemId);
+                msg.writeByte(it.amount);
             }
 
             if (amount == 0)
@@ -354,24 +360,26 @@ int Inventory::removeFromSlot(int slot, int amount)
     amount -= nb;
 
     msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
-    msg.writeShort(it.itemId);
-    msg.writeByte(it.amount);
-
-    // If the slot is empty, compress the inventory.
     if (it.amount == 0)
     {
+        msg.writeShort(0);
         freeIndex(i);
+    }
+    else
+    {
+        msg.writeShort(it.itemId);
+        msg.writeByte(it.amount);
     }
 
     return amount;
 }
 
-bool Inventory::equip(int slot)
+void Inventory::equip(int slot)
 {
     int itemId = getItem(slot);
     if (!itemId)
     {
-        return false;
+        return;
     }
 
     prepare();
@@ -387,13 +395,13 @@ bool Inventory::equip(int slot)
             int id = mPoss->equipment[EQUIP_FIGHT1_SLOT];
             if (id && !insert(id, 1))
             {
-                return false;
+                return;
             }
 
             id = mPoss->equipment[EQUIP_FIGHT2_SLOT];
             if (id && !insert(id, 1))
             {
-                return false;
+                return;
             }
 
             msg.writeByte(EQUIP_FIGHT1_SLOT);
@@ -403,14 +411,14 @@ bool Inventory::equip(int slot)
             mPoss->equipment[EQUIP_FIGHT1_SLOT] = itemId;
             mPoss->equipment[EQUIP_FIGHT2_SLOT] = 0;
             removeFromSlot(slot, 1);
-            return true;
+            return;
         }
 
         case ITEM_EQUIPMENT_PROJECTILE:
             msg.writeByte(EQUIP_PROJECTILE_SLOT);
             msg.writeShort(itemId);
             mPoss->equipment[EQUIP_PROJECTILE_SLOT] = itemId;
-            return true;
+            return;
 
         case ITEM_EQUIPMENT_ONE_HAND_WEAPON:
         case ITEM_EQUIPMENT_SHIELD:
@@ -451,7 +459,7 @@ bool Inventory::equip(int slot)
         case ITEM_UNUSABLE:
         case ITEM_USABLE:
         default:
-            return false;
+            return;
     }
 
     int id = mPoss->equipment[firstSlot];
@@ -468,22 +476,43 @@ bool Inventory::equip(int slot)
             msg.writeShort(itemId);
             mPoss->equipment[secondSlot] = itemId;
             removeFromSlot(slot, 1);
-            return true;
+            return;
         }
         // no break!
 
     case 1:
         if (id && !insert(id, 1))
         {
-            return false;
+            return;
         }
         msg.writeByte(firstSlot);
         msg.writeShort(itemId);
         mPoss->equipment[firstSlot] = itemId;
         removeFromSlot(slot, 1);
-        return true;
+        return;
 
     default:
-        return false;
+        return;
+    }
+}
+
+void Inventory::unequip(int slot)
+{
+    int itemId = mPoss->equipment[slot];
+    if (!itemId)
+    {
+        return;
+    }
+
+    prepare();
+    msg.writeByte(slot);
+    msg.writeShort(0);
+    if (insert(itemId, 1))
+    {
+        cancel();
+    }
+    else
+    {
+        mPoss->equipment[slot] = 0;
     }
 }

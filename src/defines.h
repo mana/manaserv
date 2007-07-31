@@ -145,6 +145,7 @@ enum {
     PGMSG_PICKUP                   = 0x0110, // W*2 position
     PGMSG_DROP                     = 0x0111, // B slot, B amount
     PGMSG_EQUIP                    = 0x0112, // B slot
+    PGMSG_UNEQUIP                  = 0x0113, // B slot
     GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
     GPMSG_PLAYER_ATTRIBUTE_UPDATE  = 0x0130, // { W attribute, W value }*

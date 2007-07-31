@@ -97,7 +97,12 @@ class Inventory
         /**
          * Equips item from given inventory slot.
          */
-        bool equip(int slot);
+        void equip(int slot);
+
+        /**
+         * Unequips item from given equipment slot.
+         */
+        void unequip(int slot);
 
         /**
          * Gets the ID of projectiles. Removes one of these projectiles from
