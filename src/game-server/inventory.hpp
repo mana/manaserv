@@ -146,6 +146,16 @@ class Inventory
         void prepare();
 
         /**
+         * Updates the original in delayed mode.
+         */
+        void update();
+
+        /**
+         * Starts a new notification message.
+         */
+        void restart();
+
+        /**
          * Fills some slots with items.
          * @return number of items not inserted.
          */
@@ -166,10 +176,16 @@ class Inventory
          */
         int getSlot(int index) const;
 
+        /**
+         * Replaces a whole slot of items from inventory.
+         */
+        void replaceInSlot(int slot, int itemId, int amount);
+
         Possessions *mPoss; /**< Pointer to the modified possessions. */
         MessageOut msg;     /**< Update message containing all the changes. */
         Character *mClient; /**< Character to notify. */
         bool mDelayed;      /**< Delayed changes. */
+        bool mChangedLook;  /**< Need to notify of a visible equipment change. */
 };
 
 

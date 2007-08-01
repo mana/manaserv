@@ -32,7 +32,8 @@
 #include "net/messageout.hpp"
 
 Inventory::Inventory(Character *p, bool d):
-    mPoss(&p->getPossessions()), msg(GPMSG_INVENTORY), mClient(p), mDelayed(d)
+    mPoss(&p->getPossessions()), msg(GPMSG_INVENTORY), mClient(p),
+    mDelayed(d), mChangedLook(false)
 {
 }
 
@@ -40,49 +41,64 @@ Inventory::~Inventory()
 {
     if (msg.getLength() > 2)
     {
-        if (mDelayed)
-        {
-            Possessions &poss = mClient->getPossessions();
-            if (mPoss != &poss)
-            {
-                poss = *mPoss;
-                delete mPoss;
-            }
-        }
+        update();
         gameHandler->sendTo(mClient, msg);
     }
 }
 
-void Inventory::cancel()
+void Inventory::restart()
 {
     msg.clear();
     msg.writeShort(GPMSG_INVENTORY);
-    mPoss = &mClient->getPossessions();
+    mChangedLook = false;
+}
+
+void Inventory::cancel()
+{
+    assert(mDelayed);
+    Possessions &poss = mClient->getPossessions();
+    if (mPoss != &poss)
+    {
+        delete mPoss;
+        mPoss = &poss;
+    }
+    restart();
+}
+
+void Inventory::update()
+{
+    if (mDelayed)
+    {
+        Possessions &poss = mClient->getPossessions();
+        if (mPoss != &poss)
+        {
+            poss = *mPoss;
+            delete mPoss;
+            mPoss = &poss;
+        }
+    }
+    if (mChangedLook)
+    {
+        mClient->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+    }
 }
 
 void Inventory::commit()
 {
     if (msg.getLength() > 2)
     {
-        if (mDelayed)
-        {
-            Possessions &poss = mClient->getPossessions();
-            if (mPoss != &poss)
-            {
-                poss = *mPoss;
-                delete mPoss;
-                mPoss = &poss;
-            }
-        }
+        update();
         gameHandler->sendTo(mClient, msg);
-        msg.clear();
-        msg.writeShort(GPMSG_INVENTORY);
+        restart();
     }
 }
 
 void Inventory::prepare()
 {
-    if (!mDelayed) return;
+    if (!mDelayed)
+    {
+        return;
+    }
     Possessions &poss = mClient->getPossessions();
     if (mPoss == &poss)
     {
@@ -228,6 +244,11 @@ int Inventory::fillFreeSlot(int itemId, int amount, int maxPerSlot)
 
 int Inventory::insert(int itemId, int amount)
 {
+    if (itemId == 0 || amount == 0)
+    {
+        return 0;
+    }
+
     prepare();
 
     int maxPerSlot = ItemManager::getItem(itemId)->getMaxPerSlot();
@@ -285,25 +306,34 @@ void Inventory::freeIndex(int i)
 {
     InventoryItem &it = mPoss->inventory[i];
 
+    // Is it the last slot?
     if (i == (int)mPoss->inventory.size() - 1)
     {
         mPoss->inventory.pop_back();
+        if (i > 0 && mPoss->inventory[i - 1].itemId == 0)
+        {
+            mPoss->inventory.pop_back();
+        }
+        return;
     }
-    else if (mPoss->inventory[i + 1].itemId == 0)
+
+    it.itemId = 0;
+
+    // First concatenate with an empty slot on the right.
+    if (mPoss->inventory[i + 1].itemId == 0)
     {
-        it.itemId = 0;
         it.amount = mPoss->inventory[i + 1].amount + 1;
         mPoss->inventory.erase(mPoss->inventory.begin() + i + 1);
     }
     else
     {
-        it.itemId = 0;
         it.amount = 1;
     }
 
+    // Then concatenate with an empty slot on the left.
     if (i > 0 && mPoss->inventory[i - 1].itemId == 0)
     {
-        // Note: "it" is no longer a valid iterator.
+        // Note: "it" is no longer a valid reference, hence inventory[i] below.
         mPoss->inventory[i - 1].amount += mPoss->inventory[i].amount;
         mPoss->inventory.erase(mPoss->inventory.begin() + i);
     }
@@ -311,6 +341,11 @@ void Inventory::freeIndex(int i)
 
 int Inventory::remove(int itemId, int amount)
 {
+    if (itemId == 0 || amount == 0)
+    {
+        return 0;
+    }
+
     prepare();
 
     for (int i = mPoss->inventory.size() - 1; i >= 0; --i)
@@ -346,6 +381,11 @@ int Inventory::remove(int itemId, int amount)
 
 int Inventory::removeFromSlot(int slot, int amount)
 {
+    if (amount == 0)
+    {
+        return 0;
+    }
+
     int i = getIndex(slot);
     if (i < 0)
     {
@@ -374,6 +414,28 @@ int Inventory::removeFromSlot(int slot, int amount)
     return amount;
 }
 
+void Inventory::replaceInSlot(int slot, int itemId, int amount)
+{
+    int i = getIndex(slot);
+    assert(i >= 0);
+    prepare();
+
+    msg.writeByte(slot + EQUIP_CLIENT_INVENTORY);
+    if (itemId == 0 || amount == 0)
+    {
+        msg.writeShort(0);
+        freeIndex(i);
+    }
+    else
+    {
+        InventoryItem &it = mPoss->inventory[i];
+        it.itemId = itemId;
+        it.amount = amount;
+        msg.writeShort(itemId);
+        msg.writeByte(amount);
+    }
+}
+
 void Inventory::equip(int slot)
 {
     int itemId = getItem(slot);
@@ -390,27 +452,27 @@ void Inventory::equip(int slot)
     {
         case ITEM_EQUIPMENT_TWO_HANDS_WEAPON:
         {
-            // Special case 1, the two one-handed weapons are to be placed back
-            // in the inventory, if there are any.
-            int id = mPoss->equipment[EQUIP_FIGHT1_SLOT];
-            if (id && !insert(id, 1))
+            // The one-handed weapons are to be placed back in the inventory.
+            int id1 = mPoss->equipment[EQUIP_FIGHT1_SLOT],
+                id2 = mPoss->equipment[EQUIP_FIGHT2_SLOT];
+
+            if (id2)
             {
-                return;
+                if (id1 && insert(id1, 1) != 0)
+                {
+                    return;
+                }
+                id1 = id2;
             }
 
-            id = mPoss->equipment[EQUIP_FIGHT2_SLOT];
-            if (id && !insert(id, 1))
-            {
-                return;
-            }
-
+            replaceInSlot(slot, id1, 1);
             msg.writeByte(EQUIP_FIGHT1_SLOT);
             msg.writeShort(itemId);
             msg.writeByte(EQUIP_FIGHT2_SLOT);
             msg.writeShort(0);
             mPoss->equipment[EQUIP_FIGHT1_SLOT] = itemId;
             mPoss->equipment[EQUIP_FIGHT2_SLOT] = 0;
-            removeFromSlot(slot, 1);
+            mChangedLook = true;
             return;
         }
 
@@ -464,36 +526,20 @@ void Inventory::equip(int slot)
 
     int id = mPoss->equipment[firstSlot];
 
-    switch (availableSlots)
+    if (availableSlots == 2 && id && !mPoss->equipment[secondSlot] &&
+        ItemManager::getItem(id)->getType() != ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
     {
-    case 2:
-        if (id && !mPoss->equipment[secondSlot] &&
-            ItemManager::getItem(id)->getType() !=
-                ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
-        {
-            // The first slot is full and the second slot is empty.
-            msg.writeByte(secondSlot);
-            msg.writeShort(itemId);
-            mPoss->equipment[secondSlot] = itemId;
-            removeFromSlot(slot, 1);
-            return;
-        }
-        // no break!
-
-    case 1:
-        if (id && !insert(id, 1))
-        {
-            return;
-        }
-        msg.writeByte(firstSlot);
-        msg.writeShort(itemId);
-        mPoss->equipment[firstSlot] = itemId;
-        removeFromSlot(slot, 1);
-        return;
-
-    default:
-        return;
+        // The first equipment slot is full, but the second one is empty.
+        id = 0;
+        firstSlot = secondSlot;
     }
+
+    // Put the item in the first equipment slot.
+    replaceInSlot(slot, id, 1);
+    msg.writeByte(firstSlot);
+    msg.writeShort(itemId);
+    mPoss->equipment[firstSlot] = itemId;
+    mChangedLook = true;
 }
 
 void Inventory::unequip(int slot)
@@ -503,16 +549,13 @@ void Inventory::unequip(int slot)
     {
         return;
     }
+    // No need to prepare.
 
-    prepare();
-    msg.writeByte(slot);
-    msg.writeShort(0);
-    if (insert(itemId, 1))
+    if (insert(itemId, 1) == 0)
     {
-        cancel();
-    }
-    else
-    {
+        msg.writeByte(slot);
+        msg.writeShort(0);
         mPoss->equipment[slot] = 0;
+        mChangedLook = true;
     }
 }

@@ -106,6 +106,28 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
         modifiers.range = XML::getProperty(node, "range", 0);
         modifiers.weaponType = XML::getProperty(node, "weapon_type", 0);
 
+        if (maxPerSlot == 0)
+        {
+            LOG_WARN("Item Manager: Missing max_per_slot property for "
+                     "item " << id << " in " << itemReferenceFile << '.');
+            maxPerSlot = 1;
+        }
+
+        if (itemType > ITEM_USABLE && itemType < ITEM_EQUIPMENT_PROJECTILE &&
+            maxPerSlot != 1)
+        {
+            LOG_WARN("Item Manager: Setting max_per_slot property to 1 for "
+                     "equipment " << id << " in " << itemReferenceFile << '.');
+            maxPerSlot = 1;
+        }
+
+        if (weight == 0)
+        {
+            LOG_WARN("Item Manager: Missing weight for item "
+                     << id << " in " << itemReferenceFile << '.');
+            weight = 1;
+        }
+
         ItemClass *item = new ItemClass(id, itemType);
         item->setWeight(weight);
         item->setCost(value);
@@ -115,17 +137,6 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
         item->setSpriteID(sprite ? sprite : id);
         itemClasses[id] = item;
         ++nbItems;
-
-        if (maxPerSlot == 0)
-        {
-            LOG_WARN("Item Manager: Missing max per slot properties for item: "
-                     << id << " in " << itemReferenceFile << ".");
-        }
-        if (weight == 0)
-        {
-            LOG_WARN("Item Manager: Missing weight for item: "
-                     << id << " in " << itemReferenceFile << ".");
-        }
 
         LOG_DEBUG("Item: ID: " << id << ", itemType: " << itemType
                   << ", weight: " << weight << ", value: " << value <<

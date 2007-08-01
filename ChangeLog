@@ -1,3 +1,13 @@
+2007-08-01  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/game-server/itemmanager.cpp: Ensured equipment items cannot
+	stack.
+	* src/game-server/inventory.hpp, src/game-server/inventory.cpp:
+	Improved equipment change so that no empty slot is used, unless really
+	needed. Ensured equip and unequip do not modify inventory when they
+	fail in non-delayed mode. Simplified and robustified code. Added
+	notification on changes of looks.
+
 2007-07-31  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/defines.h, src/game-server/inventory.hpp,
