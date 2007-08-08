@@ -123,6 +123,12 @@ class Inventory
         int remove(int itemId, int amount);
 
         /**
+         * Moves some items from the first slot to the second one.
+         * @returns number of items not moved.
+         */
+        int move(int slot1, int slot2, int amount);
+
+        /**
          * Removes some items from inventory.
          * @return number of items not removed.
          */

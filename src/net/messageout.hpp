@@ -40,7 +40,7 @@ class MessageOut
         /**
          * Constructor that takes a message ID.
          */
-        MessageOut(short id);
+        MessageOut(int id);
 
         /**
          * Destructor.
@@ -52,14 +52,11 @@ class MessageOut
          */
         void clear();
 
-        void
-        writeByte(char value);          /**< Writes a byte. */
+        void writeByte(int value);     /**< Writes an integer on one byte. */
 
-        void
-        writeShort(short value);        /**< Writes a short. */
+        void writeShort(int value);    /**< Writes an integer on two bytes. */
 
-        void
-        writeLong(long value);          /**< Writes a long. */
+        void writeLong(int value);     /**< Writes an integer on four bytes. */
 
         /**
          * Writes a 3-byte block containing tile-based coordinates.

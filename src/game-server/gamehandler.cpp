@@ -259,6 +259,14 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
         } break;
 
+        case PGMSG_MOVE_ITEM:
+        {
+            int slot1 = message.readByte();
+            int slot2 = message.readByte();
+            int amount = message.readByte();
+            Inventory(computer.character).move(slot1, slot2, amount);
+        } break;
+
         case PGMSG_ATTACK:
         {
             LOG_DEBUG("Character " << computer.character->getPublicID()

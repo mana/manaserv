@@ -43,7 +43,7 @@ MessageOut::MessageOut():
     mDataSize = INITIAL_DATA_CAPACITY;
 }
 
-MessageOut::MessageOut(short id):
+MessageOut::MessageOut(int id):
     mPos(0)
 {
     mData = (char*) malloc(INITIAL_DATA_CAPACITY);
@@ -79,16 +79,14 @@ MessageOut::expand(size_t bytes)
     }
 }
 
-void
-MessageOut::writeByte(char value)
+void MessageOut::writeByte(int value)
 {
     expand(mPos + 1);
     mData[mPos] = value;
     mPos += 1;
 }
 
-void
-MessageOut::writeShort(short value)
+void MessageOut::writeShort(int value)
 {
     expand(mPos + 2);
     uint16_t t = ENET_HOST_TO_NET_16(value);
@@ -96,8 +94,7 @@ MessageOut::writeShort(short value)
     mPos += 2;
 }
 
-void
-MessageOut::writeLong(long value)
+void MessageOut::writeLong(int value)
 {
     expand(mPos + 4);
     uint32_t t = ENET_HOST_TO_NET_32(value);

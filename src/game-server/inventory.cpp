@@ -162,12 +162,13 @@ int Inventory::getItem(int slot) const
 int Inventory::getIndex(int slot) const
 {
     int index = 0;
+
     for (std::vector< InventoryItem >::const_iterator i = mPoss->inventory.begin(),
          i_end = mPoss->inventory.end(); i != i_end; ++i, ++index)
     {
         if (slot == 0)
         {
-            return index;
+            return i->itemId ? index : -1;
         }
 
         slot -= i->itemId ? 1 : i->amount;
@@ -376,6 +377,150 @@ int Inventory::remove(int itemId, int amount)
         }
     }
 
+    return amount;
+}
+
+int Inventory::move(int slot1, int slot2, int amount)
+{
+    if (amount == 0 || slot2 >= INVENTORY_SLOTS)
+    {
+        return amount;
+    }
+
+    int i1 = getIndex(slot1);
+    if (i1 < 0)
+    {
+        return amount;
+    }
+
+    prepare();
+
+    InventoryItem &it1 = mPoss->inventory[i1];
+    int i2 = getIndex(slot2);
+
+    if (i2 >= 0)
+    {
+        InventoryItem &it2 = mPoss->inventory[i2];
+        if (it1.itemId == it2.itemId)
+        {
+            // Move between two stacks of the same kind.
+            int nb = std::min(std::min(amount, (int)it1.amount), 255 - it2.amount);
+            if (nb == 0)
+            {
+                return amount;
+            }
+
+            it1.amount -= nb;
+            it2.amount += nb;
+            amount -= nb;
+
+            msg.writeByte(slot1 + EQUIP_CLIENT_INVENTORY);
+            if (it1.amount == 0)
+            {
+                msg.writeShort(0);
+                freeIndex(i1);
+            }
+            else
+            {
+                msg.writeShort(it1.itemId);
+                msg.writeByte(it1.amount);
+            }
+
+            msg.writeByte(slot2 + EQUIP_CLIENT_INVENTORY);
+            msg.writeShort(it2.itemId);
+            msg.writeByte(it2.amount);
+            return amount;
+        }
+
+        // Swap between two different stacks.
+
+        if (it1.amount != amount)
+        {
+            return amount;
+        }
+
+        std::swap(it1, it2);
+
+        msg.writeByte(slot1 + EQUIP_CLIENT_INVENTORY);
+        msg.writeShort(it1.itemId);
+        msg.writeByte(it1.amount);
+        msg.writeByte(slot2 + EQUIP_CLIENT_INVENTORY);
+        msg.writeShort(it2.itemId);
+        msg.writeByte(it2.amount);
+        return 0;
+    }
+
+    // Move some items to an empty slot.
+    int id = it1.itemId;
+    int nb = std::min((int)it1.amount, amount);
+    it1.amount -= nb;
+    amount -= nb;
+
+    msg.writeByte(slot1 + EQUIP_CLIENT_INVENTORY);
+    if (it1.amount == 0)
+    {
+        msg.writeShort(0);
+        freeIndex(i1);
+    }
+    else
+    {
+        msg.writeShort(id);
+        msg.writeByte(it1.amount);
+    }
+
+    // Fill second slot.
+    for (std::vector< InventoryItem >::iterator i = mPoss->inventory.begin(),
+         i_end = mPoss->inventory.end(); i != i_end; ++i)
+    {
+        if (i->itemId)
+        {
+            --slot2;
+            continue;
+        }
+
+        if (slot2 >= i->amount)
+        {
+            slot2 -= i->amount;
+            continue;
+        }
+
+        assert(slot2 >= 0 && i + 1 != i_end);
+
+        if (i->amount == 1)
+        {
+            // One single empty slot in the range.
+            i->itemId = id;
+            i->amount = nb;
+            break;
+        }
+
+        InventoryItem it = { id, nb };
+        --i->amount;
+
+        if (slot2 == 0)
+        {
+            // First slot in an empty range.
+            mPoss->inventory.insert(i + 1, it);
+            break;
+        }
+
+        if (slot2 == i->amount)
+        {
+            // Last slot in an empty range.
+            mPoss->inventory.insert(i, it);
+            break;
+        }
+
+        InventoryItem it3 = { 0, slot2 };
+        i->amount -= slot2;
+        i = mPoss->inventory.insert(i, it);
+        mPoss->inventory.insert(i, it3);
+        break;
+    }
+
+    msg.writeByte(slot2 + EQUIP_CLIENT_INVENTORY);
+    msg.writeShort(id);
+    msg.writeByte(nb);
     return amount;
 }
 

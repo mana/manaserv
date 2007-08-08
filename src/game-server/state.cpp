@@ -138,7 +138,7 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
 
     /* Bitmask enumerating the sent slots.
        Setting the upper bit tells the client to clear the slots beforehand. */
-    int mask = full ? mask_full | (1 << 8) : mask_diff;
+    int mask = full ? mask_full | (1 << 7) : mask_diff;
 
     msg.writeByte(mask);
     for (int i = 0; i < nb_slots; ++i)
