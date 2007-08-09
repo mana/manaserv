@@ -404,7 +404,8 @@ int Inventory::move(int slot1, int slot2, int amount)
         if (it1.itemId == it2.itemId)
         {
             // Move between two stacks of the same kind.
-            int nb = std::min(std::min(amount, (int)it1.amount), 255 - it2.amount);
+            int maxPerSlot = ItemManager::getItem(it1.itemId)->getMaxPerSlot();
+            int nb = std::min(std::min(amount, (int)it1.amount), maxPerSlot - it2.amount);
             if (nb == 0)
             {
                 return amount;
