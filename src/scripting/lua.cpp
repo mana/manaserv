@@ -33,6 +33,7 @@ extern "C" {
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/npc.hpp"
+#include "game-server/state.hpp"
 #include "net/messageout.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
@@ -61,6 +62,8 @@ class LuaScript: public Script
         lua_State *mState;
         int nbArgs;
 };
+
+static char const registryKey = 0;
 
 /* Functions below are unsafe, as they assume the script has passed pointers
    to objects which have not yet been destroyed. If the script never keeps
@@ -128,6 +131,34 @@ static int LuaMsg_NpcChoice(lua_State *s)
     return 0;
 }
 
+/**
+ * Callback for creating a NPC on the current map with the current script
+ * (1: int) (2: int) (3: int).
+ */
+static int LuaObj_CreateNpc(lua_State *s)
+{
+    if (!lua_isnumber(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
+    {
+        LOG_WARN("LuaObj_CreateNpc called with incorrect parameters.");
+        return 0;
+    }
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    NPC *q = new NPC(lua_tointeger(s, 1), t);
+    MapComposite *m = t->getMap();
+    if (!m)
+    {
+        LOG_WARN("LuaObj_CreateNpc called outside a map.");
+        return 0;
+    }
+    q->setMap(m);
+    q->setPosition(Point(lua_tointeger(s, 2), lua_tointeger(s, 3)));
+    GameState::insert(q);
+    lua_pushlightuserdata(s, q);
+    return 1;
+}
+
 LuaScript::LuaScript(lua_State *s):
     mState(s),
     nbArgs(-1)
@@ -138,18 +169,26 @@ LuaScript::LuaScript(lua_State *s):
     if (res)
     {
         LOG_ERROR("Failure while initializing Lua script: "
-                  << lua_tostring(mState, 1));
-        lua_pop(mState, 1);
+                  << lua_tostring(mState, -1));
+        lua_settop(s, 0);
         return;
     }
 
+    // Put some callback functions in the scripting environment.
     static luaL_reg const callbacks[] = {
-        { "msg_npc_message", &LuaMsg_NpcMessage },
-        { "msg_npc_choice",  &LuaMsg_NpcChoice  },
+        { "msg_npc_message",  &LuaMsg_NpcMessage  },
+        { "msg_npc_choice",   &LuaMsg_NpcChoice   },
+        { "obj_create_npc",   &LuaObj_CreateNpc   },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
-    lua_pop(mState, 1);
+
+    // Make script object available to callback functions.
+    lua_pushlightuserdata(mState, (void *)&registryKey);
+    lua_pushlightuserdata(mState, this);
+    lua_settable(mState, LUA_REGISTRYINDEX);
+
+    lua_settop(s, 0);
 }
 
 LuaScript::~LuaScript()
@@ -183,7 +222,7 @@ int LuaScript::execute()
     assert(nbArgs >= 0);
     int res = lua_pcall(mState, nbArgs, 1, 0);
     nbArgs = -1;
-    if (res || !lua_isnumber(mState, 1))
+    if (res || !(lua_isnil(mState, 1) || lua_isnumber(mState, 1)))
     {
         char const *s = lua_tostring(mState, 1);
         LOG_WARN("Failure while calling Lua function: error=" << res
@@ -228,5 +267,3 @@ struct LuaRegister
 };
 
 static LuaRegister dummy;
-
-

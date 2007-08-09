@@ -10,17 +10,9 @@
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
-#include "game-server/npc.hpp"
 #include "game-server/state.hpp"
 #include "net/messageout.hpp"
 #include "scripting/script.hpp"
-
-// For testing purpose only, the NPC class is not meant to be inherited!!
-struct DummyNPC: NPC
-{
-    DummyNPC(): NPC(110, Script::create("lua", "test.lua"))
-    {}
-};
 
 static void dropItem(MapComposite *map, int x, int y, int type)
 {
@@ -43,11 +35,14 @@ void testingMap(MapComposite *map)
             dropItem(map, 58 * 32 + 16, 20 * 32 + 16, 508);
             dropItem(map, 58 * 32 + 16, 21 * 32 + 16, 524);
 
-            // Add an NPC
-            NPC *q = new DummyNPC;
-            q->setMap(map);
-            q->setPosition(Point(50 * 32 + 16, 19 * 32 + 16));
-            GameState::insert(q);
+            // Associate a script
+            Script *s = Script::create("lua", "test.lua");
+            if (s)
+            {
+                s->setMap(map);
+                s->prepare("initialize");
+                s->execute();
+            }
         } break;
     }
 }

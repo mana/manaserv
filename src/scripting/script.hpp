@@ -26,6 +26,7 @@
 
 #include <string>
 
+class MapComposite;
 class Thing;
 
 /**
@@ -46,6 +47,8 @@ class Script
          * Creates a new script.
          */
         static Script *create(std::string const &engine, std::string const &file);
+
+        Script(): mMap(NULL) {}
 
         virtual ~Script() {}
 
@@ -79,6 +82,21 @@ class Script
          * @return the value returned by the script.
          */
         virtual int execute() = 0;
+
+        /**
+         * Sets associated map.
+         */
+        void setMap(MapComposite *m)
+        { mMap = m; }
+
+        /**
+         * Gets associated map.
+         */
+        MapComposite *getMap() const
+        { return mMap; }
+
+    private:
+        MapComposite *mMap;
 };
 
 #endif
