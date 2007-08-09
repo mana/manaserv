@@ -27,9 +27,7 @@
 #include <iostream>
 #include <vector>
 
-#ifdef SCRIPT_SUPPORT
-#include "script.h"
-#endif
+class Script;
 
 class Skill
 {

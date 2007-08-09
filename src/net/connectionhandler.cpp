@@ -27,10 +27,6 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 
-#ifdef SCRIPT_SUPPORT
-#include "script.h"
-#endif
-
 bool ConnectionHandler::startListen(enet_uint16 port)
 {
     // Bind the server to the default localhost.
@@ -95,15 +91,6 @@ void ConnectionHandler::process(enet_uint32 timeout)
             case ENET_EVENT_TYPE_RECEIVE:
             {
                 NetComputer *comp = (NetComputer*) event.peer->data;
-
-#ifdef SCRIPT_SUPPORT
-                // This could be good if you wanted to extend the
-                // server protocol using a scripting language. This
-                // could be attained by using allowing scripts to
-                // "hook" certain messages.
-
-                //script->message(buffer);
-#endif
 
                 // If the scripting subsystem didn't hook the message
                 // it will be handled by the default message handler.

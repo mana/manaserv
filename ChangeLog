@@ -2,6 +2,8 @@
 
 	* src/game-server/inventory.cpp: Fixed item move toward a not yet
 	existing slot.
+	* src/skill.h, src/net/connectionhandler.cpp: Removed useless
+	references to script header.
 
 2007-08-08  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
