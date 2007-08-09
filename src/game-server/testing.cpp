@@ -13,43 +13,13 @@
 #include "game-server/npc.hpp"
 #include "game-server/state.hpp"
 #include "net/messageout.hpp"
+#include "scripting/script.hpp"
 
 // For testing purpose only, the NPC class is not meant to be inherited!!
 struct DummyNPC: NPC
 {
-    DummyNPC(): NPC(110) {}
-
-    void prompt(Character *q, bool restart)
-    {
-        if (restart)
-        {
-            MessageOut msg(GPMSG_NPC_MESSAGE);
-            msg.writeShort(getPublicID());
-            std::string text = "What do you want?";
-            msg.writeString(text, text.length());
-            gameHandler->sendTo(q, msg);
-        }
-        else
-        {
-            MessageOut msg(GPMSG_NPC_CHOICE);
-            msg.writeShort(getPublicID());
-            std::string text = "Guns! Lots of guns!:Nothing";
-            msg.writeString(text, text.length());
-            gameHandler->sendTo(q, msg);
-        }
-    }
-
-    void select(Character *q, int c)
-    {
-        if (c == 1)
-        {
-            MessageOut msg(GPMSG_NPC_MESSAGE);
-            msg.writeShort(getPublicID());
-            std::string text = "Sorry, this is a heroic-fantasy game, I do not have any gun.";
-            msg.writeString(text, text.length());
-            gameHandler->sendTo(q, msg);
-        }
-    }
+    DummyNPC(): NPC(110, Script::create("lua", "test.lua"))
+    {}
 };
 
 static void dropItem(MapComposite *map, int x, int y, int type)

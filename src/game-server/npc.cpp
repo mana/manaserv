@@ -20,43 +20,39 @@
  *  $Id$
  */
 
-#ifndef _TMWSERV_GAMESERVER_NPC_HPP_
-#define _TMWSERV_GAMESERVER_NPC_HPP_
+#include "game-server/character.hpp"
+#include "game-server/npc.hpp"
+#include "scripting/script.hpp"
 
-#include "game-server/being.hpp"
-
-class Script;
-class Character;
-
-/**
- * Class describing a non-player character.
- */
-class NPC : public Being
+NPC::NPC(int id, Script *s):
+    Being(OBJECT_NPC, 65535), mScript(s), mID(id)
 {
-    public:
-        NPC(int id, Script *);
+}
 
-        void update();
+void NPC::update()
+{
+    if (!mScript) return;
+    mScript->prepare("npc_update");
+    mScript->push(this);
+    mScript->execute();
+}
 
-        /**
-         * Prompts NPC.
-         */
-        void prompt(Character *, bool restart);
+void NPC::prompt(Character *ch, bool restart)
+{
+    if (!mScript) return;
+    mScript->prepare(restart ? "npc_start" : "npc_next");
+    mScript->push(this);
+    mScript->push(ch);
+    mScript->execute();
+}
 
-        /**
-         * Selects an NPC proposition.
-         */
-        void select(Character *, int);
+void NPC::select(Character *ch, int v)
+{
+    if (!mScript) return;
+    mScript->prepare("npc_choose");
+    mScript->push(this);
+    mScript->push(ch);
+    mScript->push(v);
+    mScript->execute();
+}
 
-        /**
-         * Gets NPC ID.
-         */
-        int getNPC() const
-        { return mID; }
-
-    private:
-        Script *mScript;    /**< Script describing NPC behavior. */
-        unsigned short mID; /**< ID of the NPC. */
-};
-
-#endif

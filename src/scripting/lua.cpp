@@ -47,7 +47,7 @@ class LuaScript: public Script
 
         void push(int);
 
-        void push(Character *);
+        void push(Thing *);
 
         int execute();
 
@@ -90,8 +90,11 @@ void LuaScript::push(int v)
     ++nbArgs;
 }
 
-void LuaScript::push(Character *v)
+void LuaScript::push(Thing *v)
 {
+    assert(nbArgs >= 0);
+    lua_pushlightuserdata(mState, v);
+    ++nbArgs;
 }
 
 int LuaScript::execute()
@@ -99,13 +102,15 @@ int LuaScript::execute()
     assert(nbArgs >= 0);
     int res = lua_pcall(mState, nbArgs, 1, 0);
     nbArgs = -1;
-    if (res || !lua_isnumber(mState, 0))
+    if (res || !lua_isnumber(mState, 1))
     {
-        LOG_ERROR("Failure while calling Lua function: "
-                  << lua_tostring(mState, 0));
+        LOG_WARN("Failure while calling Lua function: error=" << res
+                 << ", type=" << lua_typename(mState, lua_type(mState, 1))
+                 << ", message=" << lua_tostring(mState, 1));
+        lua_pop(mState, 1);
         return 0;
     }
-    res = lua_tointeger(mState, 0);
+    res = lua_tointeger(mState, 1);
     lua_pop(mState, 1);
     return res;
 }

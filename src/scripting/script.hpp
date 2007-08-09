@@ -26,7 +26,7 @@
 
 #include <string>
 
-class Character;
+class Thing;
 
 /**
  * Abstract interface for calling functions written in an external language.
@@ -67,12 +67,12 @@ class Script
         virtual void push(int) = 0;
 
         /**
-         * Pushes a pointer to Character for the function being prepared.
-         * It usually is the character doing the action. The interface can
-         * pass the pointer as an opaque value to the scripting engine, if
-         * needed.
+         * Pushes a pointer argument to a game entity.
+         * The interface can pass the pointer as an opaque value to the
+         * scripting engine, if needed. This value will usually be passed
+         * by the script to some callabck functions.
          */
-        virtual void push(Character *) = 0;
+        virtual void push(Thing *) = 0;
 
         /**
          * Executes the function being prepared.
