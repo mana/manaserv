@@ -1,3 +1,8 @@
+2007-08-09  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/game-server/inventory.cpp: Fixed item move toward a not yet
+	existing slot.
+
 2007-08-08  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/net/messageout.hpp, src/net/messageout.cpp: Changed argument

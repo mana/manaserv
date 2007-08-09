@@ -521,7 +521,15 @@ int Inventory::move(int slot1, int slot2, int amount)
         return amount;
     }
 
-    assert(false);
+    // The second slot does not yet exist.
+    assert(slot2 >= 0);
+    if (slot2 != 0)
+    {
+        InventoryItem it = { 0, slot2 };
+        mPoss->inventory.insert(mPoss->inventory.end(), it);
+    }
+    InventoryItem it = { id, nb };
+    mPoss->inventory.insert(mPoss->inventory.end(), it);        
     return amount;
 }
 
