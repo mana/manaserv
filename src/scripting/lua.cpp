@@ -28,7 +28,12 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include "defines.h"
 #include "resourcemanager.h"
+#include "game-server/character.hpp"
+#include "game-server/gamehandler.hpp"
+#include "game-server/npc.hpp"
+#include "net/messageout.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
 
@@ -57,6 +62,72 @@ class LuaScript: public Script
         int nbArgs;
 };
 
+/* Functions below are unsafe, as they assume the script has passed pointers
+   to objects which have not yet been destroyed. If the script never keeps
+   pointers around, there will be no problem. In order to be safe, the engine
+   should replace pointers by local identifiers and store them in a map. By
+   listening to the death of objects, it could keep track of pointers still
+   valid in the map.
+   TODO: do it. */
+
+static NPC *getNPC(lua_State *s, int p)
+{
+    if (!lua_islightuserdata(s, p)) return NULL;
+    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
+    if (t->getType() != OBJECT_NPC) return NULL;
+    return static_cast<NPC *>(t);
+}
+
+static Character *getCharacter(lua_State *s, int p)
+{
+    if (!lua_islightuserdata(s, p)) return NULL;
+    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
+    if (t->getType() != OBJECT_CHARACTER) return NULL;
+    return static_cast<Character *>(t);
+}
+
+/**
+ * Callback for sending a NPC_MESSAGE (1: NPC, 2: Character, 3: string).
+ */
+static int LuaMsg_NpcMessage(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+    size_t l;
+    char const *m = lua_tolstring(s, 3, &l);
+    if (!p || !q || !m)
+    {
+        LOG_WARN("LuaMsg_NpcMessage called with incorrect parameters.");
+        return 0;
+    }
+    MessageOut msg(GPMSG_NPC_MESSAGE);
+    msg.writeShort(p->getPublicID());
+    msg.writeString(std::string(m), l);
+    gameHandler->sendTo(q, msg);
+    return 0;
+}
+
+/**
+ * Callback for sending a NPC_CHOICE (1: NPC, 2: Character, 3: string).
+ */
+static int LuaMsg_NpcChoice(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+    size_t l;
+    char const *m = lua_tolstring(s, 3, &l);
+    if (!p || !q || !m)
+    {
+        LOG_WARN("LuaMsg_NpcChoice called with incorrect parameters.");
+        return 0;
+    }
+    MessageOut msg(GPMSG_NPC_CHOICE);
+    msg.writeShort(p->getPublicID());
+    msg.writeString(std::string(m), l);
+    gameHandler->sendTo(q, msg);
+    return 0;
+}
+
 LuaScript::LuaScript(lua_State *s):
     mState(s),
     nbArgs(-1)
@@ -67,8 +138,18 @@ LuaScript::LuaScript(lua_State *s):
     if (res)
     {
         LOG_ERROR("Failure while initializing Lua script: "
-                  << lua_tostring(mState, 0));
+                  << lua_tostring(mState, 1));
+        lua_pop(mState, 1);
+        return;
     }
+
+    static luaL_reg const callbacks[] = {
+        { "msg_npc_message", &LuaMsg_NpcMessage },
+        { "msg_npc_choice",  &LuaMsg_NpcChoice  },
+        { NULL, NULL }
+    };
+    luaL_register(mState, "tmw", callbacks);
+    lua_pop(mState, 1);
 }
 
 LuaScript::~LuaScript()
@@ -104,9 +185,10 @@ int LuaScript::execute()
     nbArgs = -1;
     if (res || !lua_isnumber(mState, 1))
     {
+        char const *s = lua_tostring(mState, 1);
         LOG_WARN("Failure while calling Lua function: error=" << res
                  << ", type=" << lua_typename(mState, lua_type(mState, 1))
-                 << ", message=" << lua_tostring(mState, 1));
+                 << ", message=" << (s ? s : ""));
         lua_pop(mState, 1);
         return 0;
     }

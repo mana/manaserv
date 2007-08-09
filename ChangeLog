@@ -12,6 +12,7 @@
 	scripting engine.
 	* src/game-server/npc.cpp, src/game-server/npc.hpp,
 	src/game-server/testing.cpp: Converted NPC class to scripting engine.
+	* data/test.lua: Converted testing NPC to Lua.
 
 2007-08-08  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
