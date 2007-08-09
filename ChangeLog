@@ -4,6 +4,12 @@
 	existing slot.
 	* src/skill.h, src/net/connectionhandler.cpp: Removed useless
 	references to script header.
+	* src/script.cpp, src/script.h: Removed old scripting interface.
+	* src/resourcemanager.cpp: Allowed binary files to be used as strings.
+	* src/scripting/script.cpp, src/scripting/script.hpp: Added new
+	scripting interface.
+	* src/configure.ac, src/Makefile.am, src/scripting/lua.cpp: Added Lua
+	scripting engine.
 
 2007-08-08  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

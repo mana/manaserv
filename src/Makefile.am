@@ -133,6 +133,8 @@ tmwserv_game_SOURCES = \
 	net/messageout.cpp \
 	net/netcomputer.hpp \
 	net/netcomputer.cpp \
+	scripting/script.hpp \
+	scripting/script.cpp \
 	serialize/characterdata.hpp \
 	utils/base64.h \
 	utils/base64.cpp \
@@ -186,3 +188,9 @@ bindings_wrap.cpp: bindings.i
 tmwserv_game_SOURCES += \
 	bindings_wrap.cpp
 endif
+
+if BUILD_LUA
+tmwserv_game_SOURCES += \
+	scripting/lua.cpp
+endif
+

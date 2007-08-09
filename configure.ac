@@ -107,7 +107,7 @@ AC_ARG_WITH(
     [scripting-engine],
     AS_HELP_STRING(
         [--with-scripting-engine=ARG],
-        [use scripting engine [[ARG=ruby,squirrel]] [(default=squirrel)]]
+        [use scripting engine [[ARG=ruby,squirrel,lua]] [(default=no)]]
     ),
     [],
     [with_scripting_engine="no"]
@@ -134,6 +134,10 @@ elif test "$with_scripting_engine" = "squirrel"; then
     # there is no need to append -lsquirrel as it is already done by
     # AC_CHECK_LIB
     LIBS="$LIBS -lsqstdlib"
+elif test "$with_scripting_engine" = "lua"; then
+    PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1])
+    CXXFLAGS="$CXXFLAGS -DSCRIPT_SUPPORT -DLUA_SUPPORT $LUA_CFLAGS"
+    LIBS="$LIBS $LUA_LIBS"    
 elif test "$with_scripting_engine" != "no"; then
     AC_MSG_ERROR([unknown scripting engine: $with_scripting_engine])
 fi
@@ -145,6 +149,7 @@ AM_CONDITIONAL(BUILD_SQLITE, test "$with_storage_backend" = "sqlite")
 
 AM_CONDITIONAL(BUILD_RUBY, test "$with_scripting_engine" = "ruby")
 AM_CONDITIONAL(BUILD_SQUIRREL, test "$with_scripting_engine" = "squirrel")
+AM_CONDITIONAL(BUILD_LUA, test "$with_scripting_engine" = "lua")
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 

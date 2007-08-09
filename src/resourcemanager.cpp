@@ -161,12 +161,14 @@ ResourceManager::loadFile(const std::string &fileName, int &fileSize)
     fileSize = PHYSFS_fileLength(file);
 
     // Allocate memory and load the file
-    void *buffer = malloc(fileSize);
+    void *buffer = malloc(fileSize + 1);
     PHYSFS_read(file, buffer, 1, fileSize);
 
     // Close the file and let the user deallocate the memory
     PHYSFS_close(file);
 
+    // Add a trailing nul character, so that the file can be used as a string
+    ((char *)buffer)[fileSize] = 0;
     return buffer;
 }
 
@@ -182,10 +184,6 @@ ResourceManager::loadTextFile(const std::string &fileName)
         LOG_ERROR("Couldn't load text file: " << fileName);
         return lines;
     }
-
-    // Reallocate and include terminating 0 character
-    fileContents = (char*)realloc(fileContents, contentsLength + 1);
-    fileContents[contentsLength] = '\0';
 
     // Tokenize and add each line separately
     char *line = strtok(fileContents, "\n");
