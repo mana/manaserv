@@ -382,7 +382,7 @@ int Inventory::remove(int itemId, int amount)
 
 int Inventory::move(int slot1, int slot2, int amount)
 {
-    if (amount == 0 || slot2 >= INVENTORY_SLOTS)
+    if (amount == 0 || slot1 == slot2 || slot2 >= INVENTORY_SLOTS)
     {
         return amount;
     }
@@ -503,14 +503,14 @@ int Inventory::move(int slot1, int slot2, int amount)
         if (slot2 == 0)
         {
             // First slot in an empty range.
-            mPoss->inventory.insert(i + 1, it);
+            mPoss->inventory.insert(i, it);
             return amount;
         }
 
         if (slot2 == i->amount)
         {
             // Last slot in an empty range.
-            mPoss->inventory.insert(i, it);
+            mPoss->inventory.insert(i + 1, it);
             return amount;
         }
 
