@@ -39,6 +39,7 @@
 #include "game-server/npc.hpp"
 #include "game-server/trade.hpp"
 #include "net/messageout.hpp"
+#include "scripting/script.hpp"
 #include "utils/logger.h"
 
 typedef std::map< Object *, DelayedEvent > DelayedEvents;
@@ -88,6 +89,10 @@ static void updateMap(MapComposite *map)
     }
 
     // 5. update the map itself.
+    if (Script *s = map->getScript())
+    {
+        s->update();
+    }
     map->update();
 }
 

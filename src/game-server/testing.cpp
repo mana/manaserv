@@ -39,6 +39,7 @@ void testingMap(MapComposite *map)
             Script *s = Script::create("lua", "test.lua");
             if (s)
             {
+                map->setScript(s);
                 s->setMap(map);
                 s->prepare("initialize");
                 s->execute();

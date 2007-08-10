@@ -1,3 +1,10 @@
+2007-08-10  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* data/test.lua: Added Lua helper functions to simplify scripts.
+	* src/game-server/testing.cpp, src/game-server/state.cpp,
+	src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp:
+	Associated scripts to maps.
+
 2007-08-09  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/inventory.cpp: Fixed item move toward a not yet

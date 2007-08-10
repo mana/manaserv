@@ -28,7 +28,7 @@
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/character.hpp"
-
+#include "scripting/script.hpp"
 #include "utils/logger.h"
 
 /* TODO: Implement overlapping map zones instead of strict partitioning.
@@ -452,10 +452,17 @@ void MapComposite::setMap(Map *m)
     mContent = new MapContent(m);
 }
 
+
+MapComposite::MapComposite(int id, std::string const &name):
+    mMap(NULL), mContent(NULL), mScript(NULL), mName(name), mID(id)
+{
+}
+
 MapComposite::~MapComposite()
 {
     delete mMap;
     delete mContent;
+    delete mScript;
 }
 
 bool MapContent::allocate(MovingObject *obj)
@@ -658,5 +665,3 @@ std::vector< Thing * > const &MapComposite::getEverything() const
 {
     return mContent->things;
 }
-
-

@@ -34,6 +34,7 @@ class Object;
 class Character;
 class Point;
 class Rectangle;
+class Script;
 class Thing;
 
 struct MapContent;
@@ -129,8 +130,7 @@ class MapComposite
         /**
          * Constructor.
          */
-        MapComposite(int id, std::string const &name)
-            : mMap(NULL), mContent(NULL), mName(name), mID(id) {}
+        MapComposite(int id, std::string const &name);
 
         /**
          * Destructor.
@@ -148,6 +148,18 @@ class MapComposite
          */
         Map *getMap() const
         { return mMap; }
+
+        /**
+         * Sets the associated script.
+         */
+        void setScript(Script *s)
+        { mScript = s; }
+
+        /**
+         * Gets the associated script.
+         */
+        Script *getScript() const
+        { return mScript; }
 
         /**
          * Returns whether the map is active on this server or not.
@@ -217,10 +229,11 @@ class MapComposite
     private:
         MapComposite(MapComposite const &);
 
-        Map *mMap; /**< Actual map. */
+        Map *mMap;            /**< Actual map. */
         MapContent *mContent; /**< Entities on the map. */
-        std::string mName; /**< Name of the map. */
-        unsigned short mID; /**< ID of the map. */
+        Script *mScript;      /**< Script associated to this map. */
+        std::string mName;    /**< Name of the map. */
+        unsigned short mID;   /**< ID of the map. */
 };
 
 #endif
