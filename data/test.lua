@@ -100,6 +100,7 @@ function initialize()
   create_npc(110, 50 * 32 + 16, 19 * 32 + 16, my_npc1)
   create_npc(107, 53 * 32 + 16, 21 * 32 + 16, my_npc2)
   create_npc(107, 53 * 32 + 16, 23 * 32 + 16, my_npc3)
+  create_npc(108, 51 * 32 + 16, 25 * 32 + 16, my_npc4)
 end
 
 function my_npc1(npc, ch)
@@ -122,4 +123,20 @@ end
 
 function my_npc3(npc, ch)
   do_message(npc, ch, "Don't you think the guy behind me is my evil twin?")
+end
+
+function my_npc4(npc, ch)
+  do_message(npc, ch, "Where do you want to go?")
+  local v = do_choice(npc, ch, "Map 1:Map 3")
+  if v >= 1 and v <= 2 then
+    do_message(npc, ch, "Are you really sure?")
+    local w = do_choice(npc, ch, "Yes, I am.:I still have a few things to do around here.")
+    if w == 1 then
+      if v == 1 then
+        tmw.chr_warp(ch, nil, 60 * 32, 50 * 32)
+      else
+        tmw.chr_warp(ch, 3, 25 * 32, 25 * 32)
+      end
+    end
+  end
 end

@@ -4,6 +4,8 @@
 	* src/game-server/testing.cpp, src/game-server/state.cpp,
 	src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp:
 	Associated scripts to maps.
+	* src/scripting/lua.cpp, data/test.lua: Added Lua function for warping
+	people around.
 
 2007-08-09  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

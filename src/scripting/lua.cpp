@@ -32,6 +32,7 @@ extern "C" {
 #include "resourcemanager.h"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
+#include "game-server/mapmanager.hpp"
 #include "game-server/npc.hpp"
 #include "game-server/state.hpp"
 #include "net/messageout.hpp"
@@ -159,6 +160,42 @@ static int LuaObj_CreateNpc(lua_State *s)
     return 1;
 }
 
+/**
+ * Callback for warping a player to another place.
+ * (1: Character) (2: nil/int) (3: int) (4: int)
+ */
+static int LuaChr_Warp(lua_State *s)
+{
+    Character *q = getCharacter(s, 1);
+    bool b = lua_isnil(s, 2);
+    if (!q || !(b || lua_isnumber(s, 2)) ||
+        !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
+    {
+        LOG_WARN("LuaChr_Warp called with incorrect parameters.");
+        return 0;
+    }
+    MapComposite *m;
+    if (b)
+    {
+        lua_pushlightuserdata(s, (void *)&registryKey);
+        lua_gettable(s, LUA_REGISTRYINDEX);
+        Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+        m = t->getMap();
+    }
+    else
+    {
+        m = MapManager::getMap(lua_tointeger(s, 2));
+    }
+    if (!m)
+    {
+        LOG_WARN("LuaChr_Warp called with a non-existing map.");
+        return 0;
+    }
+    DelayedEvent e = { EVENT_WARP, lua_tointeger(s, 3), lua_tointeger(s, 4), m };
+    GameState::enqueueEvent(q, e);
+    return 0;
+}
+
 LuaScript::LuaScript(lua_State *s):
     mState(s),
     nbArgs(-1)
@@ -179,6 +216,7 @@ LuaScript::LuaScript(lua_State *s):
         { "msg_npc_message",  &LuaMsg_NpcMessage  },
         { "msg_npc_choice",   &LuaMsg_NpcChoice   },
         { "obj_create_npc",   &LuaObj_CreateNpc   },
+        { "chr_warp",         &LuaChr_Warp        },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
