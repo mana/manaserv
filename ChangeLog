@@ -5,7 +5,7 @@
 	src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp:
 	Associated scripts to maps.
 	* src/scripting/lua.cpp, data/test.lua: Added Lua function for warping
-	people around.
+	people around. Removed colon in NPC choice messages.
 
 2007-08-09  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

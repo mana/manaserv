@@ -14,8 +14,8 @@ function do_message(npc, ch, msg)
   coroutine.yield(1)
 end
 
-function do_choice(npc, ch, msg)
-  tmw.msg_npc_choice(npc, ch, msg)
+function do_choice(npc, ch, ...)
+  tmw.msg_npc_choice(npc, ch, ...)
   return coroutine.yield(2)
 end
 
@@ -107,7 +107,7 @@ function my_npc1(npc, ch)
   do_message(npc, ch, "Hello! I am the testing NPC")
   do_message(npc, ch, "This message is just here for testing intertwined connections.")
   do_message(npc, ch, "What do you want?")
-  local v = do_choice(npc, ch, "Guns! Lots of guns!:Nothing")
+  local v = do_choice(npc, ch, "Guns! Lots of guns!", "Nothing.")
   if v == 1 then
     do_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
   end
@@ -127,10 +127,10 @@ end
 
 function my_npc4(npc, ch)
   do_message(npc, ch, "Where do you want to go?")
-  local v = do_choice(npc, ch, "Map 1:Map 3")
+  local v = do_choice(npc, ch, "Map 1", "Map 3")
   if v >= 1 and v <= 2 then
     do_message(npc, ch, "Are you really sure?")
-    local w = do_choice(npc, ch, "Yes, I am.:I still have a few things to do around here.")
+    local w = do_choice(npc, ch, "Yes, I am.", "I still have a few things to do around here.")
     if w == 1 then
       if v == 1 then
         tmw.chr_warp(ch, nil, 60 * 32, 50 * 32)

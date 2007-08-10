@@ -118,16 +118,23 @@ static int LuaMsg_NpcChoice(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
-    size_t l;
-    char const *m = lua_tolstring(s, 3, &l);
-    if (!p || !q || !m)
+    if (!p || !q)
     {
         LOG_WARN("LuaMsg_NpcChoice called with incorrect parameters.");
         return 0;
     }
     MessageOut msg(GPMSG_NPC_CHOICE);
     msg.writeShort(p->getPublicID());
-    msg.writeString(std::string(m), l);
+    for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
+    {
+        char const *m = lua_tostring(s, i);
+        if (!m)
+        {
+            LOG_WARN("LuaMsg_NpcChoice called with incorrect parameters.");
+            return 0;
+        }
+        msg.writeString(m);
+    }
     gameHandler->sendTo(q, msg);
     return 0;
 }
