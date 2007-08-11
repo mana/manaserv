@@ -250,17 +250,20 @@ static int LuaChr_InvChange(lua_State *s)
         }
         else
         {
+            ItemClass *ic = ItemManager::getItem(id);
+            if (!ic)
+            {
+                LOG_WARN("LuaChr_InvChange called with an unknown item.");
+                continue;
+            }
             nb = inv.insert(id, nb);
             if (nb)
             {
-                if (ItemClass *ic = ItemManager::getItem(id))
-                {
-                    Item *item = new Item(ic, nb);
-                    item->setMap(q->getMap());
-                    item->setPosition(q->getPosition());
-                    DelayedEvent e = { EVENT_INSERT };
-                    GameState::enqueueEvent(item, e);
-                }
+                Item *item = new Item(ic, nb);
+                item->setMap(q->getMap());
+                item->setPosition(q->getPosition());
+                DelayedEvent e = { EVENT_INSERT };
+                GameState::enqueueEvent(item, e);
             }
         }
     }
