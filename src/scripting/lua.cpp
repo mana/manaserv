@@ -32,6 +32,9 @@ extern "C" {
 #include "resourcemanager.h"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
+#include "game-server/inventory.hpp"
+#include "game-server/item.hpp"
+#include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/npc.hpp"
 #include "game-server/state.hpp"
@@ -91,7 +94,8 @@ static Character *getCharacter(lua_State *s, int p)
 }
 
 /**
- * Callback for sending a NPC_MESSAGE (1: NPC, 2: Character, 3: string).
+ * Callback for sending a NPC_MESSAGE.
+ * tmw.msg_npc_message(npc, character, string)
  */
 static int LuaMsg_NpcMessage(lua_State *s)
 {
@@ -112,7 +116,8 @@ static int LuaMsg_NpcMessage(lua_State *s)
 }
 
 /**
- * Callback for sending a NPC_CHOICE (1: NPC, 2: Character, 3: string).
+ * Callback for sending a NPC_CHOICE.
+ * tmw.msg_npc_choice(npc, character, string...)
  */
 static int LuaMsg_NpcChoice(lua_State *s)
 {
@@ -140,8 +145,8 @@ static int LuaMsg_NpcChoice(lua_State *s)
 }
 
 /**
- * Callback for creating a NPC on the current map with the current script
- * (1: int) (2: int) (3: int).
+ * Callback for creating a NPC on the current map with the current script.
+ * tmw.obj_create_npc(int id, int x, int y): npc
  */
 static int LuaObj_CreateNpc(lua_State *s)
 {
@@ -169,7 +174,7 @@ static int LuaObj_CreateNpc(lua_State *s)
 
 /**
  * Callback for warping a player to another place.
- * (1: Character) (2: nil/int) (3: int) (4: int)
+ * tmw.chr_warp(character, nil/int map, int x, int y)
  */
 static int LuaChr_Warp(lua_State *s)
 {
@@ -203,6 +208,94 @@ static int LuaChr_Warp(lua_State *s)
     return 0;
 }
 
+/**
+ * Callback for inserting/removing items in inventory.
+ * The function can be called several times in a row, but it is better to
+ * perform all the changes at once, so as to reduce bandwidth. Removals
+ * (negative amount) should be passed first, then insertions (positive amount).
+ * If a removal fails, all the previous operations are canceled (except for
+ * items dropped on the floor, hence why removals should be passed first), and
+ * the function returns false. Otherwise the function will return true.
+ * Note: If an insertion fails, extra items are dropped on the floor.
+ * tmw.chr_inv_change(character, (int id, int nb)...): bool success
+ */
+static int LuaChr_InvChange(lua_State *s)
+{
+    Character *q = getCharacter(s, 1);
+    if (!q)
+    {
+        LOG_WARN("LuaChr_InvChange called with incorrect parameters.");
+        return 0;
+    }
+    int nb_items = (lua_gettop(s) - 1) / 2;
+    Inventory inv(q, true);
+    for (int i = 0; i < nb_items; ++i)
+    {
+        if (!lua_isnumber(s, i * 2 + 2) || !lua_isnumber(s, i * 2 + 3))
+        {
+            LOG_WARN("LuaChr_InvChange called with incorrect parameters.");
+            return 0;
+        }
+        int id = lua_tointeger(s, i * 2 + 2);
+        int nb = lua_tointeger(s, i * 2 + 3);
+        if (nb < 0)
+        {
+            nb = inv.remove(id, -nb);
+            if (nb)
+            {
+                inv.cancel();
+                lua_pushboolean(s, 0);
+                return 1;
+            }
+        }
+        else
+        {
+            nb = inv.insert(id, nb);
+            if (nb)
+            {
+                if (ItemClass *ic = ItemManager::getItem(id))
+                {
+                    Item *item = new Item(ic, nb);
+                    item->setMap(q->getMap());
+                    item->setPosition(q->getPosition());
+                    DelayedEvent e = { EVENT_INSERT };
+                    GameState::enqueueEvent(item, e);
+                }
+            }
+        }
+    }
+    lua_pushboolean(s, 1);
+    return 1;
+}
+
+/**
+ * Callback for counting items in inventory.
+ * tmw.chr_inv_count(character, int id...): int count...
+ */
+static int LuaChr_InvCount(lua_State *s)
+{
+    Character *q = getCharacter(s, 1);
+    if (!q)
+    {
+        LOG_WARN("LuaChr_InvCount called with incorrect parameters.");
+        return 0;
+    }
+    int nb_items = lua_gettop(s) - 1;
+    lua_checkstack(s, nb_items);
+    Inventory inv(q);
+    for (int i = 2; i <= nb_items + 1; ++i)
+    {
+        if (!lua_isnumber(s, i))
+        {
+            LOG_WARN("LuaChr_InvCount called with incorrect parameters.");
+            return 0;
+        }
+        int nb = inv.count(lua_tointeger(s, i));
+        lua_pushinteger(s, nb);
+    }
+    return nb_items;
+}
+
 LuaScript::LuaScript(lua_State *s):
     mState(s),
     nbArgs(-1)
@@ -224,6 +317,8 @@ LuaScript::LuaScript(lua_State *s):
         { "msg_npc_choice",   &LuaMsg_NpcChoice   },
         { "obj_create_npc",   &LuaObj_CreateNpc   },
         { "chr_warp",         &LuaChr_Warp        },
+        { "chr_inv_change",   &LuaChr_InvChange   },
+        { "chr_inv_count",    &LuaChr_InvCount    },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

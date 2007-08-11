@@ -107,9 +107,20 @@ function my_npc1(npc, ch)
   do_message(npc, ch, "Hello! I am the testing NPC")
   do_message(npc, ch, "This message is just here for testing intertwined connections.")
   do_message(npc, ch, "What do you want?")
-  local v = do_choice(npc, ch, "Guns! Lots of guns!", "Nothing.")
+  local v = do_choice(npc, ch, "Guns! Lots of guns!", "A christmas party!", "Nothing.")
   if v == 1 then
     do_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
+  elseif v == 2 then
+    local n1, n2 = tmw.chr_inv_count(ch, 524, 511)
+    if n1 == 0 or n2 ~= 0 then
+      do_message(npc, ch, "Yeah right...")
+    else
+      do_message(npc, ch, "I can't help you with the party. But I see you have a fancy hat. I could change it into a santa hat. Not much of a party, but it would get you going.")
+      v = do_choice(npc, ch, "Please do.", "No way! Fancy hats are classier.")
+      if v == 1 then
+        tmw.chr_inv_change(ch, 524, -1, 511, 1)
+      end
+    end
   end
 end
 

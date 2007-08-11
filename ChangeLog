@@ -1,3 +1,8 @@
+2007-08-11  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/scripting/lua.cpp: Added Lua functions for handling inventories.
+	* data/test.lua: Tested them.
+
 2007-08-10  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* data/test.lua: Added Lua helper functions to simplify scripts.
