@@ -21,12 +21,13 @@
  *  $Id$
  */
 
-#include "game-server/gamehandler.hpp"
-
 #include <cassert>
 #include <map>
 
+#include "game-server/gamehandler.hpp"
+
 #include "game-server/accountconnection.hpp"
+#include "game-server/buysell.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
@@ -335,7 +336,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
 
             Character *q = findCharacterNear(computer.character, id);
-            if (!q || q->getTrading())
+            if (!q || q->isBusy())
             {
                 result.writeShort(GPMSG_TRADE_CANCEL);
                 break;
@@ -366,7 +367,14 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
         } break;
 
-
+        case PGMSG_NPC_BUYSELL:
+        {
+            BuySell *t = computer.character->getBuySell();
+            if (!t) break;
+            int id = message.readShort();
+            int amount = message.readShort();
+            t->perform(id, amount);
+        } break;
 
 // The following messages should be handled by the chat server, not the game server.
 #if 0

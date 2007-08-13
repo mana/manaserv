@@ -21,27 +21,13 @@
  *  $Id$
  */
 
-#ifndef _TMSERV_GAMESERVER_TRADE_HPP_
-#define _TMSERV_GAMESERVER_TRADE_HPP_
+#ifndef _TMWSERV_GAMESERVER_TRADE_HPP_
+#define _TMWSERV_GAMESERVER_TRADE_HPP_
 
 #include <vector>
 
 class Character;
-
-enum TradeState
-{
-    TRADE_INIT = 0, /**< Waiting for an ack from player 2. */
-    TRADE_RUN,      /**< Currently trading. */
-    TRADE_EXIT      /**< Waiting for an ack from player 2. */
-};
-
-struct TradedItem
-{
-    unsigned short id;
-    unsigned char slot, amount;
-};
-
-typedef std::vector< TradedItem > TradedItems;
+class Inventory;
 
 class Trade
 {
@@ -52,8 +38,6 @@ class Trade
          * Asks for an acknowledgment from the second one.
          */
         Trade(Character *, Character *);
-
-        ~Trade();
 
         /**
          * Cancels a trade by a given character (optional).
@@ -81,6 +65,25 @@ class Trade
         void addItem(Character *, int slot, int amount);
 
     private:
+
+        ~Trade();
+
+        struct TradedItem
+        {
+            unsigned short id;
+            unsigned char slot, amount;
+        };
+
+        typedef std::vector< TradedItem > TradedItems;
+
+        enum TradeState
+        {
+            TRADE_INIT = 0, /**< Waiting for an ack from player 2. */
+            TRADE_RUN,      /**< Currently trading. */
+            TRADE_EXIT      /**< Waiting for an ack from player 2. */
+        };
+
+        static bool perform(TradedItems items, Inventory &inv1, Inventory &inv2);
 
         Character *mChar1, *mChar2; /**< Characters involved. */
         TradedItems mItems1, mItems2; /**< Traded items. */

@@ -44,8 +44,8 @@ Trade::Trade(Character *c1, Character *c2):
 
 Trade::~Trade()
 {
-    mChar1->setTrading(NULL);
-    mChar2->setTrading(NULL);
+    mChar1->cancelTransaction();
+    mChar2->cancelTransaction();
 }
 
 void Trade::cancel(Character *c)
@@ -74,7 +74,7 @@ bool Trade::request(Character *c, int id)
     return true;
 }
 
-static bool performTrade(TradedItems items, Inventory &inv1, Inventory &inv2)
+bool Trade::perform(TradedItems items, Inventory &inv1, Inventory &inv2)
 {
     for (TradedItems::const_iterator i = items.begin(),
          i_end = items.end(); i != i_end; ++i)
@@ -113,7 +113,7 @@ void Trade::accept(Character *c)
     }
 
     Inventory v1(mChar1, true), v2(mChar2, true);
-    if (!performTrade(mItems1, v1, v2) || !performTrade(mItems2, v2, v1))
+    if (!perform(mItems1, v1, v2) || !perform(mItems2, v2, v1))
     {
         v1.cancel();
         v2.cancel();

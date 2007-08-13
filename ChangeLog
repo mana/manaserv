@@ -13,6 +13,13 @@
 	src/account-server/dalstoragesql.hpp, src/dal/dataproviderfactory.cpp,
 	src/account-server/accounthandler.cpp: Cleaned configuration. Removed
 	obsolete SQL tables.
+	* src/defines.h, src/Makefile.am, src/game-server/trade.cpp,
+	src/game-server/trade.hpp, src/game-server/state.cpp,
+	src/game-server/character.cpp, src/game-server/character.hpp,
+	src/game-server/gamehandler.cpp, src/game-server/buysell.cpp,
+	src/game-server/buysell.hpp: Implemented buy/sell handler.
+	* src/scripting/lua.cpp, data/test.lua: Added a bit of buy/sell testing
+	code.
 
 2007-08-11  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

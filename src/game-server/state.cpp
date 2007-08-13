@@ -507,8 +507,7 @@ void GameState::remove(Thing *ptr)
     {
         if (ptr->getType() == OBJECT_CHARACTER)
         {
-            Character *ch = static_cast< Character * >(ptr);
-            if (Trade *t = ch->getTrading()) t->cancel(ch);
+            static_cast< Character * >(ptr)->cancelTransaction();
         }
 
         MovingObject *obj = static_cast< MovingObject * >(ptr);

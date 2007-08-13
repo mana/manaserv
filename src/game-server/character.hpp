@@ -29,6 +29,7 @@
 #include "common/inventorydata.hpp"
 #include "game-server/being.hpp"
 
+class BuySell;
 class GameClient;
 class MessageIn;
 class MessageOut;
@@ -78,16 +79,37 @@ class Character : public Being
         { return mPossessions; }
 
         /**
-         * Gets the trade object the character is involved in.
+         * Gets the Trade object the character is involved in.
          */
-        Trade *getTrading() const
-        { return mTrading; }
+        Trade *getTrading() const;
+
+        /**
+         * Sets the Trade object the character is involved in.
+         * Cancels other transactions.
+         */
+        void setTrading(Trade *t);
+
+        /**
+         * Gets the BuySell object the character is involved in.
+         */
+        BuySell *getBuySell() const;
 
         /**
          * Sets the trade object the character is involved in.
+         * Cancels other transactions.
          */
-        void setTrading(Trade *t)
-        { mTrading = t; }
+        void setBuySell(BuySell *t);
+
+        /**
+         * Cancels current transaction.
+         */
+        void cancelTransaction();
+
+        /**
+         * Gets transaction status of the character.
+         */
+        bool isBusy() const
+        { return mTransaction != TRANS_NONE; }
 
         /*
          * Character data:
@@ -211,8 +233,12 @@ class Character : public Being
         Character(Character const &);
         Character &operator=(Character const &);
 
+        enum TransactionType
+        { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
+
         GameClient *mClient;   /**< Client computer. */
-        Trade *mTrading;       /**< Trade object the character is involved in. */
+        /** Handler of the transaction the character is involved in. */
+        void *mTransactionHandler;
 
         /** Atributes as the client should currently know them. */
         std::vector<unsigned short> mOldAttributes;
@@ -226,6 +252,7 @@ class Character : public Being
         unsigned char mHairStyle;    /**< Hair Style of the character. */
         unsigned char mHairColor;    /**< Hair Color of the character. */
         unsigned char mLevel;        /**< Level of the character. */
+        TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
 
         /**
          * true when one or more attributes might have changed since the

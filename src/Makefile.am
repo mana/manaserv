@@ -80,6 +80,8 @@ tmwserv_game_SOURCES = \
 	game-server/accountconnection.cpp \
 	game-server/being.hpp \
 	game-server/being.cpp \
+	game-server/buysell.hpp \
+	game-server/buysell.cpp \
 	game-server/character.hpp \
 	game-server/character.cpp \
 	game-server/collisiondetection.hpp \

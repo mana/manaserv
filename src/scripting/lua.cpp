@@ -30,6 +30,7 @@ extern "C" {
 
 #include "defines.h"
 #include "resourcemanager.h"
+#include "game-server/buysell.hpp"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
@@ -299,6 +300,35 @@ static int LuaChr_InvCount(lua_State *s)
     return nb_items;
 }
 
+// For testing purpose.
+static int test_NpcBuy(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+    if (!p || !q) return 0;
+    BuySell *t = new BuySell(q, false);
+    t->registerItem(533, 10, 20);
+    t->registerItem(535, 10, 30);
+    t->registerItem(537, 10, 50);
+    t->start(p);
+    return 0;
+}
+
+// For testing purpose.
+static int test_NpcSell(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+    if (!p || !q) return 0;
+    BuySell *t = new BuySell(q, true);
+    t->registerItem(511, 10, 200);
+    t->registerItem(524, 10, 300);
+    t->registerItem(508, 10, 500);
+    t->registerItem(537, 10, 25);
+    t->start(p);
+    return 0;
+}
+
 LuaScript::LuaScript(lua_State *s):
     mState(s),
     nbArgs(-1)
@@ -322,6 +352,8 @@ LuaScript::LuaScript(lua_State *s):
         { "chr_warp",         &LuaChr_Warp        },
         { "chr_inv_change",   &LuaChr_InvChange   },
         { "chr_inv_count",    &LuaChr_InvCount    },
+        { "test_npc_buy",     &test_NpcBuy        },
+        { "test_npc_sell",    &test_NpcSell       },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

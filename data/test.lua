@@ -107,7 +107,7 @@ function my_npc1(npc, ch)
   do_message(npc, ch, "Hello! I am the testing NPC")
   do_message(npc, ch, "This message is just here for testing intertwined connections.")
   do_message(npc, ch, "What do you want?")
-  local v = do_choice(npc, ch, "Guns! Lots of guns!", "A christmas party!", "Nothing.")
+  local v = do_choice(npc, ch, "Guns! Lots of guns!", "A christmas party!", "To buy.", "To sell.", "Nothing.")
   if v == 1 then
     do_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
   elseif v == 2 then
@@ -121,6 +121,10 @@ function my_npc1(npc, ch)
         tmw.chr_inv_change(ch, 524, -1, 511, 1)
       end
     end
+  elseif v == 3 then
+    tmw.test_npc_buy(npc, ch)
+  elseif v == 4 then
+    tmw.test_npc_sell(npc, ch)
   end
 end
 

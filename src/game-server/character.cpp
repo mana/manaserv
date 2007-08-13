@@ -22,19 +22,22 @@
 
 #include <cassert>
 
-#include "defines.h"
 #include "game-server/character.hpp"
+
+#include "defines.h"
+#include "game-server/buysell.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/trade.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "serialize/characterdata.hpp"
 
 Character::Character(MessageIn & msg):
     Being(OBJECT_CHARACTER, 65535),
-    mClient(NULL), mTrading(NULL), mDatabaseID(-1),
+    mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),
     mMoney(0), mGender(0), mHairStyle(0), mHairColor(0), mLevel(0),
-    mAttributesChanged(true)
+    mTransaction(TRANS_NONE), mAttributesChanged(true)
 {
     // prepare attributes vector
     mAttributes.resize(NB_ATTRIBUTES_CHAR, 1);
@@ -121,3 +124,47 @@ void Character::setMapId(int id)
 {
     setMap(MapManager::getMap(id));
 }
+
+void Character::cancelTransaction()
+{
+    TransactionType t = mTransaction;
+    mTransaction = TRANS_NONE;
+    switch (t)
+    {
+        case TRANS_TRADE:
+            static_cast< Trade * >(mTransactionHandler)->cancel(this);
+            break;
+        case TRANS_BUYSELL:
+            static_cast< BuySell * >(mTransactionHandler)->cancel();
+            break;
+        case TRANS_NONE:
+            return;
+    }
+}
+
+Trade *Character::getTrading() const
+{
+    return mTransaction == TRANS_TRADE
+        ? static_cast< Trade * >(mTransactionHandler) : NULL;
+}
+
+BuySell *Character::getBuySell() const
+{
+    return mTransaction == TRANS_BUYSELL
+        ? static_cast< BuySell * >(mTransactionHandler) : NULL;
+}
+
+void Character::setTrading(Trade *t)
+{
+    cancelTransaction();
+    mTransactionHandler = t;
+    mTransaction = TRANS_TRADE;
+}
+
+void Character::setBuySell(BuySell *t)
+{
+    cancelTransaction();
+    mTransactionHandler = t;
+    mTransaction = TRANS_BUYSELL;
+}
+

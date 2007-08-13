@@ -166,11 +166,14 @@ enum {
     GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // W being id, S text
-    GPMSG_NPC_CHOICE               = 0x02B0, // W being id, B* text
+    GPMSG_NPC_CHOICE               = 0x02B0, // W being id, { S text }*
     GPMSG_NPC_MESSAGE              = 0x02B1, // W being id, B* text
     PGMSG_NPC_TALK                 = 0x02B2, // W being id
     PGMSG_NPC_TALK_NEXT            = 0x02B3, // W being id
     PGMSG_NPC_SELECT               = 0x02B4, // W being id, B choice
+    GPMSG_NPC_BUY                  = 0x02B5, // W being id, { W item id, W amount, W cost }*
+    GPMSG_NPC_SELL                 = 0x02B6, // W being id, { W item id, W amount, W cost }*
+    PGMSG_NPC_BUYSELL              = 0x02B7, // W item id, W amount
     PGMSG_TRADE_REQUEST            = 0x02C0, // W being id
     GPMSG_TRADE_REQUEST            = 0x02C1, // W being id
     GPMSG_TRADE_START              = 0x02C2, // -
