@@ -83,17 +83,6 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 {
     AccountClient &computer = *static_cast< AccountClient * >(comp);
 
-    Storage &store = Storage::instance("tmw");
-
-#if defined (SQLITE_SUPPORT)
-    // Reopen the db in this thread for sqlite, to avoid
-    // Library Call out of sequence problem due to thread safe.
-    store.setUser(config.getValue("dbuser", ""));
-    store.setPassword(config.getValue("dbpass", ""));
-    store.close();
-    store.open();
-#endif
-
     switch (message.getId())
     {
         case PAMSG_LOGIN:

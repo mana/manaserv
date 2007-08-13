@@ -12,8 +12,6 @@ tmwserv_account_SOURCES = \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
-	skill.h \
-	skill.cpp \
 	account-server/account.hpp \
 	account-server/account.cpp \
 	account-server/accountclient.hpp \
@@ -77,8 +75,6 @@ tmwserv_game_SOURCES = \
 	point.h \
 	resourcemanager.h \
 	resourcemanager.cpp \
-	skill.h \
-	skill.cpp \
 	common/inventorydata.hpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
@@ -173,21 +169,6 @@ if BUILD_SQLITE
 tmwserv_account_SOURCES += \
 	dal/sqlitedataprovider.h \
 	dal/sqlitedataprovider.cpp
-endif
-
-if BUILD_SQUIRREL
-tmwserv_game_SOURCES += \
-	script.h \
-	script.cpp \
-	script-squirrel.h \
-	script-squirrel.cpp
-endif
-
-if BUILD_RUBY
-bindings_wrap.cpp: bindings.i
-	$(SWIG) $(SWIGFLAGS) -o bindings_wrap.cpp bindings.i
-tmwserv_game_SOURCES += \
-	bindings_wrap.cpp
 endif
 
 if BUILD_LUA

@@ -24,11 +24,13 @@
 #ifndef _TMWSERV_DALSTORAGE_SQL_H_
 #define _TMWSERV_DALSTORAGE_SQL_H_
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #if !defined (MYSQL_SUPPORT) && !defined (SQLITE_SUPPORT) && \
     !defined (POSTGRESQL_SUPPORT)
-
-#error "(dalstorage.h) no database backend defined"
+#error "(dalstorage.hpp) no database backend defined"
 #endif
 
 
@@ -60,9 +62,6 @@
  */
 
 
-namespace {
-
-
 /**
  * TABLE: tmw_accounts.
  *
@@ -73,8 +72,8 @@ namespace {
  *           2: administrator (i am god :))
  *     - the 'banned' field contains the UNIX time of unban (default = 0)
  */
-const std::string ACCOUNTS_TBL_NAME("tmw_accounts");
-const std::string SQL_ACCOUNTS_TABLE(
+static char const *ACCOUNTS_TBL_NAME = "tmw_accounts";
+static char const *SQL_ACCOUNTS_TABLE =
     "CREATE TABLE tmw_accounts ("
 #if defined (MYSQL_SUPPORT)
         "id       INTEGER     PRIMARY KEY AUTO_INCREMENT,"
@@ -99,8 +98,7 @@ const std::string SQL_ACCOUNTS_TABLE(
         "level    INTEGER     NOT NULL,"
         "banned   INTEGER     NOT NULL"
 #endif
-    ");"
-);
+    ");";
 
 
 /**
@@ -112,8 +110,8 @@ const std::string SQL_ACCOUNTS_TABLE(
  *       separate table for storing the skill levels.
  *     - gender is 0 for male, 1 for female.
  */
-const std::string CHARACTERS_TBL_NAME("tmw_characters");
-const std::string SQL_CHARACTERS_TABLE(
+static char const *CHARACTERS_TBL_NAME = "tmw_characters";
+static char const *SQL_CHARACTERS_TABLE =
     "CREATE TABLE tmw_characters ("
 #if defined (MYSQL_SUPPORT)
         "id      INTEGER     PRIMARY KEY AUTO_INCREMENT,"
@@ -190,94 +188,14 @@ const std::string SQL_CHARACTERS_TABLE(
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
 #endif
-    ");"
-);
-
-
-/**
- * TABLE: tmw_items.
- *
- * Notes:
- *     - amount: indicates how many items of the same kind can stack.
- *     - state: (optional) item state saved by script.
- */
-const std::string ITEMS_TBL_NAME("tmw_items");
-const std::string SQL_ITEMS_TABLE(
-    "CREATE TABLE tmw_items ("
-#if defined (MYSQL_SUPPORT)
-        "id     SMALLINT PRIMARY KEY AUTO_INCREMENT,"
-        "amount TINYINT  UNSIGNED NOT NULL,"
-        "type   TINYINT  UNSIGNED NOT NULL,"
-        "state  TEXT,"
-        "INDEX (id)"
-#elif defined (SQLITE_SUPPORT)
-        "id     INTEGER  PRIMARY KEY,"
-        "amount INTEGER  NOT NULL,"
-        "type   INTEGER  NOT NULL,"
-        "state  TEXT"
-#elif defined (POSTGRESQL_SUPPORT)
-        "id     SERIAL   PRIMARY KEY,"
-        "amount INTEGER  NOT NULL,"
-        "type   INTEGER  NOT NULL,"
-        "state  TEXT"
-#endif
-    ");"
-);
-
-
-/**
- * TABLE: tmw_world_items.
- *
- * Notes:
- *     - store items on the ground in the game world.
- */
-const std::string WORLD_ITEMS_TBL_NAME("tmw_world_items");
-// NOTE: Problem here with primary key (only one type of item is allowed on the same map at one time).
-const std::string SQL_WORLD_ITEMS_TABLE(
-    "CREATE TABLE tmw_world_items ("
-#if defined (MYSQL_SUPPORT)
-        "id        SMALLINT UNSIGNED NOT NULL,"
-        // location on the map
-        "x         SMALLINT UNSIGNED NOT NULL,"
-        "y         SMALLINT UNSIGNED NOT NULL,"
-        "map_id    TINYINT  NOT NULL,"
-        // time to die (UNIX time)
-        "deathtime INTEGER  UNSIGNED NOT NULL,"
-        "PRIMARY KEY (id, map_id),"
-        "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
-        "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
-#elif defined (SQLITE_SUPPORT)
-        "id        INTEGER  NOT NULL,"
-        // location on the map
-        "x         INTEGER  NOT NULL,"
-        "y         INTEGER  NOT NULL,"
-        "map_id    INTEGER  NOT NULL,"
-        // time to die (UNIX time)
-        "deathtime INTEGER  NOT NULL,"
-        "PRIMARY KEY (id, map_id),"
-        "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
-        "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
-#elif defined (POSTGRESQL_SUPPORT)
-        "id        INTEGER  NOT NULL,"
-        // location on the map
-        "x         INTEGER  NOT NULL,"
-        "y         INTEGER  NOT NULL,"
-        "map_id    INTEGER  NOT NULL,"
-        // time to die (UNIX time)
-        "deathtime INTEGER  NOT NULL,"
-        "PRIMARY KEY (id, map_id),"
-        "FOREIGN KEY (id)     REFERENCES tmw_items(id),"
-        "FOREIGN KEY (map_id) REFERENCES tmw_maps(id)"
-#endif
-    ");"
-);
+    ");";
 
 
 /**
  * TABLE: tmw_inventories.
  */
-const std::string INVENTORIES_TBL_NAME("tmw_inventories");
-const std::string SQL_INVENTORIES_TABLE(
+static char const *INVENTORIES_TBL_NAME("tmw_inventories");
+static char const *SQL_INVENTORIES_TABLE =
     "CREATE TABLE tmw_inventories ("
 #if defined (MYSQL_SUPPORT)
         "id       INTEGER  PRIMARY KEY AUTO_INCREMENT,"
@@ -302,15 +220,14 @@ const std::string SQL_INVENTORIES_TABLE(
         "amount   INTEGER  NOT NULL,"
         "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
 #endif
-    ");"
-);
+    ");";
 
 /**
  * TABLE: tmw_channels.
  * Keeps opened public Channel list
  */
-const std::string CHANNELS_TBL_NAME("tmw_channels");
-const std::string SQL_CHANNELS_TABLE(
+static char const *CHANNELS_TBL_NAME = "tmw_channels";
+static char const *SQL_CHANNELS_TABLE =
     "CREATE TABLE tmw_channels ("
 #if defined (MYSQL_SUPPORT)
         "id            INTEGER     PRIMARY KEY,"
@@ -328,15 +245,14 @@ const std::string SQL_CHANNELS_TABLE(
         "announcement    TEXT NOT NULL,"
         "password        TEXT NOT NULL"
 #endif
-    ");"
-);
+    ");";
 
 /**
  * TABLE: tmw_guilds.
  * Store player guilds
  */
-const std::string GUILDS_TBL_NAME("tmw_guilds");
-const std::string SQL_GUILDS_TABLE(
+static char const *GUILDS_TBL_NAME = "tmw_guilds";
+static char const *SQL_GUILDS_TABLE =
     "CREATE TABLE tmw_guilds ("
 #if defined (MYSQL_SUPPORT)
         "id            INTEGER     PRIMARY KEY AUTO_INCREMENT,"
@@ -351,15 +267,14 @@ const std::string SQL_GUILDS_TABLE(
         "name    TEXT        NOT NULL UNIQUE,"
         "FOREIGN KEY (name) REFERENCES tmw_characters(name)"
 #endif
-    ");"
-);
+    ");";
 
 /**
  * TABLE: tmw_guild_members.
  * Store guild members
  */
-const std::string GUILD_MEMBERS_TBL_NAME("tmw_guild_members");
-const std::string SQL_GUILD_MEMBERS_TABLE(
+static char const *GUILD_MEMBERS_TBL_NAME = "tmw_guild_members";
+static char const *SQL_GUILD_MEMBERS_TABLE =
     "CREATE TABLE tmw_guild_members ("
 #if defined (MYSQL_SUPPORT)
         "guild_id       INTEGER         NOT NULL,"
@@ -377,11 +292,7 @@ const std::string SQL_GUILD_MEMBERS_TABLE(
         "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
         "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
 #endif
-    ");"
-);
-
-
-} // anonymous namespace
+    ");";
 
 
 #endif // _TMWSERV_DALSTORAGE_SQL_H_

@@ -33,7 +33,6 @@
 
 #include "configuration.h"
 #include "resourcemanager.h"
-#include "skill.h"
 #include "account-server/accounthandler.hpp"
 #include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
@@ -52,8 +51,6 @@
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 
 bool running = true;            /**< Determines if server keeps running */
-
-Skill skillTree("base");        /**< Skill tree */
 
 Configuration config;           /**< XML config reader */
 
@@ -166,17 +163,6 @@ void initialize()
         LOG_FATAL("An error occurred while initializing ENet");
         exit(2);
     }
-
-
-#if defined (MYSQL_SUPPORT)
-    LOG_INFO("Using MySQL DB Backend.");
-#elif defined (POSTGRESQL_SUPPORT)
-    LOG_INFO("Using PostGreSQL DB Backend.");
-#elif defined (SQLITE_SUPPORT)
-    LOG_INFO("Using SQLite DB Backend.");
-#else
-    LOG_WARN("No Database Backend Support.");
-#endif
 
     // Initialize configuration defaults
     config.setValue("dbuser", "");

@@ -23,6 +23,10 @@
 
 #include "dataproviderfactory.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #if defined (MYSQL_SUPPORT)
 #include "mysqldataprovider.h"
 #elif defined (POSTGRESQL_SUPPORT)

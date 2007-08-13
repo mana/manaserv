@@ -2,7 +2,7 @@ dnl $Id$
 
 
 AC_PREREQ(2.59)
-AC_INIT([TMW Server], [0.0.1], [b_lindeijer@users.sourceforge.net], [tmwserv])
+AC_INIT([TMW Server], [0.0.1], [themanaworld-devel@lists.sourceforge.net], [tmwserv])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
 
@@ -35,20 +35,9 @@ LIBS="$LIBS $XML2_LIBS"
 AC_HEADER_STDC
 AC_HEADER_TIME
 
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_STDBOOL
-AC_C_CONST
-AC_TYPE_SIZE_T
-AC_STRUCT_TM
-
-
 # Checks for library functions.
-AC_FUNC_ALLOCA
-AC_FUNC_ERROR_AT_LINE
-AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([atexit strrchr])
+AC_CHECK_FUNCS([atexit])
 
 
 # Checks for the storage backend.
@@ -92,64 +81,33 @@ elif test "$with_storage_backend" = "sqlite"; then
     # use pkg-config to check libsqlite3.
     # SQLITE_CFLAGS and SQLITE_LIBS are set by PKG_CHECK_MODULES.
     PKG_CHECK_MODULES(SQLITE,[sqlite3 >= 3.0.6])
-
     # update CXXFLAGS and LIBS.
-    CXXFLAGS="$CXXFLAGS -DSQLITE_SUPPORT $SQLITE_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $SQLITE_CFLAGS"
     LIBS="$LIBS $SQLITE_LIBS"
+    AC_DEFINE(SQLITE_SUPPORT, [], [Define if the Sqlite back-end should be used.])
 else
     # at the moment, we support only those three databases as backends.
     AC_MSG_ERROR([unknown storage backend: $with_storage_backend])
 fi
 
 
-# Checks for the scripting engine.
-AC_ARG_WITH(
-    [scripting-engine],
-    AS_HELP_STRING(
-        [--with-scripting-engine=ARG],
-        [use scripting engine [[ARG=ruby,squirrel,lua]] [(default=no)]]
-    ),
-    [],
-    [with_scripting_engine="no"]
+# Checks for Lua support
+AC_ARG_ENABLE(
+    [lua-engine],
+    AS_HELP_STRING([--enable-lua-engine], [support Lua scripts]),
+    [if test "$enable_lua_engine" = "yes"; then
+        PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1])
+        CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
+        LIBS="$LIBS $LUA_LIBS"
+    fi],
+    [enable_lua_engine="no"]
 )
-
-if test "$with_scripting_engine" = "ruby"; then
-    # AC_MSG_ERROR([sorry, $with_scripting_engine is not supported yet])
-    AC_CHECK_LIB([ruby], [ruby_init])
-    AC_PATH_PROG(swig_path, swig, no)
-    if test "$swig_path" = "no"; then
-       AC_MSG_ERROR(Could not find swig in PATH)
-    fi
-    SWIG="$swig_path"
-    SWIGFLAGS="-c++ -ruby -minherit"
-    AC_SUBST(SWIG)
-    AC_SUBST(SWIGFLAGS)
-    CXXFLAGS="$CXXFLAGS -DSCRIPT_SUPPORT -DRUBY_SUPPORT -I/usr/lib/ruby/1.8/linux/"
-    LIBS="$LIBS -lruby"
-elif test "$with_scripting_engine" = "squirrel"; then
-    AC_CHECK_LIB([squirrel], [sq_open])
-
-    # update CXXFLAGS and LIBS
-    CXXFLAGS="$CXXFLAGS -DSCRIPT_SUPPORT -DSQUIRREL_SUPPORT"
-    # there is no need to append -lsquirrel as it is already done by
-    # AC_CHECK_LIB
-    LIBS="$LIBS -lsqstdlib"
-elif test "$with_scripting_engine" = "lua"; then
-    PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1])
-    CXXFLAGS="$CXXFLAGS -DSCRIPT_SUPPORT -DLUA_SUPPORT $LUA_CFLAGS"
-    LIBS="$LIBS $LUA_LIBS"    
-elif test "$with_scripting_engine" != "no"; then
-    AC_MSG_ERROR([unknown scripting engine: $with_scripting_engine])
-fi
-
 
 AM_CONDITIONAL(BUILD_MYSQL, test "$with_storage_backend" = "mysql")
 AM_CONDITIONAL(BUILD_POSTGRESQL, test "$with_storage_backend" = "postgresql")
 AM_CONDITIONAL(BUILD_SQLITE, test "$with_storage_backend" = "sqlite")
 
-AM_CONDITIONAL(BUILD_RUBY, test "$with_scripting_engine" = "ruby")
-AM_CONDITIONAL(BUILD_SQUIRREL, test "$with_scripting_engine" = "squirrel")
-AM_CONDITIONAL(BUILD_LUA, test "$with_scripting_engine" = "lua")
+AM_CONDITIONAL(BUILD_LUA, test "$enable_lua_engine" = "yes")
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 
@@ -158,10 +116,9 @@ AC_OUTPUT
 
 echo
 echo "-------------------------------------------------------"
-echo "  $PACKAGE_NAME will be compiled with these options:   "
+echo "  $PACKAGE_NAME will be compiled with these options:"
 echo
-echo "    + storage backend : $with_storage_backend          "
-echo "    + scripting engine: $with_scripting_engine         "
-echo "    + with unit tests : $enable_unit_tests             "
+echo "    + storage backend     : $with_storage_backend"
+echo "    + Lua scripting engine: $enable_lua_engine"
 echo "-------------------------------------------------------"
 echo

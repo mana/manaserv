@@ -33,7 +33,6 @@
 
 #include "configuration.h"
 #include "resourcemanager.h"
-#include "skill.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/itemmanager.hpp"
@@ -48,27 +47,6 @@
 #include "utils/timer.h"
 #include "utils/mathutils.h"
 
-// Scripting
-#ifdef SCRIPT_SUPPORT
-
-extern "C" void Init_Tmw();
-
-#if defined (SQUIRREL_SUPPORT)
-std::string scriptLanguage = "squirrel";
-#elif defined (RUBY_SUPPORT)
-#include <ruby.h>
-int rubyStatus;
-std::string scriptLanguage = "ruby";
-#elif defined (LUA_SUPPORT)
-std::string scriptLanguage = "lua";
-#else
-#error "Scripting enabled, but no language selected"
-#endif
-
-#else
-std::string scriptLanugage = "none";
-#endif // SCRIPT_SUPPORT
-
 // Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE        "tmwserv-game.log"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
@@ -79,8 +57,6 @@ std::string scriptLanugage = "none";
 utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
 int worldTime = 0;              /**< Current world time in 100ms ticks */
 bool running = true;            /**< Determines if server keeps running */
-
-Skill skillTree("base");        /**< Skill tree */
 
 Configuration config;           /**< XML config reader */
 
@@ -183,25 +159,6 @@ void initialize()
     // Set enet to quit on exit.
     atexit(enet_deinitialize);
 
-    // --- Initialize scripting subsystem.
-#ifdef RUBY_SUPPORT
-    LOG_INFO("Script language: " << scriptLanguage);
-
-    // Initialize ruby
-    ruby_init();
-    ruby_init_loadpath();
-    ruby_script("tmw");
-
-    // Initialize bindings
-    Init_Tmw();
-
-    // Run test script
-    rb_load_file("scripts/init.rb");
-    rubyStatus = ruby_exec();
-#else
-    LOG_WARN("No scripting language support.");
-#endif
-
     // Pre-calulate the needed trigomic function values
     utils::math::init();
 
@@ -223,12 +180,6 @@ void deinitialize()
 
     // Stop world timer
     worldTimer.stop();
-
-#ifdef RUBY_SUPPORT
-    // Finish up ruby
-    ruby_finalize();
-    ruby_cleanup(rubyStatus);
-#endif
 
     // Destroy message handlers
     delete gameHandler;

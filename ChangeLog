@@ -1,3 +1,14 @@
+2007-08-13  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/bindings.i, src/script-squirrel.cpp, src/script-squirrel.h,
+	src/skill.cpp, src/skill.h, scripts/init.rb: Deleted obsolete files.
+	* configure.ac, src/Makefile.am, src/account-server/main-account.cpp,
+	src/game-server/main-game.cpp, src/dal/sqlitedataprovider.cpp,
+	src/dal/mysqldataprovider.cpp, src/account-server/dalstorage.cpp,
+	src/account-server/dalstoragesql.hpp, src/dal/dataproviderfactory.cpp,
+	src/account-server/accounthandler.cpp: Cleaned configuration. Removed
+	obsolete SQL tables.
+
 2007-08-11  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/scripting/lua.cpp: Added Lua functions for handling inventories.
