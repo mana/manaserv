@@ -1,3 +1,8 @@
+2007-08-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp: Updated project files and added
+	scripting engine.
+
 2007-08-13  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/bindings.i, src/script-squirrel.cpp, src/script-squirrel.h,

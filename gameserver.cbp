@@ -35,6 +35,7 @@
 			<Add library="pthreadGC2"/>
 			<Add library="z"/>
 			<Add library="winmm"/>
+			<Add library="lua"/>
 		</Linker>
 		<Unit filename="src\configuration.cpp">
 			<Option compilerVar="CPP"/>
@@ -196,6 +197,16 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
+		<Unit filename="src\game-server\npc.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\npc.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
 		<Unit filename="src\game-server\spawnarea.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
@@ -218,6 +229,16 @@
 		</Unit>
 		<Unit filename="src\game-server\testing.cpp">
 			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\trade.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\trade.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\game-server\trigger.cpp">
@@ -296,11 +317,15 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\skill.cpp">
+		<Unit filename="src\scripting\lua.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\skill.h">
+		<Unit filename="src\scripting\script.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\scripting\script.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
