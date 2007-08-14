@@ -10,6 +10,8 @@
 	* src/game-server/inventory.hpp, src/game-server/inventory.cpp,
 	src/game-server/buysell.cpp: Added money accessor to the inventory
 	manager.
+	* src/game-server/inventory.cpp: Fixed incorrect update message when
+	merging item stacks and removing one of them.
 
 2007-08-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

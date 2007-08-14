@@ -324,6 +324,7 @@ bool Inventory::changeMoney(int amount)
     mPoss->money = money;
     msg.writeByte(255);
     msg.writeLong(money);
+    return true;
 }
 
 void Inventory::freeIndex(int i)
@@ -438,6 +439,10 @@ int Inventory::move(int slot1, int slot2, int amount)
             it2.amount += nb;
             amount -= nb;
 
+            msg.writeByte(slot2 + EQUIP_CLIENT_INVENTORY);
+            msg.writeShort(it2.itemId);
+            msg.writeByte(it2.amount);
+
             msg.writeByte(slot1 + EQUIP_CLIENT_INVENTORY);
             if (it1.amount == 0)
             {
@@ -449,10 +454,6 @@ int Inventory::move(int slot1, int slot2, int amount)
                 msg.writeShort(it1.itemId);
                 msg.writeByte(it1.amount);
             }
-
-            msg.writeByte(slot2 + EQUIP_CLIENT_INVENTORY);
-            msg.writeShort(it2.itemId);
-            msg.writeByte(it2.amount);
             return amount;
         }
 
