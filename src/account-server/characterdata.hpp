@@ -99,14 +99,6 @@ class CharacterData
         void
         setLevel(int level) { mLevel = level; }
 
-        /** Gets the amount of money the character has. */
-        int
-        getMoney() const { return mMoney; }
-
-        /** Sets the amount of money the character has. */
-        void
-        setMoney(int amount) { mMoney = amount; }
-
         /** Gets the value of a base attribute of the character. */
         unsigned short
         getBaseAttribute(int attributeNumber) const
@@ -165,7 +157,6 @@ class CharacterData
         unsigned char mHairStyle; //!< Hair Style of the being.
         unsigned char mHairColor; //!< Hair Color of the being.
         unsigned char mLevel;     //!< Level of the being.
-        unsigned int mMoney;      //!< Wealth of the being.
         unsigned short mBaseAttributes[NB_BASE_ATTRIBUTES]; //!< The attributes of the
                                                    //!< character.
         unsigned short mMapId;    //!< Map the being is on.

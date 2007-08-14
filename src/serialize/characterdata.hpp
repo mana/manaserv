@@ -36,7 +36,6 @@ void serializeCharacterData(T const &data, MessageOut &msg)
     msg.writeByte(data.getHairStyle());
     msg.writeByte(data.getHairColor());
     msg.writeByte(data.getLevel());
-    msg.writeShort(data.getMoney());
 
     for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
     {
@@ -49,6 +48,7 @@ void serializeCharacterData(T const &data, MessageOut &msg)
     msg.writeShort(pos.y);
 
     Possessions const &poss = data.getPossessions();
+    msg.writeLong(poss.money);
     for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
     {
         msg.writeShort(poss.equipment[j]);
@@ -68,7 +68,6 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setHairStyle(msg.readByte());
     data.setHairColor(msg.readByte());
     data.setLevel(msg.readByte());
-    data.setMoney(msg.readShort());
 
     for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
     {
@@ -83,6 +82,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setPosition(temporaryPoint);
 
     Possessions &poss = data.getPossessions();
+    poss.money = msg.readLong();
     for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
     {
         poss.equipment[j] = msg.readShort();

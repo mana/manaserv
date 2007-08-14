@@ -93,7 +93,9 @@ class AccountHandler : public ConnectionHandler
         void
         computerDisconnected(NetComputer *comp);
 
-        // --- message handling ---
+    private:
+
+        void sendCharacterData(AccountClient &, int, CharacterData const &);
 
         void
         handleLoginMessage(AccountClient &computer, MessageIn &msg);

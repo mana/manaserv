@@ -354,7 +354,7 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
         character->setHairStyle(toUshort(charInfo(0, 4)));
         character->setHairColor(toUshort(charInfo(0, 5)));
         character->setLevel(toUshort(charInfo(0, 6)));
-        character->setMoney(toUint(charInfo(0, 7)));
+        character->getPossessions().money = toUint(charInfo(0, 7));
         Point pos(toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)));
         character->setPosition(pos);
         for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
@@ -581,7 +581,7 @@ DALStorage::updateCharacter(CharacterPtr character)
                                << "', "
             << "level = '"      << character->getLevel()
                                << "', "
-            << "money = '"      << character->getMoney()
+            << "money = '"      << character->getPossessions().money
                                << "', "
             << "x = '"          << character->getPosition().x
                                << "', "
@@ -920,7 +920,7 @@ void DALStorage::flush(AccountPtr const &account)
                  << (int)(*it)->getHairStyle() << ", "
                  << (int)(*it)->getHairColor() << ", "
                  << (int)(*it)->getLevel() << ", "
-                 << (*it)->getMoney() << ", "
+                 << (*it)->getPossessions().money << ", "
                  << (*it)->getPosition().x << ", "
                  << (*it)->getPosition().y << ", "
                  << (*it)->getMapId() << ", "
@@ -942,7 +942,7 @@ void DALStorage::flush(AccountPtr const &account)
                 << " hair_style = " << (int)(*it)->getHairStyle() << ", "
                 << " hair_color = " << (int)(*it)->getHairColor() << ", "
                 << " level = " << (int)(*it)->getLevel() << ", "
-                << " money = " << (*it)->getMoney() << ", "
+                << " money = " << (*it)->getPossessions().money << ", "
                 << " x = " << (*it)->getPosition().x << ", "
                 << " y = " << (*it)->getPosition().y << ", "
                 << " map_id = " << (*it)->getMapId() << ", "

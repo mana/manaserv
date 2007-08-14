@@ -136,6 +136,9 @@ void Inventory::sendFull() const
         }
     }
 
+    m.writeByte(255);
+    m.writeLong(mPoss->money);
+
     gameHandler->sendTo(mClient, m);
 }
 
@@ -301,6 +304,26 @@ int Inventory::count(int itemId) const
     }
 
     return nb;
+}
+
+bool Inventory::changeMoney(int amount)
+{
+    if (amount == 0)
+    {
+        return true;
+    }
+
+    int money = mPoss->money + amount;
+    if (money < 0)
+    {
+        return false;
+    }
+
+    prepare();
+
+    mPoss->money = money;
+    msg.writeByte(255);
+    msg.writeLong(money);
 }
 
 void Inventory::freeIndex(int i)

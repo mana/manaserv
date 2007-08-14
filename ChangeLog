@@ -1,3 +1,16 @@
+2007-08-14  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/serialize/characterdata.hpp, src/common/inventorydata.hpp,
+	src/account-server/accounthandler.hpp, src/game-server/character.cpp,
+	src/account-server/dalstorage.cpp, src/game-server/character.hpp,
+	src/account-server/characterdata.cpp,
+	src/account-server/accounthandler.cpp,
+	src/account-server/characterdata.hpp: Handled money as part of the
+	inventory.
+	* src/game-server/inventory.hpp, src/game-server/inventory.cpp,
+	src/game-server/buysell.cpp: Added money accessor to the inventory
+	manager.
+
 2007-08-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp: Updated project files and added

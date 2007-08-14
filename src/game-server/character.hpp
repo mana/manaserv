@@ -176,16 +176,6 @@ class Character : public Being
         setLevel(int level)
         { mLevel = level; }
 
-        /** Gets the amount of money the character has. */
-        int
-        getMoney() const
-        { return mMoney; }
-
-        /** Sets the amount of money the character has. */
-        void
-        setMoney(int amount)
-        { mMoney = amount; }
-
         /**
          * Gets the value of an attribute of the character.
          */
@@ -247,7 +237,6 @@ class Character : public Being
 
         std::string mName;           /**< Name of the character. */
         int mDatabaseID;             /**< Character's database ID. */
-        unsigned short mMoney;       /**< Wealth of the character. */
         unsigned char mGender;       /**< Gender of the character. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
         unsigned char mHairColor;    /**< Hair Color of the character. */

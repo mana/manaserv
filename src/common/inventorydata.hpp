@@ -51,9 +51,11 @@ struct InventoryItem
  */
 struct Possessions
 {
-    unsigned short equipment[EQUIPMENT_SLOTS];
     std::vector< InventoryItem > inventory;
-    Possessions() { for (int i = 0; i < EQUIPMENT_SLOTS; ++i) equipment[i] = 0; }
+    int money;
+    unsigned short equipment[EQUIPMENT_SLOTS];
+    Possessions(): money(0)
+    { for (int i = 0; i < EQUIPMENT_SLOTS; ++i) equipment[i] = 0; }
 };
 
 #endif

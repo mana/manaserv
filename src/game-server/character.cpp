@@ -36,7 +36,7 @@
 Character::Character(MessageIn & msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),
-    mMoney(0), mGender(0), mHairStyle(0), mHairColor(0), mLevel(0),
+    mGender(0), mHairStyle(0), mHairColor(0), mLevel(0),
     mTransaction(TRANS_NONE), mAttributesChanged(true)
 {
     // prepare attributes vector

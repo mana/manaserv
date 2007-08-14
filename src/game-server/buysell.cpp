@@ -83,7 +83,6 @@ void BuySell::start(MovingObject *obj)
 void BuySell::perform(int id, int amount)
 {
     Inventory inv(mChar);
-    int money = mChar->getMoney();
     for (TradedItems::iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {
@@ -92,13 +91,13 @@ void BuySell::perform(int id, int amount)
         if (mSell)
         {
             amount -= inv.remove(id, amount);
-            money += amount * i->cost;
+            inv.changeMoney(amount * i->cost);
         }
         else
         {
-            amount = std::min(amount, money / i->cost);
+            amount = std::min(amount, mChar->getPossessions().money / i->cost);
             amount -= inv.insert(id, amount);
-            money -= amount * i->cost;
+            inv.changeMoney(-amount * i->cost);
         }
         if (i->amount)
         {
@@ -108,7 +107,6 @@ void BuySell::perform(int id, int amount)
                 mItems.erase(i);
             }
         }
-        mChar->setMoney(money);
         return;
     }
 }

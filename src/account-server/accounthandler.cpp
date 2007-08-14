@@ -149,6 +149,25 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
     }
 }
 
+void AccountHandler::sendCharacterData(AccountClient &computer, int slot, CharacterData const &ch)
+{
+    MessageOut charInfo(APMSG_CHAR_INFO);
+    charInfo.writeByte(slot);
+    charInfo.writeString(ch.getName());
+    charInfo.writeByte((int)ch.getGender());
+    charInfo.writeByte(ch.getHairStyle());
+    charInfo.writeByte(ch.getHairColor());
+    charInfo.writeByte(ch.getLevel());
+    charInfo.writeLong(ch.getPossessions().money);
+
+    for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
+    {
+        charInfo.writeShort(ch.getBaseAttribute(j));
+    }
+
+    computer.send(charInfo);
+}
+
 void
 AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
 {
@@ -211,19 +230,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
     // Send characters list
     for (unsigned int i = 0; i < chars.size(); i++)
     {
-        MessageOut charInfo(APMSG_CHAR_INFO);
-        charInfo.writeByte(i); // Slot
-        charInfo.writeString(chars[i]->getName());
-        charInfo.writeByte((unsigned char) chars[i]->getGender());
-        charInfo.writeByte(chars[i]->getHairStyle());
-        charInfo.writeByte(chars[i]->getHairColor());
-        charInfo.writeByte(chars[i]->getLevel());
-        charInfo.writeLong(chars[i]->getMoney());
-
-        for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
-            charInfo.writeShort(chars[i]->getBaseAttribute(j));
-
-        computer.send(charInfo);
+        sendCharacterData(computer, i, *chars[i]);
     }
     return;
 }
@@ -582,7 +589,6 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             CharacterPtr newCharacter(new CharacterData(name));
             for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
                 newCharacter->setBaseAttribute(i, attributes[i]);
-            newCharacter->setMoney(0);
             newCharacter->setLevel(1);
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
@@ -601,18 +607,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             computer.send(reply);
 
             // Send new characters infos back to client
-            MessageOut charInfo(APMSG_CHAR_INFO);
             int slot = chars.size() - 1;
-            charInfo.writeByte(slot);
-            charInfo.writeString(chars[slot]->getName());
-            charInfo.writeByte((unsigned char) chars[slot]->getGender());
-            charInfo.writeByte(chars[slot]->getHairStyle());
-            charInfo.writeByte(chars[slot]->getHairColor());
-            charInfo.writeByte(chars[slot]->getLevel());
-            charInfo.writeShort(chars[slot]->getMoney());
-            for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
-                charInfo.writeShort(chars[slot]->getBaseAttribute(j));
-            computer.send(charInfo);
+            sendCharacterData(computer, slot, *chars[slot]);
             return;
         }
     }
@@ -745,20 +741,7 @@ AccountHandler::tokenMatched(AccountClient *computer, int accountID)
     // Send characters list
     for (unsigned int i = 0; i < chars.size(); i++)
     {
-        MessageOut charInfo(APMSG_CHAR_INFO);
-        charInfo.writeByte(i); // Slot
-        charInfo.writeString(chars[i]->getName());
-        charInfo.writeByte((unsigned char) chars[i]->getGender());
-        charInfo.writeByte(chars[i]->getHairStyle());
-        charInfo.writeByte(chars[i]->getHairColor());
-        charInfo.writeByte(chars[i]->getLevel());
-        charInfo.writeShort(chars[i]->getMoney());
-
-        for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
-        {
-            charInfo.writeShort(chars[i]->getBaseAttribute(j));
-        }
-        computer->send(charInfo);
+        sendCharacterData(*computer, i, *chars[i]);
     }
 }
 

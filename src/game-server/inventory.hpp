@@ -144,6 +144,12 @@ class Inventory
          */
         int getItem(int slot) const;
 
+        /**
+         * Changes amount of money.
+         * @return false if not enough money.
+         */
+        bool changeMoney(int);
+
     private:
 
         /**
