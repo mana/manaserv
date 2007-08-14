@@ -29,7 +29,6 @@ extern "C" {
 }
 
 #include "defines.h"
-#include "resourcemanager.h"
 #include "game-server/buysell.hpp"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
@@ -50,9 +49,11 @@ class LuaScript: public Script
 {
     public:
 
-        LuaScript(lua_State *);
+        LuaScript();
 
         ~LuaScript();
+
+        void load(char const *);
 
         void prepare(std::string const &);
 
@@ -329,20 +330,11 @@ static int test_NpcSell(lua_State *s)
     return 0;
 }
 
-LuaScript::LuaScript(lua_State *s):
-    mState(s),
+LuaScript::LuaScript():
     nbArgs(-1)
 {
+    mState = luaL_newstate();
     luaL_openlibs(mState);
-    // A Lua state is like a function, so "execute" it in order to initialize it.
-    int res = lua_pcall(mState, 0, 0, 0);
-    if (res)
-    {
-        LOG_ERROR("Failure while initializing Lua script: "
-                  << lua_tostring(mState, -1));
-        lua_settop(s, 0);
-        return;
-    }
 
     // Put some callback functions in the scripting environment.
     static luaL_reg const callbacks[] = {
@@ -363,7 +355,7 @@ LuaScript::LuaScript(lua_State *s):
     lua_pushlightuserdata(mState, this);
     lua_settable(mState, LUA_REGISTRYINDEX);
 
-    lua_settop(s, 0);
+    lua_settop(mState, 0);
 }
 
 LuaScript::~LuaScript()
@@ -411,34 +403,35 @@ int LuaScript::execute()
     return res;
 }
 
-static Script *loadScript(std::string const &filename)
+void LuaScript::load(char const *prog)
 {
-    // Load the file through resource manager.
-    ResourceManager *resman = ResourceManager::getInstance();
-    int fileSize;
-    char *buffer = (char *)resman->loadFile(filename, fileSize);
-    if (!buffer) return NULL;
+    int res = luaL_loadstring(mState, prog);
 
-    lua_State *s = luaL_newstate();
-    int res = luaL_loadstring(s, buffer);
-    free(buffer);
-
-    switch(res)
+    if (res == LUA_ERRSYNTAX)
     {
-        case 0:
-            LOG_INFO("Successfully loaded script " << filename);
-            return new LuaScript(s);
-        case LUA_ERRSYNTAX:
-            LOG_ERROR("Syntax error while loading script " << filename);
+        LOG_ERROR("Syntax error while loading Lua script.");
+        return;
     }
 
-    lua_close(s);
-    return NULL;
+    // A Lua chunk is like a function, so "execute" it in order to initialize it.
+    res = lua_pcall(mState, 0, 0, 0);
+    if (res)
+    {
+        LOG_ERROR("Failure while initializing Lua script: "
+                  << lua_tostring(mState, -1));
+        lua_settop(mState, 0);
+        return;
+    }
+}
+
+static Script *LuaFactory()
+{
+    return new LuaScript();
 }
 
 struct LuaRegister
 {
-    LuaRegister() { Script::registerEngine("lua", loadScript); }
+    LuaRegister() { Script::registerEngine("lua", LuaFactory); }
 };
 
 static LuaRegister dummy;

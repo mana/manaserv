@@ -36,7 +36,7 @@ class Script
 {
     public:
 
-        typedef Script *(*Factory)(std::string const &);
+        typedef Script *(*Factory)();
 
         /**
          * Registers a new scripting engine.
@@ -44,13 +44,19 @@ class Script
         static void registerEngine(std::string const &, Factory);
 
         /**
-         * Creates a new script.
+         * Creates a new script context for a given engine.
          */
-        static Script *create(std::string const &engine, std::string const &file);
+        static Script *create(std::string const &engine);
 
         Script(): mMap(NULL) {}
 
         virtual ~Script() {}
+
+        /**
+         * Loads a chunk of text into the script context and executes
+         * its global statements.
+         */
+        virtual void load(char const *) = 0;
 
         /**
          * Called every tick for the script to manage its data.

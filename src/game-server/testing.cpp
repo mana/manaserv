@@ -5,6 +5,7 @@
 #include <cassert>
 
 #include "defines.h"
+#include "resourcemanager.h"
 #include "game-server/gamehandler.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
@@ -36,9 +37,18 @@ void testingMap(MapComposite *map)
             dropItem(map, 58 * 32 + 16, 21 * 32 + 16, 524);
 
             // Associate a script
-            Script *s = Script::create("lua", "test.lua");
+            Script *s = Script::create("lua");
             if (s)
             {
+                ResourceManager *resman = ResourceManager::getInstance();
+                int fileSize;
+                char *buffer = (char *)resman->loadFile("test.lua", fileSize);
+                if (buffer)
+                {
+                    s->load(buffer);
+                    free(buffer);
+                }
+
                 map->setScript(s);
                 s->setMap(map);
                 s->prepare("initialize");

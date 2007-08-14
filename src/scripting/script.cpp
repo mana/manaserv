@@ -43,7 +43,7 @@ void Script::registerEngine(std::string const &name, Factory f)
     (*engines)[name] = f;
 }
 
-Script *Script::create(std::string const &engine, std::string const &file)
+Script *Script::create(std::string const &engine)
 {
     Engines::const_iterator i = engines->find(engine);
     if (i == engines->end())
@@ -51,12 +51,7 @@ Script *Script::create(std::string const &engine, std::string const &file)
         LOG_ERROR("No scripting engine named " << engine);
         return NULL;
     }
-    Script *s = i->second(file);
-    if (!s)
-    {
-        LOG_ERROR("Failure while loading script " << file);
-    }
-    return s;
+    return i->second();
 }
 
 void Script::update()
