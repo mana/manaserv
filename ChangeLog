@@ -12,6 +12,10 @@
 	manager.
 	* src/game-server/inventory.cpp: Fixed incorrect update message when
 	merging item stacks and removing one of them.
+	* src/game-server/character.cpp, src/game-server/buysell.cpp: Ensured
+	cancelations do not enter an infinite loop of death.
+	* src/defines.h, src/game-server/trade.cpp, src/game-server/trade.hpp,
+	src/game-server/gamehandler.cpp: Involved money in trade handler.
 
 2007-08-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

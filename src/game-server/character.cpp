@@ -156,15 +156,31 @@ BuySell *Character::getBuySell() const
 
 void Character::setTrading(Trade *t)
 {
-    cancelTransaction();
-    mTransactionHandler = t;
-    mTransaction = TRANS_TRADE;
+    if (t)
+    {
+        cancelTransaction();
+        mTransactionHandler = t;
+        mTransaction = TRANS_TRADE;
+    }
+    else
+    {
+        assert(mTransaction == TRANS_NONE || mTransaction == TRANS_TRADE);
+        mTransaction = TRANS_NONE;
+    }
 }
 
 void Character::setBuySell(BuySell *t)
 {
-    cancelTransaction();
-    mTransactionHandler = t;
-    mTransaction = TRANS_BUYSELL;
+    if (t)
+    {
+        cancelTransaction();
+        mTransactionHandler = t;
+        mTransaction = TRANS_BUYSELL;
+    }
+    else
+    {
+        assert(mTransaction == TRANS_NONE || mTransaction == TRANS_BUYSELL);
+        mTransaction = TRANS_NONE;
+    }
 }
 

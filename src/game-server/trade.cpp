@@ -33,7 +33,7 @@
 #include "net/messageout.hpp"
 
 Trade::Trade(Character *c1, Character *c2):
-    mChar1(c1), mChar2(c2), mState(TRADE_INIT)
+    mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT)
 {
     MessageOut msg(GPMSG_TRADE_REQUEST);
     msg.writeShort(c1->getPublicID());
@@ -44,8 +44,8 @@ Trade::Trade(Character *c1, Character *c2):
 
 Trade::~Trade()
 {
-    mChar1->cancelTransaction();
-    mChar2->cancelTransaction();
+    mChar1->setTrading(NULL);
+    mChar2->setTrading(NULL);
 }
 
 void Trade::cancel(Character *c)
@@ -97,6 +97,7 @@ void Trade::accept(Character *c)
         {
             std::swap(mChar1, mChar2);
             std::swap(mItems1, mItems2);
+            std::swap(mMoney1, mMoney2);
         }
         assert(c == mChar1);
         // First player agrees.
@@ -113,7 +114,10 @@ void Trade::accept(Character *c)
     }
 
     Inventory v1(mChar1, true), v2(mChar2, true);
-    if (!perform(mItems1, v1, v2) || !perform(mItems2, v2, v1))
+    if (!perform(mItems1, v1, v2) ||
+        !perform(mItems2, v2, v1) ||
+        !v1.changeMoney(mMoney2 - mMoney1) ||
+        !v2.changeMoney(mMoney1 - mMoney2))
     {
         v1.cancel();
         v2.cancel();
@@ -125,6 +129,33 @@ void Trade::accept(Character *c)
     mChar1->getClient()->send(msg);
     mChar2->getClient()->send(msg);
     delete this;
+}
+
+void Trade::setMoney(Character *c, int amount)
+{
+    if (mState == TRADE_INIT || amount < 0) return;
+
+    /* Checking now if there is enough money is useless as it can change
+       later on. At worst, the transaction will be canceled at the end if
+       the client lied. */
+
+    MessageOut msg(GPMSG_TRADE_SET_MONEY);
+    msg.writeLong(amount);
+
+    if (c == mChar1)
+    {
+        mMoney1 = amount;
+        mChar2->getClient()->send(msg);
+    }
+    else
+    {
+        assert(c == mChar2);
+        mMoney2 = amount;
+        mChar1->getClient()->send(msg);
+    }
+
+    // Go back to normal run.
+    mState = TRADE_RUN;
 }
 
 void Trade::addItem(Character *c, int slot, int amount)
@@ -148,12 +179,12 @@ void Trade::addItem(Character *c, int slot, int amount)
     // Arbitrary limit to prevent a client from DOSing the server.
     if (items->size() >= 50) return;
 
-    Inventory inv(c, true);
+    Inventory inv(c);
     int id = inv.getItem(slot);
     if (id == 0) return;
 
     /* Checking now if there is enough items is useless as it can change
-       later on. At worst, the transaction will be cancelled at the end if
+       later on. At worst, the transaction will be canceled at the end if
        the client lied. */
 
     TradedItem ti = { id, slot, amount };

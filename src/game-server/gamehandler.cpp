@@ -348,6 +348,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_TRADE_CANCEL:
         case PGMSG_TRADE_ACCEPT:
         case PGMSG_TRADE_ADD_ITEM:
+        case PGMSG_TRADE_SET_MONEY:
         {
             Trade *t = computer.character->getTrading();
             if (!t) break;
@@ -359,6 +360,9 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     break;
                 case PGMSG_TRADE_ACCEPT :
                     t->accept(computer.character);
+                    break;
+                case PGMSG_TRADE_SET_MONEY:
+                    t->setMoney(computer.character, message.readLong());
                     break;
                 case PGMSG_TRADE_ADD_ITEM:
                     int slot = message.readByte();

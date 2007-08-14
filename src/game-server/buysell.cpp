@@ -39,7 +39,7 @@ BuySell::BuySell(Character *c, bool sell):
 
 BuySell::~BuySell()
 {
-    mChar->cancelTransaction();
+    mChar->setBuySell(NULL);
 }
 
 void BuySell::cancel()

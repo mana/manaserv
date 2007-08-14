@@ -64,6 +64,11 @@ class Trade
          */
         void addItem(Character *, int slot, int amount);
 
+        /**
+         * Adds some money to the trade.
+         */
+        void setMoney(Character *, int amount);
+
     private:
 
         ~Trade();
@@ -85,9 +90,10 @@ class Trade
 
         static bool perform(TradedItems items, Inventory &inv1, Inventory &inv2);
 
-        Character *mChar1, *mChar2; /**< Characters involved. */
+        Character *mChar1, *mChar2;   /**< Characters involved. */
         TradedItems mItems1, mItems2; /**< Traded items. */
-        TradeState mState;
+        int mMoney1, mMoney2;         /**< Traded money. */
+        TradeState mState;            /**< State of transaction. */
 };
 
 #endif

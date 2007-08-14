@@ -184,7 +184,9 @@ enum {
     GPMSG_TRADE_ACCEPT             = 0x02C7, // -
     PGMSG_TRADE_ADD_ITEM           = 0x02C8, // B slot, B amount
     GPMSG_TRADE_ADD_ITEM           = 0x02C9, // W item id, B amount
-    PGMSG_USE_ITEM                 = 0x0300, // L item id
+    PGMSG_TRADE_SET_MONEY          = 0x02CA, // L amount
+    GPMSG_TRADE_SET_MONEY          = 0x02CB, // L amount
+    PGMSG_USE_ITEM                 = 0x0300, // B slot
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
 
