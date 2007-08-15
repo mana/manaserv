@@ -53,10 +53,22 @@ class Script
         virtual ~Script() {}
 
         /**
-         * Loads a chunk of text into the script context and executes
-         * its global statements.
+         * Loads a chunk of text into script context and executes its global
+         * statements.
          */
         virtual void load(char const *) = 0;
+
+        /**
+         * Loads a text file into script context and executes its global
+         * statements.
+         */
+        virtual void loadFile(std::string const &);
+
+        /**
+         * Loads a chunk of text and considers it as an NPC handler. This
+         * handler will later be used to create the given NPC.
+         */
+        virtual void loadNPC(int id, int x, int y, char const *);
 
         /**
          * Called every tick for the script to manage its data.

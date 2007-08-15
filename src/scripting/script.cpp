@@ -23,8 +23,10 @@
 
 #include <map>
 
-#include "utils/logger.h"
 #include "scripting/script.hpp"
+
+#include "resourcemanager.h"
+#include "utils/logger.h"
 
 typedef std::map< std::string, Script::Factory > Engines;
 
@@ -60,3 +62,24 @@ void Script::update()
     execute();
 }
 
+void Script::loadFile(std::string const &name)
+{
+    ResourceManager *resman = ResourceManager::getInstance();
+    int size;
+    char *buffer = (char *)resman->loadFile(name, size);
+    if (buffer)
+    {
+        load(buffer);
+        free(buffer);
+    }
+}
+
+void Script::loadNPC(int id, int x, int y, char const *prog)
+{
+    load(prog);
+    prepare("create_npc_delayed");
+    push(id);
+    push(x);
+    push(y);
+    execute();
+}

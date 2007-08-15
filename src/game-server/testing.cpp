@@ -4,15 +4,11 @@
 
 #include <cassert>
 
-#include "defines.h"
-#include "resourcemanager.h"
 #include "game-server/gamehandler.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapcomposite.hpp"
-#include "game-server/mapmanager.hpp"
 #include "game-server/state.hpp"
-#include "net/messageout.hpp"
 #include "scripting/script.hpp"
 
 static void dropItem(MapComposite *map, int x, int y, int type)
@@ -26,29 +22,40 @@ static void dropItem(MapComposite *map, int x, int y, int type)
     GameState::insert(i);
 }
 
+static char const *npc1 =
+   "npc2_times = 1\n"
+   "function npc_handler(npc, ch)\n"
+   "  do_message(npc, ch, \"You know what?\")\n"
+   "  do_message(npc, ch, string.format(\"I have already asked this question %d times today.\", npc2_times))\n"
+   "  npc2_times = npc2_times + 1\n"
+   "end\n";
+
+static char const *npc2 =
+  "function npc_handler(npc, ch)\n"
+  "  do_message(npc, ch, \"Don't you think the guy behind me is my evil twin?\")\n"
+  "end\n";
+
 void testingMap(MapComposite *map)
 {
     switch (map->getID())
     {
         case 1:
         {
-            // Drop some items
+            // Drop some items.
             dropItem(map, 58 * 32 + 16, 20 * 32 + 16, 508);
             dropItem(map, 58 * 32 + 16, 21 * 32 + 16, 524);
 
-            // Associate a script
-            Script *s = Script::create("lua");
-            if (s)
+            // Create a Lua context.
+            if (Script *s = Script::create("lua"))
             {
-                ResourceManager *resman = ResourceManager::getInstance();
-                int fileSize;
-                char *buffer = (char *)resman->loadFile("test.lua", fileSize);
-                if (buffer)
-                {
-                    s->load(buffer);
-                    free(buffer);
-                }
+                // Load a script.
+                s->loadFile("test.lua");
 
+                // Create two NPCs.
+                s->loadNPC(107, 53 * 32 + 16, 21 * 32 + 16, npc1);
+                s->loadNPC(107, 53 * 32 + 16, 23 * 32 + 16, npc2);
+
+                // Associate the script context to the map.
                 map->setScript(s);
                 s->setMap(map);
                 s->prepare("initialize");

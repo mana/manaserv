@@ -1,3 +1,11 @@
+2007-08-15  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/scripting/script.cpp, src/scripting/script.hpp: Added helper
+	functions for loading files and NPCs as scripts.
+	* src/scripting/lua.cpp, data/scripts/libtmw.lua: Put the Lua helpers
+	into a separate library automatically loaded into new contexts.
+	* src/game-server/testing.cpp, data/test.lua: Updated testing files.
+
 2007-08-14  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/serialize/characterdata.hpp, src/common/inventorydata.hpp,
