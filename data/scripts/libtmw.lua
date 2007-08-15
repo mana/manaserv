@@ -2,6 +2,11 @@
 -- Support code --
 ------------------
 
+local npcs = {}
+local states = {}
+local init_fun = {}
+local timer
+
 function create_npc(id, x, y, handler)
   local npc = tmw.obj_create_npc(id, x, y)
   npcs[npc] = handler
@@ -104,8 +109,3 @@ function initialize()
   end
   init_fun = nil
 end
-
-npcs = {}
-states = {}
-init_fun = {}
-

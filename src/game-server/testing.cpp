@@ -23,11 +23,11 @@ static void dropItem(MapComposite *map, int x, int y, int type)
 }
 
 static char const *npc1 =
-   "npc2_times = 1\n"
+   "local nb_times = 1\n"
    "function npc_handler(npc, ch)\n"
    "  do_message(npc, ch, \"You know what?\")\n"
-   "  do_message(npc, ch, string.format(\"I have already asked this question %d times today.\", npc2_times))\n"
-   "  npc2_times = npc2_times + 1\n"
+   "  do_message(npc, ch, string.format(\"I have already asked this question %d times today.\", nb_times))\n"
+   "  nb_times = nb_times + 1\n"
    "end\n";
 
 static char const *npc2 =
