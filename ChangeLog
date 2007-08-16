@@ -1,3 +1,8 @@
+2007-08-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* data/scripts/libtmw.lua: Improved NPC state machine, so that the
+	engine avoids waiting, once the last message has been sent.
+
 2007-08-15  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/scripting/script.cpp, src/scripting/script.hpp: Added helper
