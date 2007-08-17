@@ -5,6 +5,9 @@
 	* src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp,
 	src/game-server/accountconnection.cpp: Handled multiple connections by
 	allowing clients to take over characters.
+	* src/utils/tokencollector.cpp, src/utils/tokencollector.hpp,
+	src/Makefile.am: Simplified TokenCollector and fixed a few bugs. Moved
+	its implementation outside the header file.
 
 2007-08-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

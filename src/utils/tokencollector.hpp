@@ -27,300 +27,114 @@
 #include <list>
 #include <time.h>
 
-#include "utils/logger.h"
-
-#define NB_ACTIONS_BETWEEN_OUTDATED_CHECKS 100
-
 /**
- * Because the timeStamp is not updated for every new list item and the
- * removeOutdated function is not called on regular intervals, a list item
- * might persist significantly longer then this.
+ * Base class containing the generic implementation of TokenCollector.
  */
-#define TIMEOUT 10 // in seconds
-
-
-/**
- * A structure used for the list items,
- * prefixed with 'TC_' to avoid any conflicts.
- */
-template <typename T>
-struct TC_ListItem
+class TokenCollectorBase
 {
-    /** The magic_token aka passToken */
-    std::string token;
+        struct Item
+        {
+            std::string token; /**< Cookie used by the client. */
+            intptr_t data;     /**< User data. */
+            time_t timeStamp;  /**< Creation time. */
+        };
 
-    /** The actual data, which will be sent back when matched */
-    T payload;
+        /**
+         * List containing client already connected. Newer clients are at the
+         * back of the list.
+         */
+        std::list<Item> mPendingClients;
 
-    /**
-     * The amount of seconds since TokenCollector was running,
-     * at the last outdated check.
-     */
-    time_t timeStamp;
+        /**
+         * List containing server data waiting for clients. Newer data are at
+         * the back of the list.
+         */
+        std::list<Item> mPendingConnects;
+
+        /**
+         * Time at which the TokenCollector performed its last check.
+         */
+        time_t mLastCheck;
+
+    protected:
+
+        virtual void removedClient(intptr_t) = 0;
+        virtual void removedConnect(intptr_t) = 0;
+        virtual void foundMatch(intptr_t client, intptr_t connect) = 0;
+        TokenCollectorBase();
+        virtual ~TokenCollectorBase();
+        void insertClient(std::string const &, intptr_t);
+        void removeClient(intptr_t);
+        void insertConnect(std::string const &, intptr_t);
+        void removeOutdated(time_t);
 };
 
-// Prototype
+/**
+ * Compile-time check to ensure that Client and ServerData are simple enough
+ * for TokenCollector.
+ */
+template< class T > struct _TC_CheckData;
+template<> struct _TC_CheckData< int > {};
+template< class T > struct _TC_CheckData< T * > {};
 
 /**
- * \brief A class for storing and matching magic_tokens
+ * A class for storing and matching tokens.
  *
- *  T is used for the class of the owner, U is the client payload,
- *  V is the connect payload
+ * The Handler class must provide three member functions:
+ *  - deletePendingClient(Client),
+ *  - deletePendingConnect(ServerData), and
+ *  - tokenMatched(Client, ServerData).
  *
- * The owning class must implement as it's member functions;
- * - destroyPendingClient(U clientPayload),
- * - destroyPendingConnect(V connectPayload) and
- * - tokenMatched(U clientPayload, V connectPayload),
- * in a way that TokenCollector can reach them
- * (public, or declare TokenCollector a friend class).
+ * The delete members will be called whenever the collector considers that a
+ * token has become obsolete and it is about to remove it.
  */
-template <class T, class U, class V>
-class TokenCollector
+template< class Handler, class Client, class ServerData >
+class TokenCollector: private TokenCollectorBase
 {
-        public:
-        /**
-         * Constructor.
-         */
-        TokenCollector(T * owner);
+
+    public:
+
+        TokenCollector(Handler *h): mHandler(h)
+        {
+            _TC_CheckData<Client> ClientMustBeSimple;
+            (void)&ClientMustBeSimple;
+            _TC_CheckData<ServerData> ServerDataMustBeSimple;
+            (void)&ServerDataMustBeSimple;
+        }
 
         /**
-         * Destructor.
+         * Checks if the server expected this client token. If so, calls
+         * Handler::tokenMatched. Otherwise marks the client as pending.
          */
-        ~TokenCollector();
+        void addPendingClient(std::string const &token, Client data)
+        { insertClient(token, (intptr_t)data); }
 
         /**
-         * \brief Adds a pending client
-         *
-         * Searches the pending connects for a match.
-         * Calls mOwner->tokenMatched when a match is found.
-         * Inserts in mPendingClients if no match is found.
+         * Checks if a client already registered this token. If so, calls
+         * Handler::tokenMatched. Otherwise marks the data as pending.
          */
-        void addPendingClient(const std::string & token, U clientPayload);
+        void addPendingConnect(std::string const &token, ServerData data)
+        { insertConnect(token, (intptr_t)data); }
 
         /**
-         * \brief Removes a pending client from the list
-         *
-         * Searches the pending client for the payload.
+         * Removes a pending client.
+         * @note Does not call destroyPendingClient.
          */
-        void deletePendingClient(U clientPayload);
-
-        /**
-         * \brief Adds a pending connect
-         *
-         * Searches the pending clients for a match.
-         * Calls mOwner->tokenMatched when a match is found.
-         * Inserts in mPendingConnects if no match is found.
-         */
-        void addPendingConnect(const std::string & token, V connectPayload);
+        void deletePendingClient(Client data)
+        { removeClient((intptr_t)data); }
 
     private:
 
-        /**
-         * \brief A simple list of all pending clients
-         *
-         * On a well setup system, this list is mostly empty.
-         * The servers send the magic_token to the other server, before they
-         * send it to the client. In a well setup system, the route
-         * server1 -> server2 is faster then server1 -> client -> server2.
-         *
-         * A std::list is used because the basic work cycle for one client
-         * (search PendingClients, insert PendingConnects, search
-         * PendingConnects, remove pendingConnect) will run in (allmost)
-         * constant time, when the size of PendingClients is small.
-         * This can not be said for a map or sorted vector.
-         *
-         * The list items are pointers to void, because a list can not be
-         * instantiationised with an incomplete type.
-         */
-        std::list< void* > mPendingClients;
+        void removedClient(intptr_t data)
+        { mHandler->deletePendingClient((Client)data); }
 
-        /**
-         * \brief A simple list of all pending clients.
-         *
-         * See mPendingClients for details.
-         */
-        std::list< void* > mPendingConnects;
+        void removedConnect(intptr_t data)
+        { mHandler->deletePendingConnect((ServerData)data); }
 
-        /**
-         * \brief The number of actions since the last time that the lists
-         *        where checked for outdated pendingClients or
-         *        pendingConnects.
-         */
-        int mNumberOfActions;
+        void foundMatch(intptr_t client, intptr_t data)
+        { mHandler->tokenMatched((Client)client, (ServerData)data); }
 
-        /**
-         * \brief The time that TokenCollector was created, used for keeping
-         *        the variable times low numbers.
-         */
-        time_t mTimeStart;
-
-        /**
-         * \brief The number of seconds between the creation of TokenCollector
-         *        and the last removeOutdated.
-         */
-        time_t mTimeNow;
-
-        /**
-         * \brief Pointer to the owner of this TokenCollector object.
-         */
-        T * mOwner;
-
-        /**
-         * \brief Removes outdated entries.
-         */
-        void removeOutdated();
+        Handler *mHandler;
 };
-
-// Implementation
-
-template <class T, class U, class V>
-TokenCollector<T, U, V>::
-TokenCollector(T * owner):
-    mNumberOfActions(0), mTimeStart(time(NULL)), mTimeNow(0), mOwner(owner)
-{
-}
-
-template <class T, class U, class V>
-TokenCollector<T, U, V>::
-~TokenCollector()
-{
-    if (mPendingClients.size())
-        LOG_INFO("TokenCollector deleted with " <<
-                 mPendingClients.size() <<
-                 " clients still pending.");
-
-    if (mPendingConnects.size())
-        LOG_INFO("TokenCollector deleted with " <<
-                 mPendingConnects.size() <<
-                 " connects still pending.");
-}
-
-template <class T, class U, class V>
-void TokenCollector<T, U, V>::
-addPendingClient(const std::string & token, U clientPayload)
-{
-    // Find could also be used for a list, but because new items are
-    // inserted at the top, we want to start looking there.
-    for (std::list< void* >::iterator it = mPendingConnects.begin(),
-                          it_end = mPendingConnects.end(); it != it_end; it++)
-    {
-        // Because the pointer to the listItem was stored as a pointer to
-        // void, we have to cast it back to a pointer to a listItem.
-        // Examples: it = void**; *it = void*;
-        // ((TC_ListItem< V >*)*it) = TC_ListItem< V >*;
-        // ---------------------------------------------
-        if (((TC_ListItem< V >*)*it)->token == token) // Found a match
-        {
-            TC_ListItem< V >* tempConnect = (TC_ListItem< V >*)*it;
-            mPendingConnects.erase(it);
-            mOwner->tokenMatched(clientPayload, tempConnect->payload);
-            delete tempConnect;
-            return; // Done
-        }
-    }
-
-    TC_ListItem< U >* listItem = new TC_ListItem< U >;
-    listItem->token = token;
-    listItem->payload = clientPayload;
-    listItem->timeStamp = mTimeNow;
-
-    mPendingClients.push_front((void*)listItem);
-
-    if (!(++mNumberOfActions < NB_ACTIONS_BETWEEN_OUTDATED_CHECKS))
-        removeOutdated();
-}
-
-template <class T, class U, class V>
-void TokenCollector<T, U, V>::
-deletePendingClient(U clientPayload)
-{
-    // Find could also be used for a list, but because new items are
-    // inserted at the top, we want to start looking there.
-    for (std::list< void* >::iterator it = mPendingClients.begin(),
-                          it_end = mPendingClients.end(); it != it_end; it++)
-    {
-        // Because the pointer to the listItem was stored as a pointer to
-        // void, we have to cast it back to a pointer to a listItem.
-        // Examples: it = void**; *it = void*;
-        // ((TC_ListItem< U >*)*it) = TC_ListItem< U >*;
-        // ---------------------------------------------
-        if (((TC_ListItem< U >*)*it)->payload == clientPayload) // Found a match
-        {
-            delete ((TC_ListItem< U >*)*it);
-            mPendingConnects.erase(it);
-            return; // Done
-        }
-    }
-}
-
-template <class T, class U, class V>
-void TokenCollector<T, U, V>::
-addPendingConnect(const std::string & token, V connectPayload)
-{
-    // Find could also be used for a list, but because new items are
-    // inserted at the top, we want to start looking there.
-    for (std::list< void* >::iterator it = mPendingClients.begin(),
-                          it_end = mPendingClients.end(); it != it_end; it++)
-    {
-        // Because the pointer to the listItem was stored as a pointer to
-        // void, we have to cast it back to a pointer to a listItem.
-        // Examples: it = void**; *it = void*;
-        // ((TC_ListItem< U >*)*it) = TC_ListItem< U >*;
-        // ---------------------------------------------
-        if (((TC_ListItem< U >*)*it)->token == token) // Found a match
-        {
-            TC_ListItem< U >* tempClient = (TC_ListItem< U >*)*it;
-            mPendingClients.erase(it);
-            mOwner->tokenMatched(tempClient->payload, connectPayload);
-            delete tempClient;
-            return; // Done
-        }
-    }
-
-    TC_ListItem< V >* listItem = new TC_ListItem< V >;
-    listItem->token = token;
-    listItem->payload = connectPayload;
-    listItem->timeStamp = mTimeNow;
-
-    mPendingConnects.push_front((void*)listItem);
-
-    if (!(++mNumberOfActions < NB_ACTIONS_BETWEEN_OUTDATED_CHECKS))
-        removeOutdated();
-}
-
-template <class T, class U, class V>
-void TokenCollector<T, U, V>::
-removeOutdated()
-{
-    time_t eraseTime = (mTimeNow > (time_t)TIMEOUT) ?
-                                    (mTimeNow - (time_t)TIMEOUT) : (time_t) 0;
-
-    // See addPendingClient for a comment about the casting.
-    while ((mPendingClients.size()) &&
-       (((TC_ListItem< U >*)(mPendingClients.back()))->timeStamp < eraseTime))
-    {
-        mOwner->deletePendingClient(
-                      ((TC_ListItem< U >*)(mPendingClients.back()))->payload);
-        delete ((TC_ListItem< U >*)(mPendingClients.back()));
-        mPendingClients.pop_back();
-    }
-
-    while ((mPendingConnects.size()) &&
-       (((TC_ListItem< V >*)(mPendingConnects.back()))->timeStamp < eraseTime))
-    {
-        mOwner->deletePendingConnect(
-                     ((TC_ListItem< V >*)(mPendingConnects.back()))->payload);
-        delete ((TC_ListItem< U >*)(mPendingConnects.back()));
-        mPendingConnects.pop_back();
-    }
-
-    /**
-     * Change the timeStap after the check, else everything that was just
-     * inserted might be thrown away.
-     */
-    mTimeNow = time(NULL) - mTimeStart;
-
-    mNumberOfActions = 0; // Reset the counter.
-}
 
 #endif // _TMW_TOKENCOLLECTOR_HPP
