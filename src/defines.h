@@ -36,13 +36,14 @@
  * It may be better to wait and see what permissions we'd want to grant to or
  * take from users, and then come up with a convenient way to handle that.
  */
-typedef enum {
+enum AccountLevel
+{
     AL_NORMAL,      // User has regular rights
     AL_ADMIN,       // User can perform administrator tasks
     AL_GM,          // User can perform a subset of administrator tasks
     AL_BANNED,      // This user is currently banned
     AL_RESTRICTED   // User rights have been restricted
-} AccountLevel;
+};
 
 enum
 {
@@ -138,6 +139,7 @@ enum {
 
     APMSG_CONNECTION_TIMEDOUT      = 0x0070, // -
     GPMSG_CONNECTION_TIMEDOUT      = 0x0071, // -
+    CPMSG_CONNECTION_TIMEDOUT      = 0x0072, // -
 
     // Game
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y

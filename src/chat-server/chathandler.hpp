@@ -29,6 +29,7 @@
 #include "net/connectionhandler.hpp"
 
 class ChatClient;
+enum AccountLevel;
 
 /**
  * Manages chat related things like private messaging, chat channel handling
@@ -40,14 +41,19 @@ class ChatClient;
  */
 class ChatHandler : public ConnectionHandler
 {
-    public:
+
         /**
-         * Overridden from ConnectionHandler to also clean connected clients
-         * that haven't sent in a magic token.
-         *
-         * @see ConnectionHandler::process
+         * Data needed for initializing a ChatClient.
          */
-        void process(enet_uint32 timeout = 0);
+        struct Pending
+        {
+            std::string character;
+            AccountLevel level;
+        };
+
+    public:
+
+        ChatHandler();
 
         /**
          * Start the handler.
@@ -77,6 +83,21 @@ class ChatHandler : public ConnectionHandler
         void sendGuildInvite(const std::string &invitedName,
                              const std::string &inviterName,
                              const std::string &guildName);
+
+        /**
+         * Called by TokenCollector when a client wrongly connected.
+         */
+        void deletePendingClient(ChatClient *);
+
+        /**
+         * Called by TokenCollector when a client failed to connect.
+         */
+        void deletePendingConnect(Pending *);
+
+        /**
+         * Called by TokenCollector when a client succesfully connected.
+         */
+        void tokenMatched(ChatClient *, Pending *);
 
     protected:
         /**
@@ -147,26 +168,12 @@ class ChatHandler : public ConnectionHandler
                          const std::string &text);
 
         /**
-         * Sends a message to every client in a registered channel. O(c*u),
-         * where <b>c</b> is the amount of connected clients and <b>u</b> the
-         * number of users in the given channel.
+         * Sends a message to every client in a registered channel.
          *
          * @param channel the channel to send the message in, must not be NULL
          * @param msg     the message to be sent
-         *
-         * @todo <b>b_lindeijer:</b> Currently this method is looping through
-         *       the channel users for each connected client in order to
-         *       determine whether it should receive the message. It would be
-         *       much better to directly associate the connected clients with
-         *       the channel.
          */
         void sendInChannel(ChatChannel *channel, MessageOut &msg);
-
-        /**
-         * Removes outdated pending logins. These are connected clients that
-         * still haven't sent in their magic token.
-         */
-        void removeOutdatedPending();
 
         /**
          * Send user joined message.
@@ -183,6 +190,13 @@ class ChatHandler : public ConnectionHandler
          * @param name    the name of the user who left
          */
         void sendUserLeft(ChatChannel *channel, const std::string &name);
+
+        /**
+         * Container for pending clients and pending connections.
+         */
+        TokenCollector<ChatHandler, ChatClient *, Pending *> mTokenCollector;
+        friend void registerChatClient(const std::string &, const std::string &, int);
+
 };
 
 /**

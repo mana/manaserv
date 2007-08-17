@@ -39,44 +39,19 @@
 #include "utils/stringfilter.h"
 #include "utils/tokendispenser.hpp"
 
-
-struct ChatPendingLogin
-{
-    std::string character;
-    AccountLevel level;
-    int timeout;
-};
-
-typedef std::map< std::string, ChatPendingLogin > ChatPendingLogins;
-static ChatPendingLogins pendingLogins;
-
-typedef std::map< std::string, ChatClient * > ChatPendingClients;
-static ChatPendingClients pendingClients;
-
 void registerChatClient(const std::string &token,
                         const std::string &name,
                         int level)
 {
-    ChatPendingClients::iterator i = pendingClients.find(token);
-    if (i != pendingClients.end())
-    {
-        ChatClient *computer = i->second;
-        computer->characterName = name;
-        computer->accountLevel = (AccountLevel) level;
-        pendingClients.erase(i);
-        MessageOut result;
-        result.writeShort(CPMSG_CONNECT_RESPONSE);
-        result.writeByte(ERRMSG_OK);
-        computer->send(result);
-    }
-    else
-    {
-        ChatPendingLogin p;
-        p.character = name;
-        p.level = (AccountLevel) level;
-        p.timeout = 300; // world ticks
-        pendingLogins.insert(std::make_pair(token, p));
-    }
+    ChatHandler::Pending *p = new ChatHandler::Pending;
+    p->character = name;
+    p->level = (AccountLevel) level;
+    chatHandler->mTokenCollector.addPendingConnect(token, p);
+}
+
+ChatHandler::ChatHandler():
+    mTokenCollector(this)
+{
 }
 
 bool ChatHandler::startListen(enet_uint16 port)
@@ -85,15 +60,27 @@ bool ChatHandler::startListen(enet_uint16 port)
     return ConnectionHandler::startListen(port);
 }
 
-void ChatHandler::removeOutdatedPending()
+void ChatHandler::deletePendingClient(ChatClient *c)
 {
-    ChatPendingLogins::iterator i = pendingLogins.begin(), next;
-    while (i != pendingLogins.end())
-    {
-        next = i; ++next;
-        if (--i->second.timeout <= 0) pendingLogins.erase(i);
-        i = next;
-    }
+    MessageOut msg(GPMSG_CONNECTION_TIMEDOUT);
+
+    // The computer will be deleted when the disconnect event is processed
+    c->disconnect(msg);
+}
+
+void ChatHandler::deletePendingConnect(Pending *p)
+{
+    delete p;
+}
+
+void ChatHandler::tokenMatched(ChatClient *c, Pending *p)
+{
+    c->characterName = p->character;
+    c->accountLevel = p->level;
+    delete p;
+    MessageOut msg(CPMSG_CONNECT_RESPONSE);
+    msg.writeByte(ERRMSG_OK);
+    c->send(msg);
 }
 
 NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
@@ -101,28 +88,22 @@ NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
     return new ChatClient(peer);
 }
 
-void ChatHandler::computerDisconnected(NetComputer *computer)
+void ChatHandler::computerDisconnected(NetComputer *comp)
 {
-    // Remove user from all channels
-    chatChannelManager->
-        removeUserFromAllChannels(static_cast<ChatClient*>(computer));
-    ChatPendingClients::iterator i_end = pendingClients.end();
-    for (ChatPendingClients::iterator i = pendingClients.begin();
-            i != i_end; ++i)
-    {
-        if (i->second == computer)
-        {
-            pendingClients.erase(i);
-            break;
-        }
-    }
-    delete computer;
-}
+    ChatClient *computer = static_cast< ChatClient * >(comp);
 
-void ChatHandler::process(enet_uint32 timeout)
-{
-    ConnectionHandler::process(timeout);
-    removeOutdatedPending();
+    if (computer->characterName.empty())
+    {
+        // Not yet fully logged in, remove it from pending clients.
+        mTokenCollector.deletePendingClient(computer);
+    }
+    else
+    {
+        // Remove user from all channels.
+        chatChannelManager->removeUserFromAllChannels(computer);
+    }
+
+    delete computer;
 }
 
 void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
@@ -133,26 +114,9 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
     if (computer.characterName.empty())
     {
         if (message.getId() != PCMSG_CONNECT) return;
-        std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
-        ChatPendingLogins::iterator i = pendingLogins.find(magic_token);
-        if (i == pendingLogins.end())
-        {
-            ChatPendingClients::iterator i_end = pendingClients.end();
-            for (ChatPendingClients::iterator i = pendingClients.begin();
-                 i != i_end; ++i)
-            {
-                if (i->second == &computer) return;
-            }
-            pendingClients.insert(std::make_pair(magic_token, &computer));
-            return;
-        }
 
-        computer.characterName = i->second.character;
-        computer.accountLevel = i->second.level;
-        pendingLogins.erase(i);
-        result.writeShort(CPMSG_CONNECT_RESPONSE);
-        result.writeByte(ERRMSG_OK);
-        computer.send(result);
+        std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
+        mTokenCollector.addPendingClient(magic_token, &computer);
         // sendGuildRejoin(computer);
         return;
     }
@@ -481,8 +445,7 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-    void
-ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_ENTER_CHANNEL_RESPONSE);
 

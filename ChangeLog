@@ -8,6 +8,8 @@
 	* src/utils/tokencollector.cpp, src/utils/tokencollector.hpp,
 	src/Makefile.am: Simplified TokenCollector and fixed a few bugs. Moved
 	its implementation outside the header file.
+	* src/chat-server/chathandler.hpp, src/chat-server/chathandler.cpp,
+	src/defines.h: Used TokenCollector to manage cookies in ChatHandler.
 
 2007-08-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
