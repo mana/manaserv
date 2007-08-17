@@ -301,31 +301,45 @@ static int LuaChr_InvCount(lua_State *s)
     return nb_items;
 }
 
-// For testing purpose.
-static int test_NpcBuy(lua_State *s)
+/**
+ * Callback for trading between a a player and an NPC.
+ * tmw.npc_trade(npc, character, bool sell, table items)
+ */
+static int LuaNpc_Trade(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
-    if (!p || !q) return 0;
-    BuySell *t = new BuySell(q, false);
-    t->registerItem(533, 10, 20);
-    t->registerItem(535, 10, 30);
-    t->registerItem(537, 10, 50);
-    t->start(p);
-    return 0;
-}
-
-// For testing purpose.
-static int test_NpcSell(lua_State *s)
-{
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
-    if (!p || !q) return 0;
-    BuySell *t = new BuySell(q, true);
-    t->registerItem(511, 10, 200);
-    t->registerItem(524, 10, 300);
-    t->registerItem(508, 10, 500);
-    t->registerItem(537, 10, 25);
+    if (!p || !q || !lua_isboolean(s, 3) || !lua_istable(s, 4))
+    {
+        LOG_WARN("LuaNpc_Trade called with incorrect parameters.");
+        return 0;
+    }
+    BuySell *t = new BuySell(q, lua_toboolean(s, 3));
+    lua_pushnil(s);
+    while (lua_next(s, 4))
+    {
+        if (!lua_istable(s, -1))
+        {
+            LOG_WARN("LuaNpc_Trade called with incorrect parameters.");
+            t->cancel();
+            return 0;
+        }
+        int v[3];
+        for (int i = 0; i < 3; ++i)
+        {
+            lua_rawgeti(s, -1, i + 1);
+            if (!lua_isnumber(s, -1))
+            {
+                LOG_WARN("LuaNpc_Trade called with incorrect parameters.");
+                t->cancel();
+                return 0;
+            }
+            v[i] = lua_tointeger(s, -1);
+            lua_pop(s, 1);
+        }
+        t->registerItem(v[0], v[1], v[2]);
+        lua_pop(s, 1);
+    }
     t->start(p);
     return 0;
 }
@@ -344,8 +358,7 @@ LuaScript::LuaScript():
         { "chr_warp",         &LuaChr_Warp        },
         { "chr_inv_change",   &LuaChr_InvChange   },
         { "chr_inv_count",    &LuaChr_InvCount    },
-        { "test_npc_buy",     &test_NpcBuy        },
-        { "test_npc_sell",    &test_NpcSell       },
+        { "npc_trade",        &LuaNpc_Trade       },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

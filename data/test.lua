@@ -26,9 +26,9 @@ function my_npc1(npc, ch)
       end
     end
   elseif v == 3 then
-    tmw.test_npc_buy(npc, ch)
+    tmw.npc_trade(npc, ch, false, { {533, 10, 20}, {535, 10, 30}, {537, 10, 50} })
   elseif v == 4 then
-    tmw.test_npc_sell(npc, ch)
+    tmw.npc_trade(npc, ch, true, { {511, 10, 200}, {524, 10, 300}, {508, 10, 500}, {537, 10, 25} })
   end
 end
 

@@ -1,3 +1,8 @@
+2007-08-17  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/scripting/lua.cpp, data/test.lua: Added Lua function for trading
+	between players and NPCs.
+
 2007-08-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* data/scripts/libtmw.lua: Improved NPC state machine, so that the
