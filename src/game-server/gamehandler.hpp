@@ -109,13 +109,6 @@ class GameHandler: public ConnectionHandler
         void
         deletePendingConnect(Character* character);
 
-        /**
-         * TokenCollector, used to match a gameclient with the data received
-         * from the accountserver.
-         */
-        TokenCollector<GameHandler, GameClient*, Character*>
-        mTokenCollector;
-
     protected:
         NetComputer *computerConnected(ENetPeer *);
         void computerDisconnected(NetComputer *);
@@ -124,6 +117,14 @@ class GameHandler: public ConnectionHandler
          * Processes messages related to core game events.
          */
         void processMessage(NetComputer *computer, MessageIn &message);
+
+    private:
+
+        /**
+         * Container for pending clients and pending connections.
+         */
+        TokenCollector<GameHandler, GameClient *, Character *> mTokenCollector;
+
 };
 
 extern GameHandler *gameHandler;
