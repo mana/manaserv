@@ -55,10 +55,6 @@ class GameHandler: public ConnectionHandler
          * Constructor
          */
         GameHandler();
-        /**
-         * Processes messages and cleans outdated characters.
-         */
-        void process();
 
         /**
          * Starts the handler
@@ -87,13 +83,13 @@ class GameHandler: public ConnectionHandler
                                   std::string const &address, int port);
         
         /**
-         * Map of character's and their id used for getting which character to
-         * forward account server messages back to.
+         * Registers a character that should soon be claimed by a client.
+         * @param token token used by the client when connecting.
          */
-        // std::map<int, Character*> messageMap;
+        void addPendingCharacter(std::string const &token, Character *);
 
         /**
-         * Combines a client with it's character.
+         * Combines a client with its character.
          * (Needed for TokenCollector)
          */
         void

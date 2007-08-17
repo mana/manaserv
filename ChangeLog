@@ -2,6 +2,9 @@
 
 	* src/scripting/lua.cpp, data/test.lua: Added Lua function for trading
 	between players and NPCs.
+	* src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp,
+	src/game-server/accountconnection.cpp: Handled multiple connections by
+	allowing clients to take over characters.
 
 2007-08-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

@@ -81,6 +81,7 @@ void GameHandler::kill(Character *ch)
     assert(client != NULL);
     client->character = NULL;
     client->status = CLIENT_LOGIN;
+    ch->setClient(NULL);
 }
 
 void GameHandler::prepareServerChange(Character *ch)
@@ -111,11 +112,6 @@ void GameHandler::completeServerChange(int id, std::string const &token,
             return;
         }
     }
-}
-
-void GameHandler::process()
-{
-    ConnectionHandler::process();
 }
 
 static MovingObject *findBeingNear(Object *p, int id)
@@ -440,6 +436,44 @@ void GameHandler::sendTo(Character *beingPtr, MessageOut &msg)
     GameClient *client = beingPtr->getClient();
     assert(client && client->status == CLIENT_CONNECTED);
     client->send(msg);
+}
+
+void GameHandler::addPendingCharacter(std::string const &token, Character *ch)
+{
+    /* First, check if the character is already on the map. This may happen if
+       a client just lost its connection, and logged to the account server
+       again, yet the game server has not yet detected the lost connection. */
+
+    int id = ch->getDatabaseID();
+    for (NetComputers::const_iterator i = clients.begin(),
+         i_end = clients.end(); i != i_end; ++i)
+    {
+        GameClient *c = static_cast< GameClient * >(*i);
+        Character *old_ch = c->character;
+        if (old_ch && old_ch->getDatabaseID() == id)
+        {
+            if (c->status != CLIENT_CONNECTED)
+            {
+                /* Either the server is confused, or the client is up to no
+                   good. So ignore the request, and wait for the connections
+                   to properly time out. */
+                return;
+            }
+
+            /* As the connection was not properly closed, the account server
+               has not yet updated its data, so ignore them. Instead, take the
+               already present character, kill its current connection, and make
+               it available for a new connection. */
+            delete ch;
+            GameState::remove(old_ch);
+            kill(old_ch);
+            ch = old_ch;
+            break;
+        }
+    }
+
+    // Mark the character as pending a connection.    
+    mTokenCollector.addPendingConnect(token, ch);
 }
 
 void

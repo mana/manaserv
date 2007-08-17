@@ -75,7 +75,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             Character *ptr = new Character(msg);
             ptr->setSpeed(250); // TODO
             ptr->fillHitpoints();// TODO: the current hit points should be saved in the database. Otherwise players could heal their characters by logging in and out again.
-            gameHandler->mTokenCollector.addPendingConnect(token, ptr);
+            gameHandler->addPendingCharacter(token, ptr);
         } break;
 
         case AGMSG_ACTIVE_MAP:
