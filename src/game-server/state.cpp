@@ -62,36 +62,22 @@ static void updateMap(MapComposite *map)
         (*i)->update();
     }
 
-    // 2. perform attacks.
-    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
-    {
-        MovingObject *o = *i;
-        if (o->getUpdateFlags() & UPDATEFLAG_ATTACK)
-        {
-            static_cast< Being * >(o)->performAttack(map);
-        }
-    }
-
-    // 3. move objects around and update zones.
-    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
-    {
-        (*i)->move();
-    }
-
-    // 4. remove dead beings.
-    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
-    {
-        if ((*i)->getUpdateFlags() & UPDATEFLAG_REMOVE)
-        {
-            DelayedEvent e = { EVENT_REMOVE};
-            GameState::enqueueEvent((*i), e);
-        }
-    }
-
-    // 5. update the map itself.
+    // 2. run scripts.
     if (Script *s = map->getScript())
     {
         s->update();
+    }
+
+    // 3. perform actions.
+    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        (*i)->perform();
+    }
+
+    // 4. move objects around and update zones.
+    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        (*i)->move();
     }
     map->update();
 }
@@ -212,14 +198,6 @@ static void informPlayer(MapComposite *map, Character *p)
                 gameHandler->sendTo(p, LooksMsg);
             }
 
-            // Send leave messages of dead beings
-            if ((oflags & UPDATEFLAG_REMOVE))
-            {
-                MessageOut leaveMsg(GPMSG_BEING_LEAVE);
-                leaveMsg.writeShort(oid);
-                gameHandler->sendTo(p, leaveMsg);
-            }
-
             // Send damage messages.
             if (o->canFight())
             {
@@ -330,11 +308,8 @@ static void informPlayer(MapComposite *map, Character *p)
     if (damageMsg.getLength() > 2)
         gameHandler->sendTo(p, damageMsg);
 
-    // Inform client about attribute changes of its character
-    MessageOut attributeUpdateMsg(GPMSG_PLAYER_ATTRIBUTE_UPDATE);
-    p->writeAttributeUpdateMessage(attributeUpdateMsg);
-    if (attributeUpdateMsg.getLength() > 2)
-        gameHandler->sendTo(p, attributeUpdateMsg);
+    // Inform client about status change.
+    p->sendStatus();
 
     // Inform client about items on the ground around its character
     MessageOut itemMsg(GPMSG_ITEMS);

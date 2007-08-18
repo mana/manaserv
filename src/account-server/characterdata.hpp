@@ -100,14 +100,12 @@ class CharacterData
         setLevel(int level) { mLevel = level; }
 
         /** Gets the value of a base attribute of the character. */
-        unsigned short
-        getBaseAttribute(int attributeNumber) const
-        { return mBaseAttributes[attributeNumber]; }
+        int getAttribute(int n) const
+        { return mAttributes[n - CHAR_ATTR_BEGIN]; }
 
         /** Sets the value of a base attribute of the character. */
-        void
-        setBaseAttribute(int attributeNumber, int value)
-        { mBaseAttributes[attributeNumber] = value; }
+        void setAttribute(int n, int value)
+        { mAttributes[n - CHAR_ATTR_BEGIN] = value; }
 
         /** Gets the Id of the map that the character is on. */
         int
@@ -157,8 +155,7 @@ class CharacterData
         unsigned char mHairStyle; //!< Hair Style of the being.
         unsigned char mHairColor; //!< Hair Color of the being.
         unsigned char mLevel;     //!< Level of the being.
-        unsigned short mBaseAttributes[NB_BASE_ATTRIBUTES]; //!< The attributes of the
-                                                   //!< character.
+        unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
         unsigned short mMapId;    //!< Map the being is on.
         Point mPos;               //!< Position the being is at.
         Possessions mPossessions; //!< All the possesions of the character.

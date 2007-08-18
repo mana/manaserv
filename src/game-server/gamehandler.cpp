@@ -490,7 +490,12 @@ GameHandler::tokenMatched(GameClient* computer, Character* character)
 
     GameState::insert(character);
 
+    // Force sending the whole character to the client.
     Inventory(character).sendFull();
+    for (int i = 0; i < NB_CHARACTER_ATTRIBUTES; ++i)
+    {
+        character->modifiedAttribute(i);
+    }
 }
 
 void

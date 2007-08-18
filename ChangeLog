@@ -1,3 +1,21 @@
+2007-08-18  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/serialize/characterdata.hpp, src/account-server/dalstorage.cpp,
+	src/account-server/characterdata.cpp, src/game-server/spawnarea.cpp,
+	src/account-server/accounthandler.cpp, src/defines.h,
+	src/account-server/characterdata.hpp, src/game-server/state.cpp,
+	src/game-server/being.cpp, src/game-server/monster.cpp,
+	src/game-server/being.hpp, src/game-server/movingobject.hpp,
+	src/game-server/monster.hpp, src/game-server/character.cpp,
+	src/game-server/item.cpp, src/game-server/character.hpp,
+	src/game-server/item.hpp, src/game-server/gamehandler.cpp,
+	src/game-server/object.hpp, src/game-server/accountconnection.cpp,
+	src/game-server/itemmanager.cpp: Removed character statistics from
+	Being. Kept only attributes useful for fighting. Improved combat
+	handling (evade and elements). Added support for weapon characteristics
+	and weapon skills. Added support for attribute modifiers. Cleaned game
+	state handling.
+
 2007-08-17  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/scripting/lua.cpp, data/test.lua: Added Lua function for trading

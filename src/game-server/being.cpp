@@ -20,6 +20,8 @@
  *  $Id$
  */
 
+#include <cassert>
+
 #include "game-server/being.hpp"
 
 #include "defines.h"
@@ -32,7 +34,8 @@ Being::Being(int type, int id):
     MovingObject(type, id),
     mAction(STAND)
 {
-    mAttributes.resize(NB_ATTRIBUTES_BEING);
+    Attribute attr = { 0, 0 };
+    mAttributes.resize(NB_BEING_ATTRIBUTES, attr);
 }
 
 Being::~Being()
@@ -47,47 +50,84 @@ Being::~Being()
 
 }
 
-int Being::damage(Damage damage)
+int Being::damage(Object *, Damage const &damage)
 {
     if (mAction == DEAD) return 0;
 
-    // TODO: Implement dodge chance
-
-    int HPloss = damage.value;
-
-    // TODO: Implement elemental modifier
-
-    switch (damage.type)
+    int HPloss = damage.base;
+    if (damage.delta)
     {
-        case DAMAGETYPE_PHYSICAL:
-            HPloss -= getAttribute(DERIVED_ATTR_PHYSICAL_DEFENCE) / damage.piercing;
-            HPloss -= getAttribute(ATTR_EFF_VITALITY);
-            break;
-        case DAMAGETYPE_MAGICAL:
-            HPloss /= getAttribute(ATTR_EFF_WILLPOWER) + 1;
-            break;
-        case DAMAGETYPE_HAZARD:
-            HPloss /= getAttribute(ATTR_EFF_VITALITY) + 1;
-            break;
-        case DAMAGETYPE_OTHER:
-            // nothing to do here
-            break;
+        HPloss += rand() / (RAND_MAX / (damage.delta + 1));
     }
 
-    if (HPloss < 0) HPloss = 0;
-    if (HPloss > mHitpoints) HPloss = mHitpoints;
+    /* Damage can either be avoided, or applied, or critical (applied twice).
+       This is decided by comparing CTH and Evade. If they are equal, the
+       probabilities are 10%, 80%, 10%. Otherwise, the bigger the CTH, the
+       higher the chance to do a critical, up to 50%; and the bigger the Evade,
+       the higher the chance to do evade the hit, up to 50% again. */
 
-    mHitpoints -= HPloss;
+    int avoidChance = 10, criticalChance = 10;
+    int diff = damage.cth - getModifiedAttribute(BASE_ATTR_EVADE);
+    if (diff > 0)
+    {
+        // CTH - Evade >= 200 => 50% critical
+        criticalChance += diff * diff / 1000;
+        if (criticalChance > 50) criticalChance = 50;
+    }
+    else if (diff < 0)
+    {
+        // Evade - CTH >= 200 => 50% avoid
+        avoidChance += diff * diff / 10000;
+        if (avoidChance > 50) avoidChance = 50;
+    }
+    int chance = rand() / (RAND_MAX / 100);
+    LOG_INFO("Chance: " << chance << " (" << avoidChance << ", " << 100 - criticalChance << "); Damage: " << HPloss);
+    if (chance <= avoidChance)
+    {
+        mHitsTaken.push_back(0);
+        return 0;
+    }
+    if (chance >= 100 - criticalChance) HPloss *= 2;
+
+    /* Elemental modifier at 0 means normal damage. At -100, it means immune.
+       And at 100, it means vulnerable (double damage). */
+    int mod1 = 100 + getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
+
+    /* Resistance to damage at 0 gives normal damage. At 100, it gives halved
+       damage. At 200, it divides damage by 3. And so on. */
+    int mod2 = 0;
+    switch (damage.type)
+    {
+        case DAMAGE_PHYSICAL:
+            mod2 = getModifiedAttribute(BASE_ATTR_PHY_RES);
+            break;
+        case DAMAGE_MAGICAL:
+            mod2 = getModifiedAttribute(BASE_ATTR_MAG_RES);
+            break;
+        default:
+            break;
+    }
+    HPloss = HPloss * mod1 / (100 + mod2);
+
     mHitsTaken.push_back(HPloss);
     LOG_DEBUG("Being " << getPublicID() << " got hit.");
 
-    if (mHitpoints == 0) die();
+    Attribute &HP = mAttributes[BASE_ATTR_HP];
+    if (HPloss >= HP.base + HP.mod) HPloss = HP.base + HP.mod;
+    if (HPloss > 0)
+    {
+        HP.mod -= HPloss;
+        modifiedAttribute(BASE_ATTR_HP);
+        if (HP.base + HP.mod == 0) die();
+    }
 
     return HPloss;
 }
 
 void Being::die()
 {
+    if (mAction == DEAD) return;
+
     LOG_DEBUG("Being " << getPublicID() << " died.");
     setAction(DEAD);
     // dead beings stay where they are
@@ -118,7 +158,7 @@ void Being::move()
     }
 }
 
-void Being::performAttack(MapComposite *map)
+void Being::performAttack(Damage const &damage)
 {
     int SHORT_RANGE = 60;
     int SMALL_ANGLE = 35;
@@ -145,7 +185,8 @@ void Being::performAttack(MapComposite *map)
             break;
     }
 
-    for (MovingObjectIterator i(map->getAroundObjectIterator(this, SHORT_RANGE)); i; ++i)
+    for (MovingObjectIterator
+         i(getMap()->getAroundObjectIterator(this, SHORT_RANGE)); i; ++i)
     {
         MovingObject *o = *i;
         if (o == this) continue;
@@ -161,7 +202,7 @@ void Being::performAttack(MapComposite *map)
                 ppos, SHORT_RANGE, SMALL_ANGLE, attackAngle)
             )
         {
-            static_cast< Being * >(o)->damage(getPhysicalAttackDamage());
+            static_cast< Being * >(o)->damage(this, damage);
         }
     }
 }
@@ -176,54 +217,48 @@ void Being::setAction(Action action)
     }
 }
 
-void Being::calculateDerivedAttributes()
+void Being::addModifier(AttributeModifier const &mod)
 {
-    // effective values for basic attributes
-    for (int i = NB_BASE_ATTRIBUTES; i < NB_EFFECTIVE_ATTRIBUTES; i++)
+    mModifiers.push_back(mod);
+    mAttributes[mod.attr].mod += mod.value;
+    modifiedAttribute(mod.attr);
+}
+
+void Being::removeEquipmentModifier(int attr, int value)
+{
+    bool found = false;
+    for (AttributeModifiers::iterator i = mModifiers.begin(),
+         i_end = mModifiers.end(); i != i_end; ++i)
     {
-        mAttributes.at(i)
-            = getAttribute(i - NB_BASE_ATTRIBUTES); // TODO: add modifiers
+        found = i->level == 0 && i->attr == attr && i->value == value;
+        if (found)
+        {
+            // Remove one equivalent modifier.
+            mModifiers.erase(i);
+            break;
+        }
     }
-
-    // combat-related derived stats
-    mAttributes.at(DERIVED_ATTR_HP_MAXIMUM)
-        = getAttribute(ATTR_EFF_VITALITY); // TODO: find a better formula
-
-    mAttributes.at(DERIVED_ATTR_PHYSICAL_ATTACK_MINIMUM)
-        = getAttribute(ATTR_EFF_STRENGTH);
-
-    mAttributes.at(DERIVED_ATTR_PHYSICAL_ATTACK_FLUCTUATION)
-        = getAttribute(getWeaponStats().skill);
-
-    mAttributes.at(DERIVED_ATTR_PHYSICAL_DEFENCE)
-        = 0 /* + sum of equipment pieces */;
+    assert(found);
+    mAttributes[attr].mod -= value;
+    modifiedAttribute(attr);
 }
 
-Damage Being::getPhysicalAttackDamage()
+void Being::dispellModifiers(int level)
 {
-    Damage damage;
-    WeaponStats weaponStats = getWeaponStats();
-
-    damage.type = DAMAGETYPE_PHYSICAL;
-    damage.value = getAttribute(DERIVED_ATTR_PHYSICAL_ATTACK_MINIMUM)
-                + (rand()%getAttribute(DERIVED_ATTR_PHYSICAL_ATTACK_FLUCTUATION));
-    damage.piercing = weaponStats.piercing;
-    damage.element = weaponStats.element;
-    damage.source = this;
-
-    return damage;
+    for (AttributeModifiers::iterator i = mModifiers.begin();
+         i != mModifiers.end(); ++i)
+    {
+        if (i->level && i->level <= level)
+        {
+            mAttributes[i->attr].mod -= i->value;
+            modifiedAttribute(i->attr);
+            i = mModifiers.erase(i);
+        }
+    }
 }
 
-WeaponStats Being::getWeaponStats()
+int Being::getModifiedAttribute(int attr) const
 {
-    /* this function should never be called. it is just here to pacify the
-     * compiler.
-     */
-    WeaponStats weaponStats;
-
-    weaponStats.piercing = 1;
-    weaponStats.element = ELEMENT_NEUTRAL;
-    weaponStats.skill = 0;
-
-    return weaponStats;
+    int res = mAttributes[attr].base + mAttributes[attr].mod;
+    return res <= 0 ? 0 : res;
 }

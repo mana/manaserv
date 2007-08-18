@@ -119,6 +119,11 @@ class Monster : public Being, public DeathListener
         void update();
 
         /**
+         * Performs an attack, if needed.
+         */
+        void perform();
+
+        /**
          * Kills the being
          */
         virtual void die();
@@ -126,7 +131,7 @@ class Monster : public Being, public DeathListener
         /**
          * Calls the damage function in Being and updates the aggro list
          */
-        virtual int damage(Damage damage);
+        virtual int damage(Object *source, Damage const &damage);
 
         /**
          * Getting informed that a being that might be on the target list died
@@ -141,18 +146,6 @@ class Monster : public Being, public DeathListener
         {
             died(being);
         }
-
-    protected:
-        /**
-         * Gets the stats of the currently equipped weapon that are relevant
-         * for damage calculation
-         */
-        virtual WeaponStats getWeaponStats();
-
-        /**
-         * Calculates all derived attributes
-         */
-        void calculateDerivedAttributes();
 
     private:
         int calculatePositionPriority(Point position, int targetPriority);

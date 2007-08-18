@@ -24,8 +24,7 @@
 #ifndef _TMWSERV_ITEM
 #define _TMWSERV_ITEM
 
-// For NB_BASE_ATTRIBUTES and NB_DERIVED_ATTRIBUTES
-#include "defines.h"
+#include <vector>
 
 #include "game-server/character.hpp"
 
@@ -61,7 +60,7 @@ enum
     WPNTYPE_JAVELIN,        // 4
     WPNTYPE_ROD,            // 5
     WPNTYPE_STAFF,          // 6
-    WPNTYPE_WIPE,           // 7
+    WPNTYPE_WHIP,           // 7
     WPNTYPE_PROJECTILE,     // 8
     WPNTYPE_BOOMERANG,      // 9
     WPNTYPE_BOW,            // 10
@@ -102,25 +101,41 @@ enum
 };
 
 /**
- * statistics modifiers.
- * once for usables.
- * Permanent for equipment.
+ * Item modifier types.
  */
-struct Modifiers
+enum
 {
-    // General
-    unsigned char element; /**< Item Element */
-    unsigned char beingStateEffect; /**< Being State (dis)alteration */
-    unsigned short lifetime; /**< Modifiers lifetime in seconds. */
-
-    // Characteristics Modifiers
-    short attributes[NB_ATTRIBUTES_CHAR]; /**< Attribute modifiers */
-
-    // Weapon
-    unsigned short range; /**< Weapon Item Range */
-    unsigned char weaponType; /**< Weapon Type enum */
+    MOD_WEAPON_TYPE = 0,
+    MOD_WEAPON_RANGE,
+    MOD_WEAPON_DAMAGE,
+    MOD_ELEMENT_TYPE,
+    MOD_LIFETIME,
+    MOD_ATTRIBUTE
 };
 
+/**
+ * Characteristic of an item.
+ */
+struct ItemModifier
+{
+    unsigned char type;
+    signed short value;
+};
+
+/**
+ * Set of item characteristics.
+ */
+class ItemModifiers
+{
+    public:
+        int getValue(int type) const;
+        void setValue(int type, int amount);
+        int getAttributeValue(int attr) const;
+        void setAttributeValue(int attr, int amount);
+
+    private:
+        std::vector< ItemModifier > mModifiers;
+};
 
 /**
  * Class for simple reference to item information.
@@ -183,13 +198,13 @@ class ItemClass
         /**
          * Gets item modifiers.
          */
-        Modifiers const &getModifiers() const
+        ItemModifiers const &getModifiers() const
         { return mModifiers; }
 
         /**
          * Sets item modifiers.
          */
-        void setModifiers(Modifiers const &modifiers)
+        void setModifiers(ItemModifiers const &modifiers)
         { mModifiers = modifiers; }
 
         /**
@@ -216,7 +231,6 @@ class ItemClass
         int getSpriteID()
         { return mSpriteID; }
 
-
     private:
 
         /**
@@ -232,7 +246,7 @@ class ItemClass
         unsigned short mCost;    /**< Unit cost the item. */
         unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory. */
         std::string mScriptName; /**< Item script. */
-        Modifiers mModifiers; /**< Item modifiers. */
+        ItemModifiers mModifiers; /**< Item modifiers. */
 };
 
 class Item: public Object

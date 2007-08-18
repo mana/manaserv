@@ -20,12 +20,17 @@
  *  $Id$
  */
 
+#include <algorithm>
 #include <cassert>
 
 #include "game-server/character.hpp"
 
 #include "defines.h"
 #include "game-server/buysell.hpp"
+#include "game-server/inventory.hpp"
+#include "game-server/item.hpp"
+#include "game-server/itemmanager.hpp"
+#include "game-server/gamehandler.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/trade.hpp"
@@ -33,86 +38,52 @@
 #include "net/messageout.hpp"
 #include "serialize/characterdata.hpp"
 
-Character::Character(MessageIn & msg):
+Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),
     mGender(0), mHairStyle(0), mHairColor(0), mLevel(0),
-    mTransaction(TRANS_NONE), mAttributesChanged(true)
+    mTransaction(TRANS_NONE)
 {
-    // prepare attributes vector
-    mAttributes.resize(NB_ATTRIBUTES_CHAR, 1);
-    mOldAttributes.resize(NB_ATTRIBUTES_CHAR, 0);
-    // get character data
+    Attribute attr = { 0, 0 };
+    mAttributes.resize(NB_CHARACTER_ATTRIBUTES, attr);
+    // Get character data.
     mDatabaseID = msg.readLong();
     mName = msg.readString();
     deserializeCharacterData(*this, msg);
-    // give the player 10 weapon skill for testing purpose
-    setAttribute(CHAR_SKILL_WEAPON_UNARMED, 10);
-
     setSize(16);
 }
-/**
- * Update the internal status.
- */
-void
-Character::update()
+
+void Character::perform()
 {
-    // attacking
-    if (mAction == ATTACK)
+    if (mAction != ATTACK || mActionTime > 0) return;
+
+    mActionTime = 1000;
+    mAction = STAND;
+    raiseUpdateFlags(UPDATEFLAG_ATTACK);
+
+    // TODO: Check slot 2 too.
+    int itemId = mPossessions.equipment[EQUIP_FIGHT1_SLOT];
+    ItemClass *ic = ItemManager::getItem(itemId);
+    int type = ic ? ic->getModifiers().getValue(MOD_WEAPON_TYPE) : WPNTYPE_NONE;
+
+    Damage damage;
+    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK) / 10;
+    damage.type = DAMAGE_PHYSICAL;
+    if (type)
     {
-        // plausibility check of attack command
-        if (mActionTime <= 0)
-        {
-            // request perform attack
-            mActionTime = 1000;
-            mAction = STAND;
-            raiseUpdateFlags(UPDATEFLAG_ATTACK);
-        }
+        ItemModifiers const &mods = ic->getModifiers();
+        damage.delta = mods.getValue(MOD_WEAPON_DAMAGE);
+        damage.cth = getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
+        damage.element = mods.getValue(MOD_ELEMENT_TYPE);
     }
-}
-
-void Character::calculateDerivedAttributes()
-{
-    Being::calculateDerivedAttributes();
-    /*
-     * Do any player character specific attribute calculation here
-     */
-
-    mAttributesChanged = true;
-}
-
-WeaponStats
-Character::getWeaponStats()
-{
-    WeaponStats weaponStats;
-
-    /*
-     * TODO: get all this stuff from the currently equipped weapon
-     */
-    weaponStats.piercing = 1;
-    weaponStats.element = ELEMENT_NEUTRAL;
-    weaponStats.skill = CHAR_SKILL_WEAPON_UNARMED;
-
-    return weaponStats;
-}
-
-void
-Character::writeAttributeUpdateMessage(MessageOut &msg)
-{
-    if (!mAttributesChanged) return;
-
-    for (int i = 0; i<NB_ATTRIBUTES_CHAR; i++)
+    else
     {
-        unsigned short attribute = getAttribute(i);
-        if (attribute != mOldAttributes[i])
-        {
-            msg.writeShort(i);
-            msg.writeShort(attribute);
-            mOldAttributes[i] = attribute;
-        }
+        // No-weapon fighting.
+        damage.delta = 1;
+        damage.cth = getModifiedAttribute(CHAR_SKILL_WEAPON_NONE);
+        damage.element = ELEMENT_NEUTRAL;
     }
-
-    mAttributesChanged = false;
+    performAttack(damage);
 }
 
 int Character::getMapId() const
@@ -184,3 +155,49 @@ void Character::setBuySell(BuySell *t)
     }
 }
 
+void Character::sendStatus()
+{
+    if (mModifiedAttributes.empty()) return;
+
+    MessageOut msg(GPMSG_PLAYER_ATTRIBUTE_CHANGE);
+    for (std::vector< unsigned char >::const_iterator i = mModifiedAttributes.begin(),
+         i_end = mModifiedAttributes.end(); i != i_end; ++i)
+    {
+        int attr = *i;
+        msg.writeByte(attr);
+        msg.writeShort(getAttribute(attr));
+        msg.writeShort(getModifiedAttribute(attr));
+    }
+    gameHandler->sendTo(this, msg);
+
+    mModifiedAttributes.clear();
+}
+
+void Character::modifiedAttribute(int attr)
+{
+    if (attr >= CHAR_ATTR_BEGIN && attr < CHAR_ATTR_END)
+    {
+        /* FIXME: The following formulas are for testing purpose only. They
+           should be replaced by a real system once designed. */
+        setAttribute(BASE_ATTR_HP, getModifiedAttribute(CHAR_ATTR_VITALITY));
+        setAttribute(BASE_ATTR_PHY_ATK, getModifiedAttribute(CHAR_ATTR_STRENGTH));
+        setAttribute(BASE_ATTR_PHY_RES, getModifiedAttribute(CHAR_ATTR_VITALITY));
+        setAttribute(BASE_ATTR_MAG_RES, getModifiedAttribute(CHAR_ATTR_WILLPOWER));
+        setAttribute(BASE_ATTR_EVADE, getModifiedAttribute(CHAR_ATTR_DEXTERITY));
+        // We have just modified the computed attributes. Mark them as such.
+        for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; ++i)
+        {
+            mModifiedAttributes.push_back(i);
+        }
+    }
+    mModifiedAttributes.push_back(attr);
+}
+
+void Character::flagAttribute(int attr)
+{
+    // Warn the player of this attribute modification.
+    std::vector< unsigned char >::iterator
+        i_end = mModifiedAttributes.end(),
+        i = std::find(mModifiedAttributes.begin(), i_end, (unsigned char)attr);
+    if (i == i_end) mModifiedAttributes.push_back(attr);
+}

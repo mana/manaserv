@@ -37,9 +37,9 @@ void serializeCharacterData(T const &data, MessageOut &msg)
     msg.writeByte(data.getHairColor());
     msg.writeByte(data.getLevel());
 
-    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
+    for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
-        msg.writeByte(data.getBaseAttribute(i));
+        msg.writeByte(data.getAttribute(i));
     }
 
     msg.writeShort(data.getMapId());
@@ -69,9 +69,9 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setHairColor(msg.readByte());
     data.setLevel(msg.readByte());
 
-    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
+    for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
-        data.setBaseAttribute(i, msg.readByte());
+        data.setAttribute(i, msg.readByte());
     }
 
     data.setMapId(msg.readShort());

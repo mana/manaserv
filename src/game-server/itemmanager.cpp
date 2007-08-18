@@ -90,21 +90,21 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
         std::string scriptName = XML::getProperty(node, "script_name", std::string());
 
         //TODO: add child nodes for these modifiers (additive and factor)
-        Modifiers modifiers;
-        modifiers.element = XML::getProperty(node, "element", 0);
-        modifiers.lifetime = XML::getProperty(node, "lifetime", 0);
-        modifiers.attributes[BASE_ATTR_STRENGTH]     = XML::getProperty(node, "strength",     0);
-        modifiers.attributes[BASE_ATTR_AGILITY]      = XML::getProperty(node, "agility",      0);
-        modifiers.attributes[BASE_ATTR_DEXTERITY]    = XML::getProperty(node, "dexterity",    0);
-        modifiers.attributes[BASE_ATTR_VITALITY]     = XML::getProperty(node, "vitality",     0);
-        modifiers.attributes[BASE_ATTR_INTELLIGENCE] = XML::getProperty(node, "intelligence", 0);
-        modifiers.attributes[BASE_ATTR_WILLPOWER]    = XML::getProperty(node, "willpower",    0);
-        modifiers.attributes[BASE_ATTR_CHARISMA]     = XML::getProperty(node, "charisma",     0);
-        modifiers.attributes[DERIVED_ATTR_HP_MAXIMUM]         = XML::getProperty(node, "hp",          0);
-        modifiers.attributes[DERIVED_ATTR_PHYSICAL_ATTACK_MINIMUM]   = XML::getProperty(node, "attack",   0);
-        modifiers.attributes[DERIVED_ATTR_PHYSICAL_DEFENCE]  = XML::getProperty(node, "defence",      0);
-        modifiers.range = XML::getProperty(node, "range", 0);
-        modifiers.weaponType = XML::getProperty(node, "weapon_type", 0);
+        ItemModifiers modifiers;
+        modifiers.setValue(MOD_WEAPON_TYPE,   XML::getProperty(node, "weapon_type", 0));
+        modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));
+        modifiers.setValue(MOD_WEAPON_DAMAGE, XML::getProperty(node, "attack",      0));
+        modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));
+        modifiers.setValue(MOD_LIFETIME,      XML::getProperty(node, "lifetime",    0));
+        modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
+        modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defense", 0));
+        modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,     XML::getProperty(node, "strength",     0));
+        modifiers.setAttributeValue(CHAR_ATTR_AGILITY,      XML::getProperty(node, "agility",      0));
+        modifiers.setAttributeValue(CHAR_ATTR_DEXTERITY,    XML::getProperty(node, "dexterity",    0));
+        modifiers.setAttributeValue(CHAR_ATTR_VITALITY,     XML::getProperty(node, "vitality",     0));
+        modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE, XML::getProperty(node, "intelligence", 0));
+        modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
+        modifiers.setAttributeValue(CHAR_ATTR_CHARISMA,     XML::getProperty(node, "charisma",     0));
 
         if (maxPerSlot == 0)
         {

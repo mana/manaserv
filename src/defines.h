@@ -151,7 +151,7 @@ enum {
     PGMSG_MOVE_ITEM                = 0x0114, // B slot1, B slot2, B amount
     GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
-    GPMSG_PLAYER_ATTRIBUTE_UPDATE  = 0x0130, // { W attribute, W value }*
+    GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { B attribute, W base value, W modified value }*
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
                                              // monster: W type id
@@ -324,10 +324,6 @@ enum {
 };
 
 /**
- * Enumerations for the handling of attributes and their modifiers.
- */
-
-/**
  * Possible states of beings.
  * States can be multiple for the same being.
  * To be used as bitmask values.
@@ -346,76 +342,92 @@ enum BeingState
 };
 
 /**
- * Stats every being needs
+ * Element attribute for beings, actors, and items.
+ * Subject to change until Pauan and Dabe are finished with the element system.
+ * Please keep element modifier of BeingAttribute in sync.
  */
-enum BeingStats
+enum
 {
-    BASE_ATTR_STRENGTH = 0,    // Basic attributes
-    BASE_ATTR_AGILITY,
-    BASE_ATTR_DEXTERITY,
-    BASE_ATTR_VITALITY,
-    BASE_ATTR_INTELLIGENCE,
-    BASE_ATTR_WILLPOWER,
-    BASE_ATTR_CHARISMA,
-    NB_BASE_ATTRIBUTES,
-
-    ATTR_EFF_STRENGTH = NB_BASE_ATTRIBUTES,    // modified basic attributes
-    ATTR_EFF_AGILITY,
-    ATTR_EFF_DEXTERITY,
-    ATTR_EFF_VITALITY,
-    ATTR_EFF_INTELLIGENCE,
-    ATTR_EFF_WILLPOWER,
-    ATTR_EFF_CHARISMA,
-    NB_EFFECTIVE_ATTRIBUTES,
-
-    DERIVED_ATTR_HP_MAXIMUM = NB_EFFECTIVE_ATTRIBUTES,    // Computed stats
-    DERIVED_ATTR_PHYSICAL_ATTACK_MINIMUM,
-    DERIVED_ATTR_PHYSICAL_ATTACK_FLUCTUATION,
-    DERIVED_ATTR_PHYSICAL_DEFENCE,
-    // add new computed statistics when they are needed
-    NB_ATTRIBUTES_BEING
+    ELEMENT_NEUTRAL = 0,
+    ELEMENT_FIRE,
+    ELEMENT_WATER,
+    ELEMENT_EARTH,
+    ELEMENT_AIR,
+    ELEMENT_SACRED,
+    ELEMENT_DEATH
 };
 
+/**
+ * Attributes used during combat. Available to all the beings.
+ */
+enum
+{
+    BASE_ATTR_BEGIN = 0,
+    BASE_ATTR_PHY_ATK = BASE_ATTR_BEGIN,
+                       /**< Physical attack power. */
+    BASE_ATTR_MAG_ATK, /**< Magical attack power. */
+    BASE_ATTR_PHY_RES, /**< Resistance to physical damage. */
+    BASE_ATTR_MAG_RES, /**< Resistance to magical damage. */
+    BASE_ATTR_EVADE,   /**< Ability to avoid hits. */
+    BASE_ATTR_HP,      /**< Remaining Hit Points. */
+    BASE_ATTR_END,
+    BASE_ATTR_NB = BASE_ATTR_END - BASE_ATTR_BEGIN,
+
+    BASE_ELEM_BEGIN = BASE_ATTR_END,
+    BASE_ELEM_NEUTRAL = BASE_ELEM_BEGIN,
+    BASE_ELEM_FIRE,
+    BASE_ELEM_WATER,
+    BASE_ELEM_EARTH,
+    BASE_ELEM_AIR,
+    BASE_ELEM_SACRED,
+    BASE_ELEM_DEATH,
+    BASE_ELEM_END,
+    BASE_ELEM_NB = BASE_ELEM_END - BASE_ELEM_BEGIN,
+
+    NB_BEING_ATTRIBUTES = BASE_ELEM_END
+};
 
 /**
- * Player character specific stats
+ * Attributes of characters. Used to derive being attributes.
+ * Please keep weapon skills in sync with item weapon types.
  */
-enum CharacterStats
+enum
 {
-    CHAR_SKILL_WEAPON_UNARMED = NB_ATTRIBUTES_BEING,
+    CHAR_ATTR_BEGIN = BASE_ATTR_END,
+    CHAR_ATTR_STRENGTH = CHAR_ATTR_BEGIN,
+    CHAR_ATTR_AGILITY,
+    CHAR_ATTR_DEXTERITY,
+    CHAR_ATTR_VITALITY,
+    CHAR_ATTR_INTELLIGENCE,
+    CHAR_ATTR_WILLPOWER,
+    CHAR_ATTR_CHARISMA,
+    CHAR_ATTR_END,
+    CHAR_ATTR_NB = CHAR_ATTR_END - CHAR_ATTR_BEGIN,
+
+    CHAR_SKILL_WEAPON_BEGIN = CHAR_ATTR_END,
+    CHAR_SKILL_WEAPON_NONE = CHAR_SKILL_WEAPON_BEGIN,
+    CHAR_SKILL_WEAPON_KNIFE,
     CHAR_SKILL_WEAPON_SWORD,
-    CHAR_SKILL_WEAPON_AXE,
-    CHAR_SKILL_WEAPON_POLEARM,
+    CHAR_SKILL_WEAPON_SPEAR,
     CHAR_SKILL_WEAPON_JAVELIN,
-    CHAR_SKILL_WEAPON_WHIP,
-    CHAR_SKILL_WEAPON_DAGGER,
+    CHAR_SKILL_WEAPON_ROD,
     CHAR_SKILL_WEAPON_STAFF,
+    CHAR_SKILL_WEAPON_WHIP,
+    CHAR_SKILL_WEAPON_PROJECTILE,
+    CHAR_SKILL_WEAPON_BOOMERANG,
     CHAR_SKILL_WEAPON_BOW,
+    CHAR_SKILL_WEAPON_SICKLE,
     CHAR_SKILL_WEAPON_CROSSBOW,
-    CHAR_SKILL_WEAPON_THROWN,
-    NB_CHAR_WEAPONSKILLS,
+    CHAR_SKILL_WEAPON_STICK,
+    CHAR_SKILL_WEAPON_HAMMER,
+    CHAR_SKILL_WEAPON_AXE,
+    CHAR_SKILL_WEAPON_HAND_PROJECTILE,
+    CHAR_SKILL_WEAPON_END,
+    CHAR_SKILL_WEAPON_NB = CHAR_SKILL_WEAPON_END - CHAR_SKILL_WEAPON_BEGIN,
 
-    CHAR_SKILL_MAGIC_IAMJUSTAPLACEHOLDER = NB_CHAR_WEAPONSKILLS,
-    NB_CHAR_MAGICSKILLS,
+    // Magic skills should follow.
 
-    CHAR_SKILL_CRAFT_IAMJUSTAPLACEHOLDER = NB_CHAR_MAGICSKILLS,
-    NB_CHAR_CRAFTSKILLS,
-
-    CHAR_SKILL_IAMJUSTAPLACEHOLDER = NB_CHAR_CRAFTSKILLS,
-    NB_CHAR_OTHERSKILLS,
-
-    NB_ATTRIBUTES_CHAR = NB_CHAR_OTHERSKILLS
+    NB_CHARACTER_ATTRIBUTES = CHAR_SKILL_WEAPON_END
 };
-
-
-/**
- * Monster-specific stats
- */
-enum MonsterStats
-{
-    MONSTER_SKILL_WEAPON = NB_ATTRIBUTES_BEING,
-    NB_ATTRIBUTES_CONTROLLED
-};
-
 
 #endif // _TMWSERV_DEFINES_H_

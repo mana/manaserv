@@ -105,6 +105,11 @@ class MovingObject : public Object
         { return mSize; }
 
         /**
+         * Performs actions scheduled by the object.
+         */
+        virtual void perform() {}
+
+        /**
          * Moves the object toward its destination.
          */
         virtual void move();

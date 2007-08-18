@@ -53,12 +53,12 @@ Monster::Monster(MonsterClass *specy):
     LOG_DEBUG("Monster spawned!");
     mAgressive = false;   // TODO: Get from monster database
     mAgressionRange = 10; // TODO: Get from monster database
-    // TODO: Fill with the real attributes
-    mAttributes.resize(NB_ATTRIBUTES_CONTROLLED, 1);
 
-    // Some bogus values for testing monster attacks on players
-    setAttribute(BASE_ATTR_STRENGTH, 10);
-    setAttribute(MONSTER_SKILL_WEAPON, 3);
+    // Some bogus stats for testing.
+    setSpeed(300);
+    setSize(8);
+    setAttribute(BASE_ATTR_HP, 10);
+    setAttribute(BASE_ATTR_PHY_ATK, 10);
 
     // Set positions relative to target from which the monster can attack
     mAttackPositions.push_back(AttackPosition(+32, 0, DIRECTION_LEFT));
@@ -77,6 +77,23 @@ Monster::~Monster()
     }
 }
 
+void Monster::perform()
+{
+    if (mAttackTime != mAttackAftDelay) return;
+
+    mAction = ATTACK;
+    raiseUpdateFlags(UPDATEFLAG_ATTACK);
+
+    // Hard-coded values for now.
+    Damage damage;
+    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK) / 10;
+    damage.delta = 2;
+    damage.cth = 50;
+    damage.element = ELEMENT_NEUTRAL;
+    damage.type = DAMAGE_PHYSICAL;
+    performAttack(damage);
+}
+
 void Monster::update()
 {
     // If dead do nothing but rot
@@ -85,7 +102,8 @@ void Monster::update()
         mCountDown--;
         if (mCountDown <= 0)
         {
-            raiseUpdateFlags(UPDATEFLAG_REMOVE);
+            DelayedEvent e = { EVENT_REMOVE};
+            GameState::enqueueEvent(this, e);
         }
         return;
     }
@@ -93,11 +111,6 @@ void Monster::update()
     // If currently attacking finish attack;
     if (mAttackTime)
     {
-        if (mAttackTime == mAttackAftDelay)
-        {
-            mAction = ATTACK;
-            raiseUpdateFlags(UPDATEFLAG_ATTACK);
-        }
         mAttackTime--;
         return;
     }
@@ -219,22 +232,23 @@ void Monster::died(Being *being)
     mDeathListeners.remove((DeathListener *)being);
 }
 
-int Monster::damage(Damage damage)
+int Monster::damage(Object *source, Damage const &damage)
 {
-    int HPLoss = Being::damage(damage);
-    if  (   HPLoss
-         && damage.source
-         && damage.source->getType() == OBJECT_CHARACTER
-        )
+    int HPLoss = Being::damage(source, damage);
+    if (getModifiedAttribute(BASE_ATTR_HP) && HPLoss && source &&
+        source->getType() == OBJECT_CHARACTER)
     {
-        if (mAnger.find(damage.source) == mAnger.end())
+        Being *s = static_cast< Being * >(source);
+        std::pair< std::map< Being *, int >::iterator, bool > ib =
+            mAnger.insert(std::make_pair(s, HPLoss));
+
+        if (ib.second)
         {
-            damage.source->addDeathListener(this);
-            mAnger[damage.source] = HPLoss;
+            s->addDeathListener(this);
         }
         else
         {
-            mAnger[damage.source] += HPLoss;
+            ib.first->second += HPLoss;
         }
     }
     return HPLoss;
@@ -254,25 +268,3 @@ void Monster::die()
     }
 }
 
-WeaponStats Monster::getWeaponStats()
-{
-
-    WeaponStats weaponStats;
-
-    /*
-     * TODO: This should all be set by the monster database
-     */
-    weaponStats.piercing = 1;
-    weaponStats.element = ELEMENT_NEUTRAL;
-    weaponStats.skill = MONSTER_SKILL_WEAPON;
-
-    return weaponStats;
-}
-
-void Monster::calculateDerivedAttributes()
-{
-    Being::calculateDerivedAttributes();
-    /*
-     * Do any monster specific attribute calculation here
-     */
-}

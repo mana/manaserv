@@ -70,12 +70,6 @@ SpawnArea::update()
                 Being *being = new Monster(mSpecy);
                 being->addDeathListener(this);
 
-                // some bogus stats for testing
-                being->setSpeed(300);
-                being->setSize(8);
-                being->setAttribute(BASE_ATTR_VITALITY, 10);
-                being->fillHitpoints();
-
                 being->setMap(map);
                 being->setPosition(position);
                 being->clearDestination();

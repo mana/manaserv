@@ -52,7 +52,12 @@ class Character : public Being
         /**
          * Updates the internal status.
          */
-        void update();
+        void update() {}
+
+        /**
+         * Perform actions.
+         */
+        void perform();
 
         /**
          * Gets client computer.
@@ -177,23 +182,10 @@ class Character : public Being
         { mLevel = level; }
 
         /**
-         * Gets the value of an attribute of the character.
+         * Sends a message that informs the client about attribute
+         * modified since last call.
          */
-        int getBaseAttribute(int attributeNumber) const
-        { return getAttribute(attributeNumber); }
-
-        /**
-         * Sets the value of an attribute of the character.
-         */
-        void setBaseAttribute(int attributeNumber, int value)
-        { setAttribute(attributeNumber, value); }
-
-        /**
-         * Creates a message that informs the client about the attribute
-         * changes since last call.
-         */
-        void
-        writeAttributeUpdateMessage(MessageOut &msg);
+        void sendStatus();
 
         /**
          * Gets the ID of the map that the character is on.
@@ -207,21 +199,19 @@ class Character : public Being
          */
         void setMapId(int);
 
-    protected:
         /**
-         * Calculates all derived attributes
+         * Updates base Being attributes.
          */
-        void calculateDerivedAttributes();
-
-        /**
-         * Gets the stats of the currently equipped weapon that are relevant
-         * for damage calculation
-         */
-        virtual WeaponStats getWeaponStats();
+        void modifiedAttribute(int);
 
     private:
         Character(Character const &);
         Character &operator=(Character const &);
+
+        /**
+         * Marks attribute as recently modified.
+         */
+        void flagAttribute(int);
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
@@ -230,10 +220,10 @@ class Character : public Being
         /** Handler of the transaction the character is involved in. */
         void *mTransactionHandler;
 
-        /** Atributes as the client should currently know them. */
-        std::vector<unsigned short> mOldAttributes;
-
         Possessions mPossessions;    /**< Possesssions of the character. */
+
+        /** Attributes modified since last update. */
+        std::vector< unsigned char > mModifiedAttributes;
 
         std::string mName;           /**< Name of the character. */
         int mDatabaseID;             /**< Character's database ID. */
@@ -242,12 +232,6 @@ class Character : public Being
         unsigned char mHairColor;    /**< Hair Color of the character. */
         unsigned char mLevel;        /**< Level of the character. */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
-
-        /**
-         * true when one or more attributes might have changed since the
-         * client has been updated about them.
-         */
-        bool mAttributesChanged;
 };
 
 #endif // _TMWSERV_CHARACTER_HPP_

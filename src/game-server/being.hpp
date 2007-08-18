@@ -23,7 +23,6 @@
 #ifndef _TMWSERV_BEING_H_
 #define _TMWSERV_BEING_H_
 
-#include <list>
 #include <string>
 #include <vector>
 
@@ -33,29 +32,6 @@
 class Being;
 class DeathListener;
 class MapComposite;
-
-/**
- * Derived attributes of a Being.
- */
-enum
-{
-
-};
-
-/**
- * Element attribute for beings, actors and items.
- * Subject to change until pauan and dabe are finished with the element system.
- */
-enum Element
-{
-    ELEMENT_NEUTRAL = 0,
-    ELEMENT_FIRE,
-    ELEMENT_WATER,
-    ELEMENT_EARTH,
-    ELEMENT_AIR,
-    ELEMENT_SACRED,
-    ELEMENT_DEATH
-};
 
 /**
  * Beings and actors directions
@@ -71,12 +47,11 @@ enum Direction
 /**
  * Methods of damage calculation
  */
-enum Damagetype
+enum
 {
-    DAMAGETYPE_PHYSICAL,
-    DAMAGETYPE_MAGICAL,
-    DAMAGETYPE_HAZARD,
-    DAMAGETYPE_OTHER
+    DAMAGE_PHYSICAL,
+    DAMAGE_MAGICAL,
+    DAMAGE_OTHER
 };
 
 /**
@@ -85,28 +60,44 @@ enum Damagetype
  */
 struct Damage
 {
-    int value;
-    int piercing;
-    Element element;
-    Damagetype type;
-    Being *source;
+    unsigned short base;   /**< Base amount of damage. */
+    unsigned short delta;  /**< Additional damage when lucky. */
+    unsigned short cth;    /**< Chance to hit. Opposes the evade attribute. */
+    unsigned char element; /**< Elemental damage. */
+    unsigned char type;    /**< Damage type: Physical or magical? */
 };
 
 /**
- * Structure that holds weapon stats that are relevant for damage calculation
+ * Holds the base value of an attribute and the sum of all its modifiers.
+ * While base + mod may be negative, the modified attribute is not.
  */
-struct WeaponStats
+struct Attribute
 {
-    int piercing;
-    Element element;
-    int skill;
+    unsigned short base;
+    short mod;
 };
+
+struct AttributeModifier
+{
+    /**< Number of ticks (0 means permanent, e.g. equipment). */
+    unsigned short duration;
+    short value;         /**< Positive or negative amount. */
+    unsigned char attr;  /**< Attribute to modify. */
+    /**
+     * Strength of the modification.
+     * - Zero means permanent, e.g. equipment.
+     * - Non-zero means spell. Can only be removed by a wizard with a
+     *   dispell level higher than this value.
+     */
+    unsigned char level;
+};
+
+typedef std::vector< AttributeModifier > AttributeModifiers;
 
 /**
  * Type definition for a list of hits
  */
-typedef std::list<unsigned int> Hits;
-
+typedef std::vector<unsigned int> Hits;
 
 /**
  * Generic Being (living object).
@@ -138,23 +129,11 @@ class Being : public MovingObject
         ~Being();
 
         /**
-         * Creates a damage structure for a normal melee attack based on the
-         * current being stats and equipment.
-         */
-        Damage getPhysicalAttackDamage();
-
-        /**
-         * Sets the hit points to maximum
-         */
-        void fillHitpoints()
-        { mHitpoints = getAttribute(DERIVED_ATTR_HP_MAXIMUM); }
-
-        /**
          * Takes a damage structure, computes the real damage based on the
          * stats, deducts the result from the hitpoints and adds the result to
          * the HitsTaken list.
          */
-        virtual int damage(Damage damage);
+        virtual int damage(Object *source, Damage const &damage);
 
         /**
          * Kills the being
@@ -176,38 +155,55 @@ class Being : public MovingObject
         /**
          * Performs an attack.
          */
-        void performAttack(MapComposite *);
+        void performAttack(Damage const &);
 
         /**
          * Sets the current action.
          */
-        virtual void setAction(Action action);
+        void setAction(Action action);
 
         /**
          * Sets the current action.
          */
-        virtual Action getAction() const
+        Action getAction() const
         { return mAction; }
 
         /**
          * Moves the being toward its destination.
          */
-        virtual void move();
+        void move();
 
         /**
-         * Sets an attribute (doesn't work on derived attributes)
+         * Sets an attribute.
          */
-        void setAttribute(int attributeNumber, unsigned short value)
-        {
-            mAttributes.at(attributeNumber) = value;
-            calculateDerivedAttributes();
-        }
+        void setAttribute(int n, int value)
+        { mAttributes[n].base = value; }
 
         /**
          * Gets an attribute.
          */
-        unsigned short getAttribute(int attributeNumber) const
-        { return mAttributes.at(attributeNumber); }
+        int getAttribute(int n) const
+        { return mAttributes[n].base; }
+
+        /**
+         * Gets an attribute after applying modifiers.
+         */
+        int getModifiedAttribute(int) const;
+
+        /**
+         * Adds a modifier to one attribute.
+         */
+        void addModifier(AttributeModifier const &);
+
+        /**
+         * Removes a modifier due to an equipment.
+         */
+        void removeEquipmentModifier(int attr, int value);
+
+        /**
+         * Removes all the modifiers with a level low enough.
+         */
+        void dispellModifiers(int level);
 
         /**
          * Adds a death listener.
@@ -225,21 +221,14 @@ class Being : public MovingObject
             mDeathListeners.remove(listener);
         }
 
+        /**
+         * Called when an attribute modifier is changed.
+         */
+        virtual void modifiedAttribute(int) {}
+
     protected:
-        /**
-         * Calculates all derived attributes of a beings
-         */
-        void calculateDerivedAttributes();
-
-        /**
-         * Gets the stats of the currently equipped weapon that are relevant
-         * for damage calculation
-         */
-        virtual WeaponStats getWeaponStats();
-
-        int mHitpoints; /**< Hitpoints of the being */
         Action mAction;
-        std::vector<unsigned short> mAttributes;
+        std::vector< Attribute > mAttributes;
         std::list<DeathListener*> mDeathListeners;
 
     private:
@@ -247,6 +236,7 @@ class Being : public MovingObject
         Being &operator=(Being const &rhs);
 
         Hits mHitsTaken; /**< List of punches taken since last update */
+        AttributeModifiers mModifiers; /**< Currently modified attributes. */
 };
 
 #endif // _TMWSERV_BEING_H_

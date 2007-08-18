@@ -160,9 +160,9 @@ void AccountHandler::sendCharacterData(AccountClient &computer, int slot, Charac
     charInfo.writeByte(ch.getLevel());
     charInfo.writeLong(ch.getPossessions().money);
 
-    for (int j = 0; j < NB_BASE_ATTRIBUTES; ++j)
+    for (int j = BASE_ATTR_BEGIN; j < BASE_ATTR_END; ++j)
     {
-        charInfo.writeShort(ch.getBaseAttribute(j));
+        charInfo.writeShort(ch.getAttribute(j));
     }
 
     computer.send(charInfo);
@@ -557,13 +557,13 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         // LATER_ON: Add race, face and maybe special attributes.
 
         // Customization of character's attributes...
-        unsigned short attributes[NB_BASE_ATTRIBUTES];
-        for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
+        int attributes[CHAR_ATTR_NB];
+        for (int i = 0; i < CHAR_ATTR_NB; ++i)
             attributes[i] = msg.readShort();
 
         unsigned int totalAttributes = 0;
         bool validNonZeroAttributes = true;
-        for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
+        for (int i = 0; i < CHAR_ATTR_NB; ++i)
         {
             // For good total attributes check.
             totalAttributes += attributes[i];
@@ -587,8 +587,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         else
         {
             CharacterPtr newCharacter(new CharacterData(name));
-            for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
-                newCharacter->setBaseAttribute(i, attributes[i]);
+            for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
+                newCharacter->setAttribute(i, attributes[i - CHAR_ATTR_BEGIN]);
             newCharacter->setLevel(1);
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);

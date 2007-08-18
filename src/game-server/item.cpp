@@ -23,6 +23,37 @@
 
 #include "game-server/item.hpp"
 
+int ItemModifiers::getValue(int type) const
+{
+    for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
+         i_end = mModifiers.end(); i != i_end; ++i)
+    {
+        if (i->type == type) return i->value;
+    }
+    return 0;
+}
+
+int ItemModifiers::getAttributeValue(int attr) const
+{
+    return getValue(MOD_ATTRIBUTE + attr);
+}
+
+void ItemModifiers::setValue(int type, int value)
+{
+    if (value)
+    {
+        ItemModifier m;
+        m.type = type;
+        m.value = value;
+        mModifiers.push_back(m);
+    }
+}
+
+void ItemModifiers::setAttributeValue(int attr, int value)
+{
+    setValue(MOD_ATTRIBUTE + attr, value);
+}
+
 bool ItemClass::use(Being *itemUser)
 {
     bool usedSuccessfully = true;

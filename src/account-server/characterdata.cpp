@@ -26,9 +26,9 @@ CharacterData::CharacterData(std::string const &name, int id):
     mDatabaseID(id), mAccountID(-1), mName(name), mGender(0), mHairStyle(0),
     mHairColor(0), mLevel(0), mMapId(0), mPos(0,0)
 {
-    for (int i = 0; i < NB_BASE_ATTRIBUTES; ++i)
+    for (int i = 0; i < CHAR_ATTR_NB; ++i)
     {
-        mBaseAttributes[i] = 0;
+        mAttributes[i] = 0;
     }
 }
 
