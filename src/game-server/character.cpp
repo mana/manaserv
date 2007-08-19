@@ -51,6 +51,7 @@ Character::Character(MessageIn &msg):
     mName = msg.readString();
     deserializeCharacterData(*this, msg);
     setSize(16);
+    Inventory(this).initialize();
 }
 
 void Character::perform()
@@ -187,10 +188,10 @@ void Character::modifiedAttribute(int attr)
         // We have just modified the computed attributes. Mark them as such.
         for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; ++i)
         {
-            mModifiedAttributes.push_back(i);
+            flagAttribute(i);
         }
     }
-    mModifiedAttributes.push_back(attr);
+    flagAttribute(attr);
 }
 
 void Character::flagAttribute(int attr)

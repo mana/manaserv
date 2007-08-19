@@ -30,6 +30,7 @@
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
 #include "net/messageout.hpp"
+#include "utils/logger.h"
 
 Inventory::Inventory(Character *p, bool d):
     mPoss(&p->getPossessions()), msg(GPMSG_INVENTORY), mClient(p),
@@ -140,6 +141,47 @@ void Inventory::sendFull() const
     m.writeLong(mPoss->money);
 
     gameHandler->sendTo(mClient, m);
+}
+
+void Inventory::initialize()
+{
+    assert(!mDelayed);
+
+    // First, check the equipment and apply its modifiers.
+    for (int i = 0; i < EQUIP_PROJECTILE_SLOT; ++i)
+    {
+        int itemId = mPoss->equipment[i];
+        if (!itemId) continue;
+        if (ItemClass *ic = ItemManager::getItem(itemId))
+        {
+            ic->getModifiers().applyAttributes(mClient);
+        }
+        else
+        {
+            mPoss->equipment[i] = 0;
+            LOG_WARN("Removed unknown item " << itemId << " from equipment "
+                     "of character " << mClient->getDatabaseID() << '.');
+        }
+    }
+
+    // Second, remove unknown inventory items.
+    int i = 0;
+    while (i < (int)mPoss->inventory.size())
+    {
+        int itemId = mPoss->inventory[i].itemId;
+        if (itemId)
+        {
+            ItemClass *ic = ItemManager::getItem(itemId);
+            if (!ic)
+            {
+                LOG_WARN("Removed unknown item " << itemId << " from inventory"
+                         " of character " << mClient->getDatabaseID() << '.');
+                freeIndex(i);
+                continue;
+            }
+        }
+        ++i;
+    }
 }
 
 int Inventory::getItem(int slot) const
@@ -615,6 +657,33 @@ void Inventory::replaceInSlot(int slot, int itemId, int amount)
     }
 }
 
+void Inventory::changeEquipment(int slot, int itemId)
+{
+    // FIXME: Changes are applied now, so it does not work in delayed mode.
+    assert(!mDelayed);
+
+    int oldId = mPoss->equipment[slot];
+    if (oldId == itemId)
+    {
+        return;
+    }
+
+    if (oldId)
+    {
+        ItemManager::getItem(oldId)->getModifiers().cancelAttributes(mClient);
+    }
+
+    if (itemId)
+    {
+        ItemManager::getItem(itemId)->getModifiers().applyAttributes(mClient);
+    }
+
+    msg.writeByte(slot);
+    msg.writeShort(itemId);
+    mPoss->equipment[slot] = itemId;
+    mChangedLook = true;
+}
+
 void Inventory::equip(int slot)
 {
     int itemId = getItem(slot);
@@ -645,13 +714,8 @@ void Inventory::equip(int slot)
             }
 
             replaceInSlot(slot, id1, 1);
-            msg.writeByte(EQUIP_FIGHT1_SLOT);
-            msg.writeShort(itemId);
-            msg.writeByte(EQUIP_FIGHT2_SLOT);
-            msg.writeShort(0);
-            mPoss->equipment[EQUIP_FIGHT1_SLOT] = itemId;
-            mPoss->equipment[EQUIP_FIGHT2_SLOT] = 0;
-            mChangedLook = true;
+            changeEquipment(EQUIP_FIGHT1_SLOT, itemId);
+            changeEquipment(EQUIP_FIGHT2_SLOT, 0);
             return;
         }
 
@@ -715,10 +779,7 @@ void Inventory::equip(int slot)
 
     // Put the item in the first equipment slot.
     replaceInSlot(slot, id, 1);
-    msg.writeByte(firstSlot);
-    msg.writeShort(itemId);
-    mPoss->equipment[firstSlot] = itemId;
-    mChangedLook = true;
+    changeEquipment(firstSlot, itemId);
 }
 
 void Inventory::unequip(int slot)
@@ -732,9 +793,6 @@ void Inventory::unequip(int slot)
 
     if (insert(itemId, 1) == 0)
     {
-        msg.writeByte(slot);
-        msg.writeShort(0);
-        mPoss->equipment[slot] = 0;
-        mChangedLook = true;
+        changeEquipment(slot, 0);
     }
 }

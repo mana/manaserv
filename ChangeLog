@@ -1,3 +1,19 @@
+2007-08-19  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/account-server/accounthandler.cpp, src/defines.h: Fixed typos.
+	* src/game-server/itemmanager.cpp: Worked around inconsistent spelling.
+	* src/game-server/item.cpp, src/game-server/item.hpp: Added support for
+	equipment modifiers.
+	* src/game-server/inventory.hpp, src/game-server/inventory.cpp: Added
+	sanity checks at initialization. Applied equipment modifiers to
+	character.
+	* src/game-server/being.hpp, src/game-server/being.cpp: Set base
+	element resistance to 100. Added support for temporary modifiers.
+	* src/game-server/character.cpp: Removed redundant updates of
+	attributes.
+	* src/game-server/monster.cpp, src/game-server/character.hpp: Cleaned
+	fallout due to above patches.
+
 2007-08-18  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/serialize/characterdata.hpp, src/account-server/dalstorage.cpp,

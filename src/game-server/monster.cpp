@@ -96,6 +96,8 @@ void Monster::perform()
 
 void Monster::update()
 {
+    Being::update();
+
     // If dead do nothing but rot
     if (mAction == DEAD)
     {
@@ -235,8 +237,7 @@ void Monster::died(Being *being)
 int Monster::damage(Object *source, Damage const &damage)
 {
     int HPLoss = Being::damage(source, damage);
-    if (getModifiedAttribute(BASE_ATTR_HP) && HPLoss && source &&
-        source->getType() == OBJECT_CHARACTER)
+    if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
     {
         Being *s = static_cast< Being * >(source);
         std::pair< std::map< Being *, int >::iterator, bool > ib =

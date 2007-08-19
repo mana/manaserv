@@ -24,9 +24,12 @@
 #ifndef _TMWSERV_ITEM
 #define _TMWSERV_ITEM
 
+#include <string>
 #include <vector>
 
-#include "game-server/character.hpp"
+#include "game-server/object.hpp"
+
+class Being;
 
 /**
  * Enumeration of available Item types.
@@ -119,7 +122,7 @@ enum
 struct ItemModifier
 {
     unsigned char type;
-    signed short value;
+    short value;
 };
 
 /**
@@ -128,10 +131,37 @@ struct ItemModifier
 class ItemModifiers
 {
     public:
+
+        /**
+         * Gets the value associated to a modifier type, or zero if none.
+         */
         int getValue(int type) const;
+
+        /**
+         * Sets the value associated to a modifier type.
+         */
         void setValue(int type, int amount);
+
+        /**
+         * Gets the value associated to a MOD_ATTRIBUTE class, or zero if none.
+         */
         int getAttributeValue(int attr) const;
+
+        /**
+         * Sets the value associated to a MOD_ATTRIBUTE class.
+         */
         void setAttributeValue(int attr, int amount);
+
+        /**
+         * Applies all the attribute modifiers to a given Being.
+         */
+        void applyAttributes(Being *) const;
+
+        /**
+         * Cancels all the applied modifiers to a given Being.
+         * Only meant for equipment.
+         */
+        void cancelAttributes(Being *) const;
 
     private:
         std::vector< ItemModifier > mModifiers;

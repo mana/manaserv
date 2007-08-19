@@ -95,6 +95,12 @@ class Inventory
         void sendFull() const;
 
         /**
+         * Ensures the inventory is sane and apply equipment modifiers.
+         * Should be run only once and the very first time.
+         */
+        void initialize();
+
+        /**
          * Equips item from given inventory slot.
          */
         void equip(int slot);
@@ -192,6 +198,11 @@ class Inventory
          * Replaces a whole slot of items from inventory.
          */
         void replaceInSlot(int slot, int itemId, int amount);
+
+        /**
+         * Changes equipment and adjusts character attributes.
+         */
+        void changeEquipment(int slot, int itemId);
 
         Possessions *mPoss; /**< Pointer to the modified possessions. */
         MessageOut msg;     /**< Update message containing all the changes. */

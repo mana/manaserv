@@ -36,6 +36,11 @@ Being::Being(int type, int id):
 {
     Attribute attr = { 0, 0 };
     mAttributes.resize(NB_BEING_ATTRIBUTES, attr);
+    // Initialize element resistance to 100 (normal damage).
+    for (int i = BASE_ELEM_BEGIN; i < BASE_ELEM_END; ++i)
+    {
+        mAttributes[i].base = 100;
+    }
 }
 
 Being::~Being()
@@ -81,7 +86,6 @@ int Being::damage(Object *, Damage const &damage)
         if (avoidChance > 50) avoidChance = 50;
     }
     int chance = rand() / (RAND_MAX / 100);
-    LOG_INFO("Chance: " << chance << " (" << avoidChance << ", " << 100 - criticalChance << "); Damage: " << HPloss);
     if (chance <= avoidChance)
     {
         mHitsTaken.push_back(0);
@@ -89,9 +93,9 @@ int Being::damage(Object *, Damage const &damage)
     }
     if (chance >= 100 - criticalChance) HPloss *= 2;
 
-    /* Elemental modifier at 0 means normal damage. At -100, it means immune.
-       And at 100, it means vulnerable (double damage). */
-    int mod1 = 100 + getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
+    /* Elemental modifier at 100 means normal damage. At 0, it means immune.
+       And at 200, it means vulnerable (double damage). */
+    int mod1 = getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
 
     /* Resistance to damage at 0 gives normal damage. At 100, it gives halved
        damage. At 200, it divides damage by 3. And so on. */
@@ -245,15 +249,17 @@ void Being::removeEquipmentModifier(int attr, int value)
 
 void Being::dispellModifiers(int level)
 {
-    for (AttributeModifiers::iterator i = mModifiers.begin();
-         i != mModifiers.end(); ++i)
+    AttributeModifiers::iterator i = mModifiers.begin();
+    while (i != mModifiers.end())
     {
         if (i->level && i->level <= level)
         {
             mAttributes[i->attr].mod -= i->value;
             modifiedAttribute(i->attr);
             i = mModifiers.erase(i);
+            continue;
         }
+        ++i;
     }
 }
 
@@ -261,4 +267,23 @@ int Being::getModifiedAttribute(int attr) const
 {
     int res = mAttributes[attr].base + mAttributes[attr].mod;
     return res <= 0 ? 0 : res;
+}
+
+void Being::update()
+{
+    // Update lifetime of effects.
+    AttributeModifiers::iterator i = mModifiers.begin();
+    while (i != mModifiers.end())
+    {
+        if (i->duration)
+        {
+            --i->duration;
+            if (!i->duration)
+            {
+                i = mModifiers.erase(i);
+                continue;
+            }
+        }
+        ++i;
+    }
 }

@@ -160,7 +160,7 @@ void AccountHandler::sendCharacterData(AccountClient &computer, int slot, Charac
     charInfo.writeByte(ch.getLevel());
     charInfo.writeLong(ch.getPossessions().money);
 
-    for (int j = BASE_ATTR_BEGIN; j < BASE_ATTR_END; ++j)
+    for (int j = CHAR_ATTR_BEGIN; j < CHAR_ATTR_END; ++j)
     {
         charInfo.writeShort(ch.getAttribute(j));
     }

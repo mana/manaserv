@@ -50,11 +50,6 @@ class Character : public Being
         Character(MessageIn &msg);
 
         /**
-         * Updates the internal status.
-         */
-        void update() {}
-
-        /**
          * Perform actions.
          */
         void perform();

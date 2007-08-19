@@ -23,6 +23,8 @@
 
 #include "game-server/item.hpp"
 
+#include "game-server/being.hpp"
+
 int ItemModifiers::getValue(int type) const
 {
     for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
@@ -52,6 +54,34 @@ void ItemModifiers::setValue(int type, int value)
 void ItemModifiers::setAttributeValue(int attr, int value)
 {
     setValue(MOD_ATTRIBUTE + attr, value);
+}
+
+void ItemModifiers::applyAttributes(Being *b) const
+{
+    int lifetime = getValue(MOD_LIFETIME);
+    for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
+         i_end = mModifiers.end(); i != i_end; ++i)
+    {
+        if (i->type < MOD_ATTRIBUTE) continue;
+
+        AttributeModifier am;
+        am.attr = i->type - MOD_ATTRIBUTE;
+        am.duration = lifetime;
+        am.value = i->value;
+        // TODO: No spell currently.
+        am.level = 0;
+        b->addModifier(am);
+    }
+}
+
+void ItemModifiers::cancelAttributes(Being *b) const
+{
+    for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
+         i_end = mModifiers.end(); i != i_end; ++i)
+    {
+        if (i->type < MOD_ATTRIBUTE) continue;
+        b->removeEquipmentModifier(i->type - MOD_ATTRIBUTE, i->value);
+    }
 }
 
 bool ItemClass::use(Being *itemUser)

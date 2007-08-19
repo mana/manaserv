@@ -129,6 +129,11 @@ class Being : public MovingObject
         ~Being();
 
         /**
+         * Cleans obsolete attribute modifiers.
+         */
+        void update();
+
+        /**
          * Takes a damage structure, computes the real damage based on the
          * stats, deducts the result from the hitpoints and adds the result to
          * the HitsTaken list.
