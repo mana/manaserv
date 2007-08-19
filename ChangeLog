@@ -13,6 +13,8 @@
 	attributes.
 	* src/game-server/monster.cpp, src/game-server/character.hpp: Cleaned
 	fallout due to above patches.
+	* src/scripting/lua.cpp, data/test.lua: Allowed Lua scripts to query
+	and change money.
 
 2007-08-18  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

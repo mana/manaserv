@@ -217,7 +217,8 @@ static int LuaChr_Warp(lua_State *s)
  * (negative amount) should be passed first, then insertions (positive amount).
  * If a removal fails, all the previous operations are canceled (except for
  * items dropped on the floor, hence why removals should be passed first), and
- * the function returns false. Otherwise the function will return true.
+ * the function returns false. Otherwise the function will return true. When
+ * the item identifier is zero, money is modified.
  * Note: If an insertion fails, extra items are dropped on the floor.
  * tmw.chr_inv_change(character, (int id, int nb)...): bool success
  */
@@ -240,7 +241,17 @@ static int LuaChr_InvChange(lua_State *s)
         }
         int id = lua_tointeger(s, i * 2 + 2);
         int nb = lua_tointeger(s, i * 2 + 3);
-        if (nb < 0)
+
+        if (id == 0)
+        {
+            if (!inv.changeMoney(nb))
+            {
+                inv.cancel();
+                lua_pushboolean(s, 0);
+                return 1;
+            }
+        }
+        else if (nb < 0)
         {
             nb = inv.remove(id, -nb);
             if (nb)
@@ -275,6 +286,7 @@ static int LuaChr_InvChange(lua_State *s)
 
 /**
  * Callback for counting items in inventory.
+ * When an item identifier is zero, money is queried.
  * tmw.chr_inv_count(character, int id...): int count...
  */
 static int LuaChr_InvCount(lua_State *s)
@@ -295,7 +307,8 @@ static int LuaChr_InvCount(lua_State *s)
             LOG_WARN("LuaChr_InvCount called with incorrect parameters.");
             return 0;
         }
-        int nb = inv.count(lua_tointeger(s, i));
+        int id = lua_tointeger(s, i);
+        int nb = id ? inv.count(id) : q->getPossessions().money;
         lua_pushinteger(s, nb);
     }
     return nb_items;

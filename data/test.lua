@@ -8,10 +8,10 @@ atinit(function()
 end)
 
 function my_npc1(npc, ch)
-  do_message(npc, ch, "Hello! I am the testing NPC")
+  do_message(npc, ch, "Hello! I am the testing NPC.")
   do_message(npc, ch, "This message is just here for testing intertwined connections.")
   do_message(npc, ch, "What do you want?")
-  local v = do_choice(npc, ch, "Guns! Lots of guns!", "A christmas party!", "To buy.", "To sell.", "Nothing.")
+  local v = do_choice(npc, ch, "Guns! Lots of guns!", "A Christmas party!", "To buy.", "To sell.", "To make a donation.")
   if v == 1 then
     do_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
   elseif v == 2 then
@@ -19,7 +19,7 @@ function my_npc1(npc, ch)
     if n1 == 0 or n2 ~= 0 then
       do_message(npc, ch, "Yeah right...")
     else
-      do_message(npc, ch, "I can't help you with the party. But I see you have a fancy hat. I could change it into a santa hat. Not much of a party, but it would get you going.")
+      do_message(npc, ch, "I can't help you with the party. But I see you have a fancy hat. I could change it into Santa's hat. Not much of a party, but it would get you going.")
       v = do_choice(npc, ch, "Please do.", "No way! Fancy hats are classier.")
       if v == 1 then
         tmw.chr_inv_change(ch, 524, -1, 511, 1)
@@ -29,6 +29,12 @@ function my_npc1(npc, ch)
     tmw.npc_trade(npc, ch, false, { {533, 10, 20}, {535, 10, 30}, {537, 10, 50} })
   elseif v == 4 then
     tmw.npc_trade(npc, ch, true, { {511, 10, 200}, {524, 10, 300}, {508, 10, 500}, {537, 10, 25} })
+  elseif v == 5 then
+    if tmw.chr_inv_change(ch, 0, -100) then
+      do_message(npc, ch, string.format("Thank you for you patronage! You are left with %d gil.", tmw.chr_inv_count(ch, 0)))
+    else
+      do_message(npc, ch, "I would feel bad taking money from someone that poor.")
+    end
   end
 end
 
