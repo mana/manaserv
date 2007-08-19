@@ -15,6 +15,11 @@
 	fallout due to above patches.
 	* src/scripting/lua.cpp, data/test.lua: Allowed Lua scripts to query
 	and change money.
+	* src/game-server/being.cpp, src/game-server/being.hpp: Simplified
+	handling of permanent modifiers.
+	* src/game-server/item.cpp, src/game-server/item.hpp,
+	src/game-server/gamehandler.cpp: Implemented use of items.
+	* src/game-server/itemmanager.cpp: Fixed lifetime value.
 
 2007-08-18  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

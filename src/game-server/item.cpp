@@ -58,19 +58,16 @@ void ItemModifiers::setAttributeValue(int attr, int value)
 
 void ItemModifiers::applyAttributes(Being *b) const
 {
+    /* Note: if someone puts a "lifetime" property on an equipment, strange
+       behavior will occur, as its effect will be canceled twice. While this
+       could be desirable for some "cursed" items, it is probably an error
+       that should be detected somewhere else. */
     int lifetime = getValue(MOD_LIFETIME);
     for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
          i_end = mModifiers.end(); i != i_end; ++i)
     {
         if (i->type < MOD_ATTRIBUTE) continue;
-
-        AttributeModifier am;
-        am.attr = i->type - MOD_ATTRIBUTE;
-        am.duration = lifetime;
-        am.value = i->value;
-        // TODO: No spell currently.
-        am.level = 0;
-        b->addModifier(am);
+        b->applyModifier(i->type - MOD_ATTRIBUTE, i->value, lifetime);
     }
 }
 
@@ -80,25 +77,14 @@ void ItemModifiers::cancelAttributes(Being *b) const
          i_end = mModifiers.end(); i != i_end; ++i)
     {
         if (i->type < MOD_ATTRIBUTE) continue;
-        b->removeEquipmentModifier(i->type - MOD_ATTRIBUTE, i->value);
+        b->applyModifier(i->type - MOD_ATTRIBUTE, -i->value);
     }
 }
 
 bool ItemClass::use(Being *itemUser)
 {
-    bool usedSuccessfully = true;
-    // Applying Modifiers for a given lifetime
-    // TODO
+    if (mType != ITEM_USABLE) return false;
 
-    // Calling a script if scriptName != ""
-    if (!mScriptName.empty())
-            return (runScript(itemUser) && usedSuccessfully);
-
-    return usedSuccessfully;
-}
-
-bool ItemClass::runScript(Being *itemUser)
-{
-    //TODO
+    mModifiers.applyAttributes(itemUser);
     return true;
 }

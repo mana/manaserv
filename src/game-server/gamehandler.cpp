@@ -216,6 +216,19 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
         } break;
 
+        case PGMSG_USE_ITEM:
+        {
+            int slot = message.readByte();
+            Inventory inv(computer.character);
+            if (ItemClass *ic = ItemManager::getItem(inv.getItem(slot)))
+            {
+                if (ic->use(computer.character))
+                {
+                    inv.removeFromSlot(slot, 1);
+                }
+            }
+        } break;
+
         case PGMSG_DROP:
         {
             int slot = message.readByte();

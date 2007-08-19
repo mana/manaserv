@@ -197,13 +197,12 @@ class Being : public MovingObject
 
         /**
          * Adds a modifier to one attribute.
+         * @param duration If non-zero, creates a temporary modifier that
+         *        expires after \p duration ticks.
+         * @param lvl If non-zero, indicates that a temporary modifier can be
+         *        dispelled prematuraly by a spell of given level.
          */
-        void addModifier(AttributeModifier const &);
-
-        /**
-         * Removes a modifier due to an equipment.
-         */
-        void removeEquipmentModifier(int attr, int value);
+        void applyModifier(int attr, int value, int duration = 0, int lvl = 0);
 
         /**
          * Removes all the modifiers with a level low enough.

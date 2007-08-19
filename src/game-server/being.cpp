@@ -221,29 +221,18 @@ void Being::setAction(Action action)
     }
 }
 
-void Being::addModifier(AttributeModifier const &mod)
+void Being::applyModifier(int attr, int amount, int duration, int lvl)
 {
-    mModifiers.push_back(mod);
-    mAttributes[mod.attr].mod += mod.value;
-    modifiedAttribute(mod.attr);
-}
-
-void Being::removeEquipmentModifier(int attr, int value)
-{
-    bool found = false;
-    for (AttributeModifiers::iterator i = mModifiers.begin(),
-         i_end = mModifiers.end(); i != i_end; ++i)
+    if (duration)
     {
-        found = i->level == 0 && i->attr == attr && i->value == value;
-        if (found)
-        {
-            // Remove one equivalent modifier.
-            mModifiers.erase(i);
-            break;
-        }
+        AttributeModifier mod;
+        mod.attr = attr;
+        mod.value = amount;
+        mod.duration = duration;
+        mod.level = lvl;
+        mModifiers.push_back(mod);
     }
-    assert(found);
-    mAttributes[attr].mod -= value;
+    mAttributes[attr].mod += amount;
     modifiedAttribute(attr);
 }
 
@@ -275,14 +264,13 @@ void Being::update()
     AttributeModifiers::iterator i = mModifiers.begin();
     while (i != mModifiers.end())
     {
-        if (i->duration)
+        --i->duration;
+        if (!i->duration)
         {
-            --i->duration;
-            if (!i->duration)
-            {
-                i = mModifiers.erase(i);
-                continue;
-            }
+            mAttributes[i->attr].mod -= i->value;
+            modifiedAttribute(i->attr);
+            i = mModifiers.erase(i);
+            continue;
         }
         ++i;
     }

@@ -24,7 +24,6 @@
 #ifndef _TMWSERV_ITEM
 #define _TMWSERV_ITEM
 
-#include <string>
 #include <vector>
 
 #include "game-server/object.hpp"
@@ -178,8 +177,8 @@ class ItemClass
         {}
 
         /**
-         * The function called to use an item applying
-         * only the modifiers (for simple items...)
+         * Applies the modifiers of an item to a given user.
+         * @return true if the item was sucessfully used and should be removed.
          */
         bool use(Being *itemUser);
 
@@ -238,12 +237,6 @@ class ItemClass
         { mModifiers = modifiers; }
 
         /**
-         * Sets associated script name.
-         */
-        void setScriptName(std::string const &name)
-        { mScriptName = name; }
-
-        /**
          * Gets database ID.
          */
         int getDatabaseID()
@@ -263,11 +256,6 @@ class ItemClass
 
     private:
 
-        /**
-         * Runs the associated script when using the item, if any.
-         */
-        bool runScript(Being *itemUser);
-
         // Item reference information
         unsigned short mDatabaseID;
         unsigned short mSpriteID; /**< The sprite that should be shown to the character */
@@ -275,7 +263,6 @@ class ItemClass
         unsigned short mWeight;  /**< Weight of the item. */
         unsigned short mCost;    /**< Unit cost the item. */
         unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory. */
-        std::string mScriptName; /**< Item script. */
         ItemModifiers mModifiers; /**< Item modifiers. */
 };
 

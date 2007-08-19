@@ -95,7 +95,7 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
         modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));
         modifiers.setValue(MOD_WEAPON_DAMAGE, XML::getProperty(node, "attack",      0));
         modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));
-        modifiers.setValue(MOD_LIFETIME,      XML::getProperty(node, "lifetime",    0));
+        modifiers.setValue(MOD_LIFETIME,      XML::getProperty(node, "lifetime", 0) * 10);
         modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
         // FIXME: decide on one single spelling for defense/defence
         modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defense", 0));
@@ -134,7 +134,7 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
         item->setWeight(weight);
         item->setCost(value);
         item->setMaxPerSlot(maxPerSlot);
-        item->setScriptName(scriptName);
+        //item->setScriptName(scriptName);
         item->setModifiers(modifiers);
         item->setSpriteID(sprite ? sprite : id);
         itemClasses[id] = item;
