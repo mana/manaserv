@@ -94,14 +94,16 @@ fi
 # Checks for Lua support
 AC_ARG_ENABLE(
     [lua-engine],
-    AS_HELP_STRING([--enable-lua-engine], [support Lua scripts]),
-    [if test "$enable_lua_engine" = "yes"; then
-        PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1])
-        CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
-        LIBS="$LIBS $LUA_LIBS"
-    fi],
-    [enable_lua_engine="no"]
+    AS_HELP_STRING([--disable-lua-engine], [do not support Lua scripts]),
+    [],
+    [enable_lua_engine="yes"]
 )
+
+if test "$enable_lua_engine" = "yes"; then
+    PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1])
+    CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
+    LIBS="$LIBS $LUA_LIBS"
+fi
 
 AM_CONDITIONAL(BUILD_MYSQL, test "$with_storage_backend" = "mysql")
 AM_CONDITIONAL(BUILD_POSTGRESQL, test "$with_storage_backend" = "postgresql")
