@@ -1,3 +1,7 @@
+2007-08-20  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/scripting/script.cpp: Prevented access to uninitialized engines.
+
 2007-08-19  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/accounthandler.cpp, src/defines.h: Fixed typos.

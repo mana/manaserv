@@ -47,13 +47,16 @@ void Script::registerEngine(std::string const &name, Factory f)
 
 Script *Script::create(std::string const &engine)
 {
-    Engines::const_iterator i = engines->find(engine);
-    if (i == engines->end())
+    if (engines)
     {
-        LOG_ERROR("No scripting engine named " << engine);
-        return NULL;
+        Engines::const_iterator i = engines->find(engine);
+        if (i != engines->end())
+        {
+            return i->second();
+        }
     }
-    return i->second();
+    LOG_ERROR("No scripting engine named " << engine);
+    return NULL;
 }
 
 void Script::update()
