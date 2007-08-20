@@ -1,3 +1,8 @@
+2007-08-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* data/test.lua, data/scripts/libtmw.lua: Defined two helper functions
+	to abstract away money being available under inventory index 0.
+
 2007-08-20  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/scripting/script.cpp: Prevented access to uninitialized engines.

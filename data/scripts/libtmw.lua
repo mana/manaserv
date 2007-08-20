@@ -160,3 +160,13 @@ function initialize()
   end
   init_fun = nil
 end
+
+-- Below are some convenience methods added to the engine API
+
+tmw.chr_money_change = function(ch, amount)
+  return tmw.chr_inv_change(ch, 0, amount)
+end
+
+tmw.chr_money = function(ch)
+  return tmw.chr_inv_count(ch, 0)
+end

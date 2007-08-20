@@ -48,9 +48,14 @@ extern "C" {
 class LuaScript: public Script
 {
     public:
-
+        /**
+         * Constructor.
+         */
         LuaScript();
 
+        /**
+         * Destructor.
+         */
         ~LuaScript();
 
         void load(char const *);
@@ -440,7 +445,8 @@ void LuaScript::load(char const *prog)
         return;
     }
 
-    // A Lua chunk is like a function, so "execute" it in order to initialize it.
+    // A Lua chunk is like a function, so "execute" it in order to initialize
+    // it.
     res = lua_pcall(mState, 0, 0, 0);
     if (res)
     {

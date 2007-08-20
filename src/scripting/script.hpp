@@ -48,8 +48,14 @@ class Script
          */
         static Script *create(std::string const &engine);
 
+        /**
+         * Constructor.
+         */
         Script(): mMap(NULL) {}
 
+        /**
+         * Destructor.
+         */
         virtual ~Script() {}
 
         /**
@@ -91,7 +97,7 @@ class Script
          * Pushes a pointer argument to a game entity.
          * The interface can pass the pointer as an opaque value to the
          * scripting engine, if needed. This value will usually be passed
-         * by the script to some callabck functions.
+         * by the script to some callback functions.
          */
         virtual void push(Thing *) = 0;
 
