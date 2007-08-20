@@ -102,9 +102,9 @@ static Character *getCharacter(lua_State *s, int p)
 
 /**
  * Callback for sending a NPC_MESSAGE.
- * tmw.msg_npc_message(npc, character, string)
+ * tmw.npc_message(npc, character, string)
  */
-static int LuaMsg_NpcMessage(lua_State *s)
+static int LuaNpc_Message(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
@@ -112,7 +112,7 @@ static int LuaMsg_NpcMessage(lua_State *s)
     char const *m = lua_tolstring(s, 3, &l);
     if (!p || !q || !m)
     {
-        LOG_WARN("LuaMsg_NpcMessage called with incorrect parameters.");
+        LOG_WARN("LuaNpc_Message called with incorrect parameters.");
         return 0;
     }
     MessageOut msg(GPMSG_NPC_MESSAGE);
@@ -124,15 +124,15 @@ static int LuaMsg_NpcMessage(lua_State *s)
 
 /**
  * Callback for sending a NPC_CHOICE.
- * tmw.msg_npc_choice(npc, character, string...)
+ * tmw.npc_choice(npc, character, string...)
  */
-static int LuaMsg_NpcChoice(lua_State *s)
+static int LuaNpc_Choice(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
     if (!p || !q)
     {
-        LOG_WARN("LuaMsg_NpcChoice called with incorrect parameters.");
+        LOG_WARN("LuaNpc_Choice called with incorrect parameters.");
         return 0;
     }
     MessageOut msg(GPMSG_NPC_CHOICE);
@@ -142,7 +142,7 @@ static int LuaMsg_NpcChoice(lua_State *s)
         char const *m = lua_tostring(s, i);
         if (!m)
         {
-            LOG_WARN("LuaMsg_NpcChoice called with incorrect parameters.");
+            LOG_WARN("LuaNpc_Choice called with incorrect parameters.");
             return 0;
         }
         msg.writeString(m);
@@ -153,13 +153,13 @@ static int LuaMsg_NpcChoice(lua_State *s)
 
 /**
  * Callback for creating a NPC on the current map with the current script.
- * tmw.obj_create_npc(int id, int x, int y): npc
+ * tmw.npc_create(int id, int x, int y): npc
  */
-static int LuaObj_CreateNpc(lua_State *s)
+static int LuaNpc_Create(lua_State *s)
 {
     if (!lua_isnumber(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
     {
-        LOG_WARN("LuaObj_CreateNpc called with incorrect parameters.");
+        LOG_WARN("LuaNpc_Create called with incorrect parameters.");
         return 0;
     }
     lua_pushlightuserdata(s, (void *)&registryKey);
@@ -169,7 +169,7 @@ static int LuaObj_CreateNpc(lua_State *s)
     MapComposite *m = t->getMap();
     if (!m)
     {
-        LOG_WARN("LuaObj_CreateNpc called outside a map.");
+        LOG_WARN("LuaNpc_Create called outside a map.");
         return 0;
     }
     q->setMap(m);
@@ -370,13 +370,13 @@ LuaScript::LuaScript():
 
     // Put some callback functions in the scripting environment.
     static luaL_reg const callbacks[] = {
-        { "msg_npc_message",  &LuaMsg_NpcMessage  },
-        { "msg_npc_choice",   &LuaMsg_NpcChoice   },
-        { "obj_create_npc",   &LuaObj_CreateNpc   },
+        { "npc_create",       &LuaNpc_Create      },
+        { "npc_message",      &LuaNpc_Message     },
+        { "npc_choice",       &LuaNpc_Choice      },
+        { "npc_trade",        &LuaNpc_Trade       },
         { "chr_warp",         &LuaChr_Warp        },
         { "chr_inv_change",   &LuaChr_InvChange   },
         { "chr_inv_count",    &LuaChr_InvCount    },
-        { "npc_trade",        &LuaNpc_Trade       },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

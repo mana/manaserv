@@ -7,6 +7,8 @@
 
 	* src/scripting/script.cpp: Prevented access to uninitialized engines.
 	* configure.ac: Enabled Lua scripting by default.
+	* src/scripting/lua.cpp, data/scripts/libtmw.lua: Removed useless
+	function prefixes. Commented Lua internal variables.
 
 2007-08-19  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

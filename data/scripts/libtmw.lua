@@ -2,15 +2,28 @@
 -- Support code --
 ------------------
 
+-- Table that associates to each NPC pointer the handler function that is
+-- called when a player starts talking to an NPC.
 local npcs = {}
+
+-- Table that associates to each Character pointer its state with respect to
+-- NPCs (only one at a time). A state is an array with four fields:
+-- . 1: pointer of the NPC the player is currently talking to.
+-- . 2: coroutine running the NPC handler.
+-- . 3: next query the NPC expects from a player (1 = next, 2 = choice).
+-- . 4: countdown (in minutes) before the state is deleted.
 local states = {}
+
+-- Array containing the function registered by atinit.
 local init_fun = {}
+
+-- Tick timer used during update to clean obsolete states.
 local timer
 
 -- Creates an NPC and associates the given handler.
 -- Note: Cannot be called until map initialization has started.
 function create_npc(id, x, y, handler)
-  local npc = tmw.obj_create_npc(id, x, y)
+  local npc = tmw.npc_create(id, x, y)
   npcs[npc] = handler
 end
 
@@ -19,7 +32,7 @@ end
 function do_message(npc, ch, msg)
   -- Wait for the arrival of a pending acknowledgment, if any.
   coroutine.yield(0)
-  tmw.msg_npc_message(npc, ch, msg)
+  tmw.npc_message(npc, ch, msg)
   -- An acknowledgment is pending, but do not wait for its arrival.
   coroutine.yield(1)
 end
@@ -28,7 +41,7 @@ end
 function do_choice(npc, ch, ...)
   -- Wait for the arrival of a pending acknowledgment, if any.
   coroutine.yield(0)
-  tmw.msg_npc_choice(npc, ch, ...)
+  tmw.npc_choice(npc, ch, ...)
   -- Wait for player choice.
   return coroutine.yield(2)
 end
