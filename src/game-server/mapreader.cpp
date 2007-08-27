@@ -54,23 +54,30 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
         return;
     }
 
-    // Inflate the gzipped map data.
-    char *inflated;
-    unsigned inflatedSize = 0;
-    bool ret = inflateMemory(buffer, fileSize, inflated, inflatedSize);
-    free(buffer);
-
     xmlDocPtr doc = NULL;
 
-    if (ret)
+    int l = filename.length();
+    if (l > 3 && filename.substr(l - 3) == ".gz")
     {
-        doc = xmlParseMemory(inflated, inflatedSize);
-        free(inflated);
+        // Inflate the gzipped map data.
+        char *inflated;
+        unsigned inflatedSize = 0;
+        bool ret = inflateMemory(buffer, fileSize, inflated, inflatedSize);
+        free(buffer);
+        buffer = ret ? inflated : NULL;
+        fileSize = inflatedSize;
+    }
+
+    if (buffer)
+    {
+        // Parse the XML document.
+        doc = xmlParseMemory(buffer, fileSize);
+        free(buffer);
     }
 
     if (!doc)
     {
-        LOG_ERROR("Error while parsing map file (" << filename << ")!");
+        LOG_ERROR("Error while parsing map file '" << filename << "'!");
         return;
     }
 
@@ -311,7 +318,6 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                 }
                 else if (objType == "SCRIPT")
                 {
-                    printf("SCRIPT");
                     Script *s = composite->getScript();
                     if (!s)
                     {
@@ -378,91 +384,110 @@ static void readLayer(xmlNodePtr node, Map *map)
     int x = 0;
     int y = 0;
 
-    // Load the tile data. Layers are assumed to be map size, with (0,0) as
-    // origin.
-    while (node != NULL)
+    // Layers are assumed to be map size, with (0,0) as origin.
+    // Find its single "data" element.
+    while (node)
     {
-        if (xmlStrEqual(node->name, BAD_CAST "data"))
+        if (xmlStrEqual(node->name, BAD_CAST "data")) break;
+        node = node->next;
+    }
+
+    if (!node)
+    {
+        LOG_WARN("Layer without any 'data' element.");
+        return;
+    }
+
+    if (XML::getProperty(node, "encoding", std::string()) == "base64")
+    {
+        // Read base64 encoded map file
+        xmlNodePtr dataChild = node->xmlChildrenNode;
+        if (!dataChild)
         {
-            if (XML::getProperty(node, "encoding", std::string()) == "base64")
+            LOG_WARN("Corrupted layer.");
+            return;
+        }
+
+        int len = strlen((char const *)dataChild->content) + 1;
+        char *charData = new char[len + 1];
+        char const *charStart = (char const *)dataChild->content;
+        char *charIndex = charData;
+
+        while (*charStart)
+        {
+            if (*charStart != ' ' && *charStart != '\t' && *charStart != '\n')
             {
-                if (xmlHasProp(node, BAD_CAST "compression"))
-                {
-                    LOG_WARN("Warning: no layer compression supported!");
-                    return;
-                }
-
-                // Read base64 encoded map file
-                xmlNodePtr dataChild = node->xmlChildrenNode;
-                if (!dataChild) continue;
-
-                int len = strlen((char const *)dataChild->content) + 1;
-                char *charData = new char[len + 1];
-                char const *charStart = (char const *)dataChild->content;
-                char *charIndex = charData;
-
-                while (*charStart)
-                {
-                    if (*charStart != ' ' && *charStart != '\t' && *charStart != '\n')
-                    {
-                        *charIndex = *charStart;
-                        ++charIndex;
-                    }
-                    ++charStart;
-                }
-                *charIndex = '\0';
-
-                int binLen;
-                unsigned char *binData =
-                    php_base64_decode((unsigned char *)charData, strlen(charData), &binLen);
-
-                delete[] charData;
-
-                if (binData)
-                {
-                    for (int i = 0; i < binLen - 3; i += 4)
-                    {
-                        int gid = binData[i] |
-                                  (binData[i + 1] << 8)  |
-                                  (binData[i + 2] << 16) |
-                                  (binData[i + 3] << 24);
-
-                        setTileWithGid(map, x, y, gid);
-
-                        if (++x == w)
-                        {
-                            x = 0;
-                            ++y;
-                        }
-                    }
-                    free(binData);
-                }
+                *charIndex = *charStart;
+                ++charIndex;
             }
-            else
+            ++charStart;
+        }
+        *charIndex = '\0';
+
+        int binLen;
+        unsigned char *binData =
+            php_base64_decode((unsigned char *)charData, strlen(charData), &binLen);
+
+        delete[] charData;
+
+        if (!binData)
+        {
+            LOG_WARN("Failed to decode base64-encoded layer.");
+            return;
+        }
+
+        if (XML::getProperty(node, "compression", std::string()) == "gzip")
+        {
+            // Inflate the gzipped layer data
+            char *inflated;
+            unsigned inflatedSize;
+            bool res = inflateMemory((char *)binData, binLen, inflated, inflatedSize);
+            free(binData);
+
+            if (!res)
             {
-                // Read plain XML map file
-                xmlNodePtr n2 = node->xmlChildrenNode;
-
-                while (n2 != NULL)
-                {
-                    if (xmlStrEqual(n2->name, BAD_CAST "tile") && y < h)
-                    {
-                        int gid = XML::getProperty(n2, "gid", -1);
-                        setTileWithGid(map, x, y, gid);
-
-                        if (++x == w)
-                        {
-                            x = 0;
-                            ++y;
-                        }
-                    }
-
-                    n2 = n2->next;
-                }
+                LOG_WARN("Failed to decompress gzipped layer");
+                return;
             }
 
-            // There can be only one data element
-            break;
+            binData = (unsigned char *)inflated;
+            binLen = inflatedSize;
+        }
+
+        for (int i = 0; i < binLen - 3; i += 4)
+        {
+            int gid = binData[i] |
+                      (binData[i + 1] << 8)  |
+                      (binData[i + 2] << 16) |
+                      (binData[i + 3] << 24);
+
+            setTileWithGid(map, x, y, gid);
+
+            if (++x == w)
+            {
+                x = 0;
+                ++y;
+            }
+        }
+        free(binData);
+        return;
+    }
+
+    // Read plain XML map file
+    node = node->xmlChildrenNode;
+
+    while (node)
+    {
+        if (xmlStrEqual(node->name, BAD_CAST "tile") && y < h)
+        {
+            int gid = XML::getProperty(node, "gid", -1);
+            setTileWithGid(map, x, y, gid);
+
+            if (++x == w)
+            {
+                x = 0;
+                ++y;
+            }
         }
 
         node = node->next;
