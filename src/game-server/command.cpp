@@ -29,6 +29,8 @@
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/monster.hpp"
+#include "game-server/monstermanager.hpp"
 #include "game-server/state.hpp"
 
 template< typename T1 >
@@ -73,6 +75,8 @@ template<> struct Argument< MapComposite * >
 { static char const type = 'm'; };
 template<> struct Argument< ItemClass * >
 { static char const type = 'i'; };
+template<> struct Argument< MonsterClass * >
+{ static char const type = 'o'; };
 
 /**
  * A command that a user can run remotely with sufficient rights.
@@ -184,6 +188,22 @@ static void drop(Character *from, ItemClass *it, int nb)
     GameState::enqueueEvent(item, e);
 }
 
+static void spawn(Character *from, MonsterClass *specy, int nb)
+{
+    MapComposite *map = from->getMap();
+    Point const &pos = from->getPosition();
+    
+    for (int i = 0; i < nb; ++i)
+    {
+        Being *monster = new Monster(specy);
+        monster->setMap(map);
+        monster->setPosition(pos);
+        monster->clearDestination();
+        DelayedEvent e = { EVENT_INSERT };
+        GameState::enqueueEvent(monster, e);
+    }
+}
+
 /**
  * List of remote commands.
  */
@@ -193,6 +213,7 @@ static Command const commands[] =
     handle("item", AL_GM, item),
     handle("drop", AL_GM, drop),
     handle("money", AL_GM, money),
+    handle("spawn", AL_GM, spawn),
 };
 
 /**
@@ -284,6 +305,18 @@ void runCommand(Character *ch, std::string const &text)
 
             case 'n':
                 args[i] = atoi(arg.c_str());
+                break;
+
+            case 'o':
+                if (MonsterClass *mc = MonsterManager::getMonster(atoi(arg.c_str())))
+                {
+                    args[i] = (intptr_t)mc;
+                }
+                else
+                {
+                    // No such item.
+                    return;
+                }
                 break;
         }
         pos = pos2;

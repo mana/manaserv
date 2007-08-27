@@ -10,7 +10,7 @@
 	* src/game-server/gamehandler.cpp, src/game-server/command.cpp,
 	src/Makefile.am: Added support for remote commands.
 	* src/game-server/command.cpp: Implemented "warp", "item", "money",
-	and "drop" remote commands.
+	"drop", and "spawn" remote commands.
 
 2007-08-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
