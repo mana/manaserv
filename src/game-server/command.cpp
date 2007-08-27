@@ -31,6 +31,12 @@
 #include "game-server/mapmanager.hpp"
 #include "game-server/state.hpp"
 
+template< typename T1, typename T2 >
+static void proxy(void (*f)(), intptr_t args[4])
+{
+    ((void (*)(T1, T2))f)((T1)args[0], (T2)args[1]);
+}
+
 template< typename T1, typename T2, typename T3 >
 static void proxy(void (*f)(), intptr_t args[4])
 {
@@ -69,6 +75,24 @@ struct Command
     void (*target)();
     unsigned char level;
 };
+
+/**
+ * Creates a command with a 2-parameter handler.
+ */
+template< typename T1, typename T2 >
+static Command handle(char const *name, int level, void (*f)(T1, T2))
+{
+    Command c;
+    c.name = name;
+    c.level = level;
+    c.handler = &proxy< T1, T2 >;
+    c.target = (void (*)())f;
+    c.type[0] = Argument<T1>::type;
+    c.type[1] = Argument<T2>::type;
+    c.type[2] = 0;
+    c.type[3] = 0;
+    return c;
+}
 
 /**
  * Creates a command with a 3-parameter handler.
@@ -117,6 +141,11 @@ static void item(Character *q, ItemClass *it, int nb)
     Inventory(q).insert(it->getDatabaseID(), nb);
 }
 
+static void money(Character *q, int nb)
+{
+    Inventory(q).changeMoney(nb);
+}
+
 /**
  * List of remote commands.
  */
@@ -124,6 +153,7 @@ static Command const commands[] =
 {
     handle("warp", AL_GM, warp),
     handle("item", AL_GM, item),
+    handle("money", AL_GM, money),
 };
 
 /**

@@ -8,8 +8,9 @@
 	src/serialize/characterdata.hpp, src/account-server/characterdata.hpp:
 	Added serialization of account level.
 	* src/game-server/gamehandler.cpp, src/game-server/command.cpp,
-	src/Makefile.am: Added support for user commands. Implemented "warp"
-	and "item".
+	src/Makefile.am: Added support for remote commands.
+	* src/game-server/command.cpp: Implemented "warp", "item", and "money"
+	remote commands.
 
 2007-08-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
