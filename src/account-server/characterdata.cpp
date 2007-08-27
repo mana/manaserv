@@ -22,9 +22,11 @@
 
 #include "account-server/characterdata.hpp"
 
+#include "account-server/dalstorage.hpp"
+
 CharacterData::CharacterData(std::string const &name, int id):
-    mDatabaseID(id), mAccountID(-1), mName(name), mGender(0), mHairStyle(0),
-    mHairColor(0), mLevel(0), mMapId(0), mPos(0,0)
+    mName(name), mDatabaseID(id), mAccountID(-1), mPos(0,0), mMapId(0),
+    mGender(0), mHairStyle(0), mHairColor(0), mLevel(0)
 {
     for (int i = 0; i < CHAR_ATTR_NB; ++i)
     {
@@ -32,3 +34,8 @@ CharacterData::CharacterData(std::string const &name, int id):
     }
 }
 
+int CharacterData::getAccountLevel() const
+{
+    AccountPtr acc = Storage::instance("tmw").getAccountByID(mAccountID);
+    return acc->getLevel();
+}

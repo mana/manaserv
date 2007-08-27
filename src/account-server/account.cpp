@@ -34,11 +34,11 @@ Account::Account(const std::string& name,
                  const std::string& password,
                  const std::string& email,
                  int id)
-        : mID(id),
-          mName(name),
+        : mName(name),
           mPassword(password),
           mEmail(email),
           mCharacters(),
+          mID(id),
           mLevel(AL_NORMAL)
 {
     // NOOP
@@ -69,87 +69,6 @@ Account::~Account()
 {
     // mCharacters is a list of smart pointers which will take care about
     // deallocating the memory so nothing to deallocate here :)
-}
-
-
-/**
- * Set the user name.
- */
-void
-Account::setName(const std::string& name)
-{
-    mName = name;
-}
-
-
-/**
- * Get the user name.
- */
-const std::string&
-Account::getName(void) const
-{
-    return mName;
-}
-
-
-/**
- * Set the user password.
- */
-void
-Account::setPassword(const std::string& password)
-{
-    mPassword = password;
-}
-
-
-/**
- * Get the user password.
- */
-const std::string
-Account::getPassword(void) const
-{
-    return mPassword;
-}
-
-
-/**
- * Set the user email address.
- */
-void
-Account::setEmail(const std::string& email)
-{
-    // Email validity is checked by Accounthandler
-    mEmail = email;
-}
-
-
-/**
- * Get the user email address.
- */
-const std::string&
-Account::getEmail(void) const
-{
-    return mEmail;
-}
-
-
-/**
- * Set the account level.
- */
-void
-Account::setLevel(AccountLevel level)
-{
-    mLevel = level;
-}
-
-
-/**
- * Get the account level.
- */
-AccountLevel
-Account::getLevel(void) const
-{
-    return mLevel;
 }
 
 
@@ -187,15 +106,6 @@ bool Account::delCharacter(std::string const &name)
     if (it == end) return false;
     mCharacters.erase(it);
     return true;
-}
-
-
-/**
- * Get all the characters.
- */
-Characters &Account::getCharacters()
-{
-    return mCharacters;
 }
 
 

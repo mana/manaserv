@@ -166,6 +166,15 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_SAY:
         {
             std::string say = message.readString();
+            if (say.empty()) break;
+
+            if (say[0] == '/')
+            {
+                // Handle special command.
+                extern void runCommand(Character *, std::string const &);
+                runCommand(computer.character, say);
+                break;
+            }
             GameState::sayAround(computer.character, say);
         } break;
 

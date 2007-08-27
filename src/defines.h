@@ -27,22 +27,13 @@
 
 /**
  * Enumeration type for account levels.
- *
- * Note the the actual tasks that can be done by admin or gm, or the
- * restrictions on a restricted user, are not specified yet. Also, banned
- * status will probably be derived from a date field (the time until an account
- * is banned).
- *
- * It may be better to wait and see what permissions we'd want to grant to or
- * take from users, and then come up with a convenient way to handle that.
  */
-enum AccountLevel
+enum
 {
-    AL_NORMAL,      // User has regular rights
-    AL_ADMIN,       // User can perform administrator tasks
-    AL_GM,          // User can perform a subset of administrator tasks
-    AL_BANNED,      // This user is currently banned
-    AL_RESTRICTED   // User rights have been restricted
+    AL_BANNED =  0,     /**< This user is currently banned. */
+    AL_NORMAL = 10,     /**< User has regular rights. */
+    AL_GM     = 50,     /**< User can perform a subset of administrator tasks. */
+    AL_ADMIN  = 99,     /**< User can perform administrator tasks. */
 };
 
 enum

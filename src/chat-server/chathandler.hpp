@@ -29,7 +29,6 @@
 #include "net/connectionhandler.hpp"
 
 class ChatClient;
-enum AccountLevel;
 
 /**
  * Manages chat related things like private messaging, chat channel handling
@@ -48,7 +47,7 @@ class ChatHandler : public ConnectionHandler
         struct Pending
         {
             std::string character;
-            AccountLevel level;
+            unsigned char level;
         };
 
     public:

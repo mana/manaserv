@@ -25,7 +25,6 @@
 
 #include <string>
 
-#include "defines.h"
 #include "account-server/characterdata.hpp"
 #include "utils/countedptr.h"
 
@@ -85,8 +84,8 @@ class Account
          *
          * @param name the user name.
          */
-        void
-        setName(const std::string& name);
+        void setName(std::string const &name)
+        { mName = name; }
 
 
         /**
@@ -94,8 +93,8 @@ class Account
          *
          * @return the user name.
          */
-        const std::string&
-        getName() const;
+        std::string const &getName() const
+        { return mName; }
 
 
         /**
@@ -103,8 +102,8 @@ class Account
          *
          * @param password the user password.
          */
-        void
-        setPassword(const std::string& password);
+        void setPassword(std::string const &password)
+        { mPassword = password; }
 
 
         /**
@@ -112,8 +111,8 @@ class Account
          *
          * @return the user password.
          */
-        const std::string
-        getPassword(void) const;
+        std::string const &getPassword() const
+        { return mPassword; }
 
 
         /**
@@ -121,8 +120,8 @@ class Account
          *
          * @param email the user email address.
          */
-        void
-        setEmail(const std::string& email);
+        void setEmail(std::string const &email)
+        { mEmail = email; }
 
 
         /**
@@ -130,8 +129,8 @@ class Account
          *
          * @return the user email address.
          */
-        const std::string&
-        getEmail(void) const;
+        std::string const &getEmail() const
+        { return mEmail; }
 
 
         /**
@@ -139,8 +138,8 @@ class Account
          *
          * @param level the new level.
          */
-        void
-        setLevel(AccountLevel level);
+        void setLevel(int level)
+        { mLevel = level; }
 
 
         /**
@@ -148,8 +147,8 @@ class Account
          *
          * @return the account level.
          */
-        AccountLevel
-        getLevel() const;
+        int getLevel() const
+        { return mLevel; }
 
 
         /**
@@ -183,8 +182,16 @@ class Account
          *
          * @return all the characters.
          */
-        Characters&
-        getCharacters();
+        Characters &getCharacters()
+        { return mCharacters; }
+
+        /**
+         * Get all the characters.
+         *
+         * @return all the characters.
+         */
+        Characters const &getCharacters() const
+        { return mCharacters; }
 
         /**
          * Get a character by name.
@@ -215,12 +222,12 @@ class Account
 
 
     private:
-        int mID;               /**< unique id */
         std::string mName;     /**< user name */
         std::string mPassword; /**< user password (encrypted) */
         std::string mEmail;    /**< user email address */
         Characters mCharacters;   /**< Character data */
-        AccountLevel mLevel;   /**< account level */
+        int mID;               /**< unique id */
+        unsigned char mLevel;   /**< account level */
 };
 
 

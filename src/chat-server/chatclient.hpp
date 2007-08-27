@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 
-#include "defines.h"
 #include "net/netcomputer.hpp"
 
 class ChatChannel;
@@ -43,14 +42,13 @@ class ChatClient : public NetComputer
          * Constructor.
          */
         ChatClient(ENetPeer *peer):
-            NetComputer(peer),
-            accountLevel(AL_NORMAL)
+            NetComputer(peer)
         {
         }
 
         std::string characterName;
         std::vector< ChatChannel * > channels;
-        AccountLevel accountLevel;
+        unsigned char accountLevel;
 };
 
 #endif

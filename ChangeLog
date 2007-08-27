@@ -1,3 +1,16 @@
+2007-08-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/chat-server/chathandler.hpp, src/chat-server/chatclient.hpp,
+	src/chat-server/chatclient.cpp, src/account-server/account.hpp,
+	src/account-server/account.cpp, src/defines.hpp: Used discontiguous
+	values for account level.
+	* src/account-server/characterdata.cpp, src/game-server/character.hpp,
+	src/serialize/characterdata.hpp, src/account-server/characterdata.hpp:
+	Added serialization of account level.
+	* src/game-server/gamehandler.cpp, src/game-server/command.cpp,
+	src/Makefile.am: Added support for user commands. Implemented "warp"
+	and "item".
+
 2007-08-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* data/test.lua, data/scripts/libtmw.lua: Defined two helper functions

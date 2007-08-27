@@ -45,7 +45,7 @@ void registerChatClient(const std::string &token,
 {
     ChatHandler::Pending *p = new ChatHandler::Pending;
     p->character = name;
-    p->level = (AccountLevel) level;
+    p->level = level;
     chatHandler->mTokenCollector.addPendingConnect(token, p);
 }
 

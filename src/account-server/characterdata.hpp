@@ -91,6 +91,13 @@ class CharacterData
         void
         setHairColor(int color) { mHairColor = color; }
 
+        /** Gets the account level of the user. */
+        int getAccountLevel() const;
+
+        /** Sets the account level of the user. */
+        void setAccountLevel(int)
+        { /* Ignored as we do not trust game servers that much. */ }
+
         /** Gets the level of the character. */
         int
         getLevel() const { return mLevel; }
@@ -146,19 +153,20 @@ class CharacterData
         CharacterData(CharacterData const &);
         CharacterData &operator=(CharacterData const &);
 
+        Possessions mPossessions; //!< All the possesions of the character.
+        std::string mName;        //!< Name of the character.
         int mDatabaseID;          //!< Character database ID.
                                   //!< (-1) if not set yet.
         int mAccountID;           //!< Account ID of the account the character
                                   //!< belongs to. (-1) if not set yet.
-        std::string mName;        //!< Name of the character.
-        unsigned char mGender;    //!< Gender of the being.
-        unsigned char mHairStyle; //!< Hair Style of the being.
-        unsigned char mHairColor; //!< Hair Color of the being.
-        unsigned char mLevel;     //!< Level of the being.
+        Point mPos;               //!< Position the being is at.
         unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
         unsigned short mMapId;    //!< Map the being is on.
-        Point mPos;               //!< Position the being is at.
-        Possessions mPossessions; //!< All the possesions of the character.
+        unsigned char mGender;    //!< Gender of the being.
+        unsigned char mHairStyle; //!< Hair style of the being.
+        unsigned char mHairColor; //!< Hair color of the being.
+        unsigned char mLevel;     //!< Level of the being.
+
         std::vector<std::string> mGuilds;        //!< All the guilds the player
                                                  //!< belongs to.
 };

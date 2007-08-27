@@ -176,6 +176,14 @@ class Character : public Being
         setLevel(int level)
         { mLevel = level; }
 
+        /** Gets the account level of the user. */
+        int getAccountLevel() const
+        { return mAccountLevel; }
+
+        /** Sets the account level of the user. */
+        void setAccountLevel(int l)
+        { mAccountLevel = l; }
+
         /**
          * Sends a message that informs the client about attribute
          * modified since last call.
@@ -226,6 +234,7 @@ class Character : public Being
         unsigned char mHairStyle;    /**< Hair Style of the character. */
         unsigned char mHairColor;    /**< Hair Color of the character. */
         unsigned char mLevel;        /**< Level of the character. */
+        unsigned char mAccountLevel; /**< Account level of the user. */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
 };
 
