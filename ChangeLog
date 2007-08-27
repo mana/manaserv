@@ -19,6 +19,11 @@
 	"drop", and "spawn" remote commands.
 	* src/game-server/mapreader.cpp: Added support for uncompressed map
 	files and compressed layers.
+	* src/resourcemanager.cpp, src/resourcemanager.h: Added "exists"
+	function to resource manager.
+	* src/game-server/mapmanager.cpp: Used runtime selection of map
+	filename extensions.
+	* data/maps.xml: Removed extensions from map names.
 
 2007-08-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

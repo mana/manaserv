@@ -116,8 +116,13 @@ void MapManager::raiseActive(int mapId)
         return;
     }
 
-    std::string const &file = composite->getName();
-    MapReader::readMap("maps/" + file, composite);
+    std::string file = "maps/" + composite->getName() + ".tmx";
+    ResourceManager *resman = ResourceManager::getInstance();
+    if (!resman->exists(file))
+    {
+        file += ".gz";
+    }
+    MapReader::readMap(file, composite);
 
     LOG_INFO("Activated map \"" << file << "\" (id " << mapId << ")");
     // Add some testing stuff

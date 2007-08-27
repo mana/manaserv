@@ -139,11 +139,17 @@ ResourceManager::searchAndAddZipFiles()
 #endif
 }
 
+bool ResourceManager::exists(std::string const &path)
+{
+    return PHYSFS_exists(path.c_str());
+}
+
 void*
 ResourceManager::loadFile(const std::string &fileName, int &fileSize)
 {
     // If the file doesn't exist indicate failure
-    if (!PHYSFS_exists(fileName.c_str())) {
+    if (!exists(fileName))
+    {
         LOG_WARN("Warning: " << fileName << " not found!");
         return NULL;
     }

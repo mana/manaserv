@@ -44,6 +44,11 @@ class ResourceManager
         ~ResourceManager();
 
         /**
+         * Checks whether the given file or directory exists in the search path
+         */
+        bool exists(std::string const &path);
+
+        /**
          * Allocates data into a buffer pointer for raw data loading. The
          * returned data is expected to be freed using <code>free()</code>.
          *
