@@ -22,19 +22,6 @@ static void dropItem(MapComposite *map, int x, int y, int type)
     GameState::insert(i);
 }
 
-static char const *npc1 =
-   "local nb_times = 1\n"
-   "function npc_handler(npc, ch)\n"
-   "  do_message(npc, ch, \"You know what?\")\n"
-   "  do_message(npc, ch, string.format(\"I have already asked this question %d times today.\", nb_times))\n"
-   "  nb_times = nb_times + 1\n"
-   "end\n";
-
-static char const *npc2 =
-  "function npc_handler(npc, ch)\n"
-  "  do_message(npc, ch, \"Don't you think the guy behind me is my evil twin?\")\n"
-  "end\n";
-
 void testingMap(MapComposite *map)
 {
     switch (map->getID())
@@ -44,23 +31,6 @@ void testingMap(MapComposite *map)
             // Drop some items.
             dropItem(map, 58 * 32 + 16, 20 * 32 + 16, 508);
             dropItem(map, 58 * 32 + 16, 21 * 32 + 16, 524);
-
-            // Create a Lua context.
-            if (Script *s = Script::create("lua"))
-            {
-                // Load a script.
-                s->loadFile("test.lua");
-
-                // Create two NPCs.
-                s->loadNPC(107, 53 * 32 + 16, 21 * 32 + 16, npc1);
-                s->loadNPC(107, 53 * 32 + 16, 23 * 32 + 16, npc2);
-
-                // Associate the script context to the map.
-                map->setScript(s);
-                s->setMap(map);
-                s->prepare("initialize");
-                s->execute();
-            }
         } break;
     }
 }

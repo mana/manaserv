@@ -29,6 +29,7 @@
 #include "game-server/monstermanager.hpp"
 #include "game-server/spawnarea.hpp"
 #include "game-server/trigger.hpp"
+#include "scripting/script.hpp"
 #include "utils/base64.h"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
@@ -98,6 +99,13 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
              i_end = things.end(); i != i_end; ++i)
         {
             composite->insert(*i);
+        }
+
+        if (Script *s = composite->getScript())
+        {
+            s->setMap(composite);
+            s->prepare("initialize");
+            s->execute();
         }
     }
 }
@@ -175,16 +183,16 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
 
                 if (objType == "WARP")
                 {
+                    int destMapId = -1;
+                    int destX = -1;
+                    int destY = -1;
+
                     for_each_xml_child_node(propertiesNode, objectNode)
                     {
                         if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
                         {
                             continue;
                         }
-
-                        int destMapId = -1;
-                        int destX = -1;
-                        int destY = -1;
 
                         for_each_xml_child_node(propertyNode, propertiesNode)
                         {
@@ -205,33 +213,33 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                                 }
                             }
                         }
+                    }
 
-                        if (destMapId != -1 && destX != -1 && destY != -1)
+                    if (destMapId != -1 && destX != -1 && destY != -1)
+                    {
+                        MapComposite *destMap = MapManager::getMap(destMapId);
+                        if (destMap)
                         {
-                            MapComposite *destMap = MapManager::getMap(destMapId);
-                            if (destMap)
-                            {
-                                things.push_back(new TriggerArea(
-                                    composite, rect,
-                                    new WarpAction(destMap, destX, destY)));
-                            }
+                            things.push_back(new TriggerArea(
+                                composite, rect,
+                                new WarpAction(destMap, destX, destY)));
                         }
-                        else
-                        {
-                            LOG_WARN("Unrecognized warp format");
-                        }
+                    }
+                    else
+                    {
+                        LOG_WARN("Unrecognized warp format");
                     }
                 }
                 else if (objType == "SPAWN")
                 {
+                    int monsterId = -1;
+
                     for_each_xml_child_node(propertiesNode, objectNode)
                     {
                         if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
                         {
                             continue;
                         }
-
-                        int monsterId = -1;
 
                         for_each_xml_child_node(propertyNode, propertiesNode)
                         {
@@ -243,16 +251,113 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                                 }
                             }
                         }
+                    }
 
-                        MonsterClass *monster = MonsterManager::getMonster(monsterId);
-                        if (monster != NULL)
+                    MonsterClass *monster = MonsterManager::getMonster(monsterId);
+                    if (monster != NULL)
+                    {
+                        things.push_back(new SpawnArea(composite, monster, rect));
+                    }
+                    else
+                    {
+                        LOG_WARN("Unrecognized format for spawn area");
+                    }
+                }
+                else if (objType == "NPC")
+                {
+                    Script *s = composite->getScript();
+                    if (!s)
+                    {
+                        // Create a Lua context.
+                        s = Script::create("lua");
+                        composite->setScript(s);
+                    }
+
+                    int npcId = -1;
+                    char const *scriptText = NULL;
+
+                    for_each_xml_child_node(propertiesNode, objectNode)
+                    {
+                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
                         {
-                            things.push_back(new SpawnArea(composite, monster, rect));
+                            continue;
                         }
-                        else
+
+                        for_each_xml_child_node(propertyNode, propertiesNode)
                         {
-                            LOG_WARN("Unrecognized format for spawn area");
+                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
+                            {
+                                std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                if (value == "NPC_ID")
+                                {
+                                    npcId = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                }
+                                else if (value == "SCRIPT")
+                                {
+                                    scriptText = (const char *)propertyNode->xmlChildrenNode->content;
+                                }
+                            }
                         }
+                    }
+
+                    if (npcId != -1 && scriptText != NULL)
+                    {
+                        s->loadNPC(npcId, objX, objY, scriptText);
+                    }
+                    else
+                    {
+                        LOG_WARN("Unrecognized format for npc");
+                    }
+                }
+                else if (objType == "SCRIPT")
+                {
+                    printf("SCRIPT");
+                    Script *s = composite->getScript();
+                    if (!s)
+                    {
+                        // Create a Lua context.
+                        s = Script::create("lua");
+                        composite->setScript(s);
+                    }
+
+                    char const *scriptFilename = NULL;
+                    char const *scriptText = NULL;
+
+                    for_each_xml_child_node(propertiesNode, objectNode)
+                    {
+                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
+                        {
+                            continue;
+                        }
+
+                        for_each_xml_child_node(propertyNode, propertiesNode)
+                        {
+                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
+                            {
+                                std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                if (value == "FILENAME")
+                                {
+                                    scriptFilename = (const char *)propertyNode->xmlChildrenNode->content;
+                                }
+                                else if (value == "TEXT")
+                                {
+                                    scriptText = (const char *)propertyNode->xmlChildrenNode->content;
+                                }
+                            }
+                        }
+                    }
+
+                    if (scriptFilename != NULL)
+                    {
+                        s->loadFile(scriptFilename);
+                    }
+                    else if (scriptText != NULL)
+                    {
+                        s->load(scriptText);
+                    }
+                    else
+                    {
+                        LOG_WARN("Unrecognized format for script");
                     }
                 }
             }

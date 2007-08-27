@@ -1,3 +1,9 @@
+2007-08-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp, src/game-server/mapreader.cpp,
+	src/game-server/testing.cpp: Enabled loading of npcs and scripts from
+	map files.
+
 2007-08-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/chat-server/chathandler.hpp, src/chat-server/chatclient.hpp,
