@@ -31,22 +31,32 @@
 #include "game-server/mapmanager.hpp"
 #include "game-server/state.hpp"
 
-template< typename T1, typename T2 >
-static void proxy(void (*f)(), intptr_t args[4])
+template< typename T1 >
+static void proxy(void (*f)(), Character *from, intptr_t args[1])
 {
-    ((void (*)(T1, T2))f)((T1)args[0], (T2)args[1]);
+    ((void (*)(Character *, T1))f)
+        (from, (T1)args[0]);
+}
+
+template< typename T1, typename T2 >
+static void proxy(void (*f)(), Character *from, intptr_t args[2])
+{
+    ((void (*)(Character *, T1, T2))f)
+        (from, (T1)args[0], (T2)args[1]);
 }
 
 template< typename T1, typename T2, typename T3 >
-static void proxy(void (*f)(), intptr_t args[4])
+static void proxy(void (*f)(), Character *from, intptr_t args[3])
 {
-    ((void (*)(T1, T2, T3))f)((T1)args[0], (T2)args[1], (T3)args[2]);
+    ((void (*)(Character *, T1, T2, T3))f)
+        (from, (T1)args[0], (T2)args[1], (T3)args[2]);
 }
 
 template< typename T1, typename T2, typename T3, typename T4 >
-static void proxy(void (*f)(), intptr_t args[4])
+static void proxy(void (*f)(), Character *from, intptr_t args[4])
 {
-    ((void (*)(T1, T2, T3, T4))f)((T1)args[0], (T2)args[1], (T3)args[2], (T4)args[3]);
+    ((void (*)(Character *, T1, T2, T3, T4))f)
+        (from, (T1)args[0], (T2)args[1], (T3)args[2], (T4)args[3]);
 }
 
 /**
@@ -71,16 +81,34 @@ struct Command
 {
     char const *name;
     char type[4];
-    void (*handler)(void (*f)(), intptr_t[4]);
+    void (*handler)(void (*f)(), Character *, intptr_t[]);
     void (*target)();
     unsigned char level;
 };
 
 /**
+ * Creates a command with a 1-parameter handler.
+ */
+template< typename T1 >
+static Command handle(char const *name, int level,
+                      void (*f)(Character *, T1))
+{
+    Command c;
+    c.name = name;
+    c.level = level;
+    c.handler = &proxy< T1 >;
+    c.target = (void (*)())f;
+    c.type[0] = Argument<T1>::type;
+    c.type[1] = 0;
+    return c;
+}
+
+/**
  * Creates a command with a 2-parameter handler.
  */
 template< typename T1, typename T2 >
-static Command handle(char const *name, int level, void (*f)(T1, T2))
+static Command handle(char const *name, int level,
+                      void (*f)(Character *, T1, T2))
 {
     Command c;
     c.name = name;
@@ -90,7 +118,6 @@ static Command handle(char const *name, int level, void (*f)(T1, T2))
     c.type[0] = Argument<T1>::type;
     c.type[1] = Argument<T2>::type;
     c.type[2] = 0;
-    c.type[3] = 0;
     return c;
 }
 
@@ -98,7 +125,8 @@ static Command handle(char const *name, int level, void (*f)(T1, T2))
  * Creates a command with a 3-parameter handler.
  */
 template< typename T1, typename T2, typename T3 >
-static Command handle(char const *name, int level, void (*f)(T1, T2, T3))
+static Command handle(char const *name, int level,
+                      void (*f)(Character *, T1, T2, T3))
 {
     Command c;
     c.name = name;
@@ -116,7 +144,8 @@ static Command handle(char const *name, int level, void (*f)(T1, T2, T3))
  * Creates a command with a 4-parameter handler.
  */
 template< typename T1, typename T2, typename T3, typename T4 >
-static Command handle(char const *name, int level, void (*f)(T1, T2, T3, T4))
+static Command handle(char const *name, int level,
+                      void (*f)(Character *, T1, T2, T3, T4))
 {
     Command c;
     c.name = name;
@@ -130,20 +159,29 @@ static Command handle(char const *name, int level, void (*f)(T1, T2, T3, T4))
     return c;
 }
 
-static void warp(Character *q, MapComposite *m, int x, int y)
+static void warp(Character *, Character *q, MapComposite *m, int x, int y)
 {
     DelayedEvent e = { EVENT_WARP, x, y, m };
     GameState::enqueueEvent(q, e);
 }
 
-static void item(Character *q, ItemClass *it, int nb)
+static void item(Character *, Character *q, ItemClass *it, int nb)
 {
     Inventory(q).insert(it->getDatabaseID(), nb);
 }
 
-static void money(Character *q, int nb)
+static void money(Character *, Character *q, int nb)
 {
     Inventory(q).changeMoney(nb);
+}
+
+static void drop(Character *from, ItemClass *it, int nb)
+{
+    Item *item = new Item(it, nb);
+    item->setMap(from->getMap());
+    item->setPosition(from->getPosition());
+    DelayedEvent e = { EVENT_INSERT };
+    GameState::enqueueEvent(item, e);
 }
 
 /**
@@ -153,6 +191,7 @@ static Command const commands[] =
 {
     handle("warp", AL_GM, warp),
     handle("item", AL_GM, item),
+    handle("drop", AL_GM, drop),
     handle("money", AL_GM, money),
 };
 
@@ -249,5 +288,5 @@ void runCommand(Character *ch, std::string const &text)
         }
         pos = pos2;
     }
-    c->handler(c->target, args);
+    c->handler(c->target, ch, args);
 }
