@@ -23,6 +23,7 @@
 #ifndef _TMWSERV_CHARACTER_HPP_
 #define _TMWSERV_CHARACTER_HPP_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -206,6 +207,12 @@ class Character : public Being
          * Updates base Being attributes.
          */
         void modifiedAttribute(int);
+
+        /**
+         * Associative array containing all the quest variables known by the
+         * server.
+         */
+        std::map< std::string, std::string > questCache;
 
     private:
         Character(Character const &);

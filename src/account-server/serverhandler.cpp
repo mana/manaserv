@@ -189,6 +189,27 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
         } break;
 
+        case GAMSG_GET_QUEST:
+        {
+            int id = msg.readLong();
+            std::string name = msg.readString();
+            Storage &store = Storage::instance("tmw");
+            std::string value = store.getQuestVar(id, name);
+            result.writeShort(AGMSG_GET_QUEST_RESPONSE);
+            result.writeLong(id);
+            result.writeString(name);
+            result.writeString(value);
+        } break;
+
+        case GAMSG_SET_QUEST:
+        {
+            int id = msg.readLong();
+            std::string name = msg.readString();
+            std::string value = msg.readString();
+            Storage &store = Storage::instance("tmw");
+            store.setQuestVar(id, name, value);
+        } break;
+
 #if 0
         case GAMSG_GUILD_CREATE:
         {

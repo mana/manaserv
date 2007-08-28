@@ -184,6 +184,7 @@ void DALStorage::open()
         createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
         createTable(GUILDS_TBL_NAME, SQL_GUILDS_TABLE);
         createTable(GUILD_MEMBERS_TBL_NAME, SQL_GUILD_MEMBERS_TABLE);
+        createTable(QUESTS_TBL_NAME, SQL_QUESTS_TABLE);
     }
     catch (const DbConnectionFailure& e) {
         LOG_ERROR("(DALStorage::open #1) Unable to connect to the database: "
@@ -1230,4 +1231,59 @@ std::list<Guild*> DALStorage::getGuildList()
     }
     
     return guilds;
+}
+
+std::string DALStorage::getQuestVar(int id, std::string const &name)
+{
+    // connect to the database (if not connected yet).
+    open();
+
+    using namespace dal;
+
+    try
+    {
+        std::ostringstream query;
+        query << "select value from " << QUESTS_TBL_NAME
+              << " where owner_id = '" << id << "' and name = '"
+              << name << "';";
+        RecordSet const &info = mDb->execSql(query.str());
+
+        if (!info.isEmpty()) return info(0, 0);
+    }
+    catch (DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::getQuestVar) SQL query failure: " << e.what());
+    }
+
+    return std::string();
+}
+
+void DALStorage::setQuestVar(int id, std::string const &name,
+                             std::string const &value)
+{
+    // connect to the database (if not connected yet).
+    open();
+
+    using namespace dal;
+
+    try
+    {
+        std::ostringstream query1;
+        query1 << "delete from " << QUESTS_TBL_NAME
+               << " where owner_id = '" << id << "' and name = '"
+               << name << "';";
+        mDb->execSql(query1.str());
+
+        if (value.empty()) return;
+
+        std::ostringstream query2;
+        query2 << "insert into " << QUESTS_TBL_NAME
+               << " (owner_id, name, value) values ('"
+               << id << "', '" << name << "', '" << value << "');";
+        mDb->execSql(query2.str());
+    }
+    catch (DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::setQuestVar) SQL query failure: " << e.what());
+    }
 }

@@ -319,6 +319,17 @@ class Storage
          */
         virtual void flush(AccountPtr const &account) = 0;
 
+        /**
+         * Gets the value of a quest variable.
+         */
+        virtual std::string getQuestVar(int id, std::string const &) = 0;
+
+        /**
+         * Sets the value of a quest variable.
+         */
+        virtual void setQuestVar(int id, std::string const &,
+                                 std::string const &) = 0;
+
 
     protected:
         /**

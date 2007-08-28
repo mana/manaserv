@@ -37,6 +37,7 @@ extern "C" {
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/npc.hpp"
+#include "game-server/quest.hpp"
 #include "game-server/state.hpp"
 #include "net/messageout.hpp"
 #include "scripting/script.hpp"
@@ -67,6 +68,9 @@ class LuaScript: public Script
         void push(Thing *);
 
         int execute();
+
+        static void getQuestCallback(Character *, std::string const &,
+                                     std::string const &, void *);
 
     private:
 
@@ -320,7 +324,7 @@ static int LuaChr_InvCount(lua_State *s)
 }
 
 /**
- * Callback for trading between a a player and an NPC.
+ * Callback for trading between a player and an NPC.
  * tmw.npc_trade(npc, character, bool sell, table items)
  */
 static int LuaNpc_Trade(lua_State *s)
@@ -362,6 +366,69 @@ static int LuaNpc_Trade(lua_State *s)
     return 0;
 }
 
+/**
+ * Called when the server has recovered the value of a quest variable.
+ */
+void LuaScript::getQuestCallback(Character *q, std::string const &name,
+                                 std::string const &value, void *data)
+{
+    LuaScript *s = static_cast< LuaScript * >(data);
+    assert(s->nbArgs == -1);
+    lua_getglobal(s->mState, "quest_reply");
+    lua_pushlightuserdata(s->mState, q);
+    lua_pushstring(s->mState, name.c_str());
+    lua_pushstring(s->mState, value.c_str());
+    s->nbArgs = 3;
+    s->execute();
+}
+
+/**
+ * Callback for getting a quest variable. Starts a recovery and returns
+ * immediatly, if the variable is not known yet.
+ * tmw.chr_get_chest(character, string): nil or string
+ */
+static int LuaChr_GetQuest(lua_State *s)
+{
+    Character *q = getCharacter(s, 1);
+    char const *m = lua_tostring(s, 2);
+    if (!m || m[0] == 0)
+    {
+        LOG_WARN("LuaChr_GetQuest called with incorrect parameters.");
+        return 0;
+    }
+    std::string value, name = m;
+    bool res = getQuestVar(q, name, value);
+    if (res)
+    {
+        lua_pushstring(s, value.c_str());
+        return 1;
+    }
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    QuestCallback f = { &LuaScript::getQuestCallback, t };
+    recoverQuestVar(q, name, f);
+    return 0;
+}
+
+/**
+ * Callback for setting a quest variable.
+ * tmw.chr_set_chest(character, string, string)
+ */
+static int LuaChr_SetQuest(lua_State *s)
+{
+    Character *q = getCharacter(s, 1);
+    char const *m = lua_tostring(s, 2);
+    char const *n = lua_tostring(s, 3);
+    if (!m || !n || m[0] == 0)
+    {
+        LOG_WARN("LuaChr_SetQuest called with incorrect parameters.");
+        return 0;
+    }
+    setQuestVar(q, m, n);
+    return 0;
+}
+
 LuaScript::LuaScript():
     nbArgs(-1)
 {
@@ -377,6 +444,8 @@ LuaScript::LuaScript():
         { "chr_warp",         &LuaChr_Warp        },
         { "chr_inv_change",   &LuaChr_InvChange   },
         { "chr_inv_count",    &LuaChr_InvCount    },
+        { "chr_get_quest",    &LuaChr_GetQuest    },
+        { "chr_set_quest",    &LuaChr_SetQuest    },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

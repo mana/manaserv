@@ -114,6 +114,8 @@ tmwserv_game_SOURCES = \
 	game-server/npc.hpp \
 	game-server/npc.cpp \
 	game-server/object.hpp \
+	game-server/quest.hpp \
+	game-server/quest.cpp \
 	game-server/spawnarea.hpp \
 	game-server/spawnarea.cpp \
 	game-server/state.hpp \

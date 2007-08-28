@@ -29,6 +29,7 @@
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/quest.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -92,6 +93,14 @@ void AccountConnection::processMessage(MessageIn &msg)
             std::string address = msg.readString();
             int port = msg.readShort();
             gameHandler->completeServerChange(id, token, address, port);
+        } break;
+
+        case AGMSG_GET_QUEST_RESPONSE:
+        {
+            int id = msg.readLong();
+            std::string name = msg.readString();
+            std::string value = msg.readString();
+            recoveredQuestVar(id, name, value);
         } break;
 
 // The client should directly talk with the chat server and not go through the game server.
@@ -216,12 +225,30 @@ void AccountConnection::processMessage(MessageIn &msg)
     }
 }
 
-void AccountConnection::playerReconnectAccount(int id, const std::string magic_token)
+void AccountConnection::playerReconnectAccount(int id, std::string const &magic_token)
 {
-    LOG_INFO("Send GAMSG_PLAYER_RECONNECT.");
+    LOG_DEBUG("Send GAMSG_PLAYER_RECONNECT.");
     MessageOut msg(GAMSG_PLAYER_RECONNECT);
     msg.writeLong(id);
     msg.writeString(magic_token, MAGIC_TOKEN_LENGTH);
+    send(msg);
+}
+
+void AccountConnection::requestQuestVar(Character *ch, std::string const &name)
+{
+    MessageOut msg(GAMSG_GET_QUEST);
+    msg.writeLong(ch->getDatabaseID());
+    msg.writeString(name);
+    send(msg);
+}
+
+void AccountConnection::updateQuestVar(Character *ch, std::string const &name,
+                                        std::string const &value)
+{
+    MessageOut msg(GAMSG_SET_QUEST);
+    msg.writeLong(ch->getDatabaseID());
+    msg.writeString(name);
+    msg.writeString(value);
     send(msg);
 }
 

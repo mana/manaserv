@@ -64,13 +64,6 @@
 
 /**
  * TABLE: tmw_accounts.
- *
- * Notes:
- *     - the user levels are:
- *           0: normal user
- *           1: moderator (has medium level rights)
- *           2: administrator (i am god :))
- *     - the 'banned' field contains the UNIX time of unban (default = 0)
  */
 static char const *ACCOUNTS_TBL_NAME = "tmw_accounts";
 static char const *SQL_ACCOUNTS_TABLE =
@@ -294,5 +287,22 @@ static char const *SQL_GUILD_MEMBERS_TABLE =
 #endif
     ");";
 
+/**
+ * TABLE: tmw_quests.
+ */
+static char const *QUESTS_TBL_NAME = "tmw_quests";
+static char const *SQL_QUESTS_TABLE =
+    "CREATE TABLE tmw_quests ("
+#if defined (MYSQL_SUPPORT)
+#error "Missing definition. Please fill the blanks."
+#elif defined (SQLITE_SUPPORT)
+        "owner_id INTEGER NOT NULL,"
+        "name     TEXT    NOT NULL,"
+        "value    TEXT    NOT NULL,"
+        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
+#elif defined (POSTGRESQL_SUPPORT)
+#error "Missing definition. Please fill the blanks."
+#endif
+    ");";
 
 #endif // _TMWSERV_DALSTORAGE_SQL_H_

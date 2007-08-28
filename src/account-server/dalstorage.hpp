@@ -203,6 +203,17 @@ class DALStorage: public Storage
         void flushAll();
         void flush(AccountPtr const &);
 
+        /**
+         * Gets the value of a quest variable.
+         */
+        std::string getQuestVar(int id, std::string const &);
+
+        /**
+         * Sets the value of a quest variable.
+         */
+        void setQuestVar(int id, std::string const &, std::string const &);
+
+
     private:
         /**
          * Constructor.

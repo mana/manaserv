@@ -1,3 +1,20 @@
+2007-08-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/account-server/storage.hpp, src/account-server/dalstoragesql.hpp,
+	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
+	Implemented storing and recovering quest variables from database.
+	* src/account-server/serverhandler.cpp, src/defines.h,
+	src/game-server/accountconnection.cpp,
+	src/game-server/accountconnection.hpp: Added protocol for sending quest
+	variables between servers.
+	* src/game-server/quest.cpp, src/game-server/quest.hpp,
+	src/game-server/character.hpp, src/Makefile.am: Added async handling of
+	quest variables.
+	* src/scripting/lua.cpp, data/scripts/libtmw.lua: Added helper
+	functions for querying quest variables from Lua scripts. Reworked state
+	machine of the NPC support library.
+	* data/test.lua: Modified for testing quest variables.
+
 2007-08-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp, src/game-server/mapreader.cpp,

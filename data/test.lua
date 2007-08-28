@@ -36,6 +36,11 @@ function my_npc1(npc, ch)
   elseif v == 5 then
     if tmw.chr_money_change(ch, -100) then
       do_message(npc, ch, string.format("Thank you for you patronage! You are left with %d gil.", tmw.chr_money(ch)))
+      local g = tonumber(get_quest_var(npc, ch, "001_donation"))
+      if not g then g = 0 end
+      g = g + 100
+      tmw.chr_set_quest(ch, "001_donation", g)
+      do_message(npc, ch, string.format("As of today, you have donated %d gil.", g))
     else
       do_message(npc, ch, "I would feel bad taking money from someone that poor.")
     end
