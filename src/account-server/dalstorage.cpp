@@ -234,7 +234,8 @@ AccountPtr DALStorage::getAccountBySQL(std::string const &query)
         // and initialize it with information about the user.
         AccountPtr account(new Account(accountInfo(0, 1),
                                        accountInfo(0, 2),
-                                       accountInfo(0, 3), id));
+                                       accountInfo(0, 3),
+                                       toUint(accountInfo(0, 4)), id));
 
         mAccounts.insert(std::make_pair(id, account));
 

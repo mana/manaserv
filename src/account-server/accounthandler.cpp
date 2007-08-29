@@ -337,7 +337,7 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         }
         else
         {
-            AccountPtr acc(new Account(username, password, email));
+            AccountPtr acc(new Account(username, password, email, AL_NORMAL));
             store.addAccount(acc);
             reply.writeByte(ERRMSG_OK);
 

@@ -56,21 +56,8 @@ class Account
         Account(const std::string& name,
                 const std::string& password,
                 const std::string& email,
+                int level,
                 int id = -1);
-
-
-        /**
-         * Constructor with initial account info.
-         *
-         * @param name the user name.
-         * @param password the user password.
-         * @param email the user email.
-         * @param characters the characters.
-         */
-        Account(const std::string& name,
-                const std::string& password,
-                const std::string& email,
-                const Characters& characters);
 
 
         /**

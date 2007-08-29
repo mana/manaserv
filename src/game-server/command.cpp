@@ -85,9 +85,9 @@ template<> struct Argument< MonsterClass * >
 struct Command
 {
     char const *name;
-    char type[4];
     void (*handler)(void (*f)(), Character *, intptr_t[]);
     void (*target)();
+    char type[4];
     unsigned char level;
 };
 
@@ -254,7 +254,7 @@ void runCommand(Character *ch, std::string const &text)
         }
     }
 
-    if (!c || c->level < ch->getAccountLevel())
+    if (!c || c->level > ch->getAccountLevel())
     {
         // No such command or no sufficient rights.
         return;

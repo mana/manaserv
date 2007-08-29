@@ -20,9 +20,9 @@
  *  $Id$
  */
 
-#include "account-server/account.hpp"
-
 #include <cassert>
+
+#include "account-server/account.hpp"
 
 #include "account-server/accountclient.hpp"
 #include "utils/functors.h"
@@ -33,30 +33,14 @@
 Account::Account(const std::string& name,
                  const std::string& password,
                  const std::string& email,
+                 int level,
                  int id)
         : mName(name),
           mPassword(password),
           mEmail(email),
           mCharacters(),
           mID(id),
-          mLevel(AL_NORMAL)
-{
-    // NOOP
-}
-
-
-/**
- * Constructor with initial account info.
- */
-Account::Account(const std::string& name,
-                 const std::string& password,
-                 const std::string& email,
-                 const Characters& characters)
-        : mName(name),
-          mPassword(password),
-          mEmail(email),
-          mCharacters(characters),
-          mLevel(AL_NORMAL)
+          mLevel(level)
 {
     // NOOP
 }
