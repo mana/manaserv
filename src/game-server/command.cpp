@@ -205,6 +205,22 @@ static void spawn(Character *from, MonsterClass *specy, int nb)
     }
 }
 
+static void goto_(Character *from, Character *ch)
+{
+    MapComposite *m = ch->getMap();
+    Point const &pos = ch->getPosition();
+    DelayedEvent e = { EVENT_WARP, pos.x, pos.y, m };
+    GameState::enqueueEvent(from, e);
+}
+
+static void recall(Character *from, Character *ch)
+{
+    MapComposite *m = from->getMap();
+    Point const &pos = from->getPosition();
+    DelayedEvent e = { EVENT_WARP, pos.x, pos.y, m };
+    GameState::enqueueEvent(ch, e);
+}
+
 /**
  * List of remote commands.
  */
@@ -215,6 +231,8 @@ static Command const commands[] =
     handle("drop", AL_GM, drop),
     handle("money", AL_GM, money),
     handle("spawn", AL_GM, spawn),
+    handle("goto", AL_GM, goto_),
+    handle("recall", AL_GM, recall),
 };
 
 /**

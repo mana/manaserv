@@ -5,6 +5,8 @@
 	* src/game-server/command.cpp, src/game-server/gamehandler.cpp,
 	src/game-server/gamehandler.hpp: Completed handler for admin commands,
 	so that they can also touch local players.
+	* src/game-server/comand.cpp: Implemented "goto" and "recall" remote
+	commands.
 
 2007-08-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
