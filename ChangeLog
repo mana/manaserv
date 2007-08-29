@@ -1,3 +1,8 @@
+2007-08-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* data/scripts/libtmw.lua: Fixed race condition between quest_reply and
+	npc_next.
+
 2007-08-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/storage.hpp, src/account-server/dalstoragesql.hpp,

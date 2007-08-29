@@ -131,9 +131,17 @@ end
 -- Checks that the NPC expects it, and processes the respective coroutine.
 function npc_next(npc, ch)
   local w = states[ch]
-  if not (w and w[1] == npc and w[3] == 1 and process_npc(w)) then
-    states[ch] = nil
+  if w then
+    local w3 = w[3]
+    if w3 == 4 then
+      w[3] = 3
+      return
+    end
+    if w3 == 1 and process_npc(w) then
+      return
+    end
   end
+  states[ch] = nil
 end
 
 -- Called by the game whenever a player selects a particular reply.
