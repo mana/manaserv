@@ -42,10 +42,23 @@ ItemClass *MonsterClass::getRandomDrop() const
     return NULL;
 }
 
+struct MonsterTargetEventDispatch: EventDispatch
+{
+    MonsterTargetEventDispatch()
+    {
+        typedef EventListenerFactory< Monster, &Monster::mTargetListener > Factory;
+        removed = &Factory::create< Thing, &Monster::forgetTarget >::function;
+        died = &Factory::create< Thing, &Monster::forgetTarget, Being >::function;
+    }
+};
+
+static MonsterTargetEventDispatch monsterTargetEventDispatch;
+
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER, 65535),
     mSpecy(specy),
     mCountDown(0),
+    mTargetListener(&monsterTargetEventDispatch),
     mAttackTime(0),
     mAttackPreDelay(5),
     mAttackAftDelay(10)
@@ -69,11 +82,11 @@ Monster::Monster(MonsterClass *specy):
 
 Monster::~Monster()
 {
-    // deactivate death listeners
-    std::map<Being *, int>::iterator i;
-    for (i = mAnger.begin(); i != mAnger.end(); i++)
+    // Remove death listeners.
+    for (std::map<Being *, int>::iterator i = mAnger.begin(),
+         i_end = mAnger.end(); i != i_end; ++i)
     {
-        i->first->removeDeathListener(this);
+        i->first->removeListener(&mTargetListener);
     }
 }
 
@@ -228,10 +241,11 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
     }
 }
 
-void Monster::died(Being *being)
+void Monster::forgetTarget(Thing *t)
 {
-    mAnger.erase(being);
-    mDeathListeners.remove((DeathListener *)being);
+    Being *b = static_cast< Being * >(t);
+    mAnger.erase(b);
+    b->removeListener(&mTargetListener);
 }
 
 int Monster::damage(Object *source, Damage const &damage)
@@ -245,7 +259,7 @@ int Monster::damage(Object *source, Damage const &damage)
 
         if (ib.second)
         {
-            s->addDeathListener(this);
+            s->addListener(&mTargetListener);
         }
         else
         {
@@ -255,10 +269,10 @@ int Monster::damage(Object *source, Damage const &damage)
     return HPLoss;
 }
 
-void Monster::die()
+void Monster::died()
 {
+    Being::died();
     mCountDown = 50; // Sets remove time to 5 seconds
-    Being::die();
     if (ItemClass *drop = mSpecy->getRandomDrop())
     {
         Item *item = new Item(drop, 1);

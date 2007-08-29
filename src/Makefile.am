@@ -88,7 +88,7 @@ tmwserv_game_SOURCES = \
 	game-server/collisiondetection.hpp \
 	game-server/collisiondetection.cpp \
 	game-server/command.cpp \
-	game-server/deathlistener.hpp \
+	game-server/eventlistener.hpp \
 	game-server/gamehandler.hpp \
 	game-server/gamehandler.cpp \
 	game-server/inventory.hpp \
@@ -122,6 +122,7 @@ tmwserv_game_SOURCES = \
 	game-server/state.cpp \
 	game-server/testing.cpp \
 	game-server/thing.hpp \
+	game-server/thing.cpp \
 	game-server/trade.hpp \
 	game-server/trade.cpp \
 	game-server/trigger.hpp \

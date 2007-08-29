@@ -27,6 +27,7 @@
 
 #include "defines.h"
 #include "game-server/buysell.hpp"
+#include "game-server/eventlistener.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
@@ -201,4 +202,15 @@ void Character::flagAttribute(int attr)
         i_end = mModifiedAttributes.end(),
         i = std::find(mModifiedAttributes.begin(), i_end, (unsigned char)attr);
     if (i == i_end) mModifiedAttributes.push_back(attr);
+}
+
+void Character::disconnected()
+{
+    for (Listeners::iterator i = mListeners.begin(),
+         i_end = mListeners.end(); i != i_end;)
+    {
+        EventListener const &l = **i;
+        ++i; // In case the listener removes itself from the list on the fly.
+        if (l.dispatch->disconnected) l.dispatch->disconnected(&l, this);
+    }
 }

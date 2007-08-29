@@ -21,21 +21,28 @@
  *  $Id$
  */
 
-#include "spawnarea.hpp"
+#include "game-server/spawnarea.hpp"
 
 #include "game-server/mapcomposite.hpp"
 #include "game-server/monster.hpp"
 #include "game-server/state.hpp"
-
 #include "utils/logger.h"
 
-/*
- * TODO: Allow specifying being type and use it.
- */
+struct SpawnAreaEventDispatch: EventDispatch
+{
+    SpawnAreaEventDispatch()
+    {
+        typedef EventListenerFactory< SpawnArea, &SpawnArea::mSpawnedListener > Factory;
+        removed = &Factory::create< Thing, &SpawnArea::decrease >::function;
+    }
+};
+
+static SpawnAreaEventDispatch spawnAreaEventDispatch;
 
 SpawnArea::SpawnArea(MapComposite *map, MonsterClass *specy, const Rectangle &zone):
     Thing(OBJECT_OTHER, map),
     mSpecy(specy),
+    mSpawnedListener(&spawnAreaEventDispatch),
     mZone(zone),
     mMaxBeings(10),
     mSpawnRate(10),
@@ -68,7 +75,7 @@ SpawnArea::update()
             if (c)
             {
                 Being *being = new Monster(mSpecy);
-                being->addDeathListener(this);
+                being->addListener(&mSpawnedListener);
 
                 being->setMap(map);
                 being->setPosition(position);
@@ -94,8 +101,8 @@ SpawnArea::update()
     }
 }
 
-void
-SpawnArea::died(Being *being)
+void SpawnArea::decrease(Thing *t)
 {
-    mNumBeings--;
+    --mNumBeings;
+    t->removeListener(&mSpawnedListener);
 }

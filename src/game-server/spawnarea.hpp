@@ -25,7 +25,7 @@
 #define _TMWSERV_SPAWNAREA
 
 #include "point.h"
-#include "game-server/deathlistener.hpp"
+#include "game-server/eventlistener.hpp"
 #include "game-server/thing.hpp"
 
 class Being;
@@ -35,22 +35,28 @@ class MonsterClass;
  * A spawn area, where monsters spawn. The area is a rectangular field and will
  * spawn a certain number of a given monster type.
  */
-class SpawnArea : public Thing, public DeathListener
+class SpawnArea : public Thing
 {
     public:
         SpawnArea(MapComposite *, MonsterClass *, Rectangle const &zone);
 
-        virtual void update();
+        void update();
 
-        virtual void died(Being *being);
+        /**
+         * Keeps track of the number of spawned being.
+         */
+        void decrease(Thing *);
 
-    protected:
+    private:
         MonsterClass *mSpecy; /**< Specy of monster that spawns in this area. */
+        EventListener mSpawnedListener; /**< Tracking of spawned monsters. */
         Rectangle mZone;
         int mMaxBeings;    /**< Maximum population of this area. */
         int mSpawnRate;    /**< Number of beings spawning per minute. */
         int mNumBeings;    /**< Current population of this area. */
         int mNextSpawn;    /**< The time until next being spawn. */
+
+        friend struct SpawnAreaEventDispatch;
 };
 
 #endif

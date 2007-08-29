@@ -21,7 +21,7 @@
  *  $Id$
  */
 
-#include <algorithm>
+#include <cassert>
 #include <list>
 #include <map>
 #include <string>
@@ -31,7 +31,7 @@
 #include "defines.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/character.hpp"
-#include "game-server/deathlistener.hpp"
+#include "game-server/eventlistener.hpp"
 #include "utils/logger.h"
 
 typedef std::list< QuestCallback > QuestCallbacks;
@@ -79,25 +79,43 @@ void setQuestVar(Character *ch, std::string const &name,
 /**
  * Listener for deleting related quests when a character disappears.
  */
-struct QuestDeathListener: DeathListener
+struct QuestDeathListener: EventDispatch
 {
-    void deleted(Being *b)
+    static void partialRemove(EventListener const *, Thing *t)
     {
-        /* FIXME: At this point, Character has already been destroyed and we
-           are potentially reading garbage or segfaulting. This is a misfeature
-           of DeathListener and it should be fixed there. Anyway, as we are
-           calling a non-virtual method and it accesses a primitive datatype,
-           we should be safe with any compiler without vicious compliance. */
-        int id = static_cast< Character * >(b)->getDatabaseID();
-        pendingQuests.erase(id);
+        int id = static_cast< Character * >(t)->getDatabaseID();
+        PendingVariables &variables = pendingQuests[id].variables;
+        // Remove all the callbacks, but do not remove the variable names.
+        for (PendingVariables::iterator i = variables.begin(),
+             i_end = variables.end(); i != i_end; ++i)
+        {
+            i->second.clear();
+        }
+        // The listener is kept in case a fullRemove is needed later.
+    }
+
+    static void fullRemove(EventListener const *, Character *ch)
+    {
+        extern EventListener questDeathListener;
+        ch->removeListener(&questDeathListener);
+        // Remove anything related to this character.
+        pendingQuests.erase(ch->getDatabaseID());
+    }
+
+    QuestDeathListener()
+    {
+        removed = &partialRemove;
+        disconnected = &fullRemove;
     }
 };
 
-static QuestDeathListener questDeathListener;
+static QuestDeathListener questDeathDummy;
+static EventListener questDeathListener = { &questDeathDummy };
 
 void recoverQuestVar(Character *ch, std::string const &name,
                      QuestCallback const &f)
 {
+    assert(ch->questCache.find(name) == ch->questCache.end());
     int id = ch->getDatabaseID();
     PendingQuests::iterator i = pendingQuests.lower_bound(id);
     if (i == pendingQuests.end() || i->first != id)
@@ -106,7 +124,7 @@ void recoverQuestVar(Character *ch, std::string const &name,
         i->second.character = ch;
         /* Register a listener, because we cannot afford to get invalid
            pointers, when we finally recover the variable. */
-        ch->addDeathListener(&questDeathListener);
+        ch->addListener(&questDeathListener);
     }
     i->second.variables[name].push_back(f);
     accountHandler->requestQuestVar(ch, name);
@@ -117,6 +135,10 @@ void recoveredQuestVar(int id, std::string const &name,
 {
     PendingQuests::iterator i = pendingQuests.find(id);
     if (i == pendingQuests.end()) return;
+
+    Character *ch = i->second.character;
+    ch->removeListener(&questDeathListener);
+
     PendingVariables &variables = i->second.variables;
     PendingVariables::iterator j = variables.find(name);
     if (j == variables.end())
@@ -125,7 +147,6 @@ void recoveredQuestVar(int id, std::string const &name,
         return;
     }
 
-    Character *ch = i->second.character;
     ch->questCache[name] = value;
 
     // Call the registered callbacks.

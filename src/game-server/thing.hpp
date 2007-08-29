@@ -23,6 +23,9 @@
 #ifndef _TMWSERV_THING_H_
 #define _TMWSERV_THING_H_
 
+#include <set>
+
+class EventListener;
 class MapComposite;
 
 /**
@@ -43,7 +46,7 @@ enum
 
 /**
  * Base class for in-game objects. Knows only its type and the map is resides
- * on.
+ * on. Provides listeners.
  */
 class Thing
 {
@@ -57,9 +60,9 @@ class Thing
         {}
 
         /**
-         * Empty virtual destructor.
+         * Destructor.
          */
-        virtual ~Thing() {}
+        virtual ~Thing();
 
         /**
          * Gets type of this thing.
@@ -105,6 +108,30 @@ class Thing
          */
         void setMap(MapComposite *map)
         { mMap = map; }
+
+        /**
+         * Adds a new listener.
+         */
+        void addListener(EventListener const *);
+
+        /**
+         * Removes an existing listener.
+         */
+        void removeListener(EventListener const *);
+
+        /**
+         * Calls all the "inserted" listeners.
+         */
+        virtual void inserted();
+
+        /**
+         * Calls all the "removed" listeners.
+         */
+        virtual void removed();
+
+    protected:
+        typedef std::set< EventListener const * > Listeners;
+        Listeners mListeners; /**< List of event listeners. */
 
     private:
         MapComposite *mMap;     /**< Map the thing is on */

@@ -404,7 +404,9 @@ void GameState::update()
                 remove(o);
                 if (o->getType() == OBJECT_CHARACTER)
                 {
-                    gameHandler->kill(static_cast< Character * >(o));
+                    Character *ch = static_cast< Character * >(o);
+                    ch->disconnected();
+                    gameHandler->kill(ch);
                 }
                 delete o;
             } break;
@@ -456,6 +458,8 @@ void GameState::insert(Thing *ptr)
         return;
     }
 
+    ptr->inserted();
+
     if (ptr->isVisible())
     {
         Object *obj = static_cast< Object * >(ptr);
@@ -477,6 +481,8 @@ void GameState::remove(Thing *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
+
+    ptr->removed();
 
     if (ptr->canMove())
     {

@@ -30,7 +30,6 @@
 #include "game-server/movingobject.hpp"
 
 class Being;
-class DeathListener;
 class MapComposite;
 
 /**
@@ -126,8 +125,6 @@ class Being : public MovingObject
          */
         Being(int type, int id);
 
-        ~Being();
-
         /**
          * Cleans obsolete attribute modifiers.
          */
@@ -141,9 +138,9 @@ class Being : public MovingObject
         virtual int damage(Object *source, Damage const &damage);
 
         /**
-         * Kills the being
+         * Changes status and calls all the "died" listeners.
          */
-        virtual void die();
+        virtual void died();
 
         /**
          * Gets the damage list.
@@ -210,22 +207,6 @@ class Being : public MovingObject
         void dispellModifiers(int level);
 
         /**
-         * Adds a death listener.
-         */
-        void addDeathListener(DeathListener *listener)
-        {
-            mDeathListeners.push_back(listener);
-        }
-
-        /**
-         * Removes a death listener.
-         */
-        void removeDeathListener(DeathListener *listener)
-        {
-            mDeathListeners.remove(listener);
-        }
-
-        /**
          * Called when an attribute modifier is changed.
          */
         virtual void modifiedAttribute(int) {}
@@ -233,7 +214,6 @@ class Being : public MovingObject
     protected:
         Action mAction;
         std::vector< Attribute > mAttributes;
-        std::list<DeathListener*> mDeathListeners;
 
     private:
         Being(Being const &rhs);

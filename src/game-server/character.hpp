@@ -209,6 +209,11 @@ class Character : public Being
         void modifiedAttribute(int);
 
         /**
+         * Calls all the "disconnected" listener.
+         */
+        void disconnected();
+
+        /**
          * Associative array containing all the quest variables known by the
          * server.
          */

@@ -26,7 +26,7 @@
 
 #include "defines.h"
 #include "game-server/collisiondetection.hpp"
-#include "game-server/deathlistener.hpp"
+#include "game-server/eventlistener.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "utils/logger.h"
 
@@ -41,18 +41,6 @@ Being::Being(int type, int id):
     {
         mAttributes[i].base = 100;
     }
-}
-
-Being::~Being()
-{
-    // Notify death listeners
-    DeathListeners::iterator i_end = mDeathListeners.end();
-    DeathListeners::iterator i;
-    for (i = mDeathListeners.begin(); i != i_end; ++i)
-    {
-        (*i)->deleted(this);
-    }
-
 }
 
 int Being::damage(Object *, Damage const &damage)
@@ -122,13 +110,13 @@ int Being::damage(Object *, Damage const &damage)
     {
         HP.mod -= HPloss;
         modifiedAttribute(BASE_ATTR_HP);
-        if (HP.base + HP.mod == 0) die();
+        if (HP.base + HP.mod == 0) died();
     }
 
     return HPloss;
 }
 
-void Being::die()
+void Being::died()
 {
     if (mAction == DEAD) return;
 
@@ -137,12 +125,12 @@ void Being::die()
     // dead beings stay where they are
     clearDestination();
 
-    // Notify death listeners
-    DeathListeners::iterator i_end = mDeathListeners.end();
-    DeathListeners::iterator i;
-    for (i = mDeathListeners.begin(); i != i_end; ++i)
+    for (Listeners::iterator i = mListeners.begin(),
+         i_end = mListeners.end(); i != i_end;)
     {
-        (*i)->died(this);
+        EventListener const &l = **i;
+        ++i; // In case the listener removes itself from the list on the fly.
+        if (l.dispatch->died) l.dispatch->died(&l, this);
     }
 }
 

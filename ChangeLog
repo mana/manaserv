@@ -7,6 +7,21 @@
 	so that they can also touch local players.
 	* src/game-server/comand.cpp: Implemented "goto" and "recall" remote
 	commands.
+	* src/Makefile.am, src/game-server/deathlistener.hpp,
+	src/game-server/eventlistener.hpp: Replaced event system.
+	* src/games-server/thing.hpp, src/game-server/thing.cpp: Placed
+	listener handling at the lowest level. Added "inserted" and "removed"
+	event.
+	* src/game-server/being.hpp, src/game-server/being.cpp,
+	src/game-server/character.hpp, src/game-server/character.cpp: Added
+	"died" and "disconnected" event.
+	* src/game-server/state.cpp, src/game-server/gamehandler.cpp: Added
+	event notification.
+	* src/game-server/spawnarea.cpp, src/game-server/spawnarea.hpp,
+	src/game-server/monster.cpp, src/game-server/monster.hpp: Modified to
+	use the new event system.
+	* src/game-server/quest.cpp: Fixed event listener on character removal
+	and/or disconnection.
 
 2007-08-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

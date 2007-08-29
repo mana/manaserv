@@ -27,7 +27,7 @@
 #include <vector>
 
 #include "game-server/being.hpp"
-#include "game-server/deathlistener.hpp"
+#include "game-server/eventlistener.hpp"
 
 class ItemClass;
 class MapComposite;
@@ -94,7 +94,7 @@ struct AttackPosition
 /**
  * The class for a fightable monster with its own AI
  */
-class Monster : public Being, public DeathListener
+class Monster : public Being
 {
     public:
         /**
@@ -124,9 +124,9 @@ class Monster : public Being, public DeathListener
         void perform();
 
         /**
-         * Kills the being
+         * Kills the being.
          */
-        virtual void die();
+        void died();
 
         /**
          * Calls the damage function in Being and updates the aggro list
@@ -134,18 +134,9 @@ class Monster : public Being, public DeathListener
         virtual int damage(Object *source, Damage const &damage);
 
         /**
-         * Getting informed that a being that might be on the target list died
+         * Removes a being from the anger list.
          */
-        virtual void died(Being *being);
-
-        /**
-         * Getting informed that a being that might be on the target list is
-         * deleted
-         */
-        virtual void deleted(Being *being)
-        {
-            died(being);
-        }
+        void forgetTarget(Thing *being);
 
     private:
         int calculatePositionPriority(Point position, int targetPriority);
@@ -153,6 +144,7 @@ class Monster : public Being, public DeathListener
         MonsterClass *mSpecy; /**< Monster specy. */
         int mCountDown; /**< Count down till next random movement (temporary). */
         std::map<Being *, int> mAnger;   /**< Aggression towards other beings */
+        EventListener mTargetListener; /**< Listener for updating the anger list. */
         int mAttackTime;                       /**< Delay until monster can attack */
         // TODO: the following vars should all be the same for all monsters of
         // the same type. So they should be put into some central data structure
@@ -162,6 +154,8 @@ class Monster : public Being, public DeathListener
         bool mAgressive;            /**< Does the monster attack without being provoked? */
         unsigned mAgressionRange;   /**< Distance the monster tracks enemies in */
         std::list<AttackPosition> mAttackPositions; /**< set positions relative to target from which the monster can attack */
+
+        friend struct MonsterTargetEventDispatch;
 };
 
 #endif // _TMWSERV_MONSTER_H_

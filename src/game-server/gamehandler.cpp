@@ -70,6 +70,7 @@ void GameHandler::computerDisconnected(NetComputer *comp)
     {
         accountHandler->sendCharacterData(ch);
         GameState::remove(ch);
+        ch->disconnected();
         delete ch;
     }
     delete &computer;
@@ -106,6 +107,7 @@ void GameHandler::completeServerChange(int id, std::string const &token,
             msg.writeString(address);
             msg.writeShort(port);
             c->send(msg);
+            c->character->disconnected();
             delete c->character;
             c->character = NULL;
             c->status = CLIENT_LOGIN;
@@ -339,6 +341,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             accountHandler->sendCharacterData(computer.character);
 
             // Done with the character
+            computer.character->disconnected();
             delete computer.character;
             computer.character = NULL;
             computer.status = CLIENT_LOGIN;
