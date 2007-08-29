@@ -25,6 +25,7 @@
 
 #include "defines.h"
 #include "game-server/character.hpp"
+#include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
@@ -269,8 +270,19 @@ void runCommand(Character *ch, std::string const &text)
                 }
                 else
                 {
-                    // TODO: explicitly named character.
-                    return;
+                    GameClient *c = gameHandler->getClientByNameSlow(arg);
+                    if (!c)
+                    {
+                        /* TODO: forward command to other game servers through
+                           account server, in case the player is elsewhere. */
+                        return;
+                    }
+                    if (c->status != CLIENT_CONNECTED)
+                    {
+                        // No suitable character.
+                        return;
+                    }
+                    args[i] = (intptr_t)c->character;
                 }
                 break;
 

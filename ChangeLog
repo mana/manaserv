@@ -2,6 +2,9 @@
 
 	* data/scripts/libtmw.lua: Fixed race condition between quest_reply and
 	npc_next.
+	* src/game-server/command.cpp, src/game-server/gamehandler.cpp,
+	src/game-server/gamehandler.hpp: Completed handler for admin commands,
+	so that they can also touch local players.
 
 2007-08-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

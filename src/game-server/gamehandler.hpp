@@ -109,6 +109,12 @@ class GameHandler: public ConnectionHandler
         void
         deletePendingConnect(Character* character);
 
+        /**
+         * Gets the client associated to a character name. This method is slow,
+         * so it should never be called for regular operations.
+         */
+        GameClient *getClientByNameSlow(std::string const &);
+
     protected:
         NetComputer *computerConnected(ENetPeer *);
         void computerDisconnected(NetComputer *);
