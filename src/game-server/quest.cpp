@@ -83,6 +83,11 @@ struct QuestDeathListener: DeathListener
 {
     void deleted(Being *b)
     {
+        /* FIXME: At this point, Character has already been destroyed and we
+           are potentially reading garbage or segfaulting. This is a misfeature
+           of DeathListener and it should be fixed there. Anyway, as we are
+           calling a non-virtual method and it accesses a primitive datatype,
+           we should be safe with any compiler without vicious compliance. */
         int id = static_cast< Character * >(b)->getDatabaseID();
         pendingQuests.erase(id);
     }
