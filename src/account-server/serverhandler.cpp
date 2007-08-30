@@ -24,13 +24,11 @@
 #include <cassert>
 #include <sstream>
 
-#include "account-server/accountclient.hpp"
-#include "account-server/characterdata.hpp"
-#include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
-#include "account-server/storage.hpp"
-#include "chat-server/chathandler.hpp"
-#include "chat-server/chatchannelmanager.hpp"
+
+#include "account-server/accountclient.hpp"
+#include "account-server/character.hpp"
+#include "account-server/dalstorage.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
@@ -78,7 +76,7 @@ bool ServerHandler::getGameServerFromMap(unsigned mapId, std::string &address,
     return true;
 }
 
-void ServerHandler::registerGameClient(std::string const &token, CharacterPtr ptr)
+void ServerHandler::registerGameClient(std::string const &token, Character *ptr)
 {
     unsigned mapId = ptr->getMapId();
 
@@ -130,22 +128,22 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_PLAYER_DATA:
         {
             LOG_DEBUG("GAMSG_PLAYER_DATA");
-            Storage &store = Storage::instance("tmw");
             int id = msg.readLong();
-            CharacterPtr ptr = store.getCharacter(id);
-            if (ptr.get())
+            if (Character *ptr = storage->getCharacter(id, NULL))
             {
                 deserializeCharacterData(*ptr, msg);
-                if (!store.updateCharacter(ptr))
-                    LOG_ERROR("Failed to update character " <<
-                              ptr->getDatabaseID() << '.');
+                if (!storage->updateCharacter(ptr))
+                {
+                    LOG_ERROR("Failed to update character "
+                              << id << '.');
+                }
+                delete ptr;
             }
             else
             {
-                LOG_ERROR("Received data for non-existing character " <<
-                          ptr->getDatabaseID() << '.');
+                LOG_ERROR("Received data for non-existing character "
+                          << id << '.');
             }
-
         } break;
 
         case GAMSG_REDIRECT:
@@ -153,48 +151,59 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             LOG_DEBUG("GAMSG_REDIRECT");
             int id = msg.readLong();
             std::string magic_token(utils::getMagicToken());
-            Storage &store = Storage::instance("tmw");
-            CharacterPtr ptr = store.getCharacter(id);
-            std::string address;
-            short port;
-            if (serverHandler->getGameServerFromMap(ptr->getMapId(), address,
-                                                    port))
+            if (Character *ptr = storage->getCharacter(id, NULL))
             {
-                registerGameClient(magic_token, ptr);
-                result.writeShort(AGMSG_REDIRECT_RESPONSE);
-                result.writeLong(ptr->getDatabaseID());
-                result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
-                result.writeString(address);
-                result.writeShort(port);
+                std::string address;
+                short port;
+                if (serverHandler->getGameServerFromMap
+                        (ptr->getMapId(), address, port))
+                {
+                    registerGameClient(magic_token, ptr);
+                    result.writeShort(AGMSG_REDIRECT_RESPONSE);
+                    result.writeLong(ptr->getDatabaseID());
+                    result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
+                    result.writeString(address);
+                    result.writeShort(port);
+                }
+                else
+                {
+                    LOG_ERROR("Server Change: No game server for map " <<
+                              ptr->getMapId() << ".");
+                }
+                delete ptr;
             }
             else
             {
-                LOG_ERROR("Server Change: No game server for map " <<
-                          ptr->getMapId() << ".");
+                LOG_ERROR("Received data for non-existing character "
+                          << id << '.');
             }
         } break;
 
         case GAMSG_PLAYER_RECONNECT:
         {
             LOG_DEBUG("GAMSG_PLAYER_RECONNECT");
-            int characterID = msg.readLong();
+            int id = msg.readLong();
             std::string magic_token = msg.readString(MAGIC_TOKEN_LENGTH);
 
-            Storage &store = Storage::instance("tmw");
-            CharacterPtr ptr = store.getCharacter(characterID);
-
-            int accountID = ptr->getAccountID();
-            accountHandler->
+            if (Character *ptr = storage->getCharacter(id, NULL))
+            {
+                int accountID = ptr->getAccountID();
+                accountHandler->
                     mTokenCollector.addPendingConnect(magic_token, accountID);
-
+                delete ptr;
+            }
+            else
+            {
+                LOG_ERROR("Received data for non-existing character "
+                          << id << '.');
+            }
         } break;
 
         case GAMSG_GET_QUEST:
         {
             int id = msg.readLong();
             std::string name = msg.readString();
-            Storage &store = Storage::instance("tmw");
-            std::string value = store.getQuestVar(id, name);
+            std::string value = storage->getQuestVar(id, name);
             result.writeShort(AGMSG_GET_QUEST_RESPONSE);
             result.writeLong(id);
             result.writeString(name);
@@ -206,8 +215,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readLong();
             std::string name = msg.readString();
             std::string value = msg.readString();
-            Storage &store = Storage::instance("tmw");
-            store.setQuestVar(id, name, value);
+            storage->setQuestVar(id, name, value);
         } break;
 
 #if 0
@@ -431,7 +439,6 @@ void ServerHandler::enterChannel(const std::string &name,
 
     chatHandler->sendGuildEnterChannel(result, player->getName());
 }
-#endif
 
 void ServerHandler::sendInvite(const std::string &invitedName,
                                const std::string &inviterName,
@@ -440,10 +447,4 @@ void ServerHandler::sendInvite(const std::string &invitedName,
     // TODO: Separate account and chat server
     chatHandler->sendGuildInvite(invitedName, inviterName, guildName);
 }
-
-CharacterPtr ServerHandler::getCharacter(const std::string &name)
-{
-    Storage &store = Storage::instance("tmw");
-    CharacterPtr character = store.getCharacter(name);
-    return character;
-}
+#endif

@@ -36,7 +36,7 @@
 #include "account-server/accounthandler.hpp"
 #include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
-#include "account-server/storage.hpp"
+#include "account-server/dalstorage.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chathandler.hpp"
 #include "net/connectionhandler.hpp"
@@ -56,6 +56,9 @@ Configuration config;           /**< XML config reader */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
+/** Database handler. */
+DALStorage *storage;
+
 /** Account message handler */
 AccountHandler *accountHandler;
 
@@ -67,12 +70,12 @@ ServerHandler *serverHandler;
 
 /** Chat Channels Manager */
 ChatChannelManager *chatChannelManager;
-                
+
 /** Guild Manager */
 GuildManager *guildManager;
 
 /** Callback used when SIGQUIT signal is received. */
-void closeGracefully(int dummy)
+void closeGracefully(int)
 {
     running = false;
 }
@@ -143,13 +146,20 @@ void initialize()
     LOG_INFO("Using Config File: " << configPath);
     LOG_INFO("Using Log File: " << logPath);
 
+    // Open database.
+    storage = new DALStorage;
+    storage->open();
+
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
     stringFilter = new StringFilter(&config);
     // Initialize the Chat channels manager
-    chatChannelManager = new ChatChannelManager();
+    chatChannelManager = new ChatChannelManager;
+
+#if 0
     // Initialise the guild manager
-    guildManager = new GuildManager();
+    guildManager = new GuildManager;
+#endif
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -163,11 +173,6 @@ void initialize()
         LOG_FATAL("An error occurred while initializing ENet");
         exit(2);
     }
-
-    // Initialize configuration defaults
-    config.setValue("dbuser", "");
-    config.setValue("dbpass", "");
-    config.setValue("dbhost", "");
 
     // Initialize the processor utility functions
     utils::processor::init();
@@ -196,10 +201,12 @@ void deinitialize()
 
     // Destroy Managers
     delete chatChannelManager;
+#if 0
     delete guildManager;
+#endif
 
     // Get rid of persistent data storage
-    Storage::destroy();
+    delete storage;
 
     PHYSFS_deinit();
 }
@@ -229,7 +236,7 @@ void parseOptions(int argc, char *argv[])
         { "help",       no_argument, 0, 'h' },
         { "verbosity",  required_argument, 0, 'v' },
         { "port",       required_argument, 0, 'p' },
-        { 0 }
+        { 0, 0, 0, 0 }
     };
 
     while (optind < argc) {
@@ -285,13 +292,6 @@ int main(int argc, char *argv[])
         LOG_FATAL("Unable to create an ENet server host.");
         return 3;
     }
-
-    // Create storage wrapper
-    Storage& store = Storage::instance("tmw");
-    store.setUser(config.getValue("dbuser", ""));
-    store.setPassword(config.getValue("dbpass", ""));
-    store.close();
-    store.open();
 
     while (running) {
         accountHandler->process(50);

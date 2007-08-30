@@ -24,9 +24,9 @@
 #define _TMWSERV_ACCOUNT_H_
 
 #include <string>
+#include <vector>
 
-#include "account-server/characterdata.hpp"
-#include "utils/countedptr.h"
+#include "account-server/character.hpp"
 
 /**
  * Notes:
@@ -47,18 +47,10 @@ class Account
 {
     public:
         /**
-         * Constructor with initial account info.
-         *
-         * @param name the user name.
-         * @param password the user password.
-         * @param email the user email.
+         * Constructor.
          */
-        Account(const std::string& name,
-                const std::string& password,
-                const std::string& email,
-                int level,
-                int id = -1);
-
+        Account(int id = -1): mID(id)
+        {}
 
         /**
          * Destructor.
@@ -152,8 +144,7 @@ class Account
          *
          * @param character the new character.
          */
-        void
-        addCharacter(CharacterPtr character);
+        void addCharacter(Character *character);
 
         /**
          * Remove a character.
@@ -181,14 +172,6 @@ class Account
         { return mCharacters; }
 
         /**
-         * Get a character by name.
-         *
-         * @return the character if found, NULL otherwise.
-         */
-        CharacterPtr
-        getCharacter(const std::string& name);
-
-        /**
          * Get account ID.
          *
          * @return the unique ID of the account, a negative number if none yet.
@@ -203,7 +186,6 @@ class Account
          void setID(int);
 
     private:
-        Account();
         Account(Account const &rhs);
         Account &operator=(Account const &rhs);
 
@@ -217,11 +199,6 @@ class Account
         unsigned char mLevel;   /**< account level */
 };
 
-
-/**
- * Type definition for a smart pointer to Account.
- */
-typedef utils::CountedPtr<Account> AccountPtr;
-
+typedef std::vector< Account * > Accounts;
 
 #endif // _TMWSERV_ACCOUNT_H_

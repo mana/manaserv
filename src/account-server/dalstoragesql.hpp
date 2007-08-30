@@ -76,6 +76,7 @@ static char const *SQL_ACCOUNTS_TABLE =
         "level    TINYINT     UNSIGNED NOT NULL,"
         "banned   TINYINT     UNSIGNED NOT NULL,"
         "INDEX (id)"
+#error "Incorrect definition. Please fix the types."
 #elif defined (SQLITE_SUPPORT)
         "id       INTEGER     PRIMARY KEY,"
         "username TEXT        NOT NULL UNIQUE,"

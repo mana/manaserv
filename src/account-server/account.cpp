@@ -28,31 +28,15 @@
 #include "utils/functors.h"
 
 /**
- * Constructor with initial account info.
- */
-Account::Account(const std::string& name,
-                 const std::string& password,
-                 const std::string& email,
-                 int level,
-                 int id)
-        : mName(name),
-          mPassword(password),
-          mEmail(email),
-          mCharacters(),
-          mID(id),
-          mLevel(level)
-{
-    // NOOP
-}
-
-
-/**
  * Destructor.
  */
 Account::~Account()
 {
-    // mCharacters is a list of smart pointers which will take care about
-    // deallocating the memory so nothing to deallocate here :)
+    for (Characters::iterator i = mCharacters.begin(),
+         i_end = mCharacters.end(); i != i_end; ++i)
+    {
+        delete *i;
+    }
 }
 
 
@@ -69,12 +53,9 @@ Account::setCharacters(const Characters& characters)
 /**
  * Add a new character.
  */
-void
-Account::addCharacter(CharacterPtr character)
+void Account::addCharacter(Character *character)
 {
-    if (character.get() != 0) {
-        mCharacters.push_back(character);
-    }
+    mCharacters.push_back(character);
 }
 
 /**
@@ -85,26 +66,11 @@ bool Account::delCharacter(std::string const &name)
     Characters::iterator
         end = mCharacters.end(),
         it = std::find_if(mCharacters.begin(), end,
-                          std::bind2nd(obj_name_is<CharacterPtr>(), name));
+                          std::bind2nd(obj_name_is<Character *>(), name));
 
     if (it == end) return false;
     mCharacters.erase(it);
     return true;
-}
-
-
-/**
- * Get a character by name.
- */
-CharacterPtr Account::getCharacter(const std::string& name)
-{
-    Characters::iterator
-        end = mCharacters.end(),
-        it = std::find_if(mCharacters.begin(), end,
-                          std::bind2nd(obj_name_is<CharacterPtr>(), name));
-
-    if (it != end) return *it;
-    return CharacterPtr();
 }
 
 void Account::setID(int id)

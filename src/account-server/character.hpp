@@ -29,15 +29,15 @@
 #include "defines.h"
 #include "point.h"
 #include "common/inventorydata.hpp"
-#include "utils/countedptr.h"
 
+class Account;
 class MessageIn;
 
-class CharacterData
+class Character
 {
     public:
 
-        CharacterData(std::string const &name, int id = -1);
+        Character(std::string const &name, int id = -1);
 
         /**
          * Get and set methods
@@ -51,13 +51,20 @@ class CharacterData
         void
         setDatabaseID(int id) { mDatabaseID = id; }
 
-        /** Gets the account id of the account the character belongs to. */
-        int
-        getAccountID() const { return mAccountID; }
+        /** Gets the account the character belongs to. */
+        Account *getAccount() const
+        { return mAccount; }
 
-        /** Sets the account id of the account the character belongs to. */
-        void
-        setAccountID(int id) { mAccountID = id; }
+        /** Sets the account the character belongs to, and related fields. */
+        void setAccount(Account *ptr);
+
+        /** Gets the ID of the account the character belongs to. */
+        int getAccountID() const
+        { return mAccountID; }
+
+        /** Sets the ID of the account the character belongs to. */
+        void setAccountID(int id)
+        { mAccountID = id; }
 
         /** Gets the name of the character. */
         std::string const &
@@ -92,11 +99,15 @@ class CharacterData
         setHairColor(int color) { mHairColor = color; }
 
         /** Gets the account level of the user. */
-        int getAccountLevel() const;
+        int getAccountLevel() const
+        { return mAccountLevel; }
 
-        /** Sets the account level of the user. */
-        void setAccountLevel(int)
-        { /* Ignored as we do not trust game servers that much. */ }
+        /**
+          * Sets the account level of the user.
+          * @param force ensure the level is not modified by a game server.
+          */
+        void setAccountLevel(int l, bool force = false)
+        { if (force) mAccountLevel = l; }
 
         /** Gets the level of the character. */
         int
@@ -150,15 +161,14 @@ class CharacterData
         { return mPossessions; }
 
     private:
-        CharacterData(CharacterData const &);
-        CharacterData &operator=(CharacterData const &);
+        Character(Character const &);
+        Character &operator=(Character const &);
 
         Possessions mPossessions; //!< All the possesions of the character.
         std::string mName;        //!< Name of the character.
         int mDatabaseID;          //!< Character database ID.
-                                  //!< (-1) if not set yet.
-        int mAccountID;           //!< Account ID of the account the character
-                                  //!< belongs to. (-1) if not set yet.
+        int mAccountID;           //!< Account ID of the owner.
+        Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
         unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
         unsigned short mMapId;    //!< Map the being is on.
@@ -166,20 +176,17 @@ class CharacterData
         unsigned char mHairStyle; //!< Hair style of the being.
         unsigned char mHairColor; //!< Hair color of the being.
         unsigned char mLevel;     //!< Level of the being.
+        unsigned char mAccountLevel; //!< Level of the associated account.
 
         std::vector<std::string> mGuilds;        //!< All the guilds the player
                                                  //!< belongs to.
 };
 
 // Utility typedefs
-/**
- * Type definition for a smart pointer to CharacterData.
- */
-typedef utils::CountedPtr< CharacterData > CharacterPtr;
 
 /**
  * Type definition for a list of Characters.
  */
-typedef std::vector< CharacterPtr > Characters;
+typedef std::vector< Character * > Characters;
 
 #endif

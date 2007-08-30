@@ -26,9 +26,8 @@
 
 #include <map>
 #include "account-server/accounthandler.hpp"
-#include "account-server/characterdata.hpp"
+#include "account-server/character.hpp"
 #include "net/connectionhandler.hpp"
-#include "utils/countedptr.h"
 
 class AccountClient;
 
@@ -53,17 +52,20 @@ class ServerHandler: public ConnectionHandler
         /**
          * Sends a magic token and character data to the relevant game server.
          */
-        void registerGameClient(std::string const &, CharacterPtr);
-        
+        void registerGameClient(std::string const &, Character *);
+
+// There is no rationale for having a character name, but not its ID.
+#if 0
         /**
          * Get character (temp used by chat server).
          */
         CharacterPtr getCharacter(const std::string &name);
-        
+#endif
+
         /**
          * Make client join the specified guild channel
          */
-        void enterChannel(const std::string &guildName, CharacterData *player);
+        void enterChannel(const std::string &guildName, Character *player);
 
     protected:
         /**

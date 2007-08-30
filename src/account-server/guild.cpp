@@ -20,6 +20,7 @@
  *  $Id$
  */
 
+#if 0
 #include "guild.hpp"
 
 #include "account-server/characterdata.hpp"
@@ -88,3 +89,4 @@ bool Guild::checkInGuild(const std::string &name)
     }
     return false;
 }
+#endif

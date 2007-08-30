@@ -26,7 +26,7 @@
 #include <string>
 #include <list>
 
-class CharacterData;
+class Character;
 
 /**
  * A guild and its members.
@@ -34,7 +34,7 @@ class CharacterData;
 class Guild
 {
     public:
-        typedef std::list<CharacterData*> guildMembers;
+        typedef std::list<Character *> guildMembers;
 
         /**
          * Constructor.
@@ -49,22 +49,22 @@ class Guild
         /**
          * Add a member to the guild.
          */
-        void addMember(CharacterData* player);
+        void addMember(Character *player);
 
         /**
          * Remove a member from the guild.
          */
-        void removeMember(CharacterData* player);
+        void removeMember(Character *player);
 
         /**
          * Check player is the leader of the guild.
          */
-        bool checkLeader(CharacterData* player);
+        bool checkLeader(Character *player);
 
         /**
          * Set the ID of the guild.
          */
-        void setId(short id)
+        void setId(int id)
         { mId = id; }
 
         /**
@@ -86,13 +86,13 @@ class Guild
         /**
          * Returns the ID of the guild.
          */
-        short getId() const
+        int getId() const
         { return mId; }
 
         /**
          * Returns the total number of members in the guild.
          */
-        short totalMembers() const
+        int totalMembers() const
         { return mMembers.size(); }
 
         /**
@@ -108,7 +108,7 @@ class Guild
     private:
         short mId;
         std::string mName;
-        std::list<CharacterData*> mMembers;
+        std::list<Character *> mMembers;
         std::list<std::string> mInvited;
 };
 

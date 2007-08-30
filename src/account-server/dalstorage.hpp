@@ -24,10 +24,14 @@
 #ifndef _TMWSERV_DALSTORAGE_H_
 #define _TMWSERV_DALSTORAGE_H_
 
-#include "account-server/characterdata.hpp"
-#include "account-server/storage.hpp"
+#include <list>
+#include <map>
+
 #include "dal/dataprovider.h"
 
+class Account;
+class Character;
+class ChatChannel;
 class Guild;
 
 /**
@@ -37,13 +41,21 @@ class Guild;
  *     - this class cannot be instanciated nor duplicated in order to force
  *       a user class to use the Storage singleton.
  */
-class DALStorage: public Storage
+class DALStorage
 {
-    // friend so that Storage can call the constructor.
-    friend class Storage;
-
-
     public:
+        /**
+         * Constructor.
+         */
+        DALStorage();
+
+
+        /**
+         * Destructor.
+         */
+        ~DALStorage();
+
+
         /**
          * Connect to the database and initialize it if necessary.
          */
@@ -63,8 +75,7 @@ class DALStorage: public Storage
          *
          * @return the account associated to the user name.
          */
-        AccountPtr
-        getAccount(const std::string& userName);
+        Account *getAccount(const std::string& userName);
 
         /**
          * Get an account by ID.
@@ -73,18 +84,19 @@ class DALStorage: public Storage
          *
          * @return the account associated with the ID.
          */
-        AccountPtr
-        getAccountByID(int accountID);
+        Account *getAccount(int accountID);
 
         /**
          * Gets a character by database ID.
          *
          * @param id the ID of the character.
+         * @param owner the account the character is in.
          *
          * @return the character associated to the ID.
          */
-        CharacterPtr getCharacter(int id);
-        
+        Character *getCharacter(int id, Account *owner);
+
+#if 0
         /**
          * Gets a character by character name.
          *
@@ -92,7 +104,8 @@ class DALStorage: public Storage
          *
          * @return the character associated to the name
          */
-        CharacterPtr getCharacter(const std::string &name);
+        Character *getCharacter(const std::string &name);
+#endif
 
         /**
          * Add a new account.
@@ -100,7 +113,7 @@ class DALStorage: public Storage
          * @param account the new account.
          */
         void
-        addAccount(const AccountPtr& account);
+        addAccount(Account *account);
 
 
         /**
@@ -108,21 +121,16 @@ class DALStorage: public Storage
          *
          * @param account the account to delete.
          */
-        void delAccount(AccountPtr const &account);
+        void delAccount(Account *account);
 
-        /**
-         * Flush and unload an account.
-         *
-         * @param account the account to unload.
-         */
-        void unloadAccount(AccountPtr const &account);
-
+#if 0
         /**
          * Get the list of Emails in the accounts list.
          * @return the list of Email's Addresses.
          */
         std::list<std::string>
         getEmailList();
+#endif
 
         /**
          * Tells if the email address already exists.
@@ -144,7 +152,7 @@ class DALStorage: public Storage
          * returns true if succefull, false otherwise.
          */
         bool
-        updateCharacter(CharacterPtr ptr);
+        updateCharacter(Character *ptr);
 
         /**
          * Gives the list of opened public channels registered in database
@@ -201,7 +209,7 @@ class DALStorage: public Storage
          * @exception tmwserv::dal::DbSqlQueryExecFailure.
          */
         void flushAll();
-        void flush(AccountPtr const &);
+        void flush(Account *);
 
         /**
          * Gets the value of a quest variable.
@@ -215,18 +223,6 @@ class DALStorage: public Storage
 
 
     private:
-        /**
-         * Constructor.
-         */
-        DALStorage();
-
-
-        /**
-         * Destructor.
-         */
-        ~DALStorage();
-
-
         /**
          * Copy constructor.
          */
@@ -260,20 +256,22 @@ class DALStorage: public Storage
          *
          * @return the account found by the query
          */
-        AccountPtr getAccountBySQL(std::string const &query);
+        Account *getAccountBySQL(std::string const &query);
 
 
         /**
          * Gets a character by character name.
          *
-         * @param query the query for the character
+         * @param query the query for the character.
+         * @param owner the account the character is in.
          *
-         * @return the character found by the query
+         * @return the character found by the query.
          */
-        CharacterPtr getCharacterBySQL(const std::string &query);
+        Character *getCharacterBySQL(std::string const &query, Account *owner);
 
-
-        std::auto_ptr<dal::DataProvider> mDb; /**< the data provider */
+        dal::DataProvider *mDb; /**< the data provider */
 };
+
+extern DALStorage *storage;
 
 #endif // _TMWSERV_DALSTORAGE_H_

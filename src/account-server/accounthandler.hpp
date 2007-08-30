@@ -28,7 +28,7 @@
 #include "utils/tokencollector.hpp"
 
 class AccountClient;
-class CharacterData;
+class Character;
 
 /**
  * Manages the data stored in user accounts and provides a reliable interface
@@ -95,7 +95,7 @@ class AccountHandler : public ConnectionHandler
 
     private:
 
-        void sendCharacterData(AccountClient &, int, CharacterData const &);
+        void sendCharacterData(AccountClient &, int, Character const &);
 
         void
         handleLoginMessage(AccountClient &computer, MessageIn &msg);
@@ -133,8 +133,7 @@ class AccountHandler : public ConnectionHandler
         /**
          * Send guild join for each guild the player belongs to.
          */
-        void
-        handleGuildJoining(AccountClient &computer, CharacterData *character);
+        void handleGuildJoining(AccountClient &computer, Character *character);
 };
 
 extern AccountHandler * accountHandler;

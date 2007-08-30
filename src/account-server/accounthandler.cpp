@@ -28,11 +28,11 @@
 #include "point.h"
 #include "account-server/account.hpp"
 #include "account-server/accountclient.hpp"
-#include "account-server/characterdata.hpp"
+#include "account-server/character.hpp"
+#include "account-server/dalstorage.hpp"
 #include "account-server/guild.hpp"
 #include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
-#include "account-server/storage.hpp"
 #include "chat-server/chathandler.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
@@ -149,12 +149,12 @@ AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
     }
 }
 
-void AccountHandler::sendCharacterData(AccountClient &computer, int slot, CharacterData const &ch)
+void AccountHandler::sendCharacterData(AccountClient &computer, int slot, Character const &ch)
 {
     MessageOut charInfo(APMSG_CHAR_INFO);
     charInfo.writeByte(slot);
     charInfo.writeString(ch.getName());
-    charInfo.writeByte((int)ch.getGender());
+    charInfo.writeByte(ch.getGender());
     charInfo.writeByte(ch.getHairStyle());
     charInfo.writeByte(ch.getHairColor());
     charInfo.writeByte(ch.getLevel());
@@ -207,10 +207,9 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
     }
 
     // Check if the account exists
-    Storage &store = Storage::instance("tmw");
-    AccountPtr acc = store.getAccount(username);
+    Account *acc = storage->getAccount(username);
 
-    if (!acc.get() || acc->getPassword() != password)
+    if (!acc || acc->getPassword() != password)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
         computer.send(reply);
@@ -225,7 +224,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
     computer.send(reply); // Acknowledge login
 
     // Return information about available characters
-    Characters &chars = computer.getAccount()->getCharacters();
+    Characters &chars = acc->getCharacters();
 
     // Send characters list
     for (unsigned int i = 0; i < chars.size(); i++)
@@ -320,31 +319,30 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
+    // Check whether the account already exists.
+    else if (storage->getAccount(username))
+    {
+        reply.writeByte(REGISTER_EXISTS_USERNAME);
+    }
+    // Find out whether the email is already in use.
+    else if (storage->doesEmailAddressExist(email))
+    {
+        reply.writeByte(REGISTER_EXISTS_EMAIL);
+    }
     else
     {
-        Storage &store = Storage::instance("tmw");
-        AccountPtr accPtr = store.getAccount(username);
+        Account *acc = new Account;
+        acc->setName(username);
+        acc->setPassword(password);
+        acc->setEmail(email);
+        acc->setLevel(AL_NORMAL);
 
-        // Check whether the account already exists.
-        if (accPtr.get())
-        {
-            reply.writeByte(REGISTER_EXISTS_USERNAME);
-        }
-        // Find out whether the email is already in use.
-        else if (store.doesEmailAddressExist(email))
-        {
-            reply.writeByte(REGISTER_EXISTS_EMAIL);
-        }
-        else
-        {
-            AccountPtr acc(new Account(username, password, email, AL_NORMAL));
-            store.addAccount(acc);
-            reply.writeByte(ERRMSG_OK);
+        storage->addAccount(acc);
+        reply.writeByte(ERRMSG_OK);
 
-            // Associate account with connection
-            computer.setAccount(acc);
-            computer.status = CLIENT_CONNECTED;
-        }
+        // Associate account with connection
+        computer.setAccount(acc);
+        computer.status = CLIENT_CONNECTED;
     }
 
     computer.send(reply);
@@ -375,10 +373,9 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
     }
 
     // See if the account exists
-    Storage &store = Storage::instance("tmw");
-    AccountPtr accPtr = store.getAccount(username);
+    Account *acc = storage->getAccount(username);
 
-    if (!accPtr.get() || accPtr->getPassword() != password)
+    if (!acc || acc->getPassword() != password)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
         computer.send(reply);
@@ -387,14 +384,13 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
 
     // Delete account and associated characters
     LOG_DEBUG("Unregistered \"" << username
-              << "\", AccountID: " << accPtr->getID());
-    store.delAccount(accPtr);
+              << "\", AccountID: " << acc->getID());
+    storage->delAccount(acc);
     reply.writeByte(ERRMSG_OK);
 
     // If the account to delete is the current account we're loggedin
     // on, get out of it in memory.
-    if (computer.getAccount().get() != NULL &&
-                                 computer.getAccount()->getName() == username)
+    if (computer.getAccount() && computer.getAccount()->getName() == username)
     {
         computer.unsetAccount();
         computer.status = CLIENT_LOGIN;
@@ -407,8 +403,7 @@ handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_EMAIL_CHANGE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED ||
-        computer.getAccount().get() == NULL)
+    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
@@ -416,8 +411,6 @@ handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     }
 
     std::string email = msg.readString();
-
-    Storage &store = Storage::instance("tmw");
 
     if (!stringFilter->isEmailValid(email))
     {
@@ -427,7 +420,7 @@ handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (store.doesEmailAddressExist(email))
+    else if (storage->doesEmailAddressExist(email))
     {
         reply.writeByte(EMAILCHG_EXISTS_EMAIL);
     }
@@ -444,8 +437,7 @@ handleEmailGetMessage(AccountClient &computer)
 {
     MessageOut reply(APMSG_EMAIL_GET_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED ||
-        computer.getAccount().get() == NULL)
+    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
@@ -467,8 +459,7 @@ AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
 
     MessageOut reply(APMSG_PASSWORD_CHANGE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED ||
-        computer.getAccount().get() == NULL)
+    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
@@ -505,8 +496,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED ||
-        computer.getAccount().get() == NULL)
+    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
@@ -537,8 +527,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
     }
     else
     {
-        Storage &store = Storage::instance("tmw");
-        if (store.doesCharacterNameExist(name))
+        if (storage->doesCharacterNameExist(name))
         {
             reply.writeByte(CREATE_EXISTS_NAME);
             computer.send(reply);
@@ -586,9 +575,10 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         }
         else
         {
-            CharacterPtr newCharacter(new CharacterData(name));
+            Character *newCharacter = new Character(name);
             for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
                 newCharacter->setAttribute(i, attributes[i - CHAR_ATTR_BEGIN]);
+            newCharacter->setAccount(computer.getAccount());
             newCharacter->setLevel(1);
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
@@ -602,7 +592,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             LOG_INFO("Character " << name << " was created for "
                      << computer.getAccount()->getName() << "'s account.");
 
-            store.flush(computer.getAccount()); // flush changes
+            storage->flush(computer.getAccount()); // flush changes
             reply.writeByte(ERRMSG_OK);
             computer.send(reply);
 
@@ -621,8 +611,7 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_SELECT_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED ||
-        computer.getAccount().get() == NULL)
+    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
@@ -654,7 +643,7 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
 
     // set character
     computer.setCharacter(chars[charNum]);
-    CharacterPtr selectedChar = computer.getCharacter();
+    Character *selectedChar = computer.getCharacter();
     reply.writeByte(ERRMSG_OK);
 
     LOG_DEBUG(selectedChar->getName() << " is trying to enter the servers.");
@@ -680,8 +669,7 @@ handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_DELETE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED ||
-        computer.getAccount().get() == NULL)
+    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
@@ -702,15 +690,14 @@ handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg)
 
     // Delete the character. If the character to delete is the current
     // character, get off of it in memory.
-    if (computer.getCharacter().get() != NULL &&
-        computer.getCharacter()->getName() == chars[charNum].get()->getName())
+    std::string const &deletedCharacter = chars[charNum]->getName();
+    if (computer.getCharacter() &&
+        computer.getCharacter()->getName() == deletedCharacter)
             computer.unsetCharacter();
 
-    std::string deletedCharacter = chars[charNum].get()->getName();
     computer.getAccount()->delCharacter(deletedCharacter);
 
-    Storage &store = Storage::instance("tmw");
-    store.flush(computer.getAccount());
+    storage->flush(computer.getAccount());
 
     LOG_INFO(deletedCharacter << ": Character deleted...");
 
@@ -725,8 +712,7 @@ AccountHandler::tokenMatched(AccountClient *computer, int accountID)
     MessageOut reply(APMSG_RECONNECT_RESPONSE);
 
     // Check if the account exists
-    Storage &store = Storage::instance("tmw");
-    AccountPtr acc = store.getAccountByID(accountID);
+    Account *acc = storage->getAccount(accountID);
 
     // Associate account with connection
     computer->setAccount(acc);

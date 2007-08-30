@@ -20,71 +20,21 @@
  *  $Id$
  */
 
-#include "account-server/dalstorage.hpp"
-
 #include <cassert>
+
+#include "account-server/dalstorage.hpp"
 
 #include "configuration.h"
 #include "point.h"
-#include "account-server/characterdata.hpp"
+#include "account-server/account.hpp"
 #include "account-server/guild.hpp"
 #include "account-server/guildmanager.hpp"
 #include "account-server/dalstoragesql.hpp"
+#include "chat-server/chatchannel.hpp"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
 #include "utils/logger.h"
-
-/**
- * Functor used to search an Account by name in Accounts.
- */
-class account_by_name
-{
-    public:
-        account_by_name(const std::string& name)
-            : mName(name)
-        {}
-
-        bool operator()(std::pair<unsigned, AccountPtr> const &elem) const
-        { return elem.second->getName() == mName; }
-
-    private:
-        std::string mName; /**< the name to look for */
-};
-
-/**
- * Functor used to search a character by ID in Characters.
- */
-class character_by_id
-{
-    public:
-        character_by_id(int id)
-            : mID(id)
-        {}
-
-        bool operator()(CharacterPtr const &elem) const
-        { return elem->getDatabaseID() == mID; }
-
-    private:
-        int mID; /**< the ID to look for */
-};
-
-/**
- * Functor used to search a character by name in Characters.
- */
-class character_by_name
-{
-public:
-    character_by_name(const std::string &name)
-    : mName(name)
-    {}
-
-    bool operator()(CharacterPtr const &elem) const
-    { return elem->getName() == mName; }
-
-private:
-    std::string mName; /**< the name to look for */
-};
 
 /**
  * Constructor.
@@ -105,6 +55,7 @@ DALStorage::~DALStorage()
     if (mDb->isConnected()) {
         close();
     }
+    delete mDb;
 
     // mAccounts and mCharacters contain smart pointers that will deallocate
     // the memory so nothing else to do here :)
@@ -124,7 +75,7 @@ void DALStorage::open()
     using namespace dal;
 
     static bool dbFileShown = false;
-    std::string dbFile(getName());
+    std::string dbFile = "tmw";
     try {
         // open a connection to the database.
 #if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT)
@@ -193,8 +144,6 @@ void DALStorage::open()
     catch (const DbSqlQueryExecFailure& e) {
         LOG_ERROR("(DALStorage::open #2) SQL query failure: " << e.what());
     }
-
-    mIsOpen = mDb->isConnected();
 }
 
 
@@ -204,25 +153,19 @@ void DALStorage::open()
 void DALStorage::close()
 {
     mDb->disconnect();
-    mIsOpen = mDb->isConnected();
 }
 
 
-AccountPtr DALStorage::getAccountBySQL(std::string const &query)
+Account *DALStorage::getAccountBySQL(std::string const &query)
 {
-    // connect to the database (if not connected yet).
-    open();
-
-    using namespace dal;
-
     try {
-        const RecordSet& accountInfo = mDb->execSql(query);
+        dal::RecordSet const &accountInfo = mDb->execSql(query);
 
         // if the account is not even in the database then
         // we have no choice but to return nothing.
         if (accountInfo.isEmpty())
         {
-            return AccountPtr(NULL);
+            return NULL;
         }
 
         // specialize the string_to functor to convert
@@ -232,18 +175,17 @@ AccountPtr DALStorage::getAccountBySQL(std::string const &query)
 
         // create an Account instance
         // and initialize it with information about the user.
-        AccountPtr account(new Account(accountInfo(0, 1),
-                                       accountInfo(0, 2),
-                                       accountInfo(0, 3),
-                                       toUint(accountInfo(0, 4)), id));
-
-        mAccounts.insert(std::make_pair(id, account));
+        Account *account = new Account(id);
+        account->setName(accountInfo(0, 1));
+        account->setPassword(accountInfo(0, 2));
+        account->setEmail(accountInfo(0, 3));
+        account->setLevel(toUint(accountInfo(0, 4)));
 
         // load the characters associated with the account.
         std::ostringstream sql;
         sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
             << id << "';";
-        RecordSet const &charInfo = mDb->execSql(sql.str());
+        dal::RecordSet const &charInfo = mDb->execSql(sql.str());
 
         if (!charInfo.isEmpty())
         {
@@ -261,10 +203,9 @@ AccountPtr DALStorage::getAccountBySQL(std::string const &query)
 
             for (int k = 0; k < size; ++k)
             {
-                CharacterPtr ptr = getCharacter(characterIDs[k]);
-                if (ptr.get())
+                if (Character *ptr = getCharacter(characterIDs[k], account))
                 {
-                    characters.push_back(getCharacter(characterIDs[k]));
+                    characters.push_back(ptr);
                 }
                 else
                 {
@@ -277,9 +218,9 @@ AccountPtr DALStorage::getAccountBySQL(std::string const &query)
 
         return account;
     }
-    catch (const DbSqlQueryExecFailure& e)
+    catch (dal::DbSqlQueryExecFailure const &e)
     {
-        return AccountPtr(NULL); // TODO: Throw exception here
+        return NULL; // TODO: Throw exception here
     }
 }
 
@@ -287,17 +228,8 @@ AccountPtr DALStorage::getAccountBySQL(std::string const &query)
 /**
  * Get an account by user name.
  */
-AccountPtr
-DALStorage::getAccount(const std::string& userName)
+Account *DALStorage::getAccount(std::string const &userName)
 {
-    // look for the account in the list first.
-    Accounts::iterator it_end = mAccounts.end(),
-        it = std::find_if(mAccounts.begin(), it_end, account_by_name(userName));
-
-    if (it != it_end)
-        return it->second;
-
-    // the account was not in the list, look for it in the database.
     std::ostringstream sql;
     sql << "select * from " << ACCOUNTS_TBL_NAME << " where username = \"" << userName << "\";";
     return getAccountBySQL(sql.str());
@@ -307,51 +239,37 @@ DALStorage::getAccount(const std::string& userName)
 /**
  * Get an account by ID.
  */
-AccountPtr
-DALStorage::getAccountByID(int accountID)
+Account *DALStorage::getAccount(int accountID)
 {
-    // look for the account in the list first.
-    Accounts::iterator it = mAccounts.find(accountID);
-
-    if (it != mAccounts.end())
-        return it->second;
-
-    // the account was not in the list, look for it in the database.
     std::ostringstream sql;
     sql << "select * from " << ACCOUNTS_TBL_NAME << " where id = '" << accountID << "';";
     return getAccountBySQL(sql.str());
 }
 
 
-CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
+Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owner)
 {
-    // connect to the database (if not connected yet).
-    open();
-
-    CharacterData *character; 
+    Character *character; 
 
     // specialize the string_to functor to convert
     // a string to an unsigned int.
     string_to< unsigned > toUint;
 
-    using namespace dal;
-
     try {
-        RecordSet const &charInfo = mDb->execSql(query);
+        dal::RecordSet const &charInfo = mDb->execSql(query);
 
         // if the character is not even in the database then
         // we have no choice but to return nothing.
         if (charInfo.isEmpty())
         {
-            return CharacterPtr(NULL);
+            return NULL;
         }
 
         // specialize the string_to functor to convert
         // a string to an unsigned short.
         string_to< unsigned short > toUshort;
 
-        character = new CharacterData(charInfo(0, 2), toUint(charInfo(0, 0)));
-        character->setAccountID(toUint(charInfo(0, 1)));
+        character = new Character(charInfo(0, 2), toUint(charInfo(0, 0)));
         character->setGender(toUshort(charInfo(0, 3)));
         character->setHairStyle(toUshort(charInfo(0, 4)));
         character->setHairColor(toUshort(charInfo(0, 5)));
@@ -376,11 +294,28 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
             // Default map is to be 1, as not found return value will be 0.
             character->setMapId((int)config.getValue("defaultMap", 1));
         }
+
+        /* Fill the account-related fields. Last step, as it may require a new
+           SQL query. */
+        if (owner)
+        {
+            character->setAccount(owner);
+        }
+        else
+        {
+            int id = toUint(charInfo(0, 1));
+            character->setAccountID(id);
+            std::ostringstream s;
+            s << "select level from tmw_accounts where id = '" << id << "';";
+            dal::RecordSet const &levelInfo = mDb->execSql(s.str());
+            character->setAccountLevel(toUint(levelInfo(0, 0)), true);
+        }
+
     }
-    catch (const DbSqlQueryExecFailure& e)
+    catch (dal::DbSqlQueryExecFailure const &e)
     {
         LOG_ERROR("(DALStorage::getCharacter #1) SQL query failure: " << e.what());
-        return CharacterPtr(NULL);
+        return NULL;
     }
 
     try
@@ -389,7 +324,7 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
         sql << " select * from " << INVENTORIES_TBL_NAME << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot asc;";
 
-        RecordSet const &itemInfo = mDb->execSql(sql.str());
+        dal::RecordSet const &itemInfo = mDb->execSql(sql.str());
         if (!itemInfo.isEmpty())
         {
             Possessions &poss = character->getPossessions();
@@ -425,39 +360,30 @@ CharacterPtr DALStorage::getCharacterBySQL(std::string const &query)
             }
         }
     }
-    catch (const DbSqlQueryExecFailure& e)
+    catch (dal::DbSqlQueryExecFailure const &e)
     {
         LOG_ERROR("(DALStorage::getCharacter #2) SQL query failure: " << e.what());
     }
 
-    CharacterPtr ptr(character);
-    mCharacters.push_back(ptr);
-    return ptr;
+    return character;
 }
 
 
 /**
  * Gets a character by database ID.
  */
-CharacterPtr DALStorage::getCharacter(int id)
+Character *DALStorage::getCharacter(int id, Account *owner)
 {
-    // look for the character in the list first.
-    Characters::iterator it_end = mCharacters.end(),
-        it = std::find_if(mCharacters.begin(), it_end, character_by_id(id));
-
-    if (it != it_end)
-        return *it;
-
-    // the account was not in the list, look for it in the database.
     std::ostringstream sql;
     sql << "select * from " << CHARACTERS_TBL_NAME << " where id = '" << id << "';";
-    return getCharacterBySQL(sql.str());
+    return getCharacterBySQL(sql.str(), owner);
 }
 
+#if 0
 /**
-* Gets a character by character name.
+ * Gets a character by character name.
  */
-CharacterPtr DALStorage::getCharacter(const std::string &name)
+Character *DALStorage::getCharacter(const std::string &name)
 {
     // look for the character in the list first.
     Characters::iterator it_end = mCharacters.end(),
@@ -471,16 +397,15 @@ CharacterPtr DALStorage::getCharacter(const std::string &name)
     sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '" << name << "';";
     return getCharacterBySQL(sql.str());
 }
+#endif
 
+#if 0
 /**
  * Return the list of all Emails addresses.
  */
 std::list<std::string>
 DALStorage::getEmailList()
 {
-    // If not opened already
-    open();
-
     std::list <std::string> emailList;
 
     try {
@@ -507,6 +432,7 @@ DALStorage::getEmailList()
 
     return emailList;
 }
+#endif
 
 /**
  * Tells if the email address already exists
@@ -514,9 +440,6 @@ DALStorage::getEmailList()
  */
 bool DALStorage::doesEmailAddressExist(std::string const &email)
 {
-    // If not opened already
-    open();
-
     try {
         std::ostringstream sql;
         sql << "select count(email) from " << ACCOUNTS_TBL_NAME
@@ -541,9 +464,6 @@ bool DALStorage::doesEmailAddressExist(std::string const &email)
  */
 bool DALStorage::doesCharacterNameExist(const std::string& name)
 {
-    // If not opened already
-    open();
-
     try {
         std::ostringstream sql;
         sql << "select count(name) from " << CHARACTERS_TBL_NAME
@@ -563,12 +483,8 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
     return true;
 }
 
-bool
-DALStorage::updateCharacter(CharacterPtr character)
+bool DALStorage::updateCharacter(Character *character)
 {
-    // If not opened already
-    open();
-
     // Update the database Character data (see CharacterData for details)
     try
     {
@@ -821,7 +737,7 @@ DALStorage::createTable(const std::string& tblName,
 /**
  * Add an account to the database.
  */
-void DALStorage::addAccount(AccountPtr const &account)
+void DALStorage::addAccount(Account *account)
 {
     assert(account->getCharacters().size() == 0);
 
@@ -849,23 +765,12 @@ void DALStorage::addAccount(AccountPtr const &account)
     string_to<unsigned int> toUint;
     unsigned id = toUint(accountInfo(0, 0));
     account->setID(id);
-    mAccounts.insert(std::make_pair(id, account));
-}
-
-/**
- * Update all the accounts from the database.
- */
-void DALStorage::flushAll()
-{
-    for (Accounts::iterator i = mAccounts.begin(),
-         i_end = mAccounts.end(); i != i_end; ++i)
-        flush(i->second);
 }
 
 /**
  * Update an account from the database.
  */
-void DALStorage::flush(AccountPtr const &account)
+void DALStorage::flush(Account *account)
 {
     assert(account->getID() >= 0);
 
@@ -891,7 +796,12 @@ void DALStorage::flush(AccountPtr const &account)
     for (Characters::const_iterator it = characters.begin(),
          it_end = characters.end(); it != it_end; ++it)
     {
-        if ((*it)->getDatabaseID() < 0) {
+        if ((*it)->getDatabaseID() >= 0)
+        {
+            updateCharacter(*it);
+        }
+        else
+        {
             std::ostringstream sqlInsertCharactersTable;
             // insert the character
             // This assumes that the characters name has been checked for
@@ -919,39 +829,8 @@ void DALStorage::flush(AccountPtr const &account)
                  << (*it)->getAttribute(CHAR_ATTR_CHARISMA) << ");";
 
             mDb->execSql(sqlInsertCharactersTable.str());
-        } else {
-            std::ostringstream sqlUpdateCharactersTable;
-            sqlUpdateCharactersTable
-                << "update " << CHARACTERS_TBL_NAME
-                << " set name = \"" << (*it)->getName() << "\", "
-                << " gender = " << (*it)->getGender() << ", "
-                << " hair_style = " << (int)(*it)->getHairStyle() << ", "
-                << " hair_color = " << (int)(*it)->getHairColor() << ", "
-                << " level = " << (int)(*it)->getLevel() << ", "
-                << " money = " << (*it)->getPossessions().money << ", "
-                << " x = " << (*it)->getPosition().x << ", "
-                << " y = " << (*it)->getPosition().y << ", "
-                << " map_id = " << (*it)->getMapId() << ", "
-                << " str = " << (*it)->getAttribute(CHAR_ATTR_STRENGTH) << ", "
-                << " agi = " << (*it)->getAttribute(CHAR_ATTR_AGILITY) << ", "
-                << " dex = " << (*it)->getAttribute(CHAR_ATTR_DEXTERITY) << ", "
-                << " vit = " << (*it)->getAttribute(CHAR_ATTR_VITALITY) << ", "
-#if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-                << " `int` = "
-#else
-                << " int = "
-#endif
-                             << (*it)->getAttribute(CHAR_ATTR_INTELLIGENCE) << ", "
-                << " will = " << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ", "
-                << " charisma = " << (*it)->getAttribute(CHAR_ATTR_CHARISMA)
-                << " where id = " << (*it)->getDatabaseID() << ";";
 
-            mDb->execSql(sqlUpdateCharactersTable.str());
-        }
-
-        if ((*it)->getDatabaseID() < 0)
-        {
-            // get the character's id
+            // Update the character ID.
             std::ostringstream sqlSelectIdCharactersTable;
             sqlSelectIdCharactersTable
                  << "select id from " << CHARACTERS_TBL_NAME
@@ -969,8 +848,6 @@ void DALStorage::flush(AccountPtr const &account)
                 // error has occured
             }
         }
-
-        // TODO: inventories.
     }
 
     // Existing characters in memory have been inserted or updated in database.
@@ -1038,13 +915,10 @@ void DALStorage::flush(AccountPtr const &account)
 /**
  * Delete an account and its associated data from the database.
  */
-void DALStorage::delAccount(AccountPtr const &account)
+void DALStorage::delAccount(Account *account)
 {
-    using namespace dal;
-
     account->setCharacters(Characters());
     flush(account);
-    mAccounts.erase(account->getID());
 
     // delete the account.
     std::ostringstream sql;
@@ -1054,26 +928,10 @@ void DALStorage::delAccount(AccountPtr const &account)
 }
 
 /**
- * Unload an account from memory.
- */
-void DALStorage::unloadAccount(AccountPtr const &account)
-{
-    flush(account);
-    mAccounts.erase(account->getID());
-}
-
-/**
  * Add a guild
  */
 void DALStorage::addGuild(Guild* guild)
 {
-#if defined (SQLITE_SUPPORT)
-    // Reopen the db in this thread for sqlite, to avoid
-    // Library Call out of sequence problem due to thread safe.
-    close();
-#endif
-    open();
-    
     std::ostringstream insertSql;
     insertSql << "insert into " << GUILDS_TBL_NAME
         << " (name) "
@@ -1114,13 +972,6 @@ void DALStorage::removeGuild(Guild* guild)
  */
 void DALStorage::addGuildMember(int guildId, const std::string &memberName)
 {
-#if defined (SQLITE_SUPPORT)
-    // Reopen the db in this thread for sqlite, to avoid
-    // Library Call out of sequence problem due to thread safe.
-    close();
-#endif
-    open();
-    
     std::ostringstream sql;
     
     try
@@ -1143,13 +994,6 @@ void DALStorage::addGuildMember(int guildId, const std::string &memberName)
  */
 void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
 {
-#if defined (SQLITE_SUPPORT)
-    // Reopen the db in this thread for sqlite, to avoid
-    // Library Call out of sequence problem due to thread safe.
-    close();
-#endif
-    open();
-    
     std::ostringstream sql;
     
     try
@@ -1166,18 +1010,13 @@ void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
     }    
 }
 
+// Guild members should not be stored by name in the database.
+#if 0
 /**
  * get a list of guilds
  */
 std::list<Guild*> DALStorage::getGuildList()
 {
-#if defined (SQLITE_SUPPORT)
-    // Reopen the db in this thread for sqlite, to avoid
-    // Library Call out of sequence problem due to thread safe.
-    close();
-#endif
-    open();
-    
     std::list<Guild*> guilds;
     std::stringstream sql;
     string_to<short> toShort;
@@ -1220,9 +1059,9 @@ std::list<Guild*> DALStorage::getGuildList()
         
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
-                CharacterPtr character = getCharacter(memberInfo(j,0));
+                Character *character = getCharacter(memberInfo(j,0));
                 character->addGuild((*itr)->getName());
-                (*itr)->addMember(character.get());
+                (*itr)->addMember(character);
             }
         }
     }
@@ -1233,25 +1072,21 @@ std::list<Guild*> DALStorage::getGuildList()
     
     return guilds;
 }
+#endif
 
 std::string DALStorage::getQuestVar(int id, std::string const &name)
 {
-    // connect to the database (if not connected yet).
-    open();
-
-    using namespace dal;
-
     try
     {
         std::ostringstream query;
         query << "select value from " << QUESTS_TBL_NAME
               << " where owner_id = '" << id << "' and name = '"
               << name << "';";
-        RecordSet const &info = mDb->execSql(query.str());
+        dal::RecordSet const &info = mDb->execSql(query.str());
 
         if (!info.isEmpty()) return info(0, 0);
     }
-    catch (DbSqlQueryExecFailure const &e)
+    catch (dal::DbSqlQueryExecFailure const &e)
     {
         LOG_ERROR("(DALStorage::getQuestVar) SQL query failure: " << e.what());
     }
@@ -1262,11 +1097,6 @@ std::string DALStorage::getQuestVar(int id, std::string const &name)
 void DALStorage::setQuestVar(int id, std::string const &name,
                              std::string const &value)
 {
-    // connect to the database (if not connected yet).
-    open();
-
-    using namespace dal;
-
     try
     {
         std::ostringstream query1;
@@ -1283,7 +1113,7 @@ void DALStorage::setQuestVar(int id, std::string const &name,
                << id << "', '" << name << "', '" << value << "');";
         mDb->execSql(query2.str());
     }
-    catch (DbSqlQueryExecFailure const &e)
+    catch (dal::DbSqlQueryExecFailure const &e)
     {
         LOG_ERROR("(DALStorage::setQuestVar) SQL query failure: " << e.what());
     }

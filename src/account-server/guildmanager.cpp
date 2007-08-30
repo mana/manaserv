@@ -20,6 +20,7 @@
  *  $Id$
  */
 
+#if 0
 #include "guildmanager.hpp"
 
 #include "account-server/characterdata.hpp"
@@ -122,3 +123,4 @@ bool GuildManager::doesExist(const std::string &name)
 {
     return findByName(name) != NULL;
 }
+#endif

@@ -27,7 +27,7 @@
 #include <enet/enet.h>
 
 #include "account-server/account.hpp"
-#include "account-server/characterdata.hpp"
+#include "account-server/character.hpp"
 #include "net/netcomputer.hpp"
 
 class AccountHandler;
@@ -59,8 +59,7 @@ class AccountClient : public NetComputer
         /**
          * Set the account associated with the connection
          */
-        void
-        setAccount(AccountPtr acc);
+        void setAccount(Account *acc);
 
         /**
          * Unset the account associated with the connection
@@ -71,14 +70,14 @@ class AccountClient : public NetComputer
         /**
          * Get account associated with the connection.
          */
-        AccountPtr
-        getAccount() const { return mAccountPtr; }
+        Account *getAccount() const
+        { return mAccount; }
 
         /**
          * Set the selected character associated with connection.
          */
         void
-        setCharacter(CharacterPtr ch);
+        setCharacter(Character *ch);
 
         /**
          * Deselect the character associated with connection.
@@ -89,17 +88,17 @@ class AccountClient : public NetComputer
         /**
          * Get character associated with the connection
          */
-        CharacterPtr
-        getCharacter() const { return mCharacterPtr; }
+        Character *getCharacter() const
+        { return mCharacter; }
 
         int status;
 
     private:
         /** Account associated with connection */
-        AccountPtr mAccountPtr;
+        Account *mAccount;
 
         /** Selected character */
-        CharacterPtr mCharacterPtr;
+        Character *mCharacter;
 };
 
 #endif

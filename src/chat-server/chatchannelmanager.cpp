@@ -23,23 +23,22 @@
 
 #include <list>
 
-#include "account-server/storage.hpp"
 #include "chat-server/chatchannelmanager.hpp"
+
+#include "defines.h"
+#include "account-server/dalstorage.hpp"
 #include "chat-server/chatclient.hpp"
 
 ChatChannelManager::ChatChannelManager()
 {
     // Load stored public chat channels from db
-    Storage &store = Storage::instance("tmw");
-    mChatChannels = store.getChannelList();
+    mChatChannels = storage->getChannelList();
 }
 
 
 ChatChannelManager::~ChatChannelManager()
 {
-    Storage &store = Storage::instance("tmw");
-    store.updateChannels(mChatChannels);
-    mChatChannels.clear();
+    storage->updateChannels(mChatChannels);
 }
 
 int

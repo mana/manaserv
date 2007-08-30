@@ -22,8 +22,8 @@
 
 #include <list>
 
+class Character;
 class Guild;
-class CharacterData;
 
 /**
  * Guild manager takes care of creating, removing and modifying guilds.
@@ -44,7 +44,7 @@ class GuildManager
         /**
          * Creates a guild.
          */
-        short createGuild(const std::string &name, CharacterData *player);
+        short createGuild(const std::string &name, Character *player);
 
         /**
          * Removes a guild.
@@ -54,12 +54,12 @@ class GuildManager
         /**
          * Adds a member to a guild.
          */
-        void addGuildMember(short guildId, CharacterData *player);
+        void addGuildMember(short guildId, Character *player);
 
         /**
          * Removes a member from a guild.
          */
-        void removeGuildMember(short guildId, CharacterData *player);
+        void removeGuildMember(short guildId, Character *player);
 
         /**
          * Returns the guild with the given id. O(n)

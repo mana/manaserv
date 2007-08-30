@@ -18,8 +18,8 @@ tmwserv_account_SOURCES = \
 	account-server/accountclient.cpp \
 	account-server/accounthandler.hpp \
 	account-server/accounthandler.cpp \
-	account-server/characterdata.hpp \
-	account-server/characterdata.cpp \
+	account-server/character.hpp \
+	account-server/character.cpp \
 	account-server/dalstorage.hpp \
 	account-server/dalstorage.cpp \
 	account-server/dalstoragesql.hpp \
@@ -29,8 +29,6 @@ tmwserv_account_SOURCES = \
 	account-server/guildmanager.h \
 	account-server/serverhandler.hpp \
 	account-server/serverhandler.cpp \
-	account-server/storage.hpp \
-	account-server/storage.cpp \
 	chat-server/chathandler.hpp \
 	chat-server/chathandler.cpp \
 	chat-server/chatclient.hpp \
@@ -55,7 +53,6 @@ tmwserv_account_SOURCES = \
 	net/netcomputer.hpp \
 	net/netcomputer.cpp \
 	serialize/characterdata.hpp \
-	utils/countedptr.h \
 	utils/functors.h \
 	utils/logger.h \
 	utils/logger.cpp \

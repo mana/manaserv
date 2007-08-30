@@ -1,5 +1,29 @@
 2007-08-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
+	* src/account-server/storage.hpp, src/account-server/storage.cpp,
+	src/account-server/main-account.cpp: Removed abstract Storage. Relied
+	on SQL-based implementation only.
+	* src/account-server/characterdata.hpp,
+	src/account-server/characterdata.cpp: Renamed class and files to just
+	Character.
+	* src/utils/countedptr.h: Got rid of reference-counted pointers.
+	* src/account-server/dalstorage.hpp, src/account-server/dalstorage.cpp:
+	Fixed permanent memory usage for accounts and characters loaded once.
+	* src/account-server/serverhandler.cpp: Improved robustness to game
+	server messages.
+	* src/chat-server/chathandler.cpp, src/account-server/guildmanager.cpp,
+	src/chat-server/chatchannelmanager.cpp, src/account-server/account.hpp,
+	src/account-server/accounthandler.hpp, src/account-server/guild.cpp,
+	src/account-server/accountclient.hpp, src/account-server/guild.hpp,
+	src/account-server/guildmanager.hpp, src/account-server/account.cpp,
+	src/account-server/serverhandler.hpp, src/Makefile.am,
+	src/account-server/dalstoragesql.hpp,
+	src/account-server/accounthandler.cpp,
+	src/account-server/accountclient.cpp: Fixed fallout from previous
+	patches.
+
+2007-08-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
 	* data/scripts/libtmw.lua: Fixed race condition between quest_reply and
 	npc_next.
 	* src/game-server/command.cpp, src/game-server/gamehandler.cpp,

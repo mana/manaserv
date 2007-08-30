@@ -24,7 +24,6 @@
 #include <list>
 
 #include "defines.h"
-#include "account-server/characterdata.hpp"
 #include "account-server/guild.hpp"
 #include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
@@ -312,11 +311,13 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
+#if 0
     else if (guildManager->doesExist(channelName))
     {
         // Channel already exists
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
+#endif
     else
     {
         // We attempt to create a new channel
@@ -375,12 +376,6 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
     else if (channelId < (signed) MAX_PUBLIC_CHANNELS_RANGE)
     {
         // Public channel
-
-        // Get character based on name
-        CharacterPtr character =
-            serverHandler->getCharacter(client.characterName);
-        const std::string &channelName = channel->getName();
-
         if (client.accountLevel == AL_ADMIN || client.accountLevel == AL_GM)
         {
             warnUsersAboutPlayerEventInChat(
@@ -390,6 +385,9 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
             else
                 reply.writeByte(ERRMSG_FAILURE);
         }
+/* The chat server should not access directly to the objects of the account
+   server, so that they can be splitted later, if needed. */
+#if 0
         else if (guildManager->doesExist(channelName))
         {
             Guild *guild = guildManager->findByName(channelName);
@@ -408,6 +406,7 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
                 reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
             }
         }
+#endif
         else
         {
             reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
@@ -455,11 +454,13 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     short channelId = chatChannelManager->getChannelId(channelName);
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
+#if 0
     // TODO: b_lindeijer: Currently, the client has to join its guild channels
     //        explicitly by sending 'enter channel' messages. This should be
     //        changed to implicitly joining relevant guild channels right after
     //        login.
     Guild *guild = guildManager->findByName(channelName);
+#endif
 
     if (!channelId || !channel)
     {
@@ -471,20 +472,24 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
         // Incorrect password (should probably have its own return value)
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
+#if 0
     else if (guild && !guild->checkInGuild(client.characterName))
     {
         // Player tried to join a guild channel of a guild he's not a member of
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
+#endif
     else
     {
         if (channel->addUser(&client))
         {
+#if 0
             // In the case of a guild, send user joined message.
             if (guild)
             {
                 sendUserJoined(channel, client.characterName);
             }
+#endif
 
             reply.writeByte(ERRMSG_OK);
             // The user entered the channel, now give him the channel
@@ -542,6 +547,7 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
                 client.characterName,
                 CHAT_EVENT_LEAVING_PLAYER);
 
+#if 0
         // TODO: b_lindeijer: Clients aren't supposed to quit guild
         //        channels explicitly, this should rather happen
         //        implicitly. See similar note at handling 'enter channel'
@@ -553,6 +559,7 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
             // Send a user left message
             sendUserLeft(channel, client.characterName);
         }
+#endif
     }
 
     client.send(reply);
