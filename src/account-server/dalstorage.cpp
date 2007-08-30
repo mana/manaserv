@@ -594,9 +594,6 @@ bool DALStorage::updateCharacter(Character *character)
 std::map<unsigned short, ChatChannel>
 DALStorage::getChannelList()
 {
-    // If not opened already
-    open();
-
     // specialize the string_to functor to convert
     // a string to a short.
     string_to<int> toInt;
@@ -644,13 +641,6 @@ DALStorage::getChannelList()
 void
 DALStorage::updateChannels(std::map<unsigned short, ChatChannel>& channelList)
 {
-#if defined (SQLITE_SUPPORT)
-    // Reopen the db in this thread for sqlite, to avoid
-    // Library Call out of sequence problem due to thread safe.
-    close();
-#endif
-    open();
-
     try {
         // Empties the table
         std::stringstream sql;
@@ -953,13 +943,6 @@ void DALStorage::addGuild(Guild* guild)
  */
 void DALStorage::removeGuild(Guild* guild)
 {
-#if defined (SQLITE_SUPPORT)
-    // Reopen the db in this thread for sqlite, to avoid
-    // Library Call out of sequence problem due to thread safe.
-    close();
-#endif
-    open();
-    
     std::ostringstream sql;
     sql << "delete from " << GUILDS_TBL_NAME
         << " where id = '"
