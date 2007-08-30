@@ -110,7 +110,7 @@ struct QuestDeathListener: EventDispatch
 };
 
 static QuestDeathListener questDeathDummy;
-static EventListener questDeathListener = { &questDeathDummy };
+static EventListener questDeathListener(&questDeathDummy);
 
 void recoverQuestVar(Character *ch, std::string const &name,
                      QuestCallback const &f)
