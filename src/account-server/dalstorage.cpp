@@ -42,8 +42,6 @@
 DALStorage::DALStorage()
         : mDb(dal::DataProviderFactory::createDataProvider())
 {
-    // the connection to the database will be made on the first request
-    // to the database.
 }
 
 
@@ -56,9 +54,6 @@ DALStorage::~DALStorage()
         close();
     }
     delete mDb;
-
-    // mAccounts and mCharacters contain smart pointers that will deallocate
-    // the memory so nothing else to do here :)
 }
 
 

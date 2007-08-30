@@ -36,10 +36,6 @@ class Guild;
 
 /**
  * A storage class that relies on DAL.
- *
- * Notes:
- *     - this class cannot be instanciated nor duplicated in order to force
- *       a user class to use the Storage singleton.
  */
 class DALStorage
 {
@@ -206,7 +202,7 @@ class DALStorage
         /**
          * Save changes to the database permanently.
          *
-         * @exception tmwserv::dal::DbSqlQueryExecFailure.
+         * @exception dal::DbSqlQueryExecFailure.
          */
         void flushAll();
         void flush(Account *);
@@ -242,7 +238,7 @@ class DALStorage
          * @param tblName the table name.
          * @param sql the SQL query to execute.
          *
-         * @exception tmwserv::dal::DbSqlQueryExecFailure.
+         * @exception dal::DbSqlQueryExecFailure.
          */
         void
         createTable(const std::string& tblName,
