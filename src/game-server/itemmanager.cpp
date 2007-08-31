@@ -23,17 +23,25 @@
 
 #include <map>
 
+#include "game-server/itemmanager.hpp"
+
 #include "defines.h"
 #include "resourcemanager.h"
 #include "game-server/item.hpp"
-#include "game-server/itemmanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
 typedef std::map< int, ItemClass * > ItemClasses;
 static ItemClasses itemClasses; /**< Item reference */
+static std::string itemReferenceFile;
 
-void ItemManager::initialize(std::string const &itemReferenceFile)
+void ItemManager::initialize(std::string const &file)
+{
+    itemReferenceFile = file;
+    reload();
+}
+
+void ItemManager::reload()
 {
     ResourceManager *resman = ResourceManager::getInstance();
     int size;
@@ -73,7 +81,8 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
             continue;
         }
 
-        unsigned id = XML::getProperty(node, "id", 0);
+        int id = XML::getProperty(node, "id", 0);
+        int itemType = XML::getProperty(node, "type", 0);
 
         if (id == 0)
         {
@@ -82,7 +91,18 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
             continue;
         }
 
-        int itemType = XML::getProperty(node, "type", 0);
+        ItemClass *item;
+        ItemClasses::iterator i = itemClasses.find(id);
+        if (i == itemClasses.end())
+        {
+            item = new ItemClass(id, itemType);
+            itemClasses[id] = item;
+        }
+        else
+        {
+            item = i->second;
+        }
+
         int weight = XML::getProperty(node, "weight", 0);
         int value = XML::getProperty(node, "value", 0);
         int maxPerSlot = XML::getProperty(node, "max_per_slot", 0);
@@ -130,14 +150,12 @@ void ItemManager::initialize(std::string const &itemReferenceFile)
             weight = 1;
         }
 
-        ItemClass *item = new ItemClass(id, itemType);
         item->setWeight(weight);
         item->setCost(value);
         item->setMaxPerSlot(maxPerSlot);
         //item->setScriptName(scriptName);
         item->setModifiers(modifiers);
         item->setSpriteID(sprite ? sprite : id);
-        itemClasses[id] = item;
         ++nbItems;
 
         LOG_DEBUG("Item: ID: " << id << ", itemType: " << itemType

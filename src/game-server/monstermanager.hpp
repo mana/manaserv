@@ -36,6 +36,11 @@ namespace MonsterManager
     void initialize(std::string const &);
 
     /**
+     * Reloads monster reference file.
+     */
+    void reload();
+
+    /**
      * Destroy monster classes.
      */
     void deinitialize();

@@ -36,6 +36,11 @@ namespace ItemManager
     void initialize(std::string const &);
 
     /**
+     * Reloads item reference file.
+     */
+    void reload();
+
+    /**
      * Destroy item classes.
      */
     void deinitialize();

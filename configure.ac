@@ -100,7 +100,8 @@ AC_ARG_ENABLE(
 )
 
 if test "$enable_lua_engine" = "yes"; then
-    PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1])
+    PKG_CHECK_MODULES(LUA, [lua >= 5.1], ,
+        [PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1])])
     CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
     LIBS="$LIBS $LUA_LIBS"
 fi

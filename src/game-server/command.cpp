@@ -34,32 +34,42 @@
 #include "game-server/monstermanager.hpp"
 #include "game-server/state.hpp"
 
+template< typename T >
+static T proxy_cast(intptr_t v)
+{ return (T)v; }
+
+template<>
+static std::string const &proxy_cast(intptr_t v)
+{ return *(std::string const *)v; }
+
 template< typename T1 >
-static void proxy(void (*f)(), Character *from, intptr_t args[1])
+static void proxy(void (*f)(), Character *from, intptr_t const args[1])
 {
     ((void (*)(Character *, T1))f)
-        (from, (T1)args[0]);
+        (from, proxy_cast<T1>(args[0]));
 }
 
 template< typename T1, typename T2 >
-static void proxy(void (*f)(), Character *from, intptr_t args[2])
+static void proxy(void (*f)(), Character *from, intptr_t const args[2])
 {
     ((void (*)(Character *, T1, T2))f)
-        (from, (T1)args[0], (T2)args[1]);
+        (from, proxy_cast<T1>(args[0]), proxy_cast<T2>(args[1]));
 }
 
 template< typename T1, typename T2, typename T3 >
-static void proxy(void (*f)(), Character *from, intptr_t args[3])
+static void proxy(void (*f)(), Character *from, intptr_t const args[3])
 {
     ((void (*)(Character *, T1, T2, T3))f)
-        (from, (T1)args[0], (T2)args[1], (T3)args[2]);
+        (from, proxy_cast<T1>(args[0]), proxy_cast<T2>(args[1]),
+               proxy_cast<T3>(args[2]));
 }
 
 template< typename T1, typename T2, typename T3, typename T4 >
-static void proxy(void (*f)(), Character *from, intptr_t args[4])
+static void proxy(void (*f)(), Character *from, intptr_t const args[4])
 {
     ((void (*)(Character *, T1, T2, T3, T4))f)
-        (from, (T1)args[0], (T2)args[1], (T3)args[2], (T4)args[3]);
+        (from, proxy_cast<T1>(args[0]), proxy_cast<T2>(args[1]),
+               proxy_cast<T3>(args[2]), proxy_cast<T4>(args[3]));
 }
 
 /**
@@ -70,6 +80,8 @@ template< typename T > struct Argument;
 
 template<> struct Argument< int >
 { static char const type = 'n'; };
+template<> struct Argument< std::string const & >
+{ static char const type = 's'; };
 template<> struct Argument< Character * >
 { static char const type = 'c'; };
 template<> struct Argument< MapComposite * >
@@ -85,7 +97,7 @@ template<> struct Argument< MonsterClass * >
 struct Command
 {
     char const *name;
-    void (*handler)(void (*f)(), Character *, intptr_t[]);
+    void (*handler)(void (*f)(), Character *, intptr_t const[]);
     void (*target)();
     char type[4];
     unsigned char level;
@@ -221,6 +233,18 @@ static void recall(Character *from, Character *ch)
     GameState::enqueueEvent(ch, e);
 }
 
+static void reload(Character *from, std::string const &db)
+{
+    if (db == "items")
+    {
+        ItemManager::reload();
+    }
+    else if (db == "monsters")
+    {
+        MonsterManager::reload();
+    }
+}
+
 /**
  * List of remote commands.
  */
@@ -233,6 +257,7 @@ static Command const commands[] =
     handle("spawn", AL_GM, spawn),
     handle("goto", AL_GM, goto_),
     handle("recall", AL_GM, recall),
+    handle("reload", AL_ADMIN, reload),
 };
 
 /**
@@ -348,8 +373,24 @@ void runCommand(Character *ch, std::string const &text)
                     return;
                 }
                 break;
+
+            case 's':
+                args[i] = (intptr_t)new std::string(arg);
+                break;
+                
         }
         pos = pos2;
     }
+
+    // Call the command handler.
     c->handler(c->target, ch, args);
+
+    // Delete dynamic arguments.
+    for (int i = 0; i < 4 && c->type[i]; ++i)
+    {
+        if (c->type[i] == 's')
+        {
+            delete (std::string *)args[i];
+        }
+    }
 }

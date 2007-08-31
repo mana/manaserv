@@ -1,4 +1,13 @@
-2007-08-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+2007-08-31  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* configure.ac: Fixed detection of generic lua.pc file.
+	* src/game-server/itemmanager.cpp, src/game-server/itemmanager.hpp,
+	src/game-server/monstermanager.cpp, src/game-server/monstermanager.hpp:
+	Modified loading of reference files, so that it is possible to reload
+	them.
+	* src/game-server/command.cpp: Implemented "reload" remote command.
+
+2007-08-30  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/storage.hpp, src/account-server/storage.cpp,
 	src/account-server/main-account.cpp: Removed abstract Storage. Relied

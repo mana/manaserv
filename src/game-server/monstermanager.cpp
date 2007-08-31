@@ -23,25 +23,34 @@
 
 #include <map>
 
+#include "game-server/monstermanager.hpp"
+
 #include "defines.h"
 #include "resourcemanager.h"
 #include "game-server/itemmanager.hpp"
 #include "game-server/monster.hpp"
-#include "game-server/monstermanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
 typedef std::map< int, MonsterClass * > MonsterClasses;
 static MonsterClasses monsterClasses; /**< Monster reference */
+static std::string monsterReferenceFile;
 
 void MonsterManager::initialize(std::string const &file)
 {
+    monsterReferenceFile = file;
+    reload();
+}
+
+void MonsterManager::reload()
+{
     ResourceManager *resman = ResourceManager::getInstance();
     int size;
-    char *data = (char *)resman->loadFile(file, size);
+    char *data = (char *)resman->loadFile(monsterReferenceFile, size);
 
     if (!data) {
-        LOG_ERROR("Monster Manager: Could not find " << file << "!");
+        LOG_ERROR("Monster Manager: Could not find "
+                  << monsterReferenceFile << "!");
         free(data);
         return;
     }
@@ -52,14 +61,14 @@ void MonsterManager::initialize(std::string const &file)
     if (!doc)
     {
         LOG_ERROR("Monster Manager: Error while parsing item database ("
-                  << file << ")!");
+                  << monsterReferenceFile << ")!");
         return;
     }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
     if (!node || !xmlStrEqual(node->name, BAD_CAST "monsters"))
     {
-        LOG_ERROR("Monster Manager: " << file
+        LOG_ERROR("Monster Manager: " << monsterReferenceFile
                   << " is not a valid database file!");
         xmlFreeDoc(doc);
         return;
@@ -79,8 +88,20 @@ void MonsterManager::initialize(std::string const &file)
         if (id == 0)
         {
             LOG_WARN("Monster Manager: There is a monster without ID in "
-                     << file << "! It has been ignored.");
+                     << monsterReferenceFile << "! It has been ignored.");
             continue;
+        }
+
+        MonsterClass *monster;
+        MonsterClasses::iterator i = monsterClasses.find(id);
+        if (i == monsterClasses.end())
+        {
+            monster = new MonsterClass(id);
+            monsterClasses[id] = monster;
+        }
+        else
+        {
+            monster = i->second;
         }
 
         MonsterDrops drops;
@@ -100,13 +121,12 @@ void MonsterManager::initialize(std::string const &file)
             }
         }
 
-        MonsterClass *monster = new MonsterClass(id);
         monster->setDrops(drops);
-        monsterClasses[id] = monster;
         ++nbMonsters;
     }
 
-    LOG_INFO("Loaded " << nbMonsters << " monsters from " << file << '.');
+    LOG_INFO("Loaded " << nbMonsters << " monsters from "
+             << monsterReferenceFile << '.');
 
     xmlFreeDoc(doc);
 }
