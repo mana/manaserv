@@ -505,15 +505,15 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (hairStyle < 0 || hairStyle > MAX_HAIRSTYLE_VALUE)
+    else if (hairStyle > MAX_HAIRSTYLE_VALUE)
     {
         reply.writeByte(CREATE_INVALID_HAIRSTYLE);
     }
-    else if (hairColor < 0 || hairColor > MAX_HAIRCOLOR_VALUE)
+    else if (hairColor > MAX_HAIRCOLOR_VALUE)
     {
         reply.writeByte(CREATE_INVALID_HAIRCOLOR);
     }
-    else if (gender < 0 || gender > MAX_GENDER_VALUE)
+    else if (gender > MAX_GENDER_VALUE)
     {
         reply.writeByte(CREATE_INVALID_GENDER);
     }
@@ -721,9 +721,6 @@ AccountHandler::tokenMatched(AccountClient *computer, int accountID)
 void
 AccountHandler::deletePendingClient(AccountClient* computer)
 {
-    // Something might have changed since it was inserted
-    if (computer->status != CLIENT_QUEUED) return;
-
     MessageOut msg(APMSG_CONNECTION_TIMEDOUT);
     computer->disconnect(msg);
     // The computer will be deleted when the disconnect event is processed
