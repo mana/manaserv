@@ -12,6 +12,12 @@
 	src/account-server/accounthandler.cpp,
 	src/account-server/accountclient.cpp: Removed selected character from
 	client data. Cleaned account handler.
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
+	Added helper for querying existence of usernames.
+	* src/account-server/accounthandler.cpp: Plugged several account leaks
+	on error.
+	* src/defines.h, src/account-server/accounthandler.cpp: Prevented
+	banned users from logging in.
 
 2007-08-30  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

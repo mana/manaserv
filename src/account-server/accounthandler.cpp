@@ -180,7 +180,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
-    unsigned long clientVersion = msg.readLong();
+    int clientVersion = msg.readLong();
 
     if (clientVersion < config.getValue("clientVersion", 0))
     {
@@ -213,6 +213,15 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
         computer.send(reply);
+        delete acc;
+        return;
+    }
+
+    if (acc->getLevel() == AL_BANNED)
+    {
+        reply.writeByte(LOGIN_BANNED);
+        computer.send(reply);
+        delete acc;
         return;
     }
 
@@ -231,7 +240,6 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
     {
         sendCharacterData(computer, i, *chars[i]);
     }
-    return;
 }
 
 void
@@ -320,7 +328,7 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     // Check whether the account already exists.
-    else if (storage->getAccount(username))
+    else if (storage->doesUserNameExist(username))
     {
         reply.writeByte(REGISTER_EXISTS_USERNAME);
     }
@@ -379,6 +387,7 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
         computer.send(reply);
+        delete acc;
         return;
     }
 

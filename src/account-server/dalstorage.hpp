@@ -129,14 +129,20 @@ class DALStorage
 #endif
 
         /**
+         * Tells if the user name already exists.
+         * @return true if the user name exists.
+         */
+        bool doesUserNameExist(std::string const &name);
+
+        /**
          * Tells if the email address already exists.
          * @return true if the email address exists.
          */
         bool doesEmailAddressExist(std::string const &email);
 
         /**
-         * Tells if the character's name already exists
-         * @return true if character's name exists.
+         * Tells if the character name already exists.
+         * @return true if the character name exists.
          */
         bool doesCharacterNameExist(std::string const &name);
 

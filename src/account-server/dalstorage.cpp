@@ -429,6 +429,26 @@ DALStorage::getEmailList()
 }
 #endif
 
+bool DALStorage::doesUserNameExist(std::string const &name)
+{
+    try {
+        std::ostringstream sql;
+        sql << "select count(username) from " << ACCOUNTS_TBL_NAME
+            << " where username = \"" << name << "\";";
+        dal::RecordSet const &accountInfo = mDb->execSql(sql.str());
+
+        std::istringstream ssStream(accountInfo(0, 0));
+        unsigned int iReturn = 1;
+        ssStream >> iReturn;
+        return iReturn != 0;
+    } catch (std::exception const &e) {
+        // TODO: throw an exception.
+        LOG_ERROR("(DALStorage::doesUserNameExist) SQL query failure: " << e.what());
+    }
+
+    return true;
+}
+
 /**
  * Tells if the email address already exists
  * @return true if the email address exists.

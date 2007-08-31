@@ -270,7 +270,8 @@ enum {
 // Login specific return values
 enum {
     LOGIN_INVALID_VERSION = 0x40,       // the user is using an incompatible protocol
-    LOGIN_SERVER_FULL                   // the server is overloaded
+    LOGIN_SERVER_FULL,                  // the server is overloaded
+    LOGIN_BANNED                        // the user is currently banned
 };
 
 // Account register specific return values
