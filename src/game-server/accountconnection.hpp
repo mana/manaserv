@@ -61,6 +61,11 @@ class AccountConnection : public Connection
         void updateQuestVar(Character *, std::string const &name,
                             std::string const &value);
 
+        /**
+         * Sends ban message.
+         */
+         void banCharacter(Character *, int);
+
 #if 0
         /**
          * Sends create guild message

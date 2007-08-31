@@ -24,6 +24,7 @@
 #include <cstddef>
 
 #include "defines.h"
+#include "game-server/accountconnection.hpp"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
@@ -245,6 +246,23 @@ static void reload(Character *from, std::string const &db)
     }
 }
 
+static void ban(Character *from, Character *ch, std::string const &duration)
+{
+    if (from->getAccountLevel() <= ch->getAccountLevel())
+    {
+        // Special case: Only ban strictly less priviledged accounts.
+        return;
+    }
+
+    int d = atoi(duration.c_str());
+    switch (duration[duration.length() - 1])
+    {
+        case 'd': d = d * 24; // nobreak
+        case 'h': d = d * 60;
+    }
+    accountHandler->banCharacter(ch, d);
+}
+
 /**
  * List of remote commands.
  */
@@ -258,6 +276,7 @@ static Command const commands[] =
     handle("goto", AL_GM, goto_),
     handle("recall", AL_GM, recall),
     handle("reload", AL_ADMIN, reload),
+    handle("ban", AL_GM, ban),
 };
 
 /**

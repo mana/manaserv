@@ -252,6 +252,14 @@ void AccountConnection::updateQuestVar(Character *ch, std::string const &name,
     send(msg);
 }
 
+void AccountConnection::banCharacter(Character *ch, int duration)
+{
+    MessageOut msg(GAMSG_BAN_PLAYER);
+    msg.writeLong(ch->getDatabaseID());
+    msg.writeShort(duration);
+    send(msg);
+}
+
 #if 0
 void AccountConnection::playerCreateGuild(int id, const std::string &guildName)
 {

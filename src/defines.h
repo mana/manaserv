@@ -237,7 +237,8 @@ enum {
     GAMSG_PLAYER_RECONNECT  = 0x0532, // L id, B*32 token
     GAMSG_SET_QUEST          = 0x0540, // L id, S name, S value
     GAMSG_GET_QUEST          = 0x0541, // L id, S name
-    AGMSG_GET_QUEST_RESPONSE = 0x0542, // L id S name, S value
+    AGMSG_GET_QUEST_RESPONSE = 0x0542, // L id, S name, S value
+    GAMSG_BAN_PLAYER = 0x550, // L id, W duration
 
 #if 0
     GAMSG_GUILD_CREATE                  = 0x0550, // S name

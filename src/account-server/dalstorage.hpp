@@ -119,6 +119,14 @@ class DALStorage
          */
         void delAccount(Account *account);
 
+        /**
+         * Sets a ban on an account (hence on all its characters).
+         *
+         * @param id character identifier.
+         * @param duration duration in minutes.
+         */
+        void banCharacter(int id, int duration);
+
 #if 0
         /**
          * Get the list of Emails in the accounts list.

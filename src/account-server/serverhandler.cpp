@@ -218,6 +218,13 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             storage->setQuestVar(id, name, value);
         } break;
 
+        case GAMSG_BAN_PLAYER:
+        {
+            int id = msg.readLong();
+            int duration = msg.readShort();
+            storage->banCharacter(id, duration);
+        } break;
+
 #if 0
         case GAMSG_GUILD_CREATE:
         {

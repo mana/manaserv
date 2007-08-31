@@ -18,6 +18,13 @@
 	on error.
 	* src/defines.h, src/account-server/accounthandler.cpp: Prevented
 	banned users from logging in.
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
+	Handled banned database field.
+	* src/game-server/accountconnection.hpp, src/defines.h,
+	src/game-server/accountconnection.cpp,
+	src/account-server/serverhandler.cpp: Added protocol for banning
+	players.
+	* src/game-server/command.cpp: Implemented "ban" remote command.
 
 2007-08-30  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

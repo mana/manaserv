@@ -21,6 +21,7 @@
  */
 
 #include <cassert>
+#include <time.h>
 
 #include "account-server/dalstorage.hpp"
 
@@ -174,7 +175,16 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
         account->setName(accountInfo(0, 1));
         account->setPassword(accountInfo(0, 2));
         account->setEmail(accountInfo(0, 3));
-        account->setLevel(toUint(accountInfo(0, 4)));
+
+        int level = toUint(accountInfo(0, 4));
+        // Check if the user is permanently banned, or temporarily banned.
+        if (level == AL_BANNED || time(NULL) <= toUint(accountInfo(0, 5)))
+        {
+            account->setLevel(AL_BANNED);
+            // It is, so skip character loading.
+            return account;
+        }
+        account->setLevel(level);
 
         // load the characters associated with the account.
         std::ostringstream sql;
@@ -301,7 +311,8 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
             int id = toUint(charInfo(0, 1));
             character->setAccountID(id);
             std::ostringstream s;
-            s << "select level from tmw_accounts where id = '" << id << "';";
+            s << "select level from " << ACCOUNTS_TBL_NAME
+              << " where id = '" << id << "';";
             dal::RecordSet const &levelInfo = mDb->execSql(s.str());
             character->setAccountLevel(toUint(levelInfo(0, 0)), true);
         }
@@ -1115,4 +1126,30 @@ void DALStorage::setQuestVar(int id, std::string const &name,
     {
         LOG_ERROR("(DALStorage::setQuestVar) SQL query failure: " << e.what());
     }
+}
+
+void DALStorage::banCharacter(int id, int duration)
+{
+    try
+    {
+        std::ostringstream query;
+        query << "select user_id from " << CHARACTERS_TBL_NAME
+              << " where id = '" << id << "';";
+        dal::RecordSet const &info = mDb->execSql(query.str());
+        if (info.isEmpty())
+        {
+            LOG_ERROR("Tried to ban an unknown user.");
+            return;
+        }
+
+        std::ostringstream sql;
+        sql << "update " << ACCOUNTS_TBL_NAME
+            << " set banned = '" << time(NULL) + duration * 60
+            << "' where id = '" << info(0, 0) << "';";
+        mDb->execSql(sql.str());
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::banAccount) SQL query failure: " << e.what());
+    }    
 }
