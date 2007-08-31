@@ -253,8 +253,8 @@ AccountHandler::handleLogoutMessage(AccountClient &computer)
     {
         // Delete it from the pendingClient list
         mTokenCollector.deletePendingClient(&computer);
-        // deletePendingClient makes sure that the client get's the message
-        return;
+        computer.status = CLIENT_LOGIN;
+        reply.writeByte(ERRMSG_OK);
     }
     computer.send(reply);
 }
@@ -277,7 +277,7 @@ handleReconnectMessage(AccountClient &computer, MessageIn &msg)
 void
 AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
 {
-    unsigned long clientVersion = msg.readLong();
+    int clientVersion = msg.readLong();
     std::string username = msg.readString();
     std::string password = msg.readString();
     std::string email = msg.readString();
@@ -388,13 +388,6 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
     storage->delAccount(acc);
     reply.writeByte(ERRMSG_OK);
 
-    // If the account to delete is the current account we're loggedin
-    // on, get out of it in memory.
-    if (computer.getAccount() && computer.getAccount()->getName() == username)
-    {
-        computer.unsetAccount();
-        computer.status = CLIENT_LOGIN;
-    }
     computer.send(reply);
 }
 
@@ -403,7 +396,8 @@ handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_EMAIL_CHANGE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
+    Account *acc = computer.getAccount();
+    if (!acc)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
@@ -426,7 +420,7 @@ handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     }
     else
     {
-        computer.getAccount()->setEmail(email);
+        acc->setEmail(email);
         reply.writeByte(ERRMSG_OK);
     }
     computer.send(reply);
@@ -437,7 +431,8 @@ handleEmailGetMessage(AccountClient &computer)
 {
     MessageOut reply(APMSG_EMAIL_GET_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
+    Account *acc = computer.getAccount();
+    if (!acc)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
@@ -445,7 +440,7 @@ handleEmailGetMessage(AccountClient &computer)
     }
 
     reply.writeByte(ERRMSG_OK);
-    reply.writeString(computer.getAccount()->getEmail());
+    reply.writeString(acc->getEmail());
 
     computer.send(reply);
 }
@@ -459,12 +454,13 @@ AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
 
     MessageOut reply(APMSG_PASSWORD_CHANGE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
+    Account *acc = computer.getAccount();
+    if (!acc)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
     else if (newPassword.length() < MIN_PASSWORD_LENGTH ||
-            newPassword.length() > MAX_PASSWORD_LENGTH)
+             newPassword.length() > MAX_PASSWORD_LENGTH)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
@@ -472,13 +468,13 @@ AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (oldPassword != computer.getAccount()->getPassword())
+    else if (oldPassword != acc->getPassword())
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
     else
     {
-        computer.getAccount()->setPassword(newPassword);
+        acc->setPassword(newPassword);
         reply.writeByte(ERRMSG_OK);
     }
 
@@ -496,7 +492,8 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
+    Account *acc = computer.getAccount();
+    if (!acc)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
@@ -535,7 +532,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
         }
 
         // An account shouldn't have more than MAX_OF_CHARACTERS characters.
-        Characters &chars = computer.getAccount()->getCharacters();
+        Characters &chars = acc->getCharacters();
         if (chars.size() >= MAX_OF_CHARACTERS)
         {
             reply.writeByte(CREATE_TOO_MUCH_CHARACTERS);
@@ -578,7 +575,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             Character *newCharacter = new Character(name);
             for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
                 newCharacter->setAttribute(i, attributes[i - CHAR_ATTR_BEGIN]);
-            newCharacter->setAccount(computer.getAccount());
+            newCharacter->setAccount(acc);
             newCharacter->setLevel(1);
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
@@ -587,12 +584,12 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             Point startingPos((int) config.getValue("startX", 512),
                                   (int) config.getValue("startY", 512));
             newCharacter->setPosition(startingPos);
-            computer.getAccount()->addCharacter(newCharacter);
+            acc->addCharacter(newCharacter);
 
             LOG_INFO("Character " << name << " was created for "
-                     << computer.getAccount()->getName() << "'s account.");
+                     << acc->getName() << "'s account.");
 
-            storage->flush(computer.getAccount()); // flush changes
+            storage->flush(acc); // flush changes
             reply.writeByte(ERRMSG_OK);
             computer.send(reply);
 
@@ -611,15 +608,16 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_SELECT_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
+    Account *acc = computer.getAccount();
+    if (!acc)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
         return; // not logged in
     }
 
-    unsigned char charNum = msg.readByte();
-    Characters &chars = computer.getAccount()->getCharacters();
+    unsigned charNum = msg.readByte();
+    Characters &chars = acc->getCharacters();
 
     // Character ID = 0 to Number of Characters - 1.
     if (charNum >= chars.size())
@@ -630,10 +628,12 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
+    Character *selectedChar = chars[charNum];
+
     std::string address;
     short port;
-    if (!serverHandler->getGameServerFromMap(
-                                 chars[charNum]->getMapId(), address, port))
+    if (!serverHandler->getGameServerFromMap
+            (selectedChar->getMapId(), address, port))
     {
         LOG_ERROR("Character Selection: No game server for the map.");
         reply.writeByte(ERRMSG_FAILURE);
@@ -641,9 +641,6 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
-    // set character
-    computer.setCharacter(chars[charNum]);
-    Character *selectedChar = computer.getCharacter();
     reply.writeByte(ERRMSG_OK);
 
     LOG_DEBUG(selectedChar->getName() << " is trying to enter the servers.");
@@ -669,15 +666,16 @@ handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_DELETE_RESPONSE);
 
-    if (computer.status != CLIENT_CONNECTED || !computer.getAccount())
+    Account *acc = computer.getAccount();
+    if (!acc)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
         computer.send(reply);
         return; // not logged in
     }
 
-    unsigned char charNum = msg.readByte();
-    Characters &chars = computer.getAccount()->getCharacters();
+    unsigned charNum = msg.readByte();
+    Characters &chars = acc->getCharacters();
 
     // Character ID = 0 to Number of Characters - 1.
     if (charNum >= chars.size())
@@ -688,21 +686,12 @@ handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg)
         return; // not logged in
     }
 
-    // Delete the character. If the character to delete is the current
-    // character, get off of it in memory.
-    std::string const &deletedCharacter = chars[charNum]->getName();
-    if (computer.getCharacter() &&
-        computer.getCharacter()->getName() == deletedCharacter)
-            computer.unsetCharacter();
+    LOG_INFO("Character deleted:" << chars[charNum]->getName());
 
-    computer.getAccount()->delCharacter(deletedCharacter);
-
-    storage->flush(computer.getAccount());
-
-    LOG_INFO(deletedCharacter << ": Character deleted...");
+    acc->delCharacter(charNum);
+    storage->flush(acc);
 
     reply.writeByte(ERRMSG_OK);
-
     computer.send(reply);
 }
 
@@ -711,10 +700,8 @@ AccountHandler::tokenMatched(AccountClient *computer, int accountID)
 {
     MessageOut reply(APMSG_RECONNECT_RESPONSE);
 
-    // Check if the account exists
+    // Associate account with connection.
     Account *acc = storage->getAccount(accountID);
-
-    // Associate account with connection
     computer->setAccount(acc);
     computer->status = CLIENT_CONNECTED;
 
@@ -722,7 +709,7 @@ AccountHandler::tokenMatched(AccountClient *computer, int accountID)
     computer->send(reply);
 
     // Return information about available characters
-    Characters &chars = computer->getAccount()->getCharacters();
+    Characters &chars = acc->getCharacters();
 
     // Send characters list
     for (unsigned int i = 0; i < chars.size(); i++)
@@ -742,10 +729,7 @@ AccountHandler::deletePendingClient(AccountClient* computer)
     // The computer will be deleted when the disconnect event is processed
 }
 
-void
-AccountHandler::deletePendingConnect(int accountID)
+void AccountHandler::deletePendingConnect(int)
 {
-    // NOOP
-    // No memory was allocated for the PendingConnect (that was not
-    // allocated to a countedPtr).
+    // No resources to free.
 }

@@ -24,9 +24,6 @@
 
 #include "account-server/account.hpp"
 
-#include "account-server/accountclient.hpp"
-#include "utils/functors.h"
-
 /**
  * Destructor.
  */
@@ -58,19 +55,9 @@ void Account::addCharacter(Character *character)
     mCharacters.push_back(character);
 }
 
-/**
- * Remove a character.
- */
-bool Account::delCharacter(std::string const &name)
+void Account::delCharacter(int i)
 {
-    Characters::iterator
-        end = mCharacters.end(),
-        it = std::find_if(mCharacters.begin(), end,
-                          std::bind2nd(obj_name_is<Character *>(), name));
-
-    if (it == end) return false;
-    mCharacters.erase(it);
-    return true;
+    mCharacters.erase(mCharacters.begin() + i);
 }
 
 void Account::setID(int id)

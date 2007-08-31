@@ -6,6 +6,12 @@
 	Modified loading of reference files, so that it is possible to reload
 	them.
 	* src/game-server/command.cpp: Implemented "reload" remote command.
+	* src/account-server/account.hpp, src/account-server/account.cpp:
+	Simplified character removal.
+	* src/account-server/accountclient.hpp,
+	src/account-server/accounthandler.cpp,
+	src/account-server/accountclient.cpp: Removed selected character from
+	client data. Cleaned account handler.
 
 2007-08-30  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

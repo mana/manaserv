@@ -27,7 +27,6 @@
 #include <enet/enet.h>
 
 #include "account-server/account.hpp"
-#include "account-server/character.hpp"
 #include "net/netcomputer.hpp"
 
 class AccountHandler;
@@ -40,8 +39,7 @@ enum
 };
 
 /**
- * A connected computer that can have an account and character associated with
- * it.
+ * A connected computer with an associated account.
  */
 class AccountClient : public NetComputer
 {
@@ -73,32 +71,11 @@ class AccountClient : public NetComputer
         Account *getAccount() const
         { return mAccount; }
 
-        /**
-         * Set the selected character associated with connection.
-         */
-        void
-        setCharacter(Character *ch);
-
-        /**
-         * Deselect the character associated with connection.
-         */
-        void
-        unsetCharacter();
-
-        /**
-         * Get character associated with the connection
-         */
-        Character *getCharacter() const
-        { return mCharacter; }
-
         int status;
 
     private:
         /** Account associated with connection */
         Account *mAccount;
-
-        /** Selected character */
-        Character *mCharacter;
 };
 
 #endif

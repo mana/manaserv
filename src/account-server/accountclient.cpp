@@ -23,13 +23,10 @@
 
 #include "account-server/accountclient.hpp"
 
-#include "account-server/accounthandler.hpp"
-
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),
     status(CLIENT_LOGIN),
-    mAccount(NULL),
-    mCharacter(NULL)
+    mAccount(NULL)
 {
 }
 
@@ -38,27 +35,14 @@ AccountClient::~AccountClient()
     unsetAccount();
 }
 
-
 void AccountClient::setAccount(Account *acc)
 {
     unsetAccount();
     mAccount = acc;
 }
 
-void AccountClient::setCharacter(Character *ch)
-{
-    unsetCharacter();
-    mCharacter = ch;
-}
-
 void AccountClient::unsetAccount()
 {
-    unsetCharacter();
     delete mAccount;
     mAccount = NULL;
-}
-
-void AccountClient::unsetCharacter()
-{
-    mCharacter = NULL;
 }

@@ -147,12 +147,11 @@ class Account
         void addCharacter(Character *character);
 
         /**
-         * Remove a character.
+         * Removes a character from the account.
          *
-         * @param name The character's name to delete.
+         * @param i index of the character.
          */
-        bool
-        delCharacter(std::string const &name);
+        void delCharacter(int i);
 
 
         /**
