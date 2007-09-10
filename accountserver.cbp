@@ -33,7 +33,7 @@
 			<Add library="ws2_32"/>
 			<Add library="xml2"/>
 			<Add library="physfs"/>
-			<Add library="pthreadGC2"/>
+			<Add library="pthreadGCE2"/>
 			<Add library="z"/>
 			<Add library="winmm"/>
 			<Add library="sqlite3"/>
@@ -68,11 +68,11 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\account-server\characterdata.cpp">
+		<Unit filename="src\account-server\character.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\account-server\characterdata.hpp">
+		<Unit filename="src\account-server\character.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -123,16 +123,6 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\account-server\serverhandler.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\account-server\storage.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\account-server\storage.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

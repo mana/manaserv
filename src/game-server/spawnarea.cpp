@@ -60,15 +60,17 @@ SpawnArea::update()
 
         if (mNextSpawn == 0)
         {
-            //find a free spawn location. Give up after 10 tries
+            // Find a free spawn location. Give up after 10 tries
             int c = 10;
             Point position;
             MapComposite *map = getMap();
             Map *realMap = map->getMap();
+            int width = mZone.w == 0 ? realMap->getWidth() : mZone.w;
+            int height = mZone.h == 0 ? realMap->getHeight() : mZone.h;
             do
             {
-                position = Point(mZone.x + rand() % mZone.w,
-                           mZone.y + rand() % mZone.h);
+                position = Point(mZone.x + rand() % width,
+                           mZone.y + rand() % height);
                 c--;
             } while (!realMap->getWalk(position.x / 32, position.y / 32) && c);
 

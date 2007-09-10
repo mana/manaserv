@@ -1,3 +1,8 @@
+2007-09-10  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp, src/game-server/spawnarea.cpp:
+	Dimensionless spawn points now spawn over the whole map.
+
 2007-08-31  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* configure.ac: Fixed detection of generic lua.pc file.

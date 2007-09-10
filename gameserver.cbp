@@ -32,7 +32,7 @@
 			<Add library="ws2_32"/>
 			<Add library="xml2"/>
 			<Add library="physfs"/>
-			<Add library="pthreadGC2"/>
+			<Add library="pthreadGCE2"/>
 			<Add library="z"/>
 			<Add library="winmm"/>
 			<Add library="lua"/>
@@ -231,6 +231,16 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
+		<Unit filename="src\game-server\quest.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\quest.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
 		<Unit filename="src\game-server\spawnarea.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
@@ -253,6 +263,16 @@
 		</Unit>
 		<Unit filename="src\game-server\testing.cpp">
 			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\thing.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\thing.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\game-server\trade.cpp">
