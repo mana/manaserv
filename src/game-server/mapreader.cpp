@@ -240,6 +240,8 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                 else if (objType == "SPAWN")
                 {
                     int monsterId = -1;
+                    int maxBeings = 10; // Default value
+                    int spawnRate = 10; // Default value
 
                     for_each_xml_child_node(propertiesNode, objectNode)
                     {
@@ -256,6 +258,14 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                                 {
                                     monsterId = atoi((const char *)propertyNode->xmlChildrenNode->content);
                                 }
+                                else if (XML::getProperty(propertyNode, "name", std::string()) == "MAX_BEINGS")
+                                {
+                                    maxBeings = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                }
+                                else if (XML::getProperty(propertyNode, "name", std::string()) == "SPAWN_RATE")
+                                {
+                                    spawnRate = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                }
                             }
                         }
                     }
@@ -263,7 +273,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                     MonsterClass *monster = MonsterManager::getMonster(monsterId);
                     if (monster != NULL)
                     {
-                        things.push_back(new SpawnArea(composite, monster, rect));
+                        things.push_back(new SpawnArea(composite, monster, rect, maxBeings, spawnRate));
                     }
                     else
                     {

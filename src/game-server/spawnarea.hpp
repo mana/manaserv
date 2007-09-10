@@ -38,7 +38,8 @@ class MonsterClass;
 class SpawnArea : public Thing
 {
     public:
-        SpawnArea(MapComposite *, MonsterClass *, Rectangle const &zone);
+        SpawnArea(MapComposite *, MonsterClass *, Rectangle const &zone,
+            int maxBeings, int spawnRate);
 
         void update();
 

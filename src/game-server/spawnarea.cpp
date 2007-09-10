@@ -39,13 +39,13 @@ struct SpawnAreaEventDispatch: EventDispatch
 
 static SpawnAreaEventDispatch spawnAreaEventDispatch;
 
-SpawnArea::SpawnArea(MapComposite *map, MonsterClass *specy, const Rectangle &zone):
+SpawnArea::SpawnArea(MapComposite *map, MonsterClass *specy, const Rectangle &zone, int maxBeings, int spawnRate):
     Thing(OBJECT_OTHER, map),
     mSpecy(specy),
     mSpawnedListener(&spawnAreaEventDispatch),
     mZone(zone),
-    mMaxBeings(10),
-    mSpawnRate(10),
+    mMaxBeings(maxBeings),
+    mSpawnRate(spawnRate),
     mNumBeings(0),
     mNextSpawn(0)
 {
@@ -65,12 +65,23 @@ SpawnArea::update()
             Point position;
             MapComposite *map = getMap();
             Map *realMap = map->getMap();
-            int width = mZone.w == 0 ? realMap->getWidth() : mZone.w;
-            int height = mZone.h == 0 ? realMap->getHeight() : mZone.h;
+            int x = mZone.x;
+            int y = mZone.y;
+            int width = mZone.w;
+            int height = mZone.h;
+
+            // Reset the spawn area to the whole map in case of dimensionless zone
+            if (width == 0 || height == 0)
+            {
+                x = 0;
+                y = 0;
+                width = realMap->getWidth() * 32;
+                height = realMap->getHeight() * 32;
+            }
+
             do
             {
-                position = Point(mZone.x + rand() % width,
-                           mZone.y + rand() % height);
+                position = Point(x + rand() % width, y + rand() % height);
                 c--;
             } while (!realMap->getWalk(position.x / 32, position.y / 32) && c);
 
