@@ -1,0 +1,67 @@
+---------------------------
+THE MANA WORLD SERVER
+
+ADMIN/GM COMMANDS REFERENCE
+---------------------------
+
+
+The following commands could be issued in the chat window using the syntax:
+	/admin command args
+
+
+1. ADMIN COMMANDS
+-----------------
+
+
+They require the player to have an account level of 99 at least (AL_ADMIN).
+
+
+* reload <db> // Reloads the specifyed database.
+	- db: could be "items" or "monsters"
+
+
+2. GM COMMANDS
+--------------
+
+
+They require the player to have an account level of 50 at least (AL_GM).
+The <name> parameter can be replaced by the special character '#' to
+execute the command on the local player. The <map> parameter can be replaced by
+the special character '#' to denote the map the admin player is on.
+
+
+* warp <name> <map> <x> <y> // Warps a characters
+	- name: the character to be warped
+	- map: the destination map
+	- x: the destination x coordinate
+	- y: the destination y coordinate
+
+* item <name> <id> <quantity> // Adds an item to inventory
+	- name: the destination character
+	- id: the id of the item to be created
+	- quantity: the amount of items to be created
+
+* drop <id> <quantity> // Drops an item
+	- id: the id of the item to be created
+	- quantity: the amount of items to be created
+
+* money <name> <quantity> // Changes the amount of money of a player
+	- name: the destination character
+	- quantity: the amount of money to be added (to remove money use negative
+	quantity)
+
+* spawn <id> <quantity> // Spawns monsters on the current map
+	- id: the id of the monster to be spawned
+	- quantity: the amount of monsters to spawn
+
+* goto <name> // Warps to a specifyed character
+	- name: the destination character
+
+* recall <name> // Warps a character to the location of the admin player
+	- name: the destination character
+
+* ban <name> <duration> // Bans a character
+	- name: the destination character
+	- duration: the amount of time the player will be banned. Can be
+	immediately followed by 'h' for hours and 'd' for days, minutes are assumed
+	otherwise.

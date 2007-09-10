@@ -5,6 +5,7 @@
 	* src/game-server/mapreader.cpp, src/game-server/spawnarea.cpp,
 	src/game-server/spawnarea.hpp: Spawn rate and limit are now read from map
 	files and really fixed size of spawn area.
+	* docs/commands.txt: Added first draft of admin/gm commands reference.
 
 2007-08-31  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
