@@ -640,7 +640,7 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
     Character *selectedChar = chars[charNum];
 
     std::string address;
-    short port;
+    int port;
     if (!serverHandler->getGameServerFromMap
             (selectedChar->getMapId(), address, port))
     {

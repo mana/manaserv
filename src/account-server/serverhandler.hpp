@@ -24,12 +24,13 @@
 #ifndef _TMWSERV_SERVERHANDLER_H_
 #define _TMWSERV_SERVERHANDLER_H_
 
-#include <map>
-#include "account-server/accounthandler.hpp"
-#include "account-server/character.hpp"
+#include <string>
+
 #include "net/connectionhandler.hpp"
 
 class AccountClient;
+class Character;
+struct GameServer;
 
 /**
  * Manages communications with all the game servers. This class also keeps
@@ -47,7 +48,7 @@ class ServerHandler: public ConnectionHandler
          * Returns the information a client needs to connect to the game server
          * corresponding to the given map ID.
          */
-        bool getGameServerFromMap(unsigned, std::string &address, short &port);
+        bool getGameServerFromMap(int, std::string &address, int &port) const;
 
         /**
          * Sends a magic token and character data to the relevant game server.
@@ -87,24 +88,18 @@ class ServerHandler: public ConnectionHandler
     private:
         
         /**
+         * Returns the information a client needs to connect to the game server
+         * corresponding to the given map ID.
+         */
+        GameServer *getGameServerFromMap(int) const;
+
+#if 0
+        /**
          * Send invite to user
          */
         void sendInvite(const std::string &invitedName, const std::string &inviterName,
                         const std::string &guildName);
-
-        struct Server
-        {
-            std::string address;
-            short port;
-            NetComputer *server;
-        };
-
-        typedef std::map< unsigned, Server > Servers;
-
-        /**
-         * Maps map IDs to game server data.
-         */
-        Servers servers;
+#endif
 };
 
 extern ServerHandler *serverHandler;

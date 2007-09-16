@@ -234,7 +234,7 @@ static void recall(Character *from, Character *ch)
     GameState::enqueueEvent(ch, e);
 }
 
-static void reload(Character *from, std::string const &db)
+static void reload(Character *, std::string const &db)
 {
     if (db == "items")
     {

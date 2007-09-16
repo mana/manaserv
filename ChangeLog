@@ -1,10 +1,20 @@
+2007-09-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/game-server/command.cpp: Removed unused argument name.
+	* src/defines.h: Added packet from for sending server statistics.
+	* src/account-server/serverhandler.hpp,
+	src/account-server/accounthandler.cpp: Cleaned function prototypes.
+	* src/chat-server/chathandler.hpp: Fixed missing header.
+	* src/account-server/serverhandler.cpp: Moved map/server data into
+	connection local storage.
+
 2007-09-10  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp, src/game-server/spawnarea.cpp:
 	Dimensionless spawn points now spawn over the whole map.
 	* src/game-server/mapreader.cpp, src/game-server/spawnarea.cpp,
-	src/game-server/spawnarea.hpp: Spawn rate and limit are now read from map
-	files and really fixed size of spawn area.
+	src/game-server/spawnarea.hpp: Spawn rate and limit are now read from
+	map files and really fixed size of spawn area.
 	* docs/commands.txt: Added first draft of admin/gm commands reference.
 
 2007-08-31  Guillaume Melquiond  <guillaume.melquiond@gmail.com>

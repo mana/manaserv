@@ -27,6 +27,7 @@
 #include "account-server/serverhandler.hpp"
 
 #include "account-server/accountclient.hpp"
+#include "account-server/accounthandler.hpp"
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
 #include "net/messagein.hpp"
@@ -37,6 +38,25 @@
 #include "utils/tokendispenser.hpp"
 #include "utils/tokencollector.hpp"
 
+struct MapStatistics
+{
+  std::vector< int > players;
+  unsigned short nbThings;
+  unsigned short nbMonsters;
+};
+
+typedef std::map< unsigned short, MapStatistics > ServerStatistics;
+
+struct GameServer: NetComputer
+{
+    GameServer(ENetPeer *peer): NetComputer(peer), port(0) {}
+
+    std::string address;
+    NetComputer *server;
+    ServerStatistics maps;
+    short port;
+};
+
 bool ServerHandler::startListen(enet_uint16 port)
 {
     LOG_INFO("Game server handler started:");
@@ -45,40 +65,42 @@ bool ServerHandler::startListen(enet_uint16 port)
 
 NetComputer *ServerHandler::computerConnected(ENetPeer *peer)
 {
-    return new NetComputer(peer);
+    return new GameServer(peer);
 }
 
 void ServerHandler::computerDisconnected(NetComputer *comp)
 {
-    Servers::iterator i = servers.begin();
-    while (i != servers.end())
-    {
-        if (i->second.server == comp)
-        {
-            LOG_INFO("Unregistering map " << i->first << '.');
-            servers.erase(i++);
-        }
-        else
-        {
-            ++i;
-        }
-    }
     delete comp;
 }
 
-bool ServerHandler::getGameServerFromMap(unsigned mapId, std::string &address,
-                                         short &port)
+GameServer *ServerHandler::getGameServerFromMap(int mapId) const
 {
-    Servers::const_iterator i = servers.find(mapId);
-    if (i == servers.end()) return false;
-    address = i->second.address;
-    port = i->second.port;
-    return true;
+    for (NetComputers::const_iterator i = clients.begin(),
+         i_end = clients.end(); i != i_end; ++i)
+    {
+        GameServer *server = static_cast< GameServer * >(*i);
+        ServerStatistics::const_iterator i = server->maps.find(mapId);
+        if (i == server->maps.end()) continue;
+        return server;
+    }
+    return NULL;
+}
+
+bool ServerHandler::getGameServerFromMap(int mapId, std::string &address,
+                                         int &port) const
+{
+    if (GameServer *s = getGameServerFromMap(mapId))
+    {
+        address = s->address;
+        port = s->port;
+        return true;
+    }
+    return false;
 }
 
 void ServerHandler::registerGameClient(std::string const &token, Character *ptr)
 {
-    unsigned mapId = ptr->getMapId();
+    int mapId = ptr->getMapId();
 
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
@@ -86,14 +108,15 @@ void ServerHandler::registerGameClient(std::string const &token, Character *ptr)
     msg.writeString(ptr->getName());
     serializeCharacterData(*ptr, msg);
 
-    Servers::const_iterator i = servers.find(mapId);
-    assert(i != servers.end());
-    i->second.server->send(msg);
+    GameServer *s = getGameServerFromMap(mapId);
+    assert(s);
+    s->send(msg);
 }
 
 void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 {
     MessageOut result;
+    GameServer *server = static_cast< GameServer * >(comp);
 
     switch (msg.getId())
     {
@@ -101,10 +124,9 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             LOG_DEBUG("GAMSG_REGISTER");
             // TODO: check the credentials of the game server
-            std::string address = msg.readString();
-            int port = msg.readShort();
-            Server s = { address, port, comp };
-            LOG_INFO("Game server " << address << ':' << port
+            server->address = msg.readString();
+            server->port = msg.readShort();
+            LOG_INFO("Game server " << server->address << ':' << server->port
                      << " wants to register " << (msg.getUnreadLength() / 2)
                      << " maps.");
 
@@ -112,15 +134,19 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             {
                 int id = msg.readShort();
                 LOG_INFO("Registering map " << id << '.');
-                if (servers.insert(std::make_pair(id, s)).second)
+                if (GameServer *s = getGameServerFromMap(id))
+                {
+                    LOG_ERROR("Server Handler: map is already registered by "
+                              << s->address << ':' << s->port << '.');
+                }
+                else
                 {
                     MessageOut outMsg(AGMSG_ACTIVE_MAP);
                     outMsg.writeShort(id);
                     comp->send(outMsg);
-                }
-                else
-                {
-                    LOG_ERROR("Server Handler: map is already registered.");
+                    MapStatistics &m = server->maps[id];
+                    m.nbThings = 0;
+                    m.nbMonsters = 0;
                 }
             }
         } break;
@@ -153,22 +179,20 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             std::string magic_token(utils::getMagicToken());
             if (Character *ptr = storage->getCharacter(id, NULL))
             {
-                std::string address;
-                short port;
-                if (serverHandler->getGameServerFromMap
-                        (ptr->getMapId(), address, port))
+                int mapId = ptr->getMapId();
+                if (GameServer *s = getGameServerFromMap(mapId))
                 {
                     registerGameClient(magic_token, ptr);
                     result.writeShort(AGMSG_REDIRECT_RESPONSE);
-                    result.writeLong(ptr->getDatabaseID());
+                    result.writeLong(id);
                     result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
-                    result.writeString(address);
-                    result.writeShort(port);
+                    result.writeString(s->address);
+                    result.writeShort(s->port);
                 }
                 else
                 {
                     LOG_ERROR("Server Change: No game server for map " <<
-                              ptr->getMapId() << ".");
+                              mapId << '.');
                 }
                 delete ptr;
             }

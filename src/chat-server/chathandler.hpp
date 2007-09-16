@@ -27,6 +27,7 @@
 #include <iosfwd>
 
 #include "net/connectionhandler.hpp"
+#include "utils/tokencollector.hpp"
 
 class ChatClient;
 

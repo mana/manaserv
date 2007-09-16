@@ -239,6 +239,7 @@ enum {
     GAMSG_GET_QUEST          = 0x0541, // L id, S name
     AGMSG_GET_QUEST_RESPONSE = 0x0542, // L id, S name, S value
     GAMSG_BAN_PLAYER = 0x550, // L id, W duration
+    GAMSG_STATISTICS = 0x560, // { W map id, W thing nb, W monster nb, W player nb, { L character id }* }*
 
 #if 0
     GAMSG_GUILD_CREATE                  = 0x0550, // S name
