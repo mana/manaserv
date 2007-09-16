@@ -24,6 +24,7 @@
 #include <getopt.h>
 #include <signal.h>
 #include <iostream>
+#include <fstream>
 #include <physfs.h>
 #include <enet/enet.h>
 
@@ -44,13 +45,15 @@
 #include "utils/logger.h"
 #include "utils/processorutils.hpp"
 #include "utils/stringfilter.h"
+#include "utils/timer.h"
 
 // Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE        "tmwserv-account.log"
+#define DEFAULT_STATS_FILE      "tmwserv.stats"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 
-bool running = true;            /**< Determines if server keeps running */
+static bool running = true;        /**< Determines if server keeps running */
 
 Configuration config;           /**< XML config reader */
 
@@ -75,7 +78,7 @@ ChatChannelManager *chatChannelManager;
 GuildManager *guildManager;
 
 /** Callback used when SIGQUIT signal is received. */
-void closeGracefully(int)
+static void closeGracefully(int)
 {
     running = false;
 }
@@ -83,7 +86,7 @@ void closeGracefully(int)
 /**
  * Initializes the server.
  */
-void initialize()
+static void initialize()
 {
 
     // Reset to default segmentation fault handling for debugging purposes
@@ -185,7 +188,7 @@ void initialize()
 /**
  * Deinitializes the server.
  */
-void deinitialize()
+static void deinitialize()
 {
     delete stringFilter;
     // Write configuration file
@@ -211,11 +214,35 @@ void deinitialize()
     PHYSFS_deinit();
 }
 
+/**
+ * Dumps statistics.
+ */
+static void dumpStatistics()
+{
+#if defined STATS_FILE
+    std::string path = STATS_FILE;
+#else
+
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
+    std::string path = getenv("HOME");
+    path += "/.";
+    path += DEFAULT_STATS_FILE;
+#else // Win32, ...
+    std::string path = DEFAULT_STATS_FILE;
+#endif
+
+#endif
+
+    std::ofstream os(path.c_str());
+    os << "<statistics>\n";
+    serverHandler->dumpStatistics(os);
+    os << "</statistics>\n";
+}
 
 /**
  * Show command line arguments
  */
-void printHelp()
+static void printHelp()
 {
     std::cout << "tmwserv" << std::endl << std::endl
               << "Options: " << std::endl
@@ -228,7 +255,7 @@ void printHelp()
 /**
  * Parse the command line arguments
  */
-void parseOptions(int argc, char *argv[])
+static void parseOptions(int argc, char *argv[])
 {
     const char *optstring = "h";
 
@@ -293,10 +320,14 @@ int main(int argc, char *argv[])
         return 3;
     }
 
+    // Dump statistics every 10 seconds.
+    utils::Timer statTimer(10000);
+
     while (running) {
         accountHandler->process(50);
         chatHandler->process(50);
         serverHandler->process(50);
+        if (statTimer.poll()) dumpStatistics();
     }
 
     LOG_INFO("Received: Quit signal, closing down...");

@@ -60,6 +60,7 @@ tmwserv_account_SOURCES = \
 	utils/processorutils.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
+	utils/timer.cpp \
 	utils/tokencollector.hpp \
 	utils/tokencollector.cpp \
 	utils/tokendispenser.hpp \

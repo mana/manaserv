@@ -249,6 +249,32 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             storage->banCharacter(id, duration);
         } break;
 
+        case GAMSG_STATISTICS:
+        {
+            while (msg.getUnreadLength())
+            {
+                int mapId = msg.readShort();
+                ServerStatistics::iterator i = server->maps.find(mapId);
+                if (i == server->maps.end())
+                {
+                    LOG_ERROR("Server " << server->address << ':'
+                              << server->port << " should not be sending stati"
+                              "stics for map " << mapId << '.');
+                    // Skip remaining data.
+                    break;
+                }
+                MapStatistics &m = i->second;
+                m.nbThings = msg.readShort();
+                m.nbMonsters = msg.readShort();
+                int nb = msg.readShort();
+                m.players.resize(nb);
+                for (int j = 0; j < nb; ++j)
+                {
+                    m.players[j] = msg.readLong();
+                }
+            }
+        } break;
+
 #if 0
         case GAMSG_GUILD_CREATE:
         {
@@ -422,6 +448,33 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
     // return result
     if (result.getLength() > 0)
         comp->send(result);
+}
+
+void ServerHandler::dumpStatistics(std::ostream &os) const
+{
+    for (NetComputers::const_iterator i = clients.begin(),
+         i_end = clients.end(); i != i_end; ++i)
+    {
+        GameServer *server = static_cast< GameServer * >(*i);
+        if (!server->port) continue;
+        os << "<gameserver address=\"" << server->address << "\" port=\""
+           << server->port << "\">\n";
+
+        for (ServerStatistics::const_iterator j = server->maps.begin(),
+             j_end = server->maps.end(); j != j_end; ++j)
+        {
+            MapStatistics const &m = j->second;
+            os << "<map id=\"" << j->first << "\" nb_things=\"" << m.nbThings
+               << "\" nb_monsters=\"" << m.nbMonsters << "\">\n";
+            for (std::vector< int >::const_iterator k = m.players.begin(),
+                 k_end = m.players.end(); k != k_end; ++k)
+            {
+                os << "<character id=\"" << *k << "\"/>\n";
+            }
+            os << "</map>\n";
+        }
+        os << "</gameserver>\n";
+    }
 }
 
 #if 0

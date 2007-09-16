@@ -64,7 +64,12 @@ class AccountConnection : public Connection
         /**
          * Sends ban message.
          */
-         void banCharacter(Character *, int);
+        void banCharacter(Character *, int);
+
+        /**
+         * Gathers statistics and sends them.
+         */
+        void sendStatistics();
 
 #if 0
         /**

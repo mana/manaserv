@@ -24,6 +24,7 @@
 #ifndef _TMWSERV_SERVERHANDLER_H_
 #define _TMWSERV_SERVERHANDLER_H_
 
+#include <iosfwd>
 #include <string>
 
 #include "net/connectionhandler.hpp"
@@ -67,6 +68,11 @@ class ServerHandler: public ConnectionHandler
          * Make client join the specified guild channel
          */
         void enterChannel(const std::string &guildName, Character *player);
+
+        /**
+         * Dumps per-server statistics into given stream
+         */
+        void dumpStatistics(std::ostream &) const;
 
     protected:
         /**

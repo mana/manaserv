@@ -21,9 +21,10 @@
  *  $Id$
  */
 
+#include "game-server/accountconnection.hpp"
+
 #include "configuration.h"
 #include "defines.h"
-#include "game-server/accountconnection.hpp"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/map.hpp"
@@ -257,6 +258,49 @@ void AccountConnection::banCharacter(Character *ch, int duration)
     MessageOut msg(GAMSG_BAN_PLAYER);
     msg.writeLong(ch->getDatabaseID());
     msg.writeShort(duration);
+    send(msg);
+}
+
+void AccountConnection::sendStatistics()
+{
+    MessageOut msg(GAMSG_STATISTICS);
+    MapManager::Maps const &maps = MapManager::getMaps();
+    for (MapManager::Maps::const_iterator i = maps.begin(),
+         i_end = maps.end(); i != i_end; ++i)
+    {
+        MapComposite *m = i->second;
+        if (!m->isActive()) continue;
+        msg.writeShort(i->first);
+        int nbThings = 0, nbMonsters = 0;
+        typedef std::vector< Thing * > Things;
+        Things const &things = m->getEverything();
+        std::vector< int > players;
+        for (Things::const_iterator j = things.begin(),
+             j_end = things.end(); j != j_end; ++j)
+        {
+            Thing *t = *j;
+            switch (t->getType())
+            {
+                case OBJECT_CHARACTER:
+                    players.push_back
+                        (static_cast< Character * >(t)->getDatabaseID());
+                    break;
+                case OBJECT_MONSTER:
+                    ++nbMonsters;
+                    break;
+                default:
+                    ++nbThings;
+            }
+        }
+        msg.writeShort(nbThings);
+        msg.writeShort(nbMonsters);
+        msg.writeShort(players.size());
+        for (std::vector< int >::const_iterator j = players.begin(),
+             j_end = players.end(); j != j_end; ++j)
+        {
+            msg.writeLong(*j);
+        }
+    }
     send(msg);
 }
 

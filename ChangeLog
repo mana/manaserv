@@ -7,6 +7,13 @@
 	* src/chat-server/chathandler.hpp: Fixed missing header.
 	* src/account-server/serverhandler.cpp: Moved map/server data into
 	connection local storage.
+	* src/game-server/accountconnection.cpp, src/game-server/main-game.cpp,
+	src/game-server/accountconnection.hpp: Added statistic sender to
+	game server.
+	* src/account-server/serverhandler.cpp,
+	src/account-server/serverhandler.hpp, src/Makefile.am,
+	src/account-server/main-account.cpp: Added statistic receiver and
+	dumper to account server.
 
 2007-09-10  Eugenio Favalli  <elvenprogrammer@gmail.com>
 

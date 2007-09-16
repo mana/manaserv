@@ -301,6 +301,7 @@ int main(int argc, char *argv[])
             // Print world time at 10 second intervals to show we're alive
             if (worldTime % 100 == 0) {
                 LOG_INFO("World time: " << worldTime);
+                accountHandler->sendStatistics();
             }
 
             // Handle all messages that are in the message queues
