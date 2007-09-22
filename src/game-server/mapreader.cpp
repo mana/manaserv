@@ -21,12 +21,13 @@
  *  $Id$
  */
 
-#include "resourcemanager.h"
+#include "game-server/mapreader.hpp"
+
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
-#include "game-server/mapreader.hpp"
 #include "game-server/monstermanager.hpp"
+#include "game-server/resourcemanager.hpp"
 #include "game-server/spawnarea.hpp"
 #include "game-server/trigger.hpp"
 #include "scripting/script.hpp"
@@ -43,10 +44,8 @@ static void setTileWithGid(Map *map, int x, int y, int gid);
 
 void MapReader::readMap(const std::string &filename, MapComposite *composite)
 {
-    // Load the file through resource manager.
-    ResourceManager *resman = ResourceManager::getInstance();
     int fileSize;
-    char *buffer = (char *)resman->loadFile(filename, fileSize);
+    char *buffer = ResourceManager::loadFile(filename, fileSize);
 
     if (buffer == NULL)
     {

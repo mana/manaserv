@@ -6,12 +6,8 @@ bin_PROGRAMS = tmwserv-account tmwserv-game
 
 tmwserv_account_SOURCES = \
 	account-server/main-account.cpp \
-	configuration.h \
-	configuration.cpp \
 	defines.h \
 	point.h \
-	resourcemanager.h \
-	resourcemanager.cpp \
 	account-server/account.hpp \
 	account-server/account.cpp \
 	account-server/accountclient.hpp \
@@ -36,6 +32,8 @@ tmwserv_account_SOURCES = \
 	chat-server/chatchannel.cpp \
 	chat-server/chatchannelmanager.hpp \
 	chat-server/chatchannelmanager.cpp \
+	common/configuration.hpp \
+	common/configuration.cpp \
 	common/inventorydata.hpp \
 	dal/dalexcept.h \
 	dal/dataprovider.h \
@@ -64,16 +62,16 @@ tmwserv_account_SOURCES = \
 	utils/tokencollector.hpp \
 	utils/tokencollector.cpp \
 	utils/tokendispenser.hpp \
-	utils/tokendispenser.cpp
+	utils/tokendispenser.cpp \
+	utils/xml.hpp \
+	utils/xml.cpp
 
 tmwserv_game_SOURCES = \
 	game-server/main-game.cpp \
-	configuration.h \
-	configuration.cpp \
 	defines.h \
 	point.h \
-	resourcemanager.h \
-	resourcemanager.cpp \
+	common/configuration.hpp \
+	common/configuration.cpp \
 	common/inventorydata.hpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
@@ -114,6 +112,8 @@ tmwserv_game_SOURCES = \
 	game-server/object.hpp \
 	game-server/quest.hpp \
 	game-server/quest.cpp \
+	game-server/resourcemanager.hpp \
+	game-server/resourcemanager.cpp \
 	game-server/spawnarea.hpp \
 	game-server/spawnarea.cpp \
 	game-server/state.hpp \

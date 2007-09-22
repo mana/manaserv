@@ -23,11 +23,12 @@
 
 #include <cassert>
 
-#include "resourcemanager.h"
+#include "game-server/mapmanager.hpp"
+
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
-#include "game-server/mapmanager.hpp"
 #include "game-server/mapreader.hpp"
+#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
@@ -43,9 +44,8 @@ MapManager::Maps const &MapManager::getMaps()
 
 void MapManager::initialize(std::string const &mapReferenceFile)
 {
-    ResourceManager *resman = ResourceManager::getInstance();
     int size;
-    char *data = (char *)resman->loadFile(mapReferenceFile, size);
+    char *data = ResourceManager::loadFile(mapReferenceFile, size);
 
     if (!data) {
         LOG_ERROR("Map Manager: Could not find " << mapReferenceFile << "!");
@@ -117,8 +117,7 @@ void MapManager::raiseActive(int mapId)
     }
 
     std::string file = "maps/" + composite->getName() + ".tmx";
-    ResourceManager *resman = ResourceManager::getInstance();
-    if (!resman->exists(file))
+    if (!ResourceManager::exists(file))
     {
         file += ".gz";
     }

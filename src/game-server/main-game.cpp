@@ -27,17 +27,17 @@
 #include <physfs.h>
 #include <enet/enet.h>
 
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
+#ifdef HAVE_CONFIG_H
 #include "../config.h"
 #endif
 
-#include "configuration.h"
-#include "resourcemanager.h"
+#include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/monstermanager.hpp"
+#include "game-server/resourcemanager.hpp"
 #include "game-server/state.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
@@ -58,8 +58,6 @@ utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms *
 int worldTime = 0;              /**< Current world time in 100ms ticks */
 bool running = true;            /**< Determines if server keeps running */
 
-Configuration config;           /**< XML config reader */
-
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
 /** Core game message handler */
@@ -69,7 +67,7 @@ GameHandler *gameHandler;
 AccountConnection *accountHandler;
 
 /** Callback used when SIGQUIT signal is received. */
-void closeGracefully(int dummy)
+void closeGracefully(int)
 {
     running = false;
 }
@@ -132,14 +130,15 @@ void initialize()
     // Write the messages to both the screen and the log file.
     Logger::setTeeMode(true);
 
-    config.init(configPath);
+    Configuration::initialize(configPath);
     LOG_INFO("Using config file: " << configPath);
     LOG_INFO("Using log file: " << logPath);
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
-    stringFilter = new StringFilter(&config);
+    stringFilter = new StringFilter;
 
+    ResourceManager::initialize();
     MapManager::initialize(DEFAULT_MAPSDB_FILE);
     ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
     MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
@@ -147,8 +146,8 @@ void initialize()
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
     // singleton or a local variable in the event-loop
-    gameHandler = new GameHandler();
-    accountHandler = new AccountConnection();
+    gameHandler = new GameHandler;
+    accountHandler = new AccountConnection;
 
     // --- Initialize enet.
     if (enet_initialize() != 0) {
@@ -176,7 +175,7 @@ void initialize()
 void deinitialize()
 {
     // Write configuration file
-    config.write();
+    Configuration::deinitialize();
 
     // Stop world timer
     worldTimer.stop();
@@ -246,7 +245,7 @@ void parseOptions(int argc, char *argv[])
                 // Change the port to listen on.
                 unsigned short portToListenOn;
                 portToListenOn = atoi(optarg);
-                config.setValue("gameServerPort", portToListenOn);
+                Configuration::setValue("gameServerPort", portToListenOn);
                 LOG_INFO("Setting default port to " << portToListenOn);
                 break;
         }
@@ -275,7 +274,7 @@ int main(int argc, char *argv[])
     }
 
     int gameServerPort =
-        (int) config.getValue("gameServerPort", DEFAULT_SERVER_PORT + 3);
+        Configuration::getValue("gameServerPort", DEFAULT_SERVER_PORT + 3);
 
     if (!gameHandler->startListen(gameServerPort))
     {

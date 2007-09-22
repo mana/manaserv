@@ -28,18 +28,17 @@
 #include <physfs.h>
 #include <enet/enet.h>
 
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
+#ifdef HAVE_CONFIG_H
 #include "../config.h"
 #endif
 
-#include "configuration.h"
-#include "resourcemanager.h"
 #include "account-server/accounthandler.hpp"
 #include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
 #include "account-server/dalstorage.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chathandler.hpp"
+#include "common/configuration.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
@@ -54,8 +53,6 @@
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 
 static bool running = true;        /**< Determines if server keeps running */
-
-Configuration config;           /**< XML config reader */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
@@ -145,7 +142,7 @@ static void initialize()
     // write the messages to both the screen and the log file.
     Logger::setTeeMode(true);
 
-    config.init(configPath);
+    Configuration::initialize(configPath);
     LOG_INFO("Using Config File: " << configPath);
     LOG_INFO("Using Log File: " << logPath);
 
@@ -155,7 +152,7 @@ static void initialize()
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
-    stringFilter = new StringFilter(&config);
+    stringFilter = new StringFilter;
     // Initialize the Chat channels manager
     chatChannelManager = new ChatChannelManager;
 
@@ -167,9 +164,9 @@ static void initialize()
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
     // singleton or a local variable in the event-loop
-    accountHandler = new AccountHandler();
-    chatHandler = new ChatHandler();
-    serverHandler = new ServerHandler();
+    accountHandler = new AccountHandler;
+    chatHandler = new ChatHandler;
+    serverHandler = new ServerHandler;
 
     // --- Initialize enet.
     if (enet_initialize() != 0) {
@@ -192,7 +189,7 @@ static void deinitialize()
 {
     delete stringFilter;
     // Write configuration file
-    config.write();
+    Configuration::deinitialize();
 
     // Quit ENet
     enet_deinitialize();
@@ -290,7 +287,7 @@ static void parseOptions(int argc, char *argv[])
                 // Change the port to listen on.
                 unsigned short portToListenOn;
                 portToListenOn = atoi(optarg);
-                config.setValue("ListenOnPort", portToListenOn);
+                Configuration::setValue("ListenOnPort", portToListenOn);
                 LOG_INFO("Setting Default Port to " << portToListenOn);
                 break;
         }
@@ -311,7 +308,7 @@ int main(int argc, char *argv[])
     // General Initialization
     initialize();
 
-    int port = int(config.getValue("accountServerPort", DEFAULT_SERVER_PORT));
+    int port = Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT);
     if (!accountHandler->startListen(port) ||
         !serverHandler->startListen(port + 1) ||
         !chatHandler->startListen(port + 2))

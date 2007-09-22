@@ -24,6 +24,7 @@
 #ifndef _TMWSERV_CHATCHANNELMANAGER_H_
 #define _TMWSERV_CHATCHANNELMANAGER_H_
 
+#include <list>
 #include <map>
 
 #include "chat-server/chatchannel.hpp"

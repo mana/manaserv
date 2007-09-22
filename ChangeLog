@@ -1,3 +1,20 @@
+2007-09-22  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/chat-server/chatchannelmanager.hpp,
+	src/chat-server/chathandler.hpp: Fixed header dependencies.
+	* src/configuration.cpp, src/configuration.h: Changed to namespace.
+	Removed listeners. Simplified property handling. Moved to common/.
+	* src/resourcemanager.cpp, src/resourcemanager.h: Changed to namespace.
+	Removed dead code. Moved to game-server/.
+	* src/account-server/dalstorage.cpp, src/utils/stringfilter.cpp,
+	src/account-server/accounthandler.cpp, src/utils/stringfilter.h,
+	src/game-server/accountconnection.cpp: Updated to new configuration.
+	* src/scripting/script.cpp, src/game-server/mapreader.cpp,
+	src/game-server/mapmanager.cpp, src/game-server/monstermanager.cpp,
+	src/game-server/itemmanager.cpp: Updated to new resource manager.
+	* src/Makefile.am, src/account-server/main-account.cpp,
+	src/game-server/main-game.cpp: Updated.
+
 2007-09-16  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/command.cpp: Removed unused argument name.

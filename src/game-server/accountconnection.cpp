@@ -23,8 +23,8 @@
 
 #include "game-server/accountconnection.hpp"
 
-#include "configuration.h"
 #include "defines.h"
+#include "common/configuration.hpp"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/map.hpp"
@@ -41,15 +41,16 @@
 
 bool AccountConnection::start()
 {
-    if (!Connection::start(config.getValue("accountServerAddress", "localhost"),
-                           int(config.getValue("accountServerPort", DEFAULT_SERVER_PORT)) + 1))
+    if (!Connection::start(
+            Configuration::getValue("accountServerAddress", "localhost"),
+            Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT) + 1))
     {
         return false;
     }
     LOG_INFO("Connection established to the account server.");
     MessageOut msg(GAMSG_REGISTER);
-    msg.writeString(config.getValue("gameServerAddress", "localhost"));
-    msg.writeShort(int(config.getValue("gameServerPort", DEFAULT_SERVER_PORT + 3)));
+    msg.writeString(Configuration::getValue("gameServerAddress", "localhost"));
+    msg.writeShort(Configuration::getValue("gameServerPort", DEFAULT_SERVER_PORT + 3));
     MapManager::Maps const &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end(); i != i_end; ++i)
     {

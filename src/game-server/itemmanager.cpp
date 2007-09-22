@@ -26,8 +26,8 @@
 #include "game-server/itemmanager.hpp"
 
 #include "defines.h"
-#include "resourcemanager.h"
 #include "game-server/item.hpp"
+#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
@@ -43,9 +43,8 @@ void ItemManager::initialize(std::string const &file)
 
 void ItemManager::reload()
 {
-    ResourceManager *resman = ResourceManager::getInstance();
     int size;
-    char *data = (char *)resman->loadFile(itemReferenceFile, size);
+    char *data = ResourceManager::loadFile(itemReferenceFile, size);
 
     if (!data) {
         LOG_ERROR("Item Manager: Could not find " << itemReferenceFile << "!");

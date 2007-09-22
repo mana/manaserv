@@ -26,9 +26,9 @@
 #include "game-server/monstermanager.hpp"
 
 #include "defines.h"
-#include "resourcemanager.h"
 #include "game-server/itemmanager.hpp"
 #include "game-server/monster.hpp"
+#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
@@ -44,9 +44,8 @@ void MonsterManager::initialize(std::string const &file)
 
 void MonsterManager::reload()
 {
-    ResourceManager *resman = ResourceManager::getInstance();
     int size;
-    char *data = (char *)resman->loadFile(monsterReferenceFile, size);
+    char *data = ResourceManager::loadFile(monsterReferenceFile, size);
 
     if (!data) {
         LOG_ERROR("Monster Manager: Could not find "

@@ -24,7 +24,6 @@
 #include "account-server/accounthandler.hpp"
 
 #include "defines.h"
-#include "configuration.h"
 #include "point.h"
 #include "account-server/account.hpp"
 #include "account-server/accountclient.hpp"
@@ -34,6 +33,7 @@
 #include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
 #include "chat-server/chathandler.hpp"
+#include "common/configuration.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -182,7 +182,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
 
     int clientVersion = msg.readLong();
 
-    if (clientVersion < config.getValue("clientVersion", 0))
+    if (clientVersion < Configuration::getValue("clientVersion", 0))
     {
         reply.writeByte(LOGIN_INVALID_VERSION);
         computer.send(reply);
@@ -296,7 +296,7 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
-    else if (clientVersion < config.getValue("clientVersion", 0))
+    else if (clientVersion < Configuration::getValue("clientVersion", 0))
     {
         reply.writeByte(REGISTER_INVALID_VERSION);
     }
@@ -392,8 +392,8 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
     }
 
     // Delete account and associated characters
-    LOG_DEBUG("Unregistered \"" << username
-              << "\", AccountID: " << acc->getID());
+    LOG_INFO("Unregistered \"" << username
+             << "\", AccountID: " << acc->getID());
     storage->delAccount(acc);
     reply.writeByte(ERRMSG_OK);
 
@@ -589,9 +589,9 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
-            newCharacter->setMapId((int) config.getValue("defaultMap", 1));
-            Point startingPos((int) config.getValue("startX", 512),
-                                  (int) config.getValue("startY", 512));
+            newCharacter->setMapId(Configuration::getValue("defaultMap", 1));
+            Point startingPos(Configuration::getValue("startX", 512),
+                              Configuration::getValue("startY", 512));
             newCharacter->setPosition(startingPos);
             acc->addCharacter(newCharacter);
 
@@ -660,9 +660,10 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
     reply.writeShort(port);
 
     // TODO: get correct address and port for the chat server
-    reply.writeString(config.getValue("accountServerAddress", "localhost"));
-    reply.writeShort(int(config.getValue("accountServerPort",
-                                                   DEFAULT_SERVER_PORT)) + 2);
+    reply.writeString(Configuration::getValue("accountServerAddress",
+                                              "localhost"));
+    reply.writeShort(Configuration::getValue("accountServerPort",
+                                             DEFAULT_SERVER_PORT) + 2);
 
     serverHandler->registerGameClient(magic_token, selectedChar);
     registerChatClient(magic_token, selectedChar->getName(), AL_NORMAL);

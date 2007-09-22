@@ -25,13 +25,13 @@
 
 #include "account-server/dalstorage.hpp"
 
-#include "configuration.h"
 #include "point.h"
 #include "account-server/account.hpp"
 #include "account-server/guild.hpp"
 #include "account-server/guildmanager.hpp"
 #include "account-server/dalstoragesql.hpp"
 #include "chat-server/chatchannel.hpp"
+#include "common/configuration.hpp"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
@@ -297,7 +297,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
         {
             // Set character to default map and one of the default location
             // Default map is to be 1, as not found return value will be 0.
-            character->setMapId((int)config.getValue("defaultMap", 1));
+            character->setMapId(Configuration::getValue("defaultMap", 1));
         }
 
         /* Fill the account-related fields. Last step, as it may require a new

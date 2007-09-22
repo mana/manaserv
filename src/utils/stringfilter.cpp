@@ -20,19 +20,17 @@
  *  $Id$
  */
 
-#include "stringfilter.h"
+#include "utils/stringfilter.h"
 
-#include "logger.h"
-
-#include "../configuration.h"
-#include "../defines.h"
+#include "defines.h"
+#include "common/configuration.hpp"
+#include "utils/logger.h"
 
 namespace utils
 {
 
-StringFilter::StringFilter(Configuration *config):
-    mInitialized(false),
-    mConfig(config)
+StringFilter::StringFilter():
+    mInitialized(false)
 {
     mSlangs.clear(); // Does this make any sense here?
     loadSlangFilterList();
@@ -48,7 +46,7 @@ bool StringFilter::loadSlangFilterList()
 {
     mInitialized = false;
 
-    std::string slangsList = mConfig->getValue("SlangsList", "");
+    std::string slangsList = Configuration::getValue("SlangsList", "");
     if (slangsList != "") {
         std::istringstream iss(slangsList);
         std::string tmp;

@@ -29,6 +29,7 @@
 #include "net/connectionhandler.hpp"
 #include "utils/tokencollector.hpp"
 
+class ChatChannel;
 class ChatClient;
 
 /**

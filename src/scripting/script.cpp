@@ -25,7 +25,7 @@
 
 #include "scripting/script.hpp"
 
-#include "resourcemanager.h"
+#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
 
 typedef std::map< std::string, Script::Factory > Engines;
@@ -67,9 +67,8 @@ void Script::update()
 
 void Script::loadFile(std::string const &name)
 {
-    ResourceManager *resman = ResourceManager::getInstance();
     int size;
-    char *buffer = (char *)resman->loadFile(name, size);
+    char *buffer = ResourceManager::loadFile(name, size);
     if (buffer)
     {
         load(buffer);

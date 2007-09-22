@@ -1,6 +1,6 @@
 /*
  *  The Mana World
- *  Copyright 2004 The Mana World Development Team
+ *  Copyright 2004-2007 The Mana World Development Team
  *
  *  This file is part of The Mana World.
  *
@@ -21,13 +21,7 @@
  *  $Id$
  */
 
-#include "resourcemanager.h"
-
-#include <physfs.h>
-
-#include "utils/logger.h"
-
-#ifdef WIN32
+#ifdef _WIN32
 #include <io.h>
 #include <direct.h>
 #else
@@ -35,39 +29,15 @@
 #include <dirent.h>
 #endif
 
+#include <physfs.h>
+
+#include "game-server/resourcemanager.hpp"
+
+#include "utils/logger.h"
+
 #define TMWSERV_DATADIR ""
 
-ResourceManager *ResourceManager::instance = NULL;
-
-ResourceManager::ResourceManager()
-{
-    // Add zip files to PhysicsFS
-    searchAndAddZipFiles();
-}
-
-ResourceManager::~ResourceManager()
-{
-}
-
-ResourceManager*
-ResourceManager::getInstance()
-{
-    // Create a new instance if necessary.
-    if (instance == NULL) instance = new ResourceManager();
-    return instance;
-}
-
-void
-ResourceManager::deleteInstance()
-{
-    if (instance != NULL) {
-        delete instance;
-        instance = NULL;
-    }
-}
-
-void
-ResourceManager::searchAndAddZipFiles()
+void ResourceManager::initialize()
 {
     PHYSFS_permitSymbolicLinks(1);
     // Add the main data directory to our PhysicsFS search path
@@ -144,22 +114,16 @@ bool ResourceManager::exists(std::string const &path)
     return PHYSFS_exists(path.c_str());
 }
 
-void*
-ResourceManager::loadFile(const std::string &fileName, int &fileSize)
+char *ResourceManager::loadFile(std::string const &fileName, int &fileSize)
 {
-    // If the file doesn't exist indicate failure
-    if (!exists(fileName))
-    {
-        LOG_WARN("Warning: " << fileName << " not found!");
-        return NULL;
-    }
-
     // Attempt to open the specified file using PhysicsFS
     PHYSFS_file* file = PHYSFS_openRead(fileName.c_str());
 
     // If the handler is an invalid pointer indicate failure
-    if (file == NULL) {
-        LOG_WARN("Warning: " << fileName << " failed to load!");
+    if (file == NULL)
+    {
+        LOG_WARN("Failed to load '" << fileName << "': "
+                 << PHYSFS_getLastError());
         return NULL;
     }
 
@@ -167,38 +131,19 @@ ResourceManager::loadFile(const std::string &fileName, int &fileSize)
     fileSize = PHYSFS_fileLength(file);
 
     // Allocate memory and load the file
-    void *buffer = malloc(fileSize + 1);
-    PHYSFS_read(file, buffer, 1, fileSize);
+    char *buffer = (char *)malloc(fileSize + 1);
+    if (PHYSFS_read(file, buffer, 1, fileSize) != fileSize)
+    {
+        free(buffer);
+        LOG_WARN("Failed to load '" << fileName << "': "
+                 << PHYSFS_getLastError());
+        return NULL;
+    }
 
     // Close the file and let the user deallocate the memory
     PHYSFS_close(file);
 
     // Add a trailing nul character, so that the file can be used as a string
-    ((char *)buffer)[fileSize] = 0;
+    buffer[fileSize] = 0;
     return buffer;
-}
-
-std::vector<std::string>
-ResourceManager::loadTextFile(const std::string &fileName)
-{
-    int contentsLength;
-    char *fileContents = (char*)loadFile(fileName, contentsLength);
-    std::vector<std::string> lines;
-
-    if (!fileContents)
-    {
-        LOG_ERROR("Couldn't load text file: " << fileName);
-        return lines;
-    }
-
-    // Tokenize and add each line separately
-    char *line = strtok(fileContents, "\n");
-    while (line != NULL)
-    {
-        lines.push_back(line);
-        line = strtok(NULL, "\n");
-    }
-
-    free(fileContents);
-    return lines;
 }

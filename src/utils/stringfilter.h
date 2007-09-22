@@ -27,8 +27,6 @@
 #include <list>
 #include <string>
 
-class Configuration;
-
 namespace utils
 {
 
@@ -41,7 +39,7 @@ class StringFilter
         /**
          * ctors.
          */
-        StringFilter(Configuration *config);
+        StringFilter();
 
         ~StringFilter();
 
@@ -89,7 +87,6 @@ class StringFilter
         typedef Slangs::iterator SlangIterator;
         Slangs mSlangs;    /**< the formatted Slangs list */
         bool mInitialized;                 /**< Set if the list is loaded */
-        Configuration *mConfig;            /**< The config instance */
 };
 
 } // ::utils
