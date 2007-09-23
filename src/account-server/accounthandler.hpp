@@ -24,118 +24,29 @@
 #ifndef _TMWSERV_ACCOUNTHANDLER_H_
 #define _TMWSERV_ACCOUNTHANDLER_H_
 
-#include "net/connectionhandler.hpp"
-#include "utils/tokencollector.hpp"
+#include <string>
 
-class AccountClient;
-class Character;
-
-/**
- * Manages the data stored in user accounts and provides a reliable interface
- * for working with an account. The account handler class can be used as a link
- * to a working account handle, and can be assigned to a user persistently as
- * an interface between the computer and account. (Messages from the user can
- * be traced to this account through the NetComputer structure, then processed
- * here with the persistent stored data).
- */
-class AccountHandler : public ConnectionHandler
+namespace AccountClientHandler
 {
-    public:
-        /**
-         * Constructor
-         */
-        AccountHandler();
+    /**
+     * Creates a connection handler and starts listening on given port.
+     */
+    bool initialize(int port);
 
-        /**
-         * Start the handler
-         */
-        bool
-        startListen(enet_uint16 port);
+    /**
+     * Stops listening to messages and destroys the connection handler.
+     */
+    void deinitialize();
 
-        /**
-         * Combines a client with it's account.
-         * (Needed for TokenCollector)
-         */
-        void
-        tokenMatched(AccountClient *computer, int accountID);
+    /**
+     * Prepares a connection for a client coming from a game server.
+     */
+    void prepareReconnect(std::string const &token, int accountID);
 
-        /**
-         * Deletes a pending client's data.
-         * (Needed for TokenCollector)
-         */
-        void
-        deletePendingClient(AccountClient* computer);
-
-        /**
-         * Deletes a pending connection's data.
-         * (Needed for TokenCollector)
-         */
-        void
-        deletePendingConnect(int accountID);
-
-        /**
-         * TokenCollector, used to login a client without the client having to
-         * send username and password a second time.
-         */
-        TokenCollector<AccountHandler, AccountClient*, int>
-        mTokenCollector;
-
-    protected:
-        /**
-         * Process account related messages.
-         */
-        void
-        processMessage(NetComputer *computer, MessageIn &message);
-
-        NetComputer*
-        computerConnected(ENetPeer *peer);
-
-        void
-        computerDisconnected(NetComputer *comp);
-
-    private:
-
-        void sendCharacterData(AccountClient &, int, Character const &);
-
-        void
-        handleLoginMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleLogoutMessage(AccountClient &computer);
-
-        void
-        handleReconnectMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleRegisterMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleUnregisterMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleEmailChangeMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleEmailGetMessage(AccountClient &computer);
-
-        void
-        handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg);
-
-        void
-        handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg);
-
-        /**
-         * Send guild join for each guild the player belongs to.
-         */
-        void handleGuildJoining(AccountClient &computer, Character *character);
-};
-
-extern AccountHandler * accountHandler;
+    /**
+     * Processes messages received by the connection handler.
+     */
+    void process();
+}
 
 #endif

@@ -59,9 +59,6 @@ utils::StringFilter *stringFilter; /**< Slang's Filter */
 /** Database handler. */
 DALStorage *storage;
 
-/** Account message handler */
-AccountHandler *accountHandler;
-
 /** Communications (chat) message handler */
 ChatHandler *chatHandler;
 
@@ -164,7 +161,6 @@ static void initialize()
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
     // singleton or a local variable in the event-loop
-    accountHandler = new AccountHandler;
     chatHandler = new ChatHandler;
     serverHandler = new ServerHandler;
 
@@ -191,13 +187,14 @@ static void deinitialize()
     // Write configuration file
     Configuration::deinitialize();
 
+    AccountClientHandler::deinitialize();
+
     // Quit ENet
     enet_deinitialize();
 
     // Destroy message handlers
     delete serverHandler;
     delete chatHandler;
-    delete accountHandler;
 
     // Destroy Managers
     delete chatChannelManager;
@@ -309,7 +306,7 @@ int main(int argc, char *argv[])
     initialize();
 
     int port = Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT);
-    if (!accountHandler->startListen(port) ||
+    if (!AccountClientHandler::initialize(port) ||
         !serverHandler->startListen(port + 1) ||
         !chatHandler->startListen(port + 2))
     {
@@ -321,7 +318,7 @@ int main(int argc, char *argv[])
     utils::Timer statTimer(10000);
 
     while (running) {
-        accountHandler->process(50);
+        AccountClientHandler::process();
         chatHandler->process(50);
         serverHandler->process(50);
         if (statTimer.poll()) dumpStatistics();
@@ -330,6 +327,5 @@ int main(int argc, char *argv[])
     LOG_INFO("Received: Quit signal, closing down...");
     serverHandler->stopListen();
     chatHandler->stopListen();
-    accountHandler->stopListen();
     deinitialize();
 }

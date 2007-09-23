@@ -212,8 +212,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             if (Character *ptr = storage->getCharacter(id, NULL))
             {
                 int accountID = ptr->getAccountID();
-                accountHandler->
-                    mTokenCollector.addPendingConnect(magic_token, accountID);
+                AccountClientHandler::prepareReconnect(magic_token, accountID);
                 delete ptr;
             }
             else

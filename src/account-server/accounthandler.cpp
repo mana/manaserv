@@ -43,16 +43,76 @@
 #include "utils/tokencollector.hpp"
 #include "utils/tokendispenser.hpp"
 
+class AccountHandler : public ConnectionHandler
+{
+    public:
+        /**
+         * Constructor.
+         */
+        AccountHandler();
+
+        /**
+         * Called by the token collector in order to associate a client to its
+         * account ID.
+         */
+        void tokenMatched(AccountClient *computer, int accountID);
+
+        /**
+         * Called by the token collector when a client was not acknowledged for
+         * some time and should be disconnected.
+         */
+        void deletePendingClient(AccountClient *computer);
+
+        /**
+         * Called by the token collector.
+         */
+        void deletePendingConnect(int) {}
+
+        /**
+         * Token collector for connecting a client coming from a game server
+         * without having to provide username and password a second time.
+         */
+        TokenCollector< AccountHandler, AccountClient *, int > mTokenCollector;
+
+    protected:
+        /**
+         * Processes account related messages.
+         */
+        void processMessage(NetComputer *computer, MessageIn &message);
+
+        NetComputer *computerConnected(ENetPeer *peer);
+
+        void computerDisconnected(NetComputer *comp);
+};
+
+static AccountHandler *accountHandler;
+
 AccountHandler::AccountHandler():
     mTokenCollector(this)
 {
 }
 
-bool
-AccountHandler::startListen(enet_uint16 port)
+bool AccountClientHandler::initialize(int port)
 {
+    accountHandler = new AccountHandler;
     LOG_INFO("Account handler started:");
-    return ConnectionHandler::startListen(port);
+    return accountHandler->startListen(port);
+}
+
+void AccountClientHandler::deinitialize()
+{
+    accountHandler->stopListen();
+    delete accountHandler;
+}
+
+void AccountClientHandler::process()
+{
+    accountHandler->process(50);
+}
+
+void AccountClientHandler::prepareReconnect(std::string const &token, int id)
+{
+    accountHandler->mTokenCollector.addPendingConnect(token, id);
 }
 
 NetComputer*
@@ -73,83 +133,7 @@ AccountHandler::computerDisconnected(NetComputer *comp)
     delete computer; // ~AccountClient unsets the account
 }
 
-/**
- * Generic interface convention for getting a message and sending it to the
- * correct subroutines. Account handler takes care of determining the
- * current step in the account process, be it creation, setup, or login.
- */
-void
-AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
-{
-    AccountClient &computer = *static_cast< AccountClient * >(comp);
-
-    switch (message.getId())
-    {
-        case PAMSG_LOGIN:
-            LOG_DEBUG("Received msg ... PAMSG_LOGIN");
-            handleLoginMessage(computer, message);
-            break;
-
-        case PAMSG_LOGOUT:
-            LOG_DEBUG("Received msg ... PAMSG_LOGOUT");
-            handleLogoutMessage(computer);
-            break;
-
-        case PAMSG_RECONNECT:
-            LOG_DEBUG("Received msg ... PAMSG_RECONNECT");
-            handleReconnectMessage(computer, message);
-            break;
-
-        case PAMSG_REGISTER:
-            LOG_DEBUG("Received msg ... PAMSG_REGISTER");
-            handleRegisterMessage(computer, message);
-            break;
-
-        case PAMSG_UNREGISTER:
-            LOG_DEBUG("Received msg ... PAMSG_UNREGISTER");
-            handleUnregisterMessage(computer, message);
-            break;
-
-        case PAMSG_EMAIL_CHANGE:
-            LOG_DEBUG("Received msg ... PAMSG_EMAIL_CHANGE");
-            handleEmailChangeMessage(computer, message);
-            break;
-
-        case PAMSG_EMAIL_GET:
-            LOG_DEBUG("Received msg ... PAMSG_EMAIL_GET");
-            handleEmailGetMessage(computer);
-            break;
-
-        case PAMSG_PASSWORD_CHANGE:
-            LOG_DEBUG("Received msg ... PAMSG_PASSWORD_CHANGE");
-            handlePasswordChangeMessage(computer, message);
-            break;
-
-        case PAMSG_CHAR_CREATE:
-            LOG_DEBUG("Received msg ... PAMSG_CHAR_CREATE");
-            handleCharacterCreateMessage(computer, message);
-            break;
-
-        case PAMSG_CHAR_SELECT:
-            LOG_DEBUG("Received msg ... PAMSG_CHAR_SELECT");
-            handleCharacterSelectMessage(computer, message);
-            break;
-
-        case PAMSG_CHAR_DELETE:
-            LOG_DEBUG("Received msg ... PAMSG_CHAR_DELETE");
-            handleCharacterDeleteMessage(computer, message);
-            break;
-
-        default:
-            LOG_WARN("AccountHandler::processMessage, Invalid message type "
-                     << message.getId());
-            MessageOut result(XXMSG_INVALID);
-            computer.send(result);
-            break;
-    }
-}
-
-void AccountHandler::sendCharacterData(AccountClient &computer, int slot, Character const &ch)
+static void sendCharacterData(AccountClient &computer, int slot, Character const &ch)
 {
     MessageOut charInfo(APMSG_CHAR_INFO);
     charInfo.writeByte(slot);
@@ -168,8 +152,7 @@ void AccountHandler::sendCharacterData(AccountClient &computer, int slot, Charac
     computer.send(charInfo);
 }
 
-void
-AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
+static void handleLoginMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_LOGIN_RESPONSE);
 
@@ -199,7 +182,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
-    if (getClientNumber() >= MAX_CLIENTS )
+    if (accountHandler->getClientNumber() >= MAX_CLIENTS )
     {
         reply.writeByte(ERRMSG_SERVER_FULL);
         computer.send(reply);
@@ -242,8 +225,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
     }
 }
 
-void
-AccountHandler::handleLogoutMessage(AccountClient &computer)
+static void handleLogoutMessage(AccountClient &computer)
 {
     MessageOut reply(APMSG_LOGOUT_RESPONSE);
 
@@ -260,30 +242,28 @@ AccountHandler::handleLogoutMessage(AccountClient &computer)
     else if (computer.status == CLIENT_QUEUED)
     {
         // Delete it from the pendingClient list
-        mTokenCollector.deletePendingClient(&computer);
+        accountHandler->mTokenCollector.deletePendingClient(&computer);
         computer.status = CLIENT_LOGIN;
         reply.writeByte(ERRMSG_OK);
     }
     computer.send(reply);
 }
 
-void AccountHandler::
-handleReconnectMessage(AccountClient &computer, MessageIn &msg)
+static void handleReconnectMessage(AccountClient &computer, MessageIn &msg)
 {
     if (computer.status != CLIENT_LOGIN)
     {
         LOG_DEBUG("Account tried to reconnect, but was already logged in "
-                 << "or queued.");
+                  "or queued.");
         return;
     }
 
     std::string magic_token = msg.readString(MAGIC_TOKEN_LENGTH);
     computer.status = CLIENT_QUEUED; // Before the addPendingClient
-    mTokenCollector.addPendingClient(magic_token, &computer);
+    accountHandler->mTokenCollector.addPendingClient(magic_token, &computer);
 }
 
-void
-AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
+static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
 {
     int clientVersion = msg.readLong();
     std::string username = msg.readString();
@@ -356,9 +336,7 @@ AccountHandler::handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     computer.send(reply);
 }
 
-void
-AccountHandler::handleUnregisterMessage(AccountClient &computer,
-                                        MessageIn &msg)
+static void handleUnregisterMessage(AccountClient &computer, MessageIn &msg)
 {
     LOG_DEBUG("AccountHandler::handleUnregisterMessage");
     std::string username = msg.readString();
@@ -400,8 +378,7 @@ AccountHandler::handleUnregisterMessage(AccountClient &computer,
     computer.send(reply);
 }
 
-void AccountHandler::
-handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
+static void handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_EMAIL_CHANGE_RESPONSE);
 
@@ -435,8 +412,7 @@ handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     computer.send(reply);
 }
 
-void AccountHandler::
-handleEmailGetMessage(AccountClient &computer)
+static void handleEmailGetMessage(AccountClient &computer)
 {
     MessageOut reply(APMSG_EMAIL_GET_RESPONSE);
 
@@ -454,9 +430,7 @@ handleEmailGetMessage(AccountClient &computer)
     computer.send(reply);
 }
 
-void
-AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
-                                            MessageIn &msg)
+static void handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg)
 {
     std::string oldPassword = msg.readString();
     std::string newPassword = msg.readString();
@@ -490,9 +464,7 @@ AccountHandler::handlePasswordChangeMessage(AccountClient &computer,
     computer.send(reply);
 }
 
-void
-AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
-                                             MessageIn &msg)
+static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg)
 {
     std::string name = msg.readString();
     int hairStyle = msg.readByte();
@@ -612,8 +584,7 @@ AccountHandler::handleCharacterCreateMessage(AccountClient &computer,
     computer.send(reply);
 }
 
-void AccountHandler::
-handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
+static void handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_SELECT_RESPONSE);
 
@@ -671,8 +642,7 @@ handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg)
     computer.send(reply);
 }
 
-void AccountHandler::
-handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg)
+static void handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_DELETE_RESPONSE);
 
@@ -737,7 +707,72 @@ AccountHandler::deletePendingClient(AccountClient* computer)
     // The computer will be deleted when the disconnect event is processed
 }
 
-void AccountHandler::deletePendingConnect(int)
+void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 {
-    // No resources to free.
+    AccountClient &computer = *static_cast< AccountClient * >(comp);
+
+    switch (message.getId())
+    {
+        case PAMSG_LOGIN:
+            LOG_DEBUG("Received msg ... PAMSG_LOGIN");
+            handleLoginMessage(computer, message);
+            break;
+
+        case PAMSG_LOGOUT:
+            LOG_DEBUG("Received msg ... PAMSG_LOGOUT");
+            handleLogoutMessage(computer);
+            break;
+
+        case PAMSG_RECONNECT:
+            LOG_DEBUG("Received msg ... PAMSG_RECONNECT");
+            handleReconnectMessage(computer, message);
+            break;
+
+        case PAMSG_REGISTER:
+            LOG_DEBUG("Received msg ... PAMSG_REGISTER");
+            handleRegisterMessage(computer, message);
+            break;
+
+        case PAMSG_UNREGISTER:
+            LOG_DEBUG("Received msg ... PAMSG_UNREGISTER");
+            handleUnregisterMessage(computer, message);
+            break;
+
+        case PAMSG_EMAIL_CHANGE:
+            LOG_DEBUG("Received msg ... PAMSG_EMAIL_CHANGE");
+            handleEmailChangeMessage(computer, message);
+            break;
+
+        case PAMSG_EMAIL_GET:
+            LOG_DEBUG("Received msg ... PAMSG_EMAIL_GET");
+            handleEmailGetMessage(computer);
+            break;
+
+        case PAMSG_PASSWORD_CHANGE:
+            LOG_DEBUG("Received msg ... PAMSG_PASSWORD_CHANGE");
+            handlePasswordChangeMessage(computer, message);
+            break;
+
+        case PAMSG_CHAR_CREATE:
+            LOG_DEBUG("Received msg ... PAMSG_CHAR_CREATE");
+            handleCharacterCreateMessage(computer, message);
+            break;
+
+        case PAMSG_CHAR_SELECT:
+            LOG_DEBUG("Received msg ... PAMSG_CHAR_SELECT");
+            handleCharacterSelectMessage(computer, message);
+            break;
+
+        case PAMSG_CHAR_DELETE:
+            LOG_DEBUG("Received msg ... PAMSG_CHAR_DELETE");
+            handleCharacterDeleteMessage(computer, message);
+            break;
+
+        default:
+            LOG_WARN("AccountHandler::processMessage, Invalid message type "
+                     << message.getId());
+            MessageOut result(XXMSG_INVALID);
+            computer.send(result);
+            break;
+    }
 }
