@@ -128,10 +128,6 @@ enum {
     PAMSG_RECONNECT                = 0x0065, // B*32 token
     APMSG_RECONNECT_RESPONSE       = 0x0066, // B error
 
-    APMSG_CONNECTION_TIMEDOUT      = 0x0070, // -
-    GPMSG_CONNECTION_TIMEDOUT      = 0x0071, // -
-    CPMSG_CONNECTION_TIMEDOUT      = 0x0072, // -
-
     // Game
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
     GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
@@ -266,13 +262,14 @@ enum {
     ERRMSG_NO_CHARACTER_SELECTED,       // the user needs a character
     ERRMSG_INSUFFICIENT_RIGHTS,         // the user is not privileged
     ERRMSG_INVALID_ARGUMENT,            // part of the received message was invalid
-    ERRMSG_ALREADY_TAKEN                // name used was already taken
+    ERRMSG_ALREADY_TAKEN,               // name used was already taken
+    ERRMSG_SERVER_FULL,                 // the server is overloaded
+    ERRMSG_TIME_OUT                     // data failed to arrive in due time
 };
 
 // Login specific return values
 enum {
     LOGIN_INVALID_VERSION = 0x40,       // the user is using an incompatible protocol
-    LOGIN_SERVER_FULL,                  // the server is overloaded
     LOGIN_BANNED                        // the user is currently banned
 };
 

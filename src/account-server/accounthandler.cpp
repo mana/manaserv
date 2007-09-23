@@ -201,7 +201,7 @@ AccountHandler::handleLoginMessage(AccountClient &computer, MessageIn &msg)
 
     if (getClientNumber() >= MAX_CLIENTS )
     {
-        reply.writeByte(LOGIN_SERVER_FULL);
+        reply.writeByte(ERRMSG_SERVER_FULL);
         computer.send(reply);
         return;
     }
@@ -731,7 +731,8 @@ AccountHandler::tokenMatched(AccountClient *computer, int accountID)
 void
 AccountHandler::deletePendingClient(AccountClient* computer)
 {
-    MessageOut msg(APMSG_CONNECTION_TIMEDOUT);
+    MessageOut msg(APMSG_RECONNECT_RESPONSE);
+    msg.writeByte(ERRMSG_TIME_OUT);
     computer->disconnect(msg);
     // The computer will be deleted when the disconnect event is processed
 }

@@ -40,9 +40,22 @@ namespace GameState
 
     /**
      * Inserts an object in the game world.
+     * @return false if the insertion failed and the object is in limbo.
      * @note No update may be in progress.
      */
-    void insert(Thing *);
+    bool insert(Thing *)
+#   ifdef __GNUC__
+    __attribute__((warn_unused_result))
+#   endif
+    ;
+
+    /**
+     * Inserts an object in the game world. Deletes the object if the insertion
+     * failed.
+     * @return false if the insertion failed.
+     * @note No update may be in progress. Invalid for characters.
+     */
+    bool insertSafe(Thing *);
 
     /**
      * Removes an object from the game world.

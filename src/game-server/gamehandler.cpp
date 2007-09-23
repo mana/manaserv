@@ -251,7 +251,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 Item *item = new Item(ic, amount - nb);
                 item->setMap(computer.character->getMap());
                 item->setPosition(computer.character->getPosition());
-                GameState::insert(item);
+                if (!GameState::insert(item))
+                {
+                    // The map is full. Put back into inventory.
+                    inv.insert(ic->getDatabaseID(), amount - nb);
+                    delete item;
+                }
             }
         } break;
 
@@ -510,10 +515,18 @@ GameHandler::tokenMatched(GameClient* computer, Character* character)
     character->setClient(computer);
 
     MessageOut result(GPMSG_CONNECT_RESPONSE);
+
+    if (!GameState::insert(character))
+    {
+        result.writeByte(ERRMSG_SERVER_FULL);
+        kill(character);
+        delete character;
+        computer->disconnect(result);
+        return;
+    }
+
     result.writeByte(ERRMSG_OK);
     computer->send(result);
-
-    GameState::insert(character);
 
     // Force sending the whole character to the client.
     Inventory(character).sendFull();
@@ -529,7 +542,8 @@ GameHandler::deletePendingClient(GameClient* computer)
     // Something might have changed since it was inserted
     if (computer->status != CLIENT_QUEUED) return;
 
-    MessageOut msg(GPMSG_CONNECTION_TIMEDOUT);
+    MessageOut msg(GPMSG_CONNECT_RESPONSE);
+    msg.writeByte(ERRMSG_TIME_OUT);
 
     // The computer will be deleted when the disconnect event is processed
     computer->disconnect(msg);

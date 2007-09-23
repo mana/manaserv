@@ -61,7 +61,8 @@ bool ChatHandler::startListen(enet_uint16 port)
 
 void ChatHandler::deletePendingClient(ChatClient *c)
 {
-    MessageOut msg(GPMSG_CONNECTION_TIMEDOUT);
+    MessageOut msg(CPMSG_CONNECT_RESPONSE);
+    msg.writeByte(ERRMSG_TIME_OUT);
 
     // The computer will be deleted when the disconnect event is processed
     c->disconnect(msg);

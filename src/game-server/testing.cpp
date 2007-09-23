@@ -19,7 +19,7 @@ static void dropItem(MapComposite *map, int x, int y, int type)
     i->setMap(map);
     Point pos(x, y);
     i->setPosition(pos);
-    GameState::insert(i);
+    GameState::insertSafe(i);
 }
 
 void testingMap(MapComposite *map)

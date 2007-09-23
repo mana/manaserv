@@ -6,6 +6,14 @@
 	src/game-server/state.cpp, src/game-server/spawnarea.cpp,
 	src/game-server/state.hpp, src/game-server/monster.cpp,
 	src/game-server/trigger.cpp: Updated to new interface.
+	* src/account-server/accounthandler.cpp, src/defines.h,
+	src/chat-server/chathandler.cpp: Merged time-out messages with response
+	to connection messages.
+	* src/game-server/state.cpp, src/game-server/state.hpp: Modified
+	interface to deal with failure to insert objects.
+	* src/scripting/lua.cpp, src/game-server/testing.cpp,
+	src/game-server/command.cpp, src/game-server/gamehandler.cpp: Taken
+	insertion failures into account.
 
 2007-09-22  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

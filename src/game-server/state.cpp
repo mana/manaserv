@@ -427,7 +427,7 @@ void GameState::update()
                 break;
 
             case EVENT_INSERT:
-                insert(o);
+                insertSafe(o);
                 break;
 
             case EVENT_WARP:
@@ -439,33 +439,63 @@ void GameState::update()
     delayedEvents.clear();
 }
 
-void GameState::insert(Thing *ptr)
+bool GameState::insert(Thing *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
-    if (!map || !map->insert(ptr))
+    assert(map && map->isActive());
+
+    /* Non-visible objects have neither position nor public ID, so their
+       insertion cannot fail. Take care of them first. */
+    if (!ptr->isVisible())
     {
-        // TODO: Deal with failure to place Thing on the map.
-        return;
+        map->insert(ptr);
+        ptr->inserted();
+        return true;
     }
 
-    ptr->inserted();
-
-    if (ptr->isVisible())
+    // Check that coordinates are actually valid.
+    Object *obj = static_cast< Object * >(ptr);
+    Map *mp = map->getMap();
+    Point pos = obj->getPosition();
+    if (pos.x / 32 >= (unsigned)mp->getWidth() ||
+        pos.y / 32 >= (unsigned)mp->getHeight())
     {
-        Object *obj = static_cast< Object * >(ptr);
-        obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
-        if (obj->getType() != OBJECT_CHARACTER) return;
-
-        /* Since the character doesn't know yet where on the world he is after
-           connecting to the map server, we send him an initial change map message. */
-        MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
-        mapChangeMessage.writeString(map->getName());
-        Point pos = obj->getPosition();
-        mapChangeMessage.writeShort(pos.x);
-        mapChangeMessage.writeShort(pos.y);
-        gameHandler->sendTo(static_cast< Character * >(obj), mapChangeMessage);
+        LOG_ERROR("Tried to insert an object at position " << pos.x << ','
+                  << pos.y << " outside map " << map->getID() << '.');
+        // Set an arbitrary small position.
+        pos = Point(100, 100);
+        obj->setPosition(pos);
     }
+
+    if (!map->insert(obj))
+    {
+        // The map is overloaded. No room to add a new object.
+        LOG_ERROR("Too many objects on map " << map->getID() << '.');
+        return false;
+    }
+
+    obj->inserted();
+
+    obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
+    if (obj->getType() != OBJECT_CHARACTER) return true;
+
+    /* Since the player does not know yet where in the world its character is,
+       we send a map-change message, even if it is the first time it
+       connects to this server. */
+    MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
+    mapChangeMessage.writeString(map->getName());
+    mapChangeMessage.writeShort(pos.x);
+    mapChangeMessage.writeShort(pos.y);
+    gameHandler->sendTo(static_cast< Character * >(obj), mapChangeMessage);
+    return true;
+}
+
+bool GameState::insertSafe(Thing *ptr)
+{
+    if (insert(ptr)) return true;
+    delete ptr;
+    return false;
 }
 
 void GameState::remove(Thing *ptr)
@@ -529,7 +559,12 @@ void GameState::warp(Character *ptr, MapComposite *map, int x, int y)
 
     if (map->isActive())
     {
-        insert(ptr);
+        if (!insert(ptr))
+        {
+            ptr->disconnected();
+            gameHandler->kill(ptr);
+            delete ptr;
+        }
     }
     else
     {
