@@ -15,12 +15,13 @@
 	src/game-server/command.cpp, src/game-server/gamehandler.cpp: Taken
 	insertion failures into account.
 	* src/account-server/accounthandler.hpp,
-	src/account-server/accounthandler.cpp: Simplified interface of
-	connection handler. Moved all the implementation details outside the
+	src/account-server/accounthandler.cpp,
+	src/account-server/serverhandler.cpp,
+	src/account-server/serverhandler.hpp: Simplified interface of
+	connection handlers. Moved all the implementation details outside the
 	header file.
-	* src/account-server/serverhandler.cpp,
-	src/account-server/main-account.cpp: Updated to new interface of
-	connection handler.
+	* src/account-server/main-account.cpp: Updated to new interface of
+	connection handlers.
 
 2007-09-22  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 

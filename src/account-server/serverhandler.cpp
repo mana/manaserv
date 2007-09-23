@@ -30,13 +30,13 @@
 #include "account-server/accounthandler.hpp"
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
+#include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
 #include "serialize/characterdata.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
-#include "utils/tokencollector.hpp"
 
 struct MapStatistics
 {
@@ -47,6 +47,9 @@ struct MapStatistics
 
 typedef std::map< unsigned short, MapStatistics > ServerStatistics;
 
+/**
+ * Stores address, maps, and statistics, of a connected game server.
+ */
 struct GameServer: NetComputer
 {
     GameServer(ENetPeer *peer): NetComputer(peer), port(0) {}
@@ -57,10 +60,52 @@ struct GameServer: NetComputer
     short port;
 };
 
-bool ServerHandler::startListen(enet_uint16 port)
+static GameServer *getGameServerFromMap(int);
+
+/**
+ * Manages communications with all the game servers.
+ */
+class ServerHandler: public ConnectionHandler
 {
+    friend GameServer *getGameServerFromMap(int);
+    friend void GameServerHandler::dumpStatistics(std::ostream &);
+
+    protected:
+        /**
+         * Processes server messages.
+         */
+        void processMessage(NetComputer *computer, MessageIn &message);
+
+        /**
+         * Called when a game server connects. Initializes a simple NetComputer
+         * as these connections are stateless.
+         */
+        NetComputer *computerConnected(ENetPeer *peer);
+
+        /**
+         * Called when a game server disconnects.
+         */
+        void computerDisconnected(NetComputer *comp);
+};
+
+static ServerHandler *serverHandler;
+
+bool GameServerHandler::initialize(int port)
+{
+    serverHandler = new ServerHandler;
     LOG_INFO("Game server handler started:");
-    return ConnectionHandler::startListen(port);
+    return serverHandler->startListen(port);
+}
+
+void GameServerHandler::deinitialize()
+{
+    serverHandler->stopListen();
+    delete serverHandler;
+}
+
+void GameServerHandler::process()
+{
+    serverHandler->process(50);
 }
 
 NetComputer *ServerHandler::computerConnected(ENetPeer *peer)
@@ -73,10 +118,11 @@ void ServerHandler::computerDisconnected(NetComputer *comp)
     delete comp;
 }
 
-GameServer *ServerHandler::getGameServerFromMap(int mapId) const
+static GameServer *getGameServerFromMap(int mapId)
 {
-    for (NetComputers::const_iterator i = clients.begin(),
-         i_end = clients.end(); i != i_end; ++i)
+    for (ServerHandler::NetComputers::const_iterator
+         i = serverHandler->clients.begin(),
+         i_end = serverHandler->clients.end(); i != i_end; ++i)
     {
         GameServer *server = static_cast< GameServer * >(*i);
         ServerStatistics::const_iterator i = server->maps.find(mapId);
@@ -86,10 +132,10 @@ GameServer *ServerHandler::getGameServerFromMap(int mapId) const
     return NULL;
 }
 
-bool ServerHandler::getGameServerFromMap(int mapId, std::string &address,
-                                         int &port) const
+bool GameServerHandler::getGameServerFromMap
+    (int mapId, std::string &address, int &port)
 {
-    if (GameServer *s = getGameServerFromMap(mapId))
+    if (GameServer *s = ::getGameServerFromMap(mapId))
     {
         address = s->address;
         port = s->port;
@@ -98,19 +144,22 @@ bool ServerHandler::getGameServerFromMap(int mapId, std::string &address,
     return false;
 }
 
-void ServerHandler::registerGameClient(std::string const &token, Character *ptr)
+static void registerGameClient
+    (GameServer *s, std::string const &token, Character *ptr)
 {
-    int mapId = ptr->getMapId();
-
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
     msg.writeLong(ptr->getDatabaseID());
     msg.writeString(ptr->getName());
     serializeCharacterData(*ptr, msg);
-
-    GameServer *s = getGameServerFromMap(mapId);
-    assert(s);
     s->send(msg);
+}
+
+void GameServerHandler::registerClient(std::string const &token, Character *ptr)
+{
+    GameServer *s = ::getGameServerFromMap(ptr->getMapId());
+    assert(s);
+    registerGameClient(s, token, ptr);
 }
 
 void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
@@ -182,7 +231,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 int mapId = ptr->getMapId();
                 if (GameServer *s = getGameServerFromMap(mapId))
                 {
-                    registerGameClient(magic_token, ptr);
+                    registerGameClient(s, magic_token, ptr);
                     result.writeShort(AGMSG_REDIRECT_RESPONSE);
                     result.writeLong(id);
                     result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
@@ -449,10 +498,11 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         comp->send(result);
 }
 
-void ServerHandler::dumpStatistics(std::ostream &os) const
+void GameServerHandler::dumpStatistics(std::ostream &os)
 {
-    for (NetComputers::const_iterator i = clients.begin(),
-         i_end = clients.end(); i != i_end; ++i)
+    for (ServerHandler::NetComputers::const_iterator
+         i = serverHandler->clients.begin(),
+         i_end = serverHandler->clients.end(); i != i_end; ++i)
     {
         GameServer *server = static_cast< GameServer * >(*i);
         if (!server->port) continue;

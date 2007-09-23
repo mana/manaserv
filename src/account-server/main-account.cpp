@@ -62,9 +62,6 @@ DALStorage *storage;
 /** Communications (chat) message handler */
 ChatHandler *chatHandler;
 
-/** Server message handler */
-ServerHandler *serverHandler;
-
 /** Chat Channels Manager */
 ChatChannelManager *chatChannelManager;
 
@@ -162,7 +159,6 @@ static void initialize()
     // FIXME: Make the global handlers global vars or part of a bigger
     // singleton or a local variable in the event-loop
     chatHandler = new ChatHandler;
-    serverHandler = new ServerHandler;
 
     // --- Initialize enet.
     if (enet_initialize() != 0) {
@@ -187,13 +183,13 @@ static void deinitialize()
     // Write configuration file
     Configuration::deinitialize();
 
+    // Destroy message handlers.
     AccountClientHandler::deinitialize();
+    GameServerHandler::deinitialize();
 
     // Quit ENet
     enet_deinitialize();
 
-    // Destroy message handlers
-    delete serverHandler;
     delete chatHandler;
 
     // Destroy Managers
@@ -229,7 +225,7 @@ static void dumpStatistics()
 
     std::ofstream os(path.c_str());
     os << "<statistics>\n";
-    serverHandler->dumpStatistics(os);
+    GameServerHandler::dumpStatistics(os);
     os << "</statistics>\n";
 }
 
@@ -307,7 +303,7 @@ int main(int argc, char *argv[])
 
     int port = Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT);
     if (!AccountClientHandler::initialize(port) ||
-        !serverHandler->startListen(port + 1) ||
+        !GameServerHandler::initialize(port + 1) ||
         !chatHandler->startListen(port + 2))
     {
         LOG_FATAL("Unable to create an ENet server host.");
@@ -319,13 +315,12 @@ int main(int argc, char *argv[])
 
     while (running) {
         AccountClientHandler::process();
+        GameServerHandler::process();
         chatHandler->process(50);
-        serverHandler->process(50);
         if (statTimer.poll()) dumpStatistics();
     }
 
     LOG_INFO("Received: Quit signal, closing down...");
-    serverHandler->stopListen();
     chatHandler->stopListen();
     deinitialize();
 }

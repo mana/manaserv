@@ -27,87 +27,40 @@
 #include <iosfwd>
 #include <string>
 
-#include "net/connectionhandler.hpp"
-
-class AccountClient;
 class Character;
-struct GameServer;
 
-/**
- * Manages communications with all the game servers. This class also keeps
- * track of the maps each game server supports.
- */
-class ServerHandler: public ConnectionHandler
+namespace GameServerHandler
 {
-    public:
-        /**
-         * Starts the handler on the given port.
-         */
-        bool startListen(enet_uint16 port);
+    /**
+     * Creates a connection handler and starts listening on given port.
+     */
+    bool initialize(int port);
 
-        /**
-         * Returns the information a client needs to connect to the game server
-         * corresponding to the given map ID.
-         */
-        bool getGameServerFromMap(int, std::string &address, int &port) const;
+    /**
+     * Stops listening to messages and destroys the connection handler.
+     */
+    void deinitialize();
 
-        /**
-         * Sends a magic token and character data to the relevant game server.
-         */
-        void registerGameClient(std::string const &, Character *);
+    /**
+     * Returns the information a client needs to connect to the game server
+     * corresponding to the given map ID.
+     */
+    bool getGameServerFromMap(int, std::string &address, int &port);
 
-// There is no rationale for having a character name, but not its ID.
-#if 0
-        /**
-         * Get character (temp used by chat server).
-         */
-        CharacterPtr getCharacter(const std::string &name);
-#endif
+    /**
+     * Warns a game server about a soon-to-connect client.
+     */
+    void registerClient(std::string const &token, Character *);
 
-        /**
-         * Make client join the specified guild channel
-         */
-        void enterChannel(const std::string &guildName, Character *player);
+    /**
+     * Dumps per-server statistics into given stream
+     */
+    void dumpStatistics(std::ostream &);
 
-        /**
-         * Dumps per-server statistics into given stream
-         */
-        void dumpStatistics(std::ostream &) const;
-
-    protected:
-        /**
-         * Processes server messages.
-         */
-        void processMessage(NetComputer *computer, MessageIn &message);
-
-        /**
-         * Called when a game server connects. Initializes a simple NetComputer
-         * as these connections are stateless.
-         */
-        NetComputer *computerConnected(ENetPeer *peer);
-
-        /**
-         * Called when a game server disconnects.
-         */
-        void computerDisconnected(NetComputer *comp);
-
-    private:
-        
-        /**
-         * Returns the information a client needs to connect to the game server
-         * corresponding to the given map ID.
-         */
-        GameServer *getGameServerFromMap(int) const;
-
-#if 0
-        /**
-         * Send invite to user
-         */
-        void sendInvite(const std::string &invitedName, const std::string &inviterName,
-                        const std::string &guildName);
-#endif
-};
-
-extern ServerHandler *serverHandler;
+    /**
+     * Processes messages received by the connection handler.
+     */
+    void process();
+}
 
 #endif

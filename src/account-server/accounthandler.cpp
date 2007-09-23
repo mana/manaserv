@@ -612,7 +612,7 @@ static void handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg
 
     std::string address;
     int port;
-    if (!serverHandler->getGameServerFromMap
+    if (!GameServerHandler::getGameServerFromMap
             (selectedChar->getMapId(), address, port))
     {
         LOG_ERROR("Character Selection: No game server for the map.");
@@ -636,7 +636,7 @@ static void handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg
     reply.writeShort(Configuration::getValue("accountServerPort",
                                              DEFAULT_SERVER_PORT) + 2);
 
-    serverHandler->registerGameClient(magic_token, selectedChar);
+    GameServerHandler::registerClient(magic_token, selectedChar);
     registerChatClient(magic_token, selectedChar->getName(), AL_NORMAL);
 
     computer.send(reply);
