@@ -46,6 +46,9 @@ ChatChannelManager::registerPublicChannel(const std::string &channelName,
         const std::string &channelAnnouncement,
         const std::string &channelPassword)
 {
+    /* FIXME: This code is ill-designed. If the highest ID is already in use,
+       then it is impossible to create new channels, even if there are some
+       unused IDs. */
     int channelId = 1;
     for (ChatChannelIterator i = mChatChannels.begin(),
          end = mChatChannels.end(); i != end; ++i)
@@ -81,6 +84,7 @@ ChatChannelManager::registerPrivateChannel(const std::string &channelName,
         const std::string &channelAnnouncement,
         const std::string &channelPassword)
 {
+    // FIXME: see above.
     int channelId = MAX_PUBLIC_CHANNELS_RANGE;
 
     for (ChatChannelIterator i = mChatChannels.begin(),
