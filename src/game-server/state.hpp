@@ -29,19 +29,7 @@
 class MapComposite;
 class Thing;
 class Object;
-
-enum
-{
-    EVENT_REMOVE = 0,
-    EVENT_INSERT,
-    EVENT_WARP
-};
-
-struct DelayedEvent
-{
-    unsigned short type, x, y;
-    MapComposite *map;
-};
+class Character;
 
 namespace GameState
 {
@@ -52,20 +40,42 @@ namespace GameState
 
     /**
      * Inserts an object in the game world.
-     * No update may be in progress.
+     * @note No update may be in progress.
      */
     void insert(Thing *);
 
     /**
      * Removes an object from the game world.
-     * No update may be in progress.
+     * @note No update may be in progress.
+     * @note The object is not destroyed by this call.
      */
     void remove(Thing *);
 
     /**
-     * Enqueues an event. It will be executed at end of update.
+     * Warps a character between places of the game world.
+     * @note No update may be in progress.
+     * @note The character is destroyed, if needed.
      */
-    void enqueueEvent(Object *, DelayedEvent const &);
+    void warp(Character *, MapComposite *, int x, int y);
+
+    /**
+     * Enqueues an insert event.
+     * @note The event will be executed at end of update.
+     */
+    void enqueueInsert(Object *);
+
+    /**
+     * Enqueues a remove event.
+     * @note The event will be executed at end of update.
+     * @note The object will be destroyed at that time.
+     */
+    void enqueueRemove(Object *);
+
+    /**
+     * Enqueues a warp event.
+     * @note The event will be executed at end of update.
+     */
+    void enqueueWarp(Character *, MapComposite *, int x, int y);
 
     /**
      * Says something around an object.

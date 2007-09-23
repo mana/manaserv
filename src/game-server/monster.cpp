@@ -117,8 +117,7 @@ void Monster::update()
         mCountDown--;
         if (mCountDown <= 0)
         {
-            DelayedEvent e = { EVENT_REMOVE};
-            GameState::enqueueEvent(this, e);
+            GameState::enqueueRemove(this);
         }
         return;
     }
@@ -278,8 +277,7 @@ void Monster::died()
         Item *item = new Item(drop, 1);
         item->setMap(getMap());
         item->setPosition(getPosition());
-        DelayedEvent e = { EVENT_INSERT };
-        GameState::enqueueEvent(item, e);
+        GameState::enqueueInsert(item);
     }
 }
 

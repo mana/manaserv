@@ -42,6 +42,22 @@
 #include "scripting/script.hpp"
 #include "utils/logger.h"
 
+enum
+{
+    EVENT_REMOVE = 0,
+    EVENT_INSERT,
+    EVENT_WARP
+};
+
+/**
+ * Event expected to happen at next update.
+ */
+struct DelayedEvent
+{
+    unsigned short type, x, y;
+    MapComposite *map;
+};
+
 typedef std::map< Object *, DelayedEvent > DelayedEvents;
 
 /**
@@ -400,7 +416,6 @@ void GameState::update()
         switch (e.type)
         {
             case EVENT_REMOVE:
-            {
                 remove(o);
                 if (o->getType() == OBJECT_CHARACTER)
                 {
@@ -409,40 +424,16 @@ void GameState::update()
                     gameHandler->kill(ch);
                 }
                 delete o;
-            } break;
+                break;
 
             case EVENT_INSERT:
-            {
                 insert(o);
-            } break;
+                break;
 
             case EVENT_WARP:
-            {
-                remove(o);
-                Point pos(e.x, e.y);
-                o->setMap(e.map);
-                o->setPosition(pos);
-
                 assert(o->getType() == OBJECT_CHARACTER);
-                Character *p = static_cast< Character * >(o);
-                p->clearDestination();
-                /* Force update of persistent data on map change, so that
-                   characters can respawn at the start of the map after a death or
-                   a disconnection. */
-                accountHandler->sendCharacterData(p);
-
-                if (e.map->getMap())
-                {
-                    insert(o);
-                }
-                else
-                {
-                    MessageOut msg(GAMSG_REDIRECT);
-                    msg.writeLong(p->getDatabaseID());
-                    accountHandler->send(msg);
-                    gameHandler->prepareServerChange(p);
-                }
-            } break;
+                warp(static_cast< Character * >(o), e.map, e.x, e.y);
+                break;
         }
     }
     delayedEvents.clear();
@@ -525,7 +516,34 @@ void GameState::remove(Thing *ptr)
     map->remove(ptr);
 }
 
-void GameState::enqueueEvent(Object *ptr, DelayedEvent const &e)
+void GameState::warp(Character *ptr, MapComposite *map, int x, int y)
+{
+    remove(ptr);
+    ptr->setMap(map);
+    ptr->setPosition(Point(x, y));
+    ptr->clearDestination();
+    /* Force update of persistent data on map change, so that
+       characters can respawn at the start of the map after a death or
+       a disconnection. */
+    accountHandler->sendCharacterData(ptr);
+
+    if (map->isActive())
+    {
+        insert(ptr);
+    }
+    else
+    {
+        MessageOut msg(GAMSG_REDIRECT);
+        msg.writeLong(ptr->getDatabaseID());
+        accountHandler->send(msg);
+        gameHandler->prepareServerChange(ptr);
+    }
+}
+
+/**
+ * Enqueues an event. It will be executed at end of update.
+ */
+static void enqueueEvent(Object *ptr, DelayedEvent const &e)
 {
     std::pair< DelayedEvents::iterator, bool > p =
         delayedEvents.insert(std::make_pair(ptr, e));
@@ -534,6 +552,24 @@ void GameState::enqueueEvent(Object *ptr, DelayedEvent const &e)
     {
         p.first->second.type = EVENT_REMOVE;
     }
+}
+
+void GameState::enqueueInsert(Object *ptr)
+{
+    DelayedEvent e = { EVENT_INSERT, 0, 0, 0 };
+    enqueueEvent(ptr, e);
+}
+
+void GameState::enqueueRemove(Object *ptr)
+{
+    DelayedEvent e = { EVENT_REMOVE, 0, 0, 0 };
+    enqueueEvent(ptr, e);
+}
+
+void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
+{
+    DelayedEvent e = { EVENT_WARP, x, y, m };
+    enqueueEvent(ptr, e);
 }
 
 void GameState::sayAround(Object *obj, std::string const &text)

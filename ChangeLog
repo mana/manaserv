@@ -1,3 +1,12 @@
+2007-09-23  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/game-server/state.hpp, src/game-server/state.cpp: Changed
+	delayed events to an explicit interface.
+	* src/scripting/lua.cpp, src/game-server/command.cpp,
+	src/game-server/state.cpp, src/game-server/spawnarea.cpp,
+	src/game-server/state.hpp, src/game-server/monster.cpp,
+	src/game-server/trigger.cpp: Updated to new interface.
+
 2007-09-22  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/chat-server/chatchannelmanager.hpp,

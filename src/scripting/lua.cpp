@@ -214,8 +214,7 @@ static int LuaChr_Warp(lua_State *s)
         LOG_WARN("LuaChr_Warp called with a non-existing map.");
         return 0;
     }
-    DelayedEvent e = { EVENT_WARP, lua_tointeger(s, 3), lua_tointeger(s, 4), m };
-    GameState::enqueueEvent(q, e);
+    GameState::enqueueWarp(q, m, lua_tointeger(s, 3), lua_tointeger(s, 4));
     return 0;
 }
 
@@ -284,8 +283,7 @@ static int LuaChr_InvChange(lua_State *s)
                 Item *item = new Item(ic, nb);
                 item->setMap(q->getMap());
                 item->setPosition(q->getPosition());
-                DelayedEvent e = { EVENT_INSERT };
-                GameState::enqueueEvent(item, e);
+                GameState::enqueueInsert(item);
             }
         }
     }

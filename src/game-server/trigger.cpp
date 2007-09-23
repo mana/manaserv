@@ -23,17 +23,16 @@
 
 #include "game-server/trigger.hpp"
 
+#include "game-server/character.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/movingobject.hpp"
-#include "game-server/object.hpp"
 #include "game-server/state.hpp"
 
 void WarpAction::process(Object *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
     {
-        DelayedEvent e = { EVENT_WARP, mX, mY, mMap };
-        GameState::enqueueEvent(obj, e);
+        GameState::enqueueWarp(static_cast< Character * >(obj), mMap, mX, mY);
     }
 }
 

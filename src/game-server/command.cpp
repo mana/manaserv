@@ -179,8 +179,7 @@ static Command handle(char const *name, int level,
 
 static void warp(Character *, Character *q, MapComposite *m, int x, int y)
 {
-    DelayedEvent e = { EVENT_WARP, x, y, m };
-    GameState::enqueueEvent(q, e);
+    GameState::warp(q, m, x, y);
 }
 
 static void item(Character *, Character *q, ItemClass *it, int nb)
@@ -198,8 +197,7 @@ static void drop(Character *from, ItemClass *it, int nb)
     Item *item = new Item(it, nb);
     item->setMap(from->getMap());
     item->setPosition(from->getPosition());
-    DelayedEvent e = { EVENT_INSERT };
-    GameState::enqueueEvent(item, e);
+    GameState::insert(item);
 }
 
 static void spawn(Character *from, MonsterClass *specy, int nb)
@@ -213,8 +211,7 @@ static void spawn(Character *from, MonsterClass *specy, int nb)
         monster->setMap(map);
         monster->setPosition(pos);
         monster->clearDestination();
-        DelayedEvent e = { EVENT_INSERT };
-        GameState::enqueueEvent(monster, e);
+        GameState::insert(monster);
     }
 }
 
@@ -222,16 +219,14 @@ static void goto_(Character *from, Character *ch)
 {
     MapComposite *m = ch->getMap();
     Point const &pos = ch->getPosition();
-    DelayedEvent e = { EVENT_WARP, pos.x, pos.y, m };
-    GameState::enqueueEvent(from, e);
+    GameState::warp(from, m, pos.x, pos.y);
 }
 
 static void recall(Character *from, Character *ch)
 {
     MapComposite *m = from->getMap();
     Point const &pos = from->getPosition();
-    DelayedEvent e = { EVENT_WARP, pos.x, pos.y, m };
-    GameState::enqueueEvent(ch, e);
+    GameState::warp(ch, m, pos.x, pos.y);
 }
 
 static void reload(Character *, std::string const &db)
