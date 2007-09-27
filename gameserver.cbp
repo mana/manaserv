@@ -37,11 +37,11 @@
 			<Add library="winmm"/>
 			<Add library="lua"/>
 		</Linker>
-		<Unit filename="src\configuration.cpp">
+		<Unit filename="src\common\configuration.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\configuration.h">
+		<Unit filename="src\common\configuration.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -105,6 +105,12 @@
 		</Unit>
 		<Unit filename="src\game-server\command.cpp">
 			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\eventlistener.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\game-server\gamehandler.cpp">
@@ -241,6 +247,16 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
+		<Unit filename="src\game-server\resourcemanager.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="default"/>
+		</Unit>
+		<Unit filename="src\game-server\resourcemanager.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="default"/>
+		</Unit>
 		<Unit filename="src\game-server\spawnarea.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
@@ -346,16 +362,6 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\point.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\resourcemanager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\resourcemanager.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

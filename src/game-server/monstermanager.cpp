@@ -59,7 +59,7 @@ void MonsterManager::reload()
 
     if (!doc)
     {
-        LOG_ERROR("Monster Manager: Error while parsing item database ("
+        LOG_ERROR("Monster Manager: Error while parsing monster database ("
                   << monsterReferenceFile << ")!");
         return;
     }

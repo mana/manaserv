@@ -164,11 +164,11 @@
 			<Option link="0"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\configuration.cpp">
+		<Unit filename="src\common\configuration.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="default"/>
 		</Unit>
-		<Unit filename="src\configuration.h">
+		<Unit filename="src\common\configuration.hpp">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -303,22 +303,6 @@
 			<Option target="default"/>
 		</Unit>
 		<Unit filename="src\properties.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\resourcemanager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\resourcemanager.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\countedptr.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
