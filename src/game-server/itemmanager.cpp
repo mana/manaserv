@@ -116,9 +116,7 @@ void ItemManager::reload()
         modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));
         modifiers.setValue(MOD_LIFETIME,      XML::getProperty(node, "lifetime", 0) * 10);
         modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
-        // FIXME: decide on one single spelling for defense/defence
         modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defense", 0));
-        modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defence", 0));
         modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,     XML::getProperty(node, "strength",     0));
         modifiers.setAttributeValue(CHAR_ATTR_AGILITY,      XML::getProperty(node, "agility",      0));
         modifiers.setAttributeValue(CHAR_ATTR_DEXTERITY,    XML::getProperty(node, "dexterity",    0));

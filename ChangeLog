@@ -1,3 +1,8 @@
+2007-10-18  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* data/items.xml, data/monsters.xml: Superseded by client files.
+	* src/game-server/itemmanager.cpp: Removed compatibility hack.
+
 2007-09-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, data/monsters.xml, gameserver.cbp,
