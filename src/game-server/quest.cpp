@@ -81,26 +81,9 @@ void setQuestVar(Character *ch, std::string const &name,
  */
 struct QuestDeathListener: EventDispatch
 {
-    static void partialRemove(EventListener const *, Thing *t)
-    {
-        int id = static_cast< Character * >(t)->getDatabaseID();
-        PendingVariables &variables = pendingQuests[id].variables;
-        // Remove all the callbacks, but do not remove the variable names.
-        for (PendingVariables::iterator i = variables.begin(),
-             i_end = variables.end(); i != i_end; ++i)
-        {
-            i->second.clear();
-        }
-        // The listener is kept in case a fullRemove is needed later.
-    }
+    static void partialRemove(EventListener const *, Thing *);
 
-    static void fullRemove(EventListener const *, Character *ch)
-    {
-        extern EventListener questDeathListener;
-        ch->removeListener(&questDeathListener);
-        // Remove anything related to this character.
-        pendingQuests.erase(ch->getDatabaseID());
-    }
+    static void fullRemove(EventListener const *, Character *);
 
     QuestDeathListener()
     {
@@ -111,6 +94,26 @@ struct QuestDeathListener: EventDispatch
 
 static QuestDeathListener questDeathDummy;
 static EventListener questDeathListener(&questDeathDummy);
+
+void QuestDeathListener::partialRemove(EventListener const *, Thing *t)
+{
+    int id = static_cast< Character * >(t)->getDatabaseID();
+    PendingVariables &variables = pendingQuests[id].variables;
+    // Remove all the callbacks, but do not remove the variable names.
+    for (PendingVariables::iterator i = variables.begin(),
+         i_end = variables.end(); i != i_end; ++i)
+    {
+        i->second.clear();
+    }
+    // The listener is kept in case a fullRemove is needed later.
+}
+
+void QuestDeathListener::fullRemove(EventListener const *, Character *ch)
+{
+    ch->removeListener(&questDeathListener);
+    // Remove anything related to this character.
+    pendingQuests.erase(ch->getDatabaseID());
+}
 
 void recoverQuestVar(Character *ch, std::string const &name,
                      QuestCallback const &f)

@@ -21,10 +21,12 @@
  *  $Id$
  */
 
+#include <cstdlib>
 #include <zlib.h>
 
-#include "utils/logger.h"
 #include "utils/zlib.hpp"
+
+#include "utils/logger.h"
 
 static void logZlibError(int error)
 {

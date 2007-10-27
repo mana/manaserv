@@ -1,3 +1,13 @@
+2007-10-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/dal/recordset.cpp, src/utils/zlib.cpp, src/scripting/script.cpp,
+	src/utils/stringfilter.cpp, src/chat-server/chatchannel.cpp,
+	src/net/messagein.cpp, src/net/messageout.cpp, src/game-server/map.cpp,
+	src/net/connectionhandler.cpp, src/game-server/mapreader.cpp,
+	src/game-server/command.cpp, src/game-server/resourcemanager.cpp,
+	src/game-server/quest.cpp: Fixed missing dependencies and changed some
+	storage qualifiers, so that it compiles with GCC 4.3.
+
 2007-10-18  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* data/items.xml, data/monsters.xml: Superseded by client files.

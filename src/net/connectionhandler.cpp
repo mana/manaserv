@@ -20,8 +20,11 @@
  *  $Id$
  */
 
-#include "defines.h"
+#include <algorithm>
+
 #include "net/connectionhandler.hpp"
+
+#include "defines.h"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"

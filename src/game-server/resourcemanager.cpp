@@ -21,6 +21,9 @@
  *  $Id$
  */
 
+#include <cstdlib>
+#include <cstring>
+
 #ifdef _WIN32
 #include <io.h>
 #include <direct.h>

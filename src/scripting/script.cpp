@@ -21,6 +21,7 @@
  *  $Id$
  */
 
+#include <cstdlib>
 #include <map>
 
 #include "scripting/script.hpp"

@@ -20,6 +20,8 @@
  *  $Id$
  */
 
+#include <algorithm>
+
 #include "utils/stringfilter.h"
 
 #include "defines.h"

@@ -40,7 +40,7 @@ static T proxy_cast(intptr_t v)
 { return (T)v; }
 
 template<>
-static std::string const &proxy_cast(intptr_t v)
+std::string const &proxy_cast(intptr_t v)
 { return *(std::string const *)v; }
 
 template< typename T1 >

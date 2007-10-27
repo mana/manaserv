@@ -21,6 +21,8 @@
  *  $Id$
  */
 
+#include <cstring>
+
 #include "game-server/mapreader.hpp"
 
 #include "game-server/map.hpp"

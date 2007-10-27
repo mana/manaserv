@@ -20,12 +20,13 @@
  *  $Id$
  */
 
-#include "recordset.h"
-
+#include <algorithm>
 #include <sstream>
 #include <stdexcept>
 
-#include "dalexcept.h"
+#include "dal/recordset.h"
+
+#include "dal/dalexcept.h"
 
 namespace dal
 {

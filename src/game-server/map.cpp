@@ -21,9 +21,10 @@
  *  $Id$
  */
 
-#include "game-server/map.hpp"
-
+#include <algorithm>
 #include <queue>
+
+#include "game-server/map.hpp"
 
 MetaTile::MetaTile():
     whichList(0)

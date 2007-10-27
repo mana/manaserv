@@ -21,11 +21,10 @@
  *  $Id$
  */
 
-#include <cstdlib>
-#include <iosfwd>
-#include <string>
-#include <iostream>
+#include <cstring>
 #include <iomanip>
+#include <iostream>
+#include <string>
 #include <enet/enet.h>
 
 #include "net/messageout.hpp"

@@ -21,6 +21,8 @@
  *  $Id$
  */
 
+#include <algorithm>
+
 #include "chat-server/chatchannel.hpp"
 #include "chat-server/chatclient.hpp"
 
