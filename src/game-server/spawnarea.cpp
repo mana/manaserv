@@ -99,9 +99,10 @@ SpawnArea::update()
             }
             else
             {
-                //TODO: This log message should have more information when
-                //      more flexibility is added to the spawn area
-                LOG_WARN("Unable to find a free spawn location for monster");
+                LOG_WARN("Unable to find a free spawn location for monster "
+                         << mSpecy->getType() << " on map " << map->getName()
+                         << " (" << x << ',' << y << ','
+                         << width << ',' << height << ')');
             }
         }
     }

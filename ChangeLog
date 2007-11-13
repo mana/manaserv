@@ -2,6 +2,7 @@
 
 	* src/utils/trim.hpp, src/Makefile.am: Added trim function.
 	* src/game-server/mapreader.cpp: Trimed script filenames from spaces.
+	* src/game-server/spawnarea.cpp: Improved warning message on spawning.
 
 2007-10-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
