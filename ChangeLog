@@ -1,3 +1,8 @@
+2007-11-13  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* src/utils/trim.hpp, src/Makefile.am: Added trim function.
+	* src/game-server/mapreader.cpp: Trimed script filenames from spaces.
+
 2007-10-27  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/dal/recordset.cpp, src/utils/zlib.cpp, src/scripting/script.cpp,

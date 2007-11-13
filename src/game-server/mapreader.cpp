@@ -35,6 +35,7 @@
 #include "scripting/script.hpp"
 #include "utils/base64.h"
 #include "utils/logger.h"
+#include "utils/trim.hpp"
 #include "utils/xml.hpp"
 #include "utils/zlib.hpp"
 
@@ -337,7 +338,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                         composite->setScript(s);
                     }
 
-                    char const *scriptFilename = NULL;
+                    std::string scriptFilename;
                     char const *scriptText = NULL;
 
                     for_each_xml_child_node(propertiesNode, objectNode)
@@ -355,6 +356,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                                 if (value == "FILENAME")
                                 {
                                     scriptFilename = (const char *)propertyNode->xmlChildrenNode->content;
+                                    trim(scriptFilename);
                                 }
                                 else if (value == "TEXT")
                                 {
@@ -364,7 +366,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                         }
                     }
 
-                    if (scriptFilename != NULL)
+                    if (!scriptFilename.empty())
                     {
                         s->loadFile(scriptFilename);
                     }
