@@ -29,6 +29,11 @@ function create_npc(id, x, y, handler)
   npcs[npc] = handler
 end
 
+-- Waits for the player to acknowledge the previous message, if any.
+function do_wait()
+  coroutine.yield(0)
+end
+
 -- Sends an npc message to a player.
 -- Note: Does not wait for the player to acknowledge the message.
 function do_message(npc, ch, msg)

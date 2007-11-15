@@ -1,3 +1,7 @@
+2007-11-15  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
+
+	* data/scripts/libtmw.lua: Added do_wait helper function.
+
 2007-11-13  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/utils/trim.hpp, src/Makefile.am: Added trim function.
