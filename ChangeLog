@@ -1,3 +1,9 @@
+2007-11-19  Eugenio Favalli  <elvenprogrammer@gmail.com>
+
+	* accountserver.cbp, gameserver.cbp, src/utils/timer.cpp,
+	src/utils/wingettimeofday.cpp, src/utils/wingettimeofday.h: Removed
+	useless win32 implementation of gettimeofday.
+
 2007-11-15  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* data/scripts/libtmw.lua: Added do_wait helper function.

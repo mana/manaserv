@@ -25,7 +25,7 @@
 #include <sys/time.h>
 
 #ifdef _WIN32
-#include "wingettimeofday.h"
+#include <windows.h>
 #endif
 
 namespace utils
