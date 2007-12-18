@@ -123,7 +123,6 @@ void ItemManager::reload()
         modifiers.setAttributeValue(CHAR_ATTR_VITALITY,     XML::getProperty(node, "vitality",     0));
         modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE, XML::getProperty(node, "intelligence", 0));
         modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
-        modifiers.setAttributeValue(CHAR_ATTR_CHARISMA,     XML::getProperty(node, "charisma",     0));
 
         if (maxPerSlot == 0)
         {

@@ -71,7 +71,7 @@ enum
 /**
  * Points to give to a brand new character
  */
-    POINTS_TO_DISTRIBUTES_AT_LVL1 = 70,
+    POINTS_TO_DISTRIBUTES_AT_LVL1 = 60,
 
     // Screen Related
 /**
@@ -394,7 +394,6 @@ enum
     CHAR_ATTR_VITALITY,
     CHAR_ATTR_INTELLIGENCE,
     CHAR_ATTR_WILLPOWER,
-    CHAR_ATTR_CHARISMA,
     CHAR_ATTR_END,
     CHAR_ATTR_NB = CHAR_ATTR_END - CHAR_ATTR_BEGIN,
 

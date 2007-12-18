@@ -254,7 +254,7 @@ Account *DALStorage::getAccount(int accountID)
 
 Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owner)
 {
-    Character *character; 
+    Character *character;
 
     // specialize the string_to functor to convert
     // a string to an unsigned int.
@@ -537,7 +537,6 @@ bool DALStorage::updateCharacter(Character *character)
 #endif
                                 << character->getAttribute(CHAR_ATTR_INTELLIGENCE) << "', "
             << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "', "
-            << "charisma = '"   << character->getAttribute(CHAR_ATTR_CHARISMA) << "' "
             << "where id = '"   << character->getDatabaseID() << "';";
 
         mDb->execSql(sqlUpdateCharacterInfo.str());
@@ -825,7 +824,7 @@ void DALStorage::flush(Account *account)
             sqlInsertCharactersTable
                  << "insert into " << CHARACTERS_TBL_NAME
                  << " (user_id, name, gender, hair_style, hair_color, level, money,"
-                 << " x, y, map_id, str, agi, dex, vit, int, will, charisma) values ("
+                 << " x, y, map_id, str, agi, dex, vit, int, will) values ("
                  << account->getID() << ", \""
                  << (*it)->getName() << "\", "
                  << (*it)->getGender() << ", "
@@ -841,8 +840,7 @@ void DALStorage::flush(Account *account)
                  << (*it)->getAttribute(CHAR_ATTR_DEXTERITY) << ", "
                  << (*it)->getAttribute(CHAR_ATTR_VITALITY) << ", "
                  << (*it)->getAttribute(CHAR_ATTR_INTELLIGENCE) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_CHARISMA) << ");";
+                 << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ");";
 
             mDb->execSql(sqlInsertCharactersTable.str());
 
@@ -982,7 +980,7 @@ void DALStorage::removeGuild(Guild* guild)
 void DALStorage::addGuildMember(int guildId, const std::string &memberName)
 {
     std::ostringstream sql;
-    
+
     try
     {
         sql << "insert into " << GUILD_MEMBERS_TBL_NAME
@@ -995,7 +993,7 @@ void DALStorage::addGuildMember(int guildId, const std::string &memberName)
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what());
-    }    
+    }
 }
 
 /**
@@ -1004,7 +1002,7 @@ void DALStorage::addGuildMember(int guildId, const std::string &memberName)
 void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
 {
     std::ostringstream sql;
-    
+
     try
     {
         sql << "delete from " << GUILD_MEMBERS_TBL_NAME
@@ -1016,7 +1014,7 @@ void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
     catch (const dal::DbSqlQueryExecFailure& e) {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what());
-    }    
+    }
 }
 
 // Guild members should not be stored by name in the database.
@@ -1033,18 +1031,18 @@ std::list<Guild*> DALStorage::getGuildList()
     /**
      * Get the guilds stored in the db.
      */
-    
+
     try
     {
         sql << "select id, name from " << GUILDS_TBL_NAME << ";";
         const dal::RecordSet& guildInfo = mDb->execSql(sql.str());
-        
+
         // check that at least 1 guild was returned
         if(guildInfo.isEmpty())
         {
             return guilds;
         }
-        
+
         // loop through every row in the table and assign it to a guild
         for ( unsigned int i = 0; i < guildInfo.rows(); ++i)
         {
@@ -1052,11 +1050,11 @@ std::list<Guild*> DALStorage::getGuildList()
             guild->setId(toShort(guildInfo(i,0)));
             guilds.push_back(guild);
         }
-        
+
         /**
          * Add the members to the guilds.
          */
-        
+
         for (std::list<Guild*>::iterator itr = guilds.begin();
              itr != guilds.end();
              ++itr)
@@ -1065,7 +1063,7 @@ std::list<Guild*> DALStorage::getGuildList()
             memberSql << "select member_name from " << GUILD_MEMBERS_TBL_NAME
             << " where guild_id = '" << (*itr)->getId() << "';";
             const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
-        
+
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
                 Character *character = getCharacter(memberInfo(j,0));
@@ -1078,7 +1076,7 @@ std::list<Guild*> DALStorage::getGuildList()
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what());
     }
-    
+
     return guilds;
 }
 #endif
@@ -1151,5 +1149,5 @@ void DALStorage::banCharacter(int id, int duration)
     catch (dal::DbSqlQueryExecFailure const &e)
     {
         LOG_ERROR("(DALStorage::banAccount) SQL query failure: " << e.what());
-    }    
+    }
 }

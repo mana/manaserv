@@ -1,3 +1,11 @@
+2007-12-18  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstoragesql.hpp,
+	src/defines.h, src/game-server/itemmanager.cpp: Updated
+	attribute system to the latest design decisions (removed
+	charisma, kept agility in)
+
 2007-11-19  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
 	* accountserver.cbp, gameserver.cbp, src/utils/timer.cpp,
