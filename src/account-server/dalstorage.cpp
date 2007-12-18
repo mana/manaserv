@@ -536,7 +536,7 @@ bool DALStorage::updateCharacter(Character *character)
             << "int = '"
 #endif
                                 << character->getAttribute(CHAR_ATTR_INTELLIGENCE) << "', "
-            << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "', "
+            << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "' "
             << "where id = '"   << character->getDatabaseID() << "';";
 
         mDb->execSql(sqlUpdateCharacterInfo.str());
