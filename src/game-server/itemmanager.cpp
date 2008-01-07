@@ -112,9 +112,10 @@ void ItemManager::reload()
         ItemModifiers modifiers;
         modifiers.setValue(MOD_WEAPON_TYPE,   XML::getProperty(node, "weapon_type", 0));
         modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));
-        modifiers.setValue(MOD_WEAPON_DAMAGE, XML::getProperty(node, "attack",      0));
         modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));
         modifiers.setValue(MOD_LIFETIME,      XML::getProperty(node, "lifetime", 0) * 10);
+        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
+        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_DELTA,      XML::getProperty(node, "attack-delta",      0));
         modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
         modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defense", 0));
         modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,     XML::getProperty(node, "strength",     0));

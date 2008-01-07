@@ -596,7 +596,7 @@ int Inventory::move(int slot1, int slot2, int amount)
         mPoss->inventory.insert(mPoss->inventory.end(), it);
     }
     InventoryItem it = { id, nb };
-    mPoss->inventory.insert(mPoss->inventory.end(), it);        
+    mPoss->inventory.insert(mPoss->inventory.end(), it);
     return amount;
 }
 
@@ -682,6 +682,9 @@ void Inventory::changeEquipment(int slot, int itemId)
     msg.writeShort(itemId);
     mPoss->equipment[slot] = itemId;
     mChangedLook = true;
+
+    //mark evade as modified because it depends on equipment weight
+    mClient->modifiedAttribute(BASE_ATTR_EVADE);
 }
 
 void Inventory::equip(int slot)

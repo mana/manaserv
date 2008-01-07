@@ -1,3 +1,14 @@
+2008-01-07  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/defines.h, src/game-server/being.cpp,
+	src/game-server/being.hpp, src/game-server/character.cpp,
+	src/game-server/inventory.cpp, src/game-server/itemmanager.cpp,
+	src/game-server/monster.cpp, src/serialize/characterdata.hpp:
+	Implemented some of the game mechanics we decided to use.
+	* src/game-server/character.cpp:
+	The clients now only receive attribute change messages
+	when the attribute actually changed.
+
 2007-12-18  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/account-server/dalstorage.cpp,

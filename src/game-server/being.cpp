@@ -53,33 +53,12 @@ int Being::damage(Object *, Damage const &damage)
         HPloss += rand() / (RAND_MAX / (damage.delta + 1));
     }
 
-    /* Damage can either be avoided, or applied, or critical (applied twice).
-       This is decided by comparing CTH and Evade. If they are equal, the
-       probabilities are 10%, 80%, 10%. Otherwise, the bigger the CTH, the
-       higher the chance to do a critical, up to 50%; and the bigger the Evade,
-       the higher the chance to do evade the hit, up to 50% again. */
-
-    int avoidChance = 10, criticalChance = 10;
-    int diff = damage.cth - getModifiedAttribute(BASE_ATTR_EVADE);
-    if (diff > 0)
+    int hitThrow = rand()%(damage.cth + 1);
+    int evadeThrow = rand()%(getModifiedAttribute(BASE_ATTR_EVADE) + 1);
+    if (evadeThrow > hitThrow)
     {
-        // CTH - Evade >= 200 => 50% critical
-        criticalChance += diff * diff / 1000;
-        if (criticalChance > 50) criticalChance = 50;
+        HPloss = 0;
     }
-    else if (diff < 0)
-    {
-        // Evade - CTH >= 200 => 50% avoid
-        avoidChance += diff * diff / 10000;
-        if (avoidChance > 50) avoidChance = 50;
-    }
-    int chance = rand() / (RAND_MAX / 100);
-    if (chance <= avoidChance)
-    {
-        mHitsTaken.push_back(0);
-        return 0;
-    }
-    if (chance >= 100 - criticalChance) HPloss *= 2;
 
     /* Elemental modifier at 100 means normal damage. At 0, it means immune.
        And at 200, it means vulnerable (double damage). */
@@ -99,7 +78,9 @@ int Being::damage(Object *, Damage const &damage)
         default:
             break;
     }
-    HPloss = HPloss * mod1 / (100 + mod2);
+    HPloss = HPloss * (mod1 / 100) - mod2;
+
+    if (HPloss < 0) HPloss = 0;
 
     mHitsTaken.push_back(HPloss);
     LOG_DEBUG("Being " << getPublicID() << " got hit.");

@@ -70,8 +70,11 @@ Monster::Monster(MonsterClass *specy):
     // Some bogus stats for testing.
     setSpeed(300);
     setSize(8);
-    setAttribute(BASE_ATTR_HP, 10);
-    setAttribute(BASE_ATTR_PHY_ATK, 10);
+    setAttribute(BASE_ATTR_HP, 100);
+    setAttribute(BASE_ATTR_PHY_ATK_MIN, 20);
+    setAttribute(BASE_ATTR_PHY_ATK_DELTA, 2);
+    setAttribute(BASE_ATTR_HIT, 10);
+    setAttribute(BASE_ATTR_EVADE, 10);
 
     // Set positions relative to target from which the monster can attack
     mAttackPositions.push_back(AttackPosition(+32, 0, DIRECTION_LEFT));
@@ -99,9 +102,9 @@ void Monster::perform()
 
     // Hard-coded values for now.
     Damage damage;
-    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK) / 10;
-    damage.delta = 2;
-    damage.cth = 50;
+    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
+    damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA);
+    damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
     damage.element = ELEMENT_NEUTRAL;
     damage.type = DAMAGE_PHYSICAL;
     performAttack(damage);

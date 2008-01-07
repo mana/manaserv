@@ -42,7 +42,7 @@
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),
-    mGender(0), mHairStyle(0), mHairColor(0), mLevel(0),
+    mGender(0), mHairStyle(0), mHairColor(0), mLevel(1),
     mTransaction(TRANS_NONE)
 {
     Attribute attr = { 0, 0 };
@@ -69,20 +69,19 @@ void Character::perform()
     int type = ic ? ic->getModifiers().getValue(MOD_WEAPON_TYPE) : WPNTYPE_NONE;
 
     Damage damage;
-    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK) / 10;
+    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
+    damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA);
     damage.type = DAMAGE_PHYSICAL;
+    damage.cth = getModifiedAttribute(BASE_ATTR_HIT)
+        + getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
     if (type)
     {
         ItemModifiers const &mods = ic->getModifiers();
-        damage.delta = mods.getValue(MOD_WEAPON_DAMAGE);
-        damage.cth = getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
         damage.element = mods.getValue(MOD_ELEMENT_TYPE);
     }
     else
     {
         // No-weapon fighting.
-        damage.delta = 1;
-        damage.cth = getModifiedAttribute(CHAR_SKILL_WEAPON_NONE);
         damage.element = ELEMENT_NEUTRAL;
     }
     performAttack(damage);
@@ -179,17 +178,46 @@ void Character::modifiedAttribute(int attr)
 {
     if (attr >= CHAR_ATTR_BEGIN && attr < CHAR_ATTR_END)
     {
-        /* FIXME: The following formulas are for testing purpose only. They
-           should be replaced by a real system once designed. */
-        setAttribute(BASE_ATTR_HP, getModifiedAttribute(CHAR_ATTR_VITALITY));
-        setAttribute(BASE_ATTR_PHY_ATK, getModifiedAttribute(CHAR_ATTR_STRENGTH));
-        setAttribute(BASE_ATTR_PHY_RES, getModifiedAttribute(CHAR_ATTR_VITALITY));
-        setAttribute(BASE_ATTR_MAG_RES, getModifiedAttribute(CHAR_ATTR_WILLPOWER));
-        setAttribute(BASE_ATTR_EVADE, getModifiedAttribute(CHAR_ATTR_DEXTERITY));
-        // We have just modified the computed attributes. Mark them as such.
         for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; ++i)
         {
-            flagAttribute(i);
+            int newValue = getAttribute(i);
+
+            if (i == BASE_ATTR_HP){
+                newValue = (getModifiedAttribute(CHAR_ATTR_VITALITY) + 10)
+                        * (mLevel + 10);
+            }
+            else if (i == BASE_ATTR_HIT) {
+                newValue = getModifiedAttribute(CHAR_ATTR_DEXTERITY)
+                        /* + skill in class of currently equipped weapon */;
+            }
+            else if (i == BASE_ATTR_EVADE) {
+                newValue = getModifiedAttribute(CHAR_ATTR_AGILITY);
+                        /* TODO: multiply with 10 / (10 * equip_weight)*/
+            }
+            else if (i == BASE_ATTR_PHY_RES) {
+                newValue = getModifiedAttribute(CHAR_ATTR_VITALITY);
+                        /* equip defence is through equip modifiers */
+            }
+            else if (i == BASE_ATTR_PHY_ATK_MIN) {
+                newValue = getModifiedAttribute(CHAR_ATTR_STRENGTH);
+                        /* weapon attack is applied through equip modifiers */
+            }
+            else if (i == BASE_ATTR_PHY_ATK_DELTA) {
+                newValue =  0 /* + skill in class of currently equipped weapon */;
+                        /* weapon attack is applied through equip modifiers */
+            }
+            else if (i == BASE_ATTR_MAG_RES) {
+                newValue = getModifiedAttribute(CHAR_ATTR_WILLPOWER);
+            }
+            else if (i == BASE_ATTR_MAG_ATK) {
+                newValue = getModifiedAttribute(CHAR_ATTR_WILLPOWER);
+            }
+
+            if (newValue != getAttribute(i))
+            {
+                setAttribute(i, newValue);
+                flagAttribute(i);
+            }
         }
     }
     flagAttribute(attr);

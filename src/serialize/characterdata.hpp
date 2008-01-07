@@ -74,6 +74,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
         data.setAttribute(i, msg.readByte());
+        data.modifiedAttribute(i);
     }
 
     data.setMapId(msg.readShort());
