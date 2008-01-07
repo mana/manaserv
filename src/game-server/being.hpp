@@ -157,7 +157,7 @@ class Being : public MovingObject
         /**
          * Performs an attack.
          */
-        void performAttack(Damage const &);
+        void performAttack(Damage const &, int range, int angle);
 
         /**
          * Sets the current action.

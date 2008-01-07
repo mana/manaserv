@@ -59,15 +59,18 @@ Monster::Monster(MonsterClass *specy):
     mSpecy(specy),
     mCountDown(0),
     mTargetListener(&monsterTargetEventDispatch),
-    mAttackTime(0),
-    mAttackPreDelay(5),
-    mAttackAftDelay(10)
+    mAttackTime(0)
 {
     LOG_DEBUG("Monster spawned!");
-    mAgressive = false;   // TODO: Get from monster database
-    mAgressionRange = 10; // TODO: Get from monster database
 
     // Some bogus stats for testing.
+    // TODO: Get all this stuff from the monster database.
+    mAgressive = false;
+    mAgressionRange = 10;
+    mAttackPreDelay = 10;
+    mAttackAftDelay = 10;
+    mAttackRange = 32;
+    mAttackAngle = 10;
     setSpeed(300);
     setSize(8);
     setAttribute(BASE_ATTR_HP, 100);
@@ -107,7 +110,7 @@ void Monster::perform()
     damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
     damage.element = ELEMENT_NEUTRAL;
     damage.type = DAMAGE_PHYSICAL;
-    performAttack(damage);
+    performAttack(damage, mAttackRange, mAttackAngle);
 }
 
 void Monster::update()

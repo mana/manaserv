@@ -131,10 +131,8 @@ void Being::move()
     }
 }
 
-void Being::performAttack(Damage const &damage)
+void Being::performAttack(Damage const &damage, int range, int angle)
 {
-    int SHORT_RANGE = 60;
-    int SMALL_ANGLE = 35;
     Point ppos = getPosition();
     int dir = getDirection();
 
@@ -159,7 +157,7 @@ void Being::performAttack(Damage const &damage)
     }
 
     for (MovingObjectIterator
-         i(getMap()->getAroundObjectIterator(this, SHORT_RANGE)); i; ++i)
+         i(getMap()->getAroundObjectIterator(this, range)); i; ++i)
     {
         MovingObject *o = *i;
         if (o == this) continue;
@@ -172,7 +170,7 @@ void Being::performAttack(Damage const &damage)
 
         if  (Collision::diskWithCircleSector(
                 opos, o->getSize(),
-                ppos, SHORT_RANGE, SMALL_ANGLE, attackAngle)
+                ppos, range, angle, attackAngle)
             )
         {
             static_cast< Being * >(o)->damage(this, damage);

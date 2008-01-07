@@ -151,6 +151,8 @@ class Monster : public Being
         // to save memory.
         int mAttackPreDelay;        /**< time between decision to make an attack and performing the attack */
         int mAttackAftDelay;        /**< time it takes to perform an attack */
+        int mAttackRange;           /**< range of the monsters attacks in pixel */
+        int mAttackAngle;           /**< angle of the monsters attacks in degree */
         bool mAgressive;            /**< Does the monster attack without being provoked? */
         unsigned mAgressionRange;   /**< Distance the monster tracks enemies in */
         std::list<AttackPosition> mAttackPositions; /**< set positions relative to target from which the monster can attack */

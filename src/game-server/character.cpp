@@ -84,7 +84,11 @@ void Character::perform()
         // No-weapon fighting.
         damage.element = ELEMENT_NEUTRAL;
     }
-    performAttack(damage);
+
+    int attackRange = 60; //TODO: get from weapon
+    int attackAngle = 30; //TODO: get from weapon
+
+    performAttack(damage, attackRange, attackAngle);
 }
 
 int Character::getMapId() const

@@ -8,6 +8,12 @@
 	* src/game-server/character.cpp:
 	The clients now only receive attribute change messages
 	when the attribute actually changed.
+	* src/game-server/being.cpp, src/beinggame-server/.hpp,
+	src/game-server/character.cpp, src/game-server/monster.cpp,
+	src/game-server/monster.hpp:
+	Player characters and monsters now attack with different ranges
+	and angles (preparation for getting attack zone from weapon
+	properties or monster database).
 
 2007-12-18  Philipp Sehmisch  <tmw@crushnet.org>
 
