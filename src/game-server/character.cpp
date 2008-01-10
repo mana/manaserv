@@ -51,6 +51,10 @@ Character::Character(MessageIn &msg):
     mDatabaseID = msg.readLong();
     mName = msg.readString();
     deserializeCharacterData(*this, msg);
+    for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
+    {
+        modifiedAttribute(i);
+    }
     setSize(16);
     Inventory(this).initialize();
 }
