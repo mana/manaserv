@@ -1,3 +1,10 @@
+2008-01-10  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/inventory.cpp, src/game-server/item.hpp,
+	src/game-server/itemmanager.cpp: Item types and weapon types
+	are now identified by name instead of numbers in the items.xml.
+	Cleaned out some nonsensical weapon types.
+
 2008-01-07  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/defines.h, src/game-server/being.cpp,

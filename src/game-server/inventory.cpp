@@ -722,7 +722,7 @@ void Inventory::equip(int slot)
             return;
         }
 
-        case ITEM_EQUIPMENT_PROJECTILE:
+        case ITEM_EQUIPMENT_AMMO:
             msg.writeByte(EQUIP_PROJECTILE_SLOT);
             msg.writeShort(itemId);
             mPoss->equipment[EQUIP_PROJECTILE_SLOT] = itemId;

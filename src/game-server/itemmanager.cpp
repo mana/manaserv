@@ -35,6 +35,65 @@ typedef std::map< int, ItemClass * > ItemClasses;
 static ItemClasses itemClasses; /**< Item reference */
 static std::string itemReferenceFile;
 
+
+ItemType itemTypeFromString (std::string name, int id = 0)
+{
+    if      (name=="generic")           return ITEM_UNUSABLE;
+    else if (name=="usable")            return ITEM_USABLE;
+    else if (name=="equip-1hand")       return ITEM_EQUIPMENT_ONE_HAND_WEAPON;
+    else if (name=="equip-2hand")       return ITEM_EQUIPMENT_TWO_HANDS_WEAPON;
+    else if (name=="equip-torso")       return ITEM_EQUIPMENT_TORSO;
+    else if (name=="equip-arms")        return ITEM_EQUIPMENT_ARMS;
+    else if (name=="equip-head")        return ITEM_EQUIPMENT_HEAD;
+    else if (name=="equip-legs")        return ITEM_EQUIPMENT_LEGS;
+    else if (name=="equip-shield")      return ITEM_EQUIPMENT_SHIELD;
+    else if (name=="equip-ring")        return ITEM_EQUIPMENT_RING;
+    else if (name=="equip-necklace")    return ITEM_EQUIPMENT_NECKLACE;
+    else if (name=="equip-feet")        return ITEM_EQUIPMENT_FEET;
+    else if (name=="equip-ammo")        return ITEM_EQUIPMENT_AMMO;
+    else if (name=="")
+    {
+        LOG_WARN("No item type defined for item "<<id<<" in items.xml");
+        return ITEM_UNUSABLE;
+    }
+    else
+    {
+        LOG_WARN("Unknown item type \""<<name<<"\" for item "<<id<<" in items.xml");
+        if (name.find("weapon") != std::string::npos)
+            LOG_WARN("do you mean \"equip-1hand\" or \"equip-2hand\"?");
+        if (name.find("armor") != std::string::npos)
+            LOG_WARN("do you mean \"equip-...\" instead of \"armor-...\"?");
+        return ITEM_UNUSABLE;
+    }
+}
+
+WeaponType weaponTypeFromString (std::string name, int id = 0)
+{
+    if      (name=="knife")      return WPNTYPE_KNIFE;
+    else if (name=="sword")      return WPNTYPE_SWORD;
+    else if (name=="polearm")    return WPNTYPE_POLEARM;
+    else if (name=="javelin")    return WPNTYPE_JAVELIN;
+    else if (name=="staff")      return WPNTYPE_STAFF;
+    else if (name=="whip")       return WPNTYPE_WHIP;
+    else if (name=="boomerang")  return WPNTYPE_BOOMERANG;
+    else if (name=="bow")        return WPNTYPE_BOW;
+    else if (name=="sickle")     return WPNTYPE_SICKLE;
+    else if (name=="crossbow")   return WPNTYPE_CROSSBOW;
+    else if (name=="mace")       return WPNTYPE_MACE;
+    else if (name=="axe")        return WPNTYPE_AXE;
+    else if (name=="thrown")     return WPNTYPE_THROWN;
+    else if (name=="")
+    {
+        LOG_WARN("ItemManager: No weapon type defined for weapon with item id "<<id);
+        return WPNTYPE_NONE;
+    }
+    else
+    {
+        LOG_WARN("ItemManager: Unknown weapon type \""<<name<<"\" for item "<<id);
+        return WPNTYPE_NONE;
+    }
+}
+
 void ItemManager::initialize(std::string const &file)
 {
     itemReferenceFile = file;
@@ -81,14 +140,15 @@ void ItemManager::reload()
         }
 
         int id = XML::getProperty(node, "id", 0);
-        int itemType = XML::getProperty(node, "type", 0);
-
         if (id == 0)
         {
             LOG_WARN("Item Manager: An (ignored) item has no ID in "
                      << itemReferenceFile << "!");
             continue;
         }
+
+        std::string sItemType = XML::getProperty(node, "type", "");
+        ItemType itemType = itemTypeFromString(sItemType, id);
 
         ItemClass *item;
         ItemClasses::iterator i = itemClasses.find(id);
@@ -104,16 +164,22 @@ void ItemManager::reload()
 
         int weight = XML::getProperty(node, "weight", 0);
         int value = XML::getProperty(node, "value", 0);
-        int maxPerSlot = XML::getProperty(node, "max_per_slot", 0);
+        int maxPerSlot = XML::getProperty(node, "max-per-slot", 0);
         int sprite = XML::getProperty(node, "sprite_id", 0);
         std::string scriptName = XML::getProperty(node, "script_name", std::string());
 
-        //TODO: add child nodes for these modifiers (additive and factor)
         ItemModifiers modifiers;
-        modifiers.setValue(MOD_WEAPON_TYPE,   XML::getProperty(node, "weapon_type", 0));
-        modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));
-        modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));
+        if (itemType == ITEM_EQUIPMENT_ONE_HAND_WEAPON ||
+            itemType == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
+        {
+            std::string sWeaponType = XML::getProperty(node, "weapon-type", "");
+            WeaponType weaponType = weaponTypeFromString(sWeaponType, id);
+            modifiers.setValue(MOD_WEAPON_TYPE, weaponType);
+            modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));
+            modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));
+        }
         modifiers.setValue(MOD_LIFETIME,      XML::getProperty(node, "lifetime", 0) * 10);
+        //TODO: add child nodes for these modifiers (additive and factor)
         modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
         modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_DELTA,      XML::getProperty(node, "attack-delta",      0));
         modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
@@ -127,15 +193,15 @@ void ItemManager::reload()
 
         if (maxPerSlot == 0)
         {
-            LOG_WARN("Item Manager: Missing max_per_slot property for "
+            LOG_WARN("Item Manager: Missing max-per-slot property for "
                      "item " << id << " in " << itemReferenceFile << '.');
             maxPerSlot = 1;
         }
 
-        if (itemType > ITEM_USABLE && itemType < ITEM_EQUIPMENT_PROJECTILE &&
+        if (itemType > ITEM_USABLE && itemType < ITEM_EQUIPMENT_AMMO &&
             maxPerSlot != 1)
         {
-            LOG_WARN("Item Manager: Setting max_per_slot property to 1 for "
+            LOG_WARN("Item Manager: Setting max-per-slot property to 1 for "
                      "equipment " << id << " in " << itemReferenceFile << '.');
             maxPerSlot = 1;
         }

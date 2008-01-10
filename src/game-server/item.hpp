@@ -33,45 +33,42 @@ class Being;
 /**
  * Enumeration of available Item types.
  */
-enum
+enum ItemType
 {
     ITEM_UNUSABLE = 0,
-    ITEM_USABLE,                            // 1
-    ITEM_EQUIPMENT_ONE_HAND_WEAPON,         // 2
-    ITEM_EQUIPMENT_TWO_HANDS_WEAPON,        // 3
-    ITEM_EQUIPMENT_TORSO,                   // 4
-    ITEM_EQUIPMENT_ARMS,                    // 5
-    ITEM_EQUIPMENT_HEAD,                    // 6
-    ITEM_EQUIPMENT_LEGS,                    // 7
-    ITEM_EQUIPMENT_SHIELD,                  // 8
-    ITEM_EQUIPMENT_RING,                    // 9
-    ITEM_EQUIPMENT_NECKLACE,                // 10
-    ITEM_EQUIPMENT_FEET,                    // 11
-    ITEM_EQUIPMENT_PROJECTILE               // 12
+    ITEM_USABLE, //                     1
+    ITEM_EQUIPMENT_ONE_HAND_WEAPON, //  2
+    ITEM_EQUIPMENT_TWO_HANDS_WEAPON,//  3
+    ITEM_EQUIPMENT_TORSO,//             4
+    ITEM_EQUIPMENT_ARMS,//              5
+    ITEM_EQUIPMENT_HEAD,//              6
+    ITEM_EQUIPMENT_LEGS,//              7
+    ITEM_EQUIPMENT_SHIELD,//            8
+    ITEM_EQUIPMENT_RING,//              9
+    ITEM_EQUIPMENT_NECKLACE,//         10
+    ITEM_EQUIPMENT_FEET,//             11
+    ITEM_EQUIPMENT_AMMO//              12
 };
 
 /**
  * Enumeration of available weapon's types.
  */
-enum
+enum WeaponType
 {
     WPNTYPE_NONE = 0,
-    WPNTYPE_KNIFE,          // 1
-    WPNTYPE_SWORD,          // 2
-    WPNTYPE_SPEAR,          // 3
-    WPNTYPE_JAVELIN,        // 4
-    WPNTYPE_ROD,            // 5
-    WPNTYPE_STAFF,          // 6
-    WPNTYPE_WHIP,           // 7
-    WPNTYPE_PROJECTILE,     // 8
-    WPNTYPE_BOOMERANG,      // 9
-    WPNTYPE_BOW,            // 10
-    WPNTYPE_SICKLE,         // 11
-    WPNTYPE_CROSSBOW,       // 12
-    WPNTYPE_STICK,          // 13
-    WPNTYPE_HAMMER,         // 14
-    WPNTYPE_AXE,            // 15
-    WPNTYPE_HAND_PROJECTILE  // 16
+    WPNTYPE_KNIFE,//        1
+    WPNTYPE_SWORD,//        2
+    WPNTYPE_POLEARM,//      3
+    WPNTYPE_JAVELIN,//      4
+    WPNTYPE_STAFF,//        5
+    WPNTYPE_WHIP,//         6
+    WPNTYPE_BOOMERANG,//    7
+    WPNTYPE_BOW,//          8
+    WPNTYPE_SICKLE,//       9
+    WPNTYPE_CROSSBOW,//    10
+    WPNTYPE_MACE,//        11
+    WPNTYPE_AXE,//         12
+    WPNTYPE_THROWN//       13
 };
 
 /**
@@ -172,7 +169,7 @@ class ItemModifiers
 class ItemClass
 {
     public:
-        ItemClass(int id, int type)
+        ItemClass(int id, ItemType type)
           : mDatabaseID(id), mType(type)
         {}
 
@@ -185,7 +182,7 @@ class ItemClass
         /**
          * Gets item type.
          */
-        int getType() const
+        ItemType getType() const
         { return mType; }
 
         /**
@@ -259,7 +256,7 @@ class ItemClass
         // Item reference information
         unsigned short mDatabaseID;
         unsigned short mSpriteID; /**< The sprite that should be shown to the character */
-        unsigned char mType;     /**< Type: usable, equipment. */
+        ItemType mType;     /**< Type: usable, equipment etc. */
         unsigned short mWeight;  /**< Weight of the item. */
         unsigned short mCost;    /**< Unit cost the item. */
         unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory. */
