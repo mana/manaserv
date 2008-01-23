@@ -1,6 +1,8 @@
 2008-01-23  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.cpp: Fixed "immortal monster" bug.
+	* src/game-server/main-game.cpp: Made the gameserver work more and
+	complain less about not having enough time.
 
 2008-01-10  Philipp Sehmisch  <tmw@crushnet.org>
 

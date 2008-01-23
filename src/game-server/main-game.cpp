@@ -287,13 +287,14 @@ int main(int argc, char *argv[])
 
     while (running) {
         elapsedWorldTicks = worldTimer.poll();
-        if (elapsedWorldTicks > 0) {
+        if (elapsedWorldTicks > 0)
+        {
             worldTime += elapsedWorldTicks;
 
             if (elapsedWorldTicks > 1)
             {
-                LOG_WARN(elapsedWorldTicks -1 << " World Tick(s) skipped "
-                        "because of insufficient time. Please buy a faster "
+                LOG_WARN("Not enough time to calculate "<< elapsedWorldTicks -1
+                        << " World Tick(s) - skipping. Please buy a faster "
                         "machine ;-)");
             };
 
@@ -311,7 +312,10 @@ int main(int argc, char *argv[])
             // Send potentially urgent outgoing messages
             gameHandler->flush();
         }
-        worldTimer.sleep();
+        else
+        {
+            worldTimer.sleep();
+        }
     }
 
     LOG_INFO("Received: Quit signal, closing down...");
