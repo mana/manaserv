@@ -83,16 +83,12 @@ int Being::damage(Object *, Damage const &damage)
     if (HPloss < 0) HPloss = 0;
 
     mHitsTaken.push_back(HPloss);
-    LOG_DEBUG("Being " << getPublicID() << " got hit.");
 
     Attribute &HP = mAttributes[BASE_ATTR_HP];
-    if (HPloss >= HP.base + HP.mod) HPloss = HP.base + HP.mod;
-    if (HPloss > 0)
-    {
-        HP.mod -= HPloss;
-        modifiedAttribute(BASE_ATTR_HP);
-        if (HP.base + HP.mod == 0) died();
-    }
+    LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
+    HP.mod -= HPloss;
+    modifiedAttribute(BASE_ATTR_HP);
+    if (HP.base + HP.mod <= 0) died();
 
     return HPloss;
 }
