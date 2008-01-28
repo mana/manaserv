@@ -105,7 +105,7 @@ enum {
     APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
     PAMSG_CHAR_DELETE              = 0x0022, // B index
     APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
-    APMSG_CHAR_INFO                = 0x0024, // B index, S name, B gender, B hair style, B hair color, B level, W money, W*6 stats
+    APMSG_CHAR_INFO                = 0x0024, // B index, S name, B gender, B hair style, B hair color, W level, W character points, W correction points, D money, W*6 stats
     PAMSG_CHAR_SELECT              = 0x0026, // B index
     APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, B*32 token, S game address, W game port, S chat address, W chat port
     PAMSG_EMAIL_CHANGE             = 0x0030, // S email
@@ -139,6 +139,13 @@ enum {
     GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { B attribute, W base value, W modified value }*
+    GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { B skill, D exp got, D exp needed }*
+    GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points
+    GPMSG_LEVEL_PROGRESS           = 0x0151, // B percent completed to next levelup
+    PGMSG_RAISE_ATTRIBUTE          = 0x0160, // B attribute
+    GPMSG_RAISE_ATTRIBUTE_RESPONSE = 0x0161, // B error
+    PGMSG_LOWER_ATTRIBUTE          = 0x0170, // B attribute
+    GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
                                              // monster: W type id
@@ -292,6 +299,14 @@ enum {
     CREATE_TOO_MUCH_CHARACTERS
 };
 
+// Character attribute modification specific return value
+enum AttribmodResponseCode {
+    ATTRIBMOD_OK = ERRMSG_OK,
+    ATTRIBMOD_INVALID_ATTRIBUTE = 0x40,
+    ATTRIBMOD_NO_POINTS_LEFT,
+    ATTRIBMOD_DENIED
+};
+
 // Email change specific return values
 enum {
     EMAILCHG_EXISTS_EMAIL = 0x40
@@ -399,30 +414,39 @@ enum
     CHAR_ATTR_END,
     CHAR_ATTR_NB = CHAR_ATTR_END - CHAR_ATTR_BEGIN,
 
-    CHAR_SKILL_WEAPON_BEGIN = CHAR_ATTR_END,
+    CHAR_SKILL_BEGIN = CHAR_ATTR_END,
+
+    CHAR_SKILL_WEAPON_BEGIN = CHAR_SKILL_BEGIN,
     CHAR_SKILL_WEAPON_NONE = CHAR_SKILL_WEAPON_BEGIN,
     CHAR_SKILL_WEAPON_KNIFE,
     CHAR_SKILL_WEAPON_SWORD,
-    CHAR_SKILL_WEAPON_SPEAR,
-    CHAR_SKILL_WEAPON_JAVELIN,
-    CHAR_SKILL_WEAPON_ROD,
+    CHAR_SKILL_WEAPON_POLEARM,
     CHAR_SKILL_WEAPON_STAFF,
     CHAR_SKILL_WEAPON_WHIP,
-    CHAR_SKILL_WEAPON_PROJECTILE,
-    CHAR_SKILL_WEAPON_BOOMERANG,
     CHAR_SKILL_WEAPON_BOW,
-    CHAR_SKILL_WEAPON_SICKLE,
-    CHAR_SKILL_WEAPON_CROSSBOW,
-    CHAR_SKILL_WEAPON_STICK,
-    CHAR_SKILL_WEAPON_HAMMER,
+    CHAR_SKILL_WEAPON_SHOOTING,
+    CHAR_SKILL_WEAPON_MACE,
     CHAR_SKILL_WEAPON_AXE,
-    CHAR_SKILL_WEAPON_HAND_PROJECTILE,
+    CHAR_SKILL_WEAPON_THROWN,
     CHAR_SKILL_WEAPON_END,
     CHAR_SKILL_WEAPON_NB = CHAR_SKILL_WEAPON_END - CHAR_SKILL_WEAPON_BEGIN,
 
-    // Magic skills should follow.
+    CHAR_SKILL_MAGIC_BEGIN = CHAR_SKILL_WEAPON_END,
+    CHAR_SKILL_MAGIC_IAMJUSTAPLACEHOLDER = CHAR_SKILL_MAGIC_BEGIN,
+    // add magic skills here
+    CHAR_SKILL_MAGIC_END,
+    CHAR_SKILL_MAGIC_NB = CHAR_SKILL_MAGIC_END - CHAR_SKILL_MAGIC_BEGIN,
 
-    NB_CHARACTER_ATTRIBUTES = CHAR_SKILL_WEAPON_END
+    CHAR_SKILL_CRAFT_BEGIN = CHAR_SKILL_MAGIC_END,
+    CHAR_SKILL_CRAFT_IAMJUSTAPLACEHOLDER = CHAR_SKILL_CRAFT_BEGIN,
+    // add crafting skills here
+    CHAR_SKILL_CRAFT_END,
+    CHAR_SKILL_CRAFT_NB = CHAR_SKILL_CRAFT_END - CHAR_SKILL_CRAFT_BEGIN,
+
+    CHAR_SKILL_END = CHAR_SKILL_CRAFT_END,
+    CHAR_SKILL_NB = CHAR_SKILL_END - CHAR_SKILL_BEGIN,
+
+    NB_CHARACTER_ATTRIBUTES = CHAR_SKILL_END
 };
 
 #endif // _TMWSERV_DEFINES_H_

@@ -279,16 +279,23 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
         character->setHairStyle(toUshort(charInfo(0, 4)));
         character->setHairColor(toUshort(charInfo(0, 5)));
         character->setLevel(toUshort(charInfo(0, 6)));
-        character->getPossessions().money = toUint(charInfo(0, 7));
-        Point pos(toUshort(charInfo(0, 8)), toUshort(charInfo(0, 9)));
+        character->setCharacterPoints(toUshort(charInfo(0, 7)));
+        character->setCorrectionPoints(toUshort(charInfo(0, 8)));
+        character->getPossessions().money = toUint(charInfo(0, 9));
+        Point pos(toUshort(charInfo(0, 10)), toUshort(charInfo(0, 11)));
         character->setPosition(pos);
         for (int i = 0; i < CHAR_ATTR_NB; ++i)
         {
             character->setAttribute(CHAR_ATTR_BEGIN + i,
-                                    toUshort(charInfo(0, 11 + i)));
+                                    toUshort(charInfo(0, 13 + i)));
+        }
+        for (int i = 0; i < CHAR_SKILL_WEAPON_NB; ++i)
+        {
+            int exp = toUint(charInfo(0, 13 + CHAR_ATTR_NB + i));
+            character->setExperience(i, exp);
         }
 
-        int mapId = toUint(charInfo(0, 10));
+        int mapId = toUint(charInfo(0, 12));
         if (mapId > 0)
         {
             character->setMapId(mapId);
@@ -522,6 +529,8 @@ bool DALStorage::updateCharacter(Character *character)
             << "hair_style = '" << character->getHairStyle() << "', "
             << "hair_color = '" << character->getHairColor() << "', "
             << "level = '"      << character->getLevel() << "', "
+            << "char_pts = '"   << character->getCharacterPoints() << "', "
+            << "correct_pts = '"<< character->getCorrectionPoints() << "', "
             << "money = '"      << character->getPossessions().money << "', "
             << "x = '"          << character->getPosition().x << "', "
             << "y = '"          << character->getPosition().y << "', "
@@ -536,7 +545,19 @@ bool DALStorage::updateCharacter(Character *character)
             << "int = '"
 #endif
                                 << character->getAttribute(CHAR_ATTR_INTELLIGENCE) << "', "
-            << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "' "
+            << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "', "
+            << "unarmed_exp = '"<< character->getExperience(CHAR_SKILL_WEAPON_NONE - CHAR_SKILL_BEGIN) << "', "
+            << "knife_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_KNIFE - CHAR_SKILL_BEGIN) << "', "
+            << "sword_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_SWORD - CHAR_SKILL_BEGIN) << "', "
+            << "polearm_exp = '"<< character->getExperience(CHAR_SKILL_WEAPON_POLEARM - CHAR_SKILL_BEGIN) << "', "
+            << "staff_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_STAFF - CHAR_SKILL_BEGIN) << "', "
+            << "whip_exp = '"   << character->getExperience(CHAR_SKILL_WEAPON_WHIP - CHAR_SKILL_BEGIN) << "', "
+            << "bow_exp = '"    << character->getExperience(CHAR_SKILL_WEAPON_BOW - CHAR_SKILL_BEGIN) << "', "
+            << "shoot_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_SHOOTING - CHAR_SKILL_BEGIN) << "', "
+            << "mace_exp = '"   << character->getExperience(CHAR_SKILL_WEAPON_MACE - CHAR_SKILL_BEGIN) << "', "
+            << "axe_exp = '"    << character->getExperience(CHAR_SKILL_WEAPON_AXE - CHAR_SKILL_BEGIN) << "', "
+            << "thrown_exp = '" << character->getExperience(CHAR_SKILL_WEAPON_THROWN - CHAR_SKILL_BEGIN) << "' "
+
             << "where id = '"   << character->getDatabaseID() << "';";
 
         mDb->execSql(sqlUpdateCharacterInfo.str());
@@ -823,14 +844,17 @@ void DALStorage::flush(Account *account)
             // uniqueness
             sqlInsertCharactersTable
                  << "insert into " << CHARACTERS_TBL_NAME
-                 << " (user_id, name, gender, hair_style, hair_color, level, money,"
-                 << " x, y, map_id, str, agi, dex, vit, int, will) values ("
+                 << " (user_id, name, gender, hair_style, hair_color, level, char_pts, correct_pts, money,"
+                 << " x, y, map_id, str, agi, dex, vit, int, will, unarmed_exp, knife_exp, sword_exp, polearm_exp,"
+                 << " staff_exp, whip_exp, bow_exp, shoot_exp, mace_exp, axe_exp, thrown_exp) values ("
                  << account->getID() << ", \""
                  << (*it)->getName() << "\", "
                  << (*it)->getGender() << ", "
                  << (int)(*it)->getHairStyle() << ", "
                  << (int)(*it)->getHairColor() << ", "
                  << (int)(*it)->getLevel() << ", "
+                 << (int)(*it)->getCharacterPoints() << ", "
+                 << (int)(*it)->getCorrectionPoints() << ", "
                  << (*it)->getPossessions().money << ", "
                  << (*it)->getPosition().x << ", "
                  << (*it)->getPosition().y << ", "
@@ -840,7 +864,19 @@ void DALStorage::flush(Account *account)
                  << (*it)->getAttribute(CHAR_ATTR_DEXTERITY) << ", "
                  << (*it)->getAttribute(CHAR_ATTR_VITALITY) << ", "
                  << (*it)->getAttribute(CHAR_ATTR_INTELLIGENCE) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ");";
+                 << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_NONE - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_KNIFE - CHAR_SKILL_BEGIN) << ","
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_SWORD - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_POLEARM - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_STAFF - CHAR_SKILL_BEGIN) << ","
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_WHIP - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_BOW - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_SHOOTING - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_MACE - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_AXE - CHAR_SKILL_BEGIN) << ", "
+                 << (*it)->getExperience(CHAR_SKILL_WEAPON_THROWN - CHAR_SKILL_BEGIN)
+                 << ");";
 
             mDb->execSql(sqlInsertCharactersTable.str());
 

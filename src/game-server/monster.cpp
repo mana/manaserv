@@ -22,6 +22,7 @@
 
 #include "game-server/monster.hpp"
 
+#include "game-server/character.hpp"
 #include "game-server/item.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/state.hpp"
@@ -59,6 +60,8 @@ Monster::Monster(MonsterClass *specy):
     mSpecy(specy),
     mCountDown(0),
     mTargetListener(&monsterTargetEventDispatch),
+    mOwner(NULL),
+    mOwnerTimer(0),
     mAttackTime(0)
 {
     LOG_DEBUG("Monster spawned!");
@@ -78,6 +81,7 @@ Monster::Monster(MonsterClass *specy):
     setAttribute(BASE_ATTR_PHY_ATK_DELTA, 2);
     setAttribute(BASE_ATTR_HIT, 10);
     setAttribute(BASE_ATTR_EVADE, 10);
+    mExpReward = 100;
 
     // Set positions relative to target from which the monster can attack
     mAttackPositions.push_back(AttackPosition(+32, 0, DIRECTION_LEFT));
@@ -98,24 +102,38 @@ Monster::~Monster()
 
 void Monster::perform()
 {
-    if (mAttackTime != mAttackAftDelay) return;
 
-    mAction = ATTACK;
-    raiseUpdateFlags(UPDATEFLAG_ATTACK);
-
-    // Hard-coded values for now.
-    Damage damage;
-    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
-    damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA);
-    damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
-    damage.element = ELEMENT_NEUTRAL;
-    damage.type = DAMAGE_PHYSICAL;
-    performAttack(damage, mAttackRange, mAttackAngle);
+    if (mAction == ATTACK)
+    {
+        if (mAttackTime == mAttackAftDelay)
+        {
+            // Hard-coded values for now.
+            Damage damage;
+            damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
+            damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA);
+            damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
+            damage.element = ELEMENT_NEUTRAL;
+            damage.type = DAMAGE_PHYSICAL;
+            damage.usedSkill = 0;
+            performAttack(damage, mAttackRange, mAttackAngle);
+        }
+        if (!mAttackTime)
+        {
+            setAction(STAND);
+        }
+    }
 }
 
 void Monster::update()
 {
     Being::update();
+
+    if (mOwner && mOwnerTimer)
+    {
+        mOwnerTimer--;
+    } else {
+        mOwner = NULL;
+    }
 
     // If dead do nothing but rot
     if (mAction == DEAD)
@@ -128,8 +146,7 @@ void Monster::update()
         return;
     }
 
-    // If currently attacking finish attack;
-    if (mAttackTime)
+    if (mAction == ATTACK)
     {
         mAttackTime--;
         return;
@@ -196,8 +213,10 @@ void Monster::update()
         // Check if we are there
         if (bestAttackPosition == getPosition())
         {
-            // We are there - let's get ready to beat the crap out of the target
+            // We are there - let's beat the crap out of the target
             setDirection(bestAttackDirection);
+            setAction(ATTACK);
+            raiseUpdateFlags(UPDATEFLAG_ATTACK);
             mAttackTime = mAttackPreDelay + mAttackAftDelay;
         }
         else
@@ -251,6 +270,13 @@ void Monster::forgetTarget(Thing *t)
     Being *b = static_cast< Being * >(t);
     mAnger.erase(b);
     b->removeListener(&mTargetListener);
+
+    if (b->getType() == OBJECT_CHARACTER)
+    {
+        Character *c = static_cast< Character * >(b);
+        mExpReceivers.erase(c);
+        mLegalExpReceivers.erase(c);
+    }
 }
 
 int Monster::damage(Object *source, Damage const &damage)
@@ -258,7 +284,7 @@ int Monster::damage(Object *source, Damage const &damage)
     int HPLoss = Being::damage(source, damage);
     if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
     {
-        Being *s = static_cast< Being * >(source);
+        Character *s = static_cast< Character * >(source);
         std::pair< std::map< Being *, int >::iterator, bool > ib =
             mAnger.insert(std::make_pair(s, HPLoss));
 
@@ -270,6 +296,17 @@ int Monster::damage(Object *source, Damage const &damage)
         {
             ib.first->second += HPLoss;
         }
+
+        if (damage.usedSkill)
+        {
+            mExpReceivers[s].insert(damage.usedSkill);
+            if (!mOwnerTimer || mOwner == s /*TODO: || mOwner->getParty() == s->getParty() */)
+            {
+                mOwner = s;
+                mLegalExpReceivers.insert(s);
+                mOwnerTimer = KILLSTEAL_PROTECTION_TIME;
+            }
+        }
     }
     return HPLoss;
 }
@@ -278,12 +315,40 @@ void Monster::died()
 {
     Being::died();
     mCountDown = 50; // Sets remove time to 5 seconds
+
+    //drop item
     if (ItemClass *drop = mSpecy->getRandomDrop())
     {
         Item *item = new Item(drop, 1);
         item->setMap(getMap());
         item->setPosition(getPosition());
         GameState::enqueueInsert(item);
+    }
+
+    //distribute exp reward
+    if (mExpReceivers.size() > 0)
+    {
+        std::map<Character *, std::set <size_t> > ::iterator iChar;
+        std::set<size_t>::iterator iSkill;
+
+        float expPerChar = mExpReward / mExpReceivers.size();
+
+        for (iChar = mExpReceivers.begin(); iChar != mExpReceivers.end(); iChar++)
+        {
+            Character *character = (*iChar).first;
+            std::set<size_t> *skillSet = &(*iChar).second;
+
+            if (mLegalExpReceivers.find(character) == mLegalExpReceivers.end()
+                || skillSet->size() < 1)
+            {
+                continue;
+            }
+            int expPerSkill = int(expPerChar / skillSet->size());
+            for (iSkill = skillSet->begin(); iSkill != skillSet->end(); iSkill++)
+            {
+                character->receiveExperience(*iSkill, expPerSkill);
+            }
+        }
     }
 }
 

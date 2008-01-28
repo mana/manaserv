@@ -64,6 +64,7 @@ struct Damage
     unsigned short cth;    /**< Chance to hit. Opposes the evade attribute. */
     unsigned char element; /**< Elemental damage. */
     unsigned char type;    /**< Damage type: Physical or magical? */
+    size_t usedSkill;      /**< Skill used by source (needed for exp calculation) */
 };
 
 /**
@@ -128,7 +129,7 @@ class Being : public MovingObject
         /**
          * Cleans obsolete attribute modifiers.
          */
-        void update();
+        virtual void update();
 
         /**
          * Takes a damage structure, computes the real damage based on the

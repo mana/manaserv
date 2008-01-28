@@ -72,13 +72,10 @@ WeaponType weaponTypeFromString (std::string name, int id = 0)
     if      (name=="knife")      return WPNTYPE_KNIFE;
     else if (name=="sword")      return WPNTYPE_SWORD;
     else if (name=="polearm")    return WPNTYPE_POLEARM;
-    else if (name=="javelin")    return WPNTYPE_JAVELIN;
     else if (name=="staff")      return WPNTYPE_STAFF;
     else if (name=="whip")       return WPNTYPE_WHIP;
-    else if (name=="boomerang")  return WPNTYPE_BOOMERANG;
     else if (name=="bow")        return WPNTYPE_BOW;
-    else if (name=="sickle")     return WPNTYPE_SICKLE;
-    else if (name=="crossbow")   return WPNTYPE_CROSSBOW;
+    else if (name=="shooting")   return WPNTYPE_SHOOTING;
     else if (name=="mace")       return WPNTYPE_MACE;
     else if (name=="axe")        return WPNTYPE_AXE;
     else if (name=="thrown")     return WPNTYPE_THROWN;

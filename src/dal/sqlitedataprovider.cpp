@@ -26,6 +26,8 @@
 
 #include "dalexcept.h"
 
+#include "../utils/logger.h"
+
 namespace dal
 {
 
@@ -115,6 +117,8 @@ SqLiteDataProvider::execSql(const std::string& sql,
     if (!mIsConnected) {
         throw std::runtime_error("not connected to database");
     }
+
+    LOG_DEBUG("Performing SQL querry: "<<sql);
 
     // do something only if the query is different from the previous
     // or if the cache must be refreshed

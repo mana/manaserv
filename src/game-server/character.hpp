@@ -51,6 +51,11 @@ class Character : public Being
         Character(MessageIn &msg);
 
         /**
+         * recalculates the level when necessary and calls Being::update
+         */
+        void update();
+
+        /**
          * Perform actions.
          */
         void perform();
@@ -219,14 +224,88 @@ class Character : public Being
          */
         std::map< std::string, std::string > questCache;
 
+        /**
+         * Gives a skill a specific amount of exp and checks if a levelup
+         * occured.
+         */
+        void receiveExperience(size_t skill, int experience);
+
+        /**
+         * Gets total accumulated exp for skill
+         */
+        int getExperience(int skill) const
+        { return mExperience[skill]; }
+
+        /**
+         * Sets total accumulated exp for skill
+         */
+        void setExperience(int skill, int value)
+        { mExperience[skill] = 0; receiveExperience(skill + CHAR_SKILL_BEGIN , value) ; }
+
+        /**
+         * Tries to use a character point to increase a
+         * basic attribute
+         */
+        AttribmodResponseCode useCharacterPoint(size_t attribute);
+
+        /**
+         * Tries to use a correction point to reduce a
+         * basic attribute and regain a character point
+         */
+        AttribmodResponseCode useCorrectionPoint(size_t attribute);
+
+        void setCharacterPoints(int points)
+        { mCharacterPoints = points; }
+
+        int getCharacterPoints() const
+        { return mCharacterPoints; }
+
+        void setCorrectionPoints(int points)
+        { mCorrectionPoints = points; }
+
+        int getCorrectionPoints() const
+        { return mCorrectionPoints; }
+
     private:
         Character(Character const &);
         Character &operator=(Character const &);
+
+        static const float EXPCURVE_EXPONENT = 3.0f; // should maybe be obtained
+        static const float EXPCURVE_FACTOR = 10.0f;  // from the config file
+        static const float LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f; // I am taking suggestions for a better name
+        static const int CHARPOINTS_PER_LEVELUP = 5;
+        static const int CORRECTIONPOINTS_PER_LEVELUP = 2;
+        static const int CORRECTIONPOINTS_MAX = 10;
+
+        /**
+         * Advances the character by one level;
+         */
+        void levelup();
 
         /**
          * Marks attribute as recently modified.
          */
         void flagAttribute(int);
+
+        /**
+         * Returns the exp needed to reach a specific skill level
+         */
+        static int expForLevel(int level);
+
+        /**
+         * Returns the exp needed for next skill levelup
+         */
+        int getExpNeeded(size_t skill);
+
+        /**
+         * Returns the exp collected on this skill level
+         */
+        int getExpGot(size_t skill);
+
+        /**
+         * Recalculates the character level
+         */
+        void recalculateLevel();
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
@@ -238,14 +317,22 @@ class Character : public Being
         Possessions mPossessions;    /**< Possesssions of the character. */
 
         /** Attributes modified since last update. */
-        std::vector< unsigned char > mModifiedAttributes;
+        std::set<size_t> mModifiedAttributes;
+        std::set<size_t> mModifiedExperience;
+
+        std::vector<unsigned int> mExperience; /**< experience collected for each skill.*/
 
         std::string mName;           /**< Name of the character. */
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mGender;       /**< Gender of the character. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
         unsigned char mHairColor;    /**< Hair Color of the character. */
-        unsigned char mLevel;        /**< Level of the character. */
+        int mLevel;                  /**< Level of the character. */
+        int mLevelProgress;          /**< progress to next level in percent */
+        int mCharacterPoints;        /**< unused attribute points that can be distributed */
+        int mCorrectionPoints;       /**< unused attribute correction points */
+        bool mUpdateLevelProgress;   /**< flag raised when percent to next level changed */
+        bool mRecalculateLevel;      /**< flag raised when the character level might have increased */
         unsigned char mAccountLevel; /**< Account level of the user. */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
 };

@@ -125,6 +125,15 @@ class Character
         void setAttribute(int n, int value)
         { mAttributes[n - CHAR_ATTR_BEGIN] = value; }
 
+        int getExperience(int skill) const
+        { return mExperience[skill]; }
+
+        void setExperience(int skill, int value)
+        { mExperience[skill] = value; }
+
+        void receiveExperience(int skill, int value)
+        { mExperience[skill] += value; }
+
         /** Gets the Id of the map that the character is on. */
         int
         getMapId() const { return mMapId; }
@@ -160,6 +169,19 @@ class Character
         Possessions &getPossessions()
         { return mPossessions; }
 
+        void setCharacterPoints(int points)
+        { mCharacterPoints = points; }
+
+        int getCharacterPoints() const
+        { return mCharacterPoints; }
+
+        void setCorrectionPoints(int points)
+        { mCorrectionPoints = points; }
+
+        int getCorrectionPoints() const
+        { return mCorrectionPoints; }
+
+
     private:
         Character(Character const &);
         Character &operator=(Character const &);
@@ -171,11 +193,14 @@ class Character
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
         unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
+        int mExperience[CHAR_SKILL_NB]; //!< Skill Experience.
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.
         unsigned char mHairColor; //!< Hair color of the being.
-        unsigned char mLevel;     //!< Level of the being.
+        short mLevel;             //!< Level of the being.
+        short mCharacterPoints;   //!< Unused character points.
+        short mCorrectionPoints;  //!< Unused correction points.
         unsigned char mAccountLevel; //!< Level of the associated account.
 
         std::vector<std::string> mGuilds;        //!< All the guilds the player

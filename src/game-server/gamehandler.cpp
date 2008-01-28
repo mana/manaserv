@@ -406,6 +406,27 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             t->perform(id, amount);
         } break;
 
+        case PGMSG_RAISE_ATTRIBUTE:
+        {
+            int attribute = message.readByte();
+            AttribmodResponseCode retCode;
+            retCode = computer.character->useCharacterPoint(attribute);
+            result.writeShort(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
+            result.writeByte(retCode);
+            result.writeByte(attribute);
+        } break;
+
+        case PGMSG_LOWER_ATTRIBUTE:
+        {
+            int attribute = message.readByte();
+            AttribmodResponseCode retCode;
+            retCode = computer.character->useCorrectionPoint(attribute);
+            result.writeShort(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
+            result.writeByte(retCode);
+            result.writeByte(attribute);
+        } break;
+
+
 // The following messages should be handled by the chat server, not the game server.
 #if 0
 
@@ -416,7 +437,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             messageMap[characterId] = computer.character;
             accountHandler->playerCreateGuild(characterId, name);
         } break;
-            
+
         case PGMSG_GUILD_INVITE:
         {
             short guildId = message.readShort();
@@ -425,7 +446,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             messageMap[characterId] = computer.character;
             accountHandler->playerInviteToGuild(characterId, guildId, member);
         } break;
-            
+
         case PGMSG_GUILD_ACCEPT:
         {
             std::string guildName = message.readString();
@@ -433,7 +454,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             messageMap[characterId] = computer.character;
             accountHandler->playerAcceptInvite(characterId, guildName);
         } break;
-            
+
         case PGMSG_GUILD_GET_MEMBERS:
         {
             short guildId = message.readShort();
@@ -441,7 +462,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             messageMap[characterId] = computer.character;
             accountHandler->getGuildMembers(characterId, guildId);
         } break;
-            
+
         case PGMSG_GUILD_QUIT:
         {
             short guildId = message.readShort();
@@ -502,7 +523,7 @@ void GameHandler::addPendingCharacter(std::string const &token, Character *ch)
         }
     }
 
-    // Mark the character as pending a connection.    
+    // Mark the character as pending a connection.
     mTokenCollector.addPendingConnect(token, ch);
 }
 

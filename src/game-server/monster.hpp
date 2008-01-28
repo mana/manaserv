@@ -97,6 +97,9 @@ struct AttackPosition
 class Monster : public Being
 {
     public:
+
+        static const int KILLSTEAL_PROTECTION_TIME = 100; /**< Time in game ticks until ownership of a monster can change */
+
         /**
          * Constructor.
          */
@@ -145,10 +148,17 @@ class Monster : public Being
         int mCountDown; /**< Count down till next random movement (temporary). */
         std::map<Being *, int> mAnger;   /**< Aggression towards other beings */
         EventListener mTargetListener; /**< Listener for updating the anger list. */
+
+        Character* mOwner; /**< Character who currently owns this monster (killsteal protection) */
+        int mOwnerTimer; /**< Time until someone else can claim this monster (killsteal protection) */
+        std::map<Character *, std::set <size_t> > mExpReceivers; /**< List of characters and their skills that attacked this monster*/
+        std::set<Character *> mLegalExpReceivers; /**< List of characters who are entitled to receive exp (killsteal protection)*/
+
         int mAttackTime;                       /**< Delay until monster can attack */
         // TODO: the following vars should all be the same for all monsters of
         // the same type. So they should be put into some central data structure
         // to save memory.
+        int mExpReward;             /**< Exp reward for defeating the monster */
         int mAttackPreDelay;        /**< time between decision to make an attack and performing the attack */
         int mAttackAftDelay;        /**< time it takes to perform an attack */
         int mAttackRange;           /**< range of the monsters attacks in pixel */

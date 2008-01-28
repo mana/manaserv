@@ -97,11 +97,6 @@ static char const *SQL_ACCOUNTS_TABLE =
 
 /**
  * TABLE: tmw_characters.
- *
- * Notes:
- *     - the stats will need to be thought over, as we'll be implementing a
- *       much more elaborate skill based system; we should probably have a
- *       separate table for storing the skill levels.
  *     - gender is 0 for male, 1 for female.
  */
 static char const *CHARACTERS_TBL_NAME = "tmw_characters";
@@ -115,7 +110,9 @@ static char const *SQL_CHARACTERS_TABLE =
         "gender      TINYINT     UNSIGNED NOT NULL,"
         "hair_style  TINYINT     UNSIGNED NOT NULL,"
         "hair_color  TINYINT     UNSIGNED NOT NULL,"
-        "level   TINYINT     UNSIGNED NOT NULL,"
+        "level       INTEGER     UNSIGNED NOT NULL,"
+        "char_pts    INTEGER     UNSIGNED NOT NULL,"
+        "correct_pts INTEGER     UNSIGNED NOT NULL,"
         "money   INTEGER     UNSIGNED NOT NULL,"
         // location on the map
         "x       SMALLINT    UNSIGNED NOT NULL,"
@@ -129,6 +126,19 @@ static char const *SQL_CHARACTERS_TABLE =
         // note: int must be backquoted as it's a MySQL keyword
         "`int`   SMALLINT    UNSIGNED NOT NULL,"
         "will    SMALLINT    UNSIGNED NOT NULL,"
+        //skill experience
+        "unarmedExp     INTEGER  UNSIGNED NOT NULL,"
+        "knife_exp      INTEGER  UNSIGNED NOT NULL,"
+        "sword_exp      INTEGER  UNSIGNED NOT NULL,"
+        "polearm_exp    INTEGER  UNSIGNED NOT NULL,"
+        "staff_exp      INTEGER  UNSIGNED NOT NULL,"
+        "whip_exp       INTEGER  UNSIGNED NOT NULL,"
+        "bow_exp        INTEGER  UNSIGNED NOT NULL,"
+        "shoot_exp      INTEGER  UNSIGNED NOT NULL,"
+        "mace_exp       INTEGER  UNSIGNED NOT NULL,"
+        "axe_exp        INTEGER  UNSIGNED NOT NULL,"
+        "thrown_exp     INTEGER  UNSIGNED NOT NULL,"
+
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id),"
         "INDEX (id)"
@@ -140,7 +150,9 @@ static char const *SQL_CHARACTERS_TABLE =
         "gender      INTEGER     NOT NULL,"
         "hair_style  INTEGER     NOT NULL,"
         "hair_color  INTEGER     NOT NULL,"
-        "level   INTEGER     NOT NULL,"
+        "level       INTEGER     NOT NULL,"
+        "char_pts    INTEGER     NOT NULL,"
+        "correct_pts INTEGER     NOT NULL,"
         "money   INTEGER     NOT NULL,"
         // location on the map
         "x       INTEGER     NOT NULL,"
@@ -153,6 +165,18 @@ static char const *SQL_CHARACTERS_TABLE =
         "vit     INTEGER     NOT NULL,"
         "int     INTEGER     NOT NULL,"
         "will    INTEGER     NOT NULL,"
+        //skill experience
+        "unarmed_exp    INTEGER  NOT NULL,"
+        "knife_exp      INTEGER  NOT NULL,"
+        "sword_exp      INTEGER  NOT NULL,"
+        "polearm_exp    INTEGER  NOT NULL,"
+        "staff_exp      INTEGER  NOT NULL,"
+        "whip_exp       INTEGER  NOT NULL,"
+        "bow_exp        INTEGER  NOT NULL,"
+        "shoot_exp      INTEGER  NOT NULL,"
+        "mace_exp       INTEGER  NOT NULL,"
+        "axe_exp        INTEGER  NOT NULL,"
+        "thrown_exp     INTEGER  NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
 #elif defined (POSTGRESQL_SUPPORT)
@@ -164,6 +188,9 @@ static char const *SQL_CHARACTERS_TABLE =
         "hair_style  INTEGER     NOT NULL,"
         "hair_color  INTEGER     NOT NULL,"
         "level   INTEGER     NOT NULL,"
+
+        "char_pts    INTEGER NOT NULL,"
+        "correct_pts INTEGER NOT NULL,"
         "money   INTEGER     NOT NULL,"
         // location on the map
         "x       INTEGER     NOT NULL,"
@@ -176,6 +203,18 @@ static char const *SQL_CHARACTERS_TABLE =
         "vit     INTEGER     NOT NULL,"
         "int     INTEGER     NOT NULL,"
         "will    INTEGER     NOT NULL,"
+        //skill experience
+        "unarmed_exp    INTEGER  NOT NULL,"
+        "knife_exp      INTEGER  NOT NULL,"
+        "sword_exp      INTEGER  NOT NULL,"
+        "polearm_exp    INTEGER  NOT NULL,"
+        "staff_exp      INTEGER  NOT NULL,"
+        "whip_exp       INTEGER  NOT NULL,"
+        "bow_exp        INTEGER  NOT NULL,"
+        "shoot_exp      INTEGER  NOT NULL,"
+        "mace_exp       INTEGER  NOT NULL,"
+        "axe_exp        INTEGER  NOT NULL,"
+        "thrown_exp     INTEGER  NOT NULL,"
         "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
         "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
 #endif

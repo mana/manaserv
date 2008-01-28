@@ -36,12 +36,20 @@ void serializeCharacterData(T const &data, MessageOut &msg)
     msg.writeByte(data.getGender());
     msg.writeByte(data.getHairStyle());
     msg.writeByte(data.getHairColor());
-    msg.writeByte(data.getLevel());
+    msg.writeShort(data.getLevel());
+    msg.writeShort(data.getCharacterPoints());
+    msg.writeShort(data.getCorrectionPoints());
 
     for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
         msg.writeByte(data.getAttribute(i));
     }
+
+    for (int i = 0; i < CHAR_SKILL_NB; ++i)
+    {
+        msg.writeLong(data.getExperience(i));
+    }
+
 
     msg.writeShort(data.getMapId());
     Point const &pos = data.getPosition();
@@ -69,11 +77,18 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setGender(msg.readByte());
     data.setHairStyle(msg.readByte());
     data.setHairColor(msg.readByte());
-    data.setLevel(msg.readByte());
+    data.setLevel(msg.readShort());
+    data.setCharacterPoints(msg.readShort());
+    data.setCorrectionPoints(msg.readShort());
 
     for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
         data.setAttribute(i, msg.readByte());
+    }
+
+    for (int i = 0; i < CHAR_SKILL_NB; ++i)
+    {
+        data.setExperience(i, msg.readLong());
     }
 
     data.setMapId(msg.readShort());

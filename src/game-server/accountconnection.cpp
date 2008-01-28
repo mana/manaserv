@@ -77,8 +77,6 @@ void AccountConnection::processMessage(MessageIn &msg)
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             Character *ptr = new Character(msg);
             ptr->setSpeed(250); // TODO
-            // FIXME: for testing purpose.
-            ptr->setAttribute(CHAR_SKILL_WEAPON_NONE, 10);
             gameHandler->addPendingCharacter(token, ptr);
         } break;
 
@@ -112,10 +110,10 @@ void AccountConnection::processMessage(MessageIn &msg)
             if(msg.readByte() == ERRMSG_OK)
             {
                 int playerId = msg.readLong();
-                
+
                 MessageOut result(GPMSG_GUILD_CREATE_RESPONSE);
                 result.writeByte(ERRMSG_OK);
-                
+
                 /*  Create a message that the player has joined the guild
                  *  Output the guild ID and guild name
                  *  Send a 1 if the player has rights
@@ -125,7 +123,7 @@ void AccountConnection::processMessage(MessageIn &msg)
                 out.writeShort(msg.readShort());
                 out.writeString(msg.readString());
                 out.writeShort(msg.readShort());
-                
+
                 Character *player = gameHandler->messageMap[playerId];
                 if(player)
                 {
@@ -134,33 +132,33 @@ void AccountConnection::processMessage(MessageIn &msg)
                 }
             }
         } break;
-            
+
         case AGMSG_GUILD_INVITE_RESPONSE:
         {
             if(msg.readByte() == ERRMSG_OK)
             {
                 int playerId = msg.readLong();
-                
+
                 MessageOut result(GPMSG_GUILD_INVITE_RESPONSE);
                 result.writeByte(ERRMSG_OK);
-                
+
                 Character *player = gameHandler->messageMap[playerId];
                 if(player)
                 {
                     gameHandler->sendTo(player, result);
-                }                
+                }
             }
         } break;
-            
+
         case AGMSG_GUILD_ACCEPT_RESPONSE:
         {
             if(msg.readByte() == ERRMSG_OK)
             {
                 int playerId = msg.readLong();
-                
+
                 MessageOut result(GPMSG_GUILD_ACCEPT_RESPONSE);
                 result.writeByte(ERRMSG_OK);
-                
+
                 /*  Create a message that the player has joined the guild
                  *  Output the guild ID and guild name
                  *  Send a 0 for invite rights, since player has been invited
@@ -170,23 +168,23 @@ void AccountConnection::processMessage(MessageIn &msg)
                 out.writeShort(msg.readShort());
                 out.writeString(msg.readString());
                 out.writeShort(0);
-                
+
                 Character *player = gameHandler->messageMap[playerId];
                 if(player)
                 {
                     gameHandler->sendTo(player, result);
                     gameHandler->sendTo(player, out);
-                }                
+                }
             }
         } break;
-            
+
         case AGMSG_GUILD_GET_MEMBERS_RESPONSE:
         {
             if(msg.readByte() != ERRMSG_OK)
                 break;
             int playerId = msg.readLong();
             short guildId = msg.readShort();
-            
+
             MessageOut result(GPMSG_GUILD_GET_MEMBERS_RESPONSE);
             result.writeByte(ERRMSG_OK);
             result.writeShort(guildId);
@@ -194,25 +192,25 @@ void AccountConnection::processMessage(MessageIn &msg)
             {
                 result.writeString(msg.readString());
             }
-            
+
             Character *player = gameHandler->messageMap[playerId];
             if(player)
             {
                 gameHandler->sendTo(player, result);
             }
         } break;
-            
+
         case AGMSG_GUILD_QUIT_RESPONSE:
         {
             if(msg.readByte() != ERRMSG_OK)
                 break;
             int playerId = msg.readLong();
             short guildId = msg.readShort();
-            
+
             MessageOut result(GPMSG_GUILD_QUIT_RESPONSE);
             result.writeByte(ERRMSG_OK);
             result.writeShort(guildId);
-            
+
             Character *player = gameHandler->messageMap[playerId];
             if(player)
             {

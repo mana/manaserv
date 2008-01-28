@@ -56,19 +56,16 @@ enum ItemType
 enum WeaponType
 {
     WPNTYPE_NONE = 0,
-    WPNTYPE_KNIFE,//        1
-    WPNTYPE_SWORD,//        2
-    WPNTYPE_POLEARM,//      3
-    WPNTYPE_JAVELIN,//      4
-    WPNTYPE_STAFF,//        5
-    WPNTYPE_WHIP,//         6
-    WPNTYPE_BOOMERANG,//    7
-    WPNTYPE_BOW,//          8
-    WPNTYPE_SICKLE,//       9
-    WPNTYPE_CROSSBOW,//    10
-    WPNTYPE_MACE,//        11
-    WPNTYPE_AXE,//         12
-    WPNTYPE_THROWN//       13
+    WPNTYPE_KNIFE,
+    WPNTYPE_SWORD,
+    WPNTYPE_POLEARM,
+    WPNTYPE_STAFF,
+    WPNTYPE_WHIP,
+    WPNTYPE_BOW,
+    WPNTYPE_SHOOTING,
+    WPNTYPE_MACE,
+    WPNTYPE_AXE,
+    WPNTYPE_THROWN
 };
 
 /**

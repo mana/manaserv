@@ -26,11 +26,16 @@
 
 Character::Character(std::string const &name, int id):
     mName(name), mDatabaseID(id), mAccountID(-1), mAccount(NULL), mPos(0,0), mMapId(0),
-    mGender(0), mHairStyle(0), mHairColor(0), mLevel(0), mAccountLevel(0)
+    mGender(0), mHairStyle(0), mHairColor(0), mLevel(0), mCharacterPoints(0),
+    mCorrectionPoints(0), mAccountLevel(0)
 {
     for (int i = 0; i < CHAR_ATTR_NB; ++i)
     {
         mAttributes[i] = 0;
+    }
+    for (int i = 0; i < CHAR_SKILL_NB; ++i)
+    {
+        mExperience[i] = 0;
     }
 }
 

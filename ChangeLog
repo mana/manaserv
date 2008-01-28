@@ -1,3 +1,23 @@
+2008-01-28  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/account-server/accounthandler.cpp, src/account-server/character.cpp,
+	src/account-server/character.hpp, src/account-server/dalstorage.cpp,
+	src/account-server/dalstoragesql.hpp, src/dal/sqlitedataprovider.cpp,
+	src/defines.h, src/game-server/accountconnection.cpp,
+	src/game-server/being.hpp, src/game-server/character.cpp,
+	src/game-server/character.hpp, src/game-server/gamehandler.cpp, 
+	src/game-server/item.cpp, src/game-server/itemmanager.cpp,
+	src/game-server/monster.cpp, src/game-server/monster.hpp,
+	src/serialize/characterdata.hpp: Implemented skill system, level gain
+	and attribute raising. Using 16 bit instead of 8 bit for representing
+	the character level. Updated weapon skill selection to latest design
+	decisions.
+	* src/game-server/monster.cpp: Monster attack animation is now
+	started in the moment the monster decides to attack and not the
+	moment damage is calculated. This makes it easier for the player
+	to react on the monsters attacks and makes the combat behavior of
+	monsters look more natural.
+
 2008-01-24  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/state.cpp: The direction of attacking beings is

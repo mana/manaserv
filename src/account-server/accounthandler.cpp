@@ -141,7 +141,9 @@ static void sendCharacterData(AccountClient &computer, int slot, Character const
     charInfo.writeByte(ch.getGender());
     charInfo.writeByte(ch.getHairStyle());
     charInfo.writeByte(ch.getHairColor());
-    charInfo.writeByte(ch.getLevel());
+    charInfo.writeShort(ch.getLevel());
+    charInfo.writeShort(ch.getCharacterPoints());
+    charInfo.writeShort(ch.getCorrectionPoints());
     charInfo.writeLong(ch.getPossessions().money);
 
     for (int j = CHAR_ATTR_BEGIN; j < CHAR_ATTR_END; ++j)
@@ -558,6 +560,8 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
                 newCharacter->setAttribute(i, attributes[i - CHAR_ATTR_BEGIN]);
             newCharacter->setAccount(acc);
             newCharacter->setLevel(1);
+            newCharacter->setCharacterPoints(0);
+            newCharacter->setCorrectionPoints(0);
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
