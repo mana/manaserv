@@ -82,7 +82,6 @@ Monster::Monster(MonsterClass *specy):
     mAttackAngle = 10;
     setSpeed(300);
     setSize(8);
-    mExpReward = 100;
 
     // Set positions relative to target from which the monster can attack
     mAttackPositions.push_back(AttackPosition(+32, 0, DIRECTION_LEFT));
@@ -332,7 +331,8 @@ void Monster::died()
         std::map<Character *, std::set <size_t> > ::iterator iChar;
         std::set<size_t>::iterator iSkill;
 
-        float expPerChar = mExpReward / mExpReceivers.size();
+
+        float expPerChar = (float)mSpecy->getExp() / mExpReceivers.size();
 
         for (iChar = mExpReceivers.begin(); iChar != mExpReceivers.end(); iChar++)
         {

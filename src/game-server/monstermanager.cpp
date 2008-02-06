@@ -154,12 +154,23 @@ void MonsterManager::reload()
                 if (!attributesComplete) LOG_WARN(monsterReferenceFile
                     <<": Attributes incomplete for monster #"<<id);
             }
+            else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
+            {
+                xmlChar *exp = subnode->xmlChildrenNode->content;
+                monster->setExp(atoi((const char*)exp));
+            }
         }
 
         monster->setDrops(drops);
         if (!attributesSet) LOG_WARN(monsterReferenceFile
                                     <<": No attributes defined for monster #"
                                     <<id);
+        if (monster->getExp() == -1)
+        {
+            LOG_WARN(monsterReferenceFile
+                    <<": No experience defined for monster #"<<id);
+            monster->setExp(0);
+        }
         ++nbMonsters;
     }
 

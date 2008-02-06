@@ -49,7 +49,7 @@ typedef std::vector< MonsterDrop > MonsterDrops;
 class MonsterClass
 {
     public:
-        MonsterClass(int id): mID(id), mAttributes(BASE_ATTR_NB, 0) {}
+        MonsterClass(int id): mID(id), mAttributes(BASE_ATTR_NB, 0), mExp(-1) {}
 
         /**
          * Gets monster type.
@@ -76,6 +76,18 @@ class MonsterClass
         { return mAttributes.at(attribute); }
 
         /**
+         * Sets exp reward for killing the monster
+         */
+        void setExp(int exp)
+        { mExp = exp; }
+
+        /**
+         * Gets exp reward for killing the monster
+         */
+        int getExp() const
+        { return mExp; }
+
+        /**
          * Randomly selects a monster drop (may return NULL).
          * TODO: pass some luck modifier as an argument.
          */
@@ -85,6 +97,7 @@ class MonsterClass
         unsigned short mID; /**< ID of the monster class. */
         MonsterDrops mDrops; /**< Items the monster drops when dying. */
         std::vector<int> mAttributes; /**< Base attributes of the monster*/
+        int mExp; /**< Exp reward for killing the monster */
 };
 
 /**
@@ -169,9 +182,7 @@ class Monster : public Being
 
         int mAttackTime;                       /**< Delay until monster can attack */
         // TODO: the following vars should all be the same for all monsters of
-        // the same type. So they should be put into some central data structure
-        // to save memory.
-        int mExpReward;             /**< Exp reward for defeating the monster */
+        // the same type. So they should be stored in mSpecy to save memory
         int mAttackPreDelay;        /**< time between decision to make an attack and performing the attack */
         int mAttackAftDelay;        /**< time it takes to perform an attack */
         int mAttackRange;           /**< range of the monsters attacks in pixel */

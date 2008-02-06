@@ -1,8 +1,8 @@
 2008-02-05  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/monster.cpp, src/game-server/monster.hpp, 
-	src/game-server/monstermanager.cpp: Monster base attributes are now read
-	from monsters.xml.
+	src/game-server/monstermanager.cpp: Monster base attributes and
+	experience reward are now read from monsters.xml.
 
 2008-01-28  Philipp Sehmisch  <tmw@crushnet.org>
 
