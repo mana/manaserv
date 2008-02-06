@@ -49,7 +49,7 @@ typedef std::vector< MonsterDrop > MonsterDrops;
 class MonsterClass
 {
     public:
-        MonsterClass(int id): mID(id) {}
+        MonsterClass(int id): mID(id), mAttributes(BASE_ATTR_NB, 0) {}
 
         /**
          * Gets monster type.
@@ -64,6 +64,18 @@ class MonsterClass
         { mDrops = v; }
 
         /**
+         * Sets a being attribute
+         */
+        void setAttribute(size_t attribute, int value)
+        { mAttributes.at(attribute) = value ; }
+
+        /**
+         * Gets a being attribute
+         */
+        int getAttribute(size_t attribute) const
+        { return mAttributes.at(attribute); }
+
+        /**
          * Randomly selects a monster drop (may return NULL).
          * TODO: pass some luck modifier as an argument.
          */
@@ -72,6 +84,7 @@ class MonsterClass
     private:
         unsigned short mID; /**< ID of the monster class. */
         MonsterDrops mDrops; /**< Items the monster drops when dying. */
+        std::vector<int> mAttributes; /**< Base attributes of the monster*/
 };
 
 /**

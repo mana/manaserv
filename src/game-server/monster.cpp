@@ -66,6 +66,12 @@ Monster::Monster(MonsterClass *specy):
 {
     LOG_DEBUG("Monster spawned!");
 
+    // get basic attributes from monster database
+    for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; i++)
+    {
+        setAttribute(i, specy->getAttribute(i));
+    }
+
     // Some bogus stats for testing.
     // TODO: Get all this stuff from the monster database.
     mAgressive = false;
@@ -76,11 +82,6 @@ Monster::Monster(MonsterClass *specy):
     mAttackAngle = 10;
     setSpeed(300);
     setSize(8);
-    setAttribute(BASE_ATTR_HP, 100);
-    setAttribute(BASE_ATTR_PHY_ATK_MIN, 20);
-    setAttribute(BASE_ATTR_PHY_ATK_DELTA, 2);
-    setAttribute(BASE_ATTR_HIT, 10);
-    setAttribute(BASE_ATTR_EVADE, 10);
     mExpReward = 100;
 
     // Set positions relative to target from which the monster can attack
