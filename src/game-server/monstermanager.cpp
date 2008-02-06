@@ -122,14 +122,22 @@ void MonsterManager::reload()
             else if (xmlStrEqual(subnode->name, BAD_CAST "attributes"))
             {
                 attributesSet = true;
-                monster->setAttribute(BASE_ATTR_HP, XML::getProperty(subnode, "hp", -1));
-                monster->setAttribute(BASE_ATTR_PHY_ATK_MIN, XML::getProperty(subnode, "attack-min", -1));
-                monster->setAttribute(BASE_ATTR_PHY_ATK_DELTA, XML::getProperty(subnode, "attack-delta", -1));
-                monster->setAttribute(BASE_ATTR_MAG_ATK, XML::getProperty(subnode, "attack-magic", -1));
-                monster->setAttribute(BASE_ATTR_EVADE, XML::getProperty(subnode, "evade", -1));
-                monster->setAttribute(BASE_ATTR_HIT, XML::getProperty(subnode, "hit", -1));
-                monster->setAttribute(BASE_ATTR_PHY_RES, XML::getProperty(subnode, "physical-defence", -1));
-                monster->setAttribute(BASE_ATTR_MAG_RES, XML::getProperty(subnode, "magical-defence", -1));
+                monster->setAttribute(BASE_ATTR_HP,
+                    XML::getProperty(subnode, "hp", -1));
+                monster->setAttribute(BASE_ATTR_PHY_ATK_MIN,
+                    XML::getProperty(subnode, "attack-min", -1));
+                monster->setAttribute(BASE_ATTR_PHY_ATK_DELTA,
+                    XML::getProperty(subnode, "attack-delta", -1));
+                monster->setAttribute(BASE_ATTR_MAG_ATK,
+                    XML::getProperty(subnode, "attack-magic", -1));
+                monster->setAttribute(BASE_ATTR_EVADE,
+                    XML::getProperty(subnode, "evade", -1));
+                monster->setAttribute(BASE_ATTR_HIT,
+                    XML::getProperty(subnode, "hit", -1));
+                monster->setAttribute(BASE_ATTR_PHY_RES,
+                    XML::getProperty(subnode, "physical-defence", -1));
+                monster->setAttribute(BASE_ATTR_MAG_RES,
+                    XML::getProperty(subnode, "magical-defence", -1));
                 // TODO: speed
                 // TODO: size
 
@@ -143,12 +151,15 @@ void MonsterManager::reload()
                         monster->setAttribute(i, 0);
                     }
                 }
-                if (!attributesComplete) LOG_WARN(monsterReferenceFile<<": Attributes incomplete for monster #"<<id);
+                if (!attributesComplete) LOG_WARN(monsterReferenceFile
+                    <<": Attributes incomplete for monster #"<<id);
             }
         }
 
         monster->setDrops(drops);
-        if (!attributesSet) LOG_WARN(monsterReferenceFile<<": No attributes defined for monster #"<<id);
+        if (!attributesSet) LOG_WARN(monsterReferenceFile
+                                    <<": No attributes defined for monster #"
+                                    <<id);
         ++nbMonsters;
     }
 
