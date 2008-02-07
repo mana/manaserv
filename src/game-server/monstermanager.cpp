@@ -83,10 +83,11 @@ void MonsterManager::reload()
         }
 
         int id = XML::getProperty(node, "id", 0);
+        std::string name = XML::getProperty(node, "name", "unnamed");
 
         if (id == 0)
         {
-            LOG_WARN("Monster Manager: There is a monster without ID in "
+            LOG_WARN("Monster Manager: There is a monster ("<<name<<") without ID in "
                      << monsterReferenceFile << "! It has been ignored.");
             continue;
         }
@@ -105,6 +106,7 @@ void MonsterManager::reload()
 
         MonsterDrops drops;
         bool attributesSet = false;
+        bool behaviorSet = false;
 
         for (xmlNodePtr subnode = node->xmlChildrenNode; subnode != NULL;
              subnode = subnode->next)
@@ -159,16 +161,30 @@ void MonsterManager::reload()
                 xmlChar *exp = subnode->xmlChildrenNode->content;
                 monster->setExp(atoi((const char*)exp));
             }
+            else if (xmlStrEqual(subnode->name, BAD_CAST "behavior"))
+            {
+                behaviorSet = true;
+                if (XML::getProperty(subnode, "aggressive", "") == "true")
+                {
+                    monster->setAggressive(true);
+                }
+                monster->setTrackRange(XML::getProperty(subnode, "track-range", 1));
+                monster->setStrollRange(XML::getProperty(subnode, "stroll-range", 0) * 32);
+            }
         }
 
         monster->setDrops(drops);
         if (!attributesSet) LOG_WARN(monsterReferenceFile
                                     <<": No attributes defined for monster #"
-                                    <<id);
+                                    <<id<<" ("<<name<<")");
+        if (!behaviorSet) LOG_WARN(monsterReferenceFile
+                            <<": No behavior defined for monster #"
+                            <<id<<" ("<<name<<")");
         if (monster->getExp() == -1)
         {
             LOG_WARN(monsterReferenceFile
-                    <<": No experience defined for monster #"<<id);
+                    <<": No experience defined for monster #"
+                    <<id<<" ("<<name<<")");
             monster->setExp(0);
         }
         ++nbMonsters;

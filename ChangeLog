@@ -1,3 +1,10 @@
+2008-02-07  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/monster.cpp, src/game-server/monster.hpp,
+	src/game-server/monstermanager.cpp: Parts of monster behavior are now
+	read from monsters.xml. Warnings during monster parsing now include
+	the name of the monster.
+
 2008-02-07  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/scripting/lua.cpp: Fail gracefully on invalid monster IDs, don't

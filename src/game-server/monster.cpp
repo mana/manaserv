@@ -74,8 +74,6 @@ Monster::Monster(MonsterClass *specy):
 
     // Some bogus stats for testing.
     // TODO: Get all this stuff from the monster database.
-    mAgressive = false;
-    mAgressionRange = 10;
     mAttackPreDelay = 10;
     mAttackAftDelay = 10;
     mAttackRange = 32;
@@ -177,7 +175,7 @@ void Monster::update()
         {
             targetPriority = angerIterator->second;
         }
-        else if (mAgressive)
+        else if (mSpecy->isAggressive())
         {
             targetPriority = 1;
         }
@@ -231,10 +229,14 @@ void Monster::update()
         mCountDown--;
         if (mCountDown <= 0)
         {
-            Point randomPos(rand() % 160 - 80 + getPosition().x,
-                            rand() % 160 - 80 + getPosition().y);
-            setDestination(randomPos);
-            mCountDown = 10 + rand() % 10;
+            unsigned range = mSpecy->getStrollRange();
+            if (range)
+            {
+                Point randomPos(rand() % (range * 2) - range + getPosition().x,
+                                rand() % (range * 2) - range + getPosition().y);
+                setDestination(randomPos);
+                mCountDown = 10 + rand() % 10;
+            }
         }
     }
 }
@@ -243,25 +245,27 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
 {
     Point thisPos = getPosition();
 
+    unsigned range = mSpecy->getTrackRange();
+
     // Check if we already are on this position
     if (thisPos.x / 32 == position.x / 32 &&
         thisPos.y / 32 == position.y / 32)
     {
-        return targetPriority *= mAgressionRange;
+        return targetPriority *= range;
     }
 
     std::list<PATH_NODE> path;
     path = getMap()->getMap()->findPath(thisPos.x / 32, thisPos.y / 32,
                                         position.x / 32, position.y / 32,
-                                        mAgressionRange);
+                                        range);
 
-    if (path.empty() || path.size() >= mAgressionRange)
+    if (path.empty() || path.size() >= range)
     {
         return 0;
     }
     else
     {
-        return targetPriority * (mAgressionRange - path.size());
+        return targetPriority * (range - path.size());
     }
 }
 
