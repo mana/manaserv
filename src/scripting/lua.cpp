@@ -380,24 +380,34 @@ static int LuaMonster_Create(lua_State *s)
         LOG_WARN("LuaMonster_Create called with incorrect parameters.");
         return 0;
     }
+
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
     Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-
-    MonsterClass *spec = MonsterManager::getMonster(lua_tointeger(s, 1));
-    Monster *q = new Monster(spec);
     MapComposite *m = t->getMap();
     if (!m)
     {
         LOG_WARN("LuaMonster_Create called outside a map.");
         return 0;
     }
+
+    int monsterId = lua_tointeger(s, 1);
+    MonsterClass *spec = MonsterManager::getMonster(monsterId);
+    if (!spec)
+    {
+        LOG_WARN("LuaMonster_Create invalid monster ID: " << monsterId);
+        return 0;
+    }
+
+    Monster *q = new Monster(spec);
     q->setMap(m);
     q->setPosition(Point(lua_tointeger(s, 2), lua_tointeger(s, 3)));
-    bool b = GameState::insert(q);
-    /* Do not try to deal with a failure there. There are some serious issues
-       if an insertion failed on an almost empty map. */
-    assert(b); (void)b;
+    if (!GameState::insertSafe(q))
+    {
+        LOG_WARN("LuaMonster_Create failed to insert monster");
+        return 0;
+    }
+
     lua_pushlightuserdata(s, q);
     return 1;
 };
