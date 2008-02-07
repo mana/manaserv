@@ -5,6 +5,7 @@
 atinit(function()
   create_npc(110, 50 * 32 + 16, 19 * 32 + 16, my_npc1)
   create_npc(108, 51 * 32 + 16, 25 * 32 + 16, my_npc4)
+  create_npc(126, 45 * 32 + 16, 25 * 32 + 16, my_npc5)
 end)
 
 function my_npc1(npc, ch)
@@ -60,5 +61,16 @@ function my_npc4(npc, ch)
         tmw.chr_warp(ch, 3, 25 * 32, 25 * 32)
       end
     end
+  end
+end
+
+function my_npc5(npc, ch)
+  do_message(npc, ch, "I am the spider tamer. Do you want me to spawn some spiders?")
+  local answer = do_choice(npc, ch, "Yes", "No");
+  if answer == 1 then
+    tmw.monster_create(1012, 44 * 32 + 16, 24 * 32 + 16)
+    tmw.monster_create(1012, 44 * 32 + 16, 26 * 32 + 16)
+    tmw.monster_create(1012, 46 * 32 + 16, 24 * 32 + 16)
+    tmw.monster_create(1012, 46 * 32 + 16, 26 * 32 + 16)
   end
 end

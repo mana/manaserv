@@ -36,6 +36,8 @@ extern "C" {
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/monster.hpp"
+#include "game-server/monstermanager.hpp"
 #include "game-server/npc.hpp"
 #include "game-server/quest.hpp"
 #include "game-server/state.hpp"
@@ -368,6 +370,39 @@ static int LuaNpc_Trade(lua_State *s)
 }
 
 /**
+ * Callback for creating a monster on the current map.
+ * tmw.monster_create(int type, int x, int y)
+ */
+static int LuaMonster_Create(lua_State *s)
+{
+    if (!lua_isnumber(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
+    {
+        LOG_WARN("LuaMonster_Create called with incorrect parameters.");
+        return 0;
+    }
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+
+    MonsterClass *spec = MonsterManager::getMonster(lua_tointeger(s, 1));
+    Monster *q = new Monster(spec);
+    MapComposite *m = t->getMap();
+    if (!m)
+    {
+        LOG_WARN("LuaMonster_Create called outside a map.");
+        return 0;
+    }
+    q->setMap(m);
+    q->setPosition(Point(lua_tointeger(s, 2), lua_tointeger(s, 3)));
+    bool b = GameState::insert(q);
+    /* Do not try to deal with a failure there. There are some serious issues
+       if an insertion failed on an almost empty map. */
+    assert(b); (void)b;
+    lua_pushlightuserdata(s, q);
+    return 1;
+};
+
+/**
  * Called when the server has recovered the value of a quest variable.
  */
 void LuaScript::getQuestCallback(Character *q, std::string const &name,
@@ -447,6 +482,7 @@ LuaScript::LuaScript():
         { "chr_inv_count",    &LuaChr_InvCount    },
         { "chr_get_quest",    &LuaChr_GetQuest    },
         { "chr_set_quest",    &LuaChr_SetQuest    },
+        { "monster_create",   &LuaMonster_Create  },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

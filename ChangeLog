@@ -1,3 +1,9 @@
+2008-02-06  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/scripting/lua.cpp: Implemented LUA callback function for
+	creating monsters.
+	* data/test.lua: Added NPC for testing scripted monster creation.
+
 2008-02-05  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/monster.cpp, src/game-server/monster.hpp, 
