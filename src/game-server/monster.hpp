@@ -52,6 +52,8 @@ class MonsterClass
         MonsterClass(int id):
             mID(id),
             mAttributes(BASE_ATTR_NB, 0),
+            mSpeed(1),
+            mSize(16),
             mExp(-1),
             mAggressive(false),
             mTrackRange(1),
@@ -82,35 +84,23 @@ class MonsterClass
         int getAttribute(size_t attribute) const
         { return mAttributes.at(attribute); }
 
-        /**
-         * Sets exp reward for killing the monster
-         */
-        void setExp(int exp)
-        { mExp = exp; }
+        void setSpeed(int speed) { mSpeed = speed; } /**< sets inverted movement speed*/
+        int getSpeed() const { return mSpeed; } /**< gets inverted movement speed*/
 
-        /**
-         * Gets exp reward for killing the monster
-         */
-        int getExp() const
-        { return mExp; }
+        void setSize(int size) { mSize = size; } /**< sets hit circle radius*/
+        int getSize() const { return mSize; } /**< gets hit circle radius*/
 
-        void setAggressive(bool aggressive)
-        { mAggressive = aggressive; }
+        void setExp(int exp) { mExp = exp; } /**< sets experience reward*/
+        int getExp() const { return mExp; } /**< gets experience reward*/
 
-        bool isAggressive() const
-        { return mAggressive; }
+        void setAggressive(bool aggressive) { mAggressive = aggressive; } /**< sets if the monster attacks without being attacked first*/
+        bool isAggressive() const { return mAggressive; } /**< gets if the monster attacks without being attacked first*/
 
-        void setTrackRange(int range)
-        { mTrackRange = range; }
+        void setTrackRange(int range){ mTrackRange = range; } /**< sets range in tiles in which the monster searches for enemies*/
+        unsigned getTrackRange() const { return mTrackRange; } /**< gets range in tiles in which the monster searches for enemies*/
 
-        unsigned getTrackRange() const
-        { return mTrackRange; }
-
-        void setStrollRange(int range)
-        { mStrollRange = range; }
-
-        unsigned getStrollRange() const
-        { return mStrollRange; }
+        void setStrollRange(int range) { mStrollRange = range; } /**< sets range in tiles in which the monster moves around when idled*/
+        unsigned getStrollRange() const { return mStrollRange; } /**< gets range in tiles in which the monster moves around when idled*/
 
         /**
          * Randomly selects a monster drop (may return NULL).
@@ -121,6 +111,8 @@ class MonsterClass
         unsigned short mID; /**< ID of the monster class. */
         MonsterDrops mDrops; /**< Items the monster drops when dying. */
         std::vector<int> mAttributes; /**< Base attributes of the monster*/
+        int mSpeed; /** (inverted) Movement speed of the monster */
+        int mSize; /** Collision circle radius of the monster */
         int mExp; /**< Exp reward for killing the monster */
         bool mAggressive;        /**< Does the monster attack without being provoked? */
         unsigned mTrackRange;   /**< Distance the monster tracks enemies in */

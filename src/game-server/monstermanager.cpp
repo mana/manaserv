@@ -140,8 +140,8 @@ void MonsterManager::reload()
                     XML::getProperty(subnode, "physical-defence", -1));
                 monster->setAttribute(BASE_ATTR_MAG_RES,
                     XML::getProperty(subnode, "magical-defence", -1));
-                // TODO: speed
-                // TODO: size
+                monster->setSize(XML::getProperty(subnode, "size", 0));
+                int speed = (XML::getProperty(subnode, "speed", 0));
 
                 //check for completeness
                 bool attributesComplete = true;
@@ -153,8 +153,24 @@ void MonsterManager::reload()
                         monster->setAttribute(i, 0);
                     }
                 }
+                if (monster->getSize() == 0)
+                {
+                    monster->setSize(16);
+                    attributesComplete = false;
+                }
+                if (speed == 0)
+                {
+                    speed = 1;
+                    attributesComplete = false;
+                }
+
                 if (!attributesComplete) LOG_WARN(monsterReferenceFile
                     <<": Attributes incomplete for monster #"<<id);
+
+                //for usability reasons we set the speed in the monsters.xml as tiles per second
+                //instead of miliseconds per tile.
+                monster->setSpeed(1000/speed);
+
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
             {

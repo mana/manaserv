@@ -72,14 +72,15 @@ Monster::Monster(MonsterClass *specy):
         setAttribute(i, specy->getAttribute(i));
     }
 
+    setSpeed(specy->getSpeed());
+    setSize(specy->getSize());
+
     // Some bogus stats for testing.
     // TODO: Get all this stuff from the monster database.
     mAttackPreDelay = 10;
     mAttackAftDelay = 10;
     mAttackRange = 32;
     mAttackAngle = 10;
-    setSpeed(300);
-    setSize(8);
 
     // Set positions relative to target from which the monster can attack
     mAttackPositions.push_back(AttackPosition(+32, 0, DIRECTION_LEFT));
@@ -226,16 +227,19 @@ void Monster::update()
     else
     {
         // We have no target - let's wander around
-        mCountDown--;
-        if (mCountDown <= 0)
+        if (getPosition() == getDestination())
         {
-            unsigned range = mSpecy->getStrollRange();
-            if (range)
+            mCountDown--;
+            if (mCountDown <= 0)
             {
-                Point randomPos(rand() % (range * 2) - range + getPosition().x,
-                                rand() % (range * 2) - range + getPosition().y);
-                setDestination(randomPos);
-                mCountDown = 10 + rand() % 10;
+                unsigned range = mSpecy->getStrollRange();
+                if (range)
+                {
+                    Point randomPos(rand() % (range * 2) - range + getPosition().x,
+                                    rand() % (range * 2) - range + getPosition().y);
+                    setDestination(randomPos);
+                    mCountDown = 10 + rand() % 10;
+                }
             }
         }
     }

@@ -1,3 +1,9 @@
+2008-02-12  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/gameserver/monster.cpp, src/game-server/monster.hpp,
+	src/game-server/monstermanager.cpp: Monster speed and size is now read
+	from monsters.xml.
+
 2008-02-07  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/monster.cpp, src/game-server/monster.hpp,
