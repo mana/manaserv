@@ -167,9 +167,9 @@ void MonsterManager::reload()
                 if (!attributesComplete) LOG_WARN(monsterReferenceFile
                     <<": Attributes incomplete for monster #"<<id);
 
-                //for usability reasons we set the speed in the monsters.xml as tiles per second
-                //instead of miliseconds per tile.
-                monster->setSpeed(1000/speed);
+                //for usability reasons we set the speed in the monsters.xml as pixels
+                //per second instead of miliseconds per tile.
+                monster->setSpeed(32000/speed);
 
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))

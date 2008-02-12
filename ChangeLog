@@ -1,3 +1,8 @@
+2008-02-13  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/monstermanager.cpp: Movement speed in monsters.xml
+	is now interpreted as pixels per second instead of tiles per second.
+
 2008-02-12  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/gameserver/monster.cpp, src/game-server/monster.hpp,
