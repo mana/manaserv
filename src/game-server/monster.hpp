@@ -57,7 +57,8 @@ class MonsterClass
             mExp(-1),
             mAggressive(false),
             mTrackRange(1),
-            mStrollRange(0)
+            mStrollRange(0),
+            mMutation(0)
         {}
 
         /**
@@ -96,11 +97,14 @@ class MonsterClass
         void setAggressive(bool aggressive) { mAggressive = aggressive; } /**< sets if the monster attacks without being attacked first*/
         bool isAggressive() const { return mAggressive; } /**< gets if the monster attacks without being attacked first*/
 
-        void setTrackRange(int range){ mTrackRange = range; } /**< sets range in tiles in which the monster searches for enemies*/
+        void setTrackRange(unsigned range){ mTrackRange = range; } /**< sets range in tiles in which the monster searches for enemies*/
         unsigned getTrackRange() const { return mTrackRange; } /**< gets range in tiles in which the monster searches for enemies*/
 
-        void setStrollRange(int range) { mStrollRange = range; } /**< sets range in tiles in which the monster moves around when idled*/
+        void setStrollRange(unsigned range) { mStrollRange = range; } /**< sets range in tiles in which the monster moves around when idled*/
         unsigned getStrollRange() const { return mStrollRange; } /**< gets range in tiles in which the monster moves around when idled*/
+
+        void setMutation(unsigned factor) { mMutation = factor; } /**< sets mutation factor in percent*/
+        unsigned getMutation() const { return mMutation; } /**< gets mutation factor in percent*/
 
         /**
          * Randomly selects a monster drop (may return NULL).
@@ -114,9 +118,10 @@ class MonsterClass
         int mSpeed; /** (inverted) Movement speed of the monster */
         int mSize; /** Collision circle radius of the monster */
         int mExp; /**< Exp reward for killing the monster */
-        bool mAggressive;        /**< Does the monster attack without being provoked? */
+        bool mAggressive;       /**< Does the monster attack without being provoked? */
         unsigned mTrackRange;   /**< Distance the monster tracks enemies in */
         unsigned mStrollRange;  /**< Distance the monster strolls around in when not fighting */
+        unsigned mMutation;     /**< Mutation factor in percent*/
 };
 
 /**

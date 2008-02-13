@@ -28,6 +28,8 @@
 #include "game-server/state.hpp"
 #include "utils/logger.h"
 
+#include <cmath>
+
 ItemClass *MonsterClass::getRandomDrop() const
 {
     int p = rand() / (RAND_MAX / 10000);
@@ -67,9 +69,15 @@ Monster::Monster(MonsterClass *specy):
     LOG_DEBUG("Monster spawned!");
 
     // get basic attributes from monster database
+    int mutation = specy->getMutation();
     for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; i++)
     {
-        setAttribute(i, specy->getAttribute(i));
+        float attr = (float)specy->getAttribute(i);
+        if (mutation)
+        {
+            attr *= (100 + (rand()%(mutation * 2)) - mutation) / 100.0f;
+        }
+        setAttribute(i, (int)std::ceil(attr));
     }
 
     setSpeed(specy->getSpeed());

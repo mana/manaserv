@@ -142,8 +142,18 @@ void MonsterManager::reload()
                     XML::getProperty(subnode, "magical-defence", -1));
                 monster->setSize(XML::getProperty(subnode, "size", 0));
                 int speed = (XML::getProperty(subnode, "speed", 0));
+                monster->setMutation(XML::getProperty(subnode, "mutation", 0));
 
-                //check for completeness
+                //checking attributes for completeness and plausibility
+
+                if (monster->getMutation() > 99)
+                {
+                    LOG_WARN(monsterReferenceFile
+                    <<": Mutation of monster #"<<id
+                    <<" more than 99% - ignored");
+                    monster->setMutation(0);
+                }
+
                 bool attributesComplete = true;
                 for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; i++)
                 {
