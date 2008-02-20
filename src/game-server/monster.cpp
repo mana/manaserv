@@ -64,7 +64,8 @@ Monster::Monster(MonsterClass *specy):
     mTargetListener(&monsterTargetEventDispatch),
     mOwner(NULL),
     mOwnerTimer(0),
-    mAttackTime(0)
+    mAttackTime(0),
+    mCurrentAttack(NULL)
 {
     LOG_DEBUG("Monster spawned!");
 
@@ -83,18 +84,12 @@ Monster::Monster(MonsterClass *specy):
     setSpeed(specy->getSpeed());
     setSize(specy->getSize());
 
-    // Some bogus stats for testing.
-    // TODO: Get all this stuff from the monster database.
-    mAttackPreDelay = 10;
-    mAttackAftDelay = 10;
-    mAttackRange = 32;
-    mAttackAngle = 10;
-
     // Set positions relative to target from which the monster can attack
-    mAttackPositions.push_back(AttackPosition(+32, 0, DIRECTION_LEFT));
-    mAttackPositions.push_back(AttackPosition(-32, 0, DIRECTION_RIGHT));
-    mAttackPositions.push_back(AttackPosition(0, +32, DIRECTION_DOWN));
-    mAttackPositions.push_back(AttackPosition(0, -32, DIRECTION_UP));
+    int dist = specy->getAttackDistance();
+    mAttackPositions.push_back(AttackPosition(dist, 0, DIRECTION_LEFT));
+    mAttackPositions.push_back(AttackPosition(-dist, 0, DIRECTION_RIGHT));
+    mAttackPositions.push_back(AttackPosition(0, dist, DIRECTION_DOWN));
+    mAttackPositions.push_back(AttackPosition(0, -dist, DIRECTION_UP));
 }
 
 Monster::~Monster()
@@ -110,19 +105,19 @@ Monster::~Monster()
 void Monster::perform()
 {
 
-    if (mAction == ATTACK)
+    if (mAction == ATTACK && mCurrentAttack)
     {
-        if (mAttackTime == mAttackAftDelay)
+        if (mAttackTime == mCurrentAttack->aftDelay)
         {
             // Hard-coded values for now.
             Damage damage;
-            damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
-            damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA);
+            damage.base = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN) * mCurrentAttack->damageFactor);
+            damage.delta = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) * mCurrentAttack->damageFactor);
             damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
-            damage.element = ELEMENT_NEUTRAL;
-            damage.type = DAMAGE_PHYSICAL;
+            damage.element = mCurrentAttack->element;
+            damage.type = mCurrentAttack->type;
             damage.usedSkill = 0;
-            performAttack(damage, mAttackRange, mAttackAngle);
+            performAttack(damage, mCurrentAttack->range, mCurrentAttack->angle);
         }
         if (!mAttackTime)
         {
@@ -222,9 +217,15 @@ void Monster::update()
         {
             // We are there - let's beat the crap out of the target
             setDirection(bestAttackDirection);
-            setAction(ATTACK);
-            raiseUpdateFlags(UPDATEFLAG_ATTACK);
-            mAttackTime = mAttackPreDelay + mAttackAftDelay;
+            MonsterAttacks allAttacks = mSpecy->getAttacks();
+
+            if (!allAttacks.empty())
+            {
+                mCurrentAttack = allAttacks.at(rand()%allAttacks.size()); //TODO: this ignores priority -> fix it
+                mAttackTime = mCurrentAttack->preDelay + mCurrentAttack->aftDelay;
+                setAction(ATTACK);
+                raiseUpdateFlags(UPDATEFLAG_ATTACK);
+            }
         }
         else
         {

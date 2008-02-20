@@ -44,6 +44,24 @@ struct MonsterDrop
 typedef std::vector< MonsterDrop > MonsterDrops;
 
 /**
+ * Structure containing different attack types of a monster type
+ */
+struct MonsterAttack
+{
+    unsigned id;
+    int priority;
+    float damageFactor;
+    int element;
+    int type;
+    int preDelay;
+    int aftDelay;
+    int range;
+    int angle;
+};
+
+typedef std::vector< MonsterAttack *> MonsterAttacks;
+
+/**
  * Class describing the characteristics of a generic monster.
  */
 class MonsterClass
@@ -58,7 +76,8 @@ class MonsterClass
             mAggressive(false),
             mTrackRange(1),
             mStrollRange(0),
-            mMutation(0)
+            mMutation(0),
+            mAttackDistance(0)
         {}
 
         /**
@@ -106,6 +125,12 @@ class MonsterClass
         void setMutation(unsigned factor) { mMutation = factor; } /**< sets mutation factor in percent*/
         unsigned getMutation() const { return mMutation; } /**< gets mutation factor in percent*/
 
+        void setAttackDistance(unsigned distance) { mAttackDistance = distance; } /**< sets preferred combat distance in pixels*/
+        unsigned getAttackDistance() const { return mAttackDistance; } /**< gets preferred combat distance in pixels*/
+
+        void addAttack(MonsterAttack *type) { mAttacks.push_back(type); } /**< adds an attack to the monsters repertoire */
+        const MonsterAttacks &getAttacks() const { return mAttacks; } /**< gets all attacks of the monster */
+
         /**
          * Randomly selects a monster drop (may return NULL).
          */
@@ -122,6 +147,8 @@ class MonsterClass
         unsigned mTrackRange;   /**< Distance the monster tracks enemies in */
         unsigned mStrollRange;  /**< Distance the monster strolls around in when not fighting */
         unsigned mMutation;     /**< Mutation factor in percent*/
+        unsigned mAttackDistance;
+        MonsterAttacks mAttacks; /**< preferred combat distance in pixels*/
 };
 
 /**
@@ -205,12 +232,7 @@ class Monster : public Being
         std::set<Character *> mLegalExpReceivers; /**< List of characters who are entitled to receive exp (killsteal protection)*/
 
         int mAttackTime;                       /**< Delay until monster can attack */
-        // TODO: the following vars should all be the same for all monsters of
-        // the same type. So they should be stored in mSpecy to save memory
-        int mAttackPreDelay;        /**< time between decision to make an attack and performing the attack */
-        int mAttackAftDelay;        /**< time it takes to perform an attack */
-        int mAttackRange;           /**< range of the monsters attacks in pixel */
-        int mAttackAngle;           /**< angle of the monsters attacks in degree */
+        MonsterAttack *mCurrentAttack; /**<Attack the monster is currently performing */
         std::list<AttackPosition> mAttackPositions; /**< set positions relative to target from which the monster can attack */
 
         friend struct MonsterTargetEventDispatch;

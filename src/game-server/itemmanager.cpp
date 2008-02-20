@@ -22,6 +22,7 @@
  */
 
 #include <map>
+#include <set>
 
 #include "game-server/itemmanager.hpp"
 
@@ -35,61 +36,6 @@ typedef std::map< int, ItemClass * > ItemClasses;
 static ItemClasses itemClasses; /**< Item reference */
 static std::string itemReferenceFile;
 
-
-ItemType itemTypeFromString (std::string name, int id = 0)
-{
-    if      (name=="generic")           return ITEM_UNUSABLE;
-    else if (name=="usable")            return ITEM_USABLE;
-    else if (name=="equip-1hand")       return ITEM_EQUIPMENT_ONE_HAND_WEAPON;
-    else if (name=="equip-2hand")       return ITEM_EQUIPMENT_TWO_HANDS_WEAPON;
-    else if (name=="equip-torso")       return ITEM_EQUIPMENT_TORSO;
-    else if (name=="equip-arms")        return ITEM_EQUIPMENT_ARMS;
-    else if (name=="equip-head")        return ITEM_EQUIPMENT_HEAD;
-    else if (name=="equip-legs")        return ITEM_EQUIPMENT_LEGS;
-    else if (name=="equip-shield")      return ITEM_EQUIPMENT_SHIELD;
-    else if (name=="equip-ring")        return ITEM_EQUIPMENT_RING;
-    else if (name=="equip-necklace")    return ITEM_EQUIPMENT_NECKLACE;
-    else if (name=="equip-feet")        return ITEM_EQUIPMENT_FEET;
-    else if (name=="equip-ammo")        return ITEM_EQUIPMENT_AMMO;
-    else if (name=="")
-    {
-        LOG_WARN("No item type defined for item "<<id<<" in items.xml");
-        return ITEM_UNUSABLE;
-    }
-    else
-    {
-        LOG_WARN("Unknown item type \""<<name<<"\" for item "<<id<<" in items.xml");
-        if (name.find("weapon") != std::string::npos)
-            LOG_WARN("do you mean \"equip-1hand\" or \"equip-2hand\"?");
-        if (name.find("armor") != std::string::npos)
-            LOG_WARN("do you mean \"equip-...\" instead of \"armor-...\"?");
-        return ITEM_UNUSABLE;
-    }
-}
-
-WeaponType weaponTypeFromString (std::string name, int id = 0)
-{
-    if      (name=="knife")      return WPNTYPE_KNIFE;
-    else if (name=="sword")      return WPNTYPE_SWORD;
-    else if (name=="polearm")    return WPNTYPE_POLEARM;
-    else if (name=="staff")      return WPNTYPE_STAFF;
-    else if (name=="whip")       return WPNTYPE_WHIP;
-    else if (name=="bow")        return WPNTYPE_BOW;
-    else if (name=="shooting")   return WPNTYPE_SHOOTING;
-    else if (name=="mace")       return WPNTYPE_MACE;
-    else if (name=="axe")        return WPNTYPE_AXE;
-    else if (name=="thrown")     return WPNTYPE_THROWN;
-    else if (name=="")
-    {
-        LOG_WARN("ItemManager: No weapon type defined for weapon with item id "<<id);
-        return WPNTYPE_NONE;
-    }
-    else
-    {
-        LOG_WARN("ItemManager: Unknown weapon type \""<<name<<"\" for item "<<id);
-        return WPNTYPE_NONE;
-    }
-}
 
 void ItemManager::initialize(std::string const &file)
 {
@@ -145,7 +91,19 @@ void ItemManager::reload()
         }
 
         std::string sItemType = XML::getProperty(node, "type", "");
-        ItemType itemType = itemTypeFromString(sItemType, id);
+        ItemType itemType = XML::itemTypeFromString(sItemType);
+
+        if (itemType == ITEM_UNKNOWN)
+        {
+            LOG_WARN(itemReferenceFile<<": Unknown item type \""<<sItemType
+                     <<"\" for item #"<<id<<" - treating it as \"generic\"");
+            itemType = ITEM_UNUSABLE;
+        }
+
+        if (itemType == ITEM_HAIRSPRITE || itemType == ITEM_RACESPRITE)
+        {
+            continue;
+        }
 
         ItemClass *item;
         ItemClasses::iterator i = itemClasses.find(id);
@@ -170,7 +128,13 @@ void ItemManager::reload()
             itemType == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
         {
             std::string sWeaponType = XML::getProperty(node, "weapon-type", "");
-            WeaponType weaponType = weaponTypeFromString(sWeaponType, id);
+            WeaponType weaponType = XML::weaponTypeFromString(sWeaponType);
+            if (weaponType == WPNTYPE_NONE)
+            {
+                LOG_WARN(itemReferenceFile<<": Unknown weapon type \""
+                         <<sWeaponType<<"\" for item #"<<id<<" - treating it as generic item");
+                itemType = ITEM_UNUSABLE;
+            }
             modifiers.setValue(MOD_WEAPON_TYPE, weaponType);
             modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));
             modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));

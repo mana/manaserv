@@ -27,6 +27,9 @@
 #include <string>
 #include <libxml/tree.h>
 
+#include "defines.h"
+#include "../game-server/item.hpp"
+
 namespace XML
 {
     /**
@@ -38,6 +41,26 @@ namespace XML
      * Gets a string property from an xmlNodePtr.
      */
     std::string getProperty(xmlNodePtr node, char const *name, std::string const &def);
+
+    /**
+     * Gets an floating point property from an xmlNodePtr.
+     */
+    double
+    getFloatProperty(xmlNodePtr node, const char *name, double def);
+
+
+    /**
+     * Converts a string into an element number
+     */
+    unsigned int elementFromString(std::string name);
+    /**
+     * Converts a string into an ItemType number
+     */
+    ItemType itemTypeFromString (std::string name);
+    /**
+     * Converts a string into a weaponType number
+     */
+    WeaponType weaponTypeFromString (std::string name);
 }
 
 #define for_each_xml_child_node(var, parent) \

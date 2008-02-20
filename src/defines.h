@@ -355,15 +355,18 @@ enum BeingState
  * Subject to change until Pauan and Dabe are finished with the element system.
  * Please keep element modifier of BeingAttribute in sync.
  */
-enum
+enum Element
 {
     ELEMENT_NEUTRAL = 0,
     ELEMENT_FIRE,
     ELEMENT_WATER,
     ELEMENT_EARTH,
     ELEMENT_AIR,
-    ELEMENT_SACRED,
-    ELEMENT_DEATH
+    ELEMENT_LIGHTNING,
+    ELEMENT_METAL,
+    ELEMENT_WOOD,
+    ELEMENT_ICE,
+    ELEMENT_ILLEGAL
 };
 
 /**

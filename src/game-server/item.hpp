@@ -47,7 +47,10 @@ enum ItemType
     ITEM_EQUIPMENT_RING,//              9
     ITEM_EQUIPMENT_NECKLACE,//         10
     ITEM_EQUIPMENT_FEET,//             11
-    ITEM_EQUIPMENT_AMMO//              12
+    ITEM_EQUIPMENT_AMMO,//              12
+    ITEM_HAIRSPRITE,
+    ITEM_RACESPRITE,
+    ITEM_UNKNOWN
 };
 
 /**

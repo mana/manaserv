@@ -1,3 +1,17 @@
+2008-02-21  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/util/xml.cpp, src/util/xml.hpp, src/game-server/itemmanager.cpp,
+	src/game-server/monstermanager.cpp, src/game-server/item.hpp:
+	Moved the functions which translate strings in XML files into
+	enumerations from the parsers to the XML utilities.
+	* src/game-server/itemmanager.cpp, src/game-server/item.hpp: Added
+	"item types" hairsprite and racesprite and made the server ignore
+	items of these types so it stops complaining about these entries
+	(which only concern the client) being incomplete.
+	* src/defines.h, src/game-server/monstermanager.cpp,
+	src/game-server/monster.cpp, src/game-server/monster.hpp: Implemented
+	getting attack distance and attack properties from monsters.xml.
+
 2008-02-20  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/monster.cpp: Fixed a bug which made wandering

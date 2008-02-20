@@ -196,6 +196,49 @@ void MonsterManager::reload()
                 }
                 monster->setTrackRange(XML::getProperty(subnode, "track-range", 1));
                 monster->setStrollRange(XML::getProperty(subnode, "stroll-range", 0) * 32);
+                monster->setAttackDistance(XML::getProperty(subnode, "attack-distance", 0));
+            }
+            else if (xmlStrEqual(subnode->name, BAD_CAST "attack"))
+            {
+                MonsterAttack *att = new MonsterAttack;
+                att->id = XML::getProperty(subnode, "id", 0);
+                att->priority = XML::getProperty(subnode, "priority", 1);
+                att->damageFactor = XML::getFloatProperty(subnode, "damage-factor", 1.0f);
+                att->preDelay = XML::getProperty(subnode, "pre-delay", 1);
+                att->aftDelay = XML::getProperty(subnode, "aft-delay", 0);
+                att->range = XML::getProperty(subnode, "range", 1);
+                att->angle = XML::getProperty(subnode, "angle", 1);
+                std::string sElement = XML::getProperty(subnode, "element", "neutral");
+                att->element = XML::elementFromString(sElement);
+                std::string sType = XML::getProperty(subnode, "type", "physical");
+                if (sType == "physical") {att->type = DAMAGE_PHYSICAL; }
+                else if (sType == "magical" || sType == "magic") {att->type = DAMAGE_MAGICAL; }
+                else if (sType == "other") {att->type = DAMAGE_OTHER; }
+                else { att->type = -1; }
+
+                if (att->id == 0)
+                {
+                    LOG_WARN(monsterReferenceFile
+                             <<": Attack without ID for monster #"
+                             <<id<<" ("<<name<<") - attack ignored");
+                }
+                else if (att->element == ELEMENT_ILLEGAL)
+                {
+                    LOG_WARN(monsterReferenceFile
+                             <<": Attack with unknown element \""<<sElement<<"\" "
+                             <<"for monster #"<<id<<" ("<<name<<") - attack ignored");
+                }
+                else if (att->type == -1)
+                {
+                    LOG_WARN(monsterReferenceFile
+                             <<": Attack with unknown type \""<<sType<<"\" "
+                             <<"for monster #"<<id<<" ("<<name<<")");
+                }
+                else
+                {
+                    monster->addAttack(att);
+                }
+
             }
         }
 
