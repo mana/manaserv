@@ -1,3 +1,8 @@
+2008-02-20  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/monster.cpp: Fixed a bug which made wandering
+	monsters prefer walking northwest.
+
 2008-02-13  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/monstermanager.cpp: Movement speed in monsters.xml

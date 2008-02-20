@@ -243,8 +243,8 @@ void Monster::update()
                 unsigned range = mSpecy->getStrollRange();
                 if (range)
                 {
-                    Point randomPos(rand() % (range * 2) - range + getPosition().x,
-                                    rand() % (range * 2) - range + getPosition().y);
+                    Point randomPos(rand() % (range * 2 + 1) - range + getPosition().x,
+                                    rand() % (range * 2 + 1) - range + getPosition().y);
                     setDestination(randomPos);
                     mCountDown = 10 + rand() % 10;
                 }
