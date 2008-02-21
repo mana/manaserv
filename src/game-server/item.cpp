@@ -21,9 +21,64 @@
  *  $Id$
  */
 
+
+#include <string>
+#include <map>
+
 #include "game-server/item.hpp"
 
 #include "game-server/being.hpp"
+
+WeaponType weaponTypeFromString (const std::string &name)
+{
+    static std::map<const std::string, WeaponType> table;
+
+    if (table.empty())
+    {
+        table["knife"]      = WPNTYPE_KNIFE;
+        table["sword"]      = WPNTYPE_SWORD;
+        table["polearm"]    = WPNTYPE_POLEARM;
+        table["staff"]      = WPNTYPE_STAFF;
+        table["whip"]       = WPNTYPE_WHIP;
+        table["bow"]        = WPNTYPE_BOW;
+        table["shooting"]   = WPNTYPE_SHOOTING;
+        table["mace"]       = WPNTYPE_MACE;
+        table["axe"]        = WPNTYPE_AXE;
+        table["thrown"]     = WPNTYPE_THROWN;
+    }
+
+    std::map<const std::string, WeaponType>::iterator val = table.find(name);
+
+    return val == table.end() ? WPNTYPE_NONE : (*val).second;
+}
+
+ItemType itemTypeFromString (const std::string &name)
+{
+    static std::map<const std::string, ItemType> table;
+
+    if (table.empty())
+    {
+        table["generic"]        = ITEM_UNUSABLE;
+        table["usable"]         = ITEM_USABLE;
+        table["equip-1hand"]    = ITEM_EQUIPMENT_ONE_HAND_WEAPON;
+        table["equip-2hand"]    = ITEM_EQUIPMENT_TWO_HANDS_WEAPON;
+        table["equip-torso"]    = ITEM_EQUIPMENT_TORSO;
+        table["equip-arms"]     = ITEM_EQUIPMENT_ARMS;
+        table["equip-head"]     = ITEM_EQUIPMENT_HEAD;
+        table["equip-legs"]     = ITEM_EQUIPMENT_LEGS;
+        table["equip-shield"]   = ITEM_EQUIPMENT_SHIELD;
+        table["equip-ring"]     = ITEM_EQUIPMENT_RING;
+        table["equip-necklace"] = ITEM_EQUIPMENT_NECKLACE;
+        table["equip-feet"]     = ITEM_EQUIPMENT_FEET;
+        table["equip-ammo"]     = ITEM_EQUIPMENT_AMMO;
+        table["hairsprite"]     = ITEM_HAIRSPRITE;
+        table["racesprite"]     = ITEM_RACESPRITE;
+    }
+
+    std::map<const std::string, ItemType>::iterator val = table.find(name);
+
+    return val == table.end() ? ITEM_UNKNOWN : (*val).second;
+}
 
 int ItemModifiers::getValue(int type) const
 {

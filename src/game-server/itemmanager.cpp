@@ -91,7 +91,7 @@ void ItemManager::reload()
         }
 
         std::string sItemType = XML::getProperty(node, "type", "");
-        ItemType itemType = XML::itemTypeFromString(sItemType);
+        ItemType itemType = itemTypeFromString(sItemType);
 
         if (itemType == ITEM_UNKNOWN)
         {
@@ -128,7 +128,7 @@ void ItemManager::reload()
             itemType == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
         {
             std::string sWeaponType = XML::getProperty(node, "weapon-type", "");
-            WeaponType weaponType = XML::weaponTypeFromString(sWeaponType);
+            WeaponType weaponType = weaponTypeFromString(sWeaponType);
             if (weaponType == WPNTYPE_NONE)
             {
                 LOG_WARN(itemReferenceFile<<": Unknown weapon type \""

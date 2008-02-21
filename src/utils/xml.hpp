@@ -47,20 +47,6 @@ namespace XML
      */
     double
     getFloatProperty(xmlNodePtr node, const char *name, double def);
-
-
-    /**
-     * Converts a string into an element number
-     */
-    unsigned int elementFromString(std::string name);
-    /**
-     * Converts a string into an ItemType number
-     */
-    ItemType itemTypeFromString (std::string name);
-    /**
-     * Converts a string into a weaponType number
-     */
-    WeaponType weaponTypeFromString (std::string name);
 }
 
 #define for_each_xml_child_node(var, parent) \

@@ -36,6 +36,28 @@ typedef std::map< int, MonsterClass * > MonsterClasses;
 static MonsterClasses monsterClasses; /**< Monster reference */
 static std::string monsterReferenceFile;
 
+Element elementFromString (const std::string &name)
+{
+    static std::map<const std::string, Element> table;
+
+    if (table.empty())
+    {
+        table["neutral"]    = ELEMENT_NEUTRAL;
+        table["fire"]       = ELEMENT_FIRE;
+        table["water"]      = ELEMENT_WATER;
+        table["earth"]      = ELEMENT_EARTH;
+        table["air"]        = ELEMENT_AIR;
+        table["lightning"]  = ELEMENT_LIGHTNING;
+        table["metal"]      = ELEMENT_METAL;
+        table["wood"]       = ELEMENT_WOOD;
+        table["ice"]        = ELEMENT_ICE;
+    }
+
+    std::map<const std::string, Element>::iterator val = table.find(name);
+
+    return val == table.end() ? ELEMENT_ILLEGAL : (*val).second;
+}
+
 void MonsterManager::initialize(std::string const &file)
 {
     monsterReferenceFile = file;
@@ -209,7 +231,7 @@ void MonsterManager::reload()
                 att->range = XML::getProperty(subnode, "range", 1);
                 att->angle = XML::getProperty(subnode, "angle", 1);
                 std::string sElement = XML::getProperty(subnode, "element", "neutral");
-                att->element = XML::elementFromString(sElement);
+                att->element = elementFromString(sElement);
                 std::string sType = XML::getProperty(subnode, "type", "physical");
                 if (sType == "physical") {att->type = DAMAGE_PHYSICAL; }
                 else if (sType == "magical" || sType == "magic") {att->type = DAMAGE_MAGICAL; }

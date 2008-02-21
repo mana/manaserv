@@ -11,6 +11,11 @@
 	* src/defines.h, src/game-server/monstermanager.cpp,
 	src/game-server/monster.cpp, src/game-server/monster.hpp: Implemented
 	getting attack distance and attack properties from monsters.xml.
+	* src/util/xml.cpp, src/util/xml.hpp, src/game-server/item.hpp,
+	src/game-server/item.cpp, src/game-server/monstermanager.cpp,
+	src/game-server/itemmanager.cpp: Moved the functions which translate
+	strings into enumerations from the XML library into the item and
+	monstermanager modules and reimplemented them using std::maps.
 
 2008-02-20  Philipp Sehmisch  <tmw@crushnet.org>
 

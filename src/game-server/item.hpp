@@ -53,6 +53,9 @@ enum ItemType
     ITEM_UNKNOWN
 };
 
+ItemType itemTypeFromString (const std::string &name);
+
+
 /**
  * Enumeration of available weapon's types.
  */
@@ -70,6 +73,8 @@ enum WeaponType
     WPNTYPE_AXE,
     WPNTYPE_THROWN
 };
+
+WeaponType weaponTypeFromString (const std::string &name);
 
 /**
  * State effects to beings, and actors.
