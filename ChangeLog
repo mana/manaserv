@@ -1,3 +1,9 @@
+2008-02-23  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/monster.cpp: Improved monster AI by making monster only
+	use attacks which have a chance to hit the target and also use them
+	when the optimal combat distance hasn't been reached yet.
+
 2008-02-21  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/util/xml.cpp, src/util/xml.hpp, src/game-server/itemmanager.cpp,

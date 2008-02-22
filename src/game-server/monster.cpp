@@ -23,6 +23,7 @@
 #include "game-server/monster.hpp"
 
 #include "game-server/character.hpp"
+#include "game-server/collisiondetection.hpp"
 #include "game-server/item.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/state.hpp"
@@ -209,28 +210,45 @@ void Monster::update()
         }
     }
 
-    // Check if an attack position has been found
+    // Check if an enemy has been found
     if (bestAttackTarget)
     {
-        // Check if we are there
-        if (bestAttackPosition == getPosition())
-        {
-            // We are there - let's beat the crap out of the target
-            setDirection(bestAttackDirection);
-            MonsterAttacks allAttacks = mSpecy->getAttacks();
+        //check which attacks have a chance to hit the target
+        MonsterAttacks allAttacks = mSpecy->getAttacks();
+        MonsterAttacks workingAttacks; //TODO: maybe another container than vector is better - reevaluate when implementing priority
 
-            if (!allAttacks.empty())
+        for (MonsterAttacks::iterator i = allAttacks.begin();
+             i != allAttacks.end();
+             i++)
+        {
+            int attackAngle = 0;
+            switch (bestAttackDirection)
             {
-                mCurrentAttack = allAttacks.at(rand()%allAttacks.size()); //TODO: this ignores priority -> fix it
-                mAttackTime = mCurrentAttack->preDelay + mCurrentAttack->aftDelay;
-                setAction(ATTACK);
-                raiseUpdateFlags(UPDATEFLAG_ATTACK);
+                case DIRECTION_UP: attackAngle = 90; break;
+                case DIRECTION_DOWN: attackAngle = 270; break;
+                case DIRECTION_LEFT: attackAngle = 180; break;
+                case DIRECTION_RIGHT:attackAngle = 0; break;
+                default: break;
             }
+            if  (Collision::diskWithCircleSector(
+                bestAttackTarget->getPosition(), bestAttackTarget->getSize(),
+                getPosition(), (*i)->range, (*i)->angle, attackAngle))
+            {
+                workingAttacks.push_back((*i));
+            }
+        }
+        if (workingAttacks.empty())
+        {   //when no attack can hit move closer to attack position
+            setDestination(bestAttackPosition);
         }
         else
         {
-            // We aren't there yet - let's move
-            setDestination(bestAttackPosition);
+            setDestination(getPosition());
+            setDirection(bestAttackDirection);
+            mCurrentAttack = workingAttacks.at(rand()%workingAttacks.size()); //TODO: this ignores priority -> fix it
+            mAttackTime = mCurrentAttack->preDelay + mCurrentAttack->aftDelay;
+            setAction(ATTACK);
+            raiseUpdateFlags(UPDATEFLAG_ATTACK);
         }
     }
     else
