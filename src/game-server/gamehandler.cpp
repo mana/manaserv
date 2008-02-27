@@ -426,6 +426,11 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             result.writeByte(attribute);
         } break;
 
+        case PGMSG_RESPAWN:
+        {
+            computer.character->respawn(); // plausibility check is done by character class
+        } break;
+
 
 // The following messages should be handled by the chat server, not the game server.
 #if 0

@@ -1,3 +1,9 @@
+2008-02-27  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/defines.h, src/game-server/character.cpp,
+	src/game-server/character.hpp, src/game-server/gamehandler.cpp:
+	Implemented provisorical player respawn.
+
 2008-02-23  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/monster.cpp: Improved monster AI by making monster only

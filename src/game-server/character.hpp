@@ -61,6 +61,11 @@ class Character : public Being
         void perform();
 
         /**
+         * makes the character respawn
+         */
+        void respawn();
+
+        /**
          * Gets client computer.
          */
         GameClient *getClient() const

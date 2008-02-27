@@ -146,6 +146,7 @@ enum {
     GPMSG_RAISE_ATTRIBUTE_RESPONSE = 0x0161, // B error
     PGMSG_LOWER_ATTRIBUTE          = 0x0170, // B attribute
     GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error
+    PGMSG_RESPAWN                  = 0x0180, // -
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
                                              // monster: W type id

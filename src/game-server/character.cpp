@@ -35,6 +35,7 @@
 #include "game-server/gamehandler.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/state.hpp"
 #include "game-server/trade.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -108,6 +109,27 @@ void Character::perform()
     int attackAngle = 30; //TODO: get from weapon
 
     performAttack(damage, attackRange, attackAngle);
+}
+
+void Character::respawn()
+{
+    if (mAction != DEAD)
+    {
+        LOG_WARN("Character \""<<mName<<"\" tried to respawn without being dead");
+        return;
+    }
+
+    //warp back to spawn point
+    static const int spawnMap = 1;
+    static const int spawnX = 1024;
+    static const int spawnY = 1024;
+    GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
+
+    //restore hit points
+    mAttributes[BASE_ATTR_HP].mod = 0;
+
+    //make alive again
+    setAction(STAND);
 }
 
 int Character::getMapId() const
