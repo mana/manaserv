@@ -391,6 +391,15 @@ Character *DALStorage::getCharacter(int id, Account *owner)
     return getCharacterBySQL(sql.str(), owner);
 }
 
+/**
+ * Gets a character by character name.
+ */
+Character *DALStorage::getCharacter(const std::string &name)
+{
+    // TODO: Get character, this most likely needs to find the account first.
+}
+
+
 #if 0
 /**
  * Return the list of all Emails addresses.
