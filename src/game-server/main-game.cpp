@@ -259,9 +259,10 @@ void parseOptions(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     int elapsedWorldTicks;
-
+#ifdef PACKAGE_VERSION
     LOG_INFO("The Mana World Game Server v" << PACKAGE_VERSION);
-
+#endif
+    
     // Parse command line options
     parseOptions(argc, argv);
 

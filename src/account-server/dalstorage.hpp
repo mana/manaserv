@@ -92,7 +92,6 @@ class DALStorage
          */
         Character *getCharacter(int id, Account *owner);
 
-#if 0
         /**
          * Gets a character by character name.
          *
@@ -101,7 +100,6 @@ class DALStorage
          * @return the character associated to the name
          */
         Character *getCharacter(const std::string &name);
-#endif
 
         /**
          * Add a new account.

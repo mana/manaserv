@@ -431,52 +431,6 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character->respawn(); // plausibility check is done by character class
         } break;
 
-
-// The following messages should be handled by the chat server, not the game server.
-#if 0
-
-        case PGMSG_GUILD_CREATE:
-        {
-            std::string name = message.readString();
-            int characterId = computer.character->getDatabaseID();
-            messageMap[characterId] = computer.character;
-            accountHandler->playerCreateGuild(characterId, name);
-        } break;
-
-        case PGMSG_GUILD_INVITE:
-        {
-            short guildId = message.readShort();
-            std::string member = message.readString();
-            int characterId = computer.character->getDatabaseID();
-            messageMap[characterId] = computer.character;
-            accountHandler->playerInviteToGuild(characterId, guildId, member);
-        } break;
-
-        case PGMSG_GUILD_ACCEPT:
-        {
-            std::string guildName = message.readString();
-            int characterId = computer.character->getDatabaseID();
-            messageMap[characterId] = computer.character;
-            accountHandler->playerAcceptInvite(characterId, guildName);
-        } break;
-
-        case PGMSG_GUILD_GET_MEMBERS:
-        {
-            short guildId = message.readShort();
-            int characterId = computer.character->getDatabaseID();
-            messageMap[characterId] = computer.character;
-            accountHandler->getGuildMembers(characterId, guildId);
-        } break;
-
-        case PGMSG_GUILD_QUIT:
-        {
-            short guildId = message.readShort();
-            int characterId = computer.character->getDatabaseID();
-            messageMap[characterId] = computer.character;
-            accountHandler->quitGuild(characterId, guildId);
-        } break;
-#endif
-
         default:
             LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);

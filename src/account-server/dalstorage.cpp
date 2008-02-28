@@ -27,10 +27,9 @@
 
 #include "point.h"
 #include "account-server/account.hpp"
-#include "account-server/guild.hpp"
-#include "account-server/guildmanager.hpp"
 #include "account-server/dalstoragesql.hpp"
 #include "chat-server/chatchannel.hpp"
+#include "chat-server/guild.hpp"
 #include "common/configuration.hpp"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
@@ -391,26 +390,6 @@ Character *DALStorage::getCharacter(int id, Account *owner)
     sql << "select * from " << CHARACTERS_TBL_NAME << " where id = '" << id << "';";
     return getCharacterBySQL(sql.str(), owner);
 }
-
-#if 0
-/**
- * Gets a character by character name.
- */
-Character *DALStorage::getCharacter(const std::string &name)
-{
-    // look for the character in the list first.
-    Characters::iterator it_end = mCharacters.end(),
-    it = std::find_if(mCharacters.begin(), it_end, character_by_name(name));
-
-    if (it != it_end)
-        return *it;
-
-    // the account was not in the list, look for it in the database.
-    std::ostringstream sql;
-    sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '" << name << "';";
-    return getCharacterBySQL(sql.str());
-}
-#endif
 
 #if 0
 /**
@@ -1053,8 +1032,6 @@ void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
     }
 }
 
-// Guild members should not be stored by name in the database.
-#if 0
 /**
  * get a list of guilds
  */
@@ -1104,7 +1081,7 @@ std::list<Guild*> DALStorage::getGuildList()
             {
                 Character *character = getCharacter(memberInfo(j,0));
                 character->addGuild((*itr)->getName());
-                (*itr)->addMember(character);
+                (*itr)->addMember(character->getName());
             }
         }
     }
@@ -1115,7 +1092,6 @@ std::list<Guild*> DALStorage::getGuildList()
 
     return guilds;
 }
-#endif
 
 std::string DALStorage::getQuestVar(int id, std::string const &name)
 {

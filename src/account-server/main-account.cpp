@@ -33,11 +33,11 @@
 #endif
 
 #include "account-server/accounthandler.hpp"
-#include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
 #include "account-server/dalstorage.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chathandler.hpp"
+#include "chat-server/guildmanager.hpp"
 #include "common/configuration.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
@@ -150,11 +150,6 @@ static void initialize()
     // Initialize the Chat channels manager
     chatChannelManager = new ChatChannelManager;
 
-#if 0
-    // Initialise the guild manager
-    guildManager = new GuildManager;
-#endif
-
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
     // singleton or a local variable in the event-loop
@@ -194,9 +189,6 @@ static void deinitialize()
 
     // Destroy Managers
     delete chatChannelManager;
-#if 0
-    delete guildManager;
-#endif
 
     // Get rid of persistent data storage
     delete storage;
@@ -293,8 +285,10 @@ static void parseOptions(int argc, char *argv[])
  */
 int main(int argc, char *argv[])
 {
+#ifdef PACKAGE_VERSION
     LOG_INFO("The Mana World Account+Chat Server v" << PACKAGE_VERSION);
-
+#endif
+    
     // Parse Command Line Options
     parseOptions(argc, argv);
 

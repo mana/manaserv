@@ -29,8 +29,6 @@
 #include "account-server/accountclient.hpp"
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
-#include "account-server/guild.hpp"
-#include "account-server/guildmanager.hpp"
 #include "account-server/serverhandler.hpp"
 #include "chat-server/chathandler.hpp"
 #include "common/configuration.hpp"

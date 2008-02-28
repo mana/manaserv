@@ -17,21 +17,17 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id$
+ *  $Id: guildmanager.cpp 3549 2007-08-30 16:20:33Z gmelquio $
  */
 
-#if 0
 #include "guildmanager.hpp"
-
-#include "account-server/characterdata.hpp"
-#include "account-server/guild.hpp"
-#include "account-server/storage.hpp"
+#include "guild.hpp"
+#include "account-server/dalstorage.hpp"
 
 GuildManager::GuildManager()
 {
     // Load stored guilds from db
-    Storage &store = Storage::instance("tmw");
-    mGuilds = store.getGuildList();
+    mGuilds = storage->getGuildList();
 }
 
 GuildManager::~GuildManager()
@@ -41,19 +37,19 @@ GuildManager::~GuildManager()
     {
         delete *itr;
     }
+    mGuilds.clear();
 }
 
-short GuildManager::createGuild(const std::string &name, CharacterData *player)
+short GuildManager::createGuild(const std::string &name, const std::string &playerName)
 {
     Guild *guild = new Guild(name);
     // Add guild to db
-    Storage &store = Storage::instance("tmw");
-    store.addGuild(guild);
+    storage->addGuild(guild);
 
     // Make sure to add guild to mGuilds before searching for it to add the
     // player
     mGuilds.push_back(guild);
-    addGuildMember(guild->getId(), player);
+    addGuildMember(guild->getId(), playerName);
 
     return guild->getId();
 }
@@ -63,28 +59,27 @@ void GuildManager::removeGuild(short guildId)
     Guild *guild = findById(guildId);
     if (!guild)
         return;
-    Storage &store = Storage::instance("tmw");
-    store.removeGuild(guild);
+    storage->removeGuild(guild);
+    mGuilds.remove(guild);
+    delete guild;
 }
 
-void GuildManager::addGuildMember(short guildId, CharacterData *player)
+void GuildManager::addGuildMember(short guildId, const std::string &playerName)
 {
     Guild *guild = findById(guildId);
     if (!guild)
         return;
-    Storage &store = Storage::instance("tmw");
-    store.addGuildMember(guildId, player->getName());
-    guild->addMember(player);
+    storage->addGuildMember(guildId, playerName);
+    guild->addMember(playerName);
 }
 
-void GuildManager::removeGuildMember(short guildId, CharacterData *player)
+void GuildManager::removeGuildMember(short guildId, const std::string &playerName)
 {
     Guild *guild = findById(guildId);
     if (!guild)
         return;
-    Storage &store = Storage::instance("tmw");
-    store.removeGuildMember(guildId, player->getName());
-    guild->removeMember(player);
+    storage->removeGuildMember(guildId, playerName);
+    guild->removeMember(playerName);
     if(guild->totalMembers() == 0)
     {
         removeGuild(guildId);
@@ -93,10 +88,12 @@ void GuildManager::removeGuildMember(short guildId, CharacterData *player)
 
 Guild *GuildManager::findById(short id)
 {
-    for (std::list<Guild*>::iterator itr = mGuilds.begin();
-            itr != mGuilds.end(); ++itr)
+    Guild *guild;
+    for (std::list<Guild*>::iterator itr = mGuilds.begin(),
+            itr_end = mGuilds.end();
+            itr != itr_end; ++itr)
     {
-        Guild *guild = (*itr);
+        guild = (*itr);
         if (guild->getId() == id)
         {
             return guild;
@@ -107,10 +104,12 @@ Guild *GuildManager::findById(short id)
 
 Guild *GuildManager::findByName(const std::string &name)
 {
-    for (std::list<Guild*>::iterator itr = mGuilds.begin();
-            itr != mGuilds.end(); ++itr)
+    Guild *guild;
+    for (std::list<Guild*>::iterator itr = mGuilds.begin(),
+            itr_end = mGuilds.end();
+            itr != itr_end; ++itr)
     {
-        Guild *guild = (*itr);
+        guild = (*itr);
         if (guild->getName() == name)
         {
             return guild;
@@ -123,4 +122,3 @@ bool GuildManager::doesExist(const std::string &name)
 {
     return findByName(name) != NULL;
 }
-#endif

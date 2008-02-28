@@ -275,8 +275,8 @@ class Character : public Being
         Character(Character const &);
         Character &operator=(Character const &);
 
-        static const float EXPCURVE_EXPONENT = 3.0f; // should maybe be obtained
-        static const float EXPCURVE_FACTOR = 10.0f;  // from the config file
+        static const float EXPCURVE_EXPONENT = 5.0f; // should maybe be obtained
+        static const float EXPCURVE_FACTOR = 3.0f;  // from the config file
         static const float LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f; // I am taking suggestions for a better name
         static const int CHARPOINTS_PER_LEVELUP = 5;
         static const int CORRECTIONPOINTS_PER_LEVELUP = 2;

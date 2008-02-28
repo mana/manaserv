@@ -17,16 +17,14 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id$
+ *  $Id: guild.hpp 3549 2007-08-30 16:20:33Z gmelquio $
  */
 
-#ifndef _TMWSERV_ACCOUNTSERVER_GUILD_H_
-#define _TMWSERV_ACCOUNTSERVER_GUILD_H_
+#ifndef _TMWSERV_CHATSERVER_GUILD_H_
+#define _TMWSERV_CHATSERVER_GUILD_H_
 
 #include <string>
 #include <list>
-
-class Character;
 
 /**
  * A guild and its members.
@@ -34,7 +32,7 @@ class Character;
 class Guild
 {
     public:
-        typedef std::list<Character *> guildMembers;
+        typedef std::list<std::string> guildMembers;
 
         /**
          * Constructor.
@@ -49,17 +47,17 @@ class Guild
         /**
          * Add a member to the guild.
          */
-        void addMember(Character *player);
+        void addMember(const std::string &playerName);
 
         /**
          * Remove a member from the guild.
          */
-        void removeMember(Character *player);
+        void removeMember(const std::string &playerName);
 
         /**
          * Check player is the leader of the guild.
          */
-        bool checkLeader(Character *player);
+        bool checkLeader(const std::string &playerName);
 
         /**
          * Set the ID of the guild.
@@ -70,12 +68,12 @@ class Guild
         /**
          * Check if player has been invited to the guild.
          */
-        bool checkInvited(const std::string &name);
+        bool checkInvited(const std::string &playerName);
 
         /**
          * Add a player to the invite list.
          */
-        void addInvited(const std::string &name);
+        void addInvited(const std::string &playerName);
 
         /**
          * Returns the name of the guild.
@@ -98,17 +96,21 @@ class Guild
         /**
          * Get a member in the guild.
          */
-        std::string getMember(int i) const;
+        const std::string& getMember(int i) const;
 
         /**
          * Find member by name.
          */
-        bool checkInGuild(const std::string &name);
+        bool checkInGuild(const std::string &playerName);
+    
+        /**
+         * Return the ID of the guild leader.
+         */
 
     private:
         short mId;
         std::string mName;
-        std::list<Character *> mMembers;
+        std::list<std::string> mMembers;
         std::list<std::string> mInvited;
 };
 

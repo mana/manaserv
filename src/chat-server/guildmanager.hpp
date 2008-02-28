@@ -17,12 +17,14 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id$
+ *  $Id: guildmanager.hpp 3549 2007-08-30 16:20:33Z gmelquio $
  */
+#ifndef TMW_CHATSERVER_GUILDMANAGER_H
+#define TMW_CHATSERVER_GUILDMANAGER_H
 
 #include <list>
+#include <string>
 
-class Character;
 class Guild;
 
 /**
@@ -44,7 +46,7 @@ class GuildManager
         /**
          * Creates a guild.
          */
-        short createGuild(const std::string &name, Character *player);
+        short createGuild(const std::string &name, const std::string &playerName);
 
         /**
          * Removes a guild.
@@ -54,12 +56,12 @@ class GuildManager
         /**
          * Adds a member to a guild.
          */
-        void addGuildMember(short guildId, Character *player);
+        void addGuildMember(short guildId, const std::string &playerName);
 
         /**
          * Removes a member from a guild.
          */
-        void removeGuildMember(short guildId, Character *player);
+        void removeGuildMember(short guildId, const std::string &playerName);
 
         /**
          * Returns the guild with the given id. O(n)
@@ -89,3 +91,5 @@ class GuildManager
 };
 
 extern GuildManager *guildManager;
+
+#endif

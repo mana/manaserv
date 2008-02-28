@@ -46,17 +46,10 @@ ChatChannelManager::registerPublicChannel(const std::string &channelName,
         const std::string &channelAnnouncement,
         const std::string &channelPassword)
 {
-    /* FIXME: This code is ill-designed. If the highest ID is already in use,
-       then it is impossible to create new channels, even if there are some
-       unused IDs. */
     int channelId = 1;
     for (ChatChannelIterator i = mChatChannels.begin(),
          end = mChatChannels.end(); i != end; ++i)
     {
-        // Don't allow channels with the same name
-        if (i->second.getName() == channelName)
-            return 0;
-
         // We seek the highest channelId in the public range
         if (channelId <= i->first &&
                 i->first < MAX_PUBLIC_CHANNELS_RANGE)
@@ -65,7 +58,7 @@ ChatChannelManager::registerPublicChannel(const std::string &channelName,
         }
     }
 
-    // Too much channels registered
+    // Too many channels registered
     if (channelId >= MAX_PUBLIC_CHANNELS_RANGE)
         return 0;
 
@@ -84,21 +77,20 @@ ChatChannelManager::registerPrivateChannel(const std::string &channelName,
         const std::string &channelAnnouncement,
         const std::string &channelPassword)
 {
-    // FIXME: see above.
     int channelId = MAX_PUBLIC_CHANNELS_RANGE;
 
     for (ChatChannelIterator i = mChatChannels.begin(),
             end = mChatChannels.end(); i != end; ++i)
     {
-        if (i->second.getName() == channelName) return 0;
 
         // We seek the highest channelId in the private range
         if (channelId <= i->first)
             channelId = i->first + 1;
     }
 
-    // Too much channels registered
-    if (channelId >= MAX_PRIVATE_CHANNELS_RANGE) return 0;
+    // Too many channels registered
+    if (channelId >= MAX_PRIVATE_CHANNELS_RANGE) 
+        return 0;
 
     // Register Channel
     mChatChannels.insert(std::make_pair(channelId,

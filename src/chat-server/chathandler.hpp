@@ -51,6 +51,11 @@ class ChatHandler : public ConnectionHandler
             std::string character;
             unsigned char level;
         };
+    
+        /**
+         * Map the chat clients to the characters name
+         */
+        std::map<std::string, ChatClient*> mPlayerMap;
 
     public:
 
@@ -70,20 +75,6 @@ class ChatHandler : public ConnectionHandler
         void warnUsersAboutPlayerEventInChat(ChatChannel *channel,
                                              const std::string &userName,
                                              char eventId);
-
-        /**
-         * Send chat and guild info to chat client, so that they can join the
-         * correct channels.
-         */
-        void sendGuildEnterChannel(const MessageOut &msg,
-                                   const std::string &name);
-
-        /**
-         * Send guild invite.
-         */
-        void sendGuildInvite(const std::string &invitedName,
-                             const std::string &inviterName,
-                             const std::string &guildName);
 
         /**
          * Called by TokenCollector when a client wrongly connected.
@@ -120,6 +111,20 @@ class ChatHandler : public ConnectionHandler
          * Send messages for each guild the character belongs to.
          */
         void sendGuildRejoin(ChatClient &computer);
+    
+        /**
+         * Send chat and guild info to chat client, so that they can join the
+         * correct channels.
+         */
+        void sendGuildEnterChannel(const MessageOut &msg,
+                                   const std::string &name);
+    
+        /**
+         * Send guild invite.
+         */
+        void sendGuildInvite(const std::string &invitedName,
+                             const std::string &inviterName,
+                             const std::string &guildName);
 
     private:
         /**
@@ -156,6 +161,21 @@ class ChatHandler : public ConnectionHandler
 
         void
         handleDisconnectMessage(ChatClient &client, MessageIn &msg);
+    
+        void
+        handleGuildCreation(ChatClient &client, MessageIn &msg);
+    
+        void
+        handleGuildInvitation(ChatClient &client, MessageIn &msg);
+    
+        void
+        handleGuildAcceptInvite(ChatClient &client, MessageIn &msg);
+    
+        void
+        handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg);
+    
+        void
+        handleGuildQuit(ChatClient &client, MessageIn &msg);
 
         /**
          * Tell the player to be more polite.

@@ -17,14 +17,10 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id$
+ *  $Id: guild.cpp 3549 2007-08-30 16:20:33Z gmelquio $
  */
-
-#if 0
 #include "guild.hpp"
 
-#include "account-server/characterdata.hpp"
-#include "account-server/storage.hpp"
 
 Guild::Guild(const std::string &name) :
 mName(name)
@@ -35,33 +31,33 @@ Guild::~Guild()
 {
 }
 
-void Guild::addMember(CharacterData* player)
+void Guild::addMember(const std::string &playerName)
 {
-    mMembers.push_back(player);
+    mMembers.push_back(playerName);
 }
 
-void Guild::removeMember(CharacterData* player)
+void Guild::removeMember(const std::string &playerName)
 {
-    mMembers.remove(player);
+    mMembers.remove(playerName);
 }
 
-bool Guild::checkLeader(CharacterData *player)
+bool Guild::checkLeader(const std::string &playerName)
 {
-    CharacterData *leader = mMembers.front();
-    return leader == player;
+    std::string leaderName = mMembers.front();
+    return leaderName == playerName;
 }
 
-bool Guild::checkInvited(const std::string &name)
+bool Guild::checkInvited(const std::string &playerName)
 {
-    return std::find(mInvited.begin(), mInvited.end(), name) != mInvited.end();
+    return std::find(mInvited.begin(), mInvited.end(), playerName) != mInvited.end();
 }
 
-void Guild::addInvited(const std::string &name)
+void Guild::addInvited(const std::string &playerName)
 {
-    mInvited.push_back(name);
+    mInvited.push_back(playerName);
 }
 
-std::string Guild::getMember(int i) const
+const std::string& Guild::getMember(int i) const
 {
     int x = 0;
     for (guildMembers::const_iterator itr = mMembers.begin();
@@ -70,23 +66,13 @@ std::string Guild::getMember(int i) const
     {
         if (x == i)
         {
-            CharacterData *player = (*itr);
-            return player->getName();
+            return (*itr);
         }
     }
-    return "";
+    return NULL;
 }
 
-bool Guild::checkInGuild(const std::string &name)
+bool Guild::checkInGuild(const std::string &playerName)
 {
-    for (guildMembers::iterator itr = mMembers.begin(); itr != mMembers.end(); ++itr)
-    {
-        CharacterData *player = (*itr);
-        if (player->getName() == name)
-        {
-            return true;
-        }
-    }
-    return false;
+    return std::find(mMembers.begin(), mMembers.end(), playerName) != mMembers.end();
 }
-#endif

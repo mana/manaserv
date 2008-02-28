@@ -24,9 +24,8 @@
 #include <list>
 
 #include "defines.h"
-#include "account-server/guild.hpp"
-#include "account-server/guildmanager.hpp"
-#include "account-server/serverhandler.hpp"
+#include "chat-server/guild.hpp"
+#include "chat-server/guildmanager.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chatclient.hpp"
 #include "chat-server/chathandler.hpp"
@@ -161,6 +160,26 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PCMSG_DISCONNECT:
             handleDisconnectMessage(computer, message);
+            break;
+            
+        case PCMSG_GUILD_CREATE:
+            handleGuildCreation(computer, message);
+            break;
+            
+        case PCMSG_GUILD_INVITE:
+            handleGuildInvitation(computer, message);
+            break;
+            
+        case PCMSG_GUILD_ACCEPT:
+            handleGuildAcceptInvite(computer, message);
+            break;
+            
+        case PCMSG_GUILD_GET_MEMBERS:
+            handleGuildRetrieveMembers(computer, message);
+            break;
+            
+        case PCMSG_GUILD_QUIT:
+            handleGuildQuit(computer, message);
             break;
 
         default:
@@ -312,13 +331,11 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-#if 0
     else if (guildManager->doesExist(channelName))
     {
         // Channel already exists
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-#endif
     else
     {
         // We attempt to create a new channel
@@ -386,28 +403,6 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
             else
                 reply.writeByte(ERRMSG_FAILURE);
         }
-/* The chat server should not access directly to the objects of the account
-   server, so that they can be splitted later, if needed. */
-#if 0
-        else if (guildManager->doesExist(channelName))
-        {
-            Guild *guild = guildManager->findByName(channelName);
-            if (guild->checkLeader(character.get()))
-            {
-                // TODO: b_lindeijer: I think it would be better if guild
-                //        channels were removed in response to a guild being
-                //        removed, as opposed to removing a guild because its
-                //        channel disappears.
-                chatChannelManager->removeChannel(channelId);
-                guildManager->removeGuild(guild->getId());
-                reply.writeByte(ERRMSG_OK);
-            }
-            else
-            {
-                reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-            }
-        }
-#endif
         else
         {
             reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
@@ -455,14 +450,6 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     short channelId = chatChannelManager->getChannelId(channelName);
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
-#if 0
-    // TODO: b_lindeijer: Currently, the client has to join its guild channels
-    //        explicitly by sending 'enter channel' messages. This should be
-    //        changed to implicitly joining relevant guild channels right after
-    //        login.
-    Guild *guild = guildManager->findByName(channelName);
-#endif
-
     if (!channelId || !channel)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
@@ -473,25 +460,10 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
         // Incorrect password (should probably have its own return value)
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-#if 0
-    else if (guild && !guild->checkInGuild(client.characterName))
-    {
-        // Player tried to join a guild channel of a guild he's not a member of
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
-    }
-#endif
     else
     {
         if (channel->addUser(&client))
         {
-#if 0
-            // In the case of a guild, send user joined message.
-            if (guild)
-            {
-                sendUserJoined(channel, client.characterName);
-            }
-#endif
-
             reply.writeByte(ERRMSG_OK);
             // The user entered the channel, now give him the channel
             // id, the announcement string and the user list.
@@ -547,20 +519,6 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
         warnUsersAboutPlayerEventInChat(channel,
                 client.characterName,
                 CHAT_EVENT_LEAVING_PLAYER);
-
-#if 0
-        // TODO: b_lindeijer: Clients aren't supposed to quit guild
-        //        channels explicitly, this should rather happen
-        //        implicitly. See similar note at handling 'enter channel'
-        //        messages.
-        const std::string &channelName = channel->getName();
-
-        if (guildManager->doesExist(channelName))
-        {
-            // Send a user left message
-            sendUserLeft(channel, client.characterName);
-        }
-#endif
     }
 
     client.send(reply);
@@ -592,15 +550,10 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_LIST_CHANNELUSERS_RESPONSE);
 
-    // TODO: b_lindeijer: Since it only makes sense to ask for the list of
-    //        users in a channel you're in, this message should really take
-    //        a channel id instead.
-    std::string channelName = msg.readString();
-
-    int channelId = chatChannelManager->getChannelId(channelName);
+    int channelId = msg.readLong();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
-    reply.writeString(channelName);
+    reply.writeLong(channelId);
 
     if (channel)
     {
@@ -622,6 +575,162 @@ ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
     MessageOut reply(CPMSG_DISCONNECT_RESPONSE);
     reply.writeByte(ERRMSG_OK);
     chatChannelManager->removeUserFromAllChannels(&client);
+    client.send(reply);
+}
+
+void
+ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
+{
+    MessageOut reply(CPMSG_GUILD_CREATE_RESPONSE);
+    
+    // Check if guild already exists and if so, return error
+    std::string guildName = msg.readString();
+    if (!guildManager->doesExist(guildName))
+    {
+        // Guild doesnt already exist so create it
+        guildManager->createGuild(guildName, client.characterName);
+        reply.writeByte(ERRMSG_OK);
+        Guild *guild = guildManager->findByName(guildName);
+        reply.writeShort(guild->getId());
+        reply.writeString(guildName);
+    }
+    else
+    {
+        reply.writeByte(ERRMSG_ALREADY_TAKEN);
+    }
+    
+    client.send(reply);
+}
+
+void
+ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
+{
+    MessageOut reply(CPMSG_GUILD_INVITE_RESPONSE);
+    MessageOut invite(CPMSG_GUILD_INVITED);
+    
+    // send an invitation from sender to character to join guild
+    int guildId = msg.readShort();
+    std::string character = msg.readString();
+    
+    // get the chat client and the guild
+    ChatClient *invitedClient = mPlayerMap[character];
+    Guild *guild = guildManager->findById(guildId);
+    
+    if (invitedClient && guild)
+    {
+        // check permissions of inviter
+        if (guild->checkLeader(client.characterName))
+        {
+            // send the name of the inviter and the name of the guild
+            // that the character has been invited to join
+            std::string senderName = client.characterName;
+            std::string guildName = guild->getName();
+            invite.writeString(senderName);
+            invite.writeString(guildName);
+            invite.writeShort(guildId);
+            invitedClient->send(invite);
+            reply.writeByte(ERRMSG_OK);
+            
+            // add member to list of invited members to the guild
+            guild->addInvited(character);
+        }
+        else
+        {
+            reply.writeByte(ERRMSG_FAILURE);
+        }
+    }
+    else
+    {
+        reply.writeByte(ERRMSG_FAILURE);
+    }
+                           
+    client.send(reply);
+}
+
+void
+ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
+{
+    MessageOut reply(CPMSG_GUILD_ACCEPT_RESPONSE);
+    short guildId = msg.readShort();
+    
+    // check guild exists and that member was invited
+    // then add them as guild member
+    // and remove from invite list
+    Guild *guild = guildManager->findById(guildId);
+    if (guild)
+    {
+        if (guild->checkInvited(client.characterName))
+        {
+            guild->addMember(client.characterName);
+            reply.writeByte(ERRMSG_OK);
+            reply.writeShort(guild->getId());
+            reply.writeString(guild->getName());
+        }
+        else
+        {
+            reply.writeByte(ERRMSG_FAILURE);
+        }
+    }
+    else
+    {
+        reply.writeByte(ERRMSG_FAILURE);
+    }
+    
+    client.send(reply);
+}
+
+void
+ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
+{
+    MessageOut reply(CPMSG_GUILD_GET_MEMBERS_RESPONSE);
+    short guildId = msg.readShort();
+    Guild *guild = guildManager->findById(guildId);
+    
+    // check for valid guild
+    // write a list of member names that belong to the guild
+    if (guild)
+    {
+        reply.writeByte(ERRMSG_OK);
+        for(int i = 0; i < guild->totalMembers(); ++i)
+        {
+            reply.writeString(guild->getMember(i));
+        }
+    }
+    else
+    {
+        reply.writeByte(ERRMSG_FAILURE);
+    }
+    
+    client.send(reply);
+}
+
+void
+ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
+{
+    MessageOut reply(CPMSG_GUILD_QUIT_RESPONSE);
+    short guildId = msg.readShort();
+    Guild *guild = guildManager->findById(guildId);
+    
+    // check for valid guild
+    // check the member is in the guild
+    // remove the member from the guild
+    if (guild)
+    {
+        if (guild->checkInGuild(client.characterName))
+        {
+            reply.writeByte(ERRMSG_OK);
+            guild->removeMember(client.characterName);
+        }
+        else
+        {
+            reply.writeByte(ERRMSG_FAILURE);
+        }
+    }
+    else
+    {
+        reply.writeByte(ERRMSG_FAILURE);
+    }
+    
     client.send(reply);
 }
 
@@ -665,23 +774,6 @@ void ChatHandler::sendInChannel(ChatChannel *channel, MessageOut &msg)
          i = users.begin(), i_end = users.end(); i != i_end; ++i)
     {
         (*i)->send(msg);
-    }
-}
-
-void ChatHandler::sendGuildEnterChannel(const MessageOut &msg,
-                                        const std::string &name)
-{
-    // TODO: b_lindeijer: This method is just an inefficient way to send a
-    //        message to a player with a certain name. Would be good to get
-    //        rid of it.
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i)
-    {
-        if (static_cast< ChatClient * >(*i)->characterName == name)
-        {
-            (*i)->send(msg);
-            break;
-        }
     }
 }
 
