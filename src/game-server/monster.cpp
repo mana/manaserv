@@ -215,7 +215,8 @@ void Monster::update()
     {
         //check which attacks have a chance to hit the target
         MonsterAttacks allAttacks = mSpecy->getAttacks();
-        MonsterAttacks workingAttacks; //TODO: maybe another container than vector is better - reevaluate when implementing priority
+        std::map<int, MonsterAttack *> workingAttacks;
+        int prioritySum = 0;
 
         for (MonsterAttacks::iterator i = allAttacks.begin();
              i != allAttacks.end();
@@ -234,18 +235,22 @@ void Monster::update()
                 bestAttackTarget->getPosition(), bestAttackTarget->getSize(),
                 getPosition(), (*i)->range, (*i)->angle, attackAngle))
             {
-                workingAttacks.push_back((*i));
+                prioritySum += (*i)->priority;
+                workingAttacks[prioritySum] = (*i);
             }
         }
-        if (workingAttacks.empty())
+        if (workingAttacks.empty() || !prioritySum)
         {   //when no attack can hit move closer to attack position
             setDestination(bestAttackPosition);
         }
         else
         {
+            //stop movement
             setDestination(getPosition());
+            //turn into direction of enemy
             setDirection(bestAttackDirection);
-            mCurrentAttack = workingAttacks.at(rand()%workingAttacks.size()); //TODO: this ignores priority -> fix it
+            //perform a random attack based on priority
+            mCurrentAttack = workingAttacks.upper_bound(rand()%prioritySum)->second;
             mAttackTime = mCurrentAttack->preDelay + mCurrentAttack->aftDelay;
             setAction(ATTACK);
             raiseUpdateFlags(UPDATEFLAG_ATTACK);

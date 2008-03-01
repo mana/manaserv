@@ -1,3 +1,8 @@
+2008-03-01  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/monster.cpp: Implemented priority of different
+	monster attacks.
+
 2008-02-27  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/defines.h, src/game-server/character.cpp,
