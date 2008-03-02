@@ -353,6 +353,8 @@ int Monster::damage(Object *source, Damage const &damage)
 
 void Monster::died()
 {
+    if (mAction == DEAD) return;
+
     Being::died();
     mCountDown = 50; // Sets remove time to 5 seconds
 

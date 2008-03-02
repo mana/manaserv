@@ -1,3 +1,10 @@
+2008-03-02  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/being.cpp, src/game-server/monster.cpp: Moved death
+	check from Being::damage to Being::update for more reliable death
+	detection and to fix the bug that the last hit on a monster does not
+	count for exp calculation.
+
 2008-03-01  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/monster.cpp: Implemented priority of different

@@ -88,7 +88,6 @@ int Being::damage(Object *, Damage const &damage)
     LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
     HP.mod -= HPloss;
     modifiedAttribute(BASE_ATTR_HP);
-    if (HP.base + HP.mod <= 0) died();
 
     return HPloss;
 }
@@ -236,5 +235,11 @@ void Being::update()
             continue;
         }
         ++i;
+    }
+
+    //check if being died
+    if (getModifiedAttribute(BASE_ATTR_HP) <= 0 && mAction != DEAD)
+    {
+        died();
     }
 }
