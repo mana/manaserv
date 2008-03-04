@@ -1,3 +1,9 @@
+2008-03-04  David Athay <ko2fan@gmail.com>
+
+	* src/Makefile.am: Changed guild from account to chat server.
+	* src/account-server/main-account.cpp: Initialise guild manager
+	after the chat manager.
+
 2008-03-03  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/defines.h, src/game-server/being.cpp,

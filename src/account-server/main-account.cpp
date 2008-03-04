@@ -149,6 +149,8 @@ static void initialize()
     stringFilter = new StringFilter;
     // Initialize the Chat channels manager
     chatChannelManager = new ChatChannelManager;
+    // Initialise the Guild manager
+    guildManager = new GuildManager;
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -288,7 +290,7 @@ int main(int argc, char *argv[])
 #ifdef PACKAGE_VERSION
     LOG_INFO("The Mana World Account+Chat Server v" << PACKAGE_VERSION);
 #endif
-    
+
     // Parse Command Line Options
     parseOptions(argc, argv);
 
