@@ -369,6 +369,7 @@ enum
     BASE_ATTR_EVADE,   /**< Ability to avoid hits. */
     BASE_ATTR_HIT,     /**< Ability to hit stuff. */
     BASE_ATTR_HP,      /**< Hit Points (Base value: maximum, Modded value: current) */
+    BASE_ATTR_HP_REGEN,/**< number of HP regenerated every 10 game ticks */
     BASE_ATTR_END,
     BASE_ATTR_NB = BASE_ATTR_END - BASE_ATTR_BEGIN,
 

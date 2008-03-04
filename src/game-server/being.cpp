@@ -32,7 +32,8 @@
 
 Being::Being(int type, int id):
     MovingObject(type, id),
-    mAction(STAND)
+    mAction(STAND),
+    mHpRegenTimer(0)
 {
     Attribute attr = { 0, 0 };
     mAttributes.resize(NB_BEING_ATTRIBUTES, attr);
@@ -222,6 +223,29 @@ int Being::getModifiedAttribute(int attr) const
 
 void Being::update()
 {
+
+    int oldHP = getModifiedAttribute(BASE_ATTR_HP);
+    int newHP = oldHP;
+    int maxHP = getAttribute(BASE_ATTR_HP);
+
+    // regenerate HP
+    if (mAction != DEAD && mHpRegenTimer++ >= TICKS_PER_HP_REGENERATION)
+    {
+        mHpRegenTimer = 0;
+        newHP += getModifiedAttribute(BASE_ATTR_HP_REGEN);
+    }
+    //cap HP at maximum
+    if (newHP > maxHP)
+    {
+        newHP = maxHP;
+    }
+    //only update HP when it actually changed to avoid network noise
+    if (newHP != oldHP)
+    {
+        LOG_INFO("HP Update - newHP:"<<newHP<<", oldHP:"<<oldHP<<", maxHP:"<<maxHP);
+        applyModifier(BASE_ATTR_HP, newHP - oldHP);
+    }
+
     // Update lifetime of effects.
     AttributeModifiers::iterator i = mModifiers.begin();
     while (i != mModifiers.end())

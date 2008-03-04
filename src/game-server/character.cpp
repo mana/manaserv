@@ -125,11 +125,10 @@ void Character::respawn()
     static const int spawnY = 1024;
     GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
 
-    //restore hit points
-    mAttributes[BASE_ATTR_HP].mod = 0;
-
     //make alive again
     setAction(STAND);
+    mAttributes[BASE_ATTR_HP].mod = -mAttributes[BASE_ATTR_HP].base + 1;
+    modifiedAttribute(BASE_ATTR_HP);
 }
 
 int Character::getMapId() const
@@ -244,7 +243,13 @@ void Character::modifiedAttribute(int attr)
         {
             int newValue = getAttribute(i);
 
-            if (i == BASE_ATTR_HP){
+            if (i == BASE_ATTR_HP_REGEN){
+                newValue = (getModifiedAttribute(CHAR_ATTR_VITALITY) + 10)
+                         * (getModifiedAttribute(CHAR_ATTR_VITALITY) + 10)
+                         / (600 / TICKS_PER_HP_REGENERATION);
+                         // formula is in HP per minute. 600 game ticks = 1 minute.
+            }
+            else if (i == BASE_ATTR_HP){
                 newValue = (getModifiedAttribute(CHAR_ATTR_VITALITY) + 10)
                         * (mLevel + 10);
             }

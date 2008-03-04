@@ -1,3 +1,11 @@
+2008-03-03  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/defines.h, src/game-server/being.cpp,
+	src/game-server/being.hpp, src/game-server/character.cpp: Added natural
+	HP regeneration, capped HP at maximum and set HP to 1 after respawn.
+	* src/game-server/character.hpp: Reverted variables of exp per level
+	formula to reasonable values.
+
 2008-03-02  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.cpp, src/game-server/monster.cpp: Moved death

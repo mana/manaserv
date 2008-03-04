@@ -213,6 +213,7 @@ class Being : public MovingObject
         virtual void modifiedAttribute(int) {}
 
     protected:
+        static const int TICKS_PER_HP_REGENERATION = 100;
         Action mAction;
         std::vector< Attribute > mAttributes;
 
@@ -222,6 +223,7 @@ class Being : public MovingObject
 
         Hits mHitsTaken; /**< List of punches taken since last update */
         AttributeModifiers mModifiers; /**< Currently modified attributes. */
+        int mHpRegenTimer; /**< timer for hp regeneration*/
 };
 
 #endif // _TMWSERV_BEING_H_
