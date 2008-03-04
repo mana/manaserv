@@ -229,7 +229,7 @@ void Being::update()
     int maxHP = getAttribute(BASE_ATTR_HP);
 
     // regenerate HP
-    if (mAction != DEAD && mHpRegenTimer++ >= TICKS_PER_HP_REGENERATION)
+    if (mAction != DEAD && ++mHpRegenTimer >= TICKS_PER_HP_REGENERATION)
     {
         mHpRegenTimer = 0;
         newHP += getModifiedAttribute(BASE_ATTR_HP_REGEN);
