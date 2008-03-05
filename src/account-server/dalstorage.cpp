@@ -397,6 +397,7 @@ Character *DALStorage::getCharacter(int id, Account *owner)
 Character *DALStorage::getCharacter(const std::string &name)
 {
     // TODO: Get character, this most likely needs to find the account first.
+    return NULL;
 }
 
 
@@ -1089,8 +1090,11 @@ std::list<Guild*> DALStorage::getGuildList()
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
                 Character *character = getCharacter(memberInfo(j,0));
-                character->addGuild((*itr)->getName());
-                (*itr)->addMember(character->getName());
+                if (character)
+                {
+                    character->addGuild((*itr)->getName());
+                    (*itr)->addMember(character->getName());
+                }
             }
         }
     }

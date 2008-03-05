@@ -40,7 +40,7 @@ GuildManager::~GuildManager()
     mGuilds.clear();
 }
 
-short GuildManager::createGuild(const std::string &name, const std::string &playerName)
+Guild* GuildManager::createGuild(const std::string &name, const std::string &playerName)
 {
     Guild *guild = new Guild(name);
     // Add guild to db
@@ -51,7 +51,7 @@ short GuildManager::createGuild(const std::string &name, const std::string &play
     mGuilds.push_back(guild);
     addGuildMember(guild->getId(), playerName);
 
-    return guild->getId();
+    return guild;
 }
 
 void GuildManager::removeGuild(short guildId)

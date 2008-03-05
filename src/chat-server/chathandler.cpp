@@ -80,6 +80,9 @@ void ChatHandler::tokenMatched(ChatClient *c, Pending *p)
     MessageOut msg(CPMSG_CONNECT_RESPONSE);
     msg.writeByte(ERRMSG_OK);
     c->send(msg);
+
+    // Insert the ChatClient and Character into the Player map
+    mPlayerMap.insert(std::pair<std::string, ChatClient*>(c->characterName, c));
 }
 
 NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
@@ -100,6 +103,9 @@ void ChatHandler::computerDisconnected(NetComputer *comp)
     {
         // Remove user from all channels.
         chatChannelManager->removeUserFromAllChannels(computer);
+
+        // Remove the character from the player map
+        mPlayerMap.erase(computer->characterName);
     }
 
     delete computer;
@@ -116,7 +122,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
         mTokenCollector.addPendingClient(magic_token, &computer);
-        // sendGuildRejoin(computer);
+//        sendGuildRejoin(computer);
         return;
     }
 
@@ -161,23 +167,23 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PCMSG_DISCONNECT:
             handleDisconnectMessage(computer, message);
             break;
-            
+
         case PCMSG_GUILD_CREATE:
             handleGuildCreation(computer, message);
             break;
-            
+
         case PCMSG_GUILD_INVITE:
             handleGuildInvitation(computer, message);
             break;
-            
+
         case PCMSG_GUILD_ACCEPT:
             handleGuildAcceptInvite(computer, message);
             break;
-            
+
         case PCMSG_GUILD_GET_MEMBERS:
             handleGuildRetrieveMembers(computer, message);
             break;
-            
+
         case PCMSG_GUILD_QUIT:
             handleGuildQuit(computer, message);
             break;
@@ -582,15 +588,14 @@ void
 ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_CREATE_RESPONSE);
-    
+
     // Check if guild already exists and if so, return error
     std::string guildName = msg.readString();
     if (!guildManager->doesExist(guildName))
     {
         // Guild doesnt already exist so create it
-        guildManager->createGuild(guildName, client.characterName);
+        Guild *guild = guildManager->createGuild(guildName, client.characterName);
         reply.writeByte(ERRMSG_OK);
-        Guild *guild = guildManager->findByName(guildName);
         reply.writeShort(guild->getId());
         reply.writeString(guildName);
     }
@@ -598,7 +603,7 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_ALREADY_TAKEN);
     }
-    
+
     client.send(reply);
 }
 
@@ -607,15 +612,15 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_INVITE_RESPONSE);
     MessageOut invite(CPMSG_GUILD_INVITED);
-    
+
     // send an invitation from sender to character to join guild
     int guildId = msg.readShort();
     std::string character = msg.readString();
-    
+
     // get the chat client and the guild
     ChatClient *invitedClient = mPlayerMap[character];
     Guild *guild = guildManager->findById(guildId);
-    
+
     if (invitedClient && guild)
     {
         // check permissions of inviter
@@ -630,7 +635,7 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
             invite.writeShort(guildId);
             invitedClient->send(invite);
             reply.writeByte(ERRMSG_OK);
-            
+
             // add member to list of invited members to the guild
             guild->addInvited(character);
         }
@@ -643,7 +648,7 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
-                           
+
     client.send(reply);
 }
 
@@ -652,7 +657,7 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_ACCEPT_RESPONSE);
     short guildId = msg.readShort();
-    
+
     // check guild exists and that member was invited
     // then add them as guild member
     // and remove from invite list
@@ -675,7 +680,7 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
-    
+
     client.send(reply);
 }
 
@@ -685,12 +690,13 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
     MessageOut reply(CPMSG_GUILD_GET_MEMBERS_RESPONSE);
     short guildId = msg.readShort();
     Guild *guild = guildManager->findById(guildId);
-    
+
     // check for valid guild
     // write a list of member names that belong to the guild
     if (guild)
     {
         reply.writeByte(ERRMSG_OK);
+        reply.writeShort(guildId);
         for(int i = 0; i < guild->totalMembers(); ++i)
         {
             reply.writeString(guild->getMember(i));
@@ -700,7 +706,7 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
-    
+
     client.send(reply);
 }
 
@@ -710,7 +716,7 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
     MessageOut reply(CPMSG_GUILD_QUIT_RESPONSE);
     short guildId = msg.readShort();
     Guild *guild = guildManager->findById(guildId);
-    
+
     // check for valid guild
     // check the member is in the guild
     // remove the member from the guild
@@ -730,7 +736,7 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
-    
+
     client.send(reply);
 }
 
@@ -785,17 +791,11 @@ void ChatHandler::sendGuildInvite(const std::string &invitedName,
     msg.writeString(inviterName);
     msg.writeString(guildName);
 
-    // TODO: b_lindeijer: This is just an inefficient way to send a message to
-    //        a player with a certain name. Would be good if the invitedName
-    //        could be replaced with a ChatClient.
-    for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
-         i != i_end; ++i)
+    std::map<std::string, ChatClient*>::iterator itr = mPlayerMap.find(invitedName);
+    if (itr == mPlayerMap.end())
     {
-        if (static_cast< ChatClient * >(*i)->characterName == invitedName)
-        {
-            (*i)->send(msg);
-            break;
-        }
+        ChatClient *invited = itr->second;
+        invited->send(msg);
     }
 }
 
@@ -815,7 +815,7 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         {
             return;
         }
-        if (guild->checkLeader(character.get()))
+        if (guild->checkLeader(client.characterName))
         {
             leader = 1;
         }

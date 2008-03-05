@@ -176,7 +176,6 @@ static void initialize()
  */
 static void deinitialize()
 {
-    delete stringFilter;
     // Write configuration file
     Configuration::deinitialize();
 
@@ -190,7 +189,9 @@ static void deinitialize()
     delete chatHandler;
 
     // Destroy Managers
+    delete stringFilter;
     delete chatChannelManager;
+    delete guildManager;
 
     // Get rid of persistent data storage
     delete storage;

@@ -46,7 +46,7 @@ class GuildManager
         /**
          * Creates a guild.
          */
-        short createGuild(const std::string &name, const std::string &playerName);
+        Guild* createGuild(const std::string &name, const std::string &playerName);
 
         /**
          * Removes a guild.
