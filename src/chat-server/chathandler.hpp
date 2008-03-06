@@ -51,7 +51,7 @@ class ChatHandler : public ConnectionHandler
             std::string character;
             unsigned char level;
         };
-    
+
         /**
          * Map the chat clients to the characters name
          */
@@ -111,14 +111,14 @@ class ChatHandler : public ConnectionHandler
          * Send messages for each guild the character belongs to.
          */
         void sendGuildRejoin(ChatClient &computer);
-    
+
         /**
          * Send chat and guild info to chat client, so that they can join the
          * correct channels.
          */
         void sendGuildEnterChannel(const MessageOut &msg,
                                    const std::string &name);
-    
+
         /**
          * Send guild invite.
          */
@@ -161,19 +161,19 @@ class ChatHandler : public ConnectionHandler
 
         void
         handleDisconnectMessage(ChatClient &client, MessageIn &msg);
-    
+
         void
         handleGuildCreation(ChatClient &client, MessageIn &msg);
-    
+
         void
         handleGuildInvitation(ChatClient &client, MessageIn &msg);
-    
+
         void
         handleGuildAcceptInvite(ChatClient &client, MessageIn &msg);
-    
+
         void
         handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg);
-    
+
         void
         handleGuildQuit(ChatClient &client, MessageIn &msg);
 
@@ -211,6 +211,15 @@ class ChatHandler : public ConnectionHandler
          * @param name    the name of the user who left
          */
         void sendUserLeft(ChatChannel *channel, const std::string &name);
+
+        /**
+         * Retrieves the guild channel or creates one automatically
+         * Automatically makes client join it
+         * @param The name of the guild (and therefore the channel)
+         * @param The client to join the channel
+         * @return Returns the channel Id
+         */
+        int joinGuildChannel(const std::string &name, ChatClient &client);
 
         /**
          * Container for pending clients and pending connections.

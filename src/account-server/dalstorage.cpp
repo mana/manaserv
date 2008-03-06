@@ -396,8 +396,9 @@ Character *DALStorage::getCharacter(int id, Account *owner)
  */
 Character *DALStorage::getCharacter(const std::string &name)
 {
-    // TODO: Get character, this most likely needs to find the account first.
-    return NULL;
+    std::ostringstream sql;
+    sql << "select * from " << CHARACTERS_TBL_NAME << " where name = \"" << name << "\";";
+    return getCharacterBySQL(sql.str(), NULL);
 }
 
 

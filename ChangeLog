@@ -1,3 +1,11 @@
+2008-03-06  David Athay  <ko2fan@gmail.com>
+
+	* src/account-server/dalstorage.cpp, 
+	src/chat-server/guildmanager.cpp, src/chat-server/chathandler.hpp,
+	src/chat-server/guildmanager.hpp, src/chat-server/chathandler.cpp,
+	src/chat-server/guild.hpp: Fixed rejoining guilds after client 
+	reconnects to the server.
+
 2008-03-05  David Athay  <ko2fan@gmail.com>
 
 	* src/account-server/main-account.cpp, 

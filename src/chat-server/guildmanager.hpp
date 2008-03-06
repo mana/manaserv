@@ -24,6 +24,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 class Guild;
 
@@ -85,6 +86,11 @@ class GuildManager
          * Returns whether a guild exists.
          */
         bool doesExist(const std::string &name);
+
+        /**
+         * Return the guilds a character is in
+         */
+        std::vector<Guild*> getGuilds(const std::string &name);
 
     private:
         std::list<Guild*> mGuilds;

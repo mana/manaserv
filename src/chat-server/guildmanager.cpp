@@ -122,3 +122,29 @@ bool GuildManager::doesExist(const std::string &name)
 {
     return findByName(name) != NULL;
 }
+
+std::vector<Guild*> GuildManager::getGuilds(const std::string &name)
+{
+    Guild *guild;
+    std::vector<Guild*> guildList;
+
+    // Iterate through all guilds, get the number of members
+    // Check if any of the members match the specified name
+    // Add the guild to the list if they match, and return
+    // the list of all guilds the user with that name belongs to
+    for (std::list<Guild*>::iterator itr = mGuilds.begin(),
+            itr_end = mGuilds.end();
+            itr != itr_end; ++itr)
+    {
+        guild = (*itr);
+        for (int i = 0; i < guild->totalMembers(); ++i)
+        {
+            if (guild->getMember(i) == name)
+            {
+                guildList.push_back(guild);
+                break;
+            }
+        }
+    }
+    return guildList;
+}

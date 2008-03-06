@@ -122,7 +122,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
         mTokenCollector.addPendingClient(magic_token, &computer);
-//        sendGuildRejoin(computer);
+        sendGuildRejoin(computer);
         return;
     }
 
@@ -598,6 +598,11 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
         reply.writeByte(ERRMSG_OK);
         reply.writeShort(guild->getId());
         reply.writeString(guildName);
+        reply.writeByte(true);
+
+        // Send autocreated channel id
+        short channelId = joinGuildChannel(guildName, client);
+        reply.writeShort(channelId);
     }
     else
     {
@@ -670,6 +675,10 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guild->getId());
             reply.writeString(guild->getName());
+            reply.writeByte(false);
+
+            short id = joinGuildChannel(guild->getName(), client);
+            reply.writeShort(id);
         }
         else
         {
@@ -799,17 +808,13 @@ void ChatHandler::sendGuildInvite(const std::string &invitedName,
     }
 }
 
-#if 0
 void ChatHandler::sendGuildRejoin(ChatClient &client)
 {
-    // Get character based on name.
-    CharacterPtr character = serverHandler->getCharacter(client.characterName);
-
     // Get list of guilds and check what rights they have.
-    std::vector<std::string> guilds = character->getGuilds();
+    std::vector<Guild*> guilds = guildManager->getGuilds(client.characterName);
     for (unsigned int i = 0; i != guilds.size(); ++i)
     {
-        Guild *guild = guildManager->findByName(guilds[i]);
+        Guild *guild = guilds[i];
         short leader = 0;
         if (!guild)
         {
@@ -819,15 +824,25 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         {
             leader = 1;
         }
+
+        std::string guildName = guild->getName();
+
+        // Tell the client what guilds the character belongs to and their permissions
         MessageOut msg(CPMSG_GUILD_REJOIN);
-        msg.writeString(guild->getName());
+        msg.writeString(guildName);
         msg.writeShort(guild->getId());
-        msg.writeShort(leader);
+        msg.writeByte(leader);
+
+        // get channel id of guild channel
+        short channelId = joinGuildChannel(guildName, client);
+
+        // send the channel id for the autojoined channel
+        msg.writeShort(channelId);
+
         client.send(msg);
-        serverHandler->enterChannel(guild->getName(), character.get());
+
     }
 }
-#endif
 
 void ChatHandler::sendUserJoined(ChatChannel *channel, const std::string &name)
 {
@@ -843,4 +858,31 @@ void ChatHandler::sendUserLeft(ChatChannel *channel, const std::string &name)
     msg.writeShort(channel->getId());
     msg.writeString(name);
     sendInChannel(channel, msg);
+}
+
+int ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &client)
+{
+    // Automatically make the character join the guild chat channel
+    // COMMENT: I think it shouldn't need to go through channelId to
+    // get the channel pointer. Also need to change this to registering
+    // a generic channel, rather than public, once public and private
+    // are merged
+    short channelId = chatChannelManager->getChannelId(guildName);
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+    if (!channel)
+    {
+        // Channel doesnt exist so create it
+        channelId = chatChannelManager->registerPublicChannel(guildName,
+                "Guild Channel", "");
+        channel = chatChannelManager->getChannel(channelId);
+    }
+
+    // Add user to the channel
+    if (channel->addUser(&client))
+    {
+        // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
+        // in the channel.
+        warnUsersAboutPlayerEventInChat(channel, client.characterName,
+                CHAT_EVENT_NEW_PLAYER);
+    }
 }

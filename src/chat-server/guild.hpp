@@ -102,10 +102,6 @@ class Guild
          * Find member by name.
          */
         bool checkInGuild(const std::string &playerName);
-    
-        /**
-         * Return the ID of the guild leader.
-         */
 
     private:
         short mId;
