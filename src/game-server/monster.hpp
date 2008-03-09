@@ -206,7 +206,7 @@ class Monster : public Being
         /**
          *
          */
-        virtual int getAttackType()
+        virtual int getAttackType() const
         { return mCurrentAttack->id; }
 
         /**
