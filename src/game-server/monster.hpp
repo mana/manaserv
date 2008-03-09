@@ -204,6 +204,12 @@ class Monster : public Being
         void perform();
 
         /**
+         *
+         */
+        virtual int getAttackType()
+        { return mCurrentAttack->id; }
+
+        /**
          * Kills the being.
          */
         void died();

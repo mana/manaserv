@@ -1,3 +1,10 @@
+2008-03-09  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/defines.h, src/game-server/being.hpp,
+	src/game-server/monster.hpp, src/game-server/state.cpp:
+	Sending the attack type with attack messages so that the client can
+	visualize the different attacks monsters are using.
+
 2008-03-06  David Athay  <ko2fan@gmail.com>
 
 	* src/account-server/dalstorage.cpp, 

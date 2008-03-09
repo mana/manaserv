@@ -172,6 +172,12 @@ class Being : public MovingObject
         { return mAction; }
 
         /**
+         * Gets the type of the attack the being is currently performing.
+         */
+        virtual int getAttackType() const
+        { return 0; }
+
+        /**
          * Moves the being toward its destination.
          */
         void move();

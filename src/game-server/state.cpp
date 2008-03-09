@@ -194,6 +194,7 @@ static void informPlayer(MapComposite *map, Character *p)
                 MessageOut AttackMsg(GPMSG_BEING_ATTACK);
                 AttackMsg.writeShort(oid);
                 AttackMsg.writeByte(o->getDirection());
+                AttackMsg.writeByte(static_cast< Being * >(o)->getAttackType());
                 gameHandler->sendTo(p, AttackMsg);
             }
 
