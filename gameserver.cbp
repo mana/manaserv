@@ -1,491 +1,150 @@
-<?xml version="1.0"?>
-<!DOCTYPE CodeBlocks_project_file>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
-	<FileVersion major="1" minor="1"/>
+	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="TMWServ Gameserver"/>
-		<Option makefile="Makefile"/>
-		<Option makefile_is_custom="0"/>
-		<Option compiler="0"/>
+		<Option title="TMWServ Gameserver" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="default">
-				<Option output="gameserver.exe"/>
-				<Option working_dir="."/>
-				<Option object_output=".objs"/>
-				<Option deps_output=".deps"/>
-				<Option type="1"/>
-				<Option compiler="0"/>
-				<Option use_console_runner="0"/>
-				<Option projectResourceIncludeDirsRelation="1"/>
+				<Option output="gameserver.exe" prefix_auto="0" extension_auto="0" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Option projectResourceIncludeDirsRelation="1" />
 				<Compiler>
-					<Add directory="src"/>
+					<Add option='-DPACKAGE_VERSION=&quot;\&quot;2nd milestone\&quot;&quot;' />
+					<Add option="-DNOGDI" />
+					<Add directory="src" />
 				</Compiler>
+				<Linker>
+					<Add library="ws2_32" />
+					<Add library="winmm" />
+				</Linker>
+			</Target>
+			<Target title="unix">
+				<Option output="bin/gameserver" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add directory="src" />
+					<Add directory="/usr/local/include/libxml2" />
+					<Add directory="/usr/local/include/lua51" />
+				</Compiler>
+				<Linker>
+					<Add library="pthread" />
+					<Add directory="/usr/local/lib/lua51" />
+				</Linker>
 			</Target>
 		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="default;" />
+		</VirtualTargets>
 		<Compiler>
-			<Add option="-Wall"/>
-			<Add option="-DPACKAGE_VERSION=&quot;\&quot;2nd milestone\&quot;&quot;"/>
-			<Add option="-DNOGDI"/>
+			<Add option="-Wall" />
 		</Compiler>
 		<Linker>
-			<Add library="enet"/>
-			<Add library="ws2_32"/>
-			<Add library="xml2"/>
-			<Add library="physfs"/>
-			<Add library="pthreadGCE2"/>
-			<Add library="z"/>
-			<Add library="winmm"/>
-			<Add library="lua"/>
+			<Add library="enet" />
+			<Add library="xml2" />
+			<Add library="physfs" />
+			<Add library="z" />
+			<Add library="lua" />
 		</Linker>
-		<Unit filename="src\common\configuration.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\common\configuration.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\defines.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\accountconnection.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\accountconnection.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\being.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\being.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\buysell.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\buysell.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\character.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\character.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\collisiondetection.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\collisiondetection.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\command.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\eventlistener.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\gamehandler.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\gamehandler.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\inventory.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\inventory.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\item.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\item.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\itemmanager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\itemmanager.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\main-game.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\map.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\map.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\mapcomposite.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\mapcomposite.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\mapmanager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\mapmanager.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\mapreader.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\mapreader.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\monster.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\monster.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\monstermanager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\monstermanager.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\movingobject.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\movingobject.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\npc.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\npc.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\quest.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\quest.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\resourcemanager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\resourcemanager.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\spawnarea.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\spawnarea.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\state.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\state.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\testing.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\thing.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\thing.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\trade.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\trade.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\trigger.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\game-server\trigger.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\connection.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\connection.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\connectionhandler.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\connectionhandler.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\messagein.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\messagein.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\messageout.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\messageout.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\netcomputer.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\net\netcomputer.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\point.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\scripting\lua.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\scripting\script.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\scripting\script.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\base64.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\base64.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\cipher.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\logger.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\logger.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\mathutils.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\mathutils.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\processorutils.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\processorutils.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\stringfilter.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\stringfilter.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\timer.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\timer.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\tokencollector.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\tokencollector.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\tokendispenser.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\tokendispenser.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\xml.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\xml.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\zlib.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="default"/>
-		</Unit>
-		<Unit filename="src\utils\zlib.hpp">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="default"/>
-		</Unit>
+		<Unit filename="src/common/configuration.cpp" />
+		<Unit filename="src/common/configuration.hpp" />
+		<Unit filename="src/defines.h" />
+		<Unit filename="src/game-server/accountconnection.cpp" />
+		<Unit filename="src/game-server/accountconnection.hpp" />
+		<Unit filename="src/game-server/being.cpp" />
+		<Unit filename="src/game-server/being.hpp" />
+		<Unit filename="src/game-server/buysell.cpp" />
+		<Unit filename="src/game-server/buysell.hpp" />
+		<Unit filename="src/game-server/character.cpp" />
+		<Unit filename="src/game-server/character.hpp" />
+		<Unit filename="src/game-server/collisiondetection.cpp" />
+		<Unit filename="src/game-server/collisiondetection.hpp" />
+		<Unit filename="src/game-server/command.cpp" />
+		<Unit filename="src/game-server/eventlistener.hpp" />
+		<Unit filename="src/game-server/gamehandler.cpp" />
+		<Unit filename="src/game-server/gamehandler.hpp" />
+		<Unit filename="src/game-server/inventory.cpp" />
+		<Unit filename="src/game-server/inventory.hpp" />
+		<Unit filename="src/game-server/item.cpp" />
+		<Unit filename="src/game-server/item.hpp" />
+		<Unit filename="src/game-server/itemmanager.cpp" />
+		<Unit filename="src/game-server/itemmanager.hpp" />
+		<Unit filename="src/game-server/main-game.cpp" />
+		<Unit filename="src/game-server/map.cpp" />
+		<Unit filename="src/game-server/map.hpp" />
+		<Unit filename="src/game-server/mapcomposite.cpp" />
+		<Unit filename="src/game-server/mapcomposite.hpp" />
+		<Unit filename="src/game-server/mapmanager.cpp" />
+		<Unit filename="src/game-server/mapmanager.hpp" />
+		<Unit filename="src/game-server/mapreader.cpp" />
+		<Unit filename="src/game-server/mapreader.hpp" />
+		<Unit filename="src/game-server/monster.cpp" />
+		<Unit filename="src/game-server/monster.hpp" />
+		<Unit filename="src/game-server/monstermanager.cpp" />
+		<Unit filename="src/game-server/monstermanager.hpp" />
+		<Unit filename="src/game-server/movingobject.cpp" />
+		<Unit filename="src/game-server/movingobject.hpp" />
+		<Unit filename="src/game-server/npc.cpp" />
+		<Unit filename="src/game-server/npc.hpp" />
+		<Unit filename="src/game-server/quest.cpp" />
+		<Unit filename="src/game-server/quest.hpp" />
+		<Unit filename="src/game-server/resourcemanager.cpp" />
+		<Unit filename="src/game-server/resourcemanager.hpp" />
+		<Unit filename="src/game-server/spawnarea.cpp" />
+		<Unit filename="src/game-server/spawnarea.hpp" />
+		<Unit filename="src/game-server/state.cpp" />
+		<Unit filename="src/game-server/state.hpp" />
+		<Unit filename="src/game-server/testing.cpp" />
+		<Unit filename="src/game-server/thing.cpp" />
+		<Unit filename="src/game-server/thing.hpp" />
+		<Unit filename="src/game-server/trade.cpp" />
+		<Unit filename="src/game-server/trade.hpp" />
+		<Unit filename="src/game-server/trigger.cpp" />
+		<Unit filename="src/game-server/trigger.hpp" />
+		<Unit filename="src/net/connection.cpp" />
+		<Unit filename="src/net/connection.hpp" />
+		<Unit filename="src/net/connectionhandler.cpp" />
+		<Unit filename="src/net/connectionhandler.hpp" />
+		<Unit filename="src/net/messagein.cpp" />
+		<Unit filename="src/net/messagein.hpp" />
+		<Unit filename="src/net/messageout.cpp" />
+		<Unit filename="src/net/messageout.hpp" />
+		<Unit filename="src/net/netcomputer.cpp" />
+		<Unit filename="src/net/netcomputer.hpp" />
+		<Unit filename="src/point.h" />
+		<Unit filename="src/scripting/lua.cpp" />
+		<Unit filename="src/scripting/script.cpp" />
+		<Unit filename="src/scripting/script.hpp" />
+		<Unit filename="src/utils/base64.cpp" />
+		<Unit filename="src/utils/base64.h" />
+		<Unit filename="src/utils/cipher.h" />
+		<Unit filename="src/utils/logger.cpp" />
+		<Unit filename="src/utils/logger.h" />
+		<Unit filename="src/utils/mathutils.cpp" />
+		<Unit filename="src/utils/mathutils.h" />
+		<Unit filename="src/utils/processorutils.cpp" />
+		<Unit filename="src/utils/processorutils.hpp" />
+		<Unit filename="src/utils/stringfilter.cpp" />
+		<Unit filename="src/utils/stringfilter.h" />
+		<Unit filename="src/utils/timer.cpp" />
+		<Unit filename="src/utils/timer.h" />
+		<Unit filename="src/utils/tokencollector.cpp" />
+		<Unit filename="src/utils/tokencollector.hpp" />
+		<Unit filename="src/utils/tokendispenser.cpp" />
+		<Unit filename="src/utils/tokendispenser.hpp" />
+		<Unit filename="src/utils/xml.cpp" />
+		<Unit filename="src/utils/xml.hpp" />
+		<Unit filename="src/utils/zlib.cpp" />
+		<Unit filename="src/utils/zlib.hpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
