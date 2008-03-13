@@ -224,6 +224,12 @@ class Monster : public Being
          */
         void forgetTarget(Thing *being);
 
+        /**
+         * Gets the way the object is blocked by other things on the map
+         */
+        virtual unsigned char getWalkMask() const
+        { return 0x83; } // blocked walls, other monsters and players ( bin 1000 0011)
+
     private:
         int calculatePositionPriority(Point position, int targetPriority);
 
@@ -242,6 +248,12 @@ class Monster : public Being
         std::list<AttackPosition> mAttackPositions; /**< set positions relative to target from which the monster can attack */
 
         friend struct MonsterTargetEventDispatch;
+    protected:
+        /**
+         * Gets the way the object blocks pathfinding for other objects
+         */
+        virtual Map::BlockType getBlockType() const
+        { return Map::BLOCKTYPE_MONSTER; }
 };
 
 #endif // _TMWSERV_MONSTER_H_

@@ -24,6 +24,35 @@
 #include "game-server/mapcomposite.hpp"
 #include "game-server/movingobject.hpp"
 
+
+void MovingObject::setPosition(const Point &p)
+{
+    //update blockmap
+    if (getMap())
+    {
+        Point oldP = getPosition();
+        if ((oldP.x / 32 != p.x / 32 || oldP.y / 32 != p.y / 32))
+        {
+            getMap()->getMap()->freeTile(oldP.x / 32, oldP.y / 32, getBlockType());
+            getMap()->getMap()->blockTile(p.x / 32, p.y / 32, getBlockType());
+        }
+    }
+
+    Object::setPosition(p);
+}
+
+void MovingObject::setMap(MapComposite *map)
+{
+    Point p = getPosition();
+    MapComposite *oldMap = getMap();
+    if (oldMap)
+    {
+        oldMap->getMap()->freeTile(p.x / 32, p.y / 32, getBlockType());
+    }
+    map->getMap()->blockTile(p.x / 32, p.y / 32, getBlockType());
+    Object::setMap(map);
+}
+
 void MovingObject::setDestination(Point const &dst)
 {
     mDst = dst;
@@ -63,7 +92,7 @@ void MovingObject::move()
     for (std::list<PATH_NODE>::iterator pathIterator = mPath.begin();
             pathIterator != mPath.end(); pathIterator++)
     {
-        if (!map->getWalk(pathIterator->x, pathIterator->y))
+        if (!map->getWalk(pathIterator->x, pathIterator->y, getWalkMask()))
         {
             mPath.clear();
             break;
@@ -74,7 +103,7 @@ void MovingObject::move()
     {
         // No path exists: the walkability of cached path has changed, the
         // destination has changed, or a path was never set.
-        mPath = map->findPath(tileSX, tileSY, tileDX, tileDY);
+        mPath = map->findPath(tileSX, tileSY, tileDX, tileDY, getWalkMask());
     }
 
     if (mPath.empty())

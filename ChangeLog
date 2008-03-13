@@ -1,3 +1,16 @@
+2008-03-13  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/being.cpp, src/game-server/character.cpp,
+	src/game-server/character.hpp, src/game-server/map.cpp,
+	src/game-server/map.hpp, src/game-server/mapreader.cpp,
+	src/game-server/monster.cpp, src/game-server/monster.hpp,
+	src/game-server/movingobject.cpp, src/game-server/movingobject.hpp,
+	src/game-server/object.hpp, src/game-server/spawnarea.cpp,
+	src/game-server/thing.hpp: Implemented dynamic and selective
+	pathblocking. Monsters are blocked by player characters and
+	other monsters, player characters only by monsters.
+	* src/game-server/being.cpp: Omitted some superficial hit point updates.
+
 2008-03-09  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/defines.h, src/game-server/being.hpp,

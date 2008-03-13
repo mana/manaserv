@@ -106,7 +106,7 @@ class Thing
         /**
          * Sets the map this thing is located on.
          */
-        void setMap(MapComposite *map)
+        virtual void setMap(MapComposite *map)
         { mMap = map; }
 
         /**

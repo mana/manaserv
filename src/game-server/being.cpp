@@ -65,8 +65,7 @@ int Being::damage(Object *, Damage const &damage)
        And at 200, it means vulnerable (double damage). */
     int mod1 = getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
 
-    /* Resistance to damage at 0 gives normal damage. At 100, it gives halved
-       damage. At 200, it divides damage by 3. And so on. */
+    /* Defence is an absolute value which is subtracted from the damage total. */
     int mod2 = 0;
     switch (damage.type)
     {
@@ -84,11 +83,10 @@ int Being::damage(Object *, Damage const &damage)
     if (HPloss < 0) HPloss = 0;
 
     mHitsTaken.push_back(HPloss);
-
     Attribute &HP = mAttributes[BASE_ATTR_HP];
     LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
     HP.mod -= HPloss;
-    modifiedAttribute(BASE_ATTR_HP);
+    if (HPloss != 0) modifiedAttribute(BASE_ATTR_HP);
 
     return HPloss;
 }
@@ -242,7 +240,6 @@ void Being::update()
     //only update HP when it actually changed to avoid network noise
     if (newHP != oldHP)
     {
-        LOG_INFO("HP Update - newHP:"<<newHP<<", oldHP:"<<oldHP<<", maxHP:"<<maxHP);
         applyModifier(BASE_ATTR_HP, newHP - oldHP);
     }
 

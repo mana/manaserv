@@ -521,5 +521,9 @@ static void setTileWithGid(Map *map, int x, int y, int gid)
         set = *i;
     }
 
-    map->setWalk(x, y, gid == set);
+    if (gid!=set)
+    {
+        map->blockTile(x, y, Map::BLOCKTYPE_WALL);
+    }
+
 }

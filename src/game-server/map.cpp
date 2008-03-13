@@ -27,7 +27,8 @@
 #include "game-server/map.hpp"
 
 MetaTile::MetaTile():
-    whichList(0)
+    whichList(0),
+    blockmask(0)
 {
 }
 
@@ -44,62 +45,131 @@ bool Location::operator< (const Location &loc) const
 
 
 Map::Map():
-    width(0), height(0),
+    mWidth(0), mHeight(0),
     tileWidth(32), tileHeight(32),
     onClosedList(1), onOpenList(2)
 {
-    metaTiles = new MetaTile[width * height];
+    mMetaTiles = new MetaTile[mWidth * mHeight];
+    for (int i=0; i < NB_BLOCKTYPES; i++)
+    {
+        mOccupation[i] = new int[mWidth * mHeight];
+        memset(mOccupation[i], 0, mWidth * mHeight * sizeof(int));
+    }
 }
 
 Map::Map(int width, int height):
-    width(width), height(height),
+    mWidth(width), mHeight(height),
     tileWidth(32), tileHeight(32),
     onClosedList(1), onOpenList(2)
 {
-    metaTiles = new MetaTile[width * height];
+    mMetaTiles = new MetaTile[mWidth * mHeight];
+    for (int i=0; i < NB_BLOCKTYPES; i++)
+    {
+        mOccupation[i] = new int[mWidth * mHeight];
+        memset(mOccupation[i], 0, mWidth * mHeight * sizeof(int));
+    }
 }
 
 Map::~Map()
 {
-    delete[] metaTiles;
+    delete[] mMetaTiles;
+    for (int i=0; i < NB_BLOCKTYPES; i++)
+    {
+        delete[] mOccupation[i];
+    }
 }
 
 void
 Map::setSize(int width, int height)
 {
-    this->width = width;
-    this->height = height;
-    delete[] metaTiles;
-    metaTiles = new MetaTile[width * height];
+    this->mWidth = width;
+    this->mHeight = height;
+
+    delete[] mMetaTiles;
+    mMetaTiles = new MetaTile[mWidth * mHeight];
+
+    for (int i=0; i < NB_BLOCKTYPES; i++)
+    {
+        delete[] mOccupation[i];
+        mOccupation[i] = new int[mWidth * mHeight];
+    }
 }
 
-void Map::setWalk(int x, int y, bool walkable)
+void Map::blockTile(int x, int y, BlockType type)
 {
-    metaTiles[x + y * width].walkable = walkable;
+    if (type == BLOCKTYPE_NONE) return;
+    int tileNum = x + y * mWidth;
+    assert (tileNum <= mWidth * mHeight);
+
+    if (++mOccupation[type][tileNum])
+    {
+        switch (type)
+        {
+            case BLOCKTYPE_WALL:
+                mMetaTiles[tileNum].blockmask |= BLOCKMASK_WALL;
+                break;
+            case BLOCKTYPE_CHARACTER:
+                mMetaTiles[tileNum].blockmask |= BLOCKMASK_CHARACTER;
+                break;
+            case BLOCKTYPE_MONSTER:
+                mMetaTiles[tileNum].blockmask |= BLOCKMASK_MONSTER;
+                break;
+            default:
+                // shut up!
+                break;
+        }
+    }
 }
 
-bool Map::getWalk(int x, int y) const
+void Map::freeTile(int x, int y, BlockType type)
+{
+    if (type == BLOCKTYPE_NONE) return;
+
+    int tileNum = x + y * mWidth;
+    assert (tileNum <= mWidth * mHeight);
+
+    if (!(--mOccupation[type][tileNum]))
+    {
+        switch (type)
+        {
+            case BLOCKTYPE_WALL:
+                mMetaTiles[tileNum].blockmask &= (BLOCKMASK_WALL xor 0xff);
+                break;
+            case BLOCKTYPE_CHARACTER:
+                mMetaTiles[tileNum].blockmask &= (BLOCKMASK_CHARACTER xor 0xff);
+                break;
+            case BLOCKTYPE_MONSTER:
+                mMetaTiles[tileNum].blockmask &= (BLOCKMASK_MONSTER xor 0xff);
+                break;
+            default:
+                // shut up!
+                break;
+        }
+    }
+}
+
+bool Map::getWalk(int x, int y, char walkmask) const
 {
     // You can't walk outside of the map
-    if (x < 0 || y < 0 || x >= width || y >= height)
+    if (x < 0 || y < 0 || x >= mWidth || y >= mHeight)
     {
         return false;
     }
 
     // Check if the tile is walkable
-    return metaTiles[x + y * width].walkable;
+    return !(mMetaTiles[x + y * mWidth].blockmask & walkmask);
 }
 
 MetaTile*
 Map::getMetaTile(int x, int y)
 {
-    return &metaTiles[x + y * width];
+    return &mMetaTiles[x + y * mWidth];
 }
 
 static int const basicCost = 100;
 
 std::list<PATH_NODE>
-Map::findPath(int startX, int startY, int destX, int destY, int maxCost)
+Map::findPath(int startX, int startY, int destX, int destY, unsigned char walkmask, int maxCost)
 {
     // Path to be built up (empty by default)
     std::list<PATH_NODE> path;
@@ -108,7 +178,7 @@ Map::findPath(int startX, int startY, int destX, int destY, int maxCost)
     std::priority_queue<Location> openList;
 
     // Return when destination not walkable
-    if (!getWalk(destX, destY)) return path;
+    if (!getWalk(destX, destY, walkmask)) return path;
 
     // Reset starting tile's G cost to 0
     MetaTile *startTile = getMetaTile(startX, startY);
@@ -149,7 +219,7 @@ Map::findPath(int startX, int startY, int destX, int destY, int maxCost)
                 // Skip if if we're checking the same tile we're leaving from,
                 // or if the new location falls outside of the map boundaries
                 if ((dx == 0 && dy == 0) ||
-                        (x < 0 || y < 0 || x >= width || y >= height))
+                        (x < 0 || y < 0 || x >= mWidth || y >= mHeight))
                 {
                     continue;
                 }
@@ -157,20 +227,19 @@ Map::findPath(int startX, int startY, int destX, int destY, int maxCost)
                 MetaTile *newTile = getMetaTile(x, y);
 
                 // Skip if the tile is on the closed list or is not walkable
-                if (newTile->whichList == onClosedList || !newTile->walkable)
+                if (newTile->whichList == onClosedList || newTile->blockmask & walkmask)
                 {
                     continue;
                 }
 
                 // When taking a diagonal step, verify that we can skip the
-                // corner. We allow skipping past beings but not past non-
-                // walkable tiles.
+                // corner.
                 if (dx != 0 && dy != 0)
                 {
                     MetaTile *t1 = getMetaTile(curr.x, curr.y + dy);
                     MetaTile *t2 = getMetaTile(curr.x + dx, curr.y);
 
-                    if (!(t1->walkable && t2->walkable))
+                    if (t1->blockmask & walkmask && !(t2->blockmask & walkmask)) // I hope I didn't fuck this line up
                     {
                         continue;
                     }

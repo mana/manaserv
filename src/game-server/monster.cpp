@@ -101,6 +101,13 @@ Monster::~Monster()
     {
         i->first->removeListener(&mTargetListener);
     }
+
+    // free map position
+    if (getMap())
+    {
+        Point oldP = getPosition();
+        getMap()->getMap()->freeTile(oldP.x / 32, oldP.y / 32, getBlockType());
+    }
 }
 
 void Monster::perform()
@@ -293,6 +300,7 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
     std::list<PATH_NODE> path;
     path = getMap()->getMap()->findPath(thisPos.x / 32, thisPos.y / 32,
                                         position.x / 32, position.y / 32,
+                                        getWalkMask(),
                                         range);
 
     if (path.empty() || path.size() >= range)

@@ -57,7 +57,7 @@ class MetaTile
         int whichList;          /**< No list, open list or closed list */
         int parentX;            /**< X coordinate of parent tile */
         int parentY;            /**< Y coordinate of parent tile */
-        bool walkable;          /**< Can beings normally walk on this tile */
+        char blockmask;          /**< walkability bitfield */
 };
 
 /**
@@ -86,6 +86,15 @@ class Location
 class Map
 {
     public:
+        enum BlockType
+        {
+            BLOCKTYPE_NONE = -1,
+            BLOCKTYPE_WALL,
+            BLOCKTYPE_CHARACTER,
+            BLOCKTYPE_MONSTER,
+            NB_BLOCKTYPES
+        };
+
         /**
          * Constructor.
          */
@@ -105,7 +114,7 @@ class Map
          * Sets the size of the map. This will destroy any existing map data.
          */
         void
-        setSize(int width, int height);
+        setSize(int mWidth, int height);
 
         /**
          * Get tile reference.
@@ -114,26 +123,31 @@ class Map
         getMetaTile(int x, int y);
 
         /**
-         * Sets walkability for a tile.
+         * Marks a tile as occupied
          */
-        void setWalk(int x, int y, bool walkable);
+        void blockTile(int x, int y, BlockType type);
 
         /**
-         * Gets walkability for a tile.
+         * Marks a tile as unoccupied
          */
-        bool getWalk(int x, int y) const;
+        void freeTile(int x, int y, BlockType type);
+
+        /**
+         * Gets walkability for a tile with a blocking bitmask
+         */
+        bool getWalk(int x, int y, char walkmask) const;
 
         /**
          * Returns the width of this map.
          */
         int getWidth() const
-        { return width; }
+        { return mWidth; }
 
         /**
          * Returns the height of this map.
          */
         int getHeight() const
-        { return height; }
+        { return mHeight; }
 
         /**
          * Returns the tile width of this map.
@@ -151,15 +165,25 @@ class Map
          * Find a path from one location to the next.
          */
         std::list<PATH_NODE> findPath(int startX, int startY,
-                                      int destX, int destY, int maxCost = 20);
+                                      int destX, int destY,
+                                      unsigned char walkmask,
+                                      int maxCost = 20);
 
     private:
-        int width, height;
+        /**
+         * Blockmasks for different entities
+         */
+        static const unsigned char BLOCKMASK_WALL = 128;   // = bin 1000 0000
+        static const unsigned char BLOCKMASK_CHARACTER = 1;// = bin 0000 0001
+        static const unsigned char BLOCKMASK_MONSTER = 2;  // = bin 0000 0010
+        int *mOccupation[NB_BLOCKTYPES];
+        int mWidth, mHeight;
         int tileWidth, tileHeight;
-        MetaTile *metaTiles;
+        MetaTile *mMetaTiles;
 
         // Pathfinding members
         int onClosedList, onOpenList;
+
 };
 
 #endif

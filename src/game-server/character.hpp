@@ -50,6 +50,8 @@ class Character : public Being
          */
         Character(MessageIn &msg);
 
+        ~Character();
+
         /**
          * recalculates the level when necessary and calls Being::update
          */
@@ -271,6 +273,12 @@ class Character : public Being
         int getCorrectionPoints() const
         { return mCorrectionPoints; }
 
+        /**
+         * Gets the way the object is blocked by other things on the map
+         */
+        virtual unsigned char getWalkMask() const
+        { return 0x82; } // blocked by walls and monsters ( bin 1000 0010)
+
     private:
         Character(Character const &);
         Character &operator=(Character const &);
@@ -340,6 +348,13 @@ class Character : public Being
         bool mRecalculateLevel;      /**< flag raised when the character level might have increased */
         unsigned char mAccountLevel; /**< Account level of the user. */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
+
+    protected:
+        /**
+         * Gets the way the object blocks pathfinding for other objects
+         */
+        virtual Map::BlockType getBlockType() const
+        { return Map::BLOCKTYPE_CHARACTER; }
 };
 
 #endif // _TMWSERV_CHARACTER_HPP_

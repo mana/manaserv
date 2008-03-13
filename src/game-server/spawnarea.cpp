@@ -79,15 +79,16 @@ SpawnArea::update()
                 height = realMap->getHeight() * 32;
             }
 
+            Being *being = new Monster(mSpecy);
+
             do
             {
                 position = Point(x + rand() % width, y + rand() % height);
                 c--;
-            } while (!realMap->getWalk(position.x / 32, position.y / 32) && c);
+            } while (!realMap->getWalk(position.x / 32, position.y / 32, being->getWalkMask()) && c);
 
             if (c)
             {
-                Being *being = new Monster(mSpecy);
                 being->addListener(&mSpawnedListener);
 
                 being->setMap(map);
@@ -103,6 +104,7 @@ SpawnArea::update()
                          << mSpecy->getType() << " on map " << map->getName()
                          << " (" << x << ',' << y << ','
                          << width << ',' << height << ')');
+                delete being;
             }
         }
     }

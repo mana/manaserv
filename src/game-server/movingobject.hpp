@@ -45,6 +45,14 @@ class MovingObject : public Object
             mDirection(0)
         {}
 
+        virtual ~MovingObject() {};
+
+        /**
+         * Updates the walkmap of the map the object is on before
+         * calling Object::setPosition
+         */
+        virtual void setPosition(const Point &p);
+
         /**
          * Gets the destination coordinates of the object.
          */
@@ -128,6 +136,17 @@ class MovingObject : public Object
         void setPublicID(int id)
         { mPublicID = id; }
 
+        /**
+         * Gets the way the object blocks pathfinding for other objects
+         */
+        virtual unsigned char getWalkMask() const
+        { return 0x00; } //can walk through everything
+
+        /**
+         * Sets the map this thing is located on.
+         */
+        virtual void setMap(MapComposite *map);
+
     private:
         /** Object ID sent to clients (unique with respect to the map). */
         unsigned short mPublicID;
@@ -141,6 +160,12 @@ class MovingObject : public Object
         unsigned short mActionTime; /**< Delay until next action. */
         unsigned char mDirection;   /**< Facing direction. */
         unsigned char mSize;        /**< Radius of bounding circle. */
+
+        /**
+         * Gets the way the object blocks pathfinding for other objects
+         */
+        virtual Map::BlockType getBlockType() const
+        { return Map::BLOCKTYPE_NONE; }
 };
 
 #endif // _TMWSERV_MOVINGOBJECT_H_

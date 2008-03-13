@@ -59,7 +59,7 @@ class Object : public Thing
          *
          * @param p the coordinates.
          */
-        void setPosition(const Point &p)
+        virtual void setPosition(const Point &p)
         { mPos = p; }
 
         /**

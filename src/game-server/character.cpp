@@ -429,3 +429,13 @@ void Character::disconnected()
         if (l.dispatch->disconnected) l.dispatch->disconnected(&l, this);
     }
 }
+
+Character::~Character()
+{
+    if (getMap())
+    {
+        Point oldP = getPosition();
+        getMap()->getMap()->freeTile(oldP.x / 32, oldP.y / 32, getBlockType());
+    }
+}
+
