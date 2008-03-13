@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <queue>
+#include <cassert>
 
 #include "game-server/map.hpp"
 
