@@ -249,15 +249,16 @@ static void informPlayer(MapComposite *map, Character *p)
         {
             // o is now visible by p. Send enter message.
             flags |= MOVING_POSITION;
+            flags |= MOVING_DESTINATION;
 
             MessageOut enterMsg(GPMSG_BEING_ENTER);
             enterMsg.writeByte(otype);
             enterMsg.writeShort(oid);
             enterMsg.writeByte(static_cast< Being *>(o)->getAction());
-            enterMsg.writeShort(opos.x);
-            enterMsg.writeShort(opos.y);
-            switch (otype) {
-
+            enterMsg.writeShort(opos.x); // aren't these two lines redundand considering
+            enterMsg.writeShort(opos.y); // that a MOVING_POSITION message is following?
+            switch (otype)
+            {
                 case OBJECT_CHARACTER:
                 {
                     Character *q = static_cast< Character * >(o);

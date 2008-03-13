@@ -10,6 +10,9 @@
 	pathblocking. Monsters are blocked by player characters and
 	other monsters, player characters only by monsters.
 	* src/game-server/being.cpp: Omitted some superficial hit point updates.
+	* src/game-server/state.cpp: Sending destination of beings when the
+	client comes on-screen to fix a bug which showed moving monsters as
+	standing in this situation.
 
 2008-03-09  Philipp Sehmisch  <tmw@crushnet.org>
 
