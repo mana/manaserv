@@ -3,13 +3,13 @@
 --------------
 
 atinit(function()
-  create_npc(110, 50 * 32 + 16, 19 * 32 + 16, my_npc1)
-  create_npc(108, 51 * 32 + 16, 25 * 32 + 16, my_npc4)
-  create_npc(126, 45 * 32 + 16, 25 * 32 + 16, my_npc5)
-  create_npc(122, 58 * 32 + 16, 15 * 32 + 16, my_npc6)
+  create_npc(110, 50 * 32 + 16, 19 * 32 + 16, npc1_talk, nil)
+  create_npc(108, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, nil)
+  create_npc(126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npc5_update)
+  create_npc(122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, nil)
 end)
 
-function my_npc1(npc, ch)
+function npc1_talk(npc, ch)
   do_message(npc, ch, "Hello! I am the testing NPC.")
   do_message(npc, ch, "This message is just here for testing intertwined connections.")
   do_message(npc, ch, "What do you want?")
@@ -49,7 +49,7 @@ function my_npc1(npc, ch)
   end
 end
 
-function my_npc4(npc, ch)
+function npc4_talk(npc, ch)
   do_message(npc, ch, "Where do you want to go?")
   local v = do_choice(npc, ch, "Map 1", "Map 3")
   if v >= 1 and v <= 2 then
@@ -65,27 +65,40 @@ function my_npc4(npc, ch)
   end
 end
 
-function my_npc5(npc, ch)
+function npc5_talk(npc, ch)
   do_message(npc, ch, "I am the spider tamer. Do you want me to spawn some spiders?")
   local answer = do_choice(npc, ch, "Yes", "No");
   if answer == 1 then
-    tmw.monster_create(1012, 44 * 32 + 16, 24 * 32 + 16)
-    tmw.monster_create(1012, 44 * 32 + 16, 26 * 32 + 16)
-    tmw.monster_create(1012, 46 * 32 + 16, 24 * 32 + 16)
-    tmw.monster_create(1012, 46 * 32 + 16, 26 * 32 + 16)
+    local x = tmw.posX(npc)
+    local y = tmw.posY(npc)
+    tmw.monster_create(1012, x + 32, y + 32)
+    tmw.monster_create(1012, x - 32, y + 32)
+    tmw.monster_create(1012, x + 32, y - 32)
+    tmw.monster_create(1012, x - 32, y - 32)
   end
 end
 
+local spidertamer_timer = 0
+
+function npc5_update(npc)
+  spidertamer_timer = spidertamer_timer + 1
+  if spidertamer_timer == 50 then
+    spidertamer_timer = 0
+    local x = math.random(-64, 64) + tmw.posX(npc)
+    local y = math.random(-64, 64) + tmw.posY(npc)
+    tmw.being_walk(npc, x, y, 500)
+  end
+end
 
 local guard_position = 1
 
-function my_npc6(npc, ch)
-  
+function npc6_talk(npc, ch)
+
   if guard_position == 1 then
     tmw.being_walk(npc, 61 * 32 + 16, 15 * 32 + 16, 400)
     guard_position = 2
   else
     tmw.being_walk(npc, 55 * 32 + 16, 15 * 32 + 16, 400)
     guard_position = 1
-  end  
+  end
 end

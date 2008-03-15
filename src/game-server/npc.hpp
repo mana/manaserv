@@ -54,6 +54,20 @@ class NPC : public Being
         int getNPC() const
         { return mID; }
 
+        /**
+         * Gets the way an NPC is blocked by other things on the map
+         */
+        virtual unsigned char getWalkMask() const
+        { return 0x83; } // blocked like a monster by walls, monsters and characters ( bin 1000 0011)
+
+    protected:
+
+        /**
+         * Gets the way a monster blocks pathfinding for other objects
+         */
+        virtual Map::BlockType getBlockType() const
+        { return Map::BLOCKTYPE_CHARACTER; } //blocks like a player character
+
     private:
         Script *mScript;    /**< Script describing NPC behavior. */
         unsigned short mID; /**< ID of the NPC. */

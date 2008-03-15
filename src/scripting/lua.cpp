@@ -400,6 +400,34 @@ static int LuaBeing_Walk(lua_State *s)
 }
 
 /**
+ * Function for getting the x-coordinate of the position of a being
+ */
+static int LuaPosX(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    int x = getBeing(s, 1)->getPosition().x;
+    lua_pushinteger(s, x);
+
+    return 1;
+}
+
+/**
+ * Function for getting the y-coordinate of the position of a being
+ */
+static int LuaPosY(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    int y = getBeing(s, 1)->getPosition().y;
+    lua_pushinteger(s, y);
+
+    return 1;
+}
+
+/**
  * Callback for creating a monster on the current map.
  * tmw.monster_create(int type, int x, int y)
  */
@@ -524,6 +552,8 @@ LuaScript::LuaScript():
         { "chr_set_quest",    &LuaChr_SetQuest    },
         { "monster_create",   &LuaMonster_Create  },
         { "being_walk",       &LuaBeing_Walk      },
+        { "posX",             &LuaPosX            },
+        { "posY",             &LuaPosY            },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

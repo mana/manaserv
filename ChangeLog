@@ -3,9 +3,15 @@
 	* src/game-server/map.cpp, src/game-server/movingobject.hpp,
 	src/game-server/object.hpp: Fixed a crash caused by the new blocking
 	system (thanks to peavey for reporting).
-	* src/scripting/lua.cpp: Implemented script binding for controllig
-	movement of beings.
-	* data/test.lua: Implemented NPC which moves around when talked to.
+	* src/scripting/lua.cpp: Implemented script bindings for querying
+	positions and controllig movement of beings.
+	* data/scripts/libtmw.lua, data/test.lua: Implemented script
+	infrastructure for regularily called NPC function.
+	* data/test.lua: Implemented NPCs which move around. One automatically
+	and one when talked to.
+	* src/game-server/npc.hpp: Added pathblocking rules to NPCs (blocked
+	by walls, mosters, other NPCs and player characters but do not block
+	player characters.
 
 2008-03-13  Philipp Sehmisch  <tmw@crushnet.org>
 

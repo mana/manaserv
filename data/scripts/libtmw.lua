@@ -4,7 +4,8 @@
 
 -- Table that associates to each NPC pointer the handler function that is
 -- called when a player starts talking to an NPC.
-local npcs = {}
+local npc_talk_functs = {}
+local npc_update_functs = {}
 
 -- Table that associates to each Character pointer its state with respect to
 -- NPCs (only one at a time). A state is an array with four fields:
@@ -24,9 +25,10 @@ local timer
 
 -- Creates an NPC and associates the given handler.
 -- Note: Cannot be called until map initialization has started.
-function create_npc(id, x, y, handler)
+function create_npc(id, x, y, talkfunct, updatefunct)
   local npc = tmw.npc_create(id, x, y)
-  npcs[npc] = handler
+  if talkfunct then npc_talk_functs[npc] = talkfunct end
+  if updatefunct then npc_update_functs[npc] = updatefunct end
 end
 
 -- Waits for the player to acknowledge the previous message, if any.
@@ -121,7 +123,7 @@ end
 -- Creates a coroutine based on the registered NPC handler.
 function npc_start(npc, ch)
   states[ch] = nil
-  local h = npcs[npc]
+  local h = npc_talk_functs[npc]
   if not h then return end
   local w = { npc, coroutine.create(h) }
   if process_npc(w, npc, ch) then
@@ -177,6 +179,8 @@ end
 
 -- Called by the game every tick for each NPC.
 function npc_update(npc)
+  local h = npc_update_functs[npc];
+  if h then h(npc) end;
 end
 
 -- Called by the game every tick.
@@ -214,7 +218,7 @@ end
 function create_npc_delayed(id, x, y)
   -- Bind the name to a local variable first, as it will be reused.
   local h = npc_handler
-  atinit(function() create_npc(id, x, y, h) end)
+  atinit(function() create_npc(id, x, y, h, nil) end)
   npc_handler = nil
 end
 
