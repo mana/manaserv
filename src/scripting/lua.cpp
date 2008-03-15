@@ -106,6 +106,13 @@ static Character *getCharacter(lua_State *s, int p)
     return static_cast<Character *>(t);
 }
 
+static Being *getBeing(lua_State *s, int p)
+{
+    if (!lua_islightuserdata(s, p)) return NULL;
+    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
+    return static_cast<Being *>(t);
+}
+
 /**
  * Callback for sending a NPC_MESSAGE.
  * tmw.npc_message(npc, character, string)
@@ -370,6 +377,29 @@ static int LuaNpc_Trade(lua_State *s)
 }
 
 /**
+ * Function for making a being walk to a position
+ * being_walk(Being *being, int x, int y, int speed)
+ */
+static int LuaBeing_Walk(lua_State *s)
+{
+    if (!lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
+    {
+        LOG_WARN("LuaBeing_walk called with incorrect parameters.");
+        return 0;
+    }
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    Being *being = getBeing(s, 1);
+    Point destination(lua_tointeger(s, 2), lua_tointeger(s, 3));
+    being->setDestination(destination);
+    being->setSpeed(lua_tointeger(s, 4));
+
+    return 0;
+}
+
+/**
  * Callback for creating a monster on the current map.
  * tmw.monster_create(int type, int x, int y)
  */
@@ -493,6 +523,7 @@ LuaScript::LuaScript():
         { "chr_get_quest",    &LuaChr_GetQuest    },
         { "chr_set_quest",    &LuaChr_SetQuest    },
         { "monster_create",   &LuaMonster_Create  },
+        { "being_walk",       &LuaBeing_Walk      },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

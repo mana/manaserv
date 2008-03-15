@@ -1,3 +1,12 @@
+2008-03-15  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/map.cpp, src/game-server/movingobject.hpp,
+	src/game-server/object.hpp: Fixed a crash caused by the new blocking
+	system (thanks to peavey for reporting).
+	* src/scripting/lua.cpp: Implemented script binding for controllig
+	movement of beings.
+	* data/test.lua: Implemented NPC which moves around when talked to.
+
 2008-03-13  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.cpp, src/game-server/character.cpp,

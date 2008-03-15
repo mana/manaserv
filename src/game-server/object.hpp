@@ -51,7 +51,8 @@ class Object : public Thing
          */
         Object(int type)
           : Thing(type),
-            mUpdateFlags(0)
+            mUpdateFlags(0),
+            mPos(Point(0, 0))
         {}
 
         /**

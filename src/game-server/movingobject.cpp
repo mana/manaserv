@@ -20,6 +20,8 @@
  *  $Id$
  */
 
+#include <cassert>
+
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/movingobject.hpp"
@@ -43,14 +45,22 @@ void MovingObject::setPosition(const Point &p)
 
 void MovingObject::setMap(MapComposite *map)
 {
-    Point p = getPosition();
+    assert (map);
     MapComposite *oldMap = getMap();
+    Point p = getPosition();
+
     if (oldMap)
     {
         oldMap->getMap()->freeTile(p.x / 32, p.y / 32, getBlockType());
     }
-    map->getMap()->blockTile(p.x / 32, p.y / 32, getBlockType());
     Object::setMap(map);
+    map->getMap()->blockTile(p.x / 32, p.y / 32, getBlockType());
+    /* the last line might look illogical because the current position is
+     * invalid on the new map, but it is necessary to block the old position
+     * because the next call of setPosition() will automatically free the old
+     * position. When we don't block the position now the occupation counting
+     * will be off.
+     */
 }
 
 void MovingObject::setDestination(Point const &dst)
@@ -63,6 +73,7 @@ void MovingObject::setDestination(Point const &dst)
 void MovingObject::move()
 {
     mOld = getPosition();
+
     if (mActionTime > 100)
     {
         // Current move has not yet ended

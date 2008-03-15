@@ -98,9 +98,12 @@ Map::setSize(int width, int height)
 
 void Map::blockTile(int x, int y, BlockType type)
 {
-    if (type == BLOCKTYPE_NONE) return;
+    if (type == BLOCKTYPE_NONE || x < 0 || y < 0 || x >= mWidth || y >= mHeight)
+    {
+        return;
+    }
+
     int tileNum = x + y * mWidth;
-    assert (tileNum <= mWidth * mHeight);
 
     if (++mOccupation[type][tileNum])
     {
@@ -124,10 +127,12 @@ void Map::blockTile(int x, int y, BlockType type)
 
 void Map::freeTile(int x, int y, BlockType type)
 {
-    if (type == BLOCKTYPE_NONE) return;
+    if (type == BLOCKTYPE_NONE || x < 0 || y < 0 || x >= mWidth || y >= mHeight)
+    {
+        return;
+    }
 
     int tileNum = x + y * mWidth;
-    assert (tileNum <= mWidth * mHeight);
 
     if (!(--mOccupation[type][tileNum]))
     {

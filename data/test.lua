@@ -6,6 +6,7 @@ atinit(function()
   create_npc(110, 50 * 32 + 16, 19 * 32 + 16, my_npc1)
   create_npc(108, 51 * 32 + 16, 25 * 32 + 16, my_npc4)
   create_npc(126, 45 * 32 + 16, 25 * 32 + 16, my_npc5)
+  create_npc(122, 58 * 32 + 16, 15 * 32 + 16, my_npc6)
 end)
 
 function my_npc1(npc, ch)
@@ -73,4 +74,18 @@ function my_npc5(npc, ch)
     tmw.monster_create(1012, 46 * 32 + 16, 24 * 32 + 16)
     tmw.monster_create(1012, 46 * 32 + 16, 26 * 32 + 16)
   end
+end
+
+
+local guard_position = 1
+
+function my_npc6(npc, ch)
+  
+  if guard_position == 1 then
+    tmw.being_walk(npc, 61 * 32 + 16, 15 * 32 + 16, 400)
+    guard_position = 2
+  else
+    tmw.being_walk(npc, 55 * 32 + 16, 15 * 32 + 16, 400)
+    guard_position = 1
+  end  
 end
