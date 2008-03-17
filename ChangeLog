@@ -1,3 +1,8 @@
+2008-03-17  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/scripting/lua.cpp: Error messages in script callback functions
+	are now handed to the lua interpreter.
+
 2008-03-15  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/map.cpp, src/game-server/movingobject.hpp,

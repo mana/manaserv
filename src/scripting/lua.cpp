@@ -82,6 +82,19 @@ class LuaScript: public Script
 
 static char const registryKey = 0;
 
+
+void raiseScriptError(lua_State *s, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    char message[1024];
+    vsprintf(message, format, args);
+    va_end( args );
+
+    LOG_WARN("Lua script error: "<<message);
+    luaL_error(s, message);
+}
+
 /* Functions below are unsafe, as they assume the script has passed pointers
    to objects which have not yet been destroyed. If the script never keeps
    pointers around, there will be no problem. In order to be safe, the engine
@@ -125,7 +138,7 @@ static int LuaNpc_Message(lua_State *s)
     char const *m = lua_tolstring(s, 3, &l);
     if (!p || !q || !m)
     {
-        LOG_WARN("LuaNpc_Message called with incorrect parameters.");
+        raiseScriptError(s, "npc_message called with incorrect parameters.");
         return 0;
     }
     MessageOut msg(GPMSG_NPC_MESSAGE);
@@ -145,7 +158,7 @@ static int LuaNpc_Choice(lua_State *s)
     Character *q = getCharacter(s, 2);
     if (!p || !q)
     {
-        LOG_WARN("LuaNpc_Choice called with incorrect parameters.");
+        raiseScriptError(s, "npc_Choice called with incorrect parameters.");
         return 0;
     }
     MessageOut msg(GPMSG_NPC_CHOICE);
@@ -155,7 +168,7 @@ static int LuaNpc_Choice(lua_State *s)
         char const *m = lua_tostring(s, i);
         if (!m)
         {
-            LOG_WARN("LuaNpc_Choice called with incorrect parameters.");
+            raiseScriptError(s, "npc_Choice called with incorrect parameters.");
             return 0;
         }
         msg.writeString(m);
@@ -172,7 +185,7 @@ static int LuaNpc_Create(lua_State *s)
 {
     if (!lua_isnumber(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
     {
-        LOG_WARN("LuaNpc_Create called with incorrect parameters.");
+        raiseScriptError(s, "npc_create called with incorrect parameters.");
         return 0;
     }
     lua_pushlightuserdata(s, (void *)&registryKey);
@@ -182,7 +195,7 @@ static int LuaNpc_Create(lua_State *s)
     MapComposite *m = t->getMap();
     if (!m)
     {
-        LOG_WARN("LuaNpc_Create called outside a map.");
+        raiseScriptError(s, "npc_create called outside a map.");
         return 0;
     }
     q->setMap(m);
@@ -206,7 +219,7 @@ static int LuaChr_Warp(lua_State *s)
     if (!q || !(b || lua_isnumber(s, 2)) ||
         !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
     {
-        LOG_WARN("LuaChr_Warp called with incorrect parameters.");
+        raiseScriptError(s, "chr_warp called with incorrect parameters.");
         return 0;
     }
     MapComposite *m;
@@ -223,7 +236,7 @@ static int LuaChr_Warp(lua_State *s)
     }
     if (!m)
     {
-        LOG_WARN("LuaChr_Warp called with a non-existing map.");
+        raiseScriptError(s, "chr_warp called with a non-existing map.");
         return 0;
     }
     GameState::enqueueWarp(q, m, lua_tointeger(s, 3), lua_tointeger(s, 4));
@@ -247,7 +260,7 @@ static int LuaChr_InvChange(lua_State *s)
     Character *q = getCharacter(s, 1);
     if (!q)
     {
-        LOG_WARN("LuaChr_InvChange called with incorrect parameters.");
+        raiseScriptError(s, "chr_inv_change called with incorrect parameters.");
         return 0;
     }
     int nb_items = (lua_gettop(s) - 1) / 2;
@@ -256,7 +269,7 @@ static int LuaChr_InvChange(lua_State *s)
     {
         if (!lua_isnumber(s, i * 2 + 2) || !lua_isnumber(s, i * 2 + 3))
         {
-            LOG_WARN("LuaChr_InvChange called with incorrect parameters.");
+            raiseScriptError(s, "chr_inv_change called with incorrect parameters.");
             return 0;
         }
         int id = lua_tointeger(s, i * 2 + 2);
@@ -286,7 +299,7 @@ static int LuaChr_InvChange(lua_State *s)
             ItemClass *ic = ItemManager::getItem(id);
             if (!ic)
             {
-                LOG_WARN("LuaChr_InvChange called with an unknown item.");
+                raiseScriptError(s, "chr_inv_change called with an unknown item.");
                 continue;
             }
             nb = inv.insert(id, nb);
@@ -313,7 +326,7 @@ static int LuaChr_InvCount(lua_State *s)
     Character *q = getCharacter(s, 1);
     if (!q)
     {
-        LOG_WARN("LuaChr_InvCount called with incorrect parameters.");
+        raiseScriptError(s, "chr_inv_count called with incorrect parameters.");
         return 0;
     }
     int nb_items = lua_gettop(s) - 1;
@@ -323,7 +336,7 @@ static int LuaChr_InvCount(lua_State *s)
     {
         if (!lua_isnumber(s, i))
         {
-            LOG_WARN("LuaChr_InvCount called with incorrect parameters.");
+            raiseScriptError(s, "chr_inv_count called with incorrect parameters.");
             return 0;
         }
         int id = lua_tointeger(s, i);
@@ -343,7 +356,7 @@ static int LuaNpc_Trade(lua_State *s)
     Character *q = getCharacter(s, 2);
     if (!p || !q || !lua_isboolean(s, 3) || !lua_istable(s, 4))
     {
-        LOG_WARN("LuaNpc_Trade called with incorrect parameters.");
+        raiseScriptError(s, "npc_trade called with incorrect parameters.");
         return 0;
     }
     BuySell *t = new BuySell(q, lua_toboolean(s, 3));
@@ -352,7 +365,7 @@ static int LuaNpc_Trade(lua_State *s)
     {
         if (!lua_istable(s, -1))
         {
-            LOG_WARN("LuaNpc_Trade called with incorrect parameters.");
+            raiseScriptError(s, "npc_trade called with incorrect parameters.");
             t->cancel();
             return 0;
         }
@@ -362,7 +375,7 @@ static int LuaNpc_Trade(lua_State *s)
             lua_rawgeti(s, -1, i + 1);
             if (!lua_isnumber(s, -1))
             {
-                LOG_WARN("LuaNpc_Trade called with incorrect parameters.");
+                raiseScriptError(s, "rpc_trade called with incorrect parameters.");
                 t->cancel();
                 return 0;
             }
@@ -384,7 +397,7 @@ static int LuaBeing_Walk(lua_State *s)
 {
     if (!lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
     {
-        LOG_WARN("LuaBeing_walk called with incorrect parameters.");
+        raiseScriptError(s, "being_walk called with incorrect parameters.");
         return 0;
     }
 
@@ -435,7 +448,7 @@ static int LuaMonster_Create(lua_State *s)
 {
     if (!lua_isnumber(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
     {
-        LOG_WARN("LuaMonster_Create called with incorrect parameters.");
+        raiseScriptError(s, "monster_create called with incorrect parameters.");
         return 0;
     }
 
@@ -445,7 +458,7 @@ static int LuaMonster_Create(lua_State *s)
     MapComposite *m = t->getMap();
     if (!m)
     {
-        LOG_WARN("LuaMonster_Create called outside a map.");
+        raiseScriptError(s, "monster_create called outside a map.");
         return 0;
     }
 
@@ -453,7 +466,8 @@ static int LuaMonster_Create(lua_State *s)
     MonsterClass *spec = MonsterManager::getMonster(monsterId);
     if (!spec)
     {
-        LOG_WARN("LuaMonster_Create invalid monster ID: " << monsterId);
+        raiseScriptError(s, "monster_create called with invalid monster ID: %d", monsterId);
+        //LOG_WARN("LuaMonster_Create invalid monster ID: " << monsterId);
         return 0;
     }
 
@@ -497,7 +511,7 @@ static int LuaChr_GetQuest(lua_State *s)
     char const *m = lua_tostring(s, 2);
     if (!m || m[0] == 0)
     {
-        LOG_WARN("LuaChr_GetQuest called with incorrect parameters.");
+        raiseScriptError(s, "chr_get_quest called with incorrect parameters.");
         return 0;
     }
     std::string value, name = m;
@@ -526,7 +540,7 @@ static int LuaChr_SetQuest(lua_State *s)
     char const *n = lua_tostring(s, 3);
     if (!m || !n || m[0] == 0)
     {
-        LOG_WARN("LuaChr_SetQuest called with incorrect parameters.");
+        raiseScriptError(s, "chr_set_quest called with incorrect parameters.");
         return 0;
     }
     setQuestVar(q, m, n);
