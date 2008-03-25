@@ -2,10 +2,12 @@
 -- Map code --
 --------------
 
+require "data/scripts/npclib"
+
 atinit(function()
-  create_npc(110, 50 * 32 + 16, 19 * 32 + 16, npc1_talk, nil)
-  create_npc(108, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, nil)
-  create_npc(126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npc5_update)
+  create_npc(110, 50 * 32 + 16, 19 * 32 + 16, npc1_talk, npclib.walkaround_small)
+  create_npc(108, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, npclib.walkaround_wide)
+  create_npc(126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npclib.walkaround_map)
   create_npc(122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, nil)
 end)
 
@@ -72,21 +74,9 @@ function npc5_talk(npc, ch)
     local x = tmw.posX(npc)
     local y = tmw.posY(npc)
     tmw.monster_create(1012, x + 32, y + 32)
-    tmw.monster_create(1012, x - 32, y + 32)
+    tmw.monster_create(112, x - 32, y + 32)
     tmw.monster_create(1012, x + 32, y - 32)
     tmw.monster_create(1012, x - 32, y - 32)
-  end
-end
-
-local spidertamer_timer = 0
-
-function npc5_update(npc)
-  spidertamer_timer = spidertamer_timer + 1
-  if spidertamer_timer == 50 then
-    spidertamer_timer = 0
-    local x = math.random(-64, 64) + tmw.posX(npc)
-    local y = math.random(-64, 64) + tmw.posY(npc)
-    tmw.being_walk(npc, x, y, 500)
   end
 end
 

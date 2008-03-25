@@ -1,3 +1,8 @@
+2008-03-25  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* data/test.lua, data/scripts/npclib.lua: Added a Lua library with
+	walk around functions for NPCs.
+
 2008-03-17  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/scripting/lua.cpp: Error messages in script callback functions
