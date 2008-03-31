@@ -1,3 +1,8 @@
+2008-03-31  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* data/test.lua: Removed the +100 offset of NPC IDs (relict from
+	eAthena)
+
 2008-03-25  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* data/test.lua, data/scripts/npclib.lua: Added a Lua library with

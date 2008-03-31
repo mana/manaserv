@@ -5,10 +5,10 @@
 require "data/scripts/npclib"
 
 atinit(function()
-  create_npc(110, 50 * 32 + 16, 19 * 32 + 16, npc1_talk, npclib.walkaround_small)
-  create_npc(108, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, npclib.walkaround_wide)
-  create_npc(126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npclib.walkaround_map)
-  create_npc(122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, nil)
+  create_npc(100, 50 * 32 + 16, 19 * 32 + 16, npc1_talk, npclib.walkaround_small)
+  create_npc(101, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, npclib.walkaround_wide)
+  create_npc(26, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npclib.walkaround_map)
+  create_npc(22, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, nil)
 end)
 
 function npc1_talk(npc, ch)
