@@ -1,3 +1,17 @@
+2008-04-01  David Athay  <ko2fan@gmail.com>
+
+	* src/account-server/dalstorage.cpp, 
+	src/account-server/dalstoragesql.hpp, 
+	src/chat-server/chatchannelmanager.cpp, 
+	src/chat-server/chatchannel.cpp, 
+	src/chat-server/chatchannelmanager.hpp,
+	src/chat-server/chatchannel.hpp, src/chat-server/chathandler.cpp,
+	gameserver.cbp: Consolidated public and private channels into one,
+	which also includes guild channels. Channels now have a joinable 
+	field, which is true for channels that are created by users, and 
+	false for guild channels. Chatting in guild channels now works, and 
+	non-guild members can no longer join guild channels.
+
 2008-03-31  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* data/test.lua: Removed the +100 offset of NPC IDs (relict from

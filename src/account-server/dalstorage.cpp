@@ -697,13 +697,13 @@ DALStorage::updateChannels(std::map<unsigned short, ChatChannel>& channelList)
                     sql.str("");
                     sql << "insert into "
                         << CHANNELS_TBL_NAME
-                        << " (id, name, announcement, password, privacy)"
+                        << " (id, name, announcement, password, joinable)"
                         << " values ("
                         << i->first << ", \""
                         << i->second.getName() << "\", \""
                         << i->second.getAnnouncement() << "\", \""
                         << i->second.getPassword() << "\", \""
-                        << i->second.isPrivate() << "\");";
+                        << i->second.canJoin() << "\");";
 
                         LOG_DEBUG("Channel (" << i->first << ") saved: "
                                   << i->second.getName()

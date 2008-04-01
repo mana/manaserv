@@ -26,6 +26,7 @@
 
 #include <list>
 #include <map>
+#include <deque>
 
 #include "chat-server/chatchannel.hpp"
 
@@ -47,32 +48,14 @@ class ChatChannelManager
         ~ChatChannelManager();
 
         /**
-         * Registers a public channel. Can fail if the maximum of public
-         * channels has already been reached or when a channel with the same
-         * name already exists.
+         * Create a new chat channel.
          *
-         * @return the ID of the registered channel, or 0 if the registering
-         *         was unsuccessful.
+         * @return the ID of the registered channel
          */
-        int registerPublicChannel(const std::string &channelName,
+        int createNewChannel(const std::string &channelName,
                                     const std::string &channelAnnouncement,
-                                    const std::string &channelPassword);
-
-        /**
-         * Registers a private channel. Can fail if the maximum of private
-         * channels has already been reached or when a channel with the same
-         * name already exists.
-         *
-         * @todo <b>b_lindeijer:</b> Pretty much the same as registering public
-         *       channel. Maybe they should be merged and private/public should
-         *       be passed as a boolean?
-         *
-         * @return the ID of the registered channel, or 0 if the registering
-         *         was unsuccessful.
-         */
-        int registerPrivateChannel(const std::string &channelName,
-                                     const std::string &channelAnnouncement,
-                                     const std::string &channelPassword);
+                                    const std::string &channelPassword,
+                                    bool joinable);
 
         /**
          * Remove a channel.
@@ -101,6 +84,13 @@ class ChatChannelManager
         ChatChannel* getChannel(int channelId);
 
         /**
+         * Returns the chat channel with the given channel name.
+         *
+         * @return The chat channel, or NULL when it doesn't exist.
+         */
+        ChatChannel* getChannel(const std::string &name);
+
+        /**
          * Remove a user from all channels. Used at logout.
          *
          * @see ChatChannel::removeUserFromChannel
@@ -114,6 +104,11 @@ class ChatChannelManager
          */
         bool channelExists(int channelId);
 
+        /**
+         * Get next usable channel ID
+         */
+        int nextUsable();
+
     private:
         typedef std::map<unsigned short, ChatChannel> ChatChannels;
         typedef ChatChannels::iterator ChatChannelIterator;
@@ -123,6 +118,8 @@ class ChatChannelManager
          * unique.
          */
         ChatChannels mChatChannels;
+        int mNextChannelId;
+        std::deque<int> mChannelsNoLongerUsed;
 };
 
 extern ChatChannelManager *chatChannelManager;

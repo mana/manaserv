@@ -347,21 +347,11 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
         // We attempt to create a new channel
         short channelId;
 
-        // TODO: b_lindeijer: These methods should really be combined.
-        if (channelType)
-        {
-            channelId = chatChannelManager->registerPrivateChannel(
+        channelId = chatChannelManager->createNewChannel(
                     channelName,
                     channelAnnouncement,
-                    channelPassword);
-        }
-        else
-        {
-            channelId = chatChannelManager->registerPublicChannel(
-                    channelName,
-                    channelAnnouncement,
-                    channelPassword);
-        }
+                    channelPassword,
+                    true);
 
         if (channelId)
         {
@@ -453,10 +443,9 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     std::string channelName = msg.readString();
     std::string givenPassword = msg.readString();
 
-    short channelId = chatChannelManager->getChannelId(channelName);
-    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+    ChatChannel *channel = chatChannelManager->getChannel(channelName);
 
-    if (!channelId || !channel)
+    if (!channel)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
@@ -466,6 +455,10 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
         // Incorrect password (should probably have its own return value)
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
+    else if (!channel->canJoin())
+    {
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
     else
     {
         if (channel->addUser(&client))
@@ -473,7 +466,7 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
             reply.writeByte(ERRMSG_OK);
             // The user entered the channel, now give him the channel
             // id, the announcement string and the user list.
-            reply.writeShort(channelId);
+            reply.writeShort(channel->getId());
             reply.writeString(channelName);
             reply.writeString(channel->getAnnouncement());
             const ChatChannel::ChannelUsers &users = channel->getUserList();
@@ -596,8 +589,8 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
         // Guild doesnt already exist so create it
         Guild *guild = guildManager->createGuild(guildName, client.characterName);
         reply.writeByte(ERRMSG_OK);
-        reply.writeShort(guild->getId());
         reply.writeString(guildName);
+        reply.writeShort(guild->getId());
         reply.writeByte(true);
 
         // Send autocreated channel id
@@ -734,6 +727,7 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
         if (guild->checkInGuild(client.characterName))
         {
             reply.writeByte(ERRMSG_OK);
+            reply.writeShort(guildId);
             guild->removeMember(client.characterName);
         }
         else
@@ -862,19 +856,19 @@ void ChatHandler::sendUserLeft(ChatChannel *channel, const std::string &name)
 
 int ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &client)
 {
+    int channelId = 0;
     // Automatically make the character join the guild chat channel
-    // COMMENT: I think it shouldn't need to go through channelId to
-    // get the channel pointer. Also need to change this to registering
-    // a generic channel, rather than public, once public and private
-    // are merged
-    short channelId = chatChannelManager->getChannelId(guildName);
-    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+    ChatChannel *channel = chatChannelManager->getChannel(guildName);
     if (!channel)
     {
         // Channel doesnt exist so create it
-        channelId = chatChannelManager->registerPublicChannel(guildName,
-                "Guild Channel", "");
+        channelId = chatChannelManager->createNewChannel(guildName,
+                "Guild Channel", "", false);
         channel = chatChannelManager->getChannel(channelId);
+    }
+    else
+    {
+        channelId = channel->getId();
     }
 
     // Add user to the channel
@@ -885,4 +879,6 @@ int ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &clie
         warnUsersAboutPlayerEventInChat(channel, client.characterName,
                 CHAT_EVENT_NEW_PLAYER);
     }
+
+    return channelId;
 }

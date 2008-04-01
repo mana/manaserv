@@ -56,7 +56,8 @@ class ChatChannel
         ChatChannel(int id,
                     const std::string &name,
                     const std::string &announcement = std::string(),
-                    const std::string &password = std::string());
+                    const std::string &password = std::string(),
+                    bool joinable = true);
 
         /**
          * Get the ID of the channel.
@@ -131,11 +132,17 @@ class ChatChannel
          */
         void removeAllUsers();
 
+        /**
+         * Get whether a user can join this channel
+         */
+        bool canJoin() const;
+
     private:
         unsigned short mId;            /**< The ID of the channel. */
         std::string mName;             /**< The name of the channel. */
         std::string mAnnouncement;     /**< Welcome message. */
         std::string mPassword;         /**< The channel password. */
+        bool mJoinable;                /**< Whether anyone can join. */
         ChannelUsers mRegisteredUsers; /**< Users in this channel. */
 };
 

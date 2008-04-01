@@ -29,11 +29,13 @@
 ChatChannel::ChatChannel(int id,
                          const std::string &name,
                          const std::string &announcement,
-                         const std::string &password):
+                         const std::string &password,
+                         bool joinable):
     mId(id),
     mName(name),
     mAnnouncement(announcement),
-    mPassword(password)
+    mPassword(password),
+    mJoinable(joinable)
 {
 }
 
@@ -68,4 +70,9 @@ void ChatChannel::removeAllUsers()
         channels.erase(std::find(channels.begin(), channels.end(), this));
     }
     mRegisteredUsers.clear();
+}
+
+bool ChatChannel::canJoin() const
+{
+    return mJoinable;
 }
