@@ -126,6 +126,12 @@ class ChatHandler : public ConnectionHandler
                              const std::string &inviterName,
                              const std::string &guildName);
 
+        /**
+         * Send the new list of guild members
+         */
+        void sendGuildListUpdate(const std::string &guildName,
+                                 const std::string &characterName);
+
     private:
         /**
          * Deal with command messages.

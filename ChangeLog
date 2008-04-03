@@ -2,6 +2,9 @@
 
 	* src/chat-server/chathandler.cpp: Restricted who can be invited to 
 	guilds.
+	* src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
+	src/defines.h: Fixed accepting guild invite and added updating the 
+	guild member list.
 
 2008-04-02  David Athay  <ko2fan@gmail.com>
 

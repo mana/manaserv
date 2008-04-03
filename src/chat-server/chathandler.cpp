@@ -669,8 +669,8 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
         {
             guild->addMember(client.characterName);
             reply.writeByte(ERRMSG_OK);
-            reply.writeShort(guild->getId());
             reply.writeString(guild->getName());
+            reply.writeShort(guild->getId());
             reply.writeByte(false);
 
             short id = joinGuildChannel(guild->getName(), client);
@@ -881,7 +881,34 @@ int ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &clie
         // in the channel.
         warnUsersAboutPlayerEventInChat(channel, client.characterName,
                 CHAT_EVENT_NEW_PLAYER);
+
+        sendGuildListUpdate(guildName, client.characterName);
     }
 
     return channelId;
+}
+
+void ChatHandler::sendGuildListUpdate(const std::string &guildName,
+                                      const std::string &characterName)
+{
+    Guild *guild = guildManager->findByName(guildName);
+    if (guild)
+    {
+        MessageOut msg(CPMSG_GUILD_UPDATE_LIST);
+
+        msg.writeShort(guild->getId());
+        msg.writeString(characterName);
+
+        // TODO: This should get a list of all members
+        // and iterate through them
+        std::map<std::string, ChatClient*>::iterator itr;
+        for (int i = 0; i < guild->totalMembers(); ++i)
+        {
+            itr = mPlayerMap.find(guild->getMember(i));
+            if (itr != mPlayerMap.end())
+            {
+                itr->second->send(msg);
+            }
+        }
+    }
 }

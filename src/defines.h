@@ -189,18 +189,19 @@ enum {
 
     // Guild
     PCMSG_GUILD_CREATE                  = 0x0350, // S name
-    CPMSG_GUILD_CREATE_RESPONSE         = 0x0351, // B error, W id, S name
+    CPMSG_GUILD_CREATE_RESPONSE         = 0x0351, // B error, W guild, B rights, W channel
     PCMSG_GUILD_INVITE                  = 0x0352, // W id, S name
     CPMSG_GUILD_INVITE_RESPONSE         = 0x0353, // B error
     PCMSG_GUILD_ACCEPT                  = 0x0354, // W id
-    CPMSG_GUILD_ACCEPT_RESPONSE         = 0x0355, // B error, W id, S name, W leader
+    CPMSG_GUILD_ACCEPT_RESPONSE         = 0x0355, // B error, W guild, B rights, W channel
     PCMSG_GUILD_GET_MEMBERS             = 0x0356, // W id
     CPMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0357, // S names
+    CPMSG_GUILD_UPDATE_LIST             = 0x0358, // W id, S name
     PCMSG_GUILD_QUIT                    = 0x0360, // W id
     CPMSG_GUILD_QUIT_RESPONSE           = 0x0361, // B error
 
     CPMSG_GUILD_INVITED                 = 0x0370, // S char name, S  guild name, W id
-    CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W id, W rights
+    CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W guild, B rights, W channel
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error
