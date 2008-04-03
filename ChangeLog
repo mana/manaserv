@@ -1,3 +1,8 @@
+2008-04-03  David Athay  <kofan@gmail.com>
+
+	* src/chat-server/chathandler.cpp: Restricted who can be invited to 
+	guilds.
+
 2008-04-02  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/chathandler.cpp: Fix accepting guild invites.

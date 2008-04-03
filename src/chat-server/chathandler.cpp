@@ -621,8 +621,11 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
 
     if (invitedClient && guild)
     {
-        // check permissions of inviter
-        if (guild->checkLeader(client.characterName))
+        // check permissions of inviter, and that they arent inviting themself,
+        // and arent someone already in the guild
+        if (guild->checkLeader(client.characterName) &&
+            (client.characterName != character) &&
+            !guild->checkInGuild(character))
         {
             // send the name of the inviter and the name of the guild
             // that the character has been invited to join
