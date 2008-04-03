@@ -654,12 +654,12 @@ void
 ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_ACCEPT_RESPONSE);
-    short guildId = msg.readShort();
+    std::string guildName = msg.readString();
 
     // check guild exists and that member was invited
     // then add them as guild member
     // and remove from invite list
-    Guild *guild = guildManager->findById(guildId);
+    Guild *guild = guildManager->findByName(guildName);
     if (guild)
     {
         if (guild->checkInvited(client.characterName))
