@@ -453,7 +453,7 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
             channel->getPassword() != givenPassword)
     {
         // Incorrect password (should probably have its own return value)
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
     }
     else if (!channel->canJoin())
     {
@@ -549,13 +549,13 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_LIST_CHANNELUSERS_RESPONSE);
 
-    int channelId = msg.readLong();
-    ChatChannel *channel = chatChannelManager->getChannel(channelId);
-
-    reply.writeLong(channelId);
+    std::string channelName = msg.readString();
+    ChatChannel *channel = chatChannelManager->getChannel(channelName);
 
     if (channel)
     {
+        reply.writeString(channel->getName());
+
         const ChatChannel::ChannelUsers &users = channel->getUserList();
 
         for (ChatChannel::ChannelUsers::const_iterator
@@ -563,9 +563,9 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
         {
             reply.writeString((*i)->characterName);
         }
-    }
 
-    client.send(reply);
+        client.send(reply);
+    }
 }
 
 void
