@@ -60,7 +60,7 @@ void Guild::addInvited(const std::string &playerName)
 const std::string& Guild::getMember(int i) const
 {
     int x = 0;
-    for (guildMembers::const_iterator itr = mMembers.begin();
+    for (GuildMembers::const_iterator itr = mMembers.begin();
         itr != mMembers.end();
         ++itr, ++x)
     {

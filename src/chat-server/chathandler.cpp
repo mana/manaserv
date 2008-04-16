@@ -29,6 +29,7 @@
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chatclient.hpp"
 #include "chat-server/chathandler.hpp"
+#include "chat-server/party.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -81,7 +82,7 @@ void ChatHandler::tokenMatched(ChatClient *c, Pending *p)
     msg.writeByte(ERRMSG_OK);
     c->send(msg);
 
-    // Insert the ChatClient and Character into the Player map
+    // Add chat client to player map
     mPlayerMap.insert(std::pair<std::string, ChatClient*>(c->characterName, c));
 }
 
@@ -187,6 +188,13 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PCMSG_GUILD_QUIT:
             handleGuildQuit(computer, message);
             break;
+
+        case PCMSG_PARTY_CREATE:
+            handlePartyCreation(computer, message);
+            break;
+
+        case PCMSG_PARTY_QUIT:
+            handlePartyQuit(computer, message);
 
         default:
             LOG_WARN("ChatHandler::processMessage, Invalid message type"
@@ -302,19 +310,6 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_REGISTER_CHANNEL_RESPONSE);
 
-    char channelType = msg.readByte();
-    if (!channelType)  // 0 public, 1 private
-    {
-        if (client.accountLevel != AL_ADMIN &&
-                client.accountLevel != AL_GM)
-        {
-            // Removed the need for admin/gm rights to create public channels
-            //reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-            //send message
-            //return;
-        }
-    }
-
     std::string channelName = msg.readString();
     std::string channelAnnouncement = msg.readString();
     std::string channelPassword = msg.readString();
@@ -387,27 +382,12 @@ ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (channelId < (signed) MAX_PUBLIC_CHANNELS_RANGE)
+    else if (!channel->canJoin())
     {
-        // Public channel
-        if (client.accountLevel == AL_ADMIN || client.accountLevel == AL_GM)
-        {
-            warnUsersAboutPlayerEventInChat(
-                    channel, "", CHAT_EVENT_LEAVING_PLAYER);
-            if (chatChannelManager->removeChannel(channelId))
-                reply.writeByte(ERRMSG_OK);
-            else
-                reply.writeByte(ERRMSG_FAILURE);
-        }
-        else
-        {
-            reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-        }
+        reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
     }
     else
     {
-        // Private channel
-
         // We first see if the user is the admin (first user) of the channel
         const ChatChannel::ChannelUsers &userList = channel->getUserList();
         ChatChannel::ChannelUsers::const_iterator i = userList.begin();
@@ -596,6 +576,9 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
         // Send autocreated channel id
         short channelId = joinGuildChannel(guildName, client);
         reply.writeShort(channelId);
+
+        // Add new guild to chatclient
+        client.guilds.push_back(guild);
     }
     else
     {
@@ -675,6 +658,8 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
 
             short id = joinGuildChannel(guild->getName(), client);
             reply.writeShort(id);
+
+            client.guilds.push_back(guild);
         }
         else
         {
@@ -700,11 +685,15 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
     // write a list of member names that belong to the guild
     if (guild)
     {
-        reply.writeByte(ERRMSG_OK);
-        reply.writeShort(guildId);
-        for(int i = 0; i < guild->totalMembers(); ++i)
+        // make sure the requestor is in the guild
+        if (guild->checkInGuild(client.characterName))
         {
-            reply.writeString(guild->getMember(i));
+            reply.writeByte(ERRMSG_OK);
+            reply.writeShort(guildId);
+            for(int i = 0; i < guild->totalMembers(); ++i)
+            {
+                reply.writeString(guild->getMember(i));
+            }
         }
     }
     else
@@ -800,8 +789,7 @@ void ChatHandler::sendGuildInvite(const std::string &invitedName,
     std::map<std::string, ChatClient*>::iterator itr = mPlayerMap.find(invitedName);
     if (itr == mPlayerMap.end())
     {
-        ChatClient *invited = itr->second;
-        invited->send(msg);
+        itr->second->send(msg);
     }
 }
 
@@ -909,6 +897,28 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
             {
                 itr->second->send(msg);
             }
+        }
+    }
+}
+
+void ChatHandler::handlePartyCreation(ChatClient &client, MessageIn &msg)
+{
+    if (!client.party)
+    {
+        client.party = new Party();
+        client.party->addUser(client.characterName);
+    }
+}
+
+void ChatHandler::handlePartyQuit(ChatClient &client, MessageIn &msg)
+{
+    if (client.party)
+    {
+        client.party->removeUser(client.characterName);
+        if (client.party->numUsers() < 1)
+        {
+            delete client.party;
+            client.party = 0;
         }
     }
 }

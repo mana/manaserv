@@ -135,11 +135,11 @@ static Character *findCharacterNear(Object *p, int id)
     MapComposite *map = p->getMap();
     Point const &ppos = p->getPosition();
     // TODO: use a less arbitrary value.
-    for (CharacterIterator i(map->getAroundPointIterator(ppos, 48)); i; ++i)
+    for (CharacterIterator i(map->getAroundPointIterator(ppos, 64)); i; ++i)
     {
         Character *o = *i;
         if (o->getPublicID() != id) continue;
-        return ppos.inRangeOf(o->getPosition(), 48) ? o : NULL;
+        return ppos.inRangeOf(o->getPosition(), 64) ? o : NULL;
     }
     return NULL;
 }

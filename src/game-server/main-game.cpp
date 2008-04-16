@@ -54,7 +54,7 @@
 #define DEFAULT_MAPSDB_FILE     "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE "monsters.xml"
 
-utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
+utils::Timer worldTimer(150, false);   /**< Timer for world tics set to 100 ms */
 int worldTime = 0;              /**< Current world time in 100ms ticks */
 bool running = true;            /**< Determines if server keeps running */
 
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
 #ifdef PACKAGE_VERSION
     LOG_INFO("The Mana World Game Server v" << PACKAGE_VERSION);
 #endif
-    
+
     // Parse command line options
     parseOptions(argc, argv);
 

@@ -52,9 +52,6 @@ class ChatHandler : public ConnectionHandler
             unsigned char level;
         };
 
-        /**
-         * Map the chat clients to the characters name
-         */
         std::map<std::string, ChatClient*> mPlayerMap;
 
     public:
@@ -138,50 +135,107 @@ class ChatHandler : public ConnectionHandler
          */
         void handleCommand(ChatClient &client, const std::string &command);
 
+        /**
+         * Deal with Chat messages.
+         */
         void
         handleChatMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with Announcement messages.
+         */
         void
         handleAnnounceMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with Private messages.
+         */
         void
         handlePrivMsgMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with channel registration.
+         */
         void
         handleRegisterChannelMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with channel unregistering.
+         */
         void
         handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with player entering channel.
+         */
         void
         handleEnterChannelMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with player leaving channel.
+         */
         void
         handleQuitChannelMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with listing all accessible channels.
+         */
         void
         handleListChannelsMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with listing all channel users in a channel.
+         */
         void
         handleListChannelUsersMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with disconnection.
+         */
         void
         handleDisconnectMessage(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with creating a guild.
+         */
         void
         handleGuildCreation(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with inviting a player to a guild.
+         */
         void
         handleGuildInvitation(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with accepting an invite to join a guild.
+         */
         void
         handleGuildAcceptInvite(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with returning all the guild members of a guild.
+         */
         void
         handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg);
 
+        /**
+         * Deal with leaving a guild.
+         */
         void
         handleGuildQuit(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Deal with creating a party.
+         */
+        void
+        handlePartyCreation(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Deal with Announcement messages.
+         */
+        void
+        handlePartyQuit(ChatClient &client, MessageIn &msg);
 
         /**
          * Tell the player to be more polite.

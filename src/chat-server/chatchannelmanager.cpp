@@ -77,7 +77,7 @@ std::list<const ChatChannel*> ChatChannelManager::getPublicChannels()
             i_end = mChatChannels.end();
          i != i_end; ++i)
     {
-        if (!i->second.isPrivate())
+        if (!i->second.canJoin())
         {
             channels.push_back(&i->second);
         }

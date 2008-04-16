@@ -1,6 +1,6 @@
 /*
  *  The Mana World Server
- *  Copyright 2004 The Mana World Development Team
+ *  Copyright 2008 The Mana World Development Team
  *
  *  This file is part of The Mana World.
  *
@@ -18,42 +18,43 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id$
+ *  $Id: $
  */
 
-#ifndef _TMWSERV_CHATCLIENT_H_
-#define _TMWSERV_CHATCLIENT_H_
+#ifndef _TMWSERV_PARTY_H_
+#define _TMWSERV_PARTY_H_
 
 #include <string>
 #include <vector>
 
-#include "net/netcomputer.hpp"
-
-class ChatChannel;
-class Guild;
-class Party;
-
 /**
- * A client connected to the chat server. Via this class, the chat server
- * keeps track of the character name and account level of a client.
+ * A party that contains 1 or more characters to play together
  */
-class ChatClient : public NetComputer
+class Party
 {
-    public:
-        /**
-         * Constructor.
-         */
-        ChatClient(ENetPeer *peer):
-            NetComputer(peer),
-            party(0)
-        {
-        }
+public:
+    typedef std::vector<std::string> PartyUsers;
 
-        std::string characterName;
-        std::vector< ChatChannel * > channels;
-        std::vector< Guild* > guilds;
-        Party* party;
-        unsigned char accountLevel;
+    /** Constructor */
+    Party();
+
+    /**
+     * Add user to party
+     */
+    void addUser(const std::string &name);
+
+    /**
+     * Remove user from party
+     */
+    void removeUser(const std::string &name);
+
+    /**
+     * Return number of users in party
+     */
+    unsigned int numUsers() { return mUsers.size(); }
+
+private:
+    PartyUsers mUsers;
 };
 
 #endif

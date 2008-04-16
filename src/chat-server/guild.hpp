@@ -32,7 +32,7 @@
 class Guild
 {
     public:
-        typedef std::list<std::string> guildMembers;
+        typedef std::list<std::string> GuildMembers;
 
         /**
          * Constructor.
@@ -106,8 +106,8 @@ class Guild
     private:
         short mId;
         std::string mName;
-        std::list<std::string> mMembers;
-        std::list<std::string> mInvited;
+        GuildMembers mMembers;
+        GuildMembers mInvited;
 };
 
 #endif

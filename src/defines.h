@@ -203,6 +203,12 @@ enum {
     CPMSG_GUILD_INVITED                 = 0x0370, // S char name, S  guild name, W id
     CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W guild, B rights, W channel
 
+    // Party
+    PCMSG_PARTY_CREATE                  = 0x03A0, // -
+    CPMSG_PARTY_CREATE_RESPONSE         = 0x03A1, // B error
+    PCMSG_PARTY_QUIT                    = 0x03AA, // -
+    CPMSG_PARTY_QUIT_RESPONSE           = 0x03AB, // B error
+
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error
     CPMSG_ANNOUNCEMENT             = 0x0402, // S text

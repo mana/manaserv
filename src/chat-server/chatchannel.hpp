@@ -84,12 +84,6 @@ class ChatChannel
         { return mPassword; }
 
         /**
-         * Returns whether this channel is private.
-         */
-        bool isPrivate() const
-        { return !mPassword.empty(); }
-
-        /**
          * Sets the name of the channel.
          */
         void setName(const std::string &channelName)
