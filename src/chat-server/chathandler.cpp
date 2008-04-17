@@ -107,6 +107,9 @@ void ChatHandler::computerDisconnected(NetComputer *comp)
 
         // Remove the character from the player map
         mPlayerMap.erase(computer->characterName);
+
+        // Remove user from party
+        removeUserFromParty(*computer);
     }
 
     delete computer;
@@ -903,14 +906,29 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
 
 void ChatHandler::handlePartyCreation(ChatClient &client, MessageIn &msg)
 {
+    MessageOut out(CPMSG_PARTY_CREATE_RESPONSE);
     if (!client.party)
     {
         client.party = new Party();
         client.party->addUser(client.characterName);
+        out.writeByte(ERRMSG_OK);
     }
+    else
+    {
+        out.writeByte(ERRMSG_FAILURE);
+    }
+    client.send(out);
 }
 
 void ChatHandler::handlePartyQuit(ChatClient &client, MessageIn &msg)
+{
+    removeUserFromParty(client);
+    MessageOut out(CPMSG_PARTY_QUIT_RESPONSE);
+    out.writeByte(ERRMSG_OK);
+    client.send(out);
+}
+
+void ChatHandler::removeUserFromParty(ChatClient &client)
 {
     if (client.party)
     {

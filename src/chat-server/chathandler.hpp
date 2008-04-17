@@ -232,10 +232,16 @@ class ChatHandler : public ConnectionHandler
         handlePartyCreation(ChatClient &client, MessageIn &msg);
 
         /**
-         * Deal with Announcement messages.
+         * Deal with leaving a party.
          */
         void
         handlePartyQuit(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Remove user from party
+         */
+        void
+        removeUserFromParty(ChatClient &client);
 
         /**
          * Tell the player to be more polite.
