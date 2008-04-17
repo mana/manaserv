@@ -1,6 +1,10 @@
+2008-04-17  Yohann Ferreira <bertram@cegetel.net>
+
+	* src/Makefile.am: Fixed compilation using automake.
+
 2008-04-16  David Athay  <ko2fan@gmail.com>
 
-	*  accountserver.cbp, src/chat-server/party.cpp,
+	* accountserver.cbp, src/chat-server/party.cpp,
 	src/chat-server/chathandler.hpp, 
 	src/chat-server/chatchannelmanager.cpp, 
 	src/chat-server/chatclient.hpp, src/chat-server/guild.cpp,

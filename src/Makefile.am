@@ -32,6 +32,8 @@ tmwserv_account_SOURCES = \
 	chat-server/guild.cpp \
 	chat-server/guildmanager.hpp \
 	chat-server/guildmanager.cpp \
+	chat-server/party.cpp \
+	chat-server/party.hpp \
 	common/configuration.hpp \
 	common/configuration.cpp \
 	common/inventorydata.hpp \
