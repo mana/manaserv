@@ -29,7 +29,7 @@
 #include "account-server/dalstorage.hpp"
 #include "chat-server/chatclient.hpp"
 
-ChatChannelManager::ChatChannelManager() : mNextChannelId(0)
+ChatChannelManager::ChatChannelManager() : mNextChannelId(1)
 {
     // Load stored public chat channels from db
     mChatChannels = storage->getChannelList();
@@ -146,7 +146,8 @@ int ChatChannelManager::nextUsable()
     }
     else
     {
-        channelId = ++mNextChannelId;
+        channelId = mNextChannelId;
+        ++mNextChannelId;
     }
 
     return channelId;

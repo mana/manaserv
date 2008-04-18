@@ -338,7 +338,7 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
     else if (guildManager->doesExist(channelName))
     {
         // Channel already exists
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeByte(ERRMSG_ALREADY_TAKEN);
     }
     else
     {
@@ -579,9 +579,6 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
         // Send autocreated channel id
         short channelId = joinGuildChannel(guildName, client);
         reply.writeShort(channelId);
-
-        // Add new guild to chatclient
-        client.guilds.push_back(guild);
     }
     else
     {
@@ -661,8 +658,6 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
 
             short id = joinGuildChannel(guild->getName(), client);
             reply.writeShort(id);
-
-            client.guilds.push_back(guild);
         }
         else
         {
@@ -723,7 +718,7 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
-            guild->removeMember(client.characterName);
+            guildManager->removeGuildMember(guildId, client.characterName);
         }
         else
         {
