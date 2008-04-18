@@ -1,3 +1,9 @@
+2008-04-19  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/account-server/accounthandler.cpp,
+	src/account-server/dalstorage.hpp: Fixed 'Password changes' and 
+	'Unregistering', server-side this time.
+
 2008-04-18  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/chatchannelmanager.cpp,

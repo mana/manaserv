@@ -344,7 +344,7 @@ static void handleUnregisterMessage(AccountClient &computer, MessageIn &msg)
 
     MessageOut reply(APMSG_UNREGISTER_RESPONSE);
 
-    if (computer.status != CLIENT_LOGIN)
+    if (computer.status != CLIENT_CONNECTED)
     {
         reply.writeByte(ERRMSG_FAILURE);
         computer.send(reply);
@@ -407,6 +407,8 @@ static void handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     else
     {
         acc->setEmail(email);
+        // Keep the database up to date otherwise we will go out of sync
+        storage->flush(acc);
         reply.writeByte(ERRMSG_OK);
     }
     computer.send(reply);
@@ -458,6 +460,8 @@ static void handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg)
     else
     {
         acc->setPassword(newPassword);
+        // Keep the database up to date otherwise we will go out of sync
+        storage->flush(acc);
         reply.writeByte(ERRMSG_OK);
     }
 

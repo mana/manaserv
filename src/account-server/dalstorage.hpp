@@ -182,27 +182,27 @@ class DALStorage
          */
         void
         addGuild(Guild* guild);
-        
+
         /**
          * Delete a guild
          *
          */
         void
         removeGuild(Guild* guild);
-        
+
         /**
          * Add member to guild
          *
          */
         void
         addGuildMember(int guild_id, const std::string &member_name);
-        
+
         /*
          * Remove member from guild
          */
         void
         removeGuildMember(int guildId, const std::string &memberName);
-        
+
         /**
          * Get guild list
          *@return a list of guilds
@@ -210,7 +210,7 @@ class DALStorage
          */
         std::list<Guild*>
         getGuildList();
-        
+
         /**
          * Save changes to the database permanently.
          *
