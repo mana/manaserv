@@ -3,6 +3,8 @@
 	* src/chat-server/chatchannelmanager.cpp,
 	src/chat-server/chatclient.hpp, src/chat-server/chathandler.cpp:
 	Fixed guilds not being removed when leader quits.
+	* src/chat-server/chathandler.cpp: Remove channel when leader quits 
+	guild.
 
 2008-04-17  David Athay  <ko2fan@gmail.com>
 

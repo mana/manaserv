@@ -718,6 +718,13 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
+
+            // Check if they are the leader, and if so, remove the guild channel
+            if (guild->checkLeader(client.characterName))
+            {
+                chatChannelManager->removeChannel(chatChannelManager->getChannelId(guild->getName()));
+            }
+
             guildManager->removeGuildMember(guildId, client.characterName);
         }
         else
