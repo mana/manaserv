@@ -68,6 +68,7 @@ bool inflateMemory(char *in, unsigned inLength,
     if (ret != Z_OK)
     {
         logZlibError(ret);
+        free(out);
         return false;
     }
 
@@ -83,6 +84,7 @@ bool inflateMemory(char *in, unsigned inLength,
             case Z_MEM_ERROR:
                 inflateEnd(&strm);
                 logZlibError(ret);
+                free(out);
                 return false;
         }
 
@@ -94,6 +96,7 @@ bool inflateMemory(char *in, unsigned inLength,
             {
                 inflateEnd(&strm);
                 logZlibError(Z_MEM_ERROR);
+                free(out);
                 return false;
             }
 
@@ -107,6 +110,7 @@ bool inflateMemory(char *in, unsigned inLength,
     if (strm.avail_in != 0)
     {
         logZlibError(Z_DATA_ERROR);
+        free(out);
         return false;
     }
 

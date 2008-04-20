@@ -1,3 +1,7 @@
+2008-04-20  Dennis Friis  <peavey@placid.dk>
+	* src/utils/zlib.cpp: Fix a possible memleak in inflateMemory if the
+	stream fails to uncompress cleanly.
+
 2008-04-19  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/account-server/accounthandler.cpp,
