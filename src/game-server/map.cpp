@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <queue>
 #include <cassert>
+#include <cstring>
 
 #include "game-server/map.hpp"
 

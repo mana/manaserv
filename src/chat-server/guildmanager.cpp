@@ -17,7 +17,7 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id: guildmanager.cpp 3549 2007-08-30 16:20:33Z gmelquio $
+ *  $Id$
  */
 
 #include "guildmanager.hpp"

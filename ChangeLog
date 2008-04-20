@@ -1,4 +1,13 @@
+2008-04-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/account-server/dalstorage.cpp, src/scripting/lua.cpp,
+	src/chat-server/party.cpp, src/chat-server/guild.cpp, src/defines.h,
+	src/net/connectionhandler.cpp, src/game-server/map.cpp,
+	src/game-server/character.cpp, src/game-server/character.hpp: Fixed
+	some compiler errors/warnings.
+
 2008-04-20  Dennis Friis  <peavey@placid.dk>
+
 	* src/utils/zlib.cpp: Fix a possible memleak in inflateMemory if the
 	stream fails to uncompress cleanly.
 
@@ -729,9 +738,10 @@
 2007-07-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/storage.hpp, src/account-server/dalstorage.cpp,
-	src/account-server/dalstorage.hpp: Stored channel IDs as unsigned data.
+	src/account-server/dalstorage.hpp: Stored channel IDs as unsigned
+	data.
 	* src/src/account-server/dalstoragesql.hpp,
-	src/chat-server/chatchannel.hpp: Assumed channels withpassword are
+	src/chat-server/chatchannel.hpp: Assumed channels with password are
 	private.
 	* src/chat-server/chatclient.hpp, src/chat-server/chatchannel.cpp:
 	Added to client the channels it is connected to.
@@ -747,9 +757,10 @@
 	object, and used generic integer in signatures.
 	* src/defines.h, src/game-server/state.cpp: Added being speed to
 	protocol.
-	* src/game-server/spawnarea.cpp, src/game-server/accountconnection.cpp:
-	Halved speed of maggots. Reduced speed of characters, so that they do
-	not travel much more than one tile per data round-trip.
+	* src/game-server/spawnarea.cpp,
+	src/game-server/accountconnection.cpp: Halved speed of maggots.
+	Reduced speed of characters, so that they donot travel much more than
+	one tile per data round-trip.
 
 2007-07-25  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -761,6 +772,7 @@
 	src/account-server/serverhandler.cpp,
 	src/account-server/dalstorage.cpp: Removed a host of unnecessary
 	methods from ChatChannelManager.
+	* AUTHORS: Added David Athay.
 
 2007-07-23  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
@@ -768,7 +780,8 @@
 	monster identifiers.
 	* src/resourcemanager.cpp: Enabled symlinks to data directory.
 	* src/game-server/accountconnection.cpp,
-	src/game-server/gamehandler.hpp, src/game-server/accountconnection.hpp,
+	src/game-server/gamehandler.hpp,
+	src/game-server/accountconnection.hpp,
 	src/account-server/serverhandler.cpp: Commented out unused guild code.
 	It should not have been handled by the game server anyway.
 	* src/game-server/mapcomposite.hpp: Removed slow member, if it were to
@@ -832,8 +845,8 @@
 2007-07-08  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/game-server/being.cpp: Lowered messages to debug level.
-	* src/game-server/deathlistener.hpp: Made members non-abstract, so that
-	inheritors do not have to define them when they do not use them.
+	* src/game-server/deathlistener.hpp: Made members non-abstract, so
+	that inheritors do not have to define them when they do not use them.
 	* data/monsters.xml: Added sample monster database.
 	* src/game-server/monstermanager.cpp, src/game-server/main-game.cpp,
 	src/game-server/monstermanager.hpp: Added manager for monster species.
@@ -864,9 +877,10 @@
 	src/game-server/itemmanager.cpp, src/game-server/itemmanager.hpp,
 	src/game-server/mapmanager.cpp, src/game-server/mapmanager.hpp,
 	src/game-server/state.cpp, src/game-server/state.hpp,
-	src/game-server/accountconnection.cpp, src/game-server/gamehandler.cpp:
-	Changed singleton managers from classes to namespace interfaces.
-	Removed global pointers. Moved private members to implementation files.
+	src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.cpp: Changed singleton managers from
+	classes to namespace interfaces. Removed global pointers. Moved
+	private members to implementation files.
 	* src/game-server/state.cpp, src/game-server/being.cpp,
 	src/game-server/movingobject.cpp, src/game-server/movingobject.hpp:
 	Fixed teleportation hack caused by caching of pathfinder results.
@@ -879,12 +893,12 @@
 
 2007-07-02  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
-	* src/account-server/storage.cpp, src/account-server/storage.hpp: Moved
-	trivial accessors to header file. Removed C-like prototypes and harmful
-	exception specifications.
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
-	Factored duplicate query code. Removed C-like prototypes and harmful
-	exception specifications.
+	* src/account-server/storage.cpp, src/account-server/storage.hpp:
+	Moved trivial accessors to header file. Removed C-like prototypes and
+	harmful exception specifications.
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp: Factored duplicate query code.
+	Removed C-like prototypes and harmful exception specifications.
 	* src/account-server/dalstorage.cpp: Added support for loading
 	inventory from database. Fixed mysqlism for multi-insertion.
 
@@ -899,8 +913,8 @@
 	src/game-server/accountconnection.cpp: Removed multiple inheritance
 	mechanism for serialization. Replaced it by a less cumbersome template
 	interface.
-	* src/common/inventorydata.hpp: Set inventory structures in a directory
-	common to both servers.
+	* src/common/inventorydata.hpp: Set inventory structures in a
+	directory common to both servers.
 	* src/account-server/dalstorage.cpp: Commented out unused code.
 	* src/Makefile.am: Taken new files into account.
 	* src/account-server/characterdata.cpp, src/game-server/character.cpp,
@@ -910,13 +924,14 @@
 	fine.
 	* src/game-server/state.cpp: Added assertions to detect insertion and
 	removal of objects at updating time.
-	* src/game-server/accountconnection.cpp, src/game-server/character.cpp,
-	src/defines.h, src/account-server/characterdata.hpp,
+	* src/game-server/accountconnection.cpp,
+	src/game-server/character.cpp, src/defines.h,
+	src/account-server/characterdata.hpp,
 	src/account-server/characterdata.cpp, src/serialize/characterdata.hpp:
 	Removed automatic (de)serialization of ID, so that it can be properly
 	used, and of name, so that it does not waste bandwidth.
-	* src/account-server/serverhandler.cpp: Reverted to the scheme based on
-	character ID, so that runtime character data are persistent again.
+	* src/account-server/serverhandler.cpp: Reverted to the scheme based
+	on character ID, so that runtime character data are persistent again.
 	* src/account-server/dalstoragesql.hpp,
 	src/account-server/dalstorage.cpp: Added support for storing inventory
 	in database.
@@ -936,16 +951,16 @@
 	loss of hit points.
 	* src/game-server/character.cpp: Characters hit circle size is now
 	initialized properly.
-	* src/game-server/map.cpp, src/game-server/map.hpp, 
+	* src/game-server/map.cpp, src/game-server/map.hpp,
 	src/game-server/mapcomposite.cpp, src/game-server/mapcomposite.hpp,
-	src/game-server/mapreader.cpp, src/state.cpp: Pathfinding now takes 
-	the tiles that are occupied by beings into account. Map::find_path() 
+	src/game-server/mapreader.cpp, src/state.cpp: Pathfinding now takes
+	the tiles that are occupied by beings into account. Map::find_path()
 	now has an optional argument that sets the maximum path cost.
-	* src/game-server/monster.cpp, src/game-server/monster.hpp, 
-	src/game-server/spawnarea.cpp, src/game-server/thing.hpp: Implemented 
+	* src/game-server/monster.cpp, src/game-server/monster.hpp,
+	src/game-server/spawnarea.cpp, src/game-server/thing.hpp: Implemented
 	monster attacking and provisoric monster AI. Monster now chase and
 	attack players that hurt them.
-	* src/game-server/spawnarea.cpp: Monsters are no longer spawned on 
+	* src/game-server/spawnarea.cpp: Monsters are no longer spawned on
 	unwalkable tiles.
 
 2007-06-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>

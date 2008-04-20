@@ -33,7 +33,7 @@ enum
     AL_BANNED =  0,     /**< This user is currently banned. */
     AL_NORMAL = 10,     /**< User has regular rights. */
     AL_GM     = 50,     /**< User can perform a subset of administrator tasks. */
-    AL_ADMIN  = 99,     /**< User can perform administrator tasks. */
+    AL_ADMIN  = 99      /**< User can perform administrator tasks. */
 };
 
 enum

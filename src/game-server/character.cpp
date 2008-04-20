@@ -43,6 +43,11 @@
 
 #include "utils/logger.h"
 
+// These values should maybe be obtained from the config file
+const float Character::EXPCURVE_EXPONENT = 3.0f;
+const float Character::EXPCURVE_FACTOR = 10.0f;
+const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
+
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),

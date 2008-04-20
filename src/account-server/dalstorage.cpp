@@ -177,7 +177,8 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
 
         int level = toUint(accountInfo(0, 4));
         // Check if the user is permanently banned, or temporarily banned.
-        if (level == AL_BANNED || time(NULL) <= toUint(accountInfo(0, 5)))
+        if (level == AL_BANNED
+                || time(NULL) <= (int) toUint(accountInfo(0, 5)))
         {
             account->setLevel(AL_BANNED);
             // It is, so skip character loading.

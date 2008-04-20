@@ -17,9 +17,12 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id: guild.cpp 3549 2007-08-30 16:20:33Z gmelquio $
+ *  $Id$
  */
+
 #include "guild.hpp"
+
+#include <algorithm>
 
 
 Guild::Guild(const std::string &name) :
@@ -59,6 +62,7 @@ void Guild::addInvited(const std::string &playerName)
 
 const std::string& Guild::getMember(int i) const
 {
+    const static std::string empty = "";
     int x = 0;
     for (GuildMembers::const_iterator itr = mMembers.begin();
         itr != mMembers.end();
@@ -69,7 +73,7 @@ const std::string& Guild::getMember(int i) const
             return (*itr);
         }
     }
-    return NULL;
+    return empty;
 }
 
 bool Guild::checkInGuild(const std::string &playerName)

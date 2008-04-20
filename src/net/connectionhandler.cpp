@@ -93,7 +93,8 @@ void ConnectionHandler::process(enet_uint32 timeout)
 
             case ENET_EVENT_TYPE_RECEIVE:
             {
-                NetComputer *comp = (NetComputer*) event.peer->data;
+                NetComputer *comp =
+                    static_cast<NetComputer*>(event.peer->data);
 
                 // If the scripting subsystem didn't hook the message
                 // it will be handled by the default message handler.
@@ -116,8 +117,11 @@ void ConnectionHandler::process(enet_uint32 timeout)
 
             case ENET_EVENT_TYPE_DISCONNECT:
             {
-                NetComputer *comp = (NetComputer *)event.peer->data;
+                NetComputer *comp =
+                    static_cast<NetComputer*>(event.peer->data);
+
                 LOG_INFO("" << *comp << " disconnected.");
+
                 // Reset the peer's client information.
                 computerDisconnected(comp);
                 clients.erase(std::find(clients.begin(), clients.end(), comp));

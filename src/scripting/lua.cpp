@@ -482,7 +482,7 @@ static int LuaMonster_Create(lua_State *s)
 
     lua_pushlightuserdata(s, q);
     return 1;
-};
+}
 
 /**
  * Called when the server has recovered the value of a quest variable.
