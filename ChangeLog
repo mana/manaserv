@@ -5,6 +5,8 @@
 	src/net/connectionhandler.cpp, src/game-server/map.cpp,
 	src/game-server/character.cpp, src/game-server/character.hpp: Fixed
 	some compiler errors/warnings.
+	* data/test.lua: Added 100 to NPC IDs to keep 0.0 compatibility for
+	now.
 
 2008-04-20  Dennis Friis  <peavey@placid.dk>
 
