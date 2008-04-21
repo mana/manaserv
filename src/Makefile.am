@@ -54,10 +54,14 @@ tmwserv_account_SOURCES = \
 	net/netcomputer.cpp \
 	serialize/characterdata.hpp \
 	utils/functors.h \
+	utils/encryption.h \
+	utils/encryption.cpp \
 	utils/logger.h \
 	utils/logger.cpp \
 	utils/processorutils.hpp \
 	utils/processorutils.cpp \
+	utils/sha2.h \
+	utils/sha2.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
 	utils/timer.cpp \

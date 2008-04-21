@@ -1,3 +1,10 @@
+2008-04-21  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/Makefile.am, src/utils/sha2.h, src/utils/sha2.cpp,
+	src/utils/encryption.h, src/utils/encryption.cpp,
+	src/account-server/account.hpp, src/account-server/accounthandler.cpp:
+	Added password and email encryption server-side using SHA256.
+
 2008-04-20  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/account-server/dalstorage.cpp, src/scripting/lua.cpp,

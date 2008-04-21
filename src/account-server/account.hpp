@@ -191,8 +191,8 @@ class Account
 
     private:
         std::string mName;     /**< user name */
-        std::string mPassword; /**< user password (encrypted) */
-        std::string mEmail;    /**< user email address */
+        std::string mPassword; /**< user password (encrypted with salt) */
+        std::string mEmail;    /**< user email address (encrypted) */
         Characters mCharacters;   /**< Character data */
         int mID;               /**< unique id */
         unsigned char mLevel;   /**< account level */

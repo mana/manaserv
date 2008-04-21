@@ -40,6 +40,7 @@
 #include "utils/stringfilter.h"
 #include "utils/tokencollector.hpp"
 #include "utils/tokendispenser.hpp"
+#include "utils/encryption.h"
 
 class AccountHandler : public ConnectionHandler
 {
@@ -293,8 +294,12 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if ((password.length() < MIN_PASSWORD_LENGTH) ||
-            (password.length() > MAX_PASSWORD_LENGTH))
+    else if (password.length() < MIN_PASSWORD_LENGTH ||
+             password.length() > MAX_PASSWORD_LENGTH)
+    {
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+    else if (stringFilter->findDoubleQuotes(password))
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
@@ -313,7 +318,7 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         reply.writeByte(REGISTER_EXISTS_USERNAME);
     }
     // Find out whether the email is already in use.
-    else if (storage->doesEmailAddressExist(email))
+    else if (storage->doesEmailAddressExist(Encryption::GetSHA2Hash(email)))
     {
         reply.writeByte(REGISTER_EXISTS_EMAIL);
     }
@@ -321,8 +326,12 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     {
         Account *acc = new Account;
         acc->setName(username);
-        acc->setPassword(password);
-        acc->setEmail(email);
+        // We hash the password using the username
+        // as salt.
+        acc->setPassword(Encryption::GetSHA2Hash(
+                         std::string(username+password)));
+        // We hash Email server-side without using a salt.
+        acc->setEmail(Encryption::GetSHA2Hash(email));
         acc->setLevel(AL_NORMAL);
 
         storage->addAccount(acc);
@@ -400,13 +409,13 @@ static void handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (storage->doesEmailAddressExist(email))
+    else if (storage->doesEmailAddressExist(Encryption::GetSHA2Hash(email)))
     {
         reply.writeByte(EMAILCHG_EXISTS_EMAIL);
     }
     else
     {
-        acc->setEmail(email);
+        acc->setEmail(Encryption::GetSHA2Hash(email));
         // Keep the database up to date otherwise we will go out of sync
         storage->flush(acc);
         reply.writeByte(ERRMSG_OK);
@@ -444,8 +453,7 @@ static void handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
-    else if (newPassword.length() < MIN_PASSWORD_LENGTH ||
-             newPassword.length() > MAX_PASSWORD_LENGTH)
+    else if (newPassword.length() != Encryption::SHA256HashLength)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
