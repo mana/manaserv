@@ -43,6 +43,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <cstring>
 
 // NOTE: You may need to define things by hand for your system: 
 typedef unsigned char  sha_byte;           // Exactly 1 byte 

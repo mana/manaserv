@@ -1,3 +1,8 @@
+2008-04-22  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/account-server/accounthandler.cpp, src/utils/sha2.h,
+	src/game-server/mapreader.cpp: Fixed some small issues.
+
 2008-04-22  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,

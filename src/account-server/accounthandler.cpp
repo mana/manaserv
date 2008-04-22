@@ -453,7 +453,7 @@ static void handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
-    else if (newPassword.length() != Encryption::SHA256HashLength)
+    else if (newPassword.length() != (std::string::size_type) Encryption::SHA256HashLength)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }

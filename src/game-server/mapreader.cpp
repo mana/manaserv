@@ -279,7 +279,8 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                     }
                     else
                     {
-                        LOG_WARN("Unrecognized format for spawn area");
+                        LOG_WARN("Couldn't find monster ID %d for spawn area",
+                                monsterId);
                     }
                 }
                 else if (objType == "NPC")
