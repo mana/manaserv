@@ -1,3 +1,8 @@
+2008-04-22  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
+	src/defines.h: Added more support for parties.
+
 2008-04-21  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/Makefile.am, src/utils/sha2.h, src/utils/sha2.cpp,

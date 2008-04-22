@@ -53,6 +53,7 @@ class ChatHandler : public ConnectionHandler
         };
 
         std::map<std::string, ChatClient*> mPlayerMap;
+        std::vector<std::string> mPartyInvitedUsers;
 
     public:
 
@@ -226,16 +227,29 @@ class ChatHandler : public ConnectionHandler
         handleGuildQuit(ChatClient &client, MessageIn &msg);
 
         /**
-         * Deal with creating a party.
+         * Deal with a player joining a party.
+         * @return Returns whether player successfully joined the party
+         */
+        bool
+        handlePartyJoin(const std::string &invited, const std::string &inviter);
+
+        /**
+         * Deal with inviting player to a party
          */
         void
-        handlePartyCreation(ChatClient &client, MessageIn &msg);
+        handlePartyInvite(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Deal with accepting an invite to join a party
+         */
+        void
+        handlePartyAcceptInvite(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with leaving a party.
          */
         void
-        handlePartyQuit(ChatClient &client, MessageIn &msg);
+        handlePartyQuit(ChatClient &client);
 
         /**
          * Remove user from party
@@ -286,6 +300,13 @@ class ChatHandler : public ConnectionHandler
          * @return Returns the channel Id
          */
         int joinGuildChannel(const std::string &name, ChatClient &client);
+
+        /**
+         * Returns ChatClient from the Player Map
+         * @param The name of the character
+         * @return The Chat Client
+         */
+        ChatClient* getClient(const std::string &name);
 
         /**
          * Container for pending clients and pending connections.

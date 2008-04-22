@@ -192,12 +192,16 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleGuildQuit(computer, message);
             break;
 
-        case PCMSG_PARTY_CREATE:
-            handlePartyCreation(computer, message);
+        case PCMSG_PARTY_INVITE:
+            handlePartyInvite(computer, message);
+            break;
+
+        case PCMSG_PARTY_ACCEPT_INVITE:
+            handlePartyAcceptInvite(computer, message);
             break;
 
         case PCMSG_PARTY_QUIT:
-            handlePartyQuit(computer, message);
+            handlePartyQuit(computer);
 
         default:
             LOG_WARN("ChatHandler::processMessage, Invalid message type"
@@ -906,14 +910,83 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
     }
 }
 
-void ChatHandler::handlePartyCreation(ChatClient &client, MessageIn &msg)
+bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string &inviter)
 {
-    MessageOut out(CPMSG_PARTY_CREATE_RESPONSE);
-    if (!client.party)
+    MessageOut out(CPMSG_PARTY_INVITE_RESPONSE);
+
+    // Get inviting client
+    ChatClient *c1 = getClient(inviter);
+    if (c1)
     {
-        client.party = new Party();
-        client.party->addUser(client.characterName);
-        out.writeByte(ERRMSG_OK);
+        // if party doesnt exist, create it
+        if (!c1->party)
+        {
+            c1->party = new Party();
+        }
+
+        // add inviter to the party
+        c1->party->addUser(inviter);
+
+        // Get invited client
+        ChatClient *c2 = getClient(invited);
+        if (c2)
+        {
+            // add invited to the party
+            c1->party->addUser(invited);
+            c2->party = c1->party;
+            // was successful so return success to inviter
+            out.writeByte(ERRMSG_OK);
+            c1->send(out);
+            return true;
+        }
+    }
+
+    // there was an error, return false
+    return false;
+
+}
+
+void ChatHandler::handlePartyInvite(ChatClient &client, MessageIn &msg)
+{
+    //TODO: Handle errors
+    MessageOut out(CPMSG_PARTY_INVITED);
+
+    out.writeString(client.characterName);
+
+    std::string invited = msg.readString();
+    if (invited != "")
+    {
+        // Get client and send it the invite
+        ChatClient *c = getClient(invited);
+        if (c)
+        {
+            // store the invite
+            mPartyInvitedUsers.push_back(invited);
+            c->send(out);
+        }
+    }
+}
+
+void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)
+{
+    MessageOut out(CPMSG_PARTY_ACCEPT_INVITE_RESPONSE);
+
+    // Check that the player was invited
+    std::vector<std::string>::iterator itr;
+    itr = std::find(mPartyInvitedUsers.begin(), mPartyInvitedUsers.end(),
+                    client.characterName);
+    if (itr != mPartyInvitedUsers.end())
+    {
+        // make them join the party
+        if (handlePartyJoin(client.characterName, msg.readString()))
+        {
+            out.writeByte(ERRMSG_OK);
+            mPartyInvitedUsers.erase(itr);
+        }
+        else
+        {
+            out.writeByte(ERRMSG_FAILURE);
+        }
     }
     else
     {
@@ -922,7 +995,7 @@ void ChatHandler::handlePartyCreation(ChatClient &client, MessageIn &msg)
     client.send(out);
 }
 
-void ChatHandler::handlePartyQuit(ChatClient &client, MessageIn &msg)
+void ChatHandler::handlePartyQuit(ChatClient &client)
 {
     removeUserFromParty(client);
     MessageOut out(CPMSG_PARTY_QUIT_RESPONSE);
@@ -940,5 +1013,19 @@ void ChatHandler::removeUserFromParty(ChatClient &client)
             delete client.party;
             client.party = 0;
         }
+    }
+}
+
+ChatClient* ChatHandler::getClient(const std::string &name)
+{
+    std::map<std::string, ChatClient*>::iterator itr;
+    itr = mPlayerMap.find(name);
+    if (itr != mPlayerMap.end())
+    {
+        return itr->second;
+    }
+    else
+    {
+        return NULL;
     }
 }
