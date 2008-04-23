@@ -18,29 +18,19 @@
  *  along with The Mana World; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  $Id: $
+ *  $Id$
  */
 
 #include "encryption.h"
 
 #include <time.h>
 
-std::string Encryption::GetSHA2Hash(std::string stringToHash)
+using namespace Encryption;
+
+static char getRandomCharacter()
 {
-
-    if (stringToHash.length() == 0)
-        return "";
-
-    sha2 mySha;
-    return mySha.GetHash(shaType, (const sha_byte *)stringToHash.c_str(), stringToHash.size());
-}
-
-char _getRandomCharacter()
-{
-    char result = '0';
-
     // Taking a number of character taken between 33 and 127
-    // (Every normal characters from ASCII table).
+    // (every normal characters from ASCII table).
     int number = (rand() % 94) + 33;
 
     // Those characters are dodged to ease user input and avoid database
@@ -50,26 +40,26 @@ char _getRandomCharacter()
         number == 124 || number == 126)
         number++;
 
-    result = char(number);
-    return result;
+    return (char) number;
 }
 
 /**
   * Using this function, the random salt changes at every second.
   */
-std::string Encryption::CreateRandomPassword()
+std::string createRandomPassword()
 {
-
     std::string result = "";
 
     // Ititializing random seed.
     srand(time(NULL));
+
     // Taking a number of character taken between 20 and 30.
     int characterNumber = (rand() % 10) + 20;
 
     for (int a = 1; a < characterNumber; a++)
     {
-        result += _getRandomCharacter();
+        result += getRandomCharacter();
     }
-        return result;
+
+    return result;
 }

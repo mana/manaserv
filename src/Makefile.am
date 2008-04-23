@@ -60,8 +60,8 @@ tmwserv_account_SOURCES = \
 	utils/logger.cpp \
 	utils/processorutils.hpp \
 	utils/processorutils.cpp \
-	utils/sha2.h \
-	utils/sha2.cpp \
+	utils/sha256.h \
+	utils/sha256.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
 	utils/timer.cpp \

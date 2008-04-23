@@ -1,6 +1,6 @@
 /*
- *  The Mana World
- *  Copyright 2008 The Mana World Development Team
+ *  The Mana World Server
+ *  Copyright 2007 The Mana World Development Team
  *
  *  This file is part of The Mana World.
  *
@@ -21,19 +21,19 @@
  *  $Id$
  */
 
-#ifndef _TMW_UTILS_ENCRYPTION_H
-#define _TMW_UTILS_ENCRYPTION_H
+#ifndef _TMW_UTILS_SHA256_H_
+#define _TMW_UTILS_SHA256_H_
 
 #include <string>
 
-namespace Encryption {
+static const unsigned int SHA256_HASH_LENGTH = 64;
 
 /**
- * Creates a random string, suitable for a user to type,
- * and that doesn't break a database
+ * Returns the SHA-256 hash for the given string.
+ *
+ * @param string the string to create the SHA-256 hash for
+ * @return the SHA-256 hash for the given string.
  */
-std::string createRandomPassword();
+std::string sha256(const std::string& string);
 
-}
-
-#endif // TMW_UTILS_ENCRYPTION_H
+#endif // _TMW_UTILS_SHA256_H_

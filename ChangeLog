@@ -1,3 +1,11 @@
+2008-04-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/utils/sha2.h, src/utils/sha256.h, src/utils/sha2.cpp,
+	src/utils/encryption.h, src/utils/sha256.cpp,
+	src/utils/encryption.cpp, src/account-server/accounthandler.cpp,
+	src/Makefile.am: Switched to alternative SHA-256 implementation from
+	InspIRCd.
+
 2008-04-22  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/account-server/accounthandler.cpp, src/utils/sha2.h,

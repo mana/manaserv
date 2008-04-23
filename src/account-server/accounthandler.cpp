@@ -40,7 +40,7 @@
 #include "utils/stringfilter.h"
 #include "utils/tokencollector.hpp"
 #include "utils/tokendispenser.hpp"
-#include "utils/encryption.h"
+#include "utils/sha256.h"
 
 class AccountHandler : public ConnectionHandler
 {
@@ -114,14 +114,12 @@ void AccountClientHandler::prepareReconnect(std::string const &token, int id)
     accountHandler->mTokenCollector.addPendingConnect(token, id);
 }
 
-NetComputer*
-AccountHandler::computerConnected(ENetPeer *peer)
+NetComputer* AccountHandler::computerConnected(ENetPeer *peer)
 {
     return new AccountClient(peer);
 }
 
-void
-AccountHandler::computerDisconnected(NetComputer *comp)
+void AccountHandler::computerDisconnected(NetComputer *comp)
 {
     AccountClient* computer = static_cast< AccountClient * >(comp);
 
@@ -318,7 +316,7 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         reply.writeByte(REGISTER_EXISTS_USERNAME);
     }
     // Find out whether the email is already in use.
-    else if (storage->doesEmailAddressExist(Encryption::GetSHA2Hash(email)))
+    else if (storage->doesEmailAddressExist(sha256(email)))
     {
         reply.writeByte(REGISTER_EXISTS_EMAIL);
     }
@@ -326,12 +324,10 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     {
         Account *acc = new Account;
         acc->setName(username);
-        // We hash the password using the username
-        // as salt.
-        acc->setPassword(Encryption::GetSHA2Hash(
-                         std::string(username+password)));
-        // We hash Email server-side without using a salt.
-        acc->setEmail(Encryption::GetSHA2Hash(email));
+        // We hash the password using the username as salt.
+        acc->setPassword(sha256(username + password));
+        // We hash email server-side without using a salt.
+        acc->setEmail(sha256(email));
         acc->setLevel(AL_NORMAL);
 
         storage->addAccount(acc);
@@ -399,7 +395,8 @@ static void handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
-    std::string email = msg.readString();
+    const std::string email = msg.readString();
+    const std::string emailHash = sha256(email);
 
     if (!stringFilter->isEmailValid(email))
     {
@@ -409,13 +406,13 @@ static void handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (storage->doesEmailAddressExist(Encryption::GetSHA2Hash(email)))
+    else if (storage->doesEmailAddressExist(emailHash))
     {
         reply.writeByte(EMAILCHG_EXISTS_EMAIL);
     }
     else
     {
-        acc->setEmail(Encryption::GetSHA2Hash(email));
+        acc->setEmail(emailHash);
         // Keep the database up to date otherwise we will go out of sync
         storage->flush(acc);
         reply.writeByte(ERRMSG_OK);
@@ -453,7 +450,7 @@ static void handlePasswordChangeMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
     }
-    else if (newPassword.length() != (std::string::size_type) Encryption::SHA256HashLength)
+    else if (newPassword.length() != SHA256_HASH_LENGTH)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
