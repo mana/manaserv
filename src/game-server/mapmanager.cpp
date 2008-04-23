@@ -102,8 +102,7 @@ void MapManager::deinitialize()
 MapComposite *MapManager::getMap(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
-    assert(i != maps.end());
-    return i->second;
+    return (i != maps.end()) ? i->second : NULL;
 }
 
 void MapManager::raiseActive(int mapId)

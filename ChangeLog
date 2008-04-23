@@ -5,6 +5,9 @@
 	src/utils/encryption.cpp, src/account-server/accounthandler.cpp,
 	src/Makefile.am: Switched to alternative SHA-256 implementation from
 	InspIRCd.
+	* src/game-server/mapmanager.cpp, src/game-server/mapmanager.hpp:
+	Accepted fix by rodge, getting rid of assertion failure when an admin
+	tries to warp to a non-existing map.
 
 2008-04-22  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

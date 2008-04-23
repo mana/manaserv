@@ -36,7 +36,7 @@ namespace MapManager
     /**
      * Loads map reference file and prepares maps.
      */
-    void initialize(std::string const &);
+    void initialize(std::string const &mapReferenceFile);
 
     /**
      * Destroy loaded maps.
@@ -45,8 +45,10 @@ namespace MapManager
 
     /**
      * Returns the requested map.
+     *
+     * @return the requested map, or NULL if no map with the given ID exists.
      */
-    MapComposite *getMap(int);
+    MapComposite *getMap(int mapId);
 
     /**
      * Returns all the maps.
@@ -56,7 +58,7 @@ namespace MapManager
     /**
      * Sets the activity status of the map.
      */
-    void raiseActive(int);
+    void raiseActive(int mapId);
 }
 
 #endif
