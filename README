@@ -1,34 +1,63 @@
 Setting up a TMW server
 =======================
 
-The compilation should produce two binaries: tmwserv-account and
-tmwserv-game.
+COMPILATION
 
-1. Run tmwserv-account on one single computer. It will open three
-consecutive UDP ports, starting from the one given by the configuration
-option "accountServerPort". This first port is the one you should
-advertise to your users. The configuration option "accountServerAddress"
-should contain the public address the server runs on, as it will be sent
-to the users as the address of the chat server, which happens to be the
-account server for now.
+The compilation should produce two binaries:
 
-2. Run tmwserv-game on multiple computers. Each game server will open
-one UDP port given by the configuration option "gameServerPort". It will
-also connect to the account server given by the configuration options
-"accountServerAddress" and "accountServerPort". The configuration option
-"gameServerAddress" should contain the public address of the computer
-the server runs on, as it will be sent to the users. The file
-data/maps.xml contains the maps the server will load and register on the
-account server; split it across your multiple game servers, in order to
-balance the load.
+* tmwserv-account - The account + chat server
+* tmwserv-game - The game server
 
-Access to port "accountServerPort + 1" of the account server can be
-restricted to connections from game servers only. Users do not need to
-access it.
+
+SERVER DATA
+
+Before you can run the game server there are some data files you will need to
+provide (the account server doesn't need these):
+
+* data/items.xml - Item definitions
+* data/monsters.xml - Monster definitions
+* data/maps.xml - Map definitions (file for TMW maps included in Subversion)
+* data/maps/*.tmx{.gz} - Maps
+
+Since the server shares some of these files with the client via dynamic
+updates, we keep them under 'tmwdata' in Subversion. The easiest is to check
+out tmwdata/trunk somewhere and use symbolic links to the missing files.
+
+
+CONFIGURATION
+
+The configuration is currently loaded from ~/.tmwserv.xml. An example file is
+located at docs/tmwserv.xml.
 
 Default option values:
 
-	accountServerAddress		localhost
-	accountServerPort		9601
-	gameServerAddress		localhost
-	gameServerPort			9604
+    accountServerAddress    localhost
+    accountServerPort       9601
+    gameServerAddress       localhost
+    gameServerPort          9604
+
+
+RUNNING
+
+1. Run tmwserv-account on one single computer. It will open three consecutive
+UDP ports, starting from the one given by the configuration option
+"accountServerPort". This first port is the one you should advertise to your
+users. The configuration option "accountServerAddress" should contain the
+public address the server runs on, as it will be sent to the users as the
+address of the chat server, which happens to be the account server for now.
+
+2. Run tmwserv-game on multiple computers. Each game server will open one UDP
+port given by the configuration option "gameServerPort". It will also connect
+to the account server given by the configuration options "accountServerAddress"
+and "accountServerPort". The configuration option "gameServerAddress" should
+contain the public address of the computer the server runs on, as it will be
+sent to the users. The file data/maps.xml contains the maps the server will
+load and register on the account server; split it across your multiple game
+servers, in order to balance the load.
+
+Access to port "accountServerPort + 1" of the account server can be restricted
+to connections from game servers only. Users do not need to access it.
+
+
+TODO: Explain about automatic first time creation of database
+TODO: Explain about setting a character to be administrator

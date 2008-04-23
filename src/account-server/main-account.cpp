@@ -50,7 +50,6 @@
 #define DEFAULT_LOG_FILE        "tmwserv-account.log"
 #define DEFAULT_STATS_FILE      "tmwserv.stats"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
-#define DEFAULT_ITEMSDB_FILE    "items.xml"
 
 static bool running = true;        /**< Determines if server keeps running */
 

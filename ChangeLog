@@ -12,6 +12,7 @@
 	encryption, since all we do is hashing.
 	* configure.ac: Since we decided not to use libcrypto, remove its
 	configure check.
+	* README: Updated documentation a bit.
 
 2008-04-22  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
