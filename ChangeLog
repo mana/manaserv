@@ -8,6 +8,10 @@
 	* src/game-server/mapmanager.cpp, src/game-server/mapmanager.hpp:
 	Accepted fix by rodge, getting rid of assertion failure when an admin
 	tries to warp to a non-existing map.
+	* src/account-server/account.hpp: Fixed docs not to mention
+	encryption, since all we do is hashing.
+	* configure.ac: Since we decided not to use libcrypto, remove its
+	configure check.
 
 2008-04-22  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

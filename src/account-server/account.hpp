@@ -29,19 +29,8 @@
 #include "account-server/character.hpp"
 
 /**
- * Notes:
- *     - change from the previous implementation: this class does not encrypt
- *       passwords anymore and will just store the passwords as they are
- *       passed to setPassword().
- *     - the encryption should and must be performed externally from this
- *       class or else we would end up with the password being encrypted many
- *       times (e.g setPassword(getPassword()) would encrypt the password
- *       twice or setPassword(encrypted_password_from_database) would also
- *       encrypt the password twice).
- */
-
-/**
- * A player's account.
+ * A player's account. Stores the account information as well as the
+ * player characters available under this account.
  */
 class Account
 {
@@ -77,36 +66,42 @@ class Account
 
 
         /**
-         * Set the user password.
+         * Set the user password. The password is expected to be already
+         * hashed with a salt.
          *
-         * @param password the user password.
+         * The hashing must be performed externally from this class or else
+         * we would end up with the password being hashed many times
+         * (e.g setPassword(getPassword()) would hash the password twice.
+         *
+         * @param password the user password (hashed with salt).
          */
         void setPassword(std::string const &password)
         { mPassword = password; }
 
 
         /**
-         * Get the user password.
+         * Get the user password (hashed with salt).
          *
-         * @return the user password.
+         * @return the user password (hashed with salt).
          */
         std::string const &getPassword() const
         { return mPassword; }
 
 
         /**
-         * Set the user email address.
+         * Set the user email address. The email address is expected to be
+         * already hashed.
          *
-         * @param email the user email address.
+         * @param email the user email address (hashed).
          */
         void setEmail(std::string const &email)
         { mEmail = email; }
 
 
         /**
-         * Get the user email address.
+         * Get the user email address (hashed).
          *
-         * @return the user email address.
+         * @return the user email address (hashed).
          */
         std::string const &getEmail() const
         { return mEmail; }
@@ -190,12 +185,12 @@ class Account
 
 
     private:
-        std::string mName;     /**< user name */
-        std::string mPassword; /**< user password (encrypted with salt) */
-        std::string mEmail;    /**< user email address (encrypted) */
-        Characters mCharacters;   /**< Character data */
-        int mID;               /**< unique id */
-        unsigned char mLevel;   /**< account level */
+        std::string mName;      /**< User name */
+        std::string mPassword;  /**< User password (hashed with salt) */
+        std::string mEmail;     /**< User email address (hashed) */
+        Characters mCharacters; /**< Character data */
+        int mID;                /**< Unique id */
+        unsigned char mLevel;   /**< Account level */
 };
 
 typedef std::vector< Account * > Accounts;

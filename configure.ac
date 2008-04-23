@@ -17,9 +17,6 @@ AC_PROG_INSTALL
 
 # Checks for libraries.
 
-AC_CHECK_LIB([crypto], [EVP_md5], ,
-AC_MSG_ERROR([ *** Unable to find libcrypto library]))
-
 AC_CHECK_LIB([physfs], [PHYSFS_init], ,
 AC_MSG_ERROR([ *** Unable to find PhysFS library (icculus.org/physfs/)]))
 
