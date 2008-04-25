@@ -24,7 +24,6 @@
 #ifndef _TMWSERV_DEFINES_H_
 #define _TMWSERV_DEFINES_H_
 
-
 /**
  * Enumeration type for account levels.
  */
@@ -110,8 +109,6 @@ enum {
     APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, B*32 token, S game address, W game port, S chat address, W chat port
     PAMSG_EMAIL_CHANGE             = 0x0030, // S email
     APMSG_EMAIL_CHANGE_RESPONSE    = 0x0031, // B error
-    PAMSG_EMAIL_GET                = 0x0032, // -
-    APMSG_EMAIL_GET_RESPONSE       = 0x0033, // B error, S email
     PAMSG_PASSWORD_CHANGE          = 0x0034, // S old password, S new password
     APMSG_PASSWORD_CHANGE_RESPONSE = 0x0035, // B error
 
@@ -264,6 +261,7 @@ enum {
     ERRMSG_NO_CHARACTER_SELECTED,       // the user needs a character
     ERRMSG_INSUFFICIENT_RIGHTS,         // the user is not privileged
     ERRMSG_INVALID_ARGUMENT,            // part of the received message was invalid
+    ERRMSG_EMAIL_ALREADY_EXISTS,        // The Email Address already exists
     ERRMSG_ALREADY_TAKEN,               // name used was already taken
     ERRMSG_SERVER_FULL,                 // the server is overloaded
     ERRMSG_TIME_OUT                     // data failed to arrive in due time

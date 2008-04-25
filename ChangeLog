@@ -1,3 +1,8 @@
+2008-04_23  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/account-server/accounthandler.cpp, src/defines.h: Realigned 
+	Email already exists error return value and removed GetEmail Address.
+
 2008-04-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/utils/sha2.h, src/utils/sha256.h, src/utils/sha2.cpp,

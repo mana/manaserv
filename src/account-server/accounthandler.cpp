@@ -408,7 +408,7 @@ static void handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
     }
     else if (storage->doesEmailAddressExist(emailHash))
     {
-        reply.writeByte(EMAILCHG_EXISTS_EMAIL);
+        reply.writeByte(ERRMSG_EMAIL_ALREADY_EXISTS);
     }
     else
     {
@@ -417,24 +417,6 @@ static void handleEmailChangeMessage(AccountClient &computer, MessageIn &msg)
         storage->flush(acc);
         reply.writeByte(ERRMSG_OK);
     }
-    computer.send(reply);
-}
-
-static void handleEmailGetMessage(AccountClient &computer)
-{
-    MessageOut reply(APMSG_EMAIL_GET_RESPONSE);
-
-    Account *acc = computer.getAccount();
-    if (!acc)
-    {
-        reply.writeByte(ERRMSG_NO_LOGIN);
-        computer.send(reply);
-        return;
-    }
-
-    reply.writeByte(ERRMSG_OK);
-    reply.writeString(acc->getEmail());
-
     computer.send(reply);
 }
 
@@ -752,11 +734,6 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PAMSG_EMAIL_CHANGE:
             LOG_DEBUG("Received msg ... PAMSG_EMAIL_CHANGE");
             handleEmailChangeMessage(computer, message);
-            break;
-
-        case PAMSG_EMAIL_GET:
-            LOG_DEBUG("Received msg ... PAMSG_EMAIL_GET");
-            handleEmailGetMessage(computer);
             break;
 
         case PAMSG_PASSWORD_CHANGE:
