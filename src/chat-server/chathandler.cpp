@@ -935,6 +935,7 @@ bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string 
             c1->party->addUser(invited);
             c2->party = c1->party;
             // was successful so return success to inviter
+            out.writeString(invited);
             out.writeByte(ERRMSG_OK);
             c1->send(out);
             return true;

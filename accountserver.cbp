@@ -108,6 +108,8 @@
 		<Unit filename="src/utils/base64.h" />
 		<Unit filename="src/utils/cipher.cpp" />
 		<Unit filename="src/utils/cipher.h" />
+		<Unit filename="src/utils/encryption.cpp" />
+		<Unit filename="src/utils/encryption.h" />
 		<Unit filename="src/utils/functors.h" />
 		<Unit filename="src/utils/logger.cpp" />
 		<Unit filename="src/utils/logger.h" />
@@ -115,6 +117,8 @@
 		<Unit filename="src/utils/mathutils.h" />
 		<Unit filename="src/utils/processorutils.cpp" />
 		<Unit filename="src/utils/processorutils.hpp" />
+		<Unit filename="src/utils/sha256.cpp" />
+		<Unit filename="src/utils/sha256.h" />
 		<Unit filename="src/utils/singleton.h" />
 		<Unit filename="src/utils/stringfilter.cpp" />
 		<Unit filename="src/utils/stringfilter.h" />

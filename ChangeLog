@@ -1,3 +1,8 @@
+2008-04-28  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.cpp, src/defines.h, accountserver.cbp:
+	Added sending who accepted invite on invite response to client.
+
 2008-04_23  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/account-server/accounthandler.cpp, src/defines.h: Realigned 

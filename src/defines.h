@@ -202,7 +202,7 @@ enum {
 
     // Party
     PCMSG_PARTY_INVITE                  = 0x03A0, // S name
-    CPMSG_PARTY_INVITE_RESPONSE         = 0x03A1, // B error
+    CPMSG_PARTY_INVITE_RESPONSE         = 0x03A1, // B error, S name
     CPMSG_PARTY_INVITED                 = 0x03A2, // S name
     PCMSG_PARTY_ACCEPT_INVITE           = 0x03A5, // S name
     CPMSG_PARTY_ACCEPT_INVITE_RESPONSE  = 0x03A6, // B error
