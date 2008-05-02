@@ -1,3 +1,9 @@
+2008-05-03  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* data/test.lua, data/scripts/libtmw.lua, data/scripts/npclib.lua: Added
+	headers to LUA files mentioning the purpose of the files and their
+	license.
+	
 2008-04-28  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/chathandler.cpp, src/defines.h, accountserver.cbp:

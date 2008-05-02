@@ -1,6 +1,19 @@
-------------------
--- Support code --
-------------------
+-------------------------------------------------------------
+-- TMW Support Library                                     --
+--                                                         --
+-- Functions which are called by the game engine and       --
+-- helper functions useful for writing other scripts.      --
+--                                                         --
+----------------------------------------------------------------------------------
+--  Copyright 2008 The Mana World Development Team                              --
+--                                                                              --
+--  This file is part of The Mana World.                                        --
+--                                                                              --
+--  The Mana World  is free software; you can redistribute  it and/or modify it --
+--  under the terms of the GNU General  Public License as published by the Free --
+--  Software Foundation; either version 2 of the License, or any later version. --
+----------------------------------------------------------------------------------
+
 
 -- Table that associates to each NPC pointer the handler function that is
 -- called when a player starts talking to an NPC.

@@ -1,6 +1,19 @@
---------------
--- Map code --
---------------
+----------------------------------------------------------
+-- Test Scripts                                         --
+--                                                      --
+-- Provisorical NPC scripts currently included on map   --
+-- new_1-1.tmx for demonstrating and testing variouse   --
+-- features of the scripting engine.                    --
+--                                                      --
+----------------------------------------------------------------------------------
+--  Copyright 2008 The Mana World Development Team                              --
+--                                                                              --
+--  This file is part of The Mana World.                                        --
+--                                                                              --
+--  The Mana World  is free software; you can redistribute  it and/or modify it --
+--  under the terms of the GNU General  Public License as published by the Free --
+--  Software Foundation; either version 2 of the License, or any later version. --
+----------------------------------------------------------------------------------
 
 require "data/scripts/npclib"
 

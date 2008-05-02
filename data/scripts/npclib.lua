@@ -1,9 +1,20 @@
-------------------------------------------------------------------------------
--- Library for commonly used NPC scripts                                    --
---                                                                          --
--- Any NPC update function or talk function which could be used for NPCs on --
--- more than one map should be placed here.                                 --
-------------------------------------------------------------------------------
+----------------------------------------------------------
+-- Library for commonly used NPC scripts                --
+--                                                      --
+--                                                      --
+-- Any NPC update function or talk function which could --
+-- be used for NPCs on more than one map should be      --
+-- placed here.                                         --
+--                                                      --
+----------------------------------------------------------------------------------
+--  Copyright 2008 The Mana World Development Team                              --
+--                                                                              --
+--  This file is part of The Mana World.                                        --
+--                                                                              --
+--  The Mana World  is free software; you can redistribute  it and/or modify it --
+--  under the terms of the GNU General  Public License as published by the Free --
+--  Software Foundation; either version 2 of the License, or any later version. --
+----------------------------------------------------------------------------------
 
 module("npclib", package.seeall);
 
