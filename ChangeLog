@@ -1,3 +1,11 @@
+2008-05-06  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/trigger.cpp, src/game-server/trigger.h,
+	src/scripting/lua.cpp: Implemented script trigger areas which call a
+	script function when an object steps into them.
+	* data/test.lua: Used script trigger areas to send all objects which
+	step into one of the areas onto a patrol path.
+
 2008-05-03  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* data/test.lua, data/scripts/libtmw.lua, data/scripts/npclib.lua: Added

@@ -26,6 +26,7 @@
 
 #include "point.h"
 #include "game-server/thing.hpp"
+#include "scripting/script.hpp"
 
 class Object;
 
@@ -47,6 +48,20 @@ class WarpAction : public TriggerAction
     private:
         MapComposite *mMap;
         unsigned short mX, mY;
+};
+
+class ScriptAction : public TriggerAction
+{
+    public:
+        ScriptAction(Script *script, std::string function, int arg)
+          : mScript(script), mFunction(function), mArg(arg) {}
+
+        virtual void process(Object *obj);
+
+    private:
+        Script *mScript;        //Script object to be called
+        std::string mFunction;  //Name of the function called in the script object
+        int mArg;               //Argument passed to script function (meaning is function-specific)
 };
 
 class TriggerArea : public Thing

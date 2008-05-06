@@ -22,7 +22,23 @@ atinit(function()
   create_npc(201, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, npclib.walkaround_wide)
   create_npc(126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npclib.walkaround_map)
   create_npc(122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, nil)
+  
+  create_npc(200, 63 * 32 + 16, 31 * 32 + 16, nil, nil)
+  tmw.trigger_create(56 * 32, 30 * 32, 64, 64, "patrol_waypoint", 1)
+  tmw.trigger_create(63 * 32, 30 * 32, 64, 64, "patrol_waypoint", 2)
+  
 end)
+
+
+function patrol_waypoint(obj, id)
+	if (id == 1) then
+		tmw.being_walk(obj, 64 * 32, 31 * 32, 400)
+	end
+	if (id == 2) then
+		tmw.being_walk(obj, 57 * 32, 31 * 32, 400)
+	end
+end
+
 
 function npc1_talk(npc, ch)
   do_message(npc, ch, "Hello! I am the testing NPC.")

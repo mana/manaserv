@@ -41,6 +41,7 @@ extern "C" {
 #include "game-server/npc.hpp"
 #include "game-server/quest.hpp"
 #include "game-server/state.hpp"
+#include "game-server/trigger.hpp"
 #include "net/messageout.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
@@ -547,6 +548,54 @@ static int LuaChr_SetQuest(lua_State *s)
     return 0;
 }
 
+/**
+ * Creates a trigger area. Whenever an object enters this area
+ * a Lua function is called.
+ * tmw.trigger_create (x, y, width, height, function, id)
+ */
+static int LuaTrigger_Create(lua_State *s)
+{
+    //TODO: argument check
+    if (!lua_isnumber(s, 1) ||
+        !lua_isnumber(s, 2) ||
+        !lua_isnumber(s, 3) ||
+        !lua_isnumber(s, 4) ||
+        !lua_isstring(s, 5) ||
+        !lua_isnumber(s, 6))
+    {
+        raiseScriptError(s, "trigger_create called with incorrect parameters.");
+        return 0;
+    }
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
+    int x = lua_tointeger(s, 1);
+    int y = lua_tointeger(s, 2);
+    int width = lua_tointeger(s, 3);
+    int height = lua_tointeger(s, 4);
+    std::string function = lua_tostring(s, 5);
+    int id = lua_tointeger(s, 6);
+
+    LOG_INFO("Created script trigger at "<<x<<":"<<y<<" ("<<width<<"x"<<height<<") function: "<<function<<" ("<<id<<")");
+
+    MapComposite *m = script->getMap();
+
+    if (!m)
+    {
+        raiseScriptError(s, "trigger_create called for nonexistent a map.");
+        return 0;
+    }
+
+    ScriptAction *action = new ScriptAction(script, function, id);
+    Rectangle r = { x, y, width, height };
+    TriggerArea *area = new TriggerArea(m, r, action);
+
+    bool ret = GameState::insert(area);
+    lua_pushboolean(s, ret);
+    return 1;
+}
+
 LuaScript::LuaScript():
     nbArgs(-1)
 {
@@ -568,6 +617,7 @@ LuaScript::LuaScript():
         { "being_walk",       &LuaBeing_Walk      },
         { "posX",             &LuaPosX            },
         { "posY",             &LuaPosY            },
+        { "trigger_create",   &LuaTrigger_Create  },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

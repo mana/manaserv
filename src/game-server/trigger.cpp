@@ -28,12 +28,25 @@
 #include "game-server/movingobject.hpp"
 #include "game-server/state.hpp"
 
+#include "utils/logger.h"
+
 void WarpAction::process(Object *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
     {
         GameState::enqueueWarp(static_cast< Character * >(obj), mMap, mX, mY);
     }
+}
+
+void ScriptAction::process(Object *obj)
+{
+    LOG_DEBUG("Script trigger area activated: "<<mFunction<<"("<<obj<<", "<<mArg<<")");
+    if (!mScript) return;
+    if (mFunction == "") return;
+    mScript->prepare(mFunction);
+    mScript->push(obj);
+    mScript->push(mArg);
+    mScript->execute();
 }
 
 void TriggerArea::update()
