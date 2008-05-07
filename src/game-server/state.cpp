@@ -612,18 +612,30 @@ void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
 
 void GameState::sayAround(Object *obj, std::string const &text)
 {
-    MessageOut msg(GPMSG_SAY);
-    msg.writeShort(!obj->canMove() ? 65535 :
-                   static_cast< MovingObject * >(obj)->getPublicID());
-    msg.writeString(text);
-
     Point speakerPosition = obj->getPosition();
 
     for (CharacterIterator i(obj->getMap()->getAroundObjectIterator(obj, AROUND_AREA)); i; ++i)
     {
         if (speakerPosition.inRangeOf((*i)->getPosition(), AROUND_AREA))
         {
-            gameHandler->sendTo(*i, msg);
+            sayTo(*i, obj, text);
         }
     }
+}
+
+void GameState::sayTo(Object *destination, Object *source, std::string const &text)
+{
+    if (destination->getType() != OBJECT_CHARACTER) return; //only characters will read it anyway
+
+    MessageOut msg(GPMSG_SAY);
+    if (source == NULL) {
+        msg.writeShort(0);
+    } else if (!source->canMove()) {
+        msg.writeShort(65535);
+    } else {
+        msg.writeShort(static_cast< MovingObject * >(source)->getPublicID());
+    }
+    msg.writeString(text);
+
+    gameHandler->sendTo(static_cast< Character * >(destination), msg);
 }

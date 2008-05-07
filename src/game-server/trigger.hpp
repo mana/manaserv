@@ -70,14 +70,16 @@ class TriggerArea : public Thing
         /**
          * Creates a rectangular trigger for a given map.
          */
-        TriggerArea(MapComposite *m, Rectangle const &r, TriggerAction *ptr)
-          : Thing(OBJECT_OTHER, m), mZone(r), mAction(ptr) {}
+        TriggerArea(MapComposite *m, Rectangle const &r, TriggerAction *ptr, bool once)
+          : Thing(OBJECT_OTHER, m), mZone(r), mAction(ptr), mOnce(once) {}
 
         virtual void update();
 
     private:
         Rectangle mZone;
         TriggerAction *mAction;
+        bool mOnce;
+        std::set<Object *> mInside;
 };
 
 #endif

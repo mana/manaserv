@@ -414,6 +414,32 @@ static int LuaBeing_Walk(lua_State *s)
 }
 
 /**
+ * Makes the being say something
+ * tmw.being_say(source, message)
+ */
+static int LuaBeing_Say(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) || !lua_isstring(s, 2) )
+    {
+        raiseScriptError(s, "being_say called with incorrect parameters.");
+        return 0;
+    }
+
+    Being *being = getBeing(s, 1);
+    std::string message = lua_tostring(s, 2);
+
+    if (being && message != "")
+    {
+        GameState::sayAround(being, message);
+    } else {
+        raiseScriptError(s, "being_say called with incorrect parameters.");
+        return 0;
+    }
+
+    return 0;
+}
+
+/**
  * Function for getting the x-coordinate of the position of a being
  */
 static int LuaPosX(lua_State *s)
@@ -561,7 +587,8 @@ static int LuaTrigger_Create(lua_State *s)
         !lua_isnumber(s, 3) ||
         !lua_isnumber(s, 4) ||
         !lua_isstring(s, 5) ||
-        !lua_isnumber(s, 6))
+        !lua_isnumber(s, 6) ||
+        !lua_isboolean(s, 7))
     {
         raiseScriptError(s, "trigger_create called with incorrect parameters.");
         return 0;
@@ -576,6 +603,7 @@ static int LuaTrigger_Create(lua_State *s)
     int height = lua_tointeger(s, 4);
     std::string function = lua_tostring(s, 5);
     int id = lua_tointeger(s, 6);
+    bool once = lua_toboolean(s, 7);
 
     LOG_INFO("Created script trigger at "<<x<<":"<<y<<" ("<<width<<"x"<<height<<") function: "<<function<<" ("<<id<<")");
 
@@ -589,12 +617,43 @@ static int LuaTrigger_Create(lua_State *s)
 
     ScriptAction *action = new ScriptAction(script, function, id);
     Rectangle r = { x, y, width, height };
-    TriggerArea *area = new TriggerArea(m, r, action);
+    TriggerArea *area = new TriggerArea(m, r, action, once);
 
     bool ret = GameState::insert(area);
     lua_pushboolean(s, ret);
     return 1;
 }
+
+/**
+ * Creates a chat message in the users chatlog(s)
+ * global message: tmw.chatmessage (message)
+ * private massage: tmw.chatmessage (recipent, message)
+ */
+static int LuaChatmessage(lua_State *s)
+{
+    if (lua_gettop(s) == 2 && lua_isuserdata(s, 1) && lua_isstring(s, 2) )
+    {
+        Being *being = getBeing(s, 1);
+        std::string message = lua_tostring(s, 2);
+
+        if (being && message != "")
+        {
+            GameState::sayTo(being, NULL, message);
+        }
+    }
+    else if(lua_gettop(s) == 1 && lua_isstring(s, 1))
+    {
+        // TODO: make chatserver send a global message
+    }
+    else
+    {
+        raiseScriptError(s, "being_say called with incorrect parameters.");
+        return 0;
+    }
+
+    return 0;
+}
+
 
 LuaScript::LuaScript():
     nbArgs(-1)
@@ -615,9 +674,11 @@ LuaScript::LuaScript():
         { "chr_set_quest",    &LuaChr_SetQuest    },
         { "monster_create",   &LuaMonster_Create  },
         { "being_walk",       &LuaBeing_Walk      },
+        { "being_say",        &LuaBeing_Say       },
         { "posX",             &LuaPosX            },
         { "posY",             &LuaPosY            },
         { "trigger_create",   &LuaTrigger_Create  },
+        { "chatmessage",      &LuaChatmessage     },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

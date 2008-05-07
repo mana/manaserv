@@ -231,7 +231,8 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                         {
                             things.push_back(new TriggerArea(
                                 composite, rect,
-                                new WarpAction(destMap, destX, destY)));
+                                new WarpAction(destMap, destX, destY),
+                                false));
                         }
                     }
                     else

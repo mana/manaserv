@@ -91,9 +91,16 @@ namespace GameState
     void enqueueWarp(Character *, MapComposite *, int x, int y);
 
     /**
-     * Says something around an object.
+     * Says something to an object
+     * @note passing NULL as source generates a message from "Server:"
+     */
+    void sayTo(Object *destination, Object *source, std::string const &text);
+
+    /**
+     * Says something to everything around an object.
      */
     void sayAround(Object *, std::string const &text);
+
 }
 
 #endif

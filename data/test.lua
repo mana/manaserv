@@ -21,21 +21,22 @@ atinit(function()
   create_npc(200, 50 * 32 + 16, 19 * 32 + 16, npc1_talk, npclib.walkaround_small)
   create_npc(201, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, npclib.walkaround_wide)
   create_npc(126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npclib.walkaround_map)
-  create_npc(122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, nil)
+  create_npc(122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, npc6_update)
   
-  create_npc(200, 63 * 32 + 16, 31 * 32 + 16, nil, nil)
-  tmw.trigger_create(56 * 32, 30 * 32, 64, 64, "patrol_waypoint", 1)
-  tmw.trigger_create(63 * 32, 30 * 32, 64, 64, "patrol_waypoint", 2)
+  tmw.trigger_create(56 * 32, 32 * 32, 64, 64, "patrol_waypoint", 1, true)
+  tmw.trigger_create(63 * 32, 32 * 32, 64, 64, "patrol_waypoint", 2, true)
   
 end)
 
 
 function patrol_waypoint(obj, id)
 	if (id == 1) then
-		tmw.being_walk(obj, 64 * 32, 31 * 32, 400)
+		tmw.chatmessage(obj, "you've reached patrol point 1")
+		tmw.being_say(obj, "I have reached patrol point 1")
 	end
 	if (id == 2) then
-		tmw.being_walk(obj, 57 * 32, 31 * 32, 400)
+		tmw.chatmessage(obj, "you've reached patrol point 2")
+		tmw.being_say(obj, "I have reached patrol point 2")
 	end
 end
 
@@ -119,5 +120,18 @@ function npc6_talk(npc, ch)
   else
     tmw.being_walk(npc, 55 * 32 + 16, 15 * 32 + 16, 400)
     guard_position = 1
+  end
+end
+
+function npc6_update(npc)
+  local r = math.random(0, 100)
+  if (r == 0) then
+    tmw.being_say(npc, "*humhumhum*")
+  end
+  if (r == 1) then
+    tmw.being_say(npc, "guarding the city gate is so much fun *sigh*")
+  end
+  if (r == 2) then
+    tmw.being_say(npc, "can't someone order me to walk to the other side of the gate?")
   end
 end

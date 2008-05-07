@@ -51,11 +51,18 @@ void ScriptAction::process(Object *obj)
 
 void TriggerArea::update()
 {
+    std::set<Object*> insideNow;
     for (MovingObjectIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
     {
-        if (mZone.contains((*i)->getPosition()))
+        if (mZone.contains((*i)->getPosition())) //<-- Why is this additional condition necessary? Shouldn't getInsideRectangleIterator already exclude those outside of the zone? --Crush
         {
-            mAction->process(*i);
+            insideNow.insert(*i);
+
+            if (!mOnce || mInside.find(*i) == mInside.end())
+            {
+                mAction->process(*i);
+            }
         }
     }
+    mInside.swap(insideNow); //swapping is faster than assigning
 }

@@ -1,3 +1,17 @@
+2008-05-08  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/trigger.cpp, src/game-server/trigger.hpp,
+	src/game-server/mapreader.cpp, src/game-server/scripting.cpp: Implemented
+	possibility to have trigger areas which only trigger when a being enters
+	them and not every game tick the being is inside.
+	* src/scripting/lua.cpp, src/game-server/state.cpp,
+	src/game-server/state.hpp: Implemented script bindings for making beings
+	say something, sending private chat messages from scripts to clients.
+	* data/test.lua: The trigger areas now make every being which steps on them
+	say something and send a private chat message to the being which steps on
+	them. Made the guard at the gate say something in random intervals to
+	demonstrate tmw.being_say with NPCs.
+
 2008-05-06  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/trigger.cpp, src/game-server/trigger.h,
