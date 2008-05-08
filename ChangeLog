@@ -6,7 +6,7 @@
 	them and not every game tick the being is inside.
 	* src/scripting/lua.cpp, src/game-server/state.cpp,
 	src/game-server/state.hpp: Implemented script bindings for making beings
-	say something, sending private chat messages from scripts to clients.
+	say something and sending private chat messages from scripts to clients.
 	* data/test.lua: The trigger areas now make every being which steps on them
 	say something and send a private chat message to the being which steps on
 	them. Made the guard at the gate say something in random intervals to
