@@ -103,6 +103,7 @@ class ChatChannelManager
          * @param channelId a channel ID
          */
         bool channelExists(int channelId);
+        bool channelExists(const std::string &channelName);
 
         /**
          * Get next usable channel ID

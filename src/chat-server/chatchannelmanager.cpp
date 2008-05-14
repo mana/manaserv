@@ -135,6 +135,11 @@ bool ChatChannelManager::channelExists(int channelId)
     return mChatChannels.find(channelId) != mChatChannels.end();
 }
 
+bool ChatChannelManager::channelExists(const std::string &channelName)
+{
+    return getChannel(channelName) != NULL;
+}
+
 int ChatChannelManager::nextUsable()
 {
     int channelId = 0;

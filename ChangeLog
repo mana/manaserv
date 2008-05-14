@@ -1,3 +1,10 @@
+2008-05-14  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chatchannelmanager.cpp,
+	src/chat-server/chatchannelmanager.hpp,
+	src/chat-server/chathandler.cpp: Added check to ensure channel name 
+	not already in use.
+
 2008-05-08  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/trigger.cpp, src/game-server/trigger.hpp,

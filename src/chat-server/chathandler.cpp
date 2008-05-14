@@ -339,7 +339,7 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (guildManager->doesExist(channelName))
+    else if (guildManager->doesExist(channelName) || chatChannelManager->channelExists(channelName))
     {
         // Channel already exists
         reply.writeByte(ERRMSG_ALREADY_TAKEN);
@@ -834,6 +834,8 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         msg.writeShort(channelId);
 
         client.send(msg);
+
+        sendGuildListUpdate(guildName, client.characterName);
 
     }
 }
