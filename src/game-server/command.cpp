@@ -279,6 +279,15 @@ static Command const commands[] =
 };
 
 /**
+ * Send a message to the given character from the server.
+ */
+static void say(Character * ch, std::string const &message)
+{
+    GameState::sayTo(ch, NULL, message);
+}
+
+
+/**
  * Parses a command and executes its associated handler.
  */
 void runCommand(Character *ch, std::string const &text)
@@ -297,10 +306,15 @@ void runCommand(Character *ch, std::string const &text)
         }
     }
 
-    if (!c || c->level > ch->getAccountLevel())
+    if (!c)
     {
-        // No such command or no sufficient rights.
+        say(ch, "The command " + s + " was not found");
         return;
+    }
+
+    if (c->level > ch->getAccountLevel())
+    {
+        say(ch, "You have insufficient rights to perform the " + s + " command");
     }
 
     intptr_t args[4];
@@ -310,6 +324,8 @@ void runCommand(Character *ch, std::string const &text)
         if (pos == npos || pos + 1 >= text.length())
         {
             // Not enough parameters.
+            say(ch, "Not enough parameters for the " + s +
+                    " command. See the command documentation for details");
             return;
         }
 
@@ -318,6 +334,7 @@ void runCommand(Character *ch, std::string const &text)
         if (arg.empty())
         {
             // Empty parameter.
+            say(ch, "One of your parameters was empty");
             return;
         }
 
@@ -336,11 +353,13 @@ void runCommand(Character *ch, std::string const &text)
                     {
                         /* TODO: forward command to other game servers through
                            account server, in case the player is elsewhere. */
+                        say(ch, "Player " + arg + " was not found");
                         return;
                     }
                     if (c->status != CLIENT_CONNECTED)
                     {
                         // No suitable character.
+                        say(ch, "Player " + arg + " is offline");
                         return;
                     }
                     args[i] = (intptr_t)c->character;
@@ -355,6 +374,7 @@ void runCommand(Character *ch, std::string const &text)
                 else
                 {
                     // No such item.
+                    say(ch, "No item was found with id " + arg);
                     return;
                 }
                 break;
@@ -372,6 +392,7 @@ void runCommand(Character *ch, std::string const &text)
                 else
                 {
                     // No such map.
+                    say(ch, "Map " + arg + " was not found");
                     return;
                 }
                 break;                
@@ -388,6 +409,7 @@ void runCommand(Character *ch, std::string const &text)
                 else
                 {
                     // No such item.
+                    say(ch, "No monster with id " + arg + " was found");
                     return;
                 }
                 break;

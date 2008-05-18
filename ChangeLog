@@ -1,23 +1,29 @@
+2008-05-18  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/command.cpp: Provide feedback when admin commands
+	fail.
+
 2008-05-14  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/chatchannelmanager.cpp,
 	src/chat-server/chatchannelmanager.hpp,
-	src/chat-server/chathandler.cpp: Added check to ensure channel name 
+	src/chat-server/chathandler.cpp: Added check to ensure channel name
 	not already in use.
 
 2008-05-08  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/trigger.cpp, src/game-server/trigger.hpp,
-	src/game-server/mapreader.cpp, src/game-server/scripting.cpp: Implemented
-	possibility to have trigger areas which only trigger when a being enters
-	them and not every game tick the being is inside.
+	src/game-server/mapreader.cpp, src/game-server/scripting.cpp:
+	Implemented possibility to have trigger areas which only trigger when
+	a being enters them and not every game tick the being is inside.
 	* src/scripting/lua.cpp, src/game-server/state.cpp,
-	src/game-server/state.hpp: Implemented script bindings for making beings
-	say something and sending private chat messages from scripts to clients.
-	* data/test.lua: The trigger areas now make every being which steps on them
-	say something and send a private chat message to the being which steps on
-	them. Made the guard at the gate say something in random intervals to
-	demonstrate tmw.being_say with NPCs.
+	src/game-server/state.hpp: Implemented script bindings for making
+	beings say something and sending private chat messages from scripts to
+	clients.
+	* data/test.lua: The trigger areas now make every being which steps on
+	them say something and send a private chat message to the being which
+	steps on them. Made the guard at the gate say something in random
+	intervals to demonstrate tmw.being_say with NPCs.
 
 2008-05-06  Philipp Sehmisch  <tmw@crushnet.org>
 
@@ -29,10 +35,10 @@
 
 2008-05-03  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* data/test.lua, data/scripts/libtmw.lua, data/scripts/npclib.lua: Added
-	headers to LUA files mentioning the purpose of the files and their
-	license.
-	
+	* data/test.lua, data/scripts/libtmw.lua, data/scripts/npclib.lua:
+	Added headers to LUA files mentioning the purpose of the files and
+	their license.
+
 2008-04-28  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/chathandler.cpp, src/defines.h, accountserver.cbp:
@@ -40,8 +46,8 @@
 
 2008-04_23  Yohann Ferreira  <bertram@cegetel.net>
 
-	* src/account-server/accounthandler.cpp, src/defines.h: Realigned 
-	Email already exists error return value and removed GetEmail Address.
+	* src/account-server/accounthandler.cpp, src/defines.h: Realigned
+	email already exists error return value and removed getEmailAddress.
 
 2008-04-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -94,7 +100,7 @@
 2008-04-19  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/account-server/accounthandler.cpp,
-	src/account-server/dalstorage.hpp: Fixed 'Password changes' and 
+	src/account-server/dalstorage.hpp: Fixed 'Password changes' and
 	'Unregistering', server-side this time.
 
 2008-04-18  David Athay  <ko2fan@gmail.com>
@@ -102,7 +108,7 @@
 	* src/chat-server/chatchannelmanager.cpp,
 	src/chat-server/chatclient.hpp, src/chat-server/chathandler.cpp:
 	Fixed guilds not being removed when leader quits.
-	* src/chat-server/chathandler.cpp: Remove channel when leader quits 
+	* src/chat-server/chathandler.cpp: Remove channel when leader quits
 	guild.
 
 2008-04-17  David Athay  <ko2fan@gmail.com>
@@ -117,13 +123,13 @@
 2008-04-16  David Athay  <ko2fan@gmail.com>
 
 	* accountserver.cbp, src/chat-server/party.cpp,
-	src/chat-server/chathandler.hpp, 
-	src/chat-server/chatchannelmanager.cpp, 
+	src/chat-server/chathandler.hpp,
+	src/chat-server/chatchannelmanager.cpp,
 	src/chat-server/chatclient.hpp, src/chat-server/guild.cpp,
 	src/chat-server/party.hpp, src/chat-server/guild.hpp,
 	src/chat-server/chatchannel.hpp, src/chat-server/chathandler.cpp,
-	src/defines.h, src/game-server/gamehandler.cpp, 
-	src/game-server/main-game.cpp: Added handling creating and leaving 
+	src/defines.h, src/game-server/gamehandler.cpp,
+	src/game-server/main-game.cpp: Added handling creating and leaving
 	parties. Fixed up some of the private channel stuff that remained.
 
 2008-04-15  David Athay  <ko2fan@gmail.com>
@@ -132,10 +138,10 @@
 
 2008-04-03  David Athay  <kofan@gmail.com>
 
-	* src/chat-server/chathandler.cpp: Restricted who can be invited to 
+	* src/chat-server/chathandler.cpp: Restricted who can be invited to
 	guilds.
 	* src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
-	src/defines.h: Fixed accepting guild invite and added updating the 
+	src/defines.h: Fixed accepting guild invite and added updating the
 	guild member list.
 
 2008-04-02  David Athay  <ko2fan@gmail.com>
@@ -144,16 +150,16 @@
 
 2008-04-01  David Athay  <ko2fan@gmail.com>
 
-	* src/account-server/dalstorage.cpp, 
-	src/account-server/dalstoragesql.hpp, 
-	src/chat-server/chatchannelmanager.cpp, 
-	src/chat-server/chatchannel.cpp, 
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstoragesql.hpp,
+	src/chat-server/chatchannelmanager.cpp,
+	src/chat-server/chatchannel.cpp,
 	src/chat-server/chatchannelmanager.hpp,
 	src/chat-server/chatchannel.hpp, src/chat-server/chathandler.cpp,
 	gameserver.cbp: Consolidated public and private channels into one,
-	which also includes guild channels. Channels now have a joinable 
-	field, which is true for channels that are created by users, and 
-	false for guild channels. Chatting in guild channels now works, and 
+	which also includes guild channels. Channels now have a joinable
+	field, which is true for channels that are created by users, and
+	false for guild channels. Chatting in guild channels now works, and
 	non-guild members can no longer join guild channels.
 
 2008-03-31  Philipp Sehmisch  <tmw@crushnet.org>
@@ -211,15 +217,15 @@
 
 2008-03-06  David Athay  <ko2fan@gmail.com>
 
-	* src/account-server/dalstorage.cpp, 
+	* src/account-server/dalstorage.cpp,
 	src/chat-server/guildmanager.cpp, src/chat-server/chathandler.hpp,
 	src/chat-server/guildmanager.hpp, src/chat-server/chathandler.cpp,
-	src/chat-server/guild.hpp: Fixed rejoining guilds after client 
+	src/chat-server/guild.hpp: Fixed rejoining guilds after client
 	reconnects to the server.
 
 2008-03-05  David Athay  <ko2fan@gmail.com>
 
-	* src/account-server/main-account.cpp, 
+	* src/account-server/main-account.cpp,
 	src/account-server/dalstorage.cpp, src/chat-server/guildmanager.cpp
 	src/chat-server/guildmanager.hpp, src/chat-server/chathandler.cpp:
 	Fixed guild creation.
@@ -1018,7 +1024,7 @@
 
 2007-06-28  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* src/defines.h, src/game-server/state.cpp: Attack direction is now 
+	* src/defines.h, src/game-server/state.cpp: Attack direction is now
 	included in being attack messages.
 	* src/game-server/accountconnection.cpp: Player characters are now
 	spawned with full hit points (todo: save current hit points in
