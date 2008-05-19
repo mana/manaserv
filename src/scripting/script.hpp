@@ -74,7 +74,7 @@ class Script
          * Loads a chunk of text and considers it as an NPC handler. This
          * handler will later be used to create the given NPC.
          */
-        virtual void loadNPC(int id, int x, int y, char const *);
+        virtual void loadNPC(std::string const &name, int id, int x, int y, char const *);
 
         /**
          * Called every tick for the script to manage its data.
@@ -92,6 +92,11 @@ class Script
          * Pushes an integer argument for the function being prepared.
          */
         virtual void push(int) = 0;
+
+        /**
+         * Pushes a string argument for the function being prepared.
+         */
+        virtual void push(std::string const &) = 0;
 
         /**
          * Pushes a pointer argument to a game entity.

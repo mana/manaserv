@@ -68,6 +68,8 @@ class LuaScript: public Script
 
         void push(int);
 
+        void push(const std::string &);
+
         void push(Thing *);
 
         int execute();
@@ -180,11 +182,11 @@ static int LuaNpc_Choice(lua_State *s)
 
 /**
  * Callback for creating a NPC on the current map with the current script.
- * tmw.npc_create(int id, int x, int y): npc
+ * tmw.npc_create(string name, int id, int x, int y): npc
  */
 static int LuaNpc_Create(lua_State *s)
 {
-    if (!lua_isnumber(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
+    if (!lua_isstring(s, 1), !lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
     {
         raiseScriptError(s, "npc_create called with incorrect parameters.");
         return 0;
@@ -192,7 +194,7 @@ static int LuaNpc_Create(lua_State *s)
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
     Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    NPC *q = new NPC(lua_tointeger(s, 1), t);
+    NPC *q = new NPC(lua_tostring(s, 1), lua_tointeger(s, 2), t);
     MapComposite *m = t->getMap();
     if (!m)
     {
@@ -200,7 +202,7 @@ static int LuaNpc_Create(lua_State *s)
         return 0;
     }
     q->setMap(m);
-    q->setPosition(Point(lua_tointeger(s, 2), lua_tointeger(s, 3)));
+    q->setPosition(Point(lua_tointeger(s, 3), lua_tointeger(s, 4)));
     bool b = GameState::insert(q);
     /* Do not try to deal with a failure there. There are some serious issues
        if an insertion failed on an almost empty map. */
@@ -710,6 +712,14 @@ void LuaScript::push(int v)
     lua_pushinteger(mState, v);
     ++nbArgs;
 }
+
+void LuaScript::push(std::string const &v)
+{
+    assert(nbArgs >= 0);
+    lua_pushstring(mState, v.c_str());
+    ++nbArgs;
+}
+
 
 void LuaScript::push(Thing *v)
 {

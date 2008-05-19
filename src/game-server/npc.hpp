@@ -34,7 +34,7 @@ class Character;
 class NPC : public Being
 {
     public:
-        NPC(int id, Script *);
+        NPC(const std::string &name, int id, Script *);
 
         void update();
 

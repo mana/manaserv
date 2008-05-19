@@ -218,6 +218,16 @@ class Being : public MovingObject
          */
         virtual void modifiedAttribute(int) {}
 
+        /** Gets the name of the being. */
+        std::string const &
+        getName() const
+        { return mName; }
+
+        /** Sets the name of the being. */
+        void
+        setName(const std::string& name)
+        { mName = name; }
+
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
         Action mAction;
@@ -227,6 +237,7 @@ class Being : public MovingObject
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
 
+        std::string mName;           /**< Name of the being. */
         Hits mHitsTaken; /**< List of punches taken since last update */
         AttributeModifiers mModifiers; /**< Currently modified attributes. */
         int mHpRegenTimer; /**< timer for hp regeneration*/

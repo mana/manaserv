@@ -273,12 +273,14 @@ static void informPlayer(MapComposite *map, Character *p)
                 {
                     Monster *q = static_cast< Monster * >(o);
                     enterMsg.writeShort(q->getSpecy()->getType());
+                    enterMsg.writeString(q->getName());
                 } break;
 
                 case OBJECT_NPC:
                 {
                     NPC *q = static_cast< NPC * >(o);
                     enterMsg.writeShort(q->getNPC());
+                    enterMsg.writeString(q->getName());
                 } break;
 
                 default:

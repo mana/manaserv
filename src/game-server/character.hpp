@@ -139,16 +139,6 @@ class Character : public Being
         setDatabaseID(int id)
         { mDatabaseID = id; }
 
-        /** Gets the name of the character. */
-        std::string const &
-        getName() const
-        { return mName; }
-
-        /** Sets the name of the character. */
-        void
-        setName(const std::string& name)
-        { mName = name; }
-
         /** Gets the gender of the character (male or female). */
         int
         getGender() const
@@ -335,7 +325,6 @@ class Character : public Being
 
         std::vector<unsigned int> mExperience; /**< experience collected for each skill.*/
 
-        std::string mName;           /**< Name of the character. */
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mGender;       /**< Gender of the character. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */

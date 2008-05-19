@@ -323,7 +323,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
 
                     if (npcId != -1 && scriptText != NULL)
                     {
-                        s->loadNPC(npcId, objX, objY, scriptText);
+                        s->loadNPC(objName, npcId, objX, objY, scriptText);
                     }
                     else
                     {

@@ -38,8 +38,8 @@ local timer
 
 -- Creates an NPC and associates the given handler.
 -- Note: Cannot be called until map initialization has started.
-function create_npc(id, x, y, talkfunct, updatefunct)
-  local npc = tmw.npc_create(id, x, y)
+function create_npc(name, id, x, y, talkfunct, updatefunct)
+  local npc = tmw.npc_create(name, id, x, y)
   if talkfunct then npc_talk_functs[npc] = talkfunct end
   if updatefunct then npc_update_functs[npc] = updatefunct end
 end
@@ -228,10 +228,10 @@ end
 -- Called by the game for creating NPCs embedded into maps.
 -- Delays the creation until map initialization is performed.
 -- Note: Assumes that the "npc_handler" global field contains the NPC handler.
-function create_npc_delayed(id, x, y)
+function create_npc_delayed(name, id, x, y)
   -- Bind the name to a local variable first, as it will be reused.
   local h = npc_handler
-  atinit(function() create_npc(id, x, y, h, nil) end)
+  atinit(function() create_npc(name, id, x, y, h, nil) end)
   npc_handler = nil
 end
 

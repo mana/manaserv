@@ -1,3 +1,14 @@
+2008-05-19  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/being.cpp, src/game-server/character.cpp,
+	src/game-server/character.hpp, src/game-server/mapreader.cpp,
+	src/game-server/npc.hpp, src/game-server/npc.cpp,
+	src/game-server/state.cpp, src/scripting/script.cpp,
+	src/scripting/script.hpp, src/scripting/lua.cpp, data/scripts/libtmw.lua,
+	data/test.lua: Implemented NPC names. Implemented the theoretical
+	possibility to have named monsters along the way. Note that the syntax of
+	the LUA functions for creating NPCs has changed.
+
 2008-05-18  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/game-server/command.cpp: Provide feedback when admin commands

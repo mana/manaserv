@@ -77,10 +77,11 @@ void Script::loadFile(std::string const &name)
     }
 }
 
-void Script::loadNPC(int id, int x, int y, char const *prog)
+void Script::loadNPC(std::string const &name, int id, int x, int y, char const *prog)
 {
     load(prog);
     prepare("create_npc_delayed");
+    push(name);
     push(id);
     push(x);
     push(y);

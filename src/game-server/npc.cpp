@@ -24,9 +24,10 @@
 #include "game-server/npc.hpp"
 #include "scripting/script.hpp"
 
-NPC::NPC(int id, Script *s):
+NPC::NPC(const std::string &name, int id, Script *s):
     Being(OBJECT_NPC, 65535), mScript(s), mID(id)
 {
+    setName(name);
 }
 
 void NPC::update()

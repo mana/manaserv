@@ -59,7 +59,7 @@ Character::Character(MessageIn &msg):
     mExperience.resize(CHAR_SKILL_NB, 0);
     // Get character data.
     mDatabaseID = msg.readLong();
-    mName = msg.readString();
+    setName(msg.readString());
     deserializeCharacterData(*this, msg);
     for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
@@ -120,7 +120,7 @@ void Character::respawn()
 {
     if (mAction != DEAD)
     {
-        LOG_WARN("Character \""<<mName<<"\" tried to respawn without being dead");
+        LOG_WARN("Character \""<<getName()<<"\" tried to respawn without being dead");
         return;
     }
 
@@ -395,7 +395,7 @@ void Character::levelup()
     levelupMsg.writeShort(mCharacterPoints);
     levelupMsg.writeShort(mCorrectionPoints);
     gameHandler->sendTo(this, levelupMsg);
-    LOG_INFO(mName<<" reached level "<<mLevel);
+    LOG_INFO(getName()<<" reached level "<<mLevel);
 }
 
 AttribmodResponseCode Character::useCharacterPoint(size_t attribute)
