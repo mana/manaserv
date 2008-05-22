@@ -48,7 +48,7 @@ enum Direction
  */
 enum
 {
-    DAMAGE_PHYSICAL,
+    DAMAGE_PHYSICAL = 0,
     DAMAGE_MAGICAL,
     DAMAGE_OTHER
 };

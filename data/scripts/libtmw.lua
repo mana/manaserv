@@ -14,6 +14,22 @@
 --  Software Foundation; either version 2 of the License, or any later version. --
 ----------------------------------------------------------------------------------
 
+-- constant identifiers (is there some LUA way to make them real constants?)
+
+DAMAGE_PHYSICAL = 0
+DAMAGE_MAGICAL = 1
+DAMAGE_OTHER = 2
+
+ELEMENT_NEUTRAL = 0
+ELEMENT_FIRE = 1
+ELEMENT_WATER = 2
+ELEMENT_EARTH = 3
+ELEMENT_AIR = 4
+ELEMENT_LIGHTNING = 5
+ELEMENT_METAL = 6
+ELEMENT_WOOD = 7
+ELEMENT_ICE = 8
+
 
 -- Table that associates to each NPC pointer the handler function that is
 -- called when a player starts talking to an NPC.

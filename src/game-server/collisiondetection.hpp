@@ -47,6 +47,14 @@ namespace Collision
     diskWithCircleSector(const Point &diskCenter, int diskRadius,
                          const Point &sectorCenter, int sectorRadius,
                          int halfTopAngle, int placeAngle);
+
+    /**
+     * Checks if two circles intersect.
+     */
+    bool
+    CircleWithCircle(const Point &center1, int radius1,
+                     const Point &center2, int radius2);
+
 }
 
 #endif

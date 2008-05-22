@@ -22,6 +22,7 @@ atinit(function()
   create_npc("Teleporter", 201, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, npclib.walkaround_wide)
   create_npc("Spider Tamer", 126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npclib.walkaround_map)
   create_npc("Guard", 122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, npc6_update)
+  create_npc("Fire Demon", 202, 58 * 32 + 16, 35 * 32 + 16, firedemon_talk, firedemon_update)
   
   tmw.trigger_create(56 * 32, 32 * 32, 64, 64, "patrol_waypoint", 1, true)
   tmw.trigger_create(63 * 32, 32 * 32, 64, 64, "patrol_waypoint", 2, true)
@@ -134,4 +135,26 @@ function npc6_update(npc)
   if (r == 2) then
     tmw.being_say(npc, "can't someone order me to walk to the other side of the gate?")
   end
+end
+
+
+function firedemon_talk(npc, ch)
+  do_message(npc, ch, "Burn, puny mortals! BURN! BUUUURN!!!")
+end
+
+local firedemon_timer = 0;
+
+function firedemon_update(npc)
+	firedemon_timer = firedemon_timer + 1
+	if (firedemon_timer == 5) then
+	  firedemon_timer = 0
+	  local victims = tmw.get_beings_in_circle(tmw.posX(npc), tmw.posY(npc), 64)
+	  local i = 1;
+	  while (victims[i]) do
+	    tmw.being_damage(victims[i], 20, 10, 32000, DAMAGE_MAGICAL, ELEMENT_FIRE)
+		i = i + 1
+	  end
+	end
+	
+	npclib.walkaround_map(npc)
 end

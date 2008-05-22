@@ -31,10 +31,12 @@ extern "C" {
 #include "defines.h"
 #include "game-server/buysell.hpp"
 #include "game-server/character.hpp"
+#include "game-server/collisiondetection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
+#include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/monster.hpp"
 #include "game-server/monstermanager.hpp"
@@ -441,6 +443,29 @@ static int LuaBeing_Say(lua_State *s)
     return 0;
 }
 
+
+/**
+ * Applies combat damage to a being
+ * tmw.being_damage(victim, value, delta, cth, type, element)
+ */
+static int LuaBeing_Damage(lua_State *s)
+{
+    Being *being = getBeing(s, 1);
+
+    Damage damage;
+    damage.base = lua_tointeger(s, 2);
+    damage.delta = lua_tointeger(s, 3);
+    damage.cth = lua_tointeger(s, 4);
+    damage.type = lua_tointeger(s, 5);
+    damage.element = lua_tointeger(s, 6);
+    damage.usedSkill = 0;
+
+    being->damage(NULL, damage);
+
+    return 0;
+}
+
+
 /**
  * Function for getting the x-coordinate of the position of a being
  */
@@ -656,6 +681,45 @@ static int LuaChatmessage(lua_State *s)
     return 0;
 }
 
+/**
+ * Gets a LUA table with the being IDs of all beings
+ * inside of a circular area of the current map.
+ * tmw.get_beings_in_circle (x, y, radius)
+ */
+static int LuaGetBeingsInCircle(lua_State *s)
+{
+    int x = lua_tointeger(s, 1);
+    int y = lua_tointeger(s, 2);
+    int r = lua_tointeger(s, 3);
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    MapComposite *m = t->getMap();
+
+    //create a lua table with the beings in the given area.
+    lua_newtable(s);
+    int tableStackPosition = lua_gettop(s);
+    int tableIndex = 1;
+    for (MovingObjectIterator i(m->getAroundPointIterator(Point(x, y), r)); i; ++i)
+    {
+        char t = (*i)->getType();
+        if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
+        {
+            Being *b = static_cast<Being *> (*i);
+            if (Collision::CircleWithCircle(b->getPosition(), b->getSize(),
+                                            Point (x, y), r))
+            {
+                lua_pushinteger(s, tableIndex);
+                lua_pushlightuserdata (s, b);
+                lua_settable (s, tableStackPosition);
+                tableIndex++;
+            }
+        }
+    }
+
+    return 1;
+}
 
 LuaScript::LuaScript():
     nbArgs(-1)
@@ -665,22 +729,24 @@ LuaScript::LuaScript():
 
     // Put some callback functions in the scripting environment.
     static luaL_reg const callbacks[] = {
-        { "npc_create",       &LuaNpc_Create      },
-        { "npc_message",      &LuaNpc_Message     },
-        { "npc_choice",       &LuaNpc_Choice      },
-        { "npc_trade",        &LuaNpc_Trade       },
-        { "chr_warp",         &LuaChr_Warp        },
-        { "chr_inv_change",   &LuaChr_InvChange   },
-        { "chr_inv_count",    &LuaChr_InvCount    },
-        { "chr_get_quest",    &LuaChr_GetQuest    },
-        { "chr_set_quest",    &LuaChr_SetQuest    },
-        { "monster_create",   &LuaMonster_Create  },
-        { "being_walk",       &LuaBeing_Walk      },
-        { "being_say",        &LuaBeing_Say       },
-        { "posX",             &LuaPosX            },
-        { "posY",             &LuaPosY            },
-        { "trigger_create",   &LuaTrigger_Create  },
-        { "chatmessage",      &LuaChatmessage     },
+        { "npc_create",             &LuaNpc_Create       },
+        { "npc_message",            &LuaNpc_Message      },
+        { "npc_choice",             &LuaNpc_Choice       },
+        { "npc_trade",              &LuaNpc_Trade        },
+        { "chr_warp",               &LuaChr_Warp         },
+        { "chr_inv_change",         &LuaChr_InvChange    },
+        { "chr_inv_count",          &LuaChr_InvCount     },
+        { "chr_get_quest",          &LuaChr_GetQuest     },
+        { "chr_set_quest",          &LuaChr_SetQuest     },
+        { "monster_create",         &LuaMonster_Create   },
+        { "being_walk",             &LuaBeing_Walk       },
+        { "being_say",              &LuaBeing_Say        },
+        { "being_damage",           &LuaBeing_Damage     },
+        { "posX",                   &LuaPosX             },
+        { "posY",                   &LuaPosY             },
+        { "trigger_create",         &LuaTrigger_Create   },
+        { "chatmessage",            &LuaChatmessage      },
+        { "get_beings_in_circle",   &LuaGetBeingsInCircle},
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
