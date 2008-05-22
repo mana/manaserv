@@ -71,6 +71,7 @@
  */
 
 #include "sha256.h"
+#include <memory.h>
 
 #ifdef HAS_STDINT
 #include <stdint.h>

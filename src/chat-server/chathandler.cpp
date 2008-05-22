@@ -22,6 +22,7 @@
  */
 
 #include <list>
+#include <algorithm>
 
 #include "defines.h"
 #include "chat-server/guild.hpp"

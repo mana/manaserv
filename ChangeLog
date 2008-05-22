@@ -1,13 +1,20 @@
+2008-05-22  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/utils/sha256.cpp, src/utils/encryption.cpp,
+	src/chat-server/chathandler.cpp, src/game-server/character.cpp: Fixed
+	compilation with GCC 4.3.
+
 2008-05-19  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.cpp, src/game-server/character.cpp,
 	src/game-server/character.hpp, src/game-server/mapreader.cpp,
 	src/game-server/npc.hpp, src/game-server/npc.cpp,
 	src/game-server/state.cpp, src/scripting/script.cpp,
-	src/scripting/script.hpp, src/scripting/lua.cpp, data/scripts/libtmw.lua,
-	data/test.lua: Implemented NPC names. Implemented the theoretical
-	possibility to have named monsters along the way. Note that the syntax of
-	the LUA functions for creating NPCs has changed.
+	src/scripting/script.hpp, src/scripting/lua.cpp,
+	data/scripts/libtmw.lua, data/test.lua: Implemented NPC names.
+	Implemented the theoretical possibility to have named monsters along
+	the way. Note that the syntax of the LUA functions for creating NPCs
+	has changed.
 
 2008-05-18  Roderic Morris  <roderic@ccs.neu.edu>
 
@@ -55,7 +62,7 @@
 	* src/chat-server/chathandler.cpp, src/defines.h, accountserver.cbp:
 	Added sending who accepted invite on invite response to client.
 
-2008-04_23  Yohann Ferreira  <bertram@cegetel.net>
+2008-04-23  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/account-server/accounthandler.cpp, src/defines.h: Realigned
 	email already exists error return value and removed getEmailAddress.
