@@ -708,7 +708,7 @@ static int LuaGetBeingsInCircle(lua_State *s)
         {
             Being *b = static_cast<Being *> (*i);
             if (Collision::CircleWithCircle(b->getPosition(), b->getSize(),
-                                            Point (x, y), r))
+                                            Point(x, y), r))
             {
                 lua_pushinteger(s, tableIndex);
                 lua_pushlightuserdata (s, b);
