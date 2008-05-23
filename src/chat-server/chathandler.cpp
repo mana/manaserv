@@ -655,7 +655,7 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
     {
         if (guild->checkInvited(client.characterName))
         {
-            guild->addMember(client.characterName);
+            guildManager->addGuildMember(guild, client.characterName);
             reply.writeByte(ERRMSG_OK);
             reply.writeString(guild->getName());
             reply.writeShort(guild->getId());
@@ -730,7 +730,7 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
                 chatChannelManager->removeChannel(chatChannelManager->getChannelId(guild->getName()));
             }
 
-            guildManager->removeGuildMember(guildId, client.characterName);
+            guildManager->removeGuildMember(guild, client.characterName);
         }
         else
         {

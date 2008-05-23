@@ -49,14 +49,13 @@ Guild* GuildManager::createGuild(const std::string &name, const std::string &pla
     // Make sure to add guild to mGuilds before searching for it to add the
     // player
     mGuilds.push_back(guild);
-    addGuildMember(guild->getId(), playerName);
+    addGuildMember(guild, playerName);
 
     return guild;
 }
 
-void GuildManager::removeGuild(short guildId)
+void GuildManager::removeGuild(Guild *guild)
 {
-    Guild *guild = findById(guildId);
     if (!guild)
         return;
     storage->removeGuild(guild);
@@ -64,25 +63,23 @@ void GuildManager::removeGuild(short guildId)
     delete guild;
 }
 
-void GuildManager::addGuildMember(short guildId, const std::string &playerName)
+void GuildManager::addGuildMember(Guild *guild, const std::string &playerName)
 {
-    Guild *guild = findById(guildId);
     if (!guild)
         return;
-    storage->addGuildMember(guildId, playerName);
+    storage->addGuildMember(guild->getId(), playerName);
     guild->addMember(playerName);
 }
 
-void GuildManager::removeGuildMember(short guildId, const std::string &playerName)
+void GuildManager::removeGuildMember(Guild *guild, const std::string &playerName)
 {
-    Guild *guild = findById(guildId);
     if (!guild)
         return;
-    storage->removeGuildMember(guildId, playerName);
+    storage->removeGuildMember(guild->getId(), playerName);
     guild->removeMember(playerName);
     if(guild->totalMembers() == 0)
     {
-        removeGuild(guildId);
+        removeGuild(guild);
     }
 }
 

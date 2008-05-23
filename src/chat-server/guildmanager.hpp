@@ -52,17 +52,17 @@ class GuildManager
         /**
          * Removes a guild.
          */
-        void removeGuild(short guildId);
+        void removeGuild(Guild *guild);
 
         /**
          * Adds a member to a guild.
          */
-        void addGuildMember(short guildId, const std::string &playerName);
+        void addGuildMember(Guild *guild, const std::string &playerName);
 
         /**
          * Removes a member from a guild.
          */
-        void removeGuildMember(short guildId, const std::string &playerName);
+        void removeGuildMember(Guild *guild, const std::string &playerName);
 
         /**
          * Returns the guild with the given id. O(n)

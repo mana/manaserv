@@ -1,3 +1,9 @@
+2008-05-23  David Athay  <ko2fan@gmail.com>
+
+	*  src/chat-server/guildmanager.cpp, 
+	src/chat-server/guildmanager.hpp, src/chat-server/chathandler.cpp: 
+	Use guildmanager to add users to guilds so its stored in the db.
+
 2008-05-22  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.hpp, src/game-server/collisiondetection.cpp,
