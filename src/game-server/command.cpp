@@ -204,7 +204,7 @@ static void spawn(Character *from, MonsterClass *specy, int nb)
 {
     MapComposite *map = from->getMap();
     Point const &pos = from->getPosition();
-    
+
     for (int i = 0; i < nb; ++i)
     {
         Being *monster = new Monster(specy);
@@ -315,6 +315,7 @@ void runCommand(Character *ch, std::string const &text)
     if (c->level > ch->getAccountLevel())
     {
         say(ch, "You have insufficient rights to perform the " + s + " command");
+        return;
     }
 
     intptr_t args[4];
@@ -395,7 +396,7 @@ void runCommand(Character *ch, std::string const &text)
                     say(ch, "Map " + arg + " was not found");
                     return;
                 }
-                break;                
+                break;
 
             case 'n':
                 args[i] = atoi(arg.c_str());
@@ -417,7 +418,7 @@ void runCommand(Character *ch, std::string const &text)
             case 's':
                 args[i] = (intptr_t)new std::string(arg);
                 break;
-                
+
         }
         pos = pos2;
     }

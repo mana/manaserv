@@ -1,3 +1,8 @@
+2008-05-29  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/command.cpp: Fixed execution of commands even if the
+	user has insufficient rights.
+
 2008-05-23  David Athay  <ko2fan@gmail.com>
 
 	*  src/chat-server/guildmanager.cpp, 
@@ -8,10 +13,10 @@
 
 	* src/game-server/being.hpp, src/game-server/collisiondetection.cpp,
 	src/game-server/collisiondetection.hpp, src/scripting/lua:cpp,
-	data/scripts/libtmw.lua: Implemented script bindings for getting beings
-	in a circular map area and damaging beings.
-	* data/test.lua: Scripted an NPC which damages all monsters and characters
-	which come close to it.
+	data/scripts/libtmw.lua: Implemented script bindings for getting
+	beings in a circular map area and damaging beings.
+	* data/test.lua: Scripted an NPC which damages all monsters and
+	characters which come close to it.
 
 2008-05-22  Roderic Morris  <roderic@ccs.neu.edu>
 
