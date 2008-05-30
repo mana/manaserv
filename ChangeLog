@@ -1,3 +1,8 @@
+2008-05-30  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/account-server/accounthandler.cpp: Register chat clients with
+	their account level, don't assume normal user.
+
 2008-05-29  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/game-server/command.cpp: Fixed execution of commands even if the

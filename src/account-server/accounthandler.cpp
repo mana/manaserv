@@ -630,7 +630,7 @@ static void handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg
                                              DEFAULT_SERVER_PORT) + 2);
 
     GameServerHandler::registerClient(magic_token, selectedChar);
-    registerChatClient(magic_token, selectedChar->getName(), AL_NORMAL);
+    registerChatClient(magic_token, selectedChar->getName(), acc->getLevel());
 
     computer.send(reply);
 }
