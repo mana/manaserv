@@ -27,6 +27,17 @@ atinit(function()
   tmw.trigger_create(56 * 32, 32 * 32, 64, 64, "patrol_waypoint", 1, true)
   tmw.trigger_create(63 * 32, 32 * 32, 64, 64, "patrol_waypoint", 2, true)
   
+  schedule_every(5, function()
+    print("This is the schedule_every 5 seconds task")
+  end)
+  
+  schedule_in(25, function()
+	print("This is the schedule_in 25 seconds after map initialisation task")
+	schedule_in(7, function()
+      print("This task was scheduled 7 seconds ago by the other schedule_in task")
+	end)
+  end)
+  
 end)
 
 

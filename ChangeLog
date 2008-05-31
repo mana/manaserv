@@ -1,3 +1,12 @@
+2008-05-31  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* data/script/libtmw.lua: Scripted a scheduler which can execute script
+	functions at regular intervals or in a given number of seconds. This will
+	be very useful for any quest or effect script where timing is important.
+	* data/test.lua: Used the script scheduler to schedule 3 demo tasks: a 5
+	second cronjob and two fixed point tasks where the second is scheduled by
+	the first (I'll make them do something more useful soon).
+
 2008-05-30  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/account-server/accounthandler.cpp: Register chat clients with

@@ -213,8 +213,12 @@ function npc_update(npc)
 end
 
 -- Called by the game every tick.
+-- Checks for scheduled function calls
 -- Cleans obsolete connections.
 function update()
+  -- check the scheduler
+  check_schedule()
+  
   -- Run every minute only, in order not to overload the server.
   if not timer then return end
   timer = timer - 1
@@ -259,6 +263,61 @@ function initialize()
   end
   init_fun = nil
 end
+
+
+-- SCHEDULER
+
+-- Table of scheduled jobs. A job is an array with 3 elements:
+-- 0: the UNIX timestamp when it is executed
+-- 1: the function which is executed
+-- 2: nil when it is a one-time job. Repetition interval is seconds when it is
+--    a repeated job.
+local scheduler_jobs = {}
+
+-- compare function used to sort the scheduler_jobs table.
+-- the jobs which come first are at the end of the table.
+local function job_cmp(job1, job2)
+  return (job1[0] > job2[0])
+end
+
+-- checks for jobs which have to be executed, executes them and reschedules
+-- them when they are repeated jobs.
+function check_schedule()
+  if #scheduler_jobs==0 then return end
+  while os.time() > scheduler_jobs[#scheduler_jobs][0] do
+    -- retreive the job and remove it from the schedule
+    job = scheduler_jobs[#scheduler_jobs]
+	table.remove(scheduler_jobs)
+	-- reschedule the job when it is a repeated job
+	if job[2] then
+		schedule_every(job[2], job[1])
+	end
+	-- execute the job
+	job[1]()
+  end
+end
+
+-- schedules a function call to be executed once in n seconds
+function schedule_in(seconds, funct)
+  local job = {}
+  job[0] = os.time() + seconds
+  job[1] = funct
+  job[2] = nil
+  table.insert(scheduler_jobs, job)
+  table.sort(scheduler_jobs, job_cmp)
+end
+
+-- schedules a function call to be executed at regular intervals of n seconds
+function schedule_every(seconds, funct)
+  local job = {}
+  job[0] = os.time() + seconds
+  job[1] = funct
+  job[2] = seconds
+  table.insert(scheduler_jobs, job)
+  table.sort(scheduler_jobs, job_cmp)
+end
+
+
 
 -- Below are some convenience methods added to the engine API
 
