@@ -27,17 +27,9 @@ atinit(function()
   tmw.trigger_create(56 * 32, 32 * 32, 64, 64, "patrol_waypoint", 1, true)
   tmw.trigger_create(63 * 32, 32 * 32, 64, 64, "patrol_waypoint", 2, true)
   
-  schedule_every(5, function()
-    print("This is the schedule_every 5 seconds task")
+  schedule_every(3600, function()
+    print("One hour has passed on map 1-1")
   end)
-  
-  schedule_in(25, function()
-	print("This is the schedule_in 25 seconds after map initialisation task")
-	schedule_in(7, function()
-      print("This task was scheduled 7 seconds ago by the other schedule_in task")
-	end)
-  end)
-  
 end)
 
 
@@ -61,7 +53,8 @@ function npc1_talk(npc, ch)
                                "A Christmas party!",
                                "To buy.",
                                "To sell.",
-                               "To make a donation.")
+                               "To make a donation.",
+                               "Slowly count from one to ten.")
   if v == 1 then
     do_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
   elseif v == 2 then
@@ -90,6 +83,18 @@ function npc1_talk(npc, ch)
     else
       do_message(npc, ch, "I would feel bad taking money from someone that poor.")
     end
+  elseif v == 6 then
+    tmw.being_say(npc, "As you wish...")
+    schedule_in(2, function() tmw.being_say(npc, "One") end)
+    schedule_in(4, function() tmw.being_say(npc, "Two") end)
+    schedule_in(6, function() tmw.being_say(npc, "Three") end)
+    schedule_in(8, function() tmw.being_say(npc, "Four") end)
+    schedule_in(10, function() tmw.being_say(npc, "Five") end)
+    schedule_in(12, function() tmw.being_say(npc, "Six") end)
+    schedule_in(14, function() tmw.being_say(npc, "Seven") end)
+    schedule_in(16, function() tmw.being_say(npc, "Eight") end)
+    schedule_in(18, function() tmw.being_say(npc, "Nine") end)
+    schedule_in(20, function() tmw.being_say(npc, "Ten") end)
   end
 end
 

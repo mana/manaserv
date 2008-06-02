@@ -1,3 +1,9 @@
+2008-06-02  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* data/test.lua: Used an example for schedule_in which is more in step with
+	actual practice. Used an example for schedule_every which is less annoying
+	for the server admin.
+
 2008-05-31  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* data/script/libtmw.lua: Scripted a scheduler which can execute script
