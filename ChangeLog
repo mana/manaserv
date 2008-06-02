@@ -5,6 +5,8 @@
 	for the server admin.
 	* data/test.lua, data/scripts/libtmw.lua: Replaced some magic numbers with
 	variables for better code readability.
+	* data/test.lua, data/scripts/libtmw.lua: Removed the unused "npc" argument
+	from the get_quest_var function.
 
 2008-05-31  Philipp Sehmisch  <tmw@crushnet.org>
 

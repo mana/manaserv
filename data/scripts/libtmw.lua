@@ -91,7 +91,7 @@ end
 -- Gets the value of a quest variable.
 -- Calling this function while an acknowledment is pending is desirable, so
 -- that lag cannot be perceived by the player.
-function get_quest_var(npc, ch, name)
+function get_quest_var(ch, name)
   -- Query the server and return immediatly if a value is available.
   local value = tmw.chr_get_quest(ch, name)
   if value then return value end

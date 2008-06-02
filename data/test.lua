@@ -75,7 +75,7 @@ function npc1_talk(npc, ch)
   elseif v == 5 then
     if tmw.chr_money_change(ch, -100) then
       do_message(npc, ch, string.format("Thank you for you patronage! You are left with %d gil.", tmw.chr_money(ch)))
-      local g = tonumber(get_quest_var(npc, ch, "001_donation"))
+      local g = tonumber(get_quest_var(ch, "001_donation"))
       if not g then g = 0 end
       g = g + 100
       tmw.chr_set_quest(ch, "001_donation", g)
