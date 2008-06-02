@@ -3,6 +3,8 @@
 	* data/test.lua: Used an example for schedule_in which is more in step with
 	actual practice. Used an example for schedule_every which is less annoying
 	for the server admin.
+	* data/test.lua, data/scripts/libtmw.lua: Replaced some magic numbers with
+	variables for better code readability.
 
 2008-05-31  Philipp Sehmisch  <tmw@crushnet.org>
 

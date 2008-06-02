@@ -30,6 +30,10 @@ ELEMENT_METAL = 6
 ELEMENT_WOOD = 7
 ELEMENT_ICE = 8
 
+TILESIZE = 32
+HOURS = 3600
+MINUTES = 60
+
 
 -- Table that associates to each NPC pointer the handler function that is
 -- called when a player starts talking to an NPC.

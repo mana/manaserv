@@ -18,17 +18,17 @@
 require "data/scripts/npclib"
 
 atinit(function()
-  create_npc("Test NPC", 200, 50 * 32 + 16, 19 * 32 + 16, npc1_talk, npclib.walkaround_small)
-  create_npc("Teleporter", 201, 51 * 32 + 16, 25 * 32 + 16, npc4_talk, npclib.walkaround_wide)
-  create_npc("Spider Tamer", 126, 45 * 32 + 16, 25 * 32 + 16, npc5_talk, npclib.walkaround_map)
-  create_npc("Guard", 122, 58 * 32 + 16, 15 * 32 + 16, npc6_talk, npc6_update)
-  create_npc("Fire Demon", 202, 58 * 32 + 16, 35 * 32 + 16, firedemon_talk, firedemon_update)
+  create_npc("Test NPC", 200, 50 * TILESIZE + 16, 19 * TILESIZE + 16, npc1_talk, npclib.walkaround_small)
+  create_npc("Teleporter", 201, 51 * TILESIZE + 16, 25 * TILESIZE + 16, npc4_talk, npclib.walkaround_wide)
+  create_npc("Spider Tamer", 126, 45 * TILESIZE + 16, 25 * TILESIZE + 16, npc5_talk, npclib.walkaround_map)
+  create_npc("Guard", 122, 58 * TILESIZE + 16, 15 * TILESIZE + 16, npc6_talk, npc6_update)
+  create_npc("Fire Demon", 202, 58 * TILESIZE + 16, 35 * TILESIZE + 16, firedemon_talk, firedemon_update)
   
-  tmw.trigger_create(56 * 32, 32 * 32, 64, 64, "patrol_waypoint", 1, true)
-  tmw.trigger_create(63 * 32, 32 * 32, 64, 64, "patrol_waypoint", 2, true)
+  tmw.trigger_create(56 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 1, true)
+  tmw.trigger_create(63 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 2, true)
   
-  schedule_every(3600, function()
-    print("One hour has passed on map 1-1")
+  schedule_every(1 * HOURS + 30 * MINUTES, function()
+    print("One and a half hour has passed on map 1-1")
   end)
 end)
 
@@ -106,9 +106,9 @@ function npc4_talk(npc, ch)
     local w = do_choice(npc, ch, "Yes, I am.", "I still have a few things to do around here.")
     if w == 1 then
       if v == 1 then
-        tmw.chr_warp(ch, nil, 60 * 32, 50 * 32)
+        tmw.chr_warp(ch, nil, 60 * TILESIZE, 50 * TILESIZE)
       else
-        tmw.chr_warp(ch, 3, 25 * 32, 25 * 32)
+        tmw.chr_warp(ch, 3, 25 * TILESIZE, 25 * TILESIZE)
       end
     end
   end
@@ -120,10 +120,10 @@ function npc5_talk(npc, ch)
   if answer == 1 then
     local x = tmw.posX(npc)
     local y = tmw.posY(npc)
-    tmw.monster_create(1012, x + 32, y + 32)
-    tmw.monster_create(112, x - 32, y + 32)
-    tmw.monster_create(1012, x + 32, y - 32)
-    tmw.monster_create(1012, x - 32, y - 32)
+    tmw.monster_create(1012, x + TILESIZE, y + TILESIZE)
+    tmw.monster_create(112, x - TILESIZE, y + TILESIZE)
+    tmw.monster_create(1012, x + TILESIZE, y - TILESIZE)
+    tmw.monster_create(1012, x - TILESIZE, y - TILESIZE)
   end
 end
 
@@ -132,10 +132,10 @@ local guard_position = 1
 function npc6_talk(npc, ch)
 
   if guard_position == 1 then
-    tmw.being_walk(npc, 61 * 32 + 16, 15 * 32 + 16, 400)
+    tmw.being_walk(npc, 61 * TILESIZE + 16, 15 * TILESIZE + 16, 400)
     guard_position = 2
   else
-    tmw.being_walk(npc, 55 * 32 + 16, 15 * 32 + 16, 400)
+    tmw.being_walk(npc, 55 * TILESIZE + 16, 15 * TILESIZE + 16, 400)
     guard_position = 1
   end
 end
