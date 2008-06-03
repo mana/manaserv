@@ -127,7 +127,6 @@ void DALStorage::open()
         createTable(ACCOUNTS_TBL_NAME, SQL_ACCOUNTS_TABLE);
         createTable(CHARACTERS_TBL_NAME, SQL_CHARACTERS_TABLE);
         createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
-        createTable(CHANNELS_TBL_NAME, SQL_CHANNELS_TABLE);
         createTable(GUILDS_TBL_NAME, SQL_GUILDS_TABLE);
         createTable(GUILD_MEMBERS_TBL_NAME, SQL_GUILD_MEMBERS_TABLE);
         createTable(QUESTS_TBL_NAME, SQL_QUESTS_TABLE);
@@ -626,101 +625,6 @@ bool DALStorage::updateCharacter(Character *character)
     }
 
     return true;
-}
-
-std::map<unsigned short, ChatChannel>
-DALStorage::getChannelList()
-{
-    // specialize the string_to functor to convert
-    // a string to a short.
-    string_to<int> toInt;
-
-    // The formatted datas
-    std::map<unsigned short, ChatChannel> channels;
-
-    try {
-        std::stringstream sql;
-        sql << "select id, name, announcement, password from ";
-        sql << CHANNELS_TBL_NAME;
-        sql << ";";
-
-        const dal::RecordSet& channelInfo = mDb->execSql(sql.str());
-
-        // If the map return is empty then we have no choice but to return false.
-        if (channelInfo.isEmpty()) {
-            return channels;
-        }
-
-        for (unsigned int i = 0; i < channelInfo.rows(); ++i)
-        {
-            unsigned short channelId = toInt(channelInfo(i, 0));
-            channels.insert(
-                    std::make_pair(channelId,
-                                   ChatChannel(channelId,
-                                               channelInfo(i, 1),
-                                               channelInfo(i, 2),
-                                               channelInfo(i, 3))));
-
-            LOG_DEBUG("Channel (" << channelId << ") loaded: "
-                      << channelInfo(i, 1) << ": " << channelInfo(i, 2));
-        }
-
-        return channels;
-    }
-    catch (const dal::DbSqlQueryExecFailure& e) {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::getChannelList) SQL query failure: " << e.what());
-    }
-
-    return channels;
-}
-
-void
-DALStorage::updateChannels(std::map<unsigned short, ChatChannel>& channelList)
-{
-    try {
-        // Empties the table
-        std::stringstream sql;
-        sql << "delete from "
-            << CHANNELS_TBL_NAME
-            << ";";
-
-        mDb->execSql(sql.str());
-
-        for (std::map<unsigned short, ChatChannel>::iterator i = channelList.begin();
-                i != channelList.end();)
-        {
-            // insert registered channel if id < MAX_PUBLIC_CHANNELS_RANGE;
-            if (i->first < MAX_PUBLIC_CHANNELS_RANGE)
-            {
-                if (i->second.getName() != "")
-                {
-                    sql.str("");
-                    sql << "insert into "
-                        << CHANNELS_TBL_NAME
-                        << " (id, name, announcement, password, joinable)"
-                        << " values ("
-                        << i->first << ", \""
-                        << i->second.getName() << "\", \""
-                        << i->second.getAnnouncement() << "\", \""
-                        << i->second.getPassword() << "\", \""
-                        << i->second.canJoin() << "\");";
-
-                        LOG_DEBUG("Channel (" << i->first << ") saved: "
-                                  << i->second.getName()
-                                  << ": " << i->second.getAnnouncement());
-                }
-
-                mDb->execSql(sql.str());
-            }
-            ++i;
-        }
-
-    }
-    catch (const dal::DbSqlQueryExecFailure& e) {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateChannels) SQL query failure: " << e.what());
-    }
 }
 
 

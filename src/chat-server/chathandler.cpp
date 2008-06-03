@@ -340,7 +340,8 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (guildManager->doesExist(channelName) || chatChannelManager->channelExists(channelName))
+    else if (guildManager->doesExist(channelName) || 
+             chatChannelManager->channelExists(channelName))
     {
         // Channel already exists
         reply.writeByte(ERRMSG_ALREADY_TAKEN);
@@ -368,6 +369,7 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(channelId);
             reply.writeString(channelName);
+            reply.writeString(channelAnnouncement);
         }
         else
         {
@@ -582,8 +584,8 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
         reply.writeByte(true);
 
         // Send autocreated channel id
-        short channelId = joinGuildChannel(guildName, client);
-        reply.writeShort(channelId);
+        ChatChannel* channel = joinGuildChannel(guildName, client);
+        reply.writeShort(channel->getId());
     }
     else
     {
@@ -661,8 +663,8 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
             reply.writeShort(guild->getId());
             reply.writeByte(false);
 
-            short id = joinGuildChannel(guild->getName(), client);
-            reply.writeShort(id);
+            ChatChannel *channel = joinGuildChannel(guild->getName(), client);
+            reply.writeShort(channel->getId());
         }
         else
         {
@@ -829,10 +831,10 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         msg.writeByte(leader);
 
         // get channel id of guild channel
-        short channelId = joinGuildChannel(guildName, client);
+        ChatChannel *channel = joinGuildChannel(guildName, client);
 
         // send the channel id for the autojoined channel
-        msg.writeShort(channelId);
+        msg.writeShort(channel->getId());
 
         client.send(msg);
 
@@ -857,21 +859,16 @@ void ChatHandler::sendUserLeft(ChatChannel *channel, const std::string &name)
     sendInChannel(channel, msg);
 }
 
-int ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &client)
+ChatChannel* ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &client)
 {
-    int channelId = 0;
     // Automatically make the character join the guild chat channel
     ChatChannel *channel = chatChannelManager->getChannel(guildName);
     if (!channel)
     {
         // Channel doesnt exist so create it
-        channelId = chatChannelManager->createNewChannel(guildName,
+        int channelId = chatChannelManager->createNewChannel(guildName,
                 "Guild Channel", "", false);
         channel = chatChannelManager->getChannel(channelId);
-    }
-    else
-    {
-        channelId = channel->getId();
     }
 
     // Add user to the channel
@@ -885,7 +882,7 @@ int ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &clie
         sendGuildListUpdate(guildName, client.characterName);
     }
 
-    return channelId;
+    return channel;
 }
 
 void ChatHandler::sendGuildListUpdate(const std::string &guildName,

@@ -1,3 +1,12 @@
+2008-06-03  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
+	src/chat-server/chatchannelmanager.cpp, src/account-server/dalstoragesql.hpp:
+	Stop storing chat channels in the db
+	* src/chat-server/chathandler.hpp, src/chat-server/chathandler.cpp:
+	Have joinGuildChannel return a ChatChannel in case we need it
+	constructing a packet. Send channel announcements.
+
 2008-06-02  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* data/test.lua: Used an example for schedule_in which is more in step with

@@ -125,15 +125,6 @@ class DALStorage
          */
         void banCharacter(int id, int duration);
 
-#if 0
-        /**
-         * Get the list of Emails in the accounts list.
-         * @return the list of Email's Addresses.
-         */
-        std::list<std::string>
-        getEmailList();
-#endif
-
         /**
          * Tells if the user name already exists.
          * @return true if the user name exists.
@@ -163,20 +154,6 @@ class DALStorage
         updateCharacter(Character *ptr);
 
         /**
-         * Gives the list of opened public channels registered in database
-         * @return a map of the public channels
-         */
-        std::map<unsigned short, ChatChannel>
-        getChannelList();
-
-        /**
-         * apply channel differences from the list in memory
-         * to the one in db.
-         */
-        void
-        updateChannels(std::map<unsigned short, ChatChannel>& channelList);
-
-        /**
          * Add a new guild
          * 
          */
@@ -197,7 +174,7 @@ class DALStorage
         void
         addGuildMember(int guild_id, const std::string &member_name);
 
-        /*
+        /**
          * Remove member from guild
          */
         void

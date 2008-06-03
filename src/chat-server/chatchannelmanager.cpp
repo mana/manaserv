@@ -31,14 +31,11 @@
 
 ChatChannelManager::ChatChannelManager() : mNextChannelId(1)
 {
-    // Load stored public chat channels from db
-    mChatChannels = storage->getChannelList();
 }
 
 
 ChatChannelManager::~ChatChannelManager()
 {
-    storage->updateChannels(mChatChannels);
 }
 
 int

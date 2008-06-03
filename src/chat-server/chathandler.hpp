@@ -297,9 +297,9 @@ class ChatHandler : public ConnectionHandler
          * Automatically makes client join it
          * @param The name of the guild (and therefore the channel)
          * @param The client to join the channel
-         * @return Returns the channel Id
+         * @return Returns the channel joined
          */
-        int joinGuildChannel(const std::string &name, ChatClient &client);
+        ChatChannel* joinGuildChannel(const std::string &name, ChatClient &client);
 
         /**
          * Returns ChatClient from the Player Map
