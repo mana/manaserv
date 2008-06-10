@@ -1,3 +1,9 @@
+2008-06-10  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
+	src/defines.h: Update chat packet definitions, get rid of old unused
+	functions.
+
 2008-06-09  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/chat-server/chatchannelmanager.cpp: List channels that can

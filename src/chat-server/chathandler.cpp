@@ -149,10 +149,6 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleRegisterChannelMessage(computer, message);
             break;
 
-        case PCMSG_UNREGISTER_CHANNEL:
-            handleUnregisterChannelMessage(computer, message);
-            break;
-
         case PCMSG_ENTER_CHANNEL:
             handleEnterChannelMessage(computer, message);
             break;
@@ -374,52 +370,6 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
         else
         {
             reply.writeByte(ERRMSG_FAILURE);
-        }
-    }
-
-    client.send(reply);
-}
-
-void
-ChatHandler::handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg)
-{
-    MessageOut reply(CPMSG_UNREGISTER_CHANNEL_RESPONSE);
-
-    short channelId = msg.readShort();
-    ChatChannel *channel = chatChannelManager->getChannel(channelId);
-
-    if (!channel)
-    {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
-    }
-    else if (!channel->canJoin())
-    {
-        reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-    }
-    else
-    {
-        // We first see if the user is the admin (first user) of the channel
-        const ChatChannel::ChannelUsers &userList = channel->getUserList();
-        ChatChannel::ChannelUsers::const_iterator i = userList.begin();
-
-        if (*i != &client)
-        {
-            reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
-        }
-        else
-        {
-            // Make every user quit the channel
-            warnUsersAboutPlayerEventInChat(
-                    channel, "", CHAT_EVENT_LEAVING_PLAYER);
-
-            if (chatChannelManager->removeChannel(channelId))
-            {
-                reply.writeByte(ERRMSG_OK);
-            }
-            else
-            {
-                reply.writeByte(ERRMSG_FAILURE);
-            }
         }
     }
 
@@ -841,22 +791,6 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         sendGuildListUpdate(guildName, client.characterName);
 
     }
-}
-
-void ChatHandler::sendUserJoined(ChatChannel *channel, const std::string &name)
-{
-    MessageOut msg(CPMSG_USERJOINED);
-    msg.writeShort(channel->getId());
-    msg.writeString(name);
-    sendInChannel(channel, msg);
-}
-
-void ChatHandler::sendUserLeft(ChatChannel *channel, const std::string &name)
-{
-    MessageOut msg(CPMSG_USERLEFT);
-    msg.writeShort(channel->getId());
-    msg.writeString(name);
-    sendInChannel(channel, msg);
 }
 
 ChatChannel* ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &client)

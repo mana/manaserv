@@ -218,22 +218,17 @@ enum {
     PCMSG_ANNOUNCE                 = 0x0411, // S text
     PCMSG_PRIVMSG                  = 0x0412, // S user, S text
     // -- Channeling
-    PCMSG_REGISTER_CHANNEL            = 0x0420, // B pub/priv, S name, S announcement, S password
-    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0421, // B error, W id
-    PCMSG_UNREGISTER_CHANNEL          = 0x0422, // W channel
-    CPMSG_UNREGISTER_CHANNEL_RESPONSE = 0x0423, // B error
+    PCMSG_REGISTER_CHANNEL            = 0x0420, // S name, S announcement, S password
+    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0421, // B error, W id, S name, S announcement
     CPMSG_CHANNEL_EVENT               = 0x0430, // W channel, B event, S user
     PCMSG_ENTER_CHANNEL               = 0x0440, // S channel, S password
-    CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0441, // B error, W channel
-    CPMSG_JOINED_CHANNEL              = 0x0442, // S channel, W channel id
-    PCMSG_QUIT_CHANNEL                = 0x0443, // W channel
-    CPMSG_QUIT_CHANNEL_RESPONSE       = 0x0444, // B error
+    CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0441, // B error, W id, S name, S announcement, S userlist
+    PCMSG_QUIT_CHANNEL                = 0x0443, // W channel id
+    CPMSG_QUIT_CHANNEL_RESPONSE       = 0x0444, // B error, W channel id
     PCMSG_LIST_CHANNELS               = 0x0445, // -
-    CPMSG_LIST_CHANNELS_RESPONSE      = 0x0446, // W number of channels, S channels
-    CPMSG_USERJOINED                  = 0x0450, // W channel, S name
-    CPMSG_USERLEFT                    = 0x0451, // W channel, S name
+    CPMSG_LIST_CHANNELS_RESPONSE      = 0x0446, // S names, W number of users
     PCMSG_LIST_CHANNELUSERS           = 0x0460, // S channel
-    CPMSG_LIST_CHANNELUSERS_RESPONSE  = 0x0461, // S users
+    CPMSG_LIST_CHANNELUSERS_RESPONSE  = 0x0461, // S channel, S users
 
     // Inter-server
     GAMSG_REGISTER     = 0x0500, // S address, W port, { W map id }*

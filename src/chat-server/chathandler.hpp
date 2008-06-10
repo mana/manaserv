@@ -161,12 +161,6 @@ class ChatHandler : public ConnectionHandler
         handleRegisterChannelMessage(ChatClient &client, MessageIn &msg);
 
         /**
-         * Deal with channel unregistering.
-         */
-        void
-        handleUnregisterChannelMessage(ChatClient &client, MessageIn &msg);
-
-        /**
          * Deal with player entering channel.
          */
         void
@@ -275,22 +269,6 @@ class ChatHandler : public ConnectionHandler
          * @param msg     the message to be sent
          */
         void sendInChannel(ChatChannel *channel, MessageOut &msg);
-
-        /**
-         * Send user joined message.
-         *
-         * @param channel the channel to send the message in, must not be NULL
-         * @param name    the name of the user who joined
-         */
-        void sendUserJoined(ChatChannel *channel, const std::string &name);
-
-        /**
-         * Send user left message.
-         *
-         * @param channel the channel to send the message in, must not be NULL
-         * @param name    the name of the user who left
-         */
-        void sendUserLeft(ChatChannel *channel, const std::string &name);
 
         /**
          * Retrieves the guild channel or creates one automatically
