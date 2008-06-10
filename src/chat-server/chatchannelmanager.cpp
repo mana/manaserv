@@ -28,6 +28,7 @@
 #include "defines.h"
 #include "account-server/dalstorage.hpp"
 #include "chat-server/chatclient.hpp"
+#include "chat-server/chathandler.hpp"
 
 ChatChannelManager::ChatChannelManager() : mNextChannelId(1)
 {
@@ -74,7 +75,7 @@ std::list<const ChatChannel*> ChatChannelManager::getPublicChannels()
             i_end = mChatChannels.end();
          i != i_end; ++i)
     {
-        if (!i->second.canJoin())
+        if (i->second.canJoin())
         {
             channels.push_back(&i->second);
         }
@@ -123,7 +124,10 @@ void ChatChannelManager::removeUserFromAllChannels(ChatClient *user)
     for (std::vector<ChatChannel *>::const_reverse_iterator
          i = channels.rbegin(), i_end = channels.rend(); i != i_end; ++i)
     {
-         (*i)->removeUser(user);
+        chatHandler->warnUsersAboutPlayerEventInChat((*i),
+                                                     user->characterName,
+                                                     CHAT_EVENT_LEAVING_PLAYER);
+        (*i)->removeUser(user);
     }
 }
 

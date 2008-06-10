@@ -1,3 +1,9 @@
+2008-06-09  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/chat-server/chatchannelmanager.cpp: List channels that can
+	be joined, not ones that can't, and tell players that a person has
+	left their channels when they've disconnected from the chat server.
+
 2008-06-03  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
