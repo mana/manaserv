@@ -993,9 +993,17 @@ std::list<Guild*> DALStorage::getGuildList()
             << " where guild_id = '" << (*itr)->getId() << "';";
             const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
 
+            std::list<std::string> names;
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
-                Character *character = getCharacter(memberInfo(j,0));
+                names.push_back(memberInfo(j, 0));
+            }
+
+            for (std::list<std::string>::const_iterator i = names.begin();
+                 i != names.end();
+                 ++i)
+            {
+                Character *character = getCharacter((*i));
                 if (character)
                 {
                     character->addGuild((*itr)->getName());

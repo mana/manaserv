@@ -1,3 +1,8 @@
+2008-06-14  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/account-server/dalstorage.cpp: Work around for members not being
+	added to their guilds.
+
 2008-06-10  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
