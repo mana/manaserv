@@ -192,8 +192,8 @@ enum {
     PCMSG_GUILD_ACCEPT                  = 0x0354, // W id
     CPMSG_GUILD_ACCEPT_RESPONSE         = 0x0355, // B error, W guild, B rights, W channel
     PCMSG_GUILD_GET_MEMBERS             = 0x0356, // W id
-    CPMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0357, // S names
-    CPMSG_GUILD_UPDATE_LIST             = 0x0358, // W id, S name
+    CPMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0357, // S names, B online
+    CPMSG_GUILD_UPDATE_LIST             = 0x0358, // W id, S name, B event
     PCMSG_GUILD_QUIT                    = 0x0360, // W id
     CPMSG_GUILD_QUIT_RESPONSE           = 0x0361, // B error
 
@@ -218,17 +218,18 @@ enum {
     PCMSG_ANNOUNCE                 = 0x0411, // S text
     PCMSG_PRIVMSG                  = 0x0412, // S user, S text
     // -- Channeling
-    PCMSG_REGISTER_CHANNEL            = 0x0420, // S name, S announcement, S password
-    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0421, // B error, W id, S name, S announcement
-    CPMSG_CHANNEL_EVENT               = 0x0430, // W channel, B event, S user
+    PCMSG_REGISTER_CHANNEL            = 0x0420, // S name, S topic, S password
+    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0421, // B error, W id, S name, S topic
+    CPMSG_CHANNEL_EVENT               = 0x0430, // W channel, B event, S info
     PCMSG_ENTER_CHANNEL               = 0x0440, // S channel, S password
-    CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0441, // B error, W id, S name, S announcement, S userlist
+    CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0441, // B error, W id, S name, S topic, S userlist
     PCMSG_QUIT_CHANNEL                = 0x0443, // W channel id
     CPMSG_QUIT_CHANNEL_RESPONSE       = 0x0444, // B error, W channel id
     PCMSG_LIST_CHANNELS               = 0x0445, // -
     CPMSG_LIST_CHANNELS_RESPONSE      = 0x0446, // S names, W number of users
     PCMSG_LIST_CHANNELUSERS           = 0x0460, // S channel
     CPMSG_LIST_CHANNELUSERS_RESPONSE  = 0x0461, // S channel, S users
+    PCMSG_TOPIC_CHANGE                = 0x0462, // W channel id, S topic
 
     // Inter-server
     GAMSG_REGISTER     = 0x0500, // S address, W port, { W map id }*
@@ -309,7 +310,16 @@ enum {
 // Chat channels event values
 enum {
     CHAT_EVENT_NEW_PLAYER = 0,
-    CHAT_EVENT_LEAVING_PLAYER
+    CHAT_EVENT_LEAVING_PLAYER,
+    CHAT_EVENT_TOPIC_CHANGE
+};
+
+// Guild member event values
+enum {
+    GUILD_EVENT_NEW_PLAYER = 0,
+    GUILD_EVENT_LEAVING_PLAYER,
+    GUILD_EVENT_ONLINE_PLAYER,
+    GUILD_EVENT_OFFLINE_PLAYER
 };
 
 // Moving object flags

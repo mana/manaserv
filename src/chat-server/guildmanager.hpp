@@ -27,6 +27,7 @@
 #include <vector>
 
 class Guild;
+class ChatClient;
 
 /**
  * Guild manager takes care of creating, removing and modifying guilds.
@@ -91,6 +92,11 @@ class GuildManager
          * Return the guilds a character is in
          */
         std::vector<Guild*> getGuilds(const std::string &name);
+
+        /**
+         * Inform guild members that a player has disconnected.
+         */
+        void disconnectPlayer(ChatClient* player);
 
     private:
         std::list<Guild*> mGuilds;

@@ -86,6 +86,12 @@ class Guild
          */
         int getId() const
         { return mId; }
+        
+        /**
+         * Returns a list of the members in this guild.
+         */
+        GuildMembers* getMembers()
+        { return &mMembers; }
 
         /**
          * Returns the total number of members in the guild.

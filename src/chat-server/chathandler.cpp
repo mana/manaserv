@@ -165,6 +165,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleListChannelUsersMessage(computer, message);
             break;
 
+        case PCMSG_TOPIC_CHANGE:
+            handleTopicChange(computer, message);
+            break;
+
         case PCMSG_DISCONNECT:
             handleDisconnectMessage(computer, message);
             break;
@@ -475,10 +479,8 @@ ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
             i_end = channels.end();
             i != i_end; ++i)
     {
-        const std::string &name = (*i)->getName();
-        short users = (*i)->getUserList().size();
-        reply.writeString(name);
-        reply.writeShort(users);
+        reply.writeString((*i)->getName());
+        reply.writeShort((*i)->getUserList().size());
     }
 
     client.send(reply);
@@ -509,11 +511,33 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
 }
 
 void
+ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
+{
+    short channelId = msg.readShort();
+    std::string topic = msg.readString();
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+    
+    if(!guildManager->doesExist(channel->getName()))
+    {
+        chatChannelManager->setChannelTopic(channelId, topic);
+    }
+    else
+    {
+        Guild *guild = guildManager->findByName(channel->getName());
+        if(guild->checkLeader(client.characterName))
+        {
+            chatChannelManager->setChannelTopic(channelId, topic);
+        }
+    }
+}
+
+void
 ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_DISCONNECT_RESPONSE);
     reply.writeByte(ERRMSG_OK);
     chatChannelManager->removeUserFromAllChannels(&client);
+    guildManager->disconnectPlayer(&client);
     client.send(reply);
 }
 
@@ -615,6 +639,7 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
 
             ChatChannel *channel = joinGuildChannel(guild->getName(), client);
             reply.writeShort(channel->getId());
+            sendGuildListUpdate(guildName, client.characterName, GUILD_EVENT_NEW_PLAYER);
         }
         else
         {
@@ -645,9 +670,11 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
-            for(int i = 0; i < guild->totalMembers(); ++i)
+            for(std::list<std::string>::const_iterator itr = guild->getMembers()->begin(); 
+                itr != guild->getMembers()->end(); ++itr)
             {
-                reply.writeString(guild->getMember(i));
+                reply.writeString((*itr));
+                reply.writeByte(mPlayerMap.find((*itr)) != mPlayerMap.end());
             }
         }
     }
@@ -681,8 +708,11 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
             {
                 chatChannelManager->removeChannel(chatChannelManager->getChannelId(guild->getName()));
             }
-
-            guildManager->removeGuildMember(guild, client.characterName);
+            else
+            {
+                guildManager->removeGuildMember(guild, client.characterName);
+                sendGuildListUpdate(guild->getName(), client.characterName, GUILD_EVENT_LEAVING_PLAYER);
+            }
         }
         else
         {
@@ -719,13 +749,13 @@ ChatHandler::sayToPlayer(ChatClient &computer, const std::string &playerName,
 }
 
 void ChatHandler::warnUsersAboutPlayerEventInChat(ChatChannel *channel,
-                                                  const std::string &userName,
+                                                  const std::string &info,
                                                   char eventId)
 {
     MessageOut msg(CPMSG_CHANNEL_EVENT);
     msg.writeShort(channel->getId());
     msg.writeByte(eventId);
-    msg.writeString(userName);
+    msg.writeString(info);
     sendInChannel(channel, msg);
 }
 
@@ -785,10 +815,11 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
 
         // send the channel id for the autojoined channel
         msg.writeShort(channel->getId());
+        msg.writeString(channel->getAnnouncement());
 
         client.send(msg);
 
-        sendGuildListUpdate(guildName, client.characterName);
+        sendGuildListUpdate(guildName, client.characterName, GUILD_EVENT_ONLINE_PLAYER);
 
     }
 }
@@ -812,15 +843,14 @@ ChatChannel* ChatHandler::joinGuildChannel(const std::string &guildName, ChatCli
         // in the channel.
         warnUsersAboutPlayerEventInChat(channel, client.characterName,
                 CHAT_EVENT_NEW_PLAYER);
-
-        sendGuildListUpdate(guildName, client.characterName);
     }
 
     return channel;
 }
 
 void ChatHandler::sendGuildListUpdate(const std::string &guildName,
-                                      const std::string &characterName)
+                                      const std::string &characterName,
+                                      char eventId)
 {
     Guild *guild = guildManager->findByName(guildName);
     if (guild)
@@ -829,16 +859,17 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
 
         msg.writeShort(guild->getId());
         msg.writeString(characterName);
+        msg.writeByte(eventId);
+        std::map<std::string, ChatClient*>::const_iterator chr;
+	std::list<std::string> *members = guild->getMembers();
 
-        // TODO: This should get a list of all members
-        // and iterate through them
-        std::map<std::string, ChatClient*>::iterator itr;
-        for (int i = 0; i < guild->totalMembers(); ++i)
+        for (std::list<std::string>::const_iterator itr = members->begin(); 
+             itr != members->end(); ++itr)
         {
-            itr = mPlayerMap.find(guild->getMember(i));
-            if (itr != mPlayerMap.end())
+            chr = mPlayerMap.find((*itr));
+            if (chr != mPlayerMap.end())
             {
-                itr->second->send(msg);
+                chr->second->send(msg);
             }
         }
     }

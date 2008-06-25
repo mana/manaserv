@@ -65,13 +65,13 @@ class ChatHandler : public ConnectionHandler
         bool startListen(enet_uint16 port);
 
         /**
-         * Tell a list of users about an event in a chatchannel about a player.
+         * Tell a list of users about an event in a chatchannel.
          *
          * @param channel the channel to send the message in, must not be NULL
-         * @param userName the name of the player the event applies to
+         * @param info information pertaining to the event
          */
         void warnUsersAboutPlayerEventInChat(ChatChannel *channel,
-                                             const std::string &userName,
+                                             const std::string &info,
                                              char eventId);
 
         /**
@@ -88,6 +88,13 @@ class ChatHandler : public ConnectionHandler
          * Called by TokenCollector when a client succesfully connected.
          */
         void tokenMatched(ChatClient *, Pending *);
+
+        /**
+         * Send information about a change in the guild list to guild members.
+         */
+        void sendGuildListUpdate(const std::string &guildName,
+                                 const std::string &characterName,
+                                 char eventId);
 
     protected:
         /**
@@ -123,12 +130,6 @@ class ChatHandler : public ConnectionHandler
         void sendGuildInvite(const std::string &invitedName,
                              const std::string &inviterName,
                              const std::string &guildName);
-
-        /**
-         * Send the new list of guild members
-         */
-        void sendGuildListUpdate(const std::string &guildName,
-                                 const std::string &characterName);
 
     private:
         /**
@@ -183,6 +184,12 @@ class ChatHandler : public ConnectionHandler
          */
         void
         handleListChannelUsersMessage(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Deal with changing a channel's topic
+         */
+        void
+        handleTopicChange(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with disconnection.

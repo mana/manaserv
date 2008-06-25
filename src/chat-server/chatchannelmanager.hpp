@@ -98,6 +98,13 @@ class ChatChannelManager
         void removeUserFromAllChannels(ChatClient *);
 
         /**
+         * Set the topic of a channel.
+         *
+         * @param topic the new topic of the given channel
+         */
+        void setChannelTopic(int channelId, const std::string &name);
+
+        /**
          * Returns whether a channel exists.
          *
          * @param channelId a channel ID

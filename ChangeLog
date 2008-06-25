@@ -1,3 +1,12 @@
+2008-06-25  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/chat-server/guildmanager.cpp, src/chat-server/guildmanager.hpp,
+	src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
+	src/chat-server/chatchannelmanager.cpp, src/chat-server/chatchannelmanager.hpp,
+	src/chat-server/guild.hpp: Handle topic changes, and inform guild members about
+	players going offline / online and leaving / joining the guild.
+	* src/defines.h: Update protocol definitions.
+
 2008-06-14  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/account-server/dalstorage.cpp: Work around for members not being

@@ -104,8 +104,8 @@ ChatChannel* ChatChannelManager::getChannel(int channelId)
 
 ChatChannel* ChatChannelManager::getChannel(const std::string &name)
 {
-    ChatChannelIterator i_end = mChatChannels.end();
-    for (ChatChannelIterator i = mChatChannels.begin(); i != i_end; ++i)
+    for (ChatChannelIterator i = mChatChannels.begin();
+         i != mChatChannels.end(); ++i)
     {
         if (i->second.getName() == name)
         {
@@ -114,6 +114,18 @@ ChatChannel* ChatChannelManager::getChannel(const std::string &name)
     }
 
     return NULL;
+}
+
+void ChatChannelManager::setChannelTopic(int channelId, const std::string &topic)
+{
+    ChatChannelIterator i = mChatChannels.find(channelId);
+    if(i == mChatChannels.end())
+        return;
+
+    i->second.setAnnouncement(topic);
+    chatHandler->warnUsersAboutPlayerEventInChat(&(i->second),
+                                                 topic,
+                                                 CHAT_EVENT_TOPIC_CHANGE);
 }
 
 void ChatChannelManager::removeUserFromAllChannels(ChatClient *user)

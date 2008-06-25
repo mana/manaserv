@@ -22,7 +22,10 @@
 
 #include "guildmanager.hpp"
 #include "guild.hpp"
+#include "defines.h"
 #include "account-server/dalstorage.hpp"
+#include "chat-server/chatclient.hpp"
+#include "chat-server/chathandler.hpp"
 
 GuildManager::GuildManager()
 {
@@ -122,26 +125,28 @@ bool GuildManager::doesExist(const std::string &name)
 
 std::vector<Guild*> GuildManager::getGuilds(const std::string &name)
 {
-    Guild *guild;
     std::vector<Guild*> guildList;
-
-    // Iterate through all guilds, get the number of members
-    // Check if any of the members match the specified name
-    // Add the guild to the list if they match, and return
-    // the list of all guilds the user with that name belongs to
-    for (std::list<Guild*>::iterator itr = mGuilds.begin(),
-            itr_end = mGuilds.end();
-            itr != itr_end; ++itr)
+    
+    for (std::list<Guild*>::iterator itr = mGuilds.begin();
+            itr != mGuilds.end(); ++itr)
     {
-        guild = (*itr);
-        for (int i = 0; i < guild->totalMembers(); ++i)
+        if((*itr)->checkInGuild(name))
         {
-            if (guild->getMember(i) == name)
-            {
-                guildList.push_back(guild);
-                break;
-            }
+            guildList.push_back((*itr));
         }
     }
     return guildList;
+}
+
+void GuildManager::disconnectPlayer(ChatClient *player)
+{
+    std::vector<Guild*> guildList = getGuilds(player->characterName);
+
+    for (std::vector<Guild*>::const_iterator itr = guildList.begin();
+         itr != guildList.end(); ++itr)
+    {
+        chatHandler->sendGuildListUpdate((*itr)->getName(), 
+					 player->characterName, 
+					 GUILD_EVENT_OFFLINE_PLAYER);
+    }
 }
