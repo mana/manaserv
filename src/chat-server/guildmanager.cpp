@@ -123,7 +123,7 @@ bool GuildManager::doesExist(const std::string &name)
     return findByName(name) != NULL;
 }
 
-std::vector<Guild*> GuildManager::getGuilds(const std::string &name)
+std::vector<Guild*> GuildManager::getGuildsForPlayer(const std::string &name)
 {
     std::vector<Guild*> guildList;
     
@@ -140,7 +140,7 @@ std::vector<Guild*> GuildManager::getGuilds(const std::string &name)
 
 void GuildManager::disconnectPlayer(ChatClient *player)
 {
-    std::vector<Guild*> guildList = getGuilds(player->characterName);
+    std::vector<Guild*> guildList = getGuildsForPlayer(player->characterName);
 
     for (std::vector<Guild*>::const_iterator itr = guildList.begin();
          itr != guildList.end(); ++itr)

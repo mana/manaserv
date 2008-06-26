@@ -1,3 +1,13 @@
+2008-06-26  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/scripting/lua.cpp: Fix compile error.
+	* src/chat-server/guild.hpp, src/chat-server/guild.cpp,
+	src/account-server/serverhandler.cpp: Get rid of random access
+	method on list.
+	* src/chat-server/guildmanager.hpp, src/chat-server/guildmanager.cpp,
+	src/chat-server/chathandler.cpp: Use a clearer method name.
+	
+
 2008-06-25  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/chat-server/guildmanager.cpp, src/chat-server/guildmanager.hpp,

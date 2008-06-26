@@ -788,7 +788,7 @@ void ChatHandler::sendGuildInvite(const std::string &invitedName,
 void ChatHandler::sendGuildRejoin(ChatClient &client)
 {
     // Get list of guilds and check what rights they have.
-    std::vector<Guild*> guilds = guildManager->getGuilds(client.characterName);
+    std::vector<Guild*> guilds = guildManager->getGuildsForPlayer(client.characterName);
     for (unsigned int i = 0; i != guilds.size(); ++i)
     {
         Guild *guild = guilds[i];

@@ -100,11 +100,6 @@ class Guild
         { return mMembers.size(); }
 
         /**
-         * Get a member in the guild.
-         */
-        const std::string& getMember(int i) const;
-
-        /**
          * Find member by name.
          */
         bool checkInGuild(const std::string &playerName);

@@ -60,22 +60,6 @@ void Guild::addInvited(const std::string &playerName)
     mInvited.push_back(playerName);
 }
 
-const std::string& Guild::getMember(int i) const
-{
-    const static std::string empty = "";
-    int x = 0;
-    for (GuildMembers::const_iterator itr = mMembers.begin();
-        itr != mMembers.end();
-        ++itr, ++x)
-    {
-        if (x == i)
-        {
-            return (*itr);
-        }
-    }
-    return empty;
-}
-
 bool Guild::checkInGuild(const std::string &playerName)
 {
     return std::find(mMembers.begin(), mMembers.end(), playerName) != mMembers.end();

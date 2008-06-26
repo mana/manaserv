@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <list>
 
 #include "account-server/serverhandler.hpp"
 
@@ -459,9 +460,10 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             result.writeByte(ERRMSG_OK);
             result.writeLong(playerId);
             result.writeShort(guildId);
-            for (int i = 0; i < guild->totalMembers(); ++i)
+            for (std::list<std::string>::const_iterater itr = guild->getMembers()->begin(); 
+                 itr != guild->getMembers()->end(); ++itr)
             {
-                result.writeString(guild->getMember(i));
+                result.writeString((*itr));
             }
         } break;
 

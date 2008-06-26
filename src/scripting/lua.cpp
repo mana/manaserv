@@ -188,7 +188,7 @@ static int LuaNpc_Choice(lua_State *s)
  */
 static int LuaNpc_Create(lua_State *s)
 {
-    if (!lua_isstring(s, 1), !lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
+    if (!lua_isstring(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
     {
         raiseScriptError(s, "npc_create called with incorrect parameters.");
         return 0;
