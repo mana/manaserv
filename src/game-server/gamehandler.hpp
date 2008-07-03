@@ -81,7 +81,12 @@ class GameHandler: public ConnectionHandler
          */
         void completeServerChange(int id, std::string const &token,
                                   std::string const &address, int port);
-        
+
+        /**
+         * Updates the party id of the character
+         */
+        void updateCharacter(int charid, int partyid);
+
         /**
          * Registers a character that should soon be claimed by a client.
          * @param token token used by the client when connecting.

@@ -53,7 +53,8 @@ Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER, 65535),
     mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),
     mGender(0), mHairStyle(0), mHairColor(0), mLevel(1), mLevelProgress(0),
-    mUpdateLevelProgress(false), mRecalculateLevel(true), mTransaction(TRANS_NONE)
+    mUpdateLevelProgress(false), mRecalculateLevel(true), mParty(0),
+    mTransaction(TRANS_NONE)
 {
     Attribute attr = { 0, 0 };
     mAttributes.resize(NB_CHARACTER_ATTRIBUTES, attr);

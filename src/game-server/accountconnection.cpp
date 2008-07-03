@@ -103,121 +103,14 @@ void AccountConnection::processMessage(MessageIn &msg)
             recoveredQuestVar(id, name, value);
         } break;
 
-// The client should directly talk with the chat server and not go through the game server.
-#if 0
-        case AGMSG_GUILD_CREATE_RESPONSE:
+        case CGMSG_CHANGED_PARTY:
         {
-            if(msg.readByte() == ERRMSG_OK)
-            {
-                int playerId = msg.readLong();
-
-                MessageOut result(GPMSG_GUILD_CREATE_RESPONSE);
-                result.writeByte(ERRMSG_OK);
-
-                /*  Create a message that the player has joined the guild
-                 *  Output the guild ID and guild name
-                 *  Send a 1 if the player has rights
-                 *  to invite users, otherwise 0.
-                 */
-                MessageOut out(GPMSG_GUILD_JOINED);
-                out.writeShort(msg.readShort());
-                out.writeString(msg.readString());
-                out.writeShort(msg.readShort());
-
-                Character *player = gameHandler->messageMap[playerId];
-                if(player)
-                {
-                    gameHandler->sendTo(player, result);
-                    gameHandler->sendTo(player, out);
-                }
-            }
+            // Party id, 0 for none
+            int partyid = msg.readLong();
+            // Character DB id
+            int charid = msg.readLong();
+            gameHandler->updateCharacter(charid, partyid);
         } break;
-
-        case AGMSG_GUILD_INVITE_RESPONSE:
-        {
-            if(msg.readByte() == ERRMSG_OK)
-            {
-                int playerId = msg.readLong();
-
-                MessageOut result(GPMSG_GUILD_INVITE_RESPONSE);
-                result.writeByte(ERRMSG_OK);
-
-                Character *player = gameHandler->messageMap[playerId];
-                if(player)
-                {
-                    gameHandler->sendTo(player, result);
-                }
-            }
-        } break;
-
-        case AGMSG_GUILD_ACCEPT_RESPONSE:
-        {
-            if(msg.readByte() == ERRMSG_OK)
-            {
-                int playerId = msg.readLong();
-
-                MessageOut result(GPMSG_GUILD_ACCEPT_RESPONSE);
-                result.writeByte(ERRMSG_OK);
-
-                /*  Create a message that the player has joined the guild
-                 *  Output the guild ID and guild name
-                 *  Send a 0 for invite rights, since player has been invited
-                 *  they wont have any rights to invite other users yet.
-                 */
-                MessageOut out(GPMSG_GUILD_JOINED);
-                out.writeShort(msg.readShort());
-                out.writeString(msg.readString());
-                out.writeShort(0);
-
-                Character *player = gameHandler->messageMap[playerId];
-                if(player)
-                {
-                    gameHandler->sendTo(player, result);
-                    gameHandler->sendTo(player, out);
-                }
-            }
-        } break;
-
-        case AGMSG_GUILD_GET_MEMBERS_RESPONSE:
-        {
-            if(msg.readByte() != ERRMSG_OK)
-                break;
-            int playerId = msg.readLong();
-            short guildId = msg.readShort();
-
-            MessageOut result(GPMSG_GUILD_GET_MEMBERS_RESPONSE);
-            result.writeByte(ERRMSG_OK);
-            result.writeShort(guildId);
-            while(msg.getUnreadLength())
-            {
-                result.writeString(msg.readString());
-            }
-
-            Character *player = gameHandler->messageMap[playerId];
-            if(player)
-            {
-                gameHandler->sendTo(player, result);
-            }
-        } break;
-
-        case AGMSG_GUILD_QUIT_RESPONSE:
-        {
-            if(msg.readByte() != ERRMSG_OK)
-                break;
-            int playerId = msg.readLong();
-            short guildId = msg.readShort();
-
-            MessageOut result(GPMSG_GUILD_QUIT_RESPONSE);
-            result.writeByte(ERRMSG_OK);
-            result.writeShort(guildId);
-
-            Character *player = gameHandler->messageMap[playerId];
-            if(player)
-            {
-                gameHandler->sendTo(player, result);
-            }
-        } break;
-#endif
 
         default:
             LOG_WARN("Invalid message type");
@@ -303,50 +196,3 @@ void AccountConnection::sendStatistics()
     send(msg);
 }
 
-#if 0
-void AccountConnection::playerCreateGuild(int id, const std::string &guildName)
-{
-    LOG_INFO("Send GAMSG_GUILD_CREATE");
-    MessageOut msg(GAMSG_GUILD_CREATE);
-    msg.writeLong(id);
-    msg.writeString(guildName);
-    send(msg);
-}
-
-void AccountConnection::playerInviteToGuild(int id, short guildId, const std::string &member)
-{
-    LOG_INFO("Send GAMSG_GUILD_INVITE");
-    MessageOut msg(GAMSG_GUILD_INVITE);
-    msg.writeLong(id);
-    msg.writeShort(guildId);
-    msg.writeString(member);
-    send(msg);
-}
-
-void AccountConnection::playerAcceptInvite(int id, const std::string &guildName)
-{
-    LOG_INFO("Send GAMSG_GUILD_ACCEPT");
-    MessageOut msg(GAMSG_GUILD_ACCEPT);
-    msg.writeLong(id);
-    msg.writeString(guildName);
-    send(msg);
-}
-
-void AccountConnection::getGuildMembers(int id, short guildId)
-{
-    LOG_INFO("Send GAMSG_GUILD_GET_MEMBERS");
-    MessageOut msg(GAMSG_GUILD_GET_MEMBERS);
-    msg.writeLong(id);
-    msg.writeShort(guildId);
-    send(msg);
-}
-
-void AccountConnection::quitGuild(int id, short guildId)
-{
-    LOG_INFO("Send GAMSG_GUILD_QUIT");
-    MessageOut msg(GAMSG_GUILD_QUIT);
-    msg.writeLong(id);
-    msg.writeShort(guildId);
-    send(msg);
-}
-#endif

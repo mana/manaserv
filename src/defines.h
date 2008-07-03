@@ -244,6 +244,7 @@ enum {
     AGMSG_GET_QUEST_RESPONSE = 0x0542, // L id, S name, S value
     GAMSG_BAN_PLAYER = 0x550, // L id, W duration
     GAMSG_STATISTICS = 0x560, // { W map id, W thing nb, W monster nb, W player nb, { L character id }* }*
+    CGMSG_CHANGED_PARTY                 = 0x0590, // L character id, L party id
 
     XXMSG_INVALID = 0x7FFF
 };

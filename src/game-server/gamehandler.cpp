@@ -116,6 +116,19 @@ void GameHandler::completeServerChange(int id, std::string const &token,
     }
 }
 
+void GameHandler::updateCharacter(int charid, int partyid)
+{
+    for (NetComputers::const_iterator i = clients.begin(),
+         i_end = clients.end(); i != i_end; ++i)
+    {
+        GameClient *c = static_cast< GameClient * >(*i);
+        if (c->character->getDatabaseID() == id)
+        {
+            c->character->setParty(partyid);
+        }
+    }
+}
+
 static MovingObject *findBeingNear(Object *p, int id)
 {
     MapComposite *map = p->getMap();

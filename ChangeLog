@@ -1,3 +1,11 @@
+2008-07-03  David Athay  <ko2fan@gmail.com>
+
+	* src/defines.h, src/game-server/character.cpp, 
+	src/game-server/character.hpp, src/game-server/gamehandler.cpp,
+	src/game-server/accountconnection.cpp, src/game-server/gamehandler.hpp,
+	src/game-server/accountconnection.hpp: Removed guild stuff from game 
+	server. Added some party stuff to game server.
+
 2008-07-03  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/game-server/mapreader.cpp, src/game-server/mapreader.hpp:

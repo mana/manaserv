@@ -187,6 +187,14 @@ class Character : public Being
         void setAccountLevel(int l)
         { mAccountLevel = l; }
 
+        /** Gets the party id of the character */
+        int getParty() const
+        { return mPartyId; }
+
+        /** Sets the party id of the character */
+        void setParty(int party)
+        { mParty = party; }
+
         /**
          * Sends a message that informs the client about attribute
          * modified since last call.
@@ -336,6 +344,7 @@ class Character : public Being
         bool mUpdateLevelProgress;   /**< flag raised when percent to next level changed */
         bool mRecalculateLevel;      /**< flag raised when the character level might have increased */
         unsigned char mAccountLevel; /**< Account level of the user. */
+        int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
 
     protected:

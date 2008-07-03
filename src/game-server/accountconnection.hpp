@@ -71,38 +71,12 @@ class AccountConnection : public Connection
          */
         void sendStatistics();
 
-#if 0
-        /**
-         * Sends create guild message
-         */
-        void playerCreateGuild(int id, const std::string &guildName);
-        
-        /**
-         * Sends invite message
-         */
-        void playerInviteToGuild(int id, short guildId, const std::string &name);
-        
-        /**
-         * Sends accept message
-         */
-        void playerAcceptInvite(int id, const std::string &name);
-        
-        /**
-         * Sends get guild members message.
-         */
-        void getGuildMembers(int id, short guildId);
-        
-        /**
-         * Sends quit guild message.
-         */
-        void quitGuild(int id, short guildId);
-#endif
-
     protected:
         /**
          * Processes server messages.
          */
         virtual void processMessage(MessageIn &);
+
 };
 
 extern AccountConnection *accountHandler;
