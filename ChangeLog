@@ -1,3 +1,12 @@
+2008-07-03  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/mapreader.cpp, src/game-server/mapreader.hpp:
+	Avoid a crash when there's no content in <property/> tags.
+	* src/game-server/map.cpp, src/game-server/map.hpp: Enable arbitrary
+	tile sizes. This hasn't been tested yet.
+	* data/maps.xml: Enable the new maps, though their warps and spawns haven't
+	been set up yet.
+
 2008-06-26  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/scripting/lua.cpp: Fix compile error.

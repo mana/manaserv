@@ -96,14 +96,9 @@ class Map
         };
 
         /**
-         * Constructor.
-         */
-        Map();
-
-        /**
          * Constructor that takes initial map size as parameters.
          */
-        Map(int width, int height);
+        Map(int width = 0, int height = 0, int twidth = 32, int theight = 32);
 
         /**
          * Destructor.

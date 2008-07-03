@@ -45,23 +45,9 @@ bool Location::operator< (const Location &loc) const
    return tile->Fcost > loc.tile->Fcost;
 }
 
-
-Map::Map():
-    mWidth(0), mHeight(0),
-    tileWidth(32), tileHeight(32),
-    onClosedList(1), onOpenList(2)
-{
-    mMetaTiles = new MetaTile[mWidth * mHeight];
-    for (int i=0; i < NB_BLOCKTYPES; i++)
-    {
-        mOccupation[i] = new int[mWidth * mHeight];
-        memset(mOccupation[i], 0, mWidth * mHeight * sizeof(int));
-    }
-}
-
-Map::Map(int width, int height):
+Map::Map(int width, int height, int twidth, int theight):
     mWidth(width), mHeight(height),
-    tileWidth(32), tileHeight(32),
+    tileWidth(twidth), tileHeight(theight),
     onClosedList(1), onOpenList(2)
 {
     mMetaTiles = new MetaTile[mWidth * mHeight];

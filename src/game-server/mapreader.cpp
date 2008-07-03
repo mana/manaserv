@@ -39,11 +39,9 @@
 #include "utils/xml.hpp"
 #include "utils/zlib.hpp"
 
+const unsigned int DEFAULT_TILE_WIDTH = 32;
+const unsigned int DEFAULT_TILE_HEIGHT = 32;
 static std::vector< int > tilesetFirstGids;
-
-static Map* readMap(xmlNodePtr node, std::string const &path, MapComposite *composite, std::vector<Thing *> &things);
-static void readLayer(xmlNodePtr node, Map *map);
-static void setTileWithGid(Map *map, int x, int y, int gid);
 
 void MapReader::readMap(const std::string &filename, MapComposite *composite)
 {
@@ -91,7 +89,7 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
     // Parse the inflated map data.
     if (node && xmlStrEqual(node->name, BAD_CAST "map"))
     {
-        map = ::readMap(node, filename, composite, things);
+        map = MapReader::readMap(node, filename, composite, things);
     }
     else
     {
@@ -119,7 +117,8 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
     }
 }
 
-static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *composite, std::vector<Thing *> &things)
+Map* MapReader::readMap(xmlNodePtr node, std::string const &path, 
+                        MapComposite *composite, std::vector<Thing *> &things)
 {
     // Take the filename off the path
     std::string pathDir = path.substr(0, path.rfind("/") + 1);
@@ -127,31 +126,13 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
     int w = XML::getProperty(node, "width", 0);
     int h = XML::getProperty(node, "height", 0);
     // We only support tile width of 32 at the moment
-    //int tilew = getProperty(node, "tilewidth", DEFAULT_TILE_WIDTH);
-    //int tileh = getProperty(node, "tileheight", DEFAULT_TILE_HEIGHT);
+    int tilew = XML::getProperty(node, "tilewidth", DEFAULT_TILE_WIDTH);
+    int tileh = XML::getProperty(node, "tileheight", DEFAULT_TILE_HEIGHT);
     int layerNr = 0;
-    Map* map = new Map(w, h);
+    Map* map = new Map(w, h, tilew, tileh);
 
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
-        /* // Properties are useless server-side.
-        if (xmlStrEqual(node->name, BAD_CAST "property"))
-        {
-            // Example: <property name="name" value="value"/>
-
-            xmlChar *name = xmlGetProp(node, BAD_CAST "name");
-            xmlChar *value = xmlGetProp(node, BAD_CAST "value");
-
-            if (name && value)
-            {
-                map->setProperty((const char*)name, (const char*)value);
-            }
-
-            if (name) xmlFree(name);
-            if (value) xmlFree(value);
-        }
-        else
-        */
         if (xmlStrEqual(node->name, BAD_CAST "tileset"))
         {
             if (xmlHasProp(node, BAD_CAST "source"))
@@ -160,7 +141,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
             }
             else
             {
-                tilesetFirstGids.push_back(XML::getProperty(node, "firstgid", 0));
+                ::tilesetFirstGids.push_back(XML::getProperty(node, "firstgid", 0));
             }
         }
         else if (xmlStrEqual(node->name, BAD_CAST "layer"))
@@ -210,15 +191,15 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 if (value == "DEST_MAP")
                                 {
-                                    destMapId = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                    destMapId = getObjectProperty(propertyNode, -1);
                                 }
                                 else if (value == "DEST_X")
                                 {
-                                    destX = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                    destX = getObjectProperty(propertyNode, -1);
                                 }
                                 else if (value == "DEST_Y")
                                 {
-                                    destY = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                    destY = getObjectProperty(propertyNode, -1);
                                 }
                             }
                         }
@@ -259,15 +240,15 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                             {
                                 if (XML::getProperty(propertyNode, "name", std::string()) == "MONSTER_ID")
                                 {
-                                    monsterId = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                    monsterId = getObjectProperty(propertyNode, monsterId);
                                 }
                                 else if (XML::getProperty(propertyNode, "name", std::string()) == "MAX_BEINGS")
                                 {
-                                    maxBeings = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                    maxBeings = getObjectProperty(propertyNode, maxBeings);
                                 }
                                 else if (XML::getProperty(propertyNode, "name", std::string()) == "SPAWN_RATE")
                                 {
-                                    spawnRate = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                    spawnRate = getObjectProperty(propertyNode, spawnRate);
                                 }
                             }
                         }
@@ -311,7 +292,7 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 if (value == "NPC_ID")
                                 {
-                                    npcId = atoi((const char *)propertyNode->xmlChildrenNode->content);
+                                    npcId = getObjectProperty(propertyNode, npcId);
                                 }
                                 else if (value == "SCRIPT")
                                 {
@@ -386,12 +367,12 @@ static Map *readMap(xmlNodePtr node, std::string const &path, MapComposite *comp
     }
 
     // Clean up tilesets
-    tilesetFirstGids.clear();
+    ::tilesetFirstGids.clear();
 
     return map;
 }
 
-static void readLayer(xmlNodePtr node, Map *map)
+void MapReader::readLayer(xmlNodePtr node, Map *map)
 {
     node = node->xmlChildrenNode;
     int h = map->getHeight();
@@ -509,12 +490,26 @@ static void readLayer(xmlNodePtr node, Map *map)
     }
 }
 
-static void setTileWithGid(Map *map, int x, int y, int gid)
+int MapReader::getObjectProperty(xmlNodePtr node, int def)
+{
+    int val = def;
+    if(xmlHasProp(node, BAD_CAST "value"))
+    {
+        val = XML::getProperty(node, "value", def);
+    }
+    else if(const char * prop = (const char *)node->xmlChildrenNode->content)
+    {
+        val = atoi(prop);
+    }
+    return val;
+}
+
+void MapReader::setTileWithGid(Map *map, int x, int y, int gid)
 {
     // Find the tileset with the highest firstGid below/eq to gid
     int set = gid;
-    for (std::vector< int >::const_iterator i = tilesetFirstGids.begin(),
-         i_end = tilesetFirstGids.end(); i != i_end; ++i)
+    for (std::vector< int >::const_iterator i = ::tilesetFirstGids.begin(),
+         i_end = ::tilesetFirstGids.end(); i != i_end; ++i)
     {
         if (gid < *i)
         {

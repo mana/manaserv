@@ -25,9 +25,13 @@
 #define _INCLUDED_MAPREADER_H
 
 #include <string>
+#include <vector>
+
+#include <libxml/tree.h>
 
 class Map;
 class MapComposite;
+class Thing;
 
 /**
  * Reader for XML map files (*.tmx)
@@ -39,6 +43,29 @@ class MapReader
          * Read an XML map from a file.
          */
         static void readMap(const std::string &filename, MapComposite *composite);
+
+    private:
+        
+        /**
+         * Read an XML map from a parsed XML tree, and populate things with objects
+         * in that map.
+         */
+        static Map* readMap(xmlNodePtr node, std::string const &path,
+                            MapComposite *composite, std::vector<Thing *> &things);
+        
+        /**
+         * Reads a map layer and adds it to the given map.
+         */
+        static void readLayer(xmlNodePtr node, Map *map);
+
+        /**
+         * Get the integer value from the given object property node.
+         */
+        static int getObjectProperty(xmlNodePtr node, int def);
+
+        static void setTileWithGid(Map *map, int x, int y, int gid);
+
+
 };
 
 #endif
