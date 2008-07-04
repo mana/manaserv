@@ -122,7 +122,7 @@ void GameHandler::updateCharacter(int charid, int partyid)
          i_end = clients.end(); i != i_end; ++i)
     {
         GameClient *c = static_cast< GameClient * >(*i);
-        if (c->character->getDatabaseID() == id)
+        if (c->character->getDatabaseID() == charid)
         {
             c->character->setParty(partyid);
         }

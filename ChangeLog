@@ -1,3 +1,8 @@
+2008-07-03  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/character.cpp, src/game-server/gamehandler.cpp:
+	Fix errors in the last commit.
+
 2008-07-03  David Athay  <ko2fan@gmail.com>
 
 	* src/defines.h, src/game-server/character.cpp, 

@@ -189,7 +189,7 @@ class Character : public Being
 
         /** Gets the party id of the character */
         int getParty() const
-        { return mPartyId; }
+        { return mParty; }
 
         /** Sets the party id of the character */
         void setParty(int party)
