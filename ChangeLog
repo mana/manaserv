@@ -1,3 +1,10 @@
+2008-07-07  David Athay  <ko2fan@gmail.com>
+
+	* src/account-server/serverhandler.cpp, 
+	src/account-server/serverhandler.hpp, src/chat-server/party.cpp,
+	src/chat-server/party.hpp, src/chat-server/chathandler.cpp: Added party 
+	support between account and game servers.
+
 2008-07-03  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/game-server/character.cpp, src/game-server/gamehandler.cpp:

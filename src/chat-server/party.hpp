@@ -53,8 +53,14 @@ public:
      */
     unsigned int numUsers() { return mUsers.size(); }
 
+    /**
+     * Return the party id
+     */
+    unsigned int getId() { return mId; }
+
 private:
     PartyUsers mUsers;
+    unsigned int mId;
 };
 
 #endif

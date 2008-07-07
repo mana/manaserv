@@ -61,6 +61,11 @@ namespace GameServerHandler
      * Processes messages received by the connection handler.
      */
     void process();
+
+    /**
+     * Sends chat party information
+     */
+    void sendPartyChange(Character *ptr, int partyId);
 }
 
 #endif

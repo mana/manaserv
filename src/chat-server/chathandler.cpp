@@ -25,6 +25,8 @@
 #include <algorithm>
 
 #include "defines.h"
+#include "account-server/dalstorage.hpp"
+#include "account-server/serverhandler.hpp"
 #include "chat-server/guild.hpp"
 #include "chat-server/guildmanager.hpp"
 #include "chat-server/chatchannelmanager.hpp"
@@ -47,6 +49,12 @@ void registerChatClient(const std::string &token,
     p->character = name;
     p->level = level;
     chatHandler->mTokenCollector.addPendingConnect(token, p);
+}
+
+void updateInfo(ChatClient *client, int partyId)
+{
+    Character *character = storage->getCharacter(client->characterName);
+    GameServerHandler::sendPartyChange(character, partyId);
 }
 
 ChatHandler::ChatHandler():
@@ -340,7 +348,7 @@ ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (guildManager->doesExist(channelName) || 
+    else if (guildManager->doesExist(channelName) ||
              chatChannelManager->channelExists(channelName))
     {
         // Channel already exists
@@ -516,7 +524,7 @@ ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
     short channelId = msg.readShort();
     std::string topic = msg.readString();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
-    
+
     if(!guildManager->doesExist(channel->getName()))
     {
         chatChannelManager->setChannelTopic(channelId, topic);
@@ -670,7 +678,7 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
-            for(std::list<std::string>::const_iterator itr = guild->getMembers()->begin(); 
+            for(std::list<std::string>::const_iterator itr = guild->getMembers()->begin();
                 itr != guild->getMembers()->end(); ++itr)
             {
                 reply.writeString((*itr));
@@ -863,7 +871,7 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
         std::map<std::string, ChatClient*>::const_iterator chr;
 	std::list<std::string> *members = guild->getMembers();
 
-        for (std::list<std::string>::const_iterator itr = members->begin(); 
+        for (std::list<std::string>::const_iterator itr = members->begin();
              itr != members->end(); ++itr)
         {
             chr = mPlayerMap.find((*itr));
@@ -887,6 +895,8 @@ bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string 
         if (!c1->party)
         {
             c1->party = new Party();
+            // tell game server to update info
+            updateInfo(c1, c1->party->getId());
         }
 
         // add inviter to the party
@@ -903,6 +913,9 @@ bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string 
             out.writeString(invited);
             out.writeByte(ERRMSG_OK);
             c1->send(out);
+
+            // tell game server to update info
+            updateInfo(c2, c2->party->getId());
             return true;
         }
     }
@@ -958,6 +971,7 @@ void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)
     {
         out.writeByte(ERRMSG_FAILURE);
     }
+
     client.send(out);
 }
 
@@ -967,6 +981,9 @@ void ChatHandler::handlePartyQuit(ChatClient &client)
     MessageOut out(CPMSG_PARTY_QUIT_RESPONSE);
     out.writeByte(ERRMSG_OK);
     client.send(out);
+
+    // tell game server to update info
+    updateInfo(&client, 0);
 }
 
 void ChatHandler::removeUserFromParty(ChatClient &client)
@@ -974,6 +991,7 @@ void ChatHandler::removeUserFromParty(ChatClient &client)
     if (client.party)
     {
         client.party->removeUser(client.characterName);
+        // if theres less than 1 member left, remove the party
         if (client.party->numUsers() < 1)
         {
             delete client.party;

@@ -27,6 +27,9 @@
 
 Party::Party()
 {
+    static int id = 0;
+    id++;
+    mId = id;
 }
 
 void Party::addUser(const std::string &name)
