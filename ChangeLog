@@ -1,3 +1,11 @@
+2008-07-07  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/chat-server/chathandler.hpp, src/chat-server/chathandler.cpp,
+	src/chat-server/chatchannelmanager.hpp, src/defines.h,
+	src/chat-server/chatchannelmanager.cpp: Got rid of channel registering.
+	Channels are automatically created with /join,and removed when the 
+	last person /quits.
+	
 2008-07-07  David Athay  <ko2fan@gmail.com>
 
 	* src/account-server/serverhandler.cpp, 

@@ -218,8 +218,6 @@ enum {
     PCMSG_ANNOUNCE                 = 0x0411, // S text
     PCMSG_PRIVMSG                  = 0x0412, // S user, S text
     // -- Channeling
-    PCMSG_REGISTER_CHANNEL            = 0x0420, // S name, S topic, S password
-    CPMSG_REGISTER_CHANNEL_RESPONSE   = 0x0421, // B error, W id, S name, S topic
     CPMSG_CHANNEL_EVENT               = 0x0430, // W channel, B event, S info
     PCMSG_ENTER_CHANNEL               = 0x0440, // S channel, S password
     CPMSG_ENTER_CHANNEL_RESPONSE      = 0x0441, // B error, W id, S name, S topic, S userlist

@@ -29,6 +29,8 @@
 #include "account-server/dalstorage.hpp"
 #include "chat-server/chatclient.hpp"
 #include "chat-server/chathandler.hpp"
+#include "chat-server/guildmanager.hpp"
+#include "utils/stringfilter.h"
 
 ChatChannelManager::ChatChannelManager() : mNextChannelId(1)
 {
@@ -55,6 +57,34 @@ ChatChannelManager::createNewChannel(const std::string &channelName,
                                                     channelPassword,
                                                     joinable)));
     return channelId;
+}
+
+bool ChatChannelManager::tryNewPublicChannel(const std::string &name)
+{
+    if (!stringFilter->filterContent(name))
+    {
+        return false;
+    }
+
+    // Checking strings for length and double quotes
+    if (name.empty() ||
+        name.length() > MAX_CHANNEL_NAME ||
+        stringFilter->findDoubleQuotes(name))
+    {
+        return false;
+    }
+    else if (guildManager->doesExist(name) || 
+             channelExists(name))
+    {
+        // Channel already exists
+        return false;
+    }
+    else
+    {
+        // We attempt to create a new channel
+        short id = createNewChannel(name, "", "", true);
+        return id ? true : false;
+    }
 }
 
 bool ChatChannelManager::removeChannel(int channelId)

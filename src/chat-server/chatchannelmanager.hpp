@@ -58,6 +58,13 @@ class ChatChannelManager
                                     bool joinable);
 
         /**
+         * Try to create a new public channel with the given name.
+         *
+         * @return true if created successfully, false otherwise.
+         */
+        bool tryNewPublicChannel(const std::string &name);
+
+        /**
          * Remove a channel.
          */
         bool removeChannel(int channelId);

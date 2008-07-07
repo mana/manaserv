@@ -156,12 +156,6 @@ class ChatHandler : public ConnectionHandler
         handlePrivMsgMessage(ChatClient &client, MessageIn &msg);
 
         /**
-         * Deal with channel registration.
-         */
-        void
-        handleRegisterChannelMessage(ChatClient &client, MessageIn &msg);
-
-        /**
          * Deal with player entering channel.
          */
         void

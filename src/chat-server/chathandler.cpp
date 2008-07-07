@@ -153,10 +153,6 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handlePrivMsgMessage(computer, message);
             break;
 
-        case PCMSG_REGISTER_CHANNEL:
-            handleRegisterChannelMessage(computer, message);
-            break;
-
         case PCMSG_ENTER_CHANNEL:
             handleEnterChannelMessage(computer, message);
             break;
@@ -321,84 +317,21 @@ ChatHandler::handlePrivMsgMessage(ChatClient &client, MessageIn &msg)
     sayToPlayer(client, user, text);
 }
 
-void
-ChatHandler::handleRegisterChannelMessage(ChatClient &client, MessageIn &msg)
-{
-    MessageOut reply(CPMSG_REGISTER_CHANNEL_RESPONSE);
-
-    std::string channelName = msg.readString();
-    std::string channelAnnouncement = msg.readString();
-    std::string channelPassword = msg.readString();
-
-    if (!stringFilter->filterContent(channelName) ||
-            !stringFilter->filterContent(channelAnnouncement))
-    {
-        warnPlayerAboutBadWords(client);
-        return;
-    }
-
-    // Checking strings for length and double quotes
-    if (channelName.empty() ||
-            channelName.length() > MAX_CHANNEL_NAME ||
-            stringFilter->findDoubleQuotes(channelName) ||
-            channelAnnouncement.length() > MAX_CHANNEL_ANNOUNCEMENT ||
-            stringFilter->findDoubleQuotes(channelAnnouncement) ||
-            channelPassword.length() > MAX_CHANNEL_PASSWORD ||
-            stringFilter->findDoubleQuotes(channelPassword))
-    {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
-    }
-    else if (guildManager->doesExist(channelName) ||
-             chatChannelManager->channelExists(channelName))
-    {
-        // Channel already exists
-        reply.writeByte(ERRMSG_ALREADY_TAKEN);
-    }
-    else
-    {
-        // We attempt to create a new channel
-        short channelId;
-
-        channelId = chatChannelManager->createNewChannel(
-                    channelName,
-                    channelAnnouncement,
-                    channelPassword,
-                    true);
-
-        if (channelId)
-        {
-            // We add the player as admin of this channel as he created it. The
-            // user registering a private channel is the only one to be able to
-            // update the password and the announcement in it and also to
-            // remove it.
-            ChatChannel *channel = chatChannelManager->getChannel(channelId);
-            channel->addUser(&client);
-
-            reply.writeByte(ERRMSG_OK);
-            reply.writeShort(channelId);
-            reply.writeString(channelName);
-            reply.writeString(channelAnnouncement);
-        }
-        else
-        {
-            reply.writeByte(ERRMSG_FAILURE);
-        }
-    }
-
-    client.send(reply);
-}
-
 void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_ENTER_CHANNEL_RESPONSE);
 
     std::string channelName = msg.readString();
     std::string givenPassword = msg.readString();
-
-    ChatChannel *channel = chatChannelManager->getChannel(channelName);
+    ChatChannel *channel = NULL;
+    if(chatChannelManager->channelExists(channelName) ||
+       chatChannelManager->tryNewPublicChannel(channelName))
+    {        
+        channel = chatChannelManager->getChannel(channelName);
+    }
 
     if (!channel)
-    {
+    {       
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (!channel->getPassword().empty() &&
@@ -470,6 +403,10 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
         warnUsersAboutPlayerEventInChat(channel,
                 client.characterName,
                 CHAT_EVENT_LEAVING_PLAYER);
+        if(channel->getUserList().empty())
+        {
+            chatChannelManager->removeChannel(channel->getId());
+        }
     }
 
     client.send(reply);
