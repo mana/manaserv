@@ -342,6 +342,7 @@ function death_notification(being)
     for i,funct in pairs(ondeath_functs[being]) do
       funct()
     end
+    ondeath_functs[being] = nil
   end
 end
 
