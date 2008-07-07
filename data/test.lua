@@ -125,11 +125,11 @@ function npc5_talk(npc, ch)
     m3 = tmw.monster_create(1, x + TILESIZE, y - TILESIZE)
     m4 = tmw.monster_create(1, x - TILESIZE, y - TILESIZE)
     
-    onDeath(m1, function() tmw.being_say(npc, "NOOO!") end)
-    onDeath(m2, function() tmw.being_say(npc, "Please stop this violence!") end)
-    onDeath(m3, function() tmw.being_say(npc, "Stop slaughtering my scorpions!") end)
-    onDeath(m4, function() tmw.being_say(npc, "Leave my scorpions alone!") end)
-    onDeath(m4, function() tmw.being_say(m4, "AAARGH!") end)
+    on_death(m1, function() tmw.being_say(npc, "NOOO!") end)
+    on_death(m2, function() tmw.being_say(npc, "Please stop this violence!") end)
+    on_death(m3, function() tmw.being_say(npc, "Stop slaughtering my scorpions!") end)
+    on_death(m4, function() tmw.being_say(npc, "Leave my scorpions alone!") end)
+    on_death(m4, function() tmw.being_say(m4, "AAARGH!") end)
     
   end
 end

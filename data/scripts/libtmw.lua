@@ -325,15 +325,19 @@ end
 -- DEATH NOTIFICATIONS
 local ondeath_functs = {}
 
-function onDeath(being, funct)
+-- requests the gameserver to notify the script engine when the being
+-- dies and adds a script function to be executed in this case.
+function on_death(being, funct)
   if ondeath_functs[being] == nil then
     ondeath_functs[being] = {}
   end
   table.insert(ondeath_functs[being], funct)
-  tmw.noteOnDeath(being)
+  tmw.note_on_death(being)
 end
 
-function deathNotification(being)
+-- called by the engine when a being with dies for which a death 
+-- notification has been requested
+function death_notification(being)
   if type(ondeath_functs[being]) == "table" then
     for i,funct in pairs(ondeath_functs[being]) do
       funct()

@@ -726,7 +726,7 @@ static int LuaGetBeingsInCircle(lua_State *s)
 /**
  * Makes the server call the lua function deathEvent
  * with the being ID when the being dies.
- * tmw.noteOnDeath (being)
+ * tmw.note_on_death (being)
  */
 static int LuaNoteOnDeath(lua_State *s)
 {
@@ -776,7 +776,7 @@ LuaScript::LuaScript():
         { "trigger_create",         &LuaTrigger_Create   },
         { "chatmessage",            &LuaChatmessage      },
         { "get_beings_in_circle",   &LuaGetBeingsInCircle},
-        { "noteOnDeath",            &LuaNoteOnDeath      },
+        { "note_on_death",          &LuaNoteOnDeath      },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
@@ -867,7 +867,7 @@ void LuaScript::load(char const *prog)
 
 void LuaScript::processDeathEvent(Being *being)
 {
-    prepare("deathNotification");
+    prepare("death_notification");
     push(being);
     //TODO: get and push a list of creatures who contributed to killing the
     //      being. This might be very interesting for scripting quests.
