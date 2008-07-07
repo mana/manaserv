@@ -322,6 +322,25 @@ function schedule_every(seconds, funct)
 end
 
 
+-- DEATH NOTIFICATIONS
+local ondeath_functs = {}
+
+function onDeath(being, funct)
+  if ondeath_functs[being] == nil then
+    ondeath_functs[being] = {}
+  end
+  table.insert(ondeath_functs[being], funct)
+  tmw.noteOnDeath(being)
+end
+
+function deathNotification(being)
+  if type(ondeath_functs[being]) == "table" then
+    for i,funct in pairs(ondeath_functs[being]) do
+      funct()
+    end
+  end
+end
+
 
 -- Below are some convenience methods added to the engine API
 

@@ -20,7 +20,7 @@ require "data/scripts/npclib"
 atinit(function()
   create_npc("Test NPC", 200, 50 * TILESIZE + 16, 19 * TILESIZE + 16, npc1_talk, npclib.walkaround_small)
   create_npc("Teleporter", 201, 51 * TILESIZE + 16, 25 * TILESIZE + 16, npc4_talk, npclib.walkaround_wide)
-  create_npc("Spider Tamer", 126, 45 * TILESIZE + 16, 25 * TILESIZE + 16, npc5_talk, npclib.walkaround_map)
+  create_npc("Scorpion Tamer", 126, 45 * TILESIZE + 16, 25 * TILESIZE + 16, npc5_talk, nil)
   create_npc("Guard", 122, 58 * TILESIZE + 16, 15 * TILESIZE + 16, npc6_talk, npc6_update)
   create_npc("Fire Demon", 202, 58 * TILESIZE + 16, 35 * TILESIZE + 16, firedemon_talk, firedemon_update)
   
@@ -115,15 +115,22 @@ function npc4_talk(npc, ch)
 end
 
 function npc5_talk(npc, ch)
-  do_message(npc, ch, "I am the spider tamer. Do you want me to spawn some spiders?")
+  do_message(npc, ch, "I am the scorpion tamer. Do you want me to spawn some scorpions?")
   local answer = do_choice(npc, ch, "Yes", "No");
   if answer == 1 then
     local x = tmw.posX(npc)
     local y = tmw.posY(npc)
-    tmw.monster_create(1012, x + TILESIZE, y + TILESIZE)
-    tmw.monster_create(112, x - TILESIZE, y + TILESIZE)
-    tmw.monster_create(1012, x + TILESIZE, y - TILESIZE)
-    tmw.monster_create(1012, x - TILESIZE, y - TILESIZE)
+    m1 = tmw.monster_create(1, x + TILESIZE, y + TILESIZE)
+    m2 = tmw.monster_create(1, x - TILESIZE, y + TILESIZE)
+    m3 = tmw.monster_create(1, x + TILESIZE, y - TILESIZE)
+    m4 = tmw.monster_create(1, x - TILESIZE, y - TILESIZE)
+    
+    onDeath(m1, function() tmw.being_say(npc, "NOOO!") end)
+    onDeath(m2, function() tmw.being_say(npc, "Please stop this violence!") end)
+    onDeath(m3, function() tmw.being_say(npc, "Stop slaughtering my scorpions!") end)
+    onDeath(m4, function() tmw.being_say(npc, "Leave my scorpions alone!") end)
+    onDeath(m4, function() tmw.being_say(m4, "AAARGH!") end)
+    
   end
 end
 

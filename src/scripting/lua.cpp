@@ -79,6 +79,8 @@ class LuaScript: public Script
         static void getQuestCallback(Character *, std::string const &,
                                      std::string const &, void *);
 
+        void processDeathEvent(Being* thing);
+
     private:
 
         lua_State *mState;
@@ -721,6 +723,33 @@ static int LuaGetBeingsInCircle(lua_State *s)
     return 1;
 }
 
+/**
+ * Makes the server call the lua function deathEvent
+ * with the being ID when the being dies.
+ * tmw.noteOnDeath (being)
+ */
+static int LuaNoteOnDeath(lua_State *s)
+{
+    if (!lua_islightuserdata(s, 1) || lua_gettop(s) != 1)
+    {
+        raiseScriptError(s, "lua_noteOnDeath called with incorrect parameters.");
+        return 0;
+    }
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    Being *being = getBeing(s, 1);
+    if (!being)
+    {
+        raiseScriptError(s, "lua_noteOnDeath called for nonexistent being.");
+        return 0;
+    }
+
+    being->addListener(t->getScriptDeathListener());
+    return 0;
+}
+
 LuaScript::LuaScript():
     nbArgs(-1)
 {
@@ -747,6 +776,7 @@ LuaScript::LuaScript():
         { "trigger_create",         &LuaTrigger_Create   },
         { "chatmessage",            &LuaChatmessage      },
         { "get_beings_in_circle",   &LuaGetBeingsInCircle},
+        { "noteOnDeath",            &LuaNoteOnDeath      },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
@@ -833,6 +863,17 @@ void LuaScript::load(char const *prog)
         lua_settop(mState, 0);
         return;
     }
+}
+
+void LuaScript::processDeathEvent(Being *being)
+{
+    prepare("deathNotification");
+    push(being);
+    //TODO: get and push a list of creatures who contributed to killing the
+    //      being. This might be very interesting for scripting quests.
+    execute();
+
+    being->removeListener(getScriptDeathListener());
 }
 
 static Script *LuaFactory()

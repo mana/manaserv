@@ -26,6 +26,8 @@
 
 #include <string>
 
+#include "game-server/eventlistener.hpp"
+
 class MapComposite;
 class Thing;
 
@@ -51,7 +53,7 @@ class Script
         /**
          * Constructor.
          */
-        Script(): mMap(NULL) {}
+        Script();
 
         /**
          * Destructor.
@@ -124,8 +126,27 @@ class Script
         MapComposite *getMap() const
         { return mMap; }
 
+        EventListener *getScriptDeathListener()
+        { return &mEventListener; }
+
+        virtual void processDeathEvent(Being* thing) = 0;
+
     private:
         MapComposite *mMap;
+        EventListener mEventListener; /**< Tracking of being deaths. */
+
+    friend struct ScriptDeathEventDispatch;
 };
+
+struct ScriptDeathEventDispatch: EventDispatch
+{
+    ScriptDeathEventDispatch()
+    {
+        typedef EventListenerFactory< Script, &Script::mEventListener > Factory;
+        died = &Factory::create< Being, &Script::processDeathEvent >::function;
+    }
+};
+
+static ScriptDeathEventDispatch scriptDeathEventDispatch;
 
 #endif

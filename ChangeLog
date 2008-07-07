@@ -1,3 +1,11 @@
+2008-07-07  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/scripting/script.cpp, src/scripting/script.hpp, src/scripting/lua.cpp,
+	data/scripts/libtmw.lua: Implemented death listener for scripting engine.
+	* data/test.lua: Made the spider tamer a scorpion tamer (because spiders aren't
+	implemeted and thus make bad test subjects in this case) and used the death
+	listeners to make him complain when the scorpions are killed.
+
 2008-07-07  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/chat-server/chathandler.hpp, src/chat-server/chathandler.cpp,

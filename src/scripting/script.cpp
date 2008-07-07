@@ -33,6 +33,11 @@ typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
 
+Script::Script():
+    mMap(NULL),
+    mEventListener(&scriptDeathEventDispatch)
+{}
+
 void Script::registerEngine(std::string const &name, Factory f)
 {
     if (!engines)
