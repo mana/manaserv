@@ -27,13 +27,53 @@
 #include <list>
 
 /**
+ * Guild members
+ */
+
+class GuildMember
+{
+    public:
+        /**
+         * Permissions
+         * Members with NONE cannot invite users or set permissions
+         * Members with COMMANDER can invite other users but
+         *  cannot set permissions
+         * Members with LEADER can invite users and set permissions
+         */
+        enum { NONE = 0, COMMANDER, LEADER };
+
+        /**
+         * Constructor
+         */
+        GuildMember(std::string name);
+
+        /**
+         * Get name
+         */
+        std::string getName() const;
+
+        /**
+         * Set permissions
+         */
+        void setPermission(int perm);
+
+        /**
+         * Get permissions
+         */
+        int getPermissions() const;
+
+    private:
+        std::string mName;
+        int mPermissions;
+
+};
+
+/**
  * A guild and its members.
  */
 class Guild
 {
     public:
-        typedef std::list<std::string> GuildMembers;
-
         /**
          * Constructor.
          */
@@ -86,12 +126,12 @@ class Guild
          */
         int getId() const
         { return mId; }
-        
+
         /**
          * Returns a list of the members in this guild.
          */
-        GuildMembers* getMembers()
-        { return &mMembers; }
+        std::list<GuildMember*> getMembers()
+        { return mMembers; }
 
         /**
          * Returns the total number of members in the guild.
@@ -104,11 +144,27 @@ class Guild
          */
         bool checkInGuild(const std::string &playerName);
 
+        /**
+         * Returns whether a user can invite
+         */
+        bool canInvite(const std::string &name);
+
+        /**
+         * Returns a users permissions
+         */
+        int getUserPermissions(const std::string &name);
+
+    protected:
+        /**
+         * Return a member based on their character name
+         */
+        GuildMember* getMember(const std::string &playerName);
+
     private:
         short mId;
         std::string mName;
-        GuildMembers mMembers;
-        GuildMembers mInvited;
+        std::list<GuildMember*> mMembers;
+        std::list<std::string> mInvited;
 };
 
 #endif

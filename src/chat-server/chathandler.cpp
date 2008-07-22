@@ -326,12 +326,12 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     ChatChannel *channel = NULL;
     if(chatChannelManager->channelExists(channelName) ||
        chatChannelManager->tryNewPublicChannel(channelName))
-    {        
+    {
         channel = chatChannelManager->getChannel(channelName);
     }
 
     if (!channel)
-    {       
+    {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (!channel->getPassword().empty() &&
@@ -532,7 +532,7 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
     {
         // check permissions of inviter, and that they arent inviting themself,
         // and arent someone already in the guild
-        if (guild->checkLeader(client.characterName) &&
+        if (guild->canInvite(client.characterName) &&
             (client.characterName != character) &&
             !guild->checkInGuild(character))
         {
@@ -615,11 +615,11 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
-            for(std::list<std::string>::const_iterator itr = guild->getMembers()->begin();
-                itr != guild->getMembers()->end(); ++itr)
+            for(std::list<GuildMember*>::const_iterator itr = guild->getMembers().begin();
+                itr != guild->getMembers().end(); ++itr)
             {
-                reply.writeString((*itr));
-                reply.writeByte(mPlayerMap.find((*itr)) != mPlayerMap.end());
+                reply.writeString((*itr)->getName());
+                reply.writeByte(mPlayerMap.find((*itr)->getName()) != mPlayerMap.end());
             }
         }
     }
@@ -655,6 +655,8 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
             }
             else
             {
+                // guild manager checks if the member is the last in the guild
+                // and removes the guild if so
                 guildManager->removeGuildMember(guild, client.characterName);
                 sendGuildListUpdate(guild->getName(), client.characterName, GUILD_EVENT_LEAVING_PLAYER);
             }
@@ -737,15 +739,12 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
     for (unsigned int i = 0; i != guilds.size(); ++i)
     {
         Guild *guild = guilds[i];
-        short leader = 0;
+        short permissions;
         if (!guild)
         {
             return;
         }
-        if (guild->checkLeader(client.characterName))
-        {
-            leader = 1;
-        }
+        permissions = guild->getUserPermissions(client.characterName);
 
         std::string guildName = guild->getName();
 
@@ -753,7 +752,7 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         MessageOut msg(CPMSG_GUILD_REJOIN);
         msg.writeString(guildName);
         msg.writeShort(guild->getId());
-        msg.writeByte(leader);
+        msg.writeShort(permissions);
 
         // get channel id of guild channel
         ChatChannel *channel = joinGuildChannel(guildName, client);
@@ -806,12 +805,12 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
         msg.writeString(characterName);
         msg.writeByte(eventId);
         std::map<std::string, ChatClient*>::const_iterator chr;
-	std::list<std::string> *members = guild->getMembers();
+        std::list<GuildMember*> members = guild->getMembers();
 
-        for (std::list<std::string>::const_iterator itr = members->begin();
-             itr != members->end(); ++itr)
+        for (std::list<GuildMember*>::const_iterator itr = members.begin();
+             itr != members.end(); ++itr)
         {
-            chr = mPlayerMap.find((*itr));
+            chr = mPlayerMap.find((*itr)->getName());
             if (chr != mPlayerMap.end())
             {
                 chr->second->send(msg);

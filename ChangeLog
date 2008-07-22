@@ -1,3 +1,9 @@
+2008-07-22  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/guild.cpp, src/chat-server/guild.hpp,
+	src/chat-server/chathandler.cpp, src/defines.h: Add permissions to guild
+	members.
+
 2008-07-07  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/scripting/script.cpp, src/scripting/script.hpp, src/scripting/lua.cpp,

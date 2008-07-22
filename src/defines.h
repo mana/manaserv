@@ -198,7 +198,7 @@ enum {
     CPMSG_GUILD_QUIT_RESPONSE           = 0x0361, // B error
 
     CPMSG_GUILD_INVITED                 = 0x0370, // S char name, S  guild name, W id
-    CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W guild, B rights, W channel
+    CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W guild, W rights, W channel, S announce
 
     // Party
     PCMSG_PARTY_INVITE                  = 0x03A0, // S name
