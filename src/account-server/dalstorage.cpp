@@ -915,10 +915,11 @@ void DALStorage::addGuildMember(int guildId, const std::string &memberName)
     try
     {
         sql << "insert into " << GUILD_MEMBERS_TBL_NAME
-        << " (guild_id, member_name)"
+        << " (guild_id, member_name, rights)"
         << " values ("
         << guildId << ", \""
-        << memberName << "\");";
+        << memberName << "\", "
+        << 0 << ");";
         mDb->execSql(sql.str());
     }
     catch (const dal::DbSqlQueryExecFailure& e) {
@@ -942,7 +943,26 @@ void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
         << guildId << "';";
         mDb->execSql(sql.str());
     }
-    catch (const dal::DbSqlQueryExecFailure& e) {
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        LOG_ERROR("SQL query failure: " << e.what());
+    }
+}
+
+void DALStorage::setMemberRights(const std::string &memberName, int rights)
+{
+    std::ostringstream sql;
+
+    try
+    {
+        sql << "update " << GUILD_MEMBERS_TBL_NAME
+        << " set rights = '" << rights << "'"
+        << " where member_name = \""
+        << memberName << "\";";
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what());
     }

@@ -284,16 +284,19 @@ static char const *SQL_GUILD_MEMBERS_TABLE =
 #if defined (MYSQL_SUPPORT)
         "guild_id       INTEGER         NOT NULL,"
         "member_name    VARCHAR(32)     NOT NULL,"
+        "rights         INTEGER         NOT NULL,"
         "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
         "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
 #elif defined (SQLITE_SUPPORT)
         "guild_id       INTEGER     NOT NULL,"
         "member_name    TEXT        NOT NULL,"
+        "rights         INTEGER     NOT NULL,"
         "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
         "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
 #elif defined (POSTGRESQL_SUPPORT)
         "guild_id       INTEGER     NOT NULL,"
         "member_name    TEXT        NOT NULL,"
+        "rights         INTEGER     NOT NULL,"
         "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
         "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
 #endif

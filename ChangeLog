@@ -3,6 +3,10 @@
 	* src/chat-server/guild.cpp, src/chat-server/guild.hpp,
 	src/chat-server/chathandler.cpp, src/defines.h: Add permissions to guild
 	members.
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
+	src/account-server/dalstoragesql.hpp, src/chat-server/guildmanager.cpp,
+	src/chat-server/guild.cpp, src/chat-server/guild.hpp: Save guild member
+	permissions.
 
 2008-07-07  Philipp Sehmisch  <tmw@crushnet.org>
 

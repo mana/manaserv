@@ -54,6 +54,11 @@ Guild* GuildManager::createGuild(const std::string &name, const std::string &pla
     mGuilds.push_back(guild);
     addGuildMember(guild, playerName);
 
+    // Set and save the member rights
+    storage->setMemberRights(playerName, GuildMember::LEADER);
+
+    guild->setLeader(playerName);
+
     return guild;
 }
 
@@ -126,7 +131,7 @@ bool GuildManager::doesExist(const std::string &name)
 std::vector<Guild*> GuildManager::getGuildsForPlayer(const std::string &name)
 {
     std::vector<Guild*> guildList;
-    
+
     for (std::list<Guild*>::iterator itr = mGuilds.begin();
             itr != mGuilds.end(); ++itr)
     {
@@ -145,8 +150,8 @@ void GuildManager::disconnectPlayer(ChatClient *player)
     for (std::vector<Guild*>::const_iterator itr = guildList.begin();
          itr != guildList.end(); ++itr)
     {
-        chatHandler->sendGuildListUpdate((*itr)->getName(), 
-					 player->characterName, 
+        chatHandler->sendGuildListUpdate((*itr)->getName(),
+					 player->characterName,
 					 GUILD_EVENT_OFFLINE_PLAYER);
     }
 }

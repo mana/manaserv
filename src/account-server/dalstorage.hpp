@@ -155,7 +155,7 @@ class DALStorage
 
         /**
          * Add a new guild
-         * 
+         *
          */
         void
         addGuild(Guild* guild);
@@ -172,13 +172,19 @@ class DALStorage
          *
          */
         void
-        addGuildMember(int guild_id, const std::string &member_name);
+        addGuildMember(int guild_id, const std::string &memberName);
 
         /**
          * Remove member from guild
          */
         void
         removeGuildMember(int guildId, const std::string &memberName);
+
+        /**
+         * Save guild member rights
+         */
+        void
+        setMemberRights(const std::string &memberName, int rights);
 
         /**
          * Get guild list

@@ -100,6 +100,11 @@ class Guild
         bool checkLeader(const std::string &playerName);
 
         /**
+         * Set player as leader of the guild.
+         */
+        void setLeader(const std::string &playerName);
+
+        /**
          * Set the ID of the guild.
          */
         void setId(int id)

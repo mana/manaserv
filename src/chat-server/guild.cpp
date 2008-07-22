@@ -84,6 +84,15 @@ bool Guild::checkLeader(const std::string &playerName)
 
 }
 
+void Guild::setLeader(const std::string &playerName)
+{
+    GuildMember *member = getMember(playerName);
+    if (member)
+    {
+        member->setPermission(GuildMember::LEADER);
+    }
+}
+
 bool Guild::checkInvited(const std::string &playerName)
 {
     return std::find(mInvited.begin(), mInvited.end(), playerName) != mInvited.end();
