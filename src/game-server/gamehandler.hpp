@@ -125,6 +125,11 @@ class GameHandler: public ConnectionHandler
         void computerDisconnected(NetComputer *);
 
         /**
+         * Send error message back to player
+         */
+        void sendError(NetComputer *computer, int id, std::string errorMsg);
+
+        /**
          * Processes messages related to core game events.
          */
         void processMessage(NetComputer *computer, MessageIn &message);

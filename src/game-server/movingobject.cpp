@@ -131,6 +131,7 @@ void MovingObject::move()
     {
         PATH_NODE next = mPath.front();
         mPath.pop_front();
+        // 362 / 256 is square root of 2, used for walking diagonally
         mActionTime += (prev.x != next.x && prev.y != next.y)
                        ? mSpeed * 362 / 256 : mSpeed;
         if (mPath.empty())
@@ -139,6 +140,7 @@ void MovingObject::move()
             pos = mDst;
             break;
         }
+        // position the object in the middle of the tile for pathfinding purposes
         pos.x = next.x * 32 + 16;
         pos.y = next.y * 32 + 16;
     }

@@ -1,3 +1,9 @@
+2008-07-24  David Athay  <ko2fan@gmail.com>
+
+	* src/defines.h, src/game-server/movingobject.cpp, 
+	src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp, 
+	gameserver.cbp: Added error message when NPC is too far away.
+
 2008-07-22  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/guild.cpp, src/chat-server/guild.hpp,

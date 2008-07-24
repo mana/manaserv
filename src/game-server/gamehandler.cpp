@@ -199,7 +199,11 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             int id = message.readShort();
             MovingObject *o = findBeingNear(computer.character, id);
-            if (!o || o->getType() != OBJECT_NPC) break;
+            if (!o || o->getType() != OBJECT_NPC)
+            {
+                sendError(comp, id, "Not close enough to NPC\n");
+                break;
+            }
 
             NPC *q = static_cast< NPC * >(o);
             if (message.getId() == PGMSG_NPC_SELECT)
@@ -561,4 +565,12 @@ GameClient *GameHandler::getClientByNameSlow(std::string const &name)
         }
     }
     return NULL;
+}
+
+void GameHandler::sendError(NetComputer *computer, int id, std::string errorMsg)
+{
+    MessageOut msg(GPMSG_NPC_ERROR);
+    msg.writeShort(id);
+    msg.writeString(errorMsg, errorMsg.size());
+    computer->send(msg);
 }

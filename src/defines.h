@@ -168,6 +168,7 @@ enum {
     GPMSG_NPC_BUY                  = 0x02B5, // W being id, { W item id, W amount, W cost }*
     GPMSG_NPC_SELL                 = 0x02B6, // W being id, { W item id, W amount, W cost }*
     PGMSG_NPC_BUYSELL              = 0x02B7, // W item id, W amount
+    GPMSG_NPC_ERROR                = 0x02B8, // B error
     PGMSG_TRADE_REQUEST            = 0x02C0, // W being id
     GPMSG_TRADE_REQUEST            = 0x02C1, // W being id
     GPMSG_TRADE_START              = 0x02C2, // -
