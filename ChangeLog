@@ -1,3 +1,8 @@
+2008-07-27  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/character.cpp: take into account weapon skills
+	in damage calculation.
+	
 2008-07-24  David Athay  <ko2fan@gmail.com>
 
 	* src/defines.h, src/game-server/movingobject.cpp, 
