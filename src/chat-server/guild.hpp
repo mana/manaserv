@@ -45,12 +45,13 @@ class GuildMember
         /**
          * Constructor
          */
-        GuildMember(std::string name);
+        GuildMember(const std::string &name);
 
         /**
          * Get name
          */
-        std::string getName() const;
+        const std::string& getName() const
+        { return mName; }
 
         /**
          * Set permissions
@@ -87,7 +88,7 @@ class Guild
         /**
          * Add a member to the guild.
          */
-        void addMember(const std::string &playerName);
+        void addMember(const std::string &playerName, int permissions = GuildMember::NONE);
 
         /**
          * Remove a member from the guild.

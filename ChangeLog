@@ -1,3 +1,10 @@
+2008-07-28  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/character.cpp: avoid a crash caused by the last commit.
+	* src/game-server/being.cpp: calculate magic damage according to wiki spec.
+	* src/account-server/dalstorage.cpp: read guild permissions from the db.
+	* src/chat-server/guild.hpp, src/chat-server/guild.cpp: use const strings.
+	
 2008-07-27  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/game-server/character.cpp: take into account weapon skills

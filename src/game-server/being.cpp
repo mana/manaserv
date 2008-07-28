@@ -64,21 +64,22 @@ int Being::damage(Object *, Damage const &damage)
     /* Elemental modifier at 100 means normal damage. At 0, it means immune.
        And at 200, it means vulnerable (double damage). */
     int mod1 = getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
-
+    HPloss = HPloss * (mod1 / 100);
     /* Defence is an absolute value which is subtracted from the damage total. */
     int mod2 = 0;
     switch (damage.type)
     {
         case DAMAGE_PHYSICAL:
             mod2 = getModifiedAttribute(BASE_ATTR_PHY_RES);
+            HPloss = HPloss - mod2;
             break;
         case DAMAGE_MAGICAL:
             mod2 = getModifiedAttribute(BASE_ATTR_MAG_RES);
+            HPloss = HPloss / (mod2 + 1);
             break;
         default:
             break;
     }
-    HPloss = HPloss * (mod1 / 100) - mod2;
 
     if (HPloss < 0) HPloss = 0;
 

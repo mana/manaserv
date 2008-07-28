@@ -96,7 +96,7 @@ void Character::perform()
 
     Damage damage;
     damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN) +
-                  (rand() % getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type));
+                  (rand() % (getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type) + 1));
     damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA);
     damage.type = DAMAGE_PHYSICAL;
     damage.cth = getModifiedAttribute(BASE_ATTR_HIT) +

@@ -999,7 +999,7 @@ std::list<Guild*> DALStorage::getGuildList()
             guild->setId(toShort(guildInfo(i,0)));
             guilds.push_back(guild);
         }
-
+        string_to< unsigned > toUint;
         /**
          * Add the members to the guilds.
          */
@@ -1009,25 +1009,25 @@ std::list<Guild*> DALStorage::getGuildList()
              ++itr)
         {
             std::ostringstream memberSql;
-            memberSql << "select member_name from " << GUILD_MEMBERS_TBL_NAME
+            memberSql << "select member_name, rights from " << GUILD_MEMBERS_TBL_NAME
             << " where guild_id = '" << (*itr)->getId() << "';";
             const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
 
-            std::list<std::string> names;
+            std::list<std::pair<std::string, int> > names;
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
-                names.push_back(memberInfo(j, 0));
+	      names.push_back(std::pair<std::string, int>(memberInfo(j, 0), toUint(memberInfo(j, 1))));
             }
 
-            for (std::list<std::string>::const_iterator i = names.begin();
+            for (std::list<std::pair<std::string, int> >::const_iterator i = names.begin();
                  i != names.end();
                  ++i)
             {
-                Character *character = getCharacter((*i));
+                Character *character = getCharacter((*i).first);
                 if (character)
                 {
                     character->addGuild((*itr)->getName());
-                    (*itr)->addMember(character->getName());
+                    (*itr)->addMember(character->getName(), (*i).second);
                 }
             }
         }

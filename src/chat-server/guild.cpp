@@ -24,15 +24,10 @@
 
 #include <algorithm>
 
-GuildMember::GuildMember(std::string name) :
+GuildMember::GuildMember(const std::string &name) :
     mName(name),
     mPermissions(0)
 {
-}
-
-std::string GuildMember::getName() const
-{
-    return mName;
 }
 
 void GuildMember::setPermission(int perm)
@@ -54,9 +49,10 @@ Guild::~Guild()
 {
 }
 
-void Guild::addMember(const std::string &playerName)
+void Guild::addMember(const std::string &playerName, int permissions)
 {
     GuildMember *member = new GuildMember(playerName);
+    member->setPermission(permissions);
     mMembers.push_back(member);
     if (checkInvited(playerName))
     {
