@@ -1,19 +1,24 @@
+2008-08-04  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/game-server/mapreader.cpp, src/game-server/mapreader.hpp: Fixed
+	another crash when reading inlined object properties.
+
 2008-07-28  Roderic Morris  <roderic@ccs.neu.edu>
 
-	* src/game-server/character.cpp: avoid a crash caused by the last commit.
-	* src/game-server/being.cpp: calculate magic damage according to wiki spec.
-	* src/account-server/dalstorage.cpp: read guild permissions from the db.
-	* src/chat-server/guild.hpp, src/chat-server/guild.cpp: use const strings.
-	
+	* src/game-server/character.cpp: Avoid a crash caused by the last commit.
+	* src/game-server/being.cpp: Calculate magic damage according to wiki spec.
+	* src/account-server/dalstorage.cpp: Read guild permissions from the db.
+	* src/chat-server/guild.hpp, src/chat-server/guild.cpp: Use const strings.
+
 2008-07-27  Roderic Morris  <roderic@ccs.neu.edu>
 
-	* src/game-server/character.cpp: take into account weapon skills
-	in damage calculation.
-	
+	* src/game-server/character.cpp: Take into account weapon skills in
+	damage calculation.
+
 2008-07-24  David Athay  <ko2fan@gmail.com>
 
-	* src/defines.h, src/game-server/movingobject.cpp, 
-	src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp, 
+	* src/defines.h, src/game-server/movingobject.cpp,
+	src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp,
 	gameserver.cbp: Added error message when NPC is too far away.
 
 2008-07-22  David Athay  <ko2fan@gmail.com>
@@ -56,10 +61,10 @@
 
 2008-07-03  David Athay  <ko2fan@gmail.com>
 
-	* src/defines.h, src/game-server/character.cpp, 
+	* src/defines.h, src/game-server/character.cpp,
 	src/game-server/character.hpp, src/game-server/gamehandler.cpp,
 	src/game-server/accountconnection.cpp, src/game-server/gamehandler.hpp,
-	src/game-server/accountconnection.hpp: Removed guild stuff from game 
+	src/game-server/accountconnection.hpp: Removed guild stuff from game
 	server. Added some party stuff to game server.
 
 2008-07-03  Roderic Morris  <roderic@ccs.neu.edu>

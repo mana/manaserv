@@ -276,7 +276,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                     }
 
                     int npcId = -1;
-                    char const *scriptText = NULL;
+                    std::string scriptText;
 
                     for_each_xml_child_node(propertiesNode, objectNode)
                     {
@@ -296,15 +296,15 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                                 }
                                 else if (value == "SCRIPT")
                                 {
-                                    scriptText = (const char *)propertyNode->xmlChildrenNode->content;
+                                    scriptText = getObjectProperty(propertyNode, "");
                                 }
                             }
                         }
                     }
 
-                    if (npcId != -1 && scriptText != NULL)
+                    if (npcId != -1 && !scriptText.empty())
                     {
-                        s->loadNPC(objName, npcId, objX, objY, scriptText);
+                        s->loadNPC(objName, npcId, objX, objY, scriptText.c_str());
                     }
                     else
                     {
@@ -322,7 +322,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                     }
 
                     std::string scriptFilename;
-                    char const *scriptText = NULL;
+                    std::string scriptText;
 
                     for_each_xml_child_node(propertiesNode, objectNode)
                     {
@@ -338,12 +338,12 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 if (value == "FILENAME")
                                 {
-                                    scriptFilename = (const char *)propertyNode->xmlChildrenNode->content;
+                                    scriptFilename = getObjectProperty(propertyNode, "");
                                     trim(scriptFilename);
                                 }
                                 else if (value == "TEXT")
                                 {
-                                    scriptText = (const char *)propertyNode->xmlChildrenNode->content;
+                                    scriptText = getObjectProperty(propertyNode, "");
                                 }
                             }
                         }
@@ -353,9 +353,9 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                     {
                         s->loadFile(scriptFilename);
                     }
-                    else if (scriptText != NULL)
+                    else if (!scriptText.empty())
                     {
-                        s->load(scriptText);
+                        s->load(scriptText.c_str());
                     }
                     else
                     {
@@ -490,14 +490,28 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
     }
 }
 
+std::string MapReader::getObjectProperty(xmlNodePtr node,
+                                         const std::string &def)
+{
+    if (xmlHasProp(node, BAD_CAST "value"))
+    {
+        return XML::getProperty(node, "value", def);
+    }
+    else if (const char *prop = (const char *)node->xmlChildrenNode->content)
+    {
+        return std::string(prop);
+    }
+    return std::string();
+}
+
 int MapReader::getObjectProperty(xmlNodePtr node, int def)
 {
     int val = def;
-    if(xmlHasProp(node, BAD_CAST "value"))
+    if (xmlHasProp(node, BAD_CAST "value"))
     {
         val = XML::getProperty(node, "value", def);
     }
-    else if(const char * prop = (const char *)node->xmlChildrenNode->content)
+    else if (const char *prop = (const char *)node->xmlChildrenNode->content)
     {
         val = atoi(prop);
     }
