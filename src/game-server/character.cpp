@@ -95,9 +95,9 @@ void Character::perform()
     int type = ic ? ic->getModifiers().getValue(MOD_WEAPON_TYPE) : WPNTYPE_NONE;
 
     Damage damage;
-    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN) +
-                  (rand() % (getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type) + 1));
-    damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA);
+    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
+    damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) +
+                   getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
     damage.type = DAMAGE_PHYSICAL;
     damage.cth = getModifiedAttribute(BASE_ATTR_HIT) +
                  getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);

@@ -1,3 +1,8 @@
+2008-08-10  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/character.cpp: Corrected the way weapon skills is taken into
+	account in damage calculation.
+
 2008-08-04  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/game-server/mapreader.cpp, src/game-server/mapreader.hpp: Fixed
