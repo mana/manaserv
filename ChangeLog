@@ -1,16 +1,21 @@
+2008-08-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/game-server/monstermanager.cpp: Don't ignore monster with ID 0,
+	since our maggot uses that.
+
 2008-08-13  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/guildmanager.cpp, src/chat-server/chathandler.hpp,
 	src/chat-server/chatclient.hpp, src/chat-server/guild.cpp,
 	src/chat-server/guildmanager.hpp, src/chat-server/chatchannel.cpp,
 	src/chat-server/guild.hpp, src/chat-server/chatchannel.hpp,
-	src/chat-server/chathandler.cpp, src/defines.h: Added permission levels
-	to guilds and operator permissions to channels.
+	src/chat-server/chathandler.cpp, src/defines.h: Added permission
+	levels to guilds and operator permissions to channels.
 
 2008-08-10  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* src/game-server/character.cpp: Corrected the way weapon skills is taken into
-	account in damage calculation.
+	* src/game-server/character.cpp: Corrected the way weapon skills is
+	taken into account in damage calculation.
 
 2008-08-04  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
@@ -19,10 +24,14 @@
 
 2008-07-28  Roderic Morris  <roderic@ccs.neu.edu>
 
-	* src/game-server/character.cpp: Avoid a crash caused by the last commit.
-	* src/game-server/being.cpp: Calculate magic damage according to wiki spec.
-	* src/account-server/dalstorage.cpp: Read guild permissions from the db.
-	* src/chat-server/guild.hpp, src/chat-server/guild.cpp: Use const strings.
+	* src/game-server/character.cpp: Avoid a crash caused by the last
+	commit.
+	* src/game-server/being.cpp: Calculate magic damage according to wiki
+	spec.
+	* src/account-server/dalstorage.cpp: Read guild permissions from the
+	db.
+	* src/chat-server/guild.hpp, src/chat-server/guild.cpp: Use const
+	strings.
 
 2008-07-27  Roderic Morris  <roderic@ccs.neu.edu>
 
@@ -38,35 +47,38 @@
 2008-07-22  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/guild.cpp, src/chat-server/guild.hpp,
-	src/chat-server/chathandler.cpp, src/defines.h: Add permissions to guild
-	members.
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
-	src/account-server/dalstoragesql.hpp, src/chat-server/guildmanager.cpp,
-	src/chat-server/guild.cpp, src/chat-server/guild.hpp: Save guild member
-	permissions.
+	src/chat-server/chathandler.cpp, src/defines.h: Add permissions to
+	guild members.
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp,
+	src/account-server/dalstoragesql.hpp,
+	src/chat-server/guildmanager.cpp, src/chat-server/guild.cpp,
+	src/chat-server/guild.hpp: Save guild member permissions.
 
 2008-07-07  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* src/scripting/script.cpp, src/scripting/script.hpp, src/scripting/lua.cpp,
-	data/scripts/libtmw.lua: Implemented death listener for scripting engine.
-	* data/test.lua: Made the spider tamer a scorpion tamer (because spiders aren't
-	implemeted and thus make bad test subjects in this case) and used the death
-	listeners to make him complain when the scorpions are killed.
+	* src/scripting/script.cpp, src/scripting/script.hpp,
+	src/scripting/lua.cpp, data/scripts/libtmw.lua: Implemented death
+	listener for scripting engine.
+	* data/test.lua: Made the spider tamer a scorpion tamer (because
+	spiders aren't implemeted and thus make bad test subjects in this
+	case) and used the death listeners to make him complain when the
+	scorpions are killed.
 
 2008-07-07  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/chat-server/chathandler.hpp, src/chat-server/chathandler.cpp,
 	src/chat-server/chatchannelmanager.hpp, src/defines.h,
-	src/chat-server/chatchannelmanager.cpp: Got rid of channel registering.
-	Channels are automatically created with /join,and removed when the 
-	last person /quits.
-	
+	src/chat-server/chatchannelmanager.cpp: Got rid of channel
+	registering. Channels are automatically created with /join,and removed
+	when the last person /quits.
+
 2008-07-07  David Athay  <ko2fan@gmail.com>
 
-	* src/account-server/serverhandler.cpp, 
+	* src/account-server/serverhandler.cpp,
 	src/account-server/serverhandler.hpp, src/chat-server/party.cpp,
-	src/chat-server/party.hpp, src/chat-server/chathandler.cpp: Added party 
-	support between account and game servers.
+	src/chat-server/party.hpp, src/chat-server/chathandler.cpp: Added
+	party support between account and game servers.
 
 2008-07-03  Roderic Morris  <roderic@ccs.neu.edu>
 
@@ -77,7 +89,8 @@
 
 	* src/defines.h, src/game-server/character.cpp,
 	src/game-server/character.hpp, src/game-server/gamehandler.cpp,
-	src/game-server/accountconnection.cpp, src/game-server/gamehandler.hpp,
+	src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.hpp,
 	src/game-server/accountconnection.hpp: Removed guild stuff from game
 	server. Added some party stuff to game server.
 
@@ -87,8 +100,8 @@
 	Avoid a crash when there's no content in <property/> tags.
 	* src/game-server/map.cpp, src/game-server/map.hpp: Enable arbitrary
 	tile sizes. This hasn't been tested yet.
-	* data/maps.xml: Enable the new maps, though their warps and spawns haven't
-	been set up yet.
+	* data/maps.xml: Enable the new maps, though their warps and spawns
+	haven't been set up yet.
 
 2008-06-26  Roderic Morris  <roderic@ccs.neu.edu>
 
@@ -98,15 +111,15 @@
 	method on list.
 	* src/chat-server/guildmanager.hpp, src/chat-server/guildmanager.cpp,
 	src/chat-server/chathandler.cpp: Use a clearer method name.
-	
 
 2008-06-25  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/chat-server/guildmanager.cpp, src/chat-server/guildmanager.hpp,
 	src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
-	src/chat-server/chatchannelmanager.cpp, src/chat-server/chatchannelmanager.hpp,
-	src/chat-server/guild.hpp: Handle topic changes, and inform guild members about
-	players going offline / online and leaving / joining the guild.
+	src/chat-server/chatchannelmanager.cpp,
+	src/chat-server/chatchannelmanager.hpp, src/chat-server/guild.hpp:
+	Handle topic changes, and inform guild members about players going
+	offline / online and leaving / joining the guild.
 	* src/defines.h: Update protocol definitions.
 
 2008-06-14  Roderic Morris  <roderic@ccs.neu.edu>
@@ -128,31 +141,34 @@
 
 2008-06-03  Roderic Morris  <roderic@ccs.neu.edu>
 
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
-	src/chat-server/chatchannelmanager.cpp, src/account-server/dalstoragesql.hpp:
-	Stop storing chat channels in the db
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp,
+	src/chat-server/chatchannelmanager.cpp,
+	src/account-server/dalstoragesql.hpp: Stop storing chat channels in
+	the db.
 	* src/chat-server/chathandler.hpp, src/chat-server/chathandler.cpp:
 	Have joinGuildChannel return a ChatChannel in case we need it
 	constructing a packet. Send channel announcements.
 
 2008-06-02  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* data/test.lua: Used an example for schedule_in which is more in step with
-	actual practice. Used an example for schedule_every which is less annoying
-	for the server admin.
-	* data/test.lua, data/scripts/libtmw.lua: Replaced some magic numbers with
-	variables for better code readability.
-	* data/test.lua, data/scripts/libtmw.lua: Removed the unused "npc" argument
-	from the get_quest_var function.
+	* data/test.lua: Used an example for schedule_in which is more in step
+	with actual practice. Used an example for schedule_every which is less
+	annoying for the server admin.
+	* data/test.lua, data/scripts/libtmw.lua: Replaced some magic numbers
+	with variables for better code readability.
+	* data/test.lua, data/scripts/libtmw.lua: Removed the unused "npc"
+	argument from the get_quest_var function.
 
 2008-05-31  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* data/script/libtmw.lua: Scripted a scheduler which can execute script
-	functions at regular intervals or in a given number of seconds. This will
-	be very useful for any quest or effect script where timing is important.
-	* data/test.lua: Used the script scheduler to schedule 3 demo tasks: a 5
-	second cronjob and two fixed point tasks where the second is scheduled by
-	the first (I'll make them do something more useful soon).
+	* data/script/libtmw.lua: Scripted a scheduler which can execute
+	script functions at regular intervals or in a given number of seconds.
+	This will be very useful for any quest or effect script where timing
+	is important.
+	* data/test.lua: Used the script scheduler to schedule 3 demo tasks: a
+	5 second cronjob and two fixed point tasks where the second is
+	scheduled by the first (I'll make them do something more useful soon).
 
 2008-05-30  Roderic Morris  <roderic@ccs.neu.edu>
 
@@ -166,8 +182,8 @@
 
 2008-05-23  David Athay  <ko2fan@gmail.com>
 
-	*  src/chat-server/guildmanager.cpp, 
-	src/chat-server/guildmanager.hpp, src/chat-server/chathandler.cpp: 
+	*  src/chat-server/guildmanager.cpp,
+	src/chat-server/guildmanager.hpp, src/chat-server/chathandler.cpp:
 	Use guildmanager to add users to guilds so its stored in the db.
 
 2008-05-22  Philipp Sehmisch  <tmw@crushnet.org>
@@ -402,7 +418,8 @@
 	src/game-server/thing.hpp: Implemented dynamic and selective
 	pathblocking. Monsters are blocked by player characters and
 	other monsters, player characters only by monsters.
-	* src/game-server/being.cpp: Omitted some superficial hit point updates.
+	* src/game-server/being.cpp: Omitted some superficial hit point
+	updates.
 	* src/game-server/state.cpp: Sending destination of beings when the
 	client comes on-screen to fix a bug which showed moving monsters as
 	standing in this situation.
@@ -438,8 +455,9 @@
 2008-03-03  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/defines.h, src/game-server/being.cpp,
-	src/game-server/being.hpp, src/game-server/character.cpp: Added natural
-	HP regeneration, capped HP at maximum and set HP to 1 after respawn.
+	src/game-server/being.hpp, src/game-server/character.cpp: Added
+	natural HP regeneration, capped HP at maximum and set HP to 1 after
+	respawn.
 	* src/game-server/character.hpp: Reverted variables of exp per level
 	formula to reasonable values.
 
@@ -463,9 +481,9 @@
 
 2008-02-23  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* src/game-server/monster.cpp: Improved monster AI by making monster only
-	use attacks which have a chance to hit the target and also use them
-	when the optimal combat distance hasn't been reached yet.
+	* src/game-server/monster.cpp: Improved monster AI by making monster
+	only use attacks which have a chance to hit the target and also use
+	them when the optimal combat distance hasn't been reached yet.
 
 2008-02-21  Philipp Sehmisch  <tmw@crushnet.org>
 
@@ -616,11 +634,12 @@
 
 	* src/dal/recordset.cpp, src/utils/zlib.cpp, src/scripting/script.cpp,
 	src/utils/stringfilter.cpp, src/chat-server/chatchannel.cpp,
-	src/net/messagein.cpp, src/net/messageout.cpp, src/game-server/map.cpp,
-	src/net/connectionhandler.cpp, src/game-server/mapreader.cpp,
-	src/game-server/command.cpp, src/game-server/resourcemanager.cpp,
-	src/game-server/quest.cpp: Fixed missing dependencies and changed some
-	storage qualifiers, so that it compiles with GCC 4.3.
+	src/net/messagein.cpp, src/net/messageout.cpp,
+	src/game-server/map.cpp, src/net/connectionhandler.cpp,
+	src/game-server/mapreader.cpp, src/game-server/command.cpp,
+	src/game-server/resourcemanager.cpp, src/game-server/quest.cpp: Fixed
+	missing dependencies and changed some storage qualifiers, so that it
+	compiles with GCC 4.3.
 
 2007-10-18  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
@@ -641,8 +660,8 @@
 	src/game-server/state.hpp, src/game-server/monster.cpp,
 	src/game-server/trigger.cpp: Updated to new interface.
 	* src/account-server/accounthandler.cpp, src/defines.h,
-	src/chat-server/chathandler.cpp: Merged time-out messages with response
-	to connection messages.
+	src/chat-server/chathandler.cpp: Merged time-out messages with
+	response to connection messages.
 	* src/game-server/state.cpp, src/game-server/state.hpp: Modified
 	interface to deal with failure to insert objects.
 	* src/scripting/lua.cpp, src/game-server/testing.cpp,
@@ -663,8 +682,8 @@
 	src/chat-server/chathandler.hpp: Fixed header dependencies.
 	* src/configuration.cpp, src/configuration.h: Changed to namespace.
 	Removed listeners. Simplified property handling. Moved to common/.
-	* src/resourcemanager.cpp, src/resourcemanager.h: Changed to namespace.
-	Removed dead code. Moved to game-server/.
+	* src/resourcemanager.cpp, src/resourcemanager.h: Changed to
+	namespace. Removed dead code. Moved to game-server/.
 	* src/account-server/dalstorage.cpp, src/utils/stringfilter.cpp,
 	src/account-server/accounthandler.cpp, src/utils/stringfilter.h,
 	src/game-server/accountconnection.cpp: Updated to new configuration.
@@ -683,9 +702,9 @@
 	* src/chat-server/chathandler.hpp: Fixed missing header.
 	* src/account-server/serverhandler.cpp: Moved map/server data into
 	connection local storage.
-	* src/game-server/accountconnection.cpp, src/game-server/main-game.cpp,
-	src/game-server/accountconnection.hpp: Added statistic sender to
-	game server.
+	* src/game-server/accountconnection.cpp,
+	src/game-server/main-game.cpp, src/game-server/accountconnection.hpp:
+	Added statistic sender to game server.
 	* src/account-server/serverhandler.cpp,
 	src/account-server/serverhandler.hpp, src/Makefile.am,
 	src/account-server/main-account.cpp: Added statistic receiver and
@@ -704,9 +723,9 @@
 
 	* configure.ac: Fixed detection of generic lua.pc file.
 	* src/game-server/itemmanager.cpp, src/game-server/itemmanager.hpp,
-	src/game-server/monstermanager.cpp, src/game-server/monstermanager.hpp:
-	Modified loading of reference files, so that it is possible to reload
-	them.
+	src/game-server/monstermanager.cpp,
+	src/game-server/monstermanager.hpp: Modified loading of reference
+	files, so that it is possible to reload them.
 	* src/game-server/command.cpp: Implemented "reload" remote command.
 	* src/account-server/account.hpp, src/account-server/account.cpp:
 	Simplified character removal.
@@ -714,14 +733,15 @@
 	src/account-server/accounthandler.cpp,
 	src/account-server/accountclient.cpp: Removed selected character from
 	client data. Cleaned account handler.
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
-	Added helper for querying existence of usernames.
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp: Added helper for querying existence
+	of usernames.
 	* src/account-server/accounthandler.cpp: Plugged several account leaks
 	on error.
 	* src/defines.h, src/account-server/accounthandler.cpp: Prevented
 	banned users from logging in.
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
-	Handled banned database field.
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp: Handled banned database field.
 	* src/game-server/accountconnection.hpp, src/defines.h,
 	src/game-server/accountconnection.cpp,
 	src/account-server/serverhandler.cpp: Added protocol for banning
@@ -737,25 +757,27 @@
 	src/account-server/characterdata.cpp: Renamed class and files to just
 	Character.
 	* src/utils/countedptr.h: Got rid of reference-counted pointers.
-	* src/account-server/dalstorage.hpp, src/account-server/dalstorage.cpp:
-	Fixed permanent memory usage for accounts and characters loaded once.
+	* src/account-server/dalstorage.hpp,
+	src/account-server/dalstorage.cpp: Fixed permanent memory usage for
+	accounts and characters loaded once.
 	* src/account-server/serverhandler.cpp: Improved robustness to game
 	server messages.
-	* src/chat-server/chathandler.cpp, src/account-server/guildmanager.cpp,
-	src/chat-server/chatchannelmanager.cpp, src/account-server/account.hpp,
-	src/account-server/accounthandler.hpp, src/account-server/guild.cpp,
-	src/account-server/accountclient.hpp, src/account-server/guild.hpp,
-	src/account-server/guildmanager.hpp, src/account-server/account.cpp,
-	src/account-server/serverhandler.hpp, src/Makefile.am,
-	src/account-server/dalstoragesql.hpp,
+	* src/chat-server/chathandler.cpp,
+	src/account-server/guildmanager.cpp,
+	src/chat-server/chatchannelmanager.cpp,
+	src/account-server/account.hpp, src/account-server/accounthandler.hpp,
+	src/account-server/guild.cpp, src/account-server/accountclient.hpp,
+	src/account-server/guild.hpp, src/account-server/guildmanager.hpp,
+	src/account-server/account.cpp, src/account-server/serverhandler.hpp,
+	src/Makefile.am, src/account-server/dalstoragesql.hpp,
 	src/account-server/accounthandler.cpp,
 	src/account-server/accountclient.cpp: Fixed fallout from previous
 	patches.
 
 2007-08-29  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
-	* data/scripts/libtmw.lua: Fixed race condition between quest_reply and
-	npc_next.
+	* data/scripts/libtmw.lua: Fixed race condition between quest_reply
+	and npc_next.
 	* src/game-server/command.cpp, src/game-server/gamehandler.cpp,
 	src/game-server/gamehandler.hpp: Completed handler for admin commands,
 	so that they can also touch local players.
@@ -783,19 +805,20 @@
 
 2007-08-28  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
-	* src/account-server/storage.hpp, src/account-server/dalstoragesql.hpp,
+	* src/account-server/storage.hpp,
+	src/account-server/dalstoragesql.hpp,
 	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
 	Implemented storing and recovering quest variables from database.
 	* src/account-server/serverhandler.cpp, src/defines.h,
 	src/game-server/accountconnection.cpp,
-	src/game-server/accountconnection.hpp: Added protocol for sending quest
-	variables between servers.
+	src/game-server/accountconnection.hpp: Added protocol for sending
+	quest variables between servers.
 	* src/game-server/quest.cpp, src/game-server/quest.hpp,
-	src/game-server/character.hpp, src/Makefile.am: Added async handling of
-	quest variables.
+	src/game-server/character.hpp, src/Makefile.am: Added async handling
+	of quest variables.
 	* src/scripting/lua.cpp, data/scripts/libtmw.lua: Added helper
-	functions for querying quest variables from Lua scripts. Reworked state
-	machine of the NPC support library.
+	functions for querying quest variables from Lua scripts. Reworked
+	state machine of the NPC support library.
 	* data/test.lua: Modified for testing quest variables.
 
 2007-08-27  Eugenio Favalli  <elvenprogrammer@gmail.com>
@@ -840,9 +863,10 @@
 2007-08-19  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
 	* src/account-server/accounthandler.cpp, src/defines.h: Fixed typos.
-	* src/game-server/itemmanager.cpp: Worked around inconsistent spelling.
-	* src/game-server/item.cpp, src/game-server/item.hpp: Added support for
-	equipment modifiers.
+	* src/game-server/itemmanager.cpp: Worked around inconsistent
+	spelling.
+	* src/game-server/item.cpp, src/game-server/item.hpp: Added support
+	for equipment modifiers.
 	* src/game-server/inventory.hpp, src/game-server/inventory.cpp: Added
 	sanity checks at initialization. Applied equipment modifiers to
 	character.
@@ -874,9 +898,9 @@
 	src/game-server/object.hpp, src/game-server/accountconnection.cpp,
 	src/game-server/itemmanager.cpp: Removed character statistics from
 	Being. Kept only attributes useful for fighting. Improved combat
-	handling (evade and elements). Added support for weapon characteristics
-	and weapon skills. Added support for attribute modifiers. Cleaned game
-	state handling.
+	handling (evade and elements). Added support for weapon
+	characteristics and weapon skills. Added support for attribute
+	modifiers. Cleaned game state handling.
 
 2007-08-17  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
@@ -923,8 +947,8 @@
 	* src/defines.h, src/game-server/trade.cpp, src/game-server/trade.hpp,
 	src/game-server/gamehandler.cpp: Involved money in trade handler.
 	* src/scripting/lua.cpp, src/scripting/script.cpp,
-	src/scripting/script.hpp, src/game-server/testing.cpp: Made it possible
-	to load scripts from strings instead of files.
+	src/scripting/script.hpp, src/game-server/testing.cpp: Made it
+	possible to load scripts from strings instead of files.
 
 2007-08-13  Eugenio Favalli  <elvenprogrammer@gmail.com>
 
@@ -946,8 +970,8 @@
 	src/game-server/character.cpp, src/game-server/character.hpp,
 	src/game-server/gamehandler.cpp, src/game-server/buysell.cpp,
 	src/game-server/buysell.hpp: Implemented buy/sell handler.
-	* src/scripting/lua.cpp, data/test.lua: Added a bit of buy/sell testing
-	code.
+	* src/scripting/lua.cpp, data/test.lua: Added a bit of buy/sell
+	testing code.
 
 2007-08-11  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
@@ -1013,8 +1037,8 @@
 	one is too cpu intensive.
 	* src/net/messageout.hpp, src/net/messageout.cpp: Allowed cancellation
 	of outgoing messages.
-	* src/game-server/inventory.hpp, src/game-server/inventory.hpp: Allowed
-	delayed changes of inventories.
+	* src/game-server/inventory.hpp, src/game-server/inventory.hpp:
+	Allowed delayed changes of inventories.
 	* src/defines.h, src/Makefile.am, src/game-server/trade.cpp,
 	src/game-server/trade.hpp, src/game-server/state.cpp,
 	src/game-server/character.cpp, src/game-server/character.hpp,
@@ -1136,7 +1160,8 @@
 	* src/game-server/monstermanager.cpp, src/game-server/main-game.cpp,
 	src/game-server/monstermanager.hpp: Added manager for monster species.
 	* src/game-server/spawnarea.cpp, src/game-server/spawnarea.hpp,
-	src/game-server/testing.cpp: Specified the monster specy being spawned.
+	src/game-server/testing.cpp: Specified the monster specy being
+	spawned.
 	* src/game-server/monster.cpp, src/game-server/monster.hpp: Added
 	monster drops.
 	* src/game-server/gamehandler.cpp: Update account database on
@@ -1174,7 +1199,8 @@
 
 	* src/account-server/dalstorage.cpp: Added error messages for failed
 	SQL requests when retrieving character. Added check for failed
-	character when retrieving account. Added check for corrupted inventory.
+	character when retrieving account. Added check for corrupted
+	inventory.
 
 2007-07-02  Guillaume Melquiond  <guillaume.melquiond@gmail.com>
 
@@ -1288,8 +1314,8 @@
 
 2007-04-11  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* src/game-server/being.cpp: Using effective attributes instead of base
-	attributes for damage calculation.
+	* src/game-server/being.cpp: Using effective attributes instead of
+	base attributes for damage calculation.
 
 2007-04-05  David Athay  <ko2fan@gmail.com>
 
@@ -1759,10 +1785,12 @@
 	* src/controller.h, src/item.h, src/game-server/mapcomposite.cpp,
 	src/game-server/mapreader.cpp, src/game-server/mapcomposite.hpp,
 	src/game-server/trigger.cpp, src/game-server/trigger.hpp,
-	src/game-server/accountconnection.cpp, src/game-server/gamehandler.hpp,
-	src/game-server/state.cpp, src/game-server/accountconnection.hpp,
+	src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.hpp, src/game-server/state.cpp,
+	src/game-server/accountconnection.hpp,
 	src/game-server/itemmanager.cpp: Updated accordingly.
-	* src/account-server/account.hpp, src/account-server/serverhandler.cpp,
+	* src/account-server/account.hpp,
+	src/account-server/serverhandler.cpp,
 	src/account-server/dalstorage.cpp, src/chat-server/chatchannel.hpp,
 	src/account-server/serverhandler.hpp, src/chat-server/chathandler.cpp,
 	src/account-server/accounthandler.cpp: Relied on PlayerData to remove
@@ -1855,8 +1883,8 @@
 	src/player.h, src/game-server/gamehandler.cpp, src/Makefile.am:
 	Embedded a simplified version of GameClient into GameHandler. Removed
 	the original files.
-	* src/game-server/mapmanager.hpp, src/game-server/mapmanager.cpp: Added
-	on-the-fly map loading.
+	* src/game-server/mapmanager.hpp, src/game-server/mapmanager.cpp:
+	Added on-the-fly map loading.
 	* src/defines.h, src/game-server/accountconnection.cpp,
 	src/account-server/serverhandler.cpp: Controlled map activation from
 	the account server, so that clients are not kept on the wrong server
@@ -1879,7 +1907,8 @@
 	src/account-server directory and changed header extension to hpp.
 	* src/chathandler.h, src/chathandler.cpp, src/chatchannelmanager.h,
 	src/chatchannel.cpp, src/chatchannel.h, src/chatchannelmanager.cpp:
-	Moved to src/chat-server directory and changed header extension to hpp.
+	Moved to src/chat-server directory and changed header extension to
+	hpp.
 	* src/itemmanger.h, src/itemmanager.cpp, src/state.h, src/state.cpp,
 	src/gamehandler.h, src/gamehandler.cpp, src/gameclient.h,
 	src/gameclient.cpp, src/mapmanager.h, src/mapmanager.cpp: Moved to
@@ -1912,7 +1941,8 @@
 	missing returns.
 	* src/player.cpp, src/game-server/gamehandler.cpp: Commented out the
 	currently unused inventory interface.
-	* src/net/messagein.hpp: Updated from tmwclient to add getUnreadLength.
+	* src/net/messagein.hpp: Updated from tmwclient to add
+	getUnreadLength.
 	* src/net/connectionhandler.hpp, src/net/connectionhandler.cpp:
 	Removed unused ClientData class.
 	* src/inventory.h: Removed "at" accessors, as nobody is ready to catch

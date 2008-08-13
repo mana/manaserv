@@ -104,10 +104,10 @@ void MonsterManager::reload()
             continue;
         }
 
-        int id = XML::getProperty(node, "id", 0);
+        int id = XML::getProperty(node, "id", -1);
         std::string name = XML::getProperty(node, "name", "unnamed");
 
-        if (id == 0)
+        if (id == -1)
         {
             LOG_WARN("Monster Manager: There is a monster ("<<name<<") without ID in "
                      << monsterReferenceFile << "! It has been ignored.");
