@@ -1,3 +1,9 @@
+2008-08-13  Yohann Ferreira  <bertram@cegetel.net>
+
+	* src/game-server/gamehandler.cpp, src/game-server/map.hpp:
+	Corrected the distance needed to speak to NPC and trade with others
+	characters.
+
 2008-08-13  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/game-server/monstermanager.cpp: Don't ignore monster with ID 0,

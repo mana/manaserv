@@ -42,6 +42,8 @@
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
 
+const unsigned int TILES_TO_BE_NEAR = 7;
+
 GameHandler::GameHandler():
     mTokenCollector(this)
 {
@@ -133,12 +135,14 @@ static MovingObject *findBeingNear(Object *p, int id)
 {
     MapComposite *map = p->getMap();
     Point const &ppos = p->getPosition();
-    // TODO: use a less arbitrary value.
-    for (MovingObjectIterator i(map->getAroundPointIterator(ppos, 48)); i; ++i)
+    // See map.hpp for tiles constants
+    for (MovingObjectIterator i(map->getAroundPointIterator(ppos,
+        DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR)); i; ++i)
     {
         MovingObject *o = *i;
         if (o->getPublicID() != id) continue;
-        return ppos.inRangeOf(o->getPosition(), 48) ? o : NULL;
+        return ppos.inRangeOf(o->getPosition(), DEFAULT_TILE_WIDTH *
+        TILES_TO_BE_NEAR) ? o : NULL;
     }
     return NULL;
 }
@@ -147,12 +151,14 @@ static Character *findCharacterNear(Object *p, int id)
 {
     MapComposite *map = p->getMap();
     Point const &ppos = p->getPosition();
-    // TODO: use a less arbitrary value.
-    for (CharacterIterator i(map->getAroundPointIterator(ppos, 64)); i; ++i)
+    // See map.hpp for tiles constants
+    for (CharacterIterator i(map->getAroundPointIterator(ppos,
+        DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR)); i; ++i)
     {
         Character *o = *i;
         if (o->getPublicID() != id) continue;
-        return ppos.inRangeOf(o->getPosition(), 64) ? o : NULL;
+        return ppos.inRangeOf(o->getPosition(), DEFAULT_TILE_WIDTH *
+        TILES_TO_BE_NEAR) ? o : NULL;
     }
     return NULL;
 }

@@ -28,6 +28,8 @@
 #include <map>
 #include <string>
 
+const unsigned int DEFAULT_TILE_WIDTH = 32;
+const unsigned int DEFAULT_TILE_HEIGHT = 32;
 
 struct PATH_NODE {
     PATH_NODE(unsigned short u, unsigned short v)
