@@ -155,3 +155,22 @@ void GuildManager::disconnectPlayer(ChatClient *player)
 					 GUILD_EVENT_OFFLINE_PLAYER);
     }
 }
+
+int GuildManager::changeMemberLevel(ChatClient *player, Guild *guild,
+                                     const std::string &name, int level)
+{
+    if (guild->checkInGuild(player->characterName) && guild->checkInGuild(name))
+    {
+        int playerLevel = guild->getUserPermissions(player->characterName);
+
+        if (playerLevel == GuildMember::LEADER)
+        {
+            // player can modify anyones permissions
+            guild->setUserPermissions(name, level);
+            return 0;
+        }
+    }
+
+    return -1;
+}
+

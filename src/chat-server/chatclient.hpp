@@ -24,6 +24,7 @@
 #ifndef _TMWSERV_CHATCLIENT_H_
 #define _TMWSERV_CHATCLIENT_H_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -45,7 +46,8 @@ class ChatClient : public NetComputer
          */
         ChatClient(ENetPeer *peer):
             NetComputer(peer),
-            party(0)
+            party(0),
+            accountLevel(0)
         {
         }
 
@@ -53,6 +55,7 @@ class ChatClient : public NetComputer
         std::vector< ChatChannel * > channels;
         Party* party;
         unsigned char accountLevel;
+        std::map<ChatChannel*, std::string> userModes;
 };
 
 #endif

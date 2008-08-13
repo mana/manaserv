@@ -131,6 +131,16 @@ class ChatChannel
          */
         bool canJoin() const;
 
+        /**
+         * Set user mode
+         */
+        void setUserMode(ChatClient *, unsigned char mode);
+
+        /**
+         * Get user mode
+         */
+        std::string getUserMode(ChatClient *);
+
     private:
         unsigned short mId;            /**< The ID of the channel. */
         std::string mName;             /**< The name of the channel. */
@@ -138,6 +148,7 @@ class ChatChannel
         std::string mPassword;         /**< The channel password. */
         bool mJoinable;                /**< Whether anyone can join. */
         ChannelUsers mRegisteredUsers; /**< Users in this channel. */
+        std::string mOwner;             /**< Channel owner character name */
 };
 
 #endif

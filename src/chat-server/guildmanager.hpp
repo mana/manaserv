@@ -98,6 +98,15 @@ class GuildManager
          */
         void disconnectPlayer(ChatClient* player);
 
+        /**
+         * Promote a guild member to higher level or
+         * Demote a guild member to a lower level
+         *
+         * @return Returns 0 if successful, -1 otherwise
+         */
+        int changeMemberLevel(ChatClient *player, Guild *guild,
+                               const std::string &name, int level);
+
     private:
         std::list<Guild*> mGuilds;
 };

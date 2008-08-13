@@ -162,6 +162,18 @@ class ChatHandler : public ConnectionHandler
         handleEnterChannelMessage(ChatClient &client, MessageIn &msg);
 
         /**
+         * Deal with player changing mode.
+         */
+        void
+        handleModeChangeMessage(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Deal with player kicking other player from channel.
+         */
+        void
+        handleKickUserMessage(ChatClient &client, MessageIn &msg);
+
+        /**
          * Deal with player leaving channel.
          */
         void
@@ -214,6 +226,12 @@ class ChatHandler : public ConnectionHandler
          */
         void
         handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Deal with level change of member
+         */
+        void
+        handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with leaving a guild.

@@ -197,6 +197,8 @@ enum {
     CPMSG_GUILD_UPDATE_LIST             = 0x0358, // W id, S name, B event
     PCMSG_GUILD_QUIT                    = 0x0360, // W id
     CPMSG_GUILD_QUIT_RESPONSE           = 0x0361, // B error
+    PCMSG_GUILD_PROMOTE_MEMBER          = 0x0365, // W guild, S name, B rights
+    CPMSG_GUILD_PROMOTE_MEMBER_RESPONSE = 0x0366, // B error
 
     CPMSG_GUILD_INVITED                 = 0x0370, // S char name, S  guild name, W id
     CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W guild, W rights, W channel, S announce
@@ -227,8 +229,11 @@ enum {
     PCMSG_LIST_CHANNELS               = 0x0445, // -
     CPMSG_LIST_CHANNELS_RESPONSE      = 0x0446, // S names, W number of users
     PCMSG_LIST_CHANNELUSERS           = 0x0460, // S channel
-    CPMSG_LIST_CHANNELUSERS_RESPONSE  = 0x0461, // S channel, S users
+    CPMSG_LIST_CHANNELUSERS_RESPONSE  = 0x0461, // S channel, { S user, B mode }
     PCMSG_TOPIC_CHANGE                = 0x0462, // W channel id, S topic
+    // -- User modes
+    PCMSG_USER_MODE                   = 0x0465, // W channel id, S name, B mode
+    PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
 
     // Inter-server
     GAMSG_REGISTER     = 0x0500, // S address, W port, { W map id }*
@@ -311,7 +316,9 @@ enum {
 enum {
     CHAT_EVENT_NEW_PLAYER = 0,
     CHAT_EVENT_LEAVING_PLAYER,
-    CHAT_EVENT_TOPIC_CHANGE
+    CHAT_EVENT_TOPIC_CHANGE,
+    CHAT_EVENT_MODE_CHANGE,
+    CHAT_EVENT_KICKED_PLAYER
 };
 
 // Guild member event values

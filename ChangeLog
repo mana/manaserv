@@ -1,3 +1,12 @@
+2008-08-13  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/guildmanager.cpp, src/chat-server/chathandler.hpp,
+	src/chat-server/chatclient.hpp, src/chat-server/guild.cpp,
+	src/chat-server/guildmanager.hpp, src/chat-server/chatchannel.cpp,
+	src/chat-server/guild.hpp, src/chat-server/chatchannel.hpp,
+	src/chat-server/chathandler.cpp, src/defines.h: Added permission levels
+	to guilds and operator permissions to channels.
+
 2008-08-10  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/character.cpp: Corrected the way weapon skills is taken into

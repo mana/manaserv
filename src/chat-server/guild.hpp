@@ -160,6 +160,11 @@ class Guild
          */
         int getUserPermissions(const std::string &name);
 
+        /**
+         * Sets a users permissions
+         */
+        void setUserPermissions(const std::string &playerName, int level);
+
     protected:
         /**
          * Return a member based on their character name

@@ -22,6 +22,7 @@
  */
 
 #include <algorithm>
+#include <sstream>
 
 #include "chat-server/chatchannel.hpp"
 #include "chat-server/chatclient.hpp"
@@ -41,12 +42,31 @@ ChatChannel::ChatChannel(int id,
 
 bool ChatChannel::addUser(ChatClient *user)
 {
+    // First user is the channel owner
+    if (mRegisteredUsers.size() < 1)
+    {
+        mOwner = user->characterName;
+        setUserMode(user, 'o');
+    }
+
     // Check if the user already exists in the channel
     ChannelUsers::const_iterator i = mRegisteredUsers.begin(),
                                  i_end = mRegisteredUsers.end();
-    if (std::find(i, i_end, user) != i_end) return false;
+    if (std::find(i, i_end, user) != i_end)
+        return false;
+
     mRegisteredUsers.push_back(user);
     user->channels.push_back(this);
+
+    // set user as logged in
+    setUserMode(user, 'l');
+
+    // if owner has rejoined, give them ops
+    if (user->characterName == mOwner)
+    {
+        setUserMode(user, 'o');
+    }
+
     return true;
 }
 
@@ -58,6 +78,8 @@ bool ChatChannel::removeUser(ChatClient *user)
     mRegisteredUsers.erase(i);
     std::vector< ChatChannel * > &channels = user->channels;
     channels.erase(std::find(channels.begin(), channels.end(), this));
+    std::map<ChatChannel*,std::string> &modes = user->userModes;
+    modes.erase(modes.begin(), modes.end());
     return true;
 }
 
@@ -68,6 +90,8 @@ void ChatChannel::removeAllUsers()
     {
         std::vector< ChatChannel * > &channels = (*i)->channels;
         channels.erase(std::find(channels.begin(), channels.end(), this));
+        std::map<ChatChannel*,std::string> &modes = (*i)->userModes;
+        modes.erase(modes.begin(), modes.end());
     }
     mRegisteredUsers.clear();
 }
@@ -75,4 +99,29 @@ void ChatChannel::removeAllUsers()
 bool ChatChannel::canJoin() const
 {
     return mJoinable;
+}
+
+void ChatChannel::setUserMode(ChatClient *user, unsigned char mode)
+{
+    std::map<ChatChannel*, std::string>::iterator itr = user->userModes.find(this);
+    if (itr != user->userModes.end())
+    {
+        itr->second += mode;
+    }
+    else
+    {
+        std::stringstream ss; ss << mode;
+        user->userModes.insert(std::pair<ChatChannel*, std::string>(this, ss.str()));
+    }
+}
+
+std::string ChatChannel::getUserMode(ChatClient *user)
+{
+    std::map<ChatChannel*, std::string>::iterator itr = user->userModes.find(this);
+    if (itr != user->userModes.end())
+    {
+        return itr->second;
+    }
+
+    return 0;
 }

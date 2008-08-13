@@ -23,6 +23,8 @@
 
 #include <list>
 #include <algorithm>
+#include <string>
+#include <sstream>
 
 #include "defines.h"
 #include "account-server/dalstorage.hpp"
@@ -157,6 +159,13 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleEnterChannelMessage(computer, message);
             break;
 
+        case PCMSG_USER_MODE:
+            handleModeChangeMessage(computer, message);
+            break;
+
+        case PCMSG_KICK_USER:
+            handleKickUserMessage(computer, message);
+
         case PCMSG_QUIT_CHANNEL:
             handleQuitChannelMessage(computer, message);
             break;
@@ -191,6 +200,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PCMSG_GUILD_GET_MEMBERS:
             handleGuildRetrieveMembers(computer, message);
+            break;
+
+        case PCMSG_GUILD_PROMOTE_MEMBER:
+            handleGuildMemberLevelChange(computer, message);
             break;
 
         case PCMSG_GUILD_QUIT:
@@ -361,6 +374,7 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
                     i != i_end; ++i)
             {
                 reply.writeString((*i)->characterName);
+                reply.writeString(channel->getUserMode((*i)));
             }
             // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user went
             // in the channel.
@@ -375,6 +389,71 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     }
 
     client.send(reply);
+}
+
+void
+ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
+{
+    short channelId = msg.readShort();
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+
+    if (channelId == 0 || !channel)
+    {
+        // invalid channel
+        return;
+    }
+
+    if (channel->getUserMode(&client).find('o') != std::string::npos)
+    {
+        // invalid permissions
+        return;
+    }
+
+    // get the user whos mode has been changed
+    std::string user = msg.readString();
+
+    // get the mode to change to
+    unsigned char mode = msg.readByte();
+    channel->setUserMode(getClient(user), mode);
+
+    // set the info to pass to all channel clients
+    std::stringstream info;
+    info << client.characterName << ":" << user << ":" << mode;
+
+    warnUsersAboutPlayerEventInChat(channel,
+                    info.str(),
+                    CHAT_EVENT_MODE_CHANGE);
+}
+
+void
+ChatHandler::handleKickUserMessage(ChatClient &client, MessageIn &msg)
+{
+    short channelId = msg.readShort();
+    ChatChannel *channel = chatChannelManager->getChannel(channelId);
+
+    if (channelId == 0 || !channel)
+    {
+        // invalid channel
+        return;
+    }
+
+    if (channel->getUserMode(&client).find('o') != std::string::npos)
+    {
+        // invalid permissions
+        return;
+    }
+
+    // get the user whos being kicked
+    std::string user = msg.readString();
+
+    if (channel->removeUser(getClient(user)))
+    {
+        std::stringstream ss;
+        ss << client.characterName << ":" << user;
+        warnUsersAboutPlayerEventInChat(channel,
+                ss.str(),
+                CHAT_EVENT_KICKED_PLAYER);
+    }
 }
 
 void
@@ -449,6 +528,7 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
              i = users.begin(), i_end = users.end(); i != i_end; ++i)
         {
             reply.writeString((*i)->characterName);
+            reply.writeString(channel->getUserMode((*i)));
         }
 
         client.send(reply);
@@ -628,6 +708,28 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
         reply.writeByte(ERRMSG_FAILURE);
     }
 
+    client.send(reply);
+}
+
+void
+ChatHandler::handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg)
+{
+    MessageOut reply(CPMSG_GUILD_PROMOTE_MEMBER_RESPONSE);
+    short guildId = msg.readShort();
+    std::string user = msg.readString();
+    short level = msg.readByte();
+    Guild *guild = guildManager->findById(guildId);
+
+    if (guild)
+    {
+        if (guildManager->changeMemberLevel(&client, guild, user, level) == 0)
+        {
+            reply.writeByte(ERRMSG_OK);
+            client.send(reply);
+        }
+    }
+
+    reply.writeByte(ERRMSG_FAILURE);
     client.send(reply);
 }
 

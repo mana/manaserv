@@ -136,3 +136,9 @@ int Guild::getUserPermissions(const std::string &playerName)
     GuildMember *member = getMember(playerName);
     return member->getPermissions();
 }
+
+void Guild::setUserPermissions(const std::string &playerName, int level)
+{
+    GuildMember *member = getMember(playerName);
+    member->setPermission(level);
+}
