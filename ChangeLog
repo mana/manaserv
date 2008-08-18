@@ -1,3 +1,7 @@
+2008-08-18  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/mapreader.cpp: fix compilation on gcc 4.3.
+
 2008-08-18  David Athay  <ko2fan@gmail.com>
 
 	* src/account-server/dalstorage.cpp, src/chat-server/guild.hpp,

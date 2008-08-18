@@ -39,8 +39,6 @@
 #include "utils/xml.hpp"
 #include "utils/zlib.hpp"
 
-const unsigned int DEFAULT_TILE_WIDTH = 32;
-const unsigned int DEFAULT_TILE_HEIGHT = 32;
 static std::vector< int > tilesetFirstGids;
 
 void MapReader::readMap(const std::string &filename, MapComposite *composite)
