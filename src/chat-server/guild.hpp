@@ -30,42 +30,21 @@
  * Guild members
  */
 
-class GuildMember
+struct GuildMember
 {
-    public:
-        /**
-         * Permissions
-         * Members with NONE cannot invite users or set permissions
-         * Members with COMMANDER can invite other users but
-         *  cannot set permissions
-         * Members with LEADER can invite users and set permissions
-         */
-        enum { NONE = 0, COMMANDER, LEADER };
+public:
+    /**
+     * Permissions
+     * Members with NONE cannot invite users or set permissions
+     * Members with COMMANDER can invite other users but
+     *  cannot set permissions
+     * Members with LEADER can invite users and set permissions
+     */
+    enum { NONE = 0, COMMANDER, LEADER };
 
-        /**
-         * Constructor
-         */
-        GuildMember(const std::string &name);
-
-        /**
-         * Get name
-         */
-        const std::string& getName() const
-        { return mName; }
-
-        /**
-         * Set permissions
-         */
-        void setPermission(int perm);
-
-        /**
-         * Get permissions
-         */
-        int getPermissions() const;
-
-    private:
-        std::string mName;
-        int mPermissions;
+    int mId;
+    std::string mName;
+    int mPermissions;
 
 };
 
@@ -87,23 +66,24 @@ class Guild
 
         /**
          * Add a member to the guild.
+         * Removes a user from invite list if on it
          */
-        void addMember(const std::string &playerName, int permissions = GuildMember::NONE);
+        void addMember(int playerId, int permissions = GuildMember::NONE);
 
         /**
          * Remove a member from the guild.
          */
-        void removeMember(const std::string &playerName);
+        void removeMember(int playerId);
 
         /**
          * Check player is the leader of the guild.
          */
-        bool checkLeader(const std::string &playerName);
+        bool checkLeader(int playerId);
 
         /**
          * Set player as leader of the guild.
          */
-        void setLeader(const std::string &playerName);
+        void setLeader(int playerId);
 
         /**
          * Set the ID of the guild.
@@ -114,12 +94,12 @@ class Guild
         /**
          * Check if player has been invited to the guild.
          */
-        bool checkInvited(const std::string &playerName);
+        bool checkInvited(int playerId);
 
         /**
          * Add a player to the invite list.
          */
-        void addInvited(const std::string &playerName);
+        void addInvited(int playerId);
 
         /**
          * Returns the name of the guild.
@@ -148,34 +128,34 @@ class Guild
         /**
          * Find member by name.
          */
-        bool checkInGuild(const std::string &playerName);
+        bool checkInGuild(int playerId);
 
         /**
          * Returns whether a user can invite
          */
-        bool canInvite(const std::string &name);
+        bool canInvite(int playerId);
 
         /**
          * Returns a users permissions
          */
-        int getUserPermissions(const std::string &name);
+        int getUserPermissions(int playerId);
 
         /**
          * Sets a users permissions
          */
-        void setUserPermissions(const std::string &playerName, int level);
+        void setUserPermissions(int playerId, int level);
 
     protected:
         /**
          * Return a member based on their character name
          */
-        GuildMember* getMember(const std::string &playerName);
+        GuildMember* getMember(int playerId);
 
     private:
         short mId;
         std::string mName;
         std::list<GuildMember*> mMembers;
-        std::list<std::string> mInvited;
+        std::list<int> mInvited;
 };
 
 #endif

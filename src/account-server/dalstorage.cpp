@@ -391,17 +391,12 @@ Character *DALStorage::getCharacter(int id, Account *owner)
     return getCharacterBySQL(sql.str(), owner);
 }
 
-/**
- * Gets a character by character name.
- */
 Character *DALStorage::getCharacter(const std::string &name)
 {
     std::ostringstream sql;
-    sql << "select * from " << CHARACTERS_TBL_NAME << " where name = \"" << name << "\";";
+    sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '" << name << "';";
     return getCharacterBySQL(sql.str(), NULL);
 }
-
-
 #if 0
 /**
  * Return the list of all Emails addresses.
@@ -908,17 +903,17 @@ void DALStorage::removeGuild(Guild* guild)
 /**
  * add a member to a guild
  */
-void DALStorage::addGuildMember(int guildId, const std::string &memberName)
+void DALStorage::addGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
 
     try
     {
         sql << "insert into " << GUILD_MEMBERS_TBL_NAME
-        << " (guild_id, member_name, rights)"
+        << " (guild_id, member_id, rights)"
         << " values ("
         << guildId << ", \""
-        << memberName << "\", "
+        << memberId << "\", "
         << 0 << ");";
         mDb->execSql(sql.str());
     }
@@ -931,15 +926,15 @@ void DALStorage::addGuildMember(int guildId, const std::string &memberName)
 /**
 * remove a member from a guild
  */
-void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
+void DALStorage::removeGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
 
     try
     {
         sql << "delete from " << GUILD_MEMBERS_TBL_NAME
-        << " where member_name = \""
-        << memberName << "\" and guild_id = '"
+        << " where member_id = \""
+        << memberId << "\" and guild_id = '"
         << guildId << "';";
         mDb->execSql(sql.str());
     }
@@ -950,7 +945,7 @@ void DALStorage::removeGuildMember(int guildId, const std::string &memberName)
     }
 }
 
-void DALStorage::setMemberRights(const std::string &memberName, int rights)
+void DALStorage::setMemberRights(int memberId, int rights)
 {
     std::ostringstream sql;
 
@@ -958,8 +953,8 @@ void DALStorage::setMemberRights(const std::string &memberName, int rights)
     {
         sql << "update " << GUILD_MEMBERS_TBL_NAME
         << " set rights = '" << rights << "'"
-        << " where member_name = \""
-        << memberName << "\";";
+        << " where member_id = \""
+        << memberId << "\";";
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
@@ -1009,25 +1004,25 @@ std::list<Guild*> DALStorage::getGuildList()
              ++itr)
         {
             std::ostringstream memberSql;
-            memberSql << "select member_name, rights from " << GUILD_MEMBERS_TBL_NAME
+            memberSql << "select member_id, rights from " << GUILD_MEMBERS_TBL_NAME
             << " where guild_id = '" << (*itr)->getId() << "';";
             const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
 
-            std::list<std::pair<std::string, int> > names;
+            std::list<std::pair<int, int> > members;
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
-	      names.push_back(std::pair<std::string, int>(memberInfo(j, 0), toUint(memberInfo(j, 1))));
+	      members.push_back(std::pair<int, int>(toUint(memberInfo(j, 0)), toUint(memberInfo(j, 1))));
             }
 
-            for (std::list<std::pair<std::string, int> >::const_iterator i = names.begin();
-                 i != names.end();
+            for (std::list<std::pair<int, int> >::const_iterator i = members.begin();
+                 i != members.end();
                  ++i)
             {
-                Character *character = getCharacter((*i).first);
+                Character *character = getCharacter((*i).first, NULL);
                 if (character)
                 {
                     character->addGuild((*itr)->getName());
-                    (*itr)->addMember(character->getName(), (*i).second);
+                    (*itr)->addMember(character->getDatabaseID(), (*i).second);
                 }
             }
         }

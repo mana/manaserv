@@ -52,6 +52,7 @@ class ChatClient : public NetComputer
         }
 
         std::string characterName;
+        unsigned int characterId;
         std::vector< ChatChannel * > channels;
         Party* party;
         unsigned char accountLevel;

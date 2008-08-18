@@ -75,6 +75,7 @@ static char const *SQL_ACCOUNTS_TABLE =
         "email    VARCHAR(64) NOT NULL,"
         "level    TINYINT     UNSIGNED NOT NULL,"
         "banned   TINYINT     UNSIGNED NOT NULL,"
+//        "activation VARCHAR(32),"
         "INDEX (id)"
 #error "Incorrect definition. Please fix the types."
 #elif defined (SQLITE_SUPPORT)
@@ -84,13 +85,15 @@ static char const *SQL_ACCOUNTS_TABLE =
         "email    TEXT        NOT NULL,"
         "level    INTEGER     NOT NULL,"
         "banned   INTEGER     NOT NULL"
+//        "activation TEXT"
 #elif defined (POSTGRESQL_SUPPORT)
         "id       SERIAL      PRIMARY KEY,"
         "username TEXT        NOT NULL UNIQUE,"
         "password TEXT        NOT NULL,"
         "email    TEXT        NOT NULL,"
         "level    INTEGER     NOT NULL,"
-        "banned   INTEGER     NOT NULL"
+        "banned   INTEGER     NOT NULL,"
+//        "activation TEXT"
 #endif
     ");";
 
@@ -261,16 +264,13 @@ static char const *SQL_GUILDS_TABLE =
     "CREATE TABLE tmw_guilds ("
 #if defined (MYSQL_SUPPORT)
         "id            INTEGER     PRIMARY KEY AUTO_INCREMENT,"
-        "name          VARCHAR(32) NOT NULL UNIQUE,"
-        "FOREIGN KEY (name) REFERENCES tmw_characters(name)"
+        "name          VARCHAR(32) NOT NULL UNIQUE"
 #elif defined (SQLITE_SUPPORT)
         "id      INTEGER     PRIMARY KEY,"
-        "name    TEXT        NOT NULL UNIQUE,"
-        "FOREIGN KEY (name) REFERENCES tmw_characters(name)"
+        "name    TEXT        NOT NULL UNIQUE"
 #elif defined (POSTGRESQL_SUPPORT)
         "id      SERIAL      PRIMARY KEY,"
-        "name    TEXT        NOT NULL UNIQUE,"
-        "FOREIGN KEY (name) REFERENCES tmw_characters(name)"
+        "name    TEXT        NOT NULL UNIQUE"
 #endif
     ");";
 
@@ -282,23 +282,23 @@ static char const *GUILD_MEMBERS_TBL_NAME = "tmw_guild_members";
 static char const *SQL_GUILD_MEMBERS_TABLE =
     "CREATE TABLE tmw_guild_members ("
 #if defined (MYSQL_SUPPORT)
-        "guild_id       INTEGER         NOT NULL,"
-        "member_name    VARCHAR(32)     NOT NULL,"
-        "rights         INTEGER         NOT NULL,"
+        "guild_id       INTEGER     NOT NULL,"
+        "member_id      INTEGER     NOT NULL,"
+        "rights         INTEGER     NOT NULL,"
         "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
-        "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
+        "FOREIGN KEY (member_id)   REFERENCES tmw_characters(id)"
 #elif defined (SQLITE_SUPPORT)
         "guild_id       INTEGER     NOT NULL,"
-        "member_name    TEXT        NOT NULL,"
+        "member_id      INTEGER     NOT NULL,"
         "rights         INTEGER     NOT NULL,"
         "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
-        "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
+        "FOREIGN KEY (member_id)   REFERENCES tmw_characters(id)"
 #elif defined (POSTGRESQL_SUPPORT)
         "guild_id       INTEGER     NOT NULL,"
-        "member_name    TEXT        NOT NULL,"
+        "member_id      INTEGER     NOT NULL,"
         "rights         INTEGER     NOT NULL,"
         "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
-        "FOREIGN KEY (member_name) REFERENCES tmw_characters(name)"
+        "FOREIGN KEY (member_id)   REFERENCES tmw_characters(id)"
 #endif
     ");";
 

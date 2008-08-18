@@ -43,7 +43,7 @@ GuildManager::~GuildManager()
     mGuilds.clear();
 }
 
-Guild* GuildManager::createGuild(const std::string &name, const std::string &playerName)
+Guild* GuildManager::createGuild(const std::string &name, int playerId)
 {
     Guild *guild = new Guild(name);
     // Add guild to db
@@ -52,12 +52,12 @@ Guild* GuildManager::createGuild(const std::string &name, const std::string &pla
     // Make sure to add guild to mGuilds before searching for it to add the
     // player
     mGuilds.push_back(guild);
-    addGuildMember(guild, playerName);
+    addGuildMember(guild, playerId);
 
     // Set and save the member rights
-    storage->setMemberRights(playerName, GuildMember::LEADER);
+    storage->setMemberRights(playerId, GuildMember::LEADER);
 
-    guild->setLeader(playerName);
+    guild->setLeader(playerId);
 
     return guild;
 }
@@ -71,20 +71,20 @@ void GuildManager::removeGuild(Guild *guild)
     delete guild;
 }
 
-void GuildManager::addGuildMember(Guild *guild, const std::string &playerName)
+void GuildManager::addGuildMember(Guild *guild, int playerId)
 {
     if (!guild)
         return;
-    storage->addGuildMember(guild->getId(), playerName);
-    guild->addMember(playerName);
+    storage->addGuildMember(guild->getId(), playerId);
+    guild->addMember(playerId);
 }
 
-void GuildManager::removeGuildMember(Guild *guild, const std::string &playerName)
+void GuildManager::removeGuildMember(Guild *guild, int playerId)
 {
     if (!guild)
         return;
-    storage->removeGuildMember(guild->getId(), playerName);
-    guild->removeMember(playerName);
+    storage->removeGuildMember(guild->getId(), playerId);
+    guild->removeMember(playerId);
     if(guild->totalMembers() == 0)
     {
         removeGuild(guild);
@@ -128,14 +128,14 @@ bool GuildManager::doesExist(const std::string &name)
     return findByName(name) != NULL;
 }
 
-std::vector<Guild*> GuildManager::getGuildsForPlayer(const std::string &name)
+std::vector<Guild*> GuildManager::getGuildsForPlayer(int playerId)
 {
     std::vector<Guild*> guildList;
 
     for (std::list<Guild*>::iterator itr = mGuilds.begin();
             itr != mGuilds.end(); ++itr)
     {
-        if((*itr)->checkInGuild(name))
+        if((*itr)->checkInGuild(playerId))
         {
             guildList.push_back((*itr));
         }
@@ -145,7 +145,7 @@ std::vector<Guild*> GuildManager::getGuildsForPlayer(const std::string &name)
 
 void GuildManager::disconnectPlayer(ChatClient *player)
 {
-    std::vector<Guild*> guildList = getGuildsForPlayer(player->characterName);
+    std::vector<Guild*> guildList = getGuildsForPlayer(player->characterId);
 
     for (std::vector<Guild*>::const_iterator itr = guildList.begin();
          itr != guildList.end(); ++itr)
@@ -157,16 +157,16 @@ void GuildManager::disconnectPlayer(ChatClient *player)
 }
 
 int GuildManager::changeMemberLevel(ChatClient *player, Guild *guild,
-                                     const std::string &name, int level)
+                                    int playerId, int level)
 {
-    if (guild->checkInGuild(player->characterName) && guild->checkInGuild(name))
+    if (guild->checkInGuild(player->characterId) && guild->checkInGuild(playerId))
     {
-        int playerLevel = guild->getUserPermissions(player->characterName);
+        int playerLevel = guild->getUserPermissions(player->characterId);
 
         if (playerLevel == GuildMember::LEADER)
         {
             // player can modify anyones permissions
-            guild->setUserPermissions(name, level);
+            guild->setUserPermissions(playerId, level);
             return 0;
         }
     }

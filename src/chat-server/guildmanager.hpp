@@ -48,7 +48,7 @@ class GuildManager
         /**
          * Creates a guild.
          */
-        Guild* createGuild(const std::string &name, const std::string &playerName);
+        Guild* createGuild(const std::string &name, int playerId);
 
         /**
          * Removes a guild.
@@ -58,12 +58,12 @@ class GuildManager
         /**
          * Adds a member to a guild.
          */
-        void addGuildMember(Guild *guild, const std::string &playerName);
+        void addGuildMember(Guild *guild, int playerId);
 
         /**
          * Removes a member from a guild.
          */
-        void removeGuildMember(Guild *guild, const std::string &playerName);
+        void removeGuildMember(Guild *guild, int playerId);
 
         /**
          * Returns the guild with the given id. O(n)
@@ -91,7 +91,7 @@ class GuildManager
         /**
          * Return the guilds a character is in
          */
-        std::vector<Guild*> getGuildsForPlayer(const std::string &name);
+        std::vector<Guild*> getGuildsForPlayer(int playerId);
 
         /**
          * Inform guild members that a player has disconnected.
@@ -105,7 +105,7 @@ class GuildManager
          * @return Returns 0 if successful, -1 otherwise
          */
         int changeMemberLevel(ChatClient *player, Guild *guild,
-                               const std::string &name, int level);
+                              int playerId, int level);
 
     private:
         std::list<Guild*> mGuilds;

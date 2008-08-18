@@ -24,22 +24,6 @@
 
 #include <algorithm>
 
-GuildMember::GuildMember(const std::string &name) :
-    mName(name),
-    mPermissions(0)
-{
-}
-
-void GuildMember::setPermission(int perm)
-{
-    mPermissions = perm;
-}
-
-int GuildMember::getPermissions() const
-{
-    return mPermissions;
-}
-
 Guild::Guild(const std::string &name) :
 mName(name)
 {
@@ -49,68 +33,74 @@ Guild::~Guild()
 {
 }
 
-void Guild::addMember(const std::string &playerName, int permissions)
+void Guild::addMember(int playerId, int permissions)
 {
-    GuildMember *member = new GuildMember(playerName);
-    member->setPermission(permissions);
+    // create new guild member
+    GuildMember *member = new GuildMember();
+    member->mId = playerId;
+    member->mPermissions = permissions;
+
+    // add new guild member to guild
     mMembers.push_back(member);
-    if (checkInvited(playerName))
+
+    if (checkInvited(playerId))
     {
-        mInvited.remove(playerName);
+        mInvited.remove(playerId);
     }
 }
 
-void Guild::removeMember(const std::string &playerName)
+void Guild::removeMember(int playerId)
 {
-    GuildMember *member = getMember(playerName);
+    GuildMember *member = getMember(playerId);
     if (member)
         mMembers.remove(member);
 }
 
-bool Guild::checkLeader(const std::string &playerName)
+bool Guild::checkLeader(int playerId)
 {
-    // check that guild member permissions is set to LEADER
     int leader = 0;
-    GuildMember *member = getMember(playerName);
+    GuildMember *member = getMember(playerId);
+    // check member exists
     if (member)
-        leader = member->getPermissions();
+        leader = member->mPermissions;
+    // check permissions
     if (leader == GuildMember::LEADER)
         return true;
     return false;
 
 }
 
-void Guild::setLeader(const std::string &playerName)
+void Guild::setLeader(int playerId)
 {
-    GuildMember *member = getMember(playerName);
+    GuildMember *member = getMember(playerId);
     if (member)
     {
-        member->setPermission(GuildMember::LEADER);
+        member->mPermissions = GuildMember::LEADER;
     }
 }
 
-bool Guild::checkInvited(const std::string &playerName)
+bool Guild::checkInvited(int playerId)
 {
-    return std::find(mInvited.begin(), mInvited.end(), playerName) != mInvited.end();
+    return std::find(mInvited.begin(), mInvited.end(), playerId) != mInvited.end();
 }
 
-void Guild::addInvited(const std::string &playerName)
+void Guild::addInvited(int playerId)
 {
-    mInvited.push_back(playerName);
+    mInvited.push_back(playerId);
 }
 
-bool Guild::checkInGuild(const std::string &playerName)
+bool Guild::checkInGuild(int playerId)
 {
-    GuildMember *member = getMember(playerName);
+    GuildMember *member = getMember(playerId);
     return member ? true : false;
 }
 
-GuildMember* Guild::getMember(const std::string &playerName)
+GuildMember* Guild::getMember(int playerId)
 {
     std::list<GuildMember*>::iterator itr = mMembers.begin(), itr_end = mMembers.end();
     while (itr != itr_end)
     {
-        if ((*itr)->getName() == playerName)
+        if ((*itr)->mId == playerId)
         {
             return (*itr);
         }
@@ -121,24 +111,24 @@ GuildMember* Guild::getMember(const std::string &playerName)
     return NULL;
 }
 
-bool Guild::canInvite(const std::string &playerName)
+bool Guild::canInvite(int playerId)
 {
     // Guild members with permissions above NONE can invite
     // Check that guild members permissions are not NONE
-    GuildMember *member = getMember(playerName);
-    if (member->getPermissions() > GuildMember::NONE)
+    GuildMember *member = getMember(playerId);
+    if (member->mPermissions > GuildMember::NONE)
         return true;
     return false;
 }
 
-int Guild::getUserPermissions(const std::string &playerName)
+int Guild::getUserPermissions(int playerId)
 {
-    GuildMember *member = getMember(playerName);
-    return member->getPermissions();
+    GuildMember *member = getMember(playerId);
+    return member->mPermissions;
 }
 
-void Guild::setUserPermissions(const std::string &playerName, int level)
+void Guild::setUserPermissions(int playerId, int level)
 {
-    GuildMember *member = getMember(playerName);
-    member->setPermission(level);
+    GuildMember *member = getMember(playerId);
+    member->mPermissions = level;
 }

@@ -27,6 +27,7 @@
 #include <sstream>
 
 #include "defines.h"
+#include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
 #include "account-server/serverhandler.hpp"
 #include "chat-server/guild.hpp"
@@ -84,17 +85,19 @@ void ChatHandler::deletePendingConnect(Pending *p)
     delete p;
 }
 
-void ChatHandler::tokenMatched(ChatClient *c, Pending *p)
+void ChatHandler::tokenMatched(ChatClient *client, Pending *p)
 {
-    c->characterName = p->character;
-    c->accountLevel = p->level;
+    client->characterName = p->character;
+    client->accountLevel = p->level;
+    Character *c = storage->getCharacter(p->character);
+    client->characterId = c->getDatabaseID();
     delete p;
     MessageOut msg(CPMSG_CONNECT_RESPONSE);
     msg.writeByte(ERRMSG_OK);
-    c->send(msg);
+    client->send(msg);
 
     // Add chat client to player map
-    mPlayerMap.insert(std::pair<std::string, ChatClient*>(c->characterName, c));
+    mPlayerMap.insert(std::pair<std::string, ChatClient*>(client->characterName, client));
 }
 
 NetComputer *ChatHandler::computerConnected(ENetPeer *peer)
@@ -549,9 +552,12 @@ ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
     else
     {
         Guild *guild = guildManager->findByName(channel->getName());
-        if(guild->checkLeader(client.characterName))
+        if (guild)
         {
-            chatChannelManager->setChannelTopic(channelId, topic);
+            if(guild->checkLeader(client.characterId))
+            {
+                chatChannelManager->setChannelTopic(channelId, topic);
+            }
         }
     }
 }
@@ -576,11 +582,11 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
     if (!guildManager->doesExist(guildName))
     {
         // Guild doesnt already exist so create it
-        Guild *guild = guildManager->createGuild(guildName, client.characterName);
+        Guild *guild = guildManager->createGuild(guildName, client.characterId);
         reply.writeByte(ERRMSG_OK);
         reply.writeString(guildName);
         reply.writeShort(guild->getId());
-        reply.writeByte(true);
+        reply.writeShort(guild->getUserPermissions(client.characterId));
 
         // Send autocreated channel id
         ChatChannel* channel = joinGuildChannel(guildName, client);
@@ -612,9 +618,9 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
     {
         // check permissions of inviter, and that they arent inviting themself,
         // and arent someone already in the guild
-        if (guild->canInvite(client.characterName) &&
+        if (guild->canInvite(client.characterId) &&
             (client.characterName != character) &&
-            !guild->checkInGuild(character))
+            !guild->checkInGuild(invitedClient->characterId))
         {
             // send the name of the inviter and the name of the guild
             // that the character has been invited to join
@@ -627,7 +633,7 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
             reply.writeByte(ERRMSG_OK);
 
             // add member to list of invited members to the guild
-            guild->addInvited(character);
+            guild->addInvited(invitedClient->characterId);
         }
         else
         {
@@ -647,6 +653,7 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_ACCEPT_RESPONSE);
     std::string guildName = msg.readString();
+    bool error = true; // set true by default, and set false only if success
 
     // check guild exists and that member was invited
     // then add them as guild member
@@ -654,24 +661,26 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
     Guild *guild = guildManager->findByName(guildName);
     if (guild)
     {
-        if (guild->checkInvited(client.characterName))
+        if (guild->checkInvited(client.characterId))
         {
-            guildManager->addGuildMember(guild, client.characterName);
+            // add user to guild
+            guildManager->addGuildMember(guild, client.characterId);
             reply.writeByte(ERRMSG_OK);
             reply.writeString(guild->getName());
             reply.writeShort(guild->getId());
-            reply.writeByte(false);
+            reply.writeShort(guild->getUserPermissions(client.characterId));
 
+            // have character join guild channel
             ChatChannel *channel = joinGuildChannel(guild->getName(), client);
             reply.writeShort(channel->getId());
             sendGuildListUpdate(guildName, client.characterName, GUILD_EVENT_NEW_PLAYER);
-        }
-        else
-        {
-            reply.writeByte(ERRMSG_FAILURE);
+
+            // success! set error to false
+            error = false;
         }
     }
-    else
+
+    if (error)
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
@@ -691,7 +700,7 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
     if (guild)
     {
         // make sure the requestor is in the guild
-        if (guild->checkInGuild(client.characterName))
+        if (guild->checkInGuild(client.characterId))
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
@@ -700,8 +709,10 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
             for(std::list<GuildMember*>::iterator itr = memberList.begin();
                 itr != itr_end; ++itr)
             {
-                reply.writeString((*itr)->getName());
-                reply.writeByte(mPlayerMap.find((*itr)->getName()) != mPlayerMap.end());
+                Character *c = storage->getCharacter((*itr)->mId, NULL);
+                std::string memberName = c->getName();
+                reply.writeString(memberName);
+                reply.writeByte(mPlayerMap.find(memberName) != mPlayerMap.end());
             }
         }
     }
@@ -716,15 +727,18 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
 void
 ChatHandler::handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg)
 {
+    // get the guild, the user to change the permissions, and the new permission
+    // check theyre valid, and then change them
     MessageOut reply(CPMSG_GUILD_PROMOTE_MEMBER_RESPONSE);
     short guildId = msg.readShort();
     std::string user = msg.readString();
     short level = msg.readByte();
     Guild *guild = guildManager->findById(guildId);
+    Character *c = storage->getCharacter(user);
 
-    if (guild)
+    if (guild && c)
     {
-        if (guildManager->changeMemberLevel(&client, guild, user, level) == 0)
+        if (guildManager->changeMemberLevel(&client, guild, c->getDatabaseID(), level) == 0)
         {
             reply.writeByte(ERRMSG_OK);
             client.send(reply);
@@ -747,13 +761,13 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
     // remove the member from the guild
     if (guild)
     {
-        if (guild->checkInGuild(client.characterName))
+        if (guild->checkInGuild(client.characterId))
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
 
             // Check if they are the leader, and if so, remove the guild channel
-            if (guild->checkLeader(client.characterName))
+            if (guild->checkLeader(client.characterId))
             {
                 chatChannelManager->removeChannel(chatChannelManager->getChannelId(guild->getName()));
             }
@@ -761,7 +775,7 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
             {
                 // guild manager checks if the member is the last in the guild
                 // and removes the guild if so
-                guildManager->removeGuildMember(guild, client.characterName);
+                guildManager->removeGuildMember(guild, client.characterId);
                 sendGuildListUpdate(guild->getName(), client.characterName, GUILD_EVENT_LEAVING_PLAYER);
             }
         }
@@ -839,7 +853,7 @@ void ChatHandler::sendGuildInvite(const std::string &invitedName,
 void ChatHandler::sendGuildRejoin(ChatClient &client)
 {
     // Get list of guilds and check what rights they have.
-    std::vector<Guild*> guilds = guildManager->getGuildsForPlayer(client.characterName);
+    std::vector<Guild*> guilds = guildManager->getGuildsForPlayer(client.characterId);
     for (unsigned int i = 0; i != guilds.size(); ++i)
     {
         Guild *guild = guilds[i];
@@ -848,7 +862,7 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         {
             return;
         }
-        permissions = guild->getUserPermissions(client.characterName);
+        permissions = guild->getUserPermissions(client.characterId);
 
         std::string guildName = guild->getName();
 
@@ -914,7 +928,8 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
         for (std::list<GuildMember*>::const_iterator itr = members.begin();
              itr != members.end(); ++itr)
         {
-            chr = mPlayerMap.find((*itr)->getName());
+            Character *c = storage->getCharacter((*itr)->mId, NULL);
+            chr = mPlayerMap.find(c->getName());
             if (chr != mPlayerMap.end())
             {
                 chr->second->send(msg);

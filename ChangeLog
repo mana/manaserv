@@ -6,6 +6,11 @@
 
 	* src/account-server/dalstorage.cpp, src/chat-server/guild.hpp,
 	src/chat-server/chathandler.cpp: Misc fixes of guild.
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
+	src/account-server/dalstoragesql.hpp, src/chat-server/guildmanager.cpp,
+	src/chat-server/chatclient.hpp, src/chat-server/guild.cpp,
+	src/chat-server/guildmanager.hpp, src/chat-server/guild.hpp,
+	src/chat-server/chathandler.cpp: Changed guilds to use character id.
 
 2008-08-13  Yohann Ferreira  <bertram@cegetel.net>
 
