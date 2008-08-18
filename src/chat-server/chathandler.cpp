@@ -695,8 +695,10 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
         {
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
-            for(std::list<GuildMember*>::const_iterator itr = guild->getMembers().begin();
-                itr != guild->getMembers().end(); ++itr)
+            std::list<GuildMember*> memberList = guild->getMembers();
+            std::list<GuildMember*>::const_iterator itr_end = memberList.end();
+            for(std::list<GuildMember*>::iterator itr = memberList.begin();
+                itr != itr_end; ++itr)
             {
                 reply.writeString((*itr)->getName());
                 reply.writeByte(mPlayerMap.find((*itr)->getName()) != mPlayerMap.end());

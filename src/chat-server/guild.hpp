@@ -124,7 +124,7 @@ class Guild
         /**
          * Returns the name of the guild.
          */
-        const std::string& getName() const
+        std::string getName() const
         { return mName; }
 
         /**

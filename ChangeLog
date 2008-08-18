@@ -1,3 +1,8 @@
+2008-08-18  David Athay  <ko2fan@gmail.com>
+
+	* src/account-server/dalstorage.cpp, src/chat-server/guild.hpp,
+	src/chat-server/chathandler.cpp: Misc fixes of guild.
+
 2008-08-13  Yohann Ferreira  <bertram@cegetel.net>
 
 	* src/game-server/gamehandler.cpp, src/game-server/map.hpp:

@@ -1000,10 +1000,10 @@ std::list<Guild*> DALStorage::getGuildList()
             guilds.push_back(guild);
         }
         string_to< unsigned > toUint;
+
         /**
          * Add the members to the guilds.
          */
-
         for (std::list<Guild*>::iterator itr = guilds.begin();
              itr != guilds.end();
              ++itr)
