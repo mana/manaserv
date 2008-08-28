@@ -1096,7 +1096,8 @@ void DALStorage::banCharacter(int id, int duration)
 
         std::ostringstream sql;
         sql << "update " << ACCOUNTS_TBL_NAME
-            << " set banned = '" << time(NULL) + duration * 60
+            << " set level = '" << AL_BANNED << "', banned = '"
+            << time(NULL) + duration * 60
             << "' where id = '" << info(0, 0) << "';";
         mDb->execSql(sql.str());
     }

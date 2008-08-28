@@ -1,3 +1,8 @@
+2008-08-28  David Athay  <ko2fan@gmail.com>
+
+	* src/account-server/dalstorage.cpp: Set banned user's level to
+	AL_BANNED.
+
 2008-08-18  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/game-server/mapreader.cpp: fix compilation on gcc 4.3.

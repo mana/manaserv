@@ -30,6 +30,7 @@
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
 				<Compiler>
+					<Add option="-g" />
 					<Add option="-DSQLITE_SUPPORT" />
 					<Add directory="src" />
 					<Add directory="/usr/local/include/libxml2" />
