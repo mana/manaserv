@@ -5,6 +5,8 @@
 	* src/account-server/main-account.cpp, 
 	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp: 
 	Added checking for expired bans.
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
+	ExceptionFault corrected my poor sql skills.
 
 2008-08-18  Roderic Morris  <roderic@ccs.neu.edu>
 

@@ -1107,51 +1107,17 @@ void DALStorage::banCharacter(int id, int duration)
     }
 }
 
-void DALStorage::removeBan(int accountID)
-{
-    try
-    {
-        std::ostringstream sql;
-        sql << "update " << ACCOUNTS_TBL_NAME
-            << " set level = '" << AL_NORMAL << "', banned = '"
-            << 0
-            << "' where id = '" << accountID << "';";
-        mDb->execSql(sql.str());
-    }
-    catch (dal::DbSqlQueryExecFailure const &e)
-    {
-        LOG_ERROR("(DALStorage::removeBan) SQL query failure: " << e.what());
-    }
-}
-
 void DALStorage::checkBannedAccounts()
 {
     try
     {
-        // get all banned users
+        // update expired bans
         std::ostringstream sql;
-        sql << "select id,banned from " << ACCOUNTS_TBL_NAME
-        << " where level = '" << AL_BANNED << "';";
-        dal::RecordSet const &info = mDb->execSql(sql.str());
-
-        // loop through all banned users, and see if they have expired
-        for (int i = 0; i < info.rows(); ++i)
-        {
-            int t = time(NULL);
-            std::stringstream expiry;
-            expiry << info(i, 1);
-            int banned;
-            expiry >> banned;
-            if (t > banned)
-            {
-                // ban has expired, remove it
-                std::stringstream user;
-                user << info(i,0);
-                int id;
-                user >> id;
-                removeBan(id);
-            }
-        }
+        sql << "update " << ACCOUNTS_TBL_NAME
+        << " set level = " << AL_NORMAL << ", banned = 0"
+        << " where level = " << AL_BANNED
+        << " AND banned <= " << time(NULL) << ";";
+        mDb->execSql(sql.str());
     }
     catch (dal::DbSqlQueryExecFailure const &e)
     {
