@@ -308,12 +308,15 @@ int main(int argc, char *argv[])
 
     // Dump statistics every 10 seconds.
     utils::Timer statTimer(10000);
+    // Check for expired bans every 30 seconds
+    utils::Timer banTimer(30000);
 
     while (running) {
         AccountClientHandler::process();
         GameServerHandler::process();
         chatHandler->process(50);
         if (statTimer.poll()) dumpStatistics();
+        if (banTimer.poll()) storage->checkBannedAccounts();
     }
 
     LOG_INFO("Received: Quit signal, closing down...");

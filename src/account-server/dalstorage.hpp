@@ -126,6 +126,18 @@ class DALStorage
         void banCharacter(int id, int duration);
 
         /**
+         * Removes a ban on an account (hence on all its characters).
+         *
+         * @param accountID account identifier.
+         */
+        void removeBan(int accountID);
+
+        /**
+         * Removes expired bans from accounts
+         */
+        void checkBannedAccounts();
+
+        /**
          * Tells if the user name already exists.
          * @return true if the user name exists.
          */

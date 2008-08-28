@@ -2,6 +2,9 @@
 
 	* src/account-server/dalstorage.cpp: Set banned user's level to
 	AL_BANNED.
+	* src/account-server/main-account.cpp, 
+	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp: 
+	Added checking for expired bans.
 
 2008-08-18  Roderic Morris  <roderic@ccs.neu.edu>
 
