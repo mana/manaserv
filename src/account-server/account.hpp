@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <time.h>
 
 #include "account-server/character.hpp"
 
@@ -170,14 +171,40 @@ class Account
          *
          * @return the unique ID of the account, a negative number if none yet.
          */
-         int getID() const
-         { return mID; }
+        int getID() const
+        { return mID; }
 
         /**
          * Set account ID.
          * The account shall not have any ID yet.
          */
-         void setID(int);
+        void setID(int);
+
+        /**
+         * Get the time of the account registration.
+         */
+        time_t getRegistrationDate() const
+        { return mRegistrationDate; }
+
+        /**
+         * Sets the time of the account registration.
+         *
+         * @param time of the account registration.
+         */
+        void setRegistrationDate(time_t time);
+
+        /**
+         * Get the time of the last login.
+         */
+        time_t getLastLogin() const
+        { return mLastLogin; }
+
+        /**
+         * Sets the time of the last login.
+         *
+         * @param time of the last login.
+         */
+        void setLastLogin(time_t time);
 
     private:
         Account(Account const &rhs);
@@ -185,12 +212,14 @@ class Account
 
 
     private:
-        std::string mName;      /**< User name */
-        std::string mPassword;  /**< User password (hashed with salt) */
-        std::string mEmail;     /**< User email address (hashed) */
-        Characters mCharacters; /**< Character data */
-        int mID;                /**< Unique id */
-        unsigned char mLevel;   /**< Account level */
+        std::string mName;        /**< User name */
+        std::string mPassword;    /**< User password (hashed with salt) */
+        std::string mEmail;       /**< User email address (hashed) */
+        Characters mCharacters;   /**< Character data */
+        int mID;                  /**< Unique id */
+        unsigned char mLevel;     /**< Account level */
+        time_t mRegistrationDate; /**< Date and time of the account registration */
+        time_t mLastLogin;        /**< Date and time of the last login */
 };
 
 typedef std::vector< Account * > Accounts;

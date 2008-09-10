@@ -109,13 +109,19 @@ class DALStorage
         void
         addAccount(Account *account);
 
-
         /**
          * Delete an account.
          *
          * @param account the account to delete.
          */
         void delAccount(Account *account);
+
+        /**
+         * Update the date and time of the last login.
+         *
+         * @param account the account that recently logged in.
+         */
+        void updateLastLogin(const Account *account);
 
         /**
          * Sets a ban on an account (hence on all its characters).
@@ -244,6 +250,20 @@ class DALStorage
         createTable(const std::string& tblName,
                     const std::string& sql);
 
+
+        /**
+         * Create an index on the specified column.
+         *
+         * @param indxName the name of the index.
+         * @param tblName the name of the table.
+         * @param columnName the name of the columns
+         *
+         * @exception dal::DbSqlQueryExecFailure.
+         */
+        void
+        createIndex(const std::string& indxName,
+                    const std::string& tblName,
+                    const std::string& columnName );
 
         /**
          * Gets an account by using a SQL query string.

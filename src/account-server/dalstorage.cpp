@@ -130,6 +130,13 @@ void DALStorage::open()
         createTable(GUILDS_TBL_NAME, SQL_GUILDS_TABLE);
         createTable(GUILD_MEMBERS_TBL_NAME, SQL_GUILD_MEMBERS_TABLE);
         createTable(QUESTS_TBL_NAME, SQL_QUESTS_TABLE);
+
+        // TODO: this is not the prefered way, but currently the complete
+        // generation and maintenance of the database is a little dirty so
+        // keep this as is until there is a complete cleaner solution
+        const std::string idxName("tmw_accounts_username");
+        const std::string colName("username");
+        createIndex(idxName, ACCOUNTS_TBL_NAME, colName);
     }
     catch (const DbConnectionFailure& e) {
         LOG_ERROR("(DALStorage::open #1) Unable to connect to the database: "
@@ -184,6 +191,9 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
             return account;
         }
         account->setLevel(level);
+        account->setRegistrationDate(toUint(accountInfo(0, 6)));
+        account->setLastLogin(toUint(accountInfo(0, 7)));
+
 
         // load the characters associated with the account.
         std::ostringstream sql;
@@ -659,6 +669,47 @@ DALStorage::createTable(const std::string& tblName,
     }
 }
 
+/**
+ * Create a index on the table
+ */
+void
+DALStorage::createIndex(const std::string& indxName,
+            const std::string& tblName,
+            const std::string& columnName )
+{
+#if defined (MYSQL_SUPPORT)
+#error MYSQL SUPPORT not complete implemented yet!
+
+#elif defined (SQLITE_SUPPORT)
+    std::ostringstream mSQL;
+    mSQL << "CREATE INDEX " << indxName << " ON " << tblName;
+    mSQL << " ( " << columnName << " );";
+
+    std::ostringstream mExists;
+    mExists << "index " << indxName << " already exists";
+#elif defined (POSTGRESQL_SUPPORT)
+
+#error POSTGRESQL SUPPORT not complete implemented yet!
+#endif
+
+    try {
+        mDb->execSql(mSQL.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        const std::string msg(e.what());
+        if(msg == mExists.str())
+        {
+            LOG_DEBUG(mExists.str());
+        }
+        else
+        {
+            throw;
+        }
+    }
+} // end of createIndex
+
+
 
 /**
  * Add an account to the database.
@@ -672,15 +723,18 @@ void DALStorage::addAccount(Account *account)
     // TODO: we should start a transaction here so that in case of problem
     // the lost of data would be minimized.
 
+
     // insert the account.
     std::ostringstream sql1;
     sql1 << "insert into " << ACCOUNTS_TBL_NAME
-         << " (username, password, email, level, banned)"
+         << " (username, password, email, level, banned, registration, lastlogin)"
          << " values (\""
          << account->getName() << "\", \""
          << account->getPassword() << "\", \""
          << account->getEmail() << "\", "
-         << account->getLevel() << ", 0);";
+         << account->getLevel() << ", 0, "
+         << account->getRegistrationDate() << ", "
+         << account->getLastLogin() << ");";
     mDb->execSql(sql1.str());
 
     // get the account id.
@@ -708,10 +762,11 @@ void DALStorage::flush(Account *account)
     // update the account.
     std::ostringstream sqlUpdateAccountTable;
     sqlUpdateAccountTable << "update " << ACCOUNTS_TBL_NAME
-         << " set username = \"" << account->getName() << "\", "
-         << "password = \"" << account->getPassword() << "\", "
-         << "email = \"" << account->getEmail() << "\", "
-         << "level = '" << account->getLevel() << "' "
+         << " set username = '" << account->getName() << "', "
+         << "password = '" << account->getPassword() << "', "
+         << "email = '" << account->getEmail() << "', "
+         << "level = '" << account->getLevel() << "', "
+         << "lastlogin = '" << account->getLastLogin() << "' "
          << "where id = '" << account->getID() << "';";
     mDb->execSql(sqlUpdateAccountTable.str());
 
@@ -864,6 +919,18 @@ void DALStorage::delAccount(Account *account)
     std::ostringstream sql;
     sql << "delete from " << ACCOUNTS_TBL_NAME
         << " where id = '" << account->getID() << "';";
+    mDb->execSql(sql.str());
+}
+
+/**
+ * Update the date and time of the last login.
+ */
+void DALStorage::updateLastLogin(const Account *account)
+{
+    std::ostringstream sql;
+    sql << "UPDATE " << ACCOUNTS_TBL_NAME
+        << "   SET lastlogin = '" << account->getLastLogin() << "'"
+        << " WHERE id = '" << account->getID() << "';";
     mDb->execSql(sql.str());
 }
 

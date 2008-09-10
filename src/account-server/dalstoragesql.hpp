@@ -67,7 +67,8 @@
  */
 static char const *ACCOUNTS_TBL_NAME = "tmw_accounts";
 static char const *SQL_ACCOUNTS_TABLE =
-    "CREATE TABLE tmw_accounts ("
+    "CREATE TABLE tmw_accounts \n "
+    "( \n"
 #if defined (MYSQL_SUPPORT)
         "id       INTEGER     PRIMARY KEY AUTO_INCREMENT,"
         "username VARCHAR(32) NOT NULL UNIQUE,"
@@ -79,12 +80,14 @@ static char const *SQL_ACCOUNTS_TABLE =
         "INDEX (id)"
 #error "Incorrect definition. Please fix the types."
 #elif defined (SQLITE_SUPPORT)
-        "id       INTEGER     PRIMARY KEY,"
-        "username TEXT        NOT NULL UNIQUE,"
-        "password TEXT        NOT NULL,"
-        "email    TEXT        NOT NULL,"
-        "level    INTEGER     NOT NULL,"
-        "banned   INTEGER     NOT NULL"
+        "id             INTEGER     PRIMARY KEY, \n"
+        "username       TEXT        NOT NULL UNIQUE, \n"
+        "password       TEXT        NOT NULL, \n"
+        "email          TEXT        NOT NULL, \n"
+        "level          INTEGER     NOT NULL, \n"
+        "banned         INTEGER     NOT NULL, \n"
+        "registration   INTEGER     NOT NULL, \n"
+        "lastlogin      INTEGER     NOT NULL  \n"
 //        "activation TEXT"
 #elif defined (POSTGRESQL_SUPPORT)
         "id       SERIAL      PRIMARY KEY,"
