@@ -6,8 +6,8 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "The Mana World - Server"
 PROJECT_NUMBER         = 0.1.*
-OUTPUT_DIRECTORY       = Z:/xampp/htdocs/TMW/tmwserv/trunk/docs/api
-CREATE_SUBDIRS         = NO
+OUTPUT_DIRECTORY       = docs/api
+CREATE_SUBDIRS         = YES
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
@@ -93,7 +93,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = Z:/xampp/htdocs/TMW/tmwserv/trunk
+INPUT                  = .
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \
@@ -129,7 +129,7 @@ FILE_PATTERNS          = *.c \
 RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = 
+EXCLUDE_PATTERNS       = */.svn/*
 EXCLUDE_SYMBOLS        = 
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = *
