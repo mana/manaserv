@@ -1,3 +1,12 @@
+2008-09-15  Andreas Habel  <mail@exceptionfault.de>
+
+	* Doxyfile: added doxygen file, docu will be generated under docs/api/html
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp, 
+	src/account-server/dalstoragesql.hpp, src/account-server/main-account.cpp:
+	added table tmw_world_states to store map and world-specific variables,
+	extended DALStorage to set and get those new variables, applied Kess's diff
+	file from mantis #424 with modifications for PostgreSQL support.
+    
 2008-09-10  Andreas Habel  <mail@exceptionfault.de>
 
 	* src/account-server/dalstorage.cpp, src/account-server/account.cpp,

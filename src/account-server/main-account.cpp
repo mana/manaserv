@@ -143,6 +143,7 @@ static void initialize()
     storage = new DALStorage;
     storage->open();
 
+
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
     stringFilter = new StringFilter;
@@ -310,6 +311,18 @@ int main(int argc, char *argv[])
     utils::Timer statTimer(10000);
     // Check for expired bans every 30 seconds
     utils::Timer banTimer(30000);
+
+    // -------------------------------------------------------------------------
+    // FIXME: for testing purposes only...
+    // writing accountserver startup time and svn revision to database as global
+    // world state variable
+    const time_t startup = time(NULL);
+    std::stringstream timestamp;
+    timestamp << startup;
+    storage->setWorldStateVar("accountserver_startup", timestamp.str());
+    const std::string revision = "$Revision$";
+    storage->setWorldStateVar("accountserver_version", revision);
+    // -------------------------------------------------------------------------
 
     while (running) {
         AccountClientHandler::process();

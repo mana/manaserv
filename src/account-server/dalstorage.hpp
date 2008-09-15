@@ -223,6 +223,38 @@ class DALStorage
          */
         void setQuestVar(int id, std::string const &, std::string const &);
 
+        /**
+         * Gets the string value of a world state variable.
+         *
+         * @param name Name of the requested world-state variable.
+         */
+        std::string getWorldStateVar(std::string const &name);
+
+        /**
+         * Gets the string value of a map specific world state variable.
+         *
+         * @param name Name of the requested world-state variable.
+         * @param map_id Id of the specific map.
+         */
+        std::string getWorldStateVar(std::string const &name, int map_id);
+
+        /**
+         * Sets the value of a world state variable.
+         *
+         * @param name Name of the world-state vairable.
+         * @param value New value of the world-state variable.
+         */
+        void setWorldStateVar(std::string const &name, std::string const &value);
+
+        /**
+         * Sets the value of a world state variable of a specific map.
+         *
+         * @param name Name of the world-state vairable.
+         * @param map_id ID of the specific map
+         * @param value New value of the world-state variable.
+         */
+        void setWorldStateVar(std::string const &name, int map_id,
+                              std::string const &value);
 
     private:
         /**

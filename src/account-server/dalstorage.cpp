@@ -130,6 +130,8 @@ void DALStorage::open()
         createTable(GUILDS_TBL_NAME, SQL_GUILDS_TABLE);
         createTable(GUILD_MEMBERS_TBL_NAME, SQL_GUILD_MEMBERS_TABLE);
         createTable(QUESTS_TBL_NAME, SQL_QUESTS_TABLE);
+        createTable(WORLD_STATES_TBL_NAME, SQL_WORLD_STATES_TABLE);
+
 
         // TODO: this is not the prefered way, but currently the complete
         // generation and maintenance of the database is a little dirty so
@@ -1120,6 +1122,84 @@ std::string DALStorage::getQuestVar(int id, std::string const &name)
     }
 
     return std::string();
+}
+
+std::string DALStorage::getWorldStateVar(std::string const &name)
+{
+    return getWorldStateVar(name, -1);
+}
+
+std::string DALStorage::getWorldStateVar(std::string const &name, int map_id)
+{
+    try
+    {
+        std::ostringstream query;
+        query << "SELECT value "
+              << "  FROM " << WORLD_STATES_TBL_NAME
+              << " WHERE state_name = '" << name << "'";
+
+        // add map filter if map_id is given
+        if (map_id >= 0)
+        {
+            query << "  AND map_id = '" << map_id << "'";
+        }
+
+        query << ";";
+        dal::RecordSet const &info = mDb->execSql(query.str());
+
+        if (!info.isEmpty()) return info(0, 0);
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::getWorldStateVar) SQL query failure: " << e.what());
+    }
+
+    return std::string();
+}
+
+void DALStorage::setWorldStateVar(std::string const &name, std::string const &value)
+{
+    return setWorldStateVar(name, -1, value);
+}
+
+void DALStorage::setWorldStateVar(std::string const &name,
+                                  int map_id,
+                                  std::string const &value)
+{
+    try
+    {
+        std::ostringstream query1;
+        query1 << "DELETE FROM " << WORLD_STATES_TBL_NAME
+               << " WHERE state_name = '" << name << "'";
+        if (map_id >= 0)
+        {
+            query1 << "   AND map_id = '" << map_id << "'";
+        }
+        query1 << ";";
+        mDb->execSql(query1.str());
+
+        if (value.empty()) return;
+
+        std::ostringstream query2;
+        query2 << "INSERT INTO " << WORLD_STATES_TBL_NAME
+               << " (state_name, map_id, value , moddate) VALUES ("
+               << "'" << name << "', ";
+        if (map_id >= 0)
+        {
+            query2 << "'" << map_id << "', ";
+        }
+        else
+        {
+            query2 << "NULL , ";
+        }
+        query2 << "'" << value << "', "
+               << "'" << time(NULL) << "');";
+        mDb->execSql(query2.str());
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::setWorldStateVar) SQL query failure: " << e.what());
+    }
 }
 
 void DALStorage::setQuestVar(int id, std::string const &name,
