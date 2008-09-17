@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `tmw_accounts` (
     UNIQUE KEY `username` (`username`),
     UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB 
-DEFAULT CHARSET=utf8_general_ci 
+DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `tmw_characters` (
     	REFERENCES `tmw_accounts` (`id`)
     	ON DELETE CASCADE 
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8_general_ci 
+DEFAULT CHARSET=utf8 
 AUTO_INCREMENT=1 ;
     
 --
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `tmw_inventories` (
     	REFERENCES `tmw_characters` (`id`)
     	ON DELETE CASCADE 
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8_general_ci 
+DEFAULT CHARSET=utf8 
 AUTO_INCREMENT=1 ;
 
 --
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `tmw_world_states` (
     --
     KEY `state_name` (`state_name`)
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8_general_ci;
+DEFAULT CHARSET=utf8;
 
 --
 -- table: `tmw_guilds`
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS `tmw_guilds` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8_general_ci
+DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `tmw_guild_members` (
 		REFERENCES `tmw_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8_general_ci;
+DEFAULT CHARSET=utf8;
         
 --
 -- table: `tmw_quests`
@@ -150,4 +150,4 @@ CREATE TABLE IF NOT EXISTS `tmw_quests` (
 		REFERENCES `tmw_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8_general_ci;
+DEFAULT CHARSET=utf8;
