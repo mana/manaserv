@@ -25,12 +25,20 @@
 
 #include <iosfwd>
 #include <sqlite3.h>
+#include "common/configuration.hpp"
+
+
+// sqlite3_int64 is the preferred new datatype for 64-bit int values.
+// see: http://www.sqlite.org/capi3ref.html#sqlite3_int64
+#ifndef sqlite3_int64
+typedef sqlite_int64 sqlite3_int64;
+#endif
+
 
 #include "dataprovider.h"
 
 namespace dal
 {
-
 
 /**
  * A SQLite Data Provider.
@@ -65,16 +73,9 @@ class SqLiteDataProvider: public DataProvider
         /**
          * Create a connection to the database.
          *
-         * @param dbName the database name.
-         * @param userName the user name.
-         * @param password the user password.
-         *
          * @exception DbConnectionFailure if unsuccessful connection.
          */
-        void
-        connect(const std::string& dbName,
-                const std::string& userName,
-                const std::string& password);
+        void connect();
 
 
         /**
@@ -101,8 +102,67 @@ class SqLiteDataProvider: public DataProvider
         void
         disconnect(void);
 
+        /**
+         * Starts a transaction.
+         *
+         * @exception std::runtime_error if a transaction is still open
+         */
+        void
+        beginTransaction(void)
+            throw (std::runtime_error);
+
+        /**
+         * Commits a transaction.
+         *
+         * @exception std::runtime_error if no connection is currently open.
+         */
+        void
+        commitTransaction(void)
+            throw (std::runtime_error);
+
+        /**
+         * Rollback a transaction.
+         *
+         * @exception std::runtime_error if no connection is currently open.
+         */
+        void
+        rollbackTransaction(void)
+            throw (std::runtime_error);
+
+        /**
+         * Returns the number of changed rows by the last executed SQL
+         * statement.
+         *
+         * @return Number of rows that have changed.
+         */
+        const unsigned int
+        getModifiedRows(void) const;
+
+        /**
+         * Returns the last inserted value of an autoincrement column after an
+         * INSERT statement.
+         *
+         * @return last autoincrement value.
+         */
+        const unsigned int
+        getLastId(void) const;
 
     private:
+
+        /** defines the name of the database config parameter */
+        static const std::string CFGPARAM_SQLITE_DB;
+        /** defines the default value of the CFGPARAM_SQLITE_DB parameter */
+        static const std::string CFGPARAM_SQLITE_DB_DEF;
+
+        /**
+         * Returns wheter the connection has a open transaction or is in auto-
+         * commit mode.
+         *
+         * @return true, if a transaction is open.
+         */
+        const bool
+        inTransaction(void) const;
+
         sqlite3* mDb; /**< the handle to the database connection */
 };
 

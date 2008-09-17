@@ -132,6 +132,25 @@ class DALStorage
         void banCharacter(int id, int duration);
 
         /**
+         * Delete a character in the database.
+         *
+         * @param charId character identifier.
+         * @param startTransaction indicates wheter the function should run in
+         *        its own transaction or is called inline of another transaction
+         */
+        void delCharacter(int charId, bool startTransaction) const;
+
+        /**
+         * Delete a character in the database. The object itself i not touched
+         * by this function!
+         *
+         * @param character character object.
+         * @param startTransaction indicates wheter the function should run in
+         *        its own transaction or is called inline of another transaction
+         */
+        void delCharacter(Character *character, bool startTransaction) const;
+
+        /**
          * Removes expired bans from accounts
          */
         void checkBannedAccounts();
@@ -268,34 +287,6 @@ class DALStorage
          */
         DALStorage&
         operator=(const DALStorage& rhs);
-
-
-        /**
-         * Create the specified table.
-         *
-         * @param tblName the table name.
-         * @param sql the SQL query to execute.
-         *
-         * @exception dal::DbSqlQueryExecFailure.
-         */
-        void
-        createTable(const std::string& tblName,
-                    const std::string& sql);
-
-
-        /**
-         * Create an index on the specified column.
-         *
-         * @param indxName the name of the index.
-         * @param tblName the name of the table.
-         * @param columnName the name of the columns
-         *
-         * @exception dal::DbSqlQueryExecFailure.
-         */
-        void
-        createIndex(const std::string& indxName,
-                    const std::string& tblName,
-                    const std::string& columnName );
 
         /**
          * Gets an account by using a SQL query string.

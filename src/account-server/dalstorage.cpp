@@ -59,93 +59,33 @@ DALStorage::~DALStorage()
 
 /**
  * Connect to the database and initialize it if necessary.
+ *
+ * TODO: <b>Exceptionfault:</b> after connecting to the database, we have to
+ *       verify if the version matches a supported version. Maybe implement a
+ *       "version table" to check after connect. Raise an error with verbose
+ *       informations about the discrepancy between the versions.
+ *
  */
 void DALStorage::open()
 {
     // Do nothing if already connected.
-    if (mDb->isConnected()) {
+    if (mDb->isConnected())
+    {
         return;
     }
 
     using namespace dal;
 
-    static bool dbFileShown = false;
-    std::string dbFile = "tmw";
     try {
         // open a connection to the database.
-#if defined (MYSQL_SUPPORT) || defined (POSTGRESQL_SUPPORT)
-        mDb->connect(getName(), getUser(), getPassword());
-        if (!dbFileShown)
-        {
-            LOG_INFO("Using " << dbFile << " as Database Name.");
-            dbFileShown = true;
-        }
-#elif defined (SQLITE_SUPPORT)
-        // create the database file name.
-        dbFile += ".db";
-        mDb->connect(dbFile, "", "");
-        if (!dbFileShown)
-        {
-            LOG_INFO("SQLite uses ./" << dbFile << " as DB.");
-            dbFileShown = true;
-        }
-#endif
+        mDb->connect();
 
-        // ensure that the required tables are created.
-        //
-        // strategy1: find a way to obtain the list of tables from the
-        //            underlying database and create the tables that are
-        //            missing.
-        //
-        // strategy2: try to create the tables and check the exceptions
-        //            thrown.
-        //
-        // comments:
-        //     - strategy1 is easy to achieve if we are using MysQL as
-        //       executing the request "show tables;" returns the list of
-        //       tables. However, there is not such a query for SQLite3.
-        //       When using SQLite3 from the interactive shell or the
-        //       command line, the command ".tables" returns the list of
-        //       tables but sqlite3_exec() does not validate this statement
-        //       and fails.
-        //       The cost of this strategy is:
-        //           (num. tables to create + 1) queries at most and
-        //           1 at minimum.
-        //
-        //     - strategy2 will work with probably most databases.
-        //       The cost of this strategy is:
-        //           (num. tables to create) queries.
+        //TODO: check database version here
 
-        // we will stick with strategy2 for the moment as we are focusing
-        // on SQLite.
-
-        // FIXME: The tables should be checked/created at startup in order to
-        // avoid a DbSqlQueryExecFailure assert on sqlite while registering.
-        // Also, this would initialize connection to the database earlier in
-        // memory.
-
-        createTable(ACCOUNTS_TBL_NAME, SQL_ACCOUNTS_TABLE);
-        createTable(CHARACTERS_TBL_NAME, SQL_CHARACTERS_TABLE);
-        createTable(INVENTORIES_TBL_NAME, SQL_INVENTORIES_TABLE);
-        createTable(GUILDS_TBL_NAME, SQL_GUILDS_TABLE);
-        createTable(GUILD_MEMBERS_TBL_NAME, SQL_GUILD_MEMBERS_TABLE);
-        createTable(QUESTS_TBL_NAME, SQL_QUESTS_TABLE);
-        createTable(WORLD_STATES_TBL_NAME, SQL_WORLD_STATES_TABLE);
-
-
-        // TODO: this is not the prefered way, but currently the complete
-        // generation and maintenance of the database is a little dirty so
-        // keep this as is until there is a complete cleaner solution
-        const std::string idxName("tmw_accounts_username");
-        const std::string colName("username");
-        createIndex(idxName, ACCOUNTS_TBL_NAME, colName);
     }
     catch (const DbConnectionFailure& e) {
         LOG_ERROR("(DALStorage::open #1) Unable to connect to the database: "
                      << e.what());
-    }
-    catch (const DbSqlQueryExecFailure& e) {
-        LOG_ERROR("(DALStorage::open #2) SQL query failure: " << e.what());
     }
 }
 
@@ -636,84 +576,6 @@ bool DALStorage::updateCharacter(Character *character)
 
 
 /**
- * Create the specified table.
- */
-void
-DALStorage::createTable(const std::string& tblName,
-                        const std::string& sql)
-{
-    try {
-        mDb->execSql(sql);
-    }
-    catch (const dal::DbSqlQueryExecFailure& e) {
-        // error message to check against.
-#if defined (MYSQL_SUPPORT)
-        std::string alreadyExists("Table '");
-        alreadyExists += tblName;
-        alreadyExists += "' already exists";
-#elif defined (POSTGRESQL_SUPPORT)
-        std::string alreadyExists("table ");
-        alreadyExists += tblName;
-        alreadyExists += " already exists";
-#else // SQLITE_SUPPORT
-        std::string alreadyExists("table ");
-        alreadyExists += tblName;
-        alreadyExists += " already exists";
-#endif
-
-        const std::string msg(e.what());
-
-        // oops, another problem occurred.
-        if (msg != alreadyExists) {
-            // rethrow to let other error handlers manage the problem.
-            throw;
-        }
-    }
-}
-
-/**
- * Create a index on the table
- */
-void
-DALStorage::createIndex(const std::string& indxName,
-            const std::string& tblName,
-            const std::string& columnName )
-{
-#if defined (MYSQL_SUPPORT)
-#error MYSQL SUPPORT not complete implemented yet!
-
-#elif defined (SQLITE_SUPPORT)
-    std::ostringstream mSQL;
-    mSQL << "CREATE INDEX " << indxName << " ON " << tblName;
-    mSQL << " ( " << columnName << " );";
-
-    std::ostringstream mExists;
-    mExists << "index " << indxName << " already exists";
-#elif defined (POSTGRESQL_SUPPORT)
-
-#error POSTGRESQL SUPPORT not complete implemented yet!
-#endif
-
-    try {
-        mDb->execSql(mSQL.str());
-    }
-    catch (const dal::DbSqlQueryExecFailure& e)
-    {
-        const std::string msg(e.what());
-        if(msg == mExists.str())
-        {
-            LOG_DEBUG(mExists.str());
-        }
-        else
-        {
-            throw;
-        }
-    }
-} // end of createIndex
-
-
-
-/**
  * Add an account to the database.
  */
 void DALStorage::addAccount(Account *account)
@@ -722,31 +584,44 @@ void DALStorage::addAccount(Account *account)
 
     using namespace dal;
 
-    // TODO: we should start a transaction here so that in case of problem
-    // the lost of data would be minimized.
+    mDb->beginTransaction();
+    try
+    {
+        // insert the account.
+        std::ostringstream sql1;
+        sql1 << "insert into " << ACCOUNTS_TBL_NAME
+             << " (username, password, email, level, banned, registration, lastlogin)"
+             << " values (\""
+             << account->getName() << "\", \""
+             << account->getPassword() << "\", \""
+             << account->getEmail() << "\", "
+             << account->getLevel() << ", 0, "
+             << account->getRegistrationDate() << ", "
+             << account->getLastLogin() << ");";
+        mDb->execSql(sql1.str());
 
+        // get the account id.
+        /*
+        Exceptionfault: no longer needed as our databases provides a function to
+                        get the last inserted auto-increment value
 
-    // insert the account.
-    std::ostringstream sql1;
-    sql1 << "insert into " << ACCOUNTS_TBL_NAME
-         << " (username, password, email, level, banned, registration, lastlogin)"
-         << " values (\""
-         << account->getName() << "\", \""
-         << account->getPassword() << "\", \""
-         << account->getEmail() << "\", "
-         << account->getLevel() << ", 0, "
-         << account->getRegistrationDate() << ", "
-         << account->getLastLogin() << ");";
-    mDb->execSql(sql1.str());
+        std::ostringstream sql2;
+        sql2 << "select id from " << ACCOUNTS_TBL_NAME
+             << " where username = \"" << account->getName() << "\";";
+        const RecordSet& accountInfo = mDb->execSql(sql2.str());
+        string_to<unsigned int> toUint;
+        unsigned id = toUint(accountInfo(0, 0));
+        account->setID(id);
+        */
+        account->setID(mDb->getLastId());
 
-    // get the account id.
-    std::ostringstream sql2;
-    sql2 << "select id from " << ACCOUNTS_TBL_NAME
-         << " where username = \"" << account->getName() << "\";";
-    const RecordSet& accountInfo = mDb->execSql(sql2.str());
-    string_to<unsigned int> toUint;
-    unsigned id = toUint(accountInfo(0, 0));
-    account->setID(id);
+        mDb->commitTransaction();
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        LOG_ERROR("Error in DALStorage::addAccount: " << e.what());
+        mDb->rollbackTransaction();
+    }
 }
 
 /**
@@ -758,153 +633,135 @@ void DALStorage::flush(Account *account)
 
     using namespace dal;
 
-    // TODO: we should start a transaction here so that in case of problem
-    // the loss of data would be minimized.
-
-    // update the account.
-    std::ostringstream sqlUpdateAccountTable;
-    sqlUpdateAccountTable << "update " << ACCOUNTS_TBL_NAME
-         << " set username = '" << account->getName() << "', "
-         << "password = '" << account->getPassword() << "', "
-         << "email = '" << account->getEmail() << "', "
-         << "level = '" << account->getLevel() << "', "
-         << "lastlogin = '" << account->getLastLogin() << "' "
-         << "where id = '" << account->getID() << "';";
-    mDb->execSql(sqlUpdateAccountTable.str());
-
-    // get the list of characters that belong to this account.
-    Characters &characters = account->getCharacters();
-
-    // insert or update the characters.
-    for (Characters::const_iterator it = characters.begin(),
-         it_end = characters.end(); it != it_end; ++it)
+    mDb->beginTransaction();
+    try
     {
-        if ((*it)->getDatabaseID() >= 0)
+
+        // update the account.
+        std::ostringstream sqlUpdateAccountTable;
+        sqlUpdateAccountTable
+             << "update " << ACCOUNTS_TBL_NAME
+             << " set username = '" << account->getName() << "', "
+             << "password = '" << account->getPassword() << "', "
+             << "email = '" << account->getEmail() << "', "
+             << "level = '" << account->getLevel() << "', "
+             << "lastlogin = '" << account->getLastLogin() << "' "
+             << "where id = '" << account->getID() << "';";
+        mDb->execSql(sqlUpdateAccountTable.str());
+
+        // get the list of characters that belong to this account.
+        Characters &characters = account->getCharacters();
+
+        // insert or update the characters.
+        for (Characters::const_iterator it = characters.begin(),
+             it_end = characters.end(); it != it_end; ++it)
         {
-            updateCharacter(*it);
-        }
-        else
-        {
-            std::ostringstream sqlInsertCharactersTable;
-            // insert the character
-            // This assumes that the characters name has been checked for
-            // uniqueness
-            sqlInsertCharactersTable
-                 << "insert into " << CHARACTERS_TBL_NAME
-                 << " (user_id, name, gender, hair_style, hair_color, level, char_pts, correct_pts, money,"
-                 << " x, y, map_id, str, agi, dex, vit, int, will, unarmed_exp, knife_exp, sword_exp, polearm_exp,"
-                 << " staff_exp, whip_exp, bow_exp, shoot_exp, mace_exp, axe_exp, thrown_exp) values ("
-                 << account->getID() << ", \""
-                 << (*it)->getName() << "\", "
-                 << (*it)->getGender() << ", "
-                 << (int)(*it)->getHairStyle() << ", "
-                 << (int)(*it)->getHairColor() << ", "
-                 << (int)(*it)->getLevel() << ", "
-                 << (int)(*it)->getCharacterPoints() << ", "
-                 << (int)(*it)->getCorrectionPoints() << ", "
-                 << (*it)->getPossessions().money << ", "
-                 << (*it)->getPosition().x << ", "
-                 << (*it)->getPosition().y << ", "
-                 << (*it)->getMapId() << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_STRENGTH) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_AGILITY) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_DEXTERITY) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_VITALITY) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_INTELLIGENCE) << ", "
-                 << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_NONE - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_KNIFE - CHAR_SKILL_BEGIN) << ","
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_SWORD - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_POLEARM - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_STAFF - CHAR_SKILL_BEGIN) << ","
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_WHIP - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_BOW - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_SHOOTING - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_MACE - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_AXE - CHAR_SKILL_BEGIN) << ", "
-                 << (*it)->getExperience(CHAR_SKILL_WEAPON_THROWN - CHAR_SKILL_BEGIN)
-                 << ");";
-
-            mDb->execSql(sqlInsertCharactersTable.str());
-
-            // Update the character ID.
-            std::ostringstream sqlSelectIdCharactersTable;
-            sqlSelectIdCharactersTable
-                 << "select id from " << CHARACTERS_TBL_NAME
-                 << " where name = \"" << (*it)->getName() << "\";";
-            RecordSet const &charInfo =
-                mDb->execSql(sqlSelectIdCharactersTable.str());
-
-            if (!charInfo.isEmpty()) {
-                string_to<unsigned int> toUint;
-                (*it)->setDatabaseID(toUint(charInfo(0, 0)));
+            if ((*it)->getDatabaseID() >= 0)
+            {
+                updateCharacter(*it);
             }
             else
             {
-                // TODO: The character's name is not unique, or some other
-                // error has occured
+                std::ostringstream sqlInsertCharactersTable;
+                // insert the character
+                // This assumes that the characters name has been checked for
+                // uniqueness
+                sqlInsertCharactersTable
+                     << "insert into " << CHARACTERS_TBL_NAME
+                     << " (user_id, name, gender, hair_style, hair_color, level, char_pts, correct_pts, money,"
+                     << " x, y, map_id, str, agi, dex, vit, "
+#if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
+            << "`int`, "
+#else
+            << "int, "
+#endif
+                     << "will, unarmed_exp, knife_exp, sword_exp, polearm_exp,"
+                     << " staff_exp, whip_exp, bow_exp, shoot_exp, mace_exp, axe_exp, thrown_exp) values ("
+                     << account->getID() << ", \""
+                     << (*it)->getName() << "\", "
+                     << (*it)->getGender() << ", "
+                     << (int)(*it)->getHairStyle() << ", "
+                     << (int)(*it)->getHairColor() << ", "
+                     << (int)(*it)->getLevel() << ", "
+                     << (int)(*it)->getCharacterPoints() << ", "
+                     << (int)(*it)->getCorrectionPoints() << ", "
+                     << (*it)->getPossessions().money << ", "
+                     << (*it)->getPosition().x << ", "
+                     << (*it)->getPosition().y << ", "
+                     << (*it)->getMapId() << ", "
+                     << (*it)->getAttribute(CHAR_ATTR_STRENGTH) << ", "
+                     << (*it)->getAttribute(CHAR_ATTR_AGILITY) << ", "
+                     << (*it)->getAttribute(CHAR_ATTR_DEXTERITY) << ", "
+                     << (*it)->getAttribute(CHAR_ATTR_VITALITY) << ", "
+                     << (*it)->getAttribute(CHAR_ATTR_INTELLIGENCE) << ", "
+                     << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_NONE - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_KNIFE - CHAR_SKILL_BEGIN) << ","
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_SWORD - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_POLEARM - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_STAFF - CHAR_SKILL_BEGIN) << ","
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_WHIP - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_BOW - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_SHOOTING - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_MACE - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_AXE - CHAR_SKILL_BEGIN) << ", "
+                     << (*it)->getExperience(CHAR_SKILL_WEAPON_THROWN - CHAR_SKILL_BEGIN)
+                     << ");";
+
+                mDb->execSql(sqlInsertCharactersTable.str());
+
+                // Update the character ID.
+                (*it)->setDatabaseID(mDb->getLastId());
             }
-        }
-    }
+        } //
 
-    // Existing characters in memory have been inserted or updated in database.
-    // Now, let's remove those who are no more in memory from database.
+        // Existing characters in memory have been inserted or updated in database.
+        // Now, let's remove those who are no more in memory from database.
 
-    // specialize the string_to functor to convert
-    // a string to an unsigned int.
-    string_to<unsigned short> toUint;
+        // specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to<unsigned short> toUint;
 
-    std::ostringstream sqlSelectNameIdCharactersTable;
-    sqlSelectNameIdCharactersTable
-         << "select name, id from " << CHARACTERS_TBL_NAME
-         << " where user_id = '" << account->getID() << "';";
-    const RecordSet& charInMemInfo =
-        mDb->execSql(sqlSelectNameIdCharactersTable.str());
+        std::ostringstream sqlSelectNameIdCharactersTable;
+        sqlSelectNameIdCharactersTable
+             << "select name, id from " << CHARACTERS_TBL_NAME
+             << " where user_id = '" << account->getID() << "';";
+        const RecordSet& charInMemInfo =
+            mDb->execSql(sqlSelectNameIdCharactersTable.str());
 
-    // We compare chars from memory and those existing in db,
-    // And delete those not in mem but existing in db.
-    bool charFound;
-    for (unsigned int i = 0; i < charInMemInfo.rows(); ++i) // in database
-    {
-        charFound = false;
-        for (Characters::const_iterator it = characters.begin(),
-             it_end = characters.end(); it != it_end; ++it) // In memory
+        // We compare chars from memory and those existing in db,
+        // And delete those not in mem but existing in db.
+        bool charFound;
+        for (unsigned int i = 0; i < charInMemInfo.rows(); ++i) // in database
         {
-            if (charInMemInfo(i, 0) == (*it)->getName())
+            charFound = false;
+            for (Characters::const_iterator it = characters.begin(),
+                 it_end = characters.end(); it != it_end; ++it) // In memory
             {
-                charFound = true;
-                break;
+                if (charInMemInfo(i, 0) == (*it)->getName())
+                {
+                    charFound = true;
+                    break;
+                }
+            }
+            if (!charFound)
+            {
+                // The char is db but not in memory,
+                // It will be removed from database.
+                // We store the id of the char to delete
+                // Because as deleted, the RecordSet is also emptied
+                // That creates an error.
+                unsigned int charId = toUint(charInMemInfo(i, 1));
+                delCharacter(charId, false);
             }
         }
-        if (!charFound)
-        {
-            // The char is db but not in memory,
-            // It will be removed from database.
-            // We store the id of the char to delete
-            // Because as deleted, the RecordSet is also emptied
-            // That creates an error.
-            unsigned int charId = toUint(charInMemInfo(i, 1));
 
-                // delete the inventory.
-                std::ostringstream sqlDeleteInventoryTable;
-                sqlDeleteInventoryTable
-                    << "delete from "
-                    << INVENTORIES_TBL_NAME
-                    << " where owner_id = '"
-                    << charId
-                    << "';";
-                mDb->execSql(sqlDeleteInventoryTable.str());
-
-                // now delete the character.
-                std::ostringstream sqlDeleteCharactersTable;
-                sqlDeleteCharactersTable
-                    << "delete from "
-                    << CHARACTERS_TBL_NAME
-                    << " where id = '"
-                    << charId
-                    << "';";
-                mDb->execSql(sqlDeleteCharactersTable.str());
-        }
+        mDb->commitTransaction();
+    }
+    catch (const std::exception &e)
+    {
+        LOG_ERROR("ERROR in DALStorage::flush: " << e.what());
+        mDb->rollbackTransaction();
     }
 }
 
@@ -1168,33 +1025,57 @@ void DALStorage::setWorldStateVar(std::string const &name,
 {
     try
     {
-        std::ostringstream query1;
-        query1 << "DELETE FROM " << WORLD_STATES_TBL_NAME
-               << " WHERE state_name = '" << name << "'";
-        if (map_id >= 0)
+        // set the value to empty means: delete the variable
+        if (value.empty())
         {
-            query1 << "   AND map_id = '" << map_id << "'";
+            std::ostringstream deleteStateVar;
+            deleteStateVar << "DELETE FROM " << WORLD_STATES_TBL_NAME
+                           << " WHERE state_name = '" << name << "'";
+            if (map_id >= 0)
+            {
+                deleteStateVar << " AND map_id = '" << map_id << "'";
+            }
+            deleteStateVar << ";";
+            mDb->execSql(deleteStateVar.str());
+            return;
         }
-        query1 << ";";
-        mDb->execSql(query1.str());
 
-        if (value.empty()) return;
+        // try to update the variable in the database
+        std::ostringstream updateStateVar;
+        updateStateVar << "UPDATE " << WORLD_STATES_TBL_NAME
+                       << "   SET value = '" << value << "', "
+                       << "       moddate = '" << time(NULL) << "' "
+                       << " WHERE state_name = '" << name << "'";
 
-        std::ostringstream query2;
-        query2 << "INSERT INTO " << WORLD_STATES_TBL_NAME
-               << " (state_name, map_id, value , moddate) VALUES ("
-               << "'" << name << "', ";
         if (map_id >= 0)
         {
-            query2 << "'" << map_id << "', ";
+            updateStateVar << "   AND map_id = '" << map_id << "'";
+        }
+        updateStateVar << ";";
+        mDb->execSql(updateStateVar.str());
+
+        // if we updated a row, were finished here
+        if (mDb->getModifiedRows() >= 1)
+        {
+            return;
+        }
+
+        // otherwise we have to add the new variable
+        std::ostringstream insertStateVar;
+        insertStateVar << "INSERT INTO " << WORLD_STATES_TBL_NAME
+                       << " (state_name, map_id, value , moddate) VALUES ("
+                       << "'" << name << "', ";
+        if (map_id >= 0)
+        {
+            insertStateVar << "'" << map_id << "', ";
         }
         else
         {
-            query2 << "NULL , ";
+            insertStateVar << "NULL , ";
         }
-        query2 << "'" << value << "', "
-               << "'" << time(NULL) << "');";
-        mDb->execSql(query2.str());
+        insertStateVar << "'" << value << "', "
+                       << "'" << time(NULL) << "');";
+        mDb->execSql(insertStateVar.str());
     }
     catch (dal::DbSqlQueryExecFailure const &e)
     {
@@ -1252,6 +1133,57 @@ void DALStorage::banCharacter(int id, int duration)
     {
         LOG_ERROR("(DALStorage::banAccount) SQL query failure: " << e.what());
     }
+}
+
+void DALStorage::delCharacter(int charId, bool startTransaction = true) const
+{
+    if (startTransaction)
+        mDb->beginTransaction();
+    try
+    {
+        // delete the inventory of the character
+        std::ostringstream sqlDeleteInventoryTable;
+        sqlDeleteInventoryTable
+            << "DELETE FROM " << INVENTORIES_TBL_NAME
+            << " WHERE owner_id = '" << charId << "';";
+        mDb->execSql(sqlDeleteInventoryTable.str());
+
+        // delete from the quests table
+        std::ostringstream sqlDeleteQuestsTable;
+        sqlDeleteQuestsTable
+            << "DELETE FROM " << QUESTS_TBL_NAME
+            << " WHERE owner_id = '" << charId << "';";
+        mDb->execSql(sqlDeleteQuestsTable.str());
+
+        // delete from the guilds table
+        std::ostringstream sqlDeleteGuildsTable;
+        sqlDeleteGuildsTable
+            << "DELETE FROM " << GUILD_MEMBERS_TBL_NAME
+            << " WHERE member_id = '" << charId << "';";
+        mDb->execSql(sqlDeleteGuildsTable.str());
+
+        // now delete the character itself.
+        std::ostringstream sqlDeleteCharactersTable;
+        sqlDeleteCharactersTable
+            << "DELETE FROM " << CHARACTERS_TBL_NAME
+            << " WHERE id = '" << charId << "';";
+        mDb->execSql(sqlDeleteCharactersTable.str());
+
+        if (startTransaction)
+            mDb->commitTransaction();
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        if (startTransaction)
+            mDb->rollbackTransaction();
+        LOG_ERROR("(DALStorage::delCharacter) SQL query failure: " << e.what());
+    }
+}
+
+void DALStorage::delCharacter(Character *character,
+                              bool startTransaction = true) const
+{
+    delCharacter(character->getDatabaseID(), startTransaction);
 }
 
 void DALStorage::checkBannedAccounts()

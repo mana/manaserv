@@ -1,6 +1,6 @@
 /*
  *  The Mana World Server
- *  Copyright 2004 The Mana World Development Team
+ *  Copyright 2008 The Mana World Development Team
  *
  *  This file is part of The Mana World.
  *
@@ -66,288 +66,39 @@
  * TABLE: tmw_accounts.
  */
 static char const *ACCOUNTS_TBL_NAME = "tmw_accounts";
-static char const *SQL_ACCOUNTS_TABLE =
-    "CREATE TABLE tmw_accounts \n "
-    "( \n"
-#if defined (MYSQL_SUPPORT)
-        "id           INTEGER     PRIMARY KEY AUTO_INCREMENT,"
-        "username     VARCHAR(32) NOT NULL UNIQUE,"
-        "password     VARCHAR(32) NOT NULL,"
-        "email        VARCHAR(64) NOT NULL,"
-        "level        TINYINT     UNSIGNED NOT NULL,"
-        "banned       TINYINT     UNSIGNED NOT NULL,"
-        "registration INTEGER     NOT NULL,"
-        "lastlogin    INTEGER     NOT NULL,"
-//        "activation   VARCHAR(32),"
-        "INDEX (id)"
-#error "Incorrect definition. Please fix the types."
-#elif defined (SQLITE_SUPPORT)
-        "id           INTEGER     PRIMARY KEY, \n"
-        "username     TEXT        NOT NULL UNIQUE, \n"
-        "password     TEXT        NOT NULL, \n"
-        "email        TEXT        NOT NULL, \n"
-        "level        INTEGER     NOT NULL, \n"
-        "banned       INTEGER     NOT NULL, \n"
-        "registration INTEGER     NOT NULL, \n"
-        "lastlogin    INTEGER     NOT NULL  \n"
-//        "activation   TEXT"
-#elif defined (POSTGRESQL_SUPPORT)
-        "id           SERIAL      PRIMARY KEY,"
-        "username     TEXT        NOT NULL UNIQUE,"
-        "password     TEXT        NOT NULL,"
-        "email        TEXT        NOT NULL,"
-        "level        SMALLINT    NOT NULL,"
-        "banned       SMALLINT    NOT NULL,"
-        "registration INTEGER     NOT NULL,"
-        "lastlogin    INTEGER     NOT NULL"
-//        "activation   TEXT"
-#endif
-    ");";
-
 
 /**
  * TABLE: tmw_characters.
  *     - gender is 0 for male, 1 for female.
  */
 static char const *CHARACTERS_TBL_NAME = "tmw_characters";
-static char const *SQL_CHARACTERS_TABLE =
-    "CREATE TABLE tmw_characters ("
-#if defined (MYSQL_SUPPORT)
-        "id          INTEGER     PRIMARY KEY AUTO_INCREMENT,"
-        "user_id     INTEGER     UNSIGNED NOT NULL,"
-        "name        VARCHAR(32) NOT NULL UNIQUE,"
-        // general information about the character
-        "gender      TINYINT     UNSIGNED NOT NULL,"
-        "hair_style  TINYINT     UNSIGNED NOT NULL,"
-        "hair_color  TINYINT     UNSIGNED NOT NULL,"
-        "level       INTEGER     UNSIGNED NOT NULL,"
-        "char_pts    INTEGER     UNSIGNED NOT NULL,"
-        "correct_pts INTEGER     UNSIGNED NOT NULL,"
-        "money       INTEGER     UNSIGNED NOT NULL,"
-        // location on the map
-        "x           SMALLINT    UNSIGNED NOT NULL,"
-        "y           SMALLINT    UNSIGNED NOT NULL,"
-        "map_id      TINYINT     NOT NULL,"
-        // attributes
-        "str         SMALLINT    UNSIGNED NOT NULL,"
-        "agi         SMALLINT    UNSIGNED NOT NULL,"
-        "dex         SMALLINT    UNSIGNED NOT NULL,"
-        "vit         SMALLINT    UNSIGNED NOT NULL,"
-        // note: int must be backquoted as it's a MySQL keyword
-        "`int`       SMALLINT    UNSIGNED NOT NULL,"
-        "will        SMALLINT    UNSIGNED NOT NULL,"
-        //skill experience
-        "unarmedExp  INTEGER     UNSIGNED NOT NULL,"
-        "knife_exp   INTEGER     UNSIGNED NOT NULL,"
-        "sword_exp   INTEGER     UNSIGNED NOT NULL,"
-        "polearm_exp INTEGER     UNSIGNED NOT NULL,"
-        "staff_exp   INTEGER     UNSIGNED NOT NULL,"
-        "whip_exp    INTEGER     UNSIGNED NOT NULL,"
-        "bow_exp     INTEGER     UNSIGNED NOT NULL,"
-        "shoot_exp   INTEGER     UNSIGNED NOT NULL,"
-        "mace_exp    INTEGER     UNSIGNED NOT NULL,"
-        "axe_exp     INTEGER     UNSIGNED NOT NULL,"
-        "thrown_exp  INTEGER     UNSIGNED NOT NULL,"
-        "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
-        "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id),"
-        "INDEX (id)"
-#elif defined (SQLITE_SUPPORT)
-        "id          INTEGER     PRIMARY KEY,"
-        "user_id     INTEGER     NOT NULL,"
-        "name        TEXT        NOT NULL UNIQUE,"
-        // general information about the character
-        "gender      INTEGER     NOT NULL,"
-        "hair_style  INTEGER     NOT NULL,"
-        "hair_color  INTEGER     NOT NULL,"
-        "level       INTEGER     NOT NULL,"
-        "char_pts    INTEGER     NOT NULL,"
-        "correct_pts INTEGER     NOT NULL,"
-        "money       INTEGER     NOT NULL,"
-        // location on the map
-        "x           INTEGER     NOT NULL,"
-        "y           INTEGER     NOT NULL,"
-        "map_id      INTEGER     NOT NULL,"
-        // attributes
-        "str         INTEGER     NOT NULL,"
-        "agi         INTEGER     NOT NULL,"
-        "dex         INTEGER     NOT NULL,"
-        "vit         INTEGER     NOT NULL,"
-        "int         INTEGER     NOT NULL,"
-        "will        INTEGER     NOT NULL,"
-        //skill experience
-        "unarmed_exp INTEGER     NOT NULL,"
-        "knife_exp   INTEGER     NOT NULL,"
-        "sword_exp   INTEGER     NOT NULL,"
-        "polearm_exp INTEGER     NOT NULL,"
-        "staff_exp   INTEGER     NOT NULL,"
-        "whip_exp    INTEGER     NOT NULL,"
-        "bow_exp     INTEGER     NOT NULL,"
-        "shoot_exp   INTEGER     NOT NULL,"
-        "mace_exp    INTEGER     NOT NULL,"
-        "axe_exp     INTEGER     NOT NULL,"
-        "thrown_exp  INTEGER     NOT NULL,"
-        "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
-        "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
-#elif defined (POSTGRESQL_SUPPORT)
-        "id          SERIAL      PRIMARY KEY,"
-        "user_id     INTEGER     NOT NULL,"
-        "name        TEXT        NOT NULL UNIQUE,"
-        // general information about the character
-        "gender      SMALLINT    NOT NULL,"
-        "hair_style  SMALLINT    NOT NULL,"
-        "hair_color  INTEGER     NOT NULL,"
-        "level       INTEGER     NOT NULL,"
-        "char_pts    INTEGER     NOT NULL,"
-        "correct_pts INTEGER     NOT NULL,"
-        "money       INTEGER     NOT NULL,"
-        // location on the map
-        "x           SMALLINT    NOT NULL,"
-        "y           SMALLINT    NOT NULL,"
-        "map_id      SMALLINT    NOT NULL,"
-        // attributes
-        "str         SMALLINT    NOT NULL,"
-        "agi         SMALLINT    NOT NULL,"
-        "dex         SMALLINT    NOT NULL,"
-        "vit         SMALLINT    NOT NULL,"
-        "int         SMALLINT    NOT NULL,"
-        "will        SMALLINT    NOT NULL,"
-        //skill experience
-        "unarmed_exp INTEGER     NOT NULL,"
-        "knife_exp   INTEGER     NOT NULL,"
-        "sword_exp   INTEGER     NOT NULL,"
-        "polearm_exp INTEGER     NOT NULL,"
-        "staff_exp   INTEGER     NOT NULL,"
-        "whip_exp    INTEGER     NOT NULL,"
-        "bow_exp     INTEGER     NOT NULL,"
-        "shoot_exp   INTEGER     NOT NULL,"
-        "mace_exp    INTEGER     NOT NULL,"
-        "axe_exp     INTEGER     NOT NULL,"
-        "thrown_exp  INTEGER     NOT NULL,"
-        "FOREIGN KEY (user_id) REFERENCES tmw_accounts(id),"
-        "FOREIGN KEY (map_id)  REFERENCES tmw_maps(id)"
-#endif
-    ");";
-
 
 /**
  * TABLE: tmw_inventories.
  */
 static char const *INVENTORIES_TBL_NAME("tmw_inventories");
-static char const *SQL_INVENTORIES_TABLE =
-    "CREATE TABLE tmw_inventories ("
-#if defined (MYSQL_SUPPORT)
-        "id       INTEGER  PRIMARY KEY AUTO_INCREMENT,"
-        "owner_id INTEGER  NOT NULL,"
-        "slot     SMALLINT NOT NULL,"
-        "class_id INTEGER  NOT NULL,"
-        "amount   SMALLINT NOT NULL,"
-        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
-        "INDEX (id)"
-#elif defined (SQLITE_SUPPORT)
-        "id       INTEGER  PRIMARY KEY,"
-        "owner_id INTEGER  NOT NULL,"
-        "slot     INTEGER  NOT NULL,"
-        "class_id INTEGER  NOT NULL,"
-        "amount   INTEGER  NOT NULL,"
-        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
-#elif defined (POSTGRESQL_SUPPORT)
-        "id       SERIAL   PRIMARY KEY,"
-        "owner_id INTEGER  NOT NULL,"
-        "slot     SMALLINT NOT NULL,"
-        "class_id INTEGER  NOT NULL,"
-        "amount   SMALLINT NOT NULL,"
-        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
-#endif
-    ");";
 
 /**
  * TABLE: tmw_guilds.
  * Store player guilds
  */
 static char const *GUILDS_TBL_NAME = "tmw_guilds";
-static char const *SQL_GUILDS_TABLE =
-    "CREATE TABLE tmw_guilds ("
-#if defined (MYSQL_SUPPORT)
-        "id   INTEGER     PRIMARY KEY AUTO_INCREMENT,"
-        "name VARCHAR(32) NOT NULL UNIQUE"
-#elif defined (SQLITE_SUPPORT)
-        "id   INTEGER     PRIMARY KEY,"
-        "name TEXT        NOT NULL UNIQUE"
-#elif defined (POSTGRESQL_SUPPORT)
-        "id   SERIAL      PRIMARY KEY,"
-        "name TEXT        NOT NULL UNIQUE"
-#endif
-    ");";
 
 /**
  * TABLE: tmw_guild_members.
  * Store guild members
  */
 static char const *GUILD_MEMBERS_TBL_NAME = "tmw_guild_members";
-static char const *SQL_GUILD_MEMBERS_TABLE =
-    "CREATE TABLE tmw_guild_members ("
-#if defined (MYSQL_SUPPORT)
-        "guild_id  INTEGER NOT NULL,"
-        "member_id INTEGER NOT NULL,"
-        "rights    INTEGER NOT NULL,"
-        "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
-        "FOREIGN KEY (member_id)   REFERENCES tmw_characters(id)"
-#elif defined (SQLITE_SUPPORT)
-        "guild_id  INTEGER NOT NULL,"
-        "member_id INTEGER NOT NULL,"
-        "rights    INTEGER NOT NULL,"
-        "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
-        "FOREIGN KEY (member_id)   REFERENCES tmw_characters(id)"
-#elif defined (POSTGRESQL_SUPPORT)
-        "guild_id  INTEGER NOT NULL,"
-        "member_id INTEGER NOT NULL,"
-        "rights    INTEGER NOT NULL,"
-        "FOREIGN KEY (guild_id)    REFERENCES tmw_guilds(id),"
-        "FOREIGN KEY (member_id)   REFERENCES tmw_characters(id)"
-#endif
-    ");";
 
 /**
  * TABLE: tmw_quests.
  */
 static char const *QUESTS_TBL_NAME = "tmw_quests";
-static char const *SQL_QUESTS_TABLE =
-    "CREATE TABLE tmw_quests ("
-#if defined (MYSQL_SUPPORT)
-#error "Missing definition. Please fill the blanks."
-#elif defined (SQLITE_SUPPORT)
-        "owner_id INTEGER NOT NULL,"
-        "name     TEXT    NOT NULL,"
-        "value    TEXT    NOT NULL,"
-        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
-#elif defined (POSTGRESQL_SUPPORT)
-        "owner_id INTEGER NOT NULL,"
-        "name     TEXT    NOT NULL,"
-        "value    TEXT    NOT NULL,"
-        "FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)"
-#endif
-    ");";
 
 /**
  * TABLE: tmw_world_states
  */
 static char const *WORLD_STATES_TBL_NAME = "tmw_world_states";
-static char const *SQL_WORLD_STATES_TABLE =
-    "CREATE TABLE tmw_world_states \n"
-    "( \n"
-#if defined (MYSQL_SUPPORT)
-        "state_name     VARCHAR(100)       NOT NULL, \n"
-        "map_id         SMALLINT UNSIGNED  NULL, \n"
-        "value          VARCHAR(255)       NULL, \n"
-        "moddate        INT UNSIGNED       NOT NULL, \n"
-        "PRIMARY KEY(state_name) \n"
-#elif defined (SQLITE_SUPPORT)
-        "state_name     TEXT               PRIMARY KEY, \n"
-        "map_id         INTEGER            NULL, \n"
-        "value          TEXT               NULL, \n"
-        "moddate        INTEGER            NOT NULL \n"
-#elif defined (POSTGRESQL_SUPPORT)
-#endif
-    ");";
+
 
 #endif // _TMWSERV_DALSTORAGE_SQL_H_

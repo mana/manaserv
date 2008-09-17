@@ -32,6 +32,10 @@ namespace dal
 {
 
 
+const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB     = "sqlite_database";
+const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB_DEF = "tmw.db";
+
+
 /**
  * Constructor.
  */
@@ -78,10 +82,15 @@ SqLiteDataProvider::getDbBackend(void) const
  * Create a connection to the database.
  */
 void
-SqLiteDataProvider::connect(const std::string& dbName,
-                            const std::string& userName,
-                            const std::string& password)
+SqLiteDataProvider::connect()
 {
+    // get configuration parameter for sqlite
+    const std::string dbName
+        = Configuration::getValue(CFGPARAM_SQLITE_DB, CFGPARAM_SQLITE_DB_DEF);
+
+    LOG_INFO("Trying to connect with SQLite database file '"
+        << dbName << "'");
+
     // sqlite3_open creates the database file if it does not exist
     // as a side-effect.
     if (sqlite3_open(dbName.c_str(), &mDb) != SQLITE_OK) {
@@ -104,6 +113,7 @@ SqLiteDataProvider::connect(const std::string& dbName,
     mDbName = dbName;
 
     mIsConnected = true;
+    LOG_INFO("Connection to database sucessfull.");
 }
 
 
@@ -118,7 +128,7 @@ SqLiteDataProvider::execSql(const std::string& sql,
         throw std::runtime_error("not connected to database");
     }
 
-    LOG_DEBUG("Performing SQL querry: "<<sql);
+    LOG_DEBUG("Performing SQL query: "<<sql);
 
     // do something only if the query is different from the previous
     // or if the cache must be refreshed
@@ -198,5 +208,166 @@ SqLiteDataProvider::disconnect(void)
     mIsConnected = false;
 }
 
+void
+SqLiteDataProvider::beginTransaction(void)
+    throw (std::runtime_error)
+{
+    if (!mIsConnected)
+    {
+        const std::string error = "Trying to begin a transaction while not "
+            "connected to the database!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    if (inTransaction())
+    {
+        const std::string error = "Trying to begin a transaction while anoter "
+            "one is still open!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    // trying to open a transaction
+    try
+    {
+        execSql("BEGIN TRANSACTION;");
+        LOG_DEBUG("SQL: started transaction");
+    }
+    catch (const DbSqlQueryExecFailure &e)
+    {
+        std::ostringstream error;
+        error << "SQL ERROR while trying to start a transaction: " << e.what();
+        LOG_ERROR(error);
+        throw std::runtime_error(error.str());
+    }
+}
+
+void
+SqLiteDataProvider::commitTransaction(void)
+    throw (std::runtime_error)
+{
+    if (!mIsConnected)
+    {
+        const std::string error = "Trying to commit a transaction while not "
+            "connected to the database!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    if (!inTransaction())
+    {
+        const std::string error = "Trying to commit a transaction while no "
+            "one is open!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    // trying to commit a transaction
+    try
+    {
+        execSql("COMMIT TRANSACTION;");
+        LOG_DEBUG("SQL: commited transaction");
+    }
+    catch (const DbSqlQueryExecFailure &e)
+    {
+        std::ostringstream error;
+        error << "SQL ERROR while trying to commit a transaction: " << e.what();
+        LOG_ERROR(error);
+        throw std::runtime_error(error.str());
+    }
+}
+
+void
+SqLiteDataProvider::rollbackTransaction(void)
+    throw (std::runtime_error)
+{
+    if (!mIsConnected)
+    {
+        const std::string error = "Trying to rollback a transaction while not "
+            "connected to the database!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    if (!inTransaction())
+    {
+        const std::string error = "Trying to rollback a transaction while no "
+            "one is open!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    // trying to rollback a transaction
+    try
+    {
+        execSql("ROLLBACK TRANSACTION;");
+        LOG_DEBUG("SQL: transaction rolled back");
+    }
+    catch (const DbSqlQueryExecFailure &e)
+    {
+        std::ostringstream error;
+        error << "SQL ERROR while trying to rollback a transaction: " << e.what();
+        LOG_ERROR(error);
+        throw std::runtime_error(error.str());
+    }
+}
+
+const unsigned int
+SqLiteDataProvider::getModifiedRows(void) const
+{
+    if (!mIsConnected)
+    {
+        const std::string error = "Trying to getModifiedRows while not "
+            "connected to the database!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    return (unsigned int)sqlite3_changes(mDb);
+}
+
+const bool
+SqLiteDataProvider::inTransaction(void) const
+{
+    if (!mIsConnected)
+    {
+        const std::string error = "not connected to the database!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    // The sqlite3_get_autocommit() interface returns non-zero or zero if the
+    // given database connection is or is not in autocommit mode, respectively.
+    // Autocommit mode is on by default. Autocommit mode is disabled by a BEGIN
+    // statement. Autocommit mode is re-enabled by a COMMIT or ROLLBACK.
+    const int ret = sqlite3_get_autocommit(mDb);
+    if (ret == 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+const unsigned int
+SqLiteDataProvider::getLastId(void) const
+{
+    if (!mIsConnected)
+    {
+        const std::string error = "not connected to the database!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    // FIXME: not sure if this is correct to bring 64bit int into int?
+    const sqlite3_int64 lastId = sqlite3_last_insert_rowid(mDb);
+    if (lastId > UINT_MAX)
+        throw std::runtime_error("SqLiteDataProvider::getLastId exceeded INT_MAX");
+
+    return (unsigned int)lastId;
+}
 
 } // namespace dal

@@ -26,10 +26,15 @@
 
 
 #include <iosfwd>
-
+// added to compile under windows
+#ifdef WIN32
+#include <winsock2.h>
+#endif
 #include <mysql/mysql.h>
 
 #include "dataprovider.h"
+#include "common/configuration.hpp"
+#include "utils/logger.h"
 
 namespace dal
 {
@@ -41,6 +46,16 @@ namespace dal
 class MySqlDataProvider: public DataProvider
 {
     public:
+
+        /**
+         * Replacement for mysql my_bool datatype used in mysql_autocommit()
+         * function.
+         */
+        enum {
+            AUTOCOMMIT_OFF = 0,
+            AUTOCOMMIT_ON = 1
+        };
+
         /**
          * Constructor.
          */
@@ -68,16 +83,9 @@ class MySqlDataProvider: public DataProvider
         /**
          * Create a connection to the database.
          *
-         * @param dbName the database name.
-         * @param userName the user name.
-         * @param password the user password.
-         *
          * @exception DbConnectionFailure if unsuccessful connection.
          */
-        void
-        connect(const std::string& dbName,
-                const std::string& userName,
-                const std::string& password);
+        void connect();
 
 
         /**
@@ -104,8 +112,76 @@ class MySqlDataProvider: public DataProvider
         void
         disconnect(void);
 
+        /**
+         * Starts a transaction.
+         *
+         * @exception std::runtime_error if a transaction is still open
+         */
+        void
+        beginTransaction(void)
+            throw (std::runtime_error);
+
+        /**
+         * Commits a transaction.
+         *
+         * @exception std::runtime_error if no connection is currently open.
+         */
+        void
+        commitTransaction(void)
+            throw (std::runtime_error);
+
+        /**
+         * Rollback a transaction.
+         *
+         * @exception std::runtime_error if no connection is currently open.
+         */
+        void
+        rollbackTransaction(void)
+            throw (std::runtime_error);
+
+        /**
+         * Returns the number of changed rows by the last executed SQL
+         * statement.
+         *
+         * @return Number of rows that have changed.
+         */
+        const unsigned int
+        getModifiedRows(void) const;
+
+        /**
+         * Returns the last inserted value of an autoincrement column after an
+         * INSERT statement.
+         *
+         * @return last autoincrement value.
+         */
+        const unsigned int
+        getLastId(void) const;
 
     private:
+
+        /** defines the name of the hostname config parameter */
+        static const std::string CFGPARAM_MYSQL_HOST;
+        /** defines the name of the server port config parameter */
+        static const std::string CFGPARAM_MYSQL_PORT;
+        /** defines the name of the database config parameter */
+        static const std::string CFGPARAM_MYSQL_DB;
+        /** defines the name of the username config parameter */
+        static const std::string CFGPARAM_MYSQL_USER;
+        /** defines the name of the password config parameter */
+        static const std::string CFGPARAM_MYSQL_PWD;
+
+        /** defines the default value of the CFGPARAM_MYSQL_HOST parameter */
+        static const std::string CFGPARAM_MYSQL_HOST_DEF;
+        /** defines the default value of the CFGPARAM_MYSQL_PORT parameter */
+        static const unsigned int CFGPARAM_MYSQL_PORT_DEF;
+        /** defines the default value of the CFGPARAM_MYSQL_DB parameter */
+        static const std::string CFGPARAM_MYSQL_DB_DEF;
+        /** defines the default value of the CFGPARAM_MYSQL_USER parameter */
+        static const std::string CFGPARAM_MYSQL_USER_DEF;
+        /** defines the default value of the CFGPARAM_MYSQL_PWD parameter */
+        static const std::string CFGPARAM_MYSQL_PWD_DEF;
+
+
         MYSQL* mDb; /**< the handle to the database connection */
 };
 

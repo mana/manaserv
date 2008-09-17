@@ -1,3 +1,24 @@
+2008-09-17  Andreas Habel  <mail@exceptionfault.de>
+
+	* src/sql/*, src/account-server/dalstoragesql.hpp: added installation 
+	scripts to set up database schemas for mysql, sqlite and postgresql. 
+	The create table statements have been completely removed out from the c++ 
+	source into separate, provider specific sql files.
+	* docs/tmwserv.xml: added database specific parameters to configure 
+	each provider, that is used as database backend independent
+	* Doxyfile: doxygen now also includes non-documented functions and provides
+	a dictionary for all classes
+	* dal/dataprovider.h, dal/sqlitedataprovider.h, dal/mysqldataprovider.h,
+	dal/mysqldataprovider.cpp, dal/sqlitedataprovider.cpp:
+	Extended abstract dataprovider to support transactions, implemented for 
+	SQLite and mySQL. Added methods to retrieve last inserted
+	auto-increment value and the number of modified rows in the last statement.
+	* account-server/dalstorage.cpp: Tiny rewrite to be a little more 
+	transactional and use advanced database functionality. Fixed a bug when
+	deleting a character that left data in quests table and guilds table. 
+	Simplified the connect routine of DALStorage class since every dataprovider 
+	is now responsible to retrieve its parameters for itself.
+	
 2008-09-15  Andreas Habel  <mail@exceptionfault.de>
 
 	* Doxyfile: added doxygen file, docu will be generated under docs/api/html
@@ -11,11 +32,10 @@
 
 	* src/account-server/dalstorage.cpp, src/account-server/account.cpp,
 	src/account-server/account.hpp, src/account-server/accounthandler.cpp,
-	src/account-server/dalstorage.hpp,
-	src/account-server/dalstoragesql.hpp: Extended tmw_accounts table with
-	columns for lastlogin and registration date. Modified account-server
-	to fill the new columns on registration and login. Recreation of
-	database needed!
+	src/account-server/dalstorage.hpp, src/account-server/dalstoragesql.hpp: 
+	Extended tmw_accounts table with columns for lastlogin and registration 
+	date. Modified account-server to fill the new columns on registration and 
+	login. Recreation of database needed!
 	* src/account-server/dalstorage.cpp,
 	src/account-server/dalstoragesql.hpp: Added createIndex function to
 	create indexes on tables.

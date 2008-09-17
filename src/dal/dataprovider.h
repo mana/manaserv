@@ -26,6 +26,7 @@
 
 
 #include <string>
+#include <stdexcept>
 
 #include "recordset.h"
 
@@ -96,16 +97,12 @@ class DataProvider
         /**
          * Create a connection to the database.
          *
-         * @param dbName the database name.
-         * @param userName the user name.
-         * @param password the user password.
+         * Each dataprovider is responsible to have default values and load
+         * necessary options from the config file.
          *
          * @exception DbConnectionFailure if unsuccessful connection.
          */
-        virtual void
-        connect(const std::string& dbName,
-                const std::string& userName,
-                const std::string& password) = 0;
+        virtual void connect(void) = 0;
 
 
         /**
@@ -138,7 +135,50 @@ class DataProvider
         std::string
         getDbName(void);
 
+        /**
+         * Starts a transaction.
+         *
+         * @exception std::runtime_error if a transaction is still open
+         */
+        virtual void
+        beginTransaction(void)
+            throw (std::runtime_error) = 0;
 
+        /**
+         * Commits a transaction.
+         *
+         * @exception std::runtime_error if no connection is currently open.
+         */
+        virtual void
+        commitTransaction(void)
+            throw (std::runtime_error) = 0;
+
+        /**
+         * Rollback a transaction.
+         *
+         * @exception std::runtime_error if no connection is currently open.
+         */
+        virtual void
+        rollbackTransaction(void)
+            throw (std::runtime_error) = 0;
+
+        /**
+         * Returns the number of changed rows by the last executed SQL
+         * statement.
+         *
+         * @return Number of rows that have changed.
+         */
+        virtual const unsigned int
+        getModifiedRows(void) const = 0;
+
+        /**
+         * Returns the last inserted value of an autoincrement column after an
+         * INSERT statement.
+         *
+         * @return last autoincrement value.
+         */
+        virtual const unsigned int
+        getLastId(void) const = 0;
 
     protected:
         std::string mDbName;  /**< the database name */
