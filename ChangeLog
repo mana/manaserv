@@ -1,3 +1,10 @@
+2008-09-18  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/post.hpp, src/chat-server/post.cpp, src/defines.h,
+	src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp, 
+	src/game-server/main-game.cpp: Changed timing to be 100ms per tick. 
+	Added post manager on chat server.
+
 2008-09-17  Andreas Habel  <mail@exceptionfault.de>
 
 	* src/sql/*, src/account-server/dalstoragesql.hpp: added installation 

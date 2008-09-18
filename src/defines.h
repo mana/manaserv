@@ -51,6 +51,10 @@ enum
     MAX_CHANNEL_ANNOUNCEMENT   = 150,
     MAX_CHANNEL_PASSWORD       = 12,
 
+    // Post related
+    MAX_ATTACHMENTS = 3,
+    MAX_LETTERS = 10,
+
     // Registering related
     MIN_LOGIN_LENGTH = 4,
     MAX_LOGIN_LENGTH = 16,

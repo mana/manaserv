@@ -285,12 +285,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_WALK:
         {
-            int x = message.readShort();
-            int y = message.readShort();
-            Point dst(x, y);
-            computer.character->setDestination(dst);
-
-            // no response should be required
+            handleWalk(&computer, message);
         } break;
 
         case PGMSG_EQUIP:
@@ -579,4 +574,14 @@ void GameHandler::sendError(NetComputer *computer, int id, std::string errorMsg)
     msg.writeShort(id);
     msg.writeString(errorMsg, errorMsg.size());
     computer->send(msg);
+}
+
+void GameHandler::handleWalk(GameClient *client, MessageIn &message)
+{
+    int x = message.readShort();
+    int y = message.readShort();
+
+    Point dst(x, y);
+    client->character->setDestination(dst);
+
 }

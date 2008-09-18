@@ -134,6 +134,11 @@ class GameHandler: public ConnectionHandler
          */
         void processMessage(NetComputer *computer, MessageIn &message);
 
+        /**
+         * Set the position a player wants to move to
+         */
+        void handleWalk(GameClient *client, MessageIn &message);
+
     private:
 
         /**
