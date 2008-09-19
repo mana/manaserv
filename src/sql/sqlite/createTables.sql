@@ -34,20 +34,23 @@ CREATE TABLE tmw_characters
    vit          INTEGER     NOT NULL,
    int          INTEGER     NOT NULL,
    will         INTEGER     NOT NULL,
-   unarmed_exp  INTEGER     NOT NULL,
-   knife_exp    INTEGER     NOT NULL,
-   sword_exp    INTEGER     NOT NULL,
-   polearm_exp  INTEGER     NOT NULL,
-   staff_exp    INTEGER     NOT NULL,
-   whip_exp     INTEGER     NOT NULL,
-   bow_exp      INTEGER     NOT NULL,
-   shoot_exp    INTEGER     NOT NULL,
-   mace_exp     INTEGER     NOT NULL,
-   axe_exp      INTEGER     NOT NULL,
-   thrown_exp   INTEGER     NOT NULL,
    --
    FOREIGN KEY (user_id) REFERENCES tmw_accounts(id)
 );
+
+CREATE INDEX tmw_characters_user ON tmw_characters ( user_id );
+CREATE UNIQUE INDEX tmw_characters_name ON tmw_characters ( name );
+
+CREATE TABLE tmw_char_skills 
+(
+    char_id     INTEGER     NOT NULL,
+    skill_id    INTEGER     NOT NULL,
+    skill_exp   INTEGER     NOT NULL,
+    --
+    FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+);
+
+CREATE INDEX tmw_char_skills_char ON tmw_char_skills ( char_id );
 
 CREATE TABLE tmw_inventories 
 (

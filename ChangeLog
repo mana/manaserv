@@ -1,3 +1,13 @@
+2008-09-19  Andreas Habel  <mail@exceptionfault.de>
+
+	* Doxyfile: doxygen writes all warnings into a separate file
+	* docs/tmwserv.xml: added link to wiki documentation as comment
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
+	src/account-server/dalstoragesql.hpp, src/sql/mysql/createTables.sql,
+	src/sql/sqlite/createTables.sql, src/sql/sqlite/tmw.db: Added table
+	tmw_char_skills to store skills of a character. Removed weapon skills from
+	table tmw_characters.
+
 2008-09-18  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/post.hpp, src/chat-server/post.cpp, src/defines.h,

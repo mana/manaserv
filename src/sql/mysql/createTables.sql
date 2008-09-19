@@ -46,18 +46,6 @@ CREATE TABLE IF NOT EXISTS `tmw_characters` (
     `vit`          smallint(5)  unsigned NOT NULL,
     `int`          smallint(5)  unsigned NOT NULL,
     `will`         smallint(5)  unsigned NOT NULL,
-    -- skill experience
-    `unarmed_exp`  smallint(5)  unsigned NOT NULL,
-    `knife_exp`    smallint(5)  unsigned NOT NULL,
-    `sword_exp`    smallint(5)  unsigned NOT NULL,
-    `polearm_exp`  smallint(5)  unsigned NOT NULL,
-    `staff_exp`    smallint(5)  unsigned NOT NULL,
-    `whip_exp`     smallint(5)  unsigned NOT NULL,
-    `bow_exp`      smallint(5)  unsigned NOT NULL,
-    `shoot_exp`    smallint(5)  unsigned NOT NULL,
-    `mace_exp`     smallint(5)  unsigned NOT NULL,
-    `axe_exp`      smallint(5)  unsigned NOT NULL,
-    `thrown_exp`   smallint(5)  unsigned NOT NULL,
     --
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`name`),
@@ -68,7 +56,23 @@ CREATE TABLE IF NOT EXISTS `tmw_characters` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8 
 AUTO_INCREMENT=1 ;
-    
+
+--
+-- table: `tmw_inventories`
+--
+
+CREATE TABLE IF NOT EXISTS `tmw_char_skills` (
+    `char_id`      int(10)      unsigned NOT NULL,
+    `skill_id`     smallint(5)  unsigned NOT NULL,
+    `skill_exp`    smallint(5)  unsigned NOT NULL,
+    --
+    PRIMARY KEY (`char_id`, `skill_id`),
+    FOREIGN KEY (`char_id`)
+        REFERENCES `tmw_characters` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8;
+
 --
 -- table: `tmw_inventories`
 --

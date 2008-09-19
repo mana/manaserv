@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
-<!-- An example configuration file for ~/.tmwserv.xml -->
+<!-- 
+	An example configuration file for ~/.tmwserv.xml 
+	If you add any parameters to this configuration file make sure to update
+	the wiki documentation at:
+	http://wiki.themanaworld.org/index.php/Configuration_file:tmwserv.xml
+-->
 <configuration>
  
 <!-- Database configuration ***************************************************

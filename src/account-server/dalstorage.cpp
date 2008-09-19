@@ -240,11 +240,6 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
             character->setAttribute(CHAR_ATTR_BEGIN + i,
                                     toUshort(charInfo(0, 13 + i)));
         }
-        for (int i = 0; i < CHAR_SKILL_WEAPON_NB; ++i)
-        {
-            int exp = toUint(charInfo(0, 13 + CHAR_ATTR_NB + i));
-            character->setExperience(i, exp);
-        }
 
         int mapId = toUint(charInfo(0, 12));
         if (mapId > 0)
@@ -275,6 +270,23 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
             character->setAccountLevel(toUint(levelInfo(0, 0)), true);
         }
 
+        // load the skills of the char from CHAR_SKILLS_TBL_NAME
+        std::ostringstream s;
+        s << "SELECT skill_id, skill_exp "
+          << "FROM " << CHAR_SKILLS_TBL_NAME << " "
+          << "WHERE char_id = " << character->getDatabaseID();
+
+        dal::RecordSet const &skillInfo = mDb->execSql(s.str());
+        if (!skillInfo.isEmpty())
+        {
+            const unsigned int nRows = skillInfo.rows();
+            for (unsigned int row = 0; row < nRows; row++)
+            {
+                character->setExperience(
+                    toUint(skillInfo(row, 0)),  // skillid
+                    toUint(skillInfo(row, 1))); // experience
+            }
+        }
     }
     catch (dal::DbSqlQueryExecFailure const &e)
     {
@@ -327,6 +339,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
     catch (dal::DbSqlQueryExecFailure const &e)
     {
         LOG_ERROR("(DALStorage::getCharacter #2) SQL query failure: " << e.what());
+        return NULL;
     }
 
     return character;
@@ -456,6 +469,7 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
 bool DALStorage::updateCharacter(Character *character)
 {
     // Update the database Character data (see CharacterData for details)
+    mDb->beginTransaction();
     try
     {
         std::ostringstream sqlUpdateCharacterInfo;
@@ -482,19 +496,7 @@ bool DALStorage::updateCharacter(Character *character)
             << "int = '"
 #endif
                                 << character->getAttribute(CHAR_ATTR_INTELLIGENCE) << "', "
-            << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "', "
-            << "unarmed_exp = '"<< character->getExperience(CHAR_SKILL_WEAPON_NONE - CHAR_SKILL_BEGIN) << "', "
-            << "knife_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_KNIFE - CHAR_SKILL_BEGIN) << "', "
-            << "sword_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_SWORD - CHAR_SKILL_BEGIN) << "', "
-            << "polearm_exp = '"<< character->getExperience(CHAR_SKILL_WEAPON_POLEARM - CHAR_SKILL_BEGIN) << "', "
-            << "staff_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_STAFF - CHAR_SKILL_BEGIN) << "', "
-            << "whip_exp = '"   << character->getExperience(CHAR_SKILL_WEAPON_WHIP - CHAR_SKILL_BEGIN) << "', "
-            << "bow_exp = '"    << character->getExperience(CHAR_SKILL_WEAPON_BOW - CHAR_SKILL_BEGIN) << "', "
-            << "shoot_exp = '"  << character->getExperience(CHAR_SKILL_WEAPON_SHOOTING - CHAR_SKILL_BEGIN) << "', "
-            << "mace_exp = '"   << character->getExperience(CHAR_SKILL_WEAPON_MACE - CHAR_SKILL_BEGIN) << "', "
-            << "axe_exp = '"    << character->getExperience(CHAR_SKILL_WEAPON_AXE - CHAR_SKILL_BEGIN) << "', "
-            << "thrown_exp = '" << character->getExperience(CHAR_SKILL_WEAPON_THROWN - CHAR_SKILL_BEGIN) << "' "
-
+            << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "' "
             << "where id = '"   << character->getDatabaseID() << "';";
 
         mDb->execSql(sqlUpdateCharacterInfo.str());
@@ -502,9 +504,29 @@ bool DALStorage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
+        mDb->rollbackTransaction();
         LOG_ERROR("(DALStorage::updateCharacter #1) SQL query failure: " << e.what());
         return false;
     }
+
+    /**
+     *  Character's skills
+     */
+    try
+    {
+        for (unsigned int skill_id = 0; skill_id < CHAR_SKILL_NB; skill_id++)
+        {
+            flushSkill(character, skill_id);
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        mDb->rollbackTransaction();
+        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
+        return false;
+    }
+
 
     /**
      *  Character's inventory
@@ -522,7 +544,8 @@ bool DALStorage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
+        mDb->rollbackTransaction();
+        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
         return false;
     }
 
@@ -567,11 +590,64 @@ bool DALStorage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
+        mDb->rollbackTransaction();
+        LOG_ERROR("(DALStorage::updateCharacter #4) SQL query failure: " << e.what());
         return false;
     }
 
+    mDb->commitTransaction();
     return true;
+}
+
+/**
+ * Save changes of a skill to the database permanently.
+*/
+void DALStorage::flushSkill(const Character* const character,
+                            const int skill_id )
+{
+    try
+    {
+        const unsigned int exp = character->getExperience(skill_id);
+
+        // if experience has decreased to 0 we don't store is anymore,
+        // its the default
+        if (exp == 0)
+        {
+            std::ostringstream sql;
+            sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME << " "
+                << "WHERE char_id = '" << character->getDatabaseID() << "' "
+                << "AND skill_id = '" << skill_id << "'";
+            mDb->execSql(sql.str());
+            return;
+        }
+
+        // try to update the skill
+        std::ostringstream sql;
+        sql << "UPDATE " << CHAR_SKILLS_TBL_NAME << " "
+            << "SET skill_exp = '" << exp << "' "
+            << "WHERE char_id = '" << character->getDatabaseID() << "' "
+            << "AND skill_id = '" << skill_id << "'";
+        mDb->execSql(sql.str());
+
+        // check if the update has modified a row
+        if (mDb->getModifiedRows() > 0)
+        {
+            return;
+        }
+
+        sql.clear();
+        sql << "INSERT INTO " << CHAR_SKILLS_TBL_NAME << " "
+            << "(char_id, skill_id, skill_exp) VALUES "
+            << "'" << character->getDatabaseID() << "', "
+            << "'" << skill_id << "', "
+            << "'" << exp << "'";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        LOG_ERROR("DALStorage::flushSkill: " << e.what());
+        throw;
+    }
 }
 
 
@@ -599,20 +675,6 @@ void DALStorage::addAccount(Account *account)
              << account->getRegistrationDate() << ", "
              << account->getLastLogin() << ");";
         mDb->execSql(sql1.str());
-
-        // get the account id.
-        /*
-        Exceptionfault: no longer needed as our databases provides a function to
-                        get the last inserted auto-increment value
-
-        std::ostringstream sql2;
-        sql2 << "select id from " << ACCOUNTS_TBL_NAME
-             << " where username = \"" << account->getName() << "\";";
-        const RecordSet& accountInfo = mDb->execSql(sql2.str());
-        string_to<unsigned int> toUint;
-        unsigned id = toUint(accountInfo(0, 0));
-        account->setID(id);
-        */
         account->setID(mDb->getLastId());
 
         mDb->commitTransaction();
@@ -675,8 +737,7 @@ void DALStorage::flush(Account *account)
 #else
             << "int, "
 #endif
-                     << "will, unarmed_exp, knife_exp, sword_exp, polearm_exp,"
-                     << " staff_exp, whip_exp, bow_exp, shoot_exp, mace_exp, axe_exp, thrown_exp) values ("
+                     << "will ) values ("
                      << account->getID() << ", \""
                      << (*it)->getName() << "\", "
                      << (*it)->getGender() << ", "
@@ -694,24 +755,19 @@ void DALStorage::flush(Account *account)
                      << (*it)->getAttribute(CHAR_ATTR_DEXTERITY) << ", "
                      << (*it)->getAttribute(CHAR_ATTR_VITALITY) << ", "
                      << (*it)->getAttribute(CHAR_ATTR_INTELLIGENCE) << ", "
-                     << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_NONE - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_KNIFE - CHAR_SKILL_BEGIN) << ","
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_SWORD - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_POLEARM - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_STAFF - CHAR_SKILL_BEGIN) << ","
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_WHIP - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_BOW - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_SHOOTING - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_MACE - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_AXE - CHAR_SKILL_BEGIN) << ", "
-                     << (*it)->getExperience(CHAR_SKILL_WEAPON_THROWN - CHAR_SKILL_BEGIN)
+                     << (*it)->getAttribute(CHAR_ATTR_WILLPOWER) << " "
                      << ");";
 
                 mDb->execSql(sqlInsertCharactersTable.str());
 
                 // Update the character ID.
                 (*it)->setDatabaseID(mDb->getLastId());
+
+                // update the characters skills
+                for (unsigned int skill_id = 0; skill_id < CHAR_SKILL_NB; skill_id++)
+                {
+                    flushSkill((*it), skill_id);
+                }
             }
         } //
 

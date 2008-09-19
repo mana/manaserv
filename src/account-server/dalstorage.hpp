@@ -184,6 +184,17 @@ class DALStorage
         updateCharacter(Character *ptr);
 
         /**
+         * Save changes of a skill to the database permanently.
+         *
+         * @param character Character thats skill has changed.
+         * @param skill_id Identifier of the changed skill.
+         *
+         * @exception dbl::DbSqlQueryExecFailure.
+         */
+        void
+        flushSkill(const Character* const character, const int skill_id );
+
+        /**
          * Add a new guild
          *
          */
