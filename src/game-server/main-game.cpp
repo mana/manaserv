@@ -37,6 +37,7 @@
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/monstermanager.hpp"
+#include "game-server/postman.hpp"
 #include "game-server/resourcemanager.hpp"
 #include "game-server/state.hpp"
 #include "net/connectionhandler.hpp"
@@ -65,6 +66,9 @@ GameHandler *gameHandler;
 
 /** Account server message handler */
 AccountConnection *accountHandler;
+
+/** Post Man **/
+PostMan *postMan;
 
 /** Callback used when SIGQUIT signal is received. */
 void closeGracefully(int)
@@ -148,6 +152,7 @@ void initialize()
     // singleton or a local variable in the event-loop
     gameHandler = new GameHandler;
     accountHandler = new AccountConnection;
+    postMan = new PostMan;
 
     // --- Initialize enet.
     if (enet_initialize() != 0) {
@@ -183,6 +188,7 @@ void deinitialize()
     // Destroy message handlers
     delete gameHandler;
     delete accountHandler;
+    delete postMan;
 
     // Destroy Managers
     delete stringFilter;

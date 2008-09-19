@@ -34,6 +34,7 @@
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/npc.hpp"
+#include "game-server/postman.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trade.hpp"
 #include "net/messagein.hpp"
@@ -449,6 +450,16 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character->respawn(); // plausibility check is done by character class
         } break;
 
+        case PGMSG_SEND_POST:
+        {
+            handleSendPost(&computer, message);
+        } break;
+
+        case PGMSG_GET_POST:
+        {
+            handleGetPost(&computer, message);
+        } break;
+
         default:
             LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);
@@ -584,4 +595,18 @@ void GameHandler::handleWalk(GameClient *client, MessageIn &message)
     Point dst(x, y);
     client->character->setDestination(dst);
 
+}
+
+void GameHandler::handleSendPost(GameClient *client, MessageIn &message)
+{
+    // add the character so that the post man knows them
+    postMan->addCharacter(client->character);
+    accountHandler->sendPost(client->character, message);
+}
+
+void GameHandler::handleGetPost(GameClient *client, MessageIn &message)
+{
+    // add the character so that the post man knows them
+    postMan->addCharacter(client->character);
+    accountHandler->getPost(client->character);
 }

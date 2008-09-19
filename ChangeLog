@@ -1,3 +1,13 @@
+2008-08-19  David Athay  <ko2fan@gmail.com>
+
+	* accountserver.cbp, src/account-server/main-account.cpp,
+	src/account-server/serverhandler.cpp, src/chat-server/post.cpp,
+	src/chat-server/post.hpp, src/defines.h, 
+	src/game-server/gamehandler.cpp, src/game-server/accountconnection.cpp,
+	src/game-server/gamehandler.hpp, src/game-server/accountconnection.hpp,
+	src/game-server/postman.hpp, src/game-server/main-game.cpp,
+	gameserver.cbp: Added post communication between chat and game servers.
+
 2008-09-19  Andreas Habel  <mail@exceptionfault.de>
 
 	* Doxyfile: doxygen writes all warnings into a separate file

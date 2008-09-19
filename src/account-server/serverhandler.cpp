@@ -31,6 +31,7 @@
 #include "account-server/accounthandler.hpp"
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
+#include "chat-server/post.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -322,6 +323,97 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     m.players[j] = msg.readLong();
                 }
             }
+        } break;
+
+        case GCMSG_REQUEST_POST:
+        {
+            // Retrieve the post for user
+            LOG_DEBUG("GCMSG_REQUEST_POST");
+            result.writeShort(CGMSG_POST_RESPONSE);
+
+            // get the character
+            int characterId = msg.readLong();
+            Character *ptr = storage->getCharacter(characterId, NULL);
+            if (!ptr)
+            {
+                // Invalid character
+                LOG_ERROR("Error finding character id for post");
+                break;
+            }
+
+            // get the post for that character
+            Post *post = postalManager->getPost(ptr);
+
+            // send the character id of receiver
+            result.writeLong(characterId);
+
+            // send the post if valid
+            if (post)
+            {
+                for (unsigned int i = 0; i < post->getNumberOfLetters(); ++i)
+                {
+                    // get each letter, send the sender's id,
+                    // the contents and any attachments
+                    Letter *letter = post->getLetter(i);
+                    result.writeLong(letter->getSender()->getDatabaseID());
+                    result.writeString(letter->getContents());
+                    std::vector<InventoryItem> items = letter->getAttachments();
+                    for (unsigned int j = 0; j < items.size(); ++j)
+                    {
+                        result.writeShort(items[j].itemId);
+                        result.writeShort(items[j].amount);
+                    }
+                }
+
+                // clean up
+                postalManager->clearPost(ptr);
+            }
+
+        } break;
+
+        case GCMSG_STORE_POST:
+        {
+            // Store the letter for the user
+            LOG_DEBUG("GCMSG_STORE_POST");
+            result.writeShort(CGMSG_STORE_POST_RESPONSE);
+
+            // get the sender and receiver
+            int senderId = msg.readLong();
+            std::string receiverName = msg.readString();
+
+            // get their characters
+            Character *sender = storage->getCharacter(senderId, NULL);
+            Character *receiver = storage->getCharacter(receiverName);
+            if (!sender || !receiver)
+            {
+                // Invalid character
+                LOG_ERROR("Error finding character id for post");
+                result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                break;
+            }
+
+            // get the letter contents
+            std::string contents = msg.readString();
+
+            std::vector< std::pair<int, int> > items;
+            while (msg.getUnreadLength())
+            {
+                items.push_back(std::pair<int, int>(msg.readShort(), msg.readShort()));
+            }
+
+            // save the letter
+            Letter *letter = new Letter(0, sender, receiver);
+            letter->addText(contents);
+            for (unsigned int i = 0; i < items.size(); ++i)
+            {
+                InventoryItem item;
+                item.itemId = items[i].first;
+                item.amount = items[i].second;
+                letter->addAttachment(item);
+            }
+            postalManager->addLetter(letter);
+
+            result.writeByte(ERRMSG_OK);
         } break;
 
         default:

@@ -24,8 +24,8 @@
 #ifndef _TMWSERV_POST_H_
 #define _TMWSERV_POST_H_
 
-#include <list>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "../common/inventorydata.hpp"
@@ -38,9 +38,16 @@ class Letter
 public:
     /**
      * Constructor
-     * @param type Type of Letter
+     * @param type Type of Letter - unused
+     * @param sender Pointer to character that sent the letter
+     * @param receiver Pointer to character that will receive the letter
      */
     Letter(int type, Character *sender, Character *receiver);
+
+    /**
+     * Destructor
+     */
+    ~Letter();
 
     /**
      * Set the expiry
@@ -53,8 +60,21 @@ public:
     unsigned long getExpiry() const;
 
     /**
+     * Add text contents of letter
+     * This overwrites whatever was there previously
+     * @param text The content of the letter to add
+     */
+    void addText(const std::string &text);
+
+    /**
+     * Get the text contents of letter
+     * @return String containing the text
+     */
+    std::string getContents();
+
+    /**
      * Add an attachment
-     * @param aitem The attachment to add to the letter
+     * @param item The attachment to add to the letter
      * @return Returns true if the letter doesnt have too many attachments
      */
     bool addAttachment(InventoryItem item);
@@ -65,9 +85,21 @@ public:
      */
     Character* getReceiver();
 
+    /**
+     * Get the character who sent the letter
+     * @return Returns the Character who sent the letter
+     */
+    Character* getSender();
+
+    /**
+     * Get the attachments
+     */
+    std::vector<InventoryItem> getAttachments();
+
 private:
     unsigned int mType;
     unsigned long mExpiry;
+    std::string mContents;
     std::vector<InventoryItem> mAttachments;
     Character *mSender;
     Character *mReceiver;
@@ -77,11 +109,27 @@ class Post
 {
 public:
     /**
+     * Destructor
+     */
+    ~Post();
+
+    /**
      * Add letter to post
      * @param letter Letter to add
      * @return Returns true if post isnt full
      */
-     bool addLetter(Letter *letter);
+    bool addLetter(Letter *letter);
+
+    /**
+     * Return next letter
+     */
+    Letter* getLetter(int letter) const;
+
+    /**
+     * Return number of letters in post
+     * @return Returns the size of mLetters
+     */
+    unsigned int getNumberOfLetters() const;
 
 private:
     std::vector<Letter*> mLetters;
@@ -103,8 +151,15 @@ public:
      */
     Post* getPost(Character *player);
 
+    /**
+     * Remove the post for character
+     */
+    void clearPost(Character *player);
+
 private:
     std::map<Character*, Post*> mPostBox;
 };
+
+extern PostManager *postalManager;
 
 #endif

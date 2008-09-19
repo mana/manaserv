@@ -93,6 +93,7 @@
 		<Unit filename="src/game-server/npc.cpp" />
 		<Unit filename="src/game-server/npc.hpp" />
 		<Unit filename="src/game-server/object.hpp" />
+		<Unit filename="src/game-server/postman.hpp" />
 		<Unit filename="src/game-server/quest.cpp" />
 		<Unit filename="src/game-server/quest.hpp" />
 		<Unit filename="src/game-server/resourcemanager.cpp" />

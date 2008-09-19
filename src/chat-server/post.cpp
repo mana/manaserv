@@ -23,11 +23,22 @@
 
 #include "post.hpp"
 
+#include "../account-server/character.hpp"
 #include "../defines.h"
 
 Letter::Letter(int type, Character *sender, Character *receiver)
  : mType(type), mSender(sender), mReceiver(receiver)
 {
+
+}
+
+Letter::~Letter()
+{
+    if (mSender)
+        delete mSender;
+
+    if (mReceiver)
+        delete mReceiver;
 
 }
 
@@ -39,6 +50,16 @@ void Letter::setExpiry(unsigned long expiry)
 unsigned long Letter::getExpiry() const
 {
     return mExpiry;
+}
+
+void Letter::addText(const std::string &text)
+{
+    mContents = text;
+}
+
+std::string Letter::getContents()
+{
+    return mContents;
 }
 
 bool Letter::addAttachment(InventoryItem item)
@@ -58,6 +79,29 @@ Character* Letter::getReceiver()
     return mReceiver;
 }
 
+Character* Letter::getSender()
+{
+    return mSender;
+}
+
+std::vector<InventoryItem> Letter::getAttachments()
+{
+    return mAttachments;
+}
+
+Post::~Post()
+{
+    std::vector<Letter*>::iterator itr_end = mLetters.end();
+    for (std::vector<Letter*>::iterator itr = mLetters.begin();
+         itr != itr_end;
+         ++itr)
+    {
+        delete (*itr);
+    }
+
+    mLetters.clear();
+}
+
 bool Post::addLetter(Letter *letter)
 {
     if (mLetters.size() > MAX_LETTERS)
@@ -68,6 +112,20 @@ bool Post::addLetter(Letter *letter)
     mLetters.push_back(letter);
 
     return true;
+}
+
+Letter* Post::getLetter(int letter) const
+{
+    if (letter < 0 || letter > mLetters.size())
+    {
+        return NULL;
+    }
+    return mLetters[letter];
+}
+
+unsigned int Post::getNumberOfLetters() const
+{
+    return mLetters.size();
 }
 
 void PostManager::addLetter(Letter *letter)
@@ -98,4 +156,15 @@ Post* PostManager::getPost(Character *player)
     }
 
     return itr->second;
+}
+
+void PostManager::clearPost(Character *player)
+{
+    std::map<Character*, Post*>::iterator itr =
+        mPostBox.find(player);
+    if (itr != mPostBox.end())
+    {
+        delete itr->second;
+        mPostBox.erase(itr);
+    }
 }

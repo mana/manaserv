@@ -91,7 +91,7 @@ enum
  * - CPMSG_*: from chat server to client
  * - PGMSG_*: from client to game server
  * - GPMSG_*: from game server to client
- * Components: B byte, W word, D double word, S variable-size string
+ * Components: B byte, W word, L long, S variable-size string
  *             C tile-based coordinates (B*3)
  */
 enum {
@@ -239,20 +239,32 @@ enum {
     PCMSG_USER_MODE                   = 0x0465, // W channel id, S name, B mode
     PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
 
+    // Post
+    PGMSG_SEND_POST                 = 0x04A0, // S player, S letter, { W attachment id }
+    GPMSG_SEND_POST_RESPONSE        = 0x04A1, // B error
+    PGMSG_GET_POST                  = 0x04A2, //
+    GPMSG_GET_POST_RESPONSE         = 0x04A3, // { L sender id, S letter, { W attachment id } }
+
     // Inter-server
-    GAMSG_REGISTER     = 0x0500, // S address, W port, { W map id }*
-    AGMSG_ACTIVE_MAP   = 0x0501, // W map id
-    AGMSG_PLAYER_ENTER = 0x0510, // B*32 token, L id, S name, serialised character data
-    GAMSG_PLAYER_DATA  = 0x0520, // L id, serialised character data
-    GAMSG_REDIRECT          = 0x0530, // L id
-    AGMSG_REDIRECT_RESPONSE = 0x0531, // L id, B*32 token, S game address, W game port
-    GAMSG_PLAYER_RECONNECT  = 0x0532, // L id, B*32 token
-    GAMSG_SET_QUEST          = 0x0540, // L id, S name, S value
-    GAMSG_GET_QUEST          = 0x0541, // L id, S name
-    AGMSG_GET_QUEST_RESPONSE = 0x0542, // L id, S name, S value
-    GAMSG_BAN_PLAYER = 0x550, // L id, W duration
-    GAMSG_STATISTICS = 0x560, // { W map id, W thing nb, W monster nb, W player nb, { L character id }* }*
-    CGMSG_CHANGED_PARTY                 = 0x0590, // L character id, L party id
+    GAMSG_REGISTER              = 0x0500, // S address, W port, { W map id }*
+    AGMSG_ACTIVE_MAP            = 0x0501, // W map id
+    AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, L id, S name, serialised character data
+    GAMSG_PLAYER_DATA           = 0x0520, // L id, serialised character data
+    GAMSG_REDIRECT              = 0x0530, // L id
+    AGMSG_REDIRECT_RESPONSE     = 0x0531, // L id, B*32 token, S game address, W game port
+    GAMSG_PLAYER_RECONNECT      = 0x0532, // L id, B*32 token
+    GAMSG_SET_QUEST             = 0x0540, // L id, S name, S value
+    GAMSG_GET_QUEST             = 0x0541, // L id, S name
+    AGMSG_GET_QUEST_RESPONSE    = 0x0542, // L id, S name, S value
+    GAMSG_BAN_PLAYER            = 0x0550, // L id, W duration
+    GAMSG_STATISTICS            = 0x0560, // { W map id, W thing nb, W monster nb, W player nb, { L character id }* }*
+    CGMSG_CHANGED_PARTY         = 0x0590, // L character id, L party id
+    GCMSG_REQUEST_POST          = 0x05A0, // L character id
+    CGMSG_POST_RESPONSE         = 0x05A1, // L receiver id, { L sender id, S letter, W num attachments { W attachment item id, W quantity } }
+    GCMSG_STORE_POST            = 0x05A5, // L sender id, L receiver id, S letter, { W attachment item id, W quantity }
+    CGMSG_STORE_POST_RESPONSE   = 0x05A6, // L id, B error
+
+
 
     XXMSG_INVALID = 0x7FFF
 };
@@ -269,7 +281,8 @@ enum {
     ERRMSG_EMAIL_ALREADY_EXISTS,        // The Email Address already exists
     ERRMSG_ALREADY_TAKEN,               // name used was already taken
     ERRMSG_SERVER_FULL,                 // the server is overloaded
-    ERRMSG_TIME_OUT                     // data failed to arrive in due time
+    ERRMSG_TIME_OUT,                    // data failed to arrive in due time
+    ERRMSG_TOO_MANY_ATTACHMENTS,        // too many attachments in letter
 };
 
 // Login specific return values

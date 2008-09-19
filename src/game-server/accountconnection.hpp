@@ -71,6 +71,16 @@ class AccountConnection : public Connection
          */
         void sendStatistics();
 
+        /**
+         * Send letter
+         */
+        void sendPost(Character *, MessageIn &);
+
+        /**
+         * Get post
+         */
+        void getPost(Character *);
+
     protected:
         /**
          * Processes server messages.

@@ -30,6 +30,7 @@
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/postman.hpp"
 #include "game-server/quest.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
@@ -110,6 +111,56 @@ void AccountConnection::processMessage(MessageIn &msg)
             // Character DB id
             int charid = msg.readLong();
             gameHandler->updateCharacter(charid, partyid);
+        } break;
+
+        case CGMSG_POST_RESPONSE:
+        {
+            // get the character
+            Character *character = postMan->getCharacter(msg.readLong());
+
+            // check character is still valid
+            if (!character)
+            {
+                break;
+            }
+
+            // create the message
+            MessageOut out(GPMSG_GET_POST_RESPONSE);
+
+            // get all the post for a character
+            while (msg.getUnreadLength())
+            {
+                // write the sender
+                out.writeLong(msg.readLong());
+
+                // write the contents
+                out.writeString(msg.readString());
+
+                // read the number of attachments then
+                // write the attachments
+                for (int i = 0; i < msg.readShort(); ++i)
+                {
+                    // write the id and amount
+                    out.writeShort(msg.readShort());
+                    out.writeShort(msg.readShort());
+                }
+            }
+
+            // send post to character
+            gameHandler->sendTo(character, out);
+        } break;
+
+        case CGMSG_STORE_POST_RESPONSE:
+        {
+            // get character
+            Character *character = postMan->getCharacter(msg.readLong());
+
+            // create message and put error inside
+            MessageOut out(GPMSG_SEND_POST_RESPONSE);
+            out.writeByte(msg.readByte());
+
+            // send message to character
+            gameHandler->sendTo(character, out);
         } break;
 
         default:
@@ -196,3 +247,26 @@ void AccountConnection::sendStatistics()
     send(msg);
 }
 
+void AccountConnection::sendPost(Character *c, MessageIn &msg)
+{
+    // send message to account server with id of sending player,
+    // the id of receiving player, the letter contents, and attachments
+    MessageOut out(GCMSG_STORE_POST);
+    out.writeLong(c->getDatabaseID());
+    out.writeString(msg.readString());
+    out.writeString(msg.readString());
+    while (msg.getUnreadLength())
+    {
+        // write the item id and amount for each attachment
+        out.writeLong(msg.readShort());
+        out.writeLong(msg.readShort());
+    }
+}
+
+void AccountConnection::getPost(Character *c)
+{
+    // send message to account server with id of retrieving player
+    MessageOut out(GCMSG_REQUEST_POST);
+    out.writeLong(c->getDatabaseID());
+    send(out);
+}

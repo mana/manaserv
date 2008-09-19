@@ -38,6 +38,7 @@
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chathandler.hpp"
 #include "chat-server/guildmanager.hpp"
+#include "chat-server/post.hpp"
 #include "common/configuration.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
@@ -66,6 +67,9 @@ ChatChannelManager *chatChannelManager;
 
 /** Guild Manager */
 GuildManager *guildManager;
+
+/** Post Manager */
+PostManager *postalManager;
 
 /** Callback used when SIGQUIT signal is received. */
 static void closeGracefully(int)
@@ -151,6 +155,8 @@ static void initialize()
     chatChannelManager = new ChatChannelManager;
     // Initialise the Guild manager
     guildManager = new GuildManager;
+    // Initialise the post manager
+    postalManager = new PostManager;
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -192,6 +198,7 @@ static void deinitialize()
     delete stringFilter;
     delete chatChannelManager;
     delete guildManager;
+    delete postalManager;
 
     // Get rid of persistent data storage
     delete storage;

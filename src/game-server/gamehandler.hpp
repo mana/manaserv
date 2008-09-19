@@ -139,6 +139,16 @@ class GameHandler: public ConnectionHandler
          */
         void handleWalk(GameClient *client, MessageIn &message);
 
+        /**
+         * Send a letter
+         */
+        void handleSendPost(GameClient *client, MessageIn &message);
+
+        /**
+         * Retrieve a letter
+         */
+        void handleGetPost(GameClient *client, MessageIn &message);
+
     private:
 
         /**
