@@ -34,6 +34,8 @@ tmwserv_account_SOURCES = \
 	chat-server/guildmanager.cpp \
 	chat-server/party.cpp \
 	chat-server/party.hpp \
+	chat-server/post.cpp \
+	chat-server/post.hpp \
 	common/configuration.hpp \
 	common/configuration.cpp \
 	common/inventorydata.hpp \
@@ -116,6 +118,7 @@ tmwserv_game_SOURCES = \
 	game-server/npc.hpp \
 	game-server/npc.cpp \
 	game-server/object.hpp \
+	game-server/postman.hpp \
 	game-server/quest.hpp \
 	game-server/quest.cpp \
 	game-server/resourcemanager.hpp \
