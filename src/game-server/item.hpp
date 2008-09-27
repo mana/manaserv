@@ -28,6 +28,7 @@
 
 #include "game-server/object.hpp"
 
+class AttackZone;
 class Being;
 
 /**
@@ -175,8 +176,10 @@ class ItemClass
 {
     public:
         ItemClass(int id, ItemType type)
-          : mDatabaseID(id), mType(type)
+          : mDatabaseID(id), mType(type), mAttackZone(NULL)
         {}
+
+        ~ItemClass();
 
         /**
          * Applies the modifiers of an item to a given user.
@@ -256,6 +259,18 @@ class ItemClass
         int getSpriteID()
         { return mSpriteID; }
 
+        /**
+         * Set attack zone (only needed when the item is a weapon)
+         */
+        void setAttackZone(AttackZone* attackZone) { mAttackZone = attackZone; }
+
+        /**
+         * Gets attack zone of weapon (returns NULL for non-weapon items)
+         */
+        AttackZone const *getAttackZone() const
+        { return mAttackZone ; }
+
+
     private:
 
         // Item reference information
@@ -266,6 +281,7 @@ class ItemClass
         unsigned short mCost;    /**< Unit cost the item. */
         unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory. */
         ItemModifiers mModifiers; /**< Item modifiers. */
+        AttackZone *mAttackZone; /**< attack zone when used as a weapon */
 };
 
 class Item: public Object

@@ -27,6 +27,7 @@
 
 #include "game-server/item.hpp"
 
+#include "game-server/attackzone.hpp"
 #include "game-server/being.hpp"
 
 WeaponType weaponTypeFromString (const std::string &name)
@@ -134,6 +135,11 @@ void ItemModifiers::cancelAttributes(Being *b) const
         if (i->type < MOD_ATTRIBUTE) continue;
         b->applyModifier(i->type - MOD_ATTRIBUTE, -i->value);
     }
+}
+
+ItemClass::~ItemClass()
+{
+    if (mAttackZone) delete mAttackZone;
 }
 
 bool ItemClass::use(Being *itemUser)

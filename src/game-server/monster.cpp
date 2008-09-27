@@ -125,7 +125,7 @@ void Monster::perform()
             damage.element = mCurrentAttack->element;
             damage.type = mCurrentAttack->type;
             damage.usedSkill = 0;
-            performAttack(damage, mCurrentAttack->range, mCurrentAttack->angle);
+            performAttack(damage, &mCurrentAttack->attackZone);
         }
         if (!mAttackTime)
         {
@@ -240,7 +240,7 @@ void Monster::update()
             }
             if  (Collision::diskWithCircleSector(
                 bestAttackTarget->getPosition(), bestAttackTarget->getSize(),
-                getPosition(), (*i)->range, (*i)->angle, attackAngle))
+                getPosition(), (*i)->attackZone.range, (*i)->attackZone.angle, attackAngle))
             {
                 prioritySum += (*i)->priority;
                 workingAttacks[prioritySum] = (*i);

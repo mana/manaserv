@@ -25,6 +25,7 @@
 #include "game-server/being.hpp"
 
 #include "defines.h"
+#include "game-server/attackzone.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/mapcomposite.hpp"
@@ -126,7 +127,7 @@ void Being::move()
     }
 }
 
-void Being::performAttack(Damage const &damage, int range, int angle)
+void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
 {
     Point ppos = getPosition();
     int dir = getDirection();
@@ -151,8 +152,10 @@ void Being::performAttack(Damage const &damage, int range, int angle)
             break;
     }
 
+    std::list<Being *> victims;
+
     for (MovingObjectIterator
-         i(getMap()->getAroundObjectIterator(this, range)); i; ++i)
+         i(getMap()->getAroundObjectIterator(this, attackZone->range)); i; ++i)
     {
         MovingObject *o = *i;
         if (o == this) continue;
@@ -163,13 +166,55 @@ void Being::performAttack(Damage const &damage, int range, int angle)
 
         Point opos = o->getPosition();
 
-        if  (Collision::diskWithCircleSector(
-                opos, o->getSize(),
-                ppos, range, angle, attackAngle)
-            )
+        switch (attackZone->shape)
         {
-            static_cast< Being * >(o)->damage(this, damage);
+            case ATTZONESHAPE_CONE:
+                if  (Collision::diskWithCircleSector(
+                        opos, o->getSize(),
+                        ppos, attackZone->range,
+                        attackZone->angle/2, attackAngle)
+                    )
+                {
+                    victims.push_back(static_cast< Being * >(o));
+                }
+                break;
+            default:
+                break;
         }
+    }
+
+    if (attackZone->multiTarget)
+    {
+        // damage everyone
+        for (std::list<Being *>::iterator i = victims.begin();
+             i != victims.end();
+             i++)
+        {
+            (*i)->damage(this, damage);
+        }
+    }
+    else
+    {
+        // find the closest and damage this one
+        Being* closestVictim = NULL;
+        int closestDistance = INT_MAX;
+        for (std::list<Being *>::iterator i = victims.begin();
+             i != victims.end();
+             i++)
+        {
+            Point opos = (*i)->getPosition();
+            int distance = abs(opos.x - ppos.x) + abs(opos.y - ppos.y);
+            /* not using pythagoras here is a) faster and b) results in more natural
+               target selection because targets closer to the center line of the
+               attack angle are prioritized
+            */
+            if (distance < closestDistance)
+            {
+                closestVictim = (*i);
+                closestDistance = distance;
+            }
+        }
+        if (closestVictim) closestVictim->damage(this, damage);
     }
 }
 

@@ -1,8 +1,20 @@
+2008-09-27  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/attackzone.cpp, src/game-server/attackzone.hpp,
+	src/game-server/being.cpp, src/game-server/being.hpp,
+	src/game-server/character.cpp, src/game-server/character.hpp,
+	src/game-server/item.cpp, src/game-server/item.hpp,
+	src/game-server/itemmanager.cpp, src/game-server/monster.cpp,
+	src/game-server/monster.hpp, src/game-server/monstermanager.cpp,
+	gameserver.cbp, src/Makefile.AM: Implemented getting the attack zone of
+	weapons from the item database and implemented single target attacks
+	useful for projectile weapons like bows.
+
 2008-08-19  David Athay  <ko2fan@gmail.com>
 
 	* accountserver.cbp, src/account-server/main-account.cpp,
 	src/account-server/serverhandler.cpp, src/chat-server/post.cpp,
-	src/chat-server/post.hpp, src/defines.h, 
+	src/chat-server/post.hpp, src/defines.h,
 	src/game-server/gamehandler.cpp, src/game-server/accountconnection.cpp,
 	src/game-server/gamehandler.hpp, src/game-server/accountconnection.hpp,
 	src/game-server/postman.hpp, src/game-server/main-game.cpp,
@@ -21,47 +33,47 @@
 2008-09-18  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/post.hpp, src/chat-server/post.cpp, src/defines.h,
-	src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp, 
-	src/game-server/main-game.cpp: Changed timing to be 100ms per tick. 
+	src/game-server/gamehandler.cpp, src/game-server/gamehandler.hpp,
+	src/game-server/main-game.cpp: Changed timing to be 100ms per tick.
 	Added post manager on chat server.
 
 2008-09-17  Andreas Habel  <mail@exceptionfault.de>
 
-	* src/sql/*, src/account-server/dalstoragesql.hpp: added installation 
-	scripts to set up database schemas for mysql, sqlite and postgresql. 
-	The create table statements have been completely removed out from the c++ 
+	* src/sql/*, src/account-server/dalstoragesql.hpp: added installation
+	scripts to set up database schemas for mysql, sqlite and postgresql.
+	The create table statements have been completely removed out from the c++
 	source into separate, provider specific sql files.
-	* docs/tmwserv.xml: added database specific parameters to configure 
+	* docs/tmwserv.xml: added database specific parameters to configure
 	each provider, that is used as database backend independent
 	* Doxyfile: doxygen now also includes non-documented functions and provides
 	a dictionary for all classes
 	* dal/dataprovider.h, dal/sqlitedataprovider.h, dal/mysqldataprovider.h,
 	dal/mysqldataprovider.cpp, dal/sqlitedataprovider.cpp:
-	Extended abstract dataprovider to support transactions, implemented for 
+	Extended abstract dataprovider to support transactions, implemented for
 	SQLite and mySQL. Added methods to retrieve last inserted
 	auto-increment value and the number of modified rows in the last statement.
-	* account-server/dalstorage.cpp: Tiny rewrite to be a little more 
+	* account-server/dalstorage.cpp: Tiny rewrite to be a little more
 	transactional and use advanced database functionality. Fixed a bug when
-	deleting a character that left data in quests table and guilds table. 
-	Simplified the connect routine of DALStorage class since every dataprovider 
+	deleting a character that left data in quests table and guilds table.
+	Simplified the connect routine of DALStorage class since every dataprovider
 	is now responsible to retrieve its parameters for itself.
-	
+
 2008-09-15  Andreas Habel  <mail@exceptionfault.de>
 
 	* Doxyfile: added doxygen file, docu will be generated under docs/api/html
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp, 
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
 	src/account-server/dalstoragesql.hpp, src/account-server/main-account.cpp:
 	added table tmw_world_states to store map and world-specific variables,
 	extended DALStorage to set and get those new variables, applied Kess's diff
 	file from mantis #424 with modifications for PostgreSQL support.
-    
+
 2008-09-10  Andreas Habel  <mail@exceptionfault.de>
 
 	* src/account-server/dalstorage.cpp, src/account-server/account.cpp,
 	src/account-server/account.hpp, src/account-server/accounthandler.cpp,
-	src/account-server/dalstorage.hpp, src/account-server/dalstoragesql.hpp: 
-	Extended tmw_accounts table with columns for lastlogin and registration 
-	date. Modified account-server to fill the new columns on registration and 
+	src/account-server/dalstorage.hpp, src/account-server/dalstoragesql.hpp:
+	Extended tmw_accounts table with columns for lastlogin and registration
+	date. Modified account-server to fill the new columns on registration and
 	login. Recreation of database needed!
 	* src/account-server/dalstorage.cpp,
 	src/account-server/dalstoragesql.hpp: Added createIndex function to
@@ -71,8 +83,8 @@
 
 	* src/account-server/dalstorage.cpp: Set banned user's level to
 	AL_BANNED.
-	* src/account-server/main-account.cpp, 
-	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp: 
+	* src/account-server/main-account.cpp,
+	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
 	Added checking for expired bans.
 	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
 	ExceptionFault corrected my poor sql skills.
@@ -672,7 +684,7 @@
 	now transmitted together with attack messages (has already been
 	implemented on the client-side but the server-sided part has been
 	forgotten somehow).
-	
+
 2008-01-23  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/being.cpp: Fixed "immortal monster" bug.

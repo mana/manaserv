@@ -26,9 +26,11 @@
 #include <map>
 #include <vector>
 
+#include "game-server/attackzone.hpp"
 #include "game-server/being.hpp"
 #include "game-server/eventlistener.hpp"
 
+class attackZone;
 class ItemClass;
 class MapComposite;
 
@@ -55,8 +57,7 @@ struct MonsterAttack
     int type;
     int preDelay;
     int aftDelay;
-    int range;
-    int angle;
+    AttackZone attackZone;
 };
 
 typedef std::vector< MonsterAttack *> MonsterAttacks;

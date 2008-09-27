@@ -27,6 +27,7 @@
 #include "game-server/itemmanager.hpp"
 
 #include "defines.h"
+#include "game-server/attackzone.hpp"
 #include "game-server/item.hpp"
 #include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
@@ -122,6 +123,10 @@ void ItemManager::reload()
         int maxPerSlot = XML::getProperty(node, "max-per-slot", 0);
         int sprite = XML::getProperty(node, "sprite_id", 0);
         std::string scriptName = XML::getProperty(node, "script_name", std::string());
+        std::string attackShape = XML::getProperty(node, "attack-shape", "cone");
+        std::string attackTarget = XML::getProperty(node, "attack-target", "multi");
+        int attackRange = XML::getProperty(node, "attack-range", 32);
+        int attackAngle = XML::getProperty(node, "attack-angle", 90);
 
         ItemModifiers modifiers;
         if (itemType == ITEM_EQUIPMENT_ONE_HAND_WEAPON ||
@@ -181,6 +186,42 @@ void ItemManager::reload()
         item->setModifiers(modifiers);
         item->setSpriteID(sprite ? sprite : id);
         ++nbItems;
+
+        if (itemType == ITEM_EQUIPMENT_ONE_HAND_WEAPON ||
+            itemType == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
+        {
+            AttackZone *zone = new AttackZone;
+
+            if (attackShape == "cone")
+            {
+                zone->shape = ATTZONESHAPE_CONE;
+            }
+            else
+            {
+                LOG_WARN("Item Manager: Unknown attack zone shape \"" << attackShape
+                         <<"\" for weapon " << id << " in " << itemReferenceFile << '.');
+                zone->shape = ATTZONESHAPE_CONE;
+            }
+
+            if (attackTarget == "multi")
+            {
+                zone->multiTarget = true;
+            }
+            else if (attackTarget == "single")
+            {
+                zone->multiTarget = false;
+            }
+            else
+            {
+                LOG_WARN("Item Manager: Unknown target mode \"" << attackTarget
+                         <<"\" for weapon " << id << " in " << itemReferenceFile << '.');
+                zone->multiTarget = true;
+            }
+            zone->range = attackRange;
+            zone->angle = attackAngle;
+
+            item->setAttackZone(zone);
+        }
 
         LOG_DEBUG("Item: ID: " << id << ", itemType: " << itemType
                   << ", weight: " << weight << ", value: " << value <<

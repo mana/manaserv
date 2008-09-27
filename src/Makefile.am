@@ -83,6 +83,8 @@ tmwserv_game_SOURCES = \
 	common/inventorydata.hpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
+	game-server/attackzone.hpp \
+	game-server/attackzone.cpp \
 	game-server/being.hpp \
 	game-server/being.cpp \
 	game-server/buysell.hpp \
@@ -191,4 +193,3 @@ if BUILD_LUA
 tmwserv_game_SOURCES += \
 	scripting/lua.cpp
 endif
-

@@ -57,6 +57,8 @@
 		<Unit filename="src/defines.h" />
 		<Unit filename="src/game-server/accountconnection.cpp" />
 		<Unit filename="src/game-server/accountconnection.hpp" />
+		<Unit filename="src/game-server/attackzone.cpp" />
+		<Unit filename="src/game-server/attackzone.hpp" />
 		<Unit filename="src/game-server/being.cpp" />
 		<Unit filename="src/game-server/being.hpp" />
 		<Unit filename="src/game-server/buysell.cpp" />

@@ -28,6 +28,7 @@
 #include "game-server/character.hpp"
 
 #include "defines.h"
+#include "game-server/attackzone.hpp"
 #include "game-server/buysell.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/inventory.hpp"
@@ -48,6 +49,7 @@
 const float Character::EXPCURVE_EXPONENT = 3.0f;
 const float Character::EXPCURVE_FACTOR = 10.0f;
 const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
+const AttackZone Character::UNARMED_ATTACK_ZONE = {ATTZONESHAPE_CONE, true, 32, 90};
 
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER, 65535),
@@ -102,21 +104,21 @@ void Character::perform()
     damage.cth = getModifiedAttribute(BASE_ATTR_HIT) +
                  getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
     damage.usedSkill = CHAR_SKILL_WEAPON_BEGIN + type;
-    if (type)
+
+    if (ic)
     {
+        // weapon fighting
         ItemModifiers const &mods = ic->getModifiers();
         damage.element = mods.getValue(MOD_ELEMENT_TYPE);
+        performAttack(damage, ic->getAttackZone());
     }
     else
     {
         // No-weapon fighting.
         damage.element = ELEMENT_NEUTRAL;
+        performAttack(damage, &UNARMED_ATTACK_ZONE);
     }
 
-    int attackRange = 60; //TODO: get from weapon
-    int attackAngle = 30; //TODO: get from weapon
-
-    performAttack(damage, attackRange, attackAngle);
 }
 
 void Character::respawn()

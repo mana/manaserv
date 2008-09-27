@@ -31,6 +31,7 @@
 
 class Being;
 class MapComposite;
+class AttackZone;
 
 /**
  * Beings and actors directions
@@ -158,7 +159,7 @@ class Being : public MovingObject
         /**
          * Performs an attack.
          */
-        void performAttack(Damage const &, int range, int angle);
+        void performAttack(Damage const &, AttackZone const *attackZone);
 
         /**
          * Sets the current action.
