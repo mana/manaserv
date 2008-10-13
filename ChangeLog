@@ -1,3 +1,8 @@
+2008-10-13  Andreas Habel  <mail@exceptionfault.de>
+
+	* src/account-server/dalstorage.cpp: fixed bug 456: erroneous sql query 
+	at character save
+
 2008-09-27  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/attackzone.cpp, src/game-server/attackzone.hpp,

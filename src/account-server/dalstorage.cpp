@@ -122,6 +122,8 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
         account->setName(accountInfo(0, 1));
         account->setPassword(accountInfo(0, 2));
         account->setEmail(accountInfo(0, 3));
+        account->setRegistrationDate(toUint(accountInfo(0, 6)));
+        account->setLastLogin(toUint(accountInfo(0, 7)));
 
         int level = toUint(accountInfo(0, 4));
         // Check if the user is permanently banned, or temporarily banned.
@@ -133,9 +135,6 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
             return account;
         }
         account->setLevel(level);
-        account->setRegistrationDate(toUint(accountInfo(0, 6)));
-        account->setLastLogin(toUint(accountInfo(0, 7)));
-
 
         // load the characters associated with the account.
         std::ostringstream sql;
@@ -176,6 +175,7 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
     }
     catch (dal::DbSqlQueryExecFailure const &e)
     {
+        LOG_ERROR("DALStorage::getAccountBySQL: " << e.what());
         return NULL; // TODO: Throw exception here
     }
 }
@@ -635,12 +635,12 @@ void DALStorage::flushSkill(const Character* const character,
             return;
         }
 
-        sql.clear();
+        sql.str("");
         sql << "INSERT INTO " << CHAR_SKILLS_TBL_NAME << " "
-            << "(char_id, skill_id, skill_exp) VALUES "
+            << "(char_id, skill_id, skill_exp) VALUES ( "
             << "'" << character->getDatabaseID() << "', "
             << "'" << skill_id << "', "
-            << "'" << exp << "'";
+            << "'" << exp << "' )";
         mDb->execSql(sql.str());
     }
     catch (const dal::DbSqlQueryExecFailure &e)
