@@ -80,7 +80,7 @@ class MovingObject : public Object
          * Sets object direction.
          */
         void setDirection(int direction)
-        { mDirection = direction; }
+        { mDirection = direction; raiseUpdateFlags(UPDATEFLAG_DIRCHANGE); }
 
         /**
          * Gets object direction.

@@ -87,17 +87,31 @@ void ChatHandler::deletePendingConnect(Pending *p)
 
 void ChatHandler::tokenMatched(ChatClient *client, Pending *p)
 {
+    MessageOut msg(CPMSG_CONNECT_RESPONSE);
+
     client->characterName = p->character;
     client->accountLevel = p->level;
+
     Character *c = storage->getCharacter(p->character);
-    client->characterId = c->getDatabaseID();
-    delete p;
-    MessageOut msg(CPMSG_CONNECT_RESPONSE);
-    msg.writeByte(ERRMSG_OK);
+
+    if (!c)
+    {
+        // character wasnt found
+        msg.writeByte(ERRMSG_FAILURE);
+    }
+    else
+    {
+        client->characterId = c->getDatabaseID();
+        delete p;
+
+        msg.writeByte(ERRMSG_OK);
+
+        // Add chat client to player map
+        mPlayerMap.insert(std::pair<std::string, ChatClient*>(client->characterName, client));
+    }
+
     client->send(msg);
 
-    // Add chat client to player map
-    mPlayerMap.insert(std::pair<std::string, ChatClient*>(client->characterName, client));
 }
 
 NetComputer *ChatHandler::computerConnected(ENetPeer *peer)

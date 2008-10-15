@@ -216,6 +216,15 @@ static void informPlayer(MapComposite *map, Character *p)
                 gameHandler->sendTo(p, LooksMsg);
             }
 
+            // Send direction change messages.
+            if (oflags & UPDATEFLAG_DIRCHANGE)
+            {
+                MessageOut DirMsg(GPMSG_BEING_DIR_CHANGE);
+                DirMsg.writeShort(oid);
+                DirMsg.writeByte(o->getDirection());
+                gameHandler->sendTo(p, DirMsg);
+            }
+
             // Send damage messages.
             if (o->canFight())
             {

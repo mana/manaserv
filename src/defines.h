@@ -158,6 +158,8 @@ enum {
     PGMSG_WALK                     = 0x0260, // W*2 destination
     PGMSG_ACTION_CHANGE            = 0x0270, // B Action
     GPMSG_BEING_ACTION_CHANGE      = 0x0271, // W being id, B action
+    PGMSG_DIRECTION_CHANGE         = 0x0272, // B Direction
+    GPMSG_BEING_DIR_CHANGE         = 0x0273, // W being id, B direction
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, C position, B speed] [, W*2 destination] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     PGMSG_ATTACK                   = 0x0290, // B direction

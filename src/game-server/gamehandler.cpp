@@ -343,6 +343,11 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         } break;
 
+        case PGMSG_DIRECTION_CHANGE:
+        {
+            computer.character->setDirection(message.readByte());
+        } break;
+
         case PGMSG_DISCONNECT:
         {
             bool reconnectAccount = (bool) message.readByte();

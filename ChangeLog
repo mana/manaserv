@@ -1,3 +1,10 @@
+2008-10-15  David Athay  <ko2fan@gmail.com>
+
+	* src/chat-server/chathandler.cpp, src/defines.h,
+	src/game-server/state.cpp, src/game-server/movingobject.hpp,
+	src/game-server/gamehandler.cpp, src/game-server/object.hpp: Added
+	communicating a change of direction to the clients.
+
 2008-10-13  Andreas Habel  <mail@exceptionfault.de>
 
 	* src/account-server/dalstorage.cpp: fixed bug 456: erroneous sql query 
@@ -15,7 +22,7 @@
 	weapons from the item database and implemented single target attacks
 	useful for projectile weapons like bows.
 
-2008-08-19  David Athay  <ko2fan@gmail.com>
+2008-09-19  David Athay  <ko2fan@gmail.com>
 
 	* accountserver.cbp, src/account-server/main-account.cpp,
 	src/account-server/serverhandler.cpp, src/chat-server/post.cpp,
