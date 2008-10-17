@@ -74,6 +74,25 @@ CREATE TABLE IF NOT EXISTS `tmw_char_skills` (
 DEFAULT CHARSET=utf8;
 
 --
+-- table: `tmw_items`
+--
+CREATE TABLE IF NOT EXISTS `tmw_items` (
+    `id`           int(10)      unsigned NOT NULL auto_increment,
+    `name`         varchar(100)          NOT NULL,
+    `description`  varchar(255)          NOT NULL,
+    `image`        varchar(50)           NOT NULL,
+    `weight`       smallint(5)  unsigned NOT NULL,
+    `itemtype`     varchar(50)           NOT NULL,
+    `effect`       varchar(100)              NULL,
+    `dyestring`    varchar(50)               NULL,
+    --
+    PRIMARY KEY (`id`),
+    KEY `itemtype` (`itemtype`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8 
+AUTO_INCREMENT=1 ;
+
+--
 -- table: `tmw_inventories`
 --
 
@@ -155,3 +174,53 @@ CREATE TABLE IF NOT EXISTS `tmw_quests` (
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
+
+--
+-- table: `tmw_auctions`
+--
+
+CREATE TABLE IF NOT EXISTS `tmw_auctions` (
+	`auction_id`    int(10)      unsigned  NOT NULL auto_increment,
+	`auction_state` tinyint(3)   unsigned  NOT NULL,
+	`char_id`       int(10)      unsigned  NOT NULL,
+	`itemclass_id`  int(10)      unsigned  NOT NULL,
+	`amount`        int(10)      unsigned  NOT NULL,
+	`start_time`    int(10)      unsigned  NOT NULL,
+	`end_time`      int(10)      unsigned  NOT NULL,
+	`start_price`   int(10)      unsigned  NOT NULL,
+	`min_price`     int(10)      unsigned      NULL,
+	`buyout_price`  int(10)      unsigned      NULL,
+	`description`   varchar(255)               NULL,
+	--
+	PRIMARY KEY (`auction_id`),
+	KEY (`auction_state`),
+	KEY (`itemclass_id`),
+	KEY (`char_id`),
+	FOREIGN KEY (`char_id`)
+		REFERENCES `tmw_characters` (`id`)
+		ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+AUTO_INCREMENT=1 ;
+
+--
+-- table: `tmw_auction_bids`
+--
+
+CREATE TABLE IF NOT EXISTS `tmw_auction_bids` (
+	`bid_id`        int(10)      unsigned  NOT NULL auto_increment,
+	`auction_id`    int(10)      unsigned  NOT NULL,
+	`char_id`       int(10)      unsigned  NOT NULL,
+	`bid_time`      int(10)      unsigned  NOT NULL,
+	`bid_price`     int(10)      unsigned  NOT NULL,
+	--
+	PRIMARY KEY (`bid_id`),
+	KEY (`auction_id`),
+	KEY (`char_id`),
+	FOREIGN KEY (`char_id`)
+		REFERENCES `tmw_characters` (`id`)
+		ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+AUTO_INCREMENT=1 ;
+

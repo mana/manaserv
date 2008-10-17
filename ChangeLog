@@ -1,3 +1,8 @@
+2008-10-17  Andreas Habel  <mail@exceptionfault.de>
+
+	* src/sql/sqlite/createTables.sql, src/sql/mysql/createTables.sql: added 
+	table definitions for item auctions
+	
 2008-10-15  David Athay  <ko2fan@gmail.com>
 
 	* src/chat-server/chathandler.cpp, src/defines.h,

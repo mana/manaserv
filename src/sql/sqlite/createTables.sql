@@ -52,6 +52,20 @@ CREATE TABLE tmw_char_skills
 
 CREATE INDEX tmw_char_skills_char ON tmw_char_skills ( char_id );
 
+CREATE TABLE tmw_items 
+(
+    id           INTEGER    PRIMARY KEY,
+    name         TEXT       NOT NULL,
+    description  TEXT       NOT NULL,
+    image        TEXT       NOT NULL,
+    weight       INTEGER    NOT NULL,
+    itemtype     TEXT       NOT NULL,
+    effect       TEXT,
+    dyestring    TEXT
+);
+
+CREATE INDEX tmw_items_type ON tmw_items (itemtype);
+
 CREATE TABLE tmw_inventories 
 (
    id           INTEGER     PRIMARY KEY,
@@ -102,4 +116,38 @@ CREATE TABLE tmw_world_states
 INSERT INTO "tmw_world_states" VALUES('accountserver_startup',NULL,NULL,1221633910);
 INSERT INTO "tmw_world_states" VALUES('accountserver_version',NULL,NULL,1221633910);
 
+CREATE TABLE tmw_auctions
+(
+   auction_id    INTEGER     PRIMARY KEY,
+   auction_state INTEGER     NOT NULL,
+   char_id       INTEGER     NOT NULL,
+   itemclass_id  INTEGER     NOT NULL,
+   amount        INTEGER     NOT NULL,
+   start_time    INTEGER     NOT NULL,
+   end_time      INTEGER     NOT NULL,
+   start_price   INTEGER     NOT NULL,
+   min_price     INTEGER,
+   buyout_price  INTEGER,
+   description   TEXT,
+   --
+   FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+);
 
+CREATE INDEX tmw_auctions_owner ON tmw_auctions ( char_id );
+CREATE INDEX tmw_auctions_state ON tmw_auctions ( auction_state );
+CREATE INDEX tmw_auctions_item  ON tmw_auctions ( itemclass_id );
+
+CREATE TABLE tmw_auction_bids
+(
+   bid_id        INTEGER     PRIMARY KEY,
+   auction_id    INTEGER     NOT NULL,
+   char_id       INTEGER     NOT NULL,
+   bid_time      INTEGER     NOT NULL,
+   bid_price     INTEGER     NOT NULL,
+   --
+   FOREIGN KEY (auction_id) REFERENCES tmw_auctions(auction_id),
+   FOREIGN KEY (char_id)    REFERENCES tmw_characters(id)
+);
+
+CREATE INDEX tmw_auction_bids_auction ON tmw_auction_bids ( auction_id );
+CREATE INDEX tmw_auction_bids_owner   ON tmw_auction_bids ( char_id );
