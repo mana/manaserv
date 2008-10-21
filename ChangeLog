@@ -1,3 +1,7 @@
+2008-10-21  Dennis Friis  <peavey@placid.dk>
+	* src/dal/sqlitedataprovider.h, src/game-server/being.hpp: Add
+	limits.h where needed.
+
 2008-10-21  David Athay  <ko2fan@gmail.com>
 
 	* src/account-server/serverhandler.cpp, 

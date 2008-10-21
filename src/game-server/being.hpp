@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include "limits.h"
 
 #include "defines.h"
 #include "game-server/movingobject.hpp"

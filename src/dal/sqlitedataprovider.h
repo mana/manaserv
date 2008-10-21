@@ -24,6 +24,7 @@
 #define _TMWSERV_SQLITE_DATA_PROVIDER_H_
 
 #include <iosfwd>
+#include "limits.h"
 #include <sqlite3.h>
 #include "common/configuration.hpp"
 
