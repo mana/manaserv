@@ -15,7 +15,7 @@
 --  Software Foundation; either version 2 of the License, or any later version. --
 ----------------------------------------------------------------------------------
 
-require "data/scripts/npclib"
+require "data/scripts/libs/npclib"
 
 atinit(function()
   create_npc("Test NPC", 200, 50 * TILESIZE + 16, 19 * TILESIZE + 16, npc1_talk, npclib.walkaround_small)
@@ -23,10 +23,10 @@ atinit(function()
   create_npc("Scorpion Tamer", 126, 45 * TILESIZE + 16, 25 * TILESIZE + 16, npc5_talk, nil)
   create_npc("Guard", 122, 58 * TILESIZE + 16, 15 * TILESIZE + 16, npc6_talk, npc6_update)
   create_npc("Fire Demon", 202, 58 * TILESIZE + 16, 35 * TILESIZE + 16, firedemon_talk, firedemon_update)
-  
+
   tmw.trigger_create(56 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 1, true)
   tmw.trigger_create(63 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 2, true)
-  
+
   schedule_every(1 * HOURS + 30 * MINUTES, function()
     print("One and a half hour has passed on map 1-1")
   end)
@@ -124,13 +124,13 @@ function npc5_talk(npc, ch)
     m2 = tmw.monster_create(1, x - TILESIZE, y + TILESIZE)
     m3 = tmw.monster_create(1, x + TILESIZE, y - TILESIZE)
     m4 = tmw.monster_create(1, x - TILESIZE, y - TILESIZE)
-    
+
     on_death(m1, function() tmw.being_say(npc, "NOOO!") end)
     on_death(m2, function() tmw.being_say(npc, "Please stop this violence!") end)
     on_death(m3, function() tmw.being_say(npc, "Stop slaughtering my scorpions!") end)
     on_death(m4, function() tmw.being_say(npc, "Leave my scorpions alone!") end)
     on_death(m4, function() tmw.being_say(m4, "AAARGH!") end)
-    
+
   end
 end
 
@@ -178,6 +178,6 @@ function firedemon_update(npc)
 		i = i + 1
 	  end
 	end
-	
+
 	npclib.walkaround_map(npc)
 end

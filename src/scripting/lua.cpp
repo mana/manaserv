@@ -787,7 +787,7 @@ LuaScript::LuaScript():
     lua_settable(mState, LUA_REGISTRYINDEX);
 
     lua_settop(mState, 0);
-    loadFile("scripts/libtmw.lua");
+    loadFile("scripts/libs/libtmw.lua");
 }
 
 LuaScript::~LuaScript()

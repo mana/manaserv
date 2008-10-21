@@ -1,3 +1,11 @@
+2008-10-21  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/scripting/lua.cpp, data/test.lua, data/scripts/test.lua,
+	data/scripts/npclib.lua, data/scripts/libs, data/scripts/libs/npclib.lua,
+	data/scripts/libs/libtmw.lua, data/scripts/libtmw.lua:
+	Changed the ordering of lua scripts in preperation for content
+	conversion.
+
 2008-10-21  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/account-server/account.cpp, src/chat-server/post.cpp,
