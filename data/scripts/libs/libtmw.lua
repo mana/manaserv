@@ -62,6 +62,7 @@ function create_npc(name, id, x, y, talkfunct, updatefunct)
   local npc = tmw.npc_create(name, id, x, y)
   if talkfunct then npc_talk_functs[npc] = talkfunct end
   if updatefunct then npc_update_functs[npc] = updatefunct end
+  return npc
 end
 
 -- Waits for the player to acknowledge the previous message, if any.
@@ -222,7 +223,7 @@ end
 function update()
   -- check the scheduler
   check_schedule()
-  
+
   -- Run every minute only, in order not to overload the server.
   if not timer then return end
   timer = timer - 1
@@ -335,7 +336,7 @@ function on_death(being, funct)
   tmw.note_on_death(being)
 end
 
--- called by the engine when a being with dies for which a death 
+-- called by the engine when a being with dies for which a death
 -- notification has been requested
 function death_notification(being)
   if type(ondeath_functs[being]) == "table" then
