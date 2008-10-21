@@ -1,3 +1,12 @@
+2008-10-21  David Athay  <ko2fan@gmail.com>
+
+	* src/account-server/serverhandler.cpp, 
+	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
+	src/account-server/dalstoragesql.hpp, src/defines.h,
+	src/game-server/accountconnection.cpp, src/game-server/main-game.cpp: The
+	game server now tries to connect to the account server when disconnected.
+	Fixed some of the postal system.
+
 2008-10-17  Andreas Habel  <mail@exceptionfault.de>
 
 	* src/sql/sqlite/createTables.sql, src/sql/mysql/createTables.sql: added 

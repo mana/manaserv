@@ -30,6 +30,7 @@
 #include "account-server/dalstoragesql.hpp"
 #include "chat-server/chatchannel.hpp"
 #include "chat-server/guild.hpp"
+#include "chat-server/post.hpp"
 #include "common/configuration.hpp"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
@@ -1035,11 +1036,6 @@ std::string DALStorage::getQuestVar(int id, std::string const &name)
     }
 
     return std::string();
-}
-
-std::string DALStorage::getWorldStateVar(std::string const &name)
-{
-    return getWorldStateVar(name, -1);
 }
 
 std::string DALStorage::getWorldStateVar(std::string const &name, int map_id)

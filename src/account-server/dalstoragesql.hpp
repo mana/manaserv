@@ -105,5 +105,8 @@ static char const *QUESTS_TBL_NAME = "tmw_quests";
  */
 static char const *WORLD_STATES_TBL_NAME = "tmw_world_states";
 
-
+/**
+ * TABLE: tmw_auctions
+ */
+static char const *AUCTION_TBL_NAME = "tmw_auctions";
 #endif // _TMWSERV_DALSTORAGE_SQL_H_

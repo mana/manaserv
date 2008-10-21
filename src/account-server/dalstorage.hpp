@@ -33,6 +33,7 @@ class Account;
 class Character;
 class ChatChannel;
 class Guild;
+class Letter;
 
 /**
  * A storage class that relies on DAL.
@@ -254,19 +255,12 @@ class DALStorage
         void setQuestVar(int id, std::string const &, std::string const &);
 
         /**
-         * Gets the string value of a world state variable.
-         *
-         * @param name Name of the requested world-state variable.
-         */
-        std::string getWorldStateVar(std::string const &name);
-
-        /**
          * Gets the string value of a map specific world state variable.
          *
          * @param name Name of the requested world-state variable.
          * @param map_id Id of the specific map.
          */
-        std::string getWorldStateVar(std::string const &name, int map_id);
+        std::string getWorldStateVar(std::string const &name, int map_id = -1);
 
         /**
          * Sets the value of a world state variable.
@@ -285,6 +279,29 @@ class DALStorage
          */
         void setWorldStateVar(std::string const &name, int map_id,
                               std::string const &value);
+
+        /**
+         * Store post
+         *
+         * @param letter The letter to store
+         */
+        void storePost(Letter *letter);
+
+        /**
+         * Retrieve post
+         *
+         * @param playerId The id of the player requesting his post
+         */
+        Letter* getStoredPost(int playerId);
+
+        /**
+         * Add item to auction
+         *
+         * @param itemId The id of the item for auction
+         * @param player The player who put the item up for auction
+         * @param gold The amount of money to buy it
+         */
+        void addAuctionItem(unsigned int itemId, int playerId, unsigned int gold);
 
     private:
         /**

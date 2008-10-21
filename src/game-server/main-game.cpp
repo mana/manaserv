@@ -276,8 +276,7 @@ int main(int argc, char *argv[])
     initialize();
 
     if (!accountHandler->start()) {
-        LOG_FATAL("Unable to create a connection to an account server.");
-        return 3;
+        LOG_INFO("Unable to create a connection to an account server.");
     }
 
     int gameServerPort =
@@ -308,11 +307,22 @@ int main(int argc, char *argv[])
             // Print world time at 10 second intervals to show we're alive
             if (worldTime % 100 == 0) {
                 LOG_INFO("World time: " << worldTime);
-                accountHandler->sendStatistics();
             }
 
-            // Handle all messages that are in the message queues
-            accountHandler->process();
+            if (accountHandler->isConnected())
+            {
+                // Handle all messages that are in the message queues
+                accountHandler->process();
+
+                if (worldTime % 100 == 0)
+                {
+                    accountHandler->sendStatistics();
+                }
+            }
+            else
+            {
+                accountHandler->start();
+            }
             gameHandler->process();
             // Update all active objects/beings
             GameState::update();

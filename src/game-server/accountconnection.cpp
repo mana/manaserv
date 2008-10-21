@@ -131,7 +131,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             while (msg.getUnreadLength())
             {
                 // write the sender
-                out.writeLong(msg.readLong());
+                out.writeString(msg.readString());
 
                 // write the contents
                 out.writeString(msg.readString());
@@ -154,6 +154,12 @@ void AccountConnection::processMessage(MessageIn &msg)
         {
             // get character
             Character *character = postMan->getCharacter(msg.readLong());
+
+            // check character is valid
+            if (!character)
+            {
+                break;
+            }
 
             // create message and put error inside
             MessageOut out(GPMSG_SEND_POST_RESPONSE);
@@ -251,6 +257,7 @@ void AccountConnection::sendPost(Character *c, MessageIn &msg)
 {
     // send message to account server with id of sending player,
     // the id of receiving player, the letter contents, and attachments
+    LOG_DEBUG("Sending GCMSG_STORE_POST.");
     MessageOut out(GCMSG_STORE_POST);
     out.writeLong(c->getDatabaseID());
     out.writeString(msg.readString());
@@ -261,11 +268,13 @@ void AccountConnection::sendPost(Character *c, MessageIn &msg)
         out.writeLong(msg.readShort());
         out.writeLong(msg.readShort());
     }
+    send(out);
 }
 
 void AccountConnection::getPost(Character *c)
 {
     // send message to account server with id of retrieving player
+    LOG_DEBUG("Sending GCMSG_REQUEST_POST");
     MessageOut out(GCMSG_REQUEST_POST);
     out.writeLong(c->getDatabaseID());
     send(out);

@@ -331,8 +331,13 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             LOG_DEBUG("GCMSG_REQUEST_POST");
             result.writeShort(CGMSG_POST_RESPONSE);
 
-            // get the character
+            // get the character id
             int characterId = msg.readLong();
+
+            // send the character id of sender
+            result.writeLong(characterId);
+
+            // get the character based on the id
             Character *ptr = storage->getCharacter(characterId, NULL);
             if (!ptr)
             {
@@ -344,18 +349,15 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             // get the post for that character
             Post *post = postalManager->getPost(ptr);
 
-            // send the character id of receiver
-            result.writeLong(characterId);
-
             // send the post if valid
             if (post)
             {
                 for (unsigned int i = 0; i < post->getNumberOfLetters(); ++i)
                 {
-                    // get each letter, send the sender's id,
+                    // get each letter, send the sender's name,
                     // the contents and any attachments
                     Letter *letter = post->getLetter(i);
-                    result.writeLong(letter->getSender()->getDatabaseID());
+                    result.writeString(letter->getSender()->getName());
                     result.writeString(letter->getContents());
                     std::vector<InventoryItem> items = letter->getAttachments();
                     for (unsigned int j = 0; j < items.size(); ++j)
@@ -381,6 +383,9 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int senderId = msg.readLong();
             std::string receiverName = msg.readString();
 
+            // for sending it back
+            result.writeLong(senderId);
+
             // get their characters
             Character *sender = storage->getCharacter(senderId, NULL);
             Character *receiver = storage->getCharacter(receiverName);
@@ -402,6 +407,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
 
             // save the letter
+            LOG_INFO("Creating letter");
             Letter *letter = new Letter(0, sender, receiver);
             letter->addText(contents);
             for (unsigned int i = 0; i < items.size(); ++i)

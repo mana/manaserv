@@ -245,7 +245,7 @@ enum {
     PGMSG_SEND_POST                 = 0x04A0, // S player, S letter, { W attachment id }
     GPMSG_SEND_POST_RESPONSE        = 0x04A1, // B error
     PGMSG_GET_POST                  = 0x04A2, //
-    GPMSG_GET_POST_RESPONSE         = 0x04A3, // { L sender id, S letter, { W attachment id } }
+    GPMSG_GET_POST_RESPONSE         = 0x04A3, // { S sender name, S letter, { W attachment id } }
 
     // Inter-server
     GAMSG_REGISTER              = 0x0500, // S address, W port, { W map id }*
@@ -262,8 +262,8 @@ enum {
     GAMSG_STATISTICS            = 0x0560, // { W map id, W thing nb, W monster nb, W player nb, { L character id }* }*
     CGMSG_CHANGED_PARTY         = 0x0590, // L character id, L party id
     GCMSG_REQUEST_POST          = 0x05A0, // L character id
-    CGMSG_POST_RESPONSE         = 0x05A1, // L receiver id, { L sender id, S letter, W num attachments { W attachment item id, W quantity } }
-    GCMSG_STORE_POST            = 0x05A5, // L sender id, L receiver id, S letter, { W attachment item id, W quantity }
+    CGMSG_POST_RESPONSE         = 0x05A1, // L receiver id, { S sender name, S letter, W num attachments { W attachment item id, W quantity } }
+    GCMSG_STORE_POST            = 0x05A5, // L sender id, S receiver name, S letter, { W attachment item id, W quantity }
     CGMSG_STORE_POST_RESPONSE   = 0x05A6, // L id, B error
 
 
