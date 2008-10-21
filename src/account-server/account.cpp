@@ -69,9 +69,9 @@ void Account::setID(int id)
 void Account::setRegistrationDate(time_t time)
 {
     mRegistrationDate = time;
-};
+}
 
 void Account::setLastLogin(time_t time)
 {
     mLastLogin = time;
-};
+}

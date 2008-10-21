@@ -79,7 +79,8 @@ void ResourceManager::initialize()
 #else
     // Retrieve the current path
     char programPath[256];
-    getcwd(programPath, 256);
+    if (!getcwd(programPath, 256))
+        strcpy(programPath, ".");
     strncat(programPath, "/data", 256 - strlen(programPath) - 1);
 
     // Create our directory structure

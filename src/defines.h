@@ -284,7 +284,7 @@ enum {
     ERRMSG_ALREADY_TAKEN,               // name used was already taken
     ERRMSG_SERVER_FULL,                 // the server is overloaded
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
-    ERRMSG_TOO_MANY_ATTACHMENTS,        // too many attachments in letter
+    ERRMSG_TOO_MANY_ATTACHMENTS         // too many attachments in letter
 };
 
 // Login specific return values

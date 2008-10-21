@@ -116,7 +116,7 @@ bool Post::addLetter(Letter *letter)
 
 Letter* Post::getLetter(int letter) const
 {
-    if (letter < 0 || letter > mLetters.size())
+    if (letter < 0 || (size_t) letter > mLetters.size())
     {
         return NULL;
     }
