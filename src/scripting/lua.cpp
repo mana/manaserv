@@ -29,6 +29,7 @@ extern "C" {
 }
 
 #include "defines.h"
+#include "game-server/accountconnection.hpp"
 #include "game-server/buysell.hpp"
 #include "game-server/character.hpp"
 #include "game-server/collisiondetection.hpp"
@@ -724,6 +725,24 @@ static int LuaGetBeingsInCircle(lua_State *s)
 }
 
 /**
+ * Gets the post for the character
+ */
+static int LuaGetPost(lua_State *s)
+{
+    if (lua_isuserdata(s, 1))
+    {
+        Character *c = getCharacter(s, 1);
+
+        if (c)
+        {
+            accountHandler->getPost(c);
+        }
+    }
+
+    return 0;
+}
+
+/**
  * Makes the server call the lua function deathEvent
  * with the being ID when the being dies.
  * tmw.note_on_death (being)
@@ -776,6 +795,7 @@ LuaScript::LuaScript():
         { "trigger_create",         &LuaTrigger_Create   },
         { "chatmessage",            &LuaChatmessage      },
         { "get_beings_in_circle",   &LuaGetBeingsInCircle},
+        { "get_post",               &LuaGetPost          },
         { "note_on_death",          &LuaNoteOnDeath      },
         { NULL, NULL }
     };

@@ -361,7 +361,7 @@ void ObjectIterator::operator++()
 }
 
 ObjectBucket::ObjectBucket()
-  : free(256), next_object(0)
+  : free(256), next_object(1)
 {
     for (unsigned i = 0; i < 256 / int_bitsize; ++i)
     {

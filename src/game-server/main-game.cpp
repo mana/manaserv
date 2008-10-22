@@ -321,7 +321,10 @@ int main(int argc, char *argv[])
             }
             else
             {
-                accountHandler->start();
+                if (worldTime % 200 == 0)
+                {
+                    accountHandler->start();
+                }
             }
             gameHandler->process();
             // Update all active objects/beings

@@ -1,3 +1,9 @@
+2008-10-22  David Athay  <ko2fan@gmail.com>
+
+	* src/scripting/lua.cpp, src/game-server/mapcomposite.cpp, 
+	src/game-server/main-game.cpp: Fixed NPC id's starting from 0. Changed
+	time between reconnection attempts.
+
 2008-10-21  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* data/scripts/libs/libtmw.lua: patch by Kage_Jittai to have
