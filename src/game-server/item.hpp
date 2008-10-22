@@ -27,6 +27,8 @@
 #include <vector>
 
 #include "game-server/object.hpp"
+#include "scripting/script.hpp"
+
 
 class AttackZone;
 class Being;
@@ -175,8 +177,8 @@ class ItemModifiers
 class ItemClass
 {
     public:
-        ItemClass(int id, ItemType type)
-          : mDatabaseID(id), mType(type), mAttackZone(NULL)
+        ItemClass(int id, ItemType type, Script *s = NULL)
+          : mDatabaseID(id), mType(type), mAttackZone(NULL), mScript(NULL)
         {}
 
         ~ItemClass();
@@ -260,6 +262,12 @@ class ItemClass
         { return mSpriteID; }
 
         /**
+         * Sets the script that is to be used
+         */
+        void setScript(Script *s)
+        { mScript = s; }
+
+        /**
          * Set attack zone (only needed when the item is a weapon)
          */
         void setAttackZone(AttackZone* attackZone) { mAttackZone = attackZone; }
@@ -272,6 +280,8 @@ class ItemClass
 
 
     private:
+        //Script for using items
+        Script *mScript;
 
         // Item reference information
         unsigned short mDatabaseID;

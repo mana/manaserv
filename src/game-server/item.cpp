@@ -29,6 +29,7 @@
 
 #include "game-server/attackzone.hpp"
 #include "game-server/being.hpp"
+#include "scripting/script.hpp"
 
 WeaponType weaponTypeFromString (const std::string &name)
 {
@@ -140,12 +141,19 @@ void ItemModifiers::cancelAttributes(Being *b) const
 ItemClass::~ItemClass()
 {
     if (mAttackZone) delete mAttackZone;
+    if (mScript) delete mScript;
 }
 
 bool ItemClass::use(Being *itemUser)
 {
     if (mType != ITEM_USABLE) return false;
-
+    if (mScript)
+    {
+       mScript->prepare("item_use");
+       mScript->push(mDatabaseID);
+       mScript->push(itemUser);
+       mScript->execute();
+    }
     mModifiers.applyAttributes(itemUser);
     return true;
 }

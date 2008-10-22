@@ -33,6 +33,8 @@
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
+#include <sstream>
+
 typedef std::map< int, ItemClass * > ItemClasses;
 static ItemClasses itemClasses; /**< Item reference */
 static std::string itemReferenceFile;
@@ -179,10 +181,23 @@ void ItemManager::reload()
             weight = 1;
         }
 
+        Script *s;
+        //TODO: Clean this up some
+        std::stringstream filename;
+        filename << "scripts/items/" << id << ".lua";
+
+        if(ResourceManager::exists(filename.str()))       //file exists!
+        {
+            LOG_INFO("Loading item script: " + filename.str());
+            s = Script::create("lua");
+            s->loadFile(filename.str());
+        }
+
+
         item->setWeight(weight);
         item->setCost(value);
         item->setMaxPerSlot(maxPerSlot);
-        //item->setScriptName(scriptName);
+        item->setScript(s);
         item->setModifiers(modifiers);
         item->setSpriteID(sprite ? sprite : id);
         ++nbItems;

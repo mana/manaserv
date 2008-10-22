@@ -1,9 +1,14 @@
+2008-10-22  Chuck Miller  <shadowmil@gmail.com>
+
+	* src/game-server/item.cpp, src/game-server/item.hpp
+	src/game-server/itemmanager.cpp: Added on item use scripts.
+
 2008-10-22  David Athay  <ko2fan@gmail.com>
 
-	* src/scripting/lua.cpp, src/game-server/mapcomposite.cpp, 
+	* src/scripting/lua.cpp, src/game-server/mapcomposite.cpp,
 	src/game-server/main-game.cpp: Fixed NPC id's starting from 0. Changed
 	time between reconnection attempts.
-	* src/scripting/lua.cpp, src/game-server/npc.hpp, 
+	* src/scripting/lua.cpp, src/game-server/npc.hpp,
 	src/game-server/npc.cpp: Added enabling and disabling NPCs.
 
 2008-10-21  Roderic Morris  <roderic@ccs.neu.edu>
