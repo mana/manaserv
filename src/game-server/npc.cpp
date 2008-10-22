@@ -25,14 +25,19 @@
 #include "scripting/script.hpp"
 
 NPC::NPC(const std::string &name, int id, Script *s):
-    Being(OBJECT_NPC, 65535), mScript(s), mID(id)
+    Being(OBJECT_NPC, 65535), mScript(s), mID(id), mEnabled(true)
 {
     setName(name);
 }
 
+void NPC::enable(bool enabled)
+{
+    mEnabled = enabled;
+}
+
 void NPC::update()
 {
-    if (!mScript) return;
+    if (!mScript || !mEnabled) return;
     mScript->prepare("npc_update");
     mScript->push(this);
     mScript->execute();
@@ -40,7 +45,7 @@ void NPC::update()
 
 void NPC::prompt(Character *ch, bool restart)
 {
-    if (!mScript) return;
+    if (!mScript || !mEnabled) return;
     mScript->prepare(restart ? "npc_start" : "npc_next");
     mScript->push(this);
     mScript->push(ch);
@@ -49,7 +54,7 @@ void NPC::prompt(Character *ch, bool restart)
 
 void NPC::select(Character *ch, int v)
 {
-    if (!mScript) return;
+    if (!mScript || !mEnabled) return;
     mScript->prepare("npc_choose");
     mScript->push(this);
     mScript->push(ch);

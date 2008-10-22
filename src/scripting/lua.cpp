@@ -217,6 +217,37 @@ static int LuaNpc_Create(lua_State *s)
 }
 
 /**
+ * Enable a NPC if it has previously disabled
+ */
+static int LuaNPC_Enable(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    if (p)
+    {
+        p->enable(true);
+        bool b = GameState::insert(p);
+        assert(b); (void)b;
+    }
+
+    return 0;
+}
+
+/**
+ * Disable a NPC
+ */
+static int LuaNPC_Disable(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    if (p)
+    {
+        p->enable(false);
+        GameState::remove(p);
+    }
+
+    return 0;
+}
+
+/**
  * Callback for warping a player to another place.
  * tmw.chr_warp(character, nil/int map, int x, int y)
  */
@@ -467,7 +498,6 @@ static int LuaBeing_Damage(lua_State *s)
 
     return 0;
 }
-
 
 /**
  * Function for getting the x-coordinate of the position of a being
@@ -781,6 +811,8 @@ LuaScript::LuaScript():
         { "npc_message",            &LuaNpc_Message      },
         { "npc_choice",             &LuaNpc_Choice       },
         { "npc_trade",              &LuaNpc_Trade        },
+        { "npc_enable",             &LuaNPC_Enable       },
+        { "npc_disable",            &LuaNPC_Disable      },
         { "chr_warp",               &LuaChr_Warp         },
         { "chr_inv_change",         &LuaChr_InvChange    },
         { "chr_inv_count",          &LuaChr_InvCount     },

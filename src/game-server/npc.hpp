@@ -39,6 +39,11 @@ class NPC : public Being
         void update();
 
         /**
+         * Enables the NPC
+         */
+        void enable(bool enabled);
+
+        /**
          * Prompts NPC.
          */
         void prompt(Character *, bool restart);
@@ -71,6 +76,7 @@ class NPC : public Being
     private:
         Script *mScript;    /**< Script describing NPC behavior. */
         unsigned short mID; /**< ID of the NPC. */
+        bool mEnabled;      /**< Whether NPC is enabled */
 };
 
 #endif
