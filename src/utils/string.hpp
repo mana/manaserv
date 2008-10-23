@@ -18,6 +18,7 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 #ifndef UTILS_STRING_HPP
 #define UTILS_STRING_HPP
 
@@ -28,4 +29,4 @@ namespace utils
     std::string toupper(std::string);
 }
 
-#endif
+#endif // UTILS_STRING_HPP

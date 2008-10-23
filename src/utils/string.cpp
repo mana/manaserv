@@ -18,14 +18,14 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-#include <string>
-#include <cctype>
+
 #include "utils/string.hpp"
+
+#include <cctype>
+#include <algorithm>
 
 std::string utils::toupper(std::string s)
 {
-    for (int j=0; j<s.length(); ++j)
-        s[j]=std::toupper(s[j]);
+    std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper);
     return s;
-} 
-
+}

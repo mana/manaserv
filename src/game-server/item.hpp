@@ -27,11 +27,10 @@
 #include <vector>
 
 #include "game-server/object.hpp"
-#include "scripting/script.hpp"
-
 
 class AttackZone;
 class Being;
+class Script;
 
 /**
  * Enumeration of available Item types.
@@ -178,7 +177,7 @@ class ItemClass
 {
     public:
         ItemClass(int id, ItemType type, Script *s = NULL)
-          : mDatabaseID(id), mType(type), mAttackZone(NULL), mScript(NULL)
+          : mScript(NULL), mDatabaseID(id), mType(type), mAttackZone(NULL)
         {}
 
         ~ItemClass();
@@ -280,21 +279,22 @@ class ItemClass
 
 
     private:
-        //Script for using items
-        Script *mScript;
+        Script *mScript;          /**< Script for using items */
 
-        // Item reference information
-        unsigned short mDatabaseID;
-        unsigned short mSpriteID; /**< The sprite that should be shown to the character */
-        ItemType mType;     /**< Type: usable, equipment etc. */
-        unsigned short mWeight;  /**< Weight of the item. */
-        unsigned short mCost;    /**< Unit cost the item. */
-        unsigned short mMaxPerSlot; /**< Max item amount per slot in inventory. */
+        unsigned short mDatabaseID; /**< Item reference information */
+        /** The sprite that should be shown to the character */
+        unsigned short mSpriteID;
+        ItemType mType;           /**< Type: usable, equipment etc. */
+        unsigned short mWeight;   /**< Weight of the item. */
+        unsigned short mCost;     /**< Unit cost the item. */
+        /** Max item amount per slot in inventory. */
+        unsigned short mMaxPerSlot;
+
         ItemModifiers mModifiers; /**< Item modifiers. */
-        AttackZone *mAttackZone; /**< attack zone when used as a weapon */
+        AttackZone *mAttackZone;  /**< Attack zone when used as a weapon */
 };
 
-class Item: public Object
+class Item : public Object
 {
     public:
         Item(ItemClass *type, int amount)

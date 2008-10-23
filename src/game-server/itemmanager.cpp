@@ -30,6 +30,7 @@
 #include "game-server/attackzone.hpp"
 #include "game-server/item.hpp"
 #include "game-server/resourcemanager.hpp"
+#include "scripting/script.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
@@ -181,18 +182,17 @@ void ItemManager::reload()
             weight = 1;
         }
 
-        Script *s;
-        //TODO: Clean this up some
+        // TODO: Clean this up some
+        Script *s = 0;
         std::stringstream filename;
         filename << "scripts/items/" << id << ".lua";
 
-        if(ResourceManager::exists(filename.str()))       //file exists!
+        if (ResourceManager::exists(filename.str()))       // file exists!
         {
             LOG_INFO("Loading item script: " + filename.str());
             s = Script::create("lua");
             s->loadFile(filename.str());
         }
-
 
         item->setWeight(weight);
         item->setCost(value);

@@ -1,14 +1,21 @@
+2008-10-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/utils/string.cpp, src/utils/string.hpp,
+	src/game-server/item.hpp, src/game-server/itemmanager.cpp: Fixed
+	compiler warnings, including a forgotten initialization of an item's
+	script pointer.
+
 2008-10-23  David Athay  <ko2fan@gmail.com>
 
-	* src/scripting/lua.cpp: Added functions for getting being name and 
+	* src/scripting/lua.cpp: Added functions for getting being name and
 	attributes in scripts.
 	* data/scripts/test.lua: Added example of using above functions.
 
 2008-10-22  Chuck Miller  <shadowmil@gmail.com>
 
-	* src/game-server/mapreader.cpp, src/utils/sting.cpp
-	src/utils/string.hpp: Makes the values in tmx files
-	ignore case for convience
+	* src/game-server/mapreader.cpp, src/utils/sting.cpp,
+	src/utils/string.hpp: Makes the values in tmx files ignore case for
+	convience.
 
 2008-10-22  Chuck Miller  <shadowmil@gmail.com>
 
@@ -25,16 +32,16 @@
 
 2008-10-21  Roderic Morris  <roderic@ccs.neu.edu>
 
-	* data/scripts/libs/libtmw.lua: patch by Kage_Jittai to have
-	npc ids returned when creating new npcs.
+	* data/scripts/libs/libtmw.lua: Patch by Kage_Jittai to have NPC ids
+	returned when creating new NPCs.
 
 2008-10-21  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/scripting/lua.cpp, data/test.lua, data/scripts/test.lua,
-	data/scripts/npclib.lua, data/scripts/libs, data/scripts/libs/npclib.lua,
-	data/scripts/libs/libtmw.lua, data/scripts/libtmw.lua:
-	Changed the ordering of lua scripts in preperation for content
-	conversion.
+	data/scripts/npclib.lua, data/scripts/libs,
+	data/scripts/libs/npclib.lua, data/scripts/libs/libtmw.lua,
+	data/scripts/libtmw.lua: Changed the ordering of lua scripts in
+	preperation for content conversion.
 
 2008-10-21  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
