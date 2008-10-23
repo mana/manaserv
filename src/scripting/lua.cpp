@@ -218,6 +218,7 @@ static int LuaNpc_Create(lua_State *s)
 
 /**
  * Enable a NPC if it has previously disabled
+ * tmw.npc_enable(npc)
  */
 static int LuaNPC_Enable(lua_State *s)
 {
@@ -234,6 +235,7 @@ static int LuaNPC_Enable(lua_State *s)
 
 /**
  * Disable a NPC
+ * tmw.npc_disable(npc)
  */
 static int LuaNPC_Disable(lua_State *s)
 {
@@ -497,6 +499,54 @@ static int LuaBeing_Damage(lua_State *s)
     being->damage(NULL, damage);
 
     return 0;
+}
+
+/**
+ * Gets the attribute for a being
+ * tmw.being_get_attribute(being, attribute)
+ */
+static int LuaBeing_GetAttribute(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    Being *being = getBeing(s, 1);
+
+    if (being)
+    {
+        int attr = lua_tointeger(s, 2);
+        if (attr == 0)
+        {
+            raiseScriptError(s,
+                "being_get_attribute called with incorrect parameters.");
+            return 0;
+        }
+        else
+        {
+            lua_pushinteger(s, being->getModifiedAttribute(attr));
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * Gets the being's name
+ * tmw.being_get_name(being)
+ */
+static int LuaBeing_GetName(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    Being *being = getBeing(s, 1);
+
+    if (being)
+    {
+        lua_pushstring(s, being->getName().c_str());
+    }
+
+    return 1;
 }
 
 /**
@@ -807,28 +857,30 @@ LuaScript::LuaScript():
 
     // Put some callback functions in the scripting environment.
     static luaL_reg const callbacks[] = {
-        { "npc_create",             &LuaNpc_Create       },
-        { "npc_message",            &LuaNpc_Message      },
-        { "npc_choice",             &LuaNpc_Choice       },
-        { "npc_trade",              &LuaNpc_Trade        },
-        { "npc_enable",             &LuaNPC_Enable       },
-        { "npc_disable",            &LuaNPC_Disable      },
-        { "chr_warp",               &LuaChr_Warp         },
-        { "chr_inv_change",         &LuaChr_InvChange    },
-        { "chr_inv_count",          &LuaChr_InvCount     },
-        { "chr_get_quest",          &LuaChr_GetQuest     },
-        { "chr_set_quest",          &LuaChr_SetQuest     },
-        { "monster_create",         &LuaMonster_Create   },
-        { "being_walk",             &LuaBeing_Walk       },
-        { "being_say",              &LuaBeing_Say        },
-        { "being_damage",           &LuaBeing_Damage     },
-        { "posX",                   &LuaPosX             },
-        { "posY",                   &LuaPosY             },
-        { "trigger_create",         &LuaTrigger_Create   },
-        { "chatmessage",            &LuaChatmessage      },
-        { "get_beings_in_circle",   &LuaGetBeingsInCircle},
-        { "get_post",               &LuaGetPost          },
-        { "note_on_death",          &LuaNoteOnDeath      },
+        { "npc_create",             &LuaNpc_Create        },
+        { "npc_message",            &LuaNpc_Message       },
+        { "npc_choice",             &LuaNpc_Choice        },
+        { "npc_trade",              &LuaNpc_Trade         },
+        { "npc_enable",             &LuaNPC_Enable        },
+        { "npc_disable",            &LuaNPC_Disable       },
+        { "chr_warp",               &LuaChr_Warp          },
+        { "chr_inv_change",         &LuaChr_InvChange     },
+        { "chr_inv_count",          &LuaChr_InvCount      },
+        { "chr_get_quest",          &LuaChr_GetQuest      },
+        { "chr_set_quest",          &LuaChr_SetQuest      },
+        { "monster_create",         &LuaMonster_Create    },
+        { "being_walk",             &LuaBeing_Walk        },
+        { "being_say",              &LuaBeing_Say         },
+        { "being_damage",           &LuaBeing_Damage      },
+        { "being_get_attribute",    &LuaBeing_GetAttribute},
+        { "being_get_name",         &LuaBeing_GetName     },
+        { "posX",                   &LuaPosX              },
+        { "posY",                   &LuaPosY              },
+        { "trigger_create",         &LuaTrigger_Create    },
+        { "chatmessage",            &LuaChatmessage       },
+        { "get_beings_in_circle",   &LuaGetBeingsInCircle },
+        { "get_post",               &LuaGetPost           },
+        { "note_on_death",          &LuaNoteOnDeath       },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

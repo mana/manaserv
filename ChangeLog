@@ -1,3 +1,8 @@
+2008-10-23  David Athay  <ko2fan@gmail.com>
+
+	* src/scripting/lua.cpp: Added functions for getting being name and 
+	attributes in scripts.
+
 2008-10-22  Chuck Miller  <shadowmil@gmail.com>
 
 	* src/game-server/mapreader.cpp, src/utils/sting.cpp
