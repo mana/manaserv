@@ -1,5 +1,11 @@
 2008-10-22  Chuck Miller  <shadowmil@gmail.com>
 
+	* src/game-server/mapreader.cpp, src/utils/sting.cpp
+	src/utils/string.hpp: Makes the values in tmx files
+	ignore case for convience
+
+2008-10-22  Chuck Miller  <shadowmil@gmail.com>
+
 	* src/game-server/item.cpp, src/game-server/item.hpp
 	src/game-server/itemmanager.cpp: Added on item use scripts.
 

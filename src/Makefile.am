@@ -72,7 +72,8 @@ tmwserv_account_SOURCES = \
 	utils/tokendispenser.hpp \
 	utils/tokendispenser.cpp \
 	utils/xml.hpp \
-	utils/xml.cpp
+	utils/xml.cpp \
+	utils/string.cpp
 
 tmwserv_game_SOURCES = \
 	game-server/main-game.cpp \
@@ -169,7 +170,8 @@ tmwserv_game_SOURCES = \
 	utils/xml.hpp \
 	utils/xml.cpp \
 	utils/zlib.hpp \
-	utils/zlib.cpp
+	utils/zlib.cpp \
+	utils/string.cpp
 
 if BUILD_MYSQL
 tmwserv_account_SOURCES += \

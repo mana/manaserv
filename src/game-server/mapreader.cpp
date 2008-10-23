@@ -38,6 +38,7 @@
 #include "utils/trim.hpp"
 #include "utils/xml.hpp"
 #include "utils/zlib.hpp"
+#include "utils/string.hpp"
 
 static std::vector< int > tilesetFirstGids;
 
@@ -120,7 +121,6 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
 {
     // Take the filename off the path
     std::string pathDir = path.substr(0, path.rfind("/") + 1);
-
     int w = XML::getProperty(node, "width", 0);
     int h = XML::getProperty(node, "height", 0);
     // We only support tile width of 32 at the moment
@@ -162,12 +162,13 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
 
                 std::string objName = XML::getProperty(objectNode, "name", "");
                 std::string objType = XML::getProperty(objectNode, "type", "");
+                objType = utils::toupper(objType);
                 int objX = XML::getProperty(objectNode, "x", 0);
                 int objY = XML::getProperty(objectNode, "y", 0);
                 int objW = XML::getProperty(objectNode, "width", 0);
                 int objH = XML::getProperty(objectNode, "height", 0);
                 Rectangle rect = { objX, objY, objW, objH };
-
+ 
 
                 if (objType == "WARP")
                 {
@@ -187,6 +188,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                value = utils::toupper(value);
                                 if (value == "DEST_MAP")
                                 {
                                     destMapId = getObjectProperty(propertyNode, -1);
@@ -236,15 +238,17 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                         {
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
-                                if (XML::getProperty(propertyNode, "name", std::string()) == "MONSTER_ID")
+                                std::string value = XML::getProperty(propertyNode, "name", std::string()); 
+                                value = utils::toupper(value);
+                                if (value == "MONSTER_ID")
                                 {
                                     monsterId = getObjectProperty(propertyNode, monsterId);
                                 }
-                                else if (XML::getProperty(propertyNode, "name", std::string()) == "MAX_BEINGS")
+                                else if (value == "MAX_BEINGS")
                                 {
                                     maxBeings = getObjectProperty(propertyNode, maxBeings);
                                 }
-                                else if (XML::getProperty(propertyNode, "name", std::string()) == "SPAWN_RATE")
+                                else if (value == "SPAWN_RATE")
                                 {
                                     spawnRate = getObjectProperty(propertyNode, spawnRate);
                                 }
@@ -288,6 +292,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                value = utils::toupper(value);
                                 if (value == "NPC_ID")
                                 {
                                     npcId = getObjectProperty(propertyNode, npcId);
@@ -334,6 +339,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                value = utils::toupper(value);
                                 if (value == "FILENAME")
                                 {
                                     scriptFilename = getObjectProperty(propertyNode, "");
