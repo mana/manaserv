@@ -26,6 +26,6 @@
 
 std::string utils::toupper(std::string s)
 {
-    std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper);
+    std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) std::toupper);
     return s;
 }
