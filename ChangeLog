@@ -2,6 +2,7 @@
 
 	* src/scripting/lua.cpp: Added functions for getting being name and 
 	attributes in scripts.
+	* data/scripts/test.lua: Added example of using above functions.
 
 2008-10-22  Chuck Miller  <shadowmil@gmail.com>
 

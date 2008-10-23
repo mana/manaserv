@@ -23,6 +23,8 @@ atinit(function()
   create_npc("Scorpion Tamer", 126, 45 * TILESIZE + 16, 25 * TILESIZE + 16, npc5_talk, nil)
   create_npc("Guard", 122, 58 * TILESIZE + 16, 15 * TILESIZE + 16, npc6_talk, npc6_update)
   create_npc("Fire Demon", 202, 58 * TILESIZE + 16, 35 * TILESIZE + 16, firedemon_talk, firedemon_update)
+  create_npc("Post Box", 158, 45 * TILESIZE + 16, 22 * TILESIZE + 16, 
+post_talk)
 
   tmw.trigger_create(56 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 1, true)
   tmw.trigger_create(63 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 2, true)
@@ -180,4 +182,10 @@ function firedemon_update(npc)
 	end
 
 	npclib.walkaround_map(npc)
+end
+
+function post_talk(npc, ch)
+  do_message(npc, ch, "Hello " .. tmw.being_get_name(ch))
+  local strength = tmw.being_get_attribute(ch, 2)
+  do_message(npc, ch, "You have " .. tostring(strength) .. " strength")
 end
