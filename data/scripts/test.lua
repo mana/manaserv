@@ -185,6 +185,6 @@ end
 
 function post_talk(npc, ch)
   do_message(npc, ch, "Hello " .. tmw.being_get_name(ch))
-  local strength = tmw.being_get_attribute(ch, 2)
+  local strength = tmw.being_get_attribute(ch, ATTR_STRENGTH)
   do_message(npc, ch, "You have " .. tostring(strength) .. " strength")
 end
