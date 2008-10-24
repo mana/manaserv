@@ -1,3 +1,8 @@
+2008-10-24  Chuck Miller  <shadowmil@gmail.com>
+
+	* src/game-server/being.hpp: Changed direction values to match the
+	client's
+
 2008-10-24  David Athay  <ko2fan@gmail.com>
 
 	* data/scripts/test.lua, data/scripts/libs/libtmw.lua: Fixed example 

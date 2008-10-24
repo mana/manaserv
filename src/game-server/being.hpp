@@ -36,11 +36,12 @@ class AttackZone;
 
 /**
  * Beings and actors directions
+ * Needs too match client
  */
 enum Direction
 {
-    DIRECTION_DOWN = 1,
-    DIRECTION_UP,
+    DIRECTION_UP = 1,
+    DIRECTION_DOWN,
     DIRECTION_LEFT,
     DIRECTION_RIGHT
 };
