@@ -467,10 +467,14 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
     return true;
 }
 
-bool DALStorage::updateCharacter(Character *character)
+bool DALStorage::updateCharacter(Character *character,
+                                 bool startTransaction)
 {
     // Update the database Character data (see CharacterData for details)
-    mDb->beginTransaction();
+    if (startTransaction)
+    {
+        mDb->beginTransaction();
+    }
     try
     {
         std::ostringstream sqlUpdateCharacterInfo;
@@ -505,7 +509,10 @@ bool DALStorage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        mDb->rollbackTransaction();
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
         LOG_ERROR("(DALStorage::updateCharacter #1) SQL query failure: " << e.what());
         return false;
     }
@@ -523,7 +530,10 @@ bool DALStorage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        mDb->rollbackTransaction();
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
         LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
         return false;
     }
@@ -545,7 +555,10 @@ bool DALStorage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        mDb->rollbackTransaction();
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
         LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
         return false;
     }
@@ -591,12 +604,18 @@ bool DALStorage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        mDb->rollbackTransaction();
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
         LOG_ERROR("(DALStorage::updateCharacter #4) SQL query failure: " << e.what());
         return false;
     }
 
-    mDb->commitTransaction();
+    if (startTransaction)
+    {
+        mDb->commitTransaction();
+    }
     return true;
 }
 
@@ -721,7 +740,10 @@ void DALStorage::flush(Account *account)
         {
             if ((*it)->getDatabaseID() >= 0)
             {
-                updateCharacter(*it);
+                /* 2nd. parameter false means: don't start a transaction in
+                   the updateCharacter method, cause we did this already a few
+                   lines above */
+                updateCharacter(*it, false);
             }
             else
             {
@@ -1193,33 +1215,48 @@ void DALStorage::delCharacter(int charId, bool startTransaction = true) const
         mDb->beginTransaction();
     try
     {
+        std::ostringstream sql;
+
         // delete the inventory of the character
-        std::ostringstream sqlDeleteInventoryTable;
-        sqlDeleteInventoryTable
-            << "DELETE FROM " << INVENTORIES_TBL_NAME
+        sql << "DELETE FROM " << INVENTORIES_TBL_NAME
             << " WHERE owner_id = '" << charId << "';";
-        mDb->execSql(sqlDeleteInventoryTable.str());
+        mDb->execSql(sql.str());
+
+        // delete the skills of the character
+        sql.str("");
+        sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
+            << " WHERE char_id = '" << charId << "';";
+        mDb->execSql(sql.str());
 
         // delete from the quests table
-        std::ostringstream sqlDeleteQuestsTable;
-        sqlDeleteQuestsTable
-            << "DELETE FROM " << QUESTS_TBL_NAME
+        sql.str("");
+        sql << "DELETE FROM " << QUESTS_TBL_NAME
             << " WHERE owner_id = '" << charId << "';";
-        mDb->execSql(sqlDeleteQuestsTable.str());
+        mDb->execSql(sql.str());
 
         // delete from the guilds table
-        std::ostringstream sqlDeleteGuildsTable;
-        sqlDeleteGuildsTable
-            << "DELETE FROM " << GUILD_MEMBERS_TBL_NAME
+        sql.str("");
+        sql << "DELETE FROM " << GUILD_MEMBERS_TBL_NAME
             << " WHERE member_id = '" << charId << "';";
-        mDb->execSql(sqlDeleteGuildsTable.str());
+        mDb->execSql(sql.str());
+
+        // delete auctions of the character
+        sql.str("");
+        sql << "DELETE FROM " << AUCTION_TBL_NAME
+            << " WHERE char_id = '" << charId << "';";
+        mDb->execSql(sql.str());
+
+        // delete bids made on auctions made by the character
+        sql.str("");
+        sql << "DELETE FROM " << AUCTION_BIDS_TBL_NAME
+            << " WHERE char_id = '" << charId << "';";
+        mDb->execSql(sql.str());
 
         // now delete the character itself.
-        std::ostringstream sqlDeleteCharactersTable;
-        sqlDeleteCharactersTable
-            << "DELETE FROM " << CHARACTERS_TBL_NAME
+        sql.str("");
+        sql << "DELETE FROM " << CHARACTERS_TBL_NAME
             << " WHERE id = '" << charId << "';";
-        mDb->execSql(sqlDeleteCharactersTable.str());
+        mDb->execSql(sql.str());
 
         if (startTransaction)
             mDb->commitTransaction();

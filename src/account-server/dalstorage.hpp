@@ -180,9 +180,14 @@ class DALStorage
          * Primary usage should be storing characterdata received from a
          * game server.
          * returns true if succefull, false otherwise.
+         * @param ptr Character to store values in the database.
+         * @param startTransaction set to false if this method is called as
+         *                         nested transaction.
+         * @return true on success
          */
         bool
-        updateCharacter(Character *ptr);
+        updateCharacter(Character *ptr,
+                        bool startTransaction = true);
 
         /**
          * Save changes of a skill to the database permanently.
