@@ -123,7 +123,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             {
                 break;
             }
-
+/*
             // create the message
             MessageOut out(GPMSG_GET_POST_RESPONSE);
 
@@ -148,6 +148,12 @@ void AccountConnection::processMessage(MessageIn &msg)
 
             // send post to character
             gameHandler->sendTo(character, out);
+            */
+            std::string sender = msg.readString();
+            std::string letter = msg.readString();
+
+            postMan->gotPost(character, sender, letter);
+
         } break;
 
         case CGMSG_STORE_POST_RESPONSE:
@@ -273,6 +279,9 @@ void AccountConnection::sendPost(Character *c, MessageIn &msg)
 
 void AccountConnection::getPost(Character *c)
 {
+    // let the postman know to expect some post for this character
+    postMan->addCharacter(c);
+
     // send message to account server with id of retrieving player
     LOG_DEBUG("Sending GCMSG_REQUEST_POST");
     MessageOut out(GCMSG_REQUEST_POST);

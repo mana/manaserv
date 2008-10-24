@@ -1292,3 +1292,16 @@ void DALStorage::checkBannedAccounts()
         LOG_ERROR("(DALStorage::checkBannedAccounts) SQL query failure: " << e.what());
     }
 }
+
+void DALStorage::storePost(Letter *letter)
+{
+
+}
+
+Letter* DALStorage::getStoredPost(int playerId)
+{
+    Character *sender;
+    Character *receiver;
+    Letter *letter = new Letter(0, sender, receiver);
+    return letter;
+}

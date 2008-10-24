@@ -42,6 +42,7 @@ extern "C" {
 #include "game-server/monster.hpp"
 #include "game-server/monstermanager.hpp"
 #include "game-server/npc.hpp"
+#include "game-server/postman.hpp"
 #include "game-server/quest.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
@@ -79,6 +80,9 @@ class LuaScript: public Script
 
         static void getQuestCallback(Character *, std::string const &,
                                      std::string const &, void *);
+
+        static void getPostCallback(Character *, std::string const &,
+                                    std::string const &, void *);
 
         void processDeathEvent(Being* thing);
 
@@ -638,6 +642,23 @@ void LuaScript::getQuestCallback(Character *q, std::string const &name,
 }
 
 /**
+ * Called when the server has recovered the post for a user
+ */
+void LuaScript::getPostCallback(Character *q, std::string const &sender,
+                                std::string const &letter, void *data)
+{
+    // get the script
+    LuaScript *s = static_cast<LuaScript*>(data);
+    assert(s->nbArgs == -1);
+    lua_getglobal(s->mState, "post_reply");
+    lua_pushlightuserdata(s->mState, q);
+    lua_pushstring(s->mState, sender.c_str());
+    lua_pushstring(s->mState, letter.c_str());
+    s->nbArgs = 3;
+    s->execute();
+}
+
+/**
  * Callback for getting a quest variable. Starts a recovery and returns
  * immediatly, if the variable is not known yet.
  * tmw.chr_get_chest(character, string): nil or string
@@ -807,7 +828,7 @@ static int LuaGetBeingsInCircle(lua_State *s)
 /**
  * Gets the post for the character
  */
-static int LuaGetPost(lua_State *s)
+static int LuaChr_GetPost(lua_State *s)
 {
     if (lua_isuserdata(s, 1))
     {
@@ -815,7 +836,11 @@ static int LuaGetPost(lua_State *s)
 
         if (c)
         {
-            accountHandler->getPost(c);
+            lua_pushlightuserdata(s, (void *)&registryKey);
+            lua_gettable(s, LUA_REGISTRYINDEX);
+            Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+            PostCallback f = { &LuaScript::getPostCallback, t };
+            postMan->getPost(c, f);
         }
     }
 
@@ -868,6 +893,7 @@ LuaScript::LuaScript():
         { "chr_inv_count",          &LuaChr_InvCount      },
         { "chr_get_quest",          &LuaChr_GetQuest      },
         { "chr_set_quest",          &LuaChr_SetQuest      },
+        { "chr_get_post",           &LuaChr_GetPost       },
         { "monster_create",         &LuaMonster_Create    },
         { "being_walk",             &LuaBeing_Walk        },
         { "being_say",              &LuaBeing_Say         },
@@ -879,7 +905,6 @@ LuaScript::LuaScript():
         { "trigger_create",         &LuaTrigger_Create    },
         { "chatmessage",            &LuaChatmessage       },
         { "get_beings_in_circle",   &LuaGetBeingsInCircle },
-        { "get_post",               &LuaGetPost           },
         { "note_on_death",          &LuaNoteOnDeath       },
         { NULL, NULL }
     };

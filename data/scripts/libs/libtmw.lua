@@ -123,6 +123,12 @@ function get_quest_var(ch, name)
   return coroutine.yield(3, name)
 end
 
+-- Gets the post for a user.
+function getpost(ch)
+  tmw.chr_get_post(ch)
+  return coroutine.yield(3)
+end
+
 -- Processes as much of an NPC handler as possible.
 local function process_npc(w, ...)
   local co = w[2]
@@ -227,6 +233,19 @@ function quest_reply(ch, name, value)
     if (w3 == 3 or w3 == 4) and w[5] == name then
       w[5] = nil
       if process_npc(w, value) then
+        return
+      end
+    end
+  end
+  states[ch] = nil
+end
+
+function post_reply(ch, sender, letter)
+  local w = states[ch]
+  if w then
+    local w3 = w[3]
+    if (w3 == 3 or w3 == 4) then
+      if process_npc(w, sender, letter) then
         return
       end
     end

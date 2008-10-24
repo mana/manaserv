@@ -187,4 +187,14 @@ function post_talk(npc, ch)
   do_message(npc, ch, "Hello " .. tmw.being_get_name(ch))
   local strength = tmw.being_get_attribute(ch, ATTR_STRENGTH)
   do_message(npc, ch, "You have " .. tostring(strength) .. " strength")
+  do_message(npc, ch, "Would you like to see your mail?")
+  local answer = do_choice(npc, ch, "Yes", "No")
+  if answer == 1 then
+    local sender, post = getpost(ch)
+    if sender == "" then
+      do_message(npc, ch, "No Post right now, sorry")
+    else
+      do_message(npc, ch, tostring(sender) .. " sent you " .. tostring(post))
+    end
+  end
 end

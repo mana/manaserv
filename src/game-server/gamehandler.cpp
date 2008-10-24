@@ -190,7 +190,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             std::string say = message.readString();
             if (say.empty()) break;
 
-            if (say[0] == '/')
+            if (say[0] == '@')
             {
                 // Handle special command.
                 extern void runCommand(Character *, std::string const &);
@@ -460,11 +460,6 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleSendPost(&computer, message);
         } break;
 
-        case PGMSG_GET_POST:
-        {
-            handleGetPost(&computer, message);
-        } break;
-
         default:
             LOG_WARN("Invalid message type");
             result.writeShort(XXMSG_INVALID);
@@ -607,11 +602,4 @@ void GameHandler::handleSendPost(GameClient *client, MessageIn &message)
     // add the character so that the post man knows them
     postMan->addCharacter(client->character);
     accountHandler->sendPost(client->character, message);
-}
-
-void GameHandler::handleGetPost(GameClient *client, MessageIn &message)
-{
-    // add the character so that the post man knows them
-    postMan->addCharacter(client->character);
-    accountHandler->getPost(client->character);
 }

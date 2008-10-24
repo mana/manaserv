@@ -2,6 +2,12 @@
 
 	* data/scripts/test.lua, data/scripts/libs/libtmw.lua: Fixed example 
 	script, and added defines for attributes.
+	* src/scripting/lua.cpp, src/game-server/command.cpp, 
+	src/game-server/gamehandler.cpp, src/game-server/accountconnection.cpp,
+	src/game-server/postman.hpp, gameserver.cbp, data/scripts/test.lua,
+	data/scripts/libs/libtmw.lua: Added post callback for getting post.
+	Added GM command for changing player attributes. Changed GM command to
+	 @ as '/' was already being used by client for local commands.
 
 2008-10-23  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

@@ -28,6 +28,13 @@
 
 class Character;
 
+struct PostCallback
+{
+    void (*handler)(Character *, std::string const &sender,
+                    std::string const &letter, void *data);
+    void *data;
+};
+
 class PostMan
 {
 public:
@@ -51,8 +58,24 @@ public:
         }
     }
 
+    void getPost(Character *player, PostCallback &f)
+    {
+        mCallbacks.insert(std::pair<Character*, PostCallback>(player, f));
+        accountHandler->getPost(player);
+    }
+
+    void gotPost(Character *player, std::string sender, std::string letter)
+    {
+        std::map<Character*, PostCallback>::iterator itr = mCallbacks.find(player);
+        if (itr != mCallbacks.end())
+        {
+            itr->second.handler(player, sender, letter, itr->second.data);
+        }
+    }
+
 private:
     std::map<int, Character*> mCharacters;
+    std::map<Character*, PostCallback> mCallbacks;
 };
 
 extern PostMan *postMan;

@@ -262,6 +262,11 @@ static void ban(Character *from, Character *ch, std::string const &duration)
     accountHandler->banCharacter(ch, d);
 }
 
+static void attribute(Character*, Character *ch, int attr, int value)
+{
+    ch->setAttribute(attr, value);
+}
+
 /**
  * List of remote commands.
  */
@@ -276,6 +281,7 @@ static Command const commands[] =
     handle("recall", AL_GM, recall),
     handle("reload", AL_ADMIN, reload),
     handle("ban", AL_GM, ban),
+    handle("attribute", AL_GM, attribute),
 };
 
 /**
@@ -295,8 +301,10 @@ void runCommand(Character *ch, std::string const &text)
     Command const *c = NULL;
     std::string::size_type npos = std::string::npos;
     std::string::size_type pos = text.find(' ');
-    std::string s(text, 1, pos == npos ? npos : pos - 1); // Skip slash.
+    // remove the first letter which signifies it was a command
+    std::string s(text, 1, pos == npos ? npos : pos - 1);
 
+    // check for valid command
     for (int i = 0; i < (int)(sizeof(commands) / sizeof(commands[0])); ++i)
     {
         if (s == commands[i].name)
