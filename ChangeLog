@@ -1,3 +1,9 @@
+2008-10-25  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* docs/commands.txt, docs/packets.txt, src/defines.h:
+	Correct commands.txt, get rid of horribly inaccurate packets.txt,
+	and make a todo for improving defines.h's documentation.
+
 2008-10-24  Chuck Miller  <shadowmil@gmail.com>
 
 	* src/game-server/being.hpp: Changed direction values to match the
@@ -5,9 +11,9 @@
 
 2008-10-24  David Athay  <ko2fan@gmail.com>
 
-	* data/scripts/test.lua, data/scripts/libs/libtmw.lua: Fixed example 
+	* data/scripts/test.lua, data/scripts/libs/libtmw.lua: Fixed example
 	script, and added defines for attributes.
-	* src/scripting/lua.cpp, src/game-server/command.cpp, 
+	* src/scripting/lua.cpp, src/game-server/command.cpp,
 	src/game-server/gamehandler.cpp, src/game-server/accountconnection.cpp,
 	src/game-server/postman.hpp, gameserver.cbp, data/scripts/test.lua,
 	data/scripts/libs/libtmw.lua: Added post callback for getting post.

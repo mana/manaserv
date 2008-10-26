@@ -93,6 +93,7 @@ enum
  * - GPMSG_*: from game server to client
  * Components: B byte, W word, L long, S variable-size string
  *             C tile-based coordinates (B*3)
+ * TODO - Document specific error codes for each packet
  */
 enum {
     // Login/Register

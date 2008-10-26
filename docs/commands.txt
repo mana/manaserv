@@ -6,7 +6,7 @@ ADMIN/GM COMMANDS REFERENCE
 
 
 The following commands could be issued in the chat window using the syntax:
-	/admin command args
+	@command args
 
 
 1. ADMIN COMMANDS
