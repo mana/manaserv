@@ -37,7 +37,7 @@ class MessageOut;
 class Connection
 {
     public:
-        Connection(): mRemote(NULL) {}
+        Connection();
         virtual ~Connection() {}
 
         /**
@@ -59,7 +59,8 @@ class Connection
         /**
          * Sends a message to the remote host.
          */
-        void send(MessageOut const &msg, bool reliable = true, unsigned channel = 0);
+        void send(MessageOut const &msg, bool reliable = true,
+                  unsigned channel = 0);
 
         /**
          * Dispatches received messages to processMessage.

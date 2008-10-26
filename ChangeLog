@@ -1,3 +1,11 @@
+2008-10-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/account-server/dalstorage.cpp, src/net/connection.cpp,
+	src/net/connection.hpp, src/game-server/accountconnection.cpp,
+	src/game-server/main-game.cpp: Some cleanup and an unsuccesful attempt
+	at fixing a crash on map server exit when there is no connection the
+	account server (a different one surfaced).
+
 2008-10-25  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* docs/commands.txt, docs/packets.txt, src/defines.h:

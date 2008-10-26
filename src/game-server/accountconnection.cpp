@@ -42,22 +42,36 @@
 
 bool AccountConnection::start()
 {
-    if (!Connection::start(
-            Configuration::getValue("accountServerAddress", "localhost"),
-            Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT) + 1))
+    const std::string accountServerAddress =
+        Configuration::getValue("accountServerAddress", "localhost");
+    const int accountServerPort =
+        Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT) + 1;
+
+    if (!Connection::start(accountServerAddress, accountServerPort))
     {
+        LOG_INFO("Unable to create a connection to an account server.");
         return false;
     }
+
     LOG_INFO("Connection established to the account server.");
+
+    const std::string gameServerAddress =
+        Configuration::getValue("gameServerAddress", "localhost");
+    const int gameServerPort =
+        Configuration::getValue("gameServerPort", DEFAULT_SERVER_PORT + 3);
+
+    // Register with the account server and send the list of maps we handle
     MessageOut msg(GAMSG_REGISTER);
-    msg.writeString(Configuration::getValue("gameServerAddress", "localhost"));
-    msg.writeShort(Configuration::getValue("gameServerPort", DEFAULT_SERVER_PORT + 3));
+    msg.writeString(gameServerAddress);
+    msg.writeShort(gameServerPort);
     MapManager::Maps const &m = MapManager::getMaps();
-    for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end(); i != i_end; ++i)
+    for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
+            i != i_end; ++i)
     {
         msg.writeShort(i->first);
     }
     send(msg);
+
     return true;
 }
 

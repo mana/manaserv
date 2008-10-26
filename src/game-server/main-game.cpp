@@ -275,9 +275,8 @@ int main(int argc, char *argv[])
     // General initialization
     initialize();
 
-    if (!accountHandler->start()) {
-        LOG_INFO("Unable to create a connection to an account server.");
-    }
+    // Make an initial attempt to connect to the account server
+    accountHandler->start();
 
     int gameServerPort =
         Configuration::getValue("gameServerPort", DEFAULT_SERVER_PORT + 3);

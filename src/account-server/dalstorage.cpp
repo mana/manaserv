@@ -1300,8 +1300,12 @@ void DALStorage::storePost(Letter *letter)
 
 Letter* DALStorage::getStoredPost(int playerId)
 {
-    Character *sender;
-    Character *receiver;
+    // TODO: Implement post retrieval
+    /*
+    Character *sender = 0;
+    Character *receiver = 0;
     Letter *letter = new Letter(0, sender, receiver);
     return letter;
+    */
+    return 0;
 }

@@ -26,16 +26,22 @@
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
+Connection::Connection():
+    mRemote(0),
+    mLocal(0)
+{
+}
+
 bool Connection::start(std::string const &address, int port)
 {
     ENetAddress enetAddress;
     enet_address_set_host(&enetAddress, address.c_str());
     enetAddress.port = port;
 
-    mLocal = enet_host_create(NULL    /* create a client host */,
-                              1       /* allow one outgoing connection */,
-                              0       /* assume any amount of incoming bandwidth */,
-                              0       /* assume any amount of outgoing bandwidth */);
+    mLocal = enet_host_create(NULL /* create a client host */,
+                              1 /* allow one outgoing connection */,
+                              0 /* assume any amount of incoming bandwidth */,
+                              0 /* assume any amount of outgoing bandwidth */);
 
     if (!mLocal) return false;
 
@@ -54,11 +60,17 @@ bool Connection::start(std::string const &address, int port)
 
 void Connection::stop()
 {
-    enet_peer_disconnect(mRemote, 0);
-    enet_host_flush(mLocal);
-    enet_peer_reset(mRemote);
-    enet_host_destroy(mLocal);
-    mRemote = NULL;
+    if (mRemote)
+        enet_peer_disconnect(mRemote, 0);
+    if (mLocal)
+        enet_host_flush(mLocal);
+    if (mRemote)
+        enet_peer_reset(mRemote);
+    if (mLocal)
+        enet_host_destroy(mLocal);
+
+    mRemote = 0;
+    mLocal = 0;
 }
 
 bool Connection::isConnected() const
@@ -68,19 +80,20 @@ bool Connection::isConnected() const
 
 void Connection::send(MessageOut const &msg, bool reliable, unsigned channel)
 {
+    if (!mRemote) {
+        LOG_WARN("Can't send message to unconnected host! (" << msg << ")");
+        return;
+    }
+
     ENetPacket *packet;
     packet = enet_packet_create(msg.getData(),
                                 msg.getLength(),
                                 reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
 
     if (packet)
-    {
         enet_peer_send(mRemote, channel, packet);
-    }
     else
-    {
         LOG_ERROR("Failure to create packet!");
-    }
 }
 
 void Connection::process()
