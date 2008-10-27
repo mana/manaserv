@@ -261,14 +261,14 @@ enum {
     GAMSG_GET_QUEST             = 0x0541, // L id, S name
     AGMSG_GET_QUEST_RESPONSE    = 0x0542, // L id, S name, S value
     GAMSG_BAN_PLAYER            = 0x0550, // L id, W duration
+    GAMSG_CHANGE_PLAYER_LEVEL   = 0x0555, // L id, W level
+    GAMSG_CHANGE_ACCOUNT_LEVEL  = 0x0556, // L id, W level
     GAMSG_STATISTICS            = 0x0560, // { W map id, W thing nb, W monster nb, W player nb, { L character id }* }*
     CGMSG_CHANGED_PARTY         = 0x0590, // L character id, L party id
     GCMSG_REQUEST_POST          = 0x05A0, // L character id
     CGMSG_POST_RESPONSE         = 0x05A1, // L receiver id, { S sender name, S letter, W num attachments { W attachment item id, W quantity } }
     GCMSG_STORE_POST            = 0x05A5, // L sender id, S receiver name, S letter, { W attachment item id, W quantity }
     CGMSG_STORE_POST_RESPONSE   = 0x05A6, // L id, B error
-
-
 
     XXMSG_INVALID = 0x7FFF
 };

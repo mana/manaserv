@@ -1293,19 +1293,45 @@ void DALStorage::checkBannedAccounts()
     }
 }
 
-void DALStorage::storePost(Letter *letter)
+void DALStorage::setAccountLevel(int id, int level)
 {
-
+    try
+    {
+        std::ostringstream sql;
+        sql << "update " << ACCOUNTS_TBL_NAME
+        << " set level = " << level
+        << " where id = " << id << ";";
+        mDb->execSql(sql.str());
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::setAccountLevel) SQL query failure: " << e.what());
+    }
 }
 
-Letter* DALStorage::getStoredPost(int playerId)
+void DALStorage::setPlayerLevel(int id, int level)
 {
-    // TODO: Implement post retrieval
-    /*
-    Character *sender = 0;
-    Character *receiver = 0;
-    Letter *letter = new Letter(0, sender, receiver);
-    return letter;
-    */
+    try
+    {
+        std::ostringstream sql;
+        sql << "update " << CHARACTERS_TBL_NAME
+        << " set level = " << level
+        << " where id = " << id << ";";
+        mDb->execSql(sql.str());
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::setPlayerLevel) SQL query failure: " << e.what());
+    }
+}
+
+void DALStorage::storeLetter(Letter *letter)
+{
+    // TODO: Store letter for user
+}
+
+Post* DALStorage::getStoredPost(int playerId)
+{
+    // TODO: Get post for user
     return 0;
 }

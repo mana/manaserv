@@ -1,3 +1,9 @@
+2008-10-27  David Athay  <ko2fan@gmail.com>
+
+	* src/defines.h, src/account-server/serverhandler.cpp,
+	src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp:
+	Added changing player's character and account level.
+	
 2008-10-27  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/scripting/lua.cpp: Added script binding for spawning effets from

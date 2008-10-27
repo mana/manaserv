@@ -299,6 +299,26 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             storage->banCharacter(id, duration);
         } break;
 
+        case GAMSG_CHANGE_PLAYER_LEVEL:
+        {
+            int id = msg.readLong();
+            int level = msg.readShort();
+            storage->setPlayerLevel(id, level);
+        } break;
+
+        case GAMSG_CHANGE_ACCOUNT_LEVEL:
+        {
+            int id = msg.readLong();
+            int level = msg.readShort();
+
+            // get the character so we can get the account id
+            Character *c = getCharacter(id);
+            if (c)
+            {
+                storage->setAccountLevel(c->getAccountID(), level);
+            }
+        } break;
+
         case GAMSG_STATISTICS:
         {
             while (msg.getUnreadLength())
@@ -407,7 +427,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
 
             // save the letter
-            LOG_INFO("Creating letter");
+            LOG_DEBUG("Creating letter");
             Letter *letter = new Letter(0, sender, receiver);
             letter->addText(contents);
             for (unsigned int i = 0; i < items.size(); ++i)

@@ -286,18 +286,34 @@ class DALStorage
                               std::string const &value);
 
         /**
-         * Store post
+         * Set the level on an account
+         *
+         * @param id The id of the account
+         * @param level The level to set for the account
+         */
+        void setAccountLevel(int id, int level);
+
+        /**
+         * Set the level on a character
+         *
+         * @param id The id of the character
+         * @param level The level to set for the character
+         */
+        void setPlayerLevel(int id, int level);
+
+        /**
+         * Store letter
          *
          * @param letter The letter to store
          */
-        void storePost(Letter *letter);
+        void storeLetter(Letter *letter);
 
         /**
          * Retrieve post
          *
          * @param playerId The id of the player requesting his post
          */
-        Letter* getStoredPost(int playerId);
+        Post* getStoredPost(int playerId);
 
         /**
          * Add item to auction
