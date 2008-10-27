@@ -24,6 +24,7 @@ atinit(function()
   create_npc("Guard", 122, 58 * TILESIZE + 16, 15 * TILESIZE + 16, npc6_talk, npc6_update)
   create_npc("Fire Demon", 202, 58 * TILESIZE + 16, 35 * TILESIZE + 16, firedemon_talk, firedemon_update)
   create_npc("Post Box", 158, 45 * TILESIZE + 16, 22 * TILESIZE + 16, post_talk)
+  create_npc("Fireworker", 158, 43 * TILESIZE, 23 * TILESIZE, fireworker_talk, npclib.walkaround_small)
 
   tmw.trigger_create(56 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 1, true)
   tmw.trigger_create(63 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 2, true)
@@ -196,5 +197,19 @@ function post_talk(npc, ch)
     else
       do_message(npc, ch, tostring(sender) .. " sent you " .. tostring(post))
     end
+  end
+end
+
+function fireworker_talk(npc, ch)
+  do_message(npc, ch, "Do you want some fireworks?")
+  local answer = do_choice(npc, ch, "Wheee! Fireworks", "Nah, thanks.")
+  if answer == 1 then
+    local x = tmw.posX(npc)
+    local y = tmw.posY(npc)
+      for c = 0, 25 do
+        schedule_in (c, function()
+          tmw.effect_create(c, x + math.random(-200, 200), y + math.random(-200, 200))
+        end)
+      end
   end
 end

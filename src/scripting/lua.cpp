@@ -33,6 +33,7 @@ extern "C" {
 #include "game-server/buysell.hpp"
 #include "game-server/character.hpp"
 #include "game-server/collisiondetection.hpp"
+#include "game-server/effect.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
@@ -874,6 +875,34 @@ static int LuaNoteOnDeath(lua_State *s)
     return 0;
 }
 
+/**
+ * Triggers a special effect from the clients effects.xml
+ * tmw.effect_create (id, x, y)
+ */
+static int LuaEffect_Create(lua_State *s)
+{
+    if (!lua_isnumber(s, 1) ||
+        !lua_isnumber(s, 2) ||
+        !lua_isnumber(s, 3))
+    {
+        raiseScriptError(s, "effect_create called with incorrect parameters.");
+        return 0;
+    }
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+
+    MapComposite *m = t->getMap();
+    int id = lua_tointeger(s, 1);
+    int x = lua_tointeger(s, 2);
+    int y = lua_tointeger(s, 3);
+
+    Effects::show(id, m, Point(x, y));
+
+    return 0;
+}
+
+
 LuaScript::LuaScript():
     nbArgs(-1)
 {
@@ -906,6 +935,7 @@ LuaScript::LuaScript():
         { "chatmessage",            &LuaChatmessage       },
         { "get_beings_in_circle",   &LuaGetBeingsInCircle },
         { "note_on_death",          &LuaNoteOnDeath       },
+        { "effect_create",          &LuaEffect_Create     },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

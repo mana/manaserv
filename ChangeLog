@@ -1,3 +1,10 @@
+2008-10-27  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/scripting/lua.cpp: Added script binding for spawning effets from
+	scripts.
+	* data/scripts/test.lua: Created example NPC for spawning effetcs from
+	scripts.
+
 2008-10-27  Chuck Miller  <shadowmil@gmail.com>
 
 	* src/defines.h, src/game-server/thing.hpp, src/game-server/state.cpp,
