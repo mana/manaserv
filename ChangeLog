@@ -1,3 +1,10 @@
+2008-10-27  Chuck Miller  <shadowmil@gmail.com>
+
+	* src/defines.h, src/game-server/thing.hpp, src/game-server/state.cpp,
+	src/game-server/effect.cpp, src/game-server/effect.hpp: Added a system
+	to send effects (can be sound or graphics) to the client.  You can use
+	it by including game-server/effect.hpp and calling Effects::show()
+
 2008-10-26  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/account-server/dalstorage.cpp, src/net/connection.cpp,

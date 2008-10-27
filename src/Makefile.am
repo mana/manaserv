@@ -100,6 +100,8 @@ tmwserv_game_SOURCES = \
 	game-server/gamehandler.cpp \
 	game-server/inventory.hpp \
 	game-server/inventory.cpp \
+	game-server/effect.hpp \
+	game-server/effect.cpp \
 	game-server/item.hpp \
 	game-server/item.cpp \
 	game-server/itemmanager.hpp \

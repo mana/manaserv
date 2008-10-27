@@ -29,6 +29,7 @@
 #include "game-server/collisiondetection.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/mapcomposite.hpp"
+#include "game-server/effect.hpp"
 #include "utils/logger.h"
 
 Being::Being(int type, int id):
@@ -158,13 +159,16 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
          i(getMap()->getAroundObjectIterator(this, attackZone->range)); i; ++i)
     {
         MovingObject *o = *i;
+        Point opos = o->getPosition();
+        
+        Effects::show(Effects::FIRE_BURST,getMap(),opos);
         if (o == this) continue;
 
         int type = o->getType();
 
         if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER) continue;
 
-        Point opos = o->getPosition();
+
 
         switch (attackZone->shape)
         {
@@ -172,7 +176,7 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
                 if  (Collision::diskWithCircleSector(
                         opos, o->getSize(),
                         ppos, attackZone->range,
-                        attackZone->angle/2, attackAngle)
+                        attackZone->angle, attackAngle)
                     )
                 {
                     victims.push_back(static_cast< Being * >(o));

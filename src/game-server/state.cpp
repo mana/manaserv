@@ -32,6 +32,7 @@
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
+#include "game-server/effect.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
@@ -345,8 +346,9 @@ static void informPlayer(MapComposite *map, Character *p)
     MessageOut itemMsg(GPMSG_ITEMS);
     for (FixedObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
     {
-        assert((*i)->getType() == OBJECT_ITEM);
-        Item *o = static_cast< Item * >(*i);
+        assert((*i)->getType() == OBJECT_ITEM || (*i)->getType() == OBJECT_EFFECT);
+        
+        Object *o = static_cast< Object * >(*i);
         Point opos = o->getPosition();
         int oflags = o->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, AROUND_AREA);
@@ -355,22 +357,44 @@ static void informPlayer(MapComposite *map, Character *p)
 
         if (willBeInRange ^ wereInRange)
         {
-            if (oflags & UPDATEFLAG_NEW_ON_MAP)
+            switch(o->getType())
             {
-                /* Send a specific message to the client when an item appears
-                   out of nowhere, so that a sound/animation can be performed. */
-                MessageOut appearMsg(GPMSG_ITEM_APPEAR);
-                appearMsg.writeShort(o->getItemClass()->getDatabaseID());
-                appearMsg.writeShort(opos.x);
-                appearMsg.writeShort(opos.y);
-                gameHandler->sendTo(p, appearMsg);
-            }
-            else
-            {
-                itemMsg.writeShort(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
-                itemMsg.writeShort(opos.x);
-                itemMsg.writeShort(opos.y);
-            }
+                case OBJECT_ITEM:
+                {
+                    Item *o = static_cast< Item * >(*i);
+                    if (oflags & UPDATEFLAG_NEW_ON_MAP)
+                    {
+                        /* Send a specific message to the client when an item appears
+                           out of nowhere, so that a sound/animation can be performed. */
+                        MessageOut appearMsg(GPMSG_ITEM_APPEAR);
+                        appearMsg.writeShort(o->getItemClass()->getDatabaseID());
+                        appearMsg.writeShort(opos.x);
+                        appearMsg.writeShort(opos.y);
+                        gameHandler->sendTo(p, appearMsg);
+                    }
+                    else
+                    {
+                        itemMsg.writeShort(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
+                        itemMsg.writeShort(opos.x);
+                        itemMsg.writeShort(opos.y);
+                    }
+                }
+                break;
+                case OBJECT_EFFECT:
+                {
+                    Effect *o = static_cast< Effect * >(*i);
+                    o->show();
+                    if(!(oflags & UPDATEFLAG_NEW_ON_MAP)) //don't show old effects
+                        break;
+                    MessageOut effectMsg(GPMSG_CREATE_EFFECT);
+                    effectMsg.writeShort(o->getEffectId());
+                    effectMsg.writeShort(opos.x);
+                    effectMsg.writeShort(opos.y);
+                    gameHandler->sendTo(p, effectMsg);
+                }
+                break;
+                default: break;
+            } // Switch
         }
     }
 

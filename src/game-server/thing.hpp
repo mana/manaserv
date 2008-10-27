@@ -41,6 +41,7 @@ enum
     OBJECT_MONSTER,   /**< A monster (moving actor with AI. Should be able to
                            toggle map/quest actions, too). */
     OBJECT_CHARACTER, /**< A normal being. */
+    OBJECT_EFFECT,    /**< A effect to be shown */
     OBJECT_OTHER      /**< Server-only object. */
 };
 
