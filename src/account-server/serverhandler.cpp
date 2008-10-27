@@ -312,7 +312,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int level = msg.readShort();
 
             // get the character so we can get the account id
-            Character *c = getCharacter(id);
+            Character *c = storage->getCharacter(id, NULL);
             if (c)
             {
                 storage->setAccountLevel(c->getAccountID(), level);

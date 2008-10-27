@@ -43,5 +43,5 @@ namespace Effects
         effect->setPosition(pos);
         GameState::enqueueInsert(effect);
     }
-};
+}
 

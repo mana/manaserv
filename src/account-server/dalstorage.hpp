@@ -34,6 +34,7 @@ class Character;
 class ChatChannel;
 class Guild;
 class Letter;
+class Post;
 
 /**
  * A storage class that relies on DAL.

@@ -346,9 +346,10 @@ static void informPlayer(MapComposite *map, Character *p)
     MessageOut itemMsg(GPMSG_ITEMS);
     for (FixedObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
     {
-        assert((*i)->getType() == OBJECT_ITEM || (*i)->getType() == OBJECT_EFFECT);
-        
-        Object *o = static_cast< Object * >(*i);
+        assert((*i)->getType() == OBJECT_ITEM ||
+               (*i)->getType() == OBJECT_EFFECT);
+
+        Object *o = *i;
         Point opos = o->getPosition();
         int oflags = o->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, AROUND_AREA);
@@ -357,7 +358,7 @@ static void informPlayer(MapComposite *map, Character *p)
 
         if (willBeInRange ^ wereInRange)
         {
-            switch(o->getType())
+            switch (o->getType())
             {
                 case OBJECT_ITEM:
                 {

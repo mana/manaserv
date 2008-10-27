@@ -27,7 +27,6 @@
 
 class Effect : public Object
 {
-    
     public:
         Effect(int id)
           : Object(OBJECT_EFFECT), mEffectId(id), mHasBeenShown(false)
@@ -37,8 +36,8 @@ class Effect : public Object
         { return mEffectId; }
 
         // Removes effect after it has been shown
-        virtual void update(); 
-        
+        virtual void update();
+
         // Called when the object has been shown to a player in the state loop
         void show()
         { mHasBeenShown = true; }
@@ -51,13 +50,13 @@ class Effect : public Object
 
 namespace Effects
 {
-    // Added for convince 
+    // Added for convince
     void show(int id, MapComposite *map, Point pos);
 
     // TODO: get this in sync with effects.xml
     enum {
        FIRE_BURST        = 15
     };
-};
+}
 
 #endif
