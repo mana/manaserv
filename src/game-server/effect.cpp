@@ -20,7 +20,6 @@
  *
  */
 
-
 #include "game-server/effect.hpp"
 
 #include "game-server/mapcomposite.hpp"
@@ -28,15 +27,13 @@
 
 void Effect::update()
 {
-    if(mHasBeenShown == true)
+    if (mHasBeenShown)
         GameState::enqueueRemove(this);
 }
 
-
 namespace Effects
 {
-    // Added for convince 
-    void show(int id, MapComposite *map, Point pos)
+    void show(int id, MapComposite *map, const Point &pos)
     {
         Effect *effect = new Effect(id);
         effect->setMap(map);
@@ -44,4 +41,3 @@ namespace Effects
         GameState::enqueueInsert(effect);
     }
 }
-
