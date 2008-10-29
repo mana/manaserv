@@ -117,41 +117,26 @@ void Being::move()
     MovingObject::move();
     if (mAction == WALK || mAction == STAND)
     {
-        if (mActionTime)
-        {
-            mAction = WALK;
-        }
-        else
-        {
-            mAction = STAND;
-        }
+        mAction = (mActionTime) ? WALK : STAND;
+    }
+}
+
+int Being::directionToAngle(int direction)
+{
+    switch (direction)
+    {
+        case DIRECTION_UP:    return  90;
+        case DIRECTION_DOWN:  return 270;
+        case DIRECTION_RIGHT: return 180;
+        case DIRECTION_LEFT:
+        default:              return   0;
     }
 }
 
 void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
 {
     Point ppos = getPosition();
-    int dir = getDirection();
-
-    int attackAngle = 0;
-
-    switch (dir)
-    {
-        case DIRECTION_UP:
-           attackAngle = 90;
-           break;
-        case DIRECTION_DOWN:
-           attackAngle = 270;
-           break;
-        case DIRECTION_LEFT:
-           attackAngle = 0;
-           break;
-        case DIRECTION_RIGHT:
-            attackAngle = 180;
-            break;
-        default:
-            break;
-    }
+    const int attackAngle = directionToAngle(getDirection());
 
     std::list<Being *> victims;
 
@@ -160,13 +145,12 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
     {
         MovingObject *o = *i;
         Point opos = o->getPosition();
-        
+
         if (o == this) continue;
 
         int type = o->getType();
 
         if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER) continue;
-
 
 
         switch (attackZone->shape)

@@ -222,14 +222,17 @@ class Being : public MovingObject
         virtual void modifiedAttribute(int) {}
 
         /** Gets the name of the being. */
-        std::string const &
-        getName() const
+        std::string const &getName() const
         { return mName; }
 
         /** Sets the name of the being. */
-        void
-        setName(const std::string& name)
+        void setName(const std::string &name)
         { mName = name; }
+
+        /**
+         * Converts a direction to an angle. Used for combat hit checks.
+         */
+        static int directionToAngle(int direction);
 
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
@@ -240,10 +243,10 @@ class Being : public MovingObject
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
 
-        std::string mName;           /**< Name of the being. */
-        Hits mHitsTaken; /**< List of punches taken since last update */
+        std::string mName;
+        Hits mHitsTaken; /**< List of punches taken since last update. */
         AttributeModifiers mModifiers; /**< Currently modified attributes. */
-        int mHpRegenTimer; /**< timer for hp regeneration*/
+        int mHpRegenTimer; /**< Timer for hp regeneration. */
 };
 
 #endif // _TMWSERV_BEING_H_

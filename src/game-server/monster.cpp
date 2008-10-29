@@ -229,15 +229,8 @@ void Monster::update()
              i != allAttacks.end();
              i++)
         {
-            int attackAngle = 0;
-            switch (bestAttackDirection)
-            {
-                case DIRECTION_UP: attackAngle = 90; break;
-                case DIRECTION_DOWN: attackAngle = 270; break;
-                case DIRECTION_LEFT: attackAngle = 0; break;
-                case DIRECTION_RIGHT:attackAngle = 180; break;
-                default: break;
-            }
+            const int attackAngle = directionToAngle(bestAttackDirection);
+
             if  (Collision::diskWithCircleSector(
                 bestAttackTarget->getPosition(), bestAttackTarget->getSize(),
                 getPosition(), (*i)->attackZone.range, (*i)->attackZone.angle, attackAngle))

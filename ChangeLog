@@ -1,10 +1,17 @@
+2008-10-29  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/game-server/being.cpp, src/game-server/monster.cpp,
+	src/game-server/being.hpp, src/game-server/monster.hpp: Some code
+	formatting cleanup and unduplicated conversion from direction to
+	angle.
+
 2008-10-29  Chuck Miller  <shadowmil@gmail.com>
 
 	* src/game-server/collisiondetection.cpp, src/game-server/monster.cpp,
 	src/game-server/being.cpp: Replaced the collision detection function
 	due to it being broken, I left it in the source, just commented out if
 	someone wants to try to fix it later on.  In other news, this patch
-	now makes it possible to hit them pesty maggots
+	now makes it possible to hit them pesty maggots.
 
 2008-10-27  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 

@@ -30,12 +30,11 @@
 #include "game-server/being.hpp"
 #include "game-server/eventlistener.hpp"
 
-class attackZone;
 class ItemClass;
-class MapComposite;
 
 /**
- * Structure containing an item class and its probability to be dropped (unit: 1/10000).
+ * Structure containing an item class and its probability to be dropped
+ * (unit: 1/10000).
  */
 struct MonsterDrop
 {
@@ -82,55 +81,88 @@ class MonsterClass
         {}
 
         /**
-         * Gets monster type.
+         * Returns monster type. This is the ID of the monster class.
          */
         int getType() const
         { return mID; }
 
         /**
-         * Sets monster drops.
+         * Sets monster drops. These are the items the monster drops when it
+         * dies.
          */
         void setDrops(MonsterDrops const &v)
         { mDrops = v; }
 
         /**
-         * Sets a being attribute
+         * Sets a being base attribute.
          */
         void setAttribute(size_t attribute, int value)
-        { mAttributes.at(attribute) = value ; }
+        { mAttributes.at(attribute) = value; }
 
         /**
-         * Gets a being attribute
+         * Returns a being base attribute.
          */
         int getAttribute(size_t attribute) const
         { return mAttributes.at(attribute); }
 
-        void setSpeed(int speed) { mSpeed = speed; } /**< sets inverted movement speed*/
-        int getSpeed() const { return mSpeed; } /**< gets inverted movement speed*/
+        /** Sets inverted movement speed. */
+        void setSpeed(int speed) { mSpeed = speed; }
 
-        void setSize(int size) { mSize = size; } /**< sets hit circle radius*/
-        int getSize() const { return mSize; } /**< gets hit circle radius*/
+        /** Returns inverted movement speed. */
+        int getSpeed() const { return mSpeed; }
 
-        void setExp(int exp) { mExp = exp; } /**< sets experience reward*/
-        int getExp() const { return mExp; } /**< gets experience reward*/
+        /** Sets collision circle radius. */
+        void setSize(int size) { mSize = size; }
 
-        void setAggressive(bool aggressive) { mAggressive = aggressive; } /**< sets if the monster attacks without being attacked first*/
-        bool isAggressive() const { return mAggressive; } /**< gets if the monster attacks without being attacked first*/
+        /** Returns collision circle radius. */
+        int getSize() const { return mSize; }
 
-        void setTrackRange(unsigned range){ mTrackRange = range; } /**< sets range in tiles in which the monster searches for enemies*/
-        unsigned getTrackRange() const { return mTrackRange; } /**< gets range in tiles in which the monster searches for enemies*/
+        /** Sets experience reward for killing the monster. */
+        void setExp(int exp) { mExp = exp; }
 
-        void setStrollRange(unsigned range) { mStrollRange = range; } /**< sets range in tiles in which the monster moves around when idled*/
-        unsigned getStrollRange() const { return mStrollRange; } /**< gets range in tiles in which the monster moves around when idled*/
+        /** Returns experience reward for killing the monster. */
+        int getExp() const { return mExp; }
 
-        void setMutation(unsigned factor) { mMutation = factor; } /**< sets mutation factor in percent*/
-        unsigned getMutation() const { return mMutation; } /**< gets mutation factor in percent*/
+        /** Sets if the monster attacks without being attacked first. */
+        void setAggressive(bool aggressive) { mAggressive = aggressive; }
 
-        void setAttackDistance(unsigned distance) { mAttackDistance = distance; } /**< sets preferred combat distance in pixels*/
-        unsigned getAttackDistance() const { return mAttackDistance; } /**< gets preferred combat distance in pixels*/
+        /** Returns if the monster attacks without being attacked first. */
+        bool isAggressive() const { return mAggressive; }
 
-        void addAttack(MonsterAttack *type) { mAttacks.push_back(type); } /**< adds an attack to the monsters repertoire */
-        const MonsterAttacks &getAttacks() const { return mAttacks; } /**< gets all attacks of the monster */
+        /** Sets range in tiles in which the monster searches for enemies. */
+        void setTrackRange(unsigned range){ mTrackRange = range; }
+
+        /**
+         * Returns range in tiles in which the monster searches for enemies.
+         */
+        unsigned getTrackRange() const { return mTrackRange; }
+
+        /** Sets range in tiles in which the monster moves around when idle. */
+        void setStrollRange(unsigned range) { mStrollRange = range; }
+
+        /**
+         * Returns range in tiles in which the monster moves around when idle.
+         */
+        unsigned getStrollRange() const { return mStrollRange; }
+
+        /** Sets mutation factor in percent. */
+        void setMutation(unsigned factor) { mMutation = factor; }
+
+        /** Returns mutation factor in percent. */
+        unsigned getMutation() const { return mMutation; }
+
+        /** Sets preferred combat distance in pixels. */
+        void setAttackDistance(unsigned distance)
+        { mAttackDistance = distance; }
+
+        /** Returns preferred combat distance in pixels. */
+        unsigned getAttackDistance() const { return mAttackDistance; }
+
+        /** Adds an attack to the monsters repertoire. */
+        void addAttack(MonsterAttack *type) { mAttacks.push_back(type); }
+
+        /** Returns all attacks of the monster. */
+        const MonsterAttacks &getAttacks() const { return mAttacks; }
 
         /**
          * Randomly selects a monster drop (may return NULL).
@@ -138,18 +170,19 @@ class MonsterClass
         ItemClass *getRandomDrop() const;
 
     private:
-        unsigned short mID; /**< ID of the monster class. */
-        MonsterDrops mDrops; /**< Items the monster drops when dying. */
-        std::vector<int> mAttributes; /**< Base attributes of the monster*/
-        int mSpeed; /** (inverted) Movement speed of the monster */
-        int mSize; /** Collision circle radius of the monster */
-        int mExp; /**< Exp reward for killing the monster */
-        bool mAggressive;       /**< Does the monster attack without being provoked? */
-        unsigned mTrackRange;   /**< Distance the monster tracks enemies in */
-        unsigned mStrollRange;  /**< Distance the monster strolls around in when not fighting */
-        unsigned mMutation;     /**< Mutation factor in percent*/
+        unsigned short mID;
+        MonsterDrops mDrops;
+        std::vector<int> mAttributes; /**< Base attributes of the monster. */
+        int mSpeed;
+        int mSize;
+        int mExp;
+
+        bool mAggressive;
+        unsigned mTrackRange;
+        unsigned mStrollRange;
+        unsigned mMutation;
         unsigned mAttackDistance;
-        MonsterAttacks mAttacks; /**< preferred combat distance in pixels*/
+        MonsterAttacks mAttacks;
 };
 
 /**
@@ -175,8 +208,8 @@ struct AttackPosition
 class Monster : public Being
 {
     public:
-
-        static const int KILLSTEAL_PROTECTION_TIME = 100; /**< Time in game ticks until ownership of a monster can change */
+        /** Time in game ticks until ownership of a monster can change. */
+        static const int KILLSTEAL_PROTECTION_TIME = 100;
 
         /**
          * Constructor.
@@ -189,7 +222,7 @@ class Monster : public Being
         ~Monster();
 
         /**
-         * Gets monster specy.
+         * Returns monster specy.
          */
         MonsterClass *getSpecy()
         { return mSpecy; }
@@ -226,35 +259,67 @@ class Monster : public Being
         void forgetTarget(Thing *being);
 
         /**
-         * Gets the way the object is blocked by other things on the map
+         * Returns the way the object is blocked by other things on the map
          */
         virtual unsigned char getWalkMask() const
-        { return 0x83; } // blocked walls, other monsters and players ( bin 1000 0011)
+        {
+            // blocked walls, other monsters and players ( bin 1000 0011)
+            return 0x83;
+        }
+
+    protected:
+        /**
+         * Returns the way the object blocks pathfinding for other objects
+         */
+        virtual Map::BlockType getBlockType() const
+        { return Map::BLOCKTYPE_MONSTER; }
 
     private:
         int calculatePositionPriority(Point position, int targetPriority);
 
-        MonsterClass *mSpecy; /**< Monster specy. */
-        int mCountDown; /**< Count down till next random movement (temporary). */
-        std::map<Being *, int> mAnger;   /**< Aggression towards other beings */
-        EventListener mTargetListener; /**< Listener for updating the anger list. */
+        MonsterClass *mSpecy;
 
-        Character* mOwner; /**< Character who currently owns this monster (killsteal protection) */
-        int mOwnerTimer; /**< Time until someone else can claim this monster (killsteal protection) */
-        std::map<Character *, std::set <size_t> > mExpReceivers; /**< List of characters and their skills that attacked this monster*/
-        std::set<Character *> mLegalExpReceivers; /**< List of characters who are entitled to receive exp (killsteal protection)*/
+        /** Count down till next random movement (temporary). */
+        int mCountDown;
 
-        int mAttackTime;                       /**< Delay until monster can attack */
-        MonsterAttack *mCurrentAttack; /**<Attack the monster is currently performing */
-        std::list<AttackPosition> mAttackPositions; /**< set positions relative to target from which the monster can attack */
+        /** Aggression towards other beings. */
+        std::map<Being *, int> mAnger;
+
+        /** Listener for updating the anger list. */
+        EventListener mTargetListener;
+
+        /**
+         * Character who currently owns this monster (killsteal protection).
+         */
+        Character* mOwner;
+
+        /**
+         * Time until someone else can claim this monster (killsteal
+         * protection).
+         */
+        int mOwnerTimer;
+
+        /** List of characters and their skills that attacked this monster. */
+        std::map<Character *, std::set <size_t> > mExpReceivers;
+
+        /**
+         * List of characters who are entitled to receive exp (killsteal
+         * protection).
+         */
+        std::set<Character *> mLegalExpReceivers;
+
+        /** Delay until monster can attack. */
+        int mAttackTime;
+
+        /** Attack the monster is currently performing. */
+        MonsterAttack *mCurrentAttack;
+
+        /**
+         * Set positions relative to target from which the monster can attack.
+         */
+        std::list<AttackPosition> mAttackPositions;
 
         friend struct MonsterTargetEventDispatch;
-    protected:
-        /**
-         * Gets the way the object blocks pathfinding for other objects
-         */
-        virtual Map::BlockType getBlockType() const
-        { return Map::BLOCKTYPE_MONSTER; }
 };
 
 #endif // _TMWSERV_MONSTER_H_
