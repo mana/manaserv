@@ -20,12 +20,19 @@
  *  $Id$
  */
 
-#include "collisiondetection.hpp"
+#include "game-server/collisiondetection.hpp"
 
 #include <cmath>
 
 #include "point.h"
 #include "utils/mathutils.h"
+
+#define D_TO_R 0.0174532925    // PI / 180
+#define R_TO_D 57.2957795      // 180 / PI
+
+// Tests to see if pos is between s1 degree and s2
+#define test_degrees(pos,s1,s2) (pos > s1 && pos < s2) || (s1 > s2 && !(pos < s1 && pos > s2))
+
 
 bool
 Collision::circleWithCirclesector(const Point &circlePos, int circleRadius,
@@ -77,14 +84,95 @@ Collision::circleWithCirclesector(const Point &circlePos, int circleRadius,
     return (targetDiff < secSize * 0.5f);
 }
 
+
+bool Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
+                                     const Point &sectorCenter, int sectorRadius,
+                                     int halfTopAngle, int placeAngle)
+{
+    float r1 = sectorRadius,
+          r2 = diskRadius;
+
+    float dx = sectorCenter.x - diskCenter.x,
+          dy = sectorCenter.y - diskCenter.y;
+
+    // d^2 = dx^2 + dy^2
+    float d = ((dx * dx) + (dy * dy));
+
+    // d^2 < r2^2
+    if(d < r2 * r2)
+        return true; // We are right on top of each other
+
+    // d^2 > r1^2 + r2^2
+    if(d > ((r1+r2) * (r1+r2)))
+        return false; // The two circles do not touch
+  
+    float s1 = placeAngle - halfTopAngle,
+          s2 = placeAngle + halfTopAngle;
+
+    if (s1 >= 360)
+        s1 -= 360;
+    if (s1 < 0)
+        s1 += 360;
+    if (s2 >= 360)
+        s2 -= 360;
+    if (s2 < 0)
+        s2 += 360;
+
+    // Is the center point of circle 2 within circle 1?
+    if(d < r1 * r1)
+    {
+        // Circle 2 degrees in respect to circle 1
+        float c2dc1 = atan2(dy,dx) * R_TO_D;
+        if (c2dc1 < 0)
+            c2dc1 += 360;
+       
+        if (test_degrees(c2dc1, s1, s2))
+            return true;
+        
+        // Since we are well within range, we might be
+        // Too close, so we need to make sure two circles intersect
+        d = sqrt(d);
+        r1 = d;    
+    } else {
+        d = sqrt(d);
+    }
+
+    float a = ((r1*r1) - (r2*r2) + (d*d)) / (2.0 * d);
+    float axd = (a * dx) / d,
+          ayd = (a * dy) / d,
+          h = sqrt((r1*r1) - (a*a));
+
+    float ix1 = axd + ((h * dx) / d),
+          iy1 = ayd - ((h * dy) / d),
+          ix2 = axd - ((h * dx) / d),
+          iy2 = ayd + ((h * dy) / d);
+    
+    float idc1 = atan2(iy1,ix1) * R_TO_D;
+    if(idc1 < 0)
+        idc1 += 360;
+    if(test_degrees(idc1, s1, s2))
+        return true;
+
+    idc1 = atan2(iy2,ix2) * R_TO_D;
+    if(idc1 < 0)
+        idc1 += 360;
+    if(test_degrees(idc1, s1, s2))
+        return true;
+
+    // If we got to this point, it must be false
+    return false;
+
+}
+
+
 /**
  * Collision of a Disk with a Circle-Sector
  *
  * For a detailled explanation of this function please see:
  * http://wiki.themanaworld.org/index.php/Collision_determination
- */
+ *
 bool
-Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
+Collision::diskWithCircleSector2(const Point &diskCenter, int diskRadius,
                                 const Point &sectorCenter, int sectorRadius,
                                 int halfTopAngle, int placeAngle)
 {
@@ -102,13 +190,13 @@ Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
     float sinBeta  = utils::math::cachedSin(placeAngle);
     float cosBeta  = utils::math::cachedCos(placeAngle);
 
-    /**
+    **
      * This bounding circle implementation can be used up and until a
      * half-top-angle of +/- 85 degrees. The bounding circle becomes
      * infinitly large at 90 degrees. Above about 60 degrees a bounding
      * half-circle with radius R becomes more efficient.
      * (The additional check for a region 1 collision can then be scrapped.)
-     */
+     *
 
     // Calculating the coordinates of the disk's center in coordinate system 4
     float Px1 = Px * cosBeta + Py * sinBeta;
@@ -192,7 +280,7 @@ Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
     // but the disk and circle sector don't intersect.
     return false;
 }
-
+*/
 bool
 Collision::CircleWithCircle(const Point &center1, int radius1,
                             const Point &center2, int radius2)

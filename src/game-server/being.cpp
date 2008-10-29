@@ -144,10 +144,10 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
            attackAngle = 270;
            break;
         case DIRECTION_LEFT:
-           attackAngle = 180;
+           attackAngle = 0;
            break;
         case DIRECTION_RIGHT:
-            attackAngle = 0;
+            attackAngle = 180;
             break;
         default:
             break;
@@ -161,7 +161,6 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
         MovingObject *o = *i;
         Point opos = o->getPosition();
         
-        Effects::show(Effects::FIRE_BURST,getMap(),opos);
         if (o == this) continue;
 
         int type = o->getType();
@@ -176,7 +175,7 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
                 if  (Collision::diskWithCircleSector(
                         opos, o->getSize(),
                         ppos, attackZone->range,
-                        attackZone->angle, attackAngle)
+                        attackZone->angle / 2, attackAngle)
                     )
                 {
                     victims.push_back(static_cast< Being * >(o));

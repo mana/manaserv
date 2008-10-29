@@ -234,8 +234,8 @@ void Monster::update()
             {
                 case DIRECTION_UP: attackAngle = 90; break;
                 case DIRECTION_DOWN: attackAngle = 270; break;
-                case DIRECTION_LEFT: attackAngle = 180; break;
-                case DIRECTION_RIGHT:attackAngle = 0; break;
+                case DIRECTION_LEFT: attackAngle = 0; break;
+                case DIRECTION_RIGHT:attackAngle = 180; break;
                 default: break;
             }
             if  (Collision::diskWithCircleSector(
