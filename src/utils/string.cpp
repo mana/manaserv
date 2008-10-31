@@ -29,3 +29,16 @@ std::string utils::toupper(std::string s)
     std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) std::toupper);
     return s;
 }
+
+bool utils::isNumeric(const std::string &s)
+{
+    for (unsigned int i = 0; i < s.size(); ++i)
+    {
+        if (!isdigit(s[i]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}

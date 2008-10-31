@@ -27,6 +27,7 @@
 namespace utils
 {
     std::string toupper(std::string);
+    bool isNumeric(const std::string &);
 }
 
 #endif // UTILS_STRING_HPP

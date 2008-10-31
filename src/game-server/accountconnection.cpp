@@ -137,32 +137,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             {
                 break;
             }
-/*
-            // create the message
-            MessageOut out(GPMSG_GET_POST_RESPONSE);
 
-            // get all the post for a character
-            while (msg.getUnreadLength())
-            {
-                // write the sender
-                out.writeString(msg.readString());
-
-                // write the contents
-                out.writeString(msg.readString());
-
-                // read the number of attachments then
-                // write the attachments
-                for (int i = 0; i < msg.readShort(); ++i)
-                {
-                    // write the id and amount
-                    out.writeShort(msg.readShort());
-                    out.writeShort(msg.readShort());
-                }
-            }
-
-            // send post to character
-            gameHandler->sendTo(character, out);
-            */
             std::string sender = msg.readString();
             std::string letter = msg.readString();
 
@@ -301,4 +276,12 @@ void AccountConnection::getPost(Character *c)
     MessageOut out(GCMSG_REQUEST_POST);
     out.writeLong(c->getDatabaseID());
     send(out);
+}
+
+void AccountConnection::changeAccountLevel(Character *c, int level)
+{
+    MessageOut msg(GAMSG_CHANGE_ACCOUNT_LEVEL);
+    msg.writeLong(c->getDatabaseID());
+    msg.writeShort(level);
+    send(msg);
 }

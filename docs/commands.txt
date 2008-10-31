@@ -16,9 +16,10 @@ The following commands could be issued in the chat window using the syntax:
 They require the player to have an account level of 99 at least (AL_ADMIN).
 
 
-* reload <db> // Reloads the specifyed database.
-	- db: could be "items" or "monsters"
-
+* reload // Reloads the items and monsters database.
+* level <name> <level> // Changes the Account level for the user
+	- name: the character whos account level will be changed
+	- level: the level to set it at (50 for GM, 99 for admin)
 
 2. GM COMMANDS
 --------------
@@ -65,3 +66,9 @@ the special character '#' to denote the map the admin player is on.
 	- duration: the amount of time the player will be banned. Can be
 	immediately followed by 'h' for hours and 'd' for days, minutes are assumed
 	otherwise.
+
+* attribute <name> <attribute> <amount> // changes a characters attributes
+	- name: the character to modify
+	- attribute: the attribute to modify
+	- amount: the amount to modify by
+

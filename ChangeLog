@@ -1,3 +1,11 @@
+2008-10-31  David Athay  <ko2fan@gmail.com>
+
+	* src/utils/string.cpp, src/utils/string.hpp, src/Makefile.am,
+	src/game-server/commandhandler.cpp, src/game-server/commandhandler.hpp, 
+	src/game-server/gamehandler.cpp, src/game-server/accountconnection.cpp, 
+	src/game-server/accountconnection.hpp, gameserver.cbp: Changed the
+	commands to be handled without template magic.
+
 2008-10-29  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/game-server/being.cpp, src/game-server/monster.cpp,

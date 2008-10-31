@@ -95,6 +95,8 @@ tmwserv_game_SOURCES = \
 	game-server/collisiondetection.hpp \
 	game-server/collisiondetection.cpp \
 	game-server/command.cpp \
+	game-server/commandhandler.cpp \
+	game-server/commandhandler.hpp \
 	game-server/eventlistener.hpp \
 	game-server/gamehandler.hpp \
 	game-server/gamehandler.cpp \

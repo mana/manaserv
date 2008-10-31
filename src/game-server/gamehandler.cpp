@@ -28,6 +28,7 @@
 
 #include "game-server/accountconnection.hpp"
 #include "game-server/buysell.hpp"
+#include "game-server/commandhandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"
 #include "game-server/itemmanager.hpp"
@@ -192,9 +193,9 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
             if (say[0] == '@')
             {
-                // Handle special command.
-                extern void runCommand(Character *, std::string const &);
-                runCommand(computer.character, say);
+                CommandHandler *commandHandler = new CommandHandler();
+                commandHandler->handleCommand(computer.character, say);
+                delete commandHandler;
                 break;
             }
             GameState::sayAround(computer.character, say);

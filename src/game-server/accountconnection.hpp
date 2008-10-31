@@ -81,6 +81,11 @@ class AccountConnection : public Connection
          */
         void getPost(Character *);
 
+        /**
+         * Change Account Level
+         */
+        void changeAccountLevel(Character *, int);
+
     protected:
         /**
          * Processes server messages.
