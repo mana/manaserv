@@ -39,6 +39,7 @@
 #include "game-server/mapmanager.hpp"
 #include "game-server/state.hpp"
 #include "game-server/trade.hpp"
+#include "scripting/script.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "serialize/characterdata.hpp"
@@ -139,6 +140,20 @@ void Character::respawn()
     setAction(STAND);
     mAttributes[BASE_ATTR_HP].mod = -mAttributes[BASE_ATTR_HP].base + 1;
     modifiedAttribute(BASE_ATTR_HP);
+}
+
+void Character::useSpecial(int id)
+{
+    //TODO: look up which of its special attacks the character wants to use
+    //TODO: check if the character is allowed to use it right now
+
+    Script *s = getMap()->getScript();
+    s->prepare("cast");
+    s->push(this);
+    s->push(id);
+    s->execute();
+
+    return;
 }
 
 int Character::getMapId() const

@@ -321,6 +321,14 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character->setAction(Being::ATTACK);
         } break;
 
+        case PGMSG_USE_SPECIAL:
+        {
+            int specialID = message.readByte();
+            LOG_DEBUG("Character " << computer.character->getPublicID()
+                      << " tries to use his special attack "<<specialID);
+            computer.character->useSpecial(specialID);
+        }
+
         case PGMSG_ACTION_CHANGE:
         {
             Being::Action action = (Being::Action)message.readByte();

@@ -7,6 +7,11 @@
 	* data/scripts/lib/test.lua: added constants for character skills.
 	* data/scripts/test.lua: Added example script for manipulating character
 	experience.
+	* src/game-server/character.cpp, src/game-server/character.hpp,
+	src/game-server/gamehandler.cpp, src/defines.h: Implemented basic netcode
+	for using special actions like magic. Currently triggers a function in
+	libtmw.lua which makes the caster speak some text (magic system
+	implementation phase 1 and 2)
 
 2008-10-31  David Athay  <ko2fan@gmail.com>
 

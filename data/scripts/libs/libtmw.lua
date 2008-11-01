@@ -410,3 +410,18 @@ end
 tmw.chr_money = function(ch)
   return tmw.chr_inv_count(ch, 0)
 end
+
+
+
+function cast(ch, arg)
+	if arg == 1 then
+		tmw.being_say(ch, "Kaaame...Haaame... HAAAAAA!")
+	end
+	if arg == 2 then
+		tmw.being_say(ch, "HAA-DOKEN!")
+	end
+	if arg == 3 then
+		tmw.being_say(ch, "Sonic BOOM")
+	end
+	
+end

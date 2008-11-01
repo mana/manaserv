@@ -165,6 +165,7 @@ enum {
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     PGMSG_ATTACK                   = 0x0290, // B direction
     GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction, B attacktype
+    PGMSG_USE_SPECIAL              = 0x0292, // B specialID
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // W being id, S text
     GPMSG_NPC_CHOICE               = 0x02B0, // W being id, { S text }*
@@ -191,7 +192,7 @@ enum {
     PGMSG_USE_ITEM                 = 0x0300, // B slot
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
-    GPMSG_CREATE_EFFECT            = 0x0320, // W effect id, W*2 position 
+    GPMSG_CREATE_EFFECT            = 0x0320, // W effect id, W*2 position
 
     // Guild
     PCMSG_GUILD_CREATE                  = 0x0350, // S name

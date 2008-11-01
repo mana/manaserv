@@ -68,6 +68,12 @@ class Character : public Being
         void respawn();
 
         /**
+         * makes the character perform a special action
+         * when it is allowed to do so
+         */
+        void useSpecial(int id);
+
+        /**
          * Gets client computer.
          */
         GameClient *getClient() const
