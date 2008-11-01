@@ -28,44 +28,12 @@
 
 class Character;
 
-/**
- * A class to parse and handle user commands
- */
-class CommandHandler
+namespace CommandHandler
 {
-    public:
-        /**
-         * Constructor
-         */
-        CommandHandler() {}
+    /**
+     * Parse and handle the given command.
+     */
+    void handleCommand(Character *player, const std::string &command);
+}
 
-        /**
-         * Destructor
-         */
-        ~CommandHandler() {}
-
-        /**
-         * Parse and handle the given command.
-         */
-        void handleCommand(Character *player, const std::string &command);
-
-    private:
-        void handleHelp(Character *player, std::string &args);
-        void handleWarp(Character *player, std::string &args);
-        void handleItem(Character *player, std::string &args);
-        void handleDrop(Character *player, std::string &args);
-        void handleMoney(Character *player, std::string &args);
-        void handleSpawn(Character *player, std::string &args);
-        void handleGoto(Character *player, std::string &args);
-        void handleRecall(Character *player, std::string &args);
-        void handleReload(Character *player);
-        void handleBan(Character *player, std::string &args);
-        void handleLevel(Character *player, std::string &args);
-        void handleAttribute(Character *player, std::string &args);
-
-        void errorMsg(const std::string error, Character *player);
-        std::string getArgument(std::string &args);
-        Character* getPlayer(const std::string &player);
-};
-
-#endif //_TMW_COMMANDHANDLER_H
+#endif //_TMW_SERVER_COMMANDHANDLER_H

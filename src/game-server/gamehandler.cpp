@@ -193,9 +193,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
             if (say[0] == '@')
             {
-                CommandHandler *commandHandler = new CommandHandler();
-                commandHandler->handleCommand(computer.character, say);
-                delete commandHandler;
+                CommandHandler::handleCommand(computer.character, say);
                 break;
             }
             GameState::sayAround(computer.character, say);

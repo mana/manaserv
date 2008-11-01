@@ -1,3 +1,9 @@
+2008-11-01  Roderic Morris  <roderic@ccs.neu.edu>
+
+	* src/game-server/commandhandler.hpp, src/game-server/gamehander.cpp,
+	src/game-server/commandhandler.cpp: some fixes for the command handler,
+	it still needs some more work though.
+
 2008-11-01  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/game-server/character.hpp, src/game-server/scripting/lua.cpp: Added
@@ -16,8 +22,8 @@
 2008-10-31  David Athay  <ko2fan@gmail.com>
 
 	* src/utils/string.cpp, src/utils/string.hpp, src/Makefile.am,
-	src/game-server/commandhandler.cpp, src/game-server/commandhandler.hpp, 
-	src/game-server/gamehandler.cpp, src/game-server/accountconnection.cpp, 
+	src/game-server/commandhandler.cpp, src/game-server/commandhandler.hpp,
+	src/game-server/gamehandler.cpp, src/game-server/accountconnection.cpp,
 	src/game-server/accountconnection.hpp, gameserver.cbp: Changed the
 	commands to be handled without template magic.
 
