@@ -1,3 +1,13 @@
+2008-11-01  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/character.hpp, src/game-server/scripting/lua.cpp: Added
+	script bindings for manipulating the characters experience.
+	* src/game-server/character.cpp: Catched a potential integer underflow in
+	experience calculation.
+	* data/scripts/lib/test.lua: added constants for character skills.
+	* data/scripts/test.lua: Added example script for manipulating character
+	experience.
+
 2008-10-31  David Athay  <ko2fan@gmail.com>
 
 	* src/utils/string.cpp, src/utils/string.hpp, src/Makefile.am,

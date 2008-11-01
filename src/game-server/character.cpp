@@ -322,6 +322,7 @@ void Character::receiveExperience(size_t skill, int experience)
         // add exp
         long int newExp = mExperience.at(skill - CHAR_SKILL_BEGIN) + experience;
         if (newExp > INT_MAX) newExp = INT_MAX; // avoid integer overflow.
+        if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
         mExperience.at(skill - CHAR_SKILL_BEGIN) = newExp;
         mModifiedExperience.insert(skill - CHAR_SKILL_BEGIN);
 

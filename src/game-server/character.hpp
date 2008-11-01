@@ -248,6 +248,11 @@ class Character : public Being
         { mExperience[skill] = 0; receiveExperience(skill + CHAR_SKILL_BEGIN , value) ; }
 
         /**
+         * Returns the exp needed to reach a specific skill level
+         */
+        static int expForLevel(int level);
+
+        /**
          * Tries to use a character point to increase a
          * basic attribute
          */
@@ -299,11 +304,6 @@ class Character : public Being
          * Marks attribute as recently modified.
          */
         void flagAttribute(int);
-
-        /**
-         * Returns the exp needed to reach a specific skill level
-         */
-        static int expForLevel(int level);
 
         /**
          * Returns the exp needed for next skill levelup

@@ -25,6 +25,7 @@ atinit(function()
   create_npc("Fire Demon", 202, 58 * TILESIZE + 16, 35 * TILESIZE + 16, firedemon_talk, firedemon_update)
   create_npc("Post Box", 158, 45 * TILESIZE + 16, 22 * TILESIZE + 16, post_talk)
   create_npc("Fireworker", 158, 43 * TILESIZE, 23 * TILESIZE, fireworker_talk, npclib.walkaround_small)
+  create_npc("Axe Trainer", 126, 65 * TILESIZE, 18 * TILESIZE, axetrainer_talk, nil)
 
   tmw.trigger_create(56 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 1, true)
   tmw.trigger_create(63 * TILESIZE, 32 * TILESIZE, 64, 64, "patrol_waypoint", 2, true)
@@ -211,5 +212,23 @@ function fireworker_talk(npc, ch)
           tmw.effect_create(c, x + math.random(-200, 200), y + math.random(-200, 200))
         end)
       end
+  end
+end
+
+function axetrainer_talk(npc, ch)
+  do_message(npc, ch, "I am the axe trainer. Do you want to get better at using axes?")
+  local answer = do_choice(npc, ch, "Please train me, master.", "I am good enough with axes.")
+  if answer == 1 then
+    local newexp = tmw.chr_get_exp(ch, SKILL_WEAPON_AXE) + 100
+    local nextlevel = tmw.exp_for_level(tmw.being_get_attribute(ch, SKILL_WEAPON_AXE) + 1)
+    tmw.chr_give_exp(ch, SKILL_WEAPON_AXE, 100)
+    local message = "I gave you 100 axe exp."
+    if newexp > nextlevel then
+      message = message.." This should be enough to reach the next level."
+    else
+      message = message.." You will still need "..tostring(nextlevel - newexp).." exp to reach the next level."
+    end
+    message = message.." I should really stop doing this when the server goes live."
+    do_message(npc, ch, message);
   end
 end

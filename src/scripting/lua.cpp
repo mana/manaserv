@@ -902,6 +902,77 @@ static int LuaEffect_Create(lua_State *s)
     return 0;
 }
 
+/**
+ * Gets the exp total in a skill of a specific character
+ * tmw.chr_get_exp (being, skill)
+ */
+static int LuaChr_GetExp(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "luaChr_GetExp called for nonexistent character.");
+        return 0;
+    }
+
+    int skill = lua_tointeger(s, 2);
+    if (skill < CHAR_SKILL_BEGIN || skill >= CHAR_SKILL_END)
+    {
+        raiseScriptError(s, "luaChr_GetExp called for nonexistent skill number %d.", skill);
+        return 0;
+    }
+
+    int exp = c->getExperience(skill - CHAR_SKILL_BEGIN);
+
+    lua_pushinteger(s, exp);
+    return 1;
+}
+
+
+/**
+ * Gives the character a certain amount of experience points
+ * in a skill. Can also be used to reduce the exp amount when
+ * desired.
+ * tmw.chr_give_exp (being, skill, amount)
+ */
+static int LuaChr_GiveExp(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "luaChr_GiveExp called for nonexistent character.");
+        return 0;
+    }
+
+    int skill = lua_tointeger(s, 2);
+    if (skill < CHAR_SKILL_BEGIN || skill >= CHAR_SKILL_END)
+    {
+        raiseScriptError(s, "luaChr_GiveExp called for nonexistent skill number %d.", skill);
+        return 0;
+    }
+
+    int exp = lua_tointeger(s, 3);
+
+    c->receiveExperience(skill, exp);
+
+    return 0;
+}
+
+
+/**
+ * Returns the exp total necessary to reach a specific skill level.
+ * tmw.exp_for_level (level)
+ */
+static int LuaExpForLevel(lua_State *s)
+{
+    int level = lua_tointeger(s, 1);
+
+    int exp = Character::expForLevel(level);
+
+    lua_pushinteger(s, exp);
+    return 1;
+}
+
 
 LuaScript::LuaScript():
     nbArgs(-1)
@@ -923,6 +994,9 @@ LuaScript::LuaScript():
         { "chr_get_quest",          &LuaChr_GetQuest      },
         { "chr_set_quest",          &LuaChr_SetQuest      },
         { "chr_get_post",           &LuaChr_GetPost       },
+        { "chr_get_exp",            &LuaChr_GetExp        },
+        { "chr_give_exp",           &LuaChr_GiveExp       },
+        { "exp_for_level",          &LuaExpForLevel       },
         { "monster_create",         &LuaMonster_Create    },
         { "being_walk",             &LuaBeing_Walk        },
         { "being_say",              &LuaBeing_Say         },
