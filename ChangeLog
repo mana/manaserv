@@ -1,3 +1,9 @@
+2008-11-02  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* data/scripts/libs/libtmw.lua, data/scripts/libs/libtmw-constants.lua:
+	Moved the long list of constants at the beginning of libtmw to an
+	additional lua source file.
+
 2008-11-01  Roderic Morris  <roderic@ccs.neu.edu>
 
 	* src/game-server/commandhandler.hpp, src/game-server/gamehander.cpp,
