@@ -51,8 +51,13 @@ static std::string getArgument(std::string &args)
     std::string::size_type pos = args.find(' ');
     if (pos != std::string::npos)
     {
-        argument = args.substr(0, pos-1);
+        argument = args.substr(0, pos);
         args = args.substr(pos+1);
+    }
+    else
+    {
+        argument = args.substr(0);
+        args = "";
     }
 
     return argument;
@@ -688,10 +693,10 @@ void CommandHandler::handleCommand(Character *player,
     // check character permissions
     // finer tuning for checking per command can be done
     // in the handle function for that command
-    //if (player->getAccountLevel() >= AL_GM)
-    //{
-    //    return;
-    //}
+    if (player->getAccountLevel() < AL_GM)
+    {
+        return;
+    }
 
     // get command type, and arguments
     // remove first character (the @)

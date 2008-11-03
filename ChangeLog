@@ -1,3 +1,7 @@
+2008-11-03  David Athay  <ko2fan@gmail.com>
+
+	* src/game-server/commandhandler.cpp: Fixed argument processing.
+
 2008-11-03  Andreas Habel  <mail@exceptionfault.de>
 
 	* src/sql/sqlite/createTables.sql, src/sql/mysql/createTables.sql,
