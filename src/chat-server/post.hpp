@@ -37,17 +37,39 @@ class Letter
 {
 public:
     /**
-     * Constructor
+     * Constructor.
+     *
+     * Before the letter is stored in the database, the unique Id of the letter
+     * is 0.
      * @param type Type of Letter - unused
      * @param sender Pointer to character that sent the letter
      * @param receiver Pointer to character that will receive the letter
      */
-    Letter(int type, Character *sender, Character *receiver);
+    Letter(unsigned int type, Character *sender, Character *receiver);
 
     /**
      * Destructor
      */
     ~Letter();
+
+    /**
+     * Gets the unique Id of the letter.
+     */
+    unsigned long getId() const
+    { return mId; }
+
+    /**
+     * Sets the unique Id of the letter used as primary key in the database.
+     * @param Id Unique id of the letter.
+     */
+    void setId(unsigned long Id)
+    { mId = Id; }
+
+    /**
+     * Gets the type of the letter. (unused)
+     */
+    unsigned int getType(void) const
+    { return mType; }
 
     /**
      * Set the expiry
@@ -97,6 +119,7 @@ public:
     std::vector<InventoryItem> getAttachments();
 
 private:
+    unsigned int mId;
     unsigned int mType;
     unsigned long mExpiry;
     std::string mContents;

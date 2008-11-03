@@ -106,6 +106,18 @@ static char const *QUESTS_TBL_NAME = "tmw_quests";
 static char const *WORLD_STATES_TBL_NAME = "tmw_world_states";
 
 /**
+ * TABLE: tmw_post
+ * Store letters sent by characters
+ */
+static char const *POST_TBL_NAME = "tmw_post";
+
+/**
+ * TABLE: tmw_post_attachments
+ * Store attachments per letter.
+ */
+static char const *POST_ATTACHMENTS_TBL_NAME = "tmw_post_attachments";
+
+/**
  * TABLE: tmw_auctions
  * Store items auctions.
  */

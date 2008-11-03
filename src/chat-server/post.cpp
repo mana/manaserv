@@ -26,8 +26,8 @@
 #include "../account-server/character.hpp"
 #include "../defines.h"
 
-Letter::Letter(int type, Character *sender, Character *receiver)
- : mType(type), mSender(sender), mReceiver(receiver)
+Letter::Letter(unsigned int type, Character *sender, Character *receiver)
+ : mId(0), mType(type), mSender(sender), mReceiver(receiver)
 {
 
 }

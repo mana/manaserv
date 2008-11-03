@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `tmw_guild_members` (
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
-        
+
 --
 -- table: `tmw_quests`
 --
@@ -221,6 +221,60 @@ CREATE TABLE IF NOT EXISTS `tmw_auction_bids` (
 		REFERENCES `tmw_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+AUTO_INCREMENT=1 ;
+
+--
+-- table: `tmw_post`
+--
+
+CREATE TABLE IF NOT EXISTS `tmw_post` (
+	`letter_id`        int(10)      unsigned  NOT NULL auto_increment,
+	`sender_id`        int(10)      unsigned  NOT NULL,
+	`receiver_id`      int(10)      unsigned  NOT NULL,
+	`letter_type`      int(5)       unsigned  NOT NULL,
+	`expiration_date`  int(10)      unsigned  NOT NULL,
+	`sending_date`     int(10)      unsigned  NOT NULL,
+	`letter_text`      TEXT                       NULL,
+	--
+	PRIMARY KEY (`letter_id`),
+	INDEX `fk_letter_sender` (`sender_id` ASC) ,
+	INDEX `fk_letter_receiver` (`receiver_id` ASC) ,
+	--
+	CONSTRAINT `fk_letter_sender`
+		FOREIGN KEY (`sender_id` )
+		REFERENCES `tmw_characters` (`id`)
+		ON DELETE CASCADE,
+	CONSTRAINT `fk_letter_receiver`
+		FOREIGN KEY (`receiver_id` )
+		REFERENCES `tmw_characters` (`id` )
+		ON DELETE CASCADE
+) ENGINE = InnoDB
+DEFAULT CHARSET=utf8
+AUTO_INCREMENT=1 ;
+
+--
+-- table: `tmw_post_attachements`
+--
+
+CREATE TABLE IF NOT EXISTS `tmw_post_attachments` (
+	`attachment_id`    int(10)      unsigned  NOT NULL auto_increment,
+	`letter_id`        int(10)      unsigned  NOT NULL,
+	`item_id`          int(10)      unsigned  NOT NULL,
+	--
+	PRIMARY KEY (`attachment_id`) ,
+	INDEX `fk_attachment_letter` (`letter_id` ASC) ,
+	INDEX `fk_attachment_item` (`item_id` ASC),
+	--
+	CONSTRAINT `fk_attachment_letter`
+		FOREIGN KEY (`letter_id` )
+		REFERENCES `mydb`.`tmw_post` (`letter_id` )
+		ON DELETE CASCADE,
+	CONSTRAINT `fk_attachment_item`
+		FOREIGN KEY (`item_id` )
+		REFERENCES `mydb`.`tmw_item_instances` (`item_id` )
+		ON DELETE RESTRICT
+) ENGINE = InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 

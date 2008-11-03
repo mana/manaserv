@@ -1327,11 +1327,116 @@ void DALStorage::setPlayerLevel(int id, int level)
 
 void DALStorage::storeLetter(Letter *letter)
 {
-    // TODO: Store letter for user
+    std::ostringstream sql;
+    if (letter->getId() == 0)
+    {
+        // the letter was never saved before
+        sql << "INSERT INTO " << POST_TBL_NAME << " VALUES ( "
+            << "NULL, "
+            << letter->getSender()->getDatabaseID() << ", "
+            << letter->getReceiver()->getDatabaseID() << ", "
+            << letter->getExpiry() << ", "
+            << time(NULL) << ", "
+            << "'" << letter->getContents() << "' )";
+
+        mDb->execSql(sql.str());
+        letter->setId(mDb->getLastId());
+
+        // TODO: store attachments in the database
+
+        return;
+    }
+    else
+    {
+        // the letter has a unique id, update the record in the db
+        sql << "UPDATE " << POST_TBL_NAME
+            << "   SET sender_id       = '" << letter->getSender()->getDatabaseID() << "', "
+            << "       receiver_id     = '" << letter->getReceiver()->getDatabaseID() << "', "
+            << "       letter_type     = '" << letter->getType() << "', "
+            << "       expiration_date = '" << letter->getExpiry() << "', "
+            << "       sending_date    = '" << time(NULL) << "', "
+            << "       letter_text     = '" << letter->getContents() << "' "
+            << " WHERE letter_id       = '" << letter->getId() << "'";
+
+        mDb->execSql(sql.str());
+
+        if (mDb->getModifiedRows() == 0)
+        {
+            // this should never happen...
+            LOG_ERROR("(DALStorage::storePost) trying to update nonexsistant letter");
+            throw "(DALStorage::storePost) trying to update nonexsistant letter";
+        }
+
+        // TODO: update attachments in the database
+    }
 }
 
 Post* DALStorage::getStoredPost(int playerId)
 {
-    // TODO: Get post for user
-    return 0;
+    Post* p = new Post();
+    // specialize the string_to functor to convert
+    // a string to an unsigned int.
+    string_to< unsigned > toUint;
+
+    std::ostringstream sql;
+    sql << "SELECT * FROM " << POST_TBL_NAME
+        << " WHERE receiver_id = " << playerId;
+
+    dal::RecordSet const &post = mDb->execSql(sql.str());
+
+    if (post.isEmpty())
+    {
+        // there is no post waiting for the character
+        return p;
+    }
+
+    for (unsigned int i = 0; i < post.rows(); i++ )
+    {
+        // load sender and receiver
+        Character *sender = getCharacter(toUint(post(i, 1)), NULL);
+        Character *receiver = getCharacter(toUint(post(i, 2)), NULL);
+
+        Letter *letter = new Letter(toUint( post(0,3) ), sender, receiver);
+
+        letter->setId( toUint(post(0, 0)) );
+        letter->setExpiry( toUint(post(0, 4)) );
+        letter->addText( post(0, 6) );
+
+        // TODO: load attachments per letter from POST_ATTACHMENTS_TBL_NAME
+        // needs redesign of struct ItemInventroy
+
+        p->addLetter(letter);
+    }
+
+    return p;
+}
+
+void DALStorage::deletePost(Letter* letter)
+{
+    mDb->beginTransaction();
+
+    try
+    {
+        std::ostringstream sql;
+
+        // first delete all attachments of the letter
+        // this could leave "dead" items in the item_instances table
+        sql << "DELETE FROM " << POST_ATTACHMENTS_TBL_NAME
+            << " WHERE letter_id = " << letter->getId();
+        mDb->execSql(sql.str());
+
+        // delete the letter itself
+        sql.str("");
+        sql << "DELETE FROM " << POST_TBL_NAME
+            << " WHERE letter_id = " << letter->getId();
+        mDb->execSql(sql.str());
+
+        mDb->commitTransaction();
+        letter->setId(0);
+    }
+    catch(dal::DbSqlQueryExecFailure const &e)
+    {
+        mDb->rollbackTransaction();
+        LOG_ERROR("(DALStorage::deletePost) SQL query failure: " << e.what());
+    }
 }

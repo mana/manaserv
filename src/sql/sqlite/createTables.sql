@@ -10,7 +10,8 @@ CREATE TABLE tmw_accounts
    lastlogin    INTEGER     NOT NULL  
 );
 
-CREATE INDEX tmw_accounts_username ON tmw_accounts ( username );
+CREATE UNIQUE INDEX tmw_accounts_username ON tmw_accounts ( username );
+CREATE UNIQUE INDEX tmw_accounts_email    ON tmw_accounts ( email );
 
 
 CREATE TABLE tmw_characters 
@@ -76,6 +77,8 @@ CREATE TABLE tmw_inventories
    --
    FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)
 );
+
+CREATE INDEX tmw_inventories_owner ON tmw_inventories ( owner_id );
 
 CREATE TABLE tmw_guilds 
 (
@@ -151,3 +154,38 @@ CREATE TABLE tmw_auction_bids
 
 CREATE INDEX tmw_auction_bids_auction ON tmw_auction_bids ( auction_id );
 CREATE INDEX tmw_auction_bids_owner   ON tmw_auction_bids ( char_id );
+
+
+CREATE TABLE tmw_post
+(
+   letter_id        INTEGER   PRIMARY KEY,
+   sender_id        INTEGER   NOT NULL,
+   receiver_id      INTEGER   NOT NULL,
+   letter_type      INTEGER   NOT NULL,
+   expiration_date  INTEGER   NOT NULL,
+   sending_date     INTEGER   NOT NULL,
+   letter_text      TEXT          NULL,
+   --
+   FOREIGN KEY (sender_id)   REFERENCES tmw_characters(id),
+   FOREIGN KEY (receiver_id) REFERENCES tmw_characters(id)
+);
+
+CREATE INDEX tmw_post_sender   ON tmw_post ( sender_id );
+CREATE INDEX tmw_post_receiver ON tmw_post ( receiver_id );
+
+--
+-- table: `tmw_post_attachements`
+--
+
+CREATE TABLE tmw_post_attachments
+(
+   attachment_id    INTEGER   PRIMARY KEY,
+   letter_id        INTEGER   NOT NULL,
+   item_id          INTEGER   NOT NULL,
+   --
+   FOREIGN KEY (letter_id) REFERENCES tmw_post(letter_id),
+   FOREIGN KEY (item_id)   REFERENCES tmw_item_instances(item_id)
+);
+
+CREATE INDEX tmw_post_attachments_ltr ON tmw_post_attachments ( letter_id );
+CREATE INDEX tmw_post_attachments_itm ON tmw_post_attachments ( item_id );

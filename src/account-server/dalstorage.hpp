@@ -312,9 +312,15 @@ class DALStorage
         /**
          * Retrieve post
          *
-         * @param playerId The id of the player requesting his post
+         * @param playerId The id of the character requesting his post
          */
         Post* getStoredPost(int playerId);
+
+        /**
+         * Delete a letter from the database.
+         * @param letter The letter to delete.
+         */
+        void deletePost(Letter* letter);
 
         /**
          * Add item to auction
