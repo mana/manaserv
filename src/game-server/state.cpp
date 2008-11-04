@@ -342,6 +342,29 @@ static void informPlayer(MapComposite *map, Character *p)
     // Inform client about status change.
     p->sendStatus();
 
+    // Inform client about health change of party members
+    for (CharacterIterator i(map->getWholeMapIterator()); i; ++i)
+    {
+        Character *c = *i;
+
+        // Make sure its not the same character
+        if (c == p)
+            continue;
+
+        // make sure they are in the same party
+        if (c->getParty() == p->getParty())
+        {
+            int cflags = c->getUpdateFlags();
+            if (cflags & UPDATEFLAG_HEALTHCHANGE)
+            {
+                MessageOut healthMsg(GPMSG_BEING_HEALTH_CHANGE);
+                healthMsg.writeShort(c->getPublicID());
+                healthMsg.writeShort(c->getHealth());
+                gameHandler->sendTo(p, healthMsg);
+            }
+        }
+    }
+
     // Inform client about items on the ground around its character
     MessageOut itemMsg(GPMSG_ITEMS);
     for (FixedObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)

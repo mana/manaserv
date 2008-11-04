@@ -3,6 +3,9 @@
 	*  src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
 	src/defines.h: Added notifying party members when a player joins or 
 	quits.
+	* src/game-server/state.cpp, src/game-server/being.cpp,
+	src/game-server/character.hpp, src/game-server/object.hpp: Added
+	updating party member health.
 
 2008-11-03  David Athay  <ko2fan@gmail.com>
 

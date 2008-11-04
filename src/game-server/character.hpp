@@ -254,6 +254,12 @@ class Character : public Being
         { mExperience[skill] = 0; receiveExperience(skill + CHAR_SKILL_BEGIN , value) ; }
 
         /**
+         * Shortcut to get being's health
+         */
+        int getHealth() const
+        { return getModifiedAttribute(CHAR_ATTR_VITALITY); }
+
+        /**
          * Returns the exp needed to reach a specific skill level
          */
         static int expForLevel(int level);

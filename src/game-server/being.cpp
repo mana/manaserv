@@ -274,6 +274,7 @@ void Being::update()
     if (newHP != oldHP)
     {
         applyModifier(BASE_ATTR_HP, newHP - oldHP);
+        raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
     }
 
     // Update lifetime of effects.
