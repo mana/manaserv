@@ -1,3 +1,9 @@
+2008-11-04  David Athay  <ko2fan@gmail.com>
+
+	*  src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
+	src/defines.h: Added notifying party members when a player joins or 
+	quits.
+
 2008-11-03  David Athay  <ko2fan@gmail.com>
 
 	* src/game-server/commandhandler.cpp: Fixed argument processing.

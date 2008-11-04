@@ -161,6 +161,7 @@ enum {
     GPMSG_BEING_ACTION_CHANGE      = 0x0271, // W being id, B action
     PGMSG_DIRECTION_CHANGE         = 0x0272, // B Direction
     GPMSG_BEING_DIR_CHANGE         = 0x0273, // W being id, B direction
+    GPMSG_BEING_HEALTH_CHANGE      = 0x0274, // W being id, W health
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, C position, B speed] [, W*2 destination] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     PGMSG_ATTACK                   = 0x0290, // B direction
@@ -220,6 +221,8 @@ enum {
     CPMSG_PARTY_ACCEPT_INVITE_RESPONSE  = 0x03A6, // B error
     PCMSG_PARTY_QUIT                    = 0x03AA, // -
     CPMSG_PARTY_QUIT_RESPONSE           = 0x03AB, // B error
+    CPMSG_PARTY_NEW_MEMBER              = 0x03B0, // W being id, S name
+    CPMSG_PARTY_MEMBER_LEFT             = 0x03B1, // W being id
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error

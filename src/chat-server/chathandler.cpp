@@ -983,6 +983,9 @@ bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string 
             out.writeByte(ERRMSG_OK);
             c1->send(out);
 
+            // tell everyone a player joined
+            informPartyMemberJoined(*c2);
+
             // tell game server to update info
             updateInfo(c2, c2->party->getId());
             return true;
@@ -1060,11 +1063,46 @@ void ChatHandler::removeUserFromParty(ChatClient &client)
     if (client.party)
     {
         client.party->removeUser(client.characterName);
+        informPartyMemberQuit(client);
+
         // if theres less than 1 member left, remove the party
         if (client.party->numUsers() < 1)
         {
             delete client.party;
             client.party = 0;
+        }
+    }
+}
+
+void ChatHandler::informPartyMemberQuit(ChatClient &client)
+{
+    std::map<std::string, ChatClient*>::iterator itr;
+    std::map<std::string, ChatClient*>::const_iterator itr_end = mPlayerMap.end();
+
+    for (itr = mPlayerMap.begin(); itr != itr_end; ++itr)
+    {
+        if (itr->second.party == client.party)
+        {
+            MessageOut out(CPMSG_PARTY_MEMBER_LEFT);
+            out.writeShort(client.characterId);
+            itr->second.send(out);
+        }
+    }
+}
+
+void ChatHandler::informPartyMemberJoined(ChatClient &client)
+{
+    std::map<std::string, ChatClient*>::iterator itr;
+    std::map<std::string, ChatClient*>::const_iterator itr_end = mPlayerMap.end();
+
+    for (itr = mPlayerMap.begin(); itr != itr_end; ++itr)
+    {
+        if (itr->second.party == client.party)
+        {
+            MessageOut out(CPMSG_PARTY_NEW_MEMBER);
+            out.writeShort(client.characterId);
+            out.writeString(client.characterName);
+            itr->second.send(out);
         }
     }
 }

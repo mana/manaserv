@@ -271,6 +271,24 @@ class ChatHandler : public ConnectionHandler
         removeUserFromParty(ChatClient &client);
 
         /**
+         * Send new member info to party members.
+         */
+        void
+        sendPartyMemberInfo(ChatClient &client, MessageIn &msg);
+
+        /**
+         * Tell all the party members a member has left
+         */
+        void
+        informPartyMemberQuit(ChatClient &client);
+
+        /**
+         * Tell all the party members a member has joined
+         */
+        void
+        informPartyMemberJoined(ChatClient &client);
+
+        /**
          * Tell the player to be more polite.
          */
         void warnPlayerAboutBadWords(ChatClient &computer);
