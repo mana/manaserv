@@ -68,9 +68,10 @@
 		<Unit filename="src/game-server/character.hpp" />
 		<Unit filename="src/game-server/collisiondetection.cpp" />
 		<Unit filename="src/game-server/collisiondetection.hpp" />
-		<Unit filename="src/game-server/command.cpp" />
 		<Unit filename="src/game-server/commandhandler.cpp" />
 		<Unit filename="src/game-server/commandhandler.hpp" />
+		<Unit filename="src/game-server/effect.cpp" />
+		<Unit filename="src/game-server/effect.hpp" />
 		<Unit filename="src/game-server/eventlistener.hpp" />
 		<Unit filename="src/game-server/gamehandler.cpp" />
 		<Unit filename="src/game-server/gamehandler.hpp" />

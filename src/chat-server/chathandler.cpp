@@ -1081,11 +1081,11 @@ void ChatHandler::informPartyMemberQuit(ChatClient &client)
 
     for (itr = mPlayerMap.begin(); itr != itr_end; ++itr)
     {
-        if (itr->second.party == client.party)
+        if (itr->second->party == client.party)
         {
             MessageOut out(CPMSG_PARTY_MEMBER_LEFT);
             out.writeShort(client.characterId);
-            itr->second.send(out);
+            itr->second->send(out);
         }
     }
 }
@@ -1097,12 +1097,12 @@ void ChatHandler::informPartyMemberJoined(ChatClient &client)
 
     for (itr = mPlayerMap.begin(); itr != itr_end; ++itr)
     {
-        if (itr->second.party == client.party)
+        if (itr->second->party == client.party)
         {
             MessageOut out(CPMSG_PARTY_NEW_MEMBER);
             out.writeShort(client.characterId);
             out.writeString(client.characterName);
-            itr->second.send(out);
+            itr->second->send(out);
         }
     }
 }
