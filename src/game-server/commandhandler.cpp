@@ -164,9 +164,9 @@ static void handleWarp(Character *player, std::string &args)
             return;
         }
 
-        str << mapstr;
+        str.str(mapstr);
         str >> id;
-        str.str("");
+        str.clear();
 
         // get the map
         map = MapManager::getMap(id);
@@ -190,12 +190,12 @@ static void handleWarp(Character *player, std::string &args)
     }
 
     // change the x and y to integers
-    str << xstr;
+    str.str(xstr);
     str >> x;
-    str.str("");
-    str << ystr;
+    str.clear();
+    str.str(ystr);
     str >> y;
-    str.str("");
+    str.clear();
 
     // now warp the player
     GameState::warp(other, map, x, y);
@@ -245,9 +245,9 @@ static void handleItem(Character *player, std::string &args)
     }
 
     // put the itemclass id into an integer
-    str << itemclass;
+    str.str(itemclass);
     str >> id;
-    str.str("");
+    str.clear();
 
     // check for valid item class
     ic = ItemManager::getItem(id);
@@ -264,9 +264,9 @@ static void handleItem(Character *player, std::string &args)
         return;
     }
 
-    str << valuestr;
+    str.str(valuestr);
     str >> value;
-    str.str("");
+    str.clear();
 
     if (value < 0)
     {
@@ -303,9 +303,9 @@ static void handleDrop(Character *player, std::string &args)
     }
 
     // put the item class id into an integer
-    str << itemclass;
+    str.str(itemclass);
     str >> id;
-    str.str("");
+    str.clear();
 
     // check for valid item
     ic = ItemManager::getItem(id);
@@ -316,9 +316,9 @@ static void handleDrop(Character *player, std::string &args)
     }
 
     // put the value into an integer
-    str << valuestr;
+    str.str(valuestr);
     str >> value;
-    str.str("");
+    str.clear();
 
     if (value < 0)
     {
@@ -374,9 +374,9 @@ static void handleMoney(Character *player, std::string &args)
     }
 
     // change value into an integer
-    str << valuestr;
+    str.str(valuestr);
     str >> value;
-    str.str("");
+    str.clear();
 
     // change how much money the player has
     Inventory(other).changeMoney(value);
@@ -409,9 +409,9 @@ static void handleSpawn(Character *player, std::string &args)
     }
 
     // put the monster class id into an integer
-    str << monsterclass;
+    str.str(monsterclass);
     str >> id;
-    str.str("");
+    str.clear();
 
     // check for valid monster
     mc = MonsterManager::getMonster(id);
@@ -422,9 +422,9 @@ static void handleSpawn(Character *player, std::string &args)
     }
 
     // put the amount into an integer
-    str << valuestr;
+    str.str(valuestr);
     str >> value;
-    str.str("");
+    str.clear();
 
     if (value < 0)
     {
@@ -551,9 +551,9 @@ static void handleBan(Character *player, std::string &args)
     }
 
     // change the length to an integer
-    str << valuestr;
+    str.str(valuestr);
     str >> length;
-    str.str("");
+    str.clear();
 
     if (length < 0)
     {
@@ -606,9 +606,9 @@ static void handleLevel(Character *player, std::string &args)
     }
 
     // put the amount into an integer
-    str << valuestr;
+    str.str(valuestr);
     str >> level;
-    str.str("");
+    str.clear();
 
     if (level < 0)
     {
@@ -662,9 +662,9 @@ static void handleAttribute(Character *player, std::string &args)
     }
 
     // put the attribute into an integer
-    str << attrstr;
+    str.str(attrstr);
     str >> attr;
-    str.str("");
+    str.clear();
 
     if (attr < 0)
     {
@@ -673,9 +673,9 @@ static void handleAttribute(Character *player, std::string &args)
     }
 
     // put the value into an integer
-    str << valuestr;
+    str.str(valuestr);
     str >> value;
-    str.str("");
+    str.clear();
 
     if (value < 0)
     {

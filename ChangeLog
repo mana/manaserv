@@ -1,3 +1,8 @@
+2008-11-05  Dennis Friis  <peavey@placid.dk>
+	* src/game-server/commandhandler.cpp: Fix integer arguments randomly
+	failing due to stream flags not being cleared. To reuse a stream you
+	must do stream.clear(); stream.str(string); for it to work.
+
 2008-11-05  Andreas Habel  <mail@exceptionfault.de>
 
 	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
