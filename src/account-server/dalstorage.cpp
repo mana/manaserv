@@ -663,6 +663,7 @@ void DALStorage::flushSkill(const Character* const character,
             return;
         }
 
+        sql.clear();
         sql.str("");
         sql << "INSERT INTO " << CHAR_SKILLS_TBL_NAME << " "
             << "(char_id, skill_id, skill_exp) VALUES ( "
@@ -1231,36 +1232,42 @@ void DALStorage::delCharacter(int charId, bool startTransaction = true) const
         mDb->execSql(sql.str());
 
         // delete the skills of the character
+        sql.clear();
         sql.str("");
         sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
             << " WHERE char_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
         // delete from the quests table
+        sql.clear();
         sql.str("");
         sql << "DELETE FROM " << QUESTS_TBL_NAME
             << " WHERE owner_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
         // delete from the guilds table
+        sql.clear();
         sql.str("");
         sql << "DELETE FROM " << GUILD_MEMBERS_TBL_NAME
             << " WHERE member_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
         // delete auctions of the character
+        sql.clear();
         sql.str("");
         sql << "DELETE FROM " << AUCTION_TBL_NAME
             << " WHERE char_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
         // delete bids made on auctions made by the character
+        sql.clear();
         sql.str("");
         sql << "DELETE FROM " << AUCTION_BIDS_TBL_NAME
             << " WHERE char_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
         // now delete the character itself.
+        sql.clear();
         sql.str("");
         sql << "DELETE FROM " << CHARACTERS_TBL_NAME
             << " WHERE id = '" << charId << "';";
@@ -1434,6 +1441,7 @@ void DALStorage::deletePost(Letter* letter)
         mDb->execSql(sql.str());
 
         // delete the letter itself
+        sql.clear();
         sql.str("");
         sql << "DELETE FROM " << POST_TBL_NAME
             << " WHERE letter_id = " << letter->getId();
@@ -1535,6 +1543,7 @@ void DALStorage::SyncDatabase(void)
                 mDb->execSql(sql.str());
                 if (mDb->getModifiedRows() == 0)
                 {
+                    sql.clear();
                     sql.str("");
                     sql << "INSERT INTO " << ITEMS_TBL_NAME
                         << "  VALUES ( " << id << ", '" << name << "', '"
