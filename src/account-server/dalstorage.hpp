@@ -336,7 +336,8 @@ class DALStorage
          *
          * @return Version of the item database.
          */
-        unsigned int getItemDatabaseVersion(void);
+        unsigned int getItemDatabaseVersion(void) const
+        { return mItemDbVersion; }
 
     private:
         /**
@@ -371,7 +372,18 @@ class DALStorage
          */
         Character *getCharacterBySQL(std::string const &query, Account *owner);
 
+        /**
+         * Synchronizes the base data in the connected SQL database with the xml
+         * files like items.xml.
+         * This method is called once after initialization of DALStorage.
+         * Probably this function should be called if a gm requests an online
+         * reload of the xml files to load new items or monsters without server
+         * restart.
+         */
+        void SyncDatabase(void);
+
         dal::DataProvider *mDb; /**< the data provider */
+        unsigned int mItemDbVersion;    /**< Version of the item database. */
 };
 
 extern DALStorage *storage;

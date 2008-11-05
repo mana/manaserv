@@ -153,7 +153,7 @@ SqLiteDataProvider::execSql(const std::string& sql,
         if (errCode != SQLITE_OK) {
             std::string msg(sqlite3_errmsg(mDb));
 
-            LOG_ERROR("Error in SQL: " << msg);
+            LOG_ERROR("Error in SQL: " << sql << "\n" << msg);
 
             // free memory
             sqlite3_free_table(result);

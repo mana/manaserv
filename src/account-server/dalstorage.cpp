@@ -46,7 +46,8 @@
  * Constructor.
  */
 DALStorage::DALStorage()
-        : mDb(dal::DataProviderFactory::createDataProvider())
+        : mDb(dal::DataProviderFactory::createDataProvider()),
+          mItemDbVersion(0)
 {
 }
 
@@ -88,6 +89,8 @@ void DALStorage::open()
 
         //TODO: check database version here
 
+        // synchronize base data from xml files
+        SyncDatabase();
     }
     catch (const DbConnectionFailure& e) {
         LOG_ERROR("(DALStorage::open #1) Unable to connect to the database: "
@@ -1446,16 +1449,13 @@ void DALStorage::deletePost(Letter* letter)
     }
 }
 
-unsigned int DALStorage::getItemDatabaseVersion(void)
+void DALStorage::SyncDatabase(void)
 {
-    int version;
-
-    // TODO: make data/items.xml a constant or read it from config file
     xmlDocPtr doc = xmlReadFile(DEFAULT_ITEM_FILE, NULL, 0);
     if (!doc)
     {
         LOG_ERROR("Item Manager: Error while parsing item database (items.xml)!");
-        return 0;
+        return;
     }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
@@ -1463,9 +1463,11 @@ unsigned int DALStorage::getItemDatabaseVersion(void)
     {
         LOG_ERROR("Item Manager:(items.xml) is not a valid database file!");
         xmlFreeDoc(doc);
-        return 0;
+        return;
     }
 
+    mDb->beginTransaction();
+    int itmCount = 0;
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
         // Try to load the version of the item database. The version is defined
@@ -1480,16 +1482,66 @@ unsigned int DALStorage::getItemDatabaseVersion(void)
             {
                 LOG_ERROR("Itemdatabase has wrong version format string!");
                 xmlFreeDoc(doc);
-                return 0;
+                continue;
             }
-            // position 11 is the first numeric character in the SVN tag
-            version = atoi(revision.substr(11).c_str());
 
-            LOG_INFO("Loading item database version " << version);
-            xmlFreeDoc(doc);
-            return version;
+            // position 11 is the first numeric character in the SVN tag
+            mItemDbVersion = atoi(revision.substr(11).c_str());
+            LOG_INFO("Loading item database version " << mItemDbVersion);
+        }
+
+        if (!xmlStrEqual(node->name, BAD_CAST "item"))
+        {
+            continue;
+        }
+
+        if (xmlStrEqual(node->name, BAD_CAST "item"))
+        {
+            int id = XML::getProperty(node, "id", 0);
+            if (id < 500)
+            {
+                continue;
+            }
+
+            int weight = XML::getProperty(node, "weight", 0);
+            std::string type = XML::getProperty(node, "type", "");
+            std::string name = XML::getProperty(node, "name", "");
+            std::string desc = XML::getProperty(node, "description", "");
+            std::string eff  = XML::getProperty(node, "effect", "");
+            std::string image = XML::getProperty(node, "image", "");
+
+            try
+            {
+                std::ostringstream sql;
+                sql << "UPDATE " << ITEMS_TBL_NAME
+                    << " SET name = '" << mDb->escapeSQL(name) << "', "
+                    << "     description = '" << mDb->escapeSQL(desc) << "', "
+                    << "     image = '" << image << "', "
+                    << "     weight = " << weight << ", "
+                    << "     itemtype = '" << type << "', "
+                    << "     effect = '" << mDb->escapeSQL(eff) << "', "
+                    << "     dyestring = '' "
+                    << " WHERE id = " << id;
+
+                mDb->execSql(sql.str());
+                if (mDb->getModifiedRows() == 0)
+                {
+                    sql.str("");
+                    sql << "INSERT INTO " << ITEMS_TBL_NAME
+                        << "  VALUES ( " << id << ", '" << name << "', '"
+                        << desc << "', '" << image << "', " << weight << ", '"
+                        << type << "', '" << eff << "', '' )";
+                    mDb->execSql(sql.str());
+                }
+                itmCount++;
+            }
+            catch (dal::DbSqlQueryExecFailure const &e)
+            {
+                LOG_ERROR("(DALStorage::SyncDatabase) SQL query failure: " << e.what());
+            }
         }
     }
+
+    mDb->commitTransaction();
     xmlFreeDoc(doc);
-    return 0;
 }

@@ -22,6 +22,7 @@
 
 
 #include "dataprovider.h"
+#include "../utils/logger.h"
 
 namespace dal
 {
@@ -73,5 +74,20 @@ DataProvider::getDbName(void)
     return mDbName;
 }
 
+
+std::string& DataProvider::escapeSQL(std::string &sql)
+{
+    size_t pos = 0;
+
+    pos = sql.find("'", pos);
+    while (pos != std::string::npos)
+    {
+        sql.replace(pos, 1, "\'\'");
+        pos += 2;
+        pos = sql.find("'", pos);
+    }
+
+    return sql;
+}
 
 } // namespace dal

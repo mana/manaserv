@@ -4,8 +4,10 @@
 	src/account-server/serverhandler.cpp, src/defines.h, 
 	src/game-server/accountconnection.cpp, src/game-server/itemmanager.cpp,
 	src/game-server/itemmanager.hpp: Added version information to item database.
-	Gameserver reports its local version to accountserver and gets notified 
-	if the verion is up-to-date or outdated to prevent inconsistencies.
+	Game server reports its local version to account server and gets notified 
+	if the version is up-to-date or outdated to prevent inconsistencies.
+	Account server initially loads item database on startup and synchronizes
+	tmw_items table in the database.
 
 2008-11-04  David Athay  <ko2fan@gmail.com>
 

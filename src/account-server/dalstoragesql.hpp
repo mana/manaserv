@@ -84,6 +84,11 @@ static char const *CHAR_SKILLS_TBL_NAME = "tmw_char_skills";
 static char const *INVENTORIES_TBL_NAME("tmw_inventories");
 
 /**
+ * TABLE: tmw_items.
+ */
+static char const *ITEMS_TBL_NAME("tmw_items");
+
+/**
  * TABLE: tmw_guilds.
  * Store player guilds
  */

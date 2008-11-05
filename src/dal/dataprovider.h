@@ -180,6 +180,14 @@ class DataProvider
         virtual const unsigned int
         getLastId(void) const = 0;
 
+        /**
+         * Takes a SQL snippet and escapes special caharacters like ' to prevent
+         * SQL injection attacks.
+         *
+         * @param sql SQL Snippet to escape.
+         */
+        std::string& escapeSQL(std::string &sql);
+
     protected:
         std::string mDbName;  /**< the database name */
         bool mIsConnected;    /**< the connection status */
