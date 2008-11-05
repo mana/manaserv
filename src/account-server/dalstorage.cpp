@@ -1509,6 +1509,15 @@ void DALStorage::SyncDatabase(void)
             std::string desc = XML::getProperty(node, "description", "");
             std::string eff  = XML::getProperty(node, "effect", "");
             std::string image = XML::getProperty(node, "image", "");
+            std::string dye("");
+
+            // split image name and dye string
+            size_t pipe = image.find("|");
+            if (pipe != std::string::npos)
+            {
+                dye = image.substr(pipe + 1);
+                image = image.substr(0, pipe);
+            }
 
             try
             {
@@ -1520,7 +1529,7 @@ void DALStorage::SyncDatabase(void)
                     << "     weight = " << weight << ", "
                     << "     itemtype = '" << type << "', "
                     << "     effect = '" << mDb->escapeSQL(eff) << "', "
-                    << "     dyestring = '' "
+                    << "     dyestring = '" << dye << "' "
                     << " WHERE id = " << id;
 
                 mDb->execSql(sql.str());
@@ -1530,7 +1539,7 @@ void DALStorage::SyncDatabase(void)
                     sql << "INSERT INTO " << ITEMS_TBL_NAME
                         << "  VALUES ( " << id << ", '" << name << "', '"
                         << desc << "', '" << image << "', " << weight << ", '"
-                        << type << "', '" << eff << "', '' )";
+                        << type << "', '" << eff << "', '" << dye << "' )";
                     mDb->execSql(sql.str());
                 }
                 itmCount++;
