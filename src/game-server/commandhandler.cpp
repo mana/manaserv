@@ -36,10 +36,6 @@
 
 #include "../utils/string.hpp"
 
-#include <sstream>
-
-
-
 static void say(const std::string error, Character *player)
 {
     GameState::sayTo(player, NULL, error);
@@ -115,7 +111,6 @@ static void handleHelp(Character *player, std::string &args)
 
 static void handleWarp(Character *player, std::string &args)
 {
-    std::stringstream str;
     int x, y;
     MapComposite *map;
     Character *other;
@@ -164,9 +159,7 @@ static void handleWarp(Character *player, std::string &args)
             return;
         }
 
-        str.str(mapstr);
-        str >> id;
-        str.clear();
+        id = utils::stringToInt(mapstr);
 
         // get the map
         map = MapManager::getMap(id);
@@ -190,12 +183,8 @@ static void handleWarp(Character *player, std::string &args)
     }
 
     // change the x and y to integers
-    str.str(xstr);
-    str >> x;
-    str.clear();
-    str.str(ystr);
-    str >> y;
-    str.clear();
+    x = utils::stringToInt(xstr);
+    y = utils::stringToInt(ystr);
 
     // now warp the player
     GameState::warp(other, map, x, y);
@@ -207,7 +196,6 @@ static void handleItem(Character *player, std::string &args)
     ItemClass *ic;
     int value;
     int id;
-    std::stringstream str;
 
     // get arguments
     std::string character = getArgument(args);
@@ -245,9 +233,7 @@ static void handleItem(Character *player, std::string &args)
     }
 
     // put the itemclass id into an integer
-    str.str(itemclass);
-    str >> id;
-    str.clear();
+    id = utils::stringToInt(itemclass);
 
     // check for valid item class
     ic = ItemManager::getItem(id);
@@ -264,9 +250,7 @@ static void handleItem(Character *player, std::string &args)
         return;
     }
 
-    str.str(valuestr);
-    str >> value;
-    str.clear();
+    value = utils::stringToInt(valuestr);
 
     if (value < 0)
     {
@@ -282,7 +266,6 @@ static void handleDrop(Character *player, std::string &args)
 {
     ItemClass *ic;
     int value, id;
-    std::stringstream str;
 
     // get arguments
     std::string itemclass = getArgument(args);
@@ -303,9 +286,7 @@ static void handleDrop(Character *player, std::string &args)
     }
 
     // put the item class id into an integer
-    str.str(itemclass);
-    str >> id;
-    str.clear();
+    id = utils::stringToInt(itemclass);
 
     // check for valid item
     ic = ItemManager::getItem(id);
@@ -316,9 +297,7 @@ static void handleDrop(Character *player, std::string &args)
     }
 
     // put the value into an integer
-    str.str(valuestr);
-    str >> value;
-    str.clear();
+    value = utils::stringToInt(valuestr);
 
     if (value < 0)
     {
@@ -337,7 +316,6 @@ static void handleMoney(Character *player, std::string &args)
 {
     Character *other;
     int value;
-    std::stringstream str;
 
     // get arguments
     std::string character = getArgument(args);
@@ -374,9 +352,7 @@ static void handleMoney(Character *player, std::string &args)
     }
 
     // change value into an integer
-    str.str(valuestr);
-    str >> value;
-    str.clear();
+    value = utils::stringToInt(valuestr);
 
     // change how much money the player has
     Inventory(other).changeMoney(value);
@@ -388,7 +364,6 @@ static void handleSpawn(Character *player, std::string &args)
     MapComposite *map = player->getMap();
     Point const &pos = player->getPosition();
     int value, id;
-    std::stringstream str;
 
     // get the arguments
     std::string monsterclass = getArgument(args);
@@ -409,9 +384,7 @@ static void handleSpawn(Character *player, std::string &args)
     }
 
     // put the monster class id into an integer
-    str.str(monsterclass);
-    str >> id;
-    str.clear();
+    id = utils::stringToInt(monsterclass);
 
     // check for valid monster
     mc = MonsterManager::getMonster(id);
@@ -422,9 +395,7 @@ static void handleSpawn(Character *player, std::string &args)
     }
 
     // put the amount into an integer
-    str.str(valuestr);
-    str >> value;
-    str.clear();
+    value = utils::stringToInt(valuestr);
 
     if (value < 0)
     {
@@ -522,7 +493,6 @@ static void handleBan(Character *player, std::string &args)
 {
     Character *other;
     int length;
-    std::stringstream str;
 
     // get arguments
     std::string character = getArgument(args);
@@ -551,9 +521,7 @@ static void handleBan(Character *player, std::string &args)
     }
 
     // change the length to an integer
-    str.str(valuestr);
-    str >> length;
-    str.clear();
+    length = utils::stringToInt(valuestr);
 
     if (length < 0)
     {
@@ -569,7 +537,6 @@ static void handleLevel(Character *player, std::string &args)
 {
     Character *other;
     int level;
-    std::stringstream str;
 
     // get the arguments
     std::string character = getArgument(args);
@@ -606,9 +573,7 @@ static void handleLevel(Character *player, std::string &args)
     }
 
     // put the amount into an integer
-    str.str(valuestr);
-    str >> level;
-    str.clear();
+    level = utils::stringToInt(valuestr);
 
     if (level < 0)
     {
@@ -624,7 +589,6 @@ static void handleAttribute(Character *player, std::string &args)
 {
     Character *other;
     int attr, value;
-    std::stringstream str;
 
     // get arguments
     std::string character = getArgument(args);
@@ -662,9 +626,7 @@ static void handleAttribute(Character *player, std::string &args)
     }
 
     // put the attribute into an integer
-    str.str(attrstr);
-    str >> attr;
-    str.clear();
+    attr = utils::stringToInt(attrstr);
 
     if (attr < 0)
     {
@@ -673,9 +635,7 @@ static void handleAttribute(Character *player, std::string &args)
     }
 
     // put the value into an integer
-    str.str(valuestr);
-    str >> value;
-    str.clear();
+    value = utils::stringToInt(valuestr);
 
     if (value < 0)
     {

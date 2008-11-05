@@ -1,3 +1,9 @@
+2008-11-06  David Athay  <ko2fan@gmail.com>
+
+	* src/game-server/commandhandler.cpp, src/utils/string.cpp,
+	src/utils/string.hpp: Use a string util for converting strings to
+	integers, as per Bjorns suggestion.
+
 2008-11-05  Dennis Friis  <peavey@placid.dk>
 	* src/game-server/commandhandler.cpp: Fix integer arguments randomly
 	failing due to stream flags not being cleared. To reuse a stream you

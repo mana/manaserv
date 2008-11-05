@@ -23,6 +23,7 @@
 
 #include <cctype>
 #include <algorithm>
+#include <sstream>
 
 std::string utils::toupper(std::string s)
 {
@@ -41,4 +42,15 @@ bool utils::isNumeric(const std::string &s)
     }
 
     return true;
+}
+
+int utils::stringToInt(const std::string &s)
+{
+    int value;
+    std::stringstream str(s);
+
+    // put the string into the int
+    str >> value;
+
+    return value;
 }
