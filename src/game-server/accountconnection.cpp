@@ -30,6 +30,7 @@
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
+#include "game-server/itemmanager.hpp"
 #include "game-server/postman.hpp"
 #include "game-server/quest.hpp"
 #include "game-server/state.hpp"
@@ -64,6 +65,7 @@ bool AccountConnection::start()
     MessageOut msg(GAMSG_REGISTER);
     msg.writeString(gameServerAddress);
     msg.writeShort(gameServerPort);
+    msg.writeLong(ItemManager::GetDatabaseVersion());
     MapManager::Maps const &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
             i != i_end; ++i)
@@ -87,6 +89,21 @@ void AccountConnection::processMessage(MessageIn &msg)
 {
     switch (msg.getId())
     {
+        case AGMSG_REGISTER_RESPONSE:
+        {
+            if (msg.readShort() != DATA_VERSION_OK)
+            {
+                LOG_ERROR("Item database is outdated! Please update to "
+                    "prevent inconsistencies");
+                stop();  // disconnect gracefully from account server
+                exit(1); // stop gameserver to prevent inconsistencies
+            }
+            else
+            {
+                LOG_DEBUG("Local item database is in sync with account server.");
+            }
+        } break;
+
         case AGMSG_PLAYER_ENTER:
         {
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);

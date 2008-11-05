@@ -36,6 +36,11 @@
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
 #include "utils/logger.h"
+#include "utils/xml.hpp"
+
+// TODO: make data/items.xml a constant or read it from config file
+#define DEFAULT_ITEM_FILE       "data/items.xml"
+
 
 /**
  * Constructor.
@@ -1439,4 +1444,52 @@ void DALStorage::deletePost(Letter* letter)
         mDb->rollbackTransaction();
         LOG_ERROR("(DALStorage::deletePost) SQL query failure: " << e.what());
     }
+}
+
+unsigned int DALStorage::getItemDatabaseVersion(void)
+{
+    int version;
+
+    // TODO: make data/items.xml a constant or read it from config file
+    xmlDocPtr doc = xmlReadFile(DEFAULT_ITEM_FILE, NULL, 0);
+    if (!doc)
+    {
+        LOG_ERROR("Item Manager: Error while parsing item database (items.xml)!");
+        return 0;
+    }
+
+    xmlNodePtr node = xmlDocGetRootElement(doc);
+    if (!node || !xmlStrEqual(node->name, BAD_CAST "items"))
+    {
+        LOG_ERROR("Item Manager:(items.xml) is not a valid database file!");
+        xmlFreeDoc(doc);
+        return 0;
+    }
+
+    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    {
+        // Try to load the version of the item database. The version is defined
+        // as subversion tag embedded as XML attribute. So every modification
+        // to the items.xml file will increase the revision automatically.
+        if (xmlStrEqual(node->name, BAD_CAST "version"))
+        {
+            std::string revision = XML::getProperty(node, "revision", std::string());
+            size_t found = revision.find("$Revision: ");
+
+            if (found == std::string::npos)
+            {
+                LOG_ERROR("Itemdatabase has wrong version format string!");
+                xmlFreeDoc(doc);
+                return 0;
+            }
+            // position 11 is the first numeric character in the SVN tag
+            version = atoi(revision.substr(11).c_str());
+
+            LOG_INFO("Loading item database version " << version);
+            xmlFreeDoc(doc);
+            return version;
+        }
+    }
+    xmlFreeDoc(doc);
+    return 0;
 }

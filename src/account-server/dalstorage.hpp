@@ -331,6 +331,13 @@ class DALStorage
          */
         void addAuctionItem(unsigned int itemId, int playerId, unsigned int gold);
 
+        /**
+         * Gets the version of the local item database.
+         *
+         * @return Version of the item database.
+         */
+        unsigned int getItemDatabaseVersion(void);
+
     private:
         /**
          * Copy constructor.

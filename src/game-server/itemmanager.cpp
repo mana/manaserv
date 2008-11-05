@@ -39,7 +39,7 @@
 typedef std::map< int, ItemClass * > ItemClasses;
 static ItemClasses itemClasses; /**< Item reference */
 static std::string itemReferenceFile;
-
+static unsigned int itemDatabaseVersion = 0; /**< Version of the loaded items database file.*/
 
 void ItemManager::initialize(std::string const &file)
 {
@@ -81,6 +81,26 @@ void ItemManager::reload()
     unsigned nbItems = 0;
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
+        // Try to load the version of the item database. The version is defined
+        // as subversion tag embedded as XML attribute. So every modification
+        // to the items.xml file will increase the revision automatically.
+        if (xmlStrEqual(node->name, BAD_CAST "version"))
+        {
+            std::string revision = XML::getProperty(node, "revision", std::string());
+            size_t found = revision.find("$Revision: ");
+
+            if (found==std::string::npos)
+            {
+                LOG_ERROR("Itemdatabase has wrong version format string!");
+                continue;
+            }
+            // position 11 is the first numeric character in the SVN tag
+            itemDatabaseVersion = atoi(revision.substr(11).c_str());
+
+            LOG_INFO("Loading item database version " << itemDatabaseVersion);
+            continue;
+        }
+
         if (!xmlStrEqual(node->name, BAD_CAST "item"))
         {
             continue;
@@ -262,4 +282,9 @@ ItemClass *ItemManager::getItem(int itemId)
 {
     ItemClasses::const_iterator i = itemClasses.find(itemId);
     return i != itemClasses.end() ? i->second : NULL;
+}
+
+unsigned int ItemManager::GetDatabaseVersion(void)
+{
+    return itemDatabaseVersion;
 }

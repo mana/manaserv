@@ -254,8 +254,9 @@ enum {
     GPMSG_GET_POST_RESPONSE         = 0x04A3, // { S sender name, S letter, { W attachment id } }
 
     // Inter-server
-    GAMSG_REGISTER              = 0x0500, // S address, W port, { W map id }*
-    AGMSG_ACTIVE_MAP            = 0x0501, // W map id
+    GAMSG_REGISTER              = 0x0500, // S address, W port, L items db revision, { W map id }*
+    AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version
+    AGMSG_ACTIVE_MAP            = 0x0502, // W map id
     AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, L id, S name, serialised character data
     GAMSG_PLAYER_DATA           = 0x0520, // L id, serialised character data
     GAMSG_REDIRECT              = 0x0530, // L id
@@ -291,6 +292,12 @@ enum {
     ERRMSG_SERVER_FULL,                 // the server is overloaded
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
     ERRMSG_TOO_MANY_ATTACHMENTS         // too many attachments in letter
+};
+
+// used in AGMSG_REGISTER_RESPONSE to show state of item db
+enum {
+    DATA_VERSION_OK       = 0x00,
+    DATA_VERSION_OUTDATED = 0x01
 };
 
 // Login specific return values

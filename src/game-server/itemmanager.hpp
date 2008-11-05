@@ -30,6 +30,8 @@ class ItemClass;
 
 namespace ItemManager
 {
+
+
     /**
      * Loads item reference file.
      */
@@ -49,6 +51,11 @@ namespace ItemManager
      * Gets the ItemClass having the given ID.
      */
     ItemClass *getItem(int itemId);
+
+    /**
+     * Gets the version of the loaded item database.
+     */
+    unsigned int GetDatabaseVersion(void);
 }
 
 #endif

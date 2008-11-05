@@ -177,6 +177,26 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             // TODO: check the credentials of the game server
             server->address = msg.readString();
             server->port = msg.readShort();
+
+            // checks the version of the remote item database with our local copy
+            unsigned int dbversion = msg.readLong();
+            LOG_INFO("Game server uses itemsdatabase with version " << dbversion);
+
+            LOG_DEBUG("AGMSG_REGISTER_RESPONSE");
+            MessageOut outMsg(AGMSG_REGISTER_RESPONSE);
+            if (dbversion == storage->getItemDatabaseVersion())
+            {
+                LOG_DEBUG("Item databases between account server and "
+                    "gameserver are in sync");
+                outMsg.writeShort(DATA_VERSION_OK);
+            }
+            else
+            {
+                LOG_DEBUG("Item database of game server has a wrong version");
+                outMsg.writeShort(DATA_VERSION_OUTDATED);
+            }
+            comp->send(outMsg);
+
             LOG_INFO("Game server " << server->address << ':' << server->port
                      << " wants to register " << (msg.getUnreadLength() / 2)
                      << " maps.");

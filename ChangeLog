@@ -1,3 +1,12 @@
+2008-11-05  Andreas Habel  <mail@exceptionfault.de>
+
+	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
+	src/account-server/serverhandler.cpp, src/defines.h, 
+	src/game-server/accountconnection.cpp, src/game-server/itemmanager.cpp,
+	src/game-server/itemmanager.hpp: Added version information to item database.
+	Gameserver reports its local version to accountserver and gets notified 
+	if the verion is up-to-date or outdated to prevent inconsistencies.
+
 2008-11-04  David Athay  <ko2fan@gmail.com>
 
 	*  src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
