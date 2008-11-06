@@ -173,12 +173,9 @@ void AccountConnection::processMessage(MessageIn &msg)
                 break;
             }
 
-            // create message and put error inside
-            MessageOut out(GPMSG_SEND_POST_RESPONSE);
-            out.writeByte(msg.readByte());
+            // TODO: Get NPC to tell character if the sending of post
+            // was successful or not
 
-            // send message to character
-            gameHandler->sendTo(character, out);
         } break;
 
         default:
@@ -268,13 +265,13 @@ void AccountConnection::sendStatistics()
 void AccountConnection::sendPost(Character *c, MessageIn &msg)
 {
     // send message to account server with id of sending player,
-    // the id of receiving player, the letter contents, and attachments
+    // the id of receiving player, the letter receiver and contents, and attachments
     LOG_DEBUG("Sending GCMSG_STORE_POST.");
     MessageOut out(GCMSG_STORE_POST);
     out.writeLong(c->getDatabaseID());
-    out.writeString(msg.readString());
-    out.writeString(msg.readString());
-    while (msg.getUnreadLength())
+    out.writeString(msg.readString()); // name of receiver
+    out.writeString(msg.readString()); // content of letter
+    while (msg.getUnreadLength()) // attachments
     {
         // write the item id and amount for each attachment
         out.writeLong(msg.readShort());

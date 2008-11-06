@@ -462,7 +462,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             computer.character->respawn(); // plausibility check is done by character class
         } break;
 
-        case PGMSG_SEND_POST:
+        case PGMSG_NPC_POST_SEND:
         {
             handleSendPost(&computer, message);
         } break;

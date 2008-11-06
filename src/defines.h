@@ -178,6 +178,9 @@ enum {
     GPMSG_NPC_SELL                 = 0x02B6, // W being id, { W item id, W amount, W cost }*
     PGMSG_NPC_BUYSELL              = 0x02B7, // W item id, W amount
     GPMSG_NPC_ERROR                = 0x02B8, // B error
+    GPMSG_NPC_POST                 = 0x02D0, // W being id
+    PGMSG_NPC_POST_SEND            = 0x02D1, // W being id, { S name, S text, W item id }
+    GPMSG_NPC_POST_GET             = 0x02D2, // W being id, S name, S text, W item id
     PGMSG_TRADE_REQUEST            = 0x02C0, // W being id
     GPMSG_TRADE_REQUEST            = 0x02C1, // W being id
     GPMSG_TRADE_START              = 0x02C2, // -
@@ -246,12 +249,6 @@ enum {
     // -- User modes
     PCMSG_USER_MODE                   = 0x0465, // W channel id, S name, B mode
     PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
-
-    // Post
-    PGMSG_SEND_POST                 = 0x04A0, // S player, S letter, { W attachment id }
-    GPMSG_SEND_POST_RESPONSE        = 0x04A1, // B error
-    PGMSG_GET_POST                  = 0x04A2, //
-    GPMSG_GET_POST_RESPONSE         = 0x04A3, // { S sender name, S letter, { W attachment id } }
 
     // Inter-server
     GAMSG_REGISTER              = 0x0500, // S address, W port, L items db revision, { W map id }*

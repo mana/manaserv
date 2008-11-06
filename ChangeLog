@@ -1,3 +1,8 @@
+2008-11-06  David Athay  <ko2fan@gmail.com>
+
+	* src/scripting/lua.cpp, src/defines.h, src/game-server/gamehandler.cpp,
+	src/game-server/accountconnection.cpp: Added sending post via NPC.
+
 2008-11-02  Philipp Sehmisch  <tmw@crushnet.org>
 
 	* src/scripting/lua.cpp: Added convenience wrappers for converting

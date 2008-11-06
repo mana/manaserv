@@ -314,6 +314,28 @@ static int LuaNpc_Create(lua_State *s)
 }
 
 /**
+ * Callback for sending a NPC_POST.
+ * tmw.npc_post(npc, character)
+ */
+static int LuaNPC_Post(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+
+    if (!p || !q)
+    {
+        raiseScriptError(s, "npc_Choice called with incorrect parameters.");
+        return 0;
+    }
+
+    MessageOut msg(GPMSG_NPC_POST);
+    msg.writeShort(p->getPublicID());
+    gameHandler->sendTo(q, msg);
+
+    return 0;
+}
+
+/**
  * Enable a NPC if it has previously disabled
  * tmw.npc_enable(npc)
  */
@@ -1126,6 +1148,7 @@ LuaScript::LuaScript():
         { "npc_message",            &LuaNpc_Message       },
         { "npc_choice",             &LuaNpc_Choice        },
         { "npc_trade",              &LuaNpc_Trade         },
+        { "npc_post",               &LuaNPC_Post          },
         { "npc_enable",             &LuaNPC_Enable        },
         { "npc_disable",            &LuaNPC_Disable       },
         { "chr_warp",               &LuaChr_Warp          },
