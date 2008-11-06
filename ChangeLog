@@ -1,3 +1,11 @@
+2008-11-02  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/scripting/lua.cpp: Added convenience wrappers for converting
+	STL lists, vectors, maps and sets to lua tables.
+	* data/scripts/test.lua: Added a dialog option to test npc which
+	retreives some stl containers from the c++ part and prints them to
+	the server console.
+
 2008-11-06  David Athay  <ko2fan@gmail.com>
 
 	* src/game-server/commandhandler.cpp, src/utils/string.cpp,

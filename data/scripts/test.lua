@@ -57,7 +57,8 @@ function npc1_talk(npc, ch)
                                "To buy.",
                                "To sell.",
                                "To make a donation.",
-                               "Slowly count from one to ten.")
+                               "Slowly count from one to ten.",
+                               "Tablepush Test")
   if v == 1 then
     do_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
   elseif v == 2 then
@@ -98,6 +99,29 @@ function npc1_talk(npc, ch)
     schedule_in(16, function() tmw.being_say(npc, "Eight") end)
     schedule_in(18, function() tmw.being_say(npc, "Nine") end)
     schedule_in(20, function() tmw.being_say(npc, "Ten") end)
+  elseif v == 7 then
+    local t1, t2, t3, t4 = tmw.test_tableget();
+    print("---------------");
+    print ("Table 1:"); 
+    for k,v in pairs(t1) do
+      print (k, ":", v)
+    end
+    
+    print ("Table 2:"); 
+    for k,v in pairs(t2) do
+      print (k, ":", v)
+    end
+    
+    print ("Table 3:"); 
+    for k,v in pairs(t3) do
+      print (k, ":", v)
+    end
+    
+    print ("Table 4:"); 
+    for k,v in pairs(t4) do
+      print (k, ":", v)
+    end
+    print("---------------");
   end
 end
 

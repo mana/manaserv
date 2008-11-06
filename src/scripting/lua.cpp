@@ -22,6 +22,10 @@
  */
 
 #include <cassert>
+#include <list>
+#include <map>
+#include <set>
+#include <vector>
 
 extern "C" {
 #include <lualib.h>
@@ -137,6 +141,94 @@ static Being *getBeing(lua_State *s, int p)
     if (!lua_islightuserdata(s, p)) return NULL;
     Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
     return static_cast<Being *>(t);
+}
+
+/* Polymorphic wrapper for pushing variables.
+   Useful for templates.*/
+void push(lua_State *s, int val)
+{
+    lua_pushinteger(s, val);
+}
+void push(lua_State *s, const std::string &val)
+{
+    lua_pushstring(s, val.c_str());
+}
+void push(lua_State *s, Thing* val)
+{
+    lua_pushlightuserdata(s, val);
+}
+void push(lua_State *s, double val)
+{
+    lua_pushnumber(s, val);
+}
+
+/*  Pushes an STL LIST */
+template <typename T> void pushSTLContainer(lua_State *s, const std::list<T> &container)
+{
+    int len = container.size();
+    lua_newtable(s);
+    int table = lua_gettop(s);
+    typename std::list<T>::const_iterator i;
+    i = container.begin();
+
+    for (int key = 1; key <= len; key++)
+    {
+        push(s, key);
+        push(s, *i);
+        lua_settable(s, table);
+        i++;
+    }
+}
+
+/*  Pushes an STL VECTOR */
+template <typename T> void pushSTLContainer(lua_State *s, const std::vector<T> &container)
+{
+    int len = container.size();
+    lua_createtable(s, 0, len);
+    int table = lua_gettop(s);
+
+    for (int key = 0; key < len; key++)
+    {
+        push(s, key+1);
+        push(s, container.at(key).c_str());
+        lua_settable(s, table);
+    }
+}
+
+/*  Pushes an STL MAP */
+template <typename Tkey, typename Tval> void pushSTLContainer(lua_State *s, const std::map<Tkey, Tval> &container)
+{
+    int len = container.size();
+    lua_createtable(s, 0, len);
+    int table = lua_gettop(s);
+    typename std::map<Tkey, Tval>::const_iterator i;
+    i = container.begin();
+
+    for (int key = 1; key <= len; key++)
+    {
+        push(s, i->first.c_str());
+        push(s, i->second.c_str());
+        lua_settable(s, table);
+        i++;
+    }
+}
+
+/*  Pushes an STL SET */
+template <typename T> void pushSTLContainer(lua_State *s, const std::set<T> &container)
+{
+    int len = container.size();
+    lua_newtable(s);
+    int table = lua_gettop(s);
+    typename std::set<T>::const_iterator i;
+    i = container.begin();
+
+    for (int key = 1; key <= len; key++)
+    {
+        push(s, key);
+        push(s, *i);
+        lua_settable(s, table);
+        i++;
+    }
 }
 
 /**
@@ -973,6 +1065,54 @@ static int LuaExpForLevel(lua_State *s)
     return 1;
 }
 
+/**
+ * Returns four useless tables for testing the STL container push wrappers.
+ * This function can be removed when there are more useful functions which use
+ * them.
+ */
+static int LuaTest_Tableget(lua_State *s)
+{
+
+    std::list<float> list;
+    std::vector<std::string> vector;
+    std::map<std::string, std::string> map;
+    std::set<int> set;
+
+    LOG_INFO("Pushing List");
+    list.push_back(12.636);
+    list.push_back(0.0000000045656);
+    list.push_back(185645445634566.346);
+    list.push_back(7835458.11);
+    pushSTLContainer<float>(s, list);
+
+    LOG_INFO("Pushing Vector");
+    vector.push_back("All");
+    vector.push_back("your");
+    vector.push_back("base");
+    vector.push_back("are");
+    vector.push_back("belong");
+    vector.push_back("to");
+    vector.push_back("us!");
+    pushSTLContainer<std::string>(s, vector);
+
+    LOG_INFO("Pushing Map");
+    map["Apple"] = "red";
+    map["Banana"] = "yellow";
+    map["Lime"] = "green";
+    map["Plum"] = "blue";
+    pushSTLContainer<std::string, std::string>(s, map);
+
+    LOG_INFO("Pushing Set");
+    set.insert(12);
+    set.insert(8);
+    set.insert(14);
+    set.insert(10);
+    pushSTLContainer<int>(s, set);
+
+
+    return 4;
+}
+
 
 LuaScript::LuaScript():
     nbArgs(-1)
@@ -1010,6 +1150,7 @@ LuaScript::LuaScript():
         { "get_beings_in_circle",   &LuaGetBeingsInCircle },
         { "note_on_death",          &LuaNoteOnDeath       },
         { "effect_create",          &LuaEffect_Create     },
+        { "test_tableget",          &LuaTest_Tableget     },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
@@ -1048,7 +1189,6 @@ void LuaScript::push(std::string const &v)
     lua_pushstring(mState, v.c_str());
     ++nbArgs;
 }
-
 
 void LuaScript::push(Thing *v)
 {
