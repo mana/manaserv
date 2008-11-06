@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `tmw_accounts` (
     PRIMARY KEY  (`id`),
     UNIQUE KEY `username` (`username`),
     UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB 
+) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
@@ -50,17 +50,16 @@ CREATE TABLE IF NOT EXISTS `tmw_characters` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`name`),
     KEY `user_id` (`user_id`),
-    FOREIGN KEY (`user_id`) 
+    FOREIGN KEY (`user_id`)
     	REFERENCES `tmw_accounts` (`id`)
-    	ON DELETE CASCADE 
+    	ON DELETE CASCADE
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8 
+DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_inventories`
+-- table: `tmw_char_skills`
 --
-
 CREATE TABLE IF NOT EXISTS `tmw_char_skills` (
     `char_id`      int(10)      unsigned NOT NULL,
     `skill_id`     smallint(5)  unsigned NOT NULL,
@@ -89,13 +88,45 @@ CREATE TABLE IF NOT EXISTS `tmw_items` (
     PRIMARY KEY (`id`),
     KEY `itemtype` (`itemtype`)
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8 
+DEFAULT CHARSET=utf8
+AUTO_INCREMENT=1 ;
+
+--
+-- table: `tmw_item_instances`
+--
+CREATE TABLE IF NOT EXISTS `tmw_item_instances` (
+    `item_id`      int(10)      unsigned NOT NULL auto_increment,
+    `itemclass_id` int(10)      unsigned NOT NULL,
+    `amount`       tinyint(3)   unsigned NOT NULL,
+    --
+    PRIMARY KEY (`item_id`),
+    FOREIGN KEY (`itemclass_id`)
+        REFERENCES `tmw_items` (`id`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+AUTO_INCREMENT=1 ;
+
+--
+-- table: `tmw_item_attributes`
+--
+CREATE TABLE IF NOT EXISTS `tmw_item_attributes` (
+    `attribute_id`    int(10)      unsigned NOT NULL auto_increment,
+    `item_id`         int(10)      unsigned NOT NULL,
+    `attribute_class` tinyint(3)   unsigned NOT NULL,
+    `attribute_value` varchar(500)              NULL,
+    --
+    PRIMARY KEY (`attribute_id`),
+    FOREIGN KEY (`item_id`)
+        REFERENCES `tmw_item_instances` (`item_id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
 -- table: `tmw_inventories`
+-- todo: remove class_id and amount and reference on tmw_item_instances
 --
-
 CREATE TABLE IF NOT EXISTS `tmw_inventories` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `owner_id`     int(10)      unsigned NOT NULL,
@@ -107,15 +138,14 @@ CREATE TABLE IF NOT EXISTS `tmw_inventories` (
     UNIQUE KEY `owner_id` (`owner_id`, `slot`),
     FOREIGN KEY (`owner_id`)
     	REFERENCES `tmw_characters` (`id`)
-    	ON DELETE CASCADE 
+    	ON DELETE CASCADE
 ) ENGINE=InnoDB
-DEFAULT CHARSET=utf8 
+DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
 -- table: `tmw_world_states`
 --
-
 CREATE TABLE IF NOT EXISTS `tmw_world_states` (
     `state_name`   varchar(100)          NOT NULL,
     `map_id`       int(10)      unsigned default NULL,
@@ -129,7 +159,6 @@ DEFAULT CHARSET=utf8;
 --
 -- table: `tmw_guilds`
 --
-
 CREATE TABLE IF NOT EXISTS `tmw_guilds` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `name`         varchar(35)           NOT NULL,
@@ -143,7 +172,6 @@ AUTO_INCREMENT=1 ;
 --
 -- table: `tmw_guild_members`
 --
-
 CREATE TABLE IF NOT EXISTS `tmw_guild_members` (
 	`guild_id`     int(10)      unsigned NOT NULL,
 	`member_id`    int(10)      unsigned NOT NULL,
@@ -241,13 +269,11 @@ CREATE TABLE IF NOT EXISTS `tmw_post` (
 	INDEX `fk_letter_sender` (`sender_id` ASC) ,
 	INDEX `fk_letter_receiver` (`receiver_id` ASC) ,
 	--
-	CONSTRAINT `fk_letter_sender`
-		FOREIGN KEY (`sender_id` )
+	FOREIGN KEY (`sender_id` )
 		REFERENCES `tmw_characters` (`id`)
 		ON DELETE CASCADE,
-	CONSTRAINT `fk_letter_receiver`
-		FOREIGN KEY (`receiver_id` )
-		REFERENCES `tmw_characters` (`id` )
+    FOREIGN KEY (`receiver_id` )
+		REFERENCES `tmw_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE = InnoDB
 DEFAULT CHARSET=utf8
@@ -256,7 +282,6 @@ AUTO_INCREMENT=1 ;
 --
 -- table: `tmw_post_attachements`
 --
-
 CREATE TABLE IF NOT EXISTS `tmw_post_attachments` (
 	`attachment_id`    int(10)      unsigned  NOT NULL auto_increment,
 	`letter_id`        int(10)      unsigned  NOT NULL,
@@ -266,13 +291,11 @@ CREATE TABLE IF NOT EXISTS `tmw_post_attachments` (
 	INDEX `fk_attachment_letter` (`letter_id` ASC) ,
 	INDEX `fk_attachment_item` (`item_id` ASC),
 	--
-	CONSTRAINT `fk_attachment_letter`
-		FOREIGN KEY (`letter_id` )
-		REFERENCES `mydb`.`tmw_post` (`letter_id` )
+	FOREIGN KEY (`letter_id` )
+		REFERENCES `tmw_post` (`letter_id`)
 		ON DELETE CASCADE,
-	CONSTRAINT `fk_attachment_item`
-		FOREIGN KEY (`item_id` )
-		REFERENCES `mydb`.`tmw_item_instances` (`item_id` )
+	FOREIGN KEY (`item_id` )
+		REFERENCES `tmw_item_instances` (`item_id`)
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 DEFAULT CHARSET=utf8
