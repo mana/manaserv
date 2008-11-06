@@ -71,6 +71,14 @@ function do_choice(npc, ch, ...)
   return coroutine.yield(2)
 end
 
+-- Sends an NPC request to send letter to a player and waits for them to 
+-- send the letter.
+function do_post(npc, ch)
+  coroutine.yield(0)
+  tmw.npc_post(npc, ch)
+  return coroutine.yield(1)
+end
+
 -- Gets the value of a quest variable.
 -- Calling this function while an acknowledment is pending is desirable, so
 -- that lag cannot be perceived by the player.
@@ -178,6 +186,14 @@ end
 function npc_choose(npc, ch, u)
   local w = states[ch]
   if not (w and w[1] == npc and w[3] == 2 and process_npc(w, u)) then
+    states[ch] = nil
+  end
+end
+
+-- Called by the game when a player sends a letter.
+function npc_post(npc, ch, sender, letter)
+  local w = states[ch]
+  if not (w and w[1] == npc and w[3] == 1 and process_npc(w, sender, letter)) then
     states[ch] = nil
   end
 end
