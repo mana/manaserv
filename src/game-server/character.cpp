@@ -148,10 +148,12 @@ void Character::useSpecial(int id)
     //TODO: check if the character is allowed to use it right now
 
     Script *s = getMap()->getScript();
-    s->prepare("cast");
-    s->push(this);
-    s->push(id);
-    s->execute();
+    if (s) {
+        s->prepare("cast");
+        s->push(this);
+        s->push(id);
+        s->execute();
+    }
 
     return;
 }

@@ -1,6 +1,12 @@
+2008-11-09  Bjørn Lindeijer  <bjorn@lindeijer.nl>
+
+	* src/game-server/character.cpp: Fixed crash when a script can't be
+	found.
+
 2008-11-06  David Athay  <ko2fan@gmail.com>
 
-	* src/scripting/lua.cpp, src/defines.h, src/game-server/gamehandler.cpp,
+	* src/scripting/lua.cpp, src/defines.h,
+	src/game-server/gamehandler.cpp,
 	src/game-server/accountconnection.cpp: Added sending post via NPC.
 
 2008-11-02  Philipp Sehmisch  <tmw@crushnet.org>
@@ -18,25 +24,28 @@
 	integers, as per Bjorns suggestion.
 
 2008-11-05  Dennis Friis  <peavey@placid.dk>
+
 	* src/game-server/commandhandler.cpp: Fix integer arguments randomly
 	failing due to stream flags not being cleared. To reuse a stream you
 	must do stream.clear(); stream.str(string); for it to work.
 
 2008-11-05  Andreas Habel  <mail@exceptionfault.de>
 
-	* src/account-server/dalstorage.cpp, src/account-server/dalstorage.hpp,
-	src/account-server/serverhandler.cpp, src/defines.h, 
-	src/game-server/accountconnection.cpp, src/game-server/itemmanager.cpp,
-	src/game-server/itemmanager.hpp: Added version information to item database.
-	Game server reports its local version to account server and gets notified 
-	if the version is up-to-date or outdated to prevent inconsistencies.
-	Account server initially loads item database on startup and synchronizes
-	tmw_items table in the database.
+	* src/account-server/dalstorage.cpp,
+	src/account-server/dalstorage.hpp,
+	src/account-server/serverhandler.cpp, src/defines.h,
+	src/game-server/accountconnection.cpp,
+	src/game-server/itemmanager.cpp, src/game-server/itemmanager.hpp:
+	Added version information to item database. Game server reports its
+	local version to account server and gets notified if the version is
+	up-to-date or outdated to prevent inconsistencies. Account server
+	initially loads item database on startup and synchronizes tmw_items
+	table in the database.
 
 2008-11-04  David Athay  <ko2fan@gmail.com>
 
 	*  src/chat-server/chathandler.cpp, src/chat-server/chathandler.hpp,
-	src/defines.h: Added notifying party members when a player joins or 
+	src/defines.h: Added notifying party members when a player joins or
 	quits.
 	* src/game-server/state.cpp, src/game-server/being.cpp,
 	src/game-server/character.hpp, src/game-server/object.hpp: Added
@@ -70,18 +79,18 @@
 
 2008-11-01  Philipp Sehmisch  <tmw@crushnet.org>
 
-	* src/game-server/character.hpp, src/game-server/scripting/lua.cpp: Added
-	script bindings for manipulating the characters experience.
-	* src/game-server/character.cpp: Catched a potential integer underflow in
-	experience calculation.
+	* src/game-server/character.hpp, src/game-server/scripting/lua.cpp:
+	Added script bindings for manipulating the characters experience.
+	* src/game-server/character.cpp: Catched a potential integer underflow
+	in experience calculation.
 	* data/scripts/lib/test.lua: added constants for character skills.
-	* data/scripts/test.lua: Added example script for manipulating character
-	experience.
+	* data/scripts/test.lua: Added example script for manipulating
+	character experience.
 	* src/game-server/character.cpp, src/game-server/character.hpp,
-	src/game-server/gamehandler.cpp, src/defines.h: Implemented basic netcode
-	for using special actions like magic. Currently triggers a function in
-	libtmw.lua which makes the caster speak some text (magic system
-	implementation phase 1 and 2)
+	src/game-server/gamehandler.cpp, src/defines.h: Implemented basic
+	netcode for using special actions like magic. Currently triggers a
+	function in libtmw.lua which makes the caster speak some text (magic
+	system implementation phase 1 and 2)
 
 2008-10-31  David Athay  <ko2fan@gmail.com>
 
