@@ -87,15 +87,7 @@ void ItemManager::reload()
         if (xmlStrEqual(node->name, BAD_CAST "version"))
         {
             std::string revision = XML::getProperty(node, "revision", std::string());
-            size_t found = revision.find("$Revision: ");
-
-            if (found==std::string::npos)
-            {
-                LOG_ERROR("Itemdatabase has wrong version format string!");
-                continue;
-            }
-            // position 11 is the first numeric character in the SVN tag
-            itemDatabaseVersion = atoi(revision.substr(11).c_str());
+            itemDatabaseVersion = atoi(revision.c_str());
 
             LOG_INFO("Loading item database version " << itemDatabaseVersion);
             continue;

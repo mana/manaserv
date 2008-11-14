@@ -156,6 +156,10 @@ CREATE TABLE IF NOT EXISTS `tmw_world_states` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
+INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL,1226042339);
+INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL,1226042339);
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'1', 1226042339);
+
 --
 -- table: `tmw_guilds`
 --

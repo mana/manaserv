@@ -17,7 +17,7 @@
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- *  $Id$
+ *  $Id: dalstorage.cpp 4924 2008-11-05 16:36:36Z Exceptionfault $
  */
 
 #include <cassert>
@@ -40,6 +40,11 @@
 
 // TODO: make data/items.xml a constant or read it from config file
 #define DEFAULT_ITEM_FILE       "data/items.xml"
+
+// defines the supported db version
+#define DB_VERSION_PARAMETER "database_version"
+#define SUPPORTED_DB_VERSION "1"
+
 
 
 /**
@@ -87,7 +92,17 @@ void DALStorage::open()
         // open a connection to the database.
         mDb->connect();
 
-        //TODO: check database version here
+        //check database version here
+        std::string dbversion = getWorldStateVar(DB_VERSION_PARAMETER);
+        if (dbversion != SUPPORTED_DB_VERSION)
+        {
+            std::ostringstream errmsg;
+            errmsg << "Database version is not supported. " <<
+                "Needed version: " << SUPPORTED_DB_VERSION << ", current version: " <<
+                dbversion;
+            LOG_ERROR(errmsg.str());
+            throw errmsg.str();
+        }
 
         // synchronize base data from xml files
         SyncDatabase();
@@ -1484,17 +1499,7 @@ void DALStorage::SyncDatabase(void)
         if (xmlStrEqual(node->name, BAD_CAST "version"))
         {
             std::string revision = XML::getProperty(node, "revision", std::string());
-            size_t found = revision.find("$Revision: ");
-
-            if (found == std::string::npos)
-            {
-                LOG_ERROR("Itemdatabase has wrong version format string!");
-                xmlFreeDoc(doc);
-                continue;
-            }
-
-            // position 11 is the first numeric character in the SVN tag
-            mItemDbVersion = atoi(revision.substr(11).c_str());
+            mItemDbVersion = atoi(revision.c_str());
             LOG_INFO("Loading item database version " << mItemDbVersion);
         }
 

@@ -140,8 +140,9 @@ CREATE TABLE tmw_world_states
    moddate      INTEGER     NOT NULL
 );
 
-INSERT INTO "tmw_world_states" VALUES('accountserver_startup',NULL,NULL,1221633910);
-INSERT INTO "tmw_world_states" VALUES('accountserver_version',NULL,NULL,1221633910);
+INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL,1226042339);
+INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL,1226042339);
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'1', 1226042339);
 
 CREATE TABLE tmw_auctions
 (
