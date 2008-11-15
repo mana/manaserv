@@ -46,7 +46,6 @@
 #define SUPPORTED_DB_VERSION "1"
 
 
-
 /**
  * Constructor.
  */
@@ -55,7 +54,6 @@ DALStorage::DALStorage()
           mItemDbVersion(0)
 {
 }
-
 
 /**
  * Destructor.
@@ -67,7 +65,6 @@ DALStorage::~DALStorage()
     }
     delete mDb;
 }
-
 
 /**
  * Connect to the database and initialize it if necessary.
@@ -92,15 +89,14 @@ void DALStorage::open()
         // open a connection to the database.
         mDb->connect();
 
-        //check database version here
+        // check database version here
         std::string dbversion = getWorldStateVar(DB_VERSION_PARAMETER);
         if (dbversion != SUPPORTED_DB_VERSION)
         {
             std::ostringstream errmsg;
             errmsg << "Database version is not supported. " <<
-                "Needed version: " << SUPPORTED_DB_VERSION << ", current version: " <<
-                dbversion;
-            LOG_ERROR(errmsg.str());
+                "Needed version: '" << SUPPORTED_DB_VERSION <<
+                "', current version: '" << dbversion << "'";
             throw errmsg.str();
         }
 
@@ -108,11 +104,12 @@ void DALStorage::open()
         SyncDatabase();
     }
     catch (const DbConnectionFailure& e) {
-        LOG_ERROR("(DALStorage::open #1) Unable to connect to the database: "
-                     << e.what());
+        std::ostringstream errmsg;
+        errmsg << "(DALStorage::open #1) Unable to connect to the database: "
+            << e.what();
+        throw errmsg.str();
     }
 }
-
 
 /**
  * Disconnect from the database.
@@ -121,7 +118,6 @@ void DALStorage::close()
 {
     mDb->disconnect();
 }
-
 
 Account *DALStorage::getAccountBySQL(std::string const &query)
 {
@@ -204,7 +200,6 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
     }
 }
 
-
 /**
  * Get an account by user name.
  */
@@ -215,7 +210,6 @@ Account *DALStorage::getAccount(std::string const &userName)
     return getAccountBySQL(sql.str());
 }
 
-
 /**
  * Get an account by ID.
  */
@@ -225,7 +219,6 @@ Account *DALStorage::getAccount(int accountID)
     sql << "select * from " << ACCOUNTS_TBL_NAME << " where id = '" << accountID << "';";
     return getAccountBySQL(sql.str());
 }
-
 
 Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owner)
 {
@@ -369,7 +362,6 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
     return character;
 }
 
-
 /**
  * Gets a character by database ID.
  */
@@ -386,6 +378,7 @@ Character *DALStorage::getCharacter(const std::string &name)
     sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '" << name << "';";
     return getCharacterBySQL(sql.str(), NULL);
 }
+
 #if 0
 /**
  * Return the list of all Emails addresses.
@@ -868,7 +861,6 @@ void DALStorage::flush(Account *account)
     }
 }
 
-
 /**
  * Delete an account and its associated data from the database.
  */
@@ -1040,7 +1032,7 @@ std::list<Guild*> DALStorage::getGuildList()
             std::list<std::pair<int, int> > members;
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
-	      members.push_back(std::pair<int, int>(toUint(memberInfo(j, 0)), toUint(memberInfo(j, 1))));
+                members.push_back(std::pair<int, int>(toUint(memberInfo(j, 0)), toUint(memberInfo(j, 1))));
             }
 
             for (std::list<std::pair<int, int> >::const_iterator i = members.begin();

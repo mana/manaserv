@@ -143,10 +143,14 @@ static void initialize()
     LOG_INFO("Using Config File: " << configPath);
     LOG_INFO("Using Log File: " << logPath);
 
-    // Open database.
-    storage = new DALStorage;
-    storage->open();
-
+    // Open database
+    try {
+        storage = new DALStorage;
+        storage->open();
+    } catch (std::string &error) {
+        LOG_FATAL("Error opening the database: " << error);
+        exit(1);
+    }
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
