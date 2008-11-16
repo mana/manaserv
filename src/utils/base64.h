@@ -26,7 +26,6 @@
    | Author: Jim Winstead (jimw@php.net)                                  |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #ifndef _TMW_BASE64_H
 #define _TMW_BASE64_H
