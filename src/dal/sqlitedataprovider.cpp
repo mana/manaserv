@@ -111,7 +111,7 @@ SqLiteDataProvider::connect()
     mDbName = dbName;
 
     mIsConnected = true;
-    LOG_INFO("Connection to database sucessfull.");
+    LOG_INFO("Connection to database successful.");
 }
 
 
