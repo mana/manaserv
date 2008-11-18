@@ -149,7 +149,7 @@ AUTO_INCREMENT=1 ;
 CREATE TABLE IF NOT EXISTS `tmw_world_states` (
     `state_name`   varchar(100)          NOT NULL,
     `map_id`       int(10)      unsigned default NULL,
-    `value`        varchar(255)          NOT NULL,
+    `value`        varchar(255)          default NULL,
     `moddate`      int(10)      unsigned NOT NULL,
     --
     KEY `state_name` (`state_name`)
