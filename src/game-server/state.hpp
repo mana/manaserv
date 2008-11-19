@@ -34,7 +34,7 @@ namespace GameState
     /**
      * Updates game state (contains core server logic).
      */
-    void update();
+    void update(int worldTime);
 
     /**
      * Inserts an object in the game world.

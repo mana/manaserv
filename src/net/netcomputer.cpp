@@ -23,15 +23,19 @@
 #include <queue>
 #include <enet/enet.h>
 
-#include "defines.h"
-#include "net/messageout.hpp"
-#include "net/netcomputer.hpp"
-#include "utils/logger.h"
-#include "utils/processorutils.hpp"
+#include "bandwidth.hpp"
+#include "messageout.hpp"
+#include "netcomputer.hpp"
+
+#include "../defines.h"
+
+#include "../utils/logger.h"
+#include "../utils/processorutils.hpp"
 
 NetComputer::NetComputer(ENetPeer *peer):
     mPeer(peer)
 {
+    mBandwidth = new BandwidthMonitor;
 }
 
 bool
@@ -64,6 +68,8 @@ NetComputer::send(const MessageOut &msg, bool reliable,
 {
     LOG_DEBUG("Sending message " << msg << " to " << *this);
 
+    mBandwidth->increaseOutput(msg.getLength());
+
     ENetPacket *packet;
     packet = enet_packet_create(msg.getData(),
                                 msg.getLength(),
@@ -77,6 +83,30 @@ NetComputer::send(const MessageOut &msg, bool reliable,
     {
         LOG_ERROR("Failure to create packet!");
     }
+}
+
+int
+NetComputer::totalOut()
+{
+    return mBandwidth->totalOut();
+}
+
+int
+NetComputer::totalIn()
+{
+    return mBandwidth->totalIn();
+}
+
+void
+NetComputer::increaseIn(int size)
+{
+    mBandwidth->increaseInput(size);
+}
+
+void
+NetComputer::reset()
+{
+    mBandwidth->reset();
 }
 
 std::ostream&

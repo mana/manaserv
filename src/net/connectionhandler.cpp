@@ -104,6 +104,8 @@ void ConnectionHandler::process(enet_uint32 timeout)
                     LOG_DEBUG("Received message " << msg << " from "
                               << *comp);
 
+                    comp->increaseIn(event.packet->dataLength);
+
                     processMessage(comp, msg);
                 } else {
                     LOG_ERROR("Message too short from " << *comp);

@@ -429,7 +429,7 @@ static void informPlayer(MapComposite *map, Character *p)
 static bool dbgLockObjects;
 #endif
 
-void GameState::update()
+void GameState::update(int worldTime)
 {
 #   ifndef NDEBUG
     dbgLockObjects = true;
@@ -450,6 +450,10 @@ void GameState::update()
         for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
         {
             informPlayer(map, *p);
+            if (worldTime % 2000 == 0)
+            {
+                accountHandler->sendCharacterData(*p);
+            }
         }
 
         for (ObjectIterator i(map->getWholeMapIterator()); i; ++i)

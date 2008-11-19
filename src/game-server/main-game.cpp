@@ -311,9 +311,13 @@ int main(int argc, char *argv[])
                 // Handle all messages that are in the message queues
                 accountHandler->process();
 
-                if (worldTime % 100 == 0)
+                if (worldTime % 300 == 0)
                 {
                     accountHandler->sendStatistics();
+                    LOG_INFO("Total Account Output: " << accountHandler->totalOut() << " Bytes");
+                    LOG_INFO("Total Account Input: " << accountHandler->totalIn() << " Bytes");
+                    LOG_INFO("Total Client Output: " << gameHandler->calculateTotalOut() << " Bytes");
+                    LOG_INFO("Total Client Input: " << gameHandler->calculateTotalIn() << " Bytes");
                 }
             }
             else
@@ -325,7 +329,7 @@ int main(int argc, char *argv[])
             }
             gameHandler->process();
             // Update all active objects/beings
-            GameState::update();
+            GameState::update(worldTime);
             // Send potentially urgent outgoing messages
             gameHandler->flush();
         }
