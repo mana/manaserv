@@ -48,7 +48,7 @@
 const float Character::EXPCURVE_EXPONENT = 3.0f;
 const float Character::EXPCURVE_FACTOR = 10.0f;
 const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
-const AttackZone Character::UNARMED_ATTACK_ZONE = {ATTZONESHAPE_CONE, true, 32, 90};
+const AttackZone Character::UNARMED_ATTACK_ZONE = {ATTZONESHAPE_RECT, true, 48, 16};
 
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER, 65535),

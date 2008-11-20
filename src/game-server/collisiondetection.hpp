@@ -53,6 +53,11 @@ namespace Collision
     CircleWithCircle(const Point &center1, int radius1,
                      const Point &center2, int radius2);
 
+    /** checks if two rectangles intersect */
+    bool
+    rectWithRect(const Point &pos1, const Point &size1,
+                 const Point &pos2, const Point &size2);
+
 }
 
 #endif

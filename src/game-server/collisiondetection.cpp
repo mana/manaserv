@@ -103,7 +103,7 @@ bool Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
     // d^2 > r1^2 + r2^2
     if(d > ((r1+r2) * (r1+r2)))
         return false; // The two circles do not touch
-  
+
     float s1 = placeAngle - halfTopAngle,
           s2 = placeAngle + halfTopAngle;
 
@@ -123,14 +123,14 @@ bool Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
         float c2dc1 = atan2(dy,dx) * R_TO_D;
         if (c2dc1 < 0)
             c2dc1 += 360;
-       
+
         if (test_degrees(c2dc1, s1, s2))
             return true;
-        
+
         // Since we are well within range, we might be
         // Too close, so we need to make sure two circles intersect
         d = sqrt(d);
-        r1 = d;    
+        r1 = d;
     } else {
         d = sqrt(d);
     }
@@ -144,7 +144,7 @@ bool Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
           iy1 = ayd - ((h * dy) / d),
           ix2 = axd - ((h * dx) / d),
           iy2 = ayd + ((h * dy) / d);
-    
+
     float idc1 = atan2(iy1,ix1) * R_TO_D;
     if(idc1 < 0)
         idc1 += 360;
@@ -287,4 +287,19 @@ Collision::CircleWithCircle(const Point &center1, int radius1,
     int disty = center1.y - center2.y;
     double dist = sqrt((distx * distx) + (disty * disty));
     return (dist < radius1 + radius2);
+}
+
+bool
+Collision::rectWithRect(const Point &pos1, const Point &size1,
+                        const Point &pos2, const Point &size2)
+{
+    return(
+        pos1.x < (pos2.x + size2.x) //left edge 1 left of right edge 2
+        &&
+        (pos1.x + size1.x) > pos2.x //right edge 1 right of left edge 2
+        &&
+        pos1.y < (pos2.y + size2.y) //upper edge 1 above lower edge 2
+        &&
+        (pos1.y + size1.y) > pos2.y //lower edge 1 under upper edge 2
+    );
 }

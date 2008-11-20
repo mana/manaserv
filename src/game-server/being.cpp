@@ -138,6 +138,47 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
 
     std::list<Being *> victims;
 
+    LOG_DEBUG("Direction:"<<getDirection()<<
+              " range:"<<attackZone->range<<
+              " angle:"<<attackZone->angle);
+
+    Point attPos, attSize, defPos, defSize;
+    if (attackZone->shape == ATTZONESHAPE_RECT)
+    {
+        if (getDirection() == DIRECTION_UP)
+        {
+            attPos.x = ppos.x - attackZone->angle;
+            attPos.y = ppos.y - attackZone->range;
+            attSize.x = attackZone->angle * 2;
+            attSize.y = attackZone->range;
+        }
+        if (getDirection() == DIRECTION_DOWN)
+        {
+            attPos.x = ppos.x - attackZone->angle;
+            attPos.y = ppos.y;
+            attSize.x = attackZone->angle * 2;
+            attSize.y = attackZone->range;
+        }
+        if (getDirection() == DIRECTION_RIGHT)
+        {
+            attPos.x = ppos.x;
+            attPos.y = ppos.y - attackZone->angle;
+            attSize.x = attackZone->range;
+            attSize.y = attackZone->angle * 2;
+        }
+        if (getDirection() == DIRECTION_LEFT)
+        {
+            attPos.x = ppos.x - attackZone->range;
+            attPos.y = ppos.y - attackZone->angle;
+            attSize.x = attackZone->range;
+            attSize.y = attackZone->angle * 2;
+        }
+        /* debug effect to see when and where the server pictures the attack - should
+         * be moved to the client side when the attack detection works statisfactory.
+         */
+        Effects::show(26, getMap(), Point(attPos.x + attSize.x / 2, attPos.y + attSize.y / 2));
+    }
+
     for (MovingObjectIterator
          i(getMap()->getAroundObjectIterator(this, attackZone->range)); i; ++i)
     {
@@ -147,9 +188,16 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
         if (o == this) continue;
 
         int type = o->getType();
-
         if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER) continue;
 
+        LOG_DEBUG("Attack Zone:"<<
+                  attPos.x<<":"<<attPos.y<<
+                  " "<<
+                  attSize.x<<"x"<<attSize.y);
+        LOG_DEBUG("Defender Zone:"<<
+                  defPos.x<<":"<<defPos.y<<
+                  " "<<
+                  defSize.x<<"x"<<defSize.y);
 
         switch (attackZone->shape)
         {
@@ -159,6 +207,16 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
                         ppos, attackZone->range,
                         attackZone->angle / 2, attackAngle)
                     )
+                {
+                    victims.push_back(static_cast< Being * >(o));
+                }
+                break;
+            case ATTZONESHAPE_RECT:
+                defPos.x = opos.x - o->getSize();
+                defPos.y = opos.y - o->getSize();
+                defSize.x = o->getSize() * 2;
+                defSize.y = o->getSize() * 2;
+                if (Collision::rectWithRect(attPos, attSize, defPos, defSize))
                 {
                     victims.push_back(static_cast< Being * >(o));
                 }

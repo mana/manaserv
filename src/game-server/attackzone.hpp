@@ -28,8 +28,8 @@
  */
 enum AttackZoneShape
 {
-    ATTZONESHAPE_CONE
-    //yes, there is currently only one but it is planned to add different kinds of attack zones
+    ATTZONESHAPE_CONE,
+    ATTZONESHAPE_RECT
 };
 
 struct AttackZone

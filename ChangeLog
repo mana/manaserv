@@ -1,3 +1,11 @@
+2008-11-20  Philipp Sehmisch  <tmw@crushnet.org>
+
+	* src/game-server/attackzone.hpp, src/game-server/being.cpp,
+	src/game-server/character.cpp, src/game-server/collisiondetection.cpp,
+	src/game-server/collisiondetection.hpp: Added rectangular attack zones
+	which are faster and simpler to calculate than the cone-shaped ones.
+	Currently used by the characters unarmed attack.
+
 2008-11-09  Bjørn Lindeijer  <bjorn@lindeijer.nl>
 
 	* src/game-server/character.cpp: Fixed crash when a script can't be
