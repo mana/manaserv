@@ -23,6 +23,7 @@
 #include "net/connectionhandler.hpp"
 
 #include "defines.h"
+#include "net/bandwidth.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
@@ -104,7 +105,7 @@ void ConnectionHandler::process(enet_uint32 timeout)
                     LOG_DEBUG("Received message " << msg << " from "
                               << *comp);
 
-                    comp->increaseIn(event.packet->dataLength);
+                    gBandwidth->increaseClientInput(comp, event.packet->dataLength);
 
                     processMessage(comp, msg);
                 } else {

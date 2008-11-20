@@ -29,7 +29,6 @@ Connection::Connection():
     mRemote(0),
     mLocal(0)
 {
-    mBandwidth = new BandwidthMonitor;
 }
 
 bool Connection::start(std::string const &address, int port)
@@ -68,11 +67,9 @@ void Connection::stop()
         enet_peer_reset(mRemote);
     if (mLocal)
         enet_host_destroy(mLocal);
-    delete mBandwidth;
 
     mRemote = 0;
     mLocal = 0;
-    mBandwidth = 0;
 }
 
 bool Connection::isConnected() const
@@ -87,7 +84,7 @@ void Connection::send(MessageOut const &msg, bool reliable, unsigned channel)
         return;
     }
 
-    mBandwidth->increaseOutput(msg.getLength());
+    gBandwidth->increaseInterServerOutput(msg.getLength());
 
     ENetPacket *packet;
     packet = enet_packet_create(msg.getData(),
@@ -113,7 +110,7 @@ void Connection::process()
                 {
                     MessageIn msg((char *)event.packet->data,
                                   event.packet->dataLength);
-                    mBandwidth->increaseInput(event.packet->dataLength);
+                    gBandwidth->increaseInterServerInput(event.packet->dataLength);
                     processMessage(msg);
                 }
                 else
@@ -128,14 +125,4 @@ void Connection::process()
                 break;
         }
     }
-}
-
-int Connection::totalOut()
-{
-    return mBandwidth->totalOut();
-}
-
-int Connection::totalIn()
-{
-    return mBandwidth->totalIn();
 }
