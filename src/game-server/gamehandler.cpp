@@ -45,9 +45,7 @@
 const unsigned int TILES_TO_BE_NEAR = 7;
 
 GameHandler::GameHandler():
-    mTokenCollector(this),
-    mTotalBandwidthOut(0),
-    mTotalBandwidthIn(0)
+    mTokenCollector(this)
 {
 }
 
@@ -609,27 +607,4 @@ void GameHandler::handleSendPost(GameClient *client, MessageIn &message)
     // add the character so that the post man knows them
     postMan->addCharacter(client->character);
     accountHandler->sendPost(client->character, message);
-}
-
-int GameHandler::calculateTotalOut()
-{
-    for (NetComputers::const_iterator i = clients.begin(),
-         i_end = clients.end(); i != i_end; ++i)
-    {
-        mTotalBandwidthOut += (*i)->totalOut();
-    }
-
-    return mTotalBandwidthOut;
-}
-
-int GameHandler::calculateTotalIn()
-{
-    for (NetComputers::const_iterator i = clients.begin(),
-         i_end = clients.end(); i != i_end; ++i)
-    {
-        mTotalBandwidthIn += (*i)->totalIn();
-        (*i)->reset();
-    }
-
-    return mTotalBandwidthIn;
 }

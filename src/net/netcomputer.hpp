@@ -81,31 +81,8 @@ class NetComputer
         send(const MessageOut &msg, bool reliable = true,
              unsigned int channel = 0);
 
-        /**
-         * Gets the amount of bandwidth that has been sent out by the server
-         * to this client
-         */
-        int totalOut();
-
-        /**
-         * Gets the amount of bandwidth that has been received by the server
-         * from this client
-         */
-        int totalIn();
-
-        /**
-         * Increase the total received by the server from the client
-         */
-        void increaseIn(int size);
-
-        /**
-         * Reset the totals
-         */
-        void reset();
-
     private:
         ENetPeer *mPeer;              /**< Client peer */
-        BandwidthMonitor *mBandwidth; /**< Bandwidth monitoring */
 
         /**
          * Converts the ip-address of the peer to a stringstream.

@@ -22,19 +22,33 @@
 #ifndef _TMWSERV_BANDWIDTH_H_
 #define _TMWSERV_BANDWIDTH_H_
 
+#include <map>
+
+class NetComputer;
+
 class BandwidthMonitor
 {
 public:
     BandwidthMonitor();
-    void increaseOutput(int size);
-    void increaseInput(int size);
-    void reset();
-    int totalOut() const { return mAmountOutput; }
-    int totalIn() const { return mAmountInput; }
+    void increaseInterServerOutput(int size);
+    void increaseInterServerInput(int size);
+    void increaseClientOutput(NetComputer *nc, int size);
+    void increaseClientInput(NetComputer *nc, int size);
+    int totalInterServerOut() const { return mAmountServerOutput; }
+    int totalInterServerIn() const { return mAmountServerInput; }
+    int totalClientOut() const { return mAmountClientOutput; }
+    int totalClientIn() const { return mAmountClientInput; }
 
 private:
-    int mAmountOutput;
-    int mAmountInput;
+    int mAmountServerOutput;
+    int mAmountServerInput;
+    int mAmountClientOutput;
+    int mAmountClientInput;
+    // map of client to output and input
+    typedef std::map<NetComputer*, std::pair<int, int> > ClientBandwidth;
+    ClientBandwidth mClientBandwidth;
 };
+
+extern BandwidthMonitor *gBandwidth;
 
 #endif

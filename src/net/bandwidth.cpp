@@ -21,24 +21,59 @@
 
 #include "bandwidth.hpp"
 
+#include "netcomputer.hpp"
+
 BandwidthMonitor::BandwidthMonitor():
-    mAmountOutput(0),
-    mAmountInput(0)
+    mAmountServerOutput(0),
+    mAmountServerInput(0),
+    mAmountClientOutput(0),
+    mAmountClientInput(0)
 {
 }
 
-void BandwidthMonitor::increaseOutput(int size)
+void BandwidthMonitor::increaseInterServerOutput(int size)
 {
-    mAmountOutput += size;
+    mAmountServerOutput += size;
 }
 
-void BandwidthMonitor::increaseInput(int size)
+void BandwidthMonitor::increaseInterServerInput(int size)
 {
-    mAmountInput += size;
+    mAmountServerInput += size;
 }
 
-void BandwidthMonitor::reset()
+void BandwidthMonitor::increaseClientOutput(NetComputer *nc, int size)
 {
-    mAmountOutput = 0;
-    mAmountInput = 0;
+    mAmountClientOutput += size;
+    // look for an existing client stored
+    ClientBandwidth::iterator itr = mClientBandwidth.find(nc);
+
+    // if there isnt one, create one
+    if (itr == mClientBandwidth.end())
+    {
+        std::pair<ClientBandwidth::iterator, bool> retItr;
+        retItr = mClientBandwidth.insert(std::pair<NetComputer*, std::pair<int, int> >(nc, std::pair<int, int>(0, 0)));
+        itr = retItr.first;
+    }
+
+    itr->second.first += size;
+
 }
+
+void BandwidthMonitor::increaseClientInput(NetComputer *nc, int size)
+{
+    mAmountClientInput += size;
+
+    // look for an existing client stored
+    ClientBandwidth::iterator itr = mClientBandwidth.find(nc);
+
+    // if there isnt one, create it
+    if (itr == mClientBandwidth.end())
+    {
+        std::pair<ClientBandwidth::iterator, bool> retItr;
+        retItr = mClientBandwidth.insert(std::pair<NetComputer*, std::pair<int, int> >(nc, std::pair<int, int>(0, 0)));
+        itr = retItr.first;
+    }
+
+    itr->second.second += size;
+}
+

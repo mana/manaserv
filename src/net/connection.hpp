@@ -66,16 +66,6 @@ class Connection
          */
         void process();
 
-        /**
-         * Return total output
-         */
-        int totalOut();
-
-        /**
-         * Return total input
-         */
-        int totalIn();
-
     protected:
         /**
          * Processes a single message from the remote host.
@@ -85,7 +75,6 @@ class Connection
     private:
         ENetPeer *mRemote;
         ENetHost *mLocal;
-        BandwidthMonitor *mBandwidth;
 };
 
 #endif

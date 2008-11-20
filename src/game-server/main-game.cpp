@@ -38,6 +38,7 @@
 #include "game-server/postman.hpp"
 #include "game-server/resourcemanager.hpp"
 #include "game-server/state.hpp"
+#include "net/bandwidth.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
@@ -67,6 +68,9 @@ AccountConnection *accountHandler;
 
 /** Post Man **/
 PostMan *postMan;
+
+/** Bandwidth Monitor */
+BandwidthMonitor *gBandwidth;
 
 /** Callback used when SIGQUIT signal is received. */
 void closeGracefully(int)
@@ -151,6 +155,7 @@ void initialize()
     gameHandler = new GameHandler;
     accountHandler = new AccountConnection;
     postMan = new PostMan;
+    gBandwidth = new BandwidthMonitor;
 
     // --- Initialize enet.
     if (enet_initialize() != 0) {
@@ -187,6 +192,7 @@ void deinitialize()
     delete gameHandler;
     delete accountHandler;
     delete postMan;
+    delete gBandwidth;
 
     // Destroy Managers
     delete stringFilter;
@@ -314,10 +320,10 @@ int main(int argc, char *argv[])
                 if (worldTime % 300 == 0)
                 {
                     accountHandler->sendStatistics();
-                    LOG_INFO("Total Account Output: " << accountHandler->totalOut() << " Bytes");
-                    LOG_INFO("Total Account Input: " << accountHandler->totalIn() << " Bytes");
-                    LOG_INFO("Total Client Output: " << gameHandler->calculateTotalOut() << " Bytes");
-                    LOG_INFO("Total Client Input: " << gameHandler->calculateTotalIn() << " Bytes");
+                    LOG_INFO("Total Account Output: " << gBandwidth->totalInterServerOut() << " Bytes");
+                    LOG_INFO("Total Account Input: " << gBandwidth->totalInterServerIn() << " Bytes");
+                    LOG_INFO("Total Client Output: " << gBandwidth->totalClientOut() << " Bytes");
+                    LOG_INFO("Total Client Input: " << gBandwidth->totalClientIn() << " Bytes");
                 }
             }
             else

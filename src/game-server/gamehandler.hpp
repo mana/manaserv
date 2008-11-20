@@ -118,16 +118,6 @@ class GameHandler: public ConnectionHandler
          */
         GameClient *getClientByNameSlow(std::string const &);
 
-        /**
-         * Calculate the total amount of bandwidth sent to all clients
-         */
-        int calculateTotalOut();
-
-        /**
-         * Calculate the total amount of bandwidth received from all clients
-         */
-        int calculateTotalIn();
-
     protected:
         NetComputer *computerConnected(ENetPeer *);
         void computerDisconnected(NetComputer *);
@@ -163,9 +153,6 @@ class GameHandler: public ConnectionHandler
          * Container for pending clients and pending connections.
          */
         TokenCollector<GameHandler, GameClient *, Character *> mTokenCollector;
-
-        int mTotalBandwidthOut;
-        int mTotalBandwidthIn;
 
 };
 
