@@ -123,7 +123,7 @@ static void handleHelp(Character *player, std::string &args)
         {
             say("Administrator Commands", player);
             say("@reload", player);
-            say("@level <AL level>", player);
+            say("@setgroup <character> <AL level>", player);
         }
     }
     else
@@ -548,7 +548,7 @@ static void handleBan(Character *player, std::string &args)
     accountHandler->banCharacter(other, length);
 }
 
-static void handleLevel(Character *player, std::string &args)
+static void handleSetGroup(Character *player, std::string &args)
 {
     Character *other;
     int level = 0;
@@ -605,7 +605,7 @@ static void handleLevel(Character *player, std::string &args)
 
     if (level == 0)
     {
-        say("Invalid level", player);
+        say("Invalid group", player);
         return;
     }
 
@@ -748,10 +748,10 @@ void CommandHandler::handleCommand(Character *player,
         if (handlePermissions(player, AL_GM))
             handleBan(player, args);
     }
-    else if (type == "level")
+    else if (type == "setgroup")
     {
         if (handlePermissions(player, AL_ADMIN))
-            handleLevel(player, args);
+            handleSetGroup(player, args);
     }
     else if (type == "attribute")
     {
