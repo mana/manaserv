@@ -39,6 +39,18 @@ static void say(const std::string error, Character *player)
     GameState::sayTo(player, NULL, error);
 }
 
+static bool handlePermissions(Character *player, unsigned int permissions)
+{
+    if (player->getAccountLevel() & permissions)
+    {
+        return true;
+    }
+
+    say("Invalid permissions", player);
+
+    return false;
+}
+
 static std::string getArgument(std::string &args)
 {
     std::string argument = "";
@@ -79,26 +91,39 @@ static void handleHelp(Character *player, std::string &args)
 {
     if (args == "")
     {
-        if (player->getAccountLevel() >= AL_GM)
+        if (player->getAccountLevel() & AL_PLAYER)
         {
             say("Game Master Commands:", player);
             say("@help [command]", player);
-            say("@warp <character> <map> <x> <y>", player);
-            say("@item", player);
-            say("@drop", player);
-            say("@money", player);
-            say("@spawn <monster id> <number>", player);
-            say("@goto", player);
-            say("@recall", player);
-            say("@ban", player);
-            say("@attribute", player);
+            say("@report <bug>", player);
         }
 
-        if (player->getAccountLevel() == AL_ADMIN)
+        if (player->getAccountLevel() & AL_TESTER)
+        {
+            say("@warp <character> <map> <x> <y>", player);
+            say("@goto <character>", player);
+        }
+
+        if (player->getAccountLevel() & AL_GM)
+        {
+            say("@recall <character>", player);
+            say("@ban <character> <length of time>", player);
+        }
+
+        if (player->getAccountLevel() & AL_DEV)
+        {
+            say("@item <character> <item id> <amount>", player);
+            say("@drop <item id> <amount>", player);
+            say("@money <character> <amount>", player);
+            say("@spawn <monster id> <number>", player);
+            say("@attribute <character> <attribute> <value>", player);
+        }
+
+        if (player->getAccountLevel() & AL_ADMIN)
         {
             say("Administrator Commands", player);
             say("@reload", player);
-            say("@level", player);
+            say("@level <AL level>", player);
         }
     }
     else
@@ -474,17 +499,9 @@ static void handleRecall(Character *player, std::string &args)
 
 static void handleReload(Character *player)
 {
-    // check for valid permissions
     // reload the items and monsters
-    if (player->getAccountLevel() == AL_ADMIN)
-    {
-        ItemManager::reload();
-        MonsterManager::reload();
-    }
-    else
-    {
-        say("Invalid permissions.", player);
-    }
+    ItemManager::reload();
+    MonsterManager::reload();
 }
 
 static void handleBan(Character *player, std::string &args)
@@ -534,14 +551,14 @@ static void handleBan(Character *player, std::string &args)
 static void handleLevel(Character *player, std::string &args)
 {
     Character *other;
-    int level;
+    int level = 0;
 
     // get the arguments
     std::string character = getArgument(args);
-    std::string valuestr = getArgument(args);
+    std::string levelstr = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || valuestr == "")
+    if (character == "" || levelstr == "")
     {
         say("Invalid number of arguments given.", player);
         return;
@@ -563,17 +580,30 @@ static void handleLevel(Character *player, std::string &args)
         }
     }
 
-    // check the amount is really an integer
-    if (!utils::isNumeric(valuestr))
+    // check which level they should be
+    // refer to defines.h for level info
+    if (levelstr == "AL_PLAYER")
     {
-        say("Invalid argument", player);
-        return;
+        level = AL_PLAYER;
+    }
+    else if (levelstr == "AL_TESTER")
+    {
+        level = AL_PLAYER | AL_TESTER;
+    }
+    else if (levelstr == "AL_GM")
+    {
+        level = AL_PLAYER | AL_TESTER | AL_GM;
+    }
+    else if (levelstr == "AL_DEV")
+    {
+        level = AL_PLAYER | AL_TESTER | AL_DEV;
+    }
+    else if (levelstr == "AL_ADMIN")
+    {
+        level = 255;
     }
 
-    // put the amount into an integer
-    level = utils::stringToInt(valuestr);
-
-    if (level < 0)
+    if (level == 0)
     {
         say("Invalid level", player);
         return;
@@ -645,17 +675,22 @@ static void handleAttribute(Character *player, std::string &args)
     other->setAttribute(attr, value);
 }
 
-void CommandHandler::handleCommand(Character *player,
-                                   const std::string &command)
+static void handleReport(Character *player, std::string &args)
 {
-    // check character permissions
-    // finer tuning for checking per command can be done
-    // in the handle function for that command
-    if (player->getAccountLevel() < AL_GM)
+    std::string bugReport = getArgument(args);
+
+    if (bugReport == "")
     {
+        say("Invalid number of arguments given.", player);
         return;
     }
 
+    // TODO: Send the report to a developer or something
+}
+
+void CommandHandler::handleCommand(Character *player,
+                                   const std::string &command)
+{
     // get command type, and arguments
     // remove first character (the @)
     std::string::size_type pos = command.find(' ');
@@ -665,51 +700,68 @@ void CommandHandler::handleCommand(Character *player,
     // handle the command
     if (type == "help")
     {
-        handleHelp(player, args);
+        if (handlePermissions(player, AL_PLAYER))
+            handleHelp(player, args);
     }
     else if (type == "warp")
     {
-        handleWarp(player, args);
+        if (handlePermissions(player, AL_TESTER))
+            handleWarp(player, args);
     }
     else if (type == "item")
     {
-        handleItem(player, args);
+        if (handlePermissions(player, AL_DEV))
+            handleItem(player, args);
     }
     else if (type == "drop")
     {
-        handleDrop(player, args);
+        if (handlePermissions(player, AL_DEV))
+            handleDrop(player, args);
     }
     else if (type == "money")
     {
-        handleMoney(player, args);
+        if (handlePermissions(player, AL_DEV))
+            handleMoney(player, args);
     }
     else if (type == "spawn")
     {
-        handleSpawn(player, args);
+        if (handlePermissions(player, AL_DEV))
+            handleSpawn(player, args);
     }
     else if (type == "goto")
     {
-        handleGoto(player, args);
+        if (handlePermissions(player, AL_TESTER))
+            handleGoto(player, args);
     }
     else if (type == "recall")
     {
-        handleRecall(player, args);
+        if (handlePermissions(player, AL_GM))
+            handleRecall(player, args);
     }
     else if (type == "reload")
     {
-        handleReload(player);
+        if (handlePermissions(player, AL_ADMIN))
+            handleReload(player);
     }
     else if (type == "ban")
     {
-        handleBan(player, args);
+        if (handlePermissions(player, AL_GM))
+            handleBan(player, args);
     }
     else if (type == "level")
     {
-        handleLevel(player, args);
+        if (handlePermissions(player, AL_ADMIN))
+            handleLevel(player, args);
     }
     else if (type == "attribute")
     {
-        handleAttribute(player, args);
+        if (handlePermissions(player, AL_DEV))
+            handleAttribute(player, args);
+    }
+    else if (type == "report")
+    {
+        if (handlePermissions(player, AL_PLAYER))
+            handleReport(player, args);
     }
     else
     {
