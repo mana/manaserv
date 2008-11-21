@@ -143,6 +143,8 @@ tmwserv_game_SOURCES = \
 	game-server/trade.cpp \
 	game-server/trigger.hpp \
 	game-server/trigger.cpp \
+	net/bandwidth.hpp \
+	net/bandwidth.cpp \
 	net/connection.hpp \
 	net/connection.cpp \
 	net/connectionhandler.hpp \
