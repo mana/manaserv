@@ -88,15 +88,21 @@ enum
 };
 
 /**
- * Enumerated type for communicated messages
+ * Enumerated type for communicated messages:
+ *
  * - PAMSG_*: from client to account server
  * - APMSG_*: from account server to client
  * - PCMSG_*: from client to chat server
  * - CPMSG_*: from chat server to client
  * - PGMSG_*: from client to game server
  * - GPMSG_*: from game server to client
+ *
  * Components: B byte, W word, L long, S variable-size string
  *             C tile-based coordinates (B*3)
+ *
+ * Hosts:      P (player's client), A (account server), C (char server),
+ *             G (game server)
+ *
  * TODO - Document specific error codes for each packet
  */
 enum {

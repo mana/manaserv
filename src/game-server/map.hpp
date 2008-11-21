@@ -108,14 +108,12 @@ class Map
         /**
          * Sets the size of the map. This will destroy any existing map data.
          */
-        void
-        setSize(int mWidth, int height);
+        void setSize(int mWidth, int height);
 
         /**
          * Get tile reference.
          */
-        MetaTile*
-        getMetaTile(int x, int y);
+        MetaTile *getMetaTile(int x, int y);
 
         /**
          * Marks a tile as occupied
@@ -178,7 +176,6 @@ class Map
 
         // Pathfinding members
         int onClosedList, onOpenList;
-
 };
 
 #endif

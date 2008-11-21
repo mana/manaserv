@@ -289,7 +289,7 @@ class Monster : public Being
         /**
          * Character who currently owns this monster (killsteal protection).
          */
-        Character* mOwner;
+        Character *mOwner;
 
         /**
          * Time until someone else can claim this monster (killsteal

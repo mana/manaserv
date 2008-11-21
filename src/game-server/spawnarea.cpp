@@ -26,18 +26,23 @@
 #include "game-server/state.hpp"
 #include "utils/logger.h"
 
-struct SpawnAreaEventDispatch: EventDispatch
+struct SpawnAreaEventDispatch : EventDispatch
 {
     SpawnAreaEventDispatch()
     {
-        typedef EventListenerFactory< SpawnArea, &SpawnArea::mSpawnedListener > Factory;
+        typedef EventListenerFactory< SpawnArea, &SpawnArea::mSpawnedListener >
+            Factory;
         removed = &Factory::create< Thing, &SpawnArea::decrease >::function;
     }
 };
 
 static SpawnAreaEventDispatch spawnAreaEventDispatch;
 
-SpawnArea::SpawnArea(MapComposite *map, MonsterClass *specy, const Rectangle &zone, int maxBeings, int spawnRate):
+SpawnArea::SpawnArea(MapComposite *map,
+                     MonsterClass *specy,
+                     const Rectangle &zone,
+                     int maxBeings,
+                     int spawnRate):
     Thing(OBJECT_OTHER, map),
     mSpecy(specy),
     mSpawnedListener(&spawnAreaEventDispatch),
@@ -49,46 +54,52 @@ SpawnArea::SpawnArea(MapComposite *map, MonsterClass *specy, const Rectangle &zo
 {
 }
 
-void
-SpawnArea::update()
+void SpawnArea::update()
 {
     if (mNextSpawn > 0)
-    {
         mNextSpawn--;
 
-        if (mNextSpawn == 0)
+    if (mNextSpawn == 0 && mNumBeings < mMaxBeings && mSpawnRate > 0)
+    {
+        MapComposite *map = getMap();
+        const Map *realMap = map->getMap();
+
+        // Reset the spawn area to the whole map in case of dimensionless zone
+        if (mZone.w == 0 || mZone.h == 0)
         {
-            // Find a free spawn location. Give up after 10 tries
-            int c = 10;
-            Point position;
-            MapComposite *map = getMap();
-            Map *realMap = map->getMap();
-            int x = mZone.x;
-            int y = mZone.y;
-            int width = mZone.w;
-            int height = mZone.h;
+            mZone.x = 0;
+            mZone.y = 0;
+            mZone.w = realMap->getWidth() * realMap->getTileWidth();
+            mZone.h = realMap->getHeight() * realMap->getTileHeight();
+        }
 
-            // Reset the spawn area to the whole map in case of dimensionless zone
-            if (width == 0 || height == 0)
-            {
-                x = 0;
-                y = 0;
-                width = realMap->getWidth() * 32;
-                height = realMap->getHeight() * 32;
-            }
+        // Find a free spawn location. Give up after 10 tries
+        int c = 10;
+        Point position;
+        const int x = mZone.x;
+        const int y = mZone.y;
+        const int width = mZone.w;
+        const int height = mZone.h;
 
-            Being *being = new Monster(mSpecy);
+        Being *being = new Monster(mSpecy);
 
-            do
-            {
+        if (being->getModifiedAttribute(BASE_ATTR_HP) <= 0)
+        {
+            LOG_WARN("Refusing to spawn dead monster " << mSpecy->getType());
+            delete being;
+            being = 0;
+        }
+
+        if (being) {
+            do {
                 position = Point(x + rand() % width, y + rand() % height);
                 c--;
-            } while (!realMap->getWalk(position.x / 32, position.y / 32, being->getWalkMask()) && c);
+            } while (!realMap->getWalk(position.x / realMap->getTileWidth(),
+                                       position.y / realMap->getTileHeight(),
+                                       being->getWalkMask()) && c);
 
-            if (c)
-            {
+            if (c) {
                 being->addListener(&mSpawnedListener);
-
                 being->setMap(map);
                 being->setPosition(position);
                 being->clearDestination();
@@ -96,8 +107,7 @@ SpawnArea::update()
 
                 mNumBeings++;
             }
-            else
-            {
+            else {
                 LOG_WARN("Unable to find a free spawn location for monster "
                          << mSpecy->getType() << " on map " << map->getName()
                          << " (" << x << ',' << y << ','
@@ -105,10 +115,7 @@ SpawnArea::update()
                 delete being;
             }
         }
-    }
 
-    if (mNextSpawn == 0 && mNumBeings < mMaxBeings && mSpawnRate > 0)
-    {
         // Predictable respawn intervals (can be randomized later)
         mNextSpawn = (10 * 60) / mSpawnRate;
     }

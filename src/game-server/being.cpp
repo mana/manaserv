@@ -310,7 +310,6 @@ int Being::getModifiedAttribute(int attr) const
 
 void Being::update()
 {
-
     int oldHP = getModifiedAttribute(BASE_ATTR_HP);
     int newHP = oldHP;
     int maxHP = getAttribute(BASE_ATTR_HP);
