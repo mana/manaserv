@@ -46,6 +46,8 @@ tmwserv_account_SOURCES = \
 	dal/dataproviderfactory.cpp \
 	dal/recordset.h \
 	dal/recordset.cpp \
+	net/bandwidth.hpp \
+	net/bandwidth.cpp \
 	net/connectionhandler.hpp \
 	net/connectionhandler.cpp \
 	net/messagein.hpp \

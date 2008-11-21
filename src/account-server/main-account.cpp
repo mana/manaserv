@@ -38,6 +38,7 @@
 #include "chat-server/guildmanager.hpp"
 #include "chat-server/post.hpp"
 #include "common/configuration.hpp"
+#include "net/bandwidth.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
 #include "utils/logger.h"
@@ -68,6 +69,9 @@ GuildManager *guildManager;
 
 /** Post Manager */
 PostManager *postalManager;
+
+/** Bandwidth Monitor */
+BandwidthMonitor *gBandwidth;
 
 /** Callback used when SIGQUIT signal is received. */
 static void closeGracefully(int)
@@ -159,6 +163,8 @@ static void initialize()
     guildManager = new GuildManager;
     // Initialise the post manager
     postalManager = new PostManager;
+    // Initialise the bandwidth monitor
+    gBandwidth = new BandwidthMonitor;
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -201,6 +207,7 @@ static void deinitialize()
     delete chatChannelManager;
     delete guildManager;
     delete postalManager;
+    delete gBandwidth;
 
     // Get rid of persistent data storage
     delete storage;

@@ -1302,7 +1302,7 @@ void DALStorage::checkBannedAccounts()
         // update expired bans
         std::ostringstream sql;
         sql << "update " << ACCOUNTS_TBL_NAME
-        << " set level = " << AL_NORMAL << ", banned = 0"
+        << " set level = " << AL_PLAYER << ", banned = 0"
         << " where level = " << AL_BANNED
         << " AND banned <= " << time(NULL) << ";";
         mDb->execSql(sql.str());

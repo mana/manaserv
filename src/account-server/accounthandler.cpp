@@ -333,7 +333,7 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
         acc->setPassword(sha256(username + password));
         // We hash email server-side without using a salt.
         acc->setEmail(sha256(email));
-        acc->setLevel(AL_NORMAL);
+        acc->setLevel(AL_PLAYER);
 
         // set the date and time of the account registration, and the last login
         time_t regdate;
