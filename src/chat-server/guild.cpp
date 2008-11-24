@@ -49,6 +49,13 @@ void Guild::addMember(int playerId, int permissions)
 
 void Guild::removeMember(int playerId)
 {
+    if (checkLeader(playerId))
+    {
+        // if the leader is leaving, assign next member as leader
+        std::list<GuildMember*>::iterator itr = mMembers.begin();
+        itr++;
+        setLeader((*itr)->mId);
+    }
     GuildMember *member = getMember(playerId);
     if (member)
         mMembers.remove(member);
