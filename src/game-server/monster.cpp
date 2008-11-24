@@ -339,7 +339,7 @@ int Monster::damage(Object *source, Damage const &damage)
         if (damage.usedSkill)
         {
             mExpReceivers[s].insert(damage.usedSkill);
-            if (!mOwnerTimer || mOwner == s /*TODO: || mOwner->getParty() == s->getParty() */)
+            if (!mOwnerTimer || mOwner == s || mOwner->getParty() == s->getParty())
             {
                 mOwner = s;
                 mLegalExpReceivers.insert(s);

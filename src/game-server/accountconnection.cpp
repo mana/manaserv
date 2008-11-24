@@ -135,10 +135,10 @@ void AccountConnection::processMessage(MessageIn &msg)
 
         case CGMSG_CHANGED_PARTY:
         {
-            // Party id, 0 for none
-            int partyid = msg.readLong();
             // Character DB id
             int charid = msg.readLong();
+            // Party id, 0 for none
+            int partyid = msg.readLong();
             gameHandler->updateCharacter(charid, partyid);
         } break;
 
