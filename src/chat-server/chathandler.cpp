@@ -1003,6 +1003,10 @@ void ChatHandler::handlePartyInvite(ChatClient &client, MessageIn &msg)
     out.writeString(client.characterName);
 
     std::string invited = msg.readString();
+    if (invited == client.characterName)
+    {
+        return;
+    }
     if (invited != "")
     {
         // Get client and send it the invite
