@@ -96,6 +96,8 @@
 		<Unit filename="src/dal/sqlitedataprovider.cpp" />
 		<Unit filename="src/dal/sqlitedataprovider.h" />
 		<Unit filename="src/defines.h" />
+		<Unit filename="src/net/bandwidth.cpp" />
+		<Unit filename="src/net/bandwidth.hpp" />
 		<Unit filename="src/net/connection.cpp" />
 		<Unit filename="src/net/connection.hpp" />
 		<Unit filename="src/net/connectionhandler.cpp" />
