@@ -131,11 +131,13 @@ void ChatHandler::computerDisconnected(NetComputer *comp)
         // Remove user from all channels.
         chatChannelManager->removeUserFromAllChannels(computer);
 
-        // Remove the character from the player map
-        mPlayerMap.erase(computer->characterName);
-
         // Remove user from party
         removeUserFromParty(*computer);
+
+        // Remove the character from the player map
+        // need to do this after removing them from party
+        // as that uses the player map
+        mPlayerMap.erase(computer->characterName);
     }
 
     delete computer;
