@@ -22,7 +22,9 @@
 #ifndef _TMWSERV_CHATHANDLER_H_
 #define _TMWSERV_CHATHANDLER_H_
 
-#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "net/connectionhandler.hpp"
 #include "utils/tokencollector.hpp"
@@ -320,6 +322,12 @@ class ChatHandler : public ConnectionHandler
          * @return The Chat Client
          */
         ChatClient* getClient(const std::string &name);
+
+        /**
+         * Set the topic of a guild channel
+         */
+        void guildChannelTopicChange(ChatChannel *channel, int playerId,
+                                     const std::string &topic);
 
         /**
          * Container for pending clients and pending connections.

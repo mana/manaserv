@@ -1,0 +1,197 @@
+/*
+ *  The Mana World Server
+ *  Copyright 2008 The Mana World Development Team
+ *
+ *  This file is part of The Mana World.
+ *
+ *  The Mana World is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  any later version.
+ *
+ *  The Mana World is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with The Mana World; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+#include "chathandler.hpp"
+#include "chatclient.hpp"
+#include "party.hpp"
+
+#include "../account-server/dalstorage.hpp"
+#include "../account-server/serverhandler.hpp"
+
+#include "../net/messagein.hpp"
+#include "../net/messageout.hpp"
+
+#include "../defines.h"
+
+void updateInfo(ChatClient *client, int partyId)
+{
+    Character *character = storage->getCharacter(client->characterName);
+    GameServerHandler::sendPartyChange(character, partyId);
+}
+
+bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string &inviter)
+{
+    MessageOut out(CPMSG_PARTY_INVITE_RESPONSE);
+
+    // Get inviting client
+    ChatClient *c1 = getClient(inviter);
+    if (c1)
+    {
+        // if party doesnt exist, create it
+        if (!c1->party)
+        {
+            c1->party = new Party();
+            // tell game server to update info
+            updateInfo(c1, c1->party->getId());
+        }
+
+        // add inviter to the party
+        c1->party->addUser(inviter);
+
+        // Get invited client
+        ChatClient *c2 = getClient(invited);
+        if (c2)
+        {
+            // add invited to the party
+            c1->party->addUser(invited);
+            c2->party = c1->party;
+            // was successful so return success to inviter
+            out.writeString(invited);
+            out.writeByte(ERRMSG_OK);
+            c1->send(out);
+
+            // tell everyone a player joined
+            informPartyMemberJoined(*c2);
+
+            // tell game server to update info
+            updateInfo(c2, c2->party->getId());
+            return true;
+        }
+    }
+
+    // there was an error, return false
+    return false;
+
+}
+
+void ChatHandler::handlePartyInvite(ChatClient &client, MessageIn &msg)
+{
+    //TODO: Handle errors
+    MessageOut out(CPMSG_PARTY_INVITED);
+
+    out.writeString(client.characterName);
+
+    std::string invited = msg.readString();
+    if (invited == client.characterName)
+    {
+        return;
+    }
+    if (invited != "")
+    {
+        // Get client and send it the invite
+        ChatClient *c = getClient(invited);
+        if (c)
+        {
+            // store the invite
+            mPartyInvitedUsers.push_back(invited);
+            c->send(out);
+        }
+    }
+}
+
+void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)
+{
+    MessageOut out(CPMSG_PARTY_ACCEPT_INVITE_RESPONSE);
+
+    // Check that the player was invited
+    std::vector<std::string>::iterator itr;
+    itr = std::find(mPartyInvitedUsers.begin(), mPartyInvitedUsers.end(),
+                    client.characterName);
+    if (itr != mPartyInvitedUsers.end())
+    {
+        // make them join the party
+        if (handlePartyJoin(client.characterName, msg.readString()))
+        {
+            out.writeByte(ERRMSG_OK);
+            mPartyInvitedUsers.erase(itr);
+        }
+        else
+        {
+            out.writeByte(ERRMSG_FAILURE);
+        }
+    }
+    else
+    {
+        out.writeByte(ERRMSG_FAILURE);
+    }
+
+    client.send(out);
+}
+
+void ChatHandler::handlePartyQuit(ChatClient &client)
+{
+    removeUserFromParty(client);
+    MessageOut out(CPMSG_PARTY_QUIT_RESPONSE);
+    out.writeByte(ERRMSG_OK);
+    client.send(out);
+
+    // tell game server to update info
+    updateInfo(&client, 0);
+}
+
+void ChatHandler::removeUserFromParty(ChatClient &client)
+{
+    if (client.party)
+    {
+        client.party->removeUser(client.characterName);
+        informPartyMemberQuit(client);
+
+        // if theres less than 1 member left, remove the party
+        if (client.party->numUsers() < 1)
+        {
+            delete client.party;
+            client.party = 0;
+        }
+    }
+}
+
+void ChatHandler::informPartyMemberQuit(ChatClient &client)
+{
+    std::map<std::string, ChatClient*>::iterator itr;
+    std::map<std::string, ChatClient*>::const_iterator itr_end = mPlayerMap.end();
+
+    for (itr = mPlayerMap.begin(); itr != itr_end; ++itr)
+    {
+        if (itr->second->party == client.party)
+        {
+            MessageOut out(CPMSG_PARTY_MEMBER_LEFT);
+            out.writeShort(client.characterId);
+            itr->second->send(out);
+        }
+    }
+}
+
+void ChatHandler::informPartyMemberJoined(ChatClient &client)
+{
+    std::map<std::string, ChatClient*>::iterator itr;
+    std::map<std::string, ChatClient*>::const_iterator itr_end = mPlayerMap.end();
+
+    for (itr = mPlayerMap.begin(); itr != itr_end; ++itr)
+    {
+        if (itr->second->party == client.party)
+        {
+            MessageOut out(CPMSG_PARTY_NEW_MEMBER);
+            out.writeShort(client.characterId);
+            out.writeString(client.characterName);
+            itr->second->send(out);
+        }
+    }
+}

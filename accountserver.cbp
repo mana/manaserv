@@ -77,10 +77,12 @@
 		<Unit filename="src/chat-server/chathandler.hpp" />
 		<Unit filename="src/chat-server/guild.cpp" />
 		<Unit filename="src/chat-server/guild.hpp" />
+		<Unit filename="src/chat-server/guildhandler.cpp" />
 		<Unit filename="src/chat-server/guildmanager.cpp" />
 		<Unit filename="src/chat-server/guildmanager.hpp" />
 		<Unit filename="src/chat-server/party.cpp" />
 		<Unit filename="src/chat-server/party.hpp" />
+		<Unit filename="src/chat-server/partyhandler.cpp" />
 		<Unit filename="src/chat-server/post.cpp" />
 		<Unit filename="src/chat-server/post.hpp" />
 		<Unit filename="src/common/configuration.cpp" />
