@@ -122,7 +122,6 @@ void Monster::perform()
             damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
             damage.element = mCurrentAttack->element;
             damage.type = mCurrentAttack->type;
-            damage.usedSkill = 0;
             performAttack(damage, &mCurrentAttack->attackZone);
         }
         if (!mAttackTime)
@@ -336,14 +335,18 @@ int Monster::damage(Object *source, Damage const &damage)
             ib.first->second += HPLoss;
         }
 
-        if (damage.usedSkill)
+        std::list<size_t>::const_iterator iSkill;
+        for (iSkill = damage.usedSkills.begin(); iSkill != damage.usedSkills.end(); ++iSkill)
         {
-            mExpReceivers[s].insert(damage.usedSkill);
-            if (!mOwnerTimer || mOwner == s || mOwner->getParty() == s->getParty())
+            if (*iSkill)
             {
-                mOwner = s;
-                mLegalExpReceivers.insert(s);
-                mOwnerTimer = KILLSTEAL_PROTECTION_TIME;
+                mExpReceivers[s].insert(*iSkill);
+                if (!mOwnerTimer || mOwner == s || mOwner->getParty() == s->getParty())
+                {
+                    mOwner = s;
+                    mLegalExpReceivers.insert(s);
+                    mOwnerTimer = KILLSTEAL_PROTECTION_TIME;
+                }
             }
         }
     }

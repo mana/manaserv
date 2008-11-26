@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include "limits.h"
 
 #include "defines.h"
@@ -65,7 +66,7 @@ struct Damage
     unsigned short cth;    /**< Chance to hit. Opposes the evade attribute. */
     unsigned char element; /**< Elemental damage. */
     unsigned char type;    /**< Damage type: Physical or magical? */
-    size_t usedSkill;      /**< Skill used by source (needed for exp calculation) */
+    std::list<size_t> usedSkills;      /**< Skills used by source (needed for exp calculation) */
 };
 
 /**

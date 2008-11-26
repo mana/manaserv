@@ -102,7 +102,7 @@ void Character::perform()
     damage.type = DAMAGE_PHYSICAL;
     damage.cth = getModifiedAttribute(BASE_ATTR_HIT) +
                  getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
-    damage.usedSkill = CHAR_SKILL_WEAPON_BEGIN + type;
+    damage.usedSkills.push_back(CHAR_SKILL_WEAPON_BEGIN + type);
 
     if (ic)
     {

@@ -611,7 +611,6 @@ static int LuaBeing_Damage(lua_State *s)
     damage.cth = lua_tointeger(s, 4);
     damage.type = lua_tointeger(s, 5);
     damage.element = lua_tointeger(s, 6);
-    damage.usedSkill = 0;
 
     being->damage(NULL, damage);
 
