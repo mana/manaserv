@@ -53,8 +53,9 @@ void Guild::removeMember(int playerId)
     {
         // if the leader is leaving, assign next member as leader
         std::list<GuildMember*>::iterator itr = mMembers.begin();
-        itr++;
-        setLeader((*itr)->mId);
+        ++itr;
+        if (itr != mMembers.end())
+            setLeader((*itr)->mId);
     }
     GuildMember *member = getMember(playerId);
     if (member)
