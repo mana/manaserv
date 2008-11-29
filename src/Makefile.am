@@ -30,10 +30,12 @@ tmwserv_account_SOURCES = \
 	chat-server/chatchannelmanager.cpp \
 	chat-server/guild.hpp \
 	chat-server/guild.cpp \
+	chat-server/guildhandler.cpp \
 	chat-server/guildmanager.hpp \
 	chat-server/guildmanager.cpp \
 	chat-server/party.cpp \
 	chat-server/party.hpp \
+	chat-server/partyhandler.cpp \
 	chat-server/post.cpp \
 	chat-server/post.hpp \
 	common/configuration.hpp \

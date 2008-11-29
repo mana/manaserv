@@ -31,6 +31,8 @@
 
 #include "../defines.h"
 
+#include <algorithm>
+
 void updateInfo(ChatClient *client, int partyId)
 {
     Character *character = storage->getCharacter(client->characterName);
