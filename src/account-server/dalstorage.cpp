@@ -67,11 +67,6 @@ DALStorage::~DALStorage()
 /**
  * Connect to the database and initialize it if necessary.
  *
- * TODO: <b>Exceptionfault:</b> after connecting to the database, we have to
- *       verify if the version matches a supported version. Maybe implement a
- *       "version table" to check after connect. Raise an error with verbose
- *       informations about the discrepancy between the versions.
- *
  */
 void DALStorage::open()
 {
@@ -538,7 +533,8 @@ bool DALStorage::updateCharacter(Character *character,
     {
         for (unsigned int skill_id = 0; skill_id < CHAR_SKILL_NB; skill_id++)
         {
-            flushSkill(character, skill_id);
+            updateExperience(character->getDatabaseID(), skill_id,
+                character->getExperience(skill_id));
         }
     }
     catch (const dal::DbSqlQueryExecFailure& e)
@@ -635,56 +631,14 @@ bool DALStorage::updateCharacter(Character *character,
 
 /**
  * Save changes of a skill to the database permanently.
+ * @deprecated Use DALStorage::updateExperience instead!!!
 */
 void DALStorage::flushSkill(const Character* const character,
                             const int skill_id )
 {
-    try
-    {
-        const unsigned int exp = character->getExperience(skill_id);
-
-        // if experience has decreased to 0 we don't store is anymore,
-        // its the default
-        if (exp == 0)
-        {
-            std::ostringstream sql;
-            sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME << " "
-                << "WHERE char_id = '" << character->getDatabaseID() << "' "
-                << "AND skill_id = '" << skill_id << "'";
-            mDb->execSql(sql.str());
-            return;
-        }
-
-        // try to update the skill
-        std::ostringstream sql;
-        sql << "UPDATE " << CHAR_SKILLS_TBL_NAME << " "
-            << "SET skill_exp = '" << exp << "' "
-            << "WHERE char_id = '" << character->getDatabaseID() << "' "
-            << "AND skill_id = '" << skill_id << "'";
-        mDb->execSql(sql.str());
-
-        // check if the update has modified a row
-        if (mDb->getModifiedRows() > 0)
-        {
-            return;
-        }
-
-        sql.clear();
-        sql.str("");
-        sql << "INSERT INTO " << CHAR_SKILLS_TBL_NAME << " "
-            << "(char_id, skill_id, skill_exp) VALUES ( "
-            << "'" << character->getDatabaseID() << "', "
-            << "'" << skill_id << "', "
-            << "'" << exp << "' )";
-        mDb->execSql(sql.str());
-    }
-    catch (const dal::DbSqlQueryExecFailure &e)
-    {
-        LOG_ERROR("DALStorage::flushSkill: " << e.what());
-        throw;
-    }
+    updateExperience(character->getDatabaseID(), skill_id,
+        character->getExperience(skill_id));
 }
-
 
 /**
  * Add an account to the database.
@@ -804,7 +758,8 @@ void DALStorage::flush(Account *account)
                 // update the characters skills
                 for (unsigned int skill_id = 0; skill_id < CHAR_SKILL_NB; skill_id++)
                 {
-                    flushSkill((*it), skill_id);
+                    updateExperience((*it)->getDatabaseID(), skill_id,
+                        (*it)->getExperience(skill_id));
                 }
             }
         } //
@@ -885,6 +840,78 @@ void DALStorage::updateLastLogin(const Account *account)
         << " WHERE id = '" << account->getID() << "';";
     mDb->execSql(sql.str());
 }
+
+void DALStorage::updateCharacterPoints(const int CharId, const int CharPoints,
+    const int CorrPoints, const int AttribId, const int AttribValue )
+{
+    std::ostringstream sql;
+    sql << "UPDATE " << CHARACTERS_TBL_NAME
+        << " SET char_pts = " << CharPoints << ", "
+        << " correct_pts = " << CorrPoints << ", ";
+
+    switch (AttribId)
+    {
+        case CHAR_ATTR_STRENGTH:     sql << "str = "; break;
+        case CHAR_ATTR_AGILITY:      sql << "agi = "; break;
+        case CHAR_ATTR_DEXTERITY:    sql << "dex = "; break;
+        case CHAR_ATTR_VITALITY:     sql << "vit = "; break;
+        case CHAR_ATTR_INTELLIGENCE: sql << "int = "; break;
+        case CHAR_ATTR_WILLPOWER:    sql << "will = "; break;
+    }
+    sql << AttribValue
+        << " WHERE id = " << CharId;
+
+    mDb->execSql(sql.str());
+}
+
+void DALStorage::updateExperience(const int CharId, const int SkillId,
+    const int SkillValue)
+{
+    try
+    {
+        // if experience has decreased to 0 we don't store it anymore,
+        // its the default
+        if (SkillValue == 0)
+        {
+            std::ostringstream sql;
+            sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
+                << " WHERE char_id = " << CharId
+                << " AND skill_id = " << SkillId;
+            mDb->execSql(sql.str());
+            return;
+        }
+
+        // try to update the skill
+        std::ostringstream sql;
+        sql << "UPDATE " << CHAR_SKILLS_TBL_NAME
+            << " SET skill_exp = " << SkillValue
+            << " WHERE char_id = " << CharId
+            << " AND skill_id = " << SkillId;
+        mDb->execSql(sql.str());
+
+        // check if the update has modified a row
+        if (mDb->getModifiedRows() > 0)
+        {
+            return;
+        }
+
+        sql.clear();
+        sql.str("");
+        sql << "INSERT INTO " << CHAR_SKILLS_TBL_NAME << " "
+            << "(char_id, skill_id, skill_exp) VALUES ( "
+            << CharId << ", "
+            << SkillId << ", "
+            << SkillValue << ")";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        LOG_ERROR("DALStorage::updateExperience: " << e.what());
+        throw;
+    }
+}
+
+
 
 /**
  * Add a guild

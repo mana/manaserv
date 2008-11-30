@@ -443,6 +443,16 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             result.writeShort(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
             result.writeByte(retCode);
             result.writeByte(attribute);
+
+            if (retCode == ATTRIBMOD_OK )
+            {
+                accountHandler->updateCharacterPoints(
+                    computer.character->getDatabaseID(),
+                    computer.character->getCharacterPoints(),
+                    computer.character->getCorrectionPoints(),
+                    attribute,
+                    computer.character->getAttribute(attribute));
+            }
         } break;
 
         case PGMSG_LOWER_ATTRIBUTE:
@@ -453,6 +463,16 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             result.writeShort(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
             result.writeByte(retCode);
             result.writeByte(attribute);
+
+            if (retCode == ATTRIBMOD_OK )
+            {
+                accountHandler->updateCharacterPoints(
+                    computer.character->getDatabaseID(),
+                    computer.character->getCharacterPoints(),
+                    computer.character->getCorrectionPoints(),
+                    attribute,
+                    computer.character->getAttribute(attribute));
+            }
         } break;
 
         case PGMSG_RESPAWN:

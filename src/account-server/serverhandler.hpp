@@ -25,6 +25,8 @@
 #include <iosfwd>
 #include <string>
 
+#include "net/messagein.hpp"
+
 class Character;
 
 namespace GameServerHandler
@@ -64,6 +66,12 @@ namespace GameServerHandler
      * Sends chat party information
      */
     void sendPartyChange(Character *ptr, int partyId);
+
+    /**
+     * Takes a GAMSG_PLAYER_SYNC from the gameserver and stores all changes in
+     * the database.
+     */
+    void syncDatabase(MessageIn &msg);
 }
 
 #endif

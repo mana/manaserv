@@ -33,11 +33,18 @@
 #include "game-server/quest.hpp"
 #include "game-server/state.hpp"
 #include "net/messagein.hpp"
-#include "net/messageout.hpp"
 #include "serialize/characterdata.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
 #include "utils/tokencollector.hpp"
+
+AccountConnection::~AccountConnection()
+{
+    if (mSyncBuffer)
+    {
+        delete (mSyncBuffer);
+    }
+}
 
 bool AccountConnection::start()
 {
@@ -71,6 +78,10 @@ bool AccountConnection::start()
         msg.writeShort(i->first);
     }
     send(msg);
+
+    // initialize sync buffer
+    mSyncBuffer = new MessageOut(GAMSG_PLAYER_SYNC);
+    mSyncMessages = 0;
 
     return true;
 }
@@ -296,4 +307,58 @@ void AccountConnection::changeAccountLevel(Character *c, int level)
     msg.writeLong(c->getDatabaseID());
     msg.writeShort(level);
     send(msg);
+}
+
+void AccountConnection::syncChanges(bool force)
+{
+    if (mSyncMessages == 0)
+        return;
+
+    // send buffer if:
+    //    a.) forced by any process
+    //    b.) every 10 seconds
+    //    c.) buffer reaches size of 1kb
+    //    d.) buffer holds more then 20 messages
+    if (force ||
+        mSyncMessages > SYNC_BUFFER_LIMIT ||
+        mSyncBuffer->getLength() > SYNC_BUFFER_SIZE )
+    {
+        LOG_DEBUG("Sending GAMSG_PLAYER_SYNC with " << mSyncMessages << " messages." );
+
+        // attach end-of-buffer flag
+        mSyncBuffer->writeByte(SYNC_END_OF_BUFFER);
+        send(*mSyncBuffer);
+        delete (mSyncBuffer);
+
+        mSyncBuffer = new MessageOut(GAMSG_PLAYER_SYNC);
+        mSyncMessages = 0;
+    }
+    else
+    {
+        LOG_DEBUG("No changes to sync with account server.");
+    }
+}
+
+void AccountConnection::updateCharacterPoints(const int CharId, const int CharPoints,
+    const int CorrPoints, const int AttribId, const int AttribValue )
+{
+    mSyncMessages++;
+    mSyncBuffer->writeByte(SYNC_CHARACTER_POINTS);
+    mSyncBuffer->writeLong(CharId);
+    mSyncBuffer->writeLong(CharPoints);
+    mSyncBuffer->writeLong(CorrPoints);
+    mSyncBuffer->writeByte(AttribId);
+    mSyncBuffer->writeLong(AttribValue);
+    syncChanges();
+}
+
+void AccountConnection::updateExperience(const int CharId, const int SkillId,
+    const int SkillValue)
+{
+    mSyncMessages++;
+    mSyncBuffer->writeByte(SYNC_CHARACTER_SKILL);
+    mSyncBuffer->writeLong(CharId);
+    mSyncBuffer->writeByte(SkillId);
+    mSyncBuffer->writeLong(SkillValue);
+    syncChanges();
 }

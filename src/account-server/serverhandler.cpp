@@ -31,7 +31,6 @@
 #include "account-server/dalstorage.hpp"
 #include "chat-server/post.hpp"
 #include "net/connectionhandler.hpp"
-#include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
 #include "serialize/characterdata.hpp"
@@ -239,6 +238,12 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 LOG_ERROR("Received data for non-existing character "
                           << id << '.');
             }
+        } break;
+
+        case GAMSG_PLAYER_SYNC:
+        {
+            LOG_DEBUG("GAMSG_PLAYER_SYNC");
+            GameServerHandler::syncDatabase(msg);
         } break;
 
         case GAMSG_REDIRECT:
@@ -509,5 +514,39 @@ void GameServerHandler::sendPartyChange(Character *ptr, int partyId)
         msg.writeLong(ptr->getDatabaseID());
         msg.writeLong(partyId);
         s->send(msg);
+    }
+}
+
+void GameServerHandler::syncDatabase(MessageIn &msg)
+{
+    int msgType = msg.readByte();
+    while( msgType != SYNC_END_OF_BUFFER )
+    {
+        switch (msgType)
+        {
+            case SYNC_CHARACTER_POINTS:
+            {
+                LOG_DEBUG("received SYNC_CHARACTER_POINTS");
+                int CharId = msg.readLong();
+                int CharPoints = msg.readLong();
+                int CorrPoints = msg.readLong();
+                int AttribId = msg.readByte();
+                int AttribValue = msg.readLong();
+                storage->updateCharacterPoints(CharId, CharPoints, CorrPoints,
+                                               AttribId, AttribValue);
+            } break;
+
+            case SYNC_CHARACTER_SKILL:
+            {
+                LOG_DEBUG("received SYNC_CHARACTER_SKILL");
+                int CharId = msg.readLong();
+                int SkillId = msg.readByte();
+                int SkillValue = msg.readLong();
+                storage->updateExperience(CharId, SkillId, SkillValue);
+            } break;
+        }
+
+        // read next message type from buffer
+        msgType = msg.readByte();
     }
 }

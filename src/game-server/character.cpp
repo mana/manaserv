@@ -26,6 +26,7 @@
 #include "game-server/character.hpp"
 
 #include "defines.h"
+#include "game-server/accountconnection.hpp"
 #include "game-server/attackzone.hpp"
 #include "game-server/buysell.hpp"
 #include "game-server/eventlistener.hpp"
@@ -340,6 +341,10 @@ void Character::receiveExperience(size_t skill, int experience)
         if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
         mExperience.at(skill - CHAR_SKILL_BEGIN) = newExp;
         mModifiedExperience.insert(skill - CHAR_SKILL_BEGIN);
+
+        // inform account server
+        accountHandler->updateExperience(getDatabaseID(),
+            skill - CHAR_SKILL_BEGIN, newExp);
 
         // check for skill levelup
         while (newExp >= Character::expForLevel(getAttribute(skill) + 1))

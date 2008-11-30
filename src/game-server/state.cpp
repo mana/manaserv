@@ -450,10 +450,16 @@ void GameState::update(int worldTime)
         for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
         {
             informPlayer(map, *p);
+            /*
+             sending the whole character is overhead for the database, it should
+             be replaced by a syncbuffer. see: game-server/accountconnection:
+             AccountConnection::syncChanges()
+
             if (worldTime % 2000 == 0)
             {
                 accountHandler->sendCharacterData(*p);
             }
+            */
         }
 
         for (ObjectIterator i(map->getWholeMapIterator()); i; ++i)

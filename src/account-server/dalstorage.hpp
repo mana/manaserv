@@ -123,6 +123,27 @@ class DALStorage
         void updateLastLogin(const Account *account);
 
         /**
+         * Write a modification message about Character points to the database.
+         *
+         * @param CharId      ID of the character
+         * @param CharPoints  Number of character points left for the character
+         * @param CorrPoints  Number of correction points left for the character
+         * @param AttribId    ID of the modified attribute
+         * @param AttribValue New value of the modified attribute
+         */
+        void updateCharacterPoints(const int CharId, const int CharPoints,
+            const int CorrPoints, const int AttribId, const int AttribValue );
+
+        /**
+         * Write a modification message about character skills to the database.
+         * @param CharId      ID of the character
+         * @param SkillId     ID of the skill
+         * @param SkillValue  new skill points
+         */
+        void updateExperience(const int CharId, const int SkillId,
+            const int SkillValue);
+
+        /**
          * Sets a ban on an account (hence on all its characters).
          *
          * @param id character identifier.

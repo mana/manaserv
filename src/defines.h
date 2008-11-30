@@ -96,6 +96,7 @@ enum
  * - CPMSG_*: from chat server to client
  * - PGMSG_*: from client to game server
  * - GPMSG_*: from game server to client
+ * - GAMSG_*: from game server to account server
  *
  * Components: B byte, W word, L long, S variable-size string
  *             C tile-based coordinates (B*3)
@@ -269,6 +270,7 @@ enum {
     GAMSG_REDIRECT              = 0x0530, // L id
     AGMSG_REDIRECT_RESPONSE     = 0x0531, // L id, B*32 token, S game address, W game port
     GAMSG_PLAYER_RECONNECT      = 0x0532, // L id, B*32 token
+    GAMSG_PLAYER_SYNC           = 0x0533, // serialised sync data
     GAMSG_SET_QUEST             = 0x0540, // L id, S name, S value
     GAMSG_GET_QUEST             = 0x0541, // L id, S name
     AGMSG_GET_QUEST_RESPONSE    = 0x0542, // L id, S name, S value
@@ -305,6 +307,13 @@ enum {
 enum {
     DATA_VERSION_OK       = 0x00,
     DATA_VERSION_OUTDATED = 0x01
+};
+
+// used to identify part of sync message
+enum {
+    SYNC_CHARACTER_POINTS = 0x01,       // L charId, L charPoints, L corrPoints, B attribute id, L attribute value
+    SYNC_CHARACTER_SKILL  = 0x02,       // L charId, B skillId, L skill value
+    SYNC_END_OF_BUFFER    = 0xFF        // shows, that the buffer ends here.
 };
 
 // Login specific return values
