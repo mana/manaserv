@@ -41,7 +41,7 @@
 
 // defines the supported db version
 #define DB_VERSION_PARAMETER "database_version"
-#define SUPPORTED_DB_VERSION "1"
+#define SUPPORTED_DB_VERSION "2"
 
 
 /**
@@ -95,6 +95,11 @@ void DALStorage::open()
 
         // synchronize base data from xml files
         SyncDatabase();
+
+        // clean list of online users, this should be empty after restart
+        std::ostringstream sql;
+        sql << "DELETE FROM " << ONLINE_USERS_TBL_NAME;
+        mDb->execSql(sql.str());
     }
     catch (const DbConnectionFailure& e) {
         std::ostringstream errmsg;
@@ -1584,4 +1589,41 @@ void DALStorage::SyncDatabase(void)
 
     mDb->commitTransaction();
     xmlFreeDoc(doc);
+}
+
+void DALStorage::setOnlineStatus(int charId, bool online)
+{
+    try
+    {
+        std::ostringstream sql;
+        if (online)
+        {
+            // first we try to update the online status. this prevents errors
+            // in case we get the online status twice
+            sql << "SELECT COUNT(*) FROM " << ONLINE_USERS_TBL_NAME
+                << " WHERE char_id = " << charId;
+            const std::string res = mDb->execSql(sql.str())(0, 0);
+
+            if (res != "0")
+                return;
+
+            sql.clear();
+            sql.str("");
+            sql << "INSERT INTO " << ONLINE_USERS_TBL_NAME
+                << " VALUES (" << charId << ", " << time(NULL) << ")";
+            mDb->execSql(sql.str());
+        }
+        else
+        {
+            sql << "DELETE FROM " << ONLINE_USERS_TBL_NAME
+                << " WHERE char_id = " << charId;
+            mDb->execSql(sql.str());
+        }
+
+
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::setOnlineStatus) SQL query failure: " << e.what());
+    }
 }

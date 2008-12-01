@@ -156,9 +156,9 @@ CREATE TABLE IF NOT EXISTS `tmw_world_states` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
-INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL,1226042339);
-INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL,1226042339);
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'1', 1226042339);
+INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL,UNIX_TIMESTAMP());
+INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL,UNIX_TIMESTAMP());
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'2', UNIX_TIMESTAMP());
 
 --
 -- table: `tmw_guilds`
@@ -286,6 +286,7 @@ AUTO_INCREMENT=1 ;
 --
 -- table: `tmw_post_attachements`
 --
+
 CREATE TABLE IF NOT EXISTS `tmw_post_attachments` (
 	`attachment_id`    int(10)      unsigned  NOT NULL auto_increment,
 	`letter_id`        int(10)      unsigned  NOT NULL,
@@ -305,3 +306,33 @@ CREATE TABLE IF NOT EXISTS `tmw_post_attachments` (
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
+--
+-- table: `tmw_online_list`
+--
+
+CREATE TABLE IF NOT EXISTS `tmw_online_list` (
+    `char_id`      int(10)      unsigned NOT NULL,
+    `login_date`   int(10)      NOT NULL,
+    --
+    PRIMARY KEY (`char_id`),
+    FOREIGN KEY (`char_id`) 
+    	REFERENCES `tmw_characters` (`id`)
+    	ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8 ;
+
+-- create a view to show more details about online users
+CREATE VIEW tmw_v_online_chars
+AS
+   SELECT l.char_id    as char_id,
+          l.login_date as login_date,
+          c.user_id    as user_id,
+          c.name       as name,
+          c.gender     as gender,
+          c.level      as level,
+          c.map_id     as map_id
+     FROM tmw_online_list l
+     JOIN tmw_characters c
+       ON l.char_id = c.id;
+
+ 

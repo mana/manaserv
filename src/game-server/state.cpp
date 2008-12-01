@@ -558,6 +558,11 @@ bool GameState::insert(Thing *ptr)
     mapChangeMessage.writeShort(pos.x);
     mapChangeMessage.writeShort(pos.y);
     gameHandler->sendTo(static_cast< Character * >(obj), mapChangeMessage);
+
+    // update the online state of the character
+    accountHandler->updateOnlineStatus(
+        static_cast< Character * >(obj)->getDatabaseID(), true);
+
     return true;
 }
 
@@ -580,6 +585,10 @@ void GameState::remove(Thing *ptr)
         if (ptr->getType() == OBJECT_CHARACTER)
         {
             static_cast< Character * >(ptr)->cancelTransaction();
+
+            // remove characters online status
+            accountHandler->updateOnlineStatus(
+                static_cast< Character * >(ptr)->getDatabaseID(), false);
         }
 
         MovingObject *obj = static_cast< MovingObject * >(ptr);

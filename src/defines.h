@@ -313,6 +313,7 @@ enum {
 enum {
     SYNC_CHARACTER_POINTS = 0x01,       // L charId, L charPoints, L corrPoints, B attribute id, L attribute value
     SYNC_CHARACTER_SKILL  = 0x02,       // L charId, B skillId, L skill value
+    SYNC_ONLINE_STATUS    = 0x03,       // L charId, B 0x00 = offline, 0x01 = online
     SYNC_END_OF_BUFFER    = 0xFF        // shows, that the buffer ends here.
 };
 

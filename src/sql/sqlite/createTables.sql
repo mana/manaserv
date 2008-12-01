@@ -140,9 +140,9 @@ CREATE TABLE tmw_world_states
    moddate      INTEGER     NOT NULL
 );
 
-INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL,1226042339);
-INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL,1226042339);
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'1', 1226042339);
+INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
+INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'2',  strftime('%s','now'));
 
 CREATE TABLE tmw_auctions
 (
@@ -198,9 +198,6 @@ CREATE TABLE tmw_post
 CREATE INDEX tmw_post_sender   ON tmw_post ( sender_id );
 CREATE INDEX tmw_post_receiver ON tmw_post ( receiver_id );
 
---
--- table: `tmw_post_attachements`
---
 
 CREATE TABLE tmw_post_attachments
 (
@@ -215,3 +212,24 @@ CREATE TABLE tmw_post_attachments
 CREATE INDEX tmw_post_attachments_ltr ON tmw_post_attachments ( letter_id );
 CREATE INDEX tmw_post_attachments_itm ON tmw_post_attachments ( item_id );
 
+
+CREATE TABLE tmw_online_list
+(
+    char_id     INTEGER     PRIMARY KEY,
+    login_date  INTEGER     NOT NULL,
+    --
+    FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+);
+
+CREATE VIEW tmw_v_online_chars
+AS
+   SELECT l.char_id    as char_id,
+          l.login_date as login_date,
+          c.user_id    as user_id,
+          c.name       as name,
+          c.gender     as gender,
+          c.level      as level,
+          c.map_id     as map_id
+     FROM tmw_online_list l
+     JOIN tmw_characters c
+       ON l.char_id = c.id;

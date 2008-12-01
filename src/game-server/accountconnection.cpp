@@ -362,3 +362,19 @@ void AccountConnection::updateExperience(const int CharId, const int SkillId,
     mSyncBuffer->writeLong(SkillValue);
     syncChanges();
 }
+
+void AccountConnection::updateOnlineStatus(const int CharId, const bool Online)
+{
+    mSyncMessages++;
+    mSyncBuffer->writeByte(SYNC_ONLINE_STATUS);
+    mSyncBuffer->writeLong(CharId);
+    if (Online)
+    {
+        mSyncBuffer->writeByte(0x01);
+    }
+    else
+    {
+        mSyncBuffer->writeByte(0x00);
+    }
+    syncChanges();
+}

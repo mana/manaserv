@@ -131,4 +131,10 @@ static char const *AUCTION_TBL_NAME = "tmw_auctions";
  */
 static char const *AUCTION_BIDS_TBL_NAME = "tmw_auction_bids";
 
+/**
+ * TABLE: tmw_online_list
+ * List currently online users.
+ */
+static char const *ONLINE_USERS_TBL_NAME = "tmw_online_list";
+
 #endif // _TMWSERV_DALSTORAGE_SQL_H_

@@ -129,7 +129,6 @@ class AccountConnection : public Connection
                                    const int CorrPoints, const int AttribId,
                                    const int AttribValue);
 
-
         /**
          * Write a modification message about character skills to the sync buffer.
          * @param CharId      ID of the character
@@ -138,6 +137,14 @@ class AccountConnection : public Connection
          */
         void updateExperience(const int CharId, const int SkillId,
                               const int SkillValue);
+
+        /**
+         * Update the status of a character to online (true) or offline (false).
+         *
+         * @param CharId Id of the character.
+         * @param Online True to flag the character as being online.
+         */
+        void updateOnlineStatus(const int CharId, const bool Online);
 
     protected:
         /**

@@ -544,6 +544,15 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
                 int SkillValue = msg.readLong();
                 storage->updateExperience(CharId, SkillId, SkillValue);
             } break;
+
+            case SYNC_ONLINE_STATUS:
+            {
+                LOG_DEBUG("received SYNC_ONLINE_STATUS");
+                int CharId = msg.readLong();
+                bool online;
+                msg.readByte() == 0x00 ? online = false : online = true;
+                storage->setOnlineStatus(CharId, online);
+            }
         }
 
         // read next message type from buffer

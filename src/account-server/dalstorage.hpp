@@ -357,6 +357,14 @@ class DALStorage
         unsigned int getItemDatabaseVersion(void) const
         { return mItemDbVersion; }
 
+        /**
+         * Sets the status of a character to online (true) or offline (false).
+         *
+         * @param charId Id of the character.
+         * @param online True to mark the character as being online.
+         */
+        void setOnlineStatus(int charId, bool online);
+
     private:
         /**
          * Copy constructor.
