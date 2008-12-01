@@ -1,0 +1,3 @@
+[submodule "data"]
+	path = data
+	url = git://gitorious.org/tmwserv-data/mainline.git
