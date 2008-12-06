@@ -49,6 +49,11 @@ namespace MapManager
     MapComposite *getMap(int mapId);
 
     /**
+     *  Returns the requested map
+     */
+    MapComposite *getMap(std::string const &mapName);
+
+    /**
      * Returns all the maps.
      */
     Maps const &getMaps();

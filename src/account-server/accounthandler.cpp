@@ -566,8 +566,8 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
             newCharacter->setMapId(Configuration::getValue("defaultMap", 1));
-            Point startingPos(Configuration::getValue("startX", 512),
-                              Configuration::getValue("startY", 512));
+            Point startingPos(Configuration::getValue("startX", 1024),
+                              Configuration::getValue("startY", 1024));
             newCharacter->setPosition(startingPos);
             acc->addCharacter(newCharacter);
 

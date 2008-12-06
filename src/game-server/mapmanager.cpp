@@ -103,6 +103,17 @@ MapComposite *MapManager::getMap(int mapId)
     return (i != maps.end()) ? i->second : NULL;
 }
 
+MapComposite *MapManager::getMap(std::string const &mapName)
+{
+   Maps::iterator i;
+   for (i = maps.begin(); i != maps.end(); ++i)
+   {
+      if (i->second->getName() == mapName)
+          return i->second;
+   }
+   return NULL;
+}
+
 void MapManager::raiseActive(int mapId)
 {
     Maps::iterator i = maps.find(mapId);

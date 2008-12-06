@@ -170,7 +170,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
 
                 if (objType == "WARP")
                 {
-                    int destMapId = -1;
+                    std::string destMapName = std::string();
                     int destX = -1;
                     int destY = -1;
 
@@ -189,7 +189,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                                 value = utils::toupper(value);
                                 if (value == "DEST_MAP")
                                 {
-                                    destMapId = getObjectProperty(propertyNode, -1);
+                                    destMapName = getObjectProperty(propertyNode, std::string());
                                 }
                                 else if (value == "DEST_X")
                                 {
@@ -203,9 +203,9 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                         }
                     }
 
-                    if (destMapId != -1 && destX != -1 && destY != -1)
+                    if (destMapName != "" && destX != -1 && destY != -1)
                     {
-                        MapComposite *destMap = MapManager::getMap(destMapId);
+                        MapComposite *destMap = MapManager::getMap(destMapName);
                         if (destMap)
                         {
                             things.push_back(new TriggerArea(
