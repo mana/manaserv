@@ -3,6 +3,10 @@ Setting up a TMW server
 
 COMPILATION
 
+0) ./autogen.sh (when you cloned via git)
+1) ./configure
+2) make
+
 The compilation should produce two binaries:
 
 * tmwserv-account - The account + chat server
@@ -11,17 +15,17 @@ The compilation should produce two binaries:
 
 SERVER DATA
 
-Before you can run the game server there are some data files you will need to
-provide (the account server doesn't need these):
+The server depends on parts of the client data and also has its own data
+repository. These are the 'tmwdata' and 'tmwserv-data' repositories.
+Currently, tmwserv expects these to be merged into a single 'data' directory.
 
-* data/items.xml - Item definitions
-* data/monsters.xml - Monster definitions
-* data/maps.xml - Map definitions (file for TMW maps included in Subversion)
-* data/maps/*.tmx{.gz} - Maps
+1) Clone tmwdata and tmwserv-data next to the tmwserv repository
+2) Symlink a 'data' directory in tmwserv to tmwserv-data
+3) Symlink the following files from tmwserv-data to tmwdata:
 
-Since the server shares some of these files with the client via dynamic
-updates, we keep them under 'tmwdata' in Subversion. The easiest is to check
-out tmwdata/trunk somewhere and use symbolic links to the missing files.
+  * data/items.xml - Item definitions
+  * data/monsters.xml - Monster definitions
+  * data/maps/*.tmx{.gz} - Maps
 
 
 CONFIGURATION
