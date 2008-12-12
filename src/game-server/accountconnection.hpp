@@ -49,10 +49,14 @@ class Character;
 class AccountConnection : public Connection
 {
     public:
+        /**
+         * Constructor.
+         */
+        AccountConnection();
 
         /**
-        * Destructor
-        */
+         * Destructor.
+         */
         ~AccountConnection();
 
         /**
@@ -117,34 +121,37 @@ class AccountConnection : public Connection
         void syncChanges(bool force = false);
 
         /**
-         * Write a modification message about character points to the sync buffer.
+         * Write a modification message about character points to the sync
+         * buffer.
          *
-         * @param CharId      ID of the character
-         * @param CharPoints  Number of character points left for the character
-         * @param CorrPoints  Number of correction points left for the character
-         * @param AttribId    ID of the modified attribute
-         * @param AttribValue New value of the modified attribute
+         * @param charId      ID of the character
+         * @param charPoints  character points left for the character
+         * @param corrPoints  correction points left for the character
+         * @param attribId    ID of the modified attribute
+         * @param attribValue New value of the modified attribute
          */
-        void updateCharacterPoints(const int CharId, const int CharPoints,
-                                   const int CorrPoints, const int AttribId,
-                                   const int AttribValue);
+        void updateCharacterPoints(int charId, int charPoints,
+                                   int corrPoints, int attribId,
+                                   int attribValue);
 
         /**
-         * Write a modification message about character skills to the sync buffer.
-         * @param CharId      ID of the character
-         * @param SkillId     ID of the skill
-         * @param SkillValue  new skill points
+         * Write a modification message about character skills to the sync
+         * buffer.
+         *
+         * @param charId      ID of the character
+         * @param skillId     ID of the skill
+         * @param skillValue  new skill points
          */
-        void updateExperience(const int CharId, const int SkillId,
-                              const int SkillValue);
+        void updateExperience(int charId, int skillId, int skillValue);
 
         /**
-         * Update the status of a character to online (true) or offline (false).
+         * Update the status of a character to online (true) or offline
+         * (false).
          *
-         * @param CharId Id of the character.
-         * @param Online True to flag the character as being online.
+         * @param charId Id of the character.
+         * @param online True to flag the character as being online.
          */
-        void updateOnlineStatus(const int CharId, const bool Online);
+        void updateOnlineStatus(int charId, bool online);
 
     protected:
         /**
@@ -153,12 +160,10 @@ class AccountConnection : public Connection
         virtual void processMessage(MessageIn &);
 
     private:
-
         MessageOut* mSyncBuffer;     /**< Message buffer to store sync data. */
         int mSyncMessages;           /**< Number of messages in the sync buffer. */
-
 };
 
 extern AccountConnection *accountHandler;
 
-#endif
+#endif // _TMW_ACCOUNTCONNECTION_H_

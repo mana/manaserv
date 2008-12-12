@@ -142,8 +142,8 @@ static void initialize()
     Logger::setTeeMode(true);
 
     Configuration::initialize(configPath);
-    LOG_INFO("Using Config File: " << configPath);
-    LOG_INFO("Using Log File: " << logPath);
+    LOG_INFO("Using config file: " << configPath);
+    LOG_INFO("Using log file: " << logPath);
 
     // Open database
     try {

@@ -38,12 +38,14 @@
 #include "utils/tokendispenser.hpp"
 #include "utils/tokencollector.hpp"
 
+AccountConnection::AccountConnection():
+    mSyncBuffer(0)
+{
+}
+
 AccountConnection::~AccountConnection()
 {
-    if (mSyncBuffer)
-    {
-        delete (mSyncBuffer);
-    }
+    delete mSyncBuffer;
 }
 
 bool AccountConnection::start()
@@ -323,7 +325,8 @@ void AccountConnection::syncChanges(bool force)
         mSyncMessages > SYNC_BUFFER_LIMIT ||
         mSyncBuffer->getLength() > SYNC_BUFFER_SIZE )
     {
-        LOG_DEBUG("Sending GAMSG_PLAYER_SYNC with " << mSyncMessages << " messages." );
+        LOG_DEBUG("Sending GAMSG_PLAYER_SYNC with "
+                << mSyncMessages << " messages." );
 
         // attach end-of-buffer flag
         mSyncBuffer->writeByte(SYNC_END_OF_BUFFER);
@@ -339,42 +342,37 @@ void AccountConnection::syncChanges(bool force)
     }
 }
 
-void AccountConnection::updateCharacterPoints(const int CharId, const int CharPoints,
-    const int CorrPoints, const int AttribId, const int AttribValue )
+void AccountConnection::updateCharacterPoints(int charId, int charPoints,
+                                              int corrPoints,
+                                              int attribId,
+                                              int attribValue)
 {
     mSyncMessages++;
     mSyncBuffer->writeByte(SYNC_CHARACTER_POINTS);
-    mSyncBuffer->writeLong(CharId);
-    mSyncBuffer->writeLong(CharPoints);
-    mSyncBuffer->writeLong(CorrPoints);
-    mSyncBuffer->writeByte(AttribId);
-    mSyncBuffer->writeLong(AttribValue);
+    mSyncBuffer->writeLong(charId);
+    mSyncBuffer->writeLong(charPoints);
+    mSyncBuffer->writeLong(corrPoints);
+    mSyncBuffer->writeByte(attribId);
+    mSyncBuffer->writeLong(attribValue);
     syncChanges();
 }
 
-void AccountConnection::updateExperience(const int CharId, const int SkillId,
-    const int SkillValue)
+void AccountConnection::updateExperience(int charId, int skillId,
+                                         int skillValue)
 {
     mSyncMessages++;
     mSyncBuffer->writeByte(SYNC_CHARACTER_SKILL);
-    mSyncBuffer->writeLong(CharId);
-    mSyncBuffer->writeByte(SkillId);
-    mSyncBuffer->writeLong(SkillValue);
+    mSyncBuffer->writeLong(charId);
+    mSyncBuffer->writeByte(skillId);
+    mSyncBuffer->writeLong(skillValue);
     syncChanges();
 }
 
-void AccountConnection::updateOnlineStatus(const int CharId, const bool Online)
+void AccountConnection::updateOnlineStatus(int charId, bool online)
 {
     mSyncMessages++;
     mSyncBuffer->writeByte(SYNC_ONLINE_STATUS);
-    mSyncBuffer->writeLong(CharId);
-    if (Online)
-    {
-        mSyncBuffer->writeByte(0x01);
-    }
-    else
-    {
-        mSyncBuffer->writeByte(0x00);
-    }
+    mSyncBuffer->writeLong(charId);
+    mSyncBuffer->writeByte(online ? 0x01 : 0x00);
     syncChanges();
 }
