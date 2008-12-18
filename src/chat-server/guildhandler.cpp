@@ -336,13 +336,11 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
             {
                 chatChannelManager->removeChannel(chatChannelManager->getChannelId(guild->getName()));
             }
-            else
-            {
-                // guild manager checks if the member is the last in the guild
-                // and removes the guild if so
-                guildManager->removeGuildMember(guild, client.characterId);
-                sendGuildListUpdate(guild->getName(), client.characterName, GUILD_EVENT_LEAVING_PLAYER);
-            }
+
+            // guild manager checks if the member is the last in the guild
+            // and removes the guild if so
+            guildManager->removeGuildMember(guild, client.characterId);
+            sendGuildListUpdate(guild->getName(), client.characterName, GUILD_EVENT_LEAVING_PLAYER);
         }
         else
         {
