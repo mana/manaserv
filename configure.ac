@@ -1,6 +1,3 @@
-dnl $Id$
-
-
 AC_PREREQ(2.59)
 AC_INIT([TMW Server], [0.0.1], [themanaworld-devel@lists.sourceforge.net], [tmwserv])
 AC_CONFIG_HEADER([config.h])

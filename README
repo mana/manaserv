@@ -3,7 +3,7 @@ Setting up a TMW server
 
 COMPILATION
 
-0) ./autogen.sh (when you cloned via git)
+0) autoreconf -i (when you cloned via git)
 1) ./configure
 2) make
 
