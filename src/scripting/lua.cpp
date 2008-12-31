@@ -548,6 +548,24 @@ static int LuaNpc_Trade(lua_State *s)
 }
 
 /**
+ * Returns the Thing type of the given Being
+ * tmw.being_type(Being *being)
+ */
+static int LuaBeing_Type(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) )
+    {
+        raiseScriptError(s, "being_type called with incorrect parameters.");
+        return 0;
+    }
+
+    Being *being = getBeing(s, 1);
+    if (!being) return 0;
+    lua_pushinteger(s, being->getType());
+    return 1;
+}
+
+/**
  * Function for making a being walk to a position
  * being_walk(Being *being, int x, int y, int speed)
  */
@@ -1158,6 +1176,7 @@ LuaScript::LuaScript():
         { "chr_give_exp",           &LuaChr_GiveExp       },
         { "exp_for_level",          &LuaExpForLevel       },
         { "monster_create",         &LuaMonster_Create    },
+        { "being_type",             &LuaBeing_Type        },
         { "being_walk",             &LuaBeing_Walk        },
         { "being_say",              &LuaBeing_Say         },
         { "being_damage",           &LuaBeing_Damage      },
