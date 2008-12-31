@@ -884,6 +884,93 @@ static int chr_give_exp(lua_State *s)
     return 0;
 }
 
+/**
+ * Sets the given character's hair style to the given style id
+ * tmw.chr_set_hair_style (character, styleid)
+ */
+static int chr_set_hair_style(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_set_hair_style called for nonexistent character.");
+        return 0;
+    }
+
+    int style = lua_tointeger(s, 2);
+    if (style < 0)
+    {
+        raiseScriptError(s, "chr_set_hair_style called for nonexistent style id %d.", style);
+        return 0;
+    }
+
+    c->setHairStyle(style);
+
+    return 0;
+}
+
+/**
+ * Gets the hair style of the given character
+ * tmw.chr_get_hair_style (character)
+ */
+static int chr_get_hair_style(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_get_hair_style called for nonexistent character.");
+        return 0;
+    }
+
+    int style = c->getHairStyle();
+
+    lua_pushinteger(s, style);
+    return 1;
+}
+
+/**
+ * Set the hair color of the given character to the given color id
+ * tmw.chr_set_hair_color (character, colorid)
+ */
+static int chr_set_hair_color(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_set_hair_color called for nonexistent character.");
+        return 0;
+    }
+
+    int color = lua_tointeger(s, 2);
+    if (color < 0)
+    {
+        raiseScriptError(s, "chr_set_hair_color called for nonexistent style id %d.", color);
+        return 0;
+    }
+
+    c->setHairColor(color);
+
+    return 0;
+}
+
+/**
+ * Get the hair color of the given character
+ * tmw.chr_get_hair_color (character)
+ */
+static int chr_get_hair_color(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_get_hair_color called for nonexistent character.");
+        return 0;
+    }
+
+    int color = c->getHairColor();
+
+    lua_pushinteger(s, color);
+    return 1;
+}
 
 /**
  * Returns the rights level of a character.
@@ -1044,6 +1131,10 @@ LuaScript::LuaScript():
         { "chr_get_exp",            &chr_get_exp          },
         { "chr_give_exp",           &chr_give_exp         },
         { "chr_get_rights",         &chr_get_rights       },
+        { "chr_set_hair_style",     &chr_set_hair_style   },
+        { "chr_get_hair_style",     &chr_get_hair_style   },
+        { "chr_set_hair_color",     &chr_set_hair_color   },
+        { "chr_get_hair_color",     &chr_get_hair_color   },
         { "exp_for_level",          &exp_for_level        },
         { "monster_create",         &monster_create       },
         { "being_type",             &being_type           },
