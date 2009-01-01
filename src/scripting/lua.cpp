@@ -905,6 +905,7 @@ static int chr_set_hair_style(lua_State *s)
     }
 
     c->setHairStyle(style);
+    c->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
 
     return 0;
 }
@@ -949,6 +950,7 @@ static int chr_set_hair_color(lua_State *s)
     }
 
     c->setHairColor(color);
+    c->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
 
     return 0;
 }

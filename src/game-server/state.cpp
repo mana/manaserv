@@ -211,7 +211,11 @@ static void informPlayer(MapComposite *map, Character *p)
             {
                 MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
                 LooksMsg.writeShort(oid);
-                serializeLooks(static_cast< Character * >(o), LooksMsg, false);
+                Character * c = static_cast<Character * >(o);
+                serializeLooks(c, LooksMsg, false);
+                LooksMsg.writeShort(c->getHairStyle());
+                LooksMsg.writeShort(c->getHairColor());
+                LooksMsg.writeShort(c->getGender());
                 gameHandler->sendTo(p, LooksMsg);
             }
 
