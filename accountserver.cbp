@@ -113,8 +113,6 @@
 		<Unit filename="src/point.h" />
 		<Unit filename="src/utils/base64.cpp" />
 		<Unit filename="src/utils/base64.h" />
-		<Unit filename="src/utils/cipher.cpp" />
-		<Unit filename="src/utils/cipher.h" />
 		<Unit filename="src/utils/encryption.cpp" />
 		<Unit filename="src/utils/encryption.h" />
 		<Unit filename="src/utils/functors.h" />
