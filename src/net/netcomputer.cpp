@@ -103,3 +103,8 @@ operator <<(std::ostream &os, const NetComputer &comp)
 
     return os;
 }
+
+int NetComputer::getIP()
+{
+    return mPeer->address.host;
+}

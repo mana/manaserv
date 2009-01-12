@@ -69,11 +69,23 @@ class AccountClient : public NetComputer
         Account *getAccount() const
         { return mAccount; }
 
+        /**
+         * Update lastLoginAttempt
+         */
+        void updateLoginAttempt();
+
+        /**
+         * Returns the time of the last login attempt.
+         */
+        int getLastLoginAttempt() const
+        { return lastLoginAttempt; }
+
         int status;
 
     private:
         /** Account associated with connection */
         Account *mAccount;
+        time_t lastLoginAttempt;
 };
 
 #endif
