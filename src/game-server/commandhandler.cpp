@@ -124,6 +124,7 @@ static void handleHelp(Character *player, std::string &args)
             say("Administrator Commands", player);
             say("@reload", player);
             say("@setgroup <character> <AL level>", player);
+            say("@announce <message>", player);
         }
     }
     else
@@ -688,6 +689,19 @@ static void handleReport(Character *player, std::string &args)
     // TODO: Send the report to a developer or something
 }
 
+static void handleAnnounce(Character *player, std::string &args)
+{
+    std::string msg = getArgument(args);
+
+    if (msg == "")
+    {
+        say("Invalid number of arguments given.", player);
+        return;
+    }
+
+    GameState::sayToAll(msg);
+}
+
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
 {
@@ -762,6 +776,11 @@ void CommandHandler::handleCommand(Character *player,
     {
         if (handlePermissions(player, AL_PLAYER))
             handleReport(player, args);
+    }
+    else if (type == "announce")
+    {
+        if (handlePermissions(player, AL_ADMIN))
+            handleAnnounce(player, args);
     }
     else
     {
