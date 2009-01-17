@@ -68,7 +68,7 @@ class Script
          * Loads a text file into script context and executes its global
          * statements.
          */
-        virtual void loadFile(std::string const &);
+        virtual bool loadFile(std::string const &);
 
         /**
          * Loads a chunk of text and considers it as an NPC handler. This
@@ -128,6 +128,9 @@ class Script
         { return &mEventListener; }
 
         virtual void processDeathEvent(Being* thing) = 0;
+
+    protected:
+        std::string mScriptFile;
 
     private:
         MapComposite *mMap;

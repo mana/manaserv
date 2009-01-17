@@ -69,14 +69,18 @@ void Script::update()
     execute();
 }
 
-void Script::loadFile(std::string const &name)
+bool Script::loadFile(std::string const &name)
 {
     int size;
     char *buffer = ResourceManager::loadFile(name, size);
     if (buffer)
     {
+        mScriptFile = name;
         load(buffer);
         free(buffer);
+        return true;
+    } else {
+        return false;
     }
 }
 

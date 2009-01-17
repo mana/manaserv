@@ -93,6 +93,7 @@ class LuaScript: public Script
 
         lua_State *mState;
         int nbArgs;
+        std::string mCurFunction;
 };
 
 static char const registryKey = 0;
@@ -1213,6 +1214,7 @@ void LuaScript::prepare(std::string const &name)
     assert(nbArgs == -1);
     lua_getglobal(mState, name.c_str());
     nbArgs = 0;
+    mCurFunction = name;
 }
 
 void LuaScript::push(int v)
@@ -1244,15 +1246,18 @@ int LuaScript::execute()
     if (res || !(lua_isnil(mState, 1) || lua_isnumber(mState, 1)))
     {
         char const *s = lua_tostring(mState, 1);
-        LOG_WARN("Failure while calling Lua function: error=" << res
-                 << ", type=" << lua_typename(mState, lua_type(mState, 1))
-                 << ", message=" << (s ? s : ""));
+
+        LOG_WARN("Lua Script Error" << std::endl
+                 << "     Script  : " << mScriptFile << std::endl
+                 << "     Function: " << mCurFunction << std::endl
+                 << "     Error   : " << (s ? s : "") << std::endl);
         lua_pop(mState, 1);
         return 0;
     }
     res = lua_tointeger(mState, 1);
     lua_pop(mState, 1);
     return res;
+    mCurFunction = "";
 }
 
 void LuaScript::load(char const *prog)
