@@ -715,3 +715,15 @@ void GameState::sayTo(Object *destination, Object *source, std::string const &te
 
     gameHandler->sendTo(static_cast< Character * >(destination), msg);
 }
+
+void GameState::sayToAll(const std::string &text)
+{
+    MessageOut msg(GPMSG_SAY);
+
+    // message will show as from server
+    msg.writeShort(0);
+    msg.writeString(text);
+
+    // sends to everyone connected to the game server
+    gameHandler->sendToEveryone(msg);
+}

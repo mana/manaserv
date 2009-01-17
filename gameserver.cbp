@@ -134,7 +134,6 @@
 		<Unit filename="src/scripting/script.hpp" />
 		<Unit filename="src/utils/base64.cpp" />
 		<Unit filename="src/utils/base64.h" />
-		<Unit filename="src/utils/cipher.h" />
 		<Unit filename="src/utils/logger.cpp" />
 		<Unit filename="src/utils/logger.h" />
 		<Unit filename="src/utils/mathutils.cpp" />

@@ -81,6 +81,11 @@ class NetComputer
         send(const MessageOut &msg, bool reliable = true,
              unsigned int channel = 0);
 
+        /**
+         * Returns IP address of computer in 32bit int form
+         */
+        int getIP();
+
     private:
         ENetPeer *mPeer;              /**< Client peer */
 

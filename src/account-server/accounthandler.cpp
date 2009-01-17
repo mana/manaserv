@@ -169,6 +169,22 @@ static void handleLoginMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
+    // get the IP address
+    int address = computer.getIP();
+
+    // TODO: Check IP against blacklist
+
+    time_t lastAttempt = computer.getLastLoginAttempt();
+    if ((time(NULL) - lastAttempt) < 1)
+    {
+        reply.writeByte(LOGIN_INVALID_TIME);
+        computer.send(reply);
+        return;
+    }
+
+    // updates the time last attempted to login
+    computer.updateLoginAttempt();
+
     std::string username = msg.readString();
     std::string password = msg.readString();
 

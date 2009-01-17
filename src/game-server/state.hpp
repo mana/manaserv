@@ -99,6 +99,11 @@ namespace GameState
      */
     void sayAround(Object *, std::string const &text);
 
+    /**
+     * Says something to every player on the server.
+     */
+    void sayToAll(const std::string &text);
+
 }
 
 #endif
