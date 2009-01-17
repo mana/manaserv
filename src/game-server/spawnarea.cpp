@@ -85,7 +85,7 @@ void SpawnArea::update()
 
         if (being->getModifiedAttribute(BASE_ATTR_HP) <= 0)
         {
-            LOG_WARN("Refusing to spawn dead monster " << mSpecy->getType());
+            //LOG_WARN("Refusing to spawn dead monster " << mSpecy->getType());
             delete being;
             being = 0;
         }
