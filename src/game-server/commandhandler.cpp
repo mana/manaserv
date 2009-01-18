@@ -844,6 +844,6 @@ void CommandHandler::handleCommand(Character *player,
     }
     else
     {
-        say("command not found", player);
+        say("Command not found. Enter @help to view the list of available commands.", player);
     }
 }
