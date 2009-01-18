@@ -740,11 +740,11 @@ static void handleRights(Character *player)
     str << "Your rights level is: "
         << player->getAccountLevel()
         << " (AL_PLAYER";
-    if (checkPermission(player, AL_TESTER))
+    if (player->getAccountLevel() &  AL_TESTER)
         str << ", AL_TESTER";
-    if (checkPermission(player, AL_GM))
+    if (player->getAccountLevel() &  AL_GM)
         str << ", AL_GM";
-    if (checkPermission(player, AL_ADMIN))
+    if (player->getAccountLevel() &  AL_ADMIN)
         str << ", AL_ADMIN";
     str << ")";
     say(str.str(), player);
