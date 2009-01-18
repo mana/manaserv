@@ -19,6 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <sstream>
+
 #include "defines.h"
 #include "commandhandler.hpp"
 #include "accountconnection.hpp"
@@ -39,7 +41,7 @@ static void say(const std::string error, Character *player)
     GameState::sayTo(player, NULL, error);
 }
 
-static bool handlePermissions(Character *player, unsigned int permissions)
+static bool checkPermission(Character *player, unsigned int permissions)
 {
     if (player->getAccountLevel() & permissions)
     {
@@ -93,25 +95,30 @@ static void handleHelp(Character *player, std::string &args)
     {
         if (player->getAccountLevel() & AL_PLAYER)
         {
-            say("Game Master Commands:", player);
+            say("=General Commands=", player);
             say("@help [command]", player);
             say("@report <bug>", player);
+            say("@where", player);
+            say("@rights", player);
         }
 
         if (player->getAccountLevel() & AL_TESTER)
         {
+            say("=Tester Commands=", player);
             say("@warp <character> <map> <x> <y>", player);
             say("@goto <character>", player);
         }
 
         if (player->getAccountLevel() & AL_GM)
         {
+            say("=Game Master Commands=", player);
             say("@recall <character>", player);
             say("@ban <character> <length of time>", player);
         }
 
         if (player->getAccountLevel() & AL_DEV)
         {
+            say("=Developer Commands=", player);
             say("@item <character> <item id> <amount>", player);
             say("@drop <item id> <amount>", player);
             say("@money <character> <amount>", player);
@@ -121,7 +128,7 @@ static void handleHelp(Character *player, std::string &args)
 
         if (player->getAccountLevel() & AL_ADMIN)
         {
-            say("Administrator Commands", player);
+            say("=Administrator Commands=", player);
             say("@reload", player);
             say("@setgroup <character> <AL level>", player);
             say("@announce <message>", player);
@@ -149,6 +156,7 @@ static void handleWarp(Character *player, std::string &args)
     if (character == "" || mapstr == "" || xstr == "" || ystr == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @warp <character> <map> <x> <y>", player);
         return;
     }
 
@@ -230,6 +238,7 @@ static void handleItem(Character *player, std::string &args)
     if (character == "" || itemclass == "" || valuestr == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @item <character> <itemID> <amount>", player);
         return;
     }
 
@@ -299,6 +308,7 @@ static void handleDrop(Character *player, std::string &args)
     if (itemclass == "" || valuestr == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @drop <itemID> <amount]>", player);
         return;
     }
 
@@ -349,6 +359,7 @@ static void handleMoney(Character *player, std::string &args)
     if (character == "" || valuestr == "")
     {
         say("Invalid number of arguments given", player);
+        say("Usage: @money <character> <amount>", player);
         return;
     }
 
@@ -397,6 +408,7 @@ static void handleSpawn(Character *player, std::string &args)
     if (monsterclass == "" || valuestr == "")
     {
         say("Invalid amount of arguments given.", player);
+        say("Usage: @spawn <monsterID> <number>", player);
         return;
     }
 
@@ -453,6 +465,7 @@ static void handleGoto(Character *player, std::string &args)
     if (character == "")
     {
         say("Invalid amount of arguments given.", player);
+        say("Usage: @goto <character>", player);
         return;
     }
 
@@ -481,6 +494,7 @@ static void handleRecall(Character *player, std::string &args)
     if (character == "")
     {
         say("Invalid amount of arguments given.", player);
+        say("Usage: @recall <character>", player);
         return;
     }
 
@@ -518,6 +532,7 @@ static void handleBan(Character *player, std::string &args)
     if (character == "" || valuestr == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @ban <character> <duration>", player);
         return;
     }
 
@@ -562,6 +577,7 @@ static void handleSetGroup(Character *player, std::string &args)
     if (character == "" || levelstr == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @setgroup <character> <level>", player);
         return;
     }
 
@@ -628,6 +644,7 @@ static void handleAttribute(Character *player, std::string &args)
     if (character == "" || valuestr == "" || attrstr == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @attribute <character> <attribute> <value>", player);
         return;
     }
 
@@ -683,6 +700,7 @@ static void handleReport(Character *player, std::string &args)
     if (bugReport == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @report <message>", player);
         return;
     }
 
@@ -696,11 +714,43 @@ static void handleAnnounce(Character *player, std::string &args)
     if (msg == "")
     {
         say("Invalid number of arguments given.", player);
+        say("Usage: @announce <message>", player);
         return;
     }
 
     GameState::sayToAll(msg);
 }
+
+static void handleWhere(Character *player)
+{
+    std::stringstream str;
+    str << "Your current location is map "
+        << player->getMapId()
+        << " ["
+        << player->getPosition().x
+        << ":"
+        << player->getPosition().y
+        << "]";
+    say (str.str(), player);
+}
+
+static void handleRights(Character *player)
+{
+    std::stringstream str;
+    str << "Your rights level is: "
+        << player->getAccountLevel()
+        << " (AL_PLAYER";
+    if (checkPermission(player, AL_TESTER))
+        str << ", AL_TESTER";
+    if (checkPermission(player, AL_GM))
+        str << ", AL_GM";
+    if (checkPermission(player, AL_ADMIN))
+        str << ", AL_ADMIN";
+    str << ")";
+    say(str.str(), player);
+}
+
+
 
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
@@ -714,72 +764,82 @@ void CommandHandler::handleCommand(Character *player,
     // handle the command
     if (type == "help")
     {
-        if (handlePermissions(player, AL_PLAYER))
+        if (checkPermission(player, AL_PLAYER))
             handleHelp(player, args);
+    }
+    else if (type == "where" || type == "location")
+    {
+        if (checkPermission(player, AL_PLAYER))
+            handleWhere(player);
+    }
+    else if (type == "rights" || type == "right" || type == "permission")
+    {
+        if (checkPermission(player, AL_PLAYER))
+            handleRights(player);
     }
     else if (type == "warp")
     {
-        if (handlePermissions(player, AL_TESTER))
+        if (checkPermission(player, AL_TESTER))
             handleWarp(player, args);
     }
     else if (type == "item")
     {
-        if (handlePermissions(player, AL_DEV))
+        if (checkPermission(player, AL_DEV))
             handleItem(player, args);
     }
     else if (type == "drop")
     {
-        if (handlePermissions(player, AL_DEV))
+        if (checkPermission(player, AL_DEV))
             handleDrop(player, args);
     }
     else if (type == "money")
     {
-        if (handlePermissions(player, AL_DEV))
+        if (checkPermission(player, AL_DEV))
             handleMoney(player, args);
     }
     else if (type == "spawn")
     {
-        if (handlePermissions(player, AL_DEV))
+        if (checkPermission(player, AL_DEV))
             handleSpawn(player, args);
     }
     else if (type == "goto")
     {
-        if (handlePermissions(player, AL_TESTER))
+        if (checkPermission(player, AL_TESTER))
             handleGoto(player, args);
     }
     else if (type == "recall")
     {
-        if (handlePermissions(player, AL_GM))
+        if (checkPermission(player, AL_GM))
             handleRecall(player, args);
     }
     else if (type == "reload")
     {
-        if (handlePermissions(player, AL_ADMIN))
+        if (checkPermission(player, AL_ADMIN))
             handleReload(player);
     }
     else if (type == "ban")
     {
-        if (handlePermissions(player, AL_GM))
+        if (checkPermission(player, AL_GM))
             handleBan(player, args);
     }
     else if (type == "setgroup")
     {
-        if (handlePermissions(player, AL_ADMIN))
+        if (checkPermission(player, AL_ADMIN))
             handleSetGroup(player, args);
     }
     else if (type == "attribute")
     {
-        if (handlePermissions(player, AL_DEV))
+        if (checkPermission(player, AL_DEV))
             handleAttribute(player, args);
     }
     else if (type == "report")
     {
-        if (handlePermissions(player, AL_PLAYER))
+        if (checkPermission(player, AL_PLAYER))
             handleReport(player, args);
     }
     else if (type == "announce")
     {
-        if (handlePermissions(player, AL_ADMIN))
+        if (checkPermission(player, AL_ADMIN))
             handleAnnounce(player, args);
     }
     else
