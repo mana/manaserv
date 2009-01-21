@@ -1151,6 +1151,18 @@ static int LuaTest_Tableget(lua_State *s)
     return 4;
 }
 
+/**
+ * Returns the ID of the current map
+ */
+static int LuaGet_MapId(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    int id = t->getMap()->getID();
+    lua_pushinteger(s, id);
+    return 1;
+}
 
 LuaScript::LuaScript():
     nbArgs(-1)
@@ -1191,6 +1203,7 @@ LuaScript::LuaScript():
         { "note_on_death",          &LuaNoteOnDeath       },
         { "effect_create",          &LuaEffect_Create     },
         { "test_tableget",          &LuaTest_Tableget     },
+        { "get_map_id",             &LuaGet_MapId         },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
