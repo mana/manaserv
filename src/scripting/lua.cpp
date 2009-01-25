@@ -879,6 +879,22 @@ static int chr_give_exp(lua_State *s)
 
 
 /**
+ * Returns the rights level of a character.
+ * tmw.chr_get_rights (being)
+ */
+static int chr_get_rights(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_get_rights called for nonexistent character.");
+        return 0;
+    }
+    lua_pushinteger(s, c->getAccountLevel());
+    return 1;
+}
+
+/**
  * Returns the exp total necessary to reach a specific skill level.
  * tmw.exp_for_level (level)
  */
@@ -976,6 +992,7 @@ LuaScript::LuaScript():
         { "chr_get_post",           &chr_get_post         },
         { "chr_get_exp",            &chr_get_exp          },
         { "chr_give_exp",           &chr_give_exp         },
+        { "chr_get_rights",         &chr_get_rights       },
         { "exp_for_level",          &exp_for_level        },
         { "monster_create",         &monster_create       },
         { "being_type",             &being_type           },
