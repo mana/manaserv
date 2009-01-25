@@ -37,14 +37,12 @@ NetComputer::NetComputer(ENetPeer *peer):
 {
 }
 
-bool
-NetComputer::isConnected()
+bool NetComputer::isConnected()
 {
     return (mPeer->state == ENET_PEER_STATE_CONNECTED);
 }
 
-void
-NetComputer::disconnect(const MessageOut &msg)
+void NetComputer::disconnect(const MessageOut &msg)
 {
     if (isConnected())
     {
@@ -61,9 +59,8 @@ NetComputer::disconnect(const MessageOut &msg)
     }
 }
 
-void
-NetComputer::send(const MessageOut &msg, bool reliable,
-                  unsigned int channel)
+void NetComputer::send(const MessageOut &msg, bool reliable,
+                       unsigned int channel)
 {
     LOG_DEBUG("Sending message " << msg << " to " << *this);
 
@@ -84,8 +81,7 @@ NetComputer::send(const MessageOut &msg, bool reliable,
     }
 }
 
-std::ostream&
-operator <<(std::ostream &os, const NetComputer &comp)
+std::ostream &operator <<(std::ostream &os, const NetComputer &comp)
 {
     // address.host contains the ip-address in network-byte-order
     if (utils::processor::isLittleEndian)
@@ -104,7 +100,7 @@ operator <<(std::ostream &os, const NetComputer &comp)
     return os;
 }
 
-int NetComputer::getIP()
+int NetComputer::getIP() const
 {
     return mPeer->address.host;
 }
