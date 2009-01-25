@@ -48,8 +48,7 @@ class NetComputer
         /**
          * Returns <code>true</code> if this computer is connected.
          */
-        bool
-        isConnected();
+        bool isConnected();
 
         /**
          * Disconnects the computer from the server, after sending a message.
@@ -58,8 +57,7 @@ class NetComputer
          * NetComputer does not know which handler is sending it
          * (could have been chat/game/account)
          */
-        void
-        disconnect(const MessageOut &msg);
+        void disconnect(const MessageOut &msg);
 
         /**
          * Queues a message for sending to a client.
@@ -77,14 +75,13 @@ class NetComputer
          * @param channel  The channel number of which the packet should
          *                 be sent.
          */
-        void
-        send(const MessageOut &msg, bool reliable = true,
-             unsigned int channel = 0);
+        void send(const MessageOut &msg, bool reliable = true,
+                  unsigned int channel = 0);
 
         /**
          * Returns IP address of computer in 32bit int form
          */
-        int getIP();
+        int getIP() const;
 
     private:
         ENetPeer *mPeer;              /**< Client peer */

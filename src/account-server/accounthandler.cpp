@@ -170,7 +170,7 @@ static void handleLoginMessage(AccountClient &computer, MessageIn &msg)
     }
 
     // get the IP address
-    int address = computer.getIP();
+    //int address = computer.getIP();
 
     // TODO: Check IP against blacklist
 

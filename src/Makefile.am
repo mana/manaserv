@@ -203,9 +203,9 @@ endif
 
 if BUILD_LUA
 tmwserv_game_SOURCES += \
-	scripting/lua.cpp
-	scripting/luascript.cpp
-	scripting/luascript.hpp
-	scripting/luautil.cpp
+	scripting/lua.cpp \
+	scripting/luascript.cpp \
+	scripting/luascript.hpp \
+	scripting/luautil.cpp \
 	scripting/luautil.hpp
 endif
