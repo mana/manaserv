@@ -146,16 +146,24 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
     std::string guildName = msg.readString();
     if (!guildManager->doesExist(guildName))
     {
-        // Guild doesnt already exist so create it
-        Guild *guild = guildManager->createGuild(guildName, client.characterId);
-        reply.writeByte(ERRMSG_OK);
-        reply.writeString(guildName);
-        reply.writeShort(guild->getId());
-        reply.writeShort(guild->getUserPermissions(client.characterId));
+        // check the player hasnt already created a guild
+        if (guildManager->alreadyOwner(client.characterId))
+        {
+            reply.writeByte(ERRMSG_LIMIT_REACHED);
+        }
+        else
+        {
+            // Guild doesnt already exist so create it
+            Guild *guild = guildManager->createGuild(guildName, client.characterId);
+            reply.writeByte(ERRMSG_OK);
+            reply.writeString(guildName);
+            reply.writeShort(guild->getId());
+            reply.writeShort(guild->getUserPermissions(client.characterId));
 
-        // Send autocreated channel id
-        ChatChannel* channel = joinGuildChannel(guildName, client);
-        reply.writeShort(channel->getId());
+            // Send autocreated channel id
+            ChatChannel* channel = joinGuildChannel(guildName, client);
+            reply.writeShort(channel->getId());
+        }
     }
     else
     {
@@ -303,7 +311,8 @@ ChatHandler::handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg)
 
     if (guild && c)
     {
-        if (guildManager->changeMemberLevel(&client, guild, c->getDatabaseID(), level) == 0)
+        int rights = guild->getUserPermissions(c->getDatabaseID()) | level;
+        if (guildManager->changeMemberLevel(&client, guild, c->getDatabaseID(), rights) == 0)
         {
             reply.writeByte(ERRMSG_OK);
             client.send(reply);
@@ -311,6 +320,34 @@ ChatHandler::handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg)
     }
 
     reply.writeByte(ERRMSG_FAILURE);
+    client.send(reply);
+}
+
+void ChatHandler::handleGuildMemberKick(ChatClient &client, MessageIn &msg)
+{
+    MessageOut reply(CPMSG_GUILD_KICK_MEMBER_RESPONSE);
+    short guildId = msg.readShort();
+    std::string user = msg.readString();
+
+    Guild *guild = guildManager->findById(guildId);
+    Character *c = storage->getCharacter(user);
+
+    if (guild && c)
+    {
+        if (guild->getUserPermissions(c->getDatabaseID()) & GAL_KICK)
+        {
+            reply.writeByte(ERRMSG_OK);
+        }
+        else
+        {
+            reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+        }
+    }
+    else
+    {
+        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+    }
+
     client.send(reply);
 }
 
@@ -331,8 +368,8 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
             reply.writeByte(ERRMSG_OK);
             reply.writeShort(guildId);
 
-            // Check if they are the leader, and if so, remove the guild channel
-            if (guild->checkLeader(client.characterId))
+            // Check if there are no members left, remove the guild channel
+            if (guild->totalMembers() == 0)
             {
                 chatChannelManager->removeChannel(chatChannelManager->getChannelId(guild->getName()));
             }
@@ -361,7 +398,7 @@ ChatHandler::guildChannelTopicChange(ChatChannel *channel, int playerId, const s
     Guild *guild = guildManager->findByName(channel->getName());
     if (guild)
     {
-        if(guild->checkLeader(playerId))
+        if(guild->getUserPermissions(playerId) & GAL_TOPIC_CHANGE)
         {
             chatChannelManager->setChannelTopic(channel->getId(), topic);
         }

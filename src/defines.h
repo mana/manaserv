@@ -39,6 +39,23 @@ enum
     AL_ADMIN  =  128     /**< User can perform administrator tasks. */
 };
 
+/**
+     * Guild member permissions
+     * Members with NONE cannot invite users or set permissions
+     * Members with TOPIC_CHANGE can change the guild channel topic
+     * Members with INVIT can invite other users
+     * Memeber with KICK can remove other users
+     * Members with OWNER can invite users and set permissions
+     */
+enum
+{
+    GAL_NONE = 0,
+    GAL_TOPIC_CHANGE = 1,
+    GAL_INVITE = 2,
+    GAL_KICK = 4,
+    GAL_OWNER = 255
+};
+
 enum
 {
     // Network related
@@ -223,9 +240,11 @@ enum {
     CPMSG_GUILD_QUIT_RESPONSE           = 0x0361, // B error
     PCMSG_GUILD_PROMOTE_MEMBER          = 0x0365, // W guild, S name, B rights
     CPMSG_GUILD_PROMOTE_MEMBER_RESPONSE = 0x0366, // B error
+    PCMSG_GUILD_KICK_MEMBER             = 0x0370, // W guild, S name
+    CPMSG_GUILD_KICK_MEMBER_RESPONSE    = 0x0371, // B error
 
-    CPMSG_GUILD_INVITED                 = 0x0370, // S char name, S  guild name, W id
-    CPMSG_GUILD_REJOIN                  = 0x0371, // S name, W guild, W rights, W channel, S announce
+    CPMSG_GUILD_INVITED                 = 0x0388, // S char name, S  guild name, W id
+    CPMSG_GUILD_REJOIN                  = 0x0389, // S name, W guild, W rights, W channel, S announce
 
     // Party
     PCMSG_PARTY_INVITE                  = 0x03A0, // S name
@@ -300,7 +319,7 @@ enum {
     ERRMSG_ALREADY_TAKEN,               // name used was already taken
     ERRMSG_SERVER_FULL,                 // the server is overloaded
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
-    ERRMSG_TOO_MANY_ATTACHMENTS         // too many attachments in letter
+    ERRMSG_LIMIT_REACHED                // limit reached
 };
 
 // used in AGMSG_REGISTER_RESPONSE to show state of item db

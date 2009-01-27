@@ -234,6 +234,11 @@ class ChatHandler : public ConnectionHandler
         handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg);
 
         /**
+         * Deal with kicking a member
+         */
+        void handleGuildMemberKick(ChatClient &client, MessageIn &msg);
+
+        /**
          * Deal with leaving a guild.
          */
         void

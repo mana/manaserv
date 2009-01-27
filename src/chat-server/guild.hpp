@@ -31,15 +31,6 @@
 struct GuildMember
 {
 public:
-    /**
-     * Permissions
-     * Members with NONE cannot invite users or set permissions
-     * Members with COMMANDER can invite other users but
-     *  cannot set permissions
-     * Members with LEADER can invite users and set permissions
-     */
-    enum { NONE = 0, COMMANDER, LEADER };
-
     int mId;
     std::string mName;
     int mPermissions;
@@ -66,7 +57,7 @@ class Guild
          * Add a member to the guild.
          * Removes a user from invite list if on it
          */
-        void addMember(int playerId, int permissions = GuildMember::NONE);
+        void addMember(int playerId, int permissions = 0);
 
         /**
          * Remove a member from the guild.
@@ -74,14 +65,14 @@ class Guild
         void removeMember(int playerId);
 
         /**
-         * Check player is the leader of the guild.
+         * Return owner id
          */
-        bool checkLeader(int playerId);
+        int getOwner();
 
         /**
-         * Set player as leader of the guild.
+         * Set player as owner of the guild.
          */
-        void setLeader(int playerId);
+        void setOwner(int playerId);
 
         /**
          * Set the ID of the guild.

@@ -47,15 +47,17 @@ Guild* GuildManager::createGuild(const std::string &name, int playerId)
     // Add guild to db
     storage->addGuild(guild);
 
-    // Make sure to add guild to mGuilds before searching for it to add the
-    // player
+    // Add guild, and add owner
     mGuilds.push_back(guild);
+    mOwners.push_back(playerId);
+
+    // put the owner in the guild
     addGuildMember(guild, playerId);
 
     // Set and save the member rights
-    storage->setMemberRights(playerId, GuildMember::LEADER);
+    storage->setMemberRights(guild->getId(), playerId, GAL_OWNER);
 
-    guild->setLeader(playerId);
+    guild->setOwner(playerId);
 
     return guild;
 }
@@ -65,6 +67,7 @@ void GuildManager::removeGuild(Guild *guild)
     if (!guild)
         return;
     storage->removeGuild(guild);
+    mOwners.remove(guild->getOwner());
     mGuilds.remove(guild);
     delete guild;
 }
@@ -81,11 +84,26 @@ void GuildManager::removeGuildMember(Guild *guild, int playerId)
 {
     if (!guild)
         return;
+
+    // remove the user from the guild
     storage->removeGuildMember(guild->getId(), playerId);
     guild->removeMember(playerId);
+
+    // if theres no more members left delete the guild
     if(guild->totalMembers() == 0)
     {
         removeGuild(guild);
+    }
+
+    // remove the user from owners list
+    std::list<int>::iterator itr = mOwners.begin();
+    std::list<int>::iterator itr_end = mOwners.end();
+    while (itr != itr_end)
+    {
+        if ((*itr) == playerId)
+            mOwners.remove(playerId);
+
+        ++itr;
     }
 }
 
@@ -161,10 +179,10 @@ int GuildManager::changeMemberLevel(ChatClient *player, Guild *guild,
     {
         int playerLevel = guild->getUserPermissions(player->characterId);
 
-        if (playerLevel == GuildMember::LEADER)
+        if (playerLevel == GAL_OWNER)
         {
             // player can modify anyones permissions
-            guild->setUserPermissions(playerId, level);
+            setUserRights(guild, playerId, level);
             return 0;
         }
     }
@@ -172,3 +190,27 @@ int GuildManager::changeMemberLevel(ChatClient *player, Guild *guild,
     return -1;
 }
 
+bool GuildManager::alreadyOwner(int playerId)
+{
+    std::list<int>::iterator itr = mOwners.begin();
+    std::list<int>::iterator itr_end = mOwners.end();
+
+    for (itr; itr != itr_end; ++itr)
+    {
+        if ((*itr) == playerId)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void GuildManager::setUserRights(Guild *guild, int playerId, int rights)
+{
+    // Set and save the member rights
+    storage->setMemberRights(guild->getId(), playerId, rights);
+
+    // Set with guild
+    guild->setUserPermissions(playerId, rights);
+}

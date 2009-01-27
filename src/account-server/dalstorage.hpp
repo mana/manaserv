@@ -250,7 +250,7 @@ class DALStorage
          * Save guild member rights
          */
         void
-        setMemberRights(int memberId, int rights);
+        setMemberRights(int guildId, int memberId, int rights);
 
         /**
          * Get guild list
