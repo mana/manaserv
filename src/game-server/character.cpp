@@ -26,6 +26,7 @@
 #include "game-server/character.hpp"
 
 #include "defines.h"
+#include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/attackzone.hpp"
 #include "game-server/buysell.hpp"
@@ -130,9 +131,9 @@ void Character::respawn()
     }
 
     //warp back to spawn point
-    static const int spawnMap = 1;
-    static const int spawnX = 1024;
-    static const int spawnY = 1024;
+    int spawnMap = Configuration::getValue("respawnMap", 1);
+    int spawnX = Configuration::getValue("respawnX", 1024);
+    int spawnY = Configuration::getValue("respawnY", 1024);
     GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
 
     //make alive again

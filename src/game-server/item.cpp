@@ -147,9 +147,9 @@ bool ItemClass::use(Being *itemUser)
     if (mType != ITEM_USABLE) return false;
     if (mScript)
     {
-       mScript->prepare("item_use");
-       mScript->push(mDatabaseID);
+       mScript->prepare("use");
        mScript->push(itemUser);
+       mScript->push(mDatabaseID);  // ID of the item
        mScript->execute();
     }
     mModifiers.applyAttributes(itemUser);

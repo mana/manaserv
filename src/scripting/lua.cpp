@@ -19,11 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+
 #include <cassert>
-#include <list>
-#include <map>
-#include <set>
-#include <vector>
 
 extern "C" {
 #include <lualib.h>
@@ -50,190 +47,16 @@ extern "C" {
 #include "game-server/state.hpp"
 #include "game-server/trigger.hpp"
 #include "net/messageout.hpp"
-#include "scripting/script.hpp"
+#include "scripting/luautil.hpp"
+#include "scripting/luascript.hpp"
 #include "utils/logger.h"
 
-/**
- * Implementation of the Script class for Lua.
- */
-class LuaScript: public Script
-{
-    public:
-        /**
-         * Constructor.
-         */
-        LuaScript();
-
-        /**
-         * Destructor.
-         */
-        ~LuaScript();
-
-        void load(char const *);
-
-        void prepare(std::string const &);
-
-        void push(int);
-
-        void push(const std::string &);
-
-        void push(Thing *);
-
-        int execute();
-
-        static void getQuestCallback(Character *, std::string const &,
-                                     std::string const &, void *);
-
-        static void getPostCallback(Character *, std::string const &,
-                                    std::string const &, void *);
-
-        void processDeathEvent(Being* thing);
-
-    private:
-
-        lua_State *mState;
-        int nbArgs;
-};
-
-static char const registryKey = 0;
-
-
-void raiseScriptError(lua_State *s, const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    char message[1024];
-    vsprintf(message, format, args);
-    va_end( args );
-
-    LOG_WARN("Lua script error: "<<message);
-    luaL_error(s, message);
-}
-
-/* Functions below are unsafe, as they assume the script has passed pointers
-   to objects which have not yet been destroyed. If the script never keeps
-   pointers around, there will be no problem. In order to be safe, the engine
-   should replace pointers by local identifiers and store them in a map. By
-   listening to the death of objects, it could keep track of pointers still
-   valid in the map.
-   TODO: do it. */
-
-static NPC *getNPC(lua_State *s, int p)
-{
-    if (!lua_islightuserdata(s, p)) return NULL;
-    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    if (t->getType() != OBJECT_NPC) return NULL;
-    return static_cast<NPC *>(t);
-}
-
-static Character *getCharacter(lua_State *s, int p)
-{
-    if (!lua_islightuserdata(s, p)) return NULL;
-    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    if (t->getType() != OBJECT_CHARACTER) return NULL;
-    return static_cast<Character *>(t);
-}
-
-static Being *getBeing(lua_State *s, int p)
-{
-    if (!lua_islightuserdata(s, p)) return NULL;
-    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    return static_cast<Being *>(t);
-}
-
-/* Polymorphic wrapper for pushing variables.
-   Useful for templates.*/
-void push(lua_State *s, int val)
-{
-    lua_pushinteger(s, val);
-}
-void push(lua_State *s, const std::string &val)
-{
-    lua_pushstring(s, val.c_str());
-}
-void push(lua_State *s, Thing* val)
-{
-    lua_pushlightuserdata(s, val);
-}
-void push(lua_State *s, double val)
-{
-    lua_pushnumber(s, val);
-}
-
-/*  Pushes an STL LIST */
-template <typename T> void pushSTLContainer(lua_State *s, const std::list<T> &container)
-{
-    int len = container.size();
-    lua_newtable(s);
-    int table = lua_gettop(s);
-    typename std::list<T>::const_iterator i;
-    i = container.begin();
-
-    for (int key = 1; key <= len; key++)
-    {
-        push(s, key);
-        push(s, *i);
-        lua_settable(s, table);
-        i++;
-    }
-}
-
-/*  Pushes an STL VECTOR */
-template <typename T> void pushSTLContainer(lua_State *s, const std::vector<T> &container)
-{
-    int len = container.size();
-    lua_createtable(s, 0, len);
-    int table = lua_gettop(s);
-
-    for (int key = 0; key < len; key++)
-    {
-        push(s, key+1);
-        push(s, container.at(key).c_str());
-        lua_settable(s, table);
-    }
-}
-
-/*  Pushes an STL MAP */
-template <typename Tkey, typename Tval> void pushSTLContainer(lua_State *s, const std::map<Tkey, Tval> &container)
-{
-    int len = container.size();
-    lua_createtable(s, 0, len);
-    int table = lua_gettop(s);
-    typename std::map<Tkey, Tval>::const_iterator i;
-    i = container.begin();
-
-    for (int key = 1; key <= len; key++)
-    {
-        push(s, i->first.c_str());
-        push(s, i->second.c_str());
-        lua_settable(s, table);
-        i++;
-    }
-}
-
-/*  Pushes an STL SET */
-template <typename T> void pushSTLContainer(lua_State *s, const std::set<T> &container)
-{
-    int len = container.size();
-    lua_newtable(s);
-    int table = lua_gettop(s);
-    typename std::set<T>::const_iterator i;
-    i = container.begin();
-
-    for (int key = 1; key <= len; key++)
-    {
-        push(s, key);
-        push(s, *i);
-        lua_settable(s, table);
-        i++;
-    }
-}
 
 /**
  * Callback for sending a NPC_MESSAGE.
  * tmw.npc_message(npc, character, string)
  */
-static int LuaNpc_Message(lua_State *s)
+static int npc_message(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
@@ -255,7 +78,7 @@ static int LuaNpc_Message(lua_State *s)
  * Callback for sending a NPC_CHOICE.
  * tmw.npc_choice(npc, character, string...)
  */
-static int LuaNpc_Choice(lua_State *s)
+static int npc_choice(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
@@ -284,7 +107,7 @@ static int LuaNpc_Choice(lua_State *s)
  * Callback for creating a NPC on the current map with the current script.
  * tmw.npc_create(string name, int id, int x, int y): npc
  */
-static int LuaNpc_Create(lua_State *s)
+static int npc_create(lua_State *s)
 {
     if (!lua_isstring(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
     {
@@ -315,7 +138,7 @@ static int LuaNpc_Create(lua_State *s)
  * Callback for sending a NPC_POST.
  * tmw.npc_post(npc, character)
  */
-static int LuaNPC_Post(lua_State *s)
+static int npc_post(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
@@ -337,7 +160,7 @@ static int LuaNPC_Post(lua_State *s)
  * Enable a NPC if it has previously disabled
  * tmw.npc_enable(npc)
  */
-static int LuaNPC_Enable(lua_State *s)
+static int npc_enable(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     if (p)
@@ -354,7 +177,7 @@ static int LuaNPC_Enable(lua_State *s)
  * Disable a NPC
  * tmw.npc_disable(npc)
  */
-static int LuaNPC_Disable(lua_State *s)
+static int npc_disable(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     if (p)
@@ -370,7 +193,7 @@ static int LuaNPC_Disable(lua_State *s)
  * Callback for warping a player to another place.
  * tmw.chr_warp(character, nil/int map, int x, int y)
  */
-static int LuaChr_Warp(lua_State *s)
+static int chr_warp(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
     bool b = lua_isnil(s, 2);
@@ -413,7 +236,7 @@ static int LuaChr_Warp(lua_State *s)
  * Note: If an insertion fails, extra items are dropped on the floor.
  * tmw.chr_inv_change(character, (int id, int nb)...): bool success
  */
-static int LuaChr_InvChange(lua_State *s)
+static int chr_inv_change(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
     if (!q)
@@ -479,7 +302,7 @@ static int LuaChr_InvChange(lua_State *s)
  * When an item identifier is zero, money is queried.
  * tmw.chr_inv_count(character, int id...): int count...
  */
-static int LuaChr_InvCount(lua_State *s)
+static int chr_inv_count(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
     if (!q)
@@ -508,7 +331,7 @@ static int LuaChr_InvCount(lua_State *s)
  * Callback for trading between a player and an NPC.
  * tmw.npc_trade(npc, character, bool sell, table items)
  */
-static int LuaNpc_Trade(lua_State *s)
+static int npc_trade(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
@@ -551,7 +374,7 @@ static int LuaNpc_Trade(lua_State *s)
  * Returns the Thing type of the given Being
  * tmw.being_type(Being *being)
  */
-static int LuaBeing_Type(lua_State *s)
+static int being_type(lua_State *s)
 {
     if (!lua_isuserdata(s, 1) )
     {
@@ -569,7 +392,7 @@ static int LuaBeing_Type(lua_State *s)
  * Function for making a being walk to a position
  * being_walk(Being *being, int x, int y, int speed)
  */
-static int LuaBeing_Walk(lua_State *s)
+static int being_walk(lua_State *s)
 {
     if (!lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
     {
@@ -592,7 +415,7 @@ static int LuaBeing_Walk(lua_State *s)
  * Makes the being say something
  * tmw.being_say(source, message)
  */
-static int LuaBeing_Say(lua_State *s)
+static int being_say(lua_State *s)
 {
     if (!lua_isuserdata(s, 1) || !lua_isstring(s, 2) )
     {
@@ -619,7 +442,7 @@ static int LuaBeing_Say(lua_State *s)
  * Applies combat damage to a being
  * tmw.being_damage(victim, value, delta, cth, type, element)
  */
-static int LuaBeing_Damage(lua_State *s)
+static int being_damage(lua_State *s)
 {
     Being *being = getBeing(s, 1);
 
@@ -639,7 +462,7 @@ static int LuaBeing_Damage(lua_State *s)
  * Gets the attribute for a being
  * tmw.being_get_attribute(being, attribute)
  */
-static int LuaBeing_GetAttribute(lua_State *s)
+static int being_get_attribute(lua_State *s)
 {
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
@@ -668,7 +491,7 @@ static int LuaBeing_GetAttribute(lua_State *s)
  * Gets the being's name
  * tmw.being_get_name(being)
  */
-static int LuaBeing_GetName(lua_State *s)
+static int being_get_name(lua_State *s)
 {
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
@@ -686,7 +509,7 @@ static int LuaBeing_GetName(lua_State *s)
 /**
  * Function for getting the x-coordinate of the position of a being
  */
-static int LuaPosX(lua_State *s)
+static int posX(lua_State *s)
 {
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
@@ -700,7 +523,7 @@ static int LuaPosX(lua_State *s)
 /**
  * Function for getting the y-coordinate of the position of a being
  */
-static int LuaPosY(lua_State *s)
+static int posY(lua_State *s)
 {
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
@@ -715,7 +538,7 @@ static int LuaPosY(lua_State *s)
  * Callback for creating a monster on the current map.
  * tmw.monster_create(int type, int x, int y)
  */
-static int LuaMonster_Create(lua_State *s)
+static int monster_create(lua_State *s)
 {
     if (!lua_isnumber(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
     {
@@ -747,7 +570,7 @@ static int LuaMonster_Create(lua_State *s)
     q->setPosition(Point(lua_tointeger(s, 2), lua_tointeger(s, 3)));
     if (!GameState::insertSafe(q))
     {
-        LOG_WARN("LuaMonster_Create failed to insert monster");
+        LOG_WARN("Monster_Create failed to insert monster");
         return 0;
     }
 
@@ -756,44 +579,11 @@ static int LuaMonster_Create(lua_State *s)
 }
 
 /**
- * Called when the server has recovered the value of a quest variable.
- */
-void LuaScript::getQuestCallback(Character *q, std::string const &name,
-                                 std::string const &value, void *data)
-{
-    LuaScript *s = static_cast< LuaScript * >(data);
-    assert(s->nbArgs == -1);
-    lua_getglobal(s->mState, "quest_reply");
-    lua_pushlightuserdata(s->mState, q);
-    lua_pushstring(s->mState, name.c_str());
-    lua_pushstring(s->mState, value.c_str());
-    s->nbArgs = 3;
-    s->execute();
-}
-
-/**
- * Called when the server has recovered the post for a user
- */
-void LuaScript::getPostCallback(Character *q, std::string const &sender,
-                                std::string const &letter, void *data)
-{
-    // get the script
-    LuaScript *s = static_cast<LuaScript*>(data);
-    assert(s->nbArgs == -1);
-    lua_getglobal(s->mState, "post_reply");
-    lua_pushlightuserdata(s->mState, q);
-    lua_pushstring(s->mState, sender.c_str());
-    lua_pushstring(s->mState, letter.c_str());
-    s->nbArgs = 3;
-    s->execute();
-}
-
-/**
  * Callback for getting a quest variable. Starts a recovery and returns
  * immediatly, if the variable is not known yet.
  * tmw.chr_get_chest(character, string): nil or string
  */
-static int LuaChr_GetQuest(lua_State *s)
+static int chr_get_quest(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
     char const *m = lua_tostring(s, 2);
@@ -821,7 +611,7 @@ static int LuaChr_GetQuest(lua_State *s)
  * Callback for setting a quest variable.
  * tmw.chr_set_chest(character, string, string)
  */
-static int LuaChr_SetQuest(lua_State *s)
+static int chr_set_quest(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
     char const *m = lua_tostring(s, 2);
@@ -840,7 +630,7 @@ static int LuaChr_SetQuest(lua_State *s)
  * a Lua function is called.
  * tmw.trigger_create (x, y, width, height, function, id)
  */
-static int LuaTrigger_Create(lua_State *s)
+static int trigger_create(lua_State *s)
 {
     //TODO: argument check
     if (!lua_isnumber(s, 1) ||
@@ -890,7 +680,7 @@ static int LuaTrigger_Create(lua_State *s)
  * global message: tmw.chatmessage (message)
  * private massage: tmw.chatmessage (recipent, message)
  */
-static int LuaChatmessage(lua_State *s)
+static int chatmessage(lua_State *s)
 {
     if (lua_gettop(s) == 2 && lua_isuserdata(s, 1) && lua_isstring(s, 2) )
     {
@@ -920,7 +710,7 @@ static int LuaChatmessage(lua_State *s)
  * inside of a circular area of the current map.
  * tmw.get_beings_in_circle (x, y, radius)
  */
-static int LuaGetBeingsInCircle(lua_State *s)
+static int get_beings_in_circle(lua_State *s)
 {
     int x = lua_tointeger(s, 1);
     int y = lua_tointeger(s, 2);
@@ -958,7 +748,7 @@ static int LuaGetBeingsInCircle(lua_State *s)
 /**
  * Gets the post for the character
  */
-static int LuaChr_GetPost(lua_State *s)
+static int chr_get_post(lua_State *s)
 {
     if (lua_isuserdata(s, 1))
     {
@@ -982,7 +772,7 @@ static int LuaChr_GetPost(lua_State *s)
  * with the being ID when the being dies.
  * tmw.note_on_death (being)
  */
-static int LuaNoteOnDeath(lua_State *s)
+static int note_on_death(lua_State *s)
 {
     if (!lua_islightuserdata(s, 1) || lua_gettop(s) != 1)
     {
@@ -1008,7 +798,7 @@ static int LuaNoteOnDeath(lua_State *s)
  * Triggers a special effect from the clients effects.xml
  * tmw.effect_create (id, x, y)
  */
-static int LuaEffect_Create(lua_State *s)
+static int effect_create(lua_State *s)
 {
     if (!lua_isnumber(s, 1) ||
         !lua_isnumber(s, 2) ||
@@ -1035,7 +825,7 @@ static int LuaEffect_Create(lua_State *s)
  * Gets the exp total in a skill of a specific character
  * tmw.chr_get_exp (being, skill)
  */
-static int LuaChr_GetExp(lua_State *s)
+static int chr_get_exp(lua_State *s)
 {
     Character *c = getCharacter(s, 1);
     if (!c)
@@ -1064,7 +854,7 @@ static int LuaChr_GetExp(lua_State *s)
  * desired.
  * tmw.chr_give_exp (being, skill, amount)
  */
-static int LuaChr_GiveExp(lua_State *s)
+static int chr_give_exp(lua_State *s)
 {
     Character *c = getCharacter(s, 1);
     if (!c)
@@ -1089,10 +879,26 @@ static int LuaChr_GiveExp(lua_State *s)
 
 
 /**
+ * Returns the rights level of a character.
+ * tmw.chr_get_rights (being)
+ */
+static int chr_get_rights(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_get_rights called for nonexistent character.");
+        return 0;
+    }
+    lua_pushinteger(s, c->getAccountLevel());
+    return 1;
+}
+
+/**
  * Returns the exp total necessary to reach a specific skill level.
  * tmw.exp_for_level (level)
  */
-static int LuaExpForLevel(lua_State *s)
+static int exp_for_level(lua_State *s)
 {
     int level = lua_tointeger(s, 1);
 
@@ -1107,7 +913,7 @@ static int LuaExpForLevel(lua_State *s)
  * This function can be removed when there are more useful functions which use
  * them.
  */
-static int LuaTest_Tableget(lua_State *s)
+static int test_tableget(lua_State *s)
 {
 
     std::list<float> list;
@@ -1150,6 +956,18 @@ static int LuaTest_Tableget(lua_State *s)
     return 4;
 }
 
+/**
+ * Returns the ID of the current map
+ */
+static int get_map_id(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    int id = t->getMap()->getID();
+    lua_pushinteger(s, id);
+    return 1;
+}
 
 LuaScript::LuaScript():
     nbArgs(-1)
@@ -1159,37 +977,39 @@ LuaScript::LuaScript():
 
     // Put some callback functions in the scripting environment.
     static luaL_reg const callbacks[] = {
-        { "npc_create",             &LuaNpc_Create        },
-        { "npc_message",            &LuaNpc_Message       },
-        { "npc_choice",             &LuaNpc_Choice        },
-        { "npc_trade",              &LuaNpc_Trade         },
-        { "npc_post",               &LuaNPC_Post          },
-        { "npc_enable",             &LuaNPC_Enable        },
-        { "npc_disable",            &LuaNPC_Disable       },
-        { "chr_warp",               &LuaChr_Warp          },
-        { "chr_inv_change",         &LuaChr_InvChange     },
-        { "chr_inv_count",          &LuaChr_InvCount      },
-        { "chr_get_quest",          &LuaChr_GetQuest      },
-        { "chr_set_quest",          &LuaChr_SetQuest      },
-        { "chr_get_post",           &LuaChr_GetPost       },
-        { "chr_get_exp",            &LuaChr_GetExp        },
-        { "chr_give_exp",           &LuaChr_GiveExp       },
-        { "exp_for_level",          &LuaExpForLevel       },
-        { "monster_create",         &LuaMonster_Create    },
-        { "being_type",             &LuaBeing_Type        },
-        { "being_walk",             &LuaBeing_Walk        },
-        { "being_say",              &LuaBeing_Say         },
-        { "being_damage",           &LuaBeing_Damage      },
-        { "being_get_attribute",    &LuaBeing_GetAttribute},
-        { "being_get_name",         &LuaBeing_GetName     },
-        { "posX",                   &LuaPosX              },
-        { "posY",                   &LuaPosY              },
-        { "trigger_create",         &LuaTrigger_Create    },
-        { "chatmessage",            &LuaChatmessage       },
-        { "get_beings_in_circle",   &LuaGetBeingsInCircle },
-        { "note_on_death",          &LuaNoteOnDeath       },
-        { "effect_create",          &LuaEffect_Create     },
-        { "test_tableget",          &LuaTest_Tableget     },
+        { "npc_create",             &npc_create           },
+        { "npc_message",            &npc_message          },
+        { "npc_choice",             &npc_choice           },
+        { "npc_trade",              &npc_trade            },
+        { "npc_post",               &npc_post             },
+        { "npc_enable",             &npc_enable           },
+        { "npc_disable",            &npc_disable          },
+        { "chr_warp",               &chr_warp             },
+        { "chr_inv_change",         &chr_inv_change       },
+        { "chr_inv_count",          &chr_inv_count        },
+        { "chr_get_quest",          &chr_get_quest        },
+        { "chr_set_quest",          &chr_set_quest        },
+        { "chr_get_post",           &chr_get_post         },
+        { "chr_get_exp",            &chr_get_exp          },
+        { "chr_give_exp",           &chr_give_exp         },
+        { "chr_get_rights",         &chr_get_rights       },
+        { "exp_for_level",          &exp_for_level        },
+        { "monster_create",         &monster_create       },
+        { "being_type",             &being_type           },
+        { "being_walk",             &being_walk           },
+        { "being_say",              &being_say            },
+        { "being_damage",           &being_damage         },
+        { "being_get_attribute",    &being_get_attribute  },
+        { "being_get_name",         &being_get_name       },
+        { "posX",                   &posX                 },
+        { "posY",                   &posY                 },
+        { "trigger_create",         &trigger_create       },
+        { "chatmessage",            &chatmessage          },
+        { "get_beings_in_circle",   &get_beings_in_circle },
+        { "note_on_death",          &note_on_death        },
+        { "effect_create",          &effect_create        },
+        { "test_tableget",          &test_tableget        },
+        { "get_map_id",             &get_map_id           },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
@@ -1203,99 +1023,3 @@ LuaScript::LuaScript():
     loadFile("scripts/libs/libtmw.lua");
 }
 
-LuaScript::~LuaScript()
-{
-    lua_close(mState);
-}
-
-void LuaScript::prepare(std::string const &name)
-{
-    assert(nbArgs == -1);
-    lua_getglobal(mState, name.c_str());
-    nbArgs = 0;
-}
-
-void LuaScript::push(int v)
-{
-    assert(nbArgs >= 0);
-    lua_pushinteger(mState, v);
-    ++nbArgs;
-}
-
-void LuaScript::push(std::string const &v)
-{
-    assert(nbArgs >= 0);
-    lua_pushstring(mState, v.c_str());
-    ++nbArgs;
-}
-
-void LuaScript::push(Thing *v)
-{
-    assert(nbArgs >= 0);
-    lua_pushlightuserdata(mState, v);
-    ++nbArgs;
-}
-
-int LuaScript::execute()
-{
-    assert(nbArgs >= 0);
-    int res = lua_pcall(mState, nbArgs, 1, 0);
-    nbArgs = -1;
-    if (res || !(lua_isnil(mState, 1) || lua_isnumber(mState, 1)))
-    {
-        char const *s = lua_tostring(mState, 1);
-        LOG_WARN("Failure while calling Lua function: error=" << res
-                 << ", type=" << lua_typename(mState, lua_type(mState, 1))
-                 << ", message=" << (s ? s : ""));
-        lua_pop(mState, 1);
-        return 0;
-    }
-    res = lua_tointeger(mState, 1);
-    lua_pop(mState, 1);
-    return res;
-}
-
-void LuaScript::load(char const *prog)
-{
-    int res = luaL_loadstring(mState, prog);
-
-    if (res == LUA_ERRSYNTAX)
-    {
-        LOG_ERROR("Syntax error while loading Lua script.");
-        return;
-    }
-
-    // A Lua chunk is like a function, so "execute" it in order to initialize
-    // it.
-    res = lua_pcall(mState, 0, 0, 0);
-    if (res)
-    {
-        LOG_ERROR("Failure while initializing Lua script: "
-                  << lua_tostring(mState, -1));
-        lua_settop(mState, 0);
-        return;
-    }
-}
-
-void LuaScript::processDeathEvent(Being *being)
-{
-    prepare("death_notification");
-    push(being);
-    //TODO: get and push a list of creatures who contributed to killing the
-    //      being. This might be very interesting for scripting quests.
-    execute();
-
-    being->removeListener(getScriptDeathListener());
-}
-
-static Script *LuaFactory()
-{
-    return new LuaScript();
-}
-
-struct LuaRegister
-{
-    LuaRegister() { Script::registerEngine("lua", LuaFactory); }
-};
-
-static LuaRegister dummy;

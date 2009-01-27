@@ -135,7 +135,7 @@ void ItemManager::reload()
         int value = XML::getProperty(node, "value", 0);
         int maxPerSlot = XML::getProperty(node, "max-per-slot", 0);
         int sprite = XML::getProperty(node, "sprite_id", 0);
-        std::string scriptName = XML::getProperty(node, "script_name", std::string());
+        std::string scriptFile = XML::getProperty(node, "script", "");
         std::string attackShape = XML::getProperty(node, "attack-shape", "cone");
         std::string attackTarget = XML::getProperty(node, "attack-target", "multi");
         int attackRange = XML::getProperty(node, "attack-range", 32);
@@ -172,8 +172,8 @@ void ItemManager::reload()
 
         if (maxPerSlot == 0)
         {
-            LOG_WARN("Item Manager: Missing max-per-slot property for "
-                     "item " << id << " in " << itemReferenceFile << '.');
+            //LOG_WARN("Item Manager: Missing max-per-slot property for "
+            //         "item " << id << " in " << itemReferenceFile << '.');
             maxPerSlot = 1;
         }
 
@@ -193,21 +193,24 @@ void ItemManager::reload()
         }
 
         // TODO: Clean this up some
-        Script *s = 0;
-        std::stringstream filename;
-        filename << "scripts/items/" << id << ".lua";
-
-        if (ResourceManager::exists(filename.str()))       // file exists!
+        if (scriptFile != "")
         {
-            LOG_INFO("Loading item script: " + filename.str());
-            s = Script::create("lua");
-            s->loadFile(filename.str());
+            std::stringstream filename;
+            filename << "scripts/items/" << scriptFile;
+            if (ResourceManager::exists(filename.str()))       // file exists!
+            {
+                LOG_INFO("Loading item script: " << filename.str());
+                Script *s = Script::create("lua");
+                s->loadFile(filename.str());
+                item->setScript(s);
+            } else {
+                LOG_WARN("Could not find script file \"" << filename.str() << "\" for item #"<<id);
+            }
         }
 
         item->setWeight(weight);
         item->setCost(value);
         item->setMaxPerSlot(maxPerSlot);
-        item->setScript(s);
         item->setModifiers(modifiers);
         item->setSpriteID(sprite ? sprite : id);
         ++nbItems;
@@ -250,7 +253,7 @@ void ItemManager::reload()
 
         LOG_DEBUG("Item: ID: " << id << ", itemType: " << itemType
                   << ", weight: " << weight << ", value: " << value <<
-                  ", scriptName: " << scriptName << ", maxPerSlot: " << maxPerSlot << ".");
+                  ", script: " << scriptFile << ", maxPerSlot: " << maxPerSlot << ".");
     }
 
     LOG_INFO("Loaded " << nbItems << " items from "
