@@ -130,6 +130,10 @@
 		<Unit filename="src/net/netcomputer.hpp" />
 		<Unit filename="src/point.h" />
 		<Unit filename="src/scripting/lua.cpp" />
+		<Unit filename="src/scripting/luascript.cpp" />
+		<Unit filename="src/scripting/luascript.hpp" />
+		<Unit filename="src/scripting/luautil.cpp" />
+		<Unit filename="src/scripting/luautil.hpp" />
 		<Unit filename="src/scripting/script.cpp" />
 		<Unit filename="src/scripting/script.hpp" />
 		<Unit filename="src/utils/base64.cpp" />

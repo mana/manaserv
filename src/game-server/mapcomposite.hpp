@@ -120,6 +120,103 @@ struct ObjectIterator
 };
 
 /**
+ * Part of a map.
+ */
+struct MapZone
+{
+    unsigned short nbCharacters, nbMovingObjects;
+    /**
+     * Objects present in this zone.
+     * Characters are stored first, then the remaining MovingObjects, then the
+     * remaining Objects.
+     */
+    std::vector< Object * > objects;
+
+    /**
+     * Destinations of the objects that left this zone.
+     * This is necessary in order to have an accurate iterator around moving
+     * objects.
+     */
+    MapRegion destinations;
+
+    MapZone(): nbCharacters(0), nbMovingObjects(0) {}
+    void insert(Object *);
+    void remove(Object *);
+};
+
+/**
+ * Pool of public IDs for MovingObjects on a map. By maintaining public ID
+ * availability using bits, it can locate an available public ID fast while
+ * using minimal memory access.
+ */
+struct ObjectBucket
+{
+    static int const int_bitsize = sizeof(unsigned) * 8;
+    unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
+    short free;                         /**< Number of empty places. */
+    short next_object;                  /**< Next object to look at. */
+    MovingObject *objects[256];
+
+    ObjectBucket();
+    int allocate();
+    void deallocate(int);
+};
+
+/**
+ * Entities on a map.
+ */
+struct MapContent
+{
+    MapContent(Map *);
+    ~MapContent();
+
+    /**
+     * Allocates a unique ID for a moving object on this map.
+     */
+    bool allocate(MovingObject *);
+
+    /**
+     * Deallocates an ID.
+     */
+    void deallocate(MovingObject *);
+
+    /**
+     * Fills a region of zones within the range of a point.
+     */
+    void fillRegion(MapRegion &, Point const &, int) const;
+
+    /**
+     * Fills a region of zones inside a rectangle.
+     */
+    void fillRegion(MapRegion &, Rectangle const &) const;
+
+    /**
+     * Gets zone at given position.
+     */
+    MapZone &getZone(Point const &pos) const;
+
+    /**
+     * Things (items, characters, monsters, etc) located on the map.
+     */
+    std::vector< Thing * > things;
+
+    /**
+     * Buckets of MovingObjects located on the map, referenced by ID.
+     */
+    ObjectBucket *buckets[256];
+
+    int last_bucket; /**< Last bucket acted upon. */
+
+    /**
+     * Partition of the Objects, depending on their position on the map.
+     */
+    MapZone *zones;
+
+    unsigned short mapWidth;  /**< Width with respect to zones. */
+    unsigned short mapHeight; /**< Height with respect to zones. */
+};
+
+/**
  * Combined map/entity structure.
  */
 class MapComposite
