@@ -19,6 +19,7 @@
  */
 
 #include "guild.hpp"
+#include "defines.h"
 
 #include <algorithm>
 
@@ -49,39 +50,43 @@ void Guild::addMember(int playerId, int permissions)
 
 void Guild::removeMember(int playerId)
 {
-    if (checkLeader(playerId))
+    if (getOwner() == playerId)
     {
         // if the leader is leaving, assign next member as leader
         std::list<GuildMember*>::iterator itr = mMembers.begin();
         ++itr;
         if (itr != mMembers.end())
-            setLeader((*itr)->mId);
+            setOwner((*itr)->mId);
     }
     GuildMember *member = getMember(playerId);
     if (member)
         mMembers.remove(member);
 }
 
-bool Guild::checkLeader(int playerId)
+int Guild::getOwner()
 {
-    int leader = 0;
-    GuildMember *member = getMember(playerId);
-    // check member exists
-    if (member)
-        leader = member->mPermissions;
-    // check permissions
-    if (leader == GuildMember::LEADER)
-        return true;
-    return false;
+    std::list<GuildMember*>::iterator itr = mMembers.begin();
+    std::list<GuildMember*>::iterator itr_end = mMembers.end();
 
+    while (itr != itr_end)
+    {
+        if ((*itr)->mPermissions == GAL_OWNER)
+        {
+            return (*itr)->mId;
+        }
+
+        ++itr;
+    }
+
+    return 0;
 }
 
-void Guild::setLeader(int playerId)
+void Guild::setOwner(int playerId)
 {
     GuildMember *member = getMember(playerId);
     if (member)
     {
-        member->mPermissions = GuildMember::LEADER;
+        member->mPermissions = GAL_OWNER;
     }
 }
 
@@ -122,7 +127,7 @@ bool Guild::canInvite(int playerId)
     // Guild members with permissions above NONE can invite
     // Check that guild members permissions are not NONE
     GuildMember *member = getMember(playerId);
-    if (member->mPermissions > GuildMember::NONE)
+    if (member->mPermissions & GAL_INVITE)
         return true;
     return false;
 }

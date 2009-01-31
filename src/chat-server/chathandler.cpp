@@ -214,6 +214,9 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleGuildMemberLevelChange(computer, message);
             break;
 
+        case PCMSG_GUILD_KICK_MEMBER:
+            handleGuildMemberKick(computer, message);
+
         case PCMSG_GUILD_QUIT:
             handleGuildQuit(computer, message);
             break;

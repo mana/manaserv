@@ -106,8 +106,19 @@ class GuildManager
         int changeMemberLevel(ChatClient *player, Guild *guild,
                               int playerId, int level);
 
+        /**
+         * Check if the player already owns a guild
+         */
+        bool alreadyOwner(int playerId);
+
+        /**
+         * Set user rights
+         */
+        void setUserRights(Guild *guild, int playerId, int rights);
+
     private:
         std::list<Guild*> mGuilds;
+        std::list<int> mOwners;
 };
 
 extern GuildManager *guildManager;

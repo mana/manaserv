@@ -996,7 +996,7 @@ void DALStorage::removeGuildMember(int guildId, int memberId)
     }
 }
 
-void DALStorage::setMemberRights(int memberId, int rights)
+void DALStorage::setMemberRights(int guildId, int memberId, int rights)
 {
     std::ostringstream sql;
 
