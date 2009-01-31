@@ -586,6 +586,11 @@ static int monster_create(lua_State *s)
 static int chr_get_quest(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
+    if (!q)
+    {
+        raiseScriptError(s, "chr_get_quest called for nonexistent character.");
+    }
+
     char const *m = lua_tostring(s, 2);
     if (!m || m[0] == 0)
     {
