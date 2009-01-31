@@ -124,10 +124,12 @@ class Script
         MapComposite *getMap() const
         { return mMap; }
 
-        EventListener *getScriptDeathListener()
+        EventListener *getScriptListener()
         { return &mEventListener; }
 
         virtual void processDeathEvent(Being* thing) = 0;
+
+        virtual void processRemoveEvent(Thing* thing) = 0;
 
     protected:
         std::string mScriptFile;
@@ -136,18 +138,19 @@ class Script
         MapComposite *mMap;
         EventListener mEventListener; /**< Tracking of being deaths. */
 
-    friend struct ScriptDeathEventDispatch;
+    friend struct ScriptEventDispatch;
 };
 
-struct ScriptDeathEventDispatch: EventDispatch
+struct ScriptEventDispatch: EventDispatch
 {
-    ScriptDeathEventDispatch()
+    ScriptEventDispatch()
     {
         typedef EventListenerFactory< Script, &Script::mEventListener > Factory;
         died = &Factory::create< Being, &Script::processDeathEvent >::function;
+        removed = &Factory::create< Thing, &Script::processRemoveEvent >::function;
     }
 };
 
-static ScriptDeathEventDispatch scriptDeathEventDispatch;
+static ScriptEventDispatch scriptEventDispatch;
 
 #endif

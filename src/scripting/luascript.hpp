@@ -65,6 +65,8 @@ class LuaScript: public Script
 
         void processDeathEvent(Being* thing);
 
+        void processRemoveEvent(Thing* thing);
+
     private:
 
         lua_State *mState;

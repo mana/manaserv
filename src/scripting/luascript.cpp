@@ -112,8 +112,17 @@ void LuaScript::processDeathEvent(Being *being)
     //TODO: get and push a list of creatures who contributed to killing the
     //      being. This might be very interesting for scripting quests.
     execute();
+}
 
-    being->removeListener(getScriptDeathListener());
+void LuaScript::processRemoveEvent(Thing *being)
+{
+    prepare("remove_notification");
+    push(being);
+    //TODO: get and push a list of creatures who contributed to killing the
+    //      being. This might be very interesting for scripting quests.
+    execute();
+
+    being->removeListener(getScriptListener());
 }
 
 /**

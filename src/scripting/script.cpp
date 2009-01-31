@@ -33,7 +33,7 @@ static Engines *engines = NULL;
 
 Script::Script():
     mMap(NULL),
-    mEventListener(&scriptDeathEventDispatch)
+    mEventListener(&scriptEventDispatch)
 {}
 
 void Script::registerEngine(std::string const &name, Factory f)

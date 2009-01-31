@@ -768,15 +768,16 @@ static int chr_get_post(lua_State *s)
 }
 
 /**
- * Makes the server call the lua function deathEvent
- * with the being ID when the being dies.
- * tmw.note_on_death (being)
+ * Makes the server call the lua functions deathEvent
+ * and removeEvent when the being dies or is removed
+ * from the map.
+ * tmw.being_register (being)
  */
-static int note_on_death(lua_State *s)
+static int being_register(lua_State *s)
 {
     if (!lua_islightuserdata(s, 1) || lua_gettop(s) != 1)
     {
-        raiseScriptError(s, "lua_noteOnDeath called with incorrect parameters.");
+        raiseScriptError(s, "being_register called with incorrect parameters.");
         return 0;
     }
 
@@ -786,13 +787,14 @@ static int note_on_death(lua_State *s)
     Being *being = getBeing(s, 1);
     if (!being)
     {
-        raiseScriptError(s, "lua_noteOnDeath called for nonexistent being.");
+        raiseScriptError(s, "being_register called for nonexistent being.");
         return 0;
     }
 
-    being->addListener(t->getScriptDeathListener());
+    being->addListener(t->getScriptListener());
     return 0;
 }
+
 
 /**
  * Triggers a special effect from the clients effects.xml
@@ -1006,7 +1008,7 @@ LuaScript::LuaScript():
         { "trigger_create",         &trigger_create       },
         { "chatmessage",            &chatmessage          },
         { "get_beings_in_circle",   &get_beings_in_circle },
-        { "note_on_death",          &note_on_death        },
+        { "being_register",         &being_register       },
         { "effect_create",          &effect_create        },
         { "test_tableget",          &test_tableget        },
         { "get_map_id",             &get_map_id           },
