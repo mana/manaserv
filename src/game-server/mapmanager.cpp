@@ -132,9 +132,6 @@ void MapManager::raiseActive(int mapId)
     MapReader::readMap(file, composite);
 
     LOG_INFO("Activated map \"" << file << "\" (id " << mapId << ")");
-    // Add some testing stuff
-    extern void testingMap(MapComposite *);
-    testingMap(composite);
 }
 
 

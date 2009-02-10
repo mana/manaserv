@@ -982,6 +982,14 @@ static int get_map_id(lua_State *s)
  */
 static int item_drop(lua_State *s)
 {
+    if (!lua_isnumber(s, 1) ||
+        !lua_isnumber(s, 2) ||
+        !lua_isnumber(s, 3))
+    {
+        raiseScriptError(s, "trigger_create called with incorrect parameters.");
+        return 0;
+    }
+
     int x = lua_tointeger(s, 1);
     int y = lua_tointeger(s, 2);
     int type = lua_tointeger(s, 3);
