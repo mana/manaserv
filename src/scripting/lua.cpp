@@ -976,6 +976,42 @@ static int get_map_id(lua_State *s)
     return 1;
 }
 
+/**
+ * Creates an item stack on the floor
+ * tmw.drop_item(x, y, id[, number])
+ */
+static int item_drop(lua_State *s)
+{
+    int x = lua_tointeger(s, 1);
+    int y = lua_tointeger(s, 2);
+    int type = lua_tointeger(s, 3);
+    int number = 1;
+    if (lua_isnumber(s, 4))
+    {
+        number = lua_tointeger(s, 4);
+    }
+
+    ItemClass *ic = ItemManager::getItem(type);
+    if (!ic)
+    {
+        raiseScriptError(s, "item_drop called with unknown item ID");
+    }
+    Item *i = new Item(ic, number);
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    MapComposite* map = t->getMap();
+
+    i->setMap(map);
+    Point pos(x, y);
+    i->setPosition(pos);
+    GameState::insertSafe(i);
+
+    return 0;
+}
+
+
 LuaScript::LuaScript():
     nbArgs(-1)
 {
@@ -1017,6 +1053,7 @@ LuaScript::LuaScript():
         { "effect_create",          &effect_create        },
         { "test_tableget",          &test_tableget        },
         { "get_map_id",             &get_map_id           },
+        { "item_drop",              &item_drop            },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
