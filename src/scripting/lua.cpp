@@ -51,6 +51,13 @@ extern "C" {
 #include "scripting/luascript.hpp"
 #include "utils/logger.h"
 
+/*
+ * This file includes all script bindings available to LUA scripts.
+ * When you add or change a script binding please document it on
+ *
+ * http://wiki.themanaworld.org/index.php/Scripting
+ */
+
 
 /**
  * Callback for sending a NPC_MESSAGE.
