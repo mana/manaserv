@@ -56,53 +56,10 @@ enum
     GAL_OWNER = 255
 };
 
-enum
-{
-    // Network related
-    MAX_CLIENTS  = 1024,
-
-    // Chat related
-/**
- * N.B: Private channels can't have an id less
- * than MAX_PUBLIC_CHANNELS_RANGE.
- */
-    MAX_PUBLIC_CHANNELS_RANGE  = 1000,
-    MAX_PRIVATE_CHANNELS_RANGE = 10000,
-    MAX_CHANNEL_NAME           = 15,
-    MAX_CHANNEL_ANNOUNCEMENT   = 150,
-    MAX_CHANNEL_PASSWORD       = 12,
-
-    // Post related
-    MAX_ATTACHMENTS = 3,
-    MAX_LETTERS = 10,
-
-    // Registering related
-    MIN_LOGIN_LENGTH = 4,
-    MAX_LOGIN_LENGTH = 16,
-    MIN_PASSWORD_LENGTH = 4,
-    MAX_PASSWORD_LENGTH = 25,
-    MIN_EMAIL_LENGTH = 7,
-    MAX_EMAIL_LENGTH = 50,
-
-    // Character related
-    MIN_CHARACTER_LENGTH = 4,
-    MAX_CHARACTER_LENGTH = 25,
-    MAX_OF_CHARACTERS = 3,
-    MAX_HAIRSTYLE_VALUE = 15,
-    MAX_HAIRCOLOR_VALUE = 9,
-    MAX_GENDER_VALUE = 2,
-
-/**
- * Points to give to a brand new character
- */
-    POINTS_TO_DISTRIBUTES_AT_LVL1 = 60,
-
     // Screen Related
 /**
  * Determine the area in which a character is aware of other beings
  */
-    AROUND_AREA = 320
-};
 
 /**
  * Enumerated type for communicated messages:

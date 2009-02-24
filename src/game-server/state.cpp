@@ -25,6 +25,7 @@
 
 #include "defines.h"
 #include "point.h"
+#include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
@@ -162,9 +163,10 @@ static void informPlayer(MapComposite *map, Character *p)
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
     Point pold = p->getOldPosition(), ppos = p->getPosition();
     int pid = p->getPublicID(), pflags = p->getUpdateFlags();
+    int visualRange = Configuration::getValue("visualRange", 320);
 
     // Inform client about activities of other beings near its character
-    for (MovingObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
+    for (MovingObjectIterator i(map->getAroundCharacterIterator(p, visualRange)); i; ++i)
     {
         MovingObject *o = *i;
 
@@ -174,9 +176,9 @@ static void informPlayer(MapComposite *map, Character *p)
         int flags = 0;
 
         // Check if the character p and the moving object o are around.
-        bool wereInRange = pold.inRangeOf(oold, AROUND_AREA) &&
+        bool wereInRange = pold.inRangeOf(oold, visualRange) &&
                            !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
-        bool willBeInRange = ppos.inRangeOf(opos, AROUND_AREA);
+        bool willBeInRange = ppos.inRangeOf(opos, visualRange);
 
         if (!wereInRange && !willBeInRange)
         {
@@ -369,7 +371,7 @@ static void informPlayer(MapComposite *map, Character *p)
 
     // Inform client about items on the ground around its character
     MessageOut itemMsg(GPMSG_ITEMS);
-    for (FixedObjectIterator i(map->getAroundCharacterIterator(p, AROUND_AREA)); i; ++i)
+    for (FixedObjectIterator i(map->getAroundCharacterIterator(p, visualRange)); i; ++i)
     {
         assert((*i)->getType() == OBJECT_ITEM ||
                (*i)->getType() == OBJECT_EFFECT);
@@ -377,8 +379,8 @@ static void informPlayer(MapComposite *map, Character *p)
         Object *o = *i;
         Point opos = o->getPosition();
         int oflags = o->getUpdateFlags();
-        bool willBeInRange = ppos.inRangeOf(opos, AROUND_AREA);
-        bool wereInRange = pold.inRangeOf(opos, AROUND_AREA) &&
+        bool willBeInRange = ppos.inRangeOf(opos, visualRange);
+        bool wereInRange = pold.inRangeOf(opos, visualRange) &&
                            !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
 
         if (willBeInRange ^ wereInRange)
@@ -581,6 +583,7 @@ void GameState::remove(Thing *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
+    int visualRange = Configuration::getValue("visualRange", 320);
 
     ptr->removed();
 
@@ -600,9 +603,9 @@ void GameState::remove(Thing *ptr)
         msg.writeShort(obj->getPublicID());
         Point objectPos = obj->getPosition();
 
-        for (CharacterIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
+        for (CharacterIterator p(map->getAroundObjectIterator(obj, visualRange)); p; ++p)
         {
-            if (*p != obj && objectPos.inRangeOf((*p)->getPosition(), AROUND_AREA))
+            if (*p != obj && objectPos.inRangeOf((*p)->getPosition(), visualRange))
             {
                 gameHandler->sendTo(*p, msg);
             }
@@ -617,9 +620,9 @@ void GameState::remove(Thing *ptr)
         msg.writeShort(pos.x);
         msg.writeShort(pos.y);
 
-        for (CharacterIterator p(map->getAroundObjectIterator(obj, AROUND_AREA)); p; ++p)
+        for (CharacterIterator p(map->getAroundObjectIterator(obj, visualRange)); p; ++p)
         {
-            if (pos.inRangeOf((*p)->getPosition(), AROUND_AREA))
+            if (pos.inRangeOf((*p)->getPosition(), visualRange))
             {
                 gameHandler->sendTo(*p, msg);
             }
@@ -693,10 +696,11 @@ void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
 void GameState::sayAround(Object *obj, std::string const &text)
 {
     Point speakerPosition = obj->getPosition();
+    int visualRange = Configuration::getValue("visualRange", 320);
 
-    for (CharacterIterator i(obj->getMap()->getAroundObjectIterator(obj, AROUND_AREA)); i; ++i)
+    for (CharacterIterator i(obj->getMap()->getAroundObjectIterator(obj, visualRange)); i; ++i)
     {
-        if (speakerPosition.inRangeOf((*i)->getPosition(), AROUND_AREA))
+        if (speakerPosition.inRangeOf((*i)->getPosition(), visualRange))
         {
             sayTo(*i, obj, text);
         }

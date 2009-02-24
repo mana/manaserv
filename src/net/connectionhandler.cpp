@@ -23,6 +23,7 @@
 #include "net/connectionhandler.hpp"
 
 #include "defines.h"
+#include "common/configuration.hpp"
 #include "net/bandwidth.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -38,7 +39,7 @@ bool ConnectionHandler::startListen(enet_uint16 port)
     LOG_INFO("Listening on port " << port << "...");
     host = enet_host_create(
             &address    /* the address to bind the server host to */,
-            MAX_CLIENTS /* allow up to MAX_CLIENTS connections */,
+            Configuration::getValue("net_maxClients", 1000) /* allowed connections */,
             0           /* assume any amount of incoming bandwidth */,
             0           /* assume any amount of outgoing bandwidth */);
 

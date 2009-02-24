@@ -51,9 +51,9 @@ AccountConnection::~AccountConnection()
 bool AccountConnection::start()
 {
     const std::string accountServerAddress =
-        Configuration::getValue("accountServerAddress", "localhost");
+        Configuration::getValue("net_accountServerAddress", "localhost");
     const int accountServerPort =
-        Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT) + 1;
+        Configuration::getValue("net_accountServerPort", DEFAULT_SERVER_PORT) + 1;
 
     if (!Connection::start(accountServerAddress, accountServerPort))
     {
@@ -64,9 +64,9 @@ bool AccountConnection::start()
     LOG_INFO("Connection established to the account server.");
 
     const std::string gameServerAddress =
-        Configuration::getValue("gameServerAddress", "localhost");
+        Configuration::getValue("net_gameServerAddress", "localhost");
     const int gameServerPort =
-        Configuration::getValue("gameServerPort", DEFAULT_SERVER_PORT + 3);
+        Configuration::getValue("net_gameServerPort", DEFAULT_SERVER_PORT + 3);
 
     // Register with the account server and send the list of maps we handle
     MessageOut msg(GAMSG_REGISTER);

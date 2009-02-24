@@ -28,6 +28,7 @@
 #include "chat-server/chatclient.hpp"
 #include "chat-server/chathandler.hpp"
 #include "chat-server/guildmanager.hpp"
+#include "common/configuration.hpp"
 #include "utils/stringfilter.h"
 
 ChatChannelManager::ChatChannelManager() : mNextChannelId(1)
@@ -65,13 +66,14 @@ bool ChatChannelManager::tryNewPublicChannel(const std::string &name)
     }
 
     // Checking strings for length and double quotes
+    unsigned maxNameLength = Configuration::getValue("chat_maxChannelNameLength", 150);
     if (name.empty() ||
-        name.length() > MAX_CHANNEL_NAME ||
+        name.length() > maxNameLength ||
         stringFilter->findDoubleQuotes(name))
     {
         return false;
     }
-    else if (guildManager->doesExist(name) || 
+    else if (guildManager->doesExist(name) ||
              channelExists(name))
     {
         // Channel already exists

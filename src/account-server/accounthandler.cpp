@@ -195,7 +195,7 @@ static void handleLoginMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
-    if (accountHandler->getClientNumber() >= MAX_CLIENTS )
+    if (accountHandler->getClientNumber() >= (unsigned)Configuration::getValue("net_maxClients", 1000) )
     {
         reply.writeByte(ERRMSG_SERVER_FULL);
         computer.send(reply);
@@ -289,6 +289,11 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     std::string username = msg.readString();
     std::string password = msg.readString();
     std::string email = msg.readString();
+    int minClientVersion = Configuration::getValue("clientVersion", 0);
+    unsigned minNameLength = Configuration::getValue("account_minNameLength", 4);
+    unsigned maxNameLength = Configuration::getValue("account_maxNameLength", 15);
+    unsigned minPasswordLength = Configuration::getValue("account_minPasswordLength", 6);
+    unsigned maxPasswordLength = Configuration::getValue("account_maxPasswordLength", 25);
 
     MessageOut reply(APMSG_REGISTER_RESPONSE);
 
@@ -296,7 +301,7 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
-    else if (clientVersion < Configuration::getValue("clientVersion", 0))
+    else if (clientVersion < minClientVersion)
     {
         reply.writeByte(REGISTER_INVALID_VERSION);
     }
@@ -308,13 +313,13 @@ static void handleRegisterMessage(AccountClient &computer, MessageIn &msg)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if ((username.length() < MIN_LOGIN_LENGTH) ||
-            (username.length() > MAX_LOGIN_LENGTH))
+    else if (username.length() < minNameLength ||
+            username.length() > maxNameLength)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (password.length() < MIN_PASSWORD_LENGTH ||
-             password.length() > MAX_PASSWORD_LENGTH)
+    else if (password.length() < minPasswordLength ||
+             password.length() > maxPasswordLength)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
@@ -488,6 +493,14 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
     int hairStyle = msg.readByte();
     int hairColor = msg.readByte();
     int gender = msg.readByte();
+    int numHairStyles = Configuration::getValue("char_numHairStyles", 15);
+    int numHairColors = Configuration::getValue("char_numHairColors", 9);
+    int numGenders = Configuration::getValue("char_numGenders", 2);
+    unsigned minNameLength = Configuration::getValue("char_minNameLength", 4);
+    unsigned maxNameLength = Configuration::getValue("char_maxNameLength", 25);
+    unsigned maxCharacters = Configuration::getValue("char_maxCharacters", 3);
+    unsigned startingPoints = Configuration::getValue("char_startingPoints", 60);
+
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
@@ -504,20 +517,20 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (hairStyle > MAX_HAIRSTYLE_VALUE)
+    else if (hairStyle > numHairStyles)
     {
         reply.writeByte(CREATE_INVALID_HAIRSTYLE);
     }
-    else if (hairColor > MAX_HAIRCOLOR_VALUE)
+    else if (hairColor > numHairColors)
     {
         reply.writeByte(CREATE_INVALID_HAIRCOLOR);
     }
-    else if (gender > MAX_GENDER_VALUE)
+    else if (gender > numGenders)
     {
         reply.writeByte(CREATE_INVALID_GENDER);
     }
-    else if ((name.length() < MIN_CHARACTER_LENGTH) ||
-             (name.length() > MAX_CHARACTER_LENGTH))
+    else if ((name.length() < minNameLength) ||
+             (name.length() > maxNameLength))
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
@@ -532,7 +545,7 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
 
         // An account shouldn't have more than MAX_OF_CHARACTERS characters.
         Characters &chars = acc->getCharacters();
-        if (chars.size() >= MAX_OF_CHARACTERS)
+        if (chars.size() >= maxCharacters)
         {
             reply.writeByte(CREATE_TOO_MUCH_CHARACTERS);
             computer.send(reply);
@@ -557,11 +570,11 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
             if (attributes[i] <= 0) validNonZeroAttributes = false;
         }
 
-        if (totalAttributes > POINTS_TO_DISTRIBUTES_AT_LVL1)
+        if (totalAttributes > startingPoints)
         {
             reply.writeByte(CREATE_ATTRIBUTES_TOO_HIGH);
         }
-        else if (totalAttributes < POINTS_TO_DISTRIBUTES_AT_LVL1)
+        else if (totalAttributes < startingPoints)
         {
             reply.writeByte(CREATE_ATTRIBUTES_TOO_LOW);
         }
@@ -581,9 +594,9 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
-            newCharacter->setMapId(Configuration::getValue("defaultMap", 1));
-            Point startingPos(Configuration::getValue("startX", 1024),
-                              Configuration::getValue("startY", 1024));
+            newCharacter->setMapId(Configuration::getValue("char_startMap", 1));
+            Point startingPos(Configuration::getValue("char_startX", 1024),
+                              Configuration::getValue("char_startY", 1024));
             newCharacter->setPosition(startingPos);
             acc->addCharacter(newCharacter);
 
@@ -651,9 +664,9 @@ static void handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg
     reply.writeShort(port);
 
     // TODO: get correct address and port for the chat server
-    reply.writeString(Configuration::getValue("accountServerAddress",
+    reply.writeString(Configuration::getValue("net_accountServerAddress",
                                               "localhost"));
-    reply.writeShort(Configuration::getValue("accountServerPort",
+    reply.writeShort(Configuration::getValue("net_accountServerPort",
                                              DEFAULT_SERVER_PORT) + 2);
 
     GameServerHandler::registerClient(magic_token, selectedChar);

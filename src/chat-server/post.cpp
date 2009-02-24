@@ -22,7 +22,7 @@
 #include "post.hpp"
 
 #include "../account-server/character.hpp"
-#include "../defines.h"
+#include "../common/configuration.hpp"
 
 Letter::Letter(unsigned int type, Character *sender, Character *receiver)
  : mId(0), mType(type), mSender(sender), mReceiver(receiver)
@@ -62,7 +62,7 @@ std::string Letter::getContents()
 
 bool Letter::addAttachment(InventoryItem item)
 {
-    if (mAttachments.size() > MAX_ATTACHMENTS)
+    if (mAttachments.size() > Configuration::getValue("mail_maxAttachments", 3))
     {
         return false;
     }
@@ -102,7 +102,7 @@ Post::~Post()
 
 bool Post::addLetter(Letter *letter)
 {
-    if (mLetters.size() > MAX_LETTERS)
+    if (mLetters.size() > Configuration::getValue("mail_maxLetters", 10))
     {
         return false;
     }

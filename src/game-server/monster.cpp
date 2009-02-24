@@ -20,6 +20,7 @@
 
 #include "game-server/monster.hpp"
 
+#include "common/configuration.hpp"
 #include "game-server/character.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/item.hpp"
@@ -166,7 +167,8 @@ void Monster::update()
     Direction bestAttackDirection = DIRECTION_DOWN;
 
     // Iterate through objects nearby
-    for (MovingObjectIterator i(getMap()->getAroundCharacterIterator(this, AROUND_AREA)); i; ++i)
+    int aroundArea = Configuration::getValue("visualRange", 320);
+    for (MovingObjectIterator i(getMap()->getAroundCharacterIterator(this, aroundArea)); i; ++i)
     {
         // We only want to attack player characters
         if ((*i)->getType() != OBJECT_CHARACTER) continue;
