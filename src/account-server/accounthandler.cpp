@@ -195,7 +195,8 @@ static void handleLoginMessage(AccountClient &computer, MessageIn &msg)
         return;
     }
 
-    if (accountHandler->getClientNumber() >= (unsigned)Configuration::getValue("net_maxClients", 1000) )
+    unsigned maxClients = (unsigned)Configuration::getValue("net_maxClients", 1000);
+    if (accountHandler->getClientNumber() >= maxClients)
     {
         reply.writeByte(ERRMSG_SERVER_FULL);
         computer.send(reply);

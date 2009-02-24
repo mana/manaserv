@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
     // General Initialization
     initialize();
 
-    int port = Configuration::getValue("accountServerPort", DEFAULT_SERVER_PORT);
+    int port = Configuration::getValue("net_accountServerPort", DEFAULT_SERVER_PORT);
     if (!AccountClientHandler::initialize(port) ||
         !GameServerHandler::initialize(port + 1) ||
         !chatHandler->startListen(port + 2))

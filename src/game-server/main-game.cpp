@@ -255,7 +255,7 @@ void parseOptions(int argc, char *argv[])
                 // Change the port to listen on.
                 unsigned short portToListenOn;
                 portToListenOn = atoi(optarg);
-                Configuration::setValue("gameServerPort", portToListenOn);
+                Configuration::setValue("net_gameServerPort", portToListenOn);
                 LOG_INFO("Setting default port to " << portToListenOn);
                 break;
         }
@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
     accountHandler->start();
 
     int gameServerPort =
-        Configuration::getValue("gameServerPort", DEFAULT_SERVER_PORT + 3);
+        Configuration::getValue("net_gameServerPort", DEFAULT_SERVER_PORT + 3);
 
     if (!gameHandler->startListen(gameServerPort))
     {
