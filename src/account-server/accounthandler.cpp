@@ -494,8 +494,8 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
     int hairStyle = msg.readByte();
     int hairColor = msg.readByte();
     int gender = msg.readByte();
-    int numHairStyles = Configuration::getValue("char_numHairStyles", 15);
-    int numHairColors = Configuration::getValue("char_numHairColors", 9);
+    int numHairStyles = Configuration::getValue("char_numHairStyles", 17);
+    int numHairColors = Configuration::getValue("char_numHairColors", 11);
     int numGenders = Configuration::getValue("char_numGenders", 2);
     unsigned minNameLength = Configuration::getValue("char_minNameLength", 4);
     unsigned maxNameLength = Configuration::getValue("char_maxNameLength", 25);
