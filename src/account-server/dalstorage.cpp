@@ -1635,7 +1635,7 @@ void DALStorage::addTransaction(const Transaction &trans)
     {
         std::stringstream sql;
         sql << "INSERT INTO " << TRANSACTION_TBL_NAME
-            << " VALUES (" << trans.mCharacterId << ", " << trans.mAction
+            << " VALUES (NULL, " << trans.mCharacterId << ", " << trans.mAction
             << ", '" << trans.mMessage << "', " << time(NULL) << ")";
         mDb->execSql(sql.str());
     }
@@ -1662,9 +1662,9 @@ std::vector<Transaction> DALStorage::getTransactions(unsigned int num)
         for (int i = start; i < size; ++i)
         {
             Transaction trans;
-            trans.mCharacterId = toUint(rec(i, 0));
-            trans.mAction = toUint(rec(i, 1));
-            trans.mMessage = rec(i, 2);
+            trans.mCharacterId = toUint(rec(i, 1));
+            trans.mAction = toUint(rec(i, 2));
+            trans.mMessage = rec(i, 3);
             transactions.push_back(trans);
         }
     }
@@ -1691,9 +1691,9 @@ std::vector<Transaction> DALStorage::getTransactions(time_t date)
         for (int i = 0; i < rec.rows(); ++i)
         {
             Transaction trans;
-            trans.mCharacterId = toUint(rec(i, 0));
-            trans.mAction = toUint(rec(i, 1));
-            trans.mMessage = rec(i, 2);
+            trans.mCharacterId = toUint(rec(i, 1));
+            trans.mAction = toUint(rec(i, 2));
+            trans.mMessage = rec(i, 3);
             transactions.push_back(trans);
         }
     }

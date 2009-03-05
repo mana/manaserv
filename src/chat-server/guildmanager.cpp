@@ -195,12 +195,13 @@ bool GuildManager::alreadyOwner(int playerId)
     std::list<int>::iterator itr = mOwners.begin();
     std::list<int>::iterator itr_end = mOwners.end();
 
-    for (itr; itr != itr_end; ++itr)
+    while (itr != itr_end)
     {
         if ((*itr) == playerId)
         {
             return true;
         }
+        ++itr;
     }
 
     return false;

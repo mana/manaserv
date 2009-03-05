@@ -1,5 +1,5 @@
 
--- add table tmw_online_list to store online users
+-- add table tmw_transactions to store transactional history
 CREATE TABLE tmw_transactions
 (
     id          INTEGER     PRIMARY KEY,
