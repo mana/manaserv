@@ -23,8 +23,11 @@
 
 #include <list>
 #include <map>
+#include <vector>
 
 #include "dal/dataprovider.h"
+
+#include "transaction.hpp"
 
 class Account;
 class Character;
@@ -364,6 +367,19 @@ class DALStorage
          * @param online True to mark the character as being online.
          */
         void setOnlineStatus(int charId, bool online);
+
+        /**
+         * Store a transaction
+         */
+        void addTransaction(const Transaction &trans);
+
+        /**
+         * Retrieve a series of transactions
+         * Either based on number of transactions last saved
+         * or by all transactions since a date
+         */
+        std::vector<Transaction> getTransactions(unsigned int num);
+        std::vector<Transaction> getTransactions(time_t date);
 
     private:
         /**

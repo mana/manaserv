@@ -41,7 +41,7 @@
 
 // defines the supported db version
 #define DB_VERSION_PARAMETER "database_version"
-#define SUPPORTED_DB_VERSION "2"
+#define SUPPORTED_DB_VERSION "3"
 
 
 /**
@@ -1006,6 +1006,7 @@ void DALStorage::setMemberRights(int guildId, int memberId, int rights)
         << " set rights = '" << rights << "'"
         << " where member_id = \""
         << memberId << "\";";
+        mDb->execSql(sql.str());
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
@@ -1626,4 +1627,80 @@ void DALStorage::setOnlineStatus(int charId, bool online)
     {
         LOG_ERROR("(DALStorage::setOnlineStatus) SQL query failure: " << e.what());
     }
+}
+
+void DALStorage::addTransaction(const Transaction &trans)
+{
+    try
+    {
+        std::stringstream sql;
+        sql << "INSERT INTO " << TRANSACTION_TBL_NAME
+            << " VALUES (" << trans.mCharacterId << ", " << trans.mAction
+            << ", '" << trans.mMessage << "', " << time(NULL) << ")";
+        mDb->execSql(sql.str());
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::addTransaction) SQL query failure: " << e.what());
+    }
+}
+
+std::vector<Transaction> DALStorage::getTransactions(unsigned int num)
+{
+    std::vector<Transaction> transactions;
+    string_to<unsigned int> toUint;
+
+    try
+    {
+        std::stringstream sql;
+        sql << "SELECT * FROM " << TRANSACTION_TBL_NAME;
+        dal::RecordSet const &rec = mDb->execSql(sql.str());
+
+        int size = rec.rows();
+        int start = size - num;
+        // Get the last <num> records and store them in transactions
+        for (int i = start; i < size; ++i)
+        {
+            Transaction trans;
+            trans.mCharacterId = toUint(rec(i, 0));
+            trans.mAction = toUint(rec(i, 1));
+            trans.mMessage = rec(i, 2);
+            transactions.push_back(trans);
+        }
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: " << e.what());
+    }
+
+    return transactions;
+}
+
+std::vector<Transaction> DALStorage::getTransactions(time_t date)
+{
+    std::vector<Transaction> transactions;
+    string_to<unsigned int> toUint;
+
+    try
+    {
+        std::stringstream sql;
+        sql << "SELECT * FROM " << TRANSACTION_TBL_NAME << " WHERE time > "
+            << date;
+        dal::RecordSet const &rec = mDb->execSql(sql.str());
+
+        for (int i = 0; i < rec.rows(); ++i)
+        {
+            Transaction trans;
+            trans.mCharacterId = toUint(rec(i, 0));
+            trans.mAction = toUint(rec(i, 1));
+            trans.mMessage = rec(i, 2);
+            transactions.push_back(trans);
+        }
+    }
+    catch (dal::DbSqlQueryExecFailure const &e)
+    {
+        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: " << e.what());
+    }
+
+    return transactions;
 }
