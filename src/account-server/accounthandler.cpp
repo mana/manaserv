@@ -28,6 +28,7 @@
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
 #include "account-server/serverhandler.hpp"
+#include "account-server/transaction.hpp"
 #include "chat-server/chathandler.hpp"
 #include "common/configuration.hpp"
 #include "net/connectionhandler.hpp"
@@ -494,8 +495,8 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
     int hairStyle = msg.readByte();
     int hairColor = msg.readByte();
     int gender = msg.readByte();
-    int numHairStyles = Configuration::getValue("char_numHairStyles", 15);
-    int numHairColors = Configuration::getValue("char_numHairColors", 9);
+    int numHairStyles = Configuration::getValue("char_numHairStyles", 17);
+    int numHairColors = Configuration::getValue("char_numHairColors", 11);
     int numGenders = Configuration::getValue("char_numGenders", 2);
     unsigned minNameLength = Configuration::getValue("char_minNameLength", 4);
     unsigned maxNameLength = Configuration::getValue("char_maxNameLength", 25);
@@ -604,6 +605,14 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
             LOG_INFO("Character " << name << " was created for "
                      << acc->getName() << "'s account.");
 
+            // log transaction
+            Transaction trans;
+            trans.mCharacterId = newCharacter->getDatabaseID();
+            trans.mAction = TRANS_CHAR_CREATE;
+            trans.mMessage = acc->getName() + " created character ";
+            trans.mMessage.append(" called " + name);
+            storage->addTransaction(trans);
+
             storage->flush(acc); // flush changes
             reply.writeByte(ERRMSG_OK);
             computer.send(reply);
@@ -674,6 +683,13 @@ static void handleCharacterSelectMessage(AccountClient &computer, MessageIn &msg
     registerChatClient(magic_token, selectedChar->getName(), acc->getLevel());
 
     computer.send(reply);
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = selectedChar->getDatabaseID();
+    trans.mAction = TRANS_CHAR_SELECTED;
+    trans.mMessage = "";
+    storage->addTransaction(trans);
 }
 
 static void handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg)
@@ -707,6 +723,14 @@ static void handleCharacterDeleteMessage(AccountClient &computer, MessageIn &msg
 
     reply.writeByte(ERRMSG_OK);
     computer.send(reply);
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = chars[charNum]->getDatabaseID();
+    trans.mAction = TRANS_CHAR_DELETED;
+    trans.mMessage = chars[charNum]->getName() + " deleted by ";
+    trans.mMessage.append(acc->getName());
+    storage->addTransaction(trans);
 }
 
 void

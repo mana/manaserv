@@ -27,6 +27,7 @@
 #include "defines.h"
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
+#include "account-server/transaction.hpp"
 #include "chat-server/guildmanager.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chatclient.hpp"
@@ -291,6 +292,13 @@ ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
         result.writeString(text);
         sendInChannel(channel, result);
     }
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = client.characterId;
+    trans.mAction = TRANS_MSG_PUBLIC;
+    trans.mMessage = "User said " + text;
+    storage->addTransaction(trans);
 }
 
 void
@@ -314,6 +322,13 @@ ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
         // We send the message to all players in the default channel as it is
         // an announcement.
         sendToEveryone(result);
+
+        // log transaction
+        Transaction trans;
+        trans.mCharacterId = client.characterId;
+        trans.mAction = TRANS_MSG_ANNOUNCE;
+        trans.mMessage = "User announced " + text;
+        storage->addTransaction(trans);
     }
     else
     {
@@ -323,6 +338,7 @@ ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
         LOG_INFO(client.characterName <<
             " couldn't make an announcement due to insufficient rights.");
     }
+
 }
 
 void
@@ -339,6 +355,14 @@ ChatHandler::handlePrivMsgMessage(ChatClient &client, MessageIn &msg)
 
     // We seek the player to whom the message is told and send it to her/him.
     sayToPlayer(client, user, text);
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = client.characterId;
+    trans.mAction = TRANS_MSG_PRIVATE;
+    trans.mMessage = "User said " + text;
+    trans.mMessage.append(" to " + user);
+    storage->addTransaction(trans);
 }
 
 void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
@@ -392,6 +416,13 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
             warnUsersAboutPlayerEventInChat(channel,
                     client.characterName,
                     CHAT_EVENT_NEW_PLAYER);
+
+            // log transaction
+            Transaction trans;
+            trans.mCharacterId = client.characterId;
+            trans.mAction = TRANS_CHANNEL_JOIN;
+            trans.mMessage = "User joined " + channelName;
+            storage->addTransaction(trans);
         }
         else
         {
@@ -414,7 +445,7 @@ ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
         return;
     }
 
-    if (channel->getUserMode(&client).find('o') != std::string::npos)
+    if (channel->getUserMode(&client).find('o') == std::string::npos)
     {
         // invalid permissions
         return;
@@ -434,6 +465,14 @@ ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
     warnUsersAboutPlayerEventInChat(channel,
                     info.str(),
                     CHAT_EVENT_MODE_CHANGE);
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = client.characterId;
+    trans.mAction = TRANS_CHANNEL_MODE;
+    trans.mMessage = "User mode " + mode;
+    trans.mMessage.append(" set on " + user);
+    storage->addTransaction(trans);
 }
 
 void
@@ -448,7 +487,7 @@ ChatHandler::handleKickUserMessage(ChatClient &client, MessageIn &msg)
         return;
     }
 
-    if (channel->getUserMode(&client).find('o') != std::string::npos)
+    if (channel->getUserMode(&client).find('o') == std::string::npos)
     {
         // invalid permissions
         return;
@@ -465,6 +504,13 @@ ChatHandler::handleKickUserMessage(ChatClient &client, MessageIn &msg)
                 ss.str(),
                 CHAT_EVENT_KICKED_PLAYER);
     }
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = client.characterId;
+    trans.mAction = TRANS_CHANNEL_KICK;
+    trans.mMessage = "User kicked " + user;
+    storage->addTransaction(trans);
 }
 
 void
@@ -493,6 +539,14 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
         warnUsersAboutPlayerEventInChat(channel,
                 client.characterName,
                 CHAT_EVENT_LEAVING_PLAYER);
+
+        // log transaction
+        Transaction trans;
+        trans.mCharacterId = client.characterId;
+        trans.mAction = TRANS_CHANNEL_QUIT;
+        trans.mMessage = "User left " + channel->getName();
+        storage->addTransaction(trans);
+
         if(channel->getUserList().empty())
         {
             chatChannelManager->removeChannel(channel->getId());
@@ -519,6 +573,13 @@ ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
     }
 
     client.send(reply);
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = client.characterId;
+    trans.mAction = TRANS_CHANNEL_LIST;
+    trans.mMessage = "";
+    storage->addTransaction(trans);
 }
 
 void
@@ -544,6 +605,13 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
 
         client.send(reply);
     }
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = client.characterId;
+    trans.mAction = TRANS_CHANNEL_USERLIST;
+    trans.mMessage = "";
+    storage->addTransaction(trans);
 }
 
 void
@@ -561,6 +629,14 @@ ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
     {
         guildChannelTopicChange(channel, client.characterId, topic);
     }
+
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = client.characterId;
+    trans.mAction = TRANS_CHANNEL_TOPIC;
+    trans.mMessage = "User changed topic to " + topic;
+    trans.mMessage.append(" in " + channel->getName());
+    storage->addTransaction(trans);
 }
 
 void

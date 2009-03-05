@@ -212,6 +212,14 @@ CREATE TABLE tmw_post_attachments
 CREATE INDEX tmw_post_attachments_ltr ON tmw_post_attachments ( letter_id );
 CREATE INDEX tmw_post_attachments_itm ON tmw_post_attachments ( item_id );
 
+CREATE TABLE tmw_transactions
+(
+    id          INTEGER     PRIMARY KEY,
+    char_id     INTEGER     NOT NULL,
+    action      INTEGER     NOT NULL,
+    message     TEXT,
+    time        INTEGER     NOT NULL,
+);
 
 CREATE TABLE tmw_online_list
 (

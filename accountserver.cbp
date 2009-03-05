@@ -68,6 +68,8 @@
 		<Unit filename="src/account-server/main-account.cpp" />
 		<Unit filename="src/account-server/serverhandler.cpp" />
 		<Unit filename="src/account-server/serverhandler.hpp" />
+		<Unit filename="src/account-server/transaction.cpp" />
+		<Unit filename="src/account-server/transaction.hpp" />
 		<Unit filename="src/chat-server/chatchannel.cpp" />
 		<Unit filename="src/chat-server/chatchannel.hpp" />
 		<Unit filename="src/chat-server/chatchannelmanager.cpp" />
