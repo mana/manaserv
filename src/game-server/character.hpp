@@ -35,6 +35,17 @@ class MessageOut;
 class Point;
 class Trade;
 
+struct Special
+{
+    Special(int needed)
+    {
+        currentMana = 0;
+        neededMana = needed;
+    }
+    int currentMana;
+    int neededMana;
+};
+
 /**
  * The representation of a player's character in the game world.
  */
@@ -70,6 +81,11 @@ class Character : public Being
          * when it is allowed to do so
          */
         void useSpecial(int id);
+
+        /**
+         * Allows a character to perform a special action
+         */
+        void giveSpecial(int id);
 
         /**
          * Gets client computer.
@@ -344,6 +360,8 @@ class Character : public Being
         std::set<size_t> mModifiedExperience;
 
         std::vector<unsigned int> mExperience; /**< experience collected for each skill.*/
+
+        std::map<int, Special*> mSpecials;
 
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mGender;       /**< Gender of the character. */

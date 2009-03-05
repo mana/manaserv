@@ -72,15 +72,45 @@ Character::Character(MessageIn &msg):
     }
     setSize(16);
     Inventory(this).initialize();
+
+    //give the character some specials for testing.
+    //TODO: get from quest vars and equipment
+    giveSpecial(1);
+    giveSpecial(2);
+    giveSpecial(3);
+
 }
 
 void Character::update()
 {
+    //update character level
     if (mRecalculateLevel)
     {
         mRecalculateLevel = false;
         recalculateLevel();
     }
+
+    //update special recharge
+    std::list<Special *> rechargeNeeded;
+    int numRechargeNeeded = 0;
+    for (std::map<int, Special*>::iterator i = mSpecials.begin(); i != mSpecials.end(); i++)
+    {
+        Special * s = i->second;
+        if (s->currentMana < s->neededMana)
+        {
+            rechargeNeeded.push_back(s);
+            numRechargeNeeded++;
+        }
+    }
+    if (numRechargeNeeded > 0)
+    {
+        int rechargePerSpecial = getModifiedAttribute(CHAR_ATTR_INTELLIGENCE) / numRechargeNeeded;
+        for (std::list<Special*>::iterator i = rechargeNeeded.begin(); i != rechargeNeeded.end(); i++)
+        {
+            (*i)->currentMana += rechargePerSpecial;
+        }
+    }
+
     Being::update();
 }
 
@@ -144,15 +174,31 @@ void Character::respawn()
 
 void Character::useSpecial(int id)
 {
-    //TODO: look up which of its special attacks the character wants to use
-    //TODO: check if the character is allowed to use it right now
+    //check if the character may use this special in general
+    std::map<int, Special*>::iterator i = mSpecials.find(id);
+    if (i == mSpecials.end())
+    {
+        LOG_INFO("Character uses special "<<id<<" without autorisation.");
+        return;
+    }
 
-    Script *s = getMap()->getScript();
-    if (s) {
-        s->prepare("cast");
-        s->push(this);
-        s->push(id);
-        s->execute();
+    //check if the special is currently recharged
+    Special *special = i->second;
+    if (special->currentMana < special->neededMana)
+    {
+        LOG_INFO("Character uses special "<<id<<" which is not recharged. ("
+                 <<special->currentMana<<"/"<<special->neededMana<<")");
+        return;
+    }
+
+    //tell script engine to cast the spell
+    special->currentMana = 0;
+    Script *script = getMap()->getScript();
+    if (script) {
+        script->prepare("cast");
+        script->push(this);
+        script->push(id);
+        script->execute();
     }
 
     return;
@@ -471,3 +517,17 @@ Character::~Character()
     }
 }
 
+void Character::giveSpecial(int id)
+{
+    if (mSpecials.find(id) == mSpecials.end())
+    {
+        // TODO: get the needed mana from a SpecialDB
+        int neededMana;
+        if (id == 1) neededMana = 10;
+        if (id == 2) neededMana = 100;
+        if (id == 3) neededMana = 1000;
+
+        Special *s = new Special(neededMana);
+        mSpecials[id] = s;
+    }
+}
