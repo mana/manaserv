@@ -376,3 +376,12 @@ void AccountConnection::updateOnlineStatus(int charId, bool online)
     mSyncBuffer->writeByte(online ? 0x01 : 0x00);
     syncChanges();
 }
+
+void AccountConnection::sendTransaction(int id, int action, const std::string &message)
+{
+    MessageOut msg(GAMSG_TRANSACTION);
+    msg.writeLong(id);
+    msg.writeLong(action);
+    msg.writeString(message);
+    send(msg);
+}

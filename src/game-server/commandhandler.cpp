@@ -34,6 +34,8 @@
 #include "monstermanager.hpp"
 #include "state.hpp"
 
+#include "../common/transaction.hpp"
+
 #include "../utils/string.hpp"
 
 static void say(const std::string error, Character *player)
@@ -132,6 +134,7 @@ static void handleHelp(Character *player, std::string &args)
             say("@reload", player);
             say("@setgroup <character> <AL level>", player);
             say("@announce <message>", player);
+            say("@history <number of transactions>", player);
         }
     }
     else
@@ -220,6 +223,10 @@ static void handleWarp(Character *player, std::string &args)
 
     // now warp the player
     GameState::warp(other, map, x, y);
+
+    // log transaction
+    std::string msg = "User warped to " + xstr + "x" + ystr;
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_WARP, msg);
 }
 
 static void handleItem(Character *player, std::string &args)
@@ -293,6 +300,11 @@ static void handleItem(Character *player, std::string &args)
 
     // insert the item into the inventory
     Inventory(other).insert(ic->getDatabaseID(), value);
+
+    // log transaction
+    std::stringstream str;
+    str << "User created item " << ic->getDatabaseID();
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_ITEM, str.str());
 }
 
 static void handleDrop(Character *player, std::string &args)
@@ -344,6 +356,11 @@ static void handleDrop(Character *player, std::string &args)
     item->setMap(player->getMap());
     item->setPosition(player->getPosition());
     GameState::insertSafe(item);
+
+    // log transaction
+    std::stringstream str;
+    str << "User created item " << ic->getDatabaseID();
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_DROP, str.str());
 }
 
 static void handleMoney(Character *player, std::string &args)
@@ -391,6 +408,10 @@ static void handleMoney(Character *player, std::string &args)
 
     // change how much money the player has
     Inventory(other).changeMoney(value);
+
+    // log transaction
+    std::string msg = "User created " + valuestr + " money";
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_MONEY, msg);
 }
 
 static void handleSpawn(Character *player, std::string &args)
@@ -451,6 +472,10 @@ static void handleSpawn(Character *player, std::string &args)
             // The map is full. Break out.
             break;
         }
+
+        // log transaction
+        std::string msg = "User created monster " + monster->getName();
+        accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SPAWN, msg);
     }
 }
 
@@ -562,6 +587,10 @@ static void handleBan(Character *player, std::string &args)
 
     // ban the player
     accountHandler->banCharacter(other, length);
+
+    // log transaction
+    std::string msg = "User banned " + other->getName();
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_BAN, msg);
 }
 
 static void handleSetGroup(Character *player, std::string &args)
@@ -628,6 +657,10 @@ static void handleSetGroup(Character *player, std::string &args)
 
     // change the player's account level
     accountHandler->changeAccountLevel(other, level);
+
+    // log transaction
+    std::string msg = "User changed account level of " + other->getName() + " to " + levelstr;
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
 }
 
 static void handleAttribute(Character *player, std::string &args)
@@ -750,7 +783,10 @@ static void handleRights(Character *player)
     say(str.str(), player);
 }
 
-
+static void handleHistory(Character *player, std::string args)
+{
+    // TODO: Get args number of transactions and show them to the player
+}
 
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
@@ -841,6 +877,11 @@ void CommandHandler::handleCommand(Character *player,
     {
         if (checkPermission(player, AL_ADMIN))
             handleAnnounce(player, args);
+    }
+    else if (type == "history")
+    {
+        if (checkPermission(player, AL_ADMIN))
+            handleHistory(player, args);
     }
     else
     {

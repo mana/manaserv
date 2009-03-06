@@ -24,6 +24,7 @@
 
 #include "game-server/gamehandler.hpp"
 
+#include "common/transaction.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/buysell.hpp"
 #include "game-server/commandhandler.hpp"
@@ -195,6 +196,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 break;
             }
             GameState::sayAround(computer.character, say);
+            std::string msg = computer.character->getName() + " said " + say;
+            accountHandler->sendTransaction(computer.character->getDatabaseID(), TRANS_MSG_PUBLIC, msg);
         } break;
 
         case PGMSG_NPC_TALK:
@@ -242,6 +245,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                         Inventory(computer.character)
                             .insert(ic->getDatabaseID(), item->getAmount());
                         GameState::remove(item);
+                        // log transaction
+                        std::stringstream str;
+                        str << "User picked up item " << ic->getDatabaseID()
+                            << " at " << opos.x << "x" << opos.y;
+                        accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                            TRANS_ITEM_PICKUP, str.str());
                         break;
                     }
                 }
@@ -257,6 +266,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 if (ic->use(computer.character))
                 {
                     inv.removeFromSlot(slot, 1);
+                    // log transaction
+                    std::stringstream str;
+                    str << "User used item " << ic->getDatabaseID()
+                        << " from slot " << slot;
+                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                        TRANS_ITEM_USED, str.str());
                 }
             }
         } break;
@@ -277,7 +292,15 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     // The map is full. Put back into inventory.
                     inv.insert(ic->getDatabaseID(), amount - nb);
                     delete item;
+                    break;
                 }
+                // log transaction
+                Point pt = computer.character->getPosition();
+                std::stringstream str;
+                str << "User dropped item " << ic->getDatabaseID()
+                    << " at " << pt.x << "x" << pt.y;
+                accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                    TRANS_ITEM_DROP, str.str());
             }
         } break;
 
@@ -307,6 +330,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             int slot2 = message.readByte();
             int amount = message.readByte();
             Inventory(computer.character).move(slot1, slot2, amount);
+            // log transaction
+            std::stringstream str;
+            str << "User moved item "
+                << " from slot " << slot1 << " to slot " << slot2;
+            accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                TRANS_ITEM_MOVE, str.str());
         } break;
 
         case PGMSG_ATTACK:
@@ -345,6 +374,13 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 default:
                     break;
             }
+
+            // log transaction
+            std::stringstream str;
+            str << "User changed action from " << current
+                << " to " << action;
+            accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                TRANS_ACTION_CHANGE, str.str());
 
         } break;
 
@@ -398,6 +434,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             }
 
             new Trade(computer.character, q);
+
+            // log transaction
+            std::string str;
+            str = "User requested trade with " + q->getName();
+            accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                TRANS_TRADE_REQUEST, str);
         } break;
 
         case PGMSG_TRADE_CANCEL:
@@ -405,6 +447,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_TRADE_ADD_ITEM:
         case PGMSG_TRADE_SET_MONEY:
         {
+            std::stringstream str;
             Trade *t = computer.character->getTrading();
             if (!t) break;
 
@@ -415,14 +458,28 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     break;
                 case PGMSG_TRADE_ACCEPT :
                     t->accept(computer.character);
+                    // log transaction
+                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                        TRANS_TRADE_END, "User finished trading");
                     break;
                 case PGMSG_TRADE_SET_MONEY:
-                    t->setMoney(computer.character, message.readLong());
-                    break;
+                {
+                    int money = message.readLong();
+                    t->setMoney(computer.character, money);
+                    // log transaction
+                    str << "User added " << money << " money to trade.";
+                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                        TRANS_TRADE_MONEY, str.str());
+                } break;
                 case PGMSG_TRADE_ADD_ITEM:
+                {
                     int slot = message.readByte();
                     t->addItem(computer.character, slot, message.readByte());
-                    break;
+                    // log transaction
+                    str << "User add item from slot " << slot;
+                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                        TRANS_TRADE_ITEM, str.str());
+                } break;
             }
         } break;
 
@@ -452,6 +509,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     computer.character->getCorrectionPoints(),
                     attribute,
                     computer.character->getAttribute(attribute));
+
+                // log transaction
+                std::stringstream str;
+                str << "User increased attribute " << attribute;
+                accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                    TRANS_ATTR_INCREASE, str.str());
             }
         } break;
 
@@ -472,6 +535,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     computer.character->getCorrectionPoints(),
                     attribute,
                     computer.character->getAttribute(attribute));
+
+                // log transaction
+                std::stringstream str;
+                str << "User decreased attribute " << attribute;
+                accountHandler->sendTransaction(computer.character->getDatabaseID(),
+                    TRANS_ATTR_DECREASE, str.str());
             }
         } break;
 

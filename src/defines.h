@@ -259,6 +259,7 @@ enum {
     CGMSG_POST_RESPONSE         = 0x05A1, // L receiver id, { S sender name, S letter, W num attachments { W attachment item id, W quantity } }
     GCMSG_STORE_POST            = 0x05A5, // L sender id, S receiver name, S letter, { W attachment item id, W quantity }
     CGMSG_STORE_POST_RESPONSE   = 0x05A6, // L id, B error
+    GAMSG_TRANSACTION           = 0x0600, // L character id, L action, S message
 
     XXMSG_INVALID = 0x7FFF
 };

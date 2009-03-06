@@ -153,6 +153,11 @@ class AccountConnection : public Connection
          */
         void updateOnlineStatus(int charId, bool online);
 
+        /**
+         * Send transaction to account server
+         */
+        void sendTransaction(int id, int action, const std::string &message);
+
     protected:
         /**
          * Processes server messages.

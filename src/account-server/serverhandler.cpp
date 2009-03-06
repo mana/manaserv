@@ -30,6 +30,7 @@
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
 #include "chat-server/post.hpp"
+#include "common/transaction.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
@@ -463,6 +464,20 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             postalManager->addLetter(letter);
 
             result.writeByte(ERRMSG_OK);
+        } break;
+
+        case GAMSG_TRANSACTION:
+        {
+            LOG_DEBUG("TRANSACTION");
+            int id = msg.readLong();
+            int action = msg.readLong();
+            std::string message = msg.readString();
+
+            Transaction trans;
+            trans.mCharacterId = id;
+            trans.mAction = action;
+            trans.mMessage = message;
+            storage->addTransaction(trans);
         } break;
 
         default:

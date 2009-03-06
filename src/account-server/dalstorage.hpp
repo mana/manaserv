@@ -25,9 +25,9 @@
 #include <map>
 #include <vector>
 
-#include "dal/dataprovider.h"
+#include "../dal/dataprovider.h"
 
-#include "transaction.hpp"
+#include "../common/transaction.hpp"
 
 class Account;
 class Character;
