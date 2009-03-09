@@ -218,7 +218,7 @@ CREATE TABLE tmw_transactions
     char_id     INTEGER     NOT NULL,
     action      INTEGER     NOT NULL,
     message     TEXT,
-    time        INTEGER     NOT NULL,
+    time        INTEGER     NOT NULL
 );
 
 CREATE TABLE tmw_online_list
