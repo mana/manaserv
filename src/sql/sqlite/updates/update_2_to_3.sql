@@ -6,7 +6,7 @@ CREATE TABLE tmw_transactions
     char_id     INTEGER     NOT NULL,
     action      INTEGER     NOT NULL,
     message     TEXT,
-    time        INTEGER     NOT NULL,
+    time        INTEGER     NOT NULL
 );
  
 -- update the database version, and set date of update
