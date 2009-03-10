@@ -62,7 +62,8 @@ std::string Letter::getContents()
 
 bool Letter::addAttachment(InventoryItem item)
 {
-    if (mAttachments.size() > Configuration::getValue("mail_maxAttachments", 3))
+    unsigned int max = Configuration::getValue("mail_maxAttachments", 3);
+    if (mAttachments.size() > max)
     {
         return false;
     }
@@ -102,7 +103,8 @@ Post::~Post()
 
 bool Post::addLetter(Letter *letter)
 {
-    if (mLetters.size() > Configuration::getValue("mail_maxLetters", 10))
+    unsigned int max = Configuration::getValue("mail_maxLetters", 10);
+    if (mLetters.size() > max)
     {
         return false;
     }
