@@ -532,6 +532,12 @@ void MapComposite::setMap(Map *m)
     assert(!mMap && m);
     mMap = m;
     mContent = new MapContent(m);
+
+    std::string sPvP = m->getProperty ("pvp");
+    if      (sPvP == "free") mPvPRules = PVP_FREE;
+    else if (sPvP == "none") mPvPRules = PVP_NONE;
+    else mPvPRules = PVP_NONE;
+
 }
 
 void MapComposite::update()

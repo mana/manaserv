@@ -155,6 +155,17 @@ class Map
         { return tileHeight; }
 
         /**
+         * Returns a general map property defined in the map file
+         */
+        const std::string &getProperty(const std::string &key) const;
+
+        /**
+        * Sets a map property
+        */
+        void setProperty(const std::string& key, const std::string& val)
+        { mProperties[key] = val; }
+
+        /**
          * Find a path from one location to the next.
          */
         std::list<PATH_NODE> findPath(int startX, int startY,
@@ -170,11 +181,14 @@ class Map
         static const unsigned char BLOCKMASK_CHARACTER = 0x01;// = bin 0000 0001
         static const unsigned char BLOCKMASK_MONSTER = 0x02;  // = bin 0000 0010
         int *mOccupation[NB_BLOCKTYPES];
+
+        // map properties
         int mWidth, mHeight;
         int tileWidth, tileHeight;
-        MetaTile *mMetaTiles;
+        std::map<std::string, std::string> mProperties;
 
         // Pathfinding members
+        MetaTile *mMetaTiles;
         int onClosedList, onOpenList;
 };
 

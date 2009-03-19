@@ -190,6 +190,11 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
         int type = o->getType();
         if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER) continue;
 
+        if (getMap()->getPvP() == PVP_NONE &&
+            type == OBJECT_CHARACTER &&
+            getType() == OBJECT_CHARACTER)
+            continue;
+
         LOG_DEBUG("Attack Zone:"<<
                   attPos.x<<":"<<attPos.y<<
                   " "<<

@@ -81,6 +81,14 @@ Map::setSize(int width, int height)
     }
 }
 
+const std::string &Map::getProperty(const std::string &key) const
+{
+    std::map<std::string, std::string>::const_iterator i;
+    i = mProperties.find(key);
+    if (i == mProperties.end()) return "";
+    return i->second;
+}
+
 void Map::blockTile(int x, int y, BlockType type)
 {
     if (type == BLOCKTYPE_NONE || x < 0 || y < 0 || x >= mWidth || y >= mHeight)
