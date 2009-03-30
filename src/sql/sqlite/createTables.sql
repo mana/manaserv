@@ -142,7 +142,7 @@ CREATE TABLE tmw_world_states
 
 INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
 INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'2',  strftime('%s','now'));
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'3',  strftime('%s','now'));
 
 CREATE TABLE tmw_auctions
 (
@@ -218,7 +218,7 @@ CREATE TABLE tmw_transactions
     char_id     INTEGER     NOT NULL,
     action      INTEGER     NOT NULL,
     message     TEXT,
-    time        INTEGER     NOT NULL,
+    time        INTEGER     NOT NULL
 );
 
 CREATE TABLE tmw_online_list

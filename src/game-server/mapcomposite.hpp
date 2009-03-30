@@ -38,6 +38,12 @@ class Thing;
 struct MapContent;
 struct MapZone;
 
+enum PvPRules
+{
+    PVP_NONE,   // no PvP on this map
+    PVP_FREE    // unrestricted PvP on this map
+    // [space for additional PvP modes]
+};
 /**
  * Ordered sets of zones of a map.
  */
@@ -290,6 +296,11 @@ class MapComposite
         void update();
 
         /**
+         * Gets the PvP rules on the map
+         */
+        PvPRules getPvP() const { return mPvPRules; }
+
+        /**
          * Gets an iterator on the objects of the whole map.
          */
         ZoneIterator getWholeMapIterator() const
@@ -329,6 +340,8 @@ class MapComposite
         Script *mScript;      /**< Script associated to this map. */
         std::string mName;    /**< Name of the map. */
         unsigned short mID;   /**< ID of the map. */
+
+        PvPRules mPvPRules;
 };
 
 #endif

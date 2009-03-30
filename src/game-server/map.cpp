@@ -65,8 +65,7 @@ Map::~Map()
     }
 }
 
-void
-Map::setSize(int width, int height)
+void Map::setSize(int width, int height)
 {
     this->mWidth = width;
     this->mHeight = height;
@@ -79,6 +78,16 @@ Map::setSize(int width, int height)
         delete[] mOccupation[i];
         mOccupation[i] = new int[mWidth * mHeight];
     }
+}
+
+const std::string &Map::getProperty(const std::string &key) const
+{
+    static std::string empty;
+    std::map<std::string, std::string>::const_iterator i;
+    i = mProperties.find(key);
+    if (i == mProperties.end())
+        return empty;
+    return i->second;
 }
 
 void Map::blockTile(int x, int y, BlockType type)
@@ -151,8 +160,7 @@ bool Map::getWalk(int x, int y, char walkmask) const
     return !(mMetaTiles[x + y * mWidth].blockmask & walkmask);
 }
 
-MetaTile*
-Map::getMetaTile(int x, int y)
+MetaTile *Map::getMetaTile(int x, int y)
 {
     return &mMetaTiles[x + y * mWidth];
 }

@@ -103,9 +103,11 @@ bool StringFilter::filterContent(const std::string& text)
 
 bool StringFilter::isEmailValid(const std::string& email)
 {
-    // Testing Email validity
-    if ((email.length() < Configuration::getValue("account_minEmailLength", 7)) ||
-            (email.length() > Configuration::getValue("account_maxEmailLength", 128)))
+    unsigned int min = Configuration::getValue("account_minEmailLength", 7);
+    unsigned int max = Configuration::getValue("account_maxEmailLength", 128);
+
+    // Testing email validity
+    if (email.length() < min || email.length() > max)
     {
         return false;
     }

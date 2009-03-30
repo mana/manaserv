@@ -114,7 +114,7 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
     }
 }
 
-Map* MapReader::readMap(xmlNodePtr node, std::string const &path, 
+Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                         MapComposite *composite, std::vector<Thing *> &things)
 {
     // Take the filename off the path
@@ -138,6 +138,19 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
             else
             {
                 ::tilesetFirstGids.push_back(XML::getProperty(node, "firstgid", 0));
+            }
+        }
+        else if (xmlStrEqual(node->name, BAD_CAST "properties"))
+        {
+            for_each_xml_child_node(propNode, node)
+            {
+                if (xmlStrEqual(propNode->name, BAD_CAST "property"))
+                {
+                    std::string key = XML::getProperty(propNode, "name", "");
+                    std::string val = XML::getProperty(propNode, "value", "");
+                    LOG_DEBUG("  "<<key<<": "<<val);
+                    map->setProperty(key, val);
+                }
             }
         }
         else if (xmlStrEqual(node->name, BAD_CAST "layer"))
@@ -166,7 +179,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                 int objW = XML::getProperty(objectNode, "width", 0);
                 int objH = XML::getProperty(objectNode, "height", 0);
                 Rectangle rect = { objX, objY, objW, objH };
- 
+
 
                 if (objType == "WARP")
                 {
@@ -236,7 +249,7 @@ Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
                         {
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
-                                std::string value = XML::getProperty(propertyNode, "name", std::string()); 
+                                std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 value = utils::toupper(value);
                                 if (value == "MONSTER_ID")
                                 {

@@ -1688,7 +1688,7 @@ std::vector<Transaction> DALStorage::getTransactions(time_t date)
             << date;
         dal::RecordSet const &rec = mDb->execSql(sql.str());
 
-        for (int i = 0; i < rec.rows(); ++i)
+        for (unsigned int i = 0; i < rec.rows(); ++i)
         {
             Transaction trans;
             trans.mCharacterId = toUint(rec(i, 1));

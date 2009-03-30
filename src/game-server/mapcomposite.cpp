@@ -23,6 +23,7 @@
 #include <cassert>
 
 #include "point.h"
+#include "common/configuration.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/character.hpp"
@@ -539,6 +540,14 @@ void MapComposite::setMap(Map *m)
     assert(!mMap && m);
     mMap = m;
     mContent = new MapContent(m);
+
+    std::string sPvP = m->getProperty ("pvp");
+    if (sPvP == "") sPvP = Configuration::getValue("defaultPvp", "");
+
+    if      (sPvP == "free") mPvPRules = PVP_FREE;
+    else if (sPvP == "none") mPvPRules = PVP_NONE;
+    else mPvPRules = PVP_NONE;
+
 }
 
 void MapComposite::update()
