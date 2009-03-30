@@ -275,6 +275,7 @@ int ObjectBucket::allocate()
     // Any free ID in the bucket?
     if (!free)
     {
+        LOG_INFO("No free id in bucket");
         return -1;
     }
 
@@ -313,6 +314,7 @@ int ObjectBucket::allocate()
     }
 
     // No free ID in the bucket.
+    LOG_INFO("No free id in the bucket");
     return -1;
 }
 
@@ -369,6 +371,7 @@ bool MapContent::allocate(MovingObject *obj)
                new bucket. */
             b = new ObjectBucket;
             buckets[i] = b;
+            LOG_INFO("New bucket created");
         }
         int j = b->allocate();
         if (j >= 0)
@@ -381,6 +384,7 @@ bool MapContent::allocate(MovingObject *obj)
     }
 
     // All the IDs are currently used, fail.
+    LOG_ERROR("unable to allocate id");
     return false;
 }
 
@@ -510,6 +514,9 @@ void MapComposite::remove(Thing *ptr)
 
         if (ptr->canMove())
         {
+            std::stringstream str;
+            str << "Deallocating " << ptr->getType();
+            LOG_INFO(str.str());
             mContent->deallocate(static_cast< MovingObject * >(ptr));
         }
     }
