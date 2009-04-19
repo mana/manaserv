@@ -28,6 +28,7 @@
 #include <winsock2.h>
 #endif
 #include <mysql/mysql.h>
+#include <climits>
 
 #include "dataprovider.h"
 #include "common/configuration.hpp"
