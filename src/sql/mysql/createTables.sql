@@ -336,11 +336,12 @@ AS
        ON l.char_id = c.id;
 
  
-CREATE TABLE tmw_transactions
-(
-    id          INTEGER     PRIMARY KEY,
-    char_id     INTEGER     NOT NULL,
-    action      INTEGER     NOT NULL,
-    message     TEXT,
-    time        INTEGER     NOT NULL
-);
+CREATE TABLE IF NOT EXISTS `tmw_transactions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `char_id` int(11) NOT NULL,
+  `action` int(11) NOT NULL,
+  `message` text,
+  `time` int(11) NOT NULL,
+  PRIMARY KEY  (`id`)
+)
+AUTO_INCREMENT=0 ;
