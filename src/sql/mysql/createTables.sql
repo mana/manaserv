@@ -158,7 +158,7 @@ DEFAULT CHARSET=utf8;
 
 INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL,UNIX_TIMESTAMP());
 INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL,UNIX_TIMESTAMP());
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'2', UNIX_TIMESTAMP());
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'3', UNIX_TIMESTAMP());
 
 --
 -- table: `tmw_guilds`
@@ -336,3 +336,12 @@ AS
        ON l.char_id = c.id;
 
  
+CREATE TABLE IF NOT EXISTS `tmw_transactions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `char_id` int(11) NOT NULL,
+  `action` int(11) NOT NULL,
+  `message` text,
+  `time` int(11) NOT NULL,
+  PRIMARY KEY  (`id`)
+)
+AUTO_INCREMENT=0 ;
