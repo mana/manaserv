@@ -30,6 +30,15 @@
 #include "game-server/inventory.hpp"
 #include "net/messageout.hpp"
 
+/*
+ * States :
+ * TRADE_INIT : A player has ask to make a trade, waiting for accept
+ * TRADE_RUN : Both player are now trading and can add objects and GP (1)
+ * TRADE_CONFIRM_WAIT : One player has confirm, waiting for the other one
+ * TRADE_CONFIRMED : Both player has confirmed and agree button is unlock (2)
+ * TRADE_AGREE_WAIT : One player has agreed, waiting for the other one
+ */
+
 Trade::Trade(Character *c1, Character *c2):
     mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT)
 {
@@ -46,26 +55,31 @@ Trade::~Trade()
     mChar2->setTrading(NULL);
 }
 
-void Trade::cancel(Character *c)
+void Trade::cancel()
 {
     MessageOut msg(GPMSG_TRADE_CANCEL);
-    if (c != mChar1) mChar1->getClient()->send(msg);
-    if (c != mChar2) mChar2->getClient()->send(msg);
+    mChar1->getClient()->send(msg);
+    mChar2->getClient()->send(msg);
     delete this;
 }
 
 bool Trade::request(Character *c, int id)
 {
+    //The trade isn't confirmed, the player which is request is the same.
     if (mState != TRADE_INIT || c != mChar2 || mChar1->getPublicID() != id)
     {
         /* This is not an ack for the current transaction. So assume
            a new one is about to start and cancel the current one. */
-        cancel(c);
+        cancel();
         return false;
     }
-
-    // Starts trading.
+    
+    //Second player confirmed.
+    
+    //Starts trading.
     mState = TRADE_RUN;
+    
+    //Telling both player that the trade has started
     MessageOut msg(GPMSG_TRADE_START);
     mChar1->getClient()->send(msg);
     mChar2->getClient()->send(msg);
@@ -87,30 +101,37 @@ bool Trade::perform(TradedItems items, Inventory &inv1, Inventory &inv2)
     return true;
 }
 
-void Trade::accept(Character *c)
+void Trade::agree(Character *c)
 {
-    if (mState == TRADE_RUN)
+    //No player agreed
+    if(mState == TRADE_CONFIRMED)
     {
+        //One player agreed, if it's the player 2, make it player 1
         if (c == mChar2)
         {
             std::swap(mChar1, mChar2);
             std::swap(mItems1, mItems2);
             std::swap(mMoney1, mMoney2);
         }
-        assert(c == mChar1);
         // First player agrees.
-        mState = TRADE_EXIT;
-        MessageOut msg(GPMSG_TRADE_ACCEPT);
+        mState = TRADE_CONFIRM_WAIT;
+        
+        //Send the other player that the first player has confirmed
+        MessageOut msg(GPMSG_TRADE_AGREED); 
         mChar2->getClient()->send(msg);
         return;
     }
-
-    if (mState != TRADE_EXIT || c != mChar2)
+    
+    if(mState == TRADE_AGREE_WAIT && c == mChar1)
     {
-        // First player has already agreed. We only care about the second one.
+        //We don't care about the first player, he already agreed
         return;
     }
-
+    
+    //The second player has agreed
+    
+    //Check if both player has the objects in their inventories
+    // and enouth money, then swap them.
     Inventory v1(mChar1, true), v2(mChar2, true);
     if (!perform(mItems1, v1, v2) ||
         !perform(mItems2, v2, v1) ||
@@ -119,19 +140,56 @@ void Trade::accept(Character *c)
     {
         v1.cancel();
         v2.cancel();
-        cancel(NULL);
+        cancel();
         return;
     }
-
+    
     MessageOut msg(GPMSG_TRADE_COMPLETE);
     mChar1->getClient()->send(msg);
     mChar2->getClient()->send(msg);
     delete this;
 }
 
+void Trade::confirm(Character *c)
+{
+    if(mState == TRADE_CONFIRMED || mState == TRADE_AGREE_WAIT) return;
+    
+    if (mState == TRADE_RUN) //No player has confirmed
+    {
+        //One player confirms, if it's the player 2, make it player 1
+        if (c == mChar2)
+        {
+            std::swap(mChar1, mChar2);
+            std::swap(mItems1, mItems2);
+            std::swap(mMoney1, mMoney2);
+        }
+        assert(c == mChar1);
+        // First player agrees.
+        mState = TRADE_CONFIRM_WAIT;
+        
+        //Send the other player that the first player has confirmed
+        MessageOut msg(GPMSG_TRADE_CONFIRM);
+        mChar2->getClient()->send(msg);
+        return;
+    }
+
+    if (mState != TRADE_CONFIRM_WAIT || c != mChar2)
+    {
+        // First player has already agreed. We only care about the second one.
+        return;
+    }
+    
+    mState = TRADE_CONFIRMED;
+    MessageOut msg(GPMSG_TRADE_BOTH_CONFIRM);
+    mChar1->getClient()->send(msg);
+    mChar2->getClient()->send(msg);
+}
+
 void Trade::setMoney(Character *c, int amount)
 {
-    if (mState == TRADE_INIT || amount < 0) return;
+    //If the player has already confirmed, exit.
+    if ((mState != TRADE_RUN && (mState != TRADE_CONFIRM_WAIT || c != mChar1)) 
+            || amount < 0) return;
 
     /* Checking now if there is enough money is useless as it can change
        later on. At worst, the transaction will be canceled at the end if
@@ -158,7 +216,9 @@ void Trade::setMoney(Character *c, int amount)
 
 void Trade::addItem(Character *c, int slot, int amount)
 {
-    if (mState == TRADE_INIT) return;
+    //If the player has already confirmed, exit.
+    if ((mState != TRADE_RUN && (mState != TRADE_CONFIRM_WAIT || c != mChar1)) 
+            || amount < 0) return;
 
     Character *other;
     TradedItems *items;
@@ -192,7 +252,4 @@ void Trade::addItem(Character *c, int slot, int amount)
     msg.writeShort(id);
     msg.writeByte(amount);
     other->getClient()->send(msg);
-
-    // Go back to normal run.
-    mState = TRADE_RUN;
 }
