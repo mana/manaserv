@@ -553,6 +553,35 @@ bool GameState::insert(Thing *ptr)
 
     obj->inserted();
 
+    // DEBUG INFO
+    switch (obj->getType())
+    {
+        case OBJECT_ACTOR:
+        case OBJECT_ITEM:
+            LOG_DEBUG("Item inserted: " << static_cast<Item*>(obj)->getItemClass()->getDatabaseID());
+            break;
+
+        case OBJECT_NPC:
+            LOG_DEBUG("NPC inserted: " << static_cast<NPC*>(obj)->getNPC());
+            break;
+
+        case OBJECT_CHARACTER:
+            LOG_DEBUG("Player inserted: " << static_cast<Being*>(obj)->getName());
+            break;
+
+        case OBJECT_EFFECT:
+            LOG_DEBUG("Effect inserted: " << static_cast<Effect*>(obj)->getEffectId());
+            break;
+
+        case OBJECT_MONSTER:
+            LOG_DEBUG("Monster inserted: " << static_cast<Monster*>(obj)->getSpecy()->getType());
+            break;
+
+        case OBJECT_OTHER:
+        default:
+            LOG_DEBUG("Thing inserted: " << obj->getType());
+    }
+
     obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
     if (obj->getType() != OBJECT_CHARACTER) return true;
 
@@ -586,6 +615,35 @@ void GameState::remove(Thing *ptr)
     int visualRange = Configuration::getValue("visualRange", 320);
 
     ptr->removed();
+
+    // DEBUG INFO
+    switch (ptr->getType())
+    {
+        case OBJECT_ACTOR:
+        case OBJECT_ITEM:
+            LOG_DEBUG("Item removed: " << static_cast<Item*>(ptr)->getItemClass()->getDatabaseID());
+            break;
+
+        case OBJECT_NPC:
+            LOG_DEBUG("NPC removed: " << static_cast<NPC*>(ptr)->getNPC());
+            break;
+
+        case OBJECT_CHARACTER:
+            LOG_DEBUG("Player removed: " << static_cast<Being*>(ptr)->getName());
+            break;
+
+        case OBJECT_EFFECT:
+            LOG_DEBUG("Effect removed: " << static_cast<Effect*>(ptr)->getEffectId());
+            break;
+
+        case OBJECT_MONSTER:
+            LOG_DEBUG("Monster removed: " << static_cast<Monster*>(ptr)->getSpecy()->getType());
+            break;
+
+        case OBJECT_OTHER:
+        default:
+            LOG_DEBUG("Thing removed: " << ptr->getType());
+    }
 
     if (ptr->canMove())
     {

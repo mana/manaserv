@@ -453,6 +453,9 @@ static int being_damage(lua_State *s)
 {
     Being *being = getBeing(s, 1);
 
+    if (!being->canFight())
+        return 0;
+
     Damage damage;
     damage.base = lua_tointeger(s, 2);
     damage.delta = lua_tointeger(s, 3);
