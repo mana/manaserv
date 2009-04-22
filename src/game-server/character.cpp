@@ -221,7 +221,7 @@ void Character::cancelTransaction()
     switch (t)
     {
         case TRANS_TRADE:
-            static_cast< Trade * >(mTransactionHandler)->cancel(this);
+            static_cast< Trade * >(mTransactionHandler)->cancel();
             break;
         case TRANS_BUYSELL:
             static_cast< BuySell * >(mTransactionHandler)->cancel();

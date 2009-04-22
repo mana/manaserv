@@ -42,7 +42,7 @@ class Trade
          * Warns the other character the trade is cancelled.
          * Takes care of cleaning afterwards.
          */
-        void cancel(Character *);
+        void cancel(void);
 
         /**
          * Requests a trade to start with given public ID.
@@ -53,10 +53,15 @@ class Trade
         bool request(Character *, int);
 
         /**
-         * Agrees to complete the trade.
+         * Confirm the trade.
          */
-        void accept(Character *);
+        void confirm(Character *);
 
+        /*
+         * Agree to complete the trade
+         */
+        void agree(Character *c);
+        
         /**
          * Adds some items to the trade.
          */
@@ -79,11 +84,16 @@ class Trade
 
         typedef std::vector< TradedItem > TradedItems;
 
+        /*
+         * See trade.cpp for doc on TradeStates
+         */
         enum TradeState
         {
-            TRADE_INIT = 0, /**< Waiting for an ack from player 2. */
-            TRADE_RUN,      /**< Currently trading. */
-            TRADE_EXIT      /**< Waiting for an ack from player 2. */
+            TRADE_INIT = 0, 
+            TRADE_RUN,      
+            TRADE_CONFIRM_WAIT,
+            TRADE_CONFIRMED,
+            TRADE_AGREE_WAIT
         };
 
         static bool perform(TradedItems items, Inventory &inv1, Inventory &inv2);

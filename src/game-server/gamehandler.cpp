@@ -443,7 +443,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         } break;
 
         case PGMSG_TRADE_CANCEL:
-        case PGMSG_TRADE_ACCEPT:
+        case PGMSG_TRADE_AGREED:
+        case PGMSG_TRADE_CONFIRM:
         case PGMSG_TRADE_ADD_ITEM:
         case PGMSG_TRADE_SET_MONEY:
         {
@@ -454,10 +455,13 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             switch (message.getId())
             {
                 case PGMSG_TRADE_CANCEL:
-                    t->cancel(computer.character);
+                    t->cancel();
                     break;
-                case PGMSG_TRADE_ACCEPT :
-                    t->accept(computer.character);
+                case PGMSG_TRADE_CONFIRM:
+                    t->confirm(computer.character);
+                    break;
+                case PGMSG_TRADE_AGREED:
+                    t->agree(computer.character);
                     // log transaction
                     accountHandler->sendTransaction(computer.character->getDatabaseID(),
                         TRANS_TRADE_END, "User finished trading");
