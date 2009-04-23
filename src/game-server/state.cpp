@@ -556,7 +556,6 @@ bool GameState::insert(Thing *ptr)
     // DEBUG INFO
     switch (obj->getType())
     {
-        case OBJECT_ACTOR:
         case OBJECT_ITEM:
             LOG_DEBUG("Item inserted: " << static_cast<Item*>(obj)->getItemClass()->getDatabaseID());
             break;
@@ -577,6 +576,7 @@ bool GameState::insert(Thing *ptr)
             LOG_DEBUG("Monster inserted: " << static_cast<Monster*>(obj)->getSpecy()->getType());
             break;
 
+        case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Thing inserted: " << obj->getType());
@@ -619,7 +619,6 @@ void GameState::remove(Thing *ptr)
     // DEBUG INFO
     switch (ptr->getType())
     {
-        case OBJECT_ACTOR:
         case OBJECT_ITEM:
             LOG_DEBUG("Item removed: " << static_cast<Item*>(ptr)->getItemClass()->getDatabaseID());
             break;
@@ -640,6 +639,7 @@ void GameState::remove(Thing *ptr)
             LOG_DEBUG("Monster removed: " << static_cast<Monster*>(ptr)->getSpecy()->getType());
             break;
 
+        case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Thing removed: " << ptr->getType());
