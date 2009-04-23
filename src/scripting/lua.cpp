@@ -641,8 +641,8 @@ static int chr_set_quest(lua_State *s)
 }
 
 /**
- * Creates a trigger area. Whenever an object enters this area
- * a Lua function is called.
+ * Creates a trigger area. Whenever an actor enters this area, a Lua function
+ * is called.
  * tmw.trigger_create (x, y, width, height, function, id)
  */
 static int trigger_create(lua_State *s)
@@ -740,7 +740,7 @@ static int get_beings_in_circle(lua_State *s)
     lua_newtable(s);
     int tableStackPosition = lua_gettop(s);
     int tableIndex = 1;
-    for (MovingObjectIterator i(m->getAroundPointIterator(Point(x, y), r)); i; ++i)
+    for (BeingIterator i(m->getAroundPointIterator(Point(x, y), r)); i; ++i)
     {
         char t = (*i)->getType();
         if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)

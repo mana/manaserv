@@ -50,15 +50,17 @@ void BuySell::registerItem(int id, int amount, int cost)
     if (mSell)
     {
         int nb = Inventory(mChar).count(id);
-        if (nb == 0) return;
-        if (!amount || nb < amount) amount = nb;
+        if (nb == 0)
+            return;
+        if (!amount || nb < amount)
+            amount = nb;
     }
 
     TradedItem it = { id, amount, cost };
     mItems.push_back(it);
 }
 
-void BuySell::start(MovingObject *obj)
+void BuySell::start(Actor *actor)
 {
     if (mItems.empty())
     {
@@ -67,7 +69,7 @@ void BuySell::start(MovingObject *obj)
     }
 
     MessageOut msg(mSell ? GPMSG_NPC_SELL : GPMSG_NPC_BUY);
-    msg.writeShort(obj->getPublicID());
+    msg.writeShort(actor->getPublicID());
     for (TradedItems::const_iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {

@@ -88,6 +88,8 @@ tmwserv_game_SOURCES = \
 	common/inventorydata.hpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
+	game-server/actor.hpp \
+	game-server/actor.cpp \
 	game-server/attackzone.hpp \
 	game-server/attackzone.cpp \
 	game-server/being.hpp \
@@ -124,11 +126,8 @@ tmwserv_game_SOURCES = \
 	game-server/monster.cpp \
 	game-server/monstermanager.hpp \
 	game-server/monstermanager.cpp \
-	game-server/movingobject.hpp \
-	game-server/movingobject.cpp \
 	game-server/npc.hpp \
 	game-server/npc.cpp \
-	game-server/object.hpp \
 	game-server/postman.hpp \
 	game-server/quest.hpp \
 	game-server/quest.cpp \

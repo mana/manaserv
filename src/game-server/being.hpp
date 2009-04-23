@@ -27,7 +27,7 @@
 #include "limits.h"
 
 #include "defines.h"
-#include "game-server/movingobject.hpp"
+#include "game-server/actor.hpp"
 
 class Being;
 class MapComposite;
@@ -102,10 +102,10 @@ typedef std::vector< AttributeModifier > AttributeModifiers;
 typedef std::vector<unsigned int> Hits;
 
 /**
- * Generic Being (living object).
- * Used for characters & monsters (all animated objects).
+ * Generic being (living actor). Keeps direction, destination and a few other
+ * relevant properties. Used for characters & monsters (all animated objects).
  */
-class Being : public MovingObject
+class Being : public Actor
 {
     public:
 
@@ -126,7 +126,7 @@ class Being : public MovingObject
         /**
          * Proxy constructor.
          */
-        Being(int type, int id);
+        Being(ThingType type);
 
         /**
          * Cleans obsolete attribute modifiers.
@@ -138,12 +138,57 @@ class Being : public MovingObject
          * stats, deducts the result from the hitpoints and adds the result to
          * the HitsTaken list.
          */
-        virtual int damage(Object *source, Damage const &damage);
+        virtual int damage(Actor *source, Damage const &damage);
 
         /**
          * Changes status and calls all the "died" listeners.
          */
         virtual void died();
+
+        /**
+         * Performs actions scheduled by the being.
+         */
+        virtual void perform() {}
+
+        /**
+         * Gets the destination coordinates of the being.
+         */
+        Point const &getDestination() const
+        { return mDst; }
+
+        /**
+         * Sets the destination coordinates of the being.
+         */
+        void setDestination(const Point &dst);
+
+        /**
+         * Sets the destination coordinates of the being to the current
+         * position.
+         */
+        void clearDestination()
+        { setDestination(getPosition()); }
+
+        /**
+         * Gets the old coordinates of the being.
+         */
+        const Point &getOldPosition() const
+        { return mOld; }
+
+        /**
+         * Sets the facing direction of the being.
+         */
+        void setDirection(int direction)
+        { mDirection = direction; raiseUpdateFlags(UPDATEFLAG_DIRCHANGE); }
+
+        int getDirection() const
+        { return mDirection; }
+
+        /**
+         * Gets beings speed.
+         * @todo Document what kind of units actor speed is in!
+         */
+        int getSpeed() const { return mSpeed; }
+        void setSpeed(int s) { mSpeed = s; }
 
         /**
          * Gets the damage list.
@@ -221,7 +266,7 @@ class Being : public MovingObject
         virtual void modifiedAttribute(int) {}
 
         /** Gets the name of the being. */
-        std::string const &getName() const
+        const std::string &getName() const
         { return mName; }
 
         /** Sets the name of the being. */
@@ -241,6 +286,12 @@ class Being : public MovingObject
     private:
         Being(Being const &rhs);
         Being &operator=(Being const &rhs);
+
+        std::list<PATH_NODE> mPath;
+        Point mOld;                 /**< Old coordinates. */
+        Point mDst;                 /**< Target coordinates. */
+        unsigned short mSpeed;      /**< Speed. */
+        unsigned char mDirection;   /**< Facing direction. */
 
         std::string mName;
         Hits mHitsTaken; /**< List of punches taken since last update. */

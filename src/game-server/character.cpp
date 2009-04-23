@@ -53,7 +53,7 @@ const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
 const AttackZone Character::UNARMED_ATTACK_ZONE = {ATTZONESHAPE_RECT, true, 48, 16};
 
 Character::Character(MessageIn &msg):
-    Being(OBJECT_CHARACTER, 65535),
+    Being(OBJECT_CHARACTER),
     mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),
     mGender(0), mHairStyle(0), mHairColor(0), mLevel(1), mLevelProgress(0),
     mUpdateLevelProgress(false), mRecalculateLevel(true), mParty(0),

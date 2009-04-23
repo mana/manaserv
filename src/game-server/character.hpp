@@ -303,7 +303,7 @@ class Character : public Being
         { return mCorrectionPoints; }
 
         /**
-         * Gets the way the object is blocked by other things on the map
+         * Gets the way the actor is blocked by other things on the map
          */
         virtual unsigned char getWalkMask() const
         { return 0x82; } // blocked by walls and monsters ( bin 1000 0010)
@@ -379,7 +379,7 @@ class Character : public Being
 
     protected:
         /**
-         * Gets the way the object blocks pathfinding for other objects
+         * Gets the way the actor blocks pathfinding for other objects
          */
         virtual Map::BlockType getBlockType() const
         { return Map::BLOCKTYPE_CHARACTER; }

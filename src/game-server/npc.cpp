@@ -23,7 +23,10 @@
 #include "scripting/script.hpp"
 
 NPC::NPC(const std::string &name, int id, Script *s):
-    Being(OBJECT_NPC, 65535), mScript(s), mID(id), mEnabled(true)
+    Being(OBJECT_NPC),
+    mScript(s),
+    mID(id),
+    mEnabled(true)
 {
     setName(name);
 }

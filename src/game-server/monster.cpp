@@ -58,7 +58,7 @@ struct MonsterTargetEventDispatch: EventDispatch
 static MonsterTargetEventDispatch monsterTargetEventDispatch;
 
 Monster::Monster(MonsterClass *specy):
-    Being(OBJECT_MONSTER, 65535),
+    Being(OBJECT_MONSTER),
     mSpecy(specy),
     mCountDown(0),
     mTargetListener(&monsterTargetEventDispatch),
@@ -168,7 +168,7 @@ void Monster::update()
 
     // Iterate through objects nearby
     int aroundArea = Configuration::getValue("visualRange", 320);
-    for (MovingObjectIterator i(getMap()->getAroundCharacterIterator(this, aroundArea)); i; ++i)
+    for (BeingIterator i(getMap()->getAroundBeingIterator(this, aroundArea)); i; ++i)
     {
         // We only want to attack player characters
         if ((*i)->getType() != OBJECT_CHARACTER) continue;
@@ -319,7 +319,7 @@ void Monster::forgetTarget(Thing *t)
     }
 }
 
-int Monster::damage(Object *source, Damage const &damage)
+int Monster::damage(Actor *source, Damage const &damage)
 {
     int HPLoss = Being::damage(source, damage);
     if (HPLoss && source && source->getType() == OBJECT_CHARACTER)

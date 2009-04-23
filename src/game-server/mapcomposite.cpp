@@ -32,19 +32,19 @@
 
 /* TODO: Implement overlapping map zones instead of strict partitioning.
    Purpose: to decrease the number of zone changes, as overlapping allows for
-   hysteresis effect and prevents an object from changing zone each server
-   tick. It requires storing the zone in the object since it will not be
+   hysteresis effect and prevents an actor from changing zone each server
+   tick. It requires storing the zone in the actor since it will not be
    uniquely defined any longer. */
 
 /* Pixel-based width and height of the squares used in partitioning the map.
-   Squares should be big enough so that a moving object cannot cross several
-   ones in one world tick.
+   Squares should be big enough so that an actor cannot cross several ones
+   in one world tick.
    TODO: Tune for decreasing server load. The higher the value, the closer we
    regress to quadratic behavior; the lower the value, the more we waste time
    in dealing with zone changes. */
 static int const zoneDiam = 256;
 
-void MapZone::insert(Object *obj)
+void MapZone::insert(Actor *obj)
 {
     int type = obj->getType();
     switch (type)
@@ -88,9 +88,9 @@ void MapZone::insert(Object *obj)
     }
 }
 
-void MapZone::remove(Object *obj)
+void MapZone::remove(Actor *obj)
 {
-    std::vector< Object * >::iterator i_beg = objects.begin(), i, i_end;
+    std::vector< Actor * >::iterator i_beg = objects.begin(), i, i_end;
     int type = obj->getType();
     switch (type)
     {
@@ -188,17 +188,17 @@ void CharacterIterator::operator++()
     }
 }
 
-MovingObjectIterator::MovingObjectIterator(ZoneIterator const &it)
+BeingIterator::BeingIterator(ZoneIterator const &it)
   : iterator(it), pos(0)
 {
     while (iterator && (*iterator)->nbMovingObjects == 0) ++iterator;
     if (iterator)
     {
-        current = static_cast< MovingObject * >((*iterator)->objects[pos]);
+        current = static_cast< Being * >((*iterator)->objects[pos]);
     }
 }
 
-void MovingObjectIterator::operator++()
+void BeingIterator::operator++()
 {
     if (++pos == (*iterator)->nbMovingObjects)
     {
@@ -207,11 +207,11 @@ void MovingObjectIterator::operator++()
     }
     if (iterator)
     {
-        current = static_cast< MovingObject * >((*iterator)->objects[pos]);
+        current = static_cast< Being * >((*iterator)->objects[pos]);
     }
 }
 
-FixedObjectIterator::FixedObjectIterator(ZoneIterator const &it)
+FixedActorIterator::FixedActorIterator(ZoneIterator const &it)
   : iterator(it), pos(0)
 {
     while (iterator && (*iterator)->nbMovingObjects == (*iterator)->objects.size()) ++iterator;
@@ -222,7 +222,7 @@ FixedObjectIterator::FixedObjectIterator(ZoneIterator const &it)
     }
 }
 
-void FixedObjectIterator::operator++()
+void FixedActorIterator::operator++()
 {
     if (++pos == (*iterator)->objects.size())
     {
@@ -238,7 +238,7 @@ void FixedObjectIterator::operator++()
     }
 }
 
-ObjectIterator::ObjectIterator(ZoneIterator const &it)
+ActorIterator::ActorIterator(ZoneIterator const &it)
   : iterator(it), pos(0)
 {
     while (iterator && (*iterator)->objects.empty()) ++iterator;
@@ -248,7 +248,7 @@ ObjectIterator::ObjectIterator(ZoneIterator const &it)
     }
 }
 
-void ObjectIterator::operator++()
+void ActorIterator::operator++()
 {
     if (++pos == (*iterator)->objects.size())
     {
@@ -348,7 +348,7 @@ MapContent::~MapContent()
     delete[] zones;
 }
 
-bool MapContent::allocate(MovingObject *obj)
+bool MapContent::allocate(Actor *obj)
 {
     // First, try allocating from the last used bucket.
     ObjectBucket *b = buckets[last_bucket];
@@ -389,7 +389,7 @@ bool MapContent::allocate(MovingObject *obj)
     return false;
 }
 
-void MapContent::deallocate(MovingObject *obj)
+void MapContent::deallocate(Actor *obj)
 {
     unsigned short id = obj->getPublicID();
     buckets[id / 256]->deallocate(id % 256);
@@ -449,7 +449,7 @@ ZoneIterator MapComposite::getAroundPointIterator(Point const &p, int radius) co
     return ZoneIterator(r, mContent);
 }
 
-ZoneIterator MapComposite::getAroundObjectIterator(Object *obj, int radius) const
+ZoneIterator MapComposite::getAroundActorIterator(Actor *obj, int radius) const
 {
     MapRegion r;
     mContent->fillRegion(r, obj->getPosition(), radius);
@@ -463,7 +463,7 @@ ZoneIterator MapComposite::getInsideRectangleIterator(Rectangle const &p) const
     return ZoneIterator(r, mContent);
 }
 
-ZoneIterator MapComposite::getAroundCharacterIterator(MovingObject *obj, int radius) const
+ZoneIterator MapComposite::getAroundBeingIterator(Being *obj, int radius) const
 {
     MapRegion r1;
     mContent->fillRegion(r1, obj->getOldPosition(), radius);
@@ -492,12 +492,12 @@ bool MapComposite::insert(Thing *ptr)
 {
     if (ptr->isVisible())
     {
-        if (ptr->canMove() && !mContent->allocate(static_cast< MovingObject * >(ptr)))
+        if (ptr->canMove() && !mContent->allocate(static_cast< Being * >(ptr)))
         {
             return false;
         }
 
-        Object *obj = static_cast< Object * >(ptr);
+        Actor *obj = static_cast< Actor * >(ptr);
         mContent->getZone(obj->getPosition()).insert(obj);
     }
 
@@ -510,7 +510,7 @@ void MapComposite::remove(Thing *ptr)
 {
     if (ptr->isVisible())
     {
-        Object *obj = static_cast< Object * >(ptr);
+        Actor *obj = static_cast< Actor * >(ptr);
         mContent->getZone(obj->getPosition()).remove(obj);
 
         if (ptr->canMove())
@@ -518,7 +518,7 @@ void MapComposite::remove(Thing *ptr)
             std::stringstream str;
             str << "Deallocating " << ptr->getType();
             LOG_INFO(str.str());
-            mContent->deallocate(static_cast< MovingObject * >(ptr));
+            mContent->deallocate(static_cast< Being * >(ptr));
         }
     }
 
@@ -542,7 +542,8 @@ void MapComposite::setMap(Map *m)
     mContent = new MapContent(m);
 
     std::string sPvP = m->getProperty ("pvp");
-    if (sPvP == "") sPvP = Configuration::getValue("defaultPvp", "");
+    if (sPvP == "")
+        sPvP = Configuration::getValue("defaultPvp", "");
 
     if      (sPvP == "free") mPvPRules = PVP_FREE;
     else if (sPvP == "none") mPvPRules = PVP_NONE;
@@ -562,12 +563,11 @@ void MapComposite::update()
          i_end = mContent->things.end(); i != i_end; ++i)
     {
         if (!(*i)->canMove())
-        {
             continue;
-        }
-        MovingObject *obj = static_cast< MovingObject * >(*i);
 
-        Point const &pos1 = obj->getOldPosition(),
+        Being *obj = static_cast< Being * >(*i);
+
+        const Point &pos1 = obj->getOldPosition(),
                     &pos2 = obj->getPosition();
 
         MapZone &src = mContent->getZone(pos1),

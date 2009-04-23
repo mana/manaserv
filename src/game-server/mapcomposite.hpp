@@ -25,11 +25,11 @@
 #include <string>
 #include <vector>
 
+class Actor;
+class Being;
+class Character;
 class Map;
 class MapComposite;
-class MovingObject;
-class Object;
-class Character;
 class Point;
 class Rectangle;
 class Script;
@@ -44,6 +44,7 @@ enum PvPRules
     PVP_FREE    // unrestricted PvP on this map
     // [space for additional PvP modes]
 };
+
 /**
  * Ordered sets of zones of a map.
  */
@@ -81,47 +82,47 @@ struct CharacterIterator
 };
 
 /**
- * Iterates through the MovingObjects of a region.
+ * Iterates through the Beings of a region.
  */
-struct MovingObjectIterator
+struct BeingIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    MovingObject *current;
+    Being *current;
 
-    MovingObjectIterator(ZoneIterator const &);
+    BeingIterator(ZoneIterator const &);
     void operator++();
-    MovingObject *operator*() const { return current; }
+    Being *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
 /**
- * Iterates through the non-moving Objects of a region.
+ * Iterates through the non-moving Actors of a region.
  */
-struct FixedObjectIterator
+struct FixedActorIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Object *current;
+    Actor *current;
 
-    FixedObjectIterator(ZoneIterator const &);
+    FixedActorIterator(ZoneIterator const &);
     void operator++();
-    Object *operator*() const { return current; }
+    Actor *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
 /**
- * Iterates through the Objects of a region.
+ * Iterates through the Actors of a region.
  */
-struct ObjectIterator
+struct ActorIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Object *current;
+    Actor *current;
 
-    ObjectIterator(ZoneIterator const &);
+    ActorIterator(ZoneIterator const &);
     void operator++();
-    Object *operator*() const { return current; }
+    Actor *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -136,7 +137,7 @@ struct MapZone
      * Characters are stored first, then the remaining MovingObjects, then the
      * remaining Objects.
      */
-    std::vector< Object * > objects;
+    std::vector< Actor * > objects;
 
     /**
      * Destinations of the objects that left this zone.
@@ -146,8 +147,8 @@ struct MapZone
     MapRegion destinations;
 
     MapZone(): nbCharacters(0), nbMovingObjects(0) {}
-    void insert(Object *);
-    void remove(Object *);
+    void insert(Actor *);
+    void remove(Actor *);
 };
 
 /**
@@ -161,7 +162,7 @@ struct ObjectBucket
     unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
     short free;                         /**< Number of empty places. */
     short next_object;                  /**< Next object to look at. */
-    MovingObject *objects[256];
+    Actor *objects[256];
 
     ObjectBucket();
     int allocate();
@@ -177,14 +178,14 @@ struct MapContent
     ~MapContent();
 
     /**
-     * Allocates a unique ID for a moving object on this map.
+     * Allocates a unique ID for an actor on this map.
      */
-    bool allocate(MovingObject *);
+    bool allocate(Actor *);
 
     /**
      * Deallocates an ID.
      */
-    void deallocate(MovingObject *);
+    void deallocate(Actor *);
 
     /**
      * Fills a region of zones within the range of a point.
@@ -281,12 +282,12 @@ class MapComposite
         { return mName; }
 
         /**
-         * Inserts an object on the map. Sets its public ID if relevant.
+         * Inserts a thing on the map. Sets its public ID if relevant.
          */
         bool insert(Thing *);
 
         /**
-         * Removes an object from the map.
+         * Removes a thing from the map.
          */
         void remove(Thing *);
 
@@ -296,7 +297,7 @@ class MapComposite
         void update();
 
         /**
-         * Gets the PvP rules on the map
+         * Gets the PvP rules on the map.
          */
         PvPRules getPvP() const { return mPvPRules; }
 
@@ -317,15 +318,15 @@ class MapComposite
         ZoneIterator getAroundPointIterator(Point const &, int radius) const;
 
         /**
-         * Gets an iterator on the objects around a given object.
+         * Gets an iterator on the objects around a given actor.
          */
-        ZoneIterator getAroundObjectIterator(Object *, int radius) const;
+        ZoneIterator getAroundActorIterator(Actor *, int radius) const;
 
         /**
          * Gets an iterator on the objects around the old and new positions of
          * a character (including the ones that were but are now elsewhere).
          */
-        ZoneIterator getAroundCharacterIterator(MovingObject *, int radius) const;
+        ZoneIterator getAroundBeingIterator(Being *, int radius) const;
 
         /**
          * Gets everything related to the map.

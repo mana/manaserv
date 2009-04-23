@@ -30,9 +30,11 @@
 #include "game-server/effect.hpp"
 #include "utils/logger.h"
 
-Being::Being(int type, int id):
-    MovingObject(type, id),
+Being::Being(ThingType type):
+    Actor(type),
     mAction(STAND),
+    mSpeed(0),
+    mDirection(0),
     mHpRegenTimer(0)
 {
     Attribute attr = { 0, 0 };
@@ -44,9 +46,10 @@ Being::Being(int type, int id):
     }
 }
 
-int Being::damage(Object *, Damage const &damage)
+int Being::damage(Actor *, Damage const &damage)
 {
-    if (mAction == DEAD) return 0;
+    if (mAction == DEAD)
+        return 0;
 
     int HPloss = damage.base;
     if (damage.delta)
@@ -94,7 +97,8 @@ int Being::damage(Object *, Damage const &damage)
 
 void Being::died()
 {
-    if (mAction == DEAD) return;
+    if (mAction == DEAD)
+        return;
 
     LOG_DEBUG("Being " << getPublicID() << " died.");
     setAction(DEAD);
@@ -110,9 +114,92 @@ void Being::died()
     }
 }
 
+void Being::setDestination(const Point &dst)
+{
+    mDst = dst;
+    raiseUpdateFlags(UPDATEFLAG_NEW_DESTINATION);
+    mPath.clear();
+}
+
 void Being::move()
 {
-    MovingObject::move();
+    mOld = getPosition();
+
+    if (mActionTime > 100)
+    {
+        // Current move has not yet ended
+        mActionTime -= 100;
+        return;
+    }
+
+    int tileSX = mOld.x / 32, tileSY = mOld.y / 32;
+    int tileDX = mDst.x / 32, tileDY = mDst.y / 32;
+    if (tileSX == tileDX && tileSY == tileDY)
+    {
+        // Moving while staying on the same tile is free
+        setPosition(mDst);
+        mActionTime = 0;
+        return;
+    }
+
+    Map *map = getMap()->getMap();
+
+    /* If no path exists, the for-loop won't be entered. Else a path for the
+     * current destination has already been calculated.
+     * The tiles in this path have to be checked for walkability,
+     * in case there have been changes. The 'getWalk' method of the Map
+     * class has been used, because that seems to be the most logical
+     * place extra functionality will be added.
+     */
+    for (std::list<PATH_NODE>::iterator pathIterator = mPath.begin();
+            pathIterator != mPath.end(); pathIterator++)
+    {
+        if (!map->getWalk(pathIterator->x, pathIterator->y, getWalkMask()))
+        {
+            mPath.clear();
+            break;
+        }
+    }
+
+    if (mPath.empty())
+    {
+        // No path exists: the walkability of cached path has changed, the
+        // destination has changed, or a path was never set.
+        mPath = map->findPath(tileSX, tileSY, tileDX, tileDY, getWalkMask());
+    }
+
+    if (mPath.empty())
+    {
+        // no path was found
+        mDst = mOld;
+        mActionTime = 0;
+        return;
+    }
+
+    PATH_NODE prev(tileSX, tileSY);
+    Point pos;
+    do
+    {
+        PATH_NODE next = mPath.front();
+        mPath.pop_front();
+        // 362 / 256 is square root of 2, used for walking diagonally
+        mActionTime += (prev.x != next.x && prev.y != next.y)
+                       ? mSpeed * 362 / 256 : mSpeed;
+        if (mPath.empty())
+        {
+            // skip last tile center
+            pos = mDst;
+            break;
+        }
+        // position the actor in the middle of the tile for pathfinding purposes
+        pos.x = next.x * 32 + 16;
+        pos.y = next.y * 32 + 16;
+    }
+    while (mActionTime < 100);
+    setPosition(pos);
+
+    mActionTime = mActionTime > 100 ? mActionTime - 100 : 0;
+
     if (mAction == WALK || mAction == STAND)
     {
         mAction = (mActionTime) ? WALK : STAND;
@@ -179,51 +266,50 @@ void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
         Effects::show(26, getMap(), Point(attPos.x + attSize.x / 2, attPos.y + attSize.y / 2));
     }
 
-    for (MovingObjectIterator
-         i(getMap()->getAroundObjectIterator(this, attackZone->range)); i; ++i)
+    for (BeingIterator
+         i(getMap()->getAroundActorIterator(this, attackZone->range)); i; ++i)
     {
-        MovingObject *o = *i;
-        Point opos = o->getPosition();
+        Being *b = *i;
 
-        if (o == this) continue;
+        if (b == this)
+            continue;
 
-        int type = o->getType();
-        if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER) continue;
+        const ThingType type = b->getType();
+        if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER)
+            continue;
 
         if (getMap()->getPvP() == PVP_NONE &&
             type == OBJECT_CHARACTER &&
             getType() == OBJECT_CHARACTER)
             continue;
 
-        LOG_DEBUG("Attack Zone:"<<
-                  attPos.x<<":"<<attPos.y<<
-                  " "<<
-                  attSize.x<<"x"<<attSize.y);
-        LOG_DEBUG("Defender Zone:"<<
-                  defPos.x<<":"<<defPos.y<<
-                  " "<<
-                  defSize.x<<"x"<<defSize.y);
+        LOG_DEBUG("Attack Zone:" << attPos.x << ":" << attPos.y <<
+                  " " << attSize.x << "x" << attSize.y);
+        LOG_DEBUG("Defender Zone:" << defPos.x << ":" << defPos.y <<
+                  " " << defSize.x << "x" << defSize.y);
+
+        const Point &opos = b->getPosition();
 
         switch (attackZone->shape)
         {
             case ATTZONESHAPE_CONE:
                 if  (Collision::diskWithCircleSector(
-                        opos, o->getSize(),
+                        opos, b->getSize(),
                         ppos, attackZone->range,
                         attackZone->angle / 2, attackAngle)
                     )
                 {
-                    victims.push_back(static_cast< Being * >(o));
+                    victims.push_back(b);
                 }
                 break;
             case ATTZONESHAPE_RECT:
-                defPos.x = opos.x - o->getSize();
-                defPos.y = opos.y - o->getSize();
-                defSize.x = o->getSize() * 2;
-                defSize.y = o->getSize() * 2;
+                defPos.x = opos.x - b->getSize();
+                defPos.y = opos.y - b->getSize();
+                defSize.x = b->getSize() * 2;
+                defSize.y = b->getSize() * 2;
                 if (Collision::rectWithRect(attPos, attSize, defPos, defSize))
                 {
-                    victims.push_back(static_cast< Being * >(o));
+                    victims.push_back(b);
                 }
                 break;
             default:
@@ -319,18 +405,18 @@ void Being::update()
     int newHP = oldHP;
     int maxHP = getAttribute(BASE_ATTR_HP);
 
-    // regenerate HP
+    // Regenerate HP
     if (mAction != DEAD && ++mHpRegenTimer >= TICKS_PER_HP_REGENERATION)
     {
         mHpRegenTimer = 0;
         newHP += getModifiedAttribute(BASE_ATTR_HP_REGEN);
     }
-    //cap HP at maximum
+    // Cap HP at maximum
     if (newHP > maxHP)
     {
         newHP = maxHP;
     }
-    //only update HP when it actually changed to avoid network noise
+    // Only update HP when it actually changed to avoid network noise
     if (newHP != oldHP)
     {
         applyModifier(BASE_ATTR_HP, newHP - oldHP);
@@ -352,7 +438,7 @@ void Being::update()
         ++i;
     }
 
-    //check if being died
+    // Check if being died
     if (getModifiedAttribute(BASE_ATTR_HP) <= 0 && mAction != DEAD)
     {
         died();

@@ -25,7 +25,7 @@
 #include <vector>
 
 class Character;
-class MovingObject;
+class Actor;
 
 class BuySell
 {
@@ -50,7 +50,7 @@ class BuySell
         /**
          * Sends the item list to player.
          */
-        void start(MovingObject *obj);
+        void start(Actor *actor);
 
         /**
          * Performs the trade.

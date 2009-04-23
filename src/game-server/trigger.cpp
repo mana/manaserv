@@ -23,12 +23,12 @@
 
 #include "game-server/character.hpp"
 #include "game-server/mapcomposite.hpp"
-#include "game-server/movingobject.hpp"
+#include "game-server/actor.hpp"
 #include "game-server/state.hpp"
 
 #include "utils/logger.h"
 
-void WarpAction::process(Object *obj)
+void WarpAction::process(Actor *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
     {
@@ -36,11 +36,12 @@ void WarpAction::process(Object *obj)
     }
 }
 
-void ScriptAction::process(Object *obj)
+void ScriptAction::process(Actor *obj)
 {
-    LOG_DEBUG("Script trigger area activated: "<<mFunction<<"("<<obj<<", "<<mArg<<")");
-    if (!mScript) return;
-    if (mFunction == "") return;
+    LOG_DEBUG("Script trigger area activated: " << mFunction
+              << "(" << obj << ", " << mArg << ")");
+    if (!mScript || mFunction.empty())
+        return;
     mScript->prepare(mFunction);
     mScript->push(obj);
     mScript->push(mArg);
@@ -49,8 +50,8 @@ void ScriptAction::process(Object *obj)
 
 void TriggerArea::update()
 {
-    std::set<Object*> insideNow;
-    for (MovingObjectIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
+    std::set<Actor*> insideNow;
+    for (BeingIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
     {
         if (mZone.contains((*i)->getPosition())) //<-- Why is this additional condition necessary? Shouldn't getInsideRectangleIterator already exclude those outside of the zone? --Crush
         {

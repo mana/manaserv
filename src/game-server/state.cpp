@@ -58,7 +58,7 @@ struct DelayedEvent
     MapComposite *map;
 };
 
-typedef std::map< Object *, DelayedEvent > DelayedEvents;
+typedef std::map< Actor *, DelayedEvent > DelayedEvents;
 
 /**
  * List of delayed events.
@@ -85,13 +85,13 @@ static void updateMap(MapComposite *map)
     }
 
     // 3. perform actions.
-    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    for (BeingIterator i(map->getWholeMapIterator()); i; ++i)
     {
         (*i)->perform();
     }
 
     // 4. move objects around and update zones.
-    for (MovingObjectIterator i(map->getWholeMapIterator()); i; ++i)
+    for (BeingIterator i(map->getWholeMapIterator()); i; ++i)
     {
         (*i)->move();
     }
@@ -106,7 +106,12 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
     Possessions const &poss = ch->getPossessions();
     static int const nb_slots = 4;
     static int const slots[nb_slots] =
-        { EQUIP_FIGHT1_SLOT, EQUIP_HEAD_SLOT, EQUIP_TORSO_SLOT, EQUIP_LEGS_SLOT };
+    {
+        EQUIP_FIGHT1_SLOT,
+        EQUIP_HEAD_SLOT,
+        EQUIP_TORSO_SLOT,
+        EQUIP_LEGS_SLOT
+    };
 
     // Bitmask describing the changed entries.
     int changed = (1 << nb_slots) - 1;
@@ -161,16 +166,16 @@ static void informPlayer(MapComposite *map, Character *p)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
-    Point pold = p->getOldPosition(), ppos = p->getPosition();
+    const Point &pold = p->getOldPosition(), ppos = p->getPosition();
     int pid = p->getPublicID(), pflags = p->getUpdateFlags();
     int visualRange = Configuration::getValue("visualRange", 320);
 
     // Inform client about activities of other beings near its character
-    for (MovingObjectIterator i(map->getAroundCharacterIterator(p, visualRange)); i; ++i)
+    for (BeingIterator i(map->getAroundBeingIterator(p, visualRange)); i; ++i)
     {
-        MovingObject *o = *i;
+        Being *o = *i;
 
-        Point oold = o->getOldPosition(), opos = o->getPosition();
+        const Point &oold = o->getOldPosition(), opos = o->getPosition();
         int otype = o->getType();
         int oid = o->getPublicID(), oflags = o->getUpdateFlags();
         int flags = 0;
@@ -371,12 +376,12 @@ static void informPlayer(MapComposite *map, Character *p)
 
     // Inform client about items on the ground around its character
     MessageOut itemMsg(GPMSG_ITEMS);
-    for (FixedObjectIterator i(map->getAroundCharacterIterator(p, visualRange)); i; ++i)
+    for (FixedActorIterator i(map->getAroundBeingIterator(p, visualRange)); i; ++i)
     {
         assert((*i)->getType() == OBJECT_ITEM ||
                (*i)->getType() == OBJECT_EFFECT);
 
-        Object *o = *i;
+        Actor *o = *i;
         Point opos = o->getPosition();
         int oflags = o->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, visualRange);
@@ -468,13 +473,13 @@ void GameState::update(int worldTime)
             */
         }
 
-        for (ObjectIterator i(map->getWholeMapIterator()); i; ++i)
+        for (ActorIterator i(map->getWholeMapIterator()); i; ++i)
         {
-            Object *o = *i;
-            o->clearUpdateFlags();
-            if (o->canFight())
+            Actor *a = *i;
+            a->clearUpdateFlags();
+            if (a->canFight())
             {
-                static_cast< Being * >(o)->clearHitsTaken();
+                static_cast< Being * >(a)->clearHitsTaken();
             }
         }
     }
@@ -488,7 +493,7 @@ void GameState::update(int worldTime)
          i_end = delayedEvents.end(); i != i_end; ++i)
     {
         DelayedEvent const &e = i->second;
-        Object *o = i->first;
+        Actor *o = i->first;
         switch (e.type)
         {
             case EVENT_REMOVE:
@@ -531,13 +536,13 @@ bool GameState::insert(Thing *ptr)
     }
 
     // Check that coordinates are actually valid.
-    Object *obj = static_cast< Object * >(ptr);
+    Actor *obj = static_cast< Actor * >(ptr);
     Map *mp = map->getMap();
     Point pos = obj->getPosition();
     if (pos.x / 32 >= (unsigned)mp->getWidth() ||
         pos.y / 32 >= (unsigned)mp->getHeight())
     {
-        LOG_ERROR("Tried to insert an object at position " << pos.x << ','
+        LOG_ERROR("Tried to insert an actor at position " << pos.x << ','
                   << pos.y << " outside map " << map->getID() << '.');
         // Set an arbitrary small position.
         pos = Point(100, 100);
@@ -546,8 +551,8 @@ bool GameState::insert(Thing *ptr)
 
     if (!map->insert(obj))
     {
-        // The map is overloaded. No room to add a new object.
-        LOG_ERROR("Too many objects on map " << map->getID() << '.');
+        // The map is overloaded, no room to add a new actor
+        LOG_ERROR("Too many actors on map " << map->getID() << '.');
         return false;
     }
 
@@ -583,7 +588,8 @@ bool GameState::insert(Thing *ptr)
     }
 
     obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
-    if (obj->getType() != OBJECT_CHARACTER) return true;
+    if (obj->getType() != OBJECT_CHARACTER)
+        return true;
 
     /* Since the player does not know yet where in the world its character is,
        we send a map-change message, even if it is the first time it
@@ -656,12 +662,12 @@ void GameState::remove(Thing *ptr)
                 static_cast< Character * >(ptr)->getDatabaseID(), false);
         }
 
-        MovingObject *obj = static_cast< MovingObject * >(ptr);
+        Actor *obj = static_cast< Actor * >(ptr);
         MessageOut msg(GPMSG_BEING_LEAVE);
         msg.writeShort(obj->getPublicID());
         Point objectPos = obj->getPosition();
 
-        for (CharacterIterator p(map->getAroundObjectIterator(obj, visualRange)); p; ++p)
+        for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange)); p; ++p)
         {
             if (*p != obj && objectPos.inRangeOf((*p)->getPosition(), visualRange))
             {
@@ -678,7 +684,7 @@ void GameState::remove(Thing *ptr)
         msg.writeShort(pos.x);
         msg.writeShort(pos.y);
 
-        for (CharacterIterator p(map->getAroundObjectIterator(obj, visualRange)); p; ++p)
+        for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange)); p; ++p)
         {
             if (pos.inRangeOf((*p)->getPosition(), visualRange))
             {
@@ -722,7 +728,7 @@ void GameState::warp(Character *ptr, MapComposite *map, int x, int y)
 /**
  * Enqueues an event. It will be executed at end of update.
  */
-static void enqueueEvent(Object *ptr, DelayedEvent const &e)
+static void enqueueEvent(Actor *ptr, DelayedEvent const &e)
 {
     std::pair< DelayedEvents::iterator, bool > p =
         delayedEvents.insert(std::make_pair(ptr, e));
@@ -733,13 +739,13 @@ static void enqueueEvent(Object *ptr, DelayedEvent const &e)
     }
 }
 
-void GameState::enqueueInsert(Object *ptr)
+void GameState::enqueueInsert(Actor *ptr)
 {
     DelayedEvent e = { EVENT_INSERT, 0, 0, 0 };
     enqueueEvent(ptr, e);
 }
 
-void GameState::enqueueRemove(Object *ptr)
+void GameState::enqueueRemove(Actor *ptr)
 {
     DelayedEvent e = { EVENT_REMOVE, 0, 0, 0 };
     enqueueEvent(ptr, e);
@@ -751,12 +757,12 @@ void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
     enqueueEvent(ptr, e);
 }
 
-void GameState::sayAround(Object *obj, std::string const &text)
+void GameState::sayAround(Actor *obj, std::string const &text)
 {
     Point speakerPosition = obj->getPosition();
     int visualRange = Configuration::getValue("visualRange", 320);
 
-    for (CharacterIterator i(obj->getMap()->getAroundObjectIterator(obj, visualRange)); i; ++i)
+    for (CharacterIterator i(obj->getMap()->getAroundActorIterator(obj, visualRange)); i; ++i)
     {
         if (speakerPosition.inRangeOf((*i)->getPosition(), visualRange))
         {
@@ -765,9 +771,10 @@ void GameState::sayAround(Object *obj, std::string const &text)
     }
 }
 
-void GameState::sayTo(Object *destination, Object *source, std::string const &text)
+void GameState::sayTo(Actor *destination, Actor *source, std::string const &text)
 {
-    if (destination->getType() != OBJECT_CHARACTER) return; //only characters will read it anyway
+    if (destination->getType() != OBJECT_CHARACTER)
+        return; //only characters will read it anyway
 
     MessageOut msg(GPMSG_SAY);
     if (source == NULL) {
@@ -775,7 +782,7 @@ void GameState::sayTo(Object *destination, Object *source, std::string const &te
     } else if (!source->canMove()) {
         msg.writeShort(65535);
     } else {
-        msg.writeShort(static_cast< MovingObject * >(source)->getPublicID());
+        msg.writeShort(static_cast< Actor * >(source)->getPublicID());
     }
     msg.writeString(text);
 

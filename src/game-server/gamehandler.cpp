@@ -132,36 +132,37 @@ void GameHandler::updateCharacter(int charid, int partyid)
     }
 }
 
-static MovingObject *findBeingNear(Object *p, int id)
+static Actor *findActorNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
     Point const &ppos = p->getPosition();
     // See map.hpp for tiles constants
-    for (MovingObjectIterator i(map->getAroundPointIterator(ppos,
-        DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR)); i; ++i)
+    const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
+    for (ActorIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
     {
-        MovingObject *o = *i;
-        if (o->getPublicID() != id) continue;
-        return ppos.inRangeOf(o->getPosition(), DEFAULT_TILE_WIDTH *
-        TILES_TO_BE_NEAR) ? o : NULL;
+        Actor *a = *i;
+        if (a->getPublicID() != id)
+            continue;
+        return ppos.inRangeOf(a->getPosition(), pixelDist) ? a : 0;
     }
-    return NULL;
+    return 0;
 }
 
-static Character *findCharacterNear(Object *p, int id)
+static Character *findCharacterNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
     Point const &ppos = p->getPosition();
     // See map.hpp for tiles constants
+    const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
     for (CharacterIterator i(map->getAroundPointIterator(ppos,
-        DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR)); i; ++i)
+                                                         pixelDist)); i; ++i)
     {
-        Character *o = *i;
-        if (o->getPublicID() != id) continue;
-        return ppos.inRangeOf(o->getPosition(), DEFAULT_TILE_WIDTH *
-        TILES_TO_BE_NEAR) ? o : NULL;
+        Character *c = *i;
+        if (c->getPublicID() != id)
+            continue;
+        return ppos.inRangeOf(c->getPosition(), pixelDist) ? c : 0;
     }
-    return NULL;
+    return 0;
 }
 
 void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
@@ -171,7 +172,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
     if (computer.status == CLIENT_LOGIN)
     {
-        if (message.getId() != PGMSG_CONNECT) return;
+        if (message.getId() != PGMSG_CONNECT)
+            return;
 
         std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
         computer.status = CLIENT_QUEUED; // Before the addPendingClient
@@ -205,7 +207,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_NPC_SELECT:
         {
             int id = message.readShort();
-            MovingObject *o = findBeingNear(computer.character, id);
+            Actor *o = findActorNear(computer.character, id);
             if (!o || o->getType() != OBJECT_NPC)
             {
                 sendError(comp, id, "Not close enough to NPC\n");
@@ -234,9 +236,9 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             {
                 MapComposite *map = computer.character->getMap();
                 Point ipos(x, y);
-                for (FixedObjectIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
+                for (FixedActorIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
                 {
-                    Object *o = *i;
+                    Actor *o = *i;
                     Point opos = o->getPosition();
                     if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
                     {

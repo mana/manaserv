@@ -22,13 +22,15 @@
 #ifndef _TMWSERV_EFFECT_H
 #define _TMWSERV_EFFECT_H
 
-#include "game-server/object.hpp"
+#include "game-server/actor.hpp"
 
-class Effect : public Object
+class Effect : public Actor
 {
     public:
         Effect(int id)
-          : Object(OBJECT_EFFECT), mEffectId(id), mHasBeenShown(false)
+          : Actor(OBJECT_EFFECT)
+          , mEffectId(id)
+          , mHasBeenShown(false)
         {}
 
         int getEffectId() const

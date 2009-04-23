@@ -364,7 +364,7 @@ enum {
     GUILD_EVENT_OFFLINE_PLAYER
 };
 
-// Moving object flags
+// Being flags
 enum {
     // Payload contains the current position.
     MOVING_POSITION = 1,

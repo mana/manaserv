@@ -26,13 +26,13 @@
 #include "game-server/thing.hpp"
 #include "scripting/script.hpp"
 
-class Object;
+class Actor;
 
 class TriggerAction
 {
     public:
         virtual ~TriggerAction() {}
-        virtual void process(Object *obj) = 0;
+        virtual void process(Actor *obj) = 0;
 };
 
 class WarpAction : public TriggerAction
@@ -41,7 +41,7 @@ class WarpAction : public TriggerAction
         WarpAction(MapComposite *m, int x, int y)
           : mMap(m), mX(x), mY(y) {}
 
-        virtual void process(Object *obj);
+        virtual void process(Actor *obj);
 
     private:
         MapComposite *mMap;
@@ -54,12 +54,12 @@ class ScriptAction : public TriggerAction
         ScriptAction(Script *script, std::string function, int arg)
           : mScript(script), mFunction(function), mArg(arg) {}
 
-        virtual void process(Object *obj);
+        virtual void process(Actor *obj);
 
     private:
-        Script *mScript;        //Script object to be called
-        std::string mFunction;  //Name of the function called in the script object
-        int mArg;               //Argument passed to script function (meaning is function-specific)
+        Script *mScript;        // Script object to be called
+        std::string mFunction;  // Name of the function called in the script object
+        int mArg;               // Argument passed to script function (meaning is function-specific)
 };
 
 class TriggerArea : public Thing
@@ -77,7 +77,7 @@ class TriggerArea : public Thing
         Rectangle mZone;
         TriggerAction *mAction;
         bool mOnce;
-        std::set<Object *> mInside;
+        std::set<Actor *> mInside;
 };
 
 #endif

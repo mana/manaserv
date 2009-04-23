@@ -26,7 +26,7 @@
 
 class MapComposite;
 class Thing;
-class Object;
+class Actor;
 class Character;
 
 namespace GameState
@@ -37,8 +37,8 @@ namespace GameState
     void update(int worldTime);
 
     /**
-     * Inserts an object in the game world.
-     * @return false if the insertion failed and the object is in limbo.
+     * Inserts an thing in the game world.
+     * @return false if the insertion failed and the thing is in limbo.
      * @note No update may be in progress.
      */
     bool insert(Thing *)
@@ -48,7 +48,7 @@ namespace GameState
     ;
 
     /**
-     * Inserts an object in the game world. Deletes the object if the insertion
+     * Inserts a thing in the game world. Deletes the thing if the insertion
      * failed.
      * @return false if the insertion failed.
      * @note No update may be in progress. Invalid for characters.
@@ -56,9 +56,9 @@ namespace GameState
     bool insertSafe(Thing *);
 
     /**
-     * Removes an object from the game world.
+     * Removes a thing from the game world.
      * @note No update may be in progress.
-     * @note The object is not destroyed by this call.
+     * @note The thing is not destroyed by this call.
      */
     void remove(Thing *);
 
@@ -73,14 +73,14 @@ namespace GameState
      * Enqueues an insert event.
      * @note The event will be executed at end of update.
      */
-    void enqueueInsert(Object *);
+    void enqueueInsert(Actor *);
 
     /**
      * Enqueues a remove event.
      * @note The event will be executed at end of update.
-     * @note The object will be destroyed at that time.
+     * @note The thing will be destroyed at that time.
      */
-    void enqueueRemove(Object *);
+    void enqueueRemove(Actor *);
 
     /**
      * Enqueues a warp event.
@@ -89,15 +89,15 @@ namespace GameState
     void enqueueWarp(Character *, MapComposite *, int x, int y);
 
     /**
-     * Says something to an object
+     * Says something to an actor.
      * @note passing NULL as source generates a message from "Server:"
      */
-    void sayTo(Object *destination, Object *source, std::string const &text);
+    void sayTo(Actor *destination, Actor *source, std::string const &text);
 
     /**
-     * Says something to everything around an object.
+     * Says something to everything around an actor.
      */
-    void sayAround(Object *, std::string const &text);
+    void sayAround(Actor *, std::string const &text);
 
     /**
      * Says something to every player on the server.

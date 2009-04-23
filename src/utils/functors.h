@@ -36,7 +36,7 @@ namespace
  *
  * Note:
  *     - this functor assumes that the object defines as public the following
- *       method: std::string getName(void).
+ *       method: std::string getName() const.
  *     - this functor assumes that the list is a list of pointers.
  */
 template <typename T>

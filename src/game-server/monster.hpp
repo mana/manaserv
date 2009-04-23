@@ -249,7 +249,7 @@ class Monster : public Being
         /**
          * Calls the damage function in Being and updates the aggro list
          */
-        virtual int damage(Object *source, Damage const &damage);
+        virtual int damage(Actor *source, Damage const &damage);
 
         /**
          * Removes a being from the anger list.
@@ -257,7 +257,7 @@ class Monster : public Being
         void forgetTarget(Thing *being);
 
         /**
-         * Returns the way the object is blocked by other things on the map
+         * Returns the way the actor is blocked by other things on the map.
          */
         virtual unsigned char getWalkMask() const
         {
@@ -267,7 +267,7 @@ class Monster : public Being
 
     protected:
         /**
-         * Returns the way the object blocks pathfinding for other objects
+         * Returns the way the actor blocks pathfinding for other objects.
          */
         virtual Map::BlockType getBlockType() const
         { return Map::BLOCKTYPE_MONSTER; }

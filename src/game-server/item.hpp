@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "game-server/object.hpp"
+#include "game-server/actor.hpp"
 
 class AttackZone;
 class Being;
@@ -292,11 +292,11 @@ class ItemClass
         AttackZone *mAttackZone;  /**< Attack zone when used as a weapon */
 };
 
-class Item : public Object
+class Item : public Actor
 {
     public:
         Item(ItemClass *type, int amount)
-          : Object(OBJECT_ITEM), mType(type), mAmount(amount)
+          : Actor(OBJECT_ITEM), mType(type), mAmount(amount)
         {}
 
         ItemClass *getItemClass() const

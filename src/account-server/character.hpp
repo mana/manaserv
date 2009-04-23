@@ -38,16 +38,10 @@ class Character
         Character(std::string const &name, int id = -1);
 
         /**
-         * Get and set methods
+         * Gets the database id of the character.
          */
-
-        /** Gets the database id of the character. */
-        int
-        getDatabaseID() const { return mDatabaseID; }
-
-        /** Sets the database id of the character. */
-        void
-        setDatabaseID(int id) { mDatabaseID = id; }
+        int getDatabaseID() const { return mDatabaseID; }
+        void setDatabaseID(int id) { mDatabaseID = id; }
 
         /** Gets the account the character belongs to. */
         Account *getAccount() const
@@ -56,45 +50,35 @@ class Character
         /** Sets the account the character belongs to, and related fields. */
         void setAccount(Account *ptr);
 
-        /** Gets the ID of the account the character belongs to. */
-        int getAccountID() const
-        { return mAccountID; }
+        /**
+         * Gets the ID of the account the character belongs to.
+         */
+        int getAccountID() const { return mAccountID; }
+        void setAccountID(int id) { mAccountID = id; }
 
-        /** Sets the ID of the account the character belongs to. */
-        void setAccountID(int id)
-        { mAccountID = id; }
+        /**
+         * Gets the name of the character.
+         */
+        std::string const &getName() const { return mName; }
+        void setName(const std::string& name) { mName = name; }
 
-        /** Gets the name of the character. */
-        std::string const &
-        getName() const { return mName; }
+        /**
+         * Gets the gender of the character (male / female).
+         */
+        int getGender() const { return mGender; }
+        void setGender(int gender) { mGender = gender; }
 
-        /** Sets the name of the character. */
-        void
-        setName(const std::string& name) { mName = name; }
+        /**
+         * Gets the hairstyle of the character.
+         */
+        int getHairStyle() const { return mHairStyle; }
+        void setHairStyle(int style) { mHairStyle = style; }
 
-        /** Gets the gender of the character (male / female). */
-        int
-        getGender() const { return mGender; }
-
-        /** Sets the gender of the character (male / female). */
-        void
-        setGender(int gender) { mGender = gender; }
-
-        /** Gets the hairstyle of the character. */
-        int
-        getHairStyle() const { return mHairStyle; }
-
-        /** Sets the hairstyle of the character. */
-        void
-        setHairStyle(int style) { mHairStyle = style; }
-
-        /** Gets the haircolor of the character. */
-        int
-        getHairColor() const { return mHairColor; }
-
-        /** Sets the haircolor of the character. */
-        void
-        setHairColor(int color) { mHairColor = color; }
+        /**
+         * Gets the haircolor of the character.
+         */
+        int getHairColor() const { return mHairColor; }
+        void setHairColor(int color) { mHairColor = color; }
 
         /** Gets the account level of the user. */
         int getAccountLevel() const
@@ -107,13 +91,11 @@ class Character
         void setAccountLevel(int l, bool force = false)
         { if (force) mAccountLevel = l; }
 
-        /** Gets the level of the character. */
-        int
-        getLevel() const { return mLevel; }
-
-        /** Sets the level of the character. */
-        void
-        setLevel(int level) { mLevel = level; }
+        /**
+         * Gets the level of the character.
+         */
+        int getLevel() const { return mLevel; }
+        void setLevel(int level) { mLevel = level; }
 
         /** Gets the value of a base attribute of the character. */
         int getAttribute(int n) const
@@ -132,21 +114,17 @@ class Character
         void receiveExperience(int skill, int value)
         { mExperience[skill] += value; }
 
-        /** Gets the Id of the map that the character is on. */
-        int
-        getMapId() const { return mMapId; }
+        /**
+         * Gets the Id of the map that the character is on.
+         */
+        int getMapId() const { return mMapId; }
+        void setMapId(int mapId) { mMapId = mapId; }
 
-        /** Sets the Id of the map that the character is on. */
-        void
-        setMapId(int mapId) { mMapId = mapId; }
-
-        /** Gets the position of the character on the map. */
-        Point const &
-        getPosition() const { return mPos; }
-
-        /** Sets the position of the character on the map. */
-        void
-        setPosition(const Point &p) { mPos = p; }
+        /**
+         * Gets the position of the character on the map.
+         */
+        Point const &getPosition() const { return mPos; }
+        void setPosition(const Point &p) { mPos = p; }
 
         /** Add a guild to the character */
         void addGuild(const std::string &name) { mGuilds.push_back(name); }
@@ -204,8 +182,6 @@ class Character
         std::vector<std::string> mGuilds;        //!< All the guilds the player
                                                  //!< belongs to.
 };
-
-// Utility typedefs
 
 /**
  * Type definition for a list of Characters.

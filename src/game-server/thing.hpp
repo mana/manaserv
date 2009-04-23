@@ -27,9 +27,9 @@ class EventListener;
 class MapComposite;
 
 /**
- * Object type enumeration.
+ * Types of things enumeration.
  */
-enum
+enum ThingType
 {
     OBJECT_ITEM = 0,  /**< A simple item. */
     OBJECT_ACTOR,     /**< An item that toggle map/quest actions (doors,
@@ -53,14 +53,11 @@ class Thing
         /**
          * Constructor.
          */
-        Thing(int type, MapComposite *map = NULL)
+        Thing(ThingType type, MapComposite *map = NULL)
           : mMap(map),
             mType(type)
         {}
 
-        /**
-         * Destructor.
-         */
         virtual ~Thing();
 
         /**
@@ -68,17 +65,17 @@ class Thing
          *
          * @return the type of this thing.
          */
-        int getType() const
+        ThingType getType() const
         { return mType; }
 
         /**
-         * Returns whether this thing is visible on the map or not. (Object)
+         * Returns whether this thing is visible on the map or not. (Actor)
          */
         bool isVisible() const
         { return mType != OBJECT_OTHER; }
 
         /**
-         * Returns whether this thing can move on the map or not. (MovingObject)
+         * Returns whether this thing can move on the map or not. (Actor)
          */
         bool canMove() const
         { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER ||
@@ -93,8 +90,7 @@ class Thing
         /**
          * Updates the internal status.
          */
-        virtual void
-        update() = 0;
+        virtual void update() = 0;
 
         /**
          * Gets the map this thing is located on.
@@ -130,11 +126,11 @@ class Thing
 
     protected:
         typedef std::set< EventListener const * > Listeners;
-        Listeners mListeners; /**< List of event listeners. */
+        Listeners mListeners;   /**< List of event listeners. */
 
     private:
         MapComposite *mMap;     /**< Map the thing is on */
-        char mType;             /**< Type of this thing. */
+        ThingType mType;        /**< Type of this thing. */
 };
 
 #endif // _TMWSERV_THING_H_
