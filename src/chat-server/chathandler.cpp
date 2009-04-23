@@ -232,6 +232,11 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PCMSG_PARTY_QUIT:
             handlePartyQuit(computer);
+            break;
+
+        case PCMSG_PARTY_REJECT_INVITE:
+            handlePartyRejection(computer, message);
+            break;
 
         default:
             LOG_WARN("ChatHandler::processMessage, Invalid message type"

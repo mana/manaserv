@@ -40,6 +40,7 @@ class ChatClient;
  * @todo <b>b_lindeijer:</b> Extend this class with handling of team chat once
  *       teams are implemented.
  */
+
 class ChatHandler : public ConnectionHandler
 {
 
@@ -52,8 +53,15 @@ class ChatHandler : public ConnectionHandler
             unsigned char level;
         };
 
+        struct PartyInvite
+        {
+            std::string mInviter;
+            std::string mInvited;
+            int mPartyId;
+        };
+
         std::map<std::string, ChatClient*> mPlayerMap;
-        std::vector<std::string> mPartyInvitedUsers;
+        std::vector<PartyInvite> mPartyInvitedUsers;
 
     public:
 
@@ -268,6 +276,11 @@ class ChatHandler : public ConnectionHandler
          */
         void
         handlePartyQuit(ChatClient &client);
+
+        /**
+         * Tell user the invite was rejected
+         */
+        void handlePartyRejection(ChatClient &client, MessageIn &msg);
 
         /**
          * Remove user from party

@@ -28,6 +28,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
+				<Option parameters="--verbosity 4" />
 				<Compiler>
 					<Add option="-g" />
 					<Add directory="src" />
