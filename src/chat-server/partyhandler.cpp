@@ -146,12 +146,9 @@ void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)
             {
                 out.writeByte(ERRMSG_OK);
                 mPartyInvitedUsers.erase(itr);
+                found = true;
+                break;
             }
-            else
-            {
-                out.writeByte(ERRMSG_FAILURE);
-            }
-            found = true;
         }
 
         ++itr;
@@ -198,6 +195,7 @@ void ChatHandler::handlePartyRejection(ChatClient &client, MessageIn &msg)
             // remove them from invited users list
             mPartyInvitedUsers.erase(itr);
             found = true;
+            break;
         }
 
         ++itr;
