@@ -164,6 +164,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handlePrivMsgMessage(computer, message);
             break;
 
+        case PCMSG_WHO:
+            handleWhoMessage(computer);
+            break;
+
         case PCMSG_ENTER_CHANNEL:
             handleEnterChannelMessage(computer, message);
             break;
@@ -368,6 +372,23 @@ ChatHandler::handlePrivMsgMessage(ChatClient &client, MessageIn &msg)
     trans.mMessage = "User said " + text;
     trans.mMessage.append(" to " + user);
     storage->addTransaction(trans);
+}
+
+void ChatHandler::handleWhoMessage(ChatClient &client)
+{
+    MessageOut reply(CPMSG_WHO_RESPONSE);
+
+    std::map<std::string, ChatClient*>::iterator itr, itr_end;
+    itr = mPlayerMap.begin();
+    itr_end = mPlayerMap.end();
+
+    while (itr != itr_end)
+    {
+        reply.writeString(itr->first);
+        ++itr;
+    }
+
+    client.send(reply);
 }
 
 void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)

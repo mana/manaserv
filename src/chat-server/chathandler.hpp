@@ -164,6 +164,11 @@ class ChatHandler : public ConnectionHandler
         handlePrivMsgMessage(ChatClient &client, MessageIn &msg);
 
         /**
+         * Deal with Who messages.
+         */
+        void handleWhoMessage(ChatClient &client);
+
+        /**
          * Deal with player entering channel.
          */
         void

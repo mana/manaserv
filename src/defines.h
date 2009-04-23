@@ -227,6 +227,9 @@ enum {
     PCMSG_CHAT                     = 0x0410, // S text, W channel
     PCMSG_ANNOUNCE                 = 0x0411, // S text
     PCMSG_PRIVMSG                  = 0x0412, // S user, S text
+    PCMSG_WHO                      = 0x0415, // -
+    CPMSG_WHO_RESPONSE             = 0x0416, // { S user }
+
     // -- Channeling
     CPMSG_CHANNEL_EVENT               = 0x0430, // W channel, B event, S info
     PCMSG_ENTER_CHANNEL               = 0x0440, // S channel, S password
