@@ -92,12 +92,12 @@ namespace GameState
      * Says something to an actor.
      * @note passing NULL as source generates a message from "Server:"
      */
-    void sayTo(Actor *destination, Actor *source, std::string const &text);
+    void sayTo(Actor *destination, Actor *source, const std::string &text);
 
     /**
      * Says something to everything around an actor.
      */
-    void sayAround(Actor *, std::string const &text);
+    void sayAround(Actor *, const std::string &text);
 
     /**
      * Says something to every player on the server.

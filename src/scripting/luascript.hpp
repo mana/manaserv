@@ -36,7 +36,8 @@ class LuaScript: public Script
 {
     public:
         /**
-         * Constructor.
+         * Constructor. Initializes a new Lua state, registers the native API
+         * and loads the libtmw.lua file.
          */
         LuaScript();
 
@@ -45,9 +46,9 @@ class LuaScript: public Script
          */
         ~LuaScript();
 
-        void load(char const *);
+        void load(const char *);
 
-        void prepare(std::string const &);
+        void prepare(const std::string &);
 
         void push(int);
 
@@ -57,11 +58,11 @@ class LuaScript: public Script
 
         int execute();
 
-        static void getQuestCallback(Character *, std::string const &,
-                                     std::string const &, void *);
+        static void getQuestCallback(Character *, const std::string &,
+                                     const std::string &, void *);
 
-        static void getPostCallback(Character *, std::string const &,
-                                    std::string const &, void *);
+        static void getPostCallback(Character *, const std::string &,
+                                    const std::string &, void *);
 
         void processDeathEvent(Being* thing);
 

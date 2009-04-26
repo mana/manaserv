@@ -62,85 +62,85 @@
 /**
  * TABLE: tmw_accounts.
  */
-static char const *ACCOUNTS_TBL_NAME = "tmw_accounts";
+static const char *ACCOUNTS_TBL_NAME = "tmw_accounts";
 
 /**
  * TABLE: tmw_characters.
  *     - gender is 0 for male, 1 for female.
  */
-static char const *CHARACTERS_TBL_NAME = "tmw_characters";
+static const char *CHARACTERS_TBL_NAME = "tmw_characters";
 
 /**
  * TABLE: tmw_char_skills.
  */
-static char const *CHAR_SKILLS_TBL_NAME = "tmw_char_skills";
+static const char *CHAR_SKILLS_TBL_NAME = "tmw_char_skills";
 
 /**
  * TABLE: tmw_inventories.
  */
-static char const *INVENTORIES_TBL_NAME("tmw_inventories");
+static const char *INVENTORIES_TBL_NAME("tmw_inventories");
 
 /**
  * TABLE: tmw_items.
  */
-static char const *ITEMS_TBL_NAME("tmw_items");
+static const char *ITEMS_TBL_NAME("tmw_items");
 
 /**
  * TABLE: tmw_guilds.
  * Store player guilds
  */
-static char const *GUILDS_TBL_NAME = "tmw_guilds";
+static const char *GUILDS_TBL_NAME = "tmw_guilds";
 
 /**
  * TABLE: tmw_guild_members.
  * Store guild members
  */
-static char const *GUILD_MEMBERS_TBL_NAME = "tmw_guild_members";
+static const char *GUILD_MEMBERS_TBL_NAME = "tmw_guild_members";
 
 /**
  * TABLE: tmw_quests.
  */
-static char const *QUESTS_TBL_NAME = "tmw_quests";
+static const char *QUESTS_TBL_NAME = "tmw_quests";
 
 /**
  * TABLE: tmw_world_states
  */
-static char const *WORLD_STATES_TBL_NAME = "tmw_world_states";
+static const char *WORLD_STATES_TBL_NAME = "tmw_world_states";
 
 /**
  * TABLE: tmw_post
  * Store letters sent by characters
  */
-static char const *POST_TBL_NAME = "tmw_post";
+static const char *POST_TBL_NAME = "tmw_post";
 
 /**
  * TABLE: tmw_post_attachments
  * Store attachments per letter.
  */
-static char const *POST_ATTACHMENTS_TBL_NAME = "tmw_post_attachments";
+static const char *POST_ATTACHMENTS_TBL_NAME = "tmw_post_attachments";
 
 /**
  * TABLE: tmw_auctions
  * Store items auctions.
  */
-static char const *AUCTION_TBL_NAME = "tmw_auctions";
+static const char *AUCTION_TBL_NAME = "tmw_auctions";
 
 /**
  * TABLE: tmw_auction_bids
  * Store bids on auctions.
  */
-static char const *AUCTION_BIDS_TBL_NAME = "tmw_auction_bids";
+static const char *AUCTION_BIDS_TBL_NAME = "tmw_auction_bids";
 
 /**
  * TABLE: tmw_online_list
  * List currently online users.
  */
-static char const *ONLINE_USERS_TBL_NAME = "tmw_online_list";
+static const char *ONLINE_USERS_TBL_NAME = "tmw_online_list";
 
 /**
  * TABLE: tmw_transactions
  * Stores all transactions
  */
-static char const *TRANSACTION_TBL_NAME = "tmw_transactions";
+static const char *TRANSACTION_TBL_NAME = "tmw_transactions";
 
 #endif // _TMWSERV_DALSTORAGE_SQL_H_

@@ -50,7 +50,7 @@ namespace GameServerHandler
     /**
      * Warns a game server about a soon-to-connect client.
      */
-    void registerClient(std::string const &token, Character *);
+    void registerClient(const std::string &token, Character *);
 
     /**
      * Dumps per-server statistics into given stream

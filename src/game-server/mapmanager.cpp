@@ -35,12 +35,12 @@
  */
 static MapManager::Maps maps;
 
-MapManager::Maps const &MapManager::getMaps()
+const MapManager::Maps &MapManager::getMaps()
 {
     return maps;
 }
 
-void MapManager::initialize(std::string const &mapReferenceFile)
+void MapManager::initialize(const std::string &mapReferenceFile)
 {
     int size;
     char *data = ResourceManager::loadFile(mapReferenceFile, size);
@@ -103,7 +103,7 @@ MapComposite *MapManager::getMap(int mapId)
     return (i != maps.end()) ? i->second : NULL;
 }
 
-MapComposite *MapManager::getMap(std::string const &mapName)
+MapComposite *MapManager::getMap(const std::string &mapName)
 {
    Maps::iterator i;
    for (i = maps.begin(); i != maps.end(); ++i)

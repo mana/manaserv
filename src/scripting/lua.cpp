@@ -68,7 +68,7 @@ static int npc_message(lua_State *s)
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
     size_t l;
-    char const *m = lua_tolstring(s, 3, &l);
+    const char *m = lua_tolstring(s, 3, &l);
     if (!p || !q || !m)
     {
         raiseScriptError(s, "npc_message called with incorrect parameters.");
@@ -98,7 +98,7 @@ static int npc_choice(lua_State *s)
     msg.writeShort(p->getPublicID());
     for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
     {
-        char const *m = lua_tostring(s, i);
+        const char *m = lua_tostring(s, i);
         if (!m)
         {
             raiseScriptError(s, "npc_Choice called with incorrect parameters.");
@@ -601,7 +601,7 @@ static int chr_get_quest(lua_State *s)
         raiseScriptError(s, "chr_get_quest called for nonexistent character.");
     }
 
-    char const *m = lua_tostring(s, 2);
+    const char *m = lua_tostring(s, 2);
     if (!m || m[0] == 0)
     {
         raiseScriptError(s, "chr_get_quest called with incorrect parameters.");
@@ -629,8 +629,8 @@ static int chr_get_quest(lua_State *s)
 static int chr_set_quest(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
-    char const *m = lua_tostring(s, 2);
-    char const *n = lua_tostring(s, 3);
+    const char *m = lua_tostring(s, 2);
+    const char *n = lua_tostring(s, 3);
     if (!m || !n || m[0] == 0)
     {
         raiseScriptError(s, "chr_set_quest called with incorrect parameters.");

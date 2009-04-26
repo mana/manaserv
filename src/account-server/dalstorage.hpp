@@ -182,19 +182,19 @@ class DALStorage
          * Tells if the user name already exists.
          * @return true if the user name exists.
          */
-        bool doesUserNameExist(std::string const &name);
+        bool doesUserNameExist(const std::string &name);
 
         /**
          * Tells if the email address already exists.
          * @return true if the email address exists.
          */
-        bool doesEmailAddressExist(std::string const &email);
+        bool doesEmailAddressExist(const std::string &email);
 
         /**
          * Tells if the character name already exists.
          * @return true if the character name exists.
          */
-        bool doesCharacterNameExist(std::string const &name);
+        bool doesCharacterNameExist(const std::string &name);
 
         /**
          * Updates the data for a single character, does not update the
@@ -274,12 +274,12 @@ class DALStorage
         /**
          * Gets the value of a quest variable.
          */
-        std::string getQuestVar(int id, std::string const &);
+        std::string getQuestVar(int id, const std::string &);
 
         /**
          * Sets the value of a quest variable.
          */
-        void setQuestVar(int id, std::string const &, std::string const &);
+        void setQuestVar(int id, const std::string &, const std::string &);
 
         /**
          * Gets the string value of a map specific world state variable.
@@ -287,7 +287,7 @@ class DALStorage
          * @param name Name of the requested world-state variable.
          * @param map_id Id of the specific map.
          */
-        std::string getWorldStateVar(std::string const &name, int map_id = -1);
+        std::string getWorldStateVar(const std::string &name, int map_id = -1);
 
         /**
          * Sets the value of a world state variable.
@@ -295,7 +295,7 @@ class DALStorage
          * @param name Name of the world-state vairable.
          * @param value New value of the world-state variable.
          */
-        void setWorldStateVar(std::string const &name, std::string const &value);
+        void setWorldStateVar(const std::string &name, const std::string &value);
 
         /**
          * Sets the value of a world state variable of a specific map.
@@ -304,8 +304,8 @@ class DALStorage
          * @param map_id ID of the specific map
          * @param value New value of the world-state variable.
          */
-        void setWorldStateVar(std::string const &name, int map_id,
-                              std::string const &value);
+        void setWorldStateVar(const std::string &name, int map_id,
+                              const std::string &value);
 
         /**
          * Set the level on an account
@@ -401,7 +401,7 @@ class DALStorage
          *
          * @return the account found by the query
          */
-        Account *getAccountBySQL(std::string const &query);
+        Account *getAccountBySQL(const std::string &query);
 
 
         /**
@@ -412,7 +412,7 @@ class DALStorage
          *
          * @return the character found by the query.
          */
-        Character *getCharacterBySQL(std::string const &query, Account *owner);
+        Character *getCharacterBySQL(const std::string &query, Account *owner);
 
         /**
          * Synchronizes the base data in the connected SQL database with the xml

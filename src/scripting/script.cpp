@@ -36,7 +36,7 @@ Script::Script():
     mEventListener(&scriptEventDispatch)
 {}
 
-void Script::registerEngine(std::string const &name, Factory f)
+void Script::registerEngine(const std::string &name, Factory f)
 {
     if (!engines)
     {
@@ -49,7 +49,7 @@ void Script::registerEngine(std::string const &name, Factory f)
     (*engines)[name] = f;
 }
 
-Script *Script::create(std::string const &engine)
+Script *Script::create(const std::string &engine)
 {
     if (engines)
     {
@@ -69,7 +69,7 @@ void Script::update()
     execute();
 }
 
-bool Script::loadFile(std::string const &name)
+bool Script::loadFile(const std::string &name)
 {
     int size;
     char *buffer = ResourceManager::loadFile(name, size);
@@ -84,7 +84,8 @@ bool Script::loadFile(std::string const &name)
     }
 }
 
-void Script::loadNPC(std::string const &name, int id, int x, int y, char const *prog)
+void Script::loadNPC(const std::string &name, int id, int x, int y,
+                     const char *prog)
 {
     load(prog);
     prepare("create_npc_delayed");

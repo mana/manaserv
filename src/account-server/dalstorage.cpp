@@ -117,10 +117,10 @@ void DALStorage::close()
     mDb->disconnect();
 }
 
-Account *DALStorage::getAccountBySQL(std::string const &query)
+Account *DALStorage::getAccountBySQL(const std::string &query)
 {
     try {
-        dal::RecordSet const &accountInfo = mDb->execSql(query);
+        const dal::RecordSet &accountInfo = mDb->execSql(query);
 
         // if the account is not even in the database then
         // we have no choice but to return nothing.
@@ -158,7 +158,7 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
         std::ostringstream sql;
         sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
             << id << "';";
-        dal::RecordSet const &charInfo = mDb->execSql(sql.str());
+        const dal::RecordSet &charInfo = mDb->execSql(sql.str());
 
         if (!charInfo.isEmpty())
         {
@@ -191,7 +191,7 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
 
         return account;
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("DALStorage::getAccountBySQL: " << e.what());
         return NULL; // TODO: Throw exception here
@@ -201,7 +201,7 @@ Account *DALStorage::getAccountBySQL(std::string const &query)
 /**
  * Get an account by user name.
  */
-Account *DALStorage::getAccount(std::string const &userName)
+Account *DALStorage::getAccount(const std::string &userName)
 {
     std::ostringstream sql;
     sql << "select * from " << ACCOUNTS_TBL_NAME << " where username = \"" << userName << "\";";
@@ -218,7 +218,7 @@ Account *DALStorage::getAccount(int accountID)
     return getAccountBySQL(sql.str());
 }
 
-Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owner)
+Character *DALStorage::getCharacterBySQL(const std::string &query, Account *owner)
 {
     Character *character;
 
@@ -227,7 +227,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
     string_to< unsigned > toUint;
 
     try {
-        dal::RecordSet const &charInfo = mDb->execSql(query);
+        const dal::RecordSet &charInfo = mDb->execSql(query);
 
         // if the character is not even in the database then
         // we have no choice but to return nothing.
@@ -281,7 +281,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
             std::ostringstream s;
             s << "select level from " << ACCOUNTS_TBL_NAME
               << " where id = '" << id << "';";
-            dal::RecordSet const &levelInfo = mDb->execSql(s.str());
+            const dal::RecordSet &levelInfo = mDb->execSql(s.str());
             character->setAccountLevel(toUint(levelInfo(0, 0)), true);
         }
 
@@ -291,7 +291,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
           << "FROM " << CHAR_SKILLS_TBL_NAME << " "
           << "WHERE char_id = " << character->getDatabaseID();
 
-        dal::RecordSet const &skillInfo = mDb->execSql(s.str());
+        const dal::RecordSet &skillInfo = mDb->execSql(s.str());
         if (!skillInfo.isEmpty())
         {
             const unsigned int nRows = skillInfo.rows();
@@ -303,7 +303,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
             }
         }
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::getCharacter #1) SQL query failure: " << e.what());
         return NULL;
@@ -315,7 +315,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
         sql << " select * from " << INVENTORIES_TBL_NAME << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot asc;";
 
-        dal::RecordSet const &itemInfo = mDb->execSql(sql.str());
+        const dal::RecordSet &itemInfo = mDb->execSql(sql.str());
         if (!itemInfo.isEmpty())
         {
             Possessions &poss = character->getPossessions();
@@ -351,7 +351,7 @@ Character *DALStorage::getCharacterBySQL(std::string const &query, Account *owne
             }
         }
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::getCharacter #2) SQL query failure: " << e.what());
         return NULL;
@@ -412,19 +412,19 @@ DALStorage::getEmailList()
 }
 #endif
 
-bool DALStorage::doesUserNameExist(std::string const &name)
+bool DALStorage::doesUserNameExist(const std::string &name)
 {
     try {
         std::ostringstream sql;
         sql << "select count(username) from " << ACCOUNTS_TBL_NAME
             << " where username = \"" << name << "\";";
-        dal::RecordSet const &accountInfo = mDb->execSql(sql.str());
+        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
 
         std::istringstream ssStream(accountInfo(0, 0));
         unsigned int iReturn = 1;
         ssStream >> iReturn;
         return iReturn != 0;
-    } catch (std::exception const &e) {
+    } catch (const std::exception &e) {
         // TODO: throw an exception.
         LOG_ERROR("(DALStorage::doesUserNameExist) SQL query failure: " << e.what());
     }
@@ -436,19 +436,19 @@ bool DALStorage::doesUserNameExist(std::string const &name)
  * Tells if the email address already exists
  * @return true if the email address exists.
  */
-bool DALStorage::doesEmailAddressExist(std::string const &email)
+bool DALStorage::doesEmailAddressExist(const std::string &email)
 {
     try {
         std::ostringstream sql;
         sql << "select count(email) from " << ACCOUNTS_TBL_NAME
             << " where upper(email) = upper(\"" << email << "\");";
-        dal::RecordSet const &accountInfo = mDb->execSql(sql.str());
+        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
 
         std::istringstream ssStream(accountInfo(0, 0));
         unsigned int iReturn = 1;
         ssStream >> iReturn;
         return iReturn != 0;
-    } catch (std::exception const &e) {
+    } catch (const std::exception &e) {
         // TODO: throw an exception.
         LOG_ERROR("(DALStorage::doesEmailAddressExist) SQL query failure: " << e.what());
     }
@@ -466,13 +466,13 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
         std::ostringstream sql;
         sql << "select count(name) from " << CHARACTERS_TBL_NAME
             << " where name = \"" << name << "\";";
-        dal::RecordSet const &accountInfo = mDb->execSql(sql.str());
+        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
 
         std::istringstream ssStream(accountInfo(0, 0));
         int iReturn = 1;
         ssStream >> iReturn;
         return iReturn != 0;
-    } catch (std::exception const &e) {
+    } catch (const std::exception &e) {
         // TODO: throw an exception.
         LOG_ERROR("(DALStorage::doesCharacterNameExist) SQL query failure: "
                 << e.what());
@@ -588,7 +588,7 @@ bool DALStorage::updateCharacter(Character *character,
             << character->getDatabaseID() << ", ";
         std::string base = sql.str();
 
-        Possessions const &poss = character->getPossessions();
+        const Possessions &poss = character->getPossessions();
 
         for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
         {
@@ -1087,7 +1087,7 @@ std::list<Guild*> DALStorage::getGuildList()
     return guilds;
 }
 
-std::string DALStorage::getQuestVar(int id, std::string const &name)
+std::string DALStorage::getQuestVar(int id, const std::string &name)
 {
     try
     {
@@ -1095,11 +1095,11 @@ std::string DALStorage::getQuestVar(int id, std::string const &name)
         query << "select value from " << QUESTS_TBL_NAME
               << " where owner_id = '" << id << "' and name = '"
               << name << "';";
-        dal::RecordSet const &info = mDb->execSql(query.str());
+        const dal::RecordSet &info = mDb->execSql(query.str());
 
         if (!info.isEmpty()) return info(0, 0);
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::getQuestVar) SQL query failure: " << e.what());
     }
@@ -1107,7 +1107,7 @@ std::string DALStorage::getQuestVar(int id, std::string const &name)
     return std::string();
 }
 
-std::string DALStorage::getWorldStateVar(std::string const &name, int map_id)
+std::string DALStorage::getWorldStateVar(const std::string &name, int map_id)
 {
     try
     {
@@ -1123,11 +1123,11 @@ std::string DALStorage::getWorldStateVar(std::string const &name, int map_id)
         }
 
         query << ";";
-        dal::RecordSet const &info = mDb->execSql(query.str());
+        const dal::RecordSet &info = mDb->execSql(query.str());
 
         if (!info.isEmpty()) return info(0, 0);
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::getWorldStateVar) SQL query failure: " << e.what());
     }
@@ -1135,14 +1135,14 @@ std::string DALStorage::getWorldStateVar(std::string const &name, int map_id)
     return std::string();
 }
 
-void DALStorage::setWorldStateVar(std::string const &name, std::string const &value)
+void DALStorage::setWorldStateVar(const std::string &name, const std::string &value)
 {
     return setWorldStateVar(name, -1, value);
 }
 
-void DALStorage::setWorldStateVar(std::string const &name,
+void DALStorage::setWorldStateVar(const std::string &name,
                                   int map_id,
-                                  std::string const &value)
+                                  const std::string &value)
 {
     try
     {
@@ -1198,14 +1198,14 @@ void DALStorage::setWorldStateVar(std::string const &name,
                        << "'" << time(NULL) << "');";
         mDb->execSql(insertStateVar.str());
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::setWorldStateVar) SQL query failure: " << e.what());
     }
 }
 
-void DALStorage::setQuestVar(int id, std::string const &name,
-                             std::string const &value)
+void DALStorage::setQuestVar(int id, const std::string &name,
+                             const std::string &value)
 {
     try
     {
@@ -1223,7 +1223,7 @@ void DALStorage::setQuestVar(int id, std::string const &name,
                << id << "', '" << name << "', '" << value << "');";
         mDb->execSql(query2.str());
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::setQuestVar) SQL query failure: " << e.what());
     }
@@ -1236,7 +1236,7 @@ void DALStorage::banCharacter(int id, int duration)
         std::ostringstream query;
         query << "select user_id from " << CHARACTERS_TBL_NAME
               << " where id = '" << id << "';";
-        dal::RecordSet const &info = mDb->execSql(query.str());
+        const dal::RecordSet &info = mDb->execSql(query.str());
         if (info.isEmpty())
         {
             LOG_ERROR("Tried to ban an unknown user.");
@@ -1250,7 +1250,7 @@ void DALStorage::banCharacter(int id, int duration)
             << "' where id = '" << info(0, 0) << "';";
         mDb->execSql(sql.str());
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::banAccount) SQL query failure: " << e.what());
     }
@@ -1314,7 +1314,7 @@ void DALStorage::delCharacter(int charId, bool startTransaction = true) const
         if (startTransaction)
             mDb->commitTransaction();
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         if (startTransaction)
             mDb->rollbackTransaction();
@@ -1340,7 +1340,7 @@ void DALStorage::checkBannedAccounts()
         << " AND banned <= " << time(NULL) << ";";
         mDb->execSql(sql.str());
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::checkBannedAccounts) SQL query failure: " << e.what());
     }
@@ -1356,7 +1356,7 @@ void DALStorage::setAccountLevel(int id, int level)
         << " where id = " << id << ";";
         mDb->execSql(sql.str());
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::setAccountLevel) SQL query failure: " << e.what());
     }
@@ -1372,7 +1372,7 @@ void DALStorage::setPlayerLevel(int id, int level)
         << " where id = " << id << ";";
         mDb->execSql(sql.str());
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::setPlayerLevel) SQL query failure: " << e.what());
     }
@@ -1435,7 +1435,7 @@ Post* DALStorage::getStoredPost(int playerId)
     sql << "SELECT * FROM " << POST_TBL_NAME
         << " WHERE receiver_id = " << playerId;
 
-    dal::RecordSet const &post = mDb->execSql(sql.str());
+    const dal::RecordSet &post = mDb->execSql(sql.str());
 
     if (post.isEmpty())
     {
@@ -1488,7 +1488,7 @@ void DALStorage::deletePost(Letter* letter)
         mDb->commitTransaction();
         letter->setId(0);
     }
-    catch(dal::DbSqlQueryExecFailure const &e)
+    catch(const dal::DbSqlQueryExecFailure &e)
     {
         mDb->rollbackTransaction();
         LOG_ERROR("(DALStorage::deletePost) SQL query failure: " << e.what());
@@ -1581,7 +1581,7 @@ void DALStorage::SyncDatabase(void)
                 }
                 itmCount++;
             }
-            catch (dal::DbSqlQueryExecFailure const &e)
+            catch (const dal::DbSqlQueryExecFailure &e)
             {
                 LOG_ERROR("(DALStorage::SyncDatabase) SQL query failure: " << e.what());
             }
@@ -1623,7 +1623,7 @@ void DALStorage::setOnlineStatus(int charId, bool online)
 
 
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::setOnlineStatus) SQL query failure: " << e.what());
     }
@@ -1639,7 +1639,7 @@ void DALStorage::addTransaction(const Transaction &trans)
             << ", '" << trans.mMessage << "', " << time(NULL) << ")";
         mDb->execSql(sql.str());
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::addTransaction) SQL query failure: " << e.what());
     }
@@ -1654,7 +1654,7 @@ std::vector<Transaction> DALStorage::getTransactions(unsigned int num)
     {
         std::stringstream sql;
         sql << "SELECT * FROM " << TRANSACTION_TBL_NAME;
-        dal::RecordSet const &rec = mDb->execSql(sql.str());
+        const dal::RecordSet &rec = mDb->execSql(sql.str());
 
         int size = rec.rows();
         int start = size - num;
@@ -1668,7 +1668,7 @@ std::vector<Transaction> DALStorage::getTransactions(unsigned int num)
             transactions.push_back(trans);
         }
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::getTransactions) SQL query failure: " << e.what());
     }
@@ -1686,7 +1686,7 @@ std::vector<Transaction> DALStorage::getTransactions(time_t date)
         std::stringstream sql;
         sql << "SELECT * FROM " << TRANSACTION_TBL_NAME << " WHERE time > "
             << date;
-        dal::RecordSet const &rec = mDb->execSql(sql.str());
+        const dal::RecordSet &rec = mDb->execSql(sql.str());
 
         for (unsigned int i = 0; i < rec.rows(); ++i)
         {
@@ -1697,7 +1697,7 @@ std::vector<Transaction> DALStorage::getTransactions(time_t date)
             transactions.push_back(trans);
         }
     }
-    catch (dal::DbSqlQueryExecFailure const &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("(DALStorage::getTransactions) SQL query failure: " << e.what());
     }

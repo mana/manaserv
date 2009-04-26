@@ -28,7 +28,7 @@
 #include "point.h"
 
 template< class T >
-void serializeCharacterData(T const &data, MessageOut &msg)
+void serializeCharacterData(const T &data, MessageOut &msg)
 {
     msg.writeByte(data.getAccountLevel());
     msg.writeByte(data.getGender());
@@ -50,11 +50,11 @@ void serializeCharacterData(T const &data, MessageOut &msg)
 
 
     msg.writeShort(data.getMapId());
-    Point const &pos = data.getPosition();
+    const Point &pos = data.getPosition();
     msg.writeShort(pos.x);
     msg.writeShort(pos.y);
 
-    Possessions const &poss = data.getPossessions();
+    const Possessions &poss = data.getPossessions();
     msg.writeLong(poss.money);
     for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
     {

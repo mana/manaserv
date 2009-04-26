@@ -46,7 +46,7 @@ Being::Being(ThingType type):
     }
 }
 
-int Being::damage(Actor *, Damage const &damage)
+int Being::damage(Actor *, const Damage &damage)
 {
     if (mAction == DEAD)
         return 0;
@@ -108,7 +108,7 @@ void Being::died()
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)
     {
-        EventListener const &l = **i;
+        const EventListener &l = **i;
         ++i; // In case the listener removes itself from the list on the fly.
         if (l.dispatch->died) l.dispatch->died(&l, this);
     }
@@ -218,7 +218,7 @@ int Being::directionToAngle(int direction)
     }
 }
 
-void Being::performAttack(Damage const &damage, AttackZone const *attackZone)
+void Being::performAttack(const Damage &damage, const AttackZone *attackZone)
 {
     Point ppos = getPosition();
     const int attackAngle = directionToAngle(getDirection());

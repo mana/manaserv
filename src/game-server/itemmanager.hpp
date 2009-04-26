@@ -28,12 +28,10 @@ class ItemClass;
 
 namespace ItemManager
 {
-
-
     /**
      * Loads item reference file.
      */
-    void initialize(std::string const &);
+    void initialize(const std::string &);
 
     /**
      * Reloads item reference file.

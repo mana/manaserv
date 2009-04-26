@@ -40,15 +40,17 @@ class MapReader
         /**
          * Read an XML map from a file.
          */
-        static void readMap(const std::string &filename, MapComposite *composite);
+        static void readMap(const std::string &filename,
+                            MapComposite *composite);
 
     private:
         /**
-         * Read an XML map from a parsed XML tree, and populate things with objects
-         * in that map.
+         * Read an XML map from a parsed XML tree, and populate things with
+         * objects in that map.
          */
-        static Map* readMap(xmlNodePtr node, std::string const &path,
-                            MapComposite *composite, std::vector<Thing *> &things);
+        static Map *readMap(xmlNodePtr node, const std::string &path,
+                            MapComposite *composite,
+                            std::vector<Thing *> &things);
 
         /**
          * Reads a map layer and adds it to the given map.
@@ -58,7 +60,8 @@ class MapReader
         /**
          * Get the string value from the given object property node.
          */
-        static std::string getObjectProperty(xmlNodePtr node, const std::string &def);
+        static std::string getObjectProperty(xmlNodePtr node,
+                                             const std::string &def);
 
         /**
          * Get the integer value from the given object property node.

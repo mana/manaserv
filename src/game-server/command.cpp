@@ -38,8 +38,8 @@ static T proxy_cast(intptr_t v)
 { return (T)v; }
 
 template<>
-std::string const &proxy_cast(intptr_t v)
-{ return *(std::string const *)v; }
+const std::string &proxy_cast(intptr_t v)
+{ return *(const std::string *)v; }
 
 template< typename T1 >
 static void proxy(void (*f)(), Character *from, intptr_t const args[1])
@@ -79,7 +79,7 @@ template< typename T > struct Argument;
 
 template<> struct Argument< int >
 { static char const type = 'n'; };
-template<> struct Argument< std::string const & >
+template<> struct Argument< const std::string & >
 { static char const type = 's'; };
 template<> struct Argument< Character * >
 { static char const type = 'c'; };
@@ -95,7 +95,7 @@ template<> struct Argument< MonsterClass * >
  */
 struct Command
 {
-    char const *name;
+    const char *name;
     void (*handler)(void (*f)(), Character *, intptr_t const[]);
     void (*target)();
     char type[4];
@@ -106,7 +106,7 @@ struct Command
  * Creates a command with a 1-parameter handler.
  */
 template< typename T1 >
-static Command handle(char const *name, int level,
+static Command handle(const char *name, int level,
                       void (*f)(Character *, T1))
 {
     Command c;
@@ -123,7 +123,7 @@ static Command handle(char const *name, int level,
  * Creates a command with a 2-parameter handler.
  */
 template< typename T1, typename T2 >
-static Command handle(char const *name, int level,
+static Command handle(const char *name, int level,
                       void (*f)(Character *, T1, T2))
 {
     Command c;
@@ -141,7 +141,7 @@ static Command handle(char const *name, int level,
  * Creates a command with a 3-parameter handler.
  */
 template< typename T1, typename T2, typename T3 >
-static Command handle(char const *name, int level,
+static Command handle(const char *name, int level,
                       void (*f)(Character *, T1, T2, T3))
 {
     Command c;
@@ -160,7 +160,7 @@ static Command handle(char const *name, int level,
  * Creates a command with a 4-parameter handler.
  */
 template< typename T1, typename T2, typename T3, typename T4 >
-static Command handle(char const *name, int level,
+static Command handle(const char *name, int level,
                       void (*f)(Character *, T1, T2, T3, T4))
 {
     Command c;
@@ -201,7 +201,7 @@ static void drop(Character *from, ItemClass *it, int nb)
 static void spawn(Character *from, MonsterClass *specy, int nb)
 {
     MapComposite *map = from->getMap();
-    Point const &pos = from->getPosition();
+    const Point &pos = from->getPosition();
 
     for (int i = 0; i < nb; ++i)
     {
@@ -220,18 +220,18 @@ static void spawn(Character *from, MonsterClass *specy, int nb)
 static void goto_(Character *from, Character *ch)
 {
     MapComposite *m = ch->getMap();
-    Point const &pos = ch->getPosition();
+    const Point &pos = ch->getPosition();
     GameState::warp(from, m, pos.x, pos.y);
 }
 
 static void recall(Character *from, Character *ch)
 {
     MapComposite *m = from->getMap();
-    Point const &pos = from->getPosition();
+    const Point &pos = from->getPosition();
     GameState::warp(ch, m, pos.x, pos.y);
 }
 
-static void reload(Character *, std::string const &db)
+static void reload(Character *, const std::string &db)
 {
     if (db == "items")
     {
@@ -243,7 +243,7 @@ static void reload(Character *, std::string const &db)
     }
 }
 
-static void ban(Character *from, Character *ch, std::string const &duration)
+static void ban(Character *from, Character *ch, const std::string &duration)
 {
     if (from->getAccountLevel() <= ch->getAccountLevel())
     {
@@ -285,7 +285,7 @@ static Command const commands[] =
 /**
  * Send a message to the given character from the server.
  */
-static void say(Character * ch, std::string const &message)
+static void say(Character * ch, const std::string &message)
 {
     GameState::sayTo(ch, NULL, message);
 }
@@ -294,9 +294,9 @@ static void say(Character * ch, std::string const &message)
 /**
  * Parses a command and executes its associated handler.
  */
-void runCommand(Character *ch, std::string const &text)
+void runCommand(Character *ch, const std::string &text)
 {
-    Command const *c = NULL;
+    const Command *c = NULL;
     std::string::size_type npos = std::string::npos;
     std::string::size_type pos = text.find(' ');
     // remove the first letter which signifies it was a command

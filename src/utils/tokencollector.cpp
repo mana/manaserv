@@ -27,7 +27,7 @@
    failure, especially a timeout. So we search the lists forward when removing
    data, in order to start from the older ones. */
 
-void TokenCollectorBase::insertClient(std::string const &token, intptr_t data)
+void TokenCollectorBase::insertClient(const std::string &token, intptr_t data)
 {
     for (std::list<Item>::reverse_iterator it = mPendingConnects.rbegin(),
          it_end = mPendingConnects.rend(); it != it_end; ++it)
@@ -51,7 +51,7 @@ void TokenCollectorBase::insertClient(std::string const &token, intptr_t data)
     removeOutdated(current);
 }
 
-void TokenCollectorBase::insertConnect(std::string const &token, intptr_t data)
+void TokenCollectorBase::insertConnect(const std::string &token, intptr_t data)
 {
     for (std::list<Item>::reverse_iterator it = mPendingClients.rbegin(),
          it_end = mPendingClients.rend(); it != it_end; ++it)

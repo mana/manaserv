@@ -319,7 +319,7 @@ void Monster::forgetTarget(Thing *t)
     }
 }
 
-int Monster::damage(Actor *source, Damage const &damage)
+int Monster::damage(Actor *source, const Damage &damage)
 {
     int HPLoss = Being::damage(source, damage);
     if (HPLoss && source && source->getType() == OBJECT_CHARACTER)

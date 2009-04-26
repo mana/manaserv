@@ -58,9 +58,9 @@ struct ZoneIterator
     MapRegion region; /**< Zones to visit. Empty means the entire map. */
     unsigned pos;
     MapZone *current;
-    MapContent const *map;
+    const MapContent *map;
 
-    ZoneIterator(MapRegion const &, MapContent const *);
+    ZoneIterator(const MapRegion &, const MapContent *);
     void operator++();
     MapZone *operator*() const { return current; }
     operator bool() const { return current; }
@@ -75,7 +75,7 @@ struct CharacterIterator
     unsigned short pos;
     Character *current;
 
-    CharacterIterator(ZoneIterator const &);
+    CharacterIterator(const ZoneIterator &);
     void operator++();
     Character *operator*() const { return current; }
     operator bool() const { return iterator; }
@@ -90,7 +90,7 @@ struct BeingIterator
     unsigned short pos;
     Being *current;
 
-    BeingIterator(ZoneIterator const &);
+    BeingIterator(const ZoneIterator &);
     void operator++();
     Being *operator*() const { return current; }
     operator bool() const { return iterator; }
@@ -105,7 +105,7 @@ struct FixedActorIterator
     unsigned short pos;
     Actor *current;
 
-    FixedActorIterator(ZoneIterator const &);
+    FixedActorIterator(const ZoneIterator &);
     void operator++();
     Actor *operator*() const { return current; }
     operator bool() const { return iterator; }
@@ -120,7 +120,7 @@ struct ActorIterator
     unsigned short pos;
     Actor *current;
 
-    ActorIterator(ZoneIterator const &);
+    ActorIterator(const ZoneIterator &);
     void operator++();
     Actor *operator*() const { return current; }
     operator bool() const { return iterator; }
@@ -190,17 +190,17 @@ struct MapContent
     /**
      * Fills a region of zones within the range of a point.
      */
-    void fillRegion(MapRegion &, Point const &, int) const;
+    void fillRegion(MapRegion &, const Point &, int) const;
 
     /**
      * Fills a region of zones inside a rectangle.
      */
-    void fillRegion(MapRegion &, Rectangle const &) const;
+    void fillRegion(MapRegion &, const Rectangle &) const;
 
     /**
      * Gets zone at given position.
      */
-    MapZone &getZone(Point const &pos) const;
+    MapZone &getZone(const Point &pos) const;
 
     /**
      * Things (items, characters, monsters, etc) located on the map.
@@ -232,7 +232,7 @@ class MapComposite
         /**
          * Constructor.
          */
-        MapComposite(int id, std::string const &name);
+        MapComposite(int id, const std::string &name);
 
         /**
          * Destructor.
@@ -278,7 +278,7 @@ class MapComposite
         /**
          * Gets the name of this map.
          */
-        std::string const &getName() const
+        const std::string &getName() const
         { return mName; }
 
         /**
@@ -310,12 +310,12 @@ class MapComposite
         /**
          * Gets an iterator on the objects inside a given rectangle.
          */
-        ZoneIterator getInsideRectangleIterator(Rectangle const &) const;
+        ZoneIterator getInsideRectangleIterator(const Rectangle &) const;
 
         /**
          * Gets an iterator on the objects around a given point.
          */
-        ZoneIterator getAroundPointIterator(Point const &, int radius) const;
+        ZoneIterator getAroundPointIterator(const Point &, int radius) const;
 
         /**
          * Gets an iterator on the objects around a given actor.
@@ -331,10 +331,10 @@ class MapComposite
         /**
          * Gets everything related to the map.
          */
-        std::vector< Thing * > const &getEverything() const;
+        const std::vector< Thing * > &getEverything() const;
 
     private:
-        MapComposite(MapComposite const &);
+        MapComposite(const MapComposite &);
 
         Map *mMap;            /**< Actual map. */
         MapContent *mContent; /**< Entities on the map. */

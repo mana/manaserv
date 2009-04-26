@@ -114,7 +114,7 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
     }
 }
 
-Map* MapReader::readMap(xmlNodePtr node, std::string const &path,
+Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         MapComposite *composite, std::vector<Thing *> &things)
 {
     // Take the filename off the path
@@ -419,9 +419,9 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
             return;
         }
 
-        int len = strlen((char const *)dataChild->content) + 1;
+        int len = strlen((const char *) dataChild->content) + 1;
         char *charData = new char[len + 1];
-        char const *charStart = (char const *)dataChild->content;
+        const char *charStart = (const char *) dataChild->content;
         char *charIndex = charData;
 
         while (*charStart)

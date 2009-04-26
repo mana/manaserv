@@ -65,7 +65,7 @@ static std::string getCurrentTime()
     return os.str();
 }
 
-void Logger::output(std::ostream &os, std::string const &msg, char const *prefix)
+void Logger::output(std::ostream &os, const std::string &msg, const char *prefix)
 {
     if (mHasTimestamp)
     {
@@ -80,7 +80,7 @@ void Logger::output(std::ostream &os, std::string const &msg, char const *prefix
     os << msg << std::endl;
 }
 
-void Logger::setLogFile(std::string const &logFile)
+void Logger::setLogFile(const std::string &logFile)
 {
     // Close the current log file.
     if (mLogFile.is_open())
@@ -103,10 +103,16 @@ void Logger::setLogFile(std::string const &logFile)
     }
 }
 
-void Logger::output(std::string const& msg, Level atVerbosity)
+void Logger::output(const std::string &msg, Level atVerbosity)
 {
-    static char const *prefixes[] =
-        { "[FTL]", "[ERR]", "[WRN]", "[INF]", "[DBG]" };
+    static const char *prefixes[] =
+    {
+        "[FTL]",
+        "[ERR]",
+        "[WRN]",
+        "[INF]",
+        "[DBG]"
+    };
 
     if (mVerbosity >= atVerbosity)
     {

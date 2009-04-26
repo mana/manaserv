@@ -33,7 +33,7 @@ static std::map< std::string, std::string > options;
 /**< Location of config file. */
 static std::string configPath;
 
-void Configuration::initialize(std::string const &filename)
+void Configuration::initialize(const std::string &filename)
 {
     configPath = filename;
 
@@ -92,27 +92,27 @@ void Configuration::deinitialize()
     }
 }
 
-void Configuration::setValue(std::string const &key, std::string const &value)
+void Configuration::setValue(const std::string &key, const std::string &value)
 {
     options[key] = value;
 }
 
-void Configuration::setValue(std::string const &key, int value)
+void Configuration::setValue(const std::string &key, int value)
 {
     std::ostringstream ss;
     ss << value;
     setValue(key, ss.str());
 }
 
-std::string const &Configuration::getValue(std::string const &key,
-                                           std::string const &deflt)
+const std::string &Configuration::getValue(const std::string &key,
+                                           const std::string &deflt)
 {
     std::map<std::string, std::string>::iterator iter = options.find(key);
     if (iter == options.end()) return deflt;
     return iter->second;
 }
 
-int Configuration::getValue(std::string const &key, int deflt)
+int Configuration::getValue(const std::string &key, int deflt)
 {
     std::map<std::string, std::string>::iterator iter = options.find(key);
     if (iter == options.end()) return deflt;

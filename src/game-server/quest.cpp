@@ -45,7 +45,7 @@ typedef std::map< int, PendingQuest > PendingQuests;
 
 static PendingQuests pendingQuests;
 
-bool getQuestVar(Character *ch, std::string const &name, std::string &value)
+bool getQuestVar(Character *ch, const std::string &name, std::string &value)
 {
     std::map< std::string, std::string >::iterator
         i = ch->questCache.find(name);
@@ -54,8 +54,8 @@ bool getQuestVar(Character *ch, std::string const &name, std::string &value)
     return true;
 }
 
-void setQuestVar(Character *ch, std::string const &name,
-                 std::string const &value)
+void setQuestVar(Character *ch, const std::string &name,
+                 const std::string &value)
 {
     std::map< std::string, std::string >::iterator
         i = ch->questCache.lower_bound(name);
@@ -79,9 +79,9 @@ void setQuestVar(Character *ch, std::string const &name,
  */
 struct QuestDeathListener: EventDispatch
 {
-    static void partialRemove(EventListener const *, Thing *);
+    static void partialRemove(const EventListener *, Thing *);
 
-    static void fullRemove(EventListener const *, Character *);
+    static void fullRemove(const EventListener *, Character *);
 
     QuestDeathListener()
     {
@@ -93,7 +93,7 @@ struct QuestDeathListener: EventDispatch
 static QuestDeathListener questDeathDummy;
 static EventListener questDeathListener(&questDeathDummy);
 
-void QuestDeathListener::partialRemove(EventListener const *, Thing *t)
+void QuestDeathListener::partialRemove(const EventListener *, Thing *t)
 {
     int id = static_cast< Character * >(t)->getDatabaseID();
     PendingVariables &variables = pendingQuests[id].variables;
@@ -106,15 +106,15 @@ void QuestDeathListener::partialRemove(EventListener const *, Thing *t)
     // The listener is kept in case a fullRemove is needed later.
 }
 
-void QuestDeathListener::fullRemove(EventListener const *, Character *ch)
+void QuestDeathListener::fullRemove(const EventListener *, Character *ch)
 {
     ch->removeListener(&questDeathListener);
     // Remove anything related to this character.
     pendingQuests.erase(ch->getDatabaseID());
 }
 
-void recoverQuestVar(Character *ch, std::string const &name,
-                     QuestCallback const &f)
+void recoverQuestVar(Character *ch, const std::string &name,
+                     const QuestCallback &f)
 {
     assert(ch->questCache.find(name) == ch->questCache.end());
     int id = ch->getDatabaseID();
@@ -131,8 +131,8 @@ void recoverQuestVar(Character *ch, std::string const &name,
     accountHandler->requestQuestVar(ch, name);
 }
 
-void recoveredQuestVar(int id, std::string const &name,
-                       std::string const &value)
+void recoveredQuestVar(int id, const std::string &name,
+                       const std::string &value)
 {
     PendingQuests::iterator i = pendingQuests.find(id);
     if (i == pendingQuests.end()) return;

@@ -28,8 +28,8 @@ class Character;
 
 struct QuestCallback
 {
-    void (*handler)(Character *, std::string const &name,
-                    std::string const &value, void *data);
+    void (*handler)(Character *, const std::string &name,
+                    const std::string &value, void *data);
     void *data;
 };
 
@@ -37,25 +37,25 @@ struct QuestCallback
  * Gets the value associated to a quest variable.
  * @return false if no value was in cache.
  */
-bool getQuestVar(Character *, std::string const &name, std::string &value);
+bool getQuestVar(Character *, const std::string &name, std::string &value);
 
 /**
  * Sets the value associated to a quest variable.
  */
-void setQuestVar(Character *, std::string const &name,
-                 std::string const &value);
+void setQuestVar(Character *, const std::string &name,
+                 const std::string &value);
 
 /**
  * Starts the recovery of a variable and returns immediatly. The callback will
  * be called once the value has been recovered.
  */
-void recoverQuestVar(Character *, std::string const &name,
-                     QuestCallback const &);
+void recoverQuestVar(Character *, const std::string &name,
+                     const QuestCallback &);
 
 /**
  * Called by the handler of the account server when a value is received.
  */
-void recoveredQuestVar(int id, std::string const &name,
-                       std::string const &value);
+void recoveredQuestVar(int id, const std::string &name,
+                       const std::string &value);
 
 #endif

@@ -35,12 +35,12 @@ Thing::~Thing()
     assert(mListeners.empty());
 }
 
-void Thing::addListener(EventListener const *l)
+void Thing::addListener(const EventListener *l)
 {
     mListeners.insert(l);
 }
 
-void Thing::removeListener(EventListener const *l)
+void Thing::removeListener(const EventListener *l)
 {
     mListeners.erase(l);
 }
@@ -50,7 +50,7 @@ void Thing::inserted()
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)
     {
-        EventListener const &l = **i;
+        const EventListener &l = **i;
         ++i; // In case the listener removes itself from the list on the fly.
         if (l.dispatch->inserted) l.dispatch->inserted(&l, this);
     }
@@ -61,7 +61,7 @@ void Thing::removed()
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)
     {
-        EventListener const &l = **i;
+        const EventListener &l = **i;
         ++i; // In case the listener removes itself from the list on the fly.
         if (l.dispatch->removed) l.dispatch->removed(&l, this);
     }

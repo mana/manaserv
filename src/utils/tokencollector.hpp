@@ -61,9 +61,9 @@ class TokenCollectorBase
         virtual void foundMatch(intptr_t client, intptr_t connect) = 0;
         TokenCollectorBase();
         virtual ~TokenCollectorBase();
-        void insertClient(std::string const &, intptr_t);
+        void insertClient(const std::string &, intptr_t);
         void removeClient(intptr_t);
-        void insertConnect(std::string const &, intptr_t);
+        void insertConnect(const std::string &, intptr_t);
         void removeOutdated(time_t);
 };
 
@@ -104,14 +104,14 @@ class TokenCollector: private TokenCollectorBase
          * Checks if the server expected this client token. If so, calls
          * Handler::tokenMatched. Otherwise marks the client as pending.
          */
-        void addPendingClient(std::string const &token, Client data)
+        void addPendingClient(const std::string &token, Client data)
         { insertClient(token, (intptr_t)data); }
 
         /**
          * Checks if a client already registered this token. If so, calls
          * Handler::tokenMatched. Otherwise marks the data as pending.
          */
-        void addPendingConnect(std::string const &token, ServerData data)
+        void addPendingConnect(const std::string &token, ServerData data)
         { insertConnect(token, (intptr_t)data); }
 
         /**

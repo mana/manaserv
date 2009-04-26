@@ -111,12 +111,12 @@ void ResourceManager::initialize()
 #endif
 }
 
-bool ResourceManager::exists(std::string const &path)
+bool ResourceManager::exists(const std::string &path)
 {
     return PHYSFS_exists(path.c_str());
 }
 
-char *ResourceManager::loadFile(std::string const &fileName, int &fileSize)
+char *ResourceManager::loadFile(const std::string &fileName, int &fileSize)
 {
     // Attempt to open the specified file using PhysicsFS
     PHYSFS_file* file = PHYSFS_openRead(fileName.c_str());

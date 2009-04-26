@@ -231,13 +231,13 @@ class ItemClass
         /**
          * Gets item modifiers.
          */
-        ItemModifiers const &getModifiers() const
+        const ItemModifiers &getModifiers() const
         { return mModifiers; }
 
         /**
          * Sets item modifiers.
          */
-        void setModifiers(ItemModifiers const &modifiers)
+        void setModifiers(const ItemModifiers &modifiers)
         { mModifiers = modifiers; }
 
         /**
@@ -272,7 +272,7 @@ class ItemClass
         /**
          * Gets attack zone of weapon (returns NULL for non-weapon items)
          */
-        AttackZone const *getAttackZone() const
+        const AttackZone *getAttackZone() const
         { return mAttackZone ; }
 
 

@@ -102,7 +102,7 @@ class Character : public Being
         /**
          * Gets a reference on the possessions.
          */
-        Possessions const &getPossessions() const
+        const Possessions &getPossessions() const
         { return mPossessions; }
 
         /**
@@ -309,8 +309,8 @@ class Character : public Being
         { return 0x82; } // blocked by walls and monsters ( bin 1000 0010)
 
     private:
-        Character(Character const &);
-        Character &operator=(Character const &);
+        Character(const Character &);
+        Character &operator=(const Character &);
 
         static const float EXPCURVE_EXPONENT;
         static const float EXPCURVE_FACTOR;

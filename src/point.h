@@ -43,7 +43,7 @@ class Point
         /**
          * Check whether the given point is within range of this point.
          */
-        bool inRangeOf(Point const &p, int radius) const
+        bool inRangeOf(const Point &p, int radius) const
         {
             return std::abs(x - p.x) <= radius &&
                    std::abs(y - p.y) <= radius;
@@ -72,7 +72,7 @@ class Rectangle
         unsigned short w; /**< width */
         unsigned short h; /**< height */
 
-        bool contains(Point const &p) const
+        bool contains(const Point &p) const
         {
             return (unsigned short)(p.x - x) < w &&
                    (unsigned short)(p.y - y) < h;

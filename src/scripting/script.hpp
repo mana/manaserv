@@ -41,12 +41,12 @@ class Script
         /**
          * Registers a new scripting engine.
          */
-        static void registerEngine(std::string const &, Factory);
+        static void registerEngine(const std::string &, Factory);
 
         /**
          * Creates a new script context for a given engine.
          */
-        static Script *create(std::string const &engine);
+        static Script *create(const std::string &engine);
 
         /**
          * Constructor.
@@ -62,19 +62,20 @@ class Script
          * Loads a chunk of text into script context and executes its global
          * statements.
          */
-        virtual void load(char const *) = 0;
+        virtual void load(const char *) = 0;
 
         /**
          * Loads a text file into script context and executes its global
          * statements.
          */
-        virtual bool loadFile(std::string const &);
+        virtual bool loadFile(const std::string &);
 
         /**
          * Loads a chunk of text and considers it as an NPC handler. This
          * handler will later be used to create the given NPC.
          */
-        virtual void loadNPC(std::string const &name, int id, int x, int y, char const *);
+        virtual void loadNPC(const std::string &name, int id, int x, int y,
+                             const char *);
 
         /**
          * Called every tick for the script to manage its data.
@@ -86,7 +87,7 @@ class Script
          * Prepares a call to the given function.
          * Only one function can be prepared at once.
          */
-        virtual void prepare(std::string const &name) = 0;
+        virtual void prepare(const std::string &name) = 0;
 
         /**
          * Pushes an integer argument for the function being prepared.
@@ -96,7 +97,7 @@ class Script
         /**
          * Pushes a string argument for the function being prepared.
          */
-        virtual void push(std::string const &) = 0;
+        virtual void push(const std::string &) = 0;
 
         /**
          * Pushes a pointer argument to a game entity.

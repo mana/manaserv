@@ -39,7 +39,7 @@ namespace AccountClientHandler
     /**
      * Prepares a connection for a client coming from a game server.
      */
-    void prepareReconnect(std::string const &token, int accountID);
+    void prepareReconnect(const std::string &token, int accountID);
 
     /**
      * Processes messages received by the connection handler.

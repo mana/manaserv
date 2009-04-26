@@ -22,21 +22,22 @@
 #include <sstream>
 
 #include "defines.h"
-#include "commandhandler.hpp"
-#include "accountconnection.hpp"
-#include "character.hpp"
-#include "gamehandler.hpp"
-#include "inventory.hpp"
-#include "item.hpp"
-#include "itemmanager.hpp"
-#include "mapmanager.hpp"
-#include "monster.hpp"
-#include "monstermanager.hpp"
-#include "state.hpp"
 
-#include "../common/transaction.hpp"
+#include "game-server/commandhandler.hpp"
+#include "game-server/accountconnection.hpp"
+#include "game-server/character.hpp"
+#include "game-server/gamehandler.hpp"
+#include "game-server/inventory.hpp"
+#include "game-server/item.hpp"
+#include "game-server/itemmanager.hpp"
+#include "game-server/mapmanager.hpp"
+#include "game-server/monster.hpp"
+#include "game-server/monstermanager.hpp"
+#include "game-server/state.hpp"
 
-#include "../utils/string.hpp"
+#include "common/transaction.hpp"
+
+#include "utils/string.hpp"
 
 static void say(const std::string error, Character *player)
 {
@@ -418,7 +419,7 @@ static void handleSpawn(Character *player, std::string &args)
 {
     MonsterClass *mc;
     MapComposite *map = player->getMap();
-    Point const &pos = player->getPosition();
+    const Point &pos = player->getPosition();
     int value, id;
 
     // get the arguments
@@ -504,7 +505,7 @@ static void handleGoto(Character *player, std::string &args)
 
     // move the player to where the other player is
     MapComposite *map = other->getMap();
-    Point const &pos = other->getPosition();
+    const Point &pos = other->getPosition();
     GameState::warp(player, map, pos.x, pos.y);
 }
 
@@ -533,7 +534,7 @@ static void handleRecall(Character *player, std::string &args)
 
     // move the other player to where the player is
     MapComposite *map = player->getMap();
-    Point const &pos = player->getPosition();
+    const Point &pos = player->getPosition();
     GameState::warp(other, map, pos.x, pos.y);
 }
 

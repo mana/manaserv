@@ -144,8 +144,8 @@ bool GameServerHandler::getGameServerFromMap
     return false;
 }
 
-static void registerGameClient
-    (GameServer *s, std::string const &token, Character *ptr)
+static void registerGameClient(GameServer *s, const std::string &token,
+                               Character *ptr)
 {
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
@@ -155,7 +155,8 @@ static void registerGameClient
     s->send(msg);
 }
 
-void GameServerHandler::registerClient(std::string const &token, Character *ptr)
+void GameServerHandler::registerClient(const std::string &token,
+                                       Character *ptr)
 {
     GameServer *s = ::getGameServerFromMap(ptr->getMapId());
     assert(s);
@@ -506,7 +507,7 @@ void GameServerHandler::dumpStatistics(std::ostream &os)
         for (ServerStatistics::const_iterator j = server->maps.begin(),
              j_end = server->maps.end(); j != j_end; ++j)
         {
-            MapStatistics const &m = j->second;
+            const MapStatistics &m = j->second;
             os << "<map id=\"" << j->first << "\" nb_things=\"" << m.nbThings
                << "\" nb_monsters=\"" << m.nbMonsters << "\">\n";
             for (std::vector< int >::const_iterator k = m.players.begin(),

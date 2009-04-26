@@ -77,8 +77,8 @@ class GameHandler: public ConnectionHandler
         /**
          * Completes a server change for given character ID.
          */
-        void completeServerChange(int id, std::string const &token,
-                                  std::string const &address, int port);
+        void completeServerChange(int id, const std::string &token,
+                                  const std::string &address, int port);
 
         /**
          * Updates the party id of the character
@@ -89,7 +89,7 @@ class GameHandler: public ConnectionHandler
          * Registers a character that should soon be claimed by a client.
          * @param token token used by the client when connecting.
          */
-        void addPendingCharacter(std::string const &token, Character *);
+        void addPendingCharacter(const std::string &token, Character *);
 
         /**
          * Combines a client with its character.
@@ -116,7 +116,7 @@ class GameHandler: public ConnectionHandler
          * Gets the client associated to a character name. This method is slow,
          * so it should never be called for regular operations.
          */
-        GameClient *getClientByNameSlow(std::string const &);
+        GameClient *getClientByNameSlow(const std::string &);
 
     protected:
         NetComputer *computerConnected(ENetPeer *);

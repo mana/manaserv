@@ -88,7 +88,7 @@ class MonsterClass
          * Sets monster drops. These are the items the monster drops when it
          * dies.
          */
-        void setDrops(MonsterDrops const &v)
+        void setDrops(const MonsterDrops &v)
         { mDrops = v; }
 
         /**
@@ -249,7 +249,7 @@ class Monster : public Being
         /**
          * Calls the damage function in Being and updates the aggro list
          */
-        virtual int damage(Actor *source, Damage const &damage);
+        virtual int damage(Actor *source, const Damage &damage);
 
         /**
          * Removes a being from the anger list.

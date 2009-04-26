@@ -140,7 +140,7 @@ static void addZone(MapRegion &r, unsigned z)
     }
 }
 
-ZoneIterator::ZoneIterator(MapRegion const &r, MapContent const *m)
+ZoneIterator::ZoneIterator(const MapRegion &r, const MapContent *m)
   : region(r), pos(0), map(m)
 {
     current = &map->zones[r.empty() ? 0 : r[0]];
@@ -165,7 +165,7 @@ void ZoneIterator::operator++()
     }
 }
 
-CharacterIterator::CharacterIterator(ZoneIterator const &it)
+CharacterIterator::CharacterIterator(const ZoneIterator &it)
   : iterator(it), pos(0)
 {
     while (iterator && (*iterator)->nbCharacters == 0) ++iterator;
@@ -188,7 +188,7 @@ void CharacterIterator::operator++()
     }
 }
 
-BeingIterator::BeingIterator(ZoneIterator const &it)
+BeingIterator::BeingIterator(const ZoneIterator &it)
   : iterator(it), pos(0)
 {
     while (iterator && (*iterator)->nbMovingObjects == 0) ++iterator;
@@ -211,7 +211,7 @@ void BeingIterator::operator++()
     }
 }
 
-FixedActorIterator::FixedActorIterator(ZoneIterator const &it)
+FixedActorIterator::FixedActorIterator(const ZoneIterator &it)
   : iterator(it), pos(0)
 {
     while (iterator && (*iterator)->nbMovingObjects == (*iterator)->objects.size()) ++iterator;
@@ -238,7 +238,7 @@ void FixedActorIterator::operator++()
     }
 }
 
-ActorIterator::ActorIterator(ZoneIterator const &it)
+ActorIterator::ActorIterator(const ZoneIterator &it)
   : iterator(it), pos(0)
 {
     while (iterator && (*iterator)->objects.empty()) ++iterator;
@@ -395,7 +395,7 @@ void MapContent::deallocate(Actor *obj)
     buckets[id / 256]->deallocate(id % 256);
 }
 
-void MapContent::fillRegion(MapRegion &r, Point const &p, int radius) const
+void MapContent::fillRegion(MapRegion &r, const Point &p, int radius) const
 {
     int ax = p.x > radius ? (p.x - radius) / zoneDiam : 0,
         ay = p.y > radius ? (p.y - radius) / zoneDiam : 0,
@@ -410,7 +410,7 @@ void MapContent::fillRegion(MapRegion &r, Point const &p, int radius) const
     }
 }
 
-void MapContent::fillRegion(MapRegion &r, Rectangle const &p) const
+void MapContent::fillRegion(MapRegion &r, const Rectangle &p) const
 {
     int ax = p.x / zoneDiam,
         ay = p.y / zoneDiam,
@@ -425,13 +425,17 @@ void MapContent::fillRegion(MapRegion &r, Rectangle const &p) const
     }
 }
 
-MapZone& MapContent::getZone(Point const &pos) const
+MapZone& MapContent::getZone(const Point &pos) const
 {
     return zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth];
 }
 
-MapComposite::MapComposite(int id, std::string const &name):
-    mMap(NULL), mContent(NULL), mScript(NULL), mName(name), mID(id)
+MapComposite::MapComposite(int id, const std::string &name):
+    mMap(NULL),
+    mContent(NULL),
+    mScript(NULL),
+    mName(name),
+    mID(id)
 {
 }
 
@@ -442,7 +446,7 @@ MapComposite::~MapComposite()
     delete mScript;
 }
 
-ZoneIterator MapComposite::getAroundPointIterator(Point const &p, int radius) const
+ZoneIterator MapComposite::getAroundPointIterator(const Point &p, int radius) const
 {
     MapRegion r;
     mContent->fillRegion(r, p, radius);
@@ -456,7 +460,7 @@ ZoneIterator MapComposite::getAroundActorIterator(Actor *obj, int radius) const
     return ZoneIterator(r, mContent);
 }
 
-ZoneIterator MapComposite::getInsideRectangleIterator(Rectangle const &p) const
+ZoneIterator MapComposite::getInsideRectangleIterator(const Rectangle &p) const
 {
     MapRegion r;
     mContent->fillRegion(r, p);
@@ -581,7 +585,7 @@ void MapComposite::update()
     }
 }
 
-std::vector< Thing * > const &MapComposite::getEverything() const
+const std::vector< Thing * > &MapComposite::getEverything() const
 {
     return mContent->things;
 }

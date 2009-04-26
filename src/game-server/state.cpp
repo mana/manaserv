@@ -71,7 +71,7 @@ static DelayedEvents delayedEvents;
 static void updateMap(MapComposite *map)
 {
     // 1. update object status.
-    std::vector< Thing * > const &things = map->getEverything();
+    const std::vector< Thing * > &things = map->getEverything();
     for (std::vector< Thing * >::const_iterator i = things.begin(),
          i_end = things.end(); i != i_end; ++i)
     {
@@ -103,7 +103,7 @@ static void updateMap(MapComposite *map)
  */
 static void serializeLooks(Character *ch, MessageOut &msg, bool full)
 {
-    Possessions const &poss = ch->getPossessions();
+    const Possessions &poss = ch->getPossessions();
     static int const nb_slots = 4;
     static int const slots[nb_slots] =
     {
@@ -239,7 +239,7 @@ static void informPlayer(MapComposite *map, Character *p)
             if (o->canFight())
             {
                 Being *victim = static_cast< Being * >(o);
-                Hits const &hits = victim->getHitsTaken();
+                const Hits &hits = victim->getHitsTaken();
                 for (Hits::const_iterator j = hits.begin(),
                      j_end = hits.end(); j != j_end; ++j)
                 {
@@ -447,7 +447,7 @@ void GameState::update(int worldTime)
 #   endif
 
     // Update game state (update AI, etc.)
-    MapManager::Maps const &maps = MapManager::getMaps();
+    const MapManager::Maps &maps = MapManager::getMaps();
     for (MapManager::Maps::const_iterator m = maps.begin(), m_end = maps.end(); m != m_end; ++m)
     {
         MapComposite *map = m->second;
@@ -492,7 +492,7 @@ void GameState::update(int worldTime)
     for (DelayedEvents::iterator i = delayedEvents.begin(),
          i_end = delayedEvents.end(); i != i_end; ++i)
     {
-        DelayedEvent const &e = i->second;
+        const DelayedEvent &e = i->second;
         Actor *o = i->first;
         switch (e.type)
         {
@@ -728,7 +728,7 @@ void GameState::warp(Character *ptr, MapComposite *map, int x, int y)
 /**
  * Enqueues an event. It will be executed at end of update.
  */
-static void enqueueEvent(Actor *ptr, DelayedEvent const &e)
+static void enqueueEvent(Actor *ptr, const DelayedEvent &e)
 {
     std::pair< DelayedEvents::iterator, bool > p =
         delayedEvents.insert(std::make_pair(ptr, e));
@@ -757,7 +757,7 @@ void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
     enqueueEvent(ptr, e);
 }
 
-void GameState::sayAround(Actor *obj, std::string const &text)
+void GameState::sayAround(Actor *obj, const std::string &text)
 {
     Point speakerPosition = obj->getPosition();
     int visualRange = Configuration::getValue("visualRange", 320);
@@ -771,7 +771,7 @@ void GameState::sayAround(Actor *obj, std::string const &text)
     }
 }
 
-void GameState::sayTo(Actor *destination, Actor *source, std::string const &text)
+void GameState::sayTo(Actor *destination, Actor *source, const std::string &text)
 {
     if (destination->getType() != OBJECT_CHARACTER)
         return; //only characters will read it anyway

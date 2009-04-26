@@ -95,8 +95,8 @@ void GameHandler::prepareServerChange(Character *ch)
     client->status = CLIENT_CHANGE_SERVER;
 }
 
-void GameHandler::completeServerChange(int id, std::string const &token,
-                                       std::string const &address, int port)
+void GameHandler::completeServerChange(int id, const std::string &token,
+                                       const std::string &address, int port)
 {
     for (NetComputers::const_iterator i = clients.begin(),
          i_end = clients.end(); i != i_end; ++i)
@@ -135,7 +135,7 @@ void GameHandler::updateCharacter(int charid, int partyid)
 static Actor *findActorNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
-    Point const &ppos = p->getPosition();
+    const Point &ppos = p->getPosition();
     // See map.hpp for tiles constants
     const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
     for (ActorIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
@@ -151,7 +151,7 @@ static Actor *findActorNear(Actor *p, int id)
 static Character *findCharacterNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
-    Point const &ppos = p->getPosition();
+    const Point &ppos = p->getPosition();
     // See map.hpp for tiles constants
     const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
     for (CharacterIterator i(map->getAroundPointIterator(ppos,
@@ -577,7 +577,7 @@ void GameHandler::sendTo(Character *beingPtr, MessageOut &msg)
     client->send(msg);
 }
 
-void GameHandler::addPendingCharacter(std::string const &token, Character *ch)
+void GameHandler::addPendingCharacter(const std::string &token, Character *ch)
 {
     /* First, check if the character is already on the map. This may happen if
        a client just lost its connection, and logged to the account server
@@ -615,8 +615,7 @@ void GameHandler::addPendingCharacter(std::string const &token, Character *ch)
     mTokenCollector.addPendingConnect(token, ch);
 }
 
-void
-GameHandler::tokenMatched(GameClient* computer, Character* character)
+void GameHandler::tokenMatched(GameClient* computer, Character* character)
 {
     computer->character = character;
     computer->status = CLIENT_CONNECTED;
@@ -645,8 +644,7 @@ GameHandler::tokenMatched(GameClient* computer, Character* character)
     }
 }
 
-void
-GameHandler::deletePendingClient(GameClient* computer)
+void GameHandler::deletePendingClient(GameClient* computer)
 {
     // Something might have changed since it was inserted
     if (computer->status != CLIENT_QUEUED) return;
@@ -658,13 +656,12 @@ GameHandler::deletePendingClient(GameClient* computer)
     computer->disconnect(msg);
 }
 
-void
-GameHandler::deletePendingConnect(Character* character)
+void GameHandler::deletePendingConnect(Character* character)
 {
     delete character;
 }
 
-GameClient *GameHandler::getClientByNameSlow(std::string const &name)
+GameClient *GameHandler::getClientByNameSlow(const std::string &name)
 {
     for (NetComputers::const_iterator i = clients.begin(),
          i_end = clients.end(); i != i_end; ++i)

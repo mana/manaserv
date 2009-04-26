@@ -138,7 +138,7 @@ class Being : public Actor
          * stats, deducts the result from the hitpoints and adds the result to
          * the HitsTaken list.
          */
-        virtual int damage(Actor *source, Damage const &damage);
+        virtual int damage(Actor *source, const Damage &damage);
 
         /**
          * Changes status and calls all the "died" listeners.
@@ -153,7 +153,7 @@ class Being : public Actor
         /**
          * Gets the destination coordinates of the being.
          */
-        Point const &getDestination() const
+        const Point &getDestination() const
         { return mDst; }
 
         /**
@@ -193,7 +193,7 @@ class Being : public Actor
         /**
          * Gets the damage list.
          */
-        Hits const &getHitsTaken() const
+        const Hits &getHitsTaken() const
         { return mHitsTaken; }
 
         /**
@@ -205,7 +205,7 @@ class Being : public Actor
         /**
          * Performs an attack.
          */
-        void performAttack(Damage const &, AttackZone const *attackZone);
+        void performAttack(const Damage &, const AttackZone *attackZone);
 
         /**
          * Sets the current action.
@@ -284,8 +284,8 @@ class Being : public Actor
         std::vector< Attribute > mAttributes;
 
     private:
-        Being(Being const &rhs);
-        Being &operator=(Being const &rhs);
+        Being(const Being &rhs);
+        Being &operator=(const Being &rhs);
 
         std::list<PATH_NODE> mPath;
         Point mOld;                 /**< Old coordinates. */

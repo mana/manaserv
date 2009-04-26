@@ -30,7 +30,7 @@ namespace Configuration
      * Loads the configuration options into memory.
      * @param filename path to the configuration file .
      */
-    void initialize(std::string const &filename);
+    void initialize(const std::string &filename);
 
     /**
      * Writes the current settings back to the configuration file.
@@ -42,28 +42,28 @@ namespace Configuration
      * @param key option identifier.
      * @param value Value.
      */
-    void setValue(std::string const &key, std::string const &value);
+    void setValue(const std::string &key, const std::string &value);
 
     /**
      * Sets an option to a given value.
      * @param key option identifier.
      * @param value value.
      */
-    void setValue(std::string const &key, int value);
+    void setValue(const std::string &key, int value);
 
     /**
      * Gets an option as a string.
      * @param key option identifier.
      * @param deflt default value.
      */
-    std::string const &getValue(std::string const &key, std::string const &deflt);
+    const std::string &getValue(const std::string &key, const std::string &deflt);
 
     /**
      * Gets an option as a string.
      * @param key option identifier.
      * @param deflt default value.
      */
-    int getValue(std::string const &key, int deflt);
+    int getValue(const std::string &key, int deflt);
 }
 
 #ifndef DEFAULT_SERVER_PORT

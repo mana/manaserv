@@ -51,7 +51,7 @@ class WarpAction : public TriggerAction
 class ScriptAction : public TriggerAction
 {
     public:
-        ScriptAction(Script *script, std::string function, int arg)
+        ScriptAction(Script *script, const std::string &function, int arg)
           : mScript(script), mFunction(function), mArg(arg) {}
 
         virtual void process(Actor *obj);
@@ -68,7 +68,7 @@ class TriggerArea : public Thing
         /**
          * Creates a rectangular trigger for a given map.
          */
-        TriggerArea(MapComposite *m, Rectangle const &r, TriggerAction *ptr, bool once)
+        TriggerArea(MapComposite *m, const Rectangle &r, TriggerAction *ptr, bool once)
           : Thing(OBJECT_OTHER, m), mZone(r), mAction(ptr), mOnce(once) {}
 
         virtual void update();

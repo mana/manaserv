@@ -31,7 +31,7 @@ Connection::Connection():
 {
 }
 
-bool Connection::start(std::string const &address, int port)
+bool Connection::start(const std::string &address, int port)
 {
     ENetAddress enetAddress;
     enet_address_set_host(&enetAddress, address.c_str());
@@ -42,7 +42,8 @@ bool Connection::start(std::string const &address, int port)
                               0 /* assume any amount of incoming bandwidth */,
                               0 /* assume any amount of outgoing bandwidth */);
 
-    if (!mLocal) return false;
+    if (!mLocal)
+        return false;
 
     // Initiate the connection, allocating channel 0.
     mRemote = enet_host_connect(mLocal, &enetAddress, 1);
@@ -77,7 +78,7 @@ bool Connection::isConnected() const
     return mRemote && mRemote->state == ENET_PEER_STATE_CONNECTED;
 }
 
-void Connection::send(MessageOut const &msg, bool reliable, unsigned channel)
+void Connection::send(const MessageOut &msg, bool reliable, unsigned channel)
 {
     if (!mRemote) {
         LOG_WARN("Can't send message to unconnected host! (" << msg << ")");

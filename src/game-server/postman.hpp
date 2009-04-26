@@ -28,8 +28,8 @@ class Character;
 
 struct PostCallback
 {
-    void (*handler)(Character *, std::string const &sender,
-                    std::string const &letter, void *data);
+    void (*handler)(Character *, const std::string &sender,
+                    const std::string &letter, void *data);
     void *data;
 };
 

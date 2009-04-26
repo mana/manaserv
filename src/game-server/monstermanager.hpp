@@ -31,7 +31,7 @@ namespace MonsterManager
     /**
      * Loads monster reference file.
      */
-    void initialize(std::string const &);
+    void initialize(const std::string &);
 
     /**
      * Reloads monster reference file.
@@ -46,7 +46,7 @@ namespace MonsterManager
     /**
      * Gets the MonsterClass having the given ID.
      */
-    MonsterClass *getMonster(int);
+    MonsterClass *getMonster(int id);
 }
 
 #endif

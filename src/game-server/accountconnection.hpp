@@ -73,18 +73,18 @@ class AccountConnection : public Connection
         /**
          * Prepares the account server for a reconnecting player
          */
-        void playerReconnectAccount(int id, std::string const &magic_token);
+        void playerReconnectAccount(int id, const std::string &magic_token);
 
         /**
          * Requests the value of a quest variable from the database.
          */
-        void requestQuestVar(Character *, std::string const &);
+        void requestQuestVar(Character *, const std::string &);
 
         /**
          * Pushes a new quest value to the database.
          */
-        void updateQuestVar(Character *, std::string const &name,
-                            std::string const &value);
+        void updateQuestVar(Character *, const std::string &name,
+                            const std::string &value);
 
         /**
          * Sends ban message.

@@ -26,7 +26,7 @@
 namespace XML
 {
 
-int getProperty(xmlNodePtr node, char const *name, int def)
+int getProperty(xmlNodePtr node, const char *name, int def)
 {
     if (xmlChar *prop = xmlGetProp(node, BAD_CAST name))
     {
@@ -37,8 +37,7 @@ int getProperty(xmlNodePtr node, char const *name, int def)
     return def;
 }
 
-double
-getFloatProperty(xmlNodePtr node, const char* name, double def)
+double getFloatProperty(xmlNodePtr node, const char* name, double def)
 {
     double &ret = def;
 
@@ -51,7 +50,8 @@ getFloatProperty(xmlNodePtr node, const char* name, double def)
     return ret;
 }
 
-std::string getProperty(xmlNodePtr node, char const *name, std::string const &def)
+std::string getProperty(xmlNodePtr node, const char *name,
+                        const std::string &def)
 {
     if (xmlChar *prop = xmlGetProp(node, BAD_CAST name))
     {

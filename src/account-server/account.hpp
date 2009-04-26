@@ -51,7 +51,7 @@ class Account
          *
          * @param name the user name.
          */
-        void setName(std::string const &name)
+        void setName(const std::string &name)
         { mName = name; }
 
 
@@ -60,7 +60,7 @@ class Account
          *
          * @return the user name.
          */
-        std::string const &getName() const
+        const std::string &getName() const
         { return mName; }
 
 
@@ -74,7 +74,7 @@ class Account
          *
          * @param password the user password (hashed with salt).
          */
-        void setPassword(std::string const &password)
+        void setPassword(const std::string &password)
         { mPassword = password; }
 
 
@@ -83,7 +83,7 @@ class Account
          *
          * @return the user password (hashed with salt).
          */
-        std::string const &getPassword() const
+        const std::string &getPassword() const
         { return mPassword; }
 
 
@@ -93,7 +93,7 @@ class Account
          *
          * @param email the user email address (hashed).
          */
-        void setEmail(std::string const &email)
+        void setEmail(const std::string &email)
         { mEmail = email; }
 
 
@@ -102,7 +102,7 @@ class Account
          *
          * @return the user email address (hashed).
          */
-        std::string const &getEmail() const
+        const std::string &getEmail() const
         { return mEmail; }
 
 
@@ -161,7 +161,7 @@ class Account
          *
          * @return all the characters.
          */
-        Characters const &getCharacters() const
+        const Characters &getCharacters() const
         { return mCharacters; }
 
         /**
@@ -205,11 +205,9 @@ class Account
         void setLastLogin(time_t time);
 
     private:
-        Account(Account const &rhs);
-        Account &operator=(Account const &rhs);
+        Account(const Account &rhs);
+        Account &operator=(const Account &rhs);
 
-
-    private:
         std::string mName;        /**< User name */
         std::string mPassword;    /**< User password (hashed with salt) */
         std::string mEmail;       /**< User email address (hashed) */

@@ -89,8 +89,8 @@ std::string MessageIn::readString(int length)
     }
 
     // Read the string
-    char const *stringBeg = mData + mPos;
-    char const *stringEnd = (char const *)memchr(stringBeg, '\0', length);
+    const char *stringBeg = mData + mPos;
+    const char *stringEnd = (const char *)memchr(stringBeg, '\0', length);
     std::string readString(stringBeg,
             stringEnd ? stringEnd - stringBeg : length);
     mPos += length;

@@ -91,7 +91,7 @@ class Logger
          *
          * @exception std::ios::failure if the log file could not be opened.
          */
-        static void setLogFile(std::string const &logFile);
+        static void setLogFile(const std::string &logFile);
 
         /**
          * Add/removes the timestamp.
@@ -129,7 +129,7 @@ class Logger
          *
          * @exception std::ios::failure.
          */
-        static void output(std::string const &msg, Level atVerbosity);
+        static void output(const std::string &msg, Level atVerbosity);
 
         static Level mVerbosity;   /**< Verbosity level. */
     private:
@@ -145,7 +145,8 @@ class Logger
          *
          * @exception std::ios::failure.
          */
-        static void output(std::ostream &os, std::string const &msg, char const *prefix);
+        static void output(std::ostream &os, const std::string &msg,
+                           const char *prefix);
 };
 
 

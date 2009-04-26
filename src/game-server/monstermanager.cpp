@@ -57,7 +57,7 @@ Element elementFromString (const std::string &name)
     return val == table.end() ? ELEMENT_ILLEGAL : (*val).second;
 }
 
-void MonsterManager::initialize(std::string const &file)
+void MonsterManager::initialize(const std::string &file)
 {
     monsterReferenceFile = file;
     reload();

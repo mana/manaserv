@@ -34,7 +34,7 @@ namespace MapManager
     /**
      * Loads map reference file and prepares maps.
      */
-    void initialize(std::string const &mapReferenceFile);
+    void initialize(const std::string &mapReferenceFile);
 
     /**
      * Destroy loaded maps.
@@ -51,12 +51,12 @@ namespace MapManager
     /**
      *  Returns the requested map
      */
-    MapComposite *getMap(std::string const &mapName);
+    MapComposite *getMap(const std::string &mapName);
 
     /**
      * Returns all the maps.
      */
-    Maps const &getMaps();
+    const Maps &getMaps();
 
     /**
      * Sets the activity status of the map.

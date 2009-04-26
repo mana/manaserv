@@ -108,7 +108,7 @@ void AccountClientHandler::process()
     accountHandler->process(50);
 }
 
-void AccountClientHandler::prepareReconnect(std::string const &token, int id)
+void AccountClientHandler::prepareReconnect(const std::string &token, int id)
 {
     accountHandler->mTokenCollector.addPendingConnect(token, id);
 }
@@ -129,7 +129,8 @@ void AccountHandler::computerDisconnected(NetComputer *comp)
     delete computer; // ~AccountClient unsets the account
 }
 
-static void sendCharacterData(AccountClient &computer, int slot, Character const &ch)
+static void sendCharacterData(AccountClient &computer, int slot,
+                              const Character &ch)
 {
     MessageOut charInfo(APMSG_CHAR_INFO);
     charInfo.writeByte(slot);

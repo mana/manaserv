@@ -114,7 +114,7 @@ std::list<const ChatChannel*> ChatChannelManager::getPublicChannels()
     return channels;
 }
 
-int ChatChannelManager::getChannelId(std::string const &channelName)
+int ChatChannelManager::getChannelId(const std::string &channelName)
 {
     for (ChatChannels::const_iterator i = mChatChannels.begin(),
             i_end = mChatChannels.end();

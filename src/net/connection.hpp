@@ -43,7 +43,7 @@ class Connection
          * Connects to the given host/port and waits until the connection is
          * established. Returns false if it fails to connect.
          */
-        bool start(std::string const &, int);
+        bool start(const std::string &, int);
 
         /**
          * Disconnects.
@@ -58,7 +58,7 @@ class Connection
         /**
          * Sends a message to the remote host.
          */
-        void send(MessageOut const &msg, bool reliable = true,
+        void send(const MessageOut &msg, bool reliable = true,
                   unsigned channel = 0);
 
         /**

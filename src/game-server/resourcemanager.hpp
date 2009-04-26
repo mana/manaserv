@@ -34,7 +34,7 @@ namespace ResourceManager
     /**
      * Checks whether the given file or directory exists in the search path
      */
-    bool exists(std::string const &path);
+    bool exists(const std::string &path);
 
     /**
      * Allocates data into a buffer pointer for raw data loading. The
@@ -47,7 +47,7 @@ namespace ResourceManager
      *         or <code>NULL</code> on failure.
      * @note The array contains an extra \0 character at position fileSize.
      */
-    char *loadFile(std::string const &fileName, int &fileSize);
+    char *loadFile(const std::string &fileName, int &fileSize);
 }
 
 #endif

@@ -139,7 +139,7 @@ void Character::perform()
     if (ic)
     {
         // weapon fighting
-        ItemModifiers const &mods = ic->getModifiers();
+        const ItemModifiers &mods = ic->getModifiers();
         damage.element = mods.getValue(MOD_ELEMENT_TYPE);
         performAttack(damage, ic->getAttackZone());
     }
@@ -502,7 +502,7 @@ void Character::disconnected()
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)
     {
-        EventListener const &l = **i;
+        const EventListener &l = **i;
         ++i; // In case the listener removes itself from the list on the fly.
         if (l.dispatch->disconnected) l.dispatch->disconnected(&l, this);
     }

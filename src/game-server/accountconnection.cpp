@@ -73,7 +73,7 @@ bool AccountConnection::start()
     msg.writeString(gameServerAddress);
     msg.writeShort(gameServerPort);
     msg.writeLong(ItemManager::GetDatabaseVersion());
-    MapManager::Maps const &m = MapManager::getMaps();
+    const MapManager::Maps &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
             i != i_end; ++i)
     {
@@ -195,7 +195,8 @@ void AccountConnection::processMessage(MessageIn &msg)
     }
 }
 
-void AccountConnection::playerReconnectAccount(int id, std::string const &magic_token)
+void AccountConnection::playerReconnectAccount(int id,
+                                               const std::string &magic_token)
 {
     LOG_DEBUG("Send GAMSG_PLAYER_RECONNECT.");
     MessageOut msg(GAMSG_PLAYER_RECONNECT);
@@ -204,7 +205,7 @@ void AccountConnection::playerReconnectAccount(int id, std::string const &magic_
     send(msg);
 }
 
-void AccountConnection::requestQuestVar(Character *ch, std::string const &name)
+void AccountConnection::requestQuestVar(Character *ch, const std::string &name)
 {
     MessageOut msg(GAMSG_GET_QUEST);
     msg.writeLong(ch->getDatabaseID());
@@ -212,8 +213,8 @@ void AccountConnection::requestQuestVar(Character *ch, std::string const &name)
     send(msg);
 }
 
-void AccountConnection::updateQuestVar(Character *ch, std::string const &name,
-                                        std::string const &value)
+void AccountConnection::updateQuestVar(Character *ch, const std::string &name,
+                                       const std::string &value)
 {
     MessageOut msg(GAMSG_SET_QUEST);
     msg.writeLong(ch->getDatabaseID());
@@ -233,7 +234,7 @@ void AccountConnection::banCharacter(Character *ch, int duration)
 void AccountConnection::sendStatistics()
 {
     MessageOut msg(GAMSG_STATISTICS);
-    MapManager::Maps const &maps = MapManager::getMaps();
+    const MapManager::Maps &maps = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = maps.begin(),
          i_end = maps.end(); i != i_end; ++i)
     {
@@ -242,7 +243,7 @@ void AccountConnection::sendStatistics()
         msg.writeShort(i->first);
         int nbThings = 0, nbMonsters = 0;
         typedef std::vector< Thing * > Things;
-        Things const &things = m->getEverything();
+        const Things &things = m->getEverything();
         std::vector< int > players;
         for (Things::const_iterator j = things.begin(),
              j_end = things.end(); j != j_end; ++j)

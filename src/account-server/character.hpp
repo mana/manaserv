@@ -35,7 +35,7 @@ class Character
 {
     public:
 
-        Character(std::string const &name, int id = -1);
+        Character(const std::string &name, int id = -1);
 
         /**
          * Gets the database id of the character.
@@ -59,8 +59,8 @@ class Character
         /**
          * Gets the name of the character.
          */
-        std::string const &getName() const { return mName; }
-        void setName(const std::string& name) { mName = name; }
+        const std::string &getName() const { return mName; }
+        void setName(const std::string &name) { mName = name; }
 
         /**
          * Gets the gender of the character (male / female).
@@ -123,7 +123,7 @@ class Character
         /**
          * Gets the position of the character on the map.
          */
-        Point const &getPosition() const { return mPos; }
+        const Point &getPosition() const { return mPos; }
         void setPosition(const Point &p) { mPos = p; }
 
         /** Add a guild to the character */
@@ -136,7 +136,7 @@ class Character
         /**
          * Gets a reference on the possessions.
          */
-        Possessions const &getPossessions() const
+        const Possessions &getPossessions() const
         { return mPossessions; }
 
         /**
@@ -159,8 +159,8 @@ class Character
 
 
     private:
-        Character(Character const &);
-        Character &operator=(Character const &);
+        Character(const Character &);
+        Character &operator=(const Character &);
 
         Possessions mPossessions; //!< All the possesions of the character.
         std::string mName;        //!< Name of the character.

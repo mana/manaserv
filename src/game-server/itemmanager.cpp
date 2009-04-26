@@ -39,7 +39,7 @@ static ItemClasses itemClasses; /**< Item reference */
 static std::string itemReferenceFile;
 static unsigned int itemDatabaseVersion = 0; /**< Version of the loaded items database file.*/
 
-void ItemManager::initialize(std::string const &file)
+void ItemManager::initialize(const std::string &file)
 {
     itemReferenceFile = file;
     reload();

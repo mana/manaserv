@@ -32,8 +32,8 @@ struct EventDispatch;
  */
 struct EventListener
 {
-    EventDispatch const *dispatch;
-    EventListener(EventDispatch const *d): dispatch(d) {}
+    const EventDispatch *dispatch;
+    EventListener(const EventDispatch *d): dispatch(d) {}
 };
 
 /**
@@ -44,22 +44,22 @@ struct EventDispatch
     /**
      * Called just after something is inserted in a map.
      */
-    void (*inserted)(EventListener const *, Thing *);
+    void (*inserted)(const EventListener *, Thing *);
 
     /**
      * Called just before something is removed from a map.
      */
-    void (*removed)(EventListener const *, Thing *);
+    void (*removed)(const EventListener *, Thing *);
 
     /**
      * Called just after a being has died.
      */
-    void (*died)(EventListener const *, Being *);
+    void (*died)(const EventListener *, Being *);
 
     /**
      * Called just before a character is deleted.
      */
-    void (*disconnected)(EventListener const *, Character *);
+    void (*disconnected)(const EventListener *, Character *);
 
     /**
      * Initializes dispatch methods as missing.
@@ -87,7 +87,7 @@ struct EventListenerFactory
     template< class U, void (T::*F)(U *), class V = U >
     struct create
     {
-        static void function(EventListener const *d, V *u)
+        static void function(const EventListener *d, V *u)
         {
             /* Get the address of the T object by substracting the offset of D
                from the pointer d. */

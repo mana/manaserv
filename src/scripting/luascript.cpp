@@ -32,7 +32,7 @@ LuaScript::~LuaScript()
     lua_close(mState);
 }
 
-void LuaScript::prepare(std::string const &name)
+void LuaScript::prepare(const std::string &name)
 {
     assert(nbArgs == -1);
     lua_getglobal(mState, name.c_str());
@@ -47,7 +47,7 @@ void LuaScript::push(int v)
     ++nbArgs;
 }
 
-void LuaScript::push(std::string const &v)
+void LuaScript::push(const std::string &v)
 {
     assert(nbArgs >= 0);
     lua_pushstring(mState, v.c_str());
@@ -68,7 +68,7 @@ int LuaScript::execute()
     nbArgs = -1;
     if (res || !(lua_isnil(mState, 1) || lua_isnumber(mState, 1)))
     {
-        char const *s = lua_tostring(mState, 1);
+        const char *s = lua_tostring(mState, 1);
 
         LOG_WARN("Lua Script Error" << std::endl
                  << "     Script  : " << mScriptFile << std::endl
@@ -83,7 +83,7 @@ int LuaScript::execute()
     mCurFunction = "";
 }
 
-void LuaScript::load(char const *prog)
+void LuaScript::load(const char *prog)
 {
     int res = luaL_loadstring(mState, prog);
 
@@ -128,8 +128,8 @@ void LuaScript::processRemoveEvent(Thing *being)
 /**
  * Called when the server has recovered the value of a quest variable.
  */
-void LuaScript::getQuestCallback(Character *q, std::string const &name,
-                                 std::string const &value, void *data)
+void LuaScript::getQuestCallback(Character *q, const std::string &name,
+                                 const std::string &value, void *data)
 {
     LuaScript *s = static_cast< LuaScript * >(data);
     assert(s->nbArgs == -1);
@@ -144,8 +144,8 @@ void LuaScript::getQuestCallback(Character *q, std::string const &name,
 /**
  * Called when the server has recovered the post for a user
  */
-void LuaScript::getPostCallback(Character *q, std::string const &sender,
-                                std::string const &letter, void *data)
+void LuaScript::getPostCallback(Character *q, const std::string &sender,
+                                const std::string &letter, void *data)
 {
     // get the script
     LuaScript *s = static_cast<LuaScript*>(data);

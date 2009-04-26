@@ -44,7 +44,7 @@ enum ThingType
 };
 
 /**
- * Base class for in-game objects. Knows only its type and the map is resides
+ * Base class for in-game objects. Knows only its type and the map it resides
  * on. Provides listeners.
  */
 class Thing
@@ -107,12 +107,12 @@ class Thing
         /**
          * Adds a new listener.
          */
-        void addListener(EventListener const *);
+        void addListener(const EventListener *);
 
         /**
          * Removes an existing listener.
          */
-        void removeListener(EventListener const *);
+        void removeListener(const EventListener *);
 
         /**
          * Calls all the "inserted" listeners.
@@ -125,7 +125,7 @@ class Thing
         virtual void removed();
 
     protected:
-        typedef std::set< EventListener const * > Listeners;
+        typedef std::set< const EventListener * > Listeners;
         Listeners mListeners;   /**< List of event listeners. */
 
     private:
