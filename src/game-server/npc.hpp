@@ -52,6 +52,16 @@ class NPC : public Being
         void select(Character *, int);
 
         /**
+         * The player has choosen an integer.
+         */
+        void integerRecepted(Character *ch, int v);
+
+        /**
+         * The player has entered an string.
+         */
+        void stringRecepted(Character *ch, std::string v);
+
+        /**
          * Gets NPC ID.
          */
         int getNPC() const

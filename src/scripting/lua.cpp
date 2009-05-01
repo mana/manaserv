@@ -112,12 +112,10 @@ static int npc_choice(lua_State *s)
 
 /**
  * Callback for sending a NPC_INTEGER.
- * tmw.npc_integer(npc, character, msg, min, max, defaut)
+ * tmw.npc_integer(npc, character, min, max, defaut)
  */
 static int npc_ask_integer(lua_State *s)
 {
-    LOG_WARN("Appel de NPC Integer ! ");
-
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
     if (!p || !q)
@@ -138,7 +136,25 @@ static int npc_ask_integer(lua_State *s)
     msg.writeLong(default_num);
     gameHandler->sendTo(q, msg);
 
-    LOG_WARN("MSG SENT ! " << min << " ; " << max << " ; " << default_num << " ; ");
+    return 0;
+}
+
+/**
+ * Callback for sending a NPC_STRING.
+ * tmw.npc_ask_string(npc, character)
+ */
+static int npc_ask_string(lua_State *s)
+{
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+    if (!p || !q)
+    {
+        raiseScriptError(s, "npc_string called with incorrect parameters.");
+        return 0;
+    }
+    MessageOut msg(GPMSG_NPC_STRING);
+    msg.writeShort(p->getPublicID());
+    gameHandler->sendTo(q, msg);
 
     return 0;
 }
@@ -1212,6 +1228,7 @@ LuaScript::LuaScript():
         { "item_drop",              &item_drop            },
         { "npc_ask_integer",        &npc_ask_integer      },
         { "npc_end",                &npc_end              },
+        { "npc_ask_string",         &npc_ask_string       },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);
