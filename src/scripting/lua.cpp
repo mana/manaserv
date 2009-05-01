@@ -111,6 +111,39 @@ static int npc_choice(lua_State *s)
 }
 
 /**
+ * Callback for sending a NPC_INTEGER.
+ * tmw.npc_integer(npc, character, msg, min, max, defaut)
+ */
+static int npc_ask_integer(lua_State *s)
+{
+    LOG_WARN("Appel de NPC Integer ! ");
+
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+    if (!p || !q)
+    {
+        raiseScriptError(s, "npc_integer called with incorrect parameters.");
+        return 0;
+    }
+    MessageOut msg(GPMSG_NPC_NUMBER);
+    msg.writeShort(p->getPublicID());
+
+    int min = lua_tointeger(s, 3);
+    int max = lua_tointeger(s, 4);
+    int default_num = min;
+    if(lua_gettop(s) == 5) default_num = lua_tointeger(s, 5);
+
+    msg.writeLong(min);
+    msg.writeLong(max);
+    msg.writeLong(default_num);
+    gameHandler->sendTo(q, msg);
+
+    LOG_WARN("MSG SENT ! " << min << " ; " << max << " ; " << default_num << " ; ");
+
+    return 0;
+}
+
+/**
  * Callback for creating a NPC on the current map with the current script.
  * tmw.npc_create(string name, int id, int x, int y): npc
  */
@@ -139,6 +172,18 @@ static int npc_create(lua_State *s)
     assert(b); (void)b;
     lua_pushlightuserdata(s, q);
     return 1;
+}
+
+static int npc_end(lua_State *s)
+{
+    LOG_WARN("Conversation's over !");
+
+    NPC *p = getNPC(s, 1);
+    Character *q = getCharacter(s, 2);
+
+    MessageOut msg(GPMSG_NPC_CLOSE);
+    msg.writeShort(p->getPublicID());
+    gameHandler->sendTo(q, msg);
 }
 
 /**
@@ -1165,6 +1210,8 @@ LuaScript::LuaScript():
         { "test_tableget",          &test_tableget        },
         { "get_map_id",             &get_map_id           },
         { "item_drop",              &item_drop            },
+        { "npc_ask_integer",        &npc_ask_integer      },
+        { "npc_end",                &npc_end              },
         { NULL, NULL }
     };
     luaL_register(mState, "tmw", callbacks);

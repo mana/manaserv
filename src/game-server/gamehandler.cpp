@@ -205,6 +205,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_NPC_TALK:
         case PGMSG_NPC_TALK_NEXT:
         case PGMSG_NPC_SELECT:
+        case PGMSG_NPC_NUMBER:
+        case PGMSG_NPC_STRING:
         {
             int id = message.readShort();
             Actor *o = findActorNear(computer.character, id);
@@ -218,6 +220,14 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             if (message.getId() == PGMSG_NPC_SELECT)
             {
                 q->select(computer.character, message.readByte());
+            }
+            else if(message.getId() == PGMSG_NPC_NUMBER)
+            {
+
+            }
+            else if(message.getId() == PGMSG_NPC_STRING)
+            {
+
             }
             else
             {

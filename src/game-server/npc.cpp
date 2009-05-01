@@ -63,3 +63,7 @@ void NPC::select(Character *ch, int v)
     mScript->execute();
 }
 
+/*void NPC::integerRecepted()
+{
+
+}*/

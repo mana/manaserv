@@ -113,14 +113,14 @@ MySqlDataProvider::connect()
         << "' as user, and '" << dbName << "' as database.");
 
     // actually establish the connection.
-    if (!mysql_real_connect(mDb,               // handle to the connection
-                            hostname.c_str(),  // hostname
-                            username.c_str(),  // username
-                            password.c_str(),  // password
-                            dbName.c_str(),    // database name
-                            tcpPort,           // tcp port
-                            NULL,              // socket, currently not used
-                            0))                // client flags
+    if (!mysql_real_connect(mDb,                // handle to the connection
+                            hostname.c_str(),   // hostname
+                            username.c_str(),   // username
+                            password.c_str(),   // password
+                            dbName.c_str(),     // database name
+                            tcpPort,            // tcp port
+                            NULL,               // socket, currently not used
+                            CLIENT_FOUND_ROWS)) // client flags
     {
         std::string msg(mysql_error(mDb));
         mysql_close(mDb);
