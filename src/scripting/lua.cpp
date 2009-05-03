@@ -196,6 +196,11 @@ static int npc_end(lua_State *s)
 
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
+    if (!p || !q)
+    {
+        raiseScriptError(s, "npc_end called with incorrect parameters.");
+        return 0;
+    }
 
     MessageOut msg(GPMSG_NPC_CLOSE);
     msg.writeShort(p->getPublicID());
