@@ -128,7 +128,7 @@ class Map
         /**
          * Gets walkability for a tile with a blocking bitmask
          */
-        bool getWalk(int x, int y, char walkmask) const;
+        bool getWalk(int x, int y, char walkmask = BLOCKMASK_WALL) const;
 
         /**
          * Returns the width of this map.

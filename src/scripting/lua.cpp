@@ -192,8 +192,6 @@ static int npc_create(lua_State *s)
 
 static int npc_end(lua_State *s)
 {
-    LOG_WARN("Conversation's over !");
-
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
     if (!p || !q)
@@ -293,7 +291,27 @@ static int chr_warp(lua_State *s)
         raiseScriptError(s, "chr_warp called with a non-existing map.");
         return 0;
     }
-    GameState::enqueueWarp(q, m, lua_tointeger(s, 3), lua_tointeger(s, 4));
+
+    int x = lua_tointeger(s, 3);
+    int y = lua_tointeger(s, 4);
+
+    Map *map = m->getMap();
+
+    // If the wanted warp place is unwalkable
+    if (!map->getWalk(x / map->getTileWidth(), y / map->getTileHeight()))
+    {
+        int c = 50;
+        LOG_INFO("chr_warp called with a non-walkable place.");
+        do {
+            x = rand() % map->getWidth();
+            y = rand() % map->getHeight();
+            c--;
+        } while (!map->getWalk(x, y) && c);
+        x *= map->getTileWidth();
+        y *= map->getTileHeight();
+    }
+    GameState::enqueueWarp(q, m, x, y);
+
     return 0;
 }
 
