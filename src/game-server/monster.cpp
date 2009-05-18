@@ -123,7 +123,7 @@ void Monster::perform()
             damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
             damage.element = mCurrentAttack->element;
             damage.type = mCurrentAttack->type;
-            performAttack(damage, &mCurrentAttack->attackZone);
+            performAttack(damage);
         }
         if (!mAttackTime)
         {

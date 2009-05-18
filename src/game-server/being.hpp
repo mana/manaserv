@@ -205,7 +205,7 @@ class Being : public Actor
         /**
          * Performs an attack.
          */
-        void performAttack(const Damage &, const AttackZone *attackZone);
+        void performAttack(const Damage &);
 
         /**
          * Sets the current action.
@@ -278,10 +278,23 @@ class Being : public Actor
          */
         static int directionToAngle(int direction);
 
+        /**
+         * Get Target
+         */
+        Being* getTarget() const
+        { return mTarget; }
+
+        /**
+         * Set Target
+         */
+        void setTarget(Being *target)
+        { mTarget = target; }
+
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
         Action mAction;
         std::vector< Attribute > mAttributes;
+        Being *mTarget;
 
     private:
         Being(const Being &rhs);

@@ -33,6 +33,7 @@
 Being::Being(ThingType type):
     Actor(type),
     mAction(STAND),
+    mTarget(NULL),
     mSpeed(0),
     mDirection(0),
     mHpRegenTimer(0)
@@ -104,6 +105,9 @@ void Being::died()
     setAction(DEAD);
     // dead beings stay where they are
     clearDestination();
+
+    // reset target
+    mTarget = NULL;
 
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)
@@ -218,138 +222,19 @@ int Being::directionToAngle(int direction)
     }
 }
 
-void Being::performAttack(const Damage &damage, const AttackZone *attackZone)
+void Being::performAttack(const Damage &damage)
 {
-    Point ppos = getPosition();
-    const int attackAngle = directionToAngle(getDirection());
-
-    std::list<Being *> victims;
-
     LOG_DEBUG("Direction:"<<getDirection()<<
-              " range:"<<attackZone->range<<
-              " angle:"<<attackZone->angle);
+              " Target:"<<mTarget->getName());
 
-    Point attPos, attSize, defPos, defSize;
-    if (attackZone->shape == ATTZONESHAPE_RECT)
-    {
-        if (getDirection() == DIRECTION_UP)
-        {
-            attPos.x = ppos.x - attackZone->angle;
-            attPos.y = ppos.y - attackZone->range;
-            attSize.x = attackZone->angle * 2;
-            attSize.y = attackZone->range;
-        }
-        if (getDirection() == DIRECTION_DOWN)
-        {
-            attPos.x = ppos.x - attackZone->angle;
-            attPos.y = ppos.y;
-            attSize.x = attackZone->angle * 2;
-            attSize.y = attackZone->range;
-        }
-        if (getDirection() == DIRECTION_RIGHT)
-        {
-            attPos.x = ppos.x;
-            attPos.y = ppos.y - attackZone->angle;
-            attSize.x = attackZone->range;
-            attSize.y = attackZone->angle * 2;
-        }
-        if (getDirection() == DIRECTION_LEFT)
-        {
-            attPos.x = ppos.x - attackZone->range;
-            attPos.y = ppos.y - attackZone->angle;
-            attSize.x = attackZone->range;
-            attSize.y = attackZone->angle * 2;
-        }
-        /* debug effect to see when and where the server pictures the attack - should
-         * be moved to the client side when the attack detection works statisfactory.
-         */
-        Effects::show(26, getMap(), Point(attPos.x + attSize.x / 2, attPos.y + attSize.y / 2));
-    }
+    if (!mTarget || mTarget == this || mTarget->getAction() == Being::DEAD || !mTarget->canFight())
+            return;
 
-    for (BeingIterator
-         i(getMap()->getAroundActorIterator(this, attackZone->range)); i; ++i)
-    {
-        Being *b = *i;
+    if (getMap()->getPvP() == PVP_NONE && mTarget->getType() == OBJECT_CHARACTER &&
+        getType() == OBJECT_CHARACTER)
+        return;
 
-        if (b == this)
-            continue;
-
-        const ThingType type = b->getType();
-        if (type != OBJECT_CHARACTER && type != OBJECT_MONSTER)
-            continue;
-
-        if (getMap()->getPvP() == PVP_NONE &&
-            type == OBJECT_CHARACTER &&
-            getType() == OBJECT_CHARACTER)
-            continue;
-
-        LOG_DEBUG("Attack Zone:" << attPos.x << ":" << attPos.y <<
-                  " " << attSize.x << "x" << attSize.y);
-        LOG_DEBUG("Defender Zone:" << defPos.x << ":" << defPos.y <<
-                  " " << defSize.x << "x" << defSize.y);
-
-        const Point &opos = b->getPosition();
-
-        switch (attackZone->shape)
-        {
-            case ATTZONESHAPE_CONE:
-                if  (Collision::diskWithCircleSector(
-                        opos, b->getSize(),
-                        ppos, attackZone->range,
-                        attackZone->angle / 2, attackAngle)
-                    )
-                {
-                    victims.push_back(b);
-                }
-                break;
-            case ATTZONESHAPE_RECT:
-                defPos.x = opos.x - b->getSize();
-                defPos.y = opos.y - b->getSize();
-                defSize.x = b->getSize() * 2;
-                defSize.y = b->getSize() * 2;
-                if (Collision::rectWithRect(attPos, attSize, defPos, defSize))
-                {
-                    victims.push_back(b);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    if (attackZone->multiTarget)
-    {
-        // damage everyone
-        for (std::list<Being *>::iterator i = victims.begin();
-             i != victims.end();
-             i++)
-        {
-            (*i)->damage(this, damage);
-        }
-    }
-    else
-    {
-        // find the closest and damage this one
-        Being* closestVictim = NULL;
-        int closestDistance = INT_MAX;
-        for (std::list<Being *>::iterator i = victims.begin();
-             i != victims.end();
-             i++)
-        {
-            Point opos = (*i)->getPosition();
-            int distance = abs(opos.x - ppos.x) + abs(opos.y - ppos.y);
-            /* not using pythagoras here is a) faster and b) results in more natural
-               target selection because targets closer to the center line of the
-               attack angle are prioritized
-            */
-            if (distance < closestDistance)
-            {
-                closestVictim = (*i);
-                closestDistance = distance;
-            }
-        }
-        if (closestVictim) closestVictim->damage(this, damage);
-    }
+    mTarget->damage(this, damage);
 }
 
 void Being::setAction(Action action)

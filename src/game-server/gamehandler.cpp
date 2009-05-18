@@ -354,8 +354,14 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             LOG_DEBUG("Character " << computer.character->getPublicID()
                       << " attacks");
-            computer.character->setDirection(message.readByte());
-            computer.character->setAction(Being::ATTACK);
+            int id = message.readShort();
+            Actor *o = findActorNear(computer.character, id);
+            if (o && o->getType() != OBJECT_NPC)
+            {
+                Being *being = static_cast<Being*>(o);
+                computer.character->setTarget(being);
+                computer.character->setAction(Being::ATTACK);
+            }
         } break;
 
         case PGMSG_USE_SPECIAL:

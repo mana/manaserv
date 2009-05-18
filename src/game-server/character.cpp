@@ -116,7 +116,7 @@ void Character::update()
 
 void Character::perform()
 {
-    if (mAction != ATTACK || mActionTime > 0) return;
+    if (mAction != ATTACK || mActionTime > 0 || mTarget == NULL) return;
 
     mActionTime = 1000;
     mAction = STAND;
@@ -141,13 +141,13 @@ void Character::perform()
         // weapon fighting
         const ItemModifiers &mods = ic->getModifiers();
         damage.element = mods.getValue(MOD_ELEMENT_TYPE);
-        performAttack(damage, ic->getAttackZone());
+        performAttack(damage);
     }
     else
     {
         // No-weapon fighting.
         damage.element = ELEMENT_NEUTRAL;
-        performAttack(damage, &UNARMED_ATTACK_ZONE);
+        performAttack(damage);
     }
 
 }
@@ -170,6 +170,9 @@ void Character::respawn()
     setAction(STAND);
     mAttributes[BASE_ATTR_HP].mod = -mAttributes[BASE_ATTR_HP].base + 1;
     modifiedAttribute(BASE_ATTR_HP);
+
+    // reset target
+    mTarget = NULL;
 }
 
 void Character::useSpecial(int id)
