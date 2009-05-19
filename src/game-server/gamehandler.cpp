@@ -352,9 +352,10 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_ATTACK:
         {
-            LOG_DEBUG("Character " << computer.character->getPublicID()
-                      << " attacks");
             int id = message.readShort();
+            LOG_DEBUG("Character " << computer.character->getPublicID()
+                      << " attacked being " << id);
+
             Actor *o = findActorNear(computer.character, id);
             if (o && o->getType() != OBJECT_NPC)
             {

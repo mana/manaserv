@@ -111,7 +111,6 @@ Monster::~Monster()
 
 void Monster::perform()
 {
-
     if (mAction == ATTACK && mCurrentAttack)
     {
         if (mAttackTime == mCurrentAttack->aftDelay)
@@ -208,7 +207,7 @@ void Monster::update()
                                                         targetPriority);
             if (posPriority > bestTargetPriority)
             {
-                bestAttackTarget = target;
+                bestAttackTarget = mTarget = target;
                 bestTargetPriority = posPriority;
                 bestAttackPosition = attackPosition;
                 bestAttackDirection = (*j).direction;

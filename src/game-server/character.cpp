@@ -116,11 +116,14 @@ void Character::update()
 
 void Character::perform()
 {
-    if (mAction != ATTACK || mActionTime > 0 || mTarget == NULL) return;
+    if (mAction != ATTACK || mTarget == NULL) return;
 
-    mActionTime = 1000;
-    mAction = STAND;
-    raiseUpdateFlags(UPDATEFLAG_ATTACK);
+    // wait before next attack
+    if (mActionTime > 100)
+    {
+        mActionTime -= 100;
+        return;
+    }
 
     // TODO: Check slot 2 too.
     int itemId = mPossessions.equipment[EQUIP_FIGHT1_SLOT];

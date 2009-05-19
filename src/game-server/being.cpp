@@ -224,9 +224,6 @@ int Being::directionToAngle(int direction)
 
 void Being::performAttack(const Damage &damage)
 {
-    LOG_DEBUG("Direction:"<<getDirection()<<
-              " Target:"<<mTarget->getName());
-
     if (!mTarget || mTarget == this || mTarget->getAction() == Being::DEAD || !mTarget->canFight())
             return;
 
@@ -234,7 +231,11 @@ void Being::performAttack(const Damage &damage)
         getType() == OBJECT_CHARACTER)
         return;
 
+    LOG_DEBUG("Direction: " << getDirection() <<
+              " Target: " << mTarget->getName());
+
     mTarget->damage(this, damage);
+    mActionTime += 1000; // set to 10 ticks wait time
 }
 
 void Being::setAction(Action action)
