@@ -61,6 +61,8 @@
 		<Unit filename="src/defines.h" />
 		<Unit filename="src/game-server/accountconnection.cpp" />
 		<Unit filename="src/game-server/accountconnection.hpp" />
+		<Unit filename="src/game-server/actor.cpp" />
+		<Unit filename="src/game-server/actor.hpp" />
 		<Unit filename="src/game-server/attackzone.cpp" />
 		<Unit filename="src/game-server/attackzone.hpp" />
 		<Unit filename="src/game-server/being.cpp" />
@@ -97,11 +99,8 @@
 		<Unit filename="src/game-server/monster.hpp" />
 		<Unit filename="src/game-server/monstermanager.cpp" />
 		<Unit filename="src/game-server/monstermanager.hpp" />
-		<Unit filename="src/game-server/movingobject.cpp" />
-		<Unit filename="src/game-server/movingobject.hpp" />
 		<Unit filename="src/game-server/npc.cpp" />
 		<Unit filename="src/game-server/npc.hpp" />
-		<Unit filename="src/game-server/object.hpp" />
 		<Unit filename="src/game-server/postman.hpp" />
 		<Unit filename="src/game-server/quest.cpp" />
 		<Unit filename="src/game-server/quest.hpp" />

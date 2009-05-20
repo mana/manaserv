@@ -512,6 +512,23 @@ bool MapComposite::insert(Thing *ptr)
 
 void MapComposite::remove(Thing *ptr)
 {
+    for (std::vector<Thing*>::iterator i = mContent->things.begin(),
+         i_end = mContent->things.end(); i != i_end; ++i)
+    {
+        if ((*i)->canFight())
+        {
+            Being *being = static_cast<Being*>(*i);
+            if (being->getTarget() == ptr)
+            {
+                being->setTarget(NULL);
+            }
+        }
+        if (*i == ptr)
+        {
+            i = mContent->things.erase(i);
+        }
+    }
+
     if (ptr->isVisible())
     {
         Actor *obj = static_cast< Actor * >(ptr);
@@ -525,18 +542,6 @@ void MapComposite::remove(Thing *ptr)
             mContent->deallocate(static_cast< Being * >(ptr));
         }
     }
-
-    for (std::vector< Thing * >::iterator i = mContent->things.begin(),
-         i_end = mContent->things.end(); i != i_end; ++i)
-    {
-        if (*i == ptr)
-        {
-            *i = *(i_end - 1);
-            mContent->things.pop_back();
-            return;
-        }
-    }
-    assert(false);
 }
 
 void MapComposite::setMap(Map *m)
