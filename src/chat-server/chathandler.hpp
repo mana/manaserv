@@ -64,13 +64,12 @@ class ChatHandler : public ConnectionHandler
         std::vector<PartyInvite> mPartyInvitedUsers;
 
     public:
-
         ChatHandler();
 
         /**
          * Start the handler.
          */
-        bool startListen(enet_uint16 port);
+        bool startListen(enet_uint16 port, const std::string &host);
 
         /**
          * Tell a list of users about an event in a chatchannel.

@@ -90,11 +90,11 @@ class ServerHandler: public ConnectionHandler
 
 static ServerHandler *serverHandler;
 
-bool GameServerHandler::initialize(int port)
+bool GameServerHandler::initialize(int port, const std::string &host)
 {
     serverHandler = new ServerHandler;
     LOG_INFO("Game server handler started:");
-    return serverHandler->startListen(port);
+    return serverHandler->startListen(port, host);
 }
 
 void GameServerHandler::deinitialize()

@@ -90,11 +90,12 @@ AccountHandler::AccountHandler():
 {
 }
 
-bool AccountClientHandler::initialize(int port)
+bool AccountClientHandler::initialize(int port, const std::string &host)
 {
     accountHandler = new AccountHandler;
     LOG_INFO("Account handler started:");
-    return accountHandler->startListen(port);
+
+    return accountHandler->startListen(port, host);
 }
 
 void AccountClientHandler::deinitialize()

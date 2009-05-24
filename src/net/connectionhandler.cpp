@@ -30,11 +30,15 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 
-bool ConnectionHandler::startListen(enet_uint16 port)
+bool ConnectionHandler::startListen(enet_uint16 port,
+                                    const std::string &listenHost)
 {
     // Bind the server to the default localhost.
     address.host = ENET_HOST_ANY;
     address.port = port;
+
+    if (!listenHost.empty())
+        enet_address_set_host(&address, listenHost.c_str());
 
     LOG_INFO("Listening on port " << port << "...");
     host = enet_host_create(
@@ -43,7 +47,7 @@ bool ConnectionHandler::startListen(enet_uint16 port)
             0           /* assume any amount of incoming bandwidth */,
             0           /* assume any amount of outgoing bandwidth */);
 
-    return host;
+    return host != 0;
 }
 
 void ConnectionHandler::stopListen()

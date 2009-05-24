@@ -315,9 +315,10 @@ int main(int argc, char *argv[])
     initialize();
 
     int port = Configuration::getValue("net_accountServerPort", DEFAULT_SERVER_PORT);
-    if (!AccountClientHandler::initialize(port) ||
-        !GameServerHandler::initialize(port + 1) ||
-        !chatHandler->startListen(port + 2))
+    std::string host = Configuration::getValue("net_listenHost", std::string());
+    if (!AccountClientHandler::initialize(port, host) ||
+        !GameServerHandler::initialize(port + 1, host) ||
+        !chatHandler->startListen(port + 2, host))
     {
         LOG_FATAL("Unable to create an ENet server host.");
         return 3;

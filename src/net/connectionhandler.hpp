@@ -23,6 +23,7 @@
 #define _TMWSERV_CONNECTIONHANDLER_H_
 
 #include <list>
+#include <string>
 #include <enet/enet.h>
 
 class MessageIn;
@@ -41,8 +42,11 @@ class ConnectionHandler
 
         /**
          * Open the server socket.
+         * @param port the port to listen to
+         * @host  the host IP to listen on, defaults to the default localhost
          */
-        bool startListen(enet_uint16 port);
+        bool startListen(enet_uint16 port,
+                         const std::string &host = std::string());
 
         /**
          * Disconnect all the clients and close the server socket.

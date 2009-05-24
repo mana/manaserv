@@ -55,10 +55,10 @@ ChatHandler::ChatHandler():
 {
 }
 
-bool ChatHandler::startListen(enet_uint16 port)
+bool ChatHandler::startListen(enet_uint16 port, const std::string &host)
 {
     LOG_INFO("Chat handler started:");
-    return ConnectionHandler::startListen(port);
+    return ConnectionHandler::startListen(port, host);
 }
 
 void ChatHandler::deletePendingClient(ChatClient *c)

@@ -34,7 +34,7 @@ namespace GameServerHandler
     /**
      * Creates a connection handler and starts listening on given port.
      */
-    bool initialize(int port);
+    bool initialize(int port, const std::string &host);
 
     /**
      * Stops listening to messages and destroys the connection handler.
