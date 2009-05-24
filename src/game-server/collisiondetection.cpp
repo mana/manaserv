@@ -97,11 +97,11 @@ bool Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
     float d = ((dx * dx) + (dy * dy));
 
     // d^2 < r2^2
-    if(d < r2 * r2)
+    if (d < r2 * r2)
         return true; // We are right on top of each other
 
     // d^2 > r1^2 + r2^2
-    if(d > ((r1+r2) * (r1+r2)))
+    if (d > ((r1+r2) * (r1+r2)))
         return false; // The two circles do not touch
 
     float s1 = placeAngle - halfTopAngle,
@@ -117,7 +117,7 @@ bool Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
         s2 += 360;
 
     // Is the center point of circle 2 within circle 1?
-    if(d < r1 * r1)
+    if (d < r1 * r1)
     {
         // Circle 2 degrees in respect to circle 1
         float c2dc1 = atan2(dy,dx) * R_TO_D;
@@ -146,15 +146,15 @@ bool Collision::diskWithCircleSector(const Point &diskCenter, int diskRadius,
           iy2 = ayd + ((h * dy) / d);
 
     float idc1 = atan2(iy1,ix1) * R_TO_D;
-    if(idc1 < 0)
+    if (idc1 < 0)
         idc1 += 360;
-    if(test_degrees(idc1, s1, s2))
+    if (test_degrees(idc1, s1, s2))
         return true;
 
     idc1 = atan2(iy2,ix2) * R_TO_D;
-    if(idc1 < 0)
+    if (idc1 < 0)
         idc1 += 360;
-    if(test_degrees(idc1, s1, s2))
+    if (test_degrees(idc1, s1, s2))
         return true;
 
     // If we got to this point, it must be false

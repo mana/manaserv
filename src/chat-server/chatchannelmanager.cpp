@@ -89,15 +89,16 @@ bool ChatChannelManager::tryNewPublicChannel(const std::string &name)
 
 bool ChatChannelManager::removeChannel(int channelId)
 {
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if (i == mChatChannels.end()) return false;
+    ChatChannels::iterator i = mChatChannels.find(channelId);
+    if (i == mChatChannels.end())
+        return false;
     i->second.removeAllUsers();
     mChatChannels.erase(i);
     mChannelsNoLongerUsed.push_back(channelId);
     return true;
 }
 
-std::list<const ChatChannel*> ChatChannelManager::getPublicChannels()
+std::list<const ChatChannel*> ChatChannelManager::getPublicChannels() const
 {
     std::list<const ChatChannel*> channels;
 
@@ -114,7 +115,7 @@ std::list<const ChatChannel*> ChatChannelManager::getPublicChannels()
     return channels;
 }
 
-int ChatChannelManager::getChannelId(const std::string &channelName)
+int ChatChannelManager::getChannelId(const std::string &channelName) const
 {
     for (ChatChannels::const_iterator i = mChatChannels.begin(),
             i_end = mChatChannels.end();
@@ -125,16 +126,17 @@ int ChatChannelManager::getChannelId(const std::string &channelName)
     return 0;
 }
 
-ChatChannel* ChatChannelManager::getChannel(int channelId)
+ChatChannel *ChatChannelManager::getChannel(int channelId)
 {
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if (i != mChatChannels.end()) return &i->second;
+    ChatChannels::iterator i = mChatChannels.find(channelId);
+    if (i != mChatChannels.end())
+        return &i->second;
     return NULL;
 }
 
-ChatChannel* ChatChannelManager::getChannel(const std::string &name)
+ChatChannel *ChatChannelManager::getChannel(const std::string &name)
 {
-    for (ChatChannelIterator i = mChatChannels.begin();
+    for (ChatChannels::iterator i = mChatChannels.begin();
          i != mChatChannels.end(); ++i)
     {
         if (i->second.getName() == name)
@@ -148,8 +150,8 @@ ChatChannel* ChatChannelManager::getChannel(const std::string &name)
 
 void ChatChannelManager::setChannelTopic(int channelId, const std::string &topic)
 {
-    ChatChannelIterator i = mChatChannels.find(channelId);
-    if(i == mChatChannels.end())
+    ChatChannels::iterator i = mChatChannels.find(channelId);
+    if (i == mChatChannels.end())
         return;
 
     i->second.setAnnouncement(topic);
@@ -173,7 +175,7 @@ void ChatChannelManager::removeUserFromAllChannels(ChatClient *user)
     }
 }
 
-bool ChatChannelManager::channelExists(int channelId)
+bool ChatChannelManager::channelExists(int channelId) const
 {
     return mChatChannels.find(channelId) != mChatChannels.end();
 }

@@ -536,7 +536,7 @@ void GameServerHandler::sendPartyChange(Character *ptr, int partyId)
 void GameServerHandler::syncDatabase(MessageIn &msg)
 {
     int msgType = msg.readByte();
-    while( msgType != SYNC_END_OF_BUFFER )
+    while (msgType != SYNC_END_OF_BUFFER)
     {
         switch (msgType)
         {

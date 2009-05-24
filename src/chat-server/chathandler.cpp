@@ -398,8 +398,8 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     std::string channelName = msg.readString();
     std::string givenPassword = msg.readString();
     ChatChannel *channel = NULL;
-    if(chatChannelManager->channelExists(channelName) ||
-       chatChannelManager->tryNewPublicChannel(channelName))
+    if (chatChannelManager->channelExists(channelName) ||
+        chatChannelManager->tryNewPublicChannel(channelName))
     {
         channel = chatChannelManager->getChannel(channelName);
     }
@@ -573,7 +573,7 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
         trans.mMessage = "User left " + channel->getName();
         storage->addTransaction(trans);
 
-        if(channel->getUserList().empty())
+        if (channel->getUserList().empty())
         {
             chatChannelManager->removeChannel(channel->getId());
         }
@@ -647,7 +647,7 @@ ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
     std::string topic = msg.readString();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
-    if(!guildManager->doesExist(channel->getName()))
+    if (!guildManager->doesExist(channel->getName()))
     {
         chatChannelManager->setChannelTopic(channelId, topic);
     }

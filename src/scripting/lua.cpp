@@ -129,7 +129,8 @@ static int npc_ask_integer(lua_State *s)
     int min = lua_tointeger(s, 3);
     int max = lua_tointeger(s, 4);
     int default_num = min;
-    if(lua_gettop(s) == 5) default_num = lua_tointeger(s, 5);
+    if (lua_gettop(s) == 5)
+        default_num = lua_tointeger(s, 5);
 
     msg.writeLong(min);
     msg.writeLong(max);
@@ -732,7 +733,7 @@ static int chr_set_quest(lua_State *s)
  */
 static int trigger_create(lua_State *s)
 {
-    //TODO: argument check
+    // TODO: argument check
     if (!lua_isnumber(s, 1) ||
         !lua_isnumber(s, 2) ||
         !lua_isnumber(s, 3) ||
@@ -756,7 +757,9 @@ static int trigger_create(lua_State *s)
     int id = lua_tointeger(s, 6);
     bool once = lua_toboolean(s, 7);
 
-    LOG_INFO("Created script trigger at "<<x<<":"<<y<<" ("<<width<<"x"<<height<<") function: "<<function<<" ("<<id<<")");
+    LOG_INFO("Created script trigger at " << x << ":" << y
+             << " (" << width << "x" << height << ") function: " << function
+             << " (" << id << ")");
 
     MapComposite *m = script->getMap();
 
@@ -792,7 +795,7 @@ static int chatmessage(lua_State *s)
             GameState::sayTo(being, NULL, message);
         }
     }
-    else if(lua_gettop(s) == 1 && lua_isstring(s, 1))
+    else if (lua_gettop(s) == 1 && lua_isstring(s, 1))
     {
         // TODO: make chatserver send a global message
     }

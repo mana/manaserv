@@ -417,7 +417,8 @@ static void informPlayer(MapComposite *map, Character *p)
                 {
                     Effect *o = static_cast< Effect * >(*i);
                     o->show();
-                    if(!(oflags & UPDATEFLAG_NEW_ON_MAP)) //don't show old effects
+                    // Don't show old effects
+                    if (!(oflags & UPDATEFLAG_NEW_ON_MAP))
                         break;
                     MessageOut effectMsg(GPMSG_CREATE_EFFECT);
                     effectMsg.writeShort(o->getEffectId());

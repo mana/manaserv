@@ -1034,7 +1034,7 @@ std::list<Guild*> DALStorage::getGuildList()
         const dal::RecordSet& guildInfo = mDb->execSql(sql.str());
 
         // check that at least 1 guild was returned
-        if(guildInfo.isEmpty())
+        if (guildInfo.isEmpty())
         {
             return guilds;
         }

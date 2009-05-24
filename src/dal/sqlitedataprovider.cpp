@@ -162,7 +162,7 @@ SqLiteDataProvider::execSql(const std::string& sql,
 
         // the first row of result[] contains the field names.
         Row fieldNames;
-        for(int col = 0; col < nCols; ++col) {
+        for (int col = 0; col < nCols; ++col) {
             fieldNames.push_back(result[col]);
         }
         mRecordSet.setColumnHeaders(fieldNames);
@@ -171,7 +171,7 @@ SqLiteDataProvider::execSql(const std::string& sql,
         for (int row = 0; row < nRows; ++row) {
             Row r;
 
-            for(int col = 0; col < nCols; ++col) {
+            for (int col = 0; col < nCols; ++col) {
                 r.push_back(result[nCols + (row * nCols) + col]);
 
             }

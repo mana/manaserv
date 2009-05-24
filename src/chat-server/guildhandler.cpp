@@ -26,13 +26,13 @@
 #include "guild.hpp"
 #include "guildmanager.hpp"
 
-#include "../account-server/character.hpp"
-#include "../account-server/dalstorage.hpp"
+#include "account-server/character.hpp"
+#include "account-server/dalstorage.hpp"
 
-#include "../net/messagein.hpp"
-#include "../net/messageout.hpp"
+#include "net/messagein.hpp"
+#include "net/messageout.hpp"
 
-#include "../defines.h"
+#include "defines.h"
 
 void ChatHandler::sendGuildInvite(const std::string &invitedName,
                                   const std::string &inviterName,
@@ -85,7 +85,7 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
     }
 }
 
-ChatChannel* ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &client)
+ChatChannel *ChatHandler::joinGuildChannel(const std::string &guildName, ChatClient &client)
 {
     // Automatically make the character join the guild chat channel
     ChatChannel *channel = chatChannelManager->getChannel(guildName);
@@ -137,8 +137,8 @@ void ChatHandler::sendGuildListUpdate(const std::string &guildName,
     }
 }
 
-void
-ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleGuildCreation(ChatClient &client,
+                                      MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_CREATE_RESPONSE);
 
@@ -173,8 +173,8 @@ ChatHandler::handleGuildCreation(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleGuildInvitation(ChatClient &client,
+                                        MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_INVITE_RESPONSE);
     MessageOut invite(CPMSG_GUILD_INVITED);
@@ -221,8 +221,8 @@ ChatHandler::handleGuildInvitation(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleGuildAcceptInvite(ChatClient &client,
+                                          MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_ACCEPT_RESPONSE);
     std::string guildName = msg.readString();
@@ -261,8 +261,8 @@ ChatHandler::handleGuildAcceptInvite(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleGuildRetrieveMembers(ChatClient &client,
+                                             MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_GET_MEMBERS_RESPONSE);
     short guildId = msg.readShort();
@@ -279,8 +279,8 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
             reply.writeShort(guildId);
             std::list<GuildMember*> memberList = guild->getMembers();
             std::list<GuildMember*>::const_iterator itr_end = memberList.end();
-            for(std::list<GuildMember*>::iterator itr = memberList.begin();
-                itr != itr_end; ++itr)
+            for (std::list<GuildMember*>::iterator itr = memberList.begin();
+                 itr != itr_end; ++itr)
             {
                 Character *c = storage->getCharacter((*itr)->mId, NULL);
                 std::string memberName = c->getName();
@@ -297,8 +297,8 @@ ChatHandler::handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleGuildMemberLevelChange(ChatClient &client,
+                                               MessageIn &msg)
 {
     // get the guild, the user to change the permissions, and the new permission
     // check theyre valid, and then change them
@@ -351,8 +351,7 @@ void ChatHandler::handleGuildMemberKick(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_QUIT_RESPONSE);
     short guildId = msg.readShort();
@@ -369,7 +368,7 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
             reply.writeShort(guildId);
 
             // Check if there are no members left, remove the guild channel
-            if (guild->totalMembers() == 0)
+            if (guild->memberCount() == 0)
             {
                 chatChannelManager->removeChannel(chatChannelManager->getChannelId(guild->getName()));
             }
@@ -392,15 +391,12 @@ ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::guildChannelTopicChange(ChatChannel *channel, int playerId, const std::string &topic)
+void ChatHandler::guildChannelTopicChange(ChatChannel *channel, int playerId,
+                                          const std::string &topic)
 {
     Guild *guild = guildManager->findByName(channel->getName());
-    if (guild)
+    if (guild && guild->getUserPermissions(playerId) & GAL_TOPIC_CHANGE)
     {
-        if(guild->getUserPermissions(playerId) & GAL_TOPIC_CHANGE)
-        {
-            chatChannelManager->setChannelTopic(channel->getId(), topic);
-        }
+        chatChannelManager->setChannelTopic(channel->getId(), topic);
     }
 }

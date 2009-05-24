@@ -51,9 +51,9 @@ class ChatChannelManager
          * @return the ID of the registered channel
          */
         int createNewChannel(const std::string &channelName,
-                                    const std::string &channelAnnouncement,
-                                    const std::string &channelPassword,
-                                    bool joinable);
+                             const std::string &channelAnnouncement,
+                             const std::string &channelPassword,
+                             bool joinable);
 
         /**
          * Try to create a new public channel with the given name.
@@ -72,28 +72,28 @@ class ChatChannelManager
          *
          * @return a list of all public channels
          */
-        std::list<const ChatChannel*> getPublicChannels();
+        std::list<const ChatChannel*> getPublicChannels() const;
 
         /**
          * Get the id of a channel from its name.
          *
          * @return the id of the channel, 0 if it was unsuccessful.
          */
-        int getChannelId(const std::string &channelName);
+        int getChannelId(const std::string &channelName) const;
 
         /**
          * Returns the chat channel with the given channel ID.
          *
          * @return The chat channel, or NULL when it doesn't exist.
          */
-        ChatChannel* getChannel(int channelId);
+        ChatChannel *getChannel(int channelId);
 
         /**
          * Returns the chat channel with the given channel name.
          *
          * @return The chat channel, or NULL when it doesn't exist.
          */
-        ChatChannel* getChannel(const std::string &name);
+        ChatChannel *getChannel(const std::string &name);
 
         /**
          * Remove a user from all channels. Used at logout.
@@ -114,7 +114,7 @@ class ChatChannelManager
          *
          * @param channelId a channel ID
          */
-        bool channelExists(int channelId);
+        bool channelExists(int channelId) const;
         bool channelExists(const std::string &channelName);
 
         /**
@@ -124,7 +124,6 @@ class ChatChannelManager
 
     private:
         typedef std::map<unsigned short, ChatChannel> ChatChannels;
-        typedef ChatChannels::iterator ChatChannelIterator;
 
         /**
          * The map keeping all the chat channels. The channel id must be

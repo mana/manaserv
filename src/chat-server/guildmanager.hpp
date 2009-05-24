@@ -90,7 +90,7 @@ class GuildManager
         /**
          * Return the guilds a character is in
          */
-        std::vector<Guild*> getGuildsForPlayer(int playerId);
+        std::vector<Guild*> getGuildsForPlayer(int playerId) const;
 
         /**
          * Inform guild members that a player has disconnected.

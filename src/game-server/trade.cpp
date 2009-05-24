@@ -103,10 +103,10 @@ bool Trade::perform(TradedItems items, Inventory &inv1, Inventory &inv2)
 
 void Trade::agree(Character *c)
 {
-    //No player agreed
-    if(mState == TRADE_CONFIRMED)
+    // No player agreed
+    if (mState == TRADE_CONFIRMED)
     {
-        //One player agreed, if it's the player 2, make it player 1
+        // One player agreed, if it's the player 2, make it player 1
         if (c == mChar2)
         {
             std::swap(mChar1, mChar2);
@@ -116,21 +116,21 @@ void Trade::agree(Character *c)
         // First player agrees.
         mState = TRADE_CONFIRM_WAIT;
         
-        //Send the other player that the first player has confirmed
+        // Send the other player that the first player has confirmed
         MessageOut msg(GPMSG_TRADE_AGREED); 
         mChar2->getClient()->send(msg);
         return;
     }
     
-    if(mState == TRADE_AGREE_WAIT && c == mChar1)
+    if (mState == TRADE_AGREE_WAIT && c == mChar1)
     {
-        //We don't care about the first player, he already agreed
+        // We don't care about the first player, he already agreed
         return;
     }
     
-    //The second player has agreed
+    // The second player has agreed
     
-    //Check if both player has the objects in their inventories
+    // Check if both player has the objects in their inventories
     // and enouth money, then swap them.
     Inventory v1(mChar1, true), v2(mChar2, true);
     if (!perform(mItems1, v1, v2) ||
@@ -152,7 +152,8 @@ void Trade::agree(Character *c)
 
 void Trade::confirm(Character *c)
 {
-    if(mState == TRADE_CONFIRMED || mState == TRADE_AGREE_WAIT) return;
+    if (mState == TRADE_CONFIRMED || mState == TRADE_AGREE_WAIT)
+        return;
     
     if (mState == TRADE_RUN) //No player has confirmed
     {

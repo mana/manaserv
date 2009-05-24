@@ -221,11 +221,11 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             {
                 q->select(computer.character, message.readByte());
             }
-            else if(message.getId() == PGMSG_NPC_NUMBER)
+            else if (message.getId() == PGMSG_NPC_NUMBER)
             {
                 q->integerReceived(computer.character, message.readLong());
             }
-            else if(message.getId() == PGMSG_NPC_STRING)
+            else if (message.getId() == PGMSG_NPC_STRING)
             {
                 q->stringReceived(computer.character, message.readString());
             }

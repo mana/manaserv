@@ -90,7 +90,7 @@ void GuildManager::removeGuildMember(Guild *guild, int playerId)
     guild->removeMember(playerId);
 
     // if theres no more members left delete the guild
-    if(guild->totalMembers() == 0)
+    if (guild->memberCount() == 0)
     {
         removeGuild(guild);
     }
@@ -144,14 +144,14 @@ bool GuildManager::doesExist(const std::string &name)
     return findByName(name) != NULL;
 }
 
-std::vector<Guild*> GuildManager::getGuildsForPlayer(int playerId)
+std::vector<Guild*> GuildManager::getGuildsForPlayer(int playerId) const
 {
     std::vector<Guild*> guildList;
 
-    for (std::list<Guild*>::iterator itr = mGuilds.begin();
+    for (std::list<Guild*>::const_iterator itr = mGuilds.begin();
             itr != mGuilds.end(); ++itr)
     {
-        if((*itr)->checkInGuild(playerId))
+        if ((*itr)->checkInGuild(playerId))
         {
             guildList.push_back((*itr));
         }

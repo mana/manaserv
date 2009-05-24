@@ -105,13 +105,13 @@ class Guild
         /**
          * Returns a list of the members in this guild.
          */
-        std::list<GuildMember*> getMembers()
+        std::list<GuildMember*> getMembers() const
         { return mMembers; }
 
         /**
-         * Returns the total number of members in the guild.
+         * Returns the number of members in the guild.
          */
-        int totalMembers() const
+        int memberCount() const
         { return mMembers.size(); }
 
         /**
