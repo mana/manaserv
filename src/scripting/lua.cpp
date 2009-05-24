@@ -203,6 +203,7 @@ static int npc_end(lua_State *s)
     MessageOut msg(GPMSG_NPC_CLOSE);
     msg.writeShort(p->getPublicID());
     gameHandler->sendTo(q, msg);
+    return 0;
 }
 
 /**

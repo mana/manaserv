@@ -71,10 +71,14 @@
 #include "sha256.h"
 #include <memory.h>
 
-#ifdef HAS_STDINT
-#include <stdint.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
-#ifndef HAS_STDINT
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#else
+typedef unsigned char uint8_t;
 typedef unsigned int uint32_t;
 #endif
 
@@ -269,7 +273,7 @@ std::string SHA256Hash(const char *src, int len)
     return hash;
 }
 
-std::string sha256(const std::string& string)
+std::string sha256(const std::string &string)
 {
     return SHA256Hash(string.c_str(), string.length());
 }

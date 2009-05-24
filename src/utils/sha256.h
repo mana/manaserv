@@ -32,6 +32,6 @@ static const unsigned int SHA256_HASH_LENGTH = 64;
  * @param string the string to create the SHA-256 hash for
  * @return the SHA-256 hash for the given string.
  */
-std::string sha256(const std::string& string);
+std::string sha256(const std::string &string);
 
 #endif // _TMW_UTILS_SHA256_H_

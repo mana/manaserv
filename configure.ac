@@ -28,6 +28,7 @@ LIBS="$LIBS $XML2_LIBS"
 # Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
+AC_CHECK_HEADERS([stdint.h])
 
 # Checks for library functions.
 AC_FUNC_VPRINTF
