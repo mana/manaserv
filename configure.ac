@@ -98,7 +98,8 @@ if test "$enable_lua_engine" = "yes"; then
     PKG_CHECK_MODULES(LUA, [lua >= 5.1], ,
         [PKG_CHECK_MODULES(LUA, [lua5.1 >= 5.1], ,
             [AC_CHECK_LIB([lua-5.1], [lua_newstate], ,
-                AC_MSG_ERROR([ *** Unable to find liblua 5.1]))])])
+                [AC_CHECK_LIB([lua], [lua_newstate], ,
+                    AC_MSG_ERROR([ *** Unable to find liblua 5.1]))])])])
     CXXFLAGS="$CXXFLAGS $LUA_CFLAGS"
     LIBS="$LIBS $LUA_LIBS"
 fi
