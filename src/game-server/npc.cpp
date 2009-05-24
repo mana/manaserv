@@ -63,7 +63,7 @@ void NPC::select(Character *ch, int v)
     mScript->execute();
 }
 
-void NPC::integerRecepted(Character *ch, int v)
+void NPC::integerReceived(Character *ch, int v)
 {
     if (!mScript || !mEnabled) return;
     mScript->prepare("npc_integer");
@@ -73,7 +73,7 @@ void NPC::integerRecepted(Character *ch, int v)
     mScript->execute();
 }
 
-void NPC::stringRecepted(Character *ch, std::string v)
+void NPC::stringReceived(Character *ch, const std::string &v)
 {
     if (!mScript || !mEnabled) return;
     mScript->prepare("npc_string");

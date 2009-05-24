@@ -54,12 +54,12 @@ class NPC : public Being
         /**
          * The player has choosen an integer.
          */
-        void integerRecepted(Character *ch, int v);
+        void integerReceived(Character *ch, int v);
 
         /**
          * The player has entered an string.
          */
-        void stringRecepted(Character *ch, std::string v);
+        void stringReceived(Character *ch, const std::string &v);
 
         /**
          * Gets NPC ID.
