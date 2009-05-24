@@ -40,10 +40,9 @@ class ChatClient;
  * @todo <b>b_lindeijer:</b> Extend this class with handling of team chat once
  *       teams are implemented.
  */
-
 class ChatHandler : public ConnectionHandler
 {
-
+    private:
         /**
          * Data needed for initializing a ChatClient.
          */
@@ -147,20 +146,17 @@ class ChatHandler : public ConnectionHandler
         /**
          * Deal with Chat messages.
          */
-        void
-        handleChatMessage(ChatClient &client, MessageIn &msg);
+        void handleChatMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with Announcement messages.
          */
-        void
-        handleAnnounceMessage(ChatClient &client, MessageIn &msg);
+        void handleAnnounceMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with Private messages.
          */
-        void
-        handlePrivMsgMessage(ChatClient &client, MessageIn &msg);
+        void handlePrivMsgMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with Who messages.
@@ -170,80 +166,67 @@ class ChatHandler : public ConnectionHandler
         /**
          * Deal with player entering channel.
          */
-        void
-        handleEnterChannelMessage(ChatClient &client, MessageIn &msg);
+        void handleEnterChannelMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with player changing mode.
          */
-        void
-        handleModeChangeMessage(ChatClient &client, MessageIn &msg);
+        void handleModeChangeMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with player kicking other player from channel.
          */
-        void
-        handleKickUserMessage(ChatClient &client, MessageIn &msg);
+        void handleKickUserMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with player leaving channel.
          */
-        void
-        handleQuitChannelMessage(ChatClient &client, MessageIn &msg);
+        void handleQuitChannelMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with listing all accessible channels.
          */
-        void
-        handleListChannelsMessage(ChatClient &client, MessageIn &msg);
+        void handleListChannelsMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with listing all channel users in a channel.
          */
-        void
-        handleListChannelUsersMessage(ChatClient &client, MessageIn &msg);
+        void handleListChannelUsersMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with changing a channel's topic
          */
-        void
-        handleTopicChange(ChatClient &client, MessageIn &msg);
+        void handleTopicChange(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with disconnection.
          */
-        void
-        handleDisconnectMessage(ChatClient &client, MessageIn &msg);
+        void handleDisconnectMessage(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with creating a guild.
          */
-        void
-        handleGuildCreation(ChatClient &client, MessageIn &msg);
+        void handleGuildCreation(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with inviting a player to a guild.
          */
-        void
-        handleGuildInvitation(ChatClient &client, MessageIn &msg);
+        void handleGuildInvitation(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with accepting an invite to join a guild.
          */
-        void
-        handleGuildAcceptInvite(ChatClient &client, MessageIn &msg);
+        void handleGuildAcceptInvite(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with returning all the guild members of a guild.
          */
-        void
-        handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg);
+        void handleGuildRetrieveMembers(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with level change of member
          */
-        void
-        handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg);
+        void handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with kicking a member
@@ -253,33 +236,29 @@ class ChatHandler : public ConnectionHandler
         /**
          * Deal with leaving a guild.
          */
-        void
-        handleGuildQuit(ChatClient &client, MessageIn &msg);
+        void handleGuildQuit(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with a player joining a party.
          * @return Returns whether player successfully joined the party
          */
-        bool
-        handlePartyJoin(const std::string &invited, const std::string &inviter);
+        bool handlePartyJoin(const std::string &invited,
+                             const std::string &inviter);
 
         /**
          * Deal with inviting player to a party
          */
-        void
-        handlePartyInvite(ChatClient &client, MessageIn &msg);
+        void handlePartyInvite(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with accepting an invite to join a party
          */
-        void
-        handlePartyAcceptInvite(ChatClient &client, MessageIn &msg);
+        void handlePartyAcceptInvite(ChatClient &client, MessageIn &msg);
 
         /**
          * Deal with leaving a party.
          */
-        void
-        handlePartyQuit(ChatClient &client);
+        void handlePartyQuit(ChatClient &client);
 
         /**
          * Tell user the invite was rejected
@@ -289,26 +268,22 @@ class ChatHandler : public ConnectionHandler
         /**
          * Remove user from party
          */
-        void
-        removeUserFromParty(ChatClient &client);
+        void removeUserFromParty(ChatClient &client);
 
         /**
          * Send new member info to party members.
          */
-        void
-        sendPartyMemberInfo(ChatClient &client, MessageIn &msg);
+        void sendPartyMemberInfo(ChatClient &client, MessageIn &msg);
 
         /**
          * Tell all the party members a member has left
          */
-        void
-        informPartyMemberQuit(ChatClient &client);
+        void informPartyMemberQuit(ChatClient &client);
 
         /**
          * Tell all the party members a member has joined
          */
-        void
-        informPartyMemberJoined(ChatClient &client);
+        void informPartyMemberJoined(ChatClient &client);
 
         /**
          * Tell the player to be more polite.
@@ -336,14 +311,15 @@ class ChatHandler : public ConnectionHandler
          * @param The client to join the channel
          * @return Returns the channel joined
          */
-        ChatChannel* joinGuildChannel(const std::string &name, ChatClient &client);
+        ChatChannel *joinGuildChannel(const std::string &name,
+                                      ChatClient &client);
 
         /**
          * Returns ChatClient from the Player Map
          * @param The name of the character
          * @return The Chat Client
          */
-        ChatClient* getClient(const std::string &name);
+        ChatClient *getClient(const std::string &name);
 
         /**
          * Set the topic of a guild channel
@@ -356,7 +332,6 @@ class ChatHandler : public ConnectionHandler
          */
         TokenCollector<ChatHandler, ChatClient *, Pending *> mTokenCollector;
         friend void registerChatClient(const std::string &, const std::string &, int);
-
 };
 
 /**

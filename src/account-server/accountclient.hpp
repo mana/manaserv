@@ -60,8 +60,7 @@ class AccountClient : public NetComputer
         /**
          * Unset the account associated with the connection
          */
-        void
-        unsetAccount();
+        void unsetAccount();
 
         /**
          * Get account associated with the connection.
