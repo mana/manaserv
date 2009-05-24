@@ -63,12 +63,12 @@
  The game server uses this address to connect to the account server. Clients
  will also need to be able to connect to the account server.
  -->
- <option name="accountServerAddress" value="localhost"/>
- <option name="accountServerPort" value="9601"/>
+ <option name="net_accountServerAddress" value="localhost"/>
+ <option name="net_accountServerPort" value="9601"/>
 
  <!--
  The clients use this address to connect to a game server on this machine.
  -->
- <option name="gameServerAddress" value="localhost"/>
- <option name="gameServerPort" value="9604"/>
+ <option name="net_gameServerAddress" value="localhost"/>
+ <option name="net_gameServerPort" value="9604"/>
 </configuration>
