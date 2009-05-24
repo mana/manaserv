@@ -21,7 +21,7 @@
 
 #include <cmath>
 #include <map>
-#include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 
 #include "common/configuration.hpp"
 
@@ -67,41 +67,6 @@ void Configuration::initialize(const std::string &filename)
 
 void Configuration::deinitialize()
 {
-    xmlTextWriterPtr writer = xmlNewTextWriterFilename(configPath.c_str(), 0);
-
-    if (writer)
-    {
-        xmlTextWriterSetIndent(writer, 1);
-        xmlTextWriterStartDocument(writer, NULL, NULL, NULL);
-        xmlTextWriterStartElement(writer, BAD_CAST "configuration");
-
-        std::map<std::string, std::string>::iterator iter;
-
-        for (iter = options.begin(); iter != options.end(); iter++)
-        {
-            xmlTextWriterStartElement(writer, BAD_CAST "option");
-            xmlTextWriterWriteAttribute(writer,
-                    BAD_CAST "name", BAD_CAST iter->first.c_str());
-            xmlTextWriterWriteAttribute(writer,
-                    BAD_CAST "value", BAD_CAST iter->second.c_str());
-            xmlTextWriterEndElement(writer);
-        }
-
-        xmlTextWriterEndDocument(writer);
-        xmlFreeTextWriter(writer);
-    }
-}
-
-void Configuration::setValue(const std::string &key, const std::string &value)
-{
-    options[key] = value;
-}
-
-void Configuration::setValue(const std::string &key, int value)
-{
-    std::ostringstream ss;
-    ss << value;
-    setValue(key, ss.str());
 }
 
 const std::string &Configuration::getValue(const std::string &key,

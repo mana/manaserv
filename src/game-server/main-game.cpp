@@ -47,6 +47,8 @@
 #include "utils/timer.h"
 #include "utils/mathutils.h"
 
+using utils::Logger;
+
 // Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE        "tmwserv-game.log"
 #define DEFAULT_CONFIG_FILE     "tmwserv.xml"
@@ -217,26 +219,39 @@ void printHelp()
     exit(0);
 }
 
+struct CommandLineOptions
+{
+    CommandLineOptions():
+        verbosity(Logger::INFO),
+        port(Configuration::getValue("net_gameServerPort",
+                                     DEFAULT_SERVER_PORT + 3))
+    {}
+
+    Logger::Level verbosity;
+    int port;
+};
+
 /**
  * Parse the command line arguments
  */
-void parseOptions(int argc, char *argv[])
+void parseOptions(int argc, char *argv[], CommandLineOptions &options)
 {
     const char *optstring = "h";
 
-    const struct option long_options[] = {
+    const struct option long_options[] =
+    {
         { "help",       no_argument, 0, 'h' },
         { "verbosity",  required_argument, 0, 'v' },
         { "port",       required_argument, 0, 'p' },
         { 0 }
     };
 
-    while (optind < argc) {
+    while (optind < argc)
+    {
         int result = getopt_long(argc, argv, optstring, long_options, NULL);
 
-        if (result == -1) {
+        if (result == -1)
             break;
-        }
 
         switch (result) {
             default: // Unknown option
@@ -245,18 +260,11 @@ void parseOptions(int argc, char *argv[])
                 printHelp();
                 break;
             case 'v':
-                // Set Verbosity to level
-                unsigned short verbosityLevel;
-                verbosityLevel = atoi(optarg);
-                utils::Logger::setVerbosity(utils::Logger::Level(verbosityLevel));
-                LOG_INFO("Setting log verbosity level to " << verbosityLevel);
+                options.verbosity = static_cast<Logger::Level>(atoi(optarg));
+                LOG_INFO("Using log verbosity level " << options.verbosity);
                 break;
             case 'p':
-                // Change the port to listen on.
-                unsigned short portToListenOn;
-                portToListenOn = atoi(optarg);
-                Configuration::setValue("net_gameServerPort", portToListenOn);
-                LOG_INFO("Setting default port to " << portToListenOn);
+                options.port = atoi(optarg);
                 break;
         }
     }
@@ -274,7 +282,9 @@ int main(int argc, char *argv[])
 #endif
 
     // Parse command line options
-    parseOptions(argc, argv);
+    CommandLineOptions options;
+    parseOptions(argc, argv, options);
+    Logger::setVerbosity(options.verbosity);
 
     // General initialization
     initialize();
@@ -282,10 +292,7 @@ int main(int argc, char *argv[])
     // Make an initial attempt to connect to the account server
     accountHandler->start();
 
-    int gameServerPort =
-        Configuration::getValue("net_gameServerPort", DEFAULT_SERVER_PORT + 3);
-
-    if (!gameHandler->startListen(gameServerPort))
+    if (!gameHandler->startListen(options.port))
     {
         LOG_FATAL("Unable to create an ENet server host.");
         return 3;
@@ -294,7 +301,8 @@ int main(int argc, char *argv[])
     // Initialize world timer
     worldTimer.start();
 
-    while (running) {
+    while (running)
+    {
         elapsedWorldTicks = worldTimer.poll();
         if (elapsedWorldTicks > 0)
         {

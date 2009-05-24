@@ -46,6 +46,8 @@
 #include "utils/stringfilter.h"
 #include "utils/timer.h"
 
+using utils::Logger;
+
 // Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE        "tmwserv-account.log"
 #define DEFAULT_STATS_FILE      "tmwserv.stats"
@@ -84,7 +86,6 @@ static void closeGracefully(int)
  */
 static void initialize()
 {
-
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
 
@@ -253,26 +254,39 @@ static void printHelp()
     exit(0);
 }
 
+struct CommandLineOptions
+{
+    CommandLineOptions():
+        verbosity(Logger::INFO),
+        port(Configuration::getValue("net_accountServerPort",
+                                     DEFAULT_SERVER_PORT))
+    {}
+
+    Logger::Level verbosity;
+    int port;
+};
+
 /**
  * Parse the command line arguments
  */
-static void parseOptions(int argc, char *argv[])
+static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
 {
     const char *optstring = "h";
 
-    const struct option long_options[] = {
+    const struct option long_options[] =
+    {
         { "help",       no_argument, 0, 'h' },
         { "verbosity",  required_argument, 0, 'v' },
         { "port",       required_argument, 0, 'p' },
         { 0, 0, 0, 0 }
     };
 
-    while (optind < argc) {
+    while (optind < argc)
+    {
         int result = getopt_long(argc, argv, optstring, long_options, NULL);
 
-        if (result == -1) {
+        if (result == -1)
             break;
-        }
 
         switch (result) {
             default: // Unknown option
@@ -281,18 +295,11 @@ static void parseOptions(int argc, char *argv[])
                 printHelp();
                 break;
             case 'v':
-                // Set Verbosity to level
-                unsigned short verbosityLevel;
-                verbosityLevel = atoi(optarg);
-                utils::Logger::setVerbosity(utils::Logger::Level(verbosityLevel));
-                LOG_INFO("Setting Log Verbosity Level to " << verbosityLevel);
+                options.verbosity = static_cast<Logger::Level>(atoi(optarg));
+                LOG_INFO("Using log verbosity level " << options.verbosity);
                 break;
             case 'p':
-                // Change the port to listen on.
-                unsigned short portToListenOn;
-                portToListenOn = atoi(optarg);
-                Configuration::setValue("ListenOnPort", portToListenOn);
-                LOG_INFO("Setting Default Port to " << portToListenOn);
+                options.port = atoi(optarg);
                 break;
         }
     }
@@ -308,17 +315,18 @@ int main(int argc, char *argv[])
     LOG_INFO("The Mana World Account+Chat Server v" << PACKAGE_VERSION);
 #endif
 
-    // Parse Command Line Options
-    parseOptions(argc, argv);
+    // Parse command line options
+    CommandLineOptions options;
+    parseOptions(argc, argv, options);
+    Logger::setVerbosity(options.verbosity);
 
-    // General Initialization
+    // General initialization
     initialize();
 
-    int port = Configuration::getValue("net_accountServerPort", DEFAULT_SERVER_PORT);
     std::string host = Configuration::getValue("net_listenHost", std::string());
-    if (!AccountClientHandler::initialize(port, host) ||
-        !GameServerHandler::initialize(port + 1, host) ||
-        !chatHandler->startListen(port + 2, host))
+    if (!AccountClientHandler::initialize(options.port, host) ||
+        !GameServerHandler::initialize(options.port + 1, host) ||
+        !chatHandler->startListen(options.port + 2, host))
     {
         LOG_FATAL("Unable to create an ENet server host.");
         return 3;
@@ -341,15 +349,22 @@ int main(int argc, char *argv[])
     storage->setWorldStateVar("accountserver_version", revision);
     // -------------------------------------------------------------------------
 
-    while (running) {
+    while (running)
+    {
         AccountClientHandler::process();
         GameServerHandler::process();
         chatHandler->process(50);
-        if (statTimer.poll()) dumpStatistics();
-        if (banTimer.poll()) storage->checkBannedAccounts();
+
+        if (statTimer.poll())
+            dumpStatistics();
+
+        if (banTimer.poll())
+            storage->checkBannedAccounts();
     }
 
     LOG_INFO("Received: Quit signal, closing down...");
     chatHandler->stopListen();
     deinitialize();
+
+    return 0;
 }

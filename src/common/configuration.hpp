@@ -32,24 +32,7 @@ namespace Configuration
      */
     void initialize(const std::string &filename);
 
-    /**
-     * Writes the current settings back to the configuration file.
-     */
     void deinitialize();
-
-    /**
-     * Sets an option to a given value.
-     * @param key option identifier.
-     * @param value Value.
-     */
-    void setValue(const std::string &key, const std::string &value);
-
-    /**
-     * Sets an option to a given value.
-     * @param key option identifier.
-     * @param value value.
-     */
-    void setValue(const std::string &key, int value);
 
     /**
      * Gets an option as a string.
