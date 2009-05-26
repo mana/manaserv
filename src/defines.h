@@ -149,7 +149,7 @@ enum {
     GPMSG_BEING_HEALTH_CHANGE      = 0x0274, // W being id, W health
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, C position, B speed] [, W*2 destination] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
-    PGMSG_ATTACK                   = 0x0290, // B direction
+    PGMSG_ATTACK                   = 0x0290, // W being id
     GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction, B attacktype
     PGMSG_USE_SPECIAL              = 0x0292, // B specialID
     PGMSG_SAY                      = 0x02A0, // S text

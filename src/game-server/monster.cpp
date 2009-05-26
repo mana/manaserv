@@ -111,7 +111,7 @@ Monster::~Monster()
 
 void Monster::perform()
 {
-    if (mAction == ATTACK && mCurrentAttack)
+    if (mAction == ATTACK && mCurrentAttack && mTarget)
     {
         if (mAttackTime == mCurrentAttack->aftDelay)
         {
@@ -160,7 +160,7 @@ void Monster::update()
     }
 
     // Check potential attack positions
-    Being *bestAttackTarget = NULL;
+    Being *bestAttackTarget = mTarget = NULL;
     int bestTargetPriority = 0;
     Point bestAttackPosition;
     Direction bestAttackDirection = DIRECTION_DOWN;
