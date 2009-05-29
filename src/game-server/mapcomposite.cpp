@@ -262,7 +262,7 @@ void ActorIterator::operator++()
 }
 
 ObjectBucket::ObjectBucket()
-  : free(256), next_object(1)
+  : free(256), next_object(0)
 {
     for (unsigned i = 0; i < 256 / int_bitsize; ++i)
     {
@@ -280,43 +280,43 @@ int ObjectBucket::allocate()
         return -1;
     }
 
-    /* First check if next_object is a free ID. Directly check inside the
-       bitmap, as we have to update it anyway. */
-    if (bitmap[next_object / int_bitsize] & (1 << (next_object % int_bitsize)))
+    int freeBucket = -1;
+    // See if the the next_object bucket is free 
+    if (bitmap[next_object] != 0)
     {
-        bitmap[next_object / int_bitsize] &= ~(1 << (next_object % int_bitsize));
-        int i = next_object;
-        next_object = (i + 1) & 255;
-        --free;
-        return i;
+        freeBucket = next_object;
     }
-
-    /* next_object was not free. Check the whole bucket until one ID is found,
-       starting from the IDs around next_object. */
-    for (unsigned i = 0; i < 256 / int_bitsize; ++i)
+    else
     {
-        int k = (i + next_object / int_bitsize) & 255;
-        // Check int_bitsize IDs at once.
-        if (unsigned b = bitmap[k])
+        /* next_object was not free. Check the whole bucket until one ID is found,
+           starting from the IDs around next_object. */
+        for (unsigned i = 0; i < 256 / int_bitsize; ++i)
         {
-            // One of them is free. Find it by looking bit-by-bit.
-            int j = 0;
-            while (!(b & 1))
+            // Check to see if this subbucket is free
+            if (bitmap[i] != 0)
             {
-                b >>= 1;
-                ++j;
+                freeBucket = i;
+                break;
             }
-            bitmap[k] &= ~(1 << j);
-            j += k * int_bitsize;
-            next_object = (j + 1) & 255;
-            --free;
-            return j;
         }
     }
 
-    // No free ID in the bucket.
-    LOG_INFO("No free id in the bucket");
-    return -1;
+    assert(freeBucket >= 0);
+
+    // One of them is free. Find it by looking bit-by-bit.
+    int b = bitmap[freeBucket];
+    int j = 0;
+    while (!(b & 1))
+    {
+        b >>= 1;
+        ++j;
+    }
+    // Flip that bit to on, and return the value
+    bitmap[freeBucket] &= ~(1 << j);
+    j += freeBucket * int_bitsize;
+    next_object = freeBucket;
+    --free;
+    return j;
 }
 
 void ObjectBucket::deallocate(int i)
