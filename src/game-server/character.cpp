@@ -298,7 +298,7 @@ void Character::sendStatus()
          i_end = mModifiedExperience.end(); i != i_end; ++i)
     {
         int skill = *i;
-        expMsg.writeByte(skill);
+        expMsg.writeShort(skill);
         expMsg.writeLong(getExpGot(skill));
         expMsg.writeLong(getExpNeeded(skill));
     }

@@ -126,7 +126,7 @@ enum {
     GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
     GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { B attribute, W base value, W modified value }*
-    GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { B skill, D exp got, D exp needed }*
+    GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { W skill, D exp got, D exp needed }*
     GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points
     GPMSG_LEVEL_PROGRESS           = 0x0151, // B percent completed to next levelup
     PGMSG_RAISE_ATTRIBUTE          = 0x0160, // B attribute
