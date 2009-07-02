@@ -180,8 +180,6 @@ std::list<PATH_NODE> Map::findSimplePath(int startX, int startY,
     // We go to the last good tile, and break out of the loop
     while(true)
     {
-        // need to find a way to just get negative or positive 1 or 0
-        // assume this is right for now.
         directionX = destX - positionX;
         directionY = destY - positionY;
 
