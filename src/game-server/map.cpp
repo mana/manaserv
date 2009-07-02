@@ -167,8 +167,56 @@ MetaTile *Map::getMetaTile(int x, int y)
 
 static int const basicCost = 100;
 
-std::list<PATH_NODE>
-Map::findPath(int startX, int startY, int destX, int destY, unsigned char walkmask, int maxCost)
+
+std::list<PATH_NODE> Map::findSimplePath(int startX, int startY,
+                                         int destX, int destY,
+                                         unsigned char walkmask)
+{
+    // Path to be built up (empty by default)
+    std::list<PATH_NODE> path;
+    int positionX = startX, positionY = startY;
+    int directionX, directionY;
+    // Checks our path up to 1 tiles, if a blocking tile is found
+    // We go to the last good tile, and break out of the loop
+    while(true)
+    {
+        // need to find a way to just get negative or positive 1 or 0
+        // assume this is right for now.
+        directionX = destX - positionX;
+        directionY = destY - positionY;
+
+        if (directionX > 0)
+            directionX = 1;
+        else if(directionX < 0)
+            directionX = -1;
+
+        if (directionY > 0)
+            directionY = 1;
+        else if(directionY < 0)
+            directionY = -1;
+
+        positionX += directionX;
+        positionY += directionY;
+
+        if (getWalk(positionX, positionY, walkmask))
+        {
+            path.push_back(PATH_NODE(positionX, positionY));
+
+            if ((positionX == destX) && (positionY == destY))
+            {
+                return path;
+            }
+        }
+        else
+        {
+            return path;
+        }
+    }
+}
+
+std::list<PATH_NODE> Map::findPath(int startX, int startY,
+                                   int destX, int destY,
+                                   unsigned char walkmask, int maxCost)
 {
     // Path to be built up (empty by default)
     std::list<PATH_NODE> path;

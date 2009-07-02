@@ -173,6 +173,13 @@ class Map
                                       unsigned char walkmask,
                                       int maxCost = 20);
 
+        /**
+         * Finds a simple path from location to the next.
+         */
+        std::list<PATH_NODE> findSimplePath(int startX, int startY,
+                                            int destX, int destY,
+                                            unsigned char walkmask);
+
     private:
         /**
          * Blockmasks for different entities

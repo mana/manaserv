@@ -230,6 +230,11 @@ class Being : public Actor
         void move();
 
         /**
+         * Returns the path to the being's current destination.
+         */
+        virtual std::list<PATH_NODE> findPath();
+
+        /**
          * Sets an attribute.
          */
         void setAttribute(int n, int value)
@@ -295,14 +300,14 @@ class Being : public Actor
         Action mAction;
         std::vector< Attribute > mAttributes;
         Being *mTarget;
+        Point mOld;                 /**< Old coordinates. */
+        Point mDst;                 /**< Target coordinates. */
 
     private:
         Being(const Being &rhs);
         Being &operator=(const Being &rhs);
 
         std::list<PATH_NODE> mPath;
-        Point mOld;                 /**< Old coordinates. */
-        Point mDst;                 /**< Target coordinates. */
         unsigned short mSpeed;      /**< Speed. */
         unsigned char mDirection;   /**< Facing direction. */
 

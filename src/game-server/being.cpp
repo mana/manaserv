@@ -125,6 +125,15 @@ void Being::setDestination(const Point &dst)
     mPath.clear();
 }
 
+std::list<PATH_NODE> Being::findPath()
+{
+    mOld = getPosition();
+    int startX = mOld.x / 32, startY = mOld.y / 32;
+    int destX = mDst.x / 32, destY = mDst.y / 32;
+    Map *map = getMap()->getMap();
+    return map->findPath(startX, startY, destX, destY, getWalkMask());
+}
+
 void Being::move()
 {
     mOld = getPosition();
@@ -169,7 +178,7 @@ void Being::move()
     {
         // No path exists: the walkability of cached path has changed, the
         // destination has changed, or a path was never set.
-        mPath = map->findPath(tileSX, tileSY, tileDX, tileDY, getWalkMask());
+        mPath = findPath();
     }
 
     if (mPath.empty())
