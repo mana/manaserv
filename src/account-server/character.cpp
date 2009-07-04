@@ -40,10 +40,6 @@ Character::Character(const std::string &name, int id):
     {
         mAttributes[i] = 0;
     }
-    for (int i = 0; i < CHAR_SKILL_NB; ++i)
-    {
-        mExperience[i] = 0;
-    }
 }
 
 void Character::setAccount(Account *acc)

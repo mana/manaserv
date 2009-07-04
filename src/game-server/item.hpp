@@ -55,27 +55,6 @@ enum ItemType
 
 ItemType itemTypeFromString (const std::string &name);
 
-
-/**
- * Enumeration of available weapon's types.
- */
-enum WeaponType
-{
-    WPNTYPE_NONE = 0,
-    WPNTYPE_KNIFE,
-    WPNTYPE_SWORD,
-    WPNTYPE_POLEARM,
-    WPNTYPE_STAFF,
-    WPNTYPE_WHIP,
-    WPNTYPE_BOW,
-    WPNTYPE_SHOOTING,
-    WPNTYPE_MACE,
-    WPNTYPE_AXE,
-    WPNTYPE_THROWN
-};
-
-WeaponType weaponTypeFromString (const std::string &name);
-
 /**
  * State effects to beings, and actors.
  * States can be multiple for the same being.

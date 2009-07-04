@@ -60,8 +60,7 @@ Character::Character(MessageIn &msg):
     mTransaction(TRANS_NONE)
 {
     Attribute attr = { 0, 0 };
-    mAttributes.resize(NB_CHARACTER_ATTRIBUTES, attr);
-    mExperience.resize(CHAR_SKILL_NB, 0);
+    mAttributes.resize(CHAR_ATTR_NB, attr);
     // Get character data.
     mDatabaseID = msg.readLong();
     setName(msg.readString());
@@ -137,16 +136,16 @@ void Character::perform()
     // TODO: Check slot 2 too.
     int itemId = mPossessions.equipment[EQUIP_FIGHT1_SLOT];
     ItemClass *ic = ItemManager::getItem(itemId);
-    int type = ic ? ic->getModifiers().getValue(MOD_WEAPON_TYPE) : WPNTYPE_NONE;
+    int type = ic ? ic->getModifiers().getValue(MOD_WEAPON_TYPE) : 100;
 
     Damage damage;
     damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
     damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) +
-                   getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
+                   getModifiedAttribute(type);
     damage.type = DAMAGE_PHYSICAL;
     damage.cth = getModifiedAttribute(BASE_ATTR_HIT) +
-                 getModifiedAttribute(CHAR_SKILL_WEAPON_BEGIN + type);
-    damage.usedSkills.push_back(CHAR_SKILL_WEAPON_BEGIN + type);
+                 getModifiedAttribute(type);
+    damage.usedSkills.push_back(type);
 
     if (ic)
     {
@@ -323,6 +322,18 @@ void Character::sendStatus()
     }
 }
 
+int Character::getAttribute(int attr) const
+{
+    if (attr <= CHAR_ATTR_NB)
+    {
+        return Being::getAttribute(attr);
+    }
+    else
+    {
+        return mExperience.find(attr)->second;
+    }
+}
+
 void Character::modifiedAttribute(int attr)
 {
     if (attr >= CHAR_ATTR_BEGIN && attr < CHAR_ATTR_END)
@@ -395,18 +406,18 @@ int Character::expForLevel(int level)
 
 void Character::receiveExperience(size_t skill, int experience)
 {
-    if (skill >= CHAR_SKILL_BEGIN && skill < CHAR_SKILL_END)
+    if (skill >= CHAR_ATTR_END)
     {
         // add exp
-        long int newExp = mExperience.at(skill - CHAR_SKILL_BEGIN) + experience;
+        long int newExp = mExperience[skill] + experience;
         if (newExp > INT_MAX) newExp = INT_MAX; // avoid integer overflow.
         if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
-        mExperience.at(skill - CHAR_SKILL_BEGIN) = newExp;
-        mModifiedExperience.insert(skill - CHAR_SKILL_BEGIN);
+        mExperience[skill] = newExp;
+        mModifiedExperience.insert(skill);
 
         // inform account server
         accountHandler->updateExperience(getDatabaseID(),
-            skill - CHAR_SKILL_BEGIN, newExp);
+            skill, newExp);
 
         // check for skill levelup
         while (newExp >= Character::expForLevel(getAttribute(skill) + 1))
@@ -422,11 +433,12 @@ void Character::receiveExperience(size_t skill, int experience)
 void Character::recalculateLevel()
 {
     std::list<float> levels;
-    for (int a = CHAR_SKILL_BEGIN; a < CHAR_SKILL_END; a++)
+    std::map<int, int>::const_iterator a;
+    for (a = getSkillBegin(); a != getSkillEnd(); a++)
     {
-        float expGot = getExpGot(a - CHAR_SKILL_BEGIN);
-        float expNeed = getExpNeeded(a - CHAR_SKILL_BEGIN);
-        levels.push_back(getAttribute(a) + expGot / expNeed);
+        float expGot = getExpGot(a->first);
+        float expNeed = getExpNeeded(a->first);
+        levels.push_back(getAttribute(a->first) + expGot / expNeed);
     }
     levels.sort();
 
@@ -434,7 +446,7 @@ void Character::recalculateLevel()
     float level = 0.0f;
     float factor = 1.0f;
     float factorSum = 0.0f;
-    while (i != levels.begin()) //maybe it wouldn't be a bad idea to unroll this loop
+    while (i != levels.begin())
     {
         i--;
         level += *i * factor;
@@ -459,14 +471,14 @@ void Character::recalculateLevel()
 
 int Character::getExpNeeded(size_t skill)
 {
-    int level = getAttribute(skill + CHAR_SKILL_BEGIN);
+    int level = getAttribute(skill);
     return Character::expForLevel(level + 1) - expForLevel(level);
 }
 
 int Character::getExpGot(size_t skill)
 {
-    int level = getAttribute(skill + CHAR_SKILL_BEGIN);
-    return mExperience.at(skill) - Character::expForLevel(level);
+    int level = getAttribute(skill);
+    return mExperience[skill] - Character::expForLevel(level);
 }
 
 void Character::levelup()

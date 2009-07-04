@@ -145,13 +145,11 @@ void ItemManager::reload()
         if (itemType == ITEM_EQUIPMENT_ONE_HAND_WEAPON ||
             itemType == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
         {
-            std::string sWeaponType = XML::getProperty(node, "weapon-type", "");
-            WeaponType weaponType = weaponTypeFromString(sWeaponType);
-            if (weaponType == WPNTYPE_NONE)
+            int weaponType = XML::getProperty(node, "weapon-type", 0);
+            if (weaponType == 0)
             {
                 LOG_WARN(itemReferenceFile<<": Unknown weapon type \""
-                         <<sWeaponType<<"\" for item #"<<id<<" - treating it as generic item");
-                itemType = ITEM_UNUSABLE;
+                         <<"\" for item #"<<id<<" - treating it as generic item");
             }
             modifiers.setValue(MOD_WEAPON_TYPE, weaponType);
             modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));

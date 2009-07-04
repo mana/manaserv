@@ -536,10 +536,11 @@ bool DALStorage::updateCharacter(Character *character,
      */
     try
     {
-        for (unsigned int skill_id = 0; skill_id < CHAR_SKILL_NB; skill_id++)
+        std::map<int, int>::const_iterator skill_it;
+        for (skill_it = character->getSkillBegin(); 
+             skill_it != character->getSkillEnd(); skill_it++)
         {
-            updateExperience(character->getDatabaseID(), skill_id,
-                character->getExperience(skill_id));
+            updateExperience(character->getDatabaseID(), skill_it->first, skill_it->second);
         }
     }
     catch (const dal::DbSqlQueryExecFailure& e)
@@ -760,11 +761,12 @@ void DALStorage::flush(Account *account)
                 // Update the character ID.
                 (*it)->setDatabaseID(mDb->getLastId());
 
-                // update the characters skills
-                for (unsigned int skill_id = 0; skill_id < CHAR_SKILL_NB; skill_id++)
+                // update the characters skill
+                std::map<int, int>::const_iterator skill_it;
+                for (skill_it = (*it)->getSkillBegin();
+                     skill_it != (*it)->getSkillEnd(); skill_it++)
                 {
-                    updateExperience((*it)->getDatabaseID(), skill_id,
-                        (*it)->getExperience(skill_id));
+                    updateExperience((*it)->getDatabaseID(), skill_it->first, skill_it->second);
                 }
             }
         } //

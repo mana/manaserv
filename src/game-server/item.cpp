@@ -29,29 +29,6 @@
 #include "game-server/being.hpp"
 #include "scripting/script.hpp"
 
-WeaponType weaponTypeFromString (const std::string &name)
-{
-    static std::map<const std::string, WeaponType> table;
-
-    if (table.empty())
-    {
-        table["knife"]      = WPNTYPE_KNIFE;
-        table["sword"]      = WPNTYPE_SWORD;
-        table["polearm"]    = WPNTYPE_POLEARM;
-        table["staff"]      = WPNTYPE_STAFF;
-        table["whip"]       = WPNTYPE_WHIP;
-        table["bow"]        = WPNTYPE_BOW;
-        table["shooting"]   = WPNTYPE_SHOOTING;
-        table["mace"]       = WPNTYPE_MACE;
-        table["axe"]        = WPNTYPE_AXE;
-        table["thrown"]     = WPNTYPE_THROWN;
-    }
-
-    std::map<const std::string, WeaponType>::iterator val = table.find(name);
-
-    return val == table.end() ? WPNTYPE_NONE : (*val).second;
-}
-
 ItemType itemTypeFromString (const std::string &name)
 {
     static std::map<const std::string, ItemType> table;

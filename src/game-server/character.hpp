@@ -239,6 +239,12 @@ class Character : public Being
         void setMapId(int);
 
         /**
+         * Over loads being::getAttribute, character skills are 
+         * treated as extend attributes
+         */
+        int getAttribute(int) const;
+
+        /**
          * Updates base Being attributes.
          */
         void modifiedAttribute(int);
@@ -260,17 +266,26 @@ class Character : public Being
          */
         void receiveExperience(size_t skill, int experience);
 
+        int getSkillSize() const
+        { return mExperience.size(); }
+
+        const std::map<int, int>::const_iterator getSkillBegin() const
+        { return mExperience.begin(); }
+ 
+        const std::map<int, int>::const_iterator getSkillEnd() const
+        { return mExperience.end(); }
+
         /**
          * Gets total accumulated exp for skill
          */
         int getExperience(int skill) const
-        { return mExperience[skill]; }
+        { return mExperience.find(skill)->second; }
 
         /**
          * Sets total accumulated exp for skill
          */
         void setExperience(int skill, int value)
-        { mExperience[skill] = 0; receiveExperience(skill + CHAR_SKILL_BEGIN , value) ; }
+        { mExperience[skill] = 0; receiveExperience(skill, value) ; }
 
         /**
          * Shortcut to get being's health
@@ -364,7 +379,7 @@ class Character : public Being
         std::set<size_t> mModifiedAttributes;
         std::set<size_t> mModifiedExperience;
 
-        std::vector<unsigned int> mExperience; /**< experience collected for each skill.*/
+        std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
         std::map<int, Special*> mSpecials;
 

@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "defines.h"
 #include "point.h"
@@ -105,8 +106,17 @@ class Character
         void setAttribute(int n, int value)
         { mAttributes[n - CHAR_ATTR_BEGIN] = value; }
 
+        int getSkillSize() const
+        { return mExperience.size(); }
+
+        const std::map<int, int>::const_iterator getSkillBegin() const
+        { return mExperience.begin(); }
+ 
+        const std::map<int, int>::const_iterator getSkillEnd() const
+        { return mExperience.end(); }
+
         int getExperience(int skill) const
-        { return mExperience[skill]; }
+        { return mExperience.find(skill)->second; }
 
         void setExperience(int skill, int value)
         { mExperience[skill] = value; }
@@ -169,7 +179,7 @@ class Character
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
         unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
-        int mExperience[CHAR_SKILL_NB]; //!< Skill Experience.
+        std::map<int, int> mExperience; //!< Skill Experience.
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.

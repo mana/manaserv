@@ -21,6 +21,8 @@
 #ifndef _TMWSERV_SERIALIZE_CHARACTERDATA_HPP_
 #define _TMWSERV_SERIALIZE_CHARACTERDATA_HPP_
 
+#include <map>
+
 #include "defines.h"
 #include "common/inventorydata.hpp"
 #include "net/messagein.hpp"
@@ -43,9 +45,13 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeByte(data.getAttribute(i));
     }
 
-    for (int i = 0; i < CHAR_SKILL_NB; ++i)
+    msg.writeShort(data.getSkillSize());
+
+    std::map<int, int>::const_iterator skill_it;
+    for (skill_it = data.getSkillBegin(); skill_it != data.getSkillEnd() ; skill_it++)
     {
-        msg.writeLong(data.getExperience(i));
+        msg.writeShort(skill_it->first);
+        msg.writeLong(skill_it->second);
     }
 
 
@@ -84,9 +90,11 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         data.setAttribute(i, msg.readByte());
     }
 
-    for (int i = 0; i < CHAR_SKILL_NB; ++i)
+    int skillSize = msg.readShort();
+
+    for (int i = 0; i < skillSize; ++i)
     {
-        data.setExperience(i, msg.readLong());
+        data.setExperience(msg.readShort(), msg.readLong());
     }
 
     data.setMapId(msg.readShort());

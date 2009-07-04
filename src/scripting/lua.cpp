@@ -940,13 +940,8 @@ static int chr_get_exp(lua_State *s)
     }
 
     int skill = lua_tointeger(s, 2);
-    if (skill < CHAR_SKILL_BEGIN || skill >= CHAR_SKILL_END)
-    {
-        raiseScriptError(s, "luaChr_GetExp called for nonexistent skill number %d.", skill);
-        return 0;
-    }
 
-    int exp = c->getExperience(skill - CHAR_SKILL_BEGIN);
+    int exp = c->getExperience(skill);
 
     lua_pushinteger(s, exp);
     return 1;
@@ -969,11 +964,6 @@ static int chr_give_exp(lua_State *s)
     }
 
     int skill = lua_tointeger(s, 2);
-    if (skill < CHAR_SKILL_BEGIN || skill >= CHAR_SKILL_END)
-    {
-        raiseScriptError(s, "luaChr_GiveExp called for nonexistent skill number %d.", skill);
-        return 0;
-    }
 
     int exp = lua_tointeger(s, 3);
 

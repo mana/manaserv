@@ -39,7 +39,7 @@ Being::Being(ThingType type):
     mHpRegenTimer(0)
 {
     Attribute attr = { 0, 0 };
-    mAttributes.resize(NB_BEING_ATTRIBUTES, attr);
+    mAttributes.resize(NB_BEING_ATTRIBUTES + CHAR_ATTR_NB, attr);
     // Initialize element resistance to 100 (normal damage).
     for (int i = BASE_ELEM_BEGIN; i < BASE_ELEM_END; ++i)
     {
