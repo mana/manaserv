@@ -70,7 +70,6 @@ static std::string getArgument(std::string &args)
         argument = args.substr(0);
         args = "";
     }
-
     return argument;
 }
 
@@ -741,10 +740,8 @@ static void handleReport(Character *player, std::string &args)
     // TODO: Send the report to a developer or something
 }
 
-static void handleAnnounce(Character *player, std::string &args)
+static void handleAnnounce(Character *player, std::string &msg)
 {
-    std::string msg = getArgument(args);
-
     if (msg == "")
     {
         say("Invalid number of arguments given.", player);
