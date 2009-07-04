@@ -299,6 +299,11 @@ class Character : public Being
         static int expForLevel(int level);
 
         /**
+         * Returns the level for a given exp
+         */
+        static int levelForExp(int exp);
+
+        /**
          * Tries to use a character point to increase a
          * basic attribute
          */

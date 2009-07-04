@@ -330,7 +330,7 @@ int Character::getAttribute(int attr) const
     }
     else
     {
-        return mExperience.find(attr)->second;
+        return  Character::levelForExp(mExperience.find(attr)->second);
     }
 }
 
@@ -402,6 +402,11 @@ void Character::flagAttribute(int attr)
 int Character::expForLevel(int level)
 {
     return int(pow(level, EXPCURVE_EXPONENT) * EXPCURVE_FACTOR);
+}
+
+int Character::levelForExp(int exp)
+{
+    return int(pow(float(exp) / EXPCURVE_FACTOR, 1.0f / EXPCURVE_EXPONENT));
 }
 
 void Character::receiveExperience(size_t skill, int experience)
