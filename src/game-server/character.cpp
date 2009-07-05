@@ -324,7 +324,7 @@ void Character::sendStatus()
 
 int Character::getAttribute(int attr) const
 {
-    if (attr <= CHAR_ATTR_NB)
+    if (attr <= CHAR_ATTR_END)
     {
         return Being::getAttribute(attr);
     }
