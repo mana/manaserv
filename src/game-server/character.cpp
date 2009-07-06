@@ -334,6 +334,19 @@ int Character::getAttribute(int attr) const
     }
 }
 
+int Character::getModifiedAttribute(int attr) const
+{
+    if (attr <= CHAR_ATTR_END)
+    {
+        return Being::getModifiedAttribute(attr);
+    }
+    else
+    {
+        //TODO: Find a way to modify skills
+        return  Character::levelForExp(mExperience.find(attr)->second);
+    }
+}
+
 void Character::modifiedAttribute(int attr)
 {
     if (attr >= CHAR_ATTR_BEGIN && attr < CHAR_ATTR_END)

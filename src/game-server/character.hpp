@@ -239,10 +239,16 @@ class Character : public Being
         void setMapId(int);
 
         /**
-         * Over loads being::getAttribute, character skills are 
+         * Over loads Being::getAttribute, character skills are 
          * treated as extend attributes
          */
-        int getAttribute(int) const;
+        int getAttribute(int) const; 
+
+        /**
+         * Over loads Being::getModifiedAttribute
+         * Charcter skills are treated as extend attributes
+         */
+        int getModifiedAttribute(int) const;
 
         /**
          * Updates base Being attributes.
