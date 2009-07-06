@@ -422,11 +422,12 @@ int Character::levelForExp(int exp)
     return int(pow(float(exp) / EXPCURVE_FACTOR, 1.0f / EXPCURVE_EXPONENT));
 }
 
-void Character::receiveExperience(size_t skill, int experience)
+void Character::receiveExperience(int skill, int experience)
 {
     if (skill >= CHAR_ATTR_END)
     {
         // add exp
+        int oldExp = mExperience[skill];
         long int newExp = mExperience[skill] + experience;
         if (newExp > INT_MAX) newExp = INT_MAX; // avoid integer overflow.
         if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
@@ -438,9 +439,8 @@ void Character::receiveExperience(size_t skill, int experience)
             skill, newExp);
 
         // check for skill levelup
-        while (newExp >= Character::expForLevel(getAttribute(skill) + 1))
+        if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
         {
-            setAttribute(skill, getAttribute(skill) + 1);
             modifiedAttribute(skill);
         }
 

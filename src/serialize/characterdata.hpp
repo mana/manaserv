@@ -94,7 +94,9 @@ void deserializeCharacterData(T &data, MessageIn &msg)
 
     for (int i = 0; i < skillSize; ++i)
     {
-        data.setExperience(msg.readShort(), msg.readLong());
+        int skill = msg.readShort();
+        int level = msg.readLong();
+        data.setExperience(skill,level);
     }
 
     data.setMapId(msg.readShort());

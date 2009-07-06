@@ -270,7 +270,7 @@ class Character : public Being
          * Gives a skill a specific amount of exp and checks if a levelup
          * occured.
          */
-        void receiveExperience(size_t skill, int experience);
+        void receiveExperience(int skill, int experience);
 
         int getSkillSize() const
         { return mExperience.size(); }
@@ -291,7 +291,7 @@ class Character : public Being
          * Sets total accumulated exp for skill
          */
         void setExperience(int skill, int value)
-        { mExperience[skill] = 0; receiveExperience(skill, value) ; }
+        { mExperience[skill] = 0; receiveExperience(skill, value); }
 
         /**
          * Shortcut to get being's health
