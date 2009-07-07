@@ -294,7 +294,7 @@ void Character::sendStatus()
          i_end = mModifiedAttributes.end(); i != i_end; ++i)
     {
         int attr = *i;
-        attribMsg.writeByte(attr);
+        attribMsg.writeShort(attr);
         attribMsg.writeShort(getAttribute(attr));
         attribMsg.writeShort(getModifiedAttribute(attr));
     }
