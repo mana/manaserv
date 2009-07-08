@@ -239,10 +239,10 @@ class Character : public Being
         void setMapId(int);
 
         /**
-         * Over loads Being::getAttribute, character skills are 
+         * Over loads Being::getAttribute, character skills are
          * treated as extend attributes
          */
-        int getAttribute(int) const; 
+        int getAttribute(int) const;
 
         /**
          * Over loads Being::getModifiedAttribute
@@ -277,7 +277,7 @@ class Character : public Being
 
         const std::map<int, int>::const_iterator getSkillBegin() const
         { return mExperience.begin(); }
- 
+
         const std::map<int, int>::const_iterator getSkillEnd() const
         { return mExperience.end(); }
 
@@ -377,6 +377,11 @@ class Character : public Being
          */
         void recalculateLevel();
 
+        /**
+         * Informs the client about his characters special charge status
+         */
+        void sendSpecialUpdate();
+
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
 
@@ -393,6 +398,8 @@ class Character : public Being
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
         std::map<int, Special*> mSpecials;
+        int mRechargePerSpecial;
+        bool mSpecialUpdateNeeded;
 
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mGender;       /**< Gender of the character. */

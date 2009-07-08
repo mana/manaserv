@@ -54,9 +54,19 @@ const AttackZone Character::UNARMED_ATTACK_ZONE = {ATTZONESHAPE_RECT, true, 48, 
 
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER),
-    mClient(NULL), mTransactionHandler(NULL), mDatabaseID(-1),
-    mGender(0), mHairStyle(0), mHairColor(0), mLevel(1), mLevelProgress(0),
-    mUpdateLevelProgress(false), mRecalculateLevel(true), mParty(0),
+    mClient(NULL),
+    mTransactionHandler(NULL),
+    mRechargePerSpecial(0),
+    mSpecialUpdateNeeded(false),
+    mDatabaseID(-1),
+    mGender(0),
+    mHairStyle(0),
+    mHairColor(0),
+    mLevel(1),
+    mLevelProgress(0),
+    mUpdateLevelProgress(false),
+    mRecalculateLevel(true),
+    mParty(0),
     mTransaction(TRANS_NONE)
 {
     Attribute attr = { 0, 0 };
@@ -103,11 +113,17 @@ void Character::update()
     }
     if (numRechargeNeeded > 0)
     {
-        int rechargePerSpecial = getModifiedAttribute(CHAR_ATTR_INTELLIGENCE) / numRechargeNeeded;
+        mRechargePerSpecial = getModifiedAttribute(CHAR_ATTR_INTELLIGENCE) / numRechargeNeeded;
         for (std::list<Special*>::iterator i = rechargeNeeded.begin(); i != rechargeNeeded.end(); i++)
         {
-            (*i)->currentMana += rechargePerSpecial;
+            (*i)->currentMana += mRechargePerSpecial;
         }
+    }
+
+    if (mSpecialUpdateNeeded)
+    {
+        sendSpecialUpdate();
+        mSpecialUpdateNeeded = false;
     }
 
     Being::update();
@@ -215,7 +231,28 @@ void Character::useSpecial(int id)
         script->execute();
     }
 
+    mSpecialUpdateNeeded = true;
     return;
+}
+
+void Character::sendSpecialUpdate()
+{
+    //GPMSG_SPECIAL_STATUS           = 0x0293, // { B specialID, L current, L max, L recharge }
+    for (std::map<int, Special*>::iterator i = mSpecials.begin();
+         i != mSpecials.end();
+         i++)
+    {
+
+        MessageOut msg(GPMSG_SPECIAL_STATUS );
+        msg.writeByte(i->first);
+        msg.writeLong(i->second->currentMana);
+        msg.writeLong(i->second->neededMana);
+        msg.writeLong(mRechargePerSpecial);
+        /* yes, the last one is redundant because it is the same for each
+           special, but I would like to keep the netcode flexible enough
+           to allow different recharge speed per special when necessary */
+        gameHandler->sendTo(this, msg);
+    }
 }
 
 int Character::getMapId() const
@@ -410,6 +447,10 @@ void Character::flagAttribute(int attr)
 {
     // Warn the player of this attribute modification.
     mModifiedAttributes.insert(attr);
+    if (attr = CHAR_ATTR_INTELLIGENCE)
+    {
+        mSpecialUpdateNeeded = true;
+    }
 }
 
 int Character::expForLevel(int level)
@@ -574,5 +615,6 @@ void Character::giveSpecial(int id)
 
         Special *s = new Special(neededMana);
         mSpecials[id] = s;
+        mSpecialUpdateNeeded = true;
     }
 }
