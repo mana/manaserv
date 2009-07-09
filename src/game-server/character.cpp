@@ -445,9 +445,9 @@ void Character::modifiedAttribute(int attr)
 
 void Character::flagAttribute(int attr)
 {
-    // Warn the player of this attribute modification.
+    // Inform the client of this attribute modification.
     mModifiedAttributes.insert(attr);
-    if (attr = CHAR_ATTR_INTELLIGENCE)
+    if (attr == CHAR_ATTR_INTELLIGENCE)
     {
         mSpecialUpdateNeeded = true;
     }
