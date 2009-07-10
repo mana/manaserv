@@ -330,6 +330,7 @@ MapContent::MapContent(Map *map)
   : last_bucket(0), zones(NULL)
 {
     buckets[0] = new ObjectBucket;
+    buckets[0]->allocate(); // Skip ID 0
     for (int i = 1; i < 256; ++i)
     {
         buckets[i] = NULL;
