@@ -370,4 +370,65 @@ SqLiteDataProvider::getLastId(void) const
     return (unsigned int)lastId;
 }
 
+bool SqLiteDataProvider::prepareSql(const std::string &sql)
+{
+    if (!mIsConnected)
+        return false;
+
+    LOG_DEBUG("Preparing SQL statement: "<<sql);
+
+    mRecordSet.clear();
+
+    if (sqlite3_prepare_v2(mDb, sql.c_str(), sql.size(), &mStmt, NULL) != SQLITE_OK)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+const RecordSet& SqLiteDataProvider::processSql()
+{
+    if (!mIsConnected) {
+        throw std::runtime_error("not connected to database");
+    }
+
+    int totalCols = sqlite3_column_count(mStmt);
+    Row fieldNames;
+
+    while (sqlite3_step(mStmt) == SQLITE_ROW)
+    {
+        Row r;
+        for (int col = 0; col < totalCols; ++col)
+        {
+            fieldNames.push_back(sqlite3_column_name(mStmt, col));
+            r.push_back((char*)sqlite3_column_text(mStmt, col));
+        }
+        // ensure we set column headers before adding a row
+        mRecordSet.setColumnHeaders(fieldNames);
+        mRecordSet.add(r);
+    }
+
+
+
+    sqlite3_finalize(mStmt);
+
+    return mRecordSet;
+}
+
+void SqLiteDataProvider::bindString(int place, const std::string &value)
+{
+    sqlite3_bind_text(mStmt, place, value.c_str(), value.size(), SQLITE_STATIC);
+}
+
+void SqLiteDataProvider::bindInteger(int place, int value)
+{
+    sqlite3_bind_int(mStmt, place, value);
+}
+
+void SqLiteDataProvider::bindFloat(int place, float value)
+{
+    sqlite3_bind_double(mStmt, place, value);
+}
+
 } // namespace dal

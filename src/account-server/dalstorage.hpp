@@ -395,24 +395,21 @@ class DALStorage
         operator=(const DALStorage& rhs);
 
         /**
-         * Gets an account by using a SQL query string.
+         * Gets an account from a prepared SQL statement
          *
-         * @param query the query for the account
-         *
-         * @return the account found by the query
+         * @return the account found
          */
-        Account *getAccountBySQL(const std::string &query);
+        Account *getAccountBySQL();
 
 
         /**
-         * Gets a character by character name.
+         * Gets a character from a prepared SQL statement
          *
-         * @param query the query for the character.
          * @param owner the account the character is in.
          *
          * @return the character found by the query.
          */
-        Character *getCharacterBySQL(const std::string &query, Account *owner);
+        Character *getCharacterBySQL(Account *owner);
 
         /**
          * Synchronizes the base data in the connected SQL database with the xml

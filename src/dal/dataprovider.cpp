@@ -71,7 +71,7 @@ DataProvider::getDbName(void)
     return mDbName;
 }
 
-
+/*
 std::string& DataProvider::escapeSQL(std::string &sql)
 {
     size_t pos = 0;
@@ -86,5 +86,6 @@ std::string& DataProvider::escapeSQL(std::string &sql)
 
     return sql;
 }
+*/
 
 } // namespace dal

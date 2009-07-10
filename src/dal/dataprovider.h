@@ -178,12 +178,37 @@ class DataProvider
         getLastId(void) const = 0;
 
         /**
-         * Takes a SQL snippet and escapes special caharacters like ' to prevent
-         * SQL injection attacks.
-         *
-         * @param sql SQL Snippet to escape.
+         * Prepare SQL statement
          */
-        std::string& escapeSQL(std::string &sql);
+        virtual bool prepareSql(const std::string &sql) = 0;
+
+        /**
+         * Process SQL statement
+         * SQL statement needs to be prepared and parameters binded before
+         * calling this function
+         */
+        virtual const RecordSet& processSql() = 0;
+
+        /**
+         * Bind String
+         * @param place - which parameter to bind to
+         * @param value - the string to bind
+         */
+        virtual void bindString(int place, const std::string &value) = 0;
+
+        /**
+         * Bind Integer
+         * @param place - which parameter to bind to
+         * @param value - the integer to bind
+         */
+        virtual void bindInteger(int place, int value) = 0;
+
+        /**
+         * Bind Float
+         * @param place - which parameter to bind to
+         * @param value - the float to bind
+         */
+        virtual void bindFloat(int place, float value) = 0;
 
     protected:
         std::string mDbName;  /**< the database name */

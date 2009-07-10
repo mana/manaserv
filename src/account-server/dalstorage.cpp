@@ -117,10 +117,11 @@ void DALStorage::close()
     mDb->disconnect();
 }
 
-Account *DALStorage::getAccountBySQL(const std::string &query)
+Account *DALStorage::getAccountBySQL()
 {
     try {
-        const dal::RecordSet &accountInfo = mDb->execSql(query);
+//        const dal::RecordSet &accountInfo = mDb->execSql(query);
+        const dal::RecordSet &accountInfo = mDb->processSql();
 
         // if the account is not even in the database then
         // we have no choice but to return nothing.
@@ -204,8 +205,13 @@ Account *DALStorage::getAccountBySQL(const std::string &query)
 Account *DALStorage::getAccount(const std::string &userName)
 {
     std::ostringstream sql;
-    sql << "select * from " << ACCOUNTS_TBL_NAME << " where username = \"" << userName << "\";";
-    return getAccountBySQL(sql.str());
+//    sql << "select * from " << ACCOUNTS_TBL_NAME << " where username = \"" << userName << "\";";
+    sql << "SELECT * FROM " << ACCOUNTS_TBL_NAME << " WHERE username = ?";
+    if (mDb->prepareSql(sql.str()))
+    {
+        mDb->bindString(1, userName);
+    }
+    return getAccountBySQL();
 }
 
 /**
@@ -214,11 +220,16 @@ Account *DALStorage::getAccount(const std::string &userName)
 Account *DALStorage::getAccount(int accountID)
 {
     std::ostringstream sql;
-    sql << "select * from " << ACCOUNTS_TBL_NAME << " where id = '" << accountID << "';";
-    return getAccountBySQL(sql.str());
+//    sql << "select * from " << ACCOUNTS_TBL_NAME << " where id = '" << accountID << "';";
+    sql << "SELECT * FROM " << ACCOUNTS_TBL_NAME << " WHERE id = ?";
+    if (mDb->prepareSql(sql.str()))
+    {
+        mDb->bindInteger(1, accountID);
+    }
+    return getAccountBySQL();
 }
 
-Character *DALStorage::getCharacterBySQL(const std::string &query, Account *owner)
+Character *DALStorage::getCharacterBySQL(Account *owner)
 {
     Character *character;
 
@@ -227,7 +238,8 @@ Character *DALStorage::getCharacterBySQL(const std::string &query, Account *owne
     string_to< unsigned > toUint;
 
     try {
-        const dal::RecordSet &charInfo = mDb->execSql(query);
+//        const dal::RecordSet &charInfo = mDb->execSql(query);
+        const dal::RecordSet &charInfo = mDb->processSql();
 
         // if the character is not even in the database then
         // we have no choice but to return nothing.
@@ -366,15 +378,24 @@ Character *DALStorage::getCharacterBySQL(const std::string &query, Account *owne
 Character *DALStorage::getCharacter(int id, Account *owner)
 {
     std::ostringstream sql;
-    sql << "select * from " << CHARACTERS_TBL_NAME << " where id = '" << id << "';";
-    return getCharacterBySQL(sql.str(), owner);
+//    sql << "select * from " << CHARACTERS_TBL_NAME << " where id = '" << id << "';";
+    sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE id = ?";
+    if (mDb->prepareSql(sql.str()))
+    {
+        mDb->bindInteger(1, id);
+    }
+    return getCharacterBySQL(owner);
 }
 
 Character *DALStorage::getCharacter(const std::string &name)
 {
     std::ostringstream sql;
-    sql << "select * from " << CHARACTERS_TBL_NAME << " where name = '" << name << "';";
-    return getCharacterBySQL(sql.str(), NULL);
+    sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
+    if (mDb->prepareSql(sql.str()))
+    {
+        mDb->bindString(1, name);
+    }
+    return getCharacterBySQL(NULL);
 }
 
 #if 0
@@ -416,9 +437,17 @@ bool DALStorage::doesUserNameExist(const std::string &name)
 {
     try {
         std::ostringstream sql;
-        sql << "select count(username) from " << ACCOUNTS_TBL_NAME
-            << " where username = \"" << name << "\";";
-        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
+//        sql << "select count(username) from " << ACCOUNTS_TBL_NAME
+//            << " where username = \"" << name << "\";";
+//        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
+        sql << "SELECT COUNT(username) FROM " << ACCOUNTS_TBL_NAME
+            << " WHERE username = ?";
+
+        if (mDb->prepareSql(sql.str()))
+        {
+            mDb->bindString(1, name);
+        }
+        const dal::RecordSet &accountInfo = mDb->processSql();
 
         std::istringstream ssStream(accountInfo(0, 0));
         unsigned int iReturn = 1;
@@ -440,9 +469,16 @@ bool DALStorage::doesEmailAddressExist(const std::string &email)
 {
     try {
         std::ostringstream sql;
-        sql << "select count(email) from " << ACCOUNTS_TBL_NAME
-            << " where upper(email) = upper(\"" << email << "\");";
-        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
+//        sql << "select count(email) from " << ACCOUNTS_TBL_NAME
+//            << " where upper(email) = upper(\"" << email << "\");";
+//        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
+        sql << "SELECT COUNT(email) FROM " << ACCOUNTS_TBL_NAME
+            << " WHERE UPPER(email) = UPPER(?)";
+        if (mDb->prepareSql(sql.str()))
+        {
+            mDb->bindString(1, email);
+        }
+        const dal::RecordSet &accountInfo = mDb->processSql();
 
         std::istringstream ssStream(accountInfo(0, 0));
         unsigned int iReturn = 1;
@@ -464,9 +500,15 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
 {
     try {
         std::ostringstream sql;
-        sql << "select count(name) from " << CHARACTERS_TBL_NAME
-            << " where name = \"" << name << "\";";
-        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
+//        sql << "select count(name) from " << CHARACTERS_TBL_NAME
+//            << " where name = \"" << name << "\";";
+//        const dal::RecordSet &accountInfo = mDb->execSql(sql.str());
+        sql << "SELECT COUNT(name) FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
+        if (mDb->prepareSql(sql.str()))
+        {
+            mDb->bindString(1, name);
+        }
+        const dal::RecordSet &accountInfo = mDb->processSql();
 
         std::istringstream ssStream(accountInfo(0, 0));
         int iReturn = 1;
@@ -537,7 +579,7 @@ bool DALStorage::updateCharacter(Character *character,
     try
     {
         std::map<int, int>::const_iterator skill_it;
-        for (skill_it = character->getSkillBegin(); 
+        for (skill_it = character->getSkillBegin();
              skill_it != character->getSkillEnd(); skill_it++)
         {
             updateExperience(character->getDatabaseID(), skill_it->first, skill_it->second);
@@ -659,17 +701,29 @@ void DALStorage::addAccount(Account *account)
     try
     {
         // insert the account.
-        std::ostringstream sql1;
-        sql1 << "insert into " << ACCOUNTS_TBL_NAME
+        std::ostringstream sql;
+        sql << "insert into " << ACCOUNTS_TBL_NAME
              << " (username, password, email, level, banned, registration, lastlogin)"
-             << " values (\""
-             << account->getName() << "\", \""
-             << account->getPassword() << "\", \""
-             << account->getEmail() << "\", "
-             << account->getLevel() << ", 0, "
+//             << " values (\""
+//             << account->getName() << "\", \""
+//             << account->getPassword() << "\", \""
+//             << account->getEmail() << "\", "
+//             << account->getLevel() << ", 0, "
+//             << account->getRegistrationDate() << ", "
+//             << account->getLastLogin() << ");";
+//        mDb->execSql(sql1.str());
+            << " VALUES (?, ?, ?, " << account->getLevel() << ", 0, "
              << account->getRegistrationDate() << ", "
              << account->getLastLogin() << ");";
-        mDb->execSql(sql1.str());
+
+        if (mDb->prepareSql(sql.str()))
+        {
+            mDb->bindString(1, account->getName());
+            mDb->bindString(2, account->getPassword());
+            mDb->bindString(3, account->getEmail());
+        }
+
+        mDb->processSql();
         account->setID(mDb->getLastId());
 
         mDb->commitTransaction();
@@ -927,15 +981,25 @@ void DALStorage::addGuild(Guild* guild)
 {
     std::ostringstream insertSql;
     insertSql << "insert into " << GUILDS_TBL_NAME
-        << " (name) "
-        << " values (\""
-        << guild->getName() << "\");";
-    mDb->execSql(insertSql.str());
+        << " (name) VALUES (?)";
+    if (mDb->prepareSql(insertSql.str()))
+    {
+        mDb->bindString(1, guild->getName());
+    }
+    //mDb->execSql(insertSql.str());
+    mDb->processSql();
 
     std::ostringstream selectSql;
-    selectSql << "select id from " << GUILDS_TBL_NAME
-        << " where name = \"" << guild->getName() << "\";";
-    const dal::RecordSet& guildInfo = mDb->execSql(selectSql.str());
+    selectSql << "SELECT id FROM " << GUILDS_TBL_NAME
+        << " WHERE name = ?";
+
+    if (mDb->prepareSql(selectSql.str()))
+    {
+        mDb->bindString(1, guild->getName());
+    }
+    //const dal::RecordSet& guildInfo = mDb->execSql(selectSql.str());
+    const dal::RecordSet& guildInfo = mDb->processSql();
+
     string_to<unsigned int> toUint;
     unsigned id = toUint(guildInfo(0, 0));
     guild->setId(id);
@@ -1095,9 +1159,16 @@ std::string DALStorage::getQuestVar(int id, const std::string &name)
     {
         std::ostringstream query;
         query << "select value from " << QUESTS_TBL_NAME
-              << " where owner_id = '" << id << "' and name = '"
-              << name << "';";
-        const dal::RecordSet &info = mDb->execSql(query.str());
+//              << " where owner_id = '" << id << "' and name = '"
+//              << name << "';";
+//        const dal::RecordSet &info = mDb->execSql(query.str());
+                << " WHERE owner_id = ? AND name = ?";
+        if (mDb->prepareSql(query.str()))
+        {
+            mDb->bindInteger(1, id);
+            mDb->bindString(2, name);
+        }
+        const dal::RecordSet &info = mDb->processSql();
 
         if (!info.isEmpty()) return info(0, 0);
     }
@@ -1392,9 +1463,15 @@ void DALStorage::storeLetter(Letter *letter)
             << letter->getReceiver()->getDatabaseID() << ", "
             << letter->getExpiry() << ", "
             << time(NULL) << ", "
-            << "'" << letter->getContents() << "' )";
+//            << "'" << letter->getContents() << "' )";
+            << "?)";
+        if (mDb->prepareSql(sql.str()))
+        {
+            mDb->bindString(1, letter->getContents());
+        }
 
-        mDb->execSql(sql.str());
+        mDb->processSql();
+//        mDb->execSql(sql.str());
         letter->setId(mDb->getLastId());
 
         // TODO: store attachments in the database
@@ -1410,16 +1487,22 @@ void DALStorage::storeLetter(Letter *letter)
             << "       letter_type     = '" << letter->getType() << "', "
             << "       expiration_date = '" << letter->getExpiry() << "', "
             << "       sending_date    = '" << time(NULL) << "', "
-            << "       letter_text     = '" << letter->getContents() << "' "
+//            << "       letter_text     = '" << letter->getContents() << "' "
+            << "       letter_text = ? "
             << " WHERE letter_id       = '" << letter->getId() << "'";
 
-        mDb->execSql(sql.str());
+        if (mDb->prepareSql(sql.str()))
+        {
+            mDb->bindString(1, letter->getContents());
+        }
+        mDb->processSql();
+        //mDb->execSql(sql.str());
 
         if (mDb->getModifiedRows() == 0)
         {
             // this should never happen...
-            LOG_ERROR("(DALStorage::storePost) trying to update nonexsistant letter");
-            throw "(DALStorage::storePost) trying to update nonexsistant letter";
+            LOG_ERROR("(DALStorage::storePost) trying to update nonexistant letter");
+            throw "(DALStorage::storePost) trying to update nonexistant letter";
         }
 
         // TODO: update attachments in the database
@@ -1561,25 +1644,42 @@ void DALStorage::SyncDatabase(void)
             {
                 std::ostringstream sql;
                 sql << "UPDATE " << ITEMS_TBL_NAME
-                    << " SET name = '" << mDb->escapeSQL(name) << "', "
-                    << "     description = '" << mDb->escapeSQL(desc) << "', "
+//                    << " SET name = '" << mDb->escapeSQL(name) << "', "
+                    << " SET name = ?, "
+//                    << "     description = '" << mDb->escapeSQL(desc) << "', "
+                    << "     description = ?, "
                     << "     image = '" << image << "', "
                     << "     weight = " << weight << ", "
                     << "     itemtype = '" << type << "', "
-                    << "     effect = '" << mDb->escapeSQL(eff) << "', "
+//                    << "     effect = '" << mDb->escapeSQL(eff) << "', "
+                    << "     effect = ?, "
                     << "     dyestring = '" << dye << "' "
                     << " WHERE id = " << id;
 
-                mDb->execSql(sql.str());
+//                mDb->execSql(sql.str());
+                if (mDb->prepareSql(sql.str()))
+                {
+                    mDb->bindString(1, name);
+                    mDb->bindString(2, desc);
+                    mDb->bindString(3, eff);
+                }
+                mDb->processSql();
                 if (mDb->getModifiedRows() == 0)
                 {
                     sql.clear();
                     sql.str("");
                     sql << "INSERT INTO " << ITEMS_TBL_NAME
-                        << "  VALUES ( " << id << ", '" << name << "', '"
-                        << desc << "', '" << image << "', " << weight << ", '"
-                        << type << "', '" << eff << "', '" << dye << "' )";
-                    mDb->execSql(sql.str());
+                        << "  VALUES ( " << id << ", ?, ?, '"
+                        << image << "', " << weight << ", '"
+                        << type << "', ?, '" << dye << "' )";
+                    //mDb->execSql(sql.str());
+                    if (mDb->prepareSql(sql.str()))
+                    {
+                        mDb->bindString(1, name);
+                        mDb->bindString(2, desc);
+                        mDb->bindString(3, eff);
+                    }
+                    mDb->processSql();
                 }
                 itmCount++;
             }
@@ -1637,9 +1737,17 @@ void DALStorage::addTransaction(const Transaction &trans)
     {
         std::stringstream sql;
         sql << "INSERT INTO " << TRANSACTION_TBL_NAME
-            << " VALUES (NULL, " << trans.mCharacterId << ", " << trans.mAction
-            << ", '" << trans.mMessage << "', " << time(NULL) << ")";
-        mDb->execSql(sql.str());
+            << " VALUES (NULL, " << trans.mCharacterId << ", "
+            << trans.mAction << ", "
+            << "?, "
+            << time(NULL) << ")";
+//            << ", '" << trans.mMessage << "', " << time(NULL) << ")";
+//        mDb->execSql(sql.str());
+        if (mDb->prepareSql(sql.str()))
+        {
+            mDb->bindString(1, trans.mMessage);
+        }
+        mDb->processSql();
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {

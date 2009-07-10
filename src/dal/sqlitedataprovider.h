@@ -146,6 +146,39 @@ class SqLiteDataProvider: public DataProvider
         const unsigned int
         getLastId(void) const;
 
+        /**
+         * Prepare SQL statement
+         */
+        bool prepareSql(const std::string &sql);
+
+        /**
+         * Process SQL statement
+         * SQL statement needs to be prepared and parameters binded before
+         * calling this function
+         */
+        const RecordSet& processSql();
+
+        /**
+         * Bind String
+         * @param place - which parameter to bind to
+         * @param value - the string to bind
+         */
+        void bindString(int place, const std::string &value);
+
+        /**
+         * Bind Integer
+         * @param place - which parameter to bind to
+         * @param value - the integer to bind
+         */
+        void bindInteger(int place, int value);
+
+        /**
+         * Bind Float
+         * @param place - which parameter to bind to
+         * @param value - the float to bind
+         */
+        void bindFloat(int place, float value);
+
     private:
 
         /** defines the name of the database config parameter */
@@ -162,7 +195,8 @@ class SqLiteDataProvider: public DataProvider
         const bool
         inTransaction(void) const;
 
-        sqlite3* mDb; /**< the handle to the database connection */
+        sqlite3 *mDb; /**< the handle to the database connection */
+        sqlite3_stmt *mStmt; /**< the prepared statement to process */
 };
 
 
