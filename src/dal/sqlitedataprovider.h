@@ -159,25 +159,18 @@ class SqLiteDataProvider: public DataProvider
         const RecordSet& processSql();
 
         /**
-         * Bind String
+         * Bind Value (String)
          * @param place - which parameter to bind to
          * @param value - the string to bind
          */
-        void bindString(int place, const std::string &value);
+        void bindValue(int place, const std::string &value);
 
         /**
-         * Bind Integer
+         * Bind Value (Integer)
          * @param place - which parameter to bind to
          * @param value - the integer to bind
          */
-        void bindInteger(int place, int value);
-
-        /**
-         * Bind Float
-         * @param place - which parameter to bind to
-         * @param value - the float to bind
-         */
-        void bindFloat(int place, float value);
+        void bindValue(int place, int value);
 
     private:
 

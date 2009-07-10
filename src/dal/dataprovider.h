@@ -190,25 +190,18 @@ class DataProvider
         virtual const RecordSet& processSql() = 0;
 
         /**
-         * Bind String
+         * Bind Value (String)
          * @param place - which parameter to bind to
          * @param value - the string to bind
          */
-        virtual void bindString(int place, const std::string &value) = 0;
+        virtual void bindValue(int place, const std::string &value) = 0;
 
         /**
-         * Bind Integer
+         * Bind Value (Integer)
          * @param place - which parameter to bind to
          * @param value - the integer to bind
          */
-        virtual void bindInteger(int place, int value) = 0;
-
-        /**
-         * Bind Float
-         * @param place - which parameter to bind to
-         * @param value - the float to bind
-         */
-        virtual void bindFloat(int place, float value) = 0;
+        virtual void bindValue(int place, int value) = 0;
 
     protected:
         std::string mDbName;  /**< the database name */

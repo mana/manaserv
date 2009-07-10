@@ -416,19 +416,14 @@ const RecordSet& SqLiteDataProvider::processSql()
     return mRecordSet;
 }
 
-void SqLiteDataProvider::bindString(int place, const std::string &value)
+void SqLiteDataProvider::bindValue(int place, const std::string &value)
 {
     sqlite3_bind_text(mStmt, place, value.c_str(), value.size(), SQLITE_STATIC);
 }
 
-void SqLiteDataProvider::bindInteger(int place, int value)
+void SqLiteDataProvider::bindValue(int place, int value)
 {
     sqlite3_bind_int(mStmt, place, value);
-}
-
-void SqLiteDataProvider::bindFloat(int place, float value)
-{
-    sqlite3_bind_double(mStmt, place, value);
 }
 
 } // namespace dal

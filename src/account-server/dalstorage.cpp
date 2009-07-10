@@ -209,7 +209,7 @@ Account *DALStorage::getAccount(const std::string &userName)
     sql << "SELECT * FROM " << ACCOUNTS_TBL_NAME << " WHERE username = ?";
     if (mDb->prepareSql(sql.str()))
     {
-        mDb->bindString(1, userName);
+        mDb->bindValue(1, userName);
     }
     return getAccountBySQL();
 }
@@ -224,7 +224,7 @@ Account *DALStorage::getAccount(int accountID)
     sql << "SELECT * FROM " << ACCOUNTS_TBL_NAME << " WHERE id = ?";
     if (mDb->prepareSql(sql.str()))
     {
-        mDb->bindInteger(1, accountID);
+        mDb->bindValue(1, accountID);
     }
     return getAccountBySQL();
 }
@@ -382,7 +382,7 @@ Character *DALStorage::getCharacter(int id, Account *owner)
     sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE id = ?";
     if (mDb->prepareSql(sql.str()))
     {
-        mDb->bindInteger(1, id);
+        mDb->bindValue(1, id);
     }
     return getCharacterBySQL(owner);
 }
@@ -393,7 +393,7 @@ Character *DALStorage::getCharacter(const std::string &name)
     sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
     if (mDb->prepareSql(sql.str()))
     {
-        mDb->bindString(1, name);
+        mDb->bindValue(1, name);
     }
     return getCharacterBySQL(NULL);
 }
@@ -445,7 +445,7 @@ bool DALStorage::doesUserNameExist(const std::string &name)
 
         if (mDb->prepareSql(sql.str()))
         {
-            mDb->bindString(1, name);
+            mDb->bindValue(1, name);
         }
         const dal::RecordSet &accountInfo = mDb->processSql();
 
@@ -476,7 +476,7 @@ bool DALStorage::doesEmailAddressExist(const std::string &email)
             << " WHERE UPPER(email) = UPPER(?)";
         if (mDb->prepareSql(sql.str()))
         {
-            mDb->bindString(1, email);
+            mDb->bindValue(1, email);
         }
         const dal::RecordSet &accountInfo = mDb->processSql();
 
@@ -506,7 +506,7 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
         sql << "SELECT COUNT(name) FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
         if (mDb->prepareSql(sql.str()))
         {
-            mDb->bindString(1, name);
+            mDb->bindValue(1, name);
         }
         const dal::RecordSet &accountInfo = mDb->processSql();
 
@@ -718,9 +718,9 @@ void DALStorage::addAccount(Account *account)
 
         if (mDb->prepareSql(sql.str()))
         {
-            mDb->bindString(1, account->getName());
-            mDb->bindString(2, account->getPassword());
-            mDb->bindString(3, account->getEmail());
+            mDb->bindValue(1, account->getName());
+            mDb->bindValue(2, account->getPassword());
+            mDb->bindValue(3, account->getEmail());
         }
 
         mDb->processSql();
@@ -984,7 +984,7 @@ void DALStorage::addGuild(Guild* guild)
         << " (name) VALUES (?)";
     if (mDb->prepareSql(insertSql.str()))
     {
-        mDb->bindString(1, guild->getName());
+        mDb->bindValue(1, guild->getName());
     }
     //mDb->execSql(insertSql.str());
     mDb->processSql();
@@ -995,7 +995,7 @@ void DALStorage::addGuild(Guild* guild)
 
     if (mDb->prepareSql(selectSql.str()))
     {
-        mDb->bindString(1, guild->getName());
+        mDb->bindValue(1, guild->getName());
     }
     //const dal::RecordSet& guildInfo = mDb->execSql(selectSql.str());
     const dal::RecordSet& guildInfo = mDb->processSql();
@@ -1165,8 +1165,8 @@ std::string DALStorage::getQuestVar(int id, const std::string &name)
                 << " WHERE owner_id = ? AND name = ?";
         if (mDb->prepareSql(query.str()))
         {
-            mDb->bindInteger(1, id);
-            mDb->bindString(2, name);
+            mDb->bindValue(1, id);
+            mDb->bindValue(2, name);
         }
         const dal::RecordSet &info = mDb->processSql();
 
@@ -1467,7 +1467,7 @@ void DALStorage::storeLetter(Letter *letter)
             << "?)";
         if (mDb->prepareSql(sql.str()))
         {
-            mDb->bindString(1, letter->getContents());
+            mDb->bindValue(1, letter->getContents());
         }
 
         mDb->processSql();
@@ -1493,7 +1493,7 @@ void DALStorage::storeLetter(Letter *letter)
 
         if (mDb->prepareSql(sql.str()))
         {
-            mDb->bindString(1, letter->getContents());
+            mDb->bindValue(1, letter->getContents());
         }
         mDb->processSql();
         //mDb->execSql(sql.str());
@@ -1659,9 +1659,9 @@ void DALStorage::SyncDatabase(void)
 //                mDb->execSql(sql.str());
                 if (mDb->prepareSql(sql.str()))
                 {
-                    mDb->bindString(1, name);
-                    mDb->bindString(2, desc);
-                    mDb->bindString(3, eff);
+                    mDb->bindValue(1, name);
+                    mDb->bindValue(2, desc);
+                    mDb->bindValue(3, eff);
                 }
                 mDb->processSql();
                 if (mDb->getModifiedRows() == 0)
@@ -1675,9 +1675,9 @@ void DALStorage::SyncDatabase(void)
                     //mDb->execSql(sql.str());
                     if (mDb->prepareSql(sql.str()))
                     {
-                        mDb->bindString(1, name);
-                        mDb->bindString(2, desc);
-                        mDb->bindString(3, eff);
+                        mDb->bindValue(1, name);
+                        mDb->bindValue(2, desc);
+                        mDb->bindValue(3, eff);
                     }
                     mDb->processSql();
                 }
@@ -1745,7 +1745,7 @@ void DALStorage::addTransaction(const Transaction &trans)
 //        mDb->execSql(sql.str());
         if (mDb->prepareSql(sql.str()))
         {
-            mDb->bindString(1, trans.mMessage);
+            mDb->bindValue(1, trans.mMessage);
         }
         mDb->processSql();
     }
