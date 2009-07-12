@@ -98,13 +98,31 @@ static int npc_choice(lua_State *s)
     msg.writeShort(p->getPublicID());
     for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
     {
-        const char *m = lua_tostring(s, i);
-        if (!m)
+        if (lua_isstring(s, i))
+        {
+            msg.writeString(lua_tostring(s, i));
+        }
+        else if (lua_istable(s, i))
+        {
+            lua_pushnil(s);
+            while (lua_next(s, i) != 0) {
+                if (lua_isstring(s, -1))
+                {
+                    msg.writeString(lua_tostring(s, -1));
+                }
+                else
+                {
+                    raiseScriptError(s, "npc_Choice called with incorrect parameters.");
+                    return 0;
+                }
+                lua_pop(s, 1);
+            }
+        }
+        else
         {
             raiseScriptError(s, "npc_Choice called with incorrect parameters.");
             return 0;
         }
-        msg.writeString(m);
     }
     gameHandler->sendTo(q, msg);
     return 0;
