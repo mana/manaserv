@@ -124,6 +124,7 @@ bool ItemClass::use(Being *itemUser)
     if (mType != ITEM_USABLE) return false;
     if (mScript)
     {
+       mScript->setMap(itemUser->getMap());
        mScript->prepare("use");
        mScript->push(itemUser);
        mScript->push(mDatabaseID);  // ID of the item
