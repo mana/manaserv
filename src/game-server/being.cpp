@@ -28,6 +28,8 @@
 #include "game-server/eventlistener.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/effect.hpp"
+#include "game-server/statuseffect.hpp"
+#include "game-server/statusmanager.hpp"
 #include "utils/logger.h"
 
 Being::Being(ThingType type):
@@ -294,6 +296,25 @@ int Being::getModifiedAttribute(int attr) const
     return res <= 0 ? 0 : res;
 }
 
+void Being::applyStatusEffect(int id, int timer)
+{
+     Status newStatus;
+     newStatus.status = StatusManager::getStatus(id);
+     newStatus.time = timer;
+     mStatus.push_back(newStatus);
+}
+
+bool Being::hasStatusEffect(int id)
+{
+    StatusEffects::iterator it = mStatus.begin();
+    while (it != mStatus.end())
+    {
+        if (it->status->getId() == id)
+            return true;
+    }
+    return false;
+}
+
 void Being::update()
 {
     int oldHP = getModifiedAttribute(BASE_ATTR_HP);
@@ -331,6 +352,23 @@ void Being::update()
             continue;
         }
         ++i;
+    }
+
+    // Update and run status effects
+    StatusEffects::iterator it = mStatus.begin();
+    while (it != mStatus.end())
+    {
+        it->time--;
+        if (it->time > 0 && mAction != DEAD)
+        {
+            it->status->tick(this, it->time);
+        }
+        else
+        {
+            it = mStatus.erase(it);
+            continue;
+        }
+        it++;
     }
 
     // Check if being died

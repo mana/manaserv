@@ -482,6 +482,42 @@ static int npc_trade(lua_State *s)
 }
 
 /**
+ * Applies a status effect with id to the being given for a amount of time
+ * tmw.being_apply_status(Being *being, int id, int time)
+ */
+
+static int being_apply_status(lua_State *s)
+{ 
+    if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
+    {
+        raiseScriptError(s, "being_apply_status called with incorrect parameters.");
+        return 0;
+    }
+    Being *being = getBeing(s, 1);
+    int id = lua_tointeger(s, 2);
+    int time = lua_tointeger(s, 3);
+    being->applyStatusEffect(id, time);
+    return 1;
+}
+
+/**
+ * Returns true if a being has a status effect
+ * tmw.being_has_status(Being *being, int id)
+ */
+static int being_has_status(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "being_has_status called with incorrect parameters.");
+        return 0;
+    }
+    Being *being = getBeing(s, 1);
+    lua_pushboolean(s, being->hasStatusEffect(lua_tointeger(s,2)));
+    return 1;
+}
+
+
+/**
  * Returns the Thing type of the given Being
  * tmw.being_type(Being *being)
  */
@@ -498,6 +534,7 @@ static int being_type(lua_State *s)
     lua_pushinteger(s, being->getType());
     return 1;
 }
+
 
 /**
  * Function for making a being walk to a position
@@ -1245,6 +1282,8 @@ LuaScript::LuaScript():
         { "chr_get_hair_color",     &chr_get_hair_color   },
         { "exp_for_level",          &exp_for_level        },
         { "monster_create",         &monster_create       },
+        { "being_apply_status",     &being_apply_status   },
+        { "being_has_status",       &being_has_status     },
         { "being_type",             &being_type           },
         { "being_walk",             &being_walk           },
         { "being_say",              &being_say            },

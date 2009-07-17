@@ -32,6 +32,7 @@
 class Being;
 class MapComposite;
 class AttackZone;
+class StatusEffect;
 
 /**
  * Beings and actors directions
@@ -69,6 +70,7 @@ struct Damage
     std::list<size_t> usedSkills;      /**< Skills used by source (needed for exp calculation) */
 };
 
+
 /**
  * Holds the base value of an attribute and the sum of all its modifiers.
  * While base + mod may be negative, the modified attribute is not.
@@ -94,6 +96,13 @@ struct AttributeModifier
     unsigned char level;
 };
 
+struct Status
+{
+    StatusEffect *status;
+    unsigned time;  // Number of ticks
+};
+
+typedef std::vector< Status > StatusEffects;
 typedef std::vector< AttributeModifier > AttributeModifiers;
 
 /**
@@ -270,6 +279,16 @@ class Being : public Actor
          */
         virtual void modifiedAttribute(int) {}
 
+        /**
+         * Sets a statuseffect on this being
+         */
+        void applyStatusEffect(int id, int time);
+
+        /**
+         * Returns true if the being has a status effect
+         */
+        bool hasStatusEffect(int id);
+
         /** Gets the name of the being. */
         const std::string &getName() const
         { return mName; }
@@ -314,6 +333,7 @@ class Being : public Actor
         std::string mName;
         Hits mHitsTaken; /**< List of punches taken since last update. */
         AttributeModifiers mModifiers; /**< Currently modified attributes. */
+        StatusEffects mStatus;
         int mHpRegenTimer; /**< Timer for hp regeneration. */
 };
 

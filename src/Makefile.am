@@ -137,6 +137,10 @@ tmwserv_game_SOURCES = \
 	game-server/spawnarea.cpp \
 	game-server/state.hpp \
 	game-server/state.cpp \
+	game-server/statuseffect.hpp \
+	game-server/statuseffect.cpp \
+	game-server/statusmanager.hpp \
+	game-server/statusmanager.cpp \
 	game-server/thing.hpp \
 	game-server/thing.cpp \
 	game-server/trade.hpp \

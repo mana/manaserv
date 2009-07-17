@@ -35,6 +35,7 @@
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/monstermanager.hpp"
+#include "game-server/statusmanager.hpp"
 #include "game-server/postman.hpp"
 #include "game-server/resourcemanager.hpp"
 #include "game-server/state.hpp"
@@ -55,6 +56,7 @@ using utils::Logger;
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 #define DEFAULT_MAPSDB_FILE     "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE "monsters.xml"
+#define DEFAULT_STATUSDB_FILE   "tmw-status-effect.xml"
 
 utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
 int worldTime = 0;              /**< Current world time in 100ms ticks */
@@ -150,6 +152,7 @@ void initialize()
     MapManager::initialize(DEFAULT_MAPSDB_FILE);
     ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
     MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
+    StatusManager::initialize(DEFAULT_STATUSDB_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -201,6 +204,7 @@ void deinitialize()
     MonsterManager::deinitialize();
     ItemManager::deinitialize();
     MapManager::deinitialize();
+    StatusManager::deinitialize();
 
     PHYSFS_deinit();
 }
