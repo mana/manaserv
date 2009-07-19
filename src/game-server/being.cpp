@@ -298,10 +298,18 @@ int Being::getModifiedAttribute(int attr) const
 
 void Being::applyStatusEffect(int id, int timer)
 {
-     Status newStatus;
-     newStatus.status = StatusManager::getStatus(id);
-     newStatus.time = timer;
-     mStatus.push_back(newStatus);
+    if (mAction == DEAD)
+        return;
+
+    Status newStatus;
+    newStatus.status = StatusManager::getStatus(id);
+    newStatus.time = timer;
+    mStatus[id] = newStatus;
+}
+
+void Being::removeStatusEffect(int id)
+{
+    setStatusEffectTime(id, 0);
 }
 
 bool Being::hasStatusEffect(int id)
@@ -309,10 +317,23 @@ bool Being::hasStatusEffect(int id)
     StatusEffects::iterator it = mStatus.begin();
     while (it != mStatus.end())
     {
-        if (it->status->getId() == id)
+        if (it->second.status->getId() == id)
             return true;
     }
     return false;
+}
+
+unsigned Being::getStatusEffectTime(int id)
+{
+    StatusEffects::iterator it = mStatus.find(id);
+    if (it != mStatus.end()) return it->second.time;
+    else return 0;
+}
+
+void Being::setStatusEffectTime(int id, int time)
+{
+    StatusEffects::iterator it = mStatus.find(id);
+    if (it != mStatus.end()) it->second.time = time;
 }
 
 void Being::update()
@@ -358,15 +379,15 @@ void Being::update()
     StatusEffects::iterator it = mStatus.begin();
     while (it != mStatus.end())
     {
-        it->time--;
-        if (it->time > 0 && mAction != DEAD)
+        it->second.time--;
+        if (it->second.time > 0 && mAction != DEAD)
         {
-            it->status->tick(this, it->time);
+            it->second.status->tick(this, it->second.time);
         }
-        else
+
+        if (it->second.time <= 0 || mAction == DEAD)
         {
-            it = mStatus.erase(it);
-            continue;
+            mStatus.erase(it);
         }
         it++;
     }

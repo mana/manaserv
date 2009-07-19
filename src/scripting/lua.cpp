@@ -501,7 +501,23 @@ static int being_apply_status(lua_State *s)
 }
 
 /**
- * Returns true if a being has a status effect
+ * Removes the given status effect
+ * tmw.being_remove_status(Being *being, int id)
+ */
+static int being_remove_status(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "being_remove_status called with incorrect parameters.");
+        return 0;
+    }
+    Being *being = getBeing(s, 1);
+    being->removeStatusEffect(lua_tointeger(s,2));
+    return 1;
+}
+
+/**
+ * Returns true if a being has the given status effect
  * tmw.being_has_status(Being *being, int id)
  */
 static int being_has_status(lua_State *s)
@@ -513,6 +529,38 @@ static int being_has_status(lua_State *s)
     }
     Being *being = getBeing(s, 1);
     lua_pushboolean(s, being->hasStatusEffect(lua_tointeger(s,2)));
+    return 1;
+}
+
+/**
+ * Returns the time left on the given status effect
+ * tmw.being_get_status_time(Being *being, int id)
+ */
+static int being_get_status_time(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "being_time_status called with incorrect parameters.");
+        return 0;
+    }
+    Being *being = getBeing(s, 1);
+    lua_pushinteger(s, being->getStatusEffectTime(lua_tointeger(s,2)));
+    return 1;
+}
+
+/**
+ * Sets the time left on the given status effect
+ * tmw.being_set_status_time(Being *being, int id)
+ */
+static int being_set_status_time(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
+    {
+        raiseScriptError(s, "being_time_status called with incorrect parameters.");
+        return 0;
+    }
+    Being *being = getBeing(s, 1);
+    being->setStatusEffectTime(lua_tointeger(s,2), lua_tointeger(s,3));
     return 1;
 }
 
@@ -1283,7 +1331,10 @@ LuaScript::LuaScript():
         { "exp_for_level",          &exp_for_level        },
         { "monster_create",         &monster_create       },
         { "being_apply_status",     &being_apply_status   },
+        { "being_remove_status",    &being_remove_status  },
         { "being_has_status",       &being_has_status     },
+        { "being_set_status_time",  &being_set_status_time},
+        { "being_get_status_time",  &being_get_status_time},
         { "being_type",             &being_type           },
         { "being_walk",             &being_walk           },
         { "being_say",              &being_say            },

@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 #include "limits.h"
 
 #include "defines.h"
@@ -102,7 +103,7 @@ struct Status
     unsigned time;  // Number of ticks
 };
 
-typedef std::vector< Status > StatusEffects;
+typedef std::map< int, Status > StatusEffects;
 typedef std::vector< AttributeModifier > AttributeModifiers;
 
 /**
@@ -285,9 +286,24 @@ class Being : public Actor
         void applyStatusEffect(int id, int time);
 
         /**
+         * Removes the status effect
+         */
+        void removeStatusEffect(int id);
+
+        /**
          * Returns true if the being has a status effect
          */
         bool hasStatusEffect(int id);
+
+        /**
+         * Returns the time of the status effect if in effect, or 0 if not
+         */
+        unsigned getStatusEffectTime(int id);
+
+        /**
+         * Changes the time of the status effect (if in effect)
+         */
+        void setStatusEffectTime(int id, int time);
 
         /** Gets the name of the being. */
         const std::string &getName() const
