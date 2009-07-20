@@ -34,7 +34,7 @@ namespace MapManager
     /**
      * Loads map reference file and prepares maps.
      */
-    void initialize(const std::string &mapReferenceFile);
+    unsigned int initialize(const std::string &mapReferenceFile);
 
     /**
      * Destroy loaded maps.
@@ -60,8 +60,9 @@ namespace MapManager
 
     /**
      * Sets the activity status of the map.
+     * @return true if the activation was successful.
      */
-    void raiseActive(int mapId);
+    bool raiseActive(int mapId);
 }
 
 #endif

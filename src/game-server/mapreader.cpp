@@ -40,7 +40,8 @@
 
 static std::vector< int > tilesetFirstGids;
 
-void MapReader::readMap(const std::string &filename, MapComposite *composite)
+bool MapReader::readMap(const std::string &filename, MapComposite
+*composite)
 {
     int fileSize;
     char *buffer = ResourceManager::loadFile(filename, fileSize);
@@ -48,7 +49,7 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
     if (buffer == NULL)
     {
         LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")");
-        return;
+        return false;
     }
 
     xmlDocPtr doc = NULL;
@@ -75,7 +76,7 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
     if (!doc)
     {
         LOG_ERROR("Error while parsing map file '" << filename << "'!");
-        return;
+        return false;
     }
 
     Map *map = NULL;
@@ -112,6 +113,7 @@ void MapReader::readMap(const std::string &filename, MapComposite *composite)
             s->execute();
         }
     }
+    return true;
 }
 
 Map* MapReader::readMap(xmlNodePtr node, const std::string &path,

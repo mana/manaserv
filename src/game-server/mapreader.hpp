@@ -1,6 +1,6 @@
 /*
  *  The Mana World
- *  Copyright 2004 The Mana World Development Team
+ *  Copyright 2004-2009 The Mana World Development Team
  *
  *  This file is part of The Mana World.
  *
@@ -39,8 +39,9 @@ class MapReader
     public:
         /**
          * Read an XML map from a file.
+         * @return true if it was successful.
          */
-        static void readMap(const std::string &filename,
+        static bool readMap(const std::string &filename,
                             MapComposite *composite);
 
     private:

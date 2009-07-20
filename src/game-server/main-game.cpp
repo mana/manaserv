@@ -149,7 +149,11 @@ void initialize()
     stringFilter = new StringFilter;
 
     ResourceManager::initialize();
-    MapManager::initialize(DEFAULT_MAPSDB_FILE);
+    if (MapManager::initialize(DEFAULT_MAPSDB_FILE) < 1)
+    {
+      LOG_FATAL("The Game Server can't find any valid/available maps.");
+      exit(2);
+    }
     ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
     MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
@@ -305,6 +309,9 @@ int main(int argc, char *argv[])
     // Initialize world timer
     worldTimer.start();
 
+    // Account connection lost flag
+    bool accountServerLost = false;
+
     while (running)
     {
         elapsedWorldTicks = worldTimer.poll();
@@ -327,6 +334,8 @@ int main(int argc, char *argv[])
 
             if (accountHandler->isConnected())
             {
+                accountServerLost = false;
+                
                 // Handle all messages that are in the message queues
                 accountHandler->process();
 
@@ -346,6 +355,16 @@ int main(int argc, char *argv[])
             }
             else
             {
+                // If the connection to the account server is lost.
+                // Every players have to be logged out
+                if (!accountServerLost)
+                {
+                    LOG_WARN("Lost connection to the server account. So disconnect players");
+                    gameHandler->disconnectAll();
+                    accountServerLost = true;
+                }
+
+                // Try to reconnect every 200 ticks
                 if (worldTime % 200 == 0)
                 {
                     accountHandler->start();
