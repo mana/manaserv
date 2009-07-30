@@ -110,6 +110,10 @@
 		<Unit filename="src/game-server/spawnarea.hpp" />
 		<Unit filename="src/game-server/state.cpp" />
 		<Unit filename="src/game-server/state.hpp" />
+		<Unit filename="src/game-server/statuseffect.cpp" />
+		<Unit filename="src/game-server/statuseffect.hpp" />
+		<Unit filename="src/game-server/statusmanager.cpp" />
+		<Unit filename="src/game-server/statusmanager.hpp" />
 		<Unit filename="src/game-server/thing.cpp" />
 		<Unit filename="src/game-server/thing.hpp" />
 		<Unit filename="src/game-server/trade.cpp" />
