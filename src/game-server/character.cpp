@@ -128,15 +128,6 @@ void Character::update()
     Being::update();
 }
 
-std::list<PATH_NODE> Character::findPath()
-{
-    mOld = getPosition();
-    int startX = mOld.x / 32, startY = mOld.y / 32;
-    int destX = mDst.x / 32, destY = mDst.y / 32;
-    Map *map = getMap()->getMap();
-    return map->findSimplePath(startX, startY, destX, destY, getWalkMask());
-}
-
 void Character::perform()
 {
     if (mAction != ATTACK || mTarget == NULL) return;

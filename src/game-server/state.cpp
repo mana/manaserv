@@ -267,15 +267,12 @@ static void informPlayer(MapComposite *map, Character *p)
         if (!wereInRange)
         {
             // o is now visible by p. Send enter message.
-            flags |= MOVING_POSITION;
-            flags |= MOVING_DESTINATION;
-
             MessageOut enterMsg(GPMSG_BEING_ENTER);
             enterMsg.writeByte(otype);
             enterMsg.writeShort(oid);
             enterMsg.writeByte(static_cast< Being *>(o)->getAction());
-            enterMsg.writeShort(opos.x); // aren't these two lines redundand considering
-            enterMsg.writeShort(opos.y); // that a MOVING_POSITION message is following?
+            enterMsg.writeShort(opos.x);
+            enterMsg.writeShort(opos.y);
             switch (otype)
             {
                 case OBJECT_CHARACTER:
@@ -308,22 +305,9 @@ static void informPlayer(MapComposite *map, Character *p)
             gameHandler->sendTo(p, enterMsg);
         }
 
-        /* At this point, either o has entered p's range, either o is
-           moving inside p's range. Report o's movements. */
-
-        Point odst = o->getDestination();
-        if (opos != odst)
+        if (opos != oold)
         {
             flags |= MOVING_POSITION;
-            if (oflags & UPDATEFLAG_NEW_DESTINATION)
-            {
-                flags |= MOVING_DESTINATION;
-            }
-        }
-        else
-        {
-            // No need to synchronize on the very last step.
-            flags |= MOVING_DESTINATION;
         }
 
         // Send move messages.
@@ -331,13 +315,9 @@ static void informPlayer(MapComposite *map, Character *p)
         moveMsg.writeByte(flags);
         if (flags & MOVING_POSITION)
         {
-            moveMsg.writeCoordinates(opos.x / 32, opos.y / 32);
+            moveMsg.writeShort(opos.x);
+            moveMsg.writeShort(opos.y);
             moveMsg.writeByte(o->getSpeed() / 10);
-        }
-        if (flags & MOVING_DESTINATION)
-        {
-            moveMsg.writeShort(odst.x);
-            moveMsg.writeShort(odst.y);
         }
     }
 

@@ -77,11 +77,6 @@ class Character : public Being
         void respawn();
 
         /**
-         * Returns the path to the character's current destination.
-         */
-        std::list<PATH_NODE> findPath();
-
-        /**
          * makes the character perform a special action
          * when it is allowed to do so
          */
