@@ -607,15 +607,16 @@ static void handleCharacterCreateMessage(AccountClient &computer, MessageIn &msg
             LOG_INFO("Character " << name << " was created for "
                      << acc->getName() << "'s account.");
 
+            storage->flush(acc); // flush changes
+
             // log transaction
             Transaction trans;
             trans.mCharacterId = newCharacter->getDatabaseID();
             trans.mAction = TRANS_CHAR_CREATE;
             trans.mMessage = acc->getName() + " created character ";
-            trans.mMessage.append(" called " + name);
+            trans.mMessage.append("called " + name);
             storage->addTransaction(trans);
 
-            storage->flush(acc); // flush changes
             reply.writeByte(ERRMSG_OK);
             computer.send(reply);
 
