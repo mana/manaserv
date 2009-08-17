@@ -1,13 +1,15 @@
 CREATE TABLE tmw_accounts
 (
-   id           INTEGER     PRIMARY KEY,
-   username     TEXT        NOT NULL UNIQUE,
-   password     TEXT        NOT NULL,
-   email        TEXT        NOT NULL,
-   level        INTEGER     NOT NULL,
-   banned       INTEGER     NOT NULL,
-   registration INTEGER     NOT NULL,
-   lastlogin    INTEGER     NOT NULL
+   id            INTEGER     PRIMARY KEY,
+   username      TEXT        NOT NULL UNIQUE,
+   password      TEXT        NOT NULL,
+   email         TEXT        NOT NULL,
+   level         INTEGER     NOT NULL,
+   banned        INTEGER     NOT NULL,
+   registration  INTEGER     NOT NULL,
+   lastlogin     INTEGER     NOT NULL,
+   authorization TEXT            NULL,
+   expiration    INTEGER         NULL
 );
 
 CREATE UNIQUE INDEX tmw_accounts_username ON tmw_accounts ( username );
@@ -142,7 +144,7 @@ CREATE TABLE tmw_world_states
 
 INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
 INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'3',  strftime('%s','now'));
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'4',  strftime('%s','now'));
 
 CREATE TABLE tmw_auctions
 (

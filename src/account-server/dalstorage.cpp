@@ -41,7 +41,7 @@
 
 // defines the supported db version
 #define DB_VERSION_PARAMETER "database_version"
-#define SUPPORTED_DB_VERSION "3"
+#define SUPPORTED_DB_VERSION "4"
 
 
 /**
