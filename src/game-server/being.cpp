@@ -19,7 +19,6 @@
  */
 
 #include <cassert>
-#include <cmath>
 
 #include "game-server/being.hpp"
 
@@ -242,11 +241,12 @@ void Being::performAttack(Being *target, unsigned range, const Damage &damage)
         getType() == OBJECT_CHARACTER)
         return;
 
-    // check if target is in range
+    // check if target is in range using the pythagorean theorem
     int distx = this->getPosition().x - target->getPosition().x;
     int disty = this->getPosition().y - target->getPosition().y;
-    int dist = std::sqrt(distx * distx + disty * disty); // pythagoras
-    if (range + target->getSize() < dist )
+    int distSquare = (distx * distx + disty * disty);
+    int maxDist = range + target->getSize();
+    if (maxDist * maxDist < distSquare)
         return;
 
     mTarget->damage(this, damage);
