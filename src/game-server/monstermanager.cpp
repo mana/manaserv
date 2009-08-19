@@ -24,7 +24,6 @@
 #include "game-server/monstermanager.hpp"
 
 #include "defines.h"
-#include "game-server/attackzone.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/monster.hpp"
 #include "game-server/resourcemanager.hpp"
@@ -222,17 +221,12 @@ void MonsterManager::reload()
             else if (xmlStrEqual(subnode->name, BAD_CAST "attack"))
             {
                 MonsterAttack *att = new MonsterAttack;
-                AttackZone attackZone;
                 att->id = XML::getProperty(subnode, "id", 0);
                 att->priority = XML::getProperty(subnode, "priority", 1);
                 att->damageFactor = XML::getFloatProperty(subnode, "damage-factor", 1.0f);
                 att->preDelay = XML::getProperty(subnode, "pre-delay", 1);
                 att->aftDelay = XML::getProperty(subnode, "aft-delay", 0);
-                attackZone.multiTarget = true;
-                attackZone.shape = ATTZONESHAPE_CONE;
-                attackZone.range = XML::getProperty(subnode, "range", 1);
-                attackZone.angle = XML::getProperty(subnode, "angle", 1);
-                att->attackZone = attackZone;
+                att->range = XML::getProperty(subnode, "range", 0);
                 std::string sElement = XML::getProperty(subnode, "element", "neutral");
                 att->element = elementFromString(sElement);
                 std::string sType = XML::getProperty(subnode, "type", "physical");

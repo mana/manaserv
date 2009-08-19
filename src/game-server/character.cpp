@@ -28,7 +28,6 @@
 #include "defines.h"
 #include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"
-#include "game-server/attackzone.hpp"
 #include "game-server/buysell.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/inventory.hpp"

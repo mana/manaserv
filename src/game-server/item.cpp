@@ -25,7 +25,6 @@
 
 #include "game-server/item.hpp"
 
-#include "game-server/attackzone.hpp"
 #include "game-server/being.hpp"
 #include "scripting/script.hpp"
 
