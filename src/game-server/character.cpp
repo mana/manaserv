@@ -158,13 +158,15 @@ void Character::perform()
         // weapon fighting
         const ItemModifiers &mods = ic->getModifiers();
         damage.element = mods.getValue(MOD_ELEMENT_TYPE);
-        performAttack(damage);
+        // todo: get attack range of weapon
+        // (weapon equipping has to be fixed first)
+        performAttack(mTarget, 64, damage);
     }
     else
     {
         // No-weapon fighting.
         damage.element = ELEMENT_NEUTRAL;
-        performAttack(damage);
+        performAttack(mTarget, 32, damage);
     }
 
 }

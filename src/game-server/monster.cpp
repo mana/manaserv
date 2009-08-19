@@ -115,14 +115,14 @@ void Monster::perform()
     {
         if (mAttackTime == mCurrentAttack->aftDelay)
         {
-            // Hard-coded values for now.
             Damage damage;
             damage.base = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN) * mCurrentAttack->damageFactor);
             damage.delta = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) * mCurrentAttack->damageFactor);
             damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
             damage.element = mCurrentAttack->element;
             damage.type = mCurrentAttack->type;
-            performAttack(damage);
+            // todo: get the attack range from monster DB
+            performAttack(mTarget, 64, damage);
         }
         if (!mAttackTime)
         {

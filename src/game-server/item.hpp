@@ -26,7 +26,6 @@
 
 #include "game-server/actor.hpp"
 
-class AttackZone;
 class Being;
 class Script;
 
@@ -154,7 +153,7 @@ class ItemClass
 {
     public:
         ItemClass(int id, ItemType type, Script *s = NULL)
-          : mScript(NULL), mDatabaseID(id), mType(type), mAttackZone(NULL)
+          : mScript(NULL), mDatabaseID(id), mType(type), mAttackRange(0)
         {}
 
         ~ItemClass();
@@ -244,15 +243,15 @@ class ItemClass
         { mScript = s; }
 
         /**
-         * Set attack zone (only needed when the item is a weapon)
+         * Set attack range (only needed when the item is a weapon)
          */
-        void setAttackZone(AttackZone* attackZone) { mAttackZone = attackZone; }
+        void setAttackRange(unsigned range) { mAttackRange = range; }
 
         /**
          * Gets attack zone of weapon (returns NULL for non-weapon items)
          */
-        const AttackZone *getAttackZone() const
-        { return mAttackZone ; }
+        const unsigned getAttackRange() const
+        { return mAttackRange ; }
 
 
     private:
@@ -268,7 +267,7 @@ class ItemClass
         unsigned short mMaxPerSlot;
 
         ItemModifiers mModifiers; /**< Item modifiers. */
-        AttackZone *mAttackZone;  /**< Attack zone when used as a weapon */
+        unsigned mAttackRange;  /**< Attack range when used as a weapon */
 };
 
 class Item : public Actor

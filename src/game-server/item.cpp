@@ -115,7 +115,6 @@ void ItemModifiers::cancelAttributes(Being *b) const
 
 ItemClass::~ItemClass()
 {
-    if (mAttackZone) delete mAttackZone;
     if (mScript) delete mScript;
 }
 
