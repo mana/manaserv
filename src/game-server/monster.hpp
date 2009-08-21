@@ -24,7 +24,6 @@
 #include <map>
 #include <vector>
 
-#include "game-server/attackzone.hpp"
 #include "game-server/being.hpp"
 #include "game-server/eventlistener.hpp"
 
@@ -52,9 +51,9 @@ struct MonsterAttack
     float damageFactor;
     int element;
     int type;
-    int preDelay;
-    int aftDelay;
-    AttackZone attackZone;
+    unsigned preDelay;
+    unsigned aftDelay;
+    unsigned range;
 };
 
 typedef std::vector< MonsterAttack *> MonsterAttacks;

@@ -115,14 +115,14 @@ void Monster::perform()
     {
         if (mAttackTime == mCurrentAttack->aftDelay)
         {
-            // Hard-coded values for now.
             Damage damage;
             damage.base = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN) * mCurrentAttack->damageFactor);
             damage.delta = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) * mCurrentAttack->damageFactor);
             damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
             damage.element = mCurrentAttack->element;
             damage.type = mCurrentAttack->type;
-            performAttack(damage);
+
+            performAttack(mTarget, mCurrentAttack->range, damage);
         }
         if (!mAttackTime)
         {
@@ -227,11 +227,11 @@ void Monster::update()
              i != allAttacks.end();
              i++)
         {
-            const int attackAngle = directionToAngle(bestAttackDirection);
-
-            if  (Collision::diskWithCircleSector(
-                bestAttackTarget->getPosition(), bestAttackTarget->getSize(),
-                getPosition(), (*i)->attackZone.range, (*i)->attackZone.angle, attackAngle))
+            int distx = this->getPosition().x - bestAttackTarget->getPosition().x;
+            int disty = this->getPosition().y - bestAttackTarget->getPosition().y;
+            int distSquare = (distx * distx + disty * disty);
+            int maxDist =  (*i)->range + bestAttackTarget->getSize();
+            if (maxDist * maxDist >= distSquare)
             {
                 prioritySum += (*i)->priority;
                 workingAttacks[prioritySum] = (*i);
@@ -243,6 +243,7 @@ void Monster::update()
         }
         else
         {
+            //prepare for using a random attack which can hit the enemy
             //stop movement
             setDestination(getPosition());
             //turn into direction of enemy

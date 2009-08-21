@@ -32,7 +32,6 @@
 
 class Being;
 class MapComposite;
-class AttackZone;
 class StatusEffect;
 
 /**
@@ -215,7 +214,7 @@ class Being : public Actor
         /**
          * Performs an attack.
          */
-        void performAttack(const Damage &);
+        void performAttack(Being *target, unsigned range, const Damage &damage);
 
         /**
          * Sets the current action.

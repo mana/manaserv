@@ -345,8 +345,6 @@ class Character : public Being
         static const int CORRECTIONPOINTS_PER_LEVELUP = 2;
         static const int CORRECTIONPOINTS_MAX = 10;
 
-        static const AttackZone UNARMED_ATTACK_ZONE;
-
         /**
          * Advances the character by one level;
          */

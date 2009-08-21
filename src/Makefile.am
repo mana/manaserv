@@ -90,8 +90,6 @@ tmwserv_game_SOURCES = \
 	game-server/accountconnection.cpp \
 	game-server/actor.hpp \
 	game-server/actor.cpp \
-	game-server/attackzone.hpp \
-	game-server/attackzone.cpp \
 	game-server/being.hpp \
 	game-server/being.cpp \
 	game-server/buysell.hpp \

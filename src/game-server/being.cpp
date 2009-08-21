@@ -23,7 +23,6 @@
 #include "game-server/being.hpp"
 
 #include "defines.h"
-#include "game-server/attackzone.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/mapcomposite.hpp"
@@ -233,17 +232,22 @@ int Being::directionToAngle(int direction)
     }
 }
 
-void Being::performAttack(const Damage &damage)
+void Being::performAttack(Being *target, unsigned range, const Damage &damage)
 {
-    if (!mTarget || mTarget == this || mTarget->getAction() == Being::DEAD || !mTarget->canFight())
+    // check target legality
+    if (!target || target == this || target->getAction() == Being::DEAD || !target->canFight())
             return;
-
-    if (getMap()->getPvP() == PVP_NONE && mTarget->getType() == OBJECT_CHARACTER &&
+    if (getMap()->getPvP() == PVP_NONE && target->getType() == OBJECT_CHARACTER &&
         getType() == OBJECT_CHARACTER)
         return;
 
-    LOG_DEBUG("Direction: " << getDirection() <<
-              " Target: " << mTarget->getName());
+    // check if target is in range using the pythagorean theorem
+    int distx = this->getPosition().x - target->getPosition().x;
+    int disty = this->getPosition().y - target->getPosition().y;
+    int distSquare = (distx * distx + disty * disty);
+    int maxDist = range + target->getSize();
+    if (maxDist * maxDist < distSquare)
+        return;
 
     mTarget->damage(this, damage);
     mActionTime += 1000; // set to 10 ticks wait time
