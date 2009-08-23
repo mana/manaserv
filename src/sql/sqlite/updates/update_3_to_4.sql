@@ -1,9 +1,7 @@
 
 -- add two columns to table tmw_accounts
-ALTER TABLE tmw_accounts ADD
-    authorization TEXT            NULL,
-    expiration    INTEGER         NULL
-;
+ALTER TABLE tmw_accounts ADD authorization TEXT NULL;
+ALTER TABLE tmw_accounts ADD expiration    INTEGER NULL;
 
 -- update the database version, and set date of update
 UPDATE tmw_world_states
