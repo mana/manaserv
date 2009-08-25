@@ -80,7 +80,7 @@ template <typename T> void pushSTLContainer(lua_State *s, const std::vector<T> &
     for (int key = 0; key < len; key++)
     {
         push(s, key+1);
-        push(s, container.at(key).c_str());
+        push(s, container.at(key));
         lua_settable(s, table);
     }
 }
@@ -96,8 +96,8 @@ template <typename Tkey, typename Tval> void pushSTLContainer(lua_State *s, cons
 
     for (int key = 1; key <= len; key++)
     {
-        push(s, i->first.c_str());
-        push(s, i->second.c_str());
+        push(s, i->first);
+        push(s, i->second);
         lua_settable(s, table);
         i++;
     }

@@ -487,7 +487,7 @@ static int npc_trade(lua_State *s)
  */
 
 static int being_apply_status(lua_State *s)
-{ 
+{
     if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2) || !lua_isnumber(s, 3))
     {
         raiseScriptError(s, "being_apply_status called with incorrect parameters.");
@@ -1204,35 +1204,44 @@ static int test_tableget(lua_State *s)
 {
 
     std::list<float> list;
-    std::vector<std::string> vector;
+    std::vector<std::string> svector;
+    std::vector<int> ivector;
     std::map<std::string, std::string> map;
     std::set<int> set;
 
-    LOG_INFO("Pushing List");
+    LOG_INFO("Pushing Float List");
     list.push_back(12.636);
     list.push_back(0.0000000045656);
     list.push_back(185645445634566.346);
     list.push_back(7835458.11);
     pushSTLContainer<float>(s, list);
 
-    LOG_INFO("Pushing Vector");
-    vector.push_back("All");
-    vector.push_back("your");
-    vector.push_back("base");
-    vector.push_back("are");
-    vector.push_back("belong");
-    vector.push_back("to");
-    vector.push_back("us!");
-    pushSTLContainer<std::string>(s, vector);
+    LOG_INFO("Pushing String Vector");
+    svector.push_back("All");
+    svector.push_back("your");
+    svector.push_back("base");
+    svector.push_back("are");
+    svector.push_back("belong");
+    svector.push_back("to");
+    svector.push_back("us!");
+    pushSTLContainer<std::string>(s, svector);
 
-    LOG_INFO("Pushing Map");
+    LOG_INFO("Pushing Integer Vector");
+    ivector.resize(10);
+    for (int i = 1; i < 10; i++)
+    {
+        ivector[i-1] = i * i;
+    }
+    pushSTLContainer<int>(s, ivector);
+
+    LOG_INFO("Pushing String/String Map");
     map["Apple"] = "red";
     map["Banana"] = "yellow";
     map["Lime"] = "green";
     map["Plum"] = "blue";
     pushSTLContainer<std::string, std::string>(s, map);
 
-    LOG_INFO("Pushing Set");
+    LOG_INFO("Pushing Integer Set");
     set.insert(12);
     set.insert(8);
     set.insert(14);
@@ -1240,7 +1249,7 @@ static int test_tableget(lua_State *s)
     pushSTLContainer<int>(s, set);
 
 
-    return 4;
+    return 5;
 }
 
 /**
