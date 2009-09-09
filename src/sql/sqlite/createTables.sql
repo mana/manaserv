@@ -281,7 +281,7 @@ CREATE TABLE tmw_transactions
     time        INTEGER     NOT NULL,
     --
     FOREIGN KEY (char_id) REFERENCES tmw_characters(id),
-    FOREIGN KEY (action)  REFERENCES tmw_transaction_codes(id),
+    FOREIGN KEY (action)  REFERENCES tmw_transaction_codes(id)
 );
 
 CREATE INDEX tmw_transactions_char    ON tmw_transactions ( char_id );
