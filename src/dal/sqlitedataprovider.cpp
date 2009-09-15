@@ -402,7 +402,9 @@ const RecordSet& SqLiteDataProvider::processSql()
         for (int col = 0; col < totalCols; ++col)
         {
             fieldNames.push_back(sqlite3_column_name(mStmt, col));
-            r.push_back((char*)sqlite3_column_text(mStmt, col));
+            const unsigned char *txt = sqlite3_column_text(mStmt, col);
+            r.push_back(txt ? (char*)txt : "");
+
         }
         // ensure we set column headers before adding a row
         mRecordSet.setColumnHeaders(fieldNames);
