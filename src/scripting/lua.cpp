@@ -778,6 +778,31 @@ static int monster_create(lua_State *s)
 }
 
 /**
+ * tmw.monster_load_script(mob, scriptfilename)
+ * loads a LUA script given for mob
+ */
+static int monster_load_script(lua_State *s)
+{
+    Monster *m = static_cast< Monster* >(getBeing(s, 1));
+    if (!m)
+    {
+         raiseScriptError(s, "monster_load_script called for a nonexistance monster.");
+         return 0;
+    }
+
+    std::string scriptName(lua_tostring(s, 2));
+    if (scriptName == "")
+    {
+        raiseScriptError(s, "monster_load_script called with incorrect parameters.");
+        return 0;
+    }
+
+    m->loadScript(scriptName);
+    return 0;
+}
+
+
+/**
  * Callback for getting a quest variable. Starts a recovery and returns
  * immediatly, if the variable is not known yet.
  * tmw.chr_get_chest(character, string): nil or string
@@ -1339,6 +1364,7 @@ LuaScript::LuaScript():
         { "chr_get_hair_color",     &chr_get_hair_color   },
         { "exp_for_level",          &exp_for_level        },
         { "monster_create",         &monster_create       },
+        { "monster_load_script",    &monster_load_script  },
         { "being_apply_status",     &being_apply_status   },
         { "being_remove_status",    &being_remove_status  },
         { "being_has_status",       &being_has_status     },

@@ -23,11 +23,13 @@
 
 #include <map>
 #include <vector>
+#include <string>
 
 #include "game-server/being.hpp"
 #include "game-server/eventlistener.hpp"
 
 class ItemClass;
+class Script;
 
 /**
  * Structure containing an item class and its probability to be dropped
@@ -235,6 +237,11 @@ class Monster : public Being
         void perform();
 
         /**
+         * Loads a script file for this monster
+         */
+        void loadScript(std::string &scriptName);
+
+        /**
          *
          */
         virtual int getAttackType() const
@@ -275,6 +282,11 @@ class Monster : public Being
         int calculatePositionPriority(Point position, int targetPriority);
 
         MonsterClass *mSpecy;
+
+        /**
+         * Stores script for the monster, null if no script exist
+         */
+        Script *mScript;
 
         /** Count down till next random movement (temporary). */
         int mCountDown;

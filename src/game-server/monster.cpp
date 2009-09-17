@@ -24,8 +24,10 @@
 #include "game-server/character.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/item.hpp"
+#include "game-server/resourcemanager.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/state.hpp"
+#include "scripting/script.hpp"
 #include "utils/logger.h"
 
 #include <cmath>
@@ -60,6 +62,7 @@ static MonsterTargetEventDispatch monsterTargetEventDispatch;
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
+    mScript(NULL),
     mCountDown(0),
     mTargetListener(&monsterTargetEventDispatch),
     mOwner(NULL),
@@ -94,6 +97,10 @@ Monster::Monster(MonsterClass *specy):
 
 Monster::~Monster()
 {
+    // Remove the monster's script if it has one
+    if (mScript)
+        delete mScript;
+
     // Remove death listeners.
     for (std::map<Being *, int>::iterator i = mAnger.begin(),
          i_end = mAnger.end(); i != i_end; ++i)
@@ -151,6 +158,13 @@ void Monster::update()
             GameState::enqueueRemove(this);
         }
         return;
+    }
+    else if(mScript)
+    {
+        mScript->setMap(getMap());
+        mScript->prepare("update");
+        mScript->push(this);
+        mScript->execute();
     }
 
     if (mAction == ATTACK)
@@ -274,6 +288,25 @@ void Monster::update()
             }
         }
     }
+}
+
+void Monster::loadScript(std::string &scriptName)
+{
+    if (mScript)
+        return; // A script has already been loaded for this monster
+
+    std::stringstream filename;
+    filename << "scripts/monster/" << scriptName;
+    if (ResourceManager::exists(filename.str()))       // file exists!
+    {
+        LOG_INFO("Loading monster script: " << filename.str());
+        mScript = Script::create("lua");
+        mScript->loadFile(filename.str());
+    } else {
+        LOG_WARN("Could not find script file \"" << filename.str() << "\" for monster");
+    }
+
+
 }
 
 int Monster::calculatePositionPriority(Point position, int targetPriority)
