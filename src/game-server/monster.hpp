@@ -76,7 +76,8 @@ class MonsterClass
             mTrackRange(1),
             mStrollRange(0),
             mMutation(0),
-            mAttackDistance(0)
+            mAttackDistance(0),
+            mScript("")
         {}
 
         /**
@@ -163,6 +164,12 @@ class MonsterClass
         /** Returns all attacks of the monster. */
         const MonsterAttacks &getAttacks() const { return mAttacks; }
 
+        /** sets the script file for the monster */
+        void setScript(std::string& filename) { mScript = filename; }
+
+        /** Returns script filename */
+        std::string &getScript() { return mScript; }
+
         /**
          * Randomly selects a monster drop (may return NULL).
          */
@@ -182,6 +189,7 @@ class MonsterClass
         unsigned mMutation;
         unsigned mAttackDistance;
         MonsterAttacks mAttacks;
+        std::string mScript;
 };
 
 /**
@@ -284,7 +292,8 @@ class Monster : public Being
         MonsterClass *mSpecy;
 
         /**
-         * Stores script for the monster, null if no script exist
+         * Stores individual script for the monster, when NULL the script
+         * from mSpecy is used.
          */
         Script *mScript;
 

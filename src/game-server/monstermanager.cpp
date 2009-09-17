@@ -259,6 +259,12 @@ void MonsterManager::reload()
                 }
 
             }
+            else if (xmlStrEqual(subnode->name, BAD_CAST "script"))
+            {
+                xmlChar *filename = subnode->xmlChildrenNode->content;
+                std::string val = (char *)filename;
+                monster->setScript(val);
+            }
         }
 
         monster->setDrops(drops);

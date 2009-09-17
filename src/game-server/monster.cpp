@@ -93,6 +93,9 @@ Monster::Monster(MonsterClass *specy):
     mAttackPositions.push_back(AttackPosition(-dist, 0, DIRECTION_RIGHT));
     mAttackPositions.push_back(AttackPosition(0, dist, DIRECTION_DOWN));
     mAttackPositions.push_back(AttackPosition(0, -dist, DIRECTION_UP));
+
+    //load default script
+    loadScript(specy->getScript());
 }
 
 Monster::~Monster()
@@ -293,7 +296,19 @@ void Monster::update()
 void Monster::loadScript(std::string &scriptName)
 {
     if (mScript)
-        return; // A script has already been loaded for this monster
+    {
+        delete mScript;// A script has already been loaded for this monster
+    }
+
+    if (scriptName.length() == 0)
+    {
+        if (mScript)
+        {
+            delete mScript;
+            mScript = NULL;
+        }
+        return;
+    }
 
     std::stringstream filename;
     filename << "scripts/monster/" << scriptName;
