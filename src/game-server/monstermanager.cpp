@@ -227,6 +227,7 @@ void MonsterManager::reload()
                 att->preDelay = XML::getProperty(subnode, "pre-delay", 1);
                 att->aftDelay = XML::getProperty(subnode, "aft-delay", 0);
                 att->range = XML::getProperty(subnode, "range", 0);
+                att->scriptFunction = XML::getProperty(subnode, "script-function", "");
                 std::string sElement = XML::getProperty(subnode, "element", "neutral");
                 att->element = elementFromString(sElement);
                 std::string sType = XML::getProperty(subnode, "type", "physical");

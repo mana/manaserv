@@ -132,7 +132,19 @@ void Monster::perform()
             damage.element = mCurrentAttack->element;
             damage.type = mCurrentAttack->type;
 
-            performAttack(mTarget, mCurrentAttack->range, damage);
+            int hit = performAttack(mTarget, mCurrentAttack->range, damage);
+
+            if (! mCurrentAttack->scriptFunction.empty()
+                && mScript
+                && hit > -1)
+            {
+                mScript->setMap(getMap());
+                mScript->prepare(mCurrentAttack->scriptFunction);
+                mScript->push(this);
+                mScript->push(mTarget);
+                mScript->push(hit);
+                mScript->execute();
+            }
         }
         if (!mAttackTime)
         {

@@ -56,6 +56,7 @@ struct MonsterAttack
     unsigned preDelay;
     unsigned aftDelay;
     unsigned range;
+    std::string scriptFunction;
 };
 
 typedef std::vector< MonsterAttack *> MonsterAttacks;

@@ -213,8 +213,9 @@ class Being : public Actor
 
         /**
          * Performs an attack.
+         * Return Value: damage inflicted or -1 when illegal target
          */
-        void performAttack(Being *target, unsigned range, const Damage &damage);
+        int performAttack(Being *target, unsigned range, const Damage &damage);
 
         /**
          * Sets the current action.
