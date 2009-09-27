@@ -23,6 +23,7 @@
 #define _TMWSERV_EFFECT_H
 
 #include "game-server/actor.hpp"
+#include "game-server/being.hpp"
 
 class Effect : public Actor
 {
@@ -31,10 +32,14 @@ class Effect : public Actor
           : Actor(OBJECT_EFFECT)
           , mEffectId(id)
           , mHasBeenShown(false)
+          , mBeing(NULL)
         {}
 
         int getEffectId() const
         { return mEffectId; }
+
+        Being *getBeing() const
+        { return mBeing; }
 
         /**
          * Removes effect after it has been shown.
@@ -47,18 +52,33 @@ class Effect : public Actor
         void show()
         { mHasBeenShown = true; }
 
+
+        bool setBeing(Being *b)
+        {
+            if (b)
+            {
+                setPosition(b->getPosition());
+                mBeing = b;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
     private:
         int mEffectId;
         bool mHasBeenShown;
+        Being *mBeing;
 };
 
 
 namespace Effects
 {
     /**
-     * Convenience method to show an effect.
+     * Convenience methods to show an effect.
      */
     void show(int id, MapComposite *map, const Point &pos);
+    void show(int id, MapComposite *map, Being *b);
 
     // TODO: get this in sync with effects.xml
     enum {

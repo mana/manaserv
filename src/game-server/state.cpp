@@ -400,11 +400,20 @@ static void informPlayer(MapComposite *map, Character *p)
                     // Don't show old effects
                     if (!(oflags & UPDATEFLAG_NEW_ON_MAP))
                         break;
-                    MessageOut effectMsg(GPMSG_CREATE_EFFECT);
-                    effectMsg.writeShort(o->getEffectId());
-                    effectMsg.writeShort(opos.x);
-                    effectMsg.writeShort(opos.y);
-                    gameHandler->sendTo(p, effectMsg);
+                    Being *b = o->getBeing();
+                    if (b)
+                    {
+                        MessageOut effectMsg(GPMSG_CREATE_EFFECT_BEING);
+                        effectMsg.writeShort(o->getEffectId());
+                        effectMsg.writeShort(b->getPublicID());
+                        gameHandler->sendTo(p, effectMsg);
+                    } else {
+                        MessageOut effectMsg(GPMSG_CREATE_EFFECT_POS);
+                        effectMsg.writeShort(o->getEffectId());
+                        effectMsg.writeShort(opos.x);
+                        effectMsg.writeShort(opos.y);
+                        gameHandler->sendTo(p, effectMsg);
+                    }
                 }
                 break;
                 default: break;

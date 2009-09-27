@@ -1030,12 +1030,18 @@ static int being_register(lua_State *s)
 /**
  * Triggers a special effect from the clients effects.xml
  * tmw.effect_create (id, x, y)
+ * tmw.effect_create (id,being)
  */
 static int effect_create(lua_State *s)
 {
     if (!lua_isnumber(s, 1) ||
-        !lua_isnumber(s, 2) ||
-        !lua_isnumber(s, 3))
+        (
+            !lua_isnumber(s, 2) ||
+            !lua_isnumber(s, 3)
+        ) && (
+            !lua_isuserdata(s, 2)
+        )
+       )
     {
         raiseScriptError(s, "effect_create called with incorrect parameters.");
         return 0;
@@ -1046,10 +1052,25 @@ static int effect_create(lua_State *s)
 
     MapComposite *m = t->getMap();
     int id = lua_tointeger(s, 1);
-    int x = lua_tointeger(s, 2);
-    int y = lua_tointeger(s, 3);
 
-    Effects::show(id, m, Point(x, y));
+    if (lua_isuserdata(s, 2))
+    {
+        // being mode
+        Being *b = getBeing(s, 2);
+        if (!b)
+        {
+            raiseScriptError(s, "effect_create called on non-existent being");
+            return 0;
+        }
+        Effects::show(id, m, b);
+    }
+    else
+    {
+        // positional mode
+        int x = lua_tointeger(s, 2);
+        int y = lua_tointeger(s, 3);
+        Effects::show(id, m, Point(x, y));
+    }
 
     return 0;
 }

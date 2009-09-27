@@ -39,4 +39,11 @@ namespace Effects
         effect->setPosition(pos);
         GameState::enqueueInsert(effect);
     }
+    void show(int id, MapComposite *map, Being *b)
+    {
+        Effect *effect = new Effect(id);
+        effect->setMap(map);
+        if (effect->setBeing(b))
+            GameState::enqueueInsert(effect);
+    }
 }

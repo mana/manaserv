@@ -192,7 +192,8 @@ enum {
     PGMSG_USE_ITEM                 = 0x0300, // B slot
     GPMSG_USE_RESPONSE             = 0x0301, // B error
     GPMSG_BEINGS_DAMAGE            = 0x0310, // { W being id, W amount }*
-    GPMSG_CREATE_EFFECT            = 0x0320, // W effect id, W*2 position
+    GPMSG_CREATE_EFFECT_POS        = 0x0320, // W effect id, W*2 position
+    GPMSG_CREATE_EFFECT_BEING      = 0x0321, // W effect id, W BeingID
 
     // Guild
     PCMSG_GUILD_CREATE                  = 0x0350, // S name
