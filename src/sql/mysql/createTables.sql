@@ -73,6 +73,24 @@ CREATE TABLE IF NOT EXISTS `tmw_char_skills` (
 DEFAULT CHARSET=utf8;
 
 --
+-- table: `tmw_char_status_effects`
+--
+CREATE TABLE IF NOT EXISTS `tmw_char_status_effects` (
+    `char_id`       int(10)         unsigned NOT NULL,
+    `status_id`     smallint(5)     unsigned NOT NULL,
+    `status_time`   int(10)         signed NOT NULL,
+    --
+    PRIMARY KEY (`char_id`, `status_id`),
+    FOREIGN KEY (`char_id`)
+        REFERENCES `tmw_characters` (`id`)
+        ON DELETE CASCADE
+) ENGING=InnoDB
+DEFAULT CHARSET=utf8;
+
+
+
+
+--
 -- table: `tmw_items`
 --
 CREATE TABLE IF NOT EXISTS `tmw_items` (

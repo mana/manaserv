@@ -84,6 +84,19 @@ CREATE INDEX tmw_char_skills_char ON tmw_char_skills ( char_id );
 
 -----------------------------------------------------------------------------
 
+CREATE TABLE tmw_char_status_effects
+(
+    char_id     INTEGER     NOT NULL,
+    status_id   INTEGER     NOT NULL,
+    status_time INTEGER     NOT NULL,
+    --
+    FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+);
+
+CREATE INDEX tmw_char_status_char on tmw_char_status_effects ( char_id );
+
+-----------------------------------------------------------------------------
+
 CREATE TABLE tmw_items
 (
     id           INTEGER    PRIMARY KEY,
@@ -348,7 +361,7 @@ AS
 
 INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
 INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'5',  strftime('%s','now'));
+INSERT INTO tmw_world_states VALUES('database_version',     NULL,'6',  strftime('%s','now'));
 
 -- all known transaction codes
 

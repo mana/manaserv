@@ -76,6 +76,11 @@ static const char *CHARACTERS_TBL_NAME = "tmw_characters";
 static const char *CHAR_SKILLS_TBL_NAME = "tmw_char_skills";
 
 /**
+ * TABLE: tmw_char_status_effects.
+ */
+static const char *CHAR_STATUS_EFFECTS_TBL_NAME = "tmw_char_status_effects";
+
+/**
  * TABLE: tmw_inventories.
  */
 static const char *INVENTORIES_TBL_NAME("tmw_inventories");
