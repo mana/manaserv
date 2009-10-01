@@ -314,6 +314,22 @@ Character *DALStorage::getCharacterBySQL(Account *owner)
                     toUint(skillInfo(row, 1))); // experience
             }
         }
+        s.clear();
+        s.str("");
+        // Load the status effect
+        s << "select status_id, status_time FROM " << CHAR_STATUS_EFFECTS_TBL_NAME
+          << " WHERE char_id = " << character->getDatabaseID();
+        const dal::RecordSet &statusInfo = mDb->execSql(s.str());
+        if (!statusInfo.isEmpty())
+        {
+            const unsigned int nRows = statusInfo.rows();
+            for (unsigned int row = 0; row < nRows; row++)
+            {
+                character->applyStatusEffect(
+                    toUint(statusInfo(row, 0)), // Statusid
+                    toUint(statusInfo(row, 1))); // Time
+            }
+        }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -670,6 +686,48 @@ bool DALStorage::updateCharacter(Character *character,
         return false;
     }
 
+    /**
+     * Update char status effects
+     */
+    try
+    {
+        // Delete the old status effects first
+        std::ostringstream sql;
+
+        sql << "delete from " << CHAR_STATUS_EFFECTS_TBL_NAME
+            << " where char_id = '" << character->getDatabaseID() << "';";
+
+         mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
+        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: " << e.what());
+        return false;
+    }
+    try
+    {
+        std::map<int, int>::const_iterator status_it;
+        for (status_it = character->getStatusEffectBegin();
+             status_it != character->getStatusEffectEnd(); status_it++)
+        {
+            insertStatusEffect(character->getDatabaseID(), status_it->first, status_it->second);
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
+        LOG_ERROR("(DALStorage::updateCharacter #6) SQL query failure: " << e.what());
+        return false;
+    }
     if (startTransaction)
     {
         mDb->commitTransaction();
@@ -972,6 +1030,25 @@ void DALStorage::updateExperience(const int CharId, const int SkillId,
     }
 }
 
+void DALStorage::insertStatusEffect(const int charId, const int statusId, const int time)
+{
+    try
+    {
+        std::ostringstream sql;
+
+        sql << "insert into " << CHAR_STATUS_EFFECTS_TBL_NAME
+            << " (char_id, status_id, status_time) VALUES ( "
+            << charId << ", "
+            << statusId << ", "
+            << time << ")";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        LOG_ERROR("DALStorage::insertStatusEffect: " << e.what());
+        throw;
+    }
+}
 
 
 /**

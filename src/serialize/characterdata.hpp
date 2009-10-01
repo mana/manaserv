@@ -54,6 +54,14 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeLong(skill_it->second);
     }
 
+    msg.writeShort(data.getStatusEffectSize());
+    std::map<int, int>::const_iterator status_it;
+    for (status_it = data.getStatusEffectBegin(); status_it != data.getStatusEffectEnd(); status_it++)
+    {
+        msg.writeShort(status_it->first);
+        msg.writeShort(status_it->second);
+    }
+
 
     msg.writeShort(data.getMapId());
     const Point &pos = data.getPosition();
@@ -97,6 +105,15 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         int skill = msg.readShort();
         int level = msg.readLong();
         data.setExperience(skill,level);
+    }
+
+    int statusSize = msg.readShort();
+
+    for (int i = 0; i < statusSize; i++)
+    {
+        int status = msg.readShort();
+        int time = msg.readShort();
+        data.applyStatusEffect(status, time);
     }
 
     data.setMapId(msg.readShort());

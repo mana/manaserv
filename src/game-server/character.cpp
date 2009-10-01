@@ -124,6 +124,13 @@ void Character::update()
         mSpecialUpdateNeeded = false;
     }
 
+    mStatusEffects.clear();
+    StatusEffects::iterator it = mStatus.begin();
+    while(it != mStatus.end())
+    {
+        mStatusEffects[it->first] = it->second.time;
+        it++;
+    }
     Being::update();
 }
 

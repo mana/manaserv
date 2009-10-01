@@ -334,6 +334,7 @@ class Being : public Actor
         static const int TICKS_PER_HP_REGENERATION = 100;
         Action mAction;
         std::vector< Attribute > mAttributes;
+        StatusEffects mStatus;
         Being *mTarget;
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
@@ -349,7 +350,6 @@ class Being : public Actor
         std::string mName;
         Hits mHitsTaken; /**< List of punches taken since last update. */
         AttributeModifiers mModifiers; /**< Currently modified attributes. */
-        StatusEffects mStatus;
         int mHpRegenTimer; /**< Timer for hp regeneration. */
 };
 

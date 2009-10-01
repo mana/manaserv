@@ -125,6 +125,21 @@ class Character
         { mExperience[skill] += value; }
 
         /**
+         * Get / Set a status effects
+         */
+        void applyStatusEffect(int id, int time)
+        { mStatusEffects[id] = time; }
+
+        int getStatusEffectSize() const
+        { return mStatusEffects.size(); }
+
+        const std::map<int, int>::const_iterator getStatusEffectBegin() const
+        { return mStatusEffects.begin(); }
+
+        const std::map<int, int>::const_iterator getStatusEffectEnd() const
+        { return mStatusEffects.end(); }
+
+        /**
          * Gets the Id of the map that the character is on.
          */
         int getMapId() const { return mMapId; }
@@ -180,6 +195,7 @@ class Character
         Point mPos;               //!< Position the being is at.
         unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
         std::map<int, int> mExperience; //!< Skill Experience.
+        std::map<int, int> mStatusEffects; //!< Status Effects
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.

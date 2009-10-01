@@ -277,6 +277,18 @@ class Character : public Being
         { return mExperience.end(); }
 
         /**
+         * used to serialized status effects
+         */
+        int getStatusEffectSize() const
+        { return mStatusEffects.size(); }
+
+        const std::map<int, int>::const_iterator getStatusEffectBegin() const
+        { return mStatusEffects.begin(); }
+
+        const std::map<int, int>::const_iterator getStatusEffectEnd() const
+        { return mStatusEffects.end(); }
+
+        /**
          * Gets total accumulated exp for skill
          */
         int getExperience(int skill) const
@@ -391,6 +403,9 @@ class Character : public Being
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
         std::map<int, Special*> mSpecials;
+        std::map<int, int> mStatusEffects; /**< only used by select functions
+                                                to make it easier to make the accountserver 
+                                                do not modify or use anywhere else*/
         int mRechargePerSpecial;
         bool mSpecialUpdateNeeded;
 

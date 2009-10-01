@@ -147,6 +147,14 @@ class DALStorage
             const int SkillValue);
 
         /**
+         * Inserts a record about a status effect into the database
+         * @param charId    ID of the character in the database
+         * @param statusId  ID of the status effect
+         * @param time      Time left on the status effect
+         */
+        void insertStatusEffect(const int charId, const int statusId, const int time);
+
+        /**
          * Sets a ban on an account (hence on all its characters).
          *
          * @param id character identifier.
