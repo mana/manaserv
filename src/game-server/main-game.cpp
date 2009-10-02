@@ -298,7 +298,20 @@ int main(int argc, char *argv[])
     initialize();
 
     // Make an initial attempt to connect to the account server
-    accountHandler->start();
+    // Try again after longer and longer intervals when connection fails.
+    bool isConnected = false;
+    int waittime = 0;
+    while (!isConnected)
+    {
+        LOG_INFO("Connecting to account server");
+        isConnected = accountHandler->start();
+        if (!isConnected)
+        {
+            LOG_INFO("Retrying in "<<++waittime<<" seconds");
+            Sleep(waittime * 1000);
+        }
+
+    }
 
     if (!gameHandler->startListen(options.port))
     {
@@ -335,7 +348,7 @@ int main(int argc, char *argv[])
             if (accountHandler->isConnected())
             {
                 accountServerLost = false;
-                
+
                 // Handle all messages that are in the message queues
                 accountHandler->process();
 
