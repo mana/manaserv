@@ -24,6 +24,12 @@
 #include <signal.h>
 #include <physfs.h>
 #include <enet/enet.h>
+#include <unistd.h>
+
+#ifdef __MINGW32__
+#include <windows.h>
+#define usleep(usec) (Sleep ((usec) / 1000), 0)
+#endif
 
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
@@ -308,7 +314,7 @@ int main(int argc, char *argv[])
         if (!isConnected)
         {
             LOG_INFO("Retrying in "<<++waittime<<" seconds");
-            Sleep(waittime * 1000);
+            usleep(waittime * 1000);
         }
 
     }
