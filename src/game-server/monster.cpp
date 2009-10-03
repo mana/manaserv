@@ -379,23 +379,33 @@ void Monster::forgetTarget(Thing *t)
     }
 }
 
-int Monster::damage(Actor *source, const Damage &damage)
+void Monster::changeAnger(Actor *target, int amount)
 {
-    int HPLoss = Being::damage(source, damage);
-    if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
+    if (target && (target->getType() == OBJECT_MONSTER || target->getType() == OBJECT_CHARACTER))
     {
-        Character *s = static_cast< Character * >(source);
-        std::pair< std::map< Being *, int >::iterator, bool > ib =
-            mAnger.insert(std::make_pair(s, HPLoss));
-
-        if (ib.second)
+        Being *t = static_cast< Being * >(target);
+        if (mAnger.find(t) != mAnger.end())
         {
-            s->addListener(&mTargetListener);
+            mAnger[t] = amount;
         }
         else
         {
-            ib.first->second += HPLoss;
+            mAnger[t] = amount;
+            t->addListener(&mTargetListener);
         }
+    }
+}
+
+int Monster::damage(Actor *source, const Damage &damage)
+{
+    int HPLoss = Being::damage(source, damage);
+    if (source)
+    {
+        changeAnger(source, HPLoss);
+    }
+    if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
+    {
+        Character *s = static_cast< Character * >(source);
 
         std::list<size_t>::const_iterator iSkill;
         for (iSkill = damage.usedSkills.begin(); iSkill != damage.usedSkills.end(); ++iSkill)

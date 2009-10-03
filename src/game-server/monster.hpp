@@ -262,6 +262,11 @@ class Monster : public Being
         void died();
 
         /**
+         * Alters hate for the monster
+         */
+        void changeAnger(Actor *target, int amount);
+
+        /**
          * Calls the damage function in Being and updates the aggro list
          */
         virtual int damage(Actor *source, const Damage &damage);
