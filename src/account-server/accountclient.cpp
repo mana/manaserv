@@ -26,7 +26,6 @@ AccountClient::AccountClient(ENetPeer *peer):
     status(CLIENT_LOGIN),
     mAccount(NULL)
 {
-    time(&lastLoginAttempt);
 }
 
 AccountClient::~AccountClient()
@@ -44,9 +43,4 @@ void AccountClient::unsetAccount()
 {
     delete mAccount;
     mAccount = NULL;
-}
-
-void AccountClient::updateLoginAttempt()
-{
-    time(&lastLoginAttempt);
 }

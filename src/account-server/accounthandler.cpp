@@ -93,6 +93,9 @@ private:
     void handleCharacterCreateMessage(AccountClient &client, MessageIn &msg);
     void handleCharacterSelectMessage(AccountClient &client, MessageIn &msg);
     void handleCharacterDeleteMessage(AccountClient &client, MessageIn &msg);
+
+    typedef std::map<int, time_t> IPsToTime;
+    IPsToTime mLastLoginAttemptForIP;
 };
 
 static AccountHandler *accountHandler;
@@ -175,7 +178,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
-    int clientVersion = msg.readLong();
+    const int clientVersion = msg.readLong();
 
     if (clientVersion < Configuration::getValue("clientVersion", 0))
     {
@@ -184,24 +187,24 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
-    // get the IP address
-    //int address = client.getIP();
-
-    // TODO: Check IP against blacklist
-
-    time_t lastAttempt = client.getLastLoginAttempt();
-    if ((time(NULL) - lastAttempt) < 1)
+    // Check whether the last login attempt for this IP is still too fresh
+    const int address = client.getIP();
+    const time_t now = time(NULL);
+    IPsToTime::const_iterator it = mLastLoginAttemptForIP.find(address);
+    if (it != mLastLoginAttemptForIP.end())
     {
-        reply.writeByte(LOGIN_INVALID_TIME);
-        client.send(reply);
-        return;
+        const time_t lastAttempt = it->second;
+        if (now < lastAttempt + 1)
+        {
+            reply.writeByte(LOGIN_INVALID_TIME);
+            client.send(reply);
+            return;
+        }
     }
+    mLastLoginAttemptForIP[address] = now;
 
-    // updates the time last attempted to login
-    client.updateLoginAttempt();
-
-    std::string username = msg.readString();
-    std::string password = msg.readString();
+    const std::string username = msg.readString();
+    const std::string password = msg.readString();
 
     if (stringFilter->findDoubleQuotes(username))
     {
@@ -210,7 +213,9 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
-    unsigned maxClients = (unsigned)Configuration::getValue("net_maxClients", 1000);
+    const unsigned maxClients =
+            (unsigned) Configuration::getValue("net_maxClients", 1000);
+
     if (getClientNumber() >= maxClients)
     {
         reply.writeByte(ERRMSG_SERVER_FULL);
@@ -237,12 +242,13 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
+    // The client succesfully logged in
+
     // set lastLogin date of the account
     time_t login;
     time(&login);
     acc->setLastLogin(login);
     storage->updateLastLogin(acc);
-
 
     // Associate account with connection
     client.setAccount(acc);

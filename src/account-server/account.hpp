@@ -45,7 +45,6 @@ class Account
          */
         ~Account();
 
-
         /**
          * Set the user name.
          *
@@ -54,7 +53,6 @@ class Account
         void setName(const std::string &name)
         { mName = name; }
 
-
         /**
          * Get the user name.
          *
@@ -62,7 +60,6 @@ class Account
          */
         const std::string &getName() const
         { return mName; }
-
 
         /**
          * Set the user password. The password is expected to be already
@@ -114,7 +111,6 @@ class Account
         void setLevel(int level)
         { mLevel = level; }
 
-
         /**
          * Get the account level.
          *
@@ -123,18 +119,15 @@ class Account
         int getLevel() const
         { return mLevel; }
 
-
         /**
          * Set the characters.
          *
          * @param characters a list of characters.
          */
-        void
-        setCharacters(const Characters& characters);
-
+        void setCharacters(const Characters& characters);
 
         /**
-         * Add a new character.
+         * Adds a new character.
          *
          * @param character the new character.
          */
@@ -146,7 +139,6 @@ class Account
          * @param i index of the character.
          */
         void delCharacter(int i);
-
 
         /**
          * Get all the characters.

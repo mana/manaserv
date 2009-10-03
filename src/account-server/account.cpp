@@ -22,9 +22,6 @@
 
 #include "account-server/account.hpp"
 
-/**
- * Destructor.
- */
 Account::~Account()
 {
     for (Characters::iterator i = mCharacters.begin(),
@@ -34,20 +31,11 @@ Account::~Account()
     }
 }
 
-
-/**
- * Set the characters.
- */
-void
-Account::setCharacters(const Characters& characters)
+void Account::setCharacters(const Characters& characters)
 {
     mCharacters = characters;
 }
 
-
-/**
- * Add a new character.
- */
 void Account::addCharacter(Character *character)
 {
     mCharacters.push_back(character);

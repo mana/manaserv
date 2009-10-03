@@ -120,7 +120,7 @@ bool StringFilter::isEmailValid(const std::string& email)
         (email.find_first_of(' ') == std::string::npos);
 }
 
-bool StringFilter::findDoubleQuotes(const std::string& text)
+bool StringFilter::findDoubleQuotes(const std::string &text)
 {
     return (text.find('"', 0) != std::string::npos);
 }
