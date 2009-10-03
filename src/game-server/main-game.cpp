@@ -313,10 +313,9 @@ int main(int argc, char *argv[])
         isConnected = accountHandler->start();
         if (!isConnected)
         {
-            LOG_INFO("Retrying in "<<++waittime<<" seconds");
+            LOG_INFO("Retrying in " << ++waittime << " seconds");
             usleep(waittime * 1000);
         }
-
     }
 
     if (!gameHandler->startListen(options.port))

@@ -1035,13 +1035,8 @@ static int being_register(lua_State *s)
 static int effect_create(lua_State *s)
 {
     if (!lua_isnumber(s, 1) ||
-        (
-            !lua_isnumber(s, 2) ||
-            !lua_isnumber(s, 3)
-        ) && (
-            !lua_isuserdata(s, 2)
-        )
-       )
+        ((!lua_isnumber(s, 2) || !lua_isnumber(s, 3))
+         && (!lua_isuserdata(s, 2))))
     {
         raiseScriptError(s, "effect_create called with incorrect parameters.");
         return 0;

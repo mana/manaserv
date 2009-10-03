@@ -1,5 +1,3 @@
-# $Id$
-
 AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = tmwserv-account tmwserv-game

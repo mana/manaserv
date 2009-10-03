@@ -53,9 +53,9 @@ struct MonsterAttack
     float damageFactor;
     int element;
     int type;
-    unsigned preDelay;
-    unsigned aftDelay;
-    unsigned range;
+    int preDelay;
+    int aftDelay;
+    int range;
     std::string scriptFunction;
 };
 
