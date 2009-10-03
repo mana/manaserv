@@ -386,7 +386,7 @@ void Monster::changeAnger(Actor *target, int amount)
         Being *t = static_cast< Being * >(target);
         if (mAnger.find(t) != mAnger.end())
         {
-            mAnger[t] = amount;
+            mAnger[t] += amount;
         }
         else
         {
