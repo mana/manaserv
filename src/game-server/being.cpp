@@ -324,6 +324,7 @@ bool Being::hasStatusEffect(int id)
     {
         if (it->second.status->getId() == id)
             return true;
+        it++;
     }
     return false;
 }
