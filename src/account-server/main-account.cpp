@@ -146,6 +146,13 @@ static void initialize()
     LOG_INFO("Using config file: " << configPath);
     LOG_INFO("Using log file: " << logPath);
 
+    // check inter-server password
+    if (Configuration::getValue("net_password", "") == "")
+    {
+        LOG_WARN("SECURITY WARNING: No net_password set in " << configPath <<
+                 " - set one ASAP or this server WILL get h4x0rd!!");
+    }
+
     // Open database
     try {
         storage = new DALStorage;
