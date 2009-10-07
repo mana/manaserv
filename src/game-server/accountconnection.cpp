@@ -67,11 +67,14 @@ bool AccountConnection::start()
         Configuration::getValue("net_gameServerAddress", "localhost");
     const int gameServerPort =
         Configuration::getValue("net_gameServerPort", DEFAULT_SERVER_PORT + 3);
+    const std::string password =
+        Configuration::getValue("net_password", "P@s$w0rd");
 
     // Register with the account server and send the list of maps we handle
     MessageOut msg(GAMSG_REGISTER);
     msg.writeString(gameServerAddress);
     msg.writeShort(gameServerPort);
+    msg.writeString(password);
     msg.writeLong(ItemManager::GetDatabaseVersion());
     const MapManager::Maps &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
@@ -112,6 +115,12 @@ void AccountConnection::processMessage(MessageIn &msg)
             else
             {
                 LOG_DEBUG("Local item database is in sync with account server.");
+            }
+            if (msg.readShort() != PASSWORD_OK)
+            {
+                LOG_ERROR("This game server sent a invaild password");
+                stop();
+                exit(1);
             }
         } break;
 

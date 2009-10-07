@@ -31,6 +31,7 @@
 #include "account-server/dalstorage.hpp"
 #include "chat-server/post.hpp"
 #include "common/transaction.hpp"
+#include "common/configuration.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
@@ -176,6 +177,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             // TODO: check the credentials of the game server
             server->address = msg.readString();
             server->port = msg.readShort();
+            const std::string password = msg.readString();
 
             // checks the version of the remote item database with our local copy
             unsigned int dbversion = msg.readLong();
@@ -194,7 +196,18 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 LOG_DEBUG("Item database of game server has a wrong version");
                 outMsg.writeShort(DATA_VERSION_OUTDATED);
             }
-            comp->send(outMsg);
+            if (password == Configuration::getValue("net_password", "P@s$w0rd"))
+            {
+                outMsg.writeShort(PASSWORD_OK);
+                comp->send(outMsg);
+            }
+            else
+            {
+                LOG_INFO("The password given by " << server->address << ':' << server->port << " was bad.");
+                outMsg.writeShort(PASSWORD_BAD);
+                comp->disconnect(outMsg);
+                break;
+            }
 
             LOG_INFO("Game server " << server->address << ':' << server->port
                      << " wants to register " << (msg.getUnreadLength() / 2)

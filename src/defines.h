@@ -255,8 +255,8 @@ enum {
     PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
 
     // Inter-server
-    GAMSG_REGISTER              = 0x0500, // S address, W port, L items db revision, { W map id }*
-    AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version
+    GAMSG_REGISTER              = 0x0500, // S address, W port, S password, L items db revision, { W map id }*
+    AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version, C password response
     AGMSG_ACTIVE_MAP            = 0x0502, // W map id
     AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, L id, S name, serialised character data
     GAMSG_PLAYER_DATA           = 0x0520, // L id, serialised character data
@@ -302,6 +302,12 @@ enum {
 enum {
     DATA_VERSION_OK       = 0x00,
     DATA_VERSION_OUTDATED = 0x01
+};
+
+// used in AGMSG_REGISTER_RESPNSE to show if password was accepted
+enum {
+    PASSWORD_OK = 0x00,
+    PASSWORD_BAD = 0x01
 };
 
 // used to identify part of sync message
