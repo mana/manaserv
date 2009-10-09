@@ -468,14 +468,26 @@ void Character::receiveExperience(int skill, int experience)
         // add exp
         int oldExp = mExperience[skill];
         long int newExp = mExperience[skill] + experience;
-        if (newExp > INT_MAX) newExp = INT_MAX; // avoid integer overflow.
         if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
+
+        // Check the skill cap
+        long int maxSkillCap = Configuration::getValue("maxSkillCap", INT_MAX);
+        assert(maxSkillCap <= INT_MAX);  // avoid interger overflow
+        if (newExp > maxSkillCap)
+        {
+            newExp = maxSkillCap;
+            if (oldExp != maxSkillCap)
+            {
+                LOG_INFO("Player hit the skill cap");
+                // TODO: send a message to player leting them know they hit the cap
+            }
+        }
         mExperience[skill] = newExp;
         mModifiedExperience.insert(skill);
 
         // inform account server
-        accountHandler->updateExperience(getDatabaseID(),
-            skill, newExp);
+        if (newExp != oldExp)
+            accountHandler->updateExperience(getDatabaseID(), skill, newExp);
 
         // check for skill levelup
         if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
