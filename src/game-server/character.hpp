@@ -27,6 +27,8 @@
 
 #include "common/inventorydata.hpp"
 #include "game-server/being.hpp"
+#include "protocol.h"
+#include "defines.h"
 
 class BuySell;
 class GameClient;
@@ -404,7 +406,7 @@ class Character : public Being
 
         std::map<int, Special*> mSpecials;
         std::map<int, int> mStatusEffects; /**< only used by select functions
-                                                to make it easier to make the accountserver 
+                                                to make it easier to make the accountserver
                                                 do not modify or use anywhere else*/
         int mRechargePerSpecial;
         bool mSpecialUpdateNeeded;

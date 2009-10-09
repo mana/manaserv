@@ -5,6 +5,7 @@ bin_PROGRAMS = tmwserv-account tmwserv-game
 tmwserv_account_SOURCES = \
 	account-server/main-account.cpp \
 	defines.h \
+	protocol.h \
 	point.h \
 	account-server/account.hpp \
 	account-server/account.cpp \
@@ -80,6 +81,7 @@ tmwserv_account_SOURCES = \
 tmwserv_game_SOURCES = \
 	game-server/main-game.cpp \
 	defines.h \
+	protocol.h \
 	point.h \
 	common/configuration.hpp \
 	common/configuration.cpp \

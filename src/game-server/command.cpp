@@ -21,7 +21,6 @@
 
 #include <cstddef>
 
-#include "defines.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"

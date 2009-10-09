@@ -32,7 +32,7 @@
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 
-#include "defines.h"
+#include "protocol.h"
 
 void ChatHandler::sendGuildInvite(const std::string &invitedName,
                                   const std::string &inviterName,

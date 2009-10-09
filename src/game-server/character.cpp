@@ -25,7 +25,6 @@
 
 #include "game-server/character.hpp"
 
-#include "defines.h"
 #include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/buysell.hpp"

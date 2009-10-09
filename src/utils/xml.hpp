@@ -25,7 +25,6 @@
 #include <string>
 #include <libxml/tree.h>
 
-#include "defines.h"
 #include "game-server/item.hpp"
 
 namespace XML

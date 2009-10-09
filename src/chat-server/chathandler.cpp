@@ -24,7 +24,7 @@
 #include <string>
 #include <sstream>
 
-#include "defines.h"
+#include "protocol.h"
 #include "account-server/character.hpp"
 #include "account-server/dalstorage.hpp"
 #include "chat-server/guildmanager.hpp"

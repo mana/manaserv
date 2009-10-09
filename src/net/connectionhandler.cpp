@@ -22,7 +22,6 @@
 
 #include "net/connectionhandler.hpp"
 
-#include "defines.h"
 #include "common/configuration.hpp"
 #include "net/bandwidth.hpp"
 #include "net/messagein.hpp"

@@ -27,6 +27,7 @@
 
 #include "game-server/being.hpp"
 #include "game-server/eventlistener.hpp"
+#include "defines.h"
 
 class ItemClass;
 class Script;

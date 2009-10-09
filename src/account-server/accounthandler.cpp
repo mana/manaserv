@@ -21,7 +21,7 @@
 
 #include "account-server/accounthandler.hpp"
 
-#include "defines.h"
+#include "protocol.h"
 #include "point.h"
 #include "account-server/account.hpp"
 #include "account-server/accountclient.hpp"

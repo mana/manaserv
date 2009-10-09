@@ -38,6 +38,7 @@
 #include "serialize/characterdata.hpp"
 #include "utils/logger.h"
 #include "utils/tokendispenser.hpp"
+#include "protocol.h"
 
 struct MapStatistics
 {

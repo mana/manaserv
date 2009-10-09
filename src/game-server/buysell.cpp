@@ -23,7 +23,6 @@
 
 #include "game-server/buysell.hpp"
 
-#include "defines.h"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"

@@ -22,7 +22,6 @@
 #include <algorithm>
 #include <cassert>
 
-#include "defines.h"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "game-server/item.hpp"

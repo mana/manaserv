@@ -23,7 +23,6 @@
 
 #include "game-server/state.hpp"
 
-#include "defines.h"
 #include "point.h"
 #include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"

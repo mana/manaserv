@@ -23,7 +23,7 @@
 
 #include "chat-server/chatchannelmanager.hpp"
 
-#include "defines.h"
+#include "protocol.h"
 #include "account-server/dalstorage.hpp"
 #include "chat-server/chatclient.hpp"
 #include "chat-server/chathandler.hpp"

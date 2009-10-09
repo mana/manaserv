@@ -22,7 +22,6 @@
 
 #include "utils/stringfilter.h"
 
-#include "defines.h"
 #include "common/configuration.hpp"
 #include "utils/logger.h"
 

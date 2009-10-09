@@ -29,7 +29,7 @@
 #include "../net/messagein.hpp"
 #include "../net/messageout.hpp"
 
-#include "../defines.h"
+#include "../protocol.h"
 
 #include <algorithm>
 

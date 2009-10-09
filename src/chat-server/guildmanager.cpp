@@ -20,6 +20,7 @@
 
 #include "guildmanager.hpp"
 #include "guild.hpp"
+#include "protocol.h"
 #include "defines.h"
 #include "account-server/dalstorage.hpp"
 #include "chat-server/chatclient.hpp"

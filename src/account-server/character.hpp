@@ -111,7 +111,7 @@ class Character
 
         const std::map<int, int>::const_iterator getSkillBegin() const
         { return mExperience.begin(); }
- 
+
         const std::map<int, int>::const_iterator getSkillEnd() const
         { return mExperience.end(); }
 

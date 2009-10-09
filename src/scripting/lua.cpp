@@ -27,7 +27,6 @@ extern "C" {
 #include <lauxlib.h>
 }
 
-#include "defines.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/buysell.hpp"
 #include "game-server/character.hpp"

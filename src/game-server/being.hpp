@@ -27,7 +27,6 @@
 #include <map>
 #include "limits.h"
 
-#include "defines.h"
 #include "game-server/actor.hpp"
 
 class Being;

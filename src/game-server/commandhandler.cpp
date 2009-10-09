@@ -21,8 +21,6 @@
 
 #include <sstream>
 
-#include "defines.h"
-
 #include "game-server/commandhandler.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/character.hpp"

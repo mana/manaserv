@@ -23,7 +23,6 @@
 
 #include "game-server/monstermanager.hpp"
 
-#include "defines.h"
 #include "game-server/itemmanager.hpp"
 #include "game-server/monster.hpp"
 #include "game-server/resourcemanager.hpp"

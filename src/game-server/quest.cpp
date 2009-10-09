@@ -26,7 +26,6 @@
 
 #include "game-server/quest.hpp"
 
-#include "defines.h"
 #include "game-server/accountconnection.hpp"
 #include "game-server/character.hpp"
 #include "game-server/eventlistener.hpp"

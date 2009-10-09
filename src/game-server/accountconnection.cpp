@@ -21,7 +21,6 @@
 
 #include "game-server/accountconnection.hpp"
 
-#include "defines.h"
 #include "common/configuration.hpp"
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"

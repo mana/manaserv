@@ -24,7 +24,6 @@
 
 #include "game-server/statusmanager.hpp"
 
-#include "defines.h"
 #include "game-server/statuseffect.hpp"
 #include "game-server/resourcemanager.hpp"
 #include "scripting/script.hpp"
