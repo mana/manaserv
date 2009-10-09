@@ -126,7 +126,7 @@ void Being::setDestination(const Point &dst)
     mPath.clear();
 }
 
-std::list<PATH_NODE> Being::findPath()
+Path Being::findPath()
 {
     mOld = getPosition();
     int startX = mOld.x / 32, startY = mOld.y / 32;
@@ -165,7 +165,7 @@ void Being::move()
      * class has been used, because that seems to be the most logical
      * place extra functionality will be added.
      */
-    for (std::list<PATH_NODE>::iterator pathIterator = mPath.begin();
+    for (PathIterator pathIterator = mPath.begin();
             pathIterator != mPath.end(); pathIterator++)
     {
         if (!map->getWalk(pathIterator->x, pathIterator->y, getWalkMask()))
@@ -190,11 +190,11 @@ void Being::move()
         return;
     }
 
-    PATH_NODE prev(tileSX, tileSY);
+    Position prev(tileSX, tileSY);
     Point pos;
     do
     {
-        PATH_NODE next = mPath.front();
+        Position next = mPath.front();
         mPath.pop_front();
         // 362 / 256 is square root of 2, used for walking diagonally
         mActionTime += (prev.x != next.x && prev.y != next.y)

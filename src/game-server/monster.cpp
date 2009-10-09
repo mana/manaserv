@@ -349,7 +349,7 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
         return targetPriority *= range;
     }
 
-    std::list<PATH_NODE> path;
+    Path path;
     path = getMap()->getMap()->findPath(thisPos.x / 32, thisPos.y / 32,
                                         position.x / 32, position.y / 32,
                                         getWalkMask(),

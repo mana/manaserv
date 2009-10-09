@@ -241,7 +241,7 @@ class Being : public Actor
         /**
          * Returns the path to the being's current destination.
          */
-        virtual std::list<PATH_NODE> findPath();
+        virtual Path findPath();
 
         /**
          * Sets an attribute.
@@ -342,7 +342,7 @@ class Being : public Actor
         Being(const Being &rhs);
         Being &operator=(const Being &rhs);
 
-        std::list<PATH_NODE> mPath;
+        Path mPath;
         unsigned short mSpeed;      /**< Speed. */
         unsigned char mDirection;   /**< Facing direction. */
 

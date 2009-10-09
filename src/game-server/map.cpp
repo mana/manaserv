@@ -26,17 +26,18 @@
 
 #include "game-server/map.hpp"
 
+// Basic cost for moving from one tile to another.
+// Used in findPath() function when computing the A* path algorithm.
+static int const basicCost = 100;
+
 MetaTile::MetaTile():
     whichList(0),
     blockmask(0)
-{
-}
-
+{ }
 
 Location::Location(int x, int y, MetaTile *tile):
     x(x), y(y), tile(tile)
-{
-}
+{ }
 
 bool Location::operator< (const Location &loc) const
 {
@@ -151,7 +152,7 @@ void Map::freeTile(int x, int y, BlockType type)
 bool Map::getWalk(int x, int y, char walkmask) const
 {
     // You can't walk outside of the map
-    if (x < 0 || y < 0 || x >= mWidth || y >= mHeight)
+    if (!contains(x, y))
     {
         return false;
     }
@@ -165,15 +166,17 @@ MetaTile *Map::getMetaTile(int x, int y)
     return &mMetaTiles[x + y * mWidth];
 }
 
-static int const basicCost = 100;
+bool Map::contains(int x, int y) const
+{
+    return x >= 0 && y >= 0 && x < mWidth && y < mHeight;
+}
 
-
-std::list<PATH_NODE> Map::findSimplePath(int startX, int startY,
+Path Map::findSimplePath(int startX, int startY,
                                          int destX, int destY,
                                          unsigned char walkmask)
 {
     // Path to be built up (empty by default)
-    std::list<PATH_NODE> path;
+    Path path;
     int positionX = startX, positionY = startY;
     int directionX, directionY;
     // Checks our path up to 1 tiles, if a blocking tile is found
@@ -198,7 +201,7 @@ std::list<PATH_NODE> Map::findSimplePath(int startX, int startY,
 
         if (getWalk(positionX, positionY, walkmask))
         {
-            path.push_back(PATH_NODE(positionX, positionY));
+            path.push_back(Position(positionX, positionY));
 
             if ((positionX == destX) && (positionY == destY))
             {
@@ -212,12 +215,12 @@ std::list<PATH_NODE> Map::findSimplePath(int startX, int startY,
     }
 }
 
-std::list<PATH_NODE> Map::findPath(int startX, int startY,
+Path Map::findPath(int startX, int startY,
                                    int destX, int destY,
                                    unsigned char walkmask, int maxCost)
 {
     // Path to be built up (empty by default)
-    std::list<PATH_NODE> path;
+    Path path;
 
     // Declare open list, a list with open tiles sorted on F cost
     std::priority_queue<Location> openList;
@@ -245,9 +248,7 @@ std::list<PATH_NODE> Map::findPath(int startX, int startY,
         // If the tile is already on the closed list, this means it has already
         // been processed with a shorter path to the start point (lower G cost)
         if (curr.tile->whichList == onClosedList)
-        {
             continue;
-        }
 
         // Put the current tile on the closed list
         curr.tile->whichList = onClosedList;
@@ -263,19 +264,14 @@ std::list<PATH_NODE> Map::findPath(int startX, int startY,
 
                 // Skip if if we're checking the same tile we're leaving from,
                 // or if the new location falls outside of the map boundaries
-                if ((dx == 0 && dy == 0) ||
-                        (x < 0 || y < 0 || x >= mWidth || y >= mHeight))
-                {
+                if ((dx == 0 && dy == 0) || !contains(x, y))
                     continue;
-                }
 
                 MetaTile *newTile = getMetaTile(x, y);
 
                 // Skip if the tile is on the closed list or is not walkable
                 if (newTile->whichList == onClosedList || newTile->blockmask & walkmask)
-                {
                     continue;
-                }
 
                 // When taking a diagonal step, verify that we can skip the
                 // corner.
@@ -284,10 +280,8 @@ std::list<PATH_NODE> Map::findPath(int startX, int startY,
                     MetaTile *t1 = getMetaTile(curr.x, curr.y + dy);
                     MetaTile *t2 = getMetaTile(curr.x + dx, curr.y);
 
-                    if (t1->blockmask & walkmask && !(t2->blockmask & walkmask)) // I hope I didn't fuck this line up
-                    {
+                    if ((t1->blockmask | t2->blockmask) & walkmask)
                         continue;
-                    }
                 }
 
                 // Calculate G cost for this route, ~sqrt(2) for moving diagonal
@@ -311,9 +305,7 @@ std::list<PATH_NODE> Map::findPath(int startX, int startY,
                 // Skip if Gcost becomes too much
                 // Warning: probably not entirely accurate
                 if (Gcost > maxCost * basicCost)
-                {
                     continue;
-                }
 
                 if (newTile->whichList != onOpenList)
                 {
@@ -340,7 +332,8 @@ std::list<PATH_NODE> Map::findPath(int startX, int startY,
                         newTile->whichList = onOpenList;
                         openList.push(Location(x, y, newTile));
                     }
-                    else {
+                    else
+                    {
                         // Target location was found
                         foundPath = true;
                     }
@@ -350,7 +343,7 @@ std::list<PATH_NODE> Map::findPath(int startX, int startY,
                     // Found a shorter route.
                     // Update Gcost and Fcost of the new tile
                     newTile->Gcost = Gcost;
-                    newTile->Fcost = newTile->Gcost + newTile->Hcost;
+                    newTile->Fcost = Gcost + newTile->Hcost;
 
                     // Set the current tile as the parent of the new tile
                     newTile->parentX = curr.x;
@@ -379,7 +372,7 @@ std::list<PATH_NODE> Map::findPath(int startX, int startY,
         while (pathX != startX || pathY != startY)
         {
             // Add the new path node to the start of the path list
-            path.push_front(PATH_NODE(pathX, pathY));
+            path.push_front(Position(pathX, pathY));
 
             // Find out the next parent
             MetaTile *tile = getMetaTile(pathX, pathY);

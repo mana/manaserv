@@ -29,13 +29,22 @@
 const unsigned int DEFAULT_TILE_WIDTH = 32;
 const unsigned int DEFAULT_TILE_HEIGHT = 32;
 
-struct PATH_NODE {
-    PATH_NODE(unsigned short u, unsigned short v)
-        : x(u), y(v)
-    {}
+/**
+ * A position along a being's path.
+ * Used to compute each Path Nodes of the path.
+ */
+struct Position
+{
+    Position(int x, int y):
+        x(x), y(y)
+    { }
 
-    unsigned short x, y;
+    int x;
+    int y;
 };
+
+typedef std::list<Position> Path;
+typedef Path::iterator PathIterator;
 
 /**
  * A meta tile stores additional information about a location on a tile map.
@@ -131,6 +140,11 @@ class Map
         bool getWalk(int x, int y, char walkmask = BLOCKMASK_WALL) const;
 
         /**
+         * Tells if a tile location is within the map range.
+         */
+        bool contains(int x, int y) const;
+
+        /**
          * Returns the width of this map.
          */
         int getWidth() const
@@ -168,7 +182,7 @@ class Map
         /**
          * Find a path from one location to the next.
          */
-        std::list<PATH_NODE> findPath(int startX, int startY,
+        Path findPath(int startX, int startY,
                                       int destX, int destY,
                                       unsigned char walkmask,
                                       int maxCost = 20);
@@ -176,7 +190,7 @@ class Map
         /**
          * Finds a simple path from location to the next.
          */
-        std::list<PATH_NODE> findSimplePath(int startX, int startY,
+        Path findSimplePath(int startX, int startY,
                                             int destX, int destY,
                                             unsigned char walkmask);
 
