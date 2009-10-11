@@ -504,9 +504,13 @@ void Character::recalculateLevel()
     std::map<int, int>::const_iterator a;
     for (a = getSkillBegin(); a != getSkillEnd(); a++)
     {
-        float expGot = getExpGot(a->first);
-        float expNeed = getExpNeeded(a->first);
-        levels.push_back(getAttribute(a->first) + expGot / expNeed);
+        // Only use the first 1000 skill levels in calulation
+        if (a->first < 1000)
+        {
+            float expGot = getExpGot(a->first);
+            float expNeed = getExpNeeded(a->first);
+            levels.push_back(getAttribute(a->first) + expGot / expNeed);
+        }
     }
     levels.sort();
 
