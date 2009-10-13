@@ -705,6 +705,46 @@ static int being_get_name(lua_State *s)
 }
 
 /**
+ * Gets the being's name
+ * tmw.being_get_action(being)
+ */
+static int being_get_action(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    Being *being = getBeing(s, 1);
+
+    if (being)
+    {
+        lua_pushinteger(s, being->getAction());
+    }
+
+    return 1;
+}
+
+/**
+ * Gets the being's name
+ * tmw.being_set_action(being, action)
+ */
+static int being_set_action(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    Being *being = getBeing(s, 1);
+
+    int act = lua_tointeger(s, 2);
+
+    if (being)
+    {
+        being->setAction((Being::Action) act);
+    }
+
+    return 1;
+}
+
+/**
  * Function for getting the x-coordinate of the position of a being
  */
 static int posX(lua_State *s)
@@ -1391,6 +1431,8 @@ LuaScript::LuaScript():
         { "being_damage",           &being_damage         },
         { "being_get_attribute",    &being_get_attribute  },
         { "being_get_name",         &being_get_name       },
+        { "being_get_action",       &being_get_action     },
+        { "being_set_action",       &being_set_action     },
         { "posX",                   &posX                 },
         { "posY",                   &posY                 },
         { "trigger_create",         &trigger_create       },
