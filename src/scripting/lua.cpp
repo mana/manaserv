@@ -705,7 +705,7 @@ static int being_get_name(lua_State *s)
 }
 
 /**
- * Gets the being's name
+ * Gets the being's current action
  * tmw.being_get_action(being)
  */
 static int being_get_action(lua_State *s)
@@ -724,7 +724,7 @@ static int being_get_action(lua_State *s)
 }
 
 /**
- * Gets the being's name
+ * Sets the being's current action
  * tmw.being_set_action(being, action)
  */
 static int being_set_action(lua_State *s)
@@ -739,6 +739,46 @@ static int being_set_action(lua_State *s)
     if (being)
     {
         being->setAction((Being::Action) act);
+    }
+
+    return 1;
+}
+
+/**
+ * Gets the being's current direction
+ * tmw.being_get_direction(being)
+ */
+static int being_get_direction(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    Being *being = getBeing(s, 1);
+
+    if (being)
+    {
+        lua_pushinteger(s, being->getDirection());
+    }
+
+    return 1;
+}
+
+/**
+ * Sets the being's current direction
+ * tmw.being_set_direction(being, direction)
+ */
+static int being_set_direction(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+
+    Being *being = getBeing(s, 1);
+
+    int dir = lua_tointeger(s, 2);
+
+    if (being)
+    {
+        being->setDirection(dir);
     }
 
     return 1;
@@ -1433,6 +1473,8 @@ LuaScript::LuaScript():
         { "being_get_name",         &being_get_name       },
         { "being_get_action",       &being_get_action     },
         { "being_set_action",       &being_set_action     },
+        { "being_get_direction",    &being_get_direction  },
+        { "being_set_direction",    &being_set_direction  },
         { "posX",                   &posX                 },
         { "posY",                   &posY                 },
         { "trigger_create",         &trigger_create       },
