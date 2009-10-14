@@ -84,7 +84,7 @@ Monster::Monster(MonsterClass *specy):
         setAttribute(i, (int)std::ceil(attr));
     }
 
-    setSpeed(specy->getSpeed());
+    setSpeed(specy->getSpeed()); // Put in tiles per second.
     setSize(specy->getSize());
 
     // Set positions relative to target from which the monster can attack

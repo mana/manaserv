@@ -127,7 +127,9 @@ void AccountConnection::processMessage(MessageIn &msg)
         {
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             Character *ptr = new Character(msg);
-            ptr->setSpeed(250); // TODO
+            ptr->setSpeed(6.0); // The speed is set in tiles per seconds, and transformed by the function
+                                // into the server corresponding internal value.
+                                // TODO: Make this computed somehow...
             gameHandler->addPendingCharacter(token, ptr);
         } break;
 

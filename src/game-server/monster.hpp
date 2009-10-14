@@ -107,11 +107,11 @@ class MonsterClass
         int getAttribute(size_t attribute) const
         { return mAttributes.at(attribute); }
 
-        /** Sets inverted movement speed. */
-        void setSpeed(int speed) { mSpeed = speed; }
+        /** Sets movement speed in tiles per second. */
+        void setSpeed(float speed) { mSpeed = speed; }
 
-        /** Returns inverted movement speed. */
-        int getSpeed() const { return mSpeed; }
+        /** Returns movement speed in tiles per second. */
+        float getSpeed() const { return mSpeed; }
 
         /** Sets collision circle radius. */
         void setSize(int size) { mSize = size; }
@@ -181,7 +181,7 @@ class MonsterClass
         unsigned short mID;
         MonsterDrops mDrops;
         std::vector<int> mAttributes; /**< Base attributes of the monster. */
-        int mSpeed;
+        float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
         int mExp;
 

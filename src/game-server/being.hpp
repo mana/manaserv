@@ -193,10 +193,18 @@ class Being : public Actor
 
         /**
          * Gets beings speed.
-         * @todo Document what kind of units actor speed is in!
+         * The speed is given in tiles per second.
          */
-        int getSpeed() const { return mSpeed; }
-        void setSpeed(int s) { mSpeed = s; }
+        float getSpeed() const
+        { return (float)(1000 / (float)mSpeed); }
+
+        /**
+         * Gets beings speed.
+         * The speed is to be set in tiles per second
+         * This function automatically transform it
+         * into millsecond per tile.
+         */
+        void setSpeed(float s);
 
         /**
          * Gets the damage list.
@@ -343,7 +351,7 @@ class Being : public Actor
         Being &operator=(const Being &rhs);
 
         Path mPath;
-        unsigned short mSpeed;      /**< Speed. */
+        unsigned int mSpeed;      /**< Speed. */
         unsigned char mDirection;   /**< Facing direction. */
 
         std::string mName;

@@ -316,7 +316,10 @@ static void informPlayer(MapComposite *map, Character *p)
         {
             moveMsg.writeShort(opos.x);
             moveMsg.writeShort(opos.y);
-            moveMsg.writeByte(o->getSpeed() / 10);
+            // We multiply the sent speed (in tiles per second) by ten
+            // to get it within a byte with decimal precision.
+            // For instance, a value of 4.5 will be sent as 45.
+            moveMsg.writeByte((unsigned short) (o->getSpeed() * 10));
         }
     }
 

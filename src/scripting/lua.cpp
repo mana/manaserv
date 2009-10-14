@@ -586,6 +586,7 @@ static int being_type(lua_State *s)
 /**
  * Function for making a being walk to a position
  * being_walk(Being *being, int x, int y, int speed)
+ * The speed is in tile per second
  */
 static int being_walk(lua_State *s)
 {
@@ -601,7 +602,7 @@ static int being_walk(lua_State *s)
     Being *being = getBeing(s, 1);
     Point destination(lua_tointeger(s, 2), lua_tointeger(s, 3));
     being->setDestination(destination);
-    being->setSpeed(lua_tointeger(s, 4));
+    being->setSpeed(lua_tofloat(s, 4));
 
     return 0;
 }

@@ -135,8 +135,20 @@ Path Being::findPath()
     return map->findPath(startX, startY, destX, destY, getWalkMask());
 }
 
+void Being::setSpeed(float s)
+{
+  if (s > 0)
+      mSpeed = (int)(32000 / (s * (float)DEFAULT_TILE_LENGTH));
+  else
+      mSpeed = 0;
+}
+
 void Being::move()
 {
+    // Don't deal with not moving beings
+    if (mSpeed <= 0 && mSpeed >= 32000)
+          return;
+
     mOld = getPosition();
 
     if (mActionTime > 100)

@@ -57,9 +57,13 @@ enum
 };
 
 /**
- * Determine the area in which a character is aware of other beings
+ * Determine the default area in which a character is aware of other beings
  */
-const int INTERACTION_TILES_AREA = 20;
+const int DEFAULT_INTERACTION_TILES_AREA = 20;
+/**
+ * Default tile length in pixel
+ */
+const int DEFAULT_TILE_LENGTH = 32;
 
 /**
  * Possible states of beings.
