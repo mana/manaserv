@@ -590,7 +590,7 @@ static int being_type(lua_State *s)
  */
 static int being_walk(lua_State *s)
 {
-    if (!lua_isnumber(s, 2) || !lua_isnumber(s, 3) || !lua_isnumber(s, 4))
+    if (!lua_isnumber(s, 2) || !lua_isnumber(s, 3))
     {
         raiseScriptError(s, "being_walk called with incorrect parameters.");
         return 0;
@@ -598,11 +598,12 @@ static int being_walk(lua_State *s)
 
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
-
     Being *being = getBeing(s, 1);
     Point destination(lua_tointeger(s, 2), lua_tointeger(s, 3));
     being->setDestination(destination);
-    being->setSpeed(lua_tofloat(s, 4));
+
+    if (lua_isnumber(s, 4))
+        being->setSpeed((float) lua_tonumber(s, 4));
 
     return 0;
 }
