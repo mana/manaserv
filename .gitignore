@@ -18,7 +18,9 @@ stamp-h1
 
 # files generated during build
 *.o
+*.moc
 .dirstamp
+tools/monitor/monitor
 src/tmwserv-account
 src/tmwserv-game
 accountserver.exe
