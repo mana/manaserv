@@ -101,6 +101,7 @@ void initialize()
     signal(SIGQUIT, closeGracefully);
 #endif
     signal(SIGINT, closeGracefully);
+    signal(SIGTERM, closeGracefully);
 
     /*
      * If the path values aren't defined, we set the default

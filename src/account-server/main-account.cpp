@@ -94,6 +94,7 @@ static void initialize()
     signal(SIGQUIT, closeGracefully);
 #endif
     signal(SIGINT, closeGracefully);
+    signal(SIGTERM, closeGracefully);
 
     // Set enet to quit on exit.
     atexit(enet_deinitialize);
