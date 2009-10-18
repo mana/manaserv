@@ -80,7 +80,7 @@ class ConnectionHandler
         /**
          * Return the number of connected clients.
          */
-        unsigned int getClientNumber();
+        unsigned int getClientCount() const;
 
     private:
         ENetAddress address;      /**< Includes the port to listen to. */

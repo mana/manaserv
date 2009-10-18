@@ -29,7 +29,7 @@
 
 class AccountHandler;
 
-enum
+enum AccountClientStatus
 {
     CLIENT_LOGIN = 0,
     CLIENT_CONNECTED,
@@ -68,7 +68,7 @@ class AccountClient : public NetComputer
         Account *getAccount() const
         { return mAccount; }
 
-        int status;
+        AccountClientStatus status;
 
     private:
         /** Account associated with connection */

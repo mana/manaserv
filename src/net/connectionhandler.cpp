@@ -147,7 +147,7 @@ void ConnectionHandler::sendToEveryone(const MessageOut &msg)
     }
 }
 
-unsigned int ConnectionHandler::getClientNumber()
+unsigned int ConnectionHandler::getClientCount() const
 {
     return clients.size();
 }

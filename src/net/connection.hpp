@@ -27,7 +27,6 @@
 
 class MessageIn;
 class MessageOut;
-class BandwidthMonitor;
 
 /**
  * A point-to-point connection to a remote host. The remote host can use a

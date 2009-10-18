@@ -26,7 +26,6 @@
 #include <enet/enet.h>
 
 class MessageOut;
-class BandwidthMonitor;
 
 /**
  * This class represents a known computer on the network. For example a

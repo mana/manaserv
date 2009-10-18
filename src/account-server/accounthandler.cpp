@@ -216,7 +216,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     const unsigned maxClients =
             (unsigned) Configuration::getValue("net_maxClients", 1000);
 
-    if (getClientNumber() >= maxClients)
+    if (getClientCount() >= maxClients)
     {
         reply.writeByte(ERRMSG_SERVER_FULL);
         client.send(reply);

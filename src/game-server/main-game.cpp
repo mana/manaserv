@@ -182,7 +182,7 @@ void initialize()
     // Set enet to quit on exit.
     atexit(enet_deinitialize);
 
-    // Pre-calulate the needed trigomic function values
+    // Pre-calculate the needed trigomic function values
     utils::math::init();
 
     // Initialize the processor utility functions
