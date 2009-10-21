@@ -224,7 +224,8 @@ ServerMonitor::ServerMonitor()
         qFatal("Couldn't create TERM socketpair");
 
     snTerm = new QSocketNotifier(sigtermFd[1], QSocketNotifier::Read, this);
-    connect(snTerm, SIGNAL(activated(int)), qApp, SLOT(quit()));
+    connect(snTerm, SIGNAL(activated(int)),
+            QCoreApplication::instance(), SLOT(quit()));
 }
 
 void ServerMonitor::setupUnixSignalHandlers()
