@@ -389,29 +389,41 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             Being::Action action = (Being::Action)message.readByte();
             Being::Action current = (Being::Action)computer.character->getAction();
+            bool logActionChange = true;
 
             switch (action)
             {
                 case Being::STAND:
                 {
                     if (current == Being::SIT)
+                    {
                         computer.character->setAction(Being::STAND);
+                        logActionChange = false;
+                    }
                 } break;
                 case Being::SIT:
                 {
                     if (current == Being::STAND)
+                    {
                         computer.character->setAction(Being::SIT);
+                        logActionChange = false;
+                    }
                 } break;
                 default:
                     break;
             }
 
-            // log transaction
-            std::stringstream str;
-            str << "User changed action from " << current
-                << " to " << action;
-            accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                TRANS_ACTION_CHANGE, str.str());
+            // Log the action change only when this is relevant.
+            if (logActionChange)
+            {
+                // log transaction
+                std::stringstream str;
+                str << "User changed action from " << current
+                    << " to " << action;
+                accountHandler->sendTransaction(
+                    computer.character->getDatabaseID(),
+                    TRANS_ACTION_CHANGE, str.str());
+            }
 
         } break;
 
