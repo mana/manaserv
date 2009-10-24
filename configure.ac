@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([TMW Server], [0.0.1], [themanaworld-devel@lists.sourceforge.net], [tmwserv])
+AC_INIT([Mana Server], [1.0.0], [themanaworld-devel@lists.sourceforge.net], [manaserv])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
 
@@ -56,17 +56,17 @@ AC_ARG_WITH(
 
 if test "$with_storage_backend" = "mysql"; then
     # use mysql_config to check libmysqlclient.
-    # MYSQLCLIENT_CFLAGS and MYSQLCLIENT_LIBS are set by AC_CHECK_LIB_TMW.
-    AC_CHECK_LIB_TMW([mysqlclient], [4.1.0], [mysql_config])
+    # MYSQLCLIENT_CFLAGS and MYSQLCLIENT_LIBS are set by AC_CHECK_LIB_MANA.
+    AC_CHECK_LIB_MANA([mysqlclient], [4.1.0], [mysql_config])
 
     # update CXXFLAGS and LIBS.
     CXXFLAGS="$CXXFLAGS -DMYSQL_SUPPORT $MYSQLCLIENT_CFLAGS"
     LIBS="$LIBS $MYSQLCLIENT_LIBS"
 elif test "$with_storage_backend" = "postgresql"; then
     # use pg_config to check libpq.
-    # PQ_CFLAGS and PQ_LIBS are set by AC_CHECK_LIB_TMW.
+    # PQ_CFLAGS and PQ_LIBS are set by AC_CHECK_LIB_MANA.
     # NOTE: PQ_LIBS not set correctly
-    AC_CHECK_LIB_TMW([pq], [7.0.0], [pg_config])
+    AC_CHECK_LIB_MANA([pq], [7.0.0], [pg_config])
 
     # update CXXFLAGS and LIBS.
     CXXFLAGS="$CXXFLAGS -DPOSTGRESQL_SUPPORT $PQ_CFLAGS"

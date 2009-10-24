@@ -1,5 +1,5 @@
 /*
- *  The Mana World Server
+ *  The Mana Server
  *  Copyright 2008 The Mana World Development Team
  *
  *  This file is part of The Mana World.
@@ -16,19 +16,17 @@
  *  You should  have received a  copy of the  GNU General Public  License along
  *  with The Mana  World; if not, write to the  Free Software Foundation, Inc.,
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *  $Id$
  */
 
-CREATE USER 'tmw'@'%' IDENTIFIED BY 'testtest';
-CREATE USER 'tmw'@'localhost' IDENTIFIED BY 'testtest';
+CREATE USER 'mana'@'%' IDENTIFIED BY 'testtest';
+CREATE USER 'mana'@'localhost' IDENTIFIED BY 'testtest';
 
-GRANT USAGE ON * . * TO 'tmw'@'%' IDENTIFIED BY 'testtest' 
+GRANT USAGE ON * . * TO 'mana'@'%' IDENTIFIED BY 'testtest'
 	WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;
-GRANT USAGE ON * . * TO 'tmw'@'localhost' IDENTIFIED BY 'testtest' 
+GRANT USAGE ON * . * TO 'mana'@'localhost' IDENTIFIED BY 'testtest'
 	WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;
 
-CREATE DATABASE IF NOT EXISTS `tmw` ;
+CREATE DATABASE IF NOT EXISTS `mana` ;
 
-GRANT ALL PRIVILEGES ON `tmw` . * TO 'tmw'@'%';
-GRANT ALL PRIVILEGES ON `tmw` . * TO 'tmw'@'localhost';
+GRANT ALL PRIVILEGES ON `mana` . * TO 'mana'@'%';
+GRANT ALL PRIVILEGES ON `mana` . * TO 'mana'@'localhost';

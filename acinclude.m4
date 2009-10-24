@@ -1,6 +1,6 @@
 dnl $Id$
 
-dnl @synopsis AC_CHECK_LIB_TMW(
+dnl @synopsis AC_CHECK_LIB_MANA(
 dnl               LIBRARY
 dnl               [, MINIMUM-VERSION
 dnl               [, LIBRARY-CONFIG-EXE
@@ -20,7 +20,7 @@ dnl (In other words, it must be like gtk-config.)
 dnl
 dnl Example:
 dnl
-dnl    AC_CHECK_LIB_TMW(foo, 1.0.0)
+dnl    AC_CHECK_LIB_MANA(foo, 1.0.0)
 dnl
 dnl would run `foo-config --version' and check that it is at least 1.0.0.
 dnl
@@ -36,7 +36,7 @@ dnl as the script to execute instead of the default `foo-config`.
 
 m4_include(ax_compare_version.m4)
 
-AC_DEFUN([AC_CHECK_LIB_TMW], [
+AC_DEFUN([AC_CHECK_LIB_MANA], [
     dnl define macros to uppercase or lowercase a string.
     pushdef([UP], translit([$1], [a-z], [A-Z]))dnl
     pushdef([DOWN], translit([$1], [A-Z], [a-z]))dnl

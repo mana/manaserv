@@ -1,8 +1,8 @@
 --
--- table: `tmw_accounts`
+-- table: `mana_accounts`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_accounts` (
+CREATE TABLE IF NOT EXISTS `mana_accounts` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `username`     varchar(64)           NOT NULL,
     `password`     varchar(64)           NOT NULL,
@@ -20,13 +20,13 @@ DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_characters`
+-- table: `mana_characters`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_characters` (
+CREATE TABLE IF NOT EXISTS `mana_characters` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `user_id`      int(10)      unsigned NOT NULL,
-	`name`         varchar(32)           NOT NULL,
+    `name`         varchar(32)           NOT NULL,
     --
     `gender`       tinyint(3)   unsigned NOT NULL,
     `hair_style`   tinyint(3)   unsigned NOT NULL,
@@ -51,38 +51,38 @@ CREATE TABLE IF NOT EXISTS `tmw_characters` (
     UNIQUE KEY `name` (`name`),
     KEY `user_id` (`user_id`),
     FOREIGN KEY (`user_id`)
-    	REFERENCES `tmw_accounts` (`id`)
+    	REFERENCES `mana_accounts` (`id`)
     	ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_char_skills`
+-- table: `mana_char_skills`
 --
-CREATE TABLE IF NOT EXISTS `tmw_char_skills` (
+CREATE TABLE IF NOT EXISTS `mana_char_skills` (
     `char_id`      int(10)      unsigned NOT NULL,
     `skill_id`     smallint(5)  unsigned NOT NULL,
     `skill_exp`    smallint(5)  unsigned NOT NULL,
     --
     PRIMARY KEY (`char_id`, `skill_id`),
     FOREIGN KEY (`char_id`)
-        REFERENCES `tmw_characters` (`id`)
+        REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
 --
--- table: `tmw_char_status_effects`
+-- table: `mana_char_status_effects`
 --
-CREATE TABLE IF NOT EXISTS `tmw_char_status_effects` (
+CREATE TABLE IF NOT EXISTS `mana_char_status_effects` (
     `char_id`       int(10)         unsigned NOT NULL,
     `status_id`     smallint(5)     unsigned NOT NULL,
     `status_time`   int(10)         signed NOT NULL,
     --
     PRIMARY KEY (`char_id`, `status_id`),
     FOREIGN KEY (`char_id`)
-        REFERENCES `tmw_characters` (`id`)
+        REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE
 ) ENGING=InnoDB
 DEFAULT CHARSET=utf8;
@@ -91,9 +91,9 @@ DEFAULT CHARSET=utf8;
 
 
 --
--- table: `tmw_items`
+-- table: `mana_items`
 --
-CREATE TABLE IF NOT EXISTS `tmw_items` (
+CREATE TABLE IF NOT EXISTS `mana_items` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `name`         varchar(100)          NOT NULL,
     `description`  varchar(255)          NOT NULL,
@@ -110,24 +110,24 @@ DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_item_instances`
+-- table: `mana_item_instances`
 --
-CREATE TABLE IF NOT EXISTS `tmw_item_instances` (
+CREATE TABLE IF NOT EXISTS `mana_item_instances` (
     `item_id`      int(10)      unsigned NOT NULL auto_increment,
     `itemclass_id` int(10)      unsigned NOT NULL,
     `amount`       tinyint(3)   unsigned NOT NULL,
     --
     PRIMARY KEY (`item_id`),
     FOREIGN KEY (`itemclass_id`)
-        REFERENCES `tmw_items` (`id`)
+        REFERENCES `mana_items` (`id`)
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_item_attributes`
+-- table: `mana_item_attributes`
 --
-CREATE TABLE IF NOT EXISTS `tmw_item_attributes` (
+CREATE TABLE IF NOT EXISTS `mana_item_attributes` (
     `attribute_id`    int(10)      unsigned NOT NULL auto_increment,
     `item_id`         int(10)      unsigned NOT NULL,
     `attribute_class` tinyint(3)   unsigned NOT NULL,
@@ -135,17 +135,17 @@ CREATE TABLE IF NOT EXISTS `tmw_item_attributes` (
     --
     PRIMARY KEY (`attribute_id`),
     FOREIGN KEY (`item_id`)
-        REFERENCES `tmw_item_instances` (`item_id`)
+        REFERENCES `mana_item_instances` (`item_id`)
         ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_inventories`
--- todo: remove class_id and amount and reference on tmw_item_instances
+-- table: `mana_inventories`
+-- todo: remove class_id and amount and reference on mana_item_instances
 --
-CREATE TABLE IF NOT EXISTS `tmw_inventories` (
+CREATE TABLE IF NOT EXISTS `mana_inventories` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `owner_id`     int(10)      unsigned NOT NULL,
     `slot`         tinyint(3)   unsigned NOT NULL,
@@ -155,16 +155,16 @@ CREATE TABLE IF NOT EXISTS `tmw_inventories` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `owner_id` (`owner_id`, `slot`),
     FOREIGN KEY (`owner_id`)
-    	REFERENCES `tmw_characters` (`id`)
+    	REFERENCES `mana_characters` (`id`)
     	ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_world_states`
+-- table: `mana_world_states`
 --
-CREATE TABLE IF NOT EXISTS `tmw_world_states` (
+CREATE TABLE IF NOT EXISTS `mana_world_states` (
     `state_name`   varchar(100)          NOT NULL,
     `map_id`       int(10)      unsigned default NULL,
     `value`        varchar(255)          default NULL,
@@ -174,14 +174,14 @@ CREATE TABLE IF NOT EXISTS `tmw_world_states` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
-INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL,UNIX_TIMESTAMP());
-INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL,UNIX_TIMESTAMP());
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'3', UNIX_TIMESTAMP());
+INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL,UNIX_TIMESTAMP());
+INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL,UNIX_TIMESTAMP());
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'3', UNIX_TIMESTAMP());
 
 --
--- table: `tmw_guilds`
+-- table: `mana_guilds`
 --
-CREATE TABLE IF NOT EXISTS `tmw_guilds` (
+CREATE TABLE IF NOT EXISTS `mana_guilds` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `name`         varchar(35)           NOT NULL,
     --
@@ -192,44 +192,44 @@ DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_guild_members`
+-- table: `mana_guild_members`
 --
-CREATE TABLE IF NOT EXISTS `tmw_guild_members` (
+CREATE TABLE IF NOT EXISTS `mana_guild_members` (
 	`guild_id`     int(10)      unsigned NOT NULL,
 	`member_id`    int(10)      unsigned NOT NULL,
 	`rights`       int(10)      unsigned NOT NULL,
 	--
 	PRIMARY KEY (`guild_id`, `member_id`),
 	FOREIGN KEY (`guild_id`)
-		REFERENCES `tmw_guilds` (`id`)
+		REFERENCES `mana_guilds` (`id`)
 		ON DELETE CASCADE,
 	FOREIGN KEY (`member_id`)
-		REFERENCES `tmw_characters` (`id`)
+		REFERENCES `mana_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
 --
--- table: `tmw_quests`
+-- table: `mana_quests`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_quests` (
+CREATE TABLE IF NOT EXISTS `mana_quests` (
 	`owner_id`     int(10)      unsigned NOT NULL,
 	`name`         varchar(100)          NOT NULL,
 	`value`        varchar(200)          NOT NULL,
 	--
 	PRIMARY KEY (`owner_id`, `name`),
 	FOREIGN KEY (`owner_id`)
-		REFERENCES `tmw_characters` (`id`)
+		REFERENCES `mana_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
 --
--- table: `tmw_auctions`
+-- table: `mana_auctions`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_auctions` (
+CREATE TABLE IF NOT EXISTS `mana_auctions` (
 	`auction_id`    int(10)      unsigned  NOT NULL auto_increment,
 	`auction_state` tinyint(3)   unsigned  NOT NULL,
 	`char_id`       int(10)      unsigned  NOT NULL,
@@ -247,17 +247,17 @@ CREATE TABLE IF NOT EXISTS `tmw_auctions` (
 	KEY (`itemclass_id`),
 	KEY (`char_id`),
 	FOREIGN KEY (`char_id`)
-		REFERENCES `tmw_characters` (`id`)
+		REFERENCES `mana_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_auction_bids`
+-- table: `mana_auction_bids`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_auction_bids` (
+CREATE TABLE IF NOT EXISTS `mana_auction_bids` (
 	`bid_id`        int(10)      unsigned  NOT NULL auto_increment,
 	`auction_id`    int(10)      unsigned  NOT NULL,
 	`char_id`       int(10)      unsigned  NOT NULL,
@@ -268,17 +268,17 @@ CREATE TABLE IF NOT EXISTS `tmw_auction_bids` (
 	KEY (`auction_id`),
 	KEY (`char_id`),
 	FOREIGN KEY (`char_id`)
-		REFERENCES `tmw_characters` (`id`)
+		REFERENCES `mana_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_post`
+-- table: `mana_post`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_post` (
+CREATE TABLE IF NOT EXISTS `mana_post` (
 	`letter_id`        int(10)      unsigned  NOT NULL auto_increment,
 	`sender_id`        int(10)      unsigned  NOT NULL,
 	`receiver_id`      int(10)      unsigned  NOT NULL,
@@ -292,20 +292,20 @@ CREATE TABLE IF NOT EXISTS `tmw_post` (
 	INDEX `fk_letter_receiver` (`receiver_id` ASC) ,
 	--
 	FOREIGN KEY (`sender_id` )
-		REFERENCES `tmw_characters` (`id`)
+		REFERENCES `mana_characters` (`id`)
 		ON DELETE CASCADE,
     FOREIGN KEY (`receiver_id` )
-		REFERENCES `tmw_characters` (`id`)
+		REFERENCES `mana_characters` (`id`)
 		ON DELETE CASCADE
 ) ENGINE = InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_post_attachements`
+-- table: `mana_post_attachements`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_post_attachments` (
+CREATE TABLE IF NOT EXISTS `mana_post_attachments` (
 	`attachment_id`    int(10)      unsigned  NOT NULL auto_increment,
 	`letter_id`        int(10)      unsigned  NOT NULL,
 	`item_id`          int(10)      unsigned  NOT NULL,
@@ -315,32 +315,32 @@ CREATE TABLE IF NOT EXISTS `tmw_post_attachments` (
 	INDEX `fk_attachment_item` (`item_id` ASC),
 	--
 	FOREIGN KEY (`letter_id` )
-		REFERENCES `tmw_post` (`letter_id`)
+		REFERENCES `mana_post` (`letter_id`)
 		ON DELETE CASCADE,
 	FOREIGN KEY (`item_id` )
-		REFERENCES `tmw_item_instances` (`item_id`)
+		REFERENCES `mana_item_instances` (`item_id`)
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `tmw_online_list`
+-- table: `mana_online_list`
 --
 
-CREATE TABLE IF NOT EXISTS `tmw_online_list` (
+CREATE TABLE IF NOT EXISTS `mana_online_list` (
     `char_id`      int(10)      unsigned NOT NULL,
     `login_date`   int(10)      NOT NULL,
     --
     PRIMARY KEY (`char_id`),
-    FOREIGN KEY (`char_id`) 
-    	REFERENCES `tmw_characters` (`id`)
+    FOREIGN KEY (`char_id`)
+    	REFERENCES `mana_characters` (`id`)
     	ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8 ;
 
 -- create a view to show more details about online users
-CREATE VIEW tmw_v_online_chars
+CREATE VIEW mana_v_online_chars
 AS
    SELECT l.char_id    as char_id,
           l.login_date as login_date,
@@ -349,12 +349,12 @@ AS
           c.gender     as gender,
           c.level      as level,
           c.map_id     as map_id
-     FROM tmw_online_list l
-     JOIN tmw_characters c
+     FROM mana_online_list l
+     JOIN mana_characters c
        ON l.char_id = c.id;
 
- 
-CREATE TABLE IF NOT EXISTS `tmw_transactions` (
+
+CREATE TABLE IF NOT EXISTS `mana_transactions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `char_id` int(11) NOT NULL,
   `action` int(11) NOT NULL,

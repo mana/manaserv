@@ -21,8 +21,8 @@ stamp-h1
 *.moc
 .dirstamp
 tools/monitor/monitor
-src/tmwserv-account
-src/tmwserv-game
+src/manaserv-account
+src/manaserv-game
 accountserver.exe
 accountserver.depend
 gameserver.exe
@@ -33,8 +33,8 @@ docs/api
 doxygen_warnings.txt
 
 # files generated during test/runtime
-tmw.db
-tmwserv-account.log
-tmwserv-game.log
-tmwserv.stats
-tmwserv.xml
+mana.db
+manaserv-account.log
+manaserv-game.log
+manaserv.stats
+manaserv.xml

@@ -34,9 +34,9 @@ const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD  ="mysql_password";
 
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_HOST_DEF = "localhost";
 const unsigned int MySqlDataProvider::CFGPARAM_MYSQL_PORT_DEF = 3306;
-const std::string  MySqlDataProvider::CFGPARAM_MYSQL_DB_DEF   = "tmw";
-const std::string  MySqlDataProvider::CFGPARAM_MYSQL_USER_DEF = "tmw";
-const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD_DEF  = "tmw";
+const std::string  MySqlDataProvider::CFGPARAM_MYSQL_DB_DEF   = "mana";
+const std::string  MySqlDataProvider::CFGPARAM_MYSQL_USER_DEF = "mana";
+const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD_DEF  = "mana";
 
 /**
  * Constructor.

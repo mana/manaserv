@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_DALSTORAGE_SQL_H_
-#define _TMWSERV_DALSTORAGE_SQL_H_
+#ifndef _MANASERV_DALSTORAGE_SQL_H_
+#define _MANASERV_DALSTORAGE_SQL_H_
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,92 +60,92 @@
 
 
 /**
- * TABLE: tmw_accounts.
+ * TABLE: mana_accounts.
  */
-static const char *ACCOUNTS_TBL_NAME = "tmw_accounts";
+static const char *ACCOUNTS_TBL_NAME = "mana_accounts";
 
 /**
- * TABLE: tmw_characters.
+ * TABLE: mana_characters.
  *     - gender is 0 for male, 1 for female.
  */
-static const char *CHARACTERS_TBL_NAME = "tmw_characters";
+static const char *CHARACTERS_TBL_NAME = "mana_characters";
 
 /**
- * TABLE: tmw_char_skills.
+ * TABLE: mana_char_skills.
  */
-static const char *CHAR_SKILLS_TBL_NAME = "tmw_char_skills";
+static const char *CHAR_SKILLS_TBL_NAME = "mana_char_skills";
 
 /**
- * TABLE: tmw_char_status_effects.
+ * TABLE: mana_char_status_effects.
  */
-static const char *CHAR_STATUS_EFFECTS_TBL_NAME = "tmw_char_status_effects";
+static const char *CHAR_STATUS_EFFECTS_TBL_NAME = "mana_char_status_effects";
 
 /**
- * TABLE: tmw_inventories.
+ * TABLE: mana_inventories.
  */
-static const char *INVENTORIES_TBL_NAME("tmw_inventories");
+static const char *INVENTORIES_TBL_NAME("mana_inventories");
 
 /**
- * TABLE: tmw_items.
+ * TABLE: mana_items.
  */
-static const char *ITEMS_TBL_NAME("tmw_items");
+static const char *ITEMS_TBL_NAME("mana_items");
 
 /**
- * TABLE: tmw_guilds.
+ * TABLE: mana_guilds.
  * Store player guilds
  */
-static const char *GUILDS_TBL_NAME = "tmw_guilds";
+static const char *GUILDS_TBL_NAME = "mana_guilds";
 
 /**
- * TABLE: tmw_guild_members.
+ * TABLE: mana_guild_members.
  * Store guild members
  */
-static const char *GUILD_MEMBERS_TBL_NAME = "tmw_guild_members";
+static const char *GUILD_MEMBERS_TBL_NAME = "mana_guild_members";
 
 /**
- * TABLE: tmw_quests.
+ * TABLE: mana_quests.
  */
-static const char *QUESTS_TBL_NAME = "tmw_quests";
+static const char *QUESTS_TBL_NAME = "mana_quests";
 
 /**
- * TABLE: tmw_world_states
+ * TABLE: mana_world_states
  */
-static const char *WORLD_STATES_TBL_NAME = "tmw_world_states";
+static const char *WORLD_STATES_TBL_NAME = "mana_world_states";
 
 /**
- * TABLE: tmw_post
+ * TABLE: mana_post
  * Store letters sent by characters
  */
-static const char *POST_TBL_NAME = "tmw_post";
+static const char *POST_TBL_NAME = "mana_post";
 
 /**
- * TABLE: tmw_post_attachments
+ * TABLE: mana_post_attachments
  * Store attachments per letter.
  */
-static const char *POST_ATTACHMENTS_TBL_NAME = "tmw_post_attachments";
+static const char *POST_ATTACHMENTS_TBL_NAME = "mana_post_attachments";
 
 /**
- * TABLE: tmw_auctions
+ * TABLE: mana_auctions
  * Store items auctions.
  */
-static const char *AUCTION_TBL_NAME = "tmw_auctions";
+static const char *AUCTION_TBL_NAME = "mana_auctions";
 
 /**
- * TABLE: tmw_auction_bids
+ * TABLE: mana_auction_bids
  * Store bids on auctions.
  */
-static const char *AUCTION_BIDS_TBL_NAME = "tmw_auction_bids";
+static const char *AUCTION_BIDS_TBL_NAME = "mana_auction_bids";
 
 /**
- * TABLE: tmw_online_list
+ * TABLE: mana_online_list
  * List currently online users.
  */
-static const char *ONLINE_USERS_TBL_NAME = "tmw_online_list";
+static const char *ONLINE_USERS_TBL_NAME = "mana_online_list";
 
 /**
- * TABLE: tmw_transactions
+ * TABLE: mana_transactions
  * Stores all transactions
  */
-static const char *TRANSACTION_TBL_NAME = "tmw_transactions";
+static const char *TRANSACTION_TBL_NAME = "mana_transactions";
 
-#endif // _TMWSERV_DALSTORAGE_SQL_H_
+#endif // _MANASERV_DALSTORAGE_SQL_H_

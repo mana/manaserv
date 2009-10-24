@@ -60,7 +60,7 @@ extern "C" {
 
 /**
  * Callback for sending a NPC_MESSAGE.
- * tmw.npc_message(npc, character, string)
+ * mana.npc_message(npc, character, string)
  */
 static int npc_message(lua_State *s)
 {
@@ -82,7 +82,7 @@ static int npc_message(lua_State *s)
 
 /**
  * Callback for sending a NPC_CHOICE.
- * tmw.npc_choice(npc, character, string...)
+ * mana.npc_choice(npc, character, string...)
  */
 static int npc_choice(lua_State *s)
 {
@@ -129,7 +129,7 @@ static int npc_choice(lua_State *s)
 
 /**
  * Callback for sending a NPC_INTEGER.
- * tmw.npc_integer(npc, character, min, max, defaut)
+ * mana.npc_integer(npc, character, min, max, defaut)
  */
 static int npc_ask_integer(lua_State *s)
 {
@@ -159,7 +159,7 @@ static int npc_ask_integer(lua_State *s)
 
 /**
  * Callback for sending a NPC_STRING.
- * tmw.npc_ask_string(npc, character)
+ * mana.npc_ask_string(npc, character)
  */
 static int npc_ask_string(lua_State *s)
 {
@@ -179,7 +179,7 @@ static int npc_ask_string(lua_State *s)
 
 /**
  * Callback for creating a NPC on the current map with the current script.
- * tmw.npc_create(string name, int id, int x, int y): npc
+ * mana.npc_create(string name, int id, int x, int y): npc
  */
 static int npc_create(lua_State *s)
 {
@@ -226,7 +226,7 @@ static int npc_end(lua_State *s)
 
 /**
  * Callback for sending a NPC_POST.
- * tmw.npc_post(npc, character)
+ * mana.npc_post(npc, character)
  */
 static int npc_post(lua_State *s)
 {
@@ -248,7 +248,7 @@ static int npc_post(lua_State *s)
 
 /**
  * Enable a NPC if it has previously disabled
- * tmw.npc_enable(npc)
+ * mana.npc_enable(npc)
  */
 static int npc_enable(lua_State *s)
 {
@@ -265,7 +265,7 @@ static int npc_enable(lua_State *s)
 
 /**
  * Disable a NPC
- * tmw.npc_disable(npc)
+ * mana.npc_disable(npc)
  */
 static int npc_disable(lua_State *s)
 {
@@ -281,7 +281,7 @@ static int npc_disable(lua_State *s)
 
 /**
  * Callback for warping a player to another place.
- * tmw.chr_warp(character, nil/int map, int x, int y)
+ * mana.chr_warp(character, nil/int map, int x, int y)
  */
 static int chr_warp(lua_State *s)
 {
@@ -344,7 +344,7 @@ static int chr_warp(lua_State *s)
  * the function returns false. Otherwise the function will return true. When
  * the item identifier is zero, money is modified.
  * Note: If an insertion fails, extra items are dropped on the floor.
- * tmw.chr_inv_change(character, (int id, int nb)...): bool success
+ * mana.chr_inv_change(character, (int id, int nb)...): bool success
  */
 static int chr_inv_change(lua_State *s)
 {
@@ -410,7 +410,7 @@ static int chr_inv_change(lua_State *s)
 /**
  * Callback for counting items in inventory.
  * When an item identifier is zero, money is queried.
- * tmw.chr_inv_count(character, int id...): int count...
+ * mana.chr_inv_count(character, int id...): int count...
  */
 static int chr_inv_count(lua_State *s)
 {
@@ -439,7 +439,7 @@ static int chr_inv_count(lua_State *s)
 
 /**
  * Callback for trading between a player and an NPC.
- * tmw.npc_trade(npc, character, bool sell, table items)
+ * mana.npc_trade(npc, character, bool sell, table items)
  */
 static int npc_trade(lua_State *s)
 {
@@ -482,7 +482,7 @@ static int npc_trade(lua_State *s)
 
 /**
  * Applies a status effect with id to the being given for a amount of time
- * tmw.being_apply_status(Being *being, int id, int time)
+ * mana.being_apply_status(Being *being, int id, int time)
  */
 
 static int being_apply_status(lua_State *s)
@@ -501,7 +501,7 @@ static int being_apply_status(lua_State *s)
 
 /**
  * Removes the given status effect
- * tmw.being_remove_status(Being *being, int id)
+ * mana.being_remove_status(Being *being, int id)
  */
 static int being_remove_status(lua_State *s)
 {
@@ -517,7 +517,7 @@ static int being_remove_status(lua_State *s)
 
 /**
  * Returns true if a being has the given status effect
- * tmw.being_has_status(Being *being, int id)
+ * mana.being_has_status(Being *being, int id)
  */
 static int being_has_status(lua_State *s)
 {
@@ -533,7 +533,7 @@ static int being_has_status(lua_State *s)
 
 /**
  * Returns the time left on the given status effect
- * tmw.being_get_status_time(Being *being, int id)
+ * mana.being_get_status_time(Being *being, int id)
  */
 static int being_get_status_time(lua_State *s)
 {
@@ -549,7 +549,7 @@ static int being_get_status_time(lua_State *s)
 
 /**
  * Sets the time left on the given status effect
- * tmw.being_set_status_time(Being *being, int id)
+ * mana.being_set_status_time(Being *being, int id)
  */
 static int being_set_status_time(lua_State *s)
 {
@@ -566,7 +566,7 @@ static int being_set_status_time(lua_State *s)
 
 /**
  * Returns the Thing type of the given Being
- * tmw.being_type(Being *being)
+ * mana.being_type(Being *being)
  */
 static int being_type(lua_State *s)
 {
@@ -610,7 +610,7 @@ static int being_walk(lua_State *s)
 
 /**
  * Makes the being say something
- * tmw.being_say(source, message)
+ * mana.being_say(source, message)
  */
 static int being_say(lua_State *s)
 {
@@ -637,7 +637,7 @@ static int being_say(lua_State *s)
 
 /**
  * Applies combat damage to a being
- * tmw.being_damage(victim, value, delta, cth, type, element)
+ * mana.being_damage(victim, value, delta, cth, type, element)
  */
 static int being_damage(lua_State *s)
 {
@@ -660,7 +660,7 @@ static int being_damage(lua_State *s)
 
 /**
  * Gets the attribute for a being
- * tmw.being_get_attribute(being, attribute)
+ * mana.being_get_attribute(being, attribute)
  */
 static int being_get_attribute(lua_State *s)
 {
@@ -689,7 +689,7 @@ static int being_get_attribute(lua_State *s)
 
 /**
  * Gets the being's name
- * tmw.being_get_name(being)
+ * mana.being_get_name(being)
  */
 static int being_get_name(lua_State *s)
 {
@@ -708,7 +708,7 @@ static int being_get_name(lua_State *s)
 
 /**
  * Gets the being's current action
- * tmw.being_get_action(being)
+ * mana.being_get_action(being)
  */
 static int being_get_action(lua_State *s)
 {
@@ -727,7 +727,7 @@ static int being_get_action(lua_State *s)
 
 /**
  * Sets the being's current action
- * tmw.being_set_action(being, action)
+ * mana.being_set_action(being, action)
  */
 static int being_set_action(lua_State *s)
 {
@@ -748,7 +748,7 @@ static int being_set_action(lua_State *s)
 
 /**
  * Gets the being's current direction
- * tmw.being_get_direction(being)
+ * mana.being_get_direction(being)
  */
 static int being_get_direction(lua_State *s)
 {
@@ -767,7 +767,7 @@ static int being_get_direction(lua_State *s)
 
 /**
  * Sets the being's current direction
- * tmw.being_set_direction(being, direction)
+ * mana.being_set_direction(being, direction)
  */
 static int being_set_direction(lua_State *s)
 {
@@ -816,7 +816,7 @@ static int posY(lua_State *s)
 
 /**
  * Callback for creating a monster on the current map.
- * tmw.monster_create(int type, int x, int y)
+ * mana.monster_create(int type, int x, int y)
  */
 static int monster_create(lua_State *s)
 {
@@ -859,7 +859,7 @@ static int monster_create(lua_State *s)
 }
 
 /**
- * tmw.monster_load_script(mob, scriptfilename)
+ * mana.monster_load_script(mob, scriptfilename)
  * loads a LUA script given for mob
  */
 static int monster_load_script(lua_State *s)
@@ -886,7 +886,7 @@ static int monster_load_script(lua_State *s)
 /**
  * Callback for getting a quest variable. Starts a recovery and returns
  * immediatly, if the variable is not known yet.
- * tmw.chr_get_chest(character, string): nil or string
+ * mana.chr_get_chest(character, string): nil or string
  */
 static int chr_get_quest(lua_State *s)
 {
@@ -919,7 +919,7 @@ static int chr_get_quest(lua_State *s)
 
 /**
  * Callback for setting a quest variable.
- * tmw.chr_set_chest(character, string, string)
+ * mana.chr_set_chest(character, string, string)
  */
 static int chr_set_quest(lua_State *s)
 {
@@ -938,7 +938,7 @@ static int chr_set_quest(lua_State *s)
 /**
  * Creates a trigger area. Whenever an actor enters this area, a Lua function
  * is called.
- * tmw.trigger_create (x, y, width, height, function, id)
+ * mana.trigger_create (x, y, width, height, function, id)
  */
 static int trigger_create(lua_State *s)
 {
@@ -989,8 +989,8 @@ static int trigger_create(lua_State *s)
 
 /**
  * Creates a chat message in the users chatlog(s)
- * global message: tmw.chatmessage (message)
- * private massage: tmw.chatmessage (recipent, message)
+ * global message: mana.chatmessage (message)
+ * private massage: mana.chatmessage (recipent, message)
  */
 static int chatmessage(lua_State *s)
 {
@@ -1020,7 +1020,7 @@ static int chatmessage(lua_State *s)
 /**
  * Gets a LUA table with the being IDs of all beings
  * inside of a circular area of the current map.
- * tmw.get_beings_in_circle (x, y, radius)
+ * mana.get_beings_in_circle (x, y, radius)
  */
 static int get_beings_in_circle(lua_State *s)
 {
@@ -1083,7 +1083,7 @@ static int chr_get_post(lua_State *s)
  * Makes the server call the lua functions deathEvent
  * and removeEvent when the being dies or is removed
  * from the map.
- * tmw.being_register (being)
+ * mana.being_register (being)
  */
 static int being_register(lua_State *s)
 {
@@ -1110,8 +1110,8 @@ static int being_register(lua_State *s)
 
 /**
  * Triggers a special effect from the clients effects.xml
- * tmw.effect_create (id, x, y)
- * tmw.effect_create (id,being)
+ * mana.effect_create (id, x, y)
+ * mana.effect_create (id,being)
  */
 static int effect_create(lua_State *s)
 {
@@ -1153,7 +1153,7 @@ static int effect_create(lua_State *s)
 
 /**
  * Gets the exp total in a skill of a specific character
- * tmw.chr_get_exp (being, skill)
+ * mana.chr_get_exp (being, skill)
  */
 static int chr_get_exp(lua_State *s)
 {
@@ -1177,7 +1177,7 @@ static int chr_get_exp(lua_State *s)
  * Gives the character a certain amount of experience points
  * in a skill. Can also be used to reduce the exp amount when
  * desired.
- * tmw.chr_give_exp (being, skill, amount)
+ * mana.chr_give_exp (being, skill, amount)
  */
 static int chr_give_exp(lua_State *s)
 {
@@ -1199,7 +1199,7 @@ static int chr_give_exp(lua_State *s)
 
 /**
  * Sets the given character's hair style to the given style id
- * tmw.chr_set_hair_style (character, styleid)
+ * mana.chr_set_hair_style (character, styleid)
  */
 static int chr_set_hair_style(lua_State *s)
 {
@@ -1225,7 +1225,7 @@ static int chr_set_hair_style(lua_State *s)
 
 /**
  * Gets the hair style of the given character
- * tmw.chr_get_hair_style (character)
+ * mana.chr_get_hair_style (character)
  */
 static int chr_get_hair_style(lua_State *s)
 {
@@ -1244,7 +1244,7 @@ static int chr_get_hair_style(lua_State *s)
 
 /**
  * Set the hair color of the given character to the given color id
- * tmw.chr_set_hair_color (character, colorid)
+ * mana.chr_set_hair_color (character, colorid)
  */
 static int chr_set_hair_color(lua_State *s)
 {
@@ -1270,7 +1270,7 @@ static int chr_set_hair_color(lua_State *s)
 
 /**
  * Get the hair color of the given character
- * tmw.chr_get_hair_color (character)
+ * mana.chr_get_hair_color (character)
  */
 static int chr_get_hair_color(lua_State *s)
 {
@@ -1289,7 +1289,7 @@ static int chr_get_hair_color(lua_State *s)
 
 /**
  * Returns the rights level of a character.
- * tmw.chr_get_rights (being)
+ * mana.chr_get_rights (being)
  */
 static int chr_get_rights(lua_State *s)
 {
@@ -1305,7 +1305,7 @@ static int chr_get_rights(lua_State *s)
 
 /**
  * Returns the exp total necessary to reach a specific skill level.
- * tmw.exp_for_level (level)
+ * mana.exp_for_level (level)
  */
 static int exp_for_level(lua_State *s)
 {
@@ -1389,7 +1389,7 @@ static int get_map_id(lua_State *s)
 
 /**
  * Creates an item stack on the floor
- * tmw.drop_item(x, y, id[, number])
+ * mana.drop_item(x, y, id[, number])
  */
 static int item_drop(lua_State *s)
 {
@@ -1492,7 +1492,7 @@ LuaScript::LuaScript():
         { "npc_ask_string",         &npc_ask_string       },
         { NULL, NULL }
     };
-    luaL_register(mState, "tmw", callbacks);
+    luaL_register(mState, "mana", callbacks);
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mState, (void *)&registryKey);
@@ -1500,6 +1500,6 @@ LuaScript::LuaScript():
     lua_settable(mState, LUA_REGISTRYINDEX);
 
     lua_settop(mState, 0);
-    loadFile("scripts/libs/libtmw.lua");
+    loadFile("scripts/libs/libmana.lua");
 }
 

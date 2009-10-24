@@ -1,5 +1,5 @@
 --
--- The Mana World Server
+-- The Mana Server
 -- Copyright 2009 The Mana World Development Team
 --
 -- This file is part of The Mana World.
@@ -22,7 +22,7 @@
 -- Tables
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_accounts
+CREATE TABLE mana_accounts
 (
    id            INTEGER     PRIMARY KEY,
    username      TEXT        NOT NULL UNIQUE,
@@ -36,12 +36,12 @@ CREATE TABLE tmw_accounts
    expiration    INTEGER         NULL
 );
 
-CREATE UNIQUE INDEX tmw_accounts_username ON tmw_accounts ( username );
-CREATE UNIQUE INDEX tmw_accounts_email    ON tmw_accounts ( email );
+CREATE UNIQUE INDEX mana_accounts_username ON mana_accounts ( username );
+CREATE UNIQUE INDEX mana_accounts_email    ON mana_accounts ( email );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_characters
+CREATE TABLE mana_characters
 (
    id           INTEGER     PRIMARY KEY,
    user_id      INTEGER     NOT NULL,
@@ -63,41 +63,41 @@ CREATE TABLE tmw_characters
    int          INTEGER     NOT NULL,
    will         INTEGER     NOT NULL,
    --
-   FOREIGN KEY (user_id) REFERENCES tmw_accounts(id)
+   FOREIGN KEY (user_id) REFERENCES mana_accounts(id)
 );
 
-CREATE INDEX tmw_characters_user ON tmw_characters ( user_id );
-CREATE UNIQUE INDEX tmw_characters_name ON tmw_characters ( name );
+CREATE INDEX mana_characters_user ON mana_characters ( user_id );
+CREATE UNIQUE INDEX mana_characters_name ON mana_characters ( name );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_char_skills
+CREATE TABLE mana_char_skills
 (
     char_id     INTEGER     NOT NULL,
     skill_id    INTEGER     NOT NULL,
     skill_exp   INTEGER     NOT NULL,
     --
-    FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+    FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX tmw_char_skills_char ON tmw_char_skills ( char_id );
+CREATE INDEX mana_char_skills_char ON mana_char_skills ( char_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_char_status_effects
+CREATE TABLE mana_char_status_effects
 (
     char_id     INTEGER     NOT NULL,
     status_id   INTEGER     NOT NULL,
     status_time INTEGER     NOT NULL,
     --
-    FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+    FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX tmw_char_status_char on tmw_char_status_effects ( char_id );
+CREATE INDEX mana_char_status_char on mana_char_status_effects ( char_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_items
+CREATE TABLE mana_items
 (
     id           INTEGER    PRIMARY KEY,
     name         TEXT       NOT NULL,
@@ -109,39 +109,39 @@ CREATE TABLE tmw_items
     dyestring    TEXT
 );
 
-CREATE INDEX tmw_items_type ON tmw_items (itemtype);
+CREATE INDEX mana_items_type ON mana_items (itemtype);
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_item_instances
+CREATE TABLE mana_item_instances
 (
     item_id       INTEGER    PRIMARY KEY,
     itemclass_id  INTEGER    NOT NULL,
     amount        INTEGER    NOT NULL,
     --
-    FOREIGN KEY (itemclass_id) REFERENCES tmw_items(id)
+    FOREIGN KEY (itemclass_id) REFERENCES mana_items(id)
 );
 
-CREATE INDEX tmw_item_instances_typ ON tmw_item_instances ( itemclass_id );
+CREATE INDEX mana_item_instances_typ ON mana_item_instances ( itemclass_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_item_attributes
+CREATE TABLE mana_item_attributes
 (
     attribute_id    INTEGER    PRIMARY KEY,
     item_id         INTEGER    NOT NULL,
     attribute_class INTEGER    NOT NULL,
     attribute_value TEXT,
     --
-    FOREIGN KEY (item_id) REFERENCES tmw_item_instances(item_id)
+    FOREIGN KEY (item_id) REFERENCES mana_item_instances(item_id)
 );
 
-CREATE INDEX tmw_item_attributes_item ON tmw_item_attributes ( item_id );
+CREATE INDEX mana_item_attributes_item ON mana_item_attributes ( item_id );
 
 -----------------------------------------------------------------------------
 
--- todo: remove class_id and amount and reference on tmw_item_instances
-CREATE TABLE tmw_inventories
+-- todo: remove class_id and amount and reference on mana_item_instances
+CREATE TABLE mana_inventories
 (
    id           INTEGER     PRIMARY KEY,
    owner_id     INTEGER     NOT NULL,
@@ -149,14 +149,14 @@ CREATE TABLE tmw_inventories
    class_id     INTEGER     NOT NULL,
    amount       INTEGER     NOT NULL,
    --
-   FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)
+   FOREIGN KEY (owner_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX tmw_inventories_owner ON tmw_inventories ( owner_id );
+CREATE INDEX mana_inventories_owner ON mana_inventories ( owner_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_guilds
+CREATE TABLE mana_guilds
 (
    id           INTEGER     PRIMARY KEY,
    name 		TEXT        NOT NULL UNIQUE
@@ -164,33 +164,33 @@ CREATE TABLE tmw_guilds
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_guild_members
+CREATE TABLE mana_guild_members
 (
    guild_id     INTEGER     NOT NULL,
    member_id    INTEGER     NOT NULL,
    rights       INTEGER     NOT NULL,
    --
-   FOREIGN KEY (guild_id)  REFERENCES tmw_guilds(id),
-   FOREIGN KEY (member_id) REFERENCES tmw_characters(id)
+   FOREIGN KEY (guild_id)  REFERENCES mana_guilds(id),
+   FOREIGN KEY (member_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX tmw_guild_members_g ON tmw_guild_members ( guild_id );
-CREATE INDEX tmw_guild_members_m ON tmw_guild_members ( member_id );
+CREATE INDEX mana_guild_members_g ON mana_guild_members ( guild_id );
+CREATE INDEX mana_guild_members_m ON mana_guild_members ( member_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_quests
+CREATE TABLE mana_quests
 (
    owner_id     INTEGER     NOT NULL,
    name         TEXT        NOT NULL,
    value        TEXT        NOT NULL,
    --
-   FOREIGN KEY (owner_id) REFERENCES tmw_characters(id)
+   FOREIGN KEY (owner_id) REFERENCES mana_characters(id)
 );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_world_states
+CREATE TABLE mana_world_states
 (
    state_name   TEXT        PRIMARY KEY,
    map_id       INTEGER     NULL,
@@ -200,7 +200,7 @@ CREATE TABLE tmw_world_states
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_auctions
+CREATE TABLE mana_auctions
 (
    auction_id    INTEGER     PRIMARY KEY,
    auction_state INTEGER     NOT NULL,
@@ -214,16 +214,16 @@ CREATE TABLE tmw_auctions
    buyout_price  INTEGER,
    description   TEXT,
    --
-   FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+   FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX tmw_auctions_owner ON tmw_auctions ( char_id );
-CREATE INDEX tmw_auctions_state ON tmw_auctions ( auction_state );
-CREATE INDEX tmw_auctions_item  ON tmw_auctions ( itemclass_id );
+CREATE INDEX mana_auctions_owner ON mana_auctions ( char_id );
+CREATE INDEX mana_auctions_state ON mana_auctions ( auction_state );
+CREATE INDEX mana_auctions_item  ON mana_auctions ( itemclass_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_auction_bids
+CREATE TABLE mana_auction_bids
 (
    bid_id        INTEGER     PRIMARY KEY,
    auction_id    INTEGER     NOT NULL,
@@ -231,16 +231,16 @@ CREATE TABLE tmw_auction_bids
    bid_time      INTEGER     NOT NULL,
    bid_price     INTEGER     NOT NULL,
    --
-   FOREIGN KEY (auction_id) REFERENCES tmw_auctions(auction_id),
-   FOREIGN KEY (char_id)    REFERENCES tmw_characters(id)
+   FOREIGN KEY (auction_id) REFERENCES mana_auctions(auction_id),
+   FOREIGN KEY (char_id)    REFERENCES mana_characters(id)
 );
 
-CREATE INDEX tmw_auction_bids_auction ON tmw_auction_bids ( auction_id );
-CREATE INDEX tmw_auction_bids_owner   ON tmw_auction_bids ( char_id );
+CREATE INDEX mana_auction_bids_auction ON mana_auction_bids ( auction_id );
+CREATE INDEX mana_auction_bids_owner   ON mana_auction_bids ( char_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_post
+CREATE TABLE mana_post
 (
    letter_id        INTEGER   PRIMARY KEY,
    sender_id        INTEGER   NOT NULL,
@@ -250,42 +250,42 @@ CREATE TABLE tmw_post
    sending_date     INTEGER   NOT NULL,
    letter_text      TEXT          NULL,
    --
-   FOREIGN KEY (sender_id)   REFERENCES tmw_characters(id),
-   FOREIGN KEY (receiver_id) REFERENCES tmw_characters(id)
+   FOREIGN KEY (sender_id)   REFERENCES mana_characters(id),
+   FOREIGN KEY (receiver_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX tmw_post_sender   ON tmw_post ( sender_id );
-CREATE INDEX tmw_post_receiver ON tmw_post ( receiver_id );
+CREATE INDEX mana_post_sender   ON mana_post ( sender_id );
+CREATE INDEX mana_post_receiver ON mana_post ( receiver_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_post_attachments
+CREATE TABLE mana_post_attachments
 (
    attachment_id    INTEGER   PRIMARY KEY,
    letter_id        INTEGER   NOT NULL,
    item_id          INTEGER   NOT NULL,
    --
-   FOREIGN KEY (letter_id) REFERENCES tmw_post(letter_id),
-   FOREIGN KEY (item_id)   REFERENCES tmw_item_instances(item_id)
+   FOREIGN KEY (letter_id) REFERENCES mana_post(letter_id),
+   FOREIGN KEY (item_id)   REFERENCES mana_item_instances(item_id)
 );
 
-CREATE INDEX tmw_post_attachments_ltr ON tmw_post_attachments ( letter_id );
-CREATE INDEX tmw_post_attachments_itm ON tmw_post_attachments ( item_id );
+CREATE INDEX mana_post_attachments_ltr ON mana_post_attachments ( letter_id );
+CREATE INDEX mana_post_attachments_itm ON mana_post_attachments ( item_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_transaction_codes
+CREATE TABLE mana_transaction_codes
 (
    id            INTEGER     PRIMARY KEY,
    description   TEXT        NOT NULL,
    category      TEXT        NOT NULL
 );
 
-CREATE INDEX tmw_transaction_codes_cat    ON tmw_transaction_codes ( category );
+CREATE INDEX mana_transaction_codes_cat    ON mana_transaction_codes ( category );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_transactions
+CREATE TABLE mana_transactions
 (
     id          INTEGER     PRIMARY KEY,
     char_id     INTEGER     NOT NULL,
@@ -293,22 +293,22 @@ CREATE TABLE tmw_transactions
     message     TEXT,
     time        INTEGER     NOT NULL,
     --
-    FOREIGN KEY (char_id) REFERENCES tmw_characters(id),
-    FOREIGN KEY (action)  REFERENCES tmw_transaction_codes(id)
+    FOREIGN KEY (char_id) REFERENCES mana_characters(id),
+    FOREIGN KEY (action)  REFERENCES mana_transaction_codes(id)
 );
 
-CREATE INDEX tmw_transactions_char    ON tmw_transactions ( char_id );
-CREATE INDEX tmw_transactions_action  ON tmw_transactions ( action );
-CREATE INDEX tmw_transactions_time    ON tmw_transactions ( time );
+CREATE INDEX mana_transactions_char    ON mana_transactions ( char_id );
+CREATE INDEX mana_transactions_action  ON mana_transactions ( action );
+CREATE INDEX mana_transactions_time    ON mana_transactions ( time );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE tmw_online_list
+CREATE TABLE mana_online_list
 (
     char_id     INTEGER     PRIMARY KEY,
     login_date  INTEGER     NOT NULL,
     --
-    FOREIGN KEY (char_id) REFERENCES tmw_characters(id)
+    FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
 -----------------------------------------------------------------------------
@@ -317,7 +317,7 @@ CREATE TABLE tmw_online_list
 
 -- List all online users
 
-CREATE VIEW tmw_v_online_chars
+CREATE VIEW mana_v_online_chars
 AS
    SELECT l.char_id    as char_id,
           l.login_date as login_date,
@@ -326,14 +326,14 @@ AS
           c.gender     as gender,
           c.level      as level,
           c.map_id     as map_id
-     FROM tmw_online_list l
-     JOIN tmw_characters c
+     FROM mana_online_list l
+     JOIN mana_characters c
        ON l.char_id = c.id;
 
 
 -- Show all stored transactions
 
-CREATE VIEW tmw_v_transactions
+CREATE VIEW mana_v_transactions
 AS
    SELECT t.id           as transaction_id,
           t.time         as transacition_time,
@@ -345,12 +345,12 @@ AS
           tc.description as action,
           tc.category    as category,
           t.message      as message
-     FROM tmw_transactions t
-     JOIN tmw_characters c
+     FROM mana_transactions t
+     JOIN mana_characters c
        ON t.char_id = c.id
-     JOIN tmw_accounts a
+     JOIN mana_accounts a
        ON c.user_id = a.id
-     JOIN tmw_transaction_codes tc
+     JOIN mana_transaction_codes tc
        ON t.action = tc.id;
 
 -----------------------------------------------------------------------------
@@ -359,41 +359,41 @@ AS
 
 -- initial world states and database version
 
-INSERT INTO tmw_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
-INSERT INTO tmw_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO tmw_world_states VALUES('database_version',     NULL,'6',  strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'7',  strftime('%s','now'));
 
 -- all known transaction codes
 
-INSERT INTO tmw_transaction_codes VALUES (  1, 'Character created',        'Character' );
-INSERT INTO tmw_transaction_codes VALUES (  2, 'Character selected',       'Character' );
-INSERT INTO tmw_transaction_codes VALUES (  3, 'Character deleted',        'Character' );
-INSERT INTO tmw_transaction_codes VALUES (  4, 'Public message sent',      'Chat' );
-INSERT INTO tmw_transaction_codes VALUES (  5, 'Public message annouced',  'Chat' );
-INSERT INTO tmw_transaction_codes VALUES (  6, 'Private message sent',     'Chat' );
-INSERT INTO tmw_transaction_codes VALUES (  7, 'Channel joined',           'Chat' );
-INSERT INTO tmw_transaction_codes VALUES (  8, 'Channel kicked',           'Chat' );
-INSERT INTO tmw_transaction_codes VALUES (  9, 'Channel MODE',             'Chat' );
-INSERT INTO tmw_transaction_codes VALUES ( 10, 'Channel QUIT',             'Chat' );
-INSERT INTO tmw_transaction_codes VALUES ( 11, 'Channel LIST',             'Chat' );
-INSERT INTO tmw_transaction_codes VALUES ( 12, 'Channel USERLIST',         'Chat' );
-INSERT INTO tmw_transaction_codes VALUES ( 13, 'Channel TOPIC',            'Chat' );
-INSERT INTO tmw_transaction_codes VALUES ( 14, 'Command BAN',              'Commands' );
-INSERT INTO tmw_transaction_codes VALUES ( 15, 'Command DROP',             'Commands' );
-INSERT INTO tmw_transaction_codes VALUES ( 16, 'Command ITEM',             'Commands' );
-INSERT INTO tmw_transaction_codes VALUES ( 17, 'Command MONEY',            'Commands' );
-INSERT INTO tmw_transaction_codes VALUES ( 18, 'Command SETGROUP',         'Commands' );
-INSERT INTO tmw_transaction_codes VALUES ( 19, 'Command SPAWN',            'Commands' );
-INSERT INTO tmw_transaction_codes VALUES ( 20, 'Command WARP',             'Commands' );
-INSERT INTO tmw_transaction_codes VALUES ( 21, 'Item picked up',           'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 22, 'Item used',                'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 23, 'Item dropped',             'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 24, 'Item moved',               'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 25, 'Target attacked',          'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 26, 'ACTION Changed',           'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 27, 'Trade requested',          'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 28, 'Trade ended',              'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 29, 'Trade money',              'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 30, 'Trade items',              'Actions' );
-INSERT INTO tmw_transaction_codes VALUES ( 31, 'Attribute increased',      'Character' );
-INSERT INTO tmw_transaction_codes VALUES ( 32, 'Attribute decreased',      'Character' );
+INSERT INTO mana_transaction_codes VALUES (  1, 'Character created',        'Character' );
+INSERT INTO mana_transaction_codes VALUES (  2, 'Character selected',       'Character' );
+INSERT INTO mana_transaction_codes VALUES (  3, 'Character deleted',        'Character' );
+INSERT INTO mana_transaction_codes VALUES (  4, 'Public message sent',      'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  5, 'Public message annouced',  'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  6, 'Private message sent',     'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  7, 'Channel joined',           'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  8, 'Channel kicked',           'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  9, 'Channel MODE',             'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 10, 'Channel QUIT',             'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 11, 'Channel LIST',             'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 12, 'Channel USERLIST',         'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 13, 'Channel TOPIC',            'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 14, 'Command BAN',              'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 15, 'Command DROP',             'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 16, 'Command ITEM',             'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 17, 'Command MONEY',            'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 18, 'Command SETGROUP',         'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 19, 'Command SPAWN',            'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 20, 'Command WARP',             'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 21, 'Item picked up',           'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 22, 'Item used',                'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 23, 'Item dropped',             'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 24, 'Item moved',               'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 25, 'Target attacked',          'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 26, 'ACTION Changed',           'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 27, 'Trade requested',          'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 28, 'Trade ended',              'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 29, 'Trade money',              'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 30, 'Trade items',              'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 31, 'Attribute increased',      'Character' );
+INSERT INTO mana_transaction_codes VALUES ( 32, 'Attribute decreased',      'Character' );

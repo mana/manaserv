@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
-bin_PROGRAMS = tmwserv-account tmwserv-game
+bin_PROGRAMS = manaserv-account manaserv-game
 
-tmwserv_account_SOURCES = \
+manaserv_account_SOURCES = \
 	account-server/main-account.cpp \
 	defines.h \
 	protocol.h \
@@ -78,7 +78,7 @@ tmwserv_account_SOURCES = \
 	utils/xml.cpp \
 	utils/string.cpp
 
-tmwserv_game_SOURCES = \
+manaserv_game_SOURCES = \
 	game-server/main-game.cpp \
 	defines.h \
 	protocol.h \
@@ -184,25 +184,25 @@ tmwserv_game_SOURCES = \
 	utils/string.cpp
 
 if BUILD_MYSQL
-tmwserv_account_SOURCES += \
+manaserv_account_SOURCES += \
 	dal/mysqldataprovider.h \
 	dal/mysqldataprovider.cpp
 endif
 
 if BUILD_POSTGRESQL
-tmwserv_account_SOURCES += \
+manaserv_account_SOURCES += \
 	dal/pqdataprovider.h \
 	dal/pqdataprovider.cpp
 endif
 
 if BUILD_SQLITE
-tmwserv_account_SOURCES += \
+manaserv_account_SOURCES += \
 	dal/sqlitedataprovider.h \
 	dal/sqlitedataprovider.cpp
 endif
 
 if BUILD_LUA
-tmwserv_game_SOURCES += \
+manaserv_game_SOURCES += \
 	scripting/lua.cpp \
 	scripting/luascript.cpp \
 	scripting/luascript.hpp \

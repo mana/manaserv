@@ -37,7 +37,7 @@ class LuaScript: public Script
     public:
         /**
          * Constructor. Initializes a new Lua state, registers the native API
-         * and loads the libtmw.lua file.
+         * and loads the libmana.lua file.
          */
         LuaScript();
 

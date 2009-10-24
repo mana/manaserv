@@ -31,7 +31,7 @@ namespace dal
 
 
 const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB     = "sqlite_database";
-const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB_DEF = "tmw.db";
+const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB_DEF = "mana.db";
 
 
 /**

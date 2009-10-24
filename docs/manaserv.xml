@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- 
-	An example configuration file for ~/.tmwserv.xml 
+	An example configuration file for ~/.manaserv.xml
 	If you add any parameters to this configuration file make sure to update
 	the wiki documentation at:
 	http://wiki.themanaworld.org/index.php/Configuration_file:tmwserv.xml
@@ -13,12 +13,12 @@
 -->
  
 <!--
-	SQLite specific configuration. 
+	SQLite specific configuration.
 
 	sqlite_database:	name and path to the sqlite database file
-						optional, default="tmw.db"
+						optional, default="mana.db"
 -->
-<!-- <option name="sqlite_database" value="tmw.db"/> -->
+<!-- <option name="sqlite_database" value="mana.db"/> -->
 
 
 <!--
@@ -29,18 +29,18 @@
 	mysql_port:			the port where the mysql server listens to
 						optional, default=3306
 	mysql_database:		name of the installed database
-						optional, default="tmw"
+						optional, default="mana"
 	mysql_username:		name of the user to connect to the database server
-						optional, default="tmw"
+						optional, default="mana"
 	mysql_password:		password to use whith the mysql_username
-						optional, default="tmw"
+						optional, default="mana"
 -->
 <!--
 <option name="mysql_hostname" value="localhost"/> 
 <option name="mysql_port" value="3306"/>
-<option name="mysql_database" value="tmw"/>
-<option name="mysql_username" value="tmw"/>
-<option name="mysql_password" value="tmw"/>
+<option name="mysql_database" value="mana"/>
+<option name="mysql_username" value="mana"/>
+<option name="mysql_password" value="mana"/>
 -->
 
 

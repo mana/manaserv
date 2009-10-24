@@ -1,5 +1,5 @@
-Setting up a TMW server
-=======================
+Setting up a Mana server
+========================
 
 COMPILATION
 
@@ -9,19 +9,19 @@ COMPILATION
 
 The compilation should produce two binaries:
 
-* tmwserv-account - The account + chat server
-* tmwserv-game - The game server
+* manaserv-account - The account + chat server
+* manaserv-game - The game server
 
 
 SERVER DATA
 
 The server depends on parts of the client data and also has its own data
-repository. These are the 'tmwdata' and 'tmwserv-data' repositories.
-Currently, tmwserv expects these to be merged into a single 'data' directory.
+repository. These are the 'manadata' and 'manaserv-data' repositories.
+Currently, manaserv expects these to be merged into a single 'data' directory.
 
-1) Clone tmwdata and tmwserv-data next to the tmwserv repository
-2) Symlink a 'data' directory in tmwserv to tmwserv-data
-3) Symlink the following files from tmwserv-data to tmwdata:
+1) Clone manadata and manaserv-data next to the manaserv repository
+2) Symlink a 'data' directory in manaserv to manaserv-data
+3) Symlink the following files from manaserv-data to manadata:
 
   * data/items.xml - Item definitions
   * data/monsters.xml - Monster definitions
@@ -30,8 +30,8 @@ Currently, tmwserv expects these to be merged into a single 'data' directory.
 
 CONFIGURATION
 
-The configuration is currently loaded from ~/.tmwserv.xml. An example file is
-located at docs/tmwserv.xml.
+The configuration is currently loaded from ~/.manaserv.xml. An example file is
+located at docs/manaserv.xml.
 
 Default option values:
 
@@ -43,14 +43,14 @@ Default option values:
 
 RUNNING
 
-1. Run tmwserv-account on one single computer. It will open three consecutive
+1. Run manaserv-account on one single computer. It will open three consecutive
 UDP ports, starting from the one given by the configuration option
 "accountServerPort". This first port is the one you should advertise to your
 users. The configuration option "accountServerAddress" should contain the
 public address the server runs on, as it will be sent to the users as the
 address of the chat server, which happens to be the account server for now.
 
-2. Run tmwserv-game on multiple computers. Each game server will open one UDP
+2. Run manaserv-game on multiple computers. Each game server will open one UDP
 port given by the configuration option "gameServerPort". It will also connect
 to the account server given by the configuration options "accountServerAddress"
 and "accountServerPort". The configuration option "gameServerAddress" should

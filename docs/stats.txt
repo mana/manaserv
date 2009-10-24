@@ -1,4 +1,4 @@
-The Mana World Statistics Specification - DRAFT v0.1
+Mana Statistics Specification - DRAFT v0.1
 
 Currently this work is derived from work done on Wiki. This system
 is simplified. Each being has core statistics which are used to

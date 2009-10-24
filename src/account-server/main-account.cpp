@@ -49,9 +49,9 @@
 using utils::Logger;
 
 // Default options that automake should be able to override.
-#define DEFAULT_LOG_FILE        "tmwserv-account.log"
-#define DEFAULT_STATS_FILE      "tmwserv.stats"
-#define DEFAULT_CONFIG_FILE     "tmwserv.xml"
+#define DEFAULT_LOG_FILE        "manaserv-account.log"
+#define DEFAULT_STATS_FILE      "manaserv.stats"
+#define DEFAULT_CONFIG_FILE     "manaserv.xml"
 
 static bool running = true;        /**< Determines if server keeps running */
 
@@ -254,7 +254,7 @@ static void dumpStatistics()
  */
 static void printHelp()
 {
-    std::cout << "tmwserv" << std::endl << std::endl
+    std::cout << "manaserv" << std::endl << std::endl
               << "Options: " << std::endl
               << "  -h --help          : Display this help" << std::endl
               << "     --verbosity <n> : Set the verbosity level" << std::endl

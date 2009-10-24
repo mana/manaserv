@@ -57,12 +57,12 @@
 using utils::Logger;
 
 // Default options that automake should be able to override.
-#define DEFAULT_LOG_FILE        "tmwserv-game.log"
-#define DEFAULT_CONFIG_FILE     "tmwserv.xml"
+#define DEFAULT_LOG_FILE        "manaserv-game.log"
+#define DEFAULT_CONFIG_FILE     "manaserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
 #define DEFAULT_MAPSDB_FILE     "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE "monsters.xml"
-#define DEFAULT_STATUSDB_FILE   "tmw-status-effect.xml"
+#define DEFAULT_STATUSDB_FILE   "mana-status-effect.xml"
 
 utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
 int worldTime = 0;              /**< Current world time in 100ms ticks */
@@ -226,7 +226,7 @@ void deinitialize()
  */
 void printHelp()
 {
-    std::cout << "tmwserv" << std::endl << std::endl
+    std::cout << "manaserv" << std::endl << std::endl
               << "Options: " << std::endl
               << "  -h --help          : Display this help" << std::endl
               << "     --verbosity <n> : Set the verbosity level" << std::endl

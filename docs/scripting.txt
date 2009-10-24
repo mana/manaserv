@@ -1,4 +1,4 @@
-The Mana World Scripting Specification - DRAFT v0.2
+Mana Scripting Specification - DRAFT v0.2
 
 Generic scripting interfaces for various in-game objects.
 

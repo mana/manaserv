@@ -1,5 +1,5 @@
 /**
- * A monitor application that runs tmwserv-account and tmwserv-game.
+ * A monitor application that runs manaserv-account and manaserv-game.
  * (C) 2009  Thorbjørn Lindeijer
  *
  * When a server crashes, a gdb process is spawned to create a backtrace,
@@ -217,8 +217,8 @@ private:
 int ServerMonitor::sigtermFd[2];
 
 ServerMonitor::ServerMonitor()
-    : mAccountServer("src/tmwserv-account")
-    , mGameServer("src/tmwserv-game")
+    : mAccountServer("src/manaserv-account")
+    , mGameServer("src/manaserv-game")
 {
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigtermFd))
         qFatal("Couldn't create TERM socketpair");
