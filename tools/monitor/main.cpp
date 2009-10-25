@@ -1,9 +1,10 @@
 /**
- * A monitor application that runs manaserv-account and manaserv-game.
+ * A monitor application that runs a set of servers.
  * (C) 2009  Thorbjørn Lindeijer
  *
  * When a server crashes, a gdb process is spawned to create a backtrace,
- * which is then emailed. The crashed server is restarted.
+ * which is emailed when the CRASH_REPORT_RECEIVER environment variable
+ * is set. The crashed server is restarted.
  */
 
 #include <QtCore>
@@ -18,8 +19,9 @@
 class ServerThread : public QThread
 {
 public:
-    ServerThread(const QString &executable)
-        : mProcess(0)
+    ServerThread(const QString &executable, QObject *parent = 0)
+        : QThread(parent)
+        , mProcess(0)
         , mExecutable(executable)
         , mRunning(false)
     {}
@@ -77,7 +79,8 @@ void ServerThread::run()
             qDebug() << "Terminating" << mExecutable;
             mProcess->terminate();
             if (!mProcess->waitForFinished(3000)) {
-                qDebug() << mExecutable << "didn't terminate within 3 seconds, killing";
+                qDebug() << mExecutable << "didn't terminate within 3 seconds,"
+                        " killing";
                 mProcess->kill();
             }
             break;
@@ -179,12 +182,12 @@ class ServerMonitor : public QObject
     Q_OBJECT
 
 public:
-    ServerMonitor();
+    ServerMonitor(const QStringList &serverExecutables);
 
     void start()
     {
-        mAccountServer.runServer();
-        mGameServer.runServer();
+        foreach (ServerThread *server, mServers)
+            server->runServer();
     }
 
     static void setupUnixSignalHandlers();
@@ -193,32 +196,29 @@ public:
 private slots:
     void aboutToQuit()
     {
-        mGameServer.stopServer();
-        mAccountServer.stopServer();
+        // Stop servers in reverse order
+        for (int i = mServers.count(); i >= 0; --i)
+            mServers[i]->stopServer();
     }
 
     void handleSigTerm();
 
 private:
-    ServerThread mAccountServer;
-    ServerThread mGameServer;
+    QList<ServerThread*> mServers;
+    QSocketNotifier *snTerm;
 
     static int sigtermFd[2];
-
-    QSocketNotifier *snTerm;
 };
 
 
 /* What follows is a bit of jumping through hoops in order to perform Qt stuff
  * in response to UNIX signals. Based on documentation at:
- * http://doc.trolltech.com/unix-signals.html
+ * http://doc.trolltech.com/4.5/unix-signals.html
  */
 
 int ServerMonitor::sigtermFd[2];
 
-ServerMonitor::ServerMonitor()
-    : mAccountServer("src/manaserv-account")
-    , mGameServer("src/manaserv-game")
+ServerMonitor::ServerMonitor(const QStringList &serverExecutables)
 {
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, sigtermFd))
         qFatal("Couldn't create TERM socketpair");
@@ -226,6 +226,9 @@ ServerMonitor::ServerMonitor()
     snTerm = new QSocketNotifier(sigtermFd[1], QSocketNotifier::Read, this);
     connect(snTerm, SIGNAL(activated(int)),
             QCoreApplication::instance(), SLOT(quit()));
+
+    foreach (const QString &executable, serverExecutables)
+        mServers.append(new ServerThread(executable, this));
 }
 
 void ServerMonitor::setupUnixSignalHandlers()
@@ -263,10 +266,25 @@ int main(int argc, char *argv[])
 
     QCoreApplication app(argc, argv);
 
-    ServerMonitor monitor;
+    QStringList arguments = app.arguments();
+    QStringList serverExecutables;
+
+    if (!arguments.count() > 1) {
+        arguments.removeFirst();
+        serverExecutables = arguments;
+    } else {
+        serverExecutables
+                << "src/manaserv-account"
+                << "src/manaserv-game";
+    }
+
+    app.arguments();
+
+    ServerMonitor monitor(serverExecutables);
     monitor.start();
 
-    QObject::connect(&app, SIGNAL(aboutToQuit()), &monitor, SLOT(aboutToQuit()));
+    QObject::connect(&app, SIGNAL(aboutToQuit()),
+                     &monitor, SLOT(aboutToQuit()));
 
     return app.exec();
 }
