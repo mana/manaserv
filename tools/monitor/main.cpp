@@ -197,7 +197,7 @@ private slots:
     void aboutToQuit()
     {
         // Stop servers in reverse order
-        for (int i = mServers.count(); i >= 0; --i)
+        for (int i = mServers.count() - 1; i >= 0; --i)
             mServers[i]->stopServer();
     }
 
