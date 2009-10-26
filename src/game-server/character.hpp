@@ -267,7 +267,7 @@ class Character : public Being
          * Gives a skill a specific amount of exp and checks if a levelup
          * occured.
          */
-        void receiveExperience(int skill, int experience);
+        void receiveExperience(int skill, int experience, int optimalLevel);
 
         int getSkillSize() const
         { return mExperience.size(); }
@@ -300,7 +300,7 @@ class Character : public Being
          * Sets total accumulated exp for skill
          */
         void setExperience(int skill, int value)
-        { mExperience[skill] = 0; receiveExperience(skill, value); }
+        { mExperience[skill] = 0; receiveExperience(skill, value, 0); }
 
         /**
          * Shortcut to get being's health
@@ -355,6 +355,7 @@ class Character : public Being
         static const float EXPCURVE_EXPONENT;
         static const float EXPCURVE_FACTOR;
         static const float LEVEL_SKILL_PRECEDENCE_FACTOR; // I am taking suggestions for a better name
+        static const float EXP_LEVEL_FLEXIBILITY;
         static const int CHARPOINTS_PER_LEVELUP = 5;
         static const int CORRECTIONPOINTS_PER_LEVELUP = 2;
         static const int CORRECTIONPOINTS_MAX = 10;

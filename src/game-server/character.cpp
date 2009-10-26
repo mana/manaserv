@@ -48,6 +48,7 @@
 const float Character::EXPCURVE_EXPONENT = 3.0f;
 const float Character::EXPCURVE_FACTOR = 10.0f;
 const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
+const float Character::EXP_LEVEL_FLEXIBILITY = 1.0f;
 
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER),
@@ -460,10 +461,17 @@ int Character::levelForExp(int exp)
     return int(pow(float(exp) / EXPCURVE_FACTOR, 1.0f / EXPCURVE_EXPONENT));
 }
 
-void Character::receiveExperience(int skill, int experience)
+void Character::receiveExperience(int skill, int experience, int optimalLevel)
 {
     if (skill >= CHAR_ATTR_END)
     {
+        // reduce experience when skill is over optimal level
+        int levelOverOptimum = getAttribute(skill) - optimalLevel;
+        if (optimalLevel && levelOverOptimum > 0)
+        {
+            experience *= EXP_LEVEL_FLEXIBILITY / (levelOverOptimum + EXP_LEVEL_FLEXIBILITY);
+        }
+
         // add exp
         int oldExp = mExperience[skill];
         long int newExp = mExperience[skill] + experience;

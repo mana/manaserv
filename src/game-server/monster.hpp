@@ -79,6 +79,7 @@ class MonsterClass
             mStrollRange(0),
             mMutation(0),
             mAttackDistance(0),
+            mOptimalLevel(0),
             mScript("")
         {}
 
@@ -124,6 +125,12 @@ class MonsterClass
 
         /** Returns experience reward for killing the monster. */
         int getExp() const { return mExp; }
+
+        /** Gets maximum skill level after which exp reward is reduced */
+        void setOptimalLevel(int level) { mOptimalLevel = level; }
+
+        /** Sets maximum skill level after which exp reward is reduced. */
+        int getOptimalLevel() const { return mOptimalLevel; }
 
         /** Sets if the monster attacks without being attacked first. */
         void setAggressive(bool aggressive) { mAggressive = aggressive; }
@@ -186,10 +193,11 @@ class MonsterClass
         int mExp;
 
         bool mAggressive;
-        unsigned mTrackRange;
-        unsigned mStrollRange;
-        unsigned mMutation;
-        unsigned mAttackDistance;
+        int mTrackRange;
+        int mStrollRange;
+        int mMutation;
+        int mAttackDistance;
+        int mOptimalLevel;
         MonsterAttacks mAttacks;
         std::string mScript;
 };

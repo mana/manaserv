@@ -463,7 +463,7 @@ void Monster::died()
             int expPerSkill = int(expPerChar / skillSet->size());
             for (iSkill = skillSet->begin(); iSkill != skillSet->end(); iSkill++)
             {
-                character->receiveExperience(*iSkill, expPerSkill);
+                character->receiveExperience(*iSkill, expPerSkill, mSpecy->getOptimalLevel());
             }
         }
     }

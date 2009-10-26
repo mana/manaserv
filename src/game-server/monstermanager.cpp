@@ -203,6 +203,7 @@ void MonsterManager::reload()
             {
                 xmlChar *exp = subnode->xmlChildrenNode->content;
                 monster->setExp(atoi((const char*)exp));
+                monster->setOptimalLevel(XML::getProperty(subnode, "level", 0));
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "behavior"))
             {

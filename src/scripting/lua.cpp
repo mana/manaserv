@@ -1192,7 +1192,12 @@ static int chr_give_exp(lua_State *s)
 
     int exp = lua_tointeger(s, 3);
 
-    c->receiveExperience(skill, exp);
+    int optimalLevel = 0;
+    if (lua_isnumber(s, 4))
+    {
+        optimalLevel = lua_tointeger(s, 4);
+    }
+    c->receiveExperience(skill, exp, optimalLevel);
 
     return 0;
 }
