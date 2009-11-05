@@ -47,7 +47,7 @@ AccountConnection::~AccountConnection()
     delete mSyncBuffer;
 }
 
-bool AccountConnection::start()
+bool AccountConnection::start(const int gameServerPort)
 {
     const std::string accountServerAddress =
         Configuration::getValue("net_accountServerAddress", "localhost");
@@ -64,8 +64,6 @@ bool AccountConnection::start()
 
     const std::string gameServerAddress =
         Configuration::getValue("net_gameServerAddress", "localhost");
-    const int gameServerPort =
-        Configuration::getValue("net_gameServerPort", DEFAULT_SERVER_PORT + 3);
     const std::string password =
         Configuration::getValue("net_password", "P@s$w0rd");
 

@@ -238,8 +238,7 @@ struct CommandLineOptions
 {
     CommandLineOptions():
         verbosity(Logger::INFO),
-        port(Configuration::getValue("net_gameServerPort",
-                                     DEFAULT_SERVER_PORT + 3))
+        port(0)
     {}
 
     Logger::Level verbosity;
@@ -304,6 +303,12 @@ int main(int argc, char *argv[])
     // General initialization
     initialize();
 
+    if (options.port < 1)
+    {
+        options.port = Configuration::getValue("net_gameServerPort",
+                                               DEFAULT_SERVER_PORT + 3);
+    }
+
     // Make an initial attempt to connect to the account server
     // Try again after longer and longer intervals when connection fails.
     bool isConnected = false;
@@ -311,7 +316,7 @@ int main(int argc, char *argv[])
     while (!isConnected)
     {
         LOG_INFO("Connecting to account server");
-        isConnected = accountHandler->start();
+        isConnected = accountHandler->start(options.port);
         if (!isConnected)
         {
             LOG_INFO("Retrying in " << ++waittime << " seconds");
@@ -386,7 +391,7 @@ int main(int argc, char *argv[])
                 // Try to reconnect every 200 ticks
                 if (worldTime % 200 == 0)
                 {
-                    accountHandler->start();
+                    accountHandler->start(options.port);
                 }
             }
             gameHandler->process();
