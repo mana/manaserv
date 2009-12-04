@@ -382,10 +382,10 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
     {
         Account *acc = new Account;
         acc->setName(username);
-        // We set the password
-        // TODO: apply hashing here and during login
         acc->setPassword(password);
-        // We hash email server-side without using a salt.
+        // We hash email server-side for additional privacy
+        // we ask for it again when we need it and verify it
+        // through comparing it with the hash
         acc->setEmail(sha256(email));
         acc->setLevel(AL_PLAYER);
 
