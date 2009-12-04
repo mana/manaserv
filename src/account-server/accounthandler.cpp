@@ -227,7 +227,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     // Check if the account exists
     Account *acc = storage->getAccount(username);
 
-    if (!acc || acc->getPassword() != password)
+    if (!acc || acc->getPassword() != sha256(password))
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
@@ -382,7 +382,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
     {
         Account *acc = new Account;
         acc->setName(username);
-        acc->setPassword(password);
+        acc->setPassword(sha256(password));
         // We hash email server-side for additional privacy
         // we ask for it again when we need it and verify it
         // through comparing it with the hash
@@ -507,8 +507,8 @@ void AccountHandler::handleEmailChangeMessage(AccountClient &client, MessageIn &
 
 void AccountHandler::handlePasswordChangeMessage(AccountClient &client, MessageIn &msg)
 {
-    std::string oldPassword = msg.readString();
-    std::string newPassword = msg.readString();
+    std::string oldPassword = sha256(msg.readString());
+    std::string newPassword = sha256(msg.readString());
 
     MessageOut reply(APMSG_PASSWORD_CHANGE_RESPONSE);
 
@@ -516,10 +516,6 @@ void AccountHandler::handlePasswordChangeMessage(AccountClient &client, MessageI
     if (!acc)
     {
         reply.writeByte(ERRMSG_NO_LOGIN);
-    }
-    else if (newPassword.length() != SHA256_HASH_LENGTH)
-    {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(newPassword))
     {
