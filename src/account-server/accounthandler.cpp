@@ -88,6 +88,7 @@ private:
     void handleReconnectMessage(AccountClient &client, MessageIn &msg);
     void handleRegisterMessage(AccountClient &client, MessageIn &msg);
     void handleUnregisterMessage(AccountClient &client, MessageIn &msg);
+    void handleRequestRegisterInfoMessage(AccountClient &client, MessageIn &msg);
     void handleEmailChangeMessage(AccountClient &client, MessageIn &msg);
     void handlePasswordChangeMessage(AccountClient &client, MessageIn &msg);
     void handleCharacterCreateMessage(AccountClient &client, MessageIn &msg);
@@ -305,21 +306,31 @@ void AccountHandler::handleReconnectMessage(AccountClient &client, MessageIn &ms
     mTokenCollector.addPendingClient(magic_token, &client);
 }
 
+bool checkCaptcha(AccountClient &client, std::string captcha)
+{
+    // TODO
+    return true;
+}
+
 void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg)
 {
     int clientVersion = msg.readLong();
     std::string username = msg.readString();
     std::string password = msg.readString();
     std::string email = msg.readString();
+    std::string captcha = msg.readString();
+    std::string allowed = Configuration::getValue("account_allowRegister", "1");
     int minClientVersion = Configuration::getValue("clientVersion", 0);
     unsigned minNameLength = Configuration::getValue("account_minNameLength", 4);
     unsigned maxNameLength = Configuration::getValue("account_maxNameLength", 15);
-    unsigned minPasswordLength = Configuration::getValue("account_minPasswordLength", 6);
-    unsigned maxPasswordLength = Configuration::getValue("account_maxPasswordLength", 25);
 
     MessageOut reply(APMSG_REGISTER_RESPONSE);
 
     if (client.status != CLIENT_LOGIN)
+    {
+        reply.writeByte(ERRMSG_FAILURE);
+    }
+    else if (allowed == "0" or allowed == "false")
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
@@ -337,11 +348,6 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
     }
     else if (username.length() < minNameLength ||
             username.length() > maxNameLength)
-    {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
-    }
-    else if (password.length() < minPasswordLength ||
-             password.length() > maxPasswordLength)
     {
         reply.writeByte(ERRMSG_INVALID_ARGUMENT);
     }
@@ -368,12 +374,17 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
     {
         reply.writeByte(REGISTER_EXISTS_EMAIL);
     }
+    else if (!checkCaptcha(client, captcha))
+    {
+        reply.writeByte(REGISTER_CAPTCHA_WRONG);
+    }
     else
     {
         Account *acc = new Account;
         acc->setName(username);
-        // We hash the password using the username as salt.
-        acc->setPassword(sha256(username + password));
+        // We set the password
+        // TODO: apply hashing here and during login
+        acc->setPassword(password);
         // We hash email server-side without using a salt.
         acc->setEmail(sha256(email));
         acc->setLevel(AL_PLAYER);
@@ -434,6 +445,26 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client, MessageIn &m
     storage->delAccount(acc);
     reply.writeByte(ERRMSG_OK);
 
+    client.send(reply);
+}
+
+void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client, MessageIn &msg)
+{
+    LOG_INFO("AccountHandler::handleRequestRegisterInfoMessage");
+    MessageOut reply(APMSG_REGISTER_INFO_RESPONSE);
+    std::string allowed = Configuration::getValue("account_allowRegister", "1");
+    if (allowed == "0" or allowed == "false")
+    {
+        reply.writeByte(false);
+        reply.writeString(Configuration::getValue(
+            "account_denyRegisterReason", ""));
+    } else {
+        reply.writeByte(true);
+        reply.writeByte(Configuration::getValue("account_minNameLength", 4));
+        reply.writeByte(Configuration::getValue("account_maxNameLength", 16));
+        reply.writeString("http://www.server.example/captcha.png");
+        reply.writeString("<instructions for solving captcha>");
+    }
     client.send(reply);
 }
 
@@ -814,6 +845,12 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             LOG_DEBUG("Received msg ... PAMSG_UNREGISTER");
             handleUnregisterMessage(client, message);
             break;
+
+        case PAMSG_REQUEST_REGISTER_INFO :
+            LOG_DEBUG("Received msg ... REQUEST_REGISTER_INFO");
+            handleRequestRegisterInfoMessage(client, message);
+            break;
+
 
         case PAMSG_EMAIL_CHANGE:
             LOG_DEBUG("Received msg ... PAMSG_EMAIL_CHANGE");

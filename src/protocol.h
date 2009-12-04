@@ -46,6 +46,8 @@ enum {
     APMSG_REGISTER_RESPONSE        = 0x0002, // B error
     PAMSG_UNREGISTER               = 0x0003, // S username, S password
     APMSG_UNREGISTER_RESPONSE      = 0x0004, // B error
+    PAMSG_REQUEST_REGISTER_INFO    = 0x0005, //
+    APMSG_REGISTER_INFO_RESPONSE   = 0x0006, // B byte registrationAllowed, byte minNameLength, byte maxNameLength, string captchaURL, string captchaInstructions
     PAMSG_LOGIN                    = 0x0010, // L version, S username, S password
     APMSG_LOGIN_RESPONSE           = 0x0012, // B error
     PAMSG_LOGOUT                   = 0x0013, // -
@@ -289,7 +291,8 @@ enum {
 enum {
     REGISTER_INVALID_VERSION = 0x40,    // the user is using an incompatible protocol
     REGISTER_EXISTS_USERNAME,           // there already is an account with this username
-    REGISTER_EXISTS_EMAIL               // there already is an account with this email address
+    REGISTER_EXISTS_EMAIL,              // there already is an account with this email address
+    REGISTER_CAPTCHA_WRONG              // user didn't solve the captcha correctly
 };
 
 // Character creation specific return values
