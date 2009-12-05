@@ -55,9 +55,9 @@
  <!--
  New player starting location. The map should be defined in data/maps.xml.
  -->
- <option name="defaultMap" value="1"/>
- <option name="startX" value="720"/>
- <option name="startY" value="840"/>
+ <option name="char_startMap" value="1"/>
+ <option name="char_startX" value="720"/>
+ <option name="char_startY" value="840"/>
 
  <!--
  The game server uses this address to connect to the account server. Clients
@@ -65,10 +65,52 @@
  -->
  <option name="net_accountServerAddress" value="localhost"/>
  <option name="net_accountServerPort" value="9601"/>
-
  <!--
  The clients use this address to connect to a game server on this machine.
  -->
  <option name="net_gameServerAddress" value="localhost"/>
  <option name="net_gameServerPort" value="9604"/>
+ 
+ <!-- Gameplay-related config option-->
+ <option name="visualRange" value="320"/> 
+ <option name="respawnMap" value="4"/>
+ <option name="respawnX" value="1000"/>
+ <option name="respawnY" value="1000"/>
+ <option name="defaultPvp" value="free" />
+ 
+ <!-- Network-related config options-->
+ <option name="net_maxClients" value="1000"/>
+ <!-- Account-creation-related config options-->
+ <option name="account_allowRegister" value="0" />
+ <option name="account_denyRegisterReason" value="The server administrator has disabled automatic registration!" />
+ <option name="account_minEmailLength" value="7" />
+ <option name="account_maxEmailLength" value="128" />
+ <option name="account_minNameLength" value="4" />
+ <option name="account_maxNameLength" value="16" />
+ <option name="account_minPasswordLength" value="6" />
+ <option name="account_maxPasswordLength" value="25" />
+ <!-- Character-creation-related config options -->
+ <option name="char_numHairStyles" value="17" />
+ <option name="char_numHairColors" value="9" />
+ <option name="char_numGenders" value="2" />
+ <option name="char_minNameLength" value="4" />
+ <option name="char_maxNameLength" value="25" />
+ <option name="char_maxCharacters" value="3" />
+ <option name="char_startingPoints" value="60" />
+ <!-- Chat-related config options -->
+ <option name="chat_maxChannelNameLength" value="15" />
+   <!-- I noticed the following configuration-like enumeration values which are never checked:
+        //chat-related
+         MAX_PUBLIC_CHANNELS_RANGE  = 1000,
+        MAX_PRIVATE_CHANNELS_RANGE = 10000,
+        MAX_CHANNEL_ANNOUNCEMENT   = 150,
+        MAX_CHANNEL_PASSWORD       = 12,
+    -->
+
+ <!-- Mail-system related-->
+ <option name="mail_maxAttachments" value="3" />
+ <option name="mail_maxLetters" value="10" />
+ 
+ 
+ 
 </configuration>
