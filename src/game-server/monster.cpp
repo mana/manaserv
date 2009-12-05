@@ -271,7 +271,6 @@ void Monster::update()
             setDirection(bestAttackDirection);
             //perform a random attack based on priority
             mCurrentAttack = workingAttacks.upper_bound(rand()%prioritySum)->second;
-            setTimerSoft(T_B_ATTACK_TIME, mCurrentAttack->preDelay + mCurrentAttack->aftDelay);
             setAction(ATTACK);
             raiseUpdateFlags(UPDATEFLAG_ATTACK);
         }
