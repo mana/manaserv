@@ -45,6 +45,17 @@ enum Direction
     DIRECTION_RIGHT
 };
 
+enum TimerID
+{
+    T_M_STROLL, // time until monster strolls to new location
+    T_M_KILLSTEAL_PROTECTED,  // killsteal protection time
+    T_M_DECAY,  // time until dead monster is removed
+    T_B_ATTACK_TIME,    // time until being can attack again
+    T_B_HP_REGEN    // time until hp is regenerated again
+};
+
+typedef std::map <TimerID, int> Timers;
+
 /**
  * Methods of damage calculation
  */
@@ -337,6 +348,7 @@ class Being : public Actor
         void setTarget(Being *target)
         { mTarget = target; }
 
+
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
         Action mAction;
@@ -345,6 +357,15 @@ class Being : public Actor
         Being *mTarget;
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
+        /**
+        * Timer stuff
+        */
+        void setTimerSoft(TimerID id, int value); /**< sets timer unless already higher */
+        void setTimerHard(TimerID id, int value); /**< sets timer even when already higher (when in doubt this one is faster)*/
+        int  getTimer(TimerID id);            /**< returns number of ticks left on the timer */
+        bool isTimerRunning(TimerID id);      /**< true when timer exists and is > 0 */
+        bool isTimerJustFinished(TimerID id); /**< true during the tick where the timer reaches 0 */
+
 
     private:
         Being(const Being &rhs);
@@ -357,7 +378,8 @@ class Being : public Actor
         std::string mName;
         Hits mHitsTaken; /**< List of punches taken since last update. */
         AttributeModifiers mModifiers; /**< Currently modified attributes. */
-        int mHpRegenTimer; /**< Timer for hp regeneration. */
+
+        Timers mTimers;
 };
 
 #endif // _TMWSERV_BEING_H_

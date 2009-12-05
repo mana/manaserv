@@ -36,8 +36,7 @@ Being::Being(ThingType type):
     mAction(STAND),
     mTarget(NULL),
     mSpeed(0),
-    mDirection(0),
-    mHpRegenTimer(0)
+    mDirection(0)
 {
     Attribute attr = { 0, 0 };
     mAttributes.resize(NB_BEING_ATTRIBUTES + CHAR_ATTR_NB, attr);
@@ -356,14 +355,20 @@ void Being::setStatusEffectTime(int id, int time)
 
 void Being::update()
 {
+    //update timers
+    for (Timers::iterator i = mTimers.begin(); i != mTimers.end(); i++)
+    {
+        if (i->second > -1) i->second--;
+    }
+
     int oldHP = getModifiedAttribute(BASE_ATTR_HP);
     int newHP = oldHP;
     int maxHP = getAttribute(BASE_ATTR_HP);
 
     // Regenerate HP
-    if (mAction != DEAD && ++mHpRegenTimer >= TICKS_PER_HP_REGENERATION)
+    if (mAction != DEAD && !isTimerRunning(T_B_HP_REGEN))
     {
-        mHpRegenTimer = 0;
+        setTimerHard(T_B_HP_REGEN, TICKS_PER_HP_REGENERATION);
         newHP += getModifiedAttribute(BASE_ATTR_HP_REGEN);
     }
     // Cap HP at maximum
@@ -416,3 +421,39 @@ void Being::update()
         died();
     }
 }
+
+void Being::setTimerSoft(TimerID id, int value)
+{
+    Timers::iterator i = mTimers.find(id);
+    if (i == mTimers.end())
+    {
+        mTimers[id] = value;
+    }
+    else if (i->second < value)
+    {
+        i->second = value;
+    }
+}
+
+void Being::setTimerHard(TimerID id, int value)
+{
+    mTimers[id] = value;
+}
+
+int  Being::getTimer(TimerID id)
+{
+    Timers::iterator i = mTimers.find(id);
+    if (i == mTimers.end()) return -1;
+    return i->second;
+}
+
+bool Being::isTimerRunning(TimerID id)
+{
+    return (getTimer(id) > 0);
+}
+
+bool Being::isTimerJustFinished(TimerID id)
+{
+    return (getTimer(id) == 0);
+}
+

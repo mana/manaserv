@@ -302,6 +302,8 @@ class Monster : public Being
         { return Map::BLOCKTYPE_MONSTER; }
 
     private:
+        static const int DECAY_TIME = 50;
+
         int calculatePositionPriority(Point position, int targetPriority);
 
         MonsterClass *mSpecy;
@@ -311,9 +313,6 @@ class Monster : public Being
          * from mSpecy is used.
          */
         Script *mScript;
-
-        /** Count down till next random movement (temporary). */
-        int mCountDown;
 
         /** Aggression towards other beings. */
         std::map<Being *, int> mAnger;
@@ -326,12 +325,6 @@ class Monster : public Being
          */
         Character *mOwner;
 
-        /**
-         * Time until someone else can claim this monster (killsteal
-         * protection).
-         */
-        int mOwnerTimer;
-
         /** List of characters and their skills that attacked this monster. */
         std::map<Character *, std::set <size_t> > mExpReceivers;
 
@@ -340,9 +333,6 @@ class Monster : public Being
          * protection).
          */
         std::set<Character *> mLegalExpReceivers;
-
-        /** Delay until monster can attack. */
-        int mAttackTime;
 
         /** Attack the monster is currently performing. */
         MonsterAttack *mCurrentAttack;

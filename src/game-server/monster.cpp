@@ -63,11 +63,8 @@ Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
     mScript(NULL),
-    mCountDown(0),
     mTargetListener(&monsterTargetEventDispatch),
     mOwner(NULL),
-    mOwnerTimer(0),
-    mAttackTime(0),
     mCurrentAttack(NULL)
 {
     LOG_DEBUG("Monster spawned!");
@@ -123,8 +120,9 @@ void Monster::perform()
 {
     if (mAction == ATTACK && mCurrentAttack && mTarget)
     {
-        if (mAttackTime == mCurrentAttack->aftDelay)
+        if (!isTimerRunning(T_B_ATTACK_TIME))
         {
+            setTimerHard(T_B_ATTACK_TIME, mCurrentAttack->aftDelay + mCurrentAttack->preDelay);
             Damage damage;
             damage.base = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN) * mCurrentAttack->damageFactor);
             damage.delta = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) * mCurrentAttack->damageFactor);
@@ -146,10 +144,10 @@ void Monster::perform()
                 mScript->execute();
             }
         }
-        if (!mAttackTime)
-        {
-            setAction(STAND);
-        }
+    }
+    if (mAction == ATTACK && !mTarget)
+    {
+        setAction(STAND);
     }
 }
 
@@ -157,18 +155,15 @@ void Monster::update()
 {
     Being::update();
 
-    if (mOwner && mOwnerTimer)
+    if (isTimerJustFinished(T_M_KILLSTEAL_PROTECTED))
     {
-        mOwnerTimer--;
-    } else {
         mOwner = NULL;
     }
 
     // If dead do nothing but rot
     if (mAction == DEAD)
     {
-        mCountDown--;
-        if (mCountDown <= 0)
+        if (!isTimerRunning(T_M_DECAY))
         {
             GameState::enqueueRemove(this);
         }
@@ -182,11 +177,8 @@ void Monster::update()
         mScript->execute();
     }
 
-    if (mAction == ATTACK)
-    {
-        mAttackTime--;
-        return;
-    }
+    // cancle the rest when we are currently performing an attack
+    if (isTimerRunning(T_B_ATTACK_TIME)) return;
 
     // Check potential attack positions
     Being *bestAttackTarget = mTarget = NULL;
@@ -279,7 +271,7 @@ void Monster::update()
             setDirection(bestAttackDirection);
             //perform a random attack based on priority
             mCurrentAttack = workingAttacks.upper_bound(rand()%prioritySum)->second;
-            mAttackTime = mCurrentAttack->preDelay + mCurrentAttack->aftDelay;
+            setTimerSoft(T_B_ATTACK_TIME, mCurrentAttack->preDelay + mCurrentAttack->aftDelay);
             setAction(ATTACK);
             raiseUpdateFlags(UPDATEFLAG_ATTACK);
         }
@@ -289,8 +281,7 @@ void Monster::update()
         // We have no target - let's wander around
         if (getPosition() == getDestination())
         {
-            mCountDown--;
-            if (mCountDown <= 0)
+            if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED))
             {
                 unsigned range = mSpecy->getStrollRange();
                 if (range)
@@ -298,8 +289,8 @@ void Monster::update()
                     Point randomPos(rand() % (range * 2 + 1) - range + getPosition().x,
                                     rand() % (range * 2 + 1) - range + getPosition().y);
                     setDestination(randomPos);
-                    mCountDown = 10 + rand() % 10;
                 }
+                setTimerHard(T_M_STROLL, 10 + rand() % 10);
             }
         }
     }
@@ -413,11 +404,11 @@ int Monster::damage(Actor *source, const Damage &damage)
             if (*iSkill)
             {
                 mExpReceivers[s].insert(*iSkill);
-                if (!mOwnerTimer || mOwner == s || mOwner->getParty() == s->getParty())
+                if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED) || mOwner == s || mOwner->getParty() == s->getParty())
                 {
                     mOwner = s;
                     mLegalExpReceivers.insert(s);
-                    mOwnerTimer = KILLSTEAL_PROTECTION_TIME;
+                    setTimerHard(T_M_KILLSTEAL_PROTECTED, KILLSTEAL_PROTECTION_TIME);
                 }
             }
         }
@@ -430,7 +421,7 @@ void Monster::died()
     if (mAction == DEAD) return;
 
     Being::died();
-    mCountDown = 50; // Sets remove time to 5 seconds
+    setTimerHard(T_M_DECAY, Monster::DECAY_TIME);
 
     //drop item
     if (ItemClass *drop = mSpecy->getRandomDrop())
