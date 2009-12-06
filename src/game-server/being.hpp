@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_BEING_H_
-#define _TMWSERV_BEING_H_
+#ifndef BEING_H
+#define BEING_H
 
 #include <string>
 #include <vector>
@@ -389,4 +389,4 @@ class Being : public Actor
         Timers mTimers;
 };
 
-#endif // _TMWSERV_BEING_H_
+#endif // BEING_H

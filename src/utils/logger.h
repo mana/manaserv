@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_LOGGER_H_
-#define _TMWSERV_LOGGER_H_
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include <iosfwd>
 #include <sstream>
@@ -167,4 +167,4 @@ class Logger
 #define LOG_ERROR(msg)  LOG(ERROR, msg)
 #define LOG_FATAL(msg)  LOG(FATAL, msg)
 
-#endif // _TMWSERV_LOGGER_H_
+#endif // LOGGER_H

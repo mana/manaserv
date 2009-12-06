@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_COMMON_INVENTORYDATA_HPP_
-#define _TMWSERV_COMMON_INVENTORYDATA_HPP_
+#ifndef COMMON_INVENTORYDATA_HPP
+#define COMMON_INVENTORYDATA_HPP
 
 #include <vector>
 

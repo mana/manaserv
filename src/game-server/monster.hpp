@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_MONSTER_H_
-#define _TMWSERV_MONSTER_H_
+#ifndef MONSTER_H
+#define MONSTER_H
 
 #include <map>
 #include <vector>
@@ -345,4 +345,4 @@ class Monster : public Being
         friend struct MonsterTargetEventDispatch;
 };
 
-#endif // _TMWSERV_MONSTER_H_
+#endif // MONSTER_H

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_MATHUTILS_H_
-#define _TMWSERV_MATHUTILS_H_
+#ifndef MATHUTILS_H
+#define MATHUTILS_H
 
 namespace utils {
 namespace math {

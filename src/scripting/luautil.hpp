@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_SCRIPTING_LUAUTIL_HPP
-#define _TMWSERV_SCRIPTING_LUAUTIL_HPP
+#ifndef SCRIPTING_LUAUTIL_HPP
+#define SCRIPTING_LUAUTIL_HPP
 
 extern "C" {
 #include <lualib.h>

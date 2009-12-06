@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_ACCOUNTHANDLER_H_
-#define _TMWSERV_ACCOUNTHANDLER_H_
+#ifndef ACCOUNTHANDLER_H
+#define ACCOUNTHANDLER_H
 
 #include <string>
 

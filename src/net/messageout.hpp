@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_MESSAGEOUT_H_
-#define _TMWSERV_MESSAGEOUT_H_
+#ifndef MESSAGEOUT_H
+#define MESSAGEOUT_H
 
 #include <iosfwd>
 
@@ -99,4 +99,4 @@ class MessageOut
                                          const MessageOut &msg);
 };
 
-#endif //_TMWSERV_MESSAGEOUT_H_
+#endif //MESSAGEOUT_H

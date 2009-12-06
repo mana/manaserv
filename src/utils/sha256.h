@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMW_UTILS_SHA256_H_
-#define _TMW_UTILS_SHA256_H_
+#ifndef UTILS_SHA256_H
+#define UTILS_SHA256_H
 
 #include <string>
 
@@ -34,4 +34,4 @@ static const unsigned int SHA256_HASH_LENGTH = 64;
  */
 std::string sha256(const std::string &string);
 
-#endif // _TMW_UTILS_SHA256_H_
+#endif // UTILS_SHA256_H

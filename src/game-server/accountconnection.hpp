@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMW_ACCOUNTCONNECTION_H_
-#define _TMW_ACCOUNTCONNECTION_H_
+#ifndef ACCOUNTCONNECTION_H
+#define ACCOUNTCONNECTION_H
 
 #include "net/messageout.hpp"
 #include "net/connection.hpp"
@@ -171,4 +171,4 @@ class AccountConnection : public Connection
 
 extern AccountConnection *accountHandler;
 
-#endif // _TMW_ACCOUNTCONNECTION_H_
+#endif // ACCOUNTCONNECTION_H

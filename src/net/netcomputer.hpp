@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_NETCOMPUTER_H_
-#define _TMWSERV_NETCOMPUTER_H_
+#ifndef NETCOMPUTER_H
+#define NETCOMPUTER_H
 
 #include <iostream>
 #include <enet/enet.h>
@@ -94,4 +94,4 @@ class NetComputer
                                          const NetComputer &comp);
 };
 
-#endif // _TMWSERV_NETCOMPUTER_H_
+#endif // NETCOMPUTER_H

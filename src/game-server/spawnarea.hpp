@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_SPAWNAREA
-#define _TMWSERV_SPAWNAREA
+#ifndef SPAWNAREA_HPP
+#define SPAWNAREA_HPP
 
 #include "point.h"
 #include "game-server/eventlistener.hpp"

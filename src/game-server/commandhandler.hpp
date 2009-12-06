@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMW_SERVER_COMMANDHANDLER_
-#define _TMW_SERVER_COMMANDHANDLER_
+#ifndef SERVER_COMMANDHANDLER_HPP
+#define SERVER_COMMANDHANDLER_HPP
 
 #include <string>
 
@@ -34,4 +34,4 @@ namespace CommandHandler
     void handleCommand(Character *player, const std::string &command);
 }
 
-#endif //_TMW_SERVER_COMMANDHANDLER_H
+#endif //SERVER_COMMANDHANDLER_H

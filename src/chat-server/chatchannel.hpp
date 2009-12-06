@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_CHATCHANNEL_H_
-#define _TMWSERV_CHATCHANNEL_H_
+#ifndef CHATCHANNEL_H
+#define CHATCHANNEL_H
 
 #include <string>
 #include <vector>

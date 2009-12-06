@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_THING_H_
-#define _TMWSERV_THING_H_
+#ifndef THING_H
+#define THING_H
 
 #include <set>
 
@@ -133,4 +133,4 @@ class Thing
         ThingType mType;        /**< Type of this thing. */
 };
 
-#endif // _TMWSERV_THING_H_
+#endif // THING_H

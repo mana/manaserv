@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _MANASERV_DALSTORAGE_SQL_H_
-#define _MANASERV_DALSTORAGE_SQL_H_
+#ifndef _MANASERV_DALSTORAGE_SQL_H
+#define _MANASERV_DALSTORAGE_SQL_H
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -148,4 +148,4 @@ static const char *ONLINE_USERS_TBL_NAME = "mana_online_list";
  */
 static const char *TRANSACTION_TBL_NAME = "mana_transactions";
 
-#endif // _MANASERV_DALSTORAGE_SQL_H_
+#endif // _MANASERV_DALSTORAGE_SQL_H

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_TOKENDISPENSER_HPP
-#define _TMWSERV_TOKENDISPENSER_HPP
+#ifndef TOKENDISPENSER_HPP
+#define TOKENDISPENSER_HPP
 
 #define MAGIC_TOKEN_LENGTH 32
 
@@ -42,4 +42,4 @@ namespace utils
 
 } // namespace utils
 
-#endif // _TMWSERV_TOKENDISPENSER_HPP
+#endif // TOKENDISPENSER_HPP

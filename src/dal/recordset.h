@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_RECORDSET_H_
-#define _TMWSERV_RECORDSET_H_
+#ifndef RECORDSET_H
+#define RECORDSET_H
 
 #include <iostream>
 #include <vector>
@@ -178,4 +178,4 @@ class RecordSet
 
 } // namespace dal
 
-#endif // _TMWSERV_RECORDSET_H_
+#endif // RECORDSET_H

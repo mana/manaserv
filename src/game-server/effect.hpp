@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_EFFECT_H
-#define _TMWSERV_EFFECT_H
+#ifndef EFFECT_H
+#define EFFECT_H
 
 #include "game-server/actor.hpp"
 #include "game-server/being.hpp"

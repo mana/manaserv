@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_SCRIPTING_SCRIPT_HPP
-#define _TMWSERV_SCRIPTING_SCRIPT_HPP
+#ifndef SCRIPTING_SCRIPT_HPP
+#define SCRIPTING_SCRIPT_HPP
 
 #include <string>
 

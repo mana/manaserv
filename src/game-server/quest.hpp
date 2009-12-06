@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_GAMESERVER_QUEST_
-#define _TMWSERV_GAMESERVER_QUEST_
+#ifndef GAMESERVER_QUEST_HPP
+#define GAMESERVER_QUEST_HPP
 
 #include <string>
 

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_GAMESERVER_NPC_HPP_
-#define _TMWSERV_GAMESERVER_NPC_HPP_
+#ifndef GAMESERVER_NPC_HPP
+#define GAMESERVER_NPC_HPP
 
 #include "game-server/being.hpp"
 

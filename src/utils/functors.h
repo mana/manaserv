@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_FUNCTORS_H_
-#define _TMWSERV_FUNCTORS_H_
+#ifndef FUNCTORS_H
+#define FUNCTORS_H
 
 
 #include <functional>
@@ -74,4 +74,4 @@ struct string_to: public std::unary_function<std::string, T>
 } // anonymous namespace
 
 
-#endif // _TMWSERV_FUNCTORS_H_
+#endif // FUNCTORS_H

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_POINT_H_
-#define _TMWSERV_POINT_H_
+#ifndef POINT_H
+#define POINT_H
 
 #include <algorithm>
 
@@ -87,4 +87,4 @@ class Rectangle
         }
 };
 
-#endif // _TMWSERV_POINT_H_
+#endif // POINT_H

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef TMW_CHATSERVER_GUILDMANAGER_H
-#define TMW_CHATSERVER_GUILDMANAGER_H
+#ifndef CHATSERVER_GUILDMANAGER_H
+#define CHATSERVER_GUILDMANAGER_H
 
 #include <list>
 #include <string>

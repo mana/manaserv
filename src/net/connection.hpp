@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_CONNECTION_H_
-#define _TMWSERV_CONNECTION_H_
+#ifndef CONNECTION_H
+#define CONNECTION_H
 
 #include <string>
 #include <enet/enet.h>

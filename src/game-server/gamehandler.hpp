@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMW_SERVER_GAMEHANDLER_
-#define _TMW_SERVER_GAMEHANDLER_
+#ifndef SERVER_GAMEHANDLER_HPP
+#define SERVER_GAMEHANDLER_HPP
 
 #include "game-server/character.hpp"
 #include "net/connectionhandler.hpp"

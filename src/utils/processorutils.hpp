@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_PROCESSORUTILS_HPP
-#define _TMWSERV_PROCESSORUTILS_HPP
+#ifndef PROCESSORUTILS_HPP
+#define PROCESSORUTILS_HPP
 
 namespace utils
 {
@@ -47,4 +47,4 @@ namespace utils
     } // namespace processor
 } // namespace utils
 
-#endif // _TMWSERV_TOKENDISPENSER_HPP
+#endif // TOKENDISPENSER_HPP

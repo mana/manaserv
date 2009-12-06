@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_SLANGSFILTER_H_
-#define _TMWSERV_SLANGSFILTER_H_
+#ifndef SLANGSFILTER_H
+#define SLANGSFILTER_H
 
 #include <list>
 #include <string>

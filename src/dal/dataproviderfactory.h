@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_DATA_PROVIDER_FACTORY_H_
-#define _TMWSERV_DATA_PROVIDER_FACTORY_H_
+#ifndef DATA_PROVIDER_FACTORY_H
+#define DATA_PROVIDER_FACTORY_H
 
 namespace dal
 {
@@ -71,4 +71,4 @@ class DataProviderFactory
 
 } // namespace dal
 
-#endif // _TMWSERV_DATA_PROVIDER_FACTORY_H_
+#endif // DATA_PROVIDER_FACTORY_H

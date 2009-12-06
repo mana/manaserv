@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_CHARACTERDATA
-#define _TMWSERV_CHARACTERDATA
+#ifndef CHARACTERDATA_HPP
+#define CHARACTERDATA_HPP
 
 #include <string>
 #include <vector>

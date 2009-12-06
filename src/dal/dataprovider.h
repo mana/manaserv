@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_DATA_PROVIDER_H_
-#define _TMWSERV_DATA_PROVIDER_H_
+#ifndef DATA_PROVIDER_H
+#define DATA_PROVIDER_H
 
 
 #include <string>
@@ -200,4 +200,4 @@ class DataProvider
 
 } // namespace dal
 
-#endif // _TMWSERV_DATA_PROVIDER_H_
+#endif // DATA_PROVIDER_H

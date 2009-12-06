@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef LUASCRIPT_HPP_INCLUDED
-#define LUASCRIPT_HPP_INCLUDED
+#ifndef LUASCRIPT_HPP
+#define LUASCRIPT_HPP
 
 extern "C" {
 #include <lualib.h>
@@ -89,4 +89,4 @@ struct LuaRegister
 
 static LuaRegister dummy;
 
-#endif // LUASCRIPT_HPP_INCLUDED
+#endif // LUASCRIPT_HPP

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_CHARACTER_HPP_
-#define _TMWSERV_CHARACTER_HPP_
+#ifndef CHARACTER_HPP
+#define CHARACTER_HPP
 
 #include <map>
 #include <string>
@@ -434,4 +434,4 @@ class Character : public Being
         { return Map::BLOCKTYPE_CHARACTER; }
 };
 
-#endif // _TMWSERV_CHARACTER_HPP_
+#endif // CHARACTER_HPP

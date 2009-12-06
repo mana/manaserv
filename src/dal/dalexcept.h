@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_DAL_EXCEPT_H_
-#define _TMWSERV_DAL_EXCEPT_H_
+#ifndef DAL_EXCEPT_H
+#define DAL_EXCEPT_H
 
 
 #include <string>
@@ -165,4 +165,4 @@ class RsColumnHeadersNotSet: public std::exception
 
 } // namespace dal
 
-#endif // _TMWSERV_DAL_EXCEPT_H_
+#endif // DAL_EXCEPT_H

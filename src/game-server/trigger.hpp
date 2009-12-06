@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_TRIGGER
-#define _TMWSERV_TRIGGER
+#ifndef TRIGGER_HPP
+#define TRIGGER_HPP
 
 #include "point.h"
 #include "game-server/thing.hpp"

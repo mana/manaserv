@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_SQLITE_DATA_PROVIDER_H_
-#define _TMWSERV_SQLITE_DATA_PROVIDER_H_
+#ifndef SQLITE_DATA_PROVIDER_H
+#define SQLITE_DATA_PROVIDER_H
 
 #include <iosfwd>
 #include "limits.h"
@@ -184,4 +184,4 @@ class SqLiteDataProvider: public DataProvider
 
 } // namespace dal
 
-#endif // _TMWSERV_SQLITE_DATA_PROVIDER_H_
+#endif // SQLITE_DATA_PROVIDER_H

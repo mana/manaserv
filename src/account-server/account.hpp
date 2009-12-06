@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_ACCOUNT_H_
-#define _TMWSERV_ACCOUNT_H_
+#ifndef ACCOUNT_H
+#define ACCOUNT_H
 
 #include <string>
 #include <vector>
@@ -212,4 +212,4 @@ class Account
 
 typedef std::vector< Account * > Accounts;
 
-#endif // _TMWSERV_ACCOUNT_H_
+#endif // ACCOUNT_H

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_TRANSACTION_H_
-#define _TMWSERV_TRANSACTION_H_
+#ifndef TRANSACTION_H
+#define TRANSACTION_H
 
 struct Transaction
 {

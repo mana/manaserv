@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_PROTOCOL_H_
-#define _TMWSERV_PROTOCOL_H_
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
 
 /**
  * Enumerated type for communicated messages:
@@ -351,4 +351,4 @@ enum {
     GUILD_EVENT_OFFLINE_PLAYER
 };
 
-#endif // _TMWSERV_PROTOCOL_H_
+#endif // PROTOCOL_H

@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMWSERV_ZLIB
-#define _TMWSERV_ZLIB
+#ifndef ZLIB_HPP
+#define ZLIB_HPP
 
 /**
  * Inflates either zlib or gzip deflated memory. The inflated memory is

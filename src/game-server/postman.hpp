@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMW_POSTMAN_H_
-#define _TMW_POSTMAN_H_
+#ifndef POSTMAN_H
+#define POSTMAN_H
 
 #include <map>
 

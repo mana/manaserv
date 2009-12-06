@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_DALSTORAGE_H_
-#define _TMWSERV_DALSTORAGE_H_
+#ifndef DALSTORAGE_H
+#define DALSTORAGE_H
 
 #include <list>
 #include <map>
@@ -416,4 +416,4 @@ class DALStorage
 
 extern DALStorage *storage;
 
-#endif // _TMWSERV_DALSTORAGE_H_
+#endif // DALSTORAGE_H

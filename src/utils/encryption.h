@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _TMW_UTILS_ENCRYPTION_H
-#define _TMW_UTILS_ENCRYPTION_H
+#ifndef UTILS_ENCRYPTION_H
+#define UTILS_ENCRYPTION_H
 
 #include <string>
 
@@ -34,4 +34,4 @@ std::string createRandomPassword();
 
 }
 
-#endif // TMW_UTILS_ENCRYPTION_H
+#endif // UTILS_ENCRYPTION_H

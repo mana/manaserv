@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_ACTOR_H_
-#define _TMWSERV_ACTOR_H_
+#ifndef ACTOR_H
+#define ACTOR_H
 
 #include "point.h"
 #include "game-server/map.hpp"
@@ -142,4 +142,4 @@ class Actor : public Thing
         unsigned char mSize;        /**< Radius of bounding circle. */
 };
 
-#endif // _TMWSERV_ACTOR_H_
+#endif // ACTOR_H

@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_PQDATAPROVIDER_H_
-#define _TMWSERV_PQDATAPROVIDER_H_
+#ifndef PQDATAPROVIDER_H
+#define PQDATAPROVIDER_H
 
 #include <iosfwd>
 #include <libpq-fe.h>
@@ -96,4 +96,4 @@ class PqDataProvider: public DataProvider
 
 } // namespace dal
 
-#endif // _TMWSERV_PQDATAPROVIDER_H_
+#endif // PQDATAPROVIDER_H

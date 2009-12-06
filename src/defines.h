@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMWSERV_DEFINES_H_
-#define _TMWSERV_DEFINES_H_
+#ifndef DEFINES_H
+#define DEFINES_H
 
 /**
  * Enumeration type for account levels.
@@ -151,4 +151,4 @@ enum
     CHAR_ATTR_NB = CHAR_ATTR_END - CHAR_ATTR_BEGIN
 };
 
-#endif // _TMWSERV_DEFINES_H_
+#endif // DEFINES_H

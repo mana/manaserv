@@ -18,8 +18,8 @@
  *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _TMW_TOKENCOLLECTOR_HPP
-#define _TMW_TOKENCOLLECTOR_HPP
+#ifndef TOKENCOLLECTOR_HPP
+#define TOKENCOLLECTOR_HPP
 
 #include <string>
 #include <list>
@@ -135,4 +135,4 @@ class TokenCollector: private TokenCollectorBase
         Handler *mHandler;
 };
 
-#endif // _TMW_TOKENCOLLECTOR_HPP
+#endif // TOKENCOLLECTOR_HPP
