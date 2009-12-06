@@ -26,7 +26,7 @@
 #include "guildmanager.hpp"
 
 #include "account-server/character.hpp"
-#include "account-server/dalstorage.hpp"
+#include "account-server/storage.hpp"
 
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"

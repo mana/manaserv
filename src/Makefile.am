@@ -15,11 +15,11 @@ manaserv_account_SOURCES = \
 	account-server/accounthandler.cpp \
 	account-server/character.hpp \
 	account-server/character.cpp \
-	account-server/dalstorage.hpp \
-	account-server/dalstorage.cpp \
-	account-server/dalstoragesql.hpp \
 	account-server/serverhandler.hpp \
 	account-server/serverhandler.cpp \
+	account-server/storage.hpp \
+	account-server/storage.cpp \
+	account-server/storagesql.hpp \
 	chat-server/chathandler.hpp \
 	chat-server/chathandler.cpp \
 	chat-server/chatclient.hpp \

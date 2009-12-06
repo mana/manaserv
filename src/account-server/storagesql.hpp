@@ -27,7 +27,7 @@
 
 #if !defined (MYSQL_SUPPORT) && !defined (SQLITE_SUPPORT) && \
     !defined (POSTGRESQL_SUPPORT)
-#error "(dalstorage.hpp) no database backend defined"
+#error "(storage.hpp) no database backend defined"
 #endif
 
 // TODO: Fix problem with PostgreSQL null primary key's.

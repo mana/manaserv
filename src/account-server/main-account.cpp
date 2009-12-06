@@ -32,7 +32,7 @@
 
 #include "account-server/accounthandler.hpp"
 #include "account-server/serverhandler.hpp"
-#include "account-server/dalstorage.hpp"
+#include "account-server/storage.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chathandler.hpp"
 #include "chat-server/guildmanager.hpp"
@@ -58,7 +58,7 @@ static bool running = true;        /**< Determines if server keeps running */
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
 /** Database handler. */
-DALStorage *storage;
+Storage *storage;
 
 /** Communications (chat) message handler */
 ChatHandler *chatHandler;
@@ -156,7 +156,7 @@ static void initialize()
 
     // Open database
     try {
-        storage = new DALStorage;
+        storage = new Storage;
         storage->open();
     } catch (std::string &error) {
         LOG_FATAL("Error opening the database: " << error);

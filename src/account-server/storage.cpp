@@ -21,11 +21,11 @@
 #include <cassert>
 #include <time.h>
 
-#include "account-server/dalstorage.hpp"
+#include "account-server/storage.hpp"
 
 #include "point.h"
 #include "account-server/account.hpp"
-#include "account-server/dalstoragesql.hpp"
+#include "account-server/storagesql.hpp"
 #include "chat-server/chatchannel.hpp"
 #include "chat-server/guild.hpp"
 #include "chat-server/post.hpp"
@@ -47,7 +47,7 @@
 /**
  * Constructor.
  */
-DALStorage::DALStorage()
+Storage::Storage()
         : mDb(dal::DataProviderFactory::createDataProvider()),
           mItemDbVersion(0)
 {
@@ -56,7 +56,7 @@ DALStorage::DALStorage()
 /**
  * Destructor.
  */
-DALStorage::~DALStorage()
+Storage::~Storage()
 {
     if (mDb->isConnected())
         close();
@@ -67,7 +67,7 @@ DALStorage::~DALStorage()
 /**
  * Connect to the database and initialize it if necessary.
  */
-void DALStorage::open()
+void Storage::open()
 {
     // Do nothing if already connected.
     if (mDb->isConnected())
@@ -109,7 +109,7 @@ void DALStorage::open()
 /**
  * Disconnect from the database.
  */
-void DALStorage::close()
+void Storage::close()
 {
     mDb->disconnect();
 }
@@ -119,7 +119,7 @@ void DALStorage::close()
  *
  * @return the account found
  */
-Account *DALStorage::getAccountBySQL()
+Account *Storage::getAccountBySQL()
 {
     try {
         const dal::RecordSet &accountInfo = mDb->processSql();
@@ -206,7 +206,7 @@ Account *DALStorage::getAccountBySQL()
  * @param userName the owner of the account.
  * @return the account associated to the user name.
  */
-Account *DALStorage::getAccount(const std::string &userName)
+Account *Storage::getAccount(const std::string &userName)
 {
     std::ostringstream sql;
     sql << "SELECT * FROM " << ACCOUNTS_TBL_NAME << " WHERE username = ?";
@@ -224,7 +224,7 @@ Account *DALStorage::getAccount(const std::string &userName)
  *
  * @return the account associated with the ID.
  */
-Account *DALStorage::getAccount(int accountID)
+Account *Storage::getAccount(int accountID)
 {
     std::ostringstream sql;
     sql << "SELECT * FROM " << ACCOUNTS_TBL_NAME << " WHERE id = ?";
@@ -242,7 +242,7 @@ Account *DALStorage::getAccount(int accountID)
  *
  * @return the character found by the query.
  */
-Character *DALStorage::getCharacterBySQL(Account *owner)
+Character *Storage::getCharacterBySQL(Account *owner)
 {
     Character *character;
 
@@ -408,7 +408,7 @@ Character *DALStorage::getCharacterBySQL(Account *owner)
  *
  * @return the character associated to the ID.
  */
-Character *DALStorage::getCharacter(int id, Account *owner)
+Character *Storage::getCharacter(int id, Account *owner)
 {
     std::ostringstream sql;
     sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE id = ?";
@@ -426,7 +426,7 @@ Character *DALStorage::getCharacter(int id, Account *owner)
  *
  * @return the character associated to the name
  */
-Character *DALStorage::getCharacter(const std::string &name)
+Character *Storage::getCharacter(const std::string &name)
 {
     std::ostringstream sql;
     sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
@@ -441,7 +441,7 @@ Character *DALStorage::getCharacter(const std::string &name)
  * Tells if the user name already exists.
  * @return true if the user name exists.
  */
-bool DALStorage::doesUserNameExist(const std::string &name)
+bool Storage::doesUserNameExist(const std::string &name)
 {
     try {
         std::ostringstream sql;
@@ -470,7 +470,7 @@ bool DALStorage::doesUserNameExist(const std::string &name)
  * Tells if the email address already exists.
  * @return true if the email address exists.
  */
-bool DALStorage::doesEmailAddressExist(const std::string &email)
+bool Storage::doesEmailAddressExist(const std::string &email)
 {
     try {
         std::ostringstream sql;
@@ -498,7 +498,7 @@ bool DALStorage::doesEmailAddressExist(const std::string &email)
  * Tells if the character's name already exists.
  * @return true if character's name exists.
  */
-bool DALStorage::doesCharacterNameExist(const std::string& name)
+bool Storage::doesCharacterNameExist(const std::string& name)
 {
     try {
         std::ostringstream sql;
@@ -532,8 +532,8 @@ bool DALStorage::doesCharacterNameExist(const std::string& name)
  *                         nested transaction.
  * @return true on success
  */
-bool DALStorage::updateCharacter(Character *character,
-                                 bool startTransaction)
+bool Storage::updateCharacter(Character *character,
+                              bool startTransaction)
 {
     // Update the database Character data (see CharacterData for details)
     if (startTransaction)
@@ -737,7 +737,7 @@ bool DALStorage::updateCharacter(Character *character,
  * @exception dbl::DbSqlQueryExecFailure.
  * @deprecated Use DALStorage::updateExperience instead!!!
 */
-void DALStorage::flushSkill(const Character * character, int skill_id)
+void Storage::flushSkill(const Character *character, int skill_id)
 {
     updateExperience(character->getDatabaseID(), skill_id,
         character->getExperience(skill_id));
@@ -747,7 +747,7 @@ void DALStorage::flushSkill(const Character * character, int skill_id)
  * Add an account to the database.
  * @param account the new account.
  */
-void DALStorage::addAccount(Account *account)
+void Storage::addAccount(Account *account)
 {
     assert(account->getCharacters().size() == 0);
 
@@ -787,7 +787,7 @@ void DALStorage::addAccount(Account *account)
 /**
  * Update an account from the database.
  */
-void DALStorage::flush(Account *account)
+void Storage::flush(Account *account)
 {
     assert(account->getID() >= 0);
 
@@ -928,7 +928,7 @@ void DALStorage::flush(Account *account)
  *
  * @param account the account to delete.
  */
-void DALStorage::delAccount(Account *account)
+void Storage::delAccount(Account *account)
 {
     account->setCharacters(Characters());
     flush(account);
@@ -945,7 +945,7 @@ void DALStorage::delAccount(Account *account)
  *
  * @param account the account that recently logged in.
  */
-void DALStorage::updateLastLogin(const Account *account)
+void Storage::updateLastLogin(const Account *account)
 {
     std::ostringstream sql;
     sql << "UPDATE " << ACCOUNTS_TBL_NAME
@@ -963,9 +963,9 @@ void DALStorage::updateLastLogin(const Account *account)
  * @param AttribId    ID of the modified attribute
  * @param AttribValue New value of the modified attribute
  */
-void DALStorage::updateCharacterPoints(int charId,
-                                       int charPoints, int corrPoints,
-                                       int attribId, int attribValue)
+void Storage::updateCharacterPoints(int charId,
+                                    int charPoints, int corrPoints,
+                                    int attribId, int attribValue)
 {
     std::ostringstream sql;
     sql << "UPDATE " << CHARACTERS_TBL_NAME
@@ -993,7 +993,7 @@ void DALStorage::updateCharacterPoints(int charId,
  * @param SkillId     ID of the skill
  * @param SkillValue  new skill points
  */
-void DALStorage::updateExperience(int charId, int skillId, int skillValue)
+void Storage::updateExperience(int charId, int skillId, int skillValue)
 {
     try
     {
@@ -1045,7 +1045,7 @@ void DALStorage::updateExperience(int charId, int skillId, int skillValue)
  * @param statusId  ID of the status effect
  * @param time      Time left on the status effect
  */
-void DALStorage::insertStatusEffect(int charId, int statusId, int time)
+void Storage::insertStatusEffect(int charId, int statusId, int time)
 {
     try
     {
@@ -1069,7 +1069,7 @@ void DALStorage::insertStatusEffect(int charId, int statusId, int time)
 /**
  * Add a new guild.
  */
-void DALStorage::addGuild(Guild *guild)
+void Storage::addGuild(Guild *guild)
 {
     std::ostringstream insertSql;
     insertSql << "insert into " << GUILDS_TBL_NAME
@@ -1100,7 +1100,7 @@ void DALStorage::addGuild(Guild *guild)
 /**
  * Delete a guild.
  */
-void DALStorage::removeGuild(Guild *guild)
+void Storage::removeGuild(Guild *guild)
 {
     std::ostringstream sql;
     sql << "delete from " << GUILDS_TBL_NAME
@@ -1112,7 +1112,7 @@ void DALStorage::removeGuild(Guild *guild)
 /**
  * Add member to guild.
  */
-void DALStorage::addGuildMember(int guildId, int memberId)
+void Storage::addGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
 
@@ -1135,7 +1135,7 @@ void DALStorage::addGuildMember(int guildId, int memberId)
 /**
  * Remove member from guild.
  */
-void DALStorage::removeGuildMember(int guildId, int memberId)
+void Storage::removeGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
 
@@ -1157,7 +1157,7 @@ void DALStorage::removeGuildMember(int guildId, int memberId)
 /**
  * Save guild member rights.
  */
-void DALStorage::setMemberRights(int guildId, int memberId, int rights)
+void Storage::setMemberRights(int guildId, int memberId, int rights)
 {
     std::ostringstream sql;
 
@@ -1180,7 +1180,7 @@ void DALStorage::setMemberRights(int guildId, int memberId, int rights)
  * Get the list of guilds.
  * @return a list of guilds
  */
-std::list<Guild*> DALStorage::getGuildList()
+std::list<Guild*> Storage::getGuildList()
 {
     std::list<Guild*> guilds;
     std::stringstream sql;
@@ -1252,7 +1252,7 @@ std::list<Guild*> DALStorage::getGuildList()
 /**
  * Gets the value of a quest variable.
  */
-std::string DALStorage::getQuestVar(int id, const std::string &name)
+std::string Storage::getQuestVar(int id, const std::string &name)
 {
     try
     {
@@ -1282,7 +1282,7 @@ std::string DALStorage::getQuestVar(int id, const std::string &name)
  * @param name Name of the requested world-state variable.
  * @param map_id Id of the specific map.
  */
-std::string DALStorage::getWorldStateVar(const std::string &name, int map_id)
+std::string Storage::getWorldStateVar(const std::string &name, int map_id)
 {
     try
     {
@@ -1316,7 +1316,8 @@ std::string DALStorage::getWorldStateVar(const std::string &name, int map_id)
  * @param name Name of the world-state vairable.
  * @param value New value of the world-state variable.
  */
-void DALStorage::setWorldStateVar(const std::string &name, const std::string &value)
+void Storage::setWorldStateVar(const std::string &name,
+                               const std::string &value)
 {
     return setWorldStateVar(name, -1, value);
 }
@@ -1328,9 +1329,9 @@ void DALStorage::setWorldStateVar(const std::string &name, const std::string &va
  * @param mapId ID of the specific map
  * @param value New value of the world-state variable.
  */
-void DALStorage::setWorldStateVar(const std::string &name,
-                                  int mapId,
-                                  const std::string &value)
+void Storage::setWorldStateVar(const std::string &name,
+                               int mapId,
+                               const std::string &value)
 {
     try
     {
@@ -1395,8 +1396,8 @@ void DALStorage::setWorldStateVar(const std::string &name,
 /**
  * Sets the value of a quest variable.
  */
-void DALStorage::setQuestVar(int id, const std::string &name,
-                             const std::string &value)
+void Storage::setQuestVar(int id, const std::string &name,
+                          const std::string &value)
 {
     try
     {
@@ -1426,7 +1427,7 @@ void DALStorage::setQuestVar(int id, const std::string &name,
  * @param id character identifier.
  * @param duration duration in minutes.
  */
-void DALStorage::banCharacter(int id, int duration)
+void Storage::banCharacter(int id, int duration)
 {
     try
     {
@@ -1460,7 +1461,7 @@ void DALStorage::banCharacter(int id, int duration)
  * @param startTransaction indicates wheter the function should run in
  *        its own transaction or is called inline of another transaction
  */
-void DALStorage::delCharacter(int charId, bool startTransaction = true) const
+void Storage::delCharacter(int charId, bool startTransaction = true) const
 {
     if (startTransaction)
         mDb->beginTransaction();
@@ -1534,8 +1535,8 @@ void DALStorage::delCharacter(int charId, bool startTransaction = true) const
  * @param startTransaction indicates wheter the function should run in
  *        its own transaction or is called inline of another transaction
  */
-void DALStorage::delCharacter(Character *character,
-                              bool startTransaction = true) const
+void Storage::delCharacter(Character *character,
+                           bool startTransaction = true) const
 {
     delCharacter(character->getDatabaseID(), startTransaction);
 }
@@ -1543,7 +1544,7 @@ void DALStorage::delCharacter(Character *character,
 /**
  * Removes expired bans from accounts
  */
-void DALStorage::checkBannedAccounts()
+void Storage::checkBannedAccounts()
 {
     try
     {
@@ -1567,7 +1568,7 @@ void DALStorage::checkBannedAccounts()
  * @param id The id of the account
  * @param level The level to set for the account
  */
-void DALStorage::setAccountLevel(int id, int level)
+void Storage::setAccountLevel(int id, int level)
 {
     try
     {
@@ -1589,7 +1590,7 @@ void DALStorage::setAccountLevel(int id, int level)
  * @param id The id of the character
  * @param level The level to set for the character
  */
-void DALStorage::setPlayerLevel(int id, int level)
+void Storage::setPlayerLevel(int id, int level)
 {
     try
     {
@@ -1610,7 +1611,7 @@ void DALStorage::setPlayerLevel(int id, int level)
  *
  * @param letter The letter to store
  */
-void DALStorage::storeLetter(Letter *letter)
+void Storage::storeLetter(Letter *letter)
 {
     std::ostringstream sql;
     if (letter->getId() == 0)
@@ -1669,7 +1670,7 @@ void DALStorage::storeLetter(Letter *letter)
  *
  * @param playerId The id of the character requesting his post
  */
-Post *DALStorage::getStoredPost(int playerId)
+Post *Storage::getStoredPost(int playerId)
 {
     Post *p = new Post();
     // specialize the string_to functor to convert
@@ -1713,7 +1714,7 @@ Post *DALStorage::getStoredPost(int playerId)
  * Delete a letter from the database.
  * @param letter The letter to delete.
  */
-void DALStorage::deletePost(Letter *letter)
+void Storage::deletePost(Letter *letter)
 {
     mDb->beginTransaction();
 
@@ -1752,7 +1753,7 @@ void DALStorage::deletePost(Letter *letter)
  * reload of the xml files to load new items or monsters without server
  * restart.
  */
-void DALStorage::syncDatabase()
+void Storage::syncDatabase()
 {
     xmlDocPtr doc = xmlReadFile(DEFAULT_ITEM_FILE, NULL, 0);
     if (!doc)
@@ -1868,7 +1869,7 @@ void DALStorage::syncDatabase()
  * @param charId Id of the character.
  * @param online True to mark the character as being online.
  */
-void DALStorage::setOnlineStatus(int charId, bool online)
+void Storage::setOnlineStatus(int charId, bool online)
 {
     try
     {
@@ -1908,7 +1909,7 @@ void DALStorage::setOnlineStatus(int charId, bool online)
 /**
  * Store a transaction.
  */
-void DALStorage::addTransaction(const Transaction &trans)
+void Storage::addTransaction(const Transaction &trans)
 {
     try
     {
@@ -1933,7 +1934,7 @@ void DALStorage::addTransaction(const Transaction &trans)
 /**
  * Retrieve the last \num transactions that were stored.
  */
-std::vector<Transaction> DALStorage::getTransactions(unsigned int num)
+std::vector<Transaction> Storage::getTransactions(unsigned int num)
 {
     std::vector<Transaction> transactions;
     string_to<unsigned int> toUint;
@@ -1967,7 +1968,7 @@ std::vector<Transaction> DALStorage::getTransactions(unsigned int num)
 /**
  * Retrieve all transactions since the given \a date.
  */
-std::vector<Transaction> DALStorage::getTransactions(time_t date)
+std::vector<Transaction> Storage::getTransactions(time_t date)
 {
     std::vector<Transaction> transactions;
     string_to<unsigned int> toUint;

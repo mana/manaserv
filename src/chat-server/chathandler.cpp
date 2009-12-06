@@ -25,7 +25,7 @@
 
 #include "protocol.h"
 #include "account-server/character.hpp"
-#include "account-server/dalstorage.hpp"
+#include "account-server/storage.hpp"
 #include "chat-server/guildmanager.hpp"
 #include "chat-server/chatchannelmanager.hpp"
 #include "chat-server/chatclient.hpp"

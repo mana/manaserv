@@ -27,7 +27,7 @@
 #include "account-server/accountclient.hpp"
 #include "account-server/accounthandler.hpp"
 #include "account-server/character.hpp"
-#include "account-server/dalstorage.hpp"
+#include "account-server/storage.hpp"
 #include "chat-server/post.hpp"
 #include "common/transaction.hpp"
 #include "common/configuration.hpp"

@@ -18,8 +18,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DALSTORAGE_H
-#define DALSTORAGE_H
+#ifndef STORAGE_H
+#define STORAGE_H
 
 #include <list>
 #include <map>
@@ -40,11 +40,11 @@ class Post;
  * The high level interface to the database. Through the storage you can access
  * all accounts, characters, guilds, worlds states, transactions, etc.
  */
-class DALStorage
+class Storage
 {
     public:
-        DALStorage();
-        ~DALStorage();
+        Storage();
+        ~Storage();
 
         void open();
         void close();
@@ -127,8 +127,8 @@ class DALStorage
 
     private:
         // Prevent copying
-        DALStorage(const DALStorage &rhs);
-        DALStorage &operator=(const DALStorage &rhs);
+        Storage(const Storage &rhs);
+        Storage &operator=(const Storage &rhs);
 
         Account *getAccountBySQL();
         Character *getCharacterBySQL(Account *owner);
@@ -139,6 +139,6 @@ class DALStorage
         unsigned int mItemDbVersion;    /**< Version of the item database. */
 };
 
-extern DALStorage *storage;
+extern Storage *storage;
 
-#endif // DALSTORAGE_H
+#endif // STORAGE_H
