@@ -49,6 +49,8 @@ class Storage
         void open();
         void close();
 
+        void updatePasswordHashes();
+
         Account *getAccount(const std::string &userName);
         Account *getAccount(int accountID);
 
@@ -110,7 +112,7 @@ class Storage
 
         void storeLetter(Letter *letter);
         Post *getStoredPost(int playerId);
-        void deletePost(Letter* letter);
+        void deletePost(Letter *letter);
 
         /**
          * Returns the version of the local item database.

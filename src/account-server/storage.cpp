@@ -34,6 +34,7 @@
 #include "utils/functors.h"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
+#include "utils/sha256.h"
 
 // TODO: make data/items.xml a constant or read it from config file
 static const char *DEFAULT_ITEM_FILE = "data/items.xml";
@@ -137,6 +138,13 @@ void Storage::open()
         std::ostringstream sql;
         sql << "DELETE FROM " << ONLINE_USERS_TBL_NAME;
         mDb->execSql(sql.str());
+
+        /* Uncomment this and run the account server once to update existing
+         * password hashes. Making backup of the database is recommended, since
+         * it doesn't check whether the passwords are already hashed, and the
+         * operation is not reversible!
+         */
+        //updatePasswordHashes();
     }
     catch (const DbConnectionFailure& e) {
         std::ostringstream errmsg;
@@ -152,6 +160,46 @@ void Storage::open()
 void Storage::close()
 {
     mDb->disconnect();
+}
+
+/**
+ * Temporary function to hash all account passwords, for updating a database
+ * of accounts to the change to hashing passwords on both the server and the
+ * client.
+ */
+void Storage::updatePasswordHashes()
+{
+    using namespace dal;
+
+    std::ostringstream sql2;
+    sql2 << "SELECT id, password FROM " << ACCOUNTS_TBL_NAME;
+
+    const RecordSet &results = mDb->execSql(sql2.str());
+    if (!results.isEmpty()) {
+        std::vector<std::pair <unsigned, std::string > > hashed;
+
+        const unsigned nRows = results.rows();
+
+        for (unsigned row = 0; row < nRows; row++)
+        {
+            string_to< unsigned > toUint;
+            const int id = toUint(results(row, 0));
+            const std::string password = results(row, 1);
+            const std::string hashedPassword = sha256(password);
+
+            hashed.push_back(std::pair<unsigned, std::string >(id, hashedPassword));
+        }
+
+        for (unsigned i = 0; i < hashed.size(); ++i)
+        {
+            std::ostringstream setsql;
+            setsql << "UPDATE " << ACCOUNTS_TBL_NAME << " SET password = '"
+                    << hashed[i].second << "' WHERE id = '" << hashed[i].first << "'";
+            mDb->execSql(setsql.str());
+        }
+
+        std::cout << "Hashed the passwords of " << nRows << " accounts!" << std::endl;
+    }
 }
 
 /**
@@ -1118,7 +1166,6 @@ void Storage::addGuild(Guild *guild)
     {
         mDb->bindValue(1, guild->getName());
     }
-    //mDb->execSql(insertSql.str());
     mDb->processSql();
 
     std::ostringstream selectSql;
@@ -1129,7 +1176,6 @@ void Storage::addGuild(Guild *guild)
     {
         mDb->bindValue(1, guild->getName());
     }
-    //const dal::RecordSet& guildInfo = mDb->execSql(selectSql.str());
     const dal::RecordSet& guildInfo = mDb->processSql();
 
     string_to<unsigned int> toUint;
@@ -1881,7 +1927,6 @@ void Storage::syncDatabase()
                         << "  VALUES ( " << id << ", ?, ?, '"
                         << image << "', " << weight << ", '"
                         << type << "', ?, '" << dye << "' )";
-                    //mDb->execSql(sql.str());
                     if (mDb->prepareSql(sql.str()))
                     {
                         mDb->bindValue(1, name);
