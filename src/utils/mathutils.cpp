@@ -25,11 +25,14 @@
 #include <string.h>
 #include <float.h>
 
-#define MATH_UTILS_MAX_ANGLE 360
+static const int MATH_UTILS_MAX_ANGLE = 360;
 
-float sinList[MATH_UTILS_MAX_ANGLE];
-float cosList[MATH_UTILS_MAX_ANGLE];
-float tanList[MATH_UTILS_MAX_ANGLE];
+static float sinList[MATH_UTILS_MAX_ANGLE];
+static float cosList[MATH_UTILS_MAX_ANGLE];
+static float tanList[MATH_UTILS_MAX_ANGLE];
+
+namespace utils {
+namespace math {
 
 /*
  * A very fast function to calculate the approximate inverse square root of a
@@ -41,7 +44,7 @@ float tanList[MATH_UTILS_MAX_ANGLE];
  *
  * I wholeheartedly disagree with the use of this function -- silene
  */
-float utils::math::fastInvSqrt(float x)
+float fastInvSqrt(float x)
 {
     typedef char float_must_be_32_bits[(sizeof(float) == 4) * 2 - 1];
     float xhalf = 0.5f * x;
@@ -53,12 +56,7 @@ float utils::math::fastInvSqrt(float x)
     return x;
 }
 
-float utils::math::fastSqrt(float x)
-{
-    return x * utils::math::fastInvSqrt(x);
-}
-
-void utils::math::init()
+void init()
 {
     // Constant for calculating an angle in radians out of an angle in degrees
     const float radianAngleRatio = M_PI_2 / 90.0f; // pi/2 / 90[deg]
@@ -82,17 +80,20 @@ void utils::math::init()
     }
 }
 
-float utils::math::cachedSin(int angle)
+float cachedSin(int angle)
 {
     return sinList[angle];
 }
 
-float utils::math::cachedCos(int angle)
+float cachedCos(int angle)
 {
     return cosList[angle];
 }
 
-float utils::math::cachedTan(int angle)
+float cachedTan(int angle)
 {
     return tanList[angle];
 }
+
+} // namespace math
+} // namespace utils

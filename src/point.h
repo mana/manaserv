@@ -77,6 +77,14 @@ class Rectangle
             return (unsigned short)(p.x - x) < w &&
                    (unsigned short)(p.y - y) < h;
         }
+
+        bool intersects(const Rectangle &r) const
+        {
+            return x < (r.x + r.w) &&
+                   y < (r.y + r.h) &&
+                   x + w > r.x &&
+                   y + h > r.y;
+        }
 };
 
 #endif // _TMWSERV_POINT_H_

@@ -29,10 +29,10 @@ class Point;
 namespace Collision
 {
 
-    bool
-    circleWithCirclesector(const Point &circlePos, int circleRadius,
-                           const Point &secPos, int secRadius,
-                           float secAngle, float secSize);
+    bool circleWithCirclesector(const Point &circlePos, int circleRadius,
+                                const Point &secPos, int secRadius,
+                                float secAngle, float secSize);
+
     /**
      * Checks if a disk and a circle-sector collide
      *
@@ -41,23 +41,15 @@ namespace Collision
      * @param placeAngle
      *        The placement-angle of the circle sector in degrees (0,359).
      */
-    bool
-    diskWithCircleSector(const Point &diskCenter, int diskRadius,
-                         const Point &sectorCenter, int sectorRadius,
-                         int halfTopAngle, int placeAngle);
+    bool diskWithCircleSector(const Point &diskCenter, int diskRadius,
+                              const Point &sectorCenter, int sectorRadius,
+                              int halfTopAngle, int placeAngle);
 
     /**
      * Checks if two circles intersect.
      */
-    bool
-    CircleWithCircle(const Point &center1, int radius1,
-                     const Point &center2, int radius2);
-
-    /** checks if two rectangles intersect */
-    bool
-    rectWithRect(const Point &pos1, const Point &size1,
-                 const Point &pos2, const Point &size2);
-
+    bool circleWithCircle(const Point &center1, int radius1,
+                          const Point &center2, int radius2);
 }
 
 #endif

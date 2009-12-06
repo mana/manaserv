@@ -21,32 +21,35 @@
 #ifndef _TMWSERV_MATHUTILS_H_
 #define _TMWSERV_MATHUTILS_H_
 
-namespace utils
+namespace utils {
+namespace math {
+
+/**
+ * A very fast function to calculate the approximate inverse square
+ * root of a floating point value.
+ */
+float fastInvSqrt(float x);
+
+/**
+ * A helper function that uses the fastInvSqrt for getting the
+ * normal squareroot.
+ */
+inline float fastSqrt(float x)
 {
-    namespace math
-    {
-        /**
-         * A very fast function to calculate the approximate inverse square
-         * root of a floating point value.
-         */
-        float fastInvSqrt(float x);
+    return x * fastInvSqrt(x);
+}
 
-        /**
-         * A helper function that uses the fastInvSqrt for getting the
-         * normal squareroot.
-         */
-        float fastSqrt(float x);
+float cachedSin(int angle);
+float cachedCos(int angle);
+float cachedTan(int angle);
 
-        float cachedSin(int angle);
+/**
+ * Pre-calculates the needed trigomic function values. Should be called before
+ * using cachedSin, cachedCos or cachedTan.
+ */
+void init();
 
-        float cachedCos(int angle);
-
-        float cachedTan(int angle);
-
-        void init();
-
-    } // namespace math
-
+} // namespace math
 } // namespace utils
 
 #endif

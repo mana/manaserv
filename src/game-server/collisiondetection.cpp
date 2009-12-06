@@ -32,10 +32,9 @@
 #define test_degrees(pos,s1,s2) (pos > s1 && pos < s2) || (s1 > s2 && !(pos < s1 && pos > s2))
 
 
-bool
-Collision::circleWithCirclesector(const Point &circlePos, int circleRadius,
-                                  const Point &secPos, int secRadius,
-                                  float secAngle, float secSize)
+bool Collision::circleWithCirclesector(const Point &circlePos, int circleRadius,
+                                       const Point &secPos, int secRadius,
+                                       float secAngle, float secSize)
 {
     float targetAngle;
 
@@ -279,27 +278,12 @@ Collision::diskWithCircleSector2(const Point &diskCenter, int diskRadius,
     return false;
 }
 */
-bool
-Collision::CircleWithCircle(const Point &center1, int radius1,
-                            const Point &center2, int radius2)
+
+bool Collision::circleWithCircle(const Point &center1, int radius1,
+                                 const Point &center2, int radius2)
 {
     int distx = center1.x - center2.x;
     int disty = center1.y - center2.y;
     double dist = sqrt((distx * distx) + (disty * disty));
     return (dist < radius1 + radius2);
-}
-
-bool
-Collision::rectWithRect(const Point &pos1, const Point &size1,
-                        const Point &pos2, const Point &size2)
-{
-    return(
-        pos1.x < (pos2.x + size2.x) //left edge 1 left of right edge 2
-        &&
-        (pos1.x + size1.x) > pos2.x //right edge 1 right of left edge 2
-        &&
-        pos1.y < (pos2.y + size2.y) //upper edge 1 above lower edge 2
-        &&
-        (pos1.y + size1.y) > pos2.y //lower edge 1 under upper edge 2
-    );
 }

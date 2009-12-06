@@ -1043,7 +1043,7 @@ static int get_beings_in_circle(lua_State *s)
         if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
         {
             Being *b = static_cast<Being *> (*i);
-            if (Collision::CircleWithCircle(b->getPosition(), b->getSize(),
+            if (Collision::circleWithCircle(b->getPosition(), b->getSize(),
                                             Point(x, y), r))
             {
                 lua_pushinteger(s, tableIndex);
