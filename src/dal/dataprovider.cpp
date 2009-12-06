@@ -28,30 +28,27 @@ namespace dal
 /**
  * Constructor.
  */
-DataProvider::DataProvider(void)
+DataProvider::DataProvider()
     throw()
         : mIsConnected(false),
           mRecordSet()
 {
-    // NOOP
 }
 
 
 /**
  * Destructor.
  */
-DataProvider::~DataProvider(void)
+DataProvider::~DataProvider()
     throw()
 {
-    // NOOP
 }
 
 
 /**
  * Get the connection status.
  */
-bool
-DataProvider::isConnected(void) const
+bool DataProvider::isConnected() const
     throw()
 {
     return mIsConnected;
@@ -60,8 +57,7 @@ DataProvider::isConnected(void) const
 /**
  * Get the DataBase Name
  */
-std::string
-DataProvider::getDbName(void)
+std::string DataProvider::getDbName() const
 {
     if (!isConnected())
     {

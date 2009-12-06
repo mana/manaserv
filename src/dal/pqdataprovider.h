@@ -21,7 +21,6 @@
 #ifndef _TMWSERV_PQDATAPROVIDER_H_
 #define _TMWSERV_PQDATAPROVIDER_H_
 
-
 #include <iosfwd>
 #include <libpq-fe.h>
 
@@ -29,7 +28,6 @@
 
 namespace dal
 {
-
 
 /**
  * A PostgreSQL Data Provider.
@@ -40,26 +38,22 @@ class PqDataProvider: public DataProvider
         /**
          * Constructor
          */
-        PqDataProvider(void)
+        PqDataProvider()
             throw();
-
 
         /**
          * Destructor
          */
-        ~PqDataProvider(void)
+        ~PqDataProvider()
             throw();
-
 
         /**
          * Get name of the database backend
          *
          * @return the database backend name
          */
-        DbBackends
-        getDbBackend(void) const
+        DbBackends getDbBackend() const
             throw();
-
 
         /**
          * Create a connection to the database.
@@ -70,11 +64,9 @@ class PqDataProvider: public DataProvider
          *
          * @exception DbConnectionFailure if unsuccessful connection.
          */
-        void
-        connect(const std::string& dbName,
-                const std::string& userName,
-                const std::string& password);
-
+        void connect(const std::string& dbName,
+                     const std::string& userName,
+                     const std::string& password);
 
         /**
          * Execute a SQL query.
@@ -87,19 +79,15 @@ class PqDataProvider: public DataProvider
          * @exception DbSqlQueryExecFailure if unsuccessful execution.
          * @exception std::runtime_error if trying to query a closed database.
          */
-        const RecordSet&
-        execSql(const std::string& sql,
-                const bool refresh = false);
-
+        const RecordSet &execSql(const std::string& sql,
+                                 const bool refresh = false);
 
         /**
          * Close the connection to the database.
          *
          * @exception DbDisconnectionFailure if unsuccessful disconnection.
          */
-        void
-        disconnect(void);
-
+        void disconnect();
 
     private:
         PGconn *mDb; /**<  Database connection handle */

@@ -28,18 +28,17 @@ namespace dal
 /**
  * Constructor
  */
-PqDataProvider::PqDataProvider(void)
+PqDataProvider::PqDataProvider()
     throw()
         : mDb(0)
 {
-    // NOOP
 }
 
 
 /**
  * Destructor
  */
-PqDataProvider::~PqDataProvider(void)
+PqDataProvider::~PqDataProvider()
     throw()
 {
     if (mIsConnected) {
@@ -51,8 +50,7 @@ PqDataProvider::~PqDataProvider(void)
 /**
  * Get the database backend name.
  */
-DbBackends
-PqDataProvider::getDbBackend(void) const
+DbBackends PqDataProvider::getDbBackend() const
     throw()
 {
     return DB_BKEND_POSTGRESQL;
@@ -62,10 +60,9 @@ PqDataProvider::getDbBackend(void) const
 /**
  * Create a connection to the database.
  */
-void
-PqDataProvider::connect(const std::string& dbName,
-                        const std::string& userName,
-                        const std::string& password)
+void PqDataProvider::connect(const std::string& dbName,
+                             const std::string& userName,
+                             const std::string& password)
 {
     // Create string to pass to PQconnectdb
     std::string connStr = "dbname = " + dbName + " "; // database name
@@ -94,9 +91,8 @@ PqDataProvider::connect(const std::string& dbName,
 /**
  * Execute a SQL query.
  */
-const RecordSet&
-PqDataProvider::execSql(const std::string& sql,
-                        const bool refresh)
+const RecordSet &PqDataProvider::execSql(const std::string& sql,
+                                         const bool refresh)
 {
     if (!mIsConnected) {
         throw std::runtime_error("not connected to database");
@@ -145,8 +141,7 @@ PqDataProvider::execSql(const std::string& sql,
 /**
  * Close connection to database.
  */
-void
-PqDataProvider::disconnect(void)
+void PqDataProvider::disconnect()
 {
     if (!mIsConnected) {
         return;

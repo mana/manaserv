@@ -42,7 +42,7 @@ class Trade
          * Warns the other character the trade is cancelled.
          * Takes care of cleaning afterwards.
          */
-        void cancel(void);
+        void cancel();
 
         /**
          * Requests a trade to start with given public ID.
@@ -61,7 +61,7 @@ class Trade
          * Agree to complete the trade
          */
         void agree(Character *c);
-        
+
         /**
          * Adds some items to the trade.
          */
@@ -89,8 +89,8 @@ class Trade
          */
         enum TradeState
         {
-            TRADE_INIT = 0, 
-            TRADE_RUN,      
+            TRADE_INIT = 0,
+            TRADE_RUN,
             TRADE_CONFIRM_WAIT,
             TRADE_CONFIRMED,
             TRADE_AGREE_WAIT

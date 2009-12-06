@@ -94,7 +94,7 @@ void DALStorage::open()
         }
 
         // synchronize base data from xml files
-        SyncDatabase();
+        syncDatabase();
 
         // clean list of online users, this should be empty after restart
         std::ostringstream sql;
@@ -739,8 +739,7 @@ bool DALStorage::updateCharacter(Character *character,
  * Save changes of a skill to the database permanently.
  * @deprecated Use DALStorage::updateExperience instead!!!
 */
-void DALStorage::flushSkill(const Character* const character,
-                            const int skill_id )
+void DALStorage::flushSkill(const Character * character, int skill_id)
 {
     updateExperience(character->getDatabaseID(), skill_id,
         character->getExperience(skill_id));
@@ -960,15 +959,16 @@ void DALStorage::updateLastLogin(const Account *account)
     mDb->execSql(sql.str());
 }
 
-void DALStorage::updateCharacterPoints(const int CharId, const int CharPoints,
-    const int CorrPoints, const int AttribId, const int AttribValue )
+void DALStorage::updateCharacterPoints(int charId,
+                                       int charPoints, int corrPoints,
+                                       int attribId, int attribValue)
 {
     std::ostringstream sql;
     sql << "UPDATE " << CHARACTERS_TBL_NAME
-        << " SET char_pts = " << CharPoints << ", "
-        << " correct_pts = " << CorrPoints << ", ";
+        << " SET char_pts = " << charPoints << ", "
+        << " correct_pts = " << corrPoints << ", ";
 
-    switch (AttribId)
+    switch (attribId)
     {
         case CHAR_ATTR_STRENGTH:     sql << "str = "; break;
         case CHAR_ATTR_AGILITY:      sql << "agi = "; break;
@@ -977,25 +977,24 @@ void DALStorage::updateCharacterPoints(const int CharId, const int CharPoints,
         case CHAR_ATTR_INTELLIGENCE: sql << "int = "; break;
         case CHAR_ATTR_WILLPOWER:    sql << "will = "; break;
     }
-    sql << AttribValue
-        << " WHERE id = " << CharId;
+    sql << attribValue
+        << " WHERE id = " << charId;
 
     mDb->execSql(sql.str());
 }
 
-void DALStorage::updateExperience(const int CharId, const int SkillId,
-    const int SkillValue)
+void DALStorage::updateExperience(int charId, int skillId, int skillValue)
 {
     try
     {
         // if experience has decreased to 0 we don't store it anymore,
         // its the default
-        if (SkillValue == 0)
+        if (skillValue == 0)
         {
             std::ostringstream sql;
             sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
-                << " WHERE char_id = " << CharId
-                << " AND skill_id = " << SkillId;
+                << " WHERE char_id = " << charId
+                << " AND skill_id = " << skillId;
             mDb->execSql(sql.str());
             return;
         }
@@ -1003,9 +1002,9 @@ void DALStorage::updateExperience(const int CharId, const int SkillId,
         // try to update the skill
         std::ostringstream sql;
         sql << "UPDATE " << CHAR_SKILLS_TBL_NAME
-            << " SET skill_exp = " << SkillValue
-            << " WHERE char_id = " << CharId
-            << " AND skill_id = " << SkillId;
+            << " SET skill_exp = " << skillValue
+            << " WHERE char_id = " << charId
+            << " AND skill_id = " << skillId;
         mDb->execSql(sql.str());
 
         // check if the update has modified a row
@@ -1018,9 +1017,9 @@ void DALStorage::updateExperience(const int CharId, const int SkillId,
         sql.str("");
         sql << "INSERT INTO " << CHAR_SKILLS_TBL_NAME << " "
             << "(char_id, skill_id, skill_exp) VALUES ( "
-            << CharId << ", "
-            << SkillId << ", "
-            << SkillValue << ")";
+            << charId << ", "
+            << skillId << ", "
+            << skillValue << ")";
         mDb->execSql(sql.str());
     }
     catch (const dal::DbSqlQueryExecFailure &e)
@@ -1030,7 +1029,7 @@ void DALStorage::updateExperience(const int CharId, const int SkillId,
     }
 }
 
-void DALStorage::insertStatusEffect(const int charId, const int statusId, const int time)
+void DALStorage::insertStatusEffect(int charId, int statusId, int time)
 {
     try
     {
@@ -1054,7 +1053,7 @@ void DALStorage::insertStatusEffect(const int charId, const int statusId, const 
 /**
  * Add a guild
  */
-void DALStorage::addGuild(Guild* guild)
+void DALStorage::addGuild(Guild *guild)
 {
     std::ostringstream insertSql;
     insertSql << "insert into " << GUILDS_TBL_NAME
@@ -1085,7 +1084,7 @@ void DALStorage::addGuild(Guild* guild)
 /**
  * Remove guild
  */
-void DALStorage::removeGuild(Guild* guild)
+void DALStorage::removeGuild(Guild *guild)
 {
     std::ostringstream sql;
     sql << "delete from " << GUILDS_TBL_NAME
@@ -1094,9 +1093,6 @@ void DALStorage::removeGuild(Guild* guild)
     mDb->execSql(sql.str());
 }
 
-/**
- * add a member to a guild
- */
 void DALStorage::addGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
@@ -1117,9 +1113,6 @@ void DALStorage::addGuildMember(int guildId, int memberId)
     }
 }
 
-/**
-* remove a member from a guild
- */
 void DALStorage::removeGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
@@ -1586,9 +1579,9 @@ void DALStorage::storeLetter(Letter *letter)
     }
 }
 
-Post* DALStorage::getStoredPost(int playerId)
+Post *DALStorage::getStoredPost(int playerId)
 {
-    Post* p = new Post();
+    Post *p = new Post();
     // specialize the string_to functor to convert
     // a string to an unsigned int.
     string_to< unsigned > toUint;
@@ -1626,7 +1619,7 @@ Post* DALStorage::getStoredPost(int playerId)
     return p;
 }
 
-void DALStorage::deletePost(Letter* letter)
+void DALStorage::deletePost(Letter *letter)
 {
     mDb->beginTransaction();
 
@@ -1657,7 +1650,7 @@ void DALStorage::deletePost(Letter* letter)
     }
 }
 
-void DALStorage::SyncDatabase(void)
+void DALStorage::syncDatabase()
 {
     xmlDocPtr doc = xmlReadFile(DEFAULT_ITEM_FILE, NULL, 0);
     if (!doc)

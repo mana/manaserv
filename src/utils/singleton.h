@@ -24,7 +24,6 @@
 namespace utils
 {
 
-
 /**
  * An abstract Meyer's singleton class.
  */
@@ -37,51 +36,38 @@ class Singleton
          *
          * @return the unique instance of Singleton.
          */
-        static T&
-        instance(void)
+        static T &instance()
         {
             static T theInstance;
-
             return theInstance;
         }
-
 
     protected:
         /**
          * Default constructor.
          */
-        Singleton(void)
+        Singleton()
             throw()
-        {
-            // NOOP
-        }
-
+        {}
 
         /**
          * Destructor.
          */
-        virtual
-        ~Singleton(void)
+        virtual ~Singleton()
             throw()
-        {
-            // NOOP
-        }
-
+        {}
 
     private:
         /**
          * Copy constructor.
          */
-        Singleton(const Singleton& rhs);
-
+        Singleton(const Singleton &);
 
         /**
          * Assignment operator.
          */
-        Singleton&
-        operator=(const Singleton& rhs);
+        Singleton &operator=(const Singleton &);
 };
-
 
 } // namespace utils
 

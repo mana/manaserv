@@ -37,18 +37,17 @@ const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB_DEF = "mana.db";
 /**
  * Constructor.
  */
-SqLiteDataProvider::SqLiteDataProvider(void)
+SqLiteDataProvider::SqLiteDataProvider()
     throw()
         : mDb(0)
 {
-    // NOOP
 }
 
 
 /**
  * Destructor.
  */
-SqLiteDataProvider::~SqLiteDataProvider(void)
+SqLiteDataProvider::~SqLiteDataProvider()
     throw()
 {
     try {
@@ -68,8 +67,7 @@ SqLiteDataProvider::~SqLiteDataProvider(void)
 /**
  * Get the name of the database backend.
  */
-DbBackends
-SqLiteDataProvider::getDbBackend(void) const
+DbBackends SqLiteDataProvider::getDbBackend() const
     throw()
 {
     return DB_BKEND_SQLITE;
@@ -191,12 +189,10 @@ SqLiteDataProvider::execSql(const std::string& sql,
 /**
  * Close the connection to the database.
  */
-void
-SqLiteDataProvider::disconnect(void)
+void SqLiteDataProvider::disconnect()
 {
-    if (!isConnected()) {
+    if (!isConnected())
         return;
-    }
 
     // sqlite3_close() closes the connection and deallocates the connection
     // handle.
@@ -208,8 +204,7 @@ SqLiteDataProvider::disconnect(void)
     mIsConnected = false;
 }
 
-void
-SqLiteDataProvider::beginTransaction(void)
+void SqLiteDataProvider::beginTransaction()
     throw (std::runtime_error)
 {
     if (!mIsConnected)
@@ -243,8 +238,7 @@ SqLiteDataProvider::beginTransaction(void)
     }
 }
 
-void
-SqLiteDataProvider::commitTransaction(void)
+void SqLiteDataProvider::commitTransaction()
     throw (std::runtime_error)
 {
     if (!mIsConnected)
@@ -278,8 +272,7 @@ SqLiteDataProvider::commitTransaction(void)
     }
 }
 
-void
-SqLiteDataProvider::rollbackTransaction(void)
+void SqLiteDataProvider::rollbackTransaction()
     throw (std::runtime_error)
 {
     if (!mIsConnected)
@@ -313,8 +306,7 @@ SqLiteDataProvider::rollbackTransaction(void)
     }
 }
 
-const unsigned int
-SqLiteDataProvider::getModifiedRows(void) const
+unsigned SqLiteDataProvider::getModifiedRows() const
 {
     if (!mIsConnected)
     {
@@ -324,11 +316,10 @@ SqLiteDataProvider::getModifiedRows(void) const
         throw std::runtime_error(error);
     }
 
-    return (unsigned int)sqlite3_changes(mDb);
+    return (unsigned) sqlite3_changes(mDb);
 }
 
-const bool
-SqLiteDataProvider::inTransaction(void) const
+bool SqLiteDataProvider::inTransaction() const
 {
     if (!mIsConnected)
     {
@@ -342,18 +333,10 @@ SqLiteDataProvider::inTransaction(void) const
     // Autocommit mode is on by default. Autocommit mode is disabled by a BEGIN
     // statement. Autocommit mode is re-enabled by a COMMIT or ROLLBACK.
     const int ret = sqlite3_get_autocommit(mDb);
-    if (ret == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return ret == 0;
 }
 
-const unsigned int
-SqLiteDataProvider::getLastId(void) const
+unsigned SqLiteDataProvider::getLastId() const
 {
     if (!mIsConnected)
     {
@@ -367,7 +350,7 @@ SqLiteDataProvider::getLastId(void) const
     if (lastId > UINT_MAX)
         throw std::runtime_error("SqLiteDataProvider::getLastId exceeded INT_MAX");
 
-    return (unsigned int)lastId;
+    return (unsigned) lastId;
 }
 
 bool SqLiteDataProvider::prepareSql(const std::string &sql)
@@ -387,7 +370,7 @@ bool SqLiteDataProvider::prepareSql(const std::string &sql)
     return true;
 }
 
-const RecordSet& SqLiteDataProvider::processSql()
+const RecordSet &SqLiteDataProvider::processSql()
 {
     if (!mIsConnected) {
         throw std::runtime_error("not connected to database");

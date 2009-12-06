@@ -51,7 +51,7 @@ namespace ItemManager
     /**
      * Gets the version of the loaded item database.
      */
-    unsigned int GetDatabaseVersion(void);
+    unsigned getDatabaseVersion();
 }
 
 #endif

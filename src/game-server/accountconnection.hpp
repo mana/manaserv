@@ -63,7 +63,7 @@ class AccountConnection : public Connection
          * Initializes a connection to the account server described in the
          * configuration file. Registers the maps known by MapManager.
          */
-        bool start(const int gameServerPort);
+        bool start(int gameServerPort);
 
         /**
          * Sends data of a given character.

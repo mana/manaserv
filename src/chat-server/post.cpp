@@ -37,7 +37,6 @@ Letter::~Letter()
 
     if (mReceiver)
         delete mReceiver;
-
 }
 
 void Letter::setExpiry(unsigned long expiry)
@@ -55,7 +54,7 @@ void Letter::addText(const std::string &text)
     mContents = text;
 }
 
-std::string Letter::getContents()
+std::string Letter::getContents() const
 {
     return mContents;
 }
@@ -73,17 +72,17 @@ bool Letter::addAttachment(InventoryItem item)
     return true;
 }
 
-Character* Letter::getReceiver()
+Character *Letter::getReceiver() const
 {
     return mReceiver;
 }
 
-Character* Letter::getSender()
+Character *Letter::getSender() const
 {
     return mSender;
 }
 
-std::vector<InventoryItem> Letter::getAttachments()
+std::vector<InventoryItem> Letter::getAttachments() const
 {
     return mAttachments;
 }
@@ -146,16 +145,10 @@ void PostManager::addLetter(Letter *letter)
     }
 }
 
-Post* PostManager::getPost(Character *player)
+Post *PostManager::getPost(Character *player) const
 {
-    std::map<Character*, Post*>::iterator itr =
-        mPostBox.find(player);
-    if (itr == mPostBox.end())
-    {
-        return NULL;
-    }
-
-    return itr->second;
+    std::map<Character*, Post*>::const_iterator itr = mPostBox.find(player);
+    return (itr == mPostBox.end()) ? NULL : itr->second;
 }
 
 void PostManager::clearPost(Character *player)

@@ -40,36 +40,32 @@ class DataProviderFactory
         /**
          * Create a new data provider.
          */
-        static DataProvider*
-        createDataProvider(void);
-
+        static DataProvider *createDataProvider();
 
     private:
         /**
          * Default constructor.
          */
-        DataProviderFactory(void)
+        DataProviderFactory()
             throw();
-
 
         /**
          * Destructor.
          */
-        ~DataProviderFactory(void)
+        ~DataProviderFactory()
             throw();
-
 
         /**
          * Copy constructor.
          */
-        DataProviderFactory(const DataProviderFactory& rhs);
+        DataProviderFactory(const DataProviderFactory &rhs);
 
 
         /**
          * Assignment operator.
          */
         DataProviderFactory&
-        operator=(const DataProviderFactory& rhs);
+        operator=(const DataProviderFactory &rhs);
 };
 
 

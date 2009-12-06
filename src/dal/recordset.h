@@ -27,7 +27,6 @@
 namespace dal
 {
 
-
 /**
  * Data type for a row in a RecordSet.
  */
@@ -48,50 +47,40 @@ class RecordSet
         /**
          * Default constructor.
          */
-        RecordSet(void)
+        RecordSet()
             throw();
-
 
         /**
          * Destructor.
          */
-        ~RecordSet(void)
+        ~RecordSet()
             throw();
-
 
         /**
          * Remove all the records.
          */
-        void
-        clear(void);
-
+        void clear();
 
         /**
          * Check if the RecordSet is empty.
          *
          * @return true if empty.
          */
-        bool
-        isEmpty(void) const;
-
+        bool isEmpty() const;
 
         /**
          * Get the number of rows.
          *
          * @return the number of rows.
          */
-        unsigned int
-        rows(void) const;
-
+        unsigned int rows() const;
 
         /**
          * Get the number of columns.
          *
          * @return the number of columns.
          */
-        unsigned int
-        cols(void) const;
-
+        unsigned int cols() const;
 
         /**
          * Set the column headers.
@@ -101,9 +90,7 @@ class RecordSet
          * @exception AlreadySetException if the column headers
          *            are already set.
          */
-        void
-        setColumnHeaders(const Row& headers);
-
+        void setColumnHeaders(const Row &headers);
 
         /**
          * Add a new row.
@@ -118,9 +105,7 @@ class RecordSet
          * @exception std::invalid_argument if the number of columns in the
          *            new row is not equal to the number of column headers.
          */
-        void
-        add(const Row& row);
-
+        void add(const Row &row);
 
         /**
          * Operator()
@@ -156,7 +141,7 @@ class RecordSet
          */
         const std::string&
         operator()(const unsigned int row,
-                   const std::string& name) const;
+                   const std::string &name) const;
 
 
         /**
@@ -169,21 +154,19 @@ class RecordSet
          * @return the output stream for chaining.
          */
         friend std::ostream&
-        operator<<(std::ostream& out, const RecordSet& rhs);
-
+        operator<<(std::ostream& out, const RecordSet &rhs);
 
     private:
         /**
          * Copy constructor.
          */
-        RecordSet(const RecordSet& rhs);
-
+        RecordSet(const RecordSet &rhs);
 
         /**
          * Assignment operator.
          */
         RecordSet&
-        operator=(const RecordSet& rhs);
+        operator=(const RecordSet &rhs);
 
 
     private:

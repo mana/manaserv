@@ -47,24 +47,20 @@ class DALStorage
          */
         DALStorage();
 
-
         /**
          * Destructor.
          */
         ~DALStorage();
-
 
         /**
          * Connect to the database and initialize it if necessary.
          */
         void open();
 
-
         /**
          * Disconnect from the database.
          */
         void close();
-
 
         /**
          * Get an account by user name.
@@ -108,8 +104,7 @@ class DALStorage
          *
          * @param account the new account.
          */
-        void
-        addAccount(Account *account);
+        void addAccount(Account *account);
 
         /**
          * Delete an account.
@@ -134,8 +129,9 @@ class DALStorage
          * @param AttribId    ID of the modified attribute
          * @param AttribValue New value of the modified attribute
          */
-        void updateCharacterPoints(const int CharId, const int CharPoints,
-            const int CorrPoints, const int AttribId, const int AttribValue );
+        void updateCharacterPoints(int charId,
+                                   int charPoints, int corrPoints,
+                                   int attribId, int attribValue);
 
         /**
          * Write a modification message about character skills to the database.
@@ -143,8 +139,7 @@ class DALStorage
          * @param SkillId     ID of the skill
          * @param SkillValue  new skill points
          */
-        void updateExperience(const int CharId, const int SkillId,
-            const int SkillValue);
+        void updateExperience(int charId, int skillId, int skillValue);
 
         /**
          * Inserts a record about a status effect into the database
@@ -152,7 +147,7 @@ class DALStorage
          * @param statusId  ID of the status effect
          * @param time      Time left on the status effect
          */
-        void insertStatusEffect(const int charId, const int statusId, const int time);
+        void insertStatusEffect(int charId, int statusId, int time);
 
         /**
          * Sets a ban on an account (hence on all its characters).
@@ -215,9 +210,8 @@ class DALStorage
          *                         nested transaction.
          * @return true on success
          */
-        bool
-        updateCharacter(Character *ptr,
-                        bool startTransaction = true);
+        bool updateCharacter(Character *ptr,
+                             bool startTransaction = true);
 
         /**
          * Save changes of a skill to the database permanently.
@@ -227,49 +221,38 @@ class DALStorage
          *
          * @exception dbl::DbSqlQueryExecFailure.
          */
-        void
-        flushSkill(const Character* const character, const int skill_id );
+        void flushSkill(const Character *character, int skill_id);
 
         /**
-         * Add a new guild
-         *
+         * Add a new guild.
          */
-        void
-        addGuild(Guild* guild);
+        void addGuild(Guild *guild);
 
         /**
-         * Delete a guild
-         *
+         * Delete a guild.
          */
-        void
-        removeGuild(Guild* guild);
+        void removeGuild(Guild *guild);
 
         /**
-         * Add member to guild
-         *
+         * Add member to guild.
          */
-        void
-        addGuildMember(int guild_id, int memberId);
+        void addGuildMember(int guild_id, int memberId);
 
         /**
-         * Remove member from guild
+         * Remove member from guild.
          */
-        void
-        removeGuildMember(int guildId, int memberId);
+        void removeGuildMember(int guildId, int memberId);
 
         /**
-         * Save guild member rights
+         * Save guild member rights.
          */
-        void
-        setMemberRights(int guildId, int memberId, int rights);
+        void setMemberRights(int guildId, int memberId, int rights);
 
         /**
-         * Get guild list
-         *@return a list of guilds
-         *
+         * Get guild list.
+         * @return a list of guilds
          */
-        std::list<Guild*>
-        getGuildList();
+        std::list<Guild*> getGuildList();
 
         /**
          * Save changes to the database permanently.
@@ -343,7 +326,7 @@ class DALStorage
          *
          * @param playerId The id of the character requesting his post
          */
-        Post* getStoredPost(int playerId);
+        Post *getStoredPost(int playerId);
 
         /**
          * Delete a letter from the database.
@@ -365,7 +348,7 @@ class DALStorage
          *
          * @return Version of the item database.
          */
-        unsigned int getItemDatabaseVersion(void) const
+        unsigned int getItemDatabaseVersion() const
         { return mItemDbVersion; }
 
         /**
@@ -393,14 +376,13 @@ class DALStorage
         /**
          * Copy constructor.
          */
-        DALStorage(const DALStorage& rhs);
+        DALStorage(const DALStorage &rhs);
 
 
         /**
          * Assignment operator.
          */
-        DALStorage&
-        operator=(const DALStorage& rhs);
+        DALStorage &operator=(const DALStorage &rhs);
 
         /**
          * Gets an account from a prepared SQL statement
@@ -408,7 +390,6 @@ class DALStorage
          * @return the account found
          */
         Account *getAccountBySQL();
-
 
         /**
          * Gets a character from a prepared SQL statement
@@ -427,7 +408,7 @@ class DALStorage
          * reload of the xml files to load new items or monsters without server
          * restart.
          */
-        void SyncDatabase(void);
+        void syncDatabase();
 
         dal::DataProvider *mDb; /**< the data provider */
         unsigned int mItemDbVersion;    /**< Version of the item database. */

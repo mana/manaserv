@@ -42,7 +42,7 @@ namespace utils
  * <pre>
  * \#include "logger.h"
  *
- * int main(void)
+ * int main()
  * {
  *     using namespace utils;
  *

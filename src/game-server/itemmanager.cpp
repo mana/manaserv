@@ -236,7 +236,7 @@ ItemClass *ItemManager::getItem(int itemId)
     return i != itemClasses.end() ? i->second : NULL;
 }
 
-unsigned int ItemManager::GetDatabaseVersion(void)
+unsigned ItemManager::getDatabaseVersion()
 {
     return itemDatabaseVersion;
 }

@@ -42,28 +42,21 @@ class DbException: public std::exception
         DbException(const std::string& msg)
             throw()
                 : mMsg(msg)
-        {
-            // NOOP
-        }
-
+        {}
 
         /**
          * Destructor.
          */
-        ~DbException(void)
+        ~DbException()
             throw()
-        {
-            // NOOP
-        }
-
+        {}
 
         /**
          * Get the error message.
          *
          * @return the error message.
          */
-        virtual const char*
-        what(void) const
+        virtual const char *what() const
             throw()
         {
             return mMsg.c_str();
@@ -84,12 +77,10 @@ class DbConnectionFailure: public DbException
         /**
          * Default constructor.
          */
-        DbConnectionFailure(void)
+        DbConnectionFailure()
             throw()
                 : DbException("")
-        {
-            // NOOP
-        }
+        {}
 
 
         /**
@@ -100,9 +91,7 @@ class DbConnectionFailure: public DbException
         DbConnectionFailure(const std::string& msg)
             throw()
                 : DbException(msg)
-        {
-            // NOOP
-        }
+        {}
 };
 
 
@@ -115,13 +104,10 @@ class DbDisconnectionFailure: public DbException
         /**
          * Default constructor.
          */
-        DbDisconnectionFailure(void)
+        DbDisconnectionFailure()
             throw()
                 : DbException("")
-        {
-            // NOOP
-        }
-
+        {}
 
         /**
          * Constructor.
@@ -131,9 +117,7 @@ class DbDisconnectionFailure: public DbException
         DbDisconnectionFailure(const std::string& msg)
             throw()
                 : DbException(msg)
-        {
-            // NOOP
-        }
+        {}
 };
 
 
@@ -146,13 +130,10 @@ class DbSqlQueryExecFailure: public DbException
         /**
          * Default constructor.
          */
-        DbSqlQueryExecFailure(void)
+        DbSqlQueryExecFailure()
             throw()
                 : DbException("")
-        {
-            // NOOP
-        }
-
+        {}
 
         /**
          * Constructor.
@@ -162,9 +143,7 @@ class DbSqlQueryExecFailure: public DbException
         DbSqlQueryExecFailure(const std::string& msg)
             throw()
                 : DbException(msg)
-        {
-            // NOOP
-        }
+        {}
 };
 
 

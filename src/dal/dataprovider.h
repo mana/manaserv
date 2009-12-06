@@ -59,37 +59,31 @@ class DataProvider
         /**
          * Constructor.
          */
-        DataProvider(void)
+        DataProvider()
             throw();
-
 
         /**
          * Destructor.
          */
         virtual
-        ~DataProvider(void)
+        ~DataProvider()
             throw();
-
 
         /**
          * Get the connection status.
          *
          * @return true if connected.
          */
-        bool
-        isConnected(void) const
+        bool isConnected() const
             throw();
-
 
         /**
          * Get the name of the database backend.
          *
          * @return the database backend name.
          */
-        virtual DbBackends
-        getDbBackend(void) const
+        virtual DbBackends getDbBackend() const
             throw() = 0;
-
 
         /**
          * Create a connection to the database.
@@ -99,7 +93,7 @@ class DataProvider
          *
          * @exception DbConnectionFailure if unsuccessful connection.
          */
-        virtual void connect(void) = 0;
+        virtual void connect() = 0;
 
 
         /**
@@ -123,22 +117,19 @@ class DataProvider
          *
          * @exception DbDisconnectionFailure if unsuccessful disconnection.
          */
-        virtual void
-        disconnect(void) = 0;
+        virtual void disconnect() = 0;
 
         /**
          * Get the Database Name.
          */
-        std::string
-        getDbName(void);
+        std::string getDbName() const;
 
         /**
          * Starts a transaction.
          *
          * @exception std::runtime_error if a transaction is still open
          */
-        virtual void
-        beginTransaction(void)
+        virtual void beginTransaction()
             throw (std::runtime_error) = 0;
 
         /**
@@ -146,8 +137,7 @@ class DataProvider
          *
          * @exception std::runtime_error if no connection is currently open.
          */
-        virtual void
-        commitTransaction(void)
+        virtual void commitTransaction()
             throw (std::runtime_error) = 0;
 
         /**
@@ -155,8 +145,7 @@ class DataProvider
          *
          * @exception std::runtime_error if no connection is currently open.
          */
-        virtual void
-        rollbackTransaction(void)
+        virtual void rollbackTransaction()
             throw (std::runtime_error) = 0;
 
         /**
@@ -165,8 +154,7 @@ class DataProvider
          *
          * @return Number of rows that have changed.
          */
-        virtual const unsigned int
-        getModifiedRows(void) const = 0;
+        virtual unsigned getModifiedRows() const = 0;
 
         /**
          * Returns the last inserted value of an autoincrement column after an
@@ -174,8 +162,7 @@ class DataProvider
          *
          * @return last autoincrement value.
          */
-        virtual const unsigned int
-        getLastId(void) const = 0;
+        virtual unsigned getLastId() const = 0;
 
         /**
          * Prepare SQL statement

@@ -47,7 +47,7 @@ AccountConnection::~AccountConnection()
     delete mSyncBuffer;
 }
 
-bool AccountConnection::start(const int gameServerPort)
+bool AccountConnection::start(int gameServerPort)
 {
     const std::string accountServerAddress =
         Configuration::getValue("net_accountServerAddress", "localhost");
@@ -72,7 +72,7 @@ bool AccountConnection::start(const int gameServerPort)
     msg.writeString(gameServerAddress);
     msg.writeShort(gameServerPort);
     msg.writeString(password);
-    msg.writeLong(ItemManager::GetDatabaseVersion());
+    msg.writeLong(ItemManager::getDatabaseVersion());
     const MapManager::Maps &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
             i != i_end; ++i)

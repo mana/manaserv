@@ -29,45 +29,37 @@
 namespace dal
 {
 
-
 /**
  * Default constructor.
  */
-RecordSet::RecordSet(void)
+RecordSet::RecordSet()
     throw()
 {
-    // NOOP
 }
-
 
 /**
  * Destructor.
  */
-RecordSet::~RecordSet(void)
+RecordSet::~RecordSet()
     throw()
 {
-    // NOOP
 }
-
 
 /**
  * Remove all the Records.
  */
-void
-RecordSet::clear(void)
+void RecordSet::clear()
 {
     mHeaders.clear();
     mRows.clear();
 }
 
-
 /**
  * Check if the RecordSet is empty.
  */
-bool
-RecordSet::isEmpty(void) const
+bool RecordSet::isEmpty() const
 {
-    return (mRows.size() == 0);
+    return mRows.size() == 0;
 }
 
 
@@ -76,20 +68,17 @@ RecordSet::isEmpty(void) const
  *
  * @return the number of rows.
  */
-unsigned int
-RecordSet::rows(void) const
+unsigned int RecordSet::rows() const
 {
     return mRows.size();
 }
-
 
 /**
  * Get the number of columns.
  *
  * @return the number of columns.
  */
-unsigned int
-RecordSet::cols(void) const
+unsigned int RecordSet::cols() const
 {
     return mHeaders.size();
 }
@@ -98,8 +87,7 @@ RecordSet::cols(void) const
 /**
  * Set the column headers.
  */
-void
-RecordSet::setColumnHeaders(const Row& headers)
+void RecordSet::setColumnHeaders(const Row &headers)
 {
     if (mHeaders.size() > 0) {
         throw AlreadySetException();
@@ -112,8 +100,7 @@ RecordSet::setColumnHeaders(const Row& headers)
 /**
  * Add a new row.
  */
-void
-RecordSet::add(const Row& row)
+void RecordSet::add(const Row &row)
 {
     const unsigned int nCols = mHeaders.size();
 
@@ -136,9 +123,8 @@ RecordSet::add(const Row& row)
 /**
  * Operator()
  */
-const std::string&
-RecordSet::operator()(const unsigned int row,
-                      const unsigned int col) const
+const std::string &RecordSet::operator()(const unsigned int row,
+                                         const unsigned int col) const
 {
     if ((row >= mRows.size()) || (col >= mHeaders.size())) {
         std::ostringstream os;
@@ -156,9 +142,8 @@ RecordSet::operator()(const unsigned int row,
 /**
  * Operator()
  */
-const std::string&
-RecordSet::operator()(const unsigned int row,
-                      const std::string& name) const
+const std::string &RecordSet::operator()(const unsigned int row,
+                                         const std::string& name) const
 {
     if (row >= mRows.size()) {
         std::ostringstream os;
@@ -194,8 +179,7 @@ RecordSet::operator()(const unsigned int row,
 /**
  * Operator<<
  */
-std::ostream&
-operator<<(std::ostream& out, const RecordSet& rhs)
+std::ostream &operator<<(std::ostream &out, const RecordSet &rhs)
 {
     // print the field names first.
     if (rhs.mHeaders.size() > 0) {

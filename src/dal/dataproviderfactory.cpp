@@ -41,28 +41,25 @@ namespace dal
 /**
  * Default constructor.
  */
-DataProviderFactory::DataProviderFactory(void)
+DataProviderFactory::DataProviderFactory()
     throw()
 {
-    // NOOP
 }
 
 
 /**
  * Destructor.
  */
-DataProviderFactory::~DataProviderFactory(void)
+DataProviderFactory::~DataProviderFactory()
     throw()
 {
-    // NOOP
 }
 
 
 /**
  * Create a data provider.
  */
-DataProvider*
-DataProviderFactory::createDataProvider(void)
+DataProvider *DataProviderFactory::createDataProvider()
 {
 #if defined (MYSQL_SUPPORT)
     MySqlDataProvider* provider = new MySqlDataProvider;

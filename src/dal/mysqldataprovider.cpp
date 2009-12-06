@@ -25,7 +25,6 @@
 namespace dal
 {
 
-
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_HOST ="mysql_hostname";
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PORT ="mysql_port";
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_DB   ="mysql_database";
@@ -41,18 +40,17 @@ const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD_DEF  = "mana";
 /**
  * Constructor.
  */
-MySqlDataProvider::MySqlDataProvider(void)
+MySqlDataProvider::MySqlDataProvider()
     throw()
         : mDb(0)
 {
-    // NOOP
 }
 
 
 /**
  * Destructor.
  */
-MySqlDataProvider::~MySqlDataProvider(void)
+MySqlDataProvider::~MySqlDataProvider()
     throw()
 {
     // we are using the MySQL C API, there are no exceptions to catch.
@@ -69,8 +67,7 @@ MySqlDataProvider::~MySqlDataProvider(void)
 /**
  * Get the database backend name.
  */
-DbBackends
-MySqlDataProvider::getDbBackend(void) const
+DbBackends MySqlDataProvider::getDbBackend() const
     throw()
 {
     return DB_BKEND_MYSQL;
@@ -80,8 +77,7 @@ MySqlDataProvider::getDbBackend(void) const
 /**
  * Create a connection to the database.
  */
-void
-MySqlDataProvider::connect()
+void MySqlDataProvider::connect()
 {
     if (mIsConnected) {
         return;
@@ -201,8 +197,7 @@ MySqlDataProvider::execSql(const std::string& sql,
 /**
  * Close the connection to the database.
  */
-void
-MySqlDataProvider::disconnect(void)
+void MySqlDataProvider::disconnect()
 {
     if (!mIsConnected) {
         return;
@@ -219,8 +214,7 @@ MySqlDataProvider::disconnect(void)
     mIsConnected = false;
 }
 
-void
-MySqlDataProvider::beginTransaction(void)
+void MySqlDataProvider::beginTransaction()
     throw (std::runtime_error)
 {
     if (!mIsConnected)
@@ -236,8 +230,7 @@ MySqlDataProvider::beginTransaction(void)
     LOG_DEBUG("SQL: started transaction");
 }
 
-void
-MySqlDataProvider::commitTransaction(void)
+void MySqlDataProvider::commitTransaction()
     throw (std::runtime_error)
 {
     if (!mIsConnected)
@@ -257,8 +250,7 @@ MySqlDataProvider::commitTransaction(void)
     LOG_DEBUG("SQL: commited transaction");
 }
 
-void
-MySqlDataProvider::rollbackTransaction(void)
+void MySqlDataProvider::rollbackTransaction()
     throw (std::runtime_error)
 {
     if (!mIsConnected)
@@ -278,8 +270,7 @@ MySqlDataProvider::rollbackTransaction(void)
     LOG_DEBUG("SQL: transaction rolled back");
 }
 
-const unsigned int
-MySqlDataProvider::getModifiedRows(void) const
+unsigned MySqlDataProvider::getModifiedRows() const
 {
     if (!mIsConnected)
     {
@@ -301,11 +292,10 @@ MySqlDataProvider::getModifiedRows(void) const
         throw DbSqlQueryExecFailure(mysql_error(mDb));
     }
 
-    return (unsigned int)affected;
+    return (unsigned) affected;
 }
 
-const unsigned int
-MySqlDataProvider::getLastId(void) const
+unsigned MySqlDataProvider::getLastId() const
 {
     if (!mIsConnected)
     {
@@ -319,7 +309,7 @@ MySqlDataProvider::getLastId(void) const
     if (lastId > UINT_MAX)
         throw std::runtime_error("MySqlDataProvider::getLastId exceeded INT_MAX");
 
-    return (unsigned int)lastId;
+    return (unsigned) lastId;
 }
 
 

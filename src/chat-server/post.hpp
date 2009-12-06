@@ -66,7 +66,7 @@ public:
     /**
      * Gets the type of the letter. (unused)
      */
-    unsigned int getType(void) const
+    unsigned int getType() const
     { return mType; }
 
     /**
@@ -90,7 +90,7 @@ public:
      * Get the text contents of letter
      * @return String containing the text
      */
-    std::string getContents();
+    std::string getContents() const;
 
     /**
      * Add an attachment
@@ -103,18 +103,18 @@ public:
      * Get the character receiving the letter
      * @return Returns the Character who will receive the letter
      */
-    Character* getReceiver();
+    Character *getReceiver() const;
 
     /**
      * Get the character who sent the letter
      * @return Returns the Character who sent the letter
      */
-    Character* getSender();
+    Character *getSender() const;
 
     /**
      * Get the attachments
      */
-    std::vector<InventoryItem> getAttachments();
+    std::vector<InventoryItem> getAttachments() const;
 
 private:
     unsigned int mId;
@@ -170,7 +170,7 @@ public:
      * @param player Character that is getting post
      * @return Returns the post for that character
      */
-    Post* getPost(Character *player);
+    Post *getPost(Character *player) const;
 
     /**
      * Remove the post for character

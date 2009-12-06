@@ -48,24 +48,21 @@ class SqLiteDataProvider: public DataProvider
         /**
          * Constructor.
          */
-        SqLiteDataProvider(void)
+        SqLiteDataProvider()
             throw();
-
 
         /**
          * Destructor.
          */
-        ~SqLiteDataProvider(void)
+        ~SqLiteDataProvider()
             throw();
-
 
         /**
          * Get the name of the database backend.
          *
          * @return the database backend name.
          */
-        DbBackends
-        getDbBackend(void) const
+        DbBackends getDbBackend() const
             throw();
 
 
@@ -88,9 +85,8 @@ class SqLiteDataProvider: public DataProvider
          * @exception DbSqlQueryExecFailure if unsuccessful execution.
          * @exception std::runtime_error if trying to query a closed database.
          */
-        const RecordSet&
-        execSql(const std::string& sql,
-                const bool refresh = false);
+        const RecordSet &execSql(const std::string& sql,
+                                 const bool refresh = false);
 
 
         /**
@@ -98,16 +94,14 @@ class SqLiteDataProvider: public DataProvider
          *
          * @exception DbDisconnectionFailure if unsuccessful disconnection.
          */
-        void
-        disconnect(void);
+        void disconnect();
 
         /**
          * Starts a transaction.
          *
          * @exception std::runtime_error if a transaction is still open
          */
-        void
-        beginTransaction(void)
+        void beginTransaction()
             throw (std::runtime_error);
 
         /**
@@ -115,8 +109,7 @@ class SqLiteDataProvider: public DataProvider
          *
          * @exception std::runtime_error if no connection is currently open.
          */
-        void
-        commitTransaction(void)
+        void commitTransaction()
             throw (std::runtime_error);
 
         /**
@@ -124,8 +117,7 @@ class SqLiteDataProvider: public DataProvider
          *
          * @exception std::runtime_error if no connection is currently open.
          */
-        void
-        rollbackTransaction(void)
+        void rollbackTransaction()
             throw (std::runtime_error);
 
         /**
@@ -134,8 +126,7 @@ class SqLiteDataProvider: public DataProvider
          *
          * @return Number of rows that have changed.
          */
-        const unsigned int
-        getModifiedRows(void) const;
+        unsigned getModifiedRows() const;
 
         /**
          * Returns the last inserted value of an autoincrement column after an
@@ -143,8 +134,7 @@ class SqLiteDataProvider: public DataProvider
          *
          * @return last autoincrement value.
          */
-        const unsigned int
-        getLastId(void) const;
+        unsigned getLastId() const;
 
         /**
          * Prepare SQL statement
@@ -185,8 +175,7 @@ class SqLiteDataProvider: public DataProvider
          *
          * @return true, if a transaction is open.
          */
-        const bool
-        inTransaction(void) const;
+        bool inTransaction() const;
 
         sqlite3 *mDb; /**< the handle to the database connection */
         sqlite3_stmt *mStmt; /**< the prepared statement to process */

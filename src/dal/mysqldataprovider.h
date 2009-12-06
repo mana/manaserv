@@ -37,14 +37,12 @@
 namespace dal
 {
 
-
 /**
  * A MySQL Data Provider.
  */
 class MySqlDataProvider: public DataProvider
 {
     public:
-
         /**
          * Replacement for mysql my_bool datatype used in mysql_autocommit()
          * function.
@@ -57,24 +55,21 @@ class MySqlDataProvider: public DataProvider
         /**
          * Constructor.
          */
-        MySqlDataProvider(void)
+        MySqlDataProvider()
             throw();
-
 
         /**
          * Destructor.
          */
-        ~MySqlDataProvider(void)
+        ~MySqlDataProvider()
             throw();
-
 
         /**
          * Get the name of the database backend.
          *
          * @return the database backend name.
          */
-        DbBackends
-        getDbBackend(void) const
+        DbBackends getDbBackend() const
             throw();
 
 
@@ -107,16 +102,14 @@ class MySqlDataProvider: public DataProvider
          *
          * @exception DbDisconnectionFailure if unsuccessful disconnection.
          */
-        void
-        disconnect(void);
+        void disconnect();
 
         /**
          * Starts a transaction.
          *
          * @exception std::runtime_error if a transaction is still open
          */
-        void
-        beginTransaction(void)
+        void beginTransaction()
             throw (std::runtime_error);
 
         /**
@@ -124,8 +117,7 @@ class MySqlDataProvider: public DataProvider
          *
          * @exception std::runtime_error if no connection is currently open.
          */
-        void
-        commitTransaction(void)
+        void commitTransaction()
             throw (std::runtime_error);
 
         /**
@@ -133,8 +125,7 @@ class MySqlDataProvider: public DataProvider
          *
          * @exception std::runtime_error if no connection is currently open.
          */
-        void
-        rollbackTransaction(void)
+        void rollbackTransaction()
             throw (std::runtime_error);
 
         /**
@@ -143,8 +134,7 @@ class MySqlDataProvider: public DataProvider
          *
          * @return Number of rows that have changed.
          */
-        const unsigned int
-        getModifiedRows(void) const;
+        unsigned getModifiedRows() const;
 
         /**
          * Returns the last inserted value of an autoincrement column after an
@@ -152,11 +142,9 @@ class MySqlDataProvider: public DataProvider
          *
          * @return last autoincrement value.
          */
-        const unsigned int
-        getLastId(void) const;
+        unsigned getLastId() const;
 
     private:
-
         /** defines the name of the hostname config parameter */
         static const std::string CFGPARAM_MYSQL_HOST;
         /** defines the name of the server port config parameter */
@@ -180,7 +168,7 @@ class MySqlDataProvider: public DataProvider
         static const std::string CFGPARAM_MYSQL_PWD_DEF;
 
 
-        MYSQL* mDb; /**< the handle to the database connection */
+        MYSQL *mDb; /**< the handle to the database connection */
 };
 
 
