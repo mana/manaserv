@@ -25,7 +25,6 @@
 
 #include "point.h"
 #include "account-server/account.hpp"
-#include "account-server/storagesql.hpp"
 #include "chat-server/chatchannel.hpp"
 #include "chat-server/guild.hpp"
 #include "chat-server/post.hpp"
@@ -37,12 +36,53 @@
 #include "utils/xml.hpp"
 
 // TODO: make data/items.xml a constant or read it from config file
-#define DEFAULT_ITEM_FILE       "data/items.xml"
+static const char *DEFAULT_ITEM_FILE = "data/items.xml";
 
 // defines the supported db version
-#define DB_VERSION_PARAMETER "database_version"
-#define SUPPORTED_DB_VERSION "7"
+static const char *DB_VERSION_PARAMETER = "database_version";
+static const char *SUPPORTED_DB_VERSION = "7";
 
+/*
+ * MySQL specificities:
+ *     - TINYINT is an integer (1 byte) type defined as an extension to
+ *       the SQL standard.
+ *     - all integer types can have an optional (non-standard) attribute
+ *       UNSIGNED (http://dev.mysql.com/doc/mysql/en/numeric-types.html)
+ *
+ * SQLite3 specificities:
+ *     - any column (but only one for each table) with the exact type of
+ *       'INTEGER PRIMARY KEY' is taken as auto-increment.
+ *     - the supported data types are: NULL, INTEGER, REAL, TEXT and BLOB
+ *       (http://www.sqlite.org/datatype3.html)
+ *     - the size of TEXT cannot be set, it is just ignored by the engine.
+ *     - IMPORTANT: foreign key constraints are not yet supported
+ *       (http://www.sqlite.org/omitted.html). Included in case of future
+ *       support.
+ *
+ * Notes:
+ *     - the SQL queries will take advantage of the most appropriate data
+ *       types supported by a particular database engine in order to
+ *       optimize the server database size.
+ *
+ * TODO: Fix problem with PostgreSQL null primary key's.
+ */
+
+static const char *ACCOUNTS_TBL_NAME =       "mana_accounts";
+static const char *CHARACTERS_TBL_NAME =     "mana_characters";
+static const char *CHAR_SKILLS_TBL_NAME =    "mana_char_skills";
+static const char *CHAR_STATUS_EFFECTS_TBL_NAME = "mana_char_status_effects";
+static const char *INVENTORIES_TBL_NAME =    "mana_inventories";
+static const char *ITEMS_TBL_NAME =          "mana_items";
+static const char *GUILDS_TBL_NAME =         "mana_guilds";
+static const char *GUILD_MEMBERS_TBL_NAME =  "mana_guild_members";
+static const char *QUESTS_TBL_NAME =         "mana_quests";
+static const char *WORLD_STATES_TBL_NAME =   "mana_world_states";
+static const char *POST_TBL_NAME =           "mana_post";
+static const char *POST_ATTACHMENTS_TBL_NAME = "mana_post_attachments";
+static const char *AUCTION_TBL_NAME =        "mana_auctions";
+static const char *AUCTION_BIDS_TBL_NAME =   "mana_auction_bids";
+static const char *ONLINE_USERS_TBL_NAME =   "mana_online_list";
+static const char *TRANSACTION_TBL_NAME =    "mana_transactions";
 
 /**
  * Constructor.

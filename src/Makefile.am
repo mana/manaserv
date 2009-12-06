@@ -19,7 +19,6 @@ manaserv_account_SOURCES = \
 	account-server/serverhandler.cpp \
 	account-server/storage.hpp \
 	account-server/storage.cpp \
-	account-server/storagesql.hpp \
 	chat-server/chathandler.hpp \
 	chat-server/chathandler.cpp \
 	chat-server/chatclient.hpp \
