@@ -317,10 +317,17 @@ void Being::applyStatusEffect(int id, int timer)
     if (mAction == DEAD)
         return;
 
-    Status newStatus;
-    newStatus.status = StatusManager::getStatus(id);
-    newStatus.time = timer;
-    mStatus[id] = newStatus;
+    if (StatusEffect *statusEffect = StatusManager::getStatus(id))
+    {
+        Status newStatus;
+        newStatus.status = statusEffect;
+        newStatus.time = timer;
+        mStatus[id] = newStatus;
+    }
+    else
+    {
+        LOG_ERROR("No status effect with ID " << id);
+    }
 }
 
 void Being::removeStatusEffect(int id)
@@ -328,9 +335,9 @@ void Being::removeStatusEffect(int id)
     setStatusEffectTime(id, 0);
 }
 
-bool Being::hasStatusEffect(int id)
+bool Being::hasStatusEffect(int id) const
 {
-    StatusEffects::iterator it = mStatus.begin();
+    StatusEffects::const_iterator it = mStatus.begin();
     while (it != mStatus.end())
     {
         if (it->second.status->getId() == id)
@@ -340,9 +347,9 @@ bool Being::hasStatusEffect(int id)
     return false;
 }
 
-unsigned Being::getStatusEffectTime(int id)
+unsigned Being::getStatusEffectTime(int id) const
 {
-    StatusEffects::iterator it = mStatus.find(id);
+    StatusEffects::const_iterator it = mStatus.find(id);
     if (it != mStatus.end()) return it->second.time;
     else return 0;
 }

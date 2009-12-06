@@ -308,12 +308,12 @@ class Being : public Actor
         /**
          * Returns true if the being has a status effect
          */
-        bool hasStatusEffect(int id);
+        bool hasStatusEffect(int id) const;
 
         /**
          * Returns the time of the status effect if in effect, or 0 if not
          */
-        unsigned getStatusEffectTime(int id);
+        unsigned getStatusEffectTime(int id) const;
 
         /**
          * Changes the time of the status effect (if in effect)

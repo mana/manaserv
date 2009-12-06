@@ -126,7 +126,7 @@ void Character::update()
 
     mStatusEffects.clear();
     StatusEffects::iterator it = mStatus.begin();
-    while(it != mStatus.end())
+    while (it != mStatus.end())
     {
         mStatusEffects[it->first] = it->second.time;
         it++;
