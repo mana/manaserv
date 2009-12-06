@@ -13,7 +13,7 @@ THE MANA WORLD SERVER PROJECT
 
 1. INTRODUCTION
 
-First let me show you a screen shot of TMW. From left to right it shows a
+First let me show you a screen shot of Mana. From left to right it shows a
 player, an enemy, a tree and an apple. In this document the player and enemy
 will go as beings, and the tree and apple will go as objects. Finally, the
 thing they're on is a map.
@@ -21,7 +21,7 @@ thing they're on is a map.
  o                                        O
  O : A Player        <> : A monster       | : A tree          o : An Apple.
 
-  -----------------   Fig. 1) screen shot of TMW showing three kind of objects
+  -----------------   Fig. 1) screen shot of Mana showing three kind of objects
   |               |
   |   o        O  |      MAP
   |   O <>     |o |      OBJECT
@@ -127,7 +127,7 @@ other players.
 
 6. CHAT
 
-There are several channels in the chat system: 
+There are several channels in the chat system:
 
  Area    -  To players around you             (default)
  Region  -  To players on the same map        (default)

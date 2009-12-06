@@ -35,14 +35,14 @@
 
 #include "utils/logger.h"
 
-#define TMWSERV_DATADIR ""
+#define PKG_DATADIR ""
 
 void ResourceManager::initialize()
 {
     PHYSFS_permitSymbolicLinks(1);
     // Add the main data directory to our PhysicsFS search path
     PHYSFS_addToSearchPath("data", 1);
-    PHYSFS_addToSearchPath(TMWSERV_DATADIR "data", 1);
+    PHYSFS_addToSearchPath(PKG_DATADIR "data", 1);
 
 #ifdef _WIN32
     // Define the path in which to search

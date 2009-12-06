@@ -5,7 +5,7 @@ SERVER ARCHITECTURE
 1. INTRODUCTION
 2. RO REVIEW
 3. EATHENA MODEL
-4. TMW SERVER
+4. MANA SERVER
 5. TCP - UDP
 6. SECURITY
 7. DATABASE
@@ -53,9 +53,9 @@ implements 3 servers: login, char and map. It is allowed to have more than one
 map server at a time. Every server communicates with all the others.
 
 
-4. TMW SERVER
+4. MANA SERVER
 
-The basic idea of TMW server architecture mainly is the same as the one used by
+The basic idea of Mana server architecture mainly is the same as the one used by
 eAthena. Since the login and char server don't have heavy traffic they could be
 melt togheter.
 
@@ -67,20 +67,20 @@ melt togheter.
 
 The login server manages new connections and stores all the informations about
 the player. The map server is pretty the same as the eAthena one. The login
-server manages also connections to a new map server when changing map. Having 
+server manages also connections to a new map server when changing map. Having
 only one server (L) to manage all the connections between clients and map
 servers is a bad point: if the login server crashes players won't be able to
 play anymore. In fact new connecting players won't be able to connect to login
 server, while map server will disconnect every player, since they can't save
 their infos. Some solutions are:
-    
+
     - Implementing a distributed login server which can manage crashes and
       redirect new connections to another login server. This way means a more
       complex implementation and probably the need to other computers since we
       want the login servers to be independent from each other crashes at all.
       (Remember this is a free project so we should limit the number of
       computers to act as servers)
-      
+
     - RALS (Redundant Array of Login Servers): we can have two login servers,
       only one of them is active at a time and they share the same database
       where to store infos about players. If one of the map servers loose the
@@ -89,15 +89,15 @@ their infos. Some solutions are:
       active login server will send messages to every map server to inform them.
       Every time a client connects check both of the login server and connect to
       the active one. The bad points of this system are that will imply a lot of
-      data consistency checks: map servers should resend last data since it 
+      data consistency checks: map servers should resend last data since it
       was lost when the login server crashed, the new login server should check
       if some of the data was already stored before the crash, what if both of
       them crash?
-      
+
     - Waiting it's the only solution! Let's design the login server as much
       simple and stable as possible and create a smart restarting system.
       This way we will have less frequent crashes and a very low restarting
-      time. Obviously this is the easiest and less expensive solution.    
+      time. Obviously this is the easiest and less expensive solution.
 
     - Make the server completely distributed and replicating data to all of
       them. This is the way Hammerbear would like to try.
@@ -160,10 +160,10 @@ Solutions to keep the server working and avoid unfair players:
  - DoS attack:
         * Account activation.
         * Limit number of accounts to 1 per email address.
-        
+
  - Cheating/Botting:
         * First of all just keep every calculation done by the server.
-        
+
 Also we need the possibility to warn/kick/ban players/accounts/ip addresses.
 
 
@@ -180,11 +180,11 @@ Still to decide if we want to use a dialog (client registration) or to use a
 web based interface (web registration).
 Registration should ask for less details as possible. This way it will be less
 annoying. Required infos will be:
-    
+
     - username
     - password
     - email (to limit account number and to be used to activate account)
-    
+
 More infos could be added later for security problem (such as activation codes
 and so on).
 In RO you also have to choose the sex of your player. It will be better to let
@@ -195,15 +195,15 @@ player and create a female one.
 9. SERVER CONTROL
 
 The server can be controlled in two ways:
-    
+
     - In game control: server admins or GMs sending particular commands or a
       trough a GUI (the way it is used in Ultima Online).
-    
+
     - A graphical interface which connects to the server trough an open port.
-    
+
 The prefferred way is the first one.
 
- 
+
 10. OPERATING SYSTEM
 
 We have two choices about this: the former is to follow as for the client the
@@ -216,13 +216,13 @@ Just remember that the current game server run on linux.
 11. ADVANCED DATA TRANSMISSION
 
 Other ways to reduce bandwidth can be considered such as:
-    
+
     - Using bitstreams instead of bytestreams: this way if you need to send a
       boolean values only 1 bit will be required instead of 1 byte (compression
       8:1), item types (4 different types) can be represented sending 2 bits
       instead of 1 byte (compression 8:2), player coordinates can be represented
       using 20 bits instead of 4 bytes (compression 24:20)
-      
+
     - Compressing data following packet id could help reducing bandwidth usage
       as well. RLE compression or more advanced statistical techniques can be
       used. Compression can be disabled in very slow systems (If using

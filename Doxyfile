@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "The Mana World - Server"
+PROJECT_NAME           = "The Mana Server"
 PROJECT_NUMBER         = 0.1.*
 OUTPUT_DIRECTORY       = docs/api
 CREATE_SUBDIRS         = YES
