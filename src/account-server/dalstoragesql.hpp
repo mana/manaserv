@@ -30,9 +30,6 @@
 #error "(dalstorage.hpp) no database backend defined"
 #endif
 
-
-#include <string>
-
 // TODO: Fix problem with PostgreSQL null primary key's.
 
 /**
@@ -83,12 +80,12 @@ static const char *CHAR_STATUS_EFFECTS_TBL_NAME = "mana_char_status_effects";
 /**
  * TABLE: mana_inventories.
  */
-static const char *INVENTORIES_TBL_NAME("mana_inventories");
+static const char *INVENTORIES_TBL_NAME = "mana_inventories";
 
 /**
  * TABLE: mana_items.
  */
-static const char *ITEMS_TBL_NAME("mana_items");
+static const char *ITEMS_TBL_NAME = "mana_items";
 
 /**
  * TABLE: mana_guilds.

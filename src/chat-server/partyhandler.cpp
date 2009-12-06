@@ -22,13 +22,13 @@
 #include "chatclient.hpp"
 #include "party.hpp"
 
-#include "../account-server/dalstorage.hpp"
-#include "../account-server/serverhandler.hpp"
+#include "account-server/dalstorage.hpp"
+#include "account-server/serverhandler.hpp"
 
-#include "../net/messagein.hpp"
-#include "../net/messageout.hpp"
+#include "net/messagein.hpp"
+#include "net/messageout.hpp"
 
-#include "../protocol.h"
+#include "protocol.h"
 
 #include <algorithm>
 

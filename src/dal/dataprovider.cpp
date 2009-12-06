@@ -19,11 +19,11 @@
  */
 
 #include "dataprovider.h"
-#include "../utils/logger.h"
+
+#include "utils/logger.h"
 
 namespace dal
 {
-
 
 /**
  * Constructor.
@@ -35,7 +35,6 @@ DataProvider::DataProvider()
 {
 }
 
-
 /**
  * Destructor.
  */
@@ -44,9 +43,10 @@ DataProvider::~DataProvider()
 {
 }
 
-
 /**
  * Get the connection status.
+ *
+ * @return true if connected.
  */
 bool DataProvider::isConnected() const
     throw()
@@ -55,7 +55,7 @@ bool DataProvider::isConnected() const
 }
 
 /**
- * Get the DataBase Name
+ * Get the database name.
  */
 std::string DataProvider::getDbName() const
 {

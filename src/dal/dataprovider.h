@@ -56,24 +56,12 @@ typedef enum {
 class DataProvider
 {
     public:
-        /**
-         * Constructor.
-         */
         DataProvider()
             throw();
 
-        /**
-         * Destructor.
-         */
-        virtual
-        ~DataProvider()
+        virtual ~DataProvider()
             throw();
 
-        /**
-         * Get the connection status.
-         *
-         * @return true if connected.
-         */
         bool isConnected() const
             throw();
 
@@ -119,9 +107,6 @@ class DataProvider
          */
         virtual void disconnect() = 0;
 
-        /**
-         * Get the Database Name.
-         */
         std::string getDbName() const;
 
         /**
