@@ -54,8 +54,6 @@ enum TimerID
     T_B_HP_REGEN    // time until hp is regenerated again
 };
 
-typedef std::map <TimerID, int> Timers;
-
 /**
  * Methods of damage calculation
  */
@@ -127,7 +125,6 @@ typedef std::vector<unsigned int> Hits;
 class Being : public Actor
 {
     public:
-
         /**
          * Moves enum for beings and actors for others players vision.
          * WARNING: Has to be in sync with the same enum in the Being class
@@ -339,7 +336,7 @@ class Being : public Actor
         /**
          * Get Target
          */
-        Being* getTarget() const
+        Being *getTarget() const
         { return mTarget; }
 
         /**
@@ -357,15 +354,24 @@ class Being : public Actor
         Being *mTarget;
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
-        /**
-        * Timer stuff
-        */
-        void setTimerSoft(TimerID id, int value); /**< sets timer unless already higher */
-        void setTimerHard(TimerID id, int value); /**< sets timer even when already higher (when in doubt this one is faster)*/
-        int  getTimer(TimerID id);            /**< returns number of ticks left on the timer */
-        bool isTimerRunning(TimerID id);      /**< true when timer exists and is > 0 */
-        bool isTimerJustFinished(TimerID id); /**< true during the tick where the timer reaches 0 */
 
+        /** Sets timer unless already higher. */
+        void setTimerSoft(TimerID id, int value);
+
+        /**
+         * Sets timer even when already higher (when in doubt this one is
+         * faster)
+         */
+        void setTimerHard(TimerID id, int value);
+
+        /** Returns number of ticks left on the timer */
+        int getTimer(TimerID id) const;
+
+        /** Returns whether timer exists and is > 0 */
+        bool isTimerRunning(TimerID id) const;
+
+        /** Returns whether the timer reached 0 in this tick */
+        bool isTimerJustFinished(TimerID id) const;
 
     private:
         Being(const Being &rhs);
@@ -379,6 +385,7 @@ class Being : public Actor
         Hits mHitsTaken; /**< List of punches taken since last update. */
         AttributeModifiers mModifiers; /**< Currently modified attributes. */
 
+        typedef std::map<TimerID, int> Timers;
         Timers mTimers;
 };
 

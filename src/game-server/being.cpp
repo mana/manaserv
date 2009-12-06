@@ -440,20 +440,18 @@ void Being::setTimerHard(TimerID id, int value)
     mTimers[id] = value;
 }
 
-int  Being::getTimer(TimerID id)
+int Being::getTimer(TimerID id) const
 {
-    Timers::iterator i = mTimers.find(id);
-    if (i == mTimers.end()) return -1;
-    return i->second;
+    Timers::const_iterator i = mTimers.find(id);
+    return (i == mTimers.end()) ? -1 : i->second;
 }
 
-bool Being::isTimerRunning(TimerID id)
+bool Being::isTimerRunning(TimerID id) const
 {
-    return (getTimer(id) > 0);
+    return getTimer(id) > 0;
 }
 
-bool Being::isTimerJustFinished(TimerID id)
+bool Being::isTimerJustFinished(TimerID id) const
 {
-    return (getTimer(id) == 0);
+    return getTimer(id) == 0;
 }
-
