@@ -1,25 +1,22 @@
 /*
- *  The Mana World Server
- *  Copyright 2007 The Mana World Development Team
+ *  The Mana Server
+ *  Copyright (C) 2007  The Mana World Development Team
  *
- *  This file is part of The Mana World.
+ *  This file is part of The Mana Server.
  *
- *  The Mana World is free software; you can redistribute it and/or modify
+ *  The Mana Server is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  any later version.
  *
- *  The Mana World is distributed in the hope that it will be useful,
+ *  The Mana Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with The Mana World; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <algorithm>
 
 #include "game-server/buysell.hpp"
 
@@ -27,6 +24,8 @@
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
 #include "net/messageout.hpp"
+
+#include <algorithm>
 
 BuySell::BuySell(Character *c, bool sell):
     mChar(c), mSell(sell)
