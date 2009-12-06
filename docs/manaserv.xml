@@ -72,7 +72,7 @@
  <option name="net_gameServerPort" value="9604"/>
  
  <!-- Gameplay-related config option-->
- <option name="visualRange" value="320"/> 
+ <option name="visualRange" value="448"/>
  <option name="respawnMap" value="4"/>
  <option name="respawnX" value="1000"/>
  <option name="respawnY" value="1000"/>

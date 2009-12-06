@@ -187,7 +187,7 @@ void Monster::update()
     Direction bestAttackDirection = DIRECTION_DOWN;
 
     // Iterate through objects nearby
-    int aroundArea = Configuration::getValue("visualRange", 320);
+    int aroundArea = Configuration::getValue("visualRange", 448);
     for (BeingIterator i(getMap()->getAroundBeingIterator(this, aroundArea)); i; ++i)
     {
         // We only want to attack player characters
