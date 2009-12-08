@@ -45,6 +45,10 @@
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add directory="..\include" />
+			<Add directory="include" />
+			<Add directory="..\include\libxml2" />
+			<Add directory="include\libxml2" />
 		</Compiler>
 		<Linker>
 			<Add library="enet" />
@@ -53,6 +57,8 @@
 			<Add library="z" />
 			<Add library="sqlite3" />
 			<Add library="crypto" />
+			<Add directory="..\lib" />
+			<Add directory="lib" />
 		</Linker>
 		<Unit filename="src\account-server\account.cpp" />
 		<Unit filename="src\account-server\account.hpp" />
@@ -62,12 +68,11 @@
 		<Unit filename="src\account-server\accounthandler.hpp" />
 		<Unit filename="src\account-server\character.cpp" />
 		<Unit filename="src\account-server\character.hpp" />
-		<Unit filename="src\account-server\dalstorage.cpp" />
-		<Unit filename="src\account-server\dalstorage.hpp" />
-		<Unit filename="src\account-server\dalstoragesql.hpp" />
 		<Unit filename="src\account-server\main-account.cpp" />
 		<Unit filename="src\account-server\serverhandler.cpp" />
 		<Unit filename="src\account-server\serverhandler.hpp" />
+		<Unit filename="src\account-server\storage.cpp" />
+		<Unit filename="src\account-server\storage.hpp" />
 		<Unit filename="src\chat-server\chatchannel.cpp" />
 		<Unit filename="src\chat-server\chatchannel.hpp" />
 		<Unit filename="src\chat-server\chatchannelmanager.cpp" />
