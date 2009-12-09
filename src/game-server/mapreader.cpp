@@ -125,7 +125,6 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
     // We only support tile width of 32 at the moment
     int tilew = XML::getProperty(node, "tilewidth", DEFAULT_TILE_WIDTH);
     int tileh = XML::getProperty(node, "tileheight", DEFAULT_TILE_HEIGHT);
-    int layerNr = 0;
     Map* map = new Map(w, h, tilew, tileh);
 
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
@@ -156,8 +155,8 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
         }
         else if (xmlStrEqual(node->name, BAD_CAST "layer"))
         {
-            // Layer 3 is collision layer.
-            if (layerNr++ == 3)
+            if (utils::compareStrI(XML::getProperty(node, "name", "unnamed"),
+                                   "collision") == 0)
             {
                 readLayer(node, map);
             }

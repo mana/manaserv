@@ -24,13 +24,15 @@
 #include <algorithm>
 #include <sstream>
 
-std::string utils::toupper(std::string s)
+namespace utils {
+
+std::string toupper(std::string s)
 {
     std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) std::toupper);
     return s;
 }
 
-bool utils::isNumeric(const std::string &s)
+bool isNumeric(const std::string &s)
 {
     for (unsigned int i = 0; i < s.size(); ++i)
     {
@@ -43,7 +45,7 @@ bool utils::isNumeric(const std::string &s)
     return true;
 }
 
-int utils::stringToInt(const std::string &s)
+int stringToInt(const std::string &s)
 {
     int value;
     std::stringstream str(s);
@@ -53,3 +55,22 @@ int utils::stringToInt(const std::string &s)
 
     return value;
 }
+
+int compareStrI(const std::string &a, const std::string &b)
+{
+    std::string::const_iterator itA = a.begin();
+    std::string::const_iterator endA = a.end();
+    std::string::const_iterator itB = b.begin();
+    std::string::const_iterator endB = b.end();
+
+    for (; itA < endA, itB < endB; ++itA, ++itB)
+    {
+        int comp = tolower(*itA) - tolower(*itB);
+        if (comp)
+            return comp;
+    }
+
+    return 0;
+}
+
+} // namespace utils
