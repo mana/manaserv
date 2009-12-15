@@ -81,7 +81,7 @@
  <!-- Network-related config options-->
  <option name="net_maxClients" value="1000"/>
  <!-- Account-creation-related config options-->
- <option name="account_allowRegister" value="0" />
+ <option name="account_allowRegister" value="1" />
  <option name="account_denyRegisterReason" value="The server administrator has disabled automatic registration!" />
  <option name="account_minEmailLength" value="7" />
  <option name="account_maxEmailLength" value="128" />
