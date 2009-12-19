@@ -49,7 +49,7 @@ enum {
     PAMSG_REQUEST_REGISTER_INFO    = 0x0005, //
     APMSG_REGISTER_INFO_RESPONSE   = 0x0006, // B byte registrationAllowed, byte minNameLength, byte maxNameLength, string captchaURL, string captchaInstructions
     PAMSG_LOGIN                    = 0x0010, // L version, S username, S password
-    APMSG_LOGIN_RESPONSE           = 0x0012, // B error
+    APMSG_LOGIN_RESPONSE           = 0x0012, // B error, [S update host]
     PAMSG_LOGOUT                   = 0x0013, // -
     APMSG_LOGOUT_RESPONSE          = 0x0014, // B error
     PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, W*6 stats

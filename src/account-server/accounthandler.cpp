@@ -255,6 +255,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     client.status = CLIENT_CONNECTED;
 
     reply.writeByte(ERRMSG_OK);
+    reply.writeString(Configuration::getValue("defaultUpdateHost","http://update.manasource.org"));
     client.send(reply); // Acknowledge login
 
     // Return information about available characters
