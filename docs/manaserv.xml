@@ -3,7 +3,7 @@
 	An example configuration file for ~/.manaserv.xml
 	If you add any parameters to this configuration file make sure to update
 	the wiki documentation at:
-	http://wiki.themanaworld.org/index.php/Configuration_file:tmwserv.xml
+	http://wiki.themanaworld.org/index.php/Manaserv.xml
 -->
 <configuration>
  
