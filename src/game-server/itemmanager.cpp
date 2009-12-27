@@ -26,6 +26,7 @@
 #include "defines.h"
 #include "game-server/item.hpp"
 #include "game-server/resourcemanager.hpp"
+#include "game-server/skillmanager.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
@@ -140,11 +141,14 @@ void ItemManager::reload()
         if (itemType == ITEM_EQUIPMENT_ONE_HAND_WEAPON ||
             itemType == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
         {
-            int weaponType = XML::getProperty(node, "weapon-type", 0);
-            if (weaponType == 0)
+            int weaponType = 0;
+            std::string strWeaponType = XML::getProperty(node, "weapon-type", "");
+            if (strWeaponType == "")
             {
                 LOG_WARN(itemReferenceFile<<": Unknown weapon type \""
                          <<"\" for item #"<<id<<" - treating it as generic item");
+            } else {
+                weaponType = SkillManager::getIdFromString(strWeaponType);
             }
             modifiers.setValue(MOD_WEAPON_TYPE, weaponType);
             modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));

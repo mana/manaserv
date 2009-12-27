@@ -38,6 +38,7 @@
 #include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
+#include "game-server/skillmanager.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/monstermanager.hpp"
@@ -60,6 +61,7 @@ using utils::Logger;
 #define DEFAULT_LOG_FILE        "manaserv-game.log"
 #define DEFAULT_CONFIG_FILE     "manaserv.xml"
 #define DEFAULT_ITEMSDB_FILE    "items.xml"
+#define DEFAULT_SKILLSDB_FILE   "mana-skills.xml"
 #define DEFAULT_MAPSDB_FILE     "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE "monsters.xml"
 #define DEFAULT_STATUSDB_FILE   "mana-status-effect.xml"
@@ -161,6 +163,7 @@ void initialize()
       LOG_FATAL("The Game Server can't find any valid/available maps.");
       exit(2);
     }
+    SkillManager::initialize(DEFAULT_SKILLSDB_FILE);
     ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
     MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
