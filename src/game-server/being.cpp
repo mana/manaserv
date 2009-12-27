@@ -85,13 +85,17 @@ int Being::damage(Actor *, const Damage &damage)
             break;
     }
 
-    if (HPloss < 0) HPloss = 0;
-
-    mHitsTaken.push_back(HPloss);
-    Attribute &HP = mAttributes[BASE_ATTR_HP];
-    LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
-    HP.mod -= HPloss;
-    if (HPloss != 0) modifiedAttribute(BASE_ATTR_HP);
+    if (HPloss > 0)
+    {
+        mHitsTaken.push_back(HPloss);
+        Attribute &HP = mAttributes[BASE_ATTR_HP];
+        LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
+        HP.mod -= HPloss;
+        modifiedAttribute(BASE_ATTR_HP);
+        setTimerSoft(T_B_HP_REGEN, 50); // no HP regen for 5 seconds after being hit
+    } else {
+        HPloss = 0;
+    }
 
     return HPloss;
 }
