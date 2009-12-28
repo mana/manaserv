@@ -350,9 +350,9 @@ int main(int argc, char *argv[])
         {
             if (elapsedWorldTicks > WORLD_TICK_SKIP)
             {
-                LOG_WARN("Skipped "<< elapsedWorldTicks - WORLD_TICK_SKIP
+                LOG_WARN("Skipped "<< elapsedWorldTicks - 1
                         << " world tick due to insufficient CPU time.");
-                elapsedWorldTicks = WORLD_TICK_SKIP;
+                elapsedWorldTicks = 1;
             }
             worldTime++;
             elapsedWorldTicks--;
