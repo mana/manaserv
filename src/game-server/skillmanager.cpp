@@ -20,7 +20,10 @@
 
 #include "game-server/skillmanager.hpp"
 
+#include "game-server/resourcemanager.hpp"
 #include "utils/string.hpp"   // for the toupper function
+#include "utils/logger.h"
+#include "utils/xml.hpp"
 
 #include <map>
 
@@ -36,9 +39,65 @@ void SkillManager::initialize(const std::string &file)
 
 void SkillManager::reload()
 {
-    //...
+    /*
     skillMap["UNARMED"] = 100;
     skillMap["KNIFE"] = 101;
+    */
+
+    int size;
+    char *data = ResourceManager::loadFile(skillReferenceFile, size);
+
+    if (!data) {
+        LOG_ERROR("Item Manager: Could not find " << skillReferenceFile << "!");
+        free(data);
+        return;
+    }
+
+    xmlDocPtr doc = xmlParseMemory(data, size);
+    free(data);
+
+    if (!doc)
+    {
+        LOG_ERROR("Skill Manager: Error while parsing skill database ("
+                  << skillReferenceFile << ")!");
+        return;
+    }
+
+    xmlNodePtr node = xmlDocGetRootElement(doc);
+    if (!node || !xmlStrEqual(node->name, BAD_CAST "skills"))
+    {
+        LOG_ERROR("Skill Manager: " << skillReferenceFile
+                  << " is not a valid database file!");
+        xmlFreeDoc(doc);
+        return;
+    }
+
+    LOG_INFO("Loading skill reference...");
+
+    for_each_xml_child_node(setnode, node)
+    {
+        if (xmlStrEqual(setnode->name, BAD_CAST "set"))
+        // we don't care about sets server-sided (yet?)
+        for_each_xml_child_node(skillnode, setnode)
+        {
+            if (xmlStrEqual(skillnode->name, BAD_CAST "skill"))
+            {
+                std::string name = XML::getProperty(skillnode, "name", std::string());
+                name = utils::toupper(name);
+                int id = XML::getProperty(skillnode, "id", 0);
+                if (id && !name.empty())
+                {
+                    skillMap[utils::toupper(name)] = id;
+                }
+            }
+        }
+    }
+
+    LOG_DEBUG("skill map:");
+    for (SkillMap::iterator i = skillMap.begin(); i != skillMap.end(); i++)
+    {
+        LOG_DEBUG("  "<<i->first<<" : "<<i->second);
+    }
 }
 
 int SkillManager::getIdFromString(std::string name)
