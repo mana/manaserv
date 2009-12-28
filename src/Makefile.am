@@ -130,6 +130,8 @@ manaserv_game_SOURCES = \
 	game-server/quest.cpp \
 	game-server/resourcemanager.hpp \
 	game-server/resourcemanager.cpp \
+	game-server/skillanager.hpp \
+	game-server/skillmanager.cpp \
 	game-server/spawnarea.hpp \
 	game-server/spawnarea.cpp \
 	game-server/state.hpp \

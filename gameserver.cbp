@@ -110,6 +110,8 @@
 		<Unit filename="src\game-server\quest.hpp" />
 		<Unit filename="src\game-server\resourcemanager.cpp" />
 		<Unit filename="src\game-server\resourcemanager.hpp" />
+		<Unit filename="src\game-server\skillmanager.cpp" />
+		<Unit filename="src\game-server\skillmanager.hpp" />
 		<Unit filename="src\game-server\spawnarea.cpp" />
 		<Unit filename="src\game-server\spawnarea.hpp" />
 		<Unit filename="src\game-server\state.cpp" />
@@ -137,6 +139,7 @@
 		<Unit filename="src\net\netcomputer.cpp" />
 		<Unit filename="src\net\netcomputer.hpp" />
 		<Unit filename="src\point.h" />
+		<Unit filename="src\protocol.h" />
 		<Unit filename="src\scripting\lua.cpp" />
 		<Unit filename="src\scripting\luascript.cpp" />
 		<Unit filename="src\scripting\luascript.hpp" />
