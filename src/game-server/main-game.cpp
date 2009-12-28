@@ -66,6 +66,8 @@ using utils::Logger;
 #define DEFAULT_MONSTERSDB_FILE "monsters.xml"
 #define DEFAULT_STATUSDB_FILE   "mana-status-effect.xml"
 
+static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
+
 utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
 int worldTime = 0;              /**< Current world time in 100ms ticks */
 bool running = true;            /**< Determines if server keeps running */
@@ -342,16 +344,18 @@ int main(int argc, char *argv[])
     while (running)
     {
         elapsedWorldTicks = worldTimer.poll();
-        if (elapsedWorldTicks > 0)
-        {
-            worldTime += elapsedWorldTicks;
+        if (elapsedWorldTicks == 0) worldTimer.sleep();
 
-            if (elapsedWorldTicks > 1)
+        while (elapsedWorldTicks > 0)
+        {
+            if (elapsedWorldTicks > WORLD_TICK_SKIP)
             {
-                LOG_WARN("Not enough time to calculate "<< elapsedWorldTicks -1
-                        << " World Tick(s) - skipping. Please buy a faster "
-                        "machine ;-)");
-            };
+                LOG_WARN("Skipped "<< elapsedWorldTicks - WORLD_TICK_SKIP
+                        << " world tick due to insufficient CPU time.");
+                elapsedWorldTicks = WORLD_TICK_SKIP;
+            }
+            worldTime++;
+            elapsedWorldTicks--;
 
             // Print world time at 10 second intervals to show we're alive
             if (worldTime % 100 == 0) {
@@ -402,10 +406,6 @@ int main(int argc, char *argv[])
             GameState::update(worldTime);
             // Send potentially urgent outgoing messages
             gameHandler->flush();
-        }
-        else
-        {
-            worldTimer.sleep();
         }
     }
 
