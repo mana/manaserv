@@ -1292,6 +1292,34 @@ static int chr_get_hair_color(lua_State *s)
 }
 
 /**
+ * Get the number of monsters the player killed of a type
+ * mana.chr_get_kill_count (character, monsterType)
+ */
+static int chr_get_kill_count(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_get_kill_count called for nonexistent character.");
+        return 0;
+    }
+
+    if (!lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "chr_get_kill_count called with incorect parameters");
+        return 0;
+    }
+
+    int id = lua_tointeger(s, 2);
+
+    int kills = c->getKillCount(id);
+
+    lua_pushinteger(s, kills);
+    return 1;
+}
+
+
+/**
  * Returns the rights level of a character.
  * mana.chr_get_rights (being)
  */
@@ -1463,6 +1491,7 @@ LuaScript::LuaScript():
         { "chr_get_hair_style",     &chr_get_hair_style   },
         { "chr_set_hair_color",     &chr_set_hair_color   },
         { "chr_get_hair_color",     &chr_get_hair_color   },
+        { "chr_get_kill_count",     &chr_get_kill_count   },
         { "exp_for_level",          &exp_for_level        },
         { "monster_create",         &monster_create       },
         { "monster_load_script",    &monster_load_script  },

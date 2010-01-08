@@ -323,6 +323,11 @@ class Character : public Being
         void incrementKillCount(int monsterType);
 
         /**
+         * Gets the number of monsters the character killed of a given type
+         */
+        int getKillCount(int monsterType);
+
+        /**
          * Shortcut to get being's health
          */
         int getHealth() const

@@ -519,6 +519,18 @@ void Character::incrementKillCount(int monsterType)
     };
 }
 
+int Character::getKillCount(int monsterType)
+{
+    std::map<int, int>::iterator i = mKillCount.find(monsterType);
+    if (i == mKillCount.end())
+    {
+        return 0;
+    } else {
+        return i->second;
+    };
+}
+
+
 void Character::recalculateLevel()
 {
     std::list<float> levels;
