@@ -41,7 +41,7 @@ static const char *DEFAULT_ITEM_FILE = "data/items.xml";
 
 // defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
-static const char *SUPPORTED_DB_VERSION = "7";
+static const char *SUPPORTED_DB_VERSION = "8";
 
 /*
  * MySQL specificities:
@@ -72,6 +72,7 @@ static const char *ACCOUNTS_TBL_NAME =       "mana_accounts";
 static const char *CHARACTERS_TBL_NAME =     "mana_characters";
 static const char *CHAR_SKILLS_TBL_NAME =    "mana_char_skills";
 static const char *CHAR_STATUS_EFFECTS_TBL_NAME = "mana_char_status_effects";
+static const char *CHAR_KILL_COUNT_TBL_NAME = "mana_char_kill_stats";
 static const char *INVENTORIES_TBL_NAME =    "mana_inventories";
 static const char *ITEMS_TBL_NAME =          "mana_items";
 static const char *GUILDS_TBL_NAME =         "mana_guilds";
@@ -414,9 +415,9 @@ Character *Storage::getCharacterBySQL(Account *owner)
                     toUint(skillInfo(row, 1))); // experience
             }
         }
+        // Load the status effect
         s.clear();
         s.str("");
-        // Load the status effect
         s << "select status_id, status_time FROM " << CHAR_STATUS_EFFECTS_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
         const dal::RecordSet &statusInfo = mDb->execSql(s.str());
@@ -428,6 +429,23 @@ Character *Storage::getCharacterBySQL(Account *owner)
                 character->applyStatusEffect(
                     toUint(statusInfo(row, 0)), // Statusid
                     toUint(statusInfo(row, 1))); // Time
+            }
+        }
+        // Load the kill stats
+        s.clear();
+        s.str("");
+        // Load the status effect
+        s << "select monster_id, kills FROM " << CHAR_KILL_COUNT_TBL_NAME
+          << " WHERE char_id = " << character->getDatabaseID();
+        const dal::RecordSet &killsInfo = mDb->execSql(s.str());
+        if (!statusInfo.isEmpty())
+        {
+            const unsigned int nRows = killsInfo.rows();
+            for (unsigned int row = 0; row < nRows; row++)
+            {
+                character->setKillCount(
+                    toUint(killsInfo(row, 0)), // MonsterID
+                    toUint(killsInfo(row, 1))); // Kills
             }
         }
     }
@@ -693,7 +711,28 @@ bool Storage::updateCharacter(Character *character,
         return false;
     }
 
-
+    /**
+     *  Character's kill count
+     */
+    try
+    {
+        std::map<int, int>::const_iterator kill_it;
+        for (kill_it = character->getKillCountBegin();
+             kill_it != character->getKillCountEnd(); kill_it++)
+        {
+            updateKillCount(character->getDatabaseID(), kill_it->first, kill_it->second);
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
+        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
+        return false;
+    }
     /**
      *  Character's inventory
      */
@@ -1123,6 +1162,47 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
     catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("DALStorage::updateExperience: " << e.what());
+        throw;
+    }
+}
+
+/**
+ * Write a modification message about character skills to the database.
+ * @param CharId      ID of the character
+ * @param monsterId   ID of the monster type
+ * @param kills       new amount of kills
+ */
+void Storage::updateKillCount(int charId, int monsterId, int kills)
+{
+    LOG_INFO("Updating kill counts"); //<- DELME
+    try
+    {
+        // try to update the kill count
+        std::ostringstream sql;
+        sql << "UPDATE " << CHAR_KILL_COUNT_TBL_NAME
+            << " SET kills = " << kills
+            << " WHERE char_id = " << charId
+            << " AND monster_id = " << monsterId;
+        mDb->execSql(sql.str());
+
+        // check if the update has modified a row
+        if (mDb->getModifiedRows() > 0)
+        {
+            return;
+        }
+
+        sql.clear();
+        sql.str("");
+        sql << "INSERT INTO " << CHAR_KILL_COUNT_TBL_NAME << " "
+            << "(char_id, monster_id, kills) VALUES ( "
+            << charId << ", "
+            << monsterId << ", "
+            << kills << ")";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        LOG_ERROR("DALStorage::updateKillCount: " << e.what());
         throw;
     }
 }

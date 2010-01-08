@@ -68,6 +68,8 @@ class Storage
 
         void updateExperience(int charId, int skillId, int skillValue);
 
+        void updateKillCount(int charId, int monsterId, int kills);
+
         void insertStatusEffect(int charId, int statusId, int time);
 
         void banCharacter(int id, int duration);

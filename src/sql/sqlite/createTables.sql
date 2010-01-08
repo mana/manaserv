@@ -97,6 +97,19 @@ CREATE INDEX mana_char_status_char on mana_char_status_effects ( char_id );
 
 -----------------------------------------------------------------------------
 
+CREATE TABLE mana_char_kill_stats
+(
+    char_id     INTEGER     NOT NULL,
+    monster_id  INTEGER     NOT NULL,
+    kills       INTEGER     NOT NULL,
+    --
+    FOREIGN KEY (char_id) REFERENCES mana_characters(id)
+);
+
+CREATE INDEX mana_char_kill_stats_char on mana_char_status_effects ( char_id );
+
+-----------------------------------------------------------------------------
+
 CREATE TABLE mana_items
 (
     id           INTEGER    PRIMARY KEY,
