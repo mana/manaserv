@@ -506,6 +506,31 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
     }
 }
 
+void Character::incrementKillCount(int monsterType)
+{
+    std::map<int, int>::iterator i = mKillCount.find(monsterType);
+    if (i == mKillCount.end())
+    {
+        // character has never murdered this species before
+        mKillCount[monsterType] = 1;
+    } else {
+        // character is a repeated offender
+        mKillCount[monsterType] ++;
+    };
+}
+
+int Character::getKillCount(int monsterType)
+{
+    std::map<int, int>::iterator i = mKillCount.find(monsterType);
+    if (i == mKillCount.end())
+    {
+        return 0;
+    } else {
+        return i->second;
+    };
+}
+
+
 void Character::recalculateLevel()
 {
     std::list<float> levels;

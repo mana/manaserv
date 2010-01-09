@@ -291,6 +291,21 @@ class Character : public Being
         { return mStatusEffects.end(); }
 
         /**
+         * used to serialized kill count
+         */
+        int getKillCountSize() const
+        { return mKillCount.size(); }
+
+        const std::map<int, int>::const_iterator getKillCountBegin() const
+        { return mKillCount.begin(); }
+
+        const std::map<int, int>::const_iterator getKillCountEnd() const
+        { return mKillCount.end(); }
+
+        void setKillCount(int monsterId, int kills)
+        { mKillCount[monsterId] = kills; }
+
+        /**
          * Gets total accumulated exp for skill
          */
         int getExperience(int skill) const
@@ -301,6 +316,16 @@ class Character : public Being
          */
         void setExperience(int skill, int value)
         { mExperience[skill] = 0; receiveExperience(skill, value, 0); }
+
+        /**
+         * Adds one kill of the monster type to the characters kill count
+         */
+        void incrementKillCount(int monsterType);
+
+        /**
+         * Gets the number of monsters the character killed of a given type
+         */
+        int getKillCount(int monsterType);
 
         /**
          * Shortcut to get being's health
@@ -425,6 +450,7 @@ class Character : public Being
         unsigned char mAccountLevel; /**< Account level of the user. */
         int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
+        std::map<int, int> mKillCount;  /**< how many monsters the character has slayn of each type */
 
     protected:
         /**

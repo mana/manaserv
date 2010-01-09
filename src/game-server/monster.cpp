@@ -455,6 +455,7 @@ void Monster::died()
             {
                 character->receiveExperience(*iSkill, expPerSkill, mSpecy->getOptimalLevel());
             }
+            character->incrementKillCount(mSpecy->getType());
         }
     }
 }

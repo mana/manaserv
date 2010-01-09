@@ -140,6 +140,21 @@ class Character
         { return mStatusEffects.end(); }
 
         /**
+         * Get / Set kill count
+         */
+        int getKillCountSize() const
+        { return mKillCount.size(); }
+
+        const std::map<int, int>::const_iterator getKillCountBegin() const
+        { return mKillCount.begin(); }
+
+        const std::map<int, int>::const_iterator getKillCountEnd() const
+        { return mKillCount.end(); }
+
+        void setKillCount(int monsterId, int kills)
+        { mKillCount[monsterId] = kills; }
+
+        /**
          * Gets the Id of the map that the character is on.
          */
         int getMapId() const { return mMapId; }
@@ -196,6 +211,7 @@ class Character
         unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
         std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, int> mStatusEffects; //!< Status Effects
+        std::map<int, int> mKillCount; //!< Kill Count
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.

@@ -32,6 +32,7 @@
 template< class T >
 void serializeCharacterData(const T &data, MessageOut &msg)
 {
+    // general character properties
     msg.writeByte(data.getAccountLevel());
     msg.writeByte(data.getGender());
     msg.writeByte(data.getHairStyle());
@@ -40,11 +41,13 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     msg.writeShort(data.getCharacterPoints());
     msg.writeShort(data.getCorrectionPoints());
 
+    // character attributes
     for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
         msg.writeByte(data.getAttribute(i));
     }
 
+    // character skills
     msg.writeShort(data.getSkillSize());
 
     std::map<int, int>::const_iterator skill_it;
@@ -54,6 +57,7 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeLong(skill_it->second);
     }
 
+    // status effects currently affecting the character
     msg.writeShort(data.getStatusEffectSize());
     std::map<int, int>::const_iterator status_it;
     for (status_it = data.getStatusEffectBegin(); status_it != data.getStatusEffectEnd(); status_it++)
@@ -62,12 +66,22 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeShort(status_it->second);
     }
 
-
+    // location
     msg.writeShort(data.getMapId());
     const Point &pos = data.getPosition();
     msg.writeShort(pos.x);
     msg.writeShort(pos.y);
 
+    // kill count
+    msg.writeShort(data.getKillCountSize());
+    std::map<int, int>::const_iterator kills_it;
+    for (kills_it = data.getKillCountBegin(); kills_it != data.getKillCountEnd(); kills_it++)
+    {
+        msg.writeShort(kills_it->first);
+        msg.writeLong(kills_it->second);
+    }
+
+    // inventory - must be last because size isn't transmitted
     const Possessions &poss = data.getPossessions();
     msg.writeLong(poss.money);
     for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
@@ -80,11 +94,13 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeShort(j->itemId);
         msg.writeByte(j->amount);
     }
+
 }
 
 template< class T >
 void deserializeCharacterData(T &data, MessageIn &msg)
 {
+    // general character properties
     data.setAccountLevel(msg.readByte());
     data.setGender(msg.readByte());
     data.setHairStyle(msg.readByte());
@@ -93,11 +109,13 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setCharacterPoints(msg.readShort());
     data.setCorrectionPoints(msg.readShort());
 
+    // character attributes
     for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
         data.setAttribute(i, msg.readByte());
     }
 
+    // character skills
     int skillSize = msg.readShort();
 
     for (int i = 0; i < skillSize; ++i)
@@ -107,6 +125,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         data.setExperience(skill,level);
     }
 
+    // status effects currently affecting the character
     int statusSize = msg.readShort();
 
     for (int i = 0; i < statusSize; i++)
@@ -116,6 +135,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         data.applyStatusEffect(status, time);
     }
 
+    // location
     data.setMapId(msg.readShort());
 
     Point temporaryPoint;
@@ -123,6 +143,16 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     temporaryPoint.y = msg.readShort();
     data.setPosition(temporaryPoint);
 
+    // kill count
+    int killSize = msg.readShort();
+    for (int i = 0; i < killSize; i++)
+    {
+        int monsterId = msg.readShort();
+        int kills = msg.readLong();
+        data.setKillCount(monsterId, kills);
+    }
+
+    // inventory - must be last because size isn't transmitted
     Possessions &poss = data.getPossessions();
     poss.money = msg.readLong();
     for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
@@ -137,6 +167,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         i.amount = msg.readByte();
         poss.inventory.push_back(i);
     }
+
 }
 
 #endif

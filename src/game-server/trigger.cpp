@@ -52,6 +52,9 @@ void TriggerArea::update()
     std::set<Actor*> insideNow;
     for (BeingIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
     {
+        //skip garbage
+        if (!(*i) || (*i)->getPublicID() == 0) continue;
+
         if (mZone.contains((*i)->getPosition())) //<-- Why is this additional condition necessary? Shouldn't getInsideRectangleIterator already exclude those outside of the zone? --Crush
         {
             insideNow.insert(*i);
