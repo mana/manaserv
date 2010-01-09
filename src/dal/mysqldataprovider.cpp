@@ -127,6 +127,8 @@ void MySqlDataProvider::connect()
     // Save the Db Name.
     mDbName = dbName;
 
+    mStmt = mysql_stmt_init(mDb);
+
     mIsConnected = true;
     LOG_INFO("Connection to mySQL was sucessfull.");
 }
@@ -143,7 +145,7 @@ MySqlDataProvider::execSql(const std::string& sql,
         throw std::runtime_error("not connected to database");
     }
 
-    LOG_DEBUG("Performing SQL query: "<<sql);
+    LOG_DEBUG("MySqlDataProvider::execSql Performing SQL query: "<<sql);
 
     // do something only if the query is different from the previous
     // or if the cache must be refreshed
@@ -206,6 +208,8 @@ void MySqlDataProvider::disconnect()
     // mysql_close() closes the connection and deallocates the connection
     // handle allocated by mysql_init().
     mysql_close(mDb);
+
+    mysql_stmt_close(mStmt);
 
     // deinitialize the MySQL client library.
     mysql_library_end();
@@ -312,5 +316,139 @@ unsigned MySqlDataProvider::getLastId() const
     return (unsigned) lastId;
 }
 
+bool MySqlDataProvider::prepareSql(const std::string &sql)
+{
+    if (!mIsConnected)
+        return false;
+
+    LOG_DEBUG("MySqlDataProvider::prepareSql Preparing SQL statement: "<<sql);
+
+    mBind.clear();
+
+    if (mysql_stmt_prepare(mStmt, sql.c_str(), sql.size()) != 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+const RecordSet &MySqlDataProvider::processSql()
+{
+    MYSQL_BIND* paramsBind;
+    unsigned int i;
+
+    if (!mIsConnected) {
+        throw std::runtime_error("not connected to database");
+    }
+
+    paramsBind = new MYSQL_BIND[mBind.size()];
+    for (i = 0; i < mBind.size(); ++i) {
+        paramsBind[i].buffer_type = mBind[i]->buffer_type;
+        paramsBind[i].buffer = mBind[i]->buffer;
+        paramsBind[i].buffer_length = mBind[i]->buffer_length;
+        paramsBind[i].is_null = 0;
+        paramsBind[i].length = mBind[i]->length;
+    }
+
+    if (mysql_stmt_bind_param(mStmt, paramsBind))
+    {
+        LOG_ERROR("MySqlDataProvider::processSql Bind params failed: " << mysql_stmt_error(mStmt));
+    }
+
+    if (mysql_stmt_field_count(mStmt) > 0) {
+        mRecordSet.clear();
+        MYSQL_BIND* resultBind;
+        MYSQL_RES* res;
+
+        if (mysql_stmt_execute(mStmt))
+        {
+            LOG_ERROR("MySqlDataProvider::processSql Execute failed: " << mysql_stmt_error(mStmt));
+        }
+
+        res = mysql_stmt_result_metadata(mStmt);
+
+        // set the field names.
+        unsigned int nFields = mysql_num_fields(res);
+        MYSQL_FIELD* fields = mysql_fetch_fields(res);
+        Row fieldNames;
+
+        resultBind = new MYSQL_BIND[mysql_num_fields(res)];
+
+        for (i = 0; i < mysql_num_fields(res); ++i) {
+            resultBind[i].buffer_type = MYSQL_TYPE_STRING;
+            resultBind[i].buffer = (void*) new char[255];
+            resultBind[i].buffer_length = 255;
+            resultBind[i].is_null = new my_bool;
+            resultBind[i].length = new unsigned long;
+            resultBind[i].error = new my_bool;
+        }
+
+        if (mysql_stmt_bind_result(mStmt, resultBind))
+        {
+            LOG_ERROR("MySqlDataProvider::processSql Bind result failed: " << mysql_stmt_error(mStmt));
+        }
+
+        for (i = 0; i < nFields; ++i) {
+            fieldNames.push_back(fields[i].name);
+        }
+        mRecordSet.setColumnHeaders(fieldNames);
+
+        // store the result of the query.
+        if (mysql_stmt_store_result(mStmt)) {
+            throw DbSqlQueryExecFailure(mysql_stmt_error(mStmt));
+        }
+
+        // populate the RecordSet.
+        while (!mysql_stmt_fetch(mStmt)) {
+            Row r;
+
+            for (unsigned int i = 0; i < nFields; ++i) {
+                r.push_back(static_cast<char *>(resultBind[i].buffer));
+            }
+
+            mRecordSet.add(r);
+        }
+
+        delete[] resultBind;
+    }
+    else
+    {
+        if (mysql_stmt_execute(mStmt))
+        {
+            LOG_ERROR("MySqlDataProvider::processSql Execute failed: " << mysql_stmt_error(mStmt));
+        }
+    }
+
+    // free memory
+    delete[] paramsBind;
+    mysql_stmt_free_result(mStmt);
+
+    return mRecordSet;
+}
+
+void MySqlDataProvider::bindValue(int place, const std::string &value)
+{
+    unsigned long* size = new unsigned long;
+    *size = value.size();
+    MYSQL_BIND* bind = new MYSQL_BIND;
+    bind->buffer_type= MYSQL_TYPE_STRING;
+    bind->buffer= (void*) value.c_str();
+    bind->buffer_length= value.size();
+    bind->length = size;
+
+    //FIXME : Isn't taking care of the place param
+    mBind.push_back(bind);
+}
+
+void MySqlDataProvider::bindValue(int place, int value)
+{
+    MYSQL_BIND* bind = new MYSQL_BIND;
+    bind->buffer_type= MYSQL_TYPE_LONG;
+    bind->buffer= &value;
+
+    //FIXME : Isn't taking care of the place param
+    mBind.push_back(bind);
+}
 
 } // namespace dal

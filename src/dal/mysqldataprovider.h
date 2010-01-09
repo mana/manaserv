@@ -144,6 +144,32 @@ class MySqlDataProvider: public DataProvider
          */
         unsigned getLastId() const;
 
+        /**
+         * Prepare SQL statement
+         */
+        bool prepareSql(const std::string &sql);
+
+        /**
+         * Process SQL statement
+         * SQL statement needs to be prepared and parameters binded before
+         * calling this function
+         */
+        const RecordSet& processSql() ;
+
+        /**
+         * Bind Value (String)
+         * @param place - which parameter to bind to
+         * @param value - the string to bind
+         */
+        void bindValue(int place, const std::string &value);
+
+        /**
+         * Bind Value (Integer)
+         * @param place - which parameter to bind to
+         * @param value - the integer to bind
+         */
+        void bindValue(int place, int value);
+
     private:
         /** defines the name of the hostname config parameter */
         static const std::string CFGPARAM_MYSQL_HOST;
@@ -169,6 +195,8 @@ class MySqlDataProvider: public DataProvider
 
 
         MYSQL *mDb; /**< the handle to the database connection */
+        MYSQL_STMT *mStmt; /**< the prepared statement to process */
+        std::vector<MYSQL_BIND*> mBind;
 };
 
 

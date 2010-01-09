@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS `mana_accounts` (
     `banned`       int(10)      unsigned NOT NULL,
     `registration` int(10)      unsigned NOT NULL,
     `lastlogin`    int(10)      unsigned NOT NULL,
+    `authorization` text            NULL,
+    `expiration`    int(10)         NULL,
     --
     PRIMARY KEY  (`id`),
     UNIQUE KEY `username` (`username`),
@@ -84,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `mana_char_status_effects` (
     FOREIGN KEY (`char_id`)
         REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE
-) ENGING=InnoDB
+) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
 
@@ -161,24 +163,6 @@ CREATE TABLE IF NOT EXISTS `mana_inventories` (
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
---
--- table: `mana_world_states`
---
-CREATE TABLE IF NOT EXISTS `mana_world_states` (
-    `state_name`   varchar(100)          NOT NULL,
-    `map_id`       int(10)      unsigned default NULL,
-    `value`        varchar(255)          default NULL,
-    `moddate`      int(10)      unsigned NOT NULL,
-    --
-    KEY `state_name` (`state_name`)
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8;
-
-INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL,UNIX_TIMESTAMP());
-INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL,UNIX_TIMESTAMP());
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'3', UNIX_TIMESTAMP());
-
---
 -- table: `mana_guilds`
 --
 CREATE TABLE IF NOT EXISTS `mana_guilds` (
@@ -224,6 +208,15 @@ CREATE TABLE IF NOT EXISTS `mana_quests` (
 		ON DELETE CASCADE
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS mana_world_states
+(
+   state_name   varchar(100)NOT NULL,
+   map_id       INTEGER     NULL,
+   value        TEXT        NULL,
+   moddate      INTEGER     NOT NULL,
+   PRIMARY KEY (`state_name`)
+);
 
 --
 -- table: `mana_auctions`
@@ -328,6 +321,16 @@ AUTO_INCREMENT=1 ;
 -- table: `mana_online_list`
 --
 
+CREATE TABLE IF NOT EXISTS mana_transaction_codes
+(
+   id            int(10)    unsigned NOT NULL auto_increment,
+   description   text        NOT NULL,
+   category      text        NOT NULL,
+
+   PRIMARY KEY (id)
+);
+
+
 CREATE TABLE IF NOT EXISTS `mana_online_list` (
     `char_id`      int(10)      unsigned NOT NULL,
     `login_date`   int(10)      NOT NULL,
@@ -363,3 +366,44 @@ CREATE TABLE IF NOT EXISTS `mana_transactions` (
   PRIMARY KEY  (`id`)
 )
 AUTO_INCREMENT=0 ;
+
+-- initial world states and database version
+
+INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, NOW());
+INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, NOW());
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'7',  NOW());
+
+-- all known transaction codes
+
+INSERT INTO mana_transaction_codes VALUES (  1, 'Character created',        'Character' );
+INSERT INTO mana_transaction_codes VALUES (  2, 'Character selected',       'Character' );
+INSERT INTO mana_transaction_codes VALUES (  3, 'Character deleted',        'Character' );
+INSERT INTO mana_transaction_codes VALUES (  4, 'Public message sent',      'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  5, 'Public message annouced',  'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  6, 'Private message sent',     'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  7, 'Channel joined',           'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  8, 'Channel kicked',           'Chat' );
+INSERT INTO mana_transaction_codes VALUES (  9, 'Channel MODE',             'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 10, 'Channel QUIT',             'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 11, 'Channel LIST',             'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 12, 'Channel USERLIST',         'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 13, 'Channel TOPIC',            'Chat' );
+INSERT INTO mana_transaction_codes VALUES ( 14, 'Command BAN',              'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 15, 'Command DROP',             'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 16, 'Command ITEM',             'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 17, 'Command MONEY',            'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 18, 'Command SETGROUP',         'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 19, 'Command SPAWN',            'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 20, 'Command WARP',             'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 21, 'Item picked up',           'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 22, 'Item used',                'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 23, 'Item dropped',             'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 24, 'Item moved',               'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 25, 'Target attacked',          'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 26, 'ACTION Changed',           'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 27, 'Trade requested',          'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 28, 'Trade ended',              'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 29, 'Trade money',              'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 30, 'Trade items',              'Actions' );
+INSERT INTO mana_transaction_codes VALUES ( 31, 'Attribute increased',      'Character' );
+INSERT INTO mana_transaction_codes VALUES ( 32, 'Attribute decreased',      'Character' );
