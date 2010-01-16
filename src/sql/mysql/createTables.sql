@@ -89,7 +89,19 @@ CREATE TABLE IF NOT EXISTS `mana_char_status_effects` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
+-- Create table 'mana_char_kill_stats'
 
+CREATE TABLE IF NOT EXISTS `mana_char_kill_stats`
+(
+    `char_id` int(11) NOT NULL,
+    `monster_id` int(11) NOT NULL,
+    `kills` int(11),
+    PRIMANY KEY (`char_id`, `monster_id`),
+    FOREIGN KEY (`char_id`)
+        REFERENCES `mana_characters` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8;
 
 
 --
@@ -371,7 +383,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, NOW());
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'7',  NOW());
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'8',  NOW());
 
 -- all known transaction codes
 
