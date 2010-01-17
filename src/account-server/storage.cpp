@@ -36,6 +36,9 @@
 #include "utils/xml.hpp"
 #include "utils/sha256.h"
 
+#define AL_BANNED 0x00   // temporary workaround until permission manager support is added
+#define AL_PLAYER 0x01   // temporary workaround until permission manager support is added
+
 // TODO: make data/items.xml a constant or read it from config file
 static const char *DEFAULT_ITEM_FILE = "data/items.xml";
 

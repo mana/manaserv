@@ -59,7 +59,6 @@ static void handleMoney(Character*, std::string&);
 static void handleSpawn(Character*, std::string&);
 static void handleAttribute(Character*, std::string&);
 static void handleReload(Character*, std::string&);
-static void handleSetGroup(Character*, std::string&);
 static void handleGivePermission(Character*, std::string&);
 static void handleTakePermission(Character*, std::string&);
 static void handleAnnounce(Character*, std::string&);
@@ -95,8 +94,6 @@ static CmdRef const cmdRef[] =
         "Changes the character attributes of a character", &handleAttribute},
     {"reload", "",
         "Makes the server reload all configuration files", &handleReload},
-    {"setgroup", "<character> <AL level>",
-        "Changes the permission mask of the account the character belongs to", &handleSetGroup},
     {"givepermission", "<character> <permission class>",
         "Gives a permission class to the account a character belongs to", &handleGivePermission},
     {"takepermission", "<character> <permission class>",
@@ -651,76 +648,6 @@ static void handleBan(Character *player, std::string &args)
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_BAN, msg);
 }
 
-static void handleSetGroup(Character *player, std::string &args)
-{
-    Character *other;
-    int level = 0;
-
-    // get the arguments
-    std::string character = getArgument(args);
-    std::string levelstr = getArgument(args);
-
-    // check all arguments are there
-    if (character == "" || levelstr == "")
-    {
-        say("Invalid number of arguments given.", player);
-        say("Usage: @setgroup <character> <level>", player);
-        return;
-    }
-
-    // check if its to effect the player
-    if (character == "#")
-    {
-        other = player;
-    }
-    else
-    {
-        // check for valid player
-        other = getPlayer(character);
-        if (!other)
-        {
-            say("Invalid character", player);
-            return;
-        }
-    }
-
-    // check which level they should be
-    // refer to defines.h for level info
-    if (levelstr == "AL_PLAYER")
-    {
-        level = AL_PLAYER;
-    }
-    else if (levelstr == "AL_TESTER")
-    {
-        level = AL_PLAYER | AL_TESTER;
-    }
-    else if (levelstr == "AL_GM")
-    {
-        level = AL_PLAYER | AL_TESTER | AL_GM;
-    }
-    else if (levelstr == "AL_DEV")
-    {
-        level = AL_PLAYER | AL_TESTER | AL_DEV;
-    }
-    else if (levelstr == "AL_ADMIN")
-    {
-        level = 255;
-    }
-
-    if (level == 0)
-    {
-        say("Invalid group", player);
-        return;
-    }
-
-    // change the player's account level
-    accountHandler->changeAccountLevel(other, level);
-
-    // log transaction
-    std::string msg = "User changed account level of " + other->getName() + " to " + levelstr;
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
-}
-
 static void handleGivePermission(Character *player, std::string &args)
 {
     Character *other;
@@ -755,6 +682,12 @@ static void handleGivePermission(Character *player, std::string &args)
     }
 
     unsigned char permission = PermissionManager::getMaskFromAlias(strPermission);
+
+    if (permission == 0x00)
+    {
+        say ("Unknown permission class: "+strPermission, player);
+        return;
+    }
 
     if (permission & other->getAccountLevel())
     {
@@ -809,7 +742,7 @@ static void handleTakePermission(Character *player, std::string &args)
 
     if (permission == 0x00)
     {
-        say("Unknown permission class", player);
+        say("Unknown permission class: "+strPermission, player);
         return;
     }
 
@@ -935,17 +868,22 @@ static void handleWhere(Character *player, std::string &args)
 
 static void handleRights(Character *player, std::string &args)
 {
+    std::list<std::string>classes;
+    classes = PermissionManager::getClassList(player);
+
     std::stringstream str;
     str << "Your rights level is: "
-        << player->getAccountLevel()
-        << " (AL_PLAYER";
-    if (player->getAccountLevel() &  AL_TESTER)
-        str << ", AL_TESTER";
-    if (player->getAccountLevel() &  AL_GM)
-        str << ", AL_GM";
-    if (player->getAccountLevel() &  AL_ADMIN)
-        str << ", AL_ADMIN";
+        << (unsigned int)player->getAccountLevel()
+        << " ( ";
+
+    for (std::list<std::string>::iterator i = classes.begin();
+         i != classes.end();
+         i++)
+    {
+        str << (*i) << " ";
+    }
     str << ")";
+
     say(str.str(), player);
 }
 

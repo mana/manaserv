@@ -49,6 +49,7 @@ namespace PermissionManager
      * Returns if the characters account has the given permission
      */
     Result checkPermission(const Character* character, std::string permission);
+    Result checkPermission(unsigned char level, std::string permission);
 
     /**
      * Gets the permission class bitmask of a class alias
@@ -59,6 +60,11 @@ namespace PermissionManager
      * Gets a list of all permissions the character is having
      */
     std::list<std::string> getPermissionList(const Character* character);
+
+    /**
+     * Gets a list of all permissions classes the character is having
+     */
+    std::list<std::string> getClassList(const Character* character);
 
 }
 

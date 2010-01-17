@@ -31,6 +31,7 @@
 #include "chat-server/chatclient.hpp"
 #include "chat-server/chathandler.hpp"
 #include "common/transaction.hpp"
+#include "common/permissionmanager.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
@@ -320,7 +321,7 @@ ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
         return;
     }
 
-    if (client.accountLevel == AL_ADMIN || client.accountLevel == AL_GM)
+    if (PermissionManager::checkPermission(client.accountLevel, "@broadcast") == PermissionManager::PMR_ALLOWED)
     {
         // TODO: b_lindeijer: Shouldn't announcements also have a sender?
         LOG_INFO("ANNOUNCE: " << text);

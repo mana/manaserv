@@ -123,18 +123,15 @@ void PermissionManager::reload()
             }
         }
     }
-
-    LOG_INFO("Permission List:");
-    for (std::map<std::string, unsigned char>::iterator i = permissions.begin();
-         i != permissions.end();
-         i++)
-     {
-         LOG_INFO(i->first<<" "<<(int)i->second);
-     }
 }
 
 
 PermissionManager::Result PermissionManager::checkPermission(const Character* character, std::string permission)
+{
+    return checkPermission(character->getAccountLevel(), permission);
+}
+
+PermissionManager::Result PermissionManager::checkPermission(unsigned char level, std::string permission)
 {
     std::map<std::string, unsigned char>::iterator iP = permissions.find(permission);
 
@@ -143,7 +140,7 @@ PermissionManager::Result PermissionManager::checkPermission(const Character* ch
         LOG_WARN("PermissionManager: Check for unknown permission \""<<permission<<"\" requested.");
         return PMR_UNKNOWN;
     }
-    if (character->getAccountLevel() & iP->second)
+    if (level & iP->second)
     {
         return PMR_ALLOWED;
     } else {
@@ -180,3 +177,22 @@ std::list<std::string> PermissionManager::getPermissionList(const Character* cha
 
     return result;
 }
+
+std::list<std::string> PermissionManager::getClassList(const Character* character)
+{
+    std::list<std::string> result;
+    std::map<std::string, unsigned char>::iterator i;
+
+    unsigned char mask = character->getAccountLevel();
+
+    for (i = aliases.begin(); i != aliases.end(); i++)
+    {
+        if (i->second & mask)
+        {
+            result.push_back(i->first);
+        }
+    }
+
+    return result;
+}
+
