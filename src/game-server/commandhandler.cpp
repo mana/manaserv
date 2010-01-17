@@ -32,6 +32,7 @@
 #include "game-server/monstermanager.hpp"
 #include "game-server/state.hpp"
 
+#include "common/permissionmanager.hpp"
 #include "common/transaction.hpp"
 
 #include "utils/string.hpp"
@@ -41,6 +42,7 @@ static void say(const std::string error, Character *player)
     GameState::sayTo(player, NULL, error);
 }
 
+/*
 static bool checkPermission(Character *player, unsigned int permissions)
 {
     if (player->getAccountLevel() & permissions)
@@ -51,7 +53,7 @@ static bool checkPermission(Character *player, unsigned int permissions)
     say("Invalid permissions", player);
 
     return false;
-}
+}*/
 
 static std::string getArgument(std::string &args)
 {
@@ -792,94 +794,53 @@ void CommandHandler::handleCommand(Character *player,
     std::string type(command, 1, pos == std::string::npos ? pos : pos - 1);
     std::string args(command, pos == std::string::npos ? command.size() : pos + 1);
 
-    // handle the command
-    if (type == "help")
+    PermissionManager::Result r = PermissionManager::checkPermission(player, "@"+type);
+    switch (r)
     {
-        if (checkPermission(player, AL_PLAYER))
-            handleHelp(player, args);
-    }
-    else if (type == "where" || type == "location")
-    {
-        if (checkPermission(player, AL_PLAYER))
-            handleWhere(player);
-    }
-    else if (type == "rights" || type == "right" || type == "permission")
-    {
-        if (checkPermission(player, AL_PLAYER))
-            handleRights(player);
-    }
-    else if (type == "warp")
-    {
-        if (checkPermission(player, AL_TESTER))
-            handleWarp(player, args);
-    }
-    else if (type == "item")
-    {
-        if (checkPermission(player, AL_DEV))
-            handleItem(player, args);
-    }
-    else if (type == "drop")
-    {
-        if (checkPermission(player, AL_DEV))
-            handleDrop(player, args);
-    }
-    else if (type == "money")
-    {
-        if (checkPermission(player, AL_DEV))
-            handleMoney(player, args);
-    }
-    else if (type == "spawn")
-    {
-        if (checkPermission(player, AL_DEV))
-            handleSpawn(player, args);
-    }
-    else if (type == "goto")
-    {
-        if (checkPermission(player, AL_TESTER))
-            handleGoto(player, args);
-    }
-    else if (type == "recall")
-    {
-        if (checkPermission(player, AL_GM))
-            handleRecall(player, args);
-    }
-    else if (type == "reload")
-    {
-        if (checkPermission(player, AL_ADMIN))
-            handleReload(player);
-    }
-    else if (type == "ban")
-    {
-        if (checkPermission(player, AL_GM))
-            handleBan(player, args);
-    }
-    else if (type == "setgroup")
-    {
-        if (checkPermission(player, AL_ADMIN))
-            handleSetGroup(player, args);
-    }
-    else if (type == "attribute")
-    {
-        if (checkPermission(player, AL_DEV))
-            handleAttribute(player, args);
-    }
-    else if (type == "report")
-    {
-        if (checkPermission(player, AL_PLAYER))
-            handleReport(player, args);
-    }
-    else if (type == "announce")
-    {
-        if (checkPermission(player, AL_ADMIN))
-            handleAnnounce(player, args);
-    }
-    else if (type == "history")
-    {
-        if (checkPermission(player, AL_ADMIN))
-            handleHistory(player, args);
-    }
-    else
-    {
-        say("Command not found. Enter @help to view the list of available commands.", player);
+    case PermissionManager::PMR_DENIED:
+        say("Permissions denied!", player);
+        break;
+    case PermissionManager::PMR_UNKNOWN:
+        say("Unknown command. Enter @help to view the list of available commands.", player);
+        break;
+    case PermissionManager::PMR_ALLOWED:
+        // handle the command
+        if (type == "help") handleHelp(player, args);
+        else if (type == "where" || type == "location")
+                handleWhere(player);
+        else if (type == "rights" || type == "right" || type == "permission")
+                handleRights(player);
+        else if (type == "warp")
+                handleWarp(player, args);
+        else if (type == "item")
+                handleItem(player, args);
+        else if (type == "drop")
+                handleDrop(player, args);
+        else if (type == "money")
+                handleMoney(player, args);
+        else if (type == "spawn")
+                handleSpawn(player, args);
+        else if (type == "goto")
+                handleGoto(player, args);
+        else if (type == "recall")
+                handleRecall(player, args);
+        else if (type == "reload")
+                handleReload(player);
+        else if (type == "ban")
+                handleBan(player, args);
+        else if (type == "setgroup")
+                handleSetGroup(player, args);
+        else if (type == "attribute")
+                handleAttribute(player, args);
+        else if (type == "report")
+                handleReport(player, args);
+        else if (type == "announce")
+                handleAnnounce(player, args);
+        else if (type == "history")
+                handleHistory(player, args);
+        else
+            say("Command not implemented.", player);
+
+        break;
     }
 }

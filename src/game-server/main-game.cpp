@@ -36,6 +36,7 @@
 #endif
 
 #include "common/configuration.hpp"
+#include "common/permissionmanager.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/skillmanager.hpp"
@@ -65,6 +66,7 @@ using utils::Logger;
 #define DEFAULT_MAPSDB_FILE     "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE "monsters.xml"
 #define DEFAULT_STATUSDB_FILE   "mana-status-effect.xml"
+#define DEFAULT_PERMISSION_FILE "permissions.xml"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
@@ -169,6 +171,7 @@ void initialize()
     ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
     MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
+    PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
