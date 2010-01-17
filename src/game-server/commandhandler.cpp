@@ -132,6 +132,8 @@ static void handleHelp(Character *player, std::string &args)
             say("=Administrator Commands=", player);
             say("@reload", player);
             say("@setgroup <character> <AL level>", player);
+            say("@givepermission <character> <permission class>", player);
+            say("@takepermission <character> <permission class>", player);
             say("@announce <message>", player);
             say("@history <number of transactions>", player);
         }
@@ -662,6 +664,116 @@ static void handleSetGroup(Character *player, std::string &args)
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
 }
 
+static void handleGivePermission(Character *player, std::string &args)
+{
+    Character *other;
+    int level = 0;
+
+    // get the arguments
+    std::string character = getArgument(args);
+    std::string strPermission = getArgument(args);
+
+    // check all arguments are there
+    if (character == "" || strPermission == "")
+    {
+        say("Invalid number of arguments given.", player);
+        say("Usage: @givepermission <character> <permission class>", player);
+        return;
+    }
+
+    // check if its to effect the player
+    if (character == "#")
+    {
+        other = player;
+    }
+    else
+    {
+        // check for valid player
+        other = getPlayer(character);
+        if (!other)
+        {
+            say("Invalid character", player);
+            return;
+        }
+    }
+
+    unsigned char permission = PermissionManager::getMaskFromAlias(strPermission);
+
+    if (permission & other->getAccountLevel())
+    {
+        say(player->getName()+" already has the permission "+strPermission, player);
+    } else {
+        permission += other->getAccountLevel();
+        // change the player's account level
+        other->setAccountLevel(permission);
+        accountHandler->changeAccountLevel(other, permission);
+
+        // log transaction
+        std::string msg = "User gave right " + strPermission + " to " + other->getName();
+        accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
+        say("Congratulations, "+player->getName()+" gave you the rights of a "+strPermission, other);
+    }
+}
+
+static void handleTakePermission(Character *player, std::string &args)
+{
+    Character *other;
+    int level = 0;
+
+    // get the arguments
+    std::string character = getArgument(args);
+    std::string strPermission = getArgument(args);
+
+    // check all arguments are there
+    if (character == "" || strPermission == "")
+    {
+        say("Invalid number of arguments given.", player);
+        say("Usage: @takepermission <character> <permission class>", player);
+        return;
+    }
+
+    // check if its to effect the player
+    if (character == "#")
+    {
+        other = player;
+    }
+    else
+    {
+        // check for valid player
+        other = getPlayer(character);
+        if (!other)
+        {
+            say("Invalid character", player);
+            return;
+        }
+    }
+
+    unsigned char permission = PermissionManager::getMaskFromAlias(strPermission);
+
+    if (permission == 0x00)
+    {
+        say("Unknown permission class", player);
+        return;
+    }
+
+
+    if (!(permission & other->getAccountLevel()))
+    {
+        say(player->getName()+" hasn't got the permission "+strPermission, player);
+    } else {
+        permission = other->getAccountLevel() - permission;
+        // change the player's account level
+        other->setAccountLevel(permission);
+        accountHandler->changeAccountLevel(other, permission);
+
+        // log transaction
+        std::string msg = "User took right " + strPermission + " to " + other->getName();
+        accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
+        say("Sorry, "+player->getName()+" revoked your rights of a "+strPermission, other);
+    }
+}
+
+
 static void handleAttribute(Character *player, std::string &args)
 {
     Character *other;
@@ -830,6 +942,10 @@ void CommandHandler::handleCommand(Character *player,
                 handleBan(player, args);
         else if (type == "setgroup")
                 handleSetGroup(player, args);
+        else if (type == "givepermission")
+                handleGivePermission(player, args);
+        else if (type == "takepermission")
+                handleTakePermission(player, args);
         else if (type == "attribute")
                 handleAttribute(player, args);
         else if (type == "report")

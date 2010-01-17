@@ -49,6 +49,8 @@ namespace PermissionManager
      */
     Result checkPermission(const Character* character, std::string permission);
 
+    unsigned char getMaskFromAlias(const std::string & alias);
+
 }
 
 #endif

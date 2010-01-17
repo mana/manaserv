@@ -27,6 +27,7 @@
 
 
 static std::map<std::string, unsigned char> permissions;
+static std::map<std::string, unsigned char> aliases;
 static std::string permissionFile;
 
 void addPermission(std::string permission, char mask)
@@ -114,7 +115,8 @@ void PermissionManager::reload()
                 // To be implemented
             } else if (xmlStrEqual(perNode->name, BAD_CAST "alias")){
                 const char* alias = (const char*)perNode->xmlChildrenNode->content;
-                // To be implemented
+                if (alias && strlen(alias) > 0)
+                aliases[alias] = classmask;
             }
         }
     }
@@ -143,5 +145,17 @@ PermissionManager::Result PermissionManager::checkPermission(const Character* ch
         return PMR_ALLOWED;
     } else {
         return PMR_DENIED;
+    }
+}
+
+unsigned char PermissionManager::getMaskFromAlias(const std::string &alias)
+{
+    std::map<std::string, unsigned char>::iterator i = aliases.find(alias);
+
+    if (i == aliases.end())
+    {
+        return 0x00;
+    } else {
+        return i->second;
     }
 }
