@@ -25,6 +25,7 @@
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
+#include <string.h>
 
 static std::map<std::string, unsigned char> permissions;
 static std::map<std::string, unsigned char> aliases;

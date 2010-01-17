@@ -49,6 +49,8 @@ extern "C" {
 #include "scripting/luascript.hpp"
 #include "utils/logger.h"
 
+#include <string.h>
+
 /*
  * This file includes all script bindings available to LUA scripts.
  * When you add or change a script binding please document it on

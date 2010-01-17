@@ -85,6 +85,8 @@ manaserv_game_SOURCES = \
 	common/configuration.hpp \
 	common/configuration.cpp \
 	common/inventorydata.hpp \
+	common/permissionmanager.hpp \
+	common/permissionmanager.cpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
 	game-server/actor.hpp \
@@ -100,13 +102,13 @@ manaserv_game_SOURCES = \
 	game-server/command.cpp \
 	game-server/commandhandler.cpp \
 	game-server/commandhandler.hpp \
+	game-server/effect.hpp \
+	game-server/effect.cpp \
 	game-server/eventlistener.hpp \
 	game-server/gamehandler.hpp \
 	game-server/gamehandler.cpp \
 	game-server/inventory.hpp \
 	game-server/inventory.cpp \
-	game-server/effect.hpp \
-	game-server/effect.cpp \
 	game-server/item.hpp \
 	game-server/item.cpp \
 	game-server/itemmanager.hpp \
