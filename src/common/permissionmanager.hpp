@@ -21,6 +21,7 @@
 #ifndef PERMISSIONMANAGER_HPP
 #define PERMISSIONMANAGER_HPP
 
+#include <list>
 #include <map>
 #include <string>
 
@@ -49,7 +50,15 @@ namespace PermissionManager
      */
     Result checkPermission(const Character* character, std::string permission);
 
+    /**
+     * Gets the permission class bitmask of a class alias
+     */
     unsigned char getMaskFromAlias(const std::string & alias);
+
+    /**
+     * Gets a list of all permissions the character is having
+     */
+    std::list<std::string> getPermissionList(const Character* character);
 
 }
 

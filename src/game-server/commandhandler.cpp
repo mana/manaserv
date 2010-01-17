@@ -37,6 +37,78 @@
 
 #include "utils/string.hpp"
 
+struct CmdRef
+{
+    const char *cmd;
+    const char *usage;
+    const char *help;
+    void (*func)(Character*, std::string&) ;
+};
+
+static void handleHelp(Character*, std::string&);
+static void handleReport(Character*, std::string&);
+static void handleWhere(Character*, std::string&);
+static void handleRights(Character*, std::string&);
+static void handleWarp(Character*, std::string&);
+static void handleGoto(Character*, std::string&);
+static void handleRecall(Character*, std::string&);
+static void handleBan(Character*, std::string&);
+static void handleItem(Character*, std::string&);
+static void handleDrop(Character*, std::string&);
+static void handleMoney(Character*, std::string&);
+static void handleSpawn(Character*, std::string&);
+static void handleAttribute(Character*, std::string&);
+static void handleReload(Character*, std::string&);
+static void handleSetGroup(Character*, std::string&);
+static void handleGivePermission(Character*, std::string&);
+static void handleTakePermission(Character*, std::string&);
+static void handleAnnounce(Character*, std::string&);
+static void handleHistory(Character*, std::string&);
+
+static CmdRef const cmdRef[] =
+{
+    {"help",   "[command]" ,
+        "Lists all available commands or a detailed help for a command", &handleHelp },
+    {"report", "<bug>"     ,
+        "Sends a bug or abuse reports a bug to the server administration", &handleReport},
+    {"where",  ""          ,
+        "Tells you your location in the game world", &handleWhere},
+    {"rights", ""          ,
+        "Tells you your current permissions", &handleRights},
+    {"warp",   "<character> <map> <x> <y>",
+        "Teleports your character to a different location in the game world", &handleWarp},
+    {"goto", "<character>",
+        "Teleports you to the location of another character", &handleGoto},
+    {"recall", "<character>",
+        "Teleports another character to your location", &handleRecall},
+    {"ban", "<character> <length of time>",
+        "Bans the character and all characters on the same account from the game", &handleBan},
+    {"item", "<character> <item id> <amount>",
+        "Creates a number of items in the inventory of a character", &handleItem},
+    {"drop", "<item id> <amount>",
+        "Drops a stack of items on the ground at your current location", &handleDrop},
+    {"money", "<character> <amount>",
+        "Changes the money a character possesses", &handleMoney},
+    {"spawn", "<monster id> <number>",
+        "Creates a number of monsters near your location", &handleSpawn},
+    {"attribute", "<character> <attribute> <value>",
+        "Changes the character attributes of a character", &handleAttribute},
+    {"reload", "",
+        "Makes the server reload all configuration files", &handleReload},
+    {"setgroup", "<character> <AL level>",
+        "Changes the permission mask of the account the character belongs to", &handleSetGroup},
+    {"givepermission", "<character> <permission class>",
+        "Gives a permission class to the account a character belongs to", &handleGivePermission},
+    {"takepermission", "<character> <permission class>",
+        "Takes a permission class from the account a character belongs to", &handleTakePermission},
+    {"announce", "<message>",
+        "Sends a chat message to all characters in the game", &handleAnnounce},
+    {"history", "<number of transactions>",
+        "Shows the last transactions", &handleHistory},
+    {NULL, NULL, NULL, NULL}
+
+};
+
 static void say(const std::string error, Character *player)
 {
     GameState::sayTo(player, NULL, error);
@@ -94,53 +166,38 @@ static void handleHelp(Character *player, std::string &args)
 {
     if (args == "")
     {
-        if (player->getAccountLevel() & AL_PLAYER)
+        // short list of all commands
+        say("=Available Commands=", player);
+        std::list<std::string> commands = PermissionManager::getPermissionList(player);
+        for (std::list<std::string>::iterator i = commands.begin();
+             i != commands.end();
+             i++)
         {
-            say("=General Commands=", player);
-            say("@help [command]", player);
-            say("@report <bug>", player);
-            say("@where", player);
-            say("@rights", player);
+            say((*i), player);
         }
-
-        if (player->getAccountLevel() & AL_TESTER)
+    } else {
+        // don't show help for commands the player may not use
+        if (PermissionManager::checkPermission(player, "@"+args) == PermissionManager::PMR_DENIED)
         {
-            say("=Tester Commands=", player);
-            say("@warp <character> <map> <x> <y>", player);
-            say("@goto <character>", player);
+            say("Why do you want to know? You can't use it anyway!", player);
+            return;
         }
-
-        if (player->getAccountLevel() & AL_GM)
+        // detailed description of single command
+        for (size_t j = 0; cmdRef[j].cmd != NULL; j++)
         {
-            say("=Game Master Commands=", player);
-            say("@recall <character>", player);
-            say("@ban <character> <length of time>", player);
+            if (cmdRef[j].cmd == args)
+            {
+                std::string msg;
+                msg.append("@");
+                msg.append(cmdRef[j].cmd);
+                msg.append(" ");
+                msg.append(cmdRef[j].usage);
+                say(msg, player);
+                say(cmdRef[j].help, player);
+                return;
+            }
         }
-
-        if (player->getAccountLevel() & AL_DEV)
-        {
-            say("=Developer Commands=", player);
-            say("@item <character> <item id> <amount>", player);
-            say("@drop <item id> <amount>", player);
-            say("@money <character> <amount>", player);
-            say("@spawn <monster id> <number>", player);
-            say("@attribute <character> <attribute> <value>", player);
-        }
-
-        if (player->getAccountLevel() & AL_ADMIN)
-        {
-            say("=Administrator Commands=", player);
-            say("@reload", player);
-            say("@setgroup <character> <AL level>", player);
-            say("@givepermission <character> <permission class>", player);
-            say("@takepermission <character> <permission class>", player);
-            say("@announce <message>", player);
-            say("@history <number of transactions>", player);
-        }
-    }
-    else
-    {
-
+        say("There is no command @"+args, player);
     }
 }
 
@@ -538,7 +595,7 @@ static void handleRecall(Character *player, std::string &args)
     GameState::warp(other, map, pos.x, pos.y);
 }
 
-static void handleReload(Character *player)
+static void handleReload(Character *player, std::string &args)
 {
     // reload the items and monsters
     ItemManager::reload();
@@ -863,7 +920,7 @@ static void handleAnnounce(Character *player, std::string &msg)
     GameState::sayToAll(msg);
 }
 
-static void handleWhere(Character *player)
+static void handleWhere(Character *player, std::string &args)
 {
     std::stringstream str;
     str << "Your current location is map "
@@ -876,7 +933,7 @@ static void handleWhere(Character *player)
     say (str.str(), player);
 }
 
-static void handleRights(Character *player)
+static void handleRights(Character *player, std::string &args)
 {
     std::stringstream str;
     str << "Your rights level is: "
@@ -892,10 +949,11 @@ static void handleRights(Character *player)
     say(str.str(), player);
 }
 
-static void handleHistory(Character *player, std::string args)
+static void handleHistory(Character *player, std::string &args)
 {
     // TODO: Get args number of transactions and show them to the player
 }
+
 
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
@@ -917,46 +975,16 @@ void CommandHandler::handleCommand(Character *player,
         break;
     case PermissionManager::PMR_ALLOWED:
         // handle the command
-        if (type == "help") handleHelp(player, args);
-        else if (type == "where" || type == "location")
-                handleWhere(player);
-        else if (type == "rights" || type == "right" || type == "permission")
-                handleRights(player);
-        else if (type == "warp")
-                handleWarp(player, args);
-        else if (type == "item")
-                handleItem(player, args);
-        else if (type == "drop")
-                handleDrop(player, args);
-        else if (type == "money")
-                handleMoney(player, args);
-        else if (type == "spawn")
-                handleSpawn(player, args);
-        else if (type == "goto")
-                handleGoto(player, args);
-        else if (type == "recall")
-                handleRecall(player, args);
-        else if (type == "reload")
-                handleReload(player);
-        else if (type == "ban")
-                handleBan(player, args);
-        else if (type == "setgroup")
-                handleSetGroup(player, args);
-        else if (type == "givepermission")
-                handleGivePermission(player, args);
-        else if (type == "takepermission")
-                handleTakePermission(player, args);
-        else if (type == "attribute")
-                handleAttribute(player, args);
-        else if (type == "report")
-                handleReport(player, args);
-        else if (type == "announce")
-                handleAnnounce(player, args);
-        else if (type == "history")
-                handleHistory(player, args);
-        else
-            say("Command not implemented.", player);
+        for (size_t i = 0; cmdRef[i].cmd != NULL; i++)
+        {
+            if (cmdRef[i].cmd == type)
+            {
+                cmdRef[i].func(player,args);
+                return;
+            };
+        }
 
+        say("Command not implemented.", player);
         break;
     }
 }

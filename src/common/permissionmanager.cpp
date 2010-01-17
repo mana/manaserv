@@ -18,6 +18,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstring>
+
 #include "common/permissionmanager.hpp"
 
 #include "game-server/character.hpp"
@@ -159,4 +161,22 @@ unsigned char PermissionManager::getMaskFromAlias(const std::string &alias)
     } else {
         return i->second;
     }
+}
+
+std::list<std::string> PermissionManager::getPermissionList(const Character* character)
+{
+    std::list<std::string> result;
+    std::map<std::string, unsigned char>::iterator i;
+
+    unsigned char mask = character->getAccountLevel();
+
+    for (i = permissions.begin(); i != permissions.end(); i++)
+    {
+        if (i->second & mask)
+        {
+            result.push_back(i->first);
+        }
+    }
+
+    return result;
 }
