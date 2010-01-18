@@ -63,6 +63,8 @@
 		<Unit filename="src\common\configuration.cpp" />
 		<Unit filename="src\common\configuration.hpp" />
 		<Unit filename="src\common\inventorydata.hpp" />
+		<Unit filename="src\common\permissionmanager.cpp" />
+		<Unit filename="src\common\permissionmanager.hpp" />
 		<Unit filename="src\common\transaction.hpp" />
 		<Unit filename="src\defines.h" />
 		<Unit filename="src\game-server\accountconnection.cpp" />
