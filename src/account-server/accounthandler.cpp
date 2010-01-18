@@ -29,7 +29,6 @@
 #include "account-server/serverhandler.hpp"
 #include "chat-server/chathandler.hpp"
 #include "common/configuration.hpp"
-#include "common/permissionmanager.hpp"
 #include "common/transaction.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
@@ -235,7 +234,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
-    if (PermissionManager::checkPermission(acc->getLevel(), "!play") != PermissionManager::PMR_ALLOWED)
+    if (acc->getLevel() == AL_BANNED)
     {
         reply.writeByte(LOGIN_BANNED);
         client.send(reply);
@@ -390,7 +389,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
         // we ask for it again when we need it and verify it
         // through comparing it with the hash
         acc->setEmail(sha256(email));
-        acc->setLevel(0x01);
+        acc->setLevel(AL_PLAYER);
 
         // set the date and time of the account registration, and the last login
         time_t regdate;

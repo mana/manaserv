@@ -39,8 +39,6 @@ manaserv_account_SOURCES = \
 	common/configuration.hpp \
 	common/configuration.cpp \
 	common/inventorydata.hpp \
-	common/permissionmanager.hpp \
-	common/permissionmanager.cpp \
 	dal/dalexcept.h \
 	dal/dataprovider.h \
 	dal/dataprovider.cpp \
