@@ -2,6 +2,8 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = manaserv-account manaserv-game
 
+manaserv_account_CXXFLAGS = -Wall
+
 manaserv_account_SOURCES = \
 	account-server/main-account.cpp \
 	defines.h \
@@ -76,6 +78,8 @@ manaserv_account_SOURCES = \
 	utils/xml.hpp \
 	utils/xml.cpp \
 	utils/string.cpp
+
+manaserv_game_CXXFLAGS = -Wall
 
 manaserv_game_SOURCES = \
 	game-server/main-game.cpp \
