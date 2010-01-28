@@ -17,6 +17,34 @@ SET(FLAGS "-DPACKAGE_VERSION=\\\"${VERSION}\\\"")
 SET(FLAGS "${FLAGS} -DPKG_DATADIR=\\\"${PKG_DATADIR}/\\\"")
 SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
 
+# If the Sqlite option is enabled...
+IF (WITH_SQLITE)
+    FIND_PACKAGE(Sqlite REQUIRED)
+    INCLUDE_DIRECTORIES(${SQLITE_INCLUDE_DIR})
+    SET(FLAGS "${FLAGS} -DBUILD_SQLITE")
+ENDIF(WITH_SQLITE)
+
+# If the MySQL option is enabled...
+IF (WITH_MYSQL)
+    FIND_PACKAGE(MySQL REQUIRED)
+    INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
+    SET(FLAGS "${FLAGS} -DBUILD_MYSQL")
+ENDIF()
+
+# If the postgreSQL option is enabled...
+IF (WITH_POSTGRESQL)
+    FIND_PACKAGE(PostgreSQL REQUIRED)
+    INCLUDE_DIRECTORIES(${POSTGRESQL_INCLUDE_DIR})
+    SET(FLAGS "${FLAGS} -DBUILD_POSTGRESQL")
+ENDIF()
+
+# If the Lua scripting language support is enabled...
+#IF (ENABLE_LUA)
+#    FIND_PACKAGE(Lua REQUIRED)
+ #   INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
+  #  SET(FLAGS "${FLAGS} -DBUILD_LUA")
+# #ENDIF()
+
 IF (CMAKE_BUILD_TYPE)
     STRING(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_TOLOWER)
     IF((CMAKE_BUILD_TYPE_TOLOWER MATCHES debug) OR
@@ -44,11 +72,45 @@ INCLUDE_DIRECTORIES(
 MARK_AS_ADVANCED(PHYSFS_INCLUDE_DIR)
 MARK_AS_ADVANCED(PHYSFS_LIBRARY)
 
-SET(SRCS_MANASERVACCOUNT
-    account-server/main-account.cpp
+SET(SRCS
     defines.h
     protocol.h
     point.h
+    common/configuration.hpp
+    common/configuration.cpp
+    common/inventorydata.hpp
+    net/bandwidth.hpp
+    net/bandwidth.cpp
+    net/connection.hpp
+    net/connection.cpp
+    net/connectionhandler.hpp
+    net/connectionhandler.cpp
+    net/messagein.hpp
+    net/messagein.cpp
+    net/messageout.hpp
+    net/messageout.cpp
+    net/netcomputer.hpp
+    net/netcomputer.cpp
+    serialize/characterdata.hpp
+    utils/logger.h
+    utils/logger.cpp
+    utils/processorutils.hpp
+    utils/processorutils.cpp
+    utils/stringfilter.h
+    utils/stringfilter.cpp
+    utils/timer.h
+    utils/timer.cpp
+    utils/tokencollector.hpp
+    utils/tokencollector.cpp
+    utils/tokendispenser.hpp
+    utils/tokendispenser.cpp
+    utils/xml.hpp
+    utils/xml.cpp
+    utils/string.cpp
+    )
+
+SET(SRCS_MANASERVACCOUNT
+    account-server/main-account.cpp
     account-server/account.hpp
     account-server/account.cpp
     account-server/accountclient.hpp
@@ -78,9 +140,6 @@ SET(SRCS_MANASERVACCOUNT
     chat-server/partyhandler.cpp
     chat-server/post.cpp
     chat-server/post.hpp
-    common/configuration.hpp
-    common/configuration.cpp
-    common/inventorydata.hpp
     dal/dalexcept.h
     dal/dataprovider.h
     dal/dataprovider.cpp
@@ -88,46 +147,15 @@ SET(SRCS_MANASERVACCOUNT
     dal/dataproviderfactory.cpp
     dal/recordset.h
     dal/recordset.cpp
-    net/bandwidth.hpp
-    net/bandwidth.cpp
-    net/connectionhandler.hpp
-    net/connectionhandler.cpp
-    net/messagein.hpp
-    net/messagein.cpp
-    net/messageout.hpp
-    net/messageout.cpp
-    net/netcomputer.hpp
-    net/netcomputer.cpp
-    serialize/characterdata.hpp
     utils/functors.h
     utils/encryption.h
     utils/encryption.cpp
-    utils/logger.h
-    utils/logger.cpp
-    utils/processorutils.hpp
-    utils/processorutils.cpp
     utils/sha256.h
     utils/sha256.cpp
-    utils/stringfilter.h
-    utils/stringfilter.cpp
-    utils/timer.cpp
-    utils/tokencollector.hpp
-    utils/tokencollector.cpp
-    utils/tokendispenser.hpp
-    utils/tokendispenser.cpp
-    utils/xml.hpp
-    utils/xml.cpp
-    utils/string.cpp
     )
 
 SET(SRCS_MANASERVGAME
     game-server/main-game.cpp
-    defines.h
-    protocol.h
-    point.h
-    common/configuration.hpp
-    common/configuration.cpp
-    common/inventorydata.hpp
     common/permissionmanager.hpp
     common/permissionmanager.cpp
     game-server/accountconnection.hpp
@@ -191,44 +219,43 @@ SET(SRCS_MANASERVGAME
     game-server/trade.cpp
     game-server/trigger.hpp
     game-server/trigger.cpp
-    net/bandwidth.hpp
-    net/bandwidth.cpp
-    net/connection.hpp
-    net/connection.cpp
-    net/connectionhandler.hpp
-    net/connectionhandler.cpp
-    net/messagein.hpp
-    net/messagein.cpp
-    net/messageout.hpp
-    net/messageout.cpp
-    net/netcomputer.hpp
-    net/netcomputer.cpp
     scripting/script.hpp
     scripting/script.cpp
-    serialize/characterdata.hpp
     utils/base64.h
     utils/base64.cpp
     utils/mathutils.h
     utils/mathutils.cpp
-    utils/logger.h
-    utils/logger.cpp
-    utils/processorutils.hpp
-    utils/processorutils.cpp
-    utils/stringfilter.h
-    utils/stringfilter.cpp
-    utils/timer.h
-    utils/timer.cpp
     utils/trim.hpp
-    utils/tokencollector.hpp
-    utils/tokencollector.cpp
-    utils/tokendispenser.hpp
-    utils/tokendispenser.cpp
-    utils/xml.hpp
-    utils/xml.cpp
     utils/zlib.hpp
     utils/zlib.cpp
-    utils/string.cpp
     )
+
+IF (WITH_MYSQL)
+    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT}
+    dal/mysqldataprovider.h
+    dal/mysqldataprovider.cpp)
+ENDIF()
+
+IF (WITH_POSTGRESQL)
+    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT}
+    dal/pqdataprovider.h
+    dal/pqdataprovider.cpp)
+ENDIF()
+
+IF (WITH_SQLITE)
+    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT}
+    dal/sqlitedataprovider.h
+    dal/sqlitedataprovider.cpp)
+ENDIF()
+
+IF (ENABLE_LUA)
+    SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME}
+    scripting/lua.cpp
+    scripting/luascript.cpp
+    scripting/luascript.hpp
+    scripting/luautil.cpp
+    scripting/luautil.hpp)
+ENDIF()
 
 
 SET (PROGRAMS manaserv-account manaserv-game)
@@ -250,3 +277,6 @@ IF (CMAKE_SYSTEM_NAME STREQUAL SunOS)
     SET_TARGET_PROPERTIES(manaserv-account PROPERTIES LINK_FLAGS "-L/usr/local/lib")
     SET_TARGET_PROPERTIES(manaserv-game PROPERTIES LINK_FLAGS "-L/usr/local/lib")
 ENDIF()
+
+SET_TARGET_PROPERTIES(manaserv-account PROPERTIES COMPILE_FLAGS "${FLAGS}")
+SET_TARGET_PROPERTIES(manaserv-game PROPERTIES COMPILE_FLAGS "${FLAGS}")
