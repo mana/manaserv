@@ -13,6 +13,22 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
     ENDIF()
 ENDIF()
 
+# enable rc-handling with mingw
+# most likely this part can be kicked out with some later cmake version
+IF (MINGW)
+    FIND_PATH(MINGW_INCLUDE_DIR windows.h $ENV{INCLUDE})
+    IF (MINGW_INCLUDE_DIR)
+        MESSAGE(STATUS "Found mingw headers: ${MINGW_INCLUDE_DIR}")
+        INCLUDE_DIRECTORIES(${MINGW_INCLUDE_DIR})
+    ELSE()
+        MESSAGE(FATAL_ERROR "Unable to find mingw headers. Required for windres")
+    ENDIF()
+    SET(CMAKE_RC_COMPILER_INIT windres)
+    ENABLE_LANGUAGE(RC)
+    SET(CMAKE_RC_COMPILE_OBJECT
+      "<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
+ENDIF()
+
 SET(FLAGS "-DPACKAGE_VERSION=\\\"${VERSION}\\\"")
 SET(FLAGS "${FLAGS} -DPKG_DATADIR=\\\"${PKG_DATADIR}/\\\"")
 SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
@@ -59,7 +75,7 @@ ENDIF()
 
 IF (WIN32)
     SET(EXTRA_LIBRARIES ws2_32 winmm)
-    FIND_PACKAGE(LibIntl REQUIRED)
+    #FIND_PACKAGE(LibIntl REQUIRED)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL SunOS)
     # explicit linking to libintl is required on Solaris
     SET(EXTRA_LIBRARIES intl)
@@ -233,6 +249,11 @@ SET(SRCS_MANASERVGAME
     utils/zlib.hpp
     utils/zlib.cpp
     )
+
+IF (WIN32)
+    SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT} manaserv-account.rc)
+    SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME} manaserv-game.rc)
+ENDIF ()
 
 IF (WITH_MYSQL)
     SET(SRCS_MANASERVACCOUNT ${SRCS_MANASERVACCOUNT}

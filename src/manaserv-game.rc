@@ -1,0 +1,23 @@
+#include <windows.h> // include for version info constants
+
+#include "winver.h"
+
+A ICON MOVEABLE PURE LOADONCALL DISCARDABLE "../mana.ico"
+
+1 VERSIONINFO
+FILEVERSION VER_MAJOR,VER_MINOR,VER_RELEASE,VER_BUILD
+PRODUCTVERSION VER_MAJOR,VER_MINOR,VER_RELEASE,VER_BUILD
+//FILETYPE VFT_APP
+{
+    BLOCK "StringFileInfo" {
+        BLOCK "040904E4" {
+            VALUE "CompanyName", "The Mana Development Team"
+            VALUE "FileVersion", PACKAGE_VERSION
+            VALUE "FileDescription", "Manaserv Game Server"
+            VALUE "LegalCopyright", "2004-2009 (C)"
+            VALUE "OriginalFilename", "manaserv-game.exe"
+            VALUE "ProductName", "Mana MMORPG Server"
+            VALUE "ProductVersion", PACKAGE_VERSION
+        }
+    }
+}
