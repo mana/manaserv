@@ -74,8 +74,12 @@ IF (CMAKE_BUILD_TYPE)
 ENDIF()
 
 IF (WIN32)
-    SET(EXTRA_LIBRARIES ws2_32 winmm)
-    #FIND_PACKAGE(LibIntl REQUIRED)
+    # on the client zlib gets pulled in by LibPNG, for the server
+    # we need to add it explicitly
+    FIND_PACKAGE(ZLIB REQUIRED)
+    SET(EXTRA_LIBRARIES ws2_32 winmm ${ZLIB_LIBRARIES})
+    # GDI APIs Rectangle clashes with tmwserv classes
+    SET(FLAGS "${FLAGS} -DNOGDI")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL SunOS)
     # explicit linking to libintl is required on Solaris
     SET(EXTRA_LIBRARIES intl)
