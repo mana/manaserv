@@ -265,7 +265,7 @@ static void printHelp()
 struct CommandLineOptions
 {
     CommandLineOptions():
-        verbosity(Logger::INFO),
+        verbosity(Logger::Info),
         port(Configuration::getValue("net_accountServerPort",
                                      DEFAULT_SERVER_PORT))
     {}

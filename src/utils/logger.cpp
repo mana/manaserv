@@ -35,7 +35,7 @@ namespace utils
 static std::ofstream mLogFile;     /**< Log file. */
 bool Logger::mHasTimestamp = true; /**< Timestamp flag. */
 bool Logger::mTeeMode = false;     /**< Tee mode flag. */
-Logger::Level Logger::mVerbosity = Logger::INFO; /**< Verbosity level. */
+Logger::Level Logger::mVerbosity = Logger::Info; /**< Verbosity level. */
 
 /**
   * Gets the current time.
@@ -125,7 +125,7 @@ void Logger::output(const std::string &msg, Level atVerbosity)
 
         if (!open || mTeeMode)
         {
-            output(atVerbosity <= WARN ? std::cerr : std::cout,
+            output(atVerbosity <= Warn ? std::cerr : std::cout,
                    msg, prefixes[atVerbosity]);
         }
     }

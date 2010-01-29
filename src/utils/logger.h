@@ -58,12 +58,12 @@ namespace utils
  *     // log messages using APIs.
  *     std::ostringstream os;
  *     os << "level: " << 3;
- *     Logger::output(os.str(), Logger::DEBUG);
+ *     Logger::output(os.str(), Logger::Debug);
  *
- *     Logger::output("init sound", Logger::INFO);
- *     Logger::output("not implemented", Logger::WARN);
- *     Logger::output("resource not found", Logger::ERROR);
- *     Logger::output("unable to init graphics", Logger::FATAL);
+ *     Logger::output("init sound", Logger::Info);
+ *     Logger::output("not implemented", Logger::Warn);
+ *     Logger::output("resource not found", Logger::Error);
+ *     Logger::output("unable to init graphics", Logger::Fatal);
  *
  *     return 0;
  * }
@@ -74,11 +74,11 @@ class Logger
     public:
         enum Level
         {
-            FATAL = 0,
-            ERROR,
-            WARN,
-            INFO,
-            DEBUG
+            Fatal = 0,
+            Error,
+            Warn,
+            Info,
+            Debug
         };
 
         /**
@@ -161,10 +161,10 @@ class Logger
         ::utils::Logger::output(os.str(), ::utils::Logger::level);     \
     } while (0)
 
-#define LOG_DEBUG(msg)  LOG(DEBUG, msg)
-#define LOG_INFO(msg)   LOG(INFO, msg)
-#define LOG_WARN(msg)   LOG(WARN, msg)
-#define LOG_ERROR(msg)  LOG(ERROR, msg)
-#define LOG_FATAL(msg)  LOG(FATAL, msg)
+#define LOG_DEBUG(msg)  LOG(Debug, msg)
+#define LOG_INFO(msg)   LOG(Info, msg)
+#define LOG_WARN(msg)   LOG(Warn, msg)
+#define LOG_ERROR(msg)  LOG(Error, msg)
+#define LOG_FATAL(msg)  LOG(Fatal, msg)
 
 #endif // LOGGER_H

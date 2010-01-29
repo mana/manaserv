@@ -245,7 +245,7 @@ void printHelp()
 struct CommandLineOptions
 {
     CommandLineOptions():
-        verbosity(Logger::INFO),
+        verbosity(Logger::Info),
         port(0)
     {}
 
