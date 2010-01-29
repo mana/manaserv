@@ -38,3 +38,9 @@ manaserv-account.log
 manaserv-game.log
 manaserv.stats
 manaserv.xml
+
+# files created by CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
