@@ -44,3 +44,9 @@ CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 install_manifest.txt
+
+# files created by gtags
+GPATH
+GRTAGS
+GSYMS
+GTAGS
