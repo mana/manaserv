@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
     // Try again after longer and longer intervals when connection fails.
     bool isConnected = false;
     int waittime = 0;
-    while (!isConnected)
+    while (!isConnected && running)
     {
         LOG_INFO("Connecting to account server");
         isConnected = accountHandler->start(options.port);
