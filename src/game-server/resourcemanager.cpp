@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2004-2007  The Mana World Development Team
+ *  Copyright (C) 2004-2010  The Mana World Development Team
  *
  *  This file is part of The Mana Server.
  *
