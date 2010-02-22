@@ -40,6 +40,12 @@
 #include "utils/tokendispenser.hpp"
 #include "utils/sha256.h"
 
+static void addUpdateHost(MessageOut *msg)
+{
+    std::string updateHost = Configuration::getValue("defaultUpdateHost", "");
+    msg->writeString(updateHost);
+}
+
 class AccountHandler : public ConnectionHandler
 {
 public:
@@ -255,9 +261,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     client.status = CLIENT_CONNECTED;
 
     reply.writeByte(ERRMSG_OK);
-    std::string updateHost = Configuration::getValue("defaultUpdateHost","");
-    if (updateHost != "")
-        reply.writeString(updateHost);
+    addUpdateHost(&reply);
     client.send(reply); // Acknowledge login
 
     // Return information about available characters
@@ -399,6 +403,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
 
         storage->addAccount(acc);
         reply.writeByte(ERRMSG_OK);
+        addUpdateHost(&reply);
 
         // Associate account with connection
         client.setAccount(acc);
