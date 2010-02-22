@@ -114,7 +114,7 @@ void PermissionManager::reload()
                     addPermission(permission, classmask);
                 }
             } else if (xmlStrEqual(perNode->name, BAD_CAST "deny")){
-                const char* permission = (const char*)perNode->xmlChildrenNode->content;
+                //const char* permission = (const char*)perNode->xmlChildrenNode->content;
                 // To be implemented
             } else if (xmlStrEqual(perNode->name, BAD_CAST "alias")){
                 const char* alias = (const char*)perNode->xmlChildrenNode->content;

@@ -651,7 +651,6 @@ static void handleBan(Character *player, std::string &args)
 static void handleGivePermission(Character *player, std::string &args)
 {
     Character *other;
-    int level = 0;
 
     // get the arguments
     std::string character = getArgument(args);
@@ -708,7 +707,6 @@ static void handleGivePermission(Character *player, std::string &args)
 static void handleTakePermission(Character *player, std::string &args)
 {
     Character *other;
-    int level = 0;
 
     // get the arguments
     std::string character = getArgument(args);
