@@ -280,7 +280,7 @@ int ObjectBucket::allocate()
     }
 
     int freeBucket = -1;
-    // See if the the next_object bucket is free 
+    // See if the the next_object bucket is free
     if (bitmap[next_object] != 0)
     {
         freeBucket = next_object;
@@ -372,7 +372,7 @@ bool MapContent::allocate(Actor *obj)
                new bucket. */
             b = new ObjectBucket;
             buckets[i] = b;
-            LOG_INFO("New bucket created");
+            LOG_DEBUG("New bucket created");
         }
         int j = b->allocate();
         if (j >= 0)

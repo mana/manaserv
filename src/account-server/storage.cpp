@@ -1174,7 +1174,6 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
  */
 void Storage::updateKillCount(int charId, int monsterId, int kills)
 {
-    LOG_INFO("Updating kill counts"); //<- DELME
     try
     {
         // try to update the kill count
