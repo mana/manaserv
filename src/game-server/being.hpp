@@ -156,6 +156,12 @@ class Being : public Actor
          */
         virtual int damage(Actor *source, const Damage &damage);
 
+        /** Restores all hit points of the being */
+        void heal();
+
+        /** Restores a specific number of hit points of the being */
+        void heal(int hp);
+
         /**
          * Changes status and calls all the "died" listeners.
          */

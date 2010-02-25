@@ -100,6 +100,21 @@ int Being::damage(Actor *, const Damage &damage)
     return HPloss;
 }
 
+void Being::heal()
+{
+    Attribute &HP = mAttributes[BASE_ATTR_HP];
+    HP.mod = HP.base;
+    modifiedAttribute(BASE_ATTR_HP);
+}
+
+void Being::heal(int hp)
+{
+    Attribute &HP = mAttributes[BASE_ATTR_HP];
+    HP.mod += hp;
+    if (HP.mod > HP.base) HP.mod = HP.base;
+    modifiedAttribute(BASE_ATTR_HP);
+}
+
 void Being::died()
 {
     if (mAction == DEAD)

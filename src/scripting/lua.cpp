@@ -660,6 +660,39 @@ static int being_damage(lua_State *s)
 }
 
 /**
+ * Restores hit points of a being
+ * mana.being_heal(being[, value])
+ * Without a value it heals fully.
+ */
+static int being_heal(lua_State *s)
+{
+    Being *being = getBeing(s, 1);
+    if (!being)
+    {
+        raiseScriptError(s,
+            "being_heal called for nonexistent being.");
+        return 0;
+    }
+
+    if (lua_gettop(s) == 1) // when there is only one argument
+    {
+        being->heal();
+    }
+    else if (lua_isnumber(s, 2))
+    {
+        being->heal(lua_tointeger(s, 2));
+    }
+    else
+    {
+        raiseScriptError(s,
+            "being_heal called with illegal healing value.");
+    }
+
+    return 0;
+}
+
+
+/**
  * Gets the attribute for a being
  * mana.being_get_attribute(being, attribute)
  */
@@ -1511,6 +1544,7 @@ LuaScript::LuaScript():
         { "being_walk",             &being_walk           },
         { "being_say",              &being_say            },
         { "being_damage",           &being_damage         },
+        { "being_heal",             &being_heal           },
         { "being_get_attribute",    &being_get_attribute  },
         { "being_get_name",         &being_get_name       },
         { "being_get_action",       &being_get_action     },
