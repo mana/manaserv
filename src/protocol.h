@@ -77,8 +77,6 @@ enum {
     PAMSG_RECONNECT                = 0x0065, // B*32 token
     APMSG_RECONNECT_RESPONSE       = 0x0066, // B error
 
-    GPMSG_ACCOUNT_SERVER_LOST      = 0x0067, // -
-
     // Game
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
     GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
@@ -255,7 +253,6 @@ enum {
     ERRMSG_EMAIL_ALREADY_EXISTS,        // The Email Address already exists
     ERRMSG_ALREADY_TAKEN,               // name used was already taken
     ERRMSG_SERVER_FULL,                 // the server is overloaded
-    ERRMSG_SERVER_NON_RESPONDING,       // The account server connection is lost
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
     ERRMSG_LIMIT_REACHED                // limit reached
 };

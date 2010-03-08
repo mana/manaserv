@@ -80,12 +80,6 @@ class GameHandler: public ConnectionHandler
                                   const std::string &address, int port);
 
         /**
-         * Disconnect every player in case of losing the connection
-         * to the Account server.
-         */
-        void disconnectAll();
-
-        /**
          * Updates the party id of the character
          */
         void updateCharacter(int charid, int partyid);

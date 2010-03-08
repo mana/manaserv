@@ -393,8 +393,7 @@ int main(int argc, char *argv[])
                 // Every players have to be logged out
                 if (!accountServerLost)
                 {
-                    LOG_WARN("Lost connection to the server account. So disconnect players");
-                    gameHandler->disconnectAll();
+                    LOG_WARN("The connection to the account server was lost.");
                     accountServerLost = true;
                 }
 

@@ -118,18 +118,6 @@ void GameHandler::completeServerChange(int id, const std::string &token,
     }
 }
 
-void GameHandler::disconnectAll()
-{
-    for (NetComputers::const_iterator i = clients.begin(),
-         i_end = clients.end(); i != i_end; ++i)
-    {
-            //FIXME: remove character in a safe way before disconnecting.
-            GameClient *c = static_cast< GameClient * >(*i);
-            MessageOut msg(GPMSG_ACCOUNT_SERVER_LOST);
-            c->disconnect(msg);
-    }
-}
-
 void GameHandler::updateCharacter(int charid, int partyid)
 {
     for (NetComputers::const_iterator i = clients.begin(),
