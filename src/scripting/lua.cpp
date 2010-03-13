@@ -564,6 +564,38 @@ static int being_set_status_time(lua_State *s)
     return 1;
 }
 
+/**
+* Returns the current speed of the being
+* mana.being_get_speed(Being *being, int id)
+*/
+static int being_get_speed(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "being_get_speed called with incorrect parameters.");
+        return 0;
+    }
+    Being *being = getBeing(s, 1);
+    lua_pushnumber(s, being->getSpeed());
+    return 1;
+}
+
+/**
+* Sets the speed of the being
+* mana.being_set_speed(Being *being)
+*/
+static int being_set_speed(lua_State *s)
+{
+    if (!lua_isuserdata(s, 1) || !lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "being_set_speed called with incorrect parameters.");
+        return 0;
+    }
+    Being *being = getBeing(s, 1);
+    being->setSpeed(lua_tonumber(s, 2));
+    return 1;
+}
+
 
 /**
  * Returns the Thing type of the given Being
@@ -571,7 +603,7 @@ static int being_set_status_time(lua_State *s)
  */
 static int being_type(lua_State *s)
 {
-    if (!lua_isuserdata(s, 1) )
+    if (!lua_isuserdata(s, 1))
     {
         raiseScriptError(s, "being_type called with incorrect parameters.");
         return 0;
@@ -1540,6 +1572,8 @@ LuaScript::LuaScript():
         { "being_has_status",       &being_has_status     },
         { "being_set_status_time",  &being_set_status_time},
         { "being_get_status_time",  &being_get_status_time},
+        { "being_set_speed",        &being_set_speed      },
+        { "being_get_speed",        &being_get_speed      },
         { "being_type",             &being_type           },
         { "being_walk",             &being_walk           },
         { "being_say",              &being_say            },
