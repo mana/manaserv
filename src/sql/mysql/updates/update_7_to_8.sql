@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `mana_char_kill_stats`
     `char_id` int(11) NOT NULL,
     `monster_id` int(11) NOT NULL,
     `kills` int(11),
-    PRIMANY KEY (`char_id`, `monster_id`),
+    PRIMARY KEY (`char_id`, `monster_id`),
     FOREIGN KEY (`char_id`)
         REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE
