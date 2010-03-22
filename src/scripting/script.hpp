@@ -131,6 +131,8 @@ class Script
 
         virtual void processRemoveEvent(Thing* thing) = 0;
 
+        static Script* global_event_script; // the global event script
+
     protected:
         std::string mScriptFile;
 

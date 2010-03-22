@@ -29,6 +29,7 @@
 typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
+Script *Script::global_event_script = NULL;
 
 Script::Script():
     mMap(NULL),

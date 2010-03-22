@@ -185,19 +185,36 @@ void Character::respawn()
         return;
     }
 
-    //warp back to spawn point
-    int spawnMap = Configuration::getValue("respawnMap", 1);
-    int spawnX = Configuration::getValue("respawnX", 1024);
-    int spawnY = Configuration::getValue("respawnY", 1024);
-    GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
-
     //make alive again
     setAction(STAND);
-    mAttributes[BASE_ATTR_HP].mod = -mAttributes[BASE_ATTR_HP].base + 1;
-    modifiedAttribute(BASE_ATTR_HP);
-
     // reset target
     mTarget = NULL;
+
+    // execute respawn script
+    bool isScriptHandled = false;
+    Script *script = Script::global_event_script;
+    if (script)
+    {
+        script->setMap(getMap());
+        script->prepare("on_chr_death_accept");
+        script->push(this);
+        script->execute();
+        isScriptHandled = true; // TODO: don't set to true when execution failed
+        script->setMap(NULL);
+    }
+
+    if (!isScriptHandled)
+    {
+        // script-controlled respawning didn't work - fall back to
+        // hardcoded logic
+        mAttributes[BASE_ATTR_HP].mod = -mAttributes[BASE_ATTR_HP].base + 1;
+        modifiedAttribute(BASE_ATTR_HP);    //warp back to spawn point
+        int spawnMap = Configuration::getValue("respawnMap", 1);
+        int spawnX = Configuration::getValue("respawnX", 1024);
+        int spawnY = Configuration::getValue("respawnY", 1024);
+        GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
+    }
+
 }
 
 void Character::useSpecial(int id)

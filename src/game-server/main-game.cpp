@@ -50,6 +50,7 @@
 #include "net/bandwidth.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
+#include "scripting/luascript.hpp"
 #include "utils/logger.h"
 #include "utils/processorutils.hpp"
 #include "utils/stringfilter.h"
@@ -172,6 +173,12 @@ void initialize()
     MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
+    // Initialize global event script
+    Script::global_event_script = new LuaScript();
+    if (!Script::global_event_script->loadFile("scripts/global_events.lua"))
+    {
+        Script::global_event_script = NULL;
+    }
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
