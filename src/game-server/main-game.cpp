@@ -60,14 +60,15 @@
 using utils::Logger;
 
 // Default options that automake should be able to override.
-#define DEFAULT_LOG_FILE        "manaserv-game.log"
-#define DEFAULT_CONFIG_FILE     "manaserv.xml"
-#define DEFAULT_ITEMSDB_FILE    "items.xml"
-#define DEFAULT_SKILLSDB_FILE   "mana-skills.xml"
-#define DEFAULT_MAPSDB_FILE     "maps.xml"
-#define DEFAULT_MONSTERSDB_FILE "monsters.xml"
-#define DEFAULT_STATUSDB_FILE   "mana-status-effect.xml"
-#define DEFAULT_PERMISSION_FILE "permissions.xml"
+#define DEFAULT_LOG_FILE                    "manaserv-game.log"
+#define DEFAULT_CONFIG_FILE                 "manaserv.xml"
+#define DEFAULT_ITEMSDB_FILE                "items.xml"
+#define DEFAULT_SKILLSDB_FILE               "mana-skills.xml"
+#define DEFAULT_MAPSDB_FILE                 "maps.xml"
+#define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
+#define DEFAULT_STATUSDB_FILE               "mana-status-effect.xml"
+#define DEFAULT_PERMISSION_FILE             "permissions.xml"
+#define DEFAULT_GLOBAL_EVENT_SCRIPT_FILE    "scripts/global_events.lua"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
@@ -174,11 +175,7 @@ void initialize()
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
     // Initialize global event script
-    Script::global_event_script = new LuaScript();
-    if (!Script::global_event_script->loadFile("scripts/global_events.lua"))
-    {
-        Script::global_event_script = NULL;
-    }
+    LuaScript::load_global_event_script(DEFAULT_GLOBAL_EVENT_SCRIPT_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger

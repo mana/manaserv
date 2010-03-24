@@ -67,6 +67,11 @@ class LuaScript: public Script
 
         void processRemoveEvent(Thing* thing);
 
+        /**
+         * Loads the global event script file
+         */
+        static bool load_global_event_script(const std::string &file);
+
     private:
 
         lua_State *mState;

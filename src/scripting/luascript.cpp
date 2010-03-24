@@ -156,3 +156,14 @@ void LuaScript::getPostCallback(Character *q, const std::string &sender,
     s->nbArgs = 3;
     s->execute();
 }
+
+bool LuaScript::load_global_event_script(const std::string &file)
+{
+    Script::global_event_script = new LuaScript();
+    if (!Script::global_event_script->loadFile(file))
+    {
+        Script::global_event_script = NULL;
+        return false;
+    }
+    return true;
+}
