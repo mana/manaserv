@@ -131,6 +131,11 @@ class Script
 
         virtual void processRemoveEvent(Thing* thing) = 0;
 
+        /**
+         * Runs a function in the global event script file
+         */
+        static bool execute_global_event_function(const std::string &function, Being *obj);
+
         static Script* global_event_script; // the global event script
 
     protected:

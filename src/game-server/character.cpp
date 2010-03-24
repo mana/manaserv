@@ -177,6 +177,12 @@ void Character::perform()
 
 }
 
+void Character::died()
+{
+    Being::died();
+    Script::execute_global_event_function("on_chr_death", this);
+}
+
 void Character::respawn()
 {
     if (mAction != DEAD)
@@ -191,19 +197,7 @@ void Character::respawn()
     mTarget = NULL;
 
     // execute respawn script
-    bool isScriptHandled = false;
-    Script *script = Script::global_event_script;
-    if (script)
-    {
-        script->setMap(getMap());
-        script->prepare("on_chr_death_accept");
-        script->push(this);
-        script->execute();
-        isScriptHandled = true; // TODO: don't set to true when execution failed
-        script->setMap(NULL);
-    }
-
-    if (!isScriptHandled)
+    if (!Script::execute_global_event_function("on_chr_death_accept", this))
     {
         // script-controlled respawning didn't work - fall back to
         // hardcoded logic

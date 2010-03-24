@@ -74,6 +74,11 @@ class Character : public Being
         void perform();
 
         /**
+         * Executes the global die script and calls the base class function
+         */
+        virtual void died();
+
+        /**
          * makes the character respawn
          */
         void respawn();
