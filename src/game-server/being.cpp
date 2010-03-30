@@ -180,6 +180,8 @@ void Being::move()
     int tileDX = mDst.x / 32, tileDY = mDst.y / 32;
     if (tileSX == tileDX && tileSY == tileDY)
     {
+        if (mAction == WALK)
+            setAction(STAND);
         // Moving while staying on the same tile is free
         setPosition(mDst);
         mActionTime = 0;
@@ -214,11 +216,15 @@ void Being::move()
 
     if (mPath.empty())
     {
+        if (mAction == WALK)
+            setAction(STAND);
         // no path was found
         mDst = mOld;
         mActionTime = 0;
         return;
     }
+
+    setAction(WALK);
 
     Position prev(tileSX, tileSY);
     Point pos;
@@ -243,11 +249,6 @@ void Being::move()
     setPosition(pos);
 
     mActionTime = mActionTime > 100 ? mActionTime - 100 : 0;
-
-    if (mAction == WALK || mAction == STAND)
-    {
-        mAction = (mActionTime) ? WALK : STAND;
-    }
 }
 
 int Being::directionToAngle(int direction)
