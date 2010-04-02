@@ -536,8 +536,6 @@ void MapComposite::remove(Thing *ptr)
 
         if (ptr->canMove())
         {
-            std::stringstream str;
-            LOG_INFO(str.str());
             mContent->deallocate(static_cast< Being * >(ptr));
         }
     }
