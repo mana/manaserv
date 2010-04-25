@@ -73,7 +73,8 @@ void Script::update()
 bool Script::loadFile(const std::string &name)
 {
     int size;
-    char *buffer = ResourceManager::loadFile(name, size);
+    // Note: The file is checked for UTF-8 BOM.
+    char *buffer = ResourceManager::loadFile(name, size, true);
     if (buffer)
     {
         mScriptFile = name;

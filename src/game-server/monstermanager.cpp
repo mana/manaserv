@@ -63,7 +63,8 @@ void MonsterManager::initialize(const std::string &file)
 void MonsterManager::reload()
 {
     int size;
-    char *data = ResourceManager::loadFile(monsterReferenceFile, size);
+    // Note: The file is checked for UTF-8 BOM.
+    char *data = ResourceManager::loadFile(monsterReferenceFile, size, true);
 
     if (!data) {
         LOG_ERROR("Monster Manager: Could not find "

@@ -115,7 +115,8 @@ bool ResourceManager::exists(const std::string &path)
     return PHYSFS_exists(path.c_str());
 }
 
-char *ResourceManager::loadFile(const std::string &fileName, int &fileSize)
+char *ResourceManager::loadFile(const std::string &fileName, int &fileSize,
+                                             bool removeBOM)
 {
     // Attempt to open the specified file using PhysicsFS
     PHYSFS_file* file = PHYSFS_openRead(fileName.c_str());
@@ -131,6 +132,30 @@ char *ResourceManager::loadFile(const std::string &fileName, int &fileSize)
     // Get the size of the file
     fileSize = PHYSFS_fileLength(file);
 
+    if (removeBOM)
+    {
+        // Inspired by BOMstrip from:
+        // Peter Pentchev, 2008, public domain.
+        const std::string utf8Bom = "\xef\xbb\xbf";
+        char bomBuffer[utf8Bom.length()];
+        PHYSFS_read(file, bomBuffer, 1, utf8Bom.length());
+
+        std::istringstream iss(std::string(bomBuffer, utf8Bom.length()));
+        std::string line;
+
+        // if we find a BOM, then we remove it from the buffer
+        if (std::getline(iss, line) && !line.substr(0, 3).compare(utf8Bom))
+        {
+            LOG_INFO("Found a Byte Order Mask (BOM) in '" << fileName);
+            fileSize = fileSize - utf8Bom.length();
+        }
+        else
+        {
+            // No BOM, we get back to the file start.
+            PHYSFS_seek(file, 0);
+        }
+    }
+
     // Allocate memory and load the file
     char *buffer = (char *)malloc(fileSize + 1);
     if (PHYSFS_read(file, buffer, 1, fileSize) != fileSize)
@@ -144,7 +169,7 @@ char *ResourceManager::loadFile(const std::string &fileName, int &fileSize)
     // Close the file and let the user deallocate the memory
     PHYSFS_close(file);
 
-    // Add a trailing nul character, so that the file can be used as a string
+    // Add a trailing null character, so that the file can be used as a string
     buffer[fileSize] = 0;
     return buffer;
 }

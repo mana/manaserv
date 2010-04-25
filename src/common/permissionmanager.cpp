@@ -54,7 +54,8 @@ void PermissionManager::initialize(const std::string & file)
 void PermissionManager::reload()
 {
     int size;
-    char *data = ResourceManager::loadFile(permissionFile, size);
+    // Note: The file is checked for UTF-8 BOM.
+    char *data = ResourceManager::loadFile(permissionFile, size, true);
 
     if (!data) {
         LOG_ERROR("Permission Manager: Could not find "

@@ -47,7 +47,8 @@ void ItemManager::initialize(const std::string &file)
 void ItemManager::reload()
 {
     int size;
-    char *data = ResourceManager::loadFile(itemReferenceFile, size);
+    // Note: The file is checked for UTF-8 BOM.
+    char *data = ResourceManager::loadFile(itemReferenceFile, size, true);
 
     if (!data) {
         LOG_ERROR("Item Manager: Could not find " << itemReferenceFile << "!");

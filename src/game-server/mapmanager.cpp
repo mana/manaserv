@@ -45,7 +45,8 @@ unsigned int MapManager::initialize(const std::string &mapReferenceFile)
     unsigned int loadedMaps = 0;
 
     int size;
-    char *data = ResourceManager::loadFile(mapReferenceFile, size);
+    // Note: The file is checked for UTF-8 BOM.
+    char *data = ResourceManager::loadFile(mapReferenceFile, size, true);
 
     if (!data) {
         LOG_ERROR("Map Manager: Could not find " << mapReferenceFile << "!");

@@ -46,7 +46,8 @@ namespace ResourceManager
      *         or <code>NULL</code> on failure.
      * @note The array contains an extra \0 character at position fileSize.
      */
-    char *loadFile(const std::string &fileName, int &fileSize);
+    char *loadFile(const std::string &fileName, int &fileSize,
+                   bool removeBOM = false);
 }
 
 #endif

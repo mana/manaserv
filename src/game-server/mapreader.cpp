@@ -43,7 +43,8 @@ bool MapReader::readMap(const std::string &filename, MapComposite
 *composite)
 {
     int fileSize;
-    char *buffer = ResourceManager::loadFile(filename, fileSize);
+    // Note: The file is checked for UTF-8 BOM.
+    char *buffer = ResourceManager::loadFile(filename, fileSize, true);
 
     if (buffer == NULL)
     {

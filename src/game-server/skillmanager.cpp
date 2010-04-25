@@ -45,7 +45,8 @@ void SkillManager::reload()
     */
 
     int size;
-    char *data = ResourceManager::loadFile(skillReferenceFile, size);
+    // Note: The file is checked for UTF-8 BOM.
+    char *data = ResourceManager::loadFile(skillReferenceFile, size, true);
 
     if (!data) {
         LOG_ERROR("Item Manager: Could not find " << skillReferenceFile << "!");
