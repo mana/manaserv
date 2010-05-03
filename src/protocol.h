@@ -2,6 +2,7 @@
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
  *
+ *
  *  This file is part of The Mana Server.
  *
  *  The Mana Server is free software; you can redistribute it and/or modify
@@ -32,7 +33,7 @@
  * - GPMSG_*: from game server to client
  * - GAMSG_*: from game server to account server
  *
- * Components: B byte, W word, L long, S variable-size string
+ * Components: B byte, W word, D double word, S variable-size string
  *             C tile-based coordinates (B*3)
  *
  * Hosts:      P (player's client), A (account server), C (char server),
@@ -42,14 +43,14 @@
  */
 enum {
     // Login/Register
-    PAMSG_REGISTER                 = 0x0000, // L version, S username, S password, S email
-    APMSG_REGISTER_RESPONSE        = 0x0002, // B error
+    PAMSG_REGISTER                 = 0x0000, // D version, S username, S password, S email, S captcha response
+    APMSG_REGISTER_RESPONSE        = 0x0002, // B error, [S updatehost]
     PAMSG_UNREGISTER               = 0x0003, // S username, S password
     APMSG_UNREGISTER_RESPONSE      = 0x0004, // B error
     PAMSG_REQUEST_REGISTER_INFO    = 0x0005, //
-    APMSG_REGISTER_INFO_RESPONSE   = 0x0006, // B byte registrationAllowed, byte minNameLength, byte maxNameLength, string captchaURL, string captchaInstructions
-    PAMSG_LOGIN                    = 0x0010, // L version, S username, S password
-    APMSG_LOGIN_RESPONSE           = 0x0012, // B error, [S update host]
+    APMSG_REGISTER_INFO_RESPONSE   = 0x0006, // B byte registration Allowed, byte minNameLength, byte maxNameLength, string captchaURL, string captchaInstructions
+    PAMSG_LOGIN                    = 0x0010, // D version, S username, S password
+    APMSG_LOGIN_RESPONSE           = 0x0012, // B error, [S updatehost]
     PAMSG_LOGOUT                   = 0x0013, // -
     APMSG_LOGOUT_RESPONSE          = 0x0014, // B error
     PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, W*6 stats
@@ -92,9 +93,9 @@ enum {
     GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points
     GPMSG_LEVEL_PROGRESS           = 0x0151, // B percent completed to next levelup
     PGMSG_RAISE_ATTRIBUTE          = 0x0160, // B attribute
-    GPMSG_RAISE_ATTRIBUTE_RESPONSE = 0x0161, // B error
+    GPMSG_RAISE_ATTRIBUTE_RESPONSE = 0x0161, // B error, B attribute
     PGMSG_LOWER_ATTRIBUTE          = 0x0170, // B attribute
-    GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error
+    GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error, B attribute
     PGMSG_RESPAWN                  = 0x0180, // -
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
@@ -114,7 +115,7 @@ enum {
     PGMSG_ATTACK                   = 0x0290, // W being id
     GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction, B attacktype
     PGMSG_USE_SPECIAL              = 0x0292, // B specialID
-    GPMSG_SPECIAL_STATUS           = 0x0293, // { B specialID, L current, L max, L recharge }
+    GPMSG_SPECIAL_STATUS           = 0x0293, // { B specialID, D current, D max, D recharge }
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // W being id, S text
     GPMSG_NPC_CHOICE               = 0x02B0, // W being id, { S text }*
@@ -129,10 +130,10 @@ enum {
     GPMSG_NPC_CLOSE                = 0x02B9, // W being id
     GPMSG_NPC_POST                 = 0x02D0, // W being id
     PGMSG_NPC_POST_SEND            = 0x02D1, // W being id, { S name, S text, W item id }
-    GPMSG_NPC_POST_GET             = 0x02D2, // W being id, S name, S text, W item id
-    PGMSG_NPC_NUMBER               = 0x02D3, // W being id, L number
+    GPMSG_NPC_POST_GET             = 0x02D2, // W being id, { S name, S text, W item id }
+    PGMSG_NPC_NUMBER               = 0x02D3, // W being id, D number
     PGMSG_NPC_STRING               = 0x02D4, // W being id, S string
-    GPMSG_NPC_NUMBER               = 0x02D5, // W being id
+    GPMSG_NPC_NUMBER               = 0x02D5, // W being id, D max, D min, D default
     GPMSG_NPC_STRING               = 0x02D6, // W being id
     PGMSG_TRADE_REQUEST            = 0x02C0, // W being id
     GPMSG_TRADE_REQUEST            = 0x02C1, // W being id
@@ -146,8 +147,8 @@ enum {
     GPMSG_TRADE_CONFIRM            = 0x02C9, // -
     PGMSG_TRADE_ADD_ITEM           = 0x02CA, // B slot, B amount
     GPMSG_TRADE_ADD_ITEM           = 0x02CB, // W item id, B amount
-    PGMSG_TRADE_SET_MONEY          = 0x02CC, // L amount
-    GPMSG_TRADE_SET_MONEY          = 0x02CD, // L amount
+    PGMSG_TRADE_SET_MONEY          = 0x02CC, // D amount
+    GPMSG_TRADE_SET_MONEY          = 0x02CD, // D amount
     GPMSG_TRADE_BOTH_CONFIRM       = 0x02CE, // -
     PGMSG_USE_ITEM                 = 0x0300, // B slot
     GPMSG_USE_RESPONSE             = 0x0301, // B error
@@ -180,7 +181,7 @@ enum {
     CPMSG_PARTY_INVITE_RESPONSE         = 0x03A1, // B error, S name
     CPMSG_PARTY_INVITED                 = 0x03A2, // S name
     PCMSG_PARTY_ACCEPT_INVITE           = 0x03A5, // S name
-    CPMSG_PARTY_ACCEPT_INVITE_RESPONSE  = 0x03A6, // B error
+    CPMSG_PARTY_ACCEPT_INVITE_RESPONSE  = 0x03A6, // B error, { S name }
     PCMSG_PARTY_REJECT_INVITE           = 0x03A7, // S name
     CPMSG_PARTY_REJECTED                = 0x03A8, // S name
     PCMSG_PARTY_QUIT                    = 0x03AA, // -
@@ -215,28 +216,28 @@ enum {
     PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
 
     // Inter-server
-    GAMSG_REGISTER              = 0x0500, // S address, W port, S password, L items db revision, { W map id }*
+    GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision, { W map id }*
     AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version, C password response
     AGMSG_ACTIVE_MAP            = 0x0502, // W map id
-    AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, L id, S name, serialised character data
-    GAMSG_PLAYER_DATA           = 0x0520, // L id, serialised character data
-    GAMSG_REDIRECT              = 0x0530, // L id
-    AGMSG_REDIRECT_RESPONSE     = 0x0531, // L id, B*32 token, S game address, W game port
-    GAMSG_PLAYER_RECONNECT      = 0x0532, // L id, B*32 token
+    AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, D id, S name, serialised character data
+    GAMSG_PLAYER_DATA           = 0x0520, // D id, serialised character data
+    GAMSG_REDIRECT              = 0x0530, // D id
+    AGMSG_REDIRECT_RESPONSE     = 0x0531, // D id, B*32 token, S game address, W game port
+    GAMSG_PLAYER_RECONNECT      = 0x0532, // D id, B*32 token
     GAMSG_PLAYER_SYNC           = 0x0533, // serialised sync data
-    GAMSG_SET_QUEST             = 0x0540, // L id, S name, S value
-    GAMSG_GET_QUEST             = 0x0541, // L id, S name
-    AGMSG_GET_QUEST_RESPONSE    = 0x0542, // L id, S name, S value
-    GAMSG_BAN_PLAYER            = 0x0550, // L id, W duration
-    GAMSG_CHANGE_PLAYER_LEVEL   = 0x0555, // L id, W level
-    GAMSG_CHANGE_ACCOUNT_LEVEL  = 0x0556, // L id, W level
-    GAMSG_STATISTICS            = 0x0560, // { W map id, W thing nb, W monster nb, W player nb, { L character id }* }*
-    CGMSG_CHANGED_PARTY         = 0x0590, // L character id, L party id
-    GCMSG_REQUEST_POST          = 0x05A0, // L character id
-    CGMSG_POST_RESPONSE         = 0x05A1, // L receiver id, { S sender name, S letter, W num attachments { W attachment item id, W quantity } }
-    GCMSG_STORE_POST            = 0x05A5, // L sender id, S receiver name, S letter, { W attachment item id, W quantity }
-    CGMSG_STORE_POST_RESPONSE   = 0x05A6, // L id, B error
-    GAMSG_TRANSACTION           = 0x0600, // L character id, L action, S message
+    GAMSG_SET_QUEST             = 0x0540, // D id, S name, S value
+    GAMSG_GET_QUEST             = 0x0541, // D id, S name
+    AGMSG_GET_QUEST_RESPONSE    = 0x0542, // D id, S name, S value
+    GAMSG_BAN_PLAYER            = 0x0550, // D id, W duration
+    GAMSG_CHANGE_PLAYER_LEVEL   = 0x0555, // D id, W level
+    GAMSG_CHANGE_ACCOUNT_LEVEL  = 0x0556, // D id, W level
+    GAMSG_STATISTICS            = 0x0560, // { W map id, W thing nb, W monster nb, W player nb, { D character id }* }*
+    CGMSG_CHANGED_PARTY         = 0x0590, // D character id, D party id
+    GCMSG_REQUEST_POST          = 0x05A0, // D character id
+    CGMSG_POST_RESPONSE         = 0x05A1, // D receiver id, { S sender name, S letter, W num attachments { W attachment item id, W quantity } }
+    GCMSG_STORE_POST            = 0x05A5, // D sender id, S receiver name, S letter, { W attachment item id, W quantity }
+    CGMSG_STORE_POST_RESPONSE   = 0x05A6, // D id, B error
+    GAMSG_TRANSACTION           = 0x0600, // D character id, D action, S message
 
     XXMSG_INVALID = 0x7FFF
 };
@@ -271,9 +272,9 @@ enum {
 
 // used to identify part of sync message
 enum {
-    SYNC_CHARACTER_POINTS = 0x01,       // L charId, L charPoints, L corrPoints, B attribute id, L attribute value
-    SYNC_CHARACTER_SKILL  = 0x02,       // L charId, B skillId, L skill value
-    SYNC_ONLINE_STATUS    = 0x03,       // L charId, B 0x00 = offline, 0x01 = online
+    SYNC_CHARACTER_POINTS = 0x01,       // D charId, D charPoints, D corrPoints, B attribute id, D attribute value
+    SYNC_CHARACTER_SKILL  = 0x02,       // D charId, B skillId, D skill value
+    SYNC_ONLINE_STATUS    = 0x03,       // D charId, B 0x00 = offline, 0x01 = online
     SYNC_END_OF_BUFFER    = 0xFF        // shows, that the buffer ends here.
 };
 
@@ -312,6 +313,20 @@ enum AttribmodResponseCode {
     ATTRIBMOD_DENIED
 };
 
+// Object type enumeration
+enum {
+    // A simple item
+    OBJECT_ITEM = 0,
+    // An item that can be activated (doors, switchs, sign, ...)
+    OBJECT_ACTOR,
+    // Non-Playable-Character is an actor capable of movement and maybe actions
+    OBJECT_NPC,
+    // A monster (moving actor with AI. able to toggle map/quest actions, too)
+    OBJECT_MONSTER,
+    // A player
+    OBJECT_PLAYER
+};
+
 // Moving object flags
 enum {
     // Payload contains the current position.
@@ -346,6 +361,19 @@ enum {
     GUILD_EVENT_LEAVING_PLAYER,
     GUILD_EVENT_ONLINE_PLAYER,
     GUILD_EVENT_OFFLINE_PLAYER
+};
+
+
+enum
+{
+    SPRITE_BASE = 0,
+    SPRITE_SHOE,
+    SPRITE_BOTTOMCLOTHES,
+    SPRITE_TOPCLOTHES,
+    SPRITE_HAIR,
+    SPRITE_HAT,
+    SPRITE_WEAPON,
+    SPRITE_VECTOREND
 };
 
 #endif // PROTOCOL_H
