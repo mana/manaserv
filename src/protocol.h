@@ -314,17 +314,24 @@ enum AttribmodResponseCode {
 };
 
 // Object type enumeration
-enum {
-    // A simple item
+enum ThingType
+{
+    // A simple item.
     OBJECT_ITEM = 0,
-    // An item that can be activated (doors, switchs, sign, ...)
+    // An item that toggle map/quest actions (doors, switchs, ...)
+    // and can speak (map panels).
     OBJECT_ACTOR,
-    // Non-Playable-Character is an actor capable of movement and maybe actions
+    // Non-Playable-Character is an actor capable of movement and maybe actions.
     OBJECT_NPC,
-    // A monster (moving actor with AI. able to toggle map/quest actions, too)
+    // A monster (moving actor with AI. Should be able to toggle map/quest
+    // actions, too).
     OBJECT_MONSTER,
-    // A player
-    OBJECT_PLAYER
+    // A normal being.
+    OBJECT_CHARACTER,
+    // A effect to be shown.
+    OBJECT_EFFECT,
+    // Server-only object.
+    OBJECT_OTHER
 };
 
 // Moving object flags

@@ -21,27 +21,12 @@
 #ifndef THING_H
 #define THING_H
 
+#include "protocol.h"
+
 #include <set>
 
 class EventListener;
 class MapComposite;
-
-/**
- * Types of things enumeration.
- */
-enum ThingType
-{
-    OBJECT_ITEM = 0,  /**< A simple item. */
-    OBJECT_ACTOR,     /**< An item that toggle map/quest actions (doors,
-                           switchs, ...) and can speak (map panels). */
-    OBJECT_NPC,       /**< Non-Playable-Character is an actor capable of
-                           movement and maybe actions. */
-    OBJECT_MONSTER,   /**< A monster (moving actor with AI. Should be able to
-                           toggle map/quest actions, too). */
-    OBJECT_CHARACTER, /**< A normal being. */
-    OBJECT_EFFECT,    /**< A effect to be shown */
-    OBJECT_OTHER      /**< Server-only object. */
-};
 
 /**
  * Base class for in-game objects. Knows only its type and the map it resides
