@@ -269,12 +269,14 @@ class ItemClass
         unsigned mAttackRange;  /**< Attack range when used as a weapon */
 };
 
+/**
+* Class for an item stack laying on the floor in the game world
+*/
+
 class Item : public Actor
 {
     public:
-        Item(ItemClass *type, int amount)
-          : Actor(OBJECT_ITEM), mType(type), mAmount(amount)
-        {}
+        Item(ItemClass *type, int amount);
 
         ItemClass *getItemClass() const
         { return mType; }
@@ -282,11 +284,12 @@ class Item : public Actor
         int getAmount() const
         { return mAmount; }
 
-        virtual void update() {}
+        virtual void update();
 
     private:
         ItemClass *mType;
         unsigned char mAmount;
+        int mLifetime;
 };
 
 #endif

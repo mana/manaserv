@@ -24,8 +24,11 @@
 
 #include "game-server/item.hpp"
 
+#include "common/configuration.hpp"
 #include "game-server/being.hpp"
+#include "game-server/state.hpp"
 #include "scripting/script.hpp"
+
 
 ItemType itemTypeFromString (const std::string &name)
 {
@@ -129,4 +132,23 @@ bool ItemClass::use(Being *itemUser)
     }
     mModifiers.applyAttributes(itemUser);
     return true;
+}
+
+
+Item::Item(ItemClass *type, int amount)
+          : Actor(OBJECT_ITEM), mType(type), mAmount(amount)
+{
+    mLifetime = Configuration::getValue("floorItemDecayTime", 0) * 10;
+}
+
+void Item::update()
+{
+    if (mLifetime)
+    {
+        mLifetime--;
+        if (!mLifetime)
+        {
+            GameState::enqueueRemove(this);
+        }
+    }
 }

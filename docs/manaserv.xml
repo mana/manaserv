@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
 <!-- 
 	An example configuration file for ~/.manaserv.xml
-	If you add any parameters to this configuration file make sure to update
-	the wiki documentation at:
-	http://wiki.themanaworld.org/index.php/Manaserv.xml
+	
+	Documentation: http://doc.manasource.org/manaserv.xml
+
+	Developers:	If you add any new parameters read from this configuration file
+	don't forget to update the wiki documentation!
 -->
 <configuration>
  
@@ -77,6 +79,7 @@
  <option name="respawnX" value="1000"/>
  <option name="respawnY" value="1000"/>
  <option name="defaultPvp" value="free" />
+ <option name="floorItemDecayTime" value="60" />
  
  <!-- Network-related config options-->
  <option name="net_maxClients" value="1000"/>
