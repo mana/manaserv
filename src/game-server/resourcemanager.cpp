@@ -134,20 +134,20 @@ char *ResourceManager::loadFile(const std::string &fileName, int &fileSize,
 
     if (removeBOM)
     {
-        // Inspired by BOMstrip from:
-        // Peter Pentchev, 2008, public domain.
-        const std::string utf8Bom = "\xef\xbb\xbf";
-        char bomBuffer[utf8Bom.length()];
-        PHYSFS_read(file, bomBuffer, 1, utf8Bom.length());
+        // Inspired by BOMstrip from Peter Pentchev, 2008, public domain.
+        const char utf8Bom[] = "\xef\xbb\xbf";
+        const int bomLength = sizeof(utf8Bom);
+        char bomBuffer[bomLength];
+        PHYSFS_read(file, bomBuffer, 1, bomLength);
 
-        std::istringstream iss(std::string(bomBuffer, utf8Bom.length()));
+        std::istringstream iss(std::string(bomBuffer, bomLength));
         std::string line;
 
         // if we find a BOM, then we remove it from the buffer
         if (std::getline(iss, line) && !line.substr(0, 3).compare(utf8Bom))
         {
             LOG_INFO("Found a Byte Order Mask (BOM) in '" << fileName);
-            fileSize = fileSize - utf8Bom.length();
+            fileSize = fileSize - bomLength;
         }
         else
         {
@@ -157,7 +157,7 @@ char *ResourceManager::loadFile(const std::string &fileName, int &fileSize,
     }
 
     // Allocate memory and load the file
-    char *buffer = (char *)malloc(fileSize + 1);
+    char *buffer = (char *) malloc(fileSize + 1);
     if (PHYSFS_read(file, buffer, 1, fileSize) != fileSize)
     {
         free(buffer);
