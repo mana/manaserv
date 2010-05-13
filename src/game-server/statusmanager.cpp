@@ -18,17 +18,16 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <map>
-#include <set>
-
 #include "game-server/statusmanager.hpp"
 
+#include "common/resourcemanager.hpp"
 #include "game-server/statuseffect.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
+#include <map>
+#include <set>
 #include <sstream>
 
 typedef std::map< int, StatusEffect * > StatusEffects;

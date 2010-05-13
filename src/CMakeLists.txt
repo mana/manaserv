@@ -103,6 +103,8 @@ SET(SRCS
     common/configuration.hpp
     common/configuration.cpp
     common/inventorydata.hpp
+    common/resourcemanager.hpp
+    common/resourcemanager.cpp
     net/bandwidth.hpp
     net/bandwidth.cpp
     net/connection.hpp
@@ -120,6 +122,8 @@ SET(SRCS
     utils/logger.cpp
     utils/processorutils.hpp
     utils/processorutils.cpp
+    utils/string.hpp
+    utils/string.cpp
     utils/stringfilter.h
     utils/stringfilter.cpp
     utils/timer.h
@@ -130,7 +134,6 @@ SET(SRCS
     utils/tokendispenser.cpp
     utils/xml.hpp
     utils/xml.cpp
-    utils/string.cpp
     )
 
 SET(SRCS_MANASERVACCOUNT
@@ -225,8 +228,6 @@ SET(SRCS_MANASERVGAME
     game-server/postman.hpp
     game-server/quest.hpp
     game-server/quest.cpp
-    game-server/resourcemanager.hpp
-    game-server/resourcemanager.cpp
     game-server/skillmanager.hpp
     game-server/skillmanager.cpp
     game-server/spawnarea.hpp

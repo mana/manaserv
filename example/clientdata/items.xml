@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items>
+    <item id="1"
+        image="use-food-candy.png"
+        name="Candy"
+        description="A sugar-free candy."
+        type="usable"
+        hp="5"
+        weight="1"
+        max-per-slot="30"
+        />
+</items>

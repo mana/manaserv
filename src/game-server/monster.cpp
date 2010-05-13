@@ -21,10 +21,10 @@
 #include "game-server/monster.hpp"
 
 #include "common/configuration.hpp"
+#include "common/resourcemanager.hpp"
 #include "game-server/character.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/item.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/state.hpp"
 #include "scripting/script.hpp"

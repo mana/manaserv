@@ -18,14 +18,14 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
-#include <map>
-
 #include "scripting/script.hpp"
 
+#include "common/resourcemanager.hpp"
 #include "game-server/being.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
+
+#include <cstdlib>
+#include <map>
 
 typedef std::map< std::string, Script::Factory > Engines;
 

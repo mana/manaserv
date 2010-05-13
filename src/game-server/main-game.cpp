@@ -37,6 +37,7 @@
 
 #include "common/configuration.hpp"
 #include "common/permissionmanager.hpp"
+#include "common/resourcemanager.hpp"
 #include "game-server/accountconnection.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/skillmanager.hpp"
@@ -45,7 +46,6 @@
 #include "game-server/monstermanager.hpp"
 #include "game-server/statusmanager.hpp"
 #include "game-server/postman.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "game-server/state.hpp"
 #include "net/bandwidth.hpp"
 #include "net/connectionhandler.hpp"

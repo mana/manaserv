@@ -20,7 +20,7 @@
 
 #include "game-server/skillmanager.hpp"
 
-#include "game-server/resourcemanager.hpp"
+#include "common/resourcemanager.hpp"
 #include "utils/string.hpp"   // for the toupper function
 #include "utils/logger.h"
 #include "utils/xml.hpp"

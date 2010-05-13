@@ -36,8 +36,7 @@
 #include "utils/xml.hpp"
 #include "utils/sha256.h"
 
-// TODO: make data/items.xml a constant or read it from config file
-static const char *DEFAULT_ITEM_FILE = "data/items.xml";
+static const char *DEFAULT_ITEM_FILE = "items.xml";
 
 // defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
@@ -1920,24 +1919,18 @@ void Storage::deletePost(Letter *letter)
  */
 void Storage::syncDatabase()
 {
-    xmlDocPtr doc = xmlReadFile(DEFAULT_ITEM_FILE, NULL, 0);
-    if (!doc)
+    XML::Document doc(DEFAULT_ITEM_FILE);
+    xmlNodePtr rootNode = doc.rootNode();
+
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))
     {
         LOG_ERROR("Item Manager: Error while parsing item database (items.xml)!");
         return;
     }
 
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "items"))
-    {
-        LOG_ERROR("Item Manager:(items.xml) is not a valid database file!");
-        xmlFreeDoc(doc);
-        return;
-    }
-
     mDb->beginTransaction();
     int itmCount = 0;
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for_each_xml_child_node(node, rootNode)
     {
         // Try to load the version of the item database. The version is defined
         // as subversion tag embedded as XML attribute. So every modification
@@ -2024,7 +2017,6 @@ void Storage::syncDatabase()
     }
 
     mDb->commitTransaction();
-    xmlFreeDoc(doc);
 }
 
 /**

@@ -18,15 +18,13 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstring>
-
 #include "game-server/mapreader.hpp"
 
+#include "common/resourcemanager.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapmanager.hpp"
 #include "game-server/monstermanager.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "game-server/spawnarea.hpp"
 #include "game-server/trigger.hpp"
 #include "scripting/script.hpp"
@@ -36,6 +34,8 @@
 #include "utils/xml.hpp"
 #include "utils/zlib.hpp"
 #include "utils/string.hpp"
+
+#include <cstring>
 
 static std::vector< int > tilesetFirstGids;
 

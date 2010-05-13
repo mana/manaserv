@@ -41,6 +41,8 @@ manaserv_account_SOURCES = \
 	common/configuration.hpp \
 	common/configuration.cpp \
 	common/inventorydata.hpp \
+	common/resourcemanager.hpp \
+	common/resourcemanager.cpp \
 	dal/dalexcept.h \
 	dal/dataprovider.h \
 	dal/dataprovider.cpp \
@@ -68,6 +70,8 @@ manaserv_account_SOURCES = \
 	utils/processorutils.cpp \
 	utils/sha256.h \
 	utils/sha256.cpp \
+	utils/string.hpp \
+	utils/string.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
 	utils/timer.cpp \
@@ -76,8 +80,7 @@ manaserv_account_SOURCES = \
 	utils/tokendispenser.hpp \
 	utils/tokendispenser.cpp \
 	utils/xml.hpp \
-	utils/xml.cpp \
-	utils/string.cpp
+	utils/xml.cpp
 
 manaserv_game_CXXFLAGS = -Wall
 
@@ -91,6 +94,8 @@ manaserv_game_SOURCES = \
 	common/inventorydata.hpp \
 	common/permissionmanager.hpp \
 	common/permissionmanager.cpp \
+	common/resourcemanager.hpp \
+	common/resourcemanager.cpp \
 	game-server/accountconnection.hpp \
 	game-server/accountconnection.cpp \
 	game-server/actor.hpp \
@@ -134,8 +139,6 @@ manaserv_game_SOURCES = \
 	game-server/postman.hpp \
 	game-server/quest.hpp \
 	game-server/quest.cpp \
-	game-server/resourcemanager.hpp \
-	game-server/resourcemanager.cpp \
 	game-server/skillmanager.hpp \
 	game-server/skillmanager.cpp \
 	game-server/spawnarea.hpp \
@@ -175,6 +178,8 @@ manaserv_game_SOURCES = \
 	utils/logger.cpp \
 	utils/processorutils.hpp \
 	utils/processorutils.cpp \
+	utils/string.hpp \
+	utils/string.cpp \
 	utils/stringfilter.h \
 	utils/stringfilter.cpp \
 	utils/timer.h \
@@ -187,8 +192,7 @@ manaserv_game_SOURCES = \
 	utils/xml.hpp \
 	utils/xml.cpp \
 	utils/zlib.hpp \
-	utils/zlib.cpp \
-	utils/string.cpp
+	utils/zlib.cpp
 
 if BUILD_MYSQL
 manaserv_account_SOURCES += \

@@ -18,15 +18,15 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <map>
-
 #include "game-server/monstermanager.hpp"
 
+#include "common/resourcemanager.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/monster.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
+
+#include <map>
 
 typedef std::map< int, MonsterClass * > MonsterClasses;
 static MonsterClasses monsterClasses; /**< Monster reference */

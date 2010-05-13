@@ -18,14 +18,6 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
-#include <getopt.h>
-#include <signal.h>
-#include <iostream>
-#include <fstream>
-#include <physfs.h>
-#include <enet/enet.h>
-
 #ifdef HAVE_CONFIG_H
 #include "../config.h"
 #endif
@@ -38,6 +30,7 @@
 #include "chat-server/guildmanager.hpp"
 #include "chat-server/post.hpp"
 #include "common/configuration.hpp"
+#include "common/resourcemanager.hpp"
 #include "net/bandwidth.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messageout.hpp"
@@ -45,6 +38,14 @@
 #include "utils/processorutils.hpp"
 #include "utils/stringfilter.h"
 #include "utils/timer.h"
+
+#include <cstdlib>
+#include <getopt.h>
+#include <signal.h>
+#include <iostream>
+#include <fstream>
+#include <physfs.h>
+#include <enet/enet.h>
 
 using utils::Logger;
 
@@ -63,16 +64,9 @@ Storage *storage;
 /** Communications (chat) message handler */
 ChatHandler *chatHandler;
 
-/** Chat Channels Manager */
 ChatChannelManager *chatChannelManager;
-
-/** Guild Manager */
 GuildManager *guildManager;
-
-/** Post Manager */
 PostManager *postalManager;
-
-/** Bandwidth Monitor */
 BandwidthMonitor *gBandwidth;
 
 /** Callback used when SIGQUIT signal is received. */
@@ -147,6 +141,8 @@ static void initialize()
     LOG_INFO("Using config file: " << configPath);
     LOG_INFO("Using log file: " << logPath);
 
+    ResourceManager::initialize();
+
     // check inter-server password
     if (Configuration::getValue("net_password", "") == "")
     {
@@ -164,15 +160,10 @@ static void initialize()
     }
 
     // --- Initialize the managers
-    // Initialize the slang's and double quotes filter.
-    stringFilter = new StringFilter;
-    // Initialize the Chat channels manager
+    stringFilter = new StringFilter;  // The slang's and double quotes filter.
     chatChannelManager = new ChatChannelManager;
-    // Initialise the Guild manager
     guildManager = new GuildManager;
-    // Initialise the post manager
     postalManager = new PostManager;
-    // Initialise the bandwidth monitor
     gBandwidth = new BandwidthMonitor;
 
     // --- Initialize the global handlers

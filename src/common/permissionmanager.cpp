@@ -18,16 +18,15 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstring>
-
 #include "common/permissionmanager.hpp"
 
+#include "common/resourcemanager.hpp"
 #include "game-server/character.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
 #include <string.h>
+#include <cstring>
 
 static std::map<std::string, unsigned char> permissions;
 static std::map<std::string, unsigned char> aliases;

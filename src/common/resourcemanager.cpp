@@ -18,6 +18,12 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "common/resourcemanager.hpp"
+
+#include "common/configuration.hpp"
+
+#include "utils/logger.h"
+
 #include <cstdlib>
 #include <cstring>
 
@@ -31,83 +37,19 @@
 
 #include <physfs.h>
 
-#include "game-server/resourcemanager.hpp"
-
-#include "utils/logger.h"
-
 #define PKG_DATADIR ""
 
 void ResourceManager::initialize()
 {
     PHYSFS_permitSymbolicLinks(1);
-    // Add the main data directory to our PhysicsFS search path
-    PHYSFS_addToSearchPath("data", 1);
-    PHYSFS_addToSearchPath(PKG_DATADIR "data", 1);
 
-#ifdef _WIN32
-    // Define the path in which to search
-    std::string searchString = std::string("data/*.zip");
+    const std::string clientDataPath =
+            Configuration::getValue("clientDataPath", "example/clientdata");
+    const std::string serverDataPath =
+            Configuration::getValue("serverDataPath", "example/serverdata");
 
-    // Create our find file data structure
-    struct _finddata_t findFileInfo;
-
-    // Find the first zipped file
-    long handle =
-        static_cast<long>(::_findfirst(searchString.c_str(), &findFileInfo));
-    long file = handle;
-
-    // Loop until all files we're searching for are found
-    while (file >= 0) {
-        // Define the file path string
-        std::string filePath = std::string("data/") +
-            std::string(findFileInfo.name);
-
-        LOG_INFO("Adding to PhysicsFS: " << findFileInfo.name);
-
-        // Add the zip file to our PhysicsFS search path
-        PHYSFS_addToSearchPath(filePath.c_str(), 1);
-
-        // Find the next file
-        file = ::_findnext(handle, &findFileInfo);
-    }
-
-    // Shutdown findfile stuff
-    ::_findclose(handle);
-#else
-    // Retrieve the current path
-    char programPath[256];
-    if (!getcwd(programPath, 256))
-        strcpy(programPath, ".");
-    strncat(programPath, "/data", 256 - strlen(programPath) - 1);
-
-    // Create our directory structure
-    DIR *dir = opendir(programPath);
-
-    // Return if the directory is invalid
-    if (dir == NULL) {
-        return;
-    }
-
-    struct dirent *direntry;
-    while ((direntry = readdir(dir)) != NULL)
-    {
-        char *ext = strstr(direntry->d_name, ".zip");
-
-        if (ext != NULL && strcmp(ext, ".zip") == 0)
-        {
-            // Define the file path string
-            std::string filePath = std::string(programPath) +
-                std::string("/") + std::string(direntry->d_name);
-
-            LOG_INFO("Adding to PhysicsFS: " << filePath);
-
-            // Add the zip file to our PhysicsFS search path
-            PHYSFS_addToSearchPath(filePath.c_str(), 1);
-        }
-    }
-
-    closedir(dir);
-#endif
+    PHYSFS_addToSearchPath(clientDataPath.c_str(), 1);
+    PHYSFS_addToSearchPath(serverDataPath.c_str(), 1);
 }
 
 bool ResourceManager::exists(const std::string &path)

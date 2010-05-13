@@ -18,16 +18,16 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-
 #include "game-server/mapmanager.hpp"
 
+#include "common/resourcemanager.hpp"
 #include "game-server/map.hpp"
 #include "game-server/mapcomposite.hpp"
 #include "game-server/mapreader.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
+
+#include <cassert>
 
 /**
  * List of all the game maps, be they present or not on this server.

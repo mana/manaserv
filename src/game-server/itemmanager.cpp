@@ -18,19 +18,18 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <map>
-#include <set>
-
 #include "game-server/itemmanager.hpp"
 
 #include "defines.h"
+#include "common/resourcemanager.hpp"
 #include "game-server/item.hpp"
-#include "game-server/resourcemanager.hpp"
 #include "game-server/skillmanager.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
+#include <map>
+#include <set>
 #include <sstream>
 
 typedef std::map< int, ItemClass * > ItemClasses;
