@@ -172,7 +172,7 @@ CREATE INDEX mana_inventories_owner ON mana_inventories ( owner_id );
 CREATE TABLE mana_guilds
 (
    id           INTEGER     PRIMARY KEY,
-   name 		TEXT        NOT NULL UNIQUE
+   name         TEXT        NOT NULL UNIQUE
 );
 
 -----------------------------------------------------------------------------

@@ -220,7 +220,7 @@ class ItemClass
         /**
          * Gets database ID.
          */
-        int getDatabaseID()
+        int getDatabaseID() const
         { return mDatabaseID; }
 
         /**
@@ -232,7 +232,7 @@ class ItemClass
         /**
          * Gets the sprite ID.
          */
-        int getSpriteID()
+        int getSpriteID() const
         { return mSpriteID; }
 
         /**

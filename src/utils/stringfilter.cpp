@@ -31,14 +31,12 @@ namespace utils
 StringFilter::StringFilter():
     mInitialized(false)
 {
-    mSlangs.clear(); // Does this make any sense here?
     loadSlangFilterList();
 }
 
 StringFilter::~StringFilter()
 {
     writeSlangFilterList();
-    mSlangs.clear(); // Does this make any sense here?
 }
 
 bool StringFilter::loadSlangFilterList()
@@ -71,7 +69,7 @@ void StringFilter::writeSlangFilterList()
     //mConfig->setValue("SlangsList", slangsList);
 }
 
-bool StringFilter::filterContent(const std::string& text)
+bool StringFilter::filterContent(const std::string &text) const
 {
     if (!mInitialized) {
         LOG_DEBUG("Slangs List is not initialized.");
@@ -84,7 +82,7 @@ bool StringFilter::filterContent(const std::string& text)
     std::transform(text.begin(), text.end(), upperCaseText.begin(),
             (int(*)(int))std::toupper);
 
-    for (SlangIterator i = mSlangs.begin(); i != mSlangs.end(); ++i)
+    for (Slangs::const_iterator i = mSlangs.begin(); i != mSlangs.end(); ++i)
     {
         // We look for slangs into the sentence.
         std::string upperCaseSlang = *i;
@@ -100,7 +98,7 @@ bool StringFilter::filterContent(const std::string& text)
     return isContentClean;
 }
 
-bool StringFilter::isEmailValid(const std::string& email)
+bool StringFilter::isEmailValid(const std::string &email) const
 {
     unsigned int min = Configuration::getValue("account_minEmailLength", 7);
     unsigned int max = Configuration::getValue("account_maxEmailLength", 128);
@@ -119,7 +117,7 @@ bool StringFilter::isEmailValid(const std::string& email)
         (email.find_first_of(' ') == std::string::npos);
 }
 
-bool StringFilter::findDoubleQuotes(const std::string &text)
+bool StringFilter::findDoubleQuotes(const std::string &text) const
 {
     return (text.find('"', 0) != std::string::npos);
 }

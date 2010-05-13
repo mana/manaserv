@@ -1902,7 +1902,7 @@ void Storage::deletePost(Letter *letter)
         mDb->commitTransaction();
         letter->setId(0);
     }
-    catch(const dal::DbSqlQueryExecFailure &e)
+    catch (const dal::DbSqlQueryExecFailure &e)
     {
         mDb->rollbackTransaction();
         LOG_ERROR("(DALStorage::deletePost) SQL query failure: " << e.what());
@@ -1943,17 +1943,13 @@ void Storage::syncDatabase()
         }
 
         if (!xmlStrEqual(node->name, BAD_CAST "item"))
-        {
             continue;
-        }
 
         if (xmlStrEqual(node->name, BAD_CAST "item"))
         {
             int id = XML::getProperty(node, "id", 0);
             if (id < 500)
-            {
                 continue;
-            }
 
             int weight = XML::getProperty(node, "weight", 0);
             std::string type = XML::getProperty(node, "type", "");

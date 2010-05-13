@@ -133,8 +133,9 @@ static GameServer *getGameServerFromMap(int mapId)
     return NULL;
 }
 
-bool GameServerHandler::getGameServerFromMap
-    (int mapId, std::string &address, int &port)
+bool GameServerHandler::getGameServerFromMap(int mapId,
+                                             std::string &address,
+                                             int &port)
 {
     if (GameServer *s = ::getGameServerFromMap(mapId))
     {
@@ -513,7 +514,9 @@ void GameServerHandler::dumpStatistics(std::ostream &os)
          i_end = serverHandler->clients.end(); i != i_end; ++i)
     {
         GameServer *server = static_cast< GameServer * >(*i);
-        if (!server->port) continue;
+        if (!server->port)
+            continue;
+
         os << "<gameserver address=\"" << server->address << "\" port=\""
            << server->port << "\">\n";
 

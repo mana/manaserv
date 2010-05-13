@@ -46,4 +46,4 @@ namespace AccountClientHandler
     void process();
 }
 
-#endif
+#endif // ACCOUNTHANDLER_H

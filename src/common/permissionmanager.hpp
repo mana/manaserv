@@ -66,6 +66,6 @@ namespace PermissionManager
      */
     std::list<std::string> getClassList(const Character* character);
 
-}
+} // namespace PermissionManager
 
-#endif
+#endif // PERMISSIONMANAGER_HPP

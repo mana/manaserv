@@ -28,14 +28,12 @@ namespace utils
 {
 
 /**
- * Used to filter content containing bad words. Like username, character's names, chat, ...
+ * Used to filter content containing bad words. Like username, character's
+ * names, chat, ...
  */
 class StringFilter
 {
     public:
-        /**
-         * ctors.
-         */
         StringFilter();
 
         ~StringFilter();
@@ -46,8 +44,7 @@ class StringFilter
          * @return true is the config is loaded succesfully
          *
          */
-        bool
-        loadSlangFilterList();
+        bool loadSlangFilterList();
 
         /**
          * Write slang list to the config file.
@@ -55,29 +52,25 @@ class StringFilter
          * @return true is the config is loaded succesfully
          *
          */
-        void
-        writeSlangFilterList();
+        void writeSlangFilterList();
 
         /**
         * Useful to filter slangs automatically, by instance.
         * @return true if the sentence is slangs clear.
         */
-        bool
-        filterContent(const std::string& text);
+        bool filterContent(const std::string &text) const;
 
         /**
          * Tells if an email is valid
          */
-        bool
-        isEmailValid(const std::string& email);
+        bool isEmailValid(const std::string &email) const;
 
         /**
          * find double quotes (") in strings.
-         * Very useful not to make SQL Queries bqsed on names crash
+         * Very useful not to make SQL Queries based on names crash
          * I placed it here cause where you've got " you can have slangs...
          */
-        bool
-        findDoubleQuotes(const std::string& text);
+        bool findDoubleQuotes(const std::string &text) const;
 
     private:
         typedef std::list<std::string> Slangs;
