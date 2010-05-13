@@ -3,6 +3,15 @@ Setting up a Mana server
 
 COMPILATION
 
+Before trying to compile, make sure all the dependencies are installed. For
+each dependency the Ubuntu package name is listed as well as the website.
+
+ * Enet     (libenet-dev)     - http://enet.bespin.org/
+ * libxml2  (libxml2-dev)     - http://xmlsoft.org/
+ * Lua      (liblua5.1-0-dev) - http://lua.org/
+ * PhysFS   (libphysfs-dev)   - http://icculus.org/physfs/
+ * SQLite 3 (libsqlite3-dev)  - http://sqlite.org/
+
 0) autoreconf -i (when you cloned via git)
 1) ./configure
 2) make
