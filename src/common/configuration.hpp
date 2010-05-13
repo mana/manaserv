@@ -38,7 +38,7 @@ namespace Configuration
      * @param key option identifier.
      * @param deflt default value.
      */
-    const std::string &getValue(const std::string &key, const std::string &deflt);
+    std::string getValue(const std::string &key, const std::string &deflt);
 
     /**
      * Gets an option as a string.

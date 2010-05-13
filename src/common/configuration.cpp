@@ -68,8 +68,8 @@ void Configuration::deinitialize()
 {
 }
 
-const std::string &Configuration::getValue(const std::string &key,
-                                           const std::string &deflt)
+std::string Configuration::getValue(const std::string &key,
+                                    const std::string &deflt)
 {
     std::map<std::string, std::string>::iterator iter = options.find(key);
     if (iter == options.end()) return deflt;
