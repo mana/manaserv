@@ -37,8 +37,6 @@
 
 #include <physfs.h>
 
-#define PKG_DATADIR ""
-
 void ResourceManager::initialize()
 {
     PHYSFS_permitSymbolicLinks(1);
