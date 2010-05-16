@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([Mana Server], [1.0.0], [themanaworld-devel@lists.sourceforge.net], [manaserv])
+AC_INIT([Mana Server], [1.0.0], [dev@manasource.org], [manaserv])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
 
