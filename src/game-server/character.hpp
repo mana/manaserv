@@ -29,6 +29,7 @@
 #include "game-server/being.hpp"
 #include "protocol.h"
 #include "defines.h"
+#include "utils/logger.h"
 
 class BuySell;
 class GameClient;
@@ -168,6 +169,7 @@ class Character : public Being
         /*
          * Character data:
          * Get and set methods
+         * Most of this should be accessed directly as a friend
          */
 
         /** Gets the database id of the character. */
@@ -255,21 +257,19 @@ class Character : public Being
         void setMapId(int);
 
         /**
-         * Over loads Being::getAttribute, character skills are
-         * treated as extend attributes
+         * Marks all attributes as being modified.
          */
-        int getAttribute(int) const;
-
-        /**
-         * Over loads Being::getModifiedAttribute
-         * Charcter skills are treated as extend attributes
-         */
-        int getModifiedAttribute(int) const;
+        void modifiedAllAttribute();
 
         /**
          * Updates base Being attributes.
          */
-        void modifiedAttribute(int);
+        void modifiedAttribute(unsigned int);
+
+        /**
+         * Generate an autoattack from the given itemID to the AutoAttack instance
+         */
+        void generateAutoAttack(int itemID, AutoAttack *ret);
 
         /**
          * Calls all the "disconnected" listener.
@@ -359,12 +359,6 @@ class Character : public Being
         int getKillCount(int monsterType) const;
 
         /**
-         * Shortcut to get being's health
-         */
-        int getHealth() const
-        { return getModifiedAttribute(CHAR_ATTR_VITALITY); }
-
-        /**
          * Returns the exp needed to reach a specific skill level
          */
         static int expForLevel(int level);
@@ -404,7 +398,20 @@ class Character : public Being
         virtual unsigned char getWalkMask() const
         { return 0x82; } // blocked by walls and monsters ( bin 1000 0010)
 
+    protected:
+        /**
+         * Gets the way the actor blocks pathfinding for other objects
+         */
+        virtual Map::BlockType getBlockType() const
+        { return Map::BLOCKTYPE_CHARACTER; }
+
     private:
+
+        double getAttrBase(AttributeMap::const_iterator it) const
+        { return it->second.getBase(); }
+        double getAttrMod(AttributeMap::const_iterator it) const
+        { return it->second.getModifiedAttribute(); }
+
         Character(const Character &);
         Character &operator=(const Character &);
 
@@ -483,12 +490,9 @@ class Character : public Being
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
         std::map<int, int> mKillCount;  /**< how many monsters the character has slayn of each type */
 
-    protected:
-        /**
-         * Gets the way the actor blocks pathfinding for other objects
-         */
-        virtual Map::BlockType getBlockType() const
-        { return Map::BLOCKTYPE_CHARACTER; }
+        // Set as a friend, but still a lot of redundant accessors. FIXME.
+        template< class T >
+        friend void serializeCharacterData(const T &data, MessageOut &msg);
 };
 
 #endif // CHARACTER_HPP

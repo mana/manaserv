@@ -183,10 +183,13 @@ static void item(Character *, Character *q, ItemClass *it, int nb)
     Inventory(q).insert(it->getDatabaseID(), nb);
 }
 
+// This no longer works as money is now an attribute.
+/*
 static void money(Character *, Character *q, int nb)
 {
     Inventory(q).changeMoney(nb);
 }
+*/
 
 static void drop(Character *from, ItemClass *it, int nb)
 {
@@ -233,11 +236,11 @@ static void reload(Character *, const std::string &db)
 {
     if (db == "items")
     {
-        ItemManager::reload();
+        itemManager->reload();
     }
     else if (db == "monsters")
     {
-        MonsterManager::reload();
+        monsterManager->reload();
     }
 }
 
@@ -271,7 +274,7 @@ static Command const commands[] =
     handle("warp", AL_GM, warp),
     handle("item", AL_GM, item),
     handle("drop", AL_GM, drop),
-    handle("money", AL_GM, money),
+//    handle("money", AL_GM, money),
     handle("spawn", AL_GM, spawn),
     handle("goto", AL_GM, goto_),
     handle("recall", AL_GM, recall),
@@ -372,7 +375,7 @@ void runCommand(Character *ch, const std::string &text)
                 break;
 
             case 'i':
-                if (ItemClass *ic = ItemManager::getItem(atoi(arg.c_str())))
+                if (ItemClass *ic = itemManager->getItem(atoi(arg.c_str())))
                 {
                     args[i] = (intptr_t)ic;
                 }
@@ -407,7 +410,7 @@ void runCommand(Character *ch, const std::string &text)
                 break;
 
             case 'o':
-                if (MonsterClass *mc = MonsterManager::getMonster(atoi(arg.c_str())))
+                if (MonsterClass *mc = monsterManager->getMonster(atoi(arg.c_str())))
                 {
                     args[i] = (intptr_t)mc;
                 }

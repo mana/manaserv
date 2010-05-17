@@ -55,7 +55,7 @@ static void handleRecall(Character*, std::string&);
 static void handleBan(Character*, std::string&);
 static void handleItem(Character*, std::string&);
 static void handleDrop(Character*, std::string&);
-static void handleMoney(Character*, std::string&);
+//static void handleMoney(Character*, std::string&);
 static void handleSpawn(Character*, std::string&);
 static void handleAttribute(Character*, std::string&);
 static void handleReload(Character*, std::string&);
@@ -86,8 +86,8 @@ static CmdRef const cmdRef[] =
         "Creates a number of items in the inventory of a character", &handleItem},
     {"drop", "<item id> <amount>",
         "Drops a stack of items on the ground at your current location", &handleDrop},
-    {"money", "<character> <amount>",
-        "Changes the money a character possesses", &handleMoney},
+/*    {"money", "<character> <amount>",
+        "Changes the money a character possesses", &handleMoney},*/
     {"spawn", "<monster id> <number>",
         "Creates a number of monsters near your location", &handleSpawn},
     {"attribute", "<character> <attribute> <value>",
@@ -362,7 +362,7 @@ static void handleItem(Character *player, std::string &args)
     id = utils::stringToInt(itemclass);
 
     // check for valid item class
-    ic = ItemManager::getItem(id);
+    ic = itemManager->getItem(id);
 
     if (!ic)
     {
@@ -421,7 +421,7 @@ static void handleDrop(Character *player, std::string &args)
     id = utils::stringToInt(itemclass);
 
     // check for valid item
-    ic = ItemManager::getItem(id);
+    ic = itemManager->getItem(id);
     if (!ic)
     {
         say("Invalid item", player);
@@ -448,7 +448,7 @@ static void handleDrop(Character *player, std::string &args)
     str << "User created item " << ic->getDatabaseID();
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_DROP, str.str());
 }
-
+/*
 static void handleMoney(Character *player, std::string &args)
 {
     Character *other;
@@ -499,6 +499,7 @@ static void handleMoney(Character *player, std::string &args)
     std::string msg = "User created " + valuestr + " money";
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_MONEY, msg);
 }
+*/
 
 static void handleSpawn(Character *player, std::string &args)
 {
@@ -530,7 +531,7 @@ static void handleSpawn(Character *player, std::string &args)
     id = utils::stringToInt(monsterclass);
 
     // check for valid monster
-    mc = MonsterManager::getMonster(id);
+    mc = monsterManager->getMonster(id);
     if (!mc)
     {
         say("Invalid monster", player);
@@ -626,8 +627,8 @@ static void handleRecall(Character *player, std::string &args)
 static void handleReload(Character *player, std::string &args)
 {
     // reload the items and monsters
-    ItemManager::reload();
-    MonsterManager::reload();
+    itemManager->reload();
+    monsterManager->reload();
 }
 
 static void handleBan(Character *player, std::string &args)

@@ -47,6 +47,11 @@ class MessageIn
         int readByte();             /**< Reads a byte. */
         int readShort();            /**< Reads a short. */
         int readLong();             /**< Reads a long. */
+        /**
+         * Reads a double. HACKY and should *not* be used for client
+         * communication!
+         */
+        double readDouble();
 
         /**
          * Reads a string. If a length is not given (-1), it is assumed

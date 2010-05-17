@@ -56,6 +56,12 @@ class MessageOut
         void writeLong(int value);     /**< Writes an integer on four bytes. */
 
         /**
+         * Writes a double. HACKY and should *not* be used for client
+         * communication!
+         */
+        void writeDouble(double value);
+
+        /**
          * Writes a 3-byte block containing tile-based coordinates.
          */
         void writeCoordinates(int x, int y);

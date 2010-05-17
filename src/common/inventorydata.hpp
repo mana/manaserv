@@ -22,6 +22,7 @@
 #define COMMON_INVENTORYDATA_HPP
 
 #include <vector>
+#include <map>
 
 /**
  * Numbers of inventory slots
@@ -29,7 +30,6 @@
 
 enum
 {
-    EQUIPMENT_SLOTS = 11,
     INVENTORY_SLOTS = 50
 };
 
@@ -40,20 +40,22 @@ enum
 
 struct InventoryItem
 {
-    unsigned short itemId;
-    unsigned char amount;
+    unsigned int itemId;
+    unsigned int amount;
 };
+// slot id -> { item }
+typedef std::map< unsigned short, InventoryItem > InventoryData;
+// equip slot type -> { slot ids }
+// Equipment taking up multiple slots will be referenced multiple times
+typedef std::multimap< unsigned int, unsigned int > EquipData;
 
 /**
  * Structure storing the equipment and inventory of a Player.
  */
 struct Possessions
 {
-    std::vector< InventoryItem > inventory;
-    int money;
-    unsigned short equipment[EQUIPMENT_SLOTS];
-    Possessions(): money(0)
-    { for (int i = 0; i < EQUIPMENT_SLOTS; ++i) equipment[i] = 0; }
+    InventoryData inventory;
+    EquipData equipSlots;
 };
 
 #endif

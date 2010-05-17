@@ -272,17 +272,17 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             int slot = message.readByte();
             Inventory inv(computer.character);
-            if (ItemClass *ic = ItemManager::getItem(inv.getItem(slot)))
+            if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
             {
-                if (ic->use(computer.character))
+                if (ic->hasTrigger(ITT_ACTIVATE))
                 {
-                    inv.removeFromSlot(slot, 1);
-                    // log transaction
                     std::stringstream str;
-                    str << "User used item " << ic->getDatabaseID()
+                    str << "User activated item " << ic->getDatabaseID()
                         << " from slot " << slot;
                     accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                        TRANS_ITEM_USED, str.str());
+                                                    TRANS_ITEM_USED, str.str());
+                    if (ic->useTrigger(computer.character, ITT_ACTIVATE))
+                        inv.removeFromSlot(slot, 1);
                 }
             }
         } break;
@@ -292,7 +292,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             int slot = message.readByte();
             int amount = message.readByte();
             Inventory inv(computer.character);
-            if (ItemClass *ic = ItemManager::getItem(inv.getItem(slot)))
+            if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
             {
                 int nb = inv.removeFromSlot(slot, amount);
                 Item *item = new Item(ic, amount - nb);
@@ -329,10 +329,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_UNEQUIP:
         {
             int slot = message.readByte();
-            if (slot >= 0 && slot < EQUIP_PROJECTILE_SLOT)
-            {
+            if (slot >= 0 && slot < INVENTORY_SLOTS)
                 Inventory(computer.character).unequip(slot);
-            }
         } break;
 
         case PGMSG_MOVE_ITEM:
@@ -528,12 +526,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_RAISE_ATTRIBUTE:
         {
-            int attribute = message.readByte();
+            int attribute = message.readLong();
             AttribmodResponseCode retCode;
             retCode = computer.character->useCharacterPoint(attribute);
             result.writeShort(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
             result.writeByte(retCode);
-            result.writeByte(attribute);
+            result.writeLong(attribute);
 
             if (retCode == ATTRIBMOD_OK )
             {
@@ -554,12 +552,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_LOWER_ATTRIBUTE:
         {
-            int attribute = message.readByte();
+            int attribute = message.readLong();
             AttribmodResponseCode retCode;
             retCode = computer.character->useCorrectionPoint(attribute);
             result.writeShort(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
             result.writeByte(retCode);
-            result.writeByte(attribute);
+            result.writeLong(attribute);
 
             if (retCode == ATTRIBMOD_OK )
             {
@@ -666,10 +664,7 @@ void GameHandler::tokenMatched(GameClient *computer, Character *character)
 
     // Force sending the whole character to the client.
     Inventory(character).sendFull();
-    for (int i = 0; i < CHAR_ATTR_NB; ++i)
-    {
-        character->modifiedAttribute(i);
-    }
+    character->modifiedAllAttribute();
     std::map<int, int>::const_iterator skill_it;
     for (skill_it = character->getSkillBegin(); skill_it != character->getSkillEnd(); skill_it++)
     {

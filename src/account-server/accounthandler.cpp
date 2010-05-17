@@ -29,6 +29,7 @@
 #include "account-server/serverhandler.hpp"
 #include "chat-server/chathandler.hpp"
 #include "common/configuration.hpp"
+#include "common/resourcemanager.hpp"
 #include "common/transaction.hpp"
 #include "net/connectionhandler.hpp"
 #include "net/messagein.hpp"
@@ -39,6 +40,10 @@
 #include "utils/tokencollector.hpp"
 #include "utils/tokendispenser.hpp"
 #include "utils/sha256.h"
+#include "utils/string.hpp"
+#include "utils/xml.hpp"
+
+#define DEFAULT_ATTRIBUTEDB_FILE            "stats.xml"
 
 static void addUpdateHost(MessageOut *msg)
 {
@@ -46,13 +51,18 @@ static void addUpdateHost(MessageOut *msg)
     msg->writeString(updateHost);
 }
 
+
+// List of attributes that the client can send at account creation.
+
+static std::vector< unsigned int > initAttr;
+
 class AccountHandler : public ConnectionHandler
 {
 public:
     /**
      * Constructor.
      */
-    AccountHandler();
+    AccountHandler(const std::string &attrFile);
 
     /**
      * Called by the token collector in order to associate a client to its
@@ -76,6 +86,9 @@ public:
      * without having to provide username and password a second time.
      */
     TokenCollector<AccountHandler, AccountClient *, int> mTokenCollector;
+
+    static void sendCharacterData(AccountClient &client, int slot,
+                              const Character &ch);
 
 protected:
     /**
@@ -106,14 +119,40 @@ private:
 
 static AccountHandler *accountHandler;
 
-AccountHandler::AccountHandler():
+AccountHandler::AccountHandler(const std::string &attrFile):
     mTokenCollector(this)
 {
+    // Probably not the best place for this, but I don't have a lot of time.
+    if (initAttr.empty())
+    {
+        std::string absPathFile;
+        xmlNodePtr node;
+
+        absPathFile = ResourceManager::resolve(attrFile);
+        if (absPathFile.empty()) {
+            LOG_ERROR("Account handler: Could not find " << attrFile << "!");
+            return;
+        }
+
+        XML::Document doc(absPathFile, int());
+        node = doc.rootNode();
+
+        if (!node || !xmlStrEqual(node->name, BAD_CAST "stats"))
+        {
+            LOG_ERROR("Account handler: " << attrFile
+                      << " is not a valid database file!");
+            return;
+        }
+        for_each_xml_child_node(attributenode, node)
+            if (xmlStrEqual(attributenode->name, BAD_CAST "stat"))
+                if (utils::toupper(XML::getProperty(attributenode, "modifiable", "false")) == "TRUE")
+                    initAttr.push_back(XML::getProperty(attributenode, "id", 0)); // id
+    }
 }
 
 bool AccountClientHandler::initialize(int port, const std::string &host)
 {
-    accountHandler = new AccountHandler;
+    accountHandler = new AccountHandler(DEFAULT_ATTRIBUTEDB_FILE);
     LOG_INFO("Account handler started:");
 
     return accountHandler->startListen(port, host);
@@ -151,7 +190,7 @@ void AccountHandler::computerDisconnected(NetComputer *comp)
     delete client; // ~AccountClient unsets the account
 }
 
-static void sendCharacterData(AccountClient &client, int slot,
+void AccountHandler::sendCharacterData(AccountClient &client, int slot,
                               const Character &ch)
 {
     MessageOut charInfo(APMSG_CHAR_INFO);
@@ -163,11 +202,16 @@ static void sendCharacterData(AccountClient &client, int slot,
     charInfo.writeShort(ch.getLevel());
     charInfo.writeShort(ch.getCharacterPoints());
     charInfo.writeShort(ch.getCorrectionPoints());
-    charInfo.writeLong(ch.getPossessions().money);
 
-    for (int j = CHAR_ATTR_BEGIN; j < CHAR_ATTR_END; ++j)
+    for (AttributeMap::const_iterator it = ch.mAttributes.begin(),
+                                      it_end = ch.mAttributes.end();
+        it != it_end;
+        ++it)
     {
-        charInfo.writeShort(ch.getAttribute(j));
+        // {id, base value in 256ths, modified value in 256ths }*
+        charInfo.writeLong(it->first);
+        charInfo.writeLong((int) (it->second.first * 256));
+        charInfo.writeLong((int) (it->second.second * 256));
     }
 
     client.send(charInfo);
@@ -552,10 +596,10 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client, Message
     int numHairStyles = Configuration::getValue("char_numHairStyles", 17);
     int numHairColors = Configuration::getValue("char_numHairColors", 11);
     int numGenders = Configuration::getValue("char_numGenders", 2);
-    unsigned minNameLength = Configuration::getValue("char_minNameLength", 4);
-    unsigned maxNameLength = Configuration::getValue("char_maxNameLength", 25);
-    unsigned maxCharacters = Configuration::getValue("char_maxCharacters", 3);
-    unsigned startingPoints = Configuration::getValue("char_startingPoints", 60);
+    unsigned int minNameLength = Configuration::getValue("char_minNameLength", 4);
+    unsigned int maxNameLength = Configuration::getValue("char_maxNameLength", 25);
+    unsigned int maxCharacters = Configuration::getValue("char_maxCharacters", 3);
+    unsigned int startingPoints = Configuration::getValue("char_startingPoints", 60);
 
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
@@ -611,16 +655,16 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client, Message
         // LATER_ON: Add race, face and maybe special attributes.
 
         // Customization of character's attributes...
-        int attributes[CHAR_ATTR_NB];
-        for (int i = 0; i < CHAR_ATTR_NB; ++i)
+        std::vector< unsigned int > attributes = std::vector<unsigned int>(initAttr.size(), 0);
+        for (unsigned int i = 0; i < initAttr.size(); ++i)
             attributes[i] = msg.readShort();
 
         unsigned int totalAttributes = 0;
         bool validNonZeroAttributes = true;
-        for (int i = 0; i < CHAR_ATTR_NB; ++i)
+        for (unsigned int i = 0; i < initAttr.size(); ++i)
         {
             // For good total attributes check.
-            totalAttributes += attributes[i];
+            totalAttributes += attributes.at(i);
 
             // For checking if all stats are at least > 0
             if (attributes[i] <= 0) validNonZeroAttributes = false;
@@ -641,8 +685,11 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client, Message
         else
         {
             Character *newCharacter = new Character(name);
-            for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
-                newCharacter->setAttribute(i, attributes[i - CHAR_ATTR_BEGIN]);
+            for (unsigned int i = 0; i < initAttr.size(); ++i)
+                newCharacter->mAttributes.insert(std::make_pair(
+                        (unsigned int) (initAttr.at(i)),
+                        std::make_pair((double) (attributes[i]),
+                                       (double) (attributes[i]))));
             newCharacter->setAccount(acc);
             newCharacter->setLevel(1);
             newCharacter->setCharacterPoints(0);

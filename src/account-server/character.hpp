@@ -31,6 +31,9 @@
 
 class Account;
 class MessageIn;
+class MessageOut;
+
+typedef std::map< unsigned int, std::pair<double, double> > AttributeMap;
 
 /** placeholder type needed for include compatibility with game server*/
 typedef void Special;
@@ -101,13 +104,12 @@ class Character
         int getLevel() const { return mLevel; }
         void setLevel(int level) { mLevel = level; }
 
-        /** Gets the value of a base attribute of the character. */
-        int getAttribute(int n) const
-        { return mAttributes[n - CHAR_ATTR_BEGIN]; }
-
         /** Sets the value of a base attribute of the character. */
-        void setAttribute(int n, int value)
-        { mAttributes[n - CHAR_ATTR_BEGIN] = value; }
+        void setAttribute(unsigned int id, double value)
+        { mAttributes[id].first = value; }
+
+        void setModAttribute(unsigned int id, double value)
+        { mAttributes[id].second = value; }
 
         int getSkillSize() const
         { return mExperience.size(); }
@@ -220,8 +222,14 @@ class Character
 
 
     private:
+
         Character(const Character &);
         Character &operator=(const Character &);
+
+        double getAttrBase(AttributeMap::const_iterator &it) const
+        { return it->second.first; }
+        double getAttrMod(AttributeMap::const_iterator &it) const
+        { return it->second.second; }
 
         Possessions mPossessions; //!< All the possesions of the character.
         std::string mName;        //!< Name of the character.
@@ -229,7 +237,14 @@ class Character
         int mAccountID;           //!< Account ID of the owner.
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
-        unsigned short mAttributes[CHAR_ATTR_NB]; //!< Attributes.
+        /**
+         * Stores attributes.
+         * The key is an unsigned int which is the id of the attribute.
+         * The value stores the base value of the attribute in the first part,
+         * and the modified value in the second. The modified value is only
+         * used when transmitting to the client.
+         */
+        AttributeMap mAttributes; //!< Attributes.
         std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, int> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
@@ -245,6 +260,11 @@ class Character
 
         std::vector<std::string> mGuilds;        //!< All the guilds the player
                                                  //!< belongs to.
+        friend class AccountHandler;
+        friend class Storage;
+        // Set as a friend, but still a lot of redundant accessors. FIXME.
+        template< class T >
+        friend void serializeCharacterData(const T &data, MessageOut &msg);
 };
 
 /**

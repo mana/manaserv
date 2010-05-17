@@ -39,6 +39,7 @@
 #include "common/permissionmanager.hpp"
 #include "common/resourcemanager.hpp"
 #include "game-server/accountconnection.hpp"
+#include "game-server/attributemanager.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/skillmanager.hpp"
 #include "game-server/itemmanager.hpp"
@@ -63,7 +64,9 @@ using utils::Logger;
 #define DEFAULT_LOG_FILE                    "manaserv-game.log"
 #define DEFAULT_CONFIG_FILE                 "manaserv.xml"
 #define DEFAULT_ITEMSDB_FILE                "items.xml"
+#define DEFAULT_EQUIPDB_FILE                "equip.xml"
 #define DEFAULT_SKILLSDB_FILE               "mana-skills.xml"
+#define DEFAULT_ATTRIBUTEDB_FILE            "stats.xml"
 #define DEFAULT_MAPSDB_FILE                 "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
 #define DEFAULT_STATUSDB_FILE               "mana-status-effect.xml"
@@ -78,6 +81,10 @@ int worldTime = 0;              /**< Current world time in 100ms ticks */
 bool running = true;            /**< Determines if server keeps running */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
+
+AttributeManager *attributeManager = new AttributeManager(DEFAULT_ATTRIBUTEDB_FILE);
+ItemManager *itemManager = new ItemManager(DEFAULT_ITEMSDB_FILE, DEFAULT_EQUIPDB_FILE);
+MonsterManager *monsterManager = new MonsterManager(DEFAULT_MONSTERSDB_FILE);
 
 /** Core game message handler */
 GameHandler *gameHandler;
@@ -180,9 +187,10 @@ void initialize()
         LOG_FATAL("The Game Server can't find any valid/available maps.");
         exit(2);
     }
+    attributeManager->initialize();
     SkillManager::initialize(DEFAULT_SKILLSDB_FILE);
-    ItemManager::initialize(DEFAULT_ITEMSDB_FILE);
-    MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
+    itemManager->initialize();
+    monsterManager->initialize();
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
     // Initialize global event script
@@ -237,8 +245,8 @@ void deinitialize()
 
     // Destroy Managers
     delete stringFilter;
-    MonsterManager::deinitialize();
-    ItemManager::deinitialize();
+    monsterManager->deinitialize();
+    itemManager->deinitialize();
     MapManager::deinitialize();
     StatusManager::deinitialize();
 

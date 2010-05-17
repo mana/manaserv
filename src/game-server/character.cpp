@@ -27,6 +27,7 @@
 
 #include "common/configuration.hpp"
 #include "game-server/accountconnection.hpp"
+#include "game-server/attributemanager.hpp"
 #include "game-server/buysell.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/inventory.hpp"
@@ -43,6 +44,7 @@
 #include "serialize/characterdata.hpp"
 
 #include "utils/logger.h"
+#include "utils/speedconv.hpp"
 
 // These values should maybe be obtained from the config file
 const float Character::EXPCURVE_EXPONENT = 3.0f;
@@ -67,18 +69,22 @@ Character::Character(MessageIn &msg):
     mParty(0),
     mTransaction(TRANS_NONE)
 {
-    Attribute attr = { 0, 0 };
-    mAttributes.resize(CHAR_ATTR_NB, attr);
+    const AttributeScopes &attr = attributeManager->getAttributeInfoForType(ATTR_CHAR);
+    LOG_DEBUG("Character creation: initialisation of " << attr.size() << " attributes.");
+    for (AttributeScopes::const_iterator it1 = attr.begin(),
+         it1_end = attr.end();
+        it1 != it1_end;
+        ++it1)
+        mAttributes.insert(std::make_pair(it1->first,
+                                          Attribute(*it1->second)));
     // Get character data.
     mDatabaseID = msg.readLong();
     setName(msg.readString());
     deserializeCharacterData(*this, msg);
-    for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
-    {
-        modifiedAttribute(i);
-    }
+    mOld = getPosition();
+    Inventory(this).initialise();
+    modifiedAllAttribute();
     setSize(16);
-    Inventory(this).initialize();
 
     //give the character some specials for testing.
     //TODO: get from quest vars and equipment
@@ -111,7 +117,7 @@ void Character::update()
     }
     if (numRechargeNeeded > 0)
     {
-        mRechargePerSpecial = getModifiedAttribute(CHAR_ATTR_INTELLIGENCE) / numRechargeNeeded;
+        mRechargePerSpecial = getModifiedAttribute(ATTR_INT) / numRechargeNeeded;
         for (std::list<Special*>::iterator i = rechargeNeeded.begin(); i != rechargeNeeded.end(); i++)
         {
             (*i)->currentMana += mRechargePerSpecial;
@@ -145,36 +151,11 @@ void Character::perform()
         return;
     }
 
-    // TODO: Check slot 2 too.
-    int itemId = mPossessions.equipment[EQUIP_FIGHT1_SLOT];
-    ItemClass *ic = ItemManager::getItem(itemId);
-    int type = ic ? ic->getModifiers().getValue(MOD_WEAPON_TYPE) : 100;
-
-    Damage damage;
-    damage.base = getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN);
-    damage.delta = getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) +
-                   getModifiedAttribute(type);
-    damage.type = DAMAGE_PHYSICAL;
-    damage.cth = getModifiedAttribute(BASE_ATTR_HIT) +
-                 getModifiedAttribute(type);
-    damage.usedSkills.push_back(type);
-
-    if (ic)
-    {
-        // weapon fighting
-        const ItemModifiers &mods = ic->getModifiers();
-        damage.element = mods.getValue(MOD_ELEMENT_TYPE);
-        // todo: get attack range of weapon
-        // (weapon equipping has to be fixed first)
-        performAttack(mTarget, 64, damage);
-    }
-    else
-    {
-        // No-weapon fighting.
-        damage.element = ELEMENT_NEUTRAL;
-        performAttack(mTarget, 32, damage);
-    }
-
+    std::list<AutoAttack> attacks;
+    mAutoAttacks.tick(&attacks);
+    if (attacks.empty()) return; // Install default attack?
+    else for (std::list<AutoAttack>::iterator it = attacks.begin(); it != attacks.end(); ++it)
+            performAttack(mTarget, it->getDamage());
 }
 
 void Character::died()
@@ -201,8 +182,9 @@ void Character::respawn()
     {
         // script-controlled respawning didn't work - fall back to
         // hardcoded logic
-        mAttributes[BASE_ATTR_HP].mod = -mAttributes[BASE_ATTR_HP].base + 1;
-        modifiedAttribute(BASE_ATTR_HP);    //warp back to spawn point
+        mAttributes[ATTR_HP].setBase(mAttributes[ATTR_MAX_HP].getModifiedAttribute());
+        modifiedAttribute(ATTR_HP);
+        //warp back to spawn point
         int spawnMap = Configuration::getValue("respawnMap", 1);
         int spawnX = Configuration::getValue("respawnX", 1024);
         int spawnY = Configuration::getValue("respawnY", 1024);
@@ -334,8 +316,8 @@ void Character::sendStatus()
     {
         int attr = *i;
         attribMsg.writeShort(attr);
-        attribMsg.writeShort(getAttribute(attr));
-        attribMsg.writeShort(getModifiedAttribute(attr));
+        attribMsg.writeLong(getAttribute(attr) * 256);
+        attribMsg.writeLong(getModifiedAttribute(attr) * 256);
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(this, attribMsg);
     mModifiedAttributes.clear();
@@ -361,95 +343,97 @@ void Character::sendStatus()
     }
 }
 
-int Character::getAttribute(int attr) const
+void Character::modifiedAllAttribute()
 {
-    if (attr <= CHAR_ATTR_END)
-    {
-        return Being::getAttribute(attr);
-    }
-    else
-    {
-        return  Character::levelForExp(mExperience.find(attr)->second);
-    }
+    for (AttributeMap::iterator it = mAttributes.begin(),
+         it_end = mAttributes.end();
+        it != it_end; ++it)
+        modifiedAttribute(it->first);
 }
 
-int Character::getModifiedAttribute(int attr) const
+void Character::modifiedAttribute(unsigned int attr)
 {
-    if (attr <= CHAR_ATTR_END)
-    {
-        return Being::getModifiedAttribute(attr);
-    }
-    else
-    {
-        //TODO: Find a way to modify skills
-        return  Character::levelForExp(mExperience.find(attr)->second);
-    }
-}
+// Much of this is remnants from the previous attribute system (placeholder?)
+// This could be improved by defining what attributes are derived from others
+// in xml or otherwise, so only those that need to be recomputed are.
+    if (!mAttributes.count(attr)) return;
+    double newBase = getAttribute(attr);
 
-void Character::modifiedAttribute(int attr)
-{
-    if (attr >= CHAR_ATTR_BEGIN && attr < CHAR_ATTR_END)
-    {
-        for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; ++i)
+    switch (attr) {
+    case ATTR_STR:
+        modifiedAttribute(ATTR_INV_CAPACITY);
+        break;
+    case ATTR_AGI:
+        modifiedAttribute(ATTR_DODGE);
+        break;
+    case ATTR_VIT:
+        modifiedAttribute(ATTR_MAX_HP);
+        modifiedAttribute(ATTR_HP_REGEN);
+        modifiedAttribute(ATTR_DEFENSE);
+        break;
+    case ATTR_INT:
+        break;
+    case ATTR_DEX:
+        modifiedAttribute(ATTR_ACCURACY);
+        break;
+    case ATTR_WIL:
+        break;
+    case ATTR_ACCURACY:
+        newBase = getModifiedAttribute(ATTR_DEX); // Provisional
+        break;
+    case ATTR_DEFENSE:
+        newBase = 0.3 * getModifiedAttribute(ATTR_VIT);
+        break;
+    case ATTR_DODGE:
+        newBase = getModifiedAttribute(ATTR_AGI); // Provisional
+        break;
+    case ATTR_MAGIC_DODGE:
+        newBase = 1.0;
+        // TODO
+        break;
+    case ATTR_MAGIC_DEFENSE:
+        newBase = 0.0;
+        // TODO
+        break;
+    case ATTR_BONUS_ASPD:
+        newBase = 0.0;
+        // TODO
+        break;
+    case ATTR_HP_REGEN:
         {
-            int newValue = getAttribute(i);
-
-            if (i == BASE_ATTR_HP_REGEN){
-                newValue = (getModifiedAttribute(CHAR_ATTR_VITALITY) + 10)
-                         * (getModifiedAttribute(CHAR_ATTR_VITALITY) + 10)
-                         / (600 / TICKS_PER_HP_REGENERATION);
-                         // formula is in HP per minute. 600 game ticks = 1 minute.
-            }
-            else if (i == BASE_ATTR_HP){
-                newValue = (getModifiedAttribute(CHAR_ATTR_VITALITY) + 10)
-                        * (mLevel + 10);
-            }
-            else if (i == BASE_ATTR_HIT) {
-                newValue = getModifiedAttribute(CHAR_ATTR_DEXTERITY)
-                        /* + skill in class of currently equipped weapon */;
-            }
-            else if (i == BASE_ATTR_EVADE) {
-                newValue = getModifiedAttribute(CHAR_ATTR_AGILITY);
-                        /* TODO: multiply with 10 / (10 * equip_weight)*/
-            }
-            else if (i == BASE_ATTR_PHY_RES) {
-                newValue = getModifiedAttribute(CHAR_ATTR_VITALITY);
-                        /* equip defence is through equip modifiers */
-            }
-            else if (i == BASE_ATTR_PHY_ATK_MIN) {
-                newValue = getModifiedAttribute(CHAR_ATTR_STRENGTH);
-                        /* weapon attack is applied through equip modifiers */
-            }
-            else if (i == BASE_ATTR_PHY_ATK_DELTA) {
-                newValue =  0;
-                        /* + skill in class of currently equipped weapon ( is
-                         * applied during the damage calculation)
-                         * weapon attack bonus is applied through equip
-                         * modifiers.
-                         */
-            }
-            else if (i == BASE_ATTR_MAG_RES) {
-                newValue = getModifiedAttribute(CHAR_ATTR_WILLPOWER);
-            }
-            else if (i == BASE_ATTR_MAG_ATK) {
-                newValue = getModifiedAttribute(CHAR_ATTR_WILLPOWER);
-            }
-
-            if (newValue != getAttribute(i))
-            {
-                setAttribute(i, newValue);
-                flagAttribute(i);
-            }
+            double temp = getModifiedAttribute(ATTR_VIT) * 0.05;
+            newBase = (temp * TICKS_PER_HP_REGENERATION);
         }
+        break;
+    case ATTR_MAX_HP:
+        newBase = ((getModifiedAttribute(ATTR_VIT) + 3) * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
+        break;
+    case ATTR_MOVE_SPEED_TPS:
+        newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
+        modifiedAttribute(ATTR_MOVE_SPEED_RAW);
+        break;
+    case ATTR_MOVE_SPEED_RAW:
+        newBase = utils::tpsToSpeed(getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
+        break;
+    case ATTR_INV_CAPACITY:
+        newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0; // Provisional
+        break;
+    default: break;
     }
+
+    if (newBase != getAttribute(attr))
+        Being::setAttribute(attr, newBase, false);
     flagAttribute(attr);
 }
 
 void Character::flagAttribute(int attr)
 {
     // Inform the client of this attribute modification.
+    accountHandler->updateAttributes(getDatabaseID(), attr,
+                                     getAttribute(attr),
+                                     getModifiedAttribute(attr));
     mModifiedAttributes.insert(attr);
-    if (attr == CHAR_ATTR_INTELLIGENCE)
+    if (attr == ATTR_INT)
     {
         mSpecialUpdateNeeded = true;
     }
@@ -467,47 +451,44 @@ int Character::levelForExp(int exp)
 
 void Character::receiveExperience(int skill, int experience, int optimalLevel)
 {
-    if (skill >= CHAR_ATTR_END)
+    // reduce experience when skill is over optimal level
+    int levelOverOptimum = levelForExp(getExperience(skill)) - optimalLevel;
+    if (optimalLevel && levelOverOptimum > 0)
     {
-        // reduce experience when skill is over optimal level
-        int levelOverOptimum = getAttribute(skill) - optimalLevel;
-        if (optimalLevel && levelOverOptimum > 0)
-        {
-            experience *= EXP_LEVEL_FLEXIBILITY / (levelOverOptimum + EXP_LEVEL_FLEXIBILITY);
-        }
-
-        // add exp
-        int oldExp = mExperience[skill];
-        long int newExp = mExperience[skill] + experience;
-        if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
-
-        // Check the skill cap
-        long int maxSkillCap = Configuration::getValue("maxSkillCap", INT_MAX);
-        assert(maxSkillCap <= INT_MAX);  // avoid interger overflow
-        if (newExp > maxSkillCap)
-        {
-            newExp = maxSkillCap;
-            if (oldExp != maxSkillCap)
-            {
-                LOG_INFO("Player hit the skill cap");
-                // TODO: send a message to player leting them know they hit the cap
-            }
-        }
-        mExperience[skill] = newExp;
-        mModifiedExperience.insert(skill);
-
-        // inform account server
-        if (newExp != oldExp)
-            accountHandler->updateExperience(getDatabaseID(), skill, newExp);
-
-        // check for skill levelup
-        if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
-        {
-            modifiedAttribute(skill);
-        }
-
-        mRecalculateLevel = true;
+        experience *= EXP_LEVEL_FLEXIBILITY / (levelOverOptimum + EXP_LEVEL_FLEXIBILITY);
     }
+
+    // add exp
+    int oldExp = mExperience[skill];
+    long int newExp = mExperience[skill] + experience;
+    if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
+
+    // Check the skill cap
+    long int maxSkillCap = Configuration::getValue("maxSkillCap", INT_MAX);
+    assert(maxSkillCap <= INT_MAX);  // avoid interger overflow
+    if (newExp > maxSkillCap)
+    {
+        newExp = maxSkillCap;
+        if (oldExp != maxSkillCap)
+        {
+            LOG_INFO("Player hit the skill cap");
+            // TODO: send a message to player leting them know they hit the cap
+        }
+    }
+    mExperience[skill] = newExp;
+    mModifiedExperience.insert(skill);
+
+    // inform account server
+    if (newExp != oldExp)
+        accountHandler->updateExperience(getDatabaseID(), skill, newExp);
+
+    // check for skill levelup
+    if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
+    {
+        modifiedAttribute(skill);
+    }
+
+    mRecalculateLevel = true;
 }
 
 void Character::incrementKillCount(int monsterType)
@@ -543,7 +524,7 @@ void Character::recalculateLevel()
         {
             float expGot = getExpGot(a->first);
             float expNeed = getExpNeeded(a->first);
-            levels.push_back(getAttribute(a->first) + expGot / expNeed);
+            levels.push_back(levelForExp(a->first) + expGot / expNeed);
         }
     }
     levels.sort();
@@ -577,13 +558,13 @@ void Character::recalculateLevel()
 
 int Character::getExpNeeded(size_t skill) const
 {
-    int level = getAttribute(skill);
+    int level = levelForExp(getExperience(skill));
     return Character::expForLevel(level + 1) - expForLevel(level);
 }
 
 int Character::getExpGot(size_t skill) const
 {
-    int level = getAttribute(skill);
+    int level = levelForExp(getExperience(skill));
     return mExperience.at(skill) - Character::expForLevel(level);
 }
 
@@ -606,11 +587,11 @@ void Character::levelup()
 
 AttribmodResponseCode Character::useCharacterPoint(size_t attribute)
 {
-    if (attribute < CHAR_ATTR_BEGIN) return ATTRIBMOD_INVALID_ATTRIBUTE;
-    if (attribute >= CHAR_ATTR_END) return ATTRIBMOD_INVALID_ATTRIBUTE;
+    if (!attributeManager->isAttributeDirectlyModifiable(attribute))
+        return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCharacterPoints) return ATTRIBMOD_NO_POINTS_LEFT;
 
-    mCharacterPoints--;
+    --mCharacterPoints;
     setAttribute(attribute, getAttribute(attribute) + 1);
     modifiedAttribute(attribute);
     return ATTRIBMOD_OK;
@@ -618,13 +599,13 @@ AttribmodResponseCode Character::useCharacterPoint(size_t attribute)
 
 AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
 {
-    if (attribute < CHAR_ATTR_BEGIN) return ATTRIBMOD_INVALID_ATTRIBUTE;
-    if (attribute >= CHAR_ATTR_END) return ATTRIBMOD_INVALID_ATTRIBUTE;
+    if (!attributeManager->isAttributeDirectlyModifiable(attribute))
+        return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCorrectionPoints) return ATTRIBMOD_NO_POINTS_LEFT;
     if (getAttribute(attribute) <= 1) return ATTRIBMOD_DENIED;
 
-    mCorrectionPoints--;
-    mCharacterPoints++;
+    --mCorrectionPoints;
+    ++mCharacterPoints;
     setAttribute(attribute, getAttribute(attribute) - 1);
     modifiedAttribute(attribute);
     return ATTRIBMOD_OK;

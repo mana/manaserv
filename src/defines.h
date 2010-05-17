@@ -21,6 +21,8 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#define SQRT2 1.4142135623730950488
+
 /**
  * Enumeration type for account levels.
  * A normal player would have permissions of 1
@@ -43,7 +45,7 @@ enum
      * Guild member permissions
      * Members with NONE cannot invite users or set permissions
      * Members with TOPIC_CHANGE can change the guild channel topic
-     * Members with INVIT can invite other users
+     * Members with INVITE can invite other users
      * Memeber with KICK can remove other users
      * Members with OWNER can invite users and set permissions
      */
@@ -103,52 +105,67 @@ enum Element
 };
 
 /**
- * Attributes used during combat. Available to all the beings.
+ * A series of hardcoded attributes that must be defined.
+ * Much of these serve only to indicate derivatives, and so would not be
+ * needed once this is no longer a hardcoded system.
  */
-enum
-{
-    BASE_ATTR_BEGIN = 0,
-    BASE_ATTR_PHY_ATK_MIN = BASE_ATTR_BEGIN,
-    BASE_ATTR_PHY_ATK_DELTA,
-                       /**< Physical attack power. */
-    BASE_ATTR_MAG_ATK, /**< Magical attack power. */
-    BASE_ATTR_PHY_RES, /**< Resistance to physical damage. */
-    BASE_ATTR_MAG_RES, /**< Resistance to magical damage. */
-    BASE_ATTR_EVADE,   /**< Ability to avoid hits. */
-    BASE_ATTR_HIT,     /**< Ability to hit stuff. */
-    BASE_ATTR_HP,      /**< Hit Points (Base value: maximum, Modded value: current) */
-    BASE_ATTR_HP_REGEN,/**< number of HP regenerated every 10 game ticks */
-    BASE_ATTR_END,
-    BASE_ATTR_NB = BASE_ATTR_END - BASE_ATTR_BEGIN,
 
-    BASE_ELEM_BEGIN = BASE_ATTR_END,
-    BASE_ELEM_NEUTRAL = BASE_ELEM_BEGIN,
-    BASE_ELEM_FIRE,
-    BASE_ELEM_WATER,
-    BASE_ELEM_EARTH,
-    BASE_ELEM_AIR,
-    BASE_ELEM_SACRED,
-    BASE_ELEM_DEATH,
-    BASE_ELEM_END,
-    BASE_ELEM_NB = BASE_ELEM_END - BASE_ELEM_BEGIN,
+#define ATTR_STR                1
+#define ATTR_AGI                2
+#define ATTR_VIT                3
+#define ATTR_INT                4
+#define ATTR_DEX                5
+#define ATTR_WIL                6
 
-    NB_BEING_ATTRIBUTES = BASE_ELEM_END
-};
+#define ATTR_ACCURACY           7
+#define ATTR_DEFENSE            8
+#define ATTR_DODGE              9
+
+#define ATTR_MAGIC_DODGE        10
+#define ATTR_MAGIC_DEFENSE      11
+
+#define ATTR_BONUS_ASPD         12
+
+#define ATTR_HP                 13
+#define ATTR_MAX_HP             14
+#define ATTR_HP_REGEN           15
+
+
+// Separate primary movespeed (tiles * second ^-1) and derived movespeed (raw)
+#define ATTR_MOVE_SPEED_TPS     16
+#define ATTR_MOVE_SPEED_RAW     17
+#define ATTR_GP                 18
+#define ATTR_INV_CAPACITY       19
 
 /**
- * Attributes of characters. Used to derive being attributes.
+ * Temporary attributes.
+ * @todo Use AutoAttacks instead.
  */
-enum
-{
-    CHAR_ATTR_BEGIN = NB_BEING_ATTRIBUTES,
-    CHAR_ATTR_STRENGTH = CHAR_ATTR_BEGIN,
-    CHAR_ATTR_AGILITY,
-    CHAR_ATTR_DEXTERITY,
-    CHAR_ATTR_VITALITY,
-    CHAR_ATTR_INTELLIGENCE,
-    CHAR_ATTR_WILLPOWER,
-    CHAR_ATTR_END,
-    CHAR_ATTR_NB = CHAR_ATTR_END - CHAR_ATTR_BEGIN
+#define MOB_ATTR_PHY_ATK_MIN    20
+#define MOB_ATTR_PHY_ATK_DELTA  21
+#define MOB_ATTR_MAG_ATK        22
+
+/**
+ * Attribute types. Can be one of stackable, non stackable, or non stackable bonus.
+ * @todo non-stackable malus layers
+ */
+
+enum AT_TY {
+    TY_ST,
+    TY_NST,
+    TY_NSTB,
+    TY_NONE // Should only be used on types that have not yet been properly defined
+};
+
+enum AME_TY {
+    AME_MULT,
+    AME_ADD
+};
+
+struct AttributeInfoType {
+        AT_TY sType;
+        AME_TY eType;
+        AttributeInfoType(AT_TY s, AME_TY e) : sType(s), eType(e) {}
 };
 
 #endif // DEFINES_H

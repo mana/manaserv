@@ -53,7 +53,7 @@ struct MonsterAttack
     int priority;
     float damageFactor;
     int element;
-    int type;
+    DMG_TY type;
     int preDelay;
     int aftDelay;
     int range;
@@ -70,7 +70,6 @@ class MonsterClass
     public:
         MonsterClass(int id):
             mID(id),
-            mAttributes(BASE_ATTR_NB, 0),
             mSpeed(1),
             mSize(16),
             mExp(-1),
@@ -105,14 +104,8 @@ class MonsterClass
         /**
          * Returns a being base attribute.
          */
-        int getAttribute(size_t attribute) const
+        int getAttribute(unsigned int attribute) const
         { return mAttributes.at(attribute); }
-
-        /** Sets movement speed in tiles per second. */
-        void setSpeed(float speed) { mSpeed = speed; }
-
-        /** Returns movement speed in tiles per second. */
-        float getSpeed() const { return mSpeed; }
 
         /** Sets collision circle radius. */
         void setSize(int size) { mSize = size; }
@@ -180,14 +173,15 @@ class MonsterClass
         const std::string &getScript() const { return mScript; }
 
         /**
-         * Randomly selects a monster drop (may return NULL).
+         * Randomly selects a monster drop
+         * @returns A class of item to drop, or NULL if none was found.
          */
         ItemClass *getRandomDrop() const;
 
     private:
         unsigned short mID;
         MonsterDrops mDrops;
-        std::vector<int> mAttributes; /**< Base attributes of the monster. */
+        std::map<unsigned int, double> mAttributes; /**< Base attributes of the monster. */
         float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
         int mExp;
@@ -200,6 +194,8 @@ class MonsterClass
         int mOptimalLevel;
         MonsterAttacks mAttacks;
         std::string mScript;
+
+        friend class MonsterManager;
 };
 
 /**
@@ -212,7 +208,7 @@ struct AttackPosition
         x(posX),
         y(posY),
         direction(dir)
-    {};
+    {}
 
     int x;
     int y;

@@ -133,6 +133,9 @@ class AccountConnection : public Connection
                                    int corrPoints, int attribId,
                                    int attribValue);
 
+        void updateAttributes(int charId, int attrId, double base,
+                              double mod);
+
         /**
          * Write a modification message about character skills to the sync
          * buffer.

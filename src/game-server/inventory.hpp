@@ -24,10 +24,10 @@
 #include "game-server/character.hpp"
 #include "net/messageout.hpp"
 
-enum
+/*enum
 {
 // Equipment rules:
-// 1 Brest equipment
+// 1 torso equipment
     EQUIP_TORSO_SLOT = 0,
 // 1 arms equipment
     EQUIP_ARMS_SLOT = 1,
@@ -53,9 +53,9 @@ enum
     EQUIP_PROJECTILE_SLOT = 10,
 
     EQUIP_CLIENT_INVENTORY = 32
-};
+};*/
 
-class GameClient;
+class ItemClass;
 
 /**
  * Class used to handle Character possessions and prepare outgoing messages.
@@ -66,28 +66,33 @@ class Inventory
 
         /**
          * Creates a view on the possessions of a character.
-         * @param delayed true if changes have to be cancelable.
+         * @param delayed If the changes need to be cancelable.
          */
         Inventory(Character *, bool delayed = false);
 
         /**
-         * Commits delayed changes.
+         * Commits delayed changes if applicable.
          * Sends the update message to the client.
          */
         ~Inventory();
 
         /**
-         * Commits delayed changes.
+         * Commits changes.
+         * Exclusive to delayed mode.
+         * @param doRestart Whether to prepare the inventory for more changes
+                   after this. If you are unsure, it is safe (though not
+                   terribly efficient) to leave this as true.
          */
-        void commit();
+        void commit(bool doRestart = true);
 
         /**
-         * Cancels delayed changes.
+         * Cancels changes.
+         * Exclusive to delayed mode.
          */
         void cancel();
 
         /**
-         * Sends a complete inventory update to the client.
+         * Sends complete inventory status to the client.
          */
         void sendFull() const;
 
@@ -95,117 +100,110 @@ class Inventory
          * Ensures the inventory is sane and apply equipment modifiers.
          * Should be run only once and the very first time.
          */
-        void initialize();
+        void initialise();
 
         /**
          * Equips item from given inventory slot.
+         * @param slot The slot in which the target item is in.
+         * @param override Whether this item can unequip other items to equip
+         *            itself. If true, items that are unequipped will be
+         *            attempted to be reequipped, but with override disabled.
+         * @returns whether the item could be equipped.
          */
-        void equip(int slot);
+        bool equip(int slot, bool override = true);
 
         /**
          * Unequips item from given equipment slot.
+         * @param it Starting iterator. When the only parameter, also extracts
+         *           slot number from it.
+         *           Used so that when we already have an iterator to the first
+         *           occurence from a previous operation we can start from
+         *           there.
+         * @returns Whether it was unequipped.
          */
-        void unequip(int slot);
-
-        /**
-         * Gets the ID of projectiles. Removes one of these projectiles from
-         * inventory.
-         */
-        int fireProjectile();
+        bool unequip(EquipData::iterator it);
+        bool unequip(unsigned int slot, EquipData::iterator *itp = 0);
 
         /**
          * Inserts some items into the inventory.
          * @return number of items not inserted (to be dropped on floor?).
          */
-        int insert(int itemId, int amount);
+        unsigned int insert(unsigned int itemId, unsigned int amount);
 
         /**
          * Removes some items from inventory.
+         * @param force If set to true, also remove any equipment encountered
          * @return number of items not removed.
          */
-        int remove(int itemId, int amount);
+        unsigned int remove(unsigned int itemId, unsigned int amount, bool force = false);
 
         /**
          * Moves some items from the first slot to the second one.
          * @returns number of items not moved.
          */
-        int move(int slot1, int slot2, int amount);
+        unsigned int move(unsigned int slot1, unsigned int slot2, unsigned int amount);
 
         /**
          * Removes some items from inventory.
          * @return number of items not removed.
          */
-        int removeFromSlot(int slot, int amount);
+        unsigned int removeFromSlot(unsigned int slot, unsigned int amount);
 
         /**
          * Counts number of items with given ID.
          */
-        int count(int itemId) const;
+        unsigned int count(unsigned int itemId) const;
 
         /**
          * Gets the ID of the items in a given slot.
          */
-        int getItem(int slot) const;
-
-        /**
-         * Changes amount of money.
-         * @return false if not enough money.
-         */
-        bool changeMoney(int);
+        unsigned int getItem(unsigned int slot) const;
 
     private:
 
         /**
-         * Ensures we are working on a copy in delayed mode.
+         * Make sure that changes are being done on a copy, not directly.
+         * No effect when not in delayed mode.
          */
         void prepare();
-
-        /**
-         * Updates the original in delayed mode.
-         */
-        void update();
 
         /**
          * Starts a new notification message.
          */
         void restart();
 
-        /**
-         * Fills some slots with items.
-         * @return number of items not inserted.
-         */
-        int fillFreeSlot(int itemId, int amount, int MaxPerSlot);
 
         /**
-         * Frees an inventory slot given by its real index.
+         * Check the inventory is within the slot limit and capacity.
+         * Forcibly delete items from the end if it is not.
+         * @todo Drop items instead?
          */
-        void freeIndex(int index);
+        void checkSize();
 
         /**
-         * Gets the real index associated to a slot.
+         * Helper function for equip() when computing changes to equipment
+         * When newCount is 0, the item is being unequipped.
          */
-        int getIndex(int slot) const;
-
-        /**
-         * Gets the slot number of an inventory index.
-         */
-        int getSlot(int index) const;
-
-        /**
-         * Replaces a whole slot of items from inventory.
-         */
-        void replaceInSlot(int slot, int itemId, int amount);
+        // inventory slot -> {equip slots}
+        typedef std::multimap<unsigned int, unsigned short> IdSlotMap;
+        void equip_sub(unsigned int newCount, IdSlotMap::const_iterator &it);
 
         /**
          * Changes equipment and adjusts character attributes.
          */
-        void changeEquipment(int slot, int itemId);
+        void changeEquipment(unsigned int oldId, unsigned int itemId);
+        void changeEquipment(ItemClass *oldI, ItemClass *newI);
 
         Possessions *mPoss; /**< Pointer to the modified possessions. */
-        MessageOut msg;     /**< Update message containing all the changes. */
+        /**
+         * Update message containing inventory changes.
+         * Note that in sendFull(), this is reused to send all full changes
+         * (for both inventory and equipment)
+         */
+        MessageOut mInvMsg;
+        MessageOut mEqmMsg; /**< Update message containing equipment changes */
         Character *mClient; /**< Character to notify. */
         bool mDelayed;      /**< Delayed changes. */
-        bool mChangedLook;  /**< Need to notify of a visible equipment change. */
 };
 
 

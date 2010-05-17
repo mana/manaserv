@@ -41,10 +41,16 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     msg.writeShort(data.getCharacterPoints());
     msg.writeShort(data.getCorrectionPoints());
 
-    // character attributes
-    for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
+    msg.writeShort(data.mAttributes.size());
+    AttributeMap::const_iterator attr_it, attr_it_end;
+    for (attr_it = data.mAttributes.begin(),
+         attr_it_end = data.mAttributes.end();
+         attr_it != attr_it_end;
+         ++attr_it)
     {
-        msg.writeByte(data.getAttribute(i));
+        msg.writeShort(attr_it->first);
+        msg.writeDouble(data.getAttrBase(attr_it));
+        msg.writeDouble(data.getAttrMod(attr_it));
     }
 
     // character skills
@@ -91,18 +97,22 @@ void serializeCharacterData(const T &data, MessageOut &msg)
 
     // inventory - must be last because size isn't transmitted
     const Possessions &poss = data.getPossessions();
-    msg.writeLong(poss.money);
-    for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
+    msg.writeShort(poss.equipSlots.size()); // number of equipment
+    for (EquipData::const_iterator k = poss.equipSlots.begin(),
+             k_end = poss.equipSlots.end();
+             k != k_end;
+             ++k)
     {
-        msg.writeShort(poss.equipment[j]);
+        msg.writeByte(k->first);            // Equip slot type
+        msg.writeShort(k->second);          // Inventory slot
     }
-    for (std::vector< InventoryItem >::const_iterator j = poss.inventory.begin(),
+    for (InventoryData::const_iterator j = poss.inventory.begin(),
          j_end = poss.inventory.end(); j != j_end; ++j)
     {
-        msg.writeShort(j->itemId);
-        msg.writeByte(j->amount);
+        msg.writeShort(j->first);           // slot id
+        msg.writeShort(j->second.itemId);   // item type
+        msg.writeShort(j->second.amount);   // amount
     }
-
 }
 
 template< class T >
@@ -118,9 +128,14 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setCorrectionPoints(msg.readShort());
 
     // character attributes
-    for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
+    unsigned int attrSize = msg.readShort();
+    for (unsigned int i = 0; i < attrSize; ++i)
     {
-        data.setAttribute(i, msg.readByte());
+        unsigned int id = msg.readShort();
+        double base = msg.readDouble(),
+               mod  = msg.readDouble();
+        data.setAttribute(id, base);
+        data.setModAttribute(id, mod);
     }
 
     // character skills
@@ -168,20 +183,31 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         data.giveSpecial(msg.readLong());
     }
 
-    // inventory - must be last because size isn't transmitted
+
     Possessions &poss = data.getPossessions();
-    poss.money = msg.readLong();
-    for (int j = 0; j < EQUIPMENT_SLOTS; ++j)
+    poss.equipSlots.clear();
+    int equipSlotsSize = msg.readShort();
+    unsigned int eqSlot, invSlot;
+    for (int j = 0; j < equipSlotsSize; ++j)
     {
-        poss.equipment[j] = msg.readShort();
+        int equipmentInSlotType = msg.readByte();
+        for (int k = 0; k < equipmentInSlotType; ++k)
+        {
+            eqSlot  = msg.readByte();
+            invSlot = msg.readShort();
+            poss.equipSlots.insert(poss.equipSlots.end(),
+                                   std::make_pair(eqSlot, invSlot));
+        }
     }
     poss.inventory.clear();
+    // inventory - must be last because size isn't transmitted
     while (msg.getUnreadLength())
     {
         InventoryItem i;
-        i.itemId = msg.readShort();
-        i.amount = msg.readByte();
-        poss.inventory.push_back(i);
+        int slotId = msg.readShort();
+        i.itemId   = msg.readShort();
+        i.amount   = msg.readShort();
+        poss.inventory.insert(poss.inventory.end(), std::make_pair(slotId, i));
     }
 
 }

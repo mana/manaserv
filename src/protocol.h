@@ -57,7 +57,10 @@ enum {
     APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
     PAMSG_CHAR_DELETE              = 0x0022, // B index
     APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
-    APMSG_CHAR_INFO                = 0x0024, // B index, S name, B gender, B hair style, B hair color, W level, W character points, W correction points, D money, W*6 stats
+    // B index, S name, B gender, B hair style, B hair color, W level,
+    // W character points, W correction points,
+    // {D attr id, D base value (in 1/256ths) D mod value (in 256ths) }*
+    APMSG_CHAR_INFO                = 0x0024, // ^
     PAMSG_CHAR_SELECT              = 0x0026, // B index
     APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, B*32 token, S game address, W game port, S chat address, W chat port
     PAMSG_EMAIL_CHANGE             = 0x0030, // S email
@@ -86,16 +89,17 @@ enum {
     PGMSG_EQUIP                    = 0x0112, // B slot
     PGMSG_UNEQUIP                  = 0x0113, // B slot
     PGMSG_MOVE_ITEM                = 0x0114, // B slot1, B slot2, B amount
-    GPMSG_INVENTORY                = 0x0120, // { B slot, W item id [, B amount] }*
-    GPMSG_INVENTORY_FULL           = 0x0121, // { B slot, W item id [, B amount] }*
-    GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, W base value, W modified value }*
+    GPMSG_INVENTORY                = 0x0120, // { W slot, W item id [, W amount] (if item id is nonzero) }*
+    GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount }, { B equip slot, W invy slot}*
+    GPMSG_EQUIP                    = 0x0122, // { W Invy slot, B equip slot type count { B equip slot, B number used} }*
+    GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, D base value (in 1/256ths), D modified value (in 1/256ths)}*
     GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { W skill, D exp got, D exp needed }*
     GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points
     GPMSG_LEVEL_PROGRESS           = 0x0151, // B percent completed to next levelup
-    PGMSG_RAISE_ATTRIBUTE          = 0x0160, // B attribute
-    GPMSG_RAISE_ATTRIBUTE_RESPONSE = 0x0161, // B error, B attribute
-    PGMSG_LOWER_ATTRIBUTE          = 0x0170, // B attribute
-    GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error, B attribute
+    PGMSG_RAISE_ATTRIBUTE          = 0x0160, // W attribute
+    GPMSG_RAISE_ATTRIBUTE_RESPONSE = 0x0161, // B error, W attribute
+    PGMSG_LOWER_ATTRIBUTE          = 0x0170, // W attribute
+    GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error, W attribute
     PGMSG_RESPAWN                  = 0x0180, // -
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
                                              // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
@@ -109,7 +113,7 @@ enum {
     GPMSG_BEING_ACTION_CHANGE      = 0x0271, // W being id, B action
     PGMSG_DIRECTION_CHANGE         = 0x0272, // B Direction
     GPMSG_BEING_DIR_CHANGE         = 0x0273, // W being id, B direction
-    GPMSG_BEING_HEALTH_CHANGE      = 0x0274, // W being id, W health
+    GPMSG_BEING_HEALTH_CHANGE      = 0x0274, // W being id, W hp, W max hp
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, W*2 position, B speed] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     PGMSG_ATTACK                   = 0x0290, // W being id
@@ -272,10 +276,11 @@ enum {
 
 // used to identify part of sync message
 enum {
-    SYNC_CHARACTER_POINTS = 0x01,       // D charId, D charPoints, D corrPoints, B attribute id, D attribute value
-    SYNC_CHARACTER_SKILL  = 0x02,       // D charId, B skillId, D skill value
-    SYNC_ONLINE_STATUS    = 0x03,       // D charId, B 0x00 = offline, 0x01 = online
-    SYNC_END_OF_BUFFER    = 0xFF        // shows, that the buffer ends here.
+    SYNC_CHARACTER_POINTS    = 0x01,       // D charId, D charPoints, D corrPoints
+    SYNC_CHARACTER_ATTRIBUTE = 0x02,       // D charId, D attrId, DF base, DF mod
+    SYNC_CHARACTER_SKILL     = 0x03,       // D charId, B skillId, D skill value
+    SYNC_ONLINE_STATUS       = 0x04,       // D charId, B 0x00 = offline, 0x01 = online
+    SYNC_END_OF_BUFFER       = 0xFF        // shows, that the buffer ends here.
 };
 
 // Login specific return values

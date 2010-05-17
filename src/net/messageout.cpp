@@ -21,6 +21,10 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#ifndef USE_NATIVE_DOUBLE
+#include <limits>
+#include <sstream>
+#endif
 #include <string>
 #include <enet/enet.h>
 
@@ -96,6 +100,25 @@ void MessageOut::writeLong(int value)
     uint32_t t = ENET_HOST_TO_NET_32(value);
     memcpy(mData + mPos, &t, 4);
     mPos += 4;
+}
+
+void MessageOut::writeDouble(double value)
+{
+#ifdef USE_NATIVE_DOUBLE
+    expand(mPos + sizeof(double));
+    memcpy(mData + mPos, &value, sizeof(double));
+    mPos += sizeof(double);
+#else
+// Rather inefficient, but I don't have a lot of time.
+// If anyone wants to implement a custom double you are more than welcome to.
+    std::ostringstream o;
+    // Highest precision for double
+    o.precision(std::numeric_limits< double >::digits10);
+    o << value;
+    std::string str = o.str();
+    writeByte(str.size());
+    writeString(str, str.size());
+#endif
 }
 
 void MessageOut::writeCoordinates(int x, int y)
