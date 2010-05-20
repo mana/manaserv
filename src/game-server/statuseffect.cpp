@@ -23,25 +23,25 @@
 #include "scripting/script.hpp"
 #include "game-server/being.hpp"
 
-StatusEffect::StatusEffect(int id)
+StatusEffect::StatusEffect(int id):
+    mId(id),
+    mScript(0)
 {
-    mId = id;
-    mScript = NULL;
 }
 
 StatusEffect::~StatusEffect()
 {
-     if (mScript) delete mScript;
+    delete mScript;
 }
 
 void StatusEffect::tick(Being *target, int count)
 {
-     if (mScript)
-     {
-         mScript->setMap(target->getMap());
-         mScript->prepare("tick");
-         mScript->push(target);
-         mScript->push(count);
-         mScript->execute();
-     }
+    if (mScript)
+    {
+        mScript->setMap(target->getMap());
+        mScript->prepare("tick");
+        mScript->push(target);
+        mScript->push(count);
+        mScript->execute();
+    }
 }

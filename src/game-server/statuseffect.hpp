@@ -27,7 +27,7 @@ class Being;
 class StatusEffect
 {
     public:
-        StatusEffect(int);
+        StatusEffect(int id);
         ~StatusEffect();
 
         void tick(Being *target, int count);
@@ -36,7 +36,7 @@ class StatusEffect
         { return mId; }
 
         void setScript(Script *script)
-        { mScript = script; };
+        { mScript = script; }
 
     private:
         int mId;
