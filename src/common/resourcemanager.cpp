@@ -55,8 +55,17 @@ bool ResourceManager::exists(const std::string &path)
     return PHYSFS_exists(path.c_str());
 }
 
+std::string ResourceManager::resolve(const std::string &path)
+{
+    const char *realDir = PHYSFS_getRealDir(path.c_str());
+    if (realDir)
+        return std::string(realDir) + "/" + path;
+
+    return std::string();
+}
+
 char *ResourceManager::loadFile(const std::string &fileName, int &fileSize,
-                                             bool removeBOM)
+                                bool removeBOM)
 {
     // Attempt to open the specified file using PhysicsFS
     PHYSFS_file* file = PHYSFS_openRead(fileName.c_str());

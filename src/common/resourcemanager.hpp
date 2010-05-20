@@ -36,6 +36,12 @@ namespace ResourceManager
     bool exists(const std::string &path);
 
     /**
+     * Returns the real file-system path of the resource with the given
+     * resource path.
+     */
+    std::string resolve(const std::string &path);
+
+    /**
      * Allocates data into a buffer pointer for raw data loading. The
      * returned data is expected to be freed using <code>free()</code>.
      *
