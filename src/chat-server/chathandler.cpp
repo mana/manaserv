@@ -495,8 +495,8 @@ ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
     Transaction trans;
     trans.mCharacterId = client.characterId;
     trans.mAction = TRANS_CHANNEL_MODE;
-    trans.mMessage = "User mode " + mode;
-    trans.mMessage.append(" set on " + user);
+    trans.mMessage = "User mode ";
+    trans.mMessage.append(mode + " set on " + user);
     storage->addTransaction(trans);
 }
 

@@ -438,6 +438,7 @@ void Being::update()
         if (it->second.time <= 0 || mAction == DEAD)
         {
             mStatus.erase(it);
+            it = mStatus.begin();
         }
         it++;
     }
