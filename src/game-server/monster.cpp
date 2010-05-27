@@ -422,18 +422,18 @@ void Monster::died()
     Being::died();
     setTimerHard(T_M_DECAY, Monster::DECAY_TIME);
 
-    //drop item
-    if (ItemClass *drop = mSpecy->getRandomDrop())
-    {
-        Item *item = new Item(drop, 1);
-        item->setMap(getMap());
-        item->setPosition(getPosition());
-        GameState::enqueueInsert(item);
-    }
-
-    //distribute exp reward
     if (mExpReceivers.size() > 0)
     {
+        // If the monster was killed by players, randomly drop an item.
+        if (ItemClass *drop = mSpecy->getRandomDrop())
+        {
+            Item *item = new Item(drop, 1);
+            item->setMap(getMap());
+            item->setPosition(getPosition());
+            GameState::enqueueInsert(item);
+        }
+
+        // Distribute exp reward.
         std::map<Character *, std::set <size_t> > ::iterator iChar;
         std::set<size_t>::iterator iSkill;
 
@@ -453,7 +453,8 @@ void Monster::died()
             int expPerSkill = int(expPerChar / skillSet->size());
             for (iSkill = skillSet->begin(); iSkill != skillSet->end(); iSkill++)
             {
-                character->receiveExperience(*iSkill, expPerSkill, mSpecy->getOptimalLevel());
+                character->receiveExperience(*iSkill, expPerSkill,
+                                             mSpecy->getOptimalLevel());
             }
             character->incrementKillCount(mSpecy->getType());
         }
