@@ -34,8 +34,19 @@ void raiseScriptError(lua_State *s, const char *format, ...)
     vsprintf(message, format, args);
     va_end( args );
 
-    LOG_WARN("Lua script error: "<<message);
+    LOG_WARN("Lua script error: "<< message);
     luaL_error(s, message);
+}
+
+void raiseWarning(lua_State *s, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    char message[1024];
+    vsprintf(message, format, args);
+    va_end( args );
+
+    LOG_WARN("Lua script error: "<< message);
 }
 
 /* Functions below are unsafe, as they assume the script has passed pointers

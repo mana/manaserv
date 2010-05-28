@@ -59,7 +59,6 @@ extern "C" {
  * http://doc.manasource.org/scripting
  */
 
-
 /**
  * Callback for sending a NPC_MESSAGE.
  * mana.npc_message(npc, character, string)
@@ -79,7 +78,7 @@ static int npc_message(lua_State *s)
     msg.writeShort(p->getPublicID());
     msg.writeString(std::string(m), l);
     gameHandler->sendTo(q, msg);
-    return 0;
+    return 1;
 }
 
 /**
@@ -442,44 +441,106 @@ static int chr_inv_count(lua_State *s)
 /**
  * Callback for trading between a player and an NPC.
  * mana.npc_trade(npc, character, bool sell, table items)
+ * Let the player buy or sell only a subset of predeterminded items.
+ * @param table items: a subset of buyable/sellable items.
+ * When selling, if the 4 parameter is omitted or invalid,
+ * everything in the player inventory can be sold.
+ * @return 0 if something to buy/sell, 1 if no items, 2 in case of errors.
  */
 static int npc_trade(lua_State *s)
 {
     NPC *p = getNPC(s, 1);
     Character *q = getCharacter(s, 2);
-    if (!p || !q || !lua_isboolean(s, 3) || !lua_istable(s, 4))
+    if (!p || !q || !lua_isboolean(s, 3))
     {
-        raiseScriptError(s, "npc_trade called with incorrect parameters.");
-        return 0;
+        raiseWarning(s, "npc_trade called with incorrect parameters.");
+        lua_pushinteger(s, 2); // return value
+        return 1; // Returns 1 parameter
     }
-    BuySell *t = new BuySell(q, lua_toboolean(s, 3));
+
+    bool sellMode = lua_toboolean(s, 3);
+    BuySell *t = new BuySell(q, sellMode);
+    if (!lua_istable(s, 4))
+    {
+        if (sellMode)
+        {
+            // Can sell everything
+            if (!t->registerPlayerItems())
+            {
+                // No items to sell in player inventory
+                t->cancel();
+                lua_pushinteger(s, 1);
+                return 1;
+            }
+
+            if (t->start(p))
+            {
+              lua_pushinteger(s, 0);
+              return 1;
+            }
+            else
+            {
+              lua_pushinteger(s, 1);
+              return 1;
+            }
+        }
+        else
+        {
+            raiseWarning(s, "npc_trade[Buy] called with invalid or empty items table parameter.");
+            t->cancel();
+            lua_pushinteger(s, 2);
+            return 1;
+        }
+    }
+
+    int nbItems = 0;
+
     lua_pushnil(s);
     while (lua_next(s, 4))
     {
         if (!lua_istable(s, -1))
         {
-            raiseScriptError(s, "npc_trade called with incorrect parameters.");
+            raiseWarning(s, "npc_trade called with invalid or empty items table parameter.");
             t->cancel();
-            return 0;
+            lua_pushinteger(s, 2);
+            return 1;
         }
+
         int v[3];
         for (int i = 0; i < 3; ++i)
         {
             lua_rawgeti(s, -1, i + 1);
             if (!lua_isnumber(s, -1))
             {
-                raiseScriptError(s, "rpc_trade called with incorrect parameters.");
+                raiseWarning(s, "npc_trade called with incorrect parameters in item table.");
                 t->cancel();
-                return 0;
+                lua_pushinteger(s, 2);
+                return 1;
             }
             v[i] = lua_tointeger(s, -1);
             lua_pop(s, 1);
         }
-        t->registerItem(v[0], v[1], v[2]);
+        if (t->registerItem(v[0], v[1], v[2]))
+            nbItems++;
         lua_pop(s, 1);
     }
-    t->start(p);
-    return 0;
+
+    if (nbItems == 0)
+    {
+        t->cancel();
+        lua_pushinteger(s, 1);
+        return 1;
+    }
+    if (t->start(p))
+    {
+      lua_pushinteger(s, 0);
+      return 1;
+    }
+    else
+    {
+      lua_pushinteger(s, 1);
+      return 1;
+    }
 }
 
 /**

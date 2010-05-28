@@ -43,13 +43,21 @@ class BuySell
         /**
          * Registers an item and indicates how many the NPC is ready to trade
          * and how much it will cost.
+         * @return true if at least one item was registered.
          */
-        void registerItem(int id, int amount, int cost);
+        bool registerItem(int id, int amount, int cost);
+
+        /**
+         * Registers every player's item at an average cost given by the ItemDB.
+         * @return the number of different soldable items.
+         */
+        int registerPlayerItems();
 
         /**
          * Sends the item list to player.
+         * @return true if at least one item was registered before start.
          */
-        void start(Actor *actor);
+        bool start(Actor *actor);
 
         /**
          * Performs the trade.

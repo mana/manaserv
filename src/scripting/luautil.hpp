@@ -36,7 +36,10 @@ class NPC;
 class Character;
 class Thing;
 
+// Report script errors and interrupt the script.
 void raiseScriptError(lua_State *s, const char *format, ...);
+
+void raiseWarning(lua_State *s, const char *format, ...);
 
 NPC *getNPC(lua_State *s, int p);
 Character *getCharacter(lua_State *s, int p);

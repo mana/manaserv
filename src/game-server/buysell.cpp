@@ -23,6 +23,8 @@
 #include "game-server/character.hpp"
 #include "game-server/gamehandler.hpp"
 #include "game-server/inventory.hpp"
+#include "game-server/itemmanager.hpp"
+#include "game-server/item.hpp"
 #include "net/messageout.hpp"
 
 #include <algorithm>
@@ -43,27 +45,54 @@ void BuySell::cancel()
     delete this;
 }
 
-void BuySell::registerItem(int id, int amount, int cost)
+bool BuySell::registerItem(int id, int amount, int cost)
 {
     if (mSell)
     {
         int nb = Inventory(mChar).count(id);
         if (nb == 0)
-            return;
+            return false;
         if (!amount || nb < amount)
             amount = nb;
     }
 
     TradedItem it = { id, amount, cost };
     mItems.push_back(it);
+    return true;
 }
 
-void BuySell::start(Actor *actor)
+int BuySell::registerPlayerItems()
+{
+    int nbItemsToSell = 0;
+    if (mSell)
+    {
+        for (int i = 0; i < EQUIPMENT_SLOTS; ++i)
+        {
+            int id = Inventory(mChar).getItem(i);
+            int nb = Inventory(mChar).count(id);
+            if (nb > 0)
+            {
+                int cost = -1;
+                if (ItemManager::getItem(id))
+                    cost = ItemManager::getItem(id)->getCost();
+                if (cost > 0)
+                {
+                    TradedItem it = { id, nb, cost };
+                    mItems.push_back(it);
+                    nbItemsToSell++;
+                }
+            }
+        }
+    }
+    return nbItemsToSell;
+}
+
+bool BuySell::start(Actor *actor)
 {
     if (mItems.empty())
     {
         cancel();
-        return;
+        return false;
     }
 
     MessageOut msg(mSell ? GPMSG_NPC_SELL : GPMSG_NPC_BUY);
@@ -76,6 +105,7 @@ void BuySell::start(Actor *actor)
         msg.writeShort(i->cost);
     }
     mChar->getClient()->send(msg);
+    return true;
 }
 
 void BuySell::perform(int id, int amount)
