@@ -49,6 +49,8 @@ void ItemManager::reload()
     // Note: The file is checked for UTF-8 BOM.
     char *data = ResourceManager::loadFile(itemReferenceFile, size, true);
 
+    std::string absPathFile = ResourceManager::resolve(itemReferenceFile);
+
     if (!data) {
         LOG_ERROR("Item Manager: Could not find " << itemReferenceFile << "!");
         free(data);
@@ -61,20 +63,20 @@ void ItemManager::reload()
     if (!doc)
     {
         LOG_ERROR("Item Manager: Error while parsing item database ("
-                  << itemReferenceFile << ")!");
+                  << absPathFile << ")!");
         return;
     }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
     if (!node || !xmlStrEqual(node->name, BAD_CAST "items"))
     {
-        LOG_ERROR("Item Manager: " << itemReferenceFile
+        LOG_ERROR("Item Manager: " << absPathFile
                   << " is not a valid database file!");
         xmlFreeDoc(doc);
         return;
     }
 
-    LOG_INFO("Loading item reference...");
+    LOG_INFO("Loading item reference: " << absPathFile);
     unsigned nbItems = 0;
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {

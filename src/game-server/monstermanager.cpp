@@ -66,6 +66,8 @@ void MonsterManager::reload()
     // Note: The file is checked for UTF-8 BOM.
     char *data = ResourceManager::loadFile(monsterReferenceFile, size, true);
 
+    std::string absPathFile = ResourceManager::resolve(monsterReferenceFile);
+
     if (!data) {
         LOG_ERROR("Monster Manager: Could not find "
                   << monsterReferenceFile << "!");
@@ -79,20 +81,20 @@ void MonsterManager::reload()
     if (!doc)
     {
         LOG_ERROR("Monster Manager: Error while parsing monster database ("
-                  << monsterReferenceFile << ")!");
+                  << absPathFile << ")!");
         return;
     }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
     if (!node || !xmlStrEqual(node->name, BAD_CAST "monsters"))
     {
-        LOG_ERROR("Monster Manager: " << monsterReferenceFile
+        LOG_ERROR("Monster Manager: " << absPathFile
                   << " is not a valid database file!");
         xmlFreeDoc(doc);
         return;
     }
 
-    LOG_INFO("Loading monster reference...");
+    LOG_INFO("Loading monster reference: " << absPathFile);
     int nbMonsters = 0;
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
@@ -106,8 +108,9 @@ void MonsterManager::reload()
 
         if (id == -1)
         {
-            LOG_WARN("Monster Manager: There is a monster ("<<name<<") without ID in "
-                     << monsterReferenceFile << "! It has been ignored.");
+            LOG_WARN("Monster Manager: There is a monster ("
+            << name << ") without ID in "
+            << monsterReferenceFile << "! It has been ignored.");
             continue;
         }
 
@@ -193,7 +196,7 @@ void MonsterManager::reload()
                 }
 
                 if (!attributesComplete) LOG_WARN(monsterReferenceFile
-                    <<": Attributes incomplete for monster #"<<id);
+                    << ": Attributes incomplete for monster #" << id);
 
                 //The speed is set in tiles per second in the monsters.xml
                 monster->setSpeed(speed);
@@ -237,20 +240,21 @@ void MonsterManager::reload()
                 if (att->id == 0)
                 {
                     LOG_WARN(monsterReferenceFile
-                             <<": Attack without ID for monster #"
-                             <<id<<" ("<<name<<") - attack ignored");
+                             << ": Attack without ID for monster #"
+                             << id << " (" << name << ") - attack ignored");
                 }
                 else if (att->element == ELEMENT_ILLEGAL)
                 {
                     LOG_WARN(monsterReferenceFile
-                             <<": Attack with unknown element \""<<sElement<<"\" "
-                             <<"for monster #"<<id<<" ("<<name<<") - attack ignored");
+                             << ": Attack with unknown element \""
+                             << sElement << "\" for monster #" << id
+                             << " (" << name << ") - attack ignored");
                 }
                 else if (att->type == -1)
                 {
                     LOG_WARN(monsterReferenceFile
-                             <<": Attack with unknown type \""<<sType<<"\" "
-                             <<"for monster #"<<id<<" ("<<name<<")");
+                             << ": Attack with unknown type \"" << sType << "\""
+                             << " for monster #" << id << " (" << name << ")");
                 }
                 else
                 {
@@ -268,16 +272,16 @@ void MonsterManager::reload()
 
         monster->setDrops(drops);
         if (!attributesSet) LOG_WARN(monsterReferenceFile
-                                    <<": No attributes defined for monster #"
-                                    <<id<<" ("<<name<<")");
+                                    << ": No attributes defined for monster #"
+                                    << id << " (" << name << ")");
         if (!behaviorSet) LOG_WARN(monsterReferenceFile
-                            <<": No behavior defined for monster #"
-                            <<id<<" ("<<name<<")");
+                            << ": No behavior defined for monster #"
+                            << id << " (" << name << ")");
         if (monster->getExp() == -1)
         {
             LOG_WARN(monsterReferenceFile
-                    <<": No experience defined for monster #"
-                    <<id<<" ("<<name<<")");
+                    << ": No experience defined for monster #"
+                    << id << " (" << name << ")");
             monster->setExp(0);
         }
         ++nbMonsters;

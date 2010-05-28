@@ -46,6 +46,8 @@ void StatusManager::reload()
     // Note: The file is checked for UTF-8 BOM.
     char *data = ResourceManager::loadFile(statusReferenceFile, size, true);
 
+    std::string absPathFile = ResourceManager::resolve(statusReferenceFile);
+
     if (!data) {
         LOG_ERROR("Status Manager: Could not find " << statusReferenceFile << "!");
         free(data);
@@ -58,20 +60,20 @@ void StatusManager::reload()
     if (!doc)
     {
         LOG_ERROR("Status Manager: Error while parsing status database ("
-                  << statusReferenceFile << ")!");
+                  << absPathFile << ")!");
         return;
     }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
     if (!node || !xmlStrEqual(node->name, BAD_CAST "status-effects"))
     {
-        LOG_ERROR("Status Manager: " << statusReferenceFile
+        LOG_ERROR("Status Manager: " << absPathFile
                   << " is not a valid database file!");
         xmlFreeDoc(doc);
         return;
     }
 
-    LOG_INFO("Loading status reference...");
+    LOG_INFO("Loading status reference: " << absPathFile);
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
         if (!xmlStrEqual(node->name, BAD_CAST "status-effect"))
@@ -113,7 +115,8 @@ void StatusManager::reload()
                 s->loadFile(filename.str());
                 statusEffect->setScript(s);
             } else {
-                LOG_WARN("Could not find script file \"" << filename.str() << "\" for status #"<<id);
+                LOG_WARN("Could not find script file \"" << filename.str()
+                         << "\" for status #"<<id);
             }
         }
         statusEffects[id] = statusEffect;
@@ -124,7 +127,8 @@ void StatusManager::reload()
 
 void StatusManager::deinitialize()
 {
-    for (StatusEffects::iterator i = statusEffects.begin(), i_end = statusEffects.end(); i != i_end; ++i)
+    for (StatusEffects::iterator i = statusEffects.begin(),
+           i_end = statusEffects.end(); i != i_end; ++i)
     {
         delete i->second;
     }

@@ -249,6 +249,11 @@ static void printHelp()
               << "Options: " << std::endl
               << "  -h --help          : Display this help" << std::endl
               << "     --verbosity <n> : Set the verbosity level" << std::endl
+              << "                        - 0. Fatal Errors only." << std::endl
+              << "                        - 1. All Errors." << std::endl
+              << "                        - 2. Plus warnings." << std::endl
+              << "                        - 3. Plus standard information." << std::endl
+              << "                        - 4. Plus debugging information." << std::endl
               << "     --port <n>      : Set the default port to listen on" << std::endl;
     exit(0);
 }

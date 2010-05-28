@@ -48,6 +48,8 @@ unsigned int MapManager::initialize(const std::string &mapReferenceFile)
     // Note: The file is checked for UTF-8 BOM.
     char *data = ResourceManager::loadFile(mapReferenceFile, size, true);
 
+    std::string absPathFile = ResourceManager::resolve(mapReferenceFile);
+
     if (!data) {
         LOG_ERROR("Map Manager: Could not find " << mapReferenceFile << "!");
         free(data);
@@ -60,20 +62,20 @@ unsigned int MapManager::initialize(const std::string &mapReferenceFile)
     if (!doc)
     {
         LOG_ERROR("Map Manager: Error while parsing map database ("
-                  << mapReferenceFile << ")!");
+                  << absPathFile << ")!");
         return loadedMaps;
     }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
     if (!node || !xmlStrEqual(node->name, BAD_CAST "maps"))
     {
-        LOG_ERROR("Map Manager: " << mapReferenceFile
+        LOG_ERROR("Map Manager: " << absPathFile
                   << " is not a valid database file!");
         xmlFreeDoc(doc);
         return loadedMaps;
     }
 
-    LOG_INFO("Loading map reference...");
+    LOG_INFO("Loading map reference: " << absPathFile);
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
         if (!xmlStrEqual(node->name, BAD_CAST "map")) {

@@ -48,6 +48,8 @@ void SkillManager::reload()
     // Note: The file is checked for UTF-8 BOM.
     char *data = ResourceManager::loadFile(skillReferenceFile, size, true);
 
+    std::string absPathFile = ResourceManager::resolve(skillReferenceFile);
+
     if (!data) {
         LOG_ERROR("Item Manager: Could not find " << skillReferenceFile << "!");
         free(data);
@@ -60,20 +62,20 @@ void SkillManager::reload()
     if (!doc)
     {
         LOG_ERROR("Skill Manager: Error while parsing skill database ("
-                  << skillReferenceFile << ")!");
+                  << absPathFile << ")!");
         return;
     }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
     if (!node || !xmlStrEqual(node->name, BAD_CAST "skills"))
     {
-        LOG_ERROR("Skill Manager: " << skillReferenceFile
+        LOG_ERROR("Skill Manager: " << absPathFile
                   << " is not a valid database file!");
         xmlFreeDoc(doc);
         return;
     }
 
-    LOG_INFO("Loading skill reference...");
+    LOG_INFO("Loading skill reference: " << absPathFile);
 
     for_each_xml_child_node(setnode, node)
     {
@@ -97,7 +99,7 @@ void SkillManager::reload()
     LOG_DEBUG("skill map:");
     for (SkillMap::iterator i = skillMap.begin(); i != skillMap.end(); i++)
     {
-        LOG_DEBUG("  "<<i->first<<" : "<<i->second);
+        LOG_DEBUG("  " << i->first << " : " << i->second);
     }
 }
 
