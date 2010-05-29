@@ -40,7 +40,7 @@ namespace SkillManager
      * Gets the skill ID of a skill string
      * (not case-sensitive to reduce wall-bashing)
      */
-    int getIdFromString(std::string name);  // no, thorbjorn, I am not passing this as const reference. I need a local copy.
+    int getIdFromString(const std::string &name);
 }
 
 

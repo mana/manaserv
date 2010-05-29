@@ -102,17 +102,16 @@ void SkillManager::reload()
     }
 }
 
-int SkillManager::getIdFromString(std::string name)
+int SkillManager::getIdFromString(const std::string &name)
 {
     //check if already an integer, if yes just return it
     int val;
     val = atoi(name.c_str());
-    if (val) return val;
+    if (val)
+        return val;
 
     // convert to upper case for easier finding
-    name = utils::toupper(name);
-    // find it
-    SkillMap::iterator i = skillMap.find(name);
+    SkillMap::iterator i = skillMap.find(utils::toupper(name));
     if (i == skillMap.end())
     {
         return 0;
