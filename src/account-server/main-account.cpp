@@ -75,6 +75,36 @@ static void closeGracefully(int)
     running = false;
 }
 
+static void initConfig()
+{
+    /*
+     * If the path values aren't defined, we set the default
+     * depending on the platform.
+     */
+    // The config path
+#if defined CONFIG_FILE
+    std::string configPath = CONFIG_FILE;
+#else
+
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
+    std::string configPath = getenv("HOME");
+    configPath += "/.";
+    configPath += DEFAULT_CONFIG_FILE;
+#else // Win32, ...
+    std::string configPath = DEFAULT_CONFIG_FILE;
+#endif
+
+#endif // defined CONFIG_FILE
+    Configuration::initialize(configPath);
+    LOG_INFO("Using config file: " << configPath);
+    // check inter-server password
+    if (Configuration::getValue("net_password", "") == "")
+    {
+        LOG_WARN("SECURITY WARNING: No 'net_password' set in " << configPath <<
+                 " - set one ASAP or this server WILL get h4x0rd!!");
+    }
+}
+
 /**
  * Initializes the server.
  */
@@ -97,21 +127,6 @@ static void initialize()
      * If the path values aren't defined, we set the default
      * depending on the platform.
      */
-    // The config path
-#if defined CONFIG_FILE
-    std::string configPath = CONFIG_FILE;
-#else
-
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
-    std::string configPath = getenv("HOME");
-    configPath += "/.";
-    configPath += DEFAULT_CONFIG_FILE;
-#else // Win32, ...
-    std::string configPath = DEFAULT_CONFIG_FILE;
-#endif
-
-#endif // defined CONFIG_FILE
-
     // The log path
 #if defined LOG_FILE
     std::string logPath = LOG_FILE;
@@ -137,18 +152,9 @@ static void initialize()
     // write the messages to both the screen and the log file.
     Logger::setTeeMode(true);
 
-    Configuration::initialize(configPath);
-    LOG_INFO("Using config file: " << configPath);
     LOG_INFO("Using log file: " << logPath);
 
     ResourceManager::initialize();
-
-    // check inter-server password
-    if (Configuration::getValue("net_password", "") == "")
-    {
-        LOG_WARN("SECURITY WARNING: No net_password set in " << configPath <<
-                 " - set one ASAP or this server WILL get h4x0rd!!");
-    }
 
     // Open database
     try {
@@ -261,9 +267,8 @@ static void printHelp()
 struct CommandLineOptions
 {
     CommandLineOptions():
-        verbosity(Logger::Info),
-        port(Configuration::getValue("net_accountServerPort",
-                                     DEFAULT_SERVER_PORT))
+        verbosity(Logger::Warn),
+        port(DEFAULT_SERVER_PORT)
     {}
 
     Logger::Level verbosity;
@@ -318,9 +323,15 @@ int main(int argc, char *argv[])
 #ifdef PACKAGE_VERSION
     LOG_INFO("The Mana Account+Chat Server v" << PACKAGE_VERSION);
 #endif
+    initConfig();
 
     // Parse command line options
     CommandLineOptions options;
+    options.verbosity = static_cast<Logger::Level>(
+                          Configuration::getValue("log_accountServerLogLevel",
+                                                  options.verbosity) );
+    options.port = Configuration::getValue("net_accountServerPort",
+                                           options.port);
     parseOptions(argc, argv, options);
     Logger::setVerbosity(options.verbosity);
 

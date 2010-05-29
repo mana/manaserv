@@ -55,6 +55,18 @@
 <!-- end of database configuration *************************************** -->
 
  <!--
+ Log levels configuration.
+ Available values are:
+   0. Fatal Errors only.
+   1. All Errors.
+   2. Plus warnings.
+   3. Plus standard information.
+   4. Plus debugging information.
+ -->
+ <option name="log_gameServerLogLevel" value="2"/>
+ <option name="log_accountServerLogLevel" value="2"/>
+
+ <!--
  New player starting location. The map should be defined in data/maps.xml.
  -->
  <option name="char_startMap" value="1"/>

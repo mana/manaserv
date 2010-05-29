@@ -97,6 +97,34 @@ void closeGracefully(int)
 }
 
 /**
+ * Initialize the configuration
+ */
+void initConfig()
+{
+    /*
+     * If the path values aren't defined, we set the default
+     * depending on the platform.
+     */
+    // The config path
+#if defined CONFIG_FILE
+    std::string configPath = CONFIG_FILE;
+#else
+
+#if (defined __USE_UNIX98 || defined __FreeBSD__)
+    std::string configPath = getenv("HOME");
+    configPath += "/.";
+    configPath += DEFAULT_CONFIG_FILE;
+#else // Win32, ...
+    std::string configPath = DEFAULT_CONFIG_FILE;
+#endif
+#endif // defined CONFIG_FILE
+
+    Configuration::initialize(configPath);
+    LOG_INFO("Using config file: " << configPath);
+
+}
+
+/**
  * Initializes the server.
  */
 void initialize()
@@ -115,21 +143,6 @@ void initialize()
      * If the path values aren't defined, we set the default
      * depending on the platform.
      */
-    // The config path
-#if defined CONFIG_FILE
-    std::string configPath = CONFIG_FILE;
-#else
-
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
-    std::string configPath = getenv("HOME");
-    configPath += "/.";
-    configPath += DEFAULT_CONFIG_FILE;
-#else // Win32, ...
-    std::string configPath = DEFAULT_CONFIG_FILE;
-#endif
-
-#endif // defined CONFIG_FILE
-
     // The log path
 #if defined LOG_FILE
     std::string logPath = LOG_FILE;
@@ -154,9 +167,6 @@ void initialize()
 
     // Write the messages to both the screen and the log file.
     Logger::setTeeMode(true);
-
-    Configuration::initialize(configPath);
-    LOG_INFO("Using config file: " << configPath);
     LOG_INFO("Using log file: " << logPath);
 
     // --- Initialize the managers
@@ -255,8 +265,8 @@ void printHelp()
 struct CommandLineOptions
 {
     CommandLineOptions():
-        verbosity(Logger::Info),
-        port(0)
+        verbosity(Logger::Warn),
+        port(DEFAULT_SERVER_PORT + 3)
     {}
 
     Logger::Level verbosity;
@@ -313,19 +323,20 @@ int main(int argc, char *argv[])
     LOG_INFO("The Mana Game Server v" << PACKAGE_VERSION);
 #endif
 
+    initConfig();
+
     // Parse command line options
     CommandLineOptions options;
+    options.verbosity = static_cast<Logger::Level>(
+                          Configuration::getValue("log_gameServerLogLevel",
+                                                  options.verbosity) );
+    options.port = Configuration::getValue("net_gameServerPort", options.port);
     parseOptions(argc, argv, options);
+
     Logger::setVerbosity(options.verbosity);
 
     // General initialization
     initialize();
-
-    if (options.port < 1)
-    {
-        options.port = Configuration::getValue("net_gameServerPort",
-                                               DEFAULT_SERVER_PORT + 3);
-    }
 
     // Make an initial attempt to connect to the account server
     // Try again after longer and longer intervals when connection fails.
