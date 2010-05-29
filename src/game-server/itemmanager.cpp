@@ -46,8 +46,7 @@ void ItemManager::initialize(const std::string &file)
 void ItemManager::reload()
 {
     int size;
-    // Note: The file is checked for UTF-8 BOM.
-    char *data = ResourceManager::loadFile(itemReferenceFile, size, true);
+    char *data = ResourceManager::loadFile(itemReferenceFile, size);
 
     std::string absPathFile = ResourceManager::resolve(itemReferenceFile);
 

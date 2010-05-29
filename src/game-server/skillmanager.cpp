@@ -45,8 +45,7 @@ void SkillManager::reload()
     */
 
     int size;
-    // Note: The file is checked for UTF-8 BOM.
-    char *data = ResourceManager::loadFile(skillReferenceFile, size, true);
+    char *data = ResourceManager::loadFile(skillReferenceFile, size);
 
     std::string absPathFile = ResourceManager::resolve(skillReferenceFile);
 

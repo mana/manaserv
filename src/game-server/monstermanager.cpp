@@ -63,8 +63,7 @@ void MonsterManager::initialize(const std::string &file)
 void MonsterManager::reload()
 {
     int size;
-    // Note: The file is checked for UTF-8 BOM.
-    char *data = ResourceManager::loadFile(monsterReferenceFile, size, true);
+    char *data = ResourceManager::loadFile(monsterReferenceFile, size);
 
     std::string absPathFile = ResourceManager::resolve(monsterReferenceFile);
 

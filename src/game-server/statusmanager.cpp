@@ -43,8 +43,7 @@ void StatusManager::initialize(const std::string &file)
 void StatusManager::reload()
 {
     int size;
-    // Note: The file is checked for UTF-8 BOM.
-    char *data = ResourceManager::loadFile(statusReferenceFile, size, true);
+    char *data = ResourceManager::loadFile(statusReferenceFile, size);
 
     std::string absPathFile = ResourceManager::resolve(statusReferenceFile);
 

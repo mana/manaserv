@@ -27,6 +27,8 @@
 #include <cstdlib>
 #include <map>
 
+#include <string.h>
+
 typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
@@ -70,15 +72,22 @@ void Script::update()
     execute();
 }
 
+static char *skipPotentialBom(char *text)
+{
+    // Based on the C version of bomstrip
+    const char * const utf8Bom = "\xef\xbb\xbf";
+    const int bomLength = strlen(utf8Bom);
+    return (strncmp(text, utf8Bom, bomLength) == 0) ? text + bomLength : text;
+}
+
 bool Script::loadFile(const std::string &name)
 {
     int size;
-    // Note: The file is checked for UTF-8 BOM.
-    char *buffer = ResourceManager::loadFile(name, size, true);
+    char *buffer = ResourceManager::loadFile(name, size);
     if (buffer)
     {
         mScriptFile = name;
-        load(buffer);
+        load(skipPotentialBom(buffer));
         free(buffer);
         return true;
     } else {

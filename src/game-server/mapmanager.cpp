@@ -45,8 +45,7 @@ unsigned int MapManager::initialize(const std::string &mapReferenceFile)
     unsigned int loadedMaps = 0;
 
     int size;
-    // Note: The file is checked for UTF-8 BOM.
-    char *data = ResourceManager::loadFile(mapReferenceFile, size, true);
+    char *data = ResourceManager::loadFile(mapReferenceFile, size);
 
     std::string absPathFile = ResourceManager::resolve(mapReferenceFile);
 

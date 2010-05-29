@@ -1628,7 +1628,7 @@ LuaScript::LuaScript():
     lua_pop(mState, 2);
 
     // Put some callback functions in the scripting environment.
-    static luaL_reg const callbacks[] = {
+    static luaL_Reg const callbacks[] = {
         { "npc_create",             &npc_create           },
         { "npc_message",            &npc_message          },
         { "npc_choice",             &npc_choice           },
