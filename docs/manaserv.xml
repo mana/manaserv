@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- 
+<!--
 	An example configuration file for ~/.manaserv.xml
 	
 	Documentation: http://doc.manasource.org/manaserv.xml
@@ -10,7 +10,7 @@
 <configuration>
  
 <!-- Database configuration ***************************************************
- Uncomment one of the following parts according to the database backend you 
+ Uncomment one of the following parts according to the database backend you
  would like to use.
 -->
  
@@ -38,7 +38,7 @@
 						optional, default="mana"
 -->
 <!--
-<option name="mysql_hostname" value="localhost"/> 
+<option name="mysql_hostname" value="localhost"/>
 <option name="mysql_port" value="3306"/>
 <option name="mysql_database" value="mana"/>
 <option name="mysql_username" value="mana"/>
@@ -46,8 +46,8 @@
 -->
 
 
-<!-- 
-	PostgreSQL specific configuration. 
+<!--
+	PostgreSQL specific configuration.
 
 	TODO!
 -->
@@ -84,23 +84,25 @@
  -->
  <option name="net_gameServerAddress" value="localhost"/>
  <option name="net_gameServerPort" value="9604"/>
- 
- <!--Paths to data files-->
+
+ <!-- Paths to data files -->
+ <option name="serverPath" value="." />
  <option name="clientDataPath" value="example/clientdata" />
  <option name="serverDataPath" value="example/serverdata" />
- 
- <!-- Gameplay-related config option-->
- <option name="visualRange" value="448"/> 
+
+ <!-- Gameplay-related config option -->
+ <option name="visualRange" value="448"/>
  <option name="respawnMap" value="4"/>
  <option name="respawnX" value="1000"/>
  <option name="respawnY" value="1000"/>
  <option name="defaultPvp" value="free" />
  <option name="floorItemDecayTime" value="10" />
  <option name="hpRegenBreakAfterHit" value="50" />
- 
- <!-- Network-related config options-->
+
+ <!-- Network-related config options -->
  <option name="net_maxClients" value="1000"/>
- <!-- Account-creation-related config options-->
+
+ <!-- Account-creation-related config options -->
  <option name="account_allowRegister" value="1" />
  <option name="account_denyRegisterReason" value="The server administrator has disabled automatic registration!" />
  <option name="account_minEmailLength" value="7" />
@@ -109,6 +111,7 @@
  <option name="account_maxNameLength" value="16" />
  <option name="account_minPasswordLength" value="6" />
  <option name="account_maxPasswordLength" value="25" />
+
  <!-- Character-creation-related config options -->
  <option name="char_numHairStyles" value="17" />
  <option name="char_numHairColors" value="9" />
@@ -117,6 +120,7 @@
  <option name="char_maxNameLength" value="25" />
  <option name="char_maxCharacters" value="3" />
  <option name="char_startingPoints" value="60" />
+
  <!-- Chat-related config options -->
  <option name="chat_maxChannelNameLength" value="15" />
    <!-- I noticed the following configuration-like enumeration values which are never checked:

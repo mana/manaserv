@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+  <class level="1">
+    <alias>player</alias>
+    <allow>@help</allow>
+    <allow>@where</allow>
+    <allow>@rights</allow>
+    <allow>@report</allow>
+  </class>
+  <class level="2">
+    <alias>tester</alias>
+    <allow>@warp</allow>
+  </class>
+  <class level="3">
+    <alias>dev</alias>
+    <allow>@item</allow>
+    <allow>@drop</allow>
+    <allow>@money</allow>
+    <allow>@spawn</allow>
+    <allow>@attribute</allow>
+  </class>
+  <class level="4">
+    <alias>gm</alias>
+    <allow>@goto</allow>
+    <allow>@recall</allow>
+    <allow>@ban</allow>
+    <allow>@history</allow>
+  </class>
+  <class level="5">
+  </class>
+  <class level="6">
+  </class>
+  <class level="7">
+  </class>
+  <class level="8">
+    <alias>admin</alias>
+    <allow>@reload</allow>
+    <allow>@givepermission</allow>
+    <allow>@takepermission</allow>
+    <allow>@announce</allow>
+  </class>
+</permissions>

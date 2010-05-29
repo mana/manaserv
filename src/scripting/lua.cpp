@@ -1694,6 +1694,5 @@ LuaScript::LuaScript():
     lua_settable(mState, LUA_REGISTRYINDEX);
 
     lua_settop(mState, 0);
-    loadFile("scripts/libs/libmana.lua");
+    loadFile("scripts/lua/libmana.lua");
 }
-
