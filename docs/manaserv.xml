@@ -74,8 +74,8 @@
  <option name="net_gameServerPort" value="9604"/>
  
  <!--Paths to data files-->
- <option name="clientDataPath" value="../data" />
- <option name="serverDataPath" value="../serverdata" />
+ <option name="clientDataPath" value="example/clientdata" />
+ <option name="serverDataPath" value="example/serverdata" />
  
  <!-- Gameplay-related config option-->
  <option name="visualRange" value="448"/> 
