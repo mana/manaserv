@@ -73,13 +73,18 @@
  <option name="net_gameServerAddress" value="localhost"/>
  <option name="net_gameServerPort" value="9604"/>
  
+ <!--Paths to data files-->
+ <option name="clientDataPath" value="../data" />
+ <option name="serverDataPath" value="../serverdata" />
+ 
  <!-- Gameplay-related config option-->
- <option name="visualRange" value="448"/>
+ <option name="visualRange" value="448"/> 
  <option name="respawnMap" value="4"/>
  <option name="respawnX" value="1000"/>
  <option name="respawnY" value="1000"/>
  <option name="defaultPvp" value="free" />
- <option name="floorItemDecayTime" value="60" />
+ <option name="floorItemDecayTime" value="10" />
+ <option name="hpRegenBreakAfterHit" value="50" />
  
  <!-- Network-related config options-->
  <option name="net_maxClients" value="1000"/>
@@ -113,7 +118,6 @@
  <!-- Mail-system related-->
  <option name="mail_maxAttachments" value="3" />
  <option name="mail_maxLetters" value="10" />
- 
  
  
 </configuration>
