@@ -23,6 +23,7 @@
 #include "game-server/being.hpp"
 
 #include "defines.h"
+#include "common/configuration.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/mapcomposite.hpp"
@@ -92,7 +93,7 @@ int Being::damage(Actor *, const Damage &damage)
         LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
         HP.mod -= HPloss;
         modifiedAttribute(BASE_ATTR_HP);
-        setTimerSoft(T_B_HP_REGEN, 50); // no HP regen for 5 seconds after being hit
+        setTimerSoft(T_B_HP_REGEN, Configuration::getValue("hpRegenBreakAfterHit", 0)); // no HP regen after being hit
     } else {
         HPloss = 0;
     }
