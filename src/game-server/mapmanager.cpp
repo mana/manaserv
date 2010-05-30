@@ -39,81 +39,61 @@ const MapManager::Maps &MapManager::getMaps()
     return maps;
 }
 
-unsigned int MapManager::initialize(const std::string &mapReferenceFile)
+int MapManager::initialize(const std::string &mapReferenceFile)
 {
     // Indicates the number of maps loaded successfully
-    unsigned int loadedMaps = 0;
-
-    int size;
-    char *data = ResourceManager::loadFile(mapReferenceFile, size);
+    int loadedMaps = 0;
 
     std::string absPathFile = ResourceManager::resolve(mapReferenceFile);
-
-    if (!data) {
+    if (absPathFile.empty()) {
         LOG_ERROR("Map Manager: Could not find " << mapReferenceFile << "!");
-        free(data);
         return loadedMaps;
     }
 
-    xmlDocPtr doc = xmlParseMemory(data, size);
-    free(data);
+    XML::Document doc(absPathFile, false);
+    xmlNodePtr rootNode = doc.rootNode();
 
-    if (!doc)
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "maps"))
     {
-        LOG_ERROR("Map Manager: Error while parsing map database ("
+        LOG_ERROR("Item Manager: Error while parsing map database ("
                   << absPathFile << ")!");
         return loadedMaps;
     }
 
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "maps"))
-    {
-        LOG_ERROR("Map Manager: " << absPathFile
-                  << " is not a valid database file!");
-        xmlFreeDoc(doc);
-        return loadedMaps;
-    }
-
     LOG_INFO("Loading map reference: " << absPathFile);
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for_each_xml_child_node(node, rootNode)
     {
-        if (!xmlStrEqual(node->name, BAD_CAST "map")) {
+        if (!xmlStrEqual(node->name, BAD_CAST "map"))
             continue;
-        }
 
         int id = XML::getProperty(node, "id", 0);
         std::string name = XML::getProperty(node, "name", std::string());
-        std::string file = "maps/";
-        bool mapFileExists = false;
+
         // Test id and map name
         if (id != 0 && !name.empty())
         {
             // Testing if the file is actually in the maps folder
-            file += name + ".tmx";
-            if (!ResourceManager::exists(file))
+            std::string file = std::string("maps/") + name + ".tmx";
+            bool mapFileExists = ResourceManager::exists(file);
+
+            // Try to fall back on fully compressed map
+            if (!mapFileExists)
             {
                 file += ".gz";
-                if (ResourceManager::exists(file))
-                {
-                    mapFileExists = true;
-                }
-            }
-            else
-            {
-                mapFileExists = true;
+                mapFileExists = ResourceManager::exists(file);
             }
 
             if (mapFileExists)
             {
                 maps[id] = new MapComposite(id, name);
-                loadedMaps++;
+                ++loadedMaps;
             }
         }
     }
 
-    xmlFreeDoc(doc);
     if (loadedMaps > 0)
-      LOG_INFO(loadedMaps << " valid map file references were loaded.");
+        LOG_INFO(loadedMaps << " valid map file references were loaded.");
+
     return loadedMaps;
 }
 
@@ -128,19 +108,17 @@ void MapManager::deinitialize()
 
 MapComposite *MapManager::getMap(int mapId)
 {
-    Maps::iterator i = maps.find(mapId);
+    Maps::const_iterator i = maps.find(mapId);
     return (i != maps.end()) ? i->second : NULL;
 }
 
 MapComposite *MapManager::getMap(const std::string &mapName)
 {
-   Maps::iterator i;
-   for (i = maps.begin(); i != maps.end(); ++i)
-   {
-      if (i->second->getName() == mapName)
-          return i->second;
-   }
-   return NULL;
+    for (Maps::const_iterator i = maps.begin(); i != maps.end(); ++i)
+        if (i->second->getName() == mapName)
+            return i->second;
+
+    return NULL;
 }
 
 bool MapManager::raiseActive(int mapId)
@@ -170,6 +148,3 @@ bool MapManager::raiseActive(int mapId)
         return false;
     }
 }
-
-
-

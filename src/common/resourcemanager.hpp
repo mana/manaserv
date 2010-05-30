@@ -37,7 +37,7 @@ namespace ResourceManager
 
     /**
      * Returns the real file-system path of the resource with the given
-     * resource path.
+     * resource path, or an empty string when no such resource exists.
      */
     std::string resolve(const std::string &path);
 

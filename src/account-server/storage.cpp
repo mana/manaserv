@@ -1924,7 +1924,7 @@ void Storage::syncDatabase()
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))
     {
-        LOG_ERROR("Item Manager: Error while parsing item database (items.xml)!");
+        LOG_ERROR("Item Manager: Error while loading item database (items.xml)!");
         return;
     }
 

@@ -42,43 +42,27 @@ void StatusManager::initialize(const std::string &file)
 
 void StatusManager::reload()
 {
-    int size;
-    char *data = ResourceManager::loadFile(statusReferenceFile, size);
-
     std::string absPathFile = ResourceManager::resolve(statusReferenceFile);
-
-    if (!data) {
+    if (absPathFile.empty()) {
         LOG_ERROR("Status Manager: Could not find " << statusReferenceFile << "!");
-        free(data);
         return;
     }
 
-    xmlDocPtr doc = xmlParseMemory(data, size);
-    free(data);
+    XML::Document doc(absPathFile, false);
+    xmlNodePtr rootNode = doc.rootNode();
 
-    if (!doc)
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "status-effects"))
     {
         LOG_ERROR("Status Manager: Error while parsing status database ("
                   << absPathFile << ")!");
         return;
     }
 
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "status-effects"))
-    {
-        LOG_ERROR("Status Manager: " << absPathFile
-                  << " is not a valid database file!");
-        xmlFreeDoc(doc);
-        return;
-    }
-
     LOG_INFO("Loading status reference: " << absPathFile);
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for_each_xml_child_node(node, rootNode)
     {
         if (!xmlStrEqual(node->name, BAD_CAST "status-effect"))
-        {
             continue;
-        }
 
         int id = XML::getProperty(node, "id", 0);
         if (id == 0)
@@ -120,8 +104,6 @@ void StatusManager::reload()
         }
         statusEffects[id] = statusEffect;
     }
-
-    xmlFreeDoc(doc);
 }
 
 void StatusManager::deinitialize()

@@ -62,45 +62,28 @@ void MonsterManager::initialize(const std::string &file)
 
 void MonsterManager::reload()
 {
-    int size;
-    char *data = ResourceManager::loadFile(monsterReferenceFile, size);
-
     std::string absPathFile = ResourceManager::resolve(monsterReferenceFile);
-
-    if (!data) {
-        LOG_ERROR("Monster Manager: Could not find "
-                  << monsterReferenceFile << "!");
-        free(data);
+    if (absPathFile.empty()) {
+        LOG_ERROR("Monster Manager: Could not find " << monsterReferenceFile << "!");
         return;
     }
 
-    xmlDocPtr doc = xmlParseMemory(data, size);
-    free(data);
+    XML::Document doc(absPathFile, false);
+    xmlNodePtr rootNode = doc.rootNode();
 
-    if (!doc)
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "monsters"))
     {
         LOG_ERROR("Monster Manager: Error while parsing monster database ("
                   << absPathFile << ")!");
         return;
     }
 
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "monsters"))
-    {
-        LOG_ERROR("Monster Manager: " << absPathFile
-                  << " is not a valid database file!");
-        xmlFreeDoc(doc);
-        return;
-    }
-
     LOG_INFO("Loading monster reference: " << absPathFile);
     int nbMonsters = 0;
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for_each_xml_child_node(node, rootNode)
     {
         if (!xmlStrEqual(node->name, BAD_CAST "monster"))
-        {
             continue;
-        }
 
         int id = XML::getProperty(node, "id", -1);
         std::string name = XML::getProperty(node, "name", "unnamed");
@@ -108,8 +91,8 @@ void MonsterManager::reload()
         if (id == -1)
         {
             LOG_WARN("Monster Manager: There is a monster ("
-            << name << ") without ID in "
-            << monsterReferenceFile << "! It has been ignored.");
+                     << name << ") without ID in "
+                     << monsterReferenceFile << "! It has been ignored.");
             continue;
         }
 
@@ -288,8 +271,6 @@ void MonsterManager::reload()
 
     LOG_INFO("Loaded " << nbMonsters << " monsters from "
              << monsterReferenceFile << '.');
-
-    xmlFreeDoc(doc);
 }
 
 void MonsterManager::deinitialize()

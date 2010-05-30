@@ -176,8 +176,8 @@ void initialize()
     ResourceManager::initialize();
     if (MapManager::initialize(DEFAULT_MAPSDB_FILE) < 1)
     {
-      LOG_FATAL("The Game Server can't find any valid/available maps.");
-      exit(2);
+        LOG_FATAL("The Game Server can't find any valid/available maps.");
+        exit(2);
     }
     SkillManager::initialize(DEFAULT_SKILLSDB_FILE);
     ItemManager::initialize(DEFAULT_ITEMSDB_FILE);

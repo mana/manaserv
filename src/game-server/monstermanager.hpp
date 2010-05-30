@@ -48,4 +48,4 @@ namespace MonsterManager
     MonsterClass *getMonster(int id);
 }
 
-#endif
+#endif // MONSTERMANAGER_HPP

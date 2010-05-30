@@ -45,39 +45,25 @@ void ItemManager::initialize(const std::string &file)
 
 void ItemManager::reload()
 {
-    int size;
-    char *data = ResourceManager::loadFile(itemReferenceFile, size);
-
     std::string absPathFile = ResourceManager::resolve(itemReferenceFile);
-
-    if (!data) {
+    if (absPathFile.empty()) {
         LOG_ERROR("Item Manager: Could not find " << itemReferenceFile << "!");
-        free(data);
         return;
     }
 
-    xmlDocPtr doc = xmlParseMemory(data, size);
-    free(data);
+    XML::Document doc(absPathFile, false);
+    xmlNodePtr rootNode = doc.rootNode();
 
-    if (!doc)
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))
     {
         LOG_ERROR("Item Manager: Error while parsing item database ("
                   << absPathFile << ")!");
         return;
     }
 
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "items"))
-    {
-        LOG_ERROR("Item Manager: " << absPathFile
-                  << " is not a valid database file!");
-        xmlFreeDoc(doc);
-        return;
-    }
-
     LOG_INFO("Loading item reference: " << absPathFile);
     unsigned nbItems = 0;
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for_each_xml_child_node(node, rootNode)
     {
         // Try to load the version of the item database. The version is defined
         // as subversion tag embedded as XML attribute. So every modification
@@ -109,8 +95,9 @@ void ItemManager::reload()
 
         if (itemType == ITEM_UNKNOWN)
         {
-            LOG_WARN(itemReferenceFile<<": Unknown item type \""<<sItemType
-                     <<"\" for item #"<<id<<" - treating it as \"generic\"");
+            LOG_WARN(itemReferenceFile << ": Unknown item type \"" << sItemType
+                     << "\" for item #" << id <<
+                     " - treating it as \"generic\"");
             itemType = ITEM_UNUSABLE;
         }
 
@@ -146,27 +133,28 @@ void ItemManager::reload()
             std::string strWeaponType = XML::getProperty(node, "weapon-type", "");
             if (strWeaponType == "")
             {
-                LOG_WARN(itemReferenceFile<<": Unknown weapon type \""
-                         <<"\" for item #"<<id<<" - treating it as generic item");
+                LOG_WARN(itemReferenceFile << ": Unknown weapon type \""
+                         << "\" for item #" << id <<
+                         " - treating it as generic item");
             } else {
                 weaponType = SkillManager::getIdFromString(strWeaponType);
             }
             modifiers.setValue(MOD_WEAPON_TYPE, weaponType);
-            modifiers.setValue(MOD_WEAPON_RANGE,  XML::getProperty(node, "range",       0));
-            modifiers.setValue(MOD_ELEMENT_TYPE,  XML::getProperty(node, "element",     0));
+            modifiers.setValue(MOD_WEAPON_RANGE, XML::getProperty(node, "range",   0));
+            modifiers.setValue(MOD_ELEMENT_TYPE, XML::getProperty(node, "element", 0));
         }
-        modifiers.setValue(MOD_LIFETIME,      XML::getProperty(node, "lifetime", 0) * 10);
+        modifiers.setValue(MOD_LIFETIME, XML::getProperty(node, "lifetime", 0) * 10);
         //TODO: add child nodes for these modifiers (additive and factor)
-        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
-        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_DELTA,      XML::getProperty(node, "attack-delta",      0));
-        modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
-        modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defense", 0));
-        modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,     XML::getProperty(node, "strength",     0));
-        modifiers.setAttributeValue(CHAR_ATTR_AGILITY,      XML::getProperty(node, "agility",      0));
-        modifiers.setAttributeValue(CHAR_ATTR_DEXTERITY,    XML::getProperty(node, "dexterity",    0));
-        modifiers.setAttributeValue(CHAR_ATTR_VITALITY,     XML::getProperty(node, "vitality",     0));
-        modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE, XML::getProperty(node, "intelligence", 0));
-        modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
+        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,   XML::getProperty(node, "attack-min",   0));
+        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_DELTA, XML::getProperty(node, "attack-delta", 0));
+        modifiers.setAttributeValue(BASE_ATTR_HP,            XML::getProperty(node, "hp",           0));
+        modifiers.setAttributeValue(BASE_ATTR_PHY_RES,       XML::getProperty(node, "defense",      0));
+        modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,      XML::getProperty(node, "strength",     0));
+        modifiers.setAttributeValue(CHAR_ATTR_AGILITY,       XML::getProperty(node, "agility",      0));
+        modifiers.setAttributeValue(CHAR_ATTR_DEXTERITY,     XML::getProperty(node, "dexterity",    0));
+        modifiers.setAttributeValue(CHAR_ATTR_VITALITY,      XML::getProperty(node, "vitality",     0));
+        modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE,  XML::getProperty(node, "intelligence", 0));
+        modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,     XML::getProperty(node, "willpower",    0));
 
         if (maxPerSlot == 0)
         {
@@ -220,9 +208,7 @@ void ItemManager::reload()
     }
 
     LOG_INFO("Loaded " << nbItems << " items from "
-             << itemReferenceFile << ".");
-
-    xmlFreeDoc(doc);
+             << absPathFile << ".");
 }
 
 void ItemManager::deinitialize()

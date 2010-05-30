@@ -48,4 +48,4 @@ namespace StatusManager
     StatusEffect *getStatus(int statusId);
 }
 
-#endif
+#endif // STATUSMANAGER_H

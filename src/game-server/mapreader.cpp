@@ -540,15 +540,11 @@ void MapReader::setTileWithGid(Map *map, int x, int y, int gid)
          i_end = ::tilesetFirstGids.end(); i != i_end; ++i)
     {
         if (gid < *i)
-        {
             break;
-        }
+
         set = *i;
     }
 
     if (gid!=set)
-    {
         map->blockTile(x, y, Map::BLOCKTYPE_WALL);
-    }
-
 }
