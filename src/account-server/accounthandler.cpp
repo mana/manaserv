@@ -49,6 +49,13 @@ static void addUpdateHost(MessageOut *msg)
     std::string updateHost = Configuration::getValue("net_defaultUpdateHost",
                                                      "");
     msg->writeString(updateHost);
+
+    /*
+     * This is for developing/testing an experimental new resource manager that
+     * downloads only the files it needs on demand.
+     */
+    std::string dataUrl = Configuration::getValue("net_clientDataUrl", "");
+    msg->writeString(dataUrl);
 }
 
 // List of attributes that the client can send at account creation.
