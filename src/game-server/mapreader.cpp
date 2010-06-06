@@ -94,7 +94,7 @@ bool MapReader::readMap(const std::string &filename, MapComposite *composite)
 
     xmlFreeDoc(doc);
 
-    if (map != NULL)
+    if (map)
     {
         composite->setMap(map);
 
@@ -267,7 +267,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                     }
 
                     MonsterClass *monster = MonsterManager::getMonster(monsterId);
-                    if (monster != NULL)
+                    if (monster)
                     {
                         things.push_back(new SpawnArea(composite, monster, rect, maxBeings, spawnRate));
                     }

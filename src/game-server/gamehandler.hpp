@@ -94,28 +94,25 @@ class GameHandler: public ConnectionHandler
          * Combines a client with its character.
          * (Needed for TokenCollector)
          */
-        void
-        tokenMatched(GameClient* computer, Character* character);
+        void tokenMatched(GameClient *computer, Character *character);
 
         /**
          * Deletes a pending client's data.
          * (Needed for TokenCollector)
          */
-        void
-        deletePendingClient(GameClient* computer);
+        void deletePendingClient(GameClient *computer);
 
         /**
          * Deletes a pending connection's data.
          * (Needed for TokenCollector)
          */
-        void
-        deletePendingConnect(Character* character);
+        void deletePendingConnect(Character *character);
 
         /**
          * Gets the client associated to a character name. This method is slow,
          * so it should never be called for regular operations.
          */
-        GameClient *getClientByNameSlow(const std::string &);
+        GameClient *getClientByNameSlow(const std::string &) const;
 
     protected:
         NetComputer *computerConnected(ENetPeer *);

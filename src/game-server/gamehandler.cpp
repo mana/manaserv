@@ -81,16 +81,16 @@ void GameHandler::computerDisconnected(NetComputer *comp)
 void GameHandler::kill(Character *ch)
 {
     GameClient *client = ch->getClient();
-    assert(client != NULL);
+    assert(client);
     client->character = NULL;
     client->status = CLIENT_LOGIN;
-    ch->setClient(NULL);
+    ch->setClient(0);
 }
 
 void GameHandler::prepareServerChange(Character *ch)
 {
     GameClient *client = ch->getClient();
-    assert(client != NULL);
+    assert(client);
     client->status = CLIENT_CHANGE_SERVER;
 }
 
@@ -643,7 +643,7 @@ void GameHandler::addPendingCharacter(const std::string &token, Character *ch)
     mTokenCollector.addPendingConnect(token, ch);
 }
 
-void GameHandler::tokenMatched(GameClient* computer, Character* character)
+void GameHandler::tokenMatched(GameClient *computer, Character *character)
 {
     computer->character = character;
     computer->status = CLIENT_CONNECTED;
@@ -677,10 +677,11 @@ void GameHandler::tokenMatched(GameClient* computer, Character* character)
     }
 }
 
-void GameHandler::deletePendingClient(GameClient* computer)
+void GameHandler::deletePendingClient(GameClient *computer)
 {
     // Something might have changed since it was inserted
-    if (computer->status != CLIENT_QUEUED) return;
+    if (computer->status != CLIENT_QUEUED)
+        return;
 
     MessageOut msg(GPMSG_CONNECT_RESPONSE);
     msg.writeByte(ERRMSG_TIME_OUT);
@@ -689,12 +690,12 @@ void GameHandler::deletePendingClient(GameClient* computer)
     computer->disconnect(msg);
 }
 
-void GameHandler::deletePendingConnect(Character* character)
+void GameHandler::deletePendingConnect(Character *character)
 {
     delete character;
 }
 
-GameClient *GameHandler::getClientByNameSlow(const std::string &name)
+GameClient *GameHandler::getClientByNameSlow(const std::string &name) const
 {
     for (NetComputers::const_iterator i = clients.begin(),
          i_end = clients.end(); i != i_end; ++i)
@@ -706,7 +707,7 @@ GameClient *GameHandler::getClientByNameSlow(const std::string &name)
             return c;
         }
     }
-    return NULL;
+    return 0;
 }
 
 void GameHandler::sendError(NetComputer *computer, int id, std::string errorMsg)

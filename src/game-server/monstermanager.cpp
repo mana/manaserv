@@ -112,8 +112,7 @@ void MonsterManager::reload()
         bool attributesSet = false;
         bool behaviorSet = false;
 
-        for (xmlNodePtr subnode = node->xmlChildrenNode; subnode != NULL;
-             subnode = subnode->next)
+        for_each_xml_child_node(subnode, node)
         {
             if (xmlStrEqual(subnode->name, BAD_CAST "drop"))
             {
@@ -286,5 +285,5 @@ void MonsterManager::deinitialize()
 MonsterClass *MonsterManager::getMonster(int id)
 {
     MonsterClasses::const_iterator i = monsterClasses.find(id);
-    return i != monsterClasses.end() ? i->second : NULL;
+    return i != monsterClasses.end() ? i->second : 0;
 }
