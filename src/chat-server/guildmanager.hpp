@@ -34,20 +34,13 @@ class ChatClient;
 class GuildManager
 {
     public:
-        /**
-         * Constructor.
-         */
         GuildManager();
-
-        /**
-         * Destructor.
-         */
         ~GuildManager();
 
         /**
          * Creates a guild.
          */
-        Guild* createGuild(const std::string &name, int playerId);
+        Guild *createGuild(const std::string &name, int playerId);
 
         /**
          * Removes a guild.
@@ -73,19 +66,19 @@ class GuildManager
          *
          * @return the guild with the given id, or NULL if it doesn't exist
          */
-        Guild *findById(short id);
+        Guild *findById(short id) const;
 
         /**
          * Returns the guild with the given name. O(n)
          *
          * @return the guild with the given name, or NULL if it doesn't exist
          */
-        Guild *findByName(const std::string &name);
+        Guild *findByName(const std::string &name) const;
 
         /**
          * Returns whether a guild exists.
          */
-        bool doesExist(const std::string &name);
+        bool doesExist(const std::string &name) const;
 
         /**
          * Return the guilds a character is in
@@ -109,7 +102,7 @@ class GuildManager
         /**
          * Check if the player already owns a guild
          */
-        bool alreadyOwner(int playerId);
+        bool alreadyOwner(int playerId) const;
 
         /**
          * Set user rights
