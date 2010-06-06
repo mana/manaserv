@@ -75,7 +75,7 @@ Character::Character(MessageIn &msg):
     deserializeCharacterData(*this, msg);
     for (int i = CHAR_ATTR_BEGIN; i < CHAR_ATTR_END; ++i)
     {
-        modifiedAttribute(i);
+        updateDerivedAttributes(i);
     }
     setSize(16);
     Inventory(this).initialize();
@@ -202,7 +202,7 @@ void Character::respawn()
         // script-controlled respawning didn't work - fall back to
         // hardcoded logic
         mAttributes[BASE_ATTR_HP].mod = -mAttributes[BASE_ATTR_HP].base + 1;
-        modifiedAttribute(BASE_ATTR_HP);    //warp back to spawn point
+        updateDerivedAttributes(BASE_ATTR_HP);    //warp back to spawn point
         int spawnMap = Configuration::getValue("respawnMap", 1);
         int spawnX = Configuration::getValue("respawnX", 1024);
         int spawnY = Configuration::getValue("respawnY", 1024);
@@ -386,7 +386,7 @@ int Character::getModifiedAttribute(int attr) const
     }
 }
 
-void Character::modifiedAttribute(int attr)
+void Character::updateDerivedAttributes(int attr)
 {
     if (attr >= CHAR_ATTR_BEGIN && attr < CHAR_ATTR_END)
     {
@@ -503,7 +503,7 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
         // check for skill levelup
         if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
         {
-            modifiedAttribute(skill);
+            updateDerivedAttributes(skill);
         }
 
         mRecalculateLevel = true;
@@ -612,7 +612,7 @@ AttribmodResponseCode Character::useCharacterPoint(size_t attribute)
 
     mCharacterPoints--;
     setAttribute(attribute, getAttribute(attribute) + 1);
-    modifiedAttribute(attribute);
+    updateDerivedAttributes(attribute);
     return ATTRIBMOD_OK;
 }
 
@@ -626,7 +626,7 @@ AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
     mCorrectionPoints--;
     mCharacterPoints++;
     setAttribute(attribute, getAttribute(attribute) - 1);
-    modifiedAttribute(attribute);
+    updateDerivedAttributes(attribute);
     return ATTRIBMOD_OK;
 }
 

@@ -668,12 +668,12 @@ void GameHandler::tokenMatched(GameClient *computer, Character *character)
     Inventory(character).sendFull();
     for (int i = 0; i < CHAR_ATTR_NB; ++i)
     {
-        character->modifiedAttribute(i);
+        character->updateDerivedAttributes(i);
     }
     std::map<int, int>::const_iterator skill_it;
     for (skill_it = character->getSkillBegin(); skill_it != character->getSkillEnd(); skill_it++)
     {
-        character->modifiedAttribute(skill_it->first);
+        character->updateDerivedAttributes(skill_it->first);
     }
 }
 

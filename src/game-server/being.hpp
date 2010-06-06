@@ -313,7 +313,7 @@ class Being : public Actor
         /**
          * Called when an attribute modifier is changed.
          */
-        virtual void modifiedAttribute(int) {}
+        virtual void updateDerivedAttributes(int) {}
 
         /**
          * Sets a statuseffect on this being

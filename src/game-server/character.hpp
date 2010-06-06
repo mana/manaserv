@@ -269,7 +269,7 @@ class Character : public Being
         /**
          * Updates base Being attributes.
          */
-        void modifiedAttribute(int);
+        void updateDerivedAttributes(int);
 
         /**
          * Calls all the "disconnected" listener.

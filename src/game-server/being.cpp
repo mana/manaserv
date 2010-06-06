@@ -92,7 +92,7 @@ int Being::damage(Actor *, const Damage &damage)
         Attribute &HP = mAttributes[BASE_ATTR_HP];
         LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
         HP.mod -= HPloss;
-        modifiedAttribute(BASE_ATTR_HP);
+        updateDerivedAttributes(BASE_ATTR_HP);
         setTimerSoft(T_B_HP_REGEN, Configuration::getValue("hpRegenBreakAfterHit", 0)); // no HP regen after being hit
     } else {
         HPloss = 0;
@@ -105,7 +105,7 @@ void Being::heal()
 {
     Attribute &HP = mAttributes[BASE_ATTR_HP];
     HP.mod = HP.base;
-    modifiedAttribute(BASE_ATTR_HP);
+    updateDerivedAttributes(BASE_ATTR_HP);
 }
 
 void Being::heal(int hp)
@@ -113,7 +113,7 @@ void Being::heal(int hp)
     Attribute &HP = mAttributes[BASE_ATTR_HP];
     HP.mod += hp;
     if (HP.mod > HP.base) HP.mod = HP.base;
-    modifiedAttribute(BASE_ATTR_HP);
+    updateDerivedAttributes(BASE_ATTR_HP);
 }
 
 void Being::died()
@@ -308,7 +308,7 @@ void Being::applyModifier(int attr, int amount, int duration, int lvl)
         mModifiers.push_back(mod);
     }
     mAttributes[attr].mod += amount;
-    modifiedAttribute(attr);
+    updateDerivedAttributes(attr);
 }
 
 void Being::dispellModifiers(int level)
@@ -319,7 +319,7 @@ void Being::dispellModifiers(int level)
         if (i->level && i->level <= level)
         {
             mAttributes[i->attr].mod -= i->value;
-            modifiedAttribute(i->attr);
+            updateDerivedAttributes(i->attr);
             i = mModifiers.erase(i);
             continue;
         }
@@ -419,7 +419,7 @@ void Being::update()
         if (!i->duration)
         {
             mAttributes[i->attr].mod -= i->value;
-            modifiedAttribute(i->attr);
+            updateDerivedAttributes(i->attr);
             i = mModifiers.erase(i);
             continue;
         }

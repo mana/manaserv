@@ -680,7 +680,7 @@ void Inventory::changeEquipment(int slot, int itemId)
     mChangedLook = true;
 
     //mark evade as modified because it depends on equipment weight
-    mClient->modifiedAttribute(BASE_ATTR_EVADE);
+    mClient->updateDerivedAttributes(BASE_ATTR_EVADE);
 }
 
 void Inventory::equip(int slot)
