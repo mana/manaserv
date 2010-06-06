@@ -112,13 +112,13 @@ void ChatChannel::setUserMode(ChatClient *user, unsigned char mode)
     }
 }
 
-std::string ChatChannel::getUserMode(ChatClient *user)
+std::string ChatChannel::getUserMode(ChatClient *user) const
 {
-    std::map<ChatChannel*, std::string>::iterator itr = user->userModes.find(this);
+    std::map<ChatChannel*, std::string>::const_iterator itr =
+            user->userModes.find(const_cast<ChatChannel*>(this));
+
     if (itr != user->userModes.end())
-    {
         return itr->second;
-    }
 
     return 0;
 }

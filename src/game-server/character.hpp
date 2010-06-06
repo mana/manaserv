@@ -330,7 +330,7 @@ class Character : public Being
         /**
          * Gets the number of monsters the character killed of a given type
          */
-        int getKillCount(int monsterType);
+        int getKillCount(int monsterType) const;
 
         /**
          * Shortcut to get being's health
@@ -403,12 +403,12 @@ class Character : public Being
         /**
          * Returns the exp needed for next skill levelup
          */
-        int getExpNeeded(size_t skill);
+        int getExpNeeded(size_t skill) const;
 
         /**
          * Returns the exp collected on this skill level
          */
-        int getExpGot(size_t skill);
+        int getExpGot(size_t skill) const;
 
         /**
          * Recalculates the character level

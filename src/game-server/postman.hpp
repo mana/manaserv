@@ -22,6 +22,7 @@
 #define POSTMAN_H
 
 #include <map>
+#include <string>
 
 class Character;
 
@@ -35,15 +36,12 @@ struct PostCallback
 class PostMan
 {
 public:
-    Character* getCharacter(int id)
+    Character *getCharacter(int id) const
     {
-        std::map<int, Character*>::iterator itr = mCharacters.find(id);
+        std::map<int, Character*>::const_iterator itr = mCharacters.find(id);
         if (itr != mCharacters.end())
-        {
             return itr->second;
-        }
-
-        return NULL;
+        return 0;
     }
 
     void addCharacter(Character *player)

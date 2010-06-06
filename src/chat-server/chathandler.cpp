@@ -252,8 +252,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         computer.send(result);
 }
 
-void
-ChatHandler::handleCommand(ChatClient &computer, const std::string &command)
+void ChatHandler::handleCommand(ChatClient &computer, const std::string &command)
 {
     LOG_INFO("Chat: Received unhandled command: " << command);
     MessageOut result;
@@ -262,8 +261,7 @@ ChatHandler::handleCommand(ChatClient &computer, const std::string &command)
     computer.send(result);
 }
 
-void
-ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
+void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
 {
     // We could later count if the player is really often unpolite.
     MessageOut result;
@@ -274,8 +272,7 @@ ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
     LOG_INFO(computer.characterName << " says bad words.");
 }
 
-void
-ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
 {
     std::string text = msg.readString();
 
@@ -309,8 +306,7 @@ ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void
-ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
 {
     std::string text = msg.readString();
 
@@ -349,8 +345,7 @@ ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
 
 }
 
-void
-ChatHandler::handlePrivMsgMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handlePrivMsgMessage(ChatClient &client, MessageIn &msg)
 {
     std::string user = msg.readString();
     std::string text = msg.readString();
@@ -458,8 +453,7 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
 {
     short channelId = msg.readShort();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
@@ -500,8 +494,7 @@ ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void
-ChatHandler::handleKickUserMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleKickUserMessage(ChatClient &client, MessageIn &msg)
 {
     short channelId = msg.readShort();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
@@ -538,8 +531,7 @@ ChatHandler::handleKickUserMessage(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void
-ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_QUIT_CHANNEL_RESPONSE);
 
@@ -581,8 +573,7 @@ ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_LIST_CHANNELS_RESPONSE);
 
@@ -607,8 +598,8 @@ ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void
-ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleListChannelUsersMessage(ChatClient &client,
+                                                MessageIn &msg)
 {
     MessageOut reply(CPMSG_LIST_CHANNELUSERS_RESPONSE);
 
@@ -639,8 +630,7 @@ ChatHandler::handleListChannelUsersMessage(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void
-ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
 {
     short channelId = msg.readShort();
     std::string topic = msg.readString();
@@ -664,8 +654,7 @@ ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void
-ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_DISCONNECT_RESPONSE);
     reply.writeByte(ERRMSG_OK);
@@ -674,9 +663,9 @@ ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void
-ChatHandler::sayToPlayer(ChatClient &computer, const std::string &playerName,
-                         const std::string &text)
+void ChatHandler::sayToPlayer(ChatClient &computer,
+                              const std::string &playerName,
+                              const std::string &text)
 {
     MessageOut result;
     LOG_DEBUG(computer.characterName << " says to " << playerName << ": "
@@ -717,16 +706,13 @@ void ChatHandler::sendInChannel(ChatChannel *channel, MessageOut &msg)
     }
 }
 
-ChatClient* ChatHandler::getClient(const std::string &name)
+ChatClient *ChatHandler::getClient(const std::string &name) const
 {
-    std::map<std::string, ChatClient*>::iterator itr;
-    itr = mPlayerMap.find(name);
+    std::map<std::string, ChatClient*>::const_iterator itr
+            = mPlayerMap.find(name);
+
     if (itr != mPlayerMap.end())
-    {
         return itr->second;
-    }
     else
-    {
-        return NULL;
-    }
+        return 0;
 }

@@ -120,7 +120,8 @@ int ChatChannelManager::getChannelId(const std::string &channelName) const
             i_end = mChatChannels.end();
          i != i_end; ++i)
     {
-        if (i->second.getName() == channelName) return i->first;
+        if (i->second.getName() == channelName)
+            return i->first;
     }
     return 0;
 }
@@ -130,7 +131,7 @@ ChatChannel *ChatChannelManager::getChannel(int channelId)
     ChatChannels::iterator i = mChatChannels.find(channelId);
     if (i != mChatChannels.end())
         return &i->second;
-    return NULL;
+    return 0;
 }
 
 ChatChannel *ChatChannelManager::getChannel(const std::string &name)
@@ -139,12 +140,10 @@ ChatChannel *ChatChannelManager::getChannel(const std::string &name)
          i != mChatChannels.end(); ++i)
     {
         if (i->second.getName() == name)
-        {
             return &(i->second);
-        }
     }
 
-    return NULL;
+    return 0;
 }
 
 void ChatChannelManager::setChannelTopic(int channelId, const std::string &topic)
@@ -179,9 +178,15 @@ bool ChatChannelManager::channelExists(int channelId) const
     return mChatChannels.find(channelId) != mChatChannels.end();
 }
 
-bool ChatChannelManager::channelExists(const std::string &channelName)
+bool ChatChannelManager::channelExists(const std::string &channelName) const
 {
-    return getChannel(channelName) != NULL;
+    for (ChatChannels::const_iterator i = mChatChannels.begin();
+         i != mChatChannels.end(); ++i)
+    {
+        if (i->second.getName() == channelName)
+            return true;
+    }
+    return false;
 }
 
 int ChatChannelManager::nextUsable()

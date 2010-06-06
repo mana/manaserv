@@ -65,13 +65,13 @@ class ChatChannel
         /**
          * Get the name of the channel.
          */
-        const std::string& getName() const
+        const std::string &getName() const
         { return mName; }
 
         /**
          * Get the announcement string of the channel.
          */
-        const std::string& getAnnouncement() const
+        const std::string &getAnnouncement() const
         { return mAnnouncement; }
 
         /**
@@ -101,7 +101,7 @@ class ChatChannel
         /**
          * Gets the list of the users registered in the channel.
          */
-        const ChannelUsers& getUserList() const
+        const ChannelUsers &getUserList() const
         { return mRegisteredUsers; }
 
         /**
@@ -136,7 +136,7 @@ class ChatChannel
         /**
          * Get user mode
          */
-        std::string getUserMode(ChatClient *);
+        std::string getUserMode(ChatClient *) const;
 
     private:
         unsigned short mId;            /**< The ID of the channel. */

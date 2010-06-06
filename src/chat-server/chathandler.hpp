@@ -318,7 +318,7 @@ class ChatHandler : public ConnectionHandler
          * @param The name of the character
          * @return The Chat Client
          */
-        ChatClient *getClient(const std::string &name);
+        ChatClient *getClient(const std::string &name) const;
 
         /**
          * Set the topic of a guild channel

@@ -530,15 +530,12 @@ void Character::incrementKillCount(int monsterType)
     };
 }
 
-int Character::getKillCount(int monsterType)
+int Character::getKillCount(int monsterType) const
 {
-    std::map<int, int>::iterator i = mKillCount.find(monsterType);
-    if (i == mKillCount.end())
-    {
-        return 0;
-    } else {
+    std::map<int, int>::const_iterator i = mKillCount.find(monsterType);
+    if (i != mKillCount.end())
         return i->second;
-    };
+    return 0;
 }
 
 
@@ -585,16 +582,16 @@ void Character::recalculateLevel()
     }
 }
 
-int Character::getExpNeeded(size_t skill)
+int Character::getExpNeeded(size_t skill) const
 {
     int level = getAttribute(skill);
     return Character::expForLevel(level + 1) - expForLevel(level);
 }
 
-int Character::getExpGot(size_t skill)
+int Character::getExpGot(size_t skill) const
 {
     int level = getAttribute(skill);
-    return mExperience[skill] - Character::expForLevel(level);
+    return mExperience.at(skill) - Character::expForLevel(level);
 }
 
 void Character::levelup()

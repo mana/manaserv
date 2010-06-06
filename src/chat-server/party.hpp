@@ -48,12 +48,12 @@ public:
     /**
      * Return number of users in party
      */
-    unsigned int numUsers() { return mUsers.size(); }
+    unsigned int userCount() const { return mUsers.size(); }
 
     /**
      * Return the party id
      */
-    unsigned int getId() { return mId; }
+    unsigned int getId() const { return mId; }
 
 private:
     PartyUsers mUsers;

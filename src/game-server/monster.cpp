@@ -295,7 +295,7 @@ void Monster::update()
     }
 }
 
-void Monster::loadScript(std::string &scriptName)
+void Monster::loadScript(const std::string &scriptName)
 {
     if (mScript)
     {

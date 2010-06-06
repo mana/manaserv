@@ -34,14 +34,7 @@
 class ChatChannelManager
 {
     public:
-        /**
-         * Constructor.
-         */
         ChatChannelManager();
-
-        /**
-         * Destructor.
-         */
         ~ChatChannelManager();
 
         /**
@@ -114,7 +107,7 @@ class ChatChannelManager
          * @param channelId a channel ID
          */
         bool channelExists(int channelId) const;
-        bool channelExists(const std::string &channelName);
+        bool channelExists(const std::string &channelName) const;
 
         /**
          * Get next usable channel ID

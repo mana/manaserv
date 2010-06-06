@@ -219,7 +219,7 @@ void ChatHandler::removeUserFromParty(ChatClient &client)
         informPartyMemberQuit(client);
 
         // if theres less than 1 member left, remove the party
-        if (client.party->numUsers() < 1)
+        if (client.party->userCount() < 1)
         {
             delete client.party;
             client.party = 0;

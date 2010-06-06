@@ -174,10 +174,10 @@ class MonsterClass
         const MonsterAttacks &getAttacks() const { return mAttacks; }
 
         /** sets the script file for the monster */
-        void setScript(std::string& filename) { mScript = filename; }
+        void setScript(const std::string &filename) { mScript = filename; }
 
         /** Returns script filename */
-        std::string &getScript() { return mScript; }
+        const std::string &getScript() const { return mScript; }
 
         /**
          * Randomly selects a monster drop (may return NULL).
@@ -241,7 +241,7 @@ class Monster : public Being
         /**
          * Returns monster specy.
          */
-        MonsterClass *getSpecy()
+        MonsterClass *getSpecy() const
         { return mSpecy; }
 
         /**
@@ -257,7 +257,7 @@ class Monster : public Being
         /**
          * Loads a script file for this monster
          */
-        void loadScript(std::string &scriptName);
+        void loadScript(const std::string &scriptName);
 
         /**
          *
