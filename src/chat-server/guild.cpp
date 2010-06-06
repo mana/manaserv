@@ -24,7 +24,7 @@
 #include <algorithm>
 
 Guild::Guild(const std::string &name) :
-mName(name)
+    mName(name)
 {
 }
 
@@ -35,7 +35,7 @@ Guild::~Guild()
 void Guild::addMember(int playerId, int permissions)
 {
     // create new guild member
-    GuildMember *member = new GuildMember();
+    GuildMember *member = new GuildMember;
     member->mId = playerId;
     member->mPermissions = permissions;
 
@@ -63,18 +63,15 @@ void Guild::removeMember(int playerId)
         mMembers.remove(member);
 }
 
-int Guild::getOwner()
+int Guild::getOwner() const
 {
-    std::list<GuildMember*>::iterator itr = mMembers.begin();
-    std::list<GuildMember*>::iterator itr_end = mMembers.end();
+    std::list<GuildMember*>::const_iterator itr = mMembers.begin();
+    std::list<GuildMember*>::const_iterator itr_end = mMembers.end();
 
     while (itr != itr_end)
     {
         if ((*itr)->mPermissions == GAL_OWNER)
-        {
             return (*itr)->mId;
-        }
-
         ++itr;
     }
 
@@ -90,7 +87,7 @@ void Guild::setOwner(int playerId)
     }
 }
 
-bool Guild::checkInvited(int playerId)
+bool Guild::checkInvited(int playerId) const
 {
     return std::find(mInvited.begin(), mInvited.end(), playerId) != mInvited.end();
 }
@@ -100,29 +97,26 @@ void Guild::addInvited(int playerId)
     mInvited.push_back(playerId);
 }
 
-bool Guild::checkInGuild(int playerId)
+bool Guild::checkInGuild(int playerId) const
 {
-    GuildMember *member = getMember(playerId);
-    return member ? true : false;
+    return getMember(playerId) != 0;
 }
 
-GuildMember* Guild::getMember(int playerId)
+GuildMember *Guild::getMember(int playerId) const
 {
-    std::list<GuildMember*>::iterator itr = mMembers.begin(), itr_end = mMembers.end();
+    std::list<GuildMember*>::const_iterator itr = mMembers.begin(),
+                                            itr_end = mMembers.end();
     while (itr != itr_end)
     {
         if ((*itr)->mId == playerId)
-        {
             return (*itr);
-        }
-
         ++itr;
     }
 
-    return NULL;
+    return 0;
 }
 
-bool Guild::canInvite(int playerId)
+bool Guild::canInvite(int playerId) const
 {
     // Guild members with permissions above NONE can invite
     // Check that guild members permissions are not NONE
@@ -132,7 +126,7 @@ bool Guild::canInvite(int playerId)
     return false;
 }
 
-int Guild::getUserPermissions(int playerId)
+int Guild::getUserPermissions(int playerId) const
 {
     GuildMember *member = getMember(playerId);
     return member->mPermissions;

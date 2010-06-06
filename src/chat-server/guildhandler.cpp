@@ -54,15 +54,10 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
     std::vector<Guild*> guilds = guildManager->getGuildsForPlayer(client.characterId);
     for (unsigned int i = 0; i != guilds.size(); ++i)
     {
-        Guild *guild = guilds[i];
-        short permissions;
-        if (!guild)
-        {
-            return;
-        }
-        permissions = guild->getUserPermissions(client.characterId);
+        const Guild *guild = guilds[i];
 
-        std::string guildName = guild->getName();
+        const int permissions = guild->getUserPermissions(client.characterId);
+        const std::string guildName = guild->getName();
 
         // Tell the client what guilds the character belongs to and their permissions
         MessageOut msg(CPMSG_GUILD_REJOIN);
@@ -80,7 +75,6 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
         client.send(msg);
 
         sendGuildListUpdate(guildName, client.characterName, GUILD_EVENT_ONLINE_PLAYER);
-
     }
 }
 

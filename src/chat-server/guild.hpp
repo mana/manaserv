@@ -34,7 +34,6 @@ public:
     int mId;
     std::string mName;
     int mPermissions;
-
 };
 
 /**
@@ -67,7 +66,7 @@ class Guild
         /**
          * Return owner id
          */
-        int getOwner();
+        int getOwner() const;
 
         /**
          * Set player as owner of the guild.
@@ -83,7 +82,7 @@ class Guild
         /**
          * Check if player has been invited to the guild.
          */
-        bool checkInvited(int playerId);
+        bool checkInvited(int playerId) const;
 
         /**
          * Add a player to the invite list.
@@ -117,17 +116,17 @@ class Guild
         /**
          * Find member by name.
          */
-        bool checkInGuild(int playerId);
+        bool checkInGuild(int playerId) const;
 
         /**
          * Returns whether a user can invite
          */
-        bool canInvite(int playerId);
+        bool canInvite(int playerId) const;
 
         /**
          * Returns a users permissions
          */
-        int getUserPermissions(int playerId);
+        int getUserPermissions(int playerId) const;
 
         /**
          * Sets a users permissions
@@ -136,9 +135,9 @@ class Guild
 
     protected:
         /**
-         * Return a member based on their character name
+         * Searches for a guild member by player ID
          */
-        GuildMember* getMember(int playerId);
+        GuildMember *getMember(int playerId) const;
 
     private:
         short mId;
