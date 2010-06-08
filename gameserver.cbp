@@ -65,6 +65,8 @@
 		<Unit filename="src\common\inventorydata.hpp" />
 		<Unit filename="src\common\permissionmanager.cpp" />
 		<Unit filename="src\common\permissionmanager.hpp" />
+                <Unit filename="src\common\resourcemanager.cpp" />
+                <Unit filename="src\common\resourcemanager.hpp" />
 		<Unit filename="src\common\transaction.hpp" />
 		<Unit filename="src\defines.h" />
 		<Unit filename="src\game-server\accountconnection.cpp" />
@@ -110,8 +112,6 @@
 		<Unit filename="src\game-server\postman.hpp" />
 		<Unit filename="src\game-server\quest.cpp" />
 		<Unit filename="src\game-server\quest.hpp" />
-		<Unit filename="src\game-server\resourcemanager.cpp" />
-		<Unit filename="src\game-server\resourcemanager.hpp" />
 		<Unit filename="src\game-server\skillmanager.cpp" />
 		<Unit filename="src\game-server\skillmanager.hpp" />
 		<Unit filename="src\game-server\spawnarea.cpp" />
