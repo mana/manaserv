@@ -35,7 +35,7 @@ class StatusEffect;
 
 /**
  * Beings and actors directions
- * Needs too match client
+ * Needs to match client
  */
 enum Direction
 {

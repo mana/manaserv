@@ -88,8 +88,8 @@ Monster::Monster(MonsterClass *specy):
     int dist = specy->getAttackDistance();
     mAttackPositions.push_back(AttackPosition(dist, 0, DIRECTION_LEFT));
     mAttackPositions.push_back(AttackPosition(-dist, 0, DIRECTION_RIGHT));
-    mAttackPositions.push_back(AttackPosition(0, dist, DIRECTION_DOWN));
-    mAttackPositions.push_back(AttackPosition(0, -dist, DIRECTION_UP));
+    mAttackPositions.push_back(AttackPosition(0, -dist, DIRECTION_DOWN));
+    mAttackPositions.push_back(AttackPosition(0, dist, DIRECTION_UP));
 
     //load default script
     loadScript(specy->getScript());
@@ -177,7 +177,7 @@ void Monster::update()
         mScript->execute();
     }
 
-    // cancle the rest when we are currently performing an attack
+    // Cancel the rest when we are currently performing an attack
     if (isTimerRunning(T_B_ATTACK_TIME)) return;
 
     // Check potential attack positions
