@@ -124,14 +124,45 @@ static bool checkPermission(Character *player, unsigned int permissions)
     return false;
 }*/
 
+/**
+ * Returns the next argument, and remove it from the given string.
+ */
 static std::string getArgument(std::string &args)
 {
     std::string argument = "";
-    std::string::size_type pos = args.find(' ');
+    std::string::size_type pos = std::string::npos;
+    bool doubleQuotes = false;
+
+    // Finds out if the next argument is between double-quotes
+    if (args.substr(0, 1).compare("\""))
+    {
+        // No double-quotes, we then search an ending space.
+        pos = args.find(' ');
+        doubleQuotes = false;
+    }
+    else
+    {
+        // Exclude the first double-quote from search.
+        pos = args.find('"', 1);
+        doubleQuotes = true;
+    }
+
     if (pos != std::string::npos)
     {
         argument = args.substr(0, pos);
-        args = args.substr(pos+1);
+        if (doubleQuotes)
+        {
+            // Jumps to the next parameter,
+            // after the ending double-quote and space,
+            // and remove the two double-quotes before returning.
+            args = args.substr(pos + 2);
+            argument = argument.substr(1, pos - 1);
+        }
+        else
+        {
+            // Jumps to the next parameter, after the ending space.
+            args = args.substr(pos + 1);
+        }
     }
     else
     {
@@ -229,7 +260,7 @@ static void handleWarp(Character *player, std::string &args)
         other = getPlayer(character);
         if (!other)
         {
-            say("Invalid character, or they are offline", player);
+            say("Invalid or offline character <" + character + ">.", player);
             return;
         }
     }
