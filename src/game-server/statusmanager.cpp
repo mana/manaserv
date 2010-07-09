@@ -30,8 +30,8 @@
 #include <set>
 #include <sstream>
 
-typedef std::map< int, StatusEffect * > StatusEffects;
-static StatusEffects statusEffects;
+typedef std::map< int, StatusEffect * > StatusEffectsMap;
+static StatusEffectsMap statusEffects;
 static std::string statusReferenceFile;
 
 void StatusManager::initialize(const std::string &file)
@@ -108,7 +108,7 @@ void StatusManager::reload()
 
 void StatusManager::deinitialize()
 {
-    for (StatusEffects::iterator i = statusEffects.begin(),
+    for (StatusEffectsMap::iterator i = statusEffects.begin(),
            i_end = statusEffects.end(); i != i_end; ++i)
     {
         delete i->second;
@@ -118,7 +118,7 @@ void StatusManager::deinitialize()
 
 StatusEffect *StatusManager::getStatus(int statusId)
 {
-    StatusEffects::const_iterator i = statusEffects.find(statusId);
+    StatusEffectsMap::const_iterator i = statusEffects.find(statusId);
     return i != statusEffects.end() ? i->second : NULL;
 }
 

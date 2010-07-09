@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include "game-server/character.hpp"
 #include "game-server/eventlistener.hpp"
 
 class MapComposite;
@@ -135,11 +136,13 @@ class Script
          * Runs a function from the global event script file
          */
         static bool execute_global_event_function(const std::string &function, Being *obj);
-
+        static void addDataToSpecial(int specialId, Special *special);
+        static bool perform_special_action(int specialId, Being *caster);
 
 
     protected:
         static Script* global_event_script; // the global event script
+        static Script* special_actions_script; // the special actions script
         std::string mScriptFile;
 
     private:

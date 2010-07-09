@@ -81,6 +81,14 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeLong(kills_it->second);
     }
 
+    // character specials
+    std::map<int, Special*>::const_iterator special_it;
+    msg.writeShort(data.getSpecialSize());
+    for (special_it = data.getSpecialBegin(); special_it != data.getSpecialEnd() ; special_it++)
+    {
+        msg.writeLong(special_it->first);
+    }
+
     // inventory - must be last because size isn't transmitted
     const Possessions &poss = data.getPossessions();
     msg.writeLong(poss.money);
@@ -150,6 +158,14 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         int monsterId = msg.readShort();
         int kills = msg.readLong();
         data.setKillCount(monsterId, kills);
+    }
+
+    // character specials
+    int specialSize = msg.readShort();
+    data.clearSpecials();
+    for (int i = 0; i < specialSize; i++)
+    {
+        data.giveSpecial(msg.readLong());
     }
 
     // inventory - must be last because size isn't transmitted

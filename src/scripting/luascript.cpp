@@ -167,3 +167,14 @@ bool LuaScript::load_global_event_script(const std::string &file)
     }
     return true;
 }
+
+bool LuaScript::load_special_actions_script(const std::string &file)
+{
+    Script::special_actions_script = new LuaScript();
+    if (!Script::special_actions_script->loadFile(file))
+    {
+        Script::special_actions_script = NULL;
+        return false;
+    }
+    return true;
+}

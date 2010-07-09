@@ -40,7 +40,7 @@ static const char *DEFAULT_ITEM_FILE = "items.xml";
 
 // defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
-static const char *SUPPORTED_DB_VERSION = "8";
+static const char *SUPPORTED_DB_VERSION = "9";
 
 /*
  * MySQL specificities:
@@ -72,6 +72,7 @@ static const char *CHARACTERS_TBL_NAME =     "mana_characters";
 static const char *CHAR_SKILLS_TBL_NAME =    "mana_char_skills";
 static const char *CHAR_STATUS_EFFECTS_TBL_NAME = "mana_char_status_effects";
 static const char *CHAR_KILL_COUNT_TBL_NAME = "mana_char_kill_stats";
+static const char *CHAR_SPECIALS_TBL_NAME =  "mana_char_specials";
 static const char *INVENTORIES_TBL_NAME =    "mana_inventories";
 static const char *ITEMS_TBL_NAME =          "mana_items";
 static const char *GUILDS_TBL_NAME =         "mana_guilds";
@@ -433,11 +434,10 @@ Character *Storage::getCharacterBySQL(Account *owner)
         // Load the kill stats
         s.clear();
         s.str("");
-        // Load the status effect
         s << "select monster_id, kills FROM " << CHAR_KILL_COUNT_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
         const dal::RecordSet &killsInfo = mDb->execSql(s.str());
-        if (!statusInfo.isEmpty())
+        if (!killsInfo.isEmpty())
         {
             const unsigned int nRows = killsInfo.rows();
             for (unsigned int row = 0; row < nRows; row++)
@@ -445,6 +445,20 @@ Character *Storage::getCharacterBySQL(Account *owner)
                 character->setKillCount(
                     toUint(killsInfo(row, 0)), // MonsterID
                     toUint(killsInfo(row, 1))); // Kills
+            }
+        }
+        // load the special status
+        s.clear();
+        s.str("");
+        s << "select special_id FROM " << CHAR_SPECIALS_TBL_NAME
+          << " WHERE char_id = " << character->getDatabaseID();
+        const dal::RecordSet &specialsInfo = mDb->execSql(s.str());
+        if (!specialsInfo.isEmpty())
+        {
+            const unsigned int nRows = specialsInfo.rows();
+            for (unsigned int row = 0; row < nRows; row++)
+            {
+                character->giveSpecial(toUint(specialsInfo(row, 0)));
             }
         }
     }
@@ -729,9 +743,44 @@ bool Storage::updateCharacter(Character *character,
         {
             mDb->rollbackTransaction();
         }
-        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
         return false;
     }
+    /**
+     *  Character's special actions
+     */
+    try
+    {
+        // out with the old
+        std::ostringstream deleteSql("");
+        std::ostringstream insertSql;
+        deleteSql   << "DELETE FROM " << CHAR_SPECIALS_TBL_NAME
+                    << " WHERE char_id='" << character->getDatabaseID() << "';";
+        mDb->execSql(deleteSql.str());
+        // in with the new
+        std::map<int, Special*>::const_iterator special_it;
+        for (special_it = character->getSpecialBegin();
+             special_it != character->getSpecialEnd(); special_it++)
+        {
+            insertSql.str("");
+            insertSql   << "INSERT INTO " << CHAR_SPECIALS_TBL_NAME
+                        << " (char_id, special_id) VALUES ("
+                        << " '" << character->getDatabaseID() << "',"
+                        << " '" << special_it->first << "');";
+            mDb->execSql(insertSql.str());
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        // TODO: throw an exception.
+        if (startTransaction)
+        {
+            mDb->rollbackTransaction();
+        }
+        LOG_ERROR("(DALStorage::updateCharacter #4) SQL query failure: " << e.what());
+        return false;
+    }
+
     /**
      *  Character's inventory
      */
@@ -752,7 +801,7 @@ bool Storage::updateCharacter(Character *character,
         {
             mDb->rollbackTransaction();
         }
-        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: " << e.what());
         return false;
     }
 

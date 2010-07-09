@@ -232,14 +232,7 @@ void Character::useSpecial(int id)
 
     //tell script engine to cast the spell
     special->currentMana = 0;
-    Script *script = getMap()->getScript();
-    if (script) {
-        script->prepare("cast");
-        script->push(this);
-        script->push(id);
-        script->execute();
-    }
-
+    Script::perform_special_action(id, this);
     mSpecialUpdateNeeded = true;
     return;
 }
@@ -661,14 +654,29 @@ void Character::giveSpecial(int id)
 {
     if (mSpecials.find(id) == mSpecials.end())
     {
-        // TODO: get the needed mana from a SpecialDB
-        int neededMana;
-        if (id == 1) neededMana = 10;
-        if (id == 2) neededMana = 100;
-        if (id == 3) neededMana = 1000;
-
-        Special *s = new Special(neededMana);
+        Special *s = new Special();
+        Script::addDataToSpecial(id, s);
         mSpecials[id] = s;
         mSpecialUpdateNeeded = true;
     }
+}
+
+void Character::takeSpecial(int id)
+{
+    std::map<int, Special*>::iterator i = mSpecials.find(id);
+    if (i != mSpecials.end())
+    {
+        delete i->second;
+        mSpecials.erase(i);
+        mSpecialUpdateNeeded = true;
+    }
+}
+
+void Character::clearSpecials()
+{
+    for(std::map<int, Special*>::iterator i = mSpecials.begin(); i != mSpecials.end(); i++)
+    {
+        delete i->second;
+    }
+    mSpecials.clear();
 }

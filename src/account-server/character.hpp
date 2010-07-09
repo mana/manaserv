@@ -32,6 +32,9 @@
 class Account;
 class MessageIn;
 
+/** placeholder type needed for include compatibility with game server*/
+typedef void Special;
+
 class Character
 {
     public:
@@ -155,6 +158,24 @@ class Character
         { mKillCount[monsterId] = kills; }
 
         /**
+         * Get / Set specials
+         */
+        int getSpecialSize() const
+        { return mSpecials.size(); }
+
+        const std::map<int, Special*>::const_iterator getSpecialBegin() const
+        { return mSpecials.begin(); }
+
+        const std::map<int, Special*>::const_iterator getSpecialEnd() const
+        { return mSpecials.end(); }
+
+        void clearSpecials()
+        { mSpecials.clear(); }
+
+        void giveSpecial(int id)
+        { mSpecials[id] = NULL; }
+
+        /**
          * Gets the Id of the map that the character is on.
          */
         int getMapId() const { return mMapId; }
@@ -212,6 +233,7 @@ class Character
         std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, int> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
+        std::map<int, Special*>  mSpecials;
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.

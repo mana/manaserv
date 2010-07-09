@@ -33,6 +33,7 @@ typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
 Script *Script::global_event_script = NULL;
+Script *Script::special_actions_script = NULL;
 
 Script::Script():
     mMap(NULL),
@@ -121,4 +122,33 @@ bool Script::execute_global_event_function(const std::string &function, Being* o
         isScriptHandled = true; // TODO: don't set to true when execution failed
     }
     return isScriptHandled;
+}
+
+
+void Script::addDataToSpecial(int id, Special* special)
+{
+    /* currently only gets the recharge cost.
+      TODO: get any other info in a similar way, but
+            first we have to agree on what other
+            info we actually want to provide.
+    */
+    Script *script = Script::special_actions_script;
+    script->prepare("get_special_recharge_cost");
+    script->push(id);
+    int scriptReturn = script->execute();
+    special->neededMana = scriptReturn;
+
+}
+
+bool Script::perform_special_action(int specialId, Being* caster)
+{
+    Script *script = Script::special_actions_script;
+    if (script)
+    {
+        script->prepare("use_special");
+        script->push(caster);
+        script->push(specialId);
+        script->execute();
+    }
+    return true;
 }

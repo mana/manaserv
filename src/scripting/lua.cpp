@@ -1454,6 +1454,79 @@ static int chr_get_kill_count(lua_State *s)
 
 
 /**
+ * Enables a special for a character
+ * mana.chr_give_special (character, special)
+ */
+static int chr_give_special(lua_State *s)
+{
+    // cost_type is ignored until we have more than one cost type
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_give_special called for nonexistent character.");
+        return 0;
+    }
+    if (!lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "chr_give_special called with incorect parameters");
+        return 0;
+    }
+    int special = lua_tointeger(s, 2);
+
+    c->giveSpecial(special);
+    return 0;
+}
+
+/**
+ * Checks if a character has a special and returns true or false
+ * mana.chr_has_special (character, special)
+ */
+static int chr_has_special(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_has_special called for nonexistent character.");
+        return 0;
+    }
+    if (!lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "chr_has_special called with incorect parameters");
+        return 0;
+    }
+    int special = lua_tointeger(s, 2);
+
+    lua_pushboolean(s, c->hasSpecial(special));
+    return 1;
+}
+
+/**
+ * Removes a special from a character
+ * mana.chr_take_special (character, special)
+ */
+static int chr_take_special(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_take_special called for nonexistent character.");
+        return 0;
+    }
+    if (!lua_isnumber(s, 2))
+    {
+        raiseScriptError(s, "chr_take_special called with incorect parameters");
+        return 0;
+    }
+    int special = lua_tointeger(s, 2);
+
+    lua_pushboolean(s, c->hasSpecial(special));
+    c->takeSpecial(special);
+    return 1;
+}
+
+
+
+/**
  * Returns the rights level of a character.
  * mana.chr_get_rights (being)
  */
@@ -1650,6 +1723,9 @@ LuaScript::LuaScript():
         { "chr_set_hair_color",     &chr_set_hair_color   },
         { "chr_get_hair_color",     &chr_get_hair_color   },
         { "chr_get_kill_count",     &chr_get_kill_count   },
+        { "chr_give_special",       &chr_give_special     },
+        { "chr_has_special",        &chr_has_special      },
+        { "chr_take_special",       &chr_take_special     },
         { "exp_for_level",          &exp_for_level        },
         { "monster_create",         &monster_create       },
         { "monster_load_script",    &monster_load_script  },

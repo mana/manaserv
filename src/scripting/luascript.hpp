@@ -71,6 +71,7 @@ class LuaScript: public Script
          * Loads the global event script file
          */
         static bool load_global_event_script(const std::string &file);
+        static bool load_special_actions_script(const std::string &file);
 
     private:
 

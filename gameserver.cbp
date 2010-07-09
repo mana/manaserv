@@ -65,8 +65,8 @@
 		<Unit filename="src\common\inventorydata.hpp" />
 		<Unit filename="src\common\permissionmanager.cpp" />
 		<Unit filename="src\common\permissionmanager.hpp" />
-                <Unit filename="src\common\resourcemanager.cpp" />
-                <Unit filename="src\common\resourcemanager.hpp" />
+		<Unit filename="src\common\resourcemanager.cpp" />
+		<Unit filename="src\common\resourcemanager.hpp" />
 		<Unit filename="src\common\transaction.hpp" />
 		<Unit filename="src\defines.h" />
 		<Unit filename="src\game-server\accountconnection.cpp" />
@@ -149,6 +149,7 @@
 		<Unit filename="src\scripting\luautil.hpp" />
 		<Unit filename="src\scripting\script.cpp" />
 		<Unit filename="src\scripting\script.hpp" />
+		<Unit filename="src\serialize\characterdata.hpp" />
 		<Unit filename="src\utils\base64.cpp" />
 		<Unit filename="src\utils\base64.h" />
 		<Unit filename="src\utils\logger.cpp" />

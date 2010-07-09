@@ -39,10 +39,9 @@ class Trade;
 
 struct Special
 {
-    Special(int needed)
+    Special()
     {
         currentMana = 0;
-        neededMana = needed;
     }
     int currentMana;
     int neededMana;
@@ -93,6 +92,21 @@ class Character : public Being
          * Allows a character to perform a special action
          */
         void giveSpecial(int id);
+
+        /**
+         * Removes all specials from character
+         */
+        void clearSpecials();
+
+        /**
+         * Checks if a character knows a special action
+         */
+        bool hasSpecial(int id) { return mSpecials.find(id) != mSpecials.end(); }
+
+        /**
+         * Removes an available special action
+         */
+        void takeSpecial(int id);
 
         /**
          * Gets client computer.
@@ -296,7 +310,7 @@ class Character : public Being
         { return mStatusEffects.end(); }
 
         /**
-         * used to serialized kill count
+         * used to serialize kill count
          */
         int getKillCountSize() const
         { return mKillCount.size(); }
@@ -309,6 +323,18 @@ class Character : public Being
 
         void setKillCount(int monsterId, int kills)
         { mKillCount[monsterId] = kills; }
+
+        /**
+         * used to serialize specials
+         */
+        int getSpecialSize() const
+        { return mSpecials.size(); }
+
+        const std::map<int, Special*>::const_iterator getSpecialBegin() const
+        { return mSpecials.begin(); }
+
+        const std::map<int, Special*>::const_iterator getSpecialEnd() const
+        { return mSpecials.end(); }
 
         /**
          * Gets total accumulated exp for skill
