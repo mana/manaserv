@@ -128,6 +128,14 @@ class ItemEffectConsumes : public ItemEffectInfo
         void dispell(Being *itemUser) {}
 };
 
+class ItemEffectScript : public ItemEffectInfo
+{
+    public:
+        bool apply(Being *itemUser);
+        void dispell(Being *itemUser);
+};
+
+
 /**
  * Class for simple reference to item information.
  */

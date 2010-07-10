@@ -286,6 +286,28 @@ void ItemManager::reload()
                     }
                     else if (xmlStrEqual(effectnode->name, BAD_CAST "consumes"))
                         item->addEffect(new ItemEffectConsumes(), triggerTypes.first);
+                    else if (xmlStrEqual(effectnode->name, BAD_CAST "script"))
+                    {
+                        std::string src = XML::getProperty(effectnode, "src", "");
+                        if (src.empty())
+                        {
+                            LOG_WARN("Item Manager: Empty src definition for script effect, skipping!");
+                            continue;
+                        }
+                        std::string func = XML::getProperty(effectnode, "function", "");
+                        if (func.empty())
+                        {
+                            LOG_WARN ("Item Manager: Empty func definition for script effect, skipping!");
+                            continue;
+                        }
+                        for_each_xml_child_node(scriptnode, effectnode)
+                        {
+                            // TODO: Load variables from variable subnodes
+                        }
+                        std::string dfunc = XML::getProperty(effectnode, "dispell-function", "");
+                        // STUB
+                        item->addEffect(new ItemEffectScript(), triggerTypes.first, triggerTypes.second);
+                    }
                 }
             }
             // More properties go here

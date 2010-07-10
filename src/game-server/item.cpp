@@ -63,6 +63,17 @@ void ItemEffectAutoAttack::dispell(Being *itemUser)
     // TODO
 }
 
+bool ItemEffectScript::apply(Being *itemUser)
+{
+    // TODO
+    return false;
+}
+
+void ItemEffectScript::dispell(Being *itemUser)
+{
+    // TODO
+}
+
 bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
 {
     if (!trigger) return false;
