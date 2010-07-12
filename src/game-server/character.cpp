@@ -410,8 +410,14 @@ void Character::modifiedAttribute(unsigned int attr)
             newBase = (temp * TICKS_PER_HP_REGENERATION);
         }
         break;
+    case ATTR_HP:
+        double diff;
+        if ((diff = getModifiedAttribute(ATTR_HP) - getModifiedAttribute(ATTR_MAX_HP)) > 0)
+            newBase -= diff;
+        break;
     case ATTR_MAX_HP:
         newBase = ((getModifiedAttribute(ATTR_VIT) + 3) * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
+        deps.insert(ATTR_HP);
         break;
     case ATTR_MOVE_SPEED_TPS:
         newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
