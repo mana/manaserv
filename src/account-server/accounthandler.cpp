@@ -35,6 +35,7 @@
 #include "net/messagein.hpp"
 #include "net/messageout.hpp"
 #include "net/netcomputer.hpp"
+#include "utils/functors.h"
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
 #include "utils/tokencollector.hpp"
@@ -53,6 +54,15 @@ static void addUpdateHost(MessageOut *msg)
 // List of attributes that the client can send at account creation.
 
 static std::vector< unsigned int > initAttr;
+
+/*
+ * Map attribute ids to values that they need to be initialised to at account
+ * creation.
+ * The pair contains two elements of the same value (the default) so that the
+ * iterators can be used to copy a range.
+ */
+
+static std::map< unsigned int, std::pair< double, double> > defAttr;
 
 class AccountHandler : public ConnectionHandler
 {
@@ -145,8 +155,19 @@ AccountHandler::AccountHandler(const std::string &attrFile):
         }
         for_each_xml_child_node(attributenode, node)
             if (xmlStrEqual(attributenode->name, BAD_CAST "stat"))
+            {
+                unsigned int id = XML::getProperty(attributenode, "id", 0);
+                if (!id) continue;
                 if (utils::toupper(XML::getProperty(attributenode, "modifiable", "false")) == "TRUE")
-                    initAttr.push_back(XML::getProperty(attributenode, "id", 0)); // id
+                    initAttr.push_back(id);
+                // Store as string initially to check that the property is defined.
+                std::string defStr = XML::getProperty(attributenode, "default", "");
+                if (!defStr.empty())
+                {
+                    double val = string_to<double>()(defStr);
+                    defAttr.insert(std::make_pair(id, std::make_pair(val, val)));
+                }
+            }
     }
 }
 
@@ -691,6 +712,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client, Message
                         (unsigned int) (initAttr.at(i)),
                         std::make_pair((double) (attributes[i]),
                                        (double) (attributes[i]))));
+            newCharacter->mAttributes.insert(defAttr.begin(), defAttr.end());
             newCharacter->setAccount(acc);
             newCharacter->setLevel(1);
             newCharacter->setCharacterPoints(0);

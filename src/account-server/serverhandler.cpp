@@ -116,6 +116,7 @@ NetComputer *ServerHandler::computerConnected(ENetPeer *peer)
 
 void ServerHandler::computerDisconnected(NetComputer *comp)
 {
+    LOG_INFO("Game-server disconnected.");
     delete comp;
 }
 

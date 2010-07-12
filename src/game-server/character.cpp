@@ -345,6 +345,7 @@ void Character::sendStatus()
 
 void Character::modifiedAllAttribute()
 {
+    LOG_DEBUG("Marking all attributes as changed, requiring recalculation.");
     for (AttributeMap::iterator it = mAttributes.begin(),
          it_end = mAttributes.end();
         it != it_end; ++it)
@@ -356,25 +357,29 @@ void Character::modifiedAttribute(unsigned int attr)
 // Much of this is remnants from the previous attribute system (placeholder?)
 // This could be improved by defining what attributes are derived from others
 // in xml or otherwise, so only those that need to be recomputed are.
+    LOG_DEBUG("Received modified attribute recalculation request for "
+              << attr << ".");
     if (!mAttributes.count(attr)) return;
     double newBase = getAttribute(attr);
 
+    std::set< unsigned int > deps;
+
     switch (attr) {
     case ATTR_STR:
-        modifiedAttribute(ATTR_INV_CAPACITY);
+        deps.insert(ATTR_INV_CAPACITY);
         break;
     case ATTR_AGI:
-        modifiedAttribute(ATTR_DODGE);
+        deps.insert(ATTR_DODGE);
         break;
     case ATTR_VIT:
-        modifiedAttribute(ATTR_MAX_HP);
-        modifiedAttribute(ATTR_HP_REGEN);
-        modifiedAttribute(ATTR_DEFENSE);
+        deps.insert(ATTR_MAX_HP);
+        deps.insert(ATTR_HP_REGEN);
+        deps.insert(ATTR_DEFENSE);
         break;
     case ATTR_INT:
         break;
     case ATTR_DEX:
-        modifiedAttribute(ATTR_ACCURACY);
+        deps.insert(ATTR_ACCURACY);
         break;
     case ATTR_WIL:
         break;
@@ -410,7 +415,7 @@ void Character::modifiedAttribute(unsigned int attr)
         break;
     case ATTR_MOVE_SPEED_TPS:
         newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
-        modifiedAttribute(ATTR_MOVE_SPEED_RAW);
+        deps.insert(ATTR_MOVE_SPEED_RAW);
         break;
     case ATTR_MOVE_SPEED_RAW:
         newBase = utils::tpsToSpeed(getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
@@ -423,7 +428,12 @@ void Character::modifiedAttribute(unsigned int attr)
 
     if (newBase != getAttribute(attr))
         Being::setAttribute(attr, newBase, false);
+    else
+        LOG_DEBUG("No changes to sync.");
     flagAttribute(attr);
+    for (std::set<unsigned int>::const_iterator it = deps.begin(),
+         it_end = deps.end(); it != it_end; ++it)
+        modifiedAttribute(*it);
 }
 
 void Character::flagAttribute(int attr)
