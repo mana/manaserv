@@ -70,6 +70,16 @@ namespace XML
     };
 
     /**
+     * Tells if a property from an xmlNodePtr exists.
+     */
+    bool hasProperty(xmlNodePtr node, const char *name);
+
+    /**
+     * Gets a boolean property from an xmlNodePtr.
+     */
+    bool getBoolProperty(xmlNodePtr node, const char *name, bool def);
+
+    /**
      * Gets an integer property from an xmlNodePtr.
      */
     int getProperty(xmlNodePtr node, const char *name, int def);

@@ -30,6 +30,7 @@
 typedef std::map< std::string, int > SkillMap;
 static SkillMap skillMap;
 static std::string skillReferenceFile;
+static std::string defaultSkillKey = std::string();
 
 void SkillManager::initialize(const std::string &file)
 {
@@ -49,8 +50,9 @@ void SkillManager::reload()
 
     std::string absPathFile = ResourceManager::resolve(skillReferenceFile);
 
-    if (!data) {
-        LOG_ERROR("Item Manager: Could not find " << skillReferenceFile << "!");
+    if (!data)
+    {
+        LOG_ERROR("Skill Manager: Could not find " << skillReferenceFile << "!");
         free(data);
         return;
     }
@@ -84,38 +86,128 @@ void SkillManager::reload()
         {
             if (xmlStrEqual(skillnode->name, BAD_CAST "skill"))
             {
-                std::string name = XML::getProperty(skillnode, "name", std::string());
+                std::string name = XML::getProperty(skillnode, "name",
+                                                    std::string());
                 name = utils::toupper(name);
                 int id = XML::getProperty(skillnode, "id", 0);
                 if (id && !name.empty())
                 {
-                    skillMap[utils::toupper(name)] = id;
+                    bool duplicateKey = false;
+                    for (SkillMap::iterator i = skillMap.begin();
+                         i != skillMap.end(); i++)
+                    {
+                        if (id == i->second)
+                        {
+                            LOG_ERROR("SkillManager: The same id: " << id
+                            << " is given for skill names: " << i->first
+                            << " and " << name);
+                            LOG_ERROR("The skill reference: " << "'" << name
+                            << "': " << id << " will be ignored.");
+
+                            duplicateKey = true;
+                            break;
+                        }
+                    }
+
+                    if (!duplicateKey)
+                    {
+                        if (XML::getBoolProperty(skillnode, "default", false))
+                        {
+                            if (!defaultSkillKey.empty())
+                            {
+                                LOG_WARN("SkillManager: "
+                                "Default Skill Key already defined as "
+                                << defaultSkillKey
+                                << ". Redefinit it as: " << name);
+                            }
+                            else
+                            {
+                                LOG_INFO("SkillManager: Defining " << name
+                                << " as default weapon-type key.");
+                            }
+                            defaultSkillKey = name;
+                        }
+                        skillMap[name] = id;
+                    }
                 }
             }
         }
     }
 
-    LOG_DEBUG("skill map:");
-    for (SkillMap::iterator i = skillMap.begin(); i != skillMap.end(); i++)
+    if (::utils::Logger::mVerbosity >= ::utils::Logger::Debug)
     {
-        LOG_DEBUG("  " << i->first << " : " << i->second);
+        LOG_DEBUG("Skill map in " << skillReferenceFile << ":"
+                  << std::endl << "-----");
+        for (SkillMap::iterator i = skillMap.begin(); i != skillMap.end(); i++)
+        {
+            if (!defaultSkillKey.compare(i->first))
+            {
+                LOG_DEBUG("'" << i->first << "': " << i->second
+                          << " (Default)");
+            }
+            else
+            {
+                LOG_DEBUG("'" << i->first << "': " << i->second);
+            }
+        }
+        LOG_DEBUG("-----");
     }
+
+    if (defaultSkillKey.empty())
+        LOG_WARN("SkillManager: No default weapon-type id was given during "
+                 "Skill map loading. Defaults will fall back to id 0.");
+
+    LOG_INFO("Loaded " << skillMap.size() << " skill references from "
+             << absPathFile);
 }
 
 int SkillManager::getIdFromString(const std::string &name)
 {
-    //check if already an integer, if yes just return it
-    int val;
-    val = atoi(name.c_str());
-    if (val)
-        return val;
+    // Check if the name is an integer value.
+    if (utils::isNumeric(name))
+    {
+        int val = 0;
+        val = utils::stringToInt(name);
+        if (val)
+        {
+            for (SkillMap::iterator i = skillMap.begin(); i != skillMap.end(); i++)
+            {
+                if (i->second == val)
+                    return val;
+            }
+            LOG_WARN("SkillManager::getIdFromString(): Numeric weapon-type id "
+            << val << " not found into " << skillReferenceFile);
 
-    // convert to upper case for easier finding
+            SkillMap::iterator i = skillMap.find(defaultSkillKey);
+            if (i != skillMap.end())
+            {
+                LOG_WARN("Id defaulted to " << defaultSkillKey << ": "
+                << i->second);
+                return i->second;
+            }
+            else
+            {
+                LOG_WARN("Id defaulted to 0.");
+                return 0;
+            }
+        }
+        else
+        {
+            LOG_WARN("SkillManager: Invalid skill id " << name);
+            return 0;
+        }
+    }
+
+    // Convert to upper case for easier finding
     SkillMap::iterator i = skillMap.find(utils::toupper(name));
     if (i == skillMap.end())
     {
+        LOG_WARN("SkillManager: No weapon-type name corresponding to "
+                 << utils::toupper(name) << " into " << skillReferenceFile);
         return 0;
-    } else {
+    }
+    else
+    {
         return i->second;
     }
 }

@@ -96,6 +96,35 @@ namespace XML
         return mDoc ? xmlDocGetRootElement(mDoc) : 0;
     }
 
+    bool hasProperty(xmlNodePtr node, const char *name)
+    {
+        xmlChar *prop = xmlGetProp(node, BAD_CAST name);
+        if (prop)
+        {
+            xmlFree(prop);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool getBoolProperty(xmlNodePtr node, const char *name, bool def)
+    {
+        bool ret = def;
+        xmlChar *prop = xmlGetProp(node, BAD_CAST name);
+        if (prop)
+        {
+            if (xmlStrEqual(prop, BAD_CAST "true")
+                ||xmlStrEqual(prop, BAD_CAST "yes"))
+                ret = true;
+            if (xmlStrEqual(prop, BAD_CAST "false")
+                ||xmlStrEqual(prop, BAD_CAST "no"))
+                ret = false;
+            xmlFree(prop);
+        }
+        return ret;
+    }
+
     int getProperty(xmlNodePtr node, const char *name, int def)
     {
         int &ret = def;

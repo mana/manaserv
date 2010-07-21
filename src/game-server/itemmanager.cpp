@@ -97,7 +97,7 @@ void ItemManager::reload()
         {
             LOG_WARN(itemReferenceFile << ": Unknown item type \"" << sItemType
                      << "\" for item #" << id <<
-                     " - treating it as \"generic\"");
+                     " - treating it as \"generic\".");
             itemType = ITEM_UNUSABLE;
         }
 
@@ -133,12 +133,13 @@ void ItemManager::reload()
             std::string strWeaponType = XML::getProperty(node, "weapon-type", "");
             if (strWeaponType == "")
             {
-                LOG_WARN(itemReferenceFile << ": Unknown weapon type \""
+                LOG_WARN(itemReferenceFile << ": Empty weapon type \""
                          << "\" for item #" << id <<
-                         " - treating it as generic item");
-            } else {
-                weaponType = SkillManager::getIdFromString(strWeaponType);
+                         " - treating it as generic item.");
             }
+            else
+                weaponType = SkillManager::getIdFromString(strWeaponType);
+
             modifiers.setValue(MOD_WEAPON_TYPE, weaponType);
             modifiers.setValue(MOD_WEAPON_RANGE, XML::getProperty(node, "range",   0));
             modifiers.setValue(MOD_ELEMENT_TYPE, XML::getProperty(node, "element", 0));
