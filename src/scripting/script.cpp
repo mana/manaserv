@@ -132,11 +132,17 @@ void Script::addDataToSpecial(int id, Special* special)
             first we have to agree on what other
             info we actually want to provide.
     */
-    Script *script = Script::special_actions_script;
-    script->prepare("get_special_recharge_cost");
-    script->push(id);
-    int scriptReturn = script->execute();
-    special->neededMana = scriptReturn;
+    if (special)
+    {
+        Script *script = Script::special_actions_script;
+        if (script)
+        {
+            script->prepare("get_special_recharge_cost");
+            script->push(id);
+            int scriptReturn = script->execute();
+            special->neededMana = scriptReturn;
+        }
+    }
 
 }
 
