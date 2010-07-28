@@ -140,6 +140,20 @@ class Being : public Actor
         };
 
         /**
+         * Moves enum for beings and actors for others players attack types.
+         * WARNING: Has to be in sync with the same enum in the Being class
+         * of the client!
+         */
+        enum AttackType
+        {
+            HIT = 0x00,
+            CRITICAL = 0x0a,
+            MULTI = 0x08,
+            REFLECT = 0x04,
+            FLEE = 0x0b
+        };
+
+        /**
          * Proxy constructor.
          */
         Being(ThingType type);
@@ -253,7 +267,7 @@ class Being : public Actor
          * Gets the type of the attack the being is currently performing.
          */
         virtual int getAttackType() const
-        { return 0; }
+        { return HIT; }
 
         /**
          * Moves the being toward its destination.
