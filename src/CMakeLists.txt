@@ -189,6 +189,12 @@ SET(SRCS_MANASERVGAME
     game-server/accountconnection.cpp
     game-server/actor.hpp
     game-server/actor.cpp
+    game-server/attribute.hpp
+    game-server/attribute.cpp
+    game-server/attributemanager.hpp
+    game-server/attributemanager.cpp
+    game-server/autoattack.hpp
+    game-server/autoattack.cpp
     game-server/being.hpp
     game-server/being.cpp
     game-server/buysell.hpp
@@ -250,6 +256,8 @@ SET(SRCS_MANASERVGAME
     utils/base64.cpp
     utils/mathutils.h
     utils/mathutils.cpp
+    utils/speedconv.hpp
+    utils/speedconv.cpp
     utils/trim.hpp
     utils/zlib.hpp
     utils/zlib.cpp
