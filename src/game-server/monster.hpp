@@ -98,13 +98,13 @@ class MonsterClass
         /**
          * Sets a being base attribute.
          */
-        void setAttribute(size_t attribute, int value)
-        { mAttributes.at(attribute) = value; }
+        void setAttribute(int attribute, double value)
+        { mAttributes[attribute] = value; }
 
         /**
          * Returns a being base attribute.
          */
-        int getAttribute(unsigned int attribute) const
+        double getAttribute(int attribute) const
         { return mAttributes.at(attribute); }
 
         /** Sets collision circle radius. */
@@ -181,7 +181,7 @@ class MonsterClass
     private:
         unsigned short mID;
         MonsterDrops mDrops;
-        std::map<unsigned int, double> mAttributes; /**< Base attributes of the monster. */
+        std::map<int, double> mAttributes; /**< Base attributes of the monster. */
         float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
         int mExp;
