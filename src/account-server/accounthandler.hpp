@@ -28,7 +28,8 @@ namespace AccountClientHandler
     /**
      * Creates a connection handler and starts listening on given port.
      */
-    bool initialize(int port, const std::string &host);
+    bool initialize(const std::string &configFile, int port,
+                    const std::string &host);
 
     /**
      * Stops listening to messages and destroys the connection handler.

@@ -50,9 +50,10 @@
 using utils::Logger;
 
 // Default options that automake should be able to override.
-#define DEFAULT_LOG_FILE        "manaserv-account.log"
-#define DEFAULT_STATS_FILE      "manaserv.stats"
-#define DEFAULT_CONFIG_FILE     "manaserv.xml"
+#define DEFAULT_LOG_FILE          "manaserv-account.log"
+#define DEFAULT_STATS_FILE        "manaserv.stats"
+#define DEFAULT_CONFIG_FILE       "manaserv.xml"
+#define DEFAULT_ATTRIBUTEDB_FILE  "attributes.xml"
 
 static bool running = true;        /**< Determines if server keeps running */
 
@@ -339,7 +340,8 @@ int main(int argc, char *argv[])
     initialize();
 
     std::string host = Configuration::getValue("net_listenHost", std::string());
-    if (!AccountClientHandler::initialize(options.port, host) ||
+    if (!AccountClientHandler::initialize(DEFAULT_ATTRIBUTEDB_FILE,
+                                          options.port, host) ||
         !GameServerHandler::initialize(options.port + 1, host) ||
         !chatHandler->startListen(options.port + 2, host))
     {

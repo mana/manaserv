@@ -43,7 +43,8 @@ void AttributeManager::reload()
 
     absPathFile = ResourceManager::resolve(mAttributeReferenceFile);
     if (absPathFile.empty()) {
-        LOG_ERROR("Attribute Manager: Could not find " << mAttributeReferenceFile << "!");
+        LOG_FATAL("Attribute Manager: Could not find " << mAttributeReferenceFile << "!");
+        exit(3);
         return;
     }
 
@@ -52,8 +53,9 @@ void AttributeManager::reload()
 
     if (!node || !xmlStrEqual(node->name, BAD_CAST "stats"))
     {
-        LOG_ERROR("Attribute Manager: " << mAttributeReferenceFile
+        LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
                   << " is not a valid database file!");
+        exit(3);
         return;
     }
 

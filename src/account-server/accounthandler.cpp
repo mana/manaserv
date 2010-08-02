@@ -43,8 +43,6 @@
 #include "utils/string.hpp"
 #include "utils/xml.hpp"
 
-#define DEFAULT_ATTRIBUTEDB_FILE            "stats.xml"
-
 static void addUpdateHost(MessageOut *msg)
 {
     std::string updateHost = Configuration::getValue("defaultUpdateHost", "");
@@ -130,7 +128,8 @@ AccountHandler::AccountHandler(const std::string &attrFile):
 
         absPathFile = ResourceManager::resolve(attrFile);
         if (absPathFile.empty()) {
-            LOG_ERROR("Account handler: Could not find " << attrFile << "!");
+            LOG_FATAL("Account handler: Could not find " << attrFile << "!");
+            exit(3);
             return;
         }
 
@@ -139,8 +138,9 @@ AccountHandler::AccountHandler(const std::string &attrFile):
 
         if (!node || !xmlStrEqual(node->name, BAD_CAST "stats"))
         {
-            LOG_ERROR("Account handler: " << attrFile
+            LOG_FATAL("Account handler: " << attrFile
                       << " is not a valid database file!");
+            exit(3);
             return;
         }
         for_each_xml_child_node(attributenode, node)
@@ -150,9 +150,10 @@ AccountHandler::AccountHandler(const std::string &attrFile):
     }
 }
 
-bool AccountClientHandler::initialize(int port, const std::string &host)
+bool AccountClientHandler::initialize(const std::string &configFile, int port,
+                                      const std::string &host)
 {
-    accountHandler = new AccountHandler(DEFAULT_ATTRIBUTEDB_FILE);
+    accountHandler = new AccountHandler(configFile);
     LOG_INFO("Account handler started:");
 
     return accountHandler->startListen(port, host);

@@ -66,7 +66,7 @@ using utils::Logger;
 #define DEFAULT_ITEMSDB_FILE                "items.xml"
 #define DEFAULT_EQUIPDB_FILE                "equip.xml"
 #define DEFAULT_SKILLSDB_FILE               "mana-skills.xml"
-#define DEFAULT_ATTRIBUTEDB_FILE            "stats.xml"
+#define DEFAULT_ATTRIBUTEDB_FILE            "attributes.xml"
 #define DEFAULT_MAPSDB_FILE                 "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
 #define DEFAULT_STATUSDB_FILE               "mana-status-effect.xml"
