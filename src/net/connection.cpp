@@ -36,16 +36,32 @@ bool Connection::start(const std::string &address, int port)
     enet_address_set_host(&enetAddress, address.c_str());
     enetAddress.port = port;
 
+#if ENET_VERSION_MAJOR != 1
+#error Unsuported enet version!
+#elif ENET_VERSION_MINOR < 3
     mLocal = enet_host_create(NULL /* create a client host */,
                               1 /* allow one outgoing connection */,
                               0 /* assume any amount of incoming bandwidth */,
                               0 /* assume any amount of outgoing bandwidth */);
+#else
+    mLocal = enet_host_create(NULL /* create a client host */,
+                              1 /* allow one outgoing connection */,
+                              0           /* unlimited channel count */,
+                              0 /* assume any amount of incoming bandwidth */,
+                              0 /* assume any amount of outgoing bandwidth */);
+#endif
 
     if (!mLocal)
         return false;
 
     // Initiate the connection, allocating channel 0.
+#if ENET_VERSION_MAJOR != 1
+#error Unsuported enet version!
+#elif ENET_VERSION_MINOR < 3
     mRemote = enet_host_connect(mLocal, &enetAddress, 1);
+#else
+    mRemote = enet_host_connect(mLocal, &enetAddress, 1, 0);
+#endif
 
     ENetEvent event;
     if (enet_host_service(mLocal, &event, 10000) <= 0 ||
