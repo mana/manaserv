@@ -36,16 +36,28 @@ bool Connection::start(const std::string &address, int port)
     enet_address_set_host(&enetAddress, address.c_str());
     enetAddress.port = port;
 
+#ifdef ENET_VERSION_MAJOR
+    mLocal = enet_host_create(NULL /* create a client host */,
+                              1 /* allow one outgoing connection */,
+                              0           /* unlimited channel count */,
+                              0 /* assume any amount of incoming bandwidth */,
+                              0 /* assume any amount of outgoing bandwidth */);
+#else
     mLocal = enet_host_create(NULL /* create a client host */,
                               1 /* allow one outgoing connection */,
                               0 /* assume any amount of incoming bandwidth */,
                               0 /* assume any amount of outgoing bandwidth */);
+#endif
 
     if (!mLocal)
         return false;
 
     // Initiate the connection, allocating channel 0.
+#ifdef ENET_VERSION_MAJOR
+    mRemote = enet_host_connect(mLocal, &enetAddress, 1, 0);
+#else
     mRemote = enet_host_connect(mLocal, &enetAddress, 1);
+#endif
 
     ENetEvent event;
     if (enet_host_service(mLocal, &event, 10000) <= 0 ||

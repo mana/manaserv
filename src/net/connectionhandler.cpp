@@ -40,11 +40,20 @@ bool ConnectionHandler::startListen(enet_uint16 port,
         enet_address_set_host(&address, listenHost.c_str());
 
     LOG_INFO("Listening on port " << port << "...");
+#ifdef ENET_VERSION_MAJOR
+    host = enet_host_create(
+            &address    /* the address to bind the server host to */,
+            Configuration::getValue("net_maxClients", 1000) /* allowed connections */,
+            0           /* unlimited channel count */,
+            0           /* assume any amount of incoming bandwidth */,
+            0           /* assume any amount of outgoing bandwidth */);
+#else
     host = enet_host_create(
             &address    /* the address to bind the server host to */,
             Configuration::getValue("net_maxClients", 1000) /* allowed connections */,
             0           /* assume any amount of incoming bandwidth */,
             0           /* assume any amount of outgoing bandwidth */);
+#endif
 
     return host != 0;
 }
