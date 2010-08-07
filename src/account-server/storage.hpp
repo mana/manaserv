@@ -49,8 +49,6 @@ class Storage
         void open();
         void close();
 
-        void updatePasswordHashes();
-
         Account *getAccount(const std::string &userName);
         Account *getAccount(int accountID);
 
