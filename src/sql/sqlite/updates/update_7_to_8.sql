@@ -10,7 +10,7 @@ CREATE TABLE mana_char_kill_stats
     FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX mana_char_kill_stats_chars on mana_char_kill_stats ( char_id );
+CREATE INDEX mana_char_kill_stats_char on mana_char_kill_stats ( char_id );
 
 -- update the database version, and set date of update
 UPDATE mana_world_states
