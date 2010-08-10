@@ -24,6 +24,12 @@
 #include "net/messageout.hpp"
 #include "utils/logger.h"
 
+#ifdef ENET_VERSION_CREATE
+#define ENET_CUTOFF ENET_VERSION_CREATE(1,3,0)
+#else
+#define ENET_CUTOFF 0xFFFFFFFF
+#endif
+
 Connection::Connection():
     mRemote(0),
     mLocal(0)
@@ -36,7 +42,7 @@ bool Connection::start(const std::string &address, int port)
     enet_address_set_host(&enetAddress, address.c_str());
     enetAddress.port = port;
 
-#ifdef ENET_VERSION_MAJOR
+#ifdef defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
     mLocal = enet_host_create(NULL /* create a client host */,
                               1 /* allow one outgoing connection */,
                               0           /* unlimited channel count */,
@@ -53,7 +59,7 @@ bool Connection::start(const std::string &address, int port)
         return false;
 
     // Initiate the connection, allocating channel 0.
-#ifdef ENET_VERSION_MAJOR
+#ifdef defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
     mRemote = enet_host_connect(mLocal, &enetAddress, 1, 0);
 #else
     mRemote = enet_host_connect(mLocal, &enetAddress, 1);

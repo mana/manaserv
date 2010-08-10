@@ -29,6 +29,12 @@
 #include "net/netcomputer.hpp"
 #include "utils/logger.h"
 
+#ifdef ENET_VERSION_CREATE
+#define ENET_CUTOFF ENET_VERSION_CREATE(1,3,0)
+#else
+#define ENET_CUTOFF 0xFFFFFFFF
+#endif
+
 bool ConnectionHandler::startListen(enet_uint16 port,
                                     const std::string &listenHost)
 {
@@ -40,7 +46,7 @@ bool ConnectionHandler::startListen(enet_uint16 port,
         enet_address_set_host(&address, listenHost.c_str());
 
     LOG_INFO("Listening on port " << port << "...");
-#ifdef ENET_VERSION_MAJOR
+#ifdef defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
     host = enet_host_create(
             &address    /* the address to bind the server host to */,
             Configuration::getValue("net_maxClients", 1000) /* allowed connections */,
