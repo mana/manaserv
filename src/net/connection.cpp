@@ -42,7 +42,7 @@ bool Connection::start(const std::string &address, int port)
     enet_address_set_host(&enetAddress, address.c_str());
     enetAddress.port = port;
 
-#ifdef defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
+#if defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
     mLocal = enet_host_create(NULL /* create a client host */,
                               1 /* allow one outgoing connection */,
                               0           /* unlimited channel count */,
@@ -59,7 +59,7 @@ bool Connection::start(const std::string &address, int port)
         return false;
 
     // Initiate the connection, allocating channel 0.
-#ifdef defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
+#if defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
     mRemote = enet_host_connect(mLocal, &enetAddress, 1, 0);
 #else
     mRemote = enet_host_connect(mLocal, &enetAddress, 1);
