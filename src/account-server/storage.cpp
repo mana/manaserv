@@ -1048,6 +1048,9 @@ void Storage::flush(Account *account)
 
                 mDb->execSql(sqlInsertCharactersTable.str());
 
+                // Update the character ID.
+                (*it)->setDatabaseID(mDb->getLastId());
+
                 // Update all attributes.
                 std::map<unsigned int, std::pair<double, double> >::const_iterator
                         attr_it, attr_end;
@@ -1058,9 +1061,6 @@ void Storage::flush(Account *account)
                     updateAttribute((*it)->getDatabaseID(), attr_it->first,
                                     attr_it->second.first,
                                     attr_it->second.second);
-
-                // Update the character ID.
-                (*it)->setDatabaseID(mDb->getLastId());
 
                 // update the characters skill
                 std::map<int, int>::const_iterator skill_it;
