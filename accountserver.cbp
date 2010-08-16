@@ -45,13 +45,15 @@
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-Wno-switch" />
+			<Add option="-Wno-unknown-pragmas" />
+			<Add directory="libs\enet\include" />
 			<Add directory="..\include" />
 			<Add directory="include" />
 			<Add directory="..\include\libxml2" />
 			<Add directory="include\libxml2" />
 		</Compiler>
 		<Linker>
-			<Add library="enet" />
 			<Add library="xml2" />
 			<Add library="physfs" />
 			<Add library="z" />
@@ -60,6 +62,24 @@
 			<Add directory="..\lib" />
 			<Add directory="lib" />
 		</Linker>
+		<Unit filename="libs\enet\include\enet\callbacks.h" />
+		<Unit filename="libs\enet\callbacks.c" />
+		<Unit filename="libs\enet\compress.c" />
+		<Unit filename="libs\enet\include\enet\enet.h" />
+		<Unit filename="libs\enet\host.c" />
+		<Unit filename="libs\enet\include\enet\list.h" />
+		<Unit filename="libs\enet\list.c" />
+		<Unit filename="libs\enet\packet.c" />
+		<Unit filename="libs\enet\peer.c" />
+		<Unit filename="libs\enet\include\enet\protocol.h" />
+		<Unit filename="libs\enet\protocol.c" />
+		<Unit filename="libs\enet\include\enet\time.h" />
+		<Unit filename="libs\enet\include\enet\types.h" />
+		<Unit filename="libs\enet\include\enet\unix.h" />
+		<Unit filename="libs\enet\unix.c" />
+		<Unit filename="libs\enet\include\enet\utility.h" />
+		<Unit filename="libs\enet\include\enet\win32.h" />
+		<Unit filename="libs\enet\win32.c" />
 		<Unit filename="src\account-server\account.cpp" />
 		<Unit filename="src\account-server\account.hpp" />
 		<Unit filename="src\account-server\accountclient.cpp" />
