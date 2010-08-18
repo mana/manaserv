@@ -46,4 +46,4 @@ CREATE TABLE IF NOT EXISTS `mana_char_equips` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
-UPDATE mana_world_states SET value = '10', moddate    = UNIX_TIMESTAMP() WHERE state_name = 'database_version';
+UPDATE mana_world_states SET value = '11', moddate    = UNIX_TIMESTAMP() WHERE state_name = 'database_version';
