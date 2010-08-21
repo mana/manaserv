@@ -953,13 +953,7 @@ void Storage::flush(Account *account)
                 sqlInsertCharactersTable
                      << "insert into " << CHARACTERS_TBL_NAME
                      << " (user_id, name, gender, hair_style, hair_color, level, char_pts, correct_pts, money,"
-                     << " x, y, map_id, str, agi, dex, vit, "
-#if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-            << "`int`, "
-#else
-            << "int, "
-#endif
-                     << "will ) values ("
+                     << " x, y, map_id, str, agi, dex, vit, `int`, will ) values ("
                      << account->getID() << ", \""
                      << (*it)->getName() << "\", "
                      << (*it)->getGender() << ", "
