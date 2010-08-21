@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -92,43 +93,28 @@ PostMan *postMan;
 BandwidthMonitor *gBandwidth;
 
 /** Callback used when SIGQUIT signal is received. */
-void closeGracefully(int)
+static void closeGracefully(int)
 {
     running = false;
 }
 
-/**
- * Initialize the configuration
- */
-void initConfig()
+static void initializeConfiguration()
 {
-    /*
-     * If the path values aren't defined, we set the default
-     * depending on the platform.
-     */
-    // The config path
-#if defined CONFIG_FILE
+#ifdef CONFIG_FILE
     std::string configPath = CONFIG_FILE;
 #else
-
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
-    std::string configPath = getenv("HOME");
-    configPath += "/.";
-    configPath += DEFAULT_CONFIG_FILE;
-#else // Win32, ...
     std::string configPath = DEFAULT_CONFIG_FILE;
 #endif
-#endif // defined CONFIG_FILE
 
-    Configuration::initialize(configPath);
+    if (!Configuration::initialize(configPath)) {
+        LOG_FATAL("Refusing to run without configuration!");
+        exit(1);
+    }
+
     LOG_INFO("Using config file: " << configPath);
-
 }
 
-/**
- * Initializes the server.
- */
-void initialize()
+static void initializeServer()
 {
     // Reset to default segmentation fault handling for debugging purposes
     signal(SIGSEGV, SIG_DFL);
@@ -140,30 +126,16 @@ void initialize()
     signal(SIGINT, closeGracefully);
     signal(SIGTERM, closeGracefully);
 
-    /*
-     * If the path values aren't defined, we set the default
-     * depending on the platform.
-     */
-    // The log path
 #if defined LOG_FILE
     std::string logPath = LOG_FILE;
 #else
-
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
-    std::string logPath = getenv("HOME");
-    logPath += "/.";
-    logPath += DEFAULT_LOG_FILE;
-#else // Win32, ...
     std::string logPath = DEFAULT_LOG_FILE;
-#endif
-
 #endif // defined LOG_FILE
 
     // Initialize PhysicsFS
     PHYSFS_init("");
 
     // Initialize the logger.
-    using namespace utils;
     Logger::setLogFile(logPath);
 
     // Write the messages to both the screen and the log file.
@@ -172,7 +144,7 @@ void initialize()
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
-    stringFilter = new StringFilter;
+    stringFilter = new utils::StringFilter;
 
     ResourceManager::initialize();
     if (MapManager::initialize(DEFAULT_MAPSDB_FILE) < 1)
@@ -218,10 +190,7 @@ void initialize()
 }
 
 
-/**
- * Deinitializes the server.
- */
-void deinitialize()
+static void deinitializeServer()
 {
     // Write configuration file
     Configuration::deinitialize();
@@ -247,9 +216,9 @@ void deinitialize()
 
 
 /**
- * Show command line arguments
+ * Show command line arguments.
  */
-void printHelp()
+static void printHelp()
 {
     std::cout << "manaserv" << std::endl << std::endl
               << "Options: " << std::endl
@@ -279,7 +248,7 @@ struct CommandLineOptions
 /**
  * Parse the command line arguments
  */
-void parseOptions(int argc, char *argv[], CommandLineOptions &options)
+static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
 {
     const char *optstring = "h";
 
@@ -326,7 +295,7 @@ int main(int argc, char *argv[])
     LOG_INFO("The Mana Game Server v" << PACKAGE_VERSION);
 #endif
 
-    initConfig();
+    initializeConfiguration();
 
     // Parse command line options
     CommandLineOptions options;
@@ -339,7 +308,7 @@ int main(int argc, char *argv[])
     Logger::setVerbosity(options.verbosity);
 
     // General initialization
-    initialize();
+    initializeServer();
 
     // Make an initial attempt to connect to the account server
     // Try again after longer and longer intervals when connection fails.
@@ -438,5 +407,5 @@ int main(int argc, char *argv[])
     LOG_INFO("Received: Quit signal, closing down...");
     gameHandler->stopListen();
     accountHandler->stop();
-    deinitialize();
+    deinitializeServer();
 }

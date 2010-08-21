@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -75,34 +76,23 @@ static void closeGracefully(int)
     running = false;
 }
 
-static void initConfig()
+static void initializeConfiguration()
 {
-    /*
-     * If the path values aren't defined, we set the default
-     * depending on the platform.
-     */
-    // The config path
 #if defined CONFIG_FILE
     std::string configPath = CONFIG_FILE;
 #else
-
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
-    std::string configPath = getenv("HOME");
-    configPath += "/.";
-    configPath += DEFAULT_CONFIG_FILE;
-#else // Win32, ...
     std::string configPath = DEFAULT_CONFIG_FILE;
-#endif
-
 #endif // defined CONFIG_FILE
-    Configuration::initialize(configPath);
+
+    if (!Configuration::initialize(configPath)) {
+        LOG_FATAL("Refusing to run without configuration!");
+        exit(1);
+    }
+
     LOG_INFO("Using config file: " << configPath);
     // check inter-server password
     if (Configuration::getValue("net_password", "") == "")
-    {
-        LOG_WARN("SECURITY WARNING: No 'net_password' set in " << configPath <<
-                 " - set one ASAP or this server WILL get h4x0rd!!");
-    }
+        LOG_WARN("SECURITY WARNING: 'net_password' not set!");
 }
 
 /**
@@ -123,30 +113,16 @@ static void initialize()
     // Set enet to quit on exit.
     atexit(enet_deinitialize);
 
-    /*
-     * If the path values aren't defined, we set the default
-     * depending on the platform.
-     */
-    // The log path
 #if defined LOG_FILE
     std::string logPath = LOG_FILE;
 #else
-
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
-    std::string logPath = getenv("HOME");
-    logPath += "/.";
-    logPath += DEFAULT_LOG_FILE;
-#else // Win32, ...
     std::string logPath = DEFAULT_LOG_FILE;
-#endif
-
 #endif // defined LOG_FILE
 
     // Initialize PhysicsFS
     PHYSFS_init("");
 
     // Initialize the logger.
-    using namespace utils;
     Logger::setLogFile(logPath);
 
     // write the messages to both the screen and the log file.
@@ -166,7 +142,7 @@ static void initialize()
     }
 
     // --- Initialize the managers
-    stringFilter = new StringFilter;  // The slang's and double quotes filter.
+    stringFilter = new utils::StringFilter;  // The slang's and double quotes filter.
     chatChannelManager = new ChatChannelManager;
     guildManager = new GuildManager;
     postalManager = new PostManager;
@@ -194,7 +170,7 @@ static void initialize()
 /**
  * Deinitializes the server.
  */
-static void deinitialize()
+static void deinitializeServer()
 {
     // Write configuration file
     Configuration::deinitialize();
@@ -229,15 +205,7 @@ static void dumpStatistics()
 #if defined STATS_FILE
     std::string path = STATS_FILE;
 #else
-
-#if (defined __USE_UNIX98 || defined __FreeBSD__)
-    std::string path = getenv("HOME");
-    path += "/.";
-    path += DEFAULT_STATS_FILE;
-#else // Win32, ...
     std::string path = DEFAULT_STATS_FILE;
-#endif
-
 #endif
 
     std::ofstream os(path.c_str());
@@ -323,7 +291,7 @@ int main(int argc, char *argv[])
 #ifdef PACKAGE_VERSION
     LOG_INFO("The Mana Account+Chat Server v" << PACKAGE_VERSION);
 #endif
-    initConfig();
+    initializeConfiguration();
 
     // Parse command line options
     CommandLineOptions options;
@@ -379,7 +347,7 @@ int main(int argc, char *argv[])
 
     LOG_INFO("Received: Quit signal, closing down...");
     chatHandler->stopListen();
-    deinitialize();
+    deinitializeServer();
 
     return 0;
 }

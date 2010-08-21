@@ -39,8 +39,9 @@ Currently, manaserv expects these to be merged into a single 'data' directory.
 
 CONFIGURATION
 
-The configuration is currently loaded from ~/.manaserv.xml. An example file is
-located at docs/manaserv.xml.
+The server loads its configuration from manaserv.xml, which it tries to find in
+the directory where you're running the server from. An example file is located
+at docs/manaserv.xml.example.
 
 Default option values:
 
@@ -48,6 +49,10 @@ Default option values:
     accountServerPort       9601
     gameServerAddress       localhost
     gameServerPort          9604
+
+    serverPath              .
+    serverDataPath          example/serverdata
+    clientDataPath          example/clientdata
 
 
 RUNNING

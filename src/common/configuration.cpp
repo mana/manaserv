@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -32,19 +33,23 @@ static std::map< std::string, std::string > options;
 /**< Location of config file. */
 static std::string configPath;
 
-void Configuration::initialize(const std::string &filename)
+bool Configuration::initialize(const std::string &filename)
 {
     configPath = filename;
 
     xmlDocPtr doc = xmlReadFile(filename.c_str(), NULL, 0);
 
-    if (!doc) return;
+    if (!doc) {
+        LOG_WARN("Could not read configuration file '" << filename.c_str() << "'.");
+        return false;
+    }
 
     xmlNodePtr node = xmlDocGetRootElement(doc);
 
     if (!node || !xmlStrEqual(node->name, BAD_CAST "configuration")) {
         LOG_WARN("No configuration file '" << filename.c_str() << "'.");
-        return;
+        xmlFreeDoc(doc);
+        return false;
     }
 
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
@@ -62,6 +67,7 @@ void Configuration::initialize(const std::string &filename)
     }
 
     xmlFreeDoc(doc);
+    return true;
 }
 
 void Configuration::deinitialize()
