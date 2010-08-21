@@ -631,12 +631,7 @@ bool Storage::updateCharacter(Character *character,
             << "agi = '"        << character->getAttribute(CHAR_ATTR_AGILITY) << "', "
             << "dex = '"        << character->getAttribute(CHAR_ATTR_DEXTERITY) << "', "
             << "vit = '"        << character->getAttribute(CHAR_ATTR_VITALITY) << "', "
-#if defined(MYSQL_SUPPORT) || defined(POSTGRESQL_SUPPORT)
-            << "`int` = '"
-#else
-            << "int = '"
-#endif
-                                << character->getAttribute(CHAR_ATTR_INTELLIGENCE) << "', "
+            << "`int` = '"      << character->getAttribute(CHAR_ATTR_INTELLIGENCE) << "', "
             << "will = '"       << character->getAttribute(CHAR_ATTR_WILLPOWER) << "' "
             << "where id = '"   << character->getDatabaseID() << "';";
 
@@ -1101,12 +1096,12 @@ void Storage::updateCharacterPoints(int charId,
 
     switch (attribId)
     {
-        case CHAR_ATTR_STRENGTH:     sql << "str = "; break;
-        case CHAR_ATTR_AGILITY:      sql << "agi = "; break;
-        case CHAR_ATTR_DEXTERITY:    sql << "dex = "; break;
-        case CHAR_ATTR_VITALITY:     sql << "vit = "; break;
-        case CHAR_ATTR_INTELLIGENCE: sql << "int = "; break;
-        case CHAR_ATTR_WILLPOWER:    sql << "will = "; break;
+        case CHAR_ATTR_STRENGTH:     sql << "`str` = "; break;
+        case CHAR_ATTR_AGILITY:      sql << "`agi` = "; break;
+        case CHAR_ATTR_DEXTERITY:    sql << "`dex` = "; break;
+        case CHAR_ATTR_VITALITY:     sql << "`vit` = "; break;
+        case CHAR_ATTR_INTELLIGENCE: sql << "`int` = "; break;
+        case CHAR_ATTR_WILLPOWER:    sql << "`will` = "; break;
     }
     sql << attribValue
         << " WHERE id = " << charId;
