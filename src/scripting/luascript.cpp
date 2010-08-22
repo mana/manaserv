@@ -19,13 +19,13 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-
 #include "luascript.hpp"
 
 #include "game-server/being.hpp"
-
 #include "utils/logger.h"
+
+#include <cassert>
+#include <cstring>
 
 LuaScript::~LuaScript()
 {
@@ -83,9 +83,9 @@ int LuaScript::execute()
     mCurFunction = "";
 }
 
-void LuaScript::load(const char *prog)
+void LuaScript::load(const char *prog, const char *name)
 {
-    int res = luaL_loadstring(mState, prog);
+    int res = luaL_loadbuffer(mState, prog, std::strlen(prog), name);
     if (res)
     {
         switch (res) {

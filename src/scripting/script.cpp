@@ -88,7 +88,7 @@ bool Script::loadFile(const std::string &name)
     if (buffer)
     {
         mScriptFile = name;
-        load(skipPotentialBom(buffer));
+        load(skipPotentialBom(buffer), name.c_str());
         free(buffer);
         return true;
     } else {
@@ -99,7 +99,7 @@ bool Script::loadFile(const std::string &name)
 void Script::loadNPC(const std::string &name, int id, int x, int y,
                      const char *prog)
 {
-    load(prog);
+    load(prog, name.c_str());
     prepare("create_npc_delayed");
     push(name);
     push(id);

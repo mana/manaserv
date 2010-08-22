@@ -61,8 +61,11 @@ class Script
         /**
          * Loads a chunk of text into script context and executes its global
          * statements.
+         *
+         * @param prog the program text to load
+         * @param name the name of the text, used for error reporting
          */
-        virtual void load(const char *) = 0;
+        virtual void load(const char *prog, const char *name) = 0;
 
         /**
          * Loads a text file into script context and executes its global

@@ -369,7 +369,8 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                     }
                     else if (!scriptText.empty())
                     {
-                        s->load(scriptText.c_str());
+                        const std::string name = "'" + objName + "'' in " + path;
+                        s->load(scriptText.c_str(), name.c_str());
                     }
                     else
                     {
