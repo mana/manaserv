@@ -87,7 +87,7 @@ void StatusManager::reload()
         modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
 */
         StatusEffect *statusEffect = new StatusEffect(id);
-        if (scriptFile != "")
+        if (!scriptFile.empty())
         {
             std::stringstream filename;
             filename << "scripts/status/" << scriptFile;

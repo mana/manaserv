@@ -297,20 +297,12 @@ void Monster::update()
 
 void Monster::loadScript(const std::string &scriptName)
 {
-    if (mScript)
-    {
-        delete mScript;// A script has already been loaded for this monster
-    }
+    // A script may have already been loaded for this monster
+    delete mScript;
+    mScript = 0;
 
     if (scriptName.length() == 0)
-    {
-        if (mScript)
-        {
-            delete mScript;
-            mScript = NULL;
-        }
         return;
-    }
 
     std::stringstream filename;
     filename << "scripts/monster/" << scriptName;
@@ -322,8 +314,6 @@ void Monster::loadScript(const std::string &scriptName)
     } else {
         LOG_WARN("Could not find script file \"" << filename.str() << "\" for monster");
     }
-
-
 }
 
 int Monster::calculatePositionPriority(Point position, int targetPriority)

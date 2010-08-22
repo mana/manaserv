@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -59,23 +60,28 @@ void raiseWarning(lua_State *s, const char *format, ...)
 
 NPC *getNPC(lua_State *s, int p)
 {
-    if (!lua_islightuserdata(s, p)) return NULL;
+    if (!lua_islightuserdata(s, p))
+        return 0;
     Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    if (t->getType() != OBJECT_NPC) return NULL;
+    if (t->getType() != OBJECT_NPC)
+        return 0;
     return static_cast<NPC *>(t);
 }
 
 Character *getCharacter(lua_State *s, int p)
 {
-    if (!lua_islightuserdata(s, p)) return NULL;
+    if (!lua_islightuserdata(s, p))
+        return 0;
     Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    if (t->getType() != OBJECT_CHARACTER) return NULL;
+    if (t->getType() != OBJECT_CHARACTER)
+        return 0;
     return static_cast<Character *>(t);
 }
 
 Being *getBeing(lua_State *s, int p)
 {
-    if (!lua_islightuserdata(s, p)) return NULL;
+    if (!lua_islightuserdata(s, p))
+        return 0;
     Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
     return static_cast<Being *>(t);
 }
@@ -90,7 +96,7 @@ void push(lua_State *s, const std::string &val)
     lua_pushstring(s, val.c_str());
 }
 
-void push(lua_State *s, Thing* val)
+void push(lua_State *s, Thing *val)
 {
     lua_pushlightuserdata(s, val);
 }
