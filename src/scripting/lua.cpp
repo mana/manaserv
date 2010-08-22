@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -1710,12 +1711,17 @@ LuaScript::LuaScript():
         { NULL, NULL }
     };
     luaL_register(mState, "mana", callbacks);
+    lua_pop(mState, 1);                     // pop the 'mana' table
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mState, (void *)&registryKey);
     lua_pushlightuserdata(mState, this);
     lua_settable(mState, LUA_REGISTRYINDEX);
 
-    lua_settop(mState, 0);
+    // Push the error handler to first index of the stack
+    lua_getglobal(mState, "debug");
+    lua_getfield(mState, -1, "traceback");
+    lua_remove(mState, 1);                  // remove the 'debug' table
+
     loadFile("scripts/lua/libmana.lua");
 }

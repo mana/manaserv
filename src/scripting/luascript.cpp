@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -63,11 +64,11 @@ void LuaScript::push(Thing *v)
 int LuaScript::execute()
 {
     assert(nbArgs >= 0);
-    int res = lua_pcall(mState, nbArgs, 1, 0);
+    int res = lua_pcall(mState, nbArgs, 1, 1);
     nbArgs = -1;
-    if (res || !(lua_isnil(mState, 1) || lua_isnumber(mState, 1)))
+    if (res || !(lua_isnil(mState, -1) || lua_isnumber(mState, -1)))
     {
-        const char *s = lua_tostring(mState, 1);
+        const char *s = lua_tostring(mState, -1);
 
         LOG_WARN("Lua Script Error" << std::endl
                  << "     Script  : " << mScriptFile << std::endl
@@ -76,7 +77,7 @@ int LuaScript::execute()
         lua_pop(mState, 1);
         return 0;
     }
-    res = lua_tointeger(mState, 1);
+    res = lua_tointeger(mState, -1);
     lua_pop(mState, 1);
     return res;
     mCurFunction = "";
@@ -85,26 +86,25 @@ int LuaScript::execute()
 void LuaScript::load(const char *prog)
 {
     int res = luaL_loadstring(mState, prog);
-
-    switch (res) {
-    case LUA_ERRSYNTAX:
-        LOG_ERROR("Syntax error while loading Lua script: "
-                  << lua_tostring(mState, -1));
-        return;
-    case LUA_ERRMEM:
-        LOG_ERROR("Memory allocation error while loading Lua script");
-        return;
-    }
-
-    // A Lua chunk is like a function, so "execute" it in order to initialize
-    // it.
-    res = lua_pcall(mState, 0, 0, 0);
     if (res)
+    {
+        switch (res) {
+        case LUA_ERRSYNTAX:
+            LOG_ERROR("Syntax error while loading Lua script: "
+                      << lua_tostring(mState, -1));
+            break;
+        case LUA_ERRMEM:
+            LOG_ERROR("Memory allocation error while loading Lua script");
+            break;
+        }
+
+        lua_pop(mState, 1);
+    }
+    else if (lua_pcall(mState, 0, 0, 1))
     {
         LOG_ERROR("Failure while initializing Lua script: "
                   << lua_tostring(mState, -1));
-        lua_settop(mState, 0);
-        return;
+        lua_pop(mState, 1);
     }
 }
 
