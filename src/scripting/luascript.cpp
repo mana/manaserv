@@ -161,23 +161,23 @@ void LuaScript::getPostCallback(Character *q, const std::string &sender,
     s->execute();
 }
 
-bool LuaScript::load_global_event_script(const std::string &file)
+bool LuaScript::loadGlobalEventScript(const std::string &file)
 {
-    Script::global_event_script = new LuaScript();
-    if (!Script::global_event_script->loadFile(file))
+    Script::globalEventScript = new LuaScript();
+    if (!Script::globalEventScript->loadFile(file))
     {
-        Script::global_event_script = NULL;
+        Script::globalEventScript = NULL;
         return false;
     }
     return true;
 }
 
-bool LuaScript::load_special_actions_script(const std::string &file)
+bool LuaScript::loadSpecialActionsScript(const std::string &file)
 {
-    Script::special_actions_script = new LuaScript();
-    if (!Script::special_actions_script->loadFile(file))
+    Script::specialActionsScript = new LuaScript();
+    if (!Script::specialActionsScript->loadFile(file))
     {
-        Script::special_actions_script = NULL;
+        Script::specialActionsScript = NULL;
         return false;
     }
     return true;

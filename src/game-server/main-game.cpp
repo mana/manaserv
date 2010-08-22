@@ -157,10 +157,9 @@ static void initializeServer()
     MonsterManager::initialize(DEFAULT_MONSTERSDB_FILE);
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
-    // Initialize global event script
-    LuaScript::load_global_event_script(DEFAULT_GLOBAL_EVENT_SCRIPT_FILE);
-    // Initialize special action script
-    LuaScript::load_special_actions_script(DEFAULT_SPECIAL_ACTIONS_SCRIPT_FILE);
+
+    LuaScript::loadGlobalEventScript(DEFAULT_GLOBAL_EVENT_SCRIPT_FILE);
+    LuaScript::loadSpecialActionsScript(DEFAULT_SPECIAL_ACTIONS_SCRIPT_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger

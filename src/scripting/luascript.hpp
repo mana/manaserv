@@ -63,18 +63,17 @@ class LuaScript: public Script
         static void getPostCallback(Character *, const std::string &,
                                     const std::string &, void *);
 
-        void processDeathEvent(Being* thing);
+        void processDeathEvent(Being *thing);
 
-        void processRemoveEvent(Thing* thing);
+        void processRemoveEvent(Thing *thing);
 
         /**
          * Loads the global event script file
          */
-        static bool load_global_event_script(const std::string &file);
-        static bool load_special_actions_script(const std::string &file);
+        static bool loadGlobalEventScript(const std::string &file);
+        static bool loadSpecialActionsScript(const std::string &file);
 
     private:
-
         lua_State *mState;
         int nbArgs;
         std::string mCurFunction;

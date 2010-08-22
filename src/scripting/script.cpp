@@ -32,8 +32,8 @@
 typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
-Script *Script::global_event_script = NULL;
-Script *Script::special_actions_script = NULL;
+Script *Script::globalEventScript = NULL;
+Script *Script::specialActionsScript = NULL;
 
 Script::Script():
     mMap(NULL),
@@ -108,10 +108,10 @@ void Script::loadNPC(const std::string &name, int id, int x, int y,
     execute();
 }
 
-bool Script::execute_global_event_function(const std::string &function, Being* obj)
+bool Script::executeGlobalEventFunction(const std::string &function, Being* obj)
 {
     bool isScriptHandled = false;
-    Script *script = Script::global_event_script;
+    Script *script = Script::globalEventScript;
     if (script)
     {
         script->setMap(obj->getMap());
@@ -134,7 +134,7 @@ void Script::addDataToSpecial(int id, Special* special)
     */
     if (special)
     {
-        Script *script = Script::special_actions_script;
+        Script *script = Script::specialActionsScript;
         if (script)
         {
             script->prepare("get_special_recharge_cost");
@@ -146,9 +146,9 @@ void Script::addDataToSpecial(int id, Special* special)
 
 }
 
-bool Script::perform_special_action(int specialId, Being* caster)
+bool Script::performSpecialAction(int specialId, Being* caster)
 {
-    Script *script = Script::special_actions_script;
+    Script *script = Script::specialActionsScript;
     if (script)
     {
         script->prepare("use_special");

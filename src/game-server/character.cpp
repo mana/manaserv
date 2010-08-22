@@ -180,7 +180,7 @@ void Character::perform()
 void Character::died()
 {
     Being::died();
-    Script::execute_global_event_function("on_chr_death", this);
+    Script::executeGlobalEventFunction("on_chr_death", this);
 }
 
 void Character::respawn()
@@ -197,7 +197,7 @@ void Character::respawn()
     mTarget = NULL;
 
     // execute respawn script
-    if (!Script::execute_global_event_function("on_chr_death_accept", this))
+    if (!Script::executeGlobalEventFunction("on_chr_death_accept", this))
     {
         // script-controlled respawning didn't work - fall back to
         // hardcoded logic
@@ -232,7 +232,7 @@ void Character::useSpecial(int id)
 
     //tell script engine to cast the spell
     special->currentMana = 0;
-    Script::perform_special_action(id, this);
+    Script::performSpecialAction(id, this);
     mSpecialUpdateNeeded = true;
     return;
 }
