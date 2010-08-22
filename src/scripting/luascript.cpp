@@ -86,9 +86,13 @@ void LuaScript::load(const char *prog)
 {
     int res = luaL_loadstring(mState, prog);
 
-    if (res == LUA_ERRSYNTAX)
-    {
-        LOG_ERROR("Syntax error while loading Lua script.");
+    switch (res) {
+    case LUA_ERRSYNTAX:
+        LOG_ERROR("Syntax error while loading Lua script: "
+                  << lua_tostring(mState, -1));
+        return;
+    case LUA_ERRMEM:
+        LOG_ERROR("Memory allocation error while loading Lua script");
         return;
     }
 
