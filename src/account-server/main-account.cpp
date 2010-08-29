@@ -77,21 +77,40 @@ static void closeGracefully(int)
     running = false;
 }
 
-static void initializeConfiguration()
+static void initializeConfiguration(std::string configPath = std::string())
 {
-#if defined CONFIG_FILE
-    std::string configPath = CONFIG_FILE;
-#else
-    std::string configPath = DEFAULT_CONFIG_FILE;
-#endif // defined CONFIG_FILE
+    if (configPath.empty())
+        configPath = DEFAULT_CONFIG_FILE;
 
-    if (!Configuration::initialize(configPath)) {
-        LOG_FATAL("Refusing to run without configuration!");
-        exit(1);
+    bool configFound = true;
+    if (!Configuration::initialize(configPath))
+    {
+        configFound = false;
+
+        // If the config file isn't the default and fail to load,
+        // we try the default one with a warning.
+        if (configPath.compare(DEFAULT_CONFIG_FILE))
+        {
+            LOG_WARN("Invalid config path: " << configPath
+                     << ". Trying default value: " << DEFAULT_CONFIG_FILE ".");
+            configPath = DEFAULT_CONFIG_FILE;
+            configFound = true;
+
+            if (!Configuration::initialize(configPath))
+                  configFound = false;
+        }
+
+        if (!configFound)
+        {
+            LOG_FATAL("Refusing to run without configuration!" << std::endl
+            << "Invalid config path: " << configPath << ".");
+            exit(1);
+        }
     }
 
     LOG_INFO("Using config file: " << configPath);
-    // check inter-server password
+
+    // Check inter-server password.
     if (Configuration::getValue("net_password", "") == "")
         LOG_WARN("SECURITY WARNING: 'net_password' not set!");
 }
@@ -223,6 +242,8 @@ static void printHelp()
     std::cout << "manaserv" << std::endl << std::endl
               << "Options: " << std::endl
               << "  -h --help          : Display this help" << std::endl
+              << "     --config <path> : Set the config path to use."
+              << " (Default: ./manaserv.xml)" << std::endl
               << "     --verbosity <n> : Set the verbosity level" << std::endl
               << "                        - 0. Fatal Errors only." << std::endl
               << "                        - 1. All Errors." << std::endl
@@ -236,12 +257,22 @@ static void printHelp()
 struct CommandLineOptions
 {
     CommandLineOptions():
+        configPath(DEFAULT_CONFIG_FILE),
+        configPathChanged(false),
         verbosity(Logger::Warn),
-        port(DEFAULT_SERVER_PORT)
+        verbosityChanged(false),
+        port(DEFAULT_SERVER_PORT),
+        portChanged(false)
     {}
 
+    std::string configPath;
+    bool configPathChanged;
+
     Logger::Level verbosity;
+    bool verbosityChanged;
+
     int port;
+    bool portChanged;
 };
 
 /**
@@ -249,11 +280,12 @@ struct CommandLineOptions
  */
 static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
 {
-    const char *optstring = "h";
+    const char *optString = "h";
 
-    const struct option long_options[] =
+    const struct option longOptions[] =
     {
-        { "help",       no_argument, 0, 'h' },
+        { "help",       no_argument,       0, 'h' },
+        { "config",     required_argument, 0, 'c' },
         { "verbosity",  required_argument, 0, 'v' },
         { "port",       required_argument, 0, 'p' },
         { 0, 0, 0, 0 }
@@ -261,23 +293,31 @@ static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
 
     while (optind < argc)
     {
-        int result = getopt_long(argc, argv, optstring, long_options, NULL);
+        int result = getopt_long(argc, argv, optString, longOptions, NULL);
 
         if (result == -1)
             break;
 
-        switch (result) {
-            default: // Unknown option
+        switch (result)
+        {
+            default: // Unknown option.
             case 'h':
-                // Print help
+                // Print help.
                 printHelp();
+                break;
+            case 'c':
+                // Change config filename and path.
+                options.configPath = optarg;
+                options.configPathChanged = true;
                 break;
             case 'v':
                 options.verbosity = static_cast<Logger::Level>(atoi(optarg));
+                options.verbosityChanged = true;
                 LOG_INFO("Using log verbosity level " << options.verbosity);
                 break;
             case 'p':
                 options.port = atoi(optarg);
+                options.portChanged = true;
                 break;
         }
     }
@@ -292,17 +332,22 @@ int main(int argc, char *argv[])
 #ifdef PACKAGE_VERSION
     LOG_INFO("The Mana Account+Chat Server v" << PACKAGE_VERSION);
 #endif
-    initializeConfiguration();
 
     // Parse command line options
     CommandLineOptions options;
-    options.verbosity = static_cast<Logger::Level>(
-                          Configuration::getValue("log_accountServerLogLevel",
-                                                  options.verbosity) );
-    options.port = Configuration::getValue("net_accountServerPort",
-                                           options.port);
     parseOptions(argc, argv, options);
+
+    initializeConfiguration(options.configPath);
+
+    if (!options.verbosityChanged)
+        options.verbosity = static_cast<Logger::Level>(
+                            Configuration::getValue("log_accountServerLogLevel",
+                                                    options.verbosity) );
     Logger::setVerbosity(options.verbosity);
+
+    if (!options.portChanged)
+        options.port = Configuration::getValue("net_accountServerPort",
+                                               options.port);
 
     // General initialization
     initialize();
