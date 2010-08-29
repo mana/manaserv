@@ -61,10 +61,12 @@ class Storage
         void updateLastLogin(const Account *account);
 
         void updateCharacterPoints(int charId,
-                                   int charPoints, int corrPoints,
-                                   int attribId, int attribValue);
+                                   int charPoints, int corrPoints);
 
         void updateExperience(int charId, int skillId, int skillValue);
+
+        void updateAttribute(int charId, unsigned int attrId,
+                             double base, double mod);
 
         void updateKillCount(int charId, int monsterId, int kills);
 

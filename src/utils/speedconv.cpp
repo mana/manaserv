@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2004-2010  The Mana World Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -18,29 +18,14 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "account-server/character.hpp"
+#include "utils/speedconv.hpp"
 
-#include "account-server/account.hpp"
-
-Character::Character(const std::string &name, int id):
-    mName(name),
-    mDatabaseID(id),
-    mAccountID(-1),
-    mAccount(NULL),
-    mMapId(0),
-    mGender(0),
-    mHairStyle(0),
-    mHairColor(0),
-    mLevel(0),
-    mCharacterPoints(0),
-    mCorrectionPoints(0),
-    mAccountLevel(0)
+double utils::tpsToSpeed(double tps)
 {
+    return (32000 / (tps   * DEFAULT_TILE_LENGTH));
 }
 
-void Character::setAccount(Account *acc)
+double utils::speedToTps(double speed)
 {
-    mAccount = acc;
-    mAccountID = acc->getID();
-    mAccountLevel = acc->getLevel();
+    return (32000 / (speed * DEFAULT_TILE_LENGTH));
 }

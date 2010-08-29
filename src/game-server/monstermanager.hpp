@@ -22,30 +22,41 @@
 #define MONSTERMANAGER_HPP
 
 #include <string>
-
+#include <map>
 class MonsterClass;
-
-namespace MonsterManager
+class MonsterManager
 {
-    /**
-     * Loads monster reference file.
-     */
-    void initialize(const std::string &);
+    public:
 
-    /**
-     * Reloads monster reference file.
-     */
-    void reload();
+        MonsterManager(const std::string &file) : mMonsterReferenceFile(file) {}
+        /**
+         * Loads monster reference file.
+         */
+        void initialize();
 
-    /**
-     * Destroy monster classes.
-     */
-    void deinitialize();
+        /**
+         * Reloads monster reference file.
+         */
+        void reload();
 
-    /**
-     * Gets the MonsterClass having the given ID.
-     */
-    MonsterClass *getMonster(int id);
-}
+        /**
+         * Destroy monster classes.
+         */
+        void deinitialize();
+
+        /**
+         * Gets the MonsterClass having the given ID.
+         */
+        MonsterClass *getMonster(int id);
+
+    private:
+
+        typedef std::map< int, MonsterClass * > MonsterClasses;
+        MonsterClasses mMonsterClasses; /**< Monster reference */
+
+        std::string mMonsterReferenceFile;
+};
+
+extern MonsterManager *monsterManager;
 
 #endif // MONSTERMANAGER_HPP

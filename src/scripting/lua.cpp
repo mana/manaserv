@@ -50,6 +50,7 @@ extern "C" {
 #include "scripting/luautil.hpp"
 #include "scripting/luascript.hpp"
 #include "utils/logger.h"
+#include "utils/speedconv.hpp"
 
 #include <string.h>
 
@@ -342,8 +343,10 @@ static int chr_warp(lua_State *s)
  * (negative amount) should be passed first, then insertions (positive amount).
  * If a removal fails, all the previous operations are canceled (except for
  * items dropped on the floor, hence why removals should be passed first), and
- * the function returns false. Otherwise the function will return true. When
- * the item identifier is zero, money is modified.
+ * the function returns false. Otherwise the function will return true.
+ * Note that previously when the item identifier was zero, money was modified;
+ * however currency is now handled through attributes. This breaks backwards
+ * compatibility with old scripts, and so logs a warning.
  * Note: If an insertion fails, extra items are dropped on the floor.
  * mana.chr_inv_change(character, (int id, int nb)...): bool success
  */
@@ -368,14 +371,7 @@ static int chr_inv_change(lua_State *s)
         int nb = lua_tointeger(s, i * 2 + 3);
 
         if (id == 0)
-        {
-            if (!inv.changeMoney(nb))
-            {
-                inv.cancel();
-                lua_pushboolean(s, 0);
-                return 1;
-            }
-        }
+            LOG_WARN("chr_inv_change: id 0! Currency is now handled through attributes!");
         else if (nb < 0)
         {
             nb = inv.remove(id, -nb);
@@ -388,7 +384,7 @@ static int chr_inv_change(lua_State *s)
         }
         else
         {
-            ItemClass *ic = ItemManager::getItem(id);
+            ItemClass *ic = itemManager->getItem(id);
             if (!ic)
             {
                 raiseScriptError(s, "chr_inv_change called with an unknown item.");
@@ -410,7 +406,6 @@ static int chr_inv_change(lua_State *s)
 
 /**
  * Callback for counting items in inventory.
- * When an item identifier is zero, money is queried.
  * mana.chr_inv_count(character, int id...): int count...
  */
 static int chr_inv_count(lua_State *s)
@@ -426,8 +421,7 @@ static int chr_inv_count(lua_State *s)
     Inventory inv(q);
     for (int i = 2; i <= nb_items + 1; ++i)
     {
-        const int id = luaL_checkint(s, i);
-        int nb = id ? inv.count(id) : q->getPossessions().money;
+        int nb = inv.count(luaL_checkint(s, i));
         lua_pushinteger(s, nb);
     }
     return nb_items;
@@ -632,41 +626,6 @@ static int being_set_status_time(lua_State *s)
 }
 
 /**
-* Returns the current speed of the being
-* mana.being_get_speed(Being *being)
-*/
-static int being_get_speed(lua_State *s)
-{
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_get_speed called with incorrect parameters.");
-        return 0;
-    }
-    Being *being = getBeing(s, 1);
-    lua_pushnumber(s, being->getSpeed());
-    return 1;
-}
-
-/**
-* Sets the speed of the being
-* mana.being_set_speed(Being *being, float speed)
-*/
-static int being_set_speed(lua_State *s)
-{
-    const float speed = luaL_checknumber(s, 2);
-
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_set_speed called with incorrect parameters.");
-        return 0;
-    }
-    Being *being = getBeing(s, 1);
-    being->setSpeed(speed);
-    return 1;
-}
-
-
-/**
  * Returns the Thing type of the given Being
  * mana.being_type(Being *being)
  */
@@ -702,7 +661,11 @@ static int being_walk(lua_State *s)
     being->setDestination(Point(x, y));
 
     if (lua_isnumber(s, 4))
-        being->setSpeed((float) lua_tonumber(s, 4));
+    {
+        being->setAttribute(ATTR_MOVE_SPEED_TPS, lua_tonumber(s, 4));
+        being->setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToSpeed(
+                being->getModifiedAttribute(ATTR_MOVE_SPEED_TPS)));
+    }
 
     return 0;
 }
@@ -746,14 +709,12 @@ static int being_damage(lua_State *s)
     if (!being->canFight())
         return 0;
 
-    Damage damage;
-    damage.base = lua_tointeger(s, 2);
-    damage.delta = lua_tointeger(s, 3);
-    damage.cth = lua_tointeger(s, 4);
-    damage.type = lua_tointeger(s, 5);
-    damage.element = lua_tointeger(s, 6);
-
-    being->damage(NULL, damage);
+    Damage dmg((unsigned short)    lua_tointeger(s, 2), /* base */
+               (unsigned short) lua_tointeger(s, 3),    /* delta */
+               (unsigned short) lua_tointeger(s, 4),    /* cth */
+               (unsigned char)  lua_tointeger(s, 6),    /* element */
+               DAMAGE_PHYSICAL);                        /* type */
+    being->damage(NULL, dmg);
 
     return 0;
 }
@@ -967,7 +928,7 @@ static int monster_create(lua_State *s)
         return 0;
     }
 
-    MonsterClass *spec = MonsterManager::getMonster(monsterId);
+    MonsterClass *spec = monsterManager->getMonster(monsterId);
     if (!spec)
     {
         raiseScriptError(s, "monster_create called with invalid monster ID: %d", monsterId);
@@ -1597,7 +1558,7 @@ static int item_drop(lua_State *s)
     const int type = luaL_checkint(s, 3);
     const int number = luaL_optint(s, 4, 1);
 
-    ItemClass *ic = ItemManager::getItem(type);
+    ItemClass *ic = itemManager->getItem(type);
     if (!ic)
     {
         raiseScriptError(s, "item_drop called with unknown item ID");
@@ -1682,8 +1643,6 @@ LuaScript::LuaScript():
         { "being_has_status",       &being_has_status     },
         { "being_set_status_time",  &being_set_status_time},
         { "being_get_status_time",  &being_get_status_time},
-        { "being_set_speed",        &being_set_speed      },
-        { "being_get_speed",        &being_get_speed      },
         { "being_type",             &being_type           },
         { "being_walk",             &being_walk           },
         { "being_say",              &being_say            },

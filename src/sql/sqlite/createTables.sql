@@ -52,22 +52,29 @@ CREATE TABLE mana_characters
    level        INTEGER     NOT NULL,
    char_pts     INTEGER     NOT NULL,
    correct_pts  INTEGER     NOT NULL,
-   money        INTEGER     NOT NULL,
    x            INTEGER     NOT NULL,
    y            INTEGER     NOT NULL,
    map_id       INTEGER     NOT NULL,
-   str          INTEGER     NOT NULL,
-   agi          INTEGER     NOT NULL,
-   dex          INTEGER     NOT NULL,
-   vit          INTEGER     NOT NULL,
-   int          INTEGER     NOT NULL,
-   will         INTEGER     NOT NULL,
    --
    FOREIGN KEY (user_id) REFERENCES mana_accounts(id)
 );
 
 CREATE INDEX mana_characters_user ON mana_characters ( user_id );
 CREATE UNIQUE INDEX mana_characters_name ON mana_characters ( name );
+
+-----------------------------------------------------------------------------
+
+CREATE TABLE mana_char_attr
+(
+   char_id      INTEGER     NOT NULL,
+   attr_id      INTEGER     NOT NULL,
+   attr_base    FLOAT       NOT NULL,
+   attr_mod     FLOAT       NOT NULL,
+   --
+   FOREIGN KEY (char_id) REFERENCES mana_characters(id)
+);
+
+CREATE INDEX mana_char_attr_char ON mana_char_attr ( char_id );
 
 -----------------------------------------------------------------------------
 
@@ -162,6 +169,18 @@ CREATE TABLE mana_item_attributes
 );
 
 CREATE INDEX mana_item_attributes_item ON mana_item_attributes ( item_id );
+
+-----------------------------------------------------------------------------
+
+CREATE TABLE mana_char_equips
+(
+    id               INTEGER    PRIMARY KEY,
+    owner_id         INTEGER    NOT NULL,
+    slot_type        INTEGER    NOT NULL,
+    inventory_slot   INTEGER    NOT NULL,
+    --
+    FOREIGN KEY (owner_id) REFERENCES mana_characters(id)
+);
 
 -----------------------------------------------------------------------------
 
@@ -386,7 +405,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'10',  strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'11', strftime('%s','now'));
 
 -- all known transaction codes
 

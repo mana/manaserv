@@ -22,6 +22,7 @@
 
 #include "common/configuration.hpp"
 #include "common/resourcemanager.hpp"
+#include "game-server/attributemanager.hpp"
 #include "game-server/character.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/item.hpp"
@@ -29,6 +30,7 @@
 #include "game-server/state.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
+#include "utils/speedconv.hpp"
 
 #include <cmath>
 
@@ -69,19 +71,39 @@ Monster::Monster(MonsterClass *specy):
 {
     LOG_DEBUG("Monster spawned!");
 
-    // get basic attributes from monster database
+    /*
+     * Initialise the attribute structures.
+     */
+
+    const AttributeScopes &mobAttr = attributeManager->getAttributeInfoForType(ATTR_MOB);
+
+    for (AttributeScopes::const_iterator it = mobAttr.begin(),
+         it_end = mobAttr.end();
+        it != it_end;
+        ++it)
+        mAttributes.insert(std::pair< unsigned int, Attribute >
+                           (it->first, Attribute(*it->second)));
+
+    /*
+     * Set the attributes to the values defined by the associated monster
+     * class with or without mutations as needed.
+     */
+
     int mutation = specy->getMutation();
-    for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; i++)
+
+    for (AttributeMap::iterator it2 = mAttributes.begin(),
+         it2_end = mAttributes.end();
+        it2 != it2_end;
+        ++it2)
     {
-        float attr = (float)specy->getAttribute(i);
-        if (mutation)
-        {
-            attr *= (100 + (rand()%(mutation * 2)) - mutation) / 100.0f;
-        }
-        setAttribute(i, (int)std::ceil(attr));
+        double attr = specy->getAttribute(it2->first);
+        setAttribute(it2->first,
+                  mutation ?
+                  attr * (100 + (rand()%(mutation << 1)) - mutation) / 100.0 :
+                  attr);
     }
 
-    setSpeed(specy->getSpeed()); // Put in tiles per second.
+    setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToSpeed(getAttribute(ATTR_MOVE_SPEED_TPS))); // Put in tiles per second.
     setSize(specy->getSize());
 
     // Set positions relative to target from which the monster can attack
@@ -118,36 +140,41 @@ Monster::~Monster()
 
 void Monster::perform()
 {
-    if (mAction == ATTACK && mCurrentAttack && mTarget)
+    if (mAction == ATTACK)
     {
-        if (!isTimerRunning(T_B_ATTACK_TIME))
+        if (mTarget)
         {
-            setTimerHard(T_B_ATTACK_TIME, mCurrentAttack->aftDelay + mCurrentAttack->preDelay);
-            Damage damage;
-            damage.base = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_MIN) * mCurrentAttack->damageFactor);
-            damage.delta = (int) (getModifiedAttribute(BASE_ATTR_PHY_ATK_DELTA) * mCurrentAttack->damageFactor);
-            damage.cth = getModifiedAttribute(BASE_ATTR_HIT);
-            damage.element = mCurrentAttack->element;
-            damage.type = mCurrentAttack->type;
-
-            int hit = performAttack(mTarget, mCurrentAttack->range, damage);
-
-            if (! mCurrentAttack->scriptFunction.empty()
-                && mScript
-                && hit > -1)
+            if (mCurrentAttack)
             {
-                mScript->setMap(getMap());
-                mScript->prepare(mCurrentAttack->scriptFunction);
-                mScript->push(this);
-                mScript->push(mTarget);
-                mScript->push(hit);
-                mScript->execute();
+                if (!isTimerRunning(T_M_ATTACK_TIME))
+                {
+                    setTimerHard(T_M_ATTACK_TIME, mCurrentAttack->aftDelay + mCurrentAttack->preDelay);
+                    Damage dmg(getModifiedAttribute(MOB_ATTR_PHY_ATK_MIN) *
+                                    mCurrentAttack->damageFactor,
+                               getModifiedAttribute(MOB_ATTR_PHY_ATK_DELTA) *
+                                    mCurrentAttack->damageFactor,
+                               getModifiedAttribute(ATTR_ACCURACY),
+                               mCurrentAttack->element,
+                               mCurrentAttack->type,
+                               mCurrentAttack->range);
+
+                    int hit = performAttack(mTarget, mCurrentAttack->range, dmg);
+
+                    if (! mCurrentAttack->scriptFunction.empty()
+                        && mScript
+                        && hit > -1)
+                    {
+                        mScript->setMap(getMap());
+                        mScript->prepare(mCurrentAttack->scriptFunction);
+                        mScript->push(this);
+                        mScript->push(mTarget);
+                        mScript->push(hit);
+                        mScript->execute();
+                    }
+                }
             }
-        }
-    }
-    if (mAction == ATTACK && !mTarget)
-    {
-        setAction(STAND);
+        } else
+            setAction(STAND);
     }
 }
 
@@ -178,7 +205,7 @@ void Monster::update()
     }
 
     // Cancel the rest when we are currently performing an attack
-    if (isTimerRunning(T_B_ATTACK_TIME)) return;
+    if (isTimerRunning(T_M_ATTACK_TIME)) return;
 
     // Check potential attack positions
     Being *bestAttackTarget = mTarget = NULL;

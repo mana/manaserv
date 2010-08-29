@@ -36,18 +36,10 @@ CREATE TABLE IF NOT EXISTS `mana_characters` (
     `level`        tinyint(3)   unsigned NOT NULL,
     `char_pts`     smallint(5)  unsigned NOT NULL,
     `correct_pts`  smallint(5)  unsigned NOT NULL,
-    `money`        int(10)      unsigned NOT NULL,
     -- location on the map
     `x`            smallint(5)  unsigned NOT NULL,
     `y`            smallint(5)  unsigned NOT NULL,
     `map_id`       tinyint(3)   unsigned NOT NULL,
-    -- attributes
-    `str`          smallint(5)  unsigned NOT NULL,
-    `agi`          smallint(5)  unsigned NOT NULL,
-    `dex`          smallint(5)  unsigned NOT NULL,
-    `vit`          smallint(5)  unsigned NOT NULL,
-    `int`          smallint(5)  unsigned NOT NULL,
-    `will`         smallint(5)  unsigned NOT NULL,
     --
     PRIMARY KEY (`id`),
     UNIQUE KEY `name` (`name`),
@@ -58,6 +50,23 @@ CREATE TABLE IF NOT EXISTS `mana_characters` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
+
+--
+-- Create table: `mana_char_attr`
+--
+
+CREATE TABLE IF NOT EXISTS `mana_char_attr` (
+    `char_id`      int(10)      unsigned NOT NULL,
+    `attr_id`      int(10)      unsigned NOT NULL,
+    `attr_base`    double        unsigned NOT NULL,
+    `attr_mod`     double        unsigned NOT NULL,
+    --
+    PRIMARY KEY (`char_id`, `attr_id`),
+    FOREIGN KEY (`char_id`)
+        REFERENCES `mana_characters` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8;
 
 --
 -- table: `mana_char_skills`
@@ -167,6 +176,21 @@ CREATE TABLE IF NOT EXISTS `mana_item_attributes` (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
+
+--
+-- table: `mana_char_equips`
+--
+CREATE TABLE IF NOT EXISTS `mana_char_equips` (
+    id               int(10)    unsigned NOT NULL auto_increment,
+    owner_id         int(10)    unsigned NOT NULL,
+    slot_type        tinyint(3) unsigned NOT NULL,
+    inventory_slot   tinyint(3) unsigned NOT NULL,
+    --
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `owner_id` (`owner_id`, )
+    FOREIGN KEY (owner_id) REFERENCES mana_characters(id)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8;
 
 --
 -- table: `mana_inventories`
@@ -396,7 +420,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, NOW());
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'10',  NOW());
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'11', NOW());
 
 -- all known transaction codes
 

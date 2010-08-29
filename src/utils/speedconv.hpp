@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2004-2010  The Mana World Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -18,29 +18,27 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "account-server/character.hpp"
+#ifndef SPEEDCONV_HPP
+#define SPEEDCONV_HPP
 
-#include "account-server/account.hpp"
+// Simple helper functions for converting between tiles per
+// second and the internal speed representation
 
-Character::Character(const std::string &name, int id):
-    mName(name),
-    mDatabaseID(id),
-    mAccountID(-1),
-    mAccount(NULL),
-    mMapId(0),
-    mGender(0),
-    mHairStyle(0),
-    mHairColor(0),
-    mLevel(0),
-    mCharacterPoints(0),
-    mCorrectionPoints(0),
-    mAccountLevel(0)
-{
+#include "defines.h"
+
+namespace utils {
+    /**
+     * tpsToSpeed()
+     * @param tps The speed value in tiles per second
+     * @returns The speed value in the internal representation
+     */
+    double tpsToSpeed(double);
+    /**
+     * speedToTps()
+     * @param speed The speed value in the internal representation
+     * @returns The speed value in tiles per second
+     */
+    double speedToTps(double);
 }
 
-void Character::setAccount(Account *acc)
-{
-    mAccount = acc;
-    mAccountID = acc->getID();
-    mAccountLevel = acc->getLevel();
-}
+#endif // SPEEDCONV_HPP

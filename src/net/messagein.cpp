@@ -23,8 +23,12 @@
 #include <iostream>
 #include <string>
 #include <enet/enet.h>
+#ifndef USE_NATIVE_DOUBLE
+#include <sstream>
+#endif
 
 #include "net/messagein.hpp"
+#include "utils/logger.h"
 
 MessageIn::MessageIn(const char *data, int length):
     mData(data),
@@ -42,6 +46,7 @@ int MessageIn::readByte()
     {
         value = (unsigned char) mData[mPos];
     }
+    else LOG_DEBUG("Unable to read 1 byte in " << this->getId() << "!");
     mPos += 1;
     return value;
 }
@@ -55,6 +60,7 @@ int MessageIn::readShort()
         memcpy(&t, mData + mPos, 2);
         value = (unsigned short) ENET_NET_TO_HOST_16(t);
     }
+    else LOG_DEBUG("Unable to read 2 bytes in " << this->getId() << "!");
     mPos += 2;
     return value;
 }
@@ -68,7 +74,23 @@ int MessageIn::readLong()
         memcpy(&t, mData + mPos, 4);
         value = ENET_NET_TO_HOST_32(t);
     }
+    else LOG_DEBUG("Unable to read 4 bytes in " << this->getId() << "!");
     mPos += 4;
+    return value;
+}
+
+double MessageIn::readDouble()
+{
+    double value;
+#ifdef USE_NATIVE_DOUBLE
+    if (mPos + sizeof(double) <= mLength)
+        memcpy(&value, mData + mPos, sizeof(double));
+    mPos += sizeof(double);
+#else
+    int length = readByte();
+    std::istringstream i (readString(length));
+    i >> value;
+#endif
     return value;
 }
 

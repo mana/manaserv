@@ -25,113 +25,71 @@
 #include "game-server/item.hpp"
 
 #include "common/configuration.hpp"
+#include "game-server/autoattack.hpp"
+#include "game-server/attributemanager.hpp"
 #include "game-server/being.hpp"
 #include "game-server/state.hpp"
 #include "scripting/script.hpp"
 
-
-ItemType itemTypeFromString (const std::string &name)
+bool ItemEffectInfo::apply(Being *itemUser)
 {
-    static std::map<const std::string, ItemType> table;
-
-    if (table.empty())
-    {
-        table["generic"]        = ITEM_UNUSABLE;
-        table["usable"]         = ITEM_USABLE;
-        table["equip-1hand"]    = ITEM_EQUIPMENT_ONE_HAND_WEAPON;
-        table["equip-2hand"]    = ITEM_EQUIPMENT_TWO_HANDS_WEAPON;
-        table["equip-torso"]    = ITEM_EQUIPMENT_TORSO;
-        table["equip-arms"]     = ITEM_EQUIPMENT_ARMS;
-        table["equip-head"]     = ITEM_EQUIPMENT_HEAD;
-        table["equip-legs"]     = ITEM_EQUIPMENT_LEGS;
-        table["equip-shield"]   = ITEM_EQUIPMENT_SHIELD;
-        table["equip-ring"]     = ITEM_EQUIPMENT_RING;
-        table["equip-necklace"] = ITEM_EQUIPMENT_NECKLACE;
-        table["equip-feet"]     = ITEM_EQUIPMENT_FEET;
-        table["equip-ammo"]     = ITEM_EQUIPMENT_AMMO;
-        table["hairsprite"]     = ITEM_HAIRSPRITE;
-        table["racesprite"]     = ITEM_RACESPRITE;
-    }
-
-    std::map<const std::string, ItemType>::iterator val = table.find(name);
-
-    return val == table.end() ? ITEM_UNKNOWN : (*val).second;
+    LOG_WARN("Virtual defintion used in effect application!");
+    return false;
 }
 
-int ItemModifiers::getValue(int type) const
+bool ItemEffectAttrMod::apply(Being *itemUser)
 {
-    for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
-         i_end = mModifiers.end(); i != i_end; ++i)
-    {
-        if (i->type == type) return i->value;
-    }
-    return 0;
+    LOG_DEBUG("Applying modifier.");
+    itemUser->applyModifier(mAttributeId, mMod, mAttributeLayer,
+                            mDuration, mId);
+    return false;
 }
 
-int ItemModifiers::getAttributeValue(int attr) const
+void ItemEffectAttrMod::dispell(Being *itemUser)
 {
-    return getValue(MOD_ATTRIBUTE + attr);
+    LOG_DEBUG("Dispelling modifier.");
+    itemUser->removeModifier(mAttributeId, mMod, mAttributeLayer,
+                             mId, mDuration);
 }
 
-void ItemModifiers::setValue(int type, int value)
+bool ItemEffectAutoAttack::apply(Being *itemUser)
 {
-    if (value)
-    {
-        ItemModifier m;
-        m.type = type;
-        m.value = value;
-        mModifiers.push_back(m);
-    }
+    // TODO - STUB
+    return false;
 }
 
-void ItemModifiers::setAttributeValue(int attr, int value)
+void ItemEffectAutoAttack::dispell(Being *itemUser)
 {
-    setValue(MOD_ATTRIBUTE + attr, value);
+    // TODO
 }
 
-void ItemModifiers::applyAttributes(Being *b) const
+bool ItemEffectScript::apply(Being *itemUser)
 {
-    /* Note: if someone puts a "lifetime" property on an equipment, strange
-       behavior will occur, as its effect will be canceled twice. While this
-       could be desirable for some "cursed" items, it is probably an error
-       that should be detected somewhere else. */
-    int lifetime = getValue(MOD_LIFETIME);
-    for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
-         i_end = mModifiers.end(); i != i_end; ++i)
-    {
-        if (i->type < MOD_ATTRIBUTE) continue;
-        b->applyModifier(i->type - MOD_ATTRIBUTE, i->value, lifetime);
-    }
+    // TODO
+    return false;
 }
 
-void ItemModifiers::cancelAttributes(Being *b) const
+void ItemEffectScript::dispell(Being *itemUser)
 {
-    for (std::vector< ItemModifier >::const_iterator i = mModifiers.begin(),
-         i_end = mModifiers.end(); i != i_end; ++i)
-    {
-        if (i->type < MOD_ATTRIBUTE) continue;
-        b->applyModifier(i->type - MOD_ATTRIBUTE, -i->value);
-    }
+    // TODO
 }
 
-ItemClass::~ItemClass()
+bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
 {
-    if (mScript) delete mScript;
-}
+    if (!trigger) return false;
+    std::pair<std::multimap< ItemTriggerType, ItemEffectInfo * >::iterator,
+              std::multimap< ItemTriggerType, ItemEffectInfo * >::iterator>
+      rn = mEffects.equal_range(trigger);
+    bool ret = false;
+    while (rn.first != rn.second)
+        if (rn.first++->second->apply(itemUser))
+            ret = true;
 
-bool ItemClass::use(Being *itemUser)
-{
-    if (mType != ITEM_USABLE) return false;
-    if (mScript)
-    {
-       mScript->setMap(itemUser->getMap());
-       mScript->prepare("use");
-       mScript->push(itemUser);
-       mScript->push(mDatabaseID);  // ID of the item
-       mScript->execute();
-    }
-    mModifiers.applyAttributes(itemUser);
-    return true;
+    rn = mDispells.equal_range(trigger);
+    while (rn.first != rn.second)
+        rn.first++->second->dispell(itemUser);
+
+    return ret;
 }
 
 
@@ -147,8 +105,6 @@ void Item::update()
     {
         mLifetime--;
         if (!mLifetime)
-        {
             GameState::enqueueRemove(this);
-        }
     }
 }

@@ -116,6 +116,7 @@ NetComputer *ServerHandler::computerConnected(ENetPeer *peer)
 
 void ServerHandler::computerDisconnected(NetComputer *comp)
 {
+    LOG_INFO("Game-server disconnected.");
     delete comp;
 }
 
@@ -562,10 +563,17 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
                 int CharId = msg.readLong();
                 int CharPoints = msg.readLong();
                 int CorrPoints = msg.readLong();
-                int AttribId = msg.readByte();
-                int AttribValue = msg.readLong();
-                storage->updateCharacterPoints(CharId, CharPoints, CorrPoints,
-                                               AttribId, AttribValue);
+                storage->updateCharacterPoints(CharId, CharPoints, CorrPoints);
+            } break;
+
+            case SYNC_CHARACTER_ATTRIBUTE:
+            {
+                LOG_DEBUG("received SYNC_CHARACTER_ATTRIBUTE");
+                int    charId = msg.readLong();
+                int    attrId = msg.readLong();
+                double base   = msg.readDouble();
+                double mod    = msg.readDouble();
+                storage->updateAttribute(charId, attrId, base, mod);
             } break;
 
             case SYNC_CHARACTER_SKILL:

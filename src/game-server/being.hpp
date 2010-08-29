@@ -28,10 +28,14 @@
 #include "limits.h"
 
 #include "game-server/actor.hpp"
+#include "game-server/attribute.hpp"
+#include "game-server/autoattack.hpp"
 
 class Being;
 class MapComposite;
 class StatusEffect;
+
+typedef std::map< unsigned int, Attribute > AttributeMap;
 
 /**
  * Beings and actors directions
@@ -50,58 +54,8 @@ enum TimerID
     T_M_STROLL, // time until monster strolls to new location
     T_M_KILLSTEAL_PROTECTED,  // killsteal protection time
     T_M_DECAY,  // time until dead monster is removed
-    T_B_ATTACK_TIME,    // time until being can attack again
+    T_M_ATTACK_TIME,    // time until monster can attack again
     T_B_HP_REGEN    // time until hp is regenerated again
-};
-
-/**
- * Methods of damage calculation
- */
-enum
-{
-    DAMAGE_PHYSICAL = 0,
-    DAMAGE_MAGICAL,
-    DAMAGE_OTHER
-};
-
-/**
- * Structure that describes the severity and nature of an attack a being can
- * be hit by.
- */
-struct Damage
-{
-    unsigned short base;   /**< Base amount of damage. */
-    unsigned short delta;  /**< Additional damage when lucky. */
-    unsigned short cth;    /**< Chance to hit. Opposes the evade attribute. */
-    unsigned char element; /**< Elemental damage. */
-    unsigned char type;    /**< Damage type: Physical or magical? */
-    std::list<size_t> usedSkills;      /**< Skills used by source (needed for exp calculation) */
-};
-
-
-/**
- * Holds the base value of an attribute and the sum of all its modifiers.
- * While base + mod may be negative, the modified attribute is not.
- */
-struct Attribute
-{
-    unsigned short base;
-    short mod;
-};
-
-struct AttributeModifier
-{
-    /**< Number of ticks (0 means permanent, e.g. equipment). */
-    unsigned short duration;
-    short value;         /**< Positive or negative amount. */
-    unsigned char attr;  /**< Attribute to modify. */
-    /**
-     * Strength of the modification.
-     * - Zero means permanent, e.g. equipment.
-     * - Non-zero means spell. Can only be removed by a wizard with a
-     *   dispell level higher than this value.
-     */
-    unsigned char level;
 };
 
 struct Status
@@ -111,7 +65,6 @@ struct Status
 };
 
 typedef std::map< int, Status > StatusEffects;
-typedef std::vector< AttributeModifier > AttributeModifiers;
 
 /**
  * Type definition for a list of hits
@@ -223,8 +176,6 @@ class Being : public Actor
          * Gets beings speed.
          * The speed is given in tiles per second.
          */
-        float getSpeed() const
-        { return (float)(1000 / (float)mSpeed); }
 
         /**
          * Gets beings speed.
@@ -232,7 +183,6 @@ class Being : public Actor
          * This function automatically transform it
          * into millsecond per tile.
          */
-        void setSpeed(float s);
 
         /**
          * Gets the damage list.
@@ -250,6 +200,7 @@ class Being : public Actor
          * Performs an attack.
          * Return Value: damage inflicted or -1 when illegal target
          */
+        int performAttack(Being *target, const Damage &damage);
         int performAttack(Being *target, unsigned range, const Damage &damage);
 
         /**
@@ -282,19 +233,32 @@ class Being : public Actor
         /**
          * Sets an attribute.
          */
-        void setAttribute(int n, int value)
-        { mAttributes[n].base = value; }
+        void setAttribute(unsigned int id, double value, bool calc = true);
 
         /**
          * Gets an attribute.
          */
-        int getAttribute(int n) const
-        { return mAttributes[n].base; }
+        double getAttribute(unsigned int id) const;
 
         /**
          * Gets an attribute after applying modifiers.
          */
-        int getModifiedAttribute(int) const;
+        double getModifiedAttribute(unsigned int id) const;
+
+        /**
+         * No-op to satisfy shared structure.
+         * @note The game server calculates this manually, so nothing happens
+         *       here.
+         */
+        void setModAttribute(unsigned int id, double value);
+
+        /**
+         * Checks whether or not an attribute exists in this being.
+         * @returns True if the attribute is present in the being, false otherwise.
+         */
+
+        bool checkAttributeExists(unsigned int id) const
+        { return mAttributes.count(id); }
 
         /**
          * Adds a modifier to one attribute.
@@ -303,17 +267,16 @@ class Being : public Actor
          * @param lvl If non-zero, indicates that a temporary modifier can be
          *        dispelled prematuraly by a spell of given level.
          */
-        void applyModifier(int attr, int value, int duration = 0, int lvl = 0);
+        void applyModifier(unsigned int attr, double value, unsigned int layer,
+                           unsigned int duration = 0, unsigned int id = 0);
 
-        /**
-         * Removes all the modifiers with a level low enough.
-         */
-        void dispellModifiers(int level);
+        bool removeModifier(unsigned int attr, double value, unsigned int layer,
+                            unsigned int id = 0, bool fullcheck = false);
 
         /**
          * Called when an attribute modifier is changed.
          */
-        virtual void updateDerivedAttributes(int) {}
+        virtual void updateDerivedAttributes(unsigned int) {}
 
         /**
          * Sets a statuseffect on this being
@@ -369,7 +332,8 @@ class Being : public Actor
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
         Action mAction;
-        std::vector< Attribute > mAttributes;
+        AttributeMap mAttributes;
+        AutoAttacks mAutoAttacks;
         StatusEffects mStatus;
         Being *mTarget;
         Point mOld;                 /**< Old coordinates. */
@@ -398,12 +362,10 @@ class Being : public Actor
         Being &operator=(const Being &rhs);
 
         Path mPath;
-        unsigned int mSpeed;      /**< Speed. */
         unsigned char mDirection;   /**< Facing direction. */
 
         std::string mName;
         Hits mHitsTaken; /**< List of punches taken since last update. */
-        AttributeModifiers mModifiers; /**< Currently modified attributes. */
 
         typedef std::map<TimerID, int> Timers;
         Timers mTimers;

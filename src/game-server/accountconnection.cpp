@@ -71,7 +71,7 @@ bool AccountConnection::start(int gameServerPort)
     msg.writeString(gameServerAddress);
     msg.writeShort(gameServerPort);
     msg.writeString(password);
-    msg.writeLong(ItemManager::getDatabaseVersion());
+    msg.writeLong(itemManager->getDatabaseVersion());
     const MapManager::Maps &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
             i != i_end; ++i)
@@ -124,9 +124,6 @@ void AccountConnection::processMessage(MessageIn &msg)
         {
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             Character *ptr = new Character(msg);
-            ptr->setSpeed(6.0); // The speed is set in tiles per seconds, and transformed by the function
-                                // into the server corresponding internal value.
-                                // TODO: Make this computed somehow...
             gameHandler->addPendingCharacter(token, ptr);
         } break;
 
@@ -362,6 +359,18 @@ void AccountConnection::updateCharacterPoints(int charId, int charPoints,
     mSyncBuffer->writeLong(corrPoints);
     mSyncBuffer->writeByte(attribId);
     mSyncBuffer->writeLong(attribValue);
+    syncChanges();
+}
+
+void AccountConnection::updateAttributes(int charId, int attrId, double base,
+                              double mod)
+{
+    ++mSyncMessages;
+    mSyncBuffer->writeByte(SYNC_CHARACTER_ATTRIBUTE);
+    mSyncBuffer->writeLong(charId);
+    mSyncBuffer->writeLong(attrId);
+    mSyncBuffer->writeDouble(base);
+    mSyncBuffer->writeDouble(mod);
     syncChanges();
 }
 

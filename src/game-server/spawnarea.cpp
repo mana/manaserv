@@ -82,7 +82,7 @@ void SpawnArea::update()
 
         Being *being = new Monster(mSpecy);
 
-        if (being->getModifiedAttribute(BASE_ATTR_HP) <= 0)
+        if (being->getModifiedAttribute(ATTR_MAX_HP) <= 0)
         {
             //LOG_WARN("Refusing to spawn dead monster " << mSpecy->getType());
             delete being;

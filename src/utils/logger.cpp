@@ -107,9 +107,15 @@ void Logger::output(const std::string &msg, Level atVerbosity)
 {
     static const char *prefixes[] =
     {
+#ifdef T_COL_LOG
+        "[\033[45mFTL\033[0m]",
+        "[\033[41mERR\033[0m]",
+        "[\033[43mWRN\033[0m]",
+#else
         "[FTL]",
         "[ERR]",
         "[WRN]",
+#endif
         "[INF]",
         "[DBG]"
     };

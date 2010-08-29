@@ -22,35 +22,71 @@
 #define ITEMMANAGER_H
 
 #include <string>
+#include <map>
+#include <vector>
 
 class ItemClass;
 
-namespace ItemManager
+class ItemManager
 {
-    /**
-     * Loads item reference file.
-     */
-    void initialize(const std::string &);
+    public:
+        ItemManager(const std::string &itemFile, const std::string &equipFile) :
+                mItemReferenceFile(itemFile),
+                mEquipCharSlotReferenceFile(equipFile),
+                mItemDatabaseVersion(0) {}
+        /**
+         * Loads item reference file.
+         */
+        void initialize();
 
-    /**
-     * Reloads item reference file.
-     */
-    void reload();
+        /**
+         * Reloads item reference file.
+         */
+        void reload();
 
-    /**
-     * Destroy item classes.
-     */
-    void deinitialize();
+        /**
+         * Destroy item classes.
+         */
+        void deinitialize();
 
-    /**
-     * Gets the ItemClass having the given ID.
-     */
-    ItemClass *getItem(int itemId);
+        /**
+         * Gets the ItemClass having the given ID.
+         */
+        ItemClass *getItem(int itemId) const;
 
-    /**
-     * Gets the version of the loaded item database.
-     */
-    unsigned getDatabaseVersion();
-}
+        /**
+         * Gets the version of the loaded item database.
+         */
+        unsigned int getDatabaseVersion() const;
+
+        const std::string &getEquipNameFromId(unsigned int id) const;
+
+        unsigned int getEquipIdFromName(const std::string &name) const;
+
+        unsigned int getMaxSlotsFromId(unsigned int id) const;
+
+        unsigned int getVisibleSlotCount() const;
+
+        bool isEquipSlotVisible(unsigned int id) const;
+
+    private:
+        typedef std::map< int, ItemClass * > ItemClasses;
+        // Map a string (name of slot) with (str-id, max-per-equip-slot)
+        typedef std::vector< std::pair< std::string, unsigned int > > EquipSlots;
+        // Reference to the vector position of equipSlots
+        typedef std::vector< unsigned int > VisibleEquipSlots;
+
+        ItemClasses itemClasses; /**< Item reference */
+        EquipSlots equipSlots;
+        VisibleEquipSlots visibleEquipSlots;
+
+        std::string mItemReferenceFile;
+        std::string mEquipCharSlotReferenceFile;
+        mutable unsigned int mVisibleEquipSlotCount; // Cache
+
+        unsigned int mItemDatabaseVersion; /**< Version of the loaded items database file.*/
+};
+
+extern ItemManager *itemManager;
 
 #endif

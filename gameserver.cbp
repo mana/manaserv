@@ -93,6 +93,12 @@
 		<Unit filename="src\game-server\accountconnection.hpp" />
 		<Unit filename="src\game-server\actor.cpp" />
 		<Unit filename="src\game-server\actor.hpp" />
+		<Unit filename="src\game-server\attribute.cpp" />
+		<Unit filename="src\game-server\attribute.hpp" />
+		<Unit filename="src\game-server\attributemanager.cpp" />
+		<Unit filename="src\game-server\attributemanager.hpp" />
+		<Unit filename="src\game-server\autoattack.cpp" />
+		<Unit filename="src\game-server\autoattack.hpp" />
 		<Unit filename="src\game-server\being.cpp" />
 		<Unit filename="src\game-server\being.hpp" />
 		<Unit filename="src\game-server\buysell.cpp" />
@@ -182,6 +188,8 @@
 		<Unit filename="src\utils\string.hpp" />
 		<Unit filename="src\utils\stringfilter.cpp" />
 		<Unit filename="src\utils\stringfilter.h" />
+		<Unit filename="src\utils\speedconv.cpp" />
+		<Unit filename="src\utils\speedconv.hpp">
 		<Unit filename="src\utils\timer.cpp" />
 		<Unit filename="src\utils\timer.h" />
 		<Unit filename="src\utils\tokencollector.cpp" />

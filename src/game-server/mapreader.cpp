@@ -266,7 +266,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         }
                     }
 
-                    MonsterClass *monster = MonsterManager::getMonster(monsterId);
+                    MonsterClass *monster = monsterManager->getMonster(monsterId);
                     if (monster)
                     {
                         things.push_back(new SpawnArea(composite, monster, rect, maxBeings, spawnRate));

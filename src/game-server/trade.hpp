@@ -101,6 +101,7 @@ class Trade
         TradedItems mItems1, mItems2; /**< Traded items. */
         int mMoney1, mMoney2;         /**< Traded money. */
         TradeState mState;            /**< State of transaction. */
+        unsigned int mCurrencyId;     /**< The attribute to use as currency. */
 };
 
 #endif

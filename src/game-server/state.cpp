@@ -39,6 +39,7 @@
 #include "net/messageout.hpp"
 #include "scripting/script.hpp"
 #include "utils/logger.h"
+#include "utils/speedconv.hpp"
 
 enum
 {
@@ -102,14 +103,7 @@ static void updateMap(MapComposite *map)
 static void serializeLooks(Character *ch, MessageOut &msg, bool full)
 {
     const Possessions &poss = ch->getPossessions();
-    static int const nb_slots = 4;
-    static int const slots[nb_slots] =
-    {
-        EQUIP_FIGHT1_SLOT,
-        EQUIP_HEAD_SLOT,
-        EQUIP_TORSO_SLOT,
-        EQUIP_LEGS_SLOT
-    };
+    unsigned int nb_slots = itemManager->getVisibleSlotCount();
 
     // Bitmask describing the changed entries.
     int changed = (1 << nb_slots) - 1;
@@ -119,21 +113,25 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
         changed = (1 << nb_slots) - 1;
     }
 
-    int items[nb_slots];
+    std::vector<unsigned int> items;
+    items.resize(nb_slots, 0);
     // Partially build both kinds of packet, to get their sizes.
-    int mask_full = 0, mask_diff = 0;
-    int nb_full = 0, nb_diff = 0;
-    for (int i = 0; i < nb_slots; ++i)
+    unsigned int mask_full = 0, mask_diff = 0;
+    unsigned int nb_full = 0, nb_diff = 0;
+    std::map<unsigned int, unsigned int>::const_iterator it =
+                                                    poss.equipSlots.begin();
+    for (unsigned int i = 0; i < nb_slots; ++i)
     {
-        int id = poss.equipment[slots[i]];
-        ItemClass *eq;
-        items[i] = id && (eq = ItemManager::getItem(id)) ? eq->getSpriteID() : 0;
         if (changed & (1 << i))
         {
             // Skip slots that have not changed, when sending an update.
             ++nb_diff;
             mask_diff |= 1 << i;
         }
+        if (it == poss.equipSlots.end() || it->first > i) continue;
+        ItemClass *eq;
+        items[i] = it->first && (eq = itemManager->getItem(it->first)) ?
+                   eq->getSpriteID() : 0;
         if (items[i])
         {
             /* If we are sending the whole equipment, only filled slots have to
@@ -151,7 +149,7 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
     int mask = full ? mask_full | (1 << 7) : mask_diff;
 
     msg.writeByte(mask);
-    for (int i = 0; i < nb_slots; ++i)
+    for (unsigned int i = 0; i < nb_slots; ++i)
     {
         if (mask & (1 << i)) msg.writeShort(items[i]);
     }
@@ -318,7 +316,7 @@ static void informPlayer(MapComposite *map, Character *p)
             // We multiply the sent speed (in tiles per second) by ten
             // to get it within a byte with decimal precision.
             // For instance, a value of 4.5 will be sent as 45.
-            moveMsg.writeByte((unsigned short) (o->getSpeed() * 10));
+            moveMsg.writeByte((unsigned short) (o->getModifiedAttribute(ATTR_MOVE_SPEED_TPS) * 10));
         }
     }
 
@@ -349,7 +347,8 @@ static void informPlayer(MapComposite *map, Character *p)
             {
                 MessageOut healthMsg(GPMSG_BEING_HEALTH_CHANGE);
                 healthMsg.writeShort(c->getPublicID());
-                healthMsg.writeShort(c->getHealth());
+                healthMsg.writeShort(c->getModifiedAttribute(ATTR_HP));
+                healthMsg.writeShort(c->getModifiedAttribute(ATTR_MAX_HP));
                 gameHandler->sendTo(p, healthMsg);
             }
         }

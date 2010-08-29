@@ -22,6 +22,7 @@
 
 #include "defines.h"
 #include "common/resourcemanager.hpp"
+#include "game-server/attributemanager.hpp"
 #include "game-server/item.hpp"
 #include "game-server/skillmanager.hpp"
 #include "scripting/script.hpp"
@@ -32,27 +33,82 @@
 #include <set>
 #include <sstream>
 
-typedef std::map< int, ItemClass * > ItemClasses;
-static ItemClasses itemClasses; /**< Item reference */
-static std::string itemReferenceFile;
-static unsigned int itemDatabaseVersion = 0; /**< Version of the loaded items database file.*/
-
-void ItemManager::initialize(const std::string &file)
+void ItemManager::initialize()
 {
-    itemReferenceFile = file;
+    mVisibleEquipSlotCount = 0;
     reload();
 }
 
 void ItemManager::reload()
 {
-    std::string absPathFile = ResourceManager::resolve(itemReferenceFile);
+    std::string absPathFile;
+    xmlNodePtr rootNode;
+
+    // ####################################################################
+    // ### Load the equip slots that a character has available to them. ###
+    // ####################################################################
+
+    absPathFile = ResourceManager::resolve(mEquipCharSlotReferenceFile);
     if (absPathFile.empty()) {
-        LOG_ERROR("Item Manager: Could not find " << itemReferenceFile << "!");
+        LOG_ERROR("Item Manager: Could not find " << mEquipCharSlotReferenceFile << "!");
         return;
     }
 
-    XML::Document doc(absPathFile, false);
-    xmlNodePtr rootNode = doc.rootNode();
+    XML::Document doc(absPathFile, int());
+    rootNode = doc.rootNode();
+
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "equip-slots"))
+    {
+        LOG_ERROR("Item Manager: Error while parsing equip slots database ("
+                  << absPathFile << ")!");
+        return;
+    }
+
+    LOG_INFO("Loading equip slots: " << absPathFile);
+
+    {
+        unsigned int totalCount = 0, slotCount = 0, visibleSlotCount = 0;
+        for_each_xml_child_node(node, rootNode)
+        {
+            if (xmlStrEqual(node->name, BAD_CAST "slot"))
+            {
+                std::string name = XML::getProperty(node, "name", "");
+                int count = XML::getProperty(node, "count", 0);
+                if (name.empty() || !count || count < 0)
+                    LOG_WARN("Item Manager: equip slot has no name or zero count");
+                else
+                {
+                    bool visible = XML::getProperty(node, "visible", "false") != "false";
+                    if (visible)
+                    {
+                        visibleEquipSlots.push_back(equipSlots.size());
+                        if (++visibleSlotCount > 7)
+                            LOG_WARN("Item Manager: More than 7 visible equip slot!"
+                                     "This will not work with current netcode!");
+                    }
+                    equipSlots.push_back(std::pair<std::string, unsigned int>
+                                         (name, count));
+                    totalCount += count;
+                    ++slotCount;
+                }
+            }
+        }
+        LOG_INFO("Loaded '" << slotCount << "' slot types with '"
+                 << totalCount << "' slots.");
+    }
+
+    // ####################################
+    // ### Load the main item database. ###
+    // ####################################
+
+    absPathFile = ResourceManager::resolve(mItemReferenceFile);
+    if (absPathFile.empty()) {
+        LOG_ERROR("Item Manager: Could not find " << mItemReferenceFile << "!");
+        return;
+    }
+
+    XML::Document doc2(absPathFile, int());
+    rootNode = doc2.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))
     {
@@ -62,150 +118,201 @@ void ItemManager::reload()
     }
 
     LOG_INFO("Loading item reference: " << absPathFile);
+
     unsigned nbItems = 0;
     for_each_xml_child_node(node, rootNode)
     {
-        // Try to load the version of the item database. The version is defined
-        // as subversion tag embedded as XML attribute. So every modification
-        // to the items.xml file will increase the revision automatically.
-        if (xmlStrEqual(node->name, BAD_CAST "version"))
-        {
-            std::string revision = XML::getProperty(node, "revision", std::string());
-            itemDatabaseVersion = atoi(revision.c_str());
-
-            LOG_INFO("Loading item database version " << itemDatabaseVersion);
-            continue;
-        }
-
         if (!xmlStrEqual(node->name, BAD_CAST "item"))
-        {
             continue;
-        }
 
         int id = XML::getProperty(node, "id", 0);
-        if (id == 0)
+        if (!id)
         {
-            LOG_WARN("Item Manager: An (ignored) item has no ID in "
-                     << itemReferenceFile << "!");
+            LOG_WARN("Item Manager: An item has no ID in "
+                     << mItemReferenceFile << ", and so has been ignored!");
             continue;
         }
 
+
+        // Type is mostly unused, but still serves for
+        // hairsheets and race sheets.
         std::string sItemType = XML::getProperty(node, "type", "");
-        ItemType itemType = itemTypeFromString(sItemType);
-
-        if (itemType == ITEM_UNKNOWN)
-        {
-            LOG_WARN(itemReferenceFile << ": Unknown item type \"" << sItemType
-                     << "\" for item #" << id <<
-                     " - treating it as \"generic\".");
-            itemType = ITEM_UNUSABLE;
-        }
-
-        if (itemType == ITEM_HAIRSPRITE || itemType == ITEM_RACESPRITE)
-        {
+        if (sItemType == "hairsprite" || sItemType == "racesprite")
             continue;
-        }
 
         ItemClass *item;
         ItemClasses::iterator i = itemClasses.find(id);
+
+        unsigned int maxPerSlot = XML::getProperty(node, "max-per-slot", 0);
+        if (!maxPerSlot)
+        {
+            LOG_WARN("Item Manager: Missing max-per-slot property for "
+                     "item " << id << " in " << mItemReferenceFile << '.');
+            maxPerSlot = 1;
+        }
+
         if (i == itemClasses.end())
         {
-            item = new ItemClass(id, itemType);
+            item = new ItemClass(id, maxPerSlot);
             itemClasses[id] = item;
         }
         else
         {
+            LOG_WARN("Multiple defintions of item '" << id << "'!");
             item = i->second;
         }
 
-        int weight = XML::getProperty(node, "weight", 0);
         int value = XML::getProperty(node, "value", 0);
-        int maxPerSlot = XML::getProperty(node, "max-per-slot", 0);
-        int sprite = XML::getProperty(node, "sprite_id", 0);
-        std::string scriptFile = XML::getProperty(node, "script", "");
-        unsigned attackRange = XML::getProperty(node, "attack-range", 0);
+        // Should have multiple value definitions for multiple currencies?
+        item->mCost = value;
 
-        ItemModifiers modifiers;
-        if (itemType == ITEM_EQUIPMENT_ONE_HAND_WEAPON ||
-            itemType == ITEM_EQUIPMENT_TWO_HANDS_WEAPON)
+        for_each_xml_child_node(subnode, node)
         {
-            int weaponType = 0;
-            std::string strWeaponType = XML::getProperty(node, "weapon-type", "");
-            if (strWeaponType == "")
+            if (xmlStrEqual(subnode->name, BAD_CAST "equip"))
             {
-                LOG_WARN(itemReferenceFile << ": Empty weapon type \""
-                         << "\" for item #" << id <<
-                         " - treating it as generic item.");
+                ItemEquipInfo req;
+                for_each_xml_child_node(equipnode, subnode)
+                    if (xmlStrEqual(equipnode->name, BAD_CAST "slot"))
+                    {
+                        std::string slot = XML::getProperty(equipnode, "type", "");
+                        if (slot.empty())
+                        {
+                            LOG_WARN("Item Manager: empty equip slot definition!");
+                            continue;
+                        }
+                        req.push_back(std::make_pair(getEquipIdFromName(slot),
+                                       XML::getProperty(equipnode, "required",
+                                                        1)));
+                    }
+                if (req.empty())
+                {
+                    LOG_WARN("Item Manager: empty equip requirement "
+                             "definition for item " << id << "!");
+                    continue;
+                }
+                item->mEquip.push_back(req);
             }
-            else
-                weaponType = SkillManager::getIdFromString(strWeaponType);
-
-            modifiers.setValue(MOD_WEAPON_TYPE, weaponType);
-            modifiers.setValue(MOD_WEAPON_RANGE, XML::getProperty(node, "range",   0));
-            modifiers.setValue(MOD_ELEMENT_TYPE, XML::getProperty(node, "element", 0));
-        }
-        modifiers.setValue(MOD_LIFETIME, XML::getProperty(node, "lifetime", 0) * 10);
-        //TODO: add child nodes for these modifiers (additive and factor)
-        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,   XML::getProperty(node, "attack-min",   0));
-        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_DELTA, XML::getProperty(node, "attack-delta", 0));
-        modifiers.setAttributeValue(BASE_ATTR_HP,            XML::getProperty(node, "hp",           0));
-        modifiers.setAttributeValue(BASE_ATTR_PHY_RES,       XML::getProperty(node, "defense",      0));
-        modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,      XML::getProperty(node, "strength",     0));
-        modifiers.setAttributeValue(CHAR_ATTR_AGILITY,       XML::getProperty(node, "agility",      0));
-        modifiers.setAttributeValue(CHAR_ATTR_DEXTERITY,     XML::getProperty(node, "dexterity",    0));
-        modifiers.setAttributeValue(CHAR_ATTR_VITALITY,      XML::getProperty(node, "vitality",     0));
-        modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE,  XML::getProperty(node, "intelligence", 0));
-        modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,     XML::getProperty(node, "willpower",    0));
-
-        if (maxPerSlot == 0)
-        {
-            //LOG_WARN("Item Manager: Missing max-per-slot property for "
-            //         "item " << id << " in " << itemReferenceFile << '.');
-            maxPerSlot = 1;
-        }
-
-        if (itemType > ITEM_USABLE && itemType < ITEM_EQUIPMENT_AMMO &&
-            maxPerSlot != 1)
-        {
-            LOG_WARN("Item Manager: Setting max-per-slot property to 1 for "
-                     "equipment " << id << " in " << itemReferenceFile << '.');
-            maxPerSlot = 1;
-        }
-
-        if (weight == 0)
-        {
-            LOG_WARN("Item Manager: Missing weight for item "
-                     << id << " in " << itemReferenceFile << '.');
-            weight = 1;
-        }
-
-        // TODO: Clean this up some
-        if (scriptFile != "")
-        {
-            std::stringstream filename;
-            filename << "scripts/items/" << scriptFile;
-            if (ResourceManager::exists(filename.str()))       // file exists!
+            else if (xmlStrEqual(subnode->name, BAD_CAST "effect"))
             {
-                LOG_INFO("Loading item script: " << filename.str());
-                Script *s = Script::create("lua");
-                s->loadFile(filename.str());
-                item->setScript(s);
-            } else {
-                LOG_WARN("Could not find script file \"" << filename.str() << "\" for item #"<<id);
-            }
-        }
+                std::pair< ItemTriggerType, ItemTriggerType> triggerTypes;
+                {
+                    std::string triggerName = XML::getProperty(subnode, "trigger", ""),
+                             dispellTrigger = XML::getProperty(subnode, "dispell", "");
+                    // label -> { trigger (apply), trigger (cancel (default)) }
+                    // The latter can be overridden.
+                    static std::map<const std::string,
+                                    std::pair<ItemTriggerType, ItemTriggerType> >
+                                    triggerTable;
+                    if (triggerTable.empty())
+                    {
+                        /*
+                         * The following is a table of all triggers for item
+                         *     effects.
+                         * The first element defines the trigger used for this
+                         *     trigger, and the second defines the default
+                         *     trigger to use for dispelling.
+                         */
+                        triggerTable["existence"].first         = ITT_IN_INVY;
+                        triggerTable["existence"].second        = ITT_LEAVE_INVY;
+                        triggerTable["activation"].first        = ITT_ACTIVATE;
+                        triggerTable["activation"].second       = ITT_NULL;
+                        triggerTable["equip"].first             = ITT_EQUIP;
+                        triggerTable["equip"].second            = ITT_UNEQUIP;
+                        triggerTable["leave-inventory"].first   = ITT_LEAVE_INVY;
+                        triggerTable["leave-inventory"].second  = ITT_NULL;
+                        triggerTable["unequip"].first           = ITT_UNEQUIP;
+                        triggerTable["unequip"].second          = ITT_NULL;
+                        triggerTable["equip-change"].first      = ITT_EQUIPCHG;
+                        triggerTable["equip-change"].second     = ITT_NULL;
+                        triggerTable["null"].first              = ITT_NULL;
+                        triggerTable["null"].second             = ITT_NULL;
+                    }
+                    std::map<const std::string, std::pair<ItemTriggerType,
+                                                ItemTriggerType> >::iterator
+                             it = triggerTable.find(triggerName);
 
-        item->setWeight(weight);
-        item->setCost(value);
-        item->setMaxPerSlot(maxPerSlot);
-        item->setModifiers(modifiers);
-        item->setSpriteID(sprite ? sprite : id);
+                    if (it == triggerTable.end()) {
+                        LOG_WARN("Item Manager: Unable to find effect trigger type \""
+                                 << triggerName << "\", skipping!");
+                        continue;
+                    }
+                    triggerTypes = it->second;
+                    if (!dispellTrigger.empty())
+                    {
+                        if ((it = triggerTable.find(dispellTrigger))
+                             == triggerTable.end())
+                            LOG_WARN("Item Manager: Unable to find dispell effect "
+                                     "trigger type \"" << dispellTrigger << "\"!");
+                        else
+                            triggerTypes.second = it->second.first;
+                    }
+                }
+                for_each_xml_child_node(effectnode, subnode)
+                {
+                    if (xmlStrEqual(effectnode->name, BAD_CAST "modifier"))
+                    {
+                        std::string tag = XML::getProperty(effectnode, "attribute", "");
+                        if (tag.empty())
+                        {
+                            LOG_WARN("Item Manager: Warning, modifier found "
+                                     "but no attribute specified!");
+                            continue;
+                        }
+                        unsigned int duration = XML::getProperty(effectnode,
+                                                                 "duration",
+                                                                 0);
+                        std::pair<unsigned int, unsigned int> info = attributeManager->getInfoFromTag(tag);
+                        double value = XML::getFloatProperty(effectnode, "value", 0.0);
+                        item->addEffect(new ItemEffectAttrMod(info.first,
+                                                              info.second,
+                                                              value, id,
+                                                              duration),
+                                        triggerTypes.first, triggerTypes.second);
+                    }
+                    else if (xmlStrEqual(effectnode->name, BAD_CAST "autoattack"))
+                    {
+                        // TODO - URGENT
+                    }
+                    // Having a dispell for the next three is nonsensical.
+                    else if (xmlStrEqual(effectnode->name, BAD_CAST "cooldown"))
+                    {
+                        LOG_WARN("Item Manager: Cooldown property not implemented yet!");
+                        // TODO: Also needs unique items before this action will work
+                    }
+                    else if (xmlStrEqual(effectnode->name, BAD_CAST "g-cooldown"))
+                    {
+                        LOG_WARN("Item Manager: G-Cooldown property not implemented yet!");
+                        // TODO
+                    }
+                    else if (xmlStrEqual(effectnode->name, BAD_CAST "consumes"))
+                        item->addEffect(new ItemEffectConsumes(), triggerTypes.first);
+                    else if (xmlStrEqual(effectnode->name, BAD_CAST "script"))
+                    {
+                        std::string src = XML::getProperty(effectnode, "src", "");
+                        if (src.empty())
+                        {
+                            LOG_WARN("Item Manager: Empty src definition for script effect, skipping!");
+                            continue;
+                        }
+                        std::string func = XML::getProperty(effectnode, "function", "");
+                        if (func.empty())
+                        {
+                            LOG_WARN ("Item Manager: Empty func definition for script effect, skipping!");
+                            continue;
+                        }
+                        for_each_xml_child_node(scriptnode, effectnode)
+                        {
+                            // TODO: Load variables from variable subnodes
+                        }
+                        std::string dfunc = XML::getProperty(effectnode, "dispell-function", "");
+                        // STUB
+                        item->addEffect(new ItemEffectScript(), triggerTypes.first, triggerTypes.second);
+                    }
+                }
+            }
+            // More properties go here
+        }
         ++nbItems;
-        item->setAttackRange(attackRange);
-
-        LOG_DEBUG("Item: ID: " << id << ", itemType: " << itemType
-                  << ", weight: " << weight << ", value: " << value <<
-                  ", script: " << scriptFile << ", maxPerSlot: " << maxPerSlot << ".");
     }
 
     LOG_INFO("Loaded " << nbItems << " items from "
@@ -221,13 +328,55 @@ void ItemManager::deinitialize()
     itemClasses.clear();
 }
 
-ItemClass *ItemManager::getItem(int itemId)
+ItemClass *ItemManager::getItem(int itemId) const
 {
     ItemClasses::const_iterator i = itemClasses.find(itemId);
     return i != itemClasses.end() ? i->second : NULL;
 }
 
-unsigned ItemManager::getDatabaseVersion()
+unsigned int ItemManager::getDatabaseVersion() const
 {
-    return itemDatabaseVersion;
+    return mItemDatabaseVersion;
+}
+
+const std::string &ItemManager::getEquipNameFromId(unsigned int id) const
+{
+    return equipSlots.at(id).first;
+}
+
+unsigned int ItemManager::getEquipIdFromName(const std::string &name) const
+{
+    for (unsigned int i = 0; i < equipSlots.size(); ++i)
+        if (name == equipSlots.at(i).first)
+            return i;
+    LOG_WARN("Item Manager: attempt to find equip id from name \"" <<
+             name << "\" not found, defaulting to 0!");
+    return 0;
+}
+
+unsigned int ItemManager::getMaxSlotsFromId(unsigned int id) const
+{
+    return equipSlots.at(id).second;
+}
+
+unsigned int ItemManager::getVisibleSlotCount() const
+{
+    if (!mVisibleEquipSlotCount)
+        for (VisibleEquipSlots::const_iterator it = visibleEquipSlots.begin(),
+                                               it_end = visibleEquipSlots.end();
+             it != it_end;
+             ++it)
+            mVisibleEquipSlotCount += equipSlots.at(*it).second;
+    return mVisibleEquipSlotCount;
+}
+
+bool ItemManager::isEquipSlotVisible(unsigned int id) const
+{
+    for (VisibleEquipSlots::const_iterator it = visibleEquipSlots.begin(),
+                                           it_end = visibleEquipSlots.end();
+         it != it_end;
+         ++it)
+        if (*it == id)
+            return true;
+    return false;
 }

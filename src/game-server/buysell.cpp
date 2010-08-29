@@ -27,10 +27,12 @@
 #include "game-server/item.hpp"
 #include "net/messageout.hpp"
 
+#include "defines.h"
+
 #include <algorithm>
 
 BuySell::BuySell(Character *c, bool sell):
-    mChar(c), mSell(sell)
+    mCurrencyId(ATTR_GP), mChar(c), mSell(sell)
 {
     c->setBuySell(this);
 }
@@ -61,8 +63,18 @@ bool BuySell::registerItem(int id, int amount, int cost)
     return true;
 }
 
+
 int BuySell::registerPlayerItems()
 {
+    return 0; // FIXME: STUB
+    /*
+     * Replaced with a no-op stub after the equipment slots become softcoded.
+     * I think this function is meant to fill the sell dialog with player
+     *     items, but it's iterating through the inventory.
+     * The no-op here is to stop compilation errors while I work on other
+     *     areas. FIXME
+     */
+    /*
     int nbItemsToSell = 0;
     if (mSell)
     {
@@ -85,6 +97,7 @@ int BuySell::registerPlayerItems()
         }
     }
     return nbItemsToSell;
+    */
 }
 
 bool BuySell::start(Actor *actor)
@@ -119,13 +132,17 @@ void BuySell::perform(int id, int amount)
         if (mSell)
         {
             amount -= inv.remove(id, amount);
-            inv.changeMoney(amount * i->cost);
+            mChar->setAttribute(mCurrencyId,
+                                mChar->getAttribute(mCurrencyId) +
+                                amount * i->cost);
         }
         else
         {
-            amount = std::min(amount, mChar->getPossessions().money / i->cost);
+            amount = std::min(amount, ((int) mChar->getAttribute(mCurrencyId)) / i->cost);
             amount -= inv.insert(id, amount);
-            inv.changeMoney(-amount * i->cost);
+            mChar->setAttribute(mCurrencyId,
+                                mChar->getAttribute(mCurrencyId) -
+                                amount * i->cost);
         }
         if (i->amount)
         {

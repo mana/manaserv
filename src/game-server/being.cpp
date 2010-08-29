@@ -24,6 +24,8 @@
 
 #include "defines.h"
 #include "common/configuration.hpp"
+#include "game-server/attributemanager.hpp"
+#include "game-server/character.hpp"
 #include "game-server/collisiondetection.hpp"
 #include "game-server/eventlistener.hpp"
 #include "game-server/mapcomposite.hpp"
@@ -36,64 +38,92 @@ Being::Being(ThingType type):
     Actor(type),
     mAction(STAND),
     mTarget(NULL),
-    mSpeed(0),
     mDirection(0)
 {
-    Attribute attr = { 0, 0 };
-    mAttributes.resize(NB_BEING_ATTRIBUTES + CHAR_ATTR_NB, attr);
-    // Initialize element resistance to 100 (normal damage).
-    for (int i = BASE_ELEM_BEGIN; i < BASE_ELEM_END; ++i)
+    const AttributeScopes &attr = attributeManager->getAttributeInfoForType(ATTR_BEING);
+    LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
+    for (AttributeScopes::const_iterator it1 = attr.begin(),
+         it1_end = attr.end();
+        it1 != it1_end;
+        ++it1)
     {
-        mAttributes[i].base = 100;
+        if (mAttributes.count(it1->first))
+            LOG_WARN("Redefinition of attribute '" << it1->first << "'!");
+        LOG_DEBUG("Attempting to create attribute '" << it1->first << "'.");
+        mAttributes.insert(std::make_pair(it1->first,
+                                          Attribute(*it1->second)));
+
     }
+    // TODO: Way to define default base values?
+    // Should this be handled by the virtual modifiedAttribute?
+    // URGENT either way
+#if 0
+    // Initialize element resistance to 100 (normal damage).
+    for (i = BASE_ELEM_BEGIN; i < BASE_ELEM_END; ++i)
+    {
+        mAttributes[i] = Attribute(TY_ST);
+        mAttributes[i].setBase(100);
+    }
+#endif
 }
 
-int Being::damage(Actor *, const Damage &damage)
+int Being::damage(Actor *source, const Damage &damage)
 {
     if (mAction == DEAD)
         return 0;
 
     int HPloss = damage.base;
     if (damage.delta)
-    {
-        HPloss += rand() / (RAND_MAX / (damage.delta + 1));
-    }
+        HPloss += rand() * (damage.delta + 1) / RAND_MAX;
 
-    int hitThrow = rand()%(damage.cth + 1);
-    int evadeThrow = rand()%(getModifiedAttribute(BASE_ATTR_EVADE) + 1);
-    if (evadeThrow > hitThrow)
-    {
-        HPloss = 0;
-    }
-
-    /* Elemental modifier at 100 means normal damage. At 0, it means immune.
-       And at 200, it means vulnerable (double damage). */
-    int mod1 = getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
-    HPloss = HPloss * (mod1 / 100);
-    /* Defence is an absolute value which is subtracted from the damage total. */
-    int mod2 = 0;
+    // TODO magical attacks and associated elemental modifiers
     switch (damage.type)
     {
         case DAMAGE_PHYSICAL:
-            mod2 = getModifiedAttribute(BASE_ATTR_PHY_RES);
-            HPloss = HPloss - mod2;
+            if (!damage.trueStrike &&
+                rand()%((int) getModifiedAttribute(ATTR_DODGE) + 1) >
+                    rand()%(damage.cth + 1))
+            {
+                HPloss = 0;
+                // TODO Process triggers for a dodged physical attack here.
+                // If there is an attacker included, also process triggers for the attacker (failed physical strike)
+            }
+            else
+            {
+                HPloss = HPloss * (1.0 - (0.0159375f *
+                                          getModifiedAttribute(ATTR_DEFENSE)) /
+                                   (1.0 + 0.017 *
+                                    getModifiedAttribute(ATTR_DEFENSE))) +
+                         (rand()%((HPloss >> 4) + 1));
+                // TODO Process triggers for receiving damage here.
+                // If there is an attacker included, also process triggers for the attacker (successful physical strike)
+            }
             break;
         case DAMAGE_MAGICAL:
-            mod2 = getModifiedAttribute(BASE_ATTR_MAG_RES);
-            HPloss = HPloss / (mod2 + 1);
+#if 0
+            getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
+#else
+            LOG_WARN("Attempt to use magical type damage! This has not been"
+                      "implemented yet and should not be used!");
+            HPloss = 0;
+#endif
+        case DAMAGE_DIRECT:
             break;
         default:
+            LOG_WARN("Unknown damage type '" << damage.type << "'!");
             break;
     }
 
     if (HPloss > 0)
     {
         mHitsTaken.push_back(HPloss);
-        Attribute &HP = mAttributes[BASE_ATTR_HP];
-        LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "<<HP.base + HP.mod<<"/"<<HP.base);
-        HP.mod -= HPloss;
-        updateDerivedAttributes(BASE_ATTR_HP);
-        setTimerSoft(T_B_HP_REGEN, Configuration::getValue("hpRegenBreakAfterHit", 0)); // no HP regen after being hit
+        Attribute &HP = mAttributes.at(ATTR_HP);
+        LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "
+                  << HP.getModifiedAttribute() << "/"
+                  << mAttributes.at(ATTR_MAX_HP).getModifiedAttribute());
+        HP.setBase(HP.getBase() - HPloss);
+        updateDerivedAttributes(ATTR_HP);
+        setTimerSoft(T_B_HP_REGEN, Configuration::getValue("hpRegenBreakAfterHit", 0)); // no HP regen after being hit if this is set.
     } else {
         HPloss = 0;
     }
@@ -103,17 +133,23 @@ int Being::damage(Actor *, const Damage &damage)
 
 void Being::heal()
 {
-    Attribute &HP = mAttributes[BASE_ATTR_HP];
-    HP.mod = HP.base;
-    updateDerivedAttributes(BASE_ATTR_HP);
+    Attribute &hp = mAttributes.at(ATTR_HP);
+    Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
+    if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute()) return; // Full hp, do nothing.
+    hp.clearMods(); // Reset all modifications present in hp
+    hp.setBase(maxHp.getModifiedAttribute());
+    updateDerivedAttributes(ATTR_HP);
 }
 
-void Being::heal(int hp)
+void Being::heal(int gain)
 {
-    Attribute &HP = mAttributes[BASE_ATTR_HP];
-    HP.mod += hp;
-    if (HP.mod > HP.base) HP.mod = HP.base;
-    updateDerivedAttributes(BASE_ATTR_HP);
+    Attribute &hp = mAttributes.at(ATTR_HP);
+    Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
+    if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute()) return; // Full hp, do nothing.
+    hp.setBase(hp.getBase() + gain);
+    if (hp.getModifiedAttribute() > maxHp.getModifiedAttribute()) // Cannot go over maximum hitpoints.
+        hp.setBase(maxHp.getModifiedAttribute());
+    updateDerivedAttributes(ATTR_HP);
 }
 
 void Being::died()
@@ -154,18 +190,10 @@ Path Being::findPath()
     return map->findPath(startX, startY, destX, destY, getWalkMask());
 }
 
-void Being::setSpeed(float s)
-{
-  if (s > 0)
-      mSpeed = (int)(32000 / (s * (float)DEFAULT_TILE_LENGTH));
-  else
-      mSpeed = 0;
-}
-
 void Being::move()
 {
-    // Don't deal with not moving beings
-    if (mSpeed <= 0 && mSpeed >= 32000)
+    // Immobile beings cannot move.
+    if (!checkAttributeExists(ATTR_MOVE_SPEED_RAW) || !getModifiedAttribute(ATTR_MOVE_SPEED_RAW))
           return;
 
     mOld = getPosition();
@@ -233,9 +261,10 @@ void Being::move()
     {
         Position next = mPath.front();
         mPath.pop_front();
-        // 362 / 256 is square root of 2, used for walking diagonally
-        mActionTime += (prev.x != next.x && prev.y != next.y)
-                       ? mSpeed * 362 / 256 : mSpeed;
+        // SQRT2 is used for diagonal movement.
+        mActionTime += (prev.x == next.x || prev.y == next.y) ?
+                       getModifiedAttribute(ATTR_MOVE_SPEED_RAW) :
+                       getModifiedAttribute(ATTR_MOVE_SPEED_RAW) * SQRT2;
         if (mPath.empty())
         {
             // skip last tile center
@@ -264,6 +293,10 @@ int Being::directionToAngle(int direction)
     }
 }
 
+int Being::performAttack(Being *target, const Damage &damage) {
+    return performAttack(target, damage.range, damage);
+}
+
 int Being::performAttack(Being *target, unsigned range, const Damage &damage)
 {
     // check target legality
@@ -281,7 +314,7 @@ int Being::performAttack(Being *target, unsigned range, const Damage &damage)
     if (maxDist * maxDist < distSquare)
         return -1;
 
-    mActionTime += 1000; // set to 10 ticks wait time
+    //mActionTime += 1000; // No tick. Auto-attacks should have their own, built-in delays.
 
     return (mTarget->damage(this, damage));
 }
@@ -296,41 +329,60 @@ void Being::setAction(Action action)
     }
 }
 
-void Being::applyModifier(int attr, int amount, int duration, int lvl)
+void Being::applyModifier(unsigned int attr, double value, unsigned int layer,
+                          unsigned int duration, unsigned int id)
 {
-    if (duration)
-    {
-        AttributeModifier mod;
-        mod.attr = attr;
-        mod.value = amount;
-        mod.duration = duration;
-        mod.level = lvl;
-        mModifiers.push_back(mod);
-    }
-    mAttributes[attr].mod += amount;
+    mAttributes.at(attr).add(duration, value, layer, id);
     updateDerivedAttributes(attr);
 }
 
-void Being::dispellModifiers(int level)
+bool Being::removeModifier(unsigned int attr, double value, unsigned int layer,
+                           unsigned int id, bool fullcheck)
 {
-    AttributeModifiers::iterator i = mModifiers.begin();
-    while (i != mModifiers.end())
+    bool ret = mAttributes.at(attr).remove(value, layer, id, fullcheck);
+    updateDerivedAttributes(attr);
+    return ret;
+}
+
+void Being::setAttribute(unsigned int id, double value, bool calc)
+{
+    AttributeMap::iterator ret = mAttributes.find(id);
+    if (ret == mAttributes.end())
     {
-        if (i->level && i->level <= level)
-        {
-            mAttributes[i->attr].mod -= i->value;
-            updateDerivedAttributes(i->attr);
-            i = mModifiers.erase(i);
-            continue;
-        }
-        ++i;
+        /*
+         * The attribute does not yet exist, so we must attempt to create it.
+         */
+        LOG_ERROR("Being: Attempt to access non-existing attribute '" << id << "'!");
+        LOG_WARN("Being: Creation of new attributes dynamically is not "
+                 "implemented yet!");
+    }
+    else {
+        ret->second.setBase(value);
+        if (calc)
+            updateDerivedAttributes(id);
     }
 }
 
-int Being::getModifiedAttribute(int attr) const
+double Being::getAttribute(unsigned int id) const
 {
-    int res = mAttributes[attr].base + mAttributes[attr].mod;
-    return res <= 0 ? 0 : res;
+    AttributeMap::const_iterator ret = mAttributes.find(id);
+    if (ret == mAttributes.end()) return 0;
+    return ret->second.getBase();
+}
+
+
+double Being::getModifiedAttribute(unsigned int id) const
+{
+    AttributeMap::const_iterator ret = mAttributes.find(id);
+    if (ret == mAttributes.end()) return 0;
+    return ret->second.getModifiedAttribute();
+}
+
+void Being::setModAttribute(unsigned int id, double value)
+{
+    // No-op to satisfy shared structure.
+    // The game-server calculates this manually.
+    return;
 }
 
 void Being::applyStatusEffect(int id, int timer)
@@ -389,15 +441,15 @@ void Being::update()
         if (i->second > -1) i->second--;
     }
 
-    int oldHP = getModifiedAttribute(BASE_ATTR_HP);
+    int oldHP = getModifiedAttribute(ATTR_HP);
     int newHP = oldHP;
-    int maxHP = getAttribute(BASE_ATTR_HP);
+    int maxHP = getModifiedAttribute(ATTR_MAX_HP);
 
     // Regenerate HP
     if (mAction != DEAD && !isTimerRunning(T_B_HP_REGEN))
     {
         setTimerHard(T_B_HP_REGEN, TICKS_PER_HP_REGENERATION);
-        newHP += getModifiedAttribute(BASE_ATTR_HP_REGEN);
+        newHP += getModifiedAttribute(ATTR_HP_REGEN);
     }
     // Cap HP at maximum
     if (newHP > maxHP)
@@ -407,24 +459,16 @@ void Being::update()
     // Only update HP when it actually changed to avoid network noise
     if (newHP != oldHP)
     {
-        applyModifier(BASE_ATTR_HP, newHP - oldHP);
+        mAttributes.at(ATTR_HP).setBase(newHP);
         raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
     }
 
     // Update lifetime of effects.
-    AttributeModifiers::iterator i = mModifiers.begin();
-    while (i != mModifiers.end())
-    {
-        --i->duration;
-        if (!i->duration)
-        {
-            mAttributes[i->attr].mod -= i->value;
-            updateDerivedAttributes(i->attr);
-            i = mModifiers.erase(i);
-            continue;
-        }
-        ++i;
-    }
+    for (AttributeMap::iterator it = mAttributes.begin();
+         it != mAttributes.end();
+         ++it)
+        if (it->second.tick())
+            updateDerivedAttributes(it->first);
 
     // Update and run status effects
     StatusEffects::iterator it = mStatus.begin();
@@ -432,9 +476,7 @@ void Being::update()
     {
         it->second.time--;
         if (it->second.time > 0 && mAction != DEAD)
-        {
             it->second.status->tick(this, it->second.time);
-        }
 
         if (it->second.time <= 0 || mAction == DEAD)
         {
@@ -445,10 +487,8 @@ void Being::update()
     }
 
     // Check if being died
-    if (getModifiedAttribute(BASE_ATTR_HP) <= 0 && mAction != DEAD)
-    {
+    if (getModifiedAttribute(ATTR_HP) <= 0 && mAction != DEAD)
         died();
-    }
 }
 
 void Being::setTimerSoft(TimerID id, int value)
@@ -484,3 +524,4 @@ bool Being::isTimerJustFinished(TimerID id) const
 {
     return getTimer(id) == 0;
 }
+

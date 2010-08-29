@@ -26,32 +26,9 @@
 #include "game-server/actor.hpp"
 
 class Being;
-class Script;
 
-/**
- * Enumeration of available Item types.
- */
-enum ItemType
-{
-    ITEM_UNUSABLE = 0,
-    ITEM_USABLE, //                     1
-    ITEM_EQUIPMENT_ONE_HAND_WEAPON, //  2
-    ITEM_EQUIPMENT_TWO_HANDS_WEAPON,//  3
-    ITEM_EQUIPMENT_TORSO,//             4
-    ITEM_EQUIPMENT_ARMS,//              5
-    ITEM_EQUIPMENT_HEAD,//              6
-    ITEM_EQUIPMENT_LEGS,//              7
-    ITEM_EQUIPMENT_SHIELD,//            8
-    ITEM_EQUIPMENT_RING,//              9
-    ITEM_EQUIPMENT_NECKLACE,//         10
-    ITEM_EQUIPMENT_FEET,//             11
-    ITEM_EQUIPMENT_AMMO,//              12
-    ITEM_HAIRSPRITE,
-    ITEM_RACESPRITE,
-    ITEM_UNKNOWN
-};
-
-ItemType itemTypeFromString (const std::string &name);
+typedef std::list< std::pair< unsigned int, unsigned int> > ItemEquipInfo;
+typedef std::list< ItemEquipInfo > ItemEquipsInfo;
 
 /**
  * State effects to beings, and actors.
@@ -81,69 +58,83 @@ enum
     SET_STATE_NOT_FLOATING
 };
 
-/**
- * Item modifier types.
- */
-enum
-{
-    MOD_WEAPON_TYPE = 0,
-    MOD_WEAPON_RANGE,
-    MOD_WEAPON_DAMAGE,
-    MOD_ELEMENT_TYPE,
-    MOD_LIFETIME,
-    MOD_ATTRIBUTE
+struct ItemAutoAttackInfo {
+    unsigned int base;
+    unsigned int range;
+    unsigned int baseSpeed;
+    unsigned int skillId;
+    /// attribute id -> damage bonus per point
+    std::map< unsigned int, double > attrBonus;
 };
 
-/**
- * Characteristic of an item.
- */
-struct ItemModifier
-{
-    unsigned char type;
-    short value;
+enum ItemTriggerType {
+    ITT_NULL = 0,
+    ITT_IN_INVY, // Associated effects apply when the item is in the inventory
+    ITT_ACTIVATE, // Associated effects apply when the item is activated
+    ITT_EQUIP, // Assosciated effects apply when the item is equipped
+    ITT_LEAVE_INVY, // Associated effects apply when the item leaves the inventory
+    ITT_UNEQUIP, // Associated effects apply when the item is unequipped
+    ITT_EQUIPCHG // When the item is still equipped, but in a different way
 };
 
-/**
- * Set of item characteristics.
- */
-class ItemModifiers
+enum ItemEffectType {
+    // Effects that are removed automatically when the trigger ends
+    // (ie. item no longer exists in invy, unequipped)
+    IET_ATTR_MOD = 0, // Modify a given attribute with a given value
+    IET_AUTOATTACK, // Give the associated being an autoattack
+    // Effects that do not need any automatic removal
+    IET_COOLDOWN, // Set a cooldown to this item, preventing activation for n ticks
+    IET_G_COOLDOWN, // Set a cooldown to all items of this type for this being
+    IET_SCRIPT // Call an associated lua script with given variables
+};
+
+class ItemEffectInfo
 {
     public:
+        virtual bool apply(Being *itemUser);
+        virtual void dispell(Being *itemUser) {}
+};
 
-        /**
-         * Gets the value associated to a modifier type, or zero if none.
-         */
-        int getValue(int type) const;
+class ItemEffectAttrMod : public ItemEffectInfo
+{
+    public:
+        ItemEffectAttrMod(unsigned int attrId, unsigned int layer, double value,
+                          unsigned int id, unsigned int duration = 0) :
+                        mAttributeId(attrId), mAttributeLayer(layer),
+                        mMod(value), mDuration(duration), mId(id) {}
 
-        /**
-         * Sets the value associated to a modifier type.
-         */
-        void setValue(int type, int amount);
-
-        /**
-         * Gets the value associated to a MOD_ATTRIBUTE class, or zero if none.
-         */
-        int getAttributeValue(int attr) const;
-
-        /**
-         * Sets the value associated to a MOD_ATTRIBUTE class.
-         */
-        void setAttributeValue(int attr, int amount);
-
-        /**
-         * Applies all the attribute modifiers to a given Being.
-         */
-        void applyAttributes(Being *) const;
-
-        /**
-         * Cancels all the applied modifiers to a given Being.
-         * Only meant for equipment.
-         */
-        void cancelAttributes(Being *) const;
+        bool apply(Being *itemUser);
+        void dispell(Being *itemUser);
 
     private:
-        std::vector< ItemModifier > mModifiers;
+        unsigned int mAttributeId;
+        unsigned int mAttributeLayer;
+        double mMod;
+        unsigned int mDuration;
+        unsigned int mId;
 };
+
+class ItemEffectAutoAttack : public ItemEffectInfo
+{
+    public:
+        bool apply(Being *itemUser);
+        void dispell(Being *itemUser);
+};
+
+class ItemEffectConsumes : public ItemEffectInfo
+{
+    public:
+        bool apply(Being *itemUser) { return true; }
+        void dispell(Being *itemUser) {}
+};
+
+class ItemEffectScript : public ItemEffectInfo
+{
+    public:
+        bool apply(Being *itemUser);
+        void dispell(Being *itemUser);
+};
+
 
 /**
  * Class for simple reference to item information.
@@ -151,23 +142,17 @@ class ItemModifiers
 class ItemClass
 {
     public:
-        ItemClass(int id, ItemType type, Script *s = NULL)
-          : mScript(NULL), mDatabaseID(id), mType(type), mAttackRange(0)
+        ItemClass(int id, unsigned int maxperslot)
+          : mDatabaseID(id), mSpriteID(0), mMaxPerSlot(maxperslot)
         {}
 
-        ~ItemClass();
+        ~ItemClass() { resetEffects(); }
 
         /**
          * Applies the modifiers of an item to a given user.
-         * @return true if the item was sucessfully used and should be removed.
+         * @return true if item should be removed.
          */
-        bool use(Being *itemUser);
-
-        /**
-         * Gets item type.
-         */
-        ItemType getType() const
-        { return mType; }
+        bool useTrigger(Being *itemUser, ItemTriggerType trigger);
 
         /**
          * Gets item weight.
@@ -176,46 +161,19 @@ class ItemClass
         { return mWeight; }
 
         /**
-         * Sets item weight.
-         */
-        void setWeight(int weight)
-        { mWeight = weight; }
-
-        /**
          * Gets unit cost of these items.
          */
         int getCost() const
         { return mCost; }
 
         /**
-         * Sets unit cost of these items.
-         */
-        void setCost(int cost)
-        { mCost = cost; }
-
-        /**
          * Gets max item per slot.
          */
-        int getMaxPerSlot() const
+        unsigned int getMaxPerSlot() const
         { return mMaxPerSlot; }
 
-        /**
-         * Sets max item per slot.
-         */
-        void setMaxPerSlot(int perSlot)
-        { mMaxPerSlot = perSlot; }
-
-        /**
-         * Gets item modifiers.
-         */
-        const ItemModifiers &getModifiers() const
-        { return mModifiers; }
-
-        /**
-         * Sets item modifiers.
-         */
-        void setModifiers(const ItemModifiers &modifiers)
-        { mModifiers = modifiers; }
+        bool hasTrigger(ItemTriggerType id)
+        { return mEffects.count(id); }
 
         /**
          * Gets database ID.
@@ -224,49 +182,73 @@ class ItemClass
         { return mDatabaseID; }
 
         /**
-         * Sets the sprite ID.
-         */
-        void setSpriteID(int spriteID)
-        { mSpriteID = spriteID; }
-
-        /**
          * Gets the sprite ID.
+         * @note At present this is only a stub, and will always return zero.
+         *       When you would want to extend serializeLooks to be more
+         *       efficient, keep track of a sprite id here.
          */
         int getSpriteID() const
         { return mSpriteID; }
 
         /**
-         * Sets the script that is to be used
+         * Returns equip requirements.
          */
-        void setScript(Script *s)
-        { mScript = s; }
-
-        /**
-         * Set attack range (only needed when the item is a weapon)
-         */
-        void setAttackRange(unsigned range) { mAttackRange = range; }
-
-        /**
-         * Gets attack zone of weapon (returns NULL for non-weapon items)
-         */
-        const unsigned getAttackRange() const
-        { return mAttackRange ; }
+        const ItemEquipsInfo &getItemEquipData() const { return mEquip; }
 
 
     private:
-        Script *mScript;          /**< Script for using items */
+
+        /**
+         * Add an effect to a trigger
+         * @param effect  The effect to be run when the trigger is hit.
+         * @param id      The trigger type.
+         * @param dispell The trigger that the effect should be dispelled on.
+         * @note  FIXME:  Should be more than one trigger that an effect
+         *                can be dispelled from.
+         */
+        void addEffect(ItemEffectInfo *effect,
+                       ItemTriggerType id,
+                       ItemTriggerType dispell = ITT_NULL)
+        {
+            mEffects.insert(std::make_pair(id, effect));
+            if (dispell)
+                mDispells.insert(std::make_pair(dispell, effect));
+        }
+
+        void resetEffects()
+        {
+            while (mEffects.begin() != mEffects.end())
+            {
+                delete mEffects.begin()->second;
+                mEffects.erase(mEffects.begin());
+            }
+            while (mDispells.begin() != mDispells.end())
+            {
+                delete mDispells.begin()->second;
+                mDispells.erase(mDispells.begin());
+            }
+        }
 
         unsigned short mDatabaseID; /**< Item reference information */
         /** The sprite that should be shown to the character */
         unsigned short mSpriteID;
-        ItemType mType;           /**< Type: usable, equipment etc. */
         unsigned short mWeight;   /**< Weight of the item. */
         unsigned short mCost;     /**< Unit cost the item. */
         /** Max item amount per slot in inventory. */
-        unsigned short mMaxPerSlot;
+        unsigned int mMaxPerSlot;
 
-        ItemModifiers mModifiers; /**< Item modifiers. */
-        unsigned mAttackRange;  /**< Attack range when used as a weapon */
+        std::multimap< ItemTriggerType, ItemEffectInfo * > mEffects;
+        std::multimap< ItemTriggerType, ItemEffectInfo * > mDispells;
+
+        /**
+         * List of list of requirements for equipping. Only one inner list
+         * need be satisfied to sucessfully equip. Checks occur in order
+         * from outer front to back.
+         * All conditions in an inner list must be met for success.
+         */
+        ItemEquipsInfo mEquip;
+
+        friend class ItemManager;
 };
 
 /**

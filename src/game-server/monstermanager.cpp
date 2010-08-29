@@ -21,16 +21,11 @@
 #include "game-server/monstermanager.hpp"
 
 #include "common/resourcemanager.hpp"
+#include "game-server/attributemanager.hpp"
 #include "game-server/itemmanager.hpp"
 #include "game-server/monster.hpp"
 #include "utils/logger.h"
 #include "utils/xml.hpp"
-
-#include <map>
-
-typedef std::map< int, MonsterClass * > MonsterClasses;
-static MonsterClasses monsterClasses; /**< Monster reference */
-static std::string monsterReferenceFile;
 
 Element elementFromString (const std::string &name)
 {
@@ -54,17 +49,16 @@ Element elementFromString (const std::string &name)
     return val == table.end() ? ELEMENT_ILLEGAL : (*val).second;
 }
 
-void MonsterManager::initialize(const std::string &file)
+void MonsterManager::initialize()
 {
-    monsterReferenceFile = file;
     reload();
 }
 
 void MonsterManager::reload()
 {
-    std::string absPathFile = ResourceManager::resolve(monsterReferenceFile);
+    std::string absPathFile = ResourceManager::resolve(mMonsterReferenceFile);
     if (absPathFile.empty()) {
-        LOG_ERROR("Monster Manager: Could not find " << monsterReferenceFile << "!");
+        LOG_ERROR("Monster Manager: Could not find " << mMonsterReferenceFile << "!");
         return;
     }
 
@@ -92,16 +86,16 @@ void MonsterManager::reload()
         {
             LOG_WARN("Monster Manager: There is a monster ("
                      << name << ") without ID in "
-                     << monsterReferenceFile << "! It has been ignored.");
+                     << mMonsterReferenceFile << "! It has been ignored.");
             continue;
         }
 
         MonsterClass *monster;
-        MonsterClasses::iterator i = monsterClasses.find(id);
-        if (i == monsterClasses.end())
+        MonsterClasses::iterator i = mMonsterClasses.find(id);
+        if (i == mMonsterClasses.end())
         {
             monster = new MonsterClass(id);
-            monsterClasses[id] = monster;
+            mMonsterClasses[id] = monster;
         }
         else
         {
@@ -117,7 +111,7 @@ void MonsterManager::reload()
             if (xmlStrEqual(subnode->name, BAD_CAST "drop"))
             {
                 MonsterDrop drop;
-                drop.item = ItemManager::getItem(XML::getProperty(subnode, "item", 0));
+                drop.item = itemManager->getItem(XML::getProperty(subnode, "item", 0));
                 drop.probability = XML::getProperty(subnode, "percent", 0) * 100;
                 if (drop.item && drop.probability)
                 {
@@ -127,21 +121,21 @@ void MonsterManager::reload()
             else if (xmlStrEqual(subnode->name, BAD_CAST "attributes"))
             {
                 attributesSet = true;
-                monster->setAttribute(BASE_ATTR_HP,
+                monster->setAttribute(ATTR_MAX_HP,
                     XML::getProperty(subnode, "hp", -1));
-                monster->setAttribute(BASE_ATTR_PHY_ATK_MIN,
+                monster->setAttribute(MOB_ATTR_PHY_ATK_MIN,
                     XML::getProperty(subnode, "attack-min", -1));
-                monster->setAttribute(BASE_ATTR_PHY_ATK_DELTA,
+                monster->setAttribute(MOB_ATTR_PHY_ATK_DELTA,
                     XML::getProperty(subnode, "attack-delta", -1));
-                monster->setAttribute(BASE_ATTR_MAG_ATK,
+                monster->setAttribute(MOB_ATTR_MAG_ATK,
                     XML::getProperty(subnode, "attack-magic", -1));
-                monster->setAttribute(BASE_ATTR_EVADE,
+                monster->setAttribute(ATTR_DODGE,
                     XML::getProperty(subnode, "evade", -1));
-                monster->setAttribute(BASE_ATTR_HIT,
+                monster->setAttribute(ATTR_ACCURACY,
                     XML::getProperty(subnode, "hit", -1));
-                monster->setAttribute(BASE_ATTR_PHY_RES,
+                monster->setAttribute(ATTR_DEFENSE,
                     XML::getProperty(subnode, "physical-defence", -1));
-                monster->setAttribute(BASE_ATTR_MAG_RES,
+                monster->setAttribute(ATTR_MAGIC_DEFENSE,
                     XML::getProperty(subnode, "magical-defence", -1));
                 monster->setSize(XML::getProperty(subnode, "size", 0));
                 float speed = (XML::getFloatProperty(subnode, "speed", -1.0f));
@@ -150,21 +144,27 @@ void MonsterManager::reload()
                 //checking attributes for completeness and plausibility
                 if (monster->getMutation() > 99)
                 {
-                    LOG_WARN(monsterReferenceFile
+                    LOG_WARN(mMonsterReferenceFile
                     <<": Mutation of monster #"<<id
                     <<" more than 99% - ignored");
                     monster->setMutation(0);
                 }
 
                 bool attributesComplete = true;
-                for (int i = BASE_ATTR_BEGIN; i < BASE_ATTR_END; i++)
+                const AttributeScopes &mobAttr = attributeManager->getAttributeInfoForType(ATTR_MOB);
+
+                for (AttributeScopes::const_iterator it = mobAttr.begin(),
+                     it_end = mobAttr.end();
+                it != it_end;
+                ++it)
                 {
-                    if (monster->getAttribute(i) == -1)
+                    if (!monster->mAttributes.count(it->first))
                     {
                         attributesComplete = false;
-                        monster->setAttribute(i, 0);
+                        monster->setAttribute(it->first, 0);
                     }
                 }
+
                 if (monster->getSize() == 0)
                 {
                     monster->setSize(16);
@@ -176,11 +176,8 @@ void MonsterManager::reload()
                     attributesComplete = false;
                 }
 
-                if (!attributesComplete) LOG_WARN(monsterReferenceFile
+                if (!attributesComplete) LOG_WARN(mMonsterReferenceFile
                     << ": Attributes incomplete for monster #" << id);
-
-                //The speed is set in tiles per second in the monsters.xml
-                monster->setSpeed(speed);
 
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
@@ -216,24 +213,27 @@ void MonsterManager::reload()
                 if (sType == "physical") {att->type = DAMAGE_PHYSICAL; }
                 else if (sType == "magical" || sType == "magic") {att->type = DAMAGE_MAGICAL; }
                 else if (sType == "other") {att->type = DAMAGE_OTHER; }
-                else { att->type = -1; }
+                else {
+                    LOG_WARN("Monster manager " << mMonsterReferenceFile
+                              <<  ": unknown damage type '" << sType << "'.");
+                }
 
                 if (att->id == 0)
                 {
-                    LOG_WARN(monsterReferenceFile
+                    LOG_WARN(mMonsterReferenceFile
                              << ": Attack without ID for monster #"
                              << id << " (" << name << ") - attack ignored");
                 }
                 else if (att->element == ELEMENT_ILLEGAL)
                 {
-                    LOG_WARN(monsterReferenceFile
+                    LOG_WARN(mMonsterReferenceFile
                              << ": Attack with unknown element \""
                              << sElement << "\" for monster #" << id
                              << " (" << name << ") - attack ignored");
                 }
                 else if (att->type == -1)
                 {
-                    LOG_WARN(monsterReferenceFile
+                    LOG_WARN(mMonsterReferenceFile
                              << ": Attack with unknown type \"" << sType << "\""
                              << " for monster #" << id << " (" << name << ")");
                 }
@@ -252,15 +252,15 @@ void MonsterManager::reload()
         }
 
         monster->setDrops(drops);
-        if (!attributesSet) LOG_WARN(monsterReferenceFile
+        if (!attributesSet) LOG_WARN(mMonsterReferenceFile
                                     << ": No attributes defined for monster #"
                                     << id << " (" << name << ")");
-        if (!behaviorSet) LOG_WARN(monsterReferenceFile
+        if (!behaviorSet) LOG_WARN(mMonsterReferenceFile
                             << ": No behavior defined for monster #"
                             << id << " (" << name << ")");
         if (monster->getExp() == -1)
         {
-            LOG_WARN(monsterReferenceFile
+            LOG_WARN(mMonsterReferenceFile
                     << ": No experience defined for monster #"
                     << id << " (" << name << ")");
             monster->setExp(0);
@@ -269,21 +269,21 @@ void MonsterManager::reload()
     }
 
     LOG_INFO("Loaded " << nbMonsters << " monsters from "
-             << monsterReferenceFile << '.');
+             << mMonsterReferenceFile << '.');
 }
 
 void MonsterManager::deinitialize()
 {
-    for (MonsterClasses::iterator i = monsterClasses.begin(),
-         i_end = monsterClasses.end(); i != i_end; ++i)
+    for (MonsterClasses::iterator i = mMonsterClasses.begin(),
+         i_end = mMonsterClasses.end(); i != i_end; ++i)
     {
         delete i->second;
     }
-    monsterClasses.clear();
+    mMonsterClasses.clear();
 }
 
 MonsterClass *MonsterManager::getMonster(int id)
 {
-    MonsterClasses::const_iterator i = monsterClasses.find(id);
-    return i != monsterClasses.end() ? i->second : 0;
+    MonsterClasses::const_iterator i = mMonsterClasses.find(id);
+    return i != mMonsterClasses.end() ? i->second : 0;
 }
