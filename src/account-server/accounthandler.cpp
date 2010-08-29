@@ -146,7 +146,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
         XML::Document doc(absPathFile, int());
         node = doc.rootNode();
 
-        if (!node || !xmlStrEqual(node->name, BAD_CAST "stats"))
+        if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
         {
             LOG_FATAL("Account handler: " << attrFile
                       << " is not a valid database file!");
@@ -154,7 +154,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
             return;
         }
         for_each_xml_child_node(attributenode, node)
-            if (xmlStrEqual(attributenode->name, BAD_CAST "stat"))
+            if (xmlStrEqual(attributenode->name, BAD_CAST "attribute"))
             {
                 unsigned int id = XML::getProperty(attributenode, "id", 0);
                 if (!id) continue;

@@ -51,7 +51,7 @@ void AttributeManager::reload()
     XML::Document doc(absPathFile, int());
     node = doc.rootNode();
 
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "stats"))
+    if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
     {
         LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
                   << " is not a valid database file!");
@@ -63,7 +63,7 @@ void AttributeManager::reload()
 
     for_each_xml_child_node(attributenode, node)
     {
-        if (xmlStrEqual(attributenode->name, BAD_CAST "stat"))
+        if (xmlStrEqual(attributenode->name, BAD_CAST "attribute"))
         {
             unsigned int id = XML::getProperty(attributenode, "id", 0);
 
