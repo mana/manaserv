@@ -196,9 +196,14 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 CommandHandler::handleCommand(computer.character, say);
                 break;
             }
-            GameState::sayAround(computer.character, say);
-            std::string msg = computer.character->getName() + " said " + say;
-            accountHandler->sendTransaction(computer.character->getDatabaseID(), TRANS_MSG_PUBLIC, msg);
+            if (!computer.character->isMuted())
+            {
+                GameState::sayAround(computer.character, say);
+                std::string msg = computer.character->getName() + " said " + say;
+                accountHandler->sendTransaction(computer.character->getDatabaseID(), TRANS_MSG_PUBLIC, msg);
+            }else {
+                GameState::sayTo(computer.character, NULL, "You are not allowed to talk right now.");
+            }
         } break;
 
         case PGMSG_NPC_TALK:

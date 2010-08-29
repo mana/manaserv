@@ -24,6 +24,7 @@
     <allow>@goto</allow>
     <allow>@recall</allow>
     <allow>@ban</allow>
+    <allow>@mute</allow>
     <allow>@history</allow>
   </class>
   <class level="5">

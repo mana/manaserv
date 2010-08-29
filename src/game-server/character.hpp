@@ -393,6 +393,13 @@ class Character : public Being
         virtual unsigned char getWalkMask() const
         { return 0x82; } // blocked by walls and monsters ( bin 1000 0010)
 
+        /** Makes it impossible to chat for a while */
+        void mute(int seconds)
+        { setTimerHard(T_C_MUTE, seconds * 10); }
+
+        bool isMuted() const
+        { return isTimerRunning(T_C_MUTE); }
+
     protected:
         /**
          * Gets the way the actor blocks pathfinding for other objects

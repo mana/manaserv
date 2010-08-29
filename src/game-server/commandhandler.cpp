@@ -32,6 +32,7 @@
 #include "game-server/monstermanager.hpp"
 #include "game-server/state.hpp"
 
+#include "common/configuration.hpp"
 #include "common/permissionmanager.hpp"
 #include "common/transaction.hpp"
 
@@ -63,6 +64,7 @@ static void handleGivePermission(Character*, std::string&);
 static void handleTakePermission(Character*, std::string&);
 static void handleAnnounce(Character*, std::string&);
 static void handleHistory(Character*, std::string&);
+static void handleMute(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -102,6 +104,8 @@ static CmdRef const cmdRef[] =
         "Sends a chat message to all characters in the game", &handleAnnounce},
     {"history", "<number of transactions>",
         "Shows the last transactions", &handleHistory},
+    {"mute","<character> <length in seconds>",
+        "Prevents the character from talking for the specified number of seconds. Use 0 seconds to unmute.", &handleMute},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -922,6 +926,54 @@ static void handleHistory(Character *player, std::string &args)
     // TODO: Get args number of transactions and show them to the player
 }
 
+
+static void handleMute(Character *player, std::string &args)
+{    Character *other;
+    int length;
+
+    // get arguments
+    std::string character = getArgument(args);
+    std::string valuestr = getArgument(args);
+
+
+    // check for valid player
+    other = getPlayer(character);
+    if (!other)
+    {
+        say("Invalid character", player);
+        return;
+    }
+
+    // change the length to an integer
+    if (valuestr.empty())
+    {
+        length = Configuration::getValue("defaultMuteLength", 60);
+    } else {
+        length = utils::stringToInt(valuestr);
+    }
+    if (length < 0)
+    {
+        say("Invalid length, using default", player);
+        length = Configuration::getValue("defaultMuteLength", 60);
+    }
+
+    // mute the player
+    other->mute(length);
+
+    // feedback
+    std::stringstream targetMsg;
+    std::stringstream userMsg;
+    if (length > 0)
+    {
+        targetMsg << player->getName() << " muted you for " << length << " seconds.";
+        userMsg << "You muted " << other->getName() << " for " << length << " seconds.";
+    } else {
+        targetMsg << player->getName() << " unmuted you.";
+        userMsg << "You unmuted " << other->getName() << ".";
+    }
+    GameState::sayTo(other, NULL, targetMsg.str());
+    GameState::sayTo(player, NULL, userMsg.str());
+}
 
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
