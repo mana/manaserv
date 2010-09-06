@@ -52,8 +52,10 @@ static void addUpdateHost(MessageOut *msg)
 
 
 // List of attributes that the client can send at account creation.
+static std::vector< int > initAttr;
 
-static std::vector< unsigned int > initAttr;
+// Character's starting points
+static int startPoints, attributesMinimum, attributesMaximum = 0;
 
 /*
  * Map attribute ids to values that they need to be initialised to at account
@@ -61,7 +63,6 @@ static std::vector< unsigned int > initAttr;
  * The pair contains two elements of the same value (the default) so that the
  * iterators can be used to copy a range.
  */
-
 static std::map< unsigned int, std::pair< double, double> > defAttr;
 
 class AccountHandler : public ConnectionHandler
@@ -130,45 +131,88 @@ static AccountHandler *accountHandler;
 AccountHandler::AccountHandler(const std::string &attrFile):
     mTokenCollector(this)
 {
-    // Probably not the best place for this, but I don't have a lot of time.
+    // In case of reloading...
+    initAttr.clear();
+
+    std::string absPathFile = ResourceManager::resolve(attrFile);
+    if (absPathFile.empty())
+    {
+        LOG_FATAL("Account handler: Could not find " << attrFile << "!");
+        exit(3);
+    }
+
+    XML::Document doc(absPathFile, int());
+    xmlNodePtr node = doc.rootNode();
+    if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
+    {
+        LOG_FATAL("Account handler: " << attrFile << ": "
+                  << " is not a valid database file!");
+        exit(3);
+    }
+
+    for_each_xml_child_node(attributenode, node)
+    {
+        if (xmlStrEqual(attributenode->name, BAD_CAST "attribute"))
+        {
+            int id = XML::getProperty(attributenode, "id", 0);
+            if (!id)
+            {
+                LOG_WARN("Account handler: " << attrFile << ": "
+                         << "An invalid attribute id value (0) has been found "
+                         << "and will be ignored.");
+                continue;
+            }
+
+            if (utils::toupper(XML::getProperty(attributenode, "modifiable", "false")) == "TRUE")
+                initAttr.push_back(id);
+
+            // Store as string initially to check
+            // that the property is defined.
+            std::string defStr = XML::getProperty(attributenode, "default", "");
+            if (!defStr.empty())
+            {
+                double val = string_to<double>()(defStr);
+                defAttr.insert(std::make_pair(id,std::make_pair(val, val)));
+            }
+        }
+        else if (xmlStrEqual(attributenode->name, BAD_CAST "points"))
+        {
+            startPoints = XML::getProperty(attributenode, "start", 0);
+            attributesMinimum = XML::getProperty(attributenode, "minimum", 0);
+            attributesMaximum = XML::getProperty(attributenode, "maximum", 0);
+
+            // Stops if not all the values are given.
+            if (!startPoints || !attributesMinimum || !attributesMaximum)
+            {
+                LOG_FATAL("Account handler: " << attrFile << ": "
+                          << " The characters starting points "
+                          << "are incomplete or not set!");
+                exit(3);
+            }
+        }
+    } // End for each XML nodes
+
+    // Sanity checks on attributes.
     if (initAttr.empty())
     {
-        std::string absPathFile;
-        xmlNodePtr node;
-
-        absPathFile = ResourceManager::resolve(attrFile);
-        if (absPathFile.empty()) {
-            LOG_FATAL("Account handler: Could not find " << attrFile << "!");
-            exit(3);
-            return;
-        }
-
-        XML::Document doc(absPathFile, int());
-        node = doc.rootNode();
-
-        if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
-        {
-            LOG_FATAL("Account handler: " << attrFile
-                      << " is not a valid database file!");
-            exit(3);
-            return;
-        }
-        for_each_xml_child_node(attributenode, node)
-            if (xmlStrEqual(attributenode->name, BAD_CAST "attribute"))
-            {
-                unsigned int id = XML::getProperty(attributenode, "id", 0);
-                if (!id) continue;
-                if (utils::toupper(XML::getProperty(attributenode, "modifiable", "false")) == "TRUE")
-                    initAttr.push_back(id);
-                // Store as string initially to check that the property is defined.
-                std::string defStr = XML::getProperty(attributenode, "default", "");
-                if (!defStr.empty())
-                {
-                    double val = string_to<double>()(defStr);
-                    defAttr.insert(std::make_pair(id, std::make_pair(val, val)));
-                }
-            }
+        LOG_FATAL("Account handler: " << attrFile << ": "
+                  << "No modifiable attributes found!");
+        exit(3);
     }
+
+    // Sanity checks on starting points.
+    int modifiableAttributeCount = (int) initAttr.size();
+    if (modifiableAttributeCount * attributesMaximum < startPoints ||
+        modifiableAttributeCount * attributesMinimum > startPoints)
+    {
+        LOG_FATAL("Account handler: " << attrFile << ": "
+                  << "Character's point values make "
+                  << "the character's creation impossible!");
+        exit(3);
+    }
+
+    LOG_DEBUG("Character start points: " << startPoints << " (Min: "
+              << attributesMinimum << ", Max: " << attributesMaximum << ")");
 }
 
 bool AccountClientHandler::initialize(const std::string &configFile, int port,
@@ -621,8 +665,6 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client, Message
     unsigned int minNameLength = Configuration::getValue("char_minNameLength", 4);
     unsigned int maxNameLength = Configuration::getValue("char_maxNameLength", 25);
     unsigned int maxCharacters = Configuration::getValue("char_maxCharacters", 3);
-    unsigned int startingPoints = Configuration::getValue("char_startingPoints", 60);
-
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
@@ -677,32 +719,33 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client, Message
         // LATER_ON: Add race, face and maybe special attributes.
 
         // Customization of character's attributes...
-        std::vector< unsigned int > attributes = std::vector<unsigned int>(initAttr.size(), 0);
+        std::vector<int> attributes = std::vector<int>(initAttr.size(), 0);
         for (unsigned int i = 0; i < initAttr.size(); ++i)
             attributes[i] = msg.readShort();
 
-        unsigned int totalAttributes = 0;
-        bool validNonZeroAttributes = true;
+        int totalAttributes = 0;
         for (unsigned int i = 0; i < initAttr.size(); ++i)
         {
             // For good total attributes check.
             totalAttributes += attributes.at(i);
 
-            // For checking if all stats are at least > 0
-            if (attributes[i] <= 0) validNonZeroAttributes = false;
+            // For checking if all stats are >= min and <= max.
+            if (attributes.at(i) < attributesMinimum
+                || attributes.at(i) > attributesMaximum)
+            {
+                reply.writeByte(CREATE_ATTRIBUTES_OUT_OF_RANGE);
+                client.send(reply);
+                return;
+            }
         }
 
-        if (totalAttributes > startingPoints)
+        if (totalAttributes > startPoints)
         {
             reply.writeByte(CREATE_ATTRIBUTES_TOO_HIGH);
         }
-        else if (totalAttributes < startingPoints)
+        else if (totalAttributes < startPoints)
         {
             reply.writeByte(CREATE_ATTRIBUTES_TOO_LOW);
-        }
-        else if (!validNonZeroAttributes)
-        {
-            reply.writeByte(CREATE_ATTRIBUTES_EQUAL_TO_ZERO);
         }
         else
         {
