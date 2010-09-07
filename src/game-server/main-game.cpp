@@ -140,7 +140,10 @@ static void initializeConfiguration(std::string configPath = std::string())
 
     // Check inter-server password.
     if (Configuration::getValue("net_password", "") == "")
-        LOG_WARN("SECURITY WARNING: 'net_password' not set!");
+    {
+        LOG_FATAL("SECURITY WARNING: 'net_password' not set!");
+        exit(3);
+    }
 }
 
 static void initializeServer()
@@ -155,21 +158,18 @@ static void initializeServer()
     signal(SIGINT, closeGracefully);
     signal(SIGTERM, closeGracefully);
 
-#if defined LOG_FILE
-    std::string logPath = LOG_FILE;
-#else
-    std::string logPath = DEFAULT_LOG_FILE;
-#endif // defined LOG_FILE
+    std::string logFile = Configuration::getValue("log_gameServerFile",
+                                                  DEFAULT_LOG_FILE);
 
     // Initialize PhysicsFS
     PHYSFS_init("");
 
     // Initialize the logger.
-    Logger::setLogFile(logPath);
+    Logger::setLogFile(logFile);
 
     // Write the messages to both the screen and the log file.
     Logger::setTeeMode(true);
-    LOG_INFO("Using log file: " << logPath);
+    LOG_INFO("Using log file: " << logFile);
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
@@ -200,7 +200,8 @@ static void initializeServer()
     gBandwidth = new BandwidthMonitor;
 
     // --- Initialize enet.
-    if (enet_initialize() != 0) {
+    if (enet_initialize() != 0)
+    {
         LOG_FATAL("An error occurred while initializing ENet");
         exit(2);
     }

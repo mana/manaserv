@@ -60,6 +60,8 @@ static bool running = true;        /**< Determines if server keeps running */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
+static std::string statisticsFile = std::string();
+
 /** Database handler. */
 Storage *storage;
 
@@ -112,7 +114,10 @@ static void initializeConfiguration(std::string configPath = std::string())
 
     // Check inter-server password.
     if (Configuration::getValue("net_password", "") == "")
-        LOG_WARN("SECURITY WARNING: 'net_password' not set!");
+    {
+        LOG_FATAL("SECURITY WARNING: 'net_password' not set!");
+        exit(3);
+    }
 }
 
 /**
@@ -133,30 +138,36 @@ static void initialize()
     // Set enet to quit on exit.
     atexit(enet_deinitialize);
 
-#if defined LOG_FILE
-    std::string logPath = LOG_FILE;
-#else
-    std::string logPath = DEFAULT_LOG_FILE;
-#endif // defined LOG_FILE
+    std::string logFile = Configuration::getValue("log_accountServerFile",
+                                                  DEFAULT_LOG_FILE);
 
     // Initialize PhysicsFS
     PHYSFS_init("");
 
     // Initialize the logger.
-    Logger::setLogFile(logPath);
+    Logger::setLogFile(logFile);
 
     // write the messages to both the screen and the log file.
     Logger::setTeeMode(true);
 
-    LOG_INFO("Using log file: " << logPath);
+    LOG_INFO("Using log file: " << logFile);
+
+    // Indicate in which file the statistics are put.
+    statisticsFile = Configuration::getValue("log_statisticsFile",
+                                             DEFAULT_STATS_FILE);
+
+    LOG_INFO("Using statistics file: " << statisticsFile);
 
     ResourceManager::initialize();
 
     // Open database
-    try {
+    try
+    {
         storage = new Storage;
         storage->open();
-    } catch (std::string &error) {
+    }
+    catch (std::string &error)
+    {
         LOG_FATAL("Error opening the database: " << error);
         exit(1);
     }
@@ -174,7 +185,8 @@ static void initialize()
     chatHandler = new ChatHandler;
 
     // --- Initialize enet.
-    if (enet_initialize() != 0) {
+    if (enet_initialize() != 0)
+    {
         LOG_FATAL("An error occurred while initializing ENet");
         exit(2);
     }
@@ -222,13 +234,7 @@ static void deinitializeServer()
  */
 static void dumpStatistics()
 {
-#if defined STATS_FILE
-    std::string path = STATS_FILE;
-#else
-    std::string path = DEFAULT_STATS_FILE;
-#endif
-
-    std::ofstream os(path.c_str());
+    std::ofstream os(statisticsFile.c_str());
     os << "<statistics>\n";
     GameServerHandler::dumpStatistics(os);
     os << "</statistics>\n";

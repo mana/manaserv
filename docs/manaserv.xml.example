@@ -54,6 +54,16 @@
 
 <!-- end of database configuration *************************************** -->
 
+ <!-- Paths to data files -->
+ <option name="serverPath" value="." />
+ <option name="clientDataPath" value="example/clientdata" />
+ <option name="serverDataPath" value="example/serverdata" />
+
+ <!-- Log output configuration -->
+ <option name="log_statisticsFile" value="./manaserv.stats"/>
+ <option name="log_accountServerFile" value="./manaserv-account.log"/>
+ <option name="log_gameServerFile" value="./manaserv-game.log"/>
+
  <!--
  Log levels configuration.
  Available values are:
@@ -74,6 +84,14 @@
  <option name="char_startY" value="840"/>
 
  <!--
+ ATTENTION: This is a very important option!
+ the net password is used to let the servers (game and account) speak to each
+ other in a crypted way.
+ This option is REQUIRED FOR THE SERVERS TO START.
+ -->
+ <option name="net_password" value="changeMe"/>
+
+ <!--
  The game server uses this address to connect to the account server. Clients
  will also need to be able to connect to the account server.
  -->
@@ -84,11 +102,6 @@
  -->
  <option name="net_gameServerAddress" value="localhost"/>
  <option name="net_gameServerPort" value="9604"/>
-
- <!-- Paths to data files -->
- <option name="serverPath" value="." />
- <option name="clientDataPath" value="example/clientdata" />
- <option name="serverDataPath" value="example/serverdata" />
 
  <!-- Gameplay-related config option -->
  <option name="visualRange" value="448"/>
