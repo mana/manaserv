@@ -18,8 +18,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _INCLUDED_MAPREADER_H
-#define _INCLUDED_MAPREADER_H
+#ifndef _MAPREADER_H
+#define _MAPREADER_H
 
 #include <string>
 #include <vector>

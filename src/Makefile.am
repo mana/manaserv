@@ -192,7 +192,6 @@ manaserv_game_SOURCES = \
 	utils/stringfilter.cpp \
 	utils/timer.h \
 	utils/timer.cpp \
-	utils/trim.hpp \
 	utils/tokencollector.hpp \
 	utils/tokencollector.cpp \
 	utils/tokendispenser.hpp \

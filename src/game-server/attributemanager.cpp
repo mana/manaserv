@@ -38,25 +38,21 @@ void AttributeManager::reload()
     for (unsigned int i = 0; i < ATTR_MAX; ++i)
         mAttributeScopes[i].clear();
 
-    std::string absPathFile;
-    xmlNodePtr node;
-
-    absPathFile = ResourceManager::resolve(mAttributeReferenceFile);
-    if (absPathFile.empty()) {
-        LOG_FATAL("Attribute Manager: Could not find " << mAttributeReferenceFile << "!");
+    std::string absPathFile = ResourceManager::resolve(mAttributeReferenceFile);
+    if (absPathFile.empty())
+    {
+        LOG_FATAL("Attribute Manager: Could not find "
+                  << mAttributeReferenceFile << "!");
         exit(3);
-        return;
     }
 
     XML::Document doc(absPathFile, int());
-    node = doc.rootNode();
-
+    xmlNodePtr node = doc.rootNode();
     if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
     {
         LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
                   << " is not a valid database file!");
         exit(3);
-        return;
     }
 
     LOG_INFO("Loading attribute reference...");
@@ -67,15 +63,21 @@ void AttributeManager::reload()
         {
             unsigned int id = XML::getProperty(attributenode, "id", 0);
 
-            mAttributeMap[id] = std::pair< bool , std::vector<struct AttributeInfoType> >(false , std::vector<struct AttributeInfoType>());
+            mAttributeMap[id] = std::pair< bool ,
+                              std::vector<struct AttributeInfoType> >
+                              (false , std::vector<struct AttributeInfoType>());
+
             unsigned int layerCount = 0;
             for_each_xml_child_node(subnode, attributenode)
             {
                 if (xmlStrEqual(subnode->name, BAD_CAST "modifier"))
                 {
-                    std::string sType = utils::toupper(XML::getProperty(subnode, "stacktype", ""));
-                    std::string eType = utils::toupper(XML::getProperty(subnode, "modtype", ""));
-                    std::string tag = utils::toupper(XML::getProperty(subnode, "tag", ""));
+                    std::string sType = utils::toUpper(XML::getProperty(subnode,
+                                                              "stacktype", ""));
+                    std::string eType = utils::toUpper(XML::getProperty(subnode,
+                                                              "modtype", ""));
+                    std::string tag = utils::toUpper(XML::getProperty(subnode,
+                                                              "tag", ""));
                     AT_TY pSType;
                     AME_TY pEType;
                     if (!sType.empty())
@@ -132,7 +134,8 @@ void AttributeManager::reload()
                     }
                 }
             }
-            std::string scope = utils::toupper(XML::getProperty(attributenode, "scope", std::string()));
+            std::string scope = utils::toUpper(XML::getProperty(attributenode,
+                                                       "scope", std::string()));
             if (scope.empty())
             {
                 // Give a warning unless scope has been explicitly set to "NONE"
@@ -166,11 +169,13 @@ void AttributeManager::reload()
     }
 
     LOG_DEBUG("attribute map:");
-    LOG_DEBUG("TY_ST is " << TY_ST << ", TY_ NST is " << TY_NST << ", TY_NSTB is " << TY_NSTB << ".");
+    LOG_DEBUG("TY_ST is " << TY_ST << ", TY_ NST is " << TY_NST
+              << ", TY_NSTB is " << TY_NSTB << ".");
     LOG_DEBUG("AME_ADD is " << AME_ADD << ", AME_MULT is " << AME_MULT << ".");
     const std::string *tag;
     unsigned int count = 0;
-    for (AttributeMap::const_iterator i = mAttributeMap.begin(); i != mAttributeMap.end(); ++i)
+    for (AttributeMap::const_iterator i = mAttributeMap.begin();
+         i != mAttributeMap.end(); ++i)
     {
         unsigned int lCount = 0;
         LOG_DEBUG("  "<<i->first<<" : ");

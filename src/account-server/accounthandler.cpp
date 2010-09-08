@@ -50,7 +50,6 @@ static void addUpdateHost(MessageOut *msg)
     msg->writeString(updateHost);
 }
 
-
 // List of attributes that the client can send at account creation.
 static std::vector< int > initAttr;
 
@@ -163,7 +162,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
                 continue;
             }
 
-            if (utils::toupper(XML::getProperty(attributenode, "modifiable", "false")) == "TRUE")
+            if (XML::getBoolProperty(attributenode, "modifiable", false))
                 initAttr.push_back(id);
 
             // Store as string initially to check
@@ -358,7 +357,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
-    // The client succesfully logged in
+    // The client successfully logged in
 
     // set lastLogin date of the account
     time_t login;
@@ -408,7 +407,8 @@ void AccountHandler::handleLogoutMessage(AccountClient &client)
     client.send(reply);
 }
 
-void AccountHandler::handleReconnectMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleReconnectMessage(AccountClient &client,
+                                            MessageIn &msg)
 {
     if (client.status != CLIENT_LOGIN)
     {
@@ -428,14 +428,14 @@ bool checkCaptcha(AccountClient &client, std::string captcha)
     return true;
 }
 
-void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleRegisterMessage(AccountClient &client,
+                                           MessageIn &msg)
 {
     int clientVersion = msg.readLong();
     std::string username = msg.readString();
     std::string password = msg.readString();
     std::string email = msg.readString();
     std::string captcha = msg.readString();
-    std::string allowed = Configuration::getValue("account_allowRegister", "1");
     int minClientVersion = Configuration::getValue("clientVersion", 0);
     unsigned minNameLength = Configuration::getValue("account_minNameLength", 4);
     unsigned maxNameLength = Configuration::getValue("account_maxNameLength", 15);
@@ -446,7 +446,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
-    else if (allowed == "0" or allowed == "false")
+    else if (!Configuration::getBoolValue("account_allowRegister", true))
     {
         reply.writeByte(ERRMSG_FAILURE);
     }
@@ -523,7 +523,8 @@ void AccountHandler::handleRegisterMessage(AccountClient &client, MessageIn &msg
     client.send(reply);
 }
 
-void AccountHandler::handleUnregisterMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleUnregisterMessage(AccountClient &client,
+                                             MessageIn &msg)
 {
     LOG_DEBUG("AccountHandler::handleUnregisterMessage");
     std::string username = msg.readString();
@@ -545,7 +546,7 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client, MessageIn &m
         return;
     }
 
-    // See if the account exists
+    // See whether the account exists
     Account *acc = storage->getAccount(username);
 
     if (!acc || acc->getPassword() != password)
@@ -565,17 +566,19 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client, MessageIn &m
     client.send(reply);
 }
 
-void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client,
+                                                      MessageIn &msg)
 {
     LOG_INFO("AccountHandler::handleRequestRegisterInfoMessage");
     MessageOut reply(APMSG_REGISTER_INFO_RESPONSE);
-    std::string allowed = Configuration::getValue("account_allowRegister", "1");
-    if (allowed == "0" or allowed == "false")
+    if (!Configuration::getBoolValue("account_allowRegister", true))
     {
         reply.writeByte(false);
         reply.writeString(Configuration::getValue(
-            "account_denyRegisterReason", ""));
-    } else {
+                                             "account_denyRegisterReason", ""));
+    }
+    else
+    {
         reply.writeByte(true);
         reply.writeByte(Configuration::getValue("account_minNameLength", 4));
         reply.writeByte(Configuration::getValue("account_maxNameLength", 16));
@@ -585,7 +588,8 @@ void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client, Mes
     client.send(reply);
 }
 
-void AccountHandler::handleEmailChangeMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleEmailChangeMessage(AccountClient &client,
+                                              MessageIn &msg)
 {
     MessageOut reply(APMSG_EMAIL_CHANGE_RESPONSE);
 
@@ -622,7 +626,8 @@ void AccountHandler::handleEmailChangeMessage(AccountClient &client, MessageIn &
     client.send(reply);
 }
 
-void AccountHandler::handlePasswordChangeMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handlePasswordChangeMessage(AccountClient &client,
+                                                 MessageIn &msg)
 {
     std::string oldPassword = sha256(msg.readString());
     std::string newPassword = sha256(msg.readString());
@@ -653,7 +658,8 @@ void AccountHandler::handlePasswordChangeMessage(AccountClient &client, MessageI
     client.send(reply);
 }
 
-void AccountHandler::handleCharacterCreateMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
+                                                  MessageIn &msg)
 {
     std::string name = msg.readString();
     int hairStyle = msg.readByte();
@@ -795,7 +801,8 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client, Message
     client.send(reply);
 }
 
-void AccountHandler::handleCharacterSelectMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
+                                                  MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_SELECT_RESPONSE);
 
@@ -860,7 +867,8 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client, Message
     storage->addTransaction(trans);
 }
 
-void AccountHandler::handleCharacterDeleteMessage(AccountClient &client, MessageIn &msg)
+void AccountHandler::handleCharacterDeleteMessage(AccountClient &client,
+                                                  MessageIn &msg)
 {
     MessageOut reply(APMSG_CHAR_DELETE_RESPONSE);
 

@@ -21,7 +21,7 @@
 #include "game-server/skillmanager.hpp"
 
 #include "common/resourcemanager.hpp"
-#include "utils/string.hpp"   // for the toupper function
+#include "utils/string.hpp"   // for the toUpper function
 #include "utils/logger.h"
 #include "utils/xml.hpp"
 
@@ -88,7 +88,7 @@ void SkillManager::reload()
             {
                 std::string name = XML::getProperty(skillnode, "name",
                                                     std::string());
-                name = utils::toupper(name);
+                name = utils::toUpper(name);
                 int id = XML::getProperty(skillnode, "id", 0);
                 if (id && !name.empty())
                 {
@@ -199,11 +199,11 @@ int SkillManager::getIdFromString(const std::string &name)
     }
 
     // Convert to upper case for easier finding
-    SkillMap::iterator i = skillMap.find(utils::toupper(name));
+    SkillMap::iterator i = skillMap.find(utils::toUpper(name));
     if (i == skillMap.end())
     {
         LOG_WARN("SkillManager: No weapon-type name corresponding to "
-                 << utils::toupper(name) << " into " << skillReferenceFile);
+                 << utils::toUpper(name) << " into " << skillReferenceFile);
         return 0;
     }
     else

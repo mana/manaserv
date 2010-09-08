@@ -23,6 +23,7 @@
 
 #include "common/resourcemanager.hpp"
 #include "utils/logger.h"
+#include "utils/string.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -114,12 +115,7 @@ namespace XML
         xmlChar *prop = xmlGetProp(node, BAD_CAST name);
         if (prop)
         {
-            if (xmlStrEqual(prop, BAD_CAST "true")
-                ||xmlStrEqual(prop, BAD_CAST "yes"))
-                ret = true;
-            if (xmlStrEqual(prop, BAD_CAST "false")
-                ||xmlStrEqual(prop, BAD_CAST "no"))
-                ret = false;
+            ret = utils::stringToBool((char*) prop, def);
             xmlFree(prop);
         }
         return ret;

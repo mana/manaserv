@@ -263,7 +263,6 @@ SET(SRCS_MANASERVGAME
     utils/mathutils.cpp
     utils/speedconv.hpp
     utils/speedconv.cpp
-    utils/trim.hpp
     utils/zlib.hpp
     utils/zlib.cpp
     )

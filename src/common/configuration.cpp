@@ -27,6 +27,7 @@
 
 #include "utils/logger.h"
 #include "utils/xml.hpp"
+#include "utils/string.hpp"
 
 /**< Persistent configuration. */
 static std::map< std::string, std::string > options;
@@ -78,13 +79,23 @@ std::string Configuration::getValue(const std::string &key,
                                     const std::string &deflt)
 {
     std::map<std::string, std::string>::iterator iter = options.find(key);
-    if (iter == options.end()) return deflt;
+    if (iter == options.end())
+        return deflt;
     return iter->second;
 }
 
 int Configuration::getValue(const std::string &key, int deflt)
 {
     std::map<std::string, std::string>::iterator iter = options.find(key);
-    if (iter == options.end()) return deflt;
+    if (iter == options.end())
+        return deflt;
     return atoi(iter->second.c_str());
+}
+
+bool Configuration::getBoolValue(const std::string &key, bool deflt)
+{
+    std::map<std::string, std::string>::iterator iter = options.find(key);
+    if (iter == options.end())
+        return deflt;
+    return utils::stringToBool(iter->second.c_str(), deflt);
 }

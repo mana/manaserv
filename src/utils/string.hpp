@@ -18,15 +18,32 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UTILS_STRING_HPP
-#define UTILS_STRING_HPP
+#ifndef UTILS_STRING_H
+#define UTILS_STRING_H
 
 #include <string>
 
 namespace utils
 {
-    std::string toupper(std::string);
+    /**
+     * Returns an upper-cased copy of the string.
+     */
+    std::string toUpper(std::string);
+
+    /**
+     * Returns an lower-cased copy of the string.
+     */
+    std::string toLower(std::string);
+
+    /**
+     * Tells whether the string is a numerical representation.
+     */
     bool isNumeric(const std::string &);
+
+    /**
+     * Turns a string representing a numerical representation
+     * into an integer value.
+     */
     int stringToInt(const std::string &);
 
     /**
@@ -38,6 +55,18 @@ namespace utils
      *           negative if the second is greater
      */
     int compareStrI(const std::string &a, const std::string &b);
+
+    /**
+     * Returns the boolean value represented in a string, or default.
+     */
+    bool stringToBool(const std::string &s, bool defaultValue);
+
+    /**
+     * Trims spaces off the end and the beginning of the given string.
+     *
+     * @param str the string to trim spaces off
+     */
+    void trim(std::string &str);
 }
 
-#endif // UTILS_STRING_HPP
+#endif // UTILS_STRING_H

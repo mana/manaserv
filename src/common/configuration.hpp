@@ -43,11 +43,18 @@ namespace Configuration
     std::string getValue(const std::string &key, const std::string &deflt);
 
     /**
-     * Gets an option as a string.
+     * Gets an option as an integer.
      * @param key option identifier.
      * @param deflt default value.
      */
     int getValue(const std::string &key, int deflt);
+
+    /**
+     * Gets an option as a boolean.
+     * @param key option identifier.
+     * @param deflt default value.
+     */
+    bool getBoolValue(const std::string &key, bool deflt);
 }
 
 #ifndef DEFAULT_SERVER_PORT

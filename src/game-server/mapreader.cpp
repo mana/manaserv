@@ -30,7 +30,6 @@
 #include "scripting/script.hpp"
 #include "utils/base64.h"
 #include "utils/logger.h"
-#include "utils/trim.hpp"
 #include "utils/xml.hpp"
 #include "utils/zlib.hpp"
 #include "utils/string.hpp"
@@ -136,7 +135,8 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
             }
             else
             {
-                ::tilesetFirstGids.push_back(XML::getProperty(node, "firstgid", 0));
+                ::tilesetFirstGids.push_back(XML::getProperty(node, "firstgid",
+                                                              0));
             }
         }
         else if (xmlStrEqual(node->name, BAD_CAST "properties"))
@@ -172,7 +172,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
 
                 std::string objName = XML::getProperty(objectNode, "name", "");
                 std::string objType = XML::getProperty(objectNode, "type", "");
-                objType = utils::toupper(objType);
+                objType = utils::toUpper(objType);
                 int objX = XML::getProperty(objectNode, "x", 0);
                 int objY = XML::getProperty(objectNode, "y", 0);
                 int objW = XML::getProperty(objectNode, "width", 0);
@@ -195,13 +195,16 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
 
                         for_each_xml_child_node(propertyNode, propertiesNode)
                         {
-                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
+                            if (xmlStrEqual(propertyNode->name,
+                                            BAD_CAST "property"))
                             {
-                                std::string value = XML::getProperty(propertyNode, "name", std::string());
-                                value = utils::toupper(value);
+                                std::string value = XML::getProperty(
+                                           propertyNode, "name", std::string());
+                                value = utils::toUpper(value);
                                 if (value == "DEST_MAP")
                                 {
-                                    destMapName = getObjectProperty(propertyNode, std::string());
+                                    destMapName = getObjectProperty(propertyNode,
+                                                                 std::string());
                                 }
                                 else if (value == "DEST_X")
                                 {
@@ -249,7 +252,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
-                                value = utils::toupper(value);
+                                value = utils::toUpper(value);
                                 if (value == "MONSTER_ID")
                                 {
                                     monsterId = getObjectProperty(propertyNode, monsterId);
@@ -302,7 +305,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
-                                value = utils::toupper(value);
+                                value = utils::toUpper(value);
                                 if (value == "NPC_ID")
                                 {
                                     npcId = getObjectProperty(propertyNode, npcId);
@@ -349,11 +352,11 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
-                                value = utils::toupper(value);
+                                value = utils::toUpper(value);
                                 if (value == "FILENAME")
                                 {
                                     scriptFilename = getObjectProperty(propertyNode, "");
-                                    trim(scriptFilename);
+                                    utils::trim(scriptFilename);
                                 }
                                 else if (value == "TEXT")
                                 {
@@ -546,6 +549,6 @@ void MapReader::setTileWithGid(Map *map, int x, int y, int gid)
         set = *i;
     }
 
-    if (gid!=set)
+    if (gid != set)
         map->blockTile(x, y, Map::BLOCKTYPE_WALL);
 }
