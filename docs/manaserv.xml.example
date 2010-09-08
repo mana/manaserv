@@ -83,6 +83,11 @@
  <option name="char_startX" value="720"/>
  <option name="char_startY" value="840"/>
 
+ <!-- Respawn options -->
+ <option name="respawnMap" value="4"/>
+ <option name="respawnX" value="1000"/>
+ <option name="respawnY" value="1000"/>
+
  <!--
  ATTENTION: This is a very important option!
  the net password is used to let the servers (game and account) speak to each
@@ -97,23 +102,40 @@
  -->
  <option name="net_accountServerAddress" value="localhost"/>
  <option name="net_accountServerPort" value="9601"/>
+
  <!--
  The clients use this address to connect to a game server on this machine.
  -->
  <option name="net_gameServerAddress" value="localhost"/>
  <option name="net_gameServerPort" value="9604"/>
 
- <!-- Gameplay-related config option -->
+ <!-- Max connected clients allowed. -->
+ <option name="net_maxClients" value="1000"/>
+
+ <!--
+ Host the account server will listen to. Defaulted to 'localhost'.
+ TODO: Replace with full listening config for both host and port
+ for the chat and game servers.
+ -->
+ <option name="net_listenHost" value=""/>
+
+ <!-- Minimal supported mana client version -->
+ <option name="clientVersion" value="0" />
+
+ <!-- Gameplay-related config options -->
  <option name="visualRange" value="448"/>
- <option name="respawnMap" value="4"/>
- <option name="respawnX" value="1000"/>
- <option name="respawnY" value="1000"/>
- <option name="defaultPvp" value="free" />
  <option name="floorItemDecayTime" value="10" />
  <option name="hpRegenBreakAfterHit" value="50" />
+ <option name="defaultPvp" value="free" />
 
- <!-- Network-related config options -->
- <option name="net_maxClients" value="1000"/>
+ <!-- Default Map id at character loading -->
+ <option name="defaultMap" value="1" />
+
+ <!--
+ Update host url: E.g.: "http://www.manasource.org/updates"
+ It gives the http folder where the update files can be downloaded.
+ -->
+ <option name="defaultUpdateHost" value="" />
 
  <!-- Account-creation-related config options -->
  <option name="account_allowRegister" value="1" />
@@ -147,5 +169,9 @@
  <option name="mail_maxAttachments" value="3" />
  <option name="mail_maxLetters" value="10" />
 
+ <!-- Command defaults -->
+
+ <!-- Default mute command length (in seconds.) -->
+ <option name="defaultMuteLength" value="60" />
 
 </configuration>
