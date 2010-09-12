@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<attributes>
+    <attribute id="16" name="Strength"
+          tag="str"
+          effect="Strength %+d"
+          desc=""
+          modifiable="true" />
+
+    <attribute id="17" name="Agility"
+          tag="agi"
+          effect="Agility %+d"
+          desc=""
+          modifiable="true" />
+
+    <attribute id="18" name="Dexterity"
+          tag="dex"
+          effect="Dexterity %+d"
+          desc=""
+          modifiable="true" />
+
+    <attribute id="19" name="Vitality"
+          tag="vit"
+          effect="Vitality %+d"
+          desc=""
+          modifiable="true" />
+
+    <attribute id="20" name="Intelligence"
+          tag="int"
+          effect="Intelligence %+d"
+          desc=""
+          modifiable="true" />
+
+    <attribute id="21" name="WillPower"
+          tag="will"
+          effect="Willpower %+d"
+          desc=""
+          modifiable="true" />
+</attributes>
