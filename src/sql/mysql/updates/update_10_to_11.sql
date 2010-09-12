@@ -5,13 +5,13 @@
 --      into their replacement structures.
 --
 
-ALTER TABLE `mana_char_attr` DROP `money`;
-ALTER TABLE `mana_char_attr` DROP `str`;
-ALTER TABLE `mana_char_attr` DROP `agi`;
-ALTER TABLE `mana_char_attr` DROP `vit`;
-ALTER TABLE `mana_char_attr` DROP `int`;
-ALTER TABLE `mana_char_attr` DROP `dex`;
-ALTER TABLE `mana_char_attr` DROP `will`;
+ALTER TABLE `mana_characters` DROP `money`;
+ALTER TABLE `mana_characters` DROP `str`;
+ALTER TABLE `mana_characters` DROP `agi`;
+ALTER TABLE `mana_characters` DROP `vit`;
+ALTER TABLE `mana_characters` DROP `int`;
+ALTER TABLE `mana_characters` DROP `dex`;
+ALTER TABLE `mana_characters` DROP `will`;
 
 
 --
