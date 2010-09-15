@@ -52,14 +52,26 @@
 	TODO!
 -->
 
-<!-- end of database configuration *************************************** -->
+<!-- end of database configuration **************************************** -->
 
+<!-- Paths configuration ******************************************************
+ Set here the different paths used by both the server to find data.
+-->
  <!-- Paths to data files -->
  <option name="serverPath" value="." />
  <option name="clientDataPath" value="example/clientdata" />
  <option name="serverDataPath" value="example/serverdata" />
 
- <!-- Log output configuration -->
+<!-- end of paths configuration ******************************************* -->
+
+<!-- Logs configuration *******************************************************
+ Set here the different paths used by both the server
+ to store statistics and log files.
+-->
+
+ <!--
+ Log output configuration, relative to the folders where the servers were ran.
+ -->
  <option name="log_statisticsFile" value="./manaserv.stats"/>
  <option name="log_accountServerFile" value="./manaserv-account.log"/>
  <option name="log_gameServerFile" value="./manaserv-game.log"/>
@@ -76,17 +88,12 @@
  <option name="log_gameServerLogLevel" value="2"/>
  <option name="log_accountServerLogLevel" value="2"/>
 
- <!--
- New player starting location. The map should be defined in data/maps.xml.
- -->
- <option name="char_startMap" value="1"/>
- <option name="char_startX" value="720"/>
- <option name="char_startY" value="840"/>
+<!-- end of logs configuration ****************************************** -->
 
- <!-- Respawn options -->
- <option name="respawnMap" value="4"/>
- <option name="respawnX" value="1000"/>
- <option name="respawnY" value="1000"/>
+<!-- Network options configuration ********************************************
+ Set here the different network-related options to set up the servers
+ hosts and ports, for instance.
+-->
 
  <!--
  ATTENTION: This is a very important option!
@@ -99,79 +106,163 @@
  <!--
  The game server uses this address to connect to the account server. Clients
  will also need to be able to connect to the account server.
+ Don't use the 'localhost' value when running a public server,
+ but rather the public name.
  -->
  <option name="net_accountServerAddress" value="localhost"/>
  <option name="net_accountServerPort" value="9601"/>
 
  <!--
  The clients use this address to connect to a game server on this machine.
+ Don't use the 'localhost' value when running a public server,
+ but rather the public name.
  -->
  <option name="net_gameServerAddress" value="localhost"/>
  <option name="net_gameServerPort" value="9604"/>
 
- <!-- Max connected clients allowed. -->
- <option name="net_maxClients" value="1000"/>
-
  <!--
  Host the account server will listen to. Defaulted to 'localhost'.
+ Don't use the 'localhost' value when running a public server,
+ but rather the public name.
  TODO: Replace with full listening config for both host and port
  for the chat and game servers.
  -->
  <option name="net_listenHost" value=""/>
 
- <!-- Minimal supported mana client version -->
- <option name="clientVersion" value="0" />
-
- <!-- Gameplay-related config options -->
- <option name="visualRange" value="448"/>
- <option name="floorItemDecayTime" value="10" />
- <option name="hpRegenBreakAfterHit" value="50" />
- <option name="defaultPvp" value="free" />
-
- <!-- Default Map id at character loading -->
- <option name="defaultMap" value="1" />
-
  <!--
  Update host url: E.g.: "http://www.manasource.org/updates"
  It gives the http folder where the update files can be downloaded.
  -->
- <option name="defaultUpdateHost" value="" />
+ <option name="net_defaultUpdateHost" value="" />
 
- <!-- Account-creation-related config options -->
+ <!--
+ Minimal supported mana client version.
+ The current version is 0.
+ -->
+ <option name="net_clientVersion" value="0" />
+
+ <!-- Max connected clients allowed. -->
+ <option name="net_maxClients" value="1000"/>
+
+<!-- end of network options configuration ********************************* -->
+
+<!-- Accounts configuration ***************************************************
+ Set here the different options related to players accounts
+ and used at their creation.
+-->
+
  <option name="account_allowRegister" value="1" />
- <option name="account_denyRegisterReason" value="The server administrator has disabled automatic registration!" />
+ <option name="account_denyRegisterReason"
+         value="The server administrator has disabled automatic registration!"/>
  <option name="account_minEmailLength" value="7" />
  <option name="account_maxEmailLength" value="128" />
  <option name="account_minNameLength" value="4" />
  <option name="account_maxNameLength" value="16" />
  <option name="account_minPasswordLength" value="6" />
  <option name="account_maxPasswordLength" value="25" />
+ <option name="account_maxCharacters" value="3" />
 
- <!-- Character-creation-related config options -->
+<!-- end of accounts configuration **************************************** -->
+
+<!-- Characters configuration *************************************************
+ Set here the different options related to players characters.
+-->
+
  <option name="char_numHairStyles" value="17" />
  <option name="char_numHairColors" value="9" />
  <option name="char_numGenders" value="2" />
  <option name="char_minNameLength" value="4" />
  <option name="char_maxNameLength" value="25" />
- <option name="char_maxCharacters" value="3" />
 
- <!-- Chat-related config options -->
+ <!--
+ New player starting location. The map should be defined in data/maps.xml.
+ -->
+ <option name="char_startMap" value="1"/>
+ <!--
+     Respawn coordinates on the start map:
+     In pixels, not in tiles.
+ -->
+ <option name="char_startX" value="720"/>
+ <option name="char_startY" value="840"/>
+
+ <!-- Respawn options -->
+ <option name="char_respawnMap" value="4"/>
+ <!--
+     Respawn coordinates on the respawn map:
+     In pixels, not in tiles.
+ -->
+ <option name="char_respawnX" value="1000"/>
+ <option name="char_respawnY" value="1000"/>
+
+ <!-- Default Map id at character loading -->
+ <option name="char_defaultMap" value="1" />
+
+<!-- end of characters configuration ************************************** -->
+
+<!-- Game configuration *************************************************
+ Set here the different options related to the gameplay.
+-->
+
+ <!--
+ Set the player's character visual range around him in pixels.
+ Monsters and other beings further than this value won't appear in its sight.
+ -->
+ <option name="game_visualRange" value="448"/>
+ <!--
+ The time in seconds an item standing on the floor will remain before vanishing.
+ Set it to 0 to disable it.
+ -->
+ <option name="game_floorItemDecayTime" value="10" />
+
+ <!--
+ Set how much time the auto-regeneration is stopped when hurt.
+ (in 1/10th seconds.)
+ -->
+ <option name="game_hpRegenBreakAfterHit" value="50" />
+
+ <!--
+ Default PVP (Player-versus-player) rule on a map not setting this property.
+ Values available: none (No PVP), free (All PVP).
+ -->
+ <option name="game_defaultPvp" value="free" />
+
+<!-- end of game configuration ******************************************** -->
+
+<!-- Commands configuration ***************************************************
+ Set here the different options related to chat commands.
+-->
+
+ <!--
+ Default mute command length (in seconds.)
+ -->
+ <option name="command_defaultMuteLength" value="60" />
+
+<!-- end of commands configuration **************************************** -->
+
+<!-- Chat configuration ***************************************************
+ Set here the different options related to chat handling.
+-->
+
  <option name="chat_maxChannelNameLength" value="15" />
-   <!-- I noticed the following configuration-like enumeration values which are never checked:
-        //chat-related
-         MAX_PUBLIC_CHANNELS_RANGE  = 1000,
+
+ <!--
+ TODO: Dehard-code those values, or redo the chat channeling system
+ to not make use of them.
+        MAX_PUBLIC_CHANNELS_RANGE  = 1000,
         MAX_PRIVATE_CHANNELS_RANGE = 10000,
         MAX_CHANNEL_ANNOUNCEMENT   = 150,
         MAX_CHANNEL_PASSWORD       = 12,
-    -->
+ -->
 
- <!-- Mail-system related-->
+<!-- end of chat configuration ******************************************** -->
+
+<!-- Mail configuration ***************************************************
+ Set here the different options related to the mail system.
+-->
+
  <option name="mail_maxAttachments" value="3" />
  <option name="mail_maxLetters" value="10" />
 
- <!-- Command defaults -->
-
- <!-- Default mute command length (in seconds.) -->
- <option name="defaultMuteLength" value="60" />
+<!-- end of mail configuration ******************************************** -->
 
 </configuration>

@@ -118,13 +118,18 @@ int Being::damage(Actor *source, const Damage &damage)
     {
         mHitsTaken.push_back(HPloss);
         Attribute &HP = mAttributes.at(ATTR_HP);
-        LOG_DEBUG("Being " << getPublicID() << " suffered "<<HPloss<<" damage. HP: "
+        LOG_DEBUG("Being " << getPublicID() << " suffered " << HPloss
+                  << " damage. HP: "
                   << HP.getModifiedAttribute() << "/"
                   << mAttributes.at(ATTR_MAX_HP).getModifiedAttribute());
         HP.setBase(HP.getBase() - HPloss);
         updateDerivedAttributes(ATTR_HP);
-        setTimerSoft(T_B_HP_REGEN, Configuration::getValue("hpRegenBreakAfterHit", 0)); // no HP regen after being hit if this is set.
-    } else {
+        // No HP regen after being hit if this is set.
+        setTimerSoft(T_B_HP_REGEN,
+                     Configuration::getValue("game_hpRegenBreakAfterHit", 0));
+    }
+    else
+    {
         HPloss = 0;
     }
 
@@ -135,8 +140,11 @@ void Being::heal()
 {
     Attribute &hp = mAttributes.at(ATTR_HP);
     Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
-    if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute()) return; // Full hp, do nothing.
-    hp.clearMods(); // Reset all modifications present in hp
+    if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute())
+        return; // Full hp, do nothing.
+
+    // Reset all modifications present in hp.
+    hp.clearMods();
     hp.setBase(maxHp.getModifiedAttribute());
     updateDerivedAttributes(ATTR_HP);
 }
@@ -145,9 +153,12 @@ void Being::heal(int gain)
 {
     Attribute &hp = mAttributes.at(ATTR_HP);
     Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
-    if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute()) return; // Full hp, do nothing.
+    if (maxHp.getModifiedAttribute() == hp.getModifiedAttribute())
+        return; // Full hp, do nothing.
+
+    // Cannot go over maximum hitpoints.
     hp.setBase(hp.getBase() + gain);
-    if (hp.getModifiedAttribute() > maxHp.getModifiedAttribute()) // Cannot go over maximum hitpoints.
+    if (hp.getModifiedAttribute() > maxHp.getModifiedAttribute())
         hp.setBase(maxHp.getModifiedAttribute());
     updateDerivedAttributes(ATTR_HP);
 }

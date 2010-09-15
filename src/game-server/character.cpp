@@ -185,9 +185,9 @@ void Character::respawn()
         mAttributes[ATTR_HP].setBase(mAttributes[ATTR_MAX_HP].getModifiedAttribute());
         updateDerivedAttributes(ATTR_HP);
         // Warp back to spawn point.
-        int spawnMap = Configuration::getValue("respawnMap", 1);
-        int spawnX = Configuration::getValue("respawnX", 1024);
-        int spawnY = Configuration::getValue("respawnY", 1024);
+        int spawnMap = Configuration::getValue("char_respawnMap", 1);
+        int spawnX = Configuration::getValue("char_respawnX", 1024);
+        int spawnY = Configuration::getValue("char_respawnY", 1024);
         GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
     }
 

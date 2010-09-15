@@ -46,7 +46,8 @@
 
 static void addUpdateHost(MessageOut *msg)
 {
-    std::string updateHost = Configuration::getValue("defaultUpdateHost", "");
+    std::string updateHost = Configuration::getValue("net_defaultUpdateHost",
+                                                     "");
     msg->writeString(updateHost);
 }
 
@@ -295,7 +296,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     const int clientVersion = msg.readLong();
 
-    if (clientVersion < Configuration::getValue("clientVersion", 0))
+    if (clientVersion < Configuration::getValue("net_clientVersion", 0))
     {
         reply.writeByte(LOGIN_INVALID_VERSION);
         client.send(reply);
@@ -436,7 +437,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
     std::string password = msg.readString();
     std::string email = msg.readString();
     std::string captcha = msg.readString();
-    int minClientVersion = Configuration::getValue("clientVersion", 0);
+    int minClientVersion = Configuration::getValue("net_clientVersion", 0);
     unsigned minNameLength = Configuration::getValue("account_minNameLength", 4);
     unsigned maxNameLength = Configuration::getValue("account_maxNameLength", 15);
 
@@ -670,7 +671,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
     int numGenders = Configuration::getValue("char_numGenders", 2);
     unsigned int minNameLength = Configuration::getValue("char_minNameLength", 4);
     unsigned int maxNameLength = Configuration::getValue("char_maxNameLength", 25);
-    unsigned int maxCharacters = Configuration::getValue("char_maxCharacters", 3);
+    unsigned int maxCharacters = Configuration::getValue("account_maxCharacters", 3);
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 

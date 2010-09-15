@@ -96,7 +96,7 @@ bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
 Item::Item(ItemClass *type, int amount)
           : Actor(OBJECT_ITEM), mType(type), mAmount(amount)
 {
-    mLifetime = Configuration::getValue("floorItemDecayTime", 0) * 10;
+    mLifetime = Configuration::getValue("game_floorItemDecayTime", 0) * 10;
 }
 
 void Item::update()

@@ -164,7 +164,7 @@ static void informPlayer(MapComposite *map, Character *p)
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
     const Point &pold = p->getOldPosition(), ppos = p->getPosition();
     int pid = p->getPublicID(), pflags = p->getUpdateFlags();
-    int visualRange = Configuration::getValue("visualRange", 320);
+    int visualRange = Configuration::getValue("game_visualRange", 448);
 
     // Inform client about activities of other beings near its character
     for (BeingIterator i(map->getAroundBeingIterator(p, visualRange)); i; ++i)
@@ -608,7 +608,7 @@ void GameState::remove(Thing *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
-    int visualRange = Configuration::getValue("visualRange", 320);
+    int visualRange = Configuration::getValue("game_visualRange", 448);
 
     ptr->removed();
 
@@ -750,7 +750,7 @@ void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
 void GameState::sayAround(Actor *obj, const std::string &text)
 {
     Point speakerPosition = obj->getPosition();
-    int visualRange = Configuration::getValue("visualRange", 320);
+    int visualRange = Configuration::getValue("game_visualRange", 448);
 
     for (CharacterIterator i(obj->getMap()->getAroundActorIterator(obj, visualRange)); i; ++i)
     {

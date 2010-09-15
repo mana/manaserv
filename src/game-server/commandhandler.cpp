@@ -931,12 +931,12 @@ static void handleMute(Character *player, std::string &args)
 {    Character *other;
     int length;
 
-    // get arguments
+    // Get arguments.
     std::string character = getArgument(args);
     std::string valuestr = getArgument(args);
 
 
-    // check for valid player
+    // Check for a valid player.
     other = getPlayer(character);
     if (!other)
     {
@@ -944,30 +944,34 @@ static void handleMute(Character *player, std::string &args)
         return;
     }
 
-    // change the length to an integer
+    // Turn the length back to an integer.
     if (valuestr.empty())
-    {
-        length = Configuration::getValue("defaultMuteLength", 60);
-    } else {
+        length = Configuration::getValue("command_defaultMuteLength", 60);
+    else
         length = utils::stringToInt(valuestr);
-    }
+
     if (length < 0)
     {
         say("Invalid length, using default", player);
-        length = Configuration::getValue("defaultMuteLength", 60);
+        length = Configuration::getValue("command_defaultMuteLength", 60);
     }
 
-    // mute the player
+    // Mute the player.
     other->mute(length);
 
-    // feedback
+    // Feedback.
     std::stringstream targetMsg;
     std::stringstream userMsg;
     if (length > 0)
     {
-        targetMsg << player->getName() << " muted you for " << length << " seconds.";
-        userMsg << "You muted " << other->getName() << " for " << length << " seconds.";
-    } else {
+        targetMsg << player->getName() << " muted you for "
+        << length << " seconds.";
+
+        userMsg << "You muted " << other->getName()
+        << " for " << length << " seconds.";
+    }
+    else
+    {
         targetMsg << player->getName() << " unmuted you.";
         userMsg << "You unmuted " << other->getName() << ".";
     }

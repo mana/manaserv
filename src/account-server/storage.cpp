@@ -325,7 +325,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
         {
             // Set character to default map and one of the default location
             // Default map is to be 1, as not found return value will be 0.
-            character->setMapId(Configuration::getValue("defaultMap", 1));
+            character->setMapId(Configuration::getValue("char_defaultMap", 1));
         }
 
         /* Fill the account-related fields. Last step, as it may require a new
