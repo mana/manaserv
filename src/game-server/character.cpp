@@ -46,7 +46,7 @@
 #include "utils/logger.h"
 #include "utils/speedconv.hpp"
 
-// These values should maybe be obtained from the config file
+// Experience curve related values
 const float Character::EXPCURVE_EXPONENT = 3.0f;
 const float Character::EXPCURVE_FACTOR = 10.0f;
 const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
@@ -69,14 +69,14 @@ Character::Character(MessageIn &msg):
     mParty(0),
     mTransaction(TRANS_NONE)
 {
-    const AttributeScopes &attr = attributeManager->getAttributeInfoForType(ATTR_CHAR);
-    LOG_DEBUG("Character creation: initialisation of " << attr.size() << " attributes.");
+    const AttributeScopes &attr =
+                           attributeManager->getAttributeInfoForType(ATTR_CHAR);
+    LOG_DEBUG("Character creation: initialisation of "
+              << attr.size() << " attributes.");
     for (AttributeScopes::const_iterator it1 = attr.begin(),
-         it1_end = attr.end();
-        it1 != it1_end;
-        ++it1)
-        mAttributes.insert(std::make_pair(it1->first,
-                                          Attribute(*it1->second)));
+         it1_end = attr.end(); it1 != it1_end; ++it1)
+        mAttributes.insert(std::make_pair(it1->first, Attribute(*it1->second)));
+
     // Get character data.
     mDatabaseID = msg.readLong();
     setName(msg.readString());
@@ -86,27 +86,27 @@ Character::Character(MessageIn &msg):
     modifiedAllAttribute();
     setSize(16);
 
-    //give the character some specials for testing.
-    //TODO: get from quest vars and equipment
+    // Give the character some specials for testing.
+    //TODO: Get from quest vars and equipment
     giveSpecial(1);
     giveSpecial(2);
     giveSpecial(3);
-
 }
 
 void Character::update()
 {
-    //update character level
+    // Update character level
     if (mRecalculateLevel)
     {
         mRecalculateLevel = false;
         recalculateLevel();
     }
 
-    //update special recharge
+    // Update special recharge
     std::list<Special *> rechargeNeeded;
     int numRechargeNeeded = 0;
-    for (std::map<int, Special*>::iterator i = mSpecials.begin(); i != mSpecials.end(); i++)
+    for (std::map<int, Special*>::iterator i = mSpecials.begin();
+         i != mSpecials.end(); i++)
     {
         Special * s = i->second;
         if (s->currentMana < s->neededMana)
@@ -117,8 +117,10 @@ void Character::update()
     }
     if (numRechargeNeeded > 0)
     {
-        mRechargePerSpecial = getModifiedAttribute(ATTR_INT) / numRechargeNeeded;
-        for (std::list<Special*>::iterator i = rechargeNeeded.begin(); i != rechargeNeeded.end(); i++)
+        mRechargePerSpecial = getModifiedAttribute(ATTR_INT)
+                              / numRechargeNeeded;
+        for (std::list<Special*>::iterator i = rechargeNeeded.begin();
+             i != rechargeNeeded.end(); i++)
         {
             (*i)->currentMana += mRechargePerSpecial;
         }
@@ -153,8 +155,11 @@ void Character::perform()
 
     std::list<AutoAttack> attacks;
     mAutoAttacks.tick(&attacks);
-    if (attacks.empty()) return; // Install default attack?
-    else for (std::list<AutoAttack>::iterator it = attacks.begin(); it != attacks.end(); ++it)
+    if (attacks.empty())
+        return; // TODO: Install default attack?
+    else
+        for (std::list<AutoAttack>::iterator it = attacks.begin();
+             it != attacks.end(); ++it)
             performAttack(mTarget, it->getDamage());
 }
 
@@ -168,20 +173,21 @@ void Character::respawn()
 {
     if (mAction != DEAD)
     {
-        LOG_WARN("Character \""<<getName()<<"\" tried to respawn without being dead");
+        LOG_WARN("Character \"" << getName()
+                 << "\" tried to respawn without being dead");
         return;
     }
 
-    //make alive again
+    // Make it alive again
     setAction(STAND);
-    // reset target
+    // Reset target
     mTarget = NULL;
 
-    // execute respawn script
+    // Execute respawn script
     if (!Script::executeGlobalEventFunction("on_chr_death_accept", this))
     {
-        // script-controlled respawning didn't work - fall back to
-        // hardcoded logic
+        // Script-controlled respawning didn't work - fall back to
+        // hardcoded logic.
         mAttributes[ATTR_HP].setBase(mAttributes[ATTR_MAX_HP].getModifiedAttribute());
         updateDerivedAttributes(ATTR_HP);
         // Warp back to spawn point.
@@ -221,10 +227,10 @@ void Character::useSpecial(int id)
 
 void Character::sendSpecialUpdate()
 {
-    //GPMSG_SPECIAL_STATUS           = 0x0293, // { B specialID, L current, L max, L recharge }
+    //GPMSG_SPECIAL_STATUS = 0x0293,
+    // { B specialID, L current, L max, L recharge }
     for (std::map<int, Special*>::iterator i = mSpecials.begin();
-         i != mSpecials.end();
-         i++)
+         i != mSpecials.end(); i++)
     {
 
         MessageOut msg(GPMSG_SPECIAL_STATUS );
@@ -232,7 +238,7 @@ void Character::sendSpecialUpdate()
         msg.writeLong(i->second->currentMana);
         msg.writeLong(i->second->neededMana);
         msg.writeLong(mRechargePerSpecial);
-        /* yes, the last one is redundant because it is the same for each
+        /* Yes, the last one is redundant because it is the same for each
            special, but I would like to keep the netcode flexible enough
            to allow different recharge speed per special when necessary */
         gameHandler->sendTo(this, msg);
@@ -412,11 +418,13 @@ void Character::updateDerivedAttributes(unsigned int attr)
         break;
     case ATTR_HP:
         double diff;
-        if ((diff = getModifiedAttribute(ATTR_HP) - getModifiedAttribute(ATTR_MAX_HP)) > 0)
+        if ((diff = getModifiedAttribute(ATTR_HP)
+            - getModifiedAttribute(ATTR_MAX_HP)) > 0)
             newBase -= diff;
         break;
     case ATTR_MAX_HP:
-        newBase = ((getModifiedAttribute(ATTR_VIT) + 3) * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
+        newBase = ((getModifiedAttribute(ATTR_VIT) + 3)
+                   * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
         deps.insert(ATTR_HP);
         break;
     case ATTR_MOVE_SPEED_TPS:
@@ -471,34 +479,36 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
     int levelOverOptimum = levelForExp(getExperience(skill)) - optimalLevel;
     if (optimalLevel && levelOverOptimum > 0)
     {
-        experience *= EXP_LEVEL_FLEXIBILITY / (levelOverOptimum + EXP_LEVEL_FLEXIBILITY);
+        experience *= EXP_LEVEL_FLEXIBILITY
+                      / (levelOverOptimum + EXP_LEVEL_FLEXIBILITY);
     }
 
-    // add exp
+    // Add exp
     int oldExp = mExperience[skill];
     long int newExp = mExperience[skill] + experience;
-    if (newExp < 0) newExp = 0; // avoid integer underflow/negative exp
+    if (newExp < 0) newExp = 0; // Avoid integer underflow/negative exp.
 
     // Check the skill cap
-    long int maxSkillCap = Configuration::getValue("maxSkillCap", INT_MAX);
-    assert(maxSkillCap <= INT_MAX);  // avoid interger overflow
+    long int maxSkillCap = Configuration::getValue("game_maxSkillCap", INT_MAX);
+    assert(maxSkillCap <= INT_MAX);  // Avoid integer overflow.
     if (newExp > maxSkillCap)
     {
         newExp = maxSkillCap;
         if (oldExp != maxSkillCap)
         {
             LOG_INFO("Player hit the skill cap");
-            // TODO: send a message to player leting them know they hit the cap
+            // TODO: Send a message to player letting them know they hit the cap
+            // or not?
         }
     }
     mExperience[skill] = newExp;
     mModifiedExperience.insert(skill);
 
-    // inform account server
+    // Inform account server
     if (newExp != oldExp)
         accountHandler->updateExperience(getDatabaseID(), skill, newExp);
 
-    // check for skill levelup
+    // Check for skill levelup
     if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
         updateDerivedAttributes(skill);
 
@@ -510,12 +520,14 @@ void Character::incrementKillCount(int monsterType)
     std::map<int, int>::iterator i = mKillCount.find(monsterType);
     if (i == mKillCount.end())
     {
-        // character has never murdered this species before
+        // Character has never murdered this species before
         mKillCount[monsterType] = 1;
-    } else {
-        // character is a repeated offender
+    }
+    else
+    {
+        // Character is a repeated offender
         mKillCount[monsterType] ++;
-    };
+    }
 }
 
 int Character::getKillCount(int monsterType) const
