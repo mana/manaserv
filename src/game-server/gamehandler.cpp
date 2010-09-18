@@ -543,9 +543,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 accountHandler->updateCharacterPoints(
                     computer.character->getDatabaseID(),
                     computer.character->getCharacterPoints(),
-                    computer.character->getCorrectionPoints(),
-                    attribute,
-                    computer.character->getAttribute(attribute));
+                    computer.character->getCorrectionPoints());
 
                 // log transaction
                 std::stringstream str;
@@ -569,9 +567,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 accountHandler->updateCharacterPoints(
                     computer.character->getDatabaseID(),
                     computer.character->getCharacterPoints(),
-                    computer.character->getCorrectionPoints(),
-                    attribute,
-                    computer.character->getAttribute(attribute));
+                    computer.character->getCorrectionPoints());
 
                 // log transaction
                 std::stringstream str;

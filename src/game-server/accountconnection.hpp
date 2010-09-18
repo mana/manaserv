@@ -126,12 +126,15 @@ class AccountConnection : public Connection
          * @param charId      ID of the character
          * @param charPoints  character points left for the character
          * @param corrPoints  correction points left for the character
+         */
+        void updateCharacterPoints(int charId, int charPoints,
+                                   int corrPoints);
+
+        /**
+         * @param charId      ID of the character
          * @param attribId    ID of the modified attribute
          * @param attribValue New value of the modified attribute
          */
-        void updateCharacterPoints(int charId, int charPoints,
-                                   int corrPoints, int attribId,
-                                   int attribValue);
 
         void updateAttributes(int charId, int attrId, double base,
                               double mod);

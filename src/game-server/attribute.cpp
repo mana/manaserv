@@ -179,8 +179,8 @@ void AttributeModifiersEffect::updateMod(double value)
 bool AttributeModifiersEffect::recalculateModifiedValue(double newPrevLayerValue)
  {
     double oldValue = mCacheVal;
-    switch (mEType)
-        case AME_ADD: {
+    switch (mEType) {
+        case AME_ADD:
             switch (mSType) {
             case TY_ST:
             case TY_NSTB:

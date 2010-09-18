@@ -348,17 +348,13 @@ void AccountConnection::syncChanges(bool force)
 }
 
 void AccountConnection::updateCharacterPoints(int charId, int charPoints,
-                                              int corrPoints,
-                                              int attribId,
-                                              int attribValue)
+                                              int corrPoints)
 {
     mSyncMessages++;
     mSyncBuffer->writeByte(SYNC_CHARACTER_POINTS);
     mSyncBuffer->writeLong(charId);
     mSyncBuffer->writeLong(charPoints);
     mSyncBuffer->writeLong(corrPoints);
-    mSyncBuffer->writeByte(attribId);
-    mSyncBuffer->writeLong(attribValue);
     syncChanges();
 }
 
