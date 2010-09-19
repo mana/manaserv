@@ -64,7 +64,7 @@ bool AccountConnection::start(int gameServerPort)
     const std::string gameServerAddress =
         Configuration::getValue("net_gameServerAddress", "localhost");
     const std::string password =
-        Configuration::getValue("net_password", "P@s$w0rd");
+        Configuration::getValue("net_password", "changeMe");
 
     // Register with the account server and send the list of maps we handle
     MessageOut msg(GAMSG_REGISTER);

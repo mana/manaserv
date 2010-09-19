@@ -65,7 +65,7 @@ bool ChatChannelManager::tryNewPublicChannel(const std::string &name)
     }
 
     // Checking strings for length and double quotes
-    unsigned maxNameLength = Configuration::getValue("chat_maxChannelNameLength", 150);
+    unsigned maxNameLength = Configuration::getValue("chat_maxChannelNameLength", 15);
     if (name.empty() ||
         name.length() > maxNameLength ||
         stringFilter->findDoubleQuotes(name))

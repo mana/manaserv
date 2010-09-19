@@ -198,7 +198,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 LOG_DEBUG("Item database of game server has a wrong version");
                 outMsg.writeShort(DATA_VERSION_OUTDATED);
             }
-            if (password == Configuration::getValue("net_password", "P@s$w0rd"))
+            if (password == Configuration::getValue("net_password", "changeMe"))
             {
                 outMsg.writeShort(PASSWORD_OK);
                 comp->send(outMsg);

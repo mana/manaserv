@@ -171,7 +171,7 @@
  <option name="account_minEmailLength" value="7" />
  <option name="account_maxEmailLength" value="128" />
  <option name="account_minNameLength" value="4" />
- <option name="account_maxNameLength" value="16" />
+ <option name="account_maxNameLength" value="15" />
  <option name="account_minPasswordLength" value="6" />
  <option name="account_maxPasswordLength" value="25" />
  <option name="account_maxCharacters" value="3" />
@@ -183,7 +183,7 @@
 -->
 
  <option name="char_numHairStyles" value="17" />
- <option name="char_numHairColors" value="9" />
+ <option name="char_numHairColors" value="11" />
  <option name="char_numGenders" value="2" />
  <option name="char_minNameLength" value="4" />
  <option name="char_maxNameLength" value="25" />
@@ -196,17 +196,17 @@
      Respawn coordinates on the start map:
      In pixels, not in tiles.
  -->
- <option name="char_startX" value="720"/>
- <option name="char_startY" value="840"/>
+ <option name="char_startX" value="1024"/>
+ <option name="char_startY" value="1024"/>
 
  <!-- Respawn options -->
- <option name="char_respawnMap" value="4"/>
+ <option name="char_respawnMap" value="1"/>
  <!--
      Respawn coordinates on the respawn map:
      In pixels, not in tiles.
  -->
- <option name="char_respawnX" value="1000"/>
- <option name="char_respawnY" value="1000"/>
+ <option name="char_respawnX" value="1024"/>
+ <option name="char_respawnY" value="1024"/>
 
  <!-- Default Map id at character loading -->
  <option name="char_defaultMap" value="1" />
@@ -226,19 +226,19 @@
  The time in seconds an item standing on the floor will remain before vanishing.
  Set it to 0 to disable it.
  -->
- <option name="game_floorItemDecayTime" value="10" />
+ <option name="game_floorItemDecayTime" value="0" />
 
  <!--
  Set how much time the auto-regeneration is stopped when hurt.
  (in 1/10th seconds.)
  -->
- <option name="game_hpRegenBreakAfterHit" value="50" />
+ <option name="game_hpRegenBreakAfterHit" value="0" />
 
  <!--
  Default PVP (Player-versus-player) rule on a map not setting this property.
  Values available: none (No PVP), free (All PVP).
  -->
- <option name="game_defaultPvp" value="free" />
+ <option name="game_defaultPvp" value="" />
 
 <!-- end of game configuration ******************************************** -->
 
