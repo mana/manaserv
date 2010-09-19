@@ -122,8 +122,7 @@ int Being::damage(Actor *source, const Damage &damage)
                   << " damage. HP: "
                   << HP.getModifiedAttribute() << "/"
                   << mAttributes.at(ATTR_MAX_HP).getModifiedAttribute());
-        HP.setBase(HP.getBase() - HPloss);
-        updateDerivedAttributes(ATTR_HP);
+        setAttribute(ATTR_HP, HP.getBase() - HPloss);
         // No HP regen after being hit if this is set.
         setTimerSoft(T_B_HP_REGEN,
                      Configuration::getValue("game_hpRegenBreakAfterHit", 0));
@@ -145,8 +144,7 @@ void Being::heal()
 
     // Reset all modifications present in hp.
     hp.clearMods();
-    hp.setBase(maxHp.getModifiedAttribute());
-    updateDerivedAttributes(ATTR_HP);
+    setAttribute(ATTR_HP, maxHp.getModifiedAttribute());
 }
 
 void Being::heal(int gain)
@@ -157,10 +155,9 @@ void Being::heal(int gain)
         return; // Full hp, do nothing.
 
     // Cannot go over maximum hitpoints.
-    hp.setBase(hp.getBase() + gain);
+    setAttribute(ATTR_HP, hp.getBase() + gain);
     if (hp.getModifiedAttribute() > maxHp.getModifiedAttribute())
-        hp.setBase(maxHp.getModifiedAttribute());
-    updateDerivedAttributes(ATTR_HP);
+        setAttribute(ATTR_HP, maxHp.getModifiedAttribute());
 }
 
 void Being::died()
@@ -470,7 +467,7 @@ void Being::update()
     // Only update HP when it actually changed to avoid network noise
     if (newHP != oldHP)
     {
-        mAttributes.at(ATTR_HP).setBase(newHP);
+        setAttribute(ATTR_HP, newHP);
         raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
     }
 
