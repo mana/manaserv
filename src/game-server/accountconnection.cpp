@@ -104,19 +104,21 @@ void AccountConnection::processMessage(MessageIn &msg)
             if (msg.readShort() != DATA_VERSION_OK)
             {
                 LOG_ERROR("Item database is outdated! Please update to "
-                    "prevent inconsistencies");
-                stop();  // disconnect gracefully from account server
-                exit(1); // stop gameserver to prevent inconsistencies
+                          "prevent inconsistencies");
+                stop();  // Disconnect gracefully from account server.
+                // Stop gameserver to prevent inconsistencies.
+                exit(EXIT_DB_EXCEPTION);
             }
             else
             {
-                LOG_DEBUG("Local item database is in sync with account server.");
+                LOG_DEBUG("Local item database is "
+                          "in sync with account server.");
             }
             if (msg.readShort() != PASSWORD_OK)
             {
-                LOG_ERROR("This game server sent a invaild password");
+                LOG_ERROR("This game server sent a invalid password");
                 stop();
-                exit(1);
+                exit(EXIT_BAD_CONFIG_PARAMETER);
             }
         } break;
 

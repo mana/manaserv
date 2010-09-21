@@ -138,7 +138,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
     if (absPathFile.empty())
     {
         LOG_FATAL("Account handler: Could not find " << attrFile << "!");
-        exit(3);
+        exit(EXIT_XML_NOT_FOUND);
     }
 
     XML::Document doc(absPathFile, int());
@@ -147,7 +147,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
     {
         LOG_FATAL("Account handler: " << attrFile << ": "
                   << " is not a valid database file!");
-        exit(3);
+        exit(EXIT_XML_BAD_PARAMETER);
     }
 
     for_each_xml_child_node(attributenode, node)
@@ -187,7 +187,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
                 LOG_FATAL("Account handler: " << attrFile << ": "
                           << " The characters starting points "
                           << "are incomplete or not set!");
-                exit(3);
+                exit(EXIT_XML_BAD_PARAMETER);
             }
         }
     } // End for each XML nodes
@@ -197,7 +197,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
     {
         LOG_FATAL("Account handler: " << attrFile << ": "
                   << "No modifiable attributes found!");
-        exit(3);
+        exit(EXIT_XML_BAD_PARAMETER);
     }
 
     // Sanity checks on starting points.
@@ -208,7 +208,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
         LOG_FATAL("Account handler: " << attrFile << ": "
                   << "Character's point values make "
                   << "the character's creation impossible!");
-        exit(3);
+        exit(EXIT_XML_BAD_PARAMETER);
     }
 
     LOG_DEBUG("Character start points: " << startPoints << " (Min: "
@@ -358,15 +358,15 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         return;
     }
 
-    // The client successfully logged in
+    // The client successfully logged in...
 
-    // set lastLogin date of the account
+    // Set lastLogin date of the account.
     time_t login;
     time(&login);
     acc->setLastLogin(login);
     storage->updateLastLogin(acc);
 
-    // Associate account with connection
+    // Associate account with connection.
     client.setAccount(acc);
     client.status = CLIENT_CONNECTED;
 
@@ -502,11 +502,11 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
         acc->setPassword(sha256(password));
         // We hash email server-side for additional privacy
         // we ask for it again when we need it and verify it
-        // through comparing it with the hash
+        // through comparing it with the hash.
         acc->setEmail(sha256(email));
         acc->setLevel(AL_PLAYER);
 
-        // set the date and time of the account registration, and the last login
+        // Set the date and time of the account registration, and the last login
         time_t regdate;
         time(&regdate);
         acc->setRegistrationDate(regdate);
@@ -723,7 +723,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             return;
         }
 
-        // LATER_ON: Add race, face and maybe special attributes.
+        // TODO: Add race, face and maybe special attributes.
 
         // Customization of character's attributes...
         std::vector<int> attributes = std::vector<int>(initAttr.size(), 0);

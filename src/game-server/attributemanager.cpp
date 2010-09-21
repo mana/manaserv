@@ -43,7 +43,7 @@ void AttributeManager::reload()
     {
         LOG_FATAL("Attribute Manager: Could not find "
                   << mAttributeReferenceFile << "!");
-        exit(3);
+        exit(EXIT_XML_NOT_FOUND);
     }
 
     XML::Document doc(absPathFile, int());
@@ -52,7 +52,7 @@ void AttributeManager::reload()
     {
         LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
                   << " is not a valid database file!");
-        exit(3);
+        exit(EXIT_XML_BAD_PARAMETER);
     }
 
     LOG_INFO("Loading attribute reference...");

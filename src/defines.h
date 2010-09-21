@@ -21,7 +21,24 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+// Precomputed square-root of 2.
 #define SQRT2 1.4142135623730950488
+
+/**
+ * Exit value codes are thrown back at servers exit to reflect their exit state.
+ */
+enum exitValue
+{
+    EXIT_NORMAL = 0,
+    EXIT_CONFIG_NOT_FOUND, // The main configuration file wasn't found.
+    EXIT_BAD_CONFIG_PARAMETER, // The configuration file has a wrong parameter.
+    EXIT_XML_NOT_FOUND, // A required base xml configuration file wasn't found.
+    EXIT_XML_BAD_PARAMETER, // The configuration of an xml file is faulty.
+    EXIT_MAP_FILE_NOT_FOUND, // No map files found.
+    EXIT_DB_EXCEPTION, // The database is invalid or unreachable.
+    EXIT_NET_EXCEPTION, // The server was unable to start network connections.
+    EXIT_OTHER_EXCEPTION
+};
 
 /**
  * Enumeration type for account levels.
@@ -31,7 +48,7 @@
  * A gm would have permissions of 11 (AL_PLAYER | AL_TESTER | AL_GM)
  * A admin would have permissions of 255 (*)
  */
-enum
+enum accessLevel
 {
     AL_BANNED =   0,     /**< This user is currently banned. */
     AL_PLAYER =   1,     /**< User has regular rights. */
@@ -49,7 +66,7 @@ enum
      * Memeber with KICK can remove other users
      * Members with OWNER can invite users and set permissions
      */
-enum
+enum  guildAccessLevel
 {
     GAL_NONE = 0,
     GAL_TOPIC_CHANGE = 1,
@@ -62,6 +79,7 @@ enum
  * Determine the default area in which a character is aware of other beings
  */
 const int DEFAULT_INTERACTION_TILES_AREA = 20;
+
 /**
  * Default tile length in pixel
  */
@@ -106,10 +124,11 @@ enum Element
 
 /**
  * A series of hardcoded attributes that must be defined.
- * Much of these serve only to indicate derivatives, and so would not be
+ * FIXME: Much of these serve only to indicate derivatives, and so would not be
  * needed once this is no longer a hardcoded system.
  */
 
+// Base Statistics
 #define ATTR_STR                1
 #define ATTR_AGI                2
 #define ATTR_VIT                3
@@ -117,6 +136,7 @@ enum Element
 #define ATTR_DEX                5
 #define ATTR_WIL                6
 
+// Derived attributes
 #define ATTR_ACCURACY           7
 #define ATTR_DEFENSE            8
 #define ATTR_DODGE              9
@@ -134,6 +154,8 @@ enum Element
 // Separate primary movespeed (tiles * second ^-1) and derived movespeed (raw)
 #define ATTR_MOVE_SPEED_TPS     16
 #define ATTR_MOVE_SPEED_RAW     17
+
+// Money and inventory size attributes.
 #define ATTR_GP                 18
 #define ATTR_INV_CAPACITY       19
 
@@ -146,26 +168,36 @@ enum Element
 #define MOB_ATTR_MAG_ATK        22
 
 /**
- * Attribute types. Can be one of stackable, non stackable, or non stackable bonus.
+ * Attribute types. Can be one of stackable, non stackable,
+ * or non stackable bonus.
  * @todo non-stackable malus layers
  */
-
-enum AT_TY {
+enum AT_TY
+{
     TY_ST,
     TY_NST,
     TY_NSTB,
-    TY_NONE // Should only be used on types that have not yet been properly defined
+    TY_NONE // Should only be used on types
+            // that have not yet been properly defined.
 };
 
-enum AME_TY {
+/**
+ * Attribute augmentation methods.
+ * Can be additive or multiplicative.
+ */
+enum AME_TY
+{
     AME_MULT,
     AME_ADD
 };
 
-struct AttributeInfoType {
+
+struct AttributeInfoType
+{
         AT_TY sType;
         AME_TY eType;
-        AttributeInfoType(AT_TY s, AME_TY e) : sType(s), eType(e) {}
+        AttributeInfoType(AT_TY s, AME_TY e) : sType(s), eType(e)
+        {}
 };
 
 #endif // DEFINES_H

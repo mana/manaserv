@@ -132,7 +132,7 @@ static void initializeConfiguration(std::string configPath = std::string())
         {
             LOG_FATAL("Refusing to run without configuration!" << std::endl
             << "Invalid config path: " << configPath << ".");
-            exit(1);
+            exit(EXIT_CONFIG_NOT_FOUND);
         }
     }
 
@@ -142,7 +142,7 @@ static void initializeConfiguration(std::string configPath = std::string())
     if (Configuration::getValue("net_password", "") == "")
     {
         LOG_FATAL("SECURITY WARNING: 'net_password' not set!");
-        exit(3);
+        exit(EXIT_BAD_CONFIG_PARAMETER);
     }
 }
 
@@ -179,7 +179,7 @@ static void initializeServer()
     if (MapManager::initialize(DEFAULT_MAPSDB_FILE) < 1)
     {
         LOG_FATAL("The Game Server can't find any valid/available maps.");
-        exit(2);
+        exit(EXIT_MAP_FILE_NOT_FOUND);
     }
     attributeManager->initialize();
     SkillManager::initialize(DEFAULT_SKILLSDB_FILE);
@@ -203,7 +203,7 @@ static void initializeServer()
     if (enet_initialize() != 0)
     {
         LOG_FATAL("An error occurred while initializing ENet");
-        exit(2);
+        exit(EXIT_NET_EXCEPTION);
     }
 
     // Set enet to quit on exit.
@@ -263,7 +263,7 @@ static void printHelp()
               << "                        - 4. Plus debugging information." << std::endl
               << "     --port <n>      : Set the default port to listen on."
               << std::endl;
-    exit(0);
+    exit(EXIT_NORMAL);
 }
 
 struct CommandLineOptions
@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
     if (!gameHandler->startListen(options.port))
     {
         LOG_FATAL("Unable to create an ENet server host.");
-        return 3;
+        return EXIT_NET_EXCEPTION;
     }
 
     // Initialize world timer
@@ -463,4 +463,6 @@ int main(int argc, char *argv[])
     gameHandler->stopListen();
     accountHandler->stop();
     deinitializeServer();
+
+    return EXIT_NORMAL;
 }
