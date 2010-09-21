@@ -148,9 +148,10 @@ static void initialize()
     // Initialize the logger.
     Logger::setLogFile(logFile);
 
-    // write the messages to both the screen and the log file.
-    Logger::setTeeMode(true);
-
+    // Write the messages to both the screen and the log file.
+    Logger::setTeeMode(
+                      Configuration::getBoolValue("log_accountToStandardOutput",
+                                                  true));
     LOG_INFO("Using log file: " << logFile);
 
     // Indicate in which file the statistics are put.
@@ -336,15 +337,20 @@ static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
  */
 int main(int argc, char *argv[])
 {
-#ifdef PACKAGE_VERSION
-    LOG_INFO("The Mana Account+Chat Server v" << PACKAGE_VERSION);
-#endif
-
     // Parse command line options
     CommandLineOptions options;
     parseOptions(argc, argv, options);
 
     initializeConfiguration(options.configPath);
+
+    // General initialization
+    initialize();
+
+#ifdef PACKAGE_VERSION
+    LOG_INFO("The Mana Account+Chat Server v" << PACKAGE_VERSION);
+#else
+    LOG_INFO("The Mana Account+Chat Server (unknown version)");
+#endif
 
     if (!options.verbosityChanged)
         options.verbosity = static_cast<Logger::Level>(
@@ -355,9 +361,6 @@ int main(int argc, char *argv[])
     if (!options.portChanged)
         options.port = Configuration::getValue("net_accountServerPort",
                                                options.port);
-
-    // General initialization
-    initialize();
 
     std::string host = Configuration::getValue("net_listenHost", std::string());
     if (!AccountClientHandler::initialize(DEFAULT_ATTRIBUTEDB_FILE,

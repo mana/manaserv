@@ -168,7 +168,9 @@ static void initializeServer()
     Logger::setLogFile(logFile);
 
     // Write the messages to both the screen and the log file.
-    Logger::setTeeMode(true);
+    Logger::setTeeMode(Configuration::getBoolValue("log_gameToStandardOutput",
+                                                   true));
+
     LOG_INFO("Using log file: " << logFile);
 
     // --- Initialize the managers
@@ -341,16 +343,20 @@ static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
  */
 int main(int argc, char *argv[])
 {
-    int elapsedWorldTicks;
-#ifdef PACKAGE_VERSION
-    LOG_INFO("The Mana Game Server v" << PACKAGE_VERSION);
-#endif
-
     // Parse command line options
     CommandLineOptions options;
     parseOptions(argc, argv, options);
 
     initializeConfiguration(options.configPath);
+
+    // General initialization
+    initializeServer();
+
+#ifdef PACKAGE_VERSION
+    LOG_INFO("The Mana Game Server v" << PACKAGE_VERSION);
+#else
+    LOG_INFO("The Mana Game Server (unknown version)");
+#endif
 
     if (!options.verbosityChanged)
         options.verbosity = static_cast<Logger::Level>(
@@ -361,9 +367,6 @@ int main(int argc, char *argv[])
     if (!options.portChanged)
         options.port = Configuration::getValue("net_gameServerPort",
                                                options.port);
-
-    // General initialization
-    initializeServer();
 
     // Make an initial attempt to connect to the account server
     // Try again after longer and longer intervals when connection fails.
@@ -391,6 +394,7 @@ int main(int argc, char *argv[])
 
     // Account connection lost flag
     bool accountServerLost = false;
+    int elapsedWorldTicks = 0;
 
     while (running)
     {
