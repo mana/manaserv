@@ -1,16 +1,83 @@
 --
--- SQLite does not support removing of columns, so we'll just let them be
+-- SQLite does not support removing of columns, so we'll need to recreate the
+-- table and copy the data over.
 --
 
---ALTER TABLE `mana_characters` DROP `money`;
---ALTER TABLE `mana_characters` DROP `str`;
---ALTER TABLE `mana_characters` DROP `agi`;
---ALTER TABLE `mana_characters` DROP `vit`;
---ALTER TABLE `mana_characters` DROP `int`;
---ALTER TABLE `mana_characters` DROP `dex`;
---ALTER TABLE `mana_characters` DROP `will`;
+BEGIN TRANSACTION;
 
-CREATE TABLE mana_char_attr
+CREATE TEMPORARY TABLE mana_characters_backup
+(
+   id           INTEGER     PRIMARY KEY,
+   user_id      INTEGER     NOT NULL,
+   name         TEXT        NOT NULL UNIQUE,
+   gender       INTEGER     NOT NULL,
+   hair_style   INTEGER     NOT NULL,
+   hair_color   INTEGER     NOT NULL,
+   level        INTEGER     NOT NULL,
+   char_pts     INTEGER     NOT NULL,
+   correct_pts  INTEGER     NOT NULL,
+   x            INTEGER     NOT NULL,
+   y            INTEGER     NOT NULL,
+   map_id       INTEGER     NOT NULL,
+   --
+   FOREIGN KEY (user_id) REFERENCES mana_accounts(id)
+);
+
+INSERT INTO mana_characters_backup SELECT
+    id,
+    user_id,
+    name,
+    gender,
+    hair_style,
+    hair_color,
+    level,
+    char_pts,
+    correct_pts,
+    x,
+    y,
+    map_id FROM mana_characters;
+
+DROP TABLE mana_characters;
+
+CREATE TABLE mana_characters
+(
+   id           INTEGER     PRIMARY KEY,
+   user_id      INTEGER     NOT NULL,
+   name         TEXT        NOT NULL UNIQUE,
+   gender       INTEGER     NOT NULL,
+   hair_style   INTEGER     NOT NULL,
+   hair_color   INTEGER     NOT NULL,
+   level        INTEGER     NOT NULL,
+   char_pts     INTEGER     NOT NULL,
+   correct_pts  INTEGER     NOT NULL,
+   x            INTEGER     NOT NULL,
+   y            INTEGER     NOT NULL,
+   map_id       INTEGER     NOT NULL,
+   --
+   FOREIGN KEY (user_id) REFERENCES mana_accounts(id)
+);
+
+CREATE INDEX mana_characters_user ON mana_characters ( user_id );
+CREATE UNIQUE INDEX mana_characters_name ON mana_characters ( name );
+
+INSERT INTO mana_characters SELECT
+    id,
+    user_id,
+    name,
+    gender,
+    hair_style,
+    hair_color,
+    level,
+    char_pts,
+    correct_pts,
+    x,
+    y,
+    map_id FROM mana_characters_backup;
+
+DROP TABLE mana_characters_backup;
+
+
+CREATE TABLE IF NOT EXISTS mana_char_attr
 (
    char_id      INTEGER     NOT NULL,
    attr_id      INTEGER     NOT NULL,
@@ -20,9 +87,9 @@ CREATE TABLE mana_char_attr
    FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX mana_char_attr_char ON mana_char_attr ( char_id );
+CREATE INDEX IF NOT EXISTS mana_char_attr_char ON mana_char_attr ( char_id );
 
-CREATE TABLE mana_char_equips
+CREATE TABLE IF NOT EXISTS mana_char_equips
 (
     id               INTEGER    PRIMARY KEY,
     owner_id         INTEGER    NOT NULL,
@@ -37,3 +104,5 @@ UPDATE mana_world_states
    SET value      = '11',
        moddate    = strftime('%s','now')
  WHERE state_name = 'database_version';
+
+COMMIT;
