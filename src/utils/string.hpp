@@ -22,6 +22,7 @@
 #define UTILS_STRING_H
 
 #include <string>
+#include <sstream>
 
 namespace utils
 {
@@ -67,6 +68,19 @@ namespace utils
      * @param str the string to trim spaces off
      */
     void trim(std::string &str);
+
+    /**
+     * Converts the given value to a string using std::stringstream.
+     *
+     * @param arg the value to convert to a string
+     * @return the string representation of arg
+     */
+    template<typename T> std::string toString(const T &arg)
+    {
+        std::stringstream ss;
+        ss << arg;
+        return ss.str();
+    }
 }
 
 #endif // UTILS_STRING_H

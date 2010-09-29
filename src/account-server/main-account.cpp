@@ -160,6 +160,16 @@ static void initialize()
 
     LOG_INFO("Using statistics file: " << statisticsFile);
 
+    // Set up the options related to log rotation.
+    Logger::enableLogRotation(Configuration::getBoolValue("log_enableRotation",
+                                                          false));
+
+    Logger::setMaxLogfileSize(Configuration::getValue("log_maxFileSize",
+                                                      1024));
+
+    Logger::setSwitchLogEachDay(Configuration::getBoolValue("log_perDay",
+                                                            false));
+
     ResourceManager::initialize();
 
     // Open database

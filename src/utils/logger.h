@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -88,10 +89,11 @@ class Logger
          * contents are removed.
          *
          * @param logFile the log file name (may include path).
+         * @param append whether the file is cleaned up before logging in.
          *
          * @exception std::ios::failure if the log file could not be opened.
          */
-        static void setLogFile(const std::string &logFile);
+        static void setLogFile(const std::string &logFile, bool append = false);
 
         /**
          * Add/removes the timestamp.
@@ -120,6 +122,31 @@ class Logger
         { mVerbosity = verbosity; }
 
         /**
+         * Enable logrotation based on the maximum filesize given in
+         * setMaxLogfileSize.
+         *
+         * @param enable Set to true to enable logrotation.
+         */
+        static void enableLogRotation(bool enable = true)
+        { mLogRotation = enable; }
+
+        /**
+         * Sets the maximum size of a logfile before logrotation occurs.
+         *
+         * @param kiloBytes Maximum size of logfile in bytes. Defaults to 1MB.
+         */
+        static void setMaxLogfileSize(long kiloBytes = 1024)
+        { mMaxFileSize = kiloBytes; }
+
+        /**
+         * Sets whether the logfile switches when changing date.
+         *
+         * @param switchLogEachDay Keeps whether the parameter is activated.
+         */
+        static void setSwitchLogEachDay(bool switchLogEachDay)
+        { mSwitchLogEachDay = switchLogEachDay; }
+
+        /**
          * Logs a generic message.
          *
          * @param msg the message to log.
@@ -136,6 +163,14 @@ class Logger
         static bool mHasTimestamp; /**< Timestamp flag. */
         static bool mTeeMode;      /**< Tee mode flag. */
 
+        static std::string mFilename; /**< Name of the current logfile. */
+        /** Enable rotation of logfiles by size. */
+        static bool mLogRotation;
+        /** Maximum size of current logfile in bytes */
+        static long mMaxFileSize;
+        /** Sets whether the logfile switches when changing date. */
+        static bool mSwitchLogEachDay;
+
         /**
          * Logs a generic message.
          *
@@ -147,6 +182,12 @@ class Logger
          */
         static void output(std::ostream &os, const std::string &msg,
                            const char *prefix);
+
+        /**
+         * Switch the log file based on a maximum size
+         * and/or and a date change.
+         */
+        static void switchLogs();
 };
 
 

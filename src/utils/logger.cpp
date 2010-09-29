@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -19,6 +20,8 @@
  */
 
 #include "logger.h"
+#include "common/resourcemanager.hpp"
+#include "utils/string.hpp"
 
 #include <ctime>
 #include <fstream>
@@ -31,11 +34,24 @@
 
 namespace utils
 {
-
-static std::ofstream mLogFile;     /**< Log file. */
-bool Logger::mHasTimestamp = true; /**< Timestamp flag. */
-bool Logger::mTeeMode = false;     /**< Tee mode flag. */
-Logger::Level Logger::mVerbosity = Logger::Info; /**< Verbosity level. */
+/** Log file. */
+static std::ofstream mLogFile;
+/** current log filename */
+std::string Logger::mFilename = "";
+/** Timestamp flag. */
+bool Logger::mHasTimestamp = true;
+/** Tee mode flag. */
+bool Logger::mTeeMode = false;
+/** Verbosity level. */
+Logger::Level Logger::mVerbosity = Logger::Info;
+/** Enables logrotation by size of the logfile. */
+bool Logger::mLogRotation = false;
+/** Maximum size of current logfile. */
+long Logger::mMaxFileSize = 1024; // 1 Mb
+/** Switch log file each day. */
+bool Logger::mSwitchLogEachDay = false;
+/** Last call date */
+static std::string mLastCallDate = "";
 
 /**
   * Gets the current time.
@@ -47,29 +63,72 @@ static std::string getCurrentTime()
     time_t now;
     tm local;
 
-    // get current time_t value
+    // Get current time_t value
     time(&now);
 
-    // convert time_t to tm struct to break the time into individual
-    // constituents
+    // Convert time_t to tm struct to break the time into individual
+    // constituents.
     local = *(localtime(&now));
 
-    // stringify the time, the format is: [hh:mm:ss]
+    // Stringify the time, the format is: [hh-mm-ss]
     using namespace std;
     ostringstream os;
-    os << "[" << setw(2) << setfill('0') << local.tm_hour
-       << ":" << setw(2) << setfill('0') << local.tm_min
-       << ":" << setw(2) << setfill('0') << local.tm_sec
-       << "]";
+    os << setw(2) << setfill('0') << local.tm_hour
+       << "-" << setw(2) << setfill('0') << local.tm_min
+       << "-" << setw(2) << setfill('0') << local.tm_sec;
 
     return os.str();
+}
+
+/**
+  * Gets the current date.
+  *
+  * @return the current date as string.
+  */
+static std::string getCurrentDate()
+{
+    time_t now;
+    tm local;
+
+    // Get current time_t value
+    time(&now);
+
+    // Convert time_t to tm struct to break the time into individual
+    // constituents.
+    local = *(localtime(&now));
+
+    // Stringify the time, the format is: yyyy-mm-dd
+    using namespace std;
+    ostringstream os;
+    os << setw(4) << setfill('0') << (local.tm_year + 1900)
+       << "-" << setw(2) << setfill('0') << local.tm_mon
+       << "-" << setw(2) << setfill('0') << local.tm_mday;
+
+    return os.str();
+}
+
+/**
+  * Check whether the day has changed since the last call.
+  *
+  * @return whether the day has changed.
+  */
+static bool getDayChanged()
+{
+    static std::string date = getCurrentDate();
+    if (mLastCallDate.compare(date))
+    {
+        // Reset the current date for next call.
+        mLastCallDate = date;
+        return true;
+    }
+    return false;
 }
 
 void Logger::output(std::ostream &os, const std::string &msg, const char *prefix)
 {
     if (mHasTimestamp)
     {
-        os << getCurrentTime() << ' ';
+        os << "[" << getCurrentTime() << "]" << ' ';
     }
 
     if (prefix)
@@ -80,7 +139,7 @@ void Logger::output(std::ostream &os, const std::string &msg, const char *prefix
     os << msg << std::endl;
 }
 
-void Logger::setLogFile(const std::string &logFile)
+void Logger::setLogFile(const std::string &logFile, bool append)
 {
     // Close the current log file.
     if (mLogFile.is_open())
@@ -88,8 +147,12 @@ void Logger::setLogFile(const std::string &logFile)
         mLogFile.close();
     }
 
-    // Open the file for output and remove the former file contents.
-    mLogFile.open(logFile.c_str(), std::ios::trunc);
+    // Open the file for output
+    // and remove the former file contents depending on the append flag.
+    mLogFile.open(logFile.c_str(),
+                  append ? std::ios::ate : std::ios::trunc);
+    mFilename = logFile;
+    mLastCallDate = getCurrentDate();
 
     if (!mLogFile.is_open())
     {
@@ -97,7 +160,7 @@ void Logger::setLogFile(const std::string &logFile)
     }
     else
     {
-        // by default the streams do not throw any exception
+        // By default the streams do not throw any exception
         // let std::ios::failbit and std::ios::badbit throw exceptions.
         mLogFile.exceptions(std::ios::failbit | std::ios::badbit);
     }
@@ -127,6 +190,7 @@ void Logger::output(const std::string &msg, Level atVerbosity)
         if (open)
         {
             output(mLogFile, msg, prefixes[atVerbosity]);
+            switchLogs();
         }
 
         if (!open || mTeeMode)
@@ -134,6 +198,60 @@ void Logger::output(const std::string &msg, Level atVerbosity)
             output(atVerbosity <= Warn ? std::cerr : std::cout,
                    msg, prefixes[atVerbosity]);
         }
+    }
+}
+
+void Logger::switchLogs()
+{
+    // Handles logswitch if enabled
+    // and if at least one switch condition permits it.
+    if (!mLogRotation || (mMaxFileSize <= 0 && !mSwitchLogEachDay))
+        return;
+
+    // Update current filesize
+    long mFileSize = mLogFile.tellp();
+
+    if ((mFileSize >= mMaxFileSize * 1024)
+        || (mSwitchLogEachDay && getDayChanged()))
+    {
+        // Close logfile, rename it and open a new one
+        mLogFile.flush();
+        mLogFile.close();
+
+        // Stringify the time, the format is: yyyy-mm-dd_hh-mm-ss-logFilename.
+        using namespace std;
+        ostringstream os;
+        os << getCurrentDate();
+
+        int fileNum = 1;
+        std::string newFileName = os.str() + "-" + toString<int>(fileNum)
+                                  +  "_" + mFilename;
+        // Keeping a hard limit of 100 files per day.
+        while (ResourceManager::exists(newFileName) && fileNum < 100)
+        {
+            fileNum++;
+            newFileName = os.str() + "-" + toString<int>(fileNum)
+                          +  "_" + mFilename;
+        }
+
+        if (rename(mFilename.c_str(), newFileName.c_str()))
+        {
+            ostringstream errorOs;
+            errorOs << "Error renaming file: " << mFilename << " to: "
+            << newFileName << std::endl << "Continuing on the same log file.";
+            perror(errorOs.str().c_str());
+
+            // Continue appending on the original file.
+            setLogFile(mFilename, true);
+        }
+        else
+        {
+            // Keep the logging after emptying the original log file.
+            setLogFile(mFilename);
+        }
+
+        mLogFile << "---- Continue logging from former file " << os.str()
+                 << " ----" << std::endl;
     }
 }
 

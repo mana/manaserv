@@ -173,6 +173,16 @@ static void initializeServer()
 
     LOG_INFO("Using log file: " << logFile);
 
+    // Set up the options related to log rotation.
+    Logger::enableLogRotation(Configuration::getBoolValue("log_enableRotation",
+                                                          false));
+
+    Logger::setMaxLogfileSize(Configuration::getValue("log_maxFileSize",
+                                                      1024));
+
+    Logger::setSwitchLogEachDay(Configuration::getBoolValue("log_perDay",
+                                                            false));
+
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.
     stringFilter = new utils::StringFilter;
