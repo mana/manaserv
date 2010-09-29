@@ -88,6 +88,20 @@
  <option name="log_gameServerLogLevel" value="2"/>
  <option name="log_accountServerLogLevel" value="2"/>
 
+ <!--
+ Enable log rotation when one log file reaches a max size
+ and/or the current day has changed.
+ -->
+ <option name="log_enableRotation" value="false"/>
+ <!--
+ Set the max log file size. Disabled if set to 0.
+ -->
+ <option name="log_maxFileSize" value="1024"/>
+ <!--
+ Change the log file each day.
+ -->
+ <option name="log_perDay" value="false"/>
+
 <!-- end of logs configuration ****************************************** -->
 
 <!-- Network options configuration ********************************************
