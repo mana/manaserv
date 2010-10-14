@@ -24,6 +24,7 @@
 
 #include "utils/logger.h"
 
+#include <sys/stat.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -53,8 +54,42 @@ void ResourceManager::initialize()
     PHYSFS_addToSearchPath(serverDataPath.c_str(), 1);
 }
 
-bool ResourceManager::exists(const std::string &path)
+/**
+ * This function tries to check if a file exists
+ * based on the existence of stats about it.
+ * Because simply trying to open it and check for failure
+ * is a bad thing, as you don't know if you weren't able
+ * to open it because it doesn't exist or because
+ * you don't have the right to.
+ */
+static bool fileExists(const std::string& filename)
 {
+    struct stat fileStat;
+    bool fileExist = false;
+    int statValue = -1;
+
+    // Try to get the file attributes
+    statValue = stat(filename.c_str(), &fileStat);
+
+    if(statValue == 0)
+    {
+        // The file attributes exists, so the file does, too.
+        fileExist = true;
+    }
+    else
+    {
+        // Impossible to get the file attributes.
+        fileExist = false;
+    }
+
+    return fileExist;
+}
+
+bool ResourceManager::exists(const std::string &path, bool lookInSearchPath)
+{
+    if (!lookInSearchPath)
+        return fileExists(path);
+
     return PHYSFS_exists(path.c_str());
 }
 
@@ -99,4 +134,19 @@ char *ResourceManager::loadFile(const std::string &fileName, int &fileSize)
     // Add a trailing null character, so that the file can be used as a string
     buffer[fileSize] = 0;
     return buffer;
+}
+
+ResourceManager::splittedPath ResourceManager::splitFileNameAndPath(
+                                                const std::string &fullFilePath)
+{
+    // We'll reversed-search for '/' or'\' and extract the substrings
+    // corresponding to the filename and the path separately.
+    size_t slashPos = fullFilePath.find_last_of("/\\");
+
+    ResourceManager::splittedPath splittedFilePath;
+    // Note the last slash is kept in the path name.
+    splittedFilePath.path = fullFilePath.substr(0, slashPos + 1);
+    splittedFilePath.file = fullFilePath.substr(slashPos + 1);
+
+    return splittedFilePath;
 }

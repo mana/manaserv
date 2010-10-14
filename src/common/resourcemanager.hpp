@@ -25,6 +25,13 @@
 
 namespace ResourceManager
 {
+    // A structure retaining the path and file names separately.
+    struct splittedPath
+    {
+        std::string path;
+        std::string file;
+    };
+
     /**
      * Searches for zip files and adds them to PhysFS search path.
      */
@@ -33,7 +40,7 @@ namespace ResourceManager
     /**
      * Checks whether the given file or directory exists in the search path
      */
-    bool exists(const std::string &path);
+    bool exists(const std::string &path, bool lookInSearchPath = true);
 
     /**
      * Returns the real file-system path of the resource with the given
@@ -53,6 +60,13 @@ namespace ResourceManager
      * @note The array contains an extra \0 character at position fileSize.
      */
     char *loadFile(const std::string &fileName, int &fileSize);
+
+    /**
+     * Returns the filePath sub-part corresponding to the filename only.
+     * @return splittedPath: the file path ending with '/' or '\'
+     *                       and the file name alone.
+     */
+     splittedPath splitFileNameAndPath(const std::string &fullFilePath);
 }
 
 #endif

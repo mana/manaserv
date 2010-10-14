@@ -70,12 +70,12 @@ static std::string getCurrentTime()
     // constituents.
     local = *(localtime(&now));
 
-    // Stringify the time, the format is: [hh-mm-ss]
+    // Stringify the time, the format is: hh:mm:ss
     using namespace std;
     ostringstream os;
     os << setw(2) << setfill('0') << local.tm_hour
-       << "-" << setw(2) << setfill('0') << local.tm_min
-       << "-" << setw(2) << setfill('0') << local.tm_sec;
+       << ":" << setw(2) << setfill('0') << local.tm_min
+       << ":" << setw(2) << setfill('0') << local.tm_sec;
 
     return os.str();
 }
@@ -112,10 +112,10 @@ static std::string getCurrentDate()
   *
   * @return whether the day has changed.
   */
-static bool getDayChanged()
+bool getDayChanged()
 {
     static std::string date = getCurrentDate();
-    if (mLastCallDate.compare(date))
+    if (mLastCallDate != date)
     {
         // Reset the current date for next call.
         mLastCallDate = date;
@@ -209,49 +209,49 @@ void Logger::switchLogs()
         return;
 
     // Update current filesize
-    long mFileSize = mLogFile.tellp();
+    long fileSize = mLogFile.tellp();
 
-    if ((mFileSize >= mMaxFileSize * 1024)
+    if ((fileSize >= (mMaxFileSize * 1024))
         || (mSwitchLogEachDay && getDayChanged()))
     {
         // Close logfile, rename it and open a new one
         mLogFile.flush();
         mLogFile.close();
 
-        // Stringify the time, the format is: yyyy-mm-dd_hh-mm-ss-logFilename.
+        // Stringify the time, the format is: path/yyyy-mm-dd-n_logFilename.
         using namespace std;
         ostringstream os;
         os << getCurrentDate();
 
         int fileNum = 1;
-        std::string newFileName = os.str() + "-" + toString<int>(fileNum)
-                                  +  "_" + mFilename;
+        ResourceManager::splittedPath filePath =
+                               ResourceManager::splitFileNameAndPath(mFilename);
+
+        std::string newFileName;
         // Keeping a hard limit of 100 files per day.
-        while (ResourceManager::exists(newFileName) && fileNum < 100)
+        do
         {
-            fileNum++;
-            newFileName = os.str() + "-" + toString<int>(fileNum)
-                          +  "_" + mFilename;
+            newFileName = filePath.path + os.str()
+                                + "-" + toString<int>(fileNum)
+                                + "_" + filePath.file;
         }
+        while (ResourceManager::exists(newFileName, false) && ++fileNum < 100);
 
-        if (rename(mFilename.c_str(), newFileName.c_str()))
+        if (rename(mFilename.c_str(), newFileName.c_str()) != 0)
         {
-            ostringstream errorOs;
-            errorOs << "Error renaming file: " << mFilename << " to: "
-            << newFileName << std::endl << "Continuing on the same log file.";
-            perror(errorOs.str().c_str());
-
             // Continue appending on the original file.
             setLogFile(mFilename, true);
+            mLogFile << "Error renaming file: " << mFilename << " to: "
+            << newFileName << std::endl << "Keep logging on the same log file."
+            << std::endl;
         }
         else
         {
             // Keep the logging after emptying the original log file.
             setLogFile(mFilename);
+            mLogFile << "---- Continue logging from former file " << newFileName
+                     << " ----" << std::endl;
         }
-
-        mLogFile << "---- Continue logging from former file " << os.str()
-                 << " ----" << std::endl;
     }
 }
 
