@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `mana_accounts` (
     `id`           int(10)      unsigned NOT NULL auto_increment,
     `username`     varchar(64)           NOT NULL,
     `password`     varchar(64)           NOT NULL,
-    `email`        varchar(32)           NOT NULL,
+    `email`        varchar(64)           NOT NULL,
     `level`        tinyint(3)   unsigned NOT NULL,
     `banned`       int(10)      unsigned NOT NULL,
     `registration` int(10)      unsigned NOT NULL,
