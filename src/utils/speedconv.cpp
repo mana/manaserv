@@ -22,7 +22,7 @@
 
 double utils::tpsToSpeed(double tps)
 {
-    return (32000 / (tps   * DEFAULT_TILE_LENGTH));
+    return (32000 / (tps * DEFAULT_TILE_LENGTH));
 }
 
 double utils::speedToTps(double speed)

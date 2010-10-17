@@ -106,7 +106,8 @@ class Map
         /**
          * Constructor that takes initial map size as parameters.
          */
-        Map(int width = 0, int height = 0, int twidth = 32, int theight = 32);
+        Map(int width = 0, int height = 0,
+            int twidth = DEFAULT_TILE_WIDTH, int theight = DEFAULT_TILE_HEIGHT);
 
         /**
          * Destructor.
@@ -159,13 +160,13 @@ class Map
          * Returns the tile width of this map.
          */
         int getTileWidth() const
-        { return tileWidth; }
+        { return mTileWidth; }
 
         /**
          * Returns the tile height used by this map.
          */
         int getTileHeight() const
-        { return tileHeight; }
+        { return mTileHeight; }
 
         /**
          * Returns a general map property defined in the map file
@@ -204,7 +205,7 @@ class Map
 
         // map properties
         int mWidth, mHeight;
-        int tileWidth, tileHeight;
+        int mTileWidth, mTileHeight;
         std::map<std::string, std::string> mProperties;
 
         // Pathfinding members

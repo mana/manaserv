@@ -45,7 +45,7 @@ bool Location::operator< (const Location &loc) const
 
 Map::Map(int width, int height, int twidth, int theight):
     mWidth(width), mHeight(height),
-    tileWidth(twidth), tileHeight(theight),
+    mTileWidth(twidth), mTileHeight(theight),
     onClosedList(1), onOpenList(2)
 {
     mMetaTiles = new MetaTile[mWidth * mHeight];
@@ -142,7 +142,7 @@ void Map::freeTile(int x, int y, BlockType type)
                 mMetaTiles[tileNum].blockmask &= (BLOCKMASK_MONSTER xor 0xff);
                 break;
             default:
-                // shut up!
+                // nothing
                 break;
         }
     }

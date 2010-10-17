@@ -192,16 +192,20 @@ void Being::setDestination(const Point &dst)
 Path Being::findPath()
 {
     mOld = getPosition();
-    int startX = mOld.x / 32, startY = mOld.y / 32;
-    int destX = mDst.x / 32, destY = mDst.y / 32;
     Map *map = getMap()->getMap();
+    int tileWidth = map->getTileWidth();
+    int tileHeight = map->getTileHeight();
+    int startX = mOld.x / tileWidth, startY = mOld.y / tileHeight;
+    int destX = mDst.x / tileWidth, destY = mDst.y / tileHeight;
+
     return map->findPath(startX, startY, destX, destY, getWalkMask());
 }
 
 void Being::move()
 {
     // Immobile beings cannot move.
-    if (!checkAttributeExists(ATTR_MOVE_SPEED_RAW) || !getModifiedAttribute(ATTR_MOVE_SPEED_RAW))
+    if (!checkAttributeExists(ATTR_MOVE_SPEED_RAW)
+        || !getModifiedAttribute(ATTR_MOVE_SPEED_RAW))
           return;
 
     mOld = getPosition();
@@ -213,8 +217,12 @@ void Being::move()
         return;
     }
 
-    int tileSX = mOld.x / 32, tileSY = mOld.y / 32;
-    int tileDX = mDst.x / 32, tileDY = mDst.y / 32;
+    Map *map = getMap()->getMap();
+    int tileWidth = map->getTileWidth();
+    int tileHeight = map->getTileHeight();
+    int tileSX = mOld.x / tileWidth, tileSY = mOld.y / tileHeight;
+    int tileDX = mDst.x / tileWidth, tileDY = mDst.y / tileHeight;
+
     if (tileSX == tileDX && tileSY == tileDY)
     {
         if (mAction == WALK)
@@ -224,8 +232,6 @@ void Being::move()
         mActionTime = 0;
         return;
     }
-
-    Map *map = getMap()->getMap();
 
     /* If no path exists, the for-loop won't be entered. Else a path for the
      * current destination has already been calculated.
@@ -279,9 +285,10 @@ void Being::move()
             pos = mDst;
             break;
         }
-        // position the actor in the middle of the tile for pathfinding purposes
-        pos.x = next.x * 32 + 16;
-        pos.y = next.y * 32 + 16;
+
+        // Position the actor in the middle of the tile for pathfinding purposes
+        pos.x = next.x * tileWidth + (tileWidth / 2);
+        pos.y = next.y * tileHeight + (tileHeight / 2);
     }
     while (mActionTime < 100);
     setPosition(pos);
@@ -308,10 +315,11 @@ int Being::performAttack(Being *target, const Damage &damage) {
 int Being::performAttack(Being *target, unsigned range, const Damage &damage)
 {
     // check target legality
-    if (!target || target == this || target->getAction() == Being::DEAD || !target->canFight())
+    if (!target || target == this || target->getAction() == Being::DEAD
+        || !target->canFight())
             return -1;
-    if (getMap()->getPvP() == PVP_NONE && target->getType() == OBJECT_CHARACTER &&
-        getType() == OBJECT_CHARACTER)
+    if (getMap()->getPvP() == PVP_NONE && target->getType() == OBJECT_CHARACTER
+        && getType() == OBJECT_CHARACTER)
         return -1;
 
     // check if target is in range using the pythagorean theorem
@@ -360,7 +368,8 @@ void Being::setAttribute(unsigned int id, double value, bool calc)
         /*
          * The attribute does not yet exist, so we must attempt to create it.
          */
-        LOG_ERROR("Being: Attempt to access non-existing attribute '" << id << "'!");
+        LOG_ERROR("Being: Attempt to access non-existing attribute '"
+                  << id << "'!");
         LOG_WARN("Being: Creation of new attributes dynamically is not "
                  "implemented yet!");
     }

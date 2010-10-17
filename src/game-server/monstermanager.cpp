@@ -194,7 +194,7 @@ void MonsterManager::reload()
                     monster->setAggressive(true);
                 }
                 monster->setTrackRange(XML::getProperty(subnode, "track-range", 1));
-                monster->setStrollRange(XML::getProperty(subnode, "stroll-range", 0) * 32);
+                monster->setStrollRange(XML::getProperty(subnode, "stroll-range", 0));
                 monster->setAttackDistance(XML::getProperty(subnode, "attack-distance", 0));
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "attack"))

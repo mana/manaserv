@@ -32,27 +32,39 @@ void Actor::setPosition(const Point &p)
     // Update blockmap
     if (getMap())
     {
+        Map *map = getMap()->getMap();
+        int tileWidth = map->getTileWidth();
+        int tileHeight = map->getTileHeight();
         const Point &oldP = getPosition();
-        if ((oldP.x / 32 != p.x / 32 || oldP.y / 32 != p.y / 32))
+        if ((oldP.x / tileWidth != p.x / tileWidth
+            || oldP.y / tileHeight != p.y / tileHeight))
         {
-            getMap()->getMap()->freeTile(oldP.x / 32, oldP.y / 32, getBlockType());
-            getMap()->getMap()->blockTile(p.x / 32, p.y / 32, getBlockType());
+            map->freeTile(oldP.x / tileWidth, oldP.y / tileHeight,
+                          getBlockType());
+            map->blockTile(p.x / tileWidth, p.y / tileHeight, getBlockType());
         }
     }
 }
 
-void Actor::setMap(MapComposite *map)
+void Actor::setMap(MapComposite *mapComposite)
 {
-    assert (map);
-    MapComposite *oldMap = getMap();
+    assert (mapComposite);
+    MapComposite *oldMapComposite = getMap();
     Point p = getPosition();
 
-    if (oldMap)
+    if (oldMapComposite)
     {
-        oldMap->getMap()->freeTile(p.x / 32, p.y / 32, getBlockType());
+        Map *oldMap = oldMapComposite->getMap();
+        int oldTileWidth = oldMap->getTileWidth();
+        int oldTileHeight = oldMap->getTileHeight();
+        oldMap->freeTile(p.x / oldTileWidth, p.y / oldTileHeight,
+                         getBlockType());
     }
-    Thing::setMap(map);
-    map->getMap()->blockTile(p.x / 32, p.y / 32, getBlockType());
+    Thing::setMap(mapComposite);
+    Map *map = mapComposite->getMap();
+    int tileWidth = map->getTileWidth();
+    int tileHeight = map->getTileHeight();
+    map->blockTile(p.x / tileWidth, p.y / tileHeight, getBlockType());
     /* the last line might look illogical because the current position is
      * invalid on the new map, but it is necessary to block the old position
      * because the next call of setPosition() will automatically free the old

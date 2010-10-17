@@ -334,8 +334,10 @@ MapContent::MapContent(Map *map)
     {
         buckets[i] = NULL;
     }
-    mapWidth = (map->getWidth() * 32 + zoneDiam - 1) / zoneDiam;
-    mapHeight = (map->getHeight() * 32 + zoneDiam - 1) / zoneDiam;
+    mapWidth = (map->getWidth() * map->getTileWidth() + zoneDiam - 1)
+               / zoneDiam;
+    mapHeight = (map->getHeight() * map->getTileHeight() + zoneDiam - 1)
+                / zoneDiam;
     zones = new MapZone[mapWidth * mapHeight];
 }
 

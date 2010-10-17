@@ -109,7 +109,8 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
     int changed = (1 << nb_slots) - 1;
     if (!full)
     {
-        // TODO: do not assume the whole equipment changed, when an update is asked for.
+        // TODO: do not assume the whole equipment changed,
+        // when an update is asked for.
         changed = (1 << nb_slots) - 1;
     }
 
@@ -316,7 +317,8 @@ static void informPlayer(MapComposite *map, Character *p)
             // We multiply the sent speed (in tiles per second) by ten
             // to get it within a byte with decimal precision.
             // For instance, a value of 4.5 will be sent as 45.
-            moveMsg.writeByte((unsigned short) (o->getModifiedAttribute(ATTR_MOVE_SPEED_TPS) * 10));
+            moveMsg.writeByte((unsigned short)
+                (o->getModifiedAttribute(ATTR_MOVE_SPEED_TPS) * 10));
         }
     }
 
@@ -356,7 +358,8 @@ static void informPlayer(MapComposite *map, Character *p)
 
     // Inform client about items on the ground around its character
     MessageOut itemMsg(GPMSG_ITEMS);
-    for (FixedActorIterator i(map->getAroundBeingIterator(p, visualRange)); i; ++i)
+    for (FixedActorIterator i(map->getAroundBeingIterator(p, visualRange)); i;
+                                                                            ++i)
     {
         assert((*i)->getType() == OBJECT_ITEM ||
                (*i)->getType() == OBJECT_EFFECT);
@@ -529,8 +532,8 @@ bool GameState::insert(Thing *ptr)
     Actor *obj = static_cast< Actor * >(ptr);
     Map *mp = map->getMap();
     Point pos = obj->getPosition();
-    if (pos.x / 32 >= (unsigned)mp->getWidth() ||
-        pos.y / 32 >= (unsigned)mp->getHeight())
+    if ((int)pos.x / mp->getTileWidth() >= mp->getWidth() ||
+        (int)pos.y / mp->getTileHeight() >= mp->getHeight())
     {
         LOG_ERROR("Tried to insert an actor at position " << pos.x << ','
                   << pos.y << " outside map " << map->getID() << '.');

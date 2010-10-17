@@ -652,8 +652,11 @@ Character::~Character()
 {
     if (getMap())
     {
+        Map *map = getMap()->getMap();
+        int tileWidth = map->getTileWidth();
+        int tileHeight = map->getTileHeight();
         Point oldP = getPosition();
-        getMap()->getMap()->freeTile(oldP.x / 32, oldP.y / 32, getBlockType());
+        map->freeTile(oldP.x / tileWidth, oldP.y / tileHeight, getBlockType());
     }
 }
 

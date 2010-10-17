@@ -134,7 +134,10 @@ Monster::~Monster()
     if (getMap())
     {
         Point oldP = getPosition();
-        getMap()->getMap()->freeTile(oldP.x / 32, oldP.y / 32, getBlockType());
+        Map *map = getMap()->getMap();
+        int tileWidth = map->getTileWidth();
+        int tileHeight = map->getTileHeight();
+        map->freeTile(oldP.x / tileWidth, oldP.y / tileHeight, getBlockType());
     }
 }
 
@@ -349,18 +352,22 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
 
     unsigned range = mSpecy->getTrackRange();
 
+    Map *map = getMap()->getMap();
+    int tileWidth = map->getTileWidth();
+    int tileHeight = map->getTileHeight();
+
     // Check if we already are on this position
-    if (thisPos.x / 32 == position.x / 32 &&
-        thisPos.y / 32 == position.y / 32)
+    if (thisPos.x / tileWidth == position.x / tileWidth &&
+        thisPos.y / tileHeight == position.y / tileHeight)
     {
         return targetPriority *= range;
     }
 
     Path path;
-    path = getMap()->getMap()->findPath(thisPos.x / 32, thisPos.y / 32,
-                                        position.x / 32, position.y / 32,
-                                        getWalkMask(),
-                                        range);
+    path = map->findPath(thisPos.x / tileWidth, thisPos.y / tileHeight,
+                         position.x / tileWidth, position.y / tileHeight,
+                         getWalkMask(),
+                         range);
 
     if (path.empty() || path.size() >= range)
     {
@@ -388,7 +395,8 @@ void Monster::forgetTarget(Thing *t)
 
 void Monster::changeAnger(Actor *target, int amount)
 {
-    if (target && (target->getType() == OBJECT_MONSTER || target->getType() == OBJECT_CHARACTER))
+    if (target && (target->getType() == OBJECT_MONSTER
+        || target->getType() == OBJECT_CHARACTER))
     {
         Being *t = static_cast< Being * >(target);
         if (mAnger.find(t) != mAnger.end())
@@ -415,16 +423,19 @@ int Monster::damage(Actor *source, const Damage &damage)
         Character *s = static_cast< Character * >(source);
 
         std::list<size_t>::const_iterator iSkill;
-        for (iSkill = damage.usedSkills.begin(); iSkill != damage.usedSkills.end(); ++iSkill)
+        for (iSkill = damage.usedSkills.begin();
+             iSkill != damage.usedSkills.end(); ++iSkill)
         {
             if (*iSkill)
             {
                 mExpReceivers[s].insert(*iSkill);
-                if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED) || mOwner == s || mOwner->getParty() == s->getParty())
+                if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED) || mOwner == s
+                    || mOwner->getParty() == s->getParty())
                 {
                     mOwner = s;
                     mLegalExpReceivers.insert(s);
-                    setTimerHard(T_M_KILLSTEAL_PROTECTED, KILLSTEAL_PROTECTION_TIME);
+                    setTimerHard(T_M_KILLSTEAL_PROTECTED,
+                                 KILLSTEAL_PROTECTION_TIME);
                 }
             }
         }
