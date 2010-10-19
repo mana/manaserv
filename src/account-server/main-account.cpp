@@ -146,7 +146,7 @@ static void initialize()
     PHYSFS_init("");
 
     // Initialize the logger.
-    Logger::setLogFile(logFile);
+    Logger::setLogFile(logFile, true);
 
     // Write the messages to both the screen and the log file.
     Logger::setTeeMode(

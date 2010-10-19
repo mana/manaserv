@@ -150,7 +150,8 @@ void Logger::setLogFile(const std::string &logFile, bool append)
     // Open the file for output
     // and remove the former file contents depending on the append flag.
     mLogFile.open(logFile.c_str(),
-                  append ? std::ios::ate : std::ios::trunc);
+                  append ? std::ios::app : std::ios::trunc);
+
     mFilename = logFile;
     mLastCallDate = getCurrentDate();
 
