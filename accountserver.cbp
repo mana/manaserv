@@ -154,6 +154,8 @@
 		<Unit filename="src\utils\sha256.cpp" />
 		<Unit filename="src\utils\sha256.h" />
 		<Unit filename="src\utils\singleton.h" />
+		<Unit filename="src\utils\string.cpp" />
+		<Unit filename="src\utils\string.hpp" />
 		<Unit filename="src\utils\stringfilter.cpp" />
 		<Unit filename="src\utils\stringfilter.h" />
 		<Unit filename="src\utils\timer.cpp" />
