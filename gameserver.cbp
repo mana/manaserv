@@ -189,7 +189,7 @@
 		<Unit filename="src\utils\stringfilter.cpp" />
 		<Unit filename="src\utils\stringfilter.h" />
 		<Unit filename="src\utils\speedconv.cpp" />
-		<Unit filename="src\utils\speedconv.hpp">
+		<Unit filename="src\utils\speedconv.hpp" />
 		<Unit filename="src\utils\timer.cpp" />
 		<Unit filename="src\utils\timer.h" />
 		<Unit filename="src\utils\tokencollector.cpp" />
