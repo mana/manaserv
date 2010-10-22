@@ -65,10 +65,11 @@ void StatusManager::reload()
             continue;
 
         int id = XML::getProperty(node, "id", 0);
-        if (id == 0)
+        if (id < 1)
         {
-            LOG_WARN("Status Manager: An (ignored) Status has no ID in "
-                     << statusReferenceFile << "!");
+            LOG_WARN("Status Manager: The status ID: " << id << " in "
+                     << statusReferenceFile
+                     << " is invalid and will be ignored.");
             continue;
         }
 

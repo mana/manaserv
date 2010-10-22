@@ -61,23 +61,29 @@ void AttributeManager::reload()
     {
         if (xmlStrEqual(attributenode->name, BAD_CAST "attribute"))
         {
-            unsigned int id = XML::getProperty(attributenode, "id", 0);
+            int id = XML::getProperty(attributenode, "id", 0);
 
-            mAttributeMap[id] = std::pair< bool ,
-                              std::vector<struct AttributeInfoType> >
-                              (false , std::vector<struct AttributeInfoType>());
+            if (id <= 0)
+            {
+                LOG_WARN("Attribute manager: attribute '" << id
+                         << "' is invalid and will be ignored.");
+                continue;
+            }
+
+            mAttributeMap[id] = AttributeInfoMap(false,
+                                       std::vector<struct AttributeInfoType>());
 
             unsigned int layerCount = 0;
             for_each_xml_child_node(subnode, attributenode)
             {
                 if (xmlStrEqual(subnode->name, BAD_CAST "modifier"))
                 {
-                    std::string sType = utils::toUpper(XML::getProperty(subnode,
-                                                              "stacktype", ""));
-                    std::string eType = utils::toUpper(XML::getProperty(subnode,
-                                                              "modtype", ""));
-                    std::string tag = utils::toUpper(XML::getProperty(subnode,
-                                                              "tag", ""));
+                    std::string sType = utils::toUpper(
+                                    XML::getProperty(subnode, "stacktype", ""));
+                    std::string eType = utils::toUpper(
+                                    XML::getProperty(subnode, "modtype", ""));
+                    std::string tag = utils::toUpper(
+                                    XML::getProperty(subnode, "tag", ""));
                     AT_TY pSType;
                     AME_TY pEType;
                     if (!sType.empty())
@@ -93,11 +99,12 @@ void AttributeManager::reload()
                                 pSType = TY_NSTB;
                             else
                             {
-                                LOG_WARN("Attribute manager: attribute '" << id
-                                         << "' has unknown stack type '" << sType
-                                         << "', skipping modifier!");
+                                LOG_WARN("Attribute manager: attribute '"
+                                         << id << "' has unknown stack type '"
+                                         << sType << "', skipping modifier!");
                                 fail = true;
                             }
+
                             if (!fail)
                             {
                                 if (eType == "ADDITIVE")
@@ -106,36 +113,41 @@ void AttributeManager::reload()
                                     pEType = AME_MULT;
                                 else
                                 {
-                                    LOG_WARN("Attribute manager: attribute '" << id
-                                             << "' has unknown modification type '" << sType
-                                             << "', skipping modifier!");
+                                    LOG_WARN(
+                                          "Attribute manager: attribute '" << id
+                                          << "' has unknown modification type '"
+                                          << sType << "', skipping modifier!");
                                     fail = true;
                                 }
                                 if (!fail)
                                 {
-                                    mAttributeMap[id].second.push_back(AttributeInfoType(pSType, pEType));
-                                    std::string tag = XML::getProperty(subnode, "tag", "");
+                                    mAttributeMap[id].second.push_back(
+                                          AttributeInfoType(pSType, pEType));
+                                    std::string tag = XML::getProperty(
+                                                            subnode, "tag", "");
 
                                     if (!tag.empty())
-                                        mTagMap.insert(std::make_pair(tag,
-                                                                      std::make_pair(id, layerCount)));
+                                        mTagMap.insert(
+                                        std::make_pair(tag,
+                                            std::make_pair(id, layerCount)));
                                     ++layerCount;
                                 }
                             }
                         }
                         else
-                            LOG_WARN("Attribute manager: attribute '" << id <<
-                                     "' has undefined modification type, skipping modifier!");
+                            LOG_WARN("Attribute manager: attribute '" << id
+                                     << "' has undefined modification type, "
+                                     << "skipping modifier!");
                     }
                     else
                     {
                         LOG_WARN("Attribute manager: attribute '" << id <<
-                                 "' has undefined stack type, skipping modifier!");
+                              "' has undefined stack type, skipping modifier!");
                     }
                 }
             }
-            std::string scope = utils::toUpper(XML::getProperty(attributenode,
-                                                       "scope", std::string()));
+            std::string scope = utils::toUpper(
+                    XML::getProperty(attributenode, "scope", std::string()));
             if (scope.empty())
             {
                 // Give a warning unless scope has been explicitly set to "NONE"
@@ -165,7 +177,7 @@ void AttributeManager::reload()
                 LOG_DEBUG("Attribute manager: attribute '" << id
                           << "' set to have no default scope.");
             }
-        }
+        } // End 'attribute'
     }
 
     LOG_DEBUG("attribute map:");

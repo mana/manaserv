@@ -79,10 +79,10 @@ void MonsterManager::reload()
         if (!xmlStrEqual(node->name, BAD_CAST "monster"))
             continue;
 
-        int id = XML::getProperty(node, "id", -1);
+        int id = XML::getProperty(node, "id", 0);
         std::string name = XML::getProperty(node, "name", "unnamed");
 
-        if (id == -1)
+        if (id < 1)
         {
             LOG_WARN("Monster Manager: There is a monster ("
                      << name << ") without ID in "
@@ -210,19 +210,32 @@ void MonsterManager::reload()
                 std::string sElement = XML::getProperty(subnode, "element", "neutral");
                 att->element = elementFromString(sElement);
                 std::string sType = XML::getProperty(subnode, "type", "physical");
-                if (sType == "physical") {att->type = DAMAGE_PHYSICAL; }
-                else if (sType == "magical" || sType == "magic") {att->type = DAMAGE_MAGICAL; }
-                else if (sType == "other") {att->type = DAMAGE_OTHER; }
-                else {
+
+                bool validMonsterAttack = true;
+                if (sType == "physical")
+                {
+                    att->type = DAMAGE_PHYSICAL;
+                }
+                else if (sType == "magical" || sType == "magic")
+                {
+                    att->type = DAMAGE_MAGICAL;
+                }
+                else if (sType == "other")
+                {
+                    att->type = DAMAGE_OTHER;
+                }
+                else
+                {
                     LOG_WARN("Monster manager " << mMonsterReferenceFile
                               <<  ": unknown damage type '" << sType << "'.");
                 }
 
-                if (att->id == 0)
+                if (att->id < 1)
                 {
                     LOG_WARN(mMonsterReferenceFile
                              << ": Attack without ID for monster #"
                              << id << " (" << name << ") - attack ignored");
+                    validMonsterAttack = false;
                 }
                 else if (att->element == ELEMENT_ILLEGAL)
                 {
@@ -230,16 +243,24 @@ void MonsterManager::reload()
                              << ": Attack with unknown element \""
                              << sElement << "\" for monster #" << id
                              << " (" << name << ") - attack ignored");
+                    validMonsterAttack = false;
                 }
                 else if (att->type == -1)
                 {
                     LOG_WARN(mMonsterReferenceFile
                              << ": Attack with unknown type \"" << sType << "\""
                              << " for monster #" << id << " (" << name << ")");
+                    validMonsterAttack = false;
+                }
+
+                if (validMonsterAttack)
+                {
+                    monster->addAttack(att);
                 }
                 else
                 {
-                    monster->addAttack(att);
+                    delete att;
+                    att = 0;
                 }
 
             }

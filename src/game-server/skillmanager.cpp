@@ -90,7 +90,7 @@ void SkillManager::reload()
                                                     std::string());
                 name = utils::toUpper(name);
                 int id = XML::getProperty(skillnode, "id", 0);
-                if (id && !name.empty())
+                if (id > 0 && !name.empty())
                 {
                     bool duplicateKey = false;
                     for (SkillMap::iterator i = skillMap.begin();

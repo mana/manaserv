@@ -60,10 +60,15 @@ class AttributeManager
 
         const std::string *getTagFromInfo(unsigned int, unsigned int) const;
     private:
-        // attribute id -> { modifiable, { stackable type, effect type }[] }
-        typedef std::map< int, std::pair< bool, std::vector<struct AttributeInfoType> > > AttributeMap;
+        // modifiable, { stackable type, effect type }[]
+        typedef std::pair< bool,
+                       std::vector<struct AttributeInfoType> > AttributeInfoMap;
+
+        // Attribute id -> { modifiable, { stackable type, effect type }[] }
+        typedef std::map< int, AttributeInfoMap > AttributeMap;
         // tag name -> { attribute id, layer }
-        typedef std::map< std::string, std::pair<unsigned int, unsigned int> > TagMap;
+        typedef std::map< std::string,
+                          std::pair<unsigned int, unsigned int> > TagMap;
 
         // being type id -> (*{ stackable type, effect type })[]
         AttributeScopes mAttributeScopes[ATTR_MAX];

@@ -126,10 +126,10 @@ void ItemManager::reload()
             continue;
 
         int id = XML::getProperty(node, "id", 0);
-        if (!id)
+        if (id < 1)
         {
-            LOG_WARN("Item Manager: An item has no ID in "
-                     << mItemReferenceFile << ", and so has been ignored!");
+            LOG_WARN("Item Manager: Item ID: " << id << " is invalid in "
+                     << mItemReferenceFile << ", and will be ignored.");
             continue;
         }
 

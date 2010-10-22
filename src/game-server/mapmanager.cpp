@@ -70,7 +70,7 @@ int MapManager::initialize(const std::string &mapReferenceFile)
         std::string name = XML::getProperty(node, "name", std::string());
 
         // Test id and map name
-        if (id != 0 && !name.empty())
+        if (id > 0 && !name.empty())
         {
             // Testing if the file is actually in the maps folder
             std::string file = std::string("maps/") + name + ".tmx";
@@ -87,6 +87,18 @@ int MapManager::initialize(const std::string &mapReferenceFile)
             {
                 maps[id] = new MapComposite(id, name);
                 ++loadedMaps;
+            }
+        }
+        else
+        {
+            if (name.empty())
+            {
+                LOG_WARN("Invalid unnamed map Id: " << id << '.');
+            }
+            else
+            {
+                LOG_WARN("Invalid map Id: " << id << " for map: "
+                         << name << '.');
             }
         }
     }
