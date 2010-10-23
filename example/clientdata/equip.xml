@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<equip-slots>
+    <slot name="hand" count="2" visible="true" />
+    <slot name="torso" count="1" visible="true" />
+    <slot name="arms" count="1" />
+    <slot name="head" count="1" visible="true" />
+    <slot name="legs" count="1" visible="true" />
+    <slot name="ring" count="1" />
+    <slot name="necklace" count="1" />
+    <slot name="feet" count="1" />
+    <slot name="ammo" count="1" />
+</equip-slots>
