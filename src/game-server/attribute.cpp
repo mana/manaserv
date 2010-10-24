@@ -125,21 +125,35 @@ bool AttributeModifiersEffect::remove(double value, unsigned int id, bool fullCh
     if (!fullCheck)
         mStates.sort(durationCompare); /* Search only through those with a duration of 0. */
     bool ret = false;
+    double temp;
     for (std::list< AttributeModifierState * >::iterator it = mStates.begin();
-         it != mStates.end() && (fullCheck || !(*it)->mDuration);
-         ++it)
+         it != mStates.end() && (fullCheck || !(*it)->mDuration);)
     {
         /* Check for a match */
         if ((*it)->mValue != value || (*it)->mId != id)
+        {
+            ++it;
             continue;
+        }
+
+        temp = (*it)->mValue;
+
+        delete *it;
+        mStates.erase(it++);
+
+        /* If this is stackable, we need to update for every modifier affected */
         if (mSType == TY_ST)
             updateMod();
-        delete *it;
-        mStates.erase(it);
+
+        ret = true;
         if (!id)
-            return true;
-        else ret = true;
+            break;
     }
+    /*
+     * Non stackables only need to be updated once, since this is recomputed
+     * from scratch. This is done at the end after modifications have been
+     * made as necessary.
+     */
     if (ret && mSType != TY_ST)
         updateMod();
     return ret;
@@ -152,7 +166,20 @@ void AttributeModifiersEffect::updateMod(double value)
         if (mEType == AME_ADD)
             mMod -= value;
         else if (mEType == AME_MULT)
-            mMod /= value;
+        {
+            if (value)
+                mMod /= value;
+            else
+            {
+                mMod = 1;
+                for (std::list< AttributeModifierState * >::const_iterator
+                     it = mStates.begin(),
+                     it_end = mStates.end();
+                    it != it_end;
+                    ++it)
+                    mMod *= (*it)->mValue;
+            }
+        }
         else LOG_ERROR("Attribute modifiers effect: unhandled type '"
                        << mEType << "' as a stackable in cache update!");
     }
@@ -162,15 +189,13 @@ void AttributeModifiersEffect::updateMod(double value)
         {
             mMod = 0;
             for (std::list< AttributeModifierState * >::const_iterator
-                 it2 = mStates.begin(),
-                 it2_end = mStates.end();
-                it2 != it2_end;
-                ++it2)
-                if ((*it2)->mValue > mMod)
-                    mMod = (*it2)->mValue;
+                 it = mStates.begin(),
+                 it_end = mStates.end();
+                it != it_end;
+                ++it)
+                if ((*it)->mValue > mMod)
+                    mMod = (*it)->mValue;
         }
-        else LOG_ERROR("Attribute modifiers effect: unhandled type '"
-                       << mEType << "' as a non-stackable in cache update!");
     }
     else LOG_ERROR("Attribute modifiers effect: unknown modifier type '"
                    << mSType << "' in cache update!");

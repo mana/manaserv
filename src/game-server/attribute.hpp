@@ -71,8 +71,14 @@ class AttributeModifiersEffect {
 
         /**
          * Performs the necessary modifications to mMod when the states change.
+         * @param value The value to alter. This is only used in stackable
+         *      types, as the effect can be simply inverted there.
+         *      For non stackable types (and stackable multiplicative types
+         *      where the value is zero), mMod must be recalculated from all
+         *      current modifiers.
+         * @note This /negates/ the effect of value.
+         * @note A parameter should always be provided when stackable.
          */
-
         void updateMod(double value = 0);
 
         /**

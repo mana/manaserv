@@ -49,7 +49,7 @@ void ItemEffectAttrMod::dispell(Being *itemUser)
 {
     LOG_DEBUG("Dispelling modifier.");
     itemUser->removeModifier(mAttributeId, mMod, mAttributeLayer,
-                             mId, mDuration);
+                             mId, !mDuration);
 }
 
 bool ItemEffectAutoAttack::apply(Being *itemUser)
