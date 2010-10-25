@@ -209,7 +209,9 @@ void Inventory::equip_sub(unsigned int newCount, IdSlotMap::const_iterator &it)
 
 void Inventory::prepare()
 {
-    if (!mDelayed) return;
+    if (!mDelayed)
+        return;
+
     Possessions *poss = &mClient->getPossessions();
     if (mPoss == poss)
         mPoss = new Possessions(*poss);
@@ -546,26 +548,31 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2, unsigned in
 unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
 {
     prepare();
+
     InventoryData::iterator it = mPoss->inventory.find(slot);
+
+    // When the given slot doesn't exist, we can't remove anything
     if (it == mPoss->inventory.end())
         return amount;
-    unequip(slot);
+
+    // Check if an item of the same class exists elsewhere in the inventory
+    bool exists = false;
+    for (InventoryData::const_iterator it2 = mPoss->inventory.begin(),
+         it2_end = mPoss->inventory.end();
+         it2 != it2_end; ++it2)
     {
-        bool exists = false;
-        for (InventoryData::const_iterator it2 = mPoss->inventory.begin(),
-             it2_end = mPoss->inventory.end();
-            it2 != it2_end;
-            ++it2)
-            if (it2->second.itemId == it->second.itemId
+        if (it2->second.itemId == it->second.itemId
                 && it->first != it2->first)
-            {
-                exists = true;
-                break;
-            }
-        if (!exists && it->second.itemId)
-            itemManager->getItem(it->second.itemId)
-                    ->useTrigger(mClient, ITT_LEAVE_INVY);
+        {
+            exists = true;
+            break;
+        }
     }
+    if (!exists && it->second.itemId) {
+        if (ItemClass *ic = itemManager->getItem(it->second.itemId))
+            ic->useTrigger(mClient, ITT_LEAVE_INVY);
+    }
+
     unsigned int sub = std::min(amount, it->second.amount);
     amount -= sub;
     it->second.amount -= sub;

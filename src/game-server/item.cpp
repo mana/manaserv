@@ -76,7 +76,9 @@ void ItemEffectScript::dispell(Being *itemUser)
 
 bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
 {
-    if (!trigger) return false;
+    if (!trigger)
+        return false;
+
     std::pair<std::multimap< ItemTriggerType, ItemEffectInfo * >::iterator,
               std::multimap< ItemTriggerType, ItemEffectInfo * >::iterator>
       rn = mEffects.equal_range(trigger);

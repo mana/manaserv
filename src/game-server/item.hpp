@@ -143,7 +143,10 @@ class ItemClass
 {
     public:
         ItemClass(int id, unsigned int maxperslot)
-          : mDatabaseID(id), mSpriteID(0), mMaxPerSlot(maxperslot)
+            : mDatabaseID(id)
+            , mSpriteID(0)
+            , mCost(0)
+            , mMaxPerSlot(maxperslot)
         {}
 
         ~ItemClass() { resetEffects(); }
@@ -153,12 +156,6 @@ class ItemClass
          * @return true if item should be removed.
          */
         bool useTrigger(Being *itemUser, ItemTriggerType trigger);
-
-        /**
-         * Gets item weight.
-         */
-        int getWeight() const
-        { return mWeight; }
 
         /**
          * Gets unit cost of these items.
@@ -232,7 +229,6 @@ class ItemClass
         unsigned short mDatabaseID; /**< Item reference information */
         /** The sprite that should be shown to the character */
         unsigned short mSpriteID;
-        unsigned short mWeight;   /**< Weight of the item. */
         unsigned short mCost;     /**< Unit cost the item. */
         /** Max item amount per slot in inventory. */
         unsigned int mMaxPerSlot;
