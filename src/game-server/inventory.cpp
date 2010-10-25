@@ -261,13 +261,14 @@ void Inventory::initialise()
     /*
      * Construct a set of itemIds to keep track of duplicate itemIds.
      */
-    for (it1 = mPoss->inventory.begin(); it1 != mPoss->inventory.end(); ++it1)
+    for (it1 = mPoss->inventory.begin(); it1 != mPoss->inventory.end();)
     {
         ItemClass *item = itemManager->getItem(it1->second.itemId);
         if (item)
         {
             if (itemIds.insert(it1->second.itemId).second)
                 item->useTrigger(mClient, ITT_IN_INVY);
+            ++it1;
         }
         else
         {
@@ -275,8 +276,7 @@ void Inventory::initialise()
                      << it1->second.itemId << " from the inventory of '"
                      << mClient->getName()
                      << "'!");
-            removeFromSlot(it1->first,
-                           it1->second.amount);
+            mPoss->inventory.erase(it1++);
         }
     }
 
