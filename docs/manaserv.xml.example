@@ -144,10 +144,18 @@
  <option name="net_listenHost" value=""/>
 
  <!--
- Update host url: E.g.: "http://www.manasource.org/updates"
+ Update host url: E.g.: "http://updates.manasource.org/"
  It gives the http folder where the update files can be downloaded.
  -->
  <option name="net_defaultUpdateHost" value="" />
+
+ <!--
+ Client data url: E.g.: "http://data.manasource.org/"
+ Example for local use: "file:///home/user/clientdata/"
+ The base URL where the client will get its data from. This is a new update
+ mechanism that replaces the update host, used by the Mana Mobile client.
+ -->
+ <option name="net_clientDataUrl" value="" />
 
  <!--
  Minimal supported mana client version.
