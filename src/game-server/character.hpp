@@ -41,9 +41,10 @@ class Trade;
 struct Special
 {
     Special()
-    {
-        currentMana = 0;
-    }
+        : currentMana(0)
+        , neededMana(0)
+    {}
+
     int currentMana;
     int neededMana;
 };
@@ -54,7 +55,6 @@ struct Special
 class Character : public Being
 {
     public:
-
         /**
          * Utility constructor for creating a Character from a received
          * characterdata message.
@@ -122,13 +122,13 @@ class Character : public Being
         { mClient = c; }
 
         /**
-         * Gets a reference on the possessions.
+         * Gets a reference to the possessions.
          */
         const Possessions &getPossessions() const
         { return mPossessions; }
 
         /**
-         * Gets a reference on the possessions.
+         * Gets a reference to the possessions.
          */
         Possessions &getPossessions()
         { return mPossessions; }
@@ -172,63 +172,28 @@ class Character : public Being
          * Most of this should be accessed directly as a friend
          */
 
-        /** Gets the database id of the character. */
-        int
-        getDatabaseID() const
-        { return mDatabaseID; }
-
-        /** Sets the database id of the character. */
-        void
-        setDatabaseID(int id)
-        { mDatabaseID = id; }
+        int getDatabaseID() const { return mDatabaseID; }
+        void setDatabaseID(int id) { mDatabaseID = id; }
 
         /** Gets the gender of the character (male or female). */
-        int
-        getGender() const
+        int getGender() const
         { return mGender; }
 
         /** Sets the gender of the character (male or female). */
-        void
-        setGender(int gender)
+        void setGender(int gender)
         { mGender = gender; }
 
-        /** Gets the hairstyle of the character. */
-        int
-        getHairStyle() const
-        { return mHairStyle; }
+        int getHairStyle() const { return mHairStyle; }
+        void setHairStyle(int style) { mHairStyle = style; }
 
-        /** Sets the hairstyle of the character. */
-        void
-        setHairStyle(int style)
-        { mHairStyle = style; }
+        int getHairColor() const { return mHairColor; }
+        void setHairColor(int color) { mHairColor = color; }
 
-        /** Gets the haircolor of the character. */
-        int
-        getHairColor() const
-        { return mHairColor; }
+        int getLevel() const { return mLevel; }
+        void setLevel(int level) { mLevel = level; }
 
-        /** Sets the haircolor of the character. */
-        void
-        setHairColor(int color)
-        { mHairColor = color; }
-
-        /** Gets the level of the character. */
-        int
-        getLevel() const
-        { return mLevel; }
-
-        /** Sets the level of the character. */
-        void
-        setLevel(int level)
-        { mLevel = level; }
-
-        /** Gets the account level of the user. */
-        int getAccountLevel() const
-        { return mAccountLevel; }
-
-        /** Sets the account level of the user. */
-        void setAccountLevel(int l)
-        { mAccountLevel = l; }
+        int getAccountLevel() const { return mAccountLevel; }
+        void setAccountLevel(int l) { mAccountLevel = l; }
 
         /** Gets the party id of the character */
         int getParty() const
@@ -293,7 +258,7 @@ class Character : public Being
         { return mExperience.end(); }
 
         /**
-         * used to serialized status effects
+         * Used to serialize status effects.
          */
         int getStatusEffectSize() const
         { return mStatusEffects.size(); }
@@ -305,7 +270,7 @@ class Character : public Being
         { return mStatusEffects.end(); }
 
         /**
-         * used to serialize kill count
+         * Used to serialize kill count.
          */
         int getKillCountSize() const
         { return mKillCount.size(); }
@@ -320,7 +285,7 @@ class Character : public Being
         { mKillCount[monsterId] = kills; }
 
         /**
-         * used to serialize specials
+         * Used to serialize specials.
          */
         int getSpecialSize() const
         { return mSpecials.size(); }
@@ -332,24 +297,24 @@ class Character : public Being
         { return mSpecials.end(); }
 
         /**
-         * Gets total accumulated exp for skill
+         * Gets total accumulated exp for skill.
          */
         int getExperience(int skill) const
         { return mExperience.find(skill)->second; }
 
         /**
-         * Sets total accumulated exp for skill
+         * Sets total accumulated exp for skill.
          */
         void setExperience(int skill, int value)
         { mExperience[skill] = 0; receiveExperience(skill, value, 0); }
 
         /**
-         * Adds one kill of the monster type to the characters kill count
+         * Adds one kill of the monster type to the characters kill count.
          */
         void incrementKillCount(int monsterType);
 
         /**
-         * Gets the number of monsters the character killed of a given type
+         * Gets the number of monsters the character killed of a given type.
          */
         int getKillCount(int monsterType) const;
 
@@ -375,17 +340,11 @@ class Character : public Being
          */
         AttribmodResponseCode useCorrectionPoint(size_t attribute);
 
-        void setCharacterPoints(int points)
-        { mCharacterPoints = points; }
+        void setCharacterPoints(int points) { mCharacterPoints = points; }
+        int getCharacterPoints() const { return mCharacterPoints; }
 
-        int getCharacterPoints() const
-        { return mCharacterPoints; }
-
-        void setCorrectionPoints(int points)
-        { mCorrectionPoints = points; }
-
-        int getCorrectionPoints() const
-        { return mCorrectionPoints; }
+        void setCorrectionPoints(int points) { mCorrectionPoints = points; }
+        int getCorrectionPoints() const { return mCorrectionPoints; }
 
         /**
          * Gets the way the actor is blocked by other things on the map
@@ -408,7 +367,6 @@ class Character : public Being
         { return Map::BLOCKTYPE_CHARACTER; }
 
     private:
-
         double getAttrBase(AttributeMap::const_iterator it) const
         { return it->second.getBase(); }
         double getAttrMod(AttributeMap::const_iterator it) const
@@ -483,10 +441,10 @@ class Character : public Being
         unsigned char mHairColor;    /**< Hair Color of the character. */
         int mLevel;                  /**< Level of the character. */
         int mLevelProgress;          /**< progress to next level in percent */
-        int mCharacterPoints;        /**< unused attribute points that can be distributed */
-        int mCorrectionPoints;       /**< unused attribute correction points */
-        bool mUpdateLevelProgress;   /**< flag raised when percent to next level changed */
-        bool mRecalculateLevel;      /**< flag raised when the character level might have increased */
+        int mCharacterPoints;        /**< Unused attribute points that can be distributed */
+        int mCorrectionPoints;       /**< Unused attribute correction points */
+        bool mUpdateLevelProgress;   /**< Flag raised when percent to next level changed */
+        bool mRecalculateLevel;      /**< Flag raised when the character level might have increased */
         unsigned char mAccountLevel; /**< Account level of the user. */
         int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
