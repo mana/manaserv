@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This file maps the NPC appearance IDs the server is sending to the
+    spritesheet(s).
+
+    Note that it is possible to give an NPC multiple sprites. In this case the
+    sprites are drawn in order of declaration.
+-->
+<npcs>
+</npcs>
