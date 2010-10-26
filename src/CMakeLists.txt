@@ -1,5 +1,6 @@
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PhysFS REQUIRED)
+FIND_PACKAGE(ZLIB REQUIRED)
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
     # Help getting compilation warnings
@@ -80,10 +81,7 @@ IF (CMAKE_BUILD_TYPE)
 ENDIF()
 
 IF (WIN32)
-    # on the client zlib gets pulled in by LibPNG, for the server
-    # we need to add it explicitly
-    FIND_PACKAGE(ZLIB REQUIRED)
-    SET(EXTRA_LIBRARIES ws2_32 winmm ${ZLIB_LIBRARIES})
+    SET(EXTRA_LIBRARIES ws2_32 winmm)
     # GDI APIs Rectangle clashes with tmwserv classes
     SET(FLAGS "${FLAGS} -DNOGDI")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL SunOS)
@@ -309,6 +307,7 @@ FOREACH(program ${PROGRAMS})
     TARGET_LINK_LIBRARIES(${program} ${INTERNAL_LIBRARIES}
         ${PHYSFS_LIBRARY}
         ${LIBXML2_LIBRARIES}
+        ${ZLIB_LIBRARIES}
         ${OPTIONAL_LIBRARIES}
         ${EXTRA_LIBRARIES})
     INSTALL(TARGETS ${program} RUNTIME DESTINATION ${PKG_BINDIR})
