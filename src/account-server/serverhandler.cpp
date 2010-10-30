@@ -553,7 +553,7 @@ void GameServerHandler::sendPartyChange(Character *ptr, int partyId)
 void GameServerHandler::syncDatabase(MessageIn &msg)
 {
     // It is safe to perform the following updates in a transaction
-    storage->database()->beginTransaction();
+    dal::PerformTransaction transaction(storage->database());
 
     int msgType = msg.readByte();
     while (msgType != SYNC_END_OF_BUFFER && msg.getUnreadLength() > 0)
@@ -602,5 +602,5 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
         msgType = msg.readByte();
     }
 
-    storage->database()->commitTransaction();
+    transaction.commit();
 }

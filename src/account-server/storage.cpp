@@ -906,9 +906,10 @@ void Storage::addAccount(Account *account)
 
     using namespace dal;
 
-    mDb->beginTransaction();
     try
     {
+        PerformTransaction transaction(mDb);
+
         // insert the account
         std::ostringstream sql;
         sql << "insert into " << ACCOUNTS_TBL_NAME
@@ -928,12 +929,11 @@ void Storage::addAccount(Account *account)
         mDb->processSql();
         account->setID(mDb->getLastId());
 
-        mDb->commitTransaction();
+        transaction.commit();
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
         LOG_ERROR("Error in DALStorage::addAccount: " << e.what());
-        mDb->rollbackTransaction();
     }
 }
 
@@ -946,9 +946,10 @@ void Storage::flush(Account *account)
 
     using namespace dal;
 
-    mDb->beginTransaction();
     try
     {
+        PerformTransaction transaction(mDb);
+
         // update the account
         std::ostringstream sqlUpdateAccountTable;
         sqlUpdateAccountTable
@@ -1064,12 +1065,11 @@ void Storage::flush(Account *account)
             }
         }
 
-        mDb->commitTransaction();
+        transaction.commit();
     }
     catch (const std::exception &e)
     {
         LOG_ERROR("ERROR in DALStorage::flush: " << e.what());
-        mDb->rollbackTransaction();
     }
 }
 
@@ -1943,10 +1943,9 @@ Post *Storage::getStoredPost(int playerId)
  */
 void Storage::deletePost(Letter *letter)
 {
-    mDb->beginTransaction();
-
     try
     {
+        dal::PerformTransaction transaction(mDb);
         std::ostringstream sql;
 
         // first delete all attachments of the letter
@@ -1962,12 +1961,11 @@ void Storage::deletePost(Letter *letter)
             << " WHERE letter_id = " << letter->getId();
         mDb->execSql(sql.str());
 
-        mDb->commitTransaction();
+        transaction.commit();
         letter->setId(0);
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        mDb->rollbackTransaction();
         LOG_ERROR("(DALStorage::deletePost) SQL query failure: " << e.what());
     }
 }
@@ -1991,7 +1989,7 @@ void Storage::syncDatabase()
         return;
     }
 
-    mDb->beginTransaction();
+    dal::PerformTransaction transaction(mDb);
     int itmCount = 0;
     for_each_xml_child_node(node, rootNode)
     {
@@ -2075,7 +2073,7 @@ void Storage::syncDatabase()
         }
     }
 
-    mDb->commitTransaction();
+    transaction.commit();
 }
 
 /**
