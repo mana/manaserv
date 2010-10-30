@@ -128,6 +128,8 @@ class MySqlDataProvider: public DataProvider
         void rollbackTransaction()
             throw (std::runtime_error);
 
+        bool inTransaction() const;
+
         /**
          * Returns the number of changed rows by the last executed SQL
          * statement.
@@ -197,6 +199,7 @@ class MySqlDataProvider: public DataProvider
         MYSQL *mDb; /**< the handle to the database connection */
         MYSQL_STMT *mStmt; /**< the prepared statement to process */
         std::vector<MYSQL_BIND*> mBind;
+        bool mInTransaction;
 };
 
 

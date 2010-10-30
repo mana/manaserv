@@ -59,6 +59,7 @@ public:
 
 private:
     DataProvider *mDataProvider;
+    bool mTransactionStarted;
     bool mCommitted;
 };
 
@@ -154,6 +155,11 @@ class DataProvider
          */
         virtual void rollbackTransaction()
             throw (std::runtime_error) = 0;
+
+        /**
+         * Returns whether the data provider is currently in a transaction.
+         */
+        virtual bool inTransaction() const = 0;
 
         /**
          * Returns the number of changed rows by the last executed SQL

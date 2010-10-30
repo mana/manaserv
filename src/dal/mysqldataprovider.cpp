@@ -43,6 +43,7 @@ const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD_DEF  = "mana";
 MySqlDataProvider::MySqlDataProvider()
     throw()
         : mDb(0)
+        , mInTransaction(false)
 {
 }
 
@@ -229,7 +230,21 @@ void MySqlDataProvider::beginTransaction()
         throw std::runtime_error(error);
     }
 
-    mysql_autocommit(mDb, AUTOCOMMIT_OFF);
+    if (inTransaction())
+    {
+        const std::string error = "Trying to begin a transaction while anoter "
+            "one is still open!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    if (mysql_autocommit(mDb, AUTOCOMMIT_OFF)) {
+        const std::string error = "Error while trying to disable autocommit";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    mInTransaction = true;
     execSql("BEGIN");
     LOG_DEBUG("SQL: started transaction");
 }
@@ -245,12 +260,27 @@ void MySqlDataProvider::commitTransaction()
         throw std::runtime_error(error);
     }
 
+    if (!inTransaction())
+    {
+        const std::string error = "Trying to commit a transaction while no "
+            "one is open!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
     if (mysql_commit(mDb) != 0)
     {
         LOG_ERROR("MySqlDataProvider::commitTransaction: " << mysql_error(mDb));
         throw DbSqlQueryExecFailure(mysql_error(mDb));
     }
-    mysql_autocommit(mDb, AUTOCOMMIT_ON);
+
+    if (mysql_autocommit(mDb, AUTOCOMMIT_ON)) {
+        const std::string error = "Error while trying to enable autocommit";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
+    mInTransaction = false;
     LOG_DEBUG("SQL: commited transaction");
 }
 
@@ -265,13 +295,27 @@ void MySqlDataProvider::rollbackTransaction()
         throw std::runtime_error(error);
     }
 
+    if (!inTransaction())
+    {
+        const std::string error = "Trying to rollback a transaction while no "
+            "one is open!";
+        LOG_ERROR(error);
+        throw std::runtime_error(error);
+    }
+
     if (mysql_rollback(mDb) != 0)
     {
         LOG_ERROR("MySqlDataProvider::rollbackTransaction: " << mysql_error(mDb));
         throw DbSqlQueryExecFailure(mysql_error(mDb));
     }
     mysql_autocommit(mDb, AUTOCOMMIT_ON);
+    mInTransaction = false;
     LOG_DEBUG("SQL: transaction rolled back");
+}
+
+bool MySqlDataProvider::inTransaction() const
+{
+    return mInTransaction;
 }
 
 unsigned MySqlDataProvider::getModifiedRows() const

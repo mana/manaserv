@@ -74,8 +74,8 @@ class Storage
 
         void banCharacter(int id, int duration);
 
-        void delCharacter(int charId, bool startTransaction) const;
-        void delCharacter(Character *character, bool startTransaction) const;
+        void delCharacter(int charId) const;
+        void delCharacter(Character *character) const;
 
         void checkBannedAccounts();
 
@@ -83,8 +83,7 @@ class Storage
         bool doesEmailAddressExist(const std::string &email);
         bool doesCharacterNameExist(const std::string &name);
 
-        bool updateCharacter(Character *ptr,
-                             bool startTransaction = true);
+        bool updateCharacter(Character *ptr);
 
         void flushSkill(const Character *character, int skill_id);
 

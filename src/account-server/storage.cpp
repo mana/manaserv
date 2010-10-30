@@ -613,20 +613,15 @@ bool Storage::doesCharacterNameExist(const std::string& name)
  * received from a game server.
  *
  * @param ptr Character to store values in the database.
- * @param startTransaction set to false if this method is called as
- *                         nested transaction.
  * @return true on success
  */
-bool Storage::updateCharacter(Character *character,
-                              bool startTransaction)
+bool Storage::updateCharacter(Character *character)
 {
-    // Update the database Character data (see CharacterData for details)
-    if (startTransaction)
-    {
-        mDb->beginTransaction();
-    }
+    dal::PerformTransaction transaction(mDb);
+
     try
     {
+        // Update the database Character data (see CharacterData for details)
         std::ostringstream sqlUpdateCharacterInfo;
         sqlUpdateCharacterInfo
             << "update "        << CHARACTERS_TBL_NAME << " "
@@ -647,10 +642,6 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #1) SQL query failure: " << e.what());
         return false;
     }
@@ -671,9 +662,8 @@ bool Storage::updateCharacter(Character *character,
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        if (startTransaction)
-            mDb->rollbackTransaction();
         LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
+        return false;
     }
 
     /**
@@ -691,10 +681,6 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
         return false;
     }
@@ -714,10 +700,6 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #4) SQL query failure: " << e.what());
         return false;
     }
@@ -748,10 +730,6 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: " << e.what());
         return false;
     }
@@ -772,10 +750,6 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: " << e.what());
         return false;
     }
@@ -824,10 +798,6 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #6) SQL query failure: " << e.what());
         return false;
     }
@@ -848,10 +818,6 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #7) SQL query failure: " << e.what());
         return false;
     }
@@ -867,17 +833,11 @@ bool Storage::updateCharacter(Character *character,
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception
-        if (startTransaction)
-        {
-            mDb->rollbackTransaction();
-        }
         LOG_ERROR("(DALStorage::updateCharacter #8) SQL query failure: " << e.what());
         return false;
     }
-    if (startTransaction)
-    {
-        mDb->commitTransaction();
-    }
+
+    transaction.commit();
     return true;
 }
 
@@ -971,10 +931,7 @@ void Storage::flush(Account *account)
         {
             if ((*it)->getDatabaseID() >= 0)
             {
-                /* 2nd. parameter false means: don't start a transaction in
-                   the updateCharacter method, cause we did this already a few
-                   lines above */
-                updateCharacter(*it, false);
+                updateCharacter(*it);
             }
             else
             {
@@ -1061,7 +1018,7 @@ void Storage::flush(Account *account)
                 // Because as deleted, the RecordSet is also emptied
                 // That creates an error.
                 unsigned int charId = toUint(charInMemInfo(i, 1));
-                delCharacter(charId, false);
+                delCharacter(charId);
             }
         }
 
@@ -1685,15 +1642,12 @@ void Storage::banCharacter(int id, int duration)
  * Delete a character in the database.
  *
  * @param charId character identifier.
- * @param startTransaction indicates wheter the function should run in
- *        its own transaction or is called inline of another transaction
  */
-void Storage::delCharacter(int charId, bool startTransaction = true) const
+void Storage::delCharacter(int charId) const
 {
-    if (startTransaction)
-        mDb->beginTransaction();
     try
     {
+        dal::PerformTransaction transaction(mDb);
         std::ostringstream sql;
 
         // delete the inventory of the character
@@ -1743,13 +1697,10 @@ void Storage::delCharacter(int charId, bool startTransaction = true) const
             << " WHERE id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        if (startTransaction)
-            mDb->commitTransaction();
+        transaction.commit();
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        if (startTransaction)
-            mDb->rollbackTransaction();
         LOG_ERROR("(DALStorage::delCharacter) SQL query failure: " << e.what());
     }
 }
@@ -1759,13 +1710,10 @@ void Storage::delCharacter(int charId, bool startTransaction = true) const
  * by this function!
  *
  * @param character character object.
- * @param startTransaction indicates wheter the function should run in
- *        its own transaction or is called inline of another transaction
  */
-void Storage::delCharacter(Character *character,
-                           bool startTransaction = true) const
+void Storage::delCharacter(Character *character) const
 {
-    delCharacter(character->getDatabaseID(), startTransaction);
+    delCharacter(character->getDatabaseID());
 }
 
 /**

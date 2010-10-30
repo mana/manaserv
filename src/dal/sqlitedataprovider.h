@@ -121,6 +121,14 @@ class SqLiteDataProvider: public DataProvider
             throw (std::runtime_error);
 
         /**
+         * Returns wheter the connection has a open transaction or is in auto-
+         * commit mode.
+         *
+         * @return true, if a transaction is open.
+         */
+        bool inTransaction() const;
+
+        /**
          * Returns the number of changed rows by the last executed SQL
          * statement.
          *
@@ -168,14 +176,6 @@ class SqLiteDataProvider: public DataProvider
         static const std::string CFGPARAM_SQLITE_DB;
         /** defines the default value of the CFGPARAM_SQLITE_DB parameter */
         static const std::string CFGPARAM_SQLITE_DB_DEF;
-
-        /**
-         * Returns wheter the connection has a open transaction or is in auto-
-         * commit mode.
-         *
-         * @return true, if a transaction is open.
-         */
-        bool inTransaction() const;
 
         sqlite3 *mDb; /**< the handle to the database connection */
         sqlite3_stmt *mStmt; /**< the prepared statement to process */
