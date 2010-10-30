@@ -129,6 +129,11 @@ class Storage
         std::vector<Transaction> getTransactions(unsigned int num);
         std::vector<Transaction> getTransactions(time_t date);
 
+        /**
+         * Provides direct access to the database. Use with care!
+         */
+        dal::DataProvider *database() const { return mDb; }
+
     private:
         // Prevent copying
         Storage(const Storage &rhs);

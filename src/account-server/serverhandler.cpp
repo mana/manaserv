@@ -552,18 +552,21 @@ void GameServerHandler::sendPartyChange(Character *ptr, int partyId)
 
 void GameServerHandler::syncDatabase(MessageIn &msg)
 {
+    // It is safe to perform the following updates in a transaction
+    storage->database()->beginTransaction();
+
     int msgType = msg.readByte();
-    while (msgType != SYNC_END_OF_BUFFER)
+    while (msgType != SYNC_END_OF_BUFFER && msg.getUnreadLength() > 0)
     {
         switch (msgType)
         {
             case SYNC_CHARACTER_POINTS:
             {
                 LOG_DEBUG("received SYNC_CHARACTER_POINTS");
-                int CharId = msg.readLong();
-                int CharPoints = msg.readLong();
-                int CorrPoints = msg.readLong();
-                storage->updateCharacterPoints(CharId, CharPoints, CorrPoints);
+                int charId = msg.readLong();
+                int charPoints = msg.readLong();
+                int corrPoints = msg.readLong();
+                storage->updateCharacterPoints(charId, charPoints, corrPoints);
             } break;
 
             case SYNC_CHARACTER_ATTRIBUTE:
@@ -579,23 +582,25 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
             case SYNC_CHARACTER_SKILL:
             {
                 LOG_DEBUG("received SYNC_CHARACTER_SKILL");
-                int CharId = msg.readLong();
-                int SkillId = msg.readByte();
-                int SkillValue = msg.readLong();
-                storage->updateExperience(CharId, SkillId, SkillValue);
+                int charId = msg.readLong();
+                int skillId = msg.readByte();
+                int skillValue = msg.readLong();
+                storage->updateExperience(charId, skillId, skillValue);
             } break;
 
             case SYNC_ONLINE_STATUS:
             {
                 LOG_DEBUG("received SYNC_ONLINE_STATUS");
-                int CharId = msg.readLong();
+                int charId = msg.readLong();
                 bool online;
                 msg.readByte() == 0x00 ? online = false : online = true;
-                storage->setOnlineStatus(CharId, online);
+                storage->setOnlineStatus(charId, online);
             }
         }
 
         // read next message type from buffer
         msgType = msg.readByte();
     }
+
+    storage->database()->commitTransaction();
 }
