@@ -107,6 +107,13 @@ class MonsterClass
         double getAttribute(int attribute) const
         { return mAttributes.at(attribute); }
 
+        /**
+         * Returns whether the monster has got the attribute.
+         */
+        bool hasAttribute(int attribute) const
+        { return (mAttributes.find(attribute) != mAttributes.end()); }
+
+
         /** Sets collision circle radius. */
         void setSize(int size) { mSize = size; }
 

@@ -96,7 +96,11 @@ Monster::Monster(MonsterClass *specy):
         it2 != it2_end;
         ++it2)
     {
-        double attr = specy->getAttribute(it2->first);
+        double attr = 0.0f;
+
+        if (specy->hasAttribute(it2->first))
+            attr = specy->getAttribute(it2->first);
+
         setAttribute(it2->first,
                   mutation ?
                   attr * (100 + (rand()%(mutation << 1)) - mutation) / 100.0 :
