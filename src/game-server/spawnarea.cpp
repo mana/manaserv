@@ -84,20 +84,24 @@ void SpawnArea::update()
 
         if (being->getModifiedAttribute(ATTR_MAX_HP) <= 0)
         {
-            //LOG_WARN("Refusing to spawn dead monster " << mSpecy->getType());
+            LOG_WARN("Refusing to spawn dead monster " << mSpecy->getId());
             delete being;
             being = 0;
         }
 
-        if (being) {
-            do {
+        if (being)
+        {
+            do
+            {
                 position = Point(x + rand() % width, y + rand() % height);
                 c--;
-            } while (!realMap->getWalk(position.x / realMap->getTileWidth(),
-                                       position.y / realMap->getTileHeight(),
-                                       being->getWalkMask()) && c);
+            }
+            while (!realMap->getWalk(position.x / realMap->getTileWidth(),
+                                     position.y / realMap->getTileHeight(),
+                                     being->getWalkMask()) && c);
 
-            if (c) {
+            if (c)
+            {
                 being->addListener(&mSpawnedListener);
                 being->setMap(map);
                 being->setPosition(position);
@@ -106,9 +110,10 @@ void SpawnArea::update()
 
                 mNumBeings++;
             }
-            else {
+            else
+            {
                 LOG_WARN("Unable to find a free spawn location for monster "
-                         << mSpecy->getType() << " on map " << map->getName()
+                         << mSpecy->getId() << " on map " << map->getName()
                          << " (" << x << ',' << y << ','
                          << width << ',' << height << ')');
                 delete being;

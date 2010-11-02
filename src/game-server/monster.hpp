@@ -69,7 +69,7 @@ class MonsterClass
 {
     public:
         MonsterClass(int id):
-            mID(id),
+            mId(id),
             mSpeed(1),
             mSize(16),
             mExp(-1),
@@ -83,10 +83,10 @@ class MonsterClass
         {}
 
         /**
-         * Returns monster type. This is the ID of the monster class.
+         * Returns monster type. This is the Id of the monster class.
          */
-        int getType() const
-        { return mID; }
+        int getId() const
+        { return mId; }
 
         /**
          * Sets monster drops. These are the items the monster drops when it
@@ -186,7 +186,7 @@ class MonsterClass
         ItemClass *getRandomDrop() const;
 
     private:
-        unsigned short mID;
+        unsigned short mId;
         MonsterDrops mDrops;
         std::map<int, double> mAttributes; /**< Base attributes of the monster. */
         float mSpeed; /**< The monster class speed in tiles per second */

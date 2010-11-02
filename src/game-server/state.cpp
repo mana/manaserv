@@ -285,7 +285,7 @@ static void informPlayer(MapComposite *map, Character *p)
                 case OBJECT_MONSTER:
                 {
                     Monster *q = static_cast< Monster * >(o);
-                    enterMsg.writeShort(q->getSpecy()->getType());
+                    enterMsg.writeShort(q->getSpecy()->getId());
                     enterMsg.writeString(q->getName());
                 } break;
 
@@ -555,7 +555,8 @@ bool GameState::insert(Thing *ptr)
     switch (obj->getType())
     {
         case OBJECT_ITEM:
-            LOG_DEBUG("Item inserted: " << static_cast<Item*>(obj)->getItemClass()->getDatabaseID());
+            LOG_DEBUG("Item inserted: "
+                   << static_cast<Item*>(obj)->getItemClass()->getDatabaseID());
             break;
 
         case OBJECT_NPC:
@@ -563,15 +564,18 @@ bool GameState::insert(Thing *ptr)
             break;
 
         case OBJECT_CHARACTER:
-            LOG_DEBUG("Player inserted: " << static_cast<Being*>(obj)->getName());
+            LOG_DEBUG("Player inserted: "
+                      << static_cast<Being*>(obj)->getName());
             break;
 
         case OBJECT_EFFECT:
-            LOG_DEBUG("Effect inserted: " << static_cast<Effect*>(obj)->getEffectId());
+            LOG_DEBUG("Effect inserted: "
+                      << static_cast<Effect*>(obj)->getEffectId());
             break;
 
         case OBJECT_MONSTER:
-            LOG_DEBUG("Monster inserted: " << static_cast<Monster*>(obj)->getSpecy()->getType());
+            LOG_DEBUG("Monster inserted: "
+                      << static_cast<Monster*>(obj)->getSpecy()->getId());
             break;
 
         case OBJECT_ACTOR:
@@ -619,7 +623,8 @@ void GameState::remove(Thing *ptr)
     switch (ptr->getType())
     {
         case OBJECT_ITEM:
-            LOG_DEBUG("Item removed: " << static_cast<Item*>(ptr)->getItemClass()->getDatabaseID());
+            LOG_DEBUG("Item removed: "
+                   << static_cast<Item*>(ptr)->getItemClass()->getDatabaseID());
             break;
 
         case OBJECT_NPC:
@@ -627,15 +632,18 @@ void GameState::remove(Thing *ptr)
             break;
 
         case OBJECT_CHARACTER:
-            LOG_DEBUG("Player removed: " << static_cast<Being*>(ptr)->getName());
+            LOG_DEBUG("Player removed: "
+                      << static_cast<Being*>(ptr)->getName());
             break;
 
         case OBJECT_EFFECT:
-            LOG_DEBUG("Effect removed: " << static_cast<Effect*>(ptr)->getEffectId());
+            LOG_DEBUG("Effect removed: "
+                      << static_cast<Effect*>(ptr)->getEffectId());
             break;
 
         case OBJECT_MONSTER:
-            LOG_DEBUG("Monster removed: " << static_cast<Monster*>(ptr)->getSpecy()->getType());
+            LOG_DEBUG("Monster removed: "
+                      << static_cast<Monster*>(ptr)->getSpecy()->getId());
             break;
 
         case OBJECT_ACTOR:
@@ -660,9 +668,11 @@ void GameState::remove(Thing *ptr)
         msg.writeShort(obj->getPublicID());
         Point objectPos = obj->getPosition();
 
-        for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange)); p; ++p)
+        for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange));
+             p; ++p)
         {
-            if (*p != obj && objectPos.inRangeOf((*p)->getPosition(), visualRange))
+            if (*p != obj && objectPos.inRangeOf((*p)->getPosition(),
+                visualRange))
             {
                 gameHandler->sendTo(*p, msg);
             }
@@ -770,11 +780,16 @@ void GameState::sayTo(Actor *destination, Actor *source, const std::string &text
         return; //only characters will read it anyway
 
     MessageOut msg(GPMSG_SAY);
-    if (source == NULL) {
+    if (source == NULL)
+    {
         msg.writeShort(0);
-    } else if (!source->canMove()) {
+    }
+    else if (!source->canMove())
+    {
         msg.writeShort(65535);
-    } else {
+    }
+    else
+    {
         msg.writeShort(static_cast< Actor * >(source)->getPublicID());
     }
     msg.writeString(text);
@@ -786,10 +801,10 @@ void GameState::sayToAll(const std::string &text)
 {
     MessageOut msg(GPMSG_SAY);
 
-    // message will show as from server
+    // The message will be shown as if it was from the server
     msg.writeShort(0);
     msg.writeString(text);
 
-    // sends to everyone connected to the game server
+    // Sends it to everyone connected to the game server
     gameHandler->sendToEveryone(msg);
 }

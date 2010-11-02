@@ -53,9 +53,9 @@ struct MonsterTargetEventDispatch: EventDispatch
 {
     MonsterTargetEventDispatch()
     {
-        typedef EventListenerFactory< Monster, &Monster::mTargetListener > Factory;
+        typedef EventListenerFactory<Monster, &Monster::mTargetListener> Factory;
         removed = &Factory::create< Thing, &Monster::forgetTarget >::function;
-        died = &Factory::create< Thing, &Monster::forgetTarget, Being >::function;
+        died = &Factory::create<Thing, &Monster::forgetTarget, Being>::function;
     }
 };
 
@@ -69,20 +69,20 @@ Monster::Monster(MonsterClass *specy):
     mOwner(NULL),
     mCurrentAttack(NULL)
 {
-    LOG_DEBUG("Monster spawned!");
+    LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
 
     /*
      * Initialise the attribute structures.
      */
-
-    const AttributeScopes &mobAttr = attributeManager->getAttributeInfoForType(ATTR_MOB);
+    const AttributeScopes &mobAttr = attributeManager->getAttributeInfoForType(
+                                                                      ATTR_MOB);
 
     for (AttributeScopes::const_iterator it = mobAttr.begin(),
-         it_end = mobAttr.end();
-        it != it_end;
-        ++it)
+         it_end = mobAttr.end(); it != it_end; ++it)
+    {
         mAttributes.insert(std::pair< unsigned int, Attribute >
                            (it->first, Attribute(*it->second)));
+    }
 
     /*
      * Set the attributes to the values defined by the associated monster
@@ -92,9 +92,7 @@ Monster::Monster(MonsterClass *specy):
     int mutation = specy->getMutation();
 
     for (AttributeMap::iterator it2 = mAttributes.begin(),
-         it2_end = mAttributes.end();
-        it2 != it2_end;
-        ++it2)
+         it2_end = mAttributes.end(); it2 != it2_end; ++it2)
     {
         double attr = 0.0f;
 
@@ -107,7 +105,9 @@ Monster::Monster(MonsterClass *specy):
                   attr);
     }
 
-    setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToSpeed(getAttribute(ATTR_MOVE_SPEED_TPS))); // Put in tiles per second.
+    // Set the speed in tiles per second.
+    setAttribute(ATTR_MOVE_SPEED_RAW,
+                 utils::tpsToSpeed(getAttribute(ATTR_MOVE_SPEED_TPS)));
     setSize(specy->getSize());
 
     // Set positions relative to target from which the monster can attack
@@ -117,7 +117,7 @@ Monster::Monster(MonsterClass *specy):
     mAttackPositions.push_back(AttackPosition(0, -dist, DIRECTION_DOWN));
     mAttackPositions.push_back(AttackPosition(0, dist, DIRECTION_UP));
 
-    //load default script
+    // Load default script
     loadScript(specy->getScript());
 }
 
@@ -134,7 +134,7 @@ Monster::~Monster()
         i->first->removeListener(&mTargetListener);
     }
 
-    // free map position
+    // Free the map position
     if (getMap())
     {
         Point oldP = getPosition();
@@ -155,7 +155,8 @@ void Monster::perform()
             {
                 if (!isTimerRunning(T_M_ATTACK_TIME))
                 {
-                    setTimerHard(T_M_ATTACK_TIME, mCurrentAttack->aftDelay + mCurrentAttack->preDelay);
+                    setTimerHard(T_M_ATTACK_TIME, mCurrentAttack->aftDelay
+                                                  + mCurrentAttack->preDelay);
                     Damage dmg(getModifiedAttribute(MOB_ATTR_PHY_ATK_MIN) *
                                     mCurrentAttack->damageFactor,
                                getModifiedAttribute(MOB_ATTR_PHY_ATK_DELTA) *
@@ -165,7 +166,8 @@ void Monster::perform()
                                mCurrentAttack->type,
                                mCurrentAttack->range);
 
-                    int hit = performAttack(mTarget, mCurrentAttack->range, dmg);
+                    int hit = performAttack(mTarget, mCurrentAttack->range,
+                                            dmg);
 
                     if (! mCurrentAttack->scriptFunction.empty()
                         && mScript
@@ -180,8 +182,11 @@ void Monster::perform()
                     }
                 }
             }
-        } else
+        }
+        else
+        {
             setAction(STAND);
+        }
     }
 }
 
@@ -194,7 +199,7 @@ void Monster::update()
         mOwner = NULL;
     }
 
-    // If dead do nothing but rot
+    // If dead, remove it
     if (mAction == DEAD)
     {
         if (!isTimerRunning(T_M_DECAY))
@@ -212,7 +217,8 @@ void Monster::update()
     }
 
     // Cancel the rest when we are currently performing an attack
-    if (isTimerRunning(T_M_ATTACK_TIME)) return;
+    if (isTimerRunning(T_M_ATTACK_TIME))
+        return;
 
     // Check potential attack positions
     Being *bestAttackTarget = mTarget = NULL;
@@ -222,15 +228,18 @@ void Monster::update()
 
     // Iterate through objects nearby
     int aroundArea = Configuration::getValue("game_visualRange", 448);
-    for (BeingIterator i(getMap()->getAroundBeingIterator(this, aroundArea)); i; ++i)
+    for (BeingIterator i(getMap()->getAroundBeingIterator(this, aroundArea));
+         i; ++i)
     {
         // We only want to attack player characters
-        if ((*i)->getType() != OBJECT_CHARACTER) continue;
+        if ((*i)->getType() != OBJECT_CHARACTER)
+            continue;
 
         Being *target = static_cast<Being *> (*i);
 
         // Dead characters are ignored
-        if (target->getAction() == DEAD) continue;
+        if (target->getAction() == DEAD)
+            continue;
 
         // Determine how much we hate the target
         int targetPriority = 0;
@@ -251,8 +260,7 @@ void Monster::update()
 
         // Check all attack positions
         for (std::list<AttackPosition>::iterator j = mAttackPositions.begin();
-             j != mAttackPositions.end();
-             j++)
+             j != mAttackPositions.end(); j++)
         {
             Point attackPosition = (*i)->getPosition();
             attackPosition.x += (*j).x;
@@ -273,7 +281,7 @@ void Monster::update()
     // Check if an enemy has been found
     if (bestAttackTarget)
     {
-        //check which attacks have a chance to hit the target
+        // Check which attacks have a chance to hit the target
         MonsterAttacks allAttacks = mSpecy->getAttacks();
         std::map<int, MonsterAttack *> workingAttacks;
         int prioritySum = 0;
@@ -282,29 +290,34 @@ void Monster::update()
              i != allAttacks.end();
              i++)
         {
-            int distx = this->getPosition().x - bestAttackTarget->getPosition().x;
-            int disty = this->getPosition().y - bestAttackTarget->getPosition().y;
+            int distx = this->getPosition().x
+                        - bestAttackTarget->getPosition().x;
+            int disty = this->getPosition().y
+                        - bestAttackTarget->getPosition().y;
             int distSquare = (distx * distx + disty * disty);
             int maxDist =  (*i)->range + bestAttackTarget->getSize();
+
             if (maxDist * maxDist >= distSquare)
             {
                 prioritySum += (*i)->priority;
                 workingAttacks[prioritySum] = (*i);
             }
         }
+
         if (workingAttacks.empty() || !prioritySum)
         {   //when no attack can hit move closer to attack position
             setDestination(bestAttackPosition);
         }
         else
         {
-            //prepare for using a random attack which can hit the enemy
-            //stop movement
+            // Prepare for using a random attack which can hit the enemy
+            // Stop movement
             setDestination(getPosition());
-            //turn into direction of enemy
+            // Turn into direction of enemy
             setDirection(bestAttackDirection);
-            //perform a random attack based on priority
-            mCurrentAttack = workingAttacks.upper_bound(rand()%prioritySum)->second;
+            // Perform a random attack based on priority
+            mCurrentAttack =
+                         workingAttacks.upper_bound(rand()%prioritySum)->second;
             setAction(ATTACK);
             raiseUpdateFlags(UPDATEFLAG_ATTACK);
         }
@@ -319,8 +332,10 @@ void Monster::update()
                 unsigned range = mSpecy->getStrollRange();
                 if (range)
                 {
-                    Point randomPos(rand() % (range * 2 + 1) - range + getPosition().x,
-                                    rand() % (range * 2 + 1) - range + getPosition().y);
+                    Point randomPos(rand() % (range * 2 + 1)
+                                    - range + getPosition().x,
+                                    rand() % (range * 2 + 1)
+                                    - range + getPosition().y);
                     setDestination(randomPos);
                 }
                 setTimerHard(T_M_STROLL, 10 + rand() % 10);
@@ -340,13 +355,16 @@ void Monster::loadScript(const std::string &scriptName)
 
     std::stringstream filename;
     filename << "scripts/monster/" << scriptName;
-    if (ResourceManager::exists(filename.str()))       // file exists!
+    if (ResourceManager::exists(filename.str()))
     {
         LOG_INFO("Loading monster script: " << filename.str());
         mScript = Script::create("lua");
         mScript->loadFile(filename.str());
-    } else {
-        LOG_WARN("Could not find script file \"" << filename.str() << "\" for monster");
+    }
+    else
+    {
+        LOG_WARN("Could not find script file \""
+                 << filename.str() << "\" for monster");
     }
 }
 
@@ -422,6 +440,7 @@ int Monster::damage(Actor *source, const Damage &damage)
     {
         changeAnger(source, HPLoss);
     }
+
     if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
     {
         Character *s = static_cast< Character * >(source);
@@ -472,23 +491,24 @@ void Monster::died()
 
         float expPerChar = (float)mSpecy->getExp() / mExpReceivers.size();
 
-        for (iChar = mExpReceivers.begin(); iChar != mExpReceivers.end(); iChar++)
+        for (iChar = mExpReceivers.begin(); iChar != mExpReceivers.end();
+             iChar++)
         {
             Character *character = (*iChar).first;
             std::set<size_t> *skillSet = &(*iChar).second;
 
             if (mLegalExpReceivers.find(character) == mLegalExpReceivers.end()
                 || skillSet->size() < 1)
-            {
                 continue;
-            }
+
             int expPerSkill = int(expPerChar / skillSet->size());
-            for (iSkill = skillSet->begin(); iSkill != skillSet->end(); iSkill++)
+            for (iSkill = skillSet->begin(); iSkill != skillSet->end();
+                 iSkill++)
             {
                 character->receiveExperience(*iSkill, expPerSkill,
                                              mSpecy->getOptimalLevel());
             }
-            character->incrementKillCount(mSpecy->getType());
+            character->incrementKillCount(mSpecy->getId());
         }
     }
 }
