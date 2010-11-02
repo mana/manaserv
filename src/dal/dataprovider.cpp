@@ -30,7 +30,8 @@ PerformTransaction::PerformTransaction(DataProvider *dataProvider)
     , mTransactionStarted(false)
     , mCommitted(false)
 {
-    if (!mDataProvider->inTransaction()) {
+    if (!mDataProvider->inTransaction())
+    {
         mDataProvider->beginTransaction();
         mTransactionStarted = true;
     }
@@ -44,7 +45,8 @@ PerformTransaction::~PerformTransaction()
 
 void PerformTransaction::commit()
 {
-    if (mTransactionStarted) {
+    if (mTransactionStarted)
+    {
         mDataProvider->commitTransaction();
         mCommitted = true;
         mTransactionStarted = false;
