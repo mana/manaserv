@@ -368,27 +368,11 @@ void Character::updateDerivedAttributes(unsigned int attr)
     if (!mAttributes.count(attr)) return;
     double newBase = getAttribute(attr);
 
-    std::set< unsigned int > deps;
-
-    switch (attr) {
-    case ATTR_STR:
-        deps.insert(ATTR_INV_CAPACITY);
-        break;
-    case ATTR_AGI:
-        deps.insert(ATTR_DODGE);
-        break;
-    case ATTR_VIT:
-        deps.insert(ATTR_MAX_HP);
-        deps.insert(ATTR_HP_REGEN);
-        deps.insert(ATTR_DEFENSE);
-        break;
-    case ATTR_INT:
-        break;
-    case ATTR_DEX:
-        deps.insert(ATTR_ACCURACY);
-        break;
-    case ATTR_WIL:
-        break;
+    /*
+     * Calculate new base.
+     */
+    switch (attr)
+    {
     case ATTR_ACCURACY:
         newBase = getModifiedAttribute(ATTR_DEX); // Provisional
         break;
@@ -425,17 +409,16 @@ void Character::updateDerivedAttributes(unsigned int attr)
     case ATTR_MAX_HP:
         newBase = ((getModifiedAttribute(ATTR_VIT) + 3)
                    * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
-        deps.insert(ATTR_HP);
         break;
     case ATTR_MOVE_SPEED_TPS:
         newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
-        deps.insert(ATTR_MOVE_SPEED_RAW);
         break;
     case ATTR_MOVE_SPEED_RAW:
         newBase = utils::tpsToSpeed(getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
         break;
     case ATTR_INV_CAPACITY:
-        newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0; // Provisional
+        // Provisional
+        newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0;
         break;
     default: break;
     }
@@ -445,9 +428,39 @@ void Character::updateDerivedAttributes(unsigned int attr)
     else
         LOG_DEBUG("No changes to sync.");
     flagAttribute(attr);
-    for (std::set<unsigned int>::const_iterator it = deps.begin(),
-         it_end = deps.end(); it != it_end; ++it)
-        updateDerivedAttributes(*it);
+
+    /*
+     * Update attributes dependent on this one, if applicable.
+     */
+    switch(attr)
+    {
+    case ATTR_STR:
+        updateDerivedAttributes(ATTR_INV_CAPACITY);
+        break;
+    case ATTR_AGI:
+        updateDerivedAttributes(ATTR_DODGE);
+        updateDerivedAttributes(ATTR_MOVE_SPEED_TPS);
+        break;
+    case ATTR_VIT:
+        updateDerivedAttributes(ATTR_MAX_HP);
+        updateDerivedAttributes(ATTR_HP_REGEN);
+        updateDerivedAttributes(ATTR_DEFENSE);
+        break;
+    case ATTR_INT:
+        break;
+    case ATTR_DEX:
+        updateDerivedAttributes(ATTR_ACCURACY);
+        break;
+    case ATTR_WIL:
+        break;
+    case ATTR_MAX_HP:
+        updateDerivedAttributes(ATTR_HP);
+        break;
+    case ATTR_MOVE_SPEED_TPS:
+        updateDerivedAttributes(ATTR_MOVE_SPEED_RAW);
+        break;
+    default: break;
+    }
 }
 
 void Character::flagAttribute(int attr)
@@ -486,7 +499,8 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
     // Add exp
     int oldExp = mExperience[skill];
     long int newExp = mExperience[skill] + experience;
-    if (newExp < 0) newExp = 0; // Avoid integer underflow/negative exp.
+    if (newExp < 0)
+        newExp = 0; // Avoid integer underflow/negative exp.
 
     // Check the skill cap
     long int maxSkillCap = Configuration::getValue("game_maxSkillCap", INT_MAX);
@@ -615,7 +629,8 @@ AttribmodResponseCode Character::useCharacterPoint(size_t attribute)
 {
     if (!attributeManager->isAttributeDirectlyModifiable(attribute))
         return ATTRIBMOD_INVALID_ATTRIBUTE;
-    if (!mCharacterPoints) return ATTRIBMOD_NO_POINTS_LEFT;
+    if (!mCharacterPoints)
+        return ATTRIBMOD_NO_POINTS_LEFT;
 
     --mCharacterPoints;
     setAttribute(attribute, getAttribute(attribute) + 1);
@@ -627,8 +642,10 @@ AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
 {
     if (!attributeManager->isAttributeDirectlyModifiable(attribute))
         return ATTRIBMOD_INVALID_ATTRIBUTE;
-    if (!mCorrectionPoints) return ATTRIBMOD_NO_POINTS_LEFT;
-    if (getAttribute(attribute) <= 1) return ATTRIBMOD_DENIED;
+    if (!mCorrectionPoints)
+        return ATTRIBMOD_NO_POINTS_LEFT;
+    if (getAttribute(attribute) <= 1)
+        return ATTRIBMOD_DENIED;
 
     --mCorrectionPoints;
     ++mCharacterPoints;
@@ -644,7 +661,8 @@ void Character::disconnected()
     {
         const EventListener &l = **i;
         ++i; // In case the listener removes itself from the list on the fly.
-        if (l.dispatch->disconnected) l.dispatch->disconnected(&l, this);
+        if (l.dispatch->disconnected)
+            l.dispatch->disconnected(&l, this);
     }
 }
 
