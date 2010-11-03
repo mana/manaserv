@@ -109,13 +109,13 @@ bool BuySell::start(Actor *actor)
     }
 
     MessageOut msg(mSell ? GPMSG_NPC_SELL : GPMSG_NPC_BUY);
-    msg.writeShort(actor->getPublicID());
+    msg.writeInt16(actor->getPublicID());
     for (TradedItems::const_iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {
-        msg.writeShort(i->itemId);
-        msg.writeShort(i->amount);
-        msg.writeShort(i->cost);
+        msg.writeInt16(i->itemId);
+        msg.writeInt16(i->amount);
+        msg.writeInt16(i->cost);
     }
     mChar->getClient()->send(msg);
     return true;

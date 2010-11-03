@@ -149,10 +149,10 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
        Setting the upper bit tells the client to clear the slots beforehand. */
     int mask = full ? mask_full | (1 << 7) : mask_diff;
 
-    msg.writeByte(mask);
+    msg.writeInt8(mask);
     for (unsigned int i = 0; i < nb_slots; ++i)
     {
-        if (mask & (1 << i)) msg.writeShort(items[i]);
+        if (mask & (1 << i)) msg.writeInt16(items[i]);
     }
 }
 
@@ -195,9 +195,9 @@ static void informPlayer(MapComposite *map, Character *p)
             if ((oflags & UPDATEFLAG_ATTACK) && oid != pid)
             {
                 MessageOut AttackMsg(GPMSG_BEING_ATTACK);
-                AttackMsg.writeShort(oid);
-                AttackMsg.writeByte(o->getDirection());
-                AttackMsg.writeByte(static_cast< Being * >(o)->getAttackType());
+                AttackMsg.writeInt16(oid);
+                AttackMsg.writeInt8(o->getDirection());
+                AttackMsg.writeInt8(static_cast< Being * >(o)->getAttackType());
                 gameHandler->sendTo(p, AttackMsg);
             }
 
@@ -205,8 +205,8 @@ static void informPlayer(MapComposite *map, Character *p)
             if ((oflags & UPDATEFLAG_ACTIONCHANGE))
             {
                 MessageOut ActionMsg(GPMSG_BEING_ACTION_CHANGE);
-                ActionMsg.writeShort(oid);
-                ActionMsg.writeByte(static_cast< Being * >(o)->getAction());
+                ActionMsg.writeInt16(oid);
+                ActionMsg.writeInt8(static_cast< Being * >(o)->getAction());
                 gameHandler->sendTo(p, ActionMsg);
             }
 
@@ -214,12 +214,12 @@ static void informPlayer(MapComposite *map, Character *p)
             if (oflags & UPDATEFLAG_LOOKSCHANGE)
             {
                 MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
-                LooksMsg.writeShort(oid);
+                LooksMsg.writeInt16(oid);
                 Character * c = static_cast<Character * >(o);
                 serializeLooks(c, LooksMsg, false);
-                LooksMsg.writeShort(c->getHairStyle());
-                LooksMsg.writeShort(c->getHairColor());
-                LooksMsg.writeShort(c->getGender());
+                LooksMsg.writeInt16(c->getHairStyle());
+                LooksMsg.writeInt16(c->getHairColor());
+                LooksMsg.writeInt16(c->getGender());
                 gameHandler->sendTo(p, LooksMsg);
             }
 
@@ -227,8 +227,8 @@ static void informPlayer(MapComposite *map, Character *p)
             if (oflags & UPDATEFLAG_DIRCHANGE)
             {
                 MessageOut DirMsg(GPMSG_BEING_DIR_CHANGE);
-                DirMsg.writeShort(oid);
-                DirMsg.writeByte(o->getDirection());
+                DirMsg.writeInt16(oid);
+                DirMsg.writeInt8(o->getDirection());
                 gameHandler->sendTo(p, DirMsg);
             }
 
@@ -240,8 +240,8 @@ static void informPlayer(MapComposite *map, Character *p)
                 for (Hits::const_iterator j = hits.begin(),
                      j_end = hits.end(); j != j_end; ++j)
                 {
-                    damageMsg.writeShort(oid);
-                    damageMsg.writeShort(*j);
+                    damageMsg.writeInt16(oid);
+                    damageMsg.writeInt16(*j);
                 }
             }
 
@@ -256,7 +256,7 @@ static void informPlayer(MapComposite *map, Character *p)
         {
             // o is no longer visible from p. Send leave message.
             MessageOut leaveMsg(GPMSG_BEING_LEAVE);
-            leaveMsg.writeShort(oid);
+            leaveMsg.writeInt16(oid);
             gameHandler->sendTo(p, leaveMsg);
             continue;
         }
@@ -265,34 +265,34 @@ static void informPlayer(MapComposite *map, Character *p)
         {
             // o is now visible by p. Send enter message.
             MessageOut enterMsg(GPMSG_BEING_ENTER);
-            enterMsg.writeByte(otype);
-            enterMsg.writeShort(oid);
-            enterMsg.writeByte(static_cast< Being *>(o)->getAction());
-            enterMsg.writeShort(opos.x);
-            enterMsg.writeShort(opos.y);
+            enterMsg.writeInt8(otype);
+            enterMsg.writeInt16(oid);
+            enterMsg.writeInt8(static_cast< Being *>(o)->getAction());
+            enterMsg.writeInt16(opos.x);
+            enterMsg.writeInt16(opos.y);
             switch (otype)
             {
                 case OBJECT_CHARACTER:
                 {
                     Character *q = static_cast< Character * >(o);
                     enterMsg.writeString(q->getName());
-                    enterMsg.writeByte(q->getHairStyle());
-                    enterMsg.writeByte(q->getHairColor());
-                    enterMsg.writeByte(q->getGender());
+                    enterMsg.writeInt8(q->getHairStyle());
+                    enterMsg.writeInt8(q->getHairColor());
+                    enterMsg.writeInt8(q->getGender());
                     serializeLooks(q, enterMsg, true);
                 } break;
 
                 case OBJECT_MONSTER:
                 {
                     Monster *q = static_cast< Monster * >(o);
-                    enterMsg.writeShort(q->getSpecy()->getId());
+                    enterMsg.writeInt16(q->getSpecy()->getId());
                     enterMsg.writeString(q->getName());
                 } break;
 
                 case OBJECT_NPC:
                 {
                     NPC *q = static_cast< NPC * >(o);
-                    enterMsg.writeShort(q->getNPC());
+                    enterMsg.writeInt16(q->getNPC());
                     enterMsg.writeString(q->getName());
                 } break;
 
@@ -308,16 +308,16 @@ static void informPlayer(MapComposite *map, Character *p)
         }
 
         // Send move messages.
-        moveMsg.writeShort(oid);
-        moveMsg.writeByte(flags);
+        moveMsg.writeInt16(oid);
+        moveMsg.writeInt8(flags);
         if (flags & MOVING_POSITION)
         {
-            moveMsg.writeShort(opos.x);
-            moveMsg.writeShort(opos.y);
+            moveMsg.writeInt16(opos.x);
+            moveMsg.writeInt16(opos.y);
             // We multiply the sent speed (in tiles per second) by ten
             // to get it within a byte with decimal precision.
             // For instance, a value of 4.5 will be sent as 45.
-            moveMsg.writeByte((unsigned short)
+            moveMsg.writeInt8((unsigned short)
                 (o->getModifiedAttribute(ATTR_MOVE_SPEED_TPS) * 10));
         }
     }
@@ -348,9 +348,9 @@ static void informPlayer(MapComposite *map, Character *p)
             if (cflags & UPDATEFLAG_HEALTHCHANGE)
             {
                 MessageOut healthMsg(GPMSG_BEING_HEALTH_CHANGE);
-                healthMsg.writeShort(c->getPublicID());
-                healthMsg.writeShort(c->getModifiedAttribute(ATTR_HP));
-                healthMsg.writeShort(c->getModifiedAttribute(ATTR_MAX_HP));
+                healthMsg.writeInt16(c->getPublicID());
+                healthMsg.writeInt16(c->getModifiedAttribute(ATTR_HP));
+                healthMsg.writeInt16(c->getModifiedAttribute(ATTR_MAX_HP));
                 gameHandler->sendTo(p, healthMsg);
             }
         }
@@ -383,16 +383,16 @@ static void informPlayer(MapComposite *map, Character *p)
                         /* Send a specific message to the client when an item appears
                            out of nowhere, so that a sound/animation can be performed. */
                         MessageOut appearMsg(GPMSG_ITEM_APPEAR);
-                        appearMsg.writeShort(o->getItemClass()->getDatabaseID());
-                        appearMsg.writeShort(opos.x);
-                        appearMsg.writeShort(opos.y);
+                        appearMsg.writeInt16(o->getItemClass()->getDatabaseID());
+                        appearMsg.writeInt16(opos.x);
+                        appearMsg.writeInt16(opos.y);
                         gameHandler->sendTo(p, appearMsg);
                     }
                     else
                     {
-                        itemMsg.writeShort(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
-                        itemMsg.writeShort(opos.x);
-                        itemMsg.writeShort(opos.y);
+                        itemMsg.writeInt16(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
+                        itemMsg.writeInt16(opos.x);
+                        itemMsg.writeInt16(opos.y);
                     }
                 }
                 break;
@@ -407,14 +407,14 @@ static void informPlayer(MapComposite *map, Character *p)
                     if (b)
                     {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_BEING);
-                        effectMsg.writeShort(o->getEffectId());
-                        effectMsg.writeShort(b->getPublicID());
+                        effectMsg.writeInt16(o->getEffectId());
+                        effectMsg.writeInt16(b->getPublicID());
                         gameHandler->sendTo(p, effectMsg);
                     } else {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_POS);
-                        effectMsg.writeShort(o->getEffectId());
-                        effectMsg.writeShort(opos.x);
-                        effectMsg.writeShort(opos.y);
+                        effectMsg.writeInt16(o->getEffectId());
+                        effectMsg.writeInt16(opos.x);
+                        effectMsg.writeInt16(opos.y);
                         gameHandler->sendTo(p, effectMsg);
                     }
                 }
@@ -593,8 +593,8 @@ bool GameState::insert(Thing *ptr)
        connects to this server. */
     MessageOut mapChangeMessage(GPMSG_PLAYER_MAP_CHANGE);
     mapChangeMessage.writeString(map->getName());
-    mapChangeMessage.writeShort(pos.x);
-    mapChangeMessage.writeShort(pos.y);
+    mapChangeMessage.writeInt16(pos.x);
+    mapChangeMessage.writeInt16(pos.y);
     gameHandler->sendTo(static_cast< Character * >(obj), mapChangeMessage);
 
     // update the online state of the character
@@ -665,7 +665,7 @@ void GameState::remove(Thing *ptr)
 
         Actor *obj = static_cast< Actor * >(ptr);
         MessageOut msg(GPMSG_BEING_LEAVE);
-        msg.writeShort(obj->getPublicID());
+        msg.writeInt16(obj->getPublicID());
         Point objectPos = obj->getPosition();
 
         for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange));
@@ -683,9 +683,9 @@ void GameState::remove(Thing *ptr)
         Item *obj = static_cast< Item * >(ptr);
         Point pos = obj->getPosition();
         MessageOut msg(GPMSG_ITEMS);
-        msg.writeShort(0);
-        msg.writeShort(pos.x);
-        msg.writeShort(pos.y);
+        msg.writeInt16(0);
+        msg.writeInt16(pos.x);
+        msg.writeInt16(pos.y);
 
         for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange)); p; ++p)
         {
@@ -722,7 +722,7 @@ void GameState::warp(Character *ptr, MapComposite *map, int x, int y)
     else
     {
         MessageOut msg(GAMSG_REDIRECT);
-        msg.writeLong(ptr->getDatabaseID());
+        msg.writeInt32(ptr->getDatabaseID());
         accountHandler->send(msg);
         gameHandler->prepareServerChange(ptr);
     }
@@ -782,15 +782,15 @@ void GameState::sayTo(Actor *destination, Actor *source, const std::string &text
     MessageOut msg(GPMSG_SAY);
     if (source == NULL)
     {
-        msg.writeShort(0);
+        msg.writeInt16(0);
     }
     else if (!source->canMove())
     {
-        msg.writeShort(65535);
+        msg.writeInt16(65535);
     }
     else
     {
-        msg.writeShort(static_cast< Actor * >(source)->getPublicID());
+        msg.writeInt16(static_cast< Actor * >(source)->getPublicID());
     }
     msg.writeString(text);
 
@@ -802,7 +802,7 @@ void GameState::sayToAll(const std::string &text)
     MessageOut msg(GPMSG_SAY);
 
     // The message will be shown as if it was from the server
-    msg.writeShort(0);
+    msg.writeInt16(0);
     msg.writeString(text);
 
     // Sends it to everyone connected to the game server

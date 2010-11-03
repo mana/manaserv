@@ -41,7 +41,7 @@ Trade::Trade(Character *c1, Character *c2):
     mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT), mCurrencyId(ATTR_GP)
 {
     MessageOut msg(GPMSG_TRADE_REQUEST);
-    msg.writeShort(c1->getPublicID());
+    msg.writeInt16(c1->getPublicID());
     c2->getClient()->send(msg);
     c1->setTrading(this);
     c2->setTrading(this);
@@ -202,7 +202,7 @@ void Trade::setMoney(Character *c, int amount)
        the client lied. */
 
     MessageOut msg(GPMSG_TRADE_SET_MONEY);
-    msg.writeLong(amount);
+    msg.writeInt32(amount);
 
     if (c == mChar1)
     {
@@ -255,7 +255,7 @@ void Trade::addItem(Character *c, int slot, int amount)
     items->push_back(ti);
 
     MessageOut msg(GPMSG_TRADE_ADD_ITEM);
-    msg.writeShort(id);
-    msg.writeByte(amount);
+    msg.writeInt16(id);
+    msg.writeInt8(amount);
     other->getClient()->send(msg);
 }

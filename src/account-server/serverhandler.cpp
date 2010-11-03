@@ -152,7 +152,7 @@ static void registerGameClient(GameServer *s, const std::string &token,
 {
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
-    msg.writeLong(ptr->getDatabaseID());
+    msg.writeInt32(ptr->getDatabaseID());
     msg.writeString(ptr->getName());
     serializeCharacterData(*ptr, msg);
     s->send(msg);
@@ -178,11 +178,11 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             LOG_DEBUG("GAMSG_REGISTER");
             // TODO: check the credentials of the game server
             server->address = msg.readString();
-            server->port = msg.readShort();
+            server->port = msg.readInt16();
             const std::string password = msg.readString();
 
             // checks the version of the remote item database with our local copy
-            unsigned int dbversion = msg.readLong();
+            unsigned int dbversion = msg.readInt32();
             LOG_INFO("Game server uses itemsdatabase with version " << dbversion);
 
             LOG_DEBUG("AGMSG_REGISTER_RESPONSE");
@@ -191,22 +191,22 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             {
                 LOG_DEBUG("Item databases between account server and "
                     "gameserver are in sync");
-                outMsg.writeShort(DATA_VERSION_OK);
+                outMsg.writeInt16(DATA_VERSION_OK);
             }
             else
             {
                 LOG_DEBUG("Item database of game server has a wrong version");
-                outMsg.writeShort(DATA_VERSION_OUTDATED);
+                outMsg.writeInt16(DATA_VERSION_OUTDATED);
             }
             if (password == Configuration::getValue("net_password", "changeMe"))
             {
-                outMsg.writeShort(PASSWORD_OK);
+                outMsg.writeInt16(PASSWORD_OK);
                 comp->send(outMsg);
             }
             else
             {
                 LOG_INFO("The password given by " << server->address << ':' << server->port << " was bad.");
-                outMsg.writeShort(PASSWORD_BAD);
+                outMsg.writeInt16(PASSWORD_BAD);
                 comp->disconnect(outMsg);
                 break;
             }
@@ -217,7 +217,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
             while (msg.getUnreadLength())
             {
-                int id = msg.readShort();
+                int id = msg.readInt16();
                 LOG_INFO("Registering map " << id << '.');
                 if (GameServer *s = getGameServerFromMap(id))
                 {
@@ -227,7 +227,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 else
                 {
                     MessageOut outMsg(AGMSG_ACTIVE_MAP);
-                    outMsg.writeShort(id);
+                    outMsg.writeInt16(id);
                     comp->send(outMsg);
                     MapStatistics &m = server->maps[id];
                     m.nbThings = 0;
@@ -239,7 +239,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_PLAYER_DATA:
         {
             LOG_DEBUG("GAMSG_PLAYER_DATA");
-            int id = msg.readLong();
+            int id = msg.readInt32();
             if (Character *ptr = storage->getCharacter(id, NULL))
             {
                 deserializeCharacterData(*ptr, msg);
@@ -266,7 +266,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_REDIRECT:
         {
             LOG_DEBUG("GAMSG_REDIRECT");
-            int id = msg.readLong();
+            int id = msg.readInt32();
             std::string magic_token(utils::getMagicToken());
             if (Character *ptr = storage->getCharacter(id, NULL))
             {
@@ -274,11 +274,11 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 if (GameServer *s = getGameServerFromMap(mapId))
                 {
                     registerGameClient(s, magic_token, ptr);
-                    result.writeShort(AGMSG_REDIRECT_RESPONSE);
-                    result.writeLong(id);
+                    result.writeInt16(AGMSG_REDIRECT_RESPONSE);
+                    result.writeInt32(id);
                     result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
                     result.writeString(s->address);
-                    result.writeShort(s->port);
+                    result.writeInt16(s->port);
                 }
                 else
                 {
@@ -297,7 +297,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_PLAYER_RECONNECT:
         {
             LOG_DEBUG("GAMSG_PLAYER_RECONNECT");
-            int id = msg.readLong();
+            int id = msg.readInt32();
             std::string magic_token = msg.readString(MAGIC_TOKEN_LENGTH);
 
             if (Character *ptr = storage->getCharacter(id, NULL))
@@ -315,18 +315,18 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
         case GAMSG_GET_QUEST:
         {
-            int id = msg.readLong();
+            int id = msg.readInt32();
             std::string name = msg.readString();
             std::string value = storage->getQuestVar(id, name);
-            result.writeShort(AGMSG_GET_QUEST_RESPONSE);
-            result.writeLong(id);
+            result.writeInt16(AGMSG_GET_QUEST_RESPONSE);
+            result.writeInt32(id);
             result.writeString(name);
             result.writeString(value);
         } break;
 
         case GAMSG_SET_QUEST:
         {
-            int id = msg.readLong();
+            int id = msg.readInt32();
             std::string name = msg.readString();
             std::string value = msg.readString();
             storage->setQuestVar(id, name, value);
@@ -334,22 +334,22 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
         case GAMSG_BAN_PLAYER:
         {
-            int id = msg.readLong();
-            int duration = msg.readShort();
+            int id = msg.readInt32();
+            int duration = msg.readInt16();
             storage->banCharacter(id, duration);
         } break;
 
         case GAMSG_CHANGE_PLAYER_LEVEL:
         {
-            int id = msg.readLong();
-            int level = msg.readShort();
+            int id = msg.readInt32();
+            int level = msg.readInt16();
             storage->setPlayerLevel(id, level);
         } break;
 
         case GAMSG_CHANGE_ACCOUNT_LEVEL:
         {
-            int id = msg.readLong();
-            int level = msg.readShort();
+            int id = msg.readInt32();
+            int level = msg.readInt16();
 
             // get the character so we can get the account id
             Character *c = storage->getCharacter(id, NULL);
@@ -363,7 +363,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             while (msg.getUnreadLength())
             {
-                int mapId = msg.readShort();
+                int mapId = msg.readInt16();
                 ServerStatistics::iterator i = server->maps.find(mapId);
                 if (i == server->maps.end())
                 {
@@ -374,13 +374,13 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     break;
                 }
                 MapStatistics &m = i->second;
-                m.nbThings = msg.readShort();
-                m.nbMonsters = msg.readShort();
-                int nb = msg.readShort();
+                m.nbThings = msg.readInt16();
+                m.nbMonsters = msg.readInt16();
+                int nb = msg.readInt16();
                 m.players.resize(nb);
                 for (int j = 0; j < nb; ++j)
                 {
-                    m.players[j] = msg.readLong();
+                    m.players[j] = msg.readInt32();
                 }
             }
         } break;
@@ -389,13 +389,13 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             // Retrieve the post for user
             LOG_DEBUG("GCMSG_REQUEST_POST");
-            result.writeShort(CGMSG_POST_RESPONSE);
+            result.writeInt16(CGMSG_POST_RESPONSE);
 
             // get the character id
-            int characterId = msg.readLong();
+            int characterId = msg.readInt32();
 
             // send the character id of sender
-            result.writeLong(characterId);
+            result.writeInt32(characterId);
 
             // get the character based on the id
             Character *ptr = storage->getCharacter(characterId, NULL);
@@ -422,8 +422,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     std::vector<InventoryItem> items = letter->getAttachments();
                     for (unsigned int j = 0; j < items.size(); ++j)
                     {
-                        result.writeShort(items[j].itemId);
-                        result.writeShort(items[j].amount);
+                        result.writeInt16(items[j].itemId);
+                        result.writeInt16(items[j].amount);
                     }
                 }
 
@@ -437,14 +437,14 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             // Store the letter for the user
             LOG_DEBUG("GCMSG_STORE_POST");
-            result.writeShort(CGMSG_STORE_POST_RESPONSE);
+            result.writeInt16(CGMSG_STORE_POST_RESPONSE);
 
             // get the sender and receiver
-            int senderId = msg.readLong();
+            int senderId = msg.readInt32();
             std::string receiverName = msg.readString();
 
             // for sending it back
-            result.writeLong(senderId);
+            result.writeInt32(senderId);
 
             // get their characters
             Character *sender = storage->getCharacter(senderId, NULL);
@@ -453,7 +453,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             {
                 // Invalid character
                 LOG_ERROR("Error finding character id for post");
-                result.writeByte(ERRMSG_INVALID_ARGUMENT);
+                result.writeInt8(ERRMSG_INVALID_ARGUMENT);
                 break;
             }
 
@@ -463,7 +463,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             std::vector< std::pair<int, int> > items;
             while (msg.getUnreadLength())
             {
-                items.push_back(std::pair<int, int>(msg.readShort(), msg.readShort()));
+                items.push_back(std::pair<int, int>(msg.readInt16(), msg.readInt16()));
             }
 
             // save the letter
@@ -479,14 +479,14 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
             postalManager->addLetter(letter);
 
-            result.writeByte(ERRMSG_OK);
+            result.writeInt8(ERRMSG_OK);
         } break;
 
         case GAMSG_TRANSACTION:
         {
             LOG_DEBUG("TRANSACTION");
-            int id = msg.readLong();
-            int action = msg.readLong();
+            int id = msg.readInt32();
+            int action = msg.readInt32();
             std::string message = msg.readString();
 
             Transaction trans;
@@ -499,7 +499,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "
                      << msg.getId());
-            result.writeShort(XXMSG_INVALID);
+            result.writeInt16(XXMSG_INVALID);
             break;
     }
 
@@ -544,8 +544,8 @@ void GameServerHandler::sendPartyChange(Character *ptr, int partyId)
     if (s)
     {
         MessageOut msg(CGMSG_CHANGED_PARTY);
-        msg.writeLong(ptr->getDatabaseID());
-        msg.writeLong(partyId);
+        msg.writeInt32(ptr->getDatabaseID());
+        msg.writeInt32(partyId);
         s->send(msg);
     }
 }
@@ -555,7 +555,7 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
     // It is safe to perform the following updates in a transaction
     dal::PerformTransaction transaction(storage->database());
 
-    int msgType = msg.readByte();
+    int msgType = msg.readInt8();
     while (msgType != SYNC_END_OF_BUFFER && msg.getUnreadLength() > 0)
     {
         switch (msgType)
@@ -563,17 +563,17 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
             case SYNC_CHARACTER_POINTS:
             {
                 LOG_DEBUG("received SYNC_CHARACTER_POINTS");
-                int charId = msg.readLong();
-                int charPoints = msg.readLong();
-                int corrPoints = msg.readLong();
+                int charId = msg.readInt32();
+                int charPoints = msg.readInt32();
+                int corrPoints = msg.readInt32();
                 storage->updateCharacterPoints(charId, charPoints, corrPoints);
             } break;
 
             case SYNC_CHARACTER_ATTRIBUTE:
             {
                 LOG_DEBUG("received SYNC_CHARACTER_ATTRIBUTE");
-                int    charId = msg.readLong();
-                int    attrId = msg.readLong();
+                int    charId = msg.readInt32();
+                int    attrId = msg.readInt32();
                 double base   = msg.readDouble();
                 double mod    = msg.readDouble();
                 storage->updateAttribute(charId, attrId, base, mod);
@@ -582,24 +582,24 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
             case SYNC_CHARACTER_SKILL:
             {
                 LOG_DEBUG("received SYNC_CHARACTER_SKILL");
-                int charId = msg.readLong();
-                int skillId = msg.readByte();
-                int skillValue = msg.readLong();
+                int charId = msg.readInt32();
+                int skillId = msg.readInt8();
+                int skillValue = msg.readInt32();
                 storage->updateExperience(charId, skillId, skillValue);
             } break;
 
             case SYNC_ONLINE_STATUS:
             {
                 LOG_DEBUG("received SYNC_ONLINE_STATUS");
-                int charId = msg.readLong();
+                int charId = msg.readInt32();
                 bool online;
-                msg.readByte() == 0x00 ? online = false : online = true;
+                msg.readInt8() == 0x00 ? online = false : online = true;
                 storage->setOnlineStatus(charId, online);
             }
         }
 
         // read next message type from buffer
-        msgType = msg.readByte();
+        msgType = msg.readInt8();
     }
 
     transaction.commit();

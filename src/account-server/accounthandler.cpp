@@ -267,14 +267,14 @@ void AccountHandler::sendCharacterData(AccountClient &client, int slot,
                               const Character &ch)
 {
     MessageOut charInfo(APMSG_CHAR_INFO);
-    charInfo.writeByte(slot);
+    charInfo.writeInt8(slot);
     charInfo.writeString(ch.getName());
-    charInfo.writeByte(ch.getGender());
-    charInfo.writeByte(ch.getHairStyle());
-    charInfo.writeByte(ch.getHairColor());
-    charInfo.writeShort(ch.getLevel());
-    charInfo.writeShort(ch.getCharacterPoints());
-    charInfo.writeShort(ch.getCorrectionPoints());
+    charInfo.writeInt8(ch.getGender());
+    charInfo.writeInt8(ch.getHairStyle());
+    charInfo.writeInt8(ch.getHairColor());
+    charInfo.writeInt16(ch.getLevel());
+    charInfo.writeInt16(ch.getCharacterPoints());
+    charInfo.writeInt16(ch.getCorrectionPoints());
 
     for (AttributeMap::const_iterator it = ch.mAttributes.begin(),
                                       it_end = ch.mAttributes.end();
@@ -282,9 +282,9 @@ void AccountHandler::sendCharacterData(AccountClient &client, int slot,
         ++it)
     {
         // {id, base value in 256ths, modified value in 256ths }*
-        charInfo.writeLong(it->first);
-        charInfo.writeLong((int) (it->second.first * 256));
-        charInfo.writeLong((int) (it->second.second * 256));
+        charInfo.writeInt32(it->first);
+        charInfo.writeInt32((int) (it->second.first * 256));
+        charInfo.writeInt32((int) (it->second.second * 256));
     }
 
     client.send(charInfo);
@@ -296,16 +296,16 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     if (client.status != CLIENT_LOGIN)
     {
-        reply.writeByte(ERRMSG_FAILURE);
+        reply.writeInt8(ERRMSG_FAILURE);
         client.send(reply);
         return;
     }
 
-    const int clientVersion = msg.readLong();
+    const int clientVersion = msg.readInt32();
 
     if (clientVersion < Configuration::getValue("net_clientVersion", 0))
     {
-        reply.writeByte(LOGIN_INVALID_VERSION);
+        reply.writeInt8(LOGIN_INVALID_VERSION);
         client.send(reply);
         return;
     }
@@ -319,7 +319,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
         const time_t lastAttempt = it->second;
         if (now < lastAttempt + 1)
         {
-            reply.writeByte(LOGIN_INVALID_TIME);
+            reply.writeInt8(LOGIN_INVALID_TIME);
             client.send(reply);
             return;
         }
@@ -331,7 +331,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     if (stringFilter->findDoubleQuotes(username))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
         return;
     }
@@ -341,7 +341,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     if (getClientCount() >= maxClients)
     {
-        reply.writeByte(ERRMSG_SERVER_FULL);
+        reply.writeInt8(ERRMSG_SERVER_FULL);
         client.send(reply);
         return;
     }
@@ -351,7 +351,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     if (!acc || acc->getPassword() != sha256(password))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
         delete acc;
         return;
@@ -359,7 +359,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     if (acc->getLevel() == AL_BANNED)
     {
-        reply.writeByte(LOGIN_BANNED);
+        reply.writeInt8(LOGIN_BANNED);
         client.send(reply);
         delete acc;
         return;
@@ -377,7 +377,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     client.setAccount(acc);
     client.status = CLIENT_CONNECTED;
 
-    reply.writeByte(ERRMSG_OK);
+    reply.writeInt8(ERRMSG_OK);
     addUpdateHost(&reply);
     client.send(reply); // Acknowledge login
 
@@ -397,20 +397,20 @@ void AccountHandler::handleLogoutMessage(AccountClient &client)
 
     if (client.status == CLIENT_LOGIN)
     {
-        reply.writeByte(ERRMSG_NO_LOGIN);
+        reply.writeInt8(ERRMSG_NO_LOGIN);
     }
     else if (client.status == CLIENT_CONNECTED)
     {
         client.unsetAccount();
         client.status = CLIENT_LOGIN;
-        reply.writeByte(ERRMSG_OK);
+        reply.writeInt8(ERRMSG_OK);
     }
     else if (client.status == CLIENT_QUEUED)
     {
         // Delete it from the pendingClient list
         mTokenCollector.deletePendingClient(&client);
         client.status = CLIENT_LOGIN;
-        reply.writeByte(ERRMSG_OK);
+        reply.writeInt8(ERRMSG_OK);
     }
     client.send(reply);
 }
@@ -439,7 +439,7 @@ bool checkCaptcha(AccountClient &client, std::string captcha)
 void AccountHandler::handleRegisterMessage(AccountClient &client,
                                            MessageIn &msg)
 {
-    int clientVersion = msg.readLong();
+    int clientVersion = msg.readInt32();
     std::string username = msg.readString();
     std::string password = msg.readString();
     std::string email = msg.readString();
@@ -452,55 +452,55 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
 
     if (client.status != CLIENT_LOGIN)
     {
-        reply.writeByte(ERRMSG_FAILURE);
+        reply.writeInt8(ERRMSG_FAILURE);
     }
     else if (!Configuration::getBoolValue("account_allowRegister", true))
     {
-        reply.writeByte(ERRMSG_FAILURE);
+        reply.writeInt8(ERRMSG_FAILURE);
     }
     else if (clientVersion < minClientVersion)
     {
-        reply.writeByte(REGISTER_INVALID_VERSION);
+        reply.writeInt8(REGISTER_INVALID_VERSION);
     }
     else if (stringFilter->findDoubleQuotes(username))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(email))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (username.length() < minNameLength ||
             username.length() > maxNameLength)
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(password))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (!stringFilter->isEmailValid(email))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     // Checking if the Name is slang's free.
     else if (!stringFilter->filterContent(username))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     // Check whether the account already exists.
     else if (storage->doesUserNameExist(username))
     {
-        reply.writeByte(REGISTER_EXISTS_USERNAME);
+        reply.writeInt8(REGISTER_EXISTS_USERNAME);
     }
     // Find out whether the email is already in use.
     else if (storage->doesEmailAddressExist(sha256(email)))
     {
-        reply.writeByte(REGISTER_EXISTS_EMAIL);
+        reply.writeInt8(REGISTER_EXISTS_EMAIL);
     }
     else if (!checkCaptcha(client, captcha))
     {
-        reply.writeByte(REGISTER_CAPTCHA_WRONG);
+        reply.writeInt8(REGISTER_CAPTCHA_WRONG);
     }
     else
     {
@@ -520,7 +520,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
         acc->setLastLogin(regdate);
 
         storage->addAccount(acc);
-        reply.writeByte(ERRMSG_OK);
+        reply.writeInt8(ERRMSG_OK);
         addUpdateHost(&reply);
 
         // Associate account with connection
@@ -542,14 +542,14 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
 
     if (client.status != CLIENT_CONNECTED)
     {
-        reply.writeByte(ERRMSG_FAILURE);
+        reply.writeInt8(ERRMSG_FAILURE);
         client.send(reply);
         return;
     }
 
     if (stringFilter->findDoubleQuotes(username))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
         return;
     }
@@ -559,7 +559,7 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
 
     if (!acc || acc->getPassword() != password)
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
         delete acc;
         return;
@@ -569,7 +569,7 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
     LOG_INFO("Unregistered \"" << username
              << "\", AccountID: " << acc->getID());
     storage->delAccount(acc);
-    reply.writeByte(ERRMSG_OK);
+    reply.writeInt8(ERRMSG_OK);
 
     client.send(reply);
 }
@@ -581,15 +581,15 @@ void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client,
     MessageOut reply(APMSG_REGISTER_INFO_RESPONSE);
     if (!Configuration::getBoolValue("account_allowRegister", true))
     {
-        reply.writeByte(false);
+        reply.writeInt8(false);
         reply.writeString(Configuration::getValue(
                                              "account_denyRegisterReason", ""));
     }
     else
     {
-        reply.writeByte(true);
-        reply.writeByte(Configuration::getValue("account_minNameLength", 4));
-        reply.writeByte(Configuration::getValue("account_maxNameLength", 16));
+        reply.writeInt8(true);
+        reply.writeInt8(Configuration::getValue("account_minNameLength", 4));
+        reply.writeInt8(Configuration::getValue("account_maxNameLength", 16));
         reply.writeString("http://www.server.example/captcha.png");
         reply.writeString("<instructions for solving captcha>");
     }
@@ -604,7 +604,7 @@ void AccountHandler::handleEmailChangeMessage(AccountClient &client,
     Account *acc = client.getAccount();
     if (!acc)
     {
-        reply.writeByte(ERRMSG_NO_LOGIN);
+        reply.writeInt8(ERRMSG_NO_LOGIN);
         client.send(reply);
         return;
     }
@@ -614,22 +614,22 @@ void AccountHandler::handleEmailChangeMessage(AccountClient &client,
 
     if (!stringFilter->isEmailValid(email))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(email))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (storage->doesEmailAddressExist(emailHash))
     {
-        reply.writeByte(ERRMSG_EMAIL_ALREADY_EXISTS);
+        reply.writeInt8(ERRMSG_EMAIL_ALREADY_EXISTS);
     }
     else
     {
         acc->setEmail(emailHash);
         // Keep the database up to date otherwise we will go out of sync
         storage->flush(acc);
-        reply.writeByte(ERRMSG_OK);
+        reply.writeInt8(ERRMSG_OK);
     }
     client.send(reply);
 }
@@ -645,22 +645,22 @@ void AccountHandler::handlePasswordChangeMessage(AccountClient &client,
     Account *acc = client.getAccount();
     if (!acc)
     {
-        reply.writeByte(ERRMSG_NO_LOGIN);
+        reply.writeInt8(ERRMSG_NO_LOGIN);
     }
     else if (stringFilter->findDoubleQuotes(newPassword))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (oldPassword != acc->getPassword())
     {
-        reply.writeByte(ERRMSG_FAILURE);
+        reply.writeInt8(ERRMSG_FAILURE);
     }
     else
     {
         acc->setPassword(newPassword);
         // Keep the database up to date otherwise we will go out of sync
         storage->flush(acc);
-        reply.writeByte(ERRMSG_OK);
+        reply.writeInt8(ERRMSG_OK);
     }
 
     client.send(reply);
@@ -670,9 +670,9 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
                                                   MessageIn &msg)
 {
     std::string name = msg.readString();
-    int hairStyle = msg.readByte();
-    int hairColor = msg.readByte();
-    int gender = msg.readByte();
+    int hairStyle = msg.readInt8();
+    int hairColor = msg.readInt8();
+    int gender = msg.readInt8();
     int numHairStyles = Configuration::getValue("char_numHairStyles", 17);
     int numHairColors = Configuration::getValue("char_numHairColors", 11);
     int numGenders = Configuration::getValue("char_numGenders", 2);
@@ -685,38 +685,38 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
     Account *acc = client.getAccount();
     if (!acc)
     {
-        reply.writeByte(ERRMSG_NO_LOGIN);
+        reply.writeInt8(ERRMSG_NO_LOGIN);
     }
     else if (!stringFilter->filterContent(name))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (stringFilter->findDoubleQuotes(name))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (hairStyle > numHairStyles)
     {
-        reply.writeByte(CREATE_INVALID_HAIRSTYLE);
+        reply.writeInt8(CREATE_INVALID_HAIRSTYLE);
     }
     else if (hairColor > numHairColors)
     {
-        reply.writeByte(CREATE_INVALID_HAIRCOLOR);
+        reply.writeInt8(CREATE_INVALID_HAIRCOLOR);
     }
     else if (gender > numGenders)
     {
-        reply.writeByte(CREATE_INVALID_GENDER);
+        reply.writeInt8(CREATE_INVALID_GENDER);
     }
     else if ((name.length() < minNameLength) ||
              (name.length() > maxNameLength))
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else
     {
         if (storage->doesCharacterNameExist(name))
         {
-            reply.writeByte(CREATE_EXISTS_NAME);
+            reply.writeInt8(CREATE_EXISTS_NAME);
             client.send(reply);
             return;
         }
@@ -725,7 +725,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         Characters &chars = acc->getCharacters();
         if (chars.size() >= maxCharacters)
         {
-            reply.writeByte(CREATE_TOO_MUCH_CHARACTERS);
+            reply.writeInt8(CREATE_TOO_MUCH_CHARACTERS);
             client.send(reply);
             return;
         }
@@ -735,7 +735,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         // Customization of character's attributes...
         std::vector<int> attributes = std::vector<int>(initAttr.size(), 0);
         for (unsigned int i = 0; i < initAttr.size(); ++i)
-            attributes[i] = msg.readShort();
+            attributes[i] = msg.readInt16();
 
         int totalAttributes = 0;
         for (unsigned int i = 0; i < initAttr.size(); ++i)
@@ -747,7 +747,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             if (attributes.at(i) < attributesMinimum
                 || attributes.at(i) > attributesMaximum)
             {
-                reply.writeByte(CREATE_ATTRIBUTES_OUT_OF_RANGE);
+                reply.writeInt8(CREATE_ATTRIBUTES_OUT_OF_RANGE);
                 client.send(reply);
                 return;
             }
@@ -755,11 +755,11 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
 
         if (totalAttributes > startPoints)
         {
-            reply.writeByte(CREATE_ATTRIBUTES_TOO_HIGH);
+            reply.writeInt8(CREATE_ATTRIBUTES_TOO_HIGH);
         }
         else if (totalAttributes < startPoints)
         {
-            reply.writeByte(CREATE_ATTRIBUTES_TOO_LOW);
+            reply.writeInt8(CREATE_ATTRIBUTES_TOO_LOW);
         }
         else
         {
@@ -796,7 +796,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             trans.mMessage.append("called " + name);
             storage->addTransaction(trans);
 
-            reply.writeByte(ERRMSG_OK);
+            reply.writeInt8(ERRMSG_OK);
             client.send(reply);
 
             // Send new characters infos back to client
@@ -817,19 +817,19 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
     Account *acc = client.getAccount();
     if (!acc)
     {
-        reply.writeByte(ERRMSG_NO_LOGIN);
+        reply.writeInt8(ERRMSG_NO_LOGIN);
         client.send(reply);
         return; // not logged in
     }
 
-    unsigned charNum = msg.readByte();
+    unsigned charNum = msg.readInt8();
     Characters &chars = acc->getCharacters();
 
     // Character ID = 0 to Number of Characters - 1.
     if (charNum >= chars.size())
     {
         // invalid char selection
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
         return;
     }
@@ -842,24 +842,24 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
             (selectedChar->getMapId(), address, port))
     {
         LOG_ERROR("Character Selection: No game server for the map.");
-        reply.writeByte(ERRMSG_FAILURE);
+        reply.writeInt8(ERRMSG_FAILURE);
         client.send(reply);
         return;
     }
 
-    reply.writeByte(ERRMSG_OK);
+    reply.writeInt8(ERRMSG_OK);
 
     LOG_DEBUG(selectedChar->getName() << " is trying to enter the servers.");
 
     std::string magic_token(utils::getMagicToken());
     reply.writeString(magic_token, MAGIC_TOKEN_LENGTH);
     reply.writeString(address);
-    reply.writeShort(port);
+    reply.writeInt16(port);
 
     // TODO: get correct address and port for the chat server
     reply.writeString(Configuration::getValue("net_accountServerAddress",
                                               "localhost"));
-    reply.writeShort(Configuration::getValue("net_accountServerPort",
+    reply.writeInt16(Configuration::getValue("net_accountServerPort",
                                              DEFAULT_SERVER_PORT) + 2);
 
     GameServerHandler::registerClient(magic_token, selectedChar);
@@ -883,19 +883,19 @@ void AccountHandler::handleCharacterDeleteMessage(AccountClient &client,
     Account *acc = client.getAccount();
     if (!acc)
     {
-        reply.writeByte(ERRMSG_NO_LOGIN);
+        reply.writeInt8(ERRMSG_NO_LOGIN);
         client.send(reply);
         return; // not logged in
     }
 
-    unsigned charNum = msg.readByte();
+    unsigned charNum = msg.readInt8();
     Characters &chars = acc->getCharacters();
 
     // Character ID = 0 to Number of Characters - 1.
     if (charNum >= chars.size())
     {
         // invalid char selection
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
         return; // not logged in
     }
@@ -905,7 +905,7 @@ void AccountHandler::handleCharacterDeleteMessage(AccountClient &client,
     acc->delCharacter(charNum);
     storage->flush(acc);
 
-    reply.writeByte(ERRMSG_OK);
+    reply.writeInt8(ERRMSG_OK);
     client.send(reply);
 
     // log transaction
@@ -926,7 +926,7 @@ void AccountHandler::tokenMatched(AccountClient *client, int accountID)
     client->setAccount(acc);
     client->status = CLIENT_CONNECTED;
 
-    reply.writeByte(ERRMSG_OK);
+    reply.writeInt8(ERRMSG_OK);
     client->send(reply);
 
     // Return information about available characters
@@ -942,7 +942,7 @@ void AccountHandler::tokenMatched(AccountClient *client, int accountID)
 void AccountHandler::deletePendingClient(AccountClient *client)
 {
     MessageOut msg(APMSG_RECONNECT_RESPONSE);
-    msg.writeByte(ERRMSG_TIME_OUT);
+    msg.writeInt8(ERRMSG_TIME_OUT);
     client->disconnect(msg);
     // The client will be deleted when the disconnect event is processed
 }

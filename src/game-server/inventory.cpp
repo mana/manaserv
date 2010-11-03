@@ -48,7 +48,7 @@ Inventory::~Inventory()
 void Inventory::restart()
 {
     mInvMsg.clear();
-    mInvMsg.writeShort(GPMSG_INVENTORY);
+    mInvMsg.writeInt16(GPMSG_INVENTORY);
 }
 
 void Inventory::cancel()
@@ -180,15 +180,15 @@ void Inventory::equip_sub(unsigned int newCount, IdSlotMap::const_iterator &it)
 {
     const unsigned int invSlot = it->first;
     unsigned int count = 0, eqSlot = it->second;
-    mEqmMsg.writeShort(invSlot);
-    mEqmMsg.writeByte(newCount);
+    mEqmMsg.writeInt16(invSlot);
+    mEqmMsg.writeInt8(newCount);
     do {
         if (newCount)
         {
             if (it->second != eqSlot)
             {
-                mEqmMsg.writeByte(eqSlot);
-                mEqmMsg.writeByte(count);
+                mEqmMsg.writeInt8(eqSlot);
+                mEqmMsg.writeInt8(count);
                 count = 1;
                 eqSlot = it->second;
             }
@@ -199,10 +199,10 @@ void Inventory::equip_sub(unsigned int newCount, IdSlotMap::const_iterator &it)
     } while ((++it)->first == invSlot);
     if (count)
     {
-        mEqmMsg.writeByte(eqSlot);
-        mEqmMsg.writeByte(count);
+        mEqmMsg.writeInt8(eqSlot);
+        mEqmMsg.writeInt8(count);
     }
-    mEqmMsg.writeShort(invSlot);
+    mEqmMsg.writeInt16(invSlot);
     changeEquipment(newCount ? 0 : mPoss->inventory.at(invSlot).itemId,
                     newCount ? mPoss->inventory.at(invSlot).itemId : 0);
 }
@@ -223,14 +223,14 @@ void Inventory::sendFull() const
        and equipment to the client */
     MessageOut m(GPMSG_INVENTORY_FULL);
 
-    m.writeShort(mPoss->inventory.size());
+    m.writeInt16(mPoss->inventory.size());
     for (InventoryData::const_iterator l = mPoss->inventory.begin(),
          l_end = mPoss->inventory.end(); l != l_end; ++l)
     {
         assert(l->second.itemId);
-        m.writeShort(l->first); // Slot id
-        m.writeShort(l->second.itemId);
-        m.writeShort(l->second.amount);
+        m.writeInt16(l->first); // Slot id
+        m.writeInt16(l->second.itemId);
+        m.writeInt16(l->second.amount);
     }
 
     for (EquipData::const_iterator k = mPoss->equipSlots.begin(),
@@ -238,8 +238,8 @@ void Inventory::sendFull() const
          k != k_end;
          ++k)
     {
-        m.writeByte(k->first);      // equip slot
-        m.writeShort(k->second);    // inventory slot
+        m.writeInt8(k->first);      // equip slot
+        m.writeInt16(k->second);    // inventory slot
     }
 
     gameHandler->sendTo(mClient, m);
@@ -360,9 +360,9 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
                                        - it->second.amount;
             amount -= additions;
             it->second.amount += additions;
-            mInvMsg.writeShort(it->first);
-            mInvMsg.writeShort(itemId);
-            mInvMsg.writeShort(it->second.amount);
+            mInvMsg.writeInt16(it->first);
+            mInvMsg.writeInt16(itemId);
+            mInvMsg.writeInt16(it->second.amount);
             if (!amount)
                 return 0;
         }
@@ -380,9 +380,9 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
             mPoss->inventory[slot].itemId = itemId;
             mPoss->inventory[slot].amount = additions;
             amount -= additions;
-            mInvMsg.writeShort(slot++); // Last read, so also increment
-            mInvMsg.writeShort(itemId);
-            mInvMsg.writeShort(additions);
+            mInvMsg.writeInt16(slot++); // Last read, so also increment
+            mInvMsg.writeInt16(itemId);
+            mInvMsg.writeInt16(additions);
         }
         ++slot; // Skip the slot that the iterator points to
         if (it == it_end) break;
@@ -438,11 +438,11 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
                 unsigned int sub = std::min(amount, it->second.amount);
                 amount -= sub;
                 it->second.amount -= sub;
-                mInvMsg.writeShort(it->first);
+                mInvMsg.writeInt16(it->first);
                 if (it->second.amount)
                 {
-                    mInvMsg.writeShort(it->second.itemId);
-                    mInvMsg.writeShort(it->second.amount);
+                    mInvMsg.writeInt16(it->second.itemId);
+                    mInvMsg.writeInt16(it->second.amount);
                     // Some still exist, and we have none left to remove, so
                     // no need to run leave invy triggers.
                     if (!amount)
@@ -450,7 +450,7 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
                 }
                 else
                 {
-                    mInvMsg.writeShort(0);
+                    mInvMsg.writeInt16(0);
                     mPoss->inventory.erase(it);
                 }
             }
@@ -499,20 +499,20 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2, unsigned in
         it1->second.amount -= nb;
         amount -= nb;
 
-        mInvMsg.writeShort(slot1);                  // Slot
+        mInvMsg.writeInt16(slot1);                  // Slot
         if (it1->second.amount)
         {
-            mInvMsg.writeShort(it1->second.itemId); // Item Id
-            mInvMsg.writeShort(it1->second.amount); // Amount
+            mInvMsg.writeInt16(it1->second.itemId); // Item Id
+            mInvMsg.writeInt16(it1->second.amount); // Amount
         }
         else
         {
-            mInvMsg.writeShort(0);
+            mInvMsg.writeInt16(0);
             mPoss->inventory.erase(it1);
         }
-        mInvMsg.writeShort(slot2);                  // Slot
-        mInvMsg.writeShort(it1->second.itemId);     // Item Id (same as slot 1)
-        mInvMsg.writeShort(nb);                     // Amount
+        mInvMsg.writeInt16(slot2);                  // Slot
+        mInvMsg.writeInt16(it1->second.itemId);     // Item Id (same as slot 1)
+        mInvMsg.writeInt16(nb);                     // Amount
     }
     else
     {
@@ -527,20 +527,20 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2, unsigned in
         it2->second.amount += nb;
         amount -= nb;
 
-        mInvMsg.writeShort(slot1);                  // Slot
+        mInvMsg.writeInt16(slot1);                  // Slot
         if (it1->second.amount)
         {
-            mInvMsg.writeShort(it1->second.itemId); // Item Id
-            mInvMsg.writeShort(it1->second.amount); // Amount
+            mInvMsg.writeInt16(it1->second.itemId); // Item Id
+            mInvMsg.writeInt16(it1->second.amount); // Amount
         }
         else
         {
-            mInvMsg.writeShort(0);
+            mInvMsg.writeInt16(0);
             mPoss->inventory.erase(it1);
         }
-        mInvMsg.writeShort(slot2);                  // Slot
-        mInvMsg.writeShort(it2->second.itemId);     // Item Id
-        mInvMsg.writeShort(it2->second.amount);     // Amount
+        mInvMsg.writeInt16(slot2);                  // Slot
+        mInvMsg.writeInt16(it2->second.itemId);     // Item Id
+        mInvMsg.writeInt16(it2->second.amount);     // Amount
     }
     return amount;
 }
@@ -576,15 +576,15 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
     unsigned int sub = std::min(amount, it->second.amount);
     amount -= sub;
     it->second.amount -= sub;
-    mInvMsg.writeShort(it->first);
+    mInvMsg.writeInt16(it->first);
     if (it->second.amount)
     {
-        mInvMsg.writeShort(it->second.itemId);
-        mInvMsg.writeShort(it->second.amount);
+        mInvMsg.writeInt16(it->second.itemId);
+        mInvMsg.writeInt16(it->second.amount);
     }
     else
     {
-        mInvMsg.writeShort(0);
+        mInvMsg.writeInt16(0);
         mPoss->inventory.erase(it);
     }
     return amount;
@@ -669,8 +669,8 @@ bool Inventory::equip(int slot, bool override)
              * Clean fit. Equip and apply immediately.
              */
             if (!mDelayed) {
-                mEqmMsg.writeShort(slot);           // Inventory slot
-                mEqmMsg.writeByte(it2->size());     // Equip slot type count
+                mEqmMsg.writeInt16(slot);           // Inventory slot
+                mEqmMsg.writeInt8(it2->size());     // Equip slot type count
             }
             for (it3 = it2->begin(),
                  it3_end = it2->end();
@@ -678,8 +678,8 @@ bool Inventory::equip(int slot, bool override)
                  ++it3)
             {
                 if (!mDelayed) {
-                    mEqmMsg.writeByte(it3->first);  // Equip slot
-                    mEqmMsg.writeByte(it3->second); // How many are used
+                    mEqmMsg.writeInt8(it3->first);  // Equip slot
+                    mEqmMsg.writeInt8(it3->second); // How many are used
                 }
                 /*
                  * This bit can be somewhat inefficient, but is far better for
@@ -764,8 +764,8 @@ bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
     if (changed && !mDelayed)
     {
         changeEquipment(mPoss->inventory.at(it->second).itemId, 0);
-        mEqmMsg.writeShort(slot);
-        mEqmMsg.writeByte(0);
+        mEqmMsg.writeInt16(slot);
+        mEqmMsg.writeInt8(0);
     }
     return changed;
 }

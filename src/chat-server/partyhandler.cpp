@@ -66,7 +66,7 @@ bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string 
             c2->party = c1->party;
             // was successful so return success to inviter
             out.writeString(invited);
-            out.writeByte(ERRMSG_OK);
+            out.writeInt8(ERRMSG_OK);
             c1->send(out);
 
             // tell everyone a player joined
@@ -143,7 +143,7 @@ void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)
             // make them join the party
             if (handlePartyJoin(client.characterName, inviter))
             {
-                out.writeByte(ERRMSG_OK);
+                out.writeInt8(ERRMSG_OK);
                 mPartyInvitedUsers.erase(itr);
                 found = true;
                 break;
@@ -155,7 +155,7 @@ void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)
 
     if (!found)
     {
-        out.writeByte(ERRMSG_FAILURE);
+        out.writeInt8(ERRMSG_FAILURE);
     }
 
     client.send(out);
@@ -165,7 +165,7 @@ void ChatHandler::handlePartyQuit(ChatClient &client)
 {
     removeUserFromParty(client);
     MessageOut out(CPMSG_PARTY_QUIT_RESPONSE);
-    out.writeByte(ERRMSG_OK);
+    out.writeInt8(ERRMSG_OK);
     client.send(out);
 
     // tell game server to update info
@@ -202,7 +202,7 @@ void ChatHandler::handlePartyRejection(ChatClient &client, MessageIn &msg)
 
     if (!found)
     {
-        out.writeByte(ERRMSG_FAILURE);
+        out.writeInt8(ERRMSG_FAILURE);
     }
 
     // send rejection to inviter
@@ -237,7 +237,7 @@ void ChatHandler::informPartyMemberQuit(ChatClient &client)
         if (itr->second->party == client.party)
         {
             MessageOut out(CPMSG_PARTY_MEMBER_LEFT);
-            out.writeShort(client.characterId);
+            out.writeInt16(client.characterId);
             itr->second->send(out);
         }
     }
@@ -253,7 +253,7 @@ void ChatHandler::informPartyMemberJoined(ChatClient &client)
         if (itr->second->party == client.party)
         {
             MessageOut out(CPMSG_PARTY_NEW_MEMBER);
-            out.writeShort(client.characterId);
+            out.writeInt16(client.characterId);
             out.writeString(client.characterName);
             itr->second->send(out);
         }

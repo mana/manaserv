@@ -63,7 +63,7 @@ bool ChatHandler::startListen(enet_uint16 port, const std::string &host)
 void ChatHandler::deletePendingClient(ChatClient *c)
 {
     MessageOut msg(CPMSG_CONNECT_RESPONSE);
-    msg.writeByte(ERRMSG_TIME_OUT);
+    msg.writeInt8(ERRMSG_TIME_OUT);
 
     // The computer will be deleted when the disconnect event is processed
     c->disconnect(msg);
@@ -86,14 +86,14 @@ void ChatHandler::tokenMatched(ChatClient *client, Pending *p)
     if (!c)
     {
         // character wasnt found
-        msg.writeByte(ERRMSG_FAILURE);
+        msg.writeInt8(ERRMSG_FAILURE);
     }
     else
     {
         client->characterId = c->getDatabaseID();
         delete p;
 
-        msg.writeByte(ERRMSG_OK);
+        msg.writeInt8(ERRMSG_OK);
 
         // Add chat client to player map
         mPlayerMap.insert(std::pair<std::string, ChatClient*>(client->characterName, client));
@@ -244,7 +244,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         default:
             LOG_WARN("ChatHandler::processMessage, Invalid message type"
                      << message.getId());
-            result.writeShort(XXMSG_INVALID);
+            result.writeInt16(XXMSG_INVALID);
             break;
     }
 
@@ -255,18 +255,16 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 void ChatHandler::handleCommand(ChatClient &computer, const std::string &command)
 {
     LOG_INFO("Chat: Received unhandled command: " << command);
-    MessageOut result;
-    result.writeShort(CPMSG_ERROR);
-    result.writeByte(CHAT_UNHANDLED_COMMAND);
+    MessageOut result(CPMSG_ERROR);
+    result.writeInt8(CHAT_UNHANDLED_COMMAND);
     computer.send(result);
 }
 
 void ChatHandler::warnPlayerAboutBadWords(ChatClient &computer)
 {
     // We could later count if the player is really often unpolite.
-    MessageOut result;
-    result.writeShort(CPMSG_ERROR);
-    result.writeByte(CHAT_USING_BAD_WORDS); // The Channel
+    MessageOut result(CPMSG_ERROR);
+    result.writeInt8(CHAT_USING_BAD_WORDS); // The Channel
     computer.send(result);
 
     LOG_INFO(computer.characterName << " says bad words.");
@@ -283,7 +281,7 @@ void ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
         return;
     }
 
-    short channelId = msg.readShort();
+    short channelId = msg.readInt16();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
     if (channel)
@@ -292,7 +290,7 @@ void ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
                   << ": " << text);
 
         MessageOut result(CPMSG_PUBMSG);
-        result.writeShort(channelId);
+        result.writeInt16(channelId);
         result.writeString(client.characterName);
         result.writeString(text);
         sendInChannel(channel, result);
@@ -337,7 +335,7 @@ void ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
     else
     {
         MessageOut result(CPMSG_ERROR);
-        result.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+        result.writeInt8(ERRMSG_INSUFFICIENT_RIGHTS);
         client.send(result);
         LOG_INFO(client.characterName <<
             " couldn't make an announcement due to insufficient rights.");
@@ -400,26 +398,26 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
 
     if (!channel)
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (!channel->getPassword().empty() &&
             channel->getPassword() != givenPassword)
     {
         // Incorrect password (should probably have its own return value)
-        reply.writeByte(ERRMSG_INSUFFICIENT_RIGHTS);
+        reply.writeInt8(ERRMSG_INSUFFICIENT_RIGHTS);
     }
     else if (!channel->canJoin())
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else
     {
         if (channel->addUser(&client))
         {
-            reply.writeByte(ERRMSG_OK);
+            reply.writeInt8(ERRMSG_OK);
             // The user entered the channel, now give him the channel
             // id, the announcement string and the user list.
-            reply.writeShort(channel->getId());
+            reply.writeInt16(channel->getId());
             reply.writeString(channelName);
             reply.writeString(channel->getAnnouncement());
             const ChatChannel::ChannelUsers &users = channel->getUserList();
@@ -446,7 +444,7 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
         }
         else
         {
-            reply.writeByte(ERRMSG_FAILURE);
+            reply.writeInt8(ERRMSG_FAILURE);
         }
     }
 
@@ -455,7 +453,7 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
 
 void ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
 {
-    short channelId = msg.readShort();
+    short channelId = msg.readInt16();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
     if (channelId == 0 || !channel)
@@ -474,7 +472,7 @@ void ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
     std::string user = msg.readString();
 
     // get the mode to change to
-    unsigned char mode = msg.readByte();
+    unsigned char mode = msg.readInt8();
     channel->setUserMode(getClient(user), mode);
 
     // set the info to pass to all channel clients
@@ -496,7 +494,7 @@ void ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
 
 void ChatHandler::handleKickUserMessage(ChatClient &client, MessageIn &msg)
 {
-    short channelId = msg.readShort();
+    short channelId = msg.readInt16();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
     if (channelId == 0 || !channel)
@@ -535,21 +533,21 @@ void ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_QUIT_CHANNEL_RESPONSE);
 
-    short channelId = msg.readShort();
+    short channelId = msg.readInt16();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
     if (channelId == 0 || !channel)
     {
-        reply.writeByte(ERRMSG_INVALID_ARGUMENT);
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
     else if (!channel->removeUser(&client))
     {
-        reply.writeByte(ERRMSG_FAILURE);
+        reply.writeInt8(ERRMSG_FAILURE);
     }
     else
     {
-        reply.writeByte(ERRMSG_OK);
-        reply.writeShort(channelId);
+        reply.writeInt8(ERRMSG_OK);
+        reply.writeInt16(channelId);
 
         // Send an CPMSG_UPDATE_CHANNEL to warn other clients a user left
         // the channel.
@@ -585,7 +583,7 @@ void ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
             i != i_end; ++i)
     {
         reply.writeString((*i)->getName());
-        reply.writeShort((*i)->getUserList().size());
+        reply.writeInt16((*i)->getUserList().size());
     }
 
     client.send(reply);
@@ -632,7 +630,7 @@ void ChatHandler::handleListChannelUsersMessage(ChatClient &client,
 
 void ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
 {
-    short channelId = msg.readShort();
+    short channelId = msg.readInt16();
     std::string topic = msg.readString();
     ChatChannel *channel = chatChannelManager->getChannel(channelId);
 
@@ -657,7 +655,7 @@ void ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
 void ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_DISCONNECT_RESPONSE);
-    reply.writeByte(ERRMSG_OK);
+    reply.writeInt8(ERRMSG_OK);
     chatChannelManager->removeUserFromAllChannels(&client);
     guildManager->disconnectPlayer(&client);
     client.send(reply);
@@ -667,11 +665,10 @@ void ChatHandler::sayToPlayer(ChatClient &computer,
                               const std::string &playerName,
                               const std::string &text)
 {
-    MessageOut result;
     LOG_DEBUG(computer.characterName << " says to " << playerName << ": "
               << text);
     // Send it to the being if the being exists
-    result.writeShort(CPMSG_PRIVMSG);
+    MessageOut result(CPMSG_PRIVMSG);
     result.writeString(computer.characterName);
     result.writeString(text);
     for (NetComputers::iterator i = clients.begin(), i_end = clients.end();
@@ -689,8 +686,8 @@ void ChatHandler::warnUsersAboutPlayerEventInChat(ChatChannel *channel,
                                                   char eventId)
 {
     MessageOut msg(CPMSG_CHANNEL_EVENT);
-    msg.writeShort(channel->getId());
-    msg.writeByte(eventId);
+    msg.writeInt16(channel->getId());
+    msg.writeInt8(eventId);
     msg.writeString(info);
     sendInChannel(channel, msg);
 }

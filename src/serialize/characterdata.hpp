@@ -33,85 +33,85 @@ template< class T >
 void serializeCharacterData(const T &data, MessageOut &msg)
 {
     // general character properties
-    msg.writeByte(data.getAccountLevel());
-    msg.writeByte(data.getGender());
-    msg.writeByte(data.getHairStyle());
-    msg.writeByte(data.getHairColor());
-    msg.writeShort(data.getLevel());
-    msg.writeShort(data.getCharacterPoints());
-    msg.writeShort(data.getCorrectionPoints());
+    msg.writeInt8(data.getAccountLevel());
+    msg.writeInt8(data.getGender());
+    msg.writeInt8(data.getHairStyle());
+    msg.writeInt8(data.getHairColor());
+    msg.writeInt16(data.getLevel());
+    msg.writeInt16(data.getCharacterPoints());
+    msg.writeInt16(data.getCorrectionPoints());
 
-    msg.writeShort(data.mAttributes.size());
+    msg.writeInt16(data.mAttributes.size());
     AttributeMap::const_iterator attr_it, attr_it_end;
     for (attr_it = data.mAttributes.begin(),
          attr_it_end = data.mAttributes.end();
          attr_it != attr_it_end;
          ++attr_it)
     {
-        msg.writeShort(attr_it->first);
+        msg.writeInt16(attr_it->first);
         msg.writeDouble(data.getAttrBase(attr_it));
         msg.writeDouble(data.getAttrMod(attr_it));
     }
 
     // character skills
-    msg.writeShort(data.getSkillSize());
+    msg.writeInt16(data.getSkillSize());
 
     std::map<int, int>::const_iterator skill_it;
     for (skill_it = data.getSkillBegin(); skill_it != data.getSkillEnd() ; skill_it++)
     {
-        msg.writeShort(skill_it->first);
-        msg.writeLong(skill_it->second);
+        msg.writeInt16(skill_it->first);
+        msg.writeInt32(skill_it->second);
     }
 
     // status effects currently affecting the character
-    msg.writeShort(data.getStatusEffectSize());
+    msg.writeInt16(data.getStatusEffectSize());
     std::map<int, int>::const_iterator status_it;
     for (status_it = data.getStatusEffectBegin(); status_it != data.getStatusEffectEnd(); status_it++)
     {
-        msg.writeShort(status_it->first);
-        msg.writeShort(status_it->second);
+        msg.writeInt16(status_it->first);
+        msg.writeInt16(status_it->second);
     }
 
     // location
-    msg.writeShort(data.getMapId());
+    msg.writeInt16(data.getMapId());
     const Point &pos = data.getPosition();
-    msg.writeShort(pos.x);
-    msg.writeShort(pos.y);
+    msg.writeInt16(pos.x);
+    msg.writeInt16(pos.y);
 
     // kill count
-    msg.writeShort(data.getKillCountSize());
+    msg.writeInt16(data.getKillCountSize());
     std::map<int, int>::const_iterator kills_it;
     for (kills_it = data.getKillCountBegin(); kills_it != data.getKillCountEnd(); kills_it++)
     {
-        msg.writeShort(kills_it->first);
-        msg.writeLong(kills_it->second);
+        msg.writeInt16(kills_it->first);
+        msg.writeInt32(kills_it->second);
     }
 
     // character specials
     std::map<int, Special*>::const_iterator special_it;
-    msg.writeShort(data.getSpecialSize());
+    msg.writeInt16(data.getSpecialSize());
     for (special_it = data.getSpecialBegin(); special_it != data.getSpecialEnd() ; special_it++)
     {
-        msg.writeLong(special_it->first);
+        msg.writeInt32(special_it->first);
     }
 
     // inventory - must be last because size isn't transmitted
     const Possessions &poss = data.getPossessions();
-    msg.writeShort(poss.equipSlots.size()); // number of equipment
+    msg.writeInt16(poss.equipSlots.size()); // number of equipment
     for (EquipData::const_iterator k = poss.equipSlots.begin(),
              k_end = poss.equipSlots.end();
              k != k_end;
              ++k)
     {
-        msg.writeByte(k->first);            // Equip slot type
-        msg.writeShort(k->second);          // Inventory slot
+        msg.writeInt8(k->first);            // Equip slot type
+        msg.writeInt16(k->second);          // Inventory slot
     }
     for (InventoryData::const_iterator j = poss.inventory.begin(),
          j_end = poss.inventory.end(); j != j_end; ++j)
     {
-        msg.writeShort(j->first);           // slot id
-        msg.writeShort(j->second.itemId);   // item type
-        msg.writeShort(j->second.amount);   // amount
+        msg.writeInt16(j->first);           // slot id
+        msg.writeInt16(j->second.itemId);   // item type
+        msg.writeInt16(j->second.amount);   // amount
     }
 }
 
@@ -119,19 +119,19 @@ template< class T >
 void deserializeCharacterData(T &data, MessageIn &msg)
 {
     // general character properties
-    data.setAccountLevel(msg.readByte());
-    data.setGender(msg.readByte());
-    data.setHairStyle(msg.readByte());
-    data.setHairColor(msg.readByte());
-    data.setLevel(msg.readShort());
-    data.setCharacterPoints(msg.readShort());
-    data.setCorrectionPoints(msg.readShort());
+    data.setAccountLevel(msg.readInt8());
+    data.setGender(msg.readInt8());
+    data.setHairStyle(msg.readInt8());
+    data.setHairColor(msg.readInt8());
+    data.setLevel(msg.readInt16());
+    data.setCharacterPoints(msg.readInt16());
+    data.setCorrectionPoints(msg.readInt16());
 
     // character attributes
-    unsigned int attrSize = msg.readShort();
+    unsigned int attrSize = msg.readInt16();
     for (unsigned int i = 0; i < attrSize; ++i)
     {
-        unsigned int id = msg.readShort();
+        unsigned int id = msg.readInt16();
         double base = msg.readDouble(),
                mod  = msg.readDouble();
         data.setAttribute(id, base);
@@ -139,62 +139,62 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     }
 
     // character skills
-    int skillSize = msg.readShort();
+    int skillSize = msg.readInt16();
 
     for (int i = 0; i < skillSize; ++i)
     {
-        int skill = msg.readShort();
-        int level = msg.readLong();
+        int skill = msg.readInt16();
+        int level = msg.readInt32();
         data.setExperience(skill,level);
     }
 
     // status effects currently affecting the character
-    int statusSize = msg.readShort();
+    int statusSize = msg.readInt16();
 
     for (int i = 0; i < statusSize; i++)
     {
-        int status = msg.readShort();
-        int time = msg.readShort();
+        int status = msg.readInt16();
+        int time = msg.readInt16();
         data.applyStatusEffect(status, time);
     }
 
     // location
-    data.setMapId(msg.readShort());
+    data.setMapId(msg.readInt16());
 
     Point temporaryPoint;
-    temporaryPoint.x = msg.readShort();
-    temporaryPoint.y = msg.readShort();
+    temporaryPoint.x = msg.readInt16();
+    temporaryPoint.y = msg.readInt16();
     data.setPosition(temporaryPoint);
 
     // kill count
-    int killSize = msg.readShort();
+    int killSize = msg.readInt16();
     for (int i = 0; i < killSize; i++)
     {
-        int monsterId = msg.readShort();
-        int kills = msg.readLong();
+        int monsterId = msg.readInt16();
+        int kills = msg.readInt32();
         data.setKillCount(monsterId, kills);
     }
 
     // character specials
-    int specialSize = msg.readShort();
+    int specialSize = msg.readInt16();
     data.clearSpecials();
     for (int i = 0; i < specialSize; i++)
     {
-        data.giveSpecial(msg.readLong());
+        data.giveSpecial(msg.readInt32());
     }
 
 
     Possessions &poss = data.getPossessions();
     poss.equipSlots.clear();
-    int equipSlotsSize = msg.readShort();
+    int equipSlotsSize = msg.readInt16();
     unsigned int eqSlot, invSlot;
     for (int j = 0; j < equipSlotsSize; ++j)
     {
-        int equipmentInSlotType = msg.readByte();
+        int equipmentInSlotType = msg.readInt8();
         for (int k = 0; k < equipmentInSlotType; ++k)
         {
-            eqSlot  = msg.readByte();
-            invSlot = msg.readShort();
+            eqSlot  = msg.readInt8();
+            invSlot = msg.readInt16();
             poss.equipSlots.insert(poss.equipSlots.end(),
                                    std::make_pair(eqSlot, invSlot));
         }
@@ -204,9 +204,9 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     while (msg.getUnreadLength())
     {
         InventoryItem i;
-        int slotId = msg.readShort();
-        i.itemId   = msg.readShort();
-        i.amount   = msg.readShort();
+        int slotId = msg.readInt16();
+        i.itemId   = msg.readInt16();
+        i.amount   = msg.readInt16();
         poss.inventory.insert(poss.inventory.end(), std::make_pair(slotId, i));
     }
 

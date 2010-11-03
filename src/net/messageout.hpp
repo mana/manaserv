@@ -49,11 +49,11 @@ class MessageOut
          */
         void clear();
 
-        void writeByte(int value);     /**< Writes an integer on one byte. */
+        void writeInt8(int value);     /**< Writes an integer on one byte. */
 
-        void writeShort(int value);    /**< Writes an integer on two bytes. */
+        void writeInt16(int value);    /**< Writes an integer on two bytes. */
 
-        void writeLong(int value);     /**< Writes an integer on four bytes. */
+        void writeInt32(int value);    /**< Writes an integer on four bytes. */
 
         /**
          * Writes a double. HACKY and should *not* be used for client

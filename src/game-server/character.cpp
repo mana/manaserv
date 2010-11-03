@@ -78,7 +78,7 @@ Character::Character(MessageIn &msg):
         mAttributes.insert(std::make_pair(it1->first, Attribute(*it1->second)));
 
     // Get character data.
-    mDatabaseID = msg.readLong();
+    mDatabaseID = msg.readInt32();
     setName(msg.readString());
     deserializeCharacterData(*this, msg);
     mOld = getPosition();
@@ -234,10 +234,10 @@ void Character::sendSpecialUpdate()
     {
 
         MessageOut msg(GPMSG_SPECIAL_STATUS );
-        msg.writeByte(i->first);
-        msg.writeLong(i->second->currentMana);
-        msg.writeLong(i->second->neededMana);
-        msg.writeLong(mRechargePerSpecial);
+        msg.writeInt8(i->first);
+        msg.writeInt32(i->second->currentMana);
+        msg.writeInt32(i->second->neededMana);
+        msg.writeInt32(mRechargePerSpecial);
         /* Yes, the last one is redundant because it is the same for each
            special, but I would like to keep the netcode flexible enough
            to allow different recharge speed per special when necessary */
@@ -321,9 +321,9 @@ void Character::sendStatus()
          i_end = mModifiedAttributes.end(); i != i_end; ++i)
     {
         int attr = *i;
-        attribMsg.writeShort(attr);
-        attribMsg.writeLong(getAttribute(attr) * 256);
-        attribMsg.writeLong(getModifiedAttribute(attr) * 256);
+        attribMsg.writeInt16(attr);
+        attribMsg.writeInt32(getAttribute(attr) * 256);
+        attribMsg.writeInt32(getModifiedAttribute(attr) * 256);
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(this, attribMsg);
     mModifiedAttributes.clear();
@@ -333,9 +333,9 @@ void Character::sendStatus()
          i_end = mModifiedExperience.end(); i != i_end; ++i)
     {
         int skill = *i;
-        expMsg.writeShort(skill);
-        expMsg.writeLong(getExpGot(skill));
-        expMsg.writeLong(getExpNeeded(skill));
+        expMsg.writeInt16(skill);
+        expMsg.writeInt32(getExpGot(skill));
+        expMsg.writeInt32(getExpNeeded(skill));
     }
     if (expMsg.getLength() > 2) gameHandler->sendTo(this, expMsg);
     mModifiedExperience.clear();
@@ -344,7 +344,7 @@ void Character::sendStatus()
     {
         mUpdateLevelProgress = false;
         MessageOut progressMessage(GPMSG_LEVEL_PROGRESS);
-        progressMessage.writeByte(mLevelProgress);
+        progressMessage.writeInt8(mLevelProgress);
         gameHandler->sendTo(this, progressMessage);
     }
 }
@@ -604,9 +604,9 @@ void Character::levelup()
         mCorrectionPoints = CORRECTIONPOINTS_MAX;
 
     MessageOut levelupMsg(GPMSG_LEVELUP);
-    levelupMsg.writeShort(mLevel);
-    levelupMsg.writeShort(mCharacterPoints);
-    levelupMsg.writeShort(mCorrectionPoints);
+    levelupMsg.writeInt16(mLevel);
+    levelupMsg.writeInt16(mCharacterPoints);
+    levelupMsg.writeInt16(mCorrectionPoints);
     gameHandler->sendTo(this, levelupMsg);
     LOG_INFO(getName()<<" reached level "<<mLevel);
 }

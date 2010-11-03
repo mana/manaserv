@@ -69,14 +69,14 @@ bool AccountConnection::start(int gameServerPort)
     // Register with the account server and send the list of maps we handle
     MessageOut msg(GAMSG_REGISTER);
     msg.writeString(gameServerAddress);
-    msg.writeShort(gameServerPort);
+    msg.writeInt16(gameServerPort);
     msg.writeString(password);
-    msg.writeLong(itemManager->getDatabaseVersion());
+    msg.writeInt32(itemManager->getDatabaseVersion());
     const MapManager::Maps &m = MapManager::getMaps();
     for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
             i != i_end; ++i)
     {
-        msg.writeShort(i->first);
+        msg.writeInt16(i->first);
     }
     send(msg);
 
@@ -90,7 +90,7 @@ bool AccountConnection::start(int gameServerPort)
 void AccountConnection::sendCharacterData(Character *p)
 {
     MessageOut msg(GAMSG_PLAYER_DATA);
-    msg.writeLong(p->getDatabaseID());
+    msg.writeInt32(p->getDatabaseID());
     serializeCharacterData(*p, msg);
     send(msg);
 }
@@ -101,7 +101,7 @@ void AccountConnection::processMessage(MessageIn &msg)
     {
         case AGMSG_REGISTER_RESPONSE:
         {
-            if (msg.readShort() != DATA_VERSION_OK)
+            if (msg.readInt16() != DATA_VERSION_OK)
             {
                 LOG_ERROR("Item database is outdated! Please update to "
                           "prevent inconsistencies");
@@ -114,7 +114,7 @@ void AccountConnection::processMessage(MessageIn &msg)
                 LOG_DEBUG("Local item database is "
                           "in sync with account server.");
             }
-            if (msg.readShort() != PASSWORD_OK)
+            if (msg.readInt16() != PASSWORD_OK)
             {
                 LOG_ERROR("This game server sent a invalid password");
                 stop();
@@ -131,22 +131,22 @@ void AccountConnection::processMessage(MessageIn &msg)
 
         case AGMSG_ACTIVE_MAP:
         {
-            int id = msg.readShort();
+            int id = msg.readInt16();
             MapManager::raiseActive(id);
         } break;
 
         case AGMSG_REDIRECT_RESPONSE:
         {
-            int id = msg.readLong();
+            int id = msg.readInt32();
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
             std::string address = msg.readString();
-            int port = msg.readShort();
+            int port = msg.readInt16();
             gameHandler->completeServerChange(id, token, address, port);
         } break;
 
         case AGMSG_GET_QUEST_RESPONSE:
         {
-            int id = msg.readLong();
+            int id = msg.readInt32();
             std::string name = msg.readString();
             std::string value = msg.readString();
             recoveredQuestVar(id, name, value);
@@ -155,16 +155,16 @@ void AccountConnection::processMessage(MessageIn &msg)
         case CGMSG_CHANGED_PARTY:
         {
             // Character DB id
-            int charid = msg.readLong();
+            int charid = msg.readInt32();
             // Party id, 0 for none
-            int partyid = msg.readLong();
+            int partyid = msg.readInt32();
             gameHandler->updateCharacter(charid, partyid);
         } break;
 
         case CGMSG_POST_RESPONSE:
         {
             // get the character
-            Character *character = postMan->getCharacter(msg.readLong());
+            Character *character = postMan->getCharacter(msg.readInt32());
 
             // check character is still valid
             if (!character)
@@ -182,7 +182,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case CGMSG_STORE_POST_RESPONSE:
         {
             // get character
-            Character *character = postMan->getCharacter(msg.readLong());
+            Character *character = postMan->getCharacter(msg.readInt32());
 
             // check character is valid
             if (!character)
@@ -206,7 +206,7 @@ void AccountConnection::playerReconnectAccount(int id,
 {
     LOG_DEBUG("Send GAMSG_PLAYER_RECONNECT.");
     MessageOut msg(GAMSG_PLAYER_RECONNECT);
-    msg.writeLong(id);
+    msg.writeInt32(id);
     msg.writeString(magic_token, MAGIC_TOKEN_LENGTH);
     send(msg);
 }
@@ -214,7 +214,7 @@ void AccountConnection::playerReconnectAccount(int id,
 void AccountConnection::requestQuestVar(Character *ch, const std::string &name)
 {
     MessageOut msg(GAMSG_GET_QUEST);
-    msg.writeLong(ch->getDatabaseID());
+    msg.writeInt32(ch->getDatabaseID());
     msg.writeString(name);
     send(msg);
 }
@@ -223,7 +223,7 @@ void AccountConnection::updateQuestVar(Character *ch, const std::string &name,
                                        const std::string &value)
 {
     MessageOut msg(GAMSG_SET_QUEST);
-    msg.writeLong(ch->getDatabaseID());
+    msg.writeInt32(ch->getDatabaseID());
     msg.writeString(name);
     msg.writeString(value);
     send(msg);
@@ -232,8 +232,8 @@ void AccountConnection::updateQuestVar(Character *ch, const std::string &name,
 void AccountConnection::banCharacter(Character *ch, int duration)
 {
     MessageOut msg(GAMSG_BAN_PLAYER);
-    msg.writeLong(ch->getDatabaseID());
-    msg.writeShort(duration);
+    msg.writeInt32(ch->getDatabaseID());
+    msg.writeInt16(duration);
     send(msg);
 }
 
@@ -246,7 +246,7 @@ void AccountConnection::sendStatistics()
     {
         MapComposite *m = i->second;
         if (!m->isActive()) continue;
-        msg.writeShort(i->first);
+        msg.writeInt16(i->first);
         int nbThings = 0, nbMonsters = 0;
         typedef std::vector< Thing * > Things;
         const Things &things = m->getEverything();
@@ -268,13 +268,13 @@ void AccountConnection::sendStatistics()
                     ++nbThings;
             }
         }
-        msg.writeShort(nbThings);
-        msg.writeShort(nbMonsters);
-        msg.writeShort(players.size());
+        msg.writeInt16(nbThings);
+        msg.writeInt16(nbMonsters);
+        msg.writeInt16(players.size());
         for (std::vector< int >::const_iterator j = players.begin(),
              j_end = players.end(); j != j_end; ++j)
         {
-            msg.writeLong(*j);
+            msg.writeInt32(*j);
         }
     }
     send(msg);
@@ -286,14 +286,14 @@ void AccountConnection::sendPost(Character *c, MessageIn &msg)
     // the id of receiving player, the letter receiver and contents, and attachments
     LOG_DEBUG("Sending GCMSG_STORE_POST.");
     MessageOut out(GCMSG_STORE_POST);
-    out.writeLong(c->getDatabaseID());
+    out.writeInt32(c->getDatabaseID());
     out.writeString(msg.readString()); // name of receiver
     out.writeString(msg.readString()); // content of letter
     while (msg.getUnreadLength()) // attachments
     {
         // write the item id and amount for each attachment
-        out.writeLong(msg.readShort());
-        out.writeLong(msg.readShort());
+        out.writeInt32(msg.readInt16());
+        out.writeInt32(msg.readInt16());
     }
     send(out);
 }
@@ -306,15 +306,15 @@ void AccountConnection::getPost(Character *c)
     // send message to account server with id of retrieving player
     LOG_DEBUG("Sending GCMSG_REQUEST_POST");
     MessageOut out(GCMSG_REQUEST_POST);
-    out.writeLong(c->getDatabaseID());
+    out.writeInt32(c->getDatabaseID());
     send(out);
 }
 
 void AccountConnection::changeAccountLevel(Character *c, int level)
 {
     MessageOut msg(GAMSG_CHANGE_ACCOUNT_LEVEL);
-    msg.writeLong(c->getDatabaseID());
-    msg.writeShort(level);
+    msg.writeInt32(c->getDatabaseID());
+    msg.writeInt16(level);
     send(msg);
 }
 
@@ -336,7 +336,7 @@ void AccountConnection::syncChanges(bool force)
                 << mSyncMessages << " messages." );
 
         // attach end-of-buffer flag
-        mSyncBuffer->writeByte(SYNC_END_OF_BUFFER);
+        mSyncBuffer->writeInt8(SYNC_END_OF_BUFFER);
         send(*mSyncBuffer);
         delete (mSyncBuffer);
 
@@ -353,10 +353,10 @@ void AccountConnection::updateCharacterPoints(int charId, int charPoints,
                                               int corrPoints)
 {
     mSyncMessages++;
-    mSyncBuffer->writeByte(SYNC_CHARACTER_POINTS);
-    mSyncBuffer->writeLong(charId);
-    mSyncBuffer->writeLong(charPoints);
-    mSyncBuffer->writeLong(corrPoints);
+    mSyncBuffer->writeInt8(SYNC_CHARACTER_POINTS);
+    mSyncBuffer->writeInt32(charId);
+    mSyncBuffer->writeInt32(charPoints);
+    mSyncBuffer->writeInt32(corrPoints);
     syncChanges();
 }
 
@@ -364,9 +364,9 @@ void AccountConnection::updateAttributes(int charId, int attrId, double base,
                               double mod)
 {
     ++mSyncMessages;
-    mSyncBuffer->writeByte(SYNC_CHARACTER_ATTRIBUTE);
-    mSyncBuffer->writeLong(charId);
-    mSyncBuffer->writeLong(attrId);
+    mSyncBuffer->writeInt8(SYNC_CHARACTER_ATTRIBUTE);
+    mSyncBuffer->writeInt32(charId);
+    mSyncBuffer->writeInt32(attrId);
     mSyncBuffer->writeDouble(base);
     mSyncBuffer->writeDouble(mod);
     syncChanges();
@@ -376,27 +376,27 @@ void AccountConnection::updateExperience(int charId, int skillId,
                                          int skillValue)
 {
     mSyncMessages++;
-    mSyncBuffer->writeByte(SYNC_CHARACTER_SKILL);
-    mSyncBuffer->writeLong(charId);
-    mSyncBuffer->writeByte(skillId);
-    mSyncBuffer->writeLong(skillValue);
+    mSyncBuffer->writeInt8(SYNC_CHARACTER_SKILL);
+    mSyncBuffer->writeInt32(charId);
+    mSyncBuffer->writeInt8(skillId);
+    mSyncBuffer->writeInt32(skillValue);
     syncChanges();
 }
 
 void AccountConnection::updateOnlineStatus(int charId, bool online)
 {
     mSyncMessages++;
-    mSyncBuffer->writeByte(SYNC_ONLINE_STATUS);
-    mSyncBuffer->writeLong(charId);
-    mSyncBuffer->writeByte(online ? 0x01 : 0x00);
+    mSyncBuffer->writeInt8(SYNC_ONLINE_STATUS);
+    mSyncBuffer->writeInt32(charId);
+    mSyncBuffer->writeInt8(online ? 0x01 : 0x00);
     syncChanges();
 }
 
 void AccountConnection::sendTransaction(int id, int action, const std::string &message)
 {
     MessageOut msg(GAMSG_TRANSACTION);
-    msg.writeLong(id);
-    msg.writeLong(action);
+    msg.writeInt32(id);
+    msg.writeInt32(action);
     msg.writeString(message);
     send(msg);
 }

@@ -44,9 +44,10 @@ class MessageIn
          */
         int getLength() const { return mLength; }
 
-        int readByte();             /**< Reads a byte. */
-        int readShort();            /**< Reads a short. */
-        int readLong();             /**< Reads a long. */
+        int readInt8();             /**< Reads a byte. */
+        int readInt16();            /**< Reads a short. */
+        int readInt32();            /**< Reads a long. */
+
         /**
          * Reads a double. HACKY and should *not* be used for client
          * communication!

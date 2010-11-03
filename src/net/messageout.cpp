@@ -49,7 +49,7 @@ MessageOut::MessageOut(int id):
     mData = (char*) malloc(INITIAL_DATA_CAPACITY);
     mDataSize = INITIAL_DATA_CAPACITY;
 
-    writeShort(id);
+    writeInt16(id);
 }
 
 MessageOut::~MessageOut()
@@ -79,14 +79,14 @@ MessageOut::expand(size_t bytes)
     }
 }
 
-void MessageOut::writeByte(int value)
+void MessageOut::writeInt8(int value)
 {
     expand(mPos + 1);
     mData[mPos] = value;
     mPos += 1;
 }
 
-void MessageOut::writeShort(int value)
+void MessageOut::writeInt16(int value)
 {
     expand(mPos + 2);
     uint16_t t = ENET_HOST_TO_NET_16(value);
@@ -94,7 +94,7 @@ void MessageOut::writeShort(int value)
     mPos += 2;
 }
 
-void MessageOut::writeLong(int value)
+void MessageOut::writeInt32(int value)
 {
     expand(mPos + 4);
     uint32_t t = ENET_HOST_TO_NET_32(value);
@@ -116,7 +116,7 @@ void MessageOut::writeDouble(double value)
     o.precision(std::numeric_limits< double >::digits10);
     o << value;
     std::string str = o.str();
-    writeByte(str.size());
+    writeInt8(str.size());
     writeString(str, str.size());
 #endif
 }
@@ -138,7 +138,7 @@ MessageOut::writeString(const std::string &string, int length)
     if (length < 0)
     {
         // Write the length at the start if not fixed
-        writeShort(stringLength);
+        writeInt16(stringLength);
         length = stringLength;
     }
     else if (length < stringLength)

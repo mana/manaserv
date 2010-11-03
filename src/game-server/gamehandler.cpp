@@ -107,7 +107,7 @@ void GameHandler::completeServerChange(int id, const std::string &token,
             MessageOut msg(GPMSG_PLAYER_SERVER_CHANGE);
             msg.writeString(token, MAGIC_TOKEN_LENGTH);
             msg.writeString(address);
-            msg.writeShort(port);
+            msg.writeInt16(port);
             c->send(msg);
             c->character->disconnected();
             delete c->character;
@@ -212,7 +212,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         case PGMSG_NPC_NUMBER:
         case PGMSG_NPC_STRING:
         {
-            int id = message.readShort();
+            int id = message.readInt16();
             Actor *o = findActorNear(computer.character, id);
             if (!o || o->getType() != OBJECT_NPC)
             {
@@ -223,11 +223,11 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             NPC *q = static_cast< NPC * >(o);
             if (message.getId() == PGMSG_NPC_SELECT)
             {
-                q->select(computer.character, message.readByte());
+                q->select(computer.character, message.readInt8());
             }
             else if (message.getId() == PGMSG_NPC_NUMBER)
             {
-                q->integerReceived(computer.character, message.readLong());
+                q->integerReceived(computer.character, message.readInt32());
             }
             else if (message.getId() == PGMSG_NPC_STRING)
             {
@@ -241,8 +241,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_PICKUP:
         {
-            int x = message.readShort();
-            int y = message.readShort();
+            int x = message.readInt16();
+            int y = message.readInt16();
             Point ppos = computer.character->getPosition();
 
             // TODO: use a less arbitrary value.
@@ -275,7 +275,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_USE_ITEM:
         {
-            int slot = message.readByte();
+            int slot = message.readInt8();
             Inventory inv(computer.character);
             if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
             {
@@ -294,8 +294,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_DROP:
         {
-            int slot = message.readByte();
-            int amount = message.readByte();
+            int slot = message.readInt8();
+            int amount = message.readInt8();
             Inventory inv(computer.character);
             if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
             {
@@ -327,22 +327,22 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_EQUIP:
         {
-            int slot = message.readByte();
+            int slot = message.readInt8();
             Inventory(computer.character).equip(slot);
         } break;
 
         case PGMSG_UNEQUIP:
         {
-            int slot = message.readByte();
+            int slot = message.readInt8();
             if (slot >= 0 && slot < INVENTORY_SLOTS)
                 Inventory(computer.character).unequip(slot);
         } break;
 
         case PGMSG_MOVE_ITEM:
         {
-            int slot1 = message.readByte();
-            int slot2 = message.readByte();
-            int amount = message.readByte();
+            int slot1 = message.readInt8();
+            int slot2 = message.readInt8();
+            int amount = message.readInt8();
             Inventory(computer.character).move(slot1, slot2, amount);
             // log transaction
             std::stringstream str;
@@ -354,7 +354,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_ATTACK:
         {
-            int id = message.readShort();
+            int id = message.readInt16();
             LOG_DEBUG("Character " << computer.character->getPublicID()
                       << " attacked being " << id);
 
@@ -369,7 +369,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_USE_SPECIAL:
         {
-            int specialID = message.readByte();
+            int specialID = message.readInt8();
             LOG_DEBUG("Character " << computer.character->getPublicID()
                       << " tries to use his special attack "<<specialID);
             computer.character->useSpecial(specialID);
@@ -377,7 +377,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_ACTION_CHANGE:
         {
-            Being::Action action = (Being::Action)message.readByte();
+            Being::Action action = (Being::Action)message.readInt8();
             Being::Action current = (Being::Action)computer.character->getAction();
             bool logActionChange = true;
 
@@ -419,15 +419,15 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_DIRECTION_CHANGE:
         {
-            computer.character->setDirection(message.readByte());
+            computer.character->setDirection(message.readInt8());
         } break;
 
         case PGMSG_DISCONNECT:
         {
-            bool reconnectAccount = (bool) message.readByte();
+            bool reconnectAccount = (bool) message.readInt8();
 
-            result.writeShort(GPMSG_DISCONNECT_RESPONSE);
-            result.writeByte(ERRMSG_OK); // It is, when control reaches here
+            result.writeInt16(GPMSG_DISCONNECT_RESPONSE);
+            result.writeInt8(ERRMSG_OK); // It is, when control reaches here
 
             if (reconnectAccount)
             {
@@ -452,7 +452,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_TRADE_REQUEST:
         {
-            int id = message.readShort();
+            int id = message.readInt16();
 
             if (Trade *t = computer.character->getTrading())
             {
@@ -462,7 +462,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
             Character *q = findCharacterNear(computer.character, id);
             if (!q || q->isBusy())
             {
-                result.writeShort(GPMSG_TRADE_CANCEL);
+                result.writeInt16(GPMSG_TRADE_CANCEL);
                 break;
             }
 
@@ -501,7 +501,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                     break;
                 case PGMSG_TRADE_SET_MONEY:
                 {
-                    int money = message.readLong();
+                    int money = message.readInt32();
                     t->setMoney(computer.character, money);
                     // log transaction
                     str << "User added " << money << " money to trade.";
@@ -510,8 +510,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
                 } break;
                 case PGMSG_TRADE_ADD_ITEM:
                 {
-                    int slot = message.readByte();
-                    t->addItem(computer.character, slot, message.readByte());
+                    int slot = message.readInt8();
+                    t->addItem(computer.character, slot, message.readInt8());
                     // log transaction
                     str << "User add item from slot " << slot;
                     accountHandler->sendTransaction(computer.character->getDatabaseID(),
@@ -524,19 +524,19 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
         {
             BuySell *t = computer.character->getBuySell();
             if (!t) break;
-            int id = message.readShort();
-            int amount = message.readShort();
+            int id = message.readInt16();
+            int amount = message.readInt16();
             t->perform(id, amount);
         } break;
 
         case PGMSG_RAISE_ATTRIBUTE:
         {
-            int attribute = message.readLong();
+            int attribute = message.readInt32();
             AttribmodResponseCode retCode;
             retCode = computer.character->useCharacterPoint(attribute);
-            result.writeShort(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
-            result.writeByte(retCode);
-            result.writeLong(attribute);
+            result.writeInt16(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
+            result.writeInt8(retCode);
+            result.writeInt32(attribute);
 
             if (retCode == ATTRIBMOD_OK )
             {
@@ -555,12 +555,12 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_LOWER_ATTRIBUTE:
         {
-            int attribute = message.readLong();
+            int attribute = message.readInt32();
             AttribmodResponseCode retCode;
             retCode = computer.character->useCorrectionPoint(attribute);
-            result.writeShort(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
-            result.writeByte(retCode);
-            result.writeLong(attribute);
+            result.writeInt16(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
+            result.writeInt8(retCode);
+            result.writeInt32(attribute);
 
             if (retCode == ATTRIBMOD_OK )
             {
@@ -589,7 +589,7 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         default:
             LOG_WARN("Invalid message type");
-            result.writeShort(XXMSG_INVALID);
+            result.writeInt16(XXMSG_INVALID);
             break;
     }
 
@@ -653,14 +653,14 @@ void GameHandler::tokenMatched(GameClient *computer, Character *character)
 
     if (!GameState::insert(character))
     {
-        result.writeByte(ERRMSG_SERVER_FULL);
+        result.writeInt8(ERRMSG_SERVER_FULL);
         kill(character);
         delete character;
         computer->disconnect(result);
         return;
     }
 
-    result.writeByte(ERRMSG_OK);
+    result.writeInt8(ERRMSG_OK);
     computer->send(result);
 
     // Force sending the whole character to the client.
@@ -680,7 +680,7 @@ void GameHandler::deletePendingClient(GameClient *computer)
         return;
 
     MessageOut msg(GPMSG_CONNECT_RESPONSE);
-    msg.writeByte(ERRMSG_TIME_OUT);
+    msg.writeInt8(ERRMSG_TIME_OUT);
 
     // The computer will be deleted when the disconnect event is processed
     computer->disconnect(msg);
@@ -709,15 +709,15 @@ GameClient *GameHandler::getClientByNameSlow(const std::string &name) const
 void GameHandler::sendError(NetComputer *computer, int id, std::string errorMsg)
 {
     MessageOut msg(GPMSG_NPC_ERROR);
-    msg.writeShort(id);
+    msg.writeInt16(id);
     msg.writeString(errorMsg, errorMsg.size());
     computer->send(msg);
 }
 
 void GameHandler::handleWalk(GameClient *client, MessageIn &message)
 {
-    int x = message.readShort();
-    int y = message.readShort();
+    int x = message.readInt16();
+    int y = message.readInt16();
 
     Point dst(x, y);
     client->character->setDestination(dst);

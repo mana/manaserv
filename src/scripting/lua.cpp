@@ -77,7 +77,7 @@ static int npc_message(lua_State *s)
         return 0;
     }
     MessageOut msg(GPMSG_NPC_MESSAGE);
-    msg.writeShort(p->getPublicID());
+    msg.writeInt16(p->getPublicID());
     msg.writeString(std::string(m), l);
     gameHandler->sendTo(q, msg);
     return 1;
@@ -97,7 +97,7 @@ static int npc_choice(lua_State *s)
         return 0;
     }
     MessageOut msg(GPMSG_NPC_CHOICE);
-    msg.writeShort(p->getPublicID());
+    msg.writeInt16(p->getPublicID());
     for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
     {
         if (lua_isstring(s, i))
@@ -144,7 +144,7 @@ static int npc_ask_integer(lua_State *s)
         return 0;
     }
     MessageOut msg(GPMSG_NPC_NUMBER);
-    msg.writeShort(p->getPublicID());
+    msg.writeInt16(p->getPublicID());
 
     int min = lua_tointeger(s, 3);
     int max = lua_tointeger(s, 4);
@@ -152,9 +152,9 @@ static int npc_ask_integer(lua_State *s)
     if (lua_gettop(s) == 5)
         default_num = lua_tointeger(s, 5);
 
-    msg.writeLong(min);
-    msg.writeLong(max);
-    msg.writeLong(default_num);
+    msg.writeInt32(min);
+    msg.writeInt32(max);
+    msg.writeInt32(default_num);
     gameHandler->sendTo(q, msg);
 
     return 0;
@@ -174,7 +174,7 @@ static int npc_ask_string(lua_State *s)
         return 0;
     }
     MessageOut msg(GPMSG_NPC_STRING);
-    msg.writeShort(p->getPublicID());
+    msg.writeInt16(p->getPublicID());
     gameHandler->sendTo(q, msg);
 
     return 0;
@@ -222,7 +222,7 @@ static int npc_end(lua_State *s)
     }
 
     MessageOut msg(GPMSG_NPC_CLOSE);
-    msg.writeShort(p->getPublicID());
+    msg.writeInt16(p->getPublicID());
     gameHandler->sendTo(q, msg);
     return 0;
 }
@@ -243,7 +243,7 @@ static int npc_post(lua_State *s)
     }
 
     MessageOut msg(GPMSG_NPC_POST);
-    msg.writeShort(p->getPublicID());
+    msg.writeInt16(p->getPublicID());
     gameHandler->sendTo(q, msg);
 
     return 0;
