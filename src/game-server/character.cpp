@@ -44,7 +44,6 @@
 #include "serialize/characterdata.hpp"
 
 #include "utils/logger.h"
-#include "utils/speedconv.hpp"
 
 // Experience curve related values
 const float Character::EXPCURVE_EXPONENT = 3.0f;
@@ -358,14 +357,15 @@ void Character::modifiedAllAttribute()
         updateDerivedAttributes(it->first);
 }
 
-void Character::updateDerivedAttributes(unsigned int attr)
+bool Character::recalculateBaseAttribute(unsigned int attr)
 {
-// Much of this is remnants from the previous attribute system (placeholder?)
-// This could be improved by defining what attributes are derived from others
-// in xml or otherwise, so only those that need to be recomputed are.
-    LOG_DEBUG("Received modified attribute recalculation request for "
-              << attr << ".");
-    if (!mAttributes.count(attr)) return;
+    /*
+     * `attr' may or may not have changed. Recalculate the base value.
+     */
+    LOG_DEBUG("Received update attribute recalculation request at Character"
+              "for " << attr << ".");
+    if (!mAttributes.count(attr))
+        return false;
     double newBase = getAttribute(attr);
 
     /*
@@ -394,44 +394,27 @@ void Character::updateDerivedAttributes(unsigned int attr)
         newBase = 0.0;
         // TODO
         break;
-    case ATTR_HP_REGEN:
-        {
-            double hpPerSec = getModifiedAttribute(ATTR_VIT) * 0.05;
-            newBase = (hpPerSec * TICKS_PER_HP_REGENERATION / 10);
-        }
-        break;
-    case ATTR_HP:
-        double diff;
-        if ((diff = getModifiedAttribute(ATTR_HP)
-            - getModifiedAttribute(ATTR_MAX_HP)) > 0)
-            newBase -= diff;
-        break;
-    case ATTR_MAX_HP:
-        newBase = ((getModifiedAttribute(ATTR_VIT) + 3)
-                   * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
-        break;
-    case ATTR_MOVE_SPEED_TPS:
-        newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
-        break;
-    case ATTR_MOVE_SPEED_RAW:
-        newBase = utils::tpsToSpeed(getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
-        break;
-    case ATTR_INV_CAPACITY:
-        // Provisional
-        newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0;
-        break;
-    default: break;
+    default:
+        return Being::recalculateBaseAttribute(attr);
     }
 
     if (newBase != getAttribute(attr))
-        Being::setAttribute(attr, newBase, false);
-    else
-        LOG_DEBUG("No changes to sync.");
+    {
+        setAttribute(attr, newBase);
+        updateDerivedAttributes(attr);
+        return true;
+    }
+    LOG_DEBUG("No changes to sync for attribute '" << attr << "'.");
+    return false;
+}
+
+void Character::updateDerivedAttributes(unsigned int attr)
+{
+    /*
+     * `attr' has changed, perform updates accordingly.
+     */
     flagAttribute(attr);
 
-    /*
-     * Update attributes dependent on this one, if applicable.
-     */
     switch(attr)
     {
     case ATTR_STR:
@@ -447,19 +430,16 @@ void Character::updateDerivedAttributes(unsigned int attr)
         updateDerivedAttributes(ATTR_DEFENSE);
         break;
     case ATTR_INT:
+        // TODO
         break;
     case ATTR_DEX:
         updateDerivedAttributes(ATTR_ACCURACY);
         break;
     case ATTR_WIL:
+        // TODO
         break;
-    case ATTR_MAX_HP:
-        updateDerivedAttributes(ATTR_HP);
-        break;
-    case ATTR_MOVE_SPEED_TPS:
-        updateDerivedAttributes(ATTR_MOVE_SPEED_RAW);
-        break;
-    default: break;
+    default:
+        Being::updateDerivedAttributes(attr);
     }
 }
 

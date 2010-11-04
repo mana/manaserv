@@ -174,18 +174,6 @@ class Being : public Actor
         { return mDirection; }
 
         /**
-         * Gets beings speed.
-         * The speed is given in tiles per second.
-         */
-
-        /**
-         * Gets beings speed.
-         * The speed is to be set in tiles per second
-         * This function automatically transform it
-         * into millsecond per tile.
-         */
-
-        /**
          * Gets the damage list.
          */
         const Hits &getHitsTaken() const
@@ -234,7 +222,7 @@ class Being : public Actor
         /**
          * Sets an attribute.
          */
-        void setAttribute(unsigned int id, double value, bool calc = true);
+        void setAttribute(unsigned int id, double value);
 
         /**
          * Gets an attribute.
@@ -276,8 +264,18 @@ class Being : public Actor
 
         /**
          * Called when an attribute modifier is changed.
+         * Recalculate the base value of an attribute and update derived
+         *     attributes if it has changed.
+         * @returns Whether it was changed.
          */
-        virtual void updateDerivedAttributes(unsigned int) {}
+        virtual bool recalculateBaseAttribute(unsigned int);
+
+        /**
+         * Attribute has changed, recalculate base value of dependant
+         *     attributes (and handle other actions for the modified
+         *     attribute)
+         */
+        virtual void updateDerivedAttributes(unsigned int);
 
         /**
          * Sets a statuseffect on this being

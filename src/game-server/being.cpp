@@ -33,6 +33,7 @@
 #include "game-server/statuseffect.hpp"
 #include "game-server/statusmanager.hpp"
 #include "utils/logger.h"
+#include "utils/speedconv.hpp"
 
 Being::Being(ThingType type):
     Actor(type),
@@ -360,7 +361,7 @@ bool Being::removeModifier(unsigned int attr, double value, unsigned int layer,
     return ret;
 }
 
-void Being::setAttribute(unsigned int id, double value, bool calc)
+void Being::setAttribute(unsigned int id, double value)
 {
     AttributeMap::iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -373,10 +374,10 @@ void Being::setAttribute(unsigned int id, double value, bool calc)
         LOG_WARN("Being: Creation of new attributes dynamically is not "
                  "implemented yet!");
     }
-    else {
+    else
+    {
         ret->second.setBase(value);
-        if (calc)
-            updateDerivedAttributes(id);
+        updateDerivedAttributes(id);
     }
 }
 
@@ -400,6 +401,67 @@ void Being::setModAttribute(unsigned int id, double value)
     // No-op to satisfy shared structure.
     // The game-server calculates this manually.
     return;
+}
+
+bool Being::recalculateBaseAttribute(unsigned int attr)
+{
+    LOG_DEBUG("Received update attribute recalculation request at Being for "
+              << attr << ".");
+    if (!mAttributes.count(attr)) return false;
+    double newBase = getAttribute(attr);
+
+    switch (attr)
+    {
+    case ATTR_HP_REGEN:
+        {
+            double hpPerSec = getModifiedAttribute(ATTR_VIT) * 0.05;
+            newBase = (hpPerSec * TICKS_PER_HP_REGENERATION / 10);
+        }
+        break;
+    case ATTR_HP:
+        double diff;
+        if ((diff = getModifiedAttribute(ATTR_HP)
+            - getModifiedAttribute(ATTR_MAX_HP)) > 0)
+            newBase -= diff;
+        break;
+    case ATTR_MAX_HP:
+        newBase = ((getModifiedAttribute(ATTR_VIT) + 3)
+                   * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
+        break;
+    case ATTR_MOVE_SPEED_TPS:
+        newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
+        break;
+    case ATTR_MOVE_SPEED_RAW:
+        newBase = utils::tpsToSpeed(getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
+        break;
+    case ATTR_INV_CAPACITY:
+        // Provisional
+        newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0;
+        break;
+    }
+    if (newBase != getAttribute(attr))
+    {
+        setAttribute(attr, newBase);
+        updateDerivedAttributes(attr);
+        return true;
+    }
+    LOG_DEBUG("No changes to sync for attribute '" << attr << "'.");
+    return false;
+}
+
+void Being::updateDerivedAttributes(unsigned int attr)
+{
+    switch(attr)
+    {
+    case ATTR_MAX_HP:
+        updateDerivedAttributes(ATTR_HP);
+    case ATTR_HP:
+        raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
+        break;
+    case ATTR_MOVE_SPEED_TPS:
+        updateDerivedAttributes(ATTR_MOVE_SPEED_RAW);
+        break;
+    }
 }
 
 void Being::applyStatusEffect(int id, int timer)
