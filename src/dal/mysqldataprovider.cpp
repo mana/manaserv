@@ -59,9 +59,8 @@ MySqlDataProvider::~MySqlDataProvider()
     // make sure that the database is closed.
     // disconnect() calls mysql_close() which takes care of freeing
     // the memory allocated for the handle.
-    if (mIsConnected) {
+    if (mIsConnected)
         disconnect();
-    }
 }
 
 
@@ -80,9 +79,8 @@ DbBackends MySqlDataProvider::getDbBackend() const
  */
 void MySqlDataProvider::connect()
 {
-    if (mIsConnected) {
+    if (mIsConnected)
         return;
-    }
 
     // retrieve configuration from config file
     const std::string hostname
@@ -100,7 +98,8 @@ void MySqlDataProvider::connect()
     // for mysql_real_connect().
     mDb = mysql_init(NULL);
 
-    if (!mDb) {
+    if (!mDb)
+    {
         throw DbConnectionFailure(
             "unable to initialize the MySQL library: no memory");
     }
@@ -142,48 +141,47 @@ const RecordSet&
 MySqlDataProvider::execSql(const std::string& sql,
                            const bool refresh)
 {
-    if (!mIsConnected) {
+    if (!mIsConnected)
         throw std::runtime_error("not connected to database");
-    }
 
-    LOG_DEBUG("MySqlDataProvider::execSql Performing SQL query: "<<sql);
+    LOG_DEBUG("MySqlDataProvider::execSql Performing SQL query: " << sql);
 
     // do something only if the query is different from the previous
     // or if the cache must be refreshed
     // otherwise just return the recordset from cache.
-    if (refresh || (sql != mSql)) {
+    if (refresh || (sql != mSql))
+    {
         mRecordSet.clear();
 
         // actually execute the query.
-        if (mysql_query(mDb, sql.c_str()) != 0) {
+        if (mysql_query(mDb, sql.c_str()) != 0)
             throw DbSqlQueryExecFailure(mysql_error(mDb));
-        }
 
-        if (mysql_field_count(mDb) > 0) {
+        if (mysql_field_count(mDb) > 0)
+        {
             MYSQL_RES* res;
 
             // get the result of the query.
-            if (!(res = mysql_store_result(mDb))) {
+            if (!(res = mysql_store_result(mDb)))
                 throw DbSqlQueryExecFailure(mysql_error(mDb));
-            }
 
             // set the field names.
             unsigned int nFields = mysql_num_fields(res);
             MYSQL_FIELD* fields = mysql_fetch_fields(res);
             Row fieldNames;
-            for (unsigned int i = 0; i < nFields; ++i) {
+            for (unsigned int i = 0; i < nFields; ++i)
                 fieldNames.push_back(fields[i].name);
-            }
+
             mRecordSet.setColumnHeaders(fieldNames);
 
             // populate the RecordSet.
             MYSQL_ROW row;
-            while ((row = mysql_fetch_row(res))) {
+            while ((row = mysql_fetch_row(res)))
+            {
                 Row r;
 
-                for (unsigned int i = 0; i < nFields; ++i) {
+                for (unsigned int i = 0; i < nFields; ++i)
                     r.push_back(static_cast<char *>(row[i]));
-                }
 
                 mRecordSet.add(r);
             }
@@ -202,9 +200,8 @@ MySqlDataProvider::execSql(const std::string& sql,
  */
 void MySqlDataProvider::disconnect()
 {
-    if (!mIsConnected) {
+    if (!mIsConnected)
         return;
-    }
 
     // mysql_close() closes the connection and deallocates the connection
     // handle allocated by mysql_init().
@@ -332,7 +329,8 @@ unsigned MySqlDataProvider::getModifiedRows() const
     const my_ulonglong affected = mysql_affected_rows(mDb);
 
     if (affected > INT_MAX)
-        throw std::runtime_error("MySqlDataProvider::getLastId exceeded INT_MAX");
+        throw std::runtime_error(
+                  "MySqlDataProvider::getLastId exceeded INT_MAX");
 
     if (affected == (my_ulonglong)-1)
     {
@@ -397,17 +395,20 @@ const RecordSet &MySqlDataProvider::processSql()
 
     if (mysql_stmt_bind_param(mStmt, paramsBind))
     {
-        LOG_ERROR("MySqlDataProvider::processSql Bind params failed: " << mysql_stmt_error(mStmt));
+        LOG_ERROR("MySqlDataProvider::processSql Bind params failed: "
+                  << mysql_stmt_error(mStmt));
     }
 
-    if (mysql_stmt_field_count(mStmt) > 0) {
+    if (mysql_stmt_field_count(mStmt) > 0)
+    {
         mRecordSet.clear();
         MYSQL_BIND* resultBind;
         MYSQL_RES* res;
 
         if (mysql_stmt_execute(mStmt))
         {
-            LOG_ERROR("MySqlDataProvider::processSql Execute failed: " << mysql_stmt_error(mStmt));
+            LOG_ERROR("MySqlDataProvider::processSql Execute failed: "
+                      << mysql_stmt_error(mStmt));
         }
 
         res = mysql_stmt_result_metadata(mStmt);
@@ -419,7 +420,8 @@ const RecordSet &MySqlDataProvider::processSql()
 
         resultBind = new MYSQL_BIND[mysql_num_fields(res)];
 
-        for (i = 0; i < mysql_num_fields(res); ++i) {
+        for (i = 0; i < mysql_num_fields(res); ++i)
+        {
             resultBind[i].buffer_type = MYSQL_TYPE_STRING;
             resultBind[i].buffer = (void*) new char[255];
             resultBind[i].buffer_length = 255;
@@ -430,26 +432,26 @@ const RecordSet &MySqlDataProvider::processSql()
 
         if (mysql_stmt_bind_result(mStmt, resultBind))
         {
-            LOG_ERROR("MySqlDataProvider::processSql Bind result failed: " << mysql_stmt_error(mStmt));
+            LOG_ERROR("MySqlDataProvider::processSql Bind result failed: "
+                      << mysql_stmt_error(mStmt));
         }
 
-        for (i = 0; i < nFields; ++i) {
+        for (i = 0; i < nFields; ++i)
             fieldNames.push_back(fields[i].name);
-        }
+
         mRecordSet.setColumnHeaders(fieldNames);
 
         // store the result of the query.
-        if (mysql_stmt_store_result(mStmt)) {
+        if (mysql_stmt_store_result(mStmt))
             throw DbSqlQueryExecFailure(mysql_stmt_error(mStmt));
-        }
 
         // populate the RecordSet.
-        while (!mysql_stmt_fetch(mStmt)) {
+        while (!mysql_stmt_fetch(mStmt))
+        {
             Row r;
 
-            for (unsigned int i = 0; i < nFields; ++i) {
+            for (unsigned int i = 0; i < nFields; ++i)
                 r.push_back(static_cast<char *>(resultBind[i].buffer));
-            }
 
             mRecordSet.add(r);
         }

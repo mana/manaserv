@@ -41,9 +41,8 @@ PqDataProvider::PqDataProvider()
 PqDataProvider::~PqDataProvider()
     throw()
 {
-    if (mIsConnected) {
+    if (mIsConnected)
         disconnect();
-    }
 }
 
 
@@ -94,18 +93,19 @@ void PqDataProvider::connect(const std::string& dbName,
 const RecordSet &PqDataProvider::execSql(const std::string& sql,
                                          const bool refresh)
 {
-    if (!mIsConnected) {
+    if (!mIsConnected)
         throw std::runtime_error("not connected to database");
-    }
 
-    if (refresh || (sql != mSql)) {
+    if (refresh || (sql != mSql))
+    {
         mRecordSet.clear();
 
         // execute the query
         PGresult *res;
 
         res = PQexec(mDb, sql.c_str());
-        if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+        if (PQresultStatus(res) != PGRES_COMMAND_OK)
+        {
             PQclear(res);
             throw DbSqlQueryExecFailure(PQerrorMessage(mDb));
         }
@@ -115,18 +115,19 @@ const RecordSet &PqDataProvider::execSql(const std::string& sql,
 
         // fill column names
         Row fieldNames;
-        for (unsigned int i = 0; i < nFields; i++) {
+        for (unsigned int i = 0; i < nFields; i++)
+        {
             fieldNames.push_back(PQfname(res, i));
         }
         mRecordSet.setColumnHeaders(fieldNames);
 
         // fill rows
-        for (unsigned int r = 0; r < PQntuples(res); r++) {
+        for (unsigned int r = 0; r < PQntuples(res); r++)
+        {
             Row row;
 
-            for (unsigned int i = 0; i < nFields; i++) {
+            for (unsigned int i = 0; i < nFields; i++)
                 row.push_back(PQgetvalue(res, r, i));
-            }
 
             mRecordSet.add(row);
         }
@@ -143,9 +144,8 @@ const RecordSet &PqDataProvider::execSql(const std::string& sql,
  */
 void PqDataProvider::disconnect()
 {
-    if (!mIsConnected) {
+    if (!mIsConnected)
         return;
-    }
 
     // finish up with Postgre.
     PQfinish(mDb);

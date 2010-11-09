@@ -50,15 +50,16 @@ SqLiteDataProvider::SqLiteDataProvider()
 SqLiteDataProvider::~SqLiteDataProvider()
     throw()
 {
-    try {
+    try
+    {
         // make sure that the database is closed.
         // disconnect() calls sqlite3_close() which takes care of freeing
         // the memory allocated for the handle.
-        if (mIsConnected) {
+        if (mIsConnected)
             disconnect();
-        }
     }
-    catch (...) {
+    catch (...)
+    {
         // ignore
     }
 }
@@ -89,7 +90,8 @@ SqLiteDataProvider::connect()
 
     // sqlite3_open creates the database file if it does not exist
     // as a side-effect.
-    if (sqlite3_open(dbName.c_str(), &mDb) != SQLITE_OK) {
+    if (sqlite3_open(dbName.c_str(), &mDb) != SQLITE_OK)
+    {
         // save the error message thrown by sqlite3_open()
         // as we may lose it when sqlite3_close() runs.
         std::string msg(sqlite3_errmsg(mDb));
@@ -120,16 +122,16 @@ const RecordSet&
 SqLiteDataProvider::execSql(const std::string& sql,
                             const bool refresh)
 {
-    if (!mIsConnected) {
+    if (!mIsConnected)
         throw std::runtime_error("not connected to database");
-    }
 
-    LOG_DEBUG("Performing SQL query: "<<sql);
+    LOG_DEBUG("Performing SQL query: " << sql);
 
     // do something only if the query is different from the previous
     // or if the cache must be refreshed
     // otherwise just return the recordset from cache.
-    if (refresh || (sql != mSql)) {
+    if (refresh || (sql != mSql))
+    {
         char** result;
         int nRows;
         int nCols;
@@ -146,7 +148,8 @@ SqLiteDataProvider::execSql(const std::string& sql,
                           &errMsg       // error msg
                       );
 
-        if (errCode != SQLITE_OK) {
+        if (errCode != SQLITE_OK)
+        {
             std::string msg(sqlite3_errmsg(mDb));
 
             LOG_ERROR("Error in SQL: " << sql << "\n" << msg);
@@ -160,19 +163,18 @@ SqLiteDataProvider::execSql(const std::string& sql,
 
         // the first row of result[] contains the field names.
         Row fieldNames;
-        for (int col = 0; col < nCols; ++col) {
+        for (int col = 0; col < nCols; ++col)
             fieldNames.push_back(result[col]);
-        }
+
         mRecordSet.setColumnHeaders(fieldNames);
 
         // populate the RecordSet
-        for (int row = 0; row < nRows; ++row) {
+        for (int row = 0; row < nRows; ++row)
+        {
             Row r;
 
-            for (int col = 0; col < nCols; ++col) {
+            for (int col = 0; col < nCols; ++col)
                 r.push_back(result[nCols + (row * nCols) + col]);
-
-            }
 
             mRecordSet.add(r);
         }
@@ -196,9 +198,8 @@ void SqLiteDataProvider::disconnect()
 
     // sqlite3_close() closes the connection and deallocates the connection
     // handle.
-    if (sqlite3_close(mDb) != SQLITE_OK) {
+    if (sqlite3_close(mDb) != SQLITE_OK)
         throw DbDisconnectionFailure(sqlite3_errmsg(mDb));
-    }
 
     mDb = 0;
     mIsConnected = false;
@@ -362,19 +363,17 @@ bool SqLiteDataProvider::prepareSql(const std::string &sql)
 
     mRecordSet.clear();
 
-    if (sqlite3_prepare_v2(mDb, sql.c_str(), sql.size(), &mStmt, NULL) != SQLITE_OK)
-    {
+    if (sqlite3_prepare_v2(mDb, sql.c_str(), sql.size(),
+            &mStmt, NULL) != SQLITE_OK)
         return false;
-    }
 
     return true;
 }
 
 const RecordSet &SqLiteDataProvider::processSql()
 {
-    if (!mIsConnected) {
+    if (!mIsConnected)
         throw std::runtime_error("not connected to database");
-    }
 
     int totalCols = sqlite3_column_count(mStmt);
     Row fieldNames;

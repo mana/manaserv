@@ -72,7 +72,7 @@ static const char *CHAR_ATTR_TBL_NAME           =   "mana_char_attr";
 static const char *CHAR_SKILLS_TBL_NAME         =   "mana_char_skills";
 static const char *CHAR_STATUS_EFFECTS_TBL_NAME =   "mana_char_status_effects";
 static const char *CHAR_KILL_COUNT_TBL_NAME     =   "mana_char_kill_stats";
-static const char *CHAR_SPECIALS_TBL_NAME       =  "mana_char_specials";
+static const char *CHAR_SPECIALS_TBL_NAME       =   "mana_char_specials";
 static const char *CHAR_EQUIPS_TBL_NAME         =   "mana_char_equips";
 static const char *INVENTORIES_TBL_NAME         =   "mana_inventories";
 static const char *ITEMS_TBL_NAME               =   "mana_items";
@@ -118,7 +118,8 @@ void Storage::open()
 
     using namespace dal;
 
-    try {
+    try
+    {
         // open a connection to the database.
         mDb->connect();
 
@@ -127,9 +128,9 @@ void Storage::open()
         if (dbversion != SUPPORTED_DB_VERSION)
         {
             std::ostringstream errmsg;
-            errmsg << "Database version is not supported. " <<
-                "Needed version: '" << SUPPORTED_DB_VERSION <<
-                "', current version: '" << dbversion << "'";
+            errmsg << "Database version is not supported. "
+                   << "Needed version: '" << SUPPORTED_DB_VERSION
+                   << "', current version: '" << dbversion << "'";
             throw errmsg.str();
         }
 
@@ -141,10 +142,11 @@ void Storage::open()
         sql << "DELETE FROM " << ONLINE_USERS_TBL_NAME;
         mDb->execSql(sql.str());
     }
-    catch (const DbConnectionFailure& e) {
+    catch (const DbConnectionFailure& e)
+    {
         std::ostringstream errmsg;
         errmsg << "(DALStorage::open #1) Unable to connect to the database: "
-            << e.what();
+               << e.what();
         throw errmsg.str();
     }
 }
@@ -164,7 +166,8 @@ void Storage::close()
  */
 Account *Storage::getAccountBySQL()
 {
-    try {
+    try
+    {
         const dal::RecordSet &accountInfo = mDb->processSql();
 
         // if the account is not even in the database then
@@ -191,7 +194,7 @@ Account *Storage::getAccountBySQL()
         int level = toUint(accountInfo(0, 4));
         // Check if the user is permanently banned, or temporarily banned.
         if (level == AL_BANNED
-                || time(0) <= (int) toUint(accountInfo(0, 5)))
+            || time(0) <= (int) toUint(accountInfo(0, 5)))
         {
             account->setLevel(AL_BANNED);
             // It is, so skip character loading.
@@ -293,7 +296,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
     // a string to an unsigned int.
     string_to< unsigned > toUint;
 
-    try {
+    try
+    {
         const dal::RecordSet &charInfo = mDb->processSql();
 
         // if the character is not even in the database then
@@ -528,7 +532,8 @@ Character *Storage::getCharacter(const std::string &name)
  */
 bool Storage::doesUserNameExist(const std::string &name)
 {
-    try {
+    try
+    {
         std::ostringstream sql;
         sql << "SELECT COUNT(username) FROM " << ACCOUNTS_TBL_NAME
             << " WHERE username = ?";
@@ -543,7 +548,9 @@ bool Storage::doesUserNameExist(const std::string &name)
         unsigned int iReturn = 1;
         ssStream >> iReturn;
         return iReturn != 0;
-    } catch (const std::exception &e) {
+    }
+    catch (const std::exception &e)
+    {
         // TODO: throw an exception.
         LOG_ERROR("(DALStorage::doesUserNameExist) SQL query failure: " << e.what());
     }
@@ -557,7 +564,8 @@ bool Storage::doesUserNameExist(const std::string &name)
  */
 bool Storage::doesEmailAddressExist(const std::string &email)
 {
-    try {
+    try
+    {
         std::ostringstream sql;
         sql << "SELECT COUNT(email) FROM " << ACCOUNTS_TBL_NAME
             << " WHERE UPPER(email) = UPPER(?)";
@@ -571,7 +579,9 @@ bool Storage::doesEmailAddressExist(const std::string &email)
         unsigned int iReturn = 1;
         ssStream >> iReturn;
         return iReturn != 0;
-    } catch (const std::exception &e) {
+    }
+    catch (const std::exception &e)
+    {
         // TODO: throw an exception.
         LOG_ERROR("(DALStorage::doesEmailAddressExist) SQL query failure: " << e.what());
     }
@@ -585,7 +595,8 @@ bool Storage::doesEmailAddressExist(const std::string &email)
  */
 bool Storage::doesCharacterNameExist(const std::string& name)
 {
-    try {
+    try
+    {
         std::ostringstream sql;
         sql << "SELECT COUNT(name) FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
         if (mDb->prepareSql(sql.str()))
@@ -598,7 +609,9 @@ bool Storage::doesCharacterNameExist(const std::string& name)
         int iReturn = 1;
         ssStream >> iReturn;
         return iReturn != 0;
-    } catch (const std::exception &e) {
+    }
+    catch (const std::exception &e)
+    {
         // TODO: throw an exception.
         LOG_ERROR("(DALStorage::doesCharacterNameExist) SQL query failure: "
                 << e.what());
@@ -1131,9 +1144,7 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
 
         // check if the update has modified a row
         if (mDb->getModifiedRows() > 0)
-        {
             return;
-        }
 
         sql.clear();
         sql.str("");
@@ -1162,7 +1173,8 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
 void Storage::updateAttribute(int charId, unsigned int attrId,
                               double base, double mod)
 {
-    try {
+    try
+    {
         std::ostringstream sql;
         sql << "UPDATE "       << CHAR_ATTR_TBL_NAME         << " "
             << "SET "
@@ -1320,7 +1332,8 @@ void Storage::addGuildMember(int guildId, int memberId)
         << 0 << ");";
         mDb->execSql(sql.str());
     }
-    catch (const dal::DbSqlQueryExecFailure& e) {
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what());
     }
@@ -1435,7 +1448,8 @@ std::list<Guild*> Storage::getGuildList()
             }
         }
     }
-    catch (const dal::DbSqlQueryExecFailure& e) {
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
         // TODO: throw an exception.
         LOG_ERROR("SQL query failure: " << e.what());
     }
@@ -1552,17 +1566,14 @@ void Storage::setWorldStateVar(const std::string &name,
                        << " WHERE state_name = '" << name << "'";
 
         if (mapId >= 0)
-        {
             updateStateVar << "   AND map_id = '" << mapId << "'";
-        }
+
         updateStateVar << ";";
         mDb->execSql(updateStateVar.str());
 
         // if we updated a row, were finished here
         if (mDb->getModifiedRows() >= 1)
-        {
             return;
-        }
 
         // otherwise we have to add the new variable
         std::ostringstream insertStateVar;
@@ -1570,13 +1581,10 @@ void Storage::setWorldStateVar(const std::string &name,
                        << " (state_name, map_id, value , moddate) VALUES ("
                        << "'" << name << "', ";
         if (mapId >= 0)
-        {
             insertStateVar << "'" << mapId << "', ";
-        }
         else
-        {
             insertStateVar << "0 , ";
-        }
+
         insertStateVar << "'" << value << "', "
                        << "'" << time(0) << "');";
         mDb->execSql(insertStateVar.str());
