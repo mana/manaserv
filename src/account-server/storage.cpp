@@ -1037,14 +1037,24 @@ void Storage::flush(Account *account)
  */
 void Storage::delAccount(Account *account)
 {
-    account->setCharacters(Characters());
+    // Sync the account info into the database.
     flush(account);
 
-    // delete the account.
-    std::ostringstream sql;
-    sql << "delete from " << ACCOUNTS_TBL_NAME
-        << " where id = '" << account->getID() << "';";
-    mDb->execSql(sql.str());
+    try
+    {
+        // Delete the account.
+        std::ostringstream sql;
+        sql << "delete from " << ACCOUNTS_TBL_NAME
+            << " where id = '" << account->getID() << "';";
+        mDb->execSql(sql.str());
+
+        // Remove the account's characters.
+        account->setCharacters(Characters());
+    }
+    catch (const std::exception &e)
+    {
+        LOG_ERROR("ERROR in DALStorage::delAccount: " << e.what());
+    }
 }
 
 /**

@@ -535,8 +535,6 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
                                              MessageIn &msg)
 {
     LOG_DEBUG("AccountHandler::handleUnregisterMessage");
-    std::string username = msg.readString();
-    std::string password = msg.readString();
 
     MessageOut reply(APMSG_UNREGISTER_RESPONSE);
 
@@ -546,6 +544,9 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
         client.send(reply);
         return;
     }
+
+    std::string username = msg.readString();
+    std::string password = msg.readString();
 
     if (stringFilter->findDoubleQuotes(username))
     {
@@ -557,7 +558,7 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
     // See whether the account exists
     Account *acc = storage->getAccount(username);
 
-    if (!acc || acc->getPassword() != password)
+    if (!acc || acc->getPassword() != sha256(password))
     {
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
