@@ -52,6 +52,12 @@ long Logger::mMaxFileSize = 1024; // 1 Mb
 bool Logger::mSwitchLogEachDay = false;
 /** Last call date */
 static std::string mLastCallDate = "";
+/**
+ * Old date
+ * For code simplificatiion, the old Date is kept separate
+ * from the last call date.
+ */
+static std::string mOldDate = "";
 
 /**
   * Gets the current time.
@@ -114,11 +120,14 @@ static std::string getCurrentDate()
   */
 bool getDayChanged()
 {
-    static std::string date = getCurrentDate();
-    if (mLastCallDate != date)
+    std::string dayDate = getCurrentDate();
+
+    if (mLastCallDate != dayDate)
     {
+        // Keep track of the old date.
+        mOldDate = mLastCallDate;
         // Reset the current date for next call.
-        mLastCallDate = date;
+        mLastCallDate = dayDate;
         return true;
     }
     return false;
@@ -153,7 +162,7 @@ void Logger::setLogFile(const std::string &logFile, bool append)
                   append ? std::ios::app : std::ios::trunc);
 
     mFilename = logFile;
-    mLastCallDate = getCurrentDate();
+    mLastCallDate = mOldDate = getCurrentDate();
 
     if (!mLogFile.is_open())
     {
@@ -212,8 +221,10 @@ void Logger::switchLogs()
     // Update current filesize
     long fileSize = mLogFile.tellp();
 
+    bool dayJustChanged = getDayChanged();
+
     if ((fileSize >= (mMaxFileSize * 1024))
-        || (mSwitchLogEachDay && getDayChanged()))
+        || (mSwitchLogEachDay && dayJustChanged))
     {
         // Close logfile, rename it and open a new one
         mLogFile.flush();
@@ -222,7 +233,7 @@ void Logger::switchLogs()
         // Stringify the time, the format is: path/yyyy-mm-dd-n_logFilename.
         using namespace std;
         ostringstream os;
-        os << getCurrentDate();
+        os << (dayJustChanged ? mOldDate : getCurrentDate());
 
         int fileNum = 1;
         ResourceManager::splittedPath filePath =
