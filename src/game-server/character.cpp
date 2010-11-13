@@ -354,7 +354,10 @@ void Character::modifiedAllAttribute()
     for (AttributeMap::iterator it = mAttributes.begin(),
          it_end = mAttributes.end();
         it != it_end; ++it)
+    {
+        recalculateBaseAttribute(it->first);
         updateDerivedAttributes(it->first);
+    }
 }
 
 bool Character::recalculateBaseAttribute(unsigned int attr)
