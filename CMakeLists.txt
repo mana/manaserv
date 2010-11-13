@@ -21,6 +21,7 @@ IF(WITH_MYSQL)
 ENDIF()
 
 IF(WITH_POSTGRESQL)
+    MESSAGE(STATUS "Warning: PostgreSQL support will likely not work...")
     SET(WITH_SQLITE OFF)
     SET(WITH_MYSQL OFF)
 ENDIF()
