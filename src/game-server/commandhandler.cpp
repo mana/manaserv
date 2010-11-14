@@ -20,23 +20,23 @@
 
 #include <sstream>
 
-#include "game-server/commandhandler.hpp"
-#include "game-server/accountconnection.hpp"
-#include "game-server/character.hpp"
-#include "game-server/gamehandler.hpp"
-#include "game-server/inventory.hpp"
-#include "game-server/item.hpp"
-#include "game-server/itemmanager.hpp"
-#include "game-server/mapmanager.hpp"
-#include "game-server/monster.hpp"
-#include "game-server/monstermanager.hpp"
-#include "game-server/state.hpp"
+#include "game-server/commandhandler.h"
+#include "game-server/accountconnection.h"
+#include "game-server/character.h"
+#include "game-server/gamehandler.h"
+#include "game-server/inventory.h"
+#include "game-server/item.h"
+#include "game-server/itemmanager.h"
+#include "game-server/mapmanager.h"
+#include "game-server/monster.h"
+#include "game-server/monstermanager.h"
+#include "game-server/state.h"
 
-#include "common/configuration.hpp"
-#include "common/permissionmanager.hpp"
-#include "common/transaction.hpp"
+#include "common/configuration.h"
+#include "common/permissionmanager.h"
+#include "common/transaction.h"
 
-#include "utils/string.hpp"
+#include "utils/string.h"
 
 struct CmdRef
 {

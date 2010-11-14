@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "guild.hpp"
+#include "guild.h"
 #include "defines.h"
 
 #include <algorithm>

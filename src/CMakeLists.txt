@@ -103,73 +103,73 @@ SET(SRCS
     defines.h
     protocol.h
     point.h
-    common/configuration.hpp
+    common/configuration.h
     common/configuration.cpp
-    common/inventorydata.hpp
-    common/resourcemanager.hpp
+    common/inventorydata.h
+    common/resourcemanager.h
     common/resourcemanager.cpp
-    net/bandwidth.hpp
+    net/bandwidth.h
     net/bandwidth.cpp
-    net/connection.hpp
+    net/connection.h
     net/connection.cpp
-    net/connectionhandler.hpp
+    net/connectionhandler.h
     net/connectionhandler.cpp
-    net/messagein.hpp
+    net/messagein.h
     net/messagein.cpp
-    net/messageout.hpp
+    net/messageout.h
     net/messageout.cpp
-    net/netcomputer.hpp
+    net/netcomputer.h
     net/netcomputer.cpp
-    serialize/characterdata.hpp
+    serialize/characterdata.h
     utils/logger.h
     utils/logger.cpp
-    utils/processorutils.hpp
+    utils/processorutils.h
     utils/processorutils.cpp
-    utils/string.hpp
+    utils/string.h
     utils/string.cpp
     utils/stringfilter.h
     utils/stringfilter.cpp
     utils/timer.h
     utils/timer.cpp
-    utils/tokencollector.hpp
+    utils/tokencollector.h
     utils/tokencollector.cpp
-    utils/tokendispenser.hpp
+    utils/tokendispenser.h
     utils/tokendispenser.cpp
-    utils/xml.hpp
+    utils/xml.h
     utils/xml.cpp
     )
 
 SET(SRCS_MANASERVACCOUNT
     account-server/main-account.cpp
-    account-server/account.hpp
+    account-server/account.h
     account-server/account.cpp
-    account-server/accountclient.hpp
+    account-server/accountclient.h
     account-server/accountclient.cpp
-    account-server/accounthandler.hpp
+    account-server/accounthandler.h
     account-server/accounthandler.cpp
-    account-server/character.hpp
+    account-server/character.h
     account-server/character.cpp
-    account-server/serverhandler.hpp
+    account-server/serverhandler.h
     account-server/serverhandler.cpp
-    account-server/storage.hpp
+    account-server/storage.h
     account-server/storage.cpp
-    chat-server/chathandler.hpp
+    chat-server/chathandler.h
     chat-server/chathandler.cpp
-    chat-server/chatclient.hpp
-    chat-server/chatchannel.hpp
+    chat-server/chatclient.h
+    chat-server/chatchannel.h
     chat-server/chatchannel.cpp
-    chat-server/chatchannelmanager.hpp
+    chat-server/chatchannelmanager.h
     chat-server/chatchannelmanager.cpp
-    chat-server/guild.hpp
+    chat-server/guild.h
     chat-server/guild.cpp
     chat-server/guildhandler.cpp
-    chat-server/guildmanager.hpp
+    chat-server/guildmanager.h
     chat-server/guildmanager.cpp
     chat-server/party.cpp
-    chat-server/party.hpp
+    chat-server/party.h
     chat-server/partyhandler.cpp
     chat-server/post.cpp
-    chat-server/post.hpp
+    chat-server/post.h
     dal/dalexcept.h
     dal/dataprovider.h
     dal/dataprovider.cpp
@@ -186,82 +186,82 @@ SET(SRCS_MANASERVACCOUNT
 
 SET(SRCS_MANASERVGAME
     game-server/main-game.cpp
-    common/permissionmanager.hpp
+    common/permissionmanager.h
     common/permissionmanager.cpp
-    game-server/accountconnection.hpp
+    game-server/accountconnection.h
     game-server/accountconnection.cpp
-    game-server/actor.hpp
+    game-server/actor.h
     game-server/actor.cpp
-    game-server/attribute.hpp
+    game-server/attribute.h
     game-server/attribute.cpp
-    game-server/attributemanager.hpp
+    game-server/attributemanager.h
     game-server/attributemanager.cpp
-    game-server/autoattack.hpp
+    game-server/autoattack.h
     game-server/autoattack.cpp
-    game-server/being.hpp
+    game-server/being.h
     game-server/being.cpp
-    game-server/buysell.hpp
+    game-server/buysell.h
     game-server/buysell.cpp
-    game-server/character.hpp
+    game-server/character.h
     game-server/character.cpp
-    game-server/collisiondetection.hpp
+    game-server/collisiondetection.h
     game-server/collisiondetection.cpp
     game-server/command.cpp
     game-server/commandhandler.cpp
-    game-server/commandhandler.hpp
-    game-server/effect.hpp
+    game-server/commandhandler.h
+    game-server/effect.h
     game-server/effect.cpp
-    game-server/eventlistener.hpp
-    game-server/gamehandler.hpp
+    game-server/eventlistener.h
+    game-server/gamehandler.h
     game-server/gamehandler.cpp
-    game-server/inventory.hpp
+    game-server/inventory.h
     game-server/inventory.cpp
-    game-server/item.hpp
+    game-server/item.h
     game-server/item.cpp
-    game-server/itemmanager.hpp
+    game-server/itemmanager.h
     game-server/itemmanager.cpp
-    game-server/map.hpp
+    game-server/map.h
     game-server/map.cpp
-    game-server/mapcomposite.hpp
+    game-server/mapcomposite.h
     game-server/mapcomposite.cpp
-    game-server/mapmanager.hpp
+    game-server/mapmanager.h
     game-server/mapmanager.cpp
-    game-server/mapreader.hpp
+    game-server/mapreader.h
     game-server/mapreader.cpp
-    game-server/monster.hpp
+    game-server/monster.h
     game-server/monster.cpp
-    game-server/monstermanager.hpp
+    game-server/monstermanager.h
     game-server/monstermanager.cpp
-    game-server/npc.hpp
+    game-server/npc.h
     game-server/npc.cpp
-    game-server/postman.hpp
-    game-server/quest.hpp
+    game-server/postman.h
+    game-server/quest.h
     game-server/quest.cpp
-    game-server/skillmanager.hpp
+    game-server/skillmanager.h
     game-server/skillmanager.cpp
-    game-server/spawnarea.hpp
+    game-server/spawnarea.h
     game-server/spawnarea.cpp
-    game-server/state.hpp
+    game-server/state.h
     game-server/state.cpp
-    game-server/statuseffect.hpp
+    game-server/statuseffect.h
     game-server/statuseffect.cpp
-    game-server/statusmanager.hpp
+    game-server/statusmanager.h
     game-server/statusmanager.cpp
-    game-server/thing.hpp
+    game-server/thing.h
     game-server/thing.cpp
-    game-server/trade.hpp
+    game-server/trade.h
     game-server/trade.cpp
-    game-server/trigger.hpp
+    game-server/trigger.h
     game-server/trigger.cpp
-    scripting/script.hpp
+    scripting/script.h
     scripting/script.cpp
     utils/base64.h
     utils/base64.cpp
     utils/mathutils.h
     utils/mathutils.cpp
-    utils/speedconv.hpp
+    utils/speedconv.h
     utils/speedconv.cpp
-    utils/zlib.hpp
+    utils/zlib.h
     utils/zlib.cpp
     )
 
@@ -292,9 +292,9 @@ IF (ENABLE_LUA)
     SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME}
     scripting/lua.cpp
     scripting/luascript.cpp
-    scripting/luascript.hpp
+    scripting/luascript.h
     scripting/luautil.cpp
-    scripting/luautil.hpp)
+    scripting/luautil.h)
 ENDIF()
 
 

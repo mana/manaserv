@@ -20,14 +20,14 @@
 
 #include <list>
 
-#include "chat-server/chatchannelmanager.hpp"
+#include "chat-server/chatchannelmanager.h"
 
 #include "protocol.h"
-#include "account-server/storage.hpp"
-#include "chat-server/chatclient.hpp"
-#include "chat-server/chathandler.hpp"
-#include "chat-server/guildmanager.hpp"
-#include "common/configuration.hpp"
+#include "account-server/storage.h"
+#include "chat-server/chatclient.h"
+#include "chat-server/chathandler.h"
+#include "chat-server/guildmanager.h"
+#include "common/configuration.h"
 #include "utils/stringfilter.h"
 
 ChatChannelManager::ChatChannelManager() : mNextChannelId(1)

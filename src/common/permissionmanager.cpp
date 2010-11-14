@@ -18,12 +18,12 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "common/permissionmanager.hpp"
+#include "common/permissionmanager.h"
 
-#include "common/resourcemanager.hpp"
-#include "game-server/character.hpp"
+#include "common/resourcemanager.h"
+#include "game-server/character.h"
 #include "utils/logger.h"
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 
 #include <string.h>
 #include <cstring>

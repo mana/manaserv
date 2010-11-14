@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "account-server/accountclient.hpp"
+#include "account-server/accountclient.h"
 
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),

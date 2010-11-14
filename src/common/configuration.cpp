@@ -23,11 +23,11 @@
 #include <map>
 #include <libxml/xmlreader.h>
 
-#include "common/configuration.hpp"
+#include "common/configuration.h"
 
 #include "utils/logger.h"
-#include "utils/xml.hpp"
-#include "utils/string.hpp"
+#include "utils/xml.h"
+#include "utils/string.h"
 
 /**< Persistent configuration. */
 static std::map< std::string, std::string > options;

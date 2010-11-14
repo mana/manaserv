@@ -22,12 +22,12 @@
 #include <queue>
 #include <enet/enet.h>
 
-#include "bandwidth.hpp"
-#include "messageout.hpp"
-#include "netcomputer.hpp"
+#include "bandwidth.h"
+#include "messageout.h"
+#include "netcomputer.h"
 
 #include "../utils/logger.h"
-#include "../utils/processorutils.hpp"
+#include "../utils/processorutils.h"
 
 NetComputer::NetComputer(ENetPeer *peer):
     mPeer(peer)

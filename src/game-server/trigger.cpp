@@ -18,12 +18,12 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/trigger.hpp"
+#include "game-server/trigger.h"
 
-#include "game-server/character.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/actor.hpp"
-#include "game-server/state.hpp"
+#include "game-server/character.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/actor.h"
+#include "game-server/state.h"
 
 #include "utils/logger.h"
 

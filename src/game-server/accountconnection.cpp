@@ -18,23 +18,23 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/accountconnection.hpp"
+#include "game-server/accountconnection.h"
 
-#include "common/configuration.hpp"
-#include "game-server/character.hpp"
-#include "game-server/gamehandler.hpp"
-#include "game-server/map.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/mapmanager.hpp"
-#include "game-server/itemmanager.hpp"
-#include "game-server/postman.hpp"
-#include "game-server/quest.hpp"
-#include "game-server/state.hpp"
-#include "net/messagein.hpp"
-#include "serialize/characterdata.hpp"
+#include "common/configuration.h"
+#include "game-server/character.h"
+#include "game-server/gamehandler.h"
+#include "game-server/map.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/mapmanager.h"
+#include "game-server/itemmanager.h"
+#include "game-server/postman.h"
+#include "game-server/quest.h"
+#include "game-server/state.h"
+#include "net/messagein.h"
+#include "serialize/characterdata.h"
 #include "utils/logger.h"
-#include "utils/tokendispenser.hpp"
-#include "utils/tokencollector.hpp"
+#include "utils/tokendispenser.h"
+#include "utils/tokencollector.h"
 
 AccountConnection::AccountConnection():
     mSyncBuffer(0)

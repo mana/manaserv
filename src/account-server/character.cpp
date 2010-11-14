@@ -18,9 +18,9 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "account-server/character.hpp"
+#include "account-server/character.h"
 
-#include "account-server/account.hpp"
+#include "account-server/account.h"
 
 Character::Character(const std::string &name, int id):
     mName(name),

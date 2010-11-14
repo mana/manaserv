@@ -19,10 +19,10 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "luautil.hpp"
+#include "luautil.h"
 
-#include "game-server/character.hpp"
-#include "game-server/npc.hpp"
+#include "game-server/character.h"
+#include "game-server/npc.h"
 
 #include "utils/logger.h"
 

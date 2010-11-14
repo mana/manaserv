@@ -22,14 +22,14 @@
 #include <string>
 #include <map>
 
-#include "game-server/item.hpp"
+#include "game-server/item.h"
 
-#include "common/configuration.hpp"
-#include "game-server/autoattack.hpp"
-#include "game-server/attributemanager.hpp"
-#include "game-server/being.hpp"
-#include "game-server/state.hpp"
-#include "scripting/script.hpp"
+#include "common/configuration.h"
+#include "game-server/autoattack.h"
+#include "game-server/attributemanager.h"
+#include "game-server/being.h"
+#include "game-server/state.h"
+#include "scripting/script.h"
 
 bool ItemEffectInfo::apply(Being *itemUser)
 {

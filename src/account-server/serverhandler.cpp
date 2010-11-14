@@ -22,21 +22,21 @@
 #include <sstream>
 #include <list>
 
-#include "account-server/serverhandler.hpp"
+#include "account-server/serverhandler.h"
 
-#include "account-server/accountclient.hpp"
-#include "account-server/accounthandler.hpp"
-#include "account-server/character.hpp"
-#include "account-server/storage.hpp"
-#include "chat-server/post.hpp"
-#include "common/transaction.hpp"
-#include "common/configuration.hpp"
-#include "net/connectionhandler.hpp"
-#include "net/messageout.hpp"
-#include "net/netcomputer.hpp"
-#include "serialize/characterdata.hpp"
+#include "account-server/accountclient.h"
+#include "account-server/accounthandler.h"
+#include "account-server/character.h"
+#include "account-server/storage.h"
+#include "chat-server/post.h"
+#include "common/transaction.h"
+#include "common/configuration.h"
+#include "net/connectionhandler.h"
+#include "net/messageout.h"
+#include "net/netcomputer.h"
+#include "serialize/characterdata.h"
 #include "utils/logger.h"
-#include "utils/tokendispenser.hpp"
+#include "utils/tokendispenser.h"
 #include "protocol.h"
 
 struct MapStatistics

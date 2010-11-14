@@ -21,8 +21,8 @@
 #include <algorithm>
 #include <sstream>
 
-#include "chat-server/chatchannel.hpp"
-#include "chat-server/chatclient.hpp"
+#include "chat-server/chatchannel.h"
+#include "chat-server/chatclient.h"
 
 ChatChannel::ChatChannel(int id,
                          const std::string &name,

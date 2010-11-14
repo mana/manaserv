@@ -18,16 +18,16 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/itemmanager.hpp"
+#include "game-server/itemmanager.h"
 
 #include "defines.h"
-#include "common/resourcemanager.hpp"
-#include "game-server/attributemanager.hpp"
-#include "game-server/item.hpp"
-#include "game-server/skillmanager.hpp"
-#include "scripting/script.hpp"
+#include "common/resourcemanager.h"
+#include "game-server/attributemanager.h"
+#include "game-server/item.h"
+#include "game-server/skillmanager.h"
+#include "scripting/script.h"
 #include "utils/logger.h"
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 
 #include <map>
 #include <set>

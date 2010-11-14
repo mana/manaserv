@@ -18,10 +18,10 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/statuseffect.hpp"
+#include "game-server/statuseffect.h"
 
-#include "scripting/script.hpp"
-#include "game-server/being.hpp"
+#include "scripting/script.h"
+#include "game-server/being.h"
 
 StatusEffect::StatusEffect(int id):
     mId(id),

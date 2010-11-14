@@ -18,15 +18,14 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "post.hpp"
+#include "post.h"
 
-#include "../account-server/character.hpp"
-#include "../common/configuration.hpp"
+#include "../account-server/character.h"
+#include "../common/configuration.h"
 
 Letter::Letter(unsigned int type, Character *sender, Character *receiver)
  : mId(0), mType(type), mSender(sender), mReceiver(receiver)
 {
-
 }
 
 Letter::~Letter()

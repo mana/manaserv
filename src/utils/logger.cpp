@@ -20,8 +20,8 @@
  */
 
 #include "logger.h"
-#include "common/resourcemanager.hpp"
-#include "utils/string.hpp"
+#include "common/resourcemanager.h"
+#include "utils/string.h"
 
 #include <ctime>
 #include <fstream>

@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "party.hpp"
+#include "party.h"
 
 #include <algorithm>
 

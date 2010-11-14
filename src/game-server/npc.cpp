@@ -18,9 +18,9 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/character.hpp"
-#include "game-server/npc.hpp"
-#include "scripting/script.hpp"
+#include "game-server/character.h"
+#include "game-server/npc.h"
+#include "scripting/script.h"
 
 NPC::NPC(const std::string &name, int id, Script *s):
     Being(OBJECT_NPC),

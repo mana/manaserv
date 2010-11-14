@@ -28,7 +28,7 @@
 #include <string>
 #include <enet/enet.h>
 
-#include "net/messageout.hpp"
+#include "net/messageout.h"
 
 /** Initial amount of bytes allocated for the messageout data buffer. */
 const unsigned int INITIAL_DATA_CAPACITY = 16;

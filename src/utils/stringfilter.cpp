@@ -22,7 +22,7 @@
 
 #include "utils/stringfilter.h"
 
-#include "common/configuration.hpp"
+#include "common/configuration.h"
 #include "utils/logger.h"
 
 namespace utils

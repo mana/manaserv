@@ -20,26 +20,26 @@
 
 #include <cassert>
 
-#include "game-server/state.hpp"
+#include "game-server/state.h"
 
 #include "point.h"
-#include "common/configuration.hpp"
-#include "game-server/accountconnection.hpp"
-#include "game-server/gamehandler.hpp"
-#include "game-server/inventory.hpp"
-#include "game-server/item.hpp"
-#include "game-server/itemmanager.hpp"
-#include "game-server/effect.hpp"
-#include "game-server/map.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/mapmanager.hpp"
-#include "game-server/monster.hpp"
-#include "game-server/npc.hpp"
-#include "game-server/trade.hpp"
-#include "net/messageout.hpp"
-#include "scripting/script.hpp"
+#include "common/configuration.h"
+#include "game-server/accountconnection.h"
+#include "game-server/gamehandler.h"
+#include "game-server/inventory.h"
+#include "game-server/item.h"
+#include "game-server/itemmanager.h"
+#include "game-server/effect.h"
+#include "game-server/map.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/mapmanager.h"
+#include "game-server/monster.h"
+#include "game-server/npc.h"
+#include "game-server/trade.h"
+#include "net/messageout.h"
+#include "scripting/script.h"
 #include "utils/logger.h"
-#include "utils/speedconv.hpp"
+#include "utils/speedconv.h"
 
 enum
 {

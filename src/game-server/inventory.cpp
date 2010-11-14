@@ -21,11 +21,11 @@
 #include <algorithm>
 #include <cassert>
 
-#include "game-server/gamehandler.hpp"
-#include "game-server/inventory.hpp"
-#include "game-server/item.hpp"
-#include "game-server/itemmanager.hpp"
-#include "net/messageout.hpp"
+#include "game-server/gamehandler.h"
+#include "game-server/inventory.h"
+#include "game-server/item.h"
+#include "game-server/itemmanager.h"
+#include "net/messageout.h"
 #include "utils/logger.h"
 
 // TODO:

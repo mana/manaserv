@@ -24,20 +24,20 @@
 #include <sstream>
 
 #include "protocol.h"
-#include "account-server/character.hpp"
-#include "account-server/storage.hpp"
-#include "chat-server/guildmanager.hpp"
-#include "chat-server/chatchannelmanager.hpp"
-#include "chat-server/chatclient.hpp"
-#include "chat-server/chathandler.hpp"
-#include "common/transaction.hpp"
-#include "net/connectionhandler.hpp"
-#include "net/messagein.hpp"
-#include "net/messageout.hpp"
-#include "net/netcomputer.hpp"
+#include "account-server/character.h"
+#include "account-server/storage.h"
+#include "chat-server/guildmanager.h"
+#include "chat-server/chatchannelmanager.h"
+#include "chat-server/chatclient.h"
+#include "chat-server/chathandler.h"
+#include "common/transaction.h"
+#include "net/connectionhandler.h"
+#include "net/messagein.h"
+#include "net/messageout.h"
+#include "net/netcomputer.h"
 #include "utils/logger.h"
 #include "utils/stringfilter.h"
-#include "utils/tokendispenser.hpp"
+#include "utils/tokendispenser.h"
 
 void registerChatClient(const std::string &token,
                         const std::string &name,

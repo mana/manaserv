@@ -18,9 +18,9 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "common/resourcemanager.hpp"
+#include "common/resourcemanager.h"
 
-#include "common/configuration.hpp"
+#include "common/configuration.h"
 
 #include "utils/logger.h"
 

@@ -21,12 +21,12 @@
 #include <algorithm>
 #include <cassert>
 
-#include "game-server/trade.hpp"
+#include "game-server/trade.h"
 
-#include "game-server/character.hpp"
-#include "game-server/gamehandler.hpp"
-#include "game-server/inventory.hpp"
-#include "net/messageout.hpp"
+#include "game-server/character.h"
+#include "game-server/gamehandler.h"
+#include "game-server/inventory.h"
+#include "net/messageout.h"
 
 /*
  * States :

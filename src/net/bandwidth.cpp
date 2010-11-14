@@ -18,9 +18,9 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bandwidth.hpp"
+#include "bandwidth.h"
 
-#include "netcomputer.hpp"
+#include "netcomputer.h"
 
 BandwidthMonitor::BandwidthMonitor():
     mAmountServerOutput(0),

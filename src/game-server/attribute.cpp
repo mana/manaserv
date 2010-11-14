@@ -18,8 +18,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "attribute.hpp"
-#include "game-server/being.hpp"
+#include "attribute.h"
+#include "game-server/being.h"
 #include "utils/logger.h"
 #include <cassert>
 

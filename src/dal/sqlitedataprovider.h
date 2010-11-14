@@ -24,7 +24,7 @@
 #include <iosfwd>
 #include "limits.h"
 #include <sqlite3.h>
-#include "common/configuration.hpp"
+#include "common/configuration.h"
 
 
 // sqlite3_int64 is the preferred new datatype for 64-bit int values.

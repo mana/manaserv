@@ -19,9 +19,9 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "luascript.hpp"
+#include "luascript.h"
 
-#include "game-server/being.hpp"
+#include "game-server/being.h"
 #include "utils/logger.h"
 
 #include <cassert>

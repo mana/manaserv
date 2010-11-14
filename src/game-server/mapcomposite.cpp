@@ -22,11 +22,11 @@
 #include <cassert>
 
 #include "point.h"
-#include "common/configuration.hpp"
-#include "game-server/map.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/character.hpp"
-#include "scripting/script.hpp"
+#include "common/configuration.h"
+#include "game-server/map.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/character.h"
+#include "scripting/script.h"
 #include "utils/logger.h"
 
 /* TODO: Implement overlapping map zones instead of strict partitioning.

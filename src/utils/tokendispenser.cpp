@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utils/tokendispenser.hpp"
+#include "utils/tokendispenser.h"
 
 #include <cstdlib>
 

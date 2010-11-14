@@ -18,11 +18,11 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/spawnarea.hpp"
+#include "game-server/spawnarea.h"
 
-#include "game-server/mapcomposite.hpp"
-#include "game-server/monster.hpp"
-#include "game-server/state.hpp"
+#include "game-server/mapcomposite.h"
+#include "game-server/monster.h"
+#include "game-server/state.h"
 #include "utils/logger.h"
 
 struct SpawnAreaEventDispatch : EventDispatch

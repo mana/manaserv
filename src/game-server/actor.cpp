@@ -18,10 +18,10 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/actor.hpp"
+#include "game-server/actor.h"
 
-#include "game-server/map.hpp"
-#include "game-server/mapcomposite.hpp"
+#include "game-server/map.h"
+#include "game-server/mapcomposite.h"
 
 #include <cassert>
 

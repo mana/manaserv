@@ -18,21 +18,21 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/mapreader.hpp"
+#include "game-server/mapreader.h"
 
-#include "common/resourcemanager.hpp"
-#include "game-server/map.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/mapmanager.hpp"
-#include "game-server/monstermanager.hpp"
-#include "game-server/spawnarea.hpp"
-#include "game-server/trigger.hpp"
-#include "scripting/script.hpp"
+#include "common/resourcemanager.h"
+#include "game-server/map.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/mapmanager.h"
+#include "game-server/monstermanager.h"
+#include "game-server/spawnarea.h"
+#include "game-server/trigger.h"
+#include "scripting/script.h"
 #include "utils/base64.h"
 #include "utils/logger.h"
-#include "utils/xml.hpp"
-#include "utils/zlib.hpp"
-#include "utils/string.hpp"
+#include "utils/xml.h"
+#include "utils/zlib.h"
+#include "utils/string.h"
 
 #include <cstring>
 

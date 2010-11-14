@@ -20,9 +20,9 @@
 
 #include <cassert>
 
-#include "game-server/thing.hpp"
+#include "game-server/thing.h"
 
-#include "game-server/eventlistener.hpp"
+#include "game-server/eventlistener.h"
 
 Thing::~Thing()
 {

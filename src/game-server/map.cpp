@@ -23,7 +23,7 @@
 #include <cassert>
 #include <cstring>
 
-#include "game-server/map.hpp"
+#include "game-server/map.h"
 
 // Basic cost for moving from one tile to another.
 // Used in findPath() function when computing the A* path algorithm.

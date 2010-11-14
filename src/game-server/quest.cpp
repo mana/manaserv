@@ -23,11 +23,11 @@
 #include <map>
 #include <string>
 
-#include "game-server/quest.hpp"
+#include "game-server/quest.h"
 
-#include "game-server/accountconnection.hpp"
-#include "game-server/character.hpp"
-#include "game-server/eventlistener.hpp"
+#include "game-server/accountconnection.h"
+#include "game-server/character.h"
+#include "game-server/eventlistener.h"
 #include "utils/logger.h"
 
 typedef std::list< QuestCallback > QuestCallbacks;

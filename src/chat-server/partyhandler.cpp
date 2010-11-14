@@ -18,15 +18,15 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "chathandler.hpp"
-#include "chatclient.hpp"
-#include "party.hpp"
+#include "chathandler.h"
+#include "chatclient.h"
+#include "party.h"
 
-#include "account-server/storage.hpp"
-#include "account-server/serverhandler.hpp"
+#include "account-server/storage.h"
+#include "account-server/serverhandler.h"
 
-#include "net/messagein.hpp"
-#include "net/messageout.hpp"
+#include "net/messagein.h"
+#include "net/messageout.h"
 
 #include "protocol.h"
 

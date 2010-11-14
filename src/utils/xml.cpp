@@ -19,11 +19,11 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 
-#include "common/resourcemanager.hpp"
+#include "common/resourcemanager.h"
 #include "utils/logger.h"
-#include "utils/string.hpp"
+#include "utils/string.h"
 
 #include <iostream>
 #include <fstream>

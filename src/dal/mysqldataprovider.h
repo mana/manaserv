@@ -31,7 +31,7 @@
 #include <climits>
 
 #include "dataprovider.h"
-#include "common/configuration.hpp"
+#include "common/configuration.h"
 #include "utils/logger.h"
 
 namespace dal

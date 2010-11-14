@@ -20,16 +20,16 @@
 
 #include <cstddef>
 
-#include "game-server/accountconnection.hpp"
-#include "game-server/character.hpp"
-#include "game-server/gamehandler.hpp"
-#include "game-server/inventory.hpp"
-#include "game-server/item.hpp"
-#include "game-server/itemmanager.hpp"
-#include "game-server/mapmanager.hpp"
-#include "game-server/monster.hpp"
-#include "game-server/monstermanager.hpp"
-#include "game-server/state.hpp"
+#include "game-server/accountconnection.h"
+#include "game-server/character.h"
+#include "game-server/gamehandler.h"
+#include "game-server/inventory.h"
+#include "game-server/item.h"
+#include "game-server/itemmanager.h"
+#include "game-server/mapmanager.h"
+#include "game-server/monster.h"
+#include "game-server/monstermanager.h"
+#include "game-server/state.h"
 
 template< typename T >
 static T proxy_cast(intptr_t v)

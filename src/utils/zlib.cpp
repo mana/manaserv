@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <zlib.h>
 
-#include "utils/zlib.hpp"
+#include "utils/zlib.h"
 
 #include "utils/logger.h"
 

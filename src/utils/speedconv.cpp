@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utils/speedconv.hpp"
+#include "utils/speedconv.h"
 
 double utils::tpsToSpeed(double tps)
 {

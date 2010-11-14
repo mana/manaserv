@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utils/tokencollector.hpp"
+#include "utils/tokencollector.h"
 
 /* We are optimistic and we assume that clients connect as soon as possible.
    It means that pending data are mainly outdated ones, except for the newer

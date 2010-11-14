@@ -18,12 +18,12 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/attributemanager.hpp"
+#include "game-server/attributemanager.h"
 
-#include "common/resourcemanager.hpp"
-#include "utils/string.hpp"
+#include "common/resourcemanager.h"
+#include "utils/string.h"
 #include "utils/logger.h"
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 #include "defines.h"
 
 void AttributeManager::initialize()

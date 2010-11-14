@@ -20,7 +20,7 @@
 
 #include <cassert>
 
-#include "account-server/account.hpp"
+#include "account-server/account.h"
 
 Account::~Account()
 {

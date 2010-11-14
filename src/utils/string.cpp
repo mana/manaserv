@@ -18,7 +18,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utils/string.hpp"
+#include "utils/string.h"
 
 #include <cctype>
 #include <algorithm>

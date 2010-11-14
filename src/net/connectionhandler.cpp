@@ -20,13 +20,13 @@
 
 #include <algorithm>
 
-#include "net/connectionhandler.hpp"
+#include "net/connectionhandler.h"
 
-#include "common/configuration.hpp"
-#include "net/bandwidth.hpp"
-#include "net/messagein.hpp"
-#include "net/messageout.hpp"
-#include "net/netcomputer.hpp"
+#include "common/configuration.h"
+#include "net/bandwidth.h"
+#include "net/messagein.h"
+#include "net/messageout.h"
+#include "net/netcomputer.h"
 #include "utils/logger.h"
 
 #ifdef ENET_VERSION_CREATE

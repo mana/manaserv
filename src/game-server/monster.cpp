@@ -18,19 +18,19 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/monster.hpp"
+#include "game-server/monster.h"
 
-#include "common/configuration.hpp"
-#include "common/resourcemanager.hpp"
-#include "game-server/attributemanager.hpp"
-#include "game-server/character.hpp"
-#include "game-server/collisiondetection.hpp"
-#include "game-server/item.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/state.hpp"
-#include "scripting/script.hpp"
+#include "common/configuration.h"
+#include "common/resourcemanager.h"
+#include "game-server/attributemanager.h"
+#include "game-server/character.h"
+#include "game-server/collisiondetection.h"
+#include "game-server/item.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/state.h"
+#include "scripting/script.h"
 #include "utils/logger.h"
-#include "utils/speedconv.hpp"
+#include "utils/speedconv.h"
 
 #include <cmath>
 

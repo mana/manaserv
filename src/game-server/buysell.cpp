@@ -18,14 +18,14 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/buysell.hpp"
+#include "game-server/buysell.h"
 
-#include "game-server/character.hpp"
-#include "game-server/gamehandler.hpp"
-#include "game-server/inventory.hpp"
-#include "game-server/itemmanager.hpp"
-#include "game-server/item.hpp"
-#include "net/messageout.hpp"
+#include "game-server/character.h"
+#include "game-server/gamehandler.h"
+#include "game-server/inventory.h"
+#include "game-server/itemmanager.h"
+#include "game-server/item.h"
+#include "net/messageout.h"
 
 #include "defines.h"
 

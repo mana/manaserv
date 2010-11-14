@@ -21,26 +21,26 @@
 #include <cassert>
 #include <map>
 
-#include "game-server/gamehandler.hpp"
+#include "game-server/gamehandler.h"
 
-#include "common/transaction.hpp"
-#include "game-server/accountconnection.hpp"
-#include "game-server/buysell.hpp"
-#include "game-server/commandhandler.hpp"
-#include "game-server/inventory.hpp"
-#include "game-server/item.hpp"
-#include "game-server/itemmanager.hpp"
-#include "game-server/map.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/npc.hpp"
-#include "game-server/postman.hpp"
-#include "game-server/state.hpp"
-#include "game-server/trade.hpp"
-#include "net/messagein.hpp"
-#include "net/messageout.hpp"
-#include "net/netcomputer.hpp"
+#include "common/transaction.h"
+#include "game-server/accountconnection.h"
+#include "game-server/buysell.h"
+#include "game-server/commandhandler.h"
+#include "game-server/inventory.h"
+#include "game-server/item.h"
+#include "game-server/itemmanager.h"
+#include "game-server/map.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/npc.h"
+#include "game-server/postman.h"
+#include "game-server/state.h"
+#include "game-server/trade.h"
+#include "net/messagein.h"
+#include "net/messageout.h"
+#include "net/netcomputer.h"
 #include "utils/logger.h"
-#include "utils/tokendispenser.hpp"
+#include "utils/tokendispenser.h"
 
 const unsigned int TILES_TO_BE_NEAR = 7;
 
@@ -135,7 +135,7 @@ static Actor *findActorNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
     const Point &ppos = p->getPosition();
-    // See map.hpp for tiles constants
+    // See map.h for tiles constants
     const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
     for (ActorIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
     {
@@ -151,7 +151,7 @@ static Character *findCharacterNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
     const Point &ppos = p->getPosition();
-    // See map.hpp for tiles constants
+    // See map.h for tiles constants
     const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
     for (CharacterIterator i(map->getAroundPointIterator(ppos,
                                                          pixelDist)); i; ++i)

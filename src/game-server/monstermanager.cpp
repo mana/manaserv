@@ -18,14 +18,14 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/monstermanager.hpp"
+#include "game-server/monstermanager.h"
 
-#include "common/resourcemanager.hpp"
-#include "game-server/attributemanager.hpp"
-#include "game-server/itemmanager.hpp"
-#include "game-server/monster.hpp"
+#include "common/resourcemanager.h"
+#include "game-server/attributemanager.h"
+#include "game-server/itemmanager.h"
+#include "game-server/monster.h"
 #include "utils/logger.h"
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 
 Element elementFromString (const std::string &name)
 {

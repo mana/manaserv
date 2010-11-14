@@ -18,10 +18,10 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "net/connection.hpp"
-#include "net/bandwidth.hpp"
-#include "net/messagein.hpp"
-#include "net/messageout.hpp"
+#include "net/connection.h"
+#include "net/bandwidth.h"
+#include "net/messagein.h"
+#include "net/messageout.h"
 #include "utils/logger.h"
 
 #ifdef ENET_VERSION_CREATE

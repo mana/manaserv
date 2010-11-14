@@ -18,10 +18,10 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/effect.hpp"
+#include "game-server/effect.h"
 
-#include "game-server/mapcomposite.hpp"
-#include "game-server/state.hpp"
+#include "game-server/mapcomposite.h"
+#include "game-server/state.h"
 
 void Effect::update()
 {

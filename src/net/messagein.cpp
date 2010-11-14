@@ -27,7 +27,7 @@
 #include <sstream>
 #endif
 
-#include "net/messagein.hpp"
+#include "net/messagein.h"
 #include "utils/logger.h"
 
 MessageIn::MessageIn(const char *data, int length):

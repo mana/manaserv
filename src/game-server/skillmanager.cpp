@@ -18,12 +18,12 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/skillmanager.hpp"
+#include "game-server/skillmanager.h"
 
-#include "common/resourcemanager.hpp"
-#include "utils/string.hpp"   // for the toUpper function
+#include "common/resourcemanager.h"
+#include "utils/string.h"   // for the toUpper function
 #include "utils/logger.h"
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 
 #include <map>
 

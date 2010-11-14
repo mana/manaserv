@@ -20,20 +20,20 @@
 
 #include <cassert>
 
-#include "game-server/being.hpp"
+#include "game-server/being.h"
 
 #include "defines.h"
-#include "common/configuration.hpp"
-#include "game-server/attributemanager.hpp"
-#include "game-server/character.hpp"
-#include "game-server/collisiondetection.hpp"
-#include "game-server/eventlistener.hpp"
-#include "game-server/mapcomposite.hpp"
-#include "game-server/effect.hpp"
-#include "game-server/statuseffect.hpp"
-#include "game-server/statusmanager.hpp"
+#include "common/configuration.h"
+#include "game-server/attributemanager.h"
+#include "game-server/character.h"
+#include "game-server/collisiondetection.h"
+#include "game-server/eventlistener.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/effect.h"
+#include "game-server/statuseffect.h"
+#include "game-server/statusmanager.h"
 #include "utils/logger.h"
-#include "utils/speedconv.hpp"
+#include "utils/speedconv.h"
 
 Being::Being(ThingType type):
     Actor(type),

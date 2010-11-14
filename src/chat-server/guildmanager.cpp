@@ -18,13 +18,13 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "guildmanager.hpp"
-#include "guild.hpp"
+#include "guildmanager.h"
+#include "guild.h"
 #include "protocol.h"
 #include "defines.h"
-#include "account-server/storage.hpp"
-#include "chat-server/chatclient.hpp"
-#include "chat-server/chathandler.hpp"
+#include "account-server/storage.h"
+#include "chat-server/chatclient.h"
+#include "chat-server/chathandler.h"
 
 GuildManager::GuildManager()
 {

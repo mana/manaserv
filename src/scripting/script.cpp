@@ -18,10 +18,10 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "scripting/script.hpp"
+#include "scripting/script.h"
 
-#include "common/resourcemanager.hpp"
-#include "game-server/being.hpp"
+#include "common/resourcemanager.h"
+#include "game-server/being.h"
 #include "utils/logger.h"
 
 #include <cstdlib>

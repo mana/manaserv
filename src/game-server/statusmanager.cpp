@@ -18,13 +18,13 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/statusmanager.hpp"
+#include "game-server/statusmanager.h"
 
-#include "common/resourcemanager.hpp"
-#include "game-server/statuseffect.hpp"
-#include "scripting/script.hpp"
+#include "common/resourcemanager.h"
+#include "game-server/statuseffect.h"
+#include "scripting/script.h"
 #include "utils/logger.h"
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 
 #include <map>
 #include <set>

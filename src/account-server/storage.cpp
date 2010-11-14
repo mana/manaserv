@@ -21,19 +21,19 @@
 #include <cassert>
 #include <time.h>
 
-#include "account-server/storage.hpp"
+#include "account-server/storage.h"
 
 #include "point.h"
-#include "account-server/account.hpp"
-#include "chat-server/chatchannel.hpp"
-#include "chat-server/guild.hpp"
-#include "chat-server/post.hpp"
-#include "common/configuration.hpp"
+#include "account-server/account.h"
+#include "chat-server/chatchannel.h"
+#include "chat-server/guild.h"
+#include "chat-server/post.h"
+#include "common/configuration.h"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
 #include "utils/logger.h"
-#include "utils/xml.hpp"
+#include "utils/xml.h"
 
 static const char *DEFAULT_ITEM_FILE = "items.xml";
 
