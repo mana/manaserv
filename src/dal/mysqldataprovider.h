@@ -47,7 +47,8 @@ class MySqlDataProvider: public DataProvider
          * Replacement for mysql my_bool datatype used in mysql_autocommit()
          * function.
          */
-        enum {
+        enum
+        {
             AUTOCOMMIT_OFF = 0,
             AUTOCOMMIT_ON = 1
         };
@@ -173,6 +174,13 @@ class MySqlDataProvider: public DataProvider
         void bindValue(int place, int value);
 
     private:
+        /**
+         * Bind Value (MYSQL_BIND*)
+         * @param place - which parameter to bind to
+         * @param value - the MySQL bind structure itself
+         */
+        void bindValue(int place, MYSQL_BIND* bind);
+
         /** defines the name of the hostname config parameter */
         static const std::string CFGPARAM_MYSQL_HOST;
         /** defines the name of the server port config parameter */
@@ -196,9 +204,13 @@ class MySqlDataProvider: public DataProvider
         static const std::string CFGPARAM_MYSQL_PWD_DEF;
 
 
-        MYSQL *mDb; /**< the handle to the database connection */
-        MYSQL_STMT *mStmt; /**< the prepared statement to process */
-        std::vector<MYSQL_BIND*> mBind;
+        /** The handle to the database connection */
+        MYSQL *mDb;
+        /** The prepared statement to process */
+        MYSQL_STMT *mStmt;
+        /** The Bind structure used in prepared statement */
+        MYSQL_BIND* mBind;
+        /** Tells whether we're in the middle of a transaction */
         bool mInTransaction;
 };
 

@@ -42,8 +42,10 @@ const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD_DEF  = "mana";
  */
 MySqlDataProvider::MySqlDataProvider()
     throw()
-        : mDb(0)
-        , mInTransaction(false)
+        : mDb(0),
+          mStmt(0),
+          mBind(0),
+          mInTransaction(false)
 {
 }
 
@@ -127,6 +129,7 @@ void MySqlDataProvider::connect()
     // Save the Db Name.
     mDbName = dbName;
 
+    // Initialize statement structure
     mStmt = mysql_stmt_init(mDb);
 
     mIsConnected = true;
@@ -207,6 +210,7 @@ void MySqlDataProvider::disconnect()
     // handle allocated by mysql_init().
     mysql_close(mDb);
 
+    // Clean possible statement.
     mysql_stmt_close(mStmt);
 
     // deinitialize the MySQL client library.
@@ -222,20 +226,21 @@ void MySqlDataProvider::beginTransaction()
     if (!mIsConnected)
     {
         const std::string error = "Trying to begin a transaction while not "
-            "connected to the database!";
+                                  "connected to the database!";
         LOG_ERROR(error);
         throw std::runtime_error(error);
     }
 
     if (inTransaction())
     {
-        const std::string error = "Trying to begin a transaction while anoter "
-            "one is still open!";
+        const std::string error = "Trying to begin a transaction while another "
+                                  "one is still open!";
         LOG_ERROR(error);
         throw std::runtime_error(error);
     }
 
-    if (mysql_autocommit(mDb, AUTOCOMMIT_OFF)) {
+    if (mysql_autocommit(mDb, AUTOCOMMIT_OFF))
+    {
         const std::string error = "Error while trying to disable autocommit";
         LOG_ERROR(error);
         throw std::runtime_error(error);
@@ -252,7 +257,7 @@ void MySqlDataProvider::commitTransaction()
     if (!mIsConnected)
     {
         const std::string error = "Trying to commit a transaction while not "
-            "connected to the database!";
+                                  "connected to the database!";
         LOG_ERROR(error);
         throw std::runtime_error(error);
     }
@@ -260,7 +265,7 @@ void MySqlDataProvider::commitTransaction()
     if (!inTransaction())
     {
         const std::string error = "Trying to commit a transaction while no "
-            "one is open!";
+                                  "one is open!";
         LOG_ERROR(error);
         throw std::runtime_error(error);
     }
@@ -271,7 +276,8 @@ void MySqlDataProvider::commitTransaction()
         throw DbSqlQueryExecFailure(mysql_error(mDb));
     }
 
-    if (mysql_autocommit(mDb, AUTOCOMMIT_ON)) {
+    if (mysql_autocommit(mDb, AUTOCOMMIT_ON))
+    {
         const std::string error = "Error while trying to enable autocommit";
         LOG_ERROR(error);
         throw std::runtime_error(error);
@@ -287,7 +293,7 @@ void MySqlDataProvider::rollbackTransaction()
     if (!mIsConnected)
     {
         const std::string error = "Trying to rollback a transaction while not "
-            "connected to the database!";
+                                  "connected to the database!";
         LOG_ERROR(error);
         throw std::runtime_error(error);
     }
@@ -295,16 +301,18 @@ void MySqlDataProvider::rollbackTransaction()
     if (!inTransaction())
     {
         const std::string error = "Trying to rollback a transaction while no "
-            "one is open!";
+                                  "one is open!";
         LOG_ERROR(error);
         throw std::runtime_error(error);
     }
 
     if (mysql_rollback(mDb) != 0)
     {
-        LOG_ERROR("MySqlDataProvider::rollbackTransaction: " << mysql_error(mDb));
+        LOG_ERROR("MySqlDataProvider::rollbackTransaction: "
+                  << mysql_error(mDb));
         throw DbSqlQueryExecFailure(mysql_error(mDb));
     }
+
     mysql_autocommit(mDb, AUTOCOMMIT_ON);
     mInTransaction = false;
     LOG_DEBUG("SQL: transaction rolled back");
@@ -320,17 +328,16 @@ unsigned MySqlDataProvider::getModifiedRows() const
     if (!mIsConnected)
     {
         const std::string error = "Trying to getModifiedRows while not "
-            "connected to the database!";
+                                  "connected to the database!";
         LOG_ERROR(error);
         throw std::runtime_error(error);
     }
 
-    // FIXME: not sure if this is correct to bring 64bit int into int?
     const my_ulonglong affected = mysql_affected_rows(mDb);
 
     if (affected > INT_MAX)
         throw std::runtime_error(
-                  "MySqlDataProvider::getLastId exceeded INT_MAX");
+                               "MySqlDataProvider::getLastId exceeded INT_MAX");
 
     if (affected == (my_ulonglong)-1)
     {
@@ -350,10 +357,10 @@ unsigned MySqlDataProvider::getLastId() const
         throw std::runtime_error(error);
     }
 
-    // FIXME: not sure if this is correct to bring 64bit int into int?
     const my_ulonglong lastId = mysql_insert_id(mDb);
     if (lastId > UINT_MAX)
-        throw std::runtime_error("MySqlDataProvider::getLastId exceeded INT_MAX");
+        throw std::runtime_error(
+                              "MySqlDataProvider::getLastId exceeded UINT_MAX");
 
     return (unsigned) lastId;
 }
@@ -363,45 +370,48 @@ bool MySqlDataProvider::prepareSql(const std::string &sql)
     if (!mIsConnected)
         return false;
 
-    LOG_DEBUG("MySqlDataProvider::prepareSql Preparing SQL statement: "<<sql);
+    LOG_DEBUG("MySqlDataProvider::prepareSql Preparing SQL statement: " << sql);
 
-    mBind.clear();
+    if (mBind)
+    {
+        delete[] mBind;
+        mBind = 0;
+    }
 
     if (mysql_stmt_prepare(mStmt, sql.c_str(), sql.size()) != 0)
-    {
         return false;
-    }
+
+    // Allocate bind memory now that the prepared state is done.
+    mBind = new MYSQL_BIND[(int)mysql_stmt_param_count(mStmt)];
 
     return true;
 }
 
 const RecordSet &MySqlDataProvider::processSql()
 {
-    MYSQL_BIND* paramsBind;
-    unsigned int i;
-
-    if (!mIsConnected) {
+    if (!mIsConnected)
         throw std::runtime_error("not connected to database");
+
+    // Since we'll have to return something in all cases,
+    // we clear the result member first.
+    mRecordSet.clear();
+
+    if (!mBind)
+    {
+        LOG_ERROR("MySqlDataProvider::processSql: "
+                  "No bind done before processing.");
+        return mRecordSet;
     }
 
-    paramsBind = new MYSQL_BIND[mBind.size()];
-    for (i = 0; i < mBind.size(); ++i) {
-        paramsBind[i].buffer_type = mBind[i]->buffer_type;
-        paramsBind[i].buffer = mBind[i]->buffer;
-        paramsBind[i].buffer_length = mBind[i]->buffer_length;
-        paramsBind[i].is_null = 0;
-        paramsBind[i].length = mBind[i]->length;
-    }
-
-    if (mysql_stmt_bind_param(mStmt, paramsBind))
+    if (mysql_stmt_bind_param(mStmt, mBind))
     {
         LOG_ERROR("MySqlDataProvider::processSql Bind params failed: "
                   << mysql_stmt_error(mStmt));
+        return mRecordSet;
     }
 
     if (mysql_stmt_field_count(mStmt) > 0)
     {
-        mRecordSet.clear();
         MYSQL_BIND* resultBind;
         MYSQL_RES* res;
 
@@ -420,6 +430,7 @@ const RecordSet &MySqlDataProvider::processSql()
 
         resultBind = new MYSQL_BIND[mysql_num_fields(res)];
 
+        unsigned int i = 0;
         for (i = 0; i < mysql_num_fields(res); ++i)
         {
             resultBind[i].buffer_type = MYSQL_TYPE_STRING;
@@ -450,7 +461,7 @@ const RecordSet &MySqlDataProvider::processSql()
         {
             Row r;
 
-            for (unsigned int i = 0; i < nFields; ++i)
+            for (i = 0; i < nFields; ++i)
                 r.push_back(static_cast<char *>(resultBind[i].buffer));
 
             mRecordSet.add(r);
@@ -462,12 +473,12 @@ const RecordSet &MySqlDataProvider::processSql()
     {
         if (mysql_stmt_execute(mStmt))
         {
-            LOG_ERROR("MySqlDataProvider::processSql Execute failed: " << mysql_stmt_error(mStmt));
+            LOG_ERROR("MySqlDataProvider::processSql Execute failed: "
+                      << mysql_stmt_error(mStmt));
         }
     }
 
-    // free memory
-    delete[] paramsBind;
+    // Free memory
     mysql_stmt_free_result(mStmt);
 
     return mRecordSet;
@@ -482,9 +493,9 @@ void MySqlDataProvider::bindValue(int place, const std::string &value)
     bind->buffer= (void*) value.c_str();
     bind->buffer_length= value.size();
     bind->length = size;
+    bind->is_null = 0;
 
-    //FIXME : Isn't taking care of the place param
-    mBind.push_back(bind);
+    bindValue(place, bind);
 }
 
 void MySqlDataProvider::bindValue(int place, int value)
@@ -492,9 +503,21 @@ void MySqlDataProvider::bindValue(int place, int value)
     MYSQL_BIND* bind = new MYSQL_BIND;
     bind->buffer_type= MYSQL_TYPE_LONG;
     bind->buffer= &value;
+    bind->is_null = 0;
 
-    //FIXME : Isn't taking care of the place param
-    mBind.push_back(bind);
+    bindValue(place, bind);
+}
+
+void MySqlDataProvider::bindValue(int place, MYSQL_BIND* bind)
+{
+    if (!mBind)
+        LOG_ERROR("MySqlDataProvider::bindValue: "
+                  "Attempted to use an unprepared bind!");
+    else if (place > 0 && place <= (int)mysql_stmt_param_count(mStmt))
+        mBind[place - 1] = *bind;
+    else
+        LOG_ERROR("MySqlDataProvider::bindValue: "
+                  "Attempted bind index out of range");
 }
 
 } // namespace dal
