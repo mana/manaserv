@@ -181,6 +181,9 @@ class MySqlDataProvider: public DataProvider
          */
         void bindValue(int place, MYSQL_BIND* bind);
 
+        /** Clean potential binds */
+        void cleanBinds();
+
         /** defines the name of the hostname config parameter */
         static const std::string CFGPARAM_MYSQL_HOST;
         /** defines the name of the server port config parameter */

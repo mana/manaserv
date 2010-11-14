@@ -216,6 +216,9 @@ void MySqlDataProvider::disconnect()
     // deinitialize the MySQL client library.
     mysql_library_end();
 
+    // Clean potential active binds
+    cleanBinds();
+
     mDb = 0;
     mIsConnected = false;
 }
@@ -372,11 +375,7 @@ bool MySqlDataProvider::prepareSql(const std::string &sql)
 
     LOG_DEBUG("MySqlDataProvider::prepareSql Preparing SQL statement: " << sql);
 
-    if (mBind)
-    {
-        delete[] mBind;
-        mBind = 0;
-    }
+    cleanBinds();
 
     if (mysql_stmt_prepare(mStmt, sql.c_str(), sql.size()) != 0)
         return false;
@@ -518,6 +517,15 @@ void MySqlDataProvider::bindValue(int place, MYSQL_BIND* bind)
     else
         LOG_ERROR("MySqlDataProvider::bindValue: "
                   "Attempted bind index out of range");
+}
+
+void MySqlDataProvider::cleanBinds()
+{
+    if (mBind)
+    {
+        delete[] mBind;
+        mBind = 0;
+    }
 }
 
 } // namespace dal
