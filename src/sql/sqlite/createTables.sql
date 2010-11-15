@@ -405,7 +405,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'11', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'12', strftime('%s','now'));
 
 -- all known transaction codes
 
