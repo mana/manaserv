@@ -44,6 +44,8 @@
 			<Add alias="All" targets="default;" />
 		</VirtualTargets>
 		<Compiler>
+			<Add option="-g" />
+			<Add option="-O3" />
 			<Add option="-Wall" />
 			<Add option="-Wno-switch" />
 			<Add option="-Wno-unknown-pragmas" />
@@ -126,6 +128,9 @@
 		<Unit filename="src\dal\sqlitedataprovider.cpp" />
 		<Unit filename="src\dal\sqlitedataprovider.h" />
 		<Unit filename="src\defines.h" />
+		<Unit filename="src\manaserv-account.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
 		<Unit filename="src\net\bandwidth.cpp" />
 		<Unit filename="src\net\bandwidth.h" />
 		<Unit filename="src\net\connection.cpp" />
@@ -139,6 +144,7 @@
 		<Unit filename="src\net\netcomputer.cpp" />
 		<Unit filename="src\net\netcomputer.h" />
 		<Unit filename="src\point.h" />
+		<Unit filename="src\protocol.h" />
 		<Unit filename="src\serialize\characterdata.h" />
 		<Unit filename="src\utils\base64.cpp" />
 		<Unit filename="src\utils\base64.h" />

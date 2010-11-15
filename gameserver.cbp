@@ -45,6 +45,8 @@
 			<Add alias="All" targets="default;" />
 		</VirtualTargets>
 		<Compiler>
+			<Add option="-g" />
+			<Add option="-O3" />
 			<Add option="-Wall" />
 			<Add option="-Wno-switch" />
 			<Add option="-Wno-unknown-pragmas" />
@@ -154,6 +156,9 @@
 		<Unit filename="src\game-server\trade.h" />
 		<Unit filename="src\game-server\trigger.cpp" />
 		<Unit filename="src\game-server\trigger.h" />
+		<Unit filename="src\manaserv-game.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
 		<Unit filename="src\net\bandwidth.cpp" />
 		<Unit filename="src\net\bandwidth.h" />
 		<Unit filename="src\net\connection.cpp" />
