@@ -44,7 +44,15 @@
 #include "utils/string.h"
 #include "utils/xml.h"
 
-static void addUpdateHost(MessageOut *msg)
+/**
+ * Adds server specific info to the current message
+ *
+ * The info are made of:
+ * (String) Update Host URL (or "")
+ * (String) Client Data URL (or "")
+ * (Byte)   Number of maximum character slots (empty or not)
+ */
+static void addServerInfo(MessageOut *msg)
 {
     std::string updateHost = Configuration::getValue("net_defaultUpdateHost",
                                                      "");
@@ -56,6 +64,9 @@ static void addUpdateHost(MessageOut *msg)
      */
     std::string dataUrl = Configuration::getValue("net_clientDataUrl", "");
     msg->writeString(dataUrl);
+
+    // Send the number of available slots (empty or not)
+    msg->writeInt8(Configuration::getValue("account_maxCharacters", 3));
 }
 
 // List of attributes that the client can send at account creation.
@@ -378,7 +389,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     client.status = CLIENT_CONNECTED;
 
     reply.writeInt8(ERRMSG_OK);
-    addUpdateHost(&reply);
+    addServerInfo(&reply);
     client.send(reply); // Acknowledge login
 
     // Return information about available characters
@@ -521,7 +532,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
 
         storage->addAccount(acc);
         reply.writeInt8(ERRMSG_OK);
-        addUpdateHost(&reply);
+        addServerInfo(&reply);
 
         // Associate account with connection
         client.setAccount(acc);

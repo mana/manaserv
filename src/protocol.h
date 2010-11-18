@@ -44,13 +44,13 @@
 enum {
     // Login/Register
     PAMSG_REGISTER                 = 0x0000, // D version, S username, S password, S email, S captcha response
-    APMSG_REGISTER_RESPONSE        = 0x0002, // B error, [S updatehost]
+    APMSG_REGISTER_RESPONSE        = 0x0002, // B error, S updatehost, S Client data URL, B Character slots
     PAMSG_UNREGISTER               = 0x0003, // S username, S password
     APMSG_UNREGISTER_RESPONSE      = 0x0004, // B error
     PAMSG_REQUEST_REGISTER_INFO    = 0x0005, //
     APMSG_REGISTER_INFO_RESPONSE   = 0x0006, // B byte registration Allowed, byte minNameLength, byte maxNameLength, string captchaURL, string captchaInstructions
     PAMSG_LOGIN                    = 0x0010, // D version, S username, S password
-    APMSG_LOGIN_RESPONSE           = 0x0012, // B error, [S updatehost]
+    APMSG_LOGIN_RESPONSE           = 0x0012, // B error, S updatehost, S Client data URL, B Character slots
     PAMSG_LOGOUT                   = 0x0013, // -
     APMSG_LOGOUT_RESPONSE          = 0x0014, // B error
     PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, W*6 stats
