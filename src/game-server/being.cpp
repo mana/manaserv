@@ -396,7 +396,7 @@ double Being::getModifiedAttribute(unsigned int id) const
     return ret->second.getModifiedAttribute();
 }
 
-void Being::setModAttribute(unsigned int id, double value)
+void Being::setModAttribute(unsigned int, double)
 {
     // No-op to satisfy shared structure.
     // The game-server calculates this manually.

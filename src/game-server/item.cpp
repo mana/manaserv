@@ -31,12 +31,6 @@
 #include "game-server/state.h"
 #include "scripting/script.h"
 
-bool ItemEffectInfo::apply(Being *itemUser)
-{
-    LOG_WARN("Virtual defintion used in effect application!");
-    return false;
-}
-
 bool ItemEffectAttrMod::apply(Being *itemUser)
 {
     LOG_DEBUG("Applying modifier.");

@@ -571,7 +571,7 @@ void ChatHandler::handleQuitChannelMessage(ChatClient &client, MessageIn &msg)
     client.send(reply);
 }
 
-void ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &)
 {
     MessageOut reply(CPMSG_LIST_CHANNELS_RESPONSE);
 
@@ -652,7 +652,7 @@ void ChatHandler::handleTopicChange(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleDisconnectMessage(ChatClient &client, MessageIn &)
 {
     MessageOut reply(CPMSG_DISCONNECT_RESPONSE);
     reply.writeInt8(ERRMSG_OK);

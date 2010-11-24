@@ -84,7 +84,8 @@ class Being : public Actor
          * WARNING: Has to be in sync with the same enum in the Being class
          * of the client!
          */
-        enum Action {
+        enum Action
+        {
             STAND,
             WALK,
             ATTACK,
@@ -239,7 +240,7 @@ class Being : public Actor
          * @note The game server calculates this manually, so nothing happens
          *       here.
          */
-        void setModAttribute(unsigned int id, double value);
+        void setModAttribute(unsigned int, double);
 
         /**
          * Checks whether or not an attribute exists in this being.

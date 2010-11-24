@@ -58,7 +58,8 @@ enum
     SET_STATE_NOT_FLOATING
 };
 
-struct ItemAutoAttackInfo {
+struct ItemAutoAttackInfo
+{
     unsigned int base;
     unsigned int range;
     unsigned int baseSpeed;
@@ -67,7 +68,8 @@ struct ItemAutoAttackInfo {
     std::map< unsigned int, double > attrBonus;
 };
 
-enum ItemTriggerType {
+enum ItemTriggerType
+{
     ITT_NULL = 0,
     ITT_IN_INVY, // Associated effects apply when the item is in the inventory
     ITT_ACTIVATE, // Associated effects apply when the item is activated
@@ -77,7 +79,8 @@ enum ItemTriggerType {
     ITT_EQUIPCHG // When the item is still equipped, but in a different way
 };
 
-enum ItemEffectType {
+enum ItemEffectType
+{
     // Effects that are removed automatically when the trigger ends
     // (ie. item no longer exists in invy, unequipped)
     IET_ATTR_MOD = 0, // Modify a given attribute with a given value
@@ -91,8 +94,8 @@ enum ItemEffectType {
 class ItemEffectInfo
 {
     public:
-        virtual bool apply(Being *itemUser);
-        virtual void dispell(Being *itemUser) {}
+        virtual bool apply(Being *itemUser) = 0;
+        virtual void dispell(Being *itemUser) = 0;
 };
 
 class ItemEffectAttrMod : public ItemEffectInfo
@@ -124,8 +127,10 @@ class ItemEffectAutoAttack : public ItemEffectInfo
 class ItemEffectConsumes : public ItemEffectInfo
 {
     public:
-        bool apply(Being *itemUser) { return true; }
-        void dispell(Being *itemUser) {}
+        bool apply(Being *)
+        { return true; }
+        void dispell(Being *)
+        {}
 };
 
 class ItemEffectScript : public ItemEffectInfo

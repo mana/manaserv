@@ -321,7 +321,8 @@ void Inventory::checkSize()
      *       If not, forcibly delete (drop?) items from the end until it is.
      */
     while (mPoss->inventory.size() > INVENTORY_SLOTS
-           || mClient->getModifiedAttribute(ATTR_INV_CAPACITY) < 0) {
+           || mClient->getModifiedAttribute(ATTR_INV_CAPACITY) < 0)
+    {
         LOG_WARN("Inventory: oversize inventory! Deleting '"
                  << mPoss->inventory.rbegin()->second.amount
                  << "' items of type '"
@@ -373,7 +374,7 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
     {
         if (!amount)
             return 0;
-        int lim = it == it_end ? INVENTORY_SLOTS : it->first;
+        int lim = (it == it_end) ? INVENTORY_SLOTS : it->first;
         while (amount && slot < lim)
         {
             int additions = std::min(amount, maxPerSlot);

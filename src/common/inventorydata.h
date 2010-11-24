@@ -27,17 +27,12 @@
 /**
  * Numbers of inventory slots
  */
-
-enum
-{
-    INVENTORY_SLOTS = 50
-};
+#define INVENTORY_SLOTS 50
 
 /**
  * Structure storing an item in the inventory.
  * When the itemId is zero, this item represents "amount" consecutive empty slots.
  */
-
 struct InventoryItem
 {
     unsigned int itemId;

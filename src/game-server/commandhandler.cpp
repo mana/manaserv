@@ -733,7 +733,7 @@ static void handleRecall(Character *player, std::string &args)
     GameState::warp(other, map, pos.x, pos.y);
 }
 
-static void handleReload(Character *player, std::string &args)
+static void handleReload(Character *, std::string &)
 {
     // reload the items and monsters
     itemManager->reload();
@@ -832,7 +832,9 @@ static void handleGivePermission(Character *player, std::string &args)
     if (permission & other->getAccountLevel())
     {
         say(player->getName()+" already has the permission "+strPermission, player);
-    } else {
+    }
+    else
+    {
         permission += other->getAccountLevel();
         // change the player's account level
         other->setAccountLevel(permission);
@@ -992,7 +994,7 @@ static void handleAnnounce(Character *player, std::string &msg)
     GameState::sayToAll(msg);
 }
 
-static void handleWhere(Character *player, std::string &args)
+static void handleWhere(Character *player, std::string &)
 {
     std::stringstream str;
     str << "Your current location is map "
@@ -1005,7 +1007,7 @@ static void handleWhere(Character *player, std::string &args)
     say (str.str(), player);
 }
 
-static void handleRights(Character *player, std::string &args)
+static void handleRights(Character *player, std::string &)
 {
     std::list<std::string>classes;
     classes = PermissionManager::getClassList(player);

@@ -33,13 +33,13 @@ void raiseScriptError(lua_State *s, const char *format, ...)
     va_start(args, format);
     char message[1024];
     vsprintf(message, format, args);
-    va_end( args );
+    va_end(args);
 
     LOG_WARN("Lua script error: "<< message);
     luaL_error(s, message);
 }
 
-void raiseWarning(lua_State *s, const char *format, ...)
+void raiseWarning(lua_State *, const char *format, ...)
 {
     va_list args;
     va_start(args, format);

@@ -587,7 +587,7 @@ void AccountHandler::handleUnregisterMessage(AccountClient &client,
 }
 
 void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client,
-                                                      MessageIn &msg)
+                                                      MessageIn &)
 {
     LOG_INFO("AccountHandler::handleRequestRegisterInfoMessage");
     MessageOut reply(APMSG_REGISTER_INFO_RESPONSE);
