@@ -80,7 +80,7 @@ static int npc_message(lua_State *s)
     msg.writeInt16(p->getPublicID());
     msg.writeString(std::string(m), l);
     gameHandler->sendTo(q, msg);
-    return 1;
+    return 0;
 }
 
 /**
@@ -549,7 +549,7 @@ static int being_apply_status(lua_State *s)
     }
     Being *being = getBeing(s, 1);
     being->applyStatusEffect(id, time);
-    return 1;
+    return 0;
 }
 
 /**
@@ -567,7 +567,7 @@ static int being_remove_status(lua_State *s)
     }
     Being *being = getBeing(s, 1);
     being->removeStatusEffect(id);
-    return 1;
+    return 0;
 }
 
 /**
@@ -622,7 +622,7 @@ static int being_set_status_time(lua_State *s)
     }
     Being *being = getBeing(s, 1);
     being->setStatusEffectTime(id, time);
-    return 1;
+    return 0;
 }
 
 /**
@@ -825,7 +825,7 @@ static int being_set_action(lua_State *s)
         being->setAction((Being::Action) act);
     }
 
-    return 1;
+    return 0;
 }
 
 /**
@@ -859,7 +859,7 @@ static int being_set_direction(lua_State *s)
         being->setDirection(dir);
     }
 
-    return 1;
+    return 0;
 }
 
 /**
