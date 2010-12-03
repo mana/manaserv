@@ -323,11 +323,11 @@ static int chr_warp(lua_State *s)
     {
         int c = 50;
         LOG_INFO("chr_warp called with a non-walkable place.");
-        do {
+        do
+        {
             x = rand() % map->getWidth();
             y = rand() % map->getHeight();
-            c--;
-        } while (!map->getWalk(x, y) && c);
+        } while (!map->getWalk(x, y) && --c);
         x *= map->getTileWidth();
         y *= map->getTileHeight();
     }
@@ -655,8 +655,6 @@ static int being_walk(lua_State *s)
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
     Being *being = getBeing(s, 1);
     being->setDestination(Point(x, y));
 
@@ -689,7 +687,9 @@ static int being_say(lua_State *s)
     if (being && message[0] != 0)
     {
         GameState::sayAround(being, message);
-    } else {
+    }
+    else
+    {
         raiseScriptError(s, "being_say called with incorrect parameters.");
         return 0;
     }
@@ -758,9 +758,6 @@ static int being_heal(lua_State *s)
  */
 static int being_get_attribute(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     Being *being = getBeing(s, 1);
 
     if (being)
@@ -787,9 +784,6 @@ static int being_get_attribute(lua_State *s)
  */
 static int being_get_name(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     Being *being = getBeing(s, 1);
 
     if (being)
@@ -806,9 +800,6 @@ static int being_get_name(lua_State *s)
  */
 static int being_get_action(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     Being *being = getBeing(s, 1);
 
     if (being)
@@ -825,9 +816,6 @@ static int being_get_action(lua_State *s)
  */
 static int being_set_action(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     Being *being = getBeing(s, 1);
 
     int act = lua_tointeger(s, 2);
@@ -846,9 +834,6 @@ static int being_set_action(lua_State *s)
  */
 static int being_get_direction(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     Being *being = getBeing(s, 1);
 
     if (being)
@@ -865,9 +850,6 @@ static int being_get_direction(lua_State *s)
  */
 static int being_set_direction(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     Being *being = getBeing(s, 1);
 
     int dir = lua_tointeger(s, 2);
@@ -885,9 +867,6 @@ static int being_set_direction(lua_State *s)
  */
 static int posX(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     int x = getBeing(s, 1)->getPosition().x;
     lua_pushinteger(s, x);
 
@@ -899,9 +878,6 @@ static int posX(lua_State *s)
  */
 static int posY(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-
     int y = getBeing(s, 1)->getPosition().y;
     lua_pushinteger(s, y);
 
