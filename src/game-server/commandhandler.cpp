@@ -27,6 +27,7 @@
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
+#include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monster.h"
 #include "game-server/monstermanager.h"
@@ -51,6 +52,7 @@ static void handleReport(Character*, std::string&);
 static void handleWhere(Character*, std::string&);
 static void handleRights(Character*, std::string&);
 static void handleWarp(Character*, std::string&);
+static void handleCharWarp(Character*, std::string&);
 static void handleGoto(Character*, std::string&);
 static void handleRecall(Character*, std::string&);
 static void handleBan(Character*, std::string&);
@@ -76,8 +78,10 @@ static CmdRef const cmdRef[] =
         "Tells you your location in the game world", &handleWhere},
     {"rights", ""          ,
         "Tells you your current permissions", &handleRights},
-    {"warp",   "<character> <map> <x> <y>",
+    {"warp",   "<map> <x> <y>",
         "Teleports your character to a different location in the game world", &handleWarp},
+    {"charwarp",   "<character> <map> <x> <y>",
+        "Teleports the given character to a different location in the game world", &handleCharWarp},
     {"goto", "<character>",
         "Teleports you to the location of another character", &handleGoto},
     {"recall", "<character>",
@@ -237,6 +241,90 @@ static void handleWarp(Character *player, std::string &args)
 {
     int x, y;
     MapComposite *map;
+
+    // get the arguments
+    std::string mapstr = getArgument(args);
+    std::string xstr = getArgument(args);
+    std::string ystr = getArgument(args);
+
+    // if any of them are empty strings, no argument was given
+    if (mapstr == "" || xstr == "" || ystr == "")
+    {
+        say("Invalid number of arguments given.", player);
+        say("Usage: @warp <map> <x> <y>", player);
+        return;
+    }
+
+    // if it contains # then it means the player's map
+    if (mapstr == "#")
+    {
+        map = player->getMap();
+    }
+    else
+    {
+        if (mapstr[0] == '#')
+        {
+            mapstr = mapstr.substr(1);
+            // check for valid map id
+            int id;
+            if (!utils::isNumeric(mapstr))
+            {
+                say("Invalid map", player);
+                return;
+            }
+
+            id = utils::stringToInt(mapstr);
+
+            // get the map
+            map = MapManager::getMap(id);
+            if (!map)
+            {
+                say("Invalid map", player);
+                return;
+            }
+        }
+        else
+        {
+            map = MapManager::getMap(mapstr);
+
+            if (!map)
+            {
+                say("Invalid map", player);
+                return;
+            }
+        }
+    }
+
+    if (!utils::isNumeric(xstr))
+    {
+        say("Invalid x", player);
+        return;
+    }
+
+    if (!utils::isNumeric(ystr))
+    {
+        say("Invalid y", player);
+        return;
+    }
+
+    // change the x and y to integers
+    x = utils::stringToInt(xstr);
+    y = utils::stringToInt(ystr);
+
+    // now warp the player
+    GameState::warp(player, map, x, y);
+
+    // log transaction
+    std::stringstream ss;
+    ss << "User warped to " << map->getName() << " (" << x << ", " << y << ")";
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_WARP,
+                                    ss.str());
+}
+
+static void handleCharWarp(Character *player, std::string &args)
+{
+    int x, y;
+    MapComposite *map;
     Character *other;
 
     // get the arguments
@@ -276,22 +364,36 @@ static void handleWarp(Character *player, std::string &args)
     }
     else
     {
-        // check for valid map id
-        int id;
-        if (!utils::isNumeric(mapstr))
+        if (mapstr[0] == '#')
         {
-            say("Invalid map", player);
-            return;
+            mapstr = mapstr.substr(1);
+            // check for valid map id
+            int id;
+            if (!utils::isNumeric(mapstr))
+            {
+                say("Invalid map", player);
+                return;
+            }
+
+            id = utils::stringToInt(mapstr);
+
+            // get the map
+            map = MapManager::getMap(id);
+            if (!map)
+            {
+                say("Invalid map", player);
+                return;
+            }
         }
-
-        id = utils::stringToInt(mapstr);
-
-        // get the map
-        map = MapManager::getMap(id);
-        if (!map)
+        else
         {
-            say("Invalid map", player);
-            return;
+            map = MapManager::getMap(mapstr);
+
+            if (!map)
+            {
+                say("Invalid map", player);
+                return;
+            }
         }
     }
 
@@ -315,8 +417,11 @@ static void handleWarp(Character *player, std::string &args)
     GameState::warp(other, map, x, y);
 
     // log transaction
-    std::string msg = "User warped to " + xstr + "x" + ystr;
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_WARP, msg);
+    std::stringstream ss;
+    ss << "User warped " << other->getName() << " to " << map->getName() <<
+            " (" << x << ", " << y << ")";
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_WARP,
+                                    ss.str());
 }
 
 static void handleItem(Character *player, std::string &args)

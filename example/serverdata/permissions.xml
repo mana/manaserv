@@ -18,6 +18,7 @@
     <allow>@money</allow>
     <allow>@spawn</allow>
     <allow>@attribute</allow>
+    <allow>@charwarp</allow>
   </class>
   <class level="4">
     <alias>gm</alias>
