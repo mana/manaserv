@@ -66,6 +66,7 @@ static const char *SUPPORTED_DB_VERSION = "12";
  * TODO: Fix problem with PostgreSQL null primary key's.
  */
 
+// Table names
 static const char *ACCOUNTS_TBL_NAME            =   "mana_accounts";
 static const char *CHARACTERS_TBL_NAME          =   "mana_characters";
 static const char *CHAR_ATTR_TBL_NAME           =   "mana_char_attr";
