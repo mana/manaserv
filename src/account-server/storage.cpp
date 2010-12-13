@@ -1742,9 +1742,7 @@ void Storage::syncDatabase()
     int itemCount = 0;
     for_each_xml_child_node(node, rootNode)
     {
-        // Try to load the version of the item database. The version is defined
-        // as subversion tag embedded as XML attribute. So every modification
-        // to the items.xml file will increase the revision automatically.
+        // Try to load the version of the item database.
         if (xmlStrEqual(node->name, BAD_CAST "version"))
         {
             std::string revision = XML::getProperty(node, "revision",
