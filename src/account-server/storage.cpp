@@ -87,18 +87,12 @@ static const char *AUCTION_BIDS_TBL_NAME        =   "mana_auction_bids";
 static const char *ONLINE_USERS_TBL_NAME        =   "mana_online_list";
 static const char *TRANSACTION_TBL_NAME         =   "mana_transactions";
 
-/**
- * Constructor.
- */
 Storage::Storage()
         : mDb(dal::DataProviderFactory::createDataProvider()),
           mItemDbVersion(0)
 {
 }
 
-/**
- * Destructor.
- */
 Storage::~Storage()
 {
     if (mDb->isConnected())
@@ -107,9 +101,6 @@ Storage::~Storage()
     delete mDb;
 }
 
-/**
- * Connect to the database and initialize it if necessary.
- */
 void Storage::open()
 {
     // Do nothing if already connected.
@@ -151,19 +142,11 @@ void Storage::open()
     }
 }
 
-/**
- * Disconnect from the database.
- */
 void Storage::close()
 {
     mDb->disconnect();
 }
 
-/**
- * Gets an account from a prepared SQL statement
- *
- * @return the account found
- */
 Account *Storage::getAccountBySQL()
 {
     try
@@ -246,12 +229,6 @@ Account *Storage::getAccountBySQL()
     }
 }
 
-/**
- * Get an account by user name.
- *
- * @param userName the owner of the account.
- * @return the account associated to the user name.
- */
 Account *Storage::getAccount(const std::string &userName)
 {
     std::ostringstream sql;
@@ -263,13 +240,6 @@ Account *Storage::getAccount(const std::string &userName)
     return getAccountBySQL();
 }
 
-/**
- * Get an account by ID.
- *
- * @param accountID the ID of the account.
- *
- * @return the account associated with the ID.
- */
 Account *Storage::getAccount(int accountID)
 {
     std::ostringstream sql;
@@ -281,13 +251,6 @@ Account *Storage::getAccount(int accountID)
     return getAccountBySQL();
 }
 
-/**
- * Gets a character from a prepared SQL statement
- *
- * @param owner the account the character is in.
- *
- * @return the character found by the query.
- */
 Character *Storage::getCharacterBySQL(Account *owner)
 {
     Character *character;
@@ -489,14 +452,6 @@ Character *Storage::getCharacterBySQL(Account *owner)
     return character;
 }
 
-/**
- * Gets a character by database ID.
- *
- * @param id the ID of the character.
- * @param owner the account the character is in.
- *
- * @return the character associated to the ID.
- */
 Character *Storage::getCharacter(int id, Account *owner)
 {
     std::ostringstream sql;
@@ -508,13 +463,6 @@ Character *Storage::getCharacter(int id, Account *owner)
     return getCharacterBySQL(owner);
 }
 
-/**
- * Gets a character by character name.
- *
- * @param name of the character
- *
- * @return the character associated to the name
- */
 Character *Storage::getCharacter(const std::string &name)
 {
     std::ostringstream sql;
@@ -526,10 +474,6 @@ Character *Storage::getCharacter(const std::string &name)
     return getCharacterBySQL(0);
 }
 
-/**
- * Tells if the user name already exists.
- * @return true if the user name exists.
- */
 bool Storage::doesUserNameExist(const std::string &name)
 {
     try
@@ -558,10 +502,6 @@ bool Storage::doesUserNameExist(const std::string &name)
     return true;
 }
 
-/**
- * Tells if the email address already exists.
- * @return true if the email address exists.
- */
 bool Storage::doesEmailAddressExist(const std::string &email)
 {
     try
@@ -589,10 +529,6 @@ bool Storage::doesEmailAddressExist(const std::string &email)
     return true;
 }
 
-/**
- * Tells if the character's name already exists.
- * @return true if character's name exists.
- */
 bool Storage::doesCharacterNameExist(const std::string& name)
 {
     try
@@ -620,14 +556,6 @@ bool Storage::doesCharacterNameExist(const std::string& name)
     return true;
 }
 
-/**
- * Updates the data for a single character, does not update the owning account
- * or the characters name. Primary usage should be storing characterdata
- * received from a game server.
- *
- * @param ptr Character to store values in the database.
- * @return true on success
- */
 bool Storage::updateCharacter(Character *character)
 {
     dal::PerformTransaction transaction(mDb);
@@ -854,25 +782,14 @@ bool Storage::updateCharacter(Character *character)
     return true;
 }
 
-/**
- * Save changes of a skill to the database permanently.
- *
- * @param character Character thats skill has changed.
- * @param skill_id Identifier of the changed skill.
- *
- * @exception dbl::DbSqlQueryExecFailure.
- * @deprecated Use DALStorage::updateExperience instead!!!
-*/
 void Storage::flushSkill(const Character *character, int skill_id)
 {
+    // @deprecated Use DALStorage::updateExperience instead!!!
+    // TODO: Remove calls of flushSkill for updateExperience instead.
     updateExperience(character->getDatabaseID(), skill_id,
         character->getExperience(skill_id));
 }
 
-/**
- * Add an account to the database.
- * @param account the new account.
- */
 void Storage::addAccount(Account *account)
 {
     assert(account->getCharacters().size() == 0);
@@ -910,9 +827,6 @@ void Storage::addAccount(Account *account)
     }
 }
 
-/**
- * Update an account from the database.
- */
 void Storage::flush(Account *account)
 {
     assert(account->getID() >= 0);
@@ -1043,11 +957,6 @@ void Storage::flush(Account *account)
     }
 }
 
-/**
- * Delete an account and its associated data from the database.
- *
- * @param account the account to delete.
- */
 void Storage::delAccount(Account *account)
 {
     // Sync the account info into the database.
@@ -1070,11 +979,6 @@ void Storage::delAccount(Account *account)
     }
 }
 
-/**
- * Update the date and time of the last login.
- *
- * @param account the account that recently logged in.
- */
 void Storage::updateLastLogin(const Account *account)
 {
     std::ostringstream sql;
@@ -1084,13 +988,6 @@ void Storage::updateLastLogin(const Account *account)
     mDb->execSql(sql.str());
 }
 
-/**
- * Write a modification message about Character points to the database.
- *
- * @param CharId      ID of the character
- * @param CharPoints  Number of character points left for the character
- * @param CorrPoints  Number of correction points left for the character
- */
 void Storage::updateCharacterPoints(int charId,
                                     int charPoints, int corrPoints)
 {
@@ -1112,12 +1009,6 @@ void Storage::updateCharacterPoints(int charId,
 
 }
 
-/**
- * Write a modification message about character skills to the database.
- * @param CharId      ID of the character
- * @param SkillId     ID of the skill
- * @param SkillValue  new skill points
- */
 void Storage::updateExperience(int charId, int skillId, int skillValue)
 {
     try
@@ -1162,14 +1053,6 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
     }
 }
 
-/**
- * Write a modification message about character attributes to the database.
- * @param charId    The Id of the character
- * @param attrId    The Id of the attribute
- * @param base      The base value of the attribute for this character
- * @param mod       The cached modified value for this character.
- */
-
 void Storage::updateAttribute(int charId, unsigned int attrId,
                               double base, double mod)
 {
@@ -1207,12 +1090,6 @@ void Storage::updateAttribute(int charId, unsigned int attrId,
     }
 }
 
-/**
- * Write a modification message about character skills to the database.
- * @param CharId      ID of the character
- * @param monsterId   ID of the monster type
- * @param kills       new amount of kills
- */
 void Storage::updateKillCount(int charId, int monsterId, int kills)
 {
     try
@@ -1247,12 +1124,6 @@ void Storage::updateKillCount(int charId, int monsterId, int kills)
     }
 }
 
-/**
- * Inserts a record about a status effect into the database
- * @param charId    ID of the character in the database
- * @param statusId  ID of the status effect
- * @param time      Time left on the status effect
- */
 void Storage::insertStatusEffect(int charId, int statusId, int time)
 {
     try
@@ -1273,10 +1144,6 @@ void Storage::insertStatusEffect(int charId, int statusId, int time)
     }
 }
 
-
-/**
- * Add a new guild.
- */
 void Storage::addGuild(Guild *guild)
 {
     std::ostringstream insertSql;
@@ -1303,9 +1170,6 @@ void Storage::addGuild(Guild *guild)
     guild->setId(id);
 }
 
-/**
- * Delete a guild.
- */
 void Storage::removeGuild(Guild *guild)
 {
     std::ostringstream sql;
@@ -1315,9 +1179,6 @@ void Storage::removeGuild(Guild *guild)
     mDb->execSql(sql.str());
 }
 
-/**
- * Add member to guild.
- */
 void Storage::addGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
@@ -1339,9 +1200,6 @@ void Storage::addGuildMember(int guildId, int memberId)
     }
 }
 
-/**
- * Remove member from guild.
- */
 void Storage::removeGuildMember(int guildId, int memberId)
 {
     std::ostringstream sql;
@@ -1361,9 +1219,6 @@ void Storage::removeGuildMember(int guildId, int memberId)
     }
 }
 
-/**
- * Save guild member rights.
- */
 void Storage::setMemberRights(int guildId, int memberId, int rights)
 {
     std::ostringstream sql;
@@ -1383,10 +1238,6 @@ void Storage::setMemberRights(int guildId, int memberId, int rights)
     }
 }
 
-/**
- * Get the list of guilds.
- * @return a list of guilds
- */
 std::list<Guild*> Storage::getGuildList()
 {
     std::list<Guild*> guilds;
@@ -1457,9 +1308,6 @@ std::list<Guild*> Storage::getGuildList()
     return guilds;
 }
 
-/**
- * Gets the value of a quest variable.
- */
 std::string Storage::getQuestVar(int id, const std::string &name)
 {
     try
@@ -1484,12 +1332,6 @@ std::string Storage::getQuestVar(int id, const std::string &name)
     return std::string();
 }
 
-/**
- * Gets the string value of a map specific world state variable.
- *
- * @param name Name of the requested world-state variable.
- * @param map_id Id of the specific map.
- */
 std::string Storage::getWorldStateVar(const std::string &name, int map_id)
 {
     try
@@ -1518,25 +1360,12 @@ std::string Storage::getWorldStateVar(const std::string &name, int map_id)
     return std::string();
 }
 
-/**
- * Sets the value of a world state variable.
- *
- * @param name Name of the world-state vairable.
- * @param value New value of the world-state variable.
- */
 void Storage::setWorldStateVar(const std::string &name,
                                const std::string &value)
 {
     return setWorldStateVar(name, -1, value);
 }
 
-/**
- * Sets the value of a world state variable of a specific map.
- *
- * @param name Name of the world-state vairable.
- * @param mapId ID of the specific map
- * @param value New value of the world-state variable.
- */
 void Storage::setWorldStateVar(const std::string &name,
                                int mapId,
                                const std::string &value)
@@ -1595,9 +1424,6 @@ void Storage::setWorldStateVar(const std::string &name,
     }
 }
 
-/**
- * Sets the value of a quest variable.
- */
 void Storage::setQuestVar(int id, const std::string &name,
                           const std::string &value)
 {
@@ -1623,12 +1449,6 @@ void Storage::setQuestVar(int id, const std::string &name,
     }
 }
 
-/**
- * Sets a ban on an account (hence on all its characters).
- *
- * @param id character identifier.
- * @param duration duration in minutes.
- */
 void Storage::banCharacter(int id, int duration)
 {
     try
@@ -1656,11 +1476,6 @@ void Storage::banCharacter(int id, int duration)
     }
 }
 
-/**
- * Delete a character in the database.
- *
- * @param charId character identifier.
- */
 void Storage::delCharacter(int charId) const
 {
     try
@@ -1723,20 +1538,11 @@ void Storage::delCharacter(int charId) const
     }
 }
 
-/**
- * Delete a character in the database. The object itself is not touched
- * by this function!
- *
- * @param character character object.
- */
 void Storage::delCharacter(Character *character) const
 {
     delCharacter(character->getDatabaseID());
 }
 
-/**
- * Removes expired bans from accounts
- */
 void Storage::checkBannedAccounts()
 {
     try
@@ -1755,12 +1561,6 @@ void Storage::checkBannedAccounts()
     }
 }
 
-/**
- * Set the level on an account.
- *
- * @param id The id of the account
- * @param level The level to set for the account
- */
 void Storage::setAccountLevel(int id, int level)
 {
     try
@@ -1777,12 +1577,6 @@ void Storage::setAccountLevel(int id, int level)
     }
 }
 
-/**
- * Set the level on a character.
- *
- * @param id The id of the character
- * @param level The level to set for the character
- */
 void Storage::setPlayerLevel(int id, int level)
 {
     try
@@ -1799,11 +1593,6 @@ void Storage::setPlayerLevel(int id, int level)
     }
 }
 
-/**
- * Store letter.
- *
- * @param letter The letter to store
- */
 void Storage::storeLetter(Letter *letter)
 {
     std::ostringstream sql;
@@ -1858,11 +1647,6 @@ void Storage::storeLetter(Letter *letter)
     }
 }
 
-/**
- * Retrieve post
- *
- * @param playerId The id of the character requesting his post
- */
 Post *Storage::getStoredPost(int playerId)
 {
     Post *p = new Post();
@@ -1903,10 +1687,6 @@ Post *Storage::getStoredPost(int playerId)
     return p;
 }
 
-/**
- * Delete a letter from the database.
- * @param letter The letter to delete.
- */
 void Storage::deletePost(Letter *letter)
 {
     try
@@ -1936,14 +1716,6 @@ void Storage::deletePost(Letter *letter)
     }
 }
 
-/**
- * Synchronizes the base data in the connected SQL database with the xml
- * files like items.xml.
- * This method is called once after initialization of DALStorage.
- * Probably this function should be called if a gm requests an online
- * reload of the xml files to load new items or monsters without server
- * restart.
- */
 void Storage::syncDatabase()
 {
     XML::Document doc(DEFAULT_ITEM_FILE);
@@ -2042,12 +1814,6 @@ void Storage::syncDatabase()
     transaction.commit();
 }
 
-/**
- * Sets the status of a character to online (true) or offline (false).
- *
- * @param charId Id of the character.
- * @param online True to mark the character as being online.
- */
 void Storage::setOnlineStatus(int charId, bool online)
 {
     try
@@ -2085,9 +1851,6 @@ void Storage::setOnlineStatus(int charId, bool online)
     }
 }
 
-/**
- * Store a transaction.
- */
 void Storage::addTransaction(const Transaction &trans)
 {
     try
@@ -2110,9 +1873,6 @@ void Storage::addTransaction(const Transaction &trans)
     }
 }
 
-/**
- * Retrieve the last \num transactions that were stored.
- */
 std::vector<Transaction> Storage::getTransactions(unsigned int num)
 {
     std::vector<Transaction> transactions;
@@ -2144,9 +1904,6 @@ std::vector<Transaction> Storage::getTransactions(unsigned int num)
     return transactions;
 }
 
-/**
- * Retrieve all transactions since the given \a date.
- */
 std::vector<Transaction> Storage::getTransactions(time_t date)
 {
     std::vector<Transaction> transactions;
