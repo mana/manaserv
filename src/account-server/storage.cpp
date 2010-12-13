@@ -1760,10 +1760,7 @@ void Storage::syncDatabase()
         {
             int id = XML::getProperty(node, "id", 0);
 
-            // This is here to """help""" us get away from *Athena items.
-            // This is nonsense since the config is incompatible anyway.
-            // TODO: Change this line in a specific commit to: if (id < 1)
-            if (id < 500)
+            if (id < 1)
                 continue;
 
             int weight = XML::getProperty(node, "weight", 0);
