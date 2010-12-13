@@ -66,21 +66,21 @@ class Storage
         Account *getAccount(const std::string &userName);
 
         /**
-         * Get an account by ID.
+         * Get an account by Id.
          *
-         * @param accountID the ID of the account.
+         * @param accountID the Id of the account.
          *
-         * @return the account associated with the ID.
+         * @return the account associated with the Id.
          */
-        Account *getAccount(int accountID);
+        Account *getAccount(int accountId);
 
         /**
-         * Gets a character by database ID.
+         * Gets a character by database Id.
          *
          * @param id the ID of the character.
          * @param owner the account the character is in.
          *
-         * @return the character associated to the ID.
+         * @return the character associated to the Id.
          */
         Character *getCharacter(int id, Account *owner);
 
@@ -134,7 +134,8 @@ class Storage
         void updateExperience(int charId, int skillId, int skillValue);
 
         /**
-         * Write a modification message about character attributes to the database.
+         * Write a modification message about character attributes
+         * to the database.
          *
          * @param charId    The Id of the character
          * @param attrId    The Id of the attribute
@@ -238,7 +239,7 @@ class Storage
          * @exception dbl::DbSqlQueryExecFailure.
          * @deprecated Use DALStorage::updateExperience instead!!!
          */
-        void flushSkill(const Character *character, int skill_id);
+        void flushSkill(const Character *character, int skillId);
 
         /**
          * Add a new guild.
@@ -316,7 +317,7 @@ class Storage
          * @param name Name of the requested world-state variable.
          * @param map_id Id of the specific map.
          */
-        std::string getWorldStateVar(const std::string &name, int map_id = -1);
+        std::string getWorldStateVar(const std::string &name, int mapId = -1);
 
         /**
          * Sets the value of a world state variable.

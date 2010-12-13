@@ -156,9 +156,7 @@ Account *Storage::getAccountBySQL()
         // If the account is not even in the database then
         // we have no choice but to return nothing.
         if (accountInfo.isEmpty())
-        {
             return 0;
-        }
 
         // Specialize the string_to functor to convert
         // a string to an unsigned int.
@@ -393,9 +391,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
         {
             const unsigned int nRows = specialsInfo.rows();
             for (unsigned int row = 0; row < nRows; row++)
-            {
                 character->giveSpecial(toUint(specialsInfo(row, 0)));
-            }
         }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
@@ -437,6 +433,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
 
         const dal::RecordSet &itemInfo = mDb->execSql(sql.str());
         if (!itemInfo.isEmpty())
+        {
             for (int k = 0, size = itemInfo.rows(); k < size; ++k)
             {
                 InventoryItem item;
@@ -445,6 +442,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
                 item.amount   = toUint(itemInfo(k, 4));
                 poss.inventory[slot] = item;
             }
+        }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -599,11 +597,8 @@ bool Storage::updateCharacter(Character *character)
     try
     {
         std::ostringstream sqlAttr;
-        for (AttributeMap::const_iterator
-             it = character->mAttributes.begin(),
-             it_end = character->mAttributes.end();
-            it != it_end;
-            ++it)
+        for (AttributeMap::const_iterator it = character->mAttributes.begin(),
+             it_end = character->mAttributes.end(); it != it_end; ++it)
             updateAttribute(character->getDatabaseID(), it->first,
                             it->second.first, it->second.second);
     }
@@ -791,12 +786,12 @@ bool Storage::updateCharacter(Character *character)
     return true;
 }
 
-void Storage::flushSkill(const Character *character, int skill_id)
+void Storage::flushSkill(const Character *character, int skillId)
 {
     // Note: Deprecated, use DALStorage::updateExperience instead!!!
     // TODO: Remove calls of flushSkill for updateExperience instead.
-    updateExperience(character->getDatabaseID(), skill_id,
-        character->getExperience(skill_id));
+    updateExperience(character->getDatabaseID(), skillId,
+        character->getExperience(skillId));
 }
 
 void Storage::addAccount(Account *account)
@@ -900,23 +895,24 @@ void Storage::flush(Account *account)
                 (*it)->setDatabaseID(mDb->getLastId());
 
                 // Update all attributes.
-                std::map<unsigned int, std::pair<double, double> >::const_iterator
-                        attr_it, attr_end;
+                AttributeMap::const_iterator attr_it, attr_end;
                 for (attr_it =  (*it)->mAttributes.begin(),
                      attr_end = (*it)->mAttributes.end();
-                    attr_it != attr_end;
-                    ++attr_it)
+                     attr_it != attr_end; ++attr_it)
+                {
                     updateAttribute((*it)->getDatabaseID(), attr_it->first,
                                     attr_it->second.first,
                                     attr_it->second.second);
+                }
 
                 // Update the characters skill
                 std::map<int, int>::const_iterator skill_it;
                 for (skill_it = (*it)->mExperience.begin();
-                     skill_it != (*it)->mExperience.end();
-                     skill_it++)
+                     skill_it != (*it)->mExperience.end(); skill_it++)
+                {
                     updateExperience((*it)->getDatabaseID(),
                                      skill_it->first, skill_it->second);
+                }
             }
         }
 
@@ -930,8 +926,9 @@ void Storage::flush(Account *account)
 
         std::ostringstream sqlSelectNameIdCharactersTable;
         sqlSelectNameIdCharactersTable
-             << "select name, id from " << CHARACTERS_TBL_NAME
-             << " where user_id = '" << account->getID() << "';";
+            << "select name, id from " << CHARACTERS_TBL_NAME
+            << " where user_id = '" << account->getID() << "';";
+
         const RecordSet& charInMemInfo =
             mDb->execSql(sqlSelectNameIdCharactersTable.str());
 
@@ -1072,28 +1069,25 @@ void Storage::updateAttribute(int charId, unsigned int attrId,
     try
     {
         std::ostringstream sql;
-        sql << "UPDATE "       << CHAR_ATTR_TBL_NAME         << " "
-            << "SET "
-            << "attr_base = '" << base                       << "', "
-            << "attr_mod  = '" << mod                        << "' "
-            << "WHERE "
-            << "char_id   = '" << charId                     << "' "
-            << "AND "
-            << "attr_id   = '" << attrId                     << "';";
+        sql << "UPDATE " << CHAR_ATTR_TBL_NAME
+            << " SET attr_base = '" << base << "', "
+            << "attr_mod = '" << mod << "' "
+            << "WHERE char_id = '" << charId << "' "
+            << "AND attr_id = '" << attrId << "';";
         mDb->execSql(sql.str());
+
         // If this has modified a row, we're done, it updated sucessfully.
         if (mDb->getModifiedRows() > 0)
             return;
+
         // If it did not change anything,
         // then the record didn't previously exist. Create it.
         sql.clear();
         sql.str("");
-        sql << "INSERT INTO " << CHAR_ATTR_TBL_NAME         << " "
-            << "(char_id, attr_id, attr_base, attr_mod) VALUES ( "
-            << charId                                       << ", "
-            << attrId                                       << ", "
-            << base                                         << ", "
-            << mod                                          << ")";
+        sql << "INSERT INTO " << CHAR_ATTR_TBL_NAME
+            << " (char_id, attr_id, attr_base, attr_mod) VALUES ( "
+            << charId << ", " << attrId << ", " << base << ", "
+            << mod << ")";
         mDb->execSql(sql.str());
     }
     catch (const dal::DbSqlQueryExecFailure &e)
@@ -1264,9 +1258,7 @@ std::list<Guild*> Storage::getGuildList()
 
         // Check that at least 1 guild was returned
         if (guildInfo.isEmpty())
-        {
             return guilds;
-        }
 
         // Loop through every row in the table and assign it to a guild
         for ( unsigned int i = 0; i < guildInfo.rows(); ++i)
@@ -1279,8 +1271,7 @@ std::list<Guild*> Storage::getGuildList()
 
         // Add the members to the guilds.
         for (std::list<Guild*>::iterator itr = guilds.begin();
-             itr != guilds.end();
-             ++itr)
+             itr != guilds.end(); ++itr)
         {
             std::ostringstream memberSql;
             memberSql << "select member_id, rights from "
@@ -1295,9 +1286,8 @@ std::list<Guild*> Storage::getGuildList()
                                                      toUint(memberInfo(j, 1))));
             }
 
-            for (std::list<std::pair<int, int> >::const_iterator i =
-                                                                members.begin();
-                 i != members.end(); ++i)
+            std::list<std::pair<int, int> >::const_iterator i, i_end;
+            for (i = members.begin(), i_end = members.end(); i != i_end; ++i)
             {
                 Character *character = getCharacter((*i).first, 0);
                 if (character)
@@ -1331,7 +1321,8 @@ std::string Storage::getQuestVar(int id, const std::string &name)
         }
         const dal::RecordSet &info = mDb->processSql();
 
-        if (!info.isEmpty()) return info(0, 0);
+        if (!info.isEmpty())
+            return info(0, 0);
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -1341,7 +1332,7 @@ std::string Storage::getQuestVar(int id, const std::string &name)
     return std::string();
 }
 
-std::string Storage::getWorldStateVar(const std::string &name, int map_id)
+std::string Storage::getWorldStateVar(const std::string &name, int mapId)
 {
     try
     {
@@ -1351,15 +1342,14 @@ std::string Storage::getWorldStateVar(const std::string &name, int map_id)
               << " WHERE state_name = '" << name << "'";
 
         // Add a map filter if map_id is given
-        if (map_id >= 0)
-        {
-            query << "  AND map_id = '" << map_id << "'";
-        }
+        if (mapId >= 0)
+            query << "  AND map_id = '" << mapId << "'";
 
         query << ";";
         const dal::RecordSet &info = mDb->execSql(query.str());
 
-        if (!info.isEmpty()) return info(0, 0);
+        if (!info.isEmpty())
+            return info(0, 0);
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -1388,10 +1378,10 @@ void Storage::setWorldStateVar(const std::string &name,
             std::ostringstream deleteStateVar;
             deleteStateVar << "DELETE FROM " << WORLD_STATES_TBL_NAME
                            << " WHERE state_name = '" << name << "'";
+
             if (mapId >= 0)
-            {
                 deleteStateVar << " AND map_id = '" << mapId << "'";
-            }
+
             deleteStateVar << ";";
             mDb->execSql(deleteStateVar.str());
             return;
@@ -1405,7 +1395,7 @@ void Storage::setWorldStateVar(const std::string &name,
                        << " WHERE state_name = '" << name << "'";
 
         if (mapId >= 0)
-            updateStateVar << "   AND map_id = '" << mapId << "'";
+            updateStateVar << " AND map_id = '" << mapId << "'";
 
         updateStateVar << ";";
         mDb->execSql(updateStateVar.str());
@@ -1446,7 +1436,8 @@ void Storage::setQuestVar(int id, const std::string &name,
                << name << "';";
         mDb->execSql(query1.str());
 
-        if (value.empty()) return;
+        if (value.empty())
+            return;
 
         std::ostringstream query2;
         query2 << "insert into " << QUESTS_TBL_NAME
@@ -1748,7 +1739,7 @@ void Storage::syncDatabase()
     }
 
     dal::PerformTransaction transaction(mDb);
-    int itmCount = 0;
+    int itemCount = 0;
     for_each_xml_child_node(node, rootNode)
     {
         // Try to load the version of the item database. The version is defined
@@ -1768,6 +1759,10 @@ void Storage::syncDatabase()
         if (xmlStrEqual(node->name, BAD_CAST "item"))
         {
             int id = XML::getProperty(node, "id", 0);
+
+            // This is here to """help""" us get away from *Athena items.
+            // This is nonsense since the config is incompatible anyway.
+            // TODO: Change this line in a specific commit to: if (id < 1)
             if (id < 500)
                 continue;
 
@@ -1823,7 +1818,7 @@ void Storage::syncDatabase()
                     }
                     mDb->processSql();
                 }
-                itmCount++;
+                itemCount++;
             }
             catch (const dal::DbSqlQueryExecFailure &e)
             {
