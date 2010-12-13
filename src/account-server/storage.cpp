@@ -37,7 +37,7 @@
 
 static const char *DEFAULT_ITEM_FILE = "items.xml";
 
-// defines the supported db version
+// Defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
 static const char *SUPPORTED_DB_VERSION = "12";
 
@@ -111,10 +111,10 @@ void Storage::open()
 
     try
     {
-        // open a connection to the database.
+        // Open a connection to the database.
         mDb->connect();
 
-        // check database version here
+        // Check database version here
         std::string dbversion = getWorldStateVar(DB_VERSION_PARAMETER);
         if (dbversion != SUPPORTED_DB_VERSION)
         {
@@ -125,10 +125,10 @@ void Storage::open()
             throw errmsg.str();
         }
 
-        // synchronize base data from xml files
+        // Synchronize base data from xml files
         syncDatabase();
 
-        // clean list of online users, this should be empty after restart
+        // Clean list of online users, this should be empty after restart
         std::ostringstream sql;
         sql << "DELETE FROM " << ONLINE_USERS_TBL_NAME;
         mDb->execSql(sql.str());
@@ -153,19 +153,19 @@ Account *Storage::getAccountBySQL()
     {
         const dal::RecordSet &accountInfo = mDb->processSql();
 
-        // if the account is not even in the database then
+        // If the account is not even in the database then
         // we have no choice but to return nothing.
         if (accountInfo.isEmpty())
         {
             return 0;
         }
 
-        // specialize the string_to functor to convert
+        // Specialize the string_to functor to convert
         // a string to an unsigned int.
         string_to< unsigned > toUint;
         unsigned id = toUint(accountInfo(0, 0));
 
-        // create an Account instance
+        // Create an Account instance
         // and initialize it with information about the user.
         Account *account = new Account(id);
         account->setName(accountInfo(0, 1));
@@ -185,7 +185,7 @@ Account *Storage::getAccountBySQL()
         }
         account->setLevel(level);
 
-        // load the characters associated with the account.
+        // Load the characters associated with the account.
         std::ostringstream sql;
         sql << "select id from " << CHARACTERS_TBL_NAME << " where user_id = '"
             << id << "';";
@@ -196,25 +196,22 @@ Account *Storage::getAccountBySQL()
             int size = charInfo.rows();
             Characters characters;
 
-            LOG_DEBUG("Account "<< id << " has " << size << " character(s) in database.");
+            LOG_DEBUG("Account "<< id << " has " << size
+                      << " character(s) in database.");
 
-            // Two steps: it seems like multiple requests cannot be alive at the same time.
+            // Two steps: it seems like multiple requests cannot be alive
+            // at the same time.
             std::vector< unsigned > characterIDs;
             for (int k = 0; k < size; ++k)
-            {
                 characterIDs.push_back(toUint(charInfo(k, 0)));
-            }
 
             for (int k = 0; k < size; ++k)
             {
                 if (Character *ptr = getCharacter(characterIDs[k], account))
-                {
                     characters.push_back(ptr);
-                }
                 else
-                {
-                    LOG_ERROR("Failed to get character " << characterIDs[k] << " for account " << id << '.');
-                }
+                    LOG_ERROR("Failed to get character " << characterIDs[k]
+                              << " for account " << id << '.');
             }
 
             account->setCharacters(characters);
@@ -255,7 +252,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
 {
     Character *character;
 
-    // specialize the string_to functor to convert
+    // Specialize the string_to functor to convert
     // a string to an unsigned int.
     string_to< unsigned > toUint;
 
@@ -263,12 +260,12 @@ Character *Storage::getCharacterBySQL(Account *owner)
     {
         const dal::RecordSet &charInfo = mDb->processSql();
 
-        // if the character is not even in the database then
+        // If the character is not even in the database then
         // we have no choice but to return nothing.
         if (charInfo.isEmpty())
             return 0;
 
-        // specialize the string_to functor to convert
+        // Specialize the string_to functor to convert
         // a string to an unsigned short.
         string_to< unsigned short > toUshort;
         string_to< double > toDouble;
@@ -295,8 +292,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
             character->setMapId(Configuration::getValue("char_defaultMap", 1));
         }
 
-        /* Fill the account-related fields. Last step, as it may require a new
-           SQL query. */
+        // Fill the account-related fields. Last step, as it may require a new
+        // SQL query.
         if (owner)
         {
             character->setAccount(owner);
@@ -314,9 +311,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
 
         std::ostringstream s;
 
-        /*
-         * Load attributes.
-         */
+        // Load attributes.
         s << "SELECT attr_id, attr_base, attr_mod "
           << "FROM " << CHAR_ATTR_TBL_NAME << " "
           << "WHERE char_id = " << character->getDatabaseID();
@@ -336,9 +331,9 @@ Character *Storage::getCharacterBySQL(Account *owner)
         s.clear();
         s.str("");
 
-        // load the skills of the char from CHAR_SKILLS_TBL_NAME
-
-        s << "select status_id, status_time FROM " << CHAR_STATUS_EFFECTS_TBL_NAME
+        // Load the skills of the char from CHAR_SKILLS_TBL_NAME
+        s << "select status_id, status_time FROM "
+          << CHAR_STATUS_EFFECTS_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
 
         const dal::RecordSet &skillInfo = mDb->execSql(s.str());
@@ -348,14 +343,16 @@ Character *Storage::getCharacterBySQL(Account *owner)
             for (unsigned int row = 0; row < nRows; row++)
             {
                 character->setExperience(
-                    toUint(skillInfo(row, 0)),  // skillid
-                    toUint(skillInfo(row, 1))); // experience
+                    toUint(skillInfo(row, 0)),  // Skill Id
+                    toUint(skillInfo(row, 1))); // Experience
             }
         }
+
         // Load the status effect
         s.clear();
         s.str("");
-        s << "select status_id, status_time FROM " << CHAR_STATUS_EFFECTS_TBL_NAME
+        s << "select status_id, status_time FROM "
+          << CHAR_STATUS_EFFECTS_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
         const dal::RecordSet &statusInfo = mDb->execSql(s.str());
         if (!statusInfo.isEmpty())
@@ -364,10 +361,11 @@ Character *Storage::getCharacterBySQL(Account *owner)
             for (unsigned int row = 0; row < nRows; row++)
             {
                 character->applyStatusEffect(
-                    toUint(statusInfo(row, 0)), // Statusid
+                    toUint(statusInfo(row, 0)), // Status Id
                     toUint(statusInfo(row, 1))); // Time
             }
         }
+
         // Load the kill stats
         s.clear();
         s.str("");
@@ -384,7 +382,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
                     toUint(killsInfo(row, 1))); // Kills
             }
         }
-        // load the special status
+
+        // Load the special status
         s.clear();
         s.str("");
         s << "select special_id FROM " << CHAR_SPECIALS_TBL_NAME
@@ -401,7 +400,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getCharacter #1) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getCharacter #1) SQL query failure: "
+                  << e.what());
         return 0;
     }
 
@@ -410,7 +410,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
     try
     {
         std::ostringstream sql;
-        sql << " select * from " << CHAR_EQUIPS_TBL_NAME << " where owner_id = '"
+        sql << " select * from " << CHAR_EQUIPS_TBL_NAME
+            << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot_type desc;";
 
         const dal::RecordSet &equipInfo = mDb->execSql(sql.str());
@@ -422,14 +423,16 @@ Character *Storage::getCharacterBySQL(Account *owner)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getCharacter #1) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getCharacter #2) SQL query failure: "
+                  << e.what());
         return 0;
     }
 
     try
     {
         std::ostringstream sql;
-        sql << " select * from " << INVENTORIES_TBL_NAME << " where owner_id = '"
+        sql << " select * from " << INVENTORIES_TBL_NAME
+            << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot asc;";
 
         const dal::RecordSet &itemInfo = mDb->execSql(sql.str());
@@ -445,7 +448,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getCharacter #2) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getCharacter #3) SQL query failure: "
+                  << e.what());
         return 0;
     }
 
@@ -496,7 +500,8 @@ bool Storage::doesUserNameExist(const std::string &name)
     catch (const std::exception &e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::doesUserNameExist) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::doesUserNameExist) SQL query failure: "
+                  << e.what());
     }
 
     return true;
@@ -523,7 +528,8 @@ bool Storage::doesEmailAddressExist(const std::string &email)
     catch (const std::exception &e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::doesEmailAddressExist) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::doesEmailAddressExist) SQL query failure: "
+                  << e.what());
     }
 
     return true;
@@ -534,7 +540,8 @@ bool Storage::doesCharacterNameExist(const std::string& name)
     try
     {
         std::ostringstream sql;
-        sql << "SELECT COUNT(name) FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
+        sql << "SELECT COUNT(name) FROM " << CHARACTERS_TBL_NAME
+            << " WHERE name = ?";
         if (mDb->prepareSql(sql.str()))
         {
             mDb->bindValue(1, name);
@@ -550,7 +557,7 @@ bool Storage::doesCharacterNameExist(const std::string& name)
     {
         // TODO: throw an exception.
         LOG_ERROR("(DALStorage::doesCharacterNameExist) SQL query failure: "
-                << e.what());
+                  << e.what());
     }
 
     return true;
@@ -583,13 +590,12 @@ bool Storage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #1) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #1) SQL query failure: "
+                  << e.what());
         return false;
     }
 
-    /**
-     * Character attributes.
-     */
+    // Character attributes.
     try
     {
         std::ostringstream sqlAttr;
@@ -603,59 +609,60 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: "
+                  << e.what());
         return false;
     }
 
-    /**
-     *  Character's skills
-     */
+    // Character's skills
     try
     {
         std::map<int, int>::const_iterator skill_it;
         for (skill_it = character->mExperience.begin();
              skill_it != character->mExperience.end(); skill_it++)
         {
-            updateExperience(character->getDatabaseID(), skill_it->first, skill_it->second);
+            updateExperience(character->getDatabaseID(),
+                             skill_it->first, skill_it->second);
         }
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: "
+                  << e.what());
         return false;
     }
 
-    /**
-     *  Character's kill count
-     */
+    // Character's kill count
     try
     {
         std::map<int, int>::const_iterator kill_it;
         for (kill_it = character->getKillCountBegin();
              kill_it != character->getKillCountEnd(); kill_it++)
         {
-            updateKillCount(character->getDatabaseID(), kill_it->first, kill_it->second);
+            updateKillCount(character->getDatabaseID(),
+                            kill_it->first, kill_it->second);
         }
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #4) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #4) SQL query failure: "
+                  << e.what());
         return false;
     }
-    /**
-     *  Character's special actions
-     */
+
+    //  Character's special actions
     try
     {
-        // out with the old
+        // Out with the old
         std::ostringstream deleteSql("");
         std::ostringstream insertSql;
         deleteSql   << "DELETE FROM " << CHAR_SPECIALS_TBL_NAME
-                    << " WHERE char_id='" << character->getDatabaseID() << "';";
+                    << " WHERE char_id='"
+                    << character->getDatabaseID() << "';";
         mDb->execSql(deleteSql.str());
-        // in with the new
+        // In with the new
         std::map<int, Special*>::const_iterator special_it;
         for (special_it = character->getSpecialBegin();
              special_it != character->getSpecialEnd(); special_it++)
@@ -671,14 +678,12 @@ bool Storage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: "
+                  << e.what());
         return false;
     }
 
-    /**
-     *  Character's inventory
-     */
-
+    // Character's inventory
     // Delete the old inventory first
     try
     {
@@ -691,7 +696,8 @@ bool Storage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: "
+                  << e.what());
         return false;
     }
 
@@ -739,13 +745,13 @@ bool Storage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #6) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #6) SQL query failure: "
+                  << e.what());
         return false;
     }
 
-    /**
-     * Update char status effects
-     */
+
+    // Update char status effects
     try
     {
         // Delete the old status effects first
@@ -759,7 +765,8 @@ bool Storage::updateCharacter(Character *character)
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #7) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #7) SQL query failure: "
+                  << e.what());
         return false;
     }
     try
@@ -768,13 +775,15 @@ bool Storage::updateCharacter(Character *character)
         for (status_it = character->getStatusEffectBegin();
              status_it != character->getStatusEffectEnd(); status_it++)
         {
-            insertStatusEffect(character->getDatabaseID(), status_it->first, status_it->second);
+            insertStatusEffect(character->getDatabaseID(),
+                               status_it->first, status_it->second);
         }
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
         // TODO: throw an exception
-        LOG_ERROR("(DALStorage::updateCharacter #8) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::updateCharacter #8) SQL query failure: "
+                  << e.what());
         return false;
     }
 
@@ -784,7 +793,7 @@ bool Storage::updateCharacter(Character *character)
 
 void Storage::flushSkill(const Character *character, int skill_id)
 {
-    // @deprecated Use DALStorage::updateExperience instead!!!
+    // Note: Deprecated, use DALStorage::updateExperience instead!!!
     // TODO: Remove calls of flushSkill for updateExperience instead.
     updateExperience(character->getDatabaseID(), skill_id,
         character->getExperience(skill_id));
@@ -800,10 +809,11 @@ void Storage::addAccount(Account *account)
     {
         PerformTransaction transaction(mDb);
 
-        // insert the account
+        // Insert the account
         std::ostringstream sql;
         sql << "insert into " << ACCOUNTS_TBL_NAME
-             << " (username, password, email, level, banned, registration, lastlogin)"
+             << " (username, password, email, level, "
+             << "banned, registration, lastlogin)"
              << " VALUES (?, ?, ?, "
              << account->getLevel() << ", 0, "
              << account->getRegistrationDate() << ", "
@@ -837,7 +847,7 @@ void Storage::flush(Account *account)
     {
         PerformTransaction transaction(mDb);
 
-        // update the account
+        // Update the account
         std::ostringstream sqlUpdateAccountTable;
         sqlUpdateAccountTable
              << "update " << ACCOUNTS_TBL_NAME
@@ -849,10 +859,10 @@ void Storage::flush(Account *account)
              << "where id = '" << account->getID() << "';";
         mDb->execSql(sqlUpdateAccountTable.str());
 
-        // get the list of characters that belong to this account.
+        // Get the list of characters that belong to this account.
         Characters &characters = account->getCharacters();
 
-        // insert or update the characters.
+        // Insert or update the characters.
         for (Characters::const_iterator it = characters.begin(),
              it_end = characters.end(); it != it_end; ++it)
         {
@@ -863,12 +873,13 @@ void Storage::flush(Account *account)
             else
             {
                 std::ostringstream sqlInsertCharactersTable;
-                // insert the character
+                // Insert the character
                 // This assumes that the characters name has been checked for
                 // uniqueness
                 sqlInsertCharactersTable
                      << "insert into " << CHARACTERS_TBL_NAME
-                     << " (user_id, name, gender, hair_style, hair_color, level, char_pts, correct_pts,"
+                     << " (user_id, name, gender, hair_style, hair_color,"
+                     << " level, char_pts, correct_pts,"
                      << " x, y, map_id) values ("
                      << account->getID() << ", \""
                      << (*it)->getName() << "\", "
@@ -899,19 +910,21 @@ void Storage::flush(Account *account)
                                     attr_it->second.first,
                                     attr_it->second.second);
 
-                // update the characters skill
+                // Update the characters skill
                 std::map<int, int>::const_iterator skill_it;
                 for (skill_it = (*it)->mExperience.begin();
                      skill_it != (*it)->mExperience.end();
                      skill_it++)
-                    updateExperience((*it)->getDatabaseID(), skill_it->first, skill_it->second);
+                    updateExperience((*it)->getDatabaseID(),
+                                     skill_it->first, skill_it->second);
             }
-        } //
+        }
 
-        // Existing characters in memory have been inserted or updated in database.
+        // Existing characters in memory have been inserted
+        // or updated in database.
         // Now, let's remove those who are no more in memory from database.
 
-        // specialize the string_to functor to convert
+        // Specialize the string_to functor to convert
         // a string to an unsigned int.
         string_to<unsigned short> toUint;
 
@@ -923,9 +936,9 @@ void Storage::flush(Account *account)
             mDb->execSql(sqlSelectNameIdCharactersTable.str());
 
         // We compare chars from memory and those existing in db,
-        // And delete those not in mem but existing in db.
+        // and delete those not in mem but existing in db.
         bool charFound;
-        for (unsigned int i = 0; i < charInMemInfo.rows(); ++i) // in database
+        for (unsigned int i = 0; i < charInMemInfo.rows(); ++i) // In database
         {
             charFound = false;
             for (Characters::const_iterator it = characters.begin(),
@@ -939,11 +952,11 @@ void Storage::flush(Account *account)
             }
             if (!charFound)
             {
-                // The char is db but not in memory,
-                // It will be removed from database.
-                // We store the id of the char to delete
-                // Because as deleted, the RecordSet is also emptied
-                // That creates an error.
+                // The char is in db but not in memory,
+                // it will be removed from database.
+                // We store the id of the char to delete,
+                // because as deleted, the RecordSet is also emptied,
+                // and that creates an error.
                 unsigned int charId = toUint(charInMemInfo(i, 1));
                 delCharacter(charId);
             }
@@ -1013,8 +1026,8 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
 {
     try
     {
-        // if experience has decreased to 0 we don't store it anymore,
-        // its the default
+        // If experience has decreased to 0 we don't store it anymore,
+        // since it's the default behaviour.
         if (skillValue == 0)
         {
             std::ostringstream sql;
@@ -1025,7 +1038,7 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
             return;
         }
 
-        // try to update the skill
+        // Try to update the skill
         std::ostringstream sql;
         sql << "UPDATE " << CHAR_SKILLS_TBL_NAME
             << " SET skill_exp = " << skillValue
@@ -1033,7 +1046,7 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
             << " AND skill_id = " << skillId;
         mDb->execSql(sql.str());
 
-        // check if the update has modified a row
+        // Check if the update has modified a row
         if (mDb->getModifiedRows() > 0)
             return;
 
@@ -1071,8 +1084,8 @@ void Storage::updateAttribute(int charId, unsigned int attrId,
         // If this has modified a row, we're done, it updated sucessfully.
         if (mDb->getModifiedRows() > 0)
             return;
-        // If it did not change anything, then the record didn't previously exist.
-        // Create it.
+        // If it did not change anything,
+        // then the record didn't previously exist. Create it.
         sql.clear();
         sql.str("");
         sql << "INSERT INTO " << CHAR_ATTR_TBL_NAME         << " "
@@ -1094,7 +1107,7 @@ void Storage::updateKillCount(int charId, int monsterId, int kills)
 {
     try
     {
-        // try to update the kill count
+        // Try to update the kill count
         std::ostringstream sql;
         sql << "UPDATE " << CHAR_KILL_COUNT_TBL_NAME
             << " SET kills = " << kills
@@ -1102,11 +1115,9 @@ void Storage::updateKillCount(int charId, int monsterId, int kills)
             << " AND monster_id = " << monsterId;
         mDb->execSql(sql.str());
 
-        // check if the update has modified a row
+        // Check if the update has modified a row
         if (mDb->getModifiedRows() > 0)
-        {
             return;
-        }
 
         sql.clear();
         sql.str("");
@@ -1244,22 +1255,20 @@ std::list<Guild*> Storage::getGuildList()
     std::stringstream sql;
     string_to<short> toShort;
 
-    /**
-     * Get the guilds stored in the db.
-     */
 
+    // Get the guilds stored in the db.
     try
     {
         sql << "select id, name from " << GUILDS_TBL_NAME << ";";
         const dal::RecordSet& guildInfo = mDb->execSql(sql.str());
 
-        // check that at least 1 guild was returned
+        // Check that at least 1 guild was returned
         if (guildInfo.isEmpty())
         {
             return guilds;
         }
 
-        // loop through every row in the table and assign it to a guild
+        // Loop through every row in the table and assign it to a guild
         for ( unsigned int i = 0; i < guildInfo.rows(); ++i)
         {
             Guild* guild = new Guild(guildInfo(i,1));
@@ -1268,27 +1277,27 @@ std::list<Guild*> Storage::getGuildList()
         }
         string_to< unsigned > toUint;
 
-        /**
-         * Add the members to the guilds.
-         */
+        // Add the members to the guilds.
         for (std::list<Guild*>::iterator itr = guilds.begin();
              itr != guilds.end();
              ++itr)
         {
             std::ostringstream memberSql;
-            memberSql << "select member_id, rights from " << GUILD_MEMBERS_TBL_NAME
-            << " where guild_id = '" << (*itr)->getId() << "';";
+            memberSql << "select member_id, rights from "
+                      << GUILD_MEMBERS_TBL_NAME
+                      << " where guild_id = '" << (*itr)->getId() << "';";
             const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
 
             std::list<std::pair<int, int> > members;
             for (unsigned int j = 0; j < memberInfo.rows(); ++j)
             {
-                members.push_back(std::pair<int, int>(toUint(memberInfo(j, 0)), toUint(memberInfo(j, 1))));
+                members.push_back(std::pair<int, int>(toUint(memberInfo(j, 0)),
+                                                     toUint(memberInfo(j, 1))));
             }
 
-            for (std::list<std::pair<int, int> >::const_iterator i = members.begin();
-                 i != members.end();
-                 ++i)
+            for (std::list<std::pair<int, int> >::const_iterator i =
+                                                                members.begin();
+                 i != members.end(); ++i)
             {
                 Character *character = getCharacter((*i).first, 0);
                 if (character)
@@ -1341,7 +1350,7 @@ std::string Storage::getWorldStateVar(const std::string &name, int map_id)
               << "  FROM " << WORLD_STATES_TBL_NAME
               << " WHERE state_name = '" << name << "'";
 
-        // add map filter if map_id is given
+        // Add a map filter if map_id is given
         if (map_id >= 0)
         {
             query << "  AND map_id = '" << map_id << "'";
@@ -1354,7 +1363,8 @@ std::string Storage::getWorldStateVar(const std::string &name, int map_id)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getWorldStateVar) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getWorldStateVar) SQL query failure: "
+                  << e.what());
     }
 
     return std::string();
@@ -1372,7 +1382,7 @@ void Storage::setWorldStateVar(const std::string &name,
 {
     try
     {
-        // set the value to empty means: delete the variable
+        // Set the value to empty means: delete the variable
         if (value.empty())
         {
             std::ostringstream deleteStateVar;
@@ -1387,7 +1397,7 @@ void Storage::setWorldStateVar(const std::string &name,
             return;
         }
 
-        // try to update the variable in the database
+        // Try to update the variable in the database
         std::ostringstream updateStateVar;
         updateStateVar << "UPDATE " << WORLD_STATES_TBL_NAME
                        << "   SET value = '" << value << "', "
@@ -1400,11 +1410,11 @@ void Storage::setWorldStateVar(const std::string &name,
         updateStateVar << ";";
         mDb->execSql(updateStateVar.str());
 
-        // if we updated a row, were finished here
+        // If we updated a row, were finished here
         if (mDb->getModifiedRows() >= 1)
             return;
 
-        // otherwise we have to add the new variable
+        // Otherwise we have to add the new variable
         std::ostringstream insertStateVar;
         insertStateVar << "INSERT INTO " << WORLD_STATES_TBL_NAME
                        << " (state_name, map_id, value , moddate) VALUES ("
@@ -1420,7 +1430,8 @@ void Storage::setWorldStateVar(const std::string &name,
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setWorldStateVar) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::setWorldStateVar) SQL query failure: "
+                  << e.what());
     }
 }
 
@@ -1483,47 +1494,47 @@ void Storage::delCharacter(int charId) const
         dal::PerformTransaction transaction(mDb);
         std::ostringstream sql;
 
-        // delete the inventory of the character
+        // Delete the inventory of the character
         sql << "DELETE FROM " << INVENTORIES_TBL_NAME
             << " WHERE owner_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        // delete the skills of the character
+        // Delete the skills of the character
         sql.clear();
         sql.str("");
         sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
             << " WHERE char_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        // delete from the quests table
+        // Delete from the quests table
         sql.clear();
         sql.str("");
         sql << "DELETE FROM " << QUESTS_TBL_NAME
             << " WHERE owner_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        // delete from the guilds table
+        // Delete from the guilds table
         sql.clear();
         sql.str("");
         sql << "DELETE FROM " << GUILD_MEMBERS_TBL_NAME
             << " WHERE member_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        // delete auctions of the character
+        // Delete auctions of the character
         sql.clear();
         sql.str("");
         sql << "DELETE FROM " << AUCTION_TBL_NAME
             << " WHERE char_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        // delete bids made on auctions made by the character
+        // Delete bids made on auctions made by the character
         sql.clear();
         sql.str("");
         sql << "DELETE FROM " << AUCTION_BIDS_TBL_NAME
             << " WHERE char_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        // now delete the character itself.
+        // Now delete the character itself.
         sql.clear();
         sql.str("");
         sql << "DELETE FROM " << CHARACTERS_TBL_NAME
@@ -1547,7 +1558,7 @@ void Storage::checkBannedAccounts()
 {
     try
     {
-        // update expired bans
+        // Update expired bans
         std::ostringstream sql;
         sql << "update " << ACCOUNTS_TBL_NAME
         << " set level = " << AL_PLAYER << ", banned = 0"
@@ -1557,7 +1568,8 @@ void Storage::checkBannedAccounts()
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::checkBannedAccounts) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::checkBannedAccounts) SQL query failure: "
+                  << e.what());
     }
 }
 
@@ -1573,7 +1585,8 @@ void Storage::setAccountLevel(int id, int level)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setAccountLevel) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::setAccountLevel) SQL query failure: "
+                  << e.what());
     }
 }
 
@@ -1589,7 +1602,8 @@ void Storage::setPlayerLevel(int id, int level)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setPlayerLevel) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::setPlayerLevel) SQL query failure: "
+                  << e.what());
     }
 }
 
@@ -1598,7 +1612,7 @@ void Storage::storeLetter(Letter *letter)
     std::ostringstream sql;
     if (letter->getId() == 0)
     {
-        // the letter was never saved before
+        // The letter was never saved before
         sql << "INSERT INTO " << POST_TBL_NAME << " VALUES ( "
             << "NULL, "
             << letter->getSender()->getDatabaseID() << ", "
@@ -1614,16 +1628,18 @@ void Storage::storeLetter(Letter *letter)
         mDb->processSql();
         letter->setId(mDb->getLastId());
 
-        // TODO: store attachments in the database
+        // TODO: Store attachments in the database
 
         return;
     }
     else
     {
-        // the letter has a unique id, update the record in the db
+        // The letter has a unique id, update the record in the db
         sql << "UPDATE " << POST_TBL_NAME
-            << "   SET sender_id       = '" << letter->getSender()->getDatabaseID() << "', "
-            << "       receiver_id     = '" << letter->getReceiver()->getDatabaseID() << "', "
+            << "   SET sender_id       = '"
+            << letter->getSender()->getDatabaseID() << "', "
+            << "       receiver_id     = '"
+            << letter->getReceiver()->getDatabaseID() << "', "
             << "       letter_type     = '" << letter->getType() << "', "
             << "       expiration_date = '" << letter->getExpiry() << "', "
             << "       sending_date    = '" << time(0) << "', "
@@ -1638,19 +1654,20 @@ void Storage::storeLetter(Letter *letter)
 
         if (mDb->getModifiedRows() == 0)
         {
-            // this should never happen...
-            LOG_ERROR("(DALStorage::storePost) trying to update nonexistant letter");
+            // This should never happen...
+            LOG_ERROR("(DALStorage::storePost) "
+                      "trying to update nonexistant letter");
             throw "(DALStorage::storePost) trying to update nonexistant letter";
         }
 
-        // TODO: update attachments in the database
+        // TODO: Update attachments in the database
     }
 }
 
 Post *Storage::getStoredPost(int playerId)
 {
     Post *p = new Post();
-    // specialize the string_to functor to convert
+    // Specialize the string_to functor to convert
     // a string to an unsigned int.
     string_to< unsigned > toUint;
 
@@ -1662,13 +1679,13 @@ Post *Storage::getStoredPost(int playerId)
 
     if (post.isEmpty())
     {
-        // there is no post waiting for the character
+        // There is no post waiting for the character
         return p;
     }
 
     for (unsigned int i = 0; i < post.rows(); i++ )
     {
-        // load sender and receiver
+        // Load sender and receiver
         Character *sender = getCharacter(toUint(post(i, 1)), 0);
         Character *receiver = getCharacter(toUint(post(i, 2)), 0);
 
@@ -1678,7 +1695,7 @@ Post *Storage::getStoredPost(int playerId)
         letter->setExpiry( toUint(post(0, 4)) );
         letter->addText( post(0, 6) );
 
-        // TODO: load attachments per letter from POST_ATTACHMENTS_TBL_NAME
+        // TODO: Load attachments per letter from POST_ATTACHMENTS_TBL_NAME
         // needs redesign of struct ItemInventroy
 
         p->addLetter(letter);
@@ -1694,13 +1711,13 @@ void Storage::deletePost(Letter *letter)
         dal::PerformTransaction transaction(mDb);
         std::ostringstream sql;
 
-        // first delete all attachments of the letter
-        // this could leave "dead" items in the item_instances table
+        // First delete all attachments of the letter
+        // This could leave "dead" items in the item_instances table
         sql << "DELETE FROM " << POST_ATTACHMENTS_TBL_NAME
             << " WHERE letter_id = " << letter->getId();
         mDb->execSql(sql.str());
 
-        // delete the letter itself
+        // Delete the letter itself
         sql.clear();
         sql.str("");
         sql << "DELETE FROM " << POST_TBL_NAME
@@ -1723,7 +1740,10 @@ void Storage::syncDatabase()
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))
     {
-        LOG_ERROR("Item Manager: Error while loading item database (items.xml)!");
+        std::ostringstream errMsg;
+        errMsg << "Item Manager: Error while loading item database"
+               << "(" << DEFAULT_ITEM_FILE << ")!";
+        LOG_ERROR(errMsg);
         return;
     }
 
@@ -1736,7 +1756,8 @@ void Storage::syncDatabase()
         // to the items.xml file will increase the revision automatically.
         if (xmlStrEqual(node->name, BAD_CAST "version"))
         {
-            std::string revision = XML::getProperty(node, "revision", std::string());
+            std::string revision = XML::getProperty(node, "revision",
+                                                    std::string());
             mItemDbVersion = atoi(revision.c_str());
             LOG_INFO("Loading item database version " << mItemDbVersion);
         }
@@ -1758,7 +1779,7 @@ void Storage::syncDatabase()
             std::string image = XML::getProperty(node, "image", "");
             std::string dye("");
 
-            // split image name and dye string
+            // Split image name and dye string
             size_t pipe = image.find("|");
             if (pipe != std::string::npos)
             {
@@ -1806,7 +1827,8 @@ void Storage::syncDatabase()
             }
             catch (const dal::DbSqlQueryExecFailure &e)
             {
-                LOG_ERROR("(DALStorage::SyncDatabase) SQL query failure: " << e.what());
+                LOG_ERROR("(DALStorage::SyncDatabase) SQL query failure: "
+                << e.what());
             }
         }
     }
@@ -1821,7 +1843,7 @@ void Storage::setOnlineStatus(int charId, bool online)
         std::ostringstream sql;
         if (online)
         {
-            // first we try to update the online status. this prevents errors
+            // First we try to update the online status. this prevents errors
             // in case we get the online status twice
             sql << "SELECT COUNT(*) FROM " << ONLINE_USERS_TBL_NAME
                 << " WHERE char_id = " << charId;
@@ -1847,7 +1869,8 @@ void Storage::setOnlineStatus(int charId, bool online)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setOnlineStatus) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::setOnlineStatus) SQL query failure: "
+                  << e.what());
     }
 }
 
@@ -1869,7 +1892,8 @@ void Storage::addTransaction(const Transaction &trans)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::addTransaction) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::addTransaction) SQL query failure: "
+                  << e.what());
     }
 }
 
@@ -1898,7 +1922,8 @@ std::vector<Transaction> Storage::getTransactions(unsigned int num)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: "
+                  << e.what());
     }
 
     return transactions;
@@ -1927,7 +1952,8 @@ std::vector<Transaction> Storage::getTransactions(time_t date)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: " << e.what());
+        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: "
+                  << e.what());
     }
 
     return transactions;
