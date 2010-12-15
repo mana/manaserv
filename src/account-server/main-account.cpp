@@ -368,15 +368,30 @@ int main(int argc, char *argv[])
                                                     options.verbosity) );
     Logger::setVerbosity(options.verbosity);
 
-    if (!options.portChanged)
-        options.port = Configuration::getValue("net_accountServerPort",
-                                               options.port);
+    std::string accountHost = Configuration::getValue("net_accountHost",
+                                                      "localhost");
 
-    std::string host = Configuration::getValue("net_listenHost", std::string());
+    // We separate the chat host as the chat server will be separated out
+    // from the account server.
+    std::string chatHost = Configuration::getValue("net_chatHost",
+                                                   "localhost");
+
+    // Setting the listen ports
+    // Note: The accountToGame and chatToClient listen ports auto offset
+    // to accountToClient listen port when they're not set,
+    // or to DEFAULT_SERVER_PORT otherwise.
+    if (!options.portChanged)
+        options.port = Configuration::getValue("net_accountListenToClientPort",
+                                               options.port);
+    int accountGamePort = Configuration::getValue("net_accountListenToGamePort",
+                                                  options.port + 1);
+    int chatClientPort = Configuration::getValue("net_chatListenToClientPort",
+                                                 options.port + 2);
+
     if (!AccountClientHandler::initialize(DEFAULT_ATTRIBUTEDB_FILE,
-                                          options.port, host) ||
-        !GameServerHandler::initialize(options.port + 1, host) ||
-        !chatHandler->startListen(options.port + 2, host))
+                                          options.port, accountHost) ||
+        !GameServerHandler::initialize(accountGamePort, accountHost) ||
+        !chatHandler->startListen(chatClientPort, chatHost))
     {
         LOG_FATAL("Unable to create an ENet server host.");
         return EXIT_NET_EXCEPTION;

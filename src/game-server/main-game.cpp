@@ -374,9 +374,21 @@ int main(int argc, char *argv[])
                                                        options.verbosity) );
     Logger::setVerbosity(options.verbosity);
 
+    // When the gameListenToClientPort is set, we use it.
+    // Otherwise, we use the accountListenToClientPort + 3 if the option is set.
+    // If neither, the DEFAULT_SERVER_PORT + 3 is used.
     if (!options.portChanged)
-        options.port = Configuration::getValue("net_gameServerPort",
+    {
+        // Prepare the fallback value
+        options.port = Configuration::getValue("net_accountListenToClientPort",
+                                               0) + 3;
+        if (options.port == 3)
+            options.port = DEFAULT_SERVER_PORT + 3;
+
+        // Set the actual value of options.port
+        options.port = Configuration::getValue("net_gameListenToClientPort",
                                                options.port);
+    }
 
     // Make an initial attempt to connect to the account server
     // Try again after longer and longer intervals when connection fails.

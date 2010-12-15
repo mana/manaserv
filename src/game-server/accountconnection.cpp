@@ -49,9 +49,17 @@ AccountConnection::~AccountConnection()
 bool AccountConnection::start(int gameServerPort)
 {
     const std::string accountServerAddress =
-        Configuration::getValue("net_accountServerAddress", "localhost");
+        Configuration::getValue("net_accountHost", "localhost");
+
+    // When the accountListenToGamePort is set, we use it.
+    // Otherwise, we use the accountListenToClientPort + 1 if the option is set.
+    // If neither, the DEFAULT_SERVER_PORT + 1 is used.
+    int alternativePort =
+        Configuration::getValue("net_accountListenToClientPort", 0) + 1;
+    if (alternativePort == 1)
+        alternativePort = DEFAULT_SERVER_PORT + 1;
     const int accountServerPort =
-        Configuration::getValue("net_accountServerPort", DEFAULT_SERVER_PORT) + 1;
+        Configuration::getValue("net_accountListenToGamePort", alternativePort);
 
     if (!Connection::start(accountServerAddress, accountServerPort))
     {
@@ -62,7 +70,7 @@ bool AccountConnection::start(int gameServerPort)
     LOG_INFO("Connection established to the account server.");
 
     const std::string gameServerAddress =
-        Configuration::getValue("net_gameServerAddress", "localhost");
+        Configuration::getValue("net_gameHost", "localhost");
     const std::string password =
         Configuration::getValue("net_password", "changeMe");
 

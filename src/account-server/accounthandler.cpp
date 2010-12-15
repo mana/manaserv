@@ -868,11 +868,19 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
     reply.writeString(address);
     reply.writeInt16(port);
 
-    // TODO: get correct address and port for the chat server
-    reply.writeString(Configuration::getValue("net_accountServerAddress",
+    // Give address and port for the chat server
+    reply.writeString(Configuration::getValue("net_chatHost",
                                               "localhost"));
-    reply.writeInt16(Configuration::getValue("net_accountServerPort",
-                                             DEFAULT_SERVER_PORT) + 2);
+
+    // When the chatListenToClientPort is set, we use it.
+    // Otherwise, we use the accountListenToClientPort + 2 if the option is set.
+    // If neither, the DEFAULT_SERVER_PORT + 2 is used.
+    int alternativePort =
+        Configuration::getValue("net_accountListenToClientPort", 0) + 2;
+    if (alternativePort == 2)
+        alternativePort = DEFAULT_SERVER_PORT + 2;
+    reply.writeInt16(Configuration::getValue("net_chatListenToClientPort",
+                                             alternativePort));
 
     GameServerHandler::registerClient(magic_token, selectedChar);
     registerChatClient(magic_token, selectedChar->getName(), acc->getLevel());
