@@ -179,7 +179,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                 Rectangle rect = { objX, objY, objW, objH };
 
 
-                if (objType == "WARP")
+                if (utils::compareStrI(objType, "WARP"))
                 {
                     std::string destMapName = std::string();
                     int destX = -1;
@@ -200,16 +200,16 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                                 std::string value = XML::getProperty(
                                            propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (value == "DEST_MAP")
+                                if (utils::compareStrI(value, "DEST_MAP"))
                                 {
                                     destMapName = getObjectProperty(propertyNode,
                                                                  std::string());
                                 }
-                                else if (value == "DEST_X")
+                                else if (utils::compareStrI(value, "DEST_X"))
                                 {
                                     destX = getObjectProperty(propertyNode, -1);
                                 }
-                                else if (value == "DEST_Y")
+                                else if (utils::compareStrI(value, "DEST_Y"))
                                 {
                                     destY = getObjectProperty(propertyNode, -1);
                                 }
@@ -233,7 +233,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         LOG_WARN("Unrecognized warp format");
                     }
                 }
-                else if (objType == "SPAWN")
+                else if (utils::compareStrI(objType, "SPAWN"))
                 {
                     int monsterId = -1;
                     int maxBeings = 10; // Default value
@@ -252,15 +252,15 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (value == "MONSTER_ID")
+                                if (utils::compareStrI(value, "MONSTER_ID"))
                                 {
                                     monsterId = getObjectProperty(propertyNode, monsterId);
                                 }
-                                else if (value == "MAX_BEINGS")
+                                else if (utils::compareStrI(value, "MAX_BEINGS"))
                                 {
                                     maxBeings = getObjectProperty(propertyNode, maxBeings);
                                 }
-                                else if (value == "SPAWN_RATE")
+                                else if (utils::compareStrI(value, "SPAWN_RATE"))
                                 {
                                     spawnRate = getObjectProperty(propertyNode, spawnRate);
                                 }
@@ -279,7 +279,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                                 " for spawn area");
                     }
                 }
-                else if (objType == "NPC")
+                else if (utils::compareStrI(objType, "NPC"))
                 {
                     Script *s = composite->getScript();
                     if (!s)
@@ -305,11 +305,11 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (value == "NPC_ID")
+                                if (utils::compareStrI(value, "NPC_ID"))
                                 {
                                     npcId = getObjectProperty(propertyNode, npcId);
                                 }
-                                else if (value == "SCRIPT")
+                                else if (utils::compareStrI(value, "SCRIPT"))
                                 {
                                     scriptText = getObjectProperty(propertyNode, "");
                                 }
@@ -326,7 +326,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         LOG_WARN("Unrecognized format for npc");
                     }
                 }
-                else if (objType == "SCRIPT")
+                else if (utils::compareStrI(objType, "SCRIPT"))
                 {
                     Script *s = composite->getScript();
                     if (!s)
@@ -352,12 +352,12 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (value == "FILENAME")
+                                if (utils::compareStrI(value, "FILENAME"))
                                 {
                                     scriptFilename = getObjectProperty(propertyNode, "");
                                     utils::trim(scriptFilename);
                                 }
-                                else if (value == "TEXT")
+                                else if (utils::compareStrI(value, "TEXT"))
                                 {
                                     scriptText = getObjectProperty(propertyNode, "");
                                 }
