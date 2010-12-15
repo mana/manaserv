@@ -76,7 +76,13 @@ int compareStrI(const std::string &a, const std::string &b)
             return comp;
     }
 
-    return 0;
+    // See which one is longer, if either
+    if (itA == endA && itB != endB)
+        return -1;
+    else if (itA != endA && itB == endB)
+        return 1;
+    else
+        return 0;
 }
 
 bool stringToBool(const std::string &s, bool defaultValue)
