@@ -848,13 +848,25 @@ void Storage::flush(Account *account)
         std::ostringstream sqlUpdateAccountTable;
         sqlUpdateAccountTable
              << "update " << ACCOUNTS_TBL_NAME
-             << " set username = '" << account->getName() << "', "
-             << "password = '" << account->getPassword() << "', "
-             << "email = '" << account->getEmail() << "', "
-             << "level = '" << account->getLevel() << "', "
-             << "lastlogin = '" << account->getLastLogin() << "' "
-             << "where id = '" << account->getID() << "';";
-        mDb->execSql(sqlUpdateAccountTable.str());
+             << " set username = '?', password = '?', email = '?', "
+             << "level = '?', lastlogin = '?' where id = '?';";
+
+        if (mDb->prepareSql(sqlUpdateAccountTable.str()))
+        {
+            mDb->bindValue(1, account->getName());
+            mDb->bindValue(2, account->getPassword());
+            mDb->bindValue(3, account->getEmail());
+            mDb->bindValue(4, account->getLevel());
+            mDb->bindValue(5, account->getLastLogin());
+            mDb->bindValue(6, account->getID());
+
+            mDb->processSql();
+        }
+        else
+        {
+            utils::throwError("(DALStorage::flush) "
+                              "SQL preparation query failure.");
+        }
 
         // Get the list of characters that belong to this account.
         Characters &characters = account->getCharacters();
