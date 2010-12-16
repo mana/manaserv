@@ -32,7 +32,7 @@
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
-#include "utils/logger.h"
+#include "utils/throwerror.h"
 #include "utils/xml.h"
 
 static const char *DEFAULT_ITEM_FILE = "items.xml";
@@ -123,7 +123,7 @@ void Storage::open()
             errmsg << "Database version is not supported. "
                    << "Needed version: '" << SUPPORTED_DB_VERSION
                    << "', current version: '" << dbversion << "'";
-            throw errmsg.str();
+            utils::throwError(errmsg.str());
         }
 
         // Synchronize base data from xml files
@@ -136,10 +136,8 @@ void Storage::open()
     }
     catch (const DbConnectionFailure& e)
     {
-        std::ostringstream errmsg;
-        errmsg << "(DALStorage::open #1) Unable to connect to the database: "
-               << e.what();
-        throw errmsg.str();
+        utils::throwError("(DALStorage::open) "
+                          "Unable to connect to the database: ", e);
     }
 }
 
@@ -220,9 +218,11 @@ Account *Storage::getAccountBySQL()
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("DALStorage::getAccountBySQL: " << e.what());
-        return 0; // TODO: Throw exception here
+        utils::throwError("(DALStorage::getAccountBySQL) SQL query failure: ",
+                          e);
     }
+
+    return 0;
 }
 
 Account *Storage::getAccount(const std::string &userName)
@@ -397,9 +397,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getCharacter #1) SQL query failure: "
-                  << e.what());
-        return 0;
+        utils::throwError("DALStorage::getCharacter #1) SQL query failure: ",
+                          e);
     }
 
     Possessions &poss = character->getPossessions();
@@ -420,9 +419,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getCharacter #2) SQL query failure: "
-                  << e.what());
-        return 0;
+        utils::throwError("DALStorage::getCharacter #2) SQL query failure: ",
+                          e);
     }
 
     try
@@ -447,9 +445,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getCharacter #3) SQL query failure: "
-                  << e.what());
-        return 0;
+        utils::throwError("DALStorage::getCharacter #3) SQL query failure: ",
+                          e);
     }
 
     return character;
@@ -498,9 +495,8 @@ bool Storage::doesUserNameExist(const std::string &name)
     }
     catch (const std::exception &e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::doesUserNameExist) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::doesUserNameExist) SQL query failure: ",
+                          e);
     }
 
     return true;
@@ -526,9 +522,8 @@ bool Storage::doesEmailAddressExist(const std::string &email)
     }
     catch (const std::exception &e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::doesEmailAddressExist) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::doesEmailAddressExist) "
+                          "SQL query failure: ", e);
     }
 
     return true;
@@ -554,9 +549,8 @@ bool Storage::doesCharacterNameExist(const std::string& name)
     }
     catch (const std::exception &e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::doesCharacterNameExist) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::doesCharacterNameExist) "
+                          "SQL query failure: ", e);
     }
 
     return true;
@@ -588,10 +582,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #1) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #1) "
+                          "SQL query failure: ", e);
     }
 
     // Character attributes.
@@ -605,9 +597,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::updateCharacter #2) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #2) "
+                          "SQL query failure: ", e);
     }
 
     // Character's skills
@@ -623,10 +614,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #3) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #3) "
+                          "SQL query failure: ", e);
     }
 
     // Character's kill count
@@ -642,10 +631,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #4) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #4) "
+                          "SQL query failure: ", e);
     }
 
     //  Character's special actions
@@ -673,10 +660,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #5) "
+                          "SQL query failure: ", e);;
     }
 
     // Character's inventory
@@ -691,10 +676,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #5) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #6) "
+                          "SQL query failure: ", e);
     }
 
     // Insert the new inventory data
@@ -740,10 +723,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #6) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #7) "
+                          "SQL query failure: ", e);
     }
 
 
@@ -760,10 +741,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("(DALStorage::updateCharacter #7) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #8) "
+                          "SQL query failure: ", e);
     }
     try
     {
@@ -777,10 +756,8 @@ bool Storage::updateCharacter(Character *character)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception
-        LOG_ERROR("(DALStorage::updateCharacter #8) SQL query failure: "
-                  << e.what());
-        return false;
+        utils::throwError("(DALStorage::updateCharacter #9) "
+                          "SQL query failure: ", e);
     }
 
     transaction.commit();
@@ -829,7 +806,7 @@ void Storage::addAccount(Account *account)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("Error in DALStorage::addAccount: " << e.what());
+        utils::throwError("(DALStorage::addAccount) SQL query failure: ", e);
     }
 }
 
@@ -964,7 +941,7 @@ void Storage::flush(Account *account)
     }
     catch (const std::exception &e)
     {
-        LOG_ERROR("ERROR in DALStorage::flush: " << e.what());
+        utils::throwError("(DALStorage::flush) SQL query failure: ", e);
     }
 }
 
@@ -986,7 +963,7 @@ void Storage::delAccount(Account *account)
     }
     catch (const std::exception &e)
     {
-        LOG_ERROR("ERROR in DALStorage::delAccount: " << e.what());
+        utils::throwError("(DALStorage::delAccount) SQL query failure: ", e);
     }
 }
 
@@ -1014,8 +991,8 @@ void Storage::updateCharacterPoints(int charId,
     }
     catch (dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("DALStorage::updateCharacterPoints: " << e.what());
-        throw;
+        utils::throwError("(DALStorage::updateCharacterPoints) "
+                          "SQL query failure: ", e);
     }
 
 }
@@ -1059,8 +1036,8 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("DALStorage::updateExperience: " << e.what());
-        throw;
+        utils::throwError("(DALStorage::updateExperience) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1093,8 +1070,8 @@ void Storage::updateAttribute(int charId, unsigned int attrId,
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("DALStorage::updateAttribute: " << e.what());
-        throw;
+        utils::throwError("(DALStorage::updateAttribute) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1125,8 +1102,8 @@ void Storage::updateKillCount(int charId, int monsterId, int kills)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("DALStorage::updateKillCount: " << e.what());
-        throw;
+        utils::throwError("(DALStorage::updateKillCount) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1145,8 +1122,8 @@ void Storage::insertStatusEffect(int charId, int statusId, int time)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("DALStorage::insertStatusEffect: " << e.what());
-        throw;
+        utils::throwError("(DALStorage::insertStatusEffect) "
+                          "SQL query failure: ", e);
     }
 }
 
@@ -1201,8 +1178,8 @@ void Storage::addGuildMember(int guildId, int memberId)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::addGuildMember) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1220,8 +1197,8 @@ void Storage::removeGuildMember(int guildId, int memberId)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::removeGuildMember) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1239,8 +1216,8 @@ void Storage::setMemberRights(int guildId, int memberId, int rights)
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::setMemberRights) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1301,8 +1278,7 @@ std::list<Guild*> Storage::getGuildList()
     }
     catch (const dal::DbSqlQueryExecFailure& e)
     {
-        // TODO: throw an exception.
-        LOG_ERROR("SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::getGuildList) SQL query failure: ", e);
     }
 
     return guilds;
@@ -1327,7 +1303,7 @@ std::string Storage::getQuestVar(int id, const std::string &name)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getQuestVar) SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::getQuestVar) SQL query failure: ", e);
     }
 
     return std::string();
@@ -1354,8 +1330,8 @@ std::string Storage::getWorldStateVar(const std::string &name, int mapId)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getWorldStateVar) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::getWorldStateVar) SQL query failure: ",
+                          e);
     }
 
     return std::string();
@@ -1421,8 +1397,8 @@ void Storage::setWorldStateVar(const std::string &name,
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setWorldStateVar) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::setWorldStateVar) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1448,7 +1424,7 @@ void Storage::setQuestVar(int id, const std::string &name,
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setQuestVar) SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::setQuestVar) SQL query failure: ", e);
     }
 }
 
@@ -1475,7 +1451,7 @@ void Storage::banCharacter(int id, int duration)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::banAccount) SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::banAccount) SQL query failure: ", e);
     }
 }
 
@@ -1537,7 +1513,7 @@ void Storage::delCharacter(int charId) const
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::delCharacter) SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::delCharacter) SQL query failure: ", e);
     }
 }
 
@@ -1560,8 +1536,8 @@ void Storage::checkBannedAccounts()
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::checkBannedAccounts) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::checkBannedAccounts) "
+                          "SQL query failure: ", e);
     }
 }
 
@@ -1577,8 +1553,8 @@ void Storage::setAccountLevel(int id, int level)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setAccountLevel) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::setAccountLevel) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1594,8 +1570,8 @@ void Storage::setPlayerLevel(int id, int level)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setPlayerLevel) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::setPlayerLevel) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1647,9 +1623,8 @@ void Storage::storeLetter(Letter *letter)
         if (mDb->getModifiedRows() == 0)
         {
             // This should never happen...
-            LOG_ERROR("(DALStorage::storePost) "
-                      "trying to update nonexistant letter");
-            throw "(DALStorage::storePost) trying to update nonexistant letter";
+            utils::throwError("(DALStorage::storePost) "
+                              "trying to update nonexistant letter");
         }
 
         // TODO: Update attachments in the database
@@ -1721,7 +1696,7 @@ void Storage::deletePost(Letter *letter)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::deletePost) SQL query failure: " << e.what());
+        utils::throwError("(DALStorage::deletePost) SQL query failure: ", e);
     }
 }
 
@@ -1818,8 +1793,8 @@ void Storage::syncDatabase()
             }
             catch (const dal::DbSqlQueryExecFailure &e)
             {
-                LOG_ERROR("(DALStorage::SyncDatabase) SQL query failure: "
-                << e.what());
+                utils::throwError("(DALStorage::SyncDatabase) "
+                                  "SQL query failure: ", e);
             }
         }
     }
@@ -1860,8 +1835,8 @@ void Storage::setOnlineStatus(int charId, bool online)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::setOnlineStatus) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::setOnlineStatus) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1883,8 +1858,8 @@ void Storage::addTransaction(const Transaction &trans)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::addTransaction) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::addTransaction) SQL query failure: ",
+                          e);
     }
 }
 
@@ -1913,8 +1888,8 @@ std::vector<Transaction> Storage::getTransactions(unsigned int num)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::getTransactions) SQL query failure: ",
+                          e);
     }
 
     return transactions;
@@ -1943,8 +1918,8 @@ std::vector<Transaction> Storage::getTransactions(time_t date)
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
-        LOG_ERROR("(DALStorage::getTransactions) SQL query failure: "
-                  << e.what());
+        utils::throwError("(DALStorage::getTransactions) SQL query failure: ",
+                          e);
     }
 
     return transactions;

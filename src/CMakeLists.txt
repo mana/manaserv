@@ -182,6 +182,7 @@ SET(SRCS_MANASERVACCOUNT
     utils/encryption.cpp
     utils/sha256.h
     utils/sha256.cpp
+    utils/throwerror.h
     )
 
 SET(SRCS_MANASERVGAME
