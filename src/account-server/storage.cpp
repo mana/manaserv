@@ -232,8 +232,9 @@ Account *Storage::getAccount(const std::string &userName)
     if (mDb->prepareSql(sql.str()))
     {
         mDb->bindValue(1, userName);
+        return getAccountBySQL();
     }
-    return getAccountBySQL();
+    return 0;
 }
 
 Account *Storage::getAccount(int accountID)
@@ -243,8 +244,9 @@ Account *Storage::getAccount(int accountID)
     if (mDb->prepareSql(sql.str()))
     {
         mDb->bindValue(1, accountID);
+        return getAccountBySQL();
     }
-    return getAccountBySQL();
+    return 0;
 }
 
 Character *Storage::getCharacterBySQL(Account *owner)
@@ -459,8 +461,9 @@ Character *Storage::getCharacter(int id, Account *owner)
     if (mDb->prepareSql(sql.str()))
     {
         mDb->bindValue(1, id);
+        return getCharacterBySQL(owner);
     }
-    return getCharacterBySQL(owner);
+    return 0;
 }
 
 Character *Storage::getCharacter(const std::string &name)
@@ -470,8 +473,9 @@ Character *Storage::getCharacter(const std::string &name)
     if (mDb->prepareSql(sql.str()))
     {
         mDb->bindValue(1, name);
+        return getCharacterBySQL(0);
     }
-    return getCharacterBySQL(0);
+    return 0;
 }
 
 bool Storage::doesUserNameExist(const std::string &name)
@@ -485,13 +489,18 @@ bool Storage::doesUserNameExist(const std::string &name)
         if (mDb->prepareSql(sql.str()))
         {
             mDb->bindValue(1, name);
-        }
-        const dal::RecordSet &accountInfo = mDb->processSql();
+            const dal::RecordSet &accountInfo = mDb->processSql();
 
-        std::istringstream ssStream(accountInfo(0, 0));
-        unsigned int iReturn = 1;
-        ssStream >> iReturn;
-        return iReturn != 0;
+            std::istringstream ssStream(accountInfo(0, 0));
+            unsigned int iReturn = 1;
+            ssStream >> iReturn;
+            return iReturn != 0;
+        }
+        else
+        {
+            utils::throwError("(DALStorage::doesUserNameExist) "
+                              "SQL query preparation failure.");
+        }
     }
     catch (const std::exception &e)
     {
@@ -499,6 +508,7 @@ bool Storage::doesUserNameExist(const std::string &name)
                           e);
     }
 
+    // Should never happen
     return true;
 }
 
@@ -512,13 +522,18 @@ bool Storage::doesEmailAddressExist(const std::string &email)
         if (mDb->prepareSql(sql.str()))
         {
             mDb->bindValue(1, email);
-        }
-        const dal::RecordSet &accountInfo = mDb->processSql();
+            const dal::RecordSet &accountInfo = mDb->processSql();
 
-        std::istringstream ssStream(accountInfo(0, 0));
-        unsigned int iReturn = 1;
-        ssStream >> iReturn;
-        return iReturn != 0;
+            std::istringstream ssStream(accountInfo(0, 0));
+            unsigned int iReturn = 1;
+            ssStream >> iReturn;
+            return iReturn != 0;
+        }
+        else
+        {
+            utils::throwError("(DALStorage::doesEmailAddressExist) "
+                              "SQL query preparation failure.");
+        }
     }
     catch (const std::exception &e)
     {
@@ -526,6 +541,7 @@ bool Storage::doesEmailAddressExist(const std::string &email)
                           "SQL query failure: ", e);
     }
 
+    // Should never happen
     return true;
 }
 
@@ -539,13 +555,19 @@ bool Storage::doesCharacterNameExist(const std::string& name)
         if (mDb->prepareSql(sql.str()))
         {
             mDb->bindValue(1, name);
-        }
-        const dal::RecordSet &accountInfo = mDb->processSql();
 
-        std::istringstream ssStream(accountInfo(0, 0));
-        int iReturn = 1;
-        ssStream >> iReturn;
-        return iReturn != 0;
+            const dal::RecordSet &accountInfo = mDb->processSql();
+
+            std::istringstream ssStream(accountInfo(0, 0));
+            int iReturn = 1;
+            ssStream >> iReturn;
+            return iReturn != 0;
+        }
+        else
+        {
+            utils::throwError("(DALStorage::doesCharacterNameExist) "
+                              "SQL query preparation failure.");
+        }
     }
     catch (const std::exception &e)
     {
@@ -553,6 +575,7 @@ bool Storage::doesCharacterNameExist(const std::string& name)
                           "SQL query failure: ", e);
     }
 
+    // Should never happen
     return true;
 }
 
@@ -780,8 +803,6 @@ void Storage::addAccount(Account *account)
 
     try
     {
-        PerformTransaction transaction(mDb);
-
         // Insert the account
         std::ostringstream sql;
         sql << "insert into " << ACCOUNTS_TBL_NAME
@@ -797,12 +818,15 @@ void Storage::addAccount(Account *account)
             mDb->bindValue(1, account->getName());
             mDb->bindValue(2, account->getPassword());
             mDb->bindValue(3, account->getEmail());
+
+            mDb->processSql();
+            account->setID(mDb->getLastId());
         }
-
-        mDb->processSql();
-        account->setID(mDb->getLastId());
-
-        transaction.commit();
+        else
+        {
+            utils::throwError("(DALStorage::addAccount) "
+                              "SQL preparation query failure.");
+        }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -1164,10 +1188,9 @@ void Storage::removeGuild(Guild *guild)
 
 void Storage::addGuildMember(int guildId, int memberId)
 {
-    std::ostringstream sql;
-
     try
     {
+        std::ostringstream sql;
         sql << "insert into " << GUILD_MEMBERS_TBL_NAME
         << " (guild_id, member_id, rights)"
         << " values ("
@@ -1185,10 +1208,9 @@ void Storage::addGuildMember(int guildId, int memberId)
 
 void Storage::removeGuildMember(int guildId, int memberId)
 {
-    std::ostringstream sql;
-
     try
     {
+        std::ostringstream sql;
         sql << "delete from " << GUILD_MEMBERS_TBL_NAME
         << " where member_id = \""
         << memberId << "\" and guild_id = '"
@@ -1204,10 +1226,9 @@ void Storage::removeGuildMember(int guildId, int memberId)
 
 void Storage::setMemberRights(int guildId, int memberId, int rights)
 {
-    std::ostringstream sql;
-
     try
     {
+        std::ostringstream sql;
         sql << "update " << GUILD_MEMBERS_TBL_NAME
         << " set rights = '" << rights << "'"
         << " where member_id = \""
@@ -1295,17 +1316,23 @@ std::string Storage::getQuestVar(int id, const std::string &name)
         {
             mDb->bindValue(1, id);
             mDb->bindValue(2, name);
-        }
-        const dal::RecordSet &info = mDb->processSql();
+            const dal::RecordSet &info = mDb->processSql();
 
-        if (!info.isEmpty())
-            return info(0, 0);
+            if (!info.isEmpty())
+                return info(0, 0);
+        }
+        else
+        {
+            utils::throwError("(DALStorage:getQuestVar) "
+                              "SQL query preparation failure.");
+        }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
         utils::throwError("(DALStorage::getQuestVar) SQL query failure: ", e);
     }
 
+    // Should never happen
     return std::string();
 }
 
@@ -1771,23 +1798,34 @@ void Storage::syncDatabase()
                     mDb->bindValue(1, name);
                     mDb->bindValue(2, desc);
                     mDb->bindValue(3, eff);
-                }
-                mDb->processSql();
-                if (mDb->getModifiedRows() == 0)
-                {
-                    sql.clear();
-                    sql.str("");
-                    sql << "INSERT INTO " << ITEMS_TBL_NAME
-                        << "  VALUES ( " << id << ", ?, ?, '"
-                        << image << "', " << weight << ", '"
-                        << type << "', ?, '" << dye << "' )";
-                    if (mDb->prepareSql(sql.str()))
-                    {
-                        mDb->bindValue(1, name);
-                        mDb->bindValue(2, desc);
-                        mDb->bindValue(3, eff);
-                    }
+
                     mDb->processSql();
+                    if (mDb->getModifiedRows() == 0)
+                    {
+                        sql.clear();
+                        sql.str("");
+                        sql << "INSERT INTO " << ITEMS_TBL_NAME
+                            << "  VALUES ( " << id << ", ?, ?, '"
+                            << image << "', " << weight << ", '"
+                            << type << "', ?, '" << dye << "' )";
+                        if (mDb->prepareSql(sql.str()))
+                        {
+                            mDb->bindValue(1, name);
+                            mDb->bindValue(2, desc);
+                            mDb->bindValue(3, eff);
+                            mDb->processSql();
+                        }
+                        else
+                        {
+                            utils::throwError("(DALStorage::SyncDatabase) "
+                                           "SQL query preparation failure #2.");
+                        }
+                    }
+                }
+                else
+                {
+                    utils::throwError("(DALStorage::SyncDatabase) "
+                                      "SQL query preparation failure #1.");
                 }
                 itemCount++;
             }
@@ -1853,8 +1891,13 @@ void Storage::addTransaction(const Transaction &trans)
         if (mDb->prepareSql(sql.str()))
         {
             mDb->bindValue(1, trans.mMessage);
+            mDb->processSql();
         }
-        mDb->processSql();
+        else
+        {
+            utils::throwError("(DALStorage::SyncDatabase) "
+                              "SQL query preparation failure.");
+        }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
