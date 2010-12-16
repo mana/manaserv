@@ -1005,11 +1005,19 @@ void Storage::delAccount(Account *account)
 
 void Storage::updateLastLogin(const Account *account)
 {
-    std::ostringstream sql;
-    sql << "UPDATE " << ACCOUNTS_TBL_NAME
-        << "   SET lastlogin = '" << account->getLastLogin() << "'"
-        << " WHERE id = '" << account->getID() << "';";
-    mDb->execSql(sql.str());
+    try
+    {
+        std::ostringstream sql;
+        sql << "UPDATE " << ACCOUNTS_TBL_NAME
+            << "   SET lastlogin = '" << account->getLastLogin() << "'"
+            << " WHERE id = '" << account->getID() << "';";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        utils::throwError("(DALStorage::updateLastLogin) SQL query failure: ",
+                          e);
+    }
 }
 
 void Storage::updateCharacterPoints(int charId,
@@ -1037,11 +1045,11 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
 {
     try
     {
+        std::ostringstream sql;
         // If experience has decreased to 0 we don't store it anymore,
         // since it's the default behaviour.
         if (skillValue == 0)
         {
-            std::ostringstream sql;
             sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
                 << " WHERE char_id = " << charId
                 << " AND skill_id = " << skillId;
@@ -1050,7 +1058,8 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
         }
 
         // Try to update the skill
-        std::ostringstream sql;
+        sql.clear();
+        sql.str("");
         sql << "UPDATE " << CHAR_SKILLS_TBL_NAME
             << " SET skill_exp = " << skillValue
             << " WHERE char_id = " << charId
@@ -1165,37 +1174,62 @@ void Storage::insertStatusEffect(int charId, int statusId, int time)
 
 void Storage::addGuild(Guild *guild)
 {
-    std::ostringstream insertSql;
-    insertSql << "insert into " << GUILDS_TBL_NAME
-        << " (name) VALUES (?)";
-    if (mDb->prepareSql(insertSql.str()))
+    try
     {
-        mDb->bindValue(1, guild->getName());
+        std::ostringstream sqlQuery;
+        sqlQuery << "insert into " << GUILDS_TBL_NAME
+                 << " (name) VALUES (?)";
+        if (mDb->prepareSql(sqlQuery.str()))
+        {
+            mDb->bindValue(1, guild->getName());
+            mDb->processSql();
+        }
+        else
+        {
+            utils::throwError("(DALStorage::addGuild) "
+                              "SQL query preparation failure #1.");
+        }
+
+        sqlQuery.clear();
+        sqlQuery.str("");
+        sqlQuery << "SELECT id FROM " << GUILDS_TBL_NAME
+                 << " WHERE name = ?";
+
+        if (mDb->prepareSql(sqlQuery.str()))
+        {
+            mDb->bindValue(1, guild->getName());
+            const dal::RecordSet& guildInfo = mDb->processSql();
+
+            string_to<unsigned int> toUint;
+            unsigned id = toUint(guildInfo(0, 0));
+            guild->setId(id);
+        }
+        else
+        {
+            utils::throwError("(DALStorage::addGuild) "
+                              "SQL query preparation failure #2.");
+        }
     }
-    mDb->processSql();
-
-    std::ostringstream selectSql;
-    selectSql << "SELECT id FROM " << GUILDS_TBL_NAME
-        << " WHERE name = ?";
-
-    if (mDb->prepareSql(selectSql.str()))
+    catch (const std::exception &e)
     {
-        mDb->bindValue(1, guild->getName());
+        utils::throwError("(DALStorage::addGuild) SQL query failure: ", e);
     }
-    const dal::RecordSet& guildInfo = mDb->processSql();
-
-    string_to<unsigned int> toUint;
-    unsigned id = toUint(guildInfo(0, 0));
-    guild->setId(id);
 }
 
 void Storage::removeGuild(Guild *guild)
 {
-    std::ostringstream sql;
-    sql << "delete from " << GUILDS_TBL_NAME
-        << " where id = '"
-        << guild->getId() << "';";
-    mDb->execSql(sql.str());
+    try
+    {
+        std::ostringstream sql;
+        sql << "delete from " << GUILDS_TBL_NAME
+            << " where id = '"
+            << guild->getId() << "';";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        utils::throwError("(DALStorage::removeGuild) SQL query failure: ", e);
+    }
 }
 
 void Storage::addGuildMember(int guildId, int memberId)
@@ -1353,19 +1387,31 @@ std::string Storage::getWorldStateVar(const std::string &name, int mapId)
     try
     {
         std::ostringstream query;
-        query << "SELECT value "
-              << "  FROM " << WORLD_STATES_TBL_NAME
-              << " WHERE state_name = '" << name << "'";
+        query << "SELECT `value` "
+              << "FROM " << WORLD_STATES_TBL_NAME
+              << " WHERE `state_name` = ?";
 
-        // Add a map filter if map_id is given
+        // Add map filter if map_id is given
         if (mapId >= 0)
-            query << "  AND map_id = '" << mapId << "'";
+            query << " AND `map_id` = ?";
 
-        query << ";";
-        const dal::RecordSet &info = mDb->execSql(query.str());
+        //query << ";"; <-- No ';' at the end of prepared statements.
 
-        if (!info.isEmpty())
-            return info(0, 0);
+        if (mDb->prepareSql(query.str()))
+        {
+            mDb->bindValue(1, name);
+            if (mapId >= 0)
+                mDb->bindValue(2, mapId);
+            const dal::RecordSet &info = mDb->processSql();
+
+            if (!info.isEmpty())
+                return info(0, 0);
+        }
+        else
+        {
+            utils::throwError("(DALStorage:getWorldStateVar) "
+                              "SQL query preparation failure.");
+        }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -1616,95 +1662,121 @@ void Storage::setPlayerLevel(int id, int level)
 
 void Storage::storeLetter(Letter *letter)
 {
-    std::ostringstream sql;
-    if (letter->getId() == 0)
+    try
     {
-        // The letter was never saved before
-        sql << "INSERT INTO " << POST_TBL_NAME << " VALUES ( "
-            << "NULL, "
-            << letter->getSender()->getDatabaseID() << ", "
-            << letter->getReceiver()->getDatabaseID() << ", "
-            << letter->getExpiry() << ", "
-            << time(0) << ", "
-            << "?)";
-        if (mDb->prepareSql(sql.str()))
+        std::ostringstream sql;
+        if (letter->getId() == 0)
         {
-            mDb->bindValue(1, letter->getContents());
+            // The letter was never saved before
+            sql << "INSERT INTO " << POST_TBL_NAME << " VALUES ( "
+                << "NULL, "
+                << letter->getSender()->getDatabaseID() << ", "
+                << letter->getReceiver()->getDatabaseID() << ", "
+                << letter->getExpiry() << ", "
+                << time(0) << ", "
+                << "?)";
+            if (mDb->prepareSql(sql.str()))
+            {
+                mDb->bindValue(1, letter->getContents());
+                mDb->processSql();
+
+                letter->setId(mDb->getLastId());
+
+                // TODO: Store attachments in the database
+
+                return;
+            }
+            else
+            {
+                utils::throwError("(DALStorage::storeLetter) "
+                                  "SQL query preparation failure #1.");
+            }
         }
+        else
+        {
+            // The letter has a unique id, update the record in the db
+            sql << "UPDATE " << POST_TBL_NAME
+                << "   SET sender_id       = '"
+                << letter->getSender()->getDatabaseID() << "', "
+                << "       receiver_id     = '"
+                << letter->getReceiver()->getDatabaseID() << "', "
+                << "       letter_type     = '" << letter->getType() << "', "
+                << "       expiration_date = '" << letter->getExpiry() << "', "
+                << "       sending_date    = '" << time(0) << "', "
+                << "       letter_text = ? "
+                << " WHERE letter_id       = '" << letter->getId() << "'";
 
-        mDb->processSql();
-        letter->setId(mDb->getLastId());
+            if (mDb->prepareSql(sql.str()))
+            {
+                mDb->bindValue(1, letter->getContents());
 
-        // TODO: Store attachments in the database
+                mDb->processSql();
 
-        return;
+                if (mDb->getModifiedRows() == 0)
+                {
+                    // This should never happen...
+                    utils::throwError("(DALStorage::storePost) "
+                                      "trying to update nonexistant letter.");
+                }
+
+                // TODO: Update attachments in the database
+            }
+            else
+            {
+                utils::throwError("(DALStorage::storeLetter) "
+                                  "SQL query preparation failure #2.");
+            }
+        }
     }
-    else
+    catch (const std::exception &e)
     {
-        // The letter has a unique id, update the record in the db
-        sql << "UPDATE " << POST_TBL_NAME
-            << "   SET sender_id       = '"
-            << letter->getSender()->getDatabaseID() << "', "
-            << "       receiver_id     = '"
-            << letter->getReceiver()->getDatabaseID() << "', "
-            << "       letter_type     = '" << letter->getType() << "', "
-            << "       expiration_date = '" << letter->getExpiry() << "', "
-            << "       sending_date    = '" << time(0) << "', "
-            << "       letter_text = ? "
-            << " WHERE letter_id       = '" << letter->getId() << "'";
-
-        if (mDb->prepareSql(sql.str()))
-        {
-            mDb->bindValue(1, letter->getContents());
-        }
-        mDb->processSql();
-
-        if (mDb->getModifiedRows() == 0)
-        {
-            // This should never happen...
-            utils::throwError("(DALStorage::storePost) "
-                              "trying to update nonexistant letter");
-        }
-
-        // TODO: Update attachments in the database
+        utils::throwError("(DALStorage::storeLetter) Exception failure: ", e);
     }
 }
 
 Post *Storage::getStoredPost(int playerId)
 {
     Post *p = new Post();
+
     // Specialize the string_to functor to convert
     // a string to an unsigned int.
     string_to< unsigned > toUint;
 
-    std::ostringstream sql;
-    sql << "SELECT * FROM " << POST_TBL_NAME
-        << " WHERE receiver_id = " << playerId;
-
-    const dal::RecordSet &post = mDb->execSql(sql.str());
-
-    if (post.isEmpty())
+    try
     {
-        // There is no post waiting for the character
-        return p;
+        std::ostringstream sql;
+        sql << "SELECT * FROM " << POST_TBL_NAME
+            << " WHERE receiver_id = " << playerId;
+
+        const dal::RecordSet &post = mDb->execSql(sql.str());
+
+        if (post.isEmpty())
+        {
+            // There is no post waiting for the character
+            return p;
+        }
+
+        for (unsigned int i = 0; i < post.rows(); i++ )
+        {
+            // Load sender and receiver
+            Character *sender = getCharacter(toUint(post(i, 1)), 0);
+            Character *receiver = getCharacter(toUint(post(i, 2)), 0);
+
+            Letter *letter = new Letter(toUint( post(0,3) ), sender, receiver);
+
+            letter->setId( toUint(post(0, 0)) );
+            letter->setExpiry( toUint(post(0, 4)) );
+            letter->addText( post(0, 6) );
+
+            // TODO: Load attachments per letter from POST_ATTACHMENTS_TBL_NAME
+            // needs redesign of struct ItemInventroy
+
+            p->addLetter(letter);
+        }
     }
-
-    for (unsigned int i = 0; i < post.rows(); i++ )
+    catch (const std::exception &e)
     {
-        // Load sender and receiver
-        Character *sender = getCharacter(toUint(post(i, 1)), 0);
-        Character *receiver = getCharacter(toUint(post(i, 2)), 0);
-
-        Letter *letter = new Letter(toUint( post(0,3) ), sender, receiver);
-
-        letter->setId( toUint(post(0, 0)) );
-        letter->setExpiry( toUint(post(0, 4)) );
-        letter->addText( post(0, 6) );
-
-        // TODO: Load attachments per letter from POST_ATTACHMENTS_TBL_NAME
-        // needs redesign of struct ItemInventroy
-
-        p->addLetter(letter);
+        utils::throwError("(DALStorage::getStoredPost) Exception failure: ", e);
     }
 
     return p;
