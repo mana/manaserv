@@ -179,7 +179,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                 Rectangle rect = { objX, objY, objW, objH };
 
 
-                if (utils::compareStrI(objType, "WARP"))
+                if (utils::compareStrI(objType, "WARP") == 0)
                 {
                     std::string destMapName = std::string();
                     int destX = -1;
@@ -200,16 +200,16 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                                 std::string value = XML::getProperty(
                                            propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "DEST_MAP"))
+                                if (utils::compareStrI(value, "DEST_MAP") == 0)
                                 {
                                     destMapName = getObjectProperty(propertyNode,
                                                                  std::string());
                                 }
-                                else if (utils::compareStrI(value, "DEST_X"))
+                                else if (utils::compareStrI(value, "DEST_X") == 0)
                                 {
                                     destX = getObjectProperty(propertyNode, -1);
                                 }
-                                else if (utils::compareStrI(value, "DEST_Y"))
+                                else if (utils::compareStrI(value, "DEST_Y") == 0)
                                 {
                                     destY = getObjectProperty(propertyNode, -1);
                                 }
@@ -233,7 +233,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         LOG_WARN("Unrecognized warp format");
                     }
                 }
-                else if (utils::compareStrI(objType, "SPAWN"))
+                else if (utils::compareStrI(objType, "SPAWN") == 0)
                 {
                     int monsterId = -1;
                     int maxBeings = 10; // Default value
@@ -252,15 +252,15 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "MONSTER_ID"))
+                                if (utils::compareStrI(value, "MONSTER_ID") == 0)
                                 {
                                     monsterId = getObjectProperty(propertyNode, monsterId);
                                 }
-                                else if (utils::compareStrI(value, "MAX_BEINGS"))
+                                else if (utils::compareStrI(value, "MAX_BEINGS") == 0)
                                 {
                                     maxBeings = getObjectProperty(propertyNode, maxBeings);
                                 }
-                                else if (utils::compareStrI(value, "SPAWN_RATE"))
+                                else if (utils::compareStrI(value, "SPAWN_RATE") == 0)
                                 {
                                     spawnRate = getObjectProperty(propertyNode, spawnRate);
                                 }
@@ -279,7 +279,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                                 " for spawn area");
                     }
                 }
-                else if (utils::compareStrI(objType, "NPC"))
+                else if (utils::compareStrI(objType, "NPC") == 0)
                 {
                     Script *s = composite->getScript();
                     if (!s)
@@ -305,11 +305,11 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "NPC_ID"))
+                                if (utils::compareStrI(value, "NPC_ID") == 0)
                                 {
                                     npcId = getObjectProperty(propertyNode, npcId);
                                 }
-                                else if (utils::compareStrI(value, "SCRIPT"))
+                                else if (utils::compareStrI(value, "SCRIPT") == 0)
                                 {
                                     scriptText = getObjectProperty(propertyNode, "");
                                 }
@@ -326,7 +326,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         LOG_WARN("Unrecognized format for npc");
                     }
                 }
-                else if (utils::compareStrI(objType, "SCRIPT"))
+                else if (utils::compareStrI(objType, "SCRIPT") == 0)
                 {
                     Script *s = composite->getScript();
                     if (!s)
@@ -352,12 +352,12 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                             {
                                 std::string value = XML::getProperty(propertyNode, "name", std::string());
                                 value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "FILENAME"))
+                                if (utils::compareStrI(value, "FILENAME") == 0)
                                 {
                                     scriptFilename = getObjectProperty(propertyNode, "");
                                     utils::trim(scriptFilename);
                                 }
-                                else if (utils::compareStrI(value, "TEXT"))
+                                else if (utils::compareStrI(value, "TEXT") == 0)
                                 {
                                     scriptText = getObjectProperty(propertyNode, "");
                                 }
