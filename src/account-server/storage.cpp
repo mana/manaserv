@@ -251,7 +251,7 @@ Account *Storage::getAccount(int accountID)
 
 Character *Storage::getCharacterBySQL(Account *owner)
 {
-    Character *character;
+    Character *character = 0;
 
     // Specialize the string_to functor to convert
     // a string to an unsigned int.
