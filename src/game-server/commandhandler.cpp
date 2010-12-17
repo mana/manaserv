@@ -67,6 +67,7 @@ static void handleTakePermission(Character*, std::string&);
 static void handleAnnounce(Character*, std::string&);
 static void handleHistory(Character*, std::string&);
 static void handleMute(Character*, std::string&);
+static void handleDie(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -110,6 +111,8 @@ static CmdRef const cmdRef[] =
         "Shows the last transactions", &handleHistory},
     {"mute","<character> <length in seconds>",
         "Prevents the character from talking for the specified number of seconds. Use 0 seconds to unmute.", &handleMute},
+    {"die", "",
+        "Kills you.", &handleDie},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -1033,9 +1036,9 @@ static void handleHistory(Character *player, std::string &args)
     // TODO: Get args number of transactions and show them to the player
 }
 
-
 static void handleMute(Character *player, std::string &args)
-{    Character *other;
+{
+    Character *other;
     int length;
 
     // Get arguments.
@@ -1084,6 +1087,12 @@ static void handleMute(Character *player, std::string &args)
     }
     GameState::sayTo(other, NULL, targetMsg.str());
     GameState::sayTo(player, NULL, userMsg.str());
+}
+
+static void handleDie(Character *player, std::string &args)
+{
+    player->setAttribute(ATTR_HP, 0);
+    GameState::sayTo(player, NULL, "You've killed yourself.");
 }
 
 void CommandHandler::handleCommand(Character *player,

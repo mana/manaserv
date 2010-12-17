@@ -10,6 +10,7 @@
   <class level="2">
     <alias>tester</alias>
     <allow>@warp</allow>
+    <allow>@die</allow>
   </class>
   <class level="3">
     <alias>dev</alias>
