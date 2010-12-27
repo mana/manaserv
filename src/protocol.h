@@ -259,7 +259,8 @@ enum {
     ERRMSG_ALREADY_TAKEN,               // name used was already taken
     ERRMSG_SERVER_FULL,                 // the server is overloaded
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
-    ERRMSG_LIMIT_REACHED                // limit reached
+    ERRMSG_LIMIT_REACHED,               // limit reached
+    ERRMSG_ADMINISTRATIVE_LOGOFF        // kicked by server administrator
 };
 
 // used in AGMSG_REGISTER_RESPONSE to show state of item db

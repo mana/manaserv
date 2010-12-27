@@ -705,6 +705,11 @@ static void handleGoto(Character *player, std::string &args)
     MapComposite *map = other->getMap();
     const Point &pos = other->getPosition();
     GameState::warp(player, map, pos.x, pos.y);
+
+    // log transaction
+    std::stringstream msg;
+    msg << "User warped own character to " << other->getName();
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_GOTO, msg.str());
 }
 
 static void handleRecall(Character *player, std::string &args)
@@ -901,7 +906,7 @@ static void handleTakePermission(Character *player, std::string &args)
         accountHandler->changeAccountLevel(other, permission);
 
         // log transaction
-        std::string msg = "User took right " + strPermission + " to " + other->getName();
+        std::string msg = "User took right " + strPermission + " from " + other->getName();
         accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
         say("Sorry, "+player->getName()+" revoked your rights of a "+strPermission, other);
     }
@@ -969,6 +974,12 @@ static void handleAttribute(Character *player, std::string &args)
 
     // change the player's attribute
     other->setAttribute(attr, value);
+
+    // log transaction
+    std::stringstream msg;
+    msg << "User changed attribute " << attr << " of player " << other->getName()
+        << " to " << value;
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_ATTRIBUTE, msg.str());
 }
 
 static void handleReport(Character *player, std::string &args)
@@ -995,6 +1006,9 @@ static void handleAnnounce(Character *player, std::string &msg)
     }
 
     GameState::sayToAll(msg);
+
+    // log transaction
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_ANNOUNCE, msg);
 }
 
 static void handleWhere(Character *player, std::string &)
@@ -1085,14 +1099,24 @@ static void handleMute(Character *player, std::string &args)
         targetMsg << player->getName() << " unmuted you.";
         userMsg << "You unmuted " << other->getName() << ".";
     }
-    GameState::sayTo(other, NULL, targetMsg.str());
-    GameState::sayTo(player, NULL, userMsg.str());
+    say(targetMsg.str(), other);
+    say(userMsg.str(), player);
+
+    // log transaction
+    std::stringstream msg;
+    if (length > 0)
+    {
+        msg << "User muted " << other->getName() << " for " << length << " seconds.";
+    } else {
+        msg << "User unmuted " << other->getName();
+    }
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_MUTE, msg.str());
 }
 
 static void handleDie(Character *player, std::string &args)
 {
     player->setAttribute(ATTR_HP, 0);
-    GameState::sayTo(player, NULL, "You've killed yourself.");
+    say("You've killed yourself.", player);
 }
 
 void CommandHandler::handleCommand(Character *player,
