@@ -462,3 +462,4 @@ INSERT INTO mana_transaction_codes VALUES ( 50, 'Command SHUTDOWN_ALL',     'Com
 INSERT INTO mana_transaction_codes VALUES ( 51, 'Command RESTART_THIS',     'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 52, 'Command RESTART_ALL',      'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 53, 'Command ATTRIBUTE',        'Commands' );
+INSERT INTO mana_transaction_codes VALUES ( 54, 'Command KICK',             'Commands' );

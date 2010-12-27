@@ -68,6 +68,8 @@ static void handleAnnounce(Character*, std::string&);
 static void handleHistory(Character*, std::string&);
 static void handleMute(Character*, std::string&);
 static void handleDie(Character*, std::string&);
+static void handleKill(Character*, std::string&);
+static void handleKick(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -113,6 +115,10 @@ static CmdRef const cmdRef[] =
         "Prevents the character from talking for the specified number of seconds. Use 0 seconds to unmute.", &handleMute},
     {"die", "",
         "Kills you.", &handleDie},
+    {"kill", "<character>",
+        "Kills the character.", &handleKill},
+    {"kick", "<character>",
+        "Disconnects the client of character.", &handleKick},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -1118,6 +1124,71 @@ static void handleDie(Character *player, std::string &args)
     player->setAttribute(ATTR_HP, 0);
     say("You've killed yourself.", player);
 }
+
+static void handleKill(Character *player, std::string &args)
+{
+    Character *other;
+
+    // get arguments
+    std::string character = getArgument(args);
+
+    // check for valid player
+    other = getPlayer(character);
+    if (!other)
+    {
+        say("Invalid character", player);
+        return;
+    }
+
+    // kill the player
+    player->setAttribute(ATTR_HP, 0);
+
+    // feedback
+    std::stringstream targetMsg;
+    std::stringstream userMsg;
+    targetMsg << "You were killed by server command from "<< player->getName() << ".";
+    userMsg << "You killed " << other->getName() << ".";
+    say(targetMsg.str(), other);
+    say(userMsg.str(), player);
+
+    // log transaction
+    std::stringstream logMsg;
+    logMsg << "User killed " << other->getName();
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_KILL, logMsg.str());
+}
+
+static void handleKick(Character *player, std::string &args)
+{
+    Character *other;
+
+    // get arguments
+    std::string character = getArgument(args);
+
+    // check for valid player
+    other = getPlayer(character);
+    if (!other)
+    {
+        say("Invalid character", player);
+        return;
+    }
+
+    // send feedback
+    std::stringstream userMsg;
+    userMsg << "You kicked " << other->getName() << ".";
+    say(userMsg.str(), player);
+
+    // disconnect the client
+    MessageOut msg(GPMSG_CONNECT_RESPONSE);
+    msg.writeInt8(ERRMSG_ADMINISTRATIVE_LOGOFF);
+    other->getClient()->disconnect(msg);
+
+    // log transaction
+    std::stringstream logMsg;
+    logMsg << "User kicked " << other->getName();
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_KICK, logMsg.str());
+}
+
+
 
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
