@@ -70,6 +70,8 @@ static void handleMute(Character*, std::string&);
 static void handleDie(Character*, std::string&);
 static void handleKill(Character*, std::string&);
 static void handleKick(Character*, std::string&);
+static void handleLog(Character*, std::string&);
+static void handleLogsay(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -119,6 +121,10 @@ static CmdRef const cmdRef[] =
         "Kills the character.", &handleKill},
     {"kick", "<character>",
         "Disconnects the client of character.", &handleKick},
+    {"log", "<message>",
+        "Logs a message to the transaction log.", &handleLog},
+    {"logsay", "<message>",
+        "Says something in public chat while logging it to the transaction log.", &handleLogsay},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -1188,6 +1194,42 @@ static void handleKick(Character *player, std::string &args)
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_KICK, logMsg.str());
 }
 
+
+static void handleLog(Character *player, std::string &msg)
+{
+    if (msg == "")
+    {
+        say("Invalid number of arguments given.", player);
+        say("Usage: @log <message>", player);
+        return;
+    }
+
+    // log transaction
+    std::string logmsg = "[silent] " + msg;
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_LOG, logmsg);
+
+    // send feedback
+    say("Message logged", player);
+}
+
+static void handleLogsay(Character *player, std::string &msg)
+{
+    if (msg == "")
+    {
+        say("Invalid number of arguments given.", player);
+        say("Usage: @logsay <message>", player);
+        return;
+    }
+
+    GameState::sayAround(player, msg);
+
+    // log transaction
+    std::string logmsg = "[public] " + msg;
+    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_LOG, logmsg);
+
+    // send feedback
+    say("Message logged", player);
+}
 
 
 void CommandHandler::handleCommand(Character *player,

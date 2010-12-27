@@ -30,6 +30,8 @@
     <allow>@history</allow>
     <allow>@kick</allow>
     <allow>@kill</allow>
+    <allow>@log</allow>
+    <allow>@logsay</allow>
   </class>
   <class level="5">
   </class>
