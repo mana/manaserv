@@ -822,7 +822,7 @@ static int being_set_action(lua_State *s)
 
     if (being)
     {
-        being->setAction((Being::Action) act);
+        being->setAction((BeingAction) act);
     }
 
     return 0;

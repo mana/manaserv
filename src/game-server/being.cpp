@@ -316,7 +316,7 @@ int Being::performAttack(Being *target, const Damage &damage) {
 int Being::performAttack(Being *target, unsigned range, const Damage &damage)
 {
     // check target legality
-    if (!target || target == this || target->getAction() == Being::DEAD
+    if (!target || target == this || target->getAction() == DEAD
         || !target->canFight())
             return -1;
     if (getMap()->getPvP() == PVP_NONE && target->getType() == OBJECT_CHARACTER
@@ -336,11 +336,11 @@ int Being::performAttack(Being *target, unsigned range, const Damage &damage)
     return (mTarget->damage(this, damage));
 }
 
-void Being::setAction(Action action)
+void Being::setAction(BeingAction action)
 {
     mAction = action;
-    if (action != Being::ATTACK && // The players are informed about these actions
-        action != Being::WALK)     // by other messages
+    if (action != ATTACK && // The players are informed about these actions
+        action != WALK)     // by other messages
     {
         raiseUpdateFlags(UPDATEFLAG_ACTIONCHANGE);
     }

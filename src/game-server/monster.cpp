@@ -224,7 +224,7 @@ void Monster::update()
     Being *bestAttackTarget = mTarget = NULL;
     int bestTargetPriority = 0;
     Point bestAttackPosition;
-    Direction bestAttackDirection = DIRECTION_DOWN;
+    BeingDirection bestAttackDirection = DIRECTION_DOWN;
 
     // Iterate through objects nearby
     int aroundArea = Configuration::getValue("game_visualRange", 448);

@@ -19,8 +19,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#ifndef MANASERV_PROTOCOL_H
+#define MANASERV_PROTOCOL_H
 
 /**
  * Enumerated type for communicated messages:
@@ -377,8 +377,54 @@ enum {
     GUILD_EVENT_OFFLINE_PLAYER
 };
 
+/**
+  * Moves enum for beings and actors for others players vision.
+  * WARNING: Has to be in sync with the same enum in the Being class
+  * of the client!
+  */
+enum BeingAction
+{
+    STAND,
+    WALK,
+    ATTACK,
+    SIT,
+    DEAD,
+    HURT
+};
 
-enum
+/**
+  * Moves enum for beings and actors for others players attack types.
+  * WARNING: Has to be in sync with the same enum in the Being class
+  * of the client!
+  */
+enum AttackType
+{
+    HIT = 0x00,
+    CRITICAL = 0x0a,
+    MULTI = 0x08,
+    REFLECT = 0x04,
+    FLEE = 0x0b
+};
+
+/**
+ * Beings and actors directions
+ * WARNING: Has to be in sync with the same enum in the Being class
+ * of the client!
+ */
+enum BeingDirection
+{
+    DIRECTION_UP = 1,
+    DIRECTION_DOWN,
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT
+};
+
+/**
+  * enum for sprites layers.
+  * WARNING: Has to be in sync with the same enum in the Sprite class
+  * of the client!
+  */
+enum SpriteLayer
 {
     SPRITE_BASE = 0,
     SPRITE_SHOE,
@@ -390,4 +436,4 @@ enum
     SPRITE_VECTOREND
 };
 
-#endif // PROTOCOL_H
+#endif // MANASERV_PROTOCOL_H

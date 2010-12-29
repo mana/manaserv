@@ -37,18 +37,6 @@ class StatusEffect;
 
 typedef std::map< unsigned int, Attribute > AttributeMap;
 
-/**
- * Beings and actors directions
- * Needs to match client
- */
-enum Direction
-{
-    DIRECTION_UP = 1,
-    DIRECTION_DOWN,
-    DIRECTION_LEFT,
-    DIRECTION_RIGHT
-};
-
 enum TimerID
 {
     T_M_STROLL, // time until monster strolls to new location
@@ -79,35 +67,6 @@ typedef std::vector<unsigned int> Hits;
 class Being : public Actor
 {
     public:
-        /**
-         * Moves enum for beings and actors for others players vision.
-         * WARNING: Has to be in sync with the same enum in the Being class
-         * of the client!
-         */
-        enum Action
-        {
-            STAND,
-            WALK,
-            ATTACK,
-            SIT,
-            DEAD,
-            HURT
-        };
-
-        /**
-         * Moves enum for beings and actors for others players attack types.
-         * WARNING: Has to be in sync with the same enum in the Being class
-         * of the client!
-         */
-        enum AttackType
-        {
-            HIT = 0x00,
-            CRITICAL = 0x0a,
-            MULTI = 0x08,
-            REFLECT = 0x04,
-            FLEE = 0x0b
-        };
-
         /**
          * Proxy constructor.
          */
@@ -196,12 +155,12 @@ class Being : public Actor
         /**
          * Sets the current action.
          */
-        void setAction(Action action);
+        void setAction(BeingAction action);
 
         /**
          * Sets the current action.
          */
-        Action getAction() const
+        BeingAction getAction() const
         { return mAction; }
 
         /**
@@ -331,7 +290,7 @@ class Being : public Actor
 
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
-        Action mAction;
+        BeingAction mAction;
         AttributeMap mAttributes;
         AutoAttacks mAutoAttacks;
         StatusEffects mStatus;

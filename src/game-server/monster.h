@@ -211,7 +211,7 @@ class MonsterClass
  */
 struct AttackPosition
 {
-    AttackPosition(int posX, int posY, Direction dir):
+    AttackPosition(int posX, int posY, BeingDirection dir):
         x(posX),
         y(posY),
         direction(dir)
@@ -219,7 +219,7 @@ struct AttackPosition
 
     int x;
     int y;
-    Direction direction;
+    BeingDirection direction;
 };
 
 /**
