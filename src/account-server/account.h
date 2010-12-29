@@ -120,6 +120,13 @@ class Account
         { return mLevel; }
 
         /**
+         * Tells whether a slot can be used.
+         *
+         * @param slot slot index of the character.
+         */
+        bool isSlotEmpty(unsigned int slot);
+
+        /**
          * Set the characters.
          *
          * @param characters a list of characters.
@@ -136,9 +143,9 @@ class Account
         /**
          * Removes a character from the account.
          *
-         * @param i index of the character.
+         * @param slot slot index of the character.
          */
-        void delCharacter(int i);
+        void delCharacter(unsigned int slot);
 
         /**
          * Get all the characters.

@@ -53,15 +53,15 @@ enum {
     APMSG_LOGIN_RESPONSE           = 0x0012, // B error, S updatehost, S Client data URL, B Character slots
     PAMSG_LOGOUT                   = 0x0013, // -
     APMSG_LOGOUT_RESPONSE          = 0x0014, // B error
-    PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, W*6 stats
+    PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, B slot, {W stats}*
     APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
-    PAMSG_CHAR_DELETE              = 0x0022, // B index
+    PAMSG_CHAR_DELETE              = 0x0022, // B slot
     APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
-    // B index, S name, B gender, B hair style, B hair color, W level,
+    // B slot, S name, B gender, B hair style, B hair color, W level,
     // W character points, W correction points,
     // {D attr id, D base value (in 1/256ths) D mod value (in 256ths) }*
     APMSG_CHAR_INFO                = 0x0024, // ^
-    PAMSG_CHAR_SELECT              = 0x0026, // B index
+    PAMSG_CHAR_SELECT              = 0x0026, // B slot
     APMSG_CHAR_SELECT_RESPONSE     = 0x0027, // B error, B*32 token, S game address, W game port, S chat address, W chat port
     PAMSG_EMAIL_CHANGE             = 0x0030, // S email
     APMSG_EMAIL_CHANGE_RESPONSE    = 0x0031, // B error
@@ -308,7 +308,8 @@ enum {
     CREATE_ATTRIBUTES_TOO_LOW,
     CREATE_ATTRIBUTES_OUT_OF_RANGE,
     CREATE_EXISTS_NAME,
-    CREATE_TOO_MUCH_CHARACTERS
+    CREATE_TOO_MUCH_CHARACTERS,
+    CREATE_INVALID_SLOT
 };
 
 // Character attribute modification specific return value

@@ -25,6 +25,7 @@
 Character::Character(const std::string &name, int id):
     mName(name),
     mDatabaseID(id),
+    mCharacterSlot(0),
     mAccountID(-1),
     mAccount(NULL),
     mMapId(0),

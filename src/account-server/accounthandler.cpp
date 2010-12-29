@@ -114,8 +114,10 @@ public:
      */
     TokenCollector<AccountHandler, AccountClient *, int> mTokenCollector;
 
-    static void sendCharacterData(AccountClient &client, int slot,
-                              const Character &ch);
+    /**
+     * Send the character data to the client.
+     */
+    static void sendCharacterData(AccountClient &client, const Character &ch);
 
 protected:
     /**
@@ -274,11 +276,11 @@ void AccountHandler::computerDisconnected(NetComputer *comp)
     delete client; // ~AccountClient unsets the account
 }
 
-void AccountHandler::sendCharacterData(AccountClient &client, int slot,
+void AccountHandler::sendCharacterData(AccountClient &client,
                               const Character &ch)
 {
     MessageOut charInfo(APMSG_CHAR_INFO);
-    charInfo.writeInt8(slot);
+    charInfo.writeInt8(ch.getCharacterSlot());
     charInfo.writeString(ch.getName());
     charInfo.writeInt8(ch.getGender());
     charInfo.writeInt8(ch.getHairStyle());
@@ -396,10 +398,9 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     Characters &chars = acc->getCharacters();
 
     // Send characters list
-    for (unsigned int i = 0; i < chars.size(); i++)
-    {
-        sendCharacterData(client, i, *chars[i]);
-    }
+    for (Characters::const_iterator i = chars.begin(), i_end = chars.end();
+         i != i_end; ++i)
+        sendCharacterData(client, *(*i).second);
 }
 
 void AccountHandler::handleLogoutMessage(AccountClient &client)
@@ -685,12 +686,18 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
     int hairStyle = msg.readInt8();
     int hairColor = msg.readInt8();
     int gender = msg.readInt8();
+
+    // Avoid creation of character from old clients.
+    int slot = -1;
+    if (msg.getUnreadLength() > 7)
+        slot = msg.readInt8();
+
     int numHairStyles = Configuration::getValue("char_numHairStyles", 17);
     int numHairColors = Configuration::getValue("char_numHairColors", 11);
     int numGenders = Configuration::getValue("char_numGenders", 2);
     unsigned int minNameLength = Configuration::getValue("char_minNameLength", 4);
     unsigned int maxNameLength = Configuration::getValue("char_maxNameLength", 25);
-    unsigned int maxCharacters = Configuration::getValue("account_maxCharacters", 3);
+    int maxCharacters = Configuration::getValue("account_maxCharacters", 3);
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
@@ -733,9 +740,18 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             return;
         }
 
-        // An account shouldn't have more than MAX_OF_CHARACTERS characters.
+        // An account shouldn't have more
+        // than <account_maxCharacters> characters.
         Characters &chars = acc->getCharacters();
-        if (chars.size() >= maxCharacters)
+        if (slot < 1 || slot > maxCharacters
+            || !acc->isSlotEmpty((unsigned int) slot))
+        {
+            reply.writeInt8(CREATE_INVALID_SLOT);
+            client.send(reply);
+            return;
+        }
+
+        if ((int)chars.size() >= maxCharacters)
         {
             reply.writeInt8(CREATE_TOO_MUCH_CHARACTERS);
             client.send(reply);
@@ -783,6 +799,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
                                        (double) (attributes[i]))));
             newCharacter->mAttributes.insert(defAttr.begin(), defAttr.end());
             newCharacter->setAccount(acc);
+            newCharacter->setCharacterSlot(slot);
             newCharacter->setLevel(1);
             newCharacter->setCharacterPoints(0);
             newCharacter->setCorrectionPoints(0);
@@ -812,8 +829,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             client.send(reply);
 
             // Send new characters infos back to client
-            int slot = chars.size() - 1;
-            sendCharacterData(client, slot, *chars[slot]);
+            sendCharacterData(client, *chars[slot]);
             return;
         }
     }
@@ -834,19 +850,18 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
         return; // not logged in
     }
 
-    unsigned charNum = msg.readInt8();
+    int slot = msg.readInt8();
     Characters &chars = acc->getCharacters();
 
-    // Character ID = 0 to Number of Characters - 1.
-    if (charNum >= chars.size())
+    if (slot < 1 || slot > (int)chars.size())
     {
-        // invalid char selection
+        // Invalid char selection
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
         return;
     }
 
-    Character *selectedChar = chars[charNum];
+    Character *selectedChar = chars[slot];
 
     std::string address;
     int port;
@@ -908,33 +923,33 @@ void AccountHandler::handleCharacterDeleteMessage(AccountClient &client,
         return; // not logged in
     }
 
-    unsigned charNum = msg.readInt8();
+    int slot = msg.readInt8();
     Characters &chars = acc->getCharacters();
 
-    // Character ID = 0 to Number of Characters - 1.
-    if (charNum >= chars.size())
+    if (slot < 1 || acc->isSlotEmpty(slot))
     {
-        // invalid char selection
+        // Invalid char selection
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
-        return; // not logged in
+        return;
     }
 
-    LOG_INFO("Character deleted:" << chars[charNum]->getName());
+    std::string characterName = chars[slot]->getName();
+    LOG_INFO("Character deleted:" << characterName);
 
-    acc->delCharacter(charNum);
+    // Log transaction
+    Transaction trans;
+    trans.mCharacterId = chars[slot]->getDatabaseID();
+    trans.mAction = TRANS_CHAR_DELETED;
+    trans.mMessage = chars[slot]->getName() + " deleted by ";
+    trans.mMessage.append(acc->getName());
+    storage->addTransaction(trans);
+
+    acc->delCharacter(slot);
     storage->flush(acc);
 
     reply.writeInt8(ERRMSG_OK);
     client.send(reply);
-
-    // log transaction
-    Transaction trans;
-    trans.mCharacterId = chars[charNum]->getDatabaseID();
-    trans.mAction = TRANS_CHAR_DELETED;
-    trans.mMessage = chars[charNum]->getName() + " deleted by ";
-    trans.mMessage.append(acc->getName());
-    storage->addTransaction(trans);
 }
 
 void AccountHandler::tokenMatched(AccountClient *client, int accountID)
@@ -953,10 +968,9 @@ void AccountHandler::tokenMatched(AccountClient *client, int accountID)
     Characters &chars = acc->getCharacters();
 
     // Send characters list
-    for (unsigned int i = 0; i < chars.size(); i++)
-    {
-        sendCharacterData(*client, i, *chars[i]);
-    }
+    for (Characters::const_iterator i = chars.begin(), i_end = chars.end();
+         i != i_end; ++i)
+        sendCharacterData(*client, *(*i).second);
 }
 
 void AccountHandler::deletePendingClient(AccountClient *client)

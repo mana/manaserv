@@ -50,6 +50,15 @@ class Character
         int getDatabaseID() const { return mDatabaseID; }
         void setDatabaseID(int id) { mDatabaseID = id; }
 
+        /**
+         * Gets the slot of the character.
+         */
+        unsigned int getCharacterSlot() const
+        { return mCharacterSlot; }
+
+        void setCharacterSlot(unsigned int slot)
+        { mCharacterSlot = slot; }
+
         /** Gets the account the character belongs to. */
         Account *getAccount() const
         { return mAccount; }
@@ -234,6 +243,7 @@ class Character
         Possessions mPossessions; //!< All the possesions of the character.
         std::string mName;        //!< Name of the character.
         int mDatabaseID;          //!< Character database ID.
+        unsigned int mCharacterSlot;  //!< Character slot.
         int mAccountID;           //!< Account ID of the owner.
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
@@ -270,6 +280,6 @@ class Character
 /**
  * Type definition for a list of Characters.
  */
-typedef std::vector< Character * > Characters;
+typedef std::map<unsigned int, Character* > Characters;
 
 #endif

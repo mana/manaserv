@@ -55,6 +55,7 @@ CREATE TABLE mana_characters
    x            INTEGER     NOT NULL,
    y            INTEGER     NOT NULL,
    map_id       INTEGER     NOT NULL,
+   slot         INTEGER     NOT NULL,
    --
    FOREIGN KEY (user_id) REFERENCES mana_accounts(id)
 );

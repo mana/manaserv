@@ -27,8 +27,17 @@ Account::~Account()
     for (Characters::iterator i = mCharacters.begin(),
          i_end = mCharacters.end(); i != i_end; ++i)
     {
-        delete *i;
+        delete (*i).second;
     }
+}
+
+bool Account::isSlotEmpty(unsigned int slot)
+{
+    Characters::iterator i = mCharacters.find(slot);
+    if (i != mCharacters.end())
+        return false;
+    else
+        return true;
 }
 
 void Account::setCharacters(const Characters& characters)
@@ -38,12 +47,24 @@ void Account::setCharacters(const Characters& characters)
 
 void Account::addCharacter(Character *character)
 {
-    mCharacters.push_back(character);
+    unsigned int slot = (unsigned int) character->getCharacterSlot();
+    assert(isSlotEmpty(slot));
+
+    mCharacters[slot] = character;
 }
 
-void Account::delCharacter(int i)
+void Account::delCharacter(unsigned int slot)
 {
-    mCharacters.erase(mCharacters.begin() + i);
+    for (Characters::iterator iter = mCharacters.begin(),
+             iter_end = mCharacters.end(); iter != iter_end; ++iter)
+    {
+        if ((*iter).second->getCharacterSlot() == slot)
+        {
+            delete (*iter).second;
+            (*iter).second = 0;
+            mCharacters.erase(iter);
+        }
+    }
 }
 
 void Account::setID(int id)

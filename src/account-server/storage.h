@@ -441,6 +441,15 @@ class Storage
         Character *getCharacterBySQL(Account *owner);
 
         /**
+         * Fix improper character slots
+         *
+         * @param accountId the account database Id.
+         *
+         * @note Will be deprecated in the future at some point.
+         */
+        void fixCharactersSlot(int accountId);
+
+        /**
          * Synchronizes the base data in the connected SQL database with the xml
          * files like items.xml.
          * This method is called once after initialization of DALStorage.
