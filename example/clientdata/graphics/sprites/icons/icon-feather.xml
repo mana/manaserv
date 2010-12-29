@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<sprite>
+	<imageset name="base" src="graphics/sprites/icons/icon-feather.png" width="13" height="20" />
+
+	<action name="default" imageset="base">
+		<animation direction="default">
+			<frame index="0" offsetY="-12" delay="100"/>
+		</animation>
+	</action>
+</sprite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<specials>
+    <set name="Magic">
+        <special id="1" name="Test Spell 1" />
+        <special id="2" name="Test Spell 2" />
+        <special id="3" name="Test Spell 3" />
+    </set>
+</specials>

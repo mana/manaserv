@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<!--
+A burst of red particles emitted in a narrow, horizontal cone. Could be
+used to visualize some kind of special attack.
+-->
+
+<effect>
+	<particle
+		position-x = "0"
+		position-y = "0"
+		position-z = "16"
+		lifetime = "1"
+		>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="0" max="45"/>
+			<property name="horizontal-angle" min="45" max="135"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="100"/>
+			<property name="image" value="graphics/particles/orb-small.png|W:#ff0000"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="6" max="12"/>
+		</emitter>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="0" max="45"/>
+			<property name="horizontal-angle" min="45" max="135"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="0.1"/>
+			<property name="image" value="graphics/particles/star-small.png|W:#ff0000,ffffff"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="6" max="12"/>
+		</emitter>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="0" max="45"/>
+			<property name="horizontal-angle" min="45" max="135"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="0.1"/>
+			<property name="image" value="graphics/particles/orb-medium.png|W:#ff0000"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="6" max="12"/>
+		</emitter>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="0" max="45"/>
+			<property name="horizontal-angle" min="45" max="135"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="0.1"/>
+			<property name="image" value="graphics/particles/star-medium.png|W:#ff0000,ffffff"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="3" max="6"/>
+		</emitter>
+	</particle>
+</effect>

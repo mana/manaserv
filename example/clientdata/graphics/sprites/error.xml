@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<sprite>
+	<imageset name="base" src="graphics/sprites/error.png" width="29" height="9" />
+	
+	<action name="default" imageset="base">
+		<animation direction="default">
+			<frame index="0" />
+		</animation>
+	</action>
+</sprite>

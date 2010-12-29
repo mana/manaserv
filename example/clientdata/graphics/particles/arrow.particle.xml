@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<effect>
+	<particle
+		position-x = "0"
+		position-y = "0"
+		position-z = "32"
+		lifetime = "128"
+		>
+                <rotation imageset="graphics/particles/arrowh.png" width="16" height="16">
+                    <sequence start="0" end="7" />
+                </rotation>
+	</particle>
+</effect>

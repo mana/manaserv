@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<sprite>
+
+	<imageset name="base" src="graphics/sprites/monsters/monster-slime.png|W" width="52" height="24" />
+
+	<action name="stand" imageset="base">
+		<animation>
+		  <frame index="0" offsetY="-4" />
+		</animation>
+	</action>
+
+	<action name="walk" imageset="base">
+		<animation direction="down">
+			<sequence start="0" end="3" delay="200" offsetY="-4" />
+		</animation>
+		<animation direction="left">
+			<frame index="0" delay="200" offsetY="-4" />
+			<sequence start="10" end="12" delay="200" offsetY="-4" />
+		</animation>
+		<animation direction="up">
+			<frame index="0" delay="200" offsetY="-4" />
+			<sequence start="19" end="21" delay="200" offsetY="-4" />
+		</animation>
+		<animation direction="right">
+			<frame index="0" delay="200" offsetY="-4" />
+			<sequence start="28" end="30" delay="200" offsetY="-4" />
+		</animation>
+	</action>
+
+	<action name="dead" imageset="base">
+		<animation>
+		  <frame index="8" offsetY="-4" />
+		</animation>
+	</action>
+
+	<action name="attack" imageset="base">
+		<animation direction="down">
+			<sequence start="4" end="7" delay="100" offsetY="-4" />
+		  	<end />
+		</animation>
+		<animation direction="left">
+			<sequence start="4" end="7" delay="100" offsetY="-4" />
+		  	<end />
+		</animation>
+		<animation direction="up">
+			<sequence start="22" end="25" delay="100" offsetY="-4" />
+		  	<end />
+		</animation>
+		<animation direction="right">
+			<sequence start="22" end="25" delay="100" offsetY="-4" />
+		  	<end />
+		</animation>
+	</action>
+
+</sprite>

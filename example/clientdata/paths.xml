@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!-- Use this file to override default data paths used by the system
+If this file is not used, the hard-coded defaults are the following:
+
+Files:				Default paths:
+=============		===============
+(All folders listed below are relative to the data/ directory.)
+
+Default wallpaper:	graphics/images/
+Default error path:	graphics/images/
+
+Default items path:	graphics/items/
+Default minimaps path:	graphics/minimaps/
+Default particles path:	graphics/particles/
+Default sprite path:	graphics/sprites/
+Default maps path:	maps/
+Default sfx path:		sfx/
+
+Hard-coded reference files (Some could be handled differently later):
+
+Files:					Default paths:
+=============			===============
+Error handling for missing sprites files: 	graphics/sprites/error.xml
+Level Up particle XML file: 	graphics/particles/levelup.particle.xml
+Warp/Portal effect XML file:	graphics/particles/warparea.particle.xml
+Player unarmed attack sound effect:	sfx/fist-swish.ogg
+
+You can also have a look the client data handling reference page, here:
+http://doc.manasource.org/client_data_handling
+
+Also, don't forget to add the '/' path separator at the end of folder values.
+-->
+
+<configuration>
+    <!-- Required data paths -->
+    <option name="itemIcons" value="graphics/items/" />
+    <option name="unknownItemFile" value="unknown.png" />
+    <option name="sprites" value="graphics/sprites/" />
+    <option name="spriteErrorFile" value="error.xml" />
+
+    <option name="particles" value="graphics/particles/" />
+    <option name="levelUpEffectFile" value="levelup.particle.xml" />
+    <option name="portalEffectFile" value="warparea.particle.xml" />
+
+    <option name="minimaps" value="graphics/minimaps/" />
+    <option name="maps" value="maps/" />
+
+    <option name="sfx" value="sfx/" />
+    <option name="attackSfxFile" value="fist-swish.ogg" />
+    <option name="music" value="music/" />
+
+    <option name="wallpapers" value="graphics/images/" />
+    <option name="wallpaperFile" value="login_wallpaper.png" />
+</configuration>

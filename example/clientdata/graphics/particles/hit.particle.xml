@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+
+<!--
+An explosion of white particles.
+-->
+
+<effect>
+	<particle
+		position-x = "0"
+		position-y = "0"
+		position-z = "16"
+		lifetime = "1"
+		>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="45" max="90"/>
+			<property name="horizontal-angle" min="0" max="360"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="0.1"/>
+			<property name="image" value="graphics/particles/orb-small.png"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="6" max="12"/>
+		</emitter>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="45" max="90"/>
+			<property name="horizontal-angle" min="0" max="360"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="0.1"/>
+			<property name="image" value="graphics/particles/star-small.png|W:#ffffff,ffffff"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="6" max="12"/>
+		</emitter>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="45" max="90"/>
+			<property name="horizontal-angle" min="0" max="360"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="0.1"/>
+			<property name="image" value="graphics/particles/orb-medium.png"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="6" max="12"/>
+		</emitter>
+		<emitter>
+			<property name="position-x" min="-8" max="8"/>
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="45" max="90"/>
+			<property name="horizontal-angle" min="0" max="360"/>
+			<property name="power" min="0" max="6"/>
+			<property name="gravity" value="0.1"/>
+			<property name="image" value="graphics/particles/star-medium.png|W:#ffffff,ffffff"/>
+			<property name="lifetime" min="0" max="80"/>
+			<property name="output" min="3" max="6"/>
+		</emitter>
+	</particle>
+</effect>

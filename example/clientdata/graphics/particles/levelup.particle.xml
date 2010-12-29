@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+Red stars which are supposed to engulf a character
+-->
+<effect>
+	<particle
+		position-x = "0"
+		position-y = "0"
+		position-z = "0"
+		lifetime = "128"
+		>
+		<emitter>
+		<property name="image" value="graphics/particles/star-medium.png|W:#ff0000,ffffff"/>
+		<property name="vertical-angle" value="90"/>
+		<property name="power" value="2"/>
+		<property name="lifetime" value="36"/>
+		<property name="output" min="-5" max="1"/>
+		<property name="position-x" min="-16" max="16"/>
+		<property name="position-y" min="-16" max="16"/>
+		<property name="position-z" min="0" max="32"/>
+		</emitter>
+	</particle>
+</effect>

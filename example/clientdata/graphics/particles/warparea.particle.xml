@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+Fancy fireworks effect which fills the whole screen.
+-->
+<effect>
+	<particle
+		position-x = "0"
+		position-y = "0"
+		position-z = "1"
+		size-adjustable = "true"
+		>
+		<emitter>
+			<property name="position-x" min="0" max="32"/>
+			<property name="position-y" min="0" max="48"/>
+			<property name="image" value="graphics/particles/star-small.png"/>
+			<property name="gravity" value="-0.003"/>
+			<property name="lifetime" value="90"/>
+			<property name="output" min="0" max="1"/>
+			<property name="output-pause" min="0" max="10"/>
+			<property name="fade-in" value="30"/>
+			<property name="fade-out" value="30"/>
+		</emitter>
+	</particle>
+</effect>

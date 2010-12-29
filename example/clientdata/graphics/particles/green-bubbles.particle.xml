@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+Green poison bubbles
+-->
+<effect>
+	<particle
+		position-x = "0"
+		position-y = "0"
+		position-z = "0"
+		>
+		<emitter>
+			<property name="position-z" value="90" />
+			<property name="position-y" min="-8" max="8"/>
+			<property name="vertical-angle" min="0" max="90"/>
+			<property name="horizontal-angle" min="0" max="360"/>
+			<property name="power" min="4" max="15"/>
+			<property name="lifetime" value="1"/>
+			<property name="output" value="1"/>
+			<emitter>
+				<property name="gravity" value="-0.1"/>
+				<property name="momentum" value="0.9"/>
+			        <animation imageset="graphics/particles/fullbubble-16px.png|W:#80ff80,40a020" width="16" height="16">
+					<frame index="0" delay="80" />
+					<frame index="1" delay="80" />
+					<frame index="2" delay="80" />
+					<frame index="3" delay="80" />
+					<frame index="4" delay="80" />
+					<frame index="5" delay="30" />
+					<frame index="6" delay="20" />
+					<frame index="7" delay="-1" />
+			        </animation>
+				<property name="lifetime" value="45"/>
+				<property name="fade-in" value="0"/>
+				<property name="fade-out" value="10"/>
+				<property name="output" min="0" max="1"/>
+				<property name="output-pause" min="30" max="80"/>
+			</emitter>
+		</emitter>
+	</particle>
+</effect>

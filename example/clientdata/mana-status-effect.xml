@@ -1,3 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <status-effects>
+    <status-effect name="Plague" id="1"
+                   icon="icons/icon-poison.xml"
+                   persistent-particle-effect="true"
+                   start-particle="graphics/particles/green-bubbles.particle.xml"
+                   script="plague.lua"
+                 />
+    <status-effect name="Jumping Status" id="2"
+                   icon="icons/icon-feather.xml"
+                   persistent-particle-effect="true"
+                   start-particle="graphics/particles/magic.white.xml"
+                   script="jump.lua"
+                 />
 </status-effects>

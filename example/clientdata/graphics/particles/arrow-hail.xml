@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<effect>
+	<particle
+		position-x = "0"
+		position-y = "0"
+		position-z = "400"
+		lifetime = "100"
+		>
+                <!-- <property name="follow-parent" value="0"/> -->
+                <emitter><!-- <property name="follow-parent" value="0"/> -->
+		  <property name="lifetime" min="180" max="180"/>
+		  <property name="position-x" min="105" max="145"/>
+		  <property name="position-y" min="-20" max="20"/>
+                  <property name="vertical-angle" value="255"/>
+                  <property name="power" value="14"/>
+                  <property name="output" min="0" max="1"/>
+                  <property name="output-pause" min="10" max="20"/>
+                  <property name="gravity" value="0.09"/>
+                  <property name="image" value="graphics/particles/arrow-down.png"/>
+                </emitter>
+        </particle>
+</effect>

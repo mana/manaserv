@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<units>
+    <unit type="currency" base="GP" round="0"/>
+    <unit type="weight" base="g" round="0">
+        <level symbol="kg" count="1000" round="2"/>
+    </unit>
+</units>

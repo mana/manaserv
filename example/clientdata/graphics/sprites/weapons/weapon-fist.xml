@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<sprite name="player" action="stand">
+	<imageset name="dagger" src="graphics/sprites/weapon-sword.png" width="64" height="64" />
+
+	<action name="default" imageset="dagger">
+	</action>
+</sprite>

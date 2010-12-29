@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<sprite name="player" action="stand">
+	<imageset name="bow" src="graphics/sprites/weapons/weapon-bow.png" width="64" height="64" />
+
+	<action name="default" imageset="bow">
+	</action>
+
+	<action name="attack_bow" imageset="bow">
+		<animation direction="down">
+			<sequence start="0" end="4" delay="75" />
+		  	<end />
+		</animation>
+		<animation direction="left">
+			<sequence start="5" end="9" delay="75" />
+		  	<end />
+		</animation>
+		<animation direction="up">
+			<sequence start="10" end="14" delay="75" />
+		  	<end />
+		</animation>
+		<animation direction="right">
+			<sequence start="15" end="19" delay="75" />
+		 	<end />
+		</animation>
+	</action>
+</sprite>
