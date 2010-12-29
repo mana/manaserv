@@ -15,7 +15,7 @@
     <attribute id="3" name="Vitality" desc="Increases the maximum number of hitpoints, defence, and also slightly increase hitpoint regeneration." modifiable="true" scope="being">
         <modifier stacktype="stackable" modtype="additive" tag="vit" effect="Vitality %+.1f" />
     </attribute>
-    <attribute id="4" name="Intelligence" desc="FIXME" modifiable="true" scope="being">
+    <attribute id="4" name="Intelligence" desc="Involved in magic. So better not put too much in it for now..." modifiable="true" scope="being">
         <modifier stacktype="stackable" modtype="additive" tag="int" effect="Intelligence %+.1f" />
     </attribute>
     <attribute id="5" name="Dexterity" desc="Increases conventional accuracy, decreases the proportion of warmup time to cooldown time for conventional attacks and increases the damage for many ranged weapons." modifiable="true" scope="being">
@@ -35,28 +35,28 @@
     <attribute id="9" name="Dodge" desc="Decreases the chance of incoming physical attacks hitting you." modifiable="false" scope="being">
         <modifier stacktype="non stackable bonus" modtype="additive" tag="dge" effect="Dodge %+.2f. This modifier does not stack with other dodge modifiers. "/>
     </attribute>
-    <attribute id="10" name="Magical dodge" desc="Decreases the chance of incoming magical attacks hitting you." modifiable="false" scope="being">
+    <attribute id="10" name="M. dodge" desc="Decreases the chance of incoming magical attacks hitting you." modifiable="false" scope="being">
         <modifier stacktype="stackable" modtype="additive" tag="mdge" effect="Magical dodge %+.2f"/>
     </attribute>
-    <attribute id="11" name="Magical defense" desc="Reduces incoming magical damage." modifiable="false" scope="being">
+    <attribute id="11" name="M. defense" desc="Reduces incoming magical damage." modifiable="false" scope="being">
         <modifier stacktype="non stackable bonus" modtype="additive" tag="mdef" effect="Magical defense %+.1f" additional="This modifier does not stack with other ##1Magical defense##0 modifiers." /> <!-- should this be non stackable instead of non stackable bonus? -->
     </attribute>
-    <attribute id="12" name="Bonus attack speed" tag="aspd" effect="Bonus attack speed %+f" desc="Increases the attack speed of all active auto-attacks." modifiable="false" scope="being">
+    <attribute id="12" name="Bonus att. speed" tag="aspd" effect="Bonus attack speed %+f" desc="Increases the attack speed of all active auto-attacks." modifiable="false" scope="being">
         <modifier stacktype="non stackable" modtype="additive" tag="aspd1" />
         <modifier stacktype="stackable" modtype="multiplicative" tag="aspd2" />
         <modifier stacktype="stackable" modtype="additive" tag="aspd3" />
         <modifier stacktype="non stackable bonus" modtype="multiplicative" tag="aspd4" />
     </attribute>
-    <attribute id="13" name="Hitpoints" desc="The number of hitpoints this being has. When this drops below 0, the being dies." modifiable="false" scope="being">
+    <attribute id="13" name="HP" desc="The number of hitpoints this being has. When this drops below 0, the being dies." modifiable="false" scope="being" player-info="hp">
         <modifier stacktype="stackable" modtype="additive" tag="hp" effect="Hitpoints %+.1f" additional="The modifier will still be removed normally, increasing or decreasing hp as relevant." /> <!-- Not a typo. I really am allowing modifiers to be applied here. Most normal attacks will affect the base value, but interesting things happen when either bonus of malus effects here expire... :] -->
     </attribute>
-    <attribute id="14" name="Max hitpoints" desc="The maximum number of hitpoints this being can have." modifiable="false" scope="being">
+    <attribute id="14" name="Max HP" desc="The maximum number of hitpoints this being can have." modifiable="false" scope="being" player-info="max-hp">
         <modifier stacktype="stackable" modtype="additive" tag="mhp1" effect="Max hp %+.1f" />
         <modifier stacktype="non stackable bonus" modtype="multiplicative" tag="mhp2" effect="Max hp x%.3f" additional="This modifier does not stack with other ##1Lesser##0 max hp type effects." />
         <modifier stacktype="non stackable bonus" modtype="additive" tag="mhp3" effect="Max hp %+.1f" additional="This modifier does not stack with other ##1Greater##0 max hp type effects." />
         <modifier stacktype="non stackable bonus" modtype="multiplicative" tag="mhp4" effect="Max hp x%.3f" additional="This modifier does not stack with other ##1Major##0 max hp type effects." />
     </attribute>
-    <attribute id="15" name="Hitpoint regeneration" tag="hpregen" effect="hp regen %+f" desc="The rate at which hitpoints are automatically replenished." modifiable="false" scope="being">
+    <attribute id="15" name="HP regeneration" tag="hpregen" effect="hp regen %+f" desc="The rate at which hitpoints are automatically replenished." modifiable="false" scope="being">
         <modifier stacktype="non stackable bonus" modtype="multiplicative" tag="hpr1" effect="You shouldn't be seeing this. Items shouldn't be affecting this layer." />                                                 <!-- Reserved for map effects -->
         <modifier stacktype="non stackable bonus" modtype="multiplicative" tag="hpr2" effect="Hitpoint regeneration x%.3f" additional="This modifier does not stack with other ##1Basic##0 hitpoint regeneration type effects."/>    <!-- Reserved for passive item effects -->
         <modifier stacktype="stackable" modtype="multiplicative" tag="hpr3" effect="Hitpoint regeneration x%.3f" />                                                                                                      <!-- Reserved for active effects -->
@@ -66,9 +66,9 @@
     <attribute id="16" name="Movement speed" desc="The speed at which this being moves in tiles per second." modifiable="false" scope="being">
         <modifier stacktype="non stackable bonus" modtype="additive" tag="mspd" effect="Movement speed %+.2f" additional="This modifier does not stack with other ##1Movement speed##0 type effects." />
     </attribute>
-    <attribute id="17" name="Movement speed (raw)" desc="The raw movement speed of this being." modifiable="false" scope="being" />
-    <attribute id="18" name="gp" desc="The number of gold pieces this being possesses." modifiable="false" scope="character" />
-    <attribute id="19" name="Capacity" desc="The capacity of this character." modifiable="false" scope="character" >
+    <attribute id="17" name="Movement speed (raw)" desc="The raw movement speed of this being." modifiable="false" scope="being" player-info="none" />
+    <attribute id="18" name="gp" desc="The number of gold pieces this being possesses." modifiable="false" scope="character" player-info="money" />
+    <attribute id="19" name="Capacity" desc="The capacity of this character." modifiable="false" scope="character" player-info="max-weight" >
          <modifier stacktype="stackable" modtype="additive" tag="cap1" effect="Capacity %+.2f" />
     </attribute>
     <!-- End of core-attributes definition -->
@@ -77,6 +77,4 @@
     <attribute id="20" name="physical attack (minimum)" modifiable="false" scope="monster" />
     <attribute id="21" name="physical attack (delta)"   modifiable="false" scope="monster" />
     <attribute id="22" name="magical  attack"           modifiable="false" scope="monster" />
-
-    <!-- Stop reading now. :P -->
 </attributes>
