@@ -28,7 +28,7 @@
 #include "net/messagein.h"
 #include "net/messageout.h"
 
-#include "protocol.h"
+#include "manaserv_protocol.h"
 
 #include <algorithm>
 

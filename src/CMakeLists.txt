@@ -101,7 +101,7 @@ MARK_AS_ADVANCED(PHYSFS_LIBRARY)
 
 SET(SRCS
     defines.h
-    protocol.h
+    manaserv_protocol.h
     point.h
     common/configuration.h
     common/configuration.cpp

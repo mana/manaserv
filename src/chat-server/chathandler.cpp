@@ -23,7 +23,7 @@
 #include <string>
 #include <sstream>
 
-#include "protocol.h"
+#include "manaserv_protocol.h"
 #include "account-server/character.h"
 #include "account-server/storage.h"
 #include "chat-server/guildmanager.h"

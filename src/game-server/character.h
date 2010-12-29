@@ -27,7 +27,7 @@
 
 #include "common/inventorydata.h"
 #include "game-server/being.h"
-#include "protocol.h"
+#include "manaserv_protocol.h"
 #include "defines.h"
 #include "utils/logger.h"
 

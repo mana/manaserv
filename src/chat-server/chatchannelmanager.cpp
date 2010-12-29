@@ -22,7 +22,7 @@
 
 #include "chat-server/chatchannelmanager.h"
 
-#include "protocol.h"
+#include "manaserv_protocol.h"
 #include "account-server/storage.h"
 #include "chat-server/chatclient.h"
 #include "chat-server/chathandler.h"

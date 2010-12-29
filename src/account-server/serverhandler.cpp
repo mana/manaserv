@@ -37,7 +37,7 @@
 #include "serialize/characterdata.h"
 #include "utils/logger.h"
 #include "utils/tokendispenser.h"
-#include "protocol.h"
+#include "manaserv_protocol.h"
 
 struct MapStatistics
 {

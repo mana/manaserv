@@ -20,7 +20,7 @@
 
 #include "account-server/accounthandler.h"
 
-#include "protocol.h"
+#include "manaserv_protocol.h"
 #include "point.h"
 #include "account-server/account.h"
 #include "account-server/accountclient.h"
