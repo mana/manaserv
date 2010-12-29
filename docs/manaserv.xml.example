@@ -119,29 +119,32 @@
 
  <!--
  The game server uses this address to connect to the account server. Clients
- will also need to be able to connect to the account server.
+ will also need to be able to connect to the account server through it.
+ Don't use the 'localhost' value when running a public server,
+ but rather the public name.
+
+ The port options set the port to listen to clients and to game servers
+ respectively.
+ -->
+ <option name="net_accountHost" value="localhost"/>
+ <option name="net_accountListenToClientPort" value="9601"/>
+ <option name="net_accountListenToGamePort" value="9602"/>
+
+ <!--
+ Host the chat server will listen to. Defaulted to 'localhost'.
  Don't use the 'localhost' value when running a public server,
  but rather the public name.
  -->
- <option name="net_accountServerAddress" value="localhost"/>
- <option name="net_accountServerPort" value="9601"/>
+ <option name="net_chatHost" value="localhost"/>
+ <option name="net_chatListenToClientPort" value="9603"/>
 
  <!--
  The clients use this address to connect to a game server on this machine.
  Don't use the 'localhost' value when running a public server,
  but rather the public name.
  -->
- <option name="net_gameServerAddress" value="localhost"/>
- <option name="net_gameServerPort" value="9604"/>
-
- <!--
- Host the account server will listen to. Defaulted to 'localhost'.
- Don't use the 'localhost' value when running a public server,
- but rather the public name.
- TODO: Replace with full listening config for both host and port
- for the chat and game servers.
- -->
- <option name="net_listenHost" value=""/>
+ <option name="net_gameHost" value="localhost"/>
+ <option name="net_gameListenToClientPort" value="9604"/>
 
  <!--
  Update host url: E.g.: "http://updates.manasource.org/"
