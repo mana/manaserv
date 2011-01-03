@@ -432,7 +432,8 @@ bool Being::recalculateBaseAttribute(unsigned int attr)
         newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
         break;
     case ATTR_MOVE_SPEED_RAW:
-        newBase = utils::tpsToSpeed(getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
+        newBase = utils::tpsToRawSpeed(
+                      getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
         break;
     case ATTR_INV_CAPACITY:
         // Provisional

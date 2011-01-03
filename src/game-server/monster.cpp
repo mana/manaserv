@@ -107,7 +107,7 @@ Monster::Monster(MonsterClass *specy):
 
     // Set the speed in tiles per second.
     setAttribute(ATTR_MOVE_SPEED_RAW,
-                 utils::tpsToSpeed(getAttribute(ATTR_MOVE_SPEED_TPS)));
+                 utils::tpsToRawSpeed(getAttribute(ATTR_MOVE_SPEED_TPS)));
     setSize(specy->getSize());
 
     // Set positions relative to target from which the monster can attack

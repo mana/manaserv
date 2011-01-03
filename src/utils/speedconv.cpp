@@ -20,12 +20,20 @@
 
 #include "utils/speedconv.h"
 
-double utils::tpsToSpeed(double tps)
+#include "defines.h"
+
+// Defines the max base scale used to compute the raw speed system.
+// The raw speed is the number of tile moves per server tick * 100
+// since a server tick is currently 100 ms.
+// TODO: Deharcode the magic value by obtaining the server tick time.
+#define MAX_MOVE_TIME 32000
+
+double utils::tpsToRawSpeed(double tps)
 {
-    return (32000 / (tps * DEFAULT_TILE_LENGTH));
+    return (MAX_MOVE_TIME / (tps * DEFAULT_TILE_LENGTH));
 }
 
-double utils::speedToTps(double speed)
+double utils::rawSpeedToTps(double speed)
 {
-    return (32000 / (speed * DEFAULT_TILE_LENGTH));
+    return (MAX_MOVE_TIME / (speed * DEFAULT_TILE_LENGTH));
 }

@@ -661,7 +661,7 @@ static int being_walk(lua_State *s)
     if (lua_isnumber(s, 4))
     {
         being->setAttribute(ATTR_MOVE_SPEED_TPS, lua_tonumber(s, 4));
-        being->setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToSpeed(
+        being->setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToRawSpeed(
                 being->getModifiedAttribute(ATTR_MOVE_SPEED_TPS)));
     }
 

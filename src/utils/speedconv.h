@@ -24,21 +24,27 @@
 // Simple helper functions for converting between tiles per
 // second and the internal speed representation
 
-#include "defines.h"
-
 namespace utils {
     /**
-     * tpsToSpeed()
+     * Translate the speed in tiles per second (tps)
+     * into the raw speed used internally.
+     * The raw speed is the number of tiles moves per server tick * 100
+     * since a server tick is currently 100 ms.
+     *
      * @param tps The speed value in tiles per second
+     *
      * @returns The speed value in the internal representation
      */
-    double tpsToSpeed(double);
+    double tpsToRawSpeed(double);
+
     /**
-     * speedToTps()
+     * Translate the raw speed used internally into a tile per second one.
+     *
      * @param speed The speed value in the internal representation
+     *
      * @returns The speed value in tiles per second
      */
-    double speedToTps(double);
+    double rawSpeedToTps(double);
 }
 
 #endif // SPEEDCONV_H
