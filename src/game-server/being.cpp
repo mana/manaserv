@@ -211,10 +211,10 @@ void Being::move()
 
     mOld = getPosition();
 
-    if (mActionTime > 100)
+    if (mMoveTime > 100)
     {
         // Current move has not yet ended
-        mActionTime -= 100;
+        mMoveTime -= 100;
         return;
     }
 
@@ -230,7 +230,7 @@ void Being::move()
             setAction(STAND);
         // Moving while staying on the same tile is free
         setPosition(mDst);
-        mActionTime = 0;
+        mMoveTime = 0;
         return;
     }
 
@@ -264,7 +264,7 @@ void Being::move()
             setAction(STAND);
         // no path was found
         mDst = mOld;
-        mActionTime = 0;
+        mMoveTime = 0;
         return;
     }
 
@@ -277,7 +277,7 @@ void Being::move()
         Position next = mPath.front();
         mPath.pop_front();
         // SQRT2 is used for diagonal movement.
-        mActionTime += (prev.x == next.x || prev.y == next.y) ?
+        mMoveTime += (prev.x == next.x || prev.y == next.y) ?
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) :
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) * SQRT2;
         if (mPath.empty())
@@ -291,10 +291,10 @@ void Being::move()
         pos.x = next.x * tileWidth + (tileWidth / 2);
         pos.y = next.y * tileHeight + (tileHeight / 2);
     }
-    while (mActionTime < 100);
+    while (mMoveTime < 100);
     setPosition(pos);
 
-    mActionTime = mActionTime > 100 ? mActionTime - 100 : 0;
+    mMoveTime = mMoveTime > 100 ? mMoveTime - 100 : 0;
 }
 
 int Being::directionToAngle(int direction)
@@ -331,7 +331,7 @@ int Being::performAttack(Being *target, unsigned range, const Damage &damage)
     if (maxDist * maxDist < distSquare)
         return -1;
 
-    //mActionTime += 1000; // No tick. Auto-attacks should have their own, built-in delays.
+    // Note: The auto-attack system will handle the delay between two attacks.
 
     return (mTarget->damage(this, damage));
 }

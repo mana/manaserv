@@ -146,9 +146,11 @@ void Character::perform()
     if (mAction != ATTACK || mTarget == NULL) return;
 
     // wait before next attack
-    if (mActionTime > 100)
+    // Note: The auto-attack system will handle the delay between two attacks.
+    // TODO: Remove this condition when it's done.
+    if (mMoveTime > 100)
     {
-        mActionTime -= 100;
+        mMoveTime -= 100;
         return;
     }
 

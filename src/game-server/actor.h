@@ -52,7 +52,7 @@ class Actor : public Thing
          */
         Actor(ThingType type)
           : Thing(type),
-            mActionTime(0),
+            mMoveTime(0),
             mUpdateFlags(0),
             mPublicID(65535),
             mSize(0)
@@ -130,7 +130,7 @@ class Actor : public Thing
         virtual Map::BlockType getBlockType() const
         { return Map::BLOCKTYPE_NONE; }
 
-        unsigned short mActionTime; /**< Delay until next action. */
+        unsigned short mMoveTime; /**< Delay until next action. */
 
     private:
         char mUpdateFlags;          /**< Changes in actor status. */
