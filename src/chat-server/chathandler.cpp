@@ -39,6 +39,8 @@
 #include "utils/stringfilter.h"
 #include "utils/tokendispenser.h"
 
+using namespace ManaServ;
+
 void registerChatClient(const std::string &token,
                         const std::string &name,
                         int level)

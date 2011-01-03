@@ -39,6 +39,8 @@
 #include "utils/tokendispenser.h"
 #include "manaserv_protocol.h"
 
+using namespace ManaServ;
+
 struct MapStatistics
 {
   std::vector< int > players;

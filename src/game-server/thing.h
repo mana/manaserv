@@ -22,6 +22,7 @@
 #define THING_H
 
 #include "manaserv_protocol.h"
+using namespace ManaServ;
 
 #include <set>
 

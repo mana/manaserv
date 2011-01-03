@@ -22,6 +22,8 @@
 #ifndef MANASERV_PROTOCOL_H
 #define MANASERV_PROTOCOL_H
 
+namespace ManaServ {
+
 /**
  * Enumerated type for communicated messages:
  *
@@ -435,5 +437,7 @@ enum SpriteLayer
     SPRITE_WEAPON,
     SPRITE_VECTOREND
 };
+
+}; // Namespace ManaServ
 
 #endif // MANASERV_PROTOCOL_H

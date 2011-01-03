@@ -44,6 +44,8 @@
 #include "utils/string.h"
 #include "utils/xml.h"
 
+using namespace ManaServ;
+
 /**
  * Adds server specific info to the current message
  *
