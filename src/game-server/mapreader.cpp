@@ -120,8 +120,8 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
     std::string pathDir = path.substr(0, path.rfind("/") + 1);
     int w = XML::getProperty(node, "width", 0);
     int h = XML::getProperty(node, "height", 0);
-    int tilew = XML::getProperty(node, "tilewidth", DEFAULT_TILE_WIDTH);
-    int tileh = XML::getProperty(node, "tileheight", DEFAULT_TILE_HEIGHT);
+    int tilew = XML::getProperty(node, "tilewidth", DEFAULT_TILE_LENGTH);
+    int tileh = XML::getProperty(node, "tileheight", DEFAULT_TILE_LENGTH);
     Map* map = new Map(w, h, tilew, tileh);
 
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)

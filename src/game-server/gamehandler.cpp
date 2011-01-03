@@ -136,7 +136,7 @@ static Actor *findActorNear(Actor *p, int id)
     MapComposite *map = p->getMap();
     const Point &ppos = p->getPosition();
     // See map.h for tiles constants
-    const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
+    const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
     for (ActorIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
     {
         Actor *a = *i;
@@ -152,7 +152,7 @@ static Character *findCharacterNear(Actor *p, int id)
     MapComposite *map = p->getMap();
     const Point &ppos = p->getPosition();
     // See map.h for tiles constants
-    const int pixelDist = DEFAULT_TILE_WIDTH * TILES_TO_BE_NEAR;
+    const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
     for (CharacterIterator i(map->getAroundPointIterator(ppos,
                                                          pixelDist)); i; ++i)
     {

@@ -25,6 +25,8 @@
 
 #include "game-server/map.h"
 
+#include "defines.h"
+
 // Basic cost for moving from one tile to another.
 // Used in findPath() function when computing the A* path algorithm.
 static int const basicCost = 100;
@@ -43,7 +45,8 @@ bool Location::operator< (const Location &loc) const
    return tile->Fcost > loc.tile->Fcost;
 }
 
-Map::Map(int width, int height, int twidth, int theight):
+Map::Map(int width = 0, int height = 0,
+         int twidth = DEFAULT_TILE_LENGTH, int theight = DEFAULT_TILE_LENGTH):
     mWidth(width), mHeight(height),
     mTileWidth(twidth), mTileHeight(theight),
     onClosedList(1), onOpenList(2)
