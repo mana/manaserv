@@ -26,6 +26,8 @@
 #include "chat-server/chatclient.h"
 #include "chat-server/chathandler.h"
 
+using namespace ManaServ;
+
 GuildManager::GuildManager()
 {
     // Load stored guilds from db

@@ -32,6 +32,8 @@
 
 #include <algorithm>
 
+using namespace ManaServ;
+
 void updateInfo(ChatClient *client, int partyId)
 {
     Character *character = storage->getCharacter(client->characterName);

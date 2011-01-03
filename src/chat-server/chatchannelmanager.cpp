@@ -30,6 +30,8 @@
 #include "common/configuration.h"
 #include "utils/stringfilter.h"
 
+using namespace ManaServ;
+
 ChatChannelManager::ChatChannelManager() : mNextChannelId(1)
 {
 }
