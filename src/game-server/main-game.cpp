@@ -77,8 +77,9 @@ using utils::Logger;
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
-utils::Timer worldTimer(100, false);   /**< Timer for world tics set to 100 ms */
-int worldTime = 0;              /**< Current world time in 100ms ticks */
+/** Timer for world ticks */
+utils::Timer worldTimer(WORLD_TICK_MS, false);
+int worldTime = 0;              /**< Current world time in ticks */
 bool running = true;            /**< Determines if server keeps running */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */

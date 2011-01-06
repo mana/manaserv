@@ -24,6 +24,9 @@
 // Precomputed square-root of 2.
 #define SQRT2 1.4142135623730950488
 
+// World tick time in miliseconds.
+#define WORLD_TICK_MS 100
+
 /**
  * Exit value codes are thrown back at servers exit to reflect their exit state.
  */

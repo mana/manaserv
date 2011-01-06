@@ -130,7 +130,8 @@ class Actor : public Thing
         virtual Map::BlockType getBlockType() const
         { return Map::BLOCKTYPE_NONE; }
 
-        unsigned short mMoveTime; /**< Delay until next action. */
+        /** Delay until move to next tile in miliseconds. */
+        unsigned short mMoveTime;
 
     private:
         char mUpdateFlags;          /**< Changes in actor status. */

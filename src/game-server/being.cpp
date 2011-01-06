@@ -211,10 +211,10 @@ void Being::move()
 
     mOld = getPosition();
 
-    if (mMoveTime > 100)
+    if (mMoveTime > WORLD_TICK_MS)
     {
         // Current move has not yet ended
-        mMoveTime -= 100;
+        mMoveTime -= WORLD_TICK_MS;
         return;
     }
 
@@ -291,10 +291,10 @@ void Being::move()
         pos.x = next.x * tileWidth + (tileWidth / 2);
         pos.y = next.y * tileHeight + (tileHeight / 2);
     }
-    while (mMoveTime < 100);
+    while (mMoveTime < WORLD_TICK_MS);
     setPosition(pos);
 
-    mMoveTime = mMoveTime > 100 ? mMoveTime - 100 : 0;
+    mMoveTime = mMoveTime > WORLD_TICK_MS ? mMoveTime - WORLD_TICK_MS : 0;
 }
 
 int Being::directionToAngle(int direction)

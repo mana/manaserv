@@ -148,9 +148,9 @@ void Character::perform()
     // wait before next attack
     // Note: The auto-attack system will handle the delay between two attacks.
     // TODO: Remove this condition when it's done.
-    if (mMoveTime > 100)
+    if (mMoveTime > WORLD_TICK_MS)
     {
-        mMoveTime -= 100;
+        mMoveTime -= WORLD_TICK_MS;
         return;
     }
 
