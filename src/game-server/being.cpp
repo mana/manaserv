@@ -270,16 +270,17 @@ void Being::move()
 
     setAction(WALK);
 
-    Position prev(tileSX, tileSY);
+    Point prev(tileSX, tileSY);
     Point pos;
     do
     {
-        Position next = mPath.front();
+        Point next = mPath.front();
         mPath.pop_front();
         // SQRT2 is used for diagonal movement.
         mMoveTime += (prev.x == next.x || prev.y == next.y) ?
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) :
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) * SQRT2;
+
         if (mPath.empty())
         {
             // skip last tile center

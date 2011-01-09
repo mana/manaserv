@@ -25,21 +25,9 @@
 #include <map>
 #include <string>
 
-/**
- * A position along a being's path.
- * Used to compute each Path Nodes of the path.
- */
-struct Position
-{
-    Position(int x, int y):
-        x(x), y(y)
-    { }
+#include "utils/point.h"
 
-    int x;
-    int y;
-};
-
-typedef std::list<Position> Path;
+typedef std::list<Point> Path;
 typedef Path::iterator PathIterator;
 
 /**

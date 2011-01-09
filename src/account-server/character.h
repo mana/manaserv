@@ -26,8 +26,8 @@
 #include <map>
 
 #include "defines.h"
-#include "point.h"
 #include "common/inventorydata.h"
+#include "utils/point.h"
 
 class Account;
 class MessageIn;

@@ -21,7 +21,6 @@
 #include "account-server/accounthandler.h"
 
 #include "manaserv_protocol.h"
-#include "point.h"
 #include "account-server/account.h"
 #include "account-server/accountclient.h"
 #include "account-server/character.h"
@@ -37,6 +36,7 @@
 #include "net/netcomputer.h"
 #include "utils/functors.h"
 #include "utils/logger.h"
+#include "utils/point.h"
 #include "utils/stringfilter.h"
 #include "utils/tokencollector.h"
 #include "utils/tokendispenser.h"

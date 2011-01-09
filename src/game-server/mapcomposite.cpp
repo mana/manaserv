@@ -21,13 +21,13 @@
 #include <algorithm>
 #include <cassert>
 
-#include "point.h"
 #include "common/configuration.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/character.h"
 #include "scripting/script.h"
 #include "utils/logger.h"
+#include "utils/point.h"
 
 /* TODO: Implement overlapping map zones instead of strict partitioning.
    Purpose: to decrease the number of zone changes, as overlapping allows for

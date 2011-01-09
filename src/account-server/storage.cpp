@@ -23,7 +23,6 @@
 
 #include "account-server/storage.h"
 
-#include "point.h"
 #include "account-server/account.h"
 #include "chat-server/chatchannel.h"
 #include "chat-server/guild.h"
@@ -32,6 +31,7 @@
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
+#include "utils/point.h"
 #include "utils/throwerror.h"
 #include "utils/xml.h"
 
@@ -333,6 +333,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
     // Specialize the string_to functor to convert
     // a string to an unsigned int.
     string_to< unsigned > toUint;
+    string_to< int > toInt;
 
     try
     {
@@ -355,7 +356,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
         character->setLevel(toUshort(charInfo(0, 6)));
         character->setCharacterPoints(toUshort(charInfo(0, 7)));
         character->setCorrectionPoints(toUshort(charInfo(0, 8)));
-        Point pos(toUshort(charInfo(0, 9)), toUshort(charInfo(0, 10)));
+        Point pos(toInt(charInfo(0, 9)), toInt(charInfo(0, 10)));
         character->setPosition(pos);
 
         int mapId = toUint(charInfo(0, 11));

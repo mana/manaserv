@@ -203,7 +203,7 @@ Path Map::findSimplePath(int startX, int startY,
 
         if (getWalk(positionX, positionY, walkmask))
         {
-            path.push_back(Position(positionX, positionY));
+            path.push_back(Point(positionX, positionY));
 
             if ((positionX == destX) && (positionY == destY))
             {
@@ -374,7 +374,7 @@ Path Map::findPath(int startX, int startY,
         while (pathX != startX || pathY != startY)
         {
             // Add the new path node to the start of the path list
-            path.push_front(Position(pathX, pathY));
+            path.push_front(Point(pathX, pathY));
 
             // Find out the next parent
             MetaTile *tile = getMetaTile(pathX, pathY);

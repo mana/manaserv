@@ -21,9 +21,9 @@
 #ifndef TRIGGER_H
 #define TRIGGER_H
 
-#include "point.h"
 #include "game-server/thing.h"
 #include "scripting/script.h"
+#include "utils/point.h"
 
 class Actor;
 

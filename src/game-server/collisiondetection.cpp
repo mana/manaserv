@@ -22,8 +22,8 @@
 
 #include <cmath>
 
-#include "point.h"
 #include "utils/mathutils.h"
+#include "utils/point.h"
 
 #define D_TO_R 0.0174532925    // PI / 180
 #define R_TO_D 57.2957795      // 180 / PI

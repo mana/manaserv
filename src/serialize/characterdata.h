@@ -27,7 +27,7 @@
 #include "common/inventorydata.h"
 #include "net/messagein.h"
 #include "net/messageout.h"
-#include "point.h"
+#include "utils/point.h"
 
 template< class T >
 void serializeCharacterData(const T &data, MessageOut &msg)

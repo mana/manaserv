@@ -33,12 +33,12 @@ class Point
             x(0), y(0)
         {}
 
-        Point(unsigned short X, unsigned short Y):
+        Point(int X, int Y):
             x(X), y(Y)
         {}
 
-        unsigned short x; /**< x coordinate */
-        unsigned short y; /**< y coordinate */
+        int x; /**< x coordinate */
+        int y; /**< y coordinate */
 
         /**
          * Check whether the given point is within range of this point.
@@ -67,15 +67,15 @@ class Point
 class Rectangle
 {
     public:
-        unsigned short x; /**< x coordinate */
-        unsigned short y; /**< y coordinate */
-        unsigned short w; /**< width */
-        unsigned short h; /**< height */
+        int x; /**< x coordinate */
+        int y; /**< y coordinate */
+        int w; /**< width */
+        int h; /**< height */
 
         bool contains(const Point &p) const
         {
-            return (unsigned short)(p.x - x) < w &&
-                   (unsigned short)(p.y - y) < h;
+            return (p.x - x) < w &&
+                   (p.y - y) < h;
         }
 
         bool intersects(const Rectangle &r) const

@@ -102,7 +102,6 @@ MARK_AS_ADVANCED(PHYSFS_LIBRARY)
 SET(SRCS
     defines.h
     manaserv_protocol.h
-    point.h
     common/configuration.h
     common/configuration.cpp
     common/inventorydata.h
@@ -123,6 +122,7 @@ SET(SRCS
     serialize/characterdata.h
     utils/logger.h
     utils/logger.cpp
+    utils/point.h
     utils/processorutils.h
     utils/processorutils.cpp
     utils/string.h

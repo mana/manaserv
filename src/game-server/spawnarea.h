@@ -21,9 +21,9 @@
 #ifndef SPAWNAREA_H
 #define SPAWNAREA_H
 
-#include "point.h"
 #include "game-server/eventlistener.h"
 #include "game-server/thing.h"
+#include "utils/point.h"
 
 class Being;
 class MonsterClass;

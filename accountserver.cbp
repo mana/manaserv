@@ -143,7 +143,7 @@
 		<Unit filename="src\net\messageout.h" />
 		<Unit filename="src\net\netcomputer.cpp" />
 		<Unit filename="src\net\netcomputer.h" />
-		<Unit filename="src\point.h" />
+		<Unit filename="src\utils\point.h" />
 		<Unit filename="src\protocol.h" />
 		<Unit filename="src\serialize\characterdata.h" />
 		<Unit filename="src\utils\base64.cpp" />

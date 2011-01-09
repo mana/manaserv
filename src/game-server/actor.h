@@ -21,9 +21,9 @@
 #ifndef ACTOR_H
 #define ACTOR_H
 
-#include "point.h"
 #include "game-server/map.h"
 #include "game-server/thing.h"
+#include "utils/point.h"
 
 /**
  * Flags that are raised as necessary. They trigger messages that are sent to
