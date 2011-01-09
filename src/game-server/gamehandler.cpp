@@ -419,7 +419,8 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
 
         case PGMSG_DIRECTION_CHANGE:
         {
-            computer.character->setDirection(message.readInt8());
+            computer.character->setDirection(
+                (BeingDirection)message.readInt8());
         } break;
 
         case PGMSG_DISCONNECT:

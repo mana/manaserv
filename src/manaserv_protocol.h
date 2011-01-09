@@ -103,7 +103,7 @@ enum {
     PGMSG_LOWER_ATTRIBUTE          = 0x0170, // W attribute
     GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error, W attribute
     PGMSG_RESPAWN                  = 0x0180, // -
-    GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position
+    GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position, B direction
                                              // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
                                              // monster: W type id
                                              // npc: W type id
@@ -415,10 +415,10 @@ enum AttackType
  */
 enum BeingDirection
 {
-    DIRECTION_UP = 1,
-    DIRECTION_DOWN,
-    DIRECTION_LEFT,
-    DIRECTION_RIGHT
+    DOWN = 1,
+    LEFT = 2,
+    UP = 4,
+    RIGHT = 8
 };
 
 /**

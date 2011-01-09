@@ -852,7 +852,7 @@ static int being_set_direction(lua_State *s)
 {
     Being *being = getBeing(s, 1);
 
-    int dir = lua_tointeger(s, 2);
+    BeingDirection dir = (BeingDirection) lua_tointeger(s, 2);
 
     if (being)
     {

@@ -39,7 +39,7 @@ Being::Being(ThingType type):
     Actor(type),
     mAction(STAND),
     mTarget(NULL),
-    mDirection(0)
+    mDirection(DOWN)
 {
     const AttributeScopes &attr = attributeManager->getAttributeInfoForType(ATTR_BEING);
     LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
@@ -202,6 +202,89 @@ Path Being::findPath()
     return map->findPath(startX, startY, destX, destY, getWalkMask());
 }
 
+void Being::updateDirection(const Point &currentPos, const Point &destPos)
+{
+    // We update the being direction on each tile to permit other beings
+    // entering in range to always see the being with a direction value.
+
+    // We first handle simple cases
+
+    // If the character has reached its destination,
+    // don't update the direction since it's only a matter of keeping
+    // the previous one.
+    if (currentPos == destPos)
+        return;
+
+    if (currentPos.x == destPos.x)
+    {
+        if (currentPos.y > destPos.y)
+            setDirection(UP);
+        else
+            setDirection(DOWN);
+        return;
+    }
+
+    if (currentPos.y == destPos.y)
+    {
+        if (currentPos.x > destPos.x)
+            setDirection(LEFT);
+        else
+            setDirection(RIGHT);
+        return;
+    }
+
+    // Now let's handle diagonal cases
+    // First, find the lower angle:
+    if (currentPos.x < destPos.x)
+    {
+        // Up-right direction
+        if (currentPos.y > destPos.y)
+        {
+            // Compute tan of the angle
+            if ((currentPos.y - destPos.y) / (destPos.x - currentPos.x) < 1)
+                // The angle is less than 45°, we look to the right
+                setDirection(RIGHT);
+            else
+                setDirection(UP);
+            return;
+        }
+        else // Down-right
+        {
+            // Compute tan of the angle
+            if ((destPos.y - currentPos.y) / (destPos.x - currentPos.x) < 1)
+                // The angle is less than 45°, we look to the right
+                setDirection(RIGHT);
+            else
+                setDirection(DOWN);
+            return;
+        }
+    }
+    else
+    {
+        // Up-left direction
+        if (currentPos.y > destPos.y)
+        {
+            // Compute tan of the angle
+            if ((currentPos.y - destPos.y) / (currentPos.x - destPos.x) < 1)
+                // The angle is less than 45°, we look to the right
+                setDirection(LEFT);
+            else
+                setDirection(UP);
+            return;
+        }
+        else // Down-left
+        {
+            // Compute tan of the angle
+            if ((destPos.y - currentPos.y) / (currentPos.x - destPos.x) < 1)
+                // The angle is less than 45°, we look to the right
+                setDirection(LEFT);
+            else
+                setDirection(DOWN);
+            return;
+        }
+    }
+}
+
 void Being::move()
 {
     // Immobile beings cannot move.
@@ -229,6 +312,8 @@ void Being::move()
         if (mAction == WALK)
             setAction(STAND);
         // Moving while staying on the same tile is free
+        // We only update the direction in that case.
+        updateDirection(mOld, mDst);
         setPosition(mDst);
         mMoveTime = 0;
         return;
@@ -281,6 +366,9 @@ void Being::move()
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) :
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) * SQRT2;
 
+        // Update the being direction also
+        updateDirection(prev, next);
+
         if (mPath.empty())
         {
             // skip last tile center
@@ -302,11 +390,11 @@ int Being::directionToAngle(int direction)
 {
     switch (direction)
     {
-        case DIRECTION_UP:    return  90;
-        case DIRECTION_DOWN:  return 270;
-        case DIRECTION_RIGHT: return 180;
-        case DIRECTION_LEFT:
-        default:              return   0;
+        case UP:    return  90;
+        case DOWN:  return 270;
+        case RIGHT: return 180;
+        case LEFT:
+        default:    return   0;
     }
 }
 

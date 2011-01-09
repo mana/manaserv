@@ -270,6 +270,7 @@ static void informPlayer(MapComposite *map, Character *p)
             enterMsg.writeInt8(static_cast< Being *>(o)->getAction());
             enterMsg.writeInt16(opos.x);
             enterMsg.writeInt16(opos.y);
+            enterMsg.writeInt8(o->getDirection());
             switch (otype)
             {
                 case OBJECT_CHARACTER:

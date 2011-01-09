@@ -127,10 +127,10 @@ class Being : public Actor
         /**
          * Sets the facing direction of the being.
          */
-        void setDirection(int direction)
+        void setDirection(BeingDirection direction)
         { mDirection = direction; raiseUpdateFlags(UPDATEFLAG_DIRCHANGE); }
 
-        int getDirection() const
+        BeingDirection getDirection() const
         { return mDirection; }
 
         /**
@@ -320,8 +320,15 @@ class Being : public Actor
         Being(const Being &rhs);
         Being &operator=(const Being &rhs);
 
+        /**
+         * Update the being direction when moving so avoid directions desyncs
+         * with other clients.
+         */
+        void updateDirection(const Point &currentPos,
+                             const Point &destPos);
+
         Path mPath;
-        unsigned char mDirection;   /**< Facing direction. */
+        BeingDirection mDirection;   /**< Facing direction. */
 
         std::string mName;
         Hits mHitsTaken; /**< List of punches taken since last update. */
