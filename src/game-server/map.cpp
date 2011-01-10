@@ -45,8 +45,7 @@ bool Location::operator< (const Location &loc) const
    return tile->Fcost > loc.tile->Fcost;
 }
 
-Map::Map(int width = 0, int height = 0,
-         int twidth = DEFAULT_TILE_LENGTH, int theight = DEFAULT_TILE_LENGTH):
+Map::Map(int width, int height, int twidth, int theight):
     mWidth(width), mHeight(height),
     mTileWidth(twidth), mTileHeight(theight),
     onClosedList(1), onOpenList(2)

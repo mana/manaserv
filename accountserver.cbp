@@ -144,7 +144,7 @@
 		<Unit filename="src\net\netcomputer.cpp" />
 		<Unit filename="src\net\netcomputer.h" />
 		<Unit filename="src\utils\point.h" />
-		<Unit filename="src\protocol.h" />
+		<Unit filename="src\manaserv_protocol.h" />
 		<Unit filename="src\serialize\characterdata.h" />
 		<Unit filename="src\utils\base64.cpp" />
 		<Unit filename="src\utils\base64.h" />
