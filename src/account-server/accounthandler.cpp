@@ -318,7 +318,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     const int clientVersion = msg.readInt32();
 
-    if (clientVersion < Configuration::getValue("net_clientVersion", 0))
+    if (clientVersion < PROTOCOL_VERSION)
     {
         reply.writeInt8(LOGIN_INVALID_VERSION);
         client.send(reply);
@@ -458,7 +458,6 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
     std::string password = msg.readString();
     std::string email = msg.readString();
     std::string captcha = msg.readString();
-    int minClientVersion = Configuration::getValue("net_clientVersion", 0);
     unsigned minNameLength = Configuration::getValue("account_minNameLength", 4);
     unsigned maxNameLength = Configuration::getValue("account_maxNameLength", 15);
 
@@ -472,7 +471,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
     {
         reply.writeInt8(ERRMSG_FAILURE);
     }
-    else if (clientVersion < minClientVersion)
+    else if (clientVersion < PROTOCOL_VERSION)
     {
         reply.writeInt8(REGISTER_INVALID_VERSION);
     }

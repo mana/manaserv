@@ -40,6 +40,7 @@
 #include "utils/stringfilter.h"
 #include "utils/timer.h"
 #include "defines.h"
+#include "manaserv_protocol.h"
 
 #include <cstdlib>
 #include <getopt.h>
@@ -361,6 +362,9 @@ int main(int argc, char *argv[])
 #else
     LOG_INFO("The Mana Account+Chat Server (unknown version)");
 #endif
+    LOG_INFO("Manaserv Protocol version " << ManaServ::PROTOCOL_VERSION
+             << ", " << "Enet version " << ENET_VERSION_MAJOR << "."
+             << ENET_VERSION_MINOR << "." << ENET_VERSION_PATCH);
 
     if (!options.verbosityChanged)
         options.verbosity = static_cast<Logger::Level>(

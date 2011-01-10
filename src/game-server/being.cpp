@@ -266,7 +266,7 @@ void Being::updateDirection(const Point &currentPos, const Point &destPos)
         {
             // Compute tan of the angle
             if ((currentPos.y - destPos.y) / (currentPos.x - destPos.x) < 1)
-                // The angle is less than 45°, we look to the right
+                // The angle is less than 45°, we look to the left
                 setDirection(LEFT);
             else
                 setDirection(UP);
@@ -276,7 +276,7 @@ void Being::updateDirection(const Point &currentPos, const Point &destPos)
         {
             // Compute tan of the angle
             if ((destPos.y - currentPos.y) / (currentPos.x - destPos.x) < 1)
-                // The angle is less than 45°, we look to the right
+                // The angle is less than 45°, we look to the left
                 setDirection(LEFT);
             else
                 setDirection(DOWN);
