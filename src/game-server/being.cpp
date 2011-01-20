@@ -366,9 +366,6 @@ void Being::move()
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) :
                        getModifiedAttribute(ATTR_MOVE_SPEED_RAW) * SQRT2;
 
-        // Update the being direction also
-        updateDirection(prev, next);
-
         if (mPath.empty())
         {
             // skip last tile center
@@ -384,6 +381,9 @@ void Being::move()
     setPosition(pos);
 
     mMoveTime = mMoveTime > WORLD_TICK_MS ? mMoveTime - WORLD_TICK_MS : 0;
+
+    // Update the being direction also
+    updateDirection(mOld, pos);
 }
 
 int Being::directionToAngle(int direction)
