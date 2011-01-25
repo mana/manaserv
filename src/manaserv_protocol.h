@@ -24,7 +24,7 @@
 
 namespace ManaServ {
 
-enum { PROTOCOL_VERSION = 0 };
+enum { PROTOCOL_VERSION = 1 };
 
 /**
  * Enumerated type for communicated messages:
