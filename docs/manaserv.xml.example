@@ -160,12 +160,6 @@
  -->
  <option name="net_clientDataUrl" value="" />
 
- <!--
- Minimal supported mana client version.
- The current version is 0.
- -->
- <option name="net_clientVersion" value="0" />
-
  <!-- Max connected clients allowed. -->
  <option name="net_maxClients" value="1000"/>
 
