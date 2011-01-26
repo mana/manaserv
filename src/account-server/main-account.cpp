@@ -38,6 +38,7 @@
 #include "utils/logger.h"
 #include "utils/processorutils.h"
 #include "utils/stringfilter.h"
+#include "utils/time.h"
 #include "utils/timer.h"
 #include "defines.h"
 #include "manaserv_protocol.h"
@@ -245,10 +246,19 @@ static void deinitializeServer()
 /**
  * Dumps statistics.
  */
-static void dumpStatistics()
+static void dumpStatistics(std::string accountAddress, int accountClientPort,
+                           int accountGamePort, int chatClientPort)
 {
     std::ofstream os(statisticsFile.c_str());
     os << "<statistics>\n";
+    // Print last heartbeat
+    os << "<heartbeat=\"" << utils::getCurrentDate() << "_"
+    << utils::getCurrentTime() << "\" />\n";
+    // Add account server information
+    os << "<accountserver address=\"" << accountAddress << "\" clientport=\""
+    << accountClientPort << "\" gameport=\"" << accountGamePort
+    << "\" chatclientport=\"" << chatClientPort << "\" />\n";
+    // Add game servers information
     GameServerHandler::dumpStatistics(os);
     os << "</statistics>\n";
 }
@@ -425,7 +435,8 @@ int main(int argc, char *argv[])
         chatHandler->process(50);
 
         if (statTimer.poll())
-            dumpStatistics();
+            dumpStatistics(accountHost, options.port, accountGamePort,
+                           chatClientPort);
 
         if (banTimer.poll())
             storage->checkBannedAccounts();

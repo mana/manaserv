@@ -183,6 +183,7 @@ SET(SRCS_MANASERVACCOUNT
     utils/sha256.h
     utils/sha256.cpp
     utils/throwerror.h
+    utils/time.h
     )
 
 SET(SRCS_MANASERVGAME
