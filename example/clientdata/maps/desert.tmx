@@ -8,7 +8,12 @@
  </tileset>
  <layer name="Ground" width="40" height="40">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAA+2Y2Q6CMBBFqzy4kLgmrlFR3Bcw/v/HOcYSyKSBUttxNDycCKakxzsjTFgKIZYO6QBdoOd4HxMihd+Kgdev5PcARsAYmDDwUVED6oCX+c5VjafArARzoAW0AZ8gizWwKUHo0O+Y47cFzsDui355+YWaeVL47Rn63ZEX9ruKd//fiP1wz+HzorxwX9rwU/0Pjii/5LjID+dqK78DOk98yubnur7YE3OS9dPlYsGvIWmK9FmUh6e5LmHxoV9XpPNF8lvz8DXXqa4z8RuLdL7oA4MChprrVNe57D1qAqGeczh5BoQ+JrMZhVckP3XundnnT2hpf110/F5Od7mW0i9m6If7mpufSX2z8wWVX1zCD2fJLT9VrTn7UeZnMptR+v0LAQOHXwFnxe3dYFXjiorPeAK3IQLdABkAAA==
+   H4sIAAAAAAAAA+2Y2Q6CMBBFqzy4Ja6Ja1QUF9yA//86x0gDmTTQVjqOhocTwZT0eGeECRshxMYhfWAADB3vY0Ok8Nsy8PqV/E7AFJgBcwY+KhpAE/By37mq8QJYGrACOkAX6BFksQP2BgQO/cICvwNwBY5f9CvKL9DMk8LvxNAvQV7Y7y7e/f8g9sM9h8/L8sJ9WYWf6n8QovzkcZkfzrWq/M7oXPqY5ue6vtgTc0nrp8utAr9WSltkz6IiPM11kvWHfgORzRfytxbR01ynus7Gbyay+WIEjEuYaK5TXeey96jxhXrO4eTpE/rYzGYUXlH6qXPvzD9/gor210XH7+WUpGsp/WKGfrivufnZ1Dc/X1D5xQZ+OEtu+alqzdmPMj+b2YzS71/wGTj8Cjgrbu8G6xrX1HzGE2RW0EoAGQAA
+  </data>
+ </layer>
+ <layer name="Fringe" width="40" height="40">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3BAQ0AAADCoPdPbQ8HFAAAAAAAwJcBSxPzAQAZAAA=
   </data>
  </layer>
  <layer name="Collision" width="40" height="40">
@@ -19,7 +24,7 @@
  <objectgroup name="Objects" width="40" height="40">
   <object name="Main script" type="SCRIPT" x="16" y="25" width="167" height="10">
    <properties>
-    <property name="FILENAME" value="scripts/bomtest.lua"/>
+    <property name="FILENAME" value="scripts/maps/desert.lua"/>
    </properties>
   </object>
  </objectgroup>

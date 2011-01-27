@@ -1,5 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <items>
+
+    <!-- Kept for now to display the player correctly. Will be moved to races.xml later -->
+    <item id="-1" type="hairsprite" name="Flat ponytail">
+        <sprite>races/humans/hairstyles/hairstyle1.xml</sprite>
+    </item>
+    <item id="-2" type="hairsprite" name="Bowl cut">
+        <sprite>races/humans/hairstyles/hairstyle2.xml</sprite>
+    </item>
+    <item id="-3" type="hairsprite" name="Combed back">
+        <sprite>races/humans/hairstyles/hairstyle3.xml</sprite>
+    </item>
+    <item id="-4" type="hairsprite" name="Emo">
+        <sprite>races/humans/hairstyles/hairstyle4.xml</sprite>
+    </item>
+    <item id="-5" type="hairsprite" name="Mohawk">
+        <sprite>races/humans/hairstyles/hairstyle5.xml</sprite>
+    </item>
+    <item id="-6" type="hairsprite" name="Pompadour">
+        <sprite>races/humans/hairstyles/hairstyle6.xml</sprite>
+    </item>
+    <item id="-7" type="hairsprite" name="Center parting/Short and slick">
+        <sprite>races/humans/hairstyles/hairstyle7.xml</sprite>
+    </item>
+    <item id="-8" type="hairsprite" name="Long and slick">
+        <sprite>races/humans/hairstyles/hairstyle8.xml</sprite>
+    </item>
+    <item id="-9" type="hairsprite" name="Short and curly">
+        <sprite>races/humans/hairstyles/hairstyle9.xml</sprite>
+    </item>
+    <item id="-10" type="hairsprite" name="Pigtails">
+        <sprite>races/humans/hairstyles/hairstyle10.xml</sprite>
+    </item>
+    <item id="-11" type="hairsprite" name="Long and curly">
+        <sprite>races/humans/hairstyles/hairstyle11.xml</sprite>
+    </item>
+    <item id="-12" type="hairsprite" name="Parted">
+        <sprite>races/humans/hairstyles/hairstyle12.xml</sprite>
+    </item>
+    <item id="-13" type="hairsprite" name="Perky ponytail">
+        <sprite>races/humans/hairstyles/hairstyle13.xml</sprite>
+    </item>
+    <item id="-14" type="hairsprite" name="Wave">
+        <sprite>races/humans/hairstyles/hairstyle14.xml</sprite>
+    </item>
+    <item id="-15" type="hairsprite" name="Mane">
+        <sprite>races/humans/hairstyles/hairstyle15.xml</sprite>
+    </item>
+    <item id="-16" type="hairsprite" name="Bun">
+        <sprite>races/humans/hairstyles/hairstyle16.xml</sprite>
+    </item>
+
+    <!-- Base race player sprite -->
+    <item id="-100" type="racesprite" name="Human">
+        <sprite gender="male">races/humans/human_male_base.xml</sprite>
+        <sprite gender="female">races/humans/human_female_base.xml</sprite>
+    </item>
+
     <!-- Example of an usable items -->
     <item id="1"
         image="usable/usable-candy.png"

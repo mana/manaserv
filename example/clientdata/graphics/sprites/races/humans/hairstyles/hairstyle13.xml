@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<sprite>
+
+	<imageset name="base" src="graphics/sprites/races/humans/hairstyles/hairstyle13.png|W" width="32" height="32" />
+
+	<action name="stand" imageset="base">
+		<animation direction="down">
+		  <frame index="0" offsetX="3" offsetY ="-33" />
+		</animation>
+		<animation direction="left">
+		  <frame index="3" offsetX="3" offsetY ="-33"/>
+		</animation>
+		<animation direction="up">
+		  <frame index="6" offsetX="3" offsetY ="-33"/>
+		</animation>
+		<animation direction="right">
+		  <frame index="9" offsetX="3" offsetY ="-33"/>
+		</animation>
+	</action>
+
+	<action name="walk" imageset="base">
+		<animation direction="down">
+		  <frame index="0" offsetX="3" offsetY ="-32" delay="75"/>
+		  <frame index="1" offsetX="3" offsetY ="-33" delay="75" />
+		  <frame index="1" offsetX="3" offsetY ="-33" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-32" delay="75" />
+		  <frame index="2" offsetX="3" offsetY ="-33" delay="75" />
+		  <frame index="2" offsetX="3" offsetY ="-33" delay="75" />
+		</animation>
+		<animation direction="left">
+		  <frame index="3" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="4" offsetX="3" offsetY ="-32" delay="75"/>
+		  <frame index="4" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="3" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="5" offsetX="3" offsetY ="-32" delay="75"/>
+		  <frame index="5" offsetX="3" offsetY ="-33" delay="75"/>
+		</animation>
+		<animation direction="up">
+		  <frame index="6" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="7" offsetX="3" offsetY ="-34" delay="75"/>
+		  <frame index="7" offsetX="3" offsetY ="-34" delay="75"/>
+		  <frame index="6" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="8" offsetX="3" offsetY ="-34" delay="75"/>
+		  <frame index="8" offsetX="3" offsetY ="-34" delay="75"/>
+		</animation>
+		<animation direction="right">
+		  <frame index="9" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="10" offsetX="3" offsetY ="-32" delay="75"/>
+		  <frame index="10" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="9" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="11" offsetX="3" offsetY ="-32" delay="75"/>
+		  <frame index="11" offsetX="3" offsetY ="-33" delay="75"/>
+		</animation>
+	</action>
+
+	<action name="attack" imageset="base">
+		<animation direction="down">
+		  <frame index="0" offsetX="3" offsetY ="-30" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-31" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-28" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-27" delay="75" />
+		  <end />
+		</animation>
+		<animation direction="left">
+		  <frame index="3" offsetX="7" offsetY ="-34" delay="75" />
+		  <frame index="3" offsetX="7" offsetY ="-35" delay="75" />
+		  <frame index="3" offsetX="3" offsetY ="-32" delay="75" />
+		  <frame index="3" offsetX="2" offsetY ="-31" delay="75" />
+		  <end />
+		</animation>
+		<animation direction="up">
+		  <frame index="6" offsetX="2" offsetY ="-33" delay="75"/>
+		  <frame index="6" offsetX="2" offsetY ="-33" delay="75"/>
+		  <frame index="6" offsetX="2" offsetY ="-33" delay="75"/>
+		  <frame index="6" offsetX="2" offsetY ="-31" delay="75"/>
+		  <end />
+		</animation>
+		<animation direction="right">
+		  <frame index="9" offsetX="0" offsetY ="-34" delay="75"/>
+		  <frame index="9" offsetX="0" offsetY ="-35" delay="75"/>
+		  <frame index="9" offsetX="3" offsetY ="-32" delay="75"/>
+		  <frame index="9" offsetX="4" offsetY ="-31" delay="75"/>
+		  <end />
+		</animation>
+	</action>
+
+	<action name="attack_bow" imageset="base">
+		<animation direction="down">
+		  <frame index="0" offsetX="3" offsetY ="-32" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-32" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-32" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-31" delay="75" />
+		  <frame index="0" offsetX="3" offsetY ="-32" delay="75" />
+		  <end />
+		</animation>
+		<animation direction="left">
+		  <frame index="3" offsetX="6" offsetY ="-33" delay="75" />
+		  <frame index="3" offsetX="6" offsetY ="-33" delay="75" />
+		  <frame index="3" offsetX="6" offsetY ="-33" delay="75" />
+		  <frame index="3" offsetX="8" offsetY ="-34" delay="75" />
+		  <frame index="3" offsetX="8" offsetY ="-34" delay="75" />
+		  <end />
+		</animation>
+		<animation direction="up">
+		  <frame index="6" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="6" offsetX="3" offsetY ="-33" delay="75"/>
+		  <frame index="6" offsetX="2" offsetY ="-33" delay="75"/>
+		  <frame index="6" offsetX="2" offsetY ="-32" delay="75"/>
+		  <frame index="6" offsetX="2" offsetY ="-33" delay="75"/>
+		  <end />
+		</animation>
+		<animation direction="right">
+		  <frame index="9" offsetX="0" offsetY ="-33" delay="75"/>
+		  <frame index="9" offsetX="0" offsetY ="-33" delay="75"/>
+		  <frame index="9" offsetX="0" offsetY ="-33" delay="75"/>
+		  <frame index="9" offsetX="-2" offsetY ="-34" delay="75"/>
+		  <frame index="9" offsetX="-2" offsetY ="-34" delay="75"/>
+		  <end />
+		</animation>
+	</action>
+
+	<action name="sit" imageset="base">
+		<animation direction="down">
+		  <frame index="0" offsetX="3" offsetY ="-21" />
+		</animation>
+		<animation direction="left">
+		  <frame index="3" offsetX="7" offsetY ="-24"/>
+		</animation>
+		<animation direction="up">
+		  <frame index="6" offsetX="4" offsetY ="-25"/>
+		</animation>
+		<animation direction="right">
+		  <frame index="9" offsetX="-3" offsetY ="-24"/>
+		</animation>
+	</action>
+
+	<action name="dead" imageset="base">
+		<animation direction="default">
+			<frame index="12" offsetX="23" offsetY="-8"/>
+		</animation>
+	</action>
+
+</sprite>

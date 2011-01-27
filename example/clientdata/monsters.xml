@@ -35,7 +35,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
 
 <monsters>
 
-    <monster id="0" name="Maggot" targetCursor="small">
+    <monster id="1" name="Maggot" targetCursor="small">
         <sprite>monsters/monster-maggot.xml</sprite>
         <sound event="hit">monsters/maggot/maggot-hit1.ogg</sound>
         <sound event="hit">monsters/maggot/maggot-hit2.ogg</sound>
@@ -84,7 +84,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             <script>testmonster.lua</script> <!-- only Proof of Concept-->
     </monster>
 
-    <monster id="1" name="Scorpion">
+    <monster id="2" name="Scorpion">
         <sprite>monsters/monster-scorpion.xml|#4d422d,826242,d8c282,ffffff</sprite>
         <sound event="hit">monsters/scorpion/scorpion-hit1.ogg</sound>
         <sound event="hit">monsters/scorpion/scorpion-hit2.ogg</sound>
@@ -138,7 +138,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             />
     </monster>
 
-    <monster id="2" name="Red Scorpion">
+    <monster id="3" name="Red Scorpion">
         <sprite>monsters/monster-scorpion.xml|#791d0a,cd5d27,f28d54,ffffff</sprite>
         <sound event="hit">monsters/scorpion/scorpion-hit1.ogg</sound>
         <sound event="hit">monsters/scorpion/scorpion-hit2.ogg</sound>
@@ -185,7 +185,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             />
     </monster>
 
-    <monster id="3" name="Green Slime">
+    <monster id="4" name="Green Slime">
         <sprite>monsters/monster-slime.xml|#72982c,ffffff</sprite>
         <sound event="hit">monsters/slime/slime-hit1.ogg</sound>
         <drop item="502" percent="2"/>

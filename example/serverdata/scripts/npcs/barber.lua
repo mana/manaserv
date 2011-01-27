@@ -92,7 +92,7 @@ function Barber(npc, ch, data)
     -- Repeat until the user selects nothing
     repeat
         if (result == 1) then -- Do styles
-            result = do_choice(npc, ch, "Bald", styles, "Supprise me", "Never mind")
+            result = do_choice(npc, ch, "Bald", styles, "Surprise me", "Never mind")
 
             result = result -1
 
@@ -114,7 +114,7 @@ function Barber(npc, ch, data)
                 result = 3
             end
         elseif (result == 2) then -- Do colors
-            result = do_choice(npc, ch, colors, "Supprise me", "Never mind")
+            result = do_choice(npc, ch, colors, "Surprise me", "Never mind")
 
             --Random
             if (result == #colors + 1) then

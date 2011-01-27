@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<sprite>
+  <!--
+  This is the bald hairstyle, hence it should need no imageset and no actions.
+  However, that crashes 0.0.23, so some stuff is included now, including an
+  empty image set (it's empty since the icon is 32x32 so there isn't even one
+  40x40 frame).
+  -->
+
+<!-- Testing no content
+  <imageset name="base" src="graphics/items/armor-chest-cottonshirt.png" width="40" height="40" />
+
+  <action name="stand" imageset="base">
+    <animation direction="down">
+    </animation>
+    <animation direction="left">
+    </animation>
+    <animation direction="up">
+    </animation>
+    <animation direction="right">
+    </animation>
+  </action>
+
+  <action name="walk" imageset="base">
+    <animation direction="down">
+    </animation>
+    <animation direction="left">
+    </animation>
+    <animation direction="up">
+    </animation>
+    <animation direction="right">
+    </animation>
+  </action>
+
+  <action name="attack" imageset="base">
+    <animation direction="down">
+      <end />
+    </animation>
+    <animation direction="left">
+      <end />
+    </animation>
+    <animation direction="up">
+      <end />
+    </animation>
+    <animation direction="right">
+      <end />
+    </animation>
+  </action>
+
+  <action name="attack_bow" imageset="base">
+    <animation direction="down">
+      <end />
+    </animation>
+    <animation direction="left">
+      <end />
+    </animation>
+    <animation direction="up">
+      <end />
+    </animation>
+    <animation direction="right">
+      <end />
+    </animation>
+  </action>
+
+  <action name="sit" imageset="base">
+    <animation direction="down">
+    </animation>
+    <animation direction="left">
+    </animation>
+    <animation direction="up">
+    </animation>
+    <animation direction="right">
+    </animation>
+  </action>
+
+  <action name="dead" imageset="base">
+    <animation direction="default">
+    </animation>
+  </action>-->
+</sprite>
