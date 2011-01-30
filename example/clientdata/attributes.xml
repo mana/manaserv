@@ -35,7 +35,7 @@
     <attribute id="9" name="Dodge" desc="Decreases the chance of incoming physical attacks hitting you." modifiable="false" scope="being">
         <modifier stacktype="non stackable bonus" modtype="additive" tag="dge" effect="Dodge %+.2f. This modifier does not stack with other dodge modifiers. "/>
     </attribute>
-    <attribute id="10" name="M. dodge" desc="Decreases the chance of incoming magical attacks hitting you." modifiable="false" scope="character">
+    <attribute id="10" name="M. dodge" desc="Decreases the chance of incoming magical attacks hitting you." modifiable="false" scope="being">
         <modifier stacktype="stackable" modtype="additive" tag="mdge" effect="Magical dodge %+.2f"/>
     </attribute>
     <attribute id="11" name="M. defense" desc="Reduces incoming magical damage." modifiable="false" scope="being">

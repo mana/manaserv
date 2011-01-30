@@ -131,6 +131,8 @@ void MonsterManager::reload()
                     XML::getProperty(subnode, "attack-magic", -1));
                 monster->setAttribute(ATTR_DODGE,
                     XML::getProperty(subnode, "evade", -1));
+                monster->setAttribute(ATTR_MAGIC_DODGE,
+                    XML::getProperty(subnode, "magic-evade", -1));
                 monster->setAttribute(ATTR_ACCURACY,
                     XML::getProperty(subnode, "hit", -1));
                 monster->setAttribute(ATTR_DEFENSE,
