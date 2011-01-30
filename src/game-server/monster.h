@@ -113,7 +113,6 @@ class MonsterClass
         bool hasAttribute(int attribute) const
         { return (mAttributes.find(attribute) != mAttributes.end()); }
 
-
         /** Sets collision circle radius. */
         void setSize(int size) { mSize = size; }
 
@@ -296,6 +295,14 @@ class Monster : public Being
             // blocked walls, other monsters and players ( bin 1000 0011)
             return 0x83;
         }
+
+        /**
+         * Called when an attribute modifier is changed.
+         * Recalculate the base value of an attribute and update derived
+         *     attributes if it has changed.
+         * @returns Whether it was changed.
+         */
+        virtual bool recalculateBaseAttribute(unsigned int);
 
     protected:
         /**

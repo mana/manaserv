@@ -154,9 +154,7 @@ void MonsterManager::reload()
                 const AttributeScopes &mobAttr = attributeManager->getAttributeInfoForType(ATTR_MOB);
 
                 for (AttributeScopes::const_iterator it = mobAttr.begin(),
-                     it_end = mobAttr.end();
-                it != it_end;
-                ++it)
+                     it_end = mobAttr.end(); it != it_end; ++it)
                 {
                     if (!monster->mAttributes.count(it->first))
                     {
@@ -170,14 +168,19 @@ void MonsterManager::reload()
                     monster->setSize(16);
                     attributesComplete = false;
                 }
+
                 if (speed == -1.0f)
                 {
                     speed = 4.0f;
                     attributesComplete = false;
                 }
+                monster->setAttribute(ATTR_MOVE_SPEED_TPS, speed);
 
-                if (!attributesComplete) LOG_WARN(mMonsterReferenceFile
+                if (!attributesComplete)
+                {
+                    LOG_WARN(mMonsterReferenceFile
                     << ": Attributes incomplete for monster #" << id);
+                }
 
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
@@ -189,7 +192,7 @@ void MonsterManager::reload()
             else if (xmlStrEqual(subnode->name, BAD_CAST "behavior"))
             {
                 behaviorSet = true;
-                if (XML::getProperty(subnode, "aggressive", "") == "true")
+                if (XML::getBoolProperty(subnode, "aggressive", false))
                 {
                     monster->setAggressive(true);
                 }

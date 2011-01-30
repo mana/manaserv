@@ -97,17 +97,17 @@ Monster::Monster(MonsterClass *specy):
         double attr = 0.0f;
 
         if (specy->hasAttribute(it2->first))
+        {
             attr = specy->getAttribute(it2->first);
 
-        setAttribute(it2->first,
+            setAttribute(it2->first,
                   mutation ?
                   attr * (100 + (rand()%(mutation << 1)) - mutation) / 100.0 :
                   attr);
+            recalculateBaseAttribute(it2->first);
+        }
     }
 
-    // Set the speed in tiles per second.
-    setAttribute(ATTR_MOVE_SPEED_RAW,
-                 utils::tpsToRawSpeed(getAttribute(ATTR_MOVE_SPEED_TPS)));
     setSize(specy->getSize());
 
     // Set positions relative to target from which the monster can attack
@@ -513,3 +513,42 @@ void Monster::died()
     }
 }
 
+bool Monster::recalculateBaseAttribute(unsigned int attr)
+{
+    LOG_DEBUG("Received update attribute recalculation request at Monster for "
+              << attr << ".");
+    if (!mAttributes.count(attr)) return false;
+    double newBase = getAttribute(attr);
+
+    switch (attr)
+    {
+      // Those a set only at load time.
+      case ATTR_MAX_HP:
+      case MOB_ATTR_PHY_ATK_MIN:
+      case MOB_ATTR_PHY_ATK_DELTA:
+      case MOB_ATTR_MAG_ATK:
+      case ATTR_DODGE:
+      case ATTR_MAGIC_DODGE:
+      case ATTR_ACCURACY:
+      case ATTR_DEFENSE:
+      case ATTR_MAGIC_DEFENSE:
+      case ATTR_HP_REGEN:
+      case ATTR_MOVE_SPEED_TPS:
+      case ATTR_INV_CAPACITY:
+          // nothing to do.
+          break;
+
+      // Only HP and Speed Raw updated for monsters
+      default:
+          Being::recalculateBaseAttribute(attr);
+          break;
+    }
+    if (newBase != getAttribute(attr))
+    {
+        setAttribute(attr, newBase);
+        updateDerivedAttributes(attr);
+        return true;
+    }
+    LOG_DEBUG("No changes to sync for attribute '" << attr << "'.");
+    return false;
+}
