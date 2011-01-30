@@ -27,6 +27,8 @@
 #include "utils/logger.h"
 #include "utils/xml.h"
 
+#define MAX_MUTATION 99
+
 Element elementFromString (const std::string &name)
 {
     static std::map<const std::string, Element> table;
@@ -58,7 +60,8 @@ void MonsterManager::reload()
 {
     std::string absPathFile = ResourceManager::resolve(mMonsterReferenceFile);
     if (absPathFile.empty()) {
-        LOG_ERROR("Monster Manager: Could not find " << mMonsterReferenceFile << "!");
+        LOG_ERROR("Monster Manager: Could not find "
+                  << mMonsterReferenceFile << "!");
         return;
     }
 
@@ -111,12 +114,13 @@ void MonsterManager::reload()
             if (xmlStrEqual(subnode->name, BAD_CAST "drop"))
             {
                 MonsterDrop drop;
-                drop.item = itemManager->getItem(XML::getProperty(subnode, "item", 0));
-                drop.probability = XML::getProperty(subnode, "percent", 0) * 100;
+                drop.item = itemManager->getItem(
+                                          XML::getProperty(subnode, "item", 0));
+                drop.probability = XML::getProperty(subnode, "percent", 0)
+                                   * 100;
+
                 if (drop.item && drop.probability)
-                {
                     drops.push_back(drop);
-                }
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "attributes"))
             {
@@ -143,17 +147,17 @@ void MonsterManager::reload()
                 float speed = (XML::getFloatProperty(subnode, "speed", -1.0f));
                 monster->setMutation(XML::getProperty(subnode, "mutation", 0));
 
-                //checking attributes for completeness and plausibility
-                if (monster->getMutation() > 99)
+                // Checking attributes for completeness and plausibility
+                if (monster->getMutation() > MAX_MUTATION)
                 {
-                    LOG_WARN(mMonsterReferenceFile
-                    <<": Mutation of monster #"<<id
-                    <<" more than 99% - ignored");
+                    LOG_WARN(mMonsterReferenceFile << ": Mutation of monster #"
+                    << id << " more than " << MAX_MUTATION << "% - ignored");
                     monster->setMutation(0);
                 }
 
                 bool attributesComplete = true;
-                const AttributeScopes &mobAttr = attributeManager->getAttributeInfoForType(ATTR_MOB);
+                const AttributeScopes &mobAttr =
+                            attributeManager->getAttributeInfoForType(ATTR_MOB);
 
                 for (AttributeScopes::const_iterator it = mobAttr.begin(),
                      it_end = mobAttr.end(); it != it_end; ++it)
@@ -195,26 +199,32 @@ void MonsterManager::reload()
             {
                 behaviorSet = true;
                 if (XML::getBoolProperty(subnode, "aggressive", false))
-                {
                     monster->setAggressive(true);
-                }
-                monster->setTrackRange(XML::getProperty(subnode, "track-range", 1));
-                monster->setStrollRange(XML::getProperty(subnode, "stroll-range", 0));
-                monster->setAttackDistance(XML::getProperty(subnode, "attack-distance", 0));
+
+                monster->setTrackRange(
+                               XML::getProperty(subnode, "track-range", 1));
+                monster->setStrollRange(
+                               XML::getProperty(subnode, "stroll-range", 0));
+                monster->setAttackDistance(
+                               XML::getProperty(subnode, "attack-distance", 0));
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "attack"))
             {
                 MonsterAttack *att = new MonsterAttack;
                 att->id = XML::getProperty(subnode, "id", 0);
                 att->priority = XML::getProperty(subnode, "priority", 1);
-                att->damageFactor = XML::getFloatProperty(subnode, "damage-factor", 1.0f);
+                att->damageFactor = XML::getFloatProperty(subnode,
+                                                         "damage-factor", 1.0f);
                 att->preDelay = XML::getProperty(subnode, "pre-delay", 1);
                 att->aftDelay = XML::getProperty(subnode, "aft-delay", 0);
                 att->range = XML::getProperty(subnode, "range", 0);
-                att->scriptFunction = XML::getProperty(subnode, "script-function", "");
-                std::string sElement = XML::getProperty(subnode, "element", "neutral");
+                att->scriptFunction = XML::getProperty(subnode,
+                                                       "script-function", "");
+                std::string sElement = XML::getProperty(subnode,
+                                                        "element", "neutral");
                 att->element = elementFromString(sElement);
-                std::string sType = XML::getProperty(subnode, "type", "physical");
+                std::string sType = XML::getProperty(subnode,
+                                                     "type", "physical");
 
                 bool validMonsterAttack = true;
                 if (sType == "physical")
@@ -233,6 +243,7 @@ void MonsterManager::reload()
                 {
                     LOG_WARN("Monster manager " << mMonsterReferenceFile
                               <<  ": unknown damage type '" << sType << "'.");
+                    validMonsterAttack = false;
                 }
 
                 if (att->id < 1)
@@ -278,17 +289,23 @@ void MonsterManager::reload()
         }
 
         monster->setDrops(drops);
-        if (!attributesSet) LOG_WARN(mMonsterReferenceFile
-                                    << ": No attributes defined for monster #"
-                                    << id << " (" << name << ")");
-        if (!behaviorSet) LOG_WARN(mMonsterReferenceFile
-                            << ": No behavior defined for monster #"
-                            << id << " (" << name << ")");
+        if (!attributesSet)
+        {
+            LOG_WARN(mMonsterReferenceFile
+                     << ": No attributes defined for monster #" << id
+                     << " (" << name << ")");
+        }
+        if (!behaviorSet)
+        {
+            LOG_WARN(mMonsterReferenceFile
+                << ": No behavior defined for monster #" << id
+                << " (" << name << ")");
+        }
         if (monster->getExp() == -1)
         {
             LOG_WARN(mMonsterReferenceFile
-                    << ": No experience defined for monster #"
-                    << id << " (" << name << ")");
+                    << ": No experience defined for monster #" << id
+                    << " (" << name << ")");
             monster->setExp(0);
         }
         ++nbMonsters;
