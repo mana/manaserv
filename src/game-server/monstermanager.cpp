@@ -28,6 +28,8 @@
 #include "utils/xml.h"
 
 #define MAX_MUTATION 99
+#define DEFAULT_MONSTER_SIZE 16
+#define DEFAULT_MONSTER_SPEED 4.0f
 
 Element elementFromString (const std::string &name)
 {
@@ -88,7 +90,7 @@ void MonsterManager::reload()
         if (id < 1)
         {
             LOG_WARN("Monster Manager: There is a monster ("
-                     << name << ") without ID in "
+                     << name << ") without Id in "
                      << mMonsterReferenceFile << "! It has been ignored.");
             continue;
         }
@@ -143,15 +145,16 @@ void MonsterManager::reload()
                     XML::getProperty(subnode, "physical-defence", -1));
                 monster->setAttribute(ATTR_MAGIC_DEFENSE,
                     XML::getProperty(subnode, "magical-defence", -1));
-                monster->setSize(XML::getProperty(subnode, "size", 0));
+                monster->setSize(XML::getProperty(subnode, "size", -1));
                 float speed = (XML::getFloatProperty(subnode, "speed", -1.0f));
                 monster->setMutation(XML::getProperty(subnode, "mutation", 0));
 
                 // Checking attributes for completeness and plausibility
                 if (monster->getMutation() > MAX_MUTATION)
                 {
-                    LOG_WARN(mMonsterReferenceFile << ": Mutation of monster #"
-                    << id << " more than " << MAX_MUTATION << "% - ignored");
+                    LOG_WARN(mMonsterReferenceFile
+                    << ": Mutation of monster Id:" << id << " more than "
+                    << MAX_MUTATION << "%. Defaulted to 0.");
                     monster->setMutation(0);
                 }
 
@@ -164,20 +167,31 @@ void MonsterManager::reload()
                 {
                     if (!monster->mAttributes.count(it->first))
                     {
+                        LOG_WARN(mMonsterReferenceFile << ": No attribute "
+                                 << it->first << " for monster Id: "
+                                 << id << ". Defaulted to 0.");
                         attributesComplete = false;
                         monster->setAttribute(it->first, 0);
                     }
                 }
 
-                if (monster->getSize() == 0)
+                if (monster->getSize() == -1)
                 {
-                    monster->setSize(16);
+                    LOG_WARN(mMonsterReferenceFile
+                             << ": No size set for monster Id:" << id << ". "
+                             << "Defaulted to " << DEFAULT_MONSTER_SIZE
+                             << " pixels.");
+                    monster->setSize(DEFAULT_MONSTER_SIZE);
                     attributesComplete = false;
                 }
 
                 if (speed == -1.0f)
                 {
-                    speed = 4.0f;
+                    LOG_WARN(mMonsterReferenceFile
+                             << ": No speed set for monster Id:" << id << ". "
+                             << "Defaulted to " << DEFAULT_MONSTER_SPEED
+                             << " tiles/second.");
+                    speed = DEFAULT_MONSTER_SPEED;
                     attributesComplete = false;
                 }
                 monster->setAttribute(ATTR_MOVE_SPEED_TPS, speed);
@@ -185,7 +199,8 @@ void MonsterManager::reload()
                 if (!attributesComplete)
                 {
                     LOG_WARN(mMonsterReferenceFile
-                    << ": Attributes incomplete for monster #" << id);
+                             << ": Attributes incomplete for monster Id:" << id
+                             << ". Defaults values may have been applied!");
                 }
 
             }
@@ -249,7 +264,7 @@ void MonsterManager::reload()
                 if (att->id < 1)
                 {
                     LOG_WARN(mMonsterReferenceFile
-                             << ": Attack without ID for monster #"
+                             << ": Attack without ID for monster Id:"
                              << id << " (" << name << ") - attack ignored");
                     validMonsterAttack = false;
                 }
@@ -257,7 +272,7 @@ void MonsterManager::reload()
                 {
                     LOG_WARN(mMonsterReferenceFile
                              << ": Attack with unknown element \""
-                             << sElement << "\" for monster #" << id
+                             << sElement << "\" for monster Id:" << id
                              << " (" << name << ") - attack ignored");
                     validMonsterAttack = false;
                 }
@@ -265,7 +280,8 @@ void MonsterManager::reload()
                 {
                     LOG_WARN(mMonsterReferenceFile
                              << ": Attack with unknown type \"" << sType << "\""
-                             << " for monster #" << id << " (" << name << ")");
+                             << " for monster Id:" << id
+                             << " (" << name << ")");
                     validMonsterAttack = false;
                 }
 
@@ -292,19 +308,19 @@ void MonsterManager::reload()
         if (!attributesSet)
         {
             LOG_WARN(mMonsterReferenceFile
-                     << ": No attributes defined for monster #" << id
+                     << ": No attributes defined for monster Id:" << id
                      << " (" << name << ")");
         }
         if (!behaviorSet)
         {
             LOG_WARN(mMonsterReferenceFile
-                << ": No behavior defined for monster #" << id
+                << ": No behavior defined for monster Id:" << id
                 << " (" << name << ")");
         }
         if (monster->getExp() == -1)
         {
             LOG_WARN(mMonsterReferenceFile
-                    << ": No experience defined for monster #" << id
+                    << ": No experience defined for monster Id:" << id
                     << " (" << name << ")");
             monster->setExp(0);
         }
