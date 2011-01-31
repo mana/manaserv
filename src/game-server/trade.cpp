@@ -38,7 +38,8 @@
  */
 
 Trade::Trade(Character *c1, Character *c2):
-    mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT), mCurrencyId(ATTR_GP)
+    mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT),
+    mCurrencyId(ATTR_MONEY)
 {
     MessageOut msg(GPMSG_TRADE_REQUEST);
     msg.writeInt16(c1->getPublicID());

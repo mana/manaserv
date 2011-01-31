@@ -370,8 +370,14 @@ static int chr_inv_change(lua_State *s)
         int id = lua_tointeger(s, i * 2 + 2);
         int nb = lua_tointeger(s, i * 2 + 3);
 
-        if (id == 0)
-            LOG_WARN("chr_inv_change: id 0! Currency is now handled through attributes!");
+        if (id == 0) // Id 0 = Change money amount.
+        {
+            double money = q->getModifiedAttribute(ATTR_MONEY);
+            money += nb;
+            q->setAttribute(ATTR_MONEY, money);
+            lua_pushboolean(s, 1);
+            return 1;
+        }
         else if (nb < 0)
         {
             nb = inv.remove(id, -nb);
@@ -421,8 +427,23 @@ static int chr_inv_count(lua_State *s)
     Inventory inv(q);
     for (int i = 2; i <= nb_items + 1; ++i)
     {
-        int nb = inv.count(luaL_checkint(s, i));
-        lua_pushinteger(s, nb);
+        int id = luaL_checkint(s, i);
+
+        // Id 0 = Money - get it through attributes
+        if (id == 0)
+        {
+            int money = (int) q->getAttribute(ATTR_MONEY);
+
+            if (money < 0)
+                money = 0;
+            lua_pushinteger(s, money);
+        }
+        else
+        {
+            // Otherwise, return the normal count result
+            int nb = inv.count(id);
+            lua_pushinteger(s, nb);
+        }
     }
     return nb_items;
 }

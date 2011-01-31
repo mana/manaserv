@@ -159,7 +159,7 @@ enum Element
 #define ATTR_MOVE_SPEED_RAW     17
 
 // Money and inventory size attributes.
-#define ATTR_GP                 18
+#define ATTR_MONEY              18
 #define ATTR_INV_CAPACITY       19
 
 /**

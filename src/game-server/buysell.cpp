@@ -32,7 +32,7 @@
 #include <algorithm>
 
 BuySell::BuySell(Character *c, bool sell):
-    mCurrencyId(ATTR_GP), mChar(c), mSell(sell)
+    mCurrencyId(ATTR_MONEY), mChar(c), mSell(sell)
 {
     c->setBuySell(this);
 }
