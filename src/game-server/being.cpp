@@ -528,11 +528,6 @@ bool Being::recalculateBaseAttribute(unsigned int attr)
         // Provisional
         newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0;
         break;
-    case ATTR_MONEY:
-        // Set the money to 0 if it was never set before.
-        if (getModifiedAttribute(ATTR_MONEY) < 0)
-            newBase = 0.0;
-        break;
     }
     if (newBase != getAttribute(attr))
     {
