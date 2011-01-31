@@ -56,6 +56,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             attack-magic="0"
             hit="10"
             evade="5"
+            magical-evade="5"
             physical-defence="5"
             magical-defence="0"
             mutation="50"
@@ -105,6 +106,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             attack-magic="0"
             hit="10"
             evade="10"
+            magical-evade="10"
             physical-defence="5"
             magical-defence="0"
             />
@@ -162,6 +164,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             attack-magic="0"
             hit="30"
             evade="30"
+            magical-evade="30"
             physical-defence="5"
             magical-defence="0"
             />
@@ -206,6 +209,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             attack-magic="0"
             hit="100"
             evade="10"
+            magical-evade="10"
             physical-defence="0"
             magical-defence="0"
             />
