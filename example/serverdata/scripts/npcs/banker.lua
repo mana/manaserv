@@ -11,7 +11,13 @@
 ----------------------------------------------------------------------------------
 
 function Banker(npc, ch)
-    do_message(npc, ch, "Welcome to the bank!")
+    if mana.chr_get_gender(ch) == GENDER_MALE then
+        do_message(npc, ch, "Welcome to the bank, sir!")
+    elseif mana.chr_get_gender(ch) == GENDER_FEMALE then
+        do_message(npc, ch, "Welcome to the bank, madam!")
+    else
+        do_message(npc, ch, "Welcome to the bank... uhm... person of unspecified gender!")
+    end
     local account = tonumber(get_quest_var(ch, "BankAccount"))
     local result = -1
     do_wait()

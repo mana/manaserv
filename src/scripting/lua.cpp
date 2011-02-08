@@ -1367,6 +1367,22 @@ static int chr_get_kill_count(lua_State *s)
     return 1;
 }
 
+/**
+ * Get the gender of the character
+ * mana.chr_get_gender (character)
+ */
+static int chr_get_gender(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_get_gender called for nonexistent character.");
+        return 0;
+    }
+
+    lua_pushinteger(s, c->getGender());
+    return 1;
+}
 
 /**
  * Enables a special for a character
@@ -1608,6 +1624,7 @@ LuaScript::LuaScript():
         { "chr_set_hair_color",     &chr_set_hair_color   },
         { "chr_get_hair_color",     &chr_get_hair_color   },
         { "chr_get_kill_count",     &chr_get_kill_count   },
+        { "chr_get_gender",         &chr_get_gender       },
         { "chr_give_special",       &chr_give_special     },
         { "chr_has_special",        &chr_has_special      },
         { "chr_take_special",       &chr_take_special     },
