@@ -751,31 +751,114 @@ static int being_heal(lua_State *s)
     return 0;
 }
 
-
 /**
- * Gets the attribute for a being
- * mana.being_get_attribute(being, attribute)
+ * Gets the base attribute of a being
+ * mana.being_get_base_attribute(being, attribute)
  */
-static int being_get_attribute(lua_State *s)
+static int being_get_base_attribute(lua_State *s)
 {
     Being *being = getBeing(s, 1);
 
     if (being)
     {
-        int attr = lua_tointeger(s, 2);
-        if (attr == 0)
+        lua_Integer attr = lua_tointeger(s, 2);
+        if (attr)
         {
-            raiseScriptError(s,
-                "being_get_attribute called with incorrect parameters.");
-            return 0;
+            lua_pushinteger(s, being->getAttribute(attr));
+            return 1;
         }
-        else
-        {
-            lua_pushinteger(s, being->getModifiedAttribute(attr));
-        }
+        raiseScriptError(s,
+            "being_get_base_attribute called with incorrect parameters.");
     }
 
-    return 1;
+    return 0;
+}
+
+/**
+ * Gets the modified attribute of a being
+ * mana.being_get_modified_attribute(being, attribute)
+ */
+static int being_get_modified_attribute(lua_State *s)
+{
+    Being *being = getBeing(s, 1);
+
+    if (being)
+    {
+        lua_Integer attr = lua_tointeger(s, 2);
+        if (attr)
+        {
+            lua_pushinteger(s, being->getModifiedAttribute(attr));
+            return 1;
+        }
+        raiseScriptError(s,
+            "being_get_modified_attribute called with incorrect parameters.");
+    }
+
+    return 0;
+}
+
+/**
+ * Sets the base attribute of a being
+ * mana.being_set_base_attribute(being, attribute, value)
+ */
+static int being_set_base_attribute(lua_State *s)
+{
+    Being *being = getBeing(s, 1);
+    if (!being)
+        return 0;
+
+    lua_Integer attr = lua_tointeger(s, 2);
+    lua_Number value = lua_tonumber(s, 3);
+
+    being->setAttribute(attr, value);
+
+    return 0;
+}
+
+/**
+ * Applies an attribute modifier to a being.
+ * mana.being_apply_attribute_modifier(
+ *     attribute, value, layer, [duration, [effect-id]])
+ */
+static int being_apply_attribute_modifier(lua_State *s)
+{
+    Being *being = getBeing(s, 1);
+    if (!being)
+        return 0;
+
+    lua_Integer attr  = lua_tointeger(s,2);
+    lua_Number value  = lua_tonumber(s, 3);
+    lua_Integer layer = lua_tonumber(s, 4);
+    lua_Integer duration = 0;
+    lua_Integer effectId = 0;
+    if (lua_isnumber(s, 5))
+    {
+        duration = lua_tointeger(s, 5);
+        if (lua_isnumber(s, 6))
+            effectId = lua_tointeger(s, 6);
+    }
+
+    being->applyModifier(attr, value, layer, duration, effectId);
+
+    return 0;
+}
+
+static int being_remove_attribute_modifier(lua_State *s)
+{
+    Being *being = getBeing(s, 1);
+    if (!being)
+        return 0;
+
+    lua_Integer attr  = lua_tointeger(s,2);
+    lua_Number value  = lua_tonumber(s, 3);
+    lua_Integer layer = lua_tonumber(s, 4);
+    lua_Integer effectId = 0;
+    if (lua_isnumber(s, 5))
+        effectId = lua_tointeger(s, 5);
+
+    being->removeModifier(attr, value, layer, effectId);
+
+    return 0;
 }
 
 /**
@@ -1603,63 +1686,67 @@ LuaScript::LuaScript():
 
     // Put some callback functions in the scripting environment.
     static luaL_Reg const callbacks[] = {
-        { "npc_create",             &npc_create           },
-        { "npc_message",            &npc_message          },
-        { "npc_choice",             &npc_choice           },
-        { "npc_trade",              &npc_trade            },
-        { "npc_post",               &npc_post             },
-        { "npc_enable",             &npc_enable           },
-        { "npc_disable",            &npc_disable          },
-        { "chr_warp",               &chr_warp             },
-        { "chr_inv_change",         &chr_inv_change       },
-        { "chr_inv_count",          &chr_inv_count        },
-        { "chr_get_quest",          &chr_get_quest        },
-        { "chr_set_quest",          &chr_set_quest        },
-        { "chr_get_post",           &chr_get_post         },
-        { "chr_get_exp",            &chr_get_exp          },
-        { "chr_give_exp",           &chr_give_exp         },
-        { "chr_get_rights",         &chr_get_rights       },
-        { "chr_set_hair_style",     &chr_set_hair_style   },
-        { "chr_get_hair_style",     &chr_get_hair_style   },
-        { "chr_set_hair_color",     &chr_set_hair_color   },
-        { "chr_get_hair_color",     &chr_get_hair_color   },
-        { "chr_get_kill_count",     &chr_get_kill_count   },
-        { "chr_get_gender",         &chr_get_gender       },
-        { "chr_give_special",       &chr_give_special     },
-        { "chr_has_special",        &chr_has_special      },
-        { "chr_take_special",       &chr_take_special     },
-        { "exp_for_level",          &exp_for_level        },
-        { "monster_create",         &monster_create       },
-        { "monster_load_script",    &monster_load_script  },
-        { "being_apply_status",     &being_apply_status   },
-        { "being_remove_status",    &being_remove_status  },
-        { "being_has_status",       &being_has_status     },
-        { "being_set_status_time",  &being_set_status_time},
-        { "being_get_status_time",  &being_get_status_time},
-        { "being_type",             &being_type           },
-        { "being_walk",             &being_walk           },
-        { "being_say",              &being_say            },
-        { "being_damage",           &being_damage         },
-        { "being_heal",             &being_heal           },
-        { "being_get_attribute",    &being_get_attribute  },
-        { "being_get_name",         &being_get_name       },
-        { "being_get_action",       &being_get_action     },
-        { "being_set_action",       &being_set_action     },
-        { "being_get_direction",    &being_get_direction  },
-        { "being_set_direction",    &being_set_direction  },
-        { "posX",                   &posX                 },
-        { "posY",                   &posY                 },
-        { "trigger_create",         &trigger_create       },
-        { "chatmessage",            &chatmessage          },
-        { "get_beings_in_circle",   &get_beings_in_circle },
-        { "being_register",         &being_register       },
-        { "effect_create",          &effect_create        },
-        { "test_tableget",          &test_tableget        },
-        { "get_map_id",             &get_map_id           },
-        { "item_drop",              &item_drop            },
-        { "npc_ask_integer",        &npc_ask_integer      },
-        { "npc_end",                &npc_end              },
-        { "npc_ask_string",         &npc_ask_string       },
+        { "npc_create",                      &npc_create                      },
+        { "npc_message",                     &npc_message                     },
+        { "npc_choice",                      &npc_choice                      },
+        { "npc_trade",                       &npc_trade                       },
+        { "npc_post",                        &npc_post                        },
+        { "npc_enable",                      &npc_enable                      },
+        { "npc_disable",                     &npc_disable                     },
+        { "chr_warp",                        &chr_warp                        },
+        { "chr_inv_change",                  &chr_inv_change                  },
+        { "chr_inv_count",                   &chr_inv_count                   },
+        { "chr_get_quest",                   &chr_get_quest                   },
+        { "chr_set_quest",                   &chr_set_quest                   },
+        { "chr_get_post",                    &chr_get_post                    },
+        { "chr_get_exp",                     &chr_get_exp                     },
+        { "chr_give_exp",                    &chr_give_exp                    },
+        { "chr_get_rights",                  &chr_get_rights                  },
+        { "chr_set_hair_style",              &chr_set_hair_style              },
+        { "chr_get_hair_style",              &chr_get_hair_style              },
+        { "chr_set_hair_color",              &chr_set_hair_color              },
+        { "chr_get_hair_color",              &chr_get_hair_color              },
+        { "chr_get_kill_count",              &chr_get_kill_count              },
+        { "chr_get_gender",                  &chr_get_gender                  },
+        { "chr_give_special",                &chr_give_special                },
+        { "chr_has_special",                 &chr_has_special                 },
+        { "chr_take_special",                &chr_take_special                },
+        { "exp_for_level",                   &exp_for_level                   },
+        { "monster_create",                  &monster_create                  },
+        { "monster_load_script",             &monster_load_script             },
+        { "being_apply_status",              &being_apply_status              },
+        { "being_remove_status",             &being_remove_status             },
+        { "being_has_status",                &being_has_status                },
+        { "being_set_status_time",           &being_set_status_time           },
+        { "being_get_status_time",           &being_get_status_time           },
+        { "being_type",                      &being_type                      },
+        { "being_walk",                      &being_walk                      },
+        { "being_say",                       &being_say                       },
+        { "being_damage",                    &being_damage                    },
+        { "being_heal",                      &being_heal                      },
+        { "being_get_name",                  &being_get_name                  },
+        { "being_get_action",                &being_get_action                },
+        { "being_set_action",                &being_set_action                },
+        { "being_get_direction",             &being_get_direction             },
+        { "being_set_direction",             &being_set_direction             },
+        { "being_apply_attribute_modifier",  &being_apply_attribute_modifier  },
+        { "being_remove_attribute_modifier", &being_remove_attribute_modifier },
+        { "being_set_base_attribute",        &being_set_base_attribute        },
+        { "being_get_modified_attribute",    &being_get_modified_attribute    },
+        { "being_get_base_attribute",        &being_get_base_attribute        },
+        { "posX",                            &posX                            },
+        { "posY",                            &posY                            },
+        { "trigger_create",                  &trigger_create                  },
+        { "chatmessage",                     &chatmessage                     },
+        { "get_beings_in_circle",            &get_beings_in_circle            },
+        { "being_register",                  &being_register                  },
+        { "effect_create",                   &effect_create                   },
+        { "test_tableget",                   &test_tableget                   },
+        { "get_map_id",                      &get_map_id                      },
+        { "item_drop",                       &item_drop                       },
+        { "npc_ask_integer",                 &npc_ask_integer                 },
+        { "npc_end",                         &npc_end                         },
+        { "npc_ask_string",                  &npc_ask_string                  },
         { NULL, NULL }
     };
     luaL_register(mState, "mana", callbacks);
