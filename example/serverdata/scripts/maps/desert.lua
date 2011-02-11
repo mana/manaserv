@@ -35,13 +35,10 @@ function Harmony(npc, ch, list)
     end
     --- Give the player 100 units of money the first time.
     if  harmony_have_talked_to_someone == false then
-        if mana.chr_money_change(ch, 100) then
-            do_message(npc, ch, "Here is some money for you to find some toys to play with.\nEh Eh!")
-            do_message(npc, ch, string.format("You now have %d shiny coins!", mana.chr_money(ch)))
-            harmony_have_talked_to_someone = true
-        else
-            do_message(npc, ch, "Ah, it seems something went wrong...")
-        end
+        do_message(npc, ch, "Here is some money for you to find some toys to play with.\nEh Eh!")
+        mana.chr_money_change(ch, 100)
+        do_message(npc, ch, string.format("You now have %d shiny coins!", mana.chr_money(ch)))
+        harmony_have_talked_to_someone = true
     end
     do_message(npc, ch, "Have fun!")
     mana.effect_create(EMOTE_HAPPY, npc)
