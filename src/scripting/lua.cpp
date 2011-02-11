@@ -367,11 +367,14 @@ static int chr_inv_change(lua_State *s)
             raiseScriptError(s, "chr_inv_change called with incorrect parameters.");
             return 0;
         }
+
         int id = lua_tointeger(s, i * 2 + 2);
         int nb = lua_tointeger(s, i * 2 + 3);
-
         if (id == 0)
-            LOG_WARN("chr_inv_change: id 0! Currency is now handled through attributes!");
+        {
+            LOG_WARN("mana.chr_inv_change() called with id 0! "
+                     "Currency is now handled through attributes!");
+        }
         else if (nb < 0)
         {
             nb = inv.remove(id, -nb);
@@ -419,10 +422,21 @@ static int chr_inv_count(lua_State *s)
     int nb_items = lua_gettop(s) - 1;
     lua_checkstack(s, nb_items);
     Inventory inv(q);
+
+    int id, nb = 0;
     for (int i = 2; i <= nb_items + 1; ++i)
     {
-        int nb = inv.count(luaL_checkint(s, i));
-        lua_pushinteger(s, nb);
+        id = luaL_checkint(s, i);
+        if (id == 0)
+        {
+            LOG_WARN("mana.chr_inv_count() called with id 0! "
+                     "Currency is now handled through attributes!");
+        }
+        else
+        {
+            nb = inv.count(id);
+            lua_pushinteger(s, nb);
+        }
     }
     return nb_items;
 }

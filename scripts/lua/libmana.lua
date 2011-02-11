@@ -423,13 +423,15 @@ end
 
 
 -- Below are some convenience methods added to the engine API
-
 mana.chr_money_change = function(ch, amount)
-  return mana.chr_inv_change(ch, 0, amount)
+  mana.being_set_base_attribute(
+                            ch,
+                            ATTR_GP,
+                            mana.being_get_base_attribute(ch, ATTR_GP) + amount)
 end
 
 mana.chr_money = function(ch)
-  return mana.chr_inv_count(ch, 0)
+  return mana.being_get_base_attribute(ch, ATTR_GP)
 end
 
 
