@@ -802,6 +802,17 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             newCharacter->setAccount(acc);
             newCharacter->setCharacterSlot(slot);
             newCharacter->setLevel(1);
+
+            // Init GP value to avoid flawed ones.
+            AttributeMap::iterator itr =
+                newCharacter->mAttributes.find(ATTR_GP);
+            // Set up the base and modified attribute to 0.
+            if (itr != newCharacter->mAttributes.end())
+            {
+                itr->second.first = 0;
+                itr->second.second = 0;
+            }
+
             newCharacter->setCharacterPoints(0);
             newCharacter->setCorrectionPoints(0);
             newCharacter->setGender(gender);
