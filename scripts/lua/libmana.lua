@@ -375,6 +375,17 @@ function schedule_every(seconds, funct)
   table.sort(scheduler_jobs, job_cmp)
 end
 
+-- schedules a function call to be executed at a given date
+function schedule_per_date(my_year, my_month, my_day, my_hour, my_minute, funct)
+  local job = {}
+  job[0] = os.time{year = my_year, month = my_month, day = my_day,
+                   hour = my_hour, min = my_minute}
+  job[1] = funct
+  job[2] = nil
+  table.insert(scheduler_jobs, job)
+  table.sort(scheduler_jobs, job_cmp)
+end
+
 
 -- DEATH NOTIFICATIONS
 local ondeath_functs = {}
