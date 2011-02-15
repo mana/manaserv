@@ -15,13 +15,27 @@ require "scripts/lua/npclib"
 -- From example/serverdata/scripts
 require "scripts/npcs/banker"
 require "scripts/npcs/barber"
+require "scripts/npcs/merchant"
 
 atinit(function()
+
     -- Barber examples
     create_npc("Barber Twin", 1, 14 * TILESIZE + TILESIZE / 2, 9 * TILESIZE + TILESIZE / 2, Barber, nil)
     create_npc("Barber Twin", 1, 20 * TILESIZE + TILESIZE / 2, 11 * TILESIZE + TILESIZE / 2, npclib.talk(Barber, {14, 15, 16}, {}), nil)
+
     -- A simple banker
     create_npc("Banker", 8, 35 * TILESIZE + TILESIZE / 2, 24 * TILESIZE + TILESIZE / 2, Banker, nil)
+
+    -- A simple merchant.
+    merchant_buy_table = { {1, 10, 20}, {2, 10, 30}, {3, 10, 50} }
+    merchant_sell_table = { {1, 10, 19}, {5, 10, 30}, {6, 10, 200}, {7, 10, 300} }
+    create_npc("Merchant", 3, 4 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, merchant_buy_table, merchant_sell_table), nil)
+
+    -- Another Merchant, selling some equipment, and buying everything...
+    smith_buy_table = { {5, 10, 50}, {7, 10, 70} }
+    create_npc("Smith", 5, 15 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, smith_buy_table), nil)
+
+
     -- The most simple NPC - Welcoming new ones around.
     create_npc("Harmony", 11, 4 * TILESIZE + TILESIZE / 2, 25 * TILESIZE + TILESIZE / 2, npclib.talk(Harmony, "Welcome in the template world!\nI hope you'll find here whatever you were searching for.", "Do look around to find some interesting things coming along!"), Harmony_update)
 end)

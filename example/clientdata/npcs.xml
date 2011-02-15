@@ -9,6 +9,10 @@
 <npcs>
     <npc id="1"><sprite variant="0">npcs/static-npcs.xml</sprite></npc><!-- Barber 1&2 -->
     <!-- ... -->
+    <npc id="3"><sprite variant="2">npcs/static-npcs.xml</sprite></npc><!-- Merchant -->
+    <!-- ... -->
+    <npc id="5"><sprite variant="4">npcs/static-npcs.xml</sprite></npc><!-- Smith -->
+    <!-- ... -->
     <npc id="8"><sprite variant="7">npcs/static-npcs.xml</sprite></npc><!-- Banker -->
     <!-- ... -->
     <npc id="11"><sprite variant="10">npcs/static-npcs.xml</sprite></npc><!-- Welcoming girl -->
