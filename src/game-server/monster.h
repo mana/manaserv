@@ -145,11 +145,11 @@ class MonsterClass
          */
         unsigned getTrackRange() const { return mTrackRange; }
 
-        /** Sets range in tiles in which the monster moves around when idle. */
+        /** Sets range in pixels in which the monster moves around when idle. */
         void setStrollRange(unsigned range) { mStrollRange = range; }
 
         /**
-         * Returns range in tiles in which the monster moves around when idle.
+         * Returns range in pixels in which the monster moves around when idle.
          */
         unsigned getStrollRange() const { return mStrollRange; }
 
