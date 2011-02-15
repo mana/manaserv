@@ -66,38 +66,60 @@ bool BuySell::registerItem(int id, int amount, int cost)
 
 int BuySell::registerPlayerItems()
 {
-    return 0; // FIXME: STUB
-    /*
-     * Replaced with a no-op stub after the equipment slots become softcoded.
-     * I think this function is meant to fill the sell dialog with player
-     *     items, but it's iterating through the inventory.
-     * The no-op here is to stop compilation errors while I work on other
-     *     areas. FIXME
-     */
-    /*
+    if (!mSell)
+        return 0;
+
     int nbItemsToSell = 0;
-    if (mSell)
+
+    // We parse the player inventory and add all item
+    // in a sell list.
+    const Possessions &charPoss = mChar->getPossessions();
+    for (InventoryData::const_iterator it = charPoss.inventory.begin(),
+        it_end = charPoss.inventory.end(); it != it_end; ++it)
     {
-        for (int i = 0; i < EQUIPMENT_SLOTS; ++i)
+        unsigned int nb = it->second.amount;
+        if (!nb)
+            continue;
+
+        int id = it->second.itemId;
+        int cost = -1;
+        if (itemManager->getItem(id))
         {
-            int id = Inventory(mChar).getItem(i);
-            int nb = Inventory(mChar).count(id);
-            if (nb > 0)
+            cost = itemManager->getItem(id)->getCost();
+        }
+        else
+        {
+            LOG_WARN("registerPlayersItems(): The character Id: "
+                << mChar->getPublicID() << " has unknown items (Id: " << id
+                << "). They have been ignored.");
+            continue;
+        }
+
+        if (cost < 1)
+            continue;
+
+        // We check if the item Id has been already
+        // added. If so, we cumulate the amounts.
+        bool itemAlreadyAdded = false;
+        for (TradedItems::iterator i = mItems.begin(),
+            i_end = mItems.end(); i != i_end; ++i)
+        {
+            if (i->itemId == id)
             {
-                int cost = -1;
-                if (ItemManager::getItem(id))
-                    cost = ItemManager::getItem(id)->getCost();
-                if (cost > 0)
-                {
-                    TradedItem it = { id, nb, cost };
-                    mItems.push_back(it);
-                    nbItemsToSell++;
-                }
+                itemAlreadyAdded = true;
+                i->amount += nb;
+                break;
             }
+        }
+
+        if (!itemAlreadyAdded)
+        {
+            TradedItem itTrade = { id, nb, cost };
+            mItems.push_back(itTrade);
+            nbItemsToSell++;
         }
     }
     return nbItemsToSell;
-    */
 }
 
 bool BuySell::start(Actor *actor)
