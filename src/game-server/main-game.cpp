@@ -283,7 +283,6 @@ struct CommandLineOptions
 {
     CommandLineOptions():
         configPath(DEFAULT_CONFIG_FILE),
-        configPathChanged(false),
         verbosity(Logger::Warn),
         verbosityChanged(false),
         port(DEFAULT_SERVER_PORT + 3),
@@ -291,7 +290,6 @@ struct CommandLineOptions
     {}
 
     std::string configPath;
-    bool configPathChanged;
 
     Logger::Level verbosity;
     bool verbosityChanged;
@@ -333,7 +331,6 @@ static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
             case 'c':
                 // Change config filename and path.
                 options.configPath = optarg;
-                options.configPathChanged = true;
                 break;
             case 'v':
                 options.verbosity = static_cast<Logger::Level>(atoi(optarg));
