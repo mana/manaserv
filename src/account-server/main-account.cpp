@@ -138,9 +138,6 @@ static void initialize()
     signal(SIGINT, closeGracefully);
     signal(SIGTERM, closeGracefully);
 
-    // Set enet to quit on exit.
-    atexit(enet_deinitialize);
-
     std::string logFile = Configuration::getValue("log_accountServerFile",
                                                   DEFAULT_LOG_FILE);
 

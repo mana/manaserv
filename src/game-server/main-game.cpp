@@ -219,9 +219,6 @@ static void initializeServer()
         exit(EXIT_NET_EXCEPTION);
     }
 
-    // Set enet to quit on exit.
-    atexit(enet_deinitialize);
-
     // Pre-calculate the needed trigomic function values
     utils::math::init();
 
@@ -240,6 +237,9 @@ static void deinitializeServer()
 
     // Stop world timer
     worldTimer.stop();
+
+    // Quit ENet
+    enet_deinitialize();
 
     // Destroy message handlers
     delete gameHandler;
