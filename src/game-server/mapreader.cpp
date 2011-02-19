@@ -411,7 +411,8 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
         return;
     }
 
-    if (XML::getProperty(node, "encoding", std::string()) == "base64")
+    std::string encoding = XML::getProperty(node, "encoding", std::string());
+    if (encoding == "base64")
     {
         // Read base64 encoded map file
         xmlNodePtr dataChild = node->xmlChildrenNode;
@@ -449,7 +450,9 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
             return;
         }
 
-        if (XML::getProperty(node, "compression", std::string()) == "gzip")
+        std::string compression =
+            XML::getProperty(node, "compression", std::string());
+        if (compression == "gzip" || compression == "zlib")
         {
             // Inflate the gzipped layer data
             char *inflated;
@@ -459,7 +462,7 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
 
             if (!res)
             {
-                LOG_WARN("Failed to decompress gzipped layer");
+                LOG_WARN("Failed to decompress compressed layer");
                 return;
             }
 
