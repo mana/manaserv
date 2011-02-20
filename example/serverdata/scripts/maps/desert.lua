@@ -57,6 +57,10 @@ function Harmony(npc, ch, list)
     do_message(npc, ch, "Have fun!")
     mana.effect_create(EMOTE_HAPPY, npc)
     do_npc_close(npc, ch)
+    -- Make Harmony disappear for a while...
+    mana.npc_disable(npc)
+    -- 20 seconds later, Harmony comes back
+    schedule_in(20, function() mana.npc_enable(npc)  end)
 end
 
 -- Global variable used to control Harmony's updates.
