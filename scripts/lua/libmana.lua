@@ -342,6 +342,7 @@ end
 -- them when they are repeated jobs.
 function check_schedule()
   if #scheduler_jobs==0 then return end
+
   while os.time() > scheduler_jobs[#scheduler_jobs][0] do
     -- retreive the job and remove it from the schedule
     job = scheduler_jobs[#scheduler_jobs]
@@ -352,6 +353,10 @@ function check_schedule()
 	end
 	-- execute the job
 	job[1]()
+
+    -- avoid looping on an empty table
+    if #scheduler_jobs==0 then return end
+
   end
 end
 
