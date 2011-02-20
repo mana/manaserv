@@ -488,25 +488,62 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
         free(binData);
         return;
     }
-
-    // Read plain XML map file
-    node = node->xmlChildrenNode;
-
-    while (node)
+    else if (encoding == "csv")
     {
-        if (xmlStrEqual(node->name, BAD_CAST "tile") && y < h)
+        xmlNodePtr dataChild = node->xmlChildrenNode;
+        if (!dataChild)
+            return;
+
+        const char *data = (const char*) xmlNodeGetContent(dataChild);
+        std::string csv(data);
+
+        size_t pos = 0;
+        size_t oldPos = 0;
+
+        while (oldPos != csv.npos)
         {
-            int gid = XML::getProperty(node, "gid", -1);
+            pos = csv.find_first_of(",", oldPos);
+
+            const int gid = atoi(csv.substr(oldPos, pos - oldPos).c_str());
+
             setTileWithGid(map, x, y, gid);
 
-            if (++x == w)
+            x++;
+            if (x == w)
             {
                 x = 0;
                 ++y;
-            }
-        }
 
-        node = node->next;
+                // When we're done, don't crash on too much data
+                if (y == h)
+                    break;
+            }
+
+            oldPos = pos + 1;
+        }
+    }
+    else
+    {
+
+        // Read plain XML map file
+        node = node->xmlChildrenNode;
+
+        while (node)
+        {
+            if (xmlStrEqual(node->name, BAD_CAST "tile") && y < h)
+            {
+                int gid = XML::getProperty(node, "gid", -1);
+                setTileWithGid(map, x, y, gid);
+
+                if (++x == w)
+                {
+                    x = 0;
+                    ++y;
+                }
+            }
+
+            node = node->next;
+        }
     }
 }
 
