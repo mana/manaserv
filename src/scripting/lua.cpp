@@ -259,8 +259,7 @@ static int npc_enable(lua_State *s)
     if (p)
     {
         p->enable(true);
-        bool b = GameState::insert(p);
-        assert(b); (void)b;
+        GameState::enqueueInsert(p);
     }
 
     return 0;
