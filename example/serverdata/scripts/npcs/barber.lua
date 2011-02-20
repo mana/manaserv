@@ -14,8 +14,8 @@ local barber_styles = {"Flat ponytail", "Bowl cut","Combed back", "Emo", "Mohawk
         "Pompadour", "Center parting/Short and slick", "Long and slick", "Short and curly",
         "Pigtails", "Long and curly", "Parted", "Perky ponytail", "Wave", "Mane", "Bun"}
 
-local barber_colors = {"Brunette", "Green", "Dark red", "Light purple", "Gray", "Blonde",
-        "Teal", "Light red", "Blue", "Dark purple", "Black"}
+local barber_colors = {"Light brown", "Green", "Dark red", "Light purple", "Gray", "Blonde",
+        "Blue", "Brown", "Light Bblue", "Dark purple", "Black", "Shock white"}
 
 function Barber(npc, ch, data)
     local style_ids = nil

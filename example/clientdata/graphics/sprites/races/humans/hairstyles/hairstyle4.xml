@@ -3,6 +3,6 @@
 
 	<imageset name="base" src="graphics/sprites/races/humans/hairstyles/hairstyle4.png|W" width="40" height="40" />
 
-	<include file="hairstyle1.xml"/>
+	<include file="races/humans/hairstyles/hairstyle1.xml"/>
 
 </sprite>
