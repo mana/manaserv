@@ -128,9 +128,6 @@ static void initializeConfiguration(std::string configPath = std::string())
  */
 static void initialize()
 {
-    // Reset to default segmentation fault handling for debugging purposes
-    signal(SIGSEGV, SIG_DFL);
-
     // Used to close via process signals
 #if (defined __USE_UNIX98 || defined __FreeBSD__)
     signal(SIGQUIT, closeGracefully);
