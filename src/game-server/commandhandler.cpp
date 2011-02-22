@@ -72,6 +72,7 @@ static void handleKill(Character*, std::string&);
 static void handleKick(Character*, std::string&);
 static void handleLog(Character*, std::string&);
 static void handleLogsay(Character*, std::string&);
+static void handleKillMonsters(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -125,6 +126,8 @@ static CmdRef const cmdRef[] =
         "Logs a message to the transaction log.", &handleLog},
     {"logsay", "<message>",
         "Says something in public chat while logging it to the transaction log.", &handleLogsay},
+    {"killmonsters", "",
+        "Kills all monsters on the map.", &handleKillMonsters},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -1231,6 +1234,29 @@ static void handleLogsay(Character *player, std::string &msg)
     say("Message logged", player);
 }
 
+static void handleKillMonsters(Character *player, std::string &args)
+{
+    const MapComposite *map = player->getMap();
+    int count = 0;
+
+    for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
+    {
+        if ((*it)->getType() == OBJECT_MONSTER && (*it)->getAction() != DEAD)
+        {
+            (*it)->died();
+            count++;
+        }
+    }
+
+    std::stringstream ss;
+    ss << "You killed " << count << " monster" << (count > 1 ? "s." : ".");
+    say(ss.str(), player);
+
+    // log transaction
+    std::string msg = "User killed all monsters on map " + map->getName();
+    accountHandler->sendTransaction(player->getDatabaseID(),
+                                    TRANS_CMD_KILLMONSTERS, msg);
+}
 
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)

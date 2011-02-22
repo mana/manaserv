@@ -20,6 +20,7 @@
     <allow>@spawn</allow>
     <allow>@attribute</allow>
     <allow>@charwarp</allow>
+    <allow>@killmonsters</allow>
   </class>
   <class level="4">
     <alias>gm</alias>
