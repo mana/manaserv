@@ -69,7 +69,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             aggressive="false"
             cowardly="false"
             track-range="5"
-            stroll-range="2"
+            stroll-range="32"
             attack-distance="32"
             />
         <attack id="1"
@@ -115,7 +115,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             aggressive="true"
             cowardly="false"
             track-range="2"
-            stroll-range="1"
+            stroll-range="64"
             attack-distance="64"
             />
         <!-- slow, strong, long-range tail attack-->
@@ -174,7 +174,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             aggressive="true"
             cowardly="false"
             track-range="6"
-            stroll-range="1"
+            stroll-range="32"
             attack-distance="64"
             />
         <attack id="1"
