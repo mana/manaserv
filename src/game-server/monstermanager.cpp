@@ -127,8 +127,11 @@ void MonsterManager::reload()
             else if (xmlStrEqual(subnode->name, BAD_CAST "attributes"))
             {
                 attributesSet = true;
-                monster->setAttribute(ATTR_MAX_HP,
-                    XML::getProperty(subnode, "hp", -1));
+
+                const int hp = XML::getProperty(subnode, "hp", -1);
+                monster->setAttribute(ATTR_MAX_HP, hp);
+                monster->setAttribute(ATTR_HP, hp);
+
                 monster->setAttribute(MOB_ATTR_PHY_ATK_MIN,
                     XML::getProperty(subnode, "attack-min", -1));
                 monster->setAttribute(MOB_ATTR_PHY_ATK_DELTA,
