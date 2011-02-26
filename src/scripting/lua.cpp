@@ -1743,7 +1743,7 @@ static int item_drop(lua_State *s)
     i->setMap(map);
     Point pos(x, y);
     i->setPosition(pos);
-    GameState::insertSafe(i);
+    GameState::insertOrDelete(i);
 
     return 0;
 }

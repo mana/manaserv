@@ -508,7 +508,7 @@ void GameState::update(int worldTime)
                 break;
 
             case EVENT_INSERT:
-                insertSafe(o);
+                insertOrDelete(o);
                 break;
 
             case EVENT_WARP:
@@ -611,7 +611,7 @@ bool GameState::insert(Thing *ptr)
     return true;
 }
 
-bool GameState::insertSafe(Thing *ptr)
+bool GameState::insertOrDelete(Thing *ptr)
 {
     if (insert(ptr)) return true;
     delete ptr;

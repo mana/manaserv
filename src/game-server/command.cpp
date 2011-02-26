@@ -196,7 +196,7 @@ static void drop(Character *from, ItemClass *it, int nb)
     Item *item = new Item(it, nb);
     item->setMap(from->getMap());
     item->setPosition(from->getPosition());
-    GameState::insertSafe(item);
+    GameState::insertOrDelete(item);
 }
 
 static void spawn(Character *from, MonsterClass *specy, int nb)
@@ -210,7 +210,7 @@ static void spawn(Character *from, MonsterClass *specy, int nb)
         monster->setMap(map);
         monster->setPosition(pos);
         monster->clearDestination();
-        if (!GameState::insertSafe(monster))
+        if (!GameState::insertOrDelete(monster))
         {
             // The map is full. Break out.
             break;

@@ -568,7 +568,7 @@ static void handleDrop(Character *player, std::string &args)
     Item *item = new Item(ic, value);
     item->setMap(player->getMap());
     item->setPosition(player->getPosition());
-    GameState::insertSafe(item);
+    GameState::insertOrDelete(item);
 
     // log transaction
     std::stringstream str;
@@ -681,7 +681,7 @@ static void handleSpawn(Character *player, std::string &args)
         monster->setMap(map);
         monster->setPosition(pos);
         monster->clearDestination();
-        if (!GameState::insertSafe(monster))
+        if (!GameState::insertOrDelete(monster))
         {
             // The map is full. Break out.
             break;

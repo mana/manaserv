@@ -53,7 +53,7 @@ namespace GameState
      * @return false if the insertion failed.
      * @note No update may be in progress. Invalid for characters.
      */
-    bool insertSafe(Thing *);
+    bool insertOrDelete(Thing *);
 
     /**
      * Removes a thing from the game world.
