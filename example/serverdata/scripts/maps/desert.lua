@@ -35,9 +35,11 @@ atinit(function()
     smith_buy_table = { {5, 10, 50}, {7, 10, 70} }
     create_npc("Smith", 5, 15 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, smith_buy_table), nil)
 
-
     -- The most simple NPC - Welcoming new ones around.
     create_npc("Harmony", 11, 4 * TILESIZE + TILESIZE / 2, 25 * TILESIZE + TILESIZE / 2, npclib.talk(Harmony, "Welcome in the template world!\nI hope you'll find here whatever you were searching for.", "Do look around to find some interesting things coming along!"), Harmony_update)
+
+    -- Creates a Monster an let it talk for testing purpose.
+    create_npc("Tamer", 9, 28 * TILESIZE + TILESIZE / 2, 21 * TILESIZE + TILESIZE / 2, Tamer, nil)
 end)
 
 -- Global variable used to know whether Harmony talked to someone.
@@ -74,4 +76,11 @@ function Harmony_update(npc)
         mana.being_say(npc, "Hey! You're new! Come here...")
       end
     end
+end
+
+function Tamer(npc, ch, list)
+    mana.being_say(npc, "I will now spawn a monster for your training session.")
+
+    local m1 = mana.monster_create(1, mana.posX(ch), mana.posY(ch))
+    schedule_in(0.3, function() mana.being_say(m1, "Roaaarrrr!!!") end)
 end

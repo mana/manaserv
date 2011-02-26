@@ -14,6 +14,7 @@
     <npc id="5"><sprite variant="4">npcs/static-npcs.xml</sprite></npc><!-- Smith -->
     <!-- ... -->
     <npc id="8"><sprite variant="7">npcs/static-npcs.xml</sprite></npc><!-- Banker -->
+    <npc id="9"><sprite variant="8">npcs/static-npcs.xml</sprite></npc><!-- Tamer -->
     <!-- ... -->
     <npc id="11"><sprite variant="10">npcs/static-npcs.xml</sprite></npc><!-- Welcoming girl -->
 </npcs>
