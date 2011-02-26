@@ -1011,11 +1011,7 @@ static int monster_create(lua_State *s)
     Monster *q = new Monster(spec);
     q->setMap(m);
     q->setPosition(Point(x, y));
-    if (!GameState::insertSafe(q))
-    {
-        LOG_WARN("Monster_Create failed to insert monster");
-        return 0;
-    }
+    GameState::enqueueInsert(q);
 
     lua_pushlightuserdata(s, q);
     return 1;
