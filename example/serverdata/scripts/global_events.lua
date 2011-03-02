@@ -30,7 +30,7 @@ end
 function on_chr_death_accept(ch)
 	mana.being_heal(ch)	-- restores to full hp
 	-- mana.being_heal(ch, 1)	--restores 1 hp (in case you want to be less nice)
-	-- mana.chr_warp(ch, 1, 2000, 2000) --warp the character to the respawn location
+	mana.chr_warp(ch, 1, 815, 100) --warp the character to the respawn location
 end
 
 -- This function is called after chr_death_accept. The difference is that
