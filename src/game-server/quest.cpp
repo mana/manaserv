@@ -69,7 +69,7 @@ void setQuestVar(Character *ch, const std::string &name,
     {
         i->second = value;
     }
-    accountHandler->updateQuestVar(ch, name, value);
+    accountHandler->updateCharacterVar(ch, name, value);
 }
 
 /**
@@ -126,7 +126,7 @@ void recoverQuestVar(Character *ch, const std::string &name,
         ch->addListener(&questDeathListener);
     }
     i->second.variables[name].push_back(f);
-    accountHandler->requestQuestVar(ch, name);
+    accountHandler->requestCharacterVar(ch, name);
 }
 
 void recoveredQuestVar(int id, const std::string &name,

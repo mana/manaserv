@@ -1505,6 +1505,48 @@ std::string Storage::getWorldStateVar(const std::string &name, int mapId)
     return std::string();
 }
 
+std::map<std::string, std::string> Storage::getAllWorldStateVars(int mapId)
+{
+    std::map<std::string, std::string> variables;
+
+    try
+    {
+        std::ostringstream query;
+        query << "SELECT `state_name`, `value` "
+              << "FROM " << WORLD_STATES_TBL_NAME;
+
+        // Add map filter if map_id is given
+        if (mapId >= 0)
+            query << " WHERE `map_id` = ?";
+
+        //query << ";"; <-- No ';' at the end of prepared statements.
+
+        if (mDb->prepareSql(query.str()))
+        {
+            if (mapId >= 0)
+                mDb->bindValue(1, mapId);
+            const dal::RecordSet &results = mDb->processSql();
+
+            for (unsigned int i = 0; i < results.rows(); i++)
+            {
+                variables[results(i, 0)] = results(i, 1);
+            }
+        }
+        else
+        {
+            utils::throwError("(DALStorage:getAllWorldStateVar) "
+                              "SQL query preparation failure.");
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        utils::throwError("(DALStorage::getWorldStateVar) SQL query failure: ",
+                          e);
+    }
+
+    return variables;
+}
+
 void Storage::setWorldStateVar(const std::string &name,
                                const std::string &value)
 {

@@ -128,6 +128,18 @@ void AccountConnection::processMessage(MessageIn &msg)
                 stop();
                 exit(EXIT_BAD_CONFIG_PARAMETER);
             }
+
+            // read world state variables
+            while (msg.getUnreadLength())
+            {
+                std::string key = msg.readString();
+                std::string value = msg.readString();
+                if (!key.empty() && !value.empty())
+                {
+                    GameState::setVariableFromDbserver(key, value);
+                }
+            }
+
         } break;
 
         case AGMSG_PLAYER_ENTER:
@@ -140,7 +152,28 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_ACTIVE_MAP:
         {
             int id = msg.readInt16();
-            MapManager::raiseActive(id);
+            if (MapManager::raiseActive(id))
+            {
+                // set map variables
+                MapComposite *m = MapManager::getMap(id);
+                while (msg.getUnreadLength())
+                {
+                    std::string key = msg.readString();
+                    std::string value = msg.readString();
+                    if (!key.empty() && !value.empty())
+                    {
+                        m->setVariableFromDbserver(key, value);
+                    }
+                }
+            }
+        } break;
+
+        case AGMSG_SET_VAR_WORLD:
+        {
+            std::string key = msg.readString();
+            std::string value = msg.readString();
+            GameState::setVariableFromDbserver(key, value);
+            LOG_INFO("Global variable \""<<key<<"\" has changed to \""<<value<<"\"");
         } break;
 
         case AGMSG_REDIRECT_RESPONSE:
@@ -152,7 +185,7 @@ void AccountConnection::processMessage(MessageIn &msg)
             gameHandler->completeServerChange(id, token, address, port);
         } break;
 
-        case AGMSG_GET_QUEST_RESPONSE:
+        case AGMSG_GET_VAR_CHR_RESPONSE:
         {
             int id = msg.readInt32();
             std::string name = msg.readString();
@@ -219,19 +252,38 @@ void AccountConnection::playerReconnectAccount(int id,
     send(msg);
 }
 
-void AccountConnection::requestQuestVar(Character *ch, const std::string &name)
+void AccountConnection::requestCharacterVar(Character *ch, const std::string &name)
 {
-    MessageOut msg(GAMSG_GET_QUEST);
+    MessageOut msg(GAMSG_GET_VAR_CHR);
     msg.writeInt32(ch->getDatabaseID());
     msg.writeString(name);
     send(msg);
 }
 
-void AccountConnection::updateQuestVar(Character *ch, const std::string &name,
+void AccountConnection::updateCharacterVar(Character *ch, const std::string &name,
                                        const std::string &value)
 {
-    MessageOut msg(GAMSG_SET_QUEST);
+    MessageOut msg(GAMSG_SET_VAR_CHR);
     msg.writeInt32(ch->getDatabaseID());
+    msg.writeString(name);
+    msg.writeString(value);
+    send(msg);
+}
+
+void AccountConnection::updateMapVar(MapComposite *map, const std::string &name,
+                                       const std::string &value)
+{
+    MessageOut msg(GAMSG_SET_VAR_MAP);
+    msg.writeInt32(map->getID());
+    msg.writeString(name);
+    msg.writeString(value);
+    send(msg);
+}
+
+void AccountConnection::updateWorldVar(const std::string &name,
+                                       const std::string &value)
+{
+    MessageOut msg(GAMSG_SET_VAR_WORLD);
     msg.writeString(name);
     msg.writeString(value);
     send(msg);

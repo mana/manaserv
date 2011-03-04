@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 class Actor;
 class Being;
@@ -332,6 +333,24 @@ class MapComposite
          */
         const std::vector< Thing * > &getEverything() const;
 
+        /**
+         * Gets the cached value of a map-bound script variable
+         */
+        std::string getVariable(const std::string &key);
+
+        /**
+         * Changes a script variable and notifies the database server
+         * about the change
+         */
+        void setVariable (const std::string &key, const std::string &value);
+
+        /**
+         * Changes a script variable without notifying the database server
+         * about the change
+         */
+        void setVariableFromDbserver (const std::string &key, const std::string &value)
+        { mScriptVariables[key] = value ;}
+
     private:
         MapComposite(const MapComposite &);
 
@@ -340,7 +359,7 @@ class MapComposite
         Script *mScript;      /**< Script associated to this map. */
         std::string mName;    /**< Name of the map. */
         unsigned short mID;   /**< ID of the map. */
-
+        std::map< std::string, std::string > mScriptVariables; /** Cached persistent variables */
         PvPRules mPvPRules;
 };
 

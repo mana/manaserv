@@ -65,6 +65,12 @@ typedef std::map< Actor *, DelayedEvent > DelayedEvents;
 static DelayedEvents delayedEvents;
 
 /**
+ * Cached persistent script variables
+ */
+static std::map< std::string, std::string > mScriptVariables;
+
+
+/**
  * Updates object states on the map.
  */
 static void updateMap(MapComposite *map)
@@ -808,4 +814,27 @@ void GameState::sayToAll(const std::string &text)
 
     // Sends it to everyone connected to the game server
     gameHandler->sendToEveryone(msg);
+}
+
+
+std::string GameState::getVariable(const std::string &key)
+{
+    std::map<std::string, std::string>::iterator iValue = mScriptVariables.find(key);
+    if (iValue != mScriptVariables.end())
+    {
+        return iValue->second;
+    } else {
+        return std::string();
+    }
+}
+
+void GameState::setVariable(const std::string &key, const std::string &value)
+{
+    mScriptVariables[key] = value;
+    accountHandler->updateWorldVar(key, value);
+}
+
+void GameState::setVariableFromDbserver(const std::string &key, const std::string &value)
+{
+    mScriptVariables[key] = value ;
 }

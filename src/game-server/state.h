@@ -28,6 +28,7 @@ class Thing;
 class Actor;
 class Character;
 
+
 namespace GameState
 {
     /**
@@ -102,6 +103,23 @@ namespace GameState
      * Says something to every player on the server.
      */
     void sayToAll(const std::string &text);
+
+    /**
+     * Gets the cached value of a global script variable
+     */
+    std::string getVariable(const std::string &key);
+
+    /**
+     * Changes a global script variable and notifies the database server
+     * about the change
+     */
+    void setVariable (const std::string &key, const std::string &value);
+
+    /**
+     * Changes a global variable without notifying the database server
+     * about the change
+     */
+    void setVariableFromDbserver (const std::string &key, const std::string &value);
 
 }
 

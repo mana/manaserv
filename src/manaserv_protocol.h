@@ -225,17 +225,23 @@ enum {
 
     // Inter-server
     GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision, { W map id }*
-    AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version, C password response
-    AGMSG_ACTIVE_MAP            = 0x0502, // W map id
+    AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version, C password response, { S globalvar_key, S globalvar_value }
+    AGMSG_ACTIVE_MAP            = 0x0502, // W map id, { S mapvar_key, S mapvar_value }
     AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, D id, S name, serialised character data
     GAMSG_PLAYER_DATA           = 0x0520, // D id, serialised character data
     GAMSG_REDIRECT              = 0x0530, // D id
     AGMSG_REDIRECT_RESPONSE     = 0x0531, // D id, B*32 token, S game address, W game port
     GAMSG_PLAYER_RECONNECT      = 0x0532, // D id, B*32 token
     GAMSG_PLAYER_SYNC           = 0x0533, // serialised sync data
-    GAMSG_SET_QUEST             = 0x0540, // D id, S name, S value
-    GAMSG_GET_QUEST             = 0x0541, // D id, S name
-    AGMSG_GET_QUEST_RESPONSE    = 0x0542, // D id, S name, S value
+    GAMSG_SET_VAR_CHR           = 0x0540, // D id, S name, S value
+    GAMSG_GET_VAR_CHR           = 0x0541, // D id, S name
+    AGMSG_GET_VAR_CHR_RESPONSE  = 0x0542, // D id, S name, S value
+    //reserved GAMSG_SET_VAR_ACC           = 0x0543, // D charid, S name, S value
+    //reserved GAMSG_GET_VAR_ACC           = 0x0544, // D charid, S name
+    //reserved AGMSG_GET_VAR_ACC_RESPONSE  = 0x0545, // D charid, S name, S value
+    GAMSG_SET_VAR_MAP           = 0x0546, // D mapid, S name, S value
+    GAMSG_SET_VAR_WORLD         = 0x0547, // S name, S value
+    AGMSG_SET_VAR_WORLD         = 0x0548, // S name, S value
     GAMSG_BAN_PLAYER            = 0x0550, // D id, W duration
     GAMSG_CHANGE_PLAYER_LEVEL   = 0x0555, // D id, W level
     GAMSG_CHANGE_ACCOUNT_LEVEL  = 0x0556, // D id, W level

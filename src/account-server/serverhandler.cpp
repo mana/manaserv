@@ -204,6 +204,17 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             {
                 outMsg.writeInt16(PASSWORD_OK);
                 comp->send(outMsg);
+
+                // transmit global world state variables
+                std::map<std::string, std::string> variables;
+                variables = storage->getAllWorldStateVars(0);
+                for (std::map<std::string, std::string>::iterator i = variables.begin();
+                     i != variables.end();
+                     i++)
+                {
+                    outMsg.writeString(i->first);
+                    outMsg.writeString(i->second);
+                }
             }
             else
             {
@@ -230,6 +241,15 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 {
                     MessageOut outMsg(AGMSG_ACTIVE_MAP);
                     outMsg.writeInt16(id);
+                    std::map<std::string, std::string> variables;
+                    variables = storage->getAllWorldStateVars(id);
+                    for (std::map<std::string, std::string>::iterator i = variables.begin();
+                         i != variables.end();
+                         i++)
+                    {
+                        outMsg.writeString(i->first);
+                        outMsg.writeString(i->second);
+                    }
                     comp->send(outMsg);
                     MapStatistics &m = server->maps[id];
                     m.nbThings = 0;
@@ -315,23 +335,49 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
         } break;
 
-        case GAMSG_GET_QUEST:
+        case GAMSG_GET_VAR_CHR:
         {
             int id = msg.readInt32();
             std::string name = msg.readString();
             std::string value = storage->getQuestVar(id, name);
-            result.writeInt16(AGMSG_GET_QUEST_RESPONSE);
+            result.writeInt16(AGMSG_GET_VAR_CHR_RESPONSE);
             result.writeInt32(id);
             result.writeString(name);
             result.writeString(value);
         } break;
 
-        case GAMSG_SET_QUEST:
+        case GAMSG_SET_VAR_CHR:
         {
             int id = msg.readInt32();
             std::string name = msg.readString();
             std::string value = msg.readString();
             storage->setQuestVar(id, name, value);
+        } break;
+
+        case GAMSG_SET_VAR_WORLD:
+        {
+            std::string name = msg.readString();
+            std::string value = msg.readString();
+            // save the new value to the database
+            storage->setWorldStateVar(name, value);
+            // relay the new value to all gameservers
+            for (ServerHandler::NetComputers::iterator i = clients.begin();
+                i != clients.end();
+                i++)
+            {
+                MessageOut varUpdateMessage(AGMSG_SET_VAR_WORLD);
+                varUpdateMessage.writeString(name);
+                varUpdateMessage.writeString(value);
+                (*i)->send(varUpdateMessage);
+            }
+        } break;
+
+        case GAMSG_SET_VAR_MAP:
+        {
+            int mapid = msg.readInt32();
+            std::string name = msg.readString();
+            std::string value = msg.readString();
+            storage->setWorldStateVar(name, mapid, value);
         } break;
 
         case GAMSG_BAN_PLAYER:

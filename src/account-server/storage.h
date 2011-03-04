@@ -339,6 +339,13 @@ class Storage
                               const std::string &value);
 
         /**
+         * Gets the value of all world state variable of a specific map.
+         *
+         * @param mapId ID of the specific map
+         */
+        std::map<std::string, std::string> getAllWorldStateVars(int mapId);
+
+        /**
          * Set the level on an account.
          *
          * @param id The id of the account

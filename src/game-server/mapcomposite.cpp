@@ -22,6 +22,7 @@
 #include <cassert>
 
 #include "common/configuration.h"
+#include "accountconnection.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/character.h"
@@ -592,4 +593,29 @@ void MapComposite::update()
 const std::vector< Thing * > &MapComposite::getEverything() const
 {
     return mContent->things;
+}
+
+
+std::string MapComposite::getVariable(const std::string &key)
+{
+    std::map<std::string, std::string>::iterator iValue = mScriptVariables.find(key);
+    if (iValue != mScriptVariables.end())
+    {
+        return iValue->second;
+    } else {
+        return std::string();
+    }
+}
+
+void MapComposite::setVariable(const std::string &key, const std::string &value)
+{
+    // check if the value actually changed
+    std::map<std::string, std::string>::iterator iOldValue = mScriptVariables.find(key);
+    if (iOldValue == mScriptVariables.end() || iOldValue->second != value)
+    {
+        // changed valu or unknown variable
+        mScriptVariables[key] = value;
+        // update accountserver
+        accountHandler->updateMapVar(this, key, value);
+    }
 }

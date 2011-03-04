@@ -1080,6 +1080,92 @@ static int chr_get_quest(lua_State *s)
     return 0;
 }
 
+
+/**
+ * gets the value of a persistent map variable.
+ * mana.getvar_map(string): string
+ */
+ static int getvar_map(lua_State *s)
+{
+    const char *m = luaL_checkstring(s, 1);
+    if (m[0] == 0)
+    {
+        raiseScriptError(s, "getvar_map called for unnamed variable.");
+        return 0;
+    }
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
+    std::string value = script->getMap()->getVariable(m);
+
+    lua_pushstring(s, value.c_str());
+    return 1;
+}
+
+/**
+ * sets the value of a persistent map variable.
+ * mana.setvar_map(string, string)
+ */
+ static int setvar_map(lua_State *s)
+{
+    const char *m = luaL_checkstring(s, 1);
+    if (m[0] == 0)
+    {
+        raiseScriptError(s, "getvar_map called for unnamed variable.");
+        return 0;
+    }
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
+    std::string key = lua_tostring(s, 1);
+    std::string value = lua_tostring(s, 2);
+    script->getMap()->setVariable(key, value);
+
+    return 0;
+}
+
+/**
+ * gets the value of a persistent global variable.
+ * mana.getvar_world(string): string
+ */
+ static int getvar_world(lua_State *s)
+{
+    const char *m = luaL_checkstring(s, 1);
+    if (m[0] == 0)
+    {
+        raiseScriptError(s, "getvar_world called for unnamed variable.");
+        return 0;
+    }
+
+    std::string value = GameState::getVariable(m);
+
+    lua_pushstring(s, value.c_str());
+    return 1;
+}
+
+/**
+ * sets the value of a persistent global variable.
+ * mana.setvar_world(string, string)
+ */
+ static int setvar_world(lua_State *s)
+{
+    const char *m = luaL_checkstring(s, 1);
+    if (m[0] == 0)
+    {
+        raiseScriptError(s, "setvar_world called with unnamed variable.");
+        return 0;
+    }
+
+    std::string key = lua_tostring(s, 1);
+    std::string value = lua_tostring(s, 2);
+    GameState::setVariable(key, value);
+
+    return 0;
+}
+
+
 /**
  * Callback for setting a quest variable.
  * mana.chr_set_chest(character, string, string)
@@ -1697,7 +1783,7 @@ LuaScript::LuaScript():
     lua_rawseti(mState, -2, 2);
     lua_pop(mState, 2);
 
-    // Put some callback functions in the scripting environment.
+    // Put the callback functions in the scripting environment.
     static luaL_Reg const callbacks[] = {
         { "npc_create",                      &npc_create                      },
         { "npc_message",                     &npc_message                     },
@@ -1711,6 +1797,10 @@ LuaScript::LuaScript():
         { "chr_inv_count",                   &chr_inv_count                   },
         { "chr_get_quest",                   &chr_get_quest                   },
         { "chr_set_quest",                   &chr_set_quest                   },
+        { "getvar_map",                      &getvar_map                      },
+        { "setvar_map",                      &setvar_map                      },
+        { "getvar_world",                    &getvar_world                    },
+        { "setvar_world",                    &setvar_world                    },
         { "chr_get_post",                    &chr_get_post                    },
         { "chr_get_exp",                     &chr_get_exp                     },
         { "chr_give_exp",                    &chr_give_exp                    },
