@@ -173,7 +173,8 @@ void AccountConnection::processMessage(MessageIn &msg)
             std::string key = msg.readString();
             std::string value = msg.readString();
             GameState::setVariableFromDbserver(key, value);
-            LOG_INFO("Global variable \""<<key<<"\" has changed to \""<<value<<"\"");
+            LOG_DEBUG("Global variable \"" << key << "\" has changed to \""
+                      << value << "\"");
         } break;
 
         case AGMSG_REDIRECT_RESPONSE:

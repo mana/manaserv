@@ -348,8 +348,9 @@ class MapComposite
          * Changes a script variable without notifying the database server
          * about the change
          */
-        void setVariableFromDbserver (const std::string &key, const std::string &value)
-        { mScriptVariables[key] = value ;}
+        void setVariableFromDbserver (const std::string &key,
+                                      const std::string &value)
+        { mScriptVariables[key] = value; }
 
     private:
         MapComposite(const MapComposite &);
@@ -359,7 +360,8 @@ class MapComposite
         Script *mScript;      /**< Script associated to this map. */
         std::string mName;    /**< Name of the map. */
         unsigned short mID;   /**< ID of the map. */
-        std::map< std::string, std::string > mScriptVariables; /** Cached persistent variables */
+        /** Cached persistent variables */
+        std::map< std::string, std::string > mScriptVariables;
         PvPRules mPvPRules;
 };
 

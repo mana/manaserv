@@ -819,13 +819,12 @@ void GameState::sayToAll(const std::string &text)
 
 std::string GameState::getVariable(const std::string &key)
 {
-    std::map<std::string, std::string>::iterator iValue = mScriptVariables.find(key);
+    std::map<std::string, std::string>::iterator iValue =
+                                                     mScriptVariables.find(key);
     if (iValue != mScriptVariables.end())
-    {
         return iValue->second;
-    } else {
+    else
         return std::string();
-    }
 }
 
 void GameState::setVariable(const std::string &key, const std::string &value)
@@ -834,7 +833,8 @@ void GameState::setVariable(const std::string &key, const std::string &value)
     accountHandler->updateWorldVar(key, value);
 }
 
-void GameState::setVariableFromDbserver(const std::string &key, const std::string &value)
+void GameState::setVariableFromDbserver(const std::string &key,
+                                        const std::string &value)
 {
     mScriptVariables[key] = value ;
 }

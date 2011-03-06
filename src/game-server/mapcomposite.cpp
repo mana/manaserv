@@ -598,22 +598,22 @@ const std::vector< Thing * > &MapComposite::getEverything() const
 
 std::string MapComposite::getVariable(const std::string &key)
 {
-    std::map<std::string, std::string>::iterator iValue = mScriptVariables.find(key);
+    std::map<std::string, std::string>::iterator iValue =
+                                                     mScriptVariables.find(key);
     if (iValue != mScriptVariables.end())
-    {
         return iValue->second;
-    } else {
+    else
         return std::string();
-    }
 }
 
 void MapComposite::setVariable(const std::string &key, const std::string &value)
 {
     // check if the value actually changed
-    std::map<std::string, std::string>::iterator iOldValue = mScriptVariables.find(key);
+    std::map<std::string, std::string>::iterator iOldValue =
+                                                     mScriptVariables.find(key);
     if (iOldValue == mScriptVariables.end() || iOldValue->second != value)
     {
-        // changed valu or unknown variable
+        // changed value or unknown variable
         mScriptVariables[key] = value;
         // update accountserver
         accountHandler->updateMapVar(this, key, value);

@@ -1085,7 +1085,7 @@ static int chr_get_quest(lua_State *s)
  * gets the value of a persistent map variable.
  * mana.getvar_map(string): string
  */
- static int getvar_map(lua_State *s)
+static int getvar_map(lua_State *s)
 {
     const char *m = luaL_checkstring(s, 1);
     if (m[0] == 0)
@@ -1107,7 +1107,7 @@ static int chr_get_quest(lua_State *s)
  * sets the value of a persistent map variable.
  * mana.setvar_map(string, string)
  */
- static int setvar_map(lua_State *s)
+static int setvar_map(lua_State *s)
 {
     const char *m = luaL_checkstring(s, 1);
     if (m[0] == 0)
@@ -1130,7 +1130,7 @@ static int chr_get_quest(lua_State *s)
  * gets the value of a persistent global variable.
  * mana.getvar_world(string): string
  */
- static int getvar_world(lua_State *s)
+static int getvar_world(lua_State *s)
 {
     const char *m = luaL_checkstring(s, 1);
     if (m[0] == 0)
@@ -1149,7 +1149,7 @@ static int chr_get_quest(lua_State *s)
  * sets the value of a persistent global variable.
  * mana.setvar_world(string, string)
  */
- static int setvar_world(lua_State *s)
+static int setvar_world(lua_State *s)
 {
     const char *m = luaL_checkstring(s, 1);
     if (m[0] == 0)
