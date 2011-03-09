@@ -1509,6 +1509,14 @@ std::map<std::string, std::string> Storage::getAllWorldStateVars(int mapId)
 {
     std::map<std::string, std::string> variables;
 
+    // Avoid a crash because prepared statements must have at least one binding.
+    if (mapId < 0)
+    {
+        LOG_ERROR("getAllWorldStateVars was called with a negative map Id: "
+                  << mapId);
+        return variables;
+    }
+
     try
     {
         std::ostringstream query;
@@ -1527,7 +1535,7 @@ std::map<std::string, std::string> Storage::getAllWorldStateVars(int mapId)
                 mDb->bindValue(1, mapId);
             const dal::RecordSet &results = mDb->processSql();
 
-            for (unsigned int i = 0; i < results.rows(); i++)
+            for (unsigned int i = 0; i < results.rows(); ++i)
             {
                 variables[results(i, 0)] = results(i, 1);
             }
@@ -1588,7 +1596,7 @@ void Storage::setWorldStateVar(const std::string &name,
         mDb->execSql(updateStateVar.str());
 
         // If we updated a row, were finished here
-        if (mDb->getModifiedRows() >= 1)
+        if (mDb->getModifiedRows() > 0)
             return;
 
         // Otherwise we have to add the new variable
