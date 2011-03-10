@@ -47,7 +47,7 @@ class MetaTile
         int Fcost;              /**< Estimation of total path cost */
         int Gcost;              /**< Cost from start to this location */
         int Hcost;              /**< Estimated cost to goal */
-        int whichList;          /**< No list, open list or closed list */
+        unsigned whichList;     /**< No list, open list or closed list */
         int parentX;            /**< X coordinate of parent tile */
         int parentY;            /**< Y coordinate of parent tile */
         char blockmask;          /**< walkability bitfield */
@@ -172,13 +172,6 @@ class Map
                                       unsigned char walkmask,
                                       int maxCost = 20);
 
-        /**
-         * Finds a simple path from location to the next.
-         */
-        Path findSimplePath(int startX, int startY,
-                                            int destX, int destY,
-                                            unsigned char walkmask);
-
     private:
         /**
          * Blockmasks for different entities
@@ -186,7 +179,7 @@ class Map
         static const unsigned char BLOCKMASK_WALL = 0x80;     // = bin 1000 0000
         static const unsigned char BLOCKMASK_CHARACTER = 0x01;// = bin 0000 0001
         static const unsigned char BLOCKMASK_MONSTER = 0x02;  // = bin 0000 0010
-        int *mOccupation[NB_BLOCKTYPES];
+        unsigned *mOccupation[NB_BLOCKTYPES];
 
         // map properties
         int mWidth, mHeight;
@@ -195,7 +188,7 @@ class Map
 
         // Pathfinding members
         MetaTile *mMetaTiles;
-        int onClosedList, onOpenList;
+        unsigned mOnClosedList, mOnOpenList;
 };
 
 #endif

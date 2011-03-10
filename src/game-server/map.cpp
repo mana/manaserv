@@ -22,14 +22,11 @@
 #include <queue>
 #include <cassert>
 #include <cstring>
+#include <limits.h>
 
 #include "game-server/map.h"
 
 #include "defines.h"
-
-// Basic cost for moving from one tile to another.
-// Used in findPath() function when computing the A* path algorithm.
-static int const basicCost = 100;
 
 MetaTile::MetaTile():
     whichList(0),
@@ -48,20 +45,20 @@ bool Location::operator< (const Location &loc) const
 Map::Map(int width, int height, int twidth, int theight):
     mWidth(width), mHeight(height),
     mTileWidth(twidth), mTileHeight(theight),
-    onClosedList(1), onOpenList(2)
+    mOnClosedList(1), mOnOpenList(2)
 {
     mMetaTiles = new MetaTile[mWidth * mHeight];
-    for (int i=0; i < NB_BLOCKTYPES; i++)
+    for (int i = 0; i < NB_BLOCKTYPES; i++)
     {
-        mOccupation[i] = new int[mWidth * mHeight];
-        memset(mOccupation[i], 0, mWidth * mHeight * sizeof(int));
+        mOccupation[i] = new unsigned[mWidth * mHeight];
+        memset(mOccupation[i], 0, mWidth * mHeight * sizeof(unsigned));
     }
 }
 
 Map::~Map()
 {
     delete[] mMetaTiles;
-    for (int i=0; i < NB_BLOCKTYPES; i++)
+    for (int i = 0; i < NB_BLOCKTYPES; i++)
     {
         delete[] mOccupation[i];
     }
@@ -75,10 +72,10 @@ void Map::setSize(int width, int height)
     delete[] mMetaTiles;
     mMetaTiles = new MetaTile[mWidth * mHeight];
 
-    for (int i=0; i < NB_BLOCKTYPES; i++)
+    for (int i = 0; i < NB_BLOCKTYPES; i++)
     {
         delete[] mOccupation[i];
-        mOccupation[i] = new int[mWidth * mHeight];
+        mOccupation[i] = new unsigned[mWidth * mHeight];
     }
 }
 
@@ -101,7 +98,8 @@ void Map::blockTile(int x, int y, BlockType type)
 
     int tileNum = x + y * mWidth;
 
-    if (++mOccupation[type][tileNum])
+    if (mOccupation[type][tileNum] < UINT_MAX &&
+        (++mOccupation[type][tileNum]) > 0)
     {
         switch (type)
         {
@@ -115,7 +113,7 @@ void Map::blockTile(int x, int y, BlockType type)
                 mMetaTiles[tileNum].blockmask |= BLOCKMASK_MONSTER;
                 break;
             default:
-                // shut up!
+                // Nothing to do.
                 break;
         }
     }
@@ -130,7 +128,8 @@ void Map::freeTile(int x, int y, BlockType type)
 
     int tileNum = x + y * mWidth;
 
-    if (!(--mOccupation[type][tileNum]))
+    if (mOccupation[type][tileNum] > 0 &&
+        !(--mOccupation[type][tileNum]))
     {
         switch (type)
         {
@@ -172,54 +171,13 @@ bool Map::contains(int x, int y) const
     return x >= 0 && y >= 0 && x < mWidth && y < mHeight;
 }
 
-Path Map::findSimplePath(int startX, int startY,
-                                         int destX, int destY,
-                                         unsigned char walkmask)
-{
-    // Path to be built up (empty by default)
-    Path path;
-    int positionX = startX, positionY = startY;
-    int directionX, directionY;
-    // Checks our path up to 1 tiles, if a blocking tile is found
-    // We go to the last good tile, and break out of the loop
-    while(true)
-    {
-        directionX = destX - positionX;
-        directionY = destY - positionY;
-
-        if (directionX > 0)
-            directionX = 1;
-        else if(directionX < 0)
-            directionX = -1;
-
-        if (directionY > 0)
-            directionY = 1;
-        else if(directionY < 0)
-            directionY = -1;
-
-        positionX += directionX;
-        positionY += directionY;
-
-        if (getWalk(positionX, positionY, walkmask))
-        {
-            path.push_back(Point(positionX, positionY));
-
-            if ((positionX == destX) && (positionY == destY))
-            {
-                return path;
-            }
-        }
-        else
-        {
-            return path;
-        }
-    }
-}
-
 Path Map::findPath(int startX, int startY,
                                    int destX, int destY,
                                    unsigned char walkmask, int maxCost)
 {
+    // Basic cost for moving from one tile to another.
+    static int const basicCost = 100;
+
     // Path to be built up (empty by default)
     Path path;
 
@@ -248,11 +206,11 @@ Path Map::findPath(int startX, int startY,
 
         // If the tile is already on the closed list, this means it has already
         // been processed with a shorter path to the start point (lower G cost)
-        if (curr.tile->whichList == onClosedList)
+        if (curr.tile->whichList == mOnClosedList)
             continue;
 
         // Put the current tile on the closed list
-        curr.tile->whichList = onClosedList;
+        curr.tile->whichList = mOnClosedList;
 
         // Check the adjacent tiles
         for (int dy = -1; dy <= 1; dy++)
@@ -271,7 +229,8 @@ Path Map::findPath(int startX, int startY,
                 MetaTile *newTile = getMetaTile(x, y);
 
                 // Skip if the tile is on the closed list or is not walkable
-                if (newTile->whichList == onClosedList || newTile->blockmask & walkmask)
+                if (newTile->whichList == mOnClosedList || newTile->blockmask
+                                                           & walkmask)
                     continue;
 
                 // When taking a diagonal step, verify that we can skip the
@@ -308,7 +267,7 @@ Path Map::findPath(int startX, int startY,
                 if (Gcost > maxCost * basicCost)
                     continue;
 
-                if (newTile->whichList != onOpenList)
+                if (newTile->whichList != mOnOpenList)
                 {
                     // Found a new tile (not on open nor on closed list)
 
@@ -328,9 +287,10 @@ Path Map::findPath(int startX, int startY,
                     newTile->Gcost = Gcost;
                     newTile->Fcost = newTile->Gcost + newTile->Hcost;
 
-                    if (x != destX || y != destY) {
+                    if (x != destX || y != destY)
+                    {
                         // Add this tile to the open list
-                        newTile->whichList = onOpenList;
+                        newTile->whichList = mOnOpenList;
                         openList.push(Location(x, y, newTile));
                     }
                     else
@@ -360,8 +320,22 @@ Path Map::findPath(int startX, int startY,
 
     // Two new values to indicate whether a tile is on the open or closed list,
     // this way we don't have to clear all the values between each pathfinding.
-    onClosedList += 2;
-    onOpenList += 2;
+    if (mOnOpenList > UINT_MAX - 2)
+    {
+        // We reset the list memebers value.
+        mOnClosedList = 1;
+        mOnOpenList = 2;
+
+        // Clean up the metaTiles
+        const int size = mWidth * mHeight;
+        for (int i = 0; i < size; ++i)
+            mMetaTiles[i].whichList = 0;
+    }
+    else
+    {
+        mOnClosedList += 2;
+        mOnOpenList += 2;
+    }
 
     // If a path has been found, iterate backwards using the parent locations
     // to extract it.
