@@ -343,7 +343,8 @@ end
 function check_schedule()
   if #scheduler_jobs==0 then return end
 
-  while os.time() > scheduler_jobs[#scheduler_jobs][0] do
+  local current_time = os.time()
+  while current_time > scheduler_jobs[#scheduler_jobs][0] do
     -- retreive the job and remove it from the schedule
     job = scheduler_jobs[#scheduler_jobs]
 	table.remove(scheduler_jobs)
