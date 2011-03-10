@@ -81,6 +81,6 @@ static std::string getCurrentDate()
     return os.str();
 }
 
-};
+} // namespace utils
 
 #endif // TIME_H

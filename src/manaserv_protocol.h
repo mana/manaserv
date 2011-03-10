@@ -446,6 +446,6 @@ enum SpriteLayer
     SPRITE_VECTOREND
 };
 
-}; // Namespace ManaServ
+} // namespace ManaServ
 
 #endif // MANASERV_PROTOCOL_H
