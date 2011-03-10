@@ -82,5 +82,5 @@ function Tamer(npc, ch, list)
     mana.being_say(npc, "I will now spawn a monster for your training session.")
 
     local m1 = mana.monster_create(1, mana.posX(ch), mana.posY(ch))
-    schedule_in(0.3, function() mana.being_say(m1, "Roaaarrrr!!!") end)
+    schedule_in(0.5, function() mana.being_say(m1, "Roaaarrrr!!!") end)
 end
