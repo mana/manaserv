@@ -24,6 +24,14 @@ manaserv-game.log
 manaserv.stats
 manaserv.xml
 
+# Qt Creator project files
+manaserv.creator
+manaserv.creator.user
+manaserv.files
+manaserv.config
+manaserv.includes
+tools/monitor/monitor.pro.user
+
 # files created by CMake
 Makefile
 CMakeFiles/
