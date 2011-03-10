@@ -282,8 +282,10 @@ Collision::diskWithCircleSector2(const Point &diskCenter, int diskRadius,
 bool Collision::circleWithCircle(const Point &center1, int radius1,
                                  const Point &center2, int radius2)
 {
-    int distx = center1.x - center2.x;
-    int disty = center1.y - center2.y;
-    double dist = sqrt((distx * distx) + (disty * disty));
-    return (dist < radius1 + radius2);
+    const int touchDistance = radius1 + radius2;
+    const int distX = center1.x - center2.x;
+    const int distY = center1.y - center2.y;
+    const int distSquared = distX * distX + distY * distY;
+
+    return distSquared < touchDistance * touchDistance;
 }
