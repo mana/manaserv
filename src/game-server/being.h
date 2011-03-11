@@ -286,6 +286,10 @@ class Being : public Actor
         void setTarget(Being *target)
         { mTarget = target; }
 
+        /**
+         * Overridden in order to reset the old position upon insertion.
+         */
+        virtual void inserted();
 
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;

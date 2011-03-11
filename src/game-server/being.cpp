@@ -292,6 +292,9 @@ void Being::move()
         || !getModifiedAttribute(ATTR_MOVE_SPEED_RAW))
           return;
 
+    // Remember the current position before moving. This is used by
+    // MapComposite::update() to determine whether a being has moved from one
+    // zone to another.
     mOld = getPosition();
 
     if (mMoveTime > WORLD_TICK_MS)
@@ -658,6 +661,15 @@ void Being::update()
     // Check if being died
     if (getModifiedAttribute(ATTR_HP) <= 0 && mAction != DEAD)
         died();
+}
+
+void Being::inserted()
+{
+    Actor::inserted();
+
+    // Reset the old position, since after insertion it is important that it is
+    // in sync with the zone that we're currently present in.
+    mOld = getPosition();
 }
 
 void Being::setTimerSoft(TimerID id, int value)
