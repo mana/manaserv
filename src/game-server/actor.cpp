@@ -27,23 +27,21 @@
 
 void Actor::setPosition(const Point &p)
 {
-    mPos = p;
-
     // Update blockmap
-    if (getMap())
+    if (Map *map = getMap()->getMap())
     {
-        Map *map = getMap()->getMap();
         int tileWidth = map->getTileWidth();
         int tileHeight = map->getTileHeight();
-        const Point &oldP = getPosition();
-        if ((oldP.x / tileWidth != p.x / tileWidth
-            || oldP.y / tileHeight != p.y / tileHeight))
+        if ((mPos.x / tileWidth != p.x / tileWidth
+            || mPos.y / tileHeight != p.y / tileHeight))
         {
-            map->freeTile(oldP.x / tileWidth, oldP.y / tileHeight,
+            map->freeTile(mPos.x / tileWidth, mPos.y / tileHeight,
                           getBlockType());
             map->blockTile(p.x / tileWidth, p.y / tileHeight, getBlockType());
         }
     }
+
+    mPos = p;
 }
 
 void Actor::setMap(MapComposite *mapComposite)
