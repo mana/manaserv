@@ -45,15 +45,9 @@ namespace dal
 class SqLiteDataProvider: public DataProvider
 {
     public:
-        /**
-         * Constructor.
-         */
         SqLiteDataProvider()
             throw();
 
-        /**
-         * Destructor.
-         */
         ~SqLiteDataProvider()
             throw();
 
@@ -65,14 +59,12 @@ class SqLiteDataProvider: public DataProvider
         DbBackends getDbBackend() const
             throw();
 
-
         /**
          * Create a connection to the database.
          *
          * @exception DbConnectionFailure if unsuccessful connection.
          */
         void connect();
-
 
         /**
          * Execute a SQL query.
@@ -87,7 +79,6 @@ class SqLiteDataProvider: public DataProvider
          */
         const RecordSet &execSql(const std::string& sql,
                                  const bool refresh = false);
-
 
         /**
          * Close the connection to the database.
@@ -171,7 +162,6 @@ class SqLiteDataProvider: public DataProvider
         void bindValue(int place, int value);
 
     private:
-
         /** defines the name of the database config parameter */
         static const std::string CFGPARAM_SQLITE_DB;
         /** defines the default value of the CFGPARAM_SQLITE_DB parameter */

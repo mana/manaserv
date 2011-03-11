@@ -35,15 +35,9 @@ namespace dal
 class PqDataProvider: public DataProvider
 {
     public:
-        /**
-         * Constructor
-         */
         PqDataProvider()
             throw();
 
-        /**
-         * Destructor
-         */
         ~PqDataProvider()
             throw();
 

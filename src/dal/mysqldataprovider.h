@@ -53,15 +53,9 @@ class MySqlDataProvider: public DataProvider
             AUTOCOMMIT_ON = 1
         };
 
-        /**
-         * Constructor.
-         */
         MySqlDataProvider()
             throw();
 
-        /**
-         * Destructor.
-         */
         ~MySqlDataProvider()
             throw();
 

@@ -44,9 +44,6 @@ public:
      */
     Letter(unsigned int type, Character *sender, Character *receiver);
 
-    /**
-     * Destructor
-     */
     ~Letter();
 
     /**
@@ -128,9 +125,6 @@ private:
 class Post
 {
 public:
-    /**
-     * Destructor
-     */
     ~Post();
 
     /**

@@ -49,14 +49,7 @@ class MapComposite;
 class AccountConnection : public Connection
 {
     public:
-        /**
-         * Constructor.
-         */
         AccountConnection();
-
-        /**
-         * Destructor.
-         */
         ~AccountConnection();
 
         /**

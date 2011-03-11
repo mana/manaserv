@@ -48,9 +48,6 @@ struct GameClient: NetComputer
 class GameHandler: public ConnectionHandler
 {
     public:
-        /**
-         * Constructor
-         */
         GameHandler();
 
         /**

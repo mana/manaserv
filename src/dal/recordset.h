@@ -44,15 +44,9 @@ typedef std::vector<std::string> Row;
 class RecordSet
 {
     public:
-        /**
-         * Default constructor.
-         */
         RecordSet()
             throw();
 
-        /**
-         * Destructor.
-         */
         ~RecordSet()
             throw();
 

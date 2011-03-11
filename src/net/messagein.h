@@ -31,6 +31,9 @@ class MessageIn
     public:
         /**
          * Constructor.
+         *
+         * @param data   the message data
+         * @param length the length of the data
          */
         MessageIn(const char *data, int length);
 

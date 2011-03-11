@@ -40,9 +40,6 @@ class LuaScript: public Script
          */
         LuaScript();
 
-        /**
-         * Destructor.
-         */
         ~LuaScript();
 
         void load(const char *prog, const char *name);

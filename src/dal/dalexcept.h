@@ -43,9 +43,6 @@ class DbException: public std::exception
                 : mMsg(msg)
         {}
 
-        /**
-         * Destructor.
-         */
         ~DbException()
             throw()
         {}

@@ -42,14 +42,7 @@ public:
 class Guild
 {
     public:
-        /**
-         * Constructor.
-         */
         Guild(const std::string &name);
-
-        /**
-         * Destructor.
-         */
         ~Guild();
 
         /**

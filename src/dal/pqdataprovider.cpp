@@ -24,27 +24,18 @@
 namespace dal
 {
 
-
-/**
- * Constructor
- */
 PqDataProvider::PqDataProvider()
     throw()
         : mDb(0)
 {
 }
 
-
-/**
- * Destructor
- */
 PqDataProvider::~PqDataProvider()
     throw()
 {
     if (mIsConnected)
         disconnect();
 }
-
 
 /**
  * Get the database backend name.
@@ -54,7 +45,6 @@ DbBackends PqDataProvider::getDbBackend() const
 {
     return DB_BKEND_POSTGRESQL;
 }
-
 
 /**
  * Create a connection to the database.
@@ -85,7 +75,6 @@ void PqDataProvider::connect(const std::string& dbName,
 
     mIsConnected = true;
 }
-
 
 /**
  * Execute a SQL query.
@@ -138,7 +127,6 @@ const RecordSet &PqDataProvider::execSql(const std::string& sql,
     return mRecordSet;
 }
 
-
 /**
  * Close connection to database.
  */
@@ -153,6 +141,5 @@ void PqDataProvider::disconnect()
     mDb = 0;
     mIsConnected = false;
 }
-
 
 } // namespace dal

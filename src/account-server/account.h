@@ -34,15 +34,10 @@
 class Account
 {
     public:
-        /**
-         * Constructor.
-         */
-        Account(int id = -1): mID(id)
+        Account(int id = -1)
+            : mID(id)
         {}
 
-        /**
-         * Destructor.
-         */
         ~Account();
 
         /**

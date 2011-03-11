@@ -47,9 +47,6 @@ enum
 class Actor : public Thing
 {
     public:
-        /**
-         * Constructor.
-         */
         Actor(ThingType type)
           : Thing(type),
             mMoveTime(0),

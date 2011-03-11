@@ -88,9 +88,6 @@ static std::map< unsigned int, std::pair< double, double> > defAttr;
 class AccountHandler : public ConnectionHandler
 {
 public:
-    /**
-     * Constructor.
-     */
     AccountHandler(const std::string &attrFile);
 
     /**

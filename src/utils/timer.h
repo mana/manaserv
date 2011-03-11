@@ -39,6 +39,9 @@ class Timer
     public:
         /**
          * Constructor.
+         *
+         * @param ms           the interval in milliseconds
+         * @param createActive whether the timer should be implicitly started
          */
         Timer(unsigned int ms, bool createActive = true);
 

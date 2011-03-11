@@ -29,17 +29,11 @@
 namespace dal
 {
 
-/**
- * Default constructor.
- */
 RecordSet::RecordSet()
     throw()
 {
 }
 
-/**
- * Destructor.
- */
 RecordSet::~RecordSet()
     throw()
 {
@@ -62,7 +56,6 @@ bool RecordSet::isEmpty() const
     return mRows.size() == 0;
 }
 
-
 /**
  * Get the number of rows.
  *
@@ -83,7 +76,6 @@ unsigned int RecordSet::cols() const
     return mHeaders.size();
 }
 
-
 /**
  * Set the column headers.
  */
@@ -95,7 +87,6 @@ void RecordSet::setColumnHeaders(const Row &headers)
 
     mHeaders = headers;
 }
-
 
 /**
  * Add a new row.
@@ -119,10 +110,6 @@ void RecordSet::add(const Row &row)
     mRows.push_back(row);
 }
 
-
-/**
- * Operator()
- */
 const std::string &RecordSet::operator()(const unsigned int row,
                                          const unsigned int col) const
 {
@@ -138,10 +125,6 @@ const std::string &RecordSet::operator()(const unsigned int row,
     return mRows[row][col];
 }
 
-
-/**
- * Operator()
- */
 const std::string &RecordSet::operator()(const unsigned int row,
                                          const std::string& name) const
 {
@@ -175,10 +158,6 @@ const std::string &RecordSet::operator()(const unsigned int row,
     return mRows[row][i];
 }
 
-
-/**
- * Operator<<
- */
 std::ostream &operator<<(std::ostream &out, const RecordSet &rhs)
 {
     // print the field names first.
@@ -210,6 +189,5 @@ std::ostream &operator<<(std::ostream &out, const RecordSet &rhs)
 
     return out;
 }
-
 
 } // namespace dal

@@ -37,9 +37,6 @@ const std::string  MySqlDataProvider::CFGPARAM_MYSQL_DB_DEF   = "mana";
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_USER_DEF = "mana";
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD_DEF  = "mana";
 
-/**
- * Constructor.
- */
 MySqlDataProvider::MySqlDataProvider()
     throw()
         : mDb(0),
@@ -49,10 +46,6 @@ MySqlDataProvider::MySqlDataProvider()
 {
 }
 
-
-/**
- * Destructor.
- */
 MySqlDataProvider::~MySqlDataProvider()
     throw()
 {
@@ -65,7 +58,6 @@ MySqlDataProvider::~MySqlDataProvider()
         disconnect();
 }
 
-
 /**
  * Get the database backend name.
  */
@@ -74,7 +66,6 @@ DbBackends MySqlDataProvider::getDbBackend() const
 {
     return DB_BKEND_MYSQL;
 }
-
 
 /**
  * Create a connection to the database.
@@ -136,13 +127,11 @@ void MySqlDataProvider::connect()
     LOG_INFO("Connection to mySQL was sucessfull.");
 }
 
-
 /**
  * Execute a SQL query.
  */
-const RecordSet&
-MySqlDataProvider::execSql(const std::string& sql,
-                           const bool refresh)
+const RecordSet &MySqlDataProvider::execSql(const std::string& sql,
+                                            const bool refresh)
 {
     if (!mIsConnected)
         throw std::runtime_error("not connected to database");
@@ -196,7 +185,6 @@ MySqlDataProvider::execSql(const std::string& sql,
 
     return mRecordSet;
 }
-
 
 /**
  * Close the connection to the database.

@@ -38,9 +38,6 @@ class Party;
 class ChatClient : public NetComputer
 {
     public:
-        /**
-         * Constructor.
-         */
         ChatClient(ENetPeer *peer):
             NetComputer(peer),
             party(0),

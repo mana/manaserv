@@ -230,14 +230,7 @@ class Monster : public Being
         /** Time in game ticks until ownership of a monster can change. */
         static const int KILLSTEAL_PROTECTION_TIME = 100;
 
-        /**
-         * Constructor.
-         */
         Monster(MonsterClass *);
-
-        /**
-         * Destructor.
-         */
         ~Monster();
 
         /**

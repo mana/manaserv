@@ -29,24 +29,15 @@
 namespace dal
 {
 
-
 const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB     = "sqlite_database";
 const std::string SqLiteDataProvider::CFGPARAM_SQLITE_DB_DEF = "mana.db";
 
-
-/**
- * Constructor.
- */
 SqLiteDataProvider::SqLiteDataProvider()
     throw()
         : mDb(0)
 {
 }
 
-
-/**
- * Destructor.
- */
 SqLiteDataProvider::~SqLiteDataProvider()
     throw()
 {
@@ -64,7 +55,6 @@ SqLiteDataProvider::~SqLiteDataProvider()
     }
 }
 
-
 /**
  * Get the name of the database backend.
  */
@@ -74,12 +64,10 @@ DbBackends SqLiteDataProvider::getDbBackend() const
     return DB_BKEND_SQLITE;
 }
 
-
 /**
  * Create a connection to the database.
  */
-void
-SqLiteDataProvider::connect()
+void SqLiteDataProvider::connect()
 {
     // get configuration parameter for sqlite
     const std::string dbName
@@ -114,13 +102,11 @@ SqLiteDataProvider::connect()
     LOG_INFO("Connection to database successful.");
 }
 
-
 /**
  * Execute a SQL query.
  */
-const RecordSet&
-SqLiteDataProvider::execSql(const std::string& sql,
-                            const bool refresh)
+const RecordSet &SqLiteDataProvider::execSql(const std::string& sql,
+                                             const bool refresh)
 {
     if (!mIsConnected)
         throw std::runtime_error("not connected to database");
@@ -186,7 +172,6 @@ SqLiteDataProvider::execSql(const std::string& sql,
 
     return mRecordSet;
 }
-
 
 /**
  * Close the connection to the database.

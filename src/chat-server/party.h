@@ -32,7 +32,6 @@ class Party
 public:
     typedef std::vector<std::string> PartyUsers;
 
-    /** Constructor */
     Party();
 
     /**

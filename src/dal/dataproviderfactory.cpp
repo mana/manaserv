@@ -37,24 +37,15 @@
 namespace dal
 {
 
-
-/**
- * Default constructor.
- */
 DataProviderFactory::DataProviderFactory()
     throw()
 {
 }
 
-
-/**
- * Destructor.
- */
 DataProviderFactory::~DataProviderFactory()
     throw()
 {
 }
-
 
 /**
  * Create a data provider.
@@ -72,6 +63,5 @@ DataProvider *DataProviderFactory::createDataProvider()
     return provider;
 #endif
 }
-
 
 } // namespace dal

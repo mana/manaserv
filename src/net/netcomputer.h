@@ -33,14 +33,8 @@ class MessageOut;
 class NetComputer
 {
     public:
-        /**
-         * Constructor.
-         */
         NetComputer(ENetPeer *peer);
 
-        /**
-         * Destructor.
-         */
         virtual ~NetComputer() {}
 
         /**

@@ -49,9 +49,6 @@ class DataProviderFactory
         DataProviderFactory()
             throw();
 
-        /**
-         * Destructor.
-         */
         ~DataProviderFactory()
             throw();
 

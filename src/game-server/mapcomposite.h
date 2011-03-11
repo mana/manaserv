@@ -229,14 +229,7 @@ struct MapContent
 class MapComposite
 {
     public:
-        /**
-         * Constructor.
-         */
         MapComposite(int id, const std::string &name);
-
-        /**
-         * Destructor.
-         */
         ~MapComposite();
 
         /**

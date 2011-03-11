@@ -30,7 +30,7 @@ class MessageOut
 {
     public:
         /**
-         * Constructor.
+         * Default constructor.
          */
         MessageOut();
 
@@ -39,9 +39,6 @@ class MessageOut
          */
         MessageOut(int id);
 
-        /**
-         * Destructor.
-         */
         ~MessageOut();
 
         /**

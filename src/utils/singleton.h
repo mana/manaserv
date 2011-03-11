@@ -50,9 +50,6 @@ class Singleton
             throw()
         {}
 
-        /**
-         * Destructor.
-         */
         virtual ~Singleton()
             throw()
         {}

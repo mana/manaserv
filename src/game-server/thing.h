@@ -36,9 +36,6 @@ class MapComposite;
 class Thing
 {
     public:
-        /**
-         * Constructor.
-         */
         Thing(ThingType type, MapComposite *map = NULL)
           : mMap(map),
             mType(type)

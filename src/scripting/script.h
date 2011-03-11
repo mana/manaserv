@@ -48,14 +48,8 @@ class Script
          */
         static Script *create(const std::string &engine);
 
-        /**
-         * Constructor.
-         */
         Script();
 
-        /**
-         * Destructor.
-         */
         virtual ~Script() {}
 
         /**

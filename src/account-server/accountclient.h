@@ -41,14 +41,7 @@ enum AccountClientStatus
 class AccountClient : public NetComputer
 {
     public:
-        /**
-         * Constructor.
-         */
         AccountClient(ENetPeer *peer);
-
-        /**
-         * Destructor.
-         */
         ~AccountClient();
 
         /**

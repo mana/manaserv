@@ -54,9 +54,6 @@ void PerformTransaction::commit()
 }
 
 
-/**
- * Constructor.
- */
 DataProvider::DataProvider()
     throw()
         : mIsConnected(false),
@@ -64,9 +61,6 @@ DataProvider::DataProvider()
 {
 }
 
-/**
- * Destructor.
- */
 DataProvider::~DataProvider()
     throw()
 {
