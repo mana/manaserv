@@ -58,6 +58,8 @@ class Actor : public Thing
             mSize(0)
         {}
 
+        ~Actor();
+
         /**
          * Sets the coordinates. Also updates the walkmap of the map the actor
          * is on.

@@ -651,18 +651,6 @@ void Character::disconnected()
     }
 }
 
-Character::~Character()
-{
-    if (getMap())
-    {
-        Map *map = getMap()->getMap();
-        int tileWidth = map->getTileWidth();
-        int tileHeight = map->getTileHeight();
-        Point oldP = getPosition();
-        map->freeTile(oldP.x / tileWidth, oldP.y / tileHeight, getBlockType());
-    }
-}
-
 void Character::giveSpecial(int id)
 {
     if (mSpecials.find(id) == mSpecials.end())

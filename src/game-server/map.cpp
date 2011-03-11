@@ -157,8 +157,9 @@ void Map::freeTile(int x, int y, BlockType type)
         return;
 
     MetaTile &metaTile = mMetaTiles[x + y * mWidth];
+    assert(metaTile.occupation[type] > 0);
 
-    if (metaTile.occupation[type] > 0 && !(--metaTile.occupation[type]))
+    if (!(--metaTile.occupation[type]))
     {
         switch (type)
         {

@@ -133,16 +133,6 @@ Monster::~Monster()
     {
         i->first->removeListener(&mTargetListener);
     }
-
-    // Free the map position
-    if (getMap())
-    {
-        Point oldP = getPosition();
-        Map *map = getMap()->getMap();
-        int tileWidth = map->getTileWidth();
-        int tileHeight = map->getTileHeight();
-        map->freeTile(oldP.x / tileWidth, oldP.y / tileHeight, getBlockType());
-    }
 }
 
 void Monster::perform()

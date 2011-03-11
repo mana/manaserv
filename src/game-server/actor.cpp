@@ -25,11 +25,25 @@
 
 #include <cassert>
 
+Actor::~Actor()
+{
+    // Free the map position
+    if (MapComposite *mapComposite = getMap())
+    {
+        Map *map = mapComposite->getMap();
+        int tileWidth = map->getTileWidth();
+        int tileHeight = map->getTileHeight();
+        Point oldP = getPosition();
+        map->freeTile(oldP.x / tileWidth, oldP.y / tileHeight, getBlockType());
+    }
+}
+
 void Actor::setPosition(const Point &p)
 {
     // Update blockmap
-    if (Map *map = getMap()->getMap())
+    if (MapComposite *mapComposite = getMap())
     {
+        Map *map = mapComposite->getMap();
         int tileWidth = map->getTileWidth();
         int tileHeight = map->getTileHeight();
         if ((mPos.x / tileWidth != p.x / tileWidth
@@ -46,11 +60,10 @@ void Actor::setPosition(const Point &p)
 
 void Actor::setMap(MapComposite *mapComposite)
 {
-    assert (mapComposite);
-    MapComposite *oldMapComposite = getMap();
-    Point p = getPosition();
+    assert(mapComposite);
+    const Point p = getPosition();
 
-    if (oldMapComposite)
+    if (MapComposite *oldMapComposite = getMap())
     {
         Map *oldMap = oldMapComposite->getMap();
         int oldTileWidth = oldMap->getTileWidth();

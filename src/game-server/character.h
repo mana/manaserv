@@ -61,8 +61,6 @@ class Character : public Being
          */
         Character(MessageIn &msg);
 
-        ~Character();
-
         /**
          * recalculates the level when necessary and calls Being::update
          */
