@@ -372,8 +372,8 @@ class Character : public Being
         /**
          * Gets the way the actor blocks pathfinding for other objects
          */
-        virtual Map::BlockType getBlockType() const
-        { return Map::BLOCKTYPE_CHARACTER; }
+        virtual BlockType getBlockType() const
+        { return BLOCKTYPE_CHARACTER; }
 
     private:
         double getAttrBase(AttributeMap::const_iterator it) const

@@ -127,8 +127,8 @@ class Actor : public Thing
         /**
          * Gets the way the actor blocks pathfinding for other actors.
          */
-        virtual Map::BlockType getBlockType() const
-        { return Map::BLOCKTYPE_NONE; }
+        virtual BlockType getBlockType() const
+        { return BLOCKTYPE_NONE; }
 
         /** Delay until move to next tile in miliseconds. */
         unsigned short mMoveTime;

@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2004-2011  The Mana World Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -24,11 +24,21 @@
 #include <list>
 #include <map>
 #include <string>
+#include <vector>
 
 #include "utils/point.h"
 
 typedef std::list<Point> Path;
 typedef Path::iterator PathIterator;
+
+enum BlockType
+{
+    BLOCKTYPE_NONE = -1,
+    BLOCKTYPE_WALL,
+    BLOCKTYPE_CHARACTER,
+    BLOCKTYPE_MONSTER,
+    NB_BLOCKTYPES
+};
 
 /**
  * A meta tile stores additional information about a location on a tile map.
@@ -38,39 +48,15 @@ typedef Path::iterator PathIterator;
 class MetaTile
 {
     public:
-        /**
-         * Constructor.
-         */
-        MetaTile();
+        MetaTile()
+            : blockmask(0)
+        {
+            for (unsigned i = 0; i < NB_BLOCKTYPES; ++i)
+                occupation[i] = 0;
+        }
 
-        // Pathfinding members
-        int Fcost;              /**< Estimation of total path cost */
-        int Gcost;              /**< Cost from start to this location */
-        int Hcost;              /**< Estimated cost to goal */
-        unsigned whichList;     /**< No list, open list or closed list */
-        int parentX;            /**< X coordinate of parent tile */
-        int parentY;            /**< Y coordinate of parent tile */
+        unsigned occupation[NB_BLOCKTYPES];
         char blockmask;          /**< walkability bitfield */
-};
-
-/**
- * A location on a tile map. Used for pathfinding, open list.
- */
-class Location
-{
-    public:
-        /**
-         * Constructor.
-         */
-        Location(int x, int y, MetaTile *tile);
-
-        /**
-         * Comparison operator.
-         */
-        bool operator< (const Location &loc) const;
-
-        int x, y;
-        MetaTile *tile;
 };
 
 /**
@@ -79,35 +65,16 @@ class Location
 class Map
 {
     public:
-        enum BlockType
-        {
-            BLOCKTYPE_NONE = -1,
-            BLOCKTYPE_WALL,
-            BLOCKTYPE_CHARACTER,
-            BLOCKTYPE_MONSTER,
-            NB_BLOCKTYPES
-        };
-
         /**
          * Constructor that takes initial map size as parameters.
          */
         Map(int width, int height,
-            int twidth, int theight);
-
-        /**
-         * Destructor.
-         */
-        ~Map();
+            int tileWidth, int tileHeight);
 
         /**
          * Sets the size of the map. This will destroy any existing map data.
          */
-        void setSize(int mWidth, int height);
-
-        /**
-         * Get tile reference.
-         */
-        MetaTile *getMetaTile(int x, int y);
+        void setSize(int width, int height);
 
         /**
          * Marks a tile as occupied
@@ -127,7 +94,8 @@ class Map
         /**
          * Tells if a tile location is within the map range.
          */
-        bool contains(int x, int y) const;
+        bool contains(int x, int y) const
+        { return x >= 0 && y >= 0 && x < mWidth && y < mHeight; }
 
         /**
          * Returns the width of this map.
@@ -168,9 +136,9 @@ class Map
          * Find a path from one location to the next.
          */
         Path findPath(int startX, int startY,
-                                      int destX, int destY,
-                                      unsigned char walkmask,
-                                      int maxCost = 20);
+                      int destX, int destY,
+                      unsigned char walkmask,
+                      int maxCost = 20) const;
 
     private:
         /**
@@ -179,16 +147,13 @@ class Map
         static const unsigned char BLOCKMASK_WALL = 0x80;     // = bin 1000 0000
         static const unsigned char BLOCKMASK_CHARACTER = 0x01;// = bin 0000 0001
         static const unsigned char BLOCKMASK_MONSTER = 0x02;  // = bin 0000 0010
-        unsigned *mOccupation[NB_BLOCKTYPES];
 
         // map properties
         int mWidth, mHeight;
         int mTileWidth, mTileHeight;
         std::map<std::string, std::string> mProperties;
 
-        // Pathfinding members
-        MetaTile *mMetaTiles;
-        unsigned mOnClosedList, mOnOpenList;
+        std::vector<MetaTile> mMetaTiles;
 };
 
 #endif

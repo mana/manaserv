@@ -589,5 +589,5 @@ void MapReader::setTileWithGid(Map *map, int x, int y, int gid)
     }
 
     if (gid != set)
-        map->blockTile(x, y, Map::BLOCKTYPE_WALL);
+        map->blockTile(x, y, BLOCKTYPE_WALL);
 }

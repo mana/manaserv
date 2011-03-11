@@ -308,8 +308,8 @@ class Monster : public Being
         /**
          * Returns the way the actor blocks pathfinding for other objects.
          */
-        virtual Map::BlockType getBlockType() const
-        { return Map::BLOCKTYPE_MONSTER; }
+        virtual BlockType getBlockType() const
+        { return BLOCKTYPE_MONSTER; }
 
     private:
         static const int DECAY_TIME = 50;
