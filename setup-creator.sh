@@ -13,4 +13,5 @@ git ls-files \*.cpp \
              \*.txt \
              \*.xml \
              \*.pro \
+             \*.lua \
     > manaserv.files
