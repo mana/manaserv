@@ -341,23 +341,18 @@ end
 -- checks for jobs which have to be executed, executes them and reschedules
 -- them when they are repeated jobs.
 function check_schedule()
-  if #scheduler_jobs==0 then return end
-
   local current_time = os.time()
-  while current_time > scheduler_jobs[#scheduler_jobs][0] do
+
+  while #scheduler_jobs~=0 and current_time > scheduler_jobs[#scheduler_jobs][0] do
     -- retreive the job and remove it from the schedule
     job = scheduler_jobs[#scheduler_jobs]
-	table.remove(scheduler_jobs)
-	-- reschedule the job when it is a repeated job
-	if job[2] then
-		schedule_every(job[2], job[1])
-	end
-	-- execute the job
-	job[1]()
-
-    -- avoid looping on an empty table
-    if #scheduler_jobs==0 then return end
-
+    table.remove(scheduler_jobs)
+    -- reschedule the job when it is a repeated job
+    if job[2] then
+        schedule_every(job[2], job[1])
+    end
+    -- execute the job
+    job[1]()
   end
 end
 
