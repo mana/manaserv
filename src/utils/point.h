@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2004-2011  The Mana World Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -22,6 +22,8 @@
 #define POINT_H
 
 #include <algorithm>
+#include <string>
+#include <sstream>
 
 /**
  * A point in positive space. Usually represents pixel coordinates on a map.
@@ -57,6 +59,13 @@ class Point
         bool operator!= (const Point &other) const
         {
             return (x != other.x || y != other.y);
+        }
+
+        std::string str() const
+        {
+            std::ostringstream ssPoint;
+            ssPoint << "(" << x << ", " << y << ")";
+            return ssPoint.str();
         }
 };
 
