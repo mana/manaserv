@@ -55,16 +55,16 @@ bool Configuration::initialize(const std::string &filename)
 
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
-        if (xmlStrEqual(node->name, BAD_CAST "option"))
-        {
-            std::string key = XML::getProperty(node, "name", "");
-            std::string value = XML::getProperty(node, "value", "");
+        if (!xmlStrEqual(node->name, BAD_CAST "option"))
+            continue;
+        if (!XML::hasProperty(node, "name") || !XML::hasProperty(node, "value"))
+            continue;
 
-            if (!key.empty() && !value.empty())
-            {
-                options[key] = value;
-            }
-        }
+        std::string key = XML::getProperty(node, "name", std::string());
+        std::string value = XML::getProperty(node, "value", std::string());
+
+        if (!key.empty())
+            options[key] = value;
     }
 
     xmlFreeDoc(doc);
