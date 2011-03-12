@@ -22,8 +22,7 @@
 #define POINT_H
 
 #include <algorithm>
-#include <string>
-#include <sstream>
+#include <ostream>
 
 /**
  * A point in positive space. Usually represents pixel coordinates on a map.
@@ -60,13 +59,6 @@ class Point
         {
             return (x != other.x || y != other.y);
         }
-
-        std::string str() const
-        {
-            std::ostringstream ssPoint;
-            ssPoint << "(" << x << ", " << y << ")";
-            return ssPoint.str();
-        }
 };
 
 /**
@@ -95,5 +87,18 @@ class Rectangle
                    y + h > r.y;
         }
 };
+
+inline std::ostream &operator <<(std::ostream &os, const Point &point)
+{
+    os << '(' << point.x << ", " << point.y << ')';
+    return os;
+}
+
+inline std::ostream &operator <<(std::ostream &os, const Rectangle &rect)
+{
+    os << '(' << rect.x << ',' << rect.y
+       << ' ' << rect.w << 'x' << rect.h << ')';
+    return os;
+}
 
 #endif // POINT_H
