@@ -156,8 +156,7 @@ void Monster::perform()
                                mCurrentAttack->type,
                                mCurrentAttack->range);
 
-                    int hit = performAttack(mTarget, mCurrentAttack->range,
-                                            dmg);
+                    int hit = performAttack(mTarget, dmg);
 
                     if (! mCurrentAttack->scriptFunction.empty()
                         && mScript

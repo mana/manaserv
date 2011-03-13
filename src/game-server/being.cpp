@@ -398,25 +398,25 @@ int Being::directionToAngle(int direction)
     }
 }
 
-int Being::performAttack(Being *target, const Damage &damage) {
-    return performAttack(target, damage.range, damage);
-}
-
-int Being::performAttack(Being *target, unsigned range, const Damage &damage)
+int Being::performAttack(Being *target, const Damage &damage)
 {
     // check target legality
-    if (!target || target == this || target->getAction() == DEAD
-        || !target->canFight())
-            return -1;
-    if (getMap()->getPvP() == PVP_NONE && target->getType() == OBJECT_CHARACTER
-        && getType() == OBJECT_CHARACTER)
+    if (!target
+            || target == this
+            || target->getAction() == DEAD
+            || !target->canFight())
+        return -1;
+
+    if (getMap()->getPvP() == PVP_NONE
+            && target->getType() == OBJECT_CHARACTER
+            && getType() == OBJECT_CHARACTER)
         return -1;
 
     // check if target is in range using the pythagorean theorem
     int distx = this->getPosition().x - target->getPosition().x;
     int disty = this->getPosition().y - target->getPosition().y;
     int distSquare = (distx * distx + disty * disty);
-    int maxDist = range + target->getSize();
+    int maxDist = damage.range + target->getSize();
     if (maxDist * maxDist < distSquare)
         return -1;
 
