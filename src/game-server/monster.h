@@ -53,7 +53,7 @@ struct MonsterAttack
     int priority;
     float damageFactor;
     int element;
-    DMG_TY type;
+    DamageType type;
     int preDelay;
     int aftDelay;
     int range;
