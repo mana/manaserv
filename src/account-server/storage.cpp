@@ -693,11 +693,10 @@ bool Storage::updateCharacter(Character *character)
     // Character attributes.
     try
     {
-        std::ostringstream sqlAttr;
         for (AttributeMap::const_iterator it = character->mAttributes.begin(),
              it_end = character->mAttributes.end(); it != it_end; ++it)
             updateAttribute(character->getDatabaseID(), it->first,
-                            it->second.first, it->second.second);
+                            it->second.base, it->second.modified);
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -998,8 +997,8 @@ void Storage::flush(Account *account)
                      attr_it != attr_end; ++attr_it)
                 {
                     updateAttribute(character->getDatabaseID(), attr_it->first,
-                                    attr_it->second.first,
-                                    attr_it->second.second);
+                                    attr_it->second.base,
+                                    attr_it->second.modified);
                 }
 
                 // Update the characters skill

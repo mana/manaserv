@@ -33,7 +33,26 @@ class Account;
 class MessageIn;
 class MessageOut;
 
-typedef std::map< unsigned int, std::pair<double, double> > AttributeMap;
+struct AttributeValue
+{
+    AttributeValue()
+        : base(0)
+        , modified(0)
+    {}
+
+    AttributeValue(double value)
+        : base(value)
+        , modified(value)
+    {}
+
+    double base;     /**< Base value of the attribute. */
+    double modified; /**< Value after various modifiers have been applied. */
+};
+
+/**
+ * Stores attributes by their id.
+ */
+typedef std::map< unsigned int, AttributeValue > AttributeMap;
 
 /** placeholder type needed for include compatibility with game server*/
 typedef void Special;
@@ -115,10 +134,10 @@ class Character
 
         /** Sets the value of a base attribute of the character. */
         void setAttribute(unsigned int id, double value)
-        { mAttributes[id].first = value; }
+        { mAttributes[id].base = value; }
 
         void setModAttribute(unsigned int id, double value)
-        { mAttributes[id].second = value; }
+        { mAttributes[id].modified = value; }
 
         int getSkillSize() const
         { return mExperience.size(); }
@@ -236,9 +255,9 @@ class Character
         Character &operator=(const Character &);
 
         double getAttrBase(AttributeMap::const_iterator &it) const
-        { return it->second.first; }
+        { return it->second.base; }
         double getAttrMod(AttributeMap::const_iterator &it) const
-        { return it->second.second; }
+        { return it->second.modified; }
 
         Possessions mPossessions; //!< All the possesions of the character.
         std::string mName;        //!< Name of the character.
@@ -247,13 +266,6 @@ class Character
         int mAccountID;           //!< Account ID of the owner.
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
-        /**
-         * Stores attributes.
-         * The key is an unsigned int which is the id of the attribute.
-         * The value stores the base value of the attribute in the first part,
-         * and the modified value in the second. The modified value is only
-         * used when transmitting to the client.
-         */
         AttributeMap mAttributes; //!< Attributes.
         std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, int> mStatusEffects; //!< Status Effects

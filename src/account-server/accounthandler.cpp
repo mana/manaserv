@@ -83,7 +83,7 @@ static int startPoints, attributesMinimum, attributesMaximum = 0;
  * The pair contains two elements of the same value (the default) so that the
  * iterators can be used to copy a range.
  */
-static std::map< unsigned int, std::pair< double, double> > defAttr;
+static AttributeMap defaultAttributes;
 
 class AccountHandler : public ConnectionHandler
 {
@@ -190,8 +190,8 @@ AccountHandler::AccountHandler(const std::string &attrFile):
             std::string defStr = XML::getProperty(attributenode, "default", "");
             if (!defStr.empty())
             {
-                double val = string_to<double>()(defStr);
-                defAttr.insert(std::make_pair(id,std::make_pair(val, val)));
+                const double val = string_to<double>()(defStr);
+                defaultAttributes.insert(std::make_pair(id, val));
             }
         }
         else if (xmlStrEqual(attributenode->name, BAD_CAST "points"))
@@ -295,8 +295,8 @@ void AccountHandler::sendCharacterData(AccountClient &client,
     {
         // {id, base value in 256ths, modified value in 256ths }*
         charInfo.writeInt32(it->first);
-        charInfo.writeInt32((int) (it->second.first * 256));
-        charInfo.writeInt32((int) (it->second.second * 256));
+        charInfo.writeInt32((int) (it->second.base * 256));
+        charInfo.writeInt32((int) (it->second.modified * 256));
     }
 
     client.send(charInfo);
@@ -790,12 +790,16 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         else
         {
             Character *newCharacter = new Character(name);
+
+            // Set the initial attributes provided by the client
             for (unsigned int i = 0; i < initAttr.size(); ++i)
-                newCharacter->mAttributes.insert(std::make_pair(
-                        (unsigned int) (initAttr.at(i)),
-                        std::make_pair((double) (attributes[i]),
-                                       (double) (attributes[i]))));
-            newCharacter->mAttributes.insert(defAttr.begin(), defAttr.end());
+            {
+                newCharacter->mAttributes.insert(
+                            std::make_pair(initAttr.at(i), attributes[i]));
+            }
+
+            newCharacter->mAttributes.insert(defaultAttributes.begin(),
+                                             defaultAttributes.end());
             newCharacter->setAccount(acc);
             newCharacter->setCharacterSlot(slot);
             newCharacter->setLevel(1);
@@ -803,11 +807,10 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             // Init GP value to avoid flawed ones.
             AttributeMap::iterator itr =
                 newCharacter->mAttributes.find(ATTR_GP);
-            // Set up the base and modified attribute to 0.
             if (itr != newCharacter->mAttributes.end())
             {
-                itr->second.first = 0;
-                itr->second.second = 0;
+                itr->second.base = 0;
+                itr->second.modified = 0;
             }
 
             newCharacter->setCharacterPoints(0);
