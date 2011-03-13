@@ -71,19 +71,6 @@ static void addServerInfo(MessageOut *msg)
     msg->writeInt8(Configuration::getValue("account_maxCharacters", 3));
 }
 
-// List of attributes that the client can send at account creation.
-static std::vector< int > initAttr;
-
-// Character's starting points
-static int startPoints, attributesMinimum, attributesMaximum = 0;
-
-/*
- * Map attribute ids to values that they need to be initialised to at account
- * creation.
- * The pair contains two elements of the same value (the default) so that the
- * iterators can be used to copy a range.
- */
-static AttributeMap defaultAttributes;
 
 class AccountHandler : public ConnectionHandler
 {
@@ -141,6 +128,19 @@ private:
     void handleCharacterSelectMessage(AccountClient &client, MessageIn &msg);
     void handleCharacterDeleteMessage(AccountClient &client, MessageIn &msg);
 
+
+    /** List of attributes that the client can send at account creation. */
+    std::vector<int> mModifiableAttributes;
+
+    /**
+     * Default attributes and their values, loaded from the attributes file.
+     */
+    AttributeMap mDefaultAttributes;
+
+    int mStartingPoints;   /** Character's starting points. */
+    int mAttributeMinimum; /** Minimum value for customized attributes. */
+    int mAttributeMaximum; /** Maximum value for customized attributes. */
+
     typedef std::map<int, time_t> IPsToTime;
     IPsToTime mLastLoginAttemptForIP;
 };
@@ -148,11 +148,11 @@ private:
 static AccountHandler *accountHandler;
 
 AccountHandler::AccountHandler(const std::string &attrFile):
-    mTokenCollector(this)
+    mTokenCollector(this),
+    mStartingPoints(0),
+    mAttributeMinimum(0),
+    mAttributeMaximum(0)
 {
-    // In case of reloading...
-    initAttr.clear();
-
     std::string absPathFile = ResourceManager::resolve(attrFile);
     if (absPathFile.empty())
     {
@@ -183,7 +183,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
             }
 
             if (XML::getBoolProperty(attributenode, "modifiable", false))
-                initAttr.push_back(id);
+                mModifiableAttributes.push_back(id);
 
             // Store as string initially to check
             // that the property is defined.
@@ -191,17 +191,17 @@ AccountHandler::AccountHandler(const std::string &attrFile):
             if (!defStr.empty())
             {
                 const double val = string_to<double>()(defStr);
-                defaultAttributes.insert(std::make_pair(id, val));
+                mDefaultAttributes.insert(std::make_pair(id, val));
             }
         }
         else if (xmlStrEqual(attributenode->name, BAD_CAST "points"))
         {
-            startPoints = XML::getProperty(attributenode, "start", 0);
-            attributesMinimum = XML::getProperty(attributenode, "minimum", 0);
-            attributesMaximum = XML::getProperty(attributenode, "maximum", 0);
+            mStartingPoints = XML::getProperty(attributenode, "start", 0);
+            mAttributeMinimum = XML::getProperty(attributenode, "minimum", 0);
+            mAttributeMaximum = XML::getProperty(attributenode, "maximum", 0);
 
             // Stops if not all the values are given.
-            if (!startPoints || !attributesMinimum || !attributesMaximum)
+            if (!mStartingPoints || !mAttributeMinimum || !mAttributeMaximum)
             {
                 LOG_FATAL("Account handler: " << attrFile << ": "
                           << " The characters starting points "
@@ -211,18 +211,16 @@ AccountHandler::AccountHandler(const std::string &attrFile):
         }
     } // End for each XML nodes
 
-    // Sanity checks on attributes.
-    if (initAttr.empty())
+    if (mModifiableAttributes.empty())
     {
         LOG_FATAL("Account handler: " << attrFile << ": "
                   << "No modifiable attributes found!");
         exit(EXIT_XML_BAD_PARAMETER);
     }
 
-    // Sanity checks on starting points.
-    int modifiableAttributeCount = (int) initAttr.size();
-    if (modifiableAttributeCount * attributesMaximum < startPoints ||
-        modifiableAttributeCount * attributesMinimum > startPoints)
+    int attributeCount = (int) mModifiableAttributes.size();
+    if (attributeCount * mAttributeMaximum < mStartingPoints ||
+        attributeCount * mAttributeMinimum > mStartingPoints)
     {
         LOG_FATAL("Account handler: " << attrFile << ": "
                   << "Character's point values make "
@@ -230,8 +228,8 @@ AccountHandler::AccountHandler(const std::string &attrFile):
         exit(EXIT_XML_BAD_PARAMETER);
     }
 
-    LOG_DEBUG("Character start points: " << startPoints << " (Min: "
-              << attributesMinimum << ", Max: " << attributesMaximum << ")");
+    LOG_DEBUG("Character start points: " << mStartingPoints << " (Min: "
+              << mAttributeMinimum << ", Max: " << mAttributeMaximum << ")");
 }
 
 bool AccountClientHandler::initialize(const std::string &configFile, int port,
@@ -759,19 +757,19 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         // TODO: Add race, face and maybe special attributes.
 
         // Customization of character's attributes...
-        std::vector<int> attributes = std::vector<int>(initAttr.size(), 0);
-        for (unsigned int i = 0; i < initAttr.size(); ++i)
+        std::vector<int> attributes = std::vector<int>(mModifiableAttributes.size(), 0);
+        for (unsigned int i = 0; i < mModifiableAttributes.size(); ++i)
             attributes[i] = msg.readInt16();
 
         int totalAttributes = 0;
-        for (unsigned int i = 0; i < initAttr.size(); ++i)
+        for (unsigned int i = 0; i < mModifiableAttributes.size(); ++i)
         {
             // For good total attributes check.
             totalAttributes += attributes.at(i);
 
             // For checking if all stats are >= min and <= max.
-            if (attributes.at(i) < attributesMinimum
-                || attributes.at(i) > attributesMaximum)
+            if (attributes.at(i) < mAttributeMinimum
+                || attributes.at(i) > mAttributeMaximum)
             {
                 reply.writeInt8(CREATE_ATTRIBUTES_OUT_OF_RANGE);
                 client.send(reply);
@@ -779,11 +777,11 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             }
         }
 
-        if (totalAttributes > startPoints)
+        if (totalAttributes > mStartingPoints)
         {
             reply.writeInt8(CREATE_ATTRIBUTES_TOO_HIGH);
         }
-        else if (totalAttributes < startPoints)
+        else if (totalAttributes < mStartingPoints)
         {
             reply.writeInt8(CREATE_ATTRIBUTES_TOO_LOW);
         }
@@ -792,14 +790,14 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             Character *newCharacter = new Character(name);
 
             // Set the initial attributes provided by the client
-            for (unsigned int i = 0; i < initAttr.size(); ++i)
+            for (unsigned int i = 0; i < mModifiableAttributes.size(); ++i)
             {
                 newCharacter->mAttributes.insert(
-                            std::make_pair(initAttr.at(i), attributes[i]));
+                            std::make_pair(mModifiableAttributes.at(i), attributes[i]));
             }
 
-            newCharacter->mAttributes.insert(defaultAttributes.begin(),
-                                             defaultAttributes.end());
+            newCharacter->mAttributes.insert(mDefaultAttributes.begin(),
+                                             mDefaultAttributes.end());
             newCharacter->setAccount(acc);
             newCharacter->setCharacterSlot(slot);
             newCharacter->setLevel(1);
