@@ -877,7 +877,7 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
     if (!GameServerHandler::getGameServerFromMap
             (selectedChar->getMapId(), address, port))
     {
-        LOG_ERROR("Character Selection: No game server for the map.");
+        LOG_ERROR("Character Selection: No game server for map #"<<selectedChar->getMapId());
         reply.writeInt8(ERRMSG_FAILURE);
         client.send(reply);
         return;
