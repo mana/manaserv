@@ -1395,6 +1395,50 @@ static int effect_create(lua_State *s)
     return 0;
 }
 
+
+
+/**
+ *
+ * mana.chr_shake_screen(
+ */
+static int chr_shake_screen(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "lua chr_shake_screen called for nonexistent character.");
+        return 0;
+    }
+
+    MessageOut msg(GPMSG_SHAKE);
+    if(!lua_isnumber(s, 2) || !lua_isnumber(s, 3))
+    {
+        raiseScriptError(s, "lua chr_shake_screen called with illegal arguments.");
+        return 0;
+    }
+    else
+    {
+        int x = lua_tointeger(s, 2);
+        int y = lua_tointeger(s, 3);
+        msg.writeInt16(x);
+        msg.writeInt16(y);
+    }
+    if(lua_isnumber(s, 4))
+    {
+        msg.writeInt16((int)lua_tonumber(s, 4) * 10000);
+    }
+    if(lua_isnumber(s, 5))
+    {
+        msg.writeInt16(lua_tointeger(s, 5));
+    }
+    c->getClient()->send(msg);
+
+    return 0;
+}
+
+
+
+
 /**
  * Gets the exp total in a skill of a specific character
  * mana.chr_get_exp (being, skill)
@@ -1840,6 +1884,7 @@ LuaScript::LuaScript():
         { "get_beings_in_circle",            &get_beings_in_circle            },
         { "being_register",                  &being_register                  },
         { "effect_create",                   &effect_create                   },
+        { "chr_shake_screen",                &chr_shake_screen                },
         { "test_tableget",                   &test_tableget                   },
         { "get_map_id",                      &get_map_id                      },
         { "item_drop",                       &item_drop                       },
