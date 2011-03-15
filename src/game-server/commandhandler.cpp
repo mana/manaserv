@@ -446,8 +446,7 @@ static void handleItem(Character *player, std::string &args)
 {
     Character *other;
     ItemClass *ic;
-    int value;
-    int id;
+    int value = 0;
 
     // get arguments
     std::string character = getArgument(args);
@@ -455,10 +454,10 @@ static void handleItem(Character *player, std::string &args)
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || itemclass == "" || valuestr == "")
+    if (character == "" || itemclass == "")
     {
         say("Invalid number of arguments given.", player);
-        say("Usage: @item <character> <itemID> <amount>", player);
+        say("Usage: @item <character> <item> [amount]", player);
         return;
     }
 
@@ -478,36 +477,35 @@ static void handleItem(Character *player, std::string &args)
         }
     }
 
-    // check we have a valid item
-    if (!utils::isNumeric(itemclass))
+    // identify the item type
+    if (utils::isNumeric(itemclass))
     {
-        say("Invalid item", player);
-        return;
+        int id = utils::stringToInt(itemclass);
+        ic = itemManager->getItem(id);
     }
-
-    // put the itemclass id into an integer
-    id = utils::stringToInt(itemclass);
-
-    // check for valid item class
-    ic = itemManager->getItem(id);
-
+    else
+    {
+        ic = itemManager->getItemByName(itemclass);
+    }
     if (!ic)
     {
         say("Invalid item", player);
         return;
     }
 
-    if (!utils::isNumeric(valuestr))
+    //identify the amount
+    if  (valuestr == "")
     {
-        say("Invalid value", player);
-        return;
+        value = 1;
     }
-
-    value = utils::stringToInt(valuestr);
-
-    if (value < 0)
+    else if (utils::isNumeric(valuestr))
     {
-        say("Invalid amount", player);
+        value = utils::stringToInt(valuestr);
+    }
+    // check for valid amount
+    if (value <= 0)
+    {
+        say("Invalid number of items", player);
         return;
     }
 
@@ -523,44 +521,49 @@ static void handleItem(Character *player, std::string &args)
 static void handleDrop(Character *player, std::string &args)
 {
     ItemClass *ic;
-    int value, id;
+    int value = 0;
 
     // get arguments
     std::string itemclass = getArgument(args);
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (itemclass == "" || valuestr == "")
+    if (itemclass == "" )
     {
         say("Invalid number of arguments given.", player);
-        say("Usage: @drop <itemID> <amount]>", player);
+        say("Usage: @drop <item> [amount]", player);
         return;
     }
 
-    // check that itemclass id and value are really integers
-    if (!utils::isNumeric(itemclass) || !utils::isNumeric(valuestr))
+    // identify the item type
+    if (utils::isNumeric(itemclass))
     {
-        say("Invalid arguments passed.", player);
-        return;
+        int id = utils::stringToInt(itemclass);
+        ic = itemManager->getItem(id);
     }
-
-    // put the item class id into an integer
-    id = utils::stringToInt(itemclass);
-
-    // check for valid item
-    ic = itemManager->getItem(id);
+    else
+    {
+        ic = itemManager->getItemByName(itemclass);
+    }
     if (!ic)
     {
         say("Invalid item", player);
         return;
     }
 
-    // put the value into an integer
-    value = utils::stringToInt(valuestr);
-
-    if (value < 0)
+    //identify the amount
+    if  (valuestr == "")
     {
-        say("Invalid amount", player);
+        value = 1;
+    }
+    else if (utils::isNumeric(valuestr))
+    {
+        value = utils::stringToInt(valuestr);
+    }
+    // check for valid amount
+    if (value <= 0)
+    {
+        say("Invalid number of items", player);
         return;
     }
 

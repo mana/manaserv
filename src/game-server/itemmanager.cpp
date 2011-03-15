@@ -27,6 +27,7 @@
 #include "game-server/skillmanager.h"
 #include "scripting/script.h"
 #include "utils/logger.h"
+#include "utils/string.h"
 #include "utils/xml.h"
 
 #include <map>
@@ -161,6 +162,9 @@ void ItemManager::reload()
             LOG_WARN("Multiple defintions of item '" << id << "'!");
             item = i->second;
         }
+
+        std::string name = XML::getProperty(node, "name", "unnamed");
+        item->setName(name);
 
         int value = XML::getProperty(node, "value", 0);
         // Should have multiple value definitions for multiple currencies?
@@ -332,6 +336,20 @@ ItemClass *ItemManager::getItem(int itemId) const
 {
     ItemClasses::const_iterator i = itemClasses.find(itemId);
     return i != itemClasses.end() ? i->second : NULL;
+}
+
+ItemClass *ItemManager::getItemByName(std::string name) const
+{
+    name = utils::toLower(name);
+    for (ItemClasses::const_iterator i = itemClasses.begin(),
+         i_end = itemClasses.end(); i != i_end; ++i)
+    {
+        if(utils::toLower(i->second->getName()) == name)
+        {
+            return i->second;
+        }
+    }
+    return 0;
 }
 
 unsigned int ItemManager::getDatabaseVersion() const

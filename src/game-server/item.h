@@ -149,12 +149,25 @@ class ItemClass
     public:
         ItemClass(int id, unsigned int maxperslot)
             : mDatabaseID(id)
+            , mName("unnamed")
             , mSpriteID(0)
             , mCost(0)
             , mMaxPerSlot(maxperslot)
         {}
 
         ~ItemClass() { resetEffects(); }
+
+        /**
+         * Returns the name of the item type
+         */
+        const std::string &getName() const
+        { return mName; }
+
+        /**
+         * Sets the name of the item type
+         */
+        void setName(const std::string &name)
+        { mName = name; }
 
         /**
          * Applies the modifiers of an item to a given user.
@@ -232,6 +245,7 @@ class ItemClass
         }
 
         unsigned short mDatabaseID; /**< Item reference information */
+        std::string mName; /**< name used to identify the item class */
         /** The sprite that should be shown to the character */
         unsigned short mSpriteID;
         unsigned short mCost;     /**< Unit cost the item. */

@@ -55,6 +55,14 @@ class ItemManager
         ItemClass *getItem(int itemId) const;
 
         /**
+         * Gets the first item type with a specific name.
+         * (comparison is case-insensitive).
+         * Returns null when there is no item with such
+         * a name.
+         */
+        ItemClass *getItemByName(std::string name) const;
+
+        /**
          * Gets the version of the loaded item database.
          */
         unsigned int getDatabaseVersion() const;
