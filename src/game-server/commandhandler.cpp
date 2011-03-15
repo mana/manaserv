@@ -633,44 +633,50 @@ static void handleSpawn(Character *player, std::string &args)
     MonsterClass *mc;
     MapComposite *map = player->getMap();
     const Point &pos = player->getPosition();
-    int value, id;
+    int value = 0;
 
     // get the arguments
     std::string monsterclass = getArgument(args);
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (monsterclass == "" || valuestr == "")
+    if (monsterclass == "")
     {
         say("Invalid amount of arguments given.", player);
-        say("Usage: @spawn <monsterID> <number>", player);
+        say("Usage: @spawn <monster> [number]", player);
         return;
     }
 
-    // check they are really numbers
-    if (!utils::isNumeric(monsterclass) || !utils::isNumeric(valuestr))
+    // identify the monster type
+    if (utils::isNumeric(monsterclass))
     {
-        say("Invalid arguments", player);
-        return;
+        int id = utils::stringToInt(monsterclass);
+        mc = monsterManager->getMonster(id);
     }
-
-    // put the monster class id into an integer
-    id = utils::stringToInt(monsterclass);
-
+    else
+    {
+        mc = monsterManager->getMonsterByName(monsterclass);
+    }
     // check for valid monster
-    mc = monsterManager->getMonster(id);
     if (!mc)
     {
         say("Invalid monster", player);
         return;
     }
 
-    // put the amount into an integer
-    value = utils::stringToInt(valuestr);
-
-    if (value < 0)
+    //identify the amount
+    if  (valuestr == "")
     {
-        say("Invalid amount", player);
+        value = 1;
+    }
+    else if (utils::isNumeric(valuestr))
+    {
+        value = utils::stringToInt(valuestr);
+    }
+    // check for valid amount
+    if (value <= 0)
+    {
+        say("Invalid number of monsters", player);
         return;
     }
 

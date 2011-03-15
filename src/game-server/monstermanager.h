@@ -49,6 +49,14 @@ class MonsterManager
          */
         MonsterClass *getMonster(int id);
 
+        /**
+         * Gets the first monster type with a specific name.
+         * (comparison is case-insensitive).
+         * Returns null when there is no monster with such
+         * a name.
+         */
+        MonsterClass *getMonsterByName(std::string name) const;
+
     private:
 
         typedef std::map< int, MonsterClass * > MonsterClasses;

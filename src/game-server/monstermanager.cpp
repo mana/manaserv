@@ -25,6 +25,7 @@
 #include "game-server/itemmanager.h"
 #include "game-server/monster.h"
 #include "utils/logger.h"
+#include "utils/string.h"
 #include "utils/xml.h"
 
 #define MAX_MUTATION 99
@@ -106,6 +107,7 @@ void MonsterManager::reload()
         {
             monster = i->second;
         }
+        monster->setName(name);
 
         MonsterDrops drops;
         bool attributesSet = false;
@@ -342,6 +344,25 @@ void MonsterManager::deinitialize()
         delete i->second;
     }
     mMonsterClasses.clear();
+}
+
+MonsterClass *MonsterManager::getMonsterByName(std::string name) const
+{
+    // this function is not very fast but neither does it need to be
+    // because it is only used by the @spawn command. It would be
+    // possible to speed it up by caching the lowercase_name/MonsterClass
+    // mapping in a std::map during MonsterManager::reload, should the
+    // need arise.
+    name = utils::toLower(name);
+    for (MonsterClasses::const_iterator i = mMonsterClasses.begin(),
+         i_end = mMonsterClasses.end(); i != i_end; ++i)
+    {
+        if(utils::toLower(i->second->getName()) == name)
+        {
+            return i->second;
+        }
+    }
+    return 0;
 }
 
 MonsterClass *MonsterManager::getMonster(int id)
