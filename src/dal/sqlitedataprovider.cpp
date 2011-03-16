@@ -370,7 +370,7 @@ const RecordSet &SqLiteDataProvider::processSql()
         {
             fieldNames.push_back(sqlite3_column_name(mStmt, col));
             const unsigned char *txt = sqlite3_column_text(mStmt, col);
-            r.push_back(txt ? (char*)txt : "");
+            r.push_back(txt ? (char*)txt : std::string());
 
         }
         // ensure we set column headers before adding a row

@@ -263,7 +263,7 @@ std::string SHA256Hash(const char *src, int len)
     SHA256Final(&ctx, bytehash);
     // Convert it to hex
     const char* hxc = "0123456789abcdef";
-    std::string hash = "";
+    std::string hash;
     for (int i = 0; i < SHA256_DIGEST_SIZE; i++)
     {
         hash += hxc[bytehash[i] / 16];

@@ -1241,9 +1241,9 @@ static int chatmessage(lua_State *s)
     if (lua_gettop(s) == 2 && lua_isuserdata(s, 1) && lua_isstring(s, 2) )
     {
         Being *being = getBeing(s, 1);
-        std::string message = lua_tostring(s, 2);
+        const std::string message = lua_tostring(s, 2);
 
-        if (being && message != "")
+        if (being && !message.empty())
         {
             GameState::sayTo(being, NULL, message);
         }

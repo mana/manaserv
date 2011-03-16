@@ -140,7 +140,7 @@ static void initializeConfiguration(std::string configPath = std::string())
     LOG_INFO("Using config file: " << configPath);
 
     // Check inter-server password.
-    if (Configuration::getValue("net_password", "") == "")
+    if (Configuration::getValue("net_password", std::string()).empty())
     {
         LOG_FATAL("SECURITY WARNING: 'net_password' not set!");
         exit(EXIT_BAD_CONFIG_PARAMETER);

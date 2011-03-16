@@ -86,8 +86,8 @@ ChatChannel *ChatHandler::joinGuildChannel(const std::string &guildName, ChatCli
     if (!channel)
     {
         // Channel doesnt exist so create it
-        int channelId = chatChannelManager->createNewChannel(guildName,
-                "Guild Channel", "", false);
+        int channelId = chatChannelManager->createNewChannel(
+                    guildName, "Guild Channel", std::string(), false);
         channel = chatChannelManager->getChannel(channelId);
     }
 

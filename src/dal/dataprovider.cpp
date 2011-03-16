@@ -83,7 +83,7 @@ bool DataProvider::isConnected() const
 std::string DataProvider::getDbName() const
 {
     if (!isConnected())
-        return "";
+        return std::string();
 
     return mDbName;
 }

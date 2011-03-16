@@ -80,7 +80,7 @@ int LuaScript::execute()
     res = lua_tointeger(mState, -1);
     lua_pop(mState, 1);
     return res;
-    mCurFunction = "";
+    mCurFunction.clear();
 }
 
 void LuaScript::load(const char *prog, const char *name)

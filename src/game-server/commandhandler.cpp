@@ -155,12 +155,12 @@ static bool checkPermission(Character *player, unsigned int permissions)
  */
 static std::string getArgument(std::string &args)
 {
-    std::string argument = "";
+    std::string argument;
     std::string::size_type pos = std::string::npos;
     bool doubleQuotes = false;
 
     // Finds out if the next argument is between double-quotes
-    if (args.substr(0, 1).compare("\""))
+    if (args.empty() || args.at(0) != '"')
     {
         // No double-quotes, we then search an ending space.
         pos = args.find(' ');
@@ -193,7 +193,7 @@ static std::string getArgument(std::string &args)
     else
     {
         argument = args.substr(0);
-        args = "";
+        args = std::string();
     }
     return argument;
 }
@@ -218,7 +218,7 @@ static Character* getPlayer(const std::string &player)
 
 static void handleHelp(Character *player, std::string &args)
 {
-    if (args == "")
+    if (args.empty())
     {
         // short list of all commands
         say("=Available Commands=", player);
@@ -266,7 +266,7 @@ static void handleWarp(Character *player, std::string &args)
     std::string ystr = getArgument(args);
 
     // if any of them are empty strings, no argument was given
-    if (mapstr == "" || xstr == "" || ystr == "")
+    if (mapstr.empty() || xstr.empty() || ystr.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @warp <map> <x> <y>", player);
@@ -352,7 +352,7 @@ static void handleCharWarp(Character *player, std::string &args)
     std::string ystr = getArgument(args);
 
     // if any of them are empty strings, no argument was given
-    if (character == "" || mapstr == "" || xstr == "" || ystr == "")
+    if (character.empty() || mapstr.empty() || xstr.empty() || ystr.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @warp <character> <map> <x> <y>", player);
@@ -454,7 +454,7 @@ static void handleItem(Character *player, std::string &args)
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || itemclass == "")
+    if (character.empty() || itemclass.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @item <character> <item> [amount]", player);
@@ -494,7 +494,7 @@ static void handleItem(Character *player, std::string &args)
     }
 
     //identify the amount
-    if  (valuestr == "")
+    if  (valuestr.empty())
     {
         value = 1;
     }
@@ -528,7 +528,7 @@ static void handleDrop(Character *player, std::string &args)
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (itemclass == "" )
+    if (itemclass.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @drop <item> [amount]", player);
@@ -552,7 +552,7 @@ static void handleDrop(Character *player, std::string &args)
     }
 
     //identify the amount
-    if  (valuestr == "")
+    if  (valuestr.empty())
     {
         value = 1;
     }
@@ -589,7 +589,7 @@ static void handleMoney(Character *player, std::string &args)
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || valuestr == "")
+    if (character.empty() || valuestr.empty())
     {
         say("Invalid number of arguments given", player);
         say("Usage: @money <character> <amount>", player);
@@ -643,7 +643,7 @@ static void handleSpawn(Character *player, std::string &args)
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (monsterclass == "")
+    if (monsterclass.empty())
     {
         say("Invalid amount of arguments given.", player);
         say("Usage: @spawn <monster> [number]", player);
@@ -668,7 +668,7 @@ static void handleSpawn(Character *player, std::string &args)
     }
 
     //identify the amount
-    if  (valuestr == "")
+    if  (valuestr.empty())
     {
         value = 1;
     }
@@ -710,7 +710,7 @@ static void handleGoto(Character *player, std::string &args)
     std::string character = getArgument(args);
 
     // check all arguments are there
-    if (character == "")
+    if (character.empty())
     {
         say("Invalid amount of arguments given.", player);
         say("Usage: @goto <character>", player);
@@ -744,7 +744,7 @@ static void handleRecall(Character *player, std::string &args)
     std::string character = getArgument(args);
 
     // check all arguments are there
-    if (character == "")
+    if (character.empty())
     {
         say("Invalid amount of arguments given.", player);
         say("Usage: @recall <character>", player);
@@ -782,7 +782,7 @@ static void handleBan(Character *player, std::string &args)
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || valuestr == "")
+    if (character.empty() || valuestr.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @ban <character> <duration>", player);
@@ -830,7 +830,7 @@ static void handleGivePermission(Character *player, std::string &args)
     std::string strPermission = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || strPermission == "")
+    if (character.empty() || strPermission.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @givepermission <character> <permission class>", player);
@@ -888,7 +888,7 @@ static void handleTakePermission(Character *player, std::string &args)
     std::string strPermission = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || strPermission == "")
+    if (character.empty() || strPermission.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @takepermission <character> <permission class>", player);
@@ -948,7 +948,7 @@ static void handleAttribute(Character *player, std::string &args)
     std::string valuestr = getArgument(args);
 
     // check all arguments are there
-    if (character == "" || valuestr == "" || attrstr == "")
+    if (character.empty() || valuestr.empty() || attrstr.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @attribute <character> <attribute> <value>", player);
@@ -1010,7 +1010,7 @@ static void handleReport(Character *player, std::string &args)
 {
     std::string bugReport = getArgument(args);
 
-    if (bugReport == "")
+    if (bugReport.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @report <message>", player);
@@ -1022,7 +1022,7 @@ static void handleReport(Character *player, std::string &args)
 
 static void handleAnnounce(Character *player, std::string &msg)
 {
-    if (msg == "")
+    if (msg.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @announce <message>", player);
@@ -1209,7 +1209,7 @@ static void handleKick(Character *player, std::string &args)
 
 static void handleLog(Character *player, std::string &msg)
 {
-    if (msg == "")
+    if (msg.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @log <message>", player);
@@ -1226,7 +1226,7 @@ static void handleLog(Character *player, std::string &msg)
 
 static void handleLogsay(Character *player, std::string &msg)
 {
-    if (msg == "")
+    if (msg.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @logsay <message>", player);

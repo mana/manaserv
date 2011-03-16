@@ -551,8 +551,8 @@ void MapComposite::setMap(Map *m)
     mContent = new MapContent(m);
 
     std::string sPvP = m->getProperty("pvp");
-    if (sPvP == "")
-        sPvP = Configuration::getValue("game_defaultPvp", "");
+    if (sPvP.empty())
+        sPvP = Configuration::getValue("game_defaultPvp", std::string());
 
     if (sPvP == "free")
         mPvPRules = PVP_FREE;

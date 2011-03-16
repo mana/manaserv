@@ -75,7 +75,7 @@ class DbConnectionFailure: public DbException
          */
         DbConnectionFailure()
             throw()
-                : DbException("")
+                : DbException(std::string())
         {}
 
 
@@ -102,7 +102,7 @@ class DbDisconnectionFailure: public DbException
          */
         DbDisconnectionFailure()
             throw()
-                : DbException("")
+                : DbException(std::string())
         {}
 
         /**
@@ -128,7 +128,7 @@ class DbSqlQueryExecFailure: public DbException
          */
         DbSqlQueryExecFailure()
             throw()
-                : DbException("")
+                : DbException(std::string())
         {}
 
         /**

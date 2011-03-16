@@ -79,11 +79,14 @@ void AttributeManager::reload()
                 if (xmlStrEqual(subnode->name, BAD_CAST "modifier"))
                 {
                     std::string sType = utils::toUpper(
-                                    XML::getProperty(subnode, "stacktype", ""));
+                                    XML::getProperty(subnode, "stacktype",
+                                                     std::string()));
                     std::string eType = utils::toUpper(
-                                    XML::getProperty(subnode, "modtype", ""));
+                                    XML::getProperty(subnode, "modtype",
+                                                     std::string()));
                     std::string tag = utils::toUpper(
-                                    XML::getProperty(subnode, "tag", ""));
+                                    XML::getProperty(subnode, "tag",
+                                                     std::string()));
                     AT_TY pSType;
                     AME_TY pEType;
                     if (!sType.empty())
@@ -124,7 +127,7 @@ void AttributeManager::reload()
                                     mAttributeMap[id].second.push_back(
                                           AttributeInfoType(pSType, pEType));
                                     std::string tag = XML::getProperty(
-                                                            subnode, "tag", "");
+                                                subnode, "tag", std::string());
 
                                     if (!tag.empty())
                                         mTagMap.insert(

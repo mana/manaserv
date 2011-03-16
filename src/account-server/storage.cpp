@@ -1981,12 +1981,13 @@ void Storage::syncDatabase()
                 continue;
 
             int weight = XML::getProperty(node, "weight", 0);
-            std::string type = XML::getProperty(node, "type", "");
-            std::string name = XML::getProperty(node, "name", "");
-            std::string desc = XML::getProperty(node, "description", "");
-            std::string eff  = XML::getProperty(node, "effect", "");
-            std::string image = XML::getProperty(node, "image", "");
-            std::string dye("");
+            std::string type = XML::getProperty(node, "type", std::string());
+            std::string name = XML::getProperty(node, "name", std::string());
+            std::string desc = XML::getProperty(node, "description",
+                                                std::string());
+            std::string eff  = XML::getProperty(node, "effect", std::string());
+            std::string image = XML::getProperty(node, "image", std::string());
+            std::string dye;
 
             // Split image name and dye string
             size_t pipe = image.find("|");

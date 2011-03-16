@@ -43,13 +43,13 @@ bool StringFilter::loadSlangFilterList()
 {
     mInitialized = false;
 
-    std::string slangsList = Configuration::getValue("SlangsList", "");
-    if (slangsList != "") {
+    const std::string slangsList = Configuration::getValue("SlangsList",
+                                                           std::string());
+    if (!slangsList.empty()) {
         std::istringstream iss(slangsList);
         std::string tmp;
-        while (getline(iss, tmp, ',')) {
+        while (getline(iss, tmp, ','))
             mSlangs.push_back(tmp);
-        }
         mInitialized = true;
     }
 
@@ -59,7 +59,7 @@ bool StringFilter::loadSlangFilterList()
 void StringFilter::writeSlangFilterList()
 {
     // Write the list to config
-    std::string slangsList = "";
+    std::string slangsList;
     for (SlangIterator i = mSlangs.begin(); i != mSlangs.end(); )
     {
         slangsList += *i;

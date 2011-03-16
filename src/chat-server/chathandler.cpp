@@ -594,7 +594,6 @@ void ChatHandler::handleListChannelsMessage(ChatClient &client, MessageIn &)
     Transaction trans;
     trans.mCharacterId = client.characterId;
     trans.mAction = TRANS_CHANNEL_LIST;
-    trans.mMessage = "";
     storage->addTransaction(trans);
 }
 
@@ -626,7 +625,6 @@ void ChatHandler::handleListChannelUsersMessage(ChatClient &client,
     Transaction trans;
     trans.mCharacterId = client.characterId;
     trans.mAction = TRANS_CHANNEL_USERLIST;
-    trans.mMessage = "";
     storage->addTransaction(trans);
 }
 

@@ -144,9 +144,11 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
             {
                 if (xmlStrEqual(propNode->name, BAD_CAST "property"))
                 {
-                    std::string key = XML::getProperty(propNode, "name", "");
-                    std::string val = XML::getProperty(propNode, "value", "");
-                    LOG_DEBUG("  "<<key<<": "<<val);
+                    std::string key = XML::getProperty(propNode, "name",
+                                                       std::string());
+                    std::string val = XML::getProperty(propNode, "value",
+                                                       std::string());
+                    LOG_DEBUG("  " << key << ": " << val);
                     map->setProperty(key, val);
                 }
             }
@@ -169,8 +171,10 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                     continue;
                 }
 
-                std::string objName = XML::getProperty(objectNode, "name", "");
-                std::string objType = XML::getProperty(objectNode, "type", "");
+                std::string objName = XML::getProperty(objectNode, "name",
+                                                       std::string());
+                std::string objType = XML::getProperty(objectNode, "type",
+                                                       std::string());
                 objType = utils::toUpper(objType);
                 int objX = XML::getProperty(objectNode, "x", 0);
                 int objY = XML::getProperty(objectNode, "y", 0);
@@ -217,7 +221,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         }
                     }
 
-                    if (destMapName != "" && destX != -1 && destY != -1)
+                    if (!destMapName.empty() && destX != -1 && destY != -1)
                     {
                         MapComposite *destMap = MapManager::getMap(destMapName);
                         if (destMap)
@@ -311,7 +315,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                                 }
                                 else if (utils::compareStrI(value, "SCRIPT") == 0)
                                 {
-                                    scriptText = getObjectProperty(propertyNode, "");
+                                    scriptText = getObjectProperty(propertyNode, std::string());
                                 }
                             }
                         }
@@ -350,11 +354,13 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         {
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
-                                std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                std::string value = XML::getProperty(propertyNode, "name",
+                                                                     std::string());
                                 value = utils::toUpper(value);
                                 if (utils::compareStrI(value, "FILENAME") == 0)
                                 {
-                                    scriptFilename = getObjectProperty(propertyNode, "");
+                                    scriptFilename = getObjectProperty(propertyNode,
+                                                                       std::string());
                                     utils::trim(scriptFilename);
                                 }
                                 else if (utils::compareStrI(value, "TEXT") == 0)

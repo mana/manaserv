@@ -41,11 +41,10 @@ ChatChannelManager::~ChatChannelManager()
 {
 }
 
-int
-ChatChannelManager::createNewChannel(const std::string &channelName,
-        const std::string &channelAnnouncement,
-        const std::string &channelPassword,
-        bool joinable)
+int ChatChannelManager::createNewChannel(const std::string &channelName,
+                                         const std::string &channelAnnouncement,
+                                         const std::string &channelPassword,
+                                         bool joinable)
 {
     int channelId = nextUsable();
 
@@ -83,8 +82,8 @@ bool ChatChannelManager::tryNewPublicChannel(const std::string &name)
     else
     {
         // We attempt to create a new channel
-        short id = createNewChannel(name, "", "", true);
-        return id ? true : false;
+        short id = createNewChannel(name, std::string(), std::string(), true);
+        return id != 0;
     }
 }
 

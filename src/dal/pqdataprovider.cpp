@@ -55,9 +55,9 @@ void PqDataProvider::connect(const std::string& dbName,
 {
     // Create string to pass to PQconnectdb
     std::string connStr = "dbname = " + dbName + " "; // database name
-    if (userName != "")
+    if (!userName.empty())
         connStr += "user = " + userName + " "; // username
-    if (password != "")
+    if (!password.empty())
         connStr += "password = " + password; // password
 
     // Connect to database

@@ -79,8 +79,7 @@ class MonsterClass
             mStrollRange(0),
             mMutation(0),
             mAttackDistance(0),
-            mOptimalLevel(0),
-            mScript("")
+            mOptimalLevel(0)
         {}
 
         /**

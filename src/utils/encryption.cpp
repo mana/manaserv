@@ -46,7 +46,7 @@ static char getRandomCharacter()
   */
 std::string createRandomPassword()
 {
-    std::string result = "";
+    std::string result;
 
     // Ititializing random seed.
     srand(time(NULL));
@@ -55,9 +55,7 @@ std::string createRandomPassword()
     int characterNumber = (rand() % 10) + 20;
 
     for (int a = 1; a < characterNumber; a++)
-    {
         result += getRandomCharacter();
-    }
 
     return result;
 }

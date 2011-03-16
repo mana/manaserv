@@ -73,7 +73,7 @@ void StatusManager::reload()
             continue;
         }
 
-        std::string scriptFile = XML::getProperty(node, "script", "");
+        std::string scriptFile = XML::getProperty(node, "script", std::string());
         //TODO: Get these modifiers
 /*
         modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));

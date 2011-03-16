@@ -64,7 +64,8 @@ static void addServerInfo(MessageOut *msg)
      * This is for developing/testing an experimental new resource manager that
      * downloads only the files it needs on demand.
      */
-    std::string dataUrl = Configuration::getValue("net_clientDataUrl", "");
+    std::string dataUrl = Configuration::getValue("net_clientDataUrl",
+                                                  std::string());
     msg->writeString(dataUrl);
 
     // Send the number of available slots (empty or not)
@@ -187,7 +188,8 @@ AccountHandler::AccountHandler(const std::string &attrFile):
 
             // Store as string initially to check
             // that the property is defined.
-            std::string defStr = XML::getProperty(attributenode, "default", "");
+            std::string defStr = XML::getProperty(attributenode, "default",
+                                                  std::string());
             if (!defStr.empty())
             {
                 const double val = string_to<double>()(defStr);
@@ -592,7 +594,7 @@ void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client,
     {
         reply.writeInt8(false);
         reply.writeString(Configuration::getValue(
-                                             "account_denyRegisterReason", ""));
+                              "account_denyRegisterReason", std::string()));
     }
     else
     {
@@ -916,7 +918,6 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
     Transaction trans;
     trans.mCharacterId = selectedChar->getDatabaseID();
     trans.mAction = TRANS_CHAR_SELECTED;
-    trans.mMessage = "";
     storage->addTransaction(trans);
 }
 

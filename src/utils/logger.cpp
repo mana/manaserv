@@ -36,7 +36,7 @@ namespace utils
 /** Log file. */
 static std::ofstream mLogFile;
 /** current log filename */
-std::string Logger::mFilename = "";
+std::string Logger::mFilename;
 /** Timestamp flag. */
 bool Logger::mHasTimestamp = true;
 /** Tee mode flag. */
@@ -50,13 +50,13 @@ long Logger::mMaxFileSize = 1024; // 1 Mb
 /** Switch log file each day. */
 bool Logger::mSwitchLogEachDay = false;
 /** Last call date */
-static std::string mLastCallDate = "";
+static std::string mLastCallDate;
 /**
  * Old date
  * For code simplificatiion, the old Date is kept separate
  * from the last call date.
  */
-static std::string mOldDate = "";
+static std::string mOldDate;
 
 /**
   * Check whether the day has changed since the last call.
