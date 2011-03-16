@@ -38,7 +38,6 @@ class PathInfo
             : whichList(0)
         {}
 
-        int Fcost;              /**< Estimation of total path cost */
         int Gcost;              /**< Cost from start to this location */
         int Hcost;              /**< Estimated cost to goal */
         unsigned whichList;     /**< No list, open list or closed list */
@@ -83,18 +82,18 @@ static FindPath findPath;
 class Location
 {
     public:
-        Location(int x, int y, PathInfo *info):
-            x(x), y(y), info(info)
+        Location(int x, int y, int Fcost):
+            x(x), y(y), Fcost(Fcost)
         {}
 
         /**
          * Comparison operator.
          */
-        bool operator< (const Location &loc) const
-        { return info->Fcost > loc.info->Fcost; }
+        bool operator< (const Location &other) const
+        { return Fcost > other.Fcost; }
 
         int x, y;
-        PathInfo *info;
+        int Fcost;              /**< Estimation of total path cost */
 };
 
 
@@ -223,8 +222,8 @@ Path FindPath::operator() (int startX, int startY,
     PathInfo *startTile = getInfo(startX, startY);
     startTile->Gcost = 0;
 
-    // Add the start point to the open list
-    openList.push(Location(startX, startY, startTile));
+    // Add the start point to the open list (F cost irrelevant here)
+    openList.push(Location(startX, startY, 0));
 
     bool foundPath = false;
 
@@ -235,14 +234,15 @@ Path FindPath::operator() (int startX, int startY,
         // add it to the closed list.
         Location curr = openList.top();
         openList.pop();
+        PathInfo *currInfo = getInfo(curr.x, curr.y);
 
         // If the tile is already on the closed list, this means it has already
         // been processed with a shorter path to the start point (lower G cost)
-        if (curr.info->whichList == mOnClosedList)
+        if (currInfo->whichList == mOnClosedList)
             continue;
 
         // Put the current tile on the closed list
-        curr.info->whichList = mOnClosedList;
+        currInfo->whichList = mOnClosedList;
 
         // Check the adjacent tiles
         for (int dy = -1; dy <= 1; dy++)
@@ -275,7 +275,7 @@ Path FindPath::operator() (int startX, int startY,
                 }
 
                 // Calculate G cost for this route, ~sqrt(2) for moving diagonal
-                int Gcost = curr.info->Gcost +
+                int Gcost = currInfo->Gcost +
                     (dx == 0 || dy == 0 ? basicCost : basicCost * 362 / 256);
 
                 /* Demote an arbitrary direction to speed pathfinding by
@@ -313,15 +313,14 @@ Path FindPath::operator() (int startX, int startY,
                     newTile->parentX = curr.x;
                     newTile->parentY = curr.y;
 
-                    // Update Gcost and Fcost of new tile
+                    // Update Gcost of new tile
                     newTile->Gcost = Gcost;
-                    newTile->Fcost = newTile->Gcost + newTile->Hcost;
 
                     if (x != destX || y != destY)
                     {
                         // Add this tile to the open list
                         newTile->whichList = mOnOpenList;
-                        openList.push(Location(x, y, newTile));
+                        openList.push(Location(x, y, Gcost + newTile->Hcost));
                     }
                     else
                     {
@@ -332,9 +331,8 @@ Path FindPath::operator() (int startX, int startY,
                 else if (Gcost < newTile->Gcost)
                 {
                     // Found a shorter route.
-                    // Update Gcost and Fcost of the new tile
+                    // Update Gcost of the new tile
                     newTile->Gcost = Gcost;
-                    newTile->Fcost = Gcost + newTile->Hcost;
 
                     // Set the current tile as the parent of the new tile
                     newTile->parentX = curr.x;
@@ -342,7 +340,7 @@ Path FindPath::operator() (int startX, int startY,
 
                     // Add this tile to the open list (it's already
                     // there, but this instance has a lower F score)
-                    openList.push(Location(x, y, newTile));
+                    openList.push(Location(x, y, Gcost + newTile->Hcost));
                 }
             }
         }
