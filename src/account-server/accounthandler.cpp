@@ -800,19 +800,6 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
                                              mDefaultAttributes.end());
             newCharacter->setAccount(acc);
             newCharacter->setCharacterSlot(slot);
-            newCharacter->setLevel(1);
-
-            // Init GP value to avoid flawed ones.
-            AttributeMap::iterator itr =
-                newCharacter->mAttributes.find(ATTR_GP);
-            if (itr != newCharacter->mAttributes.end())
-            {
-                itr->second.base = 0;
-                itr->second.modified = 0;
-            }
-
-            newCharacter->setCharacterPoints(0);
-            newCharacter->setCorrectionPoints(0);
             newCharacter->setGender(gender);
             newCharacter->setHairStyle(hairStyle);
             newCharacter->setHairColor(hairColor);
