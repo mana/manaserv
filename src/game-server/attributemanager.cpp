@@ -46,7 +46,7 @@ void AttributeManager::reload()
         exit(EXIT_XML_NOT_FOUND);
     }
 
-    XML::Document doc(absPathFile, int());
+    XML::Document doc(absPathFile, false);
     xmlNodePtr node = doc.rootNode();
     if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
     {
@@ -209,8 +209,8 @@ void AttributeManager::reload()
     LOG_INFO("Loaded '" << mAttributeMap.size() << "' attributes with '"
              << count << "' modifier layers.");
 
-    for(TagMap::const_iterator i = mTagMap.begin(), i_end = mTagMap.end();
-        i != i_end; ++i)
+    for (TagMap::const_iterator i = mTagMap.begin(), i_end = mTagMap.end();
+         i != i_end; ++i)
     {
         LOG_DEBUG("Tag '" << i->first << "': '" << i->second.first << "', '"
                   << i->second.second << "'.");
@@ -222,7 +222,8 @@ void AttributeManager::reload()
 const std::vector<struct AttributeInfoType> *AttributeManager::getAttributeInfo(unsigned int id) const
 {
     AttributeMap::const_iterator ret = mAttributeMap.find(id);
-    if (ret == mAttributeMap.end()) return 0;
+    if (ret == mAttributeMap.end())
+        return 0;
     return &ret->second.second;
 }
 
@@ -234,7 +235,8 @@ const AttributeScopes &AttributeManager::getAttributeInfoForType(SCOPE_TYPES typ
 bool AttributeManager::isAttributeDirectlyModifiable(unsigned int id) const
 {
     AttributeMap::const_iterator ret = mAttributeMap.find(id);
-    if (ret == mAttributeMap.end()) return false;
+    if (ret == mAttributeMap.end())
+        return false;
     return ret->second.first;
 }
 

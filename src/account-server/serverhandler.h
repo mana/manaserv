@@ -73,4 +73,4 @@ namespace GameServerHandler
     void syncDatabase(MessageIn &msg);
 }
 
-#endif
+#endif // SERVERHANDLER_H

@@ -55,7 +55,7 @@ void ItemManager::reload()
         return;
     }
 
-    XML::Document doc(absPathFile, int());
+    XML::Document doc(absPathFile, false);
     rootNode = doc.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "equip-slots"))
@@ -109,7 +109,7 @@ void ItemManager::reload()
         return;
     }
 
-    XML::Document doc2(absPathFile, int());
+    XML::Document doc2(absPathFile, false);
     rootNode = doc2.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))

@@ -46,37 +46,10 @@
 
 using namespace ManaServ;
 
-/**
- * Adds server specific info to the current message
- *
- * The info are made of:
- * (String) Update Host URL (or "")
- * (String) Client Data URL (or "")
- * (Byte)   Number of maximum character slots (empty or not)
- */
-static void addServerInfo(MessageOut *msg)
-{
-    std::string updateHost = Configuration::getValue("net_defaultUpdateHost",
-                                                     "");
-    msg->writeString(updateHost);
-
-    /*
-     * This is for developing/testing an experimental new resource manager that
-     * downloads only the files it needs on demand.
-     */
-    std::string dataUrl = Configuration::getValue("net_clientDataUrl",
-                                                  std::string());
-    msg->writeString(dataUrl);
-
-    // Send the number of available slots (empty or not)
-    msg->writeInt8(Configuration::getValue("account_maxCharacters", 3));
-}
-
-
 class AccountHandler : public ConnectionHandler
 {
 public:
-    AccountHandler(const std::string &attrFile);
+    AccountHandler(const std::string &attributesFile);
 
     /**
      * Called by the token collector in order to associate a client to its
@@ -129,6 +102,8 @@ private:
     void handleCharacterSelectMessage(AccountClient &client, MessageIn &msg);
     void handleCharacterDeleteMessage(AccountClient &client, MessageIn &msg);
 
+    void addServerInfo(MessageOut *msg);
+
 
     /** List of attributes that the client can send at account creation. */
     std::vector<int> mModifiableAttributes;
@@ -138,9 +113,21 @@ private:
      */
     AttributeMap mDefaultAttributes;
 
-    int mStartingPoints;   /** Character's starting points. */
-    int mAttributeMinimum; /** Minimum value for customized attributes. */
-    int mAttributeMaximum; /** Maximum value for customized attributes. */
+    int mStartingPoints;   /**< Character's starting points. */
+    int mAttributeMinimum; /**< Minimum value for customized attributes. */
+    int mAttributeMaximum; /**< Maximum value for customized attributes. */
+
+    int mNumHairStyles;
+    int mNumHairColors;
+    int mNumGenders;
+    unsigned mMinNameLength;
+    unsigned mMaxNameLength;
+    int mMaxCharacters;
+
+    bool mRegistrationAllowed;
+
+    std::string mUpdateHost;
+    std::string mDataUrl;
 
     typedef std::map<int, time_t> IPsToTime;
     IPsToTime mLastLoginAttemptForIP;
@@ -148,24 +135,33 @@ private:
 
 static AccountHandler *accountHandler;
 
-AccountHandler::AccountHandler(const std::string &attrFile):
+AccountHandler::AccountHandler(const std::string &attributesFile):
     mTokenCollector(this),
     mStartingPoints(0),
     mAttributeMinimum(0),
-    mAttributeMaximum(0)
+    mAttributeMaximum(0),
+    mNumHairStyles(Configuration::getValue("char_numHairStyles", 17)),
+    mNumHairColors(Configuration::getValue("char_numHairColors", 11)),
+    mNumGenders(Configuration::getValue("char_numGenders", 2)),
+    mMinNameLength(Configuration::getValue("char_minNameLength", 4)),
+    mMaxNameLength(Configuration::getValue("char_maxNameLength", 25)),
+    mMaxCharacters(Configuration::getValue("account_maxCharacters", 3)),
+    mRegistrationAllowed(Configuration::getBoolValue("account_allowRegister", true)),
+    mUpdateHost(Configuration::getValue("net_defaultUpdateHost", std::string())),
+    mDataUrl(Configuration::getValue("net_clientDataUrl", std::string()))
 {
-    std::string absPathFile = ResourceManager::resolve(attrFile);
+    std::string absPathFile = ResourceManager::resolve(attributesFile);
     if (absPathFile.empty())
     {
-        LOG_FATAL("Account handler: Could not find " << attrFile << "!");
+        LOG_FATAL("Account handler: Could not find " << attributesFile << "!");
         exit(EXIT_XML_NOT_FOUND);
     }
 
-    XML::Document doc(absPathFile, int());
+    XML::Document doc(absPathFile, false);
     xmlNodePtr node = doc.rootNode();
     if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
     {
-        LOG_FATAL("Account handler: " << attrFile << ": "
+        LOG_FATAL("Account handler: " << attributesFile << ": "
                   << " is not a valid database file!");
         exit(EXIT_XML_BAD_PARAMETER);
     }
@@ -177,7 +173,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
             int id = XML::getProperty(attributenode, "id", 0);
             if (!id)
             {
-                LOG_WARN("Account handler: " << attrFile << ": "
+                LOG_WARN("Account handler: " << attributesFile << ": "
                          << "An invalid attribute id value (0) has been found "
                          << "and will be ignored.");
                 continue;
@@ -205,7 +201,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
             // Stops if not all the values are given.
             if (!mStartingPoints || !mAttributeMinimum || !mAttributeMaximum)
             {
-                LOG_FATAL("Account handler: " << attrFile << ": "
+                LOG_FATAL("Account handler: " << attributesFile << ": "
                           << " The characters starting points "
                           << "are incomplete or not set!");
                 exit(EXIT_XML_BAD_PARAMETER);
@@ -215,7 +211,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
 
     if (mModifiableAttributes.empty())
     {
-        LOG_FATAL("Account handler: " << attrFile << ": "
+        LOG_FATAL("Account handler: " << attributesFile << ": "
                   << "No modifiable attributes found!");
         exit(EXIT_XML_BAD_PARAMETER);
     }
@@ -224,7 +220,7 @@ AccountHandler::AccountHandler(const std::string &attrFile):
     if (attributeCount * mAttributeMaximum < mStartingPoints ||
         attributeCount * mAttributeMinimum > mStartingPoints)
     {
-        LOG_FATAL("Account handler: " << attrFile << ": "
+        LOG_FATAL("Account handler: " << attributesFile << ": "
                   << "Character's point values make "
                   << "the character's creation impossible!");
         exit(EXIT_XML_BAD_PARAMETER);
@@ -234,10 +230,10 @@ AccountHandler::AccountHandler(const std::string &attrFile):
               << mAttributeMinimum << ", Max: " << mAttributeMaximum << ")");
 }
 
-bool AccountClientHandler::initialize(const std::string &configFile, int port,
+bool AccountClientHandler::initialize(const std::string &attributesFile, int port,
                                       const std::string &host)
 {
-    accountHandler = new AccountHandler(configFile);
+    accountHandler = new AccountHandler(attributesFile);
     LOG_INFO("Account handler started:");
 
     return accountHandler->startListen(port, host);
@@ -247,6 +243,7 @@ void AccountClientHandler::deinitialize()
 {
     accountHandler->stopListen();
     delete accountHandler;
+    accountHandler = 0;
 }
 
 void AccountClientHandler::process()
@@ -266,7 +263,7 @@ NetComputer *AccountHandler::computerConnected(ENetPeer *peer)
 
 void AccountHandler::computerDisconnected(NetComputer *comp)
 {
-    AccountClient *client = static_cast< AccountClient * >(comp);
+    AccountClient *client = static_cast<AccountClient *>(comp);
 
     if (client->status == CLIENT_QUEUED)
         // Delete it from the pendingClient list
@@ -441,7 +438,7 @@ void AccountHandler::handleReconnectMessage(AccountClient &client,
     mTokenCollector.addPendingClient(magic_token, &client);
 }
 
-bool checkCaptcha(AccountClient &client, std::string captcha)
+static bool checkCaptcha(AccountClient &client, const std::string &captcha)
 {
     // TODO
     return true;
@@ -455,8 +452,6 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
     std::string password = msg.readString();
     std::string email = msg.readString();
     std::string captcha = msg.readString();
-    unsigned minNameLength = Configuration::getValue("account_minNameLength", 4);
-    unsigned maxNameLength = Configuration::getValue("account_maxNameLength", 15);
 
     MessageOut reply(APMSG_REGISTER_RESPONSE);
 
@@ -464,7 +459,7 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
     {
         reply.writeInt8(ERRMSG_FAILURE);
     }
-    else if (!Configuration::getBoolValue("account_allowRegister", true))
+    else if (!mRegistrationAllowed)
     {
         reply.writeInt8(ERRMSG_FAILURE);
     }
@@ -472,38 +467,19 @@ void AccountHandler::handleRegisterMessage(AccountClient &client,
     {
         reply.writeInt8(REGISTER_INVALID_VERSION);
     }
-    else if (stringFilter->findDoubleQuotes(username))
+    else if (stringFilter->findDoubleQuotes(username)
+             || stringFilter->findDoubleQuotes(email)
+             || username.length() < mMinNameLength
+             || username.length() > mMaxNameLength
+             || !stringFilter->isEmailValid(email)
+             || !stringFilter->filterContent(username))
     {
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (stringFilter->findDoubleQuotes(email))
-    {
-        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
-    }
-    else if (username.length() < minNameLength ||
-            username.length() > maxNameLength)
-    {
-        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
-    }
-    else if (stringFilter->findDoubleQuotes(password))
-    {
-        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
-    }
-    else if (!stringFilter->isEmailValid(email))
-    {
-        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
-    }
-    // Checking if the Name is slang's free.
-    else if (!stringFilter->filterContent(username))
-    {
-        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
-    }
-    // Check whether the account already exists.
     else if (storage->doesUserNameExist(username))
     {
         reply.writeInt8(REGISTER_EXISTS_USERNAME);
     }
-    // Find out whether the email is already in use.
     else if (storage->doesEmailAddressExist(sha256(email)))
     {
         reply.writeInt8(REGISTER_EXISTS_EMAIL);
@@ -599,8 +575,8 @@ void AccountHandler::handleRequestRegisterInfoMessage(AccountClient &client,
     else
     {
         reply.writeInt8(true);
-        reply.writeInt8(Configuration::getValue("account_minNameLength", 4));
-        reply.writeInt8(Configuration::getValue("account_maxNameLength", 16));
+        reply.writeInt8(mMinNameLength);
+        reply.writeInt8(mMaxNameLength);
         reply.writeString("http://www.server.example/captcha.png");
         reply.writeString("<instructions for solving captcha>");
     }
@@ -690,13 +666,6 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
     if (msg.getUnreadLength() > 7)
         slot = msg.readInt8();
 
-    int numHairStyles = Configuration::getValue("char_numHairStyles", 17);
-    int numHairColors = Configuration::getValue("char_numHairColors", 11);
-    int numGenders = Configuration::getValue("char_numGenders", 2);
-    unsigned int minNameLength = Configuration::getValue("char_minNameLength", 4);
-    unsigned int maxNameLength = Configuration::getValue("char_maxNameLength", 25);
-    int maxCharacters = Configuration::getValue("account_maxCharacters", 3);
-
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
     Account *acc = client.getAccount();
@@ -712,20 +681,20 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
     {
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
-    else if (hairStyle > numHairStyles)
+    else if (hairStyle > mNumHairStyles)
     {
         reply.writeInt8(CREATE_INVALID_HAIRSTYLE);
     }
-    else if (hairColor > numHairColors)
+    else if (hairColor > mNumHairColors)
     {
         reply.writeInt8(CREATE_INVALID_HAIRCOLOR);
     }
-    else if (gender > numGenders)
+    else if (gender > mNumGenders)
     {
         reply.writeInt8(CREATE_INVALID_GENDER);
     }
-    else if ((name.length() < minNameLength) ||
-             (name.length() > maxNameLength))
+    else if ((name.length() < mMinNameLength) ||
+             (name.length() > mMaxNameLength))
     {
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
     }
@@ -741,7 +710,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         // An account shouldn't have more
         // than <account_maxCharacters> characters.
         Characters &chars = acc->getCharacters();
-        if (slot < 1 || slot > maxCharacters
+        if (slot < 1 || slot > mMaxCharacters
             || !acc->isSlotEmpty((unsigned int) slot))
         {
             reply.writeInt8(CREATE_INVALID_SLOT);
@@ -749,7 +718,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             return;
         }
 
-        if ((int)chars.size() >= maxCharacters)
+        if ((int)chars.size() >= mMaxCharacters)
         {
             reply.writeInt8(CREATE_TOO_MUCH_CHARACTERS);
             client.send(reply);
@@ -902,10 +871,9 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
     // When the chatListenToClientPort is set, we use it.
     // Otherwise, we use the accountListenToClientPort + 2 if the option is set.
     // If neither, the DEFAULT_SERVER_PORT + 2 is used.
-    int alternativePort =
-        Configuration::getValue("net_accountListenToClientPort", 0) + 2;
-    if (alternativePort == 2)
-        alternativePort = DEFAULT_SERVER_PORT + 2;
+    const int alternativePort =
+        Configuration::getValue("net_accountListenToClientPort",
+                                DEFAULT_SERVER_PORT) + 2;
     reply.writeInt16(Configuration::getValue("net_chatListenToClientPort",
                                              alternativePort));
 
@@ -961,6 +929,25 @@ void AccountHandler::handleCharacterDeleteMessage(AccountClient &client,
 
     reply.writeInt8(ERRMSG_OK);
     client.send(reply);
+}
+
+/**
+ * Adds server specific info to the current message
+ *
+ * The info are made of:
+ * (String) Update Host URL (or "")
+ * (String) Client Data URL (or "")
+ * (Byte)   Number of maximum character slots (empty or not)
+ */
+void AccountHandler::addServerInfo(MessageOut *msg)
+{
+    msg->writeString(mUpdateHost);
+    /*
+     * This is for developing/testing an experimental new resource manager that
+     * downloads only the files it needs on demand.
+     */
+    msg->writeString(mDataUrl);
+    msg->writeInt8(mMaxCharacters);
 }
 
 void AccountHandler::tokenMatched(AccountClient *client, int accountID)
@@ -1027,7 +1014,6 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
             LOG_DEBUG("Received msg ... REQUEST_REGISTER_INFO");
             handleRequestRegisterInfoMessage(client, message);
             break;
-
 
         case PAMSG_EMAIL_CHANGE:
             LOG_DEBUG("Received msg ... PAMSG_EMAIL_CHANGE");

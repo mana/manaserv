@@ -119,7 +119,7 @@ class Account
          *
          * @param slot slot index of the character.
          */
-        bool isSlotEmpty(unsigned int slot);
+        bool isSlotEmpty(unsigned slot) const;
 
         /**
          * Set the characters.

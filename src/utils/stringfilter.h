@@ -42,7 +42,6 @@ class StringFilter
          * Load slang list from the config file.
          *
          * @return true is the config is loaded succesfully
-         *
          */
         bool loadSlangFilterList();
 
@@ -50,7 +49,6 @@ class StringFilter
          * Write slang list to the config file.
          *
          * @return true is the config is loaded succesfully
-         *
          */
         void writeSlangFilterList();
 

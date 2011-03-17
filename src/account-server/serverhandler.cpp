@@ -43,12 +43,12 @@ using namespace ManaServ;
 
 struct MapStatistics
 {
-  std::vector< int > players;
+  std::vector<int> players;
   unsigned short nbThings;
   unsigned short nbMonsters;
 };
 
-typedef std::map< unsigned short, MapStatistics > ServerStatistics;
+typedef std::map<unsigned short, MapStatistics> ServerStatistics;
 
 /**
  * Stores address, maps, and statistics, of a connected game server.
@@ -171,7 +171,7 @@ void GameServerHandler::registerClient(const std::string &token,
 void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 {
     MessageOut result;
-    GameServer *server = static_cast< GameServer * >(comp);
+    GameServer *server = static_cast<GameServer *>(comp);
 
     switch (msg.getId())
     {

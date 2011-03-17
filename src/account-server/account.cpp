@@ -31,16 +31,12 @@ Account::~Account()
     }
 }
 
-bool Account::isSlotEmpty(unsigned int slot)
+bool Account::isSlotEmpty(unsigned slot) const
 {
-    Characters::iterator i = mCharacters.find(slot);
-    if (i != mCharacters.end())
-        return false;
-    else
-        return true;
+    return mCharacters.find(slot) == mCharacters.end();
 }
 
-void Account::setCharacters(const Characters& characters)
+void Account::setCharacters(const Characters &characters)
 {
     mCharacters = characters;
 }
