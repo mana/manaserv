@@ -1396,7 +1396,6 @@ static int effect_create(lua_State *s)
 }
 
 
-
 /**
  *
  * mana.chr_shake_screen(
@@ -1410,33 +1409,22 @@ static int chr_shake_screen(lua_State *s)
         return 0;
     }
 
+    const int x = luaL_checkint(s, 2);
+    const int y = luaL_checkint(s, 3);
+
     MessageOut msg(GPMSG_SHAKE);
-    if(!lua_isnumber(s, 2) || !lua_isnumber(s, 3))
-    {
-        raiseScriptError(s, "lua chr_shake_screen called with illegal arguments.");
-        return 0;
-    }
-    else
-    {
-        int x = lua_tointeger(s, 2);
-        int y = lua_tointeger(s, 3);
-        msg.writeInt16(x);
-        msg.writeInt16(y);
-    }
-    if(lua_isnumber(s, 4))
-    {
-        msg.writeInt16((int)lua_tonumber(s, 4) * 10000);
-    }
-    if(lua_isnumber(s, 5))
-    {
+    msg.writeInt16(x);
+    msg.writeInt16(y);
+
+    if (lua_isnumber(s, 4))
+        msg.writeInt16((int) (lua_tonumber(s, 4) * 10000));
+    if (lua_isnumber(s, 5))
         msg.writeInt16(lua_tointeger(s, 5));
-    }
+
     c->getClient()->send(msg);
 
     return 0;
 }
-
-
 
 
 /**
