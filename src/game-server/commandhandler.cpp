@@ -92,7 +92,7 @@ static CmdRef const cmdRef[] =
         "Teleports you to the location of another character", &handleGoto},
     {"recall", "<character>",
         "Teleports another character to your location", &handleRecall},
-    {"ban", "<character> <length of time>",
+    {"ban", "<character> <length of time>(m|h|d|w|y)",
         "Bans the character and all characters on the same account from the game", &handleBan},
     {"item", "<character> <item id> <amount>",
         "Creates a number of items in the inventory of a character", &handleItem},
@@ -776,6 +776,7 @@ static void handleBan(Character *player, std::string &args)
 {
     Character *other;
     int length;
+    int lengthMutiplier = 0;
 
     // get arguments
     std::string character = getArgument(args);
@@ -797,27 +798,50 @@ static void handleBan(Character *player, std::string &args)
         return;
     }
 
-    // check the length is really an integer
-    if (!utils::isNumeric(valuestr))
+    // get the unit
+    char unit = valuestr.at(valuestr.length()-1);
+    switch (unit)
     {
-        say("Invalid argument", player);
-        return;
+        case 'm':
+            lengthMutiplier = 1;
+            break;
+        case 'h':
+            lengthMutiplier = 60;
+            break;
+        case 'd':
+            lengthMutiplier = 60 * 24;
+            break;
+        case 'w':
+            lengthMutiplier = 60 * 24 * 7;
+            break;
+        case 'y':
+            lengthMutiplier = 60 * 24 * 365;
+            break;
     }
-
-    // change the length to an integer
-    length = utils::stringToInt(valuestr);
-
-    if (length < 0)
+    length = utils::stringToInt(valuestr.substr(0, valuestr.length()-1));
+    length = length * lengthMutiplier;
+    if (length <= 0)
     {
-        say("Invalid length", player);
+        std::string errmsg;
+        errmsg += "Invalid length. Please enter a positive number ";
+        errmsg += "followed by the letter m, h, d, w or y for minutes ";
+        errmsg += ", hours, days, weeks or years.";
+        say(errmsg , player);
         return;
     }
 
     // ban the player
     accountHandler->banCharacter(other, length);
+    // disconnect the player
+    MessageOut kickmsg(GPMSG_CONNECT_RESPONSE);
+    kickmsg.writeInt8(ERRMSG_ADMINISTRATIVE_LOGOFF);
+    other->getClient()->disconnect(kickmsg);
 
+    // feedback for command user
+    std::string msg = "You've banned " + other->getName() + " for " + utils::toString(length) + " minutes";
+    say(msg.c_str(), player);
     // log transaction
-    std::string msg = "User banned " + other->getName();
+    msg = "User banned " + other->getName() + " for " + utils::toString(length) + " minutes";
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_BAN, msg);
 }
 

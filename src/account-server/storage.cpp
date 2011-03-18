@@ -1649,6 +1649,7 @@ void Storage::banCharacter(int id, int duration)
 {
     try
     {
+        // check the account of the character
         std::ostringstream query;
         query << "select user_id from " << CHARACTERS_TBL_NAME
               << " where id = '" << id << "';";
@@ -1659,10 +1660,12 @@ void Storage::banCharacter(int id, int duration)
             return;
         }
 
+        uint64_t bantime = (uint64_t)time(0) + (uint64_t)duration * 60u;
+        // ban the character
         std::ostringstream sql;
         sql << "update " << ACCOUNTS_TBL_NAME
             << " set level = '" << AL_BANNED << "', banned = '"
-            << time(0) + duration * 60
+            << bantime
             << "' where id = '" << info(0, 0) << "';";
         mDb->execSql(sql.str());
     }

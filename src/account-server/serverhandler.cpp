@@ -383,7 +383,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GAMSG_BAN_PLAYER:
         {
             int id = msg.readInt32();
-            int duration = msg.readInt16();
+            int duration = msg.readInt32();
             storage->banCharacter(id, duration);
         } break;
 

@@ -294,7 +294,7 @@ void AccountConnection::banCharacter(Character *ch, int duration)
 {
     MessageOut msg(GAMSG_BAN_PLAYER);
     msg.writeInt32(ch->getDatabaseID());
-    msg.writeInt16(duration);
+    msg.writeInt32(duration);
     send(msg);
 }
 
