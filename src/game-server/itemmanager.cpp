@@ -47,25 +47,25 @@ void ItemManager::reload()
 
 void ItemManager::deinitialize()
 {
-    for (ItemClasses::iterator i = itemClasses.begin(),
-         i_end = itemClasses.end(); i != i_end; ++i)
+    for (ItemClasses::iterator i = mItemClasses.begin(),
+         i_end = mItemClasses.end(); i != i_end; ++i)
     {
         delete i->second;
     }
-    itemClasses.clear();
+    mItemClasses.clear();
 }
 
 ItemClass *ItemManager::getItem(int itemId) const
 {
-    ItemClasses::const_iterator i = itemClasses.find(itemId);
-    return i != itemClasses.end() ? i->second : 0;
+    ItemClasses::const_iterator i = mItemClasses.find(itemId);
+    return i != mItemClasses.end() ? i->second : 0;
 }
 
 ItemClass *ItemManager::getItemByName(std::string name) const
 {
     name = utils::toLower(name);
-    for (ItemClasses::const_iterator i = itemClasses.begin(),
-         i_end = itemClasses.end(); i != i_end; ++i)
+    for (ItemClasses::const_iterator i = mItemClasses.begin(),
+         i_end = mItemClasses.end(); i != i_end; ++i)
     {
         if (utils::toLower(i->second->getName()) == name)
         {
@@ -82,13 +82,13 @@ unsigned int ItemManager::getDatabaseVersion() const
 
 const std::string &ItemManager::getEquipNameFromId(unsigned int id) const
 {
-    return equipSlots.at(id).first;
+    return mEquipSlots.at(id).first;
 }
 
 unsigned int ItemManager::getEquipIdFromName(const std::string &name) const
 {
-    for (unsigned int i = 0; i < equipSlots.size(); ++i)
-        if (name == equipSlots.at(i).first)
+    for (unsigned int i = 0; i < mEquipSlots.size(); ++i)
+        if (name == mEquipSlots.at(i).first)
             return i;
     LOG_WARN("Item Manager: attempt to find equip id from name \"" <<
              name << "\" not found, defaulting to 0!");
@@ -97,19 +97,19 @@ unsigned int ItemManager::getEquipIdFromName(const std::string &name) const
 
 unsigned int ItemManager::getMaxSlotsFromId(unsigned int id) const
 {
-    return equipSlots.at(id).second;
+    return mEquipSlots.at(id).second;
 }
 
 unsigned int ItemManager::getVisibleSlotCount() const
 {
     if (!mVisibleEquipSlotCount)
     {
-        for (VisibleEquipSlots::const_iterator it = visibleEquipSlots.begin(),
-                                               it_end = visibleEquipSlots.end();
+        for (VisibleEquipSlots::const_iterator it = mVisibleEquipSlots.begin(),
+                                               it_end = mVisibleEquipSlots.end();
              it != it_end;
              ++it)
         {
-            mVisibleEquipSlotCount += equipSlots.at(*it).second;
+            mVisibleEquipSlotCount += mEquipSlots.at(*it).second;
         }
     }
     return mVisibleEquipSlotCount;
@@ -117,8 +117,8 @@ unsigned int ItemManager::getVisibleSlotCount() const
 
 bool ItemManager::isEquipSlotVisible(unsigned int id) const
 {
-    for (VisibleEquipSlots::const_iterator it = visibleEquipSlots.begin(),
-                                           it_end = visibleEquipSlots.end();
+    for (VisibleEquipSlots::const_iterator it = mVisibleEquipSlots.begin(),
+                                           it_end = mVisibleEquipSlots.end();
          it != it_end;
          ++it)
     {
@@ -169,12 +169,12 @@ void ItemManager::readEquipSlotsFile()
                 bool visible = XML::getProperty(node, "visible", "false") != "false";
                 if (visible)
                 {
-                    visibleEquipSlots.push_back(equipSlots.size());
+                    mVisibleEquipSlots.push_back(mEquipSlots.size());
                     if (++visibleSlotCount > 7)
                         LOG_WARN("Item Manager: More than 7 visible equip slot!"
                                  "This will not work with current netcode!");
                 }
-                equipSlots.push_back(std::pair<std::string, unsigned int>
+                mEquipSlots.push_back(std::pair<std::string, unsigned int>
                                      (name, count));
                 totalCount += count;
                 ++slotCount;
@@ -215,7 +215,7 @@ void ItemManager::readItemsFile()
         }
     }
 
-    LOG_INFO("Loaded " << itemClasses.size() << " items from "
+    LOG_INFO("Loaded " << mItemClasses.size() << " items from "
              << absPathFile << ".");
 }
 
@@ -236,7 +236,7 @@ void ItemManager::readItemNode(xmlNodePtr itemNode)
         return;
 
     ItemClass *item;
-    ItemClasses::iterator i = itemClasses.find(id);
+    ItemClasses::iterator i = mItemClasses.find(id);
 
     unsigned int maxPerSlot = XML::getProperty(itemNode, "max-per-slot", 0);
     if (!maxPerSlot)
@@ -246,10 +246,10 @@ void ItemManager::readItemNode(xmlNodePtr itemNode)
         maxPerSlot = 1;
     }
 
-    if (i == itemClasses.end())
+    if (i == mItemClasses.end())
     {
         item = new ItemClass(id, maxPerSlot);
-        itemClasses[id] = item;
+        mItemClasses[id] = item;
     }
     else
     {

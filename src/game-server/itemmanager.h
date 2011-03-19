@@ -98,9 +98,9 @@ class ItemManager
         // Reference to the vector position of equipSlots
         typedef std::vector< unsigned int > VisibleEquipSlots;
 
-        ItemClasses itemClasses; /**< Item reference */
-        EquipSlots equipSlots;
-        VisibleEquipSlots visibleEquipSlots;
+        ItemClasses mItemClasses; /**< Item reference */
+        EquipSlots mEquipSlots;
+        VisibleEquipSlots mVisibleEquipSlots;
 
         std::string mItemsFile;
         std::string mEquipSlotsFile;
