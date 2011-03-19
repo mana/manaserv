@@ -212,7 +212,6 @@ class ItemClass
 
 
     private:
-
         /**
          * Add an effect to a trigger
          * @param effect  The effect to be run when the trigger is hit.
@@ -267,9 +266,8 @@ class ItemClass
 };
 
 /**
-* Class for an item stack laying on the floor in the game world
-*/
-
+ * Class for an item stack laying on the floor in the game world
+ */
 class Item : public Actor
 {
     public:
@@ -289,4 +287,4 @@ class Item : public Actor
         int mLifetime;
 };
 
-#endif
+#endif // ITEM_H

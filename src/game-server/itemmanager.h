@@ -21,6 +21,8 @@
 #ifndef ITEMMANAGER_H
 #define ITEMMANAGER_H
 
+#include "utils/xml.h"
+
 #include <string>
 #include <map>
 #include <vector>
@@ -31,9 +33,12 @@ class ItemManager
 {
     public:
         ItemManager(const std::string &itemFile, const std::string &equipFile) :
-                mItemReferenceFile(itemFile),
-                mEquipCharSlotReferenceFile(equipFile),
-                mItemDatabaseVersion(0) {}
+            mItemsFile(itemFile),
+            mEquipSlotsFile(equipFile),
+            mVisibleEquipSlotCount(0),
+            mItemDatabaseVersion(0)
+        {}
+
         /**
          * Loads item reference file.
          */
@@ -78,6 +83,15 @@ class ItemManager
         bool isEquipSlotVisible(unsigned int id) const;
 
     private:
+        /** Loads the equip slots that a character has available to them. */
+        void readEquipSlotsFile();
+
+        /** Loads the main item database. */
+        void readItemsFile();
+        void readItemNode(xmlNodePtr itemNode);
+        void readEquipNode(xmlNodePtr equipNode, ItemClass *item);
+        void readEffectNode(xmlNodePtr effectNode, ItemClass *item);
+
         typedef std::map< int, ItemClass * > ItemClasses;
         // Map a string (name of slot) with (str-id, max-per-equip-slot)
         typedef std::vector< std::pair< std::string, unsigned int > > EquipSlots;
@@ -88,11 +102,12 @@ class ItemManager
         EquipSlots equipSlots;
         VisibleEquipSlots visibleEquipSlots;
 
-        std::string mItemReferenceFile;
-        std::string mEquipCharSlotReferenceFile;
+        std::string mItemsFile;
+        std::string mEquipSlotsFile;
         mutable unsigned int mVisibleEquipSlotCount; // Cache
 
-        unsigned int mItemDatabaseVersion; /**< Version of the loaded items database file.*/
+        /** Version of the loaded items database file.*/
+        unsigned int mItemDatabaseVersion;
 };
 
 extern ItemManager *itemManager;
