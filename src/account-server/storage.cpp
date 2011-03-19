@@ -35,6 +35,8 @@
 #include "utils/throwerror.h"
 #include "utils/xml.h"
 
+#include <stdint.h>
+
 static const char *DEFAULT_ITEM_FILE = "items.xml";
 
 // Defines the supported db version
