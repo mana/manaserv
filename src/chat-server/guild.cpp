@@ -19,7 +19,7 @@
  */
 
 #include "guild.h"
-#include "defines.h"
+#include "common/defines.h"
 
 #include <algorithm>
 

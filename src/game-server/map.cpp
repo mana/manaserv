@@ -26,7 +26,7 @@
 
 #include "game-server/map.h"
 
-#include "defines.h"
+#include "common/defines.h"
 
 /**
  * Stores information used during path finding for each tile of a map.

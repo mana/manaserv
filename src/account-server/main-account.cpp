@@ -31,6 +31,8 @@
 #include "chat-server/guildmanager.h"
 #include "chat-server/post.h"
 #include "common/configuration.h"
+#include "common/defines.h"
+#include "common/manaserv_protocol.h"
 #include "common/resourcemanager.h"
 #include "net/bandwidth.h"
 #include "net/connectionhandler.h"
@@ -40,8 +42,6 @@
 #include "utils/stringfilter.h"
 #include "utils/time.h"
 #include "utils/timer.h"
-#include "defines.h"
-#include "manaserv_protocol.h"
 
 #include <cstdlib>
 #include <getopt.h>

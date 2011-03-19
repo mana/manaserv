@@ -29,15 +29,15 @@
 #include "account-server/character.h"
 #include "account-server/storage.h"
 #include "chat-server/post.h"
-#include "common/transaction.h"
 #include "common/configuration.h"
+#include "common/manaserv_protocol.h"
+#include "common/transaction.h"
 #include "net/connectionhandler.h"
 #include "net/messageout.h"
 #include "net/netcomputer.h"
 #include "serialize/characterdata.h"
 #include "utils/logger.h"
 #include "utils/tokendispenser.h"
-#include "manaserv_protocol.h"
 
 using namespace ManaServ;
 

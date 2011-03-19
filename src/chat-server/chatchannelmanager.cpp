@@ -22,12 +22,12 @@
 
 #include "chat-server/chatchannelmanager.h"
 
-#include "manaserv_protocol.h"
 #include "account-server/storage.h"
 #include "chat-server/chatclient.h"
 #include "chat-server/chathandler.h"
 #include "chat-server/guildmanager.h"
 #include "common/configuration.h"
+#include "common/manaserv_protocol.h"
 #include "utils/stringfilter.h"
 
 using namespace ManaServ;

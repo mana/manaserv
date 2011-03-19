@@ -23,7 +23,7 @@
 
 #include <map>
 
-#include "defines.h"
+#include "common/defines.h"
 #include "common/inventorydata.h"
 #include "net/messagein.h"
 #include "net/messageout.h"

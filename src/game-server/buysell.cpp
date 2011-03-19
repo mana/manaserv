@@ -26,8 +26,7 @@
 #include "game-server/itemmanager.h"
 #include "game-server/item.h"
 #include "net/messageout.h"
-
-#include "defines.h"
+#include "common/defines.h"
 
 #include <algorithm>
 

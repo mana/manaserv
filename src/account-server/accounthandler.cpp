@@ -20,7 +20,6 @@
 
 #include "account-server/accounthandler.h"
 
-#include "manaserv_protocol.h"
 #include "account-server/account.h"
 #include "account-server/accountclient.h"
 #include "account-server/character.h"
@@ -28,6 +27,7 @@
 #include "account-server/serverhandler.h"
 #include "chat-server/chathandler.h"
 #include "common/configuration.h"
+#include "common/manaserv_protocol.h"
 #include "common/resourcemanager.h"
 #include "common/transaction.h"
 #include "net/connectionhandler.h"

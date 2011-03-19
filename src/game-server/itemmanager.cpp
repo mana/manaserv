@@ -20,7 +20,7 @@
 
 #include "game-server/itemmanager.h"
 
-#include "defines.h"
+#include "common/defines.h"
 #include "common/resourcemanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/item.h"

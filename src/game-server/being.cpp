@@ -22,8 +22,8 @@
 
 #include "game-server/being.h"
 
-#include "defines.h"
 #include "common/configuration.h"
+#include "common/defines.h"
 #include "game-server/attributemanager.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"

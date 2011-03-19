@@ -23,13 +23,13 @@
 #include <string>
 #include <sstream>
 
-#include "manaserv_protocol.h"
 #include "account-server/character.h"
 #include "account-server/storage.h"
 #include "chat-server/guildmanager.h"
 #include "chat-server/chatchannelmanager.h"
 #include "chat-server/chatclient.h"
 #include "chat-server/chathandler.h"
+#include "common/manaserv_protocol.h"
 #include "common/transaction.h"
 #include "net/connectionhandler.h"
 #include "net/messagein.h"

@@ -20,7 +20,7 @@
 
 #include "utils/speedconv.h"
 
-#include "defines.h"
+#include "common/defines.h"
 
 // Defines the max base scale used to compute the raw speed system.
 // The raw speed is the number of tile moves per server tick multiplied the

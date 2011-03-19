@@ -100,11 +100,11 @@ MARK_AS_ADVANCED(PHYSFS_INCLUDE_DIR)
 MARK_AS_ADVANCED(PHYSFS_LIBRARY)
 
 SET(SRCS
-    defines.h
-    manaserv_protocol.h
     common/configuration.h
     common/configuration.cpp
+    common/defines.h
     common/inventorydata.h
+    common/manaserv_protocol.h
     common/resourcemanager.h
     common/resourcemanager.cpp
     net/bandwidth.h

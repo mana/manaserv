@@ -31,7 +31,8 @@
 #include "net/messagein.h"
 #include "net/messageout.h"
 
-#include "manaserv_protocol.h"
+#include "common/manaserv_protocol.h"
+
 using namespace ManaServ;
 
 void ChatHandler::sendGuildInvite(const std::string &invitedName,

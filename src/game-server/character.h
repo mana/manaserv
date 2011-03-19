@@ -25,10 +25,10 @@
 #include <string>
 #include <vector>
 
+#include "common/defines.h"
+#include "common/manaserv_protocol.h"
 #include "common/inventorydata.h"
 #include "game-server/being.h"
-#include "manaserv_protocol.h"
-#include "defines.h"
 #include "utils/logger.h"
 
 class BuySell;

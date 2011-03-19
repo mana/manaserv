@@ -21,7 +21,7 @@
 #ifndef ATTRIBUTE_H
 #define ATTRIBUTE_H
 
-#include "defines.h"
+#include "common/defines.h"
 #include <vector>
 #include <list>
 

@@ -20,11 +20,11 @@
 
 #include "game-server/attributemanager.h"
 
+#include "common/defines.h"
 #include "common/resourcemanager.h"
 #include "utils/string.h"
 #include "utils/logger.h"
 #include "utils/xml.h"
-#include "defines.h"
 
 void AttributeManager::initialize()
 {
