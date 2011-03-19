@@ -23,12 +23,20 @@
 #include "utils/logger.h"
 #include <cassert>
 
-AttributeModifiersEffect::AttributeModifiersEffect(AT_TY sType, AME_TY eType)
-        : mMod(eType == AME_MULT ? 1 : 0), mSType(sType), mEType(eType)
+AttributeModifiersEffect::AttributeModifiersEffect(StackableType stackableType,
+                                                   ModifierEffectType effectType) :
+    mMod(effectType == Multiplicative ? 1 : 0),
+    mStackableType(stackableType),
+    mEffectType(effectType)
 {
-    assert(eType == AME_MULT || eType == AME_ADD);
-    assert(sType == TY_ST    || sType == TY_NST || sType == TY_NSTB);
-    LOG_DEBUG("Layer created with eType " << eType << " and sType " << sType << ".");
+    assert(effectType == Multiplicative
+           || effectType == Additive);
+    assert(stackableType == Stackable
+           || stackableType == NonStackable
+           || stackableType == NonStackableBonus);
+
+    LOG_DEBUG("Layer created with effectType " << effectType
+              << " and stackableType " << stackableType << ".");
 }
 
 AttributeModifiersEffect::~AttributeModifiersEffect()
@@ -38,17 +46,20 @@ AttributeModifiersEffect::~AttributeModifiersEffect()
     LOG_WARN("DELETION of attribute effect!");
 }
 
-bool AttributeModifiersEffect::add(unsigned short duration, double value, double prevLayerValue, int level)
+bool AttributeModifiersEffect::add(unsigned short duration,
+                                   double value,
+                                   double prevLayerValue,
+                                   int level)
 {
     LOG_DEBUG("Adding modifier with value " << value <<
               " with a previous layer value of " << prevLayerValue << ". "
               "Current mod at this layer: " << mMod << ".");
     bool ret = false;
     mStates.push_back(new AttributeModifierState(duration, value, level));
-    switch (mSType) {
-    case TY_ST:
-        switch (mEType) {
-        case AME_ADD:
+    switch (mStackableType) {
+    case Stackable:
+        switch (mEffectType) {
+        case Additive:
             if (value)
             {
                 ret = true;
@@ -56,7 +67,7 @@ bool AttributeModifiersEffect::add(unsigned short duration, double value, double
                 mCacheVal = prevLayerValue + mMod;
             }
             break;
-        case AME_MULT:
+        case Multiplicative:
             if (value != 1)
             {
                 ret = true;
@@ -66,14 +77,14 @@ bool AttributeModifiersEffect::add(unsigned short duration, double value, double
             break;
         default:
             LOG_FATAL("Attribute modifiers effect: unhandled type '"
-                      << mEType << "' as a stackable!");
+                      << mEffectType << "' as a stackable!");
             assert(0);
             break;
         }
         break;
-    case TY_NST:
-        switch (mEType) {
-        case AME_ADD:
+    case NonStackable:
+        switch (mEffectType) {
+        case Additive:
             if (value > mMod)
             {
                 ret = true;
@@ -84,32 +95,32 @@ bool AttributeModifiersEffect::add(unsigned short duration, double value, double
             break;
         default:
             LOG_FATAL("Attribute modifiers effect: unhandled type '"
-                      << mEType << "' as a non-stackable!");
+                      << mEffectType << "' as a non-stackable!");
             assert(0);
         }
         // A multiplicative type would also be nonsensical
         break;
-    case TY_NSTB:
-        switch (mEType) {
-        case AME_ADD:
-        case AME_MULT:
+    case NonStackableBonus:
+        switch (mEffectType) {
+        case Additive:
+        case Multiplicative:
             if (value > mMod)
             {
                 ret = true;
                 mMod = value;
-                mCacheVal = mEType == AME_ADD ? prevLayerValue + mMod
+                mCacheVal = mEffectType == Additive ? prevLayerValue + mMod
                                               : prevLayerValue * mMod;
             }
             break;
         default:
             LOG_FATAL("Attribute modifiers effect: unhandled type '"
-                      << mEType << "' as a non-stackable bonus!");
+                      << mEffectType << "' as a non-stackable bonus!");
             assert(0);
         }
         break;
     default:
-        LOG_FATAL("Attribute modifiers effect: unknown modifier type '"
-                  << mSType << "'!");
+        LOG_FATAL("Attribute modifiers effect: unknown stackable type '"
+                  << mStackableType << "'!");
         assert(0);
     }
     return ret;
@@ -117,9 +128,13 @@ bool AttributeModifiersEffect::add(unsigned short duration, double value, double
 
 bool durationCompare(const AttributeModifierState *lhs,
                      const AttributeModifierState *rhs)
-{ return lhs->mDuration < rhs->mDuration; }
+{
+    return lhs->mDuration < rhs->mDuration;
+}
 
-bool AttributeModifiersEffect::remove(double value, unsigned int id, bool fullCheck) {
+bool AttributeModifiersEffect::remove(double value, unsigned int id,
+                                      bool fullCheck)
+{
     /* We need to find and check this entry exists, and erase the entry
        from the list too. */
     if (!fullCheck)
@@ -142,7 +157,7 @@ bool AttributeModifiersEffect::remove(double value, unsigned int id, bool fullCh
         mStates.erase(it++);
 
         /* If this is stackable, we need to update for every modifier affected */
-        if (mSType == TY_ST)
+        if (mStackableType == Stackable)
             updateMod();
 
         ret = true;
@@ -154,18 +169,20 @@ bool AttributeModifiersEffect::remove(double value, unsigned int id, bool fullCh
      * from scratch. This is done at the end after modifications have been
      * made as necessary.
      */
-    if (ret && mSType != TY_ST)
+    if (ret && mStackableType != Stackable)
         updateMod();
     return ret;
 }
 
 void AttributeModifiersEffect::updateMod(double value)
 {
-    if (mSType == TY_ST)
+    if (mStackableType == Stackable)
     {
-        if (mEType == AME_ADD)
+        if (mEffectType == Additive)
+        {
             mMod -= value;
-        else if (mEType == AME_MULT)
+        }
+        else if (mEffectType == Multiplicative)
         {
             if (value)
                 mMod /= value;
@@ -181,9 +198,9 @@ void AttributeModifiersEffect::updateMod(double value)
             }
         }
         else LOG_ERROR("Attribute modifiers effect: unhandled type '"
-                       << mEType << "' as a stackable in cache update!");
+                       << mEffectType << "' as a stackable in cache update!");
     }
-    else if (mSType == TY_NST || mSType == TY_NSTB)
+    else if (mStackableType == NonStackable || mStackableType == NonStackableBonus)
     {
         if (mMod == value)
         {
@@ -197,38 +214,43 @@ void AttributeModifiersEffect::updateMod(double value)
                     mMod = (*it)->mValue;
         }
     }
-    else LOG_ERROR("Attribute modifiers effect: unknown modifier type '"
-                   << mSType << "' in cache update!");
+    else
+    {
+        LOG_ERROR("Attribute modifiers effect: unknown stackable type '"
+                  << mStackableType << "' in cache update!");
+    }
 }
 
 bool AttributeModifiersEffect::recalculateModifiedValue(double newPrevLayerValue)
- {
+{
     double oldValue = mCacheVal;
-    switch (mEType) {
-        case AME_ADD:
-            switch (mSType) {
-            case TY_ST:
-            case TY_NSTB:
+    switch (mEffectType) {
+        case Additive:
+            switch (mStackableType) {
+            case Stackable:
+            case NonStackableBonus:
                 mCacheVal = newPrevLayerValue + mMod;
             break;
-            case TY_NST:
+            case NonStackable:
                 mCacheVal = newPrevLayerValue < mMod ? mMod : newPrevLayerValue;
             break;
             default:
-            LOG_FATAL("Unknown stack type '" << mEType << "'!");
+            LOG_FATAL("Unknown effect type '" << mEffectType << "'!");
             assert(0);
         } break;
-        case AME_MULT:
-            mCacheVal = mSType == TY_ST ? newPrevLayerValue * mMod : newPrevLayerValue * mMod;
+        case Multiplicative:
+            mCacheVal = mStackableType == Stackable ? newPrevLayerValue * mMod : newPrevLayerValue * mMod;
         break;
         default:
-        LOG_FATAL("Unknown effect type '" << mEType << "'!");
+        LOG_FATAL("Unknown effect type '" << mEffectType << "'!");
         assert(0);
     }
     return oldValue != mCacheVal;
 }
 
-bool Attribute::add(unsigned short duration, double value, unsigned int layer, int level)
+
+bool Attribute::add(unsigned short duration, double value,
+                    unsigned int layer, int level)
 {
     assert(mMods.size() > layer);
     LOG_DEBUG("Adding modifier to attribute with duration " << duration <<
@@ -256,7 +278,8 @@ bool Attribute::add(unsigned short duration, double value, unsigned int layer, i
     return false;
 }
 
-bool Attribute::remove(double value, unsigned int layer, int lvl, bool fullcheck)
+bool Attribute::remove(double value, unsigned int layer,
+                       int lvl, bool fullcheck)
 {
     assert(mMods.size() > layer);
     if (mMods.at(layer)->remove(value, lvl, fullcheck))
@@ -295,9 +318,10 @@ Attribute::Attribute(const std::vector<struct AttributeInfoType> &type)
     LOG_DEBUG("Construction of new attribute with '" << type.size() << "' layers.");
     for (unsigned int i = 0; i < type.size(); ++i)
     {
-        LOG_DEBUG("Adding layer with stack type " << type[i].sType << " and effect type " << type[i].eType << ".");
-        mMods.push_back(new AttributeModifiersEffect(type[i].sType,
-                                                 type[i].eType));
+        LOG_DEBUG("Adding layer with stackable type " << type[i].stackableType
+                  << " and effect type " << type[i].effectType << ".");
+        mMods.push_back(new AttributeModifiersEffect(type[i].stackableType,
+                                                     type[i].effectType));
         LOG_DEBUG("Layer added.");
     }
 }
@@ -335,24 +359,27 @@ bool Attribute::tick()
 void Attribute::clearMods()
 {
     for (std::vector<AttributeModifiersEffect *>::iterator it = mMods.begin(),
-        it_end = mMods.end(); it != it_end; ++it)
+         it_end = mMods.end(); it != it_end; ++it)
         (*it)->clearMods(mBase);
 }
 
-void Attribute::setBase(double base) {
+void Attribute::setBase(double base)
+{
     LOG_DEBUG("Setting base attribute from " << mBase << " to " << base << ".");
     double prev = mBase = base;
     std::vector<AttributeModifiersEffect *>::iterator it = mMods.begin();
     while (it != mMods.end())
+    {
         if ((*it)->recalculateModifiedValue(prev))
             prev = (*it++)->getCachedModifiedValue();
         else
             break;
+    }
 }
 
 void AttributeModifiersEffect::clearMods(double baseValue)
 {
     mStates.clear();
     mCacheVal = baseValue;
-    mMod = mEType == AME_ADD ? 0 : 1;
+    mMod = mEffectType == Additive ? 0 : 1;
 }

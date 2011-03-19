@@ -78,54 +78,54 @@ void AttributeManager::reload()
             {
                 if (xmlStrEqual(subnode->name, BAD_CAST "modifier"))
                 {
-                    std::string sType = utils::toUpper(
-                                    XML::getProperty(subnode, "stacktype",
-                                                     std::string()));
-                    std::string eType = utils::toUpper(
-                                    XML::getProperty(subnode, "modtype",
-                                                     std::string()));
+                    std::string stackableTypeString = utils::toUpper(
+                                XML::getProperty(subnode, "stacktype",
+                                                 std::string()));
+                    std::string effectTypeString = utils::toUpper(
+                                XML::getProperty(subnode, "modtype",
+                                                 std::string()));
                     std::string tag = utils::toUpper(
                                     XML::getProperty(subnode, "tag",
                                                      std::string()));
-                    AT_TY pSType;
-                    AME_TY pEType;
-                    if (!sType.empty())
+                    StackableType stackableType;
+                    ModifierEffectType effectType;
+                    if (!stackableTypeString.empty())
                     {
-                        if (!eType.empty())
+                        if (!effectTypeString.empty())
                         {
                             bool fail = false;
-                            if (sType == "STACKABLE")
-                                pSType = TY_ST;
-                            else if (sType == "NON STACKABLE")
-                                pSType = TY_NST;
-                            else if (sType == "NON STACKABLE BONUS")
-                                pSType = TY_NSTB;
+                            if (stackableTypeString == "STACKABLE")
+                                stackableType = Stackable;
+                            else if (stackableTypeString == "NON STACKABLE")
+                                stackableType = NonStackable;
+                            else if (stackableTypeString == "NON STACKABLE BONUS")
+                                stackableType = NonStackableBonus;
                             else
                             {
                                 LOG_WARN("Attribute manager: attribute '"
                                          << id << "' has unknown stack type '"
-                                         << sType << "', skipping modifier!");
+                                         << stackableTypeString << "', skipping modifier!");
                                 fail = true;
                             }
 
                             if (!fail)
                             {
-                                if (eType == "ADDITIVE")
-                                    pEType = AME_ADD;
-                                else if (eType == "MULTIPLICATIVE")
-                                    pEType = AME_MULT;
+                                if (effectTypeString == "ADDITIVE")
+                                    effectType = Additive;
+                                else if (effectTypeString == "MULTIPLICATIVE")
+                                    effectType = Multiplicative;
                                 else
                                 {
                                     LOG_WARN(
                                           "Attribute manager: attribute '" << id
                                           << "' has unknown modification type '"
-                                          << sType << "', skipping modifier!");
+                                          << stackableTypeString << "', skipping modifier!");
                                     fail = true;
                                 }
                                 if (!fail)
                                 {
                                     mAttributeMap[id].second.push_back(
-                                          AttributeInfoType(pSType, pEType));
+                                          AttributeInfoType(stackableType, effectType));
                                     std::string tag = XML::getProperty(
                                                 subnode, "tag", std::string());
 
@@ -184,9 +184,9 @@ void AttributeManager::reload()
     }
 
     LOG_DEBUG("attribute map:");
-    LOG_DEBUG("TY_ST is " << TY_ST << ", TY_ NST is " << TY_NST
-              << ", TY_NSTB is " << TY_NSTB << ".");
-    LOG_DEBUG("AME_ADD is " << AME_ADD << ", AME_MULT is " << AME_MULT << ".");
+    LOG_DEBUG("Stackable is " << Stackable << ", NonStackable is " << NonStackable
+              << ", NonStackableBonus is " << NonStackableBonus << ".");
+    LOG_DEBUG("Additive is " << Additive << ", Multiplicative is " << Multiplicative << ".");
     const std::string *tag;
     unsigned int count = 0;
     for (AttributeMap::const_iterator i = mAttributeMap.begin();
@@ -200,8 +200,8 @@ void AttributeManager::reload()
         {
             tag = getTagFromInfo(i->first, lCount);
             std::string end = tag ? "tag of '" + (*tag) + "'." : "no tag.";
-            LOG_DEBUG("    sType: " << j->sType << ", eType: " << j->eType << ", "
-                      "and " << end);
+            LOG_DEBUG("    stackableType: " << j->stackableType
+                      << ", effectType: " << j->effectType << ", and " << end);
             ++lCount;
             ++count;
         }

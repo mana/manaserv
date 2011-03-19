@@ -173,36 +173,35 @@ enum
 };
 
 /**
- * Attribute types. Can be one of stackable, non stackable,
- * or non stackable bonus.
+ * Stackable types.
  * @todo non-stackable malus layers
  */
-enum AT_TY
+enum StackableType
 {
-    TY_ST,
-    TY_NST,
-    TY_NSTB,
-    TY_NONE // Should only be used on types
-            // that have not yet been properly defined.
+    Stackable,
+    NonStackable,
+    NonStackableBonus
 };
 
 /**
  * Attribute augmentation methods.
- * Can be additive or multiplicative.
  */
-enum AME_TY
+enum ModifierEffectType
 {
-    AME_MULT,
-    AME_ADD
+    Multiplicative,
+    Additive
 };
-
 
 struct AttributeInfoType
 {
-        AT_TY sType;
-        AME_TY eType;
-        AttributeInfoType(AT_TY s, AME_TY e) : sType(s), eType(e)
-        {}
+    StackableType stackableType;
+    ModifierEffectType effectType;
+
+    AttributeInfoType(StackableType s,
+                      ModifierEffectType effect) :
+        stackableType(s),
+        effectType(effect)
+    {}
 };
 
 #endif // DEFINES_H

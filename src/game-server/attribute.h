@@ -28,11 +28,19 @@
 class AttributeModifierState
 {
     public:
-        AttributeModifierState(unsigned short duration, double value,
+        AttributeModifierState(unsigned short duration,
+                               double value,
                                unsigned int id)
-                : mDuration(duration), mValue(value), mId(id) {}
-        ~AttributeModifierState() {}
+            : mDuration(duration)
+            , mValue(value)
+            , mId(id)
+        {}
+
+        ~AttributeModifierState()
+        {}
+
         bool tick() { return mDuration ? !--mDuration : false; }
+
     private:
         /** Number of ticks (0 means permanent, e.g. equipment). */
         unsigned short mDuration;
@@ -48,10 +56,13 @@ class AttributeModifierState
         friend class AttributeModifiersEffect;
 };
 
-class AttributeModifiersEffect {
+class AttributeModifiersEffect
+{
     public:
-        AttributeModifiersEffect(AT_TY sType, AME_TY eType);
+        AttributeModifiersEffect(StackableType stackableType,
+                                 ModifierEffectType effectType);
         ~AttributeModifiersEffect();
+
         /**
          * Recalculates the value for this level.
          * @returns True if the value changed, false if it did not change.
@@ -102,7 +113,7 @@ class AttributeModifiersEffect {
 
     private:
         /** List of all modifications present at this level */
-        std::list< AttributeModifierState * > mStates;
+        std::list<AttributeModifierState *> mStates;
         /**
          * Stores the value that results from mStates. This takes into
          * account all previous layers.
@@ -113,8 +124,8 @@ class AttributeModifiersEffect {
          * 0 for additive modifiers and 1 for multiplicative modifiers.
          */
         double mMod;
-        const AT_TY  mSType;
-        const AME_TY mEType;
+        const StackableType mStackableType;
+        const ModifierEffectType mEffectType;
 };
 
 class Attribute
@@ -132,7 +143,7 @@ class Attribute
         { return mMods.empty() ? mBase :
                                  (*mMods.rbegin())->getCachedModifiedValue(); }
 
-        /**
+        /*
          * add() and remove() are the standard functions used to add and
          * remove modifiers while keeping track of the modifier state.
          */
@@ -147,7 +158,6 @@ class Attribute
          * @param id Used to identify this effect.
          * @return Whether the modified attribute value was changed.
          */
-
         bool add(unsigned short duration, double value, unsigned int layer, int id = 0);
 
         /**
@@ -178,7 +188,7 @@ class Attribute
 
     private:
         double mBase;
-        std::vector< AttributeModifiersEffect * > mMods;
+        std::vector<AttributeModifiersEffect *> mMods;
 };
 
 #endif // ATTRIBUTE_H
