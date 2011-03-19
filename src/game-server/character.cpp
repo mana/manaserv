@@ -68,11 +68,11 @@ Character::Character(MessageIn &msg):
     mParty(0),
     mTransaction(TRANS_NONE)
 {
-    const AttributeScopes &attr =
-                           attributeManager->getAttributeInfoForType(ATTR_CHAR);
+    const AttributeScope &attr =
+                           attributeManager->getAttributeScope(CharacterScope);
     LOG_DEBUG("Character creation: initialisation of "
               << attr.size() << " attributes.");
-    for (AttributeScopes::const_iterator it1 = attr.begin(),
+    for (AttributeScope::const_iterator it1 = attr.begin(),
          it1_end = attr.end(); it1 != it1_end; ++it1)
         mAttributes.insert(std::make_pair(it1->first, Attribute(*it1->second)));
 

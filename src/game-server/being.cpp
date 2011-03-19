@@ -41,9 +41,9 @@ Being::Being(ThingType type):
     mTarget(NULL),
     mDirection(DOWN)
 {
-    const AttributeScopes &attr = attributeManager->getAttributeInfoForType(ATTR_BEING);
+    const AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
     LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
-    for (AttributeScopes::const_iterator it1 = attr.begin(),
+    for (AttributeScope::const_iterator it1 = attr.begin(),
          it1_end = attr.end();
         it1 != it1_end;
         ++it1)
@@ -541,7 +541,7 @@ bool Being::recalculateBaseAttribute(unsigned int attr)
 
 void Being::updateDerivedAttributes(unsigned int attr)
 {
-    switch(attr)
+    switch (attr)
     {
     case ATTR_MAX_HP:
         updateDerivedAttributes(ATTR_HP);

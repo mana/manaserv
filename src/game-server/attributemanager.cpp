@@ -35,7 +35,7 @@ void AttributeManager::reload()
 {
     mTagMap.clear();
     mAttributeMap.clear();
-    for (unsigned int i = 0; i < ATTR_MAX; ++i)
+    for (unsigned int i = 0; i < MaxScope; ++i)
         mAttributeScopes[i].clear();
 
     std::string absPathFile = ResourceManager::resolve(mAttributeReferenceFile);
@@ -159,19 +159,19 @@ void AttributeManager::reload()
             }
             else if (scope == "CHARACTER")
             {
-                mAttributeScopes[ATTR_CHAR][id] = &mAttributeMap.at(id).second;
+                mAttributeScopes[CharacterScope][id] = &mAttributeMap.at(id).second;
                 LOG_DEBUG("Attribute manager: attribute '" << id
                           << "' added to default character scope.");
             }
             else if (scope == "MONSTER")
             {
-                mAttributeScopes[ATTR_MOB][id] = &mAttributeMap.at(id).second;
+                mAttributeScopes[MonsterScope][id] = &mAttributeMap.at(id).second;
                 LOG_DEBUG("Attribute manager: attribute '" << id
                           << "' added to default monster scope.");
             }
             else if (scope == "BEING")
             {
-                mAttributeScopes[ATTR_BEING][id] = &mAttributeMap.at(id).second;
+                mAttributeScopes[BeingScope][id] = &mAttributeMap.at(id).second;
                 LOG_DEBUG("Attribute manager: attribute '" << id
                           << "' added to default being scope.");
             }
@@ -227,7 +227,7 @@ const std::vector<struct AttributeInfoType> *AttributeManager::getAttributeInfo(
     return &ret->second.second;
 }
 
-const AttributeScopes &AttributeManager::getAttributeInfoForType(SCOPE_TYPES type) const
+const AttributeScope &AttributeManager::getAttributeScope(ScopeType type) const
 {
     return mAttributeScopes[type];
 }

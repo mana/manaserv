@@ -36,9 +36,6 @@ class AttributeModifierState
             , mId(id)
         {}
 
-        ~AttributeModifierState()
-        {}
-
         bool tick() { return mDuration ? !--mDuration : false; }
 
     private:
@@ -77,7 +74,6 @@ class AttributeModifiersEffect
         /**
          * remove() - as with Attribute::remove().
          */
-
         bool remove(double value, unsigned int id, bool fullCheck);
 
         /**
@@ -128,6 +124,10 @@ class AttributeModifiersEffect
         const ModifierEffectType mEffectType;
 };
 
+/**
+ * Represents some attribute of a being. Is has a base value and a modified
+ * value, subject to modifiers that can be added and removed.
+ */
 class Attribute
 {
     public:
@@ -177,13 +177,11 @@ class Attribute
         /**
          * clearMods() removes *all* modifications present in this Attribute (!)
          */
-
         void clearMods();
 
         /**
          * tick() processes all timers associated with modifiers for this attribute.
          */
-
         bool tick();
 
     private:

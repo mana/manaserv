@@ -25,22 +25,24 @@
 #include <vector>
 #include <string>
 
-typedef struct AttributeInfoType AttributeInfoType_t;
-
-enum SCOPE_TYPES {
-    ATTR_BEING = 0,
-    ATTR_CHAR,
-    ATTR_MOB,
+enum ScopeType
+{
+    BeingScope = 0,
+    CharacterScope,
+    MonsterScope,
     // Add new types here as needed
-    ATTR_MAX
+    MaxScope
 };
 
-typedef std::map< int, std::vector<struct AttributeInfoType> * > AttributeScopes;
+typedef std::map< int, std::vector<struct AttributeInfoType> * > AttributeScope;
 
 class AttributeManager
 {
     public:
-        AttributeManager(const std::string &file) : mAttributeReferenceFile(file) {}
+        AttributeManager(const std::string &file) :
+            mAttributeReferenceFile(file)
+        {}
+
         /**
          * Loads attribute reference file.
          */
@@ -50,15 +52,17 @@ class AttributeManager
          * Reloads attribute reference file.
          */
         void reload();
+
         const std::vector<struct AttributeInfoType> *getAttributeInfo(unsigned int) const;
 
-        const AttributeScopes &getAttributeInfoForType(SCOPE_TYPES) const;
+        const AttributeScope &getAttributeScope(ScopeType) const;
 
         bool isAttributeDirectlyModifiable(unsigned int) const;
 
         std::pair<unsigned int,unsigned int> getInfoFromTag(const std::string &) const;
 
         const std::string *getTagFromInfo(unsigned int, unsigned int) const;
+
     private:
         // modifiable, { stackable type, effect type }[]
         typedef std::pair< bool,
@@ -71,7 +75,7 @@ class AttributeManager
                           std::pair<unsigned int, unsigned int> > TagMap;
 
         // being type id -> (*{ stackable type, effect type })[]
-        AttributeScopes mAttributeScopes[ATTR_MAX];
+        AttributeScope mAttributeScopes[MaxScope];
         AttributeMap mAttributeMap;
         TagMap mTagMap;
 
