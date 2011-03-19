@@ -25,6 +25,8 @@
 #include <vector>
 #include <string>
 
+#include "utils/xml.h"
+
 enum ScopeType
 {
     BeingScope = 0,
@@ -64,6 +66,10 @@ class AttributeManager
         const std::string *getTagFromInfo(unsigned int, unsigned int) const;
 
     private:
+        void readAttributesFile();
+        void readAttributeNode(xmlNodePtr attributeNode);
+        void readModifierNode(xmlNodePtr modifierNode, int attributeId);
+
         // modifiable, { stackable type, effect type }[]
         typedef std::pair< bool,
                        std::vector<struct AttributeInfoType> > AttributeInfoMap;

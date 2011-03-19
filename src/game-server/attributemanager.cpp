@@ -24,7 +24,6 @@
 #include "common/resourcemanager.h"
 #include "utils/string.h"
 #include "utils/logger.h"
-#include "utils/xml.h"
 
 void AttributeManager::initialize()
 {
@@ -38,150 +37,7 @@ void AttributeManager::reload()
     for (unsigned int i = 0; i < MaxScope; ++i)
         mAttributeScopes[i].clear();
 
-    std::string absPathFile = ResourceManager::resolve(mAttributeReferenceFile);
-    if (absPathFile.empty())
-    {
-        LOG_FATAL("Attribute Manager: Could not find "
-                  << mAttributeReferenceFile << "!");
-        exit(EXIT_XML_NOT_FOUND);
-    }
-
-    XML::Document doc(absPathFile, false);
-    xmlNodePtr node = doc.rootNode();
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
-    {
-        LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
-                  << " is not a valid database file!");
-        exit(EXIT_XML_BAD_PARAMETER);
-    }
-
-    LOG_INFO("Loading attribute reference...");
-
-    for_each_xml_child_node(attributenode, node)
-    {
-        if (xmlStrEqual(attributenode->name, BAD_CAST "attribute"))
-        {
-            int id = XML::getProperty(attributenode, "id", 0);
-
-            if (id <= 0)
-            {
-                LOG_WARN("Attribute manager: attribute '" << id
-                         << "' is invalid and will be ignored.");
-                continue;
-            }
-
-            mAttributeMap[id] = AttributeInfoMap(false,
-                                       std::vector<struct AttributeInfoType>());
-
-            unsigned int layerCount = 0;
-            for_each_xml_child_node(subnode, attributenode)
-            {
-                if (xmlStrEqual(subnode->name, BAD_CAST "modifier"))
-                {
-                    std::string stackableTypeString = utils::toUpper(
-                                XML::getProperty(subnode, "stacktype",
-                                                 std::string()));
-                    std::string effectTypeString = utils::toUpper(
-                                XML::getProperty(subnode, "modtype",
-                                                 std::string()));
-                    std::string tag = utils::toUpper(
-                                    XML::getProperty(subnode, "tag",
-                                                     std::string()));
-                    StackableType stackableType;
-                    ModifierEffectType effectType;
-                    if (!stackableTypeString.empty())
-                    {
-                        if (!effectTypeString.empty())
-                        {
-                            bool fail = false;
-                            if (stackableTypeString == "STACKABLE")
-                                stackableType = Stackable;
-                            else if (stackableTypeString == "NON STACKABLE")
-                                stackableType = NonStackable;
-                            else if (stackableTypeString == "NON STACKABLE BONUS")
-                                stackableType = NonStackableBonus;
-                            else
-                            {
-                                LOG_WARN("Attribute manager: attribute '"
-                                         << id << "' has unknown stack type '"
-                                         << stackableTypeString << "', skipping modifier!");
-                                fail = true;
-                            }
-
-                            if (!fail)
-                            {
-                                if (effectTypeString == "ADDITIVE")
-                                    effectType = Additive;
-                                else if (effectTypeString == "MULTIPLICATIVE")
-                                    effectType = Multiplicative;
-                                else
-                                {
-                                    LOG_WARN(
-                                          "Attribute manager: attribute '" << id
-                                          << "' has unknown modification type '"
-                                          << stackableTypeString << "', skipping modifier!");
-                                    fail = true;
-                                }
-                                if (!fail)
-                                {
-                                    mAttributeMap[id].second.push_back(
-                                          AttributeInfoType(stackableType, effectType));
-                                    std::string tag = XML::getProperty(
-                                                subnode, "tag", std::string());
-
-                                    if (!tag.empty())
-                                        mTagMap.insert(
-                                        std::make_pair(tag,
-                                            std::make_pair(id, layerCount)));
-                                    ++layerCount;
-                                }
-                            }
-                        }
-                        else
-                            LOG_WARN("Attribute manager: attribute '" << id
-                                     << "' has undefined modification type, "
-                                     << "skipping modifier!");
-                    }
-                    else
-                    {
-                        LOG_WARN("Attribute manager: attribute '" << id <<
-                              "' has undefined stack type, skipping modifier!");
-                    }
-                }
-            }
-            std::string scope = utils::toUpper(
-                    XML::getProperty(attributenode, "scope", std::string()));
-            if (scope.empty())
-            {
-                // Give a warning unless scope has been explicitly set to "NONE"
-                LOG_WARN("Attribute manager: attribute '" << id
-                         << "' has no default scope.");
-            }
-            else if (scope == "CHARACTER")
-            {
-                mAttributeScopes[CharacterScope][id] = &mAttributeMap.at(id).second;
-                LOG_DEBUG("Attribute manager: attribute '" << id
-                          << "' added to default character scope.");
-            }
-            else if (scope == "MONSTER")
-            {
-                mAttributeScopes[MonsterScope][id] = &mAttributeMap.at(id).second;
-                LOG_DEBUG("Attribute manager: attribute '" << id
-                          << "' added to default monster scope.");
-            }
-            else if (scope == "BEING")
-            {
-                mAttributeScopes[BeingScope][id] = &mAttributeMap.at(id).second;
-                LOG_DEBUG("Attribute manager: attribute '" << id
-                          << "' added to default being scope.");
-            }
-            else if (scope == "NONE")
-            {
-                LOG_DEBUG("Attribute manager: attribute '" << id
-                          << "' set to have no default scope.");
-            }
-        } // End 'attribute'
-    }
+    readAttributesFile();
 
     LOG_DEBUG("attribute map:");
     LOG_DEBUG("Stackable is " << Stackable << ", NonStackable is " << NonStackable
@@ -195,8 +51,8 @@ void AttributeManager::reload()
         unsigned int lCount = 0;
         LOG_DEBUG("  "<<i->first<<" : ");
         for (std::vector<struct AttributeInfoType>::const_iterator j = i->second.second.begin();
-        j != i->second.second.end();
-        ++j)
+             j != i->second.second.end();
+             ++j)
         {
             tag = getTagFromInfo(i->first, lCount);
             std::string end = tag ? "tag of '" + (*tag) + "'." : "no tag.";
@@ -246,11 +102,160 @@ std::pair<unsigned int,unsigned int> AttributeManager::getInfoFromTag(const std:
     return mTagMap.at(tag);
 }
 
-const std::string *AttributeManager::getTagFromInfo(unsigned int attribute, unsigned int layer) const
+const std::string *AttributeManager::getTagFromInfo(unsigned int attribute,
+                                                    unsigned int layer) const
 {
     for (TagMap::const_iterator it = mTagMap.begin(),
          it_end = mTagMap.end(); it != it_end; ++it)
         if (it->second.first == attribute && it->second.second == layer)
             return &it->first;
     return 0;
+}
+
+void AttributeManager::readAttributesFile()
+{
+    std::string absPathFile = ResourceManager::resolve(mAttributeReferenceFile);
+    if (absPathFile.empty())
+    {
+        LOG_FATAL("Attribute Manager: Could not find "
+                  << mAttributeReferenceFile << "!");
+        exit(EXIT_XML_NOT_FOUND);
+    }
+
+    XML::Document doc(absPathFile, false);
+    xmlNodePtr node = doc.rootNode();
+    if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
+    {
+        LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
+                  << " is not a valid database file!");
+        exit(EXIT_XML_BAD_PARAMETER);
+    }
+
+    LOG_INFO("Loading attribute reference...");
+
+    for_each_xml_child_node(childNode, node)
+    {
+        if (xmlStrEqual(childNode->name, BAD_CAST "attribute"))
+            readAttributeNode(childNode);
+    }
+}
+
+void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
+{
+    int id = XML::getProperty(attributeNode, "id", 0);
+
+    if (id <= 0)
+    {
+        LOG_WARN("Attribute manager: attribute '" << id
+                 << "' has an invalid id and will be ignored.");
+        return;
+    }
+
+    mAttributeMap[id] =
+            AttributeInfoMap(false, std::vector<struct AttributeInfoType>());
+
+    for_each_xml_child_node(subNode, attributeNode)
+    {
+        if (xmlStrEqual(subNode->name, BAD_CAST "modifier"))
+        {
+            readModifierNode(subNode, id);
+        }
+    }
+
+    const std::string scope = utils::toUpper(
+                XML::getProperty(attributeNode, "scope", std::string()));
+
+    if (scope.empty())
+    {
+        // Give a warning unless scope has been explicitly set to "NONE"
+        LOG_WARN("Attribute manager: attribute '" << id
+                 << "' has no default scope.");
+    }
+    else if (scope == "CHARACTER")
+    {
+        mAttributeScopes[CharacterScope][id] = &mAttributeMap.at(id).second;
+        LOG_DEBUG("Attribute manager: attribute '" << id
+                  << "' added to default character scope.");
+    }
+    else if (scope == "MONSTER")
+    {
+        mAttributeScopes[MonsterScope][id] = &mAttributeMap.at(id).second;
+        LOG_DEBUG("Attribute manager: attribute '" << id
+                  << "' added to default monster scope.");
+    }
+    else if (scope == "BEING")
+    {
+        mAttributeScopes[BeingScope][id] = &mAttributeMap.at(id).second;
+        LOG_DEBUG("Attribute manager: attribute '" << id
+                  << "' added to default being scope.");
+    }
+    else if (scope == "NONE")
+    {
+        LOG_DEBUG("Attribute manager: attribute '" << id
+                  << "' set to have no default scope.");
+    }
+}
+
+void AttributeManager::readModifierNode(xmlNodePtr modifierNode,
+                                        int attributeId)
+{
+    const std::string stackableTypeString = utils::toUpper(
+                XML::getProperty(modifierNode, "stacktype", std::string()));
+    const std::string effectTypeString = utils::toUpper(
+                XML::getProperty(modifierNode, "modtype", std::string()));
+    const std::string tag = XML::getProperty(modifierNode, "tag",
+                                             std::string());
+
+    if (stackableTypeString.empty())
+    {
+        LOG_WARN("Attribute manager: attribute '" << attributeId <<
+                 "' has undefined stackable type, skipping modifier!");
+        return;
+    }
+
+    if (effectTypeString.empty())
+    {
+        LOG_WARN("Attribute manager: attribute '" << attributeId
+                 << "' has undefined modification type, skipping modifier!");
+        return;
+    }
+
+    StackableType stackableType;
+    ModifierEffectType effectType;
+
+    if (stackableTypeString == "STACKABLE")
+        stackableType = Stackable;
+    else if (stackableTypeString == "NON STACKABLE")
+        stackableType = NonStackable;
+    else if (stackableTypeString == "NON STACKABLE BONUS")
+        stackableType = NonStackableBonus;
+    else
+    {
+        LOG_WARN("Attribute manager: attribute '"
+                 << attributeId << "' has unknown stackable type '"
+                 << stackableTypeString << "', skipping modifier!");
+        return;
+    }
+
+    if (effectTypeString == "ADDITIVE")
+        effectType = Additive;
+    else if (effectTypeString == "MULTIPLICATIVE")
+        effectType = Multiplicative;
+    else
+    {
+        LOG_WARN("Attribute manager: attribute '" << attributeId
+                 << "' has unknown modification type '"
+                 << effectTypeString << "', skipping modifier!");
+        return;
+    }
+
+    mAttributeMap[attributeId].second.push_back(
+                AttributeInfoType(stackableType, effectType));
+
+    if (!tag.empty())
+    {
+        const int layer = mAttributeMap[attributeId].second.size() - 1;
+        mTagMap.insert(std::make_pair(tag, std::make_pair(attributeId,
+                                                          layer)));
+    }
 }
