@@ -269,10 +269,10 @@ void ItemManager::reload()
                         unsigned int duration = XML::getProperty(effectnode,
                                                                  "duration",
                                                                  0);
-                        std::pair<unsigned int, unsigned int> info = attributeManager->getInfoFromTag(tag);
+                        ModifierLocation location = attributeManager->getLocation(tag);
                         double value = XML::getFloatProperty(effectnode, "value", 0.0);
-                        item->addEffect(new ItemEffectAttrMod(info.first,
-                                                              info.second,
+                        item->addEffect(new ItemEffectAttrMod(location.attributeId,
+                                                              location.layer,
                                                               value, id,
                                                               duration),
                                         triggerTypes.first, triggerTypes.second);

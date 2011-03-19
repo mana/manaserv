@@ -54,7 +54,7 @@ void AttributeManager::reload()
              j != i->second.second.end();
              ++j)
         {
-            tag = getTagFromInfo(i->first, lCount);
+            tag = getTag(ModifierLocation(i->first, lCount));
             std::string end = tag ? "tag of '" + (*tag) + "'." : "no tag.";
             LOG_DEBUG("    stackableType: " << j->stackableType
                       << ", effectType: " << j->effectType << ", and " << end);
@@ -68,14 +68,14 @@ void AttributeManager::reload()
     for (TagMap::const_iterator i = mTagMap.begin(), i_end = mTagMap.end();
          i != i_end; ++i)
     {
-        LOG_DEBUG("Tag '" << i->first << "': '" << i->second.first << "', '"
-                  << i->second.second << "'.");
+        LOG_DEBUG("Tag '" << i->first << "': '" << i->second.attributeId
+                  << "', '" << i->second.layer << "'.");
     }
 
     LOG_INFO("Loaded '" << mTagMap.size() << "' modifier tags.");
 }
 
-const std::vector<struct AttributeInfoType> *AttributeManager::getAttributeInfo(unsigned int id) const
+const std::vector<struct AttributeInfoType> *AttributeManager::getAttributeInfo(int id) const
 {
     AttributeMap::const_iterator ret = mAttributeMap.find(id);
     if (ret == mAttributeMap.end())
@@ -88,7 +88,7 @@ const AttributeScope &AttributeManager::getAttributeScope(ScopeType type) const
     return mAttributeScopes[type];
 }
 
-bool AttributeManager::isAttributeDirectlyModifiable(unsigned int id) const
+bool AttributeManager::isAttributeDirectlyModifiable(int id) const
 {
     AttributeMap::const_iterator ret = mAttributeMap.find(id);
     if (ret == mAttributeMap.end())
@@ -96,18 +96,16 @@ bool AttributeManager::isAttributeDirectlyModifiable(unsigned int id) const
     return ret->second.first;
 }
 
-// { attribute id, layer }
-std::pair<unsigned int,unsigned int> AttributeManager::getInfoFromTag(const std::string &tag) const
+ModifierLocation AttributeManager::getLocation(const std::string &tag) const
 {
     return mTagMap.at(tag);
 }
 
-const std::string *AttributeManager::getTagFromInfo(unsigned int attribute,
-                                                    unsigned int layer) const
+const std::string *AttributeManager::getTag(const ModifierLocation &location) const
 {
     for (TagMap::const_iterator it = mTagMap.begin(),
          it_end = mTagMap.end(); it != it_end; ++it)
-        if (it->second.first == attribute && it->second.second == layer)
+        if (it->second == location)
             return &it->first;
     return 0;
 }
@@ -255,7 +253,7 @@ void AttributeManager::readModifierNode(xmlNodePtr modifierNode,
     if (!tag.empty())
     {
         const int layer = mAttributeMap[attributeId].second.size() - 1;
-        mTagMap.insert(std::make_pair(tag, std::make_pair(attributeId,
-                                                          layer)));
+        mTagMap.insert(std::make_pair(tag, ModifierLocation(attributeId,
+                                                            layer)));
     }
 }
