@@ -23,6 +23,7 @@
 
 #include <string>
 #include <sstream>
+#include <map>
 
 namespace utils
 {
@@ -81,6 +82,40 @@ namespace utils
         ss << arg;
         return ss.str();
     }
-}
+
+    /**
+     * A case-insensitive name map, mapping instances from a user-specified
+     * type by their name.
+     */
+    template<typename T> class NameMap
+    {
+    public:
+        void insert(const std::string &name, T value)
+        {
+            mMap.insert(std::make_pair(toLower(name), value));
+        }
+
+        T find(const std::string &name) const
+        {
+            typename Map::const_iterator result = mMap.find(toLower(name));
+            return result != mMap.end() ? result->second : T();
+        }
+
+        bool contains(const std::string &name) const
+        {
+            return mMap.find(toLower(name)) != mMap.end();
+        }
+
+        void clear()
+        {
+            mMap.clear();
+        }
+
+    private:
+        typedef std::map<std::string, T> Map;
+        Map mMap;
+    };
+
+} // namespace utils
 
 #endif // UTILS_STRING_H

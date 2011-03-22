@@ -27,7 +27,6 @@
 #include "game-server/skillmanager.h"
 #include "scripting/script.h"
 #include "utils/logger.h"
-#include "utils/string.h"
 
 #include <map>
 #include <set>
@@ -53,6 +52,7 @@ void ItemManager::deinitialize()
         delete i->second;
     }
     mItemClasses.clear();
+    mItemClassesByName.clear();
 }
 
 ItemClass *ItemManager::getItem(int itemId) const
@@ -61,18 +61,9 @@ ItemClass *ItemManager::getItem(int itemId) const
     return i != mItemClasses.end() ? i->second : 0;
 }
 
-ItemClass *ItemManager::getItemByName(std::string name) const
+ItemClass *ItemManager::getItemByName(const std::string &name) const
 {
-    name = utils::toLower(name);
-    for (ItemClasses::const_iterator i = mItemClasses.begin(),
-         i_end = mItemClasses.end(); i != i_end; ++i)
-    {
-        if (utils::toLower(i->second->getName()) == name)
-        {
-            return i->second;
-        }
-    }
-    return 0;
+    return mItemClassesByName.find(name);
 }
 
 unsigned int ItemManager::getDatabaseVersion() const
@@ -229,14 +220,19 @@ void ItemManager::readItemNode(xmlNodePtr itemNode)
         return;
     }
 
-    // Type is mostly unused, but still serves for
-    // hairsheets and race sheets.
-    std::string sItemType = XML::getProperty(itemNode, "type", std::string());
-    if (sItemType == "hairsprite" || sItemType == "racesprite")
+    // Type is mostly unused, but still serves for hairsheets and race sheets
+    const std::string type = XML::getProperty(itemNode, "type", std::string());
+    if (type == "hairsprite" || type == "racesprite")
         return;
 
-    ItemClass *item;
     ItemClasses::iterator i = mItemClasses.find(id);
+
+    if (i != mItemClasses.end())
+    {
+        LOG_WARN("Item Manager: Ignoring duplicate definition of item '" << id
+                 << "'!");
+        return;
+    }
 
     unsigned int maxPerSlot = XML::getProperty(itemNode, "max-per-slot", 0);
     if (!maxPerSlot)
@@ -246,19 +242,19 @@ void ItemManager::readItemNode(xmlNodePtr itemNode)
         maxPerSlot = 1;
     }
 
-    if (i == mItemClasses.end())
-    {
-        item = new ItemClass(id, maxPerSlot);
-        mItemClasses[id] = item;
-    }
-    else
-    {
-        LOG_WARN("Multiple defintions of item '" << id << "'!");
-        item = i->second;
-    }
+    ItemClass *item = new ItemClass(id, maxPerSlot);
+    mItemClasses.insert(std::make_pair(id, item));
 
-    std::string name = XML::getProperty(itemNode, "name", "unnamed");
-    item->setName(name);
+    const std::string name = XML::getProperty(itemNode, "name", std::string());
+    if (!name.empty())
+    {
+        item->setName(name);
+
+        if (mItemClassesByName.contains(name))
+            LOG_WARN("Item Manager: Name not unique for item " << id);
+        else
+            mItemClassesByName.insert(name, item);
+    }
 
     int value = XML::getProperty(itemNode, "value", 0);
     // Should have multiple value definitions for multiple currencies?

@@ -22,6 +22,7 @@
 #define ITEMMANAGER_H
 
 #include "utils/xml.h"
+#include "utils/string.h"
 
 #include <string>
 #include <map>
@@ -65,7 +66,7 @@ class ItemManager
          * Returns null when there is no item with such
          * a name.
          */
-        ItemClass *getItemByName(std::string name) const;
+        ItemClass *getItemByName(const std::string &name) const;
 
         /**
          * Gets the version of the loaded item database.
@@ -99,6 +100,7 @@ class ItemManager
         typedef std::vector< unsigned int > VisibleEquipSlots;
 
         ItemClasses mItemClasses; /**< Item reference */
+        utils::NameMap<ItemClass*> mItemClassesByName;
         EquipSlots mEquipSlots;
         VisibleEquipSlots mVisibleEquipSlots;
 

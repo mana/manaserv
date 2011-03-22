@@ -23,7 +23,10 @@
 
 #include <string>
 #include <map>
+#include "utils/string.h"
+
 class MonsterClass;
+
 class MonsterManager
 {
     public:
@@ -47,7 +50,7 @@ class MonsterManager
         /**
          * Gets the MonsterClass having the given ID.
          */
-        MonsterClass *getMonster(int id);
+        MonsterClass *getMonster(int id) const;
 
         /**
          * Gets the first monster type with a specific name.
@@ -55,12 +58,13 @@ class MonsterManager
          * Returns null when there is no monster with such
          * a name.
          */
-        MonsterClass *getMonsterByName(std::string name) const;
+        MonsterClass *getMonsterByName(const std::string &name) const;
 
     private:
 
         typedef std::map< int, MonsterClass * > MonsterClasses;
         MonsterClasses mMonsterClasses; /**< Monster reference */
+        utils::NameMap<MonsterClass*> mMonsterClassesByName;
 
         std::string mMonsterReferenceFile;
 };

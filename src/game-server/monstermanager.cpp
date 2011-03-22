@@ -25,7 +25,6 @@
 #include "game-server/itemmanager.h"
 #include "game-server/monster.h"
 #include "utils/logger.h"
-#include "utils/string.h"
 #include "utils/xml.h"
 
 #define MAX_MUTATION 99
@@ -86,28 +85,36 @@ void MonsterManager::reload()
             continue;
 
         int id = XML::getProperty(node, "id", 0);
-        std::string name = XML::getProperty(node, "name", "unnamed");
+        std::string name = XML::getProperty(node, "name", std::string());
 
         if (id < 1)
         {
-            LOG_WARN("Monster Manager: There is a monster ("
+            LOG_WARN("Monster Manager: Ignoring monster ("
                      << name << ") without Id in "
                      << mMonsterReferenceFile << "! It has been ignored.");
             continue;
         }
 
-        MonsterClass *monster;
         MonsterClasses::iterator i = mMonsterClasses.find(id);
-        if (i == mMonsterClasses.end())
+        if (i != mMonsterClasses.end())
         {
-            monster = new MonsterClass(id);
-            mMonsterClasses[id] = monster;
+            LOG_WARN("Monster Manager: Ignoring duplicate definition of "
+                     "monster '" << id << "'!");
+            continue;
         }
-        else
+
+        MonsterClass *monster = new MonsterClass(id);
+        mMonsterClasses[id] = monster;
+
+        if (!name.empty())
         {
-            monster = i->second;
+            monster->setName(name);
+
+            if (mMonsterClassesByName.contains(name))
+                LOG_WARN("Monster Manager: Name not unique for monster " << id);
+            else
+                mMonsterClassesByName.insert(name, monster);
         }
-        monster->setName(name);
 
         MonsterDrops drops;
         bool attributesSet = false;
@@ -345,28 +352,15 @@ void MonsterManager::deinitialize()
         delete i->second;
     }
     mMonsterClasses.clear();
+    mMonsterClassesByName.clear();
 }
 
-MonsterClass *MonsterManager::getMonsterByName(std::string name) const
+MonsterClass *MonsterManager::getMonsterByName(const std::string &name) const
 {
-    // this function is not very fast but neither does it need to be
-    // because it is only used by the @spawn command. It would be
-    // possible to speed it up by caching the lowercase_name/MonsterClass
-    // mapping in a std::map during MonsterManager::reload, should the
-    // need arise.
-    name = utils::toLower(name);
-    for (MonsterClasses::const_iterator i = mMonsterClasses.begin(),
-         i_end = mMonsterClasses.end(); i != i_end; ++i)
-    {
-        if(utils::toLower(i->second->getName()) == name)
-        {
-            return i->second;
-        }
-    }
-    return 0;
+    return mMonsterClassesByName.find(name);
 }
 
-MonsterClass *MonsterManager::getMonster(int id)
+MonsterClass *MonsterManager::getMonster(int id) const
 {
     MonsterClasses::const_iterator i = mMonsterClasses.find(id);
     return i != mMonsterClasses.end() ? i->second : 0;
