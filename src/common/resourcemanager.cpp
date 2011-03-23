@@ -55,34 +55,16 @@ void ResourceManager::initialize()
 }
 
 /**
- * This function tries to check if a file exists
- * based on the existence of stats about it.
- * Because simply trying to open it and check for failure
- * is a bad thing, as you don't know if you weren't able
- * to open it because it doesn't exist or because
- * you don't have the right to.
+ * This function tries to check if a file exists based on the existence of
+ * stats about it. Because simply trying to open it and check for failure is a
+ * bad thing, as you don't know if you weren't able to open it because it
+ * doesn't exist or because you don't have the right to.
  */
-static bool fileExists(const std::string& filename)
+static bool fileExists(const std::string &filename)
 {
-    struct stat fileStat;
-    bool fileExist = false;
-    int statValue = -1;
-
-    // Try to get the file attributes
-    statValue = stat(filename.c_str(), &fileStat);
-
-    if(statValue == 0)
-    {
-        // The file attributes exists, so the file does, too.
-        fileExist = true;
-    }
-    else
-    {
-        // Impossible to get the file attributes.
-        fileExist = false;
-    }
-
-    return fileExist;
+    struct stat buffer;
+    // When stat is succesful, the file exists
+    return stat(filename.c_str(), &buffer) == 0;
 }
 
 bool ResourceManager::exists(const std::string &path, bool lookInSearchPath)
