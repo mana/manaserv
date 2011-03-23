@@ -20,7 +20,6 @@
 
 #include "game-server/skillmanager.h"
 
-#include "common/resourcemanager.h"
 #include "utils/string.h"   // for the toUpper function
 #include "utils/logger.h"
 #include "utils/xml.h"
@@ -45,42 +44,23 @@ void SkillManager::reload()
     skillMap["KNIFE"] = 101;
     */
 
-    int size;
-    char *data = ResourceManager::loadFile(skillReferenceFile, size);
+    XML::Document doc(skillReferenceFile);
+    xmlNodePtr rootNode = doc.rootNode();
 
-    std::string absPathFile = ResourceManager::resolve(skillReferenceFile);
-
-    if (!data)
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "skills"))
     {
-        LOG_ERROR("Skill Manager: Could not find " << skillReferenceFile << "!");
-        free(data);
-        return;
-    }
-
-    xmlDocPtr doc = xmlParseMemory(data, size);
-    free(data);
-
-    if (!doc)
-    {
-        LOG_ERROR("Skill Manager: Error while parsing skill database ("
-                  << absPathFile << ")!");
-        return;
-    }
-
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "skills"))
-    {
-        LOG_ERROR("Skill Manager: " << absPathFile
+        LOG_ERROR("Skill Manager: " << skillReferenceFile
                   << " is not a valid database file!");
-        xmlFreeDoc(doc);
         return;
     }
 
-    LOG_INFO("Loading skill reference: " << absPathFile);
+    LOG_INFO("Loading skill reference: " << skillReferenceFile);
 
-    for_each_xml_child_node(setnode, node)
+    for_each_xml_child_node(setnode, rootNode)
     {
-        if (xmlStrEqual(setnode->name, BAD_CAST "set"))
+        if (!xmlStrEqual(setnode->name, BAD_CAST "set"))
+            continue;
+
         // we don't care about sets server-sided (yet?)
         for_each_xml_child_node(skillnode, setnode)
         {
@@ -158,7 +138,7 @@ void SkillManager::reload()
                  "Skill map loading. Defaults will fall back to id 0.");
 
     LOG_INFO("Loaded " << skillMap.size() << " skill references from "
-             << absPathFile);
+             << skillReferenceFile);
 }
 
 int SkillManager::getIdFromString(const std::string &name)

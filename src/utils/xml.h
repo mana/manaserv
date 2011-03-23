@@ -40,19 +40,14 @@ namespace XML
     {
         public:
             /**
-             * Constructor that attempts to load the given file through the
-             * resource manager. Logs errors.
-             */
-            Document(const std::string &filename, bool useResman = true);
-
-            /**
-             * Constructor that attempts to load an XML document from memory.
-             * Does not log errors.
+             * Attempts to load an XML document from the given file. Logs an
+             * error when something went wrong.
              *
-             * @param data the string to parse as XML
-             * @param size the length of the string in bytes
+             * @param fileName  the file name of the XML document
+             * @param useResman whether to resolve the full path to the file
+             *                  using the resource manager (true by default).
              */
-            Document(const char *data, int size);
+            Document(const std::string &fileName, bool useResman = true);
 
             /**
              * Destructor. Frees the loaded XML file.

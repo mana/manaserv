@@ -20,7 +20,6 @@
 
 #include "common/permissionmanager.h"
 
-#include "common/resourcemanager.h"
 #include "game-server/character.h"
 #include "utils/logger.h"
 #include "utils/xml.h"
@@ -52,37 +51,18 @@ void PermissionManager::initialize(const std::string & file)
 
 void PermissionManager::reload()
 {
-    int size;
-    char *data = ResourceManager::loadFile(permissionFile, size);
+    XML::Document doc(permissionFile);
+    xmlNodePtr rootNode = doc.rootNode();
 
-    if (!data) {
-        LOG_ERROR("Permission Manager: Could not find "
-                  << permissionFile << "!");
-        free(data);
-        return;
-    }
-
-    xmlDocPtr doc = xmlParseMemory(data, size);
-    free(data);
-
-    if (!doc)
-    {
-        LOG_ERROR("Permission Manager: Error while parsing permission database ("
-                  << permissionFile << ")!");
-        return;
-    }
-
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "permissions"))
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "permissions"))
     {
         LOG_ERROR("Permission Manager: " << permissionFile
                   << " is not a valid database file!");
-        xmlFreeDoc(doc);
         return;
     }
 
     LOG_INFO("Loading permission reference...");
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for_each_xml_child_node(node, rootNode)
     {
         unsigned char classmask = 0x01;
         if (!xmlStrEqual(node->name, BAD_CAST "class"))

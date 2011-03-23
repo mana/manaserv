@@ -30,60 +30,29 @@
 
 namespace XML
 {
-    Document::Document(const std::string &filename, bool useResman):
+    Document::Document(const std::string &fileName, bool useResman):
         mDoc(0)
     {
-        int size;
-        char *data = NULL;
+        std::string resolvedFileName = fileName;
         if (useResman)
         {
-            data = ResourceManager::loadFile(filename, size);
-        }
-        else
-        {
-            std::ifstream file;
-            file.open(filename.c_str(), std::ios::in);
+            resolvedFileName = ResourceManager::resolve(fileName);
 
-            if (file.is_open())
+            if (resolvedFileName.empty())
             {
-                // Get length of file
-                file.seekg(0, std::ios::end);
-                size = file.tellg();
-                file.seekg(0, std::ios::beg);
-
-                data = (char*) malloc(size);
-
-                file.read(data, size);
-                file.close();
-            }
-            else
-            {
-                LOG_ERROR("(XML::Document) Error loading XML file: "
-                          << filename);
+                LOG_ERROR("(XML::Document) File not found in search path: "
+                          << fileName);
+                return;
             }
         }
 
-        if (data)
-        {
-            mDoc = xmlParseMemory(data, size);
-            free(data);
+        mDoc = xmlParseFile(resolvedFileName.c_str());
 
-            if (!mDoc)
-            {
-                LOG_ERROR("(XML::Document) Error parsing XML file: "
-                          << filename);
-            }
-        }
-        else
+        if (!mDoc)
         {
-            LOG_ERROR("(XML::Document) Error loading XML file: "
-                      << filename);
+            LOG_ERROR("(XML::Document) Error parsing XML file: "
+                      << resolvedFileName);
         }
-    }
-
-    Document::Document(const char *data, int size)
-    {
-        mDoc = xmlParseMemory(data, size);
     }
 
     Document::~Document()

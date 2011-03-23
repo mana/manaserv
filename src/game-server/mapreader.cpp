@@ -20,7 +20,6 @@
 
 #include "game-server/mapreader.h"
 
-#include "common/resourcemanager.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
@@ -40,58 +39,18 @@ static std::vector< int > tilesetFirstGids;
 
 bool MapReader::readMap(const std::string &filename, MapComposite *composite)
 {
-    int fileSize;
-    char *buffer = ResourceManager::loadFile(filename, fileSize);
-
-    if (buffer == NULL)
-    {
-        LOG_ERROR("Error: Map file not found (" << filename.c_str() << ")");
-        return false;
-    }
-
-    xmlDocPtr doc = NULL;
-
-    int l = filename.length();
-    if (l > 3 && filename.substr(l - 3) == ".gz")
-    {
-        // Inflate the gzipped map data.
-        char *inflated;
-        unsigned inflatedSize = 0;
-        bool ret = inflateMemory(buffer, fileSize, inflated, inflatedSize);
-        free(buffer);
-        buffer = ret ? inflated : NULL;
-        fileSize = inflatedSize;
-    }
-
-    if (buffer)
-    {
-        // Parse the XML document.
-        doc = xmlParseMemory(buffer, fileSize);
-        free(buffer);
-    }
-
-    if (!doc)
-    {
-        LOG_ERROR("Error while parsing map file '" << filename << "'!");
-        return false;
-    }
-
-    Map *map = NULL;
-    xmlNodePtr node = xmlDocGetRootElement(doc);
-
-    std::vector<Thing *> things;
+    XML::Document doc(filename);
+    xmlNodePtr rootNode = doc.rootNode();
 
     // Parse the inflated map data.
-    if (node && xmlStrEqual(node->name, BAD_CAST "map"))
-    {
-        map = MapReader::readMap(node, filename, composite, things);
-    }
-    else
+    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "map"))
     {
         LOG_ERROR("Error: Not a map file (" << filename << ")!");
+        return false;
     }
 
-    xmlFreeDoc(doc);
+    std::vector<Thing *> things;
+    Map *map = readMap(rootNode, filename, composite, things);
 
     if (map)
     {
