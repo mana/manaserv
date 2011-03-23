@@ -42,23 +42,17 @@ void StatusManager::initialize(const std::string &file)
 
 void StatusManager::reload()
 {
-    std::string absPathFile = ResourceManager::resolve(statusReferenceFile);
-    if (absPathFile.empty()) {
-        LOG_ERROR("Status Manager: Could not find " << statusReferenceFile << "!");
-        return;
-    }
-
-    XML::Document doc(absPathFile, false);
+    XML::Document doc(statusReferenceFile);
     xmlNodePtr rootNode = doc.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "status-effects"))
     {
         LOG_ERROR("Status Manager: Error while parsing status database ("
-                  << absPathFile << ")!");
+                  << statusReferenceFile << ")!");
         return;
     }
 
-    LOG_INFO("Loading status reference: " << absPathFile);
+    LOG_INFO("Loading status reference: " << statusReferenceFile);
     for_each_xml_child_node(node, rootNode)
     {
         if (!xmlStrEqual(node->name, BAD_CAST "status-effect"))

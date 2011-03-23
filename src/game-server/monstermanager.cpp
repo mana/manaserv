@@ -20,7 +20,6 @@
 
 #include "game-server/monstermanager.h"
 
-#include "common/resourcemanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/itemmanager.h"
 #include "game-server/monster.h"
@@ -60,24 +59,17 @@ void MonsterManager::initialize()
 
 void MonsterManager::reload()
 {
-    std::string absPathFile = ResourceManager::resolve(mMonsterReferenceFile);
-    if (absPathFile.empty()) {
-        LOG_ERROR("Monster Manager: Could not find "
-                  << mMonsterReferenceFile << "!");
-        return;
-    }
-
-    XML::Document doc(absPathFile, false);
+    XML::Document doc(mMonsterReferenceFile);
     xmlNodePtr rootNode = doc.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "monsters"))
     {
         LOG_ERROR("Monster Manager: Error while parsing monster database ("
-                  << absPathFile << ")!");
+                  << mMonsterReferenceFile << ")!");
         return;
     }
 
-    LOG_INFO("Loading monster reference: " << absPathFile);
+    LOG_INFO("Loading monster reference: " << mMonsterReferenceFile);
     int nbMonsters = 0;
     for_each_xml_child_node(node, rootNode)
     {

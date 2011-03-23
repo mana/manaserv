@@ -28,7 +28,6 @@
 #include "chat-server/chathandler.h"
 #include "common/configuration.h"
 #include "common/manaserv_protocol.h"
-#include "common/resourcemanager.h"
 #include "common/transaction.h"
 #include "net/connectionhandler.h"
 #include "net/messagein.h"
@@ -150,15 +149,9 @@ AccountHandler::AccountHandler(const std::string &attributesFile):
     mUpdateHost(Configuration::getValue("net_defaultUpdateHost", std::string())),
     mDataUrl(Configuration::getValue("net_clientDataUrl", std::string()))
 {
-    std::string absPathFile = ResourceManager::resolve(attributesFile);
-    if (absPathFile.empty())
-    {
-        LOG_FATAL("Account handler: Could not find " << attributesFile << "!");
-        exit(EXIT_XML_NOT_FOUND);
-    }
-
-    XML::Document doc(absPathFile, false);
+    XML::Document doc(attributesFile);
     xmlNodePtr node = doc.rootNode();
+
     if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
     {
         LOG_FATAL("Account handler: " << attributesFile << ": "

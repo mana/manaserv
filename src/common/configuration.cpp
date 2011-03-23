@@ -38,18 +38,11 @@ bool Configuration::initialize(const std::string &filename)
 {
     configPath = filename;
 
-    xmlDocPtr doc = xmlReadFile(filename.c_str(), NULL, 0);
-
-    if (!doc) {
-        LOG_WARN("Could not read configuration file '" << filename.c_str() << "'.");
-        return false;
-    }
-
-    xmlNodePtr node = xmlDocGetRootElement(doc);
+    XML::Document doc(filename, false);
+    xmlNodePtr node = doc.rootNode();
 
     if (!node || !xmlStrEqual(node->name, BAD_CAST "configuration")) {
         LOG_WARN("No configuration file '" << filename.c_str() << "'.");
-        xmlFreeDoc(doc);
         return false;
     }
 
@@ -67,7 +60,6 @@ bool Configuration::initialize(const std::string &filename)
             options[key] = value;
     }
 
-    xmlFreeDoc(doc);
     return true;
 }
 

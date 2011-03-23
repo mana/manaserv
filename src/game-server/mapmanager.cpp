@@ -44,23 +44,17 @@ int MapManager::initialize(const std::string &mapReferenceFile)
     // Indicates the number of maps loaded successfully
     int loadedMaps = 0;
 
-    std::string absPathFile = ResourceManager::resolve(mapReferenceFile);
-    if (absPathFile.empty()) {
-        LOG_ERROR("Map Manager: Could not find " << mapReferenceFile << "!");
-        return loadedMaps;
-    }
-
-    XML::Document doc(absPathFile, false);
+    XML::Document doc(mapReferenceFile);
     xmlNodePtr rootNode = doc.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "maps"))
     {
         LOG_ERROR("Item Manager: Error while parsing map database ("
-                  << absPathFile << ")!");
+                  << mapReferenceFile << ")!");
         return loadedMaps;
     }
 
-    LOG_INFO("Loading map reference: " << absPathFile);
+    LOG_INFO("Loading map reference: " << mapReferenceFile);
     for_each_xml_child_node(node, rootNode)
     {
         if (!xmlStrEqual(node->name, BAD_CAST "map"))

@@ -21,7 +21,6 @@
 #include "game-server/itemmanager.h"
 
 #include "common/defines.h"
-#include "common/resourcemanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/item.h"
 #include "game-server/skillmanager.h"
@@ -121,23 +120,17 @@ bool ItemManager::isEquipSlotVisible(unsigned int id) const
 
 void ItemManager::readEquipSlotsFile()
 {
-    std::string absPathFile = ResourceManager::resolve(mEquipSlotsFile);
-    if (absPathFile.empty()) {
-        LOG_ERROR("Item Manager: Could not find " << mEquipSlotsFile << "!");
-        return;
-    }
-
-    XML::Document doc(absPathFile, false);
+    XML::Document doc(mEquipSlotsFile);
     xmlNodePtr rootNode = doc.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "equip-slots"))
     {
         LOG_ERROR("Item Manager: Error while parsing equip slots database ("
-                  << absPathFile << ")!");
+                  << mEquipSlotsFile << ")!");
         return;
     }
 
-    LOG_INFO("Loading equip slots: " << absPathFile);
+    LOG_INFO("Loading equip slots: " << mEquipSlotsFile);
 
     unsigned totalCount = 0;
     unsigned slotCount = 0;
@@ -179,24 +172,17 @@ void ItemManager::readEquipSlotsFile()
 
 void ItemManager::readItemsFile()
 {
-    std::string absPathFile = ResourceManager::resolve(mItemsFile);
-    if (absPathFile.empty())
-    {
-        LOG_ERROR("Item Manager: Could not find " << mItemsFile << "!");
-        return;
-    }
-
-    XML::Document doc2(absPathFile, false);
+    XML::Document doc2(mItemsFile);
     xmlNodePtr rootNode = doc2.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))
     {
         LOG_ERROR("Item Manager: Error while parsing item database ("
-                  << absPathFile << ")!");
+                  << mItemsFile << ")!");
         return;
     }
 
-    LOG_INFO("Loading item reference: " << absPathFile);
+    LOG_INFO("Loading item reference: " << mItemsFile);
 
     for_each_xml_child_node(node, rootNode)
     {
@@ -207,7 +193,7 @@ void ItemManager::readItemsFile()
     }
 
     LOG_INFO("Loaded " << mItemClasses.size() << " items from "
-             << absPathFile << ".");
+             << mItemsFile << ".");
 }
 
 void ItemManager::readItemNode(xmlNodePtr itemNode)

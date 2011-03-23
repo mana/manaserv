@@ -21,7 +21,6 @@
 #include "game-server/attributemanager.h"
 
 #include "common/defines.h"
-#include "common/resourcemanager.h"
 #include "utils/string.h"
 #include "utils/logger.h"
 
@@ -112,16 +111,9 @@ const std::string *AttributeManager::getTag(const ModifierLocation &location) co
 
 void AttributeManager::readAttributesFile()
 {
-    std::string absPathFile = ResourceManager::resolve(mAttributeReferenceFile);
-    if (absPathFile.empty())
-    {
-        LOG_FATAL("Attribute Manager: Could not find "
-                  << mAttributeReferenceFile << "!");
-        exit(EXIT_XML_NOT_FOUND);
-    }
-
-    XML::Document doc(absPathFile, false);
+    XML::Document doc(mAttributeReferenceFile);
     xmlNodePtr node = doc.rootNode();
+
     if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
     {
         LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
