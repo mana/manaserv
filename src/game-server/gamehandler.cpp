@@ -164,22 +164,21 @@ static Character *findCharacterNear(Actor *p, int id)
     return 0;
 }
 
-void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
+void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
 {
-    GameClient &computer = *static_cast< GameClient * >(comp);
-    MessageOut result;
+    GameClient &client = *static_cast<GameClient *>(computer);
 
-    if (computer.status == CLIENT_LOGIN)
+    if (client.status == CLIENT_LOGIN)
     {
         if (message.getId() != PGMSG_CONNECT)
             return;
 
         std::string magic_token = message.readString(MAGIC_TOKEN_LENGTH);
-        computer.status = CLIENT_QUEUED; // Before the addPendingClient
-        mTokenCollector.addPendingClient(magic_token, &computer);
+        client.status = CLIENT_QUEUED; // Before the addPendingClient
+        mTokenCollector.addPendingClient(magic_token, &client);
         return;
     }
-    else if (computer.status != CLIENT_CONNECTED)
+    else if (client.status != CLIENT_CONNECTED)
     {
         return;
     }
@@ -187,415 +186,103 @@ void GameHandler::processMessage(NetComputer *comp, MessageIn &message)
     switch (message.getId())
     {
         case PGMSG_SAY:
-        {
-            std::string say = message.readString();
-            if (say.empty()) break;
-
-            if (say[0] == '@')
-            {
-                CommandHandler::handleCommand(computer.character, say);
-                break;
-            }
-            if (!computer.character->isMuted())
-            {
-                GameState::sayAround(computer.character, say);
-                std::string msg = computer.character->getName() + " said " + say;
-                accountHandler->sendTransaction(computer.character->getDatabaseID(), TRANS_MSG_PUBLIC, msg);
-            }else {
-                GameState::sayTo(computer.character, NULL, "You are not allowed to talk right now.");
-            }
-        } break;
+            handleSay(client, message);
+            break;
 
         case PGMSG_NPC_TALK:
         case PGMSG_NPC_TALK_NEXT:
         case PGMSG_NPC_SELECT:
         case PGMSG_NPC_NUMBER:
         case PGMSG_NPC_STRING:
-        {
-            int id = message.readInt16();
-            Actor *o = findActorNear(computer.character, id);
-            if (!o || o->getType() != OBJECT_NPC)
-            {
-                sendError(comp, id, "Not close enough to NPC\n");
-                break;
-            }
-
-            NPC *q = static_cast< NPC * >(o);
-            if (message.getId() == PGMSG_NPC_SELECT)
-            {
-                q->select(computer.character, message.readInt8());
-            }
-            else if (message.getId() == PGMSG_NPC_NUMBER)
-            {
-                q->integerReceived(computer.character, message.readInt32());
-            }
-            else if (message.getId() == PGMSG_NPC_STRING)
-            {
-                q->stringReceived(computer.character, message.readString());
-            }
-            else
-            {
-                q->prompt(computer.character, message.getId() == PGMSG_NPC_TALK);
-            }
-        } break;
+            handleNpc(client, message);
+            break;
 
         case PGMSG_PICKUP:
-        {
-            int x = message.readInt16();
-            int y = message.readInt16();
-            Point ppos = computer.character->getPosition();
-
-            // TODO: use a less arbitrary value.
-            if (std::abs(x - ppos.x) + std::abs(y - ppos.y) < 48)
-            {
-                MapComposite *map = computer.character->getMap();
-                Point ipos(x, y);
-                for (FixedActorIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
-                {
-                    Actor *o = *i;
-                    Point opos = o->getPosition();
-                    if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
-                    {
-                        Item *item = static_cast< Item * >(o);
-                        ItemClass *ic = item->getItemClass();
-                        Inventory(computer.character)
-                            .insert(ic->getDatabaseID(), item->getAmount());
-                        GameState::remove(item);
-                        // log transaction
-                        std::stringstream str;
-                        str << "User picked up item " << ic->getDatabaseID()
-                            << " at " << opos.x << "x" << opos.y;
-                        accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                            TRANS_ITEM_PICKUP, str.str());
-                        break;
-                    }
-                }
-            }
-        } break;
+            handlePickup(client, message);
+            break;
 
         case PGMSG_USE_ITEM:
-        {
-            int slot = message.readInt8();
-            Inventory inv(computer.character);
-            if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
-            {
-                if (ic->hasTrigger(ITT_ACTIVATE))
-                {
-                    std::stringstream str;
-                    str << "User activated item " << ic->getDatabaseID()
-                        << " from slot " << slot;
-                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                                                    TRANS_ITEM_USED, str.str());
-                    if (ic->useTrigger(computer.character, ITT_ACTIVATE))
-                        inv.removeFromSlot(slot, 1);
-                }
-            }
-        } break;
+            handleUseItem(client, message);
+            break;
 
         case PGMSG_DROP:
-        {
-            int slot = message.readInt8();
-            int amount = message.readInt8();
-            Inventory inv(computer.character);
-            if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
-            {
-                int nb = inv.removeFromSlot(slot, amount);
-                Item *item = new Item(ic, amount - nb);
-                item->setMap(computer.character->getMap());
-                item->setPosition(computer.character->getPosition());
-                if (!GameState::insert(item))
-                {
-                    // The map is full. Put back into inventory.
-                    inv.insert(ic->getDatabaseID(), amount - nb);
-                    delete item;
-                    break;
-                }
-                // log transaction
-                Point pt = computer.character->getPosition();
-                std::stringstream str;
-                str << "User dropped item " << ic->getDatabaseID()
-                    << " at " << pt.x << "x" << pt.y;
-                accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                    TRANS_ITEM_DROP, str.str());
-            }
-        } break;
+            handleDrop(client, message);
+            break;
 
         case PGMSG_WALK:
-        {
-            handleWalk(&computer, message);
-        } break;
+            handleWalk(client, message);
+            break;
 
         case PGMSG_EQUIP:
-        {
-            int slot = message.readInt8();
-            Inventory(computer.character).equip(slot);
-        } break;
+            handleEquip(client, message);
+            break;
 
         case PGMSG_UNEQUIP:
-        {
-            int slot = message.readInt8();
-            if (slot >= 0 && slot < INVENTORY_SLOTS)
-                Inventory(computer.character).unequip(slot);
-        } break;
+            handleUnequip(client, message);
+            break;
 
         case PGMSG_MOVE_ITEM:
-        {
-            int slot1 = message.readInt8();
-            int slot2 = message.readInt8();
-            int amount = message.readInt8();
-            Inventory(computer.character).move(slot1, slot2, amount);
-            // log transaction
-            std::stringstream str;
-            str << "User moved item "
-                << " from slot " << slot1 << " to slot " << slot2;
-            accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                TRANS_ITEM_MOVE, str.str());
-        } break;
+            handleMoveItem(client, message);
+            break;
 
         case PGMSG_ATTACK:
-        {
-            int id = message.readInt16();
-            LOG_DEBUG("Character " << computer.character->getPublicID()
-                      << " attacked being " << id);
-
-            Actor *o = findActorNear(computer.character, id);
-            if (o && o->getType() != OBJECT_NPC)
-            {
-                Being *being = static_cast<Being*>(o);
-                computer.character->setTarget(being);
-                computer.character->setAction(ATTACK);
-            }
-        } break;
+            handleAttack(client, message);
+            break;
 
         case PGMSG_USE_SPECIAL:
-        {
-            int specialID = message.readInt8();
-            LOG_DEBUG("Character " << computer.character->getPublicID()
-                      << " tries to use his special attack "<<specialID);
-            computer.character->useSpecial(specialID);
-        }
+            handleUseSpecial(client, message);
+            break;
 
         case PGMSG_ACTION_CHANGE:
-        {
-            BeingAction action = (BeingAction)message.readInt8();
-            BeingAction current = (BeingAction)computer.character->getAction();
-            bool logActionChange = true;
-
-            switch (action)
-            {
-                case STAND:
-                {
-                    if (current == SIT)
-                    {
-                        computer.character->setAction(STAND);
-                        logActionChange = false;
-                    }
-                } break;
-                case SIT:
-                {
-                    if (current == STAND)
-                    {
-                        computer.character->setAction(SIT);
-                        logActionChange = false;
-                    }
-                } break;
-                default:
-                    break;
-            }
-
-            // Log the action change only when this is relevant.
-            if (logActionChange)
-            {
-                // log transaction
-                std::stringstream str;
-                str << "User changed action from " << current
-                    << " to " << action;
-                accountHandler->sendTransaction(
-                    computer.character->getDatabaseID(),
-                    TRANS_ACTION_CHANGE, str.str());
-            }
-
-        } break;
+            handleActionChange(client, message);
+            break;
 
         case PGMSG_DIRECTION_CHANGE:
-        {
-            computer.character->setDirection(
-                (BeingDirection)message.readInt8());
-        } break;
+            handleDirectionChange(client, message);
+            break;
 
         case PGMSG_DISCONNECT:
-        {
-            bool reconnectAccount = (bool) message.readInt8();
-
-            result.writeInt16(GPMSG_DISCONNECT_RESPONSE);
-            result.writeInt8(ERRMSG_OK); // It is, when control reaches here
-
-            if (reconnectAccount)
-            {
-                std::string magic_token(utils::getMagicToken());
-                result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
-                // No accountserver data, the client should remember that
-                accountHandler->playerReconnectAccount(
-                                   computer.character->getDatabaseID(),
-                                   magic_token);
-            }
-            // TODO: implement a delayed remove
-            GameState::remove(computer.character);
-
-            accountHandler->sendCharacterData(computer.character);
-
-            // Done with the character
-            computer.character->disconnected();
-            delete computer.character;
-            computer.character = NULL;
-            computer.status = CLIENT_LOGIN;
-        } break;
+            handleDisconnect(client, message);
+            break;
 
         case PGMSG_TRADE_REQUEST:
-        {
-            int id = message.readInt16();
-
-            if (Trade *t = computer.character->getTrading())
-            {
-                if (t->request(computer.character, id)) break;
-            }
-
-            Character *q = findCharacterNear(computer.character, id);
-            if (!q || q->isBusy())
-            {
-                result.writeInt16(GPMSG_TRADE_CANCEL);
-                break;
-            }
-
-            new Trade(computer.character, q);
-
-            // log transaction
-            std::string str;
-            str = "User requested trade with " + q->getName();
-            accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                TRANS_TRADE_REQUEST, str);
-        } break;
+            handleTradeRequest(client, message);
+            break;
 
         case PGMSG_TRADE_CANCEL:
         case PGMSG_TRADE_AGREED:
         case PGMSG_TRADE_CONFIRM:
         case PGMSG_TRADE_ADD_ITEM:
         case PGMSG_TRADE_SET_MONEY:
-        {
-            std::stringstream str;
-            Trade *t = computer.character->getTrading();
-            if (!t) break;
-
-            switch (message.getId())
-            {
-                case PGMSG_TRADE_CANCEL:
-                    t->cancel();
-                    break;
-                case PGMSG_TRADE_CONFIRM:
-                    t->confirm(computer.character);
-                    break;
-                case PGMSG_TRADE_AGREED:
-                    t->agree(computer.character);
-                    // log transaction
-                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                        TRANS_TRADE_END, "User finished trading");
-                    break;
-                case PGMSG_TRADE_SET_MONEY:
-                {
-                    int money = message.readInt32();
-                    t->setMoney(computer.character, money);
-                    // log transaction
-                    str << "User added " << money << " money to trade.";
-                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                        TRANS_TRADE_MONEY, str.str());
-                } break;
-                case PGMSG_TRADE_ADD_ITEM:
-                {
-                    int slot = message.readInt8();
-                    t->addItem(computer.character, slot, message.readInt8());
-                    // log transaction
-                    str << "User add item from slot " << slot;
-                    accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                        TRANS_TRADE_ITEM, str.str());
-                } break;
-            }
-        } break;
+            handleTrade(client, message);
+            break;
 
         case PGMSG_NPC_BUYSELL:
-        {
-            BuySell *t = computer.character->getBuySell();
-            if (!t) break;
-            int id = message.readInt16();
-            int amount = message.readInt16();
-            t->perform(id, amount);
-        } break;
+            handleNpcBuySell(client, message);
+            break;
 
         case PGMSG_RAISE_ATTRIBUTE:
-        {
-            int attribute = message.readInt32();
-            AttribmodResponseCode retCode;
-            retCode = computer.character->useCharacterPoint(attribute);
-            result.writeInt16(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
-            result.writeInt8(retCode);
-            result.writeInt32(attribute);
-
-            if (retCode == ATTRIBMOD_OK )
-            {
-                accountHandler->updateCharacterPoints(
-                    computer.character->getDatabaseID(),
-                    computer.character->getCharacterPoints(),
-                    computer.character->getCorrectionPoints());
-
-                // log transaction
-                std::stringstream str;
-                str << "User increased attribute " << attribute;
-                accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                    TRANS_ATTR_INCREASE, str.str());
-            }
-        } break;
+            handleRaiseAttribute(client, message);
+            break;
 
         case PGMSG_LOWER_ATTRIBUTE:
-        {
-            int attribute = message.readInt32();
-            AttribmodResponseCode retCode;
-            retCode = computer.character->useCorrectionPoint(attribute);
-            result.writeInt16(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
-            result.writeInt8(retCode);
-            result.writeInt32(attribute);
-
-            if (retCode == ATTRIBMOD_OK )
-            {
-                accountHandler->updateCharacterPoints(
-                    computer.character->getDatabaseID(),
-                    computer.character->getCharacterPoints(),
-                    computer.character->getCorrectionPoints());
-
-                // log transaction
-                std::stringstream str;
-                str << "User decreased attribute " << attribute;
-                accountHandler->sendTransaction(computer.character->getDatabaseID(),
-                    TRANS_ATTR_DECREASE, str.str());
-            }
-        } break;
+            handleLowerAttribute(client, message);
+            break;
 
         case PGMSG_RESPAWN:
-        {
-            computer.character->respawn(); // plausibility check is done by character class
-        } break;
+            // plausibility check is done by character class
+            client.character->respawn();
+            break;
 
         case PGMSG_NPC_POST_SEND:
-        {
-            handleSendPost(&computer, message);
-        } break;
+            handleNpcPostSend(client, message);
+            break;
 
         default:
             LOG_WARN("Invalid message type");
-            result.writeInt16(XXMSG_INVALID);
+            client.send(MessageOut(XXMSG_INVALID));
             break;
     }
-
-    if (result.getLength() > 0)
-        computer.send(result);
 }
 
 void GameHandler::sendTo(Character *beingPtr, MessageOut &msg)
@@ -707,27 +394,418 @@ GameClient *GameHandler::getClientByNameSlow(const std::string &name) const
     return 0;
 }
 
-void GameHandler::sendError(NetComputer *computer, int id, std::string errorMsg)
+void GameHandler::handleSay(GameClient &client, MessageIn &message)
+{
+    const std::string say = message.readString();
+    if (say.empty())
+        return;
+
+    if (say[0] == '@')
+    {
+        CommandHandler::handleCommand(client.character, say);
+        return;
+    }
+    if (!client.character->isMuted())
+    {
+        GameState::sayAround(client.character, say);
+        std::string msg = client.character->getName() + " said " + say;
+        accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                        TRANS_MSG_PUBLIC, msg);
+    }
+    else
+    {
+        GameState::sayTo(client.character, NULL,
+                         "You are not allowed to talk right now.");
+    }
+}
+
+void GameHandler::handleNpc(GameClient &client, MessageIn &message)
+{
+    int id = message.readInt16();
+    Actor *actor = findActorNear(client.character, id);
+    if (!actor || actor->getType() != OBJECT_NPC)
+    {
+        sendNpcError(client, id, "Not close enough to NPC\n");
+        return;
+    }
+
+    NPC *npc = static_cast<NPC *>(actor);
+    switch (message.getId())
+    {
+        case PGMSG_NPC_SELECT:
+            npc->select(client.character, message.readInt8());
+            break;
+        case PGMSG_NPC_NUMBER:
+            npc->integerReceived(client.character, message.readInt32());
+            break;
+        case PGMSG_NPC_STRING:
+            npc->stringReceived(client.character, message.readString());
+            break;
+        case PGMSG_NPC_TALK:
+        case PGMSG_NPC_TALK_NEXT:
+        default:
+            npc->prompt(client.character, message.getId() == PGMSG_NPC_TALK);
+    }
+}
+
+void GameHandler::handlePickup(GameClient &client, MessageIn &message)
+{
+    const int x = message.readInt16();
+    const int y = message.readInt16();
+    const Point ppos = client.character->getPosition();
+
+    // TODO: use a less arbitrary value.
+    if (std::abs(x - ppos.x) + std::abs(y - ppos.y) < 48)
+    {
+        MapComposite *map = client.character->getMap();
+        Point ipos(x, y);
+        for (FixedActorIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
+        {
+            Actor *o = *i;
+            Point opos = o->getPosition();
+            if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
+            {
+                Item *item = static_cast< Item * >(o);
+                ItemClass *ic = item->getItemClass();
+                Inventory(client.character).insert(ic->getDatabaseID(),
+                                                   item->getAmount());
+                GameState::remove(item);
+                // log transaction
+                std::stringstream str;
+                str << "User picked up item " << ic->getDatabaseID()
+                    << " at " << opos.x << "x" << opos.y;
+                accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                                TRANS_ITEM_PICKUP, str.str());
+                break;
+            }
+        }
+    }
+}
+
+void GameHandler::handleUseItem(GameClient &client, MessageIn &message)
+{
+    const int slot = message.readInt8();
+    Inventory inv(client.character);
+
+    if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
+    {
+        if (ic->hasTrigger(ITT_ACTIVATE))
+        {
+            std::stringstream str;
+            str << "User activated item " << ic->getDatabaseID()
+                << " from slot " << slot;
+            accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                            TRANS_ITEM_USED, str.str());
+            if (ic->useTrigger(client.character, ITT_ACTIVATE))
+                inv.removeFromSlot(slot, 1);
+        }
+    }
+}
+
+void GameHandler::handleDrop(GameClient &client, MessageIn &message)
+{
+    const int slot = message.readInt8();
+    const int amount = message.readInt8();
+    Inventory inv(client.character);
+
+    if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
+    {
+        int nb = inv.removeFromSlot(slot, amount);
+        Item *item = new Item(ic, amount - nb);
+        item->setMap(client.character->getMap());
+        item->setPosition(client.character->getPosition());
+        if (!GameState::insert(item))
+        {
+            // The map is full. Put back into inventory.
+            inv.insert(ic->getDatabaseID(), amount - nb);
+            delete item;
+            return;
+        }
+        // log transaction
+        Point pt = client.character->getPosition();
+        std::stringstream str;
+        str << "User dropped item " << ic->getDatabaseID()
+            << " at " << pt.x << "x" << pt.y;
+        accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                        TRANS_ITEM_DROP, str.str());
+    }
+}
+
+void GameHandler::handleWalk(GameClient &client, MessageIn &message)
+{
+    const int x = message.readInt16();
+    const int y = message.readInt16();
+
+    Point dst(x, y);
+    client.character->setDestination(dst);
+}
+
+void GameHandler::handleEquip(GameClient &client, MessageIn &message)
+{
+    const int slot = message.readInt8();
+    Inventory(client.character).equip(slot);
+}
+
+void GameHandler::handleUnequip(GameClient &client, MessageIn &message)
+{
+    const int slot = message.readInt8();
+    if (slot >= 0 && slot < INVENTORY_SLOTS)
+        Inventory(client.character).unequip(slot);
+}
+
+void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
+{
+    const int slot1 = message.readInt8();
+    const int slot2 = message.readInt8();
+    const int amount = message.readInt8();
+
+    Inventory(client.character).move(slot1, slot2, amount);
+    // log transaction
+    std::stringstream str;
+    str << "User moved item "
+        << " from slot " << slot1 << " to slot " << slot2;
+    accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                    TRANS_ITEM_MOVE, str.str());
+}
+
+void GameHandler::handleAttack(GameClient &client, MessageIn &message)
+{
+    int id = message.readInt16();
+    LOG_DEBUG("Character " << client.character->getPublicID()
+              << " attacked being " << id);
+
+    Actor *o = findActorNear(client.character, id);
+    if (o && o->getType() != OBJECT_NPC)
+    {
+        Being *being = static_cast<Being*>(o);
+        client.character->setTarget(being);
+        client.character->setAction(ATTACK);
+    }
+}
+
+void GameHandler::handleUseSpecial(GameClient &client, MessageIn &message)
+{
+    const int specialID = message.readInt8();
+    LOG_DEBUG("Character " << client.character->getPublicID()
+              << " tries to use his special attack " << specialID);
+    client.character->useSpecial(specialID);
+}
+
+void GameHandler::handleActionChange(GameClient &client, MessageIn &message)
+{
+    const BeingAction action = (BeingAction) message.readInt8();
+    const BeingAction current = (BeingAction) client.character->getAction();
+    bool logActionChange = true;
+
+    switch (action)
+    {
+        case STAND:
+            if (current == SIT)
+            {
+                client.character->setAction(STAND);
+                logActionChange = false;
+            }
+            break;
+        case SIT:
+            if (current == STAND)
+            {
+                client.character->setAction(SIT);
+                logActionChange = false;
+            }
+            break;
+        default:
+            break;
+    }
+
+    // Log the action change only when this is relevant.
+    if (logActionChange)
+    {
+        // log transaction
+        std::stringstream str;
+        str << "User changed action from " << current << " to " << action;
+        accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                        TRANS_ACTION_CHANGE, str.str());
+    }
+
+}
+
+void GameHandler::handleDirectionChange(GameClient &client, MessageIn &message)
+{
+    const BeingDirection direction = (BeingDirection) message.readInt8();
+    client.character->setDirection(direction);
+}
+
+void GameHandler::handleDisconnect(GameClient &client, MessageIn &message)
+{
+    const bool reconnectAccount = (bool) message.readInt8();
+
+    MessageOut result(GPMSG_DISCONNECT_RESPONSE);
+    result.writeInt8(ERRMSG_OK); // It is, when control reaches here
+
+    if (reconnectAccount)
+    {
+        std::string magic_token(utils::getMagicToken());
+        result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
+        // No accountserver data, the client should remember that
+        accountHandler->playerReconnectAccount(
+                    client.character->getDatabaseID(),
+                    magic_token);
+    }
+    // TODO: implement a delayed remove
+    GameState::remove(client.character);
+
+    accountHandler->sendCharacterData(client.character);
+
+    // Done with the character
+    client.character->disconnected();
+    delete client.character;
+    client.character = 0;
+    client.status = CLIENT_LOGIN;
+
+    client.send(result);
+}
+
+void GameHandler::handleTradeRequest(GameClient &client, MessageIn &message)
+{
+    const int id = message.readInt16();
+
+    if (Trade *t = client.character->getTrading())
+        if (t->request(client.character, id))
+            return;
+
+    Character *q = findCharacterNear(client.character, id);
+    if (!q || q->isBusy())
+    {
+        client.send(MessageOut(GPMSG_TRADE_CANCEL));
+        return;
+    }
+
+    new Trade(client.character, q);
+
+    // log transaction
+    std::string str;
+    str = "User requested trade with " + q->getName();
+    accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                    TRANS_TRADE_REQUEST, str);
+}
+
+void GameHandler::handleTrade(GameClient &client, MessageIn &message)
+{
+    std::stringstream str;
+    Trade *t = client.character->getTrading();
+    if (!t)
+        return;
+
+    switch (message.getId())
+    {
+        case PGMSG_TRADE_CANCEL:
+            t->cancel();
+            break;
+        case PGMSG_TRADE_CONFIRM:
+            t->confirm(client.character);
+            break;
+        case PGMSG_TRADE_AGREED:
+            t->agree(client.character);
+            // log transaction
+            accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                            TRANS_TRADE_END,
+                                            "User finished trading");
+            break;
+        case PGMSG_TRADE_SET_MONEY:
+        {
+            int money = message.readInt32();
+            t->setMoney(client.character, money);
+            // log transaction
+            str << "User added " << money << " money to trade.";
+            accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                            TRANS_TRADE_MONEY, str.str());
+        } break;
+        case PGMSG_TRADE_ADD_ITEM:
+        {
+            int slot = message.readInt8();
+            t->addItem(client.character, slot, message.readInt8());
+            // log transaction
+            str << "User add item from slot " << slot;
+            accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                            TRANS_TRADE_ITEM, str.str());
+        } break;
+    }
+}
+
+void GameHandler::handleNpcBuySell(GameClient &client, MessageIn &message)
+{
+    BuySell *t = client.character->getBuySell();
+    if (!t)
+        return;
+    const int id = message.readInt16();
+    const int amount = message.readInt16();
+    t->perform(id, amount);
+}
+
+void GameHandler::handleRaiseAttribute(GameClient &client, MessageIn &message)
+{
+    const int attribute = message.readInt32();
+    AttribmodResponseCode retCode;
+    retCode = client.character->useCharacterPoint(attribute);
+
+    MessageOut result(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
+    result.writeInt8(retCode);
+    result.writeInt32(attribute);
+    client.send(result);
+
+    if (retCode == ATTRIBMOD_OK)
+    {
+        accountHandler->updateCharacterPoints(
+            client.character->getDatabaseID(),
+            client.character->getCharacterPoints(),
+            client.character->getCorrectionPoints());
+
+        // log transaction
+        std::stringstream str;
+        str << "User increased attribute " << attribute;
+        accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                        TRANS_ATTR_INCREASE, str.str());
+    }
+}
+
+void GameHandler::handleLowerAttribute(GameClient &client, MessageIn &message)
+{
+    const int attribute = message.readInt32();
+    AttribmodResponseCode retCode;
+    retCode = client.character->useCorrectionPoint(attribute);
+
+    MessageOut result(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
+    result.writeInt8(retCode);
+    result.writeInt32(attribute);
+    client.send(result);
+
+    if (retCode == ATTRIBMOD_OK)
+    {
+        accountHandler->updateCharacterPoints(
+            client.character->getDatabaseID(),
+            client.character->getCharacterPoints(),
+            client.character->getCorrectionPoints());
+
+        // log transaction
+        std::stringstream str;
+        str << "User decreased attribute " << attribute;
+        accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                        TRANS_ATTR_DECREASE, str.str());
+    }
+}
+
+void GameHandler::handleNpcPostSend(GameClient &client, MessageIn &message)
+{
+    // add the character so that the post man knows them
+    postMan->addCharacter(client.character);
+    accountHandler->sendPost(client.character, message);
+}
+
+void GameHandler::sendNpcError(GameClient &client, int id,
+                               const std::string &errorMsg)
 {
     MessageOut msg(GPMSG_NPC_ERROR);
     msg.writeInt16(id);
     msg.writeString(errorMsg, errorMsg.size());
-    computer->send(msg);
-}
-
-void GameHandler::handleWalk(GameClient *client, MessageIn &message)
-{
-    int x = message.readInt16();
-    int y = message.readInt16();
-
-    Point dst(x, y);
-    client->character->setDestination(dst);
-
-}
-
-void GameHandler::handleSendPost(GameClient *client, MessageIn &message)
-{
-    // add the character so that the post man knows them
-    postMan->addCharacter(client->character);
-    accountHandler->sendPost(client->character, message);
+    client.send(msg);
 }

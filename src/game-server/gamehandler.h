@@ -116,37 +116,46 @@ class GameHandler: public ConnectionHandler
         void computerDisconnected(NetComputer *);
 
         /**
-         * Send error message back to player
-         */
-        void sendError(NetComputer *computer, int id, std::string errorMsg);
-
-        /**
          * Processes messages related to core game events.
          */
         void processMessage(NetComputer *computer, MessageIn &message);
 
-        /**
-         * Set the position a player wants to move to
-         */
-        void handleWalk(GameClient *client, MessageIn &message);
-
-        /**
-         * Send a letter
-         */
-        void handleSendPost(GameClient *client, MessageIn &message);
-
-        /**
-         * Retrieve a letter
-         */
-        void handleGetPost(GameClient *client, MessageIn &message);
-
     private:
+        void handleSay(GameClient &client, MessageIn &message);
+        void handleNpc(GameClient &client, MessageIn &message);
+        void handlePickup(GameClient &client, MessageIn &message);
+        void handleUseItem(GameClient &client, MessageIn &message);
+        void handleDrop(GameClient &client, MessageIn &message);
+        void handleWalk(GameClient &client, MessageIn &message);
+
+        void handleEquip(GameClient &client, MessageIn &message);
+        void handleUnequip(GameClient &client, MessageIn &message);
+        void handleMoveItem(GameClient &client, MessageIn &message);
+
+        void handleAttack(GameClient &client, MessageIn &message);
+        void handleUseSpecial(GameClient &client, MessageIn &message);
+        void handleActionChange(GameClient &client, MessageIn &message);
+        void handleDirectionChange(GameClient &client, MessageIn &message);
+
+        void handleDisconnect(GameClient &client, MessageIn &message);
+
+        void handleTradeRequest(GameClient &client, MessageIn &message);
+        void handleTrade(GameClient &client, MessageIn &message);
+
+        void handleNpcBuySell(GameClient &client, MessageIn &message);
+
+        void handleRaiseAttribute(GameClient &client, MessageIn &message);
+        void handleLowerAttribute(GameClient &client, MessageIn &message);
+
+        void handleNpcPostSend(GameClient &client, MessageIn &message);
+
+        void sendNpcError(GameClient &client, int id,
+                          const std::string &errorMsg);
 
         /**
          * Container for pending clients and pending connections.
          */
         TokenCollector<GameHandler, GameClient *, Character *> mTokenCollector;
-
 };
 
 extern GameHandler *gameHandler;
