@@ -27,22 +27,6 @@
 class Character;
 class MapComposite;
 
-/** \fn void AccountConnection::syncChanges(bool force = false)
- *
- *  The gameserver holds a buffer with all changes made by a character. The
- *  changes are added at the time they occur. When the buffer reaches one of
- *  the following limits, the buffer is sent to the account server and applied
- *  to the database.
- *
- *  The sync buffer is sent when:
- *  - forced by any process (param force = true)
- *  - every 10 seconds
- *  - buffer reaches size of 1kb (defined in #SYNC_BUFFER_SIZE)
- *  - buffer holds more then 20 messages (defined in #SYNC_BUFFER_LIMIT)
- */
-#define SYNC_BUFFER_SIZE    1024   /**< maximum size of sync buffer in bytes. */
-#define SYNC_BUFFER_LIMIT     20   /**< maximum number of messages in sync buffer. */
-
 /**
  * A connection to the account server.
  */
@@ -119,6 +103,17 @@ class AccountConnection : public Connection
         /**
          * Sends all changed player data to the account server to minimize
          * dataloss due to failure of one server component.
+         *
+         * The gameserver holds a buffer with all changes made by a character.
+         * The changes are added at the time they occur. When the buffer
+         * reaches one of the following limits, the buffer is sent to the
+         * account server and applied to the database.
+         *
+         * The sync buffer is sent when:
+         * - forced by any process (param force = true)
+         * - every 10 seconds
+         * - buffer reaches size of 1kb (SYNC_BUFFER_SIZE)
+         * - buffer holds more then 20 messages (SYNC_BUFFER_LIMIT)
          *
          * @param force Send changes even if buffer hasn't reached its size
          *              or message limit. (used to send in timed schedules)

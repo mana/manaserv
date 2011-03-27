@@ -291,8 +291,7 @@ enum {
     SYNC_CHARACTER_POINTS    = 0x01,       // D charId, D charPoints, D corrPoints
     SYNC_CHARACTER_ATTRIBUTE = 0x02,       // D charId, D attrId, DF base, DF mod
     SYNC_CHARACTER_SKILL     = 0x03,       // D charId, B skillId, D skill value
-    SYNC_ONLINE_STATUS       = 0x04,       // D charId, B 0x00 = offline, 0x01 = online
-    SYNC_END_OF_BUFFER       = 0xFF        // shows, that the buffer ends here.
+    SYNC_ONLINE_STATUS       = 0x04        // D charId, B 0 = offline, 1 = online
 };
 
 // Login specific return values

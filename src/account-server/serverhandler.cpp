@@ -603,9 +603,9 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
     // It is safe to perform the following updates in a transaction
     dal::PerformTransaction transaction(storage->database());
 
-    int msgType = msg.readInt8();
-    while (msgType != SYNC_END_OF_BUFFER && msg.getUnreadLength() > 0)
+    while (msg.getUnreadLength() > 0)
     {
+        int msgType = msg.readInt8();
         switch (msgType)
         {
             case SYNC_CHARACTER_POINTS:
@@ -640,14 +640,10 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
             {
                 LOG_DEBUG("received SYNC_ONLINE_STATUS");
                 int charId = msg.readInt32();
-                bool online;
-                msg.readInt8() == 0x00 ? online = false : online = true;
+                bool online = (msg.readInt8() == 1);
                 storage->setOnlineStatus(charId, online);
             }
         }
-
-        // read next message type from buffer
-        msgType = msg.readInt8();
     }
 
     transaction.commit();
