@@ -201,11 +201,11 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PCMSG_GUILD_CREATE:
-            handleGuildCreation(computer, message);
+            handleGuildCreate(computer, message);
             break;
 
         case PCMSG_GUILD_INVITE:
-            handleGuildInvitation(computer, message);
+            handleGuildInvite(computer, message);
             break;
 
         case PCMSG_GUILD_ACCEPT:
@@ -213,7 +213,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PCMSG_GUILD_GET_MEMBERS:
-            handleGuildRetrieveMembers(computer, message);
+            handleGuildGetMembers(computer, message);
             break;
 
         case PCMSG_GUILD_PROMOTE_MEMBER:
@@ -221,7 +221,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PCMSG_GUILD_KICK_MEMBER:
-            handleGuildMemberKick(computer, message);
+            handleGuildKickMember(computer, message);
 
         case PCMSG_GUILD_QUIT:
             handleGuildQuit(computer, message);
@@ -240,7 +240,7 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             break;
 
         case PCMSG_PARTY_REJECT_INVITE:
-            handlePartyRejection(computer, message);
+            handlePartyRejectInvite(computer, message);
             break;
 
         default:
