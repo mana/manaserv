@@ -827,7 +827,7 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
     int slot = msg.readInt8();
     Characters &chars = acc->getCharacters();
 
-    if (slot < 1 || slot > (int)chars.size())
+    if (chars.find(slot) == chars.end())
     {
         // Invalid char selection
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
