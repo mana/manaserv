@@ -95,8 +95,10 @@ void GuildManager::removeGuildMember(Guild *guild, int playerId)
     while (itr != itr_end)
     {
         if ((*itr) == playerId)
+        {
             mOwners.remove(playerId);
-
+            break;
+        }
         ++itr;
     }
 }
