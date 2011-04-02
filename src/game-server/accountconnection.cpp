@@ -36,8 +36,11 @@
 #include "utils/tokendispenser.h"
 #include "utils/tokencollector.h"
 
-const int SYNC_BUFFER_SIZE = 1024; /**< maximum size of sync buffer in bytes. */
-const int SYNC_BUFFER_LIMIT = 20;  /**< maximum number of messages in sync buffer. */
+/** Maximum size of sync buffer in bytes. */
+const unsigned SYNC_BUFFER_SIZE = 1024;
+
+/** Maximum number of messages in sync buffer. */
+const int SYNC_BUFFER_LIMIT = 20;
 
 AccountConnection::AccountConnection():
     mSyncBuffer(0),
