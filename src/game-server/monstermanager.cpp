@@ -119,8 +119,8 @@ void MonsterManager::reload()
                 MonsterDrop drop;
                 drop.item = itemManager->getItem(
                                           XML::getProperty(subnode, "item", 0));
-                drop.probability = XML::getProperty(subnode, "percent", 0)
-                                   * 100;
+                drop.probability = XML::getFloatProperty(subnode, "percent",
+                                                         0.0) * 100 + 0.5;
 
                 if (drop.item && drop.probability)
                     drops.push_back(drop);
