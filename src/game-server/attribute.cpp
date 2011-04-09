@@ -25,6 +25,7 @@
 
 AttributeModifiersEffect::AttributeModifiersEffect(StackableType stackableType,
                                                    ModifierEffectType effectType) :
+    mCacheVal(0),
     mMod(effectType == Multiplicative ? 1 : 0),
     mStackableType(stackableType),
     mEffectType(effectType)
@@ -314,6 +315,7 @@ bool AttributeModifiersEffect::tick()
 }
 
 Attribute::Attribute(const std::vector<struct AttributeInfoType> &type)
+    : mBase(0)
 {
     LOG_DEBUG("Construction of new attribute with '" << type.size() << "' layers.");
     for (unsigned int i = 0; i < type.size(); ++i)
