@@ -190,14 +190,10 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     unsigned int eqSlot, invSlot;
     for (int j = 0; j < equipSlotsSize; ++j)
     {
-        int equipmentInSlotType = msg.readInt8();
-        for (int k = 0; k < equipmentInSlotType; ++k)
-        {
-            eqSlot  = msg.readInt8();
-            invSlot = msg.readInt16();
-            poss.equipSlots.insert(poss.equipSlots.end(),
-                                   std::make_pair(eqSlot, invSlot));
-        }
+        eqSlot  = msg.readInt8();
+        invSlot = msg.readInt16();
+        poss.equipSlots.insert(poss.equipSlots.end(),
+                               std::make_pair(eqSlot, invSlot));
     }
     poss.inventory.clear();
     // inventory - must be last because size isn't transmitted
@@ -209,7 +205,6 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         i.amount   = msg.readInt16();
         poss.inventory.insert(poss.inventory.end(), std::make_pair(slotId, i));
     }
-
 }
 
-#endif
+#endif // SERIALIZE_CHARACTERDATA_H
