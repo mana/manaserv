@@ -770,9 +770,15 @@ bool Storage::updateCharacter(Character *character)
     }
 
     // Character's inventory
-    // Delete the old inventory first
+    // Delete the old inventory and equipment table first
     try
     {
+        std::ostringstream sqlDeleteCharacterEquipment;
+        sqlDeleteCharacterEquipment
+            << "delete from " << CHAR_EQUIPS_TBL_NAME
+            << " where owner_id = '" << character->getDatabaseID() << "';";
+        mDb->execSql(sqlDeleteCharacterEquipment.str());
+
         std::ostringstream sqlDeleteCharacterInventory;
         sqlDeleteCharacterInventory
             << "delete from " << INVENTORIES_TBL_NAME
