@@ -165,7 +165,7 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
 /**
  * Informs a player of what happened around the character.
  */
-static void informPlayer(MapComposite *map, Character *p)
+static void informPlayer(MapComposite *map, Character *p, int worldTime)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
@@ -311,13 +311,23 @@ static void informPlayer(MapComposite *map, Character *p)
 
         if (opos != oold)
         {
-            flags |= MOVING_POSITION;
+            // Add position check coords every 5 seconds.
+            if (worldTime % 50 == 0)
+                flags |= MOVING_POSITION;
+
+            flags |= MOVING_DESTINATION;
         }
 
         // Send move messages.
         moveMsg.writeInt16(oid);
         moveMsg.writeInt8(flags);
         if (flags & MOVING_POSITION)
+        {
+            moveMsg.writeInt16(oold.x);
+            moveMsg.writeInt16(oold.y);
+        }
+
+        if (flags & MOVING_DESTINATION)
         {
             moveMsg.writeInt16(opos.x);
             moveMsg.writeInt16(opos.y);
@@ -460,7 +470,7 @@ void GameState::update(int worldTime)
 
         for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
         {
-            informPlayer(map, *p);
+            informPlayer(map, *p, worldTime);
             /*
              sending the whole character is overhead for the database, it should
              be replaced by a syncbuffer. see: game-server/accountconnection:
