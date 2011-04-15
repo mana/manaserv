@@ -354,6 +354,12 @@ int main(int argc, char *argv[])
 
     initializeConfiguration(options.configPath);
 
+    if (!options.verbosityChanged)
+        options.verbosity = static_cast<Logger::Level>(
+                               Configuration::getValue("log_gameServerLogLevel",
+                                                       options.verbosity) );
+    Logger::setVerbosity(options.verbosity);
+
     // General initialization
     initializeServer();
 
@@ -365,12 +371,6 @@ int main(int argc, char *argv[])
     LOG_INFO("Manaserv Protocol version " << ManaServ::PROTOCOL_VERSION
              << ", " << "Enet version " << ENET_VERSION_MAJOR << "."
              << ENET_VERSION_MINOR << "." << ENET_VERSION_PATCH);
-
-    if (!options.verbosityChanged)
-        options.verbosity = static_cast<Logger::Level>(
-                               Configuration::getValue("log_gameServerLogLevel",
-                                                       options.verbosity) );
-    Logger::setVerbosity(options.verbosity);
 
     // When the gameListenToClientPort is set, we use it.
     // Otherwise, we use the accountListenToClientPort + 3 if the option is set.
