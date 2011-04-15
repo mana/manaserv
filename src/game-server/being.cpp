@@ -192,11 +192,11 @@ void Being::setDestination(const Point &dst)
 
 Path Being::findPath()
 {
-    mOld = getPosition();
     Map *map = getMap()->getMap();
     int tileWidth = map->getTileWidth();
     int tileHeight = map->getTileHeight();
-    int startX = mOld.x / tileWidth, startY = mOld.y / tileHeight;
+    int startX = getPosition().x / tileWidth;
+    int startY = getPosition().y / tileHeight;
     int destX = mDst.x / tileWidth, destY = mDst.y / tileHeight;
 
     return map->findPath(startX, startY, destX, destY, getWalkMask());
@@ -307,8 +307,10 @@ void Being::move()
     Map *map = getMap()->getMap();
     int tileWidth = map->getTileWidth();
     int tileHeight = map->getTileHeight();
-    int tileSX = mOld.x / tileWidth, tileSY = mOld.y / tileHeight;
-    int tileDX = mDst.x / tileWidth, tileDY = mDst.y / tileHeight;
+    int tileSX = getPosition().x / tileWidth;
+    int tileSY = getPosition().y / tileHeight;
+    int tileDX = mDst.x / tileWidth;
+    int tileDY = mDst.y / tileHeight;
 
     if (tileSX == tileDX && tileSY == tileDY)
     {
@@ -316,7 +318,7 @@ void Being::move()
             setAction(STAND);
         // Moving while staying on the same tile is free
         // We only update the direction in that case.
-        updateDirection(mOld, mDst);
+        updateDirection(getPosition(), mDst);
         setPosition(mDst);
         mMoveTime = 0;
         return;
