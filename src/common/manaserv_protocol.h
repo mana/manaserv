@@ -359,11 +359,6 @@ enum {
     MOVING_DESTINATION = 2
 };
 
-// Email change specific return values
-enum {
-    EMAILCHG_EXISTS_EMAIL = 0x40
-};
-
 // Chat errors return values
 enum {
     CHAT_USING_BAD_WORDS = 0x40,
