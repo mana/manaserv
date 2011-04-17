@@ -16,6 +16,7 @@ require "scripts/lua/npclib"
 require "scripts/npcs/banker"
 require "scripts/npcs/barber"
 require "scripts/npcs/merchant"
+require "scripts/npcs/shaker"
 
 atinit(function()
 
@@ -59,10 +60,15 @@ function Harmony(npc, ch, list)
     do_message(npc, ch, "Have fun!")
     mana.effect_create(EMOTE_HAPPY, npc)
     do_npc_close(npc, ch)
-    -- Make Harmony disappear for a while...
+    -- Make Harmony disappear for a while... with a small earthquake effect!
+    local shakeX = mana.posX(npc)
+    local shakeY = mana.posY(npc)
     mana.npc_disable(npc)
+    tremor(shakeX, shakeY, 300)
+
     -- 20 seconds later, Harmony comes back
     schedule_in(20, function() mana.npc_enable(npc)  end)
+    schedule_in(20, function() tremor(shakeX, shakeY, 300)  end)
 end
 
 -- Global variable used to control Harmony's updates.
