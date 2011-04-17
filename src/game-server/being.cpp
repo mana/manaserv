@@ -552,7 +552,12 @@ void Being::updateDerivedAttributes(unsigned int attr)
         raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
         break;
     case ATTR_MOVE_SPEED_TPS:
-        updateDerivedAttributes(ATTR_MOVE_SPEED_RAW);
+        if (getAttribute(attr) > 0.0f)
+            setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToRawSpeed(
+                         getModifiedAttribute(ATTR_MOVE_SPEED_TPS)));
+        break;
+    default:
+        // Do nothing
         break;
     }
 }
