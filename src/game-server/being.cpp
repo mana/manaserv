@@ -535,7 +535,6 @@ bool Being::recalculateBaseAttribute(unsigned int attr)
     if (newBase != getAttribute(attr))
     {
         setAttribute(attr, newBase);
-        updateDerivedAttributes(attr);
         return true;
     }
     LOG_DEBUG("No changes to sync for attribute '" << attr << "'.");
