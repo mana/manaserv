@@ -503,9 +503,14 @@ void Monster::died()
 
 bool Monster::recalculateBaseAttribute(unsigned int attr)
 {
-    LOG_DEBUG("Received update attribute recalculation request at Monster for "
+    LOG_DEBUG("Monster: Received update attribute recalculation request for "
               << attr << ".");
-    if (!mAttributes.count(attr)) return false;
+    if (!mAttributes.count(attr))
+    {
+        LOG_DEBUG("Monster::recalculateBaseAttribute: "
+                  << attr << " not found!");
+        return false;
+    }
     double newBase = getAttribute(attr);
 
     switch (attr)
@@ -536,6 +541,6 @@ bool Monster::recalculateBaseAttribute(unsigned int attr)
         setAttribute(attr, newBase);
         return true;
     }
-    LOG_DEBUG("No changes to sync for attribute '" << attr << "'.");
+    LOG_DEBUG("Monster: No changes to sync for attribute '" << attr << "'.");
     return false;
 }

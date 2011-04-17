@@ -476,7 +476,12 @@ void Being::setAttribute(unsigned int id, double value)
 double Being::getAttribute(unsigned int id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
-    if (ret == mAttributes.end()) return 0;
+    if (ret == mAttributes.end())
+    {
+        LOG_DEBUG("Being::getAttribute: Attribute "
+                  << id << " not found! Returning 0.");
+        return 0;
+    }
     return ret->second.getBase();
 }
 
@@ -484,7 +489,12 @@ double Being::getAttribute(unsigned int id) const
 double Being::getModifiedAttribute(unsigned int id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
-    if (ret == mAttributes.end()) return 0;
+    if (ret == mAttributes.end())
+    {
+        LOG_DEBUG("Being::getModifiedAttribute: Attribute "
+                  << id << " not found! Returning 0.");
+        return 0;
+    }
     return ret->second.getModifiedAttribute();
 }
 
@@ -497,9 +507,13 @@ void Being::setModAttribute(unsigned int, double)
 
 bool Being::recalculateBaseAttribute(unsigned int attr)
 {
-    LOG_DEBUG("Received update attribute recalculation request at Being for "
+    LOG_DEBUG("Being: Received update attribute recalculation request for "
               << attr << ".");
-    if (!mAttributes.count(attr)) return false;
+    if (!mAttributes.count(attr))
+    {
+        LOG_DEBUG("Being::recalculateBaseAttribute: " << attr << " not found!");
+        return false;
+    }
     double newBase = getAttribute(attr);
 
     switch (attr)
@@ -537,12 +551,13 @@ bool Being::recalculateBaseAttribute(unsigned int attr)
         setAttribute(attr, newBase);
         return true;
     }
-    LOG_DEBUG("No changes to sync for attribute '" << attr << "'.");
+    LOG_DEBUG("Being: No changes to sync for attribute '" << attr << "'.");
     return false;
 }
 
 void Being::updateDerivedAttributes(unsigned int attr)
 {
+    LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
     switch (attr)
     {
     case ATTR_MAX_HP:
