@@ -104,7 +104,6 @@ Monster::Monster(MonsterClass *specy):
                   mutation ?
                   attr * (100 + (rand()%(mutation << 1)) - mutation) / 100.0 :
                   attr);
-            recalculateBaseAttribute(it2->first);
         }
     }
 
