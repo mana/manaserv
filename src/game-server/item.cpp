@@ -57,15 +57,35 @@ void ItemEffectAutoAttack::dispell(Being *itemUser)
     // TODO
 }
 
+ItemEffectScript::~ItemEffectScript()
+{
+    delete mScript;
+}
+
 bool ItemEffectScript::apply(Being *itemUser)
 {
-    // TODO
+    if (mScript && !mActivateFunctionName.empty())
+    {
+        mScript->setMap(itemUser->getMap());
+        mScript->prepare(mActivateFunctionName);
+        mScript->push(itemUser);
+        mScript->push(mItemId);
+        mScript->execute(); // TODO return depending on script execution success.
+        return true;
+    }
     return false;
 }
 
 void ItemEffectScript::dispell(Being *itemUser)
 {
-    // TODO
+    if (mScript && !mDispellFunctionName.empty())
+    {
+        mScript->setMap(itemUser->getMap());
+        mScript->prepare(mDispellFunctionName);
+        mScript->push(itemUser);
+        mScript->push(mItemId);
+        mScript->execute();
+    }
 }
 
 bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)

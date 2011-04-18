@@ -21,6 +21,7 @@
 #include "game-server/itemmanager.h"
 
 #include "common/defines.h"
+#include "common/resourcemanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/item.h"
 #include "game-server/skillmanager.h"
@@ -387,25 +388,57 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
         }
         else if (xmlStrEqual(subNode->name, BAD_CAST "script"))
         {
+            std::string activateFunctionName = XML::getProperty(subNode,
+                                                                "function",
+                                                                std::string());
+            if (activateFunctionName.empty())
+            {
+                LOG_WARN("Item Manager: Empty function definition "
+                         "for script effect, skipping!");
+                continue;
+            }
+
             std::string src = XML::getProperty(subNode, "src", std::string());
             if (src.empty())
             {
-                LOG_WARN("Item Manager: Empty src definition for script effect, skipping!");
+                LOG_WARN("Item Manager: Empty src definition for script effect,"
+                         " skipping!");
                 continue;
             }
-            std::string func = XML::getProperty(subNode, "function", std::string());
-            if (func.empty())
+            std::stringstream filename;
+            filename << "scripts/items/" << src;
+            if (!ResourceManager::exists(filename.str()))
             {
-                LOG_WARN("Item Manager: Empty func definition for script effect, skipping!");
+                LOG_WARN("Could not find script file \"" << filename.str()
+                         << "\" for item #" << item->mDatabaseID);
                 continue;
             }
+
+            LOG_INFO("Loading item script: " << filename.str());
+            Script *script = Script::create("lua");
+            if (!script->loadFile(filename.str()))
+            {
+                // Delete the script as it's invalid.
+                delete script;
+
+                LOG_WARN("Could not load script file \"" << filename.str()
+                          << "\" for item #" << item->mDatabaseID);
+                continue;
+            }
+
             for_each_xml_child_node(scriptSubNode, subNode)
             {
                 // TODO: Load variables from variable subnodes
             }
-            std::string dfunc = XML::getProperty(subNode, "dispell-function", std::string());
-            // STUB
-            item->addEffect(new ItemEffectScript(), triggerTypes.first, triggerTypes.second);
+            std::string dispellFunctionName = XML::getProperty(subNode,
+                                                             "dispell-function",
+                                                             std::string());
+
+            item->addEffect(new ItemEffectScript(item->mDatabaseID, script,
+                                                 activateFunctionName,
+                                                 dispellFunctionName),
+                                                 triggerTypes.first,
+                                                 triggerTypes.second);
         }
     }
 }

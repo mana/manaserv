@@ -64,11 +64,14 @@
         description="A sugar-free candy."
         type="usable"
         hp="5"
-        script="candy.lua"
         weight="1"
         max-per-slot="30"
-        value="15"
-        />
+        value="15">
+        <effect trigger="activation">
+            <script src="candy.lua" function="use" />
+            <consumes />
+        </effect>
+    </item>
     <item id="2" max-per-slot="1" name="Regenerative trinket"
         description="A trinket with refreshing powers."
         image="usable/usable-regenerative-trinket.png"

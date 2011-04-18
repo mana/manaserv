@@ -26,6 +26,7 @@
 #include "game-server/actor.h"
 
 class Being;
+class Script;
 
 typedef std::list< std::pair< unsigned int, unsigned int> > ItemEquipInfo;
 typedef std::list< ItemEquipInfo > ItemEquipsInfo;
@@ -136,8 +137,24 @@ class ItemEffectConsumes : public ItemEffectInfo
 class ItemEffectScript : public ItemEffectInfo
 {
     public:
+        ItemEffectScript(int itemId, Script *script,
+                         const std::string& activateFunctionName,
+                         const std::string& dispellFunctionName):
+            mItemId(0),
+            mScript(script),
+            mActivateFunctionName(activateFunctionName),
+            mDispellFunctionName(dispellFunctionName)
+        {}
+
+        ~ItemEffectScript();
+
         bool apply(Being *itemUser);
         void dispell(Being *itemUser);
+    private:
+        int mItemId;
+        Script *mScript;
+        std::string mActivateFunctionName;
+        std::string mDispellFunctionName;
 };
 
 
@@ -147,15 +164,16 @@ class ItemEffectScript : public ItemEffectInfo
 class ItemClass
 {
     public:
-        ItemClass(int id, unsigned int maxperslot)
-            : mDatabaseID(id)
-            , mName("unnamed")
-            , mSpriteID(0)
-            , mCost(0)
-            , mMaxPerSlot(maxperslot)
+        ItemClass(int id, unsigned int maxperslot):
+            mDatabaseID(id),
+            mName("unnamed"),
+            mSpriteID(0),
+            mCost(0),
+            mMaxPerSlot(maxperslot)
         {}
 
-        ~ItemClass() { resetEffects(); }
+        ~ItemClass()
+        { resetEffects(); }
 
         /**
          * Returns the name of the item type
@@ -209,7 +227,6 @@ class ItemClass
          * Returns equip requirements.
          */
         const ItemEquipsInfo &getItemEquipData() const { return mEquip; }
-
 
     private:
         /**
