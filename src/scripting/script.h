@@ -105,6 +105,12 @@ class Script
         virtual void push(Thing *) = 0;
 
         /**
+         * Pushes a list of items with amounts to the
+         * script engine.
+         */
+        virtual void push(const std::list<InventoryItem> &itemList) = 0;
+
+        /**
          * Executes the function being prepared.
          * @return the value returned by the script.
          */
@@ -135,11 +141,13 @@ class Script
         static bool executeGlobalEventFunction(const std::string &function, Being *obj);
         static void addDataToSpecial(int specialId, Special *special);
         static bool performSpecialAction(int specialId, Being *caster);
+        static bool performCraft(Being* crafter, std::list<InventoryItem> recipe);
 
 
     protected:
         static Script *globalEventScript;
         static Script *specialActionsScript;
+        static Script *craftScript;
         std::string mScriptFile;
 
     private:

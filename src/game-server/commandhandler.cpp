@@ -33,6 +33,8 @@
 #include "game-server/monstermanager.h"
 #include "game-server/state.h"
 
+#include "scripting/script.h"
+
 #include "common/configuration.h"
 #include "common/permissionmanager.h"
 #include "common/transaction.h"
@@ -73,6 +75,7 @@ static void handleKick(Character*, std::string&);
 static void handleLog(Character*, std::string&);
 static void handleLogsay(Character*, std::string&);
 static void handleKillMonsters(Character*, std::string&);
+static void handleCraft(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -128,6 +131,8 @@ static CmdRef const cmdRef[] =
         "Says something in public chat while logging it to the transaction log.", &handleLogsay},
     {"killmonsters", "",
         "Kills all monsters on the map.", &handleKillMonsters},
+    {"craft", "{ <item> <amount> }",
+        "Crafts something.", &handleCraft},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -1289,6 +1294,79 @@ static void handleKillMonsters(Character *player, std::string &args)
     std::string msg = "User killed all monsters on map " + map->getName();
     accountHandler->sendTransaction(player->getDatabaseID(),
                                     TRANS_CMD_KILLMONSTERS, msg);
+}
+
+static void handleCraft(Character *player, std::string &args)
+{
+    std::stringstream errMsg;
+    std::list<InventoryItem> recipe;
+    Inventory playerInventory(player);
+    std::map<int, int> totalAmountOfItem;
+
+    while (true)
+    {
+        // parsing
+        std::string strItem = getArgument(args);
+        ItemClass* item = itemManager->getItemByName(strItem);
+        std::string strAmount = getArgument(args);
+        int amount = utils::stringToInt(strAmount);
+
+        // syntax error checking
+        if (strItem.empty())
+        {
+            // the item list has ended
+            break;
+        }
+        if (!item)
+        {
+            // item wasn't found in the item database
+            errMsg << "Unknown item: \"" << strItem << "\".";
+            break;
+        }
+
+        if (strAmount.empty())
+        {
+            // the last item in the list has no amount defined
+            errMsg << "No amount given for \"" << strItem << "\".";
+            break;
+        }
+        if (amount < 1)
+        {
+            errMsg << "Illegal amount \""<< strAmount << "\" for item \"" << strItem << "\".";
+            break;
+        }
+
+        // inventory checking
+        int available = playerInventory.count(item->getDatabaseID());
+        if (available == 0)
+        {
+            errMsg << "You have no "<< strItem << " in your inventory.";
+            break;
+        }
+        if (available < amount)
+        {
+            errMsg << "You haven't got that many "<< strItem << "s in your inventory.";
+            break;
+        }
+
+        // when there is still no break, add the item;
+        InventoryItem recipeItem;
+        recipeItem.itemId = item->getDatabaseID();
+        recipeItem.amount = amount;
+        recipe.push_back(recipeItem);
+    }
+
+    if (!errMsg.str().empty())
+    {
+        // when an error occured, output the error
+        say(errMsg.str(), player);
+        return;
+    } else {
+        // pass to script engine. The engine is responsible for all
+        // further processing of the crafting operation, including
+        // outputting an error message when the recipe is invalid.
+        Script::performCraft(player, recipe);
+    }
 }
 
 void CommandHandler::handleCommand(Character *player,

@@ -21,6 +21,9 @@
 
 #include "luascript.h"
 
+
+#include "scripting/luautil.h"
+
 #include "game-server/being.h"
 #include "utils/logger.h"
 
@@ -58,6 +61,30 @@ void LuaScript::push(Thing *v)
 {
     assert(nbArgs >= 0);
     lua_pushlightuserdata(mState, v);
+    ++nbArgs;
+}
+
+void LuaScript::push(const std::list<InventoryItem> &itemList)
+{
+    assert(nbArgs >= 0);
+    int position = 0;
+
+    lua_createtable(mState, itemList.size(), 0);
+    int itemTable = lua_gettop(mState);
+
+    for (std::list<InventoryItem>::const_iterator i = itemList.begin();
+         i != itemList.end();
+         i++)
+    {
+        // create the item structure
+        std::map<std::string, int> item;
+        item["id"] = i->itemId;
+        item["amount"] = i->amount;
+        // add the item structure to the item table under the next index
+        lua_pushinteger(mState, ++position);
+        pushSTLContainer<std::string, int>(mState, item);
+        lua_settable(mState, itemTable);
+    }
     ++nbArgs;
 }
 
@@ -178,6 +205,17 @@ bool LuaScript::loadSpecialActionsScript(const std::string &file)
     if (!Script::specialActionsScript->loadFile(file))
     {
         Script::specialActionsScript = NULL;
+        return false;
+    }
+    return true;
+}
+
+bool LuaScript::loadCraftScript(const std::string &file)
+{
+    Script::craftScript = new LuaScript();
+    if (!Script::craftScript->loadFile(file))
+    {
+        Script::craftScript = NULL;
         return false;
     }
     return true;

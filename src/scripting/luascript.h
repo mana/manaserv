@@ -52,6 +52,8 @@ class LuaScript: public Script
 
         void push(Thing *);
 
+        void push(const std::list<InventoryItem> &itemList);
+
         int execute();
 
         static void getQuestCallback(Character *, const std::string &,
@@ -69,6 +71,7 @@ class LuaScript: public Script
          */
         static bool loadGlobalEventScript(const std::string &file);
         static bool loadSpecialActionsScript(const std::string &file);
+        static bool loadCraftScript(const std::string &file);
 
     private:
         lua_State *mState;

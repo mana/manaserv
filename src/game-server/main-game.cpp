@@ -74,6 +74,7 @@ using utils::Logger;
 #define DEFAULT_PERMISSION_FILE             "permissions.xml"
 #define DEFAULT_GLOBAL_EVENT_SCRIPT_FILE    "scripts/global_events.lua"
 #define DEFAULT_SPECIAL_ACTIONS_SCRIPT_FILE "scripts/special_actions.lua"
+#define DEFAULT_CRAFT_SCRIPT_FILE           "scripts/crafting.lua"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
@@ -200,6 +201,7 @@ static void initializeServer()
 
     LuaScript::loadGlobalEventScript(DEFAULT_GLOBAL_EVENT_SCRIPT_FILE);
     LuaScript::loadSpecialActionsScript(DEFAULT_SPECIAL_ACTIONS_SCRIPT_FILE);
+    LuaScript::loadCraftScript(DEFAULT_CRAFT_SCRIPT_FILE);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger

@@ -6,6 +6,7 @@
     <allow>@where</allow>
     <allow>@rights</allow>
     <allow>@report</allow>
+    <allow>@craft</allow>
   </class>
   <class level="2">
     <alias>tester</alias>

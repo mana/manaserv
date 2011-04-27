@@ -160,4 +160,14 @@
         <sprite gender="male">equipment/chest/chest-leather-male.xml</sprite>
         <sprite gender="female">equipment/chest/chest-leather-female.xml</sprite>
     </item>
+    
+    <!-- example crafting ingredients -->
+    <item id="8" max-per-slot="99" name="Iron"
+        description="Combine with one wood to create a sword"
+        image="crafting/generic-ingot.png"
+        value="1" />
+    <item id="9" max-per-slot="99" name="Wood"
+        description="Combine with two iron to create a sword"
+        image="crafting/generic-rawlog.png"
+        value="1" />
 </items>

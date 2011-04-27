@@ -34,6 +34,7 @@ typedef std::map< std::string, Script::Factory > Engines;
 static Engines *engines = NULL;
 Script *Script::globalEventScript = NULL;
 Script *Script::specialActionsScript = NULL;
+Script *Script::craftScript = NULL;
 
 Script::Script():
     mMap(NULL),
@@ -154,6 +155,19 @@ bool Script::performSpecialAction(int specialId, Being* caster)
         script->prepare("use_special");
         script->push(caster);
         script->push(specialId);
+        script->execute();
+    }
+    return true;
+}
+
+bool Script::performCraft(Being* crafter, std::list<InventoryItem> recipe)
+{
+    Script *script = Script::craftScript;
+    if (script)
+    {
+        script->prepare("on_craft");
+        script->push(crafter);
+        script->push(recipe);
         script->execute();
     }
     return true;
