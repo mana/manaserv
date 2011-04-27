@@ -42,8 +42,8 @@ function craft_strict(ch, recipe)
             8, -2, --take away the iron
             9, -1, --take away the wood
             5, 1 ) -- give a sword
-        return
         mana.chatmessage(ch, "You've crafted a sword")
+        return
     end
     mana.chatmessage(ch, "This wouldn't create anything useful")
 end
@@ -60,8 +60,8 @@ function craft_lax(ch, recipe)
             8, -2, --take away the iron
             9, -1, --take away the wood
             5, 1 ) -- give a sword
-        return
         mana.chatmessage(ch, "You've crafted a sword")
+        return
     end
     mana.chatmessage(ch, "This wouldn't create anything useful")
 end
