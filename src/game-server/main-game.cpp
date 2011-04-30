@@ -70,7 +70,7 @@ using utils::Logger;
 #define DEFAULT_ATTRIBUTEDB_FILE            "attributes.xml"
 #define DEFAULT_MAPSDB_FILE                 "maps.xml"
 #define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
-#define DEFAULT_STATUSDB_FILE               "mana-status-effect.xml"
+#define DEFAULT_STATUSDB_FILE               "status-effects.xml"
 #define DEFAULT_PERMISSION_FILE             "permissions.xml"
 #define DEFAULT_GLOBAL_EVENT_SCRIPT_FILE    "scripts/global_events.lua"
 #define DEFAULT_SPECIAL_ACTIONS_SCRIPT_FILE "scripts/special_actions.lua"
