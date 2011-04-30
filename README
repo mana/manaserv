@@ -75,5 +75,15 @@ Access to port "accountServerPort + 1" of the account server can be restricted
 to connections from game servers only. Users do not need to access it.
 
 
-TODO: Explain about automatic first time creation of database
-TODO: Explain about setting a character to be administrator
+INITIAL DATABASE SETUP
+
+To initally setup the database run the following command:
+
+	cat src/sql/sqlite/createTables.sql | sqlite3 mana.db
+
+This will generate a database called mana.db according to the needs of the server.
+
+For making a player admin do:
+
+	sqlite3 mana.db "UPDATE mana_accounts SET level=255 WHERE username='MyAccount';"
+
