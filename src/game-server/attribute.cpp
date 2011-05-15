@@ -141,7 +141,7 @@ bool AttributeModifiersEffect::remove(double value, unsigned int id,
     if (!fullCheck)
         mStates.sort(durationCompare); /* Search only through those with a duration of 0. */
     bool ret = false;
-    double temp;
+
     for (std::list< AttributeModifierState * >::iterator it = mStates.begin();
          it != mStates.end() && (fullCheck || !(*it)->mDuration);)
     {
@@ -151,8 +151,6 @@ bool AttributeModifiersEffect::remove(double value, unsigned int id,
             ++it;
             continue;
         }
-
-        temp = (*it)->mValue;
 
         delete *it;
         mStates.erase(it++);
