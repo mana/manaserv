@@ -355,12 +355,23 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
     for (it = mPoss->inventory.begin(); it != it_end; ++it)
         if (it->second.itemId == itemId)
         {
+            // If the slot is full, try the next slot
             if (it->second.amount >= maxPerSlot)
                 continue;
-            unsigned short additions = std::min(amount, maxPerSlot)
-                                       - it->second.amount;
-            amount -= additions;
-            it->second.amount += additions;
+
+            // Add everything that'll fit to the stack
+            unsigned short spaceleft = maxPerSlot - it->second.amount;
+            if (spaceleft >= amount)
+            {
+                it->second.amount += amount;
+                amount = 0;
+            }
+            else
+            {
+                it->second.amount += spaceleft;
+                amount -= spaceleft;
+            }
+
             mInvMsg.writeInt16(it->first);
             mInvMsg.writeInt16(itemId);
             mInvMsg.writeInt16(it->second.amount);
