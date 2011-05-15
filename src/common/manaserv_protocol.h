@@ -195,8 +195,8 @@ enum {
     CPMSG_PARTY_REJECTED                = 0x03A8, // S name
     PCMSG_PARTY_QUIT                    = 0x03AA, // -
     CPMSG_PARTY_QUIT_RESPONSE           = 0x03AB, // B error
-    CPMSG_PARTY_NEW_MEMBER              = 0x03B0, // W being id, S name
-    CPMSG_PARTY_MEMBER_LEFT             = 0x03B1, // W being id
+    CPMSG_PARTY_NEW_MEMBER              = 0x03B0, // D character id, S name
+    CPMSG_PARTY_MEMBER_LEFT             = 0x03B1, // D character id
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error

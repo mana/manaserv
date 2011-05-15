@@ -54,8 +54,11 @@ public:
      */
     unsigned int getId() const { return mId; }
 
+    const PartyUsers &getUsers() const { return mUsers; }
+
 private:
     PartyUsers mUsers;
+
     unsigned int mId;
 };
 
