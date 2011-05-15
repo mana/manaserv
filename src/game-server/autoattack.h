@@ -21,6 +21,7 @@
 #ifndef AUTOATTACK_H
 #define AUTOATTACK_H
 
+#include <cstddef>
 #include <list>
 #include <limits>
 

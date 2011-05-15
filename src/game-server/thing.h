@@ -37,7 +37,7 @@ class MapComposite;
 class Thing
 {
     public:
-        Thing(ThingType type, MapComposite *map = NULL)
+        Thing(ThingType type, MapComposite *map = 0)
           : mMap(map),
             mType(type)
         {}
