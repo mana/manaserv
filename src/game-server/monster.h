@@ -190,12 +190,6 @@ class MonsterClass
         /** Returns script filename */
         const std::string &getScript() const { return mScript; }
 
-        /**
-         * Randomly selects a monster drop
-         * @returns A class of item to drop, or NULL if none was found.
-         */
-        ItemClass *getRandomDrop() const;
-
     private:
         unsigned short mId;
         std::string mName;
@@ -216,6 +210,7 @@ class MonsterClass
         std::string mScript;
 
         friend class MonsterManager;
+        friend class Monster;
 };
 
 /**

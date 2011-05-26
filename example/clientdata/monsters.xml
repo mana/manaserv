@@ -41,12 +41,10 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <sound event="hit">monsters/maggot/maggot-hit2.ogg</sound>
         <sound event="miss">monsters/maggot/maggot-miss1.ogg</sound>
         <sound event="die">monsters/maggot/maggot-dying1.ogg</sound>
-        <drop item="505" percent="8"/>
-        <drop item="518" percent="4"/>
-        <drop item="501" percent="1.5"/>
-        <drop item="533" percent="1.5"/>
-        <drop item="502" percent="0.7"/>
-        <drop item="522" percent="0.1"/>
+        <drop item="1" percent="50"/>
+        <drop item="2" percent="15"/>
+        <drop item="3" percent="2.8"/>
+        <drop item="4" percent="0.7"/>
         <attributes
             hp="20"
             size="4"
@@ -92,10 +90,10 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <sound event="hit">monsters/scorpion/scorpion-hit3.ogg</sound>
         <sound event="hit">monsters/scorpion/scorpion-hit4.ogg</sound>
         <sound event="miss">monsters/scorpion/scorpion-miss1.ogg</sound>
-        <drop item="507" percent="7"/>
-        <drop item="510" percent="1"/>
-        <drop item="509" percent="0.5"/>
-        <drop item="518" percent="7"/>
+        <drop item="1" percent="7"/>
+        <drop item="2" percent="1"/>
+        <drop item="5" percent="0.5"/>
+        <drop item="9" percent="7"/>
         <exp>20</exp>
         <attributes
             hp="20"
@@ -147,13 +145,11 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <sound event="hit">monsters/scorpion/scorpion-hit3.ogg</sound>
         <sound event="hit">monsters/scorpion/scorpion-hit4.ogg</sound>
         <sound event="miss">monsters/scorpion/scorpion-miss1.ogg</sound>
-        <drop item="517" percent="20"/>
-        <drop item="509" percent="1"/>
-        <drop item="518" percent="5"/>
-        <drop item="1200" percent="0.1"/>
-        <drop item="1199" percent="7.6"/>
-        <drop item="1201" percent="5.4"/>
-        <drop item="524" percent="0.1"/>
+        <drop item="2" percent="20"/>
+        <drop item="3" percent="1"/>
+        <drop item="4" percent="5"/>
+        <drop item="6" percent="0.1"/>
+        <drop item="9" percent="5.4"/>
         <exp>50</exp>
         <attributes
             hp="20"
@@ -191,14 +187,13 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
     <monster id="4" name="Green Slime">
         <sprite>monsters/monster-slime.xml|#72982c,ffffff</sprite>
         <sound event="hit">monsters/slime/slime-hit1.ogg</sound>
-        <drop item="502" percent="2"/>
-        <drop item="513" percent="1"/>
-        <drop item="501" percent="1"/>
-        <drop item="521" percent="1"/>
-        <drop item="522" percent="1.9"/>
-        <drop item="526" percent="0.1"/>
-        <drop item="503" percent="5"/>
-        <drop item="535" percent="7.5"/>
+        <drop item="1" percent="2"/>
+        <drop item="2" percent="1"/>
+        <drop item="3" percent="1"/>
+        <drop item="4" percent="1"/>
+        <drop item="7" percent="1.9"/>
+        <drop item="8" percent="0.1"/>
+        <drop item="9" percent="7.5"/>
         <exp>60</exp>
         <attributes
             hp="200"
