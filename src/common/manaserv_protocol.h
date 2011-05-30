@@ -186,9 +186,11 @@ enum {
     CPMSG_GUILD_REJOIN                  = 0x0389, // S name, W guild, W rights, W channel, S announce
 
     // Party
-    PCMSG_PARTY_INVITE                  = 0x03A0, // S name
-    CPMSG_PARTY_INVITE_RESPONSE         = 0x03A1, // B error, S name
-    CPMSG_PARTY_INVITED                 = 0x03A2, // S name
+    PGMSG_PARTY_INVITE                  = 0x03A0, // S name
+    GPMSG_PARTY_INVITE_ERROR            = 0x03A1, // S name
+    GCMSG_PARTY_INVITE                  = 0x03A2, // S inviter, S invitee
+    CPMSG_PARTY_INVITE_RESPONSE         = 0x03A3, // B error, S name
+    CPMSG_PARTY_INVITED                 = 0x03A4, // S name
     PCMSG_PARTY_ACCEPT_INVITE           = 0x03A5, // S name
     CPMSG_PARTY_ACCEPT_INVITE_RESPONSE  = 0x03A6, // B error, { S name }
     PCMSG_PARTY_REJECT_INVITE           = 0x03A7, // S name

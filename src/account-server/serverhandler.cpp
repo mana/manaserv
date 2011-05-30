@@ -28,6 +28,7 @@
 #include "account-server/accounthandler.h"
 #include "account-server/character.h"
 #include "account-server/storage.h"
+#include "chat-server/chathandler.h"
 #include "chat-server/post.h"
 #include "common/configuration.h"
 #include "common/manaserv_protocol.h"
@@ -543,6 +544,10 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             trans.mMessage = message;
             storage->addTransaction(trans);
         } break;
+
+        case GCMSG_PARTY_INVITE:
+            chatHandler->handlePartyInvite(msg);
+            break;
 
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "

@@ -87,43 +87,41 @@ bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string 
 
 }
 
-void ChatHandler::handlePartyInvite(ChatClient &client, MessageIn &msg)
+void ChatHandler::handlePartyInvite(MessageIn &msg)
 {
-    //TODO: Handle errors
-    MessageOut out(CPMSG_PARTY_INVITED);
+    std::string inviterName = msg.readString();
+    std::string inviteeName = msg.readString();
+    ChatClient *inviter = getClient(inviterName);
 
-    out.writeString(client.characterName);
+    if (!inviter)
+        return;
 
-    const std::string invited = msg.readString();
-    if (invited == client.characterName)
+    ChatClient *invitee = getClient(inviteeName);
+
+    if (!invitee)
     {
+        // TODO: Send error message
         return;
     }
-    if (!invited.empty())
-    {
-        // Get client and send it the invite
-        ChatClient *c = getClient(invited);
-        if (c)
-        {
-            ++client.numInvites;
 
-            // TODO: Check number of invites
-            // and do something if too many in a short time
+    ++invitee->numInvites;
+    // TODO: Check number of invites
+    // and do something if too many in a short time
 
-            // store the invite
-            PartyInvite invite;
-            invite.mInvited = invited;
-            invite.mInviter = client.characterName;
-            if (client.party)
-                invite.mPartyId = client.party->getId();
-            else
-                invite.mPartyId = 0;
+    // store the invite
+    PartyInvite invite;
+    invite.mInvited = inviteeName;
+    invite.mInviter = inviterName;
+    if (inviter->party)
+        invite.mPartyId = inviter->party->getId();
+    else
+        invite.mPartyId = 0;
 
-            mPartyInvitedUsers.push_back(invite);
+    mPartyInvitedUsers.push_back(invite);
 
-            c->send(out);
-        }
-    }
+    MessageOut out(CPMSG_PARTY_INVITED);
+    out.writeString(inviterName);
+    invitee->send(out);
 }
 
 void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)

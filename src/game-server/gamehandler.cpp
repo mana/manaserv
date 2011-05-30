@@ -23,6 +23,7 @@
 
 #include "game-server/gamehandler.h"
 
+#include "common/configuration.h"
 #include "common/transaction.h"
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
@@ -276,6 +277,10 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
 
         case PGMSG_NPC_POST_SEND:
             handleNpcPostSend(client, message);
+            break;
+
+        case PGMSG_PARTY_INVITE:
+            handlePartyInvite(client, message);
             break;
 
         default:
@@ -799,6 +804,44 @@ void GameHandler::handleNpcPostSend(GameClient &client, MessageIn &message)
     // add the character so that the post man knows them
     postMan->addCharacter(client.character);
     accountHandler->sendPost(client.character, message);
+}
+
+void GameHandler::handlePartyInvite(GameClient &client, MessageIn &message)
+{
+    MapComposite *map = client.character->getMap();
+    const int visualRange = Configuration::getValue("game_visualRange", 448);
+    std::string invitee = message.readString();
+
+    if (invitee == client.character->getName())
+        return;
+
+    for (CharacterIterator it(map->getWholeMapIterator()); it; ++it)
+    {
+        if ((*it)->getName() == invitee)
+        {
+            // calculate if the invitee is within the visual range
+            const int xInviter = client.character->getPosition().x;
+            const int yInviter = client.character->getPosition().y;
+            const int xInvitee = (*it)->getPosition().x;
+            const int yInvitee = (*it)->getPosition().y;
+            const int dx = std::abs(xInviter - xInvitee);
+            const int dy = std::abs(yInviter - yInvitee);
+            if (visualRange > std::max(dx, dy))
+            {
+                MessageOut out(GCMSG_PARTY_INVITE);
+                out.writeString(client.character->getName());
+                out.writeString(invitee);
+                accountHandler->send(out);
+                return;
+            }
+            break;
+        }
+    }
+
+    // Invitee was not found or is too far away
+    MessageOut out(GPMSG_PARTY_INVITE_ERROR);
+    out.writeString(invitee);
+    client.send(out);
 }
 
 void GameHandler::sendNpcError(GameClient &client, int id,

@@ -101,6 +101,8 @@ class ChatHandler : public ConnectionHandler
                                  const std::string &characterName,
                                  char eventId);
 
+        void handlePartyInvite(MessageIn &msg);
+
     protected:
         /**
          * Process chat related messages.
@@ -162,7 +164,6 @@ class ChatHandler : public ConnectionHandler
         void handleGuildKickMember(ChatClient &client, MessageIn &msg);
         void handleGuildQuit(ChatClient &client, MessageIn &msg);
 
-        void handlePartyInvite(ChatClient &client, MessageIn &msg);
         void handlePartyAcceptInvite(ChatClient &client, MessageIn &msg);
         void handlePartyQuit(ChatClient &client);
         // TODO: Merge with handlePartyAcceptInvite?

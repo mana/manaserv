@@ -227,10 +227,6 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleGuildQuit(computer, message);
             break;
 
-        case PCMSG_PARTY_INVITE:
-            handlePartyInvite(computer, message);
-            break;
-
         case PCMSG_PARTY_ACCEPT_INVITE:
             handlePartyAcceptInvite(computer, message);
             break;

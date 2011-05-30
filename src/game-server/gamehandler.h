@@ -149,6 +149,8 @@ class GameHandler: public ConnectionHandler
 
         void handleNpcPostSend(GameClient &client, MessageIn &message);
 
+        void handlePartyInvite(GameClient &client, MessageIn &message);
+
         void sendNpcError(GameClient &client, int id,
                           const std::string &errorMsg);
 
