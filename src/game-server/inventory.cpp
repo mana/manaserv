@@ -765,19 +765,27 @@ bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
     EquipData::iterator it = itp ? *itp : mPoss->equipSlots.begin(),
                         it_end = mPoss->equipSlots.end();
     bool changed = false;
-    for (it = mPoss->equipSlots.begin();
-         it != it_end;
-         ++it)
+
+    // Erase all equip entries that point to the given inventory slot
+    while (it != it_end)
+    {
         if (it->second == slot)
         {
             changed = true;
-            mPoss->equipSlots.erase(it);
+            mPoss->equipSlots.erase(it++);
         }
+        else
+        {
+            ++it;
+        }
+    }
+
     if (changed && !mDelayed)
     {
-        changeEquipment(mPoss->inventory.at(it->second).itemId, 0);
+        changeEquipment(mPoss->inventory.at(slot).itemId, 0);
         mEqmMsg.writeInt16(slot);
         mEqmMsg.writeInt8(0);
     }
+
     return changed;
 }
