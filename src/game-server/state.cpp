@@ -203,7 +203,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
                 MessageOut AttackMsg(GPMSG_BEING_ATTACK);
                 AttackMsg.writeInt16(oid);
                 AttackMsg.writeInt8(o->getDirection());
-                AttackMsg.writeInt8(static_cast< Being * >(o)->getAttackType());
+                AttackMsg.writeInt8(static_cast< Being * >(o)->getAttackId());
                 gameHandler->sendTo(p, AttackMsg);
             }
 

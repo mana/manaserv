@@ -264,9 +264,9 @@ class Monster : public Being
         void loadScript(const std::string &scriptName);
 
         /**
-         *
+         * Gets the attack id the being is currently performing.
          */
-        virtual int getAttackType() const
+        virtual int getAttackId() const
         { return mCurrentAttack->id; }
 
         /**

@@ -121,7 +121,7 @@ enum {
     GPMSG_BEINGS_MOVE              = 0x0280, // { W being id, B flags [, [W*2 position,] W*2 destination, B speed] }*
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     PGMSG_ATTACK                   = 0x0290, // W being id
-    GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction, B attacktype
+    GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction, B attack Id
     PGMSG_USE_SPECIAL              = 0x0292, // B specialID
     GPMSG_SPECIAL_STATUS           = 0x0293, // { B specialID, D current, D max, D recharge }
     PGMSG_SAY                      = 0x02A0, // S text

@@ -163,10 +163,11 @@ class Being : public Actor
         { return mAction; }
 
         /**
-         * Gets the type of the attack the being is currently performing.
+         * Gets the attack id the being is currently performing.
+         * For being, this is defaulted to the first one (1).
          */
-        virtual int getAttackType() const
-        { return HIT; }
+        virtual int getAttackId() const
+        { return 1; }
 
         /**
          * Moves the being toward its destination.
