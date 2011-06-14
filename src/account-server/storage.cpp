@@ -937,8 +937,8 @@ void Storage::flush(Account *account)
         std::ostringstream sqlUpdateAccountTable;
         sqlUpdateAccountTable
              << "update " << ACCOUNTS_TBL_NAME
-             << " set username = '?', password = '?', email = '?', "
-             << "level = '?', lastlogin = '?' where id = '?';";
+             << " set username = ?, password = ?, email = ?, "
+             << "level = ?, lastlogin = ? where id = ?;";
 
         if (mDb->prepareSql(sqlUpdateAccountTable.str()))
         {
