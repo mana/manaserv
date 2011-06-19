@@ -20,6 +20,13 @@
 
 #include "party.h"
 
+#include "chatclient.h"
+#include "chathandler.h"
+
+#include "common/manaserv_protocol.h"
+
+#include "net/messageout.h"
+
 #include <algorithm>
 
 Party::Party()
@@ -29,11 +36,16 @@ Party::Party()
     mId = id;
 }
 
-void Party::addUser(const std::string &name)
+void Party::addUser(const std::string &name, const std::string &inviter)
 {
-    if (std::find(mUsers.begin(), mUsers.end(), name) == mUsers.end())
+    mUsers.push_back(name);
+
+    for (size_t i = 0; i < userCount(); ++i)
     {
-        mUsers.push_back(name);
+        MessageOut out(ManaServ::CPMSG_PARTY_NEW_MEMBER);
+        out.writeString(name);
+        out.writeString(inviter);
+        chatHandler->getClient(mUsers[i])->send(out);
     }
 }
 

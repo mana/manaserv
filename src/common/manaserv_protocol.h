@@ -189,15 +189,13 @@ enum {
     PGMSG_PARTY_INVITE                  = 0x03A0, // S name
     GPMSG_PARTY_INVITE_ERROR            = 0x03A1, // S name
     GCMSG_PARTY_INVITE                  = 0x03A2, // S inviter, S invitee
-    CPMSG_PARTY_INVITE_RESPONSE         = 0x03A3, // B error, S name
     CPMSG_PARTY_INVITED                 = 0x03A4, // S name
-    PCMSG_PARTY_ACCEPT_INVITE           = 0x03A5, // S name
-    CPMSG_PARTY_ACCEPT_INVITE_RESPONSE  = 0x03A6, // B error, { S name }
-    PCMSG_PARTY_REJECT_INVITE           = 0x03A7, // S name
-    CPMSG_PARTY_REJECTED                = 0x03A8, // S name
+    PCMSG_PARTY_INVITE_ANSWER           = 0x03A5, // S name, B accept
+    CPMSG_PARTY_INVITE_ANSWER_RESPONSE  = 0x03A6, // B error, { S name }
+    CPMSG_PARTY_REJECTED                = 0x03A8, // S name, B error
     PCMSG_PARTY_QUIT                    = 0x03AA, // -
     CPMSG_PARTY_QUIT_RESPONSE           = 0x03AB, // B error
-    CPMSG_PARTY_NEW_MEMBER              = 0x03B0, // D character id, S name
+    CPMSG_PARTY_NEW_MEMBER              = 0x03B0, // S name, S inviter
     CPMSG_PARTY_MEMBER_LEFT             = 0x03B1, // D character id
 
     // Chat

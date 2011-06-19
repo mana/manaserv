@@ -21,9 +21,9 @@
 #ifndef CHATHANDLER_H
 #define CHATHANDLER_H
 
+#include <deque>
 #include <map>
 #include <string>
-#include <vector>
 
 #include "net/connectionhandler.h"
 #include "utils/tokencollector.h"
@@ -53,13 +53,22 @@ class ChatHandler : public ConnectionHandler
 
         struct PartyInvite
         {
+            PartyInvite(std::string inviterName, std::string inviteeName)
+                : mInviter(inviterName)
+                , mInvitee(inviteeName)
+            {
+                const int validTimeframe = 60;
+                mExpireTime = time(NULL) + validTimeframe;
+            }
+
             std::string mInviter;
-            std::string mInvited;
-            int mPartyId;
+            std::string mInvitee;
+            time_t mExpireTime;
         };
 
         std::map<std::string, ChatClient*> mPlayerMap;
-        std::vector<PartyInvite> mPartyInvitedUsers;
+        std::deque<PartyInvite> mInvitations;
+        std::map<std::string, int> mNumInvites;
 
     public:
         ChatHandler();
@@ -102,6 +111,13 @@ class ChatHandler : public ConnectionHandler
                                  char eventId);
 
         void handlePartyInvite(MessageIn &msg);
+
+        /**
+         * Returns ChatClient from the Player Map
+         * @param The name of the character
+         * @return The Chat Client
+         */
+        ChatClient *getClient(const std::string &name) const;
 
     protected:
         /**
@@ -164,29 +180,15 @@ class ChatHandler : public ConnectionHandler
         void handleGuildKickMember(ChatClient &client, MessageIn &msg);
         void handleGuildQuit(ChatClient &client, MessageIn &msg);
 
-        void handlePartyAcceptInvite(ChatClient &client, MessageIn &msg);
+        void handlePartyInviteAnswer(ChatClient &client, MessageIn &msg);
         void handlePartyQuit(ChatClient &client);
-        // TODO: Merge with handlePartyAcceptInvite?
-        void handlePartyRejectInvite(ChatClient &client, MessageIn &msg);
-
-        /**
-         * Deal with a player joining a party.
-         * @return Whether player successfully joined the party
-         */
-        bool handlePartyJoin(const std::string &invited,
-                             const std::string &inviter);
-
+        void removeExpiredPartyInvites();
         void removeUserFromParty(ChatClient &client);
 
         /**
          * Tell all the party members a member has left
          */
         void informPartyMemberQuit(ChatClient &client);
-
-        /**
-         * Tell all the party members a member has joined
-         */
-        void informPartyMemberJoined(ChatClient &client);
 
         /**
          * Tell the player to be more polite.
@@ -216,13 +218,6 @@ class ChatHandler : public ConnectionHandler
          */
         ChatChannel *joinGuildChannel(const std::string &name,
                                       ChatClient &client);
-
-        /**
-         * Returns ChatClient from the Player Map
-         * @param The name of the character
-         * @return The Chat Client
-         */
-        ChatClient *getClient(const std::string &name) const;
 
         /**
          * Set the topic of a guild channel

@@ -51,7 +51,6 @@ class ChatClient : public NetComputer
         Party* party;
         unsigned char accountLevel;
         std::map<ChatChannel*, std::string> userModes;
-        int numInvites;
 };
 
 #endif

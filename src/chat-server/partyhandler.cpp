@@ -25,12 +25,10 @@
 #include "account-server/storage.h"
 #include "account-server/serverhandler.h"
 
-#include "net/messagein.h"
-#include "net/messageout.h"
-
 #include "common/manaserv_protocol.h"
 
-#include <algorithm>
+#include "net/messagein.h"
+#include "net/messageout.h"
 
 using namespace ManaServ;
 
@@ -40,51 +38,17 @@ void updateInfo(ChatClient *client, int partyId)
     GameServerHandler::sendPartyChange(character, partyId);
 }
 
-bool ChatHandler::handlePartyJoin(const std::string &invited, const std::string &inviter)
+void ChatHandler::removeExpiredPartyInvites()
 {
-    // Get inviting client
-    ChatClient *c1 = getClient(inviter);
-    if (c1)
+    time_t now = time(NULL);
+    while (!mInvitations.empty() && mInvitations.front().mExpireTime < now)
     {
-        // if party doesnt exist, create it
-        if (!c1->party)
-        {
-            c1->party = new Party();
-            // add inviter to the party
-            c1->party->addUser(inviter);
-            MessageOut out(CPMSG_PARTY_NEW_MEMBER);
-            out.writeInt32(c1->characterId);
-            out.writeString(inviter);
-            c1->send(out);
-            // tell game server to update info
-            updateInfo(c1, c1->party->getId());
-        }
-
-        // Get invited client
-        ChatClient *c2 = getClient(invited);
-        if (c2)
-        {
-            // add invited to the party
-            c1->party->addUser(invited);
-            c2->party = c1->party;
-            // was successful so return success to inviter
-            MessageOut out(CPMSG_PARTY_INVITE_RESPONSE);
-            out.writeString(invited);
-            out.writeInt8(ERRMSG_OK);
-            c1->send(out);
-
-            // tell everyone a player joined
-            informPartyMemberJoined(*c2);
-
-            // tell game server to update info
-            updateInfo(c2, c2->party->getId());
-            return true;
-        }
+        std::map<std::string, int>::iterator itr;
+        itr = mNumInvites.find(mInvitations.front().mInviter);
+        if (--itr->second <= 0)
+            mNumInvites.erase(itr);
+        mInvitations.pop_front();
     }
-
-    // there was an error, return false
-    return false;
-
 }
 
 void ChatHandler::handlePartyInvite(MessageIn &msg)
@@ -92,80 +56,120 @@ void ChatHandler::handlePartyInvite(MessageIn &msg)
     std::string inviterName = msg.readString();
     std::string inviteeName = msg.readString();
     ChatClient *inviter = getClient(inviterName);
-
-    if (!inviter)
-        return;
-
     ChatClient *invitee = getClient(inviteeName);
 
-    if (!invitee)
+    if (!inviter || !invitee)
+        return;
+
+    removeExpiredPartyInvites();
+    const int maxInvitesPerTimeframe = 10;
+    int &num = mNumInvites[inviterName];
+    if (num >= maxInvitesPerTimeframe)
     {
-        // TODO: Send error message
+        MessageOut out(CPMSG_PARTY_REJECTED);
+        out.writeString(inviterName);
+        out.writeInt8(ERRMSG_LIMIT_REACHED);
+        inviter->send(out);
+        return;
+    }
+    ++num;
+
+    if (invitee->party)
+    {
+        MessageOut out(CPMSG_PARTY_REJECTED);
+        out.writeString(inviterName);
+        out.writeInt8(ERRMSG_FAILURE);
+        inviter->send(out);
         return;
     }
 
-    ++invitee->numInvites;
-    // TODO: Check number of invites
-    // and do something if too many in a short time
-
-    // store the invite
-    PartyInvite invite;
-    invite.mInvited = inviteeName;
-    invite.mInviter = inviterName;
-    if (inviter->party)
-        invite.mPartyId = inviter->party->getId();
-    else
-        invite.mPartyId = 0;
-
-    mPartyInvitedUsers.push_back(invite);
+    mInvitations.push_back(PartyInvite(inviterName, inviteeName));
 
     MessageOut out(CPMSG_PARTY_INVITED);
     out.writeString(inviterName);
     invitee->send(out);
 }
 
-void ChatHandler::handlePartyAcceptInvite(ChatClient &client, MessageIn &msg)
+void ChatHandler::handlePartyInviteAnswer(ChatClient &client, MessageIn &msg)
 {
-    MessageOut out(CPMSG_PARTY_ACCEPT_INVITE_RESPONSE);
+    if (client.party)
+        return;
+
+    MessageOut outInvitee(CPMSG_PARTY_INVITE_ANSWER_RESPONSE);
 
     std::string inviter = msg.readString();
 
-    // Check that the player was invited
-    std::vector<PartyInvite>::iterator itr, itr_end;
-    itr = mPartyInvitedUsers.begin();
-    itr_end = mPartyInvitedUsers.end();
-
-    bool found = false;
-
-    while (itr != itr_end)
+    // check if the invite is still valid
+    bool valid = false;
+    removeExpiredPartyInvites();
+    const size_t size = mInvitations.size();
+    for (size_t i = 0; i < size; ++i)
     {
-        if ((*itr).mInvited == client.characterName &&
-            (*itr).mInviter == inviter)
+        if (mInvitations[i].mInviter == inviter &&
+            mInvitations[i].mInvitee == client.characterName)
         {
-            // make them join the party
-            if (handlePartyJoin(client.characterName, inviter))
-            {
-                out.writeInt8(ERRMSG_OK);
-                Party::PartyUsers users = client.party->getUsers();
-                const unsigned usersSize = users.size();
-                for (unsigned i = 0; i < usersSize; i++)
-                    out.writeString(users[i]);
-
-                mPartyInvitedUsers.erase(itr);
-                found = true;
-                break;
-            }
+            valid = true;
         }
-
-        ++itr;
     }
 
-    if (!found)
+    // the invitee did not accept the invitation
+    if (!msg.readInt8())
     {
-        out.writeInt8(ERRMSG_FAILURE);
+        if (!valid)
+            return;
+
+        // send rejection to inviter
+        ChatClient *inviterClient = getClient(inviter);
+        if (inviterClient)
+        {
+            MessageOut out(CPMSG_PARTY_REJECTED);
+            out.writeString(inviter);
+            out.writeInt8(ERRMSG_OK);
+            inviterClient->send(out);
+        }
+        return;
     }
 
-    client.send(out);
+    // if the invitation has expired, tell the inivtee about it
+    if (!valid)
+    {
+        outInvitee.writeInt8(ERRMSG_TIME_OUT);
+        client.send(outInvitee);
+        return;
+    }
+
+    // check that the inviter is still in the game
+    ChatClient *c1 = getClient(inviter);
+    if (!c1)
+    {
+        outInvitee.writeInt8(ERRMSG_FAILURE);
+        client.send(outInvitee);
+        return;
+    }
+
+    // if party doesnt exist, create it
+    if (!c1->party)
+    {
+        c1->party = new Party();
+        c1->party->addUser(inviter);
+        // tell game server to update info
+        updateInfo(c1, c1->party->getId());
+    }
+
+    outInvitee.writeInt8(ERRMSG_OK);
+    Party::PartyUsers users = c1->party->getUsers();
+    const unsigned usersSize = users.size();
+    for (unsigned i = 0; i < usersSize; i++)
+        outInvitee.writeString(users[i]);
+
+    client.send(outInvitee);
+
+    // add invitee to the party
+    c1->party->addUser(client.characterName, inviter);
+    client.party = c1->party;
+
+    // tell game server to update info
+    updateInfo(&client, client.party->getId());
 }
 
 void ChatHandler::handlePartyQuit(ChatClient &client)
@@ -177,45 +181,6 @@ void ChatHandler::handlePartyQuit(ChatClient &client)
 
     // tell game server to update info
     updateInfo(&client, 0);
-}
-
-void ChatHandler::handlePartyRejectInvite(ChatClient &client, MessageIn &msg)
-{
-    MessageOut out(CPMSG_PARTY_REJECTED);
-
-    std::string inviter = msg.readString();
-
-
-    std::vector<PartyInvite>::iterator itr, itr_end;
-
-    itr = mPartyInvitedUsers.begin();
-    itr_end = mPartyInvitedUsers.end();
-    bool found = false;
-
-    while (itr != itr_end)
-    {
-        // Check that the player was invited
-        if ((*itr).mInvited == client.characterName &&
-            (*itr).mInviter == inviter)
-        {
-            // remove them from invited users list
-            mPartyInvitedUsers.erase(itr);
-            found = true;
-            break;
-        }
-
-        ++itr;
-    }
-
-    if (!found)
-    {
-        out.writeInt8(ERRMSG_FAILURE);
-    }
-
-    // send rejection to inviter
-    ChatClient *inviterClient = getClient(inviter);
-
-    inviterClient->send(out);
 }
 
 void ChatHandler::removeUserFromParty(ChatClient &client)
@@ -245,23 +210,6 @@ void ChatHandler::informPartyMemberQuit(ChatClient &client)
         {
             MessageOut out(CPMSG_PARTY_MEMBER_LEFT);
             out.writeInt32(client.characterId);
-            itr->second->send(out);
-        }
-    }
-}
-
-void ChatHandler::informPartyMemberJoined(ChatClient &client)
-{
-    std::map<std::string, ChatClient*>::iterator itr;
-    std::map<std::string, ChatClient*>::const_iterator itr_end = mPlayerMap.end();
-
-    for (itr = mPlayerMap.begin(); itr != itr_end; ++itr)
-    {
-        if (itr->second->party == client.party)
-        {
-            MessageOut out(CPMSG_PARTY_NEW_MEMBER);
-            out.writeInt32(client.characterId);
-            out.writeString(client.characterName);
             itr->second->send(out);
         }
     }

@@ -37,7 +37,8 @@ public:
     /**
      * Add user to party
      */
-    void addUser(const std::string &name);
+    void addUser(const std::string &name,
+                 const std::string &inviter = std::string());
 
     /**
      * Remove user from party
