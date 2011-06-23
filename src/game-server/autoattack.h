@@ -143,6 +143,18 @@ class AutoAttacks
         void stop(); // If the character does some action other than attacking, reset all warmups (NOT cooldowns!)
         void tick(std::list<AutoAttack> *ret = 0);
 
+        /**
+         * Tells the number of attacks available
+         */
+        unsigned getAutoAttacksNumber()
+        { return mAutoAttacks.size(); }
+
+        /**
+         * Tells whether the autoattacks are active.
+         */
+        bool areActive()
+        { return mActive; }
+
     private:
         /**
          * Marks whether or not to keep auto-attacking. Cooldowns still need

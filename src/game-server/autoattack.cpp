@@ -47,7 +47,11 @@ void AutoAttacks::start()
     for (std::list<AutoAttack>::iterator it = mAutoAttacks.begin();
          it != mAutoAttacks.end(); ++it)
     {
-        it->softReset();
+        // If the attack is inactive, we hard reset it.
+        if (!it->getTimer())
+            it->reset();
+        else
+            it->softReset();
     }
     mActive = true;
 }
@@ -57,13 +61,15 @@ void AutoAttacks::tick(std::list<AutoAttack> *ret)
     for (std::list<AutoAttack>::iterator it = mAutoAttacks.begin();
          it != mAutoAttacks.end(); ++it)
     {
-        if (it->tick()) {
+        if (it->tick())
+        {
             if (mActive)
                 it->reset();
             else
                 it->halt();
         }
-        else if (ret && it->isReady())
+
+        if (ret && it->isReady())
         {
             ret->push_back(*it);
         }

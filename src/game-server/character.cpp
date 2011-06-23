@@ -143,25 +143,47 @@ void Character::update()
 
 void Character::perform()
 {
-    if (mAction != ATTACK || mTarget == NULL) return;
+    // Ticks attacks even when not attacking to permit cooldowns and warmups.
+    std::list<AutoAttack> attacksReady;
+    mAutoAttacks.tick(&attacksReady);
 
-    // wait before next attack
-    // Note: The auto-attack system will handle the delay between two attacks.
-    // TODO: Remove this condition when it's done.
-    if (mMoveTime > WORLD_TICK_MS)
+    if (mAction != ATTACK || mTarget == NULL)
     {
-        mMoveTime -= WORLD_TICK_MS;
+        mAutoAttacks.stop();
         return;
     }
 
-    std::list<AutoAttack> attacks;
-    mAutoAttacks.tick(&attacks);
-    if (attacks.empty())
-        return; // TODO: Install default attack?
+    // Deal with the ATTACK action.
+
+    // Install default bare knuckle attack if no attacks were added from config.
+    // TODO: Get this from configuration.
+    if (!mAutoAttacks.getAutoAttacksNumber())
+    {
+        int damageBase = getModifiedAttribute(ATTR_STR);
+        int damageDelta = damageBase / 2;
+        Damage knuckleDamage(damageBase, damageDelta, 2, ELEMENT_NEUTRAL,
+                            DAMAGE_PHYSICAL,
+                            (getSize() < DEFAULT_TILE_LENGTH) ?
+                                DEFAULT_TILE_LENGTH : getSize());
+
+        AutoAttack knuckleAttack(knuckleDamage, 7, 3);
+        mAutoAttacks.add(knuckleAttack);
+    }
+
+    if (attacksReady.empty())
+    {
+        if (!mAutoAttacks.areActive())
+            mAutoAttacks.start();
+    }
     else
-        for (std::list<AutoAttack>::iterator it = attacks.begin();
-             it != attacks.end(); ++it)
+    {
+        // Performs all ready attacks.
+        for (std::list<AutoAttack>::iterator it = attacksReady.begin();
+             it != attacksReady.end(); ++it)
+        {
             performAttack(mTarget, it->getDamage());
+        }
+    }
 }
 
 void Character::died()
