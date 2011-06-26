@@ -1302,6 +1302,44 @@ static int get_beings_in_circle(lua_State *s)
 }
 
 /**
+ * Gets a LUA table with the being IDs of all beings
+ * inside of a recangular area of the current map.
+ * mana.get_beings_in_rectangle (x, y, width, height)
+ */
+static int get_beings_in_rectangle(lua_State *s)
+{
+    const int x = luaL_checkint(s, 1);
+    const int y = luaL_checkint(s, 2);
+    const int w = luaL_checkint(s, 3);
+    const int h = luaL_checkint(s, 4);
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    MapComposite *m = t->getMap();
+
+    //create a lua table with the beings in the given area.
+    lua_newtable(s);
+    int tableStackPosition = lua_gettop(s);
+    int tableIndex = 1;
+    Rectangle rect = {x, y ,w, h};
+    for (BeingIterator i(
+         m->getInsideRectangleIterator(rect)); i; ++i)
+    {
+        char t = (*i)->getType();
+        if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
+        {
+            Being *b = static_cast<Being *> (*i);
+            lua_pushinteger(s, tableIndex);
+            lua_pushlightuserdata (s, b);
+            lua_settable (s, tableStackPosition);
+            tableIndex++;
+        }
+    }
+     return 1;
+ }
+
+/**
  * Gets the post for the character
  */
 static int chr_get_post(lua_State *s)
@@ -1885,6 +1923,7 @@ LuaScript::LuaScript():
         { "trigger_create",                  &trigger_create                  },
         { "chatmessage",                     &chatmessage                     },
         { "get_beings_in_circle",            &get_beings_in_circle            },
+        { "get_beings_in_rectangle",         &get_beings_in_rectangle         },
         { "being_register",                  &being_register                  },
         { "effect_create",                   &effect_create                   },
         { "chr_shake_screen",                &chr_shake_screen                },
