@@ -1780,6 +1780,21 @@ static int item_drop(lua_State *s)
     return 0;
 }
 
+/**
+ * Logs the given message to the log
+ */
+static int log(lua_State *s)
+{
+    const int loglevel = luaL_checkint(s, 1);
+    const std::string message = lua_tostring(s, 2);
+
+    if (loglevel >= utils::Logger::Fatal && loglevel <= utils::Logger::Debug)
+         utils::Logger::output(message, (utils::Logger::Level) loglevel);
+    else
+        raiseScriptError(s, "log called with unknown loglevel");
+
+    return 0;
+}
 
 static int require_loader(lua_State *s)
 {
@@ -1879,6 +1894,7 @@ LuaScript::LuaScript():
         { "npc_ask_integer",                 &npc_ask_integer                 },
         { "npc_end",                         &npc_end                         },
         { "npc_ask_string",                  &npc_ask_string                  },
+        { "log",                             &log                             },
         { NULL, NULL }
     };
     luaL_register(mState, "mana", callbacks);
