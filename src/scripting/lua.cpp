@@ -53,6 +53,7 @@ extern "C" {
 #include "utils/speedconv.h"
 
 #include <string.h>
+#include <math.h>
 
 /*
  * This file includes all script bindings available to LUA scripts.
@@ -1834,6 +1835,36 @@ static int log(lua_State *s)
     return 0;
 }
 
+/**
+ * Gets the distance between two beings or two points
+ */
+static int get_distance(lua_State *s)
+{
+    int x1, y1, x2, y2;
+    if (lua_gettop(s) == 2)
+    {
+        Being *being1 = getBeing(s, 1);
+        Being *being2 = getBeing(s, 2);
+        x1 = being1->getPosition().x;
+        y1 = being1->getPosition().y;
+        x2 = being2->getPosition().x;
+        y2 = being2->getPosition().y;
+    }
+    else
+    {
+        x1 = luaL_checkint(s, 1);
+        y1 = luaL_checkint(s, 2);
+        x2 = luaL_checkint(s, 3);
+        y2 = luaL_checkint(s, 4);
+    }
+    const int dx = x1 - x2;
+    const int dy = y1 - y2;
+    const float dist = sqrt((dx * dx) + (dy * dy));
+    lua_pushinteger(s, dist);
+
+    return 1;
+}
+
 static int require_loader(lua_State *s)
 {
     // Add .lua extension (maybe only do this when it doesn't have it already)
@@ -1934,6 +1965,7 @@ LuaScript::LuaScript():
         { "npc_end",                         &npc_end                         },
         { "npc_ask_string",                  &npc_ask_string                  },
         { "log",                             &log                             },
+        { "get_distance",                    &get_distance                    },
         { NULL, NULL }
     };
     luaL_register(mState, "mana", callbacks);

@@ -85,6 +85,8 @@ function Harmony_update(npc)
 end
 
 function Tamer(npc, ch, list)
+    mana.being_say(npc, string.format("You are %s pixel away.",
+                                      mana.get_distance(npc, ch)))
     mana.being_say(npc, "I will now spawn a monster for your training session.")
 
     local m1 = mana.monster_create(1, mana.posX(ch), mana.posY(ch))
