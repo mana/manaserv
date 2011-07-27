@@ -64,24 +64,23 @@ void Inventory::sendFull() const
 
 void Inventory::initialize()
 {
-    InventoryData::iterator it1;
-    EquipData::const_iterator it2, it2_end = mPoss->equipSlots.end();
     /*
-     * Apply all exists triggers.
-     * Remove unknown inventory items.
+     * Construct a set of item Ids to keep track of duplicate item Ids.
      */
-
-    typedef std::set<unsigned int> ItemIdSet;
-    ItemIdSet itemIds;
+    std::set<unsigned int> itemIds;
 
     /*
      * Construct a set of itemIds to keep track of duplicate itemIds.
      */
+    InventoryData::iterator it1;
     for (it1 = mPoss->inventory.begin(); it1 != mPoss->inventory.end();)
     {
         ItemClass *item = itemManager->getItem(it1->second.itemId);
         if (item)
         {
+            // If the insertion succeeded, it's the first time we're
+            // adding the item in the inventory. Hence, we can trigger
+            // item presence in inventory effect.
             if (itemIds.insert(it1->second.itemId).second)
                 item->useTrigger(mCharacter, ITT_IN_INVY);
             ++it1;
@@ -98,32 +97,45 @@ void Inventory::initialize()
 
     itemIds.clear();
 
-    typedef std::set<unsigned int> SlotSet;
-    SlotSet equipment;
-
     /*
-     * Construct a set of slot references from equipment to keep track of
-     * duplicate slot usage.
+     * Equipment effects can be cumulative if more than one item instance
+     * is equipped, but we check to trigger the item presence in equipment
+     * effect only based on the first item instance insertion.
      */
-    for (it2 = mPoss->equipSlots.begin(); it2 != it2_end; ++it2)
+    EquipData::iterator it2;
+    for (it2 = mPoss->equipSlots.begin(); it2 != mPoss->equipSlots.end();)
     {
-        if (equipment.insert(it2->second.itemInstance).second)
+        /*
+         * TODO: Check that all needed slots are available here.
+         */
+        ItemClass *item = itemManager->getItem(it2->second.itemId);
+        if (item)
         {
-            /*
-             * Perform checks for equipped items
-             * Check that all needed slots are available.
-             */
-            // TODO - Not needed for testing everything else right now, but
-            //        will be needed for production
-            /*
-             * Apply all equip triggers.
-             */
-            itemManager->getItem(it2->second.itemId)
-                    ->useTrigger(mCharacter, ITT_EQUIP);
+            // TODO: Check equip conditions.
+            // If not all needed slots are there, put the item back
+            // in the inventory.
         }
-    }
+        else
+        {
+            LOG_WARN("Equipment: deleting unknown item id "
+                     << it2->second.itemId << " from the equipment of '"
+                     << mCharacter->getName()
+                     << "'!");
+            mPoss->equipSlots.erase(++it2);
+            continue;
+        }
 
-    equipment.clear();
+        /*
+         * Apply all equip triggers at first item instance insertion
+         */
+        if (itemIds.insert(it2->second.itemInstance).second)
+        {
+            itemManager->getItem(it2->second.itemId)
+                ->useTrigger(mCharacter, ITT_EQUIP);
+        }
+
+        ++it2;
+    }
 
     checkInventorySize();
 }
