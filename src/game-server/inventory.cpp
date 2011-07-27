@@ -277,15 +277,20 @@ unsigned int Inventory::count(unsigned int itemId) const
     return nb;
 }
 
-unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool force)
+unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
 {
-    bool inv = false;
+    if (!itemId || !amount)
+        return amount;
+
+    LOG_DEBUG("Inventory: Request remove of " << amount << " item(s) id: "
+              << itemId << " for character: '" << mCharacter->getName()
+              << "'.");
 
     MessageOut invMsg(GPMSG_INVENTORY);
     bool triggerLeaveInventory = true;
     for (InventoryData::iterator it = mPoss->inventory.begin(),
-                                 it_end = mPoss->inventory.end();
-         it != it_end; ++it)
+             it_end = mPoss->inventory.end(); it != it_end; ++it)
+    {
         if (it->second.itemId == itemId)
         {
             if (amount)
@@ -302,18 +307,24 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
                     // no need to run leave invy triggers.
                     if (!amount)
                         triggerLeaveInventory = false;
+                    LOG_DEBUG("Slot id: " << it->first << " has now "
+                              << it->second.amount << "item(s).");
                 }
                 else
                 {
                     invMsg.writeInt16(0);
                     mPoss->inventory.erase(it);
+                    LOG_DEBUG("Slot id: " << it->first << " is now empty.");
                 }
             }
             else
+            {
                 // We found an instance of them existing and have none left to
                 // remove, so no need to run leave invy triggers.
                 triggerLeaveInventory = false;
+            }
         }
+    }
 
     if (triggerLeaveInventory)
         itemManager->getItem(itemId)->useTrigger(mCharacter, ITT_LEAVE_INVY);
@@ -321,9 +332,7 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
     if (invMsg.getLength() > 2)
         gameHandler->sendTo(mCharacter, invMsg);
 
-    // Rather inefficient, but still usable for now assuming small invy size.
-    // FIXME
-    return inv && !force ? remove(itemId, amount, true) : amount;
+    return amount;
 }
 
 unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,

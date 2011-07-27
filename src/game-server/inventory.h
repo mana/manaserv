@@ -86,10 +86,9 @@ class Inventory
 
         /**
          * Removes some items from inventory.
-         * @param force If set to true, also remove any equipment encountered
          * @return number of items not removed.
          */
-        unsigned int remove(unsigned int itemId, unsigned int amount, bool force = false);
+        unsigned int remove(unsigned int itemId, unsigned int amount);
 
         /**
          * Moves some items from the first slot to the second one.
