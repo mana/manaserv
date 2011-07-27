@@ -493,14 +493,14 @@ bool Inventory::equip(int slot, bool override)
              * Clean fit. Equip and apply immediately.
              */
             equipMsg.writeInt16(slot);           // Inventory slot
-            equipMsg.writeInt8(it2->size());     // Equip slot type count
+            equipMsg.writeInt16(it2->size());     // Equip slot type count
             for (it3 = it2->begin(),
                  it3_end = it2->end();
                  it3 != it3_end;
                  ++it3)
             {
-                equipMsg.writeInt8(it3->first);  // Equip slot
-                equipMsg.writeInt8(it3->second); // How many are used
+                equipMsg.writeInt16(it3->first);  // Equip slot
+                equipMsg.writeInt16(it3->second); // How many are used
                 /*
                  * This bit can be somewhat inefficient, but is far better for
                  *  average case assuming most equip use one slot max for each
@@ -598,7 +598,7 @@ bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
     {
         changeEquipment(mPoss->inventory.at(slot).itemId, 0);
         equipMsg.writeInt16(slot);
-        equipMsg.writeInt8(0);
+        equipMsg.writeInt16(0);
     }
 
     if (equipMsg.getLength() > 2)
