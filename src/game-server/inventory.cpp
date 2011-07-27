@@ -467,8 +467,11 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
     if (it == mPoss->inventory.end())
         return amount;
 
+    LOG_DEBUG("Inventory: Request Removal of " << amount << " item(s) in slot: "
+              << slot << " for character: '" << mCharacter->getName() << "'.");
+
     MessageOut invMsg(GPMSG_INVENTORY);
-    // Check if an item of the same class exists elsewhere in the inventory
+    // Check if an item of the same id exists elsewhere in the inventory
     bool exists = false;
     for (InventoryData::const_iterator it2 = mPoss->inventory.begin(),
          it2_end = mPoss->inventory.end();
@@ -481,10 +484,11 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
             break;
         }
     }
-    if (!exists && it->second.itemId) {
-        if (ItemClass *ic = itemManager->getItem(it->second.itemId))
-            ic->useTrigger(mCharacter, ITT_LEAVE_INVY);
-    }
+
+    // We check whether it's the last slot where we can find that item id.
+    bool lastSlotOfItemRemaining = false;
+    if (!exists && it->second.itemId)
+        lastSlotOfItemRemaining = true;
 
     unsigned int sub = std::min(amount, it->second.amount);
     amount -= sub;
@@ -498,6 +502,13 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
     else
     {
         invMsg.writeInt16(0);
+
+        // The item(s) was(were) the last one(s) in the inventory.
+        if (lastSlotOfItemRemaining)
+        {
+            if (ItemClass *ic = itemManager->getItem(it->second.itemId))
+                ic->useTrigger(mCharacter, ITT_LEAVE_INVY);
+        }
         mPoss->inventory.erase(it);
     }
 
