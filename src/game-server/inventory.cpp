@@ -28,15 +28,9 @@
 #include "net/messageout.h"
 #include "utils/logger.h"
 
-// TODO:
-// - Inventory::initialise()            Usable but could use a few more things
-// - Inventory::equip()                 Usable but last part would be nice
-
-typedef std::set<unsigned int> ItemIdSet;
-
 Inventory::Inventory(Character *p, bool d):
     mPoss(&p->getPossessions()), mInvMsg(GPMSG_INVENTORY),
-    mEqmMsg(GPMSG_EQUIP), mClient(p), mDelayed(d)
+    mEqmMsg(GPMSG_EQUIP), mCharacter(p), mDelayed(d)
 {
 }
 
@@ -54,7 +48,7 @@ void Inventory::restart()
 void Inventory::cancel()
 {
     assert(mDelayed);
-    Possessions &poss = mClient->getPossessions();
+    Possessions &poss = mCharacter->getPossessions();
     if (mPoss != &poss)
     {
         delete mPoss;
@@ -65,13 +59,13 @@ void Inventory::cancel()
 
 void Inventory::commit(bool doRestart)
 {
-    Possessions &poss = mClient->getPossessions();
+    Possessions &poss = mCharacter->getPossessions();
     /* Sends changes, whether delayed or not. */
     if (mInvMsg.getLength() > 2)
     {
         /* Send the message to the client directly. Perhaps this should be
            done through an update flag, too? */
-        gameHandler->sendTo(mClient, mInvMsg);
+        gameHandler->sendTo(mCharacter, mInvMsg);
     }
     if (mPoss != &poss)
     {
@@ -79,11 +73,12 @@ void Inventory::commit(bool doRestart)
         {
             /*
              * Search for any and all changes to equipment.
-             * Search through equipment for changes between old and new equipment.
+             * Search through equipment for changes between
+             * old and new equipment.
              * Send changes directly when there is a change.
-             * Even when equipment references to invy slots are the same, it still
-             *      needs to be searched for changes to the internal equiment slot
-             *      usage.
+             * Even when equipment references to invy slots are the same,
+             * it still needs to be searched for changes
+             * to the internal equiment slot usage.
              * This is probably the worst part of doing this in delayed mode.
              */
             IdSlotMap oldEquip, newEquip;
@@ -170,7 +165,7 @@ void Inventory::commit(bool doRestart)
        that have just been sent to the client. */
 
     if (mEqmMsg.getLength() > 2)
-        gameHandler->sendTo(mClient, mEqmMsg);
+        gameHandler->sendTo(mCharacter, mEqmMsg);
 
     if (doRestart)
         restart();
@@ -195,7 +190,7 @@ void Inventory::equip_sub(unsigned int newCount, IdSlotMap::const_iterator &it)
             ++count;
         }
         if (itemManager->isEquipSlotVisible(it->second))
-            mClient->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+            mCharacter->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
     } while ((++it)->first == invSlot);
     if (count)
     {
@@ -212,7 +207,7 @@ void Inventory::prepare()
     if (!mDelayed)
         return;
 
-    Possessions *poss = &mClient->getPossessions();
+    Possessions *poss = &mCharacter->getPossessions();
     if (mPoss == poss)
         mPoss = new Possessions(*poss);
 }
@@ -242,10 +237,10 @@ void Inventory::sendFull() const
         m.writeInt16(k->second);    // inventory slot
     }
 
-    gameHandler->sendTo(mClient, m);
+    gameHandler->sendTo(mCharacter, m);
 }
 
-void Inventory::initialise()
+void Inventory::initialize()
 {
     assert(!mDelayed);
 
@@ -256,6 +251,7 @@ void Inventory::initialise()
      * Remove unknown inventory items.
      */
 
+    typedef std::set<unsigned int> ItemIdSet;
     ItemIdSet itemIds;
 
     /*
@@ -267,14 +263,14 @@ void Inventory::initialise()
         if (item)
         {
             if (itemIds.insert(it1->second.itemId).second)
-                item->useTrigger(mClient, ITT_IN_INVY);
+                item->useTrigger(mCharacter, ITT_IN_INVY);
             ++it1;
         }
         else
         {
             LOG_WARN("Inventory: deleting unknown item type "
                      << it1->second.itemId << " from the inventory of '"
-                     << mClient->getName()
+                     << mCharacter->getName()
                      << "'!");
             mPoss->inventory.erase(it1++);
         }
@@ -294,7 +290,8 @@ void Inventory::initialise()
         if (equipment.insert(it2->second).second)
         {
             /*
-             * Perform checks for equipped items - check that all needed slots are available.
+             * Perform checks for equipped items
+             * Check that all needed slots are available.
              */
             // TODO - Not needed for testing everything else right now, but
             //        will be needed for production
@@ -302,16 +299,16 @@ void Inventory::initialise()
              * Apply all equip triggers.
              */
             itemManager->getItem(mPoss->inventory.at(it2->second).itemId)
-                    ->useTrigger(mClient, ITT_EQUIP);
+                    ->useTrigger(mCharacter, ITT_EQUIP);
         }
     }
 
     equipment.clear();
 
-    checkSize();
+    checkInventorySize();
 }
 
-void Inventory::checkSize()
+void Inventory::checkInventorySize()
 {
     /*
      * Check that the inventory size is greater than or equal to the size
@@ -321,7 +318,7 @@ void Inventory::checkSize()
      *       If not, forcibly delete (drop?) items from the end until it is.
      */
     while (mPoss->inventory.size() > INVENTORY_SLOTS
-           || mClient->getModifiedAttribute(ATTR_INV_CAPACITY) < 0)
+           || mCharacter->getModifiedAttribute(ATTR_INV_CAPACITY) < 0)
     {
         LOG_WARN("Inventory: oversize inventory! Deleting '"
                  << mPoss->inventory.rbegin()->second.amount
@@ -330,7 +327,7 @@ void Inventory::checkSize()
                  << "' from slot '"
                  << mPoss->inventory.rbegin()->first
                  << "' of character '"
-                 << mClient->getName()
+                 << mCharacter->getName()
                  << "'!");
         // FIXME Should probably be dropped rather than deleted.
         removeFromSlot(mPoss->inventory.rbegin()->first,
@@ -400,7 +397,7 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
         if (it == it_end) break;
     }
 
-    checkSize();
+    checkInventorySize();
 
     return amount;
 }
@@ -430,7 +427,8 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
             {
                 if (eq)
                 {
-                    // If the item is equippable, we have additional checks to make.
+                    // If the item is equippable,
+                    // we have additional checks to make.
                     bool ch = false;
                     for (EquipData::iterator it2 = mPoss->equipSlots.begin(),
                                          it2_end = mPoss->equipSlots.end();
@@ -472,13 +470,14 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
                 return 0;
         }
     if (force)
-        itemManager->getItem(itemId)->useTrigger(mClient, ITT_LEAVE_INVY);
+        itemManager->getItem(itemId)->useTrigger(mCharacter, ITT_LEAVE_INVY);
     // Rather inefficient, but still usable for now assuming small invy size.
     // FIXME
     return inv && !force ? remove(itemId, amount, true) : amount;
 }
 
-unsigned int Inventory::move(unsigned int slot1, unsigned int slot2, unsigned int amount)
+unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
+                             unsigned int amount)
 {
     if (!amount || slot1 == slot2 || slot2 >= INVENTORY_SLOTS)
         return amount;
@@ -582,7 +581,7 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
     }
     if (!exists && it->second.itemId) {
         if (ItemClass *ic = itemManager->getItem(it->second.itemId))
-            ic->useTrigger(mClient, ITT_LEAVE_INVY);
+            ic->useTrigger(mCharacter, ITT_LEAVE_INVY);
     }
 
     unsigned int sub = std::min(amount, it->second.amount);
@@ -618,11 +617,11 @@ void Inventory::changeEquipment(ItemClass *oldI, ItemClass *newI)
     if (!oldI && !newI)
         return;
     if (oldI && newI)
-        oldI->useTrigger(mClient, ITT_EQUIPCHG);
+        oldI->useTrigger(mCharacter, ITT_EQUIPCHG);
     else if (oldI)
-        oldI->useTrigger(mClient, ITT_UNEQUIP);
+        oldI->useTrigger(mCharacter, ITT_UNEQUIP);
     else if (newI)
-        newI->useTrigger(mClient, ITT_EQUIP);
+        newI->useTrigger(mCharacter, ITT_EQUIP);
 }
 
 bool Inventory::equip(int slot, bool override)
@@ -632,21 +631,21 @@ bool Inventory::equip(int slot, bool override)
     InventoryData::iterator it;
     if ((it = mPoss->inventory.find(slot)) == mPoss->inventory.end())
         return false;
-    const ItemEquipsInfo &eq = itemManager->getItem(it->second.itemId)->getItemEquipData();
+    const ItemEquipsInfo &eq = itemManager->getItem(it->second.itemId)
+                                    ->getItemEquipData();
     if (eq.empty())
         return false;
     ItemEquipInfo const *ovd = 0;
     // Iterate through all possible combinations of slots
     for (ItemEquipsInfo::const_iterator it2 = eq.begin(),
-         it2_end = eq.end();
-         it2 != it2_end;
-         ++it2)
+         it2_end = eq.end(); it2 != it2_end; ++it2)
     {
         // Iterate through this combination of slots.
         /*
          * 0 = all ok, slots free
          * 1 = possible if other items are unequipped first
-         * 2 = impossible, requires too many slots even with other equipment being removed
+         * 2 = impossible, requires too many slots
+         *     even with other equipment being removed
          */
         int fail = 0;
         ItemEquipInfo::const_iterator it3, it3_end;
@@ -736,10 +735,12 @@ bool Inventory::equip(int slot, bool override)
     if (ovd)
     {
         /*
-         * We did find an equip that works if we unequip other items, and we can override.
+         * We did find an equip that works if we unequip other items,
+         * and we can override.
          * Process unequip triggers for all items we have to unequip.
          * Process equip triggers for new item.
-         * Attempt to reequip any equipment we had to remove, but disallowing override.
+         * Attempt to reequip any equipment we had to remove,
+         * but disallowing override.
          */
 
         // TODO - this would increase ease of use substatially, add as soon as

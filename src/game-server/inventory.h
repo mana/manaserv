@@ -24,37 +24,6 @@
 #include "game-server/character.h"
 #include "net/messageout.h"
 
-/*enum
-{
-// Equipment rules:
-// 1 torso equipment
-    EQUIP_TORSO_SLOT = 0,
-// 1 arms equipment
-    EQUIP_ARMS_SLOT = 1,
-// 1 head equipment
-    EQUIP_HEAD_SLOT = 2,
-// 1 legs equipment
-    EQUIP_LEGS_SLOT = 3,
-// 1 feet equipment
-    EQUIP_FEET_SLOT = 4,
-// 2 rings
-    EQUIP_RING1_SLOT = 5,
-    EQUIP_RING2_SLOT = 6,
-// 1 necklace
-    EQUIP_NECKLACE_SLOT = 7,
-// Fight:
-//   2 one-handed weapons
-//   or 1 two-handed weapon
-//   or 1 one-handed weapon + 1 shield.
-    EQUIP_FIGHT1_SLOT = 8,
-    EQUIP_FIGHT2_SLOT = 9,
-// Projectile:
-//   this item does not amount to one, it only indicates the chosen projectile.
-    EQUIP_PROJECTILE_SLOT = 10,
-
-    EQUIP_CLIENT_INVENTORY = 32
-};*/
-
 class ItemClass;
 
 /**
@@ -100,7 +69,7 @@ class Inventory
          * Ensures the inventory is sane and apply equipment modifiers.
          * Should be run only once and the very first time.
          */
-        void initialise();
+        void initialize();
 
         /**
          * Equips item from given inventory slot.
@@ -178,7 +147,7 @@ class Inventory
          * Forcibly delete items from the end if it is not.
          * @todo Drop items instead?
          */
-        void checkSize();
+        void checkInventorySize();
 
         /**
          * Helper function for equip() when computing changes to equipment
@@ -202,9 +171,8 @@ class Inventory
          */
         MessageOut mInvMsg;
         MessageOut mEqmMsg; /**< Update message containing equipment changes */
-        Character *mClient; /**< Character to notify. */
+        Character *mCharacter; /**< Character to notify. */
         bool mDelayed;      /**< Delayed changes. */
 };
-
 
 #endif

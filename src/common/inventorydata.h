@@ -26,12 +26,12 @@
 
 /**
  * Numbers of inventory slots
+ * TODO: Make this configurable and sent to the client.
  */
 #define INVENTORY_SLOTS 50
 
 /**
  * Structure storing an item in the inventory.
- * When the itemId is zero, this item represents "amount" consecutive empty slots.
  */
 struct InventoryItem
 {

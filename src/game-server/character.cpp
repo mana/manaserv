@@ -81,7 +81,7 @@ Character::Character(MessageIn &msg):
     setName(msg.readString());
     deserializeCharacterData(*this, msg);
     mOld = getPosition();
-    Inventory(this).initialise();
+    Inventory(this).initialize();
     modifiedAllAttribute();
     setSize(16);
 
