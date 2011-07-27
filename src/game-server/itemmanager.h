@@ -30,6 +30,24 @@
 
 class ItemClass;
 
+struct EquipSlotInfo
+{
+    EquipSlotInfo():
+        slotId(0), slotCapacity(0), visibleSlot(false)
+    {}
+
+    EquipSlotInfo(unsigned int id, const std::string &name,
+                  unsigned int capacity, bool visible):
+        slotId(id), slotName(name), slotCapacity(capacity), visibleSlot(visible)
+    {}
+
+    unsigned int slotId;
+    std::string slotName;
+    unsigned int slotCapacity;
+    bool visibleSlot;
+};
+
+
 class ItemManager
 {
     public:
@@ -73,13 +91,12 @@ class ItemManager
          */
         unsigned int getDatabaseVersion() const;
 
-        const std::string &getEquipNameFromId(unsigned int id) const;
+        unsigned int getEquipSlotIdFromName(const std::string &name) const;
 
-        unsigned int getEquipIdFromName(const std::string &name) const;
+        unsigned int getEquipSlotCapacity(unsigned int id) const;
 
-        unsigned int getMaxSlotsFromId(unsigned int id) const;
-
-        unsigned int getVisibleSlotCount() const;
+        unsigned int getVisibleEquipSlotCount() const
+        { return mVisibleEquipSlotCount; }
 
         bool isEquipSlotVisible(unsigned int id) const;
 
@@ -94,19 +111,22 @@ class ItemManager
         void readEffectNode(xmlNodePtr effectNode, ItemClass *item);
 
         typedef std::map< int, ItemClass * > ItemClasses;
-        // Map a string (name of slot) with (str-id, max-per-equip-slot)
-        typedef std::vector< std::pair< std::string, unsigned int > > EquipSlots;
+        ItemClasses mItemClasses; /**< Item reference */
+        utils::NameMap<ItemClass*> mItemClassesByName;
+
+        // Map an equip slot id with the equip slot info.
+        typedef std::map< unsigned int, EquipSlotInfo > EquipSlotsInfo;
         // Reference to the vector position of equipSlots
         typedef std::vector< unsigned int > VisibleEquipSlots;
 
-        ItemClasses mItemClasses; /**< Item reference */
-        utils::NameMap<ItemClass*> mItemClassesByName;
-        EquipSlots mEquipSlots;
-        VisibleEquipSlots mVisibleEquipSlots;
+        EquipSlotsInfo mEquipSlotsInfo;
+        // Map a string (name of slot) with (str-id, max-per-equip-slot)
+        // We only keep a pointer to it: The id map will take care of deletion.
+        utils::NameMap<EquipSlotInfo* > mNamedEquipSlotsInfo;
 
         std::string mItemsFile;
         std::string mEquipSlotsFile;
-        mutable unsigned int mVisibleEquipSlotCount; // Cache
+        unsigned int mVisibleEquipSlotCount; // Cache
 
         /** Version of the loaded items database file.*/
         unsigned int mItemDatabaseVersion;

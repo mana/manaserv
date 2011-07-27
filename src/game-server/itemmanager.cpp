@@ -71,52 +71,22 @@ unsigned int ItemManager::getDatabaseVersion() const
     return mItemDatabaseVersion;
 }
 
-const std::string &ItemManager::getEquipNameFromId(unsigned int id) const
+unsigned int ItemManager::getEquipSlotIdFromName(const std::string &name) const
 {
-    return mEquipSlots.at(id).first;
+    EquipSlotInfo *slotInfo = mNamedEquipSlotsInfo.find(name);
+    return slotInfo ? slotInfo->slotId : 0;
 }
 
-unsigned int ItemManager::getEquipIdFromName(const std::string &name) const
+unsigned int ItemManager::getEquipSlotCapacity(unsigned int id) const
 {
-    for (unsigned int i = 0; i < mEquipSlots.size(); ++i)
-        if (name == mEquipSlots.at(i).first)
-            return i;
-    LOG_WARN("Item Manager: attempt to find equip id from name \"" <<
-             name << "\" not found, defaulting to 0!");
-    return 0;
-}
-
-unsigned int ItemManager::getMaxSlotsFromId(unsigned int id) const
-{
-    return mEquipSlots.at(id).second;
-}
-
-unsigned int ItemManager::getVisibleSlotCount() const
-{
-    if (!mVisibleEquipSlotCount)
-    {
-        for (VisibleEquipSlots::const_iterator it = mVisibleEquipSlots.begin(),
-                                               it_end = mVisibleEquipSlots.end();
-             it != it_end;
-             ++it)
-        {
-            mVisibleEquipSlotCount += mEquipSlots.at(*it).second;
-        }
-    }
-    return mVisibleEquipSlotCount;
+    EquipSlotsInfo::const_iterator i = mEquipSlotsInfo.find(id);
+    return i != mEquipSlotsInfo.end() ? i->second.slotCapacity : 0;
 }
 
 bool ItemManager::isEquipSlotVisible(unsigned int id) const
 {
-    for (VisibleEquipSlots::const_iterator it = mVisibleEquipSlots.begin(),
-                                           it_end = mVisibleEquipSlots.end();
-         it != it_end;
-         ++it)
-    {
-        if (*it == id)
-            return true;
-    }
-    return false;
+    EquipSlotsInfo::const_iterator i = mEquipSlotsInfo.find(id);
+    return i != mEquipSlotsInfo.end() ? i->second.visibleSlot : false;
 }
 
 void ItemManager::readEquipSlotsFile()
@@ -133,42 +103,55 @@ void ItemManager::readEquipSlotsFile()
 
     LOG_INFO("Loading equip slots: " << mEquipSlotsFile);
 
-    unsigned totalCount = 0;
+    unsigned totalCapacity = 0;
     unsigned slotCount = 0;
-    unsigned visibleSlotCount = 0;
+    mVisibleEquipSlotCount = 0;
 
     for_each_xml_child_node(node, rootNode)
     {
         if (xmlStrEqual(node->name, BAD_CAST "slot"))
         {
+            const int slotId = XML::getProperty(node, "id", 0);
             const std::string name = XML::getProperty(node, "name",
                                                       std::string());
-            const int count = XML::getProperty(node, "count", 0);
+            const int capacity = XML::getProperty(node, "capacity", 0);
 
-            if (name.empty() || count <= 0)
+            if (slotId <= 0 || name.empty() || capacity <= 0)
             {
-                LOG_WARN("Item Manager: equip slot has no name or zero count");
+                LOG_WARN("Item Manager: equip slot " << slotId
+                    << ": (" << name << ") has no name or zero count. "
+                    "The slot has been ignored.");
+                continue;
             }
-            else
+
+            bool visible = XML::getBoolProperty(node, "visible", false);
+            if (visible)
             {
-                bool visible = XML::getProperty(node, "visible", "false") != "false";
-                if (visible)
+                if (++mVisibleEquipSlotCount > 7)
                 {
-                    mVisibleEquipSlots.push_back(mEquipSlots.size());
-                    if (++visibleSlotCount > 7)
-                        LOG_WARN("Item Manager: More than 7 visible equip slot!"
-                                 "This will not work with current netcode!");
+                    LOG_WARN("Item Manager: More than 7 visible equip slot!"
+                                "This will not work with current netcode!");
                 }
-                mEquipSlots.push_back(std::pair<std::string, unsigned int>
-                                     (name, count));
-                totalCount += count;
-                ++slotCount;
             }
+
+            EquipSlotsInfo::iterator i = mEquipSlotsInfo.find(slotId);
+
+            if (i != mEquipSlotsInfo.end())
+            {
+                LOG_WARN("Item Manager: Ignoring duplicate definition "
+                         "of equip slot '" << slotId << "'!");
+                continue;
+            }
+            EquipSlotInfo equipSlotInfo(slotId, name, capacity, visible);
+            mEquipSlotsInfo[slotId] = equipSlotInfo;
+            mNamedEquipSlotsInfo.insert(name, &equipSlotInfo);
+            totalCapacity += capacity;
+            ++slotCount;
         }
     }
 
     LOG_INFO("Loaded '" << slotCount << "' slot types with '"
-             << totalCount << "' slots.");
+             << totalCapacity << "' slots.");
 }
 
 void ItemManager::readItemsFile()
@@ -274,8 +257,18 @@ void ItemManager::readEquipNode(xmlNodePtr equipNode, ItemClass *item)
                 LOG_WARN("Item Manager: empty equip slot definition!");
                 continue;
             }
-            req.push_back(std::make_pair(getEquipIdFromName(slot),
+            if (utils::isNumeric(slot))
+            {
+                // When the slot id is given
+                req.push_back(std::make_pair(utils::stringToInt(slot),
                            XML::getProperty(subNode, "required", 1)));
+            }
+            else
+            {
+                // When its name is given
+                req.push_back(std::make_pair(getEquipSlotIdFromName(slot),
+                           XML::getProperty(subNode, "required", 1)));
+            }
         }
     }
     if (req.empty())

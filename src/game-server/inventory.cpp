@@ -574,7 +574,7 @@ bool Inventory::equip(int slot, bool override)
              ++it3)
         {
             // it3 -> { slot id, number required }
-            unsigned int max = itemManager->getMaxSlotsFromId(it3->first),
+            unsigned int max = itemManager->getEquipSlotCapacity(it3->first),
                          used = mPoss->equipSlots.count(it3->first);
             if (max - used >= it3->second)
                 continue;

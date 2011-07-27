@@ -109,7 +109,7 @@ static void updateMap(MapComposite *map)
 static void serializeLooks(Character *ch, MessageOut &msg, bool full)
 {
     const EquipData &equipData = ch->getPossessions().getEquipment();
-    unsigned int nb_slots = itemManager->getVisibleSlotCount();
+    unsigned int nb_slots = itemManager->getVisibleEquipSlotCount();
 
     // Bitmask describing the changed entries.
     int changed = (1 << nb_slots) - 1;
