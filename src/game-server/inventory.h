@@ -35,30 +35,15 @@ class Inventory
 
         /**
          * Creates a view on the possessions of a character.
-         * @param delayed If the changes need to be cancelable.
          */
-        Inventory(Character *, bool delayed = false);
+        Inventory(Character *);
 
         /**
          * Commits delayed changes if applicable.
          * Sends the update message to the client.
          */
-        ~Inventory();
-
-        /**
-         * Commits changes.
-         * Exclusive to delayed mode.
-         * @param doRestart Whether to prepare the inventory for more changes
-                   after this. If you are unsure, it is safe (though not
-                   terribly efficient) to leave this as true.
-         */
-        void commit(bool doRestart = true);
-
-        /**
-         * Cancels changes.
-         * Exclusive to delayed mode.
-         */
-        void cancel();
+        ~Inventory()
+        {}
 
         /**
          * Sends complete inventory status to the client.
@@ -129,19 +114,6 @@ class Inventory
         unsigned int getItem(unsigned int slot) const;
 
     private:
-
-        /**
-         * Make sure that changes are being done on a copy, not directly.
-         * No effect when not in delayed mode.
-         */
-        void prepare();
-
-        /**
-         * Starts a new notification message.
-         */
-        void restart();
-
-
         /**
          * Check the inventory is within the slot limit and capacity.
          * Forcibly delete items from the end if it is not.
@@ -164,15 +136,8 @@ class Inventory
         void changeEquipment(ItemClass *oldI, ItemClass *newI);
 
         Possessions *mPoss; /**< Pointer to the modified possessions. */
-        /**
-         * Update message containing inventory changes.
-         * Note that in sendFull(), this is reused to send all full changes
-         * (for both inventory and equipment)
-         */
-        MessageOut mInvMsg;
-        MessageOut mEqmMsg; /**< Update message containing equipment changes */
+
         Character *mCharacter; /**< Character to notify. */
-        bool mDelayed;      /**< Delayed changes. */
 };
 
 #endif

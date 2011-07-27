@@ -359,7 +359,7 @@ static int chr_inv_change(lua_State *s)
         return 0;
     }
     int nb_items = (lua_gettop(s) - 1) / 2;
-    Inventory inv(q, true);
+    Inventory inv(q);
     for (int i = 0; i < nb_items; ++i)
     {
         if (!lua_isnumber(s, i * 2 + 2) || !lua_isnumber(s, i * 2 + 3))
@@ -377,12 +377,13 @@ static int chr_inv_change(lua_State *s)
         }
         else if (nb < 0)
         {
+            // Removing too much item is a success as for the scripter's
+            // point of view. We log it anyway.
             nb = inv.remove(id, -nb);
             if (nb)
             {
-                inv.cancel();
-                lua_pushboolean(s, 0);
-                return 1;
+                LOG_WARN("mana.chr_inv_change() removed more items than owned: "
+                     << "character: " << q->getName() << " item id: " << id);
             }
         }
         else

@@ -28,188 +28,9 @@
 #include "net/messageout.h"
 #include "utils/logger.h"
 
-Inventory::Inventory(Character *p, bool d):
-    mPoss(&p->getPossessions()), mInvMsg(GPMSG_INVENTORY),
-    mEqmMsg(GPMSG_EQUIP), mCharacter(p), mDelayed(d)
+Inventory::Inventory(Character *p):
+    mPoss(&p->getPossessions()), mCharacter(p)
 {
-}
-
-Inventory::~Inventory()
-{
-    commit(false);
-}
-
-void Inventory::restart()
-{
-    mInvMsg.clear();
-    mInvMsg.writeInt16(GPMSG_INVENTORY);
-}
-
-void Inventory::cancel()
-{
-    assert(mDelayed);
-    Possessions &poss = mCharacter->getPossessions();
-    if (mPoss != &poss)
-    {
-        delete mPoss;
-        mPoss = &poss;
-    }
-    restart();
-}
-
-void Inventory::commit(bool doRestart)
-{
-    Possessions &poss = mCharacter->getPossessions();
-    /* Sends changes, whether delayed or not. */
-    if (mInvMsg.getLength() > 2)
-    {
-        /* Send the message to the client directly. Perhaps this should be
-           done through an update flag, too? */
-        gameHandler->sendTo(mCharacter, mInvMsg);
-    }
-    if (mPoss != &poss)
-    {
-        if (mDelayed)
-        {
-            /*
-             * Search for any and all changes to equipment.
-             * Search through equipment for changes between
-             * old and new equipment.
-             * Send changes directly when there is a change.
-             * Even when equipment references to invy slots are the same,
-             * it still needs to be searched for changes
-             * to the internal equiment slot usage.
-             * This is probably the worst part of doing this in delayed mode.
-             */
-            IdSlotMap oldEquip, newEquip;
-            {
-                EquipData::const_iterator it1, it2, it1_end, it2_end;
-                for (it1 = mPoss->equipSlots.begin(),
-                     it1_end = mPoss->equipSlots.end();
-                    it1 != it1_end;
-                    ++it1)
-                {
-#ifdef INV_CONST_BOUND_DEBUG
-                        IdSlotMap::const_iterator temp2, temp =
-#endif
-                        newEquip.insert(
-                                newEquip.upper_bound(it1->second),
-                                std::make_pair(it1->second, it1->first));
-#ifdef INV_CONST_BOUND_DEBUG
-                        if (temp !=
-                            --(temp2 = newEquip.upper_bound(it1->second)))
-                            throw;
-#endif
-                }
-                for (it2 = poss.equipSlots.begin(),
-                     it2_end = poss.equipSlots.end();
-                    it2 != it2_end;
-                    ++it2)
-                    oldEquip.insert(
-                            oldEquip.upper_bound(it2->second),
-                            std::make_pair(it2->second, it2->first));
-            }
-            {
-                IdSlotMap::const_iterator it1     = newEquip.begin(),
-                                          it2     = oldEquip.begin(),
-                                          it1_end = newEquip.end(),
-                                          it2_end = oldEquip.end(),
-                                          temp1, temp2;
-                while (it1 != it1_end || it2 != it2_end)
-                {
-                    if (it1 == it1_end)
-                    {
-                        if (it2 == it2_end)
-                            break;
-                        equip_sub(0, it1);
-                    }
-                    else if (it2 == it2_end)
-                        equip_sub(newEquip.count(it2->first), it2);
-                    else if (it1->first == it2->first)
-                    {
-                        double invSlot = it1->first;
-                        while ((it1 != it1_end && it1->first == invSlot) ||
-                               (it2 != it2_end && it2->first == invSlot))
-                        {
-                            /*
-                             * Item is still equipped, but need to check
-                             *      that the slots didn't change.
-                             */
-                            if (it1->second == it2->second)
-                            {
-                                // No change.
-                                ++it1;
-                                ++it2;
-                                continue;
-                            }
-                            unsigned int itemId =
-                                    mPoss->inventory.at(it1->first).itemId;
-                            changeEquipment(itemId, itemId);
-                            break;
-                        }
-                    }
-                    else if (it1->first > it2->first)
-                        equip_sub(newEquip.count(it2->first), it2);
-                    else // it1->first < it2->first
-                        equip_sub(0, it1);
-                }
-            }
-        }
-        poss = *mPoss;
-        delete mPoss;
-        mPoss = &poss;
-    }
-
-    /* Update server sided states if in delayed mode. If we are not in
-       delayed mode, the server sided states already reflect the changes
-       that have just been sent to the client. */
-
-    if (mEqmMsg.getLength() > 2)
-        gameHandler->sendTo(mCharacter, mEqmMsg);
-
-    if (doRestart)
-        restart();
-}
-
-void Inventory::equip_sub(unsigned int newCount, IdSlotMap::const_iterator &it)
-{
-    const unsigned int invSlot = it->first;
-    unsigned int count = 0, eqSlot = it->second;
-    mEqmMsg.writeInt16(invSlot);
-    mEqmMsg.writeInt8(newCount);
-    do {
-        if (newCount)
-        {
-            if (it->second != eqSlot)
-            {
-                mEqmMsg.writeInt8(eqSlot);
-                mEqmMsg.writeInt8(count);
-                count = 1;
-                eqSlot = it->second;
-            }
-            ++count;
-        }
-        if (itemManager->isEquipSlotVisible(it->second))
-            mCharacter->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
-    } while ((++it)->first == invSlot);
-    if (count)
-    {
-        mEqmMsg.writeInt8(eqSlot);
-        mEqmMsg.writeInt8(count);
-    }
-    mEqmMsg.writeInt16(invSlot);
-    changeEquipment(newCount ? 0 : mPoss->inventory.at(invSlot).itemId,
-                    newCount ? mPoss->inventory.at(invSlot).itemId : 0);
-}
-
-void Inventory::prepare()
-{
-    if (!mDelayed)
-        return;
-
-    Possessions *poss = &mCharacter->getPossessions();
-    if (mPoss == poss)
-        mPoss = new Possessions(*poss);
 }
 
 void Inventory::sendFull() const
@@ -242,8 +63,6 @@ void Inventory::sendFull() const
 
 void Inventory::initialize()
 {
-    assert(!mDelayed);
-
     InventoryData::iterator it1;
     EquipData::const_iterator it2, it2_end = mPoss->equipSlots.end();
     /*
@@ -343,10 +162,11 @@ unsigned int Inventory::getItem(unsigned int slot) const
 
 unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
 {
-    unsigned int maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
     if (!itemId || !amount)
         return 0;
-    prepare();
+
+    MessageOut invMsg(GPMSG_INVENTORY);
+    unsigned int maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
     InventoryData::iterator it, it_end = mPoss->inventory.end();
     // Add to slots with existing items of this type first.
     for (it = mPoss->inventory.begin(); it != it_end; ++it)
@@ -369,11 +189,11 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
                 amount -= spaceleft;
             }
 
-            mInvMsg.writeInt16(it->first);
-            mInvMsg.writeInt16(itemId);
-            mInvMsg.writeInt16(it->second.amount);
+            invMsg.writeInt16(it->first);
+            invMsg.writeInt16(itemId);
+            invMsg.writeInt16(it->second.amount);
             if (!amount)
-                return 0;
+                break;
         }
 
     int slot = 0;
@@ -381,7 +201,7 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
     for (it = mPoss->inventory.begin();; ++it)
     {
         if (!amount)
-            return 0;
+            break;
         int lim = (it == it_end) ? INVENTORY_SLOTS : it->first;
         while (amount && slot < lim)
         {
@@ -389,13 +209,17 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
             mPoss->inventory[slot].itemId = itemId;
             mPoss->inventory[slot].amount = additions;
             amount -= additions;
-            mInvMsg.writeInt16(slot++); // Last read, so also increment
-            mInvMsg.writeInt16(itemId);
-            mInvMsg.writeInt16(additions);
+            invMsg.writeInt16(slot++); // Last read, so also increment
+            invMsg.writeInt16(itemId);
+            invMsg.writeInt16(additions);
         }
         ++slot; // Skip the slot that the iterator points to
         if (it == it_end) break;
     }
+
+    // Send that first, before checking potential removals
+    if (invMsg.getLength() > 2)
+        gameHandler->sendTo(mCharacter, invMsg);
 
     checkInventorySize();
 
@@ -415,9 +239,11 @@ unsigned int Inventory::count(unsigned int itemId) const
 
 unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool force)
 {
-    prepare();
     bool inv = false,
          eq = !itemManager->getItem(itemId)->getItemEquipData().empty();
+
+    MessageOut invMsg(GPMSG_INVENTORY);
+    bool triggerLeaveInventory = true;
     for (InventoryData::iterator it = mPoss->inventory.begin(),
                                  it_end = mPoss->inventory.end();
          it != it_end; ++it)
@@ -448,29 +274,34 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
                 unsigned int sub = std::min(amount, it->second.amount);
                 amount -= sub;
                 it->second.amount -= sub;
-                mInvMsg.writeInt16(it->first);
+                invMsg.writeInt16(it->first);
                 if (it->second.amount)
                 {
-                    mInvMsg.writeInt16(it->second.itemId);
-                    mInvMsg.writeInt16(it->second.amount);
+                    invMsg.writeInt16(it->second.itemId);
+                    invMsg.writeInt16(it->second.amount);
                     // Some still exist, and we have none left to remove, so
                     // no need to run leave invy triggers.
                     if (!amount)
-                        return 0;
+                        triggerLeaveInventory = false;
                 }
                 else
                 {
-                    mInvMsg.writeInt16(0);
+                    invMsg.writeInt16(0);
                     mPoss->inventory.erase(it);
                 }
             }
             else
                 // We found an instance of them existing and have none left to
                 // remove, so no need to run leave invy triggers.
-                return 0;
+                triggerLeaveInventory = false;
         }
-    if (force)
+
+    if (triggerLeaveInventory)
         itemManager->getItem(itemId)->useTrigger(mCharacter, ITT_LEAVE_INVY);
+
+    if (invMsg.getLength() > 2)
+        gameHandler->sendTo(mCharacter, invMsg);
+
     // Rather inefficient, but still usable for now assuming small invy size.
     // FIXME
     return inv && !force ? remove(itemId, amount, true) : amount;
@@ -481,7 +312,7 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
 {
     if (!amount || slot1 == slot2 || slot2 >= INVENTORY_SLOTS)
         return amount;
-    prepare();
+
     InventoryData::iterator it1 = mPoss->inventory.find(slot1),
                             it2 = mPoss->inventory.find(slot2),
                             inv_end = mPoss->inventory.end();
@@ -498,6 +329,8 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
             //     items in the same slot anyway.
             it->second =  slot2;
 
+    MessageOut invMsg(GPMSG_INVENTORY);
+
     unsigned int nb = std::min(amount, it1->second.amount);
     if (it2 == inv_end)
     {
@@ -510,20 +343,20 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
         it1->second.amount -= nb;
         amount -= nb;
 
-        mInvMsg.writeInt16(slot1);                  // Slot
+        invMsg.writeInt16(slot1);                  // Slot
         if (it1->second.amount)
         {
-            mInvMsg.writeInt16(it1->second.itemId); // Item Id
-            mInvMsg.writeInt16(it1->second.amount); // Amount
+            invMsg.writeInt16(it1->second.itemId); // Item Id
+            invMsg.writeInt16(it1->second.amount); // Amount
         }
         else
         {
-            mInvMsg.writeInt16(0);
+            invMsg.writeInt16(0);
             mPoss->inventory.erase(it1);
         }
-        mInvMsg.writeInt16(slot2);                  // Slot
-        mInvMsg.writeInt16(it1->second.itemId);     // Item Id (same as slot 1)
-        mInvMsg.writeInt16(nb);                     // Amount
+        invMsg.writeInt16(slot2);                  // Slot
+        invMsg.writeInt16(it1->second.itemId);     // Item Id (same as slot 1)
+        invMsg.writeInt16(nb);                     // Amount
     }
     else
     {
@@ -538,34 +371,37 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
         it2->second.amount += nb;
         amount -= nb;
 
-        mInvMsg.writeInt16(slot1);                  // Slot
+        invMsg.writeInt16(slot1);                  // Slot
         if (it1->second.amount)
         {
-            mInvMsg.writeInt16(it1->second.itemId); // Item Id
-            mInvMsg.writeInt16(it1->second.amount); // Amount
+            invMsg.writeInt16(it1->second.itemId); // Item Id
+            invMsg.writeInt16(it1->second.amount); // Amount
         }
         else
         {
-            mInvMsg.writeInt16(0);
+            invMsg.writeInt16(0);
             mPoss->inventory.erase(it1);
         }
-        mInvMsg.writeInt16(slot2);                  // Slot
-        mInvMsg.writeInt16(it2->second.itemId);     // Item Id
-        mInvMsg.writeInt16(it2->second.amount);     // Amount
+        invMsg.writeInt16(slot2);                  // Slot
+        invMsg.writeInt16(it2->second.itemId);     // Item Id
+        invMsg.writeInt16(it2->second.amount);     // Amount
     }
+
+    if (invMsg.getLength() > 2)
+        gameHandler->sendTo(mCharacter, invMsg);
+
     return amount;
 }
 
 unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
 {
-    prepare();
-
     InventoryData::iterator it = mPoss->inventory.find(slot);
 
     // When the given slot doesn't exist, we can't remove anything
     if (it == mPoss->inventory.end())
         return amount;
 
+    MessageOut invMsg(GPMSG_INVENTORY);
     // Check if an item of the same class exists elsewhere in the inventory
     bool exists = false;
     for (InventoryData::const_iterator it2 = mPoss->inventory.begin(),
@@ -587,17 +423,21 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
     unsigned int sub = std::min(amount, it->second.amount);
     amount -= sub;
     it->second.amount -= sub;
-    mInvMsg.writeInt16(it->first);
+    invMsg.writeInt16(it->first);
     if (it->second.amount)
     {
-        mInvMsg.writeInt16(it->second.itemId);
-        mInvMsg.writeInt16(it->second.amount);
+        invMsg.writeInt16(it->second.itemId);
+        invMsg.writeInt16(it->second.amount);
     }
     else
     {
-        mInvMsg.writeInt16(0);
+        invMsg.writeInt16(0);
         mPoss->inventory.erase(it);
     }
+
+    if (invMsg.getLength() > 2)
+        gameHandler->sendTo(mCharacter, invMsg);
+
     return amount;
 }
 
@@ -636,6 +476,8 @@ bool Inventory::equip(int slot, bool override)
     if (eq.empty())
         return false;
     ItemEquipInfo const *ovd = 0;
+
+    MessageOut equipMsg(GPMSG_EQUIP);
     // Iterate through all possible combinations of slots
     for (ItemEquipsInfo::const_iterator it2 = eq.begin(),
          it2_end = eq.end(); it2 != it2_end; ++it2)
@@ -679,19 +521,15 @@ bool Inventory::equip(int slot, bool override)
             /*
              * Clean fit. Equip and apply immediately.
              */
-            if (!mDelayed) {
-                mEqmMsg.writeInt16(slot);           // Inventory slot
-                mEqmMsg.writeInt8(it2->size());     // Equip slot type count
-            }
+            equipMsg.writeInt16(slot);           // Inventory slot
+            equipMsg.writeInt8(it2->size());     // Equip slot type count
             for (it3 = it2->begin(),
                  it3_end = it2->end();
                  it3 != it3_end;
                  ++it3)
             {
-                if (!mDelayed) {
-                    mEqmMsg.writeInt8(it3->first);  // Equip slot
-                    mEqmMsg.writeInt8(it3->second); // How many are used
-                }
+                equipMsg.writeInt8(it3->first);  // Equip slot
+                equipMsg.writeInt8(it3->second); // How many are used
                 /*
                  * This bit can be somewhat inefficient, but is far better for
                  *  average case assuming most equip use one slot max for each
@@ -704,8 +542,8 @@ bool Inventory::equip(int slot, bool override)
                     mPoss->equipSlots.insert(
                             std::make_pair(it3->first, slot));
             }
-            if (!mDelayed)
-                changeEquipment(0, it->second.itemId);
+
+            changeEquipment(0, it->second.itemId);
             return true;
             case 1:
             /*
@@ -731,6 +569,9 @@ bool Inventory::equip(int slot, bool override)
             break;
         }
     }
+
+    if (equipMsg.getLength() > 2)
+        gameHandler->sendTo(mCharacter, equipMsg);
     // We didn't find a clean equip.
     if (ovd)
     {
@@ -762,11 +603,11 @@ bool Inventory::unequip(EquipData::iterator it)
 
 bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
 {
-    prepare();
     EquipData::iterator it = itp ? *itp : mPoss->equipSlots.begin(),
                         it_end = mPoss->equipSlots.end();
     bool changed = false;
 
+    MessageOut equipMsg(GPMSG_EQUIP);
     // Erase all equip entries that point to the given inventory slot
     while (it != it_end)
     {
@@ -781,12 +622,15 @@ bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
         }
     }
 
-    if (changed && !mDelayed)
+    if (changed)
     {
         changeEquipment(mPoss->inventory.at(slot).itemId, 0);
-        mEqmMsg.writeInt16(slot);
-        mEqmMsg.writeInt8(0);
+        equipMsg.writeInt16(slot);
+        equipMsg.writeInt8(0);
     }
+
+    if (equipMsg.getLength() > 2)
+        gameHandler->sendTo(mCharacter, equipMsg);
 
     return changed;
 }
