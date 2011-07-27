@@ -25,6 +25,7 @@
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
+#include "game-server/state.h"
 #include "net/messageout.h"
 #include "utils/logger.h"
 
@@ -145,9 +146,9 @@ void Inventory::checkInventorySize()
     /*
      * Check that the inventory size is greater than or equal to the size
      *       needed.
-     *       If not, forcibly delete (drop?) items from the end until it is.
+     *       If not, forcibly drop items from the end until it is.
      * Check that inventory capacity is greater than or equal to zero.
-     *       If not, forcibly delete (drop?) items from the end until it is.
+     *       If not, forcibly drop items from the end until it is.
      */
     while (mPoss->inventory.size() > INVENTORY_SLOTS
            || mCharacter->getModifiedAttribute(ATTR_INV_CAPACITY) < 0)
@@ -161,9 +162,24 @@ void Inventory::checkInventorySize()
                  << "' of character '"
                  << mCharacter->getName()
                  << "'!");
-        // FIXME Should probably be dropped rather than deleted.
+
+        // Remove the items from inventory
         removeFromSlot(mPoss->inventory.rbegin()->first,
                        mPoss->inventory.rbegin()->second.amount);
+
+        // Drop them on the floor
+        ItemClass *ic = itemManager->getItem(mPoss->inventory.rbegin()->first);
+        int nb = mPoss->inventory.rbegin()->second.amount;
+        Item *item = new Item(ic, nb);
+        item->setMap(mCharacter->getMap());
+        item->setPosition(mCharacter->getPosition());
+        if (!GameState::insert(item))
+        {
+            // Warn about drop failure
+            LOG_WARN("Impossible to drop " << nb << " item(s) id: "
+                     << ic->getDatabaseID() << " for character: '"
+                     << mCharacter->getName() << "'!");
+        }
     }
 }
 
