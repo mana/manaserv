@@ -338,6 +338,9 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
 unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
                              unsigned int amount)
 {
+    LOG_DEBUG(amount << " item(s) requested to move from: " << slot1 << " to "
+              << slot2 << " for character: '" << mCharacter->getName() << "'.");
+
     if (!amount || slot1 == slot2 || slot2 >= INVENTORY_SLOTS)
         return amount;
 
@@ -362,48 +365,92 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
         it1->second.amount -= nb;
         amount -= nb;
 
+        //Save the itemId in case of deletion of the iterator
+        unsigned int itemId = it1->second.itemId;
         invMsg.writeInt16(slot1);                  // Slot
         if (it1->second.amount)
         {
             invMsg.writeInt16(it1->second.itemId); // Item Id
             invMsg.writeInt16(it1->second.amount); // Amount
+            LOG_DEBUG("Left " << amount << " item(s) id:"
+                      << it1->second.itemId << " into slot: " << slot1);
         }
         else
         {
             invMsg.writeInt16(0);
             mPoss->inventory.erase(it1);
+            LOG_DEBUG("Slot: " << slot1 << " is now empty.");
         }
         invMsg.writeInt16(slot2);                  // Slot
-        invMsg.writeInt16(it1->second.itemId);     // Item Id (same as slot 1)
+        invMsg.writeInt16(itemId);     // Item Id (same as slot 1)
         invMsg.writeInt16(nb);                     // Amount
+        LOG_DEBUG("Slot: " << slot2 << " has now " << nb << " of item id: "
+                  << itemId);
     }
     else
     {
         // Slot2 exists.
         if (it2->second.itemId != it1->second.itemId)
-            return amount; // Cannot stack items of a different type.
-        nb = std::min(itemManager->getItem(it1->second.itemId)->getMaxPerSlot()
-                          - it2->second.amount,
-                      nb);
+         {
+            // Swap items when they are of a different type
+            // and when all the amount of slot 1 is moving onto slot 2.
+            if (amount >= it1->second.amount)
+            {
+                unsigned int itemId = it1->second.itemId;
+                unsigned int amount = it1->second.amount;
+                it1->second.itemId = it2->second.itemId;
+                it1->second.amount = it2->second.amount;
+                it2->second.itemId = itemId;
+                it2->second.amount = amount;
 
-        it1->second.amount -= nb;
-        it2->second.amount += nb;
-        amount -= nb;
+                // Sending swapped slots.
+                invMsg.writeInt16(slot1);
+                invMsg.writeInt16(it1->second.itemId);
+                invMsg.writeInt16(it1->second.amount);
+                invMsg.writeInt16(slot2);
+                invMsg.writeInt16(it2->second.itemId);
+                invMsg.writeInt16(it2->second.amount);
+                LOG_DEBUG("Swapping items in slots " << slot1
+                          << " and " << slot2);
+            }
+            else
+            {
+                // Cannot partially stack items of a different type.
+                LOG_DEBUG("Cannot move " << amount << " item(s) from slot "
+                          << slot1 << " to " << slot2);
+                return amount;
+            }
+        }
+        else // Same item type on slot 2.
+        {
+            // Number of items moving
+            nb = std::min(itemManager->getItem(
+                              it1->second.itemId)->getMaxPerSlot()
+                              - it2->second.amount, nb);
 
-        invMsg.writeInt16(slot1);                  // Slot
-        if (it1->second.amount)
-        {
-            invMsg.writeInt16(it1->second.itemId); // Item Id
-            invMsg.writeInt16(it1->second.amount); // Amount
+            // If nothing can move, we can abort
+            if (!nb)
+                return amount;
+
+            it1->second.amount -= nb;
+            it2->second.amount += nb;
+            amount -= nb;
+
+            invMsg.writeInt16(slot1);                  // Slot
+            if (it1->second.amount)
+            {
+                invMsg.writeInt16(it1->second.itemId); // Item Id
+                invMsg.writeInt16(it1->second.amount); // Amount
+            }
+            else
+            {
+                invMsg.writeInt16(0);
+                mPoss->inventory.erase(it1);
+            }
+            invMsg.writeInt16(slot2);                  // Slot
+            invMsg.writeInt16(it2->second.itemId);     // Item Id
+            invMsg.writeInt16(it2->second.amount);     // Amount
         }
-        else
-        {
-            invMsg.writeInt16(0);
-            mPoss->inventory.erase(it1);
-        }
-        invMsg.writeInt16(slot2);                  // Slot
-        invMsg.writeInt16(it2->second.itemId);     // Item Id
-        invMsg.writeInt16(it2->second.amount);     // Amount
     }
 
     if (invMsg.getLength() > 2)

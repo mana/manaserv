@@ -94,7 +94,8 @@ class Inventory
          * Moves some items from the first slot to the second one.
          * @returns number of items not moved.
          */
-        unsigned int move(unsigned int slot1, unsigned int slot2, unsigned int amount);
+        unsigned int move(unsigned int slot1, unsigned int slot2,
+                          unsigned int amount);
 
         /**
          * Removes some items from inventory.
