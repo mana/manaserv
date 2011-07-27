@@ -196,9 +196,14 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
 
     MessageOut invMsg(GPMSG_INVENTORY);
     unsigned int maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
+
+    LOG_DEBUG("Inventory: Inserting " << amount << " item(s) Id: " << itemId
+              << " for character '" << mCharacter->getName() << "'.");
+
     InventoryData::iterator it, it_end = mPoss->inventory.end();
     // Add to slots with existing items of this type first.
     for (it = mPoss->inventory.begin(); it != it_end; ++it)
+    {
         if (it->second.itemId == itemId)
         {
             // If the slot is full, try the next slot
@@ -206,16 +211,19 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
                 continue;
 
             // Add everything that'll fit to the stack
-            unsigned short spaceleft = maxPerSlot - it->second.amount;
-            if (spaceleft >= amount)
+            unsigned short spaceLeft = maxPerSlot - it->second.amount;
+            if (spaceLeft >= amount)
             {
                 it->second.amount += amount;
                 amount = 0;
+                LOG_DEBUG("Everything inserted at slot id: " << it->first);
             }
             else
             {
-                it->second.amount += spaceleft;
-                amount -= spaceleft;
+                it->second.amount += spaceLeft;
+                amount -= spaceLeft;
+                LOG_DEBUG(spaceLeft << " item(s) inserted at slot id: "
+                          << it->first);
             }
 
             invMsg.writeInt16(it->first);
@@ -224,6 +232,7 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
             if (!amount)
                 break;
         }
+    }
 
     int slot = 0;
     // We still have some left, so add to blank slots.
@@ -238,12 +247,14 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
             mPoss->inventory[slot].itemId = itemId;
             mPoss->inventory[slot].amount = additions;
             amount -= additions;
+            LOG_DEBUG(additions << " item(s) inserted at slot id: " << slot);
             invMsg.writeInt16(slot++); // Last read, so also increment
             invMsg.writeInt16(itemId);
             invMsg.writeInt16(additions);
         }
         ++slot; // Skip the slot that the iterator points to
-        if (it == it_end) break;
+        if (it == it_end)
+            break;
     }
 
     // Send that first, before checking potential removals
