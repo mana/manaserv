@@ -35,20 +35,56 @@
  */
 struct InventoryItem
 {
+    InventoryItem():
+        itemId(0), amount(0)
+    {}
+
     unsigned int itemId;
     unsigned int amount;
 };
-// slot id -> { item }
-typedef std::map< unsigned short, InventoryItem > InventoryData;
-// equip slot type -> { slot ids }
-// Equipment taking up multiple slots will be referenced multiple times
-typedef std::multimap< unsigned int, unsigned int > EquipData;
+
+struct EquipmentItem
+{
+    EquipmentItem():
+        itemId(0), itemInstance(0)
+    {}
+
+    // The item id taken from the item db.
+    unsigned int itemId;
+    // A unique instance number used to separate items when equipping the same
+    // item id multiple times on possible multiple slots.
+    unsigned int itemInstance;
+};
+
+// inventory slot id -> { item }
+typedef std::map< unsigned int, InventoryItem > InventoryData;
+
+// equip slot id -> { item id }
+// Equipment taking up multiple equip slot ids will be referenced multiple times
+typedef std::multimap< unsigned int, EquipmentItem > EquipData;
 
 /**
  * Structure storing the equipment and inventory of a Player.
  */
 struct Possessions
 {
+    friend class Inventory;
+public:
+    const EquipData &getEquipment() const
+    { return equipSlots; }
+
+    const InventoryData &getInventory() const
+    { return inventory; }
+
+    /**
+     * Should be done only at character serialization and storage load time.
+     */
+    void setEquipment(EquipData &equipData)
+    { equipSlots.swap(equipData); }
+    void setInventory(InventoryData &inventoryData)
+    { inventory.swap(inventoryData); }
+
+private:
     InventoryData inventory;
     EquipData equipSlots;
 };

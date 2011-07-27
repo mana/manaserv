@@ -72,9 +72,9 @@ int BuySell::registerPlayerItems()
 
     // We parse the player inventory and add all item
     // in a sell list.
-    const Possessions &charPoss = mChar->getPossessions();
-    for (InventoryData::const_iterator it = charPoss.inventory.begin(),
-        it_end = charPoss.inventory.end(); it != it_end; ++it)
+    const InventoryData &inventoryData = mChar->getPossessions().getInventory();
+    for (InventoryData::const_iterator it = inventoryData.begin(),
+        it_end = inventoryData.end(); it != it_end; ++it)
     {
         unsigned int nb = it->second.amount;
         if (!nb)

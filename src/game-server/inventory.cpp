@@ -54,8 +54,9 @@ void Inventory::sendFull() const
          k != k_end;
          ++k)
     {
-        m.writeInt8(k->first);      // equip slot
-        m.writeInt16(k->second);    // inventory slot
+        m.writeInt16(k->first);                  // Equip slot id
+        m.writeInt16(k->second.itemId);          // Item id
+        m.writeInt16(k->second.itemInstance);    // Item instance
     }
 
     gameHandler->sendTo(mCharacter, m);
@@ -106,7 +107,7 @@ void Inventory::initialize()
      */
     for (it2 = mPoss->equipSlots.begin(); it2 != it2_end; ++it2)
     {
-        if (equipment.insert(it2->second).second)
+        if (equipment.insert(it2->second.itemInstance).second)
         {
             /*
              * Perform checks for equipped items
@@ -117,7 +118,7 @@ void Inventory::initialize()
             /*
              * Apply all equip triggers.
              */
-            itemManager->getItem(mPoss->inventory.at(it2->second).itemId)
+            itemManager->getItem(it2->second.itemId)
                     ->useTrigger(mCharacter, ITT_EQUIP);
         }
     }
@@ -239,8 +240,7 @@ unsigned int Inventory::count(unsigned int itemId) const
 
 unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool force)
 {
-    bool inv = false,
-         eq = !itemManager->getItem(itemId)->getItemEquipData().empty();
+    bool inv = false;
 
     MessageOut invMsg(GPMSG_INVENTORY);
     bool triggerLeaveInventory = true;
@@ -251,26 +251,6 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount, bool fo
         {
             if (amount)
             {
-                if (eq)
-                {
-                    // If the item is equippable,
-                    // we have additional checks to make.
-                    bool ch = false;
-                    for (EquipData::iterator it2 = mPoss->equipSlots.begin(),
-                                         it2_end = mPoss->equipSlots.end();
-                         it2 != it2_end;
-                         ++it2)
-                        if (it2->second == it->first)
-                        {
-                            if (force)
-                                unequip(it2);
-                            else
-                                ch = inv = true;
-                            break;
-                        }
-                    if (ch && !force)
-                        continue;
-                }
                 unsigned int sub = std::min(amount, it->second.amount);
                 amount -= sub;
                 it->second.amount -= sub;
@@ -319,15 +299,6 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
 
     if (it1 == inv_end)
         return amount;
-
-    EquipData::iterator it, it_end = mPoss->equipSlots.end();
-    for (it = mPoss->equipSlots.begin();
-         it != it_end;
-         ++it)
-        if (it->second == slot1)
-            // Bad things will happen when you can stack multiple equippable
-            //     items in the same slot anyway.
-            it->second =  slot2;
 
     MessageOut invMsg(GPMSG_INVENTORY);
 
@@ -538,9 +509,10 @@ bool Inventory::equip(int slot, bool override)
                  *  compile time options optimising for other usage.
                  * For now, this is adequate assuming `normal' usage.
                  */
-                for (unsigned int i = 0; i < it3->second; ++i)
+                /** Part disabled until reimplemented*/
+                /*for (unsigned int i = 0; i < it3->second; ++i)
                     mPoss->equipSlots.insert(
-                            std::make_pair(it3->first, slot));
+                            std::make_pair(it3->first, slot));*/
             }
 
             changeEquipment(0, it->second.itemId);
@@ -598,7 +570,7 @@ bool Inventory::equip(int slot, bool override)
 
 bool Inventory::unequip(EquipData::iterator it)
 {
-    return unequip(it->second, &it);
+    return unequip(it->first, &it);
 }
 
 bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
@@ -611,7 +583,7 @@ bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
     // Erase all equip entries that point to the given inventory slot
     while (it != it_end)
     {
-        if (it->second == slot)
+        if (it->first == slot)
         {
             changed = true;
             mPoss->equipSlots.erase(it++);

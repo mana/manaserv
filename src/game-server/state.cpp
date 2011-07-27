@@ -108,7 +108,7 @@ static void updateMap(MapComposite *map)
  */
 static void serializeLooks(Character *ch, MessageOut &msg, bool full)
 {
-    const Possessions &poss = ch->getPossessions();
+    const EquipData &equipData = ch->getPossessions().getEquipment();
     unsigned int nb_slots = itemManager->getVisibleSlotCount();
 
     // Bitmask describing the changed entries.
@@ -125,8 +125,8 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
     // Partially build both kinds of packet, to get their sizes.
     unsigned int mask_full = 0, mask_diff = 0;
     unsigned int nb_full = 0, nb_diff = 0;
-    std::map<unsigned int, unsigned int>::const_iterator it =
-                                                    poss.equipSlots.begin();
+    std::map<unsigned int, EquipmentItem>::const_iterator it =
+                                                              equipData.begin();
     for (unsigned int i = 0; i < nb_slots; ++i)
     {
         if (changed & (1 << i))
@@ -135,7 +135,7 @@ static void serializeLooks(Character *ch, MessageOut &msg, bool full)
             ++nb_diff;
             mask_diff |= 1 << i;
         }
-        if (it == poss.equipSlots.end() || it->first > i) continue;
+        if (it == equipData.end() || it->first > i) continue;
         ItemClass *eq;
         items[i] = it->first && (eq = itemManager->getItem(it->first)) ?
                    eq->getSpriteID() : 0;
