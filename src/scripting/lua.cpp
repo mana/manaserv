@@ -1019,6 +1019,30 @@ static int monster_create(lua_State *s)
 }
 
 /**
+ * mana.monster_remove(mob)
+ * Remove a monster object without kill event.
+ * return whether the monster was enqueued for removal.
+ */
+static int monster_remove(lua_State *s)
+{
+    if (!lua_islightuserdata(s, 1))
+    {
+        lua_pushboolean(s, false);
+        return 1;
+    }
+
+    bool monsterEnqueued = false;
+    Monster *m = dynamic_cast<Monster *>((Thing *)lua_touserdata(s, 1));
+    if (m)
+    {
+        GameState::enqueueRemove(m);
+        monsterEnqueued = true;
+    }
+    lua_pushboolean(s, monsterEnqueued);
+    return 1;
+}
+
+/**
  * mana.monster_load_script(mob, scriptfilename)
  * loads a LUA script given for mob
  */
@@ -1951,6 +1975,7 @@ LuaScript::LuaScript():
         { "chr_take_special",                &chr_take_special                },
         { "exp_for_level",                   &exp_for_level                   },
         { "monster_create",                  &monster_create                  },
+        { "monster_remove",                  &monster_remove                  },
         { "monster_load_script",             &monster_load_script             },
         { "being_apply_status",              &being_apply_status              },
         { "being_remove_status",             &being_remove_status             },
