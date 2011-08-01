@@ -1789,6 +1789,29 @@ static int get_map_id(lua_State *s)
 }
 
 /**
+ * Returns the value of a map property
+ */
+static int get_map_property(lua_State *s)
+{
+    const char *property = luaL_checkstring(s, 1);
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    MapComposite *m = t->getMap();
+    if (!m)
+    {
+        raiseScriptError(s, "get_map_property called outside a map.");
+        return 0;
+    }
+    Map *map = m->getMap();
+    std::string value = map->getProperty(property);
+    const char *v = &value[0];
+
+    lua_pushstring(s, v);
+    return 1;
+}
+
+/**
  * Creates an item stack on the floor
  * mana.drop_item(x, y, id[, number])
  */
@@ -1960,6 +1983,7 @@ LuaScript::LuaScript():
         { "chr_shake_screen",                &chr_shake_screen                },
         { "test_tableget",                   &test_tableget                   },
         { "get_map_id",                      &get_map_id                      },
+        { "get_map_property",                &get_map_property                },
         { "item_drop",                       &item_drop                       },
         { "npc_ask_integer",                 &npc_ask_integer                 },
         { "npc_end",                         &npc_end                         },
