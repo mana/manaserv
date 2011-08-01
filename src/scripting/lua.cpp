@@ -1836,6 +1836,35 @@ static int get_map_property(lua_State *s)
 }
 
 /**
+ * bool mana.is_walkable(int x, int y)
+ * Returns whether the pixel on the map is walkable.
+ */
+static int is_walkable(lua_State *s)
+{
+    const int x = luaL_checkint(s, 1);
+    const int y = luaL_checkint(s, 2);
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    MapComposite *m = t->getMap();
+    if (!m)
+    {
+        raiseScriptError(s, "is_walkable called outside a map.");
+        return 0;
+    }
+    Map *map = m->getMap();
+
+    // If the wanted warp place is unwalkable
+    if (map->getWalk(x / map->getTileWidth(), y / map->getTileHeight()))
+        lua_pushboolean(s, 1);
+    else
+        lua_pushboolean(s, 0);
+
+    return 1;
+}
+
+/**
  * Creates an item stack on the floor
  * mana.drop_item(x, y, id[, number])
  */
@@ -2009,6 +2038,7 @@ LuaScript::LuaScript():
         { "test_tableget",                   &test_tableget                   },
         { "get_map_id",                      &get_map_id                      },
         { "get_map_property",                &get_map_property                },
+        { "is_walkable",                     &is_walkable                     },
         { "item_drop",                       &item_drop                       },
         { "npc_ask_integer",                 &npc_ask_integer                 },
         { "npc_end",                         &npc_end                         },
