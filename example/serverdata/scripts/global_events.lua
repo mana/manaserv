@@ -50,14 +50,14 @@ end
 -- to the character and/or initialize a tutorial quest.
 function on_chr_birth(ch)
 	-- this message is shown on first login.
-	mana.chatmessage(0, ch, "And so your adventure begins...")
+	mana.chat_message(0, ch, "And so your adventure begins...")
 end
 
 -- This function is called when a character logs into the game. This can,
 -- for example, be utilized for a message-of-the-day or for various
 -- handlings of offline processing mechanics.
 function on_chr_login(ch)
-	mana.chatmessage(0, ch, "Welcome to Manasource")
+	mana.chat_message(0, ch, "Welcome to Manasource")
 end
 
 
@@ -72,7 +72,7 @@ function on_chr_logout(ch)
 	local msg = mana.being_get_name(ch).." left the game."
 	for b in pairs(around) do
 		if mana.being_type(b) == TYPE_CHARACTER then
-			mana.chatmessage(0, b, msg)
+			mana.chat_message(0, b, msg)
 		end
 	end
 end
