@@ -447,7 +447,19 @@ static int chr_inv_count(lua_State *s)
     int id, nb = 0;
     for (int i = 2; i <= nb_items + 1; ++i)
     {
-        id = luaL_checkint(s, i);
+        ItemClass *it;
+        if (lua_isnumber(s, i))
+            it = itemManager->getItem(lua_tointeger(s, i));
+        else
+            it = itemManager->getItemByName(lua_tostring(s, i));
+
+        if (!it)
+        {
+            raiseScriptError(s, "chr_inv_count called with invalid "
+                             "item id or name.");
+            return 0;
+        }
+        id = it->getDatabaseID();
         if (id == 0)
         {
             LOG_WARN("chr_inv_count called with id 0! "
@@ -536,7 +548,25 @@ static int npc_trade(lua_State *s)
         for (int i = 0; i < 3; ++i)
         {
             lua_rawgeti(s, -1, i + 1);
-            if (!lua_isnumber(s, -1))
+            if (i == 0) // item id or name
+            {
+                ItemClass *it;
+                if (lua_isnumber(s, -1))
+                    it = itemManager->getItem(lua_tointeger(s, -1));
+                else
+                    it = itemManager->getItemByName(lua_tostring(s, -1));
+
+                if (!it)
+                {
+                    raiseWarning(s, "npc_trade called with incorrect "
+                                 "item id or name.");
+                    t->cancel();
+                    lua_pushinteger(s, 2);
+                    return 1;
+                }
+                v[0] = it->getDatabaseID();
+            }
+            else if (!lua_isnumber(s, -1))
             {
                 raiseWarning(s, "npc_trade called with incorrect parameters "
                              "in item table.");
@@ -544,7 +574,10 @@ static int npc_trade(lua_State *s)
                 lua_pushinteger(s, 2);
                 return 1;
             }
-            v[i] = lua_tointeger(s, -1);
+            else
+            {
+                v[i] = lua_tointeger(s, -1);
+            }
             lua_pop(s, 1);
         }
         if (t->registerItem(v[0], v[1], v[2]))

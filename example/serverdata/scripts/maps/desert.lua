@@ -28,12 +28,12 @@ atinit(function()
     create_npc("Banker", 8, 35 * TILESIZE + TILESIZE / 2, 24 * TILESIZE + TILESIZE / 2, Banker, nil)
 
     -- A simple merchant.
-    merchant_buy_table = { {1, 10, 20}, {2, 10, 30}, {3, 10, 50} }
-    merchant_sell_table = { {1, 10, 19}, {5, 10, 30}, {6, 10, 200}, {7, 10, 300} }
+    merchant_buy_table = { {"Candy", 10, 20}, {"Regenerative trinket", 10, 30}, {"Minor health potion", 10, 50} }
+    merchant_sell_table = { {"Candy", 10, 19}, {"Sword", 10, 30}, {"Bow", 10, 200}, {"Leather shirt", 10, 300} }
     create_npc("Merchant", 3, 4 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, merchant_buy_table, merchant_sell_table), nil)
 
     -- Another Merchant, selling some equipment, and buying everything...
-    smith_buy_table = { {5, 10, 50}, {7, 10, 70} }
+    smith_buy_table = { {"Sword", 10, 50}, {7, 10, 70} }
     create_npc("Smith", 5, 15 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, smith_buy_table), nil)
 
     -- The most simple NPC - Welcoming new ones around.
@@ -85,6 +85,7 @@ function Harmony_update(npc)
 end
 
 function Tamer(npc, ch, list)
+    mana.being_say(npc, string.format("You have %s Swords.", mana.chr_inv_count(ch, "Sword")))
     mana.being_say(npc, string.format("You are %s pixel away.",
                                       mana.get_distance(npc, ch)))
     mana.being_say(npc, "I will now spawn a monster for your training session.")
