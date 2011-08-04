@@ -132,8 +132,8 @@ class Inventory
         /**
          * Changes equipment and adjusts character attributes.
          */
-        void changeEquipment(unsigned int oldId, unsigned int itemId);
-        void changeEquipment(ItemClass *oldI, ItemClass *newI);
+        void updateEquipmentTrigger(unsigned int oldId, unsigned int itemId);
+        void updateEquipmentTrigger(ItemClass *oldI, ItemClass *newI);
 
         Possessions *mPoss; /**< Pointer to the modified possessions. */
 

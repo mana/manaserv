@@ -519,15 +519,15 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
 }
 
 
-void Inventory::changeEquipment(unsigned int oldId, unsigned int newId)
+void Inventory::updateEquipmentTrigger(unsigned int oldId, unsigned int newId)
 {
     if (!oldId && !newId)
         return;
-    changeEquipment(oldId ? itemManager->getItem(oldId) : 0,
+    updateEquipmentTrigger(oldId ? itemManager->getItem(oldId) : 0,
                     newId ? itemManager->getItem(newId) : 0);
 }
 
-void Inventory::changeEquipment(ItemClass *oldI, ItemClass *newI)
+void Inventory::updateEquipmentTrigger(ItemClass *oldI, ItemClass *newI)
 {
     // This should only be called when applying changes, either directly
     // in non-delayed mode or when the changes are committed in delayed mode.
@@ -621,7 +621,7 @@ bool Inventory::equip(int slot, bool override)
                             std::make_pair(it3->first, slot));*/
             }
 
-            changeEquipment(0, it->second.itemId);
+            updateEquipmentTrigger(0, it->second.itemId);
             return true;
             case 1:
             /*
@@ -702,7 +702,7 @@ bool Inventory::unequip(unsigned int slot, EquipData::iterator *itp)
 
     if (changed)
     {
-        changeEquipment(mPoss->inventory.at(slot).itemId, 0);
+        updateEquipmentTrigger(mPoss->inventory.at(slot).itemId, 0);
         equipMsg.writeInt16(slot);
         equipMsg.writeInt16(0);
     }
