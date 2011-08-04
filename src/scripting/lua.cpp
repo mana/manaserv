@@ -343,7 +343,8 @@ static int chr_warp(lua_State *s)
 }
 
 /**
- * mana.chr_inv_change(Character*, (int id, int nb)...): bool success
+ * mana.chr_inv_change(Character*, (int id || string name,
+ *                     int nb)...): bool success
  * Callback for inserting/removing items in inventory.
  * The function can be called several times in a row, but it is better to
  * perform all the changes at once, so as to reduce bandwidth. Removals
@@ -368,21 +369,40 @@ static int chr_inv_change(lua_State *s)
     Inventory inv(q);
     for (int i = 0; i < nb_items; ++i)
     {
-        if (!lua_isnumber(s, i * 2 + 2) || !lua_isnumber(s, i * 2 + 3))
+        if (!(lua_isnumber(s, i * 2 + 2) || lua_isstring(s, i * 2 + 2)) ||
+            !lua_isnumber(s, i * 2 + 3))
         {
-            raiseScriptError(s, "chr_inv_change called "
-                             "with incorrect parameters.");
+            raiseScriptError(s, "chr_inv_change called with "
+                             "incorrect parameters.");
             return 0;
         }
 
-        int id = lua_tointeger(s, i * 2 + 2);
         int nb = lua_tointeger(s, i * 2 + 3);
-        if (id == 0)
+        ItemClass *ic;
+        int id;
+        if (lua_isnumber(s, i * 2 + 2))
         {
-            LOG_WARN("chr_inv_change called with id 0! "
-                     "Currency is now handled through attributes!");
+            int id = lua_tointeger(s, i * 2 + 2);
+            if (id == 0)
+            {
+                LOG_WARN("chr_inv_change called with id 0! "
+                         "Currency is now handled through attributes!");
+                continue;
+            }
+            ic = itemManager->getItem(id);
         }
-        else if (nb < 0)
+        else
+        {
+            ic = itemManager->getItemByName(lua_tostring(s, i * 2 + 2));
+        }
+
+        if (!ic)
+        {
+            raiseScriptError(s, "chr_inv_change called with an unknown item.");
+            continue;
+        }
+        id = ic->getDatabaseID();
+        if (nb < 0)
         {
             // Removing too much item is a success as for the scripter's
             // point of view. We log it anyway.
@@ -395,13 +415,6 @@ static int chr_inv_change(lua_State *s)
         }
         else
         {
-            ItemClass *ic = itemManager->getItem(id);
-            if (!ic)
-            {
-                raiseScriptError(s, "chr_inv_change called "
-                                 "with an unknown item.");
-                continue;
-            }
             nb = inv.insert(id, nb);
             if (nb)
             {
@@ -1006,12 +1019,11 @@ static int posY(lua_State *s)
 }
 
 /**
- * mana.monster_create(int type, int x, int y): Monster*
+ * mana.monster_create(int id || string name, int x, int y): Monster*
  * Callback for creating a monster on the current map.
  */
 static int monster_create(lua_State *s)
 {
-    const int monsterId = luaL_checkint(s, 1);
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
@@ -1025,12 +1037,31 @@ static int monster_create(lua_State *s)
         return 0;
     }
 
-    MonsterClass *spec = monsterManager->getMonster(monsterId);
-    if (!spec)
+    MonsterClass *spec;
+    if (lua_isnumber(s, 1))
     {
-        raiseScriptError(s, "monster_create called "
-                         "with invalid monster Id: %d", monsterId);
-        return 0;
+        int monsterId = luaL_checkint(s, 1);
+        spec = monsterManager->getMonster(monsterId);
+        if (!spec)
+        {
+            raiseScriptError(s, "monster_create called with invalid "
+                             "monster ID: %d", monsterId);
+            //LOG_WARN("LuaMonster_Create invalid monster ID: " << monsterId);
+            return 0;
+        }
+    }
+    else
+    {
+        std::string monsterName = lua_tostring(s, 1);
+        spec = monsterManager->getMonsterByName(monsterName);
+        if (!spec)
+        {
+            raiseScriptError(s, "monster_create called with "
+                             "invalid monster name: %s", monsterName.c_str());
+            //LOG_WARN("LuaMonster_Create invalid monster name: "
+            // << monsterName);
+            return 0;
+         }
     }
 
     Monster *q = new Monster(spec);
@@ -1039,6 +1070,24 @@ static int monster_create(lua_State *s)
     GameState::enqueueInsert(q);
 
     lua_pushlightuserdata(s, q);
+    return 1;
+}
+
+/**
+ * mana.monster_get_name(int monster_id): string monster_name
+ * Returns the name of the monster with the given id.
+ */
+static int monster_get_name(lua_State *s)
+{
+    const int id = luaL_checkint(s, 1);
+    MonsterClass *spec = monsterManager->getMonster(id);
+    if (!spec)
+    {
+        raiseScriptError(s, "monster_get_name "
+                         "called with unknown monster id.");
+        return 0;
+    }
+    lua_pushstring(s, spec->getName().c_str());
     return 1;
 }
 
@@ -1901,20 +1950,25 @@ static int is_walkable(lua_State *s)
 }
 
 /**
- * mana.drop_item(int x, int y, int id[, int number]): void
+ * mana.drop_item(int x, int y, int id || string name[, int number]): void
  * Creates an item stack on the floor.
  */
 static int item_drop(lua_State *s)
 {
     const int x = luaL_checkint(s, 1);
     const int y = luaL_checkint(s, 2);
-    const int type = luaL_checkint(s, 3);
     const int number = luaL_optint(s, 4, 1);
 
-    ItemClass *ic = itemManager->getItem(type);
+    ItemClass *ic;
+    if (lua_isnumber(s, 3))
+        ic = itemManager->getItem(lua_tointeger(s, 3));
+    else
+        ic = itemManager->getItemByName(lua_tostring(s, 3));
+
     if (!ic)
     {
-        raiseScriptError(s, "item_drop called with unknown item ID");
+        raiseScriptError(s, "item_drop called with unknown item id or name.");
+        return 0;
     }
     Item *i = new Item(ic, number);
 
@@ -1929,6 +1983,23 @@ static int item_drop(lua_State *s)
     GameState::insertOrDelete(i);
 
     return 0;
+}
+
+/**
+ * mana.item_get_name(int item_id): string item_name
+ * Returns the name of the item with the given id.
+ */
+static int item_get_name(lua_State *s)
+{
+    const int id = luaL_checkint(s, 1);
+    ItemClass *it = itemManager->getItem(id);
+    if (!it)
+    {
+        raiseScriptError(s, "item_get_name called with unknown item id.");
+        return 0;
+    }
+    lua_pushstring(s, it->getName().c_str());
+    return 1;
 }
 
 /**
@@ -2043,6 +2114,7 @@ LuaScript::LuaScript():
         { "chr_take_special",                &chr_take_special                },
         { "exp_for_level",                   &exp_for_level                   },
         { "monster_create",                  &monster_create                  },
+        { "monster_get_name",                &monster_get_name                },
         { "monster_remove",                  &monster_remove                  },
         { "monster_load_script",             &monster_load_script             },
         { "being_apply_status",              &being_apply_status              },
@@ -2079,6 +2151,7 @@ LuaScript::LuaScript():
         { "get_map_property",                &get_map_property                },
         { "is_walkable",                     &is_walkable                     },
         { "item_drop",                       &item_drop                       },
+        { "item_get_name",                   &item_get_name                   },
         { "npc_ask_integer",                 &npc_ask_integer                 },
         { "npc_end",                         &npc_end                         },
         { "npc_ask_string",                  &npc_ask_string                  },
