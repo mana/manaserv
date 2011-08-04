@@ -98,6 +98,6 @@ function Tamer(npc, ch, list)
         end
     end
 
-    local m1 = mana.monster_create(1, mana.posX(ch), mana.posY(ch))
+    local m1 = mana.monster_create("Maggot", mana.posX(ch), mana.posY(ch))
     schedule_in(0.5, function() mana.being_say(m1, "Roaaarrrr!!!") end)
 end
