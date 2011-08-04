@@ -1073,6 +1073,24 @@ static int monster_create(lua_State *s)
 }
 
 /**
+ * mana.monster_get_name(int monster_id): string monster_name
+ * Returns the name of the monster with the given id.
+ */
+static int monster_get_name(lua_State *s)
+{
+    const int id = luaL_checkint(s, 1);
+    MonsterClass *spec = monsterManager->getMonster(id);
+    if (!spec)
+    {
+        raiseScriptError(s, "monster_get_name "
+                         "called with unknown monster id.");
+        return 0;
+    }
+    lua_pushstring(s, spec->getName().c_str());
+    return 1;
+}
+
+/**
  * mana.monster_remove(Monster*): bool success
  * Remove a monster object without kill event.
  * return whether the monster was enqueued for removal.
@@ -1967,6 +1985,23 @@ static int item_drop(lua_State *s)
 }
 
 /**
+ * mana.item_get_name(int item_id): string item_name
+ * Returns the name of the item with the given id.
+ */
+static int item_get_name(lua_State *s)
+{
+    const int id = luaL_checkint(s, 1);
+    ItemClass *it = itemManager->getItem(id);
+    if (!it)
+    {
+        raiseScriptError(s, "item_get_name called with unknown item id.");
+        return 0;
+    }
+    lua_pushstring(s, it->getName().c_str());
+    return 1;
+}
+
+/**
  * mana.log(int log_level, string log_message): void
  * Logs the given message to the log.
  */
@@ -2078,6 +2113,7 @@ LuaScript::LuaScript():
         { "chr_take_special",                &chr_take_special                },
         { "exp_for_level",                   &exp_for_level                   },
         { "monster_create",                  &monster_create                  },
+        { "monster_get_name",                &monster_get_name                },
         { "monster_remove",                  &monster_remove                  },
         { "monster_load_script",             &monster_load_script             },
         { "being_apply_status",              &being_apply_status              },
@@ -2114,6 +2150,7 @@ LuaScript::LuaScript():
         { "get_map_property",                &get_map_property                },
         { "is_walkable",                     &is_walkable                     },
         { "item_drop",                       &item_drop                       },
+        { "item_get_name",                   &item_get_name                   },
         { "npc_ask_integer",                 &npc_ask_integer                 },
         { "npc_end",                         &npc_end                         },
         { "npc_ask_string",                  &npc_ask_string                  },
