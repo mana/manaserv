@@ -78,6 +78,24 @@ class Account
         const std::string &getPassword() const
         { return mPassword; }
 
+        /**
+         * Set the random salt. This salt is sent to the client, so the client
+         * can hash its password with this random salt.
+         * This will help to protect against replay attacks.
+         *
+         * @param the new random salt to be sent out next login
+         */
+        void setRandomSalt(const std::string &salt)
+        { mRandomSalt = salt; }
+
+
+        /**
+         * Get the user random salt.
+         *
+         * @return the random salt used for next login.
+         */
+        const std::string &getRandomSalt() const
+        { return mRandomSalt; }
 
         /**
          * Set the user email address. The email address is expected to be
@@ -204,6 +222,8 @@ class Account
 
         std::string mName;        /**< User name */
         std::string mPassword;    /**< User password (hashed with salt) */
+        std::string mRandomSalt;  /**< A random sequence sent to client to
+                                       protect against replay attacks.*/
         std::string mEmail;       /**< User email address (hashed) */
         Characters mCharacters;   /**< Character data */
         int mID;                  /**< Unique id */

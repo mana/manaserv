@@ -57,6 +57,8 @@ enum {
     APMSG_LOGIN_RESPONSE           = 0x0012, // B error, S updatehost, S Client data URL, B Character slots
     PAMSG_LOGOUT                   = 0x0013, // -
     APMSG_LOGOUT_RESPONSE          = 0x0014, // B error
+    PAMSG_LOGIN_RNDTRGR            = 0x0015, // S username
+    APMSG_LOGIN_RNDTRGR_RESPONSE   = 0x0016, // S random seed
     PAMSG_CHAR_CREATE              = 0x0020, // S name, B hair style, B hair color, B gender, B slot, {W stats}*
     APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
     PAMSG_CHAR_DELETE              = 0x0022, // B slot

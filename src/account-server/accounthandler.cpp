@@ -89,6 +89,7 @@ protected:
     void computerDisconnected(NetComputer *comp);
 
 private:
+    void handleLoginRandTriggerMessage(AccountClient &client, MessageIn &msg);
     void handleLoginMessage(AccountClient &client, MessageIn &msg);
     void handleLogoutMessage(AccountClient &client);
     void handleReconnectMessage(AccountClient &client, MessageIn &msg);
@@ -103,6 +104,10 @@ private:
 
     void addServerInfo(MessageOut *msg);
 
+    /** List of all accounts which requested a random seed, but are not logged
+     *  yet. This list will be regularly remove (after timeout) old accounts
+     */
+    std::list<Account*> mPendingAccounts;
 
     /** List of attributes that the client can send at account creation. */
     std::vector<int> mModifiableAttributes;
@@ -292,6 +297,32 @@ void AccountHandler::sendCharacterData(AccountClient &client,
     client.send(charInfo);
 }
 
+std::string getRandomString(int length)
+{
+    char s[length];
+    // No need to care about zeros. They can be handled.
+    // But care for endianness
+    for (int i = 0; i < length; ++i)
+        s[i] = (char)rand();
+
+    return std::string(s, length);
+}
+
+void AccountHandler::handleLoginRandTriggerMessage(AccountClient &client, MessageIn &msg)
+{
+    std::string salt = getRandomString(4);
+    std::string username = msg.readString();
+
+    if (Account *acc = storage->getAccount(username))
+    {
+        acc->setRandomSalt(salt);
+        mPendingAccounts.push_back(acc);
+    }
+    MessageOut reply(APMSG_LOGIN_RNDTRGR_RESPONSE);
+    reply.writeString(salt);
+    client.send(reply);
+}
+
 void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 {
     MessageOut reply(APMSG_LOGIN_RESPONSE);
@@ -349,9 +380,14 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
     }
 
     // Check if the account exists
-    Account *acc = storage->getAccount(username);
+    Account *acc = 0;
+    std::list<Account*>::iterator ita;
+    for ( ita = mPendingAccounts.begin() ; ita != mPendingAccounts.end(); ita++ )
+        if ((*ita)->getName() == username)
+            acc = *ita;
+    mPendingAccounts.remove(acc);
 
-    if (!acc || acc->getPassword() != sha256(password))
+    if (!acc || sha256(acc->getPassword() + acc->getRandomSalt()) != password)
     {
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
         client.send(reply);
@@ -978,6 +1014,11 @@ void AccountHandler::processMessage(NetComputer *comp, MessageIn &message)
 
     switch (message.getId())
     {
+        case PAMSG_LOGIN_RNDTRGR:
+            LOG_DEBUG("Received msg ... PAMSG_LOGIN_RANDTRIGGER");
+            handleLoginRandTriggerMessage(client, message);
+            break;
+
         case PAMSG_LOGIN:
             LOG_DEBUG("Received msg ... PAMSG_LOGIN");
             handleLoginMessage(client, message);
