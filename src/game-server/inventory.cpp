@@ -556,7 +556,7 @@ bool Inventory::equip(int slot, bool override)
 
     MessageOut equipMsg(GPMSG_EQUIP);
     // Iterate through all possible combinations of slots
-    for (ItemEquipsInfo::const_iterator it2 = eq.begin(),
+/*    for (ItemEquipsInfo::const_iterator it2 = eq.begin(),
          it2_end = eq.end(); it2 != it2_end; ++it2)
     {
         // Iterate through this combination of slots.
@@ -566,7 +566,7 @@ bool Inventory::equip(int slot, bool override)
          * 2 = impossible, requires too many slots
          *     even with other equipment being removed
          */
-        int fail = 0;
+        int fail = 0; /*
         ItemEquipInfo::const_iterator it3, it3_end;
         for (it3 = it2->begin(),
              it3_end = it2->end();
@@ -597,7 +597,7 @@ bool Inventory::equip(int slot, bool override)
             case 0:
             /*
              * Clean fit. Equip and apply immediately.
-             */
+             */ /*
             equipMsg.writeInt16(slot);           // Inventory slot
             equipMsg.writeInt16(it2->size());     // Equip slot type count
             for (it3 = it2->begin(),
@@ -619,7 +619,7 @@ bool Inventory::equip(int slot, bool override)
                 /*for (unsigned int i = 0; i < it3->second; ++i)
                     mPoss->equipSlots.insert(
                             std::make_pair(it3->first, slot));*/
-            }
+         /*   }
 
             updateEquipmentTrigger(0, it->second.itemId);
             return true;
@@ -628,7 +628,7 @@ bool Inventory::equip(int slot, bool override)
              * Definitions earlier in the item file have precedence (even if it
              *      means requiring unequipping more), so no need to store more
              *      than the first.
-             */
+             */ /*
             if (override && !ovd)
                 ovd = &*it2; // Iterator -> object -> pointer.
             break;
@@ -641,7 +641,7 @@ bool Inventory::equip(int slot, bool override)
              *      just in case non-static equip slots do want to be
              *      implemented later. This would not be a trivial task,
              *      however.
-             */
+             */ /*
             LOG_WARN("Inventory - item '" << it->second.itemId <<
                      "' cannot be equipped, even by unequipping other items!");
             break;
@@ -666,7 +666,7 @@ bool Inventory::equip(int slot, bool override)
         // there is time to do so.
 
         return false; // Return true when this section is complete
-    }
+/*    }
     /*
      * We cannot equip, either because we could not find any valid equip process
      *     or because we found a dirty equip and weren't allowed to override.

@@ -260,7 +260,6 @@ void ItemManager::readItemNode(xmlNodePtr itemNode)
 
 void ItemManager::readEquipNode(xmlNodePtr equipNode, ItemClass *item)
 {
-    ItemEquipInfo req;
     for_each_xml_child_node(subNode, equipNode)
     {
         if (xmlStrEqual(subNode->name, BAD_CAST "slot"))
@@ -274,24 +273,23 @@ void ItemManager::readEquipNode(xmlNodePtr equipNode, ItemClass *item)
             if (utils::isNumeric(slot))
             {
                 // When the slot id is given
-                req.push_back(std::make_pair(utils::stringToInt(slot),
-                           XML::getProperty(subNode, "required", 1)));
+                item->mEquip.push_back(std::make_pair(utils::stringToInt(slot),
+                    XML::getProperty(subNode, "required", 1)));
             }
             else
             {
                 // When its name is given
-                req.push_back(std::make_pair(getEquipSlotIdFromName(slot),
+                item->mEquip.push_back(std::make_pair(getEquipSlotIdFromName(slot),
                            XML::getProperty(subNode, "required", 1)));
             }
         }
     }
-    if (req.empty())
+    if (item->mEquip.empty())
     {
         LOG_WARN("Item Manager: empty equip requirement "
                  "definition for item " << item->getDatabaseID() << "!");
         return;
     }
-    item->mEquip.push_back(req);
 }
 
 void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)

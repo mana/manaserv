@@ -29,7 +29,7 @@ class Being;
 class Script;
 
 // A pair indicating: Equipment slot id -> how much slots required.
-typedef std::list< std::pair< unsigned int, unsigned int> > ItemEquipInfo;
+typedef std::pair< unsigned int, unsigned int> ItemEquipInfo;
 // The list of required slots to equip.
 typedef std::list< ItemEquipInfo > ItemEquipsInfo;
 
