@@ -115,7 +115,7 @@ class ItemManager
         utils::NameMap<ItemClass*> mItemClassesByName;
 
         // Map an equip slot id with the equip slot info.
-        typedef std::map< unsigned int, EquipSlotInfo > EquipSlotsInfo;
+        typedef std::map< unsigned int, EquipSlotInfo* > EquipSlotsInfo;
         // Reference to the vector position of equipSlots
         typedef std::vector< unsigned int > VisibleEquipSlots;
 

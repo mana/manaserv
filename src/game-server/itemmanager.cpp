@@ -51,6 +51,14 @@ void ItemManager::deinitialize()
     {
         delete i->second;
     }
+
+    for (std::map< unsigned int, EquipSlotInfo* >::iterator it =
+        mEquipSlotsInfo.begin(), it_end = mEquipSlotsInfo.end(); it != it_end;
+        ++it)
+    {
+        delete it->second;
+    }
+
     mItemClasses.clear();
     mItemClassesByName.clear();
 }
@@ -80,13 +88,13 @@ unsigned int ItemManager::getEquipSlotIdFromName(const std::string &name) const
 unsigned int ItemManager::getEquipSlotCapacity(unsigned int id) const
 {
     EquipSlotsInfo::const_iterator i = mEquipSlotsInfo.find(id);
-    return i != mEquipSlotsInfo.end() ? i->second.slotCapacity : 0;
+    return i != mEquipSlotsInfo.end() ? i->second->slotCapacity : 0;
 }
 
 bool ItemManager::isEquipSlotVisible(unsigned int id) const
 {
     EquipSlotsInfo::const_iterator i = mEquipSlotsInfo.find(id);
-    return i != mEquipSlotsInfo.end() ? i->second.visibleSlot : false;
+    return i != mEquipSlotsInfo.end() ? i->second->visibleSlot : false;
 }
 
 void ItemManager::readEquipSlotsFile()
@@ -142,9 +150,15 @@ void ItemManager::readEquipSlotsFile()
                          "of equip slot '" << slotId << "'!");
                 continue;
             }
-            EquipSlotInfo equipSlotInfo(slotId, name, capacity, visible);
-            mEquipSlotsInfo[slotId] = equipSlotInfo;
-            mNamedEquipSlotsInfo.insert(name, &equipSlotInfo);
+
+            LOG_DEBUG("Adding equip slot, id: " << slotId << ", name: " << name
+                << ", capacity: " << capacity << ", visible? " << visible);
+            EquipSlotInfo *equipSlotInfo =
+                new EquipSlotInfo(slotId, name, capacity, visible);
+            mEquipSlotsInfo.insert(
+                std::make_pair<unsigned int, EquipSlotInfo*>(slotId, equipSlotInfo));
+            mNamedEquipSlotsInfo.insert(name, equipSlotInfo);
+
             totalCapacity += capacity;
             ++slotCount;
         }
