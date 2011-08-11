@@ -97,20 +97,22 @@ void serializeCharacterData(const T &data, MessageOut &msg)
 
     // inventory - must be last because size isn't transmitted
     const Possessions &poss = data.getPossessions();
-    msg.writeInt16(poss.equipSlots.size()); // number of equipment
-    for (EquipData::const_iterator k = poss.equipSlots.begin(),
-             k_end = poss.equipSlots.end();
-             k != k_end;
-             ++k)
+    const EquipData &equipData = poss.getEquipment();
+    msg.writeInt16(equipData.size()); // number of equipment
+    for (EquipData::const_iterator k = equipData.begin(),
+             k_end = equipData.end(); k != k_end; ++k)
     {
-        msg.writeInt8(k->first);            // Equip slot type
-        msg.writeInt16(k->second);          // Inventory slot
+        msg.writeInt16(k->first);                 // Equip slot id
+        msg.writeInt16(k->second.itemId);         // ItemId
+        msg.writeInt16(k->second.itemInstance);   // Item Instance id
     }
-    for (InventoryData::const_iterator j = poss.inventory.begin(),
-         j_end = poss.inventory.end(); j != j_end; ++j)
+
+    const InventoryData &inventoryData = poss.getInventory();
+    for (InventoryData::const_iterator j = inventoryData.begin(),
+         j_end = inventoryData.end(); j != j_end; ++j)
     {
         msg.writeInt16(j->first);           // slot id
-        msg.writeInt16(j->second.itemId);   // item type
+        msg.writeInt16(j->second.itemId);   // item id
         msg.writeInt16(j->second.amount);   // amount
     }
 }
@@ -185,26 +187,31 @@ void deserializeCharacterData(T &data, MessageIn &msg)
 
 
     Possessions &poss = data.getPossessions();
-    poss.equipSlots.clear();
+    EquipData equipData;
     int equipSlotsSize = msg.readInt16();
-    unsigned int eqSlot, invSlot;
+    unsigned int eqSlot;
+    EquipmentItem equipItem;
     for (int j = 0; j < equipSlotsSize; ++j)
     {
-        eqSlot  = msg.readInt8();
-        invSlot = msg.readInt16();
-        poss.equipSlots.insert(poss.equipSlots.end(),
-                               std::make_pair(eqSlot, invSlot));
+        eqSlot  = msg.readInt16();
+        equipItem.itemId = msg.readInt16();
+        equipItem.itemInstance = msg.readInt16();
+        equipData.insert(equipData.end(),
+                               std::make_pair(eqSlot, equipItem));
     }
-    poss.inventory.clear();
-    // inventory - must be last because size isn't transmitted
+    poss.setEquipment(equipData);
+
+    // Loads inventory - must be last because size isn't transmitted
+    InventoryData inventoryData;
     while (msg.getUnreadLength())
     {
         InventoryItem i;
         int slotId = msg.readInt16();
         i.itemId   = msg.readInt16();
         i.amount   = msg.readInt16();
-        poss.inventory.insert(poss.inventory.end(), std::make_pair(slotId, i));
+        inventoryData.insert(inventoryData.end(), std::make_pair(slotId, i));
     }
+    poss.setInventory(inventoryData);
 }
 
 #endif // SERIALIZE_CHARACTERDATA_H

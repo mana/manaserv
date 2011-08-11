@@ -130,7 +130,7 @@ void Trade::agree(Character *c)
 
     // Check if both player has the objects in their inventories
     // and enouth money, then swap them.
-    Inventory v1(mChar1, true), v2(mChar2, true);
+    Inventory v1(mChar1), v2(mChar2);
     if (mChar1->getAttribute(mCurrencyId) >= mMoney1 - mMoney2 &&
         mChar2->getAttribute(mCurrencyId) >= mMoney2 - mMoney1 &&
         perform(mItems1, v1, v2) &&
@@ -143,8 +143,6 @@ void Trade::agree(Character *c)
     }
     else
     {
-        v1.cancel();
-        v2.cancel();
         cancel();
         return;
     }
