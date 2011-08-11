@@ -49,6 +49,12 @@ struct EquipmentItem
         itemId(0), itemInstance(0)
     {}
 
+    EquipmentItem(unsigned int itemId, unsigned int itemInstance)
+    {
+        this->itemId = itemId;
+        this->itemInstance = itemInstance;
+    }
+
     // The item id taken from the item db.
     unsigned int itemId;
     // A unique instance number used to separate items when equipping the same
