@@ -1124,6 +1124,35 @@ static int monster_get_name(lua_State *s)
 }
 
 /**
+ * mana.monster_change_anger(Monster*, Being*, int anger)
+ * Makes a monster angry at a being
+ */
+static int monster_change_anger(lua_State *s)
+{
+    const int anger = luaL_checkint(s, 3);
+    if (!lua_islightuserdata(s, 1))
+    {
+        lua_pushboolean(s, false);
+        return 1;
+    }
+    Monster *m = dynamic_cast<Monster *>((Thing *)lua_touserdata(s, 1));
+    if (!m)
+    {
+        raiseScriptError(s, "monster_change_anger called "
+                         "for a nonexisting monster");
+        return 0;
+    }
+    Being *being = getBeing(s, 2);
+    if (!being)
+    {
+        raiseScriptError(s, "monster_change_anger called "
+                         "for a nonexisting being");
+    }
+    m->changeAnger(being, anger);
+    return 0;
+}
+
+/**
  * mana.monster_remove(Monster*): bool success
  * Remove a monster object without kill event.
  * return whether the monster was enqueued for removal.
@@ -2147,6 +2176,7 @@ LuaScript::LuaScript():
         { "exp_for_level",                   &exp_for_level                   },
         { "monster_create",                  &monster_create                  },
         { "monster_get_name",                &monster_get_name                },
+        { "monster_change_anger",            &monster_change_anger            },
         { "monster_remove",                  &monster_remove                  },
         { "monster_load_script",             &monster_load_script             },
         { "being_apply_status",              &being_apply_status              },
