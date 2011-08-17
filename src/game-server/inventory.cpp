@@ -119,7 +119,7 @@ void Inventory::initialize()
                      << it2->second.itemId << " from the equipment of '"
                      << mCharacter->getName()
                      << "'!");
-            mPoss->equipSlots.erase(++it2);
+            mPoss->equipSlots.erase(it2++);
             continue;
         }
 
@@ -726,6 +726,8 @@ bool Inventory::equip(int inventorySlot)
         equipMsg.writeInt16(it2->first);
         // Capacity used
         equipMsg.writeInt16(it2->second);
+        // Item instance
+        equipMsg.writeInt16(itemInstance);
     }
 
     // New item trigger
@@ -740,27 +742,21 @@ bool Inventory::equip(int inventorySlot)
     return true;
 }
 
-bool Inventory::unequip(unsigned int equipmentSlot)
+bool Inventory::unequip(unsigned int itemInstance)
 {
     // map of { itemInstance, itemId }
     std::map<unsigned int, unsigned int> itemIdListToInventory;
-    bool changed = false;
 
     MessageOut equipMsg(GPMSG_EQUIP);
     equipMsg.writeInt16(0); // Item Id, useless in case of unequip.
-    equipMsg.writeInt16(1); // Number of slot types touched,
-                            // 1 in case of unequip.
 
     // Empties all equip entries that point to the given equipment slot
     // The equipment slots should NEVER be erased after initialization!
     for (EquipData::iterator it = mPoss->equipSlots.begin(),
             it_end = mPoss->equipSlots.end(); it != it_end; ++it)
     {
-        if (it->first == equipmentSlot && it->second.itemId != 0)
+        if (it->second.itemInstance == itemInstance)
         {
-            if (!it->second.itemInstance)
-                continue;
-
             // Add the item to the inventory list if not already present there
             std::map<unsigned int, unsigned int>::const_iterator it2 =
                 itemIdListToInventory.find(it->second.itemInstance);
@@ -771,11 +767,13 @@ bool Inventory::unequip(unsigned int equipmentSlot)
                         (it->second.itemInstance, it->second.itemId));
             }
 
-            changed = true;
             it->second.itemId = 0;
             it->second.itemInstance = 0;
         }
     }
+
+    // Number of slot types touched,
+    equipMsg.writeInt16(itemIdListToInventory.size());
 
     // Apply unequip trigger(s), and move the item(s) back to inventory.
     for (std::map<unsigned int, unsigned int>::const_iterator it2 =
@@ -784,16 +782,16 @@ bool Inventory::unequip(unsigned int equipmentSlot)
     {
         updateEquipmentTrigger(it2->second, 0);
         insert(it2->second, 1);
-    }
 
-    if (changed)
-    {
-        equipMsg.writeInt16(equipmentSlot);
+        equipMsg.writeInt16(it2->first);
         equipMsg.writeInt16(0); // Capacity used, set to 0 to unequip.
     }
 
     if (equipMsg.getLength() > 2)
+    {
         gameHandler->sendTo(mCharacter, equipMsg);
+        return true;
+    }
 
-    return changed;
+    return false;
 }
