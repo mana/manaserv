@@ -119,7 +119,7 @@ void Inventory::initialize()
                      << it2->second.itemId << " from the equipment of '"
                      << mCharacter->getName()
                      << "'!");
-            mPoss->equipSlots.erase(++it2);
+            mPoss->equipSlots.erase(it2++);
             continue;
         }
 
