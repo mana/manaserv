@@ -65,10 +65,10 @@ class Inventory
 
         /**
          * Unequips item from given equipment slot.
-         * @param equipmentSlot Where to remove item(s).
+         * @param itemInstance The item instance id used to know what to unequip
          * @returns Whether it was unequipped.
          */
-        bool unequip(unsigned int equipmentSlot);
+        bool unequip(unsigned int itemInstance);
 
         /**
          * Inserts some items into the inventory.
