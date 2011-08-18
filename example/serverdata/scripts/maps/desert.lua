@@ -33,7 +33,7 @@ atinit(function()
     create_npc("Merchant", 3, 4 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, merchant_buy_table, merchant_sell_table), nil)
 
     -- Another Merchant, selling some equipment, and buying everything...
-    smith_buy_table = { {5, 10, 50}, {7, 10, 70} }
+    smith_buy_table = { {5, 10, 50}, {7, 10, 70}, {10, 10, 20} }
     create_npc("Smith", 5, 15 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, smith_buy_table), nil)
 
     -- The most simple NPC - Welcoming new ones around.

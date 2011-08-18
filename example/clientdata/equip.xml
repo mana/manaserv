@@ -14,6 +14,6 @@
     <slot id="5" name="legs" capacity="1" visible="true" />
     <slot id="6" name="ring" capacity="1" />
     <slot id="7" name="necklace" capacity="1" />
-    <slot id="8" name="feet" capacity="1" />
+    <slot id="8" name="feet" capacity="1" visible="true" />
     <slot id="9" name="ammo" capacity="1" />
 </equip-slots>

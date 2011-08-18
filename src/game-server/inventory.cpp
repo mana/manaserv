@@ -600,58 +600,66 @@ bool Inventory::equip(int inventorySlot)
         return false;
 
     // Test the equip requirements. If none, it's not an equipable item.
-    const ItemEquipsInfo &equipInfoList =
-        itemManager->getItem(it->second.itemId)->getItemEquipData();
-    if (equipInfoList.empty())
+    const ItemEquipRequirement &equipReq =
+        itemManager->getItem(it->second.itemId)->getItemEquipRequirement();
+    if (!equipReq.equipSlotId)
     {
         LOG_DEBUG("No equip requirements for item id: " << it->second.itemId
             << " at slot: " << inventorySlot);
         return false;
     }
 
-    // Iterate through all slots requirements.
-    std::list<unsigned int> equipSlotsToUnequipFirst;
-    for (ItemEquipsInfo::const_iterator it2 = equipInfoList.begin(),
-         it2_end = equipInfoList.end(); it2 != it2_end; ++it2)
+    // List of potential unique itemInstances to unequip first.
+    std::set<unsigned int> equipInstancesToUnequipFirst;
+
+    // We first check the equipment slots for:
+    // - 1. whether enough total equip slot space is available.
+    // - 2. whether some other equipment is to be unequipped first.
+
+    // If not enough total space in the equipment slot is available,
+    // we cannot equip.
+    if (itemManager->getEquipSlotCapacity(equipReq.equipSlotId)
+            < equipReq.capacityRequired)
     {
-        // We first check the equipment slots for:
-        // - 1. whether enough total equip slot space is available.
-        // - 2. whether some other equipment is to be unequipped first.
+        LOG_DEBUG("Not enough equip capacity at slot: " << equipReq.equipSlotId
+                  << ", total available: "
+                  << itemManager->getEquipSlotCapacity(equipReq.equipSlotId)
+                  << ", required: " << equipReq.capacityRequired);
+        return false;
+    }
 
-        // If not enough total space in the equipment slot is available,
-        // we cannot equip.
-        if (itemManager->getEquipSlotCapacity(it2->first) < it2->second)
+    // Test whether some item(s) is(are) to be unequipped first.
+    if (!checkEquipmentCapacity(equipReq.equipSlotId,
+                                equipReq.capacityRequired))
+    {
+        // And test whether the unequip action would succeed first.
+        if (testUnequipScriptRequirements(equipReq.equipSlotId)
+            && hasInventoryEnoughSpace(equipReq.equipSlotId))
         {
-            LOG_DEBUG("Not enough equip capacity at slot: " << it2->first
-                      << ", total available: "
-                      << itemManager->getEquipSlotCapacity(it2->first)
-                      << ", required: " << it2->second);
-            return false;
+            // Then, we unequip each iteminstance of the equip slot
+            for (EquipData::iterator iter =
+                mPoss->equipSlots.begin();
+                iter != mPoss->equipSlots.end(); ++iter)
+            {
+                if (iter->first == equipReq.equipSlotId
+                    && iter->second.itemInstance)
+                    equipInstancesToUnequipFirst.insert(
+                                                     iter->second.itemInstance);
+            }
         }
-
-        // Test whether some item(s) is(are) to be unequipped first.
-        if (!checkEquipmentCapacity(it2->first, it2->second))
+        else
         {
-            // And test whether the unequip action would succeed first.
-            if (testUnequipScriptRequirements(it2->first)
-                && hasInventoryEnoughSpace(it2->first))
-            {
-                equipSlotsToUnequipFirst.push_back(it2->first);
-            }
-            else
-            {
-                // Some non-unequippable equipment is to be unequipped first.
-                // Can be the case of cursed items,
-                // or when the inventory is full, for instance.
-                return false;
-            }
+            // Some non-unequippable equipment is to be unequipped first.
+            // Can be the case of cursed items,
+            // or when the inventory is full, for instance.
+            return false;
         }
     }
 
     // Potential Pre-unequipment process
-    for (std::list<unsigned int>::const_iterator it3 =
-            equipSlotsToUnequipFirst.begin();
-            it3 != equipSlotsToUnequipFirst.end(); ++it3)
+    for (std::set<unsigned int>::const_iterator it3 =
+            equipInstancesToUnequipFirst.begin();
+            it3 != equipInstancesToUnequipFirst.end(); ++it3)
     {
         if (!unequip(*it3))
         {
@@ -667,68 +675,64 @@ bool Inventory::equip(int inventorySlot)
     //W equip slot type count, W item id, { W equip slot, W capacity used}*
     MessageOut equipMsg(GPMSG_EQUIP);
     equipMsg.writeInt16(it->second.itemId); // Item Id
-    equipMsg.writeInt16(equipInfoList.size()); // Number of equip slot changed.
+    equipMsg.writeInt16(1); // Number of equip slot changed.
 
     // Compute an unique equip item Instance id (unicity is per character only.)
     int itemInstance = getNewEquipItemInstance();
 
-    for (ItemEquipsInfo::const_iterator it2 = equipInfoList.begin(),
-         it2_end = equipInfoList.end(); it2 != it2_end; ++it2)
+    unsigned int capacityLeft = equipReq.capacityRequired;
+    unsigned int capacityUsed = 0;
+    // Apply equipment changes
+    for (EquipData::iterator it4 = mPoss->equipSlots.begin(),
+         it4_end = mPoss->equipSlots.end(); it4 != it4_end; ++it4)
     {
-        unsigned int capacityLeft = it2->second;
-        unsigned int capacityUsed = 0;
-        // Apply equipment changes
-        for (EquipData::iterator it4 = mPoss->equipSlots.begin(),
-             it4_end = mPoss->equipSlots.end(); it4 != it4_end; ++it4)
+        if (!capacityLeft)
+            break;
+
+        // We've found an existing equip slot
+        if (it4->first == equipReq.equipSlotId)
         {
-            if (!capacityLeft)
-                break;
-
-            // We've found an existing equip slot
-            if (it4->first == it2->first)
+            // We've found an empty slot
+            if (it4->second.itemInstance == 0)
             {
-                // We've found an empty slot
-                if (it4->second.itemInstance == 0)
-                {
-                    it4->second.itemId = it->second.itemId;
-                    it4->second.itemInstance = itemInstance;
-                    --capacityLeft;
-                }
-                else // The slot is already in use.
-                {
-                    ++capacityUsed;
-                }
-            }
-        }
-
-        // When there is still something to apply even when out of that loop,
-        // It means that the equip multimapis missing empty slots.
-        // Hence, we add them back
-        if(capacityLeft)
-        {
-            unsigned int maxCapacity =
-                itemManager->getEquipSlotCapacity(it2->first);
-
-            // A should never happen case
-            assert(maxCapacity >= capacityUsed + capacityLeft);
-
-            while (capacityLeft)
-            {
-                EquipmentItem equipItem(it->second.itemId, itemInstance);
-                mPoss->equipSlots.insert(
-                    std::make_pair<unsigned int, EquipmentItem>
-                        (it2->first, equipItem));
+                it4->second.itemId = it->second.itemId;
+                it4->second.itemInstance = itemInstance;
                 --capacityLeft;
             }
+            else // The slot is already in use.
+            {
+                ++capacityUsed;
+            }
         }
-
-        // Equip slot
-        equipMsg.writeInt16(it2->first);
-        // Capacity used
-        equipMsg.writeInt16(it2->second);
-        // Item instance
-        equipMsg.writeInt16(itemInstance);
     }
+
+    // When there is still something to apply even when out of that loop,
+    // It means that the equip multimapis missing empty slots.
+    // Hence, we add them back
+    if(capacityLeft)
+    {
+        unsigned int maxCapacity =
+            itemManager->getEquipSlotCapacity(equipReq.equipSlotId);
+
+        // A should never happen case
+        assert(maxCapacity >= capacityUsed + capacityLeft);
+
+        while (capacityLeft)
+        {
+            EquipmentItem equipItem(it->second.itemId, itemInstance);
+            mPoss->equipSlots.insert(
+                std::make_pair<unsigned int, EquipmentItem>
+                    (equipReq.equipSlotId, equipItem));
+            --capacityLeft;
+        }
+    }
+
+    // Equip slot
+    equipMsg.writeInt16(equipReq.equipSlotId);
+    // Capacity used
+    equipMsg.writeInt16(equipReq.capacityRequired);
+    // Item instance
+    equipMsg.writeInt16(itemInstance);
 
     // New item trigger
     updateEquipmentTrigger(0, it->second.itemId);
@@ -744,54 +748,47 @@ bool Inventory::equip(int inventorySlot)
 
 bool Inventory::unequip(unsigned int itemInstance)
 {
-    // map of { itemInstance, itemId }
-    std::map<unsigned int, unsigned int> itemIdListToInventory;
+    if (!itemInstance)
+        return false;
 
     MessageOut equipMsg(GPMSG_EQUIP);
     equipMsg.writeInt16(0); // Item Id, useless in case of unequip.
+
+    // The itemId to unequip
+    unsigned int itemId = 0;
 
     // Empties all equip entries that point to the given equipment slot
     // The equipment slots should NEVER be erased after initialization!
     for (EquipData::iterator it = mPoss->equipSlots.begin(),
             it_end = mPoss->equipSlots.end(); it != it_end; ++it)
     {
-        if (it->second.itemInstance == itemInstance)
+        if (it->second.itemInstance == itemInstance && it->second.itemId)
         {
             // Add the item to the inventory list if not already present there
-            std::map<unsigned int, unsigned int>::const_iterator it2 =
-                itemIdListToInventory.find(it->second.itemInstance);
-            if (it2 == itemIdListToInventory.end())
-            {
-                itemIdListToInventory.insert(
-                    std::make_pair<unsigned int, unsigned int>
-                        (it->second.itemInstance, it->second.itemId));
-            }
-
+            itemId = it->second.itemId;
             it->second.itemId = 0;
             it->second.itemInstance = 0;
         }
     }
 
+    // When there were no corresponding item id, it means no item was to
+    // be unequipped.
+    if (!itemId)
+        return false;
+
     // Number of slot types touched,
-    equipMsg.writeInt16(itemIdListToInventory.size());
+    equipMsg.writeInt16(1);
 
-    // Apply unequip trigger(s), and move the item(s) back to inventory.
-    for (std::map<unsigned int, unsigned int>::const_iterator it2 =
-         itemIdListToInventory.begin(), it2_end = itemIdListToInventory.end();
-         it2 != it2_end; ++it2)
-    {
-        updateEquipmentTrigger(it2->second, 0);
-        insert(it2->second, 1);
+    // Move the item back to inventory.
+    insert(itemId, 1);
 
-        equipMsg.writeInt16(it2->first);
-        equipMsg.writeInt16(0); // Capacity used, set to 0 to unequip.
-    }
+    equipMsg.writeInt16(itemInstance);
+    equipMsg.writeInt16(0); // Capacity used, set to 0 to unequip.
 
-    if (equipMsg.getLength() > 2)
-    {
-        gameHandler->sendTo(mCharacter, equipMsg);
-        return true;
-    }
+    gameHandler->sendTo(mCharacter, equipMsg);
 
-    return false;
+    // Apply unequip trigger
+    updateEquipmentTrigger(itemId, 0);
+
+    return true;
 }

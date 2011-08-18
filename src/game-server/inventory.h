@@ -120,7 +120,7 @@ class Inventory
          * @todo
          */
         bool hasInventoryEnoughSpace(unsigned int equipmentSlot)
-        { return false; }
+        { return true; }
 
         /**
          * Test the items unequipment requirements.
@@ -151,6 +151,12 @@ class Inventory
          * @todo Drop items instead?
          */
         void checkInventorySize();
+
+        /**
+         * Check whether the equipment change has visible consequence
+         * on the character sprite.
+         */
+        void checkLookUpdate(unsigned slotTypeId);
 
         /**
          * Apply equipment triggers.
