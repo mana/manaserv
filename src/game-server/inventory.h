@@ -153,10 +153,9 @@ class Inventory
         void checkInventorySize();
 
         /**
-         * Check whether the equipment change has visible consequence
-         * on the character sprite.
+         * Check potential visible character sprite changes.
          */
-        void checkLookUpdate(unsigned slotTypeId);
+        void checkLookchanges(unsigned int slotTypeId);
 
         /**
          * Apply equipment triggers.

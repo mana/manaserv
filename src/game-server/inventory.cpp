@@ -740,8 +740,10 @@ bool Inventory::equip(int inventorySlot)
     // Remove item from inventory
     removeFromSlot(inventorySlot, 1);
 
-    if (equipMsg.getLength() > 2)
-        gameHandler->sendTo(mCharacter, equipMsg);
+    gameHandler->sendTo(mCharacter, equipMsg);
+
+    // Update look when necessary
+    checkLookchanges(equipReq.equipSlotId);
 
     return true;
 }
@@ -756,6 +758,7 @@ bool Inventory::unequip(unsigned int itemInstance)
 
     // The itemId to unequip
     unsigned int itemId = 0;
+    unsigned int slotTypeId = 0;
 
     // Empties all equip entries that point to the given equipment slot
     // The equipment slots should NEVER be erased after initialization!
@@ -768,6 +771,10 @@ bool Inventory::unequip(unsigned int itemInstance)
             itemId = it->second.itemId;
             it->second.itemId = 0;
             it->second.itemInstance = 0;
+
+            // We keep track of the slot type to be able to raise a potential
+            // change in the character sprite
+            slotTypeId = it->first;
         }
     }
 
@@ -790,5 +797,13 @@ bool Inventory::unequip(unsigned int itemInstance)
     // Apply unequip trigger
     updateEquipmentTrigger(itemId, 0);
 
+    checkLookchanges(slotTypeId);
+
     return true;
+}
+
+void Inventory::checkLookchanges(unsigned int slotTypeId)
+{
+    if (itemManager->isEquipSlotVisible(slotTypeId))
+        mCharacter->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
 }

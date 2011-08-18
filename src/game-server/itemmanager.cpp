@@ -132,15 +132,17 @@ void ItemManager::readEquipSlotsFile()
                 continue;
             }
 
+            if (slotId > 255)
+            {
+                LOG_WARN("Item Manager: equip slot " << slotId
+                    << ": (" << name << ") is superior to 255 "
+                    "and has been ignored.");
+                continue;
+            }
+
             bool visible = XML::getBoolProperty(node, "visible", false);
             if (visible)
-            {
-                if (++mVisibleEquipSlotCount > 7)
-                {
-                    LOG_WARN("Item Manager: More than 7 visible equip slot!"
-                                "This will not work with current netcode!");
-                }
-            }
+                ++mVisibleEquipSlotCount;
 
             EquipSlotsInfo::iterator i = mEquipSlotsInfo.find(slotId);
 
