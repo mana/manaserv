@@ -1130,12 +1130,7 @@ static int monster_get_name(lua_State *s)
 static int monster_change_anger(lua_State *s)
 {
     const int anger = luaL_checkint(s, 3);
-    if (!lua_islightuserdata(s, 1))
-    {
-        lua_pushboolean(s, false);
-        return 1;
-    }
-    Monster *m = dynamic_cast<Monster *>((Thing *)lua_touserdata(s, 1));
+    Monster *m = getMonster(s, 1);
     if (!m)
     {
         raiseScriptError(s, "monster_change_anger called "
@@ -1159,14 +1154,8 @@ static int monster_change_anger(lua_State *s)
  */
 static int monster_remove(lua_State *s)
 {
-    if (!lua_islightuserdata(s, 1))
-    {
-        lua_pushboolean(s, false);
-        return 1;
-    }
-
     bool monsterEnqueued = false;
-    Monster *m = dynamic_cast<Monster *>((Thing *)lua_touserdata(s, 1));
+    Monster *m = getMonster(s, 1);
     if (m)
     {
         GameState::enqueueRemove(m);
@@ -1182,7 +1171,7 @@ static int monster_remove(lua_State *s)
  */
 static int monster_load_script(lua_State *s)
 {
-    Monster *m = static_cast< Monster* >(getBeing(s, 1));
+    Monster *m = getMonster(s, 1);
     if (!m)
     {
          raiseScriptError(s, "monster_load_script called "
