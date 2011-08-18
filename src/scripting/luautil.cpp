@@ -23,6 +23,7 @@
 
 #include "game-server/character.h"
 #include "game-server/npc.h"
+#include "game-server/monster.h"
 
 #include "utils/logger.h"
 
@@ -76,6 +77,16 @@ Character *getCharacter(lua_State *s, int p)
     if (t->getType() != OBJECT_CHARACTER)
         return 0;
     return static_cast<Character *>(t);
+}
+
+Monster *getMonster(lua_State *s, int p)
+{
+    if (!lua_islightuserdata(s, p))
+        return 0;
+    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
+    if (t->getType() != OBJECT_MONSTER)
+        return 0;
+    return static_cast<Monster *>(t);
 }
 
 Being *getBeing(lua_State *s, int p)

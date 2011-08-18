@@ -34,6 +34,7 @@ extern "C" {
 class Being;
 class NPC;
 class Character;
+class Monster;
 class Thing;
 
 // Report script errors and interrupt the script.
@@ -43,6 +44,7 @@ void raiseWarning(lua_State *s, const char *format, ...);
 
 NPC *getNPC(lua_State *s, int p);
 Character *getCharacter(lua_State *s, int p);
+Monster *getMonster(lua_State *s, int p);
 Being *getBeing(lua_State *s, int p);
 
 
