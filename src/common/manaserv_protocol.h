@@ -424,23 +424,6 @@ enum BeingDirection
     RIGHT = 8
 };
 
-/**
-  * enum for sprites layers.
-  * WARNING: Has to be in sync with the same enum in the Sprite class
-  * of the client!
-  */
-enum SpriteLayer
-{
-    SPRITE_BASE = 0,
-    SPRITE_SHOE,
-    SPRITE_BOTTOMCLOTHES,
-    SPRITE_TOPCLOTHES,
-    SPRITE_HAIR,
-    SPRITE_HAT,
-    SPRITE_WEAPON,
-    SPRITE_VECTOREND
-};
-
 } // namespace ManaServ
 
 #endif // MANASERV_PROTOCOL_H
