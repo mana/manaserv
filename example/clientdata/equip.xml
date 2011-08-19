@@ -7,13 +7,13 @@
   updates when making changes on it.
 -->
 <equip-slots>
-    <slot id="1" name="hand" capacity="2" visible="true" />
-    <slot id="2" name="torso" capacity="1" visible="true" />
-    <slot id="3" name="arms" capacity="1" />
-    <slot id="4" name="head" capacity="1" visible="true" />
-    <slot id="5" name="legs" capacity="1" visible="true" />
-    <slot id="6" name="ring" capacity="1" />
-    <slot id="7" name="necklace" capacity="1" />
-    <slot id="8" name="feet" capacity="1" />
-    <slot id="9" name="ammo" capacity="1" />
+    <slot id="1" name="Hand" capacity="2" visible="true" weapon="true" />
+    <slot id="2" name="Torso" capacity="1" visible="true" />
+    <slot id="3" name="Arms" capacity="1" />
+    <slot id="4" name="Head" capacity="1" visible="true" />
+    <slot id="5" name="Legs" capacity="1" visible="true" />
+    <slot id="6" name="Ring" capacity="1" />
+    <slot id="7" name="Necklace" capacity="1" />
+    <slot id="8" name="Feet" capacity="1" visible="true" />
+    <slot id="9" name="Ammo" capacity="1" ammo="true" />
 </equip-slots>

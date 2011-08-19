@@ -65,7 +65,7 @@ struct EquipmentItem
 // inventory slot id -> { item }
 typedef std::map< unsigned int, InventoryItem > InventoryData;
 
-// equip slot id -> { item id }
+// equip slot id -> { item id, item instance }
 // Equipment taking up multiple equip slot ids will be referenced multiple times
 typedef std::multimap< unsigned int, EquipmentItem > EquipData;
 

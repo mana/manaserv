@@ -108,12 +108,12 @@ enum {
     GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error, W attribute
     PGMSG_RESPAWN                  = 0x0180, // -
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position, B direction
-                                             // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
+                                             // character: S name, B hair style, B hair color, B gender, B sprite layers changed, { B slot type, W item id }*
                                              // monster: W type id
                                              // npc: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
-    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // W weapon, W hat, W top clothes, W bottom clothes
+    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // B sprite layers changed, { B slot type, W item id }*
     PGMSG_WALK                     = 0x0260, // W*2 destination
     PGMSG_ACTION_CHANGE            = 0x0270, // B Action
     GPMSG_BEING_ACTION_CHANGE      = 0x0271, // W being id, B action
@@ -424,23 +424,6 @@ enum BeingDirection
     LEFT = 2,
     UP = 4,
     RIGHT = 8
-};
-
-/**
-  * enum for sprites layers.
-  * WARNING: Has to be in sync with the same enum in the Sprite class
-  * of the client!
-  */
-enum SpriteLayer
-{
-    SPRITE_BASE = 0,
-    SPRITE_SHOE,
-    SPRITE_BOTTOMCLOTHES,
-    SPRITE_TOPCLOTHES,
-    SPRITE_HAIR,
-    SPRITE_HAT,
-    SPRITE_WEAPON,
-    SPRITE_VECTOREND
 };
 
 } // namespace ManaServ

@@ -142,6 +142,23 @@
         </effect>
         <sprite>weapons/weapon-bow.xml</sprite>
     </item>
+    <item id="10" max-per-slot="3" name="Dagger" attack-action="attack_stab"
+        description="A simple dagger."
+        image="equipment/weapons/weapon-dagger-dagger.png"
+        value="20">
+        <equip>
+            <slot type="hand" required="1" />
+        </equip>
+        <effect trigger="equip">
+            <autoattack basespeed="166" range="1" base="50" skill="100" >
+                <bonus attribute="0" value="1.5" />
+            </autoattack>
+        <effect trigger="existence">
+            <modifier attribute="cap1" value="-2000" />
+        </effect>
+        </effect>
+        <sprite>weapons/weapon-dagger.xml</sprite>
+    </item>
 
     <!-- Example of equippable items -->
     <item id="7" max-per-slot="1" name="Leather shirt"
@@ -160,7 +177,39 @@
         <sprite gender="male">equipment/chest/chest-leather-male.xml</sprite>
         <sprite gender="female">equipment/chest/chest-leather-female.xml</sprite>
     </item>
-    
+    <item id="11" max-per-slot="2" name="Pants"
+        description="Simple pants."
+        image="equipment/legs/pants.png"
+        value="50">
+        <equip>
+            <slot type="legs" required="1" />
+        </equip>
+        <effect trigger="equip">
+            <modifier attribute="def1" value="5" />
+        </effect>
+        <effect trigger="existence">
+            <modifier attribute="cap1" value="-250" />
+        </effect>
+        <sprite gender="male">equipment/legs/pants-male.xml</sprite>
+        <sprite gender="female">equipment/legs/pants-female.xml</sprite>
+    </item>
+    <item id="12" max-per-slot="1" name="Boots"
+        description="Simple boots."
+        image="equipment/feet/boots.png|W:#4f2d29,c89078"
+        value="40">
+        <equip>
+            <slot type="feet" required="1" />
+        </equip>
+        <effect trigger="equip">
+            <modifier attribute="def1" value="5" />
+        </effect>
+        <effect trigger="existence">
+            <modifier attribute="cap1" value="-250" />
+        </effect>
+        <sprite gender="male">equipment/feet/boots-male.xml|#4f2d29,c89078</sprite>
+        <sprite gender="female">equipment/feet/boots-female.xml|#4f2d29,c89078</sprite>
+    </item>
+
     <!-- example crafting ingredients -->
     <item id="8" max-per-slot="99" name="Iron"
         description="Combine with one wood to create a sword"

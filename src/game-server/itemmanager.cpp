@@ -132,15 +132,17 @@ void ItemManager::readEquipSlotsFile()
                 continue;
             }
 
+            if (slotId > 255)
+            {
+                LOG_WARN("Item Manager: equip slot " << slotId
+                    << ": (" << name << ") is superior to 255 "
+                    "and has been ignored.");
+                continue;
+            }
+
             bool visible = XML::getBoolProperty(node, "visible", false);
             if (visible)
-            {
-                if (++mVisibleEquipSlotCount > 7)
-                {
-                    LOG_WARN("Item Manager: More than 7 visible equip slot!"
-                                "This will not work with current netcode!");
-                }
-            }
+                ++mVisibleEquipSlotCount;
 
             EquipSlotsInfo::iterator i = mEquipSlotsInfo.find(slotId);
 
@@ -264,6 +266,13 @@ void ItemManager::readEquipNode(xmlNodePtr equipNode, ItemClass *item)
     {
         if (xmlStrEqual(subNode->name, BAD_CAST "slot"))
         {
+            if (item->mEquipReq.equipSlotId)
+            {
+                LOG_WARN("Item Manager: duplicate equip slot definitions!"
+                         " Only the first will apply.");
+                break;
+            }
+
             std::string slot = XML::getProperty(subNode, "type", std::string());
             if (slot.empty())
             {
@@ -273,21 +282,23 @@ void ItemManager::readEquipNode(xmlNodePtr equipNode, ItemClass *item)
             if (utils::isNumeric(slot))
             {
                 // When the slot id is given
-                item->mEquip.push_back(std::make_pair(utils::stringToInt(slot),
-                    XML::getProperty(subNode, "required", 1)));
+                item->mEquipReq.equipSlotId = utils::stringToInt(slot);
             }
             else
             {
                 // When its name is given
-                item->mEquip.push_back(std::make_pair(getEquipSlotIdFromName(slot),
-                           XML::getProperty(subNode, "required", 1)));
+                item->mEquipReq.equipSlotId = getEquipSlotIdFromName(slot);
             }
+            item->mEquipReq.capacityRequired =
+                XML::getProperty(subNode, "required", 1);
         }
     }
-    if (item->mEquip.empty())
+
+    if (!item->mEquipReq.equipSlotId)
     {
         LOG_WARN("Item Manager: empty equip requirement "
-                 "definition for item " << item->getDatabaseID() << "!");
+                 "definition for item " << item->getDatabaseID() << "!"
+                 " The item will be unequippable.");
         return;
     }
 }

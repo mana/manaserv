@@ -28,10 +28,15 @@
 class Being;
 class Script;
 
-// A pair indicating: Equipment slot id -> how much slots required.
-typedef std::pair< unsigned int, unsigned int> ItemEquipInfo;
-// The list of required slots to equip.
-typedef std::list< ItemEquipInfo > ItemEquipsInfo;
+// Indicates the equip slot "cost" to equip an item.
+struct ItemEquipRequirement {
+    ItemEquipRequirement():
+        equipSlotId(0),
+        capacityRequired(0)
+    {}
+
+    unsigned int equipSlotId, capacityRequired;
+};
 
 /**
  * State effects to beings, and actors.
@@ -226,9 +231,10 @@ class ItemClass
         { return mSpriteID; }
 
         /**
-         * Returns equip requirements.
+         * Returns equip requirement.
          */
-        const ItemEquipsInfo &getItemEquipData() const { return mEquip; }
+        const ItemEquipRequirement &getItemEquipRequirement() const
+        { return mEquipReq; }
 
     private:
         /**
@@ -274,12 +280,9 @@ class ItemClass
         std::multimap< ItemTriggerType, ItemEffectInfo * > mDispells;
 
         /**
-         * List of list of requirements for equipping. Only one inner list
-         * need be satisfied to sucessfully equip. Checks occur in order
-         * from outer front to back.
-         * All conditions in an inner list must be met for success.
+         * Requirement for equipping.
          */
-        ItemEquipsInfo mEquip;
+        ItemEquipRequirement mEquipReq;
 
         friend class ItemManager;
 };
