@@ -299,7 +299,7 @@ static int chr_warp(lua_State *s)
 
     Character *q = getCharacter(s, 1);
     bool b = lua_isnil(s, 2);
-    if (!q || !(b || lua_isnumber(s, 2)))
+    if (!q || !(b || lua_isnumber(s, 2) || lua_isstring(s, 2)))
     {
         raiseScriptError(s, "chr_warp called with incorrect parameters.");
         return 0;
@@ -312,9 +312,13 @@ static int chr_warp(lua_State *s)
         Script *t = static_cast<Script *>(lua_touserdata(s, -1));
         m = t->getMap();
     }
-    else
+    else if (lua_isnumber(s, 2))
     {
         m = MapManager::getMap(lua_tointeger(s, 2));
+    }
+    else
+    {
+        m = MapManager::getMap(lua_tostring(s, 2));
     }
     if (!m)
     {
