@@ -249,8 +249,8 @@ static void deinitializeServer()
 
     // Destroy Managers
     delete stringFilter;
-    monsterManager->deinitialize();
-    itemManager->deinitialize();
+    delete monsterManager; monsterManager = 0;
+    delete itemManager; itemManager = 0;
     delete skillManager; skillManager = 0;
     MapManager::deinitialize();
     StatusManager::deinitialize();

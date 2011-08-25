@@ -30,8 +30,13 @@ class MonsterClass;
 class MonsterManager
 {
     public:
+        MonsterManager(const std::string &file):
+            mMonsterReferenceFile(file)
+        {}
 
-        MonsterManager(const std::string &file) : mMonsterReferenceFile(file) {}
+        ~MonsterManager()
+        { deinitialize(); }
+
         /**
          * Loads monster reference file.
          */
