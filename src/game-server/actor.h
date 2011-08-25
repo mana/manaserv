@@ -111,6 +111,9 @@ class Actor : public Thing
         void setPublicID(int id)
         { mPublicID = id; }
 
+        bool isPublicIdValid() const
+        { return (mPublicID > 0 && mPublicID != 65535); }
+
         /**
          * Gets the way the actor blocks pathfinding for other actors.
          */

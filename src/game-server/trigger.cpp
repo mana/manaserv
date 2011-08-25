@@ -52,8 +52,9 @@ void TriggerArea::update()
     std::set<Actor*> insideNow;
     for (BeingIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
     {
-        //skip garbage
-        if (!(*i) || (*i)->getPublicID() == 0) continue;
+        // Don't deal with unitialized actors.
+        if (!(*i) || !(*i)->isPublicIdValid())
+            continue;
 
         // The BeingIterator returns the mapZones in touch with the rectangle
         // area. On the other hand, the beings contained in the map zones
