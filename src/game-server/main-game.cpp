@@ -242,16 +242,16 @@ static void deinitializeServer()
     enet_deinitialize();
 
     // Destroy message handlers
-    delete gameHandler;
-    delete accountHandler;
-    delete postMan;
-    delete gBandwidth;
+    delete gameHandler; gameHandler = 0;
+    delete accountHandler; accountHandler = 0;
+    delete postMan; postMan = 0;
+    delete gBandwidth; gBandwidth = 0;
 
     // Destroy Managers
-    delete stringFilter;
-    monsterManager->deinitialize();
+    delete stringFilter; stringFilter = 0;
+    delete monsterManager; monsterManager = 0;
     delete skillManager; skillManager = 0;
-    itemManager->deinitialize();
+    delete itemManager; itemManager = 0;
     MapManager::deinitialize();
     StatusManager::deinitialize();
 

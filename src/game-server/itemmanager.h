@@ -40,6 +40,9 @@ class ItemManager
             mItemDatabaseVersion(0)
         {}
 
+        ~ItemManager()
+        { deinitialize(); }
+
         /**
          * Loads item reference file.
          */
