@@ -55,7 +55,11 @@ void TriggerArea::update()
         //skip garbage
         if (!(*i) || (*i)->getPublicID() == 0) continue;
 
-        if (mZone.contains((*i)->getPosition())) //<-- Why is this additional condition necessary? Shouldn't getInsideRectangleIterator already exclude those outside of the zone? --Crush
+        // The BeingIterator returns the mapZones in touch with the rectangle
+        // area. On the other hand, the beings contained in the map zones
+        // may not be within the rectangle area. Hence, this additional
+        // contains() condition.
+        if (mZone.contains((*i)->getPosition()))
         {
             insideNow.insert(*i);
 
