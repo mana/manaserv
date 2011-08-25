@@ -206,10 +206,7 @@ static int npc_create(lua_State *s)
     }
     q->setMap(m);
     q->setPosition(Point(x, y));
-    bool b = GameState::insert(q);
-    /* Do not try to deal with a failure there. There are some serious issues
-       if an insertion failed on an almost empty map. */
-    assert(b); (void)b;
+    GameState::enqueueInsert(q);
     lua_pushlightuserdata(s, q);
     return 1;
 }
