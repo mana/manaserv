@@ -106,59 +106,50 @@ static void updateMap(MapComposite *map)
 /**
  * Sets message fields describing character look.
  */
-static void serializeLooks(Character *ch, MessageOut &msg, bool full)
+static void serializeLooks(Character *ch, MessageOut &msg)
 {
-    const Possessions &poss = ch->getPossessions();
-    unsigned int nb_slots = itemManager->getVisibleSlotCount();
+    const EquipData &equipData = ch->getPossessions().getEquipment();
 
-    // Bitmask describing the changed entries.
-    int changed = (1 << nb_slots) - 1;
-    if (!full)
-    {
-        // TODO: do not assume the whole equipment changed,
-        // when an update is asked for.
-        changed = (1 << nb_slots) - 1;
-    }
+    // We'll use a set to check whether we already sent the update for the given
+    // item instance.
+    std::set<unsigned int> itemInstances;
 
-    std::vector<unsigned int> items;
-    items.resize(nb_slots, 0);
-    // Partially build both kinds of packet, to get their sizes.
-    unsigned int mask_full = 0, mask_diff = 0;
-    unsigned int nb_full = 0, nb_diff = 0;
-    std::map<unsigned int, unsigned int>::const_iterator it =
-                                                    poss.equipSlots.begin();
-    for (unsigned int i = 0; i < nb_slots; ++i)
+    // The map storing the info about the look changes to send
+    //{ slot type id, item id }
+    std::map <unsigned int, unsigned int> lookChanges;
+
+    // Note that we can send several updates on the same slot type as different
+    // items may have been equipped.
+    for (EquipData::const_iterator it = equipData.begin(),
+         it_end = equipData.end(); it != it_end; ++it)
     {
-        if (changed & (1 << i))
+        if (!itemManager->isEquipSlotVisible(it->first))
+            continue;
+
+        if (!it->second.itemInstance
+            || itemInstances.insert(it->second.itemInstance).second)
         {
-            // Skip slots that have not changed, when sending an update.
-            ++nb_diff;
-            mask_diff |= 1 << i;
-        }
-        if (it == poss.equipSlots.end() || it->first > i) continue;
-        ItemClass *eq;
-        items[i] = it->first && (eq = itemManager->getItem(it->first)) ?
-                   eq->getSpriteID() : 0;
-        if (items[i])
-        {
-            /* If we are sending the whole equipment, only filled slots have to
-               be accounted for, as the other ones will be automatically cleared. */
-            ++nb_full;
-            mask_full |= 1 << i;
+            // When the insertion succeeds, its the first time
+            // we encounter the item, so we can send the look change.
+            // We also send empty slots for unequipment handling.
+            lookChanges.insert(
+                std::make_pair<unsigned int, unsigned int>(it->first,
+                                                           it->second.itemId));
         }
     }
 
-    // Choose the smaller payload.
-    if (nb_full <= nb_diff) full = true;
-
-    /* Bitmask enumerating the sent slots.
-       Setting the upper bit tells the client to clear the slots beforehand. */
-    int mask = full ? mask_full | (1 << 7) : mask_diff;
-
-    msg.writeInt8(mask);
-    for (unsigned int i = 0; i < nb_slots; ++i)
+    if (lookChanges.size() > 0)
     {
-        if (mask & (1 << i)) msg.writeInt16(items[i]);
+        // Number of look changes to send
+        msg.writeInt8(lookChanges.size());
+
+        for (std::map<unsigned int, unsigned int>::const_iterator it2 =
+             lookChanges.begin(), it2_end = lookChanges.end();
+             it2 != it2_end; ++it2)
+        {
+            msg.writeInt8(it2->first);
+            msg.writeInt16(it2->second);
+        }
     }
 }
 
@@ -222,7 +213,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
                 MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
                 LooksMsg.writeInt16(oid);
                 Character * c = static_cast<Character * >(o);
-                serializeLooks(c, LooksMsg, false);
+                serializeLooks(c, LooksMsg);
                 LooksMsg.writeInt16(c->getHairStyle());
                 LooksMsg.writeInt16(c->getHairColor());
                 LooksMsg.writeInt16(c->getGender());
@@ -286,7 +277,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
                     enterMsg.writeInt8(q->getHairStyle());
                     enterMsg.writeInt8(q->getHairColor());
                     enterMsg.writeInt8(q->getGender());
-                    serializeLooks(q, enterMsg, true);
+                    serializeLooks(q, enterMsg);
                 } break;
 
                 case OBJECT_MONSTER:

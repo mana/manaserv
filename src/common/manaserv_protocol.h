@@ -92,12 +92,12 @@ enum {
     GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
     PGMSG_PICKUP                   = 0x0110, // W*2 position
     PGMSG_DROP                     = 0x0111, // B slot, B amount
-    PGMSG_EQUIP                    = 0x0112, // B slot
-    PGMSG_UNEQUIP                  = 0x0113, // B slot
-    PGMSG_MOVE_ITEM                = 0x0114, // B slot1, B slot2, B amount
+    PGMSG_EQUIP                    = 0x0112, // W inventory slot
+    PGMSG_UNEQUIP                  = 0x0113, // W item Instance id
+    PGMSG_MOVE_ITEM                = 0x0114, // W slot1, W slot2, W amount
     GPMSG_INVENTORY                = 0x0120, // { W slot, W item id [, W amount] (if item id is nonzero) }*
-    GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount }, { B equip slot, W invy slot}*
-    GPMSG_EQUIP                    = 0x0122, // { W Invy slot, B equip slot type count { B equip slot, B number used} }*
+    GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount }, { W equip slot, W item Id, W item Instance}*
+    GPMSG_EQUIP                    = 0x0122, // W item Id, W equip slot type count //{ W equip slot, W capacity used}*//<- When equipping, //{ W item instance, W 0}*//<- When unequipping
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, D base value (in 1/256ths), D modified value (in 1/256ths)}*
     GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { W skill, D exp got, D exp needed }*
     GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points
@@ -108,12 +108,12 @@ enum {
     GPMSG_LOWER_ATTRIBUTE_RESPONSE = 0x0171, // B error, W attribute
     PGMSG_RESPAWN                  = 0x0180, // -
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position, B direction
-                                             // character: S name, B hair style, B hair color, B gender, B item bitmask, { W item id }*
+                                             // character: S name, B hair style, B hair color, B gender, B sprite layers changed, { B slot type, W item id }*
                                              // monster: W type id
                                              // npc: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
-    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // W weapon, W hat, W top clothes, W bottom clothes
+    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // B sprite layers changed, { B slot type, W item id }*
     PGMSG_WALK                     = 0x0260, // W*2 destination
     PGMSG_ACTION_CHANGE            = 0x0270, // B Action
     GPMSG_BEING_ACTION_CHANGE      = 0x0271, // W being id, B action
@@ -424,23 +424,6 @@ enum BeingDirection
     LEFT = 2,
     UP = 4,
     RIGHT = 8
-};
-
-/**
-  * enum for sprites layers.
-  * WARNING: Has to be in sync with the same enum in the Sprite class
-  * of the client!
-  */
-enum SpriteLayer
-{
-    SPRITE_BASE = 0,
-    SPRITE_SHOE,
-    SPRITE_BOTTOMCLOTHES,
-    SPRITE_TOPCLOTHES,
-    SPRITE_HAIR,
-    SPRITE_HAT,
-    SPRITE_WEAPON,
-    SPRITE_VECTOREND
 };
 
 } // namespace ManaServ
