@@ -75,8 +75,8 @@ class Rectangle
 
         bool contains(const Point &p) const
         {
-            return (p.x - x) < w &&
-                   (p.y - y) < h;
+            return (p.x >= x && p.x < x + w &&
+                    p.y >= y && p.y < y + h);
         }
 
         bool intersects(const Rectangle &r) const
