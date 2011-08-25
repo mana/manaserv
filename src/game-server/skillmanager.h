@@ -22,14 +22,24 @@
 #ifndef SKILLMANAGER_H
 #define SKILLMANAGER_H
 
-#include <string>
+#include "utils/string.h"
+#include "utils/xml.h"
 
-namespace SkillManager
+class SkillManager
 {
+  public:
+    SkillManager(const std::string & skillFile):
+        mSkillFile(skillFile),
+        mDefaultSkillId(0)
+    {}
+
+    ~SkillManager()
+    { clear(); }
+
     /**
      * Loads skill reference file.
      */
-    void initialize(const std::string &);
+    void initialize();
 
     /**
      * Reloads skill reference file.
@@ -37,12 +47,43 @@ namespace SkillManager
     void reload();
 
     /**
-     * Gets the skill ID of a skill string
-     * (not case-sensitive to reduce wall-bashing)
+     * Gets the skill Id from a set and a skill string.
      */
-    int getIdFromString(const std::string &name);
-}
+    unsigned int getId(const std::string& set, const std::string &name) const;
+    const std::string getSkillName(unsigned int id) const;
+    const std::string getSetName(unsigned int id) const;
 
+  private:
+    struct SkillInfo {
+        SkillInfo():
+            id(0)
+        {}
 
+        unsigned int id;
+        std::string setName;
+        std::string skillName;
+    };
+
+    /*
+     * Clears up the skill maps.
+     */
+    void clear();
+
+    void readSkillNode(xmlNodePtr skillNode, const std::string& setName);
+
+    void printDebugSkillTable();
+
+    // The skill file (skills.xml)
+    std::string mSkillFile;
+
+    // The skill map
+    typedef std::map<unsigned int, SkillInfo*> SkillsInfo;
+    SkillsInfo mSkillsInfo;
+    // A map used to get skills per name.
+    utils::NameMap<SkillInfo*> mNamedSkillsInfo;
+
+    // The default skill id
+    unsigned int mDefaultSkillId;
+};
 
 #endif // SKILLMANAGER_H

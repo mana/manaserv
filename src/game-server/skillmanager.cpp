@@ -20,174 +20,169 @@
 
 #include "game-server/skillmanager.h"
 
-#include "utils/string.h"   // for the toUpper function
 #include "utils/logger.h"
-#include "utils/xml.h"
 
 #include <map>
 
-typedef std::map< std::string, int > SkillMap;
-static SkillMap skillMap;
-static std::string skillReferenceFile;
-static std::string defaultSkillKey = std::string();
-
-void SkillManager::initialize(const std::string &file)
+void SkillManager::clear()
 {
-    skillReferenceFile = file;
-    reload();
+    for (SkillsInfo::iterator it = mSkillsInfo.begin(),
+         it_end = mSkillsInfo.end(); it != it_end; ++it)
+    {
+        delete it->second;
+    }
+
+    mSkillsInfo.clear();
+    mNamedSkillsInfo.clear();
 }
 
-void SkillManager::reload()
+void SkillManager::initialize()
 {
-    /*
-    skillMap["UNARMED"] = 100;
-    skillMap["KNIFE"] = 101;
-    */
+    clear();
 
-    XML::Document doc(skillReferenceFile);
+    XML::Document doc(mSkillFile);
     xmlNodePtr rootNode = doc.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "skills"))
     {
-        LOG_ERROR("Skill Manager: " << skillReferenceFile
+        LOG_ERROR("Skill Manager: " << mSkillFile
                   << " is not a valid database file!");
         return;
     }
 
-    LOG_INFO("Loading skill reference: " << skillReferenceFile);
+    LOG_INFO("Loading skill reference: " << mSkillFile);
 
-    for_each_xml_child_node(setnode, rootNode)
+    for_each_xml_child_node(setNode, rootNode)
     {
-        if (!xmlStrEqual(setnode->name, BAD_CAST "set"))
+        // The server will prefix the core name with the set, so we need one.
+        if (!xmlStrEqual(setNode->name, BAD_CAST "set"))
             continue;
 
-        // we don't care about sets server-sided (yet?)
-        for_each_xml_child_node(skillnode, setnode)
+        std::string setName = XML::getProperty(setNode, "name", std::string());
+        if (setName.empty())
         {
-            if (xmlStrEqual(skillnode->name, BAD_CAST "skill"))
-            {
-                std::string name = XML::getProperty(skillnode, "name",
-                                                    std::string());
-                name = utils::toUpper(name);
-                int id = XML::getProperty(skillnode, "id", 0);
-                if (id > 0 && !name.empty())
-                {
-                    bool duplicateKey = false;
-                    for (SkillMap::iterator i = skillMap.begin();
-                         i != skillMap.end(); i++)
-                    {
-                        if (id == i->second)
-                        {
-                            LOG_ERROR("SkillManager: The same id: " << id
-                            << " is given for skill names: " << i->first
-                            << " and " << name);
-                            LOG_ERROR("The skill reference: " << "'" << name
-                            << "': " << id << " will be ignored.");
-
-                            duplicateKey = true;
-                            break;
-                        }
-                    }
-
-                    if (!duplicateKey)
-                    {
-                        if (XML::getBoolProperty(skillnode, "default", false))
-                        {
-                            if (!defaultSkillKey.empty())
-                            {
-                                LOG_WARN("SkillManager: "
-                                "Default Skill Key already defined as "
-                                << defaultSkillKey
-                                << ". Redefinit it as: " << name);
-                            }
-                            else
-                            {
-                                LOG_INFO("SkillManager: Defining " << name
-                                << " as default weapon-type key.");
-                            }
-                            defaultSkillKey = name;
-                        }
-                        skillMap[name] = id;
-                    }
-                }
-            }
+            LOG_WARN("The " << mSkillFile << " file is containing unamed <set> "
+                     "tags and will be ignored.");
+            continue;
         }
+
+        setName = utils::toLower(setName);
+
+        for_each_xml_child_node(skillNode, setNode)
+            readSkillNode(skillNode, setName);
     }
 
+    printDebugSkillTable();
+
+    if (!mDefaultSkillId)
+        LOG_WARN("SkillManager: No default weapon-type id was given during "
+                 "Skill map loading. "
+                 "Players won't be able to earn XP when unarmed.");
+
+    LOG_INFO("Loaded " << mSkillsInfo.size() << " skills from "
+             << mSkillFile);
+}
+
+void SkillManager::readSkillNode(xmlNodePtr skillNode,
+                                 const std::string& setName)
+{
+    if (!xmlStrEqual(skillNode->name, BAD_CAST "skill"))
+        return;
+
+    SkillInfo *skillInfo = new SkillInfo;
+    skillInfo->setName = setName;
+    skillInfo->skillName = XML::getProperty(skillNode, "name", std::string());
+    skillInfo->skillName = utils::toLower(skillInfo->skillName);
+    int id = XML::getProperty(skillNode, "id", 0);
+
+    if (id <= 0 || skillInfo->skillName.empty())
+    {
+        LOG_WARN("Invalid skill (empty name or id <= 0) in set: " << setName);
+        return;
+    }
+    skillInfo->id = (unsigned)id;
+
+    SkillsInfo::iterator it = mSkillsInfo.find(skillInfo->id);
+    if (it != mSkillsInfo.end())
+    {
+        LOG_WARN("SkillManager: The same id: " << skillInfo->id
+        << " is given for skill names: " << it->first
+        << " and " << skillInfo->skillName);
+        LOG_WARN("The skill reference: " << skillInfo->id
+        << ": '" << skillInfo->skillName << "' will be ignored.");
+        return;
+    }
+
+    if (XML::getBoolProperty(skillNode, "default", false))
+    {
+        if (mDefaultSkillId)
+        {
+            LOG_WARN("SkillManager: "
+            "Default Skill id already defined as "
+            << mDefaultSkillId
+            << ". Redefinit it as: " << skillInfo->id);
+        }
+        else
+        {
+            LOG_INFO("SkillManager: Defining skill id: " << skillInfo->id
+            << " as default weapon-type id.");
+        }
+        mDefaultSkillId = skillInfo->id;
+    }
+
+    mSkillsInfo.insert(
+        std::make_pair<unsigned int, SkillInfo*>(skillInfo->id, skillInfo));
+
+    std::string keyName = setName + "_" + skillInfo->skillName;
+    mNamedSkillsInfo.insert(keyName, skillInfo);
+}
+
+void SkillManager::printDebugSkillTable()
+{
     if (::utils::Logger::mVerbosity >= ::utils::Logger::Debug)
     {
-        LOG_DEBUG("Skill map in " << skillReferenceFile << ":"
+        std::string lastSet;
+        LOG_DEBUG("Skill map in " << mSkillFile << ":"
                   << std::endl << "-----");
-        for (SkillMap::iterator i = skillMap.begin(); i != skillMap.end(); i++)
+        for (SkillsInfo::iterator it = mSkillsInfo.begin();
+            it != mSkillsInfo.end(); ++it)
         {
-            if (!defaultSkillKey.compare(i->first))
+            if (!lastSet.compare(it->second->setName))
             {
-                LOG_DEBUG("'" << i->first << "': " << i->second
+                lastSet = it->second->setName;
+                LOG_DEBUG("Skill set: " << lastSet);
+            }
+
+            if (it->first == mDefaultSkillId)
+            {
+                LOG_DEBUG("'" << it->first << "': " << it->second->skillName
                           << " (Default)");
             }
             else
             {
-                LOG_DEBUG("'" << i->first << "': " << i->second);
+                LOG_DEBUG("'" << it->first << "': " << it->second->skillName);
             }
         }
         LOG_DEBUG("-----");
     }
-
-    if (defaultSkillKey.empty())
-        LOG_WARN("SkillManager: No default weapon-type id was given during "
-                 "Skill map loading. Defaults will fall back to id 0.");
-
-    LOG_INFO("Loaded " << skillMap.size() << " skill references from "
-             << skillReferenceFile);
 }
 
-int SkillManager::getIdFromString(const std::string &name)
+unsigned int SkillManager::getId(const std::string& set,
+                                        const std::string &name) const
 {
-    // Check if the name is an integer value.
-    if (utils::isNumeric(name))
-    {
-        int val = 0;
-        val = utils::stringToInt(name);
-        if (val)
-        {
-            for (SkillMap::iterator i = skillMap.begin(); i != skillMap.end(); i++)
-            {
-                if (i->second == val)
-                    return val;
-            }
-            LOG_WARN("SkillManager::getIdFromString(): Numeric weapon-type id "
-            << val << " not found into " << skillReferenceFile);
+    std::string key = utils::toLower(set) + "_" + utils::toLower(name);
+    SkillInfo *skillInfo = mNamedSkillsInfo.find(key);
+    return skillInfo ? skillInfo->id : 0;
+}
 
-            SkillMap::iterator i = skillMap.find(defaultSkillKey);
-            if (i != skillMap.end())
-            {
-                LOG_WARN("Id defaulted to " << defaultSkillKey << ": "
-                << i->second);
-                return i->second;
-            }
-            else
-            {
-                LOG_WARN("Id defaulted to 0.");
-                return 0;
-            }
-        }
-        else
-        {
-            LOG_WARN("SkillManager: Invalid skill id " << name);
-            return 0;
-        }
-    }
+const std::string SkillManager::getSkillName(unsigned int id) const
+{
+    SkillsInfo::const_iterator it = mSkillsInfo.find(id);
+    return it != mSkillsInfo.end() ? it->second->skillName : "";
+}
 
-    // Convert to upper case for easier finding
-    SkillMap::iterator i = skillMap.find(utils::toUpper(name));
-    if (i == skillMap.end())
-    {
-        LOG_WARN("SkillManager: No weapon-type name corresponding to "
-                 << utils::toUpper(name) << " into " << skillReferenceFile);
-        return 0;
-    }
-    else
-    {
-        return i->second;
-    }
+const std::string SkillManager::getSetName(unsigned int id) const
+{
+    SkillsInfo::const_iterator it = mSkillsInfo.find(id);
+    return it != mSkillsInfo.end() ? it->second->setName : "";
 }
