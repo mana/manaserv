@@ -472,15 +472,20 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
             {
                 Item *item = static_cast< Item * >(o);
                 ItemClass *ic = item->getItemClass();
-                Inventory(client.character).insert(ic->getDatabaseID(),
-                                                   item->getAmount());
-                GameState::remove(item);
-                // log transaction
-                std::stringstream str;
-                str << "User picked up item " << ic->getDatabaseID()
-                    << " at " << opos.x << "x" << opos.y;
-                accountHandler->sendTransaction(client.character->getDatabaseID(),
-                                                TRANS_ITEM_PICKUP, str.str());
+                if (!Inventory(client.character).insert(ic->getDatabaseID(),
+                                                       item->getAmount()))
+                {
+
+                    GameState::remove(item);
+                    // log transaction
+                    std::stringstream str;
+                    str << "User picked up item " << ic->getDatabaseID()
+                        << " at " << opos.x << "x" << opos.y;
+                    accountHandler->sendTransaction(
+                                              client.character->getDatabaseID(),
+                                              TRANS_ITEM_PICKUP, str.str()
+                                                   );
+                }
                 break;
             }
         }
