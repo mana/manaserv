@@ -1156,14 +1156,14 @@ static int monster_change_anger(lua_State *s)
  */
 static int monster_remove(lua_State *s)
 {
-    bool monsterEnqueued = false;
+    bool monsterRemoved = false;
     Monster *m = getMonster(s, 1);
     if (m)
     {
-        GameState::enqueueRemove(m);
-        monsterEnqueued = true;
+        GameState::remove(m);
+        monsterRemoved = true;
     }
-    lua_pushboolean(s, monsterEnqueued);
+    lua_pushboolean(s, monsterRemoved);
     return 1;
 }
 
