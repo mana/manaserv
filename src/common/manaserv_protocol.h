@@ -24,7 +24,10 @@
 
 namespace ManaServ {
 
-enum { PROTOCOL_VERSION = 1 };
+enum {
+    PROTOCOL_VERSION = 1,
+    SUPPORTED_DB_VERSION = 15
+};
 
 /**
  * Enumerated type for communicated messages:

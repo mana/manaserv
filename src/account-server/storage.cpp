@@ -28,10 +28,12 @@
 #include "chat-server/guild.h"
 #include "chat-server/post.h"
 #include "common/configuration.h"
+#include "common/manaserv_protocol.h"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
 #include "utils/point.h"
+#include "utils/string.h"
 #include "utils/throwerror.h"
 #include "utils/xml.h"
 
@@ -41,7 +43,6 @@ static const char *DEFAULT_ITEM_FILE = "items.xml";
 
 // Defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
-static const char *SUPPORTED_DB_VERSION = "14";
 
 /*
  * MySQL specificities:
@@ -118,12 +119,14 @@ void Storage::open()
         mDb->connect();
 
         // Check database version here
-        std::string dbversion = getWorldStateVar(DB_VERSION_PARAMETER);
-        if (dbversion != SUPPORTED_DB_VERSION)
+        int dbversion = utils::stringToInt(
+                                        getWorldStateVar(DB_VERSION_PARAMETER));
+        int supportedDbVersion = ManaServ::SUPPORTED_DB_VERSION;
+        if (dbversion != supportedDbVersion)
         {
             std::ostringstream errmsg;
             errmsg << "Database version is not supported. "
-                   << "Needed version: '" << SUPPORTED_DB_VERSION
+                   << "Needed version: '" << supportedDbVersion
                    << "', current version: '" << dbversion << "'";
             utils::throwError(errmsg.str());
         }
