@@ -186,7 +186,15 @@ static std::string getArgument(std::string &args)
             // Jumps to the next parameter,
             // after the ending double-quote and space,
             // and remove the two double-quotes before returning.
-            args = args.substr(pos + 2);
+            if (pos + 2 < args.size())
+            {
+                args = args.substr(pos + 2);
+            }
+            else
+            {
+                // This was the last argument
+                args.clear();
+            }
             argument = argument.substr(1, pos - 1);
         }
         else
