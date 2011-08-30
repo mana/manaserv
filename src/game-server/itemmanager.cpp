@@ -325,8 +325,8 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
              *     trigger, and the second defines the default
              *     trigger to use for dispelling.
              */
-            triggerTable["existence"].first         = ITT_IN_INVY;
-            triggerTable["existence"].second        = ITT_LEAVE_INVY;
+            triggerTable["in-inventory"].first         = ITT_IN_INVY;
+            triggerTable["in-inventory"].second        = ITT_LEAVE_INVY;
             triggerTable["activation"].first        = ITT_ACTIVATE;
             triggerTable["activation"].second       = ITT_NULL;
             triggerTable["equip"].first             = ITT_EQUIP;
