@@ -22,6 +22,7 @@
     <allow>@attribute</allow>
     <allow>@charwarp</allow>
     <allow>@killmonsters</allow>
+    <allow>@getpos</allow>
   </class>
   <class level="4">
     <alias>gm</alias>
