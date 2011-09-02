@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `mana_characters` (
     -- location on the map
     `x`            smallint(5)  unsigned NOT NULL,
     `y`            smallint(5)  unsigned NOT NULL,
-    `map_id`       tinyint(3)   unsigned NOT NULL,
+    `map_id`       smallint(5)  unsigned NOT NULL,
     `slot`         smallint(5)  unsigned NOT NULL,
     --
     PRIMARY KEY (`id`),

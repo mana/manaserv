@@ -41,7 +41,7 @@ static const char *DEFAULT_ITEM_FILE = "items.xml";
 
 // Defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
-static const char *SUPPORTED_DB_VERSION = "14";
+static const char *SUPPORTED_DB_VERSION = "16";
 
 /*
  * MySQL specificities:
