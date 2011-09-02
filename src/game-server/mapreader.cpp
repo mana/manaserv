@@ -198,7 +198,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                 }
                 else if (utils::compareStrI(objType, "SPAWN") == 0)
                 {
-                    int monsterId = -1;
+                    MonsterClass *monster = 0;
                     int maxBeings = 10; // Default value
                     int spawnRate = 10; // Default value
 
@@ -213,33 +213,60 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         {
                             if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
                             {
-                                std::string value = XML::getProperty(propertyNode, "name", std::string());
+                                std::string value = XML::getProperty(
+                                                            propertyNode,
+                                                            "name",
+                                                            std::string());
                                 value = utils::toUpper(value);
                                 if (utils::compareStrI(value, "MONSTER_ID") == 0)
                                 {
-                                    monsterId = getObjectProperty(propertyNode, monsterId);
+                                    std::string monsterName =
+                                        getObjectProperty(propertyNode,
+                                                          std::string());
+                                    int monsterId = utils::stringToInt(monsterName);
+                                    if (monsterId)
+                                    {
+                                        monster = monsterManager->getMonster(
+                                                                     monsterId);
+                                        if (!monster)
+                                        {
+                                            LOG_WARN("Couldn't find monster ID "
+                                                     << monsterId <<
+                                                     " for spawn area");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        monster = monsterManager->
+                                                  getMonsterByName(monsterName);
+                                        if (!monster)
+                                        {
+                                            LOG_WARN("Couldn't find monster "
+                                                     << monsterName <<
+                                                     " for spawn area");
+                                        }
+                                    }
                                 }
-                                else if (utils::compareStrI(value, "MAX_BEINGS") == 0)
+                                else if (utils::compareStrI(value,
+                                                            "MAX_BEINGS") == 0)
                                 {
-                                    maxBeings = getObjectProperty(propertyNode, maxBeings);
+                                    maxBeings = getObjectProperty(propertyNode,
+                                                                  maxBeings);
                                 }
-                                else if (utils::compareStrI(value, "SPAWN_RATE") == 0)
+                                else if (utils::compareStrI(value,
+                                                            "SPAWN_RATE") == 0)
                                 {
-                                    spawnRate = getObjectProperty(propertyNode, spawnRate);
+                                    spawnRate = getObjectProperty(propertyNode,
+                                                                  spawnRate);
                                 }
                             }
                         }
                     }
 
-                    MonsterClass *monster = monsterManager->getMonster(monsterId);
                     if (monster)
                     {
-                        things.push_back(new SpawnArea(composite, monster, rect, maxBeings, spawnRate));
-                    }
-                    else
-                    {
-                        LOG_WARN("Couldn't find monster ID " << monsterId <<
-                                " for spawn area");
+                        things.push_back(new SpawnArea(composite, monster, rect,
+                                                       maxBeings, spawnRate));
                     }
                 }
                 else if (utils::compareStrI(objType, "NPC") == 0)
