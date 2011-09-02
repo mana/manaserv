@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Notes:
+  The id and name parameters must be unique.
+  The capacity parameter indicates the 'size' of the slot.
+  The visible parameter indicates whether the item is visible
+  on the map character. Hence, whether the server should send appearance
+  updates when making changes on it.
+-->
 <equip-slots>
-    <slot name="hand" count="2" visible="true" />
-    <slot name="torso" count="1" visible="true" />
-    <slot name="arms" count="1" />
-    <slot name="head" count="1" visible="true" />
-    <slot name="legs" count="1" visible="true" />
-    <slot name="ring" count="1" />
-    <slot name="necklace" count="1" />
-    <slot name="feet" count="1" />
-    <slot name="ammo" count="1" />
+    <slot id="1" name="Hand" capacity="2" visible="true" weapon="true">
+        <box x="8" y="123" />
+        <box x="129" y="123" />
+    </slot>
+    <slot id="2" name="Torso" capacity="1" visible="true">
+        <box x="50" y="40" />
+    </slot>
+    <slot id="3" name="Arms" capacity="1">
+        <box x="8" y="78" />
+    </slot>
+    <slot id="4" name="Head" capacity="1" visible="true">
+        <box x="70" y="0" />
+    </slot>
+    <slot id="5" name="Legs" capacity="1" visible="true">
+        <box x="50" y="208" />
+    </slot>
+    <slot id="6" name="Ring" capacity="1">
+        <box x="129" y="78" />
+    </slot>
+    <slot id="7" name="Necklace" capacity="1">
+        <box x="90" y="40" />
+    </slot>
+    <slot id="8" name="Feet" capacity="1" visible="true">
+        <box x="90" y="208" />
+    </slot>
+    <slot id="9" name="Ammo" capacity="1" ammo="true">
+        <box x="8" y="168" />
+    </slot>
 </equip-slots>

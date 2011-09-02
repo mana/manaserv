@@ -28,10 +28,12 @@
 #include "chat-server/guild.h"
 #include "chat-server/post.h"
 #include "common/configuration.h"
+#include "common/manaserv_protocol.h"
 #include "dal/dalexcept.h"
 #include "dal/dataproviderfactory.h"
 #include "utils/functors.h"
 #include "utils/point.h"
+#include "utils/string.h"
 #include "utils/throwerror.h"
 #include "utils/xml.h"
 
@@ -41,7 +43,6 @@ static const char *DEFAULT_ITEM_FILE = "items.xml";
 
 // Defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
-static const char *SUPPORTED_DB_VERSION = "14";
 
 /*
  * MySQL specificities:
@@ -118,12 +119,14 @@ void Storage::open()
         mDb->connect();
 
         // Check database version here
-        std::string dbversion = getWorldStateVar(DB_VERSION_PARAMETER);
-        if (dbversion != SUPPORTED_DB_VERSION)
+        int dbversion = utils::stringToInt(
+                                        getWorldStateVar(DB_VERSION_PARAMETER));
+        int supportedDbVersion = ManaServ::SUPPORTED_DB_VERSION;
+        if (dbversion != supportedDbVersion)
         {
             std::ostringstream errmsg;
             errmsg << "Database version is not supported. "
-                   << "Needed version: '" << SUPPORTED_DB_VERSION
+                   << "Needed version: '" << supportedDbVersion
                    << "', current version: '" << dbversion << "'";
             utils::throwError(errmsg.str());
         }
@@ -490,17 +493,26 @@ Character *Storage::getCharacterBySQL(Account *owner)
     try
     {
         std::ostringstream sql;
-        sql << " select slot_type, inventory_slot from "
+        sql << " select slot_type, item_id, item_instance from "
             << CHAR_EQUIPS_TBL_NAME
             << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot_type desc;";
 
+        EquipData equipData;
         const dal::RecordSet &equipInfo = mDb->execSql(sql.str());
         if (!equipInfo.isEmpty())
+        {
+            EquipmentItem equipItem;
             for (int k = 0, size = equipInfo.rows(); k < size; ++k)
-                poss.equipSlots.insert(std::pair<unsigned int, unsigned int>(
-                                        toUint(equipInfo(k, 0)),
-                                        toUint(equipInfo(k, 1))));
+            {
+                equipItem.itemId = toUint(equipInfo(k, 1));
+                equipItem.itemInstance = toUint(equipInfo(k, 2));
+                equipData.insert(std::pair<unsigned int, EquipmentItem>(
+                                     toUint(equipInfo(k, 0)),
+                                     equipItem));
+            }
+        }
+        poss.setEquipment(equipData);
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -515,6 +527,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
             << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot asc;";
 
+        InventoryData inventoryData;
         const dal::RecordSet &itemInfo = mDb->execSql(sql.str());
         if (!itemInfo.isEmpty())
         {
@@ -524,9 +537,10 @@ Character *Storage::getCharacterBySQL(Account *owner)
                 unsigned short slot = toUint(itemInfo(k, 2));
                 item.itemId   = toUint(itemInfo(k, 3));
                 item.amount   = toUint(itemInfo(k, 4));
-                poss.inventory[slot] = item;
+                inventoryData[slot] = item;
             }
         }
+        poss.setInventory(inventoryData);
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -798,18 +812,18 @@ bool Storage::updateCharacter(Character *character)
         std::ostringstream sql;
 
         sql << "insert into " << CHAR_EQUIPS_TBL_NAME
-            << " (owner_id, slot_type, inventory_slot) values ("
+            << " (owner_id, slot_type, item_id, item_instance) values ("
             << character->getDatabaseID() << ", ";
         std::string base = sql.str();
 
         const Possessions &poss = character->getPossessions();
-        for (EquipData::const_iterator it = poss.equipSlots.begin(),
-             it_end = poss.equipSlots.end();
-             it != it_end;
-             ++it)
+        const EquipData &equipData = poss.getEquipment();
+        for (EquipData::const_iterator it = equipData.begin(),
+             it_end = equipData.end(); it != it_end; ++it)
         {
                 sql.str("");
-                sql << base << it->first << ", " << it->second << ");";
+                sql << base << it->first << ", " << it->second.itemId
+                    << ", " << it->second.itemInstance << ");";
                 mDb->execSql(sql.str());
         }
 
@@ -820,13 +834,14 @@ bool Storage::updateCharacter(Character *character)
             << character->getDatabaseID() << ", ";
         base = sql.str();
 
-        for (InventoryData::const_iterator j = poss.inventory.begin(),
-             j_end = poss.inventory.end(); j != j_end; ++j)
+        const InventoryData &inventoryData = poss.getInventory();
+        for (InventoryData::const_iterator j = inventoryData.begin(),
+             j_end = inventoryData.end(); j != j_end; ++j)
         {
             sql.str("");
             unsigned short slot = j->first;
-            unsigned int   itemId = j->second.itemId;
-            unsigned int   amount = j->second.amount;
+            unsigned int itemId = j->second.itemId;
+            unsigned int amount = j->second.amount;
             assert(itemId);
             sql << base << slot << ", " << itemId << ", " << amount << ");";
             mDb->execSql(sql.str());

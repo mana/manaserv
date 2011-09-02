@@ -494,7 +494,7 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
 
 void GameHandler::handleUseItem(GameClient &client, MessageIn &message)
 {
-    const int slot = message.readInt8();
+    const int slot = message.readInt16();
     Inventory inv(client.character);
 
     if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
@@ -514,8 +514,8 @@ void GameHandler::handleUseItem(GameClient &client, MessageIn &message)
 
 void GameHandler::handleDrop(GameClient &client, MessageIn &message)
 {
-    const int slot = message.readInt8();
-    const int amount = message.readInt8();
+    const int slot = message.readInt16();
+    const int amount = message.readInt16();
     Inventory inv(client.character);
 
     if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
@@ -552,22 +552,22 @@ void GameHandler::handleWalk(GameClient &client, MessageIn &message)
 
 void GameHandler::handleEquip(GameClient &client, MessageIn &message)
 {
-    const int slot = message.readInt8();
+    const int slot = message.readInt16();
     Inventory(client.character).equip(slot);
 }
 
 void GameHandler::handleUnequip(GameClient &client, MessageIn &message)
 {
-    const int slot = message.readInt8();
+    const int slot = message.readInt16();
     if (slot >= 0 && slot < INVENTORY_SLOTS)
         Inventory(client.character).unequip(slot);
 }
 
 void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
 {
-    const int slot1 = message.readInt8();
-    const int slot2 = message.readInt8();
-    const int amount = message.readInt8();
+    const int slot1 = message.readInt16();
+    const int slot2 = message.readInt16();
+    const int amount = message.readInt16();
 
     Inventory(client.character).move(slot1, slot2, amount);
     // log transaction

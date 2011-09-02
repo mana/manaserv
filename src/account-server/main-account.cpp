@@ -364,8 +364,9 @@ int main(int argc, char *argv[])
     LOG_INFO("The Mana Account+Chat Server (unknown version)");
 #endif
     LOG_INFO("Manaserv Protocol version " << ManaServ::PROTOCOL_VERSION
-             << ", " << "Enet version " << ENET_VERSION_MAJOR << "."
-             << ENET_VERSION_MINOR << "." << ENET_VERSION_PATCH);
+             << ", Enet version " << ENET_VERSION_MAJOR << "."
+             << ENET_VERSION_MINOR << "." << ENET_VERSION_PATCH
+             << ", Database version " << ManaServ::SUPPORTED_DB_VERSION);
 
     if (!options.verbosityChanged)
         options.verbosity = static_cast<Logger::Level>(

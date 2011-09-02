@@ -28,12 +28,12 @@ atinit(function()
     create_npc("Banker", 8, 35 * TILESIZE + TILESIZE / 2, 24 * TILESIZE + TILESIZE / 2, Banker, nil)
 
     -- A simple merchant.
-    merchant_buy_table = { {"Candy", 10, 20}, {"Regenerative trinket", 10, 30}, {"Minor health potion", 10, 50} }
+    merchant_buy_table = { {"Candy", 10, 20}, {"Regenerative trinket", 10, 30}, {"Minor health potion", 10, 50}, {11, 10, 60}, {12, 10, 40} }
     merchant_sell_table = { {"Candy", 10, 19}, {"Sword", 10, 30}, {"Bow", 10, 200}, {"Leather shirt", 10, 300} }
     create_npc("Merchant", 3, 4 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, merchant_buy_table, merchant_sell_table), nil)
 
     -- Another Merchant, selling some equipment, and buying everything...
-    smith_buy_table = { {"Sword", 10, 50}, {7, 10, 70} }
+    smith_buy_table = { {"Sword", 10, 50}, {7, 10, 70}, {10, 10, 20} }
     create_npc("Smith", 5, 15 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, smith_buy_table), nil)
 
     -- The most simple NPC - Welcoming new ones around.
