@@ -476,7 +476,12 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
                                                        item->getAmount()))
                 {
 
+                    int amount=item->getAmount();
                     GameState::remove(item);
+
+                    //remove map persistence
+                    accountHandler->removeItemPersistence(map->getID(), ic->getDatabaseID(), amount, x, y);
+
                     // log transaction
                     std::stringstream str;
                     str << "User picked up item " << ic->getDatabaseID()
@@ -531,8 +536,12 @@ void GameHandler::handleDrop(GameClient &client, MessageIn &message)
             delete item;
             return;
         }
-        // log transaction
+
+        //create map persistence
         Point pt = client.character->getPosition();
+        accountHandler->createItemPersistence(client.character->getMap()->getID(), ic->getDatabaseID(), amount, pt.x, pt.y);
+
+        // log transaction
         std::stringstream str;
         str << "User dropped item " << ic->getDatabaseID()
             << " at " << pt.x << "x" << pt.y;

@@ -41,7 +41,7 @@ static const char *DEFAULT_ITEM_FILE = "items.xml";
 
 // Defines the supported db version
 static const char *DB_VERSION_PARAMETER = "database_version";
-static const char *SUPPORTED_DB_VERSION = "14";
+static const char *SUPPORTED_DB_VERSION = "15";
 
 /*
  * MySQL specificities:
@@ -89,6 +89,7 @@ static const char *AUCTION_TBL_NAME             =   "mana_auctions";
 static const char *AUCTION_BIDS_TBL_NAME        =   "mana_auction_bids";
 static const char *ONLINE_USERS_TBL_NAME        =   "mana_online_list";
 static const char *TRANSACTION_TBL_NAME         =   "mana_transactions";
+static const char *ITEM_PERSISTENCE_TBL_NAME    =   "mana_item_persistence";
 
 Storage::Storage()
         : mDb(dal::DataProviderFactory::createDataProvider()),
@@ -1359,6 +1360,82 @@ void Storage::removeGuildMember(int guildId, int memberId)
         utils::throwError("(DALStorage::removeGuildMember) SQL query failure: ",
                           e);
     }
+}
+
+void Storage::addItemToMap(int mapId, int itemId, int amount, int posX, int posY)
+{
+    try
+    {
+        std::ostringstream sql;
+        sql << "insert into " << ITEM_PERSISTENCE_TBL_NAME
+        << " (map_id, item_id, amount, pos_x, pos_y)"
+        << " values ("
+        << mapId << ", "
+        << itemId << ", "
+        << amount << ", "
+        << posX << ", "
+        << posY << ");";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        utils::throwError("(DALStorage::addGuildMember) SQL query failure: ",
+                          e);
+    }
+}
+
+void Storage::removeItemFromMap(int mapId, int itemId, int amount, int posX, int posY)
+{
+    try
+    {
+        std::ostringstream sql;
+        sql << "delete from " << ITEM_PERSISTENCE_TBL_NAME
+        << " where map_id = "
+        << mapId << " and item_id = "
+        << itemId << " and amount = "
+        << amount << " and pos_x = "
+        << posX << " and pos_y = "
+        << posY << ";";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        utils::throwError("(DALStorage::removeGuildMember) SQL query failure: ",
+                          e);
+    }
+}
+
+std::list<int> Storage::getItemsFromMap(int mapId)
+{
+    std::list<int> persistentItems;
+    std::stringstream sql;
+    string_to< unsigned > toUint;
+
+    try
+    {
+        std::ostringstream sql;
+        sql << "SELECT * FROM " << ITEM_PERSISTENCE_TBL_NAME
+        << " WHERE map_id = " << mapId;
+
+        const dal::RecordSet &itemInfo = mDb->execSql(sql.str());
+        if (!itemInfo.isEmpty())
+        {
+            for (int k = 0, size = itemInfo.rows(); k < size; ++k)
+            {
+                persistentItems.push_back(toUint(itemInfo(k, 2)));
+                persistentItems.push_back(toUint(itemInfo(k, 3)));
+                persistentItems.push_back(toUint(itemInfo(k, 4)));
+                persistentItems.push_back(toUint(itemInfo(k, 5)));
+            }
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        utils::throwError("DALStorage::getCharacter #3) SQL query failure: ",
+                          e);
+    }
+
+    return persistentItems;
 }
 
 void Storage::setMemberRights(int guildId, int memberId, int rights)
