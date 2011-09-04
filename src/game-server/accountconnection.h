@@ -164,6 +164,16 @@ class AccountConnection : public Connection
          */
         void sendTransaction(int id, int action, const std::string &message);
 
+        /**
+         * Create item persistence on database
+         */
+        void createItemPersistence(int mapId, int itemId, int amount, int posX, int posY);
+
+        /**
+         * Remove item persistence on database
+         */
+        void removeItemPersistence(int mapId, int itemId, int amount, int posX, int posY);
+
     protected:
         /**
          * Processes server messages.

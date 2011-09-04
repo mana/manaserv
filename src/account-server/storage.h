@@ -25,6 +25,8 @@
 #include <map>
 #include <vector>
 
+#include "account-server/persistentitem.h"
+
 #include "dal/dataprovider.h"
 
 #include "common/transaction.h"
@@ -286,6 +288,34 @@ class Storage
          * @return a list of guilds
          */
         std::list<Guild*> getGuildList();
+
+        /**
+         * Add item to map persisentence
+         *
+         * @param mapID The map id
+         * @param itemId The item id
+         * @param posX Position X of the item
+         * @param posY Position Y of the item
+         */
+        void addItemToMap(int mapId, int itemId, int amount, int posX, int posY);
+
+        /**
+         * Remove item from map persistence
+         *
+         * @param mapID The map id
+         * @param itemId The item id
+         * @param posX Position X of the item
+         * @param posY Position Y of the item
+         */
+        void removeItemFromMap(int mapId, int itemId, int amount, int posX, int posY);
+
+
+        /**
+         * Get all persistent items from map
+         *
+         * @param mapID The map id
+         */
+        std::list<PersistentItem> getItemsFromMap(int mapId);
 
         /**
          * Update an account to the database.

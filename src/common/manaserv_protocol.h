@@ -255,6 +255,8 @@ enum {
     GCMSG_STORE_POST            = 0x05A5, // D sender id, S receiver name, S letter, { W attachment item id, W quantity }
     CGMSG_STORE_POST_RESPONSE   = 0x05A6, // D id, B error
     GAMSG_TRANSACTION           = 0x0600, // D character id, D action, S message
+    GAMSG_CREATE_ITEM_ON_MAP    = 0x0601, // W map id, W item id, W pos x, W pos y
+    GAMSG_REMOVE_ITEM_ON_MAP    = 0x0602, // W map id, W item id, W pos x, W pos y
 
     XXMSG_INVALID = 0x7FFF
 };

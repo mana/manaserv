@@ -357,6 +357,18 @@ CREATE TABLE mana_online_list
 );
 
 -----------------------------------------------------------------------------
+
+CREATE TABLE mana_item_persistence
+(
+    id            INTEGER     PRIMARY KEY,
+    map_id        INTEGER     NOT NULL,
+    item_id       INTEGER     NOT NULL,
+    amount        INTEGER     NOT NULL,
+    pos_x         INTEGER     NOT NULL,
+    pos_y         INTEGER     NOT NULL
+);
+
+-----------------------------------------------------------------------------
 -- Views
 -----------------------------------------------------------------------------
 
@@ -406,7 +418,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'14', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'15', strftime('%s','now'));
 
 -- all known transaction codes
 

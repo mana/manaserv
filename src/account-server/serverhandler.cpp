@@ -242,8 +242,13 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 {
                     MessageOut outMsg(AGMSG_ACTIVE_MAP);
                     outMsg.writeInt16(id);
+
+                    //Word State Vars
                     std::map<std::string, std::string> variables;
                     variables = storage->getAllWorldStateVars(id);
+
+                    outMsg.writeInt16(variables.size()); //count worldstates
+
                     for (std::map<std::string, std::string>::iterator i = variables.begin();
                          i != variables.end();
                          i++)
@@ -251,6 +256,26 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                         outMsg.writeString(i->first);
                         outMsg.writeString(i->second);
                     }
+
+                    //Persistent Items
+                    std::list<PersistentItem> items;
+                    items = storage->getItemsFromMap(id);
+
+                    outMsg.writeInt16(items.size()*4); //count persistent items
+
+                    //write for each item: item_id, amount, pos_x, pos_y
+                    for (std::list<PersistentItem>::iterator i = items.begin();
+                         i != items.end();
+                         i++)
+                    {
+                        PersistentItem tmp=*i;
+                        outMsg.writeInt16(tmp.getItemId());
+                        outMsg.writeInt16(tmp.getItemAmount());
+                        outMsg.writeInt16(tmp.getPosX());
+                        outMsg.writeInt16(tmp.getPosY());
+                    }
+
+                    //send message
                     comp->send(outMsg);
                     MapStatistics &m = server->maps[id];
                     m.nbThings = 0;
@@ -548,6 +573,31 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GCMSG_PARTY_INVITE:
             chatHandler->handlePartyInvite(msg);
             break;
+
+        case GAMSG_CREATE_ITEM_ON_MAP:
+        {
+            LOG_DEBUG("Gameserver create item on map");
+            int mapid = msg.readInt32();
+            int itemid = msg.readInt32();
+            int amount = msg.readInt32();
+            int posx = msg.readInt32();
+            int posy = msg.readInt32();
+
+            storage->addItemToMap(mapid, itemid, amount, posx, posy);
+        } break;
+
+        case GAMSG_REMOVE_ITEM_ON_MAP:
+        {
+            LOG_DEBUG("Gameserver remove item from map");
+            int mapid = msg.readInt32();
+            int itemid = msg.readInt32();
+            int amount = msg.readInt32();
+            int posx = msg.readInt32();
+            int posy = msg.readInt32();
+
+
+            storage->removeItemFromMap(mapid, itemid, amount, posx, posy);
+        } break;
 
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "

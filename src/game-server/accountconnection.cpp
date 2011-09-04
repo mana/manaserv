@@ -26,6 +26,7 @@
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
+#include "game-server/item.h"
 #include "game-server/itemmanager.h"
 #include "game-server/postman.h"
 #include "game-server/quest.h"
@@ -162,8 +163,10 @@ void AccountConnection::processMessage(MessageIn &msg)
             if (MapManager::raiseActive(id))
             {
                 // set map variables
+                int countMapVars=msg.readInt16();
                 MapComposite *m = MapManager::getMap(id);
-                while (msg.getUnreadLength())
+                //while (msg.getUnreadLength())
+                for(int i=0; i<countMapVars; i++)
                 {
                     std::string key = msg.readString();
                     std::string value = msg.readString();
@@ -172,6 +175,34 @@ void AccountConnection::processMessage(MessageIn &msg)
                         m->setVariableFromDbserver(key, value);
                     }
                 }
+
+                //recreate persistent items
+                LOG_DEBUG("Recreate persistant items on map " << id);
+                int countPersistentItems=msg.readInt16();
+
+                for(int i=0; i<countPersistentItems; i+=4)
+                {
+                    int itemId=msg.readInt16();
+                    int amount=msg.readInt16();
+                    int posX=msg.readInt16();
+                    int posY=msg.readInt16();
+
+                    if (ItemClass *ic = itemManager->getItem(itemId))
+                    {
+                        Item *item = new Item(ic, amount);
+                        item->setMap(m);
+                        Point dst(posX, posY);
+                        item->setPosition(dst);
+
+                        if (!GameState::insert(item))
+                        {
+                            // The map is full.
+                            delete item;
+                            return;
+                        }
+                    }
+                }
+
             }
         } break;
 
@@ -464,5 +495,27 @@ void AccountConnection::sendTransaction(int id, int action, const std::string &m
     msg.writeInt32(id);
     msg.writeInt32(action);
     msg.writeString(message);
+    send(msg);
+}
+
+void AccountConnection::createItemPersistence(int mapId, int itemId, int amount, int posX, int posY)
+{
+    MessageOut msg(GAMSG_CREATE_ITEM_ON_MAP);
+    msg.writeInt32(mapId);
+    msg.writeInt32(itemId);
+    msg.writeInt32(amount);
+    msg.writeInt32(posX);
+    msg.writeInt32(posY);
+    send(msg);
+}
+
+void AccountConnection::removeItemPersistence(int mapId, int itemId, int amount, int posX, int posY)
+{
+    MessageOut msg(GAMSG_REMOVE_ITEM_ON_MAP);
+    msg.writeInt32(mapId);
+    msg.writeInt32(itemId);
+    msg.writeInt32(amount);
+    msg.writeInt32(posX);
+    msg.writeInt32(posY);
     send(msg);
 }
