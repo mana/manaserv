@@ -296,6 +296,9 @@ class Item : public Actor
         int getAmount() const
         { return mAmount; }
 
+        int getLifetime() const
+        { return mLifetime; }
+
         virtual void update();
 
     private:

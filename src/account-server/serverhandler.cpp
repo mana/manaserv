@@ -258,18 +258,21 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     }
 
                     //Persistent Items
-                    std::list<int> items;
+                    std::list<PersistentItem> items;
                     items = storage->getItemsFromMap(id);
-                    LOG_DEBUG("#################### Size of return value (getItemsFromMap) is " << items.size());
 
-                    outMsg.writeInt16(items.size()); //count persistent items
+                    outMsg.writeInt16(items.size()*4); //count persistent items
 
                     //write for each item: item_id, amount, pos_x, pos_y
-                    for (std::list<int>::iterator i = items.begin();
+                    for (std::list<PersistentItem>::iterator i = items.begin();
                          i != items.end();
                          i++)
                     {
-                        outMsg.writeInt16(*i);
+                        PersistentItem tmp=*i;
+                        outMsg.writeInt16(tmp.getItemId());
+                        outMsg.writeInt16(tmp.getItemAmount());
+                        outMsg.writeInt16(tmp.getPosX());
+                        outMsg.writeInt16(tmp.getPosY());
                     }
 
                     //send message

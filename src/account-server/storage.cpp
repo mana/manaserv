@@ -24,6 +24,7 @@
 #include "account-server/storage.h"
 
 #include "account-server/account.h"
+#include "account-server/persistentitem.h"
 #include "chat-server/chatchannel.h"
 #include "chat-server/guild.h"
 #include "chat-server/post.h"
@@ -1405,9 +1406,9 @@ void Storage::removeItemFromMap(int mapId, int itemId, int amount, int posX, int
     }
 }
 
-std::list<int> Storage::getItemsFromMap(int mapId)
+std::list<PersistentItem> Storage::getItemsFromMap(int mapId)
 {
-    std::list<int> persistentItems;
+    std::list<PersistentItem> persistentItems;
     std::stringstream sql;
     string_to< unsigned > toUint;
 
@@ -1422,10 +1423,13 @@ std::list<int> Storage::getItemsFromMap(int mapId)
         {
             for (int k = 0, size = itemInfo.rows(); k < size; ++k)
             {
-                persistentItems.push_back(toUint(itemInfo(k, 2)));
-                persistentItems.push_back(toUint(itemInfo(k, 3)));
-                persistentItems.push_back(toUint(itemInfo(k, 4)));
-                persistentItems.push_back(toUint(itemInfo(k, 5)));
+                int itemId=toUint(itemInfo(k, 2));
+                int itemAmount=toUint(itemInfo(k, 3));
+                int posX=toUint(itemInfo(k, 4));
+                int posY=toUint(itemInfo(k, 5));
+
+                PersistentItem tmp=PersistentItem(itemId, itemAmount, posX, posY);
+                persistentItems.push_back(tmp);
             }
         }
     }

@@ -25,6 +25,8 @@
 #include <map>
 #include <vector>
 
+#include "account-server/persistentitem.h"
+
 #include "dal/dataprovider.h"
 
 #include "common/transaction.h"
@@ -313,7 +315,7 @@ class Storage
          *
          * @param mapID The map id
          */
-        std::list<int> getItemsFromMap(int mapId);
+        std::list<PersistentItem> getItemsFromMap(int mapId);
 
         /**
          * Update an account to the database.

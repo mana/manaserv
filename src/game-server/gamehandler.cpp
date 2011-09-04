@@ -538,15 +538,18 @@ void GameHandler::handleDrop(GameClient &client, MessageIn &message)
         }
 
         //create map persistence
-        Point pt = client.character->getPosition();
-        accountHandler->createItemPersistence(client.character->getMap()->getID(), ic->getDatabaseID(), amount, pt.x, pt.y);
+        if(item->getLifetime()==0) //only if game_floorItemDecayTime is 0
+        {
+            Point pt = client.character->getPosition();
+            accountHandler->createItemPersistence(client.character->getMap()->getID(), ic->getDatabaseID(), amount, pt.x, pt.y);
 
-        // log transaction
-        std::stringstream str;
-        str << "User dropped item " << ic->getDatabaseID()
-            << " at " << pt.x << "x" << pt.y;
-        accountHandler->sendTransaction(client.character->getDatabaseID(),
-                                        TRANS_ITEM_DROP, str.str());
+            // log transaction
+            std::stringstream str;
+            str << "User dropped item " << ic->getDatabaseID()
+                << " at " << pt.x << "x" << pt.y;
+            accountHandler->sendTransaction(client.character->getDatabaseID(),
+                                            TRANS_ITEM_DROP, str.str());
+        }
     }
 }
 
