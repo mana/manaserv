@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `mana_characters` (
     -- location on the map
     `x`            smallint(5)  unsigned NOT NULL,
     `y`            smallint(5)  unsigned NOT NULL,
-    `map_id`       int(10)       unsigned NOT NULL,
+    `map_id`       smallint(5)  unsigned NOT NULL,
     `slot`         smallint(5)  unsigned NOT NULL,
     --
     PRIMARY KEY (`id`),
@@ -421,7 +421,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, NOW());
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'15', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'16', NOW());
 
 -- all known transaction codes
 

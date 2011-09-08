@@ -26,7 +26,7 @@ namespace ManaServ {
 
 enum {
     PROTOCOL_VERSION = 1,
-    SUPPORTED_DB_VERSION = 15
+    SUPPORTED_DB_VERSION = 16
 };
 
 /**

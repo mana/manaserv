@@ -198,7 +198,7 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                 }
                 else if (utils::compareStrI(objType, "SPAWN") == 0)
                 {
-                    MonsterClass *monster;
+                    MonsterClass *monster = 0;
                     int maxBeings = 10; // Default value
                     int spawnRate = 10; // Default value
 
