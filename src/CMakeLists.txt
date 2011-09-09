@@ -149,6 +149,7 @@ SET(SRCS_MANASERVACCOUNT
     account-server/accounthandler.cpp
     account-server/character.h
     account-server/character.cpp
+    account-server/flooritem.h
     account-server/serverhandler.h
     account-server/serverhandler.cpp
     account-server/storage.h

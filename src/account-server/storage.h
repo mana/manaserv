@@ -32,6 +32,7 @@
 class Account;
 class Character;
 class ChatChannel;
+class FloorItem;
 class Guild;
 class Letter;
 class Post;
@@ -286,6 +287,38 @@ class Storage
          * @return a list of guilds
          */
         std::list<Guild*> getGuildList();
+
+        /**
+         * Add a floor item to map.
+         *
+         * Used to keep the floor item persistently between two server restart.
+         *
+         * @param mapId The map id
+         * @param itemId The item id
+         * @param posX Position X of the item in pixels
+         * @param posY Position Y of the item in pixels
+         */
+        void addFloorItem(int mapId, int itemId, int amount,
+                          int posX, int posY);
+
+        /**
+         * Remove item from map persistence
+         *
+         * @param mapId The map id
+         * @param itemId The item id
+         * @param posX Position X of the item in pixels
+         * @param posY Position Y of the item in pixels
+         */
+        void removeFloorItem(int mapId, int itemId, int amount,
+                             int posX, int posY);
+
+
+        /**
+         * Get all persistent items from the given map id
+         *
+         * @param mapId The map id
+         */
+        std::list<FloorItem> getFloorItemsFromMap(int mapId);
 
         /**
          * Update an account to the database.

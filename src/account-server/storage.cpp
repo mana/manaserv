@@ -24,6 +24,7 @@
 #include "account-server/storage.h"
 
 #include "account-server/account.h"
+#include "account-server/flooritem.h"
 #include "chat-server/chatchannel.h"
 #include "chat-server/guild.h"
 #include "chat-server/post.h"
@@ -90,6 +91,7 @@ static const char *AUCTION_TBL_NAME             =   "mana_auctions";
 static const char *AUCTION_BIDS_TBL_NAME        =   "mana_auction_bids";
 static const char *ONLINE_USERS_TBL_NAME        =   "mana_online_list";
 static const char *TRANSACTION_TBL_NAME         =   "mana_transactions";
+static const char *FLOOR_ITEMS_TBL_NAME         =   "mana_floor_items";
 
 Storage::Storage()
         : mDb(dal::DataProviderFactory::createDataProvider()),
@@ -138,6 +140,15 @@ void Storage::open()
         std::ostringstream sql;
         sql << "DELETE FROM " << ONLINE_USERS_TBL_NAME;
         mDb->execSql(sql.str());
+
+        // In case where the server shouldn't keep floor item in database,
+        // we remove remnants at startup
+        if (Configuration::getValue("game_floorItemDecayTime", 0) > 0)
+        {
+            sql.clear();
+            sql << "DELETE FROM " << FLOOR_ITEMS_TBL_NAME;
+            mDb->execSql(sql.str());
+        }
     }
     catch (const DbConnectionFailure& e)
     {
@@ -1374,6 +1385,82 @@ void Storage::removeGuildMember(int guildId, int memberId)
         utils::throwError("(DALStorage::removeGuildMember) SQL query failure: ",
                           e);
     }
+}
+
+void Storage::addFloorItem(int mapId, int itemId, int amount,
+                           int posX, int posY)
+{
+    try
+    {
+        std::ostringstream sql;
+        sql << "INSERT INTO " << FLOOR_ITEMS_TBL_NAME
+        << " (map_id, item_id, amount, pos_x, pos_y)"
+        << " VALUES ("
+        << mapId << ", "
+        << itemId << ", "
+        << amount << ", "
+        << posX << ", "
+        << posY << ");";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        utils::throwError("(DALStorage::addFloorItem) SQL query failure: ", e);
+    }
+}
+
+void Storage::removeFloorItem(int mapId, int itemId, int amount,
+                                int posX, int posY)
+{
+    try
+    {
+        std::ostringstream sql;
+        sql << "DELETE FROM " << FLOOR_ITEMS_TBL_NAME
+        << " WHERE map_id = "
+        << mapId << " AND item_id = "
+        << itemId << " AND amount = "
+        << amount << " AND pos_x = "
+        << posX << " AND pos_y = "
+        << posY << ";";
+        mDb->execSql(sql.str());
+    }
+    catch (const dal::DbSqlQueryExecFailure& e)
+    {
+        utils::throwError("(DALStorage::removeFloorItem) SQL query failure: ",
+                          e);
+    }
+}
+
+std::list<FloorItem> Storage::getFloorItemsFromMap(int mapId)
+{
+    std::list<FloorItem> floorItems;
+
+    try
+    {
+        std::ostringstream sql;
+        sql << "SELECT * FROM " << FLOOR_ITEMS_TBL_NAME
+        << " WHERE map_id = " << mapId;
+
+        string_to< unsigned > toUint;
+        const dal::RecordSet &itemInfo = mDb->execSql(sql.str());
+        if (!itemInfo.isEmpty())
+        {
+            for (int k = 0, size = itemInfo.rows(); k < size; ++k)
+            {
+                floorItems.push_back(FloorItem(toUint(itemInfo(k, 2)),
+                                                toUint(itemInfo(k, 3)),
+                                                toUint(itemInfo(k, 4)),
+                                                toUint(itemInfo(k, 5))));
+            }
+        }
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        utils::throwError("DALStorage::getFloorItemsFromMap "
+            "SQL query failure: ", e);
+    }
+
+    return floorItems;
 }
 
 void Storage::setMemberRights(int guildId, int memberId, int rights)

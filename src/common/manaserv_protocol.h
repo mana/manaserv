@@ -26,7 +26,7 @@ namespace ManaServ {
 
 enum {
     PROTOCOL_VERSION = 1,
-    SUPPORTED_DB_VERSION = 16
+    SUPPORTED_DB_VERSION = 17
 };
 
 /**
@@ -232,7 +232,7 @@ enum {
     // Inter-server
     GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision, { W map id }*
     AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version, C password response, { S globalvar_key, S globalvar_value }
-    AGMSG_ACTIVE_MAP            = 0x0502, // W map id, { S mapvar_key, S mapvar_value }
+    AGMSG_ACTIVE_MAP            = 0x0502, // W map id, W Number of mapvar_key mapvar_value sent, { S mapvar_key, S mapvar_value }, W Number of map items, { D item Id, W amount, W posX, W posY }
     AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, D id, S name, serialised character data
     GAMSG_PLAYER_DATA           = 0x0520, // D id, serialised character data
     GAMSG_REDIRECT              = 0x0530, // D id
@@ -258,6 +258,8 @@ enum {
     GCMSG_STORE_POST            = 0x05A5, // D sender id, S receiver name, S letter, { W attachment item id, W quantity }
     CGMSG_STORE_POST_RESPONSE   = 0x05A6, // D id, B error
     GAMSG_TRANSACTION           = 0x0600, // D character id, D action, S message
+    GAMSG_CREATE_ITEM_ON_MAP    = 0x0601, // D map id, D item id, W amount, W pos x, W pos y
+    GAMSG_REMOVE_ITEM_ON_MAP    = 0x0602, // D map id, D item id, W amount, W pos x, W pos y
 
     XXMSG_INVALID = 0x7FFF
 };

@@ -472,11 +472,22 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
             {
                 Item *item = static_cast< Item * >(o);
                 ItemClass *ic = item->getItemClass();
+                int amount = item->getAmount();
                 if (!Inventory(client.character).insert(ic->getDatabaseID(),
-                                                       item->getAmount()))
+                                                       amount))
                 {
-
                     GameState::remove(item);
+
+                    // We only do this when items are to be kept in memory
+                    // between two server restart.
+                    if (!Configuration::getValue("game_floorItemDecayTime", 0))
+                    {
+                        // Remove the floor item from map
+                        accountHandler->removeFloorItems(map->getID(),
+                                                        ic->getDatabaseID(),
+                                                        amount, x, y);
+                    }
+
                     // log transaction
                     std::stringstream str;
                     str << "User picked up item " << ic->getDatabaseID()
@@ -531,8 +542,20 @@ void GameHandler::handleDrop(GameClient &client, MessageIn &message)
             delete item;
             return;
         }
-        // log transaction
+
         Point pt = client.character->getPosition();
+
+        // We store the item in database only when the floor items are meant
+        // to be persistent between two server restarts.
+        if (!Configuration::getValue("game_floorItemDecayTime", 0))
+        {
+            // Create the floor item on map
+            accountHandler->createFloorItems(client.character->getMap()->getID(),
+                                            ic->getDatabaseID(),
+                                            amount, pt.x, pt.y);
+        }
+
+        // log transaction
         std::stringstream str;
         str << "User dropped item " << ic->getDatabaseID()
             << " at " << pt.x << "x" << pt.y;

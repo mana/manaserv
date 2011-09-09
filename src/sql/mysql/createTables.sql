@@ -179,6 +179,22 @@ DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
+-- table: `mana_floor_items`
+--
+CREATE TABLE IF NOT EXISTS `mana_floor_items` (
+    `id`              int(10)      unsigned NOT NULL auto_increment,
+    `map_id`          int(10)      unsigned NOT NULL,
+    `item_id`         int(10)      unsigned NOT NULL,
+    `amount`          smallint(5)  unsigned NOT NULL,
+    `pos_x`           smallint(5)  unsigned NOT NULL,
+    `pos_y`           smallint(5)  unsigned NOT NULL,
+    --
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+AUTO_INCREMENT=1 ;
+
+--
 -- table: `mana_char_equips`
 --
 CREATE TABLE IF NOT EXISTS `mana_char_equips` (
@@ -421,7 +437,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, NOW());
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'16', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'17', NOW());
 
 -- all known transaction codes
 

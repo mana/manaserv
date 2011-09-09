@@ -173,6 +173,18 @@ CREATE INDEX mana_item_attributes_item ON mana_item_attributes ( item_id );
 
 -----------------------------------------------------------------------------
 
+CREATE TABLE mana_floor_items
+(
+    id            INTEGER     PRIMARY KEY,
+    map_id        INTEGER     NOT NULL,
+    item_id       INTEGER     NOT NULL,
+    amount        INTEGER     NOT NULL,
+    pos_x         INTEGER     NOT NULL,
+    pos_y         INTEGER     NOT NULL
+);
+
+-----------------------------------------------------------------------------
+
 CREATE TABLE mana_char_equips
 (
     id               INTEGER    PRIMARY KEY,
@@ -407,7 +419,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'16', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'17', strftime('%s','now'));
 
 -- all known transaction codes
 

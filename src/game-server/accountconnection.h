@@ -160,6 +160,21 @@ class AccountConnection : public Connection
         void updateOnlineStatus(int charId, bool online);
 
         /**
+         * Adds floor items info on database.
+         *
+         * This is used to make them potentially persistent between two server
+         * restart.
+         */
+        void createFloorItems(int mapId, int itemId, int amount,
+                              int posX, int posY);
+
+        /**
+         * Remove floor items from the database
+         */
+        void removeFloorItems(int mapId, int itemId, int amount,
+                              int posX, int posY);
+
+        /**
          * Send transaction to account server
          */
         void sendTransaction(int id, int action, const std::string &message);

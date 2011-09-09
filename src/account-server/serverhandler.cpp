@@ -27,6 +27,7 @@
 #include "account-server/accountclient.h"
 #include "account-server/accounthandler.h"
 #include "account-server/character.h"
+#include "account-server/flooritem.h"
 #include "account-server/storage.h"
 #include "chat-server/chathandler.h"
 #include "chat-server/post.h"
@@ -241,9 +242,15 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 else
                 {
                     MessageOut outMsg(AGMSG_ACTIVE_MAP);
+
+                    // Map variables
                     outMsg.writeInt16(id);
                     std::map<std::string, std::string> variables;
                     variables = storage->getAllWorldStateVars(id);
+
+                     // Map vars number
+                    outMsg.writeInt16(variables.size());
+
                     for (std::map<std::string, std::string>::iterator i = variables.begin();
                          i != variables.end();
                          i++)
@@ -251,6 +258,23 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                         outMsg.writeString(i->first);
                         outMsg.writeString(i->second);
                     }
+
+                    // Persistent Floor Items
+                    std::list<FloorItem> items;
+                    items = storage->getFloorItemsFromMap(id);
+
+                    outMsg.writeInt16(items.size()); //number of floor items
+
+                    // Send each map item: item_id, amount, pos_x, pos_y
+                    for (std::list<FloorItem>::iterator i = items.begin();
+                         i != items.end(); ++i)
+                    {
+                        outMsg.writeInt32(i->getItemId());
+                        outMsg.writeInt16(i->getItemAmount());
+                        outMsg.writeInt16(i->getPosX());
+                        outMsg.writeInt16(i->getPosY());
+                    }
+
                     comp->send(outMsg);
                     MapStatistics &m = server->maps[id];
                     m.nbThings = 0;
@@ -548,6 +572,34 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         case GCMSG_PARTY_INVITE:
             chatHandler->handlePartyInvite(msg);
             break;
+
+        case GAMSG_CREATE_ITEM_ON_MAP:
+        {
+            int mapId = msg.readInt32();
+            int itemId = msg.readInt32();
+            int amount = msg.readInt16();
+            int posX = msg.readInt16();
+            int posY = msg.readInt16();
+
+            LOG_DEBUG("Gameserver create item " << itemId
+                << " on map " << mapId);
+
+            storage->addFloorItem(mapId, itemId, amount, posX, posY);
+        } break;
+
+        case GAMSG_REMOVE_ITEM_ON_MAP:
+        {
+            int mapId = msg.readInt32();
+            int itemId = msg.readInt32();
+            int amount = msg.readInt16();
+            int posX = msg.readInt16();
+            int posY = msg.readInt16();
+
+            LOG_DEBUG("Gameserver removed item " << itemId
+                << " from map " << mapId);
+
+            storage->removeFloorItem(mapId, itemId, amount, posX, posY);
+        } break;
 
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "
