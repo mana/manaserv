@@ -52,12 +52,13 @@ Element elementFromString (const std::string &name)
     return val == table.end() ? ELEMENT_ILLEGAL : (*val).second;
 }
 
-void MonsterManager::initialize()
+void MonsterManager::reload()
 {
-    reload();
+    deinitialize();
+    initialize();
 }
 
-void MonsterManager::reload()
+void MonsterManager::initialize()
 {
     XML::Document doc(mMonsterReferenceFile);
     xmlNodePtr rootNode = doc.rootNode();

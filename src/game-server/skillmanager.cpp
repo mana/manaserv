@@ -91,8 +91,8 @@ void SkillManager::readSkillNode(xmlNodePtr skillNode,
 
     SkillInfo *skillInfo = new SkillInfo;
     skillInfo->setName = setName;
-    skillInfo->skillName = XML::getProperty(skillNode, "name", std::string());
-    skillInfo->skillName = utils::toLower(skillInfo->skillName);
+    skillInfo->skillName = utils::toLower(
+        XML::getProperty(skillNode, "name", std::string()));
     int id = XML::getProperty(skillNode, "id", 0);
 
     if (id <= 0 || skillInfo->skillName.empty())

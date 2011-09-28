@@ -32,12 +32,13 @@
 #include <set>
 #include <sstream>
 
-void ItemManager::initialize()
+void ItemManager::reload()
 {
-    reload();
+    deinitialize();
+    initialize();
 }
 
-void ItemManager::reload()
+void ItemManager::initialize()
 {
     mVisibleEquipSlotCount = 0;
     readEquipSlotsFile();
