@@ -56,6 +56,7 @@ function Harmony(npc, ch, list)
         mana.chr_money_change(ch, 100)
         do_message(npc, ch, string.format("You now have %d shiny coins!", mana.chr_money(ch)))
         harmony_have_talked_to_someone = true
+        do_message(npc, ch, string.format("Try to come back with a better level than %i.", mana.chr_get_level(ch)))
     end
     do_message(npc, ch, "Have fun!")
     mana.effect_create(EMOTE_HAPPY, npc)
