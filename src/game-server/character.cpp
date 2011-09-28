@@ -36,6 +36,7 @@
 #include "game-server/gamehandler.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
+#include "game-server/skillmanager.h"
 #include "game-server/state.h"
 #include "game-server/trade.h"
 #include "scripting/script.h"
@@ -161,7 +162,8 @@ void Character::perform()
     {
         int damageBase = getModifiedAttribute(ATTR_STR);
         int damageDelta = damageBase / 2;
-        Damage knuckleDamage(damageBase, damageDelta, 2, ELEMENT_NEUTRAL,
+        Damage knuckleDamage(skillManager->getDefaultSkillId(),
+                             damageBase, damageDelta, 2, ELEMENT_NEUTRAL,
                             DAMAGE_PHYSICAL,
                             (getSize() < DEFAULT_TILE_LENGTH) ?
                                 DEFAULT_TILE_LENGTH : getSize());

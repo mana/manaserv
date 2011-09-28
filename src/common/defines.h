@@ -126,6 +126,17 @@ enum Element
 };
 
 /**
+ * Damage type, used to know how to compute them.
+ */
+enum DamageType
+{
+    DAMAGE_PHYSICAL = 0,
+    DAMAGE_MAGICAL,
+    DAMAGE_DIRECT,
+    DAMAGE_OTHER = -1
+};
+
+/**
  * A series of hardcoded attributes that must be defined.
  * FIXME: Much of these serve only to indicate derivatives, and so would not be
  * needed once this is no longer a hardcoded system.

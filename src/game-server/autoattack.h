@@ -23,18 +23,8 @@
 
 #include <cstddef>
 #include <list>
-#include <limits>
 
-/**
- * Methods of damage calculation
- */
-enum DamageType
-{
-    DAMAGE_PHYSICAL = 0,
-    DAMAGE_MAGICAL,
-    DAMAGE_DIRECT,
-    DAMAGE_OTHER = -1
-};
+#include "common/defines.h"
 
 /**
  * Structure that describes the severity and nature of an attack a being can
@@ -42,28 +32,30 @@ enum DamageType
  */
 struct Damage
 {
+    unsigned int skill;             /**< Skill used by source (needed for exp calculation) */
     unsigned short base;            /**< Base amount of damage. */
     unsigned short delta;           /**< Additional damage when lucky. */
     unsigned short cth;             /**< Chance to hit. Opposes the evade attribute. */
     unsigned char element;          /**< Elemental damage. */
     DamageType type;                /**< Damage type: Physical or magical? */
-    unsigned trueStrike : 1;        /**< Override dodge calculation */
-    std::list<size_t> usedSkills;   /**< Skills used by source (needed for exp calculation) */
-    unsigned short range;           /**< Maximum distance that this attack can be used from */
+    bool trueStrike;                /**< Override dodge calculation */
+    unsigned short range;           /**< Maximum distance that this attack can be used from, in pixels */
 
-    Damage(unsigned short base,
+    Damage(unsigned int skill,
+           unsigned short base,
            unsigned short delta,
            unsigned short cth,
            unsigned char element,
            DamageType type = DAMAGE_OTHER,
-           unsigned short range = std::numeric_limits<unsigned short>::max())
-        : base(base)
-        , delta(delta)
-        , cth(cth)
-        , element(element)
-        , type(type)
-        , trueStrike(false)
-        , range(range)
+           unsigned short range = DEFAULT_TILE_LENGTH):
+        skill(skill),
+        base(base),
+        delta(delta),
+        cth(cth),
+        element(element),
+        type(type),
+        trueStrike(false),
+        range(range)
     {}
 };
 
@@ -74,11 +66,11 @@ struct Damage
 class AutoAttack
 {
     public:
-        AutoAttack(Damage &damage, unsigned int delay, unsigned int warmup)
-            : mDamage(damage)
-            , mTimer(0)
-            , mAspd(delay)
-            , mWarmup(warmup && warmup < delay ? warmup : delay >> 2)
+        AutoAttack(Damage &damage, unsigned int warmup, unsigned int cooldown):
+            mDamage(damage),
+            mTimer(0),
+            mAspd(cooldown),
+            mWarmup(warmup && warmup < cooldown ? warmup : cooldown >> 2)
         {}
 
         unsigned short getTimer() const { return mTimer; }

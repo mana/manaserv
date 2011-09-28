@@ -97,7 +97,10 @@ bool AttributeManager::isAttributeDirectlyModifiable(int id) const
 
 ModifierLocation AttributeManager::getLocation(const std::string &tag) const
 {
-    return mTagMap.at(tag);
+    if (mTagMap.find(tag) != mTagMap.end())
+        return mTagMap.at(tag);
+    else
+        return ModifierLocation(0, 0);
 }
 
 const std::string *AttributeManager::getTag(const ModifierLocation &location) const
