@@ -174,12 +174,11 @@ class Character : public Being
         void setDatabaseID(int id) { mDatabaseID = id; }
 
         /** Gets the gender of the character (male or female). */
-        int getGender() const
+        BeingGender getGender() const
         { return mGender; }
 
         /** Sets the gender of the character (male or female). */
-        void setGender(int gender)
-        { mGender = gender; }
+        void setGender(int gender);
 
         int getHairStyle() const { return mHairStyle; }
         void setHairStyle(int style) { mHairStyle = style; }
@@ -443,7 +442,7 @@ class Character : public Being
         bool mSpecialUpdateNeeded;
 
         int mDatabaseID;             /**< Character's database ID. */
-        unsigned char mGender;       /**< Gender of the character. */
+        BeingGender mGender;         /**< Gender of the character. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
         unsigned char mHairColor;    /**< Hair Color of the character. */
         int mLevel;                  /**< Level of the character. */
