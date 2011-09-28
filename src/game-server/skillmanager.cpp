@@ -31,9 +31,8 @@ static SkillMap skillMap;
 static std::string skillReferenceFile;
 static std::string defaultSkillKey = std::string();
 
-void SkillManager::initialize(const std::string &file)
+void SkillManager::initialize()
 {
-    skillReferenceFile = file;
     reload();
 }
 
@@ -44,7 +43,7 @@ void SkillManager::reload()
     skillMap["KNIFE"] = 101;
     */
 
-    XML::Document doc(skillReferenceFile);
+    XML::Document doc(mSkillFile);
     xmlNodePtr rootNode = doc.rootNode();
 
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "skills"))

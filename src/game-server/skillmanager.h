@@ -24,12 +24,21 @@
 
 #include <string>
 
-namespace SkillManager
+class SkillManager
 {
+  public:
+    SkillManager(const std::string & skillFile):
+        mSkillFile(skillFile),
+        mDefaultSkillId(0)
+    {}
+
+    ~SkillManager()
+    {}
+
     /**
      * Loads skill reference file.
      */
-    void initialize(const std::string &);
+    void initialize();
 
     /**
      * Reloads skill reference file.
@@ -41,7 +50,14 @@ namespace SkillManager
      * (not case-sensitive to reduce wall-bashing)
      */
     int getIdFromString(const std::string &name);
-}
+
+  private:
+    // The skill file (skills.xml)
+    std::string mSkillFile;
+
+    // The default skill id
+    unsigned int mDefaultSkillId;
+};
 
 
 
