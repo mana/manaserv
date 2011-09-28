@@ -476,6 +476,23 @@ static int chr_inv_count(lua_State *s)
 }
 
 /**
+ * mana.chr_get_level(): int level
+ * Tells the character current level.
+ */
+static int chr_get_level(lua_State *s)
+{
+    Character *ch = getCharacter(s, 1);
+    if (!ch)
+    {
+        raiseScriptError(s, "chr_get_level "
+                         "called for nonexistent character.");
+    }
+
+    lua_pushinteger(s, ch->getLevel());
+    return 1;
+}
+
+/**
  * mana.npc_trade(NPC*, Character*, bool sell, table items): int
  * Callback for trading between a player and an NPC.
  * Let the player buy or sell only a subset of predeterminded items.
@@ -2302,6 +2319,7 @@ LuaScript::LuaScript():
         { "chr_warp",                        &chr_warp                        },
         { "chr_inv_change",                  &chr_inv_change                  },
         { "chr_inv_count",                   &chr_inv_count                   },
+        { "chr_get_level",                   &chr_get_level                   },
         { "chr_get_quest",                   &chr_get_quest                   },
         { "chr_set_quest",                   &chr_set_quest                   },
         { "getvar_map",                      &getvar_map                      },
