@@ -53,6 +53,8 @@ class SkillManager
     const std::string getSkillName(unsigned int id) const;
     const std::string getSetName(unsigned int id) const;
 
+    unsigned int getDefaultSkillId() const
+    { return mDefaultSkillId; }
   private:
     struct SkillInfo {
         SkillInfo():
@@ -85,5 +87,7 @@ class SkillManager
     // The default skill id
     unsigned int mDefaultSkillId;
 };
+
+extern SkillManager *skillManager;
 
 #endif // SKILLMANAGER_H
