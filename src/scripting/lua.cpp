@@ -1811,6 +1811,25 @@ static int chr_get_gender(lua_State *s)
 }
 
 /**
+ * mana.chr_set_gender(Character*, int gender): void
+ * Set the gender of the character.
+ */
+static int chr_set_gender(lua_State *s)
+{
+    Character *c = getCharacter(s, 1);
+    if (!c)
+    {
+        raiseScriptError(s, "chr_set_gender called for nonexistent character.");
+        return 0;
+    }
+
+    const int gender = luaL_checkinteger(s, 2);
+    c->setGender(gender);
+
+    return 0;
+}
+
+/**
  * mana.chr_give_special(Character*, int special): void
  * Enables a special for a character.
  */
@@ -2179,6 +2198,7 @@ LuaScript::LuaScript():
         { "chr_get_hair_color",              &chr_get_hair_color              },
         { "chr_get_kill_count",              &chr_get_kill_count              },
         { "chr_get_gender",                  &chr_get_gender                  },
+        { "chr_set_gender",                  &chr_set_gender                  },
         { "chr_give_special",                &chr_give_special                },
         { "chr_has_special",                 &chr_has_special                 },
         { "chr_take_special",                &chr_take_special                },
