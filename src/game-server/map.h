@@ -26,11 +26,12 @@
 #include <string>
 #include <vector>
 
+#include "utils/logger.h"
 #include "utils/point.h"
+#include "utils/string.h"
 
 typedef std::list<Point> Path;
 typedef Path::iterator PathIterator;
-
 enum BlockType
 {
     BLOCKTYPE_NONE = -1,
@@ -59,6 +60,46 @@ class MetaTile
         char blockmask;          /**< walkability bitfield */
 };
 
+class MapObject
+{
+    public:
+        MapObject(const Rectangle &bounds,
+                  const std::string &name,
+                  const std::string &type)
+            : mBounds(bounds),
+              mName(name),
+              mType(type)
+        { }
+
+        void addProperty(const std::string &key, const std::string &value)
+        {   
+            if (mProperties.contains(key))
+                LOG_WARN("Duplicate property " << key <<
+                         " of object " << mName);
+            else
+                mProperties.insert(key, value);
+        }
+
+        std::string getProperty(const std::string &key) const
+        { return mProperties.find(key); }
+
+        const std::string &getName() const
+        { return mName; }
+
+        const std::string &getType() const
+        { return mType; }
+
+        const Rectangle &getBounds() const
+        { return mBounds; }
+
+    private:
+        Rectangle mBounds;
+        std::string mName;
+        std::string mType;
+        utils::NameMap<std::string> mProperties;
+};
+
+
 /**
  * A tile map.
  */
@@ -70,6 +111,8 @@ class Map
          */
         Map(int width, int height,
             int tileWidth, int tileHeight);
+
+        ~Map();
 
         /**
          * Sets the size of the map. This will destroy any existing map data.
@@ -129,8 +172,20 @@ class Map
         /**
         * Sets a map property
         */
-        void setProperty(const std::string& key, const std::string& val)
+        void setProperty(const std::string &key, const std::string &val)
         { mProperties[key] = val; }
+
+        /** 
+         * Adds an object.
+         */
+        void addObject(MapObject *object)
+        { mMapObjects.push_back(object); }
+
+        /**
+         * Returns the objects of the map.
+         */
+        const std::vector<MapObject*> &getObjects() const
+        { return mMapObjects; }
 
         /**
          * Find a path from one location to the next.
@@ -154,6 +209,7 @@ class Map
         std::map<std::string, std::string> mProperties;
 
         std::vector<MetaTile> mMetaTiles;
+        std::vector<MapObject*> mMapObjects;
 };
 
 #endif

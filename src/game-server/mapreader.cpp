@@ -141,54 +141,44 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                 int objH = XML::getProperty(objectNode, "height", 0);
                 Rectangle rect = { objX, objY, objW, objH };
 
+                MapObject *newObject = new MapObject(rect, objName, objType);
+
+                for_each_xml_child_node(propertiesNode, objectNode)
+                {
+                    if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
+                    {
+                        continue;
+                    }
+                    
+                    for_each_xml_child_node(propertyNode, propertiesNode)
+                    {
+                        if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
+                        {
+                            std::string key = XML::getProperty(
+                                    propertyNode, "name", std::string());
+                            std::string value = getObjectProperty(propertyNode,
+                                                                 std::string());
+                            newObject->addProperty(key, value);
+                        }
+                    }
+                }
 
                 if (utils::compareStrI(objType, "WARP") == 0)
                 {
-                    std::string destMapName = std::string();
-                    int destX = -1;
-                    int destY = -1;
+                    std::string destMapName = newObject->getProperty("DEST_MAP");
+                    int destX = utils::stringToInt(
+                                               newObject->getProperty("DEST_X"));
+                    int destY = utils::stringToInt(
+                                               newObject->getProperty("DEST_Y"));
 
-                    for_each_xml_child_node(propertiesNode, objectNode)
-                    {
-                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
-                        {
-                            continue;
-                        }
-
-                        for_each_xml_child_node(propertyNode, propertiesNode)
-                        {
-                            if (xmlStrEqual(propertyNode->name,
-                                            BAD_CAST "property"))
-                            {
-                                std::string value = XML::getProperty(
-                                           propertyNode, "name", std::string());
-                                value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "DEST_MAP") == 0)
-                                {
-                                    destMapName = getObjectProperty(propertyNode,
-                                                                 std::string());
-                                }
-                                else if (utils::compareStrI(value, "DEST_X") == 0)
-                                {
-                                    destX = getObjectProperty(propertyNode, -1);
-                                }
-                                else if (utils::compareStrI(value, "DEST_Y") == 0)
-                                {
-                                    destY = getObjectProperty(propertyNode, -1);
-                                }
-                            }
-                        }
-                    }
-
-                    if (!destMapName.empty() && destX != -1 && destY != -1)
+                    if (!destMapName.empty() && destX && destY)
                     {
                         MapComposite *destMap = MapManager::getMap(destMapName);
                         if (destMap)
                         {
                             things.push_back(new TriggerArea(
                                 composite, rect,
-                                new WarpAction(destMap, destX, destY),
-                                false));
+                                new WarpAction(destMap, destX, destY), false));
                         }
                     }
                     else
@@ -199,71 +189,36 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                 else if (utils::compareStrI(objType, "SPAWN") == 0)
                 {
                     MonsterClass *monster = 0;
-                    int maxBeings = 10; // Default value
-                    int spawnRate = 10; // Default value
-
-                    for_each_xml_child_node(propertiesNode, objectNode)
+                    int maxBeings = utils::stringToInt(
+                            newObject->getProperty("MAX_BEINGS"));
+                    int spawnRate = utils::stringToInt(
+                            newObject->getProperty("SPAWN_RATE"));
+                    std::string monsterName =
+                            newObject->getProperty("MONSTER_ID");
+                    int monsterId = utils::stringToInt(monsterName);
+                    if (monsterId)
                     {
-                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
+                        monster = monsterManager->getMonster(
+                                                        monsterId);
+                        if (!monster)
                         {
-                            continue;
-                        }
-
-                        for_each_xml_child_node(propertyNode, propertiesNode)
-                        {
-                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
-                            {
-                                std::string value = XML::getProperty(
-                                                            propertyNode,
-                                                            "name",
-                                                            std::string());
-                                value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "MONSTER_ID") == 0)
-                                {
-                                    std::string monsterName =
-                                        getObjectProperty(propertyNode,
-                                                          std::string());
-                                    int monsterId = utils::stringToInt(monsterName);
-                                    if (monsterId)
-                                    {
-                                        monster = monsterManager->getMonster(
-                                                                     monsterId);
-                                        if (!monster)
-                                        {
-                                            LOG_WARN("Couldn't find monster ID "
-                                                     << monsterId <<
-                                                     " for spawn area");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        monster = monsterManager->
-                                                  getMonsterByName(monsterName);
-                                        if (!monster)
-                                        {
-                                            LOG_WARN("Couldn't find monster "
-                                                     << monsterName <<
-                                                     " for spawn area");
-                                        }
-                                    }
-                                }
-                                else if (utils::compareStrI(value,
-                                                            "MAX_BEINGS") == 0)
-                                {
-                                    maxBeings = getObjectProperty(propertyNode,
-                                                                  maxBeings);
-                                }
-                                else if (utils::compareStrI(value,
-                                                            "SPAWN_RATE") == 0)
-                                {
-                                    spawnRate = getObjectProperty(propertyNode,
-                                                                  spawnRate);
-                                }
-                            }
+                            LOG_WARN("Couldn't find monster ID "
+                                        << monsterId <<
+                                        " for spawn area");
                         }
                     }
-
-                    if (monster)
+                    else
+                    {
+                        monster = monsterManager->
+                                    getMonsterByName(monsterName);
+                        if (!monster)
+                        {
+                            LOG_WARN("Couldn't find monster "
+                                        << monsterName <<
+                                        " for spawn area");
+                        }
+                    }
+                    if (monster && maxBeings && spawnRate)
                     {
                         things.push_back(new SpawnArea(composite, monster, rect,
                                                        maxBeings, spawnRate));
@@ -279,35 +234,11 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         composite->setScript(s);
                     }
 
-                    int npcId = -1;
-                    std::string scriptText;
+                    int npcId = utils::stringToInt(
+                            newObject->getProperty("NPC_ID"));
+                    std::string scriptText = newObject->getProperty("SCRIPT");
 
-                    for_each_xml_child_node(propertiesNode, objectNode)
-                    {
-                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
-                        {
-                            continue;
-                        }
-
-                        for_each_xml_child_node(propertyNode, propertiesNode)
-                        {
-                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
-                            {
-                                std::string value = XML::getProperty(propertyNode, "name", std::string());
-                                value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "NPC_ID") == 0)
-                                {
-                                    npcId = getObjectProperty(propertyNode, npcId);
-                                }
-                                else if (utils::compareStrI(value, "SCRIPT") == 0)
-                                {
-                                    scriptText = getObjectProperty(propertyNode, std::string());
-                                }
-                            }
-                        }
-                    }
-
-                    if (npcId != -1 && !scriptText.empty())
+                    if (npcId && !scriptText.empty())
                     {
                         s->loadNPC(objName, npcId, objX, objY, scriptText.c_str());
                     }
@@ -326,36 +257,9 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         composite->setScript(s);
                     }
 
-                    std::string scriptFilename;
-                    std::string scriptText;
-
-                    for_each_xml_child_node(propertiesNode, objectNode)
-                    {
-                        if (!xmlStrEqual(propertiesNode->name, BAD_CAST "properties"))
-                        {
-                            continue;
-                        }
-
-                        for_each_xml_child_node(propertyNode, propertiesNode)
-                        {
-                            if (xmlStrEqual(propertyNode->name, BAD_CAST "property"))
-                            {
-                                std::string value = XML::getProperty(propertyNode, "name",
-                                                                     std::string());
-                                value = utils::toUpper(value);
-                                if (utils::compareStrI(value, "FILENAME") == 0)
-                                {
-                                    scriptFilename = getObjectProperty(propertyNode,
-                                                                       std::string());
-                                    utils::trim(scriptFilename);
-                                }
-                                else if (utils::compareStrI(value, "TEXT") == 0)
-                                {
-                                    scriptText = getObjectProperty(propertyNode, "");
-                                }
-                            }
-                        }
-                    }
+                    std::string scriptFilename =
+                            newObject->getProperty("FILENAME");
+                    std::string scriptText = newObject->getProperty("TEXT");
 
                     if (!scriptFilename.empty())
                     {
@@ -371,6 +275,8 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                         LOG_WARN("Unrecognized format for script");
                     }
                 }
+
+                map->addObject(newObject);
             }
         }
     }

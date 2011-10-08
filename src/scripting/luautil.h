@@ -31,6 +31,8 @@ extern "C" {
 #include <set>
 #include <vector>
 
+#include "game-server/map.h"
+
 class Being;
 class NPC;
 class Character;
@@ -52,8 +54,9 @@ Being *getBeing(lua_State *s, int p);
    Useful for templates.*/
 void push(lua_State *s, int val);
 void push(lua_State *s, const std::string &val);
-void push(lua_State *s, Thing* val);
+void push(lua_State *s, Thing *val);
 void push(lua_State *s, double val);
+void push(lua_State *s, MapObject *val);
 
 
 /*  Pushes an STL LIST */
