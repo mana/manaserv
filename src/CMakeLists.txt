@@ -16,9 +16,12 @@ ENDIF()
 IF (POLICY CMP0015)
   CMAKE_POLICY(SET CMP0015 OLD)
 ENDIF()
+INCLUDE_DIRECTORIES("../libs/angelscript/include")
+LINK_DIRECTORIES("../libs/angelscript/lib")
+SET(ANGELSCRIPT_LIBRARIES Angelscript)
 INCLUDE_DIRECTORIES("../libs/enet/include")
 LINK_DIRECTORIES("../libs/enet")
-SET(INTERNAL_LIBRARIES enet)
+SET(ENET_LIBRARIES enet)
 
 # enable rc-handling with mingw
 # most likely this part can be kicked out with some later cmake version
@@ -290,6 +293,19 @@ IF (WITH_SQLITE)
     dal/sqlitedataprovider.cpp)
 ENDIF()
 
+IF (ENABLE_ANGELSCRIPT)
+    SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME}
+    scripting/angelscript/scriptbuilder/scriptbuilder.cpp
+    scripting/angelscript/scriptbuilder/scriptbuilder.h
+    scripting/angelscript/scriptarray/scriptarray.cpp
+    scripting/angelscript/scriptarray/scriptarray.h
+    scripting/angelscript/scriptstdstring/scriptstdstring.cpp
+    scripting/angelscript/scriptstdstring/scriptstdstring.h
+    scripting/angelscript/scriptstdstring/scriptstdstring_utils.cpp
+    scripting/asscript.cpp
+    scripting/asscript.h)
+ENDIF()
+
 IF (ENABLE_LUA)
     SET(SRCS_MANASERVGAME ${SRCS_MANASERVGAME}
     scripting/lua.cpp
@@ -306,7 +322,8 @@ ADD_EXECUTABLE(manaserv-game WIN32 ${SRCS} ${SRCS_MANASERVGAME})
 ADD_EXECUTABLE(manaserv-account WIN32 ${SRCS} ${SRCS_MANASERVACCOUNT})
 
 FOREACH(program ${PROGRAMS})
-    TARGET_LINK_LIBRARIES(${program} ${INTERNAL_LIBRARIES}
+    TARGET_LINK_LIBRARIES(${program} ${ENET_LIBRARIES}
+        ${ANGELSCRIPT_LIBRARIES}
         ${PHYSFS_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}

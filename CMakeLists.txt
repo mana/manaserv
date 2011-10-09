@@ -12,6 +12,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 
 OPTION(WITH_SQLITE "Enable Sqlite support (used by default)" ON)
 OPTION(WITH_MYSQL "Enable building of tranlations" OFF)
+OPTION(ENABLE_ANGELSCRIPT "Enable AngleScript scripting support" ON)
 OPTION(ENABLE_LUA "Enable Lua scripting support" ON)
 
 # Exclude Sqlite support if the MySQL support was asked.
@@ -52,5 +53,6 @@ ELSE (WIN32)
     SET(PKG_BINDIR ${CMAKE_INSTALL_PREFIX}/bin)
 ENDIF (WIN32)
 
+ADD_SUBDIRECTORY(libs/angelscript/projects/cmake)
 ADD_SUBDIRECTORY(libs/enet)
 ADD_SUBDIRECTORY(src)
