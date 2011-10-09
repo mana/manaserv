@@ -172,3 +172,12 @@ bool Script::performCraft(Being* crafter, std::list<InventoryItem> recipe)
     }
     return true;
 }
+
+std::string Script::determinateEngineOverFilename(std::string filename)
+{
+    std::string ext=filename.substr(filename.find_last_of("."));
+
+    if(ext=="lua") return "lua";
+    else if(ext=="as") return "angelscript";
+    else return "lua";
+}

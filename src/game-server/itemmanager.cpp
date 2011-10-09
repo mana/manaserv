@@ -415,7 +415,9 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
             }
 
             LOG_INFO("Loading item script: " << filename.str());
-            Script *script = Script::create("lua");
+
+            std::string engineName= Script::determinateEngineOverFilename(filename.str());
+            Script *script = Script::create(engineName);
             if (!script->loadFile(filename.str()))
             {
                 // Delete the script as it's invalid.

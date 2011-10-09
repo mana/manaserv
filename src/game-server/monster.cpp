@@ -334,7 +334,8 @@ void Monster::loadScript(const std::string &scriptName)
     if (ResourceManager::exists(filename.str()))
     {
         LOG_INFO("Loading monster script: " << filename.str());
-        mScript = Script::create("lua");
+        std::string engineName= Script::determinateEngineOverFilename(filename.str());
+        mScript = Script::create(engineName);
         mScript->loadFile(filename.str());
     }
     else

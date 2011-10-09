@@ -55,7 +55,7 @@ class Script
         /**
          * Loads a chunk of text into script context and executes its global
          * statements.
-         *
+         *e-server/itemmanager.cpp:419: Fehler:
          * @param prog the program text to load
          * @param name the name of the text, used for error reporting
          */
@@ -143,6 +143,7 @@ class Script
         static bool performSpecialAction(int specialId, Being *caster);
         static bool performCraft(Being* crafter, std::list<InventoryItem> recipe);
 
+        static std::string determinateEngineOverFilename(std::string filename);
 
     protected:
         static Script *globalEventScript;

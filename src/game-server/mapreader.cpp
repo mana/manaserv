@@ -248,7 +248,9 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                     if (!s)
                     {
                         // Create a Lua context.
-                        s = Script::create("lua");
+                        //std::string engineName= Script::determinateEngineOverFilename(filename.str());
+                        std::string engineName="lua"; //TODO Determinate Scripttype
+                        s = Script::create(engineName);
                         composite->setScript(s);
                     }
 
@@ -295,7 +297,9 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                     if (!s)
                     {
                         // Create a Lua context.
-                        s = Script::create("lua");
+                        //std::string engineName= Script::determinateEngineOverFilename(filename.str());
+                        std::string engineName="lua"; //TODO Determinate Scripttype
+                        s = Script::create(engineName);
                         composite->setScript(s);
                     }
 
