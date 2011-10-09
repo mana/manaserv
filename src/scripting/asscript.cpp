@@ -62,7 +62,8 @@ AsScript::~AsScript()
 
 void AsScript::load(const char *prog, const char *name)
 {
-       int nRet=builder.StartNewModule(asEngine, name);
+       //int nRet=builder.StartNewModule(asEngine, name);
+       int nRet=builder.StartNewModule(asEngine, "module1");
 
        if( nRet < 0 )
        {
@@ -148,44 +149,53 @@ void AsScript::push(const std::list<InventoryItem> &itemList)
 
 int AsScript::execute()
 {
-//    assert(nbArgs >= 0);
-//    int res = lua_pcall(mState, nbArgs, 1, 1);
-//    nbArgs = -1;
-//    if (res || !(lua_isnil(mState, -1) || lua_isnumber(mState, -1)))
-//    {
-//        const char *s = lua_tostring(mState, -1);
+    // Find the function that is to be called.
+    asIScriptModule *mod = asEngine->GetModule("module1");
+    int funcId = mod->GetFunctionIdByDecl("void main()");
+    if( funcId < 0 )
+    {
+      // The function couldn't be found. Instruct the script writer
+      // to include the expected function in the script.
+      LOG_FATAL("The script must have the function 'void main()'. Please add it and try again.");
+      return funcId;
+    }
 
-//        LOG_WARN("Lua Script Error" << std::endl
-//                 << "     Script  : " << mScriptFile << std::endl
-//                 << "     Function: " << mCurFunction << std::endl
-//                 << "     Error   : " << (s ? s : "") << std::endl);
-//        lua_pop(mState, 1);
-//        return 0;
-//    }
-//    res = lua_tointeger(mState, -1);
-//    lua_pop(mState, 1);
-//    return res;
-//    mCurFunction.clear();
+    // Create our context, prepare it, and then execute
+    asIScriptContext *ctx = asEngine->CreateContext();
+    ctx->Prepare(funcId);
+    int r = ctx->Execute();
+    if( r != asEXECUTION_FINISHED )
+    {
+      // The execution didn't complete as expected. Determine what happened.
+      if( r == asEXECUTION_EXCEPTION )
+      {
+        // An exception occurred, let the script writer know what happened so it can be corrected.
+        LOG_FATAL("An exception " << ctx->GetExceptionString() << " occurred. Please correct the code and try again.\n");
+      }
+    }
 
-    return 0;
+    // Clean up
+    ctx->Release();
+
+    return r;
 }
 
 void AsScript::processDeathEvent(Being *being)
 {
-//    prepare("death_notification");
-//    push(being);
-//    //TODO: get and push a list of creatures who contributed to killing the
-//    //      being. This might be very interesting for scripting quests.
-//    execute();
+    prepare("death_notification");
+    push(being);
+    //TODO: get and push a list of creatures who contributed to killing the
+    //      being. This might be very interesting for scripting quests.
+    execute();
 }
 
 void AsScript::processRemoveEvent(Thing *being)
 {
-//    prepare("remove_notification");
-//    push(being);
-//    //TODO: get and push a list of creatures who contributed to killing the
-//    //      being. This might be very interesting for scripting quests.
-//    execute();
+    prepare("remove_notification");
+    push(being);
+    //TODO: get and push a list of creatures who contributed to killing the
+    //      being. This might be very interesting for scripting quests.
+    execute();
 
-//    being->removeListener(getScriptListener());
+    being->removeListener(getScriptListener());
 }
