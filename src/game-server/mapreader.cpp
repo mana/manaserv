@@ -293,16 +293,6 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                 }
                 else if (utils::compareStrI(objType, "SCRIPT") == 0)
                 {
-                    Script *s = composite->getScript();
-                    if (!s)
-                    {
-                        // Create a Lua context.
-                        //std::string engineName= Script::determinateEngineOverFilename(filename.str());
-                        std::string engineName="lua"; //TODO Determinate Scripttype
-                        s = Script::create(engineName);
-                        composite->setScript(s);
-                    }
-
                     std::string scriptFilename;
                     std::string scriptText;
 
@@ -332,6 +322,24 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                                 }
                             }
                         }
+                    }
+
+                    Script *s = composite->getScript();
+                    if (!s)
+                    {
+                        std::string engineName="";
+                        // Create a Lua context.
+                        if (!scriptFilename.empty())
+                        {
+                            engineName=Script::determinateEngineOverFilename(scriptFilename);
+                        }
+                        else
+                        {
+                            engineName="lua"; //TODO Determinate Scripttype
+                        }
+
+                        s = Script::create(engineName);
+                        composite->setScript(s);
                     }
 
                     if (!scriptFilename.empty())
