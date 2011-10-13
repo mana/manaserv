@@ -45,7 +45,7 @@ void raiseScriptError(const char* description)
  * mana.log(int log_level, string log_message): void
  * Logs the given message to the log.
  */
-int log(const int logLevel, std::string str)
+int log(const int logLevel, const std::string str)
 {
     if (logLevel >= utils::Logger::Fatal && logLevel <= utils::Logger::Debug)
          utils::Logger::output(str, (utils::Logger::Level) logLevel);
@@ -81,7 +81,7 @@ AsScript::AsScript()
     // Register the function that we want the scripts to call
     //int r = engine->RegisterGlobalFunction("void Print(string &in)", asFUNCTION(PrintString), asCALL_CDECL); assert( r >= 0 );
     //int r=asEngine->RegisterGlobalFunction("static int log(const int logLevel)", asFUNCTIONPR(log, (const int), int), asCALL_CDECL); assert( r >= 0 );
-    int r=asEngine->RegisterGlobalFunction("int log(const int logLevel, string str)", asFUNCTIONPR(log, (const int, std::string), int), asCALL_CDECL); assert( r >= 0 );
+    int r=asEngine->RegisterGlobalFunction("int log(const int logLevel, const string str)", asFUNCTIONPR(log, (const int, std::string), int), asCALL_CDECL); assert( r >= 0 );
     //int r=asEngine->RegisterGlobalFunction("int log(const int logLevel)", asFUNCTION(_log), asCALL_CDECL); assert( r >= 0 );
 }
 
@@ -90,7 +90,7 @@ AsScript::AsScript()
 AsScript::~AsScript()
 {
     // Release the context when you're done with it
-    //asContext->Release();
+    asContext->Release();
 
     // Release the engine
     asEngine->Release();
@@ -128,6 +128,9 @@ void AsScript::load(const char *prog, const char *name)
         LOG_FATAL("Please correct the errors in the script and try again.\n");
         return;
       }
+
+      // Execute the script
+      executeScript();
 }
 
 void AsScript::prepare(const std::string &name)
@@ -183,7 +186,7 @@ void AsScript::push(const std::list<InventoryItem> &itemList)
 //    ++nbArgs;
 }
 
-int AsScript::execute()
+int AsScript::executeScript()
 {
     // Find the function that is to be called.
     asIScriptModule *mod = asEngine->GetModule("module1");
@@ -197,23 +200,28 @@ int AsScript::execute()
     }
 
     // Create our context, prepare it, and then execute
-    asIScriptContext *ctx = asEngine->CreateContext();
-    ctx->Prepare(funcId);
-    int r = ctx->Execute();
+    asContext = asEngine->CreateContext();
+    asContext->Prepare(funcId);
+    int r = asContext->Execute();
     if( r != asEXECUTION_FINISHED )
     {
       // The execution didn't complete as expected. Determine what happened.
       if( r == asEXECUTION_EXCEPTION )
       {
         // An exception occurred, let the script writer know what happened so it can be corrected.
-        LOG_FATAL("An exception " << ctx->GetExceptionString() << " occurred. Please correct the code and try again.\n");
+        LOG_FATAL("An exception " << asContext->GetExceptionString() << " occurred. Please correct the code and try again.\n");
       }
     }
 
-    // Clean up
-    ctx->Release();
+    // We don't remove the context here because we may need it later
 
     return r;
+}
+
+int AsScript::execute()
+{
+    // TODO
+    return 0;
 }
 
 void AsScript::processDeathEvent(Being *being)

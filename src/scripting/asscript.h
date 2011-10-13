@@ -61,13 +61,15 @@ class AsScript: public Script
         //int log(const int logLevel);
 
     private:
-          asIScriptEngine * asEngine;
-          //asIScriptContext *asContext;
+        int executeScript();
 
-          // The CScriptBuilder helper is an add-on that loads the file,
-          // performs a pre-processing pass if necessary, and then tells
-          // the engine to build a script module.
-          CScriptBuilder builder;
+        asIScriptEngine * asEngine;
+        asIScriptContext *asContext;
+
+        // The CScriptBuilder helper is an add-on that loads the file,
+        // performs a pre-processing pass if necessary, and then tells
+        // the engine to build a script module.
+        CScriptBuilder builder;
 //        lua_State *mState;
 //        int nbArgs;
 //        std::string mCurFunction;

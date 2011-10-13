@@ -55,7 +55,6 @@ class Script
         /**
          * Loads a chunk of text into script context and executes its global
          * statements.
-         *e-server/itemmanager.cpp:419: Fehler:
          * @param prog the program text to load
          * @param name the name of the text, used for error reporting
          */
