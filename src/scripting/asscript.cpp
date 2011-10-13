@@ -28,13 +28,14 @@
 //#include "game-server/being.h"
 //#include "utils/logger.h"
 
-//#include <cassert>
+#include <cassert>
 //#include <cstring>
 
 AsScript::AsScript()
 {
     // Create the AngelScript script engine
     asEngine = asCreateScriptEngine(ANGELSCRIPT_VERSION);
+
     if( asEngine == 0 )
     {
         LOG_FATAL("Failed to create Angel Script engine." << std::endl);
@@ -50,10 +51,34 @@ AsScript::AsScript()
     // necessary to implement the registration yourself if you don't want to.
     RegisterStdString(asEngine);
 
+    //Create Context
+    asContext = asEngine->CreateContext();
+
     // Register the function that we want the scripts to call
-    //int r=asEngine->RegisterGlobalFunction("void print(const string &in)", asFUNCTION(print), asCALL_CDECL); assert( r >= 0 );
+    //int r=asEngine->RegisterGlobalFunction("int log(const int logLevel, const string &logMessage)", asFUNCTION(log), asCALL_CDECL); assert( r >= 0 );
 }
 
+//Scriptbindings
+void AsScript::raiseScriptError(const char* description)
+{
+    LOG_WARN("Angel script error: "<< description);
+    asContext->SetException(description);
+}
+
+/**
+ * mana.log(int log_level, string log_message): void
+ * Logs the given message to the log.
+ */
+int AsScript::log(const int logLevel, const std::string &logMessage)
+{
+    if (logLevel >= utils::Logger::Fatal && logLevel <= utils::Logger::Debug)
+         utils::Logger::output(logMessage, (utils::Logger::Level) logLevel);
+    else
+        raiseScriptError("log called with unknown loglevel");
+    return 0;
+}
+
+//Destruktor
 AsScript::~AsScript()
 {
     // Release the engine
