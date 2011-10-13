@@ -19,40 +19,15 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "asscript.h"
-
-//#include "luascript.h"
-
 #include <string.h>  // strstr()
-
-//#include "scripting/luautil.h"
-
 //#include "game-server/being.h"
 //#include "utils/logger.h"
-#include "scripting/angelscript/scriptstdstring/scriptstdstring.h"
 #include <cassert>
 //#include <cstring>
 
-//Scriptbindings
-void raiseScriptError(const char* description)
-{
-    LOG_WARN("Angel script error: "<< description);
-    asIScriptContext *ctx = asGetActiveContext();
-    ctx->SetException(description);
-}
-
-/**
- * mana.log(int log_level, string log_message): void
- * Logs the given message to the log.
- */
-int log(const int logLevel, const std::string str)
-{
-    if (logLevel >= utils::Logger::Fatal && logLevel <= utils::Logger::Debug)
-         utils::Logger::output(str, (utils::Logger::Level) logLevel);
-    else
-        raiseScriptError("log called with unknown loglevel");
-    return 0;
-}
+#include "asscript.h"
+#include "scripting/angelscript/scriptstdstring/scriptstdstring.h"
+#include "scripting/angelbindings.cpp"
 
 //Constructor
 AsScript::AsScript()
@@ -75,14 +50,8 @@ AsScript::AsScript()
     // necessary to implement the registration yourself if you don't want to.
     RegisterStdString(asEngine);
 
-    //Create Context
-    //asContext = asEngine->CreateContext();
-
     // Register the function that we want the scripts to call
-    //int r = engine->RegisterGlobalFunction("void Print(string &in)", asFUNCTION(PrintString), asCALL_CDECL); assert( r >= 0 );
-    //int r=asEngine->RegisterGlobalFunction("static int log(const int logLevel)", asFUNCTIONPR(log, (const int), int), asCALL_CDECL); assert( r >= 0 );
-    int r=asEngine->RegisterGlobalFunction("int log(const int logLevel, const string str)", asFUNCTIONPR(log, (const int, std::string), int), asCALL_CDECL); assert( r >= 0 );
-    //int r=asEngine->RegisterGlobalFunction("int log(const int logLevel)", asFUNCTION(_log), asCALL_CDECL); assert( r >= 0 );
+    int r=asEngine->RegisterGlobalFunction("void log(const int logLevel, const string str)", asFUNCTIONPR(log, (const int, std::string), void), asCALL_CDECL); assert( r >= 0 );
 }
 
 
