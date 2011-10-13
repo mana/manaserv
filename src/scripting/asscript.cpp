@@ -29,7 +29,7 @@
 
 //#include "game-server/being.h"
 //#include "utils/logger.h"
-//#include "scripting/angelscript/scriptstdstring/scriptstdstring.h"
+#include "scripting/angelscript/scriptstdstring/scriptstdstring.h"
 #include <cassert>
 //#include <cstring>
 
@@ -47,11 +47,8 @@ void raiseScriptError(const char* description)
  */
 int log(const int logLevel, std::string str)
 {
-    std::string logMessage;
-    logMessage = "Test";
-    logMessage= str;
     if (logLevel >= utils::Logger::Fatal && logLevel <= utils::Logger::Debug)
-         utils::Logger::output(logMessage, (utils::Logger::Level) logLevel);
+         utils::Logger::output(str, (utils::Logger::Level) logLevel);
     else
         raiseScriptError("log called with unknown loglevel");
     return 0;
@@ -84,7 +81,7 @@ AsScript::AsScript()
     // Register the function that we want the scripts to call
     //int r = engine->RegisterGlobalFunction("void Print(string &in)", asFUNCTION(PrintString), asCALL_CDECL); assert( r >= 0 );
     //int r=asEngine->RegisterGlobalFunction("static int log(const int logLevel)", asFUNCTIONPR(log, (const int), int), asCALL_CDECL); assert( r >= 0 );
-    int r=asEngine->RegisterGlobalFunction("int log(const int logLevel)", asFUNCTIONPR(log, (const int, std::string), int), asCALL_CDECL); assert( r >= 0 );
+    int r=asEngine->RegisterGlobalFunction("int log(const int logLevel, string str)", asFUNCTIONPR(log, (const int, std::string), int), asCALL_CDECL); assert( r >= 0 );
     //int r=asEngine->RegisterGlobalFunction("int log(const int logLevel)", asFUNCTION(_log), asCALL_CDECL); assert( r >= 0 );
 }
 
