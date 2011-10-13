@@ -31,6 +31,30 @@
 #include <cassert>
 //#include <cstring>
 
+//Scriptbindings
+void raiseScriptError(const char* description)
+{
+    LOG_WARN("Angel script error: "<< description);
+    asIScriptContext *ctx = asGetActiveContext();
+    ctx->SetException(description);
+}
+
+/**
+ * mana.log(int log_level, string log_message): void
+ * Logs the given message to the log.
+ */
+int log(const int logLevel)
+{
+    std::string logMessage;
+    logMessage = "Test";
+    if (logLevel >= utils::Logger::Fatal && logLevel <= utils::Logger::Debug)
+         utils::Logger::output(logMessage, (utils::Logger::Level) logLevel);
+    else
+        raiseScriptError("log called with unknown loglevel");
+    return 0;
+}
+
+//Constructor
 AsScript::AsScript()
 {
     // Create the AngelScript script engine
@@ -52,35 +76,22 @@ AsScript::AsScript()
     RegisterStdString(asEngine);
 
     //Create Context
-    asContext = asEngine->CreateContext();
+    //asContext = asEngine->CreateContext();
 
     // Register the function that we want the scripts to call
-    //int r=asEngine->RegisterGlobalFunction("int log(const int logLevel, const string &logMessage)", asFUNCTION(log), asCALL_CDECL); assert( r >= 0 );
+    //int r = engine->RegisterGlobalFunction("void Print(string &in)", asFUNCTION(PrintString), asCALL_CDECL); assert( r >= 0 );
+    //int r=asEngine->RegisterGlobalFunction("static int log(const int logLevel)", asFUNCTIONPR(log, (const int), int), asCALL_CDECL); assert( r >= 0 );
+    int r=asEngine->RegisterGlobalFunction("int log(const int logLevel)", asFUNCTIONPR(log, (const int), int), asCALL_CDECL); assert( r >= 0 );
+    //int r=asEngine->RegisterGlobalFunction("int log(const int logLevel)", asFUNCTION(_log), asCALL_CDECL); assert( r >= 0 );
 }
 
-//Scriptbindings
-void AsScript::raiseScriptError(const char* description)
-{
-    LOG_WARN("Angel script error: "<< description);
-    asContext->SetException(description);
-}
-
-/**
- * mana.log(int log_level, string log_message): void
- * Logs the given message to the log.
- */
-int AsScript::log(const int logLevel, const std::string &logMessage)
-{
-    if (logLevel >= utils::Logger::Fatal && logLevel <= utils::Logger::Debug)
-         utils::Logger::output(logMessage, (utils::Logger::Level) logLevel);
-    else
-        raiseScriptError("log called with unknown loglevel");
-    return 0;
-}
 
 //Destruktor
 AsScript::~AsScript()
 {
+    // Release the context when you're done with it
+    //asContext->Release();
+
     // Release the engine
     asEngine->Release();
 }

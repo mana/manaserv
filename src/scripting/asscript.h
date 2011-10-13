@@ -55,14 +55,14 @@ class AsScript: public Script
 
         void processRemoveEvent(Thing *thing);
 
-        //Scriptbindings and helper functions
-        void raiseScriptError(const char* description);
+        //Script bindings and helper functions
+        //void raiseScriptError(const char* description);
 
-        int log(const int logLevel, const std::string &logMessage);
+        //int log(const int logLevel);
 
     private:
           asIScriptEngine * asEngine;
-          asIScriptContext *asContext ;
+          //asIScriptContext *asContext;
 
           // The CScriptBuilder helper is an add-on that loads the file,
           // performs a pre-processing pass if necessary, and then tells
