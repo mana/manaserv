@@ -108,8 +108,8 @@ void AsScript::load(const char *prog, const char *name)
         return;
     }
 
-    // Execute the script
-    executeScript();
+    // Create the context
+    asContext = asEngine->CreateContext();
 }
 
 void AsScript::prepare(const std::string &name)
@@ -174,20 +174,6 @@ void AsScript::push(const std::list<InventoryItem> &itemList)
 //        lua_settable(mState, itemTable);
 //    }
 //    ++nbArgs;
-}
-
-void AsScript::executeScript()
-{
-    // Create our context
-    asContext = asEngine->CreateContext();
-
-    // Prepare init function
-    prepare("atinit");
-
-    // Execute it
-    execute();
-
-    // We don't remove the context here because we may need it later
 }
 
 int AsScript::execute()

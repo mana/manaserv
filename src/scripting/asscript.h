@@ -61,8 +61,6 @@ class AsScript: public Script
         //int log(const int logLevel);
 
     private:
-        void executeScript();
-
         asIScriptEngine * asEngine;
         asIScriptContext *asContext;
         int nbArgs;
