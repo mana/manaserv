@@ -30,7 +30,7 @@
 #include "scripting/angelbindings.cpp"
 
 //Constructor
-AsScript::AsScript()
+AsScript::AsScript() : nbArgs(-1)
 {
     // Create the AngelScript script engine
     asEngine = asCreateScriptEngine(ANGELSCRIPT_VERSION);
@@ -67,54 +67,75 @@ AsScript::~AsScript()
 
 void AsScript::load(const char *prog, const char *name)
 {
-       //int nRet=builder.StartNewModule(asEngine, name);
-       int nRet=builder.StartNewModule(asEngine, "module1");
+    //int nRet=builder.StartNewModule(asEngine, name);
+    int nRet=builder.StartNewModule(asEngine, "module1");
 
-       if( nRet < 0 )
-       {
-         // If the code fails here it is usually because there
-         // is no more memory to allocate the module
-         LOG_FATAL("Unrecoverable error while starting a new module.");
-         return;
-       }
+    if( nRet < 0 )
+    {
+        // If the code fails here it is usually because there
+        // is no more memory to allocate the module
+        LOG_FATAL("Unrecoverable error while starting a new module.");
+        return;
+    }
 
-      nRet=builder.AddSectionFromMemory(prog, name);
+    nRet = builder.AddSectionFromFile("scripts/angelscript/libmana.as");
+    if( nRet < 0 )
+    {
+        // The builder wasn't able to load the file. Maybe the file
+        // has been removed, or the wrong name was given, or some
+        // preprocessing commands are incorrectly written.
+        LOG_FATAL("Couldn't load file \"libmana.as\"");
+        return;
+    }
 
-      if( nRet < 0 )
-      {
+    nRet = builder.AddSectionFromMemory(prog, name);
+
+    if( nRet < 0 )
+    {
         // The builder wasn't able to load the file. Maybe the file
         // has been removed, or the wrong name was given, or some
         // preprocessing commands are incorrectly written.
         LOG_FATAL("Please correct the errors in the script and try again.");
         return;
-      }
+    }
 
-      nRet = builder.BuildModule();
-      if( nRet < 0 )
-      {
+    nRet = builder.BuildModule();
+    if( nRet < 0 )
+    {
         // An error occurred. Instruct the script writer to fix the
         // compilation errors that were listed in the output stream.
-        LOG_FATAL("Please correct the errors in the script and try again.\n");
+        LOG_FATAL("Please correct the errors in the script and try again.");
         return;
-      }
+    }
 
-      // Execute the script
-      executeScript();
+    // Execute the script
+    executeScript();
 }
 
 void AsScript::prepare(const std::string &name)
 {
-    //assert(nbArgs == -1);
-//    lua_getglobal(mState, name.c_str());
-//    nbArgs = 0;
-//    mCurFunction = name;
+    // It shouldn't be tried to prepare more than one function at once
+    assert(nbArgs < 0);
+
+    // Find the function that is to be called.
+    asIScriptModule *mod = asEngine->GetModule("module1");
+    int funcId = mod->GetFunctionIdByName(name.c_str());
+    if( funcId < 0 )
+    {
+        // The function couldn't be found. Instruct the script writer
+        // to include the expected function in the script.
+        LOG_WARN("I should have prepared function \"" + name + "\"");
+    }else{
+        asContext->Prepare(funcId);
+        nbArgs = 0;
+    }
 }
 
 void AsScript::push(int v)
 {
-//    assert(nbArgs >= 0);
-//    lua_pushinteger(mState, v);
-//    ++nbArgs;
+    assert(nbArgs >= 0);
+    asContext->SetArgDWord(asUINT(nbArgs), asDWORD(v));
+    nbArgs++;
 }
 
 void AsScript::push(const std::string &v)
@@ -155,41 +176,41 @@ void AsScript::push(const std::list<InventoryItem> &itemList)
 //    ++nbArgs;
 }
 
-int AsScript::executeScript()
+void AsScript::executeScript()
 {
-    // Find the function that is to be called.
-    asIScriptModule *mod = asEngine->GetModule("module1");
-    int funcId = mod->GetFunctionIdByDecl("void main()");
-    if( funcId < 0 )
-    {
-      // The function couldn't be found. Instruct the script writer
-      // to include the expected function in the script.
-      LOG_FATAL("The script must have the function 'void main()'. Please add it and try again.");
-      return funcId;
-    }
-
-    // Create our context, prepare it, and then execute
+    // Create our context
     asContext = asEngine->CreateContext();
-    asContext->Prepare(funcId);
-    int r = asContext->Execute();
-    if( r != asEXECUTION_FINISHED )
-    {
-      // The execution didn't complete as expected. Determine what happened.
-      if( r == asEXECUTION_EXCEPTION )
-      {
-        // An exception occurred, let the script writer know what happened so it can be corrected.
-        LOG_FATAL("An exception " << asContext->GetExceptionString() << " occurred. Please correct the code and try again.\n");
-      }
-    }
+
+    // Prepare init function
+    prepare("atinit");
+
+    // Execute it
+    execute();
 
     // We don't remove the context here because we may need it later
-
-    return r;
 }
 
 int AsScript::execute()
-{
-    // TODO
+{   
+    // There should already be a function prepared
+    assert(nbArgs >= 0);
+
+    // Reset counter to be able to prepare another function later
+    nbArgs = -1;
+
+    // Execute context
+    int r = asContext->Execute();
+    if( r != asEXECUTION_FINISHED )
+    {
+        // The execution didn't complete as expected. Determine what happened.
+        if( r == asEXECUTION_EXCEPTION )
+        {
+            // An exception occurred, let the script writer know what happened so it can be corrected.
+            LOG_FATAL("An exception " << asContext->GetExceptionString() << " occurred. Please correct the code and try again.\n");
+        }
+        return 0;
+    }
+    // We _should_ have a return value here, but I see no reason for it
     return 0;
 }
 

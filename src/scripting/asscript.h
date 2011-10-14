@@ -61,10 +61,11 @@ class AsScript: public Script
         //int log(const int logLevel);
 
     private:
-        int executeScript();
+        void executeScript();
 
         asIScriptEngine * asEngine;
         asIScriptContext *asContext;
+        int nbArgs;
 
         // The CScriptBuilder helper is an add-on that loads the file,
         // performs a pre-processing pass if necessary, and then tells
