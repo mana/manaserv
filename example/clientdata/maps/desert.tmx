@@ -24,7 +24,7 @@
  <objectgroup name="Objects" width="40" height="40">
   <object name="Main script" type="SCRIPT" x="16" y="25" width="167" height="10">
    <properties>
-    <property name="FILENAME" value="scripts/maps/desert.lua"/>
+    <property name="FILENAME" value="scripts/maps/desert.as"/>
    </properties>
   </object>
  </objectgroup>
