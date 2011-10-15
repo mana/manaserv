@@ -1414,14 +1414,27 @@ static int chat_message(lua_State *s)
 
 /**
  * mana.get_beings_in_circle(int x, int y, int radius): table of Being*
+ * mana.get_beings_in_circle(handle centerBeing, int radius): table of Being*
  * Gets a LUA table with the Being* pointers of all beings
  * inside of a circular area of the current map.
  */
 static int get_beings_in_circle(lua_State *s)
 {
-    const int x = luaL_checkint(s, 1);
-    const int y = luaL_checkint(s, 2);
-    const int r = luaL_checkint(s, 3);
+    int x, y, r;
+    if (lua_islightuserdata(s, 1))
+    {
+        Being *b = getBeing(s, 1);
+        const Point &pos = b->getPosition();
+        x = pos.x;
+        y = pos.y;
+        r = luaL_checkint(s, 2);
+    }
+    else
+    {
+        x = luaL_checkint(s, 1);
+        y = luaL_checkint(s, 2);
+        r = luaL_checkint(s, 3);
+    }
 
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
