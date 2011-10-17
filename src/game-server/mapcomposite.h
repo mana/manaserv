@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2006-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2011  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -233,10 +234,13 @@ class MapComposite
         ~MapComposite();
 
         /**
-         * Sets the underlying pathfinding map.
-         * Can be done only once.
+         * Loads the map and initializes the map content. Should only be called
+         * once!
+         *
+         * @return <code>true</code> when succesful, <code>false</code> when
+         *         an error occurred.
          */
-        void setMap(Map *);
+        bool activate();
 
         /**
          * Gets the underlying pathfinding map.
@@ -245,13 +249,8 @@ class MapComposite
         { return mMap; }
 
         /**
-         * Sets the associated script.
-         */
-        void setScript(Script *s)
-        { mScript = s; }
-
-        /**
-         * Gets the associated script.
+         * Gets the associated script. Returns 0 when no scripts or inline
+         * NPCs are used on this map!
          */
         Script *getScript() const
         { return mScript; }
@@ -329,13 +328,13 @@ class MapComposite
         /**
          * Gets the cached value of a map-bound script variable
          */
-        std::string getVariable(const std::string &key);
+        std::string getVariable(const std::string &key) const;
 
         /**
          * Changes a script variable and notifies the database server
          * about the change
          */
-        void setVariable (const std::string &key, const std::string &value);
+        void setVariable(const std::string &key, const std::string &value);
 
         /**
          * Changes a script variable without notifying the database server
@@ -348,13 +347,15 @@ class MapComposite
     private:
         MapComposite(const MapComposite &);
 
+        void initializeContent();
+
         Map *mMap;            /**< Actual map. */
         MapContent *mContent; /**< Entities on the map. */
         Script *mScript;      /**< Script associated to this map. */
         std::string mName;    /**< Name of the map. */
         unsigned short mID;   /**< ID of the map. */
         /** Cached persistent variables */
-        std::map< std::string, std::string > mScriptVariables;
+        std::map<std::string, std::string> mScriptVariables;
         PvPRules mPvPRules;
 };
 

@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2011  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -20,13 +21,8 @@
 
 #include "game-server/mapreader.h"
 
+#include "common/defines.h"
 #include "game-server/map.h"
-#include "game-server/mapcomposite.h"
-#include "game-server/mapmanager.h"
-#include "game-server/monstermanager.h"
-#include "game-server/spawnarea.h"
-#include "game-server/trigger.h"
-#include "scripting/script.h"
 #include "utils/base64.h"
 #include "utils/logger.h"
 #include "utils/xml.h"
@@ -37,7 +33,7 @@
 
 static std::vector< int > tilesetFirstGids;
 
-bool MapReader::readMap(const std::string &filename, MapComposite *composite)
+Map *MapReader::readMap(const std::string &filename)
 {
     XML::Document doc(filename);
     xmlNodePtr rootNode = doc.rootNode();
@@ -49,39 +45,16 @@ bool MapReader::readMap(const std::string &filename, MapComposite *composite)
         return false;
     }
 
-    std::vector<Thing *> things;
-    Map *map = readMap(rootNode, filename, composite, things);
-
-    if (map)
-    {
-        composite->setMap(map);
-
-        for (std::vector< Thing * >::const_iterator i = things.begin(),
-             i_end = things.end(); i != i_end; ++i)
-        {
-            composite->insert(*i);
-        }
-
-        if (Script *s = composite->getScript())
-        {
-            s->setMap(composite);
-            s->prepare("initialize");
-            s->execute();
-        }
-    }
-    return true;
+    return readMap(rootNode);
 }
 
-Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
-                        MapComposite *composite, std::vector<Thing *> &things)
+Map *MapReader::readMap(xmlNodePtr node)
 {
-    // Take the filename off the path
-    std::string pathDir = path.substr(0, path.rfind("/") + 1);
     int w = XML::getProperty(node, "width", 0);
     int h = XML::getProperty(node, "height", 0);
-    int tilew = XML::getProperty(node, "tilewidth", DEFAULT_TILE_LENGTH);
-    int tileh = XML::getProperty(node, "tileheight", DEFAULT_TILE_LENGTH);
-    Map* map = new Map(w, h, tilew, tileh);
+    int tileW = XML::getProperty(node, "tilewidth", DEFAULT_TILE_LENGTH);
+    int tileH = XML::getProperty(node, "tileheight", DEFAULT_TILE_LENGTH);
+    Map *map = new Map(w, h, tileW, tileH);
 
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
@@ -160,119 +133,6 @@ Map* MapReader::readMap(xmlNodePtr node, const std::string &path,
                                                                  std::string());
                             newObject->addProperty(key, value);
                         }
-                    }
-                }
-
-                if (utils::compareStrI(objType, "WARP") == 0)
-                {
-                    std::string destMapName = newObject->getProperty("DEST_MAP");
-                    int destX = utils::stringToInt(
-                                               newObject->getProperty("DEST_X"));
-                    int destY = utils::stringToInt(
-                                               newObject->getProperty("DEST_Y"));
-
-                    if (!destMapName.empty() && destX && destY)
-                    {
-                        MapComposite *destMap = MapManager::getMap(destMapName);
-                        if (destMap)
-                        {
-                            things.push_back(new TriggerArea(
-                                composite, rect,
-                                new WarpAction(destMap, destX, destY), false));
-                        }
-                    }
-                    else
-                    {
-                        LOG_WARN("Unrecognized warp format");
-                    }
-                }
-                else if (utils::compareStrI(objType, "SPAWN") == 0)
-                {
-                    MonsterClass *monster = 0;
-                    int maxBeings = utils::stringToInt(
-                            newObject->getProperty("MAX_BEINGS"));
-                    int spawnRate = utils::stringToInt(
-                            newObject->getProperty("SPAWN_RATE"));
-                    std::string monsterName =
-                            newObject->getProperty("MONSTER_ID");
-                    int monsterId = utils::stringToInt(monsterName);
-                    if (monsterId)
-                    {
-                        monster = monsterManager->getMonster(
-                                                        monsterId);
-                        if (!monster)
-                        {
-                            LOG_WARN("Couldn't find monster ID "
-                                        << monsterId <<
-                                        " for spawn area");
-                        }
-                    }
-                    else
-                    {
-                        monster = monsterManager->
-                                    getMonsterByName(monsterName);
-                        if (!monster)
-                        {
-                            LOG_WARN("Couldn't find monster "
-                                        << monsterName <<
-                                        " for spawn area");
-                        }
-                    }
-                    if (monster && maxBeings && spawnRate)
-                    {
-                        things.push_back(new SpawnArea(composite, monster, rect,
-                                                       maxBeings, spawnRate));
-                    }
-                }
-                else if (utils::compareStrI(objType, "NPC") == 0)
-                {
-                    Script *s = composite->getScript();
-                    if (!s)
-                    {
-                        // Create a Lua context.
-                        s = Script::create("lua");
-                        composite->setScript(s);
-                    }
-
-                    int npcId = utils::stringToInt(
-                            newObject->getProperty("NPC_ID"));
-                    std::string scriptText = newObject->getProperty("SCRIPT");
-
-                    if (npcId && !scriptText.empty())
-                    {
-                        s->loadNPC(objName, npcId, objX, objY, scriptText.c_str());
-                    }
-                    else
-                    {
-                        LOG_WARN("Unrecognized format for npc");
-                    }
-                }
-                else if (utils::compareStrI(objType, "SCRIPT") == 0)
-                {
-                    Script *s = composite->getScript();
-                    if (!s)
-                    {
-                        // Create a Lua context.
-                        s = Script::create("lua");
-                        composite->setScript(s);
-                    }
-
-                    std::string scriptFilename =
-                            newObject->getProperty("FILENAME");
-                    std::string scriptText = newObject->getProperty("TEXT");
-
-                    if (!scriptFilename.empty())
-                    {
-                        s->loadFile(scriptFilename);
-                    }
-                    else if (!scriptText.empty())
-                    {
-                        const std::string name = "'" + objName + "'' in " + path;
-                        s->load(scriptText.c_str(), name.c_str());
-                    }
-                    else
-                    {
-                        LOG_WARN("Unrecognized format for script");
                     }
                 }
 

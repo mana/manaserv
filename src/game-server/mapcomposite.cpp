@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2006-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2011  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -21,11 +22,17 @@
 #include <algorithm>
 #include <cassert>
 
-#include "common/configuration.h"
 #include "accountconnection.h"
-#include "game-server/map.h"
-#include "game-server/mapcomposite.h"
+#include "common/configuration.h"
+#include "common/resourcemanager.h"
 #include "game-server/character.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/map.h"
+#include "game-server/mapmanager.h"
+#include "game-server/mapreader.h"
+#include "game-server/monstermanager.h"
+#include "game-server/spawnarea.h"
+#include "game-server/trigger.h"
 #include "scripting/script.h"
 #include "utils/logger.h"
 #include "utils/point.h"
@@ -261,6 +268,11 @@ void ActorIterator::operator++()
     }
 }
 
+
+/******************************************************************************
+ * ObjectBucket
+ *****************************************************************************/
+
 ObjectBucket::ObjectBucket()
   : free(256), next_object(0)
 {
@@ -325,6 +337,11 @@ void ObjectBucket::deallocate(int i)
     bitmap[i / int_bitsize] |= 1 << (i % int_bitsize);
     ++free;
 }
+
+
+/******************************************************************************
+ * MapContent
+ *****************************************************************************/
 
 MapContent::MapContent(Map *map)
   : last_bucket(0), zones(NULL)
@@ -433,6 +450,11 @@ MapZone& MapContent::getZone(const Point &pos) const
     return zones[(pos.x / zoneDiam) + (pos.y / zoneDiam) * mapWidth];
 }
 
+
+/******************************************************************************
+ * MapComposite
+ *****************************************************************************/
+
 MapComposite::MapComposite(int id, const std::string &name):
     mMap(NULL),
     mContent(NULL),
@@ -447,6 +469,39 @@ MapComposite::~MapComposite()
     delete mMap;
     delete mContent;
     delete mScript;
+}
+
+bool MapComposite::activate()
+{
+    assert(!isActive());
+
+    std::string file = "maps/" + mName + ".tmx";
+    if (!ResourceManager::exists(file))
+        file += ".gz";
+
+    mMap = MapReader::readMap(file);
+    if (!mMap)
+        return false;
+
+    initializeContent();
+
+    std::string sPvP = mMap->getProperty("pvp");
+    if (sPvP.empty())
+        sPvP = Configuration::getValue("game_defaultPvp", std::string());
+
+    if (sPvP == "free")
+        mPvPRules = PVP_FREE;
+    else
+        mPvPRules = PVP_NONE;
+
+    if (Script *s = getScript())
+    {
+        s->setMap(this);
+        s->prepare("initialize");
+        s->execute();
+    }
+
+    return true;
 }
 
 ZoneIterator MapComposite::getAroundPointIterator(const Point &p, int radius) const
@@ -544,22 +599,6 @@ void MapComposite::remove(Thing *ptr)
     }
 }
 
-void MapComposite::setMap(Map *m)
-{
-    assert(!mMap && m);
-    mMap = m;
-    mContent = new MapContent(m);
-
-    std::string sPvP = m->getProperty("pvp");
-    if (sPvP.empty())
-        sPvP = Configuration::getValue("game_defaultPvp", std::string());
-
-    if (sPvP == "free")
-        mPvPRules = PVP_FREE;
-    else
-        mPvPRules = PVP_NONE;
-}
-
 void MapComposite::update()
 {
     for (int i = 0; i < mContent->mapHeight * mContent->mapWidth; ++i)
@@ -596,12 +635,11 @@ const std::vector< Thing * > &MapComposite::getEverything() const
 }
 
 
-std::string MapComposite::getVariable(const std::string &key)
+std::string MapComposite::getVariable(const std::string &key) const
 {
-    std::map<std::string, std::string>::iterator iValue =
-                                                     mScriptVariables.find(key);
-    if (iValue != mScriptVariables.end())
-        return iValue->second;
+    std::map<std::string, std::string>::const_iterator i = mScriptVariables.find(key);
+    if (i != mScriptVariables.end())
+        return i->second;
     else
         return std::string();
 }
@@ -609,13 +647,128 @@ std::string MapComposite::getVariable(const std::string &key)
 void MapComposite::setVariable(const std::string &key, const std::string &value)
 {
     // check if the value actually changed
-    std::map<std::string, std::string>::iterator iOldValue =
-                                                     mScriptVariables.find(key);
-    if (iOldValue == mScriptVariables.end() || iOldValue->second != value)
+    std::map<std::string, std::string>::iterator i = mScriptVariables.find(key);
+    if (i == mScriptVariables.end() || i->second != value)
     {
         // changed value or unknown variable
         mScriptVariables[key] = value;
         // update accountserver
         accountHandler->updateMapVar(this, key, value);
+    }
+}
+
+/**
+ * Initializes the map content. This creates the warps, spawn areas, npcs and
+ * other scripts.
+ */
+void MapComposite::initializeContent()
+{
+    mContent = new MapContent(mMap);
+
+    const std::vector<MapObject*> &objects = mMap->getObjects();
+
+    for (size_t i = 0; i < objects.size(); ++i)
+    {
+        const MapObject *object = objects.at(i);
+        const std::string &type = object->getType();
+
+        if (utils::compareStrI(type, "WARP") == 0)
+        {
+            std::string destMapName = object->getProperty("DEST_MAP");
+            int destX = utils::stringToInt(object->getProperty("DEST_X"));
+            int destY = utils::stringToInt(object->getProperty("DEST_Y"));
+
+            if (!destMapName.empty() && destX && destY)
+            {
+                if (MapComposite *destMap = MapManager::getMap(destMapName))
+                {
+                    WarpAction *action = new WarpAction(destMap, destX, destY);
+                    insert(new TriggerArea(this, object->getBounds(),
+                                           action, false));
+                }
+            }
+            else
+            {
+                LOG_WARN("Unrecognized warp format");
+            }
+        }
+        else if (utils::compareStrI(type, "SPAWN") == 0)
+        {
+            MonsterClass *monster = 0;
+            int maxBeings = utils::stringToInt(object->getProperty("MAX_BEINGS"));
+            int spawnRate = utils::stringToInt(object->getProperty("SPAWN_RATE"));
+            std::string monsterName = object->getProperty("MONSTER_ID");
+            int monsterId = utils::stringToInt(monsterName);
+
+            if (monsterId)
+            {
+                monster = monsterManager->getMonster(monsterId);
+                if (!monster)
+                {
+                    LOG_WARN("Couldn't find monster ID " << monsterId <<
+                             " for spawn area");
+                }
+            }
+            else
+            {
+                monster = monsterManager->getMonsterByName(monsterName);
+                if (!monster)
+                {
+                    LOG_WARN("Couldn't find monster " << monsterName <<
+                             " for spawn area");
+                }
+            }
+
+            if (monster && maxBeings && spawnRate)
+            {
+                insert(new SpawnArea(this, monster, object->getBounds(),
+                                     maxBeings, spawnRate));
+            }
+        }
+        else if (utils::compareStrI(type, "NPC") == 0)
+        {
+            if (!mScript)
+            {
+                mScript = Script::create("lua");
+            }
+
+            int npcId = utils::stringToInt(object->getProperty("NPC_ID"));
+            std::string scriptText = object->getProperty("SCRIPT");
+
+            if (npcId && !scriptText.empty())
+            {
+                mScript->loadNPC(object->getName(), npcId,
+                                 object->getX(), object->getY(),
+                                 scriptText.c_str());
+            }
+            else
+            {
+                LOG_WARN("Unrecognized format for npc");
+            }
+        }
+        else if (utils::compareStrI(type, "SCRIPT") == 0)
+        {
+            if (!mScript)
+            {
+                mScript = Script::create("lua");
+            }
+
+            std::string scriptFilename = object->getProperty("FILENAME");
+            std::string scriptText = object->getProperty("TEXT");
+
+            if (!scriptFilename.empty())
+            {
+                mScript->loadFile(scriptFilename);
+            }
+            else if (!scriptText.empty())
+            {
+                std::string name = "'" + object->getName() + "'' in " + mName;
+                mScript->load(scriptText.c_str(), name.c_str());
+            }
+            else
+            {
+                LOG_WARN("Unrecognized format for script");
+            }
+        }
     }
 }

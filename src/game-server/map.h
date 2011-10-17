@@ -92,6 +92,9 @@ class MapObject
         const Rectangle &getBounds() const
         { return mBounds; }
 
+        int getX() const { return mBounds.x; }
+        int getY() const { return mBounds.y; }
+
     private:
         Rectangle mBounds;
         std::string mName;

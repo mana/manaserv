@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2011  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -62,7 +63,7 @@ namespace MapManager
      * Sets the activity status of the map.
      * @return true if the activation was successful.
      */
-    bool raiseActive(int mapId);
+    bool activateMap(int mapId);
 }
 
 #endif // MAPMANAGER_H
