@@ -141,30 +141,13 @@ static void initialize()
     // Initialize PhysicsFS
     PHYSFS_init("");
 
-    // Initialize the logger.
-    Logger::setLogFile(logFile, true);
-
-    // Write the messages to both the screen and the log file.
-    Logger::setTeeMode(
-                      Configuration::getBoolValue("log_accountToStandardOutput",
-                                                  true));
-    LOG_INFO("Using log file: " << logFile);
+    Logger::initialize(logFile);
 
     // Indicate in which file the statistics are put.
     statisticsFile = Configuration::getValue("log_statisticsFile",
                                              DEFAULT_STATS_FILE);
 
     LOG_INFO("Using statistics file: " << statisticsFile);
-
-    // Set up the options related to log rotation.
-    Logger::enableLogRotation(Configuration::getBoolValue("log_enableRotation",
-                                                          false));
-
-    Logger::setMaxLogfileSize(Configuration::getValue("log_maxFileSize",
-                                                      1024));
-
-    Logger::setSwitchLogEachDay(Configuration::getBoolValue("log_perDay",
-                                                            false));
 
     ResourceManager::initialize();
 

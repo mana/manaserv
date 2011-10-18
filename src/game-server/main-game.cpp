@@ -164,24 +164,7 @@ static void initializeServer()
     // Initialize PhysicsFS
     PHYSFS_init("");
 
-    // Initialize the logger.
-    Logger::setLogFile(logFile, true);
-
-    // Write the messages to both the screen and the log file.
-    Logger::setTeeMode(Configuration::getBoolValue("log_gameToStandardOutput",
-                                                   true));
-
-    LOG_INFO("Using log file: " << logFile);
-
-    // Set up the options related to log rotation.
-    Logger::enableLogRotation(Configuration::getBoolValue("log_enableRotation",
-                                                          false));
-
-    Logger::setMaxLogfileSize(Configuration::getValue("log_maxFileSize",
-                                                      1024));
-
-    Logger::setSwitchLogEachDay(Configuration::getBoolValue("log_perDay",
-                                                            false));
+    Logger::initialize(logFile);
 
     // --- Initialize the managers
     // Initialize the slang's and double quotes filter.

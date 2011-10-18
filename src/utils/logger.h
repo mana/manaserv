@@ -82,6 +82,8 @@ class Logger
             Debug
         };
 
+        static void initialize(const std::string &logFile);
+
         /**
          * Sets the log file.
          *
@@ -127,7 +129,7 @@ class Logger
          *
          * @param enable Set to true to enable logrotation.
          */
-        static void enableLogRotation(bool enable = true)
+        static void setLogRotation(bool enable)
         { mLogRotation = enable; }
 
         /**
