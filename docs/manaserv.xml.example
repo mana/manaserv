@@ -101,6 +101,11 @@
  Change the log file each day.
  -->
  <option name="log_perDay" value="false"/>
+ 
+ <!--
+ Set whether both servers will log also on the standard output.
+ -->
+ <option name="log_toStandardOutput" value="true"/>
 
 <!-- end of logs configuration ****************************************** -->
 
