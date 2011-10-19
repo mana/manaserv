@@ -90,15 +90,19 @@ namespace utils
     template<typename T> class NameMap
     {
     public:
+        NameMap()
+            : mDefault()
+        {}
+
         void insert(const std::string &name, T value)
         {
             mMap.insert(std::make_pair(toLower(name), value));
         }
 
-        T find(const std::string &name) const
+        const T &value(const std::string &name) const
         {
             typename Map::const_iterator result = mMap.find(toLower(name));
-            return result != mMap.end() ? result->second : T();
+            return result != mMap.end() ? result->second : mDefault;
         }
 
         bool contains(const std::string &name) const
@@ -113,7 +117,9 @@ namespace utils
 
     private:
         typedef std::map<std::string, T> Map;
+
         Map mMap;
+        const T mDefault;
     };
 
 } // namespace utils

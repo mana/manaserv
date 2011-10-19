@@ -350,7 +350,7 @@ void MonsterManager::deinitialize()
 
 MonsterClass *MonsterManager::getMonsterByName(const std::string &name) const
 {
-    return mMonsterClassesByName.find(name);
+    return mMonsterClassesByName.value(name);
 }
 
 MonsterClass *MonsterManager::getMonster(int id) const

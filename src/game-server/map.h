@@ -80,8 +80,8 @@ class MapObject
                 mProperties.insert(key, value);
         }
 
-        std::string getProperty(const std::string &key) const
-        { return mProperties.find(key); }
+        const std::string &getProperty(const std::string &key) const
+        { return mProperties.value(key); }
 
         const std::string &getName() const
         { return mName; }

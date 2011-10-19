@@ -64,7 +64,7 @@ ItemClass *ItemManager::getItem(int itemId) const
 
 ItemClass *ItemManager::getItemByName(const std::string &name) const
 {
-    return mItemClassesByName.find(name);
+    return mItemClassesByName.value(name);
 }
 
 unsigned int ItemManager::getDatabaseVersion() const
