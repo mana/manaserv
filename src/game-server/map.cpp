@@ -96,12 +96,20 @@ class Location
         int Fcost;              /**< Estimation of total path cost */
 };
 
-
 Map::Map(int width, int height, int tileWidth, int tileHeight):
     mWidth(width), mHeight(height),
     mTileWidth(tileWidth), mTileHeight(tileHeight),
     mMetaTiles(width * height)
 {
+}
+
+Map::~Map()
+{
+    for (std::vector<MapObject*>::iterator it = mMapObjects.begin();
+         it != mMapObjects.end(); ++it)
+    {
+        delete *it;
+    }
 }
 
 void Map::setSize(int width, int height)

@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2011  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -38,19 +39,15 @@ class MapReader
     public:
         /**
          * Read an XML map from a file.
-         * @return true if it was successful.
+         * @return the map when successful, 0 otherwise.
          */
-        static bool readMap(const std::string &filename,
-                            MapComposite *composite);
+        static Map *readMap(const std::string &filename);
 
     private:
         /**
-         * Read an XML map from a parsed XML tree, and populate things with
-         * objects in that map.
+         * Read an XML map from a parsed XML tree.
          */
-        static Map *readMap(xmlNodePtr node, const std::string &path,
-                            MapComposite *composite,
-                            std::vector<Thing *> &things);
+        static Map *readMap(xmlNodePtr node);
 
         /**
          * Reads a map layer and adds it to the given map.

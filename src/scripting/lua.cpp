@@ -1432,14 +1432,27 @@ static int chat_message(lua_State *s)
 
 /**
  * mana.get_beings_in_circle(int x, int y, int radius): table of Being*
+ * mana.get_beings_in_circle(handle centerBeing, int radius): table of Being*
  * Gets a LUA table with the Being* pointers of all beings
  * inside of a circular area of the current map.
  */
 static int get_beings_in_circle(lua_State *s)
 {
-    const int x = luaL_checkint(s, 1);
-    const int y = luaL_checkint(s, 2);
-    const int r = luaL_checkint(s, 3);
+    int x, y, r;
+    if (lua_islightuserdata(s, 1))
+    {
+        Being *b = getBeing(s, 1);
+        const Point &pos = b->getPosition();
+        x = pos.x;
+        y = pos.y;
+        r = luaL_checkint(s, 2);
+    }
+    else
+    {
+        x = luaL_checkint(s, 1);
+        y = luaL_checkint(s, 2);
+        r = luaL_checkint(s, 3);
+    }
 
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
@@ -2139,6 +2152,132 @@ static int get_distance(lua_State *s)
     return 1;
 }
 
+/**
+ * mana.map_get_objects(): table of all objects
+ * mana.map_get_objects(string type): table of all objects of type
+ * Gets the objects of a map.
+ */
+static int map_get_objects(lua_State *s)
+{
+    const bool filtered = (lua_gettop(s) == 1);
+    std::string filter;
+    if (filtered)
+        filter = luaL_checkstring(s, 1);
+
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    const std::vector<MapObject*> &objects = t->getMap()->getMap()->getObjects();
+
+    if (!filtered)
+        pushSTLContainer<MapObject*>(s, objects);
+    else
+    {
+        std::vector<MapObject*> filteredObjects;
+        for (std::vector<MapObject*>::const_iterator it = objects.begin();
+             it != objects.end(); ++it)
+        {
+            if (utils::compareStrI((*it)->getType(), filter) == 0)
+            {
+                filteredObjects.push_back(*it);
+            }
+        }
+        pushSTLContainer<MapObject*>(s, filteredObjects);
+    }
+    return 1;
+}
+
+/**
+ * mana.map_object_get_property(handle object, string key)
+ * Returns the value of the object property 'key'.
+ */
+static int map_object_get_property(lua_State *s)
+{
+    std::string key = luaL_checkstring(s, 2);
+    if (!lua_islightuserdata(s, 1))
+    {
+        raiseScriptError(s, "map_object_get_property called with invalid"
+                            "object handle");
+        return 0;
+    }
+    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
+    if (obj)
+    {
+        std::string property = obj->getProperty(key);
+        if (!property.empty())
+        {
+            lua_pushstring(s, property.c_str());
+            return 1;
+        }
+        else
+        {
+            // scripts can check for nil
+            return 0;
+        }
+    }
+    else
+    {
+        raiseScriptError(s, "map_object_get_property called with invalid"
+                            "object handle");
+        return 0;
+    }
+}
+
+/**
+ * mana.map_object_get_bounds(object)
+ * Returns 4 int: x/y/width/height of object.
+ */
+static int map_object_get_bounds(lua_State *s)
+{
+    if (!lua_islightuserdata(s, 1))
+    {
+        raiseScriptError(s, "map_object_get_bounds called with invalid"
+                            "object handle");
+        return 0;
+    }
+    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
+    const Rectangle &bounds = obj->getBounds();
+    lua_pushinteger(s, bounds.x);
+    lua_pushinteger(s, bounds.y);
+    lua_pushinteger(s, bounds.w);
+    lua_pushinteger(s, bounds.h);
+    return 4;
+}
+
+/**
+ * mana.map_object_get_name(object)
+ * Returns the name of the object.
+ */
+static int map_object_get_name(lua_State *s)
+{
+    if (!lua_islightuserdata(s, 1))
+    {
+        raiseScriptError(s, "map_object_get_name called with invalid"
+                            "object handle");
+        return 0;
+    }
+    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
+    lua_pushstring(s, obj->getName().c_str());
+    return 1;
+}
+
+/**
+ * mana.map_object_get_type(object)
+ * Returns the type of the object.
+ */
+static int map_object_get_type(lua_State *s)
+{
+    if (!lua_islightuserdata(s, 1))
+    {
+        raiseScriptError(s, "map_object_get_type called with invalid"
+                            "object handle");
+        return 0;
+    }
+    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
+    lua_pushstring(s, obj->getType().c_str());
+    return 1;
+}
+
 static int require_loader(lua_State *s)
 {
     // Add .lua extension (maybe only do this when it doesn't have it already)
@@ -2248,6 +2387,11 @@ LuaScript::LuaScript():
         { "npc_ask_string",                  &npc_ask_string                  },
         { "log",                             &log                             },
         { "get_distance",                    &get_distance                    },
+        { "map_get_objects",                 &map_get_objects                 },
+        { "map_object_get_property",         &map_object_get_property         },
+        { "map_object_get_bounds",           &map_object_get_bounds           },
+        { "map_object_get_name",             &map_object_get_name             },
+        { "map_object_get_type",             &map_object_get_type             },
         { NULL, NULL }
     };
     luaL_register(mState, "mana", callbacks);

@@ -92,17 +92,22 @@ function Tamer(npc, ch, list)
     mana.being_say(npc, "I will now spawn a monster for your training session.")
 
     -- Remove monsters in the area
-    for i, b in ipairs(mana.get_beings_in_rectangle(
-      mana.posX(npc) - 3 * TILESIZE, mana.posY(npc) - 3 * TILESIZE,
-      6 * TILESIZE, 6 * TILESIZE)) do
+    for i, b in ipairs(mana.get_beings_in_rectangle(mana.posX(npc) - 3 * TILESIZE,
+                                                    mana.posY(npc) - 3 * TILESIZE,
+                                                    6 * TILESIZE, 6 * TILESIZE)) do
         if mana.being_type(b) == TYPE_MONSTER then
             mana.monster_remove(b)
         end
     end
 
     local m1 = mana.monster_create("Maggot", mana.posX(ch), mana.posY(ch))
-    schedule_in(0.5, function()
-                mana.being_say(m1, "Roaaarrrr!!!")
-                mana.monster_change_anger(m1, ch, 100)
-                end)
+    mana.monster_change_anger(m1, ch, 100)
+
+    -- (The following is not safe, since the being might have been removed by
+    --  the time this function gets executed (especially with the above code))
+    --
+    --schedule_in(0.5, function()
+    --            mana.being_say(m1, "Roaaarrrr!!!")
+    --            mana.monster_change_anger(m1, ch, 100)
+    --            end)
 end

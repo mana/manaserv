@@ -350,14 +350,6 @@ void ChatHandler::handlePrivMsgMessage(ChatClient &client, MessageIn &msg)
 
     // We seek the player to whom the message is told and send it to her/him.
     sayToPlayer(client, user, text);
-
-    // log transaction
-    Transaction trans;
-    trans.mCharacterId = client.characterId;
-    trans.mAction = TRANS_MSG_PRIVATE;
-    trans.mMessage = "User said " + text;
-    trans.mMessage.append(" to " + user);
-    storage->addTransaction(trans);
 }
 
 void ChatHandler::handleWhoMessage(ChatClient &client)

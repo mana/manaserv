@@ -6,10 +6,16 @@ COMPILATION
 Before trying to compile, make sure all the dependencies are installed. For
 each dependency the Ubuntu package name is listed as well as the website.
 
- * libxml2  (libxml2-dev)     - http://xmlsoft.org/
- * Lua      (liblua5.1-0-dev) - http://lua.org/
- * PhysFS   (libphysfs-dev)   - http://icculus.org/physfs/
- * SQLite 3 (libsqlite3-dev)  - http://sqlite.org/
+ * libxml2  (libxml2-dev)        - http://xmlsoft.org/
+ * Lua      (liblua5.1-0-dev)    - http://lua.org/
+ * PhysFS   (libphysfs-dev)      - http://icculus.org/physfs/
+ * SQLite 3 (libsqlite3-dev)     - http://sqlite.org/
+
+Optional dependencies:
+
+ * MySQL    (libmysqlclient-dev) - http://dev.mysql.com/
+   (replaces the SQLite 3 depency)
+
 
 1) cmake .
 2) make

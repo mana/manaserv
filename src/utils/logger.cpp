@@ -20,6 +20,7 @@
  */
 
 #include "logger.h"
+#include "common/configuration.h"
 #include "common/resourcemanager.h"
 #include "utils/string.h"
 #include "utils/time.h"
@@ -63,7 +64,7 @@ static std::string mOldDate;
   *
   * @return whether the day has changed.
   */
-bool getDayChanged()
+static bool getDayChanged()
 {
     std::string dayDate = getCurrentDate();
 
@@ -76,6 +77,20 @@ bool getDayChanged()
         return true;
     }
     return false;
+}
+
+void Logger::initialize(const std::string &logFile)
+{
+    setLogFile(logFile, true);
+
+    // Write the messages to both the screen and the log file.
+    setTeeMode(Configuration::getBoolValue("log_toStandardOutput", true));
+    LOG_INFO("Using log file: " << logFile);
+
+    // Set up the options related to log rotation.
+    setLogRotation(Configuration::getBoolValue("log_enableRotation", false));
+    setMaxLogfileSize(Configuration::getValue("log_maxFileSize", 1024));
+    setSwitchLogEachDay(Configuration::getBoolValue("log_perDay", false));
 }
 
 void Logger::output(std::ostream &os, const std::string &msg, const char *prefix)

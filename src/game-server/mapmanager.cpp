@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2011  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -23,7 +24,6 @@
 #include "common/resourcemanager.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
-#include "game-server/mapreader.h"
 #include "utils/logger.h"
 #include "utils/xml.h"
 
@@ -127,30 +127,25 @@ MapComposite *MapManager::getMap(const std::string &mapName)
     return NULL;
 }
 
-bool MapManager::raiseActive(int mapId)
+bool MapManager::activateMap(int mapId)
 {
     Maps::iterator i = maps.find(mapId);
     assert(i != maps.end());
     MapComposite *composite = i->second;
-    if (composite->isActive())
-    {
-        return true;
-    }
 
-    std::string file = "maps/" + composite->getName() + ".tmx";
-    if (!ResourceManager::exists(file))
+    if (composite->isActive())
+        return true;
+
+    if (composite->activate())
     {
-        file += ".gz";
-    }
-    if (MapReader::readMap(file, composite))
-    {
-        LOG_INFO("Activated map \"" << file << "\" (id " << mapId << ")");
+        LOG_INFO("Activated map \"" << composite->getName()
+                 << "\" (id " << mapId << ")");
         return true;
     }
     else
     {
-        LOG_WARN("Couldn't activate invalid map \"" << file << "\" (id " <<
-                 mapId << ")");
+        LOG_WARN("Couldn't activate invalid map \"" << composite->getName()
+                 << "\" (id " << mapId << ")");
         return false;
     }
 }

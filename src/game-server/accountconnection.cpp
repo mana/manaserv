@@ -160,7 +160,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_ACTIVE_MAP:
         {
             int mapId = msg.readInt16();
-            if (MapManager::raiseActive(mapId))
+            if (MapManager::activateMap(mapId))
             {
                 // Set map variables
                 MapComposite *m = MapManager::getMap(mapId);
@@ -288,7 +288,8 @@ void AccountConnection::playerReconnectAccount(int id,
     send(msg);
 }
 
-void AccountConnection::requestCharacterVar(Character *ch, const std::string &name)
+void AccountConnection::requestCharacterVar(Character *ch,
+                                            const std::string &name)
 {
     MessageOut msg(GAMSG_GET_VAR_CHR);
     msg.writeInt32(ch->getDatabaseID());
@@ -296,8 +297,9 @@ void AccountConnection::requestCharacterVar(Character *ch, const std::string &na
     send(msg);
 }
 
-void AccountConnection::updateCharacterVar(Character *ch, const std::string &name,
-                                       const std::string &value)
+void AccountConnection::updateCharacterVar(Character *ch,
+                                           const std::string &name,
+                                           const std::string &value)
 {
     MessageOut msg(GAMSG_SET_VAR_CHR);
     msg.writeInt32(ch->getDatabaseID());
@@ -306,8 +308,9 @@ void AccountConnection::updateCharacterVar(Character *ch, const std::string &nam
     send(msg);
 }
 
-void AccountConnection::updateMapVar(MapComposite *map, const std::string &name,
-                                       const std::string &value)
+void AccountConnection::updateMapVar(MapComposite *map,
+                                     const std::string &name,
+                                     const std::string &value)
 {
     MessageOut msg(GAMSG_SET_VAR_MAP);
     msg.writeInt32(map->getID());
