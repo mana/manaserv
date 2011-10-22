@@ -171,7 +171,7 @@ unsigned int SkillManager::getId(const std::string& set,
                                         const std::string &name) const
 {
     std::string key = utils::toLower(set) + "_" + utils::toLower(name);
-    SkillInfo *skillInfo = mNamedSkillsInfo.find(key);
+    SkillInfo *skillInfo = mNamedSkillsInfo.value(key);
     return skillInfo ? skillInfo->id : 0;
 }
 
