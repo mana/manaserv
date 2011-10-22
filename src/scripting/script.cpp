@@ -20,6 +20,7 @@
 
 #include "scripting/script.h"
 
+#include "common/configuration.h"
 #include "common/resourcemanager.h"
 #include "game-server/being.h"
 #include "utils/logger.h"
@@ -171,4 +172,21 @@ bool Script::performCraft(Being* crafter, std::list<InventoryItem> recipe)
         script->execute();
     }
     return true;
+}
+
+std::string Script::determineEngineByFilename(const std::string &filename)
+{
+    std::string ext = filename.substr(filename.find_last_of(".") + 1);
+
+    if (ext == "lua")
+    {
+        return "lua";
+    }
+    else
+    {
+        // Set to default engine and print warning
+        LOG_WARN("Unknown file extension for script \""
+                + filename + "\", falling back to default script engine");
+        return Configuration::getValue("defaultScriptEngine", "lua");
+    }
 }

@@ -727,13 +727,22 @@ void MapComposite::initializeContent()
         }
         else if (utils::compareStrI(type, "NPC") == 0)
         {
-            if (!mScript)
-            {
-                mScript = Script::create("lua");
-            }
-
             int npcId = utils::stringToInt(object->getProperty("NPC_ID"));
             std::string scriptText = object->getProperty("SCRIPT");
+
+            if (!mScript)
+            {
+                // Determine script engine by xml property
+                std::string scriptEngineName = object->getProperty("ENGINE");
+                if (scriptEngineName.empty())
+                {
+                    // Set engine to default value and print warning
+                    scriptEngineName = Configuration::getValue("defaultScriptEngine", "lua");
+                    LOG_WARN("No script engine specified for map script \""
+                            + mName + "\", falling back to default");
+                }
+                mScript = Script::create(scriptEngineName);
+            }
 
             if (npcId && !scriptText.empty())
             {
@@ -748,13 +757,27 @@ void MapComposite::initializeContent()
         }
         else if (utils::compareStrI(type, "SCRIPT") == 0)
         {
-            if (!mScript)
-            {
-                mScript = Script::create("lua");
-            }
-
             std::string scriptFilename = object->getProperty("FILENAME");
             std::string scriptText = object->getProperty("TEXT");
+
+            if (!mScript)
+            {
+                // Determine script engine by xml property
+                std::string scriptEngineName = object->getProperty("ENGINE");
+                if (!scriptFilename.empty() && scriptEngineName.empty())
+                {
+                    // Engine property is empty - determine by filename
+                    scriptEngineName = Script::determineEngineByFilename(scriptFilename);
+                }
+                else if (scriptEngineName.empty())
+                {
+                    // Set engine to default value and print warning
+                    scriptEngineName = Configuration::getValue("defaultScriptEngine", "lua");
+                    LOG_WARN("No script engine specified for map script \""
+                            + mName + "\", falling back to default");
+                }
+                mScript = Script::create(scriptEngineName);
+            }
 
             if (!scriptFilename.empty())
             {

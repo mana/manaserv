@@ -143,6 +143,7 @@ class Script
         static bool performSpecialAction(int specialId, Being *caster);
         static bool performCraft(Being* crafter, std::list<InventoryItem> recipe);
 
+        static std::string determineEngineByFilename(const std::string &filename);
 
     protected:
         static Script *globalEventScript;
