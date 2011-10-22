@@ -443,6 +443,18 @@ enum SpriteLayer
     SPRITE_VECTOREND
 };
 
+/**
+ * Beings Genders
+ * WARNING: Has to be in sync with the same enum in the Being class
+ * of the client!
+ */
+enum BeingGender
+{
+    GENDER_MALE = 0,
+    GENDER_FEMALE,
+    GENDER_UNSPECIFIED
+};
+
 } // namespace ManaServ
 
 #endif // MANASERV_PROTOCOL_H
