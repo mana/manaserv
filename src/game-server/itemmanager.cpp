@@ -82,7 +82,7 @@ unsigned int ItemManager::getDatabaseVersion() const
 
 unsigned int ItemManager::getEquipSlotIdFromName(const std::string &name) const
 {
-    EquipSlotInfo *slotInfo = mNamedEquipSlotsInfo.find(name);
+    EquipSlotInfo *slotInfo = mNamedEquipSlotsInfo.value(name);
     return slotInfo ? slotInfo->slotId : 0;
 }
 
