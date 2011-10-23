@@ -60,7 +60,7 @@ static void handleRecall(Character*, std::string&);
 static void handleBan(Character*, std::string&);
 static void handleItem(Character*, std::string&);
 static void handleDrop(Character*, std::string&);
-//static void handleMoney(Character*, std::string&);
+static void handleMoney(Character*, std::string&);
 static void handleSpawn(Character*, std::string&);
 static void handleAttribute(Character*, std::string&);
 static void handleReload(Character*, std::string&);
@@ -102,8 +102,8 @@ static CmdRef const cmdRef[] =
         "Creates a number of items in the inventory of a character", &handleItem},
     {"drop", "<item id> <amount>",
         "Drops a stack of items on the ground at your current location", &handleDrop},
-/*    {"money", "<character> <amount>",
-        "Changes the money a character possesses", &handleMoney},*/
+    {"money", "<character> <amount>",
+        "Changes the money a character possesses", &handleMoney},
     {"spawn", "<monster id> <number>",
         "Creates a number of monsters near your location", &handleSpawn},
     {"attribute", "<character> <attribute> <value>",
@@ -594,7 +594,7 @@ static void handleDrop(Character *player, std::string &args)
     str << "User created item " << ic->getDatabaseID();
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_DROP, str.str());
 }
-/*
+
 static void handleMoney(Character *player, std::string &args)
 {
     Character *other;
@@ -639,13 +639,12 @@ static void handleMoney(Character *player, std::string &args)
     value = utils::stringToInt(valuestr);
 
     // change how much money the player has
-    Inventory(other).changeMoney(value);
+    other->setAttribute(ATTR_GP , other->getAttribute(ATTR_GP) + value);
 
     // log transaction
     std::string msg = "User created " + valuestr + " money";
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_MONEY, msg);
 }
-*/
 
 static void handleSpawn(Character *player, std::string &args)
 {
