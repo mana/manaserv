@@ -433,8 +433,6 @@ enum BeingDirection
 
 /**
  * Beings Genders
- * WARNING: Has to be in sync with the same enum in the Being class
- * of the client!
  */
 enum BeingGender
 {

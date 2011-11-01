@@ -301,9 +301,11 @@ void Character::setGender(int gender)
 {
     switch (gender)
     {
-        case GENDER_MALE:
-        case GENDER_FEMALE:
-            mGender = (BeingGender)gender;
+        case 0:
+            mGender = GENDER_MALE;
+        break;
+        case 1:
+            mGender = GENDER_FEMALE;
         break;
         default:
             mGender = GENDER_UNSPECIFIED;

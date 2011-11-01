@@ -477,7 +477,7 @@ static int chr_inv_count(lua_State *s)
 }
 
 /**
- * mana.chr_get_level(): int level
+ * mana.chr_get_level(Character*): int level
  * Tells the character current level.
  */
 static int chr_get_level(lua_State *s)

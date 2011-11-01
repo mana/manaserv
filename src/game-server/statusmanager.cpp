@@ -89,7 +89,9 @@ void StatusManager::reload()
             if (ResourceManager::exists(filename.str()))       // file exists!
             {
                 LOG_INFO("Loading status script: " << filename.str());
-                Script *s = Script::create("lua");
+                std::string engineName =
+                        Script::determineEngineByFilename(filename.str());
+                Script *s = Script::create(engineName);
                 s->loadFile(filename.str());
                 statusEffect->setScript(s);
             } else {
