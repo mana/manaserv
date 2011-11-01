@@ -28,10 +28,12 @@ namespace Configuration
 {
     /**
      * Loads the configuration options into memory.
-     * @param filename path to the configuration file .
+     *
+     * @param filename path to the configuration file. When empty, the default
+     *                 config file 'manaserv.xml' is used.
      * @return whether the configuration file could be read
      */
-    bool initialize(const std::string &filename);
+    bool initialize(const std::string &fileName = std::string());
 
     void deinitialize();
 

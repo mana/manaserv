@@ -56,7 +56,6 @@ using utils::Logger;
 // Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE          "manaserv-account.log"
 #define DEFAULT_STATS_FILE        "manaserv.stats"
-#define DEFAULT_CONFIG_FILE       "manaserv.xml"
 #define DEFAULT_ATTRIBUTEDB_FILE  "attributes.xml"
 
 static bool running = true;        /**< Determines if server keeps running */
@@ -80,47 +79,6 @@ BandwidthMonitor *gBandwidth;
 static void closeGracefully(int)
 {
     running = false;
-}
-
-static void initializeConfiguration(std::string configPath = std::string())
-{
-    if (configPath.empty())
-        configPath = DEFAULT_CONFIG_FILE;
-
-    bool configFound = true;
-    if (!Configuration::initialize(configPath))
-    {
-        configFound = false;
-
-        // If the config file isn't the default and fail to load,
-        // we try the default one with a warning.
-        if (configPath.compare(DEFAULT_CONFIG_FILE))
-        {
-            LOG_WARN("Invalid config path: " << configPath
-                     << ". Trying default value: " << DEFAULT_CONFIG_FILE ".");
-            configPath = DEFAULT_CONFIG_FILE;
-            configFound = true;
-
-            if (!Configuration::initialize(configPath))
-                  configFound = false;
-        }
-
-        if (!configFound)
-        {
-            LOG_FATAL("Refusing to run without configuration!" << std::endl
-            << "Invalid config path: " << configPath << ".");
-            exit(EXIT_CONFIG_NOT_FOUND);
-        }
-    }
-
-    LOG_INFO("Using config file: " << configPath);
-
-    // Check inter-server password.
-    if (Configuration::getValue("net_password", std::string()).empty())
-    {
-        LOG_FATAL("SECURITY WARNING: 'net_password' not set!");
-        exit(EXIT_BAD_CONFIG_PARAMETER);
-    }
 }
 
 /**
@@ -263,7 +221,6 @@ static void printHelp()
 struct CommandLineOptions
 {
     CommandLineOptions():
-        configPath(DEFAULT_CONFIG_FILE),
         verbosity(Logger::Warn),
         verbosityChanged(false),
         port(DEFAULT_SERVER_PORT),
@@ -336,7 +293,18 @@ int main(int argc, char *argv[])
     CommandLineOptions options;
     parseOptions(argc, argv, options);
 
-    initializeConfiguration(options.configPath);
+    if (!Configuration::initialize(options.configPath))
+    {
+        LOG_FATAL("Refusing to run without configuration!");
+        exit(EXIT_CONFIG_NOT_FOUND);
+    }
+
+    // Check inter-server password.
+    if (Configuration::getValue("net_password", std::string()).empty())
+    {
+        LOG_FATAL("SECURITY WARNING: 'net_password' not set!");
+        exit(EXIT_BAD_CONFIG_PARAMETER);
+    }
 
     // General initialization
     initialize();

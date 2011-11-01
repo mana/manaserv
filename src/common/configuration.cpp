@@ -29,20 +29,25 @@
 #include "utils/xml.h"
 #include "utils/string.h"
 
+#define DEFAULT_CONFIG_FILE       "manaserv.xml"
+
 /**< Persistent configuration. */
 static std::map< std::string, std::string > options;
 /**< Location of config file. */
 static std::string configPath;
 
-bool Configuration::initialize(const std::string &filename)
+bool Configuration::initialize(const std::string &fileName)
 {
-    configPath = filename;
+    if (fileName.empty())
+        configPath = DEFAULT_CONFIG_FILE;
+    else
+        configPath = fileName;
 
-    XML::Document doc(filename, false);
+    XML::Document doc(configPath, false);
     xmlNodePtr node = doc.rootNode();
 
     if (!node || !xmlStrEqual(node->name, BAD_CAST "configuration")) {
-        LOG_WARN("No configuration file '" << filename.c_str() << "'.");
+        LOG_WARN("No configuration file '" << configPath.c_str() << "'.");
         return false;
     }
 
@@ -59,6 +64,8 @@ bool Configuration::initialize(const std::string &filename)
         if (!key.empty())
             options[key] = value;
     }
+
+    LOG_INFO("Using config file: " << configPath);
 
     return true;
 }
