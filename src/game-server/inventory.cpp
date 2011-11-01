@@ -134,50 +134,6 @@ void Inventory::initialize()
 
         ++it2;
     }
-
-    checkInventorySize();
-}
-
-void Inventory::checkInventorySize()
-{
-    /*
-     * Check that the inventory size is greater than or equal to the size
-     *       needed.
-     *       If not, forcibly drop items from the end until it is.
-     * Check that inventory capacity is greater than or equal to zero.
-     *       If not, forcibly drop items from the end until it is.
-     */
-    while (mPoss->inventory.size() > INVENTORY_SLOTS
-           || mCharacter->getModifiedAttribute(ATTR_INV_CAPACITY) < 0)
-    {
-        LOG_WARN("Inventory: oversize inventory! Deleting '"
-                 << mPoss->inventory.rbegin()->second.amount
-                 << "' items of type '"
-                 << mPoss->inventory.rbegin()->second.itemId
-                 << "' from slot '"
-                 << mPoss->inventory.rbegin()->first
-                 << "' of character '"
-                 << mCharacter->getName()
-                 << "'!");
-
-        // Remove the items from inventory
-        removeFromSlot(mPoss->inventory.rbegin()->first,
-                       mPoss->inventory.rbegin()->second.amount);
-
-        // Drop them on the floor
-        ItemClass *ic = itemManager->getItem(mPoss->inventory.rbegin()->first);
-        int nb = mPoss->inventory.rbegin()->second.amount;
-        Item *item = new Item(ic, nb);
-        item->setMap(mCharacter->getMap());
-        item->setPosition(mCharacter->getPosition());
-        if (!GameState::insert(item))
-        {
-            // Warn about drop failure
-            LOG_WARN("Impossible to drop " << nb << " item(s) id: "
-                     << ic->getDatabaseID() << " for character: '"
-                     << mCharacter->getName() << "'!");
-        }
-    }
 }
 
 unsigned int Inventory::getItem(unsigned int slot) const
@@ -257,8 +213,6 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
     // Send that first, before checking potential removals
     if (invMsg.getLength() > 2)
         gameHandler->sendTo(mCharacter, invMsg);
-
-    checkInventorySize();
 
     return amount;
 }
