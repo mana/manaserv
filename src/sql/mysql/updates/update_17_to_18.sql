@@ -17,6 +17,6 @@ DEFAULT CHARSET=utf8;
 
 -- Update database version.
 UPDATE mana_world_states
-SET value = '15',
+SET value = '18',
 moddate = UNIX_TIMESTAMP()
-WHERE state_name = 'database_version'; 
+WHERE state_name = 'database_version';

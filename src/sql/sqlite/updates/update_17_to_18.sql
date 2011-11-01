@@ -16,6 +16,6 @@ CREATE TABLE mana_char_equips
 
 -- Update the database version, and set date of update
 UPDATE mana_world_states
-   SET value      = '15',
+   SET value      = '18',
        moddate    = strftime('%s','now')
    WHERE state_name = 'database_version';
