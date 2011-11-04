@@ -707,12 +707,11 @@ bool Inventory::unequip(unsigned int itemInstance)
     if (!itemInstance)
         return false;
 
-    MessageOut equipMsg(GPMSG_EQUIP);
-    equipMsg.writeInt16(0); // Item Id, useless in case of unequip.
-
     // The itemId to unequip
     unsigned int itemId = 0;
     unsigned int slotTypeId = 0;
+
+    bool addedToInventory = false;
 
     // Empties all equip entries that point to the given equipment slot
     // The equipment slots should NEVER be erased after initialization!
@@ -723,6 +722,13 @@ bool Inventory::unequip(unsigned int itemInstance)
         {
             // Add the item to the inventory list if not already present there
             itemId = it->second.itemId;
+
+            // Move the item back to inventory and return false when it failed.
+            if (!addedToInventory && insert(itemId, 1) > 0)
+                return false;
+            else
+                addedToInventory = true;
+
             it->second.itemId = 0;
             it->second.itemInstance = 0;
 
@@ -737,15 +743,11 @@ bool Inventory::unequip(unsigned int itemInstance)
     if (!itemId)
         return false;
 
-    // Number of slot types touched,
-    equipMsg.writeInt16(1);
-
-    // Move the item back to inventory.
-    insert(itemId, 1);
-
+    MessageOut equipMsg(GPMSG_EQUIP);
+    equipMsg.writeInt16(0); // Item Id, useless in case of unequip.
+    equipMsg.writeInt16(1); // Number of slot types touched.
     equipMsg.writeInt16(itemInstance);
     equipMsg.writeInt16(0); // Capacity used, set to 0 to unequip.
-
     gameHandler->sendTo(mCharacter, equipMsg);
 
     // Apply unequip trigger
