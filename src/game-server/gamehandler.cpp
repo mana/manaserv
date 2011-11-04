@@ -576,14 +576,25 @@ void GameHandler::handleWalk(GameClient &client, MessageIn &message)
 void GameHandler::handleEquip(GameClient &client, MessageIn &message)
 {
     const int slot = message.readInt16();
-    Inventory(client.character).equip(slot);
+    if (!Inventory(client.character).equip(slot))
+    {
+        MessageOut msg(GPMSG_SAY);
+        msg.writeInt16(0); // From the server
+        msg.writeString("Unable to equip.");
+        client.send(msg);
+    }
 }
 
 void GameHandler::handleUnequip(GameClient &client, MessageIn &message)
 {
-    const int slot = message.readInt16();
-    if (slot >= 0 && slot < INVENTORY_SLOTS)
-        Inventory(client.character).unequip(slot);
+    const int itemInstance = message.readInt16();
+    if (!Inventory(client.character).unequip(itemInstance))
+    {
+        MessageOut msg(GPMSG_SAY);
+        msg.writeInt16(0); // From the server
+        msg.writeString("Unable to unequip.");
+        client.send(msg);
+    }
 }
 
 void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
