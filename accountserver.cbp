@@ -209,7 +209,6 @@
 		<Unit filename="src\utils\processorutils.h" />
 		<Unit filename="src\utils\sha256.cpp" />
 		<Unit filename="src\utils\sha256.h" />
-		<Unit filename="src\utils\singleton.h" />
 		<Unit filename="src\utils\string.cpp" />
 		<Unit filename="src\utils\string.h" />
 		<Unit filename="src\utils\stringfilter.cpp" />
