@@ -737,7 +737,7 @@ void MapComposite::initializeContent()
                 if (scriptEngineName.empty())
                 {
                     // Set engine to default value and print warning
-                    scriptEngineName = Configuration::getValue("defaultScriptEngine", "lua");
+                    scriptEngineName = Configuration::getValue("script_defaultEngine", "lua");
                     LOG_WARN("No script engine specified for map script \""
                             + mName + "\", falling back to default");
                 }
@@ -772,7 +772,7 @@ void MapComposite::initializeContent()
                 else if (scriptEngineName.empty())
                 {
                     // Set engine to default value and print warning
-                    scriptEngineName = Configuration::getValue("defaultScriptEngine", "lua");
+                    scriptEngineName = Configuration::getValue("script_defaultEngine", "lua");
                     LOG_WARN("No script engine specified for map script \""
                             + mName + "\", falling back to default");
                 }

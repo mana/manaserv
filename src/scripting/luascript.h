@@ -31,7 +31,7 @@ extern "C" {
 /**
  * Implementation of the Script class for Lua.
  */
-class LuaScript: public Script
+class LuaScript : public Script
 {
     public:
         /**
@@ -65,13 +65,6 @@ class LuaScript: public Script
         void processDeathEvent(Being *thing);
 
         void processRemoveEvent(Thing *thing);
-
-        /**
-         * Loads the global event script file
-         */
-        static bool loadGlobalEventScript(const std::string &file);
-        static bool loadSpecialActionsScript(const std::string &file);
-        static bool loadCraftScript(const std::string &file);
 
     private:
         lua_State *mState;

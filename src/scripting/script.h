@@ -136,24 +136,28 @@ class Script
         virtual void processRemoveEvent(Thing *thing) = 0;
 
         /**
+         * Loads the global event script file
+         */
+        static bool loadGlobalEventScript(const std::string &file);
+
+        /**
          * Runs a function from the global event script file
          */
         static bool executeGlobalEventFunction(const std::string &function, Being *obj);
         static void addDataToSpecial(int specialId, Special *special);
         static bool performSpecialAction(int specialId, Being *caster);
-        static bool performCraft(Being* crafter, std::list<InventoryItem> recipe);
+        static bool performCraft(Being *crafter, const std::list<InventoryItem> &recipe);
 
         static std::string determineEngineByFilename(const std::string &filename);
 
     protected:
-        static Script *globalEventScript;
-        static Script *specialActionsScript;
-        static Script *craftScript;
         std::string mScriptFile;
 
     private:
         MapComposite *mMap;
         EventListener mEventListener; /**< Tracking of being deaths. */
+
+        static Script *globalEventScript;
 
     friend struct ScriptEventDispatch;
 };

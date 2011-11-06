@@ -714,7 +714,8 @@ void Character::takeSpecial(int id)
 
 void Character::clearSpecials()
 {
-    for(std::map<int, Special*>::iterator i = mSpecials.begin(); i != mSpecials.end(); i++)
+    for (std::map<int, Special*>::iterator i = mSpecials.begin();
+         i != mSpecials.end(); i++)
     {
         delete i->second;
     }

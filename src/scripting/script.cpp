@@ -34,8 +34,6 @@ typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
 Script *Script::globalEventScript = NULL;
-Script *Script::specialActionsScript = NULL;
-Script *Script::craftScript = NULL;
 
 Script::Script():
     mMap(NULL),
@@ -110,11 +108,21 @@ void Script::loadNPC(const std::string &name, int id, int x, int y,
     execute();
 }
 
+bool Script::loadGlobalEventScript(const std::string &file)
+{
+    std::string engineName = determineEngineByFilename(file);
+    if (Script *script = Script::create(engineName))
+    {
+        globalEventScript = script;
+        return globalEventScript->loadFile(file);
+    }
+    return false;
+}
+
 bool Script::executeGlobalEventFunction(const std::string &function, Being* obj)
 {
     bool isScriptHandled = false;
-    Script *script = Script::globalEventScript;
-    if (script)
+    if (Script *script = globalEventScript)
     {
         script->setMap(obj->getMap());
         script->prepare(function);
@@ -127,7 +135,7 @@ bool Script::executeGlobalEventFunction(const std::string &function, Being* obj)
 }
 
 
-void Script::addDataToSpecial(int id, Special* special)
+void Script::addDataToSpecial(int id, Special *special)
 {
     /* currently only gets the recharge cost.
       TODO: get any other info in a similar way, but
@@ -136,8 +144,7 @@ void Script::addDataToSpecial(int id, Special* special)
     */
     if (special)
     {
-        Script *script = Script::specialActionsScript;
-        if (script)
+        if (Script *script = globalEventScript)
         {
             script->prepare("get_special_recharge_cost");
             script->push(id);
@@ -148,10 +155,9 @@ void Script::addDataToSpecial(int id, Special* special)
 
 }
 
-bool Script::performSpecialAction(int specialId, Being* caster)
+bool Script::performSpecialAction(int specialId, Being *caster)
 {
-    Script *script = Script::specialActionsScript;
-    if (script)
+    if (Script *script = globalEventScript)
     {
         script->prepare("use_special");
         script->push(caster);
@@ -161,10 +167,10 @@ bool Script::performSpecialAction(int specialId, Being* caster)
     return true;
 }
 
-bool Script::performCraft(Being* crafter, std::list<InventoryItem> recipe)
+bool Script::performCraft(Being *crafter,
+                          const std::list<InventoryItem> &recipe)
 {
-    Script *script = Script::craftScript;
-    if (script)
+    if (Script *script = globalEventScript)
     {
         script->prepare("on_craft");
         script->push(crafter);
@@ -187,6 +193,6 @@ std::string Script::determineEngineByFilename(const std::string &filename)
         // Set to default engine and print warning
         LOG_WARN("Unknown file extension for script \""
                 + filename + "\", falling back to default script engine");
-        return Configuration::getValue("defaultScriptEngine", "lua");
+        return Configuration::getValue("script_defaultEngine", "lua");
     }
 }
