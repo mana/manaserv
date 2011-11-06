@@ -359,6 +359,9 @@ int main(int argc, char *argv[])
     // Check for expired bans every 30 seconds
     utils::Timer banTimer(30000);
 
+    statTimer.start();
+    banTimer.start();
+
     // -------------------------------------------------------------------------
     // FIXME: for testing purposes only...
     // writing accountserver startup time and svn revision to database as global

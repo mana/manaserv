@@ -41,9 +41,8 @@ class Timer
          * Constructor.
          *
          * @param ms           the interval in milliseconds
-         * @param createActive whether the timer should be implicitly started
          */
-        Timer(unsigned int ms, bool createActive = true);
+        Timer(unsigned int ms);
 
         /**
          * Returns the number of elapsed ticks since last call.
@@ -68,14 +67,9 @@ class Timer
         /**
          * Changes the interval between two pulses.
          */
-        void changeInterval (unsigned int newinterval);
+        void changeInterval(unsigned int newinterval);
 
     private:
-        /**
-         * Calls gettimeofday() and converts it into milliseconds.
-         */
-        uint64_t getTimeInMillisec();
-
         /**
          * Interval between two pulses.
          */

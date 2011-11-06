@@ -27,12 +27,25 @@
 #include <windows.h>
 #endif
 
+/**
+ * Calls gettimeofday() and converts it into milliseconds.
+ */
+static uint64_t getTimeInMillisec()
+{
+    uint64_t timeInMillisec;
+    timeval time;
+
+    gettimeofday(&time, 0);
+    timeInMillisec = (uint64_t)time.tv_sec * 1000 + time.tv_usec / 1000;
+    return timeInMillisec;
+}
+
 namespace utils
 {
 
-Timer::Timer(unsigned int ms, bool createActive)
+Timer::Timer(unsigned int ms)
 {
-    active = createActive;
+    active = false;
     interval = ms;
     lastpulse = getTimeInMillisec();
 }
@@ -87,16 +100,6 @@ void Timer::stop()
 void Timer::changeInterval(unsigned int newinterval)
 {
     interval = newinterval;
-}
-
-uint64_t Timer::getTimeInMillisec()
-{
-    uint64_t timeInMillisec;
-    timeval time;
-
-    gettimeofday(&time, 0);
-    timeInMillisec = (uint64_t)time.tv_sec * 1000 + time.tv_usec / 1000;
-    return timeInMillisec;
 }
 
 } // ::utils
