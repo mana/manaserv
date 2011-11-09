@@ -22,6 +22,7 @@
 #define ATTRIBUTE_H
 
 #include "common/defines.h"
+#include "attributemanager.h"
 #include <vector>
 #include <list>
 
@@ -133,12 +134,13 @@ class Attribute
     public:
         Attribute() {throw;} // DEBUG; Find improper constructions
 
-        Attribute(const std::vector<struct AttributeInfoType> &type);
+        Attribute(const AttributeManager::AttributeInfo &info);
 
         ~Attribute();
 
         void setBase(double base);
         double getBase() const { return mBase; }
+
         double getModifiedAttribute() const
         { return mMods.empty() ? mBase :
                                  (*mMods.rbegin())->getCachedModifiedValue(); }
@@ -185,7 +187,15 @@ class Attribute
         bool tick();
 
     private:
-        double mBase;
+        /**
+         * Checks the min and max permitted values for the given base value
+         * and return the adjusted value.
+         */
+        double checkBounds(double baseValue);
+
+        double mBase; // The attribute base value
+        double mMinValue; // The min authorized base and derived attribute value
+        double mMaxValue; // The max authorized base and derived attribute value
         std::vector<AttributeModifiersEffect *> mMods;
 };
 

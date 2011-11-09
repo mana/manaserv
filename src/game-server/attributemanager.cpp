@@ -49,9 +49,9 @@ void AttributeManager::reload()
     {
         unsigned int lCount = 0;
         LOG_DEBUG("  "<<i->first<<" : ");
-        for (std::vector<struct AttributeInfoType>::const_iterator j = i->second.second.begin();
-             j != i->second.second.end();
-             ++j)
+        for (std::vector<AttributeModifier>::const_iterator j =
+            i->second.modifiers.begin();
+            j != i->second.modifiers.end(); ++j)
         {
             tag = getTag(ModifierLocation(i->first, lCount));
             std::string end = tag ? "tag of '" + (*tag) + "'." : "no tag.";
@@ -74,15 +74,15 @@ void AttributeManager::reload()
     LOG_INFO("Loaded '" << mTagMap.size() << "' modifier tags.");
 }
 
-const std::vector<struct AttributeInfoType> *AttributeManager::getAttributeInfo(int id) const
+const std::vector<AttributeModifier> *AttributeManager::getAttributeInfo(int id) const
 {
     AttributeMap::const_iterator ret = mAttributeMap.find(id);
     if (ret == mAttributeMap.end())
         return 0;
-    return &ret->second.second;
+    return &ret->second.modifiers;
 }
 
-const AttributeScope &AttributeManager::getAttributeScope(ScopeType type) const
+const AttributeManager::AttributeScope &AttributeManager::getAttributeScope(ScopeType type) const
 {
     return mAttributeScopes[type];
 }
@@ -92,7 +92,7 @@ bool AttributeManager::isAttributeDirectlyModifiable(int id) const
     AttributeMap::const_iterator ret = mAttributeMap.find(id);
     if (ret == mAttributeMap.end())
         return false;
-    return ret->second.first;
+    return ret->second.modifiable;
 }
 
 ModifierLocation AttributeManager::getLocation(const std::string &tag) const
@@ -144,8 +144,12 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         return;
     }
 
-    mAttributeMap[id] =
-            AttributeInfoMap(false, std::vector<struct AttributeInfoType>());
+    mAttributeMap[id].modifiable = false;
+    mAttributeMap[id].modifiers = std::vector<AttributeModifier>();
+    mAttributeMap[id].minimum = XML::getFloatProperty(attributeNode, "minimum",
+                                            std::numeric_limits<double>::min());
+    mAttributeMap[id].maximum = XML::getFloatProperty(attributeNode, "maximum",
+                                            std::numeric_limits<double>::max());
 
     for_each_xml_child_node(subNode, attributeNode)
     {
@@ -166,19 +170,22 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
     }
     else if (scope == "CHARACTER")
     {
-        mAttributeScopes[CharacterScope][id] = &mAttributeMap.at(id).second;
+        mAttributeScopes[CharacterScope][id] =
+            &mAttributeMap.at(id);
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default character scope.");
     }
     else if (scope == "MONSTER")
     {
-        mAttributeScopes[MonsterScope][id] = &mAttributeMap.at(id).second;
+        mAttributeScopes[MonsterScope][id] =
+            &mAttributeMap.at(id);
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default monster scope.");
     }
     else if (scope == "BEING")
     {
-        mAttributeScopes[BeingScope][id] = &mAttributeMap.at(id).second;
+        mAttributeScopes[BeingScope][id] =
+            &mAttributeMap.at(id);
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default being scope.");
     }
@@ -242,12 +249,13 @@ void AttributeManager::readModifierNode(xmlNodePtr modifierNode,
         return;
     }
 
-    mAttributeMap[attributeId].second.push_back(
-                AttributeInfoType(stackableType, effectType));
+    mAttributeMap[attributeId].modifiers.push_back(
+                AttributeModifier(stackableType, effectType));
 
     if (!tag.empty())
     {
-        const int layer = mAttributeMap[attributeId].second.size() - 1;
+        const int layer =
+            mAttributeMap[attributeId].modifiers.size() - 1;
         mTagMap.insert(std::make_pair(tag, ModifierLocation(attributeId,
                                                             layer)));
     }

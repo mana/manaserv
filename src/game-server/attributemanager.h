@@ -24,6 +24,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <limits>
 
 #include "utils/xml.h"
 
@@ -36,7 +37,36 @@ enum ScopeType
     MaxScope
 };
 
-typedef std::map<int, std::vector<struct AttributeInfoType> *> AttributeScope;
+/**
+ * Stackable types.
+ * @todo non-stackable malus layers
+ */
+enum StackableType
+{
+    Stackable,
+    NonStackable,
+    NonStackableBonus
+};
+
+/**
+ * Attribute augmentation methods.
+ */
+enum ModifierEffectType
+{
+    Multiplicative,
+    Additive
+};
+
+struct AttributeModifier
+{
+    AttributeModifier(StackableType s, ModifierEffectType effect) :
+        stackableType(s),
+        effectType(effect)
+    {}
+
+    StackableType stackableType;
+    ModifierEffectType effectType;
+};
 
 /**
  * Identifies a modifier by the attribute id that it applies to and its layer
@@ -59,6 +89,22 @@ struct ModifierLocation
 class AttributeManager
 {
     public:
+        struct AttributeInfo {
+            AttributeInfo():
+                minimum(std::numeric_limits<double>::min()),
+                maximum(std::numeric_limits<double>::max()),
+                modifiable(false)
+        {}
+
+            /** The minimum and maximum permitted attribute values. */
+            double minimum;
+            double maximum;
+            /** Tells whether the base attribute is modifiable by the player */
+            bool modifiable;
+            /** Effect modifier type: stackability and modification type. */
+            std::vector<struct AttributeModifier> modifiers;
+        };
+
         AttributeManager(const std::string &file) :
             mAttributeReferenceFile(file)
         {}
@@ -73,7 +119,10 @@ class AttributeManager
          */
         void reload();
 
-        const std::vector<struct AttributeInfoType> *getAttributeInfo(int id) const;
+        const std::vector<AttributeModifier> *getAttributeInfo(int id) const;
+
+        // being type id -> (*{ stackable type, effect type })[]
+        typedef std::map<int, AttributeInfo*> AttributeScope;
 
         const AttributeScope &getAttributeScope(ScopeType) const;
 
@@ -88,17 +137,12 @@ class AttributeManager
         void readAttributeNode(xmlNodePtr attributeNode);
         void readModifierNode(xmlNodePtr modifierNode, int attributeId);
 
-        // modifiable, { stackable type, effect type }[]
-        typedef std::pair<bool,
-                       std::vector<struct AttributeInfoType> > AttributeInfoMap;
-
-        // Attribute id -> { modifiable, { stackable type, effect type }[] }
-        typedef std::map<int, AttributeInfoMap> AttributeMap;
+        // Attribute id -> { modifiable, min, max, { stackable type, effect type }[] }
+        typedef std::map<int, AttributeInfo> AttributeMap;
 
         /** Maps tag names to specific modifiers. */
         typedef std::map<std::string, ModifierLocation> TagMap;
 
-        // being type id -> (*{ stackable type, effect type })[]
         AttributeScope mAttributeScopes[MaxScope];
         AttributeMap mAttributeMap;
         TagMap mTagMap;

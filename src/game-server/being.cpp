@@ -42,9 +42,9 @@ Being::Being(ThingType type):
     mGender(GENDER_UNSPECIFIED),
     mDirection(DOWN)
 {
-    const AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
+    const AttributeManager::AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
     LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
-    for (AttributeScope::const_iterator it1 = attr.begin(),
+    for (AttributeManager::AttributeScope::const_iterator it1 = attr.begin(),
          it1_end = attr.end();
         it1 != it1_end;
         ++it1)

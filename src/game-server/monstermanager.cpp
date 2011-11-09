@@ -169,11 +169,11 @@ void MonsterManager::initialize()
                 }
 
                 bool attributesComplete = true;
-                const AttributeScope &mobAttr =
+                const AttributeManager::AttributeScope &mobAttr =
                             attributeManager->getAttributeScope(MonsterScope);
 
-                for (AttributeScope::const_iterator it = mobAttr.begin(),
-                     it_end = mobAttr.end(); it != it_end; ++it)
+                for (AttributeManager::AttributeScope::const_iterator it =
+                    mobAttr.begin(), it_end = mobAttr.end(); it != it_end; ++it)
                 {
                     if (!monster->mAttributes.count(it->first))
                     {

@@ -59,10 +59,10 @@ Monster::Monster(MonsterClass *specy):
     /*
      * Initialise the attribute structures.
      */
-    const AttributeScope &mobAttr = attributeManager->getAttributeScope(
-                                                                      MonsterScope);
+    const AttributeManager::AttributeScope &mobAttr =
+        attributeManager->getAttributeScope(MonsterScope);
 
-    for (AttributeScope::const_iterator it = mobAttr.begin(),
+    for (AttributeManager::AttributeScope::const_iterator it = mobAttr.begin(),
          it_end = mobAttr.end(); it != it_end; ++it)
     {
         mAttributes.insert(std::pair< unsigned int, Attribute >

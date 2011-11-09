@@ -185,36 +185,4 @@ enum
     MOB_ATTR_MAG_ATK       = 22
 };
 
-/**
- * Stackable types.
- * @todo non-stackable malus layers
- */
-enum StackableType
-{
-    Stackable,
-    NonStackable,
-    NonStackableBonus
-};
-
-/**
- * Attribute augmentation methods.
- */
-enum ModifierEffectType
-{
-    Multiplicative,
-    Additive
-};
-
-struct AttributeInfoType
-{
-    StackableType stackableType;
-    ModifierEffectType effectType;
-
-    AttributeInfoType(StackableType s,
-                      ModifierEffectType effect) :
-        stackableType(s),
-        effectType(effect)
-    {}
-};
-
 #endif // DEFINES_H

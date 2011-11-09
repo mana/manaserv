@@ -312,28 +312,34 @@ bool AttributeModifiersEffect::tick()
     return ret;
 }
 
-Attribute::Attribute(const std::vector<struct AttributeInfoType> &type)
-    : mBase(0)
+Attribute::Attribute(const AttributeManager::AttributeInfo &info):
+    mBase(0),
+    mMinValue(info.minimum),
+    mMaxValue(info.maximum)
 {
-    LOG_DEBUG("Construction of new attribute with '" << type.size() << "' layers.");
-    for (unsigned int i = 0; i < type.size(); ++i)
+    const std::vector<AttributeModifier> &modifiers = info.modifiers;
+    LOG_DEBUG("Construction of new attribute with '" << modifiers.size()
+        << "' layers.");
+    for (unsigned int i = 0; i < modifiers.size(); ++i)
     {
-        LOG_DEBUG("Adding layer with stackable type " << type[i].stackableType
-                  << " and effect type " << type[i].effectType << ".");
-        mMods.push_back(new AttributeModifiersEffect(type[i].stackableType,
-                                                     type[i].effectType));
+        LOG_DEBUG("Adding layer with stackable type "
+                  << modifiers[i].stackableType
+                  << " and effect type " << modifiers[i].effectType << ".");
+        mMods.push_back(new AttributeModifiersEffect(modifiers[i].stackableType,
+                                                     modifiers[i].effectType));
         LOG_DEBUG("Layer added.");
     }
+    mBase = checkBounds(mBase);
 }
 
 Attribute::~Attribute()
 {
-    for (std::vector<AttributeModifiersEffect *>::iterator it = mMods.begin(),
-         it_end = mMods.end(); it != it_end; ++it)
-    {
+//    for (std::vector<AttributeModifiersEffect *>::iterator it = mMods.begin(),
+//         it_end = mMods.end(); it != it_end; ++it)
+//    {
         // ?
         //delete *it;
-    }
+//    }
 }
 
 bool Attribute::tick()
@@ -365,8 +371,10 @@ void Attribute::clearMods()
 
 void Attribute::setBase(double base)
 {
+    base = checkBounds(base);
     LOG_DEBUG("Setting base attribute from " << mBase << " to " << base << ".");
     double prev = mBase = base;
+
     std::vector<AttributeModifiersEffect *>::iterator it = mMods.begin();
     while (it != mMods.end())
     {
@@ -382,4 +390,14 @@ void AttributeModifiersEffect::clearMods(double baseValue)
     mStates.clear();
     mCacheVal = baseValue;
     mMod = mEffectType == Additive ? 0 : 1;
+}
+
+double Attribute::checkBounds(double baseValue)
+{
+    LOG_DEBUG("Checking bounds for value: " << baseValue);
+    if (baseValue > mMaxValue)
+        baseValue = mMaxValue;
+    else if (baseValue < mMinValue)
+        baseValue = mMinValue;
+    return baseValue;
 }

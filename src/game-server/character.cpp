@@ -69,11 +69,11 @@ Character::Character(MessageIn &msg):
     mParty(0),
     mTransaction(TRANS_NONE)
 {
-    const AttributeScope &attr =
+    const AttributeManager::AttributeScope &attr =
                            attributeManager->getAttributeScope(CharacterScope);
     LOG_DEBUG("Character creation: initialisation of "
               << attr.size() << " attributes.");
-    for (AttributeScope::const_iterator it1 = attr.begin(),
+    for (AttributeManager::AttributeScope::const_iterator it1 = attr.begin(),
          it1_end = attr.end(); it1 != it1_end; ++it1)
         mAttributes.insert(std::make_pair(it1->first, Attribute(*it1->second)));
 
@@ -396,7 +396,7 @@ bool Character::recalculateBaseAttribute(unsigned int attr)
     /*
      * `attr' may or may not have changed. Recalculate the base value.
      */
-    LOG_DEBUG("Received update attribute recalculation request at Character"
+    LOG_DEBUG("Received update attribute recalculation request at Character "
               "for " << attr << ".");
     if (!mAttributes.count(attr))
         return false;
