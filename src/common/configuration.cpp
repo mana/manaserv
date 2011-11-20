@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <map>
+#include <set>
 #include <libxml/xmlreader.h>
 
 #include "common/configuration.h"
@@ -35,24 +36,40 @@
 static std::map< std::string, std::string > options;
 /**< Location of config file. */
 static std::string configPath;
+static std::set<std::string> processedFiles;
 
-bool Configuration::initialize(const std::string &fileName)
+static bool readFile(const std::string &fileName)
 {
-    if (fileName.empty())
-        configPath = DEFAULT_CONFIG_FILE;
+    if (processedFiles.find(fileName) != processedFiles.end())
+    {
+        LOG_WARN("Cycle include in configuration file '" <<
+                 fileName << "'.");
+        return false;
+    }
     else
-        configPath = fileName;
+        processedFiles.insert(fileName);
 
-    XML::Document doc(configPath, false);
+    XML::Document doc(fileName, false);
     xmlNodePtr node = doc.rootNode();
 
     if (!node || !xmlStrEqual(node->name, BAD_CAST "configuration")) {
-        LOG_WARN("No configuration file '" << configPath.c_str() << "'.");
+        LOG_WARN("No configuration file '" << fileName.c_str() << "'.");
         return false;
     }
 
     for (node = node->xmlChildrenNode; node != NULL; node = node->next)
     {
+        if (xmlStrEqual(node->name, BAD_CAST "include"))
+        {
+            std::string file = XML::getProperty(node, "file", std::string());
+            if (!readFile(file))
+            {
+                LOG_WARN("Error ocurred while parsing included " <<
+                         "configuration file '" << file << "'.");
+                return false;
+            }
+            continue;
+        }
         if (!xmlStrEqual(node->name, BAD_CAST "option"))
             continue;
         if (!XML::hasProperty(node, "name") || !XML::hasProperty(node, "value"))
@@ -64,6 +81,17 @@ bool Configuration::initialize(const std::string &fileName)
         if (!key.empty())
             options[key] = value;
     }
+    return true;
+}
+
+bool Configuration::initialize(const std::string &fileName)
+{
+    if (fileName.empty())
+        configPath = DEFAULT_CONFIG_FILE;
+    else
+        configPath = fileName;
+
+    readFile(configPath);
 
     LOG_INFO("Using config file: " << configPath);
 
@@ -72,6 +100,7 @@ bool Configuration::initialize(const std::string &fileName)
 
 void Configuration::deinitialize()
 {
+    processedFiles.clear();
 }
 
 std::string Configuration::getValue(const std::string &key,
