@@ -435,23 +435,28 @@ static int chr_inv_change(lua_State *s)
 }
 
 /**
- * mana.chr_inv_count(Character*, int item_id...): int count...
+ * mana.chr_inv_count(Character*, bool in inventory, bool in equipment,
+ *                    int item_id...): int count...
  * Callback for counting items in inventory.
+ * The function can search in inventory and/or in the equipment.
  */
 static int chr_inv_count(lua_State *s)
 {
     Character *q = getCharacter(s, 1);
-    if (!q)
+    if (!q || !lua_isboolean(s, 2) || !lua_isboolean(s, 3))
     {
         raiseScriptError(s, "chr_inv_count called with incorrect parameters.");
         return 0;
     }
-    int nb_items = lua_gettop(s) - 1;
-    lua_checkstack(s, nb_items);
+
+    bool inInventory = lua_toboolean(s, 2);
+    bool inEquipment = lua_toboolean(s, 3);
+
+    int nb_items = lua_gettop(s) - 3;
     Inventory inv(q);
 
     int id, nb = 0;
-    for (int i = 2; i <= nb_items + 1; ++i)
+    for (int i = 4; i < nb_items + 4; ++i)
     {
         ItemClass *it;
         if (lua_isnumber(s, i))
@@ -474,7 +479,7 @@ static int chr_inv_count(lua_State *s)
         }
         else
         {
-            nb = inv.count(id);
+            nb = inv.count(id, inInventory, inEquipment);
             lua_pushinteger(s, nb);
         }
     }

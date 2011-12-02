@@ -112,8 +112,11 @@ class Inventory
 
         /**
          * Counts number of items with given Id.
+         * @param inInventory Search in player's inventory.
+         * @param inEquipment Search in player's equipment.
          */
-        unsigned int count(unsigned int itemId) const;
+        unsigned int count(unsigned int itemId, bool inInventory = true,
+                           bool inEquipment = true) const;
 
         /**
          * Gets the ID of the items in a given slot.

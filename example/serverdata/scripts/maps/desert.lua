@@ -34,7 +34,7 @@ atinit(function()
 
     -- Another Merchant, selling some equipment, and buying everything...
     smith_buy_table = { {"Sword", 10, 50}, {7, 10, 70}, {10, 10, 20} }
-    create_npc("Smith", 5, GENDER_MALE, 15 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Merchant, smith_buy_table), nil)
+    create_npc("Smith", 5, GENDER_MALE, 15 * TILESIZE + TILESIZE / 2, 16 * TILESIZE + TILESIZE / 2, npclib.talk(Smith, smith_buy_table), nil)
 
     -- The most simple NPC - Welcoming new ones around.
     create_npc("Harmony", 11, GENDER_FEMALE, 4 * TILESIZE + TILESIZE / 2, 25 * TILESIZE + TILESIZE / 2, npclib.talk(Harmony, "Welcome in the template world!\nI hope you'll find here whatever you were searching for.", "Do look around to find some interesting things coming along!"), Harmony_update)
@@ -42,6 +42,14 @@ atinit(function()
     -- Creates a Monster an let it talk for testing purpose.
     create_npc("Tamer", 9, GENDER_UNSPECIFIED, 28 * TILESIZE + TILESIZE / 2, 21 * TILESIZE + TILESIZE / 2, Tamer, nil)
 end)
+
+function Smith(npc, ch, list)
+    local sword_count = mana.chr_inv_count(ch, true, true, "Sword")
+    if sword_count > 0 then
+        do_message(npc, ch, "Ah! I can see you already have a sword.")
+    end
+    Merchant(npc, ch, list)
+end
 
 -- Global variable used to know whether Harmony talked to someone.
 harmony_have_talked_to_someone = false
@@ -85,7 +93,8 @@ function Harmony_update(npc)
 end
 
 function Tamer(npc, ch, list)
-    mana.being_say(npc, string.format("You have %s Swords.", mana.chr_inv_count(ch, "Sword")))
+    mana.being_say(npc, string.format("You have %s Sword(s).",
+                                      mana.chr_inv_count(ch, true, true, "Sword")))
     mana.being_say(npc, string.format("You are %s pixel away.",
                                       mana.get_distance(npc, ch)))
     mana.being_say(npc, "I will now spawn a monster for your training session.")

@@ -217,14 +217,34 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
     return amount;
 }
 
-unsigned int Inventory::count(unsigned int itemId) const
+unsigned int Inventory::count(unsigned int itemId,
+                              bool inInventory, bool inEquipment) const
 {
     unsigned int nb = 0;
-    for (InventoryData::iterator it = mPoss->inventory.begin(),
-                                 it_end = mPoss->inventory.end();
-         it != it_end; ++it)
-        if (it->second.itemId == itemId)
-            nb += it->second.amount;
+    if (inInventory)
+    {
+        for (InventoryData::iterator it = mPoss->inventory.begin(),
+            it_end = mPoss->inventory.end(); it != it_end; ++it)
+            if (it->second.itemId == itemId)
+                nb += it->second.amount;
+    }
+
+    if (inEquipment)
+    {
+        std::set<unsigned> itemInstances;
+        for (EquipData::iterator it = mPoss->equipSlots.begin(),
+            it_end = mPoss->equipSlots.end(); it != it_end; ++it)
+        {
+            if (it->second.itemId != itemId || !it->second.itemInstance)
+                continue;
+
+            // If the insertion was successful, then it was the first time,
+            // and can be counted.
+            if ((itemInstances.insert(it->second.itemInstance)).second)
+                ++nb;
+        }
+    }
+
     return nb;
 }
 
@@ -248,9 +268,10 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
 
     MessageOut invMsg(GPMSG_INVENTORY);
     bool triggerLeaveInventory = true;
-    for (InventoryData::iterator it = mPoss->inventory.begin(),
-             it_end = mPoss->inventory.end(); it != it_end; ++it)
+    for (InventoryData::iterator it = mPoss->inventory.begin();
+         it != mPoss->inventory.end();)
     {
+        LOG_DEBUG("Remove: Treating slot id: " << it->first);
         if (it->second.itemId == itemId)
         {
             if (amount)
@@ -273,8 +294,10 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
                 else
                 {
                     invMsg.writeInt16(0);
-                    mPoss->inventory.erase(it);
+                    // Ensure the slot is set empty.
                     LOG_DEBUG("Slot id: " << it->first << " is now empty.");
+                    mPoss->inventory.erase(it++);
+                    continue;
                 }
             }
             else
@@ -284,6 +307,7 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
                 triggerLeaveInventory = false;
             }
         }
+        ++it;
     }
 
     if (triggerLeaveInventory)
