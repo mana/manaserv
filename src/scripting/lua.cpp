@@ -550,6 +550,69 @@ static int chr_equip_item(lua_State *s)
 }
 
 /**
+ * mana.chr_unequip_slot(Character*, int inventorySlot): bool success
+ * Makes the character unequip the item in the given equipment slot.
+ */
+static int chr_unequip_slot(lua_State *s)
+{
+    int equipmentSlot = luaL_checkint(s, 2);
+
+    Character *ch = getCharacter(s, 1);
+    if (!ch)
+    {
+        raiseScriptError(s, "chr_unequip_slot "
+                         "called for nonexistent character.");
+        return 0;
+    }
+    Inventory inv(ch);
+
+    lua_pushboolean(s, inv.unequip(inv.getSlotItemInstance(equipmentSlot)));
+    return 1;
+}
+
+/**
+ * mana.chr_unequip_item(Character*, int itemId || string itemName): bool success
+ * Makes the character unequip the item(s) corresponding to the id
+ * when it's existing in the player's equipment.
+ * Returns true when every item were unequipped from equipment.
+ */
+static int chr_unequip_item(lua_State *s)
+{
+    // Get the itemId
+    ItemClass *it;
+    if (lua_isnumber(s, 2))
+        it = itemManager->getItem(lua_tointeger(s, 2));
+    else
+        it = itemManager->getItemByName(lua_tostring(s, 2));
+
+    if (!it)
+    {
+        raiseScriptError(s, "chr_unequip_item called with invalid "
+                         "item id or name.");
+        return 0;
+    }
+    unsigned int id = it->getDatabaseID();
+    if (!id)
+    {
+        LOG_WARN("chr_unequip_item called with id 0! "
+                 "Currency is now handled through attributes!");
+        lua_pushboolean(s, false);
+        return 1;
+    }
+
+    Character *ch = getCharacter(s, 1);
+    if (!ch)
+    {
+        raiseScriptError(s, "chr_unequip_item "
+                         "called for nonexistent character.");
+        return 0;
+    }
+    Inventory inv(ch);
+    lua_pushboolean(s, inv.unequipItem(id));
+    return 1;
+}
+
+/**
  * mana.chr_get_level(Character*): int level
  * Tells the character current level.
  */
@@ -2395,6 +2458,8 @@ LuaScript::LuaScript():
         { "chr_inv_count",                   &chr_inv_count                   },
         { "chr_equip_slot",                  &chr_equip_slot                  },
         { "chr_equip_item",                  &chr_equip_item                  },
+        { "chr_unequip_slot",                &chr_unequip_slot                },
+        { "chr_unequip_item",                &chr_unequip_item                },
         { "chr_get_level",                   &chr_get_level                   },
         { "chr_get_quest",                   &chr_get_quest                   },
         { "chr_set_quest",                   &chr_set_quest                   },

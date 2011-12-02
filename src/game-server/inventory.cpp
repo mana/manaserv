@@ -711,6 +711,37 @@ bool Inventory::equip(int inventorySlot)
     return true;
 }
 
+unsigned int Inventory::getSlotItemInstance(unsigned int slot)
+{
+    EquipData::iterator it = mPoss->equipSlots.find(slot);
+    if (it != mPoss->equipSlots.end())
+        return it->second.itemInstance;
+    return 0;
+}
+
+bool Inventory::unequipItem(unsigned int itemId)
+{
+    std::set<unsigned> itemInstances;
+    for (EquipData::iterator it = mPoss->equipSlots.begin(),
+        it_end = mPoss->equipSlots.end(); it != it_end; ++it)
+    {
+        if (it->second.itemId == itemId)
+            itemInstances.insert(it->second.itemInstance);
+    }
+
+    // Nothing to do but it's a success
+    if (itemInstances.empty())
+        return true;
+
+    for (std::set<unsigned>::const_iterator it = itemInstances.begin(),
+        it_end = itemInstances.end(); it != it_end; ++it)
+    {
+        if (!unequip(*it));
+            return false;
+    }
+    return true;
+}
+
 bool Inventory::unequip(unsigned int itemInstance)
 {
     if (!itemInstance)

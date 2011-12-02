@@ -64,11 +64,26 @@ class Inventory
         bool equip(int inventorySlot);
 
         /**
+         * Unequips all the items with the given item if
+         * from given equipment slot.
+         * @param itemId The item Id to unequip.
+         * @returns whether all item id could be unequipped.
+         * @note returns true when no item with given ids were equipped.
+         */
+        bool unequipItem(unsigned int itemId);
+
+        /**
          * Unequips item from given equipment slot.
          * @param itemInstance The item instance id used to know what to unequip
          * @returns Whether it was unequipped.
          */
         bool unequip(unsigned int itemInstance);
+
+        /**
+         * Gets the item instance from the given equipment slot.
+         * Return 0 if none.
+         */
+        unsigned int getSlotItemInstance(unsigned int slot);
 
         /**
          * Inserts some items into the inventory.
