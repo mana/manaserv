@@ -152,7 +152,7 @@ AUTO_INCREMENT=1 ;
 CREATE TABLE IF NOT EXISTS `mana_item_instances` (
     `item_id`      int(10)      unsigned NOT NULL auto_increment,
     `itemclass_id` int(10)      unsigned NOT NULL,
-    `amount`       tinyint(3)   unsigned NOT NULL,
+    `amount`       int(10)      unsigned NOT NULL,
     --
     PRIMARY KEY (`item_id`),
     FOREIGN KEY (`itemclass_id`)
@@ -437,7 +437,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',NULL,NULL, NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',NULL,NULL, NOW());
-INSERT INTO mana_world_states VALUES('database_version',     NULL,'18', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     NULL,'19', NOW());
 
 -- all known transaction codes
 
