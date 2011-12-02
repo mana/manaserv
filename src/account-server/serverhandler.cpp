@@ -28,10 +28,12 @@
 #include "account-server/accounthandler.h"
 #include "account-server/character.h"
 #include "account-server/flooritem.h"
+#include "account-server/mapmanager.h"
 #include "account-server/storage.h"
 #include "chat-server/chathandler.h"
 #include "chat-server/post.h"
 #include "common/configuration.h"
+#include "common/defines.h"
 #include "common/manaserv_protocol.h"
 #include "common/transaction.h"
 #include "net/connectionhandler.h"
@@ -59,6 +61,7 @@ struct GameServer: NetComputer
 {
     GameServer(ENetPeer *peer): NetComputer(peer), server(0), port(0) {}
 
+    std::string name;
     std::string address;
     NetComputer *server;
     ServerStatistics maps;
@@ -97,6 +100,7 @@ static ServerHandler *serverHandler;
 
 bool GameServerHandler::initialize(int port, const std::string &host)
 {
+    MapManager::initialize(DEFAULT_MAPSDB_FILE);
     serverHandler = new ServerHandler;
     LOG_INFO("Game server handler started:");
     return serverHandler->startListen(port, host);
@@ -180,6 +184,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             LOG_DEBUG("GAMSG_REGISTER");
             // TODO: check the credentials of the game server
+            server->name = msg.readString();
             server->address = msg.readString();
             server->port = msg.readInt16();
             const std::string password = msg.readString();
@@ -220,31 +225,30 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             }
             else
             {
-                LOG_INFO("The password given by " << server->address << ':' << server->port << " was bad.");
+                LOG_INFO("The password given by " << server->address << ':'
+                         << server->port << " was bad.");
                 outMsg.writeInt16(PASSWORD_BAD);
                 comp->disconnect(outMsg);
                 break;
             }
 
             LOG_INFO("Game server " << server->address << ':' << server->port
-                     << " wants to register " << (msg.getUnreadLength() / 2)
-                     << " maps.");
+                     << " asks for maps to activate.");
 
-            while (msg.getUnreadLength())
+            const std::map<int, std::string> &maps = MapManager::getMaps();
+            for (std::map<int, std::string>::const_iterator it = maps.begin(),
+                 it_end = maps.end(); it != it_end; ++it)
             {
-                int id = msg.readInt16();
-                LOG_INFO("Registering map " << id << '.');
-                if (GameServer *s = getGameServerFromMap(id))
-                {
-                    LOG_ERROR("Server Handler: map is already registered by "
-                              << s->address << ':' << s->port << '.');
-                }
-                else
+                int id = it->first;
+                const std::string &reservedServer = it->second;
+                if (reservedServer == server->name)
                 {
                     MessageOut outMsg(AGMSG_ACTIVE_MAP);
 
                     // Map variables
                     outMsg.writeInt16(id);
+                    LOG_DEBUG("Issued server '" << server->name << "' "
+                              << "to enable map " << id);
                     std::map<std::string, std::string> variables;
                     variables = storage->getAllWorldStateVars(id);
 

@@ -20,6 +20,7 @@
  */
 
 #include "common/configuration.h"
+#include "common/defines.h"
 #include "common/permissionmanager.h"
 #include "common/resourcemanager.h"
 #include "game-server/accountconnection.h"
@@ -64,19 +65,8 @@
 
 using utils::Logger;
 
-// Default options that automake should be able to override.
 #define DEFAULT_LOG_FILE                    "manaserv-game.log"
-#define DEFAULT_ITEMSDB_FILE                "items.xml"
-#define DEFAULT_EQUIPDB_FILE                "equip.xml"
-#define DEFAULT_SKILLSDB_FILE               "skills.xml"
-#define DEFAULT_ATTRIBUTEDB_FILE            "attributes.xml"
-#define DEFAULT_MAPSDB_FILE                 "maps.xml"
-#define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
-#define DEFAULT_STATUSDB_FILE               "status-effects.xml"
-#define DEFAULT_PERMISSION_FILE             "permissions.xml"
 #define DEFAULT_MAIN_SCRIPT_FILE            "scripts/main.lua"
-#define DEFAULT_SPECIALSDB_FILE             "specials.xml"
-#define DEFAULT_EMOTESDB_FILE               "emotes.xml"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 

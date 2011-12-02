@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <maps>
+    <!--
+         id: unique id of map(> 0)
+         name: the name of the maps (without .tmx extension)
+         [optional] servername: the name of the server that should run this map
+    -->
     <map id="1" name="desert" />
 </maps>

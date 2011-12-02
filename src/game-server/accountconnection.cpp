@@ -77,6 +77,8 @@ bool AccountConnection::start(int gameServerPort)
 
     LOG_INFO("Connection established to the account server.");
 
+    const std::string gameServerName =
+        Configuration::getValue("net_gameServerName", "server1");
     const std::string gameServerAddress =
         Configuration::getValue("net_publicGameHost",
                                 Configuration::getValue("net_gameHost",
@@ -84,18 +86,13 @@ bool AccountConnection::start(int gameServerPort)
     const std::string password =
         Configuration::getValue("net_password", "changeMe");
 
-    // Register with the account server and send the list of maps we handle
+    // Register with the account server
     MessageOut msg(GAMSG_REGISTER);
+    msg.writeString(gameServerName);
     msg.writeString(gameServerAddress);
     msg.writeInt16(gameServerPort);
     msg.writeString(password);
     msg.writeInt32(itemManager->getDatabaseVersion());
-    const MapManager::Maps &m = MapManager::getMaps();
-    for (MapManager::Maps::const_iterator i = m.begin(), i_end = m.end();
-            i != i_end; ++i)
-    {
-        msg.writeInt16(i->first);
-    }
     send(msg);
 
     // initialize sync buffer
