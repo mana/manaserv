@@ -228,6 +228,15 @@ unsigned int Inventory::count(unsigned int itemId) const
     return nb;
 }
 
+int Inventory::getFirstSlot(unsigned int itemId)
+{
+    for (InventoryData::iterator it = mPoss->inventory.begin(),
+        it_end = mPoss->inventory.end(); it != it_end; ++it)
+        if (it->second.itemId == itemId)
+            return (int)it->first;
+    return -1;
+}
+
 unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
 {
     if (!itemId || !amount)

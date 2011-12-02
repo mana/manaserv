@@ -96,7 +96,7 @@ class Inventory
         unsigned int removeFromSlot(unsigned int slot, unsigned int amount);
 
         /**
-         * Counts number of items with given ID.
+         * Counts number of items with given Id.
          */
         unsigned int count(unsigned int itemId) const;
 
@@ -104,6 +104,12 @@ class Inventory
          * Gets the ID of the items in a given slot.
          */
         unsigned int getItem(unsigned int slot) const;
+
+        /**
+         * Returns the first inventory slot with the given item Id.
+         * Returns -1 otherwise.
+         */
+        int getFirstSlot(unsigned int itemId);
 
     private:
         /**
