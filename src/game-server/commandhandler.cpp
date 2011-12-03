@@ -78,6 +78,7 @@ static void handleLogsay(Character*, std::string&);
 static void handleKillMonsters(Character*, std::string&);
 static void handleCraft(Character*, std::string&);
 static void handleGetPos(Character*, std::string&);
+static void handleSkills(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -139,6 +140,8 @@ static CmdRef const cmdRef[] =
         "Crafts something.", &handleCraft},
     {"getpos", "<character>",
         "Gets the position of a character.", &handleGetPos},
+    {"skills", "<character>",
+        "Lists all skills and their values of a character", &handleSkills},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -1438,6 +1441,44 @@ static void handleGetPos(Character *player, std::string &args)
     say(str.str(), player);
 }
 
+static void handleSkills(Character *player, std::string &args)
+{
+    std::string character = getArgument(args);
+    if (character.empty())
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @skills <character>", player);
+        return;
+    }
+    Character *other;
+    if (character == "#")
+        other = player;
+    else
+        other = getPlayer(character);
+    if (!other)
+    {
+        say("Invalid character, or they are offline.", player);
+        return;
+    }
+
+    say("List of skills of player '" + other->getName() + "':", player);
+    std::map<int, int>::const_iterator it = other->getSkillBegin();
+    std::map<int, int>::const_iterator it_end = other->getSkillEnd(); 
+
+    if (it == it_end)
+    {
+        say("No skills available.", player);
+        return;
+    }
+
+    while (it != it_end)
+    {
+        std::stringstream str;
+        str << "Id: " << it->first << " value: " << it->second;
+        say(str.str(), player);
+        ++it;
+    }
+}
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
 {
