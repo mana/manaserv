@@ -51,6 +51,30 @@ function Smith(npc, ch, list)
     Merchant(npc, ch, list)
 end
 
+function possessions_table(npc, ch)
+    local item_message = "Inventory:"..
+                         "\nSlot id, item id, item name, amount:"..
+                         "\n----------------------"
+    local inventory_table = mana.chr_get_inventory(ch)
+    for i = 1, #inventory_table do
+        item_message = item_message.."\n"..inventory_table[i].slot..", "
+            ..inventory_table[i].id..", "..inventory_table[i].name..", "
+            ..inventory_table[i].amount
+    end
+    do_message(npc, ch, item_message)
+
+    item_message = "Equipment:"..
+                   "\nSlot id, item id, item name:"..
+                   "\n----------------------"
+    local equipment_table = mana.chr_get_equipment(ch)
+    for i = 1, #equipment_table do
+        item_message = item_message.."\n"..equipment_table[i].slot..", "
+            ..equipment_table[i].id..", "..equipment_table[i].name
+    end
+    do_message(npc, ch, item_message)
+
+end
+
 -- Global variable used to know whether Harmony talked to someone.
 harmony_have_talked_to_someone = false
 function Harmony(npc, ch, list)
@@ -65,6 +89,10 @@ function Harmony(npc, ch, list)
         do_message(npc, ch, string.format("You now have %d shiny coins!", mana.chr_money(ch)))
         harmony_have_talked_to_someone = true
         do_message(npc, ch, string.format("Try to come back with a better level than %i.", mana.chr_get_level(ch)))
+    else
+        do_message(npc, ch, "Let me see what you've got so far... Don't be afraid!")
+        mana.effect_create(EMOTE_WINK, npc)
+        possessions_table(npc, ch)
     end
     do_message(npc, ch, "Have fun!")
     mana.effect_create(EMOTE_HAPPY, npc)

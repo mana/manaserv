@@ -348,6 +348,141 @@ static int chr_warp(lua_State *s)
 }
 
 /**
+ * Callback for gathering inventory information.
+ * mana.chr_get_inventory(character): table[]{slot, item id, name, amount}
+ * Returns in the inventory slots order, the slot id, the item ids,
+ * name and amount. Only slots not empty are returned.
+ * @Example
+ * To get a piece of information, you can do something like this:
+ * -- This will print the 2nd non-empty slot id.
+ * local my_table = mana.chr_get_inventory(character)
+ * print(my_table[2].slot)
+ */
+static int chr_get_inventory(lua_State *s)
+{
+    Character *q = getCharacter(s, 1);
+    if (!q)
+    {
+        raiseScriptError(s, "chr_get_inventory"
+                         " called with incorrect parameters.");
+        return 0;
+    }
+
+    // Create a lua table with the inventory ids.
+    const InventoryData invData = q->getPossessions().getInventory();
+
+    lua_newtable(s);
+    int firstTableStackPosition = lua_gettop(s);
+    int tableIndex = 1;
+
+    std::string itemName = "";
+
+    for (InventoryData::const_iterator it = invData.begin(),
+        it_end = invData.end(); it != it_end; ++it)
+    {
+        if (!it->second.itemId || !it->second.amount)
+            continue;
+
+        lua_pushinteger(s, tableIndex);
+
+        // Create the sub-table (value of the main one)
+        lua_newtable(s);
+        int subTableStackPosition = lua_gettop(s);
+        // Stores the item info in it.
+        lua_pushstring(s, "slot");
+        lua_pushinteger(s, it->first); // The slot id
+        lua_settable(s, subTableStackPosition);
+
+        lua_pushstring(s, "id");
+        lua_pushinteger(s, it->second.itemId);
+        lua_settable(s, subTableStackPosition);
+
+        lua_pushstring(s, "name");
+        itemName = itemManager->getItem(it->second.itemId)->getName();
+        lua_pushstring(s, itemName.c_str());
+        lua_settable(s, subTableStackPosition);
+
+        lua_pushstring(s, "amount");
+        lua_pushinteger(s, it->second.amount);
+        lua_settable(s, subTableStackPosition);
+
+        // Add the sub-table as value of the main one.
+        lua_settable(s, firstTableStackPosition);
+        ++tableIndex;
+    }
+
+    return 1;
+}
+
+/**
+ * Callback for gathering equiupment information.
+ * mana.chr_get_inventory(character): table[](slot, item id, name)
+ * Returns in the inventory slots order, the slot id, the item ids, and name.
+ * Only slots not empty are returned.
+ * @Example
+ * To get a piece of information, you can do something like this:
+ * -- This will print the 2nd non-empty slot id.
+ * local my_table = mana.chr_get_equipment(character)
+ * print(my_table[2].slot)
+ */
+static int chr_get_equipment(lua_State *s)
+{
+    Character *q = getCharacter(s, 1);
+    if (!q)
+    {
+        raiseScriptError(s, "chr_get_equipment"
+                         " called with incorrect parameters.");
+        return 0;
+    }
+
+    // Create a lua table with the inventory ids.
+    const EquipData equipData = q->getPossessions().getEquipment();
+
+    lua_newtable(s);
+    int firstTableStackPosition = lua_gettop(s);
+    int tableIndex = 1;
+
+    std::string itemName = "";
+    std::set<unsigned> itemInstances;
+
+    for (EquipData::const_iterator it = equipData.begin(),
+        it_end = equipData.end(); it != it_end; ++it)
+    {
+        if (!it->second.itemId || !it->second.itemInstance)
+            continue;
+
+        // Only count multi-slot items once.
+        if (!itemInstances.insert(it->second.itemInstance).second)
+            continue;
+
+        lua_pushinteger(s, tableIndex);
+
+        // Create the sub-table (value of the main one)
+        lua_newtable(s);
+        int subTableStackPosition = lua_gettop(s);
+        // Stores the item info in it.
+        lua_pushstring(s, "slot");
+        lua_pushinteger(s, it->first); // The slot id
+        lua_settable(s, subTableStackPosition);
+
+        lua_pushstring(s, "id");
+        lua_pushinteger(s, it->second.itemId);
+        lua_settable(s, subTableStackPosition);
+
+        lua_pushstring(s, "name");
+        itemName = itemManager->getItem(it->second.itemId)->getName();
+        lua_pushstring(s, itemName.c_str());
+        lua_settable(s, subTableStackPosition);
+
+        // Add the sub-table as value of the main one.
+        lua_settable(s, firstTableStackPosition);
+        ++tableIndex;
+    }
+
+    return 1;
+}
+
+/**
  * mana.chr_inv_change(Character*, (int id || string name,
  *                     int nb)...): bool success
  * Callback for inserting/removing items in inventory.
@@ -2491,8 +2626,10 @@ LuaScript::LuaScript():
         { "npc_enable",                      &npc_enable                      },
         { "npc_disable",                     &npc_disable                     },
         { "chr_warp",                        &chr_warp                        },
+        { "chr_get_inventory",               &chr_get_inventory               },
         { "chr_inv_change",                  &chr_inv_change                  },
         { "chr_inv_count",                   &chr_inv_count                   },
+        { "chr_get_equipment",               &chr_get_equipment               },
         { "chr_equip_slot",                  &chr_equip_slot                  },
         { "chr_equip_item",                  &chr_equip_item                  },
         { "chr_unequip_slot",                &chr_unequip_slot                },
