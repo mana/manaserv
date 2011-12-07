@@ -8,6 +8,13 @@
 	don't forget to update the wiki documentation!
 -->
 <configuration>
+<!--
+    Note that you can split the config into multiple files. For example you can
+    create a global config file and let server specific settings into others,
+    including the main one.
+    Including works like this:
+    <include file="otherconfig.xml" />
+-->
 
 <!-- Database configuration ***************************************************
  Uncomment one of the following parts according to the database backend you
