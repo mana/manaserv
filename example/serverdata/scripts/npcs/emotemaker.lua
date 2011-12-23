@@ -34,7 +34,6 @@ function emote_talk(npc, ch)
   elseif (v == 3) then
     emo_state = EMOTE_SURPRISE
   end
-  do_npc_close(npc, ch)
 end
 
 function emote_update(npc)

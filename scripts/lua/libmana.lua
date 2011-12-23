@@ -42,7 +42,12 @@ local timer
 -- Note: Cannot be called until map initialization has started.
 function create_npc(name, id, x, y, talkfunct, updatefunct)
   local npc = mana.npc_create(name, id, x, y)
-  if talkfunct then npc_talk_functs[npc] = talkfunct end
+  if talkfunct then
+    npc_talk_functs[npc] = function(npc, ch)
+      talkfunct(npc, ch)
+      do_npc_close(npc, ch)
+    end
+  end
   if updatefunct then npc_update_functs[npc] = updatefunct end
   return npc
 end

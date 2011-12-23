@@ -76,5 +76,4 @@ function Banker(npc, ch)
     end
 
     do_message(npc, ch, "Thank you. Come again!")
-    do_npc_close(npc, ch)
 end

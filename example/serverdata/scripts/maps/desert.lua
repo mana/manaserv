@@ -60,7 +60,6 @@ function Harmony(npc, ch, list)
     end
     do_message(npc, ch, "Have fun!")
     mana.effect_create(EMOTE_HAPPY, npc)
-    do_npc_close(npc, ch)
     -- Make Harmony disappear for a while... with a small earthquake effect!
     local shakeX = mana.posX(npc)
     local shakeY = mana.posY(npc)

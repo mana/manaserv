@@ -18,6 +18,4 @@ function Healer(npc, ch)
 	elseif c == 2 then
 		mana.being_heal(ch, 100)
 	end
-
-	do_npc_close(npc, ch)
 end

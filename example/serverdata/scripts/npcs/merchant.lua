@@ -95,5 +95,4 @@ function Merchant(npc, ch, buy_sell_table)
 
   end
   do_message(npc, ch, "See you later!")
-  do_npc_close(npc, ch)
 end

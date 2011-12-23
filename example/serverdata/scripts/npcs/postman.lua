@@ -27,5 +27,4 @@ function post_talk(npc, ch)
   if answer == 2 then
     do_post(npc, ch)
   end
-  do_npc_close(npc, ch)
 end

@@ -96,6 +96,5 @@ function npc1_talk(npc, ch)
   end
 
   do_message(npc, ch, "See you later!")
-  do_npc_close(npc, ch)
 end
 
