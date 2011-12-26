@@ -71,6 +71,7 @@ class MonsterClass
         MonsterClass(int id):
             mId(id),
             mName("unnamed"),
+            mGender(GENDER_UNSPECIFIED),
             mSpeed(1),
             mSize(16),
             mExp(-1),
@@ -99,6 +100,12 @@ class MonsterClass
          */
         void setName(const std::string &name)
         { mName = name; }
+
+        void setGender(BeingGender gender)
+        { mGender = gender; }
+
+        const BeingGender getGender() const
+        { return mGender; }
 
         /**
          * Sets monster drops. These are the items the monster drops when it
@@ -193,6 +200,7 @@ class MonsterClass
     private:
         unsigned short mId;
         std::string mName;
+        BeingGender mGender;
 
         MonsterDrops mDrops;
         std::map<int, double> mAttributes; /**< Base attributes of the monster. */

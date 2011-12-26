@@ -179,6 +179,13 @@ class Being : public Actor
          */
         virtual Path findPath();
 
+        /** Gets the gender of the being (male or female). */
+        BeingGender getGender() const
+        { return mGender; }
+
+        /** Sets the gender of the being (male or female). */
+        void setGender(BeingGender gender);
+
         /**
          * Sets an attribute.
          */
@@ -301,6 +308,7 @@ class Being : public Actor
         Being *mTarget;
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
+        BeingGender mGender;        /**< Gender of the being. */
 
         /** Sets timer unless already higher. */
         void setTimerSoft(TimerID id, int value);

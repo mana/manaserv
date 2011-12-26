@@ -59,7 +59,6 @@ Character::Character(MessageIn &msg):
     mRechargePerSpecial(0),
     mSpecialUpdateNeeded(false),
     mDatabaseID(-1),
-    mGender(GENDER_UNSPECIFIED),
     mHairStyle(0),
     mHairColor(0),
     mLevel(1),
@@ -294,21 +293,6 @@ void Character::cancelTransaction()
             break;
         case TRANS_NONE:
             return;
-    }
-}
-
-void Character::setGender(int gender)
-{
-    switch (gender)
-    {
-        case 0:
-            mGender = GENDER_MALE;
-        break;
-        case 1:
-            mGender = GENDER_FEMALE;
-        break;
-        default:
-            mGender = GENDER_UNSPECIFIED;
     }
 }
 

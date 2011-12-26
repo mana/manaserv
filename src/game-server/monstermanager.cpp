@@ -20,6 +20,8 @@
 
 #include "game-server/monstermanager.h"
 
+#include "common/defines.h"
+
 #include "game-server/attributemanager.h"
 #include "game-server/itemmanager.h"
 #include "game-server/monster.h"
@@ -153,6 +155,9 @@ void MonsterManager::initialize()
                 monster->setSize(XML::getProperty(subnode, "size", -1));
                 float speed = (XML::getFloatProperty(subnode, "speed", -1.0f));
                 monster->setMutation(XML::getProperty(subnode, "mutation", 0));
+                std::string genderString = XML::getProperty(subnode, "gender",
+                                                            std::string());
+                monster->setGender(getGender(genderString));
 
                 // Checking attributes for completeness and plausibility
                 if (monster->getMutation() > MAX_MUTATION)

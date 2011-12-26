@@ -39,6 +39,7 @@ Being::Being(ThingType type):
     Actor(type),
     mAction(STAND),
     mTarget(NULL),
+    mGender(GENDER_UNSPECIFIED),
     mDirection(DOWN)
 {
     const AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
@@ -731,3 +732,7 @@ bool Being::isTimerJustFinished(TimerID id) const
     return getTimer(id) == 0;
 }
 
+void Being::setGender(BeingGender gender)
+{
+    mGender = gender;
+}

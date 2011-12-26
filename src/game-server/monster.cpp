@@ -93,6 +93,7 @@ Monster::Monster(MonsterClass *specy):
     }
 
     setSize(specy->getSize());
+    setGender(specy->getGender());
 
     // Set positions relative to target from which the monster can attack
     int dist = specy->getAttackDistance();

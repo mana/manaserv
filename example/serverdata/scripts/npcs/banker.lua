@@ -11,9 +11,9 @@
 ----------------------------------------------------------------------------------
 
 function Banker(npc, ch)
-    if mana.chr_get_gender(ch) == GENDER_MALE then
+    if mana.being_get_gender(ch) == GENDER_MALE then
         do_message(npc, ch, "Welcome to the bank, sir!")
-    elseif mana.chr_get_gender(ch) == GENDER_FEMALE then
+    elseif mana.being_get_gender(ch) == GENDER_FEMALE then
         do_message(npc, ch, "Welcome to the bank, madam!")
     else
         do_message(npc, ch, "Welcome to the bank... uhm... person of unspecified gender!")

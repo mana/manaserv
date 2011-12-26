@@ -40,8 +40,8 @@ local timer
 
 -- Creates an NPC and associates the given handler.
 -- Note: Cannot be called until map initialization has started.
-function create_npc(name, id, x, y, talkfunct, updatefunct)
-  local npc = mana.npc_create(name, id, x, y)
+function create_npc(name, id, gender, x, y, talkfunct, updatefunct)
+  local npc = mana.npc_create(name, id, gender, x, y)
   if talkfunct then
     npc_talk_functs[npc] = function(npc, ch)
       talkfunct(npc, ch)

@@ -21,6 +21,8 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#include "common/manaserv_protocol.h"
+
 // Precomputed square-root of 2.
 #define SQRT2 1.4142135623730950488
 

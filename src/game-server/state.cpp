@@ -285,6 +285,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
                     Monster *q = static_cast< Monster * >(o);
                     enterMsg.writeInt16(q->getSpecy()->getId());
                     enterMsg.writeString(q->getName());
+                    enterMsg.writeInt8(q->getGender());
                 } break;
 
                 case OBJECT_NPC:
@@ -292,6 +293,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
                     NPC *q = static_cast< NPC * >(o);
                     enterMsg.writeInt16(q->getNPC());
                     enterMsg.writeString(q->getName());
+                    enterMsg.writeInt8(q->getGender());
                 } break;
 
                 default:

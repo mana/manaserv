@@ -27,6 +27,7 @@ extern "C" {
 #include <lauxlib.h>
 }
 
+#include "common/defines.h"
 #include "common/resourcemanager.h"
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
@@ -191,13 +192,16 @@ static int npc_create(lua_State *s)
 {
     const char *name = luaL_checkstring(s, 1);
     const int id = luaL_checkint(s, 2);
-    const int x = luaL_checkint(s, 3);
-    const int y = luaL_checkint(s, 4);
+    const int gender = luaL_checkint(s, 3);
+    const int x = luaL_checkint(s, 4);
+    const int y = luaL_checkint(s, 5);
 
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
     Script *t = static_cast<Script *>(lua_touserdata(s, -1));
     NPC *q = new NPC(name, id, t);
+    q->setGender(getGender(gender));
+
     MapComposite *m = t->getMap();
     if (!m)
     {
@@ -1807,37 +1811,37 @@ static int chr_get_kill_count(lua_State *s)
 }
 
 /**
- * mana.chr_get_gender(Character*): int
- * Get the gender of the character.
+ * mana.being_get_gender(Being*): int
+ * Get the gender of the being.
  */
-static int chr_get_gender(lua_State *s)
+static int being_get_gender(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
+    Being *b = getBeing(s, 1);
+    if (!b)
     {
         raiseScriptError(s, "chr_get_gender called for nonexistent character.");
         return 0;
     }
 
-    lua_pushinteger(s, c->getGender());
+    lua_pushinteger(s, b->getGender());
     return 1;
 }
 
 /**
- * mana.chr_set_gender(Character*, int gender): void
- * Set the gender of the character.
+ * mana.being_set_gender(Being*, int gender): void
+ * Set the gender of the being.
  */
-static int chr_set_gender(lua_State *s)
+static int being_set_gender(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
+    Being *b = getBeing(s, 1);
+    if (!b)
     {
-        raiseScriptError(s, "chr_set_gender called for nonexistent character.");
+        raiseScriptError(s, "being_set_gender called for nonexistent character.");
         return 0;
     }
 
     const int gender = luaL_checkinteger(s, 2);
-    c->setGender(gender);
+    b->setGender(getGender(gender));
 
     return 0;
 }
@@ -2336,8 +2340,8 @@ LuaScript::LuaScript():
         { "chr_set_hair_color",              &chr_set_hair_color              },
         { "chr_get_hair_color",              &chr_get_hair_color              },
         { "chr_get_kill_count",              &chr_get_kill_count              },
-        { "chr_get_gender",                  &chr_get_gender                  },
-        { "chr_set_gender",                  &chr_set_gender                  },
+        { "being_get_gender",                &being_get_gender                },
+        { "being_set_gender",                &being_set_gender                },
         { "chr_give_special",                &chr_give_special                },
         { "chr_has_special",                 &chr_has_special                 },
         { "chr_take_special",                &chr_take_special                },

@@ -25,6 +25,7 @@
 
 #include "common/defines.h"
 #include "common/inventorydata.h"
+#include "common/manaserv_protocol.h"
 #include "net/messagein.h"
 #include "net/messageout.h"
 #include "utils/point.h"
@@ -122,7 +123,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
 {
     // general character properties
     data.setAccountLevel(msg.readInt8());
-    data.setGender(msg.readInt8());
+    data.setGender(ManaServ::getGender(msg.readInt8()));
     data.setHairStyle(msg.readInt8());
     data.setHairColor(msg.readInt8());
     data.setLevel(msg.readInt16());

@@ -29,7 +29,7 @@ function Merchant(npc, ch, buy_sell_table)
   elseif (rights >= 2) then
     do_message(npc, ch, "How can I assist you in your testing duties?")
   elseif (rights >= 1) then
-      if mana.chr_get_gender(ch) == GENDER_FEMALE then
+      if mana.being_get_gender(ch) == GENDER_FEMALE then
           do_message(npc, ch, "What do you want, Madam?")
       else
           do_message(npc, ch, "Wat do you want, Sir?")

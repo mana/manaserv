@@ -22,6 +22,10 @@
 #ifndef MANASERV_PROTOCOL_H
 #define MANASERV_PROTOCOL_H
 
+#include <string>
+
+#include "utils/string.h"
+
 namespace ManaServ {
 
 enum {
@@ -112,8 +116,8 @@ enum {
     PGMSG_RESPAWN                  = 0x0180, // -
     GPMSG_BEING_ENTER              = 0x0200, // B type, W being id, B action, W*2 position, B direction
                                              // character: S name, B hair style, B hair color, B gender, B sprite layers changed, { B slot type, W item id }*
-                                             // monster: W type id
-                                             // npc: W type id
+                                             // monster: W type id gender
+                                             // npc: W type id gender
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
     GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // B sprite layers changed, { B slot type, W item id }*
@@ -439,6 +443,37 @@ enum BeingGender
     GENDER_MALE = 0,
     GENDER_FEMALE,
     GENDER_UNSPECIFIED
+};
+
+// Helper functions for gender
+
+/**
+* Helper function for getting gender by int
+*/
+inline ManaServ::BeingGender getGender(int gender)
+{
+    switch (gender)
+    {
+        case 0:
+            return ManaServ::GENDER_MALE;
+        case 1:
+            return ManaServ::GENDER_FEMALE;
+        default:
+            return ManaServ::GENDER_UNSPECIFIED;
+    }
+};
+
+/**
+* Helper function for getting gender by string
+*/
+inline ManaServ::BeingGender getGender(std::string gender)
+{
+    if (utils::toLower(gender) == "male")
+        return ManaServ::GENDER_MALE;
+    else if (utils::toLower(gender) == "female")
+        return ManaServ::GENDER_FEMALE;
+    else
+        return ManaServ::GENDER_UNSPECIFIED;
 };
 
 } // namespace ManaServ

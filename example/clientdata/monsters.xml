@@ -163,6 +163,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             magical-evade="30"
             physical-defence="5"
             magical-defence="0"
+            gender="female"
             />
         <!-- also quite lazy when unprovoked but much more territorial
         than the normal one-->
