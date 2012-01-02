@@ -545,8 +545,8 @@ bool Inventory::equip(int inventorySlot)
     InventoryData::iterator it;
     if ((it = mPoss->inventory.find(inventorySlot)) == mPoss->inventory.end())
     {
-        return false;
         LOG_DEBUG("No existing item in inventory at slot: " << inventorySlot);
+        return false;
     }
 
     // Test the equipment scripted requirements
