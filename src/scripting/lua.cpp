@@ -470,6 +470,7 @@ static int chr_inv_count(lua_State *s)
         {
             LOG_WARN("chr_inv_count called with id 0! "
                      "Currency is now handled through attributes!");
+            lua_pushinteger(s, 0);
         }
         else
         {
@@ -623,6 +624,7 @@ static int chr_get_level(lua_State *s)
     {
         raiseScriptError(s, "chr_get_level "
                          "called for nonexistent character.");
+        return 0;
     }
 
     lua_pushinteger(s, ch->getLevel());
@@ -1108,9 +1110,10 @@ static int being_get_name(lua_State *s)
     if (being)
     {
         lua_pushstring(s, being->getName().c_str());
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 /**
@@ -1124,9 +1127,10 @@ static int being_get_action(lua_State *s)
     if (being)
     {
         lua_pushinteger(s, being->getAction());
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 /**
@@ -1158,9 +1162,10 @@ static int being_get_direction(lua_State *s)
     if (being)
     {
         lua_pushinteger(s, being->getDirection());
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 /**
@@ -1187,10 +1192,16 @@ static int being_set_direction(lua_State *s)
  */
 static int posX(lua_State *s)
 {
-    int x = getBeing(s, 1)->getPosition().x;
-    lua_pushinteger(s, x);
+    Being *being = getBeing(s, 1);
 
-    return 1;
+    if (being)
+    {
+        int x = being->getPosition().x;
+        lua_pushinteger(s, x);
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
@@ -1199,10 +1210,16 @@ static int posX(lua_State *s)
  */
 static int posY(lua_State *s)
 {
-    int y = getBeing(s, 1)->getPosition().y;
-    lua_pushinteger(s, y);
+    Being *being = getBeing(s, 1);
 
-    return 1;
+    if (being)
+    {
+        int y = being->getPosition().y;
+        lua_pushinteger(s, y);
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
@@ -1358,6 +1375,7 @@ static int chr_get_quest(lua_State *s)
     {
         raiseScriptError(s, "chr_get_quest "
                          "called for nonexistent character.");
+        return 0;
     }
 
     const char *m = luaL_checkstring(s, 2);
@@ -2128,7 +2146,13 @@ static int get_map_id(lua_State *s)
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
     Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    int id = t->getMap()->getID();
+    MapComposite *m = t->getMap();
+    if (!m)
+    {
+        raiseScriptError(s, "get_map_id called outside a map.");
+        return 0;
+    }
+    int id = m->getID();
     lua_pushinteger(s, id);
     return 1;
 }
@@ -2268,6 +2292,11 @@ static int get_distance(lua_State *s)
     {
         Being *being1 = getBeing(s, 1);
         Being *being2 = getBeing(s, 2);
+        if (!being1 || !being2)
+        {
+            raiseScriptError(s, "get_distance called for invalid beings.");
+            return 0;
+        }
         x1 = being1->getPosition().x;
         y1 = being1->getPosition().y;
         x2 = being2->getPosition().x;
