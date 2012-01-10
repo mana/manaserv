@@ -72,7 +72,6 @@ void GameHandler::computerDisconnected(NetComputer *comp)
     else if (Character *ch = computer.character)
     {
         accountHandler->sendCharacterData(ch);
-        GameState::remove(ch);
         ch->disconnected();
         delete ch;
     }
@@ -695,12 +694,9 @@ void GameHandler::handleDisconnect(GameClient &client, MessageIn &message)
                     client.character->getDatabaseID(),
                     magic_token);
     }
-    // TODO: implement a delayed remove
-    GameState::remove(client.character);
-
     accountHandler->sendCharacterData(client.character);
 
-    // Done with the character
+    // Done with the character, also handle possible respawn case
     client.character->disconnected();
     delete client.character;
     client.character = 0;

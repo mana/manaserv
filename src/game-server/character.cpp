@@ -55,6 +55,7 @@ const float Character::EXP_LEVEL_FLEXIBILITY = 1.0f;
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER),
     mClient(NULL),
+    mConnected(true),
     mTransactionHandler(NULL),
     mRechargePerSpecial(0),
     mSpecialUpdateNeeded(false),
@@ -94,12 +95,19 @@ Character::Character(MessageIn &msg):
 
 void Character::update()
 {
-    // Update character level
+    // First, deal with being generic updates
+    Being::update();
+
+    // Update character level if needed.
     if (mRecalculateLevel)
     {
         mRecalculateLevel = false;
         recalculateLevel();
     }
+
+    // Dead character: don't regenerate anything else
+    if (getAction() == DEAD)
+        return;
 
     // Update special recharge
     std::list<Special *> rechargeNeeded;
@@ -138,7 +146,6 @@ void Character::update()
         mStatusEffects[it->first] = it->second.time;
         it++;
     }
-    Being::update();
 }
 
 void Character::perform()
@@ -208,19 +215,18 @@ void Character::respawn()
     mTarget = NULL;
 
     // Execute respawn script
-    if (!Script::executeGlobalEventFunction("on_chr_death_accept", this))
-    {
-        // Script-controlled respawning didn't work - fall back to
-        // hardcoded logic.
-        mAttributes[ATTR_HP].setBase(mAttributes[ATTR_MAX_HP].getModifiedAttribute());
-        updateDerivedAttributes(ATTR_HP);
-        // Warp back to spawn point.
-        int spawnMap = Configuration::getValue("char_respawnMap", 1);
-        int spawnX = Configuration::getValue("char_respawnX", 1024);
-        int spawnY = Configuration::getValue("char_respawnY", 1024);
-        GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
-    }
+    if (Script::executeGlobalEventFunction("on_chr_death_accept", this))
+        return;
 
+    // Script-controlled respawning didn't work - fall back to hardcoded logic.
+    mAttributes[ATTR_HP].setBase(mAttributes[ATTR_MAX_HP].getModifiedAttribute());
+    updateDerivedAttributes(ATTR_HP);
+    // Warp back to spawn point.
+    int spawnMap = Configuration::getValue("char_respawnMap", 1);
+    int spawnX = Configuration::getValue("char_respawnX", 1024);
+    int spawnY = Configuration::getValue("char_respawnY", 1024);
+
+    GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
 }
 
 void Character::useSpecial(int id)
@@ -664,6 +670,14 @@ AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
 
 void Character::disconnected()
 {
+    mConnected = false;
+
+    // Make the dead characters respawn, even in case of disconnection.
+    if (getAction() == DEAD)
+        respawn();
+    else
+        GameState::remove(this);
+
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)
     {

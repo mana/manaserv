@@ -720,6 +720,11 @@ void GameState::warp(Character *ptr, MapComposite *map, int x, int y)
        a disconnection. */
     accountHandler->sendCharacterData(ptr);
 
+    // If the player has just left, The character pointer is also about
+    // to be deleted. So we don't have to do anything else.
+    if (!ptr->isConnected())
+        return;
+
     if (map->isActive())
     {
         if (!insert(ptr))
@@ -766,6 +771,14 @@ void GameState::enqueueRemove(Actor *ptr)
 
 void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
 {
+    // When the player has just disconnected, better not wait for the pointer
+    // to become invalid.
+    if (!ptr->isConnected())
+    {
+        warp(ptr, m, x, y);
+        return;
+    }
+
     DelayedEvent e = { EVENT_WARP, x, y, m };
     enqueueEvent(ptr, e);
 }

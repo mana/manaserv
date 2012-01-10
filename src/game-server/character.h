@@ -358,6 +358,9 @@ class Character : public Being
         bool isMuted() const
         { return isTimerRunning(T_C_MUTE); }
 
+        bool isConnected() const
+        { return mConnected; }
+
     protected:
         /**
          * Gets the way the actor blocks pathfinding for other objects
@@ -416,6 +419,13 @@ class Character : public Being
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
 
         GameClient *mClient;   /**< Client computer. */
+
+        /**
+         * Tells whether the character client is connected.
+         * Useful when dealing with enqueued events.
+         */
+        bool mConnected;
+
         /** Handler of the transaction the character is involved in. */
         void *mTransactionHandler;
 
