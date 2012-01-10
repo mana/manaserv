@@ -2214,8 +2214,9 @@ static int is_walkable(lua_State *s)
 }
 
 /**
- * mana.drop_item(int x, int y, int id || string name[, int number]): void
+ * mana.drop_item(int x, int y, int id || string name[, int number]): bool
  * Creates an item stack on the floor.
+ * @Returns whether the insertion was successful.
  */
 static int item_drop(lua_State *s)
 {
@@ -2244,9 +2245,8 @@ static int item_drop(lua_State *s)
     i->setMap(map);
     Point pos(x, y);
     i->setPosition(pos);
-    GameState::insertOrDelete(i);
-
-    return 0;
+    lua_pushboolean(s, GameState::insertOrDelete(i));
+    return 1;
 }
 
 /**
