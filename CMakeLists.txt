@@ -11,7 +11,7 @@ ENDIF()
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 
 OPTION(WITH_SQLITE "Enable Sqlite support (used by default)" ON)
-OPTION(WITH_MYSQL "Enable building of tranlations" OFF)
+OPTION(WITH_MYSQL "Enable MySQL support" OFF)
 OPTION(ENABLE_LUA "Enable Lua scripting support" ON)
 
 # Exclude Sqlite support if the MySQL support was asked.
