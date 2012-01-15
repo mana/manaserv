@@ -1112,7 +1112,7 @@ static int being_get_name(lua_State *s)
         lua_pushstring(s, being->getName().c_str());
         return 1;
     }
-
+    raiseScriptError(s, "being_get_name called for an invalid being.");
     return 0;
 }
 
@@ -1129,7 +1129,7 @@ static int being_get_action(lua_State *s)
         lua_pushinteger(s, being->getAction());
         return 1;
     }
-
+    raiseScriptError(s, "being_get_action called for an invalid being.");
     return 0;
 }
 
@@ -1147,7 +1147,10 @@ static int being_set_action(lua_State *s)
     {
         being->setAction((BeingAction) act);
     }
-
+    else
+    {
+        raiseScriptError(s, "being_set_action called for an invalid being.");
+    }
     return 0;
 }
 
@@ -1164,7 +1167,7 @@ static int being_get_direction(lua_State *s)
         lua_pushinteger(s, being->getDirection());
         return 1;
     }
-
+    raiseScriptError(s, "being_get_direction called for an invalid being.");
     return 0;
 }
 
@@ -1182,7 +1185,7 @@ static int being_set_direction(lua_State *s)
     {
         being->setDirection(dir);
     }
-
+    raiseScriptError(s, "being_set_direction called for an invalid being.");
     return 0;
 }
 
@@ -1200,7 +1203,7 @@ static int posX(lua_State *s)
         lua_pushinteger(s, x);
         return 1;
     }
-
+    raiseScriptError(s, "posX called for an invalid being.");
     return 0;
 }
 
@@ -1218,7 +1221,7 @@ static int posY(lua_State *s)
         lua_pushinteger(s, y);
         return 1;
     }
-
+    raiseScriptError(s, "posY called for an invalid being.");
     return 0;
 }
 
