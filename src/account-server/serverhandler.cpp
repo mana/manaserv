@@ -601,6 +601,14 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             storage->removeFloorItem(mapId, itemId, amount, posX, posY);
         } break;
 
+        case GAMSG_ANNOUNCE:
+        {
+            const std::string message = msg.readString();
+            const int senderId = msg.readInt16();
+            const std::string senderName = msg.readString();
+            chatHandler->handleAnnounce(message, senderId, senderName);
+        } break;
+
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "
                      << msg.getId());

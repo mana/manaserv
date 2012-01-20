@@ -113,6 +113,12 @@ class ChatHandler : public ConnectionHandler
         void handlePartyInvite(MessageIn &msg);
 
         /**
+         * Sends an announce to all connected clients.
+         */
+        void handleAnnounce(const std::string &message, int senderId,
+                            const std::string &senderName);
+
+        /**
          * Returns ChatClient from the Player Map
          * @param The name of the character
          * @return The Chat Client
@@ -156,7 +162,6 @@ class ChatHandler : public ConnectionHandler
         void handleCommand(ChatClient &client, const std::string &command);
 
         void handleChatMessage(ChatClient &client, MessageIn &msg);
-        void handleAnnounceMessage(ChatClient &client, MessageIn &msg);
         void handlePrivMsgMessage(ChatClient &client, MessageIn &msg);
         void handleWhoMessage(ChatClient &client);
 

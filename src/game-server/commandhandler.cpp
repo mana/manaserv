@@ -1107,19 +1107,20 @@ static void handleReport(Character *player, std::string &args)
     // TODO: Send the report to a developer or something
 }
 
-static void handleAnnounce(Character *player, std::string &msg)
+static void handleAnnounce(Character *player, std::string &args)
 {
-    if (msg.empty())
+    if (args.empty())
     {
         say("Invalid number of arguments given.", player);
         say("Usage: @announce <message>", player);
         return;
     }
 
-    GameState::sayToAll(msg);
-
-    // log transaction
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_ANNOUNCE, msg);
+    MessageOut msg(GAMSG_ANNOUNCE);
+    msg.writeString(args);
+    msg.writeInt16(player->getDatabaseID());
+    msg.writeString(player->getName());
+    accountHandler->send(msg);
 }
 
 static void handleWhere(Character *player, std::string &)
@@ -1463,7 +1464,7 @@ static void handleSkills(Character *player, std::string &args)
 
     say("List of skills of player '" + other->getName() + "':", player);
     std::map<int, int>::const_iterator it = other->getSkillBegin();
-    std::map<int, int>::const_iterator it_end = other->getSkillEnd(); 
+    std::map<int, int>::const_iterator it_end = other->getSkillEnd();
 
     if (it == it_end)
     {

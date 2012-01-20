@@ -157,10 +157,6 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
             handleChatMessage(computer, message);
             break;
 
-        case PCMSG_ANNOUNCE:
-            handleAnnounceMessage(computer, message);
-            break;
-
         case PCMSG_PRIVMSG:
             handlePrivMsgMessage(computer, message);
             break;
@@ -298,42 +294,25 @@ void ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
     storage->addTransaction(trans);
 }
 
-void ChatHandler::handleAnnounceMessage(ChatClient &client, MessageIn &msg)
+void ChatHandler::handleAnnounce(const std::string &message, int senderId,
+                                 const std::string &senderName)
 {
-    std::string text = msg.readString();
+    // We do not need to check for right permissions since the game server does
+    // this.
+    MessageOut result(CPMSG_ANNOUNCEMENT);
+    result.writeString(message);
+    result.writeString(senderName);
+    sendToEveryone(result);
 
-    if (!stringFilter->filterContent(text))
-    {
-        warnPlayerAboutBadWords(client);
-        return;
-    }
+    if (!senderId)
+        return; // Do not log scripted announcements
 
-    if (client.accountLevel == AL_ADMIN || client.accountLevel == AL_GM)
-    {
-        // TODO: b_lindeijer: Shouldn't announcements also have a sender?
-        LOG_INFO("ANNOUNCE: " << text);
-        MessageOut result(CPMSG_ANNOUNCEMENT);
-        result.writeString(text);
-
-        // We send the message to all players in the default channel as it is
-        // an announcement.
-        sendToEveryone(result);
-
-        // log transaction
-        Transaction trans;
-        trans.mCharacterId = client.characterId;
-        trans.mAction = TRANS_MSG_ANNOUNCE;
-        trans.mMessage = "User announced " + text;
-        storage->addTransaction(trans);
-    }
-    else
-    {
-        MessageOut result(CPMSG_ERROR);
-        result.writeInt8(ERRMSG_INSUFFICIENT_RIGHTS);
-        client.send(result);
-        LOG_INFO(client.characterName <<
-            " couldn't make an announcement due to insufficient rights.");
-    }
+    // log transaction
+    Transaction trans;
+    trans.mCharacterId = senderId;
+    trans.mAction = TRANS_MSG_ANNOUNCE;
+    trans.mMessage = senderName + " announced: " + message;
+    storage->addTransaction(trans);
 
 }
 

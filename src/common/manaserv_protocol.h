@@ -209,11 +209,10 @@ enum {
 
     // Chat
     CPMSG_ERROR                    = 0x0401, // B error
-    CPMSG_ANNOUNCEMENT             = 0x0402, // S text
+    CPMSG_ANNOUNCEMENT             = 0x0402, // S text, S sender
     CPMSG_PRIVMSG                  = 0x0403, // S user, S text
     CPMSG_PUBMSG                   = 0x0404, // W channel, S user, S text
     PCMSG_CHAT                     = 0x0410, // S text, W channel
-    PCMSG_ANNOUNCE                 = 0x0411, // S text
     PCMSG_PRIVMSG                  = 0x0412, // S user, S text
     PCMSG_WHO                      = 0x0415, // -
     CPMSG_WHO_RESPONSE             = 0x0416, // { S user }
@@ -264,6 +263,7 @@ enum {
     GAMSG_TRANSACTION           = 0x0600, // D character id, D action, S message
     GAMSG_CREATE_ITEM_ON_MAP    = 0x0601, // D map id, D item id, W amount, W pos x, W pos y
     GAMSG_REMOVE_ITEM_ON_MAP    = 0x0602, // D map id, D item id, W amount, W pos x, W pos y
+    GAMSG_ANNOUNCE              = 0x0603, // S text, W senderid, S sendername
 
     XXMSG_INVALID = 0x7FFF
 };
