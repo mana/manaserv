@@ -21,6 +21,7 @@ function Merchant(npc, ch, buy_sell_table)
   local rights = mana.chr_get_rights(ch);
 
   if (rights >= 128) then
+    mana.announce(mana.being_get_name(ch) .. " the big administrator was at my shop!", mana.being_get_name(npc))
     do_message(npc, ch, "Oh mighty server administrator, how can I avoid your wrath?")
   elseif (rights >= 8) then
     do_message(npc, ch, "How can I be of assistance, sir gamemaster?")

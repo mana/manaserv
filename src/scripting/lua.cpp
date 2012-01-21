@@ -1714,10 +1714,6 @@ static int chat_message(lua_State *s)
             GameState::sayTo(being, NULL, message);
         }
     }
-    else if (lua_gettop(s) == 1 && lua_isstring(s, 1))
-    {
-        // TODO: make chatserver send a global message
-    }
     else
     {
         raiseScriptError(s, "chat_message called with incorrect parameters.");
@@ -2586,6 +2582,23 @@ static int map_object_get_type(lua_State *s)
     return 1;
 }
 
+/**
+ * mana.announce(text [, sender])
+ * Does a global announce
+ */
+static int announce(lua_State *s)
+{
+    const char *message = luaL_checkstring(s, 1);
+    const char *sender = luaL_optstring(s, 2, "Server");
+
+    MessageOut msg(GAMSG_ANNOUNCE);
+    msg.writeString(message);
+    msg.writeInt16(0); // Announce from server so id = 0
+    msg.writeString(sender);
+    accountHandler->send(msg);
+    return 0;
+}
+
 static int require_loader(lua_State *s)
 {
     // Add .lua extension (maybe only do this when it doesn't have it already)
@@ -2706,6 +2719,7 @@ LuaScript::LuaScript():
         { "map_object_get_bounds",           &map_object_get_bounds           },
         { "map_object_get_name",             &map_object_get_name             },
         { "map_object_get_type",             &map_object_get_type             },
+        { "announce",                        &announce                        },
         { NULL, NULL }
     };
     luaL_register(mState, "mana", callbacks);
