@@ -412,9 +412,6 @@ void GameHandler::handleSay(GameClient &client, MessageIn &message)
     if (!client.character->isMuted())
     {
         GameState::sayAround(client.character, say);
-        std::string msg = client.character->getName() + " said " + say;
-        accountHandler->sendTransaction(client.character->getDatabaseID(),
-                                        TRANS_MSG_PUBLIC, msg);
     }
     else
     {

@@ -276,22 +276,12 @@ void ChatHandler::handleChatMessage(ChatClient &client, MessageIn &msg)
 
     if (channel)
     {
-        LOG_DEBUG(client.characterName << " says in channel " << channelId
-                  << ": " << text);
-
         MessageOut result(CPMSG_PUBMSG);
         result.writeInt16(channelId);
         result.writeString(client.characterName);
         result.writeString(text);
         sendInChannel(channel, result);
     }
-
-    // log transaction
-    Transaction trans;
-    trans.mCharacterId = client.characterId;
-    trans.mAction = TRANS_MSG_PUBLIC;
-    trans.mMessage = "User said " + text;
-    storage->addTransaction(trans);
 }
 
 void ChatHandler::handleAnnounce(const std::string &message, int senderId,
@@ -628,8 +618,6 @@ void ChatHandler::sayToPlayer(ChatClient &computer,
                               const std::string &playerName,
                               const std::string &text)
 {
-    LOG_DEBUG(computer.characterName << " says to " << playerName << ": "
-              << text);
     // Send it to the being if the being exists
     MessageOut result(CPMSG_PRIVMSG);
     result.writeString(computer.characterName);
