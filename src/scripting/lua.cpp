@@ -80,7 +80,7 @@ static int npc_message(lua_State *s)
     }
     MessageOut msg(GPMSG_NPC_MESSAGE);
     msg.writeInt16(p->getPublicID());
-    msg.writeString(std::string(m), l);
+    msg.writeString(m, l);
     gameHandler->sendTo(q, msg);
     return 0;
 }
@@ -2464,9 +2464,11 @@ static int get_distance(lua_State *s)
 static int map_get_objects(lua_State *s)
 {
     const bool filtered = (lua_gettop(s) == 1);
-    std::string filter;
+    const char *filter;
     if (filtered)
+    {
         filter = luaL_checkstring(s, 1);
+    }
 
     lua_pushlightuserdata(s, (void *)&registryKey);
     lua_gettable(s, LUA_REGISTRYINDEX);
@@ -2497,7 +2499,7 @@ static int map_get_objects(lua_State *s)
  */
 static int map_object_get_property(lua_State *s)
 {
-    std::string key = luaL_checkstring(s, 2);
+    const char *key = luaL_checkstring(s, 2);
     if (!lua_islightuserdata(s, 1))
     {
         raiseScriptError(s, "map_object_get_property called with invalid"
@@ -2602,7 +2604,8 @@ static int announce(lua_State *s)
 static int require_loader(lua_State *s)
 {
     // Add .lua extension (maybe only do this when it doesn't have it already)
-    std::string filename = luaL_checkstring(s, 1);
+    const char *file = luaL_checkstring(s, 1);
+    std::string filename = file;
     filename.append(".lua");
 
     const std::string path = ResourceManager::resolve(filename);
