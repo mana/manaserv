@@ -179,8 +179,6 @@ SET(SRCS_MANASERVACCOUNT
     dal/recordset.h
     dal/recordset.cpp
     utils/functors.h
-    utils/encryption.h
-    utils/encryption.cpp
     utils/sha256.h
     utils/sha256.cpp
     utils/throwerror.h
