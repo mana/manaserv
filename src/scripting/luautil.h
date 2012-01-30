@@ -63,7 +63,7 @@ void push(lua_State *s, MapObject *val);
 template <typename T> void pushSTLContainer(lua_State *s, const std::list<T> &container)
 {
     int len = container.size();
-    lua_newtable(s);
+    lua_createtable(s, len, 0);
     int table = lua_gettop(s);
     typename std::list<T>::const_iterator i;
     i = container.begin();
@@ -81,7 +81,7 @@ template <typename T> void pushSTLContainer(lua_State *s, const std::list<T> &co
 template <typename T> void pushSTLContainer(lua_State *s, const std::vector<T> &container)
 {
     int len = container.size();
-    lua_createtable(s, 0, len);
+    lua_createtable(s, len, 0);
     int table = lua_gettop(s);
 
     for (int key = 0; key < len; key++)
@@ -114,7 +114,7 @@ template <typename Tkey, typename Tval> void pushSTLContainer(lua_State *s, cons
 template <typename T> void pushSTLContainer(lua_State *s, const std::set<T> &container)
 {
     int len = container.size();
-    lua_newtable(s);
+    lua_createtable(s, len, 0);
     int table = lua_gettop(s);
     typename std::set<T>::const_iterator i;
     i = container.begin();

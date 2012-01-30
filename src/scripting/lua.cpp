@@ -386,7 +386,7 @@ static int chr_get_inventory(lua_State *s)
         lua_pushinteger(s, tableIndex);
 
         // Create the sub-table (value of the main one)
-        lua_newtable(s);
+        lua_createtable(s, 0, 4);
         int subTableStackPosition = lua_gettop(s);
         // Stores the item info in it.
         lua_pushstring(s, "slot");
@@ -458,7 +458,7 @@ static int chr_get_equipment(lua_State *s)
         lua_pushinteger(s, tableIndex);
 
         // Create the sub-table (value of the main one)
-        lua_newtable(s);
+        lua_createtable(s, 0, 3);
         int subTableStackPosition = lua_gettop(s);
         // Stores the item info in it.
         lua_pushstring(s, "slot");
