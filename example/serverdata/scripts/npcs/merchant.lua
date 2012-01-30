@@ -48,6 +48,7 @@ function Merchant(npc, ch, buy_sell_table)
   else
       table.insert (choice_table, "Can you make me a price for what I have?")
   end
+  table.insert (choice_table, "Tell me about the objects on this map")
   table.insert (choice_table, "Nevermind...")
 
   local v = do_choice(npc, ch, choice_table)
@@ -94,6 +95,15 @@ function Merchant(npc, ch, buy_sell_table)
         end
     end
 
+  elseif v == 3 then
+
+    local objects = mana.map_get_objects()
+    do_message(npc, ch, "There are " .. #objects .. " objects on this map, their names are:")
+    for i=1,#objects do
+        do_message(npc, ch, tostring(i) .. ": " .. objects[i]:name())
+    end
+
   end
+
   do_message(npc, ch, "See you later!")
 end

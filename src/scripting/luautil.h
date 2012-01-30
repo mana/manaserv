@@ -44,11 +44,69 @@ void raiseScriptError(lua_State *s, const char *format, ...);
 
 void raiseWarning(lua_State *s, const char *format, ...);
 
+/**
+ * A helper class for pushing and checking custom Lua user data types.
+ */
+template <typename T>
+class LuaUserData
+{
+public:
+    /**
+     * Creates a metatable to be used for the user data associated with the
+     * type. Then, registers the \a members with a library named \a typeName,
+     * and sets the '__index' member of the metatable to this library.
+     */
+    static void registerType(lua_State *s,
+                             const char *typeName,
+                             const luaL_Reg *members)
+    {
+        mTypeName = typeName;
+
+        luaL_newmetatable(s, mTypeName);        // metatable
+        lua_pushstring(s, "__index");           // metatable, "__index"
+        luaL_register(s, typeName, members);    // metatable, "__index", {}
+        lua_rawset(s, -3);                      // metatable
+        lua_pop(s, 1);                          // -empty-
+    }
+
+    /**
+     * Pushes a userdata reference to the given object on the stack. Either by
+     * creating one, or reusing an existing one.
+     */
+    static int push(lua_State *L, T *object)
+    {
+        T **userData = static_cast<T**>(lua_newuserdata(L, sizeof(T*)));
+        *userData = object;
+
+        luaL_newmetatable(L, mTypeName);
+        lua_setmetatable(L, -2);
+
+        return 1;
+    }
+
+    /**
+     * Returns the argument at position \a narg when it is of the right type,
+     * and raises a Lua error otherwise.
+     */
+    static T *check(lua_State *L, int narg)
+    {
+        void *userData = luaL_checkudata(L, narg, mTypeName);
+        return *(static_cast<T**>(userData));
+    }
+
+private:
+    static const char *mTypeName;
+};
+
+template <typename T> const char * LuaUserData<T>::mTypeName;
+
+typedef LuaUserData<MapObject> LuaMapObject;
+
+
 NPC *getNPC(lua_State *s, int p);
 Character *getCharacter(lua_State *s, int p);
 Monster *getMonster(lua_State *s, int p);
 Being *getBeing(lua_State *s, int p);
-
 
 /* Polymorphic wrapper for pushing variables.
    Useful for templates.*/
@@ -56,7 +114,11 @@ void push(lua_State *s, int val);
 void push(lua_State *s, const std::string &val);
 void push(lua_State *s, Thing *val);
 void push(lua_State *s, double val);
-void push(lua_State *s, MapObject *val);
+
+inline void push(lua_State *s, MapObject *val)
+{
+    LuaMapObject::push(s, val);
+}
 
 
 /*  Pushes an STL LIST */

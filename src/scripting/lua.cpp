@@ -2500,31 +2500,17 @@ static int map_get_objects(lua_State *s)
 static int map_object_get_property(lua_State *s)
 {
     const char *key = luaL_checkstring(s, 2);
-    if (!lua_islightuserdata(s, 1))
+    MapObject *obj = LuaMapObject::check(s, 1);
+
+    std::string property = obj->getProperty(key);
+    if (!property.empty())
     {
-        raiseScriptError(s, "map_object_get_property called with invalid"
-                            "object handle");
-        return 0;
-    }
-    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
-    if (obj)
-    {
-        std::string property = obj->getProperty(key);
-        if (!property.empty())
-        {
-            lua_pushstring(s, property.c_str());
-            return 1;
-        }
-        else
-        {
-            // scripts can check for nil
-            return 0;
-        }
+        lua_pushstring(s, property.c_str());
+        return 1;
     }
     else
     {
-        raiseScriptError(s, "map_object_get_property called with invalid"
-                            "object handle");
+        // scripts can check for nil
         return 0;
     }
 }
@@ -2535,13 +2521,7 @@ static int map_object_get_property(lua_State *s)
  */
 static int map_object_get_bounds(lua_State *s)
 {
-    if (!lua_islightuserdata(s, 1))
-    {
-        raiseScriptError(s, "map_object_get_bounds called with invalid"
-                            "object handle");
-        return 0;
-    }
-    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
+    MapObject *obj = LuaMapObject::check(s, 1);
     const Rectangle &bounds = obj->getBounds();
     lua_pushinteger(s, bounds.x);
     lua_pushinteger(s, bounds.y);
@@ -2556,13 +2536,7 @@ static int map_object_get_bounds(lua_State *s)
  */
 static int map_object_get_name(lua_State *s)
 {
-    if (!lua_islightuserdata(s, 1))
-    {
-        raiseScriptError(s, "map_object_get_name called with invalid"
-                            "object handle");
-        return 0;
-    }
-    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
+    MapObject *obj = LuaMapObject::check(s, 1);
     lua_pushstring(s, obj->getName().c_str());
     return 1;
 }
@@ -2573,13 +2547,7 @@ static int map_object_get_name(lua_State *s)
  */
 static int map_object_get_type(lua_State *s)
 {
-    if (!lua_islightuserdata(s, 1))
-    {
-        raiseScriptError(s, "map_object_get_type called with invalid"
-                            "object handle");
-        return 0;
-    }
-    MapObject *obj = static_cast<MapObject *>(lua_touserdata(s, 1));
+    MapObject *obj = LuaMapObject::check(s, 1);
     lua_pushstring(s, obj->getType().c_str());
     return 1;
 }
@@ -2718,15 +2686,21 @@ LuaScript::LuaScript():
         { "log",                             &log                             },
         { "get_distance",                    &get_distance                    },
         { "map_get_objects",                 &map_get_objects                 },
-        { "map_object_get_property",         &map_object_get_property         },
-        { "map_object_get_bounds",           &map_object_get_bounds           },
-        { "map_object_get_name",             &map_object_get_name             },
-        { "map_object_get_type",             &map_object_get_type             },
         { "announce",                        &announce                        },
         { NULL, NULL }
     };
     luaL_register(mState, "mana", callbacks);
     lua_pop(mState, 1);                     // pop the 'mana' table
+
+    static luaL_Reg const members_MapObject[] = {
+        { "property",                        &map_object_get_property         },
+        { "bounds",                          &map_object_get_bounds           },
+        { "name",                            &map_object_get_name             },
+        { "type",                            &map_object_get_type             },
+        { NULL, NULL }
+    };
+
+    LuaMapObject::registerType(mState, "MapObject", members_MapObject);
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mState, (void *)&registryKey);

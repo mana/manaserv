@@ -116,8 +116,3 @@ void push(lua_State *s, double val)
 {
     lua_pushnumber(s, val);
 }
-
-void push(lua_State *s, MapObject *val)
-{
-    lua_pushlightuserdata(s, val);
-}
