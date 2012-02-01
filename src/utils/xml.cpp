@@ -97,7 +97,7 @@ namespace XML
         xmlChar *prop = xmlGetProp(node, BAD_CAST name);
         if (prop)
         {
-            ret = atoi((char*) prop);
+            ret = atol((char*) prop);
             xmlFree(prop);
         }
 

@@ -31,7 +31,7 @@
 
 #include <cstring>
 
-static std::vector< int > tilesetFirstGids;
+static std::vector<unsigned> tilesetFirstGids;
 
 Map *MapReader::readMap(const std::string &filename)
 {
@@ -230,10 +230,10 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
 
         for (int i = 0; i < binLen - 3; i += 4)
         {
-            int gid = binData[i] |
-                      (binData[i + 1] << 8)  |
-                      (binData[i + 2] << 16) |
-                      (binData[i + 3] << 24);
+            unsigned gid = binData[i] |
+                    (binData[i + 1] << 8)  |
+                    (binData[i + 2] << 16) |
+                    (binData[i + 3] << 24);
 
             setTileWithGid(map, x, y, gid);
 
@@ -262,8 +262,7 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
         {
             pos = csv.find_first_of(",", oldPos);
 
-            const int gid = atoi(csv.substr(oldPos, pos - oldPos).c_str());
-
+            unsigned gid = atol(csv.substr(oldPos, pos - oldPos).c_str());
             setTileWithGid(map, x, y, gid);
 
             x++;
@@ -290,7 +289,7 @@ void MapReader::readLayer(xmlNodePtr node, Map *map)
         {
             if (xmlStrEqual(node->name, BAD_CAST "tile") && y < h)
             {
-                int gid = XML::getProperty(node, "gid", -1);
+                unsigned gid = XML::getProperty(node, "gid", 0);
                 setTileWithGid(map, x, y, gid);
 
                 if (++x == w)
@@ -333,11 +332,21 @@ int MapReader::getObjectProperty(xmlNodePtr node, int def)
     return val;
 }
 
-void MapReader::setTileWithGid(Map *map, int x, int y, int gid)
+void MapReader::setTileWithGid(Map *map, int x, int y, unsigned gid)
 {
+    // Bits on the far end of the 32-bit global tile ID are used for tile flags
+    const int FlippedHorizontallyFlag   = 0x80000000;
+    const int FlippedVerticallyFlag     = 0x40000000;
+    const int FlippedAntiDiagonallyFlag = 0x20000000;
+
+    // Clear flipping flags, they are not relevant
+    gid &= ~(FlippedHorizontallyFlag |
+             FlippedVerticallyFlag |
+             FlippedAntiDiagonallyFlag);
+
     // Find the tileset with the highest firstGid below/eq to gid
-    int set = gid;
-    for (std::vector< int >::const_iterator i = ::tilesetFirstGids.begin(),
+    unsigned set = gid;
+    for (std::vector<unsigned>::const_iterator i = ::tilesetFirstGids.begin(),
          i_end = ::tilesetFirstGids.end(); i != i_end; ++i)
     {
         if (gid < *i)

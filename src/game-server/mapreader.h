@@ -65,7 +65,7 @@ class MapReader
          */
         static int getObjectProperty(xmlNodePtr node, int def);
 
-        static void setTileWithGid(Map *map, int x, int y, int gid);
+        static void setTileWithGid(Map *map, int x, int y, unsigned gid);
 };
 
 #endif
