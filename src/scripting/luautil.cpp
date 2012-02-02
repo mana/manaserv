@@ -51,6 +51,65 @@ void raiseWarning(lua_State *, const char *format, ...)
     LOG_WARN("Lua script error: "<< message);
 }
 
+
+char UserDataCache::mRegistryKey;
+
+bool UserDataCache::retrieve(lua_State *s, void *object)
+{
+    // Retrieve the cache table
+    lua_pushlightuserdata(s, &mRegistryKey);    // key
+    lua_rawget(s, LUA_REGISTRYINDEX);           // Cache?
+
+    if (lua_isnil(s, -1))
+    {
+        lua_pop(s, 1);
+        return false;
+    }
+
+    lua_pushlightuserdata(s, object);           // Cache, object
+    lua_rawget(s, -2);                          // Cache, UD?
+
+    if (lua_isnil(s, -1))
+    {
+        lua_pop(s, 2);                          // ...
+        return false;
+    }
+
+    lua_replace(s, -2);                         // UD
+    return true;
+}
+
+void UserDataCache::insert(lua_State *s, void *object)
+{
+    // Retrieve the cache table
+    lua_pushlightuserdata(s, &mRegistryKey);    // UD, key
+    lua_rawget(s, LUA_REGISTRYINDEX);           // UD, Cache?
+
+    // Create the cache when it doesn't exist yet
+    if (lua_isnil(s, -1))
+    {
+        lua_pop(s, 1);                          // UD
+        lua_newtable(s);                        // UD, Cache
+
+        // The metatable that makes the values in the table above weak
+        lua_newtable(s);                        // UD, Cache, {}
+        lua_pushstring(s, "__mode");
+        lua_pushstring(s, "v");
+        lua_rawset(s, -3);                      // UD, Cache, { __mode = "v" }
+        lua_setmetatable(s, -2);                // UD, Cache
+
+        lua_pushlightuserdata(s, &mRegistryKey);// UD, Cache, key
+        lua_pushvalue(s, -2);                   // UD, Cache, key, Cache
+        lua_rawset(s, LUA_REGISTRYINDEX);       // UD, Cache
+    }
+
+    lua_pushlightuserdata(s, object);           // UD, Cache, object
+    lua_pushvalue(s, -3);                       // UD, Cache, object, UD
+    lua_rawset(s, -3);                          // UD, Cache { object = UD }
+    lua_pop(s, 1);                              // UD
+}
+
+
 /* Functions below are unsafe, as they assume the script has passed pointers
    to objects which have not yet been destroyed. If the script never keeps
    pointers around, there will be no problem. In order to be safe, the engine

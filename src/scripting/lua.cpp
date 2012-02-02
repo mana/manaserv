@@ -2703,9 +2703,9 @@ LuaScript::LuaScript():
     LuaMapObject::registerType(mState, "MapObject", members_MapObject);
 
     // Make script object available to callback functions.
-    lua_pushlightuserdata(mState, (void *)&registryKey);
+    lua_pushlightuserdata(mState, const_cast<char *>(&registryKey));
     lua_pushlightuserdata(mState, this);
-    lua_settable(mState, LUA_REGISTRYINDEX);
+    lua_rawset(mState, LUA_REGISTRYINDEX);
 
     // Push the error handler to first index of the stack
     lua_getglobal(mState, "debug");

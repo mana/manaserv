@@ -45,14 +45,47 @@ void raiseScriptError(lua_State *s, const char *format, ...);
 void raiseWarning(lua_State *s, const char *format, ...);
 
 /**
- * A helper class for pushing and checking custom Lua user data types.
+ * A generic userdata cache based on a native Lua table with weak values.
+ *
+ * Caching the created userdata instances has two main advantages:
+ *
+ * - It limits memory consumption and is a little faster. Creating these values
+ *   is relatively slow (compared to light userdata).
+ *
+ * - It makes sure that two userdata objects that refer to the same C++ object
+ *   compare as equal (because they will be the same userdata object).
+ */
+class UserDataCache
+{
+public:
+    /**
+     * Attempts to retrieve a userdata associated with the given object from
+     * the cache and pushes it on the stack when available.
+     *
+     * Returns whether a userdata was pushed.
+     */
+    static bool retrieve(lua_State *s, void *object);
+
+    /**
+     * Inserts the userdata at the top of the stack in the cache using
+     * the given object as the key. Leaves the userdata on the stack.
+     */
+    static void insert(lua_State *s, void *object);
+
+private:
+    static char mRegistryKey;
+};
+
+
+/**
+ * A helper class for pushing and checking custom Lua userdata types.
  */
 template <typename T>
 class LuaUserData
 {
 public:
     /**
-     * Creates a metatable to be used for the user data associated with the
+     * Creates a metatable to be used for the userdata associated with the
      * type. Then, registers the \a members with a library named \a typeName,
      * and sets the '__index' member of the metatable to this library.
      */
@@ -73,13 +106,18 @@ public:
      * Pushes a userdata reference to the given object on the stack. Either by
      * creating one, or reusing an existing one.
      */
-    static int push(lua_State *L, T *object)
+    static int push(lua_State *s, T *object)
     {
-        T **userData = static_cast<T**>(lua_newuserdata(L, sizeof(T*)));
-        *userData = object;
+        if (!UserDataCache::retrieve(s, object))
+        {
+            void *userData = lua_newuserdata(s, sizeof(T*));
+            * static_cast<T**>(userData) = object;
 
-        luaL_newmetatable(L, mTypeName);
-        lua_setmetatable(L, -2);
+            luaL_newmetatable(s, mTypeName);
+            lua_setmetatable(s, -2);
+
+            UserDataCache::insert(s, object);
+        }
 
         return 1;
     }
