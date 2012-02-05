@@ -37,6 +37,7 @@
     <allow>@log</allow>
     <allow>@logsay</allow>
     <allow>@permissions</allow>
+    <allow>@announce</allow>
   </class>
   <class level="5">
   </class>
@@ -49,6 +50,5 @@
     <allow>@reload</allow>
     <allow>@givepermission</allow>
     <allow>@takepermission</allow>
-    <allow>@announce</allow>
   </class>
 </permissions>
