@@ -66,8 +66,7 @@
 -->
  <!-- Paths to data files -->
  <option name="serverPath" value="." />
- <option name="clientDataPath" value="example/clientdata" />
- <option name="serverDataPath" value="example/serverdata" />
+ <option name="worldDataPath" value="example" />
 
 <!-- end of paths configuration ******************************************* -->
 

@@ -55,8 +55,7 @@ Default option values:
     gameServerPort          9604
 
     serverPath              .
-    serverDataPath          example/serverdata
-    clientDataPath          example/clientdata
+    worldDataPath           example
 
 
 RUNNING

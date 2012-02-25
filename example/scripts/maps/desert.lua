@@ -12,7 +12,7 @@
 
 -- From scripts/
 require "scripts/lua/npclib"
--- From example/serverdata/scripts
+-- From example/scripts
 require "scripts/npcs/banker"
 require "scripts/npcs/barber"
 require "scripts/npcs/merchant"
