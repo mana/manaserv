@@ -18,7 +18,6 @@ function shaker_update(npc)
     center_x = mana.posX(npc)
     center_y = mana.posY(npc)
     tremor(center_x, center_y, 300)
-    
   end
 end
 
@@ -43,6 +42,3 @@ function tremor (center_x, center_y, intensity)
         end
     end
 end
-
-
-

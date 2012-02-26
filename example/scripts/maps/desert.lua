@@ -1,14 +1,8 @@
-----------------------------------------------------------
--- Template script for the Desert map                   --
-----------------------------------------------------------------------------------
---  Copyright 2011 The Mana Development Team                                    --
---                                                                              --
---  This file is part of Manasource Project.                                    --
---                                                                              --
---  Manasource is free software; you can redistribute  it and/or modify it      --
---  under the terms of the GNU General  Public License as published by the Free --
---  Software Foundation; either version 2 of the License, or any later version. --
-----------------------------------------------------------------------------------
+--[[
+
+  Example script for the Desert map
+
+--]]
 
 -- From scripts/
 require "scripts/lua/npclib"
@@ -19,7 +13,6 @@ require "scripts/npcs/merchant"
 require "scripts/npcs/shaker"
 
 atinit(function()
-
     -- Barber examples
     create_npc("Barber Twin", 1, GENDER_MALE, 14 * TILESIZE + TILESIZE / 2, 9 * TILESIZE + TILESIZE / 2, Barber, nil)
     create_npc("Barber Twin", 1, GENDER_MALE, 20 * TILESIZE + TILESIZE / 2, 11 * TILESIZE + TILESIZE / 2, npclib.talk(Barber, {14, 15, 16}, {}), nil)
