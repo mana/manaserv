@@ -328,12 +328,6 @@ class Monster : public Being
 
         MonsterClass *mSpecy;
 
-        /**
-         * Stores individual script for the monster, when NULL the script
-         * from mSpecy is used.
-         */
-        Script *mScript;
-
         /** Aggression towards other beings. */
         std::map<Being *, int> mAnger;
 

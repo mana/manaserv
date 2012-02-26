@@ -26,6 +26,7 @@
 #include "game-server/item.h"
 #include "game-server/skillmanager.h"
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 
 #include <map>
@@ -401,7 +402,7 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
         }
         else if (xmlStrEqual(subNode->name, BAD_CAST "consumes"))
         {
-            item->addEffect(new ItemEffectConsumes(), triggerTypes.first);
+            item->addEffect(new ItemEffectConsumes, triggerTypes.first);
         }
         else if (xmlStrEqual(subNode->name, BAD_CAST "script"))
         {
@@ -432,29 +433,19 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
             }
 
             LOG_INFO("Loading item script: " << filename.str());
-
-            std::string engineName =
-                    Script::determineEngineByFilename(filename.str());
-            Script *script = Script::create(engineName);
+            Script *script = ScriptManager::currentState();
             if (!script->loadFile(filename.str()))
             {
-                // Delete the script as it's invalid.
-                delete script;
-
                 LOG_WARN("Could not load script file \"" << filename.str()
-                          << "\" for item #" << item->mDatabaseID);
+                         << "\" for item #" << item->mDatabaseID);
                 continue;
             }
 
-            for_each_xml_child_node(scriptSubNode, subNode)
-            {
-                // TODO: Load variables from variable subnodes
-            }
             std::string dispellFunctionName = XML::getProperty(subNode,
                                                              "dispell-function",
                                                              std::string());
 
-            item->addEffect(new ItemEffectScript(item->mDatabaseID, script,
+            item->addEffect(new ItemEffectScript(item->mDatabaseID,
                                                  activateFunctionName,
                                                  dispellFunctionName),
                                                  triggerTypes.first,

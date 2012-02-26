@@ -34,6 +34,7 @@
 #include "game-server/spawnarea.h"
 #include "game-server/trigger.h"
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/point.h"
 
@@ -458,7 +459,6 @@ MapZone& MapContent::getZone(const Point &pos) const
 MapComposite::MapComposite(int id, const std::string &name):
     mMap(NULL),
     mContent(NULL),
-    mScript(NULL),
     mName(name),
     mID(id)
 {
@@ -468,7 +468,6 @@ MapComposite::~MapComposite()
 {
     delete mMap;
     delete mContent;
-    delete mScript;
 }
 
 bool MapComposite::activate()
@@ -494,12 +493,10 @@ bool MapComposite::activate()
     else
         mPvPRules = PVP_NONE;
 
-    if (Script *s = getScript())
-    {
-        s->setMap(this);
-        s->prepare("initialize");
-        s->execute();
-    }
+    Script *s = ScriptManager::currentState();
+    s->setMap(this);
+    s->prepare("initialize");
+    s->execute();
 
     return true;
 }
@@ -730,25 +727,12 @@ void MapComposite::initializeContent()
             int npcId = utils::stringToInt(object->getProperty("NPC_ID"));
             std::string scriptText = object->getProperty("SCRIPT");
 
-            if (!mScript)
-            {
-                // Determine script engine by xml property
-                std::string scriptEngineName = object->getProperty("ENGINE");
-                if (scriptEngineName.empty())
-                {
-                    // Set engine to default value and print warning
-                    scriptEngineName = Configuration::getValue("script_defaultEngine", "lua");
-                    LOG_WARN("No script engine specified for map script \""
-                            + mName + "\", falling back to default");
-                }
-                mScript = Script::create(scriptEngineName);
-            }
-
             if (npcId && !scriptText.empty())
             {
-                mScript->loadNPC(object->getName(), npcId,
-                                 object->getX(), object->getY(),
-                                 scriptText.c_str());
+                Script *script = ScriptManager::currentState();
+                script->loadNPC(object->getName(), npcId,
+                                object->getX(), object->getY(),
+                                scriptText.c_str());
             }
             else
             {
@@ -760,33 +744,16 @@ void MapComposite::initializeContent()
             std::string scriptFilename = object->getProperty("FILENAME");
             std::string scriptText = object->getProperty("TEXT");
 
-            if (!mScript)
-            {
-                // Determine script engine by xml property
-                std::string scriptEngineName = object->getProperty("ENGINE");
-                if (!scriptFilename.empty() && scriptEngineName.empty())
-                {
-                    // Engine property is empty - determine by filename
-                    scriptEngineName = Script::determineEngineByFilename(scriptFilename);
-                }
-                else if (scriptEngineName.empty())
-                {
-                    // Set engine to default value and print warning
-                    scriptEngineName = Configuration::getValue("script_defaultEngine", "lua");
-                    LOG_WARN("No script engine specified for map script \""
-                            + mName + "\", falling back to default");
-                }
-                mScript = Script::create(scriptEngineName);
-            }
+            Script *script = ScriptManager::currentState();
 
             if (!scriptFilename.empty())
             {
-                mScript->loadFile(scriptFilename);
+                script->loadFile(scriptFilename);
             }
             else if (!scriptText.empty())
             {
                 std::string name = "'" + object->getName() + "'' in " + mName;
-                mScript->load(scriptText.c_str(), name.c_str());
+                script->load(scriptText.c_str(), name.c_str());
             }
             else
             {

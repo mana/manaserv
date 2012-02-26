@@ -8,14 +8,14 @@
 --  Software Foundation; either version 2 of the License, or any later version. --
 ----------------------------------------------------------------------------------
 
-function update(mob)
+function update_monster(mob)
   local r = math.random(0, 200);
   if r == 0 then
     mana.being_say(mob, "Roar! I am a boss")
   end
 end
 
-function strike(mob, victim, hit)
+function on_maggot_strike(mob, victim, hit)
   if hit > 0 then
     mana.being_say(mob, "Take this! "..hit.." damage!")
     mana.being_say(victim, "Oh Noez!")

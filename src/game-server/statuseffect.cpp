@@ -21,27 +21,27 @@
 #include "game-server/statuseffect.h"
 
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 #include "game-server/being.h"
 
 StatusEffect::StatusEffect(int id):
-    mId(id),
-    mScript(0)
+    mId(id)
 {
 }
 
 StatusEffect::~StatusEffect()
 {
-    delete mScript;
 }
 
 void StatusEffect::tick(Being *target, int count)
 {
-    if (mScript)
+    if (!mTickFunction.empty())
     {
-        mScript->setMap(target->getMap());
-        mScript->prepare("tick");
-        mScript->push(target);
-        mScript->push(count);
-        mScript->execute();
+        Script *script = ScriptManager::currentState();
+        script->setMap(target->getMap());
+        script->prepare(mTickFunction);
+        script->push(target);
+        script->push(count);
+        script->execute();
     }
 }

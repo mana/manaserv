@@ -29,6 +29,7 @@
 #include "game-server/mapcomposite.h"
 #include "game-server/state.h"
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/speedconv.h"
 
@@ -49,7 +50,6 @@ static MonsterTargetEventDispatch monsterTargetEventDispatch;
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
-    mScript(NULL),
     mTargetListener(&monsterTargetEventDispatch),
     mOwner(NULL),
     mCurrentAttack(NULL)
@@ -108,10 +108,6 @@ Monster::Monster(MonsterClass *specy):
 
 Monster::~Monster()
 {
-    // Remove the monster's script if it has one
-    if (mScript)
-        delete mScript;
-
     // Remove death listeners.
     for (std::map<Being *, int>::iterator i = mAnger.begin(),
          i_end = mAnger.end(); i != i_end; ++i)
@@ -145,15 +141,15 @@ void Monster::perform()
                     int hit = performAttack(mTarget, dmg);
 
                     if (! mCurrentAttack->scriptFunction.empty()
-                        && mScript
                         && hit > -1)
                     {
-                        mScript->setMap(getMap());
-                        mScript->prepare(mCurrentAttack->scriptFunction);
-                        mScript->push(this);
-                        mScript->push(mTarget);
-                        mScript->push(hit);
-                        mScript->execute();
+                        Script *script = ScriptManager::currentState();
+                        script->setMap(getMap());
+                        script->prepare(mCurrentAttack->scriptFunction);
+                        script->push(this);
+                        script->push(mTarget);
+                        script->push(hit);
+                        script->execute();
                     }
                 }
             }
@@ -183,13 +179,12 @@ void Monster::update()
         }
         return;
     }
-    else if(mScript)
-    {
-        mScript->setMap(getMap());
-        mScript->prepare("update");
-        mScript->push(this);
-        mScript->execute();
-    }
+
+    Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+    script->prepare("update_monster");
+    script->push(this);
+    script->execute();
 
     // Cancel the rest when we are currently performing an attack
     if (isTimerRunning(T_M_ATTACK_TIME))
@@ -324,10 +319,6 @@ void Monster::update()
 
 void Monster::loadScript(const std::string &scriptName)
 {
-    // A script may have already been loaded for this monster
-    delete mScript;
-    mScript = 0;
-
     if (scriptName.length() == 0)
         return;
 
@@ -336,10 +327,7 @@ void Monster::loadScript(const std::string &scriptName)
     if (ResourceManager::exists(filename.str()))
     {
         LOG_INFO("Loading monster script: " << filename.str());
-        std::string engineName =
-                Script::determineEngineByFilename(filename.str());
-        mScript = Script::create(engineName);
-        mScript->loadFile(filename.str());
+        ScriptManager::currentState()->loadFile(filename.str());
     }
     else
     {

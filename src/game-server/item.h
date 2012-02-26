@@ -26,7 +26,6 @@
 #include "game-server/actor.h"
 
 class Being;
-class Script;
 
 // Indicates the equip slot "cost" to equip an item.
 struct ItemEquipRequirement {
@@ -144,11 +143,10 @@ class ItemEffectConsumes : public ItemEffectInfo
 class ItemEffectScript : public ItemEffectInfo
 {
     public:
-        ItemEffectScript(int itemId, Script *script,
+        ItemEffectScript(int itemId,
                          const std::string& activateFunctionName,
                          const std::string& dispellFunctionName):
-            mItemId(0),
-            mScript(script),
+            mItemId(itemId),
             mActivateFunctionName(activateFunctionName),
             mDispellFunctionName(dispellFunctionName)
         {}
@@ -157,9 +155,9 @@ class ItemEffectScript : public ItemEffectInfo
 
         bool apply(Being *itemUser);
         void dispell(Being *itemUser);
+
     private:
         int mItemId;
-        Script *mScript;
         std::string mActivateFunctionName;
         std::string mDispellFunctionName;
 };

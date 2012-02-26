@@ -33,7 +33,6 @@
 typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
-Script *Script::globalEventScript = NULL;
 
 Script::Script():
     mMap(NULL),
@@ -106,93 +105,4 @@ void Script::loadNPC(const std::string &name, int id, int x, int y,
     push(x);
     push(y);
     execute();
-}
-
-bool Script::loadGlobalEventScript(const std::string &file)
-{
-    std::string engineName = determineEngineByFilename(file);
-    if (Script *script = Script::create(engineName))
-    {
-        globalEventScript = script;
-        return globalEventScript->loadFile(file);
-    }
-    return false;
-}
-
-bool Script::executeGlobalEventFunction(const std::string &function, Being* obj)
-{
-    bool isScriptHandled = false;
-    if (Script *script = globalEventScript)
-    {
-        script->setMap(obj->getMap());
-        script->prepare(function);
-        script->push(obj);
-        script->execute();
-        script->setMap(NULL);
-        isScriptHandled = true; // TODO: don't set to true when execution failed
-    }
-    return isScriptHandled;
-}
-
-
-void Script::addDataToSpecial(int id, Special *special)
-{
-    /* currently only gets the recharge cost.
-      TODO: get any other info in a similar way, but
-            first we have to agree on what other
-            info we actually want to provide.
-    */
-    if (special)
-    {
-        if (Script *script = globalEventScript)
-        {
-            script->prepare("get_special_recharge_cost");
-            script->push(id);
-            int scriptReturn = script->execute();
-            special->neededMana = scriptReturn;
-        }
-    }
-
-}
-
-bool Script::performSpecialAction(int specialId, Being *caster)
-{
-    if (Script *script = globalEventScript)
-    {
-        script->prepare("use_special");
-        script->push(caster);
-        script->push(specialId);
-        script->execute();
-    }
-    return true;
-}
-
-bool Script::performCraft(Being *crafter,
-                          const std::list<InventoryItem> &recipe)
-{
-    if (Script *script = globalEventScript)
-    {
-        script->prepare("on_craft");
-        script->push(crafter);
-        script->push(recipe);
-        script->execute();
-    }
-    return true;
-}
-
-std::string Script::determineEngineByFilename(const std::string &filename)
-{
-    std::string ext = filename.substr(filename.find_last_of(".") + 1);
-
-    if (ext == "lua")
-    {
-        return "lua";
-    }
-    else
-    {
-        // Set to default engine and print warning
-        LOG_WARN("Unknown file extension for script \""
-                + filename + "\", falling back to default script engine");
-        return Configuration::getValue("script_defaultEngine", "lua");
-    }
 }

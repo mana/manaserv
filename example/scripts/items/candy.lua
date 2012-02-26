@@ -12,6 +12,6 @@
 --  under the terms of the GNU General  Public License as published by the Free --
 --  Software Foundation; either version 2 of the License, or any later version. --
 ----------------------------------------------------------------------------------
-function use(user)
+function use_candy(user)
 	mana.being_say(user, "*munch*munch*munch*")
 end

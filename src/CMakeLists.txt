@@ -256,6 +256,8 @@ SET(SRCS_MANASERVGAME
     game-server/trigger.cpp
     scripting/script.h
     scripting/script.cpp
+    scripting/scriptmanager.h
+    scripting/scriptmanager.cpp
     utils/base64.h
     utils/base64.cpp
     utils/mathutils.h

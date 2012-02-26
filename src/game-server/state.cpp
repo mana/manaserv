@@ -37,6 +37,7 @@
 #include "game-server/trade.h"
 #include "net/messageout.h"
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/point.h"
 #include "utils/speedconv.h"
@@ -75,7 +76,7 @@ static std::map< std::string, std::string > mScriptVariables;
  */
 static void updateMap(MapComposite *map)
 {
-    // 1. update object status.
+    // Update object status
     const std::vector< Thing * > &things = map->getEverything();
     for (std::vector< Thing * >::const_iterator it = things.begin(),
          it_end = things.end(); it != it_end; ++it)
@@ -83,19 +84,13 @@ static void updateMap(MapComposite *map)
         (*it)->update();
     }
 
-    // 2. run scripts.
-    if (Script *s = map->getScript())
-    {
-        s->update();
-    }
-
-    // 3. perform actions.
+    // Perform actions
     for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
     {
         (*it)->perform();
     }
 
-    // 4. move objects around and update zones.
+    // Move objects around and update zones.
     for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
     {
         (*it)->move();
@@ -450,6 +445,8 @@ void GameState::update(int worldTime)
     dbgLockObjects = true;
 #   endif
 
+    ScriptManager::currentState()->update();
+
     // Update game state (update AI, etc.)
     const MapManager::Maps &maps = MapManager::getMaps();
     for (MapManager::Maps::const_iterator m = maps.begin(),
@@ -457,9 +454,7 @@ void GameState::update(int worldTime)
     {
         MapComposite *map = m->second;
         if (!map->isActive())
-        {
             continue;
-        }
 
         updateMap(map);
 

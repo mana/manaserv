@@ -33,7 +33,6 @@ class Map;
 class MapComposite;
 class Point;
 class Rectangle;
-class Script;
 class Thing;
 
 struct MapContent;
@@ -249,13 +248,6 @@ class MapComposite
         { return mMap; }
 
         /**
-         * Gets the associated script. Returns 0 when no scripts or inline
-         * NPCs are used on this map!
-         */
-        Script *getScript() const
-        { return mScript; }
-
-        /**
          * Returns whether the map is active on this server or not.
          */
         bool isActive() const
@@ -351,7 +343,6 @@ class MapComposite
 
         Map *mMap;            /**< Actual map. */
         MapContent *mContent; /**< Entities on the map. */
-        Script *mScript;      /**< Script associated to this map. */
         std::string mName;    /**< Name of the map. */
         unsigned short mID;   /**< ID of the map. */
         /** Cached persistent variables */

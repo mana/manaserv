@@ -297,7 +297,7 @@
 
 <!-- Scripting configuration ********************************************** -->
 
- <option name="script_defaultEngine" value="lua"/>
+ <option name="script_engine" value="lua"/>
  <option name="script_mainFile" value="scripts/main.lua"/>
 
 <!-- End of scripting configuration *************************************** -->

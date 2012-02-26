@@ -30,6 +30,7 @@
 #include "game-server/being.h"
 #include "game-server/state.h"
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 
 bool ItemEffectAttrMod::apply(Being *itemUser)
 {
@@ -59,18 +60,18 @@ void ItemEffectAutoAttack::dispell(Being *itemUser)
 
 ItemEffectScript::~ItemEffectScript()
 {
-    delete mScript;
 }
 
 bool ItemEffectScript::apply(Being *itemUser)
 {
-    if (mScript && !mActivateFunctionName.empty())
+    if (!mActivateFunctionName.empty())
     {
-        mScript->setMap(itemUser->getMap());
-        mScript->prepare(mActivateFunctionName);
-        mScript->push(itemUser);
-        mScript->push(mItemId);
-        mScript->execute(); // TODO return depending on script execution success.
+        Script *script = ScriptManager::currentState();
+        script->setMap(itemUser->getMap());
+        script->prepare(mActivateFunctionName);
+        script->push(itemUser);
+        script->push(mItemId);
+        script->execute(); // TODO return depending on script execution success.
         return true;
     }
     return false;
@@ -78,13 +79,14 @@ bool ItemEffectScript::apply(Being *itemUser)
 
 void ItemEffectScript::dispell(Being *itemUser)
 {
-    if (mScript && !mDispellFunctionName.empty())
+    if (!mDispellFunctionName.empty())
     {
-        mScript->setMap(itemUser->getMap());
-        mScript->prepare(mDispellFunctionName);
-        mScript->push(itemUser);
-        mScript->push(mItemId);
-        mScript->execute();
+        Script *script = ScriptManager::currentState();
+        script->setMap(itemUser->getMap());
+        script->prepare(mDispellFunctionName);
+        script->push(itemUser);
+        script->push(mItemId);
+        script->execute();
     }
 }
 

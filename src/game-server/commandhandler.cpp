@@ -33,7 +33,7 @@
 #include "game-server/monstermanager.h"
 #include "game-server/state.h"
 
-#include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 
 #include "common/configuration.h"
 #include "common/permissionmanager.h"
@@ -1408,7 +1408,7 @@ static void handleCraft(Character *player, std::string &args)
         // pass to script engine. The engine is responsible for all
         // further processing of the crafting operation, including
         // outputting an error message when the recipe is invalid.
-        Script::performCraft(player, recipe);
+        ScriptManager::performCraft(player, recipe);
     }
 }
 

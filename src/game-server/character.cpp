@@ -39,7 +39,7 @@
 #include "game-server/skillmanager.h"
 #include "game-server/state.h"
 #include "game-server/trade.h"
-#include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 #include "net/messagein.h"
 #include "net/messageout.h"
 #include "serialize/characterdata.h"
@@ -197,7 +197,7 @@ void Character::perform()
 void Character::died()
 {
     Being::died();
-    Script::executeGlobalEventFunction("on_chr_death", this);
+    ScriptManager::executeGlobalEventFunction("on_chr_death", this);
 }
 
 void Character::respawn()
@@ -215,7 +215,7 @@ void Character::respawn()
     mTarget = NULL;
 
     // Execute respawn script
-    if (Script::executeGlobalEventFunction("on_chr_death_accept", this))
+    if (ScriptManager::executeGlobalEventFunction("on_chr_death_accept", this))
         return;
 
     // Script-controlled respawning didn't work - fall back to hardcoded logic.
@@ -250,7 +250,7 @@ void Character::useSpecial(int id)
 
     //tell script engine to cast the spell
     special->currentMana = 0;
-    Script::performSpecialAction(id, this);
+    ScriptManager::performSpecialAction(id, this);
     mSpecialUpdateNeeded = true;
     return;
 }
@@ -693,7 +693,7 @@ void Character::giveSpecial(int id)
     if (mSpecials.find(id) == mSpecials.end())
     {
         Special *s = new Special();
-        Script::addDataToSpecial(id, s);
+        ScriptManager::addDataToSpecial(id, s);
         mSpecials[id] = s;
         mSpecialUpdateNeeded = true;
     }

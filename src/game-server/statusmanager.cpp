@@ -23,6 +23,7 @@
 #include "common/resourcemanager.h"
 #include "game-server/statuseffect.h"
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/xml.h"
 
@@ -68,6 +69,8 @@ void StatusManager::reload()
         }
 
         std::string scriptFile = XML::getProperty(node, "script", std::string());
+        std::string tickFunction = XML::getProperty(node, "tick-function",
+                                                    std::string());
         //TODO: Get these modifiers
 /*
         modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
@@ -82,6 +85,7 @@ void StatusManager::reload()
         modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
 */
         StatusEffect *statusEffect = new StatusEffect(id);
+        statusEffect->setTickFunction(tickFunction);
         if (!scriptFile.empty())
         {
             std::stringstream filename;
@@ -89,11 +93,8 @@ void StatusManager::reload()
             if (ResourceManager::exists(filename.str()))       // file exists!
             {
                 LOG_INFO("Loading status script: " << filename.str());
-                std::string engineName =
-                        Script::determineEngineByFilename(filename.str());
-                Script *s = Script::create(engineName);
+                Script *s = ScriptManager::currentState();
                 s->loadFile(filename.str());
-                statusEffect->setScript(s);
             } else {
                 LOG_WARN("Could not find script file \"" << filename.str()
                          << "\" for status #"<<id);

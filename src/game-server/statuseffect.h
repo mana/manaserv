@@ -21,7 +21,8 @@
 #ifndef STATUSEFFECT_H
 #define STATUSEFFECT_H
 
-class Script;
+#include <string>
+
 class Being;
 
 class StatusEffect
@@ -35,12 +36,12 @@ class StatusEffect
         int getId() const
         { return mId; }
 
-        void setScript(Script *script)
-        { mScript = script; }
+        void setTickFunction(const std::string &tickFunction)
+        { mTickFunction = tickFunction; }
 
     private:
         int mId;
-        Script *mScript;
+        std::string mTickFunction;
 };
 
 #endif

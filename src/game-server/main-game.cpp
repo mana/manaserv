@@ -52,7 +52,7 @@
 #include "net/bandwidth.h"
 #include "net/connectionhandler.h"
 #include "net/messageout.h"
-#include "scripting/luascript.h"
+#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/processorutils.h"
 #include "utils/stringfilter.h"
@@ -71,7 +71,7 @@ using utils::Logger;
 #define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
 #define DEFAULT_STATUSDB_FILE               "status-effects.xml"
 #define DEFAULT_PERMISSION_FILE             "permissions.xml"
-#define DEFAULT_GLOBAL_EVENT_SCRIPT_FILE    "scripts/main.lua"
+#define DEFAULT_MAIN_SCRIPT_FILE            "scripts/main.lua"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
@@ -127,6 +127,7 @@ static void initializeServer()
     stringFilter = new utils::StringFilter;
 
     ResourceManager::initialize();
+    ScriptManager::initialize();   // Depends on ResourceManager
     if (MapManager::initialize(DEFAULT_MAPSDB_FILE) < 1)
     {
         LOG_FATAL("The Game Server can't find any valid/available maps.");
@@ -139,10 +140,9 @@ static void initializeServer()
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
 
-    const std::string mainScriptFile =
-            Configuration::getValue("script_mainFile",
-                                    DEFAULT_GLOBAL_EVENT_SCRIPT_FILE);
-    Script::loadGlobalEventScript(mainScriptFile);
+    std::string mainScript = Configuration::getValue("script_mainFile",
+                                                     DEFAULT_MAIN_SCRIPT_FILE);
+    ScriptManager::loadMainScript(mainScript);
 
     // --- Initialize the global handlers
     // FIXME: Make the global handlers global vars or part of a bigger
@@ -194,6 +194,7 @@ static void deinitializeServer()
     delete itemManager; itemManager = 0;
     MapManager::deinitialize();
     StatusManager::deinitialize();
+    ScriptManager::deinitialize();
 
     PHYSFS_deinit();
 }

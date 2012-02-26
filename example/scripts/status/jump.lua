@@ -12,7 +12,7 @@
 ----------------------------------------------------------------------------------
 
 
-function tick(target, ticknumber)
+function tick_jump(target, ticknumber)
     if (ticknumber % 10 == 0) then
         mana.being_say(target, "I have the jumping bug!")
     end

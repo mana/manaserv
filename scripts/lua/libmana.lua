@@ -318,13 +318,13 @@ function create_npc_delayed(name, id, x, y)
   npc_handler = nil
 end
 
--- Called during map initialization.
+-- Called during map initialization, for each map.
 -- Executes all the functions registered by atinit.
 function initialize()
   for i,f in ipairs(init_fun) do
     f()
   end
-  init_fun = nil
+  init_fun = {}
 end
 
 
