@@ -77,10 +77,10 @@ static void updateMap(MapComposite *map)
 {
     // 1. update object status.
     const std::vector< Thing * > &things = map->getEverything();
-    for (std::vector< Thing * >::const_iterator i = things.begin(),
-         i_end = things.end(); i != i_end; ++i)
+    for (std::vector< Thing * >::const_iterator it = things.begin(),
+         it_end = things.end(); it != it_end; ++it)
     {
-        (*i)->update();
+        (*it)->update();
     }
 
     // 2. run scripts.
@@ -90,15 +90,15 @@ static void updateMap(MapComposite *map)
     }
 
     // 3. perform actions.
-    for (BeingIterator i(map->getWholeMapIterator()); i; ++i)
+    for (BeingIterator i(map->getWholeMapIterator()); it; ++it)
     {
-        (*i)->perform();
+        (*it)->perform();
     }
 
     // 4. move objects around and update zones.
-    for (BeingIterator i(map->getWholeMapIterator()); i; ++i)
+    for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
     {
-        (*i)->move();
+        (*it)->move();
     }
     map->update();
 }
@@ -165,9 +165,10 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
     // Inform client about activities of other beings near its character
-    for (BeingIterator i(map->getAroundBeingIterator(p, visualRange)); i; ++i)
+    for (BeingIterator it(map->getAroundBeingIterator(p, visualRange));
+         it; ++it)
     {
-        Being *o = *i;
+        Being *o = *it;
 
         const Point &oold = o->getOldPosition(), opos = o->getPosition();
         int otype = o->getType();
@@ -368,13 +369,13 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
 
     // Inform client about items on the ground around its character
     MessageOut itemMsg(GPMSG_ITEMS);
-    for (FixedActorIterator i(map->getAroundBeingIterator(p, visualRange)); i;
-                                                                            ++i)
+    for (FixedActorIterator it(map->getAroundBeingIterator(p, visualRange));
+         it; ++it)
     {
-        assert((*i)->getType() == OBJECT_ITEM ||
-               (*i)->getType() == OBJECT_EFFECT);
+        assert((*it)->getType() == OBJECT_ITEM ||
+               (*it)->getType() == OBJECT_EFFECT);
 
-        Actor *o = *i;
+        Actor *o = *it;
         Point opos = o->getPosition();
         int oflags = o->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, visualRange);
@@ -387,7 +388,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
             {
                 case OBJECT_ITEM:
                 {
-                    Item *o = static_cast< Item * >(*i);
+                    Item *o = static_cast< Item * >(*it);
                     if (oflags & UPDATEFLAG_NEW_ON_MAP)
                     {
                         /* Send a specific message to the client when an item appears
@@ -408,7 +409,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
                 break;
                 case OBJECT_EFFECT:
                 {
-                    Effect *o = static_cast< Effect * >(*i);
+                    Effect *o = static_cast< Effect * >(*it);
                     o->show();
                     // Don't show old effects
                     if (!(oflags & UPDATEFLAG_NEW_ON_MAP))
@@ -451,7 +452,8 @@ void GameState::update(int worldTime)
 
     // Update game state (update AI, etc.)
     const MapManager::Maps &maps = MapManager::getMaps();
-    for (MapManager::Maps::const_iterator m = maps.begin(), m_end = maps.end(); m != m_end; ++m)
+    for (MapManager::Maps::const_iterator m = maps.begin(),
+         m_end = maps.end(); m != m_end; ++m)
     {
         MapComposite *map = m->second;
         if (!map->isActive())
@@ -464,21 +466,11 @@ void GameState::update(int worldTime)
         for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
         {
             informPlayer(map, *p, worldTime);
-            /*
-             sending the whole character is overhead for the database, it should
-             be replaced by a syncbuffer. see: game-server/accountconnection:
-             AccountConnection::syncChanges()
-
-            if (worldTime % 2000 == 0)
-            {
-                accountHandler->sendCharacterData(*p);
-            }
-            */
         }
 
-        for (ActorIterator i(map->getWholeMapIterator()); i; ++i)
+        for (ActorIterator it(map->getWholeMapIterator()); it; ++it)
         {
-            Actor *a = *i;
+            Actor *a = *it;
             a->clearUpdateFlags();
             if (a->canFight())
             {
@@ -492,11 +484,11 @@ void GameState::update(int worldTime)
 #   endif
 
     // Take care of events that were delayed because of their side effects.
-    for (DelayedEvents::iterator i = delayedEvents.begin(),
-         i_end = delayedEvents.end(); i != i_end; ++i)
+    for (DelayedEvents::iterator it = delayedEvents.begin(),
+         it_end = delayedEvents.end(); it != it_end; ++it)
     {
-        const DelayedEvent &e = i->second;
-        Actor *o = i->first;
+        const DelayedEvent &e = it->second;
+        Actor *o = it->first;
         switch (e.type)
         {
             case EVENT_REMOVE:
