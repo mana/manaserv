@@ -60,10 +60,6 @@ class GuildManager
         /**
          * Returns the guild with the given id. O(n)
          *
-         * @todo <b>b_lindeijer:</b> Since this method is used so often, its
-         *       efficiency should be improved, probably by storing the guilds
-         *       in a map<int,Guild*> instead of list<Guild*>.
-         *
          * @return the guild with the given id, or NULL if it doesn't exist
          */
         Guild *findById(short id) const;
@@ -110,7 +106,7 @@ class GuildManager
         void setUserRights(Guild *guild, int playerId, int rights);
 
     private:
-        std::list<Guild*> mGuilds;
+        std::map<int, Guild*> mGuilds;
         std::list<int> mOwners;
 };
 

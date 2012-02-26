@@ -36,12 +36,11 @@ GuildManager::GuildManager()
 
 GuildManager::~GuildManager()
 {
-    for (std::list<Guild*>::iterator itr = mGuilds.begin();
-            itr != mGuilds.end(); ++itr)
+    for (std::map<int, Guild*>::iterator it = mGuilds.begin();
+            it != mGuilds.end(); ++it)
     {
-        delete *itr;
+        delete *it;
     }
-    mGuilds.clear();
 }
 
 Guild* GuildManager::createGuild(const std::string &name, int playerId)
@@ -89,40 +88,22 @@ void GuildManager::removeGuildMember(Guild *guild, int playerId)
     if (guild->memberCount() == 0)
         removeGuild(guild);
 
-    // remove the user from owners list
-    std::list<int>::iterator itr = mOwners.begin();
-    std::list<int>::iterator itr_end = mOwners.end();
-    while (itr != itr_end)
-    {
-        if ((*itr) == playerId)
-        {
-            mOwners.remove(playerId);
-            break;
-        }
-        ++itr;
-    }
+    mOwners.remove(playerId);
 }
 
 Guild *GuildManager::findById(short id) const
 {
-    for (std::list<Guild*>::const_iterator itr = mGuilds.begin(),
-            itr_end = mGuilds.end();
-            itr != itr_end; ++itr)
-    {
-        Guild *guild = (*itr);
-        if (guild->getId() == id)
-            return guild;
-    }
-    return 0;
+    std::map<int, Guild*>::const_iterator it = mGuilds.find(id);
+    return it == mGuilds.end() ? 0 : *it;
 }
 
 Guild *GuildManager::findByName(const std::string &name) const
 {
-    for (std::list<Guild*>::const_iterator itr = mGuilds.begin(),
-            itr_end = mGuilds.end();
-            itr != itr_end; ++itr)
+    for (std::map<int, Guild*>::const_iterator it = mGuilds.begin(),
+            it_end = mGuilds.end();
+            it != it_end; ++it)
     {
-        Guild *guild = (*itr);
+        Guild *guild = *it;
         if (guild->getName() == name)
             return guild;
     }
@@ -138,12 +119,12 @@ std::vector<Guild*> GuildManager::getGuildsForPlayer(int playerId) const
 {
     std::vector<Guild*> guildList;
 
-    for (std::list<Guild*>::const_iterator itr = mGuilds.begin();
-            itr != mGuilds.end(); ++itr)
+    for (std::list<Guild*>::const_iterator it = mGuilds.begin();
+            it != mGuilds.end(); ++it)
     {
-        if ((*itr)->checkInGuild(playerId))
+        if ((*it)->checkInGuild(playerId))
         {
-            guildList.push_back((*itr));
+            guildList.push_back(*it);
         }
     }
     return guildList;
@@ -153,10 +134,10 @@ void GuildManager::disconnectPlayer(ChatClient *player)
 {
     std::vector<Guild*> guildList = getGuildsForPlayer(player->characterId);
 
-    for (std::vector<Guild*>::const_iterator itr = guildList.begin();
-         itr != guildList.end(); ++itr)
+    for (std::vector<Guild*>::const_iterator it = guildList.begin();
+         it != guildList.end(); ++it)
     {
-        chatHandler->sendGuildListUpdate((*itr)->getName(),
+        chatHandler->sendGuildListUpdate((*it)->getName(),
                                          player->characterName,
                                          GUILD_EVENT_OFFLINE_PLAYER);
     }
@@ -182,14 +163,14 @@ int GuildManager::changeMemberLevel(ChatClient *player, Guild *guild,
 
 bool GuildManager::alreadyOwner(int playerId) const
 {
-    std::list<int>::const_iterator itr = mOwners.begin();
-    std::list<int>::const_iterator itr_end = mOwners.end();
+    std::list<int>::const_iterator it = mOwners.begin();
+    std::list<int>::const_iterator it_end = mOwners.end();
 
-    while (itr != itr_end)
+    while (it != it_end)
     {
-        if ((*itr) == playerId)
+        if (*it == playerId)
             return true;
-        ++itr;
+        ++it;
     }
 
     return false;
