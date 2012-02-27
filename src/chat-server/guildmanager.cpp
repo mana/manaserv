@@ -39,7 +39,7 @@ GuildManager::~GuildManager()
     for (std::map<int, Guild*>::iterator it = mGuilds.begin();
             it != mGuilds.end(); ++it)
     {
-        delete *it;
+        delete it->second;
     }
 }
 
@@ -50,7 +50,7 @@ Guild* GuildManager::createGuild(const std::string &name, int playerId)
     storage->addGuild(guild);
 
     // Add guild, and add owner
-    mGuilds.push_back(guild);
+    mGuilds[guild->getId()] = guild;
     mOwners.push_back(playerId);
 
     // put the owner in the guild
@@ -68,7 +68,7 @@ void GuildManager::removeGuild(Guild *guild)
 {
     storage->removeGuild(guild);
     mOwners.remove(guild->getOwner());
-    mGuilds.remove(guild);
+    mGuilds.erase(guild->getId());
     delete guild;
 }
 
@@ -94,7 +94,7 @@ void GuildManager::removeGuildMember(Guild *guild, int playerId)
 Guild *GuildManager::findById(short id) const
 {
     std::map<int, Guild*>::const_iterator it = mGuilds.find(id);
-    return it == mGuilds.end() ? 0 : *it;
+    return it == mGuilds.end() ? 0 : it->second;
 }
 
 Guild *GuildManager::findByName(const std::string &name) const
@@ -103,7 +103,7 @@ Guild *GuildManager::findByName(const std::string &name) const
             it_end = mGuilds.end();
             it != it_end; ++it)
     {
-        Guild *guild = *it;
+        Guild *guild = it->second;
         if (guild->getName() == name)
             return guild;
     }
@@ -119,12 +119,12 @@ std::vector<Guild*> GuildManager::getGuildsForPlayer(int playerId) const
 {
     std::vector<Guild*> guildList;
 
-    for (std::list<Guild*>::const_iterator it = mGuilds.begin();
-            it != mGuilds.end(); ++it)
+    for (std::map<int, Guild*>::const_iterator it = mGuilds.begin();
+         it != mGuilds.end(); ++it)
     {
-        if ((*it)->checkInGuild(playerId))
+        if (it->second->checkInGuild(playerId))
         {
-            guildList.push_back(*it);
+            guildList.push_back(it->second);
         }
     }
     return guildList;

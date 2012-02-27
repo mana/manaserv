@@ -90,7 +90,7 @@ static void updateMap(MapComposite *map)
     }
 
     // 3. perform actions.
-    for (BeingIterator i(map->getWholeMapIterator()); it; ++it)
+    for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
     {
         (*it)->perform();
     }

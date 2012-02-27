@@ -1481,9 +1481,9 @@ void Storage::setMemberRights(int guildId, int memberId, int rights)
     }
 }
 
-std::list<Guild*> Storage::getGuildList()
+std::map<int, Guild*> Storage::getGuildList()
 {
-    std::list<Guild*> guilds;
+    std::map<int, Guild*> guilds;
     std::stringstream sql;
     string_to<short> toShort;
 
@@ -1499,22 +1499,22 @@ std::list<Guild*> Storage::getGuildList()
             return guilds;
 
         // Loop through every row in the table and assign it to a guild
-        for ( unsigned int i = 0; i < guildInfo.rows(); ++i)
+        for (unsigned int i = 0; i < guildInfo.rows(); ++i)
         {
             Guild* guild = new Guild(guildInfo(i,1));
             guild->setId(toShort(guildInfo(i,0)));
-            guilds.push_back(guild);
+            guilds[guild->getId()] = guild;
         }
         string_to< unsigned > toUint;
 
         // Add the members to the guilds.
-        for (std::list<Guild*>::iterator itr = guilds.begin();
-             itr != guilds.end(); ++itr)
+        for (std::map<int, Guild*>::iterator it = guilds.begin();
+             it != guilds.end(); ++it)
         {
             std::ostringstream memberSql;
             memberSql << "select member_id, rights from "
                       << GUILD_MEMBERS_TBL_NAME
-                      << " where guild_id = '" << (*itr)->getId() << "';";
+                      << " where guild_id = '" << it->second->getId() << "';";
             const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
 
             std::list<std::pair<int, int> > members;
@@ -1530,8 +1530,8 @@ std::list<Guild*> Storage::getGuildList()
                 Character *character = getCharacter((*i).first, 0);
                 if (character)
                 {
-                    character->addGuild((*itr)->getName());
-                    (*itr)->addMember(character->getDatabaseID(), (*i).second);
+                    character->addGuild(it->second->getName());
+                    it->second->addMember(character->getDatabaseID(), (*i).second);
                 }
             }
         }

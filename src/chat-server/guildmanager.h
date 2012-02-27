@@ -24,6 +24,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <map>
 
 class Guild;
 class ChatClient;

@@ -286,7 +286,7 @@ class Storage
          *
          * @return a list of guilds
          */
-        std::list<Guild*> getGuildList();
+        std::map<int, Guild*> getGuildList();
 
         /**
          * Add a floor item to map.
