@@ -80,10 +80,8 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
         std::map<std::string, int> item;
         item["id"] = i->itemId;
         item["amount"] = i->amount;
-        // add the item structure to the item table under the next index
-        lua_pushinteger(mState, ++position);
         pushSTLContainer<std::string, int>(mState, item);
-        lua_settable(mState, itemTable);
+        lua_rawseti(mState, itemTable, ++position);
     }
     ++nbArgs;
 }

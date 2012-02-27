@@ -63,6 +63,16 @@ extern "C" {
  * http://doc.manasource.org/scripting
  */
 
+static Script *getScript(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
+    lua_pop(s, 1);
+    return script;
+}
+
+
 /**
  * mana.npc_message(NPC*, Character*, string): void
  * Callback for sending a NPC_MESSAGE.
@@ -196,9 +206,7 @@ static int npc_create(lua_State *s)
     const int x = luaL_checkint(s, 4);
     const int y = luaL_checkint(s, 5);
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
+    Script *t = getScript(s);
     NPC *q = new NPC(name, id, t);
     q->setGender(getGender(gender));
 
@@ -308,10 +316,7 @@ static int chr_warp(lua_State *s)
     MapComposite *m;
     if (b)
     {
-        lua_pushlightuserdata(s, (void *)&registryKey);
-        lua_gettable(s, LUA_REGISTRYINDEX);
-        Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-        m = t->getMap();
+        m = getScript(s)->getMap();
     }
     else if (lua_isnumber(s, 2))
     {
@@ -1374,10 +1379,7 @@ static int monster_create(lua_State *s)
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    MapComposite *m = t->getMap();
+    MapComposite *m = getScript(s)->getMap();
     if (!m)
     {
         raiseScriptError(s, "monster_create called outside a map.");
@@ -1534,10 +1536,7 @@ static int chr_get_quest(lua_State *s)
         lua_pushstring(s, value.c_str());
         return 1;
     }
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    QuestCallback f = { &LuaScript::getQuestCallback, t };
+    QuestCallback f = { &LuaScript::getQuestCallback, getScript(s) };
     recoverQuestVar(q, name, f);
     return 0;
 }
@@ -1555,10 +1554,7 @@ static int getvar_map(lua_State *s)
         return 0;
     }
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
-    std::string value = script->getMap()->getVariable(m);
+    std::string value = getScript(s)->getMap()->getVariable(m);
 
     lua_pushstring(s, value.c_str());
     return 1;
@@ -1577,12 +1573,9 @@ static int setvar_map(lua_State *s)
         return 0;
     }
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
-    std::string key = lua_tostring(s, 1);
+    std::string key = m;
     std::string value = lua_tostring(s, 2);
-    script->getMap()->setVariable(key, value);
+    getScript(s)->getMap()->setVariable(key, value);
 
     return 0;
 }
@@ -1671,9 +1664,7 @@ static int trigger_create(lua_State *s)
         return 0;
     }
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
+    Script *script = getScript(s);
     bool once = lua_toboolean(s, 7);
 
     LOG_INFO("Created script trigger at " << x << ":" << y
@@ -1747,10 +1738,7 @@ static int get_beings_in_circle(lua_State *s)
         r = luaL_checkint(s, 3);
     }
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    MapComposite *m = t->getMap();
+    MapComposite *m = getScript(s)->getMap();
 
     //create a lua table with the beings in the given area.
     lua_newtable(s);
@@ -1789,10 +1777,7 @@ static int get_beings_in_rectangle(lua_State *s)
     const int w = luaL_checkint(s, 3);
     const int h = luaL_checkint(s, 4);
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    MapComposite *m = t->getMap();
+    MapComposite *m = getScript(s)->getMap();
 
     //create a lua table with the beings in the given area.
     lua_newtable(s);
@@ -1827,10 +1812,7 @@ static int chr_get_post(lua_State *s)
 
         if (c)
         {
-            lua_pushlightuserdata(s, (void *)&registryKey);
-            lua_gettable(s, LUA_REGISTRYINDEX);
-            Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-            PostCallback f = { &LuaScript::getPostCallback, t };
+            PostCallback f = { &LuaScript::getPostCallback, getScript(s) };
             postMan->getPost(c, f);
         }
     }
@@ -1852,9 +1834,6 @@ static int being_register(lua_State *s)
         return 0;
     }
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
     Being *being = getBeing(s, 1);
     if (!being)
     {
@@ -1862,7 +1841,7 @@ static int being_register(lua_State *s)
         return 0;
     }
 
-    being->addListener(t->getScriptListener());
+    being->addListener(getScript(s)->getScriptListener());
     return 0;
 }
 
@@ -1881,11 +1860,8 @@ static int effect_create(lua_State *s)
         raiseScriptError(s, "effect_create called with incorrect parameters.");
         return 0;
     }
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
 
-    MapComposite *m = t->getMap();
+    MapComposite *m = getScript(s)->getMap();
 
     if (lua_isuserdata(s, 2))
     {
@@ -2282,10 +2258,7 @@ static int test_tableget(lua_State *s)
  */
 static int get_map_id(lua_State *s)
 {
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    MapComposite *m = t->getMap();
+    MapComposite *m = getScript(s)->getMap();
     if (!m)
     {
         raiseScriptError(s, "get_map_id called outside a map.");
@@ -2303,10 +2276,7 @@ static int get_map_id(lua_State *s)
 static int get_map_property(lua_State *s)
 {
     const char *property = luaL_checkstring(s, 1);
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    MapComposite *m = t->getMap();
+    MapComposite *m = getScript(s)->getMap();
     if (!m)
     {
         raiseScriptError(s, "get_map_property called outside a map.");
@@ -2329,10 +2299,7 @@ static int is_walkable(lua_State *s)
     const int x = luaL_checkint(s, 1);
     const int y = luaL_checkint(s, 2);
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    MapComposite *m = t->getMap();
+    MapComposite *m = getScript(s)->getMap();
     if (!m)
     {
         raiseScriptError(s, "is_walkable called outside a map.");
@@ -2373,10 +2340,7 @@ static int item_drop(lua_State *s)
     }
     Item *i = new Item(ic, number);
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    MapComposite* map = t->getMap();
+    MapComposite* map = getScript(s)->getMap();
 
     i->setMap(map);
     Point pos(x, y);
@@ -2470,10 +2434,8 @@ static int map_get_objects(lua_State *s)
         filter = luaL_checkstring(s, 1);
     }
 
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *t = static_cast<Script *>(lua_touserdata(s, -1));
-    const std::vector<MapObject*> &objects = t->getMap()->getMap()->getObjects();
+    MapComposite *m = getScript(s)->getMap();
+    const std::vector<MapObject*> &objects = m->getMap()->getObjects();
 
     if (!filtered)
         pushSTLContainer<MapObject*>(s, objects);
