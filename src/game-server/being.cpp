@@ -669,8 +669,10 @@ void Being::update()
     for (AttributeMap::iterator it = mAttributes.begin();
          it != mAttributes.end();
          ++it)
+    {
         if (it->second.tick())
             updateDerivedAttributes(it->first);
+    }
 
     // Update and run status effects
     StatusEffects::iterator it = mStatus.begin();
@@ -682,10 +684,14 @@ void Being::update()
 
         if (it->second.time <= 0 || mAction == DEAD)
         {
-            mStatus.erase(it);
-            it = mStatus.begin();
+            StatusEffects::iterator removeIt = it;
+            it++; // bring this iterator to the safety of the next element
+            mStatus.erase(removeIt);
         }
-        it++;
+        else
+        {
+            it++;
+        }
     }
 
     // Check if being died
