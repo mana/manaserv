@@ -52,6 +52,24 @@ const float Character::EXPCURVE_FACTOR = 10.0f;
 const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
 const float Character::EXP_LEVEL_FLEXIBILITY = 1.0f;
 
+Script::Ref Character::mDeathCallback = Script::NoRef;
+Script::Ref Character::mDeathAcceptedCallback = Script::NoRef;
+
+static bool executeCallback(Script::Ref function, Character *character)
+{
+    if (function == Script::NoRef)
+        return false;
+
+    Script *script = ScriptManager::currentState();
+    script->setMap(character->getMap());
+    script->prepare(function);
+    script->push(character);
+    script->execute();
+    script->setMap(0);
+    return true;
+}
+
+
 Character::Character(MessageIn &msg):
     Being(OBJECT_CHARACTER),
     mClient(NULL),
@@ -197,7 +215,7 @@ void Character::perform()
 void Character::died()
 {
     Being::died();
-    ScriptManager::executeGlobalEventFunction("on_chr_death", this);
+    executeCallback(mDeathCallback, this);
 }
 
 void Character::respawn()
@@ -214,11 +232,11 @@ void Character::respawn()
     // Reset target
     mTarget = NULL;
 
-    // Execute respawn script
-    if (ScriptManager::executeGlobalEventFunction("on_chr_death_accept", this))
+    // Execute respawn callback when set
+    if (executeCallback(mDeathAcceptedCallback, this))
         return;
 
-    // Script-controlled respawning didn't work - fall back to hardcoded logic.
+    // No script respawn callback set - fall back to hardcoded logic
     mAttributes[ATTR_HP].setBase(mAttributes[ATTR_MAX_HP].getModifiedAttribute());
     updateDerivedAttributes(ATTR_HP);
     // Warp back to spawn point.

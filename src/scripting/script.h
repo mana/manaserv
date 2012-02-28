@@ -21,10 +21,11 @@
 #ifndef SCRIPTING_SCRIPT_H
 #define SCRIPTING_SCRIPT_H
 
-#include <string>
-
-#include "game-server/character.h"
+#include "common/inventorydata.h"
 #include "game-server/eventlistener.h"
+
+#include <list>
+#include <string>
 
 class MapComposite;
 class Thing;
@@ -35,7 +36,9 @@ class Thing;
 class Script
 {
     public:
-
+        /**
+         * Defines a function that creates a Script instance.
+         */
         typedef Script *(*Factory)();
 
         /**
@@ -47,6 +50,15 @@ class Script
          * Creates a new script context for a given engine.
          */
         static Script *create(const std::string &engine);
+
+        /**
+         * A reference to a script object. It's just an integer, but the
+         * typedef makes the purpose of the variable clear.
+         *
+         * Variables of this type should be initialized to Script::NoRef.
+         */
+        typedef int Ref;
+        static Ref NoRef;
 
         Script();
 
@@ -79,6 +91,12 @@ class Script
          * Calls the "update" function of the script by default.
          */
         virtual void update();
+
+        /**
+         * Prepares a call to the referenced function.
+         * Only one function can be prepared at once.
+         */
+        virtual void prepare(Ref function) = 0;
 
         /**
          * Prepares a call to the given function.
@@ -115,6 +133,13 @@ class Script
          * @return the value returned by the script.
          */
         virtual int execute() = 0;
+
+        /**
+         * Assigns the current callback to the given \a function.
+         *
+         * Where the callback exactly comes from is up to the script engine.
+         */
+        virtual void assignCallback(Ref &function) = 0;
 
         /**
          * Sets associated map.

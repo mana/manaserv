@@ -49,19 +49,6 @@ Script *ScriptManager::currentState()
 
 // TODO: Have some generic event mechanism rather than calling global functions
 
-bool ScriptManager::executeGlobalEventFunction(const std::string &function, Being* obj)
-{
-    bool isScriptHandled = false;
-    _currentState->setMap(obj->getMap());
-    _currentState->prepare(function);
-    _currentState->push(obj);
-    _currentState->execute();
-    _currentState->setMap(NULL);
-    isScriptHandled = true; // TODO: don't set to true when execution failed
-    return isScriptHandled;
-}
-
-
 void ScriptManager::addDataToSpecial(int id, Special *special)
 {
     /* currently only gets the recharge cost.

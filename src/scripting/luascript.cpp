@@ -35,6 +35,15 @@ LuaScript::~LuaScript()
     lua_close(mState);
 }
 
+void LuaScript::prepare(Ref function)
+{
+    assert(nbArgs == -1);
+    lua_rawgeti(mState, LUA_REGISTRYINDEX, function);
+    assert(lua_isfunction(mState, -1));
+    nbArgs = 0;
+    mCurFunction = "<callback>"; // We don't know the function name
+}
+
 void LuaScript::prepare(const std::string &name)
 {
     assert(nbArgs == -1);
@@ -106,6 +115,17 @@ int LuaScript::execute()
     lua_pop(mState, 1);
     return res;
     mCurFunction.clear();
+}
+
+void LuaScript::assignCallback(Script::Ref &function)
+{
+    assert(lua_isfunction(mState, -1));
+
+    // If there is already a callback set, replace it
+    if (function != NoRef)
+        luaL_unref(mState, LUA_REGISTRYINDEX, function);
+
+    function = luaL_ref(mState, LUA_REGISTRYINDEX);
 }
 
 void LuaScript::load(const char *prog, const char *name)

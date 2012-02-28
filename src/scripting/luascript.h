@@ -44,6 +44,8 @@ class LuaScript : public Script
 
         void load(const char *prog, const char *name);
 
+        void prepare(Ref function);
+
         void prepare(const std::string &);
 
         void push(int);
@@ -55,6 +57,8 @@ class LuaScript : public Script
         void push(const std::list<InventoryItem> &itemList);
 
         int execute();
+
+        void assignCallback(Ref &function);
 
         static void getQuestCallback(Character *, const std::string &,
                                      const std::string &, void *);

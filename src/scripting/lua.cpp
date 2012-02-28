@@ -74,6 +74,30 @@ static Script *getScript(lua_State *s)
 
 
 /**
+ * mana.on_character_death( function(Character*) ): void
+ * Sets a listener function to the character death event.
+ */
+static int on_character_death(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    Character::setDeathCallback(getScript(s));
+    return 0;
+}
+
+/**
+ * mana.on_character_death_accept( function(Character*) ): void
+ * Sets a listener function that is called when the player clicks on the OK
+ * button after the death message appeared. It should be used to implement the
+ * respawn mechanic.
+ */
+static int on_character_death_accept(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    Character::setDeathAcceptedCallback(getScript(s));
+    return 0;
+}
+
+/**
  * mana.npc_message(NPC*, Character*, string): void
  * Callback for sending a NPC_MESSAGE.
  */
@@ -2564,6 +2588,8 @@ LuaScript::LuaScript():
 
     // Put the callback functions in the scripting environment.
     static luaL_Reg const callbacks[] = {
+        { "on_character_death",              &on_character_death              },
+        { "on_character_death_accept",       &on_character_death_accept       },
         { "npc_create",                      &npc_create                      },
         { "npc_message",                     &npc_message                     },
         { "npc_choice",                      &npc_choice                      },

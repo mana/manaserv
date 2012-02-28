@@ -10,24 +10,29 @@
 
 --]]
 
-
--- This function is called when the hit points of a character reach zero.
-function on_chr_death(ch)
+-- Register the callback that is called when the hit points of a character
+-- reach zero.
+mana.on_character_death(function(ch)
     mana.being_say(ch, "Noooooo!!!")
-end
+end)
 
 -- This function is called when the player clicks on the OK button after the
 -- death message appeared. It should be used to implement the respawn
 -- mechanic (for example: warp the character to the respawn location and
 -- bring HP above zero in some way)
-function on_chr_death_accept(ch)
+mana.on_character_death_accept(function(ch)
     -- restores to full hp
     mana.being_heal(ch)
     -- restores 1 hp (in case you want to be less nice)
     -- mana.being_heal(ch, 1)
     -- warp the character to the respawn location
     mana.chr_warp(ch, 1, 815, 100)
-end
+end)
+
+
+--
+-- TODO: All of the below functions are not implemented yet!
+--
 
 -- This function is called after chr_death_accept. The difference is that
 -- it is called in the context of the map the character is spawned on after

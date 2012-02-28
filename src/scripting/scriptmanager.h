@@ -56,11 +56,6 @@ bool loadMainScript(const std::string &file);
  */
 Script *currentState();
 
-
-/**
- * Runs a global function from the global event script file
- */
-bool executeGlobalEventFunction(const std::string &function, Being *obj);
 void addDataToSpecial(int specialId, Special *special);
 bool performSpecialAction(int specialId, Being *caster);
 bool performCraft(Being *crafter, const std::list<InventoryItem> &recipe);

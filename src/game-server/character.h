@@ -26,9 +26,10 @@
 #include <vector>
 
 #include "common/defines.h"
-#include "common/manaserv_protocol.h"
 #include "common/inventorydata.h"
+#include "common/manaserv_protocol.h"
 #include "game-server/being.h"
+#include "scripting/script.h"
 #include "utils/logger.h"
 
 class BuySell;
@@ -361,6 +362,12 @@ class Character : public Being
         bool isConnected() const
         { return mConnected; }
 
+        static void setDeathCallback(Script *script)
+        { script->assignCallback(mDeathCallback); }
+
+        static void setDeathAcceptedCallback(Script *script)
+        { script->assignCallback(mDeathAcceptedCallback); }
+
     protected:
         /**
          * Gets the way the actor blocks pathfinding for other objects
@@ -457,6 +464,9 @@ class Character : public Being
         int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
         std::map<int, int> mKillCount;  /**< How many monsters the character has slain of each type */
+
+        static Script::Ref mDeathCallback;
+        static Script::Ref mDeathAcceptedCallback;
 
         // Set as a friend, but still a lot of redundant accessors. FIXME.
         template< class T >
