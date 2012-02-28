@@ -2087,84 +2087,81 @@ void Storage::syncDatabase()
         if (!xmlStrEqual(node->name, BAD_CAST "item"))
             continue;
 
-        if (xmlStrEqual(node->name, BAD_CAST "item"))
+        int id = XML::getProperty(node, "id", 0);
+
+        if (id < 1)
+            continue;
+
+        int weight = XML::getProperty(node, "weight", 0);
+        std::string type = XML::getProperty(node, "type", std::string());
+        std::string name = XML::getProperty(node, "name", std::string());
+        std::string desc = XML::getProperty(node, "description",
+                                            std::string());
+        std::string eff  = XML::getProperty(node, "effect", std::string());
+        std::string image = XML::getProperty(node, "image", std::string());
+        std::string dye;
+
+        // Split image name and dye string
+        size_t pipe = image.find("|");
+        if (pipe != std::string::npos)
         {
-            int id = XML::getProperty(node, "id", 0);
+            dye = image.substr(pipe + 1);
+            image = image.substr(0, pipe);
+        }
 
-            if (id < 1)
-                continue;
+        try
+        {
+            std::ostringstream sql;
+            sql << "UPDATE " << ITEMS_TBL_NAME
+                << " SET name = ?, "
+                << "     description = ?, "
+                << "     image = '" << image << "', "
+                << "     weight = " << weight << ", "
+                << "     itemtype = '" << type << "', "
+                << "     effect = ?, "
+                << "     dyestring = '" << dye << "' "
+                << " WHERE id = " << id;
 
-            int weight = XML::getProperty(node, "weight", 0);
-            std::string type = XML::getProperty(node, "type", std::string());
-            std::string name = XML::getProperty(node, "name", std::string());
-            std::string desc = XML::getProperty(node, "description",
-                                                std::string());
-            std::string eff  = XML::getProperty(node, "effect", std::string());
-            std::string image = XML::getProperty(node, "image", std::string());
-            std::string dye;
-
-            // Split image name and dye string
-            size_t pipe = image.find("|");
-            if (pipe != std::string::npos)
+            if (mDb->prepareSql(sql.str()))
             {
-                dye = image.substr(pipe + 1);
-                image = image.substr(0, pipe);
-            }
+                mDb->bindValue(1, name);
+                mDb->bindValue(2, desc);
+                mDb->bindValue(3, eff);
 
-            try
-            {
-                std::ostringstream sql;
-                sql << "UPDATE " << ITEMS_TBL_NAME
-                    << " SET name = ?, "
-                    << "     description = ?, "
-                    << "     image = '" << image << "', "
-                    << "     weight = " << weight << ", "
-                    << "     itemtype = '" << type << "', "
-                    << "     effect = ?, "
-                    << "     dyestring = '" << dye << "' "
-                    << " WHERE id = " << id;
-
-                if (mDb->prepareSql(sql.str()))
+                mDb->processSql();
+                if (mDb->getModifiedRows() == 0)
                 {
-                    mDb->bindValue(1, name);
-                    mDb->bindValue(2, desc);
-                    mDb->bindValue(3, eff);
-
-                    mDb->processSql();
-                    if (mDb->getModifiedRows() == 0)
+                    sql.clear();
+                    sql.str("");
+                    sql << "INSERT INTO " << ITEMS_TBL_NAME
+                        << "  VALUES ( " << id << ", ?, ?, '"
+                        << image << "', " << weight << ", '"
+                        << type << "', ?, '" << dye << "' )";
+                    if (mDb->prepareSql(sql.str()))
                     {
-                        sql.clear();
-                        sql.str("");
-                        sql << "INSERT INTO " << ITEMS_TBL_NAME
-                            << "  VALUES ( " << id << ", ?, ?, '"
-                            << image << "', " << weight << ", '"
-                            << type << "', ?, '" << dye << "' )";
-                        if (mDb->prepareSql(sql.str()))
-                        {
-                            mDb->bindValue(1, name);
-                            mDb->bindValue(2, desc);
-                            mDb->bindValue(3, eff);
-                            mDb->processSql();
-                        }
-                        else
-                        {
-                            utils::throwError("(DALStorage::SyncDatabase) "
-                                           "SQL query preparation failure #2.");
-                        }
+                        mDb->bindValue(1, name);
+                        mDb->bindValue(2, desc);
+                        mDb->bindValue(3, eff);
+                        mDb->processSql();
+                    }
+                    else
+                    {
+                        utils::throwError("(DALStorage::SyncDatabase) "
+                                          "SQL query preparation failure #2.");
                     }
                 }
-                else
-                {
-                    utils::throwError("(DALStorage::SyncDatabase) "
-                                      "SQL query preparation failure #1.");
-                }
-                itemCount++;
             }
-            catch (const dal::DbSqlQueryExecFailure &e)
+            else
             {
                 utils::throwError("(DALStorage::SyncDatabase) "
-                                  "SQL query failure: ", e);
+                                  "SQL query preparation failure #1.");
             }
+            itemCount++;
+        }
+        catch (const dal::DbSqlQueryExecFailure &e)
+        {
+            utils::throwError("(DALStorage::SyncDatabase) "
+                              "SQL query failure: ", e);
         }
     }
 
