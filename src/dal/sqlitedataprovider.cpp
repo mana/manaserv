@@ -365,24 +365,26 @@ const RecordSet &SqLiteDataProvider::processSql()
         throw std::runtime_error("not connected to database");
 
     int totalCols = sqlite3_column_count(mStmt);
+
+    // ensure we set column headers before adding a row
     Row fieldNames;
+    for (int col = 0; col < totalCols; ++col)
+    {
+        fieldNames.push_back(sqlite3_column_name(mStmt, col));
+    }
+    mRecordSet.setColumnHeaders(fieldNames);
 
     while (sqlite3_step(mStmt) == SQLITE_ROW)
     {
         Row r;
         for (int col = 0; col < totalCols; ++col)
         {
-            fieldNames.push_back(sqlite3_column_name(mStmt, col));
             const unsigned char *txt = sqlite3_column_text(mStmt, col);
             r.push_back(txt ? (char*)txt : std::string());
 
         }
-        // ensure we set column headers before adding a row
-        mRecordSet.setColumnHeaders(fieldNames);
         mRecordSet.add(r);
     }
-
-
 
     sqlite3_finalize(mStmt);
 
