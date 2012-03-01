@@ -95,6 +95,10 @@ void SqLiteDataProvider::connect()
         throw DbConnectionFailure(msg);
     }
 
+    // Wait up to one second when the database is busy. This should make sure
+    // transaction failures due to locked databases are very rare.
+    sqlite3_busy_timeout(mDb, 1000);
+
     // Save the Db Name.
     mDbName = dbName;
 
