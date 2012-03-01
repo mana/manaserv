@@ -52,12 +52,12 @@ const float Character::EXPCURVE_FACTOR = 10.0f;
 const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
 const float Character::EXP_LEVEL_FLEXIBILITY = 1.0f;
 
-Script::Ref Character::mDeathCallback = Script::NoRef;
-Script::Ref Character::mDeathAcceptedCallback = Script::NoRef;
+Script::Ref Character::mDeathCallback;
+Script::Ref Character::mDeathAcceptedCallback;
 
 static bool executeCallback(Script::Ref function, Character *character)
 {
-    if (function == Script::NoRef)
+    if (!function.isValid())
         return false;
 
     Script *script = ScriptManager::currentState();

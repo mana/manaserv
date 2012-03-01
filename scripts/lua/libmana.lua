@@ -239,10 +239,11 @@ function npc_post(npc, ch, sender, letter)
   end
 end
 
--- Called by the game whenever the value of a quest variable is known.
--- Checks that the NPC expects it, and processes the respective coroutine.
+-- Registered as the function to call whenever a value of a quest variable is
+-- retrieved. Checks that the NPC expects it, and processes the respective
+-- coroutine.
 -- Note: the check for NPC correctness is missing, but it should never matter.
-function quest_reply(ch, name, value)
+local function npc_quest_reply(ch, name, value)
   local w = states[ch]
   if w then
     local w3 = w[3]
@@ -256,7 +257,9 @@ function quest_reply(ch, name, value)
   states[ch] = nil
 end
 
-function post_reply(ch, sender, letter)
+-- Registered as the function to call whenever the server has recovered a
+-- post for a user.
+local function npc_post_reply(ch, sender, letter)
   local w = states[ch]
   if w then
     local w3 = w[3]
@@ -417,8 +420,8 @@ function on_remove(being, funct)
   mana.being_register(being)
 end
 
--- called by the engine when a registred being dies.
-function death_notification(being)
+-- Registered as callback for when a registered being dies.
+local function death_notification(being)
   if type(ondeath_functs[being]) == "table" then
     for i,funct in pairs(ondeath_functs[being]) do
       funct()
@@ -427,8 +430,8 @@ function death_notification(being)
   end
 end
 
--- called by the engine when a registred being is removed.
-function remove_notification(being)
+-- Registered as callback for when a registered being is removed.
+local function remove_notification(being)
   if type(onremove_functs[being]) == "table" then
     for i,funct in pairs(onremove_functs[being]) do
       funct()
@@ -451,17 +454,9 @@ mana.chr_money = function(ch)
   return mana.being_get_base_attribute(ch, ATTR_GP)
 end
 
+-- Register callbacks
+mana.on_npc_quest_reply(npc_quest_reply)
+mana.on_npc_post_reply(npc_post_reply)
 
-
-function cast(ch, arg)
-	if arg == 1 then
-		mana.being_say(ch, "Kaaame...Haaame... HAAAAAA!")
-	end
-	if arg == 2 then
-		mana.being_say(ch, "HAA-DOKEN!")
-	end
-	if arg == 3 then
-		mana.being_say(ch, "Sonic BOOM")
-	end
-
-end
+mana.on_being_death(death_notification)
+mana.on_being_remove(remove_notification)

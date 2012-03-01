@@ -61,19 +61,37 @@ class LuaScript : public Script
         void assignCallback(Ref &function);
 
         static void getQuestCallback(Character *, const std::string &,
-                                     const std::string &, void *);
+                                     const std::string &, Script *);
 
         static void getPostCallback(Character *, const std::string &,
-                                    const std::string &, void *);
+                                    const std::string &, Script *);
 
         void processDeathEvent(Being *thing);
 
         void processRemoveEvent(Thing *thing);
 
+
+        static void setQuestReplyCallback(Script *script)
+        { script->assignCallback(mQuestReplyCallback); }
+
+        static void setPostReplyCallback(Script *script)
+        { script->assignCallback(mPostReplyCallback); }
+
+        static void setDeathNotificationCallback(Script *script)
+        { script->assignCallback(mDeathNotificationCallback); }
+
+        static void setRemoveNotificationCallback(Script *script)
+        { script->assignCallback(mRemoveNotificationCallback); }
+
     private:
         lua_State *mState;
         int nbArgs;
         std::string mCurFunction;
+
+        static Ref mQuestReplyCallback;
+        static Ref mPostReplyCallback;
+        static Ref mDeathNotificationCallback;
+        static Ref mRemoveNotificationCallback;
 };
 
 static char const registryKey = 0;

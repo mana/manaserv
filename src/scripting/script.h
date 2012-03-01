@@ -52,13 +52,16 @@ class Script
         static Script *create(const std::string &engine);
 
         /**
-         * A reference to a script object. It's just an integer, but the
-         * typedef makes the purpose of the variable clear.
-         *
-         * Variables of this type should be initialized to Script::NoRef.
+         * A reference to a script object. It wraps an integer value, but adds
+         * custom initialization and a definition of valid. It also makes the
+         * purpose clear.
          */
-        typedef int Ref;
-        static Ref NoRef;
+        class Ref {
+        public:
+            Ref() : value(-1) {}
+            bool isValid() const { return value != -1; }
+            int value;
+        };
 
         Script();
 

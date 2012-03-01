@@ -37,7 +37,7 @@ end)
 -- This function is called after chr_death_accept. The difference is that
 -- it is called in the context of the map the character is spawned on after
 -- the respawn logic has happened.
-function on_chr_respawn(ch)
+local function on_chr_respawn(ch)
     -- calls the local_respawn_function of the map the character respawned
     -- on when the script of the map has one
     if local_respawn_function ~= nil then
@@ -49,7 +49,7 @@ end
 -- This function is called when a new character enters the world for the
 -- first time. This can, for example, be used to give starting equipment
 -- to the character and/or initialize a tutorial quest.
-function on_chr_birth(ch)
+local function on_chr_birth(ch)
     -- this message is shown on first login.
     mana.chat_message(0, ch, "And so your adventure begins...")
 end
@@ -57,14 +57,14 @@ end
 -- This function is called when a character logs into the game. This can,
 -- for example, be utilized for a message-of-the-day or for various
 -- handlings of offline processing mechanics.
-function on_chr_login(ch)
+local function on_chr_login(ch)
     mana.chat_message(0, ch, "Welcome to Manasource")
 end
 
 
 -- This function is called when a character is disconnected. This could
 -- be useful for various handling of offline processing mechanics.
-function on_chr_logout(ch)
+local function on_chr_logout(ch)
     -- notifies nearby players of logout
     local around = mana.get_beings_in_circle(posX(ch), posY(ch), 1000)
     local msg = mana.being_get_name(ch).." left the game."

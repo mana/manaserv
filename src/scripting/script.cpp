@@ -34,8 +34,6 @@ typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
 
-Script::Ref Script::NoRef = -1;
-
 Script::Script():
     mMap(NULL),
     mEventListener(&scriptEventDispatch)

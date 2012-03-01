@@ -97,6 +97,34 @@ static int on_character_death_accept(lua_State *s)
     return 0;
 }
 
+static int on_npc_quest_reply(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    LuaScript::setQuestReplyCallback(getScript(s));
+    return 0;
+}
+
+static int on_npc_post_reply(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    LuaScript::setPostReplyCallback(getScript(s));
+    return 0;
+}
+
+static int on_being_death(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    LuaScript::setDeathNotificationCallback(getScript(s));
+    return 0;
+}
+
+static int on_being_remove(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    LuaScript::setRemoveNotificationCallback(getScript(s));
+    return 0;
+}
+
 /**
  * mana.npc_message(NPC*, Character*, string): void
  * Callback for sending a NPC_MESSAGE.
@@ -2590,6 +2618,10 @@ LuaScript::LuaScript():
     static luaL_Reg const callbacks[] = {
         { "on_character_death",              &on_character_death              },
         { "on_character_death_accept",       &on_character_death_accept       },
+        { "on_npc_quest_reply",              &on_npc_quest_reply              },
+        { "on_npc_post_reply",               &on_npc_post_reply               },
+        { "on_being_death",                  &on_being_death                  },
+        { "on_being_remove",                 &on_being_remove                 },
         { "npc_create",                      &npc_create                      },
         { "npc_message",                     &npc_message                     },
         { "npc_choice",                      &npc_choice                      },

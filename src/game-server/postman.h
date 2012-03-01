@@ -25,12 +25,13 @@
 #include <string>
 
 class Character;
+class Script;
 
 struct PostCallback
 {
     void (*handler)(Character *, const std::string &sender,
-                    const std::string &letter, void *data);
-    void *data;
+                    const std::string &letter, Script *script);
+    Script *script;
 };
 
 class PostMan
@@ -64,7 +65,7 @@ public:
         std::map<Character*, PostCallback>::iterator itr = mCallbacks.find(player);
         if (itr != mCallbacks.end())
         {
-            itr->second.handler(player, sender, letter, itr->second.data);
+            itr->second.handler(player, sender, letter, itr->second.script);
         }
     }
 

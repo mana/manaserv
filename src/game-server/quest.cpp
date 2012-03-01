@@ -152,7 +152,7 @@ void recoveredQuestVar(int id, const std::string &name,
     for (QuestCallbacks::const_iterator k = j->second.begin(),
          k_end = j->second.end(); k != k_end; ++k)
     {
-        k->handler(ch, name, value, k->data);
+        k->handler(ch, name, value, k->script);
     }
 
     variables.erase(j);

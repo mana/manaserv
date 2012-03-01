@@ -24,12 +24,13 @@
 #include <string>
 
 class Character;
+class Script;
 
 struct QuestCallback
 {
     void (*handler)(Character *, const std::string &name,
-                    const std::string &value, void *data);
-    void *data;
+                    const std::string &value, Script *script);
+    Script *script;
 };
 
 /**

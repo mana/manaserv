@@ -24,11 +24,16 @@
 
 #include "scripting/luautil.h"
 
-#include "game-server/being.h"
+#include "game-server/character.h"
 #include "utils/logger.h"
 
 #include <cassert>
 #include <cstring>
+
+Script::Ref LuaScript::mQuestReplyCallback;
+Script::Ref LuaScript::mPostReplyCallback;
+Script::Ref LuaScript::mDeathNotificationCallback;
+Script::Ref LuaScript::mRemoveNotificationCallback;
 
 LuaScript::~LuaScript()
 {
@@ -38,7 +43,8 @@ LuaScript::~LuaScript()
 void LuaScript::prepare(Ref function)
 {
     assert(nbArgs == -1);
-    lua_rawgeti(mState, LUA_REGISTRYINDEX, function);
+    assert(function.isValid());
+    lua_rawgeti(mState, LUA_REGISTRYINDEX, function.value);
     assert(lua_isfunction(mState, -1));
     nbArgs = 0;
     mCurFunction = "<callback>"; // We don't know the function name
@@ -122,10 +128,10 @@ void LuaScript::assignCallback(Script::Ref &function)
     assert(lua_isfunction(mState, -1));
 
     // If there is already a callback set, replace it
-    if (function != NoRef)
-        luaL_unref(mState, LUA_REGISTRYINDEX, function);
+    if (function.isValid())
+        luaL_unref(mState, LUA_REGISTRYINDEX, function.value);
 
-    function = luaL_ref(mState, LUA_REGISTRYINDEX);
+    function.value = luaL_ref(mState, LUA_REGISTRYINDEX);
 }
 
 void LuaScript::load(const char *prog, const char *name)
@@ -155,20 +161,26 @@ void LuaScript::load(const char *prog, const char *name)
 
 void LuaScript::processDeathEvent(Being *being)
 {
-    prepare("death_notification");
-    push(being);
-    //TODO: get and push a list of creatures who contributed to killing the
-    //      being. This might be very interesting for scripting quests.
-    execute();
+    if (mDeathNotificationCallback.isValid())
+    {
+        prepare(mDeathNotificationCallback);
+        push(being);
+        //TODO: get and push a list of creatures who contributed to killing the
+        //      being. This might be very interesting for scripting quests.
+        execute();
+    }
 }
 
 void LuaScript::processRemoveEvent(Thing *being)
 {
-    prepare("remove_notification");
-    push(being);
-    //TODO: get and push a list of creatures who contributed to killing the
-    //      being. This might be very interesting for scripting quests.
-    execute();
+    if (mRemoveNotificationCallback.isValid())
+    {
+        prepare(mRemoveNotificationCallback);
+        push(being);
+        //TODO: get and push a list of creatures who contributed to killing the
+        //      being. This might be very interesting for scripting quests.
+        execute();
+    }
 
     being->removeListener(getScriptListener());
 }
@@ -177,31 +189,30 @@ void LuaScript::processRemoveEvent(Thing *being)
  * Called when the server has recovered the value of a quest variable.
  */
 void LuaScript::getQuestCallback(Character *q, const std::string &name,
-                                 const std::string &value, void *data)
+                                 const std::string &value, Script *script)
 {
-    LuaScript *s = static_cast< LuaScript * >(data);
-    assert(s->nbArgs == -1);
-    lua_getglobal(s->mState, "quest_reply");
-    lua_pushlightuserdata(s->mState, q);
-    lua_pushstring(s->mState, name.c_str());
-    lua_pushstring(s->mState, value.c_str());
-    s->nbArgs = 3;
-    s->execute();
+    if (mQuestReplyCallback.isValid())
+    {
+        script->prepare(mQuestReplyCallback);
+        script->push(q);
+        script->push(name);
+        script->push(value);
+        script->execute();
+    }
 }
 
 /**
- * Called when the server has recovered the post for a user
+ * Called when the server has recovered the post for a user.
  */
 void LuaScript::getPostCallback(Character *q, const std::string &sender,
-                                const std::string &letter, void *data)
+                                const std::string &letter, Script *script)
 {
-    // get the script
-    LuaScript *s = static_cast<LuaScript*>(data);
-    assert(s->nbArgs == -1);
-    lua_getglobal(s->mState, "post_reply");
-    lua_pushlightuserdata(s->mState, q);
-    lua_pushstring(s->mState, sender.c_str());
-    lua_pushstring(s->mState, letter.c_str());
-    s->nbArgs = 3;
-    s->execute();
+    if (mPostReplyCallback.isValid())
+    {
+        script->prepare(mPostReplyCallback);
+        script->push(q);
+        script->push(sender);
+        script->push(letter);
+        script->execute();
+    }
 }
