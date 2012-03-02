@@ -31,12 +31,14 @@ extern "C" {
 #include <set>
 #include <vector>
 
-#include "game-server/map.h"
-
 class Being;
-class NPC;
 class Character;
+class ItemClass;
+class MapObject;
 class Monster;
+class MonsterClass;
+class NPC;
+class StatusEffect;
 class Thing;
 
 // Report script errors and interrupt the script.
@@ -105,10 +107,16 @@ public:
     /**
      * Pushes a userdata reference to the given object on the stack. Either by
      * creating one, or reusing an existing one.
+     *
+     * When a null-pointer is passed for \a object, the value 'nil' is pushed.
      */
-    static int push(lua_State *s, T *object)
+    static void push(lua_State *s, T *object)
     {
-        if (!UserDataCache::retrieve(s, object))
+        if (!object)
+        {
+            lua_pushnil(s);
+        }
+        else if (!UserDataCache::retrieve(s, object))
         {
             void *userData = lua_newuserdata(s, sizeof(T*));
             * static_cast<T**>(userData) = object;
@@ -118,8 +126,6 @@ public:
 
             UserDataCache::insert(s, object);
         }
-
-        return 1;
     }
 
     /**
@@ -138,7 +144,10 @@ private:
 
 template <typename T> const char * LuaUserData<T>::mTypeName;
 
+typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
+typedef LuaUserData<MonsterClass> LuaMonsterClass;
+typedef LuaUserData<StatusEffect> LuaStatusEffect;
 
 
 NPC *getNPC(lua_State *s, int p);

@@ -68,7 +68,7 @@
         max-per-slot="30"
         value="15">
         <effect trigger="activation">
-            <script src="candy.lua" function="use_candy" />
+            <scriptevent activate="use" />
             <consumes />
         </effect>
     </item>

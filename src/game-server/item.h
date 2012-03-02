@@ -24,8 +24,10 @@
 #include <vector>
 
 #include "game-server/actor.h"
+#include "scripting/script.h"
 
 class Being;
+class ItemClass;
 
 // Indicates the equip slot "cost" to equip an item.
 struct ItemEquipRequirement {
@@ -143,12 +145,12 @@ class ItemEffectConsumes : public ItemEffectInfo
 class ItemEffectScript : public ItemEffectInfo
 {
     public:
-        ItemEffectScript(int itemId,
-                         const std::string& activateFunctionName,
-                         const std::string& dispellFunctionName):
-            mItemId(itemId),
-            mActivateFunctionName(activateFunctionName),
-            mDispellFunctionName(dispellFunctionName)
+        ItemEffectScript(ItemClass *itemClass,
+                         const std::string &activateEventName,
+                         const std::string &dispellEventName):
+            mItemClass(itemClass),
+            mActivateEventName(activateEventName),
+            mDispellEventName(dispellEventName)
         {}
 
         ~ItemEffectScript();
@@ -157,9 +159,9 @@ class ItemEffectScript : public ItemEffectInfo
         void dispell(Being *itemUser);
 
     private:
-        int mItemId;
-        std::string mActivateFunctionName;
-        std::string mDispellFunctionName;
+        ItemClass *mItemClass;
+        std::string mActivateEventName;
+        std::string mDispellEventName;
 };
 
 
@@ -234,6 +236,12 @@ class ItemClass
         const ItemEquipRequirement &getItemEquipRequirement() const
         { return mEquipReq; }
 
+        void setEventCallback(const std::string &event, Script *script)
+        { script->assignCallback(mEventCallbacks[event]); }
+
+        Script::Ref getEventCallback(const std::string &event) const
+        { return mEventCallbacks.value(event); }
+
     private:
         /**
          * Add an effect to a trigger
@@ -281,6 +289,11 @@ class ItemClass
          * Requirement for equipping.
          */
         ItemEquipRequirement mEquipReq;
+
+        /**
+         * Named event callbacks. Can be used in custom item effects.
+         */
+        utils::NameMap<Script::Ref> mEventCallbacks;
 
         friend class ItemManager;
 };

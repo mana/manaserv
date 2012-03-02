@@ -64,13 +64,17 @@ ItemEffectScript::~ItemEffectScript()
 
 bool ItemEffectScript::apply(Being *itemUser)
 {
-    if (!mActivateFunctionName.empty())
+    if (mActivateEventName.empty())
+        return false;
+
+    Script::Ref function = mItemClass->getEventCallback(mActivateEventName);
+    if (function.isValid())
     {
         Script *script = ScriptManager::currentState();
         script->setMap(itemUser->getMap());
-        script->prepare(mActivateFunctionName);
+        script->prepare(function);
         script->push(itemUser);
-        script->push(mItemId);
+        script->push(mItemClass->getDatabaseID());
         script->execute(); // TODO return depending on script execution success.
         return true;
     }
@@ -79,13 +83,17 @@ bool ItemEffectScript::apply(Being *itemUser)
 
 void ItemEffectScript::dispell(Being *itemUser)
 {
-    if (!mDispellFunctionName.empty())
+    if (mDispellEventName.empty())
+        return;
+
+    Script::Ref function = mItemClass->getEventCallback(mDispellEventName);
+    if (function.isValid())
     {
         Script *script = ScriptManager::currentState();
         script->setMap(itemUser->getMap());
-        script->prepare(mDispellFunctionName);
+        script->prepare(function);
         script->push(itemUser);
-        script->push(mItemId);
+        script->push(mItemClass->getDatabaseID());
         script->execute();
     }
 }

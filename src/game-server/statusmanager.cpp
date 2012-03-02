@@ -33,6 +33,7 @@
 
 typedef std::map< int, StatusEffect * > StatusEffectsMap;
 static StatusEffectsMap statusEffects;
+static utils::NameMap<StatusEffect*> statusEffectsByName;
 static std::string statusReferenceFile;
 
 void StatusManager::initialize(const std::string &file)
@@ -59,7 +60,7 @@ void StatusManager::reload()
         if (!xmlStrEqual(node->name, BAD_CAST "status-effect"))
             continue;
 
-        int id = XML::getProperty(node, "id", 0);
+        const int id = XML::getProperty(node, "id", 0);
         if (id < 1)
         {
             LOG_WARN("Status Manager: The status ID: " << id << " in "
@@ -68,9 +69,24 @@ void StatusManager::reload()
             continue;
         }
 
+        StatusEffect *statusEffect = new StatusEffect(id);
+
+        const std::string name = XML::getProperty(node, "name",
+                                                  std::string());
+        if (!name.empty())
+        {
+            if (statusEffectsByName.contains(name))
+            {
+                LOG_WARN("StatusManager: name not unique for status effect "
+                         << id);
+            }
+            else
+            {
+                statusEffectsByName.insert(name, statusEffect);
+            }
+        }
+
         std::string scriptFile = XML::getProperty(node, "script", std::string());
-        std::string tickFunction = XML::getProperty(node, "tick-function",
-                                                    std::string());
         //TODO: Get these modifiers
 /*
         modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
@@ -84,8 +100,6 @@ void StatusManager::reload()
         modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE, XML::getProperty(node, "intelligence", 0));
         modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
 */
-        StatusEffect *statusEffect = new StatusEffect(id);
-        statusEffect->setTickFunction(tickFunction);
         if (!scriptFile.empty())
         {
             std::stringstream filename;
@@ -112,11 +126,16 @@ void StatusManager::deinitialize()
         delete i->second;
     }
     statusEffects.clear();
+    statusEffectsByName.clear();
 }
 
 StatusEffect *StatusManager::getStatus(int statusId)
 {
     StatusEffectsMap::const_iterator i = statusEffects.find(statusId);
-    return i != statusEffects.end() ? i->second : NULL;
+    return i != statusEffects.end() ? i->second : 0;
 }
 
+StatusEffect *StatusManager::getStatusByName(const std::string &name)
+{
+    return statusEffectsByName.value(name);
+}

@@ -7,14 +7,14 @@
 
 --]]
 
-function update_monster(mob)
+local function update(mob)
     local r = math.random(0, 200);
     if r == 0 then
         mana.being_say(mob, "Roar! I am a boss")
     end
 end
 
-function on_maggot_strike(mob, victim, hit)
+local function strike(mob, victim, hit)
     if hit > 0 then
         mana.being_say(mob, "Take this! "..hit.." damage!")
         mana.being_say(victim, "Oh Noez!")
@@ -23,3 +23,7 @@ function on_maggot_strike(mob, victim, hit)
         mana.being_say(victim, "Whew...")
     end
 end
+
+local maggot = mana.get_monster_class("maggot")
+maggot:on_update(update)
+maggot:on("strike", strike)

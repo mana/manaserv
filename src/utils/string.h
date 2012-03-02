@@ -105,6 +105,11 @@ namespace utils
             return result != mMap.end() ? result->second : mDefault;
         }
 
+        T &operator[](const std::string &name)
+        {
+            return mMap[toLower(name)];
+        }
+
         bool contains(const std::string &name) const
         {
             return mMap.find(toLower(name)) != mMap.end();

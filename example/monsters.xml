@@ -78,7 +78,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             damage-factor="1"
             range="32"
             animation="attack"
-            script-function="on_maggot_strike"
+            script-event="strike"
             />
             <script>testmonster.lua</script> <!-- only Proof of Concept-->
     </monster>

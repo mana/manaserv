@@ -20,9 +20,8 @@
 
 #include "game-server/statuseffect.h"
 
-#include "scripting/script.h"
-#include "scripting/scriptmanager.h"
 #include "game-server/being.h"
+#include "scripting/scriptmanager.h"
 
 StatusEffect::StatusEffect(int id):
     mId(id)
@@ -35,13 +34,13 @@ StatusEffect::~StatusEffect()
 
 void StatusEffect::tick(Being *target, int count)
 {
-    if (!mTickFunction.empty())
+    if (mTickCallback.isValid())
     {
-        Script *script = ScriptManager::currentState();
-        script->setMap(target->getMap());
-        script->prepare(mTickFunction);
-        script->push(target);
-        script->push(count);
-        script->execute();
+        Script *s = ScriptManager::currentState();
+        s->setMap(target->getMap());
+        s->prepare(mTickCallback);
+        s->push(target);
+        s->push(count);
+        s->execute();
     }
 }

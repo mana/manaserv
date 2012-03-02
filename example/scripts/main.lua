@@ -9,3 +9,6 @@
 require "scripts/global_events"
 require "scripts/special_actions"
 require "scripts/crafting"
+
+require "scripts/items/candy"
+require "scripts/monster/testmonster"

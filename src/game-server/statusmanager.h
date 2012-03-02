@@ -46,6 +46,11 @@ namespace StatusManager
      * Gets the status having the given ID.
      */
     StatusEffect *getStatus(int statusId);
+
+    /**
+     * Gets the status having the given name.
+     */
+    StatusEffect *getStatusByName(const std::string &name);
 }
 
 #endif // STATUSMANAGER_H

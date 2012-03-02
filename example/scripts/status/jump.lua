@@ -12,7 +12,7 @@
 ----------------------------------------------------------------------------------
 
 
-function tick_jump(target, ticknumber)
+local function tick(target, ticknumber)
     if (ticknumber % 10 == 0) then
         mana.being_say(target, "I have the jumping bug!")
     end
@@ -51,3 +51,5 @@ function tick_jump(target, ticknumber)
     mana.being_apply_status(victim, 2, 6000)
     mana.being_say(victim, "Now I have the jumping bug")
 end
+
+mana.get_status_effect("jumping status"):on_tick(tick)

@@ -12,7 +12,7 @@
 --  Software Foundation; either version 2 of the License, or any later version. --
 ----------------------------------------------------------------------------------
 
-function tick_plague(target, ticknumber)
+local function tick(target, ticknumber)
     if (ticknumber % 10 == 0) then
         mana.being_say(target, "I have the plague! :( = " .. ticknumber)
     end
@@ -26,3 +26,5 @@ function tick_plague(target, ticknumber)
        i = i + 1
     end
 end
+
+mana.get_status_effect("plague"):on_tick(tick)

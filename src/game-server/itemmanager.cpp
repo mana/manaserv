@@ -404,50 +404,25 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
         {
             item->addEffect(new ItemEffectConsumes, triggerTypes.first);
         }
-        else if (xmlStrEqual(subNode->name, BAD_CAST "script"))
+        else if (xmlStrEqual(subNode->name, BAD_CAST "scriptevent"))
         {
-            std::string activateFunctionName = XML::getProperty(subNode,
-                                                                "function",
-                                                                std::string());
-            if (activateFunctionName.empty())
-            {
-                LOG_WARN("Item Manager: Empty function definition "
-                         "for script effect, skipping!");
-                continue;
-            }
-
-            std::string src = XML::getProperty(subNode, "src", std::string());
-            if (src.empty())
-            {
-                LOG_WARN("Item Manager: Empty src definition for script effect,"
-                         " skipping!");
-                continue;
-            }
-            std::stringstream filename;
-            filename << "scripts/items/" << src;
-            if (!ResourceManager::exists(filename.str()))
-            {
-                LOG_WARN("Could not find script file \"" << filename.str()
-                         << "\" for item #" << item->mDatabaseID);
-                continue;
-            }
-
-            LOG_INFO("Loading item script: " << filename.str());
-            Script *script = ScriptManager::currentState();
-            if (!script->loadFile(filename.str()))
-            {
-                LOG_WARN("Could not load script file \"" << filename.str()
-                         << "\" for item #" << item->mDatabaseID);
-                continue;
-            }
-
-            std::string dispellFunctionName = XML::getProperty(subNode,
-                                                             "dispell-function",
+            std::string activateEventName = XML::getProperty(subNode,
+                                                             "activate",
                                                              std::string());
+            if (activateEventName.empty())
+            {
+                LOG_WARN("Item Manager: Empty name for 'activate' item script "
+                         "event, skipping effect!");
+                continue;
+            }
 
-            item->addEffect(new ItemEffectScript(item->mDatabaseID,
-                                                 activateFunctionName,
-                                                 dispellFunctionName),
+            std::string dispellEventName = XML::getProperty(subNode,
+                                                            "dispell",
+                                                            std::string());
+
+            item->addEffect(new ItemEffectScript(item,
+                                                 activateEventName,
+                                                 dispellEventName),
                                                  triggerTypes.first,
                                                  triggerTypes.second);
         }

@@ -46,6 +46,8 @@ extern "C" {
 #include "game-server/postman.h"
 #include "game-server/quest.h"
 #include "game-server/state.h"
+#include "game-server/statuseffect.h"
+#include "game-server/statusmanager.h"
 #include "game-server/trigger.h"
 #include "net/messageout.h"
 #include "scripting/luautil.h"
@@ -208,6 +210,27 @@ static int on_get_special_recharge_cost(lua_State *s)
     luaL_checktype(s, 1, LUA_TFUNCTION);
     ScriptManager::setGetSpecialRechargeCostCallback(getScript(s));
     return 0;
+}
+
+static int get_item_class(lua_State *s)
+{
+    const char *name = luaL_checkstring(s, 1);
+    LuaItemClass::push(s, itemManager->getItemByName(name));
+    return 1;
+}
+
+static int get_monster_class(lua_State *s)
+{
+    const char *name = luaL_checkstring(s, 1);
+    LuaMonsterClass::push(s, monsterManager->getMonsterByName(name));
+    return 1;
+}
+
+static int get_status_effect(lua_State *s)
+{
+    const char *name = luaL_checkstring(s, 1);
+    LuaStatusEffect::push(s, StatusManager::getStatusByName(name));
+    return 1;
 }
 
 /**
@@ -1507,6 +1530,23 @@ static int posY(lua_State *s)
     return 0;
 }
 
+static int monster_class_on_update(lua_State *s)
+{
+    MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    monsterClass->setUpdateCallback(getScript(s));
+    return 0;
+}
+
+static int monster_class_on(lua_State *s)
+{
+    MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
+    const char *event = luaL_checkstring(s, 2);
+    luaL_checktype(s, 3, LUA_TFUNCTION);
+    monsterClass->setEventCallback(event, getScript(s));
+    return 0;
+}
+
 /**
  * mana.monster_create(int id || string name, int x, int y): Monster*
  * Callback for creating a monster on the current map.
@@ -1617,32 +1657,6 @@ static int monster_remove(lua_State *s)
     }
     lua_pushboolean(s, monsterRemoved);
     return 1;
-}
-
-/**
- * mana.monster_load_script(Monster*, string script_filename): void
- * loads a LUA script for the given monster.
- */
-static int monster_load_script(lua_State *s)
-{
-    Monster *m = getMonster(s, 1);
-    if (!m)
-    {
-         raiseScriptError(s, "monster_load_script called "
-                          "for a nonexistent monster.");
-         return 0;
-    }
-
-    const char *scriptName = luaL_checkstring(s, 2);
-    if (scriptName[0] == 0)
-    {
-        raiseScriptError(s, "monster_load_script called "
-                         "with empty script file name.");
-        return 0;
-    }
-
-    m->loadScript(scriptName);
-    return 0;
 }
 
 /**
@@ -1959,9 +1973,8 @@ static int chr_get_post(lua_State *s)
 
 /**
  * mana.being_register(Being*): void
- * Makes the server call the lua functions deathEvent
- * and removeEvent when the being dies or is removed
- * from the map.
+ * Makes the server call the on_being_death and on_being_remove callbacks
+ * when the being dies or is removed from the map.
  */
 static int being_register(lua_State *s)
 {
@@ -2453,6 +2466,15 @@ static int is_walkable(lua_State *s)
     return 1;
 }
 
+static int item_class_on(lua_State *s)
+{
+    ItemClass *itemClass = LuaItemClass::check(s, 1);
+    const char *event = luaL_checkstring(s, 2);
+    luaL_checktype(s, 3, LUA_TFUNCTION);
+    itemClass->setEventCallback(event, getScript(s));
+    return 0;
+}
+
 /**
  * mana.drop_item(int x, int y, int id || string name[, int number]): bool
  * Creates an item stack on the floor.
@@ -2651,6 +2673,14 @@ static int map_object_get_type(lua_State *s)
     return 1;
 }
 
+static int status_effect_on_tick(lua_State *s)
+{
+    StatusEffect *statusEffect = LuaStatusEffect::check(s, 1);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    statusEffect->setTickCallback(getScript(s));
+    return 0;
+}
+
 /**
  * mana.announce(text [, sender])
  * Does a global announce
@@ -2719,6 +2749,9 @@ LuaScript::LuaScript():
         { "on_craft",                        &on_craft                        },
         { "on_use_special",                  &on_use_special                  },
         { "on_get_special_recharge_cost",    &on_get_special_recharge_cost    },
+        { "get_item_class",                  &get_item_class                  },
+        { "get_monster_class",               &get_monster_class               },
+        { "get_status_effect",               &get_status_effect               },
         { "npc_create",                      &npc_create                      },
         { "npc_message",                     &npc_message                     },
         { "npc_choice",                      &npc_choice                      },
@@ -2761,7 +2794,6 @@ LuaScript::LuaScript():
         { "monster_get_name",                &monster_get_name                },
         { "monster_change_anger",            &monster_change_anger            },
         { "monster_remove",                  &monster_remove                  },
-        { "monster_load_script",             &monster_load_script             },
         { "being_apply_status",              &being_apply_status              },
         { "being_remove_status",             &being_remove_status             },
         { "being_has_status",                &being_has_status                },
@@ -2809,6 +2841,11 @@ LuaScript::LuaScript():
     luaL_register(mState, "mana", callbacks);
     lua_pop(mState, 1);                     // pop the 'mana' table
 
+    static luaL_Reg const members_ItemClass[] = {
+        { "on",                              &item_class_on                   },
+        { NULL, NULL }
+    };
+
     static luaL_Reg const members_MapObject[] = {
         { "property",                        &map_object_get_property         },
         { "bounds",                          &map_object_get_bounds           },
@@ -2817,7 +2854,21 @@ LuaScript::LuaScript():
         { NULL, NULL }
     };
 
+    static luaL_Reg const members_MonsterClass[] = {
+        { "on_update",                       &monster_class_on_update         },
+        { "on",                              &monster_class_on                },
+        { NULL, NULL }
+    };
+
+    static luaL_Reg const members_StatusEffect[] = {
+        { "on_tick",                         &status_effect_on_tick           },
+        { NULL, NULL }
+    };
+
+    LuaItemClass::registerType(mState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mState, "MapObject", members_MapObject);
+    LuaMonsterClass::registerType(mState, "MonsterClass", members_MonsterClass);
+    LuaStatusEffect::registerType(mState, "StatusEffect", members_StatusEffect);
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mState, const_cast<char *>(&registryKey));

@@ -28,7 +28,6 @@
 #include "game-server/item.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/state.h"
-#include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/speedconv.h"
@@ -140,16 +139,20 @@ void Monster::perform()
 
                     int hit = performAttack(mTarget, dmg);
 
-                    if (! mCurrentAttack->scriptFunction.empty()
+                    if (! mCurrentAttack->scriptEvent.empty()
                         && hit > -1)
                     {
-                        Script *script = ScriptManager::currentState();
-                        script->setMap(getMap());
-                        script->prepare(mCurrentAttack->scriptFunction);
-                        script->push(this);
-                        script->push(mTarget);
-                        script->push(hit);
-                        script->execute();
+                        Script::Ref function = mSpecy->getEventCallback(mCurrentAttack->scriptEvent);
+                        if (function.isValid())
+                        {
+                            Script *script = ScriptManager::currentState();
+                            script->setMap(getMap());
+                            script->prepare(function);
+                            script->push(this);
+                            script->push(mTarget);
+                            script->push(hit);
+                            script->execute();
+                        }
                     }
                 }
             }
@@ -180,11 +183,14 @@ void Monster::update()
         return;
     }
 
-    Script *script = ScriptManager::currentState();
-    script->setMap(getMap());
-    script->prepare("update_monster");
-    script->push(this);
-    script->execute();
+    if (mSpecy->getUpdateCallback().isValid())
+    {
+        Script *script = ScriptManager::currentState();
+        script->setMap(getMap());
+        script->prepare(mSpecy->getUpdateCallback());
+        script->push(this);
+        script->execute();
+    }
 
     // Cancel the rest when we are currently performing an attack
     if (isTimerRunning(T_M_ATTACK_TIME))

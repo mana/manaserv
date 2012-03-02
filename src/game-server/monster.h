@@ -28,6 +28,8 @@
 #include "game-server/being.h"
 #include "game-server/eventlistener.h"
 #include "common/defines.h"
+#include "scripting/script.h"
+#include "utils/string.h"
 
 class ItemClass;
 class Script;
@@ -57,7 +59,7 @@ struct MonsterAttack
     int preDelay;
     int aftDelay;
     int range;
-    std::string scriptFunction;
+    std::string scriptEvent;
 };
 
 typedef std::vector< MonsterAttack *> MonsterAttacks;
@@ -197,6 +199,18 @@ class MonsterClass
         /** Returns script filename */
         const std::string &getScript() const { return mScript; }
 
+        void setUpdateCallback(Script *script)
+        { script->assignCallback(mUpdateCallback); }
+
+        void setEventCallback(const std::string &event, Script *script)
+        { script->assignCallback(mEventCallbacks[event]); }
+
+        Script::Ref getUpdateCallback() const
+        { return mUpdateCallback; }
+
+        Script::Ref getEventCallback(const std::string &event) const
+        { return mEventCallbacks.value(event); }
+
     private:
         unsigned short mId;
         std::string mName;
@@ -216,6 +230,17 @@ class MonsterClass
         int mOptimalLevel;
         MonsterAttacks mAttacks;
         std::string mScript;
+
+        /**
+         * A reference to the script function that is called each update.
+         */
+        Script::Ref mUpdateCallback;
+
+        /**
+         * Named event callbacks. Currently only used for custom attack
+         * callbacks.
+         */
+        utils::NameMap<Script::Ref> mEventCallbacks;
 
         friend class MonsterManager;
         friend class Monster;
