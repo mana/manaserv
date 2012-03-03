@@ -34,6 +34,9 @@ typedef std::map< std::string, Script::Factory > Engines;
 
 static Engines *engines = NULL;
 
+Script::Ref Script::mCreateNpcDelayedCallback;
+Script::Ref Script::mUpdateCallback;
+
 Script::Script():
     mMap(NULL),
     mEventListener(&scriptEventDispatch)
@@ -68,7 +71,12 @@ Script *Script::create(const std::string &engine)
 
 void Script::update()
 {
-    prepare("update");
+    if (!mUpdateCallback.isValid())
+    {
+        LOG_ERROR("Could not find callback for update function!");
+        return;
+    }
+    prepare(mUpdateCallback);
     execute();
 }
 
@@ -98,8 +106,14 @@ bool Script::loadFile(const std::string &name)
 void Script::loadNPC(const std::string &name, int id, int x, int y,
                      const char *prog)
 {
+    if (!mCreateNpcDelayedCallback.isValid())
+    {
+        LOG_ERROR("No callback for creating npcs delayed assigned. "
+                  "Could not enabled NPC");
+        return;
+    }
     load(prog, name.c_str());
-    prepare("create_npc_delayed");
+    prepare(mCreateNpcDelayedCallback);
     push(name);
     push(id);
     push(x);

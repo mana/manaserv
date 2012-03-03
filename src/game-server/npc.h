@@ -73,6 +73,24 @@ class NPC : public Being
         virtual unsigned char getWalkMask() const
         { return 0x83; } // blocked like a monster by walls, monsters and characters ( bin 1000 0011)
 
+        static void setStartCallback(Script *script)
+        { script->assignCallback(mStartCallback); }
+
+        static void setNextCallback(Script *script)
+        { script->assignCallback(mNextCallback); }
+
+        static void setChooseCallback(Script *script)
+        { script->assignCallback(mChooseCallback); }
+
+        static void setIntegerCallback(Script *script)
+        { script->assignCallback(mIntegerCallback); }
+
+        static void setStringCallback(Script *script)
+        { script->assignCallback(mStringCallback); }
+
+        static void setUpdateCallback(Script *script)
+        { script->assignCallback(mUpdateCallback); }
+
     protected:
         /**
          * Gets the way a monster blocks pathfinding for other objects
@@ -84,6 +102,13 @@ class NPC : public Being
         Script *mScript;    /**< Script describing NPC behavior. */
         unsigned short mID; /**< ID of the NPC. */
         bool mEnabled;      /**< Whether NPC is enabled */
+
+        static Script::Ref mStartCallback;
+        static Script::Ref mNextCallback;
+        static Script::Ref mChooseCallback;
+        static Script::Ref mIntegerCallback;
+        static Script::Ref mStringCallback;
+        static Script::Ref mUpdateCallback;
 };
 
 #endif

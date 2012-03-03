@@ -456,6 +456,8 @@ MapZone& MapContent::getZone(const Point &pos) const
  * MapComposite
  *****************************************************************************/
 
+Script::Ref MapComposite::mInitializeCallback;
+
 MapComposite::MapComposite(int id, const std::string &name):
     mMap(NULL),
     mContent(NULL),
@@ -493,10 +495,17 @@ bool MapComposite::activate()
     else
         mPvPRules = PVP_NONE;
 
-    Script *s = ScriptManager::currentState();
-    s->setMap(this);
-    s->prepare("initialize");
-    s->execute();
+    if (!mInitializeCallback.isValid())
+    {
+        LOG_WARN("No callback for map initialization found");
+    }
+    else
+    {
+        Script *s = ScriptManager::currentState();
+        s->setMap(this);
+        s->prepare(mInitializeCallback);
+        s->execute();
+    }
 
     return true;
 }

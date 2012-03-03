@@ -25,6 +25,10 @@
 
 static Script *_currentState;
 
+static Script::Ref _craftCallback;
+static Script::Ref _specialCallback;
+static Script::Ref _getSpecialRechargeCostCallback;
+
 void ScriptManager::initialize()
 {
     const std::string engine = Configuration::getValue("script_engine", "lua");
@@ -56,9 +60,9 @@ void ScriptManager::addDataToSpecial(int id, Special *special)
             first we have to agree on what other
             info we actually want to provide.
     */
-    if (special)
+    if (special && _getSpecialRechargeCostCallback.isValid())
     {
-        _currentState->prepare("get_special_recharge_cost");
+        _currentState->prepare(_getSpecialRechargeCostCallback);
         _currentState->push(id);
         int scriptReturn = _currentState->execute();
         special->neededMana = scriptReturn;
@@ -67,7 +71,13 @@ void ScriptManager::addDataToSpecial(int id, Special *special)
 
 bool ScriptManager::performSpecialAction(int specialId, Being *caster)
 {
-    _currentState->prepare("use_special");
+    if (!_specialCallback.isValid())
+    {
+        LOG_WARN("No callback for specials set! Specials disabled.");
+        return false;
+    }
+
+    _currentState->prepare(_specialCallback);
     _currentState->push(caster);
     _currentState->push(specialId);
     _currentState->execute();
@@ -77,9 +87,23 @@ bool ScriptManager::performSpecialAction(int specialId, Being *caster)
 bool ScriptManager::performCraft(Being *crafter,
                                  const std::list<InventoryItem> &recipe)
 {
-    _currentState->prepare("on_craft");
+    if (!_craftCallback.isValid())
+    {
+        LOG_WARN("No crafting callback set! Crafting disabled.");
+        return false;
+    }
+    _currentState->prepare(_craftCallback);
     _currentState->push(crafter);
     _currentState->push(recipe);
     _currentState->execute();
     return true;
 }
+
+void ScriptManager::setCraftCallback(Script *script)
+{ script->assignCallback(_craftCallback); }
+
+void ScriptManager::setSpecialCallback(Script *script)
+{ script->assignCallback(_specialCallback); }
+
+void ScriptManager::setGetSpecialRechargeCostCallback(Script *script)
+{ script->assignCallback(_getSpecialRechargeCostCallback); }

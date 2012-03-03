@@ -30,3 +30,6 @@ function get_special_recharge_cost(id)
     -- return the recharge cost for the special with the ID
     return specialCost[id]
 end
+
+mana.on_use_special(use_special)
+mana.on_get_special_recharge_cost(get_special_recharge_cost)

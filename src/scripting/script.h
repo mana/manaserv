@@ -163,12 +163,21 @@ class Script
 
         virtual void processRemoveEvent(Thing *thing) = 0;
 
+        static void setCreateNpcDelayedCallback(Script *script)
+        { script->assignCallback(mCreateNpcDelayedCallback); }
+
+        static void setUpdateCallback(Script *script)
+        { script->assignCallback(mUpdateCallback); }
+
     protected:
         std::string mScriptFile;
 
     private:
         MapComposite *mMap;
         EventListener mEventListener; /**< Tracking of being deaths. */
+
+        static Ref mCreateNpcDelayedCallback;
+        static Ref mUpdateCallback;
 
     friend struct ScriptEventDispatch;
 };

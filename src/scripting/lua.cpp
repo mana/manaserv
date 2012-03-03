@@ -50,6 +50,7 @@ extern "C" {
 #include "net/messageout.h"
 #include "scripting/luautil.h"
 #include "scripting/luascript.h"
+#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/speedconv.h"
 
@@ -122,6 +123,90 @@ static int on_being_remove(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
     LuaScript::setRemoveNotificationCallback(getScript(s));
+    return 0;
+}
+
+static int on_update(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    Script::setUpdateCallback(getScript(s));
+    return 0;
+}
+
+static int on_npc_start(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    NPC::setStartCallback(getScript(s));
+    return 0;
+}
+
+static int on_npc_next(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    NPC::setNextCallback(getScript(s));
+    return 0;
+}
+
+static int on_npc_choose(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    NPC::setChooseCallback(getScript(s));
+    return 0;
+}
+
+static int on_npc_integer(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    NPC::setIntegerCallback(getScript(s));
+    return 0;
+}
+
+static int on_npc_string(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    NPC::setStringCallback(getScript(s));
+    return 0;
+}
+
+static int on_npc_update(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    NPC::setUpdateCallback(getScript(s));
+    return 0;
+}
+
+static int on_create_npc_delayed(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    Script::setCreateNpcDelayedCallback(getScript(s));
+    return 0;
+}
+
+static int on_map_initialize(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    MapComposite::setInitializeCallback(getScript(s));
+    return 0;
+}
+
+static int on_craft(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    ScriptManager::setCraftCallback(getScript(s));
+    return 0;
+}
+
+static int on_use_special(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    ScriptManager::setSpecialCallback(getScript(s));
+    return 0;
+}
+
+static int on_get_special_recharge_cost(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    ScriptManager::setGetSpecialRechargeCostCallback(getScript(s));
     return 0;
 }
 
@@ -2622,6 +2707,18 @@ LuaScript::LuaScript():
         { "on_npc_post_reply",               &on_npc_post_reply               },
         { "on_being_death",                  &on_being_death                  },
         { "on_being_remove",                 &on_being_remove                 },
+        { "on_update",                       &on_update                       },
+        { "on_npc_start",                    &on_npc_start                    },
+        { "on_npc_next",                     &on_npc_next                     },
+        { "on_npc_choose",                   &on_npc_choose                   },
+        { "on_npc_integer",                  &on_npc_integer                  },
+        { "on_npc_string",                   &on_npc_string                   },
+        { "on_npc_update",                   &on_npc_update                   },
+        { "on_create_npc_delayed",           &on_create_npc_delayed           },
+        { "on_map_initialize",               &on_map_initialize               },
+        { "on_craft",                        &on_craft                        },
+        { "on_use_special",                  &on_use_special                  },
+        { "on_get_special_recharge_cost",    &on_get_special_recharge_cost    },
         { "npc_create",                      &npc_create                      },
         { "npc_message",                     &npc_message                     },
         { "npc_choice",                      &npc_choice                      },

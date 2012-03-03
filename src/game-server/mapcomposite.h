@@ -26,6 +26,8 @@
 #include <vector>
 #include <map>
 
+#include "scripting/script.h"
+
 class Actor;
 class Being;
 class Character;
@@ -336,6 +338,9 @@ class MapComposite
                                       const std::string &value)
         { mScriptVariables[key] = value; }
 
+        static void setInitializeCallback(Script *script)
+        { script->assignCallback(mInitializeCallback); }
+
     private:
         MapComposite(const MapComposite &);
 
@@ -348,6 +353,8 @@ class MapComposite
         /** Cached persistent variables */
         std::map<std::string, std::string> mScriptVariables;
         PvPRules mPvPRules;
+
+        static Script::Ref mInitializeCallback;
 };
 
 #endif

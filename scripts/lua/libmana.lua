@@ -455,8 +455,19 @@ mana.chr_money = function(ch)
 end
 
 -- Register callbacks
+mana.on_update(update)
+
+mana.on_npc_start(npc_start)
+mana.on_npc_next(npc_next)
+mana.on_npc_choose(npc_choose)
+mana.on_npc_integer(npc_integer)
+mana.on_npc_string(npc_string)
 mana.on_npc_quest_reply(npc_quest_reply)
 mana.on_npc_post_reply(npc_post_reply)
+mana.on_npc_update(npc_update)
+
+mana.on_create_npc_delayed(create_npc_delayed)
+mana.on_map_initialize(initialize)
 
 mana.on_being_death(death_notification)
 mana.on_being_remove(remove_notification)

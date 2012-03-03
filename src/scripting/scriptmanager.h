@@ -60,6 +60,10 @@ void addDataToSpecial(int specialId, Special *special);
 bool performSpecialAction(int specialId, Being *caster);
 bool performCraft(Being *crafter, const std::list<InventoryItem> &recipe);
 
+void setCraftCallback(Script *script);
+void setSpecialCallback(Script *script);
+void setGetSpecialRechargeCostCallback(Script *script);
+
 } // namespace ScriptManager
 
 #endif // SCRIPTMANAGER_H

@@ -22,6 +22,13 @@
 #include "game-server/npc.h"
 #include "scripting/script.h"
 
+Script::Ref NPC::mStartCallback;
+Script::Ref NPC::mNextCallback;
+Script::Ref NPC::mChooseCallback;
+Script::Ref NPC::mIntegerCallback;
+Script::Ref NPC::mStringCallback;
+Script::Ref NPC::mUpdateCallback;
+
 NPC::NPC(const std::string &name, int id, Script *s):
     Being(OBJECT_NPC),
     mScript(s),
@@ -38,16 +45,19 @@ void NPC::enable(bool enabled)
 
 void NPC::update()
 {
-    if (!mScript || !mEnabled) return;
-    mScript->prepare("npc_update");
+    if (!mScript || !mEnabled || !mUpdateCallback.isValid())
+        return;
+    mScript->prepare(mUpdateCallback);
     mScript->push(this);
     mScript->execute();
 }
 
 void NPC::prompt(Character *ch, bool restart)
 {
-    if (!mScript || !mEnabled) return;
-    mScript->prepare(restart ? "npc_start" : "npc_next");
+    if (!mScript || !mEnabled || !mStartCallback.isValid()
+            || !mNextCallback.isValid())
+        return;
+    mScript->prepare(restart ? mStartCallback : mNextCallback);
     mScript->push(this);
     mScript->push(ch);
     mScript->execute();
@@ -55,8 +65,9 @@ void NPC::prompt(Character *ch, bool restart)
 
 void NPC::select(Character *ch, int v)
 {
-    if (!mScript || !mEnabled) return;
-    mScript->prepare("npc_choose");
+    if (!mScript || !mEnabled || !mChooseCallback.isValid())
+        return;
+    mScript->prepare(mChooseCallback);
     mScript->push(this);
     mScript->push(ch);
     mScript->push(v);
@@ -65,8 +76,9 @@ void NPC::select(Character *ch, int v)
 
 void NPC::integerReceived(Character *ch, int v)
 {
-    if (!mScript || !mEnabled) return;
-    mScript->prepare("npc_integer");
+    if (!mScript || !mEnabled || !mIntegerCallback.isValid())
+        return;
+    mScript->prepare(mIntegerCallback);
     mScript->push(this);
     mScript->push(ch);
     mScript->push(v);
@@ -75,8 +87,9 @@ void NPC::integerReceived(Character *ch, int v)
 
 void NPC::stringReceived(Character *ch, const std::string &v)
 {
-    if (!mScript || !mEnabled) return;
-    mScript->prepare("npc_string");
+    if (!mScript || !mEnabled || !mStringCallback.isValid())
+        return;
+    mScript->prepare(mStringCallback);
     mScript->push(this);
     mScript->push(ch);
     mScript->push(v);

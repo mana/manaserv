@@ -85,3 +85,5 @@ function make_condensed_and_sorted_item_list(recipe)
     
     return sorted
 end
+
+mana.on_craft(on_craft)
