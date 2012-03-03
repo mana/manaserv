@@ -150,10 +150,16 @@ typedef LuaUserData<MonsterClass> LuaMonsterClass;
 typedef LuaUserData<StatusEffect> LuaStatusEffect;
 
 
-NPC *getNPC(lua_State *s, int p);
-Character *getCharacter(lua_State *s, int p);
-Monster *getMonster(lua_State *s, int p);
-Being *getBeing(lua_State *s, int p);
+Being *         getBeing(lua_State *s, int p);
+Character *     getCharacter(lua_State *s, int p);
+ItemClass *     getItemClass(lua_State *s, int p);
+Monster *       getMonster(lua_State *s, int p);
+MonsterClass *  getMonsterClass(lua_State *s, int p);
+NPC *           getNPC(lua_State *s, int p);
+
+ItemClass *     checkItemClass(lua_State *s, int p);
+MonsterClass *  checkMonsterClass(lua_State *s, int p);
+
 
 /* Polymorphic wrapper for pushing variables.
    Useful for templates.*/

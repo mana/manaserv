@@ -214,15 +214,13 @@ static int on_get_special_recharge_cost(lua_State *s)
 
 static int get_item_class(lua_State *s)
 {
-    const char *name = luaL_checkstring(s, 1);
-    LuaItemClass::push(s, itemManager->getItemByName(name));
+    LuaItemClass::push(s, checkItemClass(s, 1));
     return 1;
 }
 
 static int get_monster_class(lua_State *s)
 {
-    const char *name = luaL_checkstring(s, 1);
-    LuaMonsterClass::push(s, monsterManager->getMonsterByName(name));
+    LuaMonsterClass::push(s, checkMonsterClass(s, 1));
     return 1;
 }
 
@@ -683,30 +681,8 @@ static int chr_inv_change(lua_State *s)
         }
 
         int nb = lua_tointeger(s, i * 2 + 3);
-        ItemClass *ic;
-        int id;
-        if (lua_isnumber(s, i * 2 + 2))
-        {
-            int id = lua_tointeger(s, i * 2 + 2);
-            if (id == 0)
-            {
-                LOG_WARN("chr_inv_change called with id 0! "
-                         "Currency is now handled through attributes!");
-                continue;
-            }
-            ic = itemManager->getItem(id);
-        }
-        else
-        {
-            ic = itemManager->getItemByName(lua_tostring(s, i * 2 + 2));
-        }
-
-        if (!ic)
-        {
-            raiseScriptError(s, "chr_inv_change called with an unknown item.");
-            continue;
-        }
-        id = ic->getDatabaseID();
+        ItemClass *ic = checkItemClass(s, i * 2 + 2);
+        int id = ic->getDatabaseID();
         if (nb < 0)
         {
             // Removing too much item is a success as for the scripter's
@@ -755,33 +731,12 @@ static int chr_inv_count(lua_State *s)
     int nb_items = lua_gettop(s) - 3;
     Inventory inv(q);
 
-    int id, nb = 0;
+    int nb = 0;
     for (int i = 4; i < nb_items + 4; ++i)
     {
-        ItemClass *it;
-        if (lua_isnumber(s, i))
-            it = itemManager->getItem(lua_tointeger(s, i));
-        else
-            it = itemManager->getItemByName(lua_tostring(s, i));
-
-        if (!it)
-        {
-            raiseScriptError(s, "chr_inv_count called with invalid "
-                             "item id or name.");
-            return 0;
-        }
-        id = it->getDatabaseID();
-        if (id == 0)
-        {
-            LOG_WARN("chr_inv_count called with id 0! "
-                     "Currency is now handled through attributes!");
-            lua_pushinteger(s, 0);
-        }
-        else
-        {
-            nb = inv.count(id, inInventory, inEquipment);
-            lua_pushinteger(s, nb);
-        }
+        ItemClass *it = checkItemClass(s, i);
+        nb = inv.count(it->getDatabaseID(), inInventory, inEquipment);
+        lua_pushinteger(s, nb);
     }
     return nb_items;
 }
@@ -814,28 +769,6 @@ static int chr_equip_slot(lua_State *s)
  */
 static int chr_equip_item(lua_State *s)
 {
-    // Get the itemId
-    ItemClass *it;
-    if (lua_isnumber(s, 2))
-        it = itemManager->getItem(lua_tointeger(s, 2));
-    else
-        it = itemManager->getItemByName(lua_tostring(s, 2));
-
-    if (!it)
-    {
-        raiseScriptError(s, "chr_equip_item called with invalid "
-                         "item id or name.");
-        return 0;
-    }
-    unsigned int id = it->getDatabaseID();
-    if (!id)
-    {
-        LOG_WARN("chr_equip_item called with id 0! "
-                 "Currency is now handled through attributes!");
-        lua_pushboolean(s, false);
-        return 1;
-    }
-
     Character *ch = getCharacter(s, 1);
     if (!ch)
     {
@@ -843,9 +776,12 @@ static int chr_equip_item(lua_State *s)
                          "called for nonexistent character.");
         return 0;
     }
+
+    ItemClass *it = checkItemClass(s, 2);
+
     Inventory inv(ch);
 
-    int inventorySlot = inv.getFirstSlot(id);
+    int inventorySlot = inv.getFirstSlot(it->getDatabaseID());
     bool success = false;
 
     if (inventorySlot > -1)
@@ -884,28 +820,6 @@ static int chr_unequip_slot(lua_State *s)
  */
 static int chr_unequip_item(lua_State *s)
 {
-    // Get the itemId
-    ItemClass *it;
-    if (lua_isnumber(s, 2))
-        it = itemManager->getItem(lua_tointeger(s, 2));
-    else
-        it = itemManager->getItemByName(lua_tostring(s, 2));
-
-    if (!it)
-    {
-        raiseScriptError(s, "chr_unequip_item called with invalid "
-                         "item id or name.");
-        return 0;
-    }
-    unsigned int id = it->getDatabaseID();
-    if (!id)
-    {
-        LOG_WARN("chr_unequip_item called with id 0! "
-                 "Currency is now handled through attributes!");
-        lua_pushboolean(s, false);
-        return 1;
-    }
-
     Character *ch = getCharacter(s, 1);
     if (!ch)
     {
@@ -913,8 +827,11 @@ static int chr_unequip_item(lua_State *s)
                          "called for nonexistent character.");
         return 0;
     }
+
+    ItemClass *it = checkItemClass(s, 2);
+
     Inventory inv(ch);
-    lua_pushboolean(s, inv.unequipItem(id));
+    lua_pushboolean(s, inv.unequipItem(it->getDatabaseID()));
     return 1;
 }
 
@@ -973,13 +890,13 @@ static int npc_trade(lua_State *s)
 
             if (t->start(p))
             {
-              lua_pushinteger(s, 0);
-              return 1;
+                lua_pushinteger(s, 0);
+                return 1;
             }
             else
             {
-              lua_pushinteger(s, 1);
-              return 1;
+                lua_pushinteger(s, 1);
+                return 1;
             }
         }
         else
@@ -1012,11 +929,7 @@ static int npc_trade(lua_State *s)
             lua_rawgeti(s, -1, i + 1);
             if (i == 0) // item id or name
             {
-                ItemClass *it;
-                if (lua_isnumber(s, -1))
-                    it = itemManager->getItem(lua_tointeger(s, -1));
-                else
-                    it = itemManager->getItemByName(lua_tostring(s, -1));
+                ItemClass *it = getItemClass(s, -1);
 
                 if (!it)
                 {
@@ -1055,13 +968,13 @@ static int npc_trade(lua_State *s)
     }
     if (t->start(p))
     {
-      lua_pushinteger(s, 0);
-      return 1;
+        lua_pushinteger(s, 0);
+        return 1;
     }
     else
     {
-      lua_pushinteger(s, 1);
-      return 1;
+        lua_pushinteger(s, 1);
+        return 1;
     }
 }
 
@@ -1553,6 +1466,7 @@ static int monster_class_on(lua_State *s)
  */
 static int monster_create(lua_State *s)
 {
+    MonsterClass *monsterClass = checkMonsterClass(s, 1);
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
@@ -1563,34 +1477,7 @@ static int monster_create(lua_State *s)
         return 0;
     }
 
-    MonsterClass *spec;
-    if (lua_isnumber(s, 1))
-    {
-        int monsterId = luaL_checkint(s, 1);
-        spec = monsterManager->getMonster(monsterId);
-        if (!spec)
-        {
-            raiseScriptError(s, "monster_create called with invalid "
-                             "monster ID: %d", monsterId);
-            //LOG_WARN("LuaMonster_Create invalid monster ID: " << monsterId);
-            return 0;
-        }
-    }
-    else
-    {
-        std::string monsterName = lua_tostring(s, 1);
-        spec = monsterManager->getMonsterByName(monsterName);
-        if (!spec)
-        {
-            raiseScriptError(s, "monster_create called with "
-                             "invalid monster name: %s", monsterName.c_str());
-            //LOG_WARN("LuaMonster_Create invalid monster name: "
-            // << monsterName);
-            return 0;
-         }
-    }
-
-    Monster *q = new Monster(spec);
+    Monster *q = new Monster(monsterClass);
     q->setMap(m);
     q->setPosition(Point(x, y));
     GameState::enqueueInsert(q);
@@ -2484,22 +2371,12 @@ static int item_drop(lua_State *s)
 {
     const int x = luaL_checkint(s, 1);
     const int y = luaL_checkint(s, 2);
+    ItemClass *ic = checkItemClass(s, 3);
     const int number = luaL_optint(s, 4, 1);
 
-    ItemClass *ic;
-    if (lua_isnumber(s, 3))
-        ic = itemManager->getItem(lua_tointeger(s, 3));
-    else
-        ic = itemManager->getItemByName(lua_tostring(s, 3));
-
-    if (!ic)
-    {
-        raiseScriptError(s, "item_drop called with unknown item id or name.");
-        return 0;
-    }
     Item *i = new Item(ic, number);
 
-    MapComposite* map = getScript(s)->getMap();
+    MapComposite *map = getScript(s)->getMap();
 
     i->setMap(map);
     Point pos(x, y);

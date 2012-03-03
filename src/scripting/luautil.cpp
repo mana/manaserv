@@ -22,8 +22,10 @@
 #include "luautil.h"
 
 #include "game-server/character.h"
-#include "game-server/npc.h"
+#include "game-server/itemmanager.h"
 #include "game-server/monster.h"
+#include "game-server/monstermanager.h"
+#include "game-server/npc.h"
 
 #include "utils/logger.h"
 
@@ -118,14 +120,12 @@ void UserDataCache::insert(lua_State *s, void *object)
    valid in the map.
    TODO: do it. */
 
-NPC *getNPC(lua_State *s, int p)
+Being *getBeing(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    if (t->getType() != OBJECT_NPC)
-        return 0;
-    return static_cast<NPC *>(t);
+    return static_cast<Being *>(t);
 }
 
 Character *getCharacter(lua_State *s, int p)
@@ -138,6 +138,26 @@ Character *getCharacter(lua_State *s, int p)
     return static_cast<Character *>(t);
 }
 
+ItemClass *getItemClass(lua_State *s, int p)
+{
+    ItemClass *itemClass = 0;
+
+    switch (lua_type(s, p))
+    {
+    case LUA_TNUMBER:
+        itemClass = itemManager->getItem(lua_tointeger(s, p));
+        break;
+    case LUA_TSTRING:
+        itemClass = itemManager->getItemByName(lua_tostring(s, p));
+        break;
+    case LUA_TUSERDATA:
+        itemClass = LuaItemClass::check(s, p);
+        break;
+    }
+
+    return itemClass;
+}
+
 Monster *getMonster(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
@@ -148,13 +168,55 @@ Monster *getMonster(lua_State *s, int p)
     return static_cast<Monster *>(t);
 }
 
-Being *getBeing(lua_State *s, int p)
+MonsterClass *getMonsterClass(lua_State *s, int p)
+{
+    MonsterClass *monsterClass = 0;
+
+    switch (lua_type(s, p))
+    {
+    case LUA_TNUMBER:
+        monsterClass = monsterManager->getMonster(lua_tointeger(s, p));
+        break;
+    case LUA_TSTRING:
+        monsterClass = monsterManager->getMonsterByName(lua_tostring(s, p));
+        break;
+    case LUA_TUSERDATA:
+        monsterClass = LuaMonsterClass::check(s, p);
+        break;
+    }
+
+    return monsterClass;
+}
+
+NPC *getNPC(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    return static_cast<Being *>(t);
+    if (t->getType() != OBJECT_NPC)
+        return 0;
+    return static_cast<NPC *>(t);
 }
+
+
+ItemClass *checkItemClass(lua_State *s, int p)
+{
+    ItemClass *itemClass = getItemClass(s, p);
+    if (!itemClass)
+        luaL_argerror(s, p, "invalid item type parameter");
+
+    return itemClass;
+}
+
+MonsterClass *checkMonsterClass(lua_State *s, int p)
+{
+    MonsterClass *monsterClass = getMonsterClass(s, p);
+    if (!monsterClass)
+        luaL_argerror(s, p, "invalid monster type parameter");
+
+    return monsterClass;
+}
+
 
 void push(lua_State *s, int val)
 {
