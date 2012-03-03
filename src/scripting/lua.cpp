@@ -1681,10 +1681,10 @@ static int chr_set_quest(lua_State *s)
 }
 
 /**
- * mana.trigger_create(int x, int y, int width, int height,
- *                     string function, int id)
- * Creates a trigger area. Whenever an actor enters this area, a Lua function
- * is called.
+ * mana.trigger_create(int x, int y, int width, int height, function, int id,
+ *                     boolean once)
+ * Creates a trigger area. Whenever an actor enters this area, the given Lua
+ * function is called.
  */
 static int trigger_create(lua_State *s)
 {
@@ -1692,8 +1692,7 @@ static int trigger_create(lua_State *s)
     const int y = luaL_checkint(s, 2);
     const int width = luaL_checkint(s, 3);
     const int height = luaL_checkint(s, 4);
-    //TODO: Turn the function string to a lua function pointer
-    const char *function = luaL_checkstring(s, 5);
+    luaL_checktype(s, 5, LUA_TFUNCTION);
     const int id = luaL_checkint(s, 6);
 
     if (!lua_isboolean(s, 7))
@@ -1703,12 +1702,6 @@ static int trigger_create(lua_State *s)
     }
 
     Script *script = getScript(s);
-    bool once = lua_toboolean(s, 7);
-
-    LOG_INFO("Created script trigger at " << x << ":" << y
-             << " (" << width << "x" << height << ") function: " << function
-             << " (" << id << ")");
-
     MapComposite *m = script->getMap();
 
     if (!m)
@@ -1717,9 +1710,19 @@ static int trigger_create(lua_State *s)
         return 0;
     }
 
+    const bool once = lua_toboolean(s, 7);
+
+    Script::Ref function;
+    lua_pushvalue(s, 5);
+    script->assignCallback(function);
+    lua_pop(s, 1);
+
     ScriptAction *action = new ScriptAction(script, function, id);
     Rectangle r = { x, y, width, height };
     TriggerArea *area = new TriggerArea(m, r, action, once);
+
+    LOG_INFO("Created script trigger at " << x << "," << y
+             << " (" << width << "x" << height << ") id: " << id);
 
     bool ret = GameState::insert(area);
     lua_pushboolean(s, ret);

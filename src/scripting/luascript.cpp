@@ -47,15 +47,6 @@ void LuaScript::prepare(Ref function)
     lua_rawgeti(mState, LUA_REGISTRYINDEX, function.value);
     assert(lua_isfunction(mState, -1));
     nbArgs = 0;
-    mCurFunction = "<callback>"; // We don't know the function name
-}
-
-void LuaScript::prepare(const std::string &name)
-{
-    assert(nbArgs == -1);
-    lua_getglobal(mState, name.c_str());
-    nbArgs = 0;
-    mCurFunction = name;
 }
 
 void LuaScript::push(int v)
@@ -112,7 +103,6 @@ int LuaScript::execute()
 
         LOG_WARN("Lua Script Error" << std::endl
                  << "     Script  : " << mScriptFile << std::endl
-                 << "     Function: " << mCurFunction << std::endl
                  << "     Error   : " << (s ? s : "") << std::endl);
         lua_pop(mState, 1);
         return 0;
@@ -120,7 +110,6 @@ int LuaScript::execute()
     res = lua_tointeger(mState, -1);
     lua_pop(mState, 1);
     return res;
-    mCurFunction.clear();
 }
 
 void LuaScript::assignCallback(Script::Ref &function)

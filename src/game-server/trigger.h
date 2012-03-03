@@ -50,14 +50,13 @@ class WarpAction : public TriggerAction
 class ScriptAction : public TriggerAction
 {
     public:
-        ScriptAction(Script *script, const std::string &function, int arg)
-          : mScript(script), mFunction(function), mArg(arg) {}
+        ScriptAction(Script *script, Script::Ref callback, int arg);
 
         virtual void process(Actor *obj);
 
     private:
         Script *mScript;        // Script object to be called
-        std::string mFunction;  // Name of the function called in the script object
+        Script::Ref mCallback;  // Reference to the function to call
         int mArg;               // Argument passed to script function (meaning is function-specific)
 };
 

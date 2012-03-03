@@ -102,12 +102,6 @@ class Script
         virtual void prepare(Ref function) = 0;
 
         /**
-         * Prepares a call to the given function.
-         * Only one function can be prepared at once.
-         */
-        virtual void prepare(const std::string &name) = 0;
-
-        /**
          * Pushes an integer argument for the function being prepared.
          */
         virtual void push(int) = 0;

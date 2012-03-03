@@ -27,6 +27,8 @@
 
 #include "utils/logger.h"
 
+#include <cassert>
+
 void WarpAction::process(Actor *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
@@ -35,13 +37,20 @@ void WarpAction::process(Actor *obj)
     }
 }
 
+ScriptAction::ScriptAction(Script *script, Script::Ref callback, int arg) :
+    mScript(script),
+    mCallback(callback),
+    mArg(arg)
+{
+    assert(mCallback.isValid());
+}
+
 void ScriptAction::process(Actor *obj)
 {
-    LOG_DEBUG("Script trigger area activated: " << mFunction
+    LOG_DEBUG("Script trigger area activated: "
               << "(" << obj << ", " << mArg << ")");
-    if (!mScript || mFunction.empty())
-        return;
-    mScript->prepare(mFunction);
+
+    mScript->prepare(mCallback);
     mScript->push(obj);
     mScript->push(mArg);
     mScript->execute();

@@ -46,8 +46,6 @@ class LuaScript : public Script
 
         void prepare(Ref function);
 
-        void prepare(const std::string &);
-
         void push(int);
 
         void push(const std::string &);
@@ -86,7 +84,6 @@ class LuaScript : public Script
     private:
         lua_State *mState;
         int nbArgs;
-        std::string mCurFunction;
 
         static Ref mQuestReplyCallback;
         static Ref mPostReplyCallback;
