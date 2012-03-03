@@ -13,7 +13,7 @@ specialCost[1] = 50
 specialCost[2] = 250
 specialCost[3] = 1000
 
-function use_special(ch, id)
+local function use_special(ch, id)
     -- perform whatever the special with the ID does
     if id == 1 then
         mana.being_say(ch, "Kaaame...Haaame... HAAAAAA!")
@@ -26,7 +26,7 @@ function use_special(ch, id)
     end
 end
 
-function get_special_recharge_cost(id)
+local function get_special_recharge_cost(id)
     -- return the recharge cost for the special with the ID
     return specialCost[id]
 end

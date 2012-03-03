@@ -171,9 +171,9 @@ local function process_npc(w, ...)
   return true
 end
 
--- Called by the game whenever a player starts talking to an NPC.
--- Creates a coroutine based on the registered NPC handler.
-function npc_start(npc, ch)
+-- Registered as the function to call whenever a player starts talking to an
+-- NPC. Creates a coroutine based on the registered NPC handler.
+local function npc_start(npc, ch)
   states[ch] = nil
   local h = npc_talk_functs[npc]
   if not h then return end
@@ -192,9 +192,9 @@ function do_npc_close(npc, ch)
     mana.npc_end(npc, ch)
 end
 
--- Called by the game whenever a player keeps talking to an NPC.
--- Checks that the NPC expects it, and processes the respective coroutine.
-function npc_next(npc, ch)
+-- Registered as the function to call whenever a player continues talking to an
+-- NPC. Checks that the NPC expects it, and processes the respective coroutine.
+local function npc_next(npc, ch)
   local w = states[ch]
   if w then
     local w3 = w[3]
@@ -208,23 +208,24 @@ function npc_next(npc, ch)
   states[ch] = nil
 end
 
--- Called by the game whenever a player selects a particular reply.
--- Checks that the NPC expects it, and processes the respective coroutine.
-function npc_choose(npc, ch, u)
+-- Registered as the function to call whenever a player selects a particular
+-- reply. Checks that the NPC expects it, and processes the respective
+-- coroutine.
+local function npc_choose(npc, ch, u)
   local w = states[ch]
   if not (w and w[1] == npc and w[3] == 2 and process_npc(w, u)) then
     states[ch] = nil
   end
 end
 
-function npc_integer(npc, ch, u)
+local function npc_integer(npc, ch, u)
   local w = states[ch]
   if not (w and w[1] == npc and w[3] == 2 and process_npc(w, u)) then
     states[ch] = nil
   end
 end
 
-function npc_string(npc, ch, u)
+local function npc_string(npc, ch, u)
   local w = states[ch]
   if not (w and w[1] == npc and w[3] == 2 and process_npc(w, u)) then
     states[ch] = nil
@@ -232,7 +233,8 @@ function npc_string(npc, ch, u)
 end
 
 -- Called by the game when a player sends a letter.
-function npc_post(npc, ch, sender, letter)
+-- TODO: Actually this function isn't called, probably unfinished implementation
+local function npc_post(npc, ch, sender, letter)
   local w = states[ch]
   if not (w and w[1] == npc and w[3] == 1 and process_npc(w, sender, letter)) then
     states[ch] = nil
@@ -272,16 +274,40 @@ local function npc_post_reply(ch, sender, letter)
   states[ch] = nil
 end
 
--- Called by the game every tick for each NPC.
-function npc_update(npc)
+-- Registered as the function to call every tick for each NPC.
+local function npc_update(npc)
   local h = npc_update_functs[npc];
   if h then h(npc) end;
 end
 
--- Called by the game every tick.
--- Checks for scheduled function calls
--- Cleans obsolete connections.
-function update()
+-- Table of scheduled jobs. A job is an array with 3 elements:
+-- 0: the UNIX timestamp when it is executed
+-- 1: the function which is executed
+-- 2: nil when it is a one-time job. Repetition interval is seconds when it is
+--    a repeated job.
+local scheduler_jobs = {}
+
+-- checks for jobs which have to be executed, executes them and reschedules
+-- them when they are repeated jobs.
+local function check_schedule()
+  local current_time = os.time()
+
+  while #scheduler_jobs~=0 and current_time > scheduler_jobs[#scheduler_jobs][0] do
+    -- retreive the job and remove it from the schedule
+    job = scheduler_jobs[#scheduler_jobs]
+    table.remove(scheduler_jobs)
+    -- reschedule the job when it is a repeated job
+    if job[2] then
+        schedule_every(job[2], job[1])
+    end
+    -- execute the job
+    job[1]()
+  end
+end
+
+-- Registered as the function to call every tick.
+-- Checks for scheduled function calls and cleans obsolete connections.
+local function update()
   -- check the scheduler
   check_schedule()
 
@@ -314,7 +340,7 @@ end
 -- Called by the game for creating NPCs embedded into maps.
 -- Delays the creation until map initialization is performed.
 -- Note: Assumes that the "npc_handler" global field contains the NPC handler.
-function create_npc_delayed(name, id, x, y)
+local function create_npc_delayed(name, id, x, y)
   -- Bind the name to a local variable first, as it will be reused.
   local h = npc_handler
   atinit(function() create_npc(name, id, x, y, h, nil) end)
@@ -323,7 +349,7 @@ end
 
 -- Called during map initialization, for each map.
 -- Executes all the functions registered by atinit.
-function initialize()
+local function map_initialize()
   for i,f in ipairs(init_fun) do
     f()
   end
@@ -333,35 +359,10 @@ end
 
 -- SCHEDULER
 
--- Table of scheduled jobs. A job is an array with 3 elements:
--- 0: the UNIX timestamp when it is executed
--- 1: the function which is executed
--- 2: nil when it is a one-time job. Repetition interval is seconds when it is
---    a repeated job.
-local scheduler_jobs = {}
-
 -- compare function used to sort the scheduler_jobs table.
 -- the jobs which come first are at the end of the table.
 local function job_cmp(job1, job2)
   return (job1[0] > job2[0])
-end
-
--- checks for jobs which have to be executed, executes them and reschedules
--- them when they are repeated jobs.
-function check_schedule()
-  local current_time = os.time()
-
-  while #scheduler_jobs~=0 and current_time > scheduler_jobs[#scheduler_jobs][0] do
-    -- retreive the job and remove it from the schedule
-    job = scheduler_jobs[#scheduler_jobs]
-    table.remove(scheduler_jobs)
-    -- reschedule the job when it is a repeated job
-    if job[2] then
-        schedule_every(job[2], job[1])
-    end
-    -- execute the job
-    job[1]()
-  end
 end
 
 -- schedules a function call to be executed once in n seconds
@@ -467,7 +468,7 @@ mana.on_npc_post_reply(npc_post_reply)
 mana.on_npc_update(npc_update)
 
 mana.on_create_npc_delayed(create_npc_delayed)
-mana.on_map_initialize(initialize)
+mana.on_map_initialize(map_initialize)
 
 mana.on_being_death(death_notification)
 mana.on_being_remove(remove_notification)
