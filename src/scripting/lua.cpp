@@ -237,15 +237,11 @@ static int get_status_effect(lua_State *s)
  */
 static int npc_message(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
+    NPC *p = checkNPC(s, 1);
+    Character *q = checkCharacter(s, 2);
     size_t l;
     const char *m = luaL_checklstring(s, 3, &l);
-    if (!p || !q)
-    {
-        raiseScriptError(s, "npc_message called with incorrect parameters.");
-        return 0;
-    }
+
     MessageOut msg(GPMSG_NPC_MESSAGE);
     msg.writeInt16(p->getPublicID());
     msg.writeString(m, l);
@@ -259,13 +255,9 @@ static int npc_message(lua_State *s)
  */
 static int npc_choice(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
-    if (!p || !q)
-    {
-        raiseScriptError(s, "npc_choice called with incorrect parameters.");
-        return 0;
-    }
+    NPC *p = checkNPC(s, 1);
+    Character *q = checkCharacter(s, 2);
+
     MessageOut msg(GPMSG_NPC_CHOICE);
     msg.writeInt16(p->getPublicID());
     for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
@@ -277,7 +269,8 @@ static int npc_choice(lua_State *s)
         else if (lua_istable(s, i))
         {
             lua_pushnil(s);
-            while (lua_next(s, i) != 0) {
+            while (lua_next(s, i) != 0)
+            {
                 if (lua_isstring(s, -1))
                 {
                     msg.writeString(lua_tostring(s, -1));
@@ -307,26 +300,17 @@ static int npc_choice(lua_State *s)
  */
 static int npc_ask_integer(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
-    if (!p || !q)
-    {
-        raiseScriptError(s, "npc_ask_integer called "
-                         "with incorrect parameters.");
-        return 0;
-    }
+    NPC *p = checkNPC(s, 1);
+    Character *q = checkCharacter(s, 2);
+    int min = luaL_checkint(s, 3);
+    int max = luaL_checkint(s, 4);
+    int defaultValue = luaL_optint(s, 5, min);
+
     MessageOut msg(GPMSG_NPC_NUMBER);
     msg.writeInt16(p->getPublicID());
-
-    int min = lua_tointeger(s, 3);
-    int max = lua_tointeger(s, 4);
-    int default_num = min;
-    if (lua_gettop(s) == 5)
-        default_num = lua_tointeger(s, 5);
-
     msg.writeInt32(min);
     msg.writeInt32(max);
-    msg.writeInt32(default_num);
+    msg.writeInt32(defaultValue);
     gameHandler->sendTo(q, msg);
 
     return 0;
@@ -338,13 +322,9 @@ static int npc_ask_integer(lua_State *s)
  */
 static int npc_ask_string(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
-    if (!p || !q)
-    {
-        raiseScriptError(s, "npc_ask_string called with incorrect parameters.");
-        return 0;
-    }
+    NPC *p = checkNPC(s, 1);
+    Character *q = checkCharacter(s, 2);
+
     MessageOut msg(GPMSG_NPC_STRING);
     msg.writeInt16(p->getPublicID());
     gameHandler->sendTo(q, msg);
@@ -387,13 +367,8 @@ static int npc_create(lua_State *s)
  */
 static int npc_end(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
-    if (!p || !q)
-    {
-        raiseScriptError(s, "npc_end called with incorrect parameters.");
-        return 0;
-    }
+    NPC *p = checkNPC(s, 1);
+    Character *q = checkCharacter(s, 2);
 
     MessageOut msg(GPMSG_NPC_CLOSE);
     msg.writeInt16(p->getPublicID());
@@ -407,14 +382,8 @@ static int npc_end(lua_State *s)
  */
 static int npc_post(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
-
-    if (!p || !q)
-    {
-        raiseScriptError(s, "npc_post called with incorrect parameters.");
-        return 0;
-    }
+    NPC *p = checkNPC(s, 1);
+    Character *q = checkCharacter(s, 2);
 
     MessageOut msg(GPMSG_NPC_POST);
     msg.writeInt16(p->getPublicID());
@@ -429,13 +398,9 @@ static int npc_post(lua_State *s)
  */
 static int npc_enable(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    if (p)
-    {
-        p->enable(true);
-        GameState::enqueueInsert(p);
-    }
-
+    NPC *p = checkNPC(s, 1);
+    p->enable(true);
+    GameState::enqueueInsert(p);
     return 0;
 }
 
@@ -445,13 +410,9 @@ static int npc_enable(lua_State *s)
  */
 static int npc_disable(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    if (p)
-    {
-        p->enable(false);
-        GameState::remove(p);
-    }
-
+    NPC *p = checkNPC(s, 1);
+    p->enable(false);
+    GameState::remove(p);
     return 0;
 }
 
@@ -461,12 +422,12 @@ static int npc_disable(lua_State *s)
  */
 static int chr_warp(lua_State *s)
 {
+    Character *q = checkCharacter(s, 1);
     int x = luaL_checkint(s, 3);
     int y = luaL_checkint(s, 4);
 
-    Character *q = getCharacter(s, 1);
     bool b = lua_isnil(s, 2);
-    if (!q || !(b || lua_isnumber(s, 2) || lua_isstring(s, 2)))
+    if (!(b || lua_isnumber(s, 2) || lua_isstring(s, 2)))
     {
         raiseScriptError(s, "chr_warp called with incorrect parameters.");
         return 0;
@@ -523,13 +484,7 @@ static int chr_warp(lua_State *s)
  */
 static int chr_get_inventory(lua_State *s)
 {
-    Character *q = getCharacter(s, 1);
-    if (!q)
-    {
-        raiseScriptError(s, "chr_get_inventory"
-                         " called with incorrect parameters.");
-        return 0;
-    }
+    Character *q = checkCharacter(s, 1);
 
     // Create a lua table with the inventory ids.
     const InventoryData invData = q->getPossessions().getInventory();
@@ -545,8 +500,6 @@ static int chr_get_inventory(lua_State *s)
     {
         if (!it->second.itemId || !it->second.amount)
             continue;
-
-        lua_pushinteger(s, tableIndex);
 
         // Create the sub-table (value of the main one)
         lua_createtable(s, 0, 4);
@@ -570,7 +523,7 @@ static int chr_get_inventory(lua_State *s)
         lua_settable(s, subTableStackPosition);
 
         // Add the sub-table as value of the main one.
-        lua_settable(s, firstTableStackPosition);
+        lua_rawseti(s, firstTableStackPosition, tableIndex);
         ++tableIndex;
     }
 
@@ -590,13 +543,7 @@ static int chr_get_inventory(lua_State *s)
  */
 static int chr_get_equipment(lua_State *s)
 {
-    Character *q = getCharacter(s, 1);
-    if (!q)
-    {
-        raiseScriptError(s, "chr_get_equipment"
-                         " called with incorrect parameters.");
-        return 0;
-    }
+    Character *q = checkCharacter(s, 1);
 
     // Create a lua table with the inventory ids.
     const EquipData equipData = q->getPossessions().getEquipment();
@@ -605,7 +552,7 @@ static int chr_get_equipment(lua_State *s)
     int firstTableStackPosition = lua_gettop(s);
     int tableIndex = 1;
 
-    std::string itemName = "";
+    std::string itemName;
     std::set<unsigned> itemInstances;
 
     for (EquipData::const_iterator it = equipData.begin(),
@@ -617,8 +564,6 @@ static int chr_get_equipment(lua_State *s)
         // Only count multi-slot items once.
         if (!itemInstances.insert(it->second.itemInstance).second)
             continue;
-
-        lua_pushinteger(s, tableIndex);
 
         // Create the sub-table (value of the main one)
         lua_createtable(s, 0, 3);
@@ -638,7 +583,7 @@ static int chr_get_equipment(lua_State *s)
         lua_settable(s, subTableStackPosition);
 
         // Add the sub-table as value of the main one.
-        lua_settable(s, firstTableStackPosition);
+        lua_rawseti(s, firstTableStackPosition, tableIndex);
         ++tableIndex;
     }
 
@@ -662,12 +607,7 @@ static int chr_get_equipment(lua_State *s)
  */
 static int chr_inv_change(lua_State *s)
 {
-    Character *q = getCharacter(s, 1);
-    if (!q)
-    {
-        raiseScriptError(s, "chr_inv_change called with incorrect parameters.");
-        return 0;
-    }
+    Character *q = checkCharacter(s, 1);
     int nb_items = (lua_gettop(s) - 1) / 2;
     Inventory inv(q);
     for (int i = 0; i < nb_items; ++i)
@@ -718,8 +658,8 @@ static int chr_inv_change(lua_State *s)
  */
 static int chr_inv_count(lua_State *s)
 {
-    Character *q = getCharacter(s, 1);
-    if (!q || !lua_isboolean(s, 2) || !lua_isboolean(s, 3))
+    Character *q = checkCharacter(s, 1);
+    if (!lua_isboolean(s, 2) || !lua_isboolean(s, 3))
     {
         raiseScriptError(s, "chr_inv_count called with incorrect parameters.");
         return 0;
@@ -747,17 +687,10 @@ static int chr_inv_count(lua_State *s)
  */
 static int chr_equip_slot(lua_State *s)
 {
+    Character *ch = checkCharacter(s, 1);
     int inventorySlot = luaL_checkint(s, 2);
 
-    Character *ch = getCharacter(s, 1);
-    if (!ch)
-    {
-        raiseScriptError(s, "chr_equip_slot "
-                         "called for nonexistent character.");
-        return 0;
-    }
     Inventory inv(ch);
-
     lua_pushboolean(s, inv.equip(inventorySlot));
     return 1;
 }
@@ -769,14 +702,7 @@ static int chr_equip_slot(lua_State *s)
  */
 static int chr_equip_item(lua_State *s)
 {
-    Character *ch = getCharacter(s, 1);
-    if (!ch)
-    {
-        raiseScriptError(s, "chr_equip_item "
-                         "called for nonexistent character.");
-        return 0;
-    }
-
+    Character *ch = checkCharacter(s, 1);
     ItemClass *it = checkItemClass(s, 2);
 
     Inventory inv(ch);
@@ -797,15 +723,9 @@ static int chr_equip_item(lua_State *s)
  */
 static int chr_unequip_slot(lua_State *s)
 {
+    Character *ch = checkCharacter(s, 1);
     int equipmentSlot = luaL_checkint(s, 2);
 
-    Character *ch = getCharacter(s, 1);
-    if (!ch)
-    {
-        raiseScriptError(s, "chr_unequip_slot "
-                         "called for nonexistent character.");
-        return 0;
-    }
     Inventory inv(ch);
 
     lua_pushboolean(s, inv.unequip(inv.getSlotItemInstance(equipmentSlot)));
@@ -820,14 +740,7 @@ static int chr_unequip_slot(lua_State *s)
  */
 static int chr_unequip_item(lua_State *s)
 {
-    Character *ch = getCharacter(s, 1);
-    if (!ch)
-    {
-        raiseScriptError(s, "chr_unequip_item "
-                         "called for nonexistent character.");
-        return 0;
-    }
-
+    Character *ch = checkCharacter(s, 1);
     ItemClass *it = checkItemClass(s, 2);
 
     Inventory inv(ch);
@@ -841,14 +754,7 @@ static int chr_unequip_item(lua_State *s)
  */
 static int chr_get_level(lua_State *s)
 {
-    Character *ch = getCharacter(s, 1);
-    if (!ch)
-    {
-        raiseScriptError(s, "chr_get_level "
-                         "called for nonexistent character.");
-        return 0;
-    }
-
+    Character *ch = checkCharacter(s, 1);
     lua_pushinteger(s, ch->getLevel());
     return 1;
 }
@@ -864,9 +770,9 @@ static int chr_get_level(lua_State *s)
  */
 static int npc_trade(lua_State *s)
 {
-    NPC *p = getNPC(s, 1);
-    Character *q = getCharacter(s, 2);
-    if (!p || !q || !lua_isboolean(s, 3))
+    NPC *p = checkNPC(s, 1);
+    Character *q = checkCharacter(s, 2);
+    if (!lua_isboolean(s, 3))
     {
         raiseWarning(s, "npc_trade called with incorrect parameters.");
         lua_pushinteger(s, 2); // return value
@@ -984,16 +890,10 @@ static int npc_trade(lua_State *s)
  */
 static int being_apply_status(lua_State *s)
 {
+    Being *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
     const int time = luaL_checkint(s, 3);
 
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_apply_status called "
-                         "with incorrect parameters.");
-        return 0;
-    }
-    Being *being = getBeing(s, 1);
     being->applyStatusEffect(id, time);
     return 0;
 }
@@ -1004,15 +904,9 @@ static int being_apply_status(lua_State *s)
  */
 static int being_remove_status(lua_State *s)
 {
+    Being *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
 
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_remove_status called "
-                         "with incorrect parameters.");
-        return 0;
-    }
-    Being *being = getBeing(s, 1);
     being->removeStatusEffect(id);
     return 0;
 }
@@ -1023,15 +917,9 @@ static int being_remove_status(lua_State *s)
  */
 static int being_has_status(lua_State *s)
 {
+    Being *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
 
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_has_status called "
-                         "with incorrect parameters.");
-        return 0;
-    }
-    Being *being = getBeing(s, 1);
     lua_pushboolean(s, being->hasStatusEffect(id));
     return 1;
 }
@@ -1042,15 +930,9 @@ static int being_has_status(lua_State *s)
  */
 static int being_get_status_time(lua_State *s)
 {
+    Being *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
 
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_get_status_time called "
-                         "with incorrect parameters.");
-        return 0;
-    }
-    Being *being = getBeing(s, 1);
     lua_pushinteger(s, being->getStatusEffectTime(id));
     return 1;
 }
@@ -1061,16 +943,10 @@ static int being_get_status_time(lua_State *s)
  */
 static int being_set_status_time(lua_State *s)
 {
+    Being *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
     const int time = luaL_checkint(s, 3);
 
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_set_status_time called "
-                         "with incorrect parameters.");
-        return 0;
-    }
-    Being *being = getBeing(s, 1);
     being->setStatusEffectTime(id, time);
     return 0;
 }
@@ -1081,15 +957,7 @@ static int being_set_status_time(lua_State *s)
  */
 static int being_type(lua_State *s)
 {
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_type called with incorrect parameters.");
-        return 0;
-    }
-
-    Being *being = getBeing(s, 1);
-    if (!being)
-        return 0;
+    Being *being = checkBeing(s, 1);
     lua_pushinteger(s, being->getType());
     return 1;
 }
@@ -1102,15 +970,15 @@ static int being_type(lua_State *s)
  */
 static int being_walk(lua_State *s)
 {
+    Being *being = checkBeing(s, 1);
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
-    Being *being = getBeing(s, 1);
     being->setDestination(Point(x, y));
 
-    if (lua_isnumber(s, 4))
+    if (lua_gettop(s) >= 4)
     {
-        being->setAttribute(ATTR_MOVE_SPEED_TPS, lua_tonumber(s, 4));
+        being->setAttribute(ATTR_MOVE_SPEED_TPS, luaL_checknumber(s, 4));
         being->setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToRawSpeed(
                 being->getModifiedAttribute(ATTR_MOVE_SPEED_TPS)));
     }
@@ -1124,26 +992,9 @@ static int being_walk(lua_State *s)
  */
 static int being_say(lua_State *s)
 {
+    Being *being = checkBeing(s, 1);
     const char *message = luaL_checkstring(s, 2);
-
-    if (!lua_isuserdata(s, 1))
-    {
-        raiseScriptError(s, "being_say called with incorrect parameters.");
-        return 0;
-    }
-
-    Being *being = getBeing(s, 1);
-
-    if (being && message[0] != 0)
-    {
-        GameState::sayAround(being, message);
-    }
-    else
-    {
-        raiseScriptError(s, "being_say called with incorrect parameters.");
-        return 0;
-    }
-
+    GameState::sayAround(being, message);
     return 0;
 }
 
@@ -1155,7 +1006,7 @@ static int being_say(lua_State *s)
  */
 static int being_damage(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
+    Being *being = checkBeing(s, 1);
 
     if (!being->canFight())
         return 0;
@@ -1177,26 +1028,15 @@ static int being_damage(lua_State *s)
  */
 static int being_heal(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-    if (!being)
-    {
-        raiseScriptError(s,
-            "being_heal called for nonexistent being.");
-        return 0;
-    }
+    Being *being = checkBeing(s, 1);
 
     if (lua_gettop(s) == 1) // when there is only one argument
     {
         being->heal();
     }
-    else if (lua_isnumber(s, 2))
-    {
-        being->heal(lua_tointeger(s, 2));
-    }
     else
     {
-        raiseScriptError(s,
-            "being_heal called with illegal healing value.");
+        being->heal(luaL_checkint(s, 2));
     }
 
     return 0;
@@ -1208,21 +1048,12 @@ static int being_heal(lua_State *s)
  */
 static int being_get_base_attribute(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
+    Being *being = checkBeing(s, 1);
+    int attr = luaL_checkint(s, 2);
+    luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
 
-    if (being)
-    {
-        lua_Integer attr = lua_tointeger(s, 2);
-        if (attr)
-        {
-            lua_pushinteger(s, being->getAttribute(attr));
-            return 1;
-        }
-        raiseScriptError(s,
-            "being_get_base_attribute called with incorrect parameters.");
-    }
-
-    return 0;
+    lua_pushinteger(s, being->getAttribute(attr));
+    return 1;
 }
 
 /**
@@ -1231,21 +1062,12 @@ static int being_get_base_attribute(lua_State *s)
  */
 static int being_get_modified_attribute(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
+    Being *being = checkBeing(s, 1);
+    int attr = luaL_checkint(s, 2);
+    luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
 
-    if (being)
-    {
-        lua_Integer attr = lua_tointeger(s, 2);
-        if (attr)
-        {
-            lua_pushinteger(s, being->getModifiedAttribute(attr));
-            return 1;
-        }
-        raiseScriptError(s,
-            "being_get_modified_attribute called with incorrect parameters.");
-    }
-
-    return 0;
+    lua_pushinteger(s, being->getModifiedAttribute(attr));
+    return 1;
 }
 
 /**
@@ -1254,15 +1076,11 @@ static int being_get_modified_attribute(lua_State *s)
  */
 static int being_set_base_attribute(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-    if (!being)
-        return 0;
-
-    lua_Integer attr = lua_tointeger(s, 2);
-    lua_Number value = lua_tonumber(s, 3);
+    Being *being = checkBeing(s, 1);
+    int attr = luaL_checkint(s, 2);
+    double value = luaL_checknumber(s, 3);
 
     being->setAttribute(attr, value);
-
     return 0;
 }
 
@@ -1273,24 +1091,14 @@ static int being_set_base_attribute(lua_State *s)
  */
 static int being_apply_attribute_modifier(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-    if (!being)
-        return 0;
-
-    lua_Integer attr  = lua_tointeger(s,2);
-    lua_Number value  = lua_tonumber(s, 3);
-    lua_Integer layer = lua_tonumber(s, 4);
-    lua_Integer duration = 0;
-    lua_Integer effectId = 0;
-    if (lua_isnumber(s, 5))
-    {
-        duration = lua_tointeger(s, 5);
-        if (lua_isnumber(s, 6))
-            effectId = lua_tointeger(s, 6);
-    }
+    Being *being    = checkBeing(s, 1);
+    int attr        = luaL_checkint(s,2);
+    double value    = luaL_checknumber(s, 3);
+    int layer       = luaL_checkint(s, 4);
+    int duration    = luaL_optint(s, 5, 0);
+    int effectId    = luaL_optint(s, 6, 0);
 
     being->applyModifier(attr, value, layer, duration, effectId);
-
     return 0;
 }
 
@@ -1301,19 +1109,13 @@ static int being_apply_attribute_modifier(lua_State *s)
  */
 static int being_remove_attribute_modifier(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-    if (!being)
-        return 0;
-
-    lua_Integer attr  = lua_tointeger(s,2);
-    lua_Number value  = lua_tonumber(s, 3);
-    lua_Integer layer = lua_tonumber(s, 4);
-    lua_Integer effectId = 0;
-    if (lua_isnumber(s, 5))
-        effectId = lua_tointeger(s, 5);
+    Being *being    = checkBeing(s, 1);
+    int attr        = luaL_checkint(s, 2);
+    double value    = luaL_checknumber(s, 3);
+    int layer       = luaL_checkint(s, 4);
+    int effectId    = luaL_optint(s, 5, 0);
 
     being->removeModifier(attr, value, layer, effectId);
-
     return 0;
 }
 
@@ -1323,15 +1125,9 @@ static int being_remove_attribute_modifier(lua_State *s)
  */
 static int being_get_name(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-
-    if (being)
-    {
-        lua_pushstring(s, being->getName().c_str());
-        return 1;
-    }
-    raiseScriptError(s, "being_get_name called for an invalid being.");
-    return 0;
+    Being *being = checkBeing(s, 1);
+    lua_pushstring(s, being->getName().c_str());
+    return 1;
 }
 
 /**
@@ -1340,15 +1136,9 @@ static int being_get_name(lua_State *s)
  */
 static int being_get_action(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-
-    if (being)
-    {
-        lua_pushinteger(s, being->getAction());
-        return 1;
-    }
-    raiseScriptError(s, "being_get_action called for an invalid being.");
-    return 0;
+    Being *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getAction());
+    return 1;
 }
 
 /**
@@ -1357,18 +1147,9 @@ static int being_get_action(lua_State *s)
  */
 static int being_set_action(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-
-    int act = lua_tointeger(s, 2);
-
-    if (being)
-    {
-        being->setAction((BeingAction) act);
-    }
-    else
-    {
-        raiseScriptError(s, "being_set_action called for an invalid being.");
-    }
+    Being *being = checkBeing(s, 1);
+    int act = luaL_checkint(s, 2);
+    being->setAction((BeingAction) act);
     return 0;
 }
 
@@ -1378,15 +1159,9 @@ static int being_set_action(lua_State *s)
  */
 static int being_get_direction(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-
-    if (being)
-    {
-        lua_pushinteger(s, being->getDirection());
-        return 1;
-    }
-    raiseScriptError(s, "being_get_direction called for an invalid being.");
-    return 0;
+    Being *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getDirection());
+    return 1;
 }
 
 /**
@@ -1395,15 +1170,9 @@ static int being_get_direction(lua_State *s)
  */
 static int being_set_direction(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-
-    BeingDirection dir = (BeingDirection) lua_tointeger(s, 2);
-
-    if (being)
-    {
-        being->setDirection(dir);
-    }
-    raiseScriptError(s, "being_set_direction called for an invalid being.");
+    Being *being = checkBeing(s, 1);
+    BeingDirection dir = (BeingDirection) luaL_checkint(s, 2);
+    being->setDirection(dir);
     return 0;
 }
 
@@ -1413,16 +1182,9 @@ static int being_set_direction(lua_State *s)
  */
 static int posX(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-
-    if (being)
-    {
-        int x = being->getPosition().x;
-        lua_pushinteger(s, x);
-        return 1;
-    }
-    raiseScriptError(s, "posX called for an invalid being.");
-    return 0;
+    Being *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getPosition().x);
+    return 1;
 }
 
 /**
@@ -1431,16 +1193,9 @@ static int posX(lua_State *s)
  */
 static int posY(lua_State *s)
 {
-    Being *being = getBeing(s, 1);
-
-    if (being)
-    {
-        int y = being->getPosition().y;
-        lua_pushinteger(s, y);
-        return 1;
-    }
-    raiseScriptError(s, "posY called for an invalid being.");
-    return 0;
+    Being *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getPosition().y);
+    return 1;
 }
 
 static int monster_class_on_update(lua_State *s)
@@ -1510,21 +1265,10 @@ static int monster_get_name(lua_State *s)
  */
 static int monster_change_anger(lua_State *s)
 {
+    Monster *monster = checkMonster(s, 1);
+    Being *being = checkBeing(s, 2);
     const int anger = luaL_checkint(s, 3);
-    Monster *m = getMonster(s, 1);
-    if (!m)
-    {
-        raiseScriptError(s, "monster_change_anger called "
-                         "for a nonexisting monster");
-        return 0;
-    }
-    Being *being = getBeing(s, 2);
-    if (!being)
-    {
-        raiseScriptError(s, "monster_change_anger called "
-                         "for a nonexisting being");
-    }
-    m->changeAnger(being, anger);
+    monster->changeAnger(being, anger);
     return 0;
 }
 
@@ -1536,8 +1280,7 @@ static int monster_change_anger(lua_State *s)
 static int monster_remove(lua_State *s)
 {
     bool monsterRemoved = false;
-    Monster *m = getMonster(s, 1);
-    if (m)
+    if (Monster *m = getMonster(s, 1))
     {
         GameState::remove(m);
         monsterRemoved = true;
@@ -1547,20 +1290,13 @@ static int monster_remove(lua_State *s)
 }
 
 /**
- * mana.chr_get_chest(Character*, string): nil or string
+ * mana.chr_get_quest(Character*, string): nil or string
  * Callback for getting a quest variable. Starts a recovery and returns
  * immediatly, if the variable is not known yet.
  */
 static int chr_get_quest(lua_State *s)
 {
-    Character *q = getCharacter(s, 1);
-    if (!q)
-    {
-        raiseScriptError(s, "chr_get_quest "
-                         "called for nonexistent character.");
-        return 0;
-    }
-
+    Character *q = checkCharacter(s, 1);
     const char *m = luaL_checkstring(s, 2);
     if (m[0] == 0)
     {
@@ -1658,22 +1394,17 @@ static int setvar_world(lua_State *s)
 }
 
 /**
- * mana.chr_set_chest(Character*, string, string): void
+ * mana.chr_set_quest(Character*, string, string): void
  * Callback for setting a quest variable.
  */
 static int chr_set_quest(lua_State *s)
 {
-    Character *q = getCharacter(s, 1);
+    Character *q = checkCharacter(s, 1);
     const char *m = luaL_checkstring(s, 2);
     const char *n = luaL_checkstring(s, 3);
     if (m[0] == 0 || strlen(m) == 0)
     {
         raiseScriptError(s, "chr_set_quest called with incorrect parameters.");
-        return 0;
-    }
-    if (!q)
-    {
-        raiseScriptError(s, "chr_set_quest called for nonexistent character.");
         return 0;
     }
     setQuestVar(q, m, n);
@@ -1731,27 +1462,14 @@ static int trigger_create(lua_State *s)
 
 /**
  * private message: mana.chat_message(Being* recipent, string message): void
- * @todo global message: mana.chat_message(string message): void
  * Creates a chat message in the users chatlog(s).
  */
 static int chat_message(lua_State *s)
 {
-    if (lua_gettop(s) == 2 && lua_isuserdata(s, 1) && lua_isstring(s, 2) )
-    {
-        Being *being = getBeing(s, 1);
-        const std::string message = lua_tostring(s, 2);
+    Being *being = checkBeing(s, 1);
+    const char *message = luaL_checkstring(s, 2);
 
-        if (being && !message.empty())
-        {
-            GameState::sayTo(being, NULL, message);
-        }
-    }
-    else
-    {
-        raiseScriptError(s, "chat_message called with incorrect parameters.");
-        return 0;
-    }
-
+    GameState::sayTo(being, NULL, message);
     return 0;
 }
 
@@ -1766,7 +1484,7 @@ static int get_beings_in_circle(lua_State *s)
     int x, y, r;
     if (lua_islightuserdata(s, 1))
     {
-        Being *b = getBeing(s, 1);
+        Being *b = checkBeing(s, 1);
         const Point &pos = b->getPosition();
         x = pos.x;
         y = pos.y;
@@ -1787,16 +1505,15 @@ static int get_beings_in_circle(lua_State *s)
     int tableIndex = 1;
     for (BeingIterator i(m->getAroundPointIterator(Point(x, y), r)); i; ++i)
     {
-        char t = (*i)->getType();
+        Being *b = *i;
+        char t = b->getType();
         if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
         {
-            Being *b = static_cast<Being *> (*i);
             if (Collision::circleWithCircle(b->getPosition(), b->getSize(),
                                             Point(x, y), r))
             {
-                lua_pushinteger(s, tableIndex);
-                lua_pushlightuserdata (s, b);
-                lua_settable (s, tableStackPosition);
+                lua_pushlightuserdata(s, b);
+                lua_rawseti(s, tableStackPosition, tableIndex);
                 tableIndex++;
             }
         }
@@ -1828,13 +1545,12 @@ static int get_beings_in_rectangle(lua_State *s)
     for (BeingIterator i(
          m->getInsideRectangleIterator(rect)); i; ++i)
     {
-        char t = (*i)->getType();
+        Being *b = *i;
+        char t = b->getType();
         if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
         {
-            Being *b = static_cast<Being *> (*i);
-            lua_pushinteger(s, tableIndex);
-            lua_pushlightuserdata (s, b);
-            lua_settable (s, tableStackPosition);
+            lua_pushlightuserdata(s, b);
+            lua_rawseti(s, tableStackPosition, tableIndex);
             tableIndex++;
         }
     }
@@ -1847,16 +1563,10 @@ static int get_beings_in_rectangle(lua_State *s)
  */
 static int chr_get_post(lua_State *s)
 {
-    if (lua_isuserdata(s, 1))
-    {
-        Character *c = getCharacter(s, 1);
+    Character *c = checkCharacter(s, 1);
 
-        if (c)
-        {
-            PostCallback f = { &LuaScript::getPostCallback, getScript(s) };
-            postMan->getPost(c, f);
-        }
-    }
+    PostCallback f = { &LuaScript::getPostCallback, getScript(s) };
+    postMan->getPost(c, f);
 
     return 0;
 }
@@ -1868,19 +1578,7 @@ static int chr_get_post(lua_State *s)
  */
 static int being_register(lua_State *s)
 {
-    if (!lua_islightuserdata(s, 1) || lua_gettop(s) != 1)
-    {
-        raiseScriptError(s, "being_register called with incorrect parameters.");
-        return 0;
-    }
-
-    Being *being = getBeing(s, 1);
-    if (!being)
-    {
-        raiseScriptError(s, "being_register called for nonexistent being.");
-        return 0;
-    }
-
+    Being *being = checkBeing(s, 1);
     being->addListener(getScript(s)->getScriptListener());
     return 0;
 }
@@ -1894,31 +1592,19 @@ static int effect_create(lua_State *s)
 {
     const int id = luaL_checkint(s, 1);
 
-    if (((!lua_isnumber(s, 2) || !lua_isnumber(s, 3))
-         && (!lua_isuserdata(s, 2))))
-    {
-        raiseScriptError(s, "effect_create called with incorrect parameters.");
-        return 0;
-    }
-
     MapComposite *m = getScript(s)->getMap();
 
     if (lua_isuserdata(s, 2))
     {
         // being mode
-        Being *b = getBeing(s, 2);
-        if (!b)
-        {
-            raiseScriptError(s, "effect_create called on non-existent being");
-            return 0;
-        }
+        Being *b = checkBeing(s, 2);
         Effects::show(id, m, b);
     }
     else
     {
         // positional mode
-        int x = lua_tointeger(s, 2);
-        int y = lua_tointeger(s, 3);
+        int x = luaL_checkint(s, 2);
+        int y = luaL_checkint(s, 3);
         Effects::show(id, m, Point(x, y));
     }
 
@@ -1932,14 +1618,7 @@ static int effect_create(lua_State *s)
  */
 static int chr_shake_screen(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_shake_screen called "
-                         "for nonexistent character.");
-        return 0;
-    }
-
+    Character *c = checkCharacter(s, 1);
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
@@ -1964,13 +1643,7 @@ static int chr_shake_screen(lua_State *s)
  */
 static int chr_get_exp(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_get_exp called for nonexistent character.");
-        return 0;
-    }
-
+    Character *c = checkCharacter(s, 1);
     const int skill = luaL_checkint(s, 2);
     const int exp = c->getExperience(skill);
 
@@ -1987,19 +1660,12 @@ static int chr_get_exp(lua_State *s)
  */
 static int chr_give_exp(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_give_exp called for nonexistent character.");
-        return 0;
-    }
-
+    Character *c = checkCharacter(s, 1);
     const int skill = luaL_checkint(s, 2);
     const int exp = luaL_checkint(s, 3);
     const int optimalLevel = luaL_optint(s, 4, 0);
 
     c->receiveExperience(skill, exp, optimalLevel);
-
     return 0;
 }
 
@@ -2009,25 +1675,12 @@ static int chr_give_exp(lua_State *s)
  */
 static int chr_set_hair_style(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_set_hair_style called "
-                         "for nonexistent character.");
-        return 0;
-    }
-
+    Character *c = checkCharacter(s, 1);
     const int style = luaL_checkint(s, 2);
-    if (style < 0)
-    {
-        raiseScriptError(s, "chr_set_hair_style called "
-                         "for nonexistent style id %d.", style);
-        return 0;
-    }
+    luaL_argcheck(s, style >= 0, 2, "invalid style id");
 
     c->setHairStyle(style);
     c->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
-
     return 0;
 }
 
@@ -2037,13 +1690,7 @@ static int chr_set_hair_style(lua_State *s)
  */
 static int chr_get_hair_style(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_get_hair_style called "
-                         "for nonexistent character.");
-        return 0;
-    }
+    Character *c = checkCharacter(s, 1);
 
     lua_pushinteger(s, c->getHairStyle());
     return 1;
@@ -2055,21 +1702,9 @@ static int chr_get_hair_style(lua_State *s)
  */
 static int chr_set_hair_color(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_set_hair_color called "
-                         "for nonexistent character.");
-        return 0;
-    }
-
+    Character *c = checkCharacter(s, 1);
     const int color = luaL_checkint(s, 2);
-    if (color < 0)
-    {
-        raiseScriptError(s, "chr_set_hair_color called "
-                         "for nonexistent style id %d.", color);
-        return 0;
-    }
+    luaL_argcheck(s, color >= 0, 2, "invalid color id");
 
     c->setHairColor(color);
     c->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
@@ -2083,13 +1718,7 @@ static int chr_set_hair_color(lua_State *s)
  */
 static int chr_get_hair_color(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_get_hair_color called "
-                         "for nonexistent character.");
-        return 0;
-    }
+    Character *c = checkCharacter(s, 1);
 
     lua_pushinteger(s, c->getHairColor());
     return 1;
@@ -2101,14 +1730,7 @@ static int chr_get_hair_color(lua_State *s)
  */
 static int chr_get_kill_count(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_get_kill_count called "
-                         "for nonexistent character.");
-        return 0;
-    }
-
+    Character *c = checkCharacter(s, 1);
     const int id = luaL_checkint(s, 2);
 
     lua_pushinteger(s, c->getKillCount(id));
@@ -2121,13 +1743,7 @@ static int chr_get_kill_count(lua_State *s)
  */
 static int being_get_gender(lua_State *s)
 {
-    Being *b = getBeing(s, 1);
-    if (!b)
-    {
-        raiseScriptError(s, "chr_get_gender called for nonexistent character.");
-        return 0;
-    }
-
+    Being *b = checkBeing(s, 1);
     lua_pushinteger(s, b->getGender());
     return 1;
 }
@@ -2138,16 +1754,9 @@ static int being_get_gender(lua_State *s)
  */
 static int being_set_gender(lua_State *s)
 {
-    Being *b = getBeing(s, 1);
-    if (!b)
-    {
-        raiseScriptError(s, "being_set_gender called for nonexistent character.");
-        return 0;
-    }
-
+    Being *b = checkBeing(s, 1);
     const int gender = luaL_checkinteger(s, 2);
     b->setGender(getGender(gender));
-
     return 0;
 }
 
@@ -2158,13 +1767,7 @@ static int being_set_gender(lua_State *s)
 static int chr_give_special(lua_State *s)
 {
     // cost_type is ignored until we have more than one cost type
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_give_special called "
-                         "for nonexistent character.");
-        return 0;
-    }
+    Character *c = checkCharacter(s, 1);
     const int special = luaL_checkint(s, 2);
 
     c->giveSpecial(special);
@@ -2177,12 +1780,7 @@ static int chr_give_special(lua_State *s)
  */
 static int chr_has_special(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_has_special called for nonexistent character.");
-        return 0;
-    }
+    Character *c = checkCharacter(s, 1);
     const int special = luaL_checkint(s, 2);
 
     lua_pushboolean(s, c->hasSpecial(special));
@@ -2195,12 +1793,7 @@ static int chr_has_special(lua_State *s)
  */
 static int chr_take_special(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_take_special called for nonexistent character.");
-        return 0;
-    }
+    Character *c = checkCharacter(s, 1);
     const int special = luaL_checkint(s, 2);
 
     lua_pushboolean(s, c->hasSpecial(special));
@@ -2214,12 +1807,7 @@ static int chr_take_special(lua_State *s)
  */
 static int chr_get_rights(lua_State *s)
 {
-    Character *c = getCharacter(s, 1);
-    if (!c)
-    {
-        raiseScriptError(s, "chr_get_rights called for nonexistent character.");
-        return 0;
-    }
+    Character *c = checkCharacter(s, 1);
     lua_pushinteger(s, c->getAccountLevel());
     return 1;
 }
@@ -2411,14 +1999,17 @@ static int item_get_name(lua_State *s)
  */
 static int log(lua_State *s)
 {
+    using utils::Logger;
+
     const int loglevel = luaL_checkint(s, 1);
-    const std::string message = lua_tostring(s, 2);
+    luaL_argcheck(s,
+                  loglevel >= Logger::Fatal && loglevel <= Logger::Debug,
+                  1,
+                  "invalid log level");
 
-    if (loglevel >= utils::Logger::Fatal && loglevel <= utils::Logger::Debug)
-         utils::Logger::output(message, (utils::Logger::Level) loglevel);
-    else
-        raiseScriptError(s, "log called with unknown loglevel");
+    const std::string message = luaL_checkstring(s, 2);
 
+    Logger::output(message, (Logger::Level) loglevel);
     return 0;
 }
 
@@ -2432,13 +2023,9 @@ static int get_distance(lua_State *s)
     int x1, y1, x2, y2;
     if (lua_gettop(s) == 2)
     {
-        Being *being1 = getBeing(s, 1);
-        Being *being2 = getBeing(s, 2);
-        if (!being1 || !being2)
-        {
-            raiseScriptError(s, "get_distance called for invalid beings.");
-            return 0;
-        }
+        Being *being1 = checkBeing(s, 1);
+        Being *being2 = checkBeing(s, 2);
+
         x1 = being1->getPosition().x;
         y1 = being1->getPosition().y;
         x2 = being2->getPosition().x;

@@ -124,8 +124,7 @@ Being *getBeing(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
-    Thing *t = static_cast<Thing *>(lua_touserdata(s, p));
-    return static_cast<Being *>(t);
+    return static_cast<Being *>(lua_touserdata(s, p));
 }
 
 Character *getCharacter(lua_State *s, int p)
@@ -199,22 +198,46 @@ NPC *getNPC(lua_State *s, int p)
 }
 
 
+Being *checkBeing(lua_State *s, int p)
+{
+    Being *being = getBeing(s, p);
+    luaL_argcheck(s, being, p, "being expected");
+    return being;
+}
+
+Character *checkCharacter(lua_State *s, int p)
+{
+    Character *character = getCharacter(s, p);
+    luaL_argcheck(s, character, p, "character expected");
+    return character;
+}
+
 ItemClass *checkItemClass(lua_State *s, int p)
 {
     ItemClass *itemClass = getItemClass(s, p);
-    if (!itemClass)
-        luaL_argerror(s, p, "invalid item type parameter");
-
+    luaL_argcheck(s, itemClass, p, "item type expected");
     return itemClass;
+}
+
+Monster *checkMonster(lua_State *s, int p)
+{
+    Monster *monster = getMonster(s, p);
+    luaL_argcheck(s, monster, p, "monster expected");
+    return monster;
 }
 
 MonsterClass *checkMonsterClass(lua_State *s, int p)
 {
     MonsterClass *monsterClass = getMonsterClass(s, p);
-    if (!monsterClass)
-        luaL_argerror(s, p, "invalid monster type parameter");
-
+    luaL_argcheck(s, monsterClass, p, "monster type expected");
     return monsterClass;
+}
+
+NPC *checkNPC(lua_State *s, int p)
+{
+    NPC *npc = getNPC(s, p);
+    luaL_argcheck(s, npc, p, "npc expected");
+    return npc;
 }
 
 

@@ -157,8 +157,12 @@ Monster *       getMonster(lua_State *s, int p);
 MonsterClass *  getMonsterClass(lua_State *s, int p);
 NPC *           getNPC(lua_State *s, int p);
 
+Being *         checkBeing(lua_State *s, int p);
+Character *     checkCharacter(lua_State *s, int p);
 ItemClass *     checkItemClass(lua_State *s, int p);
+Monster *       checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
+NPC *           checkNPC(lua_State *s, int p);
 
 
 /* Polymorphic wrapper for pushing variables.
