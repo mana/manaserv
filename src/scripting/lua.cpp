@@ -1970,6 +1970,18 @@ static int is_walkable(lua_State *s)
     return 1;
 }
 
+static int map_get_pvp(lua_State *s)
+{
+    MapComposite *m = getScript(s)->getMap();
+    if (!m)
+    {
+        raiseScriptError(s, "map_get_pvp called outside a map.");
+        return 0;
+    }
+    lua_pushinteger(s, m->getPvP());
+    return 1;
+}
+
 static int item_class_on(lua_State *s)
 {
     ItemClass *itemClass = LuaItemClass::check(s, 1);
@@ -2320,6 +2332,7 @@ LuaScript::LuaScript():
         { "get_map_id",                      &get_map_id                      },
         { "get_map_property",                &get_map_property                },
         { "is_walkable",                     &is_walkable                     },
+        { "map_get_pvp",                     &map_get_pvp                     },
         { "item_drop",                       &item_drop                       },
         { "item_get_name",                   &item_get_name                   },
         { "npc_ask_integer",                 &npc_ask_integer                 },
