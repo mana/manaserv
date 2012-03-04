@@ -23,6 +23,7 @@
 #include "game-server/commandhandler.h"
 #include "game-server/accountconnection.h"
 #include "game-server/character.h"
+#include "game-server/effect.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
@@ -79,6 +80,7 @@ static void handleKillMonsters(Character*, std::string&);
 static void handleCraft(Character*, std::string&);
 static void handleGetPos(Character*, std::string&);
 static void handleSkills(Character*, std::string&);
+static void handleEffect(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -142,6 +144,10 @@ static CmdRef const cmdRef[] =
         "Gets the position of a character.", &handleGetPos},
     {"skills", "<character>",
         "Lists all skills and their values of a character", &handleSkills},
+    {"effect", "<effectid> <x> <y> / <effectid> <being> / <effectid>",
+        "Shows an effect at the given position or on the given being. "
+        "The player's character is targeted if neither of them is provided.",
+        &handleEffect},
     {NULL, NULL, NULL, NULL}
 
 };
@@ -1480,6 +1486,48 @@ static void handleSkills(Character *player, std::string &args)
         ++it;
     }
 }
+
+static void handleEffect(Character *player, std::string &args)
+{
+    std::vector<std::string> arguments;
+    for (std::string arg = getArgument(args); !arg.empty();
+         arg = getArgument(args))
+    {
+        arguments.push_back(arg);
+    }
+
+    if (arguments.size() == 1)
+    {
+        int id = utils::stringToInt(arguments[0]);
+        Effects::show(id, player->getMap(), player);
+    }
+    else if (arguments.size() == 2)
+    {
+        int id = utils::stringToInt(arguments[0]);
+        Character *p = getPlayer(arguments[1]);
+        if (!p)
+        {
+            say("Invalid target player.", player);
+            return;
+        }
+        Effects::show(id, p->getMap(), p);
+    }
+    else if (arguments.size() == 3)
+    {
+        int id = utils::stringToInt(arguments[0]);
+        int x = utils::stringToInt(arguments[1]);
+        int y = utils::stringToInt(arguments[2]);
+        Effects::show(id, player->getMap(), Point(x, y));
+    }
+    else
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @effect <effectid> <x> <y> / <effectid> <being> / "
+            "<effectid>", player);
+    }
+}
+
+
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)
 {
