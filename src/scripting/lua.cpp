@@ -1001,22 +1001,48 @@ static int being_say(lua_State *s)
 
 /**
  * mana.being_damage(Being* victim, int value, int delta, int cth, int type,
- *                   int element): void
+ *                   int element [, Being* source [, int skill]]): void
  * Applies combat damage to a being.
  */
 static int being_damage(lua_State *s)
 {
     Being *being = checkBeing(s, 1);
 
-    if (!being->canFight())
+    if (!being)
+    {
+        raiseScriptError(s, "being_damage called with invalid victim");
         return 0;
+    }
+    if (!being->canFight())
+    {
+        raiseScriptError(s, "being_damage called with "
+                            "victim that cannot fight");
+        return 0;
+    }
 
-    Damage dmg((unsigned short) lua_tointeger(s, 2), /* base */
-               (unsigned short) lua_tointeger(s, 3), /* delta */
-               (unsigned short) lua_tointeger(s, 4), /* cth */
-               (unsigned char)  lua_tointeger(s, 6), /* element */
-               DAMAGE_PHYSICAL);                     /* type */
-    being->damage(NULL, dmg);
+    Damage dmg;
+    dmg.base = luaL_checkint(s, 2);
+    dmg.delta = luaL_checkint(s, 3);
+    dmg.cth = luaL_checkint(s, 4);
+    dmg.type = (DamageType)luaL_checkint(s, 5);
+    dmg.element = luaL_checkint(s, 6);
+    Being *source = 0;
+    if (lua_gettop(s) >= 7)
+    {
+        source = checkBeing(s, 7);
+        if (!source)
+        {
+            raiseScriptError(s, "being_damage called withd invalid source");
+        }
+        if (!source->canFight())
+        {
+            raiseScriptError(s, "being_damage called with "
+                                "source that cannot fight");
+            return 0;
+        }
+    }
+    dmg.skill = luaL_optint(s, 8, 0);
+    being->damage(source, dmg);
 
     return 0;
 }

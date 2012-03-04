@@ -186,11 +186,15 @@ void Character::perform()
     {
         int damageBase = getModifiedAttribute(ATTR_STR);
         int damageDelta = damageBase / 2;
-        Damage knuckleDamage(skillManager->getDefaultSkillId(),
-                             damageBase, damageDelta, 2, ELEMENT_NEUTRAL,
-                            DAMAGE_PHYSICAL,
-                            (getSize() < DEFAULT_TILE_LENGTH) ?
-                                DEFAULT_TILE_LENGTH : getSize());
+        Damage knuckleDamage;
+        knuckleDamage.skill = skillManager->getDefaultSkillId();
+        knuckleDamage.base = damageBase;
+        knuckleDamage.delta = damageDelta;
+        knuckleDamage.cth = 2;
+        knuckleDamage.element = ELEMENT_NEUTRAL;
+        knuckleDamage.type = DAMAGE_PHYSICAL;
+        knuckleDamage.range = (getSize() < DEFAULT_TILE_LENGTH) ?
+                    DEFAULT_TILE_LENGTH : getSize();
 
         AutoAttack knuckleAttack(knuckleDamage, 7, 3);
         mAutoAttacks.add(knuckleAttack);

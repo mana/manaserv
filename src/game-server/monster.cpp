@@ -127,15 +127,15 @@ void Monster::perform()
                 {
                     setTimerHard(T_M_ATTACK_TIME, mCurrentAttack->aftDelay
                                                   + mCurrentAttack->preDelay);
-                    Damage dmg(0,
-                               getModifiedAttribute(MOB_ATTR_PHY_ATK_MIN) *
-                                    mCurrentAttack->damageFactor,
-                               getModifiedAttribute(MOB_ATTR_PHY_ATK_DELTA) *
-                                    mCurrentAttack->damageFactor,
-                               getModifiedAttribute(ATTR_ACCURACY),
-                               mCurrentAttack->element,
-                               mCurrentAttack->type,
-                               mCurrentAttack->range);
+                    Damage dmg;
+                    dmg.skill = 0;
+                    dmg.base = getModifiedAttribute(MOB_ATTR_PHY_ATK_MIN) *
+                            mCurrentAttack->damageFactor;
+                    dmg.delta = getModifiedAttribute(MOB_ATTR_PHY_ATK_DELTA) *
+                            mCurrentAttack->damageFactor;
+                    dmg.cth = getModifiedAttribute(ATTR_ACCURACY);
+                    dmg.element = mCurrentAttack->element;
+                    dmg.range = mCurrentAttack->range;
 
                     int hit = performAttack(mTarget, dmg);
 
