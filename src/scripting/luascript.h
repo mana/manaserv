@@ -81,6 +81,8 @@ class LuaScript : public Script
         static void setRemoveNotificationCallback(Script *script)
         { script->assignCallback(mRemoveNotificationCallback); }
 
+        static const char registryKey;
+
     private:
         lua_State *mState;
         int nbArgs;
@@ -90,8 +92,6 @@ class LuaScript : public Script
         static Ref mDeathNotificationCallback;
         static Ref mRemoveNotificationCallback;
 };
-
-static char const registryKey = 0;
 
 static Script *LuaFactory()
 {

@@ -29,6 +29,8 @@
 
 #include "utils/logger.h"
 
+#include "scripting/luascript.h"
+
 
 void raiseScriptError(lua_State *s, const char *format, ...)
 {
@@ -109,6 +111,16 @@ void UserDataCache::insert(lua_State *s, void *object)
     lua_pushvalue(s, -3);                       // UD, Cache, object, UD
     lua_rawset(s, -3);                          // UD, Cache { object = UD }
     lua_pop(s, 1);                              // UD
+}
+
+
+Script *getScript(lua_State *s)
+{
+    lua_pushlightuserdata(s, (void *)&LuaScript::registryKey);
+    lua_gettable(s, LUA_REGISTRYINDEX);
+    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
+    lua_pop(s, 1);
+    return script;
 }
 
 
@@ -238,6 +250,19 @@ NPC *checkNPC(lua_State *s, int p)
     NPC *npc = getNPC(s, p);
     luaL_argcheck(s, npc, p, "npc expected");
     return npc;
+}
+
+
+MapComposite *checkCurrentMap(lua_State *s, Script *script /* = 0 */)
+{
+    if (!script)
+        script = getScript(s);
+
+    MapComposite *mapComposite = script->getMap();
+    if (!mapComposite)
+        luaL_error(s, "no current map");
+
+    return mapComposite;
 }
 
 

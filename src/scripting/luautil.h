@@ -34,10 +34,12 @@ extern "C" {
 class Being;
 class Character;
 class ItemClass;
+class MapComposite;
 class MapObject;
 class Monster;
 class MonsterClass;
 class NPC;
+class Script;
 class StatusEffect;
 class Thing;
 
@@ -149,6 +151,7 @@ typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
 typedef LuaUserData<StatusEffect> LuaStatusEffect;
 
+Script *        getScript(lua_State *s);
 
 Being *         getBeing(lua_State *s, int p);
 Character *     getCharacter(lua_State *s, int p);
@@ -163,6 +166,8 @@ ItemClass *     checkItemClass(lua_State *s, int p);
 Monster *       checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
 NPC *           checkNPC(lua_State *s, int p);
+
+MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
 
 
 /* Polymorphic wrapper for pushing variables.

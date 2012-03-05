@@ -35,6 +35,8 @@ Script::Ref LuaScript::mPostReplyCallback;
 Script::Ref LuaScript::mDeathNotificationCallback;
 Script::Ref LuaScript::mRemoveNotificationCallback;
 
+const char LuaScript::registryKey = 0;
+
 LuaScript::~LuaScript()
 {
     lua_close(mState);

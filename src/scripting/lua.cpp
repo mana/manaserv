@@ -66,15 +66,6 @@ extern "C" {
  * http://doc.manasource.org/scripting
  */
 
-static Script *getScript(lua_State *s)
-{
-    lua_pushlightuserdata(s, (void *)&registryKey);
-    lua_gettable(s, LUA_REGISTRYINDEX);
-    Script *script = static_cast<Script *>(lua_touserdata(s, -1));
-    lua_pop(s, 1);
-    return script;
-}
-
 
 /**
  * mana.on_character_death( function(Character*) ): void
@@ -345,15 +336,10 @@ static int npc_create(lua_State *s)
     const int y = luaL_checkint(s, 5);
 
     Script *t = getScript(s);
+    MapComposite *m = checkCurrentMap(s, t);
+
     NPC *q = new NPC(name, id, t);
     q->setGender(getGender(gender));
-
-    MapComposite *m = t->getMap();
-    if (!m)
-    {
-        raiseScriptError(s, "npc_create called outside a map.");
-        return 0;
-    }
     q->setMap(m);
     q->setPosition(Point(x, y));
     GameState::enqueueInsert(q);
@@ -435,20 +421,17 @@ static int chr_warp(lua_State *s)
     MapComposite *m;
     if (b)
     {
-        m = getScript(s)->getMap();
+        m = checkCurrentMap(s);
     }
     else if (lua_isnumber(s, 2))
     {
         m = MapManager::getMap(lua_tointeger(s, 2));
+        luaL_argcheck(s, m, 2, "invalid map id");
     }
     else
     {
         m = MapManager::getMap(lua_tostring(s, 2));
-    }
-    if (!m)
-    {
-        raiseScriptError(s, "chr_warp called with a non-existing map.");
-        return 0;
+        luaL_argcheck(s, m, 2, "invalid map name");
     }
 
     Map *map = m->getMap();
@@ -1008,11 +991,6 @@ static int being_damage(lua_State *s)
 {
     Being *being = checkBeing(s, 1);
 
-    if (!being)
-    {
-        raiseScriptError(s, "being_damage called with invalid victim");
-        return 0;
-    }
     if (!being->canFight())
     {
         raiseScriptError(s, "being_damage called with "
@@ -1030,10 +1008,7 @@ static int being_damage(lua_State *s)
     if (lua_gettop(s) >= 7)
     {
         source = checkBeing(s, 7);
-        if (!source)
-        {
-            raiseScriptError(s, "being_damage called withd invalid source");
-        }
+
         if (!source->canFight())
         {
             raiseScriptError(s, "being_damage called with "
@@ -1250,13 +1225,7 @@ static int monster_create(lua_State *s)
     MonsterClass *monsterClass = checkMonsterClass(s, 1);
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
-
-    MapComposite *m = getScript(s)->getMap();
-    if (!m)
-    {
-        raiseScriptError(s, "monster_create called outside a map.");
-        return 0;
-    }
+    MapComposite *m = checkCurrentMap(s);
 
     Monster *q = new Monster(monsterClass);
     q->setMap(m);
@@ -1323,13 +1292,10 @@ static int monster_remove(lua_State *s)
 static int chr_get_quest(lua_State *s)
 {
     Character *q = checkCharacter(s, 1);
-    const char *m = luaL_checkstring(s, 2);
-    if (m[0] == 0)
-    {
-        raiseScriptError(s, "chr_get_quest called with empty string.");
-        return 0;
-    }
-    std::string value, name = m;
+    const char *name = luaL_checkstring(s, 2);
+    luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
+
+    std::string value;
     bool res = getQuestVar(q, name, value);
     if (res)
     {
@@ -1347,14 +1313,11 @@ static int chr_get_quest(lua_State *s)
  */
 static int getvar_map(lua_State *s)
 {
-    const char *m = luaL_checkstring(s, 1);
-    if (m[0] == 0)
-    {
-        raiseScriptError(s, "getvar_map called for unnamed variable.");
-        return 0;
-    }
+    const char *name = luaL_checkstring(s, 1);
+    luaL_argcheck(s, name[0] != 0, 1, "empty variable name");
 
-    std::string value = getScript(s)->getMap()->getVariable(m);
+    MapComposite *map = checkCurrentMap(s);
+    std::string value = map->getVariable(name);
 
     lua_pushstring(s, value.c_str());
     return 1;
@@ -1366,16 +1329,12 @@ static int getvar_map(lua_State *s)
  */
 static int setvar_map(lua_State *s)
 {
-    const char *m = luaL_checkstring(s, 1);
-    if (m[0] == 0)
-    {
-        raiseScriptError(s, "setvar_map called for unnamed variable.");
-        return 0;
-    }
+    const char *name = luaL_checkstring(s, 1);
+    const char *value = luaL_checkstring(s, 2);
+    luaL_argcheck(s, name[0] != 0, 1, "empty variable name");
 
-    std::string key = m;
-    std::string value = lua_tostring(s, 2);
-    getScript(s)->getMap()->setVariable(key, value);
+    MapComposite *map = checkCurrentMap(s);
+    map->setVariable(name, value);
 
     return 0;
 }
@@ -1386,15 +1345,10 @@ static int setvar_map(lua_State *s)
  */
 static int getvar_world(lua_State *s)
 {
-    const char *m = luaL_checkstring(s, 1);
-    if (m[0] == 0)
-    {
-        raiseScriptError(s, "getvar_world called for unnamed variable.");
-        return 0;
-    }
+    const char *name = luaL_checkstring(s, 1);
+    luaL_argcheck(s, name[0] != 0, 1, "empty variable name");
 
-    std::string value = GameState::getVariable(m);
-
+    std::string value = GameState::getVariable(name);
     lua_pushstring(s, value.c_str());
     return 1;
 }
@@ -1405,17 +1359,11 @@ static int getvar_world(lua_State *s)
  */
 static int setvar_world(lua_State *s)
 {
-    const char *m = luaL_checkstring(s, 1);
-    if (m[0] == 0)
-    {
-        raiseScriptError(s, "setvar_world called with unnamed variable.");
-        return 0;
-    }
+    const char *name = luaL_checkstring(s, 1);
+    const char *value = luaL_checkstring(s, 2);
+    luaL_argcheck(s, name[0] != 0, 1, "empty variable name");
 
-    std::string key = lua_tostring(s, 1);
-    std::string value = lua_tostring(s, 2);
-    GameState::setVariable(key, value);
-
+    GameState::setVariable(name, value);
     return 0;
 }
 
@@ -1426,14 +1374,11 @@ static int setvar_world(lua_State *s)
 static int chr_set_quest(lua_State *s)
 {
     Character *q = checkCharacter(s, 1);
-    const char *m = luaL_checkstring(s, 2);
-    const char *n = luaL_checkstring(s, 3);
-    if (m[0] == 0 || strlen(m) == 0)
-    {
-        raiseScriptError(s, "chr_set_quest called with incorrect parameters.");
-        return 0;
-    }
-    setQuestVar(q, m, n);
+    const char *name = luaL_checkstring(s, 2);
+    const char *value = luaL_checkstring(s, 3);
+    luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
+
+    setQuestVar(q, name, value);
     return 0;
 }
 
@@ -1459,13 +1404,7 @@ static int trigger_create(lua_State *s)
     }
 
     Script *script = getScript(s);
-    MapComposite *m = script->getMap();
-
-    if (!m)
-    {
-        raiseScriptError(s, "trigger_create called for nonexistent a map.");
-        return 0;
-    }
+    MapComposite *m = checkCurrentMap(s, script);
 
     const bool once = lua_toboolean(s, 7);
 
@@ -1523,7 +1462,7 @@ static int get_beings_in_circle(lua_State *s)
         r = luaL_checkint(s, 3);
     }
 
-    MapComposite *m = getScript(s)->getMap();
+    MapComposite *m = checkCurrentMap(s);
 
     //create a lua table with the beings in the given area.
     lua_newtable(s);
@@ -1561,7 +1500,7 @@ static int get_beings_in_rectangle(lua_State *s)
     const int w = luaL_checkint(s, 3);
     const int h = luaL_checkint(s, 4);
 
-    MapComposite *m = getScript(s)->getMap();
+    MapComposite *m = checkCurrentMap(s);
 
     //create a lua table with the beings in the given area.
     lua_newtable(s);
@@ -1618,19 +1557,18 @@ static int effect_create(lua_State *s)
 {
     const int id = luaL_checkint(s, 1);
 
-    MapComposite *m = getScript(s)->getMap();
-
     if (lua_isuserdata(s, 2))
     {
         // being mode
         Being *b = checkBeing(s, 2);
-        Effects::show(id, m, b);
+        Effects::show(id, m, b->getMap());
     }
     else
     {
         // positional mode
         int x = luaL_checkint(s, 2);
         int y = luaL_checkint(s, 3);
+        MapComposite *m = checkCurrentMap(s);
         Effects::show(id, m, Point(x, y));
     }
 
@@ -1912,14 +1850,8 @@ static int test_tableget(lua_State *s)
  */
 static int get_map_id(lua_State *s)
 {
-    MapComposite *m = getScript(s)->getMap();
-    if (!m)
-    {
-        raiseScriptError(s, "get_map_id called outside a map.");
-        return 0;
-    }
-    int id = m->getID();
-    lua_pushinteger(s, id);
+    MapComposite *m = checkCurrentMap(s);
+    lua_pushinteger(s, m->getID());
     return 1;
 }
 
@@ -1930,17 +1862,10 @@ static int get_map_id(lua_State *s)
 static int get_map_property(lua_State *s)
 {
     const char *property = luaL_checkstring(s, 1);
-    MapComposite *m = getScript(s)->getMap();
-    if (!m)
-    {
-        raiseScriptError(s, "get_map_property called outside a map.");
-        return 0;
-    }
-    Map *map = m->getMap();
-    std::string value = map->getProperty(property);
-    const char *v = &value[0];
+    Map *map = checkCurrentMap(s)->getMap();
 
-    lua_pushstring(s, v);
+    std::string value = map->getProperty(property);
+    lua_pushstring(s, value.c_str());
     return 1;
 }
 
@@ -1952,14 +1877,7 @@ static int is_walkable(lua_State *s)
 {
     const int x = luaL_checkint(s, 1);
     const int y = luaL_checkint(s, 2);
-
-    MapComposite *m = getScript(s)->getMap();
-    if (!m)
-    {
-        raiseScriptError(s, "is_walkable called outside a map.");
-        return 0;
-    }
-    Map *map = m->getMap();
+    Map *map = checkCurrentMap(s)->getMap();
 
     // If the wanted warp place is unwalkable
     if (map->getWalk(x / map->getTileWidth(), y / map->getTileHeight()))
@@ -1972,12 +1890,7 @@ static int is_walkable(lua_State *s)
 
 static int map_get_pvp(lua_State *s)
 {
-    MapComposite *m = getScript(s)->getMap();
-    if (!m)
-    {
-        raiseScriptError(s, "map_get_pvp called outside a map.");
-        return 0;
-    }
+    MapComposite *m = checkCurrentMap(s);
     lua_pushinteger(s, m->getPvP());
     return 1;
 }
@@ -2002,10 +1915,9 @@ static int item_drop(lua_State *s)
     const int y = luaL_checkint(s, 2);
     ItemClass *ic = checkItemClass(s, 3);
     const int number = luaL_optint(s, 4, 1);
+    MapComposite *map = checkCurrentMap(s);
 
     Item *i = new Item(ic, number);
-
-    MapComposite *map = getScript(s)->getMap();
 
     i->setMap(map);
     Point pos(x, y);
@@ -2098,7 +2010,7 @@ static int map_get_objects(lua_State *s)
         filter = luaL_checkstring(s, 1);
     }
 
-    MapComposite *m = getScript(s)->getMap();
+    MapComposite *m = checkCurrentMap(s);
     const std::vector<MapObject*> &objects = m->getMap()->getObjects();
 
     if (!filtered)
