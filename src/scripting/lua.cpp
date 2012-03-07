@@ -1561,7 +1561,7 @@ static int effect_create(lua_State *s)
     {
         // being mode
         Being *b = checkBeing(s, 2);
-        Effects::show(id, m, b->getMap());
+        Effects::show(id, b->getMap(), b);
     }
     else
     {
