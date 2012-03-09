@@ -25,6 +25,7 @@
 #include "game-server/being.h"
 #include "utils/logger.h"
 
+#include <cassert>
 #include <cstdlib>
 #include <map>
 
@@ -38,9 +39,16 @@ Script::Ref Script::mCreateNpcDelayedCallback;
 Script::Ref Script::mUpdateCallback;
 
 Script::Script():
-    mMap(NULL),
+    mCurrentThread(0),
+    mMap(0),
     mEventListener(&scriptEventDispatch)
 {}
+
+Script::~Script()
+{
+    // There should be no remaining threads when the Script gets deleted
+    assert(mThreads.empty());
+}
 
 void Script::registerEngine(const std::string &name, Factory f)
 {
@@ -119,4 +127,36 @@ void Script::loadNPC(const std::string &name, int id, int x, int y,
     push(x);
     push(y);
     execute();
+}
+
+
+/**
+ * Removes one element matching the given value by overwriting it with the last
+ * element and then popping the last element.
+ */
+template<typename T>
+static void fastRemoveOne(std::vector<T> &vector, T value)
+{
+    for (size_t i = vector.size() - 1; i >= 0; --i)
+    {
+        if (vector.at(i) == value)
+        {
+            vector.at(i) = vector.back();
+            vector.pop_back();
+            break;
+        }
+    }
+}
+
+Script::Thread::Thread(Script *script) :
+    mScript(script),
+    mState(ThreadPending),
+    mMap(0)
+{
+    script->mThreads.push_back(this);
+}
+
+Script::Thread::~Thread()
+{
+    fastRemoveOne(mScript->mThreads, this);
 }

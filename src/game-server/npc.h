@@ -32,7 +32,7 @@ class Character;
 class NPC : public Being
 {
     public:
-        NPC(const std::string &name, int id, Script *);
+        NPC(const std::string &name, int id);
 
         void update();
 
@@ -49,17 +49,17 @@ class NPC : public Being
         /**
          * Selects an NPC proposition.
          */
-        void select(Character *, int);
+        void select(Character *, int index);
 
         /**
          * The player has choosen an integer.
          */
-        void integerReceived(Character *ch, int v);
+        void integerReceived(Character *ch, int value);
 
         /**
          * The player has entered an string.
          */
-        void stringReceived(Character *ch, const std::string &v);
+        void stringReceived(Character *ch, const std::string &value);
 
         /**
          * Gets NPC ID.
@@ -76,18 +76,6 @@ class NPC : public Being
         static void setStartCallback(Script *script)
         { script->assignCallback(mStartCallback); }
 
-        static void setNextCallback(Script *script)
-        { script->assignCallback(mNextCallback); }
-
-        static void setChooseCallback(Script *script)
-        { script->assignCallback(mChooseCallback); }
-
-        static void setIntegerCallback(Script *script)
-        { script->assignCallback(mIntegerCallback); }
-
-        static void setStringCallback(Script *script)
-        { script->assignCallback(mStringCallback); }
-
         static void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
 
@@ -99,16 +87,11 @@ class NPC : public Being
         { return BLOCKTYPE_CHARACTER; } // blocks like a player character
 
     private:
-        Script *mScript;    /**< Script describing NPC behavior. */
         unsigned short mID; /**< ID of the NPC. */
         bool mEnabled;      /**< Whether NPC is enabled */
 
         static Script::Ref mStartCallback;
-        static Script::Ref mNextCallback;
-        static Script::Ref mChooseCallback;
-        static Script::Ref mIntegerCallback;
-        static Script::Ref mStringCallback;
         static Script::Ref mUpdateCallback;
 };
 
-#endif
+#endif // GAMESERVER_NPC_H

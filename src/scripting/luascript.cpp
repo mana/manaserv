@@ -21,8 +21,8 @@
 
 #include "luascript.h"
 
-
 #include "scripting/luautil.h"
+#include "scripting/scriptmanager.h"
 
 #include "game-server/character.h"
 #include "utils/logger.h"
@@ -30,8 +30,6 @@
 #include <cassert>
 #include <cstring>
 
-Script::Ref LuaScript::mQuestReplyCallback;
-Script::Ref LuaScript::mPostReplyCallback;
 Script::Ref LuaScript::mDeathNotificationCallback;
 Script::Ref LuaScript::mRemoveNotificationCallback;
 
@@ -39,36 +37,59 @@ const char LuaScript::registryKey = 0;
 
 LuaScript::~LuaScript()
 {
-    lua_close(mState);
+    lua_close(mRootState);
 }
 
 void LuaScript::prepare(Ref function)
 {
     assert(nbArgs == -1);
+
     assert(function.isValid());
-    lua_rawgeti(mState, LUA_REGISTRYINDEX, function.value);
-    assert(lua_isfunction(mState, -1));
+    lua_rawgeti(mCurrentState, LUA_REGISTRYINDEX, function.value);
+    assert(lua_isfunction(mCurrentState, -1));
+    nbArgs = 0;
+}
+
+Script::Thread *LuaScript::newThread()
+{
+    assert(nbArgs == -1);
+    assert(!mCurrentThread);
+
+    LuaThread *thread = new LuaThread(this);
+
+    mCurrentThread = thread;
+    mCurrentState = thread->mState;
+    return thread;
+}
+
+void LuaScript::prepareResume(Thread *thread)
+{
+    assert(nbArgs == -1);
+    assert(!mCurrentThread);
+
+    mCurrentThread = thread;
+    mCurrentState = static_cast<LuaThread*>(thread)->mState;
     nbArgs = 0;
 }
 
 void LuaScript::push(int v)
 {
     assert(nbArgs >= 0);
-    lua_pushinteger(mState, v);
+    lua_pushinteger(mCurrentState, v);
     ++nbArgs;
 }
 
 void LuaScript::push(const std::string &v)
 {
     assert(nbArgs >= 0);
-    lua_pushstring(mState, v.c_str());
+    lua_pushstring(mCurrentState, v.c_str());
     ++nbArgs;
 }
 
 void LuaScript::push(Thing *v)
 {
     assert(nbArgs >= 0);
-    lua_pushlightuserdata(mState, v);
+    lua_pushlightuserdata(mCurrentState, v);
     ++nbArgs;
 }
 
@@ -77,8 +98,8 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
     assert(nbArgs >= 0);
     int position = 0;
 
-    lua_createtable(mState, itemList.size(), 0);
-    int itemTable = lua_gettop(mState);
+    lua_createtable(mCurrentState, itemList.size(), 0);
+    int itemTable = lua_gettop(mCurrentState);
 
     for (std::list<InventoryItem>::const_iterator i = itemList.begin();
          i != itemList.end();
@@ -88,8 +109,8 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
         std::map<std::string, int> item;
         item["id"] = i->itemId;
         item["amount"] = i->amount;
-        pushSTLContainer<std::string, int>(mState, item);
-        lua_rawseti(mState, itemTable, ++position);
+        pushSTLContainer<std::string, int>(mCurrentState, item);
+        lua_rawseti(mCurrentState, itemTable, ++position);
     }
     ++nbArgs;
 }
@@ -97,56 +118,106 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
 int LuaScript::execute()
 {
     assert(nbArgs >= 0);
-    int res = lua_pcall(mState, nbArgs, 1, 1);
+    assert(!mCurrentThread);
+
+    int res = lua_pcall(mCurrentState, nbArgs, 1, 1);
     nbArgs = -1;
-    if (res || !(lua_isnil(mState, -1) || lua_isnumber(mState, -1)))
+
+    if (res || !(lua_isnil(mCurrentState, -1) || lua_isnumber(mCurrentState, -1)))
     {
-        const char *s = lua_tostring(mState, -1);
+        const char *s = lua_tostring(mCurrentState, -1);
 
         LOG_WARN("Lua Script Error" << std::endl
                  << "     Script  : " << mScriptFile << std::endl
                  << "     Error   : " << (s ? s : "") << std::endl);
-        lua_pop(mState, 1);
+        lua_pop(mCurrentState, 1);
         return 0;
     }
-    res = lua_tointeger(mState, -1);
-    lua_pop(mState, 1);
+    res = lua_tointeger(mCurrentState, -1);
+    lua_pop(mCurrentState, 1);
     return res;
+}
+
+bool LuaScript::resume()
+{
+    assert(nbArgs >= 0);
+    assert(mCurrentThread);
+
+    setMap(mCurrentThread->mMap);
+    int result = lua_resume(mCurrentState, nbArgs);
+    nbArgs = -1;
+    setMap(0);
+
+    if (result == 0)                // Thread is done
+    {
+        if (lua_gettop(mCurrentState) > 0)
+            LOG_WARN("Ignoring values returned by script thread!");
+    }
+    else if (result == LUA_YIELD)   // Thread has yielded
+    {
+        if (lua_gettop(mCurrentState) > 0)
+            LOG_WARN("Ignoring values passed to yield!");
+    }
+    else                            // Thread encountered an error
+    {
+        // Make a traceback using the debug.traceback function
+        lua_getglobal(mCurrentState, "debug");
+        lua_getfield(mCurrentState, -1, "traceback");
+        lua_pushvalue(mCurrentState, -3); // error string as first parameter
+        lua_pcall(mCurrentState, 1, 1, 0);
+
+        LOG_WARN("Lua Script Error:" << std::endl
+                 << lua_tostring(mCurrentState, -1));
+    }
+
+    lua_settop(mCurrentState, 0);
+    const bool done = result != LUA_YIELD;
+
+    if (done)
+    {
+        // Clean up the current thread (not sure if this is the best place)
+        delete mCurrentThread;
+    }
+
+    mCurrentThread = 0;
+    mCurrentState = mRootState;
+
+    return done;
 }
 
 void LuaScript::assignCallback(Script::Ref &function)
 {
-    assert(lua_isfunction(mState, -1));
+    assert(lua_isfunction(mRootState, -1));
 
     // If there is already a callback set, replace it
     if (function.isValid())
-        luaL_unref(mState, LUA_REGISTRYINDEX, function.value);
+        luaL_unref(mRootState, LUA_REGISTRYINDEX, function.value);
 
-    function.value = luaL_ref(mState, LUA_REGISTRYINDEX);
+    function.value = luaL_ref(mRootState, LUA_REGISTRYINDEX);
 }
 
 void LuaScript::load(const char *prog, const char *name)
 {
-    int res = luaL_loadbuffer(mState, prog, std::strlen(prog), name);
+    int res = luaL_loadbuffer(mRootState, prog, std::strlen(prog), name);
     if (res)
     {
         switch (res) {
         case LUA_ERRSYNTAX:
             LOG_ERROR("Syntax error while loading Lua script: "
-                      << lua_tostring(mState, -1));
+                      << lua_tostring(mRootState, -1));
             break;
         case LUA_ERRMEM:
             LOG_ERROR("Memory allocation error while loading Lua script");
             break;
         }
 
-        lua_pop(mState, 1);
+        lua_pop(mRootState, 1);
     }
-    else if (lua_pcall(mState, 0, 0, 1))
+    else if (lua_pcall(mRootState, 0, 0, 1))
     {
         LOG_ERROR("Failure while initializing Lua script: "
-                  << lua_tostring(mState, -1));
-        lua_pop(mState, 1);
+                  << lua_tostring(mRootState, -1));
+        lua_pop(mRootState, 1);
     }
 }
 
@@ -179,31 +250,47 @@ void LuaScript::processRemoveEvent(Thing *being)
 /**
  * Called when the server has recovered the value of a quest variable.
  */
-void LuaScript::getQuestCallback(Character *q, const std::string &name,
-                                 const std::string &value, Script *script)
+void LuaScript::getQuestCallback(Character *q,
+                                 const std::string &value,
+                                 Script *script)
 {
-    if (mQuestReplyCallback.isValid())
-    {
-        script->prepare(mQuestReplyCallback);
-        script->push(q);
-        script->push(name);
-        script->push(value);
-        script->execute();
-    }
+    Script::Thread *thread = q->getNpcThread();
+    if (!thread || thread->mState != Script::ThreadExpectingString)
+        return;
+
+    script->prepareResume(thread);
+    script->push(value);
+    script->resume();
 }
 
 /**
  * Called when the server has recovered the post for a user.
  */
-void LuaScript::getPostCallback(Character *q, const std::string &sender,
-                                const std::string &letter, Script *script)
+void LuaScript::getPostCallback(Character *q,
+                                const std::string &sender,
+                                const std::string &letter,
+                                Script *script)
 {
-    if (mPostReplyCallback.isValid())
-    {
-        script->prepare(mPostReplyCallback);
-        script->push(q);
-        script->push(sender);
-        script->push(letter);
-        script->execute();
-    }
+    Script::Thread *thread = q->getNpcThread();
+    if (!thread || thread->mState != Script::ThreadExpectingTwoStrings)
+        return;
+
+    script->prepareResume(thread);
+    script->push(sender);
+    script->push(letter);
+    script->resume();
+}
+
+
+LuaScript::LuaThread::LuaThread(LuaScript *script) :
+    Thread(script)
+{
+    mState = lua_newthread(script->mRootState);
+    mRef = luaL_ref(script->mRootState, LUA_REGISTRYINDEX);
+}
+
+LuaScript::LuaThread::~LuaThread()
+{
+    LuaScript *luaScript = static_cast<LuaScript*>(mScript);
+    luaL_unref(luaScript->mRootState, LUA_REGISTRYINDEX, mRef);
 }

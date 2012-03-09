@@ -62,6 +62,8 @@ class Character : public Being
          */
         Character(MessageIn &msg);
 
+        ~Character();
+
         /**
          * recalculates the level when necessary and calls Being::update
          */
@@ -346,6 +348,12 @@ class Character : public Being
         void setCorrectionPoints(int points) { mCorrectionPoints = points; }
         int getCorrectionPoints() const { return mCorrectionPoints; }
 
+        void setNpcThread(Script::Thread *thread)
+        { mNpcThread = thread; }
+
+        Script::Thread *getNpcThread() const
+        { return mNpcThread; }
+
         /**
          * Gets the way the actor is blocked by other things on the map
          */
@@ -464,6 +472,7 @@ class Character : public Being
         int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
         std::map<int, int> mKillCount;  /**< How many monsters the character has slain of each type */
+        Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
 
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;

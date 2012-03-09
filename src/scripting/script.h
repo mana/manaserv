@@ -26,6 +26,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 class MapComposite;
 class Thing;
@@ -56,16 +57,40 @@ class Script
          * custom initialization and a definition of valid. It also makes the
          * purpose clear.
          */
-        class Ref {
-        public:
-            Ref() : value(-1) {}
-            bool isValid() const { return value != -1; }
-            int value;
+        class Ref
+        {
+            public:
+                Ref() : value(-1) {}
+                bool isValid() const { return value != -1; }
+                int value;
+        };
+
+        enum ThreadState {
+            ThreadPending,
+            ThreadPaused,
+            ThreadExpectingNumber,
+            ThreadExpectingString,
+            ThreadExpectingTwoStrings
+        };
+
+        /**
+         * A script thread. Meant to be extended by the Script subclass to
+         * store additional information.
+         */
+        class Thread
+        {
+            public:
+                Thread(Script *script);
+                virtual ~Thread();
+
+                Script * const mScript;
+                ThreadState mState;
+                MapComposite *mMap;
         };
 
         Script();
 
-        virtual ~Script() {}
+        virtual ~Script();
 
         /**
          * Loads a chunk of text into script context and executes its global
@@ -96,10 +121,26 @@ class Script
         virtual void update();
 
         /**
+         * Creates a new script thread and makes it the current one. Script
+         * threads do not execute in parallel, but they can suspend execution
+         * and be resumed later.
+         *
+         * The new thread should be prepared as usual, but instead of
+         * execute(), the resume() function should be called.
+         */
+        virtual Thread *newThread() = 0;
+
+        /**
          * Prepares a call to the referenced function.
          * Only one function can be prepared at once.
          */
         virtual void prepare(Ref function) = 0;
+
+        /**
+         * Prepares for resuming the given script thread.
+         * Only one thread can be resumed at once.
+         */
+        virtual void prepareResume(Thread *thread) = 0;
 
         /**
          * Pushes an integer argument for the function being prepared.
@@ -120,8 +161,7 @@ class Script
         virtual void push(Thing *) = 0;
 
         /**
-         * Pushes a list of items with amounts to the
-         * script engine.
+         * Pushes a list of items with amounts to the script engine.
          */
         virtual void push(const std::list<InventoryItem> &itemList) = 0;
 
@@ -132,11 +172,26 @@ class Script
         virtual int execute() = 0;
 
         /**
+         * Starts or resumes the current thread. Deletes the thread when it is
+         * done.
+         *
+         * @return whether the thread is done executing.
+         */
+        virtual bool resume() = 0;
+
+        /**
          * Assigns the current callback to the given \a function.
          *
          * Where the callback exactly comes from is up to the script engine.
          */
         virtual void assignCallback(Ref &function) = 0;
+
+        /**
+         * Returns the currently executing thread, or null when no thread is
+         * currently executing.
+         */
+        Thread *getCurrentThread() const
+        { return mCurrentThread; }
 
         /**
          * Sets associated map.
@@ -165,15 +220,18 @@ class Script
 
     protected:
         std::string mScriptFile;
+        Thread *mCurrentThread;
 
     private:
         MapComposite *mMap;
         EventListener mEventListener; /**< Tracking of being deaths. */
+        std::vector<Thread*> mThreads;
 
         static Ref mCreateNpcDelayedCallback;
         static Ref mUpdateCallback;
 
     friend struct ScriptEventDispatch;
+    friend class Thread;
 };
 
 struct ScriptEventDispatch: EventDispatch
@@ -188,4 +246,4 @@ struct ScriptEventDispatch: EventDispatch
 
 static ScriptEventDispatch scriptEventDispatch;
 
-#endif
+#endif // SCRIPTING_SCRIPT_H

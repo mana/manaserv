@@ -29,8 +29,11 @@ class Script;
 
 struct PostCallback
 {
-    void (*handler)(Character *, const std::string &sender,
-                    const std::string &letter, Script *script);
+    void (*handler)(Character *,
+                    const std::string &sender,
+                    const std::string &letter,
+                    Script *);
+
     Script *script;
 };
 

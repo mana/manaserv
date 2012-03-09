@@ -26,8 +26,6 @@
 
 #include "common/defines.h"
 
-#include "game-server/skillmanager.h"
-
 /**
  * Structure that describes the severity and nature of an attack a being can
  * be hit by.

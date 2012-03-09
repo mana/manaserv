@@ -129,7 +129,8 @@ void recoverQuestVar(Character *ch, const std::string &name,
     accountHandler->requestCharacterVar(ch, name);
 }
 
-void recoveredQuestVar(int id, const std::string &name,
+void recoveredQuestVar(int id,
+                       const std::string &name,
                        const std::string &value)
 {
     PendingQuests::iterator i = pendingQuests.find(id);
@@ -152,7 +153,7 @@ void recoveredQuestVar(int id, const std::string &name,
     for (QuestCallbacks::const_iterator k = j->second.begin(),
          k_end = j->second.end(); k != k_end; ++k)
     {
-        k->handler(ch, name, value, k->script);
+        k->handler(ch, value, k->script);
     }
 
     variables.erase(j);

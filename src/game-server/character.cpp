@@ -85,7 +85,8 @@ Character::Character(MessageIn &msg):
     mUpdateLevelProgress(false),
     mRecalculateLevel(true),
     mParty(0),
-    mTransaction(TRANS_NONE)
+    mTransaction(TRANS_NONE),
+    mNpcThread(0)
 {
     const AttributeManager::AttributeScope &attr =
                            attributeManager->getAttributeScope(CharacterScope);
@@ -109,6 +110,11 @@ Character::Character(MessageIn &msg):
     giveSpecial(1);
     giveSpecial(2);
     giveSpecial(3);
+}
+
+Character::~Character()
+{
+    delete mNpcThread;
 }
 
 void Character::update()

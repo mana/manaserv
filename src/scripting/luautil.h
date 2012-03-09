@@ -21,10 +21,13 @@
 #ifndef SCRIPTING_LUAUTIL_H
 #define SCRIPTING_LUAUTIL_H
 
+#include "scripting/script.h"
+
 extern "C" {
 #include <lualib.h>
 #include <lauxlib.h>
 }
+
 #include <string>
 #include <list>
 #include <map>
@@ -39,7 +42,6 @@ class MapObject;
 class Monster;
 class MonsterClass;
 class NPC;
-class Script;
 class StatusEffect;
 class Thing;
 
@@ -168,6 +170,7 @@ MonsterClass *  checkMonsterClass(lua_State *s, int p);
 NPC *           checkNPC(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
+Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);
 
 
 /* Polymorphic wrapper for pushing variables.

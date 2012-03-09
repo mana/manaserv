@@ -21,17 +21,13 @@
 #include "game-server/character.h"
 #include "game-server/npc.h"
 #include "scripting/script.h"
+#include "scripting/scriptmanager.h"
 
 Script::Ref NPC::mStartCallback;
-Script::Ref NPC::mNextCallback;
-Script::Ref NPC::mChooseCallback;
-Script::Ref NPC::mIntegerCallback;
-Script::Ref NPC::mStringCallback;
 Script::Ref NPC::mUpdateCallback;
 
-NPC::NPC(const std::string &name, int id, Script *s):
+NPC::NPC(const std::string &name, int id):
     Being(OBJECT_NPC),
-    mScript(s),
     mID(id),
     mEnabled(true)
 {
@@ -45,53 +41,89 @@ void NPC::enable(bool enabled)
 
 void NPC::update()
 {
-    if (!mScript || !mEnabled || !mUpdateCallback.isValid())
+    if (!mEnabled || !mUpdateCallback.isValid())
         return;
-    mScript->prepare(mUpdateCallback);
-    mScript->push(this);
-    mScript->execute();
+
+    Script *script = ScriptManager::currentState();
+    script->prepare(mUpdateCallback);
+    script->push(this);
+    script->execute();
 }
 
 void NPC::prompt(Character *ch, bool restart)
 {
-    if (!mScript || !mEnabled || !mStartCallback.isValid()
-            || !mNextCallback.isValid())
+    if (!mEnabled || !mStartCallback.isValid())
         return;
-    mScript->prepare(restart ? mStartCallback : mNextCallback);
-    mScript->push(this);
-    mScript->push(ch);
-    mScript->execute();
+
+    Script *script = ScriptManager::currentState();
+
+    if (restart)
+    {
+        Script::Thread *thread = script->newThread();
+        thread->mMap = getMap();
+        script->prepare(mStartCallback);
+        script->push(this);
+        script->push(ch);
+
+        if (!script->resume())
+            ch->setNpcThread(thread);
+    }
+    else
+    {
+        Script::Thread *thread = ch->getNpcThread();
+        if (!thread || thread->mState != Script::ThreadPaused)
+            return;
+
+        script->prepareResume(thread);
+        if (script->resume())
+            ch->setNpcThread(0);
+    }
 }
 
-void NPC::select(Character *ch, int v)
+void NPC::select(Character *ch, int index)
 {
-    if (!mScript || !mEnabled || !mChooseCallback.isValid())
+    if (!mEnabled)
         return;
-    mScript->prepare(mChooseCallback);
-    mScript->push(this);
-    mScript->push(ch);
-    mScript->push(v);
-    mScript->execute();
+
+    Script::Thread *thread = ch->getNpcThread();
+    if (!thread || thread->mState != Script::ThreadExpectingNumber)
+        return;
+
+    Script *script = ScriptManager::currentState();
+    script->prepareResume(thread);
+    script->push(index);
+    if (script->resume())
+        ch->setNpcThread(0);
 }
 
-void NPC::integerReceived(Character *ch, int v)
+void NPC::integerReceived(Character *ch, int value)
 {
-    if (!mScript || !mEnabled || !mIntegerCallback.isValid())
+    if (!mEnabled)
         return;
-    mScript->prepare(mIntegerCallback);
-    mScript->push(this);
-    mScript->push(ch);
-    mScript->push(v);
-    mScript->execute();
+
+    Script::Thread *thread = ch->getNpcThread();
+    if (!thread || thread->mState != Script::ThreadExpectingNumber)
+        return;
+
+    Script *script = ScriptManager::currentState();
+    script->prepareResume(thread);
+    script->push(value);
+    if (script->resume())
+        ch->setNpcThread(0);
 }
 
-void NPC::stringReceived(Character *ch, const std::string &v)
+void NPC::stringReceived(Character *ch, const std::string &value)
 {
-    if (!mScript || !mEnabled || !mStringCallback.isValid())
+    if (!mEnabled)
         return;
-    mScript->prepare(mStringCallback);
-    mScript->push(this);
-    mScript->push(ch);
-    mScript->push(v);
-    mScript->execute();
+
+    Script::Thread *thread = ch->getNpcThread();
+    if (!thread || thread->mState != Script::ThreadExpectingString)
+        return;
+
+    Script *script = ScriptManager::currentState();
+    script->prepareResume(thread);
+    script->push(value);
+    if (script->resume())
+        ch->setNpcThread(0);
 }

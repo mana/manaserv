@@ -44,7 +44,11 @@ class LuaScript : public Script
 
         void load(const char *prog, const char *name);
 
+        Thread *newThread();
+
         void prepare(Ref function);
+
+        void prepareResume(Thread *thread);
 
         void push(int);
 
@@ -56,24 +60,23 @@ class LuaScript : public Script
 
         int execute();
 
+        bool resume();
+
         void assignCallback(Ref &function);
 
-        static void getQuestCallback(Character *, const std::string &,
-                                     const std::string &, Script *);
+        static void getQuestCallback(Character *,
+                                     const std::string &value,
+                                     Script *);
 
-        static void getPostCallback(Character *, const std::string &,
-                                    const std::string &, Script *);
+        static void getPostCallback(Character *,
+                                    const std::string &sender,
+                                    const std::string &letter,
+                                    Script *);
 
         void processDeathEvent(Being *thing);
 
         void processRemoveEvent(Thing *thing);
 
-
-        static void setQuestReplyCallback(Script *script)
-        { script->assignCallback(mQuestReplyCallback); }
-
-        static void setPostReplyCallback(Script *script)
-        { script->assignCallback(mPostReplyCallback); }
 
         static void setDeathNotificationCallback(Script *script)
         { script->assignCallback(mDeathNotificationCallback); }
@@ -84,13 +87,24 @@ class LuaScript : public Script
         static const char registryKey;
 
     private:
-        lua_State *mState;
+        class LuaThread : public Thread
+        {
+            public:
+                LuaThread(LuaScript *script);
+                ~LuaThread();
+
+                lua_State *mState;
+                int mRef;
+        };
+
+        lua_State *mRootState;
+        lua_State *mCurrentState;
         int nbArgs;
 
-        static Ref mQuestReplyCallback;
-        static Ref mPostReplyCallback;
         static Ref mDeathNotificationCallback;
         static Ref mRemoveNotificationCallback;
+
+        friend class LuaThread;
 };
 
 static Script *LuaFactory()

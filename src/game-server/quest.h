@@ -28,8 +28,10 @@ class Script;
 
 struct QuestCallback
 {
-    void (*handler)(Character *, const std::string &name,
-                    const std::string &value, Script *script);
+    void (*handler)(Character *,
+                    const std::string &value,
+                    Script *script);
+
     Script *script;
 };
 

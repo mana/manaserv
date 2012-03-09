@@ -20,7 +20,6 @@ function Banker(npc, ch)
     end
     local account = tonumber(get_quest_var(ch, "BankAccount"))
     local result = -1
-    do_wait()
 
     if (account == nil) then --Initial account creation, if needed
         do_message(npc, ch, "Hello! Would you like to setup a bank account? There is a sign-on bonus right now!")
@@ -45,7 +44,6 @@ function Banker(npc, ch)
                 if (money > 0) then --Make sure they have money to deposit
                     do_message(npc, ch, "How much would you like to deposit? (0 will cancel)")
                     input = do_ask_integer(npc, ch, 0, money, 1)
-                    do_wait()
                     money = mana.chr_money(ch)
                     if (input > 0 and input <= money) then --Make sure something weird doesn't happen and they try to deposit more than they have
                         mana.chr_money_change(ch, -input)

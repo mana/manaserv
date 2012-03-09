@@ -265,6 +265,18 @@ MapComposite *checkCurrentMap(lua_State *s, Script *script /* = 0 */)
     return mapComposite;
 }
 
+Script::Thread *checkCurrentThread(lua_State *s, Script *script /* = 0 */)
+{
+    if (!script)
+        script = getScript(s);
+
+    Script::Thread *thread = script->getCurrentThread();
+    if (!thread)
+        luaL_error(s, "function requires threaded execution");
+
+    return thread;
+}
+
 
 void push(lua_State *s, int val)
 {

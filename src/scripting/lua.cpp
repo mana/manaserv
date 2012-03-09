@@ -91,20 +91,6 @@ static int on_character_death_accept(lua_State *s)
     return 0;
 }
 
-static int on_npc_quest_reply(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    LuaScript::setQuestReplyCallback(getScript(s));
-    return 0;
-}
-
-static int on_npc_post_reply(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    LuaScript::setPostReplyCallback(getScript(s));
-    return 0;
-}
-
 static int on_being_death(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
@@ -130,34 +116,6 @@ static int on_npc_start(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
     NPC::setStartCallback(getScript(s));
-    return 0;
-}
-
-static int on_npc_next(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    NPC::setNextCallback(getScript(s));
-    return 0;
-}
-
-static int on_npc_choose(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    NPC::setChooseCallback(getScript(s));
-    return 0;
-}
-
-static int on_npc_integer(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    NPC::setIntegerCallback(getScript(s));
-    return 0;
-}
-
-static int on_npc_string(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    NPC::setStringCallback(getScript(s));
     return 0;
 }
 
@@ -233,11 +191,15 @@ static int npc_message(lua_State *s)
     size_t l;
     const char *m = luaL_checklstring(s, 3, &l);
 
+    Script::Thread *thread = checkCurrentThread(s);
+
     MessageOut msg(GPMSG_NPC_MESSAGE);
     msg.writeInt16(p->getPublicID());
     msg.writeString(m, l);
     gameHandler->sendTo(q, msg);
-    return 0;
+
+    thread->mState = Script::ThreadPaused;
+    return lua_yield(s, 0);
 }
 
 /**
@@ -248,6 +210,8 @@ static int npc_choice(lua_State *s)
 {
     NPC *p = checkNPC(s, 1);
     Character *q = checkCharacter(s, 2);
+
+    Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_CHOICE);
     msg.writeInt16(p->getPublicID());
@@ -282,11 +246,13 @@ static int npc_choice(lua_State *s)
         }
     }
     gameHandler->sendTo(q, msg);
-    return 0;
+
+    thread->mState = Script::ThreadExpectingNumber;
+    return lua_yield(s, 0);
 }
 
 /**
- * mana.npc_integer(NPC*, Character*, int min, int max, int defaut = min): void
+ * mana.npc_integer(NPC*, Character*, int min, int max, int default = min): void
  * Callback for sending a NPC_INTEGER.
  */
 static int npc_ask_integer(lua_State *s)
@@ -297,6 +263,8 @@ static int npc_ask_integer(lua_State *s)
     int max = luaL_checkint(s, 4);
     int defaultValue = luaL_optint(s, 5, min);
 
+    Script::Thread *thread = checkCurrentThread(s);
+
     MessageOut msg(GPMSG_NPC_NUMBER);
     msg.writeInt16(p->getPublicID());
     msg.writeInt32(min);
@@ -304,7 +272,8 @@ static int npc_ask_integer(lua_State *s)
     msg.writeInt32(defaultValue);
     gameHandler->sendTo(q, msg);
 
-    return 0;
+    thread->mState = Script::ThreadExpectingNumber;
+    return lua_yield(s, 0);
 }
 
 /**
@@ -316,15 +285,18 @@ static int npc_ask_string(lua_State *s)
     NPC *p = checkNPC(s, 1);
     Character *q = checkCharacter(s, 2);
 
+    Script::Thread *thread = checkCurrentThread(s);
+
     MessageOut msg(GPMSG_NPC_STRING);
     msg.writeInt16(p->getPublicID());
     gameHandler->sendTo(q, msg);
 
-    return 0;
+    thread->mState = Script::ThreadExpectingString;
+    return lua_yield(s, 0);
 }
 
 /**
- * mana.npc_create(string name, int id, int x, int y): NPC*
+ * mana.npc_create(string name, int id, int gender, int x, int y): NPC*
  * Callback for creating a NPC on the current map with the current script.
  */
 static int npc_create(lua_State *s)
@@ -335,10 +307,9 @@ static int npc_create(lua_State *s)
     const int x = luaL_checkint(s, 4);
     const int y = luaL_checkint(s, 5);
 
-    Script *t = getScript(s);
-    MapComposite *m = checkCurrentMap(s, t);
+    MapComposite *m = checkCurrentMap(s);
 
-    NPC *q = new NPC(name, id, t);
+    NPC *q = new NPC(name, id);
     q->setGender(getGender(gender));
     q->setMap(m);
     q->setPosition(Point(x, y));
@@ -514,7 +485,7 @@ static int chr_get_inventory(lua_State *s)
 }
 
 /**
- * Callback for gathering equiupment information.
+ * Callback for gathering equipment information.
  * mana.chr_get_inventory(character): table[](slot, item id, name)
  * Returns in the inventory slots order, the slot id, the item ids, and name.
  * Only slots not empty are returned.
@@ -1295,6 +1266,8 @@ static int chr_get_quest(lua_State *s)
     const char *name = luaL_checkstring(s, 2);
     luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
 
+    Script::Thread *thread = checkCurrentThread(s);
+
     std::string value;
     bool res = getQuestVar(q, name, value);
     if (res)
@@ -1304,7 +1277,9 @@ static int chr_get_quest(lua_State *s)
     }
     QuestCallback f = { &LuaScript::getQuestCallback, getScript(s) };
     recoverQuestVar(q, name, f);
-    return 0;
+
+    thread->mState = Script::ThreadExpectingString;
+    return lua_yield(s, 0);
 }
 
 /**
@@ -1507,8 +1482,7 @@ static int get_beings_in_rectangle(lua_State *s)
     int tableStackPosition = lua_gettop(s);
     int tableIndex = 1;
     Rectangle rect = {x, y ,w, h};
-    for (BeingIterator i(
-         m->getInsideRectangleIterator(rect)); i; ++i)
+    for (BeingIterator i(m->getInsideRectangleIterator(rect)); i; ++i)
     {
         Being *b = *i;
         char t = b->getType();
@@ -1530,10 +1504,14 @@ static int chr_get_post(lua_State *s)
 {
     Character *c = checkCharacter(s, 1);
 
-    PostCallback f = { &LuaScript::getPostCallback, getScript(s) };
+    Script *script = getScript(s);
+    Script::Thread *thread = checkCurrentThread(s, script);
+
+    PostCallback f = { &LuaScript::getPostCallback, script };
     postMan->getPost(c, f);
 
-    return 0;
+    thread->mState = Script::ThreadExpectingTwoStrings;
+    return lua_yield(s, 0);
 }
 
 /**
@@ -2135,31 +2113,26 @@ static int require_loader(lua_State *s)
 LuaScript::LuaScript():
     nbArgs(-1)
 {
-    mState = luaL_newstate();
-    luaL_openlibs(mState);
+    mRootState = luaL_newstate();
+    mCurrentState = mRootState;
+    luaL_openlibs(mRootState);
 
     // Register package loader that goes through the resource manager
     // table.insert(package.loaders, 2, require_loader)
-    lua_getglobal(mState, "package");
-    lua_getfield(mState, -1, "loaders");
-    lua_pushcfunction(mState, require_loader);
-    lua_rawseti(mState, -2, 2);
-    lua_pop(mState, 2);
+    lua_getglobal(mRootState, "package");
+    lua_getfield(mRootState, -1, "loaders");
+    lua_pushcfunction(mRootState, require_loader);
+    lua_rawseti(mRootState, -2, 2);
+    lua_pop(mRootState, 2);
 
     // Put the callback functions in the scripting environment.
     static luaL_Reg const callbacks[] = {
         { "on_character_death",              &on_character_death              },
         { "on_character_death_accept",       &on_character_death_accept       },
-        { "on_npc_quest_reply",              &on_npc_quest_reply              },
-        { "on_npc_post_reply",               &on_npc_post_reply               },
         { "on_being_death",                  &on_being_death                  },
         { "on_being_remove",                 &on_being_remove                 },
         { "on_update",                       &on_update                       },
         { "on_npc_start",                    &on_npc_start                    },
-        { "on_npc_next",                     &on_npc_next                     },
-        { "on_npc_choose",                   &on_npc_choose                   },
-        { "on_npc_integer",                  &on_npc_integer                  },
-        { "on_npc_string",                   &on_npc_string                   },
         { "on_npc_update",                   &on_npc_update                   },
         { "on_create_npc_delayed",           &on_create_npc_delayed           },
         { "on_map_initialize",               &on_map_initialize               },
@@ -2256,8 +2229,8 @@ LuaScript::LuaScript():
         { "announce",                        &announce                        },
         { NULL, NULL }
     };
-    luaL_register(mState, "mana", callbacks);
-    lua_pop(mState, 1);                     // pop the 'mana' table
+    luaL_register(mRootState, "mana", callbacks);
+    lua_pop(mRootState, 1);                     // pop the 'mana' table
 
     static luaL_Reg const members_ItemClass[] = {
         { "on",                              &item_class_on                   },
@@ -2283,20 +2256,20 @@ LuaScript::LuaScript():
         { NULL, NULL }
     };
 
-    LuaItemClass::registerType(mState, "ItemClass", members_ItemClass);
-    LuaMapObject::registerType(mState, "MapObject", members_MapObject);
-    LuaMonsterClass::registerType(mState, "MonsterClass", members_MonsterClass);
-    LuaStatusEffect::registerType(mState, "StatusEffect", members_StatusEffect);
+    LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
+    LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
+    LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);
+    LuaStatusEffect::registerType(mRootState, "StatusEffect", members_StatusEffect);
 
     // Make script object available to callback functions.
-    lua_pushlightuserdata(mState, const_cast<char *>(&registryKey));
-    lua_pushlightuserdata(mState, this);
-    lua_rawset(mState, LUA_REGISTRYINDEX);
+    lua_pushlightuserdata(mRootState, const_cast<char *>(&registryKey));
+    lua_pushlightuserdata(mRootState, this);
+    lua_rawset(mRootState, LUA_REGISTRYINDEX);
 
     // Push the error handler to first index of the stack
-    lua_getglobal(mState, "debug");
-    lua_getfield(mState, -1, "traceback");
-    lua_remove(mState, 1);                  // remove the 'debug' table
+    lua_getglobal(mRootState, "debug");
+    lua_getfield(mRootState, -1, "traceback");
+    lua_remove(mRootState, 1);                  // remove the 'debug' table
 
     loadFile("scripts/lua/libmana.lua");
 }
