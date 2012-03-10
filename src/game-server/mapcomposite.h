@@ -338,6 +338,21 @@ class MapComposite
                                       const std::string &value)
         { mScriptVariables[key] = value; }
 
+        /**
+         * Sets callback for map variable
+         */
+        void setMapVariableCallback(const std::string &key, Script *script)
+        { script->assignCallback(mMapVariableCallbacks[key]); }
+
+        /**
+         * Sets callback for global variable
+         */
+        void setWorldVariableCallback(const std::string &key, Script *script)
+        { script->assignCallback(mWorldVariableCallbacks[key]); }
+
+        void callWorldVariableCallback(const std::string &key,
+                                       const std::string &value);
+
         static void setInitializeCallback(Script *script)
         { script->assignCallback(mInitializeCallback); }
 
@@ -345,6 +360,8 @@ class MapComposite
         MapComposite(const MapComposite &);
 
         void initializeContent();
+        void callMapVariableCallback(const std::string &key,
+                                     const std::string &value);
 
         Map *mMap;            /**< Actual map. */
         MapContent *mContent; /**< Entities on the map. */
@@ -353,6 +370,8 @@ class MapComposite
         /** Cached persistent variables */
         std::map<std::string, std::string> mScriptVariables;
         PvPRules mPvPRules;
+        std::map<const std::string, Script::Ref> mMapVariableCallbacks;
+        std::map<const std::string, Script::Ref> mWorldVariableCallbacks;
 
         static Script::Ref mInitializeCallback;
 };

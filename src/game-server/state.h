@@ -121,6 +121,12 @@ namespace GameState
      */
     void setVariableFromDbserver (const std::string &key, const std::string &value);
 
+    /**
+     * Informs all maps about the change of a variable so the maps can call
+     * callbacks for those.
+     */
+    void callVariableCallbacks(const std::string &key,
+                               const std::string &value);
 }
 
 #endif

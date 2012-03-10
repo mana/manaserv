@@ -158,6 +158,50 @@ function schedule_per_date(my_year, my_month, my_day, my_hour, my_minute, funct)
   table.sort(scheduler_jobs, job_cmp)
 end
 
+-- MAP/WORLD VARIABLES NOTIFICATIONS
+local onmapvar_functs = {}
+local onworldvar_functs = {}
+
+local function on_mapvar_callback(key, value)
+  local functs = onmapvar_functs[key]
+  local mapid = mana.get_map_id()
+  for func, map in pairs(functs) do
+    if map == mapid then
+      func(key, value)
+    end
+  end
+end
+
+local function on_worldvar_callback(key, value)
+  local functs = onworldvar_functs[key]
+  for func, _ in pairs(functs) do
+    func(key, value)
+  end
+end
+
+function on_mapvar_changed(key, funct)
+  if not onmapvar_functs[key] then
+    onmapvar_functs[key] = {}
+    mana.on_mapvar_changed(key, on_mapvar_callback)
+  end
+  onmapvar_functs[key][funct] = mana.get_map_id()
+end
+
+function on_worldvar_changed(key, funct)
+  if not onworldvar_functs[key] then
+    onworldvar_functs[key] = {}
+    mana.on_worldvar_changed(key, on_worldvar_callback)
+  end
+  onworldvar_functs[key][funct] = true
+end
+
+function remove_mapvar_listener(key, funct)
+  onmapvar_functs[key][funct] = nil
+end
+
+function remove_worldvar_listener(key, funct)
+  onworldvar_functs[key][funct] = nil
+end
 
 -- DEATH NOTIFICATIONS
 local ondeath_functs = {}

@@ -832,12 +832,29 @@ std::string GameState::getVariable(const std::string &key)
 
 void GameState::setVariable(const std::string &key, const std::string &value)
 {
+    if (mScriptVariables[key] == value)
+        return;
     mScriptVariables[key] = value;
     accountHandler->updateWorldVar(key, value);
+    callVariableCallbacks(key, value);
 }
 
 void GameState::setVariableFromDbserver(const std::string &key,
                                         const std::string &value)
 {
+    if (mScriptVariables[key] == value)
+        return;
     mScriptVariables[key] = value;
+    callVariableCallbacks(key, value);
+}
+
+void GameState::callVariableCallbacks(const std::string &key,
+                                      const std::string &value)
+{
+    const MapManager::Maps &maps = MapManager::getMaps();
+    for (MapManager::Maps::const_iterator m = maps.begin(),
+         m_end = maps.end(); m != m_end; ++m)
+    {
+        m->second->callWorldVariableCallback(key, value);
+    }
 }

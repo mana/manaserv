@@ -161,6 +161,26 @@ static int on_get_special_recharge_cost(lua_State *s)
     return 0;
 }
 
+static int on_mapvar_changed(lua_State *s)
+{
+    const char *key = luaL_checkstring(s, 1);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    luaL_argcheck(s, key[0] != 0, 2, "empty variable name");
+    MapComposite *m = checkCurrentMap(s);
+    m->setMapVariableCallback(key, getScript(s));
+    return 0;
+}
+
+static int on_worldvar_changed(lua_State *s)
+{
+    const char *key = luaL_checkstring(s, 1);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    luaL_argcheck(s, key[0] != 0, 2, "empty variable name");
+    MapComposite *m = checkCurrentMap(s);
+    m->setWorldVariableCallback(key, getScript(s));
+    return 0;
+}
+
 static int get_item_class(lua_State *s)
 {
     LuaItemClass::push(s, checkItemClass(s, 1));
@@ -2139,6 +2159,8 @@ LuaScript::LuaScript():
         { "on_craft",                        &on_craft                        },
         { "on_use_special",                  &on_use_special                  },
         { "on_get_special_recharge_cost",    &on_get_special_recharge_cost    },
+        { "on_mapvar_changed",               &on_mapvar_changed               },
+        { "on_worldvar_changed",             &on_worldvar_changed             },
         { "get_item_class",                  &get_item_class                  },
         { "get_monster_class",               &get_monster_class               },
         { "get_status_effect",               &get_status_effect               },

@@ -118,10 +118,11 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
 int LuaScript::execute()
 {
     assert(nbArgs >= 0);
-    assert(!mCurrentThread);
 
-    int res = lua_pcall(mCurrentState, nbArgs, 1, 1);
+
+    const int tmpNbArgs = nbArgs;
     nbArgs = -1;
+    int res = lua_pcall(mCurrentState, tmpNbArgs, 1, 1);
 
     if (res || !(lua_isnil(mCurrentState, -1) || lua_isnumber(mCurrentState, -1)))
     {
@@ -144,8 +145,9 @@ bool LuaScript::resume()
     assert(mCurrentThread);
 
     setMap(mCurrentThread->mMap);
-    int result = lua_resume(mCurrentState, nbArgs);
+    const int tmpNbArgs = nbArgs;
     nbArgs = -1;
+    int result = lua_resume(mCurrentState, tmpNbArgs);
     setMap(0);
 
     if (result == 0)                // Thread is done

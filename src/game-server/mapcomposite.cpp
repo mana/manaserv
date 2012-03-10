@@ -658,9 +658,44 @@ void MapComposite::setVariable(const std::string &key, const std::string &value)
     {
         // changed value or unknown variable
         mScriptVariables[key] = value;
+        callMapVariableCallback(key, value);
         // update accountserver
         accountHandler->updateMapVar(this, key, value);
     }
+}
+
+static void callVariableCallback(Script::Ref &function, const std::string &key,
+                                 const std::string &value, MapComposite *map)
+{
+    if (function.isValid())
+    {
+        Script *s = ScriptManager::currentState();
+        s->setMap(map);
+        s->prepare(function);
+        s->push(key);
+        s->push(value);
+        s->execute();
+    }
+}
+
+void MapComposite::callMapVariableCallback(const std::string &key,
+                                           const std::string &value)
+{
+    std::map<const std::string, Script::Ref>::iterator it =
+            mMapVariableCallbacks.find(key);
+    if (it == mMapVariableCallbacks.end())
+        return;
+    callVariableCallback(it->second, key, value, this);
+}
+
+void MapComposite::callWorldVariableCallback(const std::string &key,
+                                             const std::string &value)
+{
+    std::map<const std::string, Script::Ref>::iterator it =
+            mWorldVariableCallbacks.find(key);
+    if (it == mWorldVariableCallbacks.end())
+        return;
+    callVariableCallback(it->second, key, value, this);
 }
 
 /**
