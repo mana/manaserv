@@ -13,7 +13,7 @@
 function Merchant(npc, ch, buy_sell_table)
 
     local function say(message)
-        do_message(npc, ch, message)
+        mana.npc_message(npc, ch, message)
     end
 
     -- Important note: You can add two tables made of trinoms here when calling the
@@ -56,7 +56,7 @@ function Merchant(npc, ch, buy_sell_table)
     table.insert (choice_table, "Tell me about the objects on this map")
     table.insert (choice_table, "Nevermind...")
 
-    local v = do_choice(npc, ch, choice_table)
+    local v = mana.npc_choice(npc, ch, choice_table)
 
     --Debug and learning purpose
     --for i,k in ipairs(choice_table) do print(i,k) end

@@ -12,38 +12,38 @@
 
 function npc1_talk(npc, ch)
   on_remove(ch, function() print "Player has left the map." end);
-  do_message(npc, ch, "Hello! I am the testing NPC.")
+  mana.npc_message(npc, ch, "Hello! I am the testing NPC.")
   local rights = mana.chr_get_rights(ch);
 
   if (rights >= 128) then
-    do_message(npc, ch, "Oh mighty server administrator, how can I avoid your wrath?")
+    mana.npc_message(npc, ch, "Oh mighty server administrator, how can I avoid your wrath?")
   elseif (rights >= 8) then
-    do_message(npc, ch, "How can I be of assistance, sir gamemaster?")
+    mana.npc_message(npc, ch, "How can I be of assistance, sir gamemaster?")
   elseif (rights >= 4) then
-    do_message(npc, ch, "What feature would you like to debug, developer?")
+    mana.npc_message(npc, ch, "What feature would you like to debug, developer?")
   elseif (rights >= 2) then
-    do_message(npc, ch, "How can I assist you in your testing duties?")
+    mana.npc_message(npc, ch, "How can I assist you in your testing duties?")
   elseif (rights >= 1) then
-    do_message(npc, ch, "What do you want, lowly player?")
+    mana.npc_message(npc, ch, "What do you want, lowly player?")
   else
-    do_message(npc, ch, "...aren't you supposed to be banned??")
+    mana.npc_message(npc, ch, "...aren't you supposed to be banned??")
   end
 
-  local v = do_choice(npc, ch, "Guns! Lots of guns!",
+  local v = mana.npc_choice(npc, ch, "Guns! Lots of guns!",
                                "A Christmas party!",
                                "To make a donation.",
                                "Slowly count from one to ten.",
                                "Tablepush Test")
   if v == 1 then
-    do_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
+    mana.npc_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
 
   elseif v == 2 then
     local n1, n2 = mana.chr_inv_count(ch, 524, 511)
     if n1 == 0 or n2 ~= 0 then
-      do_message(npc, ch, "Yeah right...")
+      mana.npc_message(npc, ch, "Yeah right...")
     else
-      do_message(npc, ch, "I can't help you with the party. But I see you have a fancy hat. I could change it into Santa's hat. Not much of a party, but it would get you going.")
-      v = do_choice(npc, ch, "Please do.", "No way! Fancy hats are classier.")
+      mana.npc_message(npc, ch, "I can't help you with the party. But I see you have a fancy hat. I could change it into Santa's hat. Not much of a party, but it would get you going.")
+      v = mana.npc_choice(npc, ch, "Please do.", "No way! Fancy hats are classier.")
       if v == 1 then
         mana.chr_inv_change(ch, 524, -1, 511, 1)
       end
@@ -51,14 +51,14 @@ function npc1_talk(npc, ch)
 
   elseif v == 3 then
     if mana.chr_money_change(ch, -100) then
-      do_message(npc, ch, string.format("Thank you for you patronage! You are left with %d GP.", mana.chr_money(ch)))
-      local g = tonumber(get_quest_var(ch, "001_donation"))
+      mana.npc_message(npc, ch, string.format("Thank you for you patronage! You are left with %d GP.", mana.chr_money(ch)))
+      local g = tonumber(mana.chr_get_quest(ch, "001_donation"))
       if not g then g = 0 end
       g = g + 100
       mana.chr_set_quest(ch, "001_donation", g)
-      do_message(npc, ch, string.format("As of today, you have donated %d GP.", g))
+      mana.npc_message(npc, ch, string.format("As of today, you have donated %d GP.", g))
     else
-      do_message(npc, ch, "I would feel bad taking money from someone that poor.")
+      mana.npc_message(npc, ch, "I would feel bad taking money from someone that poor.")
     end
 
   elseif v == 4 then
@@ -95,6 +95,6 @@ function npc1_talk(npc, ch)
     print("---------------");
   end
 
-  do_message(npc, ch, "See you later!")
+  mana.npc_message(npc, ch, "See you later!")
 end
 

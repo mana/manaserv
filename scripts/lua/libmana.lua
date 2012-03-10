@@ -39,15 +39,6 @@ function create_npc(name, id, gender, x, y, talkfunct, updatefunct)
   return npc
 end
 
--- These are deprecated and only provided for compatibility!
-do_message      = mana.npc_message
-do_choice       = mana.npc_choice
-do_ask_integer  = mana.npc_ask_integer
-do_ask_string   = mana.npc_ask_string
-do_post         = mana.npc_post
-get_quest_var   = mana.chr_get_quest
-getpost         = mana.chr_get_post
-
 -- Registered as the function to call whenever a player starts talking to an
 -- NPC. Calls the registered NPC handler.
 local function npc_start(npc, ch)

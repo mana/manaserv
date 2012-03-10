@@ -21,8 +21,8 @@ function emote_talk(npc, ch)
   elseif emo_state == EMOTE_HAPPY then
     state = "happy"
   end
-  do_message(npc, ch, string.format("The emotional palm seems %s.", state))
-  v = do_choice(npc, ch,
+  mana.npc_message(npc, ch, string.format("The emotional palm seems %s.", state))
+  v = mana.npc_choice(npc, ch,
     "Stupid palm, you are ugly and everyone hates you!",
     "You are such a nice palm, let me give you a hug.",
     "Are you a cocos nucifera or a syagrus romanzoffiana?")

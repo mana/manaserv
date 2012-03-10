@@ -39,7 +39,7 @@ end)
 function Smith(npc, ch, list)
     local sword_count = mana.chr_inv_count(ch, true, true, "Sword")
     if sword_count > 0 then
-        do_message(npc, ch, "Ah! I can see you already have a sword.")
+        mana.npc_message(npc, ch, "Ah! I can see you already have a sword.")
     end
     Merchant(npc, ch, list)
 end
@@ -54,7 +54,7 @@ function possessions_table(npc, ch)
             ..inventory_table[i].id..", "..inventory_table[i].name..", "
             ..inventory_table[i].amount
     end
-    do_message(npc, ch, item_message)
+    mana.npc_message(npc, ch, item_message)
 
     item_message = "Equipment:"..
                    "\nSlot id, item id, item name:"..
@@ -64,7 +64,7 @@ function possessions_table(npc, ch)
         item_message = item_message.."\n"..equipment_table[i].slot..", "
             ..equipment_table[i].id..", "..equipment_table[i].name
     end
-    do_message(npc, ch, item_message)
+    mana.npc_message(npc, ch, item_message)
 
 end
 
@@ -73,21 +73,21 @@ harmony_have_talked_to_someone = false
 function Harmony(npc, ch, list)
     -- Say all the messages in the messages list.
     for i = 1, #list do
-        do_message(npc, ch, list[i])
+        mana.npc_message(npc, ch, list[i])
     end
     --- Give the player 100 units of money the first time.
     if  harmony_have_talked_to_someone == false then
-        do_message(npc, ch, "Here is some money for you to find some toys to play with.\nEh Eh!")
+        mana.npc_message(npc, ch, "Here is some money for you to find some toys to play with.\nEh Eh!")
         mana.chr_money_change(ch, 100)
-        do_message(npc, ch, string.format("You now have %d shiny coins!", mana.chr_money(ch)))
+        mana.npc_message(npc, ch, string.format("You now have %d shiny coins!", mana.chr_money(ch)))
         harmony_have_talked_to_someone = true
-        do_message(npc, ch, string.format("Try to come back with a better level than %i.", mana.chr_get_level(ch)))
+        mana.npc_message(npc, ch, string.format("Try to come back with a better level than %i.", mana.chr_get_level(ch)))
     else
-        do_message(npc, ch, "Let me see what you've got so far... Don't be afraid!")
+        mana.npc_message(npc, ch, "Let me see what you've got so far... Don't be afraid!")
         mana.effect_create(EMOTE_WINK, npc)
         possessions_table(npc, ch)
     end
-    do_message(npc, ch, "Have fun!")
+    mana.npc_message(npc, ch, "Have fun!")
     mana.effect_create(EMOTE_HAPPY, npc)
     -- Make Harmony disappear for a while... with a small earthquake effect!
     local shakeX = mana.posX(npc)
