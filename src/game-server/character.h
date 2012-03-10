@@ -348,11 +348,30 @@ class Character : public Being
         void setCorrectionPoints(int points) { mCorrectionPoints = points; }
         int getCorrectionPoints() const { return mCorrectionPoints; }
 
-        void setNpcThread(Script::Thread *thread)
-        { mNpcThread = thread; }
 
+        /**
+         * Starts the given NPC thread.
+         *
+         * Should be called immediately after creating the thread and pushing
+         * the NPC function and its parameters.
+         */
+        void startNpcThread(Script::Thread *thread, int npcId);
+
+        /**
+         * Resumes the given NPC thread of this character and sends the NPC
+         * close message to the player when the script is done.
+         *
+         * Should be called after preparing the current Script instance for
+         * resuming the thread and pushing the parameters the script expects.
+         */
+        void resumeNpcThread();
+
+        /**
+         * Returns the NPC thread in use by this character, if any.
+         */
         Script::Thread *getNpcThread() const
         { return mNpcThread; }
+
 
         /**
          * Gets the way the actor is blocked by other things on the map
@@ -472,6 +491,8 @@ class Character : public Being
         int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */
         std::map<int, int> mKillCount;  /**< How many monsters the character has slain of each type */
+
+        int mTalkNpcId;              /**< Public ID of NPC the character is talking to, if any */
         Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
 
         static Script::Ref mDeathCallback;

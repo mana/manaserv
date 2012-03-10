@@ -112,20 +112,6 @@ static int on_update(lua_State *s)
     return 0;
 }
 
-static int on_npc_start(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    NPC::setStartCallback(getScript(s));
-    return 0;
-}
-
-static int on_npc_update(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    NPC::setUpdateCallback(getScript(s));
-    return 0;
-}
-
 static int on_create_npc_delayed(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
@@ -316,8 +302,10 @@ static int npc_ask_string(lua_State *s)
 }
 
 /**
- * mana.npc_create(string name, int id, int gender, int x, int y): NPC*
- * Callback for creating a NPC on the current map with the current script.
+ * mana.npc_create(string name, int id, int gender, int x, int y,
+ *                 function talk, function update): NPC*
+ *
+ * Callback for creating a NPC on the current map.
  */
 static int npc_create(lua_State *s)
 {
@@ -327,30 +315,33 @@ static int npc_create(lua_State *s)
     const int x = luaL_checkint(s, 4);
     const int y = luaL_checkint(s, 5);
 
+    if (!lua_isnoneornil(s, 6))
+        luaL_checktype(s, 6, LUA_TFUNCTION);
+    if (!lua_isnoneornil(s, 7))
+        luaL_checktype(s, 7, LUA_TFUNCTION);
+
     MapComposite *m = checkCurrentMap(s);
 
     NPC *q = new NPC(name, id);
     q->setGender(getGender(gender));
     q->setMap(m);
     q->setPosition(Point(x, y));
+
+    if (lua_isfunction(s, 6))
+    {
+        lua_pushvalue(s, 6);
+        q->setTalkCallback(luaL_ref(s, LUA_REGISTRYINDEX));
+    }
+
+    if (lua_isfunction(s, 7))
+    {
+        lua_pushvalue(s, 7);
+        q->setUpdateCallback(luaL_ref(s, LUA_REGISTRYINDEX));
+    }
+
     GameState::enqueueInsert(q);
     lua_pushlightuserdata(s, q);
     return 1;
-}
-
-/**
- * mana.npc_end(NPC*, Character*): void
- * Callback for ending a NPC conversation with the given character.
- */
-static int npc_end(lua_State *s)
-{
-    NPC *p = checkNPC(s, 1);
-    Character *q = checkCharacter(s, 2);
-
-    MessageOut msg(GPMSG_NPC_CLOSE);
-    msg.writeInt16(p->getPublicID());
-    gameHandler->sendTo(q, msg);
-    return 0;
 }
 
 /**
@@ -376,7 +367,7 @@ static int npc_post(lua_State *s)
 static int npc_enable(lua_State *s)
 {
     NPC *p = checkNPC(s, 1);
-    p->enable(true);
+    p->setEnabled(true);
     GameState::enqueueInsert(p);
     return 0;
 }
@@ -388,7 +379,7 @@ static int npc_enable(lua_State *s)
 static int npc_disable(lua_State *s)
 {
     NPC *p = checkNPC(s, 1);
-    p->enable(false);
+    p->setEnabled(false);
     GameState::remove(p);
     return 0;
 }
@@ -2152,8 +2143,6 @@ LuaScript::LuaScript():
         { "on_being_death",                  &on_being_death                  },
         { "on_being_remove",                 &on_being_remove                 },
         { "on_update",                       &on_update                       },
-        { "on_npc_start",                    &on_npc_start                    },
-        { "on_npc_update",                   &on_npc_update                   },
         { "on_create_npc_delayed",           &on_create_npc_delayed           },
         { "on_map_initialize",               &on_map_initialize               },
         { "on_craft",                        &on_craft                        },
@@ -2243,7 +2232,6 @@ LuaScript::LuaScript():
         { "item_drop",                       &item_drop                       },
         { "item_get_name",                   &item_get_name                   },
         { "npc_ask_integer",                 &npc_ask_integer                 },
-        { "npc_end",                         &npc_end                         },
         { "npc_ask_string",                  &npc_ask_string                  },
         { "log",                             &log                             },
         { "get_distance",                    &get_distance                    },

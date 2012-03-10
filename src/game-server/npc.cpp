@@ -19,12 +19,11 @@
  */
 
 #include "game-server/character.h"
+#include "game-server/gamehandler.h"
 #include "game-server/npc.h"
+#include "net/messageout.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
-
-Script::Ref NPC::mStartCallback;
-Script::Ref NPC::mUpdateCallback;
 
 NPC::NPC(const std::string &name, int id):
     Being(OBJECT_NPC),
@@ -34,7 +33,14 @@ NPC::NPC(const std::string &name, int id):
     setName(name);
 }
 
-void NPC::enable(bool enabled)
+NPC::~NPC()
+{
+    Script *script = ScriptManager::currentState();
+    script->unref(mTalkCallback);
+    script->unref(mUpdateCallback);
+}
+
+void NPC::setEnabled(bool enabled)
 {
     mEnabled = enabled;
 }
@@ -52,7 +58,7 @@ void NPC::update()
 
 void NPC::prompt(Character *ch, bool restart)
 {
-    if (!mEnabled || !mStartCallback.isValid())
+    if (!mEnabled || !mTalkCallback.isValid())
         return;
 
     Script *script = ScriptManager::currentState();
@@ -61,12 +67,10 @@ void NPC::prompt(Character *ch, bool restart)
     {
         Script::Thread *thread = script->newThread();
         thread->mMap = getMap();
-        script->prepare(mStartCallback);
+        script->prepare(mTalkCallback);
         script->push(this);
         script->push(ch);
-
-        if (!script->resume())
-            ch->setNpcThread(thread);
+        ch->startNpcThread(thread, getPublicID());
     }
     else
     {
@@ -75,8 +79,7 @@ void NPC::prompt(Character *ch, bool restart)
             return;
 
         script->prepareResume(thread);
-        if (script->resume())
-            ch->setNpcThread(0);
+        ch->resumeNpcThread();
     }
 }
 
@@ -92,8 +95,7 @@ void NPC::select(Character *ch, int index)
     Script *script = ScriptManager::currentState();
     script->prepareResume(thread);
     script->push(index);
-    if (script->resume())
-        ch->setNpcThread(0);
+    ch->resumeNpcThread();
 }
 
 void NPC::integerReceived(Character *ch, int value)
@@ -108,8 +110,7 @@ void NPC::integerReceived(Character *ch, int value)
     Script *script = ScriptManager::currentState();
     script->prepareResume(thread);
     script->push(value);
-    if (script->resume())
-        ch->setNpcThread(0);
+    ch->resumeNpcThread();
 }
 
 void NPC::stringReceived(Character *ch, const std::string &value)
@@ -124,6 +125,17 @@ void NPC::stringReceived(Character *ch, const std::string &value)
     Script *script = ScriptManager::currentState();
     script->prepareResume(thread);
     script->push(value);
-    if (script->resume())
-        ch->setNpcThread(0);
+    ch->resumeNpcThread();
+}
+
+void NPC::setTalkCallback(Script::Ref function)
+{
+    ScriptManager::currentState()->unref(mTalkCallback);
+    mTalkCallback = function;
+}
+
+void NPC::setUpdateCallback(Script::Ref function)
+{
+    ScriptManager::currentState()->unref(mUpdateCallback);
+    mUpdateCallback = function;
 }

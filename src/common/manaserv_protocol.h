@@ -461,7 +461,7 @@ inline ManaServ::BeingGender getGender(int gender)
         default:
             return ManaServ::GENDER_UNSPECIFIED;
     }
-};
+}
 
 /**
 * Helper function for getting gender by string
@@ -474,7 +474,7 @@ inline ManaServ::BeingGender getGender(std::string gender)
         return ManaServ::GENDER_FEMALE;
     else
         return ManaServ::GENDER_UNSPECIFIED;
-};
+}
 
 } // namespace ManaServ
 

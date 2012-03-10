@@ -111,7 +111,10 @@ bool Script::loadFile(const std::string &name)
     }
 }
 
-void Script::loadNPC(const std::string &name, int id, int x, int y,
+void Script::loadNPC(const std::string &name,
+                     int id,
+                     ManaServ::BeingGender gender,
+                     int x, int y,
                      const char *prog)
 {
     if (!mCreateNpcDelayedCallback.isValid())
@@ -124,6 +127,7 @@ void Script::loadNPC(const std::string &name, int id, int x, int y,
     prepare(mCreateNpcDelayedCallback);
     push(name);
     push(id);
+    push(gender);
     push(x);
     push(y);
     execute();

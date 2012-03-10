@@ -769,12 +769,14 @@ void MapComposite::initializeContent()
         else if (utils::compareStrI(type, "NPC") == 0)
         {
             int npcId = utils::stringToInt(object->getProperty("NPC_ID"));
+            std::string gender = object->getProperty("GENDER");
             std::string scriptText = object->getProperty("SCRIPT");
 
             if (npcId && !scriptText.empty())
             {
                 Script *script = ScriptManager::currentState();
                 script->loadNPC(object->getName(), npcId,
+                                ManaServ::getGender(gender),
                                 object->getX(), object->getY(),
                                 scriptText.c_str());
             }

@@ -16,43 +16,8 @@
 
 require "scripts/lua/libmana-constants"
 
-
--- Table that associates to each NPC pointer the handler function that is
--- called when a player starts talking to an NPC.
-local npc_talk_functs = {}
-local npc_update_functs = {}
-
 -- Array containing the function registered by atinit.
 local init_fun = {}
-
--- Creates an NPC and associates the given handler.
--- Note: Cannot be called until map initialization has started.
-function create_npc(name, id, gender, x, y, talkfunct, updatefunct)
-  local npc = mana.npc_create(name, id, gender, x, y)
-  if talkfunct then
-    npc_talk_functs[npc] = function(npc, ch)
-      talkfunct(npc, ch)
-      mana.npc_end(npc, ch)
-    end
-  end
-  if updatefunct then npc_update_functs[npc] = updatefunct end
-  return npc
-end
-
--- Registered as the function to call whenever a player starts talking to an
--- NPC. Calls the registered NPC handler.
-local function npc_start(npc, ch)
-  local h = npc_talk_functs[npc]
-  if h then
-    h(npc, ch)
-  end
-end
-
--- Registered as the function to call every tick for each NPC.
-local function npc_update(npc)
-  local h = npc_update_functs[npc];
-  if h then h(npc) end;
-end
 
 -- Table of scheduled jobs. A job is an array with 3 elements:
 -- 0: the UNIX timestamp when it is executed
@@ -93,10 +58,10 @@ end
 -- Called by the game for creating NPCs embedded into maps.
 -- Delays the creation until map initialization is performed.
 -- Note: Assumes that the "npc_handler" global field contains the NPC handler.
-local function create_npc_delayed(name, id, x, y)
+local function create_npc_delayed(name, id, gender, x, y)
   -- Bind the name to a local variable first, as it will be reused.
   local h = npc_handler
-  atinit(function() create_npc(name, id, x, y, h, nil) end)
+  atinit(function() mana.npc_create(name, id, gender, x, y, h) end)
   npc_handler = nil
 end
 
@@ -254,9 +219,6 @@ end
 
 -- Register callbacks
 mana.on_update(update)
-
-mana.on_npc_start(npc_start)
-mana.on_npc_update(npc_update)
 
 mana.on_create_npc_delayed(create_npc_delayed)
 mana.on_map_initialize(map_initialize)

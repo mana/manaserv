@@ -86,6 +86,7 @@ Character::Character(MessageIn &msg):
     mRecalculateLevel(true),
     mParty(0),
     mTransaction(TRANS_NONE),
+    mTalkNpcId(0),
     mNpcThread(0)
 {
     const AttributeManager::AttributeScope &attr =
@@ -694,6 +695,31 @@ AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
     setAttribute(attribute, getAttribute(attribute) - 1);
     updateDerivedAttributes(attribute);
     return ATTRIBMOD_OK;
+}
+
+void Character::startNpcThread(Script::Thread *thread, int npcId)
+{
+    mNpcThread = thread;
+    mTalkNpcId = npcId;
+
+    resumeNpcThread();
+}
+
+void Character::resumeNpcThread()
+{
+    Script *script = ScriptManager::currentState();
+
+    assert(script->getCurrentThread() == mNpcThread);
+
+    if (script->resume())
+    {
+        MessageOut msg(GPMSG_NPC_CLOSE);
+        msg.writeInt16(mTalkNpcId);
+        gameHandler->sendTo(this, msg);
+
+        mTalkNpcId = 0;
+        mNpcThread = 0;
+    }
 }
 
 void Character::disconnected()

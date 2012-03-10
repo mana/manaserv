@@ -22,6 +22,7 @@
 #define SCRIPTING_SCRIPT_H
 
 #include "common/inventorydata.h"
+#include "common/manaserv_protocol.h"
 #include "game-server/eventlistener.h"
 
 #include <list>
@@ -61,6 +62,7 @@ class Script
         {
             public:
                 Ref() : value(-1) {}
+                Ref(int value) : value(value) {}
                 bool isValid() const { return value != -1; }
                 int value;
         };
@@ -111,7 +113,10 @@ class Script
          * Loads a chunk of text and considers it as an NPC handler. This
          * handler will later be used to create the given NPC.
          */
-        virtual void loadNPC(const std::string &name, int id, int x, int y,
+        virtual void loadNPC(const std::string &name,
+                             int id,
+                             ManaServ::BeingGender gender,
+                             int x, int y,
                              const char *);
 
         /**
@@ -185,6 +190,12 @@ class Script
          * Where the callback exactly comes from is up to the script engine.
          */
         virtual void assignCallback(Ref &function) = 0;
+
+        /**
+         * Unreferences the script object given by \a ref, if any, and sets
+         * \a ref to invalid.
+         */
+        virtual void unref(Ref &ref) = 0;
 
         /**
          * Returns the currently executing thread, or null when no thread is

@@ -198,6 +198,15 @@ void LuaScript::assignCallback(Script::Ref &function)
     function.value = luaL_ref(mRootState, LUA_REGISTRYINDEX);
 }
 
+void LuaScript::unref(Ref &ref)
+{
+    if (ref.isValid())
+    {
+        luaL_unref(mRootState, LUA_REGISTRYINDEX, ref.value);
+        ref.value = -1;
+    }
+}
+
 void LuaScript::load(const char *prog, const char *name)
 {
     int res = luaL_loadbuffer(mRootState, prog, std::strlen(prog), name);
@@ -262,7 +271,7 @@ void LuaScript::getQuestCallback(Character *q,
 
     script->prepareResume(thread);
     script->push(value);
-    script->resume();
+    q->resumeNpcThread();
 }
 
 /**
@@ -280,7 +289,7 @@ void LuaScript::getPostCallback(Character *q,
     script->prepareResume(thread);
     script->push(sender);
     script->push(letter);
-    script->resume();
+    q->resumeNpcThread();
 }
 
 

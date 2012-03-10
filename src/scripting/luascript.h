@@ -64,6 +64,8 @@ class LuaScript : public Script
 
         void assignCallback(Ref &function);
 
+        void unref(Ref &ref);
+
         static void getQuestCallback(Character *,
                                      const std::string &value,
                                      Script *);

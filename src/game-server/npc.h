@@ -22,8 +22,8 @@
 #define GAMESERVER_NPC_H
 
 #include "game-server/being.h"
+#include "scripting/script.h"
 
-class Script;
 class Character;
 
 /**
@@ -34,12 +34,27 @@ class NPC : public Being
     public:
         NPC(const std::string &name, int id);
 
+        ~NPC();
+
+        /**
+         * Sets the function that should be called when this NPC is talked to.
+         */
+        void setTalkCallback(Script::Ref function);
+
+        /**
+         * Sets the function that should be called each update.
+         */
+        void setUpdateCallback(Script::Ref function);
+
+        /**
+         * Calls the update callback, if any.
+         */
         void update();
 
         /**
-         * Enables the NPC
+         * Sets whether the NPC is enabled.
          */
-        void enable(bool enabled);
+        void setEnabled(bool enabled);
 
         /**
          * Prompts NPC.
@@ -73,12 +88,6 @@ class NPC : public Being
         virtual unsigned char getWalkMask() const
         { return 0x83; } // blocked like a monster by walls, monsters and characters ( bin 1000 0011)
 
-        static void setStartCallback(Script *script)
-        { script->assignCallback(mStartCallback); }
-
-        static void setUpdateCallback(Script *script)
-        { script->assignCallback(mUpdateCallback); }
-
     protected:
         /**
          * Gets the way a monster blocks pathfinding for other objects
@@ -90,8 +99,8 @@ class NPC : public Being
         unsigned short mID; /**< ID of the NPC. */
         bool mEnabled;      /**< Whether NPC is enabled */
 
-        static Script::Ref mStartCallback;
-        static Script::Ref mUpdateCallback;
+        Script::Ref mTalkCallback;
+        Script::Ref mUpdateCallback;
 };
 
 #endif // GAMESERVER_NPC_H
