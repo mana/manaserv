@@ -839,5 +839,5 @@ void GameState::setVariable(const std::string &key, const std::string &value)
 void GameState::setVariableFromDbserver(const std::string &key,
                                         const std::string &value)
 {
-    mScriptVariables[key] = value ;
+    mScriptVariables[key] = value;
 }
