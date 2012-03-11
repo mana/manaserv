@@ -8,8 +8,8 @@
 
 --]]
 
-local candy = mana.get_item_class("candy")
+local candy = get_item_class("candy")
 
 candy:on("use", function(user)
-    mana.being_say(user, "*munch*munch*munch*")
+    being_say(user, "*munch*munch*munch*")
 end)

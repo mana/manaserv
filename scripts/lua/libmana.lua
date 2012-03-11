@@ -61,7 +61,7 @@ end
 local function create_npc_delayed(name, id, gender, x, y)
   -- Bind the name to a local variable first, as it will be reused.
   local h = npc_handler
-  atinit(function() mana.npc_create(name, id, gender, x, y, h) end)
+  atinit(function() npc_create(name, id, gender, x, y, h) end)
   npc_handler = nil
 end
 
@@ -120,7 +120,7 @@ local onworldvar_functs = {}
 
 local function on_mapvar_callback(key, value)
   local functs = onmapvar_functs[key]
-  local mapid = mana.get_map_id()
+  local mapid = get_map_id()
   for func, map in pairs(functs) do
     if map == mapid then
       func(key, value)
@@ -138,15 +138,15 @@ end
 function on_mapvar_changed(key, funct)
   if not onmapvar_functs[key] then
     onmapvar_functs[key] = {}
-    mana.on_mapvar_changed(key, on_mapvar_callback)
+    on_mapvar_changed(key, on_mapvar_callback)
   end
-  onmapvar_functs[key][funct] = mana.get_map_id()
+  onmapvar_functs[key][funct] = get_map_id()
 end
 
 function on_worldvar_changed(key, funct)
   if not onworldvar_functs[key] then
     onworldvar_functs[key] = {}
-    mana.on_worldvar_changed(key, on_worldvar_callback)
+    on_worldvar_changed(key, on_worldvar_callback)
   end
   onworldvar_functs[key][funct] = true
 end
@@ -170,7 +170,7 @@ function on_death(being, funct)
     ondeath_functs[being] = {}
   end
   table.insert(ondeath_functs[being], funct)
-  mana.being_register(being)
+  being_register(being)
 end
 
 -- requests the gameserver to notify the script engine when the being
@@ -180,7 +180,7 @@ function on_remove(being, funct)
     onremove_functs[being] = {}
   end
   table.insert(onremove_functs[being], funct)
-  mana.being_register(being)
+  being_register(being)
 end
 
 -- Registered as callback for when a registered being dies.
@@ -206,22 +206,22 @@ end
 
 
 -- Below are some convenience methods added to the engine API
-mana.chr_money_change = function(ch, amount)
-  mana.being_set_base_attribute(
+chr_money_change = function(ch, amount)
+  being_set_base_attribute(
                             ch,
                             ATTR_GP,
-                            mana.being_get_base_attribute(ch, ATTR_GP) + amount)
+                            being_get_base_attribute(ch, ATTR_GP) + amount)
 end
 
-mana.chr_money = function(ch)
-  return mana.being_get_base_attribute(ch, ATTR_GP)
+chr_money = function(ch)
+  return being_get_base_attribute(ch, ATTR_GP)
 end
 
 -- Register callbacks
-mana.on_update(update)
+on_update(update)
 
-mana.on_create_npc_delayed(create_npc_delayed)
-mana.on_map_initialize(map_initialize)
+on_create_npc_delayed(create_npc_delayed)
+on_map_initialize(map_initialize)
 
-mana.on_being_death(death_notification)
-mana.on_being_remove(remove_notification)
+on_being_death(death_notification)
+on_being_remove(remove_notification)

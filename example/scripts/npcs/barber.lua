@@ -79,11 +79,11 @@ function Barber(npc, ch, data)
 
     -- Choose an appropriate message
     if result == 1 then
-        mana.npc_message(npc, ch, "Hello! What style would you like today?")
+        npc_message(npc, ch, "Hello! What style would you like today?")
     elseif result == 2 then
-        mana.npc_message(npc, ch, "Hello! What color would you like today?")
+        npc_message(npc, ch, "Hello! What color would you like today?")
     else
-        mana.npc_message(npc, ch, "Hello! What can I do for you today?")
+        npc_message(npc, ch, "Hello! What can I do for you today?")
     end
 
     print("#styles ==", #styles)
@@ -91,7 +91,7 @@ function Barber(npc, ch, data)
     -- Repeat until the user selects nothing
     repeat
         if (result == 1) then -- Do styles
-            result = mana.npc_choice(npc, ch, "Bald", styles, "Surprise me", "Never mind")
+            result = npc_choice(npc, ch, "Bald", styles, "Surprise me", "Never mind")
 
             result = result -1
 
@@ -104,16 +104,16 @@ function Barber(npc, ch, data)
             print("Style ==", result)
 
             if (result == 0) then
-                mana.chr_set_hair_style(ch, 0)
+                chr_set_hair_style(ch, 0)
                 result = 1
             elseif (result <= #styles) then
-                mana.chr_set_hair_style(ch, style_ids[result])
+                chr_set_hair_style(ch, style_ids[result])
                 result = 1
             else --"Never mind"
                 result = 3
             end
         elseif (result == 2) then -- Do colors
-            result = mana.npc_choice(npc, ch, colors, "Surprise me", "Never mind")
+            result = npc_choice(npc, ch, colors, "Surprise me", "Never mind")
 
             --Random
             if (result == #colors + 1) then
@@ -121,7 +121,7 @@ function Barber(npc, ch, data)
             end
 
             if (result <= #colors) then
-                mana.chr_set_hair_color(ch, color_ids[result - 1])
+                chr_set_hair_color(ch, color_ids[result - 1])
                 result = 2
             else --"Never mind"
                 result = 3
@@ -130,10 +130,10 @@ function Barber(npc, ch, data)
 
         -- If we have both styles and colors, show the main menu
         if #styles > 0 and #colors > 0 then
-            result = mana.npc_choice(npc, ch, "Change my style", "Change my color", "Never mind")
+            result = npc_choice(npc, ch, "Change my style", "Change my color", "Never mind")
         end
     until result >= 3 --While they've choosen a valid option that isn't "Never mind"
 
     -- Let's close up
-    mana.npc_message(npc, ch, "Thank you. Come again!")
+    npc_message(npc, ch, "Thank you. Come again!")
 end

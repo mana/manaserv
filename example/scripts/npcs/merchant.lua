@@ -13,7 +13,7 @@
 function Merchant(npc, ch, buy_sell_table)
 
     local function say(message)
-        mana.npc_message(npc, ch, message)
+        npc_message(npc, ch, message)
     end
 
     -- Important note: You can add two tables made of trinoms here when calling the
@@ -22,11 +22,11 @@ function Merchant(npc, ch, buy_sell_table)
     -- buy_sell_table[1] will corresponds to the first table (used to list
     -- boughtable items, and buy_sell_table[2] listing sellable items.
 
-    local rights = mana.chr_get_rights(ch);
+    local rights = chr_get_rights(ch);
 
     if (rights >= 128) then
-        mana.announce(mana.being_get_name(ch) .. " the big administrator was at my shop!",
-                      mana.being_get_name(npc))
+        announce(being_get_name(ch) .. " the big administrator was at my shop!",
+                 being_get_name(npc))
         say "Oh mighty server administrator, how can I avoid your wrath?"
     elseif (rights >= 8) then
         say "How can I be of assistance, sir gamemaster?"
@@ -35,7 +35,7 @@ function Merchant(npc, ch, buy_sell_table)
     elseif (rights >= 2) then
         say "How can I assist you in your testing duties?"
     elseif (rights >= 1) then
-        if mana.being_get_gender(ch) == GENDER_FEMALE then
+        if being_get_gender(ch) == GENDER_FEMALE then
             say "What do you want, Madam?"
         else
             say "What do you want, Sir?"
@@ -56,7 +56,7 @@ function Merchant(npc, ch, buy_sell_table)
     table.insert (choice_table, "Tell me about the objects on this map")
     table.insert (choice_table, "Nevermind...")
 
-    local v = mana.npc_choice(npc, ch, choice_table)
+    local v = npc_choice(npc, ch, choice_table)
 
     --Debug and learning purpose
     --for i,k in ipairs(choice_table) do print(i,k) end
@@ -67,7 +67,7 @@ function Merchant(npc, ch, buy_sell_table)
 
     if v == 1 then
     -- "To buy."
-    local buycase = mana.npc_trade(npc, ch, false, buy_sell_table[1])
+    local buycase = npc_trade(npc, ch, false, buy_sell_table[1])
     if buycase == 0 then
         say "What do you want to buy?"
     elseif buycase == 1 then
@@ -80,7 +80,7 @@ function Merchant(npc, ch, buy_sell_table)
 
         if buy_sell_table[2] == nil then
             -- "To sell stuff..."
-            local sellcase = mana.npc_trade(npc, ch, true)
+            local sellcase = npc_trade(npc, ch, true)
             if sellcase == 0 then
                 say "Ok, what do you want to sell?"
             elseif sellcase == 1 then
@@ -90,7 +90,7 @@ function Merchant(npc, ch, buy_sell_table)
             end
         else
             -- "Can you make me a price for what I have?"
-            local sellcase = mana.npc_trade(npc, ch, true, buy_sell_table[2])
+            local sellcase = npc_trade(npc, ch, true, buy_sell_table[2])
             if sellcase == 0 then
                 say "Here we go:"
             elseif sellcase == 1 then
@@ -102,7 +102,7 @@ function Merchant(npc, ch, buy_sell_table)
 
     elseif v == 3 then
 
-        local objects = mana.map_get_objects()
+        local objects = map_get_objects()
         say("There are " .. #objects .. " objects on this map, their names are:")
         for i=1,#objects do
             say(tostring(i) .. ": " .. objects[i]:name())

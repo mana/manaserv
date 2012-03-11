@@ -16,13 +16,13 @@ specialCost[3] = 1000
 local function use_special(ch, id)
     -- perform whatever the special with the ID does
     if id == 1 then
-        mana.being_say(ch, "Kaaame...Haaame... HAAAAAA!")
+        being_say(ch, "Kaaame...Haaame... HAAAAAA!")
     end
     if id == 2 then
-        mana.being_say(ch, "HAA-DOKEN!")
+        being_say(ch, "HAA-DOKEN!")
     end
     if id == 3 then
-        mana.being_say(ch, "Sonic BOOM")
+        being_say(ch, "Sonic BOOM")
     end
 end
 
@@ -31,5 +31,5 @@ local function get_special_recharge_cost(id)
     return specialCost[id]
 end
 
-mana.on_use_special(use_special)
-mana.on_get_special_recharge_cost(get_special_recharge_cost)
+on_use_special(use_special)
+on_get_special_recharge_cost(get_special_recharge_cost)

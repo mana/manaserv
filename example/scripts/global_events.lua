@@ -12,21 +12,21 @@
 
 -- Register the callback that is called when the hit points of a character
 -- reach zero.
-mana.on_character_death(function(ch)
-    mana.being_say(ch, "Noooooo!!!")
+on_character_death(function(ch)
+    being_say(ch, "Noooooo!!!")
 end)
 
 -- This function is called when the player clicks on the OK button after the
 -- death message appeared. It should be used to implement the respawn
 -- mechanic (for example: warp the character to the respawn location and
 -- bring HP above zero in some way)
-mana.on_character_death_accept(function(ch)
+on_character_death_accept(function(ch)
     -- restores to full hp
-    mana.being_heal(ch)
+    being_heal(ch)
     -- restores 1 hp (in case you want to be less nice)
-    -- mana.being_heal(ch, 1)
+    -- being_heal(ch, 1)
     -- warp the character to the respawn location
-    mana.chr_warp(ch, 1, 815, 100)
+    chr_warp(ch, 1, 815, 100)
 end)
 
 
@@ -51,14 +51,14 @@ end
 -- to the character and/or initialize a tutorial quest.
 local function on_chr_birth(ch)
     -- this message is shown on first login.
-    mana.chat_message(0, ch, "And so your adventure begins...")
+    chat_message(0, ch, "And so your adventure begins...")
 end
 
 -- This function is called when a character logs into the game. This can,
 -- for example, be utilized for a message-of-the-day or for various
 -- handlings of offline processing mechanics.
 local function on_chr_login(ch)
-    mana.chat_message(0, ch, "Welcome to Manasource")
+    chat_message(0, ch, "Welcome to Manasource")
 end
 
 
@@ -66,11 +66,11 @@ end
 -- be useful for various handling of offline processing mechanics.
 local function on_chr_logout(ch)
     -- notifies nearby players of logout
-    local around = mana.get_beings_in_circle(posX(ch), posY(ch), 1000)
-    local msg = mana.being_get_name(ch).." left the game."
+    local around = get_beings_in_circle(posX(ch), posY(ch), 1000)
+    local msg = being_get_name(ch).." left the game."
     for b in pairs(around) do
-        if mana.being_type(b) == TYPE_CHARACTER then
-            mana.chat_message(0, b, msg)
+        if being_type(b) == TYPE_CHARACTER then
+            chat_message(0, b, msg)
         end
     end
 end

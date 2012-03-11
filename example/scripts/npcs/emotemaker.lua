@@ -21,8 +21,8 @@ function emote_talk(npc, ch)
   elseif emo_state == EMOTE_HAPPY then
     state = "happy"
   end
-  mana.npc_message(npc, ch, string.format("The emotional palm seems %s.", state))
-  v = mana.npc_choice(npc, ch,
+  npc_message(npc, ch, string.format("The emotional palm seems %s.", state))
+  v = npc_choice(npc, ch,
     "Stupid palm, you are ugly and everyone hates you!",
     "You are such a nice palm, let me give you a hug.",
     "Are you a cocos nucifera or a syagrus romanzoffiana?")
@@ -40,6 +40,6 @@ function emote_update(npc)
   emo_count = emo_count + 1
   if emo_count > 50 then
     emo_count = 0
-    mana.effect_create(emo_state, npc)
+    effect_create(emo_state, npc)
   end
 end

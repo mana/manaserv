@@ -14,16 +14,16 @@
 
 local function tick(target, ticknumber)
     if (ticknumber % 10 == 0) then
-        mana.being_say(target, "I have the jumping bug!")
+        being_say(target, "I have the jumping bug!")
     end
     
-    if (mana.being_get_status_time(target, 2) < 2000) then
-        mana.being_set_status_time(target, 2, 6000)
+    if (being_get_status_time(target, 2) < 2000) then
+        being_set_status_time(target, 2, 6000)
     end
     
     if (ticknumber % 50 ~= 0) then return end
     
-    local victims = mana.get_beings_in_circle(mana.posX(target), mana.posY(target), 64)
+    local victims = get_beings_in_circle(posX(target), posY(target), 64)
     local count = #victims
 
     if i == 0 then return end
@@ -40,16 +40,16 @@ local function tick(target, ticknumber)
             victim = nil
             i = -1
         else
-            i = mana.being_type(victim)
+            i = being_type(victim)
         end
     until (i == TYPE_MONSTER or i == TYPE_CHARACTER or remaining == 0)
 
     if (victim == nil) then return end
     
-    mana.being_remove_status(target, 2)
+    being_remove_status(target, 2)
 
-    mana.being_apply_status(victim, 2, 6000)
-    mana.being_say(victim, "Now I have the jumping bug")
+    being_apply_status(victim, 2, 6000)
+    being_say(victim, "Now I have the jumping bug")
 end
 
-mana.get_status_effect("jumping status"):on_tick(tick)
+get_status_effect("jumping status"):on_tick(tick)

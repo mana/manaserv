@@ -9,14 +9,14 @@ local function craft_strict(ch, recipe)
     if (recipe[1].id == 8 and recipe[1].amount == 2 and -- has two iron
         recipe[2].id == 9 and recipe[2].amount == 1)    -- and one wood
         then
-        mana.chr_inv_change(ch,
+        chr_inv_change(ch,
             8, -2, --take away the iron
             9, -1, --take away the wood
             5, 1 ) -- give a sword
-        mana.chat_message(ch, "You've crafted a sword")
+        chat_message(ch, "You've crafted a sword")
         return
     end
-    mana.chat_message(ch, "This wouldn't create anything useful")
+    chat_message(ch, "This wouldn't create anything useful")
 end
 
 -- this turns multiple occurences of the same item into one by adding up
@@ -56,19 +56,19 @@ local function craft_lax(ch, recipe)
     if (recipe[1].id == 8 and recipe[1].amount >= 2 and -- has at least two iron
         recipe[2].id == 9 and recipe[2].amount >= 1)    -- and at least one wood
         then
-        mana.chr_inv_change(ch,
+        chr_inv_change(ch,
             8, -2, -- take away the iron
             9, -1, -- take away the wood
             5, 1 ) -- give a sword
-        mana.chat_message(ch, "You've crafted a sword")
+        chat_message(ch, "You've crafted a sword")
         return
     end
-    mana.chat_message(ch, "This wouldn't create anything useful")
+    chat_message(ch, "This wouldn't create anything useful")
 end
 
 -- This function is registered with the game engine to use when a character
 -- tries to craft something from items in its inventory.
-local function on_craft(ch, recipe)
+local function craft(ch, recipe)
     -- ch is the crafting character
     --
     -- recipe is a table with the ingredients.
@@ -80,9 +80,9 @@ local function on_craft(ch, recipe)
     -- uncomment one (but not both!) of the following three lines to enable the
     -- example crafting systems
 
-    mana.chat_message(ch, "There is no crafting in this game world.")
+    chat_message(ch, "There is no crafting in this game world.")
     --craft_strict(ch, recipe)
     --craft_lax(ch, recipe)
 end
 
-mana.on_craft(on_craft)
+on_craft(craft)

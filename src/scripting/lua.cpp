@@ -2239,8 +2239,9 @@ LuaScript::LuaScript():
         { "announce",                        &announce                        },
         { NULL, NULL }
     };
-    luaL_register(mRootState, "mana", callbacks);
-    lua_pop(mRootState, 1);                     // pop the 'mana' table
+    lua_pushvalue(mRootState, LUA_GLOBALSINDEX);
+    luaL_register(mRootState, NULL, callbacks);
+    lua_pop(mRootState, 1);                     // pop the globals table
 
     static luaL_Reg const members_ItemClass[] = {
         { "on",                              &item_class_on                   },

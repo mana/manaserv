@@ -12,67 +12,67 @@
 
 function npc1_talk(npc, ch)
   on_remove(ch, function() print "Player has left the map." end);
-  mana.npc_message(npc, ch, "Hello! I am the testing NPC.")
-  local rights = mana.chr_get_rights(ch);
+  npc_message(npc, ch, "Hello! I am the testing NPC.")
+  local rights = chr_get_rights(ch);
 
   if (rights >= 128) then
-    mana.npc_message(npc, ch, "Oh mighty server administrator, how can I avoid your wrath?")
+    npc_message(npc, ch, "Oh mighty server administrator, how can I avoid your wrath?")
   elseif (rights >= 8) then
-    mana.npc_message(npc, ch, "How can I be of assistance, sir gamemaster?")
+    npc_message(npc, ch, "How can I be of assistance, sir gamemaster?")
   elseif (rights >= 4) then
-    mana.npc_message(npc, ch, "What feature would you like to debug, developer?")
+    npc_message(npc, ch, "What feature would you like to debug, developer?")
   elseif (rights >= 2) then
-    mana.npc_message(npc, ch, "How can I assist you in your testing duties?")
+    npc_message(npc, ch, "How can I assist you in your testing duties?")
   elseif (rights >= 1) then
-    mana.npc_message(npc, ch, "What do you want, lowly player?")
+    npc_message(npc, ch, "What do you want, lowly player?")
   else
-    mana.npc_message(npc, ch, "...aren't you supposed to be banned??")
+    npc_message(npc, ch, "...aren't you supposed to be banned??")
   end
 
-  local v = mana.npc_choice(npc, ch, "Guns! Lots of guns!",
+  local v = npc_choice(npc, ch, "Guns! Lots of guns!",
                                "A Christmas party!",
                                "To make a donation.",
                                "Slowly count from one to ten.",
                                "Tablepush Test")
   if v == 1 then
-    mana.npc_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
+    npc_message(npc, ch, "Sorry, this is a heroic-fantasy game, I do not have any gun.")
 
   elseif v == 2 then
-    local n1, n2 = mana.chr_inv_count(ch, 524, 511)
+    local n1, n2 = chr_inv_count(ch, 524, 511)
     if n1 == 0 or n2 ~= 0 then
-      mana.npc_message(npc, ch, "Yeah right...")
+      npc_message(npc, ch, "Yeah right...")
     else
-      mana.npc_message(npc, ch, "I can't help you with the party. But I see you have a fancy hat. I could change it into Santa's hat. Not much of a party, but it would get you going.")
-      v = mana.npc_choice(npc, ch, "Please do.", "No way! Fancy hats are classier.")
+      npc_message(npc, ch, "I can't help you with the party. But I see you have a fancy hat. I could change it into Santa's hat. Not much of a party, but it would get you going.")
+      v = npc_choice(npc, ch, "Please do.", "No way! Fancy hats are classier.")
       if v == 1 then
-        mana.chr_inv_change(ch, 524, -1, 511, 1)
+        chr_inv_change(ch, 524, -1, 511, 1)
       end
     end
 
   elseif v == 3 then
-    if mana.chr_money_change(ch, -100) then
-      mana.npc_message(npc, ch, string.format("Thank you for you patronage! You are left with %d GP.", mana.chr_money(ch)))
-      local g = tonumber(mana.chr_get_quest(ch, "001_donation"))
+    if chr_money_change(ch, -100) then
+      npc_message(npc, ch, string.format("Thank you for you patronage! You are left with %d GP.", chr_money(ch)))
+      local g = tonumber(chr_get_quest(ch, "001_donation"))
       if not g then g = 0 end
       g = g + 100
-      mana.chr_set_quest(ch, "001_donation", g)
-      mana.npc_message(npc, ch, string.format("As of today, you have donated %d GP.", g))
+      chr_set_quest(ch, "001_donation", g)
+      npc_message(npc, ch, string.format("As of today, you have donated %d GP.", g))
     else
-      mana.npc_message(npc, ch, "I would feel bad taking money from someone that poor.")
+      npc_message(npc, ch, "I would feel bad taking money from someone that poor.")
     end
 
   elseif v == 4 then
-    mana.being_say(npc, "As you wish...")
-    schedule_in(2, function() mana.being_say(npc, "One") end)
-    schedule_in(4, function() mana.being_say(npc, "Two") end)
-    schedule_in(6, function() mana.being_say(npc, "Three") end)
-    schedule_in(8, function() mana.being_say(npc, "Four") end)
-    schedule_in(10, function() mana.being_say(npc, "Five") end)
-    schedule_in(12, function() mana.being_say(npc, "Six") end)
-    schedule_in(14, function() mana.being_say(npc, "Seven") end)
-    schedule_in(16, function() mana.being_say(npc, "Eight") end)
-    schedule_in(18, function() mana.being_say(npc, "Nine") end)
-    schedule_in(20, function() mana.being_say(npc, "Ten") end)
+    being_say(npc, "As you wish...")
+    schedule_in(2, function() being_say(npc, "One") end)
+    schedule_in(4, function() being_say(npc, "Two") end)
+    schedule_in(6, function() being_say(npc, "Three") end)
+    schedule_in(8, function() being_say(npc, "Four") end)
+    schedule_in(10, function() being_say(npc, "Five") end)
+    schedule_in(12, function() being_say(npc, "Six") end)
+    schedule_in(14, function() being_say(npc, "Seven") end)
+    schedule_in(16, function() being_say(npc, "Eight") end)
+    schedule_in(18, function() being_say(npc, "Nine") end)
+    schedule_in(20, function() being_say(npc, "Ten") end)
 
   elseif v == 5 then
     function printTable (t)
@@ -80,7 +80,7 @@ function npc1_talk(npc, ch)
         print (k, ":", v)
       end
     end
-    local t1, t2, t3, t4, t5 = mana.test_tableget();
+    local t1, t2, t3, t4, t5 = test_tableget();
     print("---------------");
     print ("Table 1:");
     printTable (t1)
@@ -95,6 +95,6 @@ function npc1_talk(npc, ch)
     print("---------------");
   end
 
-  mana.npc_message(npc, ch, "See you later!")
+  npc_message(npc, ch, "See you later!")
 end
 
