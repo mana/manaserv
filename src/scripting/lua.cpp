@@ -68,7 +68,7 @@ extern "C" {
 
 
 /**
- * mana.on_character_death( function(Character*) ): void
+ * on_character_death( function(Character*) ): void
  * Sets a listener function to the character death event.
  */
 static int on_character_death(lua_State *s)
@@ -79,7 +79,7 @@ static int on_character_death(lua_State *s)
 }
 
 /**
- * mana.on_character_death_accept( function(Character*) ): void
+ * on_character_death_accept( function(Character*) ): void
  * Sets a listener function that is called when the player clicks on the OK
  * button after the death message appeared. It should be used to implement the
  * respawn mechanic.
@@ -187,7 +187,7 @@ static int get_status_effect(lua_State *s)
 }
 
 /**
- * mana.npc_message(NPC*, Character*, string): void
+ * npc_message(NPC*, Character*, string): void
  * Callback for sending a NPC_MESSAGE.
  */
 static int npc_message(lua_State *s)
@@ -209,7 +209,7 @@ static int npc_message(lua_State *s)
 }
 
 /**
- * mana.npc_choice(NPC*, Character*, string...): void
+ * npc_choice(NPC*, Character*, string...): void
  * Callback for sending a NPC_CHOICE.
  */
 static int npc_choice(lua_State *s)
@@ -258,7 +258,7 @@ static int npc_choice(lua_State *s)
 }
 
 /**
- * mana.npc_integer(NPC*, Character*, int min, int max, int default = min): void
+ * npc_integer(NPC*, Character*, int min, int max, int default = min): void
  * Callback for sending a NPC_INTEGER.
  */
 static int npc_ask_integer(lua_State *s)
@@ -283,7 +283,7 @@ static int npc_ask_integer(lua_State *s)
 }
 
 /**
- * mana.npc_ask_string(NPC*, Character*): void
+ * npc_ask_string(NPC*, Character*): void
  * Callback for sending a NPC_STRING.
  */
 static int npc_ask_string(lua_State *s)
@@ -302,8 +302,8 @@ static int npc_ask_string(lua_State *s)
 }
 
 /**
- * mana.npc_create(string name, int id, int gender, int x, int y,
- *                 function talk, function update): NPC*
+ * npc_create(string name, int id, int gender, int x, int y,
+ *            function talk, function update): NPC*
  *
  * Callback for creating a NPC on the current map.
  */
@@ -345,7 +345,7 @@ static int npc_create(lua_State *s)
 }
 
 /**
- * mana.npc_post(NPC*, Character*): void
+ * npc_post(NPC*, Character*): void
  * Callback for sending a NPC_POST.
  */
 static int npc_post(lua_State *s)
@@ -361,7 +361,7 @@ static int npc_post(lua_State *s)
 }
 
 /**
- * mana.npc_enable(NPC*): void
+ * npc_enable(NPC*): void
  * Enable a NPC if it has previously disabled
  */
 static int npc_enable(lua_State *s)
@@ -373,7 +373,7 @@ static int npc_enable(lua_State *s)
 }
 
 /**
- * mana.npc_disable(NPC*): void
+ * npc_disable(NPC*): void
  * Disable a NPC.
  */
 static int npc_disable(lua_State *s)
@@ -385,7 +385,7 @@ static int npc_disable(lua_State *s)
 }
 
 /**
- * mana.chr_warp(Character*, nil/int map, int x, int y): void
+ * chr_warp(Character*, nil/int map, int x, int y): void
  * Callback for warping a player to another place.
  */
 static int chr_warp(lua_State *s)
@@ -438,13 +438,13 @@ static int chr_warp(lua_State *s)
 
 /**
  * Callback for gathering inventory information.
- * mana.chr_get_inventory(character): table[]{slot, item id, name, amount}
+ * chr_get_inventory(character): table[]{slot, item id, name, amount}
  * Returns in the inventory slots order, the slot id, the item ids,
  * name and amount. Only slots not empty are returned.
  * @Example
  * To get a piece of information, you can do something like this:
  * -- This will print the 2nd non-empty slot id.
- * local my_table = mana.chr_get_inventory(character)
+ * local my_table = chr_get_inventory(character)
  * print(my_table[2].slot)
  */
 static int chr_get_inventory(lua_State *s)
@@ -497,13 +497,13 @@ static int chr_get_inventory(lua_State *s)
 
 /**
  * Callback for gathering equipment information.
- * mana.chr_get_inventory(character): table[](slot, item id, name)
+ * chr_get_inventory(character): table[](slot, item id, name)
  * Returns in the inventory slots order, the slot id, the item ids, and name.
  * Only slots not empty are returned.
  * @Example
  * To get a piece of information, you can do something like this:
  * -- This will print the 2nd non-empty slot id.
- * local my_table = mana.chr_get_equipment(character)
+ * local my_table = chr_get_equipment(character)
  * print(my_table[2].slot)
  */
 static int chr_get_equipment(lua_State *s)
@@ -556,8 +556,8 @@ static int chr_get_equipment(lua_State *s)
 }
 
 /**
- * mana.chr_inv_change(Character*, (int id || string name,
- *                     int nb)...): bool success
+ * chr_inv_change(Character*, (int id || string name,
+ *                int nb)...): bool success
  * Callback for inserting/removing items in inventory.
  * The function can be called several times in a row, but it is better to
  * perform all the changes at once, so as to reduce bandwidth. Removals
@@ -595,7 +595,7 @@ static int chr_inv_change(lua_State *s)
             nb = inv.remove(id, -nb);
             if (nb)
             {
-                LOG_WARN("mana.chr_inv_change() removed more items than owned: "
+                LOG_WARN("chr_inv_change() removed more items than owned: "
                      << "character: " << q->getName() << " item id: " << id);
             }
         }
@@ -616,8 +616,8 @@ static int chr_inv_change(lua_State *s)
 }
 
 /**
- * mana.chr_inv_count(Character*, bool in inventory, bool in equipment,
- *                    int item_id...): int count...
+ * chr_inv_count(Character*, bool in inventory, bool in equipment,
+ *               int item_id...): int count...
  * Callback for counting items in inventory.
  * The function can search in inventory and/or in the equipment.
  */
@@ -647,7 +647,7 @@ static int chr_inv_count(lua_State *s)
 }
 
 /**
- * mana.chr_equip_slot(Character*, int inventorySlot): bool success
+ * chr_equip_slot(Character*, int inventorySlot): bool success
  * Makes the character equip the item in the given inventory slot.
  */
 static int chr_equip_slot(lua_State *s)
@@ -661,7 +661,7 @@ static int chr_equip_slot(lua_State *s)
 }
 
 /**
- * mana.chr_equip_item(Character*, int itemId || string itemName): bool success
+ * chr_equip_item(Character*, int itemId || string itemName): bool success
  * Makes the character equip the item id when it's existing
  * in the player's inventory.
  */
@@ -683,7 +683,7 @@ static int chr_equip_item(lua_State *s)
 }
 
 /**
- * mana.chr_unequip_slot(Character*, int inventorySlot): bool success
+ * chr_unequip_slot(Character*, int inventorySlot): bool success
  * Makes the character unequip the item in the given equipment slot.
  */
 static int chr_unequip_slot(lua_State *s)
@@ -698,7 +698,7 @@ static int chr_unequip_slot(lua_State *s)
 }
 
 /**
- * mana.chr_unequip_item(Character*, int itemId || string itemName): bool success
+ * chr_unequip_item(Character*, int itemId || string itemName): bool success
  * Makes the character unequip the item(s) corresponding to the id
  * when it's existing in the player's equipment.
  * Returns true when every item were unequipped from equipment.
@@ -714,7 +714,7 @@ static int chr_unequip_item(lua_State *s)
 }
 
 /**
- * mana.chr_get_level(Character*): int level
+ * chr_get_level(Character*): int level
  * Tells the character current level.
  */
 static int chr_get_level(lua_State *s)
@@ -725,7 +725,7 @@ static int chr_get_level(lua_State *s)
 }
 
 /**
- * mana.npc_trade(NPC*, Character*, bool sell, table items): int
+ * npc_trade(NPC*, Character*, bool sell, table items): int
  * Callback for trading between a player and an NPC.
  * Let the player buy or sell only a subset of predeterminded items.
  * @param table items: a subset of buyable/sellable items.
@@ -850,7 +850,7 @@ static int npc_trade(lua_State *s)
 }
 
 /**
- * mana.being_apply_status(Being*, int id, int time): void
+ * being_apply_status(Being*, int id, int time): void
  * Applies a status effect with id to the being given for a amount of time.
  */
 static int being_apply_status(lua_State *s)
@@ -864,7 +864,7 @@ static int being_apply_status(lua_State *s)
 }
 
 /**
- * mana.being_remove_status(Being*, int id): void
+ * being_remove_status(Being*, int id): void
  * Removes the given status effect.
  */
 static int being_remove_status(lua_State *s)
@@ -877,7 +877,7 @@ static int being_remove_status(lua_State *s)
 }
 
 /**
- * mana.being_has_status(Being*, int id): bool
+ * being_has_status(Being*, int id): bool
  * Returns whether a being has the given status effect.
  */
 static int being_has_status(lua_State *s)
@@ -890,7 +890,7 @@ static int being_has_status(lua_State *s)
 }
 
 /**
- * mana.being_get_status_time(Being*, int id): int
+ * being_get_status_time(Being*, int id): int
  * Returns the time left on the given status effect.
  */
 static int being_get_status_time(lua_State *s)
@@ -903,7 +903,7 @@ static int being_get_status_time(lua_State *s)
 }
 
 /**
- * mana.being_set_status_time(Being*, int id, int time): void
+ * being_set_status_time(Being*, int id, int time): void
  * Sets the time left on the given status effect.
  */
 static int being_set_status_time(lua_State *s)
@@ -917,7 +917,7 @@ static int being_set_status_time(lua_State *s)
 }
 
 /**
- * mana.being_type(Being*): ThingType
+ * being_type(Being*): ThingType
  * Returns the Thing type of the given being.
  */
 static int being_type(lua_State *s)
@@ -952,7 +952,7 @@ static int being_walk(lua_State *s)
 }
 
 /**
- * mana.being_say(Being* source, string message): void
+ * being_say(Being* source, string message): void
  * Makes the being say something.
  */
 static int being_say(lua_State *s)
@@ -965,8 +965,8 @@ static int being_say(lua_State *s)
 
 
 /**
- * mana.being_damage(Being* victim, int value, int delta, int cth, int type,
- *                   int element [, Being* source [, int skill]]): void
+ * being_damage(Being* victim, int value, int delta, int cth, int type,
+ *              int element [, Being* source [, int skill]]): void
  * Applies combat damage to a being.
  */
 static int being_damage(lua_State *s)
@@ -1005,7 +1005,7 @@ static int being_damage(lua_State *s)
 }
 
 /**
- * mana.being_heal(Being* [, int value]): void
+ * being_heal(Being* [, int value]): void
  * Restores hit points of a being.
  * Without a value the being is fully healed.
  */
@@ -1026,7 +1026,7 @@ static int being_heal(lua_State *s)
 }
 
 /**
- * mana.being_get_base_attribute(Being*, int attribute): int
+ * being_get_base_attribute(Being*, int attribute): int
  * Gets the base attribute of a being.
  */
 static int being_get_base_attribute(lua_State *s)
@@ -1040,7 +1040,7 @@ static int being_get_base_attribute(lua_State *s)
 }
 
 /**
- * mana.being_get_modified_attribute(Being*, int attribute): int
+ * being_get_modified_attribute(Being*, int attribute): int
  * Gets the modified attribute of a being.
  */
 static int being_get_modified_attribute(lua_State *s)
@@ -1054,7 +1054,7 @@ static int being_get_modified_attribute(lua_State *s)
 }
 
 /**
- * mana.being_set_base_attribute(Being*, int attribute, double value): void
+ * being_set_base_attribute(Being*, int attribute, double value): void
  * Sets the base attribute of a being.
  */
 static int being_set_base_attribute(lua_State *s)
@@ -1068,7 +1068,7 @@ static int being_set_base_attribute(lua_State *s)
 }
 
 /**
- * mana.being_apply_attribute_modifier(Being*, int attribute, double value,
+ * being_apply_attribute_modifier(Being*, int attribute, double value,
  *     int layer, int [duration, int [effect-id]]): void
  * Applies an attribute modifier to a being.
  */
@@ -1086,7 +1086,7 @@ static int being_apply_attribute_modifier(lua_State *s)
 }
 
 /**
- * mana.being_remove_attribute_modifier(Being*, int attribute, double value,
+ * being_remove_attribute_modifier(Being*, int attribute, double value,
  *     int layer, int [effect-id]]): void
  * Removes an attribute modifier to a being.
  */
@@ -1103,7 +1103,7 @@ static int being_remove_attribute_modifier(lua_State *s)
 }
 
 /**
- * mana.being_get_name(Being*): string
+ * being_get_name(Being*): string
  * Gets the being's name.
  */
 static int being_get_name(lua_State *s)
@@ -1114,7 +1114,7 @@ static int being_get_name(lua_State *s)
 }
 
 /**
- * mana.being_get_action(Being*): BeingAction
+ * being_get_action(Being*): BeingAction
  * Gets the being's current action.
  */
 static int being_get_action(lua_State *s)
@@ -1125,7 +1125,7 @@ static int being_get_action(lua_State *s)
 }
 
 /**
- * mana.being_set_action(Being*, BeingAction): void
+ * being_set_action(Being*, BeingAction): void
  * Sets the being's current action.
  */
 static int being_set_action(lua_State *s)
@@ -1137,7 +1137,7 @@ static int being_set_action(lua_State *s)
 }
 
 /**
- * mana.being_get_direction(Being*): BeingDirection
+ * being_get_direction(Being*): BeingDirection
  * Gets the being's current direction.
  */
 static int being_get_direction(lua_State *s)
@@ -1148,7 +1148,7 @@ static int being_get_direction(lua_State *s)
 }
 
 /**
- * mana.being_set_direction(Being*, BeingDirection): void
+ * being_set_direction(Being*, BeingDirection): void
  * Sets the being's current direction.
  */
 static int being_set_direction(lua_State *s)
@@ -1160,7 +1160,7 @@ static int being_set_direction(lua_State *s)
 }
 
 /**
- * mana.posX(Being*): int xcoord
+ * posX(Being*): int xcoord
  * Function for getting the x-coordinate of the position of a being.
  */
 static int posX(lua_State *s)
@@ -1171,7 +1171,7 @@ static int posX(lua_State *s)
 }
 
 /**
- * mana.posY(Being*): int ycoord
+ * posY(Being*): int ycoord
  * Function for getting the y-coordinate of the position of a being.
  */
 static int posY(lua_State *s)
@@ -1199,7 +1199,7 @@ static int monster_class_on(lua_State *s)
 }
 
 /**
- * mana.monster_create(int id || string name, int x, int y): Monster*
+ * monster_create(int id || string name, int x, int y): Monster*
  * Callback for creating a monster on the current map.
  */
 static int monster_create(lua_State *s)
@@ -1219,7 +1219,7 @@ static int monster_create(lua_State *s)
 }
 
 /**
- * mana.monster_get_name(int monster_id): string monster_name
+ * monster_get_name(int monster_id): string monster_name
  * Returns the name of the monster with the given id.
  */
 static int monster_get_name(lua_State *s)
@@ -1237,7 +1237,7 @@ static int monster_get_name(lua_State *s)
 }
 
 /**
- * mana.monster_change_anger(Monster*, Being*, int anger)
+ * monster_change_anger(Monster*, Being*, int anger)
  * Makes a monster angry at a being
  */
 static int monster_change_anger(lua_State *s)
@@ -1250,7 +1250,7 @@ static int monster_change_anger(lua_State *s)
 }
 
 /**
- * mana.monster_remove(Monster*): bool success
+ * monster_remove(Monster*): bool success
  * Remove a monster object without kill event.
  * return whether the monster was enqueued for removal.
  */
@@ -1267,7 +1267,7 @@ static int monster_remove(lua_State *s)
 }
 
 /**
- * mana.chr_get_quest(Character*, string): nil or string
+ * chr_get_quest(Character*, string): nil or string
  * Callback for getting a quest variable. Starts a recovery and returns
  * immediatly, if the variable is not known yet.
  */
@@ -1294,7 +1294,7 @@ static int chr_get_quest(lua_State *s)
 }
 
 /**
- * mana.getvar_map(string): string
+ * getvar_map(string): string
  * Gets the value of a persistent map variable.
  */
 static int getvar_map(lua_State *s)
@@ -1310,7 +1310,7 @@ static int getvar_map(lua_State *s)
 }
 
 /**
- * mana.setvar_map(string, string): void
+ * setvar_map(string, string): void
  * Sets the value of a persistent map variable.
  */
 static int setvar_map(lua_State *s)
@@ -1326,7 +1326,7 @@ static int setvar_map(lua_State *s)
 }
 
 /**
- * mana.getvar_world(string): string
+ * getvar_world(string): string
  * Gets the value of a persistent global variable.
  */
 static int getvar_world(lua_State *s)
@@ -1340,7 +1340,7 @@ static int getvar_world(lua_State *s)
 }
 
 /**
- * mana.setvar_world(string, string): void
+ * setvar_world(string, string): void
  * Sets the value of a persistent global variable.
  */
 static int setvar_world(lua_State *s)
@@ -1354,7 +1354,7 @@ static int setvar_world(lua_State *s)
 }
 
 /**
- * mana.chr_set_quest(Character*, string, string): void
+ * chr_set_quest(Character*, string, string): void
  * Callback for setting a quest variable.
  */
 static int chr_set_quest(lua_State *s)
@@ -1369,8 +1369,8 @@ static int chr_set_quest(lua_State *s)
 }
 
 /**
- * mana.trigger_create(int x, int y, int width, int height, function, int id,
- *                     boolean once)
+ * trigger_create(int x, int y, int width, int height, function, int id,
+ *                boolean once)
  * Creates a trigger area. Whenever an actor enters this area, the given Lua
  * function is called.
  */
@@ -1412,7 +1412,7 @@ static int trigger_create(lua_State *s)
 }
 
 /**
- * private message: mana.chat_message(Being* recipent, string message): void
+ * private message: chat_message(Being* recipent, string message): void
  * Creates a chat message in the users chatlog(s).
  */
 static int chat_message(lua_State *s)
@@ -1425,8 +1425,8 @@ static int chat_message(lua_State *s)
 }
 
 /**
- * mana.get_beings_in_circle(int x, int y, int radius): table of Being*
- * mana.get_beings_in_circle(handle centerBeing, int radius): table of Being*
+ * get_beings_in_circle(int x, int y, int radius): table of Being*
+ * get_beings_in_circle(handle centerBeing, int radius): table of Being*
  * Gets a LUA table with the Being* pointers of all beings
  * inside of a circular area of the current map.
  */
@@ -1474,8 +1474,7 @@ static int get_beings_in_circle(lua_State *s)
 }
 
 /**
- * mana.get_beings_in_rectangle(int x, int y, int width,
- *                              int height): table of Being*
+ * get_beings_in_rectangle(int x, int y, int width, int height): table of Being*
  * Gets a LUA table with the Being* pointers of all beings
  * inside of a rectangular area of the current map.
  */
@@ -1508,7 +1507,7 @@ static int get_beings_in_rectangle(lua_State *s)
  }
 
 /**
- * mana.chr_get_post(Character*): void
+ * chr_get_post(Character*): void
  * Gets the post for the character.
  */
 static int chr_get_post(lua_State *s)
@@ -1526,7 +1525,7 @@ static int chr_get_post(lua_State *s)
 }
 
 /**
- * mana.being_register(Being*): void
+ * being_register(Being*): void
  * Makes the server call the on_being_death and on_being_remove callbacks
  * when the being dies or is removed from the map.
  */
@@ -1538,8 +1537,8 @@ static int being_register(lua_State *s)
 }
 
 /**
- * mana.effect_create (int id, int x, int y): void
- * mana.effect_create (int id, Being*): void
+ * effect_create (int id, int x, int y): void
+ * effect_create (int id, Being*): void
  * Triggers a special effect from the clients effects.xml.
  */
 static int effect_create(lua_State *s)
@@ -1565,8 +1564,7 @@ static int effect_create(lua_State *s)
 }
 
 /**
- * mana.chr_shake_screen(Character*, int x, int y[, float strength,
- *                       int radius]): void
+ * chr_shake_screen(Character*, int x, int y[, float strength, int radius]): void
  * Shake the screen for a given character.
  */
 static int chr_shake_screen(lua_State *s)
@@ -1591,7 +1589,7 @@ static int chr_shake_screen(lua_State *s)
 
 
 /**
- * mana.chr_get_exp(Character*, int skill): int
+ * chr_get_exp(Character*, int skill): int
  * Gets the exp total in a skill of a specific character
  */
 static int chr_get_exp(lua_State *s)
@@ -1605,8 +1603,7 @@ static int chr_get_exp(lua_State *s)
 }
 
 /**
- * mana.chr_give_exp(Character*, int skill,
- *                   int amount[, int optimal_level]): void
+ * chr_give_exp(Character*, int skill, int amount[, int optimal_level]): void
  * Gives the character a certain amount of experience points
  * in a skill. Can also be used to reduce the exp amount when
  * desired.
@@ -1623,7 +1620,7 @@ static int chr_give_exp(lua_State *s)
 }
 
 /**
- * mana.chr_set_hair_style(Character*, int style_id): void
+ * chr_set_hair_style(Character*, int style_id): void
  * Sets the given character's hair style to the given style id.
  */
 static int chr_set_hair_style(lua_State *s)
@@ -1638,7 +1635,7 @@ static int chr_set_hair_style(lua_State *s)
 }
 
 /**
- * mana.chr_get_hair_style(Character*): int hair_style
+ * chr_get_hair_style(Character*): int hair_style
  * Gets the hair style of the given character.
  */
 static int chr_get_hair_style(lua_State *s)
@@ -1650,7 +1647,7 @@ static int chr_get_hair_style(lua_State *s)
 }
 
 /**
- * mana.chr_set_hair_color(Character*, int color_id): void
+ * chr_set_hair_color(Character*, int color_id): void
  * Set the hair color of the given character to the given color id.
  */
 static int chr_set_hair_color(lua_State *s)
@@ -1666,7 +1663,7 @@ static int chr_set_hair_color(lua_State *s)
 }
 
 /**
- * mana.chr_get_hair_color(Character*): int hair_color
+ * chr_get_hair_color(Character*): int hair_color
  * Get the hair color of the given character.
  */
 static int chr_get_hair_color(lua_State *s)
@@ -1678,7 +1675,7 @@ static int chr_get_hair_color(lua_State *s)
 }
 
 /**
- * mana.chr_get_kill_count(Character*, int monster_type): int
+ * chr_get_kill_count(Character*, int monster_type): int
  * Get the number of monsters the player killed of a type.
  */
 static int chr_get_kill_count(lua_State *s)
@@ -1691,7 +1688,7 @@ static int chr_get_kill_count(lua_State *s)
 }
 
 /**
- * mana.being_get_gender(Being*): int
+ * being_get_gender(Being*): int
  * Get the gender of the being.
  */
 static int being_get_gender(lua_State *s)
@@ -1702,7 +1699,7 @@ static int being_get_gender(lua_State *s)
 }
 
 /**
- * mana.being_set_gender(Being*, int gender): void
+ * being_set_gender(Being*, int gender): void
  * Set the gender of the being.
  */
 static int being_set_gender(lua_State *s)
@@ -1714,7 +1711,7 @@ static int being_set_gender(lua_State *s)
 }
 
 /**
- * mana.chr_give_special(Character*, int special): void
+ * chr_give_special(Character*, int special): void
  * Enables a special for a character.
  */
 static int chr_give_special(lua_State *s)
@@ -1728,7 +1725,7 @@ static int chr_give_special(lua_State *s)
 }
 
 /**
- * mana.chr_has_special(Character*, int special): bool
+ * chr_has_special(Character*, int special): bool
  * Checks whether a character has a given special.
  */
 static int chr_has_special(lua_State *s)
@@ -1741,7 +1738,7 @@ static int chr_has_special(lua_State *s)
 }
 
 /**
- * mana.chr_take_special(Character*, int special): bool success
+ * chr_take_special(Character*, int special): bool success
  * Removes a special from a character.
  */
 static int chr_take_special(lua_State *s)
@@ -1755,7 +1752,7 @@ static int chr_take_special(lua_State *s)
 }
 
 /**
- * mana.chr_get_rights(Character*): int
+ * chr_get_rights(Character*): int
  * Returns the rights level of a character.
  */
 static int chr_get_rights(lua_State *s)
@@ -1766,7 +1763,7 @@ static int chr_get_rights(lua_State *s)
 }
 
 /**
- * mana.exp_for_level(int level): int
+ * exp_for_level(int level): int
  * Returns the exp total necessary to reach a specific skill level.
  */
 static int exp_for_level(lua_State *s)
@@ -1834,7 +1831,7 @@ static int test_tableget(lua_State *s)
 }
 
 /**
- * mana.get_map_id(): int
+ * get_map_id(): int
  * Returns the id of the current map.
  */
 static int get_map_id(lua_State *s)
@@ -1845,7 +1842,7 @@ static int get_map_id(lua_State *s)
 }
 
 /**
- * mana.get_map_property(string property): string
+ * get_map_property(string property): string
  * Returns the value of a map property.
  */
 static int get_map_property(lua_State *s)
@@ -1859,7 +1856,7 @@ static int get_map_property(lua_State *s)
 }
 
 /**
- * mana.is_walkable(int x, int y): bool
+ * is_walkable(int x, int y): bool
  * Returns whether the pixel on the map is walkable.
  */
 static int is_walkable(lua_State *s)
@@ -1894,7 +1891,7 @@ static int item_class_on(lua_State *s)
 }
 
 /**
- * mana.drop_item(int x, int y, int id || string name[, int number]): bool
+ * drop_item(int x, int y, int id || string name[, int number]): bool
  * Creates an item stack on the floor.
  * @Returns whether the insertion was successful.
  */
@@ -1916,7 +1913,7 @@ static int item_drop(lua_State *s)
 }
 
 /**
- * mana.item_get_name(int item_id): string item_name
+ * item_get_name(int item_id): string item_name
  * Returns the name of the item with the given id.
  */
 static int item_get_name(lua_State *s)
@@ -1933,7 +1930,7 @@ static int item_get_name(lua_State *s)
 }
 
 /**
- * mana.log(int log_level, string log_message): void
+ * log(int log_level, string log_message): void
  * Logs the given message to the log.
  */
 static int log(lua_State *s)
@@ -1953,8 +1950,8 @@ static int log(lua_State *s)
 }
 
 /**
- * mana.get_distance(Being*, Being*): int
- * mana.get_distance(int x1, int y1, int x2, int y2): int
+ * get_distance(Being*, Being*): int
+ * get_distance(int x1, int y1, int x2, int y2): int
  * Gets the distance between two beings or two points.
  */
 static int get_distance(lua_State *s)
@@ -1986,8 +1983,8 @@ static int get_distance(lua_State *s)
 }
 
 /**
- * mana.map_get_objects(): table of all objects
- * mana.map_get_objects(string type): table of all objects of type
+ * map_get_objects(): table of all objects
+ * map_get_objects(string type): table of all objects of type
  * Gets the objects of a map.
  */
 static int map_get_objects(lua_State *s)
@@ -2021,7 +2018,7 @@ static int map_get_objects(lua_State *s)
 }
 
 /**
- * mana.map_object_get_property(handle object, string key)
+ * map_object_get_property(handle object, string key)
  * Returns the value of the object property 'key'.
  */
 static int map_object_get_property(lua_State *s)
@@ -2043,7 +2040,7 @@ static int map_object_get_property(lua_State *s)
 }
 
 /**
- * mana.map_object_get_bounds(object)
+ * map_object_get_bounds(object)
  * Returns 4 int: x/y/width/height of object.
  */
 static int map_object_get_bounds(lua_State *s)
@@ -2058,7 +2055,7 @@ static int map_object_get_bounds(lua_State *s)
 }
 
 /**
- * mana.map_object_get_name(object)
+ * map_object_get_name(object)
  * Returns the name of the object.
  */
 static int map_object_get_name(lua_State *s)
@@ -2069,7 +2066,7 @@ static int map_object_get_name(lua_State *s)
 }
 
 /**
- * mana.map_object_get_type(object)
+ * map_object_get_type(object)
  * Returns the type of the object.
  */
 static int map_object_get_type(lua_State *s)
@@ -2088,7 +2085,7 @@ static int status_effect_on_tick(lua_State *s)
 }
 
 /**
- * mana.announce(text [, sender])
+ * announce(text [, sender])
  * Does a global announce
  */
 static int announce(lua_State *s)
