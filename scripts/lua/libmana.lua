@@ -16,6 +16,31 @@
 
 require "scripts/lua/libmana-constants"
 
+-- A table that provides access to persistent variables of the current map
+map = setmetatable({}, {
+    __index = function(_, key)
+        return getvar_map(key)
+    end,
+    __newindex = function(_, key, value)
+        setvar_map(key, value)
+    end,
+})
+
+-- A table that provides access to persistent global world variables
+world = setmetatable({}, {
+    __index = function(_, key)
+        return getvar_world(key)
+    end,
+    __newindex = function(_, key, value)
+        setvar_world(key, value)
+    end,
+})
+
+-- Some convenient shortcuts for the different log levels
+function warn(...)  log(LOG_WARN,  table.concat({...}, " ")) end
+function info(...)  log(LOG_INFO,  table.concat({...}, " ")) end
+function debug(...) log(LOG_DEBUG, table.concat({...}, " ")) end
+
 -- Array containing the function registered by atinit.
 local init_fun = {}
 
