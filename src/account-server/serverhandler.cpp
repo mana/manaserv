@@ -208,7 +208,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
                 // transmit global world state variables
                 std::map<std::string, std::string> variables;
-                variables = storage->getAllWorldStateVars(0);
+                variables = storage->getAllWorldStateVars(Storage::WorldMap);
                 for (std::map<std::string, std::string>::iterator i = variables.begin();
                      i != variables.end();
                      i++)
@@ -385,7 +385,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             std::string name = msg.readString();
             std::string value = msg.readString();
             // save the new value to the database
-            storage->setWorldStateVar(name, value);
+            storage->setWorldStateVar(name, value, Storage::WorldMap);
             // relay the new value to all gameservers
             for (ServerHandler::NetComputers::iterator i = clients.begin();
                 i != clients.end();
@@ -403,7 +403,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int mapid = msg.readInt32();
             std::string name = msg.readString();
             std::string value = msg.readString();
-            storage->setWorldStateVar(name, mapid, value);
+            storage->setWorldStateVar(name, value, mapid);
         } break;
 
         case GAMSG_BAN_PLAYER:

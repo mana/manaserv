@@ -278,10 +278,10 @@ DEFAULT CHARSET=utf8;
 CREATE TABLE IF NOT EXISTS mana_world_states
 (
    state_name   varchar(100)NOT NULL,
-   map_id       INTEGER     NULL,
-   value        TEXT        NULL,
+   map_id       INTEGER     NOT NULL,
+   value        TEXT        NOT NULL,
    moddate      INTEGER     NOT NULL,
-   PRIMARY KEY (`state_name`)
+   PRIMARY KEY (`state_name`, `map_id`)
 );
 
 --

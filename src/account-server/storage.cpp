@@ -122,7 +122,7 @@ void Storage::open()
 
         // Check database version here
         int dbversion = utils::stringToInt(
-                                        getWorldStateVar(DB_VERSION_PARAMETER));
+                    getWorldStateVar(DB_VERSION_PARAMETER, SystemMap));
         int supportedDbVersion = ManaServ::SUPPORTED_DB_VERSION;
         if (dbversion != supportedDbVersion)
         {
@@ -1666,14 +1666,8 @@ std::map<std::string, std::string> Storage::getAllWorldStateVars(int mapId)
 }
 
 void Storage::setWorldStateVar(const std::string &name,
-                               const std::string &value)
-{
-    return setWorldStateVar(name, -1, value);
-}
-
-void Storage::setWorldStateVar(const std::string &name,
-                               int mapId,
-                               const std::string &value)
+                               const std::string &value,
+                               int mapId)
 {
     try
     {
@@ -1682,12 +1676,8 @@ void Storage::setWorldStateVar(const std::string &name,
         {
             std::ostringstream deleteStateVar;
             deleteStateVar << "DELETE FROM " << WORLD_STATES_TBL_NAME
-                           << " WHERE state_name = '" << name << "'";
-
-            if (mapId >= 0)
-                deleteStateVar << " AND map_id = '" << mapId << "'";
-
-            deleteStateVar << ";";
+                           << " WHERE state_name = '" << name << "'"
+                           << " AND map_id = '" << mapId << "';";
             mDb->execSql(deleteStateVar.str());
             return;
         }
@@ -1697,12 +1687,8 @@ void Storage::setWorldStateVar(const std::string &name,
         updateStateVar << "UPDATE " << WORLD_STATES_TBL_NAME
                        << "   SET value = '" << value << "', "
                        << "       moddate = '" << time(0) << "' "
-                       << " WHERE state_name = '" << name << "'";
-
-        if (mapId >= 0)
-            updateStateVar << " AND map_id = '" << mapId << "'";
-
-        updateStateVar << ";";
+                       << " WHERE state_name = '" << name << "'"
+                       << " AND map_id = '" << mapId << "';";
         mDb->execSql(updateStateVar.str());
 
         // If we updated a row, were finished here
@@ -1713,13 +1699,9 @@ void Storage::setWorldStateVar(const std::string &name,
         std::ostringstream insertStateVar;
         insertStateVar << "INSERT INTO " << WORLD_STATES_TBL_NAME
                        << " (state_name, map_id, value , moddate) VALUES ("
-                       << "'" << name << "', ";
-        if (mapId >= 0)
-            insertStateVar << "'" << mapId << "', ";
-        else
-            insertStateVar << "0 , ";
-
-        insertStateVar << "'" << value << "', "
+                       << "'" << name << "', "
+                       << "'" << mapId << "', "
+                       << "'" << value << "', "
                        << "'" << time(0) << "');";
         mDb->execSql(insertStateVar.str());
     }

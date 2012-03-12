@@ -250,10 +250,12 @@ CREATE TABLE mana_quests
 
 CREATE TABLE mana_world_states
 (
-   state_name   TEXT        PRIMARY KEY,
-   map_id       INTEGER     NULL,
-   value        TEXT        NULL,
-   moddate      INTEGER     NOT NULL
+   state_name   TEXT        NOT NULL,
+   map_id       INTEGER     NOT NULL,
+   value        TEXT        NOT NULL,
+   moddate      INTEGER     NOT NULL,
+   --
+   PRIMARY KEY (state_name, map_id)
 );
 
 -----------------------------------------------------------------------------

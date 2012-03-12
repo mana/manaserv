@@ -344,35 +344,34 @@ class Storage
          */
         void setQuestVar(int id, const std::string &, const std::string &);
 
-        /**
-         * Gets the string value of a map specific world state variable.
-         *
-         * @param name Name of the requested world-state variable.
-         * @param map_id Id of the specific map.
-         */
-        std::string getWorldStateVar(const std::string &name, int mapId = -1);
+        enum SpecialMapId {
+            WorldMap = 0,
+            SystemMap = -1
+        };
 
         /**
-         * Sets the value of a world state variable.
+         * Gets the string value of a world state variable. The \a mapId should
+         * be a valid map ID or either WorldMap or SystemMap.
          *
-         * @param name Name of the world-state vairable.
-         * @param value New value of the world-state variable.
+         * @param name  Name of the requested world variable.
+         * @param mapId ID of the specific map.
+         */
+        std::string getWorldStateVar(const std::string &name, int mapId);
+
+        /**
+         * Sets the value of a world state variable. The \a mapId should be a
+         * valid map ID or either WorldMap or SystemMap.
+         *
+         * @param name  Name of the world vairable.
+         * @param value New value of the world variable.
          */
         void setWorldStateVar(const std::string &name,
-                              const std::string &value);
+                              const std::string &value,
+                              int mapId);
 
         /**
-         * Sets the value of a world state variable of a specific map.
-         *
-         * @param name Name of the world-state vairable.
-         * @param mapId ID of the specific map
-         * @param value New value of the world-state variable.
-         */
-        void setWorldStateVar(const std::string &name, int mapId,
-                              const std::string &value);
-
-        /**
-         * Gets the value of all world state variable of a specific map.
+         * Gets the value of all world state variables of a specific map. The
+         * \a mapId should be a valid map ID or either WorldMap or SystemMap.
          *
          * @param mapId ID of the specific map
          */

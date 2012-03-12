@@ -369,9 +369,11 @@ int main(int argc, char *argv[])
     const time_t startup = time(NULL);
     std::stringstream timestamp;
     timestamp << startup;
-    storage->setWorldStateVar("accountserver_startup", timestamp.str());
+    storage->setWorldStateVar("accountserver_startup", timestamp.str(),
+                              Storage::SystemMap);
     const std::string revision = "$Revision$";
-    storage->setWorldStateVar("accountserver_version", revision);
+    storage->setWorldStateVar("accountserver_version", revision,
+                              Storage::SystemMap);
     // -------------------------------------------------------------------------
 
     while (running)
