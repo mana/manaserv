@@ -205,7 +205,6 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             if (password == Configuration::getValue("net_password", "changeMe"))
             {
                 outMsg.writeInt16(PASSWORD_OK);
-                comp->send(outMsg);
 
                 // transmit global world state variables
                 std::map<std::string, std::string> variables;
@@ -217,6 +216,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     outMsg.writeString(i->first);
                     outMsg.writeString(i->second);
                 }
+
+                comp->send(outMsg);
             }
             else
             {
