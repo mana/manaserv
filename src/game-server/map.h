@@ -72,7 +72,7 @@ class MapObject
         { }
 
         void addProperty(const std::string &key, const std::string &value)
-        {   
+        {
             if (mProperties.contains(key))
                 LOG_WARN("Duplicate property " << key <<
                          " of object " << mName);
@@ -178,7 +178,7 @@ class Map
         void setProperty(const std::string &key, const std::string &val)
         { mProperties[key] = val; }
 
-        /** 
+        /**
          * Adds an object.
          */
         void addObject(MapObject *object)
@@ -198,7 +198,6 @@ class Map
                       unsigned char walkmask,
                       int maxCost = 20) const;
 
-    private:
         /**
          * Blockmasks for different entities
          */
@@ -206,6 +205,7 @@ class Map
         static const unsigned char BLOCKMASK_CHARACTER = 0x01;// = bin 0000 0001
         static const unsigned char BLOCKMASK_MONSTER = 0x02;  // = bin 0000 0010
 
+    private:
         // map properties
         int mWidth, mHeight;
         int mTileWidth, mTileHeight;

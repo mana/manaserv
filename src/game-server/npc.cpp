@@ -20,6 +20,7 @@
 
 #include "game-server/character.h"
 #include "game-server/gamehandler.h"
+#include "game-server/map.h"
 #include "game-server/npc.h"
 #include "net/messageout.h"
 #include "scripting/script.h"
@@ -30,6 +31,8 @@ NPC::NPC(const std::string &name, int id):
     mID(id),
     mEnabled(true)
 {
+    setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER |
+                Map::BLOCKMASK_CHARACTER);
     setName(name);
 }
 

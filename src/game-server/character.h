@@ -372,13 +372,6 @@ class Character : public Being
         Script::Thread *getNpcThread() const
         { return mNpcThread; }
 
-
-        /**
-         * Gets the way the actor is blocked by other things on the map
-         */
-        virtual unsigned char getWalkMask() const
-        { return 0x82; } // blocked by walls and monsters ( bin 1000 0010)
-
         /** Makes it impossible to chat for a while */
         void mute(int seconds)
         { setTimerHard(T_C_MUTE, seconds * 10); }

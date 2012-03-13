@@ -26,6 +26,7 @@
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
 #include "game-server/item.h"
+#include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/state.h"
 #include "scripting/scriptmanager.h"
@@ -54,6 +55,8 @@ Monster::Monster(MonsterClass *specy):
     mCurrentAttack(NULL)
 {
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
+
+    setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_CHARACTER);
 
     /*
      * Initialise the attribute structures.

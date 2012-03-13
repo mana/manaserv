@@ -323,15 +323,6 @@ class Monster : public Being
         void forgetTarget(Thing *being);
 
         /**
-         * Returns the way the actor is blocked by other things on the map.
-         */
-        virtual unsigned char getWalkMask() const
-        {
-            // blocked walls, other monsters and players ( bin 1000 0011)
-            return 0x83;
-        }
-
-        /**
          * Called when an attribute modifier is changed.
          * Recalculate the base value of an attribute and update derived
          *     attributes if it has changed.

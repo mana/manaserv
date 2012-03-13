@@ -52,7 +52,8 @@ class Actor : public Thing
             mMoveTime(0),
             mUpdateFlags(0),
             mPublicID(65535),
-            mSize(0)
+            mSize(0),
+            mWalkMask(0)
         {}
 
         ~Actor();
@@ -114,11 +115,14 @@ class Actor : public Thing
         bool isPublicIdValid() const
         { return (mPublicID > 0 && mPublicID != 65535); }
 
+        void setWalkMask(unsigned char mask)
+        { mWalkMask = mask; }
+
         /**
          * Gets the way the actor blocks pathfinding for other actors.
          */
-        virtual unsigned char getWalkMask() const
-        { return 0x00; } //can walk through everything
+        unsigned char getWalkMask() const
+        { return mWalkMask; }
 
         /**
          * Overridden in order to update the walkmap.
@@ -143,6 +147,8 @@ class Actor : public Thing
 
         Point mPos;                 /**< Coordinates. */
         unsigned char mSize;        /**< Radius of bounding circle. */
+
+        unsigned char mWalkMask;
 };
 
 #endif // ACTOR_H

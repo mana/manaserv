@@ -38,6 +38,7 @@ extern "C" {
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
+#include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monster.h"
@@ -1159,6 +1160,45 @@ static int being_set_direction(lua_State *s)
     return 0;
 }
 
+/*
+ * being_set_walkmask(Being*, string mask)
+ * Sets the walkmask of a being
+ */
+static int being_set_walkmask(lua_State *s)
+{
+   Being *being = checkBeing(s, 1);
+   const char *stringMask = luaL_checkstring(s, 2);
+   unsigned char mask = 0x00;
+   if (strchr(stringMask, 'w'))
+       mask |= Map::BLOCKMASK_WALL;
+   else if (strchr(stringMask, 'c'))
+       mask |= Map::BLOCKMASK_CHARACTER;
+   else if (strchr(stringMask, 'm'))
+       mask |= Map::BLOCKMASK_MONSTER;
+   being->setWalkMask(mask);
+   return 0;
+}
+
+/**
+ * being_get_walkmask(Being*): string
+ * Returns the walkmask of a being
+ */
+static int being_get_walkmask(lua_State *s)
+{
+   Being *being = checkBeing(s, 1);
+   const unsigned char mask = being->getWalkMask();
+   luaL_Buffer buffer;
+   luaL_buffinit(s, &buffer);
+   if (mask & Map::BLOCKMASK_WALL)
+       luaL_addstring(&buffer, "w");
+   if (mask & Map::BLOCKMASK_CHARACTER)
+       luaL_addstring(&buffer, "c");
+   if (mask & Map::BLOCKMASK_MONSTER)
+       luaL_addstring(&buffer, "m");
+   luaL_pushresult(&buffer);
+   return 1;
+}
+
 /**
  * posX(Being*): int xcoord
  * Function for getting the x-coordinate of the position of a being.
@@ -2212,6 +2252,8 @@ LuaScript::LuaScript():
         { "being_set_base_attribute",        &being_set_base_attribute        },
         { "being_get_modified_attribute",    &being_get_modified_attribute    },
         { "being_get_base_attribute",        &being_get_base_attribute        },
+        { "being_set_walkmask",              &being_set_walkmask              },
+        { "being_get_walkmask",              &being_get_walkmask              },
         { "posX",                            &posX                            },
         { "posY",                            &posY                            },
         { "trigger_create",                  &trigger_create                  },
