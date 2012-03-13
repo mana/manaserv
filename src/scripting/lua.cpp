@@ -726,6 +726,19 @@ static int chr_get_level(lua_State *s)
 }
 
 /**
+ * chr_kick(Character*)
+ * Kicks the character.
+ */
+static int chr_kick(lua_State *s)
+{
+    Character *ch = checkCharacter(s, 1);
+    MessageOut kickmsg(GPMSG_CONNECT_RESPONSE);
+    kickmsg.writeInt8(ERRMSG_ADMINISTRATIVE_LOGOFF);
+    ch->getClient()->disconnect(kickmsg);
+    return 0;
+}
+
+/**
  * npc_trade(NPC*, Character*, bool sell, table items): int
  * Callback for trading between a player and an NPC.
  * Let the player buy or sell only a subset of predeterminded items.
@@ -2254,11 +2267,10 @@ LuaScript::LuaScript():
         { "chr_set_hair_color",              &chr_set_hair_color              },
         { "chr_get_hair_color",              &chr_get_hair_color              },
         { "chr_get_kill_count",              &chr_get_kill_count              },
-        { "being_get_gender",                &being_get_gender                },
-        { "being_set_gender",                &being_set_gender                },
         { "chr_give_special",                &chr_give_special                },
         { "chr_has_special",                 &chr_has_special                 },
         { "chr_take_special",                &chr_take_special                },
+        { "chr_kick",                        &chr_kick                        },
         { "exp_for_level",                   &exp_for_level                   },
         { "monster_create",                  &monster_create                  },
         { "monster_get_name",                &monster_get_name                },
@@ -2269,6 +2281,8 @@ LuaScript::LuaScript():
         { "being_has_status",                &being_has_status                },
         { "being_set_status_time",           &being_set_status_time           },
         { "being_get_status_time",           &being_get_status_time           },
+        { "being_get_gender",                &being_get_gender                },
+        { "being_set_gender",                &being_set_gender                },
         { "being_type",                      &being_type                      },
         { "being_walk",                      &being_walk                      },
         { "being_say",                       &being_say                       },
