@@ -1160,7 +1160,7 @@ static int being_set_direction(lua_State *s)
     return 0;
 }
 
-/*
+/**
  * being_set_walkmask(Being*, string mask)
  * Sets the walkmask of a being
  */
@@ -1181,7 +1181,7 @@ static int being_set_walkmask(lua_State *s)
 
 /**
  * being_get_walkmask(Being*): string
- * Returns the walkmask of a being
+ * Returns the walkmask of a being.
  */
 static int being_get_walkmask(lua_State *s)
 {
@@ -1197,6 +1197,21 @@ static int being_get_walkmask(lua_State *s)
        luaL_addstring(&buffer, "m");
    luaL_pushresult(&buffer);
    return 1;
+}
+
+/**
+ * being_get_mapid(Being*): int
+ * Returns the id of the map where the being is located or nil if there is none.
+ */
+static int being_get_mapid(lua_State *s)
+{
+    Being *being = checkBeing(s, 1);
+    if (MapComposite *map = being->getMap())
+        lua_pushinteger(s, map->getID());
+    else
+        lua_pushnil(s);
+
+    return 1;
 }
 
 /**
@@ -2271,6 +2286,7 @@ LuaScript::LuaScript():
         { "being_get_base_attribute",        &being_get_base_attribute        },
         { "being_set_walkmask",              &being_set_walkmask              },
         { "being_get_walkmask",              &being_get_walkmask              },
+        { "being_get_mapid",                 &being_get_mapid                 },
         { "posX",                            &posX                            },
         { "posY",                            &posY                            },
         { "trigger_create",                  &trigger_create                  },
