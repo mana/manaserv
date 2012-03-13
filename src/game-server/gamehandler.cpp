@@ -383,16 +383,17 @@ void GameHandler::deletePendingConnect(Character *character)
     delete character;
 }
 
-GameClient *GameHandler::getClientByNameSlow(const std::string &name) const
+Character *GameHandler::getCharacterByNameSlow(const std::string &name) const
 {
     for (NetComputers::const_iterator i = clients.begin(),
          i_end = clients.end(); i != i_end; ++i)
     {
         GameClient *c = static_cast< GameClient * >(*i);
         Character *ch = c->character;
-        if (ch && ch->getName() == name)
+        if (ch && ch->getName() == name &&
+                c->status != CLIENT_CONNECTED)
         {
-            return c;
+            return ch;
         }
     }
     return 0;

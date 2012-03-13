@@ -1547,6 +1547,23 @@ static int get_beings_in_rectangle(lua_State *s)
  }
 
 /**
+ * get_character_by_name(string name): Character*
+ * Returns the character handle or NULL if there is none
+ */
+static int get_character_by_name(lua_State *s)
+{
+    const char *name = luaL_checkstring(s, 1);
+
+    Character *ch = gameHandler->getCharacterByNameSlow(name);
+    if (!ch)
+        lua_pushnil(s);
+    else
+        lua_pushlightuserdata(s, ch);
+
+    return 1;
+}
+
+/**
  * chr_get_post(Character*): void
  * Gets the post for the character.
  */
@@ -2260,6 +2277,7 @@ LuaScript::LuaScript():
         { "chat_message",                    &chat_message                    },
         { "get_beings_in_circle",            &get_beings_in_circle            },
         { "get_beings_in_rectangle",         &get_beings_in_rectangle         },
+        { "get_character_by_name",           &get_character_by_name           },
         { "being_register",                  &being_register                  },
         { "effect_create",                   &effect_create                   },
         { "chr_shake_screen",                &chr_shake_screen                },

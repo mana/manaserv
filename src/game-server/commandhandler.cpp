@@ -244,24 +244,6 @@ static std::string getArgument(std::string &args)
     return argument;
 }
 
-static Character* getPlayer(const std::string &player)
-{
-    // get character, via the client, as they may be
-    // on a different game server
-    GameClient *client = gameHandler->getClientByNameSlow(player);
-    if (!client)
-    {
-        return NULL;
-    }
-
-    if (client->status != CLIENT_CONNECTED)
-    {
-        return NULL;
-    }
-
-    return client->character;
-}
-
 static void handleHelp(Character *player, std::string &args)
 {
     if (args.empty())
@@ -413,7 +395,7 @@ static void handleCharWarp(Character *player, std::string &args)
     else
     {
         // check for valid player
-        other = getPlayer(character);
+        other = gameHandler->getCharacterByNameSlow(character);
         if (!other)
         {
             say("Invalid or offline character <" + character + ">.", player);
@@ -515,7 +497,7 @@ static void handleItem(Character *player, std::string &args)
     else
     {
         // check for valid player
-        other = getPlayer(character);
+        other = gameHandler->getCharacterByNameSlow(character);
         if (!other)
         {
             say("Invalid character or they are offline", player);
@@ -650,7 +632,7 @@ static void handleMoney(Character *player, std::string &args)
     else
     {
         // check for valid player
-        other = getPlayer(character);
+        other = gameHandler->getCharacterByNameSlow(character);
         if (!other)
         {
             say("Invalid character or they are offline", player);
@@ -763,7 +745,7 @@ static void handleGoto(Character *player, std::string &args)
     }
 
     // check for valid player
-    other = getPlayer(character);
+    other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character, or they are offline.", player);
@@ -797,7 +779,7 @@ static void handleRecall(Character *player, std::string &args)
     }
 
     // check for valid player
-    other = getPlayer(character);
+    other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character, or they are offline.", player);
@@ -836,7 +818,7 @@ static void handleBan(Character *player, std::string &args)
     }
 
     // check for valid player
-    other = getPlayer(character);
+    other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character", player);
@@ -900,7 +882,7 @@ static void handlePermissions(Character *player, std::string &args)
         return;
     }
 
-    Character *other = getPlayer(character);
+    Character *other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character", player);
@@ -935,7 +917,7 @@ static void handleGivePermission(Character *player, std::string &args)
     else
     {
         // check for valid player
-        other = getPlayer(character);
+        other = gameHandler->getCharacterByNameSlow(character);
         if (!other)
         {
             say("Invalid character", player);
@@ -996,7 +978,7 @@ static void handleTakePermission(Character *player, std::string &args)
     else
     {
         // check for valid player
-        other = getPlayer(character);
+        other = gameHandler->getCharacterByNameSlow(character);
         if (!other)
         {
             say("Invalid character", player);
@@ -1056,7 +1038,7 @@ static void handleAttribute(Character *player, std::string &args)
     else
     {
         // check for valid player
-        other = getPlayer(character);
+        other = gameHandler->getCharacterByNameSlow(character);
         if (!other)
         {
             say("Invalid character", player);
@@ -1163,7 +1145,7 @@ static void handleMute(Character *player, std::string &args)
 
 
     // Check for a valid player.
-    other = getPlayer(character);
+    other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character", player);
@@ -1229,7 +1211,7 @@ static void handleKill(Character *player, std::string &args)
     std::string character = getArgument(args);
 
     // check for valid player
-    other = getPlayer(character);
+    other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character", player);
@@ -1261,7 +1243,7 @@ static void handleKick(Character *player, std::string &args)
     std::string character = getArgument(args);
 
     // check for valid player
-    other = getPlayer(character);
+    other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character", player);
@@ -1428,7 +1410,7 @@ static void handleGetPos(Character *player, std::string &args)
         return;
     }
     Character *other;
-    other = getPlayer(character);
+    other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character, or they are offline.", player);
@@ -1461,7 +1443,7 @@ static void handleSkills(Character *player, std::string &args)
     if (character == "#")
         other = player;
     else
-        other = getPlayer(character);
+        other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character, or they are offline.", player);
@@ -1504,7 +1486,7 @@ static void handleEffect(Character *player, std::string &args)
     else if (arguments.size() == 2)
     {
         int id = utils::stringToInt(arguments[0]);
-        Character *p = getPlayer(arguments[1]);
+        Character *p = gameHandler->getCharacterByNameSlow(arguments[1]);
         if (!p)
         {
             say("Invalid target player.", player);

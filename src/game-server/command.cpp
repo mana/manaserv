@@ -356,7 +356,7 @@ void runCommand(Character *ch, const std::string &text)
                 }
                 else
                 {
-                    GameClient *c = gameHandler->getClientByNameSlow(arg);
+                    Character *c = gameHandler->getCharacterByNameSlow(arg);
                     if (!c)
                     {
                         /* TODO: forward command to other game servers through
@@ -364,13 +364,7 @@ void runCommand(Character *ch, const std::string &text)
                         say(ch, "Player " + arg + " was not found");
                         return;
                     }
-                    if (c->status != CLIENT_CONNECTED)
-                    {
-                        // No suitable character.
-                        say(ch, "Player " + arg + " is offline");
-                        return;
-                    }
-                    args[i] = (intptr_t)c->character;
+                    args[i] = (intptr_t)c;
                 }
                 break;
 
