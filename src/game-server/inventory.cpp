@@ -760,7 +760,7 @@ bool Inventory::unequipItem(unsigned int itemId)
     for (std::set<unsigned>::const_iterator it = itemInstances.begin(),
         it_end = itemInstances.end(); it != it_end; ++it)
     {
-        if (!unequip(*it));
+        if (!unequip(*it))
             return false;
     }
     return true;
