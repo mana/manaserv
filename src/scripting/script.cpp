@@ -141,7 +141,7 @@ void Script::loadNPC(const std::string &name,
 template<typename T>
 static void fastRemoveOne(std::vector<T> &vector, T value)
 {
-    for (size_t i = vector.size() - 1; i >= 0; --i)
+    for (size_t i = 0, size = vector.size(); i < size; ++i)
     {
         if (vector.at(i) == value)
         {
