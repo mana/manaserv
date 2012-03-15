@@ -437,7 +437,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', NOW());
-INSERT INTO mana_world_states VALUES('database_version',     -1,'19', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     -1,'20', NOW());
 
 -- all known transaction codes
 

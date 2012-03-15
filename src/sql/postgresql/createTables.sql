@@ -117,7 +117,6 @@ CREATE TABLE mana_world_states
    PRIMARY KEY (`state_name`, `map_id`)
 );
 
-INSERT INTO "mana_world_states" VALUES('accountserver_startup',NULL,NULL,1221633910);
-INSERT INTO "mana_world_states" VALUES('accountserver_version',NULL,NULL,1221633910);
-
-
+INSERT INTO "mana_world_states" VALUES('accountserver_startup',-1,'0',1221633910);
+INSERT INTO "mana_world_states" VALUES('accountserver_version',-1,'0',1221633910);
+INSERT INTO "mana_world_states" VALUES('database_version',-1,'20',1221633910);
