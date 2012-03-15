@@ -47,13 +47,13 @@ void ItemEffectAttrMod::dispell(Being *itemUser)
                              mId, !mDuration);
 }
 
-bool ItemEffectAutoAttack::apply(Being *itemUser)
+bool ItemEffectAutoAttack::apply(Being * /* itemUser */)
 {
     // TODO - STUB
     return false;
 }
 
-void ItemEffectAutoAttack::dispell(Being *itemUser)
+void ItemEffectAutoAttack::dispell(Being * /* itemUser */)
 {
     // TODO
 }

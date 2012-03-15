@@ -467,7 +467,7 @@ void AccountHandler::handleReconnectMessage(AccountClient &client,
     mTokenCollector.addPendingClient(magic_token, &client);
 }
 
-static bool checkCaptcha(AccountClient &client, const std::string &captcha)
+static bool checkCaptcha(AccountClient &, const std::string & /* captcha */)
 {
     // TODO
     return true;

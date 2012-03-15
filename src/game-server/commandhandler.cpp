@@ -1129,7 +1129,7 @@ static void handleRights(Character *player, std::string &)
     say("Your rights level is: " + playerRights(player), player);
 }
 
-static void handleHistory(Character *player, std::string &args)
+static void handleHistory(Character *, std::string &)
 {
     // TODO: Get args number of transactions and show them to the player
 }
@@ -1197,7 +1197,7 @@ static void handleMute(Character *player, std::string &args)
     accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_MUTE, msg.str());
 }
 
-static void handleDie(Character *player, std::string &args)
+static void handleDie(Character *player, std::string &)
 {
     player->setAttribute(ATTR_HP, 0);
     say("You've killed yourself.", player);
@@ -1303,7 +1303,7 @@ static void handleLogsay(Character *player, std::string &msg)
     say("Message logged", player);
 }
 
-static void handleKillMonsters(Character *player, std::string &args)
+static void handleKillMonsters(Character *player, std::string &)
 {
     const MapComposite *map = player->getMap();
     int count = 0;

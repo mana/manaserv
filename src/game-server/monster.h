@@ -106,7 +106,7 @@ class MonsterClass
         void setGender(BeingGender gender)
         { mGender = gender; }
 
-        const BeingGender getGender() const
+        BeingGender getGender() const
         { return mGender; }
 
         /**

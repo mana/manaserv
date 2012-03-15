@@ -69,7 +69,7 @@ Being::Being(ThingType type):
 #endif
 }
 
-int Being::damage(Actor *source, const Damage &damage)
+int Being::damage(Actor * /* source */, const Damage &damage)
 {
     if (mAction == DEAD)
         return 0;

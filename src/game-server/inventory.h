@@ -143,7 +143,7 @@ class Inventory
          * the willing-to-be equipment slot.
          * @todo
          */
-        bool hasInventoryEnoughSpace(unsigned int equipmentSlot)
+        bool hasInventoryEnoughSpace(unsigned int /* equipmentSlot */)
         { return true; }
 
         /**
@@ -151,14 +151,14 @@ class Inventory
          * This is especially useful for scripted equipment.
          * @todo
          */
-        bool testUnequipScriptRequirements(unsigned int equipementSlot)
+        bool testUnequipScriptRequirements(unsigned int /* equipementSlot */)
         { return true; }
 
         /**
          * Test the items equipment for scripted requirements.
          * @todo
          */
-        bool testEquipScriptRequirements(unsigned int itemId)
+        bool testEquipScriptRequirements(unsigned int /* itemId */)
         { return true; }
 
         /**
