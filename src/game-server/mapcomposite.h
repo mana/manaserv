@@ -35,7 +35,7 @@ class Map;
 class MapComposite;
 class Point;
 class Rectangle;
-class Thing;
+class Entity;
 
 struct MapContent;
 struct MapZone;
@@ -205,9 +205,9 @@ struct MapContent
     MapZone &getZone(const Point &pos) const;
 
     /**
-     * Things (items, characters, monsters, etc) located on the map.
+     * Entities (items, characters, monsters, etc) located on the map.
      */
-    std::vector< Thing * > things;
+    std::vector< Entity * > entities;
 
     /**
      * Buckets of MovingObjects located on the map, referenced by ID.
@@ -270,12 +270,12 @@ class MapComposite
         /**
          * Inserts a thing on the map. Sets its public ID if relevant.
          */
-        bool insert(Thing *);
+        bool insert(Entity *);
 
         /**
          * Removes a thing from the map.
          */
-        void remove(Thing *);
+        void remove(Entity *);
 
         /**
          * Updates zones of every moving beings.
@@ -317,7 +317,7 @@ class MapComposite
         /**
          * Gets everything related to the map.
          */
-        const std::vector< Thing * > &getEverything() const;
+        const std::vector< Entity * > &getEverything() const;
 
         /**
          * Gets the cached value of a map-bound script variable

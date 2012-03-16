@@ -28,8 +28,6 @@
 #include <libxml/tree.h>
 
 class Map;
-class MapComposite;
-class Thing;
 
 /**
  * Reader for XML map files (*.tmx)

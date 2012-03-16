@@ -45,7 +45,7 @@ class Monster;
 class MonsterClass;
 class NPC;
 class StatusEffect;
-class Thing;
+class Entity;
 
 // Report script errors and interrupt the script.
 void raiseScriptError(lua_State *s, const char *format, ...);
@@ -182,7 +182,7 @@ Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);
    Useful for templates.*/
 void push(lua_State *s, int val);
 void push(lua_State *s, const std::string &val);
-void push(lua_State *s, Thing *val);
+void push(lua_State *s, Entity *val);
 void push(lua_State *s, double val);
 
 inline void push(lua_State *s, MapObject *val)

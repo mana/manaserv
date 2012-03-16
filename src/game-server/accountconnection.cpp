@@ -346,14 +346,14 @@ void AccountConnection::sendStatistics()
         MapComposite *m = i->second;
         if (!m->isActive()) continue;
         msg.writeInt16(i->first);
-        int nbThings = 0, nbMonsters = 0;
-        typedef std::vector< Thing * > Things;
-        const Things &things = m->getEverything();
+        int nbEntities = 0, nbMonsters = 0;
+        typedef std::vector< Entity * > Entities;
+        const Entities &things = m->getEverything();
         std::vector< int > players;
-        for (Things::const_iterator j = things.begin(),
+        for (Entities::const_iterator j = things.begin(),
              j_end = things.end(); j != j_end; ++j)
         {
-            Thing *t = *j;
+            Entity *t = *j;
             switch (t->getType())
             {
                 case OBJECT_CHARACTER:
@@ -364,10 +364,10 @@ void AccountConnection::sendStatistics()
                     ++nbMonsters;
                     break;
                 default:
-                    ++nbThings;
+                    ++nbEntities;
             }
         }
-        msg.writeInt16(nbThings);
+        msg.writeInt16(nbEntities);
         msg.writeInt16(nbMonsters);
         msg.writeInt16(players.size());
         for (std::vector< int >::const_iterator j = players.begin(),

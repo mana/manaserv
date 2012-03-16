@@ -212,6 +212,8 @@ SET(SRCS_MANASERVGAME
     game-server/commandhandler.h
     game-server/effect.h
     game-server/effect.cpp
+    game-server/entity.h
+    game-server/entity.cpp
     game-server/eventlistener.h
     game-server/gamehandler.h
     game-server/gamehandler.cpp
@@ -250,8 +252,6 @@ SET(SRCS_MANASERVGAME
     game-server/statuseffect.cpp
     game-server/statusmanager.h
     game-server/statusmanager.cpp
-    game-server/thing.h
-    game-server/thing.cpp
     game-server/trade.h
     game-server/trade.cpp
     game-server/trigger.h

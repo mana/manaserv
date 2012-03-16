@@ -86,7 +86,7 @@ void LuaScript::push(const std::string &v)
     ++nbArgs;
 }
 
-void LuaScript::push(Thing *v)
+void LuaScript::push(Entity *v)
 {
     assert(nbArgs >= 0);
     if (v)
@@ -235,30 +235,30 @@ void LuaScript::load(const char *prog, const char *name)
     }
 }
 
-void LuaScript::processDeathEvent(Being *being)
+void LuaScript::processDeathEvent(Being *entity)
 {
     if (mDeathNotificationCallback.isValid())
     {
         prepare(mDeathNotificationCallback);
-        push(being);
+        push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
         //      being. This might be very interesting for scripting quests.
         execute();
     }
 }
 
-void LuaScript::processRemoveEvent(Thing *being)
+void LuaScript::processRemoveEvent(Entity *entity)
 {
     if (mRemoveNotificationCallback.isValid())
     {
         prepare(mRemoveNotificationCallback);
-        push(being);
+        push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
         //      being. This might be very interesting for scripting quests.
         execute();
     }
 
-    being->removeListener(getScriptListener());
+    entity->removeListener(getScriptListener());
 }
 
 /**

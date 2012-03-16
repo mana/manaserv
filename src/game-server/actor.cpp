@@ -71,7 +71,7 @@ void Actor::setMap(MapComposite *mapComposite)
         oldMap->freeTile(p.x / oldTileWidth, p.y / oldTileHeight,
                          getBlockType());
     }
-    Thing::setMap(mapComposite);
+    Entity::setMap(mapComposite);
     Map *map = mapComposite->getMap();
     int tileWidth = map->getTileWidth();
     int tileHeight = map->getTileHeight();

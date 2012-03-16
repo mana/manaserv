@@ -70,7 +70,7 @@ class Being : public Actor
         /**
          * Proxy constructor.
          */
-        Being(ThingType type);
+        Being(EntityType type);
 
         /**
          * Update being state.

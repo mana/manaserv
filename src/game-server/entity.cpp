@@ -20,11 +20,11 @@
 
 #include <cassert>
 
-#include "game-server/thing.h"
+#include "game-server/entity.h"
 
 #include "game-server/eventlistener.h"
 
-Thing::~Thing()
+Entity::~Entity()
 {
     /* As another object will stop listening and call removeListener when it is
        deleted, the following assertion ensures that all the calls to
@@ -35,17 +35,17 @@ Thing::~Thing()
     assert(mListeners.empty());
 }
 
-void Thing::addListener(const EventListener *l)
+void Entity::addListener(const EventListener *l)
 {
     mListeners.insert(l);
 }
 
-void Thing::removeListener(const EventListener *l)
+void Entity::removeListener(const EventListener *l)
 {
     mListeners.erase(l);
 }
 
-void Thing::inserted()
+void Entity::inserted()
 {
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)
@@ -56,7 +56,7 @@ void Thing::inserted()
     }
 }
 
-void Thing::removed()
+void Entity::removed()
 {
     for (Listeners::iterator i = mListeners.begin(),
          i_end = mListeners.end(); i != i_end;)

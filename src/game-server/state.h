@@ -24,7 +24,7 @@
 #include <string>
 
 class MapComposite;
-class Thing;
+class Entity;
 class Actor;
 class Character;
 
@@ -37,30 +37,30 @@ namespace GameState
     void update(int worldTime);
 
     /**
-     * Inserts an thing in the game world.
-     * @return false if the insertion failed and the thing is in limbo.
+     * Inserts an entity in the game world.
+     * @return false if the insertion failed and the entity is in limbo.
      * @note No update may be in progress.
      */
-    bool insert(Thing *)
+    bool insert(Entity *)
 #   ifdef __GNUC__
     __attribute__((warn_unused_result))
 #   endif
     ;
 
     /**
-     * Inserts a thing in the game world. Deletes the thing if the insertion
+     * Inserts a entity in the game world. Deletes the entity if the insertion
      * failed.
      * @return false if the insertion failed.
      * @note No update may be in progress. Invalid for characters.
      */
-    bool insertOrDelete(Thing *);
+    bool insertOrDelete(Entity *);
 
     /**
-     * Removes a thing from the game world.
+     * Removes a entity from the game world.
      * @note No update may be in progress.
-     * @note The thing is not destroyed by this call.
+     * @note The entity is not destroyed by this call.
      */
-    void remove(Thing *);
+    void remove(Entity *);
 
     /**
      * Warps a character between places of the game world.
@@ -78,7 +78,7 @@ namespace GameState
     /**
      * Enqueues a remove event.
      * @note The event will be executed at end of update.
-     * @note The thing will be destroyed at that time.
+     * @note The entity will be destroyed at that time.
      */
     void enqueueRemove(Actor *);
 

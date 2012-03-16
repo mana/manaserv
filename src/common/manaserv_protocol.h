@@ -255,7 +255,7 @@ enum {
     GAMSG_BAN_PLAYER            = 0x0550, // D id, W duration
     GAMSG_CHANGE_PLAYER_LEVEL   = 0x0555, // D id, W level
     GAMSG_CHANGE_ACCOUNT_LEVEL  = 0x0556, // D id, W level
-    GAMSG_STATISTICS            = 0x0560, // { W map id, W thing nb, W monster nb, W player nb, { D character id }* }*
+    GAMSG_STATISTICS            = 0x0560, // { W map id, W entity nb, W monster nb, W player nb, { D character id }* }*
     CGMSG_CHANGED_PARTY         = 0x0590, // D character id, D party id
     GCMSG_REQUEST_POST          = 0x05A0, // D character id
     CGMSG_POST_RESPONSE         = 0x05A1, // D receiver id, { S sender name, S letter, W num attachments { W attachment item id, W quantity } }
@@ -342,8 +342,8 @@ enum AttribmodResponseCode {
     ATTRIBMOD_DENIED
 };
 
-// Object type enumeration
-enum ThingType
+// Entity type enumeration
+enum EntityType
 {
     // A simple item.
     OBJECT_ITEM = 0,

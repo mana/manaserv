@@ -322,7 +322,7 @@ class Monster : public Being
         /**
          * Removes a being from the anger list.
          */
-        void forgetTarget(Thing *being);
+        void forgetTarget(Entity *being);
 
         /**
          * Called when an attribute modifier is changed.

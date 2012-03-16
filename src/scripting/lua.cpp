@@ -938,8 +938,8 @@ static int being_set_status_time(lua_State *s)
 }
 
 /**
- * being_type(Being*): ThingType
- * Returns the Thing type of the given being.
+ * being_type(Being*): EntityType
+ * Returns the entity type of the given being.
  */
 static int being_type(lua_State *s)
 {

@@ -557,7 +557,7 @@ ZoneIterator MapComposite::getAroundBeingIterator(Being *obj, int radius) const
     return ZoneIterator(r2, mContent);
 }
 
-bool MapComposite::insert(Thing *ptr)
+bool MapComposite::insert(Entity *ptr)
 {
     if (ptr->isVisible())
     {
@@ -571,14 +571,14 @@ bool MapComposite::insert(Thing *ptr)
     }
 
     ptr->setMap(this);
-    mContent->things.push_back(ptr);
+    mContent->entities.push_back(ptr);
     return true;
 }
 
-void MapComposite::remove(Thing *ptr)
+void MapComposite::remove(Entity *ptr)
 {
-    for (std::vector<Thing*>::iterator i = mContent->things.begin(),
-         i_end = mContent->things.end(); i != i_end; ++i)
+    for (std::vector<Entity*>::iterator i = mContent->entities.begin(),
+         i_end = mContent->entities.end(); i != i_end; ++i)
     {
         if ((*i)->canFight())
         {
@@ -590,7 +590,7 @@ void MapComposite::remove(Thing *ptr)
         }
         if (*i == ptr)
         {
-            i = mContent->things.erase(i);
+            i = mContent->entities.erase(i);
         }
     }
 
@@ -609,9 +609,9 @@ void MapComposite::remove(Thing *ptr)
 void MapComposite::update()
 {
     // Update object status
-    const std::vector< Thing * > &things = getEverything();
-    for (std::vector< Thing * >::const_iterator it = things.begin(),
-         it_end = things.end(); it != it_end; ++it)
+    const std::vector< Entity * > &entities = getEverything();
+    for (std::vector< Entity * >::const_iterator it = entities.begin(),
+         it_end = entities.end(); it != it_end; ++it)
     {
         (*it)->update();
     }
@@ -637,8 +637,8 @@ void MapComposite::update()
     }
 
     // Cannot use a WholeMap iterator as objects will change zones under its feet.
-    for (std::vector< Thing * >::iterator i = mContent->things.begin(),
-         i_end = mContent->things.end(); i != i_end; ++i)
+    for (std::vector< Entity * >::iterator i = mContent->entities.begin(),
+         i_end = mContent->entities.end(); i != i_end; ++i)
     {
         if (!(*i)->canMove())
             continue;
@@ -659,9 +659,9 @@ void MapComposite::update()
     }
 }
 
-const std::vector< Thing * > &MapComposite::getEverything() const
+const std::vector< Entity * > &MapComposite::getEverything() const
 {
-    return mContent->things;
+    return mContent->entities;
 }
 
 

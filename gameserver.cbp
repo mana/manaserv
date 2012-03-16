@@ -132,6 +132,8 @@
 		<Unit filename="src\game-server\commandhandler.h" />
 		<Unit filename="src\game-server\effect.cpp" />
 		<Unit filename="src\game-server\effect.h" />
+		<Unit filename="src\game-server\entity.cpp" />
+		<Unit filename="src\game-server\entity.h" />
 		<Unit filename="src\game-server\eventlistener.h" />
 		<Unit filename="src\game-server\gamehandler.cpp" />
 		<Unit filename="src\game-server\gamehandler.h" />
@@ -171,8 +173,6 @@
 		<Unit filename="src\game-server\statuseffect.h" />
 		<Unit filename="src\game-server\statusmanager.cpp" />
 		<Unit filename="src\game-server\statusmanager.h" />
-		<Unit filename="src\game-server\thing.cpp" />
-		<Unit filename="src\game-server\thing.h" />
 		<Unit filename="src\game-server\trade.cpp" />
 		<Unit filename="src\game-server\trade.h" />
 		<Unit filename="src\game-server\trigger.cpp" />

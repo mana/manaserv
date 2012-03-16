@@ -77,7 +77,7 @@ void setQuestVar(Character *ch, const std::string &name,
  */
 struct QuestDeathListener: EventDispatch
 {
-    static void partialRemove(const EventListener *, Thing *);
+    static void partialRemove(const EventListener *, Entity *);
 
     static void fullRemove(const EventListener *, Character *);
 
@@ -91,7 +91,7 @@ struct QuestDeathListener: EventDispatch
 static QuestDeathListener questDeathDummy;
 static EventListener questDeathListener(&questDeathDummy);
 
-void QuestDeathListener::partialRemove(const EventListener *, Thing *t)
+void QuestDeathListener::partialRemove(const EventListener *, Entity *t)
 {
     int id = static_cast< Character * >(t)->getDatabaseID();
     PendingVariables &variables = pendingQuests[id].variables;

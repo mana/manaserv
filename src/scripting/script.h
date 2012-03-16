@@ -30,7 +30,7 @@
 #include <vector>
 
 class MapComposite;
-class Thing;
+class Entity;
 
 /**
  * Abstract interface for calling functions written in an external language.
@@ -163,7 +163,7 @@ class Script
          * scripting engine, if needed. This value will usually be passed
          * by the script to some callback functions.
          */
-        virtual void push(Thing *) = 0;
+        virtual void push(Entity *) = 0;
 
         /**
          * Pushes a list of items with amounts to the script engine.
@@ -219,9 +219,9 @@ class Script
         EventListener *getScriptListener()
         { return &mEventListener; }
 
-        virtual void processDeathEvent(Being *thing) = 0;
+        virtual void processDeathEvent(Being *entity) = 0;
 
-        virtual void processRemoveEvent(Thing *thing) = 0;
+        virtual void processRemoveEvent(Entity *entity) = 0;
 
         static void setCreateNpcDelayedCallback(Script *script)
         { script->assignCallback(mCreateNpcDelayedCallback); }
@@ -251,7 +251,7 @@ struct ScriptEventDispatch: EventDispatch
     {
         typedef EventListenerFactory< Script, &Script::mEventListener > Factory;
         died = &Factory::create< Being, &Script::processDeathEvent >::function;
-        removed = &Factory::create< Thing, &Script::processRemoveEvent >::function;
+        removed = &Factory::create< Entity, &Script::processRemoveEvent >::function;
     }
 };
 

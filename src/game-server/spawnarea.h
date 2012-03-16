@@ -22,7 +22,7 @@
 #define SPAWNAREA_H
 
 #include "game-server/eventlistener.h"
-#include "game-server/thing.h"
+#include "game-server/entity.h"
 #include "utils/point.h"
 
 class Being;
@@ -32,7 +32,7 @@ class MonsterClass;
  * A spawn area, where monsters spawn. The area is a rectangular field and will
  * spawn a certain number of a given monster type.
  */
-class SpawnArea : public Thing
+class SpawnArea : public Entity
 {
     public:
         SpawnArea(MapComposite *, MonsterClass *, const Rectangle &zone,
@@ -43,7 +43,7 @@ class SpawnArea : public Thing
         /**
          * Keeps track of the number of spawned being.
          */
-        void decrease(Thing *);
+        void decrease(Entity *);
 
     private:
         MonsterClass *mSpecy; /**< Specy of monster that spawns in this area. */

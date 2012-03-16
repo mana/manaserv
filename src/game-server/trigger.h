@@ -21,7 +21,7 @@
 #ifndef TRIGGER_H
 #define TRIGGER_H
 
-#include "game-server/thing.h"
+#include "game-server/entity.h"
 #include "scripting/script.h"
 #include "utils/point.h"
 
@@ -60,14 +60,14 @@ class ScriptAction : public TriggerAction
         int mArg;               // Argument passed to script function (meaning is function-specific)
 };
 
-class TriggerArea : public Thing
+class TriggerArea : public Entity
 {
     public:
         /**
          * Creates a rectangular trigger for a given map.
          */
         TriggerArea(MapComposite *m, const Rectangle &r, TriggerAction *ptr, bool once)
-          : Thing(OBJECT_OTHER, m), mZone(r), mAction(ptr), mOnce(once) {}
+          : Entity(OBJECT_OTHER, m), mZone(r), mAction(ptr), mOnce(once) {}
 
         virtual void update();
 

@@ -40,8 +40,8 @@ struct MonsterTargetEventDispatch: EventDispatch
     MonsterTargetEventDispatch()
     {
         typedef EventListenerFactory<Monster, &Monster::mTargetListener> Factory;
-        removed = &Factory::create< Thing, &Monster::forgetTarget >::function;
-        died = &Factory::create<Thing, &Monster::forgetTarget, Being>::function;
+        removed = &Factory::create< Entity, &Monster::forgetTarget >::function;
+        died = &Factory::create<Entity, &Monster::forgetTarget, Being>::function;
     }
 };
 
@@ -376,7 +376,7 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
     }
 }
 
-void Monster::forgetTarget(Thing *t)
+void Monster::forgetTarget(Entity *t)
 {
     Being *b = static_cast< Being * >(t);
     mAnger.erase(b);

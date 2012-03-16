@@ -482,7 +482,7 @@ void GameState::update(int worldTime)
     delayedEvents.clear();
 }
 
-bool GameState::insert(Thing *ptr)
+bool GameState::insert(Entity *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
@@ -550,7 +550,7 @@ bool GameState::insert(Thing *ptr)
         case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:
-            LOG_DEBUG("Thing inserted: " << obj->getType());
+            LOG_DEBUG("Entity inserted: " << obj->getType());
     }
 
     obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
@@ -573,14 +573,14 @@ bool GameState::insert(Thing *ptr)
     return true;
 }
 
-bool GameState::insertOrDelete(Thing *ptr)
+bool GameState::insertOrDelete(Entity *ptr)
 {
     if (insert(ptr)) return true;
     delete ptr;
     return false;
 }
 
-void GameState::remove(Thing *ptr)
+void GameState::remove(Entity *ptr)
 {
     assert(!dbgLockObjects);
     MapComposite *map = ptr->getMap();
@@ -618,7 +618,7 @@ void GameState::remove(Thing *ptr)
         case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:
-            LOG_DEBUG("Thing removed: " << ptr->getType());
+            LOG_DEBUG("Entity removed: " << ptr->getType());
     }
 
     if (ptr->canMove())

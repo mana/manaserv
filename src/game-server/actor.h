@@ -22,7 +22,7 @@
 #define ACTOR_H
 
 #include "game-server/map.h"
-#include "game-server/thing.h"
+#include "game-server/entity.h"
 #include "utils/point.h"
 
 /**
@@ -44,11 +44,11 @@ enum
  * Generic client-visible object. Keeps track of position, size and what to
  * update clients about.
  */
-class Actor : public Thing
+class Actor : public Entity
 {
     public:
-        Actor(ThingType type)
-          : Thing(type),
+        Actor(EntityType type)
+          : Entity(type),
             mMoveTime(0),
             mUpdateFlags(0),
             mPublicID(65535),

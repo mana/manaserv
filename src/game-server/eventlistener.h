@@ -21,7 +21,7 @@
 #ifndef GAMESERVER_EVENTLISTENER_H
 #define GAMESERVER_EVENTLISTENER_H
 
-class Thing;
+class Entity;
 class Being;
 class Character;
 
@@ -44,12 +44,12 @@ struct EventDispatch
     /**
      * Called just after something is inserted in a map.
      */
-    void (*inserted)(const EventListener *, Thing *);
+    void (*inserted)(const EventListener *, Entity *);
 
     /**
      * Called just before something is removed from a map.
      */
-    void (*removed)(const EventListener *, Thing *);
+    void (*removed)(const EventListener *, Entity *);
 
     /**
      * Called just after a being has died.

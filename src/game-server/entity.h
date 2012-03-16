@@ -18,8 +18,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef THING_H
-#define THING_H
+#ifndef ENTITY_H
+#define ENTITY_H
 
 #include "common/manaserv_protocol.h"
 
@@ -34,39 +34,39 @@ class MapComposite;
  * Base class for in-game objects. Knows only its type and the map it resides
  * on. Provides listeners.
  */
-class Thing
+class Entity
 {
     public:
-        Thing(ThingType type, MapComposite *map = 0)
+        Entity(EntityType type, MapComposite *map = 0)
           : mMap(map),
             mType(type)
         {}
 
-        virtual ~Thing();
+        virtual ~Entity();
 
         /**
-         * Gets type of this thing.
+         * Gets type of this entity.
          *
-         * @return the type of this thing.
+         * @return the type of this entity.
          */
-        ThingType getType() const
+        EntityType getType() const
         { return mType; }
 
         /**
-         * Returns whether this thing is visible on the map or not. (Actor)
+         * Returns whether this entity is visible on the map or not. (Actor)
          */
         bool isVisible() const
         { return mType != OBJECT_OTHER; }
 
         /**
-         * Returns whether this thing can move on the map or not. (Actor)
+         * Returns whether this entity can move on the map or not. (Actor)
          */
         bool canMove() const
         { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER ||
                  mType == OBJECT_NPC; }
 
         /**
-         * Returns whether this thing can fight or not. (Being)
+         * Returns whether this entity can fight or not. (Being)
          */
         bool canFight() const
         { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER; }
@@ -77,13 +77,13 @@ class Thing
         virtual void update() = 0;
 
         /**
-         * Gets the map this thing is located on.
+         * Gets the map this entity is located on.
          */
         MapComposite *getMap() const
         { return mMap; }
 
         /**
-         * Sets the map this thing is located on.
+         * Sets the map this entity is located on.
          */
         virtual void setMap(MapComposite *map)
         { mMap = map; }
@@ -113,8 +113,8 @@ class Thing
         Listeners mListeners;   /**< List of event listeners. */
 
     private:
-        MapComposite *mMap;     /**< Map the thing is on */
-        ThingType mType;        /**< Type of this thing. */
+        MapComposite *mMap;     /**< Map the entity is on */
+        EntityType mType;       /**< Type of this entity. */
 };
 
-#endif // THING_H
+#endif // ENTITY_H

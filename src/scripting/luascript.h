@@ -54,7 +54,7 @@ class LuaScript : public Script
 
         void push(const std::string &);
 
-        void push(Thing *);
+        void push(Entity *);
 
         void push(const std::list<InventoryItem> &itemList);
 
@@ -75,9 +75,9 @@ class LuaScript : public Script
                                     const std::string &letter,
                                     Script *);
 
-        void processDeathEvent(Being *thing);
+        void processDeathEvent(Being *entity);
 
-        void processRemoveEvent(Thing *thing);
+        void processRemoveEvent(Entity *entity);
 
 
         static void setDeathNotificationCallback(Script *script)

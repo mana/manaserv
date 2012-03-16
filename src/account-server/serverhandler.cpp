@@ -46,7 +46,7 @@ using namespace ManaServ;
 struct MapStatistics
 {
   std::vector<int> players;
-  unsigned short nbThings;
+  unsigned short nbEntities;
   unsigned short nbMonsters;
 };
 
@@ -278,7 +278,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
                     comp->send(outMsg);
                     MapStatistics &m = server->maps[id];
-                    m.nbThings = 0;
+                    m.nbEntities = 0;
                     m.nbMonsters = 0;
                 }
             }
@@ -448,7 +448,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     break;
                 }
                 MapStatistics &m = i->second;
-                m.nbThings = msg.readInt16();
+                m.nbEntities = msg.readInt16();
                 m.nbMonsters = msg.readInt16();
                 int nb = msg.readInt16();
                 m.players.resize(nb);
@@ -639,7 +639,7 @@ void GameServerHandler::dumpStatistics(std::ostream &os)
              j_end = server->maps.end(); j != j_end; ++j)
         {
             const MapStatistics &m = j->second;
-            os << "<map id=\"" << j->first << "\" nb_things=\"" << m.nbThings
+            os << "<map id=\"" << j->first << "\" nb_entities=\"" << m.nbEntities
                << "\" nb_monsters=\"" << m.nbMonsters << "\">\n";
             for (std::vector< int >::const_iterator k = m.players.begin(),
                  k_end = m.players.end(); k != k_end; ++k)

@@ -31,7 +31,7 @@ struct SpawnAreaEventDispatch : EventDispatch
     {
         typedef EventListenerFactory< SpawnArea, &SpawnArea::mSpawnedListener >
             Factory;
-        removed = &Factory::create< Thing, &SpawnArea::decrease >::function;
+        removed = &Factory::create< Entity, &SpawnArea::decrease >::function;
     }
 };
 
@@ -42,7 +42,7 @@ SpawnArea::SpawnArea(MapComposite *map,
                      const Rectangle &zone,
                      int maxBeings,
                      int spawnRate):
-    Thing(OBJECT_OTHER, map),
+    Entity(OBJECT_OTHER, map),
     mSpecy(specy),
     mSpawnedListener(&spawnAreaEventDispatch),
     mZone(zone),
@@ -125,7 +125,7 @@ void SpawnArea::update()
     }
 }
 
-void SpawnArea::decrease(Thing *t)
+void SpawnArea::decrease(Entity *t)
 {
     --mNumBeings;
     t->removeListener(&mSpawnedListener);

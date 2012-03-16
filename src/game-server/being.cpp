@@ -35,7 +35,7 @@
 #include "utils/logger.h"
 #include "utils/speedconv.h"
 
-Being::Being(ThingType type):
+Being::Being(EntityType type):
     Actor(type),
     mAction(STAND),
     mTarget(NULL),
