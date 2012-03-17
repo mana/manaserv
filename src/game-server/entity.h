@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -23,28 +24,29 @@
 
 #include "common/manaserv_protocol.h"
 
-#include <set>
+#include "game-server/component.h"
 
 #include <sigc++/signal.h>
 #include <sigc++/trackable.h>
+
+#include <cassert>
 
 using namespace ManaServ;
 
 class MapComposite;
 
 /**
- * Base class for in-game objects. Knows only its type and the map it resides
- * on. Provides listeners.
+ * Base class for in-game objects.
+ *
+ * Knows its type, the map it resides on and is host to a number of optional
+ * components.
  */
 class Entity : public sigc::trackable
 {
     public:
-        Entity(EntityType type, MapComposite *map = 0)
-          : mMap(map),
-            mType(type)
-        {}
+        Entity(EntityType type, MapComposite *map = 0);
 
-        virtual ~Entity() {}
+        virtual ~Entity();
 
         /**
          * Gets type of this entity.
@@ -53,6 +55,32 @@ class Entity : public sigc::trackable
          */
         EntityType getType() const
         { return mType; }
+
+        /**
+         * Adds a component. Only one component of a given type can be added.
+         * Entity takes ownership of \a component.
+         */
+        template <class T>
+        void addComponent(T *component)
+        {
+            assert(!mComponents[T::type]);
+            mComponents[T::type] = component;
+        }
+
+        /**
+         * Returns the component of the given type, or 0 when no such component
+         * was set.
+         */
+        Component *getComponent(ComponentType type) const
+        { return mComponents[type]; }
+
+        /**
+         * Get a component by its class. Avoids the need for doing a static-
+         * cast in the calling code.
+         */
+        template <class T>
+        T *getComponent() const
+        { return static_cast<T*>(getComponent(T::type)); }
 
         /**
          * Returns whether this entity is visible on the map or not. (Actor)
@@ -74,9 +102,10 @@ class Entity : public sigc::trackable
         { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER; }
 
         /**
-         * Updates the internal status.
+         * Updates the internal status. By default, calls update on all its
+         * components.
          */
-        virtual void update() = 0;
+        virtual void update();
 
         /**
          * Gets the map this entity is located on.
@@ -96,6 +125,8 @@ class Entity : public sigc::trackable
     private:
         MapComposite *mMap;     /**< Map the entity is on */
         EntityType mType;       /**< Type of this entity. */
+
+        Component *mComponents[ComponentTypeCount];
 };
 
 #endif // ENTITY_H

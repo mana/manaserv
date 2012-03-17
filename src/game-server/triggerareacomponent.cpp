@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2006-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,7 +19,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/trigger.h"
+#include "game-server/triggerareacomponent.h"
 
 #include "game-server/character.h"
 #include "game-server/mapcomposite.h"
@@ -56,12 +57,16 @@ void ScriptAction::process(Actor *obj)
     mScript->execute(obj->getMap());
 }
 
-void TriggerArea::update()
+const ComponentType TriggerAreaComponent::type;
+
+void TriggerAreaComponent::update(Entity &entity)
 {
+    MapComposite *map = entity.getMap();
     std::set<Actor*> insideNow;
-    for (BeingIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
+
+    for (BeingIterator i(map->getInsideRectangleIterator(mZone)); i; ++i)
     {
-        // Don't deal with unitialized actors.
+        // Don't deal with uninitialized actors
         if (!(*i) || !(*i)->isPublicIdValid())
             continue;
 

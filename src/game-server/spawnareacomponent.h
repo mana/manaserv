@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2006-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,26 +19,29 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SPAWNAREA_H
-#define SPAWNAREA_H
+#ifndef SPAWNAREACOMPONENT_H
+#define SPAWNAREACOMPONENT_H
 
-#include "game-server/entity.h"
+#include "game-server/component.h"
+
 #include "utils/point.h"
 
-class Being;
 class MonsterClass;
 
 /**
  * A spawn area, where monsters spawn. The area is a rectangular field and will
  * spawn a certain number of a given monster type.
  */
-class SpawnArea : public Entity
+class SpawnAreaComponent : public Component
 {
     public:
-        SpawnArea(MapComposite *, MonsterClass *, const Rectangle &zone,
-            int maxBeings, int spawnRate);
+        static const ComponentType type = SpawnArea;
 
-        void update();
+        SpawnAreaComponent(MonsterClass *,
+                           const Rectangle &zone,
+                           int maxBeings, int spawnRate);
+
+        void update(Entity &entity);
 
         /**
          * Keeps track of the number of spawned being.
@@ -55,4 +59,4 @@ class SpawnArea : public Entity
         friend struct SpawnAreaEventDispatch;
 };
 
-#endif
+#endif // SPAWNAREACOMPONENT_H

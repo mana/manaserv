@@ -1,7 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
- *  Copyright (C) 2010  The Mana Developers
+ *  Copyright (C) 2010-2013  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -49,7 +49,7 @@ extern "C" {
 #include "game-server/state.h"
 #include "game-server/statuseffect.h"
 #include "game-server/statusmanager.h"
-#include "game-server/trigger.h"
+#include "game-server/triggerareacomponent.h"
 #include "net/messageout.h"
 #include "scripting/luautil.h"
 #include "scripting/luascript.h"
@@ -407,14 +407,18 @@ static int trigger_create(lua_State *s)
     script->assignCallback(function);
     lua_pop(s, 1);
 
+    Entity *triggerEntity = new Entity(OBJECT_OTHER, m);
+
     ScriptAction *action = new ScriptAction(script, function, id);
     Rectangle r = { x, y, width, height };
-    TriggerArea *area = new TriggerArea(m, r, action, once);
+    TriggerAreaComponent *area = new TriggerAreaComponent(r, action, once);
+
+    triggerEntity->addComponent(area);
 
     LOG_INFO("Created script trigger at " << x << "," << y
              << " (" << width << "x" << height << ") id: " << id);
 
-    bool ret = GameState::insert(area);
+    bool ret = GameState::insertOrDelete(triggerEntity);
     lua_pushboolean(s, ret);
     return 1;
 }

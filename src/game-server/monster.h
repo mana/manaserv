@@ -27,8 +27,9 @@
 #include "utils/string.h"
 
 #include <map>
-#include <vector>
+#include <set>
 #include <string>
+#include <vector>
 
 #include <sigc++/connection.h>
 

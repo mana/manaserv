@@ -215,6 +215,7 @@ SET(SRCS_MANASERVGAME
     game-server/command.cpp
     game-server/commandhandler.cpp
     game-server/commandhandler.h
+    game-server/component.h
     game-server/effect.h
     game-server/effect.cpp
     game-server/emotemanager.h
@@ -248,8 +249,8 @@ SET(SRCS_MANASERVGAME
     game-server/quest.cpp
     game-server/skillmanager.h
     game-server/skillmanager.cpp
-    game-server/spawnarea.h
-    game-server/spawnarea.cpp
+    game-server/spawnareacomponent.h
+    game-server/spawnareacomponent.cpp
     game-server/specialmanager.cpp
     game-server/specialmanager.h
     game-server/state.h
@@ -262,8 +263,8 @@ SET(SRCS_MANASERVGAME
     game-server/timeout.cpp
     game-server/trade.h
     game-server/trade.cpp
-    game-server/trigger.h
-    game-server/trigger.cpp
+    game-server/triggerareacomponent.h
+    game-server/triggerareacomponent.cpp
     scripting/script.h
     scripting/script.cpp
     scripting/scriptmanager.h

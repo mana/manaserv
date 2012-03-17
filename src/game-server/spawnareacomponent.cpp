@@ -18,19 +18,19 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/spawnarea.h"
+#include "game-server/spawnareacomponent.h"
 
 #include "game-server/mapcomposite.h"
 #include "game-server/monster.h"
 #include "game-server/state.h"
 #include "utils/logger.h"
 
-SpawnArea::SpawnArea(MapComposite *map,
-                     MonsterClass *specy,
-                     const Rectangle &zone,
-                     int maxBeings,
-                     int spawnRate):
-    Entity(OBJECT_OTHER, map),
+const ComponentType SpawnAreaComponent::type;
+
+SpawnAreaComponent::SpawnAreaComponent(MonsterClass *specy,
+                                       const Rectangle &zone,
+                                       int maxBeings,
+                                       int spawnRate):
     mSpecy(specy),
     mZone(zone),
     mMaxBeings(maxBeings),
@@ -40,14 +40,14 @@ SpawnArea::SpawnArea(MapComposite *map,
 {
 }
 
-void SpawnArea::update()
+void SpawnAreaComponent::update(Entity &entity)
 {
     if (mNextSpawn > 0)
         mNextSpawn--;
 
     if (mNextSpawn == 0 && mNumBeings < mMaxBeings && mSpawnRate > 0)
     {
-        MapComposite *map = getMap();
+        MapComposite *map = entity.getMap();
         const Map *realMap = map->getMap();
 
         // Reset the spawn area to the whole map in case of dimensionless zone
@@ -60,7 +60,7 @@ void SpawnArea::update()
         }
 
         // Find a free spawn location. Give up after 10 tries
-        int c = 10;
+        int triesLeft = 10;
         Point position;
         const int x = mZone.x;
         const int y = mZone.y;
@@ -81,16 +81,17 @@ void SpawnArea::update()
             do
             {
                 position = Point(x + rand() % width, y + rand() % height);
-                c--;
+                triesLeft--;
             }
             while (!realMap->getWalk(position.x / realMap->getTileWidth(),
                                      position.y / realMap->getTileHeight(),
-                                     being->getWalkMask()) && c);
+                                     being->getWalkMask())
+                   && triesLeft);
 
-            if (c)
+            if (triesLeft)
             {
                 being->signal_removed.connect(
-                            sigc::mem_fun(this, &SpawnArea::decrease));
+                            sigc::mem_fun(this, &SpawnAreaComponent::decrease));
 
                 being->setMap(map);
                 being->setPosition(position);
@@ -114,7 +115,7 @@ void SpawnArea::update()
     }
 }
 
-void SpawnArea::decrease(Entity *)
+void SpawnAreaComponent::decrease(Entity *)
 {
     --mNumBeings;
 }

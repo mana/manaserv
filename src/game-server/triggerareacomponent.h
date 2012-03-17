@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2006-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,12 +19,14 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRIGGER_H
-#define TRIGGER_H
+#ifndef TRIGGERAREACOMPONENT_H
+#define TRIGGERAREACOMPONENT_H
 
 #include "game-server/entity.h"
 #include "scripting/script.h"
 #include "utils/point.h"
+
+#include <set>
 
 class Actor;
 
@@ -60,16 +63,23 @@ class ScriptAction : public TriggerAction
         int mArg;               // Argument passed to script function (meaning is function-specific)
 };
 
-class TriggerArea : public Entity
+class TriggerAreaComponent : public Component
 {
     public:
+        static const ComponentType type = TriggerArea;
+
         /**
          * Creates a rectangular trigger for a given map.
          */
-        TriggerArea(MapComposite *m, const Rectangle &r, TriggerAction *ptr, bool once)
-          : Entity(OBJECT_OTHER, m), mZone(r), mAction(ptr), mOnce(once) {}
+        TriggerAreaComponent(const Rectangle &r,
+                             TriggerAction *ptr,
+                             bool once) :
+            mZone(r),
+            mAction(ptr),
+            mOnce(once)
+        {}
 
-        virtual void update();
+        virtual void update(Entity &entity);
 
     private:
         Rectangle mZone;
@@ -78,4 +88,4 @@ class TriggerArea : public Entity
         std::set<Actor *> mInside;
 };
 
-#endif
+#endif // TRIGGERAREACOMPONENT_H
