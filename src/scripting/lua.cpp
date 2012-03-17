@@ -168,6 +168,13 @@ static int on_worldvar_changed(lua_State *s)
     return 0;
 }
 
+static int on_mapupdate(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    MapComposite::setUpdateCallback(getScript(s));
+    return 0;
+}
+
 static int get_item_class(lua_State *s)
 {
     LuaItemClass::push(s, checkItemClass(s, 1));
@@ -1921,8 +1928,13 @@ static int test_tableget(lua_State *s)
  */
 static int get_map_id(lua_State *s)
 {
-    MapComposite *m = checkCurrentMap(s);
-    lua_pushinteger(s, m->getID());
+    Script *script = getScript(s);
+
+    if (MapComposite *mapComposite = script->getMap())
+        lua_pushinteger(s, mapComposite->getID());
+    else
+        lua_pushnil(s);
+
     return 1;
 }
 
@@ -2232,6 +2244,7 @@ LuaScript::LuaScript():
         { "on_get_special_recharge_cost",    &on_get_special_recharge_cost    },
         { "on_mapvar_changed",               &on_mapvar_changed               },
         { "on_worldvar_changed",             &on_worldvar_changed             },
+        { "on_mapupdate",                    &on_mapupdate                    },
         { "get_item_class",                  &get_item_class                  },
         { "get_monster_class",               &get_monster_class               },
         { "get_status_effect",               &get_status_effect               },

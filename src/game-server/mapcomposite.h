@@ -356,6 +356,9 @@ class MapComposite
         static void setInitializeCallback(Script *script)
         { script->assignCallback(mInitializeCallback); }
 
+        static void setUpdateCallback(Script *script)
+        { script->assignCallback(mUpdateCallback); }
+
     private:
         MapComposite(const MapComposite &);
 
@@ -374,6 +377,7 @@ class MapComposite
         std::map<const std::string, Script::Ref> mWorldVariableCallbacks;
 
         static Script::Ref mInitializeCallback;
+        static Script::Ref mUpdateCallback;
 };
 
 #endif

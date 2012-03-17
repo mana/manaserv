@@ -44,7 +44,8 @@ function debug(...) log(LOG_DEBUG, table.concat({...}, " ")) end
 -- Array containing the function registered by atinit.
 local init_fun = {}
 
--- Table of scheduled jobs. A job is an array with 3 elements:
+-- Set of scheduled jobs. The key is the mapid or 0 for no map.
+-- The value is an array with 3 elements:
 -- 0: the UNIX timestamp when it is executed
 -- 1: the function which is executed
 -- 2: nil when it is a one-time job. Repetition interval is seconds when it is
@@ -53,13 +54,18 @@ local scheduler_jobs = {}
 
 -- checks for jobs which have to be executed, executes them and reschedules
 -- them when they are repeated jobs.
-local function check_schedule()
+local function check_schedule(mapid)
   local current_time = os.time()
+  local jobs
 
-  while #scheduler_jobs~=0 and current_time > scheduler_jobs[#scheduler_jobs][0] do
+  jobs = scheduler_jobs[mapid or 0]
+
+  if not jobs then return end
+
+  while #jobs ~= 0 and current_time >= jobs[#jobs][0] do
     -- retreive the job and remove it from the schedule
-    job = scheduler_jobs[#scheduler_jobs]
-    table.remove(scheduler_jobs)
+    local job = jobs[#jobs]
+    table.remove(jobs)
     -- reschedule the job when it is a repeated job
     if job[2] then
         schedule_every(job[2], job[1])
@@ -70,9 +76,14 @@ local function check_schedule()
 end
 
 -- Registered as the function to call every tick.
--- Checks for scheduled function calls and cleans obsolete connections.
 local function update()
-  check_schedule()
+    check_schedule()
+end
+
+-- Registered as function to call every map tick.
+-- Checks for scheduled function calls
+local function mapupdate(mapid)
+    check_schedule(mapid)
 end
 
 -- Registers a function so that is is executed during map initialization.
@@ -114,8 +125,10 @@ function schedule_in(seconds, funct)
   job[0] = os.time() + seconds
   job[1] = funct
   job[2] = nil
-  table.insert(scheduler_jobs, job)
-  table.sort(scheduler_jobs, job_cmp)
+  local map_id = get_map_id() or 0 -- if no map context
+  scheduler_jobs[map_id] = scheduler_jobs[map_id] or {}
+  table.insert(scheduler_jobs[map_id], job)
+  table.sort(scheduler_jobs[map_id], job_cmp)
 end
 
 -- schedules a function call to be executed at regular intervals of n seconds
@@ -124,8 +137,10 @@ function schedule_every(seconds, funct)
   job[0] = os.time() + seconds
   job[1] = funct
   job[2] = seconds
-  table.insert(scheduler_jobs, job)
-  table.sort(scheduler_jobs, job_cmp)
+  local map_id = get_map_id() or 0 -- if no map context
+  scheduler_jobs[map_id] = scheduler_jobs[map_id] or {}
+  table.insert(scheduler_jobs[map_id], job)
+  table.sort(scheduler_jobs[map_id], job_cmp)
 end
 
 -- schedules a function call to be executed at a given date
@@ -135,8 +150,10 @@ function schedule_per_date(my_year, my_month, my_day, my_hour, my_minute, funct)
                    hour = my_hour, min = my_minute}
   job[1] = funct
   job[2] = nil
-  table.insert(scheduler_jobs, job)
-  table.sort(scheduler_jobs, job_cmp)
+  local map_id = get_map_id() or 0 -- if no map context
+  scheduler_jobs[map_id] = scheduler_jobs[map_id] or {}
+  table.insert(scheduler_jobs[map_id], job)
+  table.sort(scheduler_jobs[map_id], job_cmp)
 end
 
 -- MAP/WORLD VARIABLES NOTIFICATIONS
@@ -244,6 +261,7 @@ end
 
 -- Register callbacks
 on_update(update)
+on_mapupdate(mapupdate)
 
 on_create_npc_delayed(create_npc_delayed)
 on_map_initialize(map_initialize)

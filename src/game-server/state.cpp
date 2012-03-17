@@ -70,34 +70,6 @@ static DelayedEvents delayedEvents;
  */
 static std::map< std::string, std::string > mScriptVariables;
 
-
-/**
- * Updates object states on the map.
- */
-static void updateMap(MapComposite *map)
-{
-    // Update object status
-    const std::vector< Thing * > &things = map->getEverything();
-    for (std::vector< Thing * >::const_iterator it = things.begin(),
-         it_end = things.end(); it != it_end; ++it)
-    {
-        (*it)->update();
-    }
-
-    // Perform actions
-    for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
-    {
-        (*it)->perform();
-    }
-
-    // Move objects around and update zones.
-    for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
-    {
-        (*it)->move();
-    }
-    map->update();
-}
-
 /**
  * Sets message fields describing character look.
  */
@@ -456,7 +428,7 @@ void GameState::update(int worldTime)
         if (!map->isActive())
             continue;
 
-        updateMap(map);
+        map->update();
 
         for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
         {

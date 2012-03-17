@@ -457,6 +457,7 @@ MapZone& MapContent::getZone(const Point &pos) const
  *****************************************************************************/
 
 Script::Ref MapComposite::mInitializeCallback;
+Script::Ref MapComposite::mUpdateCallback;
 
 MapComposite::MapComposite(int id, const std::string &name):
     mMap(NULL),
@@ -607,6 +608,35 @@ void MapComposite::remove(Thing *ptr)
 
 void MapComposite::update()
 {
+    // Update object status
+    const std::vector< Thing * > &things = getEverything();
+    for (std::vector< Thing * >::const_iterator it = things.begin(),
+         it_end = things.end(); it != it_end; ++it)
+    {
+        (*it)->update();
+    }
+
+    if (mUpdateCallback.isValid())
+    {
+        Script *s = ScriptManager::currentState();
+        s->setMap(this);
+        s->prepare(mUpdateCallback);
+        s->push(mID);
+        s->execute();
+    }
+
+    // Perform actions
+    for (BeingIterator it(getWholeMapIterator()); it; ++it)
+    {
+        (*it)->perform();
+    }
+
+    // Move objects around and update zones.
+    for (BeingIterator it(getWholeMapIterator()); it; ++it)
+    {
+        (*it)->move();
+    }
+
     for (int i = 0; i < mContent->mapHeight * mContent->mapWidth; ++i)
     {
         mContent->zones[i].destinations.clear();
