@@ -177,7 +177,7 @@ void AccountConnection::processMessage(MessageIn &msg)
                 LOG_DEBUG("Recreate persistant items on map " << mapId);
                 int floorItemsNumber = msg.readInt16();
 
-                for(int i = 0; i < floorItemsNumber; i += 4)
+                for (int i = 0; i < floorItemsNumber; ++i)
                 {
                     int itemId = msg.readInt32();
                     int amount = msg.readInt16();
