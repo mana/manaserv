@@ -49,7 +49,14 @@ class SkillManager
     /**
      * Gets the skill Id from a set and a skill string.
      */
-    unsigned int getId(const std::string& set, const std::string &name) const;
+    unsigned int getId(const std::string &set, const std::string &name) const;
+
+    /**
+     * Gets the skill Id from a string formatted in this way:
+     * "setname_skillname"
+     */
+    unsigned int getId(const std::string &skillName) const;
+
     const std::string getSkillName(unsigned int id) const;
     const std::string getSetName(unsigned int id) const;
 

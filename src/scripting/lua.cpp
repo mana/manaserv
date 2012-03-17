@@ -1019,7 +1019,10 @@ static int being_damage(lua_State *s)
             return 0;
         }
     }
-    dmg.skill = luaL_optint(s, 8, 0);
+    if (lua_gettop(s) >= 8)
+    {
+        dmg.skill = checkSkill(s, 8);
+    }
     being->damage(source, dmg);
 
     return 0;
@@ -1682,12 +1685,15 @@ static int chr_shake_screen(lua_State *s)
 
 /**
  * chr_get_exp(Character*, int skill): int
- * Gets the exp total in a skill of a specific character
+ * chr_get_exp(Character*, string skillname): int
+ * Gets the exp total in a skill of a specific character.
+ * If called with skillname this name has to be in this format:
+ * "<setname>_<skillname>"
  */
 static int chr_get_exp(lua_State *s)
 {
     Character *c = checkCharacter(s, 1);
-    const int skill = luaL_checkint(s, 2);
+    int skill = checkSkill(s, 2);
     const int exp = c->getExperience(skill);
 
     lua_pushinteger(s, exp);
@@ -1696,14 +1702,17 @@ static int chr_get_exp(lua_State *s)
 
 /**
  * chr_give_exp(Character*, int skill, int amount[, int optimal_level]): void
+ * chr_give_exp(Character*, string skillname, int amount
+ *              [, int optimal_level]): void
  * Gives the character a certain amount of experience points
  * in a skill. Can also be used to reduce the exp amount when
- * desired.
+ * desired. If called with skillname this name has to be in this format:
+ * "<setname>_<skillname>"
  */
 static int chr_give_exp(lua_State *s)
 {
     Character *c = checkCharacter(s, 1);
-    const int skill = luaL_checkint(s, 2);
+    int skill = checkSkill(s, 2);
     const int exp = luaL_checkint(s, 3);
     const int optimalLevel = luaL_optint(s, 4, 0);
 

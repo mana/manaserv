@@ -168,6 +168,7 @@ ItemClass *     checkItemClass(lua_State *s, int p);
 Monster *       checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
 NPC *           checkNPC(lua_State *s, int p);
+int             checkSkill(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
 Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);

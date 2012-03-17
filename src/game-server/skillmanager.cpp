@@ -167,11 +167,16 @@ void SkillManager::printDebugSkillTable()
     }
 }
 
-unsigned int SkillManager::getId(const std::string& set,
-                                        const std::string &name) const
+unsigned int SkillManager::getId(const std::string &set,
+                                 const std::string &name) const
 {
     std::string key = utils::toLower(set) + "_" + utils::toLower(name);
-    SkillInfo *skillInfo = mNamedSkillsInfo.value(key);
+    return getId(key);
+}
+
+unsigned int SkillManager::getId(const std::string &skillName) const
+{
+    SkillInfo *skillInfo = mNamedSkillsInfo.value(skillName);
     return skillInfo ? skillInfo->id : 0;
 }
 
