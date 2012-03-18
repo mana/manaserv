@@ -66,7 +66,7 @@ class ScriptAction : public TriggerAction
 class TriggerAreaComponent : public Component
 {
     public:
-        static const ComponentType type = TriggerArea;
+        static const ComponentType type = CT_TriggerArea;
 
         /**
          * Creates a rectangular trigger for a given map.

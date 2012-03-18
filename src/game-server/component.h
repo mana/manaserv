@@ -25,8 +25,9 @@ class Entity;
 
 enum ComponentType
 {
-    TriggerArea,
-    SpawnArea,
+    CT_TriggerArea,
+    CT_SpawnArea,
+    CT_Item,
 
     ComponentTypeCount
 };

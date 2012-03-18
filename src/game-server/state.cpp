@@ -37,7 +37,6 @@
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 #include "utils/logger.h"
-#include "utils/point.h"
 #include "utils/speedconv.h"
 
 #include <cassert>
@@ -372,20 +371,22 @@ static void informPlayer(MapComposite *map, Character *p)
             {
                 case OBJECT_ITEM:
                 {
-                    Item *o = static_cast< Item * >(*it);
+                    ItemComponent *item = o->getComponent<ItemComponent>();
+                    ItemClass *itemClass = item->getItemClass();
+
                     if (oflags & UPDATEFLAG_NEW_ON_MAP)
                     {
                         /* Send a specific message to the client when an item appears
                            out of nowhere, so that a sound/animation can be performed. */
                         MessageOut appearMsg(GPMSG_ITEM_APPEAR);
-                        appearMsg.writeInt16(o->getItemClass()->getDatabaseID());
+                        appearMsg.writeInt16(itemClass->getDatabaseID());
                         appearMsg.writeInt16(opos.x);
                         appearMsg.writeInt16(opos.y);
                         gameHandler->sendTo(p, appearMsg);
                     }
                     else
                     {
-                        itemMsg.writeInt16(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
+                        itemMsg.writeInt16(willBeInRange ? itemClass->getDatabaseID() : 0);
                         itemMsg.writeInt16(opos.x);
                         itemMsg.writeInt16(opos.y);
                     }
@@ -544,7 +545,7 @@ bool GameState::insert(Entity *ptr)
     {
         case OBJECT_ITEM:
             LOG_DEBUG("Item inserted: "
-                   << static_cast<Item*>(obj)->getItemClass()->getDatabaseID());
+                   << obj->getComponent<ItemComponent>()->getItemClass()->getDatabaseID());
             break;
 
         case OBJECT_NPC:
@@ -618,7 +619,7 @@ void GameState::remove(Entity *ptr)
     {
         case OBJECT_ITEM:
             LOG_DEBUG("Item removed: "
-                   << static_cast<Item*>(ptr)->getItemClass()->getDatabaseID());
+                   << ptr->getComponent<ItemComponent>()->getItemClass()->getDatabaseID());
             break;
 
         case OBJECT_NPC:
@@ -675,14 +676,14 @@ void GameState::remove(Entity *ptr)
     }
     else if (ptr->getType() == OBJECT_ITEM)
     {
-        Item *obj = static_cast< Item * >(ptr);
-        Point pos = obj->getPosition();
+        Actor *actor = static_cast<Actor*>(ptr);
+        Point pos = actor->getPosition();
         MessageOut msg(GPMSG_ITEMS);
         msg.writeInt16(0);
         msg.writeInt16(pos.x);
         msg.writeInt16(pos.y);
 
-        for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange)); p; ++p)
+        for (CharacterIterator p(map->getAroundActorIterator(actor, visualRange)); p; ++p)
         {
             if (pos.inRangeOf((*p)->getPosition(), visualRange))
             {

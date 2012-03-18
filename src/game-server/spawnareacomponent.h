@@ -35,7 +35,7 @@ class MonsterClass;
 class SpawnAreaComponent : public Component
 {
     public:
-        static const ComponentType type = SpawnArea;
+        static const ComponentType type = CT_SpawnArea;
 
         SpawnAreaComponent(MonsterClass *,
                            const Rectangle &zone,

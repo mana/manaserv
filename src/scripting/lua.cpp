@@ -471,12 +471,8 @@ static int item_drop(lua_State *s)
     const int number = luaL_optint(s, 4, 1);
     MapComposite *map = checkCurrentMap(s);
 
-    Item *i = new Item(ic, number);
-
-    i->setMap(map);
-    Point pos(x, y);
-    i->setPosition(pos);
-    GameState::enqueueInsert(i);
+    Actor *item = Item::create(map, Point(x, y), ic, number);
+    GameState::enqueueInsert(item);
     return 0;
 }
 
@@ -956,9 +952,9 @@ static int chr_inv_change(lua_State *s)
             nb = inv.insert(id, nb);
             if (nb)
             {
-                Item *item = new Item(ic, nb);
-                item->setMap(q->getMap());
-                item->setPosition(q->getPosition());
+                Actor *item = Item::create(q->getMap(),
+                                           q->getPosition(),
+                                           ic, nb);
                 GameState::enqueueInsert(item);
             }
         }

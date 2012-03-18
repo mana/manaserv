@@ -568,11 +568,11 @@ static void handleItem(Character *player, std::string &args)
 static void handleDrop(Character *player, std::string &args)
 {
     ItemClass *ic;
-    int value = 0;
+    int amount = 0;
 
     // get arguments
     std::string itemclass = getArgument(args);
-    std::string valuestr = getArgument(args);
+    std::string amountstr = getArgument(args);
 
     // check all arguments are there
     if (itemclass.empty())
@@ -598,26 +598,26 @@ static void handleDrop(Character *player, std::string &args)
         return;
     }
 
-    //identify the amount
-    if  (valuestr.empty())
+    // identify the amount
+    if (amountstr.empty())
     {
-        value = 1;
+        amount = 1;
     }
-    else if (utils::isNumeric(valuestr))
+    else if (utils::isNumeric(amountstr))
     {
-        value = utils::stringToInt(valuestr);
+        amount = utils::stringToInt(amountstr);
     }
     // check for valid amount
-    if (value <= 0)
+    if (amount <= 0)
     {
         say("Invalid number of items", player);
         return;
     }
 
-    // create the integer and put it on the map
-    Item *item = new Item(ic, value);
-    item->setMap(player->getMap());
-    item->setPosition(player->getPosition());
+    Entity *item = Item::create(player->getMap(),
+                                player->getPosition(),
+                                ic, amount);
+
     GameState::insertOrDelete(item);
 
     // log transaction
