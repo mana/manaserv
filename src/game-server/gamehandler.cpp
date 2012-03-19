@@ -391,7 +391,7 @@ Character *GameHandler::getCharacterByNameSlow(const std::string &name) const
         GameClient *c = static_cast< GameClient * >(*i);
         Character *ch = c->character;
         if (ch && ch->getName() == name &&
-                c->status != CLIENT_CONNECTED)
+                c->status == CLIENT_CONNECTED)
         {
             return ch;
         }
