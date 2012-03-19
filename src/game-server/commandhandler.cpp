@@ -171,7 +171,7 @@ static CmdRef const cmdRef[] =
 
 };
 
-static void say(const std::string message, Character *player)
+static void say(const std::string &message, Character *player)
 {
     GameState::sayTo(player, NULL, message);
 }
@@ -1500,7 +1500,7 @@ static void handleEffect(Character *player, std::string &args)
     if (arguments.size() == 1)
     {
         int id = utils::stringToInt(arguments[0]);
-        Effects::show(id, player->getMap(), player);
+        Effects::show(id, player);
     }
     else if (arguments.size() == 2)
     {
@@ -1511,7 +1511,7 @@ static void handleEffect(Character *player, std::string &args)
             say("Invalid target player.", player);
             return;
         }
-        Effects::show(id, p->getMap(), p);
+        Effects::show(id, p);
     }
     else if (arguments.size() == 3)
     {

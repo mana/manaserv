@@ -355,10 +355,11 @@ static void informPlayer(MapComposite *map, Character *p)
     for (FixedActorIterator it(map->getAroundBeingIterator(p, visualRange));
          it; ++it)
     {
-        assert((*it)->getType() == OBJECT_ITEM ||
-               (*it)->getType() == OBJECT_EFFECT);
-
         Actor *o = *it;
+
+        assert(o->getType() == OBJECT_ITEM ||
+               o->getType() == OBJECT_EFFECT);
+
         Point opos = o->getPosition();
         int oflags = o->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, visualRange);
@@ -394,21 +395,21 @@ static void informPlayer(MapComposite *map, Character *p)
                 break;
                 case OBJECT_EFFECT:
                 {
-                    Effect *o = static_cast< Effect * >(*it);
-                    o->show();
+                    EffectComponent *e = o->getComponent<EffectComponent>();
+                    e->setShown();
                     // Don't show old effects
                     if (!(oflags & UPDATEFLAG_NEW_ON_MAP))
                         break;
-                    Being *b = o->getBeing();
-                    if (b)
+
+                    if (Being *b = e->getBeing())
                     {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_BEING);
-                        effectMsg.writeInt16(o->getEffectId());
+                        effectMsg.writeInt16(e->getEffectId());
                         effectMsg.writeInt16(b->getPublicID());
                         gameHandler->sendTo(p, effectMsg);
                     } else {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_POS);
-                        effectMsg.writeInt16(o->getEffectId());
+                        effectMsg.writeInt16(e->getEffectId());
                         effectMsg.writeInt16(opos.x);
                         effectMsg.writeInt16(opos.y);
                         gameHandler->sendTo(p, effectMsg);
@@ -559,7 +560,7 @@ bool GameState::insert(Entity *ptr)
 
         case OBJECT_EFFECT:
             LOG_DEBUG("Effect inserted: "
-                      << static_cast<Effect*>(obj)->getEffectId());
+                      << obj->getComponent<EffectComponent>()->getEffectId());
             break;
 
         case OBJECT_MONSTER:
@@ -633,7 +634,7 @@ void GameState::remove(Entity *ptr)
 
         case OBJECT_EFFECT:
             LOG_DEBUG("Effect removed: "
-                      << static_cast<Effect*>(ptr)->getEffectId());
+                      << ptr->getComponent<EffectComponent>()->getEffectId());
             break;
 
         case OBJECT_MONSTER:

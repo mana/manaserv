@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -20,29 +21,40 @@
 
 #include "game-server/effect.h"
 
-#include "game-server/mapcomposite.h"
+#include "game-server/being.h"
+#include "game-server/entity.h"
 #include "game-server/state.h"
 
-void Effect::update()
+const ComponentType EffectComponent::type;
+
+void EffectComponent::update(Entity &entity)
 {
     if (mHasBeenShown)
-        GameState::enqueueRemove(this);
+        GameState::enqueueRemove(static_cast<Actor*>(&entity));
 }
 
 namespace Effects
 {
     void show(int id, MapComposite *map, const Point &pos)
     {
-        Effect *effect = new Effect(id);
+        Actor *effect = new Actor(OBJECT_EFFECT);
+        effect->addComponent(new EffectComponent(id));
         effect->setMap(map);
         effect->setPosition(pos);
+
         GameState::enqueueInsert(effect);
     }
-    void show(int id, MapComposite *map, Being *b)
+
+    void show(int id, Being *b)
     {
-        Effect *effect = new Effect(id);
-        effect->setMap(map);
-        if (effect->setBeing(b))
-            GameState::enqueueInsert(effect);
+        EffectComponent *effectComponent = new EffectComponent(id);
+        effectComponent->setBeing(b);
+
+        Actor *effect = new Actor(OBJECT_EFFECT);
+        effect->addComponent(effectComponent);
+        effect->setMap(b->getMap());
+        effect->setPosition(b->getPosition());
+
+        GameState::enqueueInsert(effect);
     }
 }

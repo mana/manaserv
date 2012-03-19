@@ -19,10 +19,6 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <string>
-#include <map>
-
 #include "game-server/item.h"
 
 #include "common/configuration.h"
@@ -32,6 +28,9 @@
 #include "game-server/state.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
+
+#include <map>
+#include <string>
 
 bool ItemEffectAttrMod::apply(Being *itemUser)
 {

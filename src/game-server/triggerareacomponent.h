@@ -79,7 +79,7 @@ class TriggerAreaComponent : public Component
             mOnce(once)
         {}
 
-        virtual void update(Entity &entity);
+        void update(Entity &entity);
 
     private:
         Rectangle mZone;

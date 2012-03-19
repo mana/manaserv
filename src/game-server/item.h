@@ -311,7 +311,7 @@ class ItemComponent : public Component
         int getAmount() const
         { return mAmount; }
 
-        virtual void update(Entity &entity);
+        void update(Entity &entity);
 
     private:
         ItemClass *mType;

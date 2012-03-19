@@ -443,7 +443,7 @@ static int effect_create(lua_State *s)
     {
         // being mode
         Being *b = checkBeing(s, 2);
-        Effects::show(id, b->getMap(), b);
+        Effects::show(id, b);
     }
     else
     {

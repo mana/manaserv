@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -21,17 +22,21 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-#include "game-server/actor.h"
-#include "game-server/being.h"
+#include "game-server/component.h"
 
-class Effect : public Actor
+class Being;
+class MapComposite;
+class Point;
+
+class EffectComponent : public Component
 {
     public:
-        Effect(int id)
-          : Actor(OBJECT_EFFECT)
-          , mEffectId(id)
+        static const ComponentType type = CT_Effect;
+
+        EffectComponent(int id)
+          : mEffectId(id)
           , mHasBeenShown(false)
-          , mBeing(NULL)
+          , mBeing(0)
         {}
 
         int getEffectId() const
@@ -43,26 +48,16 @@ class Effect : public Actor
         /**
          * Removes effect after it has been shown.
          */
-        virtual void update();
+        void update(Entity &entity);
 
         /**
          * Called when the object has been shown to a player in the state loop.
          */
-        void show()
+        void setShown()
         { mHasBeenShown = true; }
 
-
-        bool setBeing(Being *b)
-        {
-            if (b)
-            {
-                setPosition(b->getPosition());
-                mBeing = b;
-                return true;
-            } else {
-                return false;
-            }
-        }
+        void setBeing(Being *b)
+        { mBeing = b; }
 
     private:
         int mEffectId;
@@ -77,7 +72,7 @@ namespace Effects
      * Convenience methods to show an effect.
      */
     void show(int id, MapComposite *map, const Point &pos);
-    void show(int id, MapComposite *map, Being *b);
+    void show(int id, Being *b);
 
     // TODO: get this in sync with effects.xml
     enum {
@@ -85,4 +80,4 @@ namespace Effects
     };
 }
 
-#endif
+#endif // EFFECT_H
