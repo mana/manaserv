@@ -180,7 +180,7 @@ enum {
     CPMSG_GUILD_CREATE_RESPONSE         = 0x0351, // B error, W guild, B rights, W channel
     PCMSG_GUILD_INVITE                  = 0x0352, // W id, S name
     CPMSG_GUILD_INVITE_RESPONSE         = 0x0353, // B error
-    PCMSG_GUILD_ACCEPT                  = 0x0354, // W id
+    PCMSG_GUILD_ACCEPT                  = 0x0354, // W id, B accepted (0 if false, 1 if true)
     CPMSG_GUILD_ACCEPT_RESPONSE         = 0x0355, // B error, W guild, B rights, W channel
     PCMSG_GUILD_GET_MEMBERS             = 0x0356, // W id
     CPMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0357, // S names, B online
@@ -191,6 +191,7 @@ enum {
     CPMSG_GUILD_PROMOTE_MEMBER_RESPONSE = 0x0366, // B error
     PCMSG_GUILD_KICK_MEMBER             = 0x0370, // W guild, S name
     CPMSG_GUILD_KICK_MEMBER_RESPONSE    = 0x0371, // B error
+    CPMSG_GUILD_KICK_NOTIFICATION       = 0x0372, // W guild, S player that kicked
 
     CPMSG_GUILD_INVITED                 = 0x0388, // S char name, S  guild name, W id
     CPMSG_GUILD_REJOIN                  = 0x0389, // S name, W guild, W rights, W channel, S announce
@@ -283,7 +284,8 @@ enum {
     ERRMSG_SERVER_FULL,                 // the server is overloaded
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
     ERRMSG_LIMIT_REACHED,               // limit reached
-    ERRMSG_ADMINISTRATIVE_LOGOFF        // kicked by server administrator
+    ERRMSG_ADMINISTRATIVE_LOGOFF,       // kicked by server administrator
+    ERRMSG_ALREADY_MEMBER               // is already member of guild/party
 };
 
 // used in AGMSG_REGISTER_RESPONSE to show state of item db

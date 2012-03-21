@@ -127,6 +127,9 @@ void ChatHandler::computerDisconnected(NetComputer *comp)
         // Remove user from party
         removeUserFromParty(*computer);
 
+        // Notify guilds about him leaving
+        guildManager->disconnectPlayer(computer);
+
         // Remove the character from the player map
         // need to do this after removing them from party
         // as that uses the player map
