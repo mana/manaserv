@@ -54,7 +54,8 @@ class Actor : public Entity
             mUpdateFlags(0),
             mPublicID(65535),
             mSize(0),
-            mWalkMask(0)
+            mWalkMask(0),
+            mBlockType(BLOCKTYPE_NONE)
         {}
 
         ~Actor();
@@ -126,16 +127,20 @@ class Actor : public Entity
         { return mWalkMask; }
 
         /**
+         * Gets the way the actor blocks pathfinding for other actors.
+         */
+        BlockType getBlockType() const
+        { return mBlockType; }
+
+        void setBlockType(BlockType blockType)
+        { mBlockType = blockType; }
+
+        /**
          * Overridden in order to update the walkmap.
          */
         virtual void setMap(MapComposite *map);
 
     protected:
-        /**
-         * Gets the way the actor blocks pathfinding for other actors.
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_NONE; }
 
         /** Delay until move to next tile in miliseconds. */
         unsigned short mMoveTime;
@@ -150,6 +155,7 @@ class Actor : public Entity
         unsigned char mSize;        /**< Radius of bounding circle. */
 
         unsigned char mWalkMask;
+        BlockType mBlockType;
 };
 
 #endif // ACTOR_H

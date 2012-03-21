@@ -274,9 +274,9 @@ static void informPlayer(MapComposite *map, Character *p)
 
                 case OBJECT_NPC:
                 {
-                    NPC *q = static_cast< NPC * >(o);
-                    enterMsg.writeInt16(q->getNPC());
-                    enterMsg.writeString(q->getName());
+                    NpcComponent *npcComponent = o->getComponent<NpcComponent>();
+                    enterMsg.writeInt16(npcComponent->getNpcId());
+                    enterMsg.writeString(o->getName());
                 } break;
 
                 default:
@@ -550,7 +550,7 @@ bool GameState::insert(Entity *ptr)
             break;
 
         case OBJECT_NPC:
-            LOG_DEBUG("NPC inserted: " << static_cast<NPC*>(obj)->getNPC());
+            LOG_DEBUG("NPC inserted: " << obj->getComponent<NpcComponent>()->getNpcId());
             break;
 
         case OBJECT_CHARACTER:
@@ -624,7 +624,7 @@ void GameState::remove(Entity *ptr)
             break;
 
         case OBJECT_NPC:
-            LOG_DEBUG("NPC removed: " << static_cast<NPC*>(ptr)->getNPC());
+            LOG_DEBUG("NPC removed: " << ptr->getComponent<NpcComponent>()->getNpcId());
             break;
 
         case OBJECT_CHARACTER:

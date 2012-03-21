@@ -453,22 +453,25 @@ void GameHandler::handleNpc(GameClient &client, MessageIn &message)
         return;
     }
 
-    NPC *npc = static_cast<NPC *>(actor);
+    Being *npc = static_cast<Being*>(actor);
+
     switch (message.getId())
     {
         case PGMSG_NPC_SELECT:
-            npc->select(client.character, message.readInt8());
+            Npc::integerReceived(client.character, message.readInt8());
             break;
         case PGMSG_NPC_NUMBER:
-            npc->integerReceived(client.character, message.readInt32());
+            Npc::integerReceived(client.character, message.readInt32());
             break;
         case PGMSG_NPC_STRING:
-            npc->stringReceived(client.character, message.readString());
+            Npc::stringReceived(client.character, message.readString());
             break;
         case PGMSG_NPC_TALK:
+            Npc::start(npc, client.character);
+            break;
         case PGMSG_NPC_TALK_NEXT:
         default:
-            npc->prompt(client.character, message.getId() == PGMSG_NPC_TALK);
+            Npc::resume(client.character);
             break;
     }
 }

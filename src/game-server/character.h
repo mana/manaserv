@@ -431,13 +431,6 @@ class Character : public Being
 
         sigc::signal<void, Character *> signal_disconnected;
 
-    protected:
-        /**
-         * Gets the way the actor blocks pathfinding for other objects
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_CHARACTER; }
-
     private:
         bool specialUseCheck(SpecialMap::iterator it);
 

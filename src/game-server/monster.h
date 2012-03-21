@@ -318,13 +318,6 @@ class Monster : public Being
          */
         void forgetTarget(Entity *entity);
 
-    protected:
-        /**
-         * Returns the way the actor blocks pathfinding for other objects.
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_MONSTER; }
-
     private:
         static const int DECAY_TIME = 50;
 

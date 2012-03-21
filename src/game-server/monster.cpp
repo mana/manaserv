@@ -60,6 +60,7 @@ Monster::Monster(MonsterClass *specy):
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
 
     setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_CHARACTER);
+    setBlockType(BLOCKTYPE_MONSTER);
 
     /*
      * Initialise the attribute structures.

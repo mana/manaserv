@@ -26,9 +26,10 @@ class Entity;
 enum ComponentType
 {
     CT_Effect,
-    CT_TriggerArea,
-    CT_SpawnArea,
     CT_Item,
+    CT_Npc,
+    CT_SpawnArea,
+    CT_TriggerArea,
 
     ComponentTypeCount
 };

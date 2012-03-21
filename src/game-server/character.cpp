@@ -97,6 +97,7 @@ Character::Character(MessageIn &msg):
         mAttributes.insert(std::make_pair(it1->first, Attribute(*it1->second)));
 
     setWalkMask(Map::BLOCKMASK_WALL);
+    setBlockType(BLOCKTYPE_CHARACTER);
 
     // Get character data.
     mDatabaseID = msg.readInt32();
@@ -677,6 +678,9 @@ AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
 
 void Character::startNpcThread(Script::Thread *thread, int npcId)
 {
+    if (mNpcThread)
+        delete mNpcThread;
+
     mNpcThread = thread;
     mTalkNpcId = npcId;
 

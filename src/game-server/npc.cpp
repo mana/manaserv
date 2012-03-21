@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,127 +19,109 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "game-server/npc.h"
+
 #include "game-server/character.h"
 #include "game-server/gamehandler.h"
 #include "game-server/map.h"
-#include "game-server/npc.h"
 #include "net/messageout.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 
-NPC::NPC(const std::string &name, int id):
-    Being(OBJECT_NPC),
-    mID(id),
+const ComponentType NpcComponent::type;
+
+NpcComponent::NpcComponent(int npcId):
+    mNpcId(npcId),
     mEnabled(true)
 {
-    setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER |
-                Map::BLOCKMASK_CHARACTER);
-    setName(name);
 }
 
-NPC::~NPC()
+NpcComponent::~NpcComponent()
 {
     Script *script = ScriptManager::currentState();
     script->unref(mTalkCallback);
     script->unref(mUpdateCallback);
 }
 
-void NPC::setEnabled(bool enabled)
+void NpcComponent::setEnabled(bool enabled)
 {
     mEnabled = enabled;
 }
 
-void NPC::update()
+void NpcComponent::update(Entity &entity)
 {
     if (!mEnabled || !mUpdateCallback.isValid())
         return;
 
     Script *script = ScriptManager::currentState();
     script->prepare(mUpdateCallback);
-    script->push(this);
-    script->execute(getMap());
+    script->push(&entity);
+    script->execute(entity.getMap());
 }
 
-void NPC::prompt(Character *ch, bool restart)
-{
-    if (!mEnabled || !mTalkCallback.isValid())
-        return;
-
-    Script *script = ScriptManager::currentState();
-
-    if (restart)
-    {
-        Script::Thread *thread = script->newThread();
-        thread->getContext().map = getMap();
-        script->prepare(mTalkCallback);
-        script->push(this);
-        script->push(ch);
-        ch->startNpcThread(thread, getPublicID());
-    }
-    else
-    {
-        Script::Thread *thread = ch->getNpcThread();
-        if (!thread || thread->mState != Script::ThreadPaused)
-            return;
-
-        script->prepareResume(thread);
-        ch->resumeNpcThread();
-    }
-}
-
-void NPC::select(Character *ch, int index)
-{
-    if (!mEnabled)
-        return;
-
-    Script::Thread *thread = ch->getNpcThread();
-    if (!thread || thread->mState != Script::ThreadExpectingNumber)
-        return;
-
-    Script *script = ScriptManager::currentState();
-    script->prepareResume(thread);
-    script->push(index);
-    ch->resumeNpcThread();
-}
-
-void NPC::integerReceived(Character *ch, int value)
-{
-    if (!mEnabled)
-        return;
-
-    Script::Thread *thread = ch->getNpcThread();
-    if (!thread || thread->mState != Script::ThreadExpectingNumber)
-        return;
-
-    Script *script = ScriptManager::currentState();
-    script->prepareResume(thread);
-    script->push(value);
-    ch->resumeNpcThread();
-}
-
-void NPC::stringReceived(Character *ch, const std::string &value)
-{
-    if (!mEnabled)
-        return;
-
-    Script::Thread *thread = ch->getNpcThread();
-    if (!thread || thread->mState != Script::ThreadExpectingString)
-        return;
-
-    Script *script = ScriptManager::currentState();
-    script->prepareResume(thread);
-    script->push(value);
-    ch->resumeNpcThread();
-}
-
-void NPC::setTalkCallback(Script::Ref function)
+void NpcComponent::setTalkCallback(Script::Ref function)
 {
     ScriptManager::currentState()->unref(mTalkCallback);
     mTalkCallback = function;
 }
 
-void NPC::setUpdateCallback(Script::Ref function)
+void NpcComponent::setUpdateCallback(Script::Ref function)
 {
     ScriptManager::currentState()->unref(mUpdateCallback);
     mUpdateCallback = function;
+}
+
+
+
+static Script *prepareResume(Character *ch, Script::ThreadState expectedState)
+{
+    Script::Thread *thread = ch->getNpcThread();
+    if (!thread || thread->mState != expectedState)
+        return 0;
+
+    Script *script = ScriptManager::currentState();
+    script->prepareResume(thread);
+    return script;
+}
+
+void Npc::start(Being *npc, Character *ch)
+{
+    NpcComponent *npcComponent = npc->getComponent<NpcComponent>();
+
+    Script *script = ScriptManager::currentState();
+    Script::Ref talkCallback = npcComponent->getTalkCallback();
+
+    if (npcComponent->isEnabled() && talkCallback.isValid())
+    {
+        Script::Thread *thread = script->newThread();
+        thread->getContext().map = npc->getMap();
+        script->prepare(talkCallback);
+        script->push(npc);
+        script->push(ch);
+        ch->startNpcThread(thread, npc->getPublicID());
+    }
+}
+
+void Npc::resume(Character *ch)
+{
+    if (prepareResume(ch, Script::ThreadPaused))
+        ch->resumeNpcThread();
+}
+
+void Npc::integerReceived(Character *ch, int value)
+{
+    if (Script *script = prepareResume(ch, Script::ThreadExpectingNumber))
+    {
+        script->push(value);
+        ch->resumeNpcThread();
+    }
+}
+
+void Npc::stringReceived(Character *ch, const std::string &value)
+{
+    if (Script *script = prepareResume(ch, Script::ThreadExpectingString))
+    {
+        script->push(value);
+        ch->resumeNpcThread();
+    }
 }
