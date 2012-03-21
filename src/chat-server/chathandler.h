@@ -25,7 +25,10 @@
 #include <map>
 #include <string>
 
+#include "chat-server/guild.h"
+
 #include "net/connectionhandler.h"
+
 #include "utils/tokencollector.h"
 
 class ChatChannel;
@@ -106,7 +109,7 @@ class ChatHandler : public ConnectionHandler
         /**
          * Send information about a change in the guild list to guild members.
          */
-        void sendGuildListUpdate(const std::string &guildName,
+        void sendGuildListUpdate(Guild *guild,
                                  const std::string &characterName,
                                  char eventId);
 

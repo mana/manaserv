@@ -51,7 +51,6 @@ Guild* GuildManager::createGuild(const std::string &name, int playerId)
 
     // Add guild, and add owner
     mGuilds[guild->getId()] = guild;
-    mOwners.push_back(playerId);
 
     // put the owner in the guild
     addGuildMember(guild, playerId);
@@ -67,7 +66,6 @@ Guild* GuildManager::createGuild(const std::string &name, int playerId)
 void GuildManager::removeGuild(Guild *guild)
 {
     storage->removeGuild(guild);
-    mOwners.remove(guild->getOwner());
     mGuilds.erase(guild->getId());
     delete guild;
 }
@@ -87,8 +85,6 @@ void GuildManager::removeGuildMember(Guild *guild, int playerId)
     // if theres no more members left delete the guild
     if (guild->memberCount() == 0)
         removeGuild(guild);
-
-    mOwners.remove(playerId);
 }
 
 Guild *GuildManager::findById(short id) const
@@ -115,29 +111,26 @@ bool GuildManager::doesExist(const std::string &name) const
     return findByName(name) != 0;
 }
 
-std::vector<Guild*> GuildManager::getGuildsForPlayer(int playerId) const
+std::vector<Guild *> GuildManager::getGuildsForPlayer(int playerId) const
 {
-    std::vector<Guild*> guildList;
-
+    std::vector<Guild *> guilds;
     for (std::map<int, Guild*>::const_iterator it = mGuilds.begin();
          it != mGuilds.end(); ++it)
     {
         if (it->second->checkInGuild(playerId))
         {
-            guildList.push_back(it->second);
+            guilds.push_back(it->second);
         }
     }
-    return guildList;
+    return guilds;
 }
 
 void GuildManager::disconnectPlayer(ChatClient *player)
 {
-    std::vector<Guild*> guildList = getGuildsForPlayer(player->characterId);
-
-    for (std::vector<Guild*>::const_iterator it = guildList.begin();
-         it != guildList.end(); ++it)
+    for (std::vector<Guild *>::iterator it = player->guilds.begin(),
+         it_end = player->guilds.end(); it != it_end; ++it)
     {
-        chatHandler->sendGuildListUpdate((*it)->getName(),
+        chatHandler->sendGuildListUpdate(*it,
                                          player->characterName,
                                          GUILD_EVENT_OFFLINE_PLAYER);
     }
@@ -146,7 +139,7 @@ void GuildManager::disconnectPlayer(ChatClient *player)
 int GuildManager::changeMemberLevel(ChatClient *player, Guild *guild,
                                     int playerId, int level)
 {
-    if (guild->checkInGuild(player->characterId) && guild->checkInGuild(playerId))
+    if (guild->checkInGuild(playerId))
     {
         int playerLevel = guild->getUserPermissions(player->characterId);
 
@@ -159,21 +152,6 @@ int GuildManager::changeMemberLevel(ChatClient *player, Guild *guild,
     }
 
     return -1;
-}
-
-bool GuildManager::alreadyOwner(int playerId) const
-{
-    std::list<int>::const_iterator it = mOwners.begin();
-    std::list<int>::const_iterator it_end = mOwners.end();
-
-    while (it != it_end)
-    {
-        if (*it == playerId)
-            return true;
-        ++it;
-    }
-
-    return false;
 }
 
 void GuildManager::setUserRights(Guild *guild, int playerId, int rights)

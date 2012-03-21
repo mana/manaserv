@@ -191,6 +191,7 @@
  <option name="account_minPasswordLength" value="6" />
  <option name="account_maxPasswordLength" value="25" />
  <option name="account_maxCharacters" value="3" />
+ <option name="account_maxGuildsPerCharacter" value="1" />
 
 <!-- end of accounts configuration **************************************** -->
 
