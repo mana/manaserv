@@ -83,6 +83,11 @@ class Guild
         void addInvited(int playerId);
 
         /**
+         * Remove a player from the invite list.
+         */
+        void removeInvited(int playerId);
+
+        /**
          * Returns the name of the guild.
          */
         std::string getName() const

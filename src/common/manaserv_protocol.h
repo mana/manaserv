@@ -180,7 +180,7 @@ enum {
     CPMSG_GUILD_CREATE_RESPONSE         = 0x0351, // B error, W guild, B rights, W channel
     PCMSG_GUILD_INVITE                  = 0x0352, // W id, S name
     CPMSG_GUILD_INVITE_RESPONSE         = 0x0353, // B error
-    PCMSG_GUILD_ACCEPT                  = 0x0354, // W id
+    PCMSG_GUILD_ACCEPT                  = 0x0354, // W id, B accepted (0 if false, 1 if true)
     CPMSG_GUILD_ACCEPT_RESPONSE         = 0x0355, // B error, W guild, B rights, W channel
     PCMSG_GUILD_GET_MEMBERS             = 0x0356, // W id
     CPMSG_GUILD_GET_MEMBERS_RESPONSE    = 0x0357, // S names, B online
@@ -283,7 +283,8 @@ enum {
     ERRMSG_SERVER_FULL,                 // the server is overloaded
     ERRMSG_TIME_OUT,                    // data failed to arrive in due time
     ERRMSG_LIMIT_REACHED,               // limit reached
-    ERRMSG_ADMINISTRATIVE_LOGOFF        // kicked by server administrator
+    ERRMSG_ADMINISTRATIVE_LOGOFF,       // kicked by server administrator
+    ERRMSG_ALREADY_MEMBER               // is already member of guild/party
 };
 
 // used in AGMSG_REGISTER_RESPONSE to show state of item db

@@ -42,10 +42,8 @@ void Guild::addMember(int playerId, int permissions)
     // add new guild member to guild
     mMembers.push_back(member);
 
-    if (checkInvited(playerId))
-    {
-        mInvited.remove(playerId);
-    }
+    // remove from invited list if nessecary
+    mInvited.remove(playerId);
 }
 
 void Guild::removeMember(int playerId)
@@ -95,6 +93,11 @@ bool Guild::checkInvited(int playerId) const
 void Guild::addInvited(int playerId)
 {
     mInvited.push_back(playerId);
+}
+
+void Guild::removeInvited(int playerId)
+{
+    mInvited.remove(playerId);
 }
 
 bool Guild::checkInGuild(int playerId) const

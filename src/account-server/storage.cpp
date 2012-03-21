@@ -1478,9 +1478,9 @@ void Storage::setMemberRights(int guildId, int memberId, int rights)
     {
         std::ostringstream sql;
         sql << "UPDATE " << GUILD_MEMBERS_TBL_NAME
-            << " SET rights = '" << rights << "'"
-            << " WHERE member_id = '" << memberId << "'"
-            << "  AND guild_id = '" << guildId << "'';";
+            << " SET rights = " << rights
+            << " WHERE member_id = " << memberId
+            << "  AND guild_id = " << guildId << ";";
         mDb->execSql(sql.str());
     }
     catch (const dal::DbSqlQueryExecFailure& e)
