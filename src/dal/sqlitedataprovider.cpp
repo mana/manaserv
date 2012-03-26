@@ -20,11 +20,19 @@
 
 #include "sqlitedataprovider.h"
 
-#include <stdexcept>
-
 #include "dalexcept.h"
 
-#include "../utils/logger.h"
+#include "common/configuration.h"
+#include "utils/logger.h"
+
+#include <stdexcept>
+#include <limits.h>
+
+// sqlite3_int64 is the preferred new datatype for 64-bit int values.
+// see: http://www.sqlite.org/capi3ref.html#sqlite3_int64
+#ifndef sqlite3_int64
+typedef sqlite_int64 sqlite3_int64;
+#endif
 
 namespace dal
 {

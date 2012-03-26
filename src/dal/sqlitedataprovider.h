@@ -21,20 +21,10 @@
 #ifndef SQLITE_DATA_PROVIDER_H
 #define SQLITE_DATA_PROVIDER_H
 
-#include <iosfwd>
-#include "limits.h"
-#include <sqlite3.h>
-#include "common/configuration.h"
-
-
-// sqlite3_int64 is the preferred new datatype for 64-bit int values.
-// see: http://www.sqlite.org/capi3ref.html#sqlite3_int64
-#ifndef sqlite3_int64
-typedef sqlite_int64 sqlite3_int64;
-#endif
-
-
 #include "dataprovider.h"
+
+#include <iosfwd>
+#include <sqlite3.h>
 
 namespace dal
 {

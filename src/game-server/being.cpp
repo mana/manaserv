@@ -180,7 +180,8 @@ void Being::died()
     {
         const EventListener &l = **i;
         ++i; // In case the listener removes itself from the list on the fly.
-        if (l.dispatch->died) l.dispatch->died(&l, this);
+        if (l.dispatch->died)
+            l.dispatch->died(&l, this);
     }
 }
 
@@ -432,7 +433,7 @@ int Being::performAttack(Being *target, const Damage &damage)
 
     // Note: The auto-attack system will handle the delay between two attacks.
 
-    return (mTarget->damage(this, damage));
+    return target->damage(this, damage);
 }
 
 void Being::setAction(BeingAction action)
@@ -640,7 +641,8 @@ void Being::update()
     //update timers
     for (Timers::iterator i = mTimers.begin(); i != mTimers.end(); i++)
     {
-        if (i->second > -1) i->second--;
+        if (i->second > -1)
+            i->second--;
     }
 
     int oldHP = getModifiedAttribute(ATTR_HP);

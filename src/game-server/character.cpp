@@ -18,11 +18,6 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <limits.h>
-
 #include "game-server/character.h"
 
 #include "common/configuration.h"
@@ -46,6 +41,11 @@
 #include "serialize/characterdata.h"
 
 #include "utils/logger.h"
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <limits.h>
 
 // Experience curve related values
 const float Character::EXPCURVE_EXPONENT = 3.0f;
@@ -174,15 +174,17 @@ void Character::update()
         mStatusEffects[it->first] = it->second.time;
         it++;
     }
+
+    processAttacks();
 }
 
-void Character::perform()
+void Character::processAttacks()
 {
     // Ticks attacks even when not attacking to permit cooldowns and warmups.
     std::list<AutoAttack> attacksReady;
     mAutoAttacks.tick(&attacksReady);
 
-    if (mAction != ATTACK || mTarget == NULL)
+    if (mAction != ATTACK || !mTarget)
     {
         mAutoAttacks.stop();
         return;

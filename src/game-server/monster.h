@@ -286,10 +286,12 @@ class Monster : public Being
          */
         void update();
 
+        void refreshTarget();
+
         /**
          * Performs an attack, if needed.
          */
-        void perform();
+        void processAttack();
 
         /**
          * Loads a script file for this monster

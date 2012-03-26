@@ -21,16 +21,16 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include <map>
-#include <string>
-#include <vector>
-
 #include "common/defines.h"
 #include "common/inventorydata.h"
 #include "common/manaserv_protocol.h"
 #include "game-server/being.h"
 #include "scripting/script.h"
 #include "utils/logger.h"
+
+#include <map>
+#include <string>
+#include <vector>
 
 class BuySell;
 class GameClient;
@@ -69,10 +69,7 @@ class Character : public Being
          */
         void update();
 
-        /**
-         * Perform actions.
-         */
-        void perform();
+        void processAttacks();
 
         /**
          * Executes the global die script and calls the base class function

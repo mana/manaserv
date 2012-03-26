@@ -118,71 +118,19 @@ Monster::~Monster()
     }
 }
 
-void Monster::perform()
-{
-    if (mAction == ATTACK)
-    {
-        if (mTarget)
-        {
-            if (mCurrentAttack)
-            {
-                if (!isTimerRunning(T_M_ATTACK_TIME))
-                {
-                    setTimerHard(T_M_ATTACK_TIME, mCurrentAttack->aftDelay
-                                                  + mCurrentAttack->preDelay);
-                    Damage dmg;
-                    dmg.skill = 0;
-                    dmg.base = getModifiedAttribute(MOB_ATTR_PHY_ATK_MIN) *
-                            mCurrentAttack->damageFactor;
-                    dmg.delta = getModifiedAttribute(MOB_ATTR_PHY_ATK_DELTA) *
-                            mCurrentAttack->damageFactor;
-                    dmg.cth = getModifiedAttribute(ATTR_ACCURACY);
-                    dmg.element = mCurrentAttack->element;
-                    dmg.range = mCurrentAttack->range;
-
-                    int hit = performAttack(mTarget, dmg);
-
-                    if (! mCurrentAttack->scriptEvent.empty()
-                        && hit > -1)
-                    {
-                        Script::Ref function = mSpecy->getEventCallback(mCurrentAttack->scriptEvent);
-                        if (function.isValid())
-                        {
-                            Script *script = ScriptManager::currentState();
-                            script->setMap(getMap());
-                            script->prepare(function);
-                            script->push(this);
-                            script->push(mTarget);
-                            script->push(hit);
-                            script->execute();
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            setAction(STAND);
-        }
-    }
-}
-
 void Monster::update()
 {
     Being::update();
 
     if (isTimerJustFinished(T_M_KILLSTEAL_PROTECTED))
-    {
         mOwner = NULL;
-    }
 
     // If dead, remove it
     if (mAction == DEAD)
     {
         if (!isTimerRunning(T_M_DECAY))
-        {
             GameState::enqueueRemove(this);
-        }
+
         return;
     }
 
@@ -199,6 +147,38 @@ void Monster::update()
     if (isTimerRunning(T_M_ATTACK_TIME))
         return;
 
+    refreshTarget();
+
+    if (!mTarget)
+    {
+        // We have no target - let's wander around
+        if (!isTimerRunning(T_M_STROLL) && getPosition() == getDestination())
+        {
+            if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED))
+            {
+                unsigned range = mSpecy->getStrollRange();
+                if (range)
+                {
+                    Point randomPos(rand() % (range * 2 + 1)
+                                    - range + getPosition().x,
+                                    rand() % (range * 2 + 1)
+                                    - range + getPosition().y);
+                    // Don't allow negative destinations, to avoid rounding
+                    // problems when divided by tile size
+                    if (randomPos.x >= 0 && randomPos.y >= 0)
+                        setDestination(randomPos);
+                }
+                setTimerHard(T_M_STROLL, 10 + rand() % 10);
+            }
+        }
+    }
+
+    if (mAction == ATTACK)
+        processAttack();
+}
+
+void Monster::refreshTarget()
+{
     // Check potential attack positions
     Being *bestAttackTarget = mTarget = NULL;
     int bestTargetPriority = 0;
@@ -214,7 +194,7 @@ void Monster::update()
         if ((*i)->getType() != OBJECT_CHARACTER)
             continue;
 
-        Being *target = static_cast<Being *> (*i);
+        Being *target = static_cast<Being *>(*i);
 
         // Dead characters are ignored
         if (target->getAction() == DEAD)
@@ -241,9 +221,9 @@ void Monster::update()
         for (std::list<AttackPosition>::iterator j = mAttackPositions.begin();
              j != mAttackPositions.end(); j++)
         {
-            Point attackPosition = (*i)->getPosition();
-            attackPosition.x += (*j).x;
-            attackPosition.y += (*j).y;
+            Point attackPosition = target->getPosition();
+            attackPosition.x += j->x;
+            attackPosition.y += j->y;
 
             int posPriority = calculatePositionPriority(attackPosition,
                                                         targetPriority);
@@ -252,7 +232,7 @@ void Monster::update()
                 bestAttackTarget = mTarget = target;
                 bestTargetPriority = posPriority;
                 bestAttackPosition = attackPosition;
-                bestAttackDirection = (*j).direction;
+                bestAttackDirection = j->direction;
             }
         }
     }
@@ -265,16 +245,15 @@ void Monster::update()
         std::map<int, MonsterAttack *> workingAttacks;
         int prioritySum = 0;
 
+        const int distX = getPosition().x - bestAttackTarget->getPosition().x;
+        const int distY = getPosition().y - bestAttackTarget->getPosition().y;
+        const int distSquare = (distX * distX + distY * distY);
+
         for (MonsterAttacks::iterator i = allAttacks.begin();
              i != allAttacks.end();
              i++)
         {
-            int distx = this->getPosition().x
-                        - bestAttackTarget->getPosition().x;
-            int disty = this->getPosition().y
-                        - bestAttackTarget->getPosition().y;
-            int distSquare = (distx * distx + disty * disty);
-            int maxDist =  (*i)->range + bestAttackTarget->getSize();
+            int maxDist = (*i)->range + bestAttackTarget->getSize();
 
             if (maxDist * maxDist >= distSquare)
             {
@@ -301,27 +280,46 @@ void Monster::update()
             raiseUpdateFlags(UPDATEFLAG_ATTACK);
         }
     }
-    else
+}
+
+void Monster::processAttack()
+{
+    if (!mTarget)
     {
-        // We have no target - let's wander around
-        if (!isTimerRunning(T_M_STROLL) && getPosition() == getDestination())
+        setAction(STAND);
+        return;
+    }
+
+    if (!mCurrentAttack)
+        return;
+
+    setTimerHard(T_M_ATTACK_TIME, mCurrentAttack->aftDelay
+                                  + mCurrentAttack->preDelay);
+
+    float damageFactor = mCurrentAttack->damageFactor;
+
+    Damage dmg;
+    dmg.skill   = 0;
+    dmg.base    = getModifiedAttribute(MOB_ATTR_PHY_ATK_MIN) * damageFactor;
+    dmg.delta   = getModifiedAttribute(MOB_ATTR_PHY_ATK_DELTA) * damageFactor;
+    dmg.cth     = getModifiedAttribute(ATTR_ACCURACY);
+    dmg.element = mCurrentAttack->element;
+    dmg.range   = mCurrentAttack->range;
+
+    int hit = performAttack(mTarget, dmg);
+
+    if (!mCurrentAttack->scriptEvent.empty() && hit > -1)
+    {
+        Script::Ref function = mSpecy->getEventCallback(mCurrentAttack->scriptEvent);
+        if (function.isValid())
         {
-            if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED))
-            {
-                unsigned range = mSpecy->getStrollRange();
-                if (range)
-                {
-                    Point randomPos(rand() % (range * 2 + 1)
-                                    - range + getPosition().x,
-                                    rand() % (range * 2 + 1)
-                                    - range + getPosition().y);
-                    // Don't allow negative destinations, to avoid rounding
-                    // problems when divided by tile size
-                    if (randomPos.x >= 0 && randomPos.y >= 0)
-                        setDestination(randomPos);
-                }
-                setTimerHard(T_M_STROLL, 10 + rand() % 10);
-            }
+            Script *script = ScriptManager::currentState();
+            script->setMap(getMap());
+            script->prepare(function);
+            script->push(this);
+            script->push(mTarget);
+            script->push(hit);
+            script->execute();
         }
     }
 }

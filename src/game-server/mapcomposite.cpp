@@ -625,12 +625,6 @@ void MapComposite::update()
         s->execute();
     }
 
-    // Perform actions
-    for (BeingIterator it(getWholeMapIterator()); it; ++it)
-    {
-        (*it)->perform();
-    }
-
     // Move objects around and update zones.
     for (BeingIterator it(getWholeMapIterator()); it; ++it)
     {

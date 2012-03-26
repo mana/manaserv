@@ -73,7 +73,7 @@ class Being : public Actor
         Being(ThingType type);
 
         /**
-         * Cleans obsolete attribute modifiers.
+         * Update being state.
          */
         virtual void update();
 
@@ -94,11 +94,6 @@ class Being : public Actor
          * Changes status and calls all the "died" listeners.
          */
         virtual void died();
-
-        /**
-         * Performs actions scheduled by the being.
-         */
-        virtual void perform() {}
 
         /**
          * Gets the destination coordinates of the being.
