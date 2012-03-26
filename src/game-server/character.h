@@ -405,10 +405,10 @@ class Character : public Being
 
         /** Makes it impossible to chat for a while */
         void mute(int seconds)
-        { setTimerHard(T_C_MUTE, seconds * 10); }
+        { mMuteTimeout.set(seconds * 10); }
 
         bool isMuted() const
-        { return isTimerRunning(T_C_MUTE); }
+        { return !mMuteTimeout.expired(); }
 
         bool isConnected() const
         { return mConnected; }
@@ -519,6 +519,8 @@ class Character : public Being
 
         int mTalkNpcId;              /**< Public ID of NPC the character is talking to, if any */
         Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
+
+        Timeout mMuteTimeout;        /**< Time until the character is no longer muted  */
 
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;

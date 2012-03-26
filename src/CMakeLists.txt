@@ -252,6 +252,8 @@ SET(SRCS_MANASERVGAME
     game-server/statuseffect.cpp
     game-server/statusmanager.h
     game-server/statusmanager.cpp
+    game-server/timeout.h
+    game-server/timeout.cpp
     game-server/trade.h
     game-server/trade.cpp
     game-server/trigger.h

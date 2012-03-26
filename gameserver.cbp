@@ -173,6 +173,8 @@
 		<Unit filename="src\game-server\statuseffect.h" />
 		<Unit filename="src\game-server\statusmanager.cpp" />
 		<Unit filename="src\game-server\statusmanager.h" />
+		<Unit filename="src\game-server\timeout.cpp" />
+		<Unit filename="src\game-server\timeout.h" />
 		<Unit filename="src\game-server\trade.cpp" />
 		<Unit filename="src\game-server\trade.h" />
 		<Unit filename="src\game-server\trigger.cpp" />

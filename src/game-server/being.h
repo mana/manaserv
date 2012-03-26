@@ -30,22 +30,13 @@
 #include "game-server/actor.h"
 #include "game-server/attribute.h"
 #include "game-server/autoattack.h"
+#include "game-server/timeout.h"
 
 class Being;
 class MapComposite;
 class StatusEffect;
 
 typedef std::map< unsigned int, Attribute > AttributeMap;
-
-enum TimerID
-{
-    T_M_STROLL, // time until monster strolls to new location
-    T_M_KILLSTEAL_PROTECTED,  // killsteal protection time
-    T_M_DECAY,  // time until dead monster is removed
-    T_M_ATTACK_TIME,    // time until monster can attack again
-    T_B_HP_REGEN,    // time until hp is regenerated again
-    T_C_MUTE // time until the character can chat again
-};
 
 struct Status
 {
@@ -296,6 +287,7 @@ class Being : public Actor
 
     protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
+
         BeingAction mAction;
         AttributeMap mAttributes;
         AutoAttacks mAutoAttacks;
@@ -304,24 +296,6 @@ class Being : public Actor
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
         BeingGender mGender;        /**< Gender of the being. */
-
-        /** Sets timer unless already higher. */
-        void setTimerSoft(TimerID id, int value);
-
-        /**
-         * Sets timer even when already higher (when in doubt this one is
-         * faster)
-         */
-        void setTimerHard(TimerID id, int value);
-
-        /** Returns number of ticks left on the timer */
-        int getTimer(TimerID id) const;
-
-        /** Returns whether timer exists and is > 0 */
-        bool isTimerRunning(TimerID id) const;
-
-        /** Returns whether the timer reached 0 in this tick */
-        bool isTimerJustFinished(TimerID id) const;
 
     private:
         Being(const Being &rhs);
@@ -340,8 +314,8 @@ class Being : public Actor
         std::string mName;
         Hits mHitsTaken; /**< List of punches taken since last update. */
 
-        typedef std::map<TimerID, int> Timers;
-        Timers mTimers;
+        /** Time until hp is regenerated again */
+        Timeout mHealthRegenerationTimeout;
 };
 
 #endif // BEING_H

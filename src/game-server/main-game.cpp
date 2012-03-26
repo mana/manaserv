@@ -19,23 +19,6 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
-#include <getopt.h>
-#include <iostream>
-#include <signal.h>
-#include <physfs.h>
-#include <enet/enet.h>
-#include <unistd.h>
-
-#ifdef __MINGW32__
-#include <windows.h>
-#define usleep(usec) (Sleep ((usec) / 1000), 0)
-#endif
-
-#ifdef HAVE_CONFIG_H
-#include "../config.h"
-#endif
-
 #include "common/configuration.h"
 #include "common/permissionmanager.h"
 #include "common/resourcemanager.h"
@@ -60,6 +43,23 @@
 #include "utils/timer.h"
 #include "utils/mathutils.h"
 
+#include <cstdlib>
+#include <getopt.h>
+#include <iostream>
+#include <signal.h>
+#include <physfs.h>
+#include <enet/enet.h>
+#include <unistd.h>
+
+#ifdef __MINGW32__
+#include <windows.h>
+#define usleep(usec) (Sleep ((usec) / 1000), 0)
+#endif
+
+#ifdef HAVE_CONFIG_H
+#include "../config.h"
+#endif
+
 using utils::Logger;
 
 // Default options that automake should be able to override.
@@ -78,9 +78,9 @@ using utils::Logger;
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
 /** Timer for world ticks */
-utils::Timer worldTimer(WORLD_TICK_MS);
-int worldTime = 0;              /**< Current world time in ticks */
-bool running = true;            /**< Determines if server keeps running */
+static utils::Timer worldTimer(WORLD_TICK_MS);
+static int currentTick = 0;     /**< Current world time in ticks */
+static bool running = true;     /**< Whether the server keeps running */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
@@ -373,29 +373,31 @@ int main(int argc, char *argv[])
 
     // Account connection lost flag
     bool accountServerLost = false;
-    int elapsedWorldTicks = 0;
 
     while (running)
     {
-        elapsedWorldTicks = worldTimer.poll();
-        if (elapsedWorldTicks == 0) worldTimer.sleep();
+        int elapsedTicks = worldTimer.poll();
 
-        while (elapsedWorldTicks > 0)
+        if (elapsedTicks == 0)
         {
-            if (elapsedWorldTicks > WORLD_TICK_SKIP)
-            {
-                LOG_WARN("Skipped "<< elapsedWorldTicks - 1
-                        << " world tick due to insufficient CPU time.");
-                elapsedWorldTicks = 1;
-            }
-            worldTime++;
-            elapsedWorldTicks--;
+            worldTimer.sleep();
+            continue;
+        }
+
+        if (elapsedTicks > WORLD_TICK_SKIP)
+        {
+            LOG_WARN("Skipping "<< elapsedTicks - 1 << " ticks.");
+            elapsedTicks = 1;
+        }
+
+        while (elapsedTicks > 0)
+        {
+            currentTick++;
+            elapsedTicks--;
 
             // Print world time at 10 second intervals to show we're alive
-            if (worldTime % 100 == 0) {
-                LOG_INFO("World time: " << worldTime);
-
-            }
+            if (currentTick % 100 == 0)
+                LOG_INFO("World time: " << currentTick);
 
             if (accountHandler->isConnected())
             {
@@ -404,12 +406,12 @@ int main(int argc, char *argv[])
                 // Handle all messages that are in the message queues
                 accountHandler->process();
 
-                if (worldTime % 100 == 0) {
+                if (currentTick % 100 == 0) {
                     accountHandler->syncChanges(true);
                     // force sending changes to the account server every 10 secs.
                 }
 
-                if (worldTime % 300 == 0)
+                if (currentTick % 300 == 0)
                 {
                     accountHandler->sendStatistics();
                     LOG_INFO("Total Account Output: " << gBandwidth->totalInterServerOut() << " Bytes");
@@ -429,14 +431,14 @@ int main(int argc, char *argv[])
                 }
 
                 // Try to reconnect every 200 ticks
-                if (worldTime % 200 == 0)
+                if (currentTick % 200 == 0)
                 {
                     accountHandler->start(options.port);
                 }
             }
             gameHandler->process();
             // Update all active objects/beings
-            GameState::update(worldTime);
+            GameState::update(currentTick);
             // Send potentially urgent outgoing messages
             gameHandler->flush();
         }

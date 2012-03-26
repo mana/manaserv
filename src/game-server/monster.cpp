@@ -122,13 +122,13 @@ void Monster::update()
 {
     Being::update();
 
-    if (isTimerJustFinished(T_M_KILLSTEAL_PROTECTED))
+    if (mKillStealProtectedTimeout.justFinished())
         mOwner = NULL;
 
     // If dead, remove it
     if (mAction == DEAD)
     {
-        if (!isTimerRunning(T_M_DECAY))
+        if (mDecayTimeout.expired())
             GameState::enqueueRemove(this);
 
         return;
@@ -144,7 +144,7 @@ void Monster::update()
     }
 
     // Cancel the rest when we are currently performing an attack
-    if (isTimerRunning(T_M_ATTACK_TIME))
+    if (!mAttackTimeout.expired())
         return;
 
     refreshTarget();
@@ -152,9 +152,9 @@ void Monster::update()
     if (!mTarget)
     {
         // We have no target - let's wander around
-        if (!isTimerRunning(T_M_STROLL) && getPosition() == getDestination())
+        if (mStrollTimeout.expired() && getPosition() == getDestination())
         {
-            if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED))
+            if (mKillStealProtectedTimeout.expired())
             {
                 unsigned range = mSpecy->getStrollRange();
                 if (range)
@@ -168,7 +168,7 @@ void Monster::update()
                     if (randomPos.x >= 0 && randomPos.y >= 0)
                         setDestination(randomPos);
                 }
-                setTimerHard(T_M_STROLL, 10 + rand() % 10);
+                mStrollTimeout.set(10 + rand() % 10);
             }
         }
     }
@@ -293,8 +293,8 @@ void Monster::processAttack()
     if (!mCurrentAttack)
         return;
 
-    setTimerHard(T_M_ATTACK_TIME, mCurrentAttack->aftDelay
-                                  + mCurrentAttack->preDelay);
+    mAttackTimeout.set(mCurrentAttack->aftDelay
+                                 + mCurrentAttack->preDelay);
 
     float damageFactor = mCurrentAttack->damageFactor;
 
@@ -421,13 +421,12 @@ int Monster::damage(Actor *source, const Damage &damage)
         Character *s = static_cast< Character * >(source);
 
         mExpReceivers[s].insert(damage.skill);
-        if (!isTimerRunning(T_M_KILLSTEAL_PROTECTED) || mOwner == s
+        if (mKillStealProtectedTimeout.expired() || mOwner == s
             || mOwner->getParty() == s->getParty())
         {
             mOwner = s;
             mLegalExpReceivers.insert(s);
-            setTimerHard(T_M_KILLSTEAL_PROTECTED,
-                         KILLSTEAL_PROTECTION_TIME);
+            mKillStealProtectedTimeout.set(KILLSTEAL_PROTECTION_TIME);
         }
     }
 
@@ -451,7 +450,7 @@ void Monster::died()
     if (mAction == DEAD) return;
 
     Being::died();
-    setTimerHard(T_M_DECAY, Monster::DECAY_TIME);
+    mDecayTimeout.set(DECAY_TIME);
 
     if (mExpReceivers.size() > 0)
     {

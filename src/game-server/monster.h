@@ -21,15 +21,15 @@
 #ifndef MONSTER_H
 #define MONSTER_H
 
-#include <map>
-#include <vector>
-#include <string>
-
 #include "game-server/being.h"
 #include "game-server/eventlistener.h"
 #include "common/defines.h"
 #include "scripting/script.h"
 #include "utils/string.h"
+
+#include <map>
+#include <vector>
+#include <string>
 
 class ItemClass;
 class Script;
@@ -384,6 +384,15 @@ class Monster : public Being
          * Set positions relative to target from which the monster can attack.
          */
         std::list<AttackPosition> mAttackPositions;
+
+        /** Time until monster strolls to new location */
+        Timeout mStrollTimeout;
+        /** Kill steal protection time */
+        Timeout mKillStealProtectedTimeout;
+        /** Time until dead monster is removed */
+        Timeout mDecayTimeout;
+        /** Time until monster can attack again */
+        Timeout mAttackTimeout;
 
         friend struct MonsterTargetEventDispatch;
 };

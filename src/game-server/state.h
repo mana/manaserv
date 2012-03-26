@@ -34,7 +34,9 @@ namespace GameState
     /**
      * Updates game state (contains core server logic).
      */
-    void update(int worldTime);
+    void update(int tick);
+
+    int getCurrentTick();
 
     /**
      * Inserts an entity in the game world.

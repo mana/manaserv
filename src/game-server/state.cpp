@@ -18,8 +18,6 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-
 #include "game-server/state.h"
 
 #include "common/configuration.h"
@@ -42,6 +40,8 @@
 #include "utils/point.h"
 #include "utils/speedconv.h"
 
+#include <cassert>
+
 enum
 {
     EVENT_REMOVE = 0,
@@ -59,6 +59,11 @@ struct DelayedEvent
 };
 
 typedef std::map< Actor *, DelayedEvent > DelayedEvents;
+
+/**
+ * The current world time in ticks since server start.
+ */
+static int currentTick;
 
 /**
  * List of delayed events.
@@ -123,7 +128,7 @@ static void serializeLooks(Character *ch, MessageOut &msg)
 /**
  * Informs a player of what happened around the character.
  */
-static void informPlayer(MapComposite *map, Character *p, int worldTime)
+static void informPlayer(MapComposite *map, Character *p)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
@@ -273,7 +278,7 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
         if (opos != oold)
         {
             // Add position check coords every 5 seconds.
-            if (worldTime % 50 == 0)
+            if (currentTick % 50 == 0)
                 flags |= MOVING_POSITION;
 
             flags |= MOVING_DESTINATION;
@@ -411,11 +416,13 @@ static void informPlayer(MapComposite *map, Character *p, int worldTime)
 static bool dbgLockObjects;
 #endif
 
-void GameState::update(int worldTime)
+void GameState::update(int tick)
 {
-#   ifndef NDEBUG
+    currentTick = tick;
+
+#ifndef NDEBUG
     dbgLockObjects = true;
-#   endif
+#endif
 
     ScriptManager::currentState()->update();
 
@@ -432,7 +439,7 @@ void GameState::update(int worldTime)
 
         for (CharacterIterator p(map->getWholeMapIterator()); p; ++p)
         {
-            informPlayer(map, *p, worldTime);
+            informPlayer(map, *p);
         }
 
         for (ActorIterator it(map->getWholeMapIterator()); it; ++it)
@@ -571,6 +578,11 @@ bool GameState::insert(Entity *ptr)
         static_cast< Character * >(obj)->getDatabaseID(), true);
 
     return true;
+}
+
+int GameState::getCurrentTick()
+{
+    return currentTick;
 }
 
 bool GameState::insertOrDelete(Entity *ptr)

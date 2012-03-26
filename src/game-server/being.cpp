@@ -126,8 +126,8 @@ int Being::damage(Actor * /* source */, const Damage &damage)
                   << mAttributes.at(ATTR_MAX_HP).getModifiedAttribute());
         setAttribute(ATTR_HP, HP.getBase() - HPloss);
         // No HP regen after being hit if this is set.
-        setTimerSoft(T_B_HP_REGEN,
-                     Configuration::getValue("game_hpRegenBreakAfterHit", 0));
+        mHealthRegenerationTimeout.setSoft(
+                    Configuration::getValue("game_hpRegenBreakAfterHit", 0));
     }
     else
     {
@@ -638,21 +638,14 @@ void Being::setStatusEffectTime(int id, int time)
 
 void Being::update()
 {
-    //update timers
-    for (Timers::iterator i = mTimers.begin(); i != mTimers.end(); i++)
-    {
-        if (i->second > -1)
-            i->second--;
-    }
-
     int oldHP = getModifiedAttribute(ATTR_HP);
     int newHP = oldHP;
     int maxHP = getModifiedAttribute(ATTR_MAX_HP);
 
     // Regenerate HP
-    if (mAction != DEAD && !isTimerRunning(T_B_HP_REGEN))
+    if (mAction != DEAD && mHealthRegenerationTimeout.expired())
     {
-        setTimerHard(T_B_HP_REGEN, TICKS_PER_HP_REGENERATION);
+        mHealthRegenerationTimeout.set(TICKS_PER_HP_REGENERATION);
         newHP += getModifiedAttribute(ATTR_HP_REGEN);
     }
     // Cap HP at maximum
@@ -708,40 +701,6 @@ void Being::inserted()
     // Reset the old position, since after insertion it is important that it is
     // in sync with the zone that we're currently present in.
     mOld = getPosition();
-}
-
-void Being::setTimerSoft(TimerID id, int value)
-{
-    Timers::iterator i = mTimers.find(id);
-    if (i == mTimers.end())
-    {
-        mTimers[id] = value;
-    }
-    else if (i->second < value)
-    {
-        i->second = value;
-    }
-}
-
-void Being::setTimerHard(TimerID id, int value)
-{
-    mTimers[id] = value;
-}
-
-int Being::getTimer(TimerID id) const
-{
-    Timers::const_iterator i = mTimers.find(id);
-    return (i == mTimers.end()) ? -1 : i->second;
-}
-
-bool Being::isTimerRunning(TimerID id) const
-{
-    return getTimer(id) > 0;
-}
-
-bool Being::isTimerJustFinished(TimerID id) const
-{
-    return getTimer(id) == 0;
 }
 
 void Being::setGender(BeingGender gender)
