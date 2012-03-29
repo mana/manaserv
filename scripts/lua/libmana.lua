@@ -37,9 +37,10 @@ world = setmetatable({}, {
 })
 
 -- Some convenient shortcuts for the different log levels
-function warn(...)  log(LOG_WARN,  table.concat({...}, " ")) end
-function info(...)  log(LOG_INFO,  table.concat({...}, " ")) end
-function debug(...) log(LOG_DEBUG, table.concat({...}, " ")) end
+function ERROR(...) log(LOG_ERROR, table.concat({...}, " ")) end
+function WARN(...)  log(LOG_WARN,  table.concat({...}, " ")) end
+function INFO(...)  log(LOG_INFO,  table.concat({...}, " ")) end
+function DEBUG(...) log(LOG_DEBUG, table.concat({...}, " ")) end
 
 -- Array containing the function registered by atinit.
 local init_fun = {}
