@@ -1819,9 +1819,10 @@ static int chr_give_special(lua_State *s)
 {
     // cost_type is ignored until we have more than one cost type
     Character *c = checkCharacter(s, 1);
-    const int special = luaL_checkint(s, 2);
+    const int special = checkSpecial(s, 2);
+    const int currentMana = luaL_optint(s, 3, 0);
 
-    c->giveSpecial(special);
+    c->giveSpecial(special, currentMana);
     return 0;
 }
 
@@ -1849,6 +1850,70 @@ static int chr_take_special(lua_State *s)
 
     lua_pushboolean(s, c->hasSpecial(special));
     c->takeSpecial(special);
+    return 1;
+}
+
+/**
+ * chr_set_special_recharge_speed(Character*, int special, int speed)
+ * Sets recharge speed for a special.
+ */
+static int chr_set_special_recharge_speed(lua_State *s)
+{
+    Character *c = checkCharacter(s, 1);
+    const int special = checkSpecial(s, 2);
+    const int speed = luaL_checkint(s, 3);
+
+    if (c->setSpecialRechargeSpeed(special, speed))
+        raiseScriptError(s, "chr_set_special_mana called with special "
+                         "that is not owned by character.");
+    return 0;
+}
+
+/**
+ * chr_get_special_recharge_speed(Character*, int special)
+ * Gets recharge speed of a special.
+ */
+static int chr_get_special_recharge_speed(lua_State *s)
+{
+    Character *c = checkCharacter(s, 1);
+    const int special = checkSpecial(s, 2);
+
+    SpecialMap::iterator it = c->findSpecial(special);
+
+    luaL_argcheck(s, it != c->getSpecialEnd(), 2,
+                  "character does not have special");
+
+    lua_pushinteger(s, it->second.rechargeSpeed);
+    return 1;
+}
+
+/**
+ * chr_set_special_mana(Character*, int special, int mana)
+ * Sets the current charge of the special.
+ */
+static int chr_set_special_mana(lua_State *s)
+{
+    Character *c = checkCharacter(s, 1);
+    const int special = checkSpecial(s, 2);
+    const int mana = luaL_checkint(s, 3);
+    if (!c->setSpecialMana(special, mana))
+        raiseScriptError(s, "chr_set_special_mana called with special "
+                         "that is not owned by character.");
+    return 0;
+}
+
+/**
+ * chr_get_special_mana(Character*, int special): int
+ * Gets the current charge of a special.
+ */
+static int chr_get_special_mana(lua_State *s)
+{
+    Character *c = checkCharacter(s, 1);
+    const int special = checkSpecial(s, 2);
+    SpecialMap::iterator it = c->findSpecial(special);
+    luaL_argcheck(s, it != c->getSpecialEnd(), 2,
+                  "character does not have special");
+    lua_pushinteger(s, it->second.currentMana);
     return 1;
 }
 
@@ -2207,6 +2272,61 @@ static int announce(lua_State *s)
     return 0;
 }
 
+static int get_special_info(lua_State *s)
+{
+    const int special = checkSpecial(s, 1);
+    SpecialManager::SpecialInfo *info = specialManager->getSpecialInfo(special);
+    luaL_argcheck(s, info, 1, "invalid special");
+    LuaSpecialInfo::push(s, info);
+    return 1;
+}
+
+static int specialinfo_get_name(lua_State *s)
+{
+    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    lua_pushstring(s, info->name.c_str());
+    return 1;
+}
+
+static int specialinfo_get_needed_mana(lua_State *s)
+{
+    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    lua_pushinteger(s, info->neededMana);
+    return 1;
+}
+
+static int specialinfo_is_rechargeable(lua_State *s)
+{
+    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    lua_pushboolean(s, info->rechargeable);
+    return 1;
+}
+
+static int specialinfo_get_category(lua_State *s)
+{
+    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    lua_pushstring(s, info->setName.c_str());
+    return 1;
+}
+
+static int specialinfo_on_recharged(lua_State *s)
+{
+    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    Script *script = getScript(s);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    script->assignCallback(info->rechargedCallback);
+    return 0;
+}
+
+static int specialinfo_on_use(lua_State *s)
+{
+    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    Script *script = getScript(s);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    script->assignCallback(info->useCallback);
+    return 0;
+}
+
 static int require_loader(lua_State *s)
 {
     // Add .lua extension (maybe only do this when it doesn't have it already)
@@ -2292,6 +2412,10 @@ LuaScript::LuaScript():
         { "chr_give_special",                &chr_give_special                },
         { "chr_has_special",                 &chr_has_special                 },
         { "chr_take_special",                &chr_take_special                },
+        { "chr_set_special_recharge_speed",  &chr_set_special_recharge_speed  },
+        { "chr_get_special_recharge_speed",  &chr_get_special_recharge_speed  },
+        { "chr_set_special_mana",            &chr_set_special_mana            },
+        { "chr_get_special_mana",            &chr_get_special_mana            },
         { "chr_kick",                        &chr_kick                        },
         { "exp_for_level",                   &exp_for_level                   },
         { "monster_create",                  &monster_create                  },
@@ -2346,6 +2470,7 @@ LuaScript::LuaScript():
         { "get_distance",                    &get_distance                    },
         { "map_get_objects",                 &map_get_objects                 },
         { "announce",                        &announce                        },
+        { "get_special_info",                &get_special_info                },
         { NULL, NULL }
     };
     lua_pushvalue(mRootState, LUA_GLOBALSINDEX);
@@ -2376,10 +2501,21 @@ LuaScript::LuaScript():
         { NULL, NULL }
     };
 
+    static luaL_Reg const members_SpecialInfo[] = {
+        { "name",                            &specialinfo_get_name            },
+        { "needed_mana",                     &specialinfo_get_needed_mana     },
+        { "rechargeable",                    &specialinfo_is_rechargeable     },
+        { "on_use",                          &specialinfo_on_use              },
+        { "on_recharged",                    &specialinfo_on_recharged        },
+        { "category",                        &specialinfo_get_category        },
+        { NULL, NULL}
+    };
+
     LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
     LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);
     LuaStatusEffect::registerType(mRootState, "StatusEffect", members_StatusEffect);
+    LuaSpecialInfo::registerType(mRootState, "SpecialInfo", members_SpecialInfo);
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mRootState, const_cast<char *>(&registryKey));

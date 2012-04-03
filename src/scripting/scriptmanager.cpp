@@ -51,39 +51,6 @@ Script *ScriptManager::currentState()
     return _currentState;
 }
 
-// TODO: Have some generic event mechanism rather than calling global functions
-
-void ScriptManager::addDataToSpecial(int id, Special *special)
-{
-    /* currently only gets the recharge cost.
-      TODO: get any other info in a similar way, but
-            first we have to agree on what other
-            info we actually want to provide.
-    */
-    if (special && _getSpecialRechargeCostCallback.isValid())
-    {
-        _currentState->prepare(_getSpecialRechargeCostCallback);
-        _currentState->push(id);
-        int scriptReturn = _currentState->execute();
-        special->neededMana = scriptReturn;
-    }
-}
-
-bool ScriptManager::performSpecialAction(int specialId, Being *caster)
-{
-    if (!_specialCallback.isValid())
-    {
-        LOG_WARN("No callback for specials set! Specials disabled.");
-        return false;
-    }
-
-    _currentState->prepare(_specialCallback);
-    _currentState->push(caster);
-    _currentState->push(specialId);
-    _currentState->execute();
-    return true;
-}
-
 bool ScriptManager::performCraft(Being *crafter,
                                  const std::list<InventoryItem> &recipe)
 {

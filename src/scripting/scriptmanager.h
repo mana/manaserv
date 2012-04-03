@@ -26,7 +26,6 @@
 #include <string>
 
 class Script;
-class Special;
 
 /**
  * Manages the script states. In fact at the moment it simply provides access
@@ -56,8 +55,6 @@ bool loadMainScript(const std::string &file);
  */
 Script *currentState();
 
-void addDataToSpecial(int specialId, Special *special);
-bool performSpecialAction(int specialId, Being *caster);
 bool performCraft(Being *crafter, const std::list<InventoryItem> &recipe);
 
 void setCraftCallback(Script *script);

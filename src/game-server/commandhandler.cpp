@@ -32,6 +32,7 @@
 #include "game-server/mapmanager.h"
 #include "game-server/monster.h"
 #include "game-server/monstermanager.h"
+#include "game-server/specialmanager.h"
 #include "game-server/state.h"
 
 #include "scripting/scriptmanager.h"
@@ -81,6 +82,10 @@ static void handleCraft(Character*, std::string&);
 static void handleGetPos(Character*, std::string&);
 static void handleSkills(Character*, std::string&);
 static void handleEffect(Character*, std::string&);
+static void handleGiveSpecial(Character*, std::string&);
+static void handleTakeSpecial(Character*, std::string&);
+static void handleRechargeSpecial(Character*, std::string&);
+static void handleListSpecials(Character*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -148,13 +153,27 @@ static CmdRef const cmdRef[] =
         "Shows an effect at the given position or on the given being. "
         "The player's character is targeted if neither of them is provided.",
         &handleEffect},
+    {"givespecial", "<character> <special>",
+        "Gives the character the special. "
+        "The special can get passed as specialid or in the format "
+        "<setname>_<specialname>", &handleGiveSpecial},
+    {"takespecial", "<character> <special>",
+        "Takes the special aways from the character. "
+        "The special can get passed as specialid or in the format "
+        "<setname>_<specialname>", &handleTakeSpecial},
+    {"rechargespecial", "<character> <special>",
+        "Recharges the special of the character. "
+        "The special can get passed as specialid or in the format "
+        "<setname>_<specialname>", &handleRechargeSpecial},
+    {"listspecials", "<character>",
+        "Lists the specials of the character.", &handleListSpecials},
     {NULL, NULL, NULL, NULL}
 
 };
 
-static void say(const std::string error, Character *player)
+static void say(const std::string message, Character *player)
 {
-    GameState::sayTo(player, NULL, error);
+    GameState::sayTo(player, NULL, message);
 }
 
 /*
@@ -748,7 +767,7 @@ static void handleGoto(Character *player, std::string &args)
     other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
-        say("Invalid character, or they are offline.", player);
+        say("Invalid character, or player is offline.", player);
         return;
     }
 
@@ -782,7 +801,7 @@ static void handleRecall(Character *player, std::string &args)
     other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
-        say("Invalid character, or they are offline.", player);
+        say("Invalid character, or player is offline.", player);
         return;
     }
 
@@ -1413,7 +1432,7 @@ static void handleGetPos(Character *player, std::string &args)
     other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
-        say("Invalid character, or they are offline.", player);
+        say("Invalid character, or player is offline.", player);
         return;
     }
     const Point &pos = other->getPosition();
@@ -1446,7 +1465,7 @@ static void handleSkills(Character *player, std::string &args)
         other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
-        say("Invalid character, or they are offline.", player);
+        say("Invalid character, or player is offline.", player);
         return;
     }
 
@@ -1509,6 +1528,175 @@ static void handleEffect(Character *player, std::string &args)
     }
 }
 
+static void handleGiveSpecial(Character *player, std::string &args)
+{
+    std::string character = getArgument(args);
+    std::string special = getArgument(args);
+    if (character.empty() || special.empty())
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @givespecial <character> <special>", player);
+        return;
+    }
+
+    Character *other;
+    if (character == "#")
+        other = player;
+    else
+        other = gameHandler->getCharacterByNameSlow(character);
+
+    if (!other)
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    int specialId;
+    if (utils::isNumeric(special))
+        specialId = utils::stringToInt(special);
+    else
+        specialId = specialManager->getId(special);
+
+    if (specialId <= 0 || !other->giveSpecial(specialId))
+    {
+        say("Invalid special.", player);
+        return;
+    }
+}
+
+static void handleTakeSpecial(Character *player, std::string &args)
+{
+    std::string character = getArgument(args);
+    std::string special = getArgument(args);
+    if (character.empty() || special.empty())
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @takespecial <character> <special>", player);
+        return;
+    }
+
+    Character *other;
+    if (character == "#")
+        other = player;
+    else
+        other = gameHandler->getCharacterByNameSlow(character);
+
+    if (!other)
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    int specialId;
+    if (utils::isNumeric(special))
+        specialId = utils::stringToInt(special);
+    else
+        specialId = specialManager->getId(special);
+
+    if (specialId <= 0)
+    {
+        say("Invalid special.", player);
+        return;
+    }
+    if (!other->takeSpecial(specialId))
+    {
+        say("Character does not have special.", player);
+        return;
+    }
+}
+
+static void handleRechargeSpecial(Character *player, std::string &args)
+{
+    std::string character = getArgument(args);
+    std::string special = getArgument(args);
+    std::string newMana = getArgument(args);
+    if (character.empty() || special.empty())
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @rechargespecial <character> <special> [<mana>]", player);
+        return;
+    }
+
+    Character *other;
+    if (character == "#")
+        other = player;
+    else
+        other = gameHandler->getCharacterByNameSlow(character);
+
+    if (!other)
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    int specialId;
+    if (utils::isNumeric(special))
+        specialId = utils::stringToInt(special);
+    else
+        specialId = specialManager->getId(special);
+
+    SpecialManager::SpecialInfo *info =
+            specialManager->getSpecialInfo(specialId);
+
+    if (!info)
+    {
+        say("Invalid special.", player);
+        return;
+    }
+    int mana;
+    if (newMana.empty())
+    {
+        mana = info->neededMana;
+    }
+    else
+    {
+        if (!utils::isNumeric(newMana))
+        {
+            say("Invalid mana amount given.", player);
+            return;
+        }
+        mana = utils::stringToInt(newMana);
+    }
+    if (!other->setSpecialMana(specialId, mana))
+    {
+        say("Character does not have special.", player);
+        return;
+    }
+}
+
+static void handleListSpecials(Character *player, std::string &args)
+{
+    std::string character = getArgument(args);
+    if (character.empty())
+    {
+        say("Invalid amount of arguments given.", player);
+        say("Usage: @listspecials <character>", player);
+        return;
+    }
+
+    Character *other;
+    if (character == "#")
+        other = player;
+    else
+        other = gameHandler->getCharacterByNameSlow(character);
+
+    if (!other)
+    {
+        say("Invalid character, or player is offline.", player);
+        return;
+    }
+
+    say("Specials of character " + other->getName() + ":", player);
+    for (SpecialMap::const_iterator it = other->getSpecialBegin(),
+         it_end = other->getSpecialEnd(); it != it_end; ++it)
+    {
+        const SpecialValue &info = it->second;
+        std::stringstream str;
+        str << info.specialInfo->id << ": " << info.specialInfo->setName << "/"
+            << info.specialInfo->name << " charge: " << info.currentMana;
+        say(str.str(), player);
+    }
+}
 
 void CommandHandler::handleCommand(Character *player,
                                    const std::string &command)

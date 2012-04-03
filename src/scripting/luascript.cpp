@@ -89,7 +89,10 @@ void LuaScript::push(const std::string &v)
 void LuaScript::push(Thing *v)
 {
     assert(nbArgs >= 0);
-    lua_pushlightuserdata(mCurrentState, v);
+    if (v)
+        lua_pushlightuserdata(mCurrentState, v);
+    else
+        lua_pushnil(mCurrentState);
     ++nbArgs;
 }
 

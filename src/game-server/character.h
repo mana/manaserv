@@ -24,8 +24,12 @@
 #include "common/defines.h"
 #include "common/inventorydata.h"
 #include "common/manaserv_protocol.h"
+
 #include "game-server/being.h"
+#include "game-server/specialmanager.h"
+
 #include "scripting/script.h"
+
 #include "utils/logger.h"
 
 #include <map>
@@ -39,16 +43,24 @@ class MessageOut;
 class Point;
 class Trade;
 
-struct Special
+struct SpecialValue
 {
-    Special()
-        : currentMana(0)
-        , neededMana(0)
+    SpecialValue(unsigned int currentMana,
+                 const SpecialManager::SpecialInfo *specialInfo)
+        : currentMana(currentMana)
+        , rechargeSpeed(specialInfo->defaultRechargeSpeed)
+        , specialInfo(specialInfo)
     {}
 
-    int currentMana;
-    int neededMana;
+    unsigned int currentMana;
+    unsigned int rechargeSpeed;
+    const SpecialManager::SpecialInfo *specialInfo;
 };
+
+/**
+ * Stores specials by their id.
+ */
+typedef std::map<unsigned int, SpecialValue> SpecialMap;
 
 /**
  * The representation of a player's character in the game world.
@@ -82,15 +94,37 @@ class Character : public Being
         void respawn();
 
         /**
-         * makes the character perform a special action
+         * makes the character perform a special action on a being
          * when it is allowed to do so
          */
-        void useSpecial(int id);
+        void useSpecialOnBeing(int id, Being *b);
+
+        /**
+         * makes the character perform a special action on a map point
+         * when it is allowed to do so
+         */
+        void useSpecialOnPoint(int id, int x, int y);
 
         /**
          * Allows a character to perform a special action
          */
-        void giveSpecial(int id);
+        bool giveSpecial(int id, int currentMana = 0);
+
+        /**
+         * Sets new current mana + makes sure that the client will get informed.
+         */
+        bool setSpecialMana(int id, int mana);
+
+        /**
+         * Gets the special value by id
+         */
+        SpecialMap::iterator findSpecial(int id)
+        { return mSpecials.find(id); }
+
+        /**
+         * Sets recharge speed of a special
+         */
+        bool setSpecialRechargeSpeed(int id, int speed);
 
         /**
          * Removes all specials from character
@@ -105,7 +139,7 @@ class Character : public Being
         /**
          * Removes an available special action
          */
-        void takeSpecial(int id);
+        bool takeSpecial(int id);
 
         /**
          * Gets client computer.
@@ -289,10 +323,10 @@ class Character : public Being
         int getSpecialSize() const
         { return mSpecials.size(); }
 
-        const std::map<int, Special*>::const_iterator getSpecialBegin() const
+        const SpecialMap::const_iterator getSpecialBegin() const
         { return mSpecials.begin(); }
 
-        const std::map<int, Special*>::const_iterator getSpecialEnd() const
+        const SpecialMap::const_iterator getSpecialEnd() const
         { return mSpecials.end(); }
 
         /**
@@ -393,6 +427,8 @@ class Character : public Being
         { return BLOCKTYPE_CHARACTER; }
 
     private:
+        bool specialUseCheck(SpecialMap::iterator it);
+
         double getAttrBase(AttributeMap::const_iterator it) const
         { return it->second.getBase(); }
         double getAttrMod(AttributeMap::const_iterator it) const
@@ -461,11 +497,10 @@ class Character : public Being
 
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
-        std::map<int, Special*> mSpecials;
+        SpecialMap mSpecials;
         std::map<int, int> mStatusEffects; /**< only used by select functions
                                                 to make it easier to make the accountserver
                                                 do not modify or use anywhere else*/
-        int mRechargePerSpecial;
         bool mSpecialUpdateNeeded;
 
         int mDatabaseID;             /**< Character's database ID. */

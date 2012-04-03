@@ -255,13 +255,22 @@ NPC *checkNPC(lua_State *s, int p)
 
 int checkSkill(lua_State *s, int p)
 {
-    if (lua_isstring(s, p))
-    {
-        int id = skillManager->getId(luaL_checkstring(s, p));
-        luaL_argcheck(s, id != 0, p, "invalid skill name");
-        return id;
-    }
-    return luaL_checkint(s, 2);
+    if (lua_isnumber(s, p))
+        return luaL_checkint(s, p);
+
+    int id = skillManager->getId(luaL_checkstring(s, p));
+    luaL_argcheck(s, id != 0, p, "invalid special name");
+    return id;
+}
+
+int checkSpecial(lua_State *s, int p)
+{
+    if (lua_isnumber(s, p))
+        return luaL_checkint(s, p);
+
+    int id = specialManager->getId(luaL_checkstring(s, p));
+    luaL_argcheck(s, id != 0, p, "invalid special name");
+    return id;
 }
 
 

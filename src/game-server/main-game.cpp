@@ -42,10 +42,11 @@
 #include "game-server/accountconnection.h"
 #include "game-server/attributemanager.h"
 #include "game-server/gamehandler.h"
-#include "game-server/skillmanager.h"
 #include "game-server/itemmanager.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
+#include "game-server/skillmanager.h"
+#include "game-server/specialmanager.h"
 #include "game-server/statusmanager.h"
 #include "game-server/postman.h"
 #include "game-server/state.h"
@@ -72,6 +73,7 @@ using utils::Logger;
 #define DEFAULT_STATUSDB_FILE               "status-effects.xml"
 #define DEFAULT_PERMISSION_FILE             "permissions.xml"
 #define DEFAULT_MAIN_SCRIPT_FILE            "scripts/main.lua"
+#define DEFAULT_SPECIALSDB_FILE             "specials.xml"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
@@ -86,6 +88,7 @@ AttributeManager *attributeManager = new AttributeManager(DEFAULT_ATTRIBUTEDB_FI
 ItemManager *itemManager = new ItemManager(DEFAULT_ITEMSDB_FILE, DEFAULT_EQUIPDB_FILE);
 MonsterManager *monsterManager = new MonsterManager(DEFAULT_MONSTERSDB_FILE);
 SkillManager *skillManager = new SkillManager(DEFAULT_SKILLSDB_FILE);
+SpecialManager *specialManager = new SpecialManager(DEFAULT_SPECIALSDB_FILE);
 
 /** Core game message handler */
 GameHandler *gameHandler;
@@ -135,6 +138,7 @@ static void initializeServer()
     }
     attributeManager->initialize();
     skillManager->initialize();
+    specialManager->initialize();
     itemManager->initialize();
     monsterManager->initialize();
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);

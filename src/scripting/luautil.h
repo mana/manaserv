@@ -34,6 +34,8 @@ extern "C" {
 #include <set>
 #include <vector>
 
+#include "game-server/specialmanager.h"
+
 class Being;
 class Character;
 class ItemClass;
@@ -152,6 +154,7 @@ typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
 typedef LuaUserData<StatusEffect> LuaStatusEffect;
+typedef LuaUserData<SpecialManager::SpecialInfo> LuaSpecialInfo;
 
 Script *        getScript(lua_State *s);
 
@@ -169,6 +172,7 @@ Monster *       checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
 NPC *           checkNPC(lua_State *s, int p);
 int             checkSkill(lua_State *s, int p);
+int             checkSpecial(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
 Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);

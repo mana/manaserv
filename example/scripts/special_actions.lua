@@ -8,28 +8,15 @@
 
 --]]
 
-local specialCost = {}
-specialCost[1] = 50
-specialCost[2] = 250
-specialCost[3] = 1000
+local spell1 = get_special_info("Magic_Test Spell 1")
+spell1:on_use(function(user, target, specialid)
+    target = target or user
+    being_say(target, "Kaaame...Haaame... HAAAAAA!")
+    chr_set_special_mana(user, specialid, 0)
+end)
+spell1:on_recharged(function(ch) being_say(ch, "Hoooooooo...") end)
 
-local function use_special(ch, id)
-    -- perform whatever the special with the ID does
-    if id == 1 then
-        being_say(ch, "Kaaame...Haaame... HAAAAAA!")
-    end
-    if id == 2 then
-        being_say(ch, "HAA-DOKEN!")
-    end
-    if id == 3 then
-        being_say(ch, "Sonic BOOM")
-    end
-end
+local spell2 = get_special_info(2)
+spell2:on_use(function(user) being_say(user, "HAA-DOKEN!") end)
 
-local function get_special_recharge_cost(id)
-    -- return the recharge cost for the special with the ID
-    return specialCost[id]
-end
-
-on_use_special(use_special)
-on_get_special_recharge_cost(get_special_recharge_cost)
+get_special_info(3):on_use(function(user) being_say(user, "Sonic BOOM") end)

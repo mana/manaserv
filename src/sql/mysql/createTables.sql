@@ -117,8 +117,9 @@ DEFAULT CHARSET=utf8;
 
 CREATE TABLE mana_char_specials
 (
-    `char_id`   	int(10) unsigned NOT NULL,
-    `special_id` 	int(10)	unsigned NOT NULL,
+    `char_id`   	       int(10) unsigned NOT NULL,
+    `special_id` 	       int(10) unsigned NOT NULL,
+    `special_current_mana` int(10) unsigned NOT NULL,
 	PRIMARY KEY (`char_id`, `special_id`),
     FOREIGN KEY (`char_id`)
         REFERENCES `mana_characters` (`id`)
@@ -437,7 +438,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', NOW());
-INSERT INTO mana_world_states VALUES('database_version',     -1,'20', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     -1,'21', NOW());
 
 -- all known transaction codes
 

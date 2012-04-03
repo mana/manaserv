@@ -49,13 +49,28 @@ struct AttributeValue
     double modified; /**< Value after various modifiers have been applied. */
 };
 
+struct SpecialValue
+{
+    SpecialValue()
+        : currentMana(0)
+    {}
+
+    SpecialValue(unsigned int currentMana)
+        : currentMana(currentMana)
+    {}
+
+    unsigned int currentMana;
+};
+
 /**
  * Stores attributes by their id.
  */
-typedef std::map< unsigned int, AttributeValue > AttributeMap;
+typedef std::map<unsigned int, AttributeValue> AttributeMap;
 
-/** placeholder type needed for include compatibility with game server*/
-typedef void Special;
+/**
+ * Stores specials by their id.
+ */
+typedef std::map<unsigned int, SpecialValue> SpecialMap;
 
 class Character
 {
@@ -193,17 +208,17 @@ class Character
         int getSpecialSize() const
         { return mSpecials.size(); }
 
-        const std::map<int, Special*>::const_iterator getSpecialBegin() const
+        SpecialMap::const_iterator getSpecialBegin() const
         { return mSpecials.begin(); }
 
-        const std::map<int, Special*>::const_iterator getSpecialEnd() const
+        SpecialMap::const_iterator getSpecialEnd() const
         { return mSpecials.end(); }
+
 
         void clearSpecials()
         { mSpecials.clear(); }
 
-        void giveSpecial(int id)
-        { mSpecials[id] = NULL; }
+        void giveSpecial(int id, int currentMana);
 
         /**
          * Gets the Id of the map that the character is on.
@@ -270,7 +285,7 @@ class Character
         std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, int> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
-        std::map<int, Special*>  mSpecials;
+        SpecialMap  mSpecials;
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.

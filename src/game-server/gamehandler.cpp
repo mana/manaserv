@@ -147,6 +147,22 @@ static Actor *findActorNear(Actor *p, int id)
     return 0;
 }
 
+static Being *findBeingNear(Actor *p, int id)
+{
+    MapComposite *map = p->getMap();
+    const Point &ppos = p->getPosition();
+    // See map.h for tiles constants
+    const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
+    for (BeingIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
+    {
+        Being *b = *i;
+        if (b->getPublicID() != id)
+            continue;
+        return ppos.inRangeOf(b->getPosition(), pixelDist) ? b : 0;
+    }
+    return 0;
+}
+
 static Character *findCharacterNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
@@ -229,8 +245,12 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
             handleAttack(client, message);
             break;
 
-        case PGMSG_USE_SPECIAL:
-            handleUseSpecial(client, message);
+        case PGMSG_USE_SPECIAL_ON_BEING:
+            handleUseSpecialOnBeing(client, message);
+            break;
+
+        case PGMSG_USE_SPECIAL_ON_POINT:
+            handleUseSpecialOnPoint(client, message);
             break;
 
         case PGMSG_ACTION_CHANGE:
@@ -615,21 +635,35 @@ void GameHandler::handleAttack(GameClient &client, MessageIn &message)
     LOG_DEBUG("Character " << client.character->getPublicID()
               << " attacked being " << id);
 
-    Actor *o = findActorNear(client.character, id);
-    if (o && o->getType() != OBJECT_NPC)
+    Being *being = findBeingNear(client.character, id);
+    if (being && being->getType() != OBJECT_NPC)
     {
-        Being *being = static_cast<Being*>(o);
         client.character->setTarget(being);
         client.character->setAction(ATTACK);
     }
 }
 
-void GameHandler::handleUseSpecial(GameClient &client, MessageIn &message)
+void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message)
 {
     const int specialID = message.readInt8();
+    const int targetID = message.readInt16(); // 0 when no target is selected
+    Being *being = 0;
+    if (targetID != 0)
+        being = findBeingNear(client.character, targetID);
     LOG_DEBUG("Character " << client.character->getPublicID()
               << " tries to use his special attack " << specialID);
-    client.character->useSpecial(specialID);
+    client.character->useSpecialOnBeing(specialID, being);
+}
+
+void GameHandler::handleUseSpecialOnPoint(GameClient &client, MessageIn &message)
+{
+    const int specialID = message.readInt8();
+    const int x = message.readInt16();
+    const int y = message.readInt16();
+
+    LOG_DEBUG("Character " << client.character->getPublicID()
+              << " tries to use his special attack " << specialID);
+    client.character->useSpecialOnPoint(specialID, x, y);
 }
 
 void GameHandler::handleActionChange(GameClient &client, MessageIn &message)

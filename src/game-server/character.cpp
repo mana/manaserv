@@ -76,7 +76,6 @@ Character::Character(MessageIn &msg):
     mClient(NULL),
     mConnected(true),
     mTransactionHandler(NULL),
-    mRechargePerSpecial(0),
     mSpecialUpdateNeeded(false),
     mDatabaseID(-1),
     mHairStyle(0),
@@ -108,12 +107,6 @@ Character::Character(MessageIn &msg):
     Inventory(this).initialize();
     modifiedAllAttribute();
     setSize(16);
-
-    // Give the character some specials for testing.
-    //TODO: Get from quest vars and equipment
-    giveSpecial(1);
-    giveSpecial(2);
-    giveSpecial(3);
 }
 
 Character::~Character()
@@ -138,26 +131,22 @@ void Character::update()
         return;
 
     // Update special recharge
-    std::list<Special *> rechargeNeeded;
-    int numRechargeNeeded = 0;
-    for (std::map<int, Special*>::iterator i = mSpecials.begin();
-         i != mSpecials.end(); i++)
+    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
+         it != it_end; it++)
     {
-        Special * s = i->second;
-        if (s->currentMana < s->neededMana)
+        SpecialValue &s = it->second;
+        if (s.specialInfo->rechargeable && s.currentMana < s.specialInfo->neededMana)
         {
-            rechargeNeeded.push_back(s);
-            numRechargeNeeded++;
-        }
-    }
-    if (numRechargeNeeded > 0)
-    {
-        mRechargePerSpecial = getModifiedAttribute(ATTR_INT)
-                              / numRechargeNeeded;
-        for (std::list<Special*>::iterator i = rechargeNeeded.begin();
-             i != rechargeNeeded.end(); i++)
-        {
-            (*i)->currentMana += mRechargePerSpecial;
+            s.currentMana += s.rechargeSpeed;
+            if (s.currentMana >= s.specialInfo->neededMana &&
+                    s.specialInfo->rechargedCallback.isValid())
+            {
+                Script *script = ScriptManager::currentState();
+                script->prepare(s.specialInfo->rechargedCallback);
+                script->push(this);
+                script->push(s.specialInfo->id);
+                script->execute();
+            }
         }
     }
 
@@ -263,50 +252,135 @@ void Character::respawn()
     GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
 }
 
-void Character::useSpecial(int id)
+bool Character::specialUseCheck(SpecialMap::iterator it)
 {
-    //check if the character may use this special in general
-    std::map<int, Special*>::iterator i = mSpecials.find(id);
-    if (i == mSpecials.end())
+    if (it == mSpecials.end())
     {
-        LOG_INFO("Character uses special "<<id<<" without autorisation.");
-        return;
+        LOG_INFO("Character uses special " << it->first
+                 << " without authorization.");
+        return false;
     }
 
     //check if the special is currently recharged
-    Special *special = i->second;
-    if (special->currentMana < special->neededMana)
+    SpecialValue &special = it->second;
+    if (special.specialInfo->rechargeable &&
+            special.currentMana < special.specialInfo->neededMana)
     {
-        LOG_INFO("Character uses special "<<id<<" which is not recharged. ("
-                 <<special->currentMana<<"/"<<special->neededMana<<")");
-        return;
+        LOG_INFO("Character uses special " << it->first << " which is not recharged. ("
+                 << special.currentMana << "/"
+                 << special.specialInfo->neededMana << ")");
+        return false;
     }
 
+    if (!special.specialInfo->useCallback.isValid())
+    {
+        LOG_WARN("No callback for use of special "
+                 << special.specialInfo->setName << "/"
+                 << special.specialInfo->name << ". Ignoring special.");
+        return false;
+    }
+    return true;
+}
+
+void Character::useSpecialOnBeing(int id, Being *b)
+{
+    SpecialMap::iterator it = mSpecials.find(id);
+    if (!specialUseCheck(it))
+            return;
+    SpecialValue &special = it->second;
+
+    if (special.specialInfo->target != SpecialManager::TARGET_BEING)
+        return;
+
     //tell script engine to cast the spell
-    special->currentMana = 0;
-    ScriptManager::performSpecialAction(id, this);
-    mSpecialUpdateNeeded = true;
-    return;
+    Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+    script->prepare(special.specialInfo->useCallback);
+    script->push(this);
+    script->push(b);
+    script->push(special.specialInfo->id);
+    script->execute();
+}
+
+void Character::useSpecialOnPoint(int id, int x, int y)
+{
+    SpecialMap::iterator it = mSpecials.find(id);
+    if (!specialUseCheck(it))
+            return;
+    SpecialValue &special = it->second;
+
+    if (special.specialInfo->target != SpecialManager::TARGET_POINT)
+        return;
+
+    //tell script engine to cast the spell
+    Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+    script->prepare(special.specialInfo->useCallback);
+    script->push(this);
+    script->push(x);
+    script->push(y);
+    script->push(special.specialInfo->id);
+    script->execute();
+}
+
+bool Character::giveSpecial(int id, int currentMana)
+{
+    if (mSpecials.find(id) == mSpecials.end())
+    {
+        const SpecialManager::SpecialInfo *specialInfo =
+                specialManager->getSpecialInfo(id);
+        if (!specialInfo)
+        {
+            LOG_ERROR("Tried to give not existing special id " << id << ".");
+            return false;
+        }
+        mSpecials.insert(std::pair<int, SpecialValue>(
+                             id, SpecialValue(currentMana, specialInfo)));
+        mSpecialUpdateNeeded = true;
+        return true;
+    }
+    return false;
+}
+
+bool Character::setSpecialMana(int id, int mana)
+{
+    SpecialMap::iterator it = mSpecials.find(id);
+    if (it != mSpecials.end())
+    {
+        it->second.currentMana = mana;
+        mSpecialUpdateNeeded = true;
+        return true;
+    }
+    return false;
+}
+
+bool Character::setSpecialRechargeSpeed(int id, int speed)
+{
+    SpecialMap::iterator it = mSpecials.find(id);
+    if (it != mSpecials.end())
+    {
+        it->second.rechargeSpeed = speed;
+        mSpecialUpdateNeeded = true;
+        return true;
+    }
+    return false;
 }
 
 void Character::sendSpecialUpdate()
 {
     //GPMSG_SPECIAL_STATUS = 0x0293,
     // { B specialID, L current, L max, L recharge }
-    for (std::map<int, Special*>::iterator i = mSpecials.begin();
-         i != mSpecials.end(); i++)
-    {
 
-        MessageOut msg(GPMSG_SPECIAL_STATUS );
-        msg.writeInt8(i->first);
-        msg.writeInt32(i->second->currentMana);
-        msg.writeInt32(i->second->neededMana);
-        msg.writeInt32(mRechargePerSpecial);
-        /* Yes, the last one is redundant because it is the same for each
-           special, but I would like to keep the netcode flexible enough
-           to allow different recharge speed per special when necessary */
-        gameHandler->sendTo(this, msg);
+    MessageOut msg(GPMSG_SPECIAL_STATUS);
+    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
+         it != it_end; ++it)
+    {
+        msg.writeInt8(it->first);
+        msg.writeInt32(it->second.currentMana);
+        msg.writeInt32(it->second.specialInfo->neededMana);
+        msg.writeInt32(it->second.rechargeSpeed);
     }
+    gameHandler->sendTo(this, msg);
 }
 
 int Character::getMapId() const
@@ -747,34 +821,19 @@ void Character::disconnected()
     }
 }
 
-void Character::giveSpecial(int id)
+bool Character::takeSpecial(int id)
 {
-    if (mSpecials.find(id) == mSpecials.end())
-    {
-        Special *s = new Special();
-        ScriptManager::addDataToSpecial(id, s);
-        mSpecials[id] = s;
-        mSpecialUpdateNeeded = true;
-    }
-}
-
-void Character::takeSpecial(int id)
-{
-    std::map<int, Special*>::iterator i = mSpecials.find(id);
+    SpecialMap::iterator i = mSpecials.find(id);
     if (i != mSpecials.end())
     {
-        delete i->second;
         mSpecials.erase(i);
         mSpecialUpdateNeeded = true;
+        return true;
     }
+    return false;
 }
 
 void Character::clearSpecials()
 {
-    for (std::map<int, Special*>::iterator i = mSpecials.begin();
-         i != mSpecials.end(); i++)
-    {
-        delete i->second;
-    }
     mSpecials.clear();
 }

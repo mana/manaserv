@@ -25,6 +25,10 @@
     <allow>@killmonsters</allow>
     <allow>@getpos</allow>
     <allow>@effect</allow>
+    <allow>@givespecial</allow>
+    <allow>@takespecial</allow>
+    <allow>@rechargespecial</allow>
+    <allow>@listspecials</allow>
   </class>
   <class level="4">
     <alias>gm</alias>

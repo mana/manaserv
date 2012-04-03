@@ -45,3 +45,11 @@ void Character::setAccount(Account *acc)
     mAccountID = acc->getID();
     mAccountLevel = acc->getLevel();
 }
+
+void Character::giveSpecial(int id, int currentMana)
+{
+    if (mSpecials.find(id) == mSpecials.end())
+    {
+        mSpecials[id] = SpecialValue(currentMana);
+    }
+}

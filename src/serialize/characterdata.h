@@ -89,11 +89,12 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     }
 
     // character specials
-    std::map<int, Special*>::const_iterator special_it;
+    SpecialMap::const_iterator special_it;
     msg.writeInt16(data.getSpecialSize());
     for (special_it = data.getSpecialBegin(); special_it != data.getSpecialEnd() ; special_it++)
     {
         msg.writeInt32(special_it->first);
+        msg.writeInt32(special_it->second.currentMana);
     }
 
     // inventory - must be last because size isn't transmitted
@@ -183,7 +184,9 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.clearSpecials();
     for (int i = 0; i < specialSize; i++)
     {
-        data.giveSpecial(msg.readInt32());
+        const int id = msg.readInt32();
+        const int mana = msg.readInt32();
+        data.giveSpecial(id, mana);
     }
 
 

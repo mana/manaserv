@@ -242,6 +242,8 @@ SET(SRCS_MANASERVGAME
     game-server/skillmanager.cpp
     game-server/spawnarea.h
     game-server/spawnarea.cpp
+    game-server/specialmanager.cpp
+    game-server/specialmanager.h
     game-server/state.h
     game-server/state.cpp
     game-server/statuseffect.h

@@ -24,6 +24,7 @@
 #include "account-server/storage.h"
 
 #include "account-server/account.h"
+#include "account-server/character.h"
 #include "account-server/flooritem.h"
 #include "chat-server/chatchannel.h"
 #include "chat-server/guild.h"
@@ -483,14 +484,18 @@ Character *Storage::getCharacterBySQL(Account *owner)
         // Load the special status
         s.clear();
         s.str("");
-        s << "select special_id FROM " << CHAR_SPECIALS_TBL_NAME
+        s << "SELECT special_id, special_current_mana FROM "
+          << CHAR_SPECIALS_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
         const dal::RecordSet &specialsInfo = mDb->execSql(s.str());
         if (!specialsInfo.isEmpty())
         {
             const unsigned int nRows = specialsInfo.rows();
             for (unsigned int row = 0; row < nRows; row++)
-                character->giveSpecial(toUint(specialsInfo(row, 0)));
+            {
+                character->giveSpecial(toUint(specialsInfo(row, 0)),
+                                       toUint(specialsInfo(row, 1)));
+            }
         }
     }
     catch (const dal::DbSqlQueryExecFailure &e)
@@ -777,15 +782,19 @@ bool Storage::updateCharacter(Character *character)
                     << character->getDatabaseID() << "';";
         mDb->execSql(deleteSql.str());
         // In with the new
-        std::map<int, Special*>::const_iterator special_it;
-        for (special_it = character->getSpecialBegin();
-             special_it != character->getSpecialEnd(); special_it++)
+        SpecialMap::const_iterator special_it, special_it_end;
+        for (special_it = character->getSpecialBegin(),
+             special_it_end = character->getSpecialEnd();
+             special_it != special_it_end; ++special_it)
         {
             insertSql.str("");
             insertSql   << "INSERT INTO " << CHAR_SPECIALS_TBL_NAME
-                        << " (char_id, special_id) VALUES ("
+                        << " (char_id, special_id, special_current_mana)"
+                        << " VALUES ("
                         << " '" << character->getDatabaseID() << "',"
-                        << " '" << special_it->first << "');";
+                        << " '" << special_it->first << "',"
+                        << " '" << special_it->second.currentMana
+                        << "');";
             mDb->execSql(insertSql.str());
         }
     }
