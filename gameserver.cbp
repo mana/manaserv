@@ -64,33 +64,52 @@
 			<Add directory="..\lib" />
 			<Add directory="lib" />
 		</Linker>
+		<Unit filename="libs\enet\callbacks.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs\enet\compress.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs\enet\host.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="libs\enet\include\enet\callbacks.h" />
-		<Unit filename="libs\enet\callbacks.c" />
-		<Unit filename="libs\enet\compress.c" />
 		<Unit filename="libs\enet\include\enet\enet.h" />
-		<Unit filename="libs\enet\host.c" />
 		<Unit filename="libs\enet\include\enet\list.h" />
-		<Unit filename="libs\enet\list.c" />
-		<Unit filename="libs\enet\packet.c" />
-		<Unit filename="libs\enet\peer.c" />
 		<Unit filename="libs\enet\include\enet\protocol.h" />
-		<Unit filename="libs\enet\protocol.c" />
 		<Unit filename="libs\enet\include\enet\time.h" />
 		<Unit filename="libs\enet\include\enet\types.h" />
 		<Unit filename="libs\enet\include\enet\unix.h" />
-		<Unit filename="libs\enet\unix.c" />
 		<Unit filename="libs\enet\include\enet\utility.h" />
 		<Unit filename="libs\enet\include\enet\win32.h" />
-		<Unit filename="libs\enet\win32.c" />
+		<Unit filename="libs\enet\list.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs\enet\packet.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs\enet\peer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs\enet\protocol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs\enet\unix.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs\enet\win32.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src\common\configuration.cpp" />
 		<Unit filename="src\common\configuration.h" />
+		<Unit filename="src\common\defines.h" />
 		<Unit filename="src\common\inventorydata.h" />
+		<Unit filename="src\common\manaserv_protocol.h" />
 		<Unit filename="src\common\permissionmanager.cpp" />
 		<Unit filename="src\common\permissionmanager.h" />
 		<Unit filename="src\common\resourcemanager.cpp" />
 		<Unit filename="src\common\resourcemanager.h" />
 		<Unit filename="src\common\transaction.h" />
-		<Unit filename="src\common\defines.h" />
 		<Unit filename="src\game-server\accountconnection.cpp" />
 		<Unit filename="src\game-server\accountconnection.h" />
 		<Unit filename="src\game-server\actor.cpp" />
@@ -144,6 +163,8 @@
 		<Unit filename="src\game-server\skillmanager.h" />
 		<Unit filename="src\game-server\spawnarea.cpp" />
 		<Unit filename="src\game-server\spawnarea.h" />
+		<Unit filename="src\game-server\specialmanager.cpp" />
+		<Unit filename="src\game-server\specialmanager.h" />
 		<Unit filename="src\game-server\state.cpp" />
 		<Unit filename="src\game-server\state.h" />
 		<Unit filename="src\game-server\statuseffect.cpp" />
@@ -171,8 +192,6 @@
 		<Unit filename="src\net\messageout.h" />
 		<Unit filename="src\net\netcomputer.cpp" />
 		<Unit filename="src\net\netcomputer.h" />
-		<Unit filename="src\utils\point.h" />
-		<Unit filename="src\common\manaserv_protocol.h" />
 		<Unit filename="src\scripting\lua.cpp" />
 		<Unit filename="src\scripting\luascript.cpp" />
 		<Unit filename="src\scripting\luascript.h" />
@@ -180,6 +199,8 @@
 		<Unit filename="src\scripting\luautil.h" />
 		<Unit filename="src\scripting\script.cpp" />
 		<Unit filename="src\scripting\script.h" />
+		<Unit filename="src\scripting\scriptmanager.cpp" />
+		<Unit filename="src\scripting\scriptmanager.h" />
 		<Unit filename="src\serialize\characterdata.h" />
 		<Unit filename="src\utils\base64.cpp" />
 		<Unit filename="src\utils\base64.h" />
@@ -187,14 +208,15 @@
 		<Unit filename="src\utils\logger.h" />
 		<Unit filename="src\utils\mathutils.cpp" />
 		<Unit filename="src\utils\mathutils.h" />
+		<Unit filename="src\utils\point.h" />
 		<Unit filename="src\utils\processorutils.cpp" />
 		<Unit filename="src\utils\processorutils.h" />
+		<Unit filename="src\utils\speedconv.cpp" />
+		<Unit filename="src\utils\speedconv.h" />
 		<Unit filename="src\utils\string.cpp" />
 		<Unit filename="src\utils\string.h" />
 		<Unit filename="src\utils\stringfilter.cpp" />
 		<Unit filename="src\utils\stringfilter.h" />
-		<Unit filename="src\utils\speedconv.cpp" />
-		<Unit filename="src\utils\speedconv.h" />
 		<Unit filename="src\utils\timer.cpp" />
 		<Unit filename="src\utils\timer.h" />
 		<Unit filename="src\utils\tokencollector.cpp" />
