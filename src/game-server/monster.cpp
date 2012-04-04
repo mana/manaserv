@@ -430,6 +430,19 @@ int Monster::damage(Actor *source, const Damage &damage)
                          KILLSTEAL_PROTECTION_TIME);
         }
     }
+
+    if (mSpecy->getDamageCallback().isValid())
+    {
+        Script *script = ScriptManager::currentState();
+        script->setMap(getMap());
+        script->prepare(mSpecy->getDamageCallback());
+        script->push(this);
+        script->push(source);
+        script->push(HPLoss);
+        // TODO: add exact damage parameters as well
+        script->execute();
+    }
+
     return HPLoss;
 }
 

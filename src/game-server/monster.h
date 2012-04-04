@@ -202,11 +202,17 @@ class MonsterClass
         void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
 
+        void setDamageCallback(Script *script)
+        { script->assignCallback(mDamageCallback); }
+
         void setEventCallback(const std::string &event, Script *script)
         { script->assignCallback(mEventCallbacks[event]); }
 
         Script::Ref getUpdateCallback() const
         { return mUpdateCallback; }
+
+        Script::Ref getDamageCallback() const
+        { return mDamageCallback; }
 
         Script::Ref getEventCallback(const std::string &event) const
         { return mEventCallbacks.value(event); }
@@ -235,6 +241,11 @@ class MonsterClass
          * A reference to the script function that is called each update.
          */
         Script::Ref mUpdateCallback;
+
+        /**
+         * A reference to the script that is called when a mob takes damage.
+         */
+        Script::Ref mDamageCallback;
 
         /**
          * Named event callbacks. Currently only used for custom attack

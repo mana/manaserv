@@ -1267,6 +1267,14 @@ static int monster_class_on_update(lua_State *s)
     return 0;
 }
 
+static int monster_class_on_damage(lua_State *s)
+{
+    MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    monsterClass->setDamageCallback(getScript(s));
+    return 0;
+}
+
 static int monster_class_on(lua_State *s)
 {
     MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
@@ -2492,6 +2500,7 @@ LuaScript::LuaScript():
 
     static luaL_Reg const members_MonsterClass[] = {
         { "on_update",                       &monster_class_on_update         },
+        { "on_damage",                       &monster_class_on_damage         },
         { "on",                              &monster_class_on                },
         { NULL, NULL }
     };
