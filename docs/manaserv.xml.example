@@ -148,6 +148,9 @@
  -->
  <option name="net_chatHost" value="localhost"/>
  <option name="net_chatListenToClientPort" value="9603"/>
+ <!-- needed to set when hosting behind router or in situations
+      where you cannot bind the server to the public url -->
+ <!-- <option name="net_publicChatHost" value="mydomain.org"/> -->
 
  <!--
  The clients use this address to connect to a game server on this machine.
@@ -156,6 +159,9 @@
  -->
  <option name="net_gameHost" value="localhost"/>
  <option name="net_gameListenToClientPort" value="9604"/>
+ <!-- needed to set when hosting behind router or in situations
+      where you cannot bind the server to the public url -->
+ <!-- <option name="net_publicGameHost" value="mydomain.org"/> -->
 
  <!--
  Update host url: E.g.: "http://updates.manasource.org/"

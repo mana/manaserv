@@ -881,8 +881,8 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
     reply.writeInt16(port);
 
     // Give address and port for the chat server
-    reply.writeString(Configuration::getValue("net_chatHost",
-                                              "localhost"));
+    reply.writeString(Configuration::getValue("net_publicChatHost",
+                         Configuration::getValue("net_chatHost", "localhost")));
 
     // When the chatListenToClientPort is set, we use it.
     // Otherwise, we use the accountListenToClientPort + 2 if the option is set.

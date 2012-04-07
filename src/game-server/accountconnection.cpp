@@ -78,7 +78,9 @@ bool AccountConnection::start(int gameServerPort)
     LOG_INFO("Connection established to the account server.");
 
     const std::string gameServerAddress =
-        Configuration::getValue("net_gameHost", "localhost");
+        Configuration::getValue("net_publicGameHost",
+                                Configuration::getValue("net_gameHost",
+                                                        "localhost"));
     const std::string password =
         Configuration::getValue("net_password", "changeMe");
 
