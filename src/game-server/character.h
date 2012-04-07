@@ -231,7 +231,7 @@ class Character : public Being
          * Sends a message that informs the client about attribute
          * modified since last call.
          */
-        void sendStatus();
+        void sendStatus(bool forceAll = false);
 
         /**
          * Gets the ID of the map that the character is on.

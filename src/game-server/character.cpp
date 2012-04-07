@@ -452,7 +452,7 @@ void Character::setBuySell(BuySell *t)
     }
 }
 
-void Character::sendStatus()
+void Character::sendStatus(bool forceAll)
 {
     MessageOut attribMsg(GPMSG_PLAYER_ATTRIBUTE_CHANGE);
     for (std::set<size_t>::const_iterator i = mModifiedAttributes.begin(),
@@ -478,7 +478,7 @@ void Character::sendStatus()
     if (expMsg.getLength() > 2) gameHandler->sendTo(this, expMsg);
     mModifiedExperience.clear();
 
-    if (mUpdateLevelProgress)
+    if (mUpdateLevelProgress || forceAll)
     {
         mUpdateLevelProgress = false;
         MessageOut progressMessage(GPMSG_LEVEL_PROGRESS);
@@ -646,9 +646,7 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
 
     // Check for skill levelup
     if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
-        updateDerivedAttributes(skill);
-
-    mRecalculateLevel = true;
+        recalculateLevel();
 }
 
 void Character::incrementKillCount(int monsterType)
