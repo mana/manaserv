@@ -91,11 +91,11 @@ bool Configuration::initialize(const std::string &fileName)
     else
         configPath = fileName;
 
-    readFile(configPath);
+    const bool success = readFile(configPath);
 
     LOG_INFO("Using config file: " << configPath);
 
-    return true;
+    return success;
 }
 
 void Configuration::deinitialize()
