@@ -103,6 +103,8 @@ enum ItemEffectType
 class ItemEffectInfo
 {
     public:
+        virtual ~ItemEffectInfo() {}
+
         virtual bool apply(Being *itemUser) = 0;
         virtual void dispell(Being *itemUser) = 0;
 };
