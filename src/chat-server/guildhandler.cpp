@@ -63,9 +63,6 @@ void ChatHandler::sendGuildRejoin(ChatClient &client)
          it_end = guilds.end(); it != it_end; ++it)
     {
         Guild *guild = *it;
-        // nothing to do if player is in no guild
-        if (!guild)
-            return;
 
         const int permissions = guild->getUserPermissions(client.characterId);
         const std::string guildName = guild->getName();
@@ -186,7 +183,7 @@ void ChatHandler::handleGuildInvite(ChatClient &client, MessageIn &msg)
     std::string character = msg.readString();
 
     // get the chat client and the guild
-    ChatClient *invitedClient = mPlayerMap[character];
+    ChatClient *invitedClient = getClient(character);
     Guild *guild = guildManager->findById(guildId);
 
     if (invitedClient && guild)
@@ -194,8 +191,8 @@ void ChatHandler::handleGuildInvite(ChatClient &client, MessageIn &msg)
         // check permissions of inviter, and that they arent inviting themself,
         // and arent someone already in the guild
         if (guild->canInvite(client.characterId) &&
-            (client.characterName != character) &&
-            (guild->checkInGuild(client.characterId)))
+            client.characterName != character &&
+            guild->checkInGuild(client.characterId))
         {
             if ((int)invitedClient->guilds.size() >=
                     Configuration::getValue("account_maxGuildsPerCharacter", 1))
@@ -239,47 +236,38 @@ void ChatHandler::handleGuildAcceptInvite(ChatClient &client,
                                           MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_ACCEPT_RESPONSE);
-    const int guildID = msg.readInt16();
+    const int guildId = msg.readInt16();
     const bool accepted = msg.readInt8();
-    bool error = true; // set true by default, and set false only if success
 
     // check guild exists and that member was invited
     // then add them as guild member
     // and remove from invite list
-    if (Guild *guild = guildManager->findById(guildID))
+    Guild *guild = guildManager->findById(guildId);
+    if (!(guild || guild->checkInvited(client.characterId)))
     {
-        if (guild->checkInvited(client.characterId))
-        {
-            if (accepted)
-            {
-                // add user to guild
-                guildManager->addGuildMember(guild, client.characterId);
-                client.guilds.push_back(guild);
-                reply.writeInt8(ERRMSG_OK);
-                reply.writeString(guild->getName());
-                reply.writeInt16(guild->getId());
-                reply.writeInt16(guild->getUserPermissions(client.characterId));
 
-                // have character join guild channel
-                ChatChannel *channel = joinGuildChannel(guild->getName(),
-                                                        client);
-                reply.writeInt16(channel->getId());
-                sendGuildListUpdate(guild, client.characterName,
-                                    GUILD_EVENT_NEW_PLAYER);
-
-                // success! set error to false
-            }
-            else
-            {
-                guild->removeInvited(client.characterId);
-            }
-            error = false;
-        }
-    }
-
-    if (error)
-    {
         reply.writeInt8(ERRMSG_FAILURE);
+    }
+    else if (accepted)
+    {
+        // add user to guild
+        guildManager->addGuildMember(guild, client.characterId);
+        client.guilds.push_back(guild);
+        reply.writeInt8(ERRMSG_OK);
+        reply.writeString(guild->getName());
+        reply.writeInt16(guild->getId());
+        reply.writeInt16(guild->getUserPermissions(client.characterId));
+
+        // have character join guild channel
+        ChatChannel *channel = joinGuildChannel(guild->getName(), client);
+        reply.writeInt16(channel->getId());
+        sendGuildListUpdate(guild, client.characterName,
+                            GUILD_EVENT_NEW_PLAYER);
+    }
+    else
+    {
+        guild->removeInvited(client.characterId);
+        reply.writeInt8(ERRMSG_OK);
     }
 
     client.send(reply);

@@ -42,7 +42,6 @@ void Guild::addMember(int playerId, int permissions)
     // add new guild member to guild
     mMembers.push_back(member);
 
-    // remove from invited list if nessecary
     mInvited.remove(playerId);
 }
 
