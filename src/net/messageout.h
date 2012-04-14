@@ -21,6 +21,8 @@
 #ifndef MESSAGEOUT_H
 #define MESSAGEOUT_H
 
+#include "common/manaserv_protocol.h"
+
 #include <iosfwd>
 
 /**
@@ -30,27 +32,28 @@ class MessageOut
 {
     public:
         /**
-         * Default constructor.
-         */
-        MessageOut();
-
-        /**
-         * Constructor that takes a message ID.
+         * Constructor.
+         *
+         * @param id the message ID
          */
         MessageOut(int id);
 
         ~MessageOut();
 
         /**
-         * Clears current message.
+         * Writes an 8-bit integer to the message.
          */
-        void clear();
+        void writeInt8(int value);
 
-        void writeInt8(int value);     /**< Writes an integer on one byte. */
+        /**
+         * Writes an 16-bit integer to the message.
+         */
+        void writeInt16(int value);
 
-        void writeInt16(int value);    /**< Writes an integer on two bytes. */
-
-        void writeInt32(int value);    /**< Writes an integer on four bytes. */
+        /**
+         * Writes an 32-bit integer to the message.
+         */
+        void writeInt32(int value);
 
         /**
          * Writes a double. HACKY and should *not* be used for client
@@ -59,40 +62,43 @@ class MessageOut
         void writeDouble(double value);
 
         /**
-         * Writes a 3-byte block containing tile-based coordinates.
-         */
-        void writeCoordinates(int x, int y);
-
-        /**
          * Writes a string. If a fixed length is not given (-1), it is stored
          * as a short at the start of the string.
          */
-        void
-        writeString(const std::string &string, int length = -1);
+        void writeString(const std::string &string, int length = -1);
 
         /**
          * Returns the content of the message.
          */
-        char*
-        getData() const { return mData; }
+        char *getData() const { return mData; }
 
         /**
          * Returns the length of the data.
          */
-        unsigned int
-        getLength() const { return mPos; }
+        unsigned int getLength() const { return mPos; }
+
+        /**
+         * Sets whether the debug mode is enabled. In debug mode, the internal
+         * data of the message is annotated so that the message contents can
+         * be printed.
+         *
+         * Debug mode is disabled by default.
+         */
+        static void setDebugModeEnabled(bool enabled);
 
     private:
         /**
          * Ensures the capacity of the data buffer is large enough to hold the
          * given amount of bytes.
          */
-        void
-        expand(size_t size);
+        void expand(size_t size);
 
-        char *mData;                         /**< Data building up. */
-        unsigned int mPos;                   /**< Position in the data. */
-        unsigned int mDataSize;              /**< Allocated datasize. */
+        void writeValueType(ManaServ::ValueType type);
+
+        char *mData;                /**< Data building up. */
+        unsigned int mPos;          /**< Position in the data. */
+        unsigned int mDataSize;     /**< Allocated datasize. */
+        bool mDebugMode;            /**< Include debugging information. */
 
         /**
          * Streams message ID and length to the given output stream.
@@ -101,4 +107,4 @@ class MessageOut
                                          const MessageOut &msg);
 };
 
-#endif //MESSAGEOUT_H
+#endif // MESSAGEOUT_H

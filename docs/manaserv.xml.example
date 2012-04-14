@@ -180,6 +180,9 @@
  <!-- Max connected clients allowed. -->
  <option name="net_maxClients" value="1000"/>
 
+ <!-- Debug mode for network messages (increases bandwidth usage) -->
+ <option name="net_debugMode" value="false"/>
+
 <!-- end of network options configuration ********************************* -->
 
 <!-- Accounts configuration ***************************************************

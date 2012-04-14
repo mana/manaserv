@@ -21,6 +21,8 @@
 #ifndef MESSAGEIN_H
 #define MESSAGEIN_H
 
+#include "common/manaserv_protocol.h"
+
 #include <iosfwd>
 
 /**
@@ -35,7 +37,7 @@ class MessageIn
          * @param data   the message data
          * @param length the length of the data
          */
-        MessageIn(const char *data, int length);
+        MessageIn(const char *data, unsigned short length);
 
         /**
          * Returns the message ID.
@@ -70,9 +72,12 @@ class MessageIn
         int getUnreadLength() const { return mLength - mPos; }
 
     private:
+        bool readValueType(ManaServ::ValueType type);
+
         const char *mData;            /**< Packet data */
         unsigned short mLength;       /**< Length of data in bytes */
         unsigned short mId;           /**< The message ID. */
+        bool mDebugMode;              /**< Includes debugging information. */
 
         /**
          * Actual position in the packet. From 0 to packet->length. A value
@@ -82,6 +87,9 @@ class MessageIn
 
         /**
          * Streams message ID and length to the given output stream.
+         *
+         * When the message includes debugging information, prints out
+         * the message contents instead of the length.
          */
         friend std::ostream& operator <<(std::ostream &os,
                                          const MessageIn &msg);

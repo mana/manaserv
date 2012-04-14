@@ -142,7 +142,6 @@ void ChatHandler::computerDisconnected(NetComputer *comp)
 void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
 {
     ChatClient &computer = *static_cast< ChatClient * >(comp);
-    MessageOut result;
 
     if (computer.characterName.empty())
     {
@@ -237,12 +236,10 @@ void ChatHandler::processMessage(NetComputer *comp, MessageIn &message)
         default:
             LOG_WARN("ChatHandler::processMessage, Invalid message type"
                      << message.getId());
-            result.writeInt16(XXMSG_INVALID);
+            MessageOut result(XXMSG_INVALID);
+            computer.send(result);
             break;
     }
-
-    if (result.getLength() > 0)
-        computer.send(result);
 }
 
 void ChatHandler::handleCommand(ChatClient &computer, const std::string &command)

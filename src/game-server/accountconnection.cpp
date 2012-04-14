@@ -115,6 +115,8 @@ void AccountConnection::sendCharacterData(Character *p)
 
 void AccountConnection::processMessage(MessageIn &msg)
 {
+    LOG_DEBUG("Received message " << msg << " from account server");
+
     switch (msg.getId())
     {
         case AGMSG_REGISTER_RESPONSE:

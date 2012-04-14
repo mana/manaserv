@@ -34,6 +34,18 @@ enum {
 };
 
 /**
+ * The type of a value in a message. Prepended before each value when the
+ * protocol is running in debug mode.
+ */
+enum ValueType {
+    Int8,
+    Int16,
+    Int32,
+    String,
+    Double
+};
+
+/**
  * Enumerated type for communicated messages:
  *
  * - PAMSG_*: from client to account server
@@ -47,7 +59,7 @@ enum {
  * Components: B byte, W word, D double word, S variable-size string
  *             C tile-based coordinates (B*3)
  *
- * Hosts:      P (player's client), A (account server), C (char server),
+ * Hosts:      P (player's client), A (account server), C (chat server),
  *             G (game server)
  *
  * TODO - Document specific error codes for each packet
@@ -97,8 +109,8 @@ enum {
     // Game
     GPMSG_PLAYER_MAP_CHANGE        = 0x0100, // S filename, W x, W y
     GPMSG_PLAYER_SERVER_CHANGE     = 0x0101, // B*32 token, S game address, W game port
-    PGMSG_PICKUP                   = 0x0110, // W*2 position
-    PGMSG_DROP                     = 0x0111, // B slot, B amount
+    PGMSG_PICKUP                   = 0x0110, // W * 2 items position
+    PGMSG_DROP                     = 0x0111, // W slot, W amount
     PGMSG_EQUIP                    = 0x0112, // W inventory slot
     PGMSG_UNEQUIP                  = 0x0113, // W item Instance id
     PGMSG_MOVE_ITEM                = 0x0114, // W slot1, W slot2, W amount
@@ -236,7 +248,7 @@ enum {
 
     // Inter-server
     GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision, { W map id }*
-    AGMSG_REGISTER_RESPONSE     = 0x0501, // C item version, C password response, { S globalvar_key, S globalvar_value }
+    AGMSG_REGISTER_RESPONSE     = 0x0501, // W item version, W password response, { S globalvar_key, S globalvar_value }
     AGMSG_ACTIVE_MAP            = 0x0502, // W map id, W Number of mapvar_key mapvar_value sent, { S mapvar_key, S mapvar_value }, W Number of map items, { D item Id, W amount, W posX, W posY }
     AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, D id, S name, serialised character data
     GAMSG_PLAYER_DATA           = 0x0520, // D id, serialised character data
@@ -267,7 +279,8 @@ enum {
     GAMSG_REMOVE_ITEM_ON_MAP    = 0x0602, // D map id, D item id, W amount, W pos x, W pos y
     GAMSG_ANNOUNCE              = 0x0603, // S text, W senderid, S sendername
 
-    XXMSG_INVALID = 0x7FFF
+    XXMSG_DEBUG_FLAG            = 0x8000, // Message in debug mode
+    XXMSG_INVALID               = 0x7FFF
 };
 
 // Generic return values

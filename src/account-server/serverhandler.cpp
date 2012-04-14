@@ -172,7 +172,6 @@ void GameServerHandler::registerClient(const std::string &token,
 
 void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 {
-    MessageOut result;
     GameServer *server = static_cast<GameServer *>(comp);
 
     switch (msg.getId())
@@ -322,11 +321,12 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 if (GameServer *s = getGameServerFromMap(mapId))
                 {
                     registerGameClient(s, magic_token, ptr);
-                    result.writeInt16(AGMSG_REDIRECT_RESPONSE);
+                    MessageOut result(AGMSG_REDIRECT_RESPONSE);
                     result.writeInt32(id);
                     result.writeString(magic_token, MAGIC_TOKEN_LENGTH);
                     result.writeString(s->address);
                     result.writeInt16(s->port);
+                    comp->send(result);
                 }
                 else
                 {
@@ -366,10 +366,11 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readInt32();
             std::string name = msg.readString();
             std::string value = storage->getQuestVar(id, name);
-            result.writeInt16(AGMSG_GET_VAR_CHR_RESPONSE);
+            MessageOut result(AGMSG_GET_VAR_CHR_RESPONSE);
             result.writeInt32(id);
             result.writeString(name);
             result.writeString(value);
+            comp->send(result);
         } break;
 
         case GAMSG_SET_VAR_CHR:
@@ -463,7 +464,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             // Retrieve the post for user
             LOG_DEBUG("GCMSG_REQUEST_POST");
-            result.writeInt16(CGMSG_POST_RESPONSE);
+            MessageOut result(CGMSG_POST_RESPONSE);
 
             // get the character id
             int characterId = msg.readInt32();
@@ -505,13 +506,14 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                 postalManager->clearPost(ptr);
             }
 
+            comp->send(result);
         } break;
 
         case GCMSG_STORE_POST:
         {
             // Store the letter for the user
             LOG_DEBUG("GCMSG_STORE_POST");
-            result.writeInt16(CGMSG_STORE_POST_RESPONSE);
+            MessageOut result(CGMSG_STORE_POST_RESPONSE);
 
             // get the sender and receiver
             int senderId = msg.readInt32();
@@ -554,6 +556,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             postalManager->addLetter(letter);
 
             result.writeInt8(ERRMSG_OK);
+            comp->send(result);
         } break;
 
         case GAMSG_TRANSACTION:
@@ -613,13 +616,10 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         default:
             LOG_WARN("ServerHandler::processMessage, Invalid message type: "
                      << msg.getId());
-            result.writeInt16(XXMSG_INVALID);
+            MessageOut result(XXMSG_INVALID);
+            comp->send(result);
             break;
     }
-
-    // return result
-    if (result.getLength() > 0)
-        comp->send(result);
 }
 
 void GameServerHandler::dumpStatistics(std::ostream &os)

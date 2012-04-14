@@ -75,12 +75,12 @@ void ConnectionHandler::stopListen()
          currentPeer < &host->peers[host->peerCount];
          ++currentPeer)
     {
-       if (currentPeer->state == ENET_PEER_STATE_CONNECTED)
-       {
+        if (currentPeer->state == ENET_PEER_STATE_CONNECTED)
+        {
             enet_peer_disconnect(currentPeer, 0);
             enet_host_flush(host);
             enet_peer_reset(currentPeer);
-       }
+        }
     }
     enet_host_destroy(host);
     // FIXME: memory leak on NetComputers

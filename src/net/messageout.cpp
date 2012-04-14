@@ -18,6 +18,9 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "net/messageout.h"
+#include "net/messagein.h"
+
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -28,28 +31,26 @@
 #include <string>
 #include <enet/enet.h>
 
-#include "net/messageout.h"
-
 /** Initial amount of bytes allocated for the messageout data buffer. */
 const unsigned int INITIAL_DATA_CAPACITY = 16;
 
 /** Factor by which the messageout data buffer is increased when too small. */
 const unsigned int CAPACITY_GROW_FACTOR = 2;
 
-MessageOut::MessageOut():
-    mPos(0)
-{
-    mData = (char*) malloc(INITIAL_DATA_CAPACITY);
-    mDataSize = INITIAL_DATA_CAPACITY;
-}
+static bool debugModeEnabled = false;
 
 MessageOut::MessageOut(int id):
-    mPos(0)
+    mPos(0),
+    mDebugMode(false)
 {
     mData = (char*) malloc(INITIAL_DATA_CAPACITY);
     mDataSize = INITIAL_DATA_CAPACITY;
 
+    if (debugModeEnabled)
+        id |= ManaServ::XXMSG_DEBUG_FLAG;
+
     writeInt16(id);
+    mDebugMode = debugModeEnabled;
 }
 
 MessageOut::~MessageOut()
@@ -57,15 +58,7 @@ MessageOut::~MessageOut()
     free(mData);
 }
 
-void MessageOut::clear()
-{
-    mData = (char *) realloc(mData, INITIAL_DATA_CAPACITY);
-    mDataSize = INITIAL_DATA_CAPACITY;
-    mPos = 0;
-}
-
-void
-MessageOut::expand(size_t bytes)
+void MessageOut::expand(size_t bytes)
 {
     if (bytes > mDataSize)
     {
@@ -81,6 +74,9 @@ MessageOut::expand(size_t bytes)
 
 void MessageOut::writeInt8(int value)
 {
+    if (mDebugMode)
+        writeValueType(ManaServ::Int8);
+
     expand(mPos + 1);
     mData[mPos] = value;
     mPos += 1;
@@ -88,6 +84,9 @@ void MessageOut::writeInt8(int value)
 
 void MessageOut::writeInt16(int value)
 {
+    if (mDebugMode)
+        writeValueType(ManaServ::Int16);
+
     expand(mPos + 2);
     uint16_t t = ENET_HOST_TO_NET_16(value);
     memcpy(mData + mPos, &t, 2);
@@ -96,6 +95,9 @@ void MessageOut::writeInt16(int value)
 
 void MessageOut::writeInt32(int value)
 {
+    if (mDebugMode)
+        writeValueType(ManaServ::Int32);
+
     expand(mPos + 4);
     uint32_t t = ENET_HOST_TO_NET_32(value);
     memcpy(mData + mPos, &t, 4);
@@ -104,6 +106,9 @@ void MessageOut::writeInt32(int value)
 
 void MessageOut::writeDouble(double value)
 {
+    if (mDebugMode)
+        writeValueType(ManaServ::Double);
+
 #ifdef USE_NATIVE_DOUBLE
     expand(mPos + sizeof(double));
     memcpy(mData + mPos, &value, sizeof(double));
@@ -121,19 +126,14 @@ void MessageOut::writeDouble(double value)
 #endif
 }
 
-void MessageOut::writeCoordinates(int x, int y)
+void MessageOut::writeString(const std::string &string, int length)
 {
-    expand(mPos + 3);
-    char *p = mData + mPos;
-    p[0] = x & 0x00FF;
-    p[1] = ((x & 0x0700) >> 8) | ((y & 0x001F) << 3);
-    p[2] = (y & 0x07E0) >> 5;
-    mPos += 3;
-}
+    if (mDebugMode)
+    {
+        writeValueType(ManaServ::String);
+        writeInt16(length);
+    }
 
-void
-MessageOut::writeString(const std::string &string, int length)
-{
     int stringLength = string.length();
     if (length < 0)
     {
@@ -149,7 +149,7 @@ MessageOut::writeString(const std::string &string, int length)
     expand(mPos + length);
 
     // Write the actual string
-    memcpy(mData + mPos, string.c_str(), stringLength);
+    memcpy(mData + mPos, string.data(), stringLength);
 
     if (length > stringLength)
     {
@@ -159,15 +159,20 @@ MessageOut::writeString(const std::string &string, int length)
     mPos += length;
 }
 
+void MessageOut::writeValueType(ManaServ::ValueType type)
+{
+    expand(mPos + 1);
+    mData[mPos] = type;
+    mPos += 1;
+}
+
 std::ostream&
 operator <<(std::ostream &os, const MessageOut &msg)
 {
     if (msg.getLength() >= 2)
     {
-        unsigned short id = ENET_NET_TO_HOST_16(*(short*) msg.mData);
-        os << std::setw(6) << std::hex << std::showbase << std::internal
-           << std::setfill('0') << id
-           << std::dec << " (" << msg.getLength() << " B)";
+        MessageIn m(msg.mData, msg.mPos);
+        os << m;
     }
     else
     {
@@ -175,4 +180,9 @@ operator <<(std::ostream &os, const MessageOut &msg)
            << std::dec << " (" << msg.getLength() << " B)";
     }
     return os;
+}
+
+void MessageOut::setDebugModeEnabled(bool enabled)
+{
+    debugModeEnabled = enabled;
 }

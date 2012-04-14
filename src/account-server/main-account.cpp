@@ -345,6 +345,9 @@ int main(int argc, char *argv[])
     int chatClientPort = Configuration::getValue("net_chatListenToClientPort",
                                                  options.port + 2);
 
+    bool debugNetwork = Configuration::getBoolValue("net_debugMode", false);
+    MessageOut::setDebugModeEnabled(debugNetwork);
+
     if (!AccountClientHandler::initialize(DEFAULT_ATTRIBUTEDB_FILE,
                                           options.port, accountHost) ||
         !GameServerHandler::initialize(accountGamePort, accountHost) ||

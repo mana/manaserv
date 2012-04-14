@@ -347,6 +347,9 @@ int main(int argc, char *argv[])
                                                options.port);
     }
 
+    bool debugNetwork = Configuration::getBoolValue("net_debugMode", false);
+    MessageOut::setDebugModeEnabled(debugNetwork);
+
     // Make an initial attempt to connect to the account server
     // Try again after longer and longer intervals when connection fails.
     bool isConnected = false;
