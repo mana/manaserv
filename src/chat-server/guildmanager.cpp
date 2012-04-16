@@ -24,6 +24,7 @@
 #include "common/manaserv_protocol.h"
 #include "account-server/storage.h"
 #include "chat-server/chatclient.h"
+#include "chat-server/chatchannelmanager.h"
 #include "chat-server/chathandler.h"
 
 using namespace ManaServ;
@@ -76,15 +77,37 @@ void GuildManager::addGuildMember(Guild *guild, int playerId)
     guild->addMember(playerId);
 }
 
-void GuildManager::removeGuildMember(Guild *guild, int playerId)
+void GuildManager::removeGuildMember(Guild *guild, int playerId,
+                                     const std::string &characterName,
+                                     ChatClient *client)
 {
     // remove the user from the guild
     storage->removeGuildMember(guild->getId(), playerId);
     guild->removeMember(playerId);
 
+    chatHandler->sendGuildListUpdate(guild, characterName,
+                                     GUILD_EVENT_LEAVING_PLAYER);
+
     // if theres no more members left delete the guild
     if (guild->memberCount() == 0)
+    {
+        chatChannelManager->removeChannel(
+                    chatChannelManager->getChannelId(guild->getName()));
         removeGuild(guild);
+    }
+
+    if (client)
+    {
+        for (std::vector<Guild *>::iterator it = client->guilds.begin(),
+             it_end = client->guilds.end(); it != it_end; ++it)
+        {
+            if (*it == guild)
+            {
+                client->guilds.erase(it);
+                break;
+            }
+        }
+    }
 }
 
 Guild *GuildManager::findById(short id) const

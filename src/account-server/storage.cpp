@@ -591,6 +591,32 @@ Character *Storage::getCharacter(const std::string &name)
     return 0;
 }
 
+unsigned int Storage::getCharacterId(const std::string &name)
+{
+    std::ostringstream sql;
+    sql << "SELECT id FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
+    if (!mDb->prepareSql(sql.str()))
+        return 0;
+    try
+    {
+        mDb->bindValue(1, name);
+        const dal::RecordSet &charInfo = mDb->processSql();
+        if (charInfo.isEmpty())
+            return 0;
+
+        // Specialize the string_to functor to convert
+        // a string to an unsigned int.
+        string_to< unsigned > toUint;
+        return toUint(charInfo(0, 0));
+    }
+    catch (const dal::DbSqlQueryExecFailure &e)
+    {
+        utils::throwError("DALStorage::getCharacterId #1) SQL query failure: ",
+                          e);
+    }
+    return 0;
+}
+
 bool Storage::doesUserNameExist(const std::string &name)
 {
     try

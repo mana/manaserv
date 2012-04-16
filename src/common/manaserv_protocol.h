@@ -191,6 +191,7 @@ enum {
     CPMSG_GUILD_PROMOTE_MEMBER_RESPONSE = 0x0366, // B error
     PCMSG_GUILD_KICK_MEMBER             = 0x0370, // W guild, S name
     CPMSG_GUILD_KICK_MEMBER_RESPONSE    = 0x0371, // B error
+    CPMSG_GUILD_KICK_NOTIFICATION       = 0x0372, // W guild, S player that kicked
 
     CPMSG_GUILD_INVITED                 = 0x0388, // S char name, S  guild name, W id
     CPMSG_GUILD_REJOIN                  = 0x0389, // S name, W guild, W rights, W channel, S announce

@@ -44,10 +44,10 @@ void ChatHandler::sendGuildInvite(const std::string &invitedName,
     msg.writeString(inviterName);
     msg.writeString(guildName);
 
-    std::map<std::string, ChatClient*>::iterator itr = mPlayerMap.find(invitedName);
-    if (itr == mPlayerMap.end())
+    ChatClient *client = getClient(invitedName);
+    if (client)
     {
-        itr->second->send(msg);
+        client->send(msg);
     }
 }
 
@@ -243,7 +243,7 @@ void ChatHandler::handleGuildAcceptInvite(ChatClient &client,
     // then add them as guild member
     // and remove from invite list
     Guild *guild = guildManager->findById(guildId);
-    if (!(guild || guild->checkInvited(client.characterId)))
+    if (!(guild && guild->checkInvited(client.characterId)))
     {
 
         reply.writeInt8(ERRMSG_FAILURE);
@@ -323,7 +323,8 @@ void ChatHandler::handleGuildMemberLevelChange(ChatClient &client,
     if (guild && c)
     {
         int rights = guild->getUserPermissions(c->getDatabaseID()) | level;
-        if (guildManager->changeMemberLevel(&client, guild, c->getDatabaseID(), rights) == 0)
+        if (guildManager->changeMemberLevel(&client, guild, c->getDatabaseID(),
+                                            rights) == 0)
         {
             reply.writeInt8(ERRMSG_OK);
             client.send(reply);
@@ -338,27 +339,50 @@ void ChatHandler::handleGuildKickMember(ChatClient &client, MessageIn &msg)
 {
     MessageOut reply(CPMSG_GUILD_KICK_MEMBER_RESPONSE);
     short guildId = msg.readInt16();
-    std::string user = msg.readString();
+    std::string otherCharName = msg.readString();
 
     Guild *guild = guildManager->findById(guildId);
-    Character *c = storage->getCharacter(user);
 
-    if (guild && c)
-    {
-        if (guild->getUserPermissions(c->getDatabaseID()) & GAL_KICK)
-        {
-            reply.writeInt8(ERRMSG_OK);
-        }
-        else
-        {
-            reply.writeInt8(ERRMSG_INSUFFICIENT_RIGHTS);
-        }
-    }
-    else
+    if (!guild)
     {
         reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
+        client.send(reply);
+        return;
+    }
+    ChatClient *otherClient = getClient(otherCharName);
+    unsigned int otherCharId;
+    if (otherClient)
+        otherCharId = otherClient->characterId;
+    else
+        otherCharId = storage->getCharacterId(otherCharName);
+
+    if (otherCharId == 0)
+    {
+        reply.writeInt8(ERRMSG_INVALID_ARGUMENT);
+        client.send(reply);
+        return;
     }
 
+    if (!((guild->getUserPermissions(client.characterId) & GAL_KICK) &&
+            guild->checkInGuild(otherCharId) &&
+            otherCharId != client.characterId))
+    {
+        reply.writeInt8(ERRMSG_INSUFFICIENT_RIGHTS);
+        client.send(reply);
+        return;
+    }
+    if (otherClient)
+    {
+        // Client is online. Inform him about that he got kicked
+        MessageOut kickMsg(CPMSG_GUILD_KICK_NOTIFICATION);
+        kickMsg.writeInt16(guild->getId());
+        kickMsg.writeString(client.characterName);
+        otherClient->send(kickMsg);
+    }
+
+    guildManager->removeGuildMember(guild, otherCharId, otherCharName,
+                                    otherClient);
+    reply.writeInt8(ERRMSG_OK);
     client.send(reply);
 }
 
@@ -367,49 +391,21 @@ void ChatHandler::handleGuildQuit(ChatClient &client, MessageIn &msg)
     MessageOut reply(CPMSG_GUILD_QUIT_RESPONSE);
     short guildId = msg.readInt16();
 
-    // check for valid guild
-    // check the member is in the guild
-    // remove the member from the guild
-    if (Guild *guild = guildManager->findById(guildId))
-    {
-        if (guild->checkInGuild(client.characterId))
-        {
-            reply.writeInt8(ERRMSG_OK);
-            reply.writeInt16(guildId);
-
-            // Check if there would be no members left, remove the guild channel
-            if (guild->memberCount() == 1)
-            {
-                chatChannelManager->removeChannel(
-                            chatChannelManager->getChannelId(guild->getName()));
-            }
-
-            // guild manager checks if the member is the last in the guild
-            // and removes the guild if so
-            guildManager->removeGuildMember(guild, client.characterId);
-            for (std::vector<Guild *>::iterator it = client.guilds.begin(),
-                 it_end = client.guilds.end(); it != it_end; ++it)
-            {
-                if (*it == guild)
-                {
-                    client.guilds.erase(it);
-                    break;
-                }
-            }
-            sendGuildListUpdate(guild, client.characterName,
-                                GUILD_EVENT_LEAVING_PLAYER);
-        }
-        else
-        {
-            reply.writeInt8(ERRMSG_FAILURE);
-        }
-    }
-    else
+    Guild *guild = guildManager->findById(guildId);
+    if (!guild || !guild->checkInGuild(client.characterId))
     {
         reply.writeInt8(ERRMSG_FAILURE);
+        client.send(reply);
+        return;
     }
+    guildManager->removeGuildMember(guild, client.characterId,
+                                    client.characterName, &client);
 
+    reply.writeInt8(ERRMSG_OK);
+    reply.writeInt16(guildId);
     client.send(reply);
+
+
 }
 
 void ChatHandler::guildChannelTopicChange(ChatChannel *channel, int playerId,

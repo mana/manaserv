@@ -95,6 +95,15 @@ class Storage
         Character *getCharacter(const std::string &name);
 
         /**
+         * Gets the id of a character by its name.
+         *
+         * @param name the name of the character.
+         *
+         * @return the id of the character
+         */
+        unsigned int getCharacterId(const std::string &name);
+
+        /**
          * Add an account to the database.
          *
          * @param account the new account.

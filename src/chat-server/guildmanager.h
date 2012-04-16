@@ -56,7 +56,9 @@ class GuildManager
         /**
          * Removes a member from a guild.
          */
-        void removeGuildMember(Guild *guild, int playerId);
+        void removeGuildMember(Guild *guild, int playerId,
+                               const std::string &characterName,
+                               ChatClient *client = 0);
 
         /**
          * Returns the guild with the given id. O(n)
