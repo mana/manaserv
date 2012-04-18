@@ -592,10 +592,6 @@ void Character::flagAttribute(int attr)
                                      getAttribute(attr),
                                      getModifiedAttribute(attr));
     mModifiedAttributes.insert(attr);
-    if (attr == ATTR_INT)
-    {
-        mSpecialUpdateNeeded = true;
-    }
 }
 
 int Character::expForLevel(int level)
