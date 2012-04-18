@@ -19,6 +19,9 @@
  */
 
 #include "guild.h"
+
+#include "chat-server/guildmanager.h"
+
 #include "common/defines.h"
 
 #include <algorithm>
@@ -42,10 +45,7 @@ void Guild::addMember(int playerId, int permissions)
     // add new guild member to guild
     mMembers.push_back(member);
 
-    if (checkInvited(playerId))
-    {
-        mInvited.remove(playerId);
-    }
+    mInvited.remove(playerId);
 }
 
 void Guild::removeMember(int playerId)
@@ -53,10 +53,16 @@ void Guild::removeMember(int playerId)
     if (getOwner() == playerId)
     {
         // if the leader is leaving, assign next member as leader
-        std::list<GuildMember*>::iterator itr = mMembers.begin();
-        ++itr;
-        if (itr != mMembers.end())
-            setOwner((*itr)->mId);
+        for (std::list<GuildMember*>::iterator it = mMembers.begin(),
+             it_end = mMembers.end(); it != it_end; ++it)
+        {
+            GuildMember *member = *it;
+            if (member->mId != playerId)
+            {
+                setOwner(member->mId);
+                break;
+            }
+        }
     }
     GuildMember *member = getMember(playerId);
     if (member)
@@ -80,11 +86,7 @@ int Guild::getOwner() const
 
 void Guild::setOwner(int playerId)
 {
-    GuildMember *member = getMember(playerId);
-    if (member)
-    {
-        member->mPermissions = GAL_OWNER;
-    }
+    guildManager->setUserRights(this, playerId, GAL_OWNER);
 }
 
 bool Guild::checkInvited(int playerId) const
@@ -95,6 +97,11 @@ bool Guild::checkInvited(int playerId) const
 void Guild::addInvited(int playerId)
 {
     mInvited.push_back(playerId);
+}
+
+void Guild::removeInvited(int playerId)
+{
+    mInvited.remove(playerId);
 }
 
 bool Guild::checkInGuild(int playerId) const
@@ -129,7 +136,7 @@ bool Guild::canInvite(int playerId) const
 int Guild::getUserPermissions(int playerId) const
 {
     GuildMember *member = getMember(playerId);
-    return member->mPermissions;
+    return member ? member->mPermissions : 0;
 }
 
 void Guild::setUserPermissions(int playerId, int level)

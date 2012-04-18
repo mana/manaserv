@@ -56,7 +56,9 @@ class GuildManager
         /**
          * Removes a member from a guild.
          */
-        void removeGuildMember(Guild *guild, int playerId);
+        void removeGuildMember(Guild *guild, int playerId,
+                               const std::string &characterName,
+                               ChatClient *client = 0);
 
         /**
          * Returns the guild with the given id. O(n)
@@ -80,7 +82,7 @@ class GuildManager
         /**
          * Return the guilds a character is in
          */
-        std::vector<Guild*> getGuildsForPlayer(int playerId) const;
+        std::vector<Guild *> getGuildsForPlayer(int playerId) const;
 
         /**
          * Inform guild members that a player has disconnected.
@@ -97,18 +99,12 @@ class GuildManager
                               int playerId, int level);
 
         /**
-         * Check if the player already owns a guild
-         */
-        bool alreadyOwner(int playerId) const;
-
-        /**
          * Set user rights
          */
         void setUserRights(Guild *guild, int playerId, int rights);
 
     private:
         std::map<int, Guild*> mGuilds;
-        std::list<int> mOwners;
 };
 
 extern GuildManager *guildManager;

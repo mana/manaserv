@@ -25,7 +25,10 @@
 #include <map>
 #include <string>
 
+#include "chat-server/guild.h"
+
 #include "net/connectionhandler.h"
+
 #include "utils/tokencollector.h"
 
 class ChatChannel;
@@ -106,7 +109,7 @@ class ChatHandler : public ConnectionHandler
         /**
          * Send information about a change in the guild list to guild members.
          */
-        void sendGuildListUpdate(const std::string &guildName,
+        void sendGuildListUpdate(Guild *guild,
                                  const std::string &characterName,
                                  char eventId);
 
@@ -182,6 +185,7 @@ class ChatHandler : public ConnectionHandler
         void handleGuildAcceptInvite(ChatClient &client, MessageIn &msg);
         void handleGuildGetMembers(ChatClient &client, MessageIn &msg);
         void handleGuildMemberLevelChange(ChatClient &client, MessageIn &msg);
+        void removeCharacterFormGuild(ChatClient &client, Guild *guild);
         void handleGuildKickMember(ChatClient &client, MessageIn &msg);
         void handleGuildQuit(ChatClient &client, MessageIn &msg);
 
@@ -205,6 +209,12 @@ class ChatHandler : public ConnectionHandler
          */
         void sayToPlayer(ChatClient &computer, const std::string &playerName,
                          const std::string &text);
+
+        /**
+         * Finds out the name of a character by its id. Either searches it
+         * in the list of online characters or otherwise gets it from the db.
+         */
+        unsigned int getIdOfChar(const std::string &name);
 
         /**
          * Sends a message to every client in a registered channel.
