@@ -118,7 +118,7 @@ enum {
     GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount }, { W equip slot, W item Id, W item Instance}*
     GPMSG_EQUIP                    = 0x0122, // W item Id, W equip slot type count //{ W equip slot, W capacity used}*//<- When equipping, //{ W item instance, W 0}*//<- When unequipping
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, D base value (in 1/256ths), D modified value (in 1/256ths)}*
-    GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { W skill, D exp got, D exp needed }*
+    GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { W skill, D exp got, D exp needed, W skill level }*
     GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points
     GPMSG_LEVEL_PROGRESS           = 0x0151, // B percent completed to next levelup
     PGMSG_RAISE_ATTRIBUTE          = 0x0160, // W attribute
