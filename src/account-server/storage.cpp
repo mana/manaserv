@@ -429,26 +429,26 @@ Character *Storage::getCharacterBySQL(Account *owner)
         s.clear();
         s.str("");
 
-        // Load the skills of the char from CHAR_SKILLS_TBL_NAME
-        s << "select status_id, status_time FROM "
-          << CHAR_STATUS_EFFECTS_TBL_NAME
+        // Load skills.
+        s << "SELECT skill_id, skill_exp "
+          << "FROM " << CHAR_SKILLS_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();
 
         const dal::RecordSet &skillInfo = mDb->execSql(s.str());
         if (!skillInfo.isEmpty())
         {
             const unsigned int nRows = skillInfo.rows();
-            for (unsigned int row = 0; row < nRows; row++)
+            for (unsigned int row = 0; row < nRows; ++row)
             {
-                character->setExperience(
-                    toUint(skillInfo(row, 0)),  // Skill Id
-                    toUint(skillInfo(row, 1))); // Experience
+                unsigned int id = toUint(skillInfo(row, 0));
+                character->setExperience(id, toInt(skillInfo(row, 1)));
             }
         }
 
-        // Load the status effect
         s.clear();
         s.str("");
+
+        // Load the status effects
         s << "select status_id, status_time FROM "
           << CHAR_STATUS_EFFECTS_TBL_NAME
           << " WHERE char_id = " << character->getDatabaseID();

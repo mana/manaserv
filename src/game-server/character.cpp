@@ -474,6 +474,7 @@ void Character::sendStatus()
         expMsg.writeInt16(skill);
         expMsg.writeInt32(getExpGot(skill));
         expMsg.writeInt32(getExpNeeded(skill));
+        expMsg.writeInt16(levelForExp(getExperience(skill)));
     }
     if (expMsg.getLength() > 2) gameHandler->sendTo(this, expMsg);
     mModifiedExperience.clear();
@@ -639,10 +640,6 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
     // Inform account server
     if (newExp != oldExp)
         accountHandler->updateExperience(getDatabaseID(), skill, newExp);
-
-    // Check for skill levelup
-    if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
-        updateDerivedAttributes(skill);
 
     mRecalculateLevel = true;
 }
