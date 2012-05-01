@@ -131,8 +131,8 @@ static GameServer *getGameServerFromMap(int mapId)
          i_end = serverHandler->clients.end(); i != i_end; ++i)
     {
         GameServer *server = static_cast< GameServer * >(*i);
-        ServerStatistics::const_iterator i = server->maps.find(mapId);
-        if (i == server->maps.end()) continue;
+        ServerStatistics::const_iterator it = server->maps.find(mapId);
+        if (it == server->maps.end()) continue;
         return server;
     }
     return NULL;
