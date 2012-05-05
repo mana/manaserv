@@ -21,6 +21,7 @@
 #ifndef TOKENCOLLECTOR_H
 #define TOKENCOLLECTOR_H
 
+#include <stdint.h>
 #include <string>
 #include <list>
 #include <time.h>
