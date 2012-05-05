@@ -42,7 +42,7 @@ Map *MapReader::readMap(const std::string &filename)
     if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "map"))
     {
         LOG_ERROR("Error: Not a map file (" << filename << ")!");
-        return false;
+        return 0;
     }
 
     return readMap(rootNode);
