@@ -202,14 +202,13 @@ static int npc_message(lua_State *s)
 {
     NPC *p = checkNPC(s, 1);
     Character *q = checkCharacter(s, 2);
-    size_t l;
-    const char *m = luaL_checklstring(s, 3, &l);
+    const char *m = luaL_checkstring(s, 3);
 
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_MESSAGE);
     msg.writeInt16(p->getPublicID());
-    msg.writeString(m, l);
+    msg.writeString(m);
     gameHandler->sendTo(q, msg);
 
     thread->mState = Script::ThreadPaused;
