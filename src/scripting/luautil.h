@@ -202,9 +202,8 @@ template <typename T> void pushSTLContainer(lua_State *s, const std::list<T> &co
 
     for (int key = 1; key <= len; key++)
     {
-        push(s, key);
         push(s, *i);
-        lua_settable(s, table);
+        lua_rawseti(s, table, key);
         i++;
     }
 }
@@ -218,9 +217,8 @@ template <typename T> void pushSTLContainer(lua_State *s, const std::vector<T> &
 
     for (int key = 0; key < len; key++)
     {
-        push(s, key+1);
         push(s, container.at(key));
-        lua_settable(s, table);
+        lua_rawseti(s, table, key + 1);
     }
 }
 
@@ -253,9 +251,8 @@ template <typename T> void pushSTLContainer(lua_State *s, const std::set<T> &con
 
     for (int key = 1; key <= len; key++)
     {
-        push(s, key);
         push(s, *i);
-        lua_settable(s, table);
+        lua_rawseti(s, table, key);
         i++;
     }
 }
