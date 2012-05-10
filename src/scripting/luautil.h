@@ -47,9 +47,6 @@ class NPC;
 class StatusEffect;
 class Entity;
 
-// Report script errors and interrupt the script.
-void raiseScriptError(lua_State *s, const char *format, ...);
-
 void raiseWarning(lua_State *s, const char *format, ...);
 
 /**
