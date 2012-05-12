@@ -26,8 +26,6 @@
 static Script *_currentState;
 
 static Script::Ref _craftCallback;
-static Script::Ref _specialCallback;
-static Script::Ref _getSpecialRechargeCostCallback;
 
 void ScriptManager::initialize()
 {
@@ -68,9 +66,3 @@ bool ScriptManager::performCraft(Being *crafter,
 
 void ScriptManager::setCraftCallback(Script *script)
 { script->assignCallback(_craftCallback); }
-
-void ScriptManager::setSpecialCallback(Script *script)
-{ script->assignCallback(_specialCallback); }
-
-void ScriptManager::setGetSpecialRechargeCostCallback(Script *script)
-{ script->assignCallback(_getSpecialRechargeCostCallback); }

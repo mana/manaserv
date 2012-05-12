@@ -134,20 +134,6 @@ static int on_craft(lua_State *s)
     return 0;
 }
 
-static int on_use_special(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    ScriptManager::setSpecialCallback(getScript(s));
-    return 0;
-}
-
-static int on_get_special_recharge_cost(lua_State *s)
-{
-    luaL_checktype(s, 1, LUA_TFUNCTION);
-    ScriptManager::setGetSpecialRechargeCostCallback(getScript(s));
-    return 0;
-}
-
 static int on_mapvar_changed(lua_State *s)
 {
     const char *key = luaL_checkstring(s, 1);
@@ -2376,8 +2362,6 @@ LuaScript::LuaScript():
         { "on_create_npc_delayed",           &on_create_npc_delayed           },
         { "on_map_initialize",               &on_map_initialize               },
         { "on_craft",                        &on_craft                        },
-        { "on_use_special",                  &on_use_special                  },
-        { "on_get_special_recharge_cost",    &on_get_special_recharge_cost    },
         { "on_mapvar_changed",               &on_mapvar_changed               },
         { "on_worldvar_changed",             &on_worldvar_changed             },
         { "on_mapupdate",                    &on_mapupdate                    },
