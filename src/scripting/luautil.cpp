@@ -247,7 +247,7 @@ int checkSkill(lua_State *s, int p)
         return luaL_checkint(s, p);
 
     int id = skillManager->getId(luaL_checkstring(s, p));
-    luaL_argcheck(s, id != 0, p, "invalid special name");
+    luaL_argcheck(s, id != 0, p, "invalid skill name");
     return id;
 }
 
@@ -284,25 +284,4 @@ Script::Thread *checkCurrentThread(lua_State *s, Script *script /* = 0 */)
         luaL_error(s, "function requires threaded execution");
 
     return thread;
-}
-
-
-void push(lua_State *s, int val)
-{
-    lua_pushinteger(s, val);
-}
-
-void push(lua_State *s, const std::string &val)
-{
-    lua_pushstring(s, val.c_str());
-}
-
-void push(lua_State *s, Entity *val)
-{
-    lua_pushlightuserdata(s, val);
-}
-
-void push(lua_State *s, double val)
-{
-    lua_pushnumber(s, val);
 }
