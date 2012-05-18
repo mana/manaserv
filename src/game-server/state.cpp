@@ -193,6 +193,19 @@ static void informPlayer(MapComposite *map, Character *p)
                 gameHandler->sendTo(p, LooksMsg);
             }
 
+            // Send emote messages.
+            if (oflags & UPDATEFLAG_EMOTE)
+            {
+                int emoteId = o->getLastEmote();
+                if (emoteId > -1)
+                {
+                    MessageOut EmoteMsg(GPMSG_BEING_EMOTE);
+                    EmoteMsg.writeInt16(oid);
+                    EmoteMsg.writeInt16(emoteId);
+                    gameHandler->sendTo(p, EmoteMsg);
+                }
+            }
+
             // Send direction change messages.
             if (oflags & UPDATEFLAG_DIRCHANGE)
             {
