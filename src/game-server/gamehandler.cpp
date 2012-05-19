@@ -378,11 +378,7 @@ void GameHandler::tokenMatched(GameClient *computer, Character *character)
     // Force sending the whole character to the client.
     Inventory(character).sendFull();
     character->modifiedAllAttribute();
-    std::map<int, int>::const_iterator skill_it;
-    for (skill_it = character->getSkillBegin(); skill_it != character->getSkillEnd(); skill_it++)
-    {
-        character->updateDerivedAttributes(skill_it->first);
-    }
+    character->sendStatus();
 }
 
 void GameHandler::deletePendingClient(GameClient *computer)

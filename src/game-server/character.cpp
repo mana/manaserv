@@ -642,9 +642,7 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
 
     // Check for skill levelup
     if (Character::levelForExp(newExp) >= Character::levelForExp(oldExp))
-        updateDerivedAttributes(skill);
-
-    mRecalculateLevel = true;
+        mRecalculateLevel = true;
 }
 
 void Character::incrementKillCount(int monsterType)
