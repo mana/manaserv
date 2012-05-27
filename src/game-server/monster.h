@@ -22,7 +22,6 @@
 #define MONSTER_H
 
 #include "game-server/being.h"
-#include "game-server/eventlistener.h"
 #include "common/defines.h"
 #include "scripting/script.h"
 #include "utils/string.h"
@@ -31,6 +30,7 @@
 #include <vector>
 #include <string>
 
+class Character;
 class ItemClass;
 class Script;
 
@@ -352,9 +352,6 @@ class Monster : public Being
 
         /** Aggression towards other beings. */
         std::map<Being *, int> mAnger;
-
-        /** Listener for updating the anger list. */
-        EventListener mTargetListener;
 
         /**
          * Character who currently owns this monster (killsteal protection).

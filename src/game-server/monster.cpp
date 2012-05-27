@@ -35,18 +35,6 @@
 
 #include <cmath>
 
-struct MonsterTargetEventDispatch: EventDispatch
-{
-    MonsterTargetEventDispatch()
-    {
-        typedef EventListenerFactory<Monster, &Monster::mTargetListener> Factory;
-        removed = &Factory::create< Entity, &Monster::forgetTarget >::function;
-        died = &Factory::create<Entity, &Monster::forgetTarget, Being>::function;
-    }
-};
-
-static MonsterTargetEventDispatch monsterTargetEventDispatch;
-
 MonsterClass::~MonsterClass()
 {
     for (std::vector<AttackInfo *>::iterator it = mAttacks.begin(),
@@ -67,7 +55,6 @@ double MonsterClass::getVulnerability(Element element) const
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
-    mTargetListener(&monsterTargetEventDispatch),
     mOwner(NULL)
 {
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
@@ -137,12 +124,6 @@ Monster::Monster(MonsterClass *specy):
 
 Monster::~Monster()
 {
-    // Remove death listeners.
-    for (std::map<Being *, int>::iterator i = mAnger.begin(),
-         i_end = mAnger.end(); i != i_end; ++i)
-    {
-        i->first->removeListener(&mTargetListener);
-    }
 }
 
 void Monster::update()
@@ -363,7 +344,6 @@ void Monster::forgetTarget(Entity *t)
 {
     Being *b = static_cast< Being * >(t);
     mAnger.erase(b);
-    b->removeListener(&mTargetListener);
 
     if (b->getType() == OBJECT_CHARACTER)
     {
@@ -386,7 +366,11 @@ void Monster::changeAnger(Actor *target, int amount)
         else
         {
             mAnger[t] = amount;
-            t->addListener(&mTargetListener);
+
+            // Forget target either when it's removed or died, whichever
+            // happens first.
+            t->signal_removed.connect(sigc::mem_fun(this, &Monster::forgetTarget));
+            t->signal_died.connect(sigc::mem_fun(this, &Monster::forgetTarget));
         }
     }
 }
