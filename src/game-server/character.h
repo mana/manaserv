@@ -428,6 +428,8 @@ class Character : public Being
 
         virtual void removeAttack(AttackInfo *attackInfo);
 
+        sigc::signal<void, Character *> signal_disconnected;
+
     protected:
         /**
          * Gets the way the actor blocks pathfinding for other objects

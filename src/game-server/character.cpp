@@ -24,7 +24,6 @@
 #include "game-server/accountconnection.h"
 #include "game-server/attributemanager.h"
 #include "game-server/buysell.h"
-#include "game-server/eventlistener.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
@@ -792,14 +791,7 @@ void Character::disconnected()
     else
         GameState::remove(this);
 
-    for (Listeners::iterator i = mListeners.begin(),
-         i_end = mListeners.end(); i != i_end;)
-    {
-        const EventListener &l = **i;
-        ++i; // In case the listener removes itself from the list on the fly.
-        if (l.dispatch->disconnected)
-            l.dispatch->disconnected(&l, this);
-    }
+    signal_disconnected.emit(this);
 }
 
 bool Character::takeSpecial(int id)

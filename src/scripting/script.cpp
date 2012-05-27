@@ -40,8 +40,7 @@ Script::Ref Script::mUpdateCallback;
 
 Script::Script():
     mCurrentThread(0),
-    mMap(0),
-    mEventListener(&scriptEventDispatch)
+    mMap(0)
 {}
 
 Script::~Script()

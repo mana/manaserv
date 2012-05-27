@@ -27,7 +27,6 @@
 #include "game-server/attributemanager.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
-#include "game-server/eventlistener.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
 #include "game-server/skillmanager.h"
@@ -58,6 +57,9 @@ Being::Being(EntityType type):
                                           Attribute(*it1->second)));
 
     }
+
+    signal_inserted.connect(sigc::mem_fun(this, &Being::inserted));
+
     // TODO: Way to define default base values?
     // Should this be handled by the virtual modifiedAttribute?
     // URGENT either way
@@ -177,14 +179,7 @@ void Being::died()
     // reset target
     mTarget = NULL;
 
-    for (Listeners::iterator i = mListeners.begin(),
-         i_end = mListeners.end(); i != i_end;)
-    {
-        const EventListener &l = **i;
-        ++i; // In case the listener removes itself from the list on the fly.
-        if (l.dispatch->died)
-            l.dispatch->died(&l, this);
-    }
+    signal_died.emit(this);
 }
 
 void Being::processAttacks()
@@ -512,6 +507,11 @@ bool Being::removeModifier(unsigned attr, double value, unsigned layer,
     return ret;
 }
 
+void Being::setGender(BeingGender gender)
+{
+    mGender = gender;
+}
+
 void Being::setAttribute(unsigned id, double value)
 {
     AttributeMap::iterator ret = mAttributes.find(id);
@@ -743,18 +743,11 @@ void Being::update()
     processAttacks();
 }
 
-void Being::inserted()
+void Being::inserted(Entity *)
 {
-    Actor::inserted();
-
     // Reset the old position, since after insertion it is important that it is
     // in sync with the zone that we're currently present in.
     mOld = getPosition();
-}
-
-void Being::setGender(BeingGender gender)
-{
-    mGender = gender;
 }
 
 void Being::processAttack(Attack &attack)

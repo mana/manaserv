@@ -23,19 +23,21 @@
 
 #include "common/inventorydata.h"
 #include "common/manaserv_protocol.h"
-#include "game-server/eventlistener.h"
 
 #include <list>
 #include <string>
 #include <vector>
 
+#include <sigc++/trackable.h>
+
+class Being;
 class MapComposite;
 class Entity;
 
 /**
  * Abstract interface for calling functions written in an external language.
  */
-class Script
+class Script : public sigc::trackable
 {
     public:
         /**
@@ -216,9 +218,6 @@ class Script
         MapComposite *getMap() const
         { return mMap; }
 
-        EventListener *getScriptListener()
-        { return &mEventListener; }
-
         virtual void processDeathEvent(Being *entity) = 0;
 
         virtual void processRemoveEvent(Entity *entity) = 0;
@@ -235,7 +234,6 @@ class Script
 
     private:
         MapComposite *mMap;
-        EventListener mEventListener; /**< Tracking of being deaths. */
         std::vector<Thread*> mThreads;
 
         static Ref mCreateNpcDelayedCallback;
@@ -244,17 +242,5 @@ class Script
     friend struct ScriptEventDispatch;
     friend class Thread;
 };
-
-struct ScriptEventDispatch: EventDispatch
-{
-    ScriptEventDispatch()
-    {
-        typedef EventListenerFactory< Script, &Script::mEventListener > Factory;
-        died = &Factory::create< Being, &Script::processDeathEvent >::function;
-        removed = &Factory::create< Entity, &Script::processRemoveEvent >::function;
-    }
-};
-
-static ScriptEventDispatch scriptEventDispatch;
 
 #endif // SCRIPTING_SCRIPT_H

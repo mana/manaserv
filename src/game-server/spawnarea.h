@@ -21,7 +21,6 @@
 #ifndef SPAWNAREA_H
 #define SPAWNAREA_H
 
-#include "game-server/eventlistener.h"
 #include "game-server/entity.h"
 #include "utils/point.h"
 
@@ -47,7 +46,6 @@ class SpawnArea : public Entity
 
     private:
         MonsterClass *mSpecy; /**< Specy of monster that spawns in this area. */
-        EventListener mSpawnedListener; /**< Tracking of spawned monsters. */
         Rectangle mZone;
         int mMaxBeings;    /**< Maximum population of this area. */
         int mSpawnRate;    /**< Number of beings spawning per minute. */

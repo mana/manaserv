@@ -265,8 +265,6 @@ void LuaScript::processRemoveEvent(Entity *entity)
         //      being. This might be very interesting for scripting quests.
         execute();
     }
-
-    entity->removeListener(getScriptListener());
 }
 
 /**

@@ -28,6 +28,8 @@ extern "C" {
 
 #include "scripting/script.h"
 
+class Character;
+
 /**
  * Implementation of the Script class for Lua.
  */

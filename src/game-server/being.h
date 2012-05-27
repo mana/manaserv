@@ -297,10 +297,7 @@ class Being : public Actor
         void setTarget(Being *target)
         { mTarget = target; }
 
-        /**
-         * Overridden in order to reset the old position upon insertion.
-         */
-        virtual void inserted();
+        sigc::signal<void, Being *> signal_died;
 
     protected:
         /**
@@ -331,6 +328,11 @@ class Being : public Actor
     private:
         Being(const Being &rhs);
         Being &operator=(const Being &rhs);
+
+        /**
+         * Connected to signal_inserted to reset the old position.
+         */
+        void inserted(Entity *);
 
         Path mPath;
         BeingDirection mDirection;   /**< Facing direction. */

@@ -1709,7 +1709,11 @@ static int chr_get_post(lua_State *s)
 static int being_register(lua_State *s)
 {
     Being *being = checkBeing(s, 1);
-    being->addListener(getScript(s)->getScriptListener());
+    Script *script = getScript(s);
+
+    being->signal_died.connect(sigc::mem_fun(script, &Script::processDeathEvent));
+    being->signal_removed.connect(sigc::mem_fun(script, &Script::processRemoveEvent));
+
     return 0;
 }
 

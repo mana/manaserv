@@ -35,18 +35,6 @@
 
 #include <cmath>
 
-struct MonsterTargetEventDispatch: EventDispatch
-{
-    MonsterTargetEventDispatch()
-    {
-        typedef EventListenerFactory<Monster, &Monster::mTargetListener> Factory;
-        removed = &Factory::create< Entity, &Monster::forgetTarget >::function;
-        died = &Factory::create<Entity, &Monster::forgetTarget, Being>::function;
-    }
-};
-
-static MonsterTargetEventDispatch monsterTargetEventDispatch;
-
 MonsterClass::~MonsterClass()
 {
     for (std::vector<AttackInfo *>::iterator it = mAttacks.begin(),
@@ -67,7 +55,6 @@ double MonsterClass::getVulnerability(Element element) const
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
-    mTargetListener(&monsterTargetEventDispatch),
     mOwner(NULL)
 {
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
@@ -137,12 +124,6 @@ Monster::Monster(MonsterClass *specy):
 
 Monster::~Monster()
 {
-    // Remove death listeners.
-    for (std::map<Being *, int>::iterator i = mAnger.begin(),
-         i_end = mAnger.end(); i != i_end; ++i)
-    {
-        i->first->removeListener(&mTargetListener);
-    }
 }
 
 void Monster::update()
@@ -229,11 +210,11 @@ void Monster::refreshTarget()
 
         // Determine how much we hate the target
         int targetPriority = 0;
-        std::map<Being *, int, std::greater<Being *> >::iterator angerIterator;
-        angerIterator = mAnger.find(target);
+        std::map<Being *, AggressionInfo>::iterator angerIterator = mAnger.find(target);
         if (angerIterator != mAnger.end())
         {
-            targetPriority = angerIterator->second;
+            const AggressionInfo &aggressionInfo = angerIterator->second;
+            targetPriority = aggressionInfo.anger;
         }
         else if (mSpecy->isAggressive())
         {
@@ -359,11 +340,15 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
     }
 }
 
-void Monster::forgetTarget(Entity *t)
+void Monster::forgetTarget(Entity *entity)
 {
-    Being *b = static_cast< Being * >(t);
+    Being *b = static_cast< Being * >(entity);
+    {
+        AggressionInfo &aggressionInfo = mAnger[b];
+        aggressionInfo.removedConnection.disconnect();
+        aggressionInfo.diedConnection.disconnect();
+    }
     mAnger.erase(b);
-    b->removeListener(&mTargetListener);
 
     if (b->getType() == OBJECT_CHARACTER)
     {
@@ -375,20 +360,42 @@ void Monster::forgetTarget(Entity *t)
 
 void Monster::changeAnger(Actor *target, int amount)
 {
-    if (target && (target->getType() == OBJECT_MONSTER
-        || target->getType() == OBJECT_CHARACTER))
+    const EntityType type = target->getType();
+    if (type != OBJECT_MONSTER && type != OBJECT_CHARACTER)
+        return;
+
+    Being *being = static_cast< Being * >(target);
+
+    if (mAnger.find(being) != mAnger.end())
     {
-        Being *t = static_cast< Being * >(target);
-        if (mAnger.find(t) != mAnger.end())
-        {
-            mAnger[t] += amount;
-        }
-        else
-        {
-            mAnger[t] = amount;
-            t->addListener(&mTargetListener);
-        }
+        mAnger[being].anger += amount;
     }
+    else
+    {
+        AggressionInfo &aggressionInfo = mAnger[being];
+        aggressionInfo.anger = amount;
+
+        // Forget target either when it's removed or died, whichever
+        // happens first.
+        aggressionInfo.removedConnection =
+                being->signal_removed.connect(sigc::mem_fun(this, &Monster::forgetTarget));
+        aggressionInfo.diedConnection =
+                being->signal_died.connect(sigc::mem_fun(this, &Monster::forgetTarget));
+    }
+}
+
+std::map<Being *, int> Monster::getAngerList() const
+{
+    std::map<Being *, int> result;
+    std::map<Being *, AggressionInfo>::const_iterator i, i_end;
+
+    for (i = mAnger.begin(), i_end = mAnger.end(); i != i_end; ++i)
+    {
+        const AggressionInfo &aggressionInfo = i->second;
+        result.insert(std::make_pair(i->first, aggressionInfo.anger));
+    }
+
+    return result;
 }
 
 int Monster::damage(Actor *source, const Damage &damage)
@@ -399,9 +406,7 @@ int Monster::damage(Actor *source, const Damage &damage)
     newDamage.delta = newDamage.delta * factor;
     int HPLoss = Being::damage(source, newDamage);
     if (source)
-    {
         changeAnger(source, HPLoss);
-    }
 
     if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
     {

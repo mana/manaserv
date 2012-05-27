@@ -23,18 +23,20 @@
 
 #include "common/manaserv_protocol.h"
 
-using namespace ManaServ;
-
 #include <set>
 
-class EventListener;
+#include <sigc++/signal.h>
+#include <sigc++/trackable.h>
+
+using namespace ManaServ;
+
 class MapComposite;
 
 /**
  * Base class for in-game objects. Knows only its type and the map it resides
  * on. Provides listeners.
  */
-class Entity
+class Entity : public sigc::trackable
 {
     public:
         Entity(EntityType type, MapComposite *map = 0)
@@ -42,7 +44,7 @@ class Entity
             mType(type)
         {}
 
-        virtual ~Entity();
+        virtual ~Entity() {}
 
         /**
          * Gets type of this entity.
@@ -88,29 +90,8 @@ class Entity
         virtual void setMap(MapComposite *map)
         { mMap = map; }
 
-        /**
-         * Adds a new listener.
-         */
-        void addListener(const EventListener *);
-
-        /**
-         * Removes an existing listener.
-         */
-        void removeListener(const EventListener *);
-
-        /**
-         * Calls all the "inserted" listeners.
-         */
-        virtual void inserted();
-
-        /**
-         * Calls all the "removed" listeners.
-         */
-        virtual void removed();
-
-    protected:
-        typedef std::set< const EventListener * > Listeners;
-        Listeners mListeners;   /**< List of event listeners. */
+        sigc::signal<void, Entity *> signal_inserted;
+        sigc::signal<void, Entity *> signal_removed;
 
     private:
         MapComposite *mMap;     /**< Map the entity is on */
