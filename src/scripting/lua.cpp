@@ -1001,7 +1001,7 @@ static int being_damage(lua_State *s)
     dmg.delta = luaL_checkint(s, 3);
     dmg.cth = luaL_checkint(s, 4);
     dmg.type = (DamageType)luaL_checkint(s, 5);
-    dmg.element = luaL_checkint(s, 6);
+    dmg.element = (Element)luaL_checkint(s, 6);
     Being *source = 0;
     if (lua_gettop(s) >= 7)
     {
@@ -1269,13 +1269,11 @@ static int monster_class_on_damage(lua_State *s)
     return 0;
 }
 
-static int monster_class_on(lua_State *s)
+static int monster_class_attacks(lua_State *s)
 {
     MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
-    const char *event = luaL_checkstring(s, 2);
-    luaL_checktype(s, 3, LUA_TFUNCTION);
-    monsterClass->setEventCallback(event, getScript(s));
-    return 0;
+    pushSTLContainer(s, monsterClass->getAttackInfos());
+    return 1;
 }
 
 /**
@@ -2170,6 +2168,14 @@ static int item_class_on(lua_State *s)
     return 0;
 }
 
+static int item_class_attacks(lua_State *s)
+{
+    ItemClass *itemClass = LuaItemClass::check(s, 1);
+    std::vector<AttackInfo *> attacks = itemClass->getAttackInfos();
+    pushSTLContainer<AttackInfo *>(s, attacks);
+    return 1;
+}
+
 /**
  * drop_item(int x, int y, int id || string name[, int number]): bool
  * Creates an item stack on the floor.
@@ -2435,6 +2441,113 @@ static int specialinfo_on_use(lua_State *s)
     return 0;
 }
 
+static int attack_get_priority(lua_State *s)
+{
+    AttackInfo *attack = LuaAttackInfo::check(s, 1);
+    lua_pushinteger(s, attack->getPriority());
+    return 1;
+}
+
+static int attack_get_cooldowntime(lua_State *s)
+{
+    AttackInfo *attack = LuaAttackInfo::check(s, 1);
+    lua_pushinteger(s, attack->getCooldownTime());
+    return 1;
+}
+
+static int attack_get_warmuptime(lua_State *s)
+{
+    AttackInfo *attack = LuaAttackInfo::check(s, 1);
+    lua_pushinteger(s, attack->getWarmupTime());
+    return 1;
+}
+
+static int attack_get_reusetime(lua_State *s)
+{
+    AttackInfo *attack = LuaAttackInfo::check(s, 1);
+    lua_pushinteger(s, attack->getReuseTime());
+    return 1;
+}
+
+static int attack_get_damage(lua_State *s)
+{
+    AttackInfo *attack = LuaAttackInfo::check(s, 1);
+    LuaDamage::push(s, &attack->getDamage());
+    return 1;
+}
+
+static int attack_on_attack(lua_State *s)
+{
+    AttackInfo *attack = LuaAttackInfo::check(s, 1);
+    luaL_checktype(s, 2, LUA_TFUNCTION);
+    attack->setCallback(getScript(s));
+    return 0;
+}
+
+static int damage_get_id(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->id);
+    return 1;
+}
+
+
+static int damage_get_skill(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->skill);
+    return 1;
+}
+
+static int damage_get_base(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->base);
+    return 1;
+}
+
+static int damage_get_delta(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->delta);
+    return 1;
+}
+
+static int damage_get_cth(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->cth);
+    return 1;
+}
+
+static int damage_get_element(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->element);
+    return 1;
+}
+
+static int damage_get_type(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->type);
+    return 1;
+}
+
+static int damage_is_truestrike(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushboolean(s, damage->trueStrike);
+    return 1;
+}
+
+static int damage_get_range(lua_State *s)
+{
+    Damage *damage = LuaDamage::check(s, 1);
+    lua_pushinteger(s, damage->range);
+    return 1;
+}
+
 static int require_loader(lua_State *s)
 {
     // Add .lua extension (maybe only do this when it doesn't have it already)
@@ -2590,8 +2703,32 @@ LuaScript::LuaScript():
     luaL_register(mRootState, NULL, callbacks);
     lua_pop(mRootState, 1);                     // pop the globals table
 
+    static luaL_Reg const members_AttackInfo[] = {
+        { "priority",                        &attack_get_priority             },
+        { "cooldowntime",                    &attack_get_cooldowntime         },
+        { "warmuptime",                      &attack_get_warmuptime           },
+        { "reusetime",                       &attack_get_reusetime            },
+        { "damage",                          &attack_get_damage               },
+        { "on_attack",                       &attack_on_attack                },
+        { NULL, NULL }
+    };
+
+    static luaL_Reg const members_Damage[] = {
+        { "id",                              &damage_get_id                   },
+        { "skill",                           &damage_get_skill                },
+        { "base",                            &damage_get_base                 },
+        { "delta",                           &damage_get_delta                },
+        { "cth",                             &damage_get_cth                  },
+        { "element",                         &damage_get_element              },
+        { "type",                            &damage_get_type                 },
+        { "is_truestrike",                   &damage_is_truestrike            },
+        { "range",                           &damage_get_range                },
+        { NULL, NULL }
+    };
+
     static luaL_Reg const members_ItemClass[] = {
         { "on",                              &item_class_on                   },
+        { "attacks",                         &item_class_attacks              },
         { NULL, NULL }
     };
 
@@ -2606,7 +2743,7 @@ LuaScript::LuaScript():
     static luaL_Reg const members_MonsterClass[] = {
         { "on_update",                       &monster_class_on_update         },
         { "on_damage",                       &monster_class_on_damage         },
-        { "on",                              &monster_class_on                },
+        { "attacks",                         &monster_class_attacks           },
         { NULL, NULL }
     };
 
@@ -2625,6 +2762,8 @@ LuaScript::LuaScript():
         { NULL, NULL}
     };
 
+    LuaAttackInfo::registerType(mRootState, "Attack", members_AttackInfo);
+    LuaDamage::registerType(mRootState, "Damage", members_Damage);
     LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
     LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);
