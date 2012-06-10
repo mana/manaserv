@@ -54,15 +54,13 @@ struct MonsterAttack
     unsigned id;
     int priority;
     float damageFactor;
-    int element;
+    Element element;
     DamageType type;
     int preDelay;
     int aftDelay;
     int range;
     std::string scriptEvent;
 };
-
-typedef std::vector< MonsterAttack *> MonsterAttacks;
 
 /**
  * Class describing the characteristics of a generic monster.
@@ -84,6 +82,8 @@ class MonsterClass
             mAttackDistance(0),
             mOptimalLevel(0)
         {}
+
+        ~MonsterClass();
 
         /**
          * Returns monster type. This is the Id of the monster class.
@@ -188,10 +188,10 @@ class MonsterClass
         unsigned getAttackDistance() const { return mAttackDistance; }
 
         /** Adds an attack to the monsters repertoire. */
-        void addAttack(MonsterAttack *type) { mAttacks.push_back(type); }
+        void addAttack(AttackInfo *info) { mAttacks.push_back(info); }
 
         /** Returns all attacks of the monster. */
-        const MonsterAttacks &getAttacks() const { return mAttacks; }
+        std::vector<AttackInfo *> &getAttackInfos() { return mAttacks; }
 
         /** sets the script file for the monster */
         void setScript(const std::string &filename) { mScript = filename; }
@@ -205,17 +205,11 @@ class MonsterClass
         void setDamageCallback(Script *script)
         { script->assignCallback(mDamageCallback); }
 
-        void setEventCallback(const std::string &event, Script *script)
-        { script->assignCallback(mEventCallbacks[event]); }
-
         Script::Ref getUpdateCallback() const
         { return mUpdateCallback; }
 
         Script::Ref getDamageCallback() const
         { return mDamageCallback; }
-
-        Script::Ref getEventCallback(const std::string &event) const
-        { return mEventCallbacks.value(event); }
 
     private:
         unsigned short mId;
@@ -234,7 +228,7 @@ class MonsterClass
         int mMutation;
         int mAttackDistance;
         int mOptimalLevel;
-        MonsterAttacks mAttacks;
+        std::vector<AttackInfo *> mAttacks;
         std::string mScript;
 
         /**
@@ -246,12 +240,6 @@ class MonsterClass
          * A reference to the script that is called when a mob takes damage.
          */
         Script::Ref mDamageCallback;
-
-        /**
-         * Named event callbacks. Currently only used for custom attack
-         * callbacks.
-         */
-        utils::NameMap<Script::Ref> mEventCallbacks;
 
         friend class MonsterManager;
         friend class Monster;
@@ -300,20 +288,14 @@ class Monster : public Being
         void refreshTarget();
 
         /**
-         * Performs an attack, if needed.
+         * Performs an attack
          */
-        void processAttack();
+        virtual void processAttack(Attack &attack);
 
         /**
          * Loads a script file for this monster
          */
         void loadScript(const std::string &scriptName);
-
-        /**
-         * Gets the attack id the being is currently performing.
-         */
-        virtual int getAttackId() const
-        { return mCurrentAttack->id; }
 
         /**
          * Kills the being.
@@ -371,6 +353,9 @@ class Monster : public Being
          */
         Character *mOwner;
 
+        /** Factor for damage mutation */
+        unsigned mDamageMutation;
+
         /** List of characters and their skills that attacked this monster. */
         std::map<Character *, std::set <size_t> > mExpReceivers;
 
@@ -379,9 +364,6 @@ class Monster : public Being
          * protection).
          */
         std::set<Character *> mLegalExpReceivers;
-
-        /** Attack the monster is currently performing. */
-        MonsterAttack *mCurrentAttack;
 
         /**
          * Set positions relative to target from which the monster can attack.
@@ -394,8 +376,6 @@ class Monster : public Being
         Timeout mKillStealProtectedTimeout;
         /** Time until dead monster is removed */
         Timeout mDecayTimeout;
-        /** Time until monster can attack again */
-        Timeout mAttackTimeout;
 
         friend struct MonsterTargetEventDispatch;
 };

@@ -26,22 +26,30 @@
 
 #include "common/defines.h"
 
+#include "scripting/script.h"
+
+#include "utils/xml.h"
+
+#include "game-server/timeout.h"
+
 /**
  * Structure that describes the severity and nature of an attack a being can
  * be hit by.
  */
 struct Damage
 {
-    unsigned int skill;             /**< Skill used by source (needed for exp calculation) */
-    unsigned short base;            /**< Base amount of damage. */
-    unsigned short delta;           /**< Additional damage when lucky. */
-    unsigned short cth;             /**< Chance to hit. Opposes the evade attribute. */
-    unsigned char element;          /**< Elemental damage. */
-    DamageType type;                /**< Damage type: Physical or magical? */
-    bool trueStrike;                /**< Override dodge calculation */
-    unsigned short range;           /**< Maximum distance that this attack can be used from, in pixels */
+    unsigned id;          /**< Id of the attack (needed for displaying animation clientside */
+    unsigned skill;       /**< Skill used by source (needed for exp calculation) */
+    unsigned short base;  /**< Base amount of damage. */
+    unsigned short delta; /**< Additional damage when lucky. */
+    unsigned short cth;   /**< Chance to hit. Opposes the evade attribute. */
+    Element element;      /**< Elemental damage. */
+    DamageType type;      /**< Damage type: Physical or magical? */
+    bool trueStrike;      /**< Override dodge calculation */
+    unsigned short range; /**< Maximum distance that this attack can be used from, in pixels */
 
     Damage():
+        id(0),
         skill(0),
         base(0),
         delta(0),
@@ -57,53 +65,51 @@ struct Damage
  * Class that stores information about an auto-attack
  */
 
-class Attack
+class Character;
+
+struct AttackInfo
 {
     public:
-        Attack(Damage &damage, unsigned int warmup, unsigned int cooldown):
+        AttackInfo(unsigned priority, const Damage &damage,
+               unsigned short warmupTime, unsigned short cooldownTime,
+               unsigned short reuseTime):
             mDamage(damage),
-            mTimer(0),
-            mAspd(cooldown),
-            mWarmup(warmup && warmup < cooldown ? warmup : cooldown >> 2)
+            mCooldownTime(cooldownTime),
+            mWarmupTime(warmupTime),
+            mReuseTime(reuseTime),
+            mPriority(priority)
         {}
 
-        unsigned short getTimer() const { return mTimer; }
-        bool tick() { return mTimer ? !--mTimer : false; }
-        void reset() { mTimer = mAspd; }
-        void softReset() { if (mTimer >= mWarmup) mTimer = mAspd; }
-        void halt() { if (mTimer >= mWarmup) mTimer = 0; }
-        bool isReady() const { return !(mTimer - mWarmup); }
+        unsigned short getWarmupTime() const
+        { return mWarmupTime; }
 
-        bool operator<(const Attack &rhs) const
-        { return mTimer < rhs.mTimer; }
+        unsigned short getCooldownTime() const
+        { return mCooldownTime; }
 
-        const Damage &getDamage() const { return mDamage; }
+        unsigned short getReuseTime() const
+        { return mReuseTime; }
+
+        static AttackInfo *readAttackNode(xmlNodePtr node);
+
+        Damage &getDamage()
+        { return mDamage; }
+
+        const Script::Ref &getScriptCallback() const
+        { return mCallback; }
+
+        void setCallback(Script *script)
+        { script->assignCallback(mCallback); }
+
+        unsigned getPriority() const
+        { return mPriority; }
 
     private:
         Damage mDamage;
 
         /**
-         * Internal timer that is modified each tick.
-         *
-         * When > warmup, the attack is warming up before a strike
-         * When = warmup, the attack triggers, dealing damage to the target
-         *  *if* the target is still in range.
-         *  (The attack is canceled when the target moves out of range before
-         *   the attack can hit, there should be a trigger for scripts here
-         *   too)
-         *  (Should the character automatically persue when the target is still
-         *   visible in this case?)
-         * When < warmup, the attack is cooling down after a strike. When in
-         *  cooldown, the timer should not be soft-reset.
-         * When 0, the attack is inactive (the character is doing something
-         *  other than attacking and the attack is not in cooldown)
-         */
-        unsigned short mTimer;
-
-        /**
          * Value to reset the timer to (warmup + cooldown)
          */
-        unsigned short mAspd;
+        unsigned short mCooldownTime;
 
         /**
          * Pre-attack delay tick.
@@ -111,7 +117,52 @@ class Attack
          * So the attack triggers where timer == warmup, having gone through
          * aspd - warmup ticks.
          */
-        unsigned short mWarmup;
+        unsigned short mWarmupTime;
+
+        /**
+         * The global cooldown that needs to be finished before the being can
+         * use the next attack.
+         */
+        unsigned short mReuseTime;
+
+        /**
+         * Name of the script callback
+         */
+        Script::Ref mCallback;
+
+        /**
+         * Priority of the attack
+         */
+        unsigned mPriority;
+};
+
+class Attack
+{
+    public:
+        Attack(AttackInfo *info):
+            mInfo(info)
+        {}
+
+        AttackInfo *getAttackInfo()
+        { return mInfo; }
+
+        void markAsTriggered()
+        { mReuseTimer.set(mInfo->getCooldownTime() + mInfo->getReuseTime()); }
+
+        bool isUsuable() const
+        { return mReuseTimer.expired(); }
+
+
+    private:
+        /**
+         * Contains infos about cooldown/damage/etc
+         */
+        AttackInfo *mInfo;
+
+        /**
+         * Internal timer that checks time for reuse
+         */
+        Timeout mReuseTimer;
 };
 
 /**
@@ -120,14 +171,16 @@ class Attack
 class Attacks
 {
     public:
-        /**
-         * Whether the being has at least one auto attack that is ready.
-         */
-        void add(const Attack &);
-        void clear(); // Wipe the list completely (used in place of remove for now; FIXME)
-        void start();
-        void stop(); // If the character does some action other than attacking, reset all warmups (NOT cooldowns!)
-        void tick(std::list<Attack> *ret = 0);
+        Attacks():
+            mCurrentAttack(0)
+        {}
+
+        void add(AttackInfo *);
+        void remove(AttackInfo *);
+        void markAttackAsTriggered();
+        Attack *getTriggerableAttack();
+        void startAttack(Attack *attack);
+        void getUsuableAttacks(std::vector<Attack *> *ret);
 
         /**
          * Tells the number of attacks available
@@ -135,19 +188,17 @@ class Attacks
         unsigned getNumber()
         { return mAttacks.size(); }
 
-        /**
-         * Tells whether the attacks are active.
-         */
-        bool areActive()
-        { return mActive; }
-
     private:
+        std::vector<Attack> mAttacks;
+
+        Attack *mCurrentAttack;
+
         /**
-         * Marks whether or not to keep auto-attacking. Cooldowns still need
-         * to be processed when false.
+         * when greater than cooldown -> warming up
+         * when equals cooldown       -> trigger attack
+         * when smaller               -> cooling down
          */
-        bool mActive;
-        std::list<Attack> mAttacks;
+        Timeout mAttackTimer;
 };
 
 #endif // ATTACK_H

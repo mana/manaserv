@@ -307,66 +307,66 @@ void ItemManager::readEquipNode(xmlNodePtr equipNode, ItemClass *item)
 
 void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
 {
-    std::pair<ItemTriggerType, ItemTriggerType> triggerTypes;
-    {
-        const std::string triggerName = XML::getProperty(
-                    effectNode, "trigger", std::string());
-        const std::string dispellTrigger = XML::getProperty(
-                    effectNode, "dispell", std::string());
-        // label -> { trigger (apply), trigger (cancel (default)) }
-        // The latter can be overridden.
-        static std::map<const std::string,
-                        std::pair<ItemTriggerType, ItemTriggerType> >
-                        triggerTable;
-        if (triggerTable.empty())
-        {
-            /*
-             * The following is a table of all triggers for item
-             *     effects.
-             * The first element defines the trigger used for this
-             *     trigger, and the second defines the default
-             *     trigger to use for dispelling.
-             */
-            triggerTable["in-inventory"].first         = ITT_IN_INVY;
-            triggerTable["in-inventory"].second        = ITT_LEAVE_INVY;
-            triggerTable["activation"].first        = ITT_ACTIVATE;
-            triggerTable["activation"].second       = ITT_NULL;
-            triggerTable["equip"].first             = ITT_EQUIP;
-            triggerTable["equip"].second            = ITT_UNEQUIP;
-            triggerTable["leave-inventory"].first   = ITT_LEAVE_INVY;
-            triggerTable["leave-inventory"].second  = ITT_NULL;
-            triggerTable["unequip"].first           = ITT_UNEQUIP;
-            triggerTable["unequip"].second          = ITT_NULL;
-            triggerTable["equip-change"].first      = ITT_EQUIPCHG;
-            triggerTable["equip-change"].second     = ITT_NULL;
-            triggerTable["null"].first              = ITT_NULL;
-            triggerTable["null"].second             = ITT_NULL;
-        }
-        std::map<const std::string, std::pair<ItemTriggerType,
-                                    ItemTriggerType> >::iterator
-                 it = triggerTable.find(triggerName);
+    const std::string triggerName = XML::getProperty(
+                effectNode, "trigger", std::string());
+    const std::string dispellTrigger = XML::getProperty(
+                effectNode, "dispell", std::string());
+    // label -> { trigger (apply), trigger (cancel (default)) }
+    // The latter can be overridden.
+    ItemTrigger triggerType;
 
-        if (it == triggerTable.end()) {
-            LOG_WARN("Item Manager: Unable to find effect trigger type \""
-                     << triggerName << "\", skipping!");
-            return;
-        }
-        triggerTypes = it->second;
-        if (!dispellTrigger.empty())
-        {
-            if ((it = triggerTable.find(dispellTrigger)) == triggerTable.end())
-                LOG_WARN("Item Manager: Unable to find dispell effect "
-                         "trigger type \"" << dispellTrigger << "\"!");
-            else
-                triggerTypes.second = it->second.first;
-        }
+    static std::map<const std::string, ItemTrigger> triggerTable;
+    if (triggerTable.empty())
+    {
+        /*
+         * The following is a table of all triggers for item
+         *     effects.
+         * The first element defines the trigger used for this
+         *     trigger, and the second defines the default
+         *     trigger to use for dispelling.
+         */
+        triggerTable["in-inventory"].apply       = ITT_IN_INVY;
+        triggerTable["in-inventory"].dispell     = ITT_LEAVE_INVY;
+        triggerTable["activation"].apply         = ITT_ACTIVATE;
+        triggerTable["activation"].dispell       = ITT_NULL;
+        triggerTable["equip"].apply              = ITT_EQUIP;
+        triggerTable["equip"].dispell            = ITT_UNEQUIP;
+        triggerTable["leave-inventory"].apply    = ITT_LEAVE_INVY;
+        triggerTable["leave-inventory"].dispell  = ITT_NULL;
+        triggerTable["unequip"].apply            = ITT_UNEQUIP;
+        triggerTable["unequip"].dispell          = ITT_NULL;
+        triggerTable["equip-change"].apply       = ITT_EQUIPCHG;
+        triggerTable["equip-change"].dispell     = ITT_NULL;
+        triggerTable["null"].apply               = ITT_NULL;
+        triggerTable["null"].dispell             = ITT_NULL;
+    }
+
+    std::map<const std::string, ItemTrigger>::iterator
+             it = triggerTable.find(triggerName);
+
+    if (it == triggerTable.end()) {
+        LOG_WARN("Item Manager: Unable to find effect trigger type \""
+                 << triggerName << "\", skipping!");
+        return;
+    }
+    triggerType = it->second;
+
+    // Overwrite dispell trigger if given
+    if (!dispellTrigger.empty())
+    {
+        if ((it = triggerTable.find(dispellTrigger)) == triggerTable.end())
+            LOG_WARN("Item Manager: Unable to find dispell effect "
+                     "trigger type \"" << dispellTrigger << "\"!");
+        else
+            triggerType.dispell = it->second.apply;
     }
 
     for_each_xml_child_node(subNode, effectNode)
     {
         if (xmlStrEqual(subNode->name, BAD_CAST "modifier"))
         {
-            std::string tag = XML::getProperty(subNode, "attribute", std::string());
+            std::string tag = XML::getProperty(subNode, "attribute",
+                                               std::string());
             if (tag.empty())
             {
                 LOG_WARN("Item Manager: Warning, modifier found "
@@ -383,11 +383,13 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
                                                   value,
                                                   item->getDatabaseID(),
                                                   duration),
-                            triggerTypes.first, triggerTypes.second);
+                            triggerType.apply, triggerType.dispell);
         }
         else if (xmlStrEqual(subNode->name, BAD_CAST "attack"))
         {
-            // TODO - URGENT
+            AttackInfo *attackInfo = AttackInfo::readAttackNode(subNode);
+            item->addAttack(attackInfo, triggerType.apply, triggerType.dispell);
+
         }
         // Having a dispell for the next three is nonsensical.
         else if (xmlStrEqual(subNode->name, BAD_CAST "cooldown"))
@@ -402,7 +404,7 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
         }
         else if (xmlStrEqual(subNode->name, BAD_CAST "consumes"))
         {
-            item->addEffect(new ItemEffectConsumes, triggerTypes.first);
+            item->addEffect(new ItemEffectConsumes, triggerType.apply);
         }
         else if (xmlStrEqual(subNode->name, BAD_CAST "scriptevent"))
         {
@@ -423,8 +425,8 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
             item->addEffect(new ItemEffectScript(item,
                                                  activateEventName,
                                                  dispellEventName),
-                                                 triggerTypes.first,
-                                                 triggerTypes.second);
+                                                 triggerType.apply,
+                                                 triggerType.dispell);
         }
     }
 }
