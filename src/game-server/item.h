@@ -67,7 +67,7 @@ enum
     SET_STATE_NOT_FLOATING
 };
 
-struct ItemAutoAttackInfo
+struct ItemAttackInfo
 {
     unsigned int base;
     unsigned int range;
@@ -93,7 +93,7 @@ enum ItemEffectType
     // Effects that are removed automatically when the trigger ends
     // (ie. item no longer exists in invy, unequipped)
     IET_ATTR_MOD = 0, // Modify a given attribute with a given value
-    IET_AUTOATTACK, // Give the associated being an autoattack
+    IET_ATTACK, // Give the associated being an attack
     // Effects that do not need any automatic removal
     IET_COOLDOWN, // Set a cooldown to this item, preventing activation for n ticks
     IET_G_COOLDOWN, // Set a cooldown to all items of this type for this being
@@ -128,7 +128,7 @@ class ItemEffectAttrMod : public ItemEffectInfo
         unsigned int mId;
 };
 
-class ItemEffectAutoAttack : public ItemEffectInfo
+class ItemEffectAttack : public ItemEffectInfo
 {
     public:
         bool apply(Being *itemUser);

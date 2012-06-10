@@ -117,7 +117,7 @@
         </equip>
         <effect trigger="equip">
             <modifier attribute="acc1" value="1.0" />
-            <autoattack skill="102" warmupspeed="10" cooldownspeed="166"
+            <attack skill="102" warmupspeed="10" cooldownspeed="166"
                 basedamage="50" deltadamage="10" chancetohit="2" range="32"
                 element="neutral" damagetype="physical" />
         </effect>
@@ -134,7 +134,7 @@
             <slot type="hand" required="2" />
         </equip>
         <effect trigger="equip">
-            <autoattack skill="106" warmupspeed="10" cooldownspeed="166"
+            <attack skill="106" warmupspeed="10" cooldownspeed="166"
                 basedamage="50" deltadamage="10" chancetohit="2" range="160"
                 element="neutral" damagetype="physical" />
             <modifier attribute="acc1" value="1.5" />
@@ -152,7 +152,7 @@
             <slot type="hand" required="1" />
         </equip>
         <effect trigger="equip">
-            <autoattack skill="100" warmupspeed="10" cooldownspeed="166"
+            <attack skill="100" warmupspeed="10" cooldownspeed="166"
                 basedamage="50" deltadamage="10" chancetohit="2" range="32"
                 element="neutral" damagetype="physical" />
             <modifier attribute="acc1" value="1.5" />

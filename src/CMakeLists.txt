@@ -193,12 +193,12 @@ SET(SRCS_MANASERVGAME
     game-server/accountconnection.cpp
     game-server/actor.h
     game-server/actor.cpp
+    game-server/attack.h
+    game-server/attack.cpp
     game-server/attribute.h
     game-server/attribute.cpp
     game-server/attributemanager.h
     game-server/attributemanager.cpp
-    game-server/autoattack.h
-    game-server/autoattack.cpp
     game-server/being.h
     game-server/being.cpp
     game-server/buysell.h

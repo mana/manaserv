@@ -385,7 +385,7 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
                                                   duration),
                             triggerTypes.first, triggerTypes.second);
         }
-        else if (xmlStrEqual(subNode->name, BAD_CAST "autoattack"))
+        else if (xmlStrEqual(subNode->name, BAD_CAST "attack"))
         {
             // TODO - URGENT
         }
