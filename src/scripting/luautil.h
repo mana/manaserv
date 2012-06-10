@@ -34,10 +34,12 @@ extern "C" {
 #include <set>
 #include <vector>
 
+#include "game-server/attack.h"
 #include "game-server/specialmanager.h"
 
 class Being;
 class Character;
+class Entity;
 class ItemClass;
 class MapComposite;
 class MapObject;
@@ -45,7 +47,6 @@ class Monster;
 class MonsterClass;
 class NPC;
 class StatusEffect;
-class Entity;
 
 // Report script errors and interrupt the script.
 void raiseScriptError(lua_State *s, const char *format, ...);
@@ -150,6 +151,8 @@ private:
 
 template <typename T> const char * LuaUserData<T>::mTypeName;
 
+typedef LuaUserData<AttackInfo> LuaAttackInfo;
+typedef LuaUserData<Damage> LuaDamage;
 typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
@@ -184,6 +187,11 @@ void push(lua_State *s, int val);
 void push(lua_State *s, const std::string &val);
 void push(lua_State *s, Entity *val);
 void push(lua_State *s, double val);
+
+inline void push(lua_State *s, AttackInfo *val)
+{
+    LuaAttackInfo::push(s, val);
+}
 
 inline void push(lua_State *s, MapObject *val)
 {
