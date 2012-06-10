@@ -47,12 +47,20 @@ struct MonsterTargetEventDispatch: EventDispatch
 
 static MonsterTargetEventDispatch monsterTargetEventDispatch;
 
+MonsterClass::~MonsterClass()
+{
+    for (std::vector<AttackInfo *>::iterator it = mAttacks.begin(),
+         it_end = mAttacks.end(); it != it_end; ++it)
+    {
+        delete *it;
+    }
+}
+
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
     mTargetListener(&monsterTargetEventDispatch),
-    mOwner(NULL),
-    mCurrentAttack(NULL)
+    mOwner(NULL)
 {
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
 
@@ -94,6 +102,9 @@ Monster::Monster(MonsterClass *specy):
         }
     }
 
+    mDamageMutation = mutation ?
+                (100 + (rand()%(mutation << 1)) - mutation) / 100.0 : 1;
+
     setSize(specy->getSize());
     setGender(specy->getGender());
 
@@ -103,6 +114,14 @@ Monster::Monster(MonsterClass *specy):
     mAttackPositions.push_back(AttackPosition(-dist, 0, RIGHT));
     mAttackPositions.push_back(AttackPosition(0, -dist, DOWN));
     mAttackPositions.push_back(AttackPosition(0, dist, UP));
+
+    // Take attacks from specy
+    std::vector<AttackInfo *> &attacks = specy->getAttackInfos();
+    for (std::vector<AttackInfo *>::iterator it = attacks.begin(),
+         it_end = attacks.end(); it != it_end; ++it)
+    {
+        addAttack(*it);
+    }
 
     // Load default script
     loadScript(specy->getScript());
@@ -143,47 +162,47 @@ void Monster::update()
         script->execute();
     }
 
-    // Cancel the rest when we are currently performing an attack
-    if (!mAttackTimeout.expired())
-        return;
-
     refreshTarget();
 
-    if (!mTarget)
+    // Cancel the rest when we have a target
+    if (mTarget)
+        return;
+
+    // We have no target - let's wander around
+    if (mStrollTimeout.expired() && getPosition() == getDestination())
     {
-        // We have no target - let's wander around
-        if (mStrollTimeout.expired() && getPosition() == getDestination())
+        if (mKillStealProtectedTimeout.expired())
         {
-            if (mKillStealProtectedTimeout.expired())
+            unsigned range = mSpecy->getStrollRange();
+            if (range)
             {
-                unsigned range = mSpecy->getStrollRange();
-                if (range)
-                {
-                    Point randomPos(rand() % (range * 2 + 1)
-                                    - range + getPosition().x,
-                                    rand() % (range * 2 + 1)
-                                    - range + getPosition().y);
-                    // Don't allow negative destinations, to avoid rounding
-                    // problems when divided by tile size
-                    if (randomPos.x >= 0 && randomPos.y >= 0)
-                        setDestination(randomPos);
-                }
-                mStrollTimeout.set(10 + rand() % 10);
+                Point randomPos(rand() % (range * 2 + 1)
+                                - range + getPosition().x,
+                                rand() % (range * 2 + 1)
+                                - range + getPosition().y);
+                // Don't allow negative destinations, to avoid rounding
+                // problems when divided by tile size
+                if (randomPos.x >= 0 && randomPos.y >= 0)
+                    setDestination(randomPos);
             }
+            mStrollTimeout.set(10 + rand() % 10);
         }
     }
-
-    if (mAction == ATTACK)
-        processAttack();
 }
 
 void Monster::refreshTarget()
 {
+    // We are dead and sadly not possible to keep attacking :(
+    if (mAction == DEAD)
+        return;
+
     // Check potential attack positions
-    Being *bestAttackTarget = mTarget = NULL;
     int bestTargetPriority = 0;
+    Being *bestTarget = 0;
     Point bestAttackPosition;
-    BeingDirection bestAttackDirection = DOWN;
+
+    // reset Target. We will find a new one if possible
+    mTarget = 0;
 
     // Iterate through objects nearby
     int aroundArea = Configuration::getValue("game_visualRange", 448);
@@ -229,60 +248,28 @@ void Monster::refreshTarget()
                                                         targetPriority);
             if (posPriority > bestTargetPriority)
             {
-                bestAttackTarget = mTarget = target;
                 bestTargetPriority = posPriority;
+                bestTarget = target;
                 bestAttackPosition = attackPosition;
-                bestAttackDirection = j->direction;
             }
         }
     }
-
-    // Check if an enemy has been found
-    if (bestAttackTarget)
+    if (bestTarget)
     {
-        // Check which attacks have a chance to hit the target
-        MonsterAttacks allAttacks = mSpecy->getAttacks();
-        std::map<int, MonsterAttack *> workingAttacks;
-        int prioritySum = 0;
-
-        const int distX = getPosition().x - bestAttackTarget->getPosition().x;
-        const int distY = getPosition().y - bestAttackTarget->getPosition().y;
-        const int distSquare = (distX * distX + distY * distY);
-
-        for (MonsterAttacks::iterator i = allAttacks.begin();
-             i != allAttacks.end();
-             i++)
+        mTarget = bestTarget;
+        if (bestAttackPosition == getPosition())
         {
-            int maxDist = (*i)->range + bestAttackTarget->getSize();
-
-            if (maxDist * maxDist >= distSquare)
-            {
-                prioritySum += (*i)->priority;
-                workingAttacks[prioritySum] = (*i);
-            }
-        }
-
-        if (workingAttacks.empty() || !prioritySum)
-        {   //when no attack can hit move closer to attack position
-            setDestination(bestAttackPosition);
+            mAction = ATTACK;
+            updateDirection(getPosition(), mTarget->getPosition());
         }
         else
         {
-            // Prepare for using a random attack which can hit the enemy
-            // Stop movement
-            setDestination(getPosition());
-            // Turn into direction of enemy
-            setDirection(bestAttackDirection);
-            // Perform a random attack based on priority
-            mCurrentAttack =
-                         workingAttacks.upper_bound(rand()%prioritySum)->second;
-            setAction(ATTACK);
-            raiseUpdateFlags(UPDATEFLAG_ATTACK);
+            setDestination(bestAttackPosition);
         }
     }
 }
 
-void Monster::processAttack()
+void Monster::processAttack(Attack &attack)
 {
     if (!mTarget)
     {
@@ -290,37 +277,25 @@ void Monster::processAttack()
         return;
     }
 
-    if (!mCurrentAttack)
-        return;
-
-    mAttackTimeout.set(mCurrentAttack->aftDelay
-                                 + mCurrentAttack->preDelay);
-
-    float damageFactor = mCurrentAttack->damageFactor;
-
-    Damage dmg;
+    Damage dmg = attack.getAttackInfo()->getDamage();
     dmg.skill   = 0;
-    dmg.base    = getModifiedAttribute(MOB_ATTR_PHY_ATK_MIN) * damageFactor;
-    dmg.delta   = getModifiedAttribute(MOB_ATTR_PHY_ATK_DELTA) * damageFactor;
-    dmg.cth     = getModifiedAttribute(ATTR_ACCURACY);
-    dmg.element = mCurrentAttack->element;
-    dmg.range   = mCurrentAttack->range;
+    dmg.base    *= mDamageMutation;
+    dmg.delta   *= mDamageMutation;
 
-    int hit = performAttack(mTarget, dmg);
+    int hit = performAttack(mTarget, attack.getAttackInfo()->getDamage());
 
-    if (!mCurrentAttack->scriptEvent.empty() && hit > -1)
+    const Script::Ref &scriptCallback =
+            attack.getAttackInfo()->getScriptCallback();
+
+    if (scriptCallback.isValid() && hit > -1)
     {
-        Script::Ref function = mSpecy->getEventCallback(mCurrentAttack->scriptEvent);
-        if (function.isValid())
-        {
-            Script *script = ScriptManager::currentState();
-            script->setMap(getMap());
-            script->prepare(function);
-            script->push(this);
-            script->push(mTarget);
-            script->push(hit);
-            script->execute();
-        }
+        Script *script = ScriptManager::currentState();
+        script->setMap(getMap());
+        script->prepare(scriptCallback);
+        script->push(this);
+        script->push(mTarget);
+        script->push(hit);
+        script->execute();
     }
 }
 
@@ -513,9 +488,6 @@ bool Monster::recalculateBaseAttribute(unsigned int attr)
     {
       // Those a set only at load time.
       case ATTR_MAX_HP:
-      case MOB_ATTR_PHY_ATK_MIN:
-      case MOB_ATTR_PHY_ATK_DELTA:
-      case MOB_ATTR_MAG_ATK:
       case ATTR_DODGE:
       case ATTR_MAGIC_DODGE:
       case ATTR_ACCURACY:

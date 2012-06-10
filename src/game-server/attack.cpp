@@ -20,58 +20,114 @@
 
 #include "attack.h"
 
-void Attacks::add(const Attack &attack)
-{
-    mAttacks.push_back(attack);
-    // Slow, but safe.
-    mAttacks.sort();
-}
+#include "common/defines.h"
 
-void Attacks::clear()
-{
-    mAttacks.clear();
-}
+#include "game-server/character.h"
+#include "game-server/skillmanager.h"
 
-void Attacks::stop()
+AttackInfo *AttackInfo::readAttackNode(xmlNodePtr node)
 {
-    for (std::list<Attack>::iterator it = mAttacks.begin();
-         it != mAttacks.end(); ++it)
+    std::string skill = XML::getProperty(node, "skill", std::string());
+    unsigned skillId;
+    if (utils::isNumeric(skill))
     {
-        it->halt();
+        skillId = utils::stringToInt(skill);
     }
-    mActive = false;
-}
-
-void Attacks::start()
-{
-    for (std::list<Attack>::iterator it = mAttacks.begin();
-         it != mAttacks.end(); ++it)
+    else
     {
-        // If the attack is inactive, we hard reset it.
-        if (!it->getTimer())
-            it->reset();
-        else
-            it->softReset();
-    }
-    mActive = true;
-}
-
-void Attacks::tick(std::list<Attack> *ret)
-{
-    for (std::list<Attack>::iterator it = mAttacks.begin();
-         it != mAttacks.end(); ++it)
-    {
-        if (it->tick())
+        skillId = skillManager->getId(skill);
+        if (skillId == 0)
         {
-            if (mActive)
-                it->reset();
-            else
-                it->halt();
+            LOG_WARN("Error parsing Attack node: Invalid skill " << skill
+                     << " taking default skill");
+            skillId = skillManager->getDefaultSkillId();
         }
+    }
+    unsigned id = XML::getProperty(node, "id", 0);
+    unsigned priority = XML::getProperty(node, "priority", 0);
+    unsigned warmupTime = XML::getProperty(node, "warmuptime", 0);
+    unsigned cooldownTime = XML::getProperty(node, "cooldowntime", 0);
+    unsigned reuseTime = XML::getProperty(node, "reusetime", 0);
+    unsigned short baseDamange = XML::getProperty(node, "basedamage", 0);
+    unsigned short deltaDamage = XML::getProperty(node, "deltadamage", 0);
+    unsigned short chanceToHit = XML::getProperty(node, "chancetohit", 0);
+    unsigned short range = XML::getProperty(node, "range", 0);
+    Element element = elementFromString(
+            XML::getProperty(node, "element", "neutral"));
+    DamageType type = damageTypeFromString(
+            XML::getProperty(node, "type", "other"));
 
-        if (ret && it->isReady())
+    Damage dmg;
+    dmg.id = id;
+    dmg.base = baseDamange;
+    dmg.delta = deltaDamage;
+    dmg.cth = chanceToHit;
+    dmg.range = range;
+    dmg.element = element;
+    dmg.type = type;
+    AttackInfo *attack = new AttackInfo(priority, dmg, warmupTime, cooldownTime,
+                                        reuseTime);
+    return attack;
+}
+
+void Attacks::add(AttackInfo *attackInfo)
+{
+    mAttacks.push_back(Attack(attackInfo));
+}
+
+void Attacks::remove(AttackInfo *attackInfo)
+{
+    for (std::vector<Attack>::iterator it = mAttacks.begin(),
+         it_end = mAttacks.end(); it != it_end; ++it)
+    {
+        if ((*it).getAttackInfo() == attackInfo)
         {
-            ret->push_back(*it);
+            if (mCurrentAttack && mCurrentAttack->getAttackInfo() == attackInfo)
+                mCurrentAttack = 0;
+            mAttacks.erase(it);
+            return;
+        }
+    }
+}
+
+void Attacks::markAttackAsTriggered()
+{
+    mCurrentAttack->markAsTriggered();
+    mCurrentAttack = 0;
+}
+
+Attack *Attacks::getTriggerableAttack()
+{
+    if (!mCurrentAttack)
+        return 0;
+
+    int warmupTime = mCurrentAttack->getAttackInfo()->getWarmupTime();
+    if (mAttackTimer.remaining() <= warmupTime)
+        return mCurrentAttack;
+
+    return 0;
+}
+
+void Attacks::startAttack(Attack *attack)
+{
+    mCurrentAttack = attack;
+    mAttackTimer.set(attack->getAttackInfo()->getWarmupTime() +
+                     attack->getAttackInfo()->getCooldownTime());
+}
+
+void Attacks::tick(std::vector<Attack *> *ret)
+{
+    // we have a current Attack
+    if (!mAttackTimer.expired() && mCurrentAttack)
+        return;
+    for (std::vector<Attack>::iterator it = mAttacks.begin();
+         it != mAttacks.end(); ++it)
+    {
+        Attack &attack = *it;
+
+        if (ret && attack.isUsuable())
+        {
+            ret->push_back(&attack);
         }
     }
 }

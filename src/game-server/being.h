@@ -87,6 +87,21 @@ class Being : public Actor
         virtual void died();
 
         /**
+         * Process all available attacks
+         */
+        void processAttacks();
+
+        /**
+         * Adds an attack to the available attacks
+         */
+        void addAttack(AttackInfo *attack);
+
+        /**
+         * Removes an attack from the available attacks
+         */
+        void removeAttack(AttackInfo *attackInfo);
+
+        /**
          * Gets the destination coordinates of the being.
          */
         const Point &getDestination() const
@@ -135,7 +150,7 @@ class Being : public Actor
          * Performs an attack.
          * Return Value: damage inflicted or -1 when illegal target
          */
-        int performAttack(Being *target, const Damage &damage);
+        int performAttack(Being *target, const Damage &dmg);
 
         /**
          * Sets the current action.
@@ -153,7 +168,9 @@ class Being : public Actor
          * For being, this is defaulted to the first one (1).
          */
         virtual int getAttackId() const
-        { return 1; }
+        { return mCurrentAttack ?
+                mCurrentAttack->getAttackInfo()->getDamage().id : 0;
+        }
 
         /**
          * Moves the being toward its destination.
@@ -286,6 +303,18 @@ class Being : public Actor
         virtual void inserted();
 
     protected:
+        /**
+         * Performs an attack
+         */
+        virtual void processAttack(Attack &attack);
+
+        /**
+         * Update the being direction when moving so avoid directions desyncs
+         * with other clients.
+         */
+        void updateDirection(const Point &currentPos,
+                             const Point &destPos);
+
         static const int TICKS_PER_HP_REGENERATION = 100;
 
         BeingAction mAction;
@@ -296,17 +325,12 @@ class Being : public Actor
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
         BeingGender mGender;        /**< Gender of the being. */
+        Attack *mCurrentAttack;     /**< Last used attack. */
+
 
     private:
         Being(const Being &rhs);
         Being &operator=(const Being &rhs);
-
-        /**
-         * Update the being direction when moving so avoid directions desyncs
-         * with other clients.
-         */
-        void updateDirection(const Point &currentPos,
-                             const Point &destPos);
 
         Path mPath;
         BeingDirection mDirection;   /**< Facing direction. */

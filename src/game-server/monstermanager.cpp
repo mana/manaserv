@@ -32,28 +32,6 @@
 #define DEFAULT_MONSTER_SIZE 16
 #define DEFAULT_MONSTER_SPEED 4.0f
 
-Element elementFromString (const std::string &name)
-{
-    static std::map<const std::string, Element> table;
-
-    if (table.empty())
-    {
-        table["neutral"]    = ELEMENT_NEUTRAL;
-        table["fire"]       = ELEMENT_FIRE;
-        table["water"]      = ELEMENT_WATER;
-        table["earth"]      = ELEMENT_EARTH;
-        table["air"]        = ELEMENT_AIR;
-        table["lightning"]  = ELEMENT_LIGHTNING;
-        table["metal"]      = ELEMENT_METAL;
-        table["wood"]       = ELEMENT_WOOD;
-        table["ice"]        = ELEMENT_ICE;
-    }
-
-    std::map<const std::string, Element>::iterator val = table.find(name);
-
-    return val == table.end() ? ELEMENT_ILLEGAL : (*val).second;
-}
-
 void MonsterManager::reload()
 {
     deinitialize();
@@ -136,12 +114,6 @@ void MonsterManager::initialize()
                 monster->setAttribute(ATTR_MAX_HP, hp);
                 monster->setAttribute(ATTR_HP, hp);
 
-                monster->setAttribute(MOB_ATTR_PHY_ATK_MIN,
-                    XML::getProperty(subnode, "attack-min", -1));
-                monster->setAttribute(MOB_ATTR_PHY_ATK_DELTA,
-                    XML::getProperty(subnode, "attack-delta", -1));
-                monster->setAttribute(MOB_ATTR_MAG_ATK,
-                    XML::getProperty(subnode, "attack-magic", -1));
                 monster->setAttribute(ATTR_DODGE,
                     XML::getProperty(subnode, "evade", -1));
                 monster->setAttribute(ATTR_MAGIC_DODGE,
@@ -235,62 +207,28 @@ void MonsterManager::initialize()
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "attack"))
             {
-                MonsterAttack *att = new MonsterAttack;
-                att->id = XML::getProperty(subnode, "id", 0);
-                att->priority = XML::getProperty(subnode, "priority", 1);
-                att->damageFactor = XML::getFloatProperty(subnode,
-                                                         "damage-factor", 1.0f);
-                att->preDelay = XML::getProperty(subnode, "pre-delay", 1);
-                att->aftDelay = XML::getProperty(subnode, "aft-delay", 0);
-                att->range = XML::getProperty(subnode, "range", 0);
-                att->scriptEvent = XML::getProperty(subnode, "script-event",
-                                                    std::string());
-                std::string sElement = XML::getProperty(subnode,
-                                                        "element", "neutral");
-                att->element = elementFromString(sElement);
-                std::string sType = XML::getProperty(subnode,
-                                                     "type", "physical");
-
+                AttackInfo *att = AttackInfo::readAttackNode(subnode);
                 bool validMonsterAttack = true;
-                if (sType == "physical")
-                {
-                    att->type = DAMAGE_PHYSICAL;
-                }
-                else if (sType == "magical" || sType == "magic")
-                {
-                    att->type = DAMAGE_MAGICAL;
-                }
-                else if (sType == "other")
-                {
-                    att->type = DAMAGE_OTHER;
-                }
-                else
-                {
-                    LOG_WARN("Monster manager " << mMonsterReferenceFile
-                              <<  ": unknown damage type '" << sType << "'.");
-                    validMonsterAttack = false;
-                }
 
-                if (att->id < 1)
+                if (att->getDamage().id < 1)
                 {
                     LOG_WARN(mMonsterReferenceFile
                              << ": Attack without ID for monster Id:"
                              << id << " (" << name << ") - attack ignored");
                     validMonsterAttack = false;
                 }
-                else if (att->element == ELEMENT_ILLEGAL)
+                else if (att->getDamage().element == ELEMENT_ILLEGAL)
                 {
                     LOG_WARN(mMonsterReferenceFile
-                             << ": Attack with unknown element \""
-                             << sElement << "\" for monster Id:" << id
-                             << " (" << name << ") - attack ignored");
+                             << ": Attack with unknown element for monster Id:"
+                             << id << " (" << name << ") - attack ignored");
                     validMonsterAttack = false;
                 }
-                else if (att->type == -1)
+                else if (att->getDamage().type == DAMAGE_OTHER)
                 {
                     LOG_WARN(mMonsterReferenceFile
-                             << ": Attack with unknown type \"" << sType << "\""
-                             << " for monster Id:" << id
+                             << ": Attack with unknown damage type "
+                             << "for monster Id:" << id
                              << " (" << name << ")");
                     validMonsterAttack = false;
                 }

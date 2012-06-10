@@ -419,12 +419,17 @@ class Character : public Being
         static void setDeathAcceptedCallback(Script *script)
         { script->assignCallback(mDeathAcceptedCallback); }
 
+        virtual void addAttack(AttackInfo *attackInfo);
+
+        virtual void removeAttack(AttackInfo *attackInfo);
+
     protected:
         /**
          * Gets the way the actor blocks pathfinding for other objects
          */
         virtual BlockType getBlockType() const
         { return BLOCKTYPE_CHARACTER; }
+
 
     private:
         bool specialUseCheck(SpecialMap::iterator it);
@@ -521,6 +526,8 @@ class Character : public Being
         Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
 
         Timeout mMuteTimeout;        /**< Time until the character is no longer muted  */
+
+        AttackInfo *mKnuckleAttackInfo;
 
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;

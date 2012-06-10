@@ -47,15 +47,15 @@ void ItemEffectAttrMod::dispell(Being *itemUser)
                              mId, !mDuration);
 }
 
-bool ItemEffectAttack::apply(Being * /* itemUser */)
+bool ItemEffectAttack::apply(Being *itemUser)
 {
-    // TODO - STUB
+    itemUser->addAttack(mAttackInfo);
     return false;
 }
 
-void ItemEffectAttack::dispell(Being * /* itemUser */)
+void ItemEffectAttack::dispell(Being *itemUser)
 {
-    // TODO
+    itemUser->removeAttack(mAttackInfo);
 }
 
 ItemEffectScript::~ItemEffectScript()
@@ -98,24 +98,43 @@ void ItemEffectScript::dispell(Being *itemUser)
     }
 }
 
+ItemClass::~ItemClass()
+{
+    resetEffects();
+    for (std::vector<AttackInfo *>::iterator it = mAttackInfos.begin(),
+         it_end = mAttackInfos.end();
+         it != it_end; ++it)
+    {
+        delete *it;
+    }
+}
+
 bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
 {
     if (!trigger)
         return false;
 
-    std::pair<std::multimap< ItemTriggerType, ItemEffectInfo * >::iterator,
-              std::multimap< ItemTriggerType, ItemEffectInfo * >::iterator>
-      rn = mEffects.equal_range(trigger);
-    bool ret = false;
-    while (rn.first != rn.second)
-        if (rn.first++->second->apply(itemUser))
-            ret = true;
+    std::multimap<ItemTriggerType, ItemEffectInfo *>::iterator it, it_end;
 
-    rn = mDispells.equal_range(trigger);
-    while (rn.first != rn.second)
-        rn.first++->second->dispell(itemUser);
+    bool ret = false;
+    for (it = mEffects.begin(), it_end = mEffects.end(); it != it_end; ++it)
+        if (it->first == trigger)
+            if (it->second->apply(itemUser))
+                ret = true;
+
+    for (it = mDispells.begin(), it_end = mDispells.end(); it != it_end; ++it)
+        if (it->first == trigger)
+            it->second->dispell(itemUser);
 
     return ret;
+}
+
+void ItemClass::addAttack(AttackInfo *attackInfo,
+                             ItemTriggerType applyTrigger,
+                             ItemTriggerType dispellTrigger)
+{
+    mAttackInfos.push_back(attackInfo);
+    addEffect(new ItemEffectAttack(attackInfo), applyTrigger, dispellTrigger);
 }
 
 

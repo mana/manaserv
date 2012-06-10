@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "game-server/actor.h"
+#include "game-server/attack.h"
 #include "scripting/script.h"
 
 class Being;
@@ -67,25 +68,15 @@ enum
     SET_STATE_NOT_FLOATING
 };
 
-struct ItemAttackInfo
-{
-    unsigned int base;
-    unsigned int range;
-    unsigned int baseSpeed;
-    unsigned int skillId;
-    /// attribute id -> damage bonus per point
-    std::map< unsigned int, double > attrBonus;
-};
-
 enum ItemTriggerType
 {
     ITT_NULL = 0,
-    ITT_IN_INVY, // Associated effects apply when the item is in the inventory
-    ITT_ACTIVATE, // Associated effects apply when the item is activated
-    ITT_EQUIP, // Assosciated effects apply when the item is equipped
+    ITT_IN_INVY,    // Associated effects apply when the item is in the inventory
+    ITT_ACTIVATE,   // Associated effects apply when the item is activated
+    ITT_EQUIP,      // Assosciated effects apply when the item is equipped
     ITT_LEAVE_INVY, // Associated effects apply when the item leaves the inventory
-    ITT_UNEQUIP, // Associated effects apply when the item is unequipped
-    ITT_EQUIPCHG // When the item is still equipped, but in a different way
+    ITT_UNEQUIP,    // Associated effects apply when the item is unequipped
+    ITT_EQUIPCHG    // When the item is still equipped, but in a different way
 };
 
 enum ItemEffectType
@@ -93,12 +84,19 @@ enum ItemEffectType
     // Effects that are removed automatically when the trigger ends
     // (ie. item no longer exists in invy, unequipped)
     IET_ATTR_MOD = 0, // Modify a given attribute with a given value
-    IET_ATTACK, // Give the associated being an attack
+    IET_ATTACK,       // Give the associated being an attack
     // Effects that do not need any automatic removal
-    IET_COOLDOWN, // Set a cooldown to this item, preventing activation for n ticks
-    IET_G_COOLDOWN, // Set a cooldown to all items of this type for this being
-    IET_SCRIPT // Call an associated lua script with given variables
+    IET_COOLDOWN,     // Set a cooldown to this item, preventing activation for n ticks
+    IET_G_COOLDOWN,   // Set a cooldown to all items of this type for this being
+    IET_SCRIPT        // Call an associated lua script with given variables
 };
+
+struct ItemTrigger
+{
+    ItemTriggerType apply;
+    ItemTriggerType dispell;
+};
+
 
 class ItemEffectInfo
 {
@@ -115,7 +113,8 @@ class ItemEffectAttrMod : public ItemEffectInfo
         ItemEffectAttrMod(unsigned int attrId, unsigned int layer, double value,
                           unsigned int id, unsigned int duration = 0) :
                         mAttributeId(attrId), mAttributeLayer(layer),
-                        mMod(value), mDuration(duration), mId(id) {}
+                        mMod(value), mDuration(duration), mId(id)
+        {}
 
         bool apply(Being *itemUser);
         void dispell(Being *itemUser);
@@ -131,8 +130,14 @@ class ItemEffectAttrMod : public ItemEffectInfo
 class ItemEffectAttack : public ItemEffectInfo
 {
     public:
+        ItemEffectAttack(AttackInfo *attackInfo) :
+            mAttackInfo(attackInfo)
+        {}
+
         bool apply(Being *itemUser);
         void dispell(Being *itemUser);
+    private:
+        AttackInfo *mAttackInfo;
 };
 
 class ItemEffectConsumes : public ItemEffectInfo
@@ -181,8 +186,7 @@ class ItemClass
             mMaxPerSlot(maxperslot)
         {}
 
-        ~ItemClass()
-        { resetEffects(); }
+        ~ItemClass();
 
         /**
          * Returns the name of the item type
@@ -244,6 +248,12 @@ class ItemClass
         Script::Ref getEventCallback(const std::string &event) const
         { return mEventCallbacks.value(event); }
 
+        void addAttack(AttackInfo *attackInfo, ItemTriggerType applyTrigger,
+                       ItemTriggerType dispellTrigger);
+
+        std::vector<AttackInfo *> &getAttackInfos()
+        { return mAttackInfos; }
+
     private:
         /**
          * Add an effect to a trigger
@@ -296,6 +306,8 @@ class ItemClass
          * Named event callbacks. Can be used in custom item effects.
          */
         utils::NameMap<Script::Ref> mEventCallbacks;
+
+        std::vector<AttackInfo *> mAttackInfos;
 
         friend class ItemManager;
 };

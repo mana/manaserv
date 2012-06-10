@@ -21,10 +21,6 @@ attributes <TAG>:  Tells all the monsters attribute. These attribute, as for ite
   size[integer]:   The monster maximal amplitude in pixels. Used to compute player's hit area.
   speed[float]:    The monster's speed in tiles per second.
                        (A tile is the smallest square map unit: by default, a tile is 32 pixel long.)
-  attack-min[integer]: The minimal attack strength of the monster. If your hasn't got any armor,
-                          there are the minimal hit points he will lose when hit by the monster.
-  attack-delta[integer]:  The amplitude between minimal and maximal damages the monster can do.
-  attack-magic[integer]:  The magical attacks are removing hp when hit but are computed against magical defense instead.
   mutation[integer]:      The mutation indicates the amplitude in percent where attributes get modified with.
                           For instance, with a mutation of 50, each attribute can be altered to become 100% to 149% of what they are.
 vulnerability<TAG>:       Tells the monster specific vulnerability to an element.
@@ -46,12 +42,9 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="3" percent="2.8"/>
         <drop item="4" percent="0.7"/>
         <attributes
-            hp="20"
+            hp="200"
             size="4"
             speed="2.0"
-            attack-min="10"
-            attack-delta="2"
-            attack-magic="0"
             hit="10"
             evade="5"
             magical-evade="5"
@@ -73,12 +66,28 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <attack id="1"
             priority="1"
             type="physical"
-            pre-delay="10"
-            aft-delay="5"
-            damage-factor="1"
+            warmuptime="10"
+            cooldowntime="10"
+            reusetime="10"
+            basedamage="10"
+            deltadamage="1"
+            chancetohit="1000"
+            element="neutral"
             range="32"
             animation="attack"
-            script-event="strike"
+            />
+        <attack id="2"
+            priority="2"
+            type="physical"
+            warmuptime="0"
+            cooldowntime="100"
+            reusetime="100"
+            basedamage="100"
+            deltadamage="1"
+            chancetohit="1000"
+            element="neutral"
+            range="32"
+            animation="attack"
             />
             <script>testmonster.lua</script> <!-- only Proof of Concept-->
     </monster>
@@ -99,9 +108,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             hp="20"
             size="8"
             speed="6.0"
-            attack-min="10"
-            attack-delta="2"
-            attack-magic="0"
             hit="10"
             evade="10"
             magical-evade="10"
@@ -120,21 +126,29 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <attack id="1"
             priority="1"
             type="physical"
-            pre-delay="5"
-            aft-delay="15"
-            damage-factor="3"
-            range="64"
-            particle-effect="graphics/particles/attack.particle.xml"
-            action="special1"
+            warmuptime="10"
+            cooldowntime="100"
+            reusetime="100"
+            basedamage="20"
+            deltadamage="1"
+            chancetohit="1000"
+            element="neutral"
+            range="32"
+            animation="attack"
             />
         <!-- fast, weak, short-range scissor attack -->
         <attack id="2"
-            priority="4"
+            priority="2"
             type="physical"
-            pre-delay="3"
-            aft-delay="3"
-            damage-factor="1"
+            warmuptime="0"
+            cooldowntime="5"
+            reusetime="1"
+            basedamage="5"
+            deltadamage="1"
+            chancetohit="1000"
+            element="neutral"
             range="32"
+            animation="attack"
             />
     </monster>
 
@@ -155,9 +169,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             hp="20"
             size="8"
             speed="6.0"
-            attack-min="20"
-            attack-delta="10"
-            attack-magic="0"
             hit="30"
             evade="30"
             magical-evade="30"
@@ -177,11 +188,15 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <attack id="1"
             priority="1"
             type="physical"
-            element="fire"
-            pre-delay="5"
-            aft-delay="10"
-            damage-factor="1"
-            range="64"
+            warmuptime="0"
+            cooldowntime="100"
+            reusetime="100"
+            basedamage="100"
+            deltadamage="1"
+            chancetohit="1000"
+            element="neutral"
+            range="32"
+            animation="attack"
             />
     </monster>
 
@@ -200,14 +215,24 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             hp="200"
             size="4"
             speed="1.0"
-            attack-min="2"
-            attack-delta="10"
-            attack-magic="0"
             hit="100"
             evade="10"
             magical-evade="10"
             physical-defence="0"
             magical-defence="0"
+            />
+        <attack id="1"
+            priority="1"
+            type="physical"
+            warmuptime="0"
+            cooldowntime="100"
+            reusetime="100"
+            basedamage="100"
+            deltadamage="1"
+            chancetohit="1000"
+            element="neutral"
+            range="32"
+            animation="attack"
             />
         <!-- Is fulfilling some unknown purpose that requires it to move around
         a lot and leaves no time for pursing attackers -->
@@ -216,7 +241,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             cowardly="false"
             track-range="4"
             stroll-range="24"
-            attack-distance="32"
             />
     </monster>
 
