@@ -26,4 +26,7 @@ end
 
 local maggot = get_monster_class("maggot")
 maggot:on_update(update)
-maggot:on("strike", strike)
+local attacks = maggot:attacks();
+for i, attack in ipairs(attacks) do
+    attack:on_attack(strike)
+end
