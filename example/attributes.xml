@@ -173,21 +173,4 @@
          <modifier stacktype="stackable" modtype="additive" tag="cap1" effect="Capacity %+.2f" />
     </attribute>
     <!-- End of core-attributes definition -->
-
-    <!-- Temporary definitions for monsters until the auto-attack system is finished. -->
-    <attribute id="20" name="physical attack (minimum)"
-        modifiable="false"
-        scope="monster"
-        minimum="0"
-        maximum="255" />
-    <attribute id="21" name="physical attack (delta)"
-        modifiable="false"
-        scope="monster"
-        minimum="0"
-        maximum="255" />
-    <attribute id="22" name="magical  attack"
-        modifiable="false"
-        scope="monster"
-        minimum="0"
-        maximum="255" />
 </attributes>

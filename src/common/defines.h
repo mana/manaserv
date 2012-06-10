@@ -127,6 +127,28 @@ enum Element
     ELEMENT_ILLEGAL
 };
 
+static inline Element elementFromString(const std::string &name)
+{
+    static std::map<const std::string, Element> table;
+
+    if (table.empty())
+    {
+        table["neutral"]    = ELEMENT_NEUTRAL;
+        table["fire"]       = ELEMENT_FIRE;
+        table["water"]      = ELEMENT_WATER;
+        table["earth"]      = ELEMENT_EARTH;
+        table["air"]        = ELEMENT_AIR;
+        table["lightning"]  = ELEMENT_LIGHTNING;
+        table["metal"]      = ELEMENT_METAL;
+        table["wood"]       = ELEMENT_WOOD;
+        table["ice"]        = ELEMENT_ICE;
+    }
+
+    std::map<const std::string, Element>::iterator val = table.find(name);
+
+    return val == table.end() ? ELEMENT_ILLEGAL : (*val).second;
+}
+
 /**
  * Damage type, used to know how to compute them.
  */
@@ -137,6 +159,23 @@ enum DamageType
     DAMAGE_DIRECT,
     DAMAGE_OTHER = -1
 };
+
+static inline DamageType damageTypeFromString(const std::string &name)
+{
+    static std::map<const std::string, DamageType> table;
+
+    if (table.empty())
+    {
+        table["physical"]   = DAMAGE_PHYSICAL;
+        table["magical"]    = DAMAGE_MAGICAL;
+        table["direct"]     = DAMAGE_DIRECT;
+        table["other"]      = DAMAGE_OTHER;
+    }
+
+    std::map<const std::string, DamageType>::iterator val = table.find(name);
+
+    return val == table.end() ? DAMAGE_OTHER : (*val).second;
+}
 
 /**
  * A series of hardcoded attributes that must be defined.
@@ -174,15 +213,7 @@ enum
 
     // Money and inventory size attributes.
     ATTR_GP                = 18,
-    ATTR_INV_CAPACITY      = 19,
-
-    /**
-     * Temporary attributes.
-     * @todo Use Attacks instead.
-     */
-    MOB_ATTR_PHY_ATK_MIN   = 20,
-    MOB_ATTR_PHY_ATK_DELTA = 21,
-    MOB_ATTR_MAG_ATK       = 22
+    ATTR_INV_CAPACITY      = 19
 };
 
 #endif // DEFINES_H
