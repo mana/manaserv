@@ -29,7 +29,7 @@
 
 #include "game-server/actor.h"
 #include "game-server/attribute.h"
-#include "game-server/autoattack.h"
+#include "game-server/attack.h"
 #include "game-server/timeout.h"
 
 class Being;
@@ -290,7 +290,7 @@ class Being : public Actor
 
         BeingAction mAction;
         AttributeMap mAttributes;
-        AutoAttacks mAutoAttacks;
+        Attacks mAttacks;
         StatusEffects mStatus;
         Being *mTarget;
         Point mOld;                 /**< Old coordinates. */

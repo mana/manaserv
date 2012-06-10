@@ -25,7 +25,7 @@
 #include "game-server/item.h"
 
 #include "common/configuration.h"
-#include "game-server/autoattack.h"
+#include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/being.h"
 #include "game-server/state.h"
@@ -47,13 +47,13 @@ void ItemEffectAttrMod::dispell(Being *itemUser)
                              mId, !mDuration);
 }
 
-bool ItemEffectAutoAttack::apply(Being * /* itemUser */)
+bool ItemEffectAttack::apply(Being * /* itemUser */)
 {
     // TODO - STUB
     return false;
 }
 
-void ItemEffectAutoAttack::dispell(Being * /* itemUser */)
+void ItemEffectAttack::dispell(Being * /* itemUser */)
 {
     // TODO
 }

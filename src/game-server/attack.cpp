@@ -18,34 +18,34 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "autoattack.h"
+#include "attack.h"
 
-void AutoAttacks::add(const AutoAttack &autoAttack)
+void Attacks::add(const Attack &attack)
 {
-    mAutoAttacks.push_back(autoAttack);
+    mAttacks.push_back(attack);
     // Slow, but safe.
-    mAutoAttacks.sort();
+    mAttacks.sort();
 }
 
-void AutoAttacks::clear()
+void Attacks::clear()
 {
-    mAutoAttacks.clear();
+    mAttacks.clear();
 }
 
-void AutoAttacks::stop()
+void Attacks::stop()
 {
-    for (std::list<AutoAttack>::iterator it = mAutoAttacks.begin();
-         it != mAutoAttacks.end(); ++it)
+    for (std::list<Attack>::iterator it = mAttacks.begin();
+         it != mAttacks.end(); ++it)
     {
         it->halt();
     }
     mActive = false;
 }
 
-void AutoAttacks::start()
+void Attacks::start()
 {
-    for (std::list<AutoAttack>::iterator it = mAutoAttacks.begin();
-         it != mAutoAttacks.end(); ++it)
+    for (std::list<Attack>::iterator it = mAttacks.begin();
+         it != mAttacks.end(); ++it)
     {
         // If the attack is inactive, we hard reset it.
         if (!it->getTimer())
@@ -56,10 +56,10 @@ void AutoAttacks::start()
     mActive = true;
 }
 
-void AutoAttacks::tick(std::list<AutoAttack> *ret)
+void Attacks::tick(std::list<Attack> *ret)
 {
-    for (std::list<AutoAttack>::iterator it = mAutoAttacks.begin();
-         it != mAutoAttacks.end(); ++it)
+    for (std::list<Attack>::iterator it = mAttacks.begin();
+         it != mAttacks.end(); ++it)
     {
         if (it->tick())
         {

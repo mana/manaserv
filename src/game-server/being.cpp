@@ -440,7 +440,7 @@ void Being::setAction(BeingAction action)
 {
     // Stops the auto-attacks when changing action
     if (mAction == ATTACK && action != ATTACK)
-        mAutoAttacks.stop();
+        mAttacks.stop();
 
     mAction = action;
     if (action != ATTACK && // The players are informed about these actions

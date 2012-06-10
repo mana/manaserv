@@ -178,7 +178,7 @@ enum
 
     /**
      * Temporary attributes.
-     * @todo Use AutoAttacks instead.
+     * @todo Use Attacks instead.
      */
     MOB_ATTR_PHY_ATK_MIN   = 20,
     MOB_ATTR_PHY_ATK_DELTA = 21,
