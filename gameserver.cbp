@@ -118,8 +118,8 @@
 		<Unit filename="src/game-server/attribute.h" />
 		<Unit filename="src/game-server/attributemanager.cpp" />
 		<Unit filename="src/game-server/attributemanager.h" />
-		<Unit filename="src/game-server/autoattack.cpp" />
-		<Unit filename="src/game-server/autoattack.h" />
+		<Unit filename="src/game-server/attack.cpp" />
+		<Unit filename="src/game-server/attack.h" />
 		<Unit filename="src/game-server/being.cpp" />
 		<Unit filename="src/game-server/being.h" />
 		<Unit filename="src/game-server/buysell.cpp" />

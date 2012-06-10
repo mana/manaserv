@@ -18,8 +18,8 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef AUTOATTACK_H
-#define AUTOATTACK_H
+#ifndef ATTACK_H
+#define ATTACK_H
 
 #include <cstddef>
 #include <list>
@@ -57,10 +57,10 @@ struct Damage
  * Class that stores information about an auto-attack
  */
 
-class AutoAttack
+class Attack
 {
     public:
-        AutoAttack(Damage &damage, unsigned int warmup, unsigned int cooldown):
+        Attack(Damage &damage, unsigned int warmup, unsigned int cooldown):
             mDamage(damage),
             mTimer(0),
             mAspd(cooldown),
@@ -74,7 +74,7 @@ class AutoAttack
         void halt() { if (mTimer >= mWarmup) mTimer = 0; }
         bool isReady() const { return !(mTimer - mWarmup); }
 
-        bool operator<(const AutoAttack &rhs) const
+        bool operator<(const Attack &rhs) const
         { return mTimer < rhs.mTimer; }
 
         const Damage &getDamage() const { return mDamage; }
@@ -117,26 +117,26 @@ class AutoAttack
 /**
  * Helper class for storing multiple auto-attacks.
  */
-class AutoAttacks
+class Attacks
 {
     public:
         /**
          * Whether the being has at least one auto attack that is ready.
          */
-        void add(const AutoAttack &);
+        void add(const Attack &);
         void clear(); // Wipe the list completely (used in place of remove for now; FIXME)
         void start();
         void stop(); // If the character does some action other than attacking, reset all warmups (NOT cooldowns!)
-        void tick(std::list<AutoAttack> *ret = 0);
+        void tick(std::list<Attack> *ret = 0);
 
         /**
          * Tells the number of attacks available
          */
-        unsigned getAutoAttacksNumber()
-        { return mAutoAttacks.size(); }
+        unsigned getNumber()
+        { return mAttacks.size(); }
 
         /**
-         * Tells whether the autoattacks are active.
+         * Tells whether the attacks are active.
          */
         bool areActive()
         { return mActive; }
@@ -147,7 +147,7 @@ class AutoAttacks
          * to be processed when false.
          */
         bool mActive;
-        std::list<AutoAttack> mAutoAttacks;
+        std::list<Attack> mAttacks;
 };
 
-#endif // AUTOATTACK_H
+#endif // ATTACK_H
