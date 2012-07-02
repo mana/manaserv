@@ -56,6 +56,14 @@ MonsterClass::~MonsterClass()
     }
 }
 
+float MonsterClass::getVulnerability(Element element) const
+{
+    Vulnerabilities::const_iterator it = mVulnerabilities.find(element);
+    if (it == mVulnerabilities.end())
+        return 1.0f;
+    return it->second;
+}
+
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
@@ -385,7 +393,11 @@ void Monster::changeAnger(Actor *target, int amount)
 
 int Monster::damage(Actor *source, const Damage &damage)
 {
-    int HPLoss = Being::damage(source, damage);
+    Damage newDamage = damage;
+    float factor = mSpecy->getVulnerability(newDamage.element);
+    newDamage.base = newDamage.base * factor;
+    newDamage.base = newDamage.delta * factor;
+    int HPLoss = Being::damage(source, newDamage);
     if (source)
     {
         changeAnger(source, HPLoss);
