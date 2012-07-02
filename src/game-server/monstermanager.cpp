@@ -264,6 +264,13 @@ void MonsterManager::initialize()
                 std::string val = (char *)filename;
                 monster->setScript(val);
             }
+            else if (xmlStrEqual(subnode->name, BAD_CAST "vulnerability"))
+            {
+                Element element = elementFromString(
+                        XML::getProperty(subnode, "element", std::string()));
+                double factor =  XML::getFloatProperty(subnode, "factor", 1.0);
+                monster->setVulnerability(element, factor);
+            }
         }
 
         monster->setDrops(drops);

@@ -62,6 +62,8 @@ struct MonsterAttack
     std::string scriptEvent;
 };
 
+typedef std::map<Element, double> Vulnerabilities;
+
 /**
  * Class describing the characteristics of a generic monster.
  */
@@ -193,6 +195,11 @@ class MonsterClass
         /** Returns all attacks of the monster. */
         std::vector<AttackInfo *> &getAttackInfos() { return mAttacks; }
 
+        void setVulnerability(Element element, double factor)
+        { mVulnerabilities[element] = factor; }
+
+        double getVulnerability(Element element) const;
+
         /** sets the script file for the monster */
         void setScript(const std::string &filename) { mScript = filename; }
 
@@ -229,6 +236,7 @@ class MonsterClass
         int mAttackDistance;
         int mOptimalLevel;
         std::vector<AttackInfo *> mAttacks;
+        Vulnerabilities mVulnerabilities;
         std::string mScript;
 
         /**
