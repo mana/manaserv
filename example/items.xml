@@ -119,7 +119,7 @@
             <modifier attribute="acc1" value="1.0" />
             <attack skill="102" warmuptime="1" cooldowntime="5" reusetime="1"
                 basedamage="1" deltadamage="10" chancetohit="200" range="320"
-                element="neutral" type="physical" />
+                element="fire" type="physical" />
             <attack skill="102" priority="2" warmuptime="100" cooldowntime="10" reusetime="100"
                 basedamage="50" deltadamage="10" chancetohit="200" range="320"
                 element="neutral" type="physical" />

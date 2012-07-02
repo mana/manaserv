@@ -52,7 +52,7 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             magical-defence="0"
             mutation="50"
             />
-        <vulnerability element="fire" factor="1.5"/>
+        <vulnerability element="fire" factor="10"/>
         <vulnerability element="earth" factor="0.7"/>
         <exp>10</exp>
         <!-- average stroll- and track range-->
