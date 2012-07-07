@@ -1306,6 +1306,17 @@ static int monster_get_name(lua_State *s)
 }
 
 /**
+ * monster_get_id(handle monster): int monsterid
+ * Returns the id of the monster handle
+ */
+static int monster_get_id(lua_State *s)
+{
+    Monster *monster = checkMonster(s, 1);
+    lua_pushinteger(s, monster->getSpecy()->getId());
+    return 1;
+}
+
+/**
  * monster_change_anger(Monster*, Being*, int anger)
  * Makes a monster angry at a being
  */
@@ -2524,6 +2535,7 @@ LuaScript::LuaScript():
         { "exp_for_level",                   &exp_for_level                   },
         { "monster_create",                  &monster_create                  },
         { "monster_get_name",                &monster_get_name                },
+        { "monster_get_id",                  &monster_get_id                  },
         { "monster_change_anger",            &monster_change_anger            },
         { "monster_remove",                  &monster_remove                  },
         { "being_apply_status",              &being_apply_status              },
