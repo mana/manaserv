@@ -419,6 +419,11 @@ class Character : public Being
         static void setDeathAcceptedCallback(Script *script)
         { script->assignCallback(mDeathAcceptedCallback); }
 
+        static void setLoginCallback(Script *script)
+        { script->assignCallback(mLoginCallback); }
+
+        void triggerLoginCallback();
+
     protected:
         /**
          * Gets the way the actor blocks pathfinding for other objects
@@ -524,6 +529,7 @@ class Character : public Being
 
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;
+        static Script::Ref mLoginCallback;
 
         // Set as a friend, but still a lot of redundant accessors. FIXME.
         template< class T >

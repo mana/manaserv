@@ -92,6 +92,13 @@ static int on_character_death_accept(lua_State *s)
     return 0;
 }
 
+static int on_character_login(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    Character::setLoginCallback(getScript(s));
+    return 0;
+}
+
 static int on_being_death(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
@@ -2367,6 +2374,7 @@ LuaScript::LuaScript():
     static luaL_Reg const callbacks[] = {
         { "on_character_death",              &on_character_death              },
         { "on_character_death_accept",       &on_character_death_accept       },
+        { "on_character_login",              &on_character_login              },
         { "on_being_death",                  &on_being_death                  },
         { "on_being_remove",                 &on_being_remove                 },
         { "on_update",                       &on_update                       },
