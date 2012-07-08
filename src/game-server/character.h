@@ -419,6 +419,11 @@ class Character : public Being
         static void setDeathAcceptedCallback(Script *script)
         { script->assignCallback(mDeathAcceptedCallback); }
 
+        static void setLoginCallback(Script *script)
+        { script->assignCallback(mLoginCallback); }
+
+        void triggerLoginCallback();
+
         virtual void addAttack(AttackInfo *attackInfo);
 
         virtual void removeAttack(AttackInfo *attackInfo);
@@ -531,6 +536,7 @@ class Character : public Being
 
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;
+        static Script::Ref mLoginCallback;
 
         // Set as a friend, but still a lot of redundant accessors. FIXME.
         template< class T >

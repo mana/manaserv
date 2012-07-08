@@ -371,6 +371,8 @@ void GameHandler::tokenMatched(GameClient *computer, Character *character)
         computer->disconnect(result);
         return;
     }
+    // Trigger login script bind
+    character->triggerLoginCallback();
 
     result.writeInt8(ERRMSG_OK);
     computer->send(result);

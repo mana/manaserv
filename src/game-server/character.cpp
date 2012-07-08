@@ -55,6 +55,7 @@ const float Character::EXP_LEVEL_FLEXIBILITY = 1.0f;
 
 Script::Ref Character::mDeathCallback;
 Script::Ref Character::mDeathAcceptedCallback;
+Script::Ref Character::mLoginCallback;
 
 static bool executeCallback(Script::Ref function, Character *character)
 {
@@ -821,4 +822,9 @@ bool Character::takeSpecial(int id)
 void Character::clearSpecials()
 {
     mSpecials.clear();
+}
+
+void Character::triggerLoginCallback()
+{
+    executeCallback(mLoginCallback, this);
 }
