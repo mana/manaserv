@@ -1791,9 +1791,9 @@ static int chr_get_hair_color(lua_State *s)
 static int chr_get_kill_count(lua_State *s)
 {
     Character *c = checkCharacter(s, 1);
-    const int id = luaL_checkint(s, 2);
+    MonsterClass *monster = checkMonsterClass(s, 2);
 
-    lua_pushinteger(s, c->getKillCount(id));
+    lua_pushinteger(s, c->getKillCount(monster->getId()));
     return 1;
 }
 
