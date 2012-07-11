@@ -139,6 +139,7 @@ int LuaScript::execute()
     }
     res = lua_tointeger(mCurrentState, -1);
     lua_pop(mCurrentState, 1);
+    setMap(0);
     return res;
 }
 
