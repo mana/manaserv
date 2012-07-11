@@ -101,9 +101,11 @@ Attack *Attacks::getTriggerableAttack()
     if (!mCurrentAttack)
         return 0;
 
-    int warmupTime = mCurrentAttack->getAttackInfo()->getWarmupTime();
-    if (mAttackTimer.remaining() <= warmupTime)
+    int cooldownTime = mCurrentAttack->getAttackInfo()->getCooldownTime();
+    if (mAttackTimer.remaining() <= cooldownTime)
+    {
         return mCurrentAttack;
+    }
 
     return 0;
 }
