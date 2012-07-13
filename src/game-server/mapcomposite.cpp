@@ -799,6 +799,7 @@ void MapComposite::initializeContent()
             if (npcId && !scriptText.empty())
             {
                 Script *script = ScriptManager::currentState();
+                script->setMap(this);
                 script->loadNPC(object->getName(), npcId,
                                 ManaServ::getGender(gender),
                                 object->getX(), object->getY(),
@@ -815,6 +816,7 @@ void MapComposite::initializeContent()
             std::string scriptText = object->getProperty("TEXT");
 
             Script *script = ScriptManager::currentState();
+            script->setMap(this);
 
             if (!scriptFilename.empty())
             {

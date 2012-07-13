@@ -234,6 +234,7 @@ void LuaScript::load(const char *prog, const char *name)
                   << lua_tostring(mRootState, -1));
         lua_pop(mRootState, 1);
     }
+    setMap(0);
 }
 
 void LuaScript::processDeathEvent(Being *entity)
