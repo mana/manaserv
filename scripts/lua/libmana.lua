@@ -89,7 +89,9 @@ end
 
 -- Registers a function so that is is executed during map initialization.
 function atinit(f)
-  init_fun[#init_fun + 1] = f
+  local map_id = get_map_id()
+  init_fun[map_id] = init_fun[map_id] or {}
+  table.insert(init_fun[map_id], f)
 end
 
 -- Called by the game for creating NPCs embedded into maps.
@@ -105,10 +107,12 @@ end
 -- Called during map initialization, for each map.
 -- Executes all the functions registered by atinit.
 local function map_initialize()
-  for i,f in ipairs(init_fun) do
+  local functions = init_fun[get_map_id()]
+  if not functions then return end
+  for i,f in ipairs(functions) do
     f()
   end
-  init_fun = {}
+  init_fun[get_map_id()] = nil
 end
 
 
