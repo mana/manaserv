@@ -1585,7 +1585,8 @@ static int get_beings_in_rectangle(lua_State *s)
     {
         Being *b = *i;
         char t = b->getType();
-        if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
+        if ((t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER) &&
+            rect.contains(b->getPosition()))
         {
             lua_pushlightuserdata(s, b);
             lua_rawseti(s, tableStackPosition, tableIndex);
