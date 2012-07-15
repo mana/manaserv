@@ -30,7 +30,7 @@
 #include "game-server/eventlistener.h"
 #include "utils/logger.h"
 
-typedef std::list< QuestCallback > QuestCallbacks;
+typedef std::list< QuestCallback * > QuestCallbacks;
 typedef std::map< std::string, QuestCallbacks > PendingVariables;
 
 struct PendingQuest
@@ -88,6 +88,21 @@ struct QuestDeathListener: EventDispatch
     }
 };
 
+void QuestRefCallback::triggerCallback(Character *ch,
+                                       const std::string &value) const
+{
+    if (!mRef.isValid())
+        return;
+
+    Script *s = ScriptManager::currentState();
+    s->setMap(ch->getMap());
+    s->prepare(mRef);
+    s->push(ch);
+    s->push(mQuestName);
+    s->push(value);
+    s->execute();
+}
+
 static QuestDeathListener questDeathDummy;
 static EventListener questDeathListener(&questDeathDummy);
 
@@ -112,7 +127,7 @@ void QuestDeathListener::fullRemove(const EventListener *, Character *ch)
 }
 
 void recoverQuestVar(Character *ch, const std::string &name,
-                     const QuestCallback &f)
+                     QuestCallback *f)
 {
     assert(ch->questCache.find(name) == ch->questCache.end());
     int id = ch->getDatabaseID();
@@ -153,7 +168,8 @@ void recoveredQuestVar(int id,
     for (QuestCallbacks::const_iterator k = j->second.begin(),
          k_end = j->second.end(); k != k_end; ++k)
     {
-        k->handler(ch, value, k->script);
+        (*k)->triggerCallback(ch, value);
+        delete (*k);
     }
 
     variables.erase(j);

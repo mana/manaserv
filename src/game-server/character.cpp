@@ -67,7 +67,6 @@ static bool executeCallback(Script::Ref function, Character *character)
     script->prepare(function);
     script->push(character);
     script->execute();
-    script->setMap(0);
     return true;
 }
 
