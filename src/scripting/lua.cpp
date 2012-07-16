@@ -1347,6 +1347,21 @@ static int monster_change_anger(lua_State *s)
     return 0;
 }
 
+static int monster_drop_anger(lua_State *s)
+{
+    Monster *monster = checkMonster(s, 1);
+    Being *being = checkBeing(s, 2);
+    monster->forgetTarget(being);
+    return 0;
+}
+
+static int monster_get_angerlist(lua_State *s)
+{
+    Monster *monster = checkMonster(s, 1);
+    pushSTLContainer(s, monster->getAngerList());
+    return 1;
+}
+
 /**
  * monster_remove(Monster*): bool success
  * Remove a monster object without kill event.
@@ -2454,6 +2469,8 @@ LuaScript::LuaScript():
         { "monster_get_name",                &monster_get_name                },
         { "monster_get_id",                  &monster_get_id                  },
         { "monster_change_anger",            &monster_change_anger            },
+        { "monster_drop_anger",              &monster_drop_anger              },
+        { "monster_get_angerlist",           &monster_get_angerlist           },
         { "monster_remove",                  &monster_remove                  },
         { "being_apply_status",              &being_apply_status              },
         { "being_remove_status",             &being_remove_status             },

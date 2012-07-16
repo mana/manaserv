@@ -325,6 +325,9 @@ class Monster : public Being
          */
         void changeAnger(Actor *target, int amount);
 
+        const std::map<Being *, int> &getAngerList() const
+        { return mAnger; }
+
         /**
          * Calls the damage function in Being and updates the aggro list
          */
