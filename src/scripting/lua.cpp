@@ -1703,6 +1703,18 @@ static int chr_shake_screen(lua_State *s)
     return 0;
 }
 
+static int chr_create_text_particle(lua_State *s)
+{
+    Character *c = checkCharacter(s, 1);
+    const char *text = luaL_checkstring(s, 2);
+
+    MessageOut msg(GPMSG_CREATE_TEXT_PARTICLE);
+    msg.writeString(text);
+    c->getClient()->send(msg);
+
+    return 0;
+}
+
 
 /**
  * chr_get_exp(Character*, int skill): int
@@ -2478,6 +2490,7 @@ LuaScript::LuaScript():
         { "being_register",                  &being_register                  },
         { "effect_create",                   &effect_create                   },
         { "chr_shake_screen",                &chr_shake_screen                },
+        { "chr_create_text_particle",        &chr_create_text_particle        },
         { "test_tableget",                   &test_tableget                   },
         { "get_map_id",                      &get_map_id                      },
         { "get_map_property",                &get_map_property                },
