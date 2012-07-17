@@ -396,7 +396,7 @@ int Monster::damage(Actor *source, const Damage &damage)
     Damage newDamage = damage;
     float factor = mSpecy->getVulnerability(newDamage.element);
     newDamage.base = newDamage.base * factor;
-    newDamage.base = newDamage.delta * factor;
+    newDamage.delta = newDamage.delta * factor;
     int HPLoss = Being::damage(source, newDamage);
     if (source)
     {
