@@ -714,13 +714,22 @@ static int chr_unequip_item(lua_State *s)
 }
 
 /**
- * chr_get_level(Character*): int level
- * Tells the character current level.
+ * chr_get_level(Character* [, skill]): int level
+ * Tells the character current level. If a skill is passed as 2nd argument it
+ * will return the skill level.
  */
 static int chr_get_level(lua_State *s)
 {
     Character *ch = checkCharacter(s, 1);
-    lua_pushinteger(s, ch->getLevel());
+    if (lua_gettop(s) > 1)
+    {
+        int skillId = checkSkill(s, 2);
+        lua_pushinteger(s, ch->levelForExp(ch->getExperience(skillId)));
+    }
+    else
+    {
+        lua_pushinteger(s, ch->getLevel());
+    }
     return 1;
 }
 
