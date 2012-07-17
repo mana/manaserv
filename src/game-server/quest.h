@@ -23,16 +23,58 @@
 
 #include <string>
 
+#include "scripting/scriptmanager.h"
+
 class Character;
 class Script;
 
-struct QuestCallback
-{
-    void (*handler)(Character *,
-                    const std::string &value,
-                    Script *script);
 
-    Script *script;
+class QuestCallback
+{
+    public:
+        virtual ~QuestCallback()
+        { }
+
+        virtual void triggerCallback(Character *ch,
+                                     const std::string &value) const = 0;
+};
+
+class QuestThreadCallback : public QuestCallback
+{
+    public:
+        QuestThreadCallback(void (*handler)(Character *,
+                                            const std::string &value,
+                                            Script *mScript),
+                            Script *script) :
+            mHandler(handler),
+            mScript(script)
+        { }
+
+        virtual void triggerCallback(Character *ch,
+                                     const std::string &value) const
+        { mHandler(ch, value, mScript); }
+
+    private:
+        void (*mHandler)(Character *,
+                         const std::string &value,
+                         Script *mScript);
+
+        Script *mScript;
+};
+
+class QuestRefCallback : public QuestCallback
+{
+    public:
+        QuestRefCallback(Script *script, const std::string &questName) :
+            mQuestName(questName)
+        { script->assignCallback(mRef); }
+
+        virtual void triggerCallback(Character *ch,
+                                     const std::string &value) const;
+
+    private:
+        Script::Ref mRef;
+        std::string mQuestName;
 };
 
 /**
@@ -51,8 +93,7 @@ void setQuestVar(Character *, const std::string &name,
  * Starts the recovery of a variable and returns immediatly. The callback will
  * be called once the value has been recovered.
  */
-void recoverQuestVar(Character *, const std::string &name,
-                     const QuestCallback &);
+void recoverQuestVar(Character *, const std::string &name, QuestCallback *);
 
 /**
  * Called by the handler of the account server when a value is received.

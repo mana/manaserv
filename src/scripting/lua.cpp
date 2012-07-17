@@ -1345,6 +1345,21 @@ static int monster_change_anger(lua_State *s)
     return 0;
 }
 
+static int monster_drop_anger(lua_State *s)
+{
+    Monster *monster = checkMonster(s, 1);
+    Being *being = checkBeing(s, 2);
+    monster->forgetTarget(being);
+    return 0;
+}
+
+static int monster_get_angerlist(lua_State *s)
+{
+    Monster *monster = checkMonster(s, 1);
+    pushSTLContainer(s, monster->getAngerList());
+    return 1;
+}
+
 /**
  * monster_remove(Monster*): bool success
  * Remove a monster object without kill event.
@@ -1363,7 +1378,7 @@ static int monster_remove(lua_State *s)
 }
 
 /**
- * chr_get_quest(Character*, string): nil or string
+ * chr_get_quest(Character*, string): string
  * Callback for getting a quest variable. Starts a recovery and returns
  * immediatly, if the variable is not known yet.
  */
@@ -1382,11 +1397,74 @@ static int chr_get_quest(lua_State *s)
         lua_pushstring(s, value.c_str());
         return 1;
     }
-    QuestCallback f = { &LuaScript::getQuestCallback, getScript(s) };
+    QuestCallback *f = new QuestThreadCallback(&LuaScript::getQuestCallback,
+                                               getScript(s));
     recoverQuestVar(q, name, f);
 
     thread->mState = Script::ThreadExpectingString;
     return lua_yield(s, 0);
+}
+
+/**
+ * chr_request_quest(Character*, string, Ref function)
+ * Requests the questvar from the account server. This will make it available in
+ * the quest cache after some time. The passwed function will be called back as
+ * soon the quest var is available.
+ */
+static int chr_request_quest(lua_State *s)
+{
+    Character *ch = checkCharacter(s, 1);
+    const char *name = luaL_checkstring(s, 2);
+    luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
+    luaL_checktype(s, 3, LUA_TFUNCTION);
+
+    std::string value;
+    bool res = getQuestVar(ch, name, value);
+    if (res)
+    {
+        // Already cached, call passed callback immediately
+        Script *script = getScript(s);
+        Script::Ref callback;
+        script->assignCallback(callback);
+
+        // Backup the map since execute will reset it
+        MapComposite *map = script->getMap();
+
+        script->prepare(callback);
+        script->push(ch);
+        script->push(name);
+        script->push(value);
+        script->execute();
+
+        // Restore map
+        script->setMap(map);
+        return 0;
+    }
+
+    QuestCallback *f = new QuestRefCallback(getScript(s), name);
+    recoverQuestVar(ch, name, f);
+
+    return 0;
+}
+
+/**
+ * chr_try_get_quest(Character*, string): nil or string
+ * Callback for checking if a quest variable is available in cache. It will
+ * return the variable if it is or nil if it is not in cache.
+ */
+static int chr_try_get_quest(lua_State *s)
+{
+    Character *q = checkCharacter(s, 1);
+    const char *name = luaL_checkstring(s, 2);
+    luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
+
+    std::string value;
+    bool res = getQuestVar(q, name, value);
+    if (res)
+        lua_pushstring(s, value.c_str());
+    else
+        lua_pushnil(s);
+    return 1;
 }
 
 /**
@@ -1696,6 +1774,18 @@ static int chr_shake_screen(lua_State *s)
     if (lua_isnumber(s, 5))
         msg.writeInt16(lua_tointeger(s, 5));
 
+    c->getClient()->send(msg);
+
+    return 0;
+}
+
+static int chr_create_text_particle(lua_State *s)
+{
+    Character *c = checkCharacter(s, 1);
+    const char *text = luaL_checkstring(s, 2);
+
+    MessageOut msg(GPMSG_CREATE_TEXT_PARTICLE);
+    msg.writeString(text);
     c->getClient()->send(msg);
 
     return 0;
@@ -2529,6 +2619,8 @@ LuaScript::LuaScript():
         { "chr_get_level",                   &chr_get_level                   },
         { "chr_get_quest",                   &chr_get_quest                   },
         { "chr_set_quest",                   &chr_set_quest                   },
+        { "chr_request_quest",               &chr_request_quest               },
+        { "chr_try_get_quest",               &chr_try_get_quest               },
         { "getvar_map",                      &getvar_map                      },
         { "setvar_map",                      &setvar_map                      },
         { "getvar_world",                    &getvar_world                    },
@@ -2555,6 +2647,8 @@ LuaScript::LuaScript():
         { "monster_get_name",                &monster_get_name                },
         { "monster_get_id",                  &monster_get_id                  },
         { "monster_change_anger",            &monster_change_anger            },
+        { "monster_drop_anger",              &monster_drop_anger              },
+        { "monster_get_angerlist",           &monster_get_angerlist           },
         { "monster_remove",                  &monster_remove                  },
         { "being_apply_status",              &being_apply_status              },
         { "being_remove_status",             &being_remove_status             },
@@ -2591,6 +2685,7 @@ LuaScript::LuaScript():
         { "being_register",                  &being_register                  },
         { "effect_create",                   &effect_create                   },
         { "chr_shake_screen",                &chr_shake_screen                },
+        { "chr_create_text_particle",        &chr_create_text_particle        },
         { "test_tableget",                   &test_tableget                   },
         { "get_map_id",                      &get_map_id                      },
         { "get_map_property",                &get_map_property                },
