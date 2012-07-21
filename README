@@ -10,6 +10,7 @@ each dependency the Ubuntu package name is listed as well as the website.
  * Lua      (liblua5.1-0-dev)    - http://lua.org/
  * PhysFS   (libphysfs-dev)      - http://icculus.org/physfs/
  * SQLite 3 (libsqlite3-dev)     - http://sqlite.org/
+ * zlib     (zlib1g-dev)         - http://zlib.net/
 
 Optional dependencies:
 
