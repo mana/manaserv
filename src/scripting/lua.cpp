@@ -238,8 +238,8 @@ static int npc_choice(lua_State *s)
                 }
                 else
                 {
-                    raiseScriptError(s, "npc_choice called "
-                                     "with incorrect parameters.");
+                    luaL_error(s, "npc_choice called "
+                               "with incorrect parameters.");
                     return 0;
                 }
                 lua_pop(s, 1);
@@ -247,7 +247,7 @@ static int npc_choice(lua_State *s)
         }
         else
         {
-            raiseScriptError(s, "npc_choice called with incorrect parameters.");
+            luaL_error(s, "npc_choice called with incorrect parameters.");
             return 0;
         }
     }
@@ -397,7 +397,7 @@ static int chr_warp(lua_State *s)
     bool b = lua_isnil(s, 2);
     if (!(b || lua_isnumber(s, 2) || lua_isstring(s, 2)))
     {
-        raiseScriptError(s, "chr_warp called with incorrect parameters.");
+        luaL_error(s, "chr_warp called with incorrect parameters.");
         return 0;
     }
     MapComposite *m;
@@ -580,8 +580,8 @@ static int chr_inv_change(lua_State *s)
         if (!(lua_isnumber(s, i * 2 + 2) || lua_isstring(s, i * 2 + 2)) ||
             !lua_isnumber(s, i * 2 + 3))
         {
-            raiseScriptError(s, "chr_inv_change called with "
-                             "incorrect parameters.");
+            luaL_error(s, "chr_inv_change called with "
+                       "incorrect parameters.");
             return 0;
         }
 
@@ -626,7 +626,7 @@ static int chr_inv_count(lua_State *s)
     Character *q = checkCharacter(s, 1);
     if (!lua_isboolean(s, 2) || !lua_isboolean(s, 3))
     {
-        raiseScriptError(s, "chr_inv_count called with incorrect parameters.");
+        luaL_error(s, "chr_inv_count called with incorrect parameters.");
         return 0;
     }
 
@@ -761,9 +761,8 @@ static int npc_trade(lua_State *s)
     Character *q = checkCharacter(s, 2);
     if (!lua_isboolean(s, 3))
     {
-        raiseWarning(s, "npc_trade called with incorrect parameters.");
-        lua_pushinteger(s, 2); // return value
-        return 1; // Returns 1 parameter
+        luaL_error(s, "npc_trade called with incorrect parameters.");
+        return 0;
     }
 
     bool sellMode = lua_toboolean(s, 3);
@@ -997,8 +996,7 @@ static int being_damage(lua_State *s)
 
     if (!being->canFight())
     {
-        raiseScriptError(s, "being_damage called with "
-                            "victim that cannot fight");
+        luaL_error(s, "being_damage called with victim that cannot fight");
         return 0;
     }
 
@@ -1015,8 +1013,7 @@ static int being_damage(lua_State *s)
 
         if (!source->canFight())
         {
-            raiseScriptError(s, "being_damage called with "
-                                "source that cannot fight");
+            luaL_error(s, "being_damage called with source that cannot fight");
             return 0;
         }
     }
@@ -1313,8 +1310,7 @@ static int monster_get_name(lua_State *s)
     MonsterClass *spec = monsterManager->getMonster(id);
     if (!spec)
     {
-        raiseScriptError(s, "monster_get_name "
-                         "called with unknown monster id.");
+        luaL_error(s, "monster_get_name called with unknown monster id.");
         return 0;
     }
     lua_pushstring(s, spec->getName().c_str());
@@ -1559,7 +1555,7 @@ static int trigger_create(lua_State *s)
 
     if (!lua_isboolean(s, 7))
     {
-        raiseScriptError(s, "trigger_create called with incorrect parameters.");
+        luaL_error(s, "trigger_create called with incorrect parameters.");
         return 0;
     }
 
@@ -1973,8 +1969,11 @@ static int chr_set_special_recharge_speed(lua_State *s)
     const int speed = luaL_checkint(s, 3);
 
     if (c->setSpecialRechargeSpeed(special, speed))
-        raiseScriptError(s, "chr_set_special_mana called with special "
-                         "that is not owned by character.");
+    {
+        luaL_error(s,
+                   "chr_set_special_mana called with special "
+                   "that is not owned by character.");
+    }
     return 0;
 }
 
@@ -2006,8 +2005,11 @@ static int chr_set_special_mana(lua_State *s)
     const int special = checkSpecial(s, 2);
     const int mana = luaL_checkint(s, 3);
     if (!c->setSpecialMana(special, mana))
-        raiseScriptError(s, "chr_set_special_mana called with special "
-                         "that is not owned by character.");
+    {
+        luaL_error(s,
+                   "chr_set_special_mana called with special "
+                   "that is not owned by character.");
+    }
     return 0;
 }
 
@@ -2210,7 +2212,7 @@ static int item_get_name(lua_State *s)
     ItemClass *it = itemManager->getItem(id);
     if (!it)
     {
-        raiseScriptError(s, "item_get_name called with unknown item id.");
+        luaL_error(s, "item_get_name called with unknown item id.");
         return 0;
     }
     lua_pushstring(s, it->getName().c_str());

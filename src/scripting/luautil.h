@@ -48,9 +48,6 @@ class MonsterClass;
 class NPC;
 class StatusEffect;
 
-// Report script errors and interrupt the script.
-void raiseScriptError(lua_State *s, const char *format, ...);
-
 void raiseWarning(lua_State *s, const char *format, ...);
 
 /**
@@ -183,10 +180,26 @@ Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);
 
 /* Polymorphic wrapper for pushing variables.
    Useful for templates.*/
-void push(lua_State *s, int val);
-void push(lua_State *s, const std::string &val);
-void push(lua_State *s, Entity *val);
-void push(lua_State *s, double val);
+
+inline void push(lua_State *s, int val)
+{
+    lua_pushinteger(s, val);
+}
+
+inline void push(lua_State *s, const std::string &val)
+{
+    lua_pushstring(s, val.c_str());
+}
+
+inline void push(lua_State *s, Entity *val)
+{
+    lua_pushlightuserdata(s, val);
+}
+
+inline void push(lua_State *s, double val)
+{
+    lua_pushnumber(s, val);
+}
 
 inline void push(lua_State *s, AttackInfo *val)
 {
@@ -200,7 +213,8 @@ inline void push(lua_State *s, MapObject *val)
 
 
 /*  Pushes an STL LIST */
-template <typename T> void pushSTLContainer(lua_State *s, const std::list<T> &container)
+template <typename T>
+void pushSTLContainer(lua_State *s, const std::list<T> &container)
 {
     int len = container.size();
     lua_createtable(s, len, 0);
@@ -217,7 +231,8 @@ template <typename T> void pushSTLContainer(lua_State *s, const std::list<T> &co
 }
 
 /*  Pushes an STL VECTOR */
-template <typename T> void pushSTLContainer(lua_State *s, const std::vector<T> &container)
+template <typename T>
+void pushSTLContainer(lua_State *s, const std::vector<T> &container)
 {
     int len = container.size();
     lua_createtable(s, len, 0);
@@ -231,7 +246,8 @@ template <typename T> void pushSTLContainer(lua_State *s, const std::vector<T> &
 }
 
 /*  Pushes an STL MAP */
-template <typename Tkey, typename Tval> void pushSTLContainer(lua_State *s, const std::map<Tkey, Tval> &container)
+template <typename Tkey, typename Tval>
+void pushSTLContainer(lua_State *s, const std::map<Tkey, Tval> &container)
 {
     int len = container.size();
     lua_createtable(s, 0, len);
@@ -249,7 +265,8 @@ template <typename Tkey, typename Tval> void pushSTLContainer(lua_State *s, cons
 }
 
 /*  Pushes an STL SET */
-template <typename T> void pushSTLContainer(lua_State *s, const std::set<T> &container)
+template <typename T>
+void pushSTLContainer(lua_State *s, const std::set<T> &container)
 {
     int len = container.size();
     lua_createtable(s, len, 0);
