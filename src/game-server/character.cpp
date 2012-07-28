@@ -97,7 +97,7 @@ Character::Character(MessageIn &msg):
          it1_end = attr.end(); it1 != it1_end; ++it1)
         mAttributes.insert(std::make_pair(it1->first, Attribute(*it1->second)));
 
-    setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER);
+    setWalkMask(Map::BLOCKMASK_WALL);
 
     // Get character data.
     mDatabaseID = msg.readInt32();
