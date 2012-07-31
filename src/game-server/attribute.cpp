@@ -157,7 +157,7 @@ bool AttributeModifiersEffect::remove(double value, unsigned int id,
 
         /* If this is stackable, we need to update for every modifier affected */
         if (mStackableType == Stackable)
-            updateMod();
+            updateMod(value);
 
         ret = true;
         if (!id)
@@ -283,9 +283,10 @@ bool Attribute::remove(double value, unsigned int layer,
     assert(mMods.size() > layer);
     if (mMods.at(layer)->remove(value, lvl, fullcheck))
     {
-        while (++layer < mMods.size())
-           if (!mMods.at(layer)->recalculateModifiedValue(
-                         mMods.at(layer - 1)->getCachedModifiedValue()))
+        for (; layer < mMods.size(); ++layer)
+            if (!mMods.at(layer)->recalculateModifiedValue(
+                        layer ? mMods.at(layer - 1)->getCachedModifiedValue()
+                              : mBase))
                return false;
         return true;
     }
