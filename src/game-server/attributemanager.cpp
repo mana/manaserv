@@ -144,12 +144,13 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         return;
     }
 
-    mAttributeMap[id].modifiable = false;
     mAttributeMap[id].modifiers = std::vector<AttributeModifier>();
     mAttributeMap[id].minimum = XML::getFloatProperty(attributeNode, "minimum",
                                             std::numeric_limits<double>::min());
     mAttributeMap[id].maximum = XML::getFloatProperty(attributeNode, "maximum",
                                             std::numeric_limits<double>::max());
+    mAttributeMap[id].modifiable = XML::getBoolProperty(attributeNode, "modifiable",
+                                            false);
 
     for_each_xml_child_node(subNode, attributeNode)
     {
