@@ -148,7 +148,13 @@ unsigned Inventory::insert(unsigned itemId, unsigned amount)
         return 0;
 
     MessageOut invMsg(GPMSG_INVENTORY);
-    unsigned maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
+    ItemClass *item = itemManager->getItem(itemId);
+    if (!item) {
+        LOG_ERROR("Inventory: Trying to insert invalid item id " << itemId
+                  << " (amount: " << amount << ")");
+        return amount;
+    }
+    unsigned maxPerSlot = item->getMaxPerSlot();
 
     LOG_DEBUG("Inventory: Inserting " << amount << " item(s) Id: " << itemId
               << " for character '" << mCharacter->getName() << "'.");
@@ -209,6 +215,8 @@ unsigned Inventory::insert(unsigned itemId, unsigned amount)
         if (it == it_end)
             break;
     }
+
+    item->useTrigger(mCharacter, ITT_IN_INVY);
 
     // Send that first, before checking potential removals
     if (invMsg.getLength() > 2)
