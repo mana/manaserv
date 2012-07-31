@@ -577,8 +577,7 @@ static int chr_inv_change(lua_State *s)
     Inventory inv(q);
     for (int i = 0; i < nb_items; ++i)
     {
-        if (!(lua_isnumber(s, i * 2 + 2) || lua_isstring(s, i * 2 + 2)) ||
-            !lua_isnumber(s, i * 2 + 3))
+        if (!lua_isnumber(s, i * 2 + 3))
         {
             luaL_error(s, "chr_inv_change called with "
                        "incorrect parameters.");
