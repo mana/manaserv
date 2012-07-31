@@ -144,7 +144,9 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         return;
     }
 
-    mAttributeMap[id].modifiable = false;
+    // TODO: this was defaulting to false, but there is no way yet to change it
+    // introduce a modifier in attributes.xml to either make it true or false.
+    mAttributeMap[id].modifiable = true;
     mAttributeMap[id].modifiers = std::vector<AttributeModifier>();
     mAttributeMap[id].minimum = XML::getFloatProperty(attributeNode, "minimum",
                                             std::numeric_limits<double>::min());
