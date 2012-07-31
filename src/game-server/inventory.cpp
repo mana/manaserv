@@ -527,17 +527,16 @@ void Inventory::updateEquipmentTrigger(ItemClass *oldI, ItemClass *newI)
 
 unsigned int Inventory::getNewEquipItemInstance()
 {
-    unsigned int itemInstance = 1;
-
-    for (EquipData::const_iterator it = mPoss->equipSlots.begin(),
-        it_end = mPoss->equipSlots.end(); it != it_end; ++it)
+    std::set<int> alreadyUsed;
+    for (EquipData::const_iterator it = mPoss->equipSlots.begin();
+        it != mPoss->equipSlots.end(); ++it)
     {
-        if (it->second.itemInstance == itemInstance)
-        {
-            ++itemInstance;
-            it = mPoss->equipSlots.begin();
-        }
+        alreadyUsed.insert(it->second.itemInstance);
     }
+
+    unsigned int itemInstance = 1;
+    while (alreadyUsed.count(itemInstance))
+        itemInstance++;
 
     return itemInstance;
 }
