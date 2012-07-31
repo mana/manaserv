@@ -819,7 +819,7 @@ void GameHandler::handleRaiseAttribute(GameClient &client, MessageIn &message)
 
     MessageOut result(GPMSG_RAISE_ATTRIBUTE_RESPONSE);
     result.writeInt8(retCode);
-    result.writeInt32(attribute);
+    result.writeInt16(attribute);
     client.send(result);
 
     if (retCode == ATTRIBMOD_OK)
@@ -845,7 +845,7 @@ void GameHandler::handleLowerAttribute(GameClient &client, MessageIn &message)
 
     MessageOut result(GPMSG_LOWER_ATTRIBUTE_RESPONSE);
     result.writeInt8(retCode);
-    result.writeInt32(attribute);
+    result.writeInt16(attribute);
     client.send(result);
 
     if (retCode == ATTRIBMOD_OK)
