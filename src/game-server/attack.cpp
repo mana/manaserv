@@ -59,6 +59,7 @@ AttackInfo *AttackInfo::readAttackNode(xmlNodePtr node)
 
     Damage dmg;
     dmg.id = id;
+    dmg.skill = skillId;
     dmg.base = baseDamange;
     dmg.delta = deltaDamage;
     dmg.cth = chanceToHit;
