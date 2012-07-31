@@ -813,7 +813,7 @@ void GameHandler::handleNpcBuySell(GameClient &client, MessageIn &message)
 
 void GameHandler::handleRaiseAttribute(GameClient &client, MessageIn &message)
 {
-    const int attribute = message.readInt32();
+    const int attribute = message.readInt16();
     AttribmodResponseCode retCode;
     retCode = client.character->useCharacterPoint(attribute);
 
