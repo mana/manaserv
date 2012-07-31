@@ -210,6 +210,10 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
             break;
     }
 
+    ItemClass *item = itemManager->getItem(itemId);
+    if (item)
+        item->useTrigger(mCharacter, ITT_IN_INVY);
+
     // Send that first, before checking potential removals
     if (invMsg.getLength() > 2)
         gameHandler->sendTo(mCharacter, invMsg);
