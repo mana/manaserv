@@ -212,7 +212,13 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
 
     ItemClass *item = itemManager->getItem(itemId);
     if (item)
-        item->useTrigger(mCharacter, ITT_IN_INVY);
+    {
+        // EVIL HACK!!  This allows to prevent sending the item to client.
+        // We need this hack for money items in lpc!
+        // REVERT THIS AS SOON AS POSSIBLE
+        if (item->useTrigger(mCharacter, ITT_IN_INVY))
+            return amount;
+    }
 
     // Send that first, before checking potential removals
     if (invMsg.getLength() > 2)
