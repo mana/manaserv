@@ -1178,7 +1178,7 @@ void Storage::updateCharacterPoints(int charId,
         std::ostringstream sql;
         sql << "UPDATE " << CHARACTERS_TBL_NAME
             << " SET char_pts = " << charPoints << ", "
-            << " correct_pts = " << corrPoints << ", "
+            << " correct_pts = " << corrPoints
             << " WHERE id = " << charId;
 
         mDb->execSql(sql.str());
@@ -1188,7 +1188,6 @@ void Storage::updateCharacterPoints(int charId,
         utils::throwError("(DALStorage::updateCharacterPoints) "
                           "SQL query failure: ", e);
     }
-
 }
 
 void Storage::updateExperience(int charId, int skillId, int skillValue)
