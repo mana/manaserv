@@ -48,10 +48,10 @@
 #include <limits.h>
 
 // Experience curve related values
-const float Character::EXPCURVE_EXPONENT = 3.0f;
-const float Character::EXPCURVE_FACTOR = 10.0f;
-const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
-const float Character::EXP_LEVEL_FLEXIBILITY = 1.0f;
+const float Character::EXPCURVE_EXPONENT = 2.5f;
+const float Character::EXPCURVE_FACTOR = 20.0f;
+const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.85f;
+const float Character::EXP_LEVEL_FLEXIBILITY = 3.0f;
 
 Script::Ref Character::mDeathCallback;
 Script::Ref Character::mDeathAcceptedCallback;
