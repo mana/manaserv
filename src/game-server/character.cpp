@@ -770,8 +770,8 @@ void Character::resumeNpcThread()
 void Character::addAttack(AttackInfo *attackInfo)
 {
     // Remove knuckle attack
-    Being::removeAttack(mKnuckleAttackInfo);
     Being::addAttack(attackInfo);
+    Being::removeAttack(mKnuckleAttackInfo);
 }
 
 void Character::removeAttack(AttackInfo *attackInfo)
@@ -779,7 +779,6 @@ void Character::removeAttack(AttackInfo *attackInfo)
     // Add knuckle attack
     if (mAttacks.getNumber() == 1)
     {
-
         Being::addAttack(mKnuckleAttackInfo);
     }
     Being::removeAttack(attackInfo);
