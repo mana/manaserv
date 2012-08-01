@@ -561,22 +561,22 @@ void Character::updateDerivedAttributes(unsigned int attr)
     switch(attr)
     {
     case ATTR_STR:
-        updateDerivedAttributes(ATTR_INV_CAPACITY);
+        recalculateBaseAttribute(ATTR_INV_CAPACITY);
         break;
     case ATTR_AGI:
-        updateDerivedAttributes(ATTR_DODGE);
-        updateDerivedAttributes(ATTR_MOVE_SPEED_TPS);
+        recalculateBaseAttribute(ATTR_DODGE);
+        recalculateBaseAttribute(ATTR_MOVE_SPEED_TPS);
         break;
     case ATTR_VIT:
-        updateDerivedAttributes(ATTR_MAX_HP);
-        updateDerivedAttributes(ATTR_HP_REGEN);
-        updateDerivedAttributes(ATTR_DEFENSE);
+        recalculateBaseAttribute(ATTR_MAX_HP);
+        recalculateBaseAttribute(ATTR_HP_REGEN);
+        recalculateBaseAttribute(ATTR_DEFENSE);
         break;
     case ATTR_INT:
         // TODO
         break;
     case ATTR_DEX:
-        updateDerivedAttributes(ATTR_ACCURACY);
+        recalculateBaseAttribute(ATTR_ACCURACY);
         break;
     case ATTR_WIL:
         // TODO
