@@ -1970,10 +1970,10 @@ static int chr_set_special_recharge_speed(lua_State *s)
     const int special = checkSpecial(s, 2);
     const int speed = luaL_checkint(s, 3);
 
-    if (c->setSpecialRechargeSpeed(special, speed))
+    if (!c->setSpecialRechargeSpeed(special, speed))
     {
         luaL_error(s,
-                   "chr_set_special_mana called with special "
+                   "chr_set_special_recharge_speed called with special "
                    "that is not owned by character.");
     }
     return 0;
