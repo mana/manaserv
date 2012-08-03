@@ -519,7 +519,11 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
 
 void GameHandler::handleUseItem(GameClient &client, MessageIn &message)
 {
+    if (client.character->getAction() == DEAD)
+        return;
+
     const int slot = message.readInt16();
+
     Inventory inv(client.character);
 
     if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
