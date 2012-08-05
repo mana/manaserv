@@ -355,14 +355,14 @@ void Being::move()
         || !getModifiedAttribute(ATTR_MOVE_SPEED_RAW))
           return;
 
-    // Ignore not moving beings
-    if (mAction == STAND && mDst == getPosition())
-        return;
-
     // Remember the current position before moving. This is used by
     // MapComposite::update() to determine whether a being has moved from one
     // zone to another.
     mOld = getPosition();
+
+    // Ignore not moving beings
+    if (mAction == STAND && mDst == getPosition())
+        return;
 
     if (mMoveTime > WORLD_TICK_MS)
     {

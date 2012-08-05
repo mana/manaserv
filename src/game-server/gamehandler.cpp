@@ -519,7 +519,11 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
 
 void GameHandler::handleUseItem(GameClient &client, MessageIn &message)
 {
+    if (client.character->getAction() == DEAD)
+        return;
+
     const int slot = message.readInt16();
+
     Inventory inv(client.character);
 
     if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
@@ -642,6 +646,9 @@ void GameHandler::handleAttack(GameClient &client, MessageIn &message)
 
 void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message)
 {
+    if (client.character->getAction() == DEAD)
+        return;
+
     const int specialID = message.readInt8();
     const int targetID = message.readInt16(); // 0 when no target is selected
     Being *being = 0;
@@ -654,6 +661,9 @@ void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message
 
 void GameHandler::handleUseSpecialOnPoint(GameClient &client, MessageIn &message)
 {
+    if (client.character->getAction() == DEAD)
+        return;
+
     const int specialID = message.readInt8();
     const int x = message.readInt16();
     const int y = message.readInt16();
