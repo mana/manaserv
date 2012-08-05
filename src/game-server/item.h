@@ -269,11 +269,7 @@ class ItemClass
                 delete mEffects.begin()->second;
                 mEffects.erase(mEffects.begin());
             }
-            while (mDispells.begin() != mDispells.end())
-            {
-                delete mDispells.begin()->second;
-                mDispells.erase(mDispells.begin());
-            }
+            mDispells.clear();
         }
 
         unsigned short mDatabaseID; /**< Item reference information */
