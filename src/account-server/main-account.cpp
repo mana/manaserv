@@ -365,19 +365,11 @@ int main(int argc, char *argv[])
     statTimer.start();
     banTimer.start();
 
-    // -------------------------------------------------------------------------
-    // FIXME: for testing purposes only...
-    // writing accountserver startup time and svn revision to database as global
-    // world state variable
-    const time_t startup = time(NULL);
+    // Write startup time to database as system world state variable
     std::stringstream timestamp;
-    timestamp << startup;
+    timestamp << time(NULL);
     storage->setWorldStateVar("accountserver_startup", timestamp.str(),
                               Storage::SystemMap);
-    const std::string revision = "$Revision$";
-    storage->setWorldStateVar("accountserver_version", revision,
-                              Storage::SystemMap);
-    // -------------------------------------------------------------------------
 
     while (running)
     {
