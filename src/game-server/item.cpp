@@ -98,6 +98,24 @@ void ItemEffectScript::dispell(Being *itemUser)
     }
 }
 
+ItemClass::~ItemClass()
+{
+    while (mEffects.begin() != mEffects.end())
+    {
+        delete mEffects.begin()->second;
+        mEffects.erase(mEffects.begin());
+    }
+}
+
+void ItemClass::addEffect(ItemEffectInfo *effect,
+                          ItemTriggerType id,
+                          ItemTriggerType dispell)
+{
+    mEffects.insert(std::make_pair(id, effect));
+    if (dispell)
+        mDispells.insert(std::make_pair(dispell, effect));
+}
+
 bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
 {
     if (!trigger)

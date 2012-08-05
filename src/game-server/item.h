@@ -181,8 +181,7 @@ class ItemClass
             mMaxPerSlot(maxperslot)
         {}
 
-        ~ItemClass()
-        { resetEffects(); }
+        ~ItemClass();
 
         /**
          * Returns the name of the item type
@@ -255,22 +254,7 @@ class ItemClass
          */
         void addEffect(ItemEffectInfo *effect,
                        ItemTriggerType id,
-                       ItemTriggerType dispell = ITT_NULL)
-        {
-            mEffects.insert(std::make_pair(id, effect));
-            if (dispell)
-                mDispells.insert(std::make_pair(dispell, effect));
-        }
-
-        void resetEffects()
-        {
-            while (mEffects.begin() != mEffects.end())
-            {
-                delete mEffects.begin()->second;
-                mEffects.erase(mEffects.begin());
-            }
-            mDispells.clear();
-        }
+                       ItemTriggerType dispell = ITT_NULL);
 
         unsigned short mDatabaseID; /**< Item reference information */
         std::string mName; /**< name used to identify the item class */
