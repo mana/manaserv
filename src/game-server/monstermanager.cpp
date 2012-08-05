@@ -120,12 +120,26 @@ void MonsterManager::initialize()
             if (xmlStrEqual(subnode->name, BAD_CAST "drop"))
             {
                 MonsterDrop drop;
-                drop.item = itemManager->getItem(
-                                          XML::getProperty(subnode, "item", 0));
+                std::string item = XML::getProperty(subnode, "item",
+                                                    std::string());
+                ItemClass *itemClass;
+                if (utils::isNumeric(item))
+                    itemClass = itemManager->getItem(utils::stringToInt(item));
+                else
+                    itemClass = itemManager->getItemByName(item);
+
+                if (!itemClass)
+                {
+                    LOG_WARN("Monster Manager: Invalid item name \"" << item
+                             << "\"");
+                    break;
+                }
+
+                drop.item = itemClass;
                 drop.probability = XML::getFloatProperty(subnode, "percent",
                                                          0.0) * 100 + 0.5;
 
-                if (drop.item && drop.probability)
+                if (drop.probability)
                     drops.push_back(drop);
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "attributes"))
