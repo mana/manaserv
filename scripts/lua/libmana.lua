@@ -87,7 +87,7 @@ local function mapupdate(mapid)
     check_schedule(mapid)
 end
 
--- Registers a function so that is is executed during map initialization.
+-- Registers a function so that it is executed during map initialization.
 function atinit(f)
   local map_id = get_map_id()
   init_fun[map_id] = init_fun[map_id] or {}

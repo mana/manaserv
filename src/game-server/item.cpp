@@ -100,13 +100,27 @@ void ItemEffectScript::dispell(Being *itemUser)
 
 ItemClass::~ItemClass()
 {
-    resetEffects();
+    while (mEffects.begin() != mEffects.end())
+    {
+        delete mEffects.begin()->second;
+        mEffects.erase(mEffects.begin());
+    }
+
     for (std::vector<AttackInfo *>::iterator it = mAttackInfos.begin(),
          it_end = mAttackInfos.end();
          it != it_end; ++it)
     {
         delete *it;
     }
+}
+
+void ItemClass::addEffect(ItemEffectInfo *effect,
+                          ItemTriggerType id,
+                          ItemTriggerType dispell)
+{
+    mEffects.insert(std::make_pair(id, effect));
+    if (dispell)
+        mDispells.insert(std::make_pair(dispell, effect));
 }
 
 bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)

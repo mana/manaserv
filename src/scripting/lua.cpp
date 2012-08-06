@@ -556,7 +556,7 @@ static int chr_get_equipment(lua_State *s)
 }
 
 /**
- * chr_inv_change(Character*, (int id || string name,
+ * chr_inv_change(Character*, (int id || string name || itemclass item,
  *                int nb)...): bool success
  * Callback for inserting/removing items in inventory.
  * The function can be called several times in a row, but it is better to
@@ -564,10 +564,7 @@ static int chr_get_equipment(lua_State *s)
  * (negative amount) should be passed first, then insertions (positive amount).
  * If a removal fails, all the previous operations are canceled (except for
  * items dropped on the floor, hence why removals should be passed first), and
- * the function returns false. Otherwise the function will return true.
- * Note that previously when the item identifier was zero, money was modified;
- * however currency is now handled through attributes. This breaks backwards
- * compatibility with old scripts, and so logs a warning.
+ * the function returns false.
  * Note: If an insertion fails, extra items are dropped on the floor.
  */
 static int chr_inv_change(lua_State *s)
