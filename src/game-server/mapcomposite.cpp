@@ -478,8 +478,6 @@ bool MapComposite::activate()
     assert(!isActive());
 
     std::string file = "maps/" + mName + ".tmx";
-    if (!ResourceManager::exists(file))
-        file += ".gz";
 
     mMap = MapReader::readMap(file);
     if (!mMap)
