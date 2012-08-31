@@ -80,6 +80,9 @@ int MapManager::initialize(const std::string &mapReferenceFile)
             if (mapFileExists)
             {
                 maps[id] = new MapComposite(id, name);
+                if (!maps[id]->readMap())
+                    LOG_FATAL("Failed to load map \"" << name << "\"!");
+
                 ++loadedMaps;
             }
         }
