@@ -460,8 +460,9 @@ Script::Ref MapComposite::mInitializeCallback;
 Script::Ref MapComposite::mUpdateCallback;
 
 MapComposite::MapComposite(int id, const std::string &name):
-    mMap(NULL),
-    mContent(NULL),
+    mActive(false),
+    mMap(0),
+    mContent(0),
     mName(name),
     mID(id)
 {
@@ -473,15 +474,18 @@ MapComposite::~MapComposite()
     delete mContent;
 }
 
+bool MapComposite::readMap()
+{
+    std::string file = "maps/" + mName + ".tmx";
+
+    mMap = MapReader::readMap(file);
+    return mMap;
+}
+
 bool MapComposite::activate()
 {
     assert(!isActive());
 
-    std::string file = "maps/" + mName + ".tmx";
-    if (!ResourceManager::exists(file))
-        file += ".gz";
-
-    mMap = MapReader::readMap(file);
     if (!mMap)
         return false;
 
@@ -507,6 +511,8 @@ bool MapComposite::activate()
         s->prepare(mInitializeCallback);
         s->execute();
     }
+
+    mActive = true;
 
     return true;
 }
@@ -730,7 +736,7 @@ void MapComposite::initializeContent()
 {
     mContent = new MapContent(mMap);
 
-    const std::vector<MapObject*> &objects = mMap->getObjects();
+    const std::vector<MapObject *> &objects = mMap->getObjects();
 
     for (size_t i = 0; i < objects.size(); ++i)
     {
@@ -740,17 +746,46 @@ void MapComposite::initializeContent()
         if (utils::compareStrI(type, "WARP") == 0)
         {
             std::string destMapName = object->getProperty("DEST_MAP");
-            int destX = utils::stringToInt(object->getProperty("DEST_X"));
-            int destY = utils::stringToInt(object->getProperty("DEST_Y"));
+            std::string destMapObjectName = object->getProperty("DEST_NAME");
 
-            if (!destMapName.empty() && destX && destY)
+            MapComposite *destMap = MapManager::getMap(destMapName);
+            int destX = 0;
+            int destY = 0;
+
+            if (destMap && !destMapObjectName.empty())
             {
-                if (MapComposite *destMap = MapManager::getMap(destMapName))
+                const std::vector<MapObject *> &destObjects =
+                                               destMap->getMap()->getObjects();
+
+                std::vector<MapObject *>::const_iterator it, it_end;
+                for (it = destObjects.begin(), it_end = destObjects.end();
+                     it != it_end; ++it)
                 {
-                    WarpAction *action = new WarpAction(destMap, destX, destY);
-                    insert(new TriggerArea(this, object->getBounds(),
-                                           action, false));
+                    const MapObject *destObject = *it;
+                    if (utils::compareStrI(destObject->getType(),
+                                           "WARP_DEST") == 0 &&
+                        utils::compareStrI(destObject->getName(),
+                                           destMapObjectName) == 0)
+                    {
+                        const Rectangle &rect = destObject->getBounds();
+                        destX = rect.x + rect.w / 2;
+                        destY = rect.y + rect.h / 2;
+                        break;
+                    }
                 }
+            }
+            else
+            {
+                destX = utils::stringToInt(object->getProperty("DEST_X"));
+                destY = utils::stringToInt(object->getProperty("DEST_Y"));
+            }
+
+
+            if (destMap && destX && destY)
+            {
+                WarpAction *action = new WarpAction(destMap, destX, destY);
+                insert(new TriggerArea(this, object->getBounds(),
+                                       action, false));
             }
             else
             {

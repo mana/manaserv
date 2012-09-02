@@ -234,6 +234,8 @@ class MapComposite
         MapComposite(int id, const std::string &name);
         ~MapComposite();
 
+        bool readMap();
+
         /**
          * Loads the map and initializes the map content. Should only be called
          * once!
@@ -253,7 +255,7 @@ class MapComposite
          * Returns whether the map is active on this server or not.
          */
         bool isActive() const
-        { return mMap; }
+        { return mActive; }
 
         /**
          * Gets the game ID of this map.
@@ -366,6 +368,7 @@ class MapComposite
         void callMapVariableCallback(const std::string &key,
                                      const std::string &value);
 
+        bool mActive;         /**< Status of map. */
         Map *mMap;            /**< Actual map. */
         MapContent *mContent; /**< Entities on the map. */
         std::string mName;    /**< Name of the map. */
