@@ -790,6 +790,12 @@ void MapComposite::initializeContent()
                               << "was not found on the map "
                               << destMap->getName());
                 }
+                if (!(destX && destY))
+                {
+                    LOG_ERROR("Warp target \"" << destMapObjectName << "\" "
+                              << "was not found on the map "
+                              << destMap->getName());
+                }
             }
             else
             {
@@ -806,7 +812,7 @@ void MapComposite::initializeContent()
             }
             else
             {
-                LOG_WARN("Unrecognized warp format");
+                LOG_WARN("Unrecognized warp format on map " << mName);
             }
         }
         else if (utils::compareStrI(type, "SPAWN") == 0)
