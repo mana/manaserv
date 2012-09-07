@@ -806,7 +806,7 @@ void MapComposite::initializeContent()
             }
             else
             {
-                LOG_WARN("Unrecognized warp format");
+                LOG_WARN("Unrecognized warp format on map " << mName);
             }
         }
         else if (utils::compareStrI(type, "SPAWN") == 0)
