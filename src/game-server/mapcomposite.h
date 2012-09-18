@@ -27,6 +27,7 @@
 #include <map>
 
 #include "scripting/script.h"
+#include "game-server/map.h"
 
 class Actor;
 class Being;
@@ -360,6 +361,9 @@ class MapComposite
 
         static void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
+
+        const MapObject *findMapObject(const std::string &name,
+                                       const std::string &type) const;
 
     private:
         MapComposite(const MapComposite &);
