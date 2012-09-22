@@ -500,6 +500,8 @@ bool MapComposite::activate()
     else
         mPvPRules = PVP_NONE;
 
+    mActive = true;
+
     if (!mInitializeCallback.isValid())
     {
         LOG_WARN("No callback for map initialization found");
@@ -511,8 +513,6 @@ bool MapComposite::activate()
         s->prepare(mInitializeCallback);
         s->execute();
     }
-
-    mActive = true;
 
     return true;
 }
@@ -729,6 +729,28 @@ void MapComposite::callWorldVariableCallback(const std::string &key,
 }
 
 /**
+ * Finds a map object by its name and type.
+ * Name and type are case insensitive.
+ */
+const MapObject *MapComposite::findMapObject(const std::string &name,
+                                             const std::string &type) const
+{
+    const std::vector<MapObject *> &destObjects = mMap->getObjects();
+    std::vector<MapObject *>::const_iterator it, it_end;
+    for (it = destObjects.begin(), it_end = destObjects.end();
+         it != it_end; ++it)
+    {
+        const MapObject *obj = *it;
+        if (utils::compareStrI(obj->getType(), type) == 0 &&
+            utils::compareStrI(obj->getName(), name) == 0)
+        {
+            return obj;
+        }
+    }
+    return 0; // nothing found
+}
+
+/**
  * Initializes the map content. This creates the warps, spawn areas, npcs and
  * other scripts.
  */
@@ -754,24 +776,19 @@ void MapComposite::initializeContent()
 
             if (destMap && !destMapObjectName.empty())
             {
-                const std::vector<MapObject *> &destObjects =
-                                               destMap->getMap()->getObjects();
-
-                std::vector<MapObject *>::const_iterator it, it_end;
-                for (it = destObjects.begin(), it_end = destObjects.end();
-                     it != it_end; ++it)
+                const MapObject *obj =
+                        destMap->findMapObject(destMapObjectName, "WARP");
+                if (obj)
                 {
-                    const MapObject *destObject = *it;
-                    if (utils::compareStrI(destObject->getType(),
-                                           "WARP_DEST") == 0 &&
-                        utils::compareStrI(destObject->getName(),
-                                           destMapObjectName) == 0)
-                    {
-                        const Rectangle &rect = destObject->getBounds();
-                        destX = rect.x + rect.w / 2;
-                        destY = rect.y + rect.h / 2;
-                        break;
-                    }
+                    const Rectangle &rect = obj->getBounds();
+                    destX = rect.x + rect.w / 2;
+                    destY = rect.y + rect.h / 2;
+                }
+                else
+                {
+                    LOG_ERROR("Warp target \"" << destMapObjectName << "\" "
+                              << "was not found on the map "
+                              << destMap->getName());
                 }
             }
             else
@@ -789,7 +806,7 @@ void MapComposite::initializeContent()
             }
             else
             {
-                LOG_WARN("Unrecognized warp format");
+                LOG_WARN("Unrecognized warp format on map " << mName);
             }
         }
         else if (utils::compareStrI(type, "SPAWN") == 0)
