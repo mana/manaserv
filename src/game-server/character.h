@@ -424,6 +424,10 @@ class Character : public Being
 
         void triggerLoginCallback();
 
+        virtual void addAttack(AttackInfo *attackInfo);
+
+        virtual void removeAttack(AttackInfo *attackInfo);
+
     protected:
         /**
          * Gets the way the actor blocks pathfinding for other objects
@@ -526,6 +530,8 @@ class Character : public Being
         Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
 
         Timeout mMuteTimeout;        /**< Time until the character is no longer muted  */
+
+        AttackInfo *mKnuckleAttackInfo;
 
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;

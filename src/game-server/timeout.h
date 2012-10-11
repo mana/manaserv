@@ -62,7 +62,7 @@ class Timeout
         /**
          * Returns whether the timeout has expired.
          */
-        bool expired() const { return remaining() < 0; }
+        bool expired() const { return remaining() <= 0; }
 
         /**
          * Returns whether the timeout was reached in the current tick.

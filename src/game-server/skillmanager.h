@@ -60,6 +60,8 @@ class SkillManager
     const std::string getSkillName(unsigned int id) const;
     const std::string getSetName(unsigned int id) const;
 
+    bool exists(unsigned id) const;
+
     unsigned int getDefaultSkillId() const
     { return mDefaultSkillId; }
   private:

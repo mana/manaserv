@@ -29,7 +29,7 @@
 
 #include "game-server/actor.h"
 #include "game-server/attribute.h"
-#include "game-server/autoattack.h"
+#include "game-server/attack.h"
 #include "game-server/timeout.h"
 
 class Being;
@@ -87,6 +87,21 @@ class Being : public Actor
         virtual void died();
 
         /**
+         * Process all available attacks
+         */
+        void processAttacks();
+
+        /**
+         * Adds an attack to the available attacks
+         */
+        void addAttack(AttackInfo *attack);
+
+        /**
+         * Removes an attack from the available attacks
+         */
+        void removeAttack(AttackInfo *attackInfo);
+
+        /**
          * Gets the destination coordinates of the being.
          */
         const Point &getDestination() const
@@ -135,7 +150,7 @@ class Being : public Actor
          * Performs an attack.
          * Return Value: damage inflicted or -1 when illegal target
          */
-        int performAttack(Being *target, const Damage &damage);
+        int performAttack(Being *target, const Damage &dmg);
 
         /**
          * Sets the current action.
@@ -153,7 +168,9 @@ class Being : public Actor
          * For being, this is defaulted to the first one (1).
          */
         virtual int getAttackId() const
-        { return 1; }
+        { return mCurrentAttack ?
+                mCurrentAttack->getAttackInfo()->getDamage().id : 0;
+        }
 
         /**
          * Moves the being toward its destination.
@@ -286,20 +303,10 @@ class Being : public Actor
         virtual void inserted();
 
     protected:
-        static const int TICKS_PER_HP_REGENERATION = 100;
-
-        BeingAction mAction;
-        AttributeMap mAttributes;
-        AutoAttacks mAutoAttacks;
-        StatusEffects mStatus;
-        Being *mTarget;
-        Point mOld;                 /**< Old coordinates. */
-        Point mDst;                 /**< Target coordinates. */
-        BeingGender mGender;        /**< Gender of the being. */
-
-    private:
-        Being(const Being &rhs);
-        Being &operator=(const Being &rhs);
+        /**
+         * Performs an attack
+         */
+        virtual void processAttack(Attack &attack);
 
         /**
          * Update the being direction when moving so avoid directions desyncs
@@ -307,6 +314,23 @@ class Being : public Actor
          */
         void updateDirection(const Point &currentPos,
                              const Point &destPos);
+
+        static const int TICKS_PER_HP_REGENERATION = 100;
+
+        BeingAction mAction;
+        AttributeMap mAttributes;
+        Attacks mAttacks;
+        StatusEffects mStatus;
+        Being *mTarget;
+        Point mOld;                 /**< Old coordinates. */
+        Point mDst;                 /**< Target coordinates. */
+        BeingGender mGender;        /**< Gender of the being. */
+        Attack *mCurrentAttack;     /**< Last used attack. */
+
+
+    private:
+        Being(const Being &rhs);
+        Being &operator=(const Being &rhs);
 
         Path mPath;
         BeingDirection mDirection;   /**< Facing direction. */

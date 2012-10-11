@@ -30,6 +30,7 @@
 #include "game-server/eventlistener.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
+#include "game-server/skillmanager.h"
 #include "game-server/statuseffect.h"
 #include "game-server/statusmanager.h"
 #include "utils/logger.h"
@@ -40,6 +41,7 @@ Being::Being(EntityType type):
     mAction(STAND),
     mTarget(NULL),
     mGender(GENDER_UNSPECIFIED),
+    mCurrentAttack(0),
     mDirection(DOWN)
 {
     const AttributeManager::AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
@@ -183,6 +185,65 @@ void Being::died()
         if (l.dispatch->died)
             l.dispatch->died(&l, this);
     }
+}
+
+void Being::processAttacks()
+{
+    if (mAction != ATTACK || !mTarget)
+        return;
+
+    // Ticks attacks even when not attacking to permit cooldowns and warmups.
+    std::vector<Attack *> attacksReady;
+    mAttacks.getUsuableAttacks(&attacksReady);
+
+    if (Attack *triggerableAttack = mAttacks.getTriggerableAttack())
+    {
+        processAttack(*triggerableAttack);
+        mAttacks.markAttackAsTriggered();
+    }
+
+    // Deal with the ATTACK action.
+    if (attacksReady.empty())
+        return;
+
+    Attack *highestPriorityAttack = 0;
+    // Performs all ready attacks.
+    for (std::vector<Attack *>::const_iterator it = attacksReady.begin(),
+         it_end = attacksReady.end(); it != it_end; ++it)
+    {
+        // check if target is in range using the pythagorean theorem
+        int distx = this->getPosition().x - mTarget->getPosition().x;
+        int disty = this->getPosition().y - mTarget->getPosition().y;
+        int distSquare = (distx * distx + disty * disty);
+        AttackInfo *info = (*it)->getAttackInfo();
+        int maxDist = info->getDamage().range + getSize();
+
+        if (distSquare <= maxDist * maxDist &&
+                (!highestPriorityAttack ||
+                 highestPriorityAttack->getAttackInfo()->getPriority()
+                 < info->getPriority()))
+        {
+            highestPriorityAttack = *it;
+        }
+    }
+    if (highestPriorityAttack)
+    {
+        mAttacks.startAttack(highestPriorityAttack);
+        mCurrentAttack = highestPriorityAttack;
+        setDestination(getPosition());
+        // TODO: Turn into direction of enemy
+        raiseUpdateFlags(UPDATEFLAG_ATTACK);
+    }
+}
+
+void Being::addAttack(AttackInfo *attackInfo)
+{
+    mAttacks.add(attackInfo);
+}
+
+void Being::removeAttack(AttackInfo *attackInfo)
+{
+    mAttacks.remove(attackInfo);
 }
 
 void Being::setDestination(const Point &dst)
@@ -409,7 +470,7 @@ int Being::directionToAngle(int direction)
     }
 }
 
-int Being::performAttack(Being *target, const Damage &damage)
+int Being::performAttack(Being *target, const Damage &dmg)
 {
     // check target legality
     if (!target
@@ -423,25 +484,11 @@ int Being::performAttack(Being *target, const Damage &damage)
             && getType() == OBJECT_CHARACTER)
         return -1;
 
-    // check if target is in range using the pythagorean theorem
-    int distx = this->getPosition().x - target->getPosition().x;
-    int disty = this->getPosition().y - target->getPosition().y;
-    int distSquare = (distx * distx + disty * disty);
-    int maxDist = damage.range + target->getSize();
-    if (maxDist * maxDist < distSquare)
-        return -1;
-
-    // Note: The auto-attack system will handle the delay between two attacks.
-
-    return target->damage(this, damage);
+    return target->damage(this, dmg);
 }
 
 void Being::setAction(BeingAction action)
 {
-    // Stops the auto-attacks when changing action
-    if (mAction == ATTACK && action != ATTACK)
-        mAutoAttacks.stop();
-
     mAction = action;
     if (action != ATTACK && // The players are informed about these actions
         action != WALK)     // by other messages
@@ -692,6 +739,8 @@ void Being::update()
     // Check if being died
     if (getModifiedAttribute(ATTR_HP) <= 0 && mAction != DEAD)
         died();
+
+    processAttacks();
 }
 
 void Being::inserted()
@@ -706,4 +755,9 @@ void Being::inserted()
 void Being::setGender(BeingGender gender)
 {
     mGender = gender;
+}
+
+void Being::processAttack(Attack &attack)
+{
+    performAttack(mTarget, attack.getAttackInfo()->getDamage());
 }

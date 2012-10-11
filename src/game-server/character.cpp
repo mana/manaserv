@@ -87,7 +87,8 @@ Character::Character(MessageIn &msg):
     mParty(0),
     mTransaction(TRANS_NONE),
     mTalkNpcId(0),
-    mNpcThread(0)
+    mNpcThread(0),
+    mKnuckleAttackInfo(0)
 {
     const AttributeManager::AttributeScope &attr =
                            attributeManager->getAttributeScope(CharacterScope);
@@ -107,11 +108,27 @@ Character::Character(MessageIn &msg):
     Inventory(this).initialize();
     modifiedAllAttribute();
     setSize(16);
+
+    // Default knuckle attack
+    int damageBase = this->getModifiedAttribute(ATTR_STR);
+    int damageDelta = damageBase / 2;
+    Damage knuckleDamage;
+    knuckleDamage.skill = skillManager->getDefaultSkillId();
+    knuckleDamage.base = damageBase;
+    knuckleDamage.delta = damageDelta;
+    knuckleDamage.cth = 2;
+    knuckleDamage.element = ELEMENT_NEUTRAL;
+    knuckleDamage.type = DAMAGE_PHYSICAL;
+    knuckleDamage.range = DEFAULT_TILE_LENGTH;
+
+    mKnuckleAttackInfo = new AttackInfo(0, knuckleDamage, 7, 3, 0);
+    addAttack(mKnuckleAttackInfo);
 }
 
 Character::~Character()
 {
     delete mNpcThread;
+    delete mKnuckleAttackInfo;
 }
 
 void Character::update()
@@ -162,58 +179,6 @@ void Character::update()
     {
         mStatusEffects[it->first] = it->second.time;
         it++;
-    }
-
-    processAttacks();
-}
-
-void Character::processAttacks()
-{
-    // Ticks attacks even when not attacking to permit cooldowns and warmups.
-    std::list<AutoAttack> attacksReady;
-    mAutoAttacks.tick(&attacksReady);
-
-    if (mAction != ATTACK || !mTarget)
-    {
-        mAutoAttacks.stop();
-        return;
-    }
-
-    // Deal with the ATTACK action.
-
-    // Install default bare knuckle attack if no attacks were added from config.
-    // TODO: Get this from configuration.
-    if (!mAutoAttacks.getAutoAttacksNumber())
-    {
-        int damageBase = getModifiedAttribute(ATTR_STR);
-        int damageDelta = damageBase / 2;
-        Damage knuckleDamage;
-        knuckleDamage.skill = skillManager->getDefaultSkillId();
-        knuckleDamage.base = damageBase;
-        knuckleDamage.delta = damageDelta;
-        knuckleDamage.cth = 2;
-        knuckleDamage.element = ELEMENT_NEUTRAL;
-        knuckleDamage.type = DAMAGE_PHYSICAL;
-        knuckleDamage.range = (getSize() < DEFAULT_TILE_LENGTH) ?
-                    DEFAULT_TILE_LENGTH : getSize();
-
-        AutoAttack knuckleAttack(knuckleDamage, 7, 3);
-        mAutoAttacks.add(knuckleAttack);
-    }
-
-    if (attacksReady.empty())
-    {
-        if (!mAutoAttacks.areActive())
-            mAutoAttacks.start();
-    }
-    else
-    {
-        // Performs all ready attacks.
-        for (std::list<AutoAttack>::iterator it = attacksReady.begin();
-             it != attacksReady.end(); ++it)
-        {
-            performAttack(mTarget, it->getDamage());
-        }
     }
 }
 
@@ -537,6 +502,14 @@ bool Character::recalculateBaseAttribute(unsigned int attr)
         newBase = 0.0;
         // TODO
         break;
+    case ATTR_STR:
+        if (mKnuckleAttackInfo)
+        {
+            Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
+            knuckleDamage.base = getModifiedAttribute(ATTR_STR);
+            knuckleDamage.delta = knuckleDamage.base / 2;
+        }
+        break;
     default:
         return Being::recalculateBaseAttribute(attr);
     }
@@ -792,6 +765,21 @@ void Character::resumeNpcThread()
         mTalkNpcId = 0;
         mNpcThread = 0;
     }
+}
+
+void Character::addAttack(AttackInfo *attackInfo)
+{
+    // Remove knuckle attack
+    Being::addAttack(attackInfo);
+    Being::removeAttack(mKnuckleAttackInfo);
+}
+
+void Character::removeAttack(AttackInfo *attackInfo)
+{
+    Being::removeAttack(attackInfo);
+    // Add knuckle attack
+    if (mAttacks.getNumber() == 0)
+        Being::addAttack(mKnuckleAttackInfo);
 }
 
 void Character::disconnected()
