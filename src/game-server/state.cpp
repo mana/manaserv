@@ -241,7 +241,6 @@ static void informPlayer(MapComposite *map, Character *p)
             enterMsg.writeInt16(opos.x);
             enterMsg.writeInt16(opos.y);
             enterMsg.writeInt8(o->getDirection());
-            enterMsg.writeInt8(o->getGender());
             switch (otype)
             {
                 case OBJECT_CHARACTER:
@@ -250,6 +249,7 @@ static void informPlayer(MapComposite *map, Character *p)
                     enterMsg.writeString(q->getName());
                     enterMsg.writeInt8(q->getHairStyle());
                     enterMsg.writeInt8(q->getHairColor());
+                    enterMsg.writeInt8(q->getGender());
                     serializeLooks(q, enterMsg);
                 } break;
 
@@ -258,6 +258,7 @@ static void informPlayer(MapComposite *map, Character *p)
                     Monster *q = static_cast< Monster * >(o);
                     enterMsg.writeInt16(q->getSpecy()->getId());
                     enterMsg.writeString(q->getName());
+                    enterMsg.writeInt8(q->getGender());
                 } break;
 
                 case OBJECT_NPC:
@@ -265,6 +266,7 @@ static void informPlayer(MapComposite *map, Character *p)
                     NPC *q = static_cast< NPC * >(o);
                     enterMsg.writeInt16(q->getNPC());
                     enterMsg.writeString(q->getName());
+                    enterMsg.writeInt8(q->getGender());
                 } break;
 
                 default:
