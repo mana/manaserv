@@ -18,6 +18,8 @@
 -- along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
 --
 
+BEGIN;
+
 -----------------------------------------------------------------------------
 -- Tables
 -----------------------------------------------------------------------------
@@ -480,3 +482,5 @@ INSERT INTO mana_transaction_codes VALUES ( 51, 'Command RESTART_THIS',     'Com
 INSERT INTO mana_transaction_codes VALUES ( 52, 'Command RESTART_ALL',      'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 53, 'Command ATTRIBUTE',        'Commands' );
 INSERT INTO mana_transaction_codes VALUES ( 54, 'Command KICK',             'Commands' );
+
+END;
