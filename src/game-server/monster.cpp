@@ -154,22 +154,19 @@ void Monster::update()
         // We have no target - let's wander around
         if (mStrollTimeout.expired() && getPosition() == getDestination())
         {
-            if (mKillStealProtectedTimeout.expired())
+            unsigned range = mSpecy->getStrollRange();
+            if (range)
             {
-                unsigned range = mSpecy->getStrollRange();
-                if (range)
-                {
-                    Point randomPos(rand() % (range * 2 + 1)
-                                    - range + getPosition().x,
-                                    rand() % (range * 2 + 1)
-                                    - range + getPosition().y);
-                    // Don't allow negative destinations, to avoid rounding
-                    // problems when divided by tile size
-                    if (randomPos.x >= 0 && randomPos.y >= 0)
-                        setDestination(randomPos);
-                }
-                mStrollTimeout.set(10 + rand() % 10);
+                Point randomPos(rand() % (range * 2 + 1)
+                                - range + getPosition().x,
+                                rand() % (range * 2 + 1)
+                                - range + getPosition().y);
+                // Don't allow negative destinations, to avoid rounding
+                // problems when divided by tile size
+                if (randomPos.x >= 0 && randomPos.y >= 0)
+                    setDestination(randomPos);
             }
+            mStrollTimeout.set(10 + rand() % 10);
         }
     }
 
