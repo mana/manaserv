@@ -2575,7 +2575,11 @@ LuaScript::LuaScript():
     // Register package loader that goes through the resource manager
     // table.insert(package.loaders, 2, require_loader)
     lua_getglobal(mRootState, "package");
+#if LUA_VERSION_NUM < 502
     lua_getfield(mRootState, -1, "loaders");
+#else
+    lua_getfield(mRootState, -1, "searchers");
+#endif
     lua_pushcfunction(mRootState, require_loader);
     lua_rawseti(mRootState, -2, 2);
     lua_pop(mRootState, 2);
@@ -2699,8 +2703,13 @@ LuaScript::LuaScript():
         { "get_special_info",                &get_special_info                },
         { NULL, NULL }
     };
+#if LUA_VERSION_NUM < 502
     lua_pushvalue(mRootState, LUA_GLOBALSINDEX);
     luaL_register(mRootState, NULL, callbacks);
+#else
+    lua_pushglobaltable(mRootState);
+    luaL_setfuncs(mRootState, callbacks, 0);
+#endif
     lua_pop(mRootState, 1);                     // pop the globals table
 
     static luaL_Reg const members_AttackInfo[] = {

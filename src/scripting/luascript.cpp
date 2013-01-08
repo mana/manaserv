@@ -151,7 +151,11 @@ bool LuaScript::resume()
     setMap(mCurrentThread->mMap);
     const int tmpNbArgs = nbArgs;
     nbArgs = -1;
+#if LUA_VERSION_NUM < 502
     int result = lua_resume(mCurrentState, tmpNbArgs);
+#else
+    int result = lua_resume(mCurrentState, NULL, tmpNbArgs);
+#endif
     setMap(0);
 
     if (result == 0)                // Thread is done
