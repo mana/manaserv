@@ -117,6 +117,7 @@ ItemClass::~ItemClass()
 void ItemClass::addEffect(ItemEffectInfo *effect,
                           ItemTriggerType id,
                           ItemTriggerType dispell)
+{
     mEffects.insert(std::make_pair(id, effect));
     if (dispell)
         mDispells.insert(std::make_pair(dispell, effect));
