@@ -42,7 +42,7 @@ class Timer
          *
          * @param ms           the interval in milliseconds
          */
-        Timer(unsigned int ms);
+        Timer(unsigned ms);
 
         /**
          * Returns the number of elapsed ticks since last call.
@@ -67,13 +67,13 @@ class Timer
         /**
          * Changes the interval between two pulses.
          */
-        void changeInterval(unsigned int newinterval);
+        void changeInterval(unsigned newinterval);
 
     private:
         /**
          * Interval between two pulses.
          */
-        unsigned int interval;
+        unsigned interval;
 
         /**
          * The time the last pulse occured.

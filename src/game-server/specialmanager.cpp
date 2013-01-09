@@ -143,14 +143,14 @@ void SpecialManager::clear()
     mNamedSpecialsInfo.clear();
 }
 
-unsigned int SpecialManager::getId(const std::string &set,
-                                   const std::string &name) const
+unsigned SpecialManager::getId(const std::string &set,
+                               const std::string &name) const
 {
     std::string key = utils::toLower(set) + "_" + utils::toLower(name);
     return getId(key);
 }
 
-unsigned int SpecialManager::getId(const std::string &specialName) const
+unsigned SpecialManager::getId(const std::string &specialName) const
 {
     if (mNamedSpecialsInfo.contains(specialName))
         return mNamedSpecialsInfo.value(specialName)->id;

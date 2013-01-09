@@ -23,7 +23,7 @@
 #include "../account-server/character.h"
 #include "../common/configuration.h"
 
-Letter::Letter(unsigned int type, Character *sender, Character *receiver)
+Letter::Letter(unsigned type, Character *sender, Character *receiver)
  : mId(0), mType(type), mSender(sender), mReceiver(receiver)
 {
 }
@@ -59,7 +59,7 @@ std::string Letter::getContents() const
 
 bool Letter::addAttachment(InventoryItem item)
 {
-    unsigned int max = Configuration::getValue("mail_maxAttachments", 3);
+    unsigned max = Configuration::getValue("mail_maxAttachments", 3);
     if (mAttachments.size() > max)
     {
         return false;
@@ -100,7 +100,7 @@ Post::~Post()
 
 bool Post::addLetter(Letter *letter)
 {
-    unsigned int max = Configuration::getValue("mail_maxLetters", 10);
+    unsigned max = Configuration::getValue("mail_maxLetters", 10);
     if (mLetters.size() > max)
     {
         return false;
@@ -120,7 +120,7 @@ Letter* Post::getLetter(int letter) const
     return mLetters[letter];
 }
 
-unsigned int Post::getNumberOfLetters() const
+unsigned Post::getNumberOfLetters() const
 {
     return mLetters.size();
 }

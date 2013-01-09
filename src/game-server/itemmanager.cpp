@@ -54,7 +54,7 @@ void ItemManager::deinitialize()
         delete i->second;
     }
 
-    for (std::map< unsigned int, EquipSlotInfo* >::iterator it =
+    for (std::map< unsigned, EquipSlotInfo* >::iterator it =
         mEquipSlotsInfo.begin(), it_end = mEquipSlotsInfo.end(); it != it_end;
         ++it)
     {
@@ -76,24 +76,24 @@ ItemClass *ItemManager::getItemByName(const std::string &name) const
     return mItemClassesByName.value(name);
 }
 
-unsigned int ItemManager::getDatabaseVersion() const
+unsigned ItemManager::getDatabaseVersion() const
 {
     return mItemDatabaseVersion;
 }
 
-unsigned int ItemManager::getEquipSlotIdFromName(const std::string &name) const
+unsigned ItemManager::getEquipSlotIdFromName(const std::string &name) const
 {
     EquipSlotInfo *slotInfo = mNamedEquipSlotsInfo.value(name);
     return slotInfo ? slotInfo->slotId : 0;
 }
 
-unsigned int ItemManager::getEquipSlotCapacity(unsigned int id) const
+unsigned ItemManager::getEquipSlotCapacity(unsigned id) const
 {
     EquipSlotsInfo::const_iterator i = mEquipSlotsInfo.find(id);
     return i != mEquipSlotsInfo.end() ? i->second->slotCapacity : 0;
 }
 
-bool ItemManager::isEquipSlotVisible(unsigned int id) const
+bool ItemManager::isEquipSlotVisible(unsigned id) const
 {
     EquipSlotsInfo::const_iterator i = mEquipSlotsInfo.find(id);
     return i != mEquipSlotsInfo.end() ? i->second->visibleSlot : false;
@@ -160,7 +160,7 @@ void ItemManager::readEquipSlotsFile()
             EquipSlotInfo *equipSlotInfo =
                 new EquipSlotInfo(slotId, name, capacity, visible);
             mEquipSlotsInfo.insert(
-                std::make_pair<unsigned int, EquipSlotInfo*>(slotId, equipSlotInfo));
+                std::make_pair<unsigned, EquipSlotInfo*>(slotId, equipSlotInfo));
             mNamedEquipSlotsInfo.insert(name, equipSlotInfo);
 
             totalCapacity += capacity;
@@ -222,7 +222,7 @@ void ItemManager::readItemNode(xmlNodePtr itemNode)
         return;
     }
 
-    unsigned int maxPerSlot = XML::getProperty(itemNode, "max-per-slot", 0);
+    unsigned maxPerSlot = XML::getProperty(itemNode, "max-per-slot", 0);
     if (!maxPerSlot)
     {
         LOG_WARN("Item Manager: Missing max-per-slot property for "
@@ -373,7 +373,7 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
                          "but no attribute specified!");
                 continue;
             }
-            unsigned int duration = XML::getProperty(subNode,
+            unsigned duration = XML::getProperty(subNode,
                                                      "duration",
                                                      0);
             ModifierLocation location = attributeManager->getLocation(tag);

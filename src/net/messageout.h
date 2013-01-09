@@ -75,7 +75,7 @@ class MessageOut
         /**
          * Returns the length of the data.
          */
-        unsigned int getLength() const { return mPos; }
+        unsigned getLength() const { return mPos; }
 
         /**
          * Sets whether the debug mode is enabled. In debug mode, the internal
@@ -96,8 +96,8 @@ class MessageOut
         void writeValueType(ManaServ::ValueType type);
 
         char *mData;                /**< Data building up. */
-        unsigned int mPos;          /**< Position in the data. */
-        unsigned int mDataSize;     /**< Allocated datasize. */
+        unsigned mPos;              /**< Position in the data. */
+        unsigned mDataSize;         /**< Allocated datasize. */
         bool mDebugMode;            /**< Include debugging information. */
 
         /**

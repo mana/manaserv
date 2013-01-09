@@ -33,7 +33,7 @@ void AttributeManager::reload()
 {
     mTagMap.clear();
     mAttributeMap.clear();
-    for (unsigned int i = 0; i < MaxScope; ++i)
+    for (unsigned i = 0; i < MaxScope; ++i)
         mAttributeScopes[i].clear();
 
     readAttributesFile();
@@ -43,11 +43,11 @@ void AttributeManager::reload()
               << ", NonStackableBonus is " << NonStackableBonus << ".");
     LOG_DEBUG("Additive is " << Additive << ", Multiplicative is " << Multiplicative << ".");
     const std::string *tag;
-    unsigned int count = 0;
+    unsigned count = 0;
     for (AttributeMap::const_iterator i = mAttributeMap.begin();
          i != mAttributeMap.end(); ++i)
     {
-        unsigned int lCount = 0;
+        unsigned lCount = 0;
         LOG_DEBUG("  "<<i->first<<" : ");
         for (std::vector<AttributeModifier>::const_iterator j =
             i->second.modifiers.begin();

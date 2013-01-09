@@ -43,7 +43,7 @@
 #include "utils/logger.h"
 #include "utils/tokendispenser.h"
 
-const unsigned int TILES_TO_BE_NEAR = 7;
+const unsigned TILES_TO_BE_NEAR = 7;
 
 GameHandler::GameHandler():
     mTokenCollector(this)

@@ -133,7 +133,7 @@ bool durationCompare(const AttributeModifierState *lhs,
     return lhs->mDuration < rhs->mDuration;
 }
 
-bool AttributeModifiersEffect::remove(double value, unsigned int id,
+bool AttributeModifiersEffect::remove(double value, unsigned id,
                                       bool fullCheck)
 {
     /* We need to find and check this entry exists, and erase the entry
@@ -249,7 +249,7 @@ bool AttributeModifiersEffect::recalculateModifiedValue(double newPrevLayerValue
 
 
 bool Attribute::add(unsigned short duration, double value,
-                    unsigned int layer, int level)
+                    unsigned layer, int level)
 {
     assert(mMods.size() > layer);
     LOG_DEBUG("Adding modifier to attribute with duration " << duration <<
@@ -277,7 +277,7 @@ bool Attribute::add(unsigned short duration, double value,
     return false;
 }
 
-bool Attribute::remove(double value, unsigned int layer,
+bool Attribute::remove(double value, unsigned layer,
                        int lvl, bool fullcheck)
 {
     assert(mMods.size() > layer);
@@ -321,7 +321,7 @@ Attribute::Attribute(const AttributeManager::AttributeInfo &info):
     const std::vector<AttributeModifier> &modifiers = info.modifiers;
     LOG_DEBUG("Construction of new attribute with '" << modifiers.size()
         << "' layers.");
-    for (unsigned int i = 0; i < modifiers.size(); ++i)
+    for (unsigned i = 0; i < modifiers.size(); ++i)
     {
         LOG_DEBUG("Adding layer with stackable type "
                   << modifiers[i].stackableType

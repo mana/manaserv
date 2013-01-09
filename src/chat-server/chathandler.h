@@ -214,7 +214,7 @@ class ChatHandler : public ConnectionHandler
          * Finds out the name of a character by its id. Either searches it
          * in the list of online characters or otherwise gets it from the db.
          */
-        unsigned int getIdOfChar(const std::string &name);
+        unsigned getIdOfChar(const std::string &name);
 
         /**
          * Sends a message to every client in a registered channel.

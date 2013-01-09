@@ -48,12 +48,12 @@ public:
             target(TARGET_BEING)
         {}
 
-        unsigned int id;
+        unsigned id;
         std::string name;
         std::string setName;
         bool rechargeable;
         int defaultRechargeSpeed;
-        unsigned int neededMana;
+        unsigned neededMana;
         TargetMode target;
         Script::Ref rechargedCallback;
         Script::Ref useCallback;
@@ -79,13 +79,13 @@ public:
     /**
      * Gets the specials Id from a set and a special string.
      */
-    unsigned int getId(const std::string &set, const std::string &name) const;
+    unsigned getId(const std::string &set, const std::string &name) const;
 
     /**
      * Gets the specials Id from a string formatted in this way:
      * "setname_skillname"
      */
-    unsigned int getId(const std::string &specialName) const;
+    unsigned getId(const std::string &specialName) const;
 
     const std::string getSpecialName(int id) const;
     const std::string getSetName(int id) const;
@@ -102,7 +102,7 @@ private:
                          const std::string &setName);
 
     std::string mSpecialFile;
-    typedef std::map<unsigned int, SpecialInfo*> SpecialsInfo;
+    typedef std::map<unsigned, SpecialInfo*> SpecialsInfo;
     SpecialsInfo mSpecialsInfo;
     typedef utils::NameMap<SpecialInfo*> NamedSpecialsInfo;
     NamedSpecialsInfo mNamedSpecialsInfo;

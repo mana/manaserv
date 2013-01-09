@@ -42,7 +42,7 @@ public:
      * @param sender Pointer to character that sent the letter
      * @param receiver Pointer to character that will receive the letter
      */
-    Letter(unsigned int type, Character *sender, Character *receiver);
+    Letter(unsigned type, Character *sender, Character *receiver);
 
     ~Letter();
 
@@ -62,7 +62,7 @@ public:
     /**
      * Gets the type of the letter. (unused)
      */
-    unsigned int getType() const
+    unsigned getType() const
     { return mType; }
 
     /**
@@ -113,8 +113,8 @@ public:
     std::vector<InventoryItem> getAttachments() const;
 
 private:
-    unsigned int mId;
-    unsigned int mType;
+    unsigned mId;
+    unsigned mType;
     unsigned long mExpiry;
     std::string mContents;
     std::vector<InventoryItem> mAttachments;
@@ -143,7 +143,7 @@ public:
      * Return number of letters in post
      * @return Returns the size of mLetters
      */
-    unsigned int getNumberOfLetters() const;
+    unsigned getNumberOfLetters() const;
 
 private:
     std::vector<Letter*> mLetters;

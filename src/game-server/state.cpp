@@ -84,11 +84,11 @@ static void serializeLooks(Character *ch, MessageOut &msg)
 
     // We'll use a set to check whether we already sent the update for the given
     // item instance.
-    std::set<unsigned int> itemInstances;
+    std::set<unsigned> itemInstances;
 
     // The map storing the info about the look changes to send
     //{ slot type id, item id }
-    std::map <unsigned int, unsigned int> lookChanges;
+    std::map <unsigned, unsigned> lookChanges;
 
     // Note that we can send several updates on the same slot type as different
     // items may have been equipped.
@@ -105,8 +105,8 @@ static void serializeLooks(Character *ch, MessageOut &msg)
             // we encounter the item, so we can send the look change.
             // We also send empty slots for unequipment handling.
             lookChanges.insert(
-                std::make_pair<unsigned int, unsigned int>(it->first,
-                                                           it->second.itemId));
+                std::make_pair<unsigned, unsigned>(it->first,
+                                                   it->second.itemId));
         }
     }
 
@@ -115,7 +115,7 @@ static void serializeLooks(Character *ch, MessageOut &msg)
         // Number of look changes to send
         msg.writeInt8(lookChanges.size());
 
-        for (std::map<unsigned int, unsigned int>::const_iterator it2 =
+        for (std::map<unsigned, unsigned>::const_iterator it2 =
              lookChanges.begin(), it2_end = lookChanges.end();
              it2 != it2_end; ++it2)
         {

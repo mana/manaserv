@@ -740,7 +740,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         // than <account_maxCharacters> characters.
         Characters &chars = acc->getCharacters();
         if (slot < 1 || slot > mMaxCharacters
-            || !acc->isSlotEmpty((unsigned int) slot))
+            || !acc->isSlotEmpty((unsigned) slot))
         {
             reply.writeInt8(CREATE_INVALID_SLOT);
             client.send(reply);
@@ -758,11 +758,11 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
 
         // Customization of character's attributes...
         std::vector<int> attributes = std::vector<int>(mModifiableAttributes.size(), 0);
-        for (unsigned int i = 0; i < mModifiableAttributes.size(); ++i)
+        for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
             attributes[i] = msg.readInt16();
 
         int totalAttributes = 0;
-        for (unsigned int i = 0; i < mModifiableAttributes.size(); ++i)
+        for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
         {
             // For good total attributes check.
             totalAttributes += attributes.at(i);
@@ -790,7 +790,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
             Character *newCharacter = new Character(name);
 
             // Set the initial attributes provided by the client
-            for (unsigned int i = 0; i < mModifiableAttributes.size(); ++i)
+            for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
             {
                 newCharacter->mAttributes.insert(
                             std::make_pair(mModifiableAttributes.at(i), attributes[i]));

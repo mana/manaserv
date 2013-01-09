@@ -158,7 +158,7 @@ class Account
          *
          * @param slot slot index of the character.
          */
-        void delCharacter(unsigned int slot);
+        void delCharacter(unsigned slot);
 
         /**
          * Get all the characters.

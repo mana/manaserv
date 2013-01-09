@@ -131,7 +131,7 @@ void SkillManager::readSkillNode(xmlNodePtr skillNode,
     }
 
     mSkillsInfo.insert(
-        std::make_pair<unsigned int, SkillInfo*>(skillInfo->id, skillInfo));
+        std::make_pair<unsigned, SkillInfo*>(skillInfo->id, skillInfo));
 
     std::string keyName = setName + "_" + skillInfo->skillName;
     mNamedSkillsInfo.insert(keyName, skillInfo);
@@ -180,13 +180,13 @@ unsigned SkillManager::getId(const std::string &skillName) const
     return skillInfo ? skillInfo->id : 0;
 }
 
-const std::string SkillManager::getSkillName(unsigned int id) const
+const std::string SkillManager::getSkillName(unsigned id) const
 {
     SkillsInfo::const_iterator it = mSkillsInfo.find(id);
     return it != mSkillsInfo.end() ? it->second->skillName : "";
 }
 
-const std::string SkillManager::getSetName(unsigned int id) const
+const std::string SkillManager::getSetName(unsigned id) const
 {
     SkillsInfo::const_iterator it = mSkillsInfo.find(id);
     return it != mSkillsInfo.end() ? it->second->setName : "";

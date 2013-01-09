@@ -350,7 +350,7 @@ void ChatHandler::handleGuildKickMember(ChatClient &client, MessageIn &msg)
         return;
     }
     ChatClient *otherClient = getClient(otherCharName);
-    unsigned int otherCharId;
+    unsigned otherCharId;
     if (otherClient)
         otherCharId = otherClient->characterId;
     else

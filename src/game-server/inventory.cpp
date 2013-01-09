@@ -68,7 +68,7 @@ void Inventory::initialize()
     /*
      * Construct a set of item Ids to keep track of duplicate item Ids.
      */
-    std::set<unsigned int> itemIds;
+    std::set<unsigned> itemIds;
 
     /*
      * Construct a set of itemIds to keep track of duplicate itemIds.
@@ -136,19 +136,19 @@ void Inventory::initialize()
     }
 }
 
-unsigned int Inventory::getItem(unsigned int slot) const
+unsigned Inventory::getItem(unsigned slot) const
 {
     InventoryData::iterator item = mPoss->inventory.find(slot);
     return item != mPoss->inventory.end() ? item->second.itemId : 0;
 }
 
-unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
+unsigned Inventory::insert(unsigned itemId, unsigned amount)
 {
     if (!itemId || !amount)
         return 0;
 
     MessageOut invMsg(GPMSG_INVENTORY);
-    unsigned int maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
+    unsigned maxPerSlot = itemManager->getItem(itemId)->getMaxPerSlot();
 
     LOG_DEBUG("Inventory: Inserting " << amount << " item(s) Id: " << itemId
               << " for character '" << mCharacter->getName() << "'.");
@@ -217,10 +217,10 @@ unsigned int Inventory::insert(unsigned int itemId, unsigned int amount)
     return amount;
 }
 
-unsigned int Inventory::count(unsigned int itemId,
+unsigned Inventory::count(unsigned itemId,
                               bool inInventory, bool inEquipment) const
 {
-    unsigned int nb = 0;
+    unsigned nb = 0;
     if (inInventory)
     {
         for (InventoryData::iterator it = mPoss->inventory.begin(),
@@ -248,7 +248,7 @@ unsigned int Inventory::count(unsigned int itemId,
     return nb;
 }
 
-int Inventory::getFirstSlot(unsigned int itemId)
+int Inventory::getFirstSlot(unsigned itemId)
 {
     for (InventoryData::iterator it = mPoss->inventory.begin(),
         it_end = mPoss->inventory.end(); it != it_end; ++it)
@@ -257,7 +257,7 @@ int Inventory::getFirstSlot(unsigned int itemId)
     return -1;
 }
 
-unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
+unsigned Inventory::remove(unsigned itemId, unsigned amount)
 {
     if (!itemId || !amount)
         return amount;
@@ -276,7 +276,7 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
         {
             if (amount)
             {
-                unsigned int sub = std::min(amount, it->second.amount);
+                unsigned sub = std::min(amount, it->second.amount);
                 amount -= sub;
                 it->second.amount -= sub;
                 invMsg.writeInt16(it->first);
@@ -319,8 +319,8 @@ unsigned int Inventory::remove(unsigned int itemId, unsigned int amount)
     return amount;
 }
 
-unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
-                             unsigned int amount)
+unsigned Inventory::move(unsigned slot1, unsigned slot2,
+                             unsigned amount)
 {
     LOG_DEBUG(amount << " item(s) requested to move from: " << slot1 << " to "
               << slot2 << " for character: '" << mCharacter->getName() << "'.");
@@ -337,7 +337,7 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
 
     MessageOut invMsg(GPMSG_INVENTORY);
 
-    unsigned int nb = std::min(amount, it1->second.amount);
+    unsigned nb = std::min(amount, it1->second.amount);
     if (it2 == inv_end)
     {
         // Slot2 does not yet exist.
@@ -350,7 +350,7 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
         amount -= nb;
 
         //Save the itemId in case of deletion of the iterator
-        unsigned int itemId = it1->second.itemId;
+        unsigned itemId = it1->second.itemId;
         invMsg.writeInt16(slot1);                  // Slot
         if (it1->second.amount)
         {
@@ -380,8 +380,8 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
             // and when all the amount of slot 1 is moving onto slot 2.
             if (amount >= it1->second.amount)
             {
-                unsigned int itemId = it1->second.itemId;
-                unsigned int amount = it1->second.amount;
+                unsigned itemId = it1->second.itemId;
+                unsigned amount = it1->second.amount;
                 it1->second.itemId = it2->second.itemId;
                 it1->second.amount = it2->second.amount;
                 it2->second.itemId = itemId;
@@ -443,7 +443,7 @@ unsigned int Inventory::move(unsigned int slot1, unsigned int slot2,
     return amount;
 }
 
-unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
+unsigned Inventory::removeFromSlot(unsigned slot, unsigned amount)
 {
     InventoryData::iterator it = mPoss->inventory.find(slot);
 
@@ -474,7 +474,7 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
     if (!exists && it->second.itemId)
         lastSlotOfItemRemaining = true;
 
-    unsigned int sub = std::min(amount, it->second.amount);
+    unsigned sub = std::min(amount, it->second.amount);
     amount -= sub;
     it->second.amount -= sub;
     invMsg.writeInt16(it->first);
@@ -503,7 +503,7 @@ unsigned int Inventory::removeFromSlot(unsigned int slot, unsigned int amount)
 }
 
 
-void Inventory::updateEquipmentTrigger(unsigned int oldId, unsigned int newId)
+void Inventory::updateEquipmentTrigger(unsigned oldId, unsigned newId)
 {
     if (!oldId && !newId)
         return;
@@ -525,7 +525,7 @@ void Inventory::updateEquipmentTrigger(ItemClass *oldI, ItemClass *newI)
         newI->useTrigger(mCharacter, ITT_EQUIP);
 }
 
-unsigned int Inventory::getNewEquipItemInstance()
+unsigned Inventory::getNewEquipItemInstance()
 {
     std::set<int> alreadyUsed;
     for (EquipData::const_iterator it = mPoss->equipSlots.begin();
@@ -534,15 +534,15 @@ unsigned int Inventory::getNewEquipItemInstance()
         alreadyUsed.insert(it->second.itemInstance);
     }
 
-    unsigned int itemInstance = 1;
+    unsigned itemInstance = 1;
     while (alreadyUsed.count(itemInstance))
         itemInstance++;
 
     return itemInstance;
 }
 
-bool Inventory::checkEquipmentCapacity(unsigned int equipmentSlot,
-                                       unsigned int capacityRequested)
+bool Inventory::checkEquipmentCapacity(unsigned equipmentSlot,
+                                       unsigned capacityRequested)
 {
     int capacity = itemManager->getEquipSlotCapacity(equipmentSlot);
 
@@ -596,7 +596,7 @@ bool Inventory::equip(int inventorySlot)
     }
 
     // List of potential unique itemInstances to unequip first.
-    std::set<unsigned int> equipInstancesToUnequipFirst;
+    std::set<unsigned> equipInstancesToUnequipFirst;
 
     // We first check the equipment slots for:
     // - 1. whether enough total equip slot space is available.
@@ -643,7 +643,7 @@ bool Inventory::equip(int inventorySlot)
     }
 
     // Potential Pre-unequipment process
-    for (std::set<unsigned int>::const_iterator it3 =
+    for (std::set<unsigned>::const_iterator it3 =
             equipInstancesToUnequipFirst.begin();
             it3 != equipInstancesToUnequipFirst.end(); ++it3)
     {
@@ -666,8 +666,8 @@ bool Inventory::equip(int inventorySlot)
     // Compute an unique equip item Instance id (unicity is per character only.)
     int itemInstance = getNewEquipItemInstance();
 
-    unsigned int capacityLeft = equipReq.capacityRequired;
-    unsigned int capacityUsed = 0;
+    unsigned capacityLeft = equipReq.capacityRequired;
+    unsigned capacityUsed = 0;
     // Apply equipment changes
     for (EquipData::iterator it4 = mPoss->equipSlots.begin(),
          it4_end = mPoss->equipSlots.end(); it4 != it4_end; ++it4)
@@ -697,7 +697,7 @@ bool Inventory::equip(int inventorySlot)
     // Hence, we add them back
     if(capacityLeft)
     {
-        unsigned int maxCapacity =
+        unsigned maxCapacity =
             itemManager->getEquipSlotCapacity(equipReq.equipSlotId);
 
         // A should never happen case
@@ -707,7 +707,7 @@ bool Inventory::equip(int inventorySlot)
         {
             EquipmentItem equipItem(it->second.itemId, itemInstance);
             mPoss->equipSlots.insert(
-                std::make_pair<unsigned int, EquipmentItem>
+                std::make_pair<unsigned, EquipmentItem>
                     (equipReq.equipSlotId, equipItem));
             --capacityLeft;
         }
@@ -734,7 +734,7 @@ bool Inventory::equip(int inventorySlot)
     return true;
 }
 
-unsigned int Inventory::getSlotItemInstance(unsigned int slot)
+unsigned Inventory::getSlotItemInstance(unsigned slot)
 {
     EquipData::iterator it = mPoss->equipSlots.find(slot);
     if (it != mPoss->equipSlots.end())
@@ -742,7 +742,7 @@ unsigned int Inventory::getSlotItemInstance(unsigned int slot)
     return 0;
 }
 
-bool Inventory::unequipItem(unsigned int itemId)
+bool Inventory::unequipItem(unsigned itemId)
 {
     std::set<unsigned> itemInstances;
     for (EquipData::iterator it = mPoss->equipSlots.begin(),
@@ -765,14 +765,14 @@ bool Inventory::unequipItem(unsigned int itemId)
     return true;
 }
 
-bool Inventory::unequip(unsigned int itemInstance)
+bool Inventory::unequip(unsigned itemInstance)
 {
     if (!itemInstance)
         return false;
 
     // The itemId to unequip
-    unsigned int itemId = 0;
-    unsigned int slotTypeId = 0;
+    unsigned itemId = 0;
+    unsigned slotTypeId = 0;
 
     bool addedToInventory = false;
 
@@ -821,7 +821,7 @@ bool Inventory::unequip(unsigned int itemInstance)
     return true;
 }
 
-void Inventory::checkLookchanges(unsigned int slotTypeId)
+void Inventory::checkLookchanges(unsigned slotTypeId)
 {
     if (itemManager->isEquipSlotVisible(slotTypeId))
         mCharacter->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);

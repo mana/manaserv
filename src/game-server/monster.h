@@ -334,7 +334,7 @@ class Monster : public Being
          *     attributes if it has changed.
          * @returns Whether it was changed.
          */
-        virtual bool recalculateBaseAttribute(unsigned int);
+        virtual bool recalculateBaseAttribute(unsigned);
 
     protected:
         /**

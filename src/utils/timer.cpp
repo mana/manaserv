@@ -43,7 +43,7 @@ static uint64_t getTimeInMillisec()
 namespace utils
 {
 
-Timer::Timer(unsigned int ms)
+Timer::Timer(unsigned ms)
 {
     active = false;
     interval = ms;
@@ -97,7 +97,7 @@ void Timer::stop()
     active = false;
 }
 
-void Timer::changeInterval(unsigned int newinterval)
+void Timer::changeInterval(unsigned newinterval)
 {
     interval = newinterval;
 }

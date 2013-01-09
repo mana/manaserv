@@ -162,7 +162,7 @@ void ConnectionHandler::sendToEveryone(const MessageOut &msg)
     }
 }
 
-unsigned int ConnectionHandler::getClientCount() const
+unsigned ConnectionHandler::getClientCount() const
 {
     return clients.size();
 }

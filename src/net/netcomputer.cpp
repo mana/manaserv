@@ -57,7 +57,7 @@ void NetComputer::disconnect(const MessageOut &msg)
 }
 
 void NetComputer::send(const MessageOut &msg, bool reliable,
-                       unsigned int channel)
+                       unsigned channel)
 {
     LOG_DEBUG("Sending message " << msg << " to " << *this);
 

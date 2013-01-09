@@ -23,8 +23,8 @@
 
 struct Transaction
 {
-    unsigned int mAction;
-    unsigned int mCharacterId;
+    unsigned mAction;
+    unsigned mCharacterId;
     std::string mMessage;
 };
 

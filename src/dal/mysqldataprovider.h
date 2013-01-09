@@ -192,7 +192,7 @@ class MySqlDataProvider: public DataProvider
         /** defines the default value of the CFGPARAM_MYSQL_HOST parameter */
         static const std::string CFGPARAM_MYSQL_HOST_DEF;
         /** defines the default value of the CFGPARAM_MYSQL_PORT parameter */
-        static const unsigned int CFGPARAM_MYSQL_PORT_DEF;
+        static const unsigned CFGPARAM_MYSQL_PORT_DEF;
         /** defines the default value of the CFGPARAM_MYSQL_DB parameter */
         static const std::string CFGPARAM_MYSQL_DB_DEF;
         /** defines the default value of the CFGPARAM_MYSQL_USER parameter */

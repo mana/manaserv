@@ -40,7 +40,7 @@ std::string toLower(std::string s)
 
 bool isNumeric(const std::string &s)
 {
-    for (unsigned int i = 0; i < s.size(); ++i)
+    for (unsigned i = 0; i < s.size(); ++i)
     {
         if (!isdigit(s[i]))
         {

@@ -43,13 +43,13 @@ void Account::setCharacters(const Characters &characters)
 
 void Account::addCharacter(Character *character)
 {
-    unsigned int slot = (unsigned int) character->getCharacterSlot();
+    unsigned slot = (unsigned) character->getCharacterSlot();
     assert(isSlotEmpty(slot));
 
     mCharacters[slot] = character;
 }
 
-void Account::delCharacter(unsigned int slot)
+void Account::delCharacter(unsigned slot)
 {
     for (Characters::iterator iter = mCharacters.begin(),
              iter_end = mCharacters.end(); iter != iter_end; ++iter)

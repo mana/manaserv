@@ -497,22 +497,22 @@ void Being::setAction(BeingAction action)
     }
 }
 
-void Being::applyModifier(unsigned int attr, double value, unsigned int layer,
-                          unsigned int duration, unsigned int id)
+void Being::applyModifier(unsigned attr, double value, unsigned layer,
+                          unsigned duration, unsigned id)
 {
     mAttributes.at(attr).add(duration, value, layer, id);
     updateDerivedAttributes(attr);
 }
 
-bool Being::removeModifier(unsigned int attr, double value, unsigned int layer,
-                           unsigned int id, bool fullcheck)
+bool Being::removeModifier(unsigned attr, double value, unsigned layer,
+                           unsigned id, bool fullcheck)
 {
     bool ret = mAttributes.at(attr).remove(value, layer, id, fullcheck);
     updateDerivedAttributes(attr);
     return ret;
 }
 
-void Being::setAttribute(unsigned int id, double value)
+void Being::setAttribute(unsigned id, double value)
 {
     AttributeMap::iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -532,7 +532,7 @@ void Being::setAttribute(unsigned int id, double value)
     }
 }
 
-double Being::getAttribute(unsigned int id) const
+double Being::getAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -545,7 +545,7 @@ double Being::getAttribute(unsigned int id) const
 }
 
 
-double Being::getModifiedAttribute(unsigned int id) const
+double Being::getModifiedAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -557,14 +557,14 @@ double Being::getModifiedAttribute(unsigned int id) const
     return ret->second.getModifiedAttribute();
 }
 
-void Being::setModAttribute(unsigned int, double)
+void Being::setModAttribute(unsigned, double)
 {
     // No-op to satisfy shared structure.
     // The game-server calculates this manually.
     return;
 }
 
-bool Being::recalculateBaseAttribute(unsigned int attr)
+bool Being::recalculateBaseAttribute(unsigned attr)
 {
     LOG_DEBUG("Being: Received update attribute recalculation request for "
               << attr << ".");
@@ -614,7 +614,7 @@ bool Being::recalculateBaseAttribute(unsigned int attr)
     return false;
 }
 
-void Being::updateDerivedAttributes(unsigned int attr)
+void Being::updateDerivedAttributes(unsigned attr)
 {
     LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
     switch (attr)

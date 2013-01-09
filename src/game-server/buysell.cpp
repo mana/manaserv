@@ -76,7 +76,7 @@ int BuySell::registerPlayerItems()
     for (InventoryData::const_iterator it = inventoryData.begin(),
         it_end = inventoryData.end(); it != it_end; ++it)
     {
-        unsigned int nb = it->second.amount;
+        unsigned nb = it->second.amount;
         if (!nb)
             continue;
 

@@ -68,7 +68,7 @@ class NetComputer
          *                 be sent.
          */
         void send(const MessageOut &msg, bool reliable = true,
-                  unsigned int channel = 0);
+                  unsigned channel = 0);
 
         /**
          * Returns IP address of computer in 32bit int form

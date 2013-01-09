@@ -465,7 +465,7 @@ void Character::modifiedAllAttribute()
     }
 }
 
-bool Character::recalculateBaseAttribute(unsigned int attr)
+bool Character::recalculateBaseAttribute(unsigned attr)
 {
     /*
      * `attr' may or may not have changed. Recalculate the base value.
@@ -524,7 +524,7 @@ bool Character::recalculateBaseAttribute(unsigned int attr)
     return false;
 }
 
-void Character::updateDerivedAttributes(unsigned int attr)
+void Character::updateDerivedAttributes(unsigned attr)
 {
     /*
      * `attr' has changed, perform updates accordingly.

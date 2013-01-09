@@ -83,7 +83,7 @@ Monster::Monster(MonsterClass *specy):
     for (AttributeManager::AttributeScope::const_iterator it = mobAttr.begin(),
          it_end = mobAttr.end(); it != it_end; ++it)
     {
-        mAttributes.insert(std::pair< unsigned int, Attribute >
+        mAttributes.insert(std::pair< unsigned, Attribute >
                            (it->first, Attribute(*it->second)));
     }
 
@@ -484,7 +484,7 @@ void Monster::died()
     }
 }
 
-bool Monster::recalculateBaseAttribute(unsigned int attr)
+bool Monster::recalculateBaseAttribute(unsigned attr)
 {
     LOG_DEBUG("Monster: Received update attribute recalculation request for "
               << attr << ".");
