@@ -29,26 +29,6 @@ namespace
 {
 
 /**
- * Functor used for the search of an object by name in a list.
- *
- * Note:
- *     - this functor assumes that the object defines as public the following
- *       method: std::string getName() const.
- *     - this functor assumes that the list is a list of pointers.
- */
-template <typename T>
-struct obj_name_is
-    : public std::binary_function<T, std::string, bool>
-{
-    bool
-    operator()(const T& obj,
-               const std::string& name) const
-    {
-        return (obj->getName() == name);
-    }
-};
-
-/**
  * Functor to convert a string into another type using
  * std::istringstream.operator>>().
  */
