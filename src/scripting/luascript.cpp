@@ -82,7 +82,7 @@ void LuaScript::push(int v)
 void LuaScript::push(const std::string &v)
 {
     assert(nbArgs >= 0);
-    lua_pushstring(mCurrentState, v.c_str());
+    lua_pushlstring(mCurrentState, v.c_str(), v.length());
     ++nbArgs;
 }
 

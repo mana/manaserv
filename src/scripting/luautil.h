@@ -102,7 +102,7 @@ public:
         mTypeName = typeName;
 
         luaL_newmetatable(s, mTypeName);        // metatable
-        lua_pushstring(s, "__index");           // metatable, "__index"
+        lua_pushliteral(s, "__index");          // metatable, "__index"
         lua_createtable(s, 0, 0);               // metatable, "__index", {}
 #if LUA_VERSION_NUM < 502
         luaL_register(s, NULL, members);
@@ -197,7 +197,7 @@ inline void push(lua_State *s, int val)
 
 inline void push(lua_State *s, const std::string &val)
 {
-    lua_pushstring(s, val.c_str());
+    lua_pushlstring(s, val.c_str(), val.length());
 }
 
 inline void push(lua_State *s, Entity *val)

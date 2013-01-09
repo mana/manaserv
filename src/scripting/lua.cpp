@@ -458,8 +458,6 @@ static int chr_get_inventory(lua_State *s)
     int firstTableStackPosition = lua_gettop(s);
     int tableIndex = 1;
 
-    std::string itemName = "";
-
     for (InventoryData::const_iterator it = invData.begin(),
         it_end = invData.end(); it != it_end; ++it)
     {
@@ -470,20 +468,19 @@ static int chr_get_inventory(lua_State *s)
         lua_createtable(s, 0, 4);
         int subTableStackPosition = lua_gettop(s);
         // Stores the item info in it.
-        lua_pushstring(s, "slot");
+        lua_pushliteral(s, "slot");
         lua_pushinteger(s, it->first); // The slot id
         lua_settable(s, subTableStackPosition);
 
-        lua_pushstring(s, "id");
+        lua_pushliteral(s, "id");
         lua_pushinteger(s, it->second.itemId);
         lua_settable(s, subTableStackPosition);
 
-        lua_pushstring(s, "name");
-        itemName = itemManager->getItem(it->second.itemId)->getName();
-        lua_pushstring(s, itemName.c_str());
+        lua_pushliteral(s, "name");
+        push(s, itemManager->getItem(it->second.itemId)->getName());
         lua_settable(s, subTableStackPosition);
 
-        lua_pushstring(s, "amount");
+        lua_pushliteral(s, "amount");
         lua_pushinteger(s, it->second.amount);
         lua_settable(s, subTableStackPosition);
 
@@ -517,7 +514,6 @@ static int chr_get_equipment(lua_State *s)
     int firstTableStackPosition = lua_gettop(s);
     int tableIndex = 1;
 
-    std::string itemName;
     std::set<unsigned> itemInstances;
 
     for (EquipData::const_iterator it = equipData.begin(),
@@ -534,17 +530,16 @@ static int chr_get_equipment(lua_State *s)
         lua_createtable(s, 0, 3);
         int subTableStackPosition = lua_gettop(s);
         // Stores the item info in it.
-        lua_pushstring(s, "slot");
+        lua_pushliteral(s, "slot");
         lua_pushinteger(s, it->first); // The slot id
         lua_settable(s, subTableStackPosition);
 
-        lua_pushstring(s, "id");
+        lua_pushliteral(s, "id");
         lua_pushinteger(s, it->second.itemId);
         lua_settable(s, subTableStackPosition);
 
-        lua_pushstring(s, "name");
-        itemName = itemManager->getItem(it->second.itemId)->getName();
-        lua_pushstring(s, itemName.c_str());
+        lua_pushliteral(s, "name");
+        push(s, itemManager->getItem(it->second.itemId)->getName());
         lua_settable(s, subTableStackPosition);
 
         // Add the sub-table as value of the main one.
@@ -1127,7 +1122,7 @@ static int being_remove_attribute_modifier(lua_State *s)
 static int being_get_name(lua_State *s)
 {
     Being *being = checkBeing(s, 1);
-    lua_pushstring(s, being->getName().c_str());
+    push(s, being->getName());
     return 1;
 }
 
@@ -1309,7 +1304,7 @@ static int monster_get_name(lua_State *s)
         luaL_error(s, "monster_get_name called with unknown monster id.");
         return 0;
     }
-    lua_pushstring(s, spec->getName().c_str());
+    push(s, spec->getName());
     return 1;
 }
 
@@ -1386,7 +1381,7 @@ static int chr_get_quest(lua_State *s)
     bool res = getQuestVar(q, name, value);
     if (res)
     {
-        lua_pushstring(s, value.c_str());
+        push(s, value);
         return 1;
     }
     QuestCallback *f = new QuestThreadCallback(&LuaScript::getQuestCallback,
@@ -1453,7 +1448,7 @@ static int chr_try_get_quest(lua_State *s)
     std::string value;
     bool res = getQuestVar(q, name, value);
     if (res)
-        lua_pushstring(s, value.c_str());
+        push(s, value);
     else
         lua_pushnil(s);
     return 1;
@@ -1469,9 +1464,8 @@ static int getvar_map(lua_State *s)
     luaL_argcheck(s, name[0] != 0, 1, "empty variable name");
 
     MapComposite *map = checkCurrentMap(s);
-    std::string value = map->getVariable(name);
 
-    lua_pushstring(s, value.c_str());
+    push(s, map->getVariable(name));
     return 1;
 }
 
@@ -1500,8 +1494,7 @@ static int getvar_world(lua_State *s)
     const char *name = luaL_checkstring(s, 1);
     luaL_argcheck(s, name[0] != 0, 1, "empty variable name");
 
-    std::string value = GameState::getVariable(name);
-    lua_pushstring(s, value.c_str());
+    push(s, GameState::getVariable(name));
     return 1;
 }
 
@@ -2128,8 +2121,7 @@ static int get_map_property(lua_State *s)
     const char *property = luaL_checkstring(s, 1);
     Map *map = checkCurrentMap(s)->getMap();
 
-    std::string value = map->getProperty(property);
-    lua_pushstring(s, value.c_str());
+    push(s, map->getProperty(property));
     return 1;
 }
 
@@ -2210,7 +2202,7 @@ static int item_get_name(lua_State *s)
         luaL_error(s, "item_get_name called with unknown item id.");
         return 0;
     }
-    lua_pushstring(s, it->getName().c_str());
+    push(s, it->getName());
     return 1;
 }
 
@@ -2314,7 +2306,7 @@ static int map_object_get_property(lua_State *s)
     std::string property = obj->getProperty(key);
     if (!property.empty())
     {
-        lua_pushstring(s, property.c_str());
+        push(s, property);
         return 1;
     }
     else
@@ -2346,7 +2338,7 @@ static int map_object_get_bounds(lua_State *s)
 static int map_object_get_name(lua_State *s)
 {
     MapObject *obj = LuaMapObject::check(s, 1);
-    lua_pushstring(s, obj->getName().c_str());
+    push(s, obj->getName());
     return 1;
 }
 
@@ -2357,7 +2349,7 @@ static int map_object_get_name(lua_State *s)
 static int map_object_get_type(lua_State *s)
 {
     MapObject *obj = LuaMapObject::check(s, 1);
-    lua_pushstring(s, obj->getType().c_str());
+    push(s, obj->getType());
     return 1;
 }
 
@@ -2398,7 +2390,7 @@ static int get_special_info(lua_State *s)
 static int specialinfo_get_name(lua_State *s)
 {
     SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
-    lua_pushstring(s, info->name.c_str());
+    push(s, info->name);
     return 1;
 }
 
@@ -2419,7 +2411,7 @@ static int specialinfo_is_rechargeable(lua_State *s)
 static int specialinfo_get_category(lua_State *s)
 {
     SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
-    lua_pushstring(s, info->setName.c_str());
+    push(s, info->setName);
     return 1;
 }
 
@@ -2559,7 +2551,7 @@ static int require_loader(lua_State *s)
     if (!path.empty())
         luaL_loadfile(s, path.c_str());
     else
-        lua_pushstring(s, "File not found");
+        lua_pushliteral(s, "File not found");
 
     return 1;
 }
@@ -2573,7 +2565,7 @@ LuaScript::LuaScript():
     luaL_openlibs(mRootState);
 
     // Register package loader that goes through the resource manager
-    // table.insert(package.loaders, 2, require_loader)
+    // package.loaders[2] = require_loader
     lua_getglobal(mRootState, "package");
 #if LUA_VERSION_NUM < 502
     lua_getfield(mRootState, -1, "loaders");

@@ -86,8 +86,8 @@ void UserDataCache::insert(lua_State *s, void *object)
 
         // The metatable that makes the values in the table above weak
         lua_newtable(s);                        // UD, Cache, {}
-        lua_pushstring(s, "__mode");
-        lua_pushstring(s, "v");
+        lua_pushliteral(s, "__mode");
+        lua_pushliteral(s, "v");
         lua_rawset(s, -3);                      // UD, Cache, { __mode = "v" }
         lua_setmetatable(s, -2);                // UD, Cache
 
