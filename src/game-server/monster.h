@@ -30,6 +30,8 @@
 #include <vector>
 #include <string>
 
+#include <sigc++/connection.h>
+
 class Character;
 class ItemClass;
 class Script;
@@ -315,8 +317,7 @@ class Monster : public Being
          */
         void changeAnger(Actor *target, int amount);
 
-        const std::map<Being *, int> &getAngerList() const
-        { return mAnger; }
+        std::map<Being *, int> getAngerList() const;
 
         /**
          * Calls the damage function in Being and updates the aggro list
@@ -326,7 +327,7 @@ class Monster : public Being
         /**
          * Removes a being from the anger list.
          */
-        void forgetTarget(Entity *being);
+        void forgetTarget(Entity *entity);
 
         /**
          * Called when an attribute modifier is changed.
@@ -351,7 +352,16 @@ class Monster : public Being
         MonsterClass *mSpecy;
 
         /** Aggression towards other beings. */
-        std::map<Being *, int> mAnger;
+        struct AggressionInfo {
+            AggressionInfo()
+                : anger(0)
+            {}
+
+            int anger;
+            sigc::connection removedConnection;
+            sigc::connection diedConnection;
+        };
+        std::map<Being *, AggressionInfo> mAnger;
 
         /**
          * Character who currently owns this monster (killsteal protection).
