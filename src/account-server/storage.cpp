@@ -927,14 +927,6 @@ bool Storage::updateCharacter(Character *character)
     return true;
 }
 
-void Storage::flushSkill(const Character *character, int skillId)
-{
-    // Note: Deprecated, use DALStorage::updateExperience instead!!!
-    // TODO: Remove calls of flushSkill for updateExperience instead.
-    updateExperience(character->getDatabaseID(), skillId,
-        character->getExperience(skillId));
-}
-
 void Storage::addAccount(Account *account)
 {
     assert(account->getCharacters().size() == 0);
