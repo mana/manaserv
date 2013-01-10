@@ -42,23 +42,21 @@ class QuestCallback
 class QuestThreadCallback : public QuestCallback
 {
     public:
-        QuestThreadCallback(void (*handler)(Character *,
-                                            const std::string &value,
-                                            Script *mScript),
+        typedef void (*Handler)(Character *,
+                                const std::string &value,
+                                Script *mScript);
+
+        QuestThreadCallback(Handler handler,
                             Script *script) :
             mHandler(handler),
             mScript(script)
         { }
 
-        virtual void triggerCallback(Character *ch,
-                                     const std::string &value) const
+        void triggerCallback(Character *ch, const std::string &value) const
         { mHandler(ch, value, mScript); }
 
     private:
-        void (*mHandler)(Character *,
-                         const std::string &value,
-                         Script *mScript);
-
+        Handler mHandler;
         Script *mScript;
 };
 
@@ -69,8 +67,7 @@ class QuestRefCallback : public QuestCallback
             mQuestName(questName)
         { script->assignCallback(mRef); }
 
-        virtual void triggerCallback(Character *ch,
-                                     const std::string &value) const;
+        void triggerCallback(Character *ch, const std::string &value) const;
 
     private:
         Script::Ref mRef;
