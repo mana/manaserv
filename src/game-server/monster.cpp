@@ -471,14 +471,14 @@ void Monster::died()
              iChar++)
         {
             Character *character = (*iChar).first;
-            std::set<size_t> *skillSet = &(*iChar).second;
+            const std::set<size_t> &skillSet = (*iChar).second;
 
             if (mLegalExpReceivers.find(character) == mLegalExpReceivers.end()
-                || skillSet->size() < 1)
+                || skillSet.empty())
                 continue;
 
-            int expPerSkill = int(expPerChar / skillSet->size());
-            for (iSkill = skillSet->begin(); iSkill != skillSet->end();
+            int expPerSkill = int(expPerChar / skillSet.size());
+            for (iSkill = skillSet.begin(); iSkill != skillSet.end();
                  iSkill++)
             {
                 character->receiveExperience(*iSkill, expPerSkill,
