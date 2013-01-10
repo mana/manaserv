@@ -73,7 +73,7 @@ enum ItemTriggerType
     ITT_NULL = 0,
     ITT_IN_INVY,    // Associated effects apply when the item is in the inventory
     ITT_ACTIVATE,   // Associated effects apply when the item is activated
-    ITT_EQUIP,      // Assosciated effects apply when the item is equipped
+    ITT_EQUIP,      // Associated effects apply when the item is equipped
     ITT_LEAVE_INVY, // Associated effects apply when the item leaves the inventory
     ITT_UNEQUIP,    // Associated effects apply when the item is unequipped
     ITT_EQUIPCHG    // When the item is still equipped, but in a different way
