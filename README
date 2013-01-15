@@ -47,7 +47,6 @@ Default option values:
     gameServerAddress       localhost
     gameServerPort          9604
 
-    serverPath              .
     worldDataPath           example
 
 
