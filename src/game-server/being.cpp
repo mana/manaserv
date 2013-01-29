@@ -113,6 +113,7 @@ int Being::damage(Actor * /* source */, const Damage &damage)
                       "implemented yet and should not be used!");
             HPloss = 0;
 #endif
+            break;
         case DAMAGE_DIRECT:
             break;
         default:

@@ -57,7 +57,7 @@ typedef std::map<unsigned short, MapStatistics> ServerStatistics;
  */
 struct GameServer: NetComputer
 {
-    GameServer(ENetPeer *peer): NetComputer(peer), port(0) {}
+    GameServer(ENetPeer *peer): NetComputer(peer), server(0), port(0) {}
 
     std::string address;
     NetComputer *server;
@@ -708,7 +708,7 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
                 int charId = msg.readInt32();
                 bool online = (msg.readInt8() == 1);
                 storage->setOnlineStatus(charId, online);
-            }
+            } break;
         }
     }
 

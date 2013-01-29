@@ -132,7 +132,11 @@ class AttributeModifiersEffect
 class Attribute
 {
     public:
-        Attribute() {throw;} // DEBUG; Find improper constructions
+        Attribute()
+            : mBase(0)
+            , mMaxValue(0)
+            , mMinValue(0)
+        {throw;} // DEBUG; Find improper constructions
 
         Attribute(const AttributeManager::AttributeInfo &info);
 
