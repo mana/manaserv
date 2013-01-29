@@ -35,7 +35,11 @@ class PathInfo
 {
     public:
         PathInfo()
-            : whichList(0)
+            : Gcost(0)
+            , Hcost(0)
+            , whichList(0)
+            , parentX(0)
+            , parentY(0)
         {}
 
         int Gcost;              /**< Cost from start to this location */

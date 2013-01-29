@@ -269,6 +269,7 @@ static void informPlayer(MapComposite *map, Character *p)
 
                 default:
                     assert(false); // TODO
+                    break;
             }
             gameHandler->sendTo(p, enterMsg);
         }
@@ -556,6 +557,7 @@ bool GameState::insert(Entity *ptr)
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Entity inserted: " << obj->getType());
+            break;
     }
 
     obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
@@ -629,6 +631,7 @@ void GameState::remove(Entity *ptr)
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Entity removed: " << ptr->getType());
+            break;
     }
 
     if (ptr->canMove())

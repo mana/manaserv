@@ -464,6 +464,7 @@ void GameHandler::handleNpc(GameClient &client, MessageIn &message)
         case PGMSG_NPC_TALK_NEXT:
         default:
             npc->prompt(client.character, message.getId() == PGMSG_NPC_TALK);
+            break;
     }
 }
 
