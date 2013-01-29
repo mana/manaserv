@@ -11,6 +11,7 @@
 
 #include <signal.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 /**
  * A thread that keeps a server running. It restarts the server when it quits
@@ -245,14 +246,16 @@ void ServerMonitor::setupUnixSignalHandlers()
 void ServerMonitor::termSignalHandler(int)
 {
     char tmp = 1;
-    ::write(sigtermFd[0], &tmp, sizeof(tmp));
+    ssize_t num = ::write(sigtermFd[0], &tmp, sizeof(tmp));
+    Q_UNUSED(num);
 }
 
 void ServerMonitor::handleSigTerm()
 {
     snTerm->setEnabled(false);
     char tmp;
-    ::read(sigtermFd[1], &tmp, sizeof(tmp));
+    ssize_t num = ::read(sigtermFd[1], &tmp, sizeof(tmp));
+    Q_UNUSED(num);
 
     QCoreApplication::quit();
 
@@ -277,8 +280,6 @@ int main(int argc, char *argv[])
                 << "src/manaserv-account"
                 << "src/manaserv-game";
     }
-
-    app.arguments();
 
     ServerMonitor monitor(serverExecutables);
     monitor.start();
