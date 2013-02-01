@@ -299,6 +299,17 @@ class Being : public Actor
 
         sigc::signal<void, Being *> signal_died;
 
+        /**
+         * Activate an emote flag on the being.
+         */
+        void triggerEmote(int id);
+
+        /**
+         * Tells the last emote used.
+         */
+        int getLastEmote() const
+        { return mEmoteId; }
+
     protected:
         /**
          * Performs an attack
@@ -342,6 +353,9 @@ class Being : public Actor
 
         /** Time until hp is regenerated again */
         Timeout mHealthRegenerationTimeout;
+
+        /** The last being emote Id. Used when triggering a being emoticon. */
+        int mEmoteId;
 };
 
 #endif // BEING_H

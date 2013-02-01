@@ -28,6 +28,7 @@
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
 #include "game-server/commandhandler.h"
+#include "game-server/emotemanager.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
@@ -300,6 +301,10 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
 
         case PGMSG_PARTY_INVITE:
             handlePartyInvite(client, message);
+            break;
+
+        case PGMSG_BEING_EMOTE:
+            handleTriggerEmoticon(client, message);
             break;
 
         default:
@@ -917,6 +922,13 @@ void GameHandler::handlePartyInvite(GameClient &client, MessageIn &message)
     MessageOut out(GPMSG_PARTY_INVITE_ERROR);
     out.writeString(invitee);
     client.send(out);
+}
+
+void GameHandler::handleTriggerEmoticon(GameClient &client, MessageIn &message)
+{
+    const int id = message.readInt16();
+    if (emoteManager->isIdAvailable(id))
+        client.character->triggerEmote(id);
 }
 
 void GameHandler::sendNpcError(GameClient &client, int id,

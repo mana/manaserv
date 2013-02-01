@@ -215,6 +215,8 @@ SET(SRCS_MANASERVGAME
     game-server/commandhandler.h
     game-server/effect.h
     game-server/effect.cpp
+    game-server/emotemanager.h
+    game-server/emotemanager.cpp
     game-server/entity.h
     game-server/entity.cpp
     game-server/gamehandler.h

@@ -464,10 +464,10 @@ Script::Ref MapComposite::mUpdateCallback;
 MapComposite::MapComposite(int id, const std::string &name):
     mActive(false),
     mMap(0),
-    mPvPRules(PVP_NONE),
     mContent(0),
     mName(name),
-    mID(id)
+    mID(id),
+    mPvPRules(PVP_NONE)
 {
 }
 
