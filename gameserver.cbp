@@ -132,6 +132,8 @@
 		<Unit filename="src/game-server/commandhandler.h" />
 		<Unit filename="src/game-server/effect.cpp" />
 		<Unit filename="src/game-server/effect.h" />
+		<Unit filename="src/game-server/emotemanager.cpp" />
+		<Unit filename="src/game-server/emotemanager.h" />
 		<Unit filename="src/game-server/entity.cpp" />
 		<Unit filename="src/game-server/entity.h" />
 		<Unit filename="src/game-server/eventlistener.h" />

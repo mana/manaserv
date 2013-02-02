@@ -1,101 +1,100 @@
 <?xml version="1.0"?>
 <emotes>
     <emote id="0"
-           name="Disgust"
-           effectid="10000"
-           image="graphics/particles/emotes/disgust.png"
-           width="30" height="32">
-    </emote>
-
-    <emote id="1"
            name="Surprise"
            effectid="10001"
            image="graphics/particles/emotes/surprise.png"
            width="30" height="32">
     </emote>
 
-    <emote id="2"
+    <emote id="1"
            name="Happy"
            effectid="10002"
            image="graphics/particles/emotes/happy.png"
            width="30" height="32">
     </emote>
 
-    <emote id="3"
+    <emote id="2"
            name="Sad"
            effectid="10003"
            image="graphics/particles/emotes/sad.png"
            width="30" height="32">
     </emote>
 
-    <emote id="4"
+    <emote id="3"
            name="Evil"
            effectid="10004"
            image="graphics/particles/emotes/evil.png"
            width="30" height="32">
     </emote>
 
-    <emote id="5"
+    <emote id="4"
            name="Wink"
            effectid="10005"
            image="graphics/particles/emotes/wink.png"
            width="30" height="32">
     </emote>
 
-    <emote id="6"
+    <emote id="5"
            name="Angel"
            effectid="10006"
            image="graphics/particles/emotes/angel.png"
            width="30" height="32">
     </emote>
 
-    <emote id="7"
+    <emote id="6"
            name="Blush"
            effectid="10007"
            image="graphics/particles/emotes/blush.png"
            width="30" height="32">
     </emote>
 
-    <emote id="8"
+    <emote id="7"
            name="Tongue"
            effectid="10008"
            image="graphics/particles/emotes/tongue.png"
            width="30" height="32">
     </emote>
 
-    <emote id="9"
+    <emote id="8"
            name="Grin"
            effectid="10009"
            image="graphics/particles/emotes/grin.png"
            width="30" height="32">
     </emote>
 
-    <emote id="10"
+    <emote id="9"
            name="Upset"
            effectid="10010"
            image="graphics/particles/emotes/upset.png"
            width="30" height="32">
     </emote>
 
-    <emote id="11"
+    <emote id="10"
            name="Perturbed"
            effectid="10011"
            image="graphics/particles/emotes/perturbed.png"
            width="30" height="32">
     </emote>
 
-    <emote id="12"
+    <emote id="11"
            name="Speech"
            effectid="10012"
            image="graphics/particles/emotes/speech.png"
            width="30" height="32">
     </emote>
 
-    <emote id="13"
+    <emote id="12"
            name="Blah"
            effectid="10013"
            image="graphics/particles/emotes/blah.png"
            width="30" height="32">
     </emote>
 
+    <emote id="13"
+           name="Disgust"
+           effectid="10014"
+           image="graphics/particles/emotes/disgust.png"
+           width="30" height="32">
+    </emote>
 </emotes>

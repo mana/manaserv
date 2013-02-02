@@ -41,7 +41,8 @@ Being::Being(EntityType type):
     mTarget(NULL),
     mGender(GENDER_UNSPECIFIED),
     mCurrentAttack(0),
-    mDirection(DOWN)
+    mDirection(DOWN),
+    mEmoteId(0)
 {
     const AttributeManager::AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
     LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
@@ -71,6 +72,14 @@ Being::Being(EntityType type):
         mAttributes[i].setBase(100);
     }
 #endif
+}
+
+void Being::triggerEmote(int id)
+{
+    mEmoteId = id;
+
+    if (id > -1)
+        raiseUpdateFlags(UPDATEFLAG_EMOTE);
 }
 
 int Being::damage(Actor * /* source */, const Damage &damage)
