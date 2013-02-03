@@ -27,6 +27,7 @@
 #ifndef USE_NATIVE_DOUBLE
 #include <sstream>
 #endif
+#include <stdint.h>
 
 #include "net/messagein.h"
 #include "utils/logger.h"
