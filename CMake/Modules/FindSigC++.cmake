@@ -23,6 +23,8 @@ find_path(SIGC++Config_INCLUDE_DIR
   PATHS ${SigC++_PKGCONF_INCLUDE_DIRS} /usr
   PATH_SUFFIXES lib/sigc++-2.0/include
 )
+MESSAGE(STATUS "PATH: ${SIGC++Config_INCLUDE_DIR}")
+
 
 libfind_library(SIGC++ sigc 2.0)
 
