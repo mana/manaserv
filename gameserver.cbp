@@ -31,9 +31,12 @@
 				<Option parameters="--verbosity 4" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-DHAS_SOCKLEN_T" />
 					<Add directory="src" />
 					<Add directory="/usr/include/libxml2" />
 					<Add directory="/usr/include/lua51" />
+					<Add directory="/usr/include/sigc++-2.0" />
+					<Add directory="/usr/lib/sigc++-2.0/include" />
 				</Compiler>
 				<Linker>
 					<Add library="pthread" />
@@ -45,9 +48,9 @@
 			<Add alias="All" targets="default;" />
 		</VirtualTargets>
 		<Compiler>
-			<Add option="-g" />
 			<Add option="-O3" />
 			<Add option="-Wall" />
+			<Add option="-g" />
 			<Add option="-Wno-switch" />
 			<Add option="-Wno-unknown-pragmas" />
 			<Add directory="libs/enet/include" />
@@ -61,6 +64,7 @@
 			<Add library="physfs" />
 			<Add library="z" />
 			<Add library="lua" />
+			<Add library="sigc-2.0" />
 			<Add directory="../lib" />
 			<Add directory="lib" />
 		</Linker>
@@ -114,12 +118,12 @@
 		<Unit filename="src/game-server/accountconnection.h" />
 		<Unit filename="src/game-server/actor.cpp" />
 		<Unit filename="src/game-server/actor.h" />
+		<Unit filename="src/game-server/attack.cpp" />
+		<Unit filename="src/game-server/attack.h" />
 		<Unit filename="src/game-server/attribute.cpp" />
 		<Unit filename="src/game-server/attribute.h" />
 		<Unit filename="src/game-server/attributemanager.cpp" />
 		<Unit filename="src/game-server/attributemanager.h" />
-		<Unit filename="src/game-server/attack.cpp" />
-		<Unit filename="src/game-server/attack.h" />
 		<Unit filename="src/game-server/being.cpp" />
 		<Unit filename="src/game-server/being.h" />
 		<Unit filename="src/game-server/buysell.cpp" />
