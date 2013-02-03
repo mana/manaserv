@@ -249,16 +249,17 @@ bool AttributeModifiersEffect::recalculateModifiedValue(double newPrevLayerValue
 
 
 bool Attribute::add(unsigned short duration, double value,
-                    unsigned layer, int level)
+                    unsigned layer, int id)
 {
     assert(mMods.size() > layer);
-    LOG_DEBUG("Adding modifier to attribute with duration " << duration <<
-              ", value " << value << ", at layer " << layer << " with id "
-              << level);
+    LOG_DEBUG("Adding modifier to attribute with duration " << duration
+              << ", value " << value
+              << ", at layer " << layer
+              << " with id " << id);
     if (mMods.at(layer)->add(duration, value,
                             (layer ? mMods.at(layer - 1)->getCachedModifiedValue()
                                    : mBase)
-                            , level))
+                            , id))
     {
         while (++layer < mMods.size())
         {
