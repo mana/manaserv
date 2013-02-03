@@ -91,7 +91,7 @@ macro(libfind_library PREFIX basename)
     string(REGEX REPLACE "\\." "_" TMP ${${PREFIX}_LIBNAMES})
     set(${PREFIX}_LIBNAMES ${${PREFIX}_LIBNAMES} ${TMP})
   endif(${ARGC} GREATER 2)
-  find_library(${PREFIX}_LIBRARY
+  find_library(${PREFIX}_LIBRARIES
     NAMES ${${PREFIX}_LIBNAMES}
     PATHS ${${PREFIX}_PKGCONF_LIBRARY_DIRS}
   )

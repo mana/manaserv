@@ -28,6 +28,7 @@
 #include <limits>
 #include <sstream>
 #endif
+#include <stdint.h>
 #include <string>
 #include <enet/enet.h>
 

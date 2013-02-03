@@ -37,7 +37,7 @@ IF (MINGW)
       "<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
 ENDIF()
 
-SET(FLAGS "-DPACKAGE_VERSION=\\\"${VERSION}\\\"")
+SET(FLAGS "${FLAGS} -DPACKAGE_VERSION=\\\"${VERSION}\\\"")
 SET(FLAGS "${FLAGS} -DPKG_DATADIR=\\\"${PKG_DATADIR}/\\\"")
 SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
 
@@ -94,8 +94,8 @@ INCLUDE_DIRECTORIES(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${PHYSFS_INCLUDE_DIR}
     ${LIBXML2_INCLUDE_DIR}
-    ${SigC++_INCLUDE_DIR}
-    ${SigC++Config_INCLUDE_DIR}
+    ${SIGC++_INCLUDE_DIR}
+    ${SIGC++Config_INCLUDE_DIR}
     )
 
 # Fix some stuff that gets not hidden by mainline modules
@@ -319,7 +319,7 @@ FOREACH(program ${PROGRAMS})
         ${PHYSFS_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
-        ${SigC++_LIBRARIES}
+        ${SIGC++_LIBRARIES}
         ${OPTIONAL_LIBRARIES}
         ${EXTRA_LIBRARIES})
     INSTALL(TARGETS ${program} RUNTIME DESTINATION ${PKG_BINDIR})

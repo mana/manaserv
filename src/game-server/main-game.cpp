@@ -54,6 +54,7 @@
 
 #ifdef __MINGW32__
 #include <windows.h>
+#include "common/winver.h"
 #define usleep(usec) (Sleep ((usec) / 1000), 0)
 #endif
 
