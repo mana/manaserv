@@ -329,14 +329,6 @@ class Monster : public Being
          */
         void forgetTarget(Entity *entity);
 
-        /**
-         * Called when an attribute modifier is changed.
-         * Recalculate the base value of an attribute and update derived
-         *     attributes if it has changed.
-         * @returns Whether it was changed.
-         */
-        virtual bool recalculateBaseAttribute(unsigned);
-
     protected:
         /**
          * Returns the way the actor blocks pathfinding for other objects.
