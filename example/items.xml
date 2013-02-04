@@ -125,7 +125,7 @@
                 element="neutral" type="physical" />
         </effect>
         <effect trigger="in-inventory">
-            <modifier attribute="cap1" value="-2000" />
+            <modifier attribute="vit" value="100" />
         </effect>
         <sprite>weapons/weapon-sword.xml</sprite>
     </item>

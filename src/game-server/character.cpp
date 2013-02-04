@@ -464,64 +464,25 @@ void Character::modifiedAllAttribute()
     }
 }
 
-bool Character::recalculateBaseAttribute(unsigned attr)
+void Character::recalculateBaseAttribute(unsigned attr)
 {
-    /*
-     * `attr' may or may not have changed. Recalculate the base value.
-     */
+    // `attr' may or may not have changed. Recalculate the base value.
     LOG_DEBUG("Received update attribute recalculation request at Character "
               "for " << attr << ".");
     if (!mAttributes.count(attr))
-        return false;
-    double newBase = getAttribute(attr);
+        return;
 
-    /*
-     * Calculate new base.
-     */
-    switch (attr)
+    if (attr == ATTR_STR && mKnuckleAttackInfo)
     {
-    case ATTR_ACCURACY:
-        newBase = getModifiedAttribute(ATTR_DEX); // Provisional
-        break;
-    case ATTR_DEFENSE:
-        newBase = 0.3 * getModifiedAttribute(ATTR_VIT);
-        break;
-    case ATTR_DODGE:
-        newBase = getModifiedAttribute(ATTR_AGI); // Provisional
-        break;
-    case ATTR_MAGIC_DODGE:
-        newBase = 1.0;
-        // TODO
-        break;
-    case ATTR_MAGIC_DEFENSE:
-        newBase = 0.0;
-        // TODO
-        break;
-    case ATTR_BONUS_ASPD:
-        newBase = 0.0;
-        // TODO
-        break;
-    case ATTR_STR:
-        if (mKnuckleAttackInfo)
-        {
-            Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
-            knuckleDamage.base = getModifiedAttribute(ATTR_STR);
-            knuckleDamage.delta = knuckleDamage.base / 2;
-        }
-        break;
-    default:
-        return Being::recalculateBaseAttribute(attr);
+        // TODO: dehardcode this
+        Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
+        knuckleDamage.base = getModifiedAttribute(ATTR_STR);
+        knuckleDamage.delta = knuckleDamage.base / 2;
     }
+    Being::recalculateBaseAttribute(attr);
 
-    if (newBase != getAttribute(attr))
-    {
-        setAttribute(attr, newBase);
-        updateDerivedAttributes(attr);
-        return true;
-    }
-    LOG_DEBUG("No changes to sync for attribute '" << attr << "'.");
-    return false;
 }
+
 
 void Character::updateDerivedAttributes(unsigned attr)
 {
@@ -530,32 +491,8 @@ void Character::updateDerivedAttributes(unsigned attr)
      */
     flagAttribute(attr);
 
-    switch(attr)
-    {
-    case ATTR_STR:
-        recalculateBaseAttribute(ATTR_INV_CAPACITY);
-        break;
-    case ATTR_AGI:
-        recalculateBaseAttribute(ATTR_DODGE);
-        recalculateBaseAttribute(ATTR_MOVE_SPEED_TPS);
-        break;
-    case ATTR_VIT:
-        recalculateBaseAttribute(ATTR_MAX_HP);
-        recalculateBaseAttribute(ATTR_HP_REGEN);
-        recalculateBaseAttribute(ATTR_DEFENSE);
-        break;
-    case ATTR_INT:
-        // TODO
-        break;
-    case ATTR_DEX:
-        recalculateBaseAttribute(ATTR_ACCURACY);
-        break;
-    case ATTR_WIL:
-        // TODO
-        break;
-    default:
-        Being::updateDerivedAttributes(attr);
-    }
+
+    Being::updateDerivedAttributes(attr);
 }
 
 void Character::flagAttribute(int attr)

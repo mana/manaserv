@@ -69,6 +69,30 @@ extern "C" {
 
 
 /**
+ * on_update_derived_attribute( function(Being*) ): void
+ * Sets a listener function to handle
+ * recalculation of derived attributes event.
+ */
+static int on_update_derived_attribute(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    Being::setUpdateDerivedAttributesCallback(getScript(s));
+    return 0;
+}
+
+
+/**
+ * on_recalculateBaseAttributeCallback( function(Being*) ): void
+ * Sets a listener function to the attribute recalculation event.
+ */
+static int on_recalculate_base_attribute(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    Being::setRecalculateBaseAttributeCallback(getScript(s));
+    return 0;
+}
+
+/**
  * on_character_death( function(Character*) ): void
  * Sets a listener function to the character death event.
  */
@@ -2582,6 +2606,8 @@ LuaScript::LuaScript():
 
     // Put the callback functions in the scripting environment.
     static luaL_Reg const callbacks[] = {
+        { "on_update_derived_attribute",     &on_update_derived_attribute     },
+        { "on_recalculate_base_attribute",   &on_recalculate_base_attribute   },
         { "on_character_death",              &on_character_death              },
         { "on_character_death_accept",       &on_character_death_accept       },
         { "on_character_login",              &on_character_login              },

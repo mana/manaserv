@@ -34,6 +34,11 @@
 #include "game-server/statusmanager.h"
 #include "utils/logger.h"
 #include "utils/speedconv.h"
+#include "scripting/scriptmanager.h"
+
+
+Script::Ref Being::mRecalculateDerivedAttributesCallback;
+Script::Ref Being::mRecalculateBaseAttributeCallback;
 
 Being::Being(EntityType type):
     Actor(type),
@@ -574,75 +579,64 @@ void Being::setModAttribute(unsigned, double)
     return;
 }
 
-bool Being::recalculateBaseAttribute(unsigned attr)
+void Being::recalculateBaseAttribute(unsigned attr)
 {
     LOG_DEBUG("Being: Received update attribute recalculation request for "
               << attr << ".");
     if (!mAttributes.count(attr))
     {
         LOG_DEBUG("Being::recalculateBaseAttribute: " << attr << " not found!");
-        return false;
+        return;
     }
-    double newBase = getAttribute(attr);
 
-    switch (attr)
+    // Handle speed conversion inside the engine
+    if (attr == ATTR_MOVE_SPEED_RAW)
     {
-    case ATTR_HP_REGEN:
-        {
-            double hpPerSec = getModifiedAttribute(ATTR_VIT) * 0.05;
-            newBase = (hpPerSec * TICKS_PER_HP_REGENERATION / 10);
-        }
-        break;
-    case ATTR_HP:
-        double diff;
-        if ((diff = getModifiedAttribute(ATTR_HP)
-            - getModifiedAttribute(ATTR_MAX_HP)) > 0)
-            newBase -= diff;
-        break;
-    case ATTR_MAX_HP:
-        newBase = ((getModifiedAttribute(ATTR_VIT) + 3)
-                   * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
-        break;
-    case ATTR_MOVE_SPEED_TPS:
-        newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
-        break;
-    case ATTR_MOVE_SPEED_RAW:
-        newBase = utils::tpsToRawSpeed(
-                      getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
-        break;
-    case ATTR_INV_CAPACITY:
-        // Provisional
-        newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0;
-        break;
+        double newBase = utils::tpsToRawSpeed(
+                                    getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
+        if (newBase != getAttribute(attr))
+            setAttribute(attr, newBase);
+        return;
     }
-    if (newBase != getAttribute(attr))
-    {
-        setAttribute(attr, newBase);
-        return true;
-    }
-    LOG_DEBUG("Being: No changes to sync for attribute '" << attr << "'.");
-    return false;
+
+    if (!mRecalculateBaseAttributeCallback.isValid())
+        return;
+
+    Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+    script->prepare(mRecalculateBaseAttributeCallback);
+    script->push(attr);
+    script->push(this);
+    script->execute();
 }
 
 void Being::updateDerivedAttributes(unsigned attr)
 {
     LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
+
+    // Handle default actions before handing over to the script engine
     switch (attr)
     {
     case ATTR_MAX_HP:
-        updateDerivedAttributes(ATTR_HP);
     case ATTR_HP:
         raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
         break;
     case ATTR_MOVE_SPEED_TPS:
-        if (getAttribute(attr) > 0.0f)
-            setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToRawSpeed(
-                         getModifiedAttribute(ATTR_MOVE_SPEED_TPS)));
-        break;
-    default:
-        // Do nothing
+        // Does not make a lot of sense to have in the scripts.
+        // So handle it here:
+        recalculateBaseAttribute(ATTR_MOVE_SPEED_RAW);
         break;
     }
+
+    if (!mRecalculateDerivedAttributesCallback.isValid())
+        return;
+
+    Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+    script->prepare(mRecalculateDerivedAttributesCallback);
+    script->push(attr);
+    script->push(this);
+    script->execute();
 }
 
 void Being::applyStatusEffect(int id, int timer)
