@@ -251,11 +251,11 @@ class Character : public Being
         void modifiedAllAttribute();
 
         /**
-         * Recalculate the base value of an attribute and update derived
-         *     attributes if it has changed.
-         * @returns Whether it was changed.
-         */
-        bool recalculateBaseAttribute(unsigned);
+          * Recalculate the base value of an attribute and update derived
+          *     attributes if it has changed.
+          */
+         void recalculateBaseAttribute(unsigned);
+
 
         /**
          * Attribute has changed, recalculate base value of dependant

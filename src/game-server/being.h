@@ -238,7 +238,7 @@ class Being : public Actor
          *     attributes if it has changed.
          * @returns Whether it was changed.
          */
-        virtual bool recalculateBaseAttribute(unsigned);
+        virtual void recalculateBaseAttribute(unsigned);
 
         /**
          * Attribute has changed, recalculate base value of dependant
@@ -296,6 +296,12 @@ class Being : public Actor
          */
         void setTarget(Being *target)
         { mTarget = target; }
+
+        static void setUpdateDerivedAttributesCallback(Script *script)
+        { script->assignCallback(mRecalculateDerivedAttributesCallback); }
+
+        static void setRecalculateBaseAttributeCallback(Script *script)
+        { script->assignCallback(mRecalculateBaseAttributeCallback); }
 
         sigc::signal<void, Being *> signal_died;
 
@@ -356,6 +362,12 @@ class Being : public Actor
 
         /** The last being emote Id. Used when triggering a being emoticon. */
         int mEmoteId;
+
+        /** Called when derived attributes need to get calculated */
+        static Script::Ref mRecalculateDerivedAttributesCallback;
+
+        /** Called when a base attribute needs to get calculated */
+        static Script::Ref mRecalculateBaseAttributeCallback;
 };
 
 #endif // BEING_H

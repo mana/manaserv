@@ -55,6 +55,8 @@ ELEMENT_METAL = 6;
 ELEMENT_WOOD = 7;
 ELEMENT_ICE = 8;
 
+TICKS_PER_HP_REGENERATION = 100
+
 -- Core attributes Id
 ATTR_STR = 1;
 ATTR_AGI = 2;
@@ -64,7 +66,7 @@ ATTR_DEX = 5;
 ATTR_WIL = 6;
 
 -- Derived attributes Id
-ATTR_ACCURACY = 6;
+ATTR_ACCURACY = 7;
 ATTR_DEFENSE = 8;
 ATTR_DODGE = 9;
 
