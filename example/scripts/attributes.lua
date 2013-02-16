@@ -56,13 +56,13 @@ end
 
 local function update_derived_attributes(being, attribute)
     if attribute == ATTR_STR then
-        recalculate_base_attribute(ATTR_INV_CAPACITY, being)
+        recalculate_base_attribute(being, ATTR_INV_CAPACITY)
     elseif attribute == ATTR_AGI then
-        recalculate_base_attribute(ATTR_DODGE, being)
+        recalculate_base_attribute(being, ATTR_DODGE)
     elseif attribute == ATTR_VIT then
-        recalculate_base_attribute(ATTR_MAX_HP, being)
-        recalculate_base_attribute(ATTR_HP_REGEN, being)
-        recalculate_base_attribute(ATTR_DEFENSE, being)
+        recalculate_base_attribute(being, ATTR_MAX_HP)
+        recalculate_base_attribute(being, ATTR_HP_REGEN)
+        recalculate_base_attribute(being, ATTR_DEFENSE)
     elseif attribute == ATTR_INT then
         -- unimplemented
     elseif attribute == ATTR_WIL then
