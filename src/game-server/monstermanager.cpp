@@ -258,12 +258,6 @@ void MonsterManager::initialize()
                 }
 
             }
-            else if (xmlStrEqual(subnode->name, BAD_CAST "script"))
-            {
-                xmlChar *filename = subnode->xmlChildrenNode->content;
-                std::string val = (char *)filename;
-                monster->setScript(val);
-            }
             else if (xmlStrEqual(subnode->name, BAD_CAST "vulnerability"))
             {
                 Element element = elementFromString(
