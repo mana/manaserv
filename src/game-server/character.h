@@ -69,10 +69,6 @@ public:
     void setCorrectionPoints(int correctionPoints);
     int getCorrectionPoints() const;
 
-    void setExperience(int skill, int level);
-    void setLevel(int level) const;
-    int getLevel() const;
-
     int getAccountLevel() const;
 
     void setHairStyle(int style);
@@ -81,10 +77,6 @@ public:
     int getHairColor() const;
 
     void setAccountLevel(int level);
-
-    int getSkillSize() const;
-    const std::map<int, int>::const_iterator getSkillBegin() const;
-    const std::map<int, int>::const_iterator getSkillEnd() const;
 
     void applyStatusEffect(int status, int time);
     int getStatusEffectSize() const;
@@ -127,7 +119,7 @@ class CharacterComponent : public Component
         ~CharacterComponent();
 
         /**
-         * recalculates the level when necessary and calls Being::update
+         * calls Being::update and handles special recharges and status effects
          */
         void update(Entity &entity);
 
@@ -213,9 +205,6 @@ class CharacterComponent : public Component
         int getHairColor() const { return mHairColor; }
         void setHairColor(int color) { mHairColor = color; }
 
-        int getLevel() const { return mLevel; }
-        void setLevel(int level) { mLevel = level; }
-
         int getAccountLevel() const { return mAccountLevel; }
         void setAccountLevel(int l) { mAccountLevel = l; }
 
@@ -258,21 +247,6 @@ class CharacterComponent : public Component
         std::map< std::string, std::string > questCache;
 
         /**
-         * Gives a skill a specific amount of exp and checks if a levelup
-         * occured.
-         */
-        void receiveExperience(int skill, int experience, int optimalLevel);
-
-        int getSkillSize() const
-        { return mExperience.size(); }
-
-        const std::map<int, int>::const_iterator getSkillBegin() const
-        { return mExperience.begin(); }
-
-        const std::map<int, int>::const_iterator getSkillEnd() const
-        { return mExperience.end(); }
-
-        /**
          * Used to serialize kill count.
          */
         int getKillCountSize() const
@@ -288,18 +262,6 @@ class CharacterComponent : public Component
         { mKillCount[monsterId] = kills; }
 
         /**
-         * Gets total accumulated exp for skill.
-         */
-        int getExperience(int skill) const
-        { return mExperience.find(skill)->second; }
-
-        /**
-         * Sets total accumulated exp for skill.
-         */
-        void setExperience(int skill, int value)
-        { mExperience[skill] = 0; receiveExperience(skill, value, 0); }
-
-        /**
          * Adds one kill of the monster type to the characters kill count.
          */
         void incrementKillCount(int monsterType);
@@ -308,16 +270,6 @@ class CharacterComponent : public Component
          * Gets the number of monsters the character killed of a given type.
          */
         int getKillCount(int monsterType) const;
-
-        /**
-         * Returns the exp needed to reach a specific skill level
-         */
-        static int expForLevel(int level);
-
-        /**
-         * Returns the level for a given exp
-         */
-        static int levelForExp(int exp);
 
         /**
          * Tries to use a character point to increase a
@@ -395,34 +347,6 @@ class CharacterComponent : public Component
         CharacterComponent(const CharacterComponent &);
         CharacterComponent &operator=(const CharacterComponent &);
 
-        static const float EXPCURVE_EXPONENT;
-        static const float EXPCURVE_FACTOR;
-        static const float LEVEL_SKILL_PRECEDENCE_FACTOR; // I am taking suggestions for a better name
-        static const float EXP_LEVEL_FLEXIBILITY;
-        static const int CHARPOINTS_PER_LEVELUP = 5;
-        static const int CORRECTIONPOINTS_PER_LEVELUP = 2;
-        static const int CORRECTIONPOINTS_MAX = 10;
-
-        /**
-         * Advances the character by one level;
-         */
-        void levelup(Entity &entity);
-
-        /**
-         * Returns the exp needed for next skill levelup
-         */
-        int getExpNeeded(size_t skill) const;
-
-        /**
-         * Returns the exp collected on this skill level
-         */
-        int getExpGot(size_t skill) const;
-
-        /**
-         * Recalculates the character level
-         */
-        void recalculateLevel(Entity &entity);
-
         void abilityStatusChanged(int id);
         void abilityCooldownActivated();
 
@@ -451,21 +375,14 @@ class CharacterComponent : public Component
 
         /** Attributes modified since last update. */
         std::set<size_t> mModifiedAttributes;
-        std::set<size_t> mModifiedExperience;
-
-        std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
         std::set<unsigned> mModifiedAbilities;
 
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
         unsigned char mHairColor;    /**< Hair Color of the character. */
-        int mLevel;                  /**< Level of the character. */
-        int mLevelProgress;          /**< progress to next level in percent */
         int mCharacterPoints;        /**< Unused attribute points that can be distributed */
         int mCorrectionPoints;       /**< Unused attribute correction points */
-        bool mUpdateLevelProgress;   /**< Flag raised when percent to next level changed */
-        bool mRecalculateLevel;      /**< Flag raised when the character level might have increased */
         bool mSendAbilityCooldown;
         unsigned char mAccountLevel; /**< Account level of the user. */
         int mParty;                  /**< Party id of the character */
@@ -562,21 +479,6 @@ inline int CharacterData::getCorrectionPoints() const
     return mCharacterComponent->getCorrectionPoints();
 }
 
-inline void CharacterData::setExperience(int skill, int level)
-{
-    mCharacterComponent->setExperience(skill, level);
-}
-
-inline void CharacterData::setLevel(int level) const
-{
-    mCharacterComponent->setLevel(level);
-}
-
-inline int CharacterData::getLevel() const
-{
-    return mCharacterComponent->getLevel();
-}
-
 inline int CharacterData::getAccountLevel() const
 {
     return mCharacterComponent->getAccountLevel();
@@ -605,21 +507,6 @@ inline int CharacterData::getHairColor() const
 inline void CharacterData::setAccountLevel(int level)
 {
     mCharacterComponent->setAccountLevel(level);
-}
-
-inline int CharacterData::getSkillSize() const
-{
-    return mCharacterComponent->getSkillSize();
-}
-
-inline const std::map<int, int>::const_iterator CharacterData::getSkillBegin() const
-{
-    return mCharacterComponent->getSkillBegin();
-}
-
-inline const std::map<int, int>::const_iterator CharacterData::getSkillEnd() const
-{
-    return mCharacterComponent->getSkillEnd();
 }
 
 inline void CharacterData::applyStatusEffect(int status, int time)

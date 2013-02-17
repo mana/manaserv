@@ -28,7 +28,6 @@
 #include "game-server/monster.h"
 #include "game-server/monstermanager.h"
 #include "game-server/npc.h"
-#include "game-server/skillmanager.h"
 
 #include "utils/logger.h"
 
@@ -213,16 +212,6 @@ Entity *checkNpc(lua_State *s, int p)
     Entity *entity = LuaEntity::check(s, p);
     luaL_argcheck(s, entity->getType() == OBJECT_NPC, p, "npc expected");
     return entity;
-}
-
-int checkSkill(lua_State *s, int p)
-{
-    if (lua_isnumber(s, p))
-        return luaL_checkint(s, p);
-
-    int id = skillManager->getId(luaL_checkstring(s, p));
-    luaL_argcheck(s, id != 0, p, "invalid skill name");
-    return id;
 }
 
 AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p)

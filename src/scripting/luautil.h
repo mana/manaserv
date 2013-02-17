@@ -178,7 +178,6 @@ ItemClass *                            checkItemClass(lua_State *s, int p);
 Entity *                               checkMonster(lua_State *s, int p);
 MonsterClass *                         checkMonsterClass(lua_State *s, int p);
 Entity *                               checkNpc(lua_State *s, int p);
-int                          checkSkill(lua_State *s, int p);
 AbilityManager::AbilityInfo *          checkAbility(lua_State *s, int p);
 const AttributeManager::AttributeInfo *checkAttribute(lua_State *s, int p);
 unsigned char                          checkWalkMask(lua_State *s, int p);

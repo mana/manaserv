@@ -24,7 +24,6 @@
 #include "common/resourcemanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/item.h"
-#include "game-server/skillmanager.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 #include "utils/logger.h"

@@ -156,12 +156,6 @@ class CharacterData
         void setAccountLevel(int l, bool force = false)
         { if (force) mAccountLevel = l; }
 
-        /**
-         * Gets the level of the character.
-         */
-        int getLevel() const { return mLevel; }
-        void setLevel(int level) { mLevel = level; }
-
         /** Sets the value of a base attribute of the character. */
         void setAttribute(unsigned id, double value)
         { mAttributes[id].base = value; }
@@ -171,24 +165,6 @@ class CharacterData
 
         const AttributeMap &getAttributes() const
         { return mAttributes; }
-
-        int getSkillSize() const
-        { return mExperience.size(); }
-
-        const std::map<int, int>::const_iterator getSkillBegin() const
-        { return mExperience.begin(); }
-
-        const std::map<int, int>::const_iterator getSkillEnd() const
-        { return mExperience.end(); }
-
-        int getExperience(int skill) const
-        { return mExperience.find(skill)->second; }
-
-        void setExperience(int skill, int value)
-        { mExperience[skill] = value; }
-
-        void receiveExperience(int skill, int value)
-        { mExperience[skill] += value; }
 
         /**
          * Get / Set a status effects
@@ -300,7 +276,6 @@ class CharacterData
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
         AttributeMap mAttributes; //!< Attributes.
-        std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, Status> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
         AbilityMap  mAbilities;
@@ -308,7 +283,6 @@ class CharacterData
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.
         unsigned char mHairColor; //!< Hair color of the being.
-        short mLevel;             //!< Level of the being.
         short mCharacterPoints;   //!< Unused character points.
         short mCorrectionPoints;  //!< Unused correction points.
         unsigned char mAccountLevel; //!< Level of the associated account.

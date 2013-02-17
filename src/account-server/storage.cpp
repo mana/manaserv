@@ -75,7 +75,6 @@ static const char *DB_VERSION_PARAMETER = "database_version";
 static const char *ACCOUNTS_TBL_NAME            =   "mana_accounts";
 static const char *CHARACTERS_TBL_NAME          =   "mana_characters";
 static const char *CHAR_ATTR_TBL_NAME           =   "mana_char_attr";
-static const char *CHAR_SKILLS_TBL_NAME         =   "mana_char_skills";
 static const char *CHAR_STATUS_EFFECTS_TBL_NAME =   "mana_char_status_effects";
 static const char *CHAR_KILL_COUNT_TBL_NAME     =   "mana_char_kill_stats";
 static const char *CHAR_ABILITIES_TBL_NAME      =   "mana_char_abilities";
@@ -363,13 +362,12 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
         character->setGender(toUshort(charInfo(0, 3)));
         character->setHairStyle(toUshort(charInfo(0, 4)));
         character->setHairColor(toUshort(charInfo(0, 5)));
-        character->setLevel(toUshort(charInfo(0, 6)));
-        character->setCharacterPoints(toUshort(charInfo(0, 7)));
-        character->setCorrectionPoints(toUshort(charInfo(0, 8)));
-        Point pos(toInt(charInfo(0, 9)), toInt(charInfo(0, 10)));
+        character->setCharacterPoints(toUshort(charInfo(0, 6)));
+        character->setCorrectionPoints(toUshort(charInfo(0, 7)));
+        Point pos(toInt(charInfo(0, 8)), toInt(charInfo(0, 9)));
         character->setPosition(pos);
 
-        int mapId = toUint(charInfo(0, 11));
+        int mapId = toUint(charInfo(0, 10));
         if (mapId > 0)
         {
             character->setMapId(mapId);
@@ -381,7 +379,7 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
             character->setMapId(Configuration::getValue("char_defaultMap", 1));
         }
 
-        character->setCharacterSlot(toUint(charInfo(0, 12)));
+        character->setCharacterSlot(toUint(charInfo(0, 11)));
 
         // Fill the account-related fields. Last step, as it may require a new
         // SQL query.
@@ -416,25 +414,6 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
                 unsigned id = toUint(attrInfo(row, 0));
                 character->setAttribute(id,    toDouble(attrInfo(row, 1)));
                 character->setModAttribute(id, toDouble(attrInfo(row, 2)));
-            }
-        }
-
-        s.clear();
-        s.str("");
-
-        // Load skills.
-        s << "SELECT skill_id, skill_exp "
-          << "FROM " << CHAR_SKILLS_TBL_NAME
-          << " WHERE char_id = " << character->getDatabaseID();
-
-        const dal::RecordSet &skillInfo = mDb->execSql(s.str());
-        if (!skillInfo.isEmpty())
-        {
-            const unsigned nRows = skillInfo.rows();
-            for (unsigned row = 0; row < nRows; ++row)
-            {
-                unsigned id = toUint(skillInfo(row, 0));
-                character->setExperience(id, toInt(skillInfo(row, 1)));
             }
         }
 
@@ -723,7 +702,6 @@ bool Storage::updateCharacter(CharacterData *character)
             << "gender = '"     << character->getGender() << "', "
             << "hair_style = '" << character->getHairStyle() << "', "
             << "hair_color = '" << character->getHairColor() << "', "
-            << "level = '"      << character->getLevel() << "', "
             << "char_pts = '"   << character->getCharacterPoints() << "', "
             << "correct_pts = '"<< character->getCorrectionPoints() << "', "
             << "x = '"          << character->getPosition().x << "', "
@@ -751,23 +729,6 @@ bool Storage::updateCharacter(CharacterData *character)
     catch (const dal::DbSqlQueryExecFailure &e)
     {
         utils::throwError("(DALStorage::updateCharacter #2) "
-                          "SQL query failure: ", e);
-    }
-
-    // Character's skills
-    try
-    {
-        std::map<int, int>::const_iterator skill_it;
-        for (skill_it = character->mExperience.begin();
-             skill_it != character->mExperience.end(); skill_it++)
-        {
-            updateExperience(character->getDatabaseID(),
-                             skill_it->first, skill_it->second);
-        }
-    }
-    catch (const dal::DbSqlQueryExecFailure& e)
-    {
-        utils::throwError("(DALStorage::updateCharacter #3) "
                           "SQL query failure: ", e);
     }
 
@@ -1022,14 +983,13 @@ void Storage::flush(Account *account)
                 sqlInsertCharactersTable
                      << "insert into " << CHARACTERS_TBL_NAME
                      << " (user_id, name, gender, hair_style, hair_color,"
-                     << " level, char_pts, correct_pts,"
+                     << " char_pts, correct_pts,"
                      << " x, y, map_id, slot) values ("
                      << account->getID() << ", \""
                      << character->getName() << "\", "
                      << character->getGender() << ", "
                      << (int)character->getHairStyle() << ", "
                      << (int)character->getHairColor() << ", "
-                     << (int)character->getLevel() << ", "
                      << (int)character->getCharacterPoints() << ", "
                      << (int)character->getCorrectionPoints() << ", "
                      << character->getPosition().x << ", "
@@ -1052,15 +1012,6 @@ void Storage::flush(Account *account)
                     updateAttribute(character->getDatabaseID(), attr_it->first,
                                     attr_it->second.base,
                                     attr_it->second.modified);
-                }
-
-                // Update the characters skill
-                std::map<int, int>::const_iterator skill_it;
-                for (skill_it = character->mExperience.begin();
-                     skill_it != character->mExperience.end(); skill_it++)
-                {
-                    updateExperience(character->getDatabaseID(),
-                                     skill_it->first, skill_it->second);
                 }
             }
         }
@@ -1170,51 +1121,6 @@ void Storage::updateCharacterPoints(int charId,
     {
         utils::throwError("(DALStorage::updateCharacterPoints) "
                           "SQL query failure: ", e);
-    }
-}
-
-void Storage::updateExperience(int charId, int skillId, int skillValue)
-{
-    try
-    {
-        std::ostringstream sql;
-        // If experience has decreased to 0 we don't store it anymore,
-        // since it's the default behaviour.
-        if (skillValue == 0)
-        {
-            sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
-                << " WHERE char_id = " << charId
-                << " AND skill_id = " << skillId;
-            mDb->execSql(sql.str());
-            return;
-        }
-
-        // Try to update the skill
-        sql.clear();
-        sql.str("");
-        sql << "UPDATE " << CHAR_SKILLS_TBL_NAME
-            << " SET skill_exp = " << skillValue
-            << " WHERE char_id = " << charId
-            << " AND skill_id = " << skillId;
-        mDb->execSql(sql.str());
-
-        // Check if the update has modified a row
-        if (mDb->getModifiedRows() > 0)
-            return;
-
-        sql.clear();
-        sql.str("");
-        sql << "INSERT INTO " << CHAR_SKILLS_TBL_NAME << " "
-            << "(char_id, skill_id, skill_exp) VALUES ( "
-            << charId << ", "
-            << skillId << ", "
-            << skillValue << ")";
-        mDb->execSql(sql.str());
-    }
-    catch (const dal::DbSqlQueryExecFailure &e)
-    {
-        utils::throwError("(DALStorage::updateExperience) SQL query failure: ",
-                          e);
     }
 }
 
@@ -1795,13 +1701,6 @@ void Storage::delCharacter(int charId) const
             << " WHERE owner_id = '" << charId << "';";
         mDb->execSql(sql.str());
 
-        // Delete the skills of the character
-        sql.clear();
-        sql.str("");
-        sql << "DELETE FROM " << CHAR_SKILLS_TBL_NAME
-            << " WHERE char_id = '" << charId << "';";
-        mDb->execSql(sql.str());
-
         // Delete from the quests table
         sql.clear();
         sql.str("");
@@ -1882,23 +1781,6 @@ void Storage::setAccountLevel(int id, int level)
     catch (const dal::DbSqlQueryExecFailure &e)
     {
         utils::throwError("(DALStorage::setAccountLevel) SQL query failure: ",
-                          e);
-    }
-}
-
-void Storage::setPlayerLevel(int id, int level)
-{
-    try
-    {
-        std::ostringstream sql;
-        sql << "update " << CHARACTERS_TBL_NAME
-        << " set level = " << level
-        << " where id = " << id << ";";
-        mDb->execSql(sql.str());
-    }
-    catch (const dal::DbSqlQueryExecFailure &e)
-    {
-        utils::throwError("(DALStorage::setPlayerLevel) SQL query failure: ",
                           e);
     }
 }

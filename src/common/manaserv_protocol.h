@@ -29,8 +29,8 @@
 namespace ManaServ {
 
 enum {
-    PROTOCOL_VERSION = 3,
-    SUPPORTED_DB_VERSION = 22
+    PROTOCOL_VERSION = 4,
+    SUPPORTED_DB_VERSION = 23
 };
 
 /**
@@ -82,7 +82,7 @@ enum {
     APMSG_CHAR_CREATE_RESPONSE     = 0x0021, // B error
     PAMSG_CHAR_DELETE              = 0x0022, // B slot
     APMSG_CHAR_DELETE_RESPONSE     = 0x0023, // B error
-    // B slot, S name, B gender, B hair style, B hair color, W level,
+    // B slot, S name, B gender, B hair style, B hair color,
     // W character points, W correction points,
     // {D attr id, D base value (in 1/256ths) D mod value (in 256ths) }*
     APMSG_CHAR_INFO                = 0x0024, // ^
@@ -118,9 +118,6 @@ enum {
     GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount }, { W equip slot, W item Id, W item Instance}*
     GPMSG_EQUIP                    = 0x0122, // W item Id, W equip slot type count //{ W equip slot, W capacity used}*//<- When equipping, //{ W item instance, W 0}*//<- When unequipping
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, D base value (in 1/256ths), D modified value (in 1/256ths)}*
-    GPMSG_PLAYER_EXP_CHANGE        = 0x0140, // { W skill, D exp got, D exp needed, W skill level }*
-    GPMSG_LEVELUP                  = 0x0150, // W new level, W character points, W correction points
-    GPMSG_LEVEL_PROGRESS           = 0x0151, // B percent completed to next levelup
     PGMSG_RAISE_ATTRIBUTE          = 0x0160, // W attribute
     GPMSG_RAISE_ATTRIBUTE_RESPONSE = 0x0161, // B error, W attribute
     PGMSG_LOWER_ATTRIBUTE          = 0x0170, // W attribute
@@ -271,7 +268,6 @@ enum {
     GAMSG_SET_VAR_WORLD         = 0x0547, // S name, S value
     AGMSG_SET_VAR_WORLD         = 0x0548, // S name, S value
     GAMSG_BAN_PLAYER            = 0x0550, // D id, W duration
-    GAMSG_CHANGE_PLAYER_LEVEL   = 0x0555, // D id, W level
     GAMSG_CHANGE_ACCOUNT_LEVEL  = 0x0556, // D id, W level
     GAMSG_STATISTICS            = 0x0560, // { W map id, W entity nb, W monster nb, W player nb, { D character id }* }*
     CGMSG_CHANGED_PARTY         = 0x0590, // D character id, D party id
@@ -322,7 +318,6 @@ enum {
 enum {
     SYNC_CHARACTER_POINTS    = 0x01,       // D charId, D charPoints, D corrPoints
     SYNC_CHARACTER_ATTRIBUTE = 0x02,       // D charId, D attrId, DF base, DF mod
-    SYNC_CHARACTER_SKILL     = 0x03,       // D charId, B skillId, D skill value
     SYNC_ONLINE_STATUS       = 0x04        // D charId, B 0 = offline, 1 = online
 };
 

@@ -30,7 +30,6 @@
 #include "game-server/itemmanager.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
-#include "game-server/skillmanager.h"
 #include "game-server/abilitymanager.h"
 #include "game-server/statusmanager.h"
 #include "game-server/postman.h"
@@ -82,7 +81,6 @@ AbilityManager *abilityManager = new AbilityManager();
 AttributeManager *attributeManager = new AttributeManager();
 ItemManager *itemManager = new ItemManager();
 MonsterManager *monsterManager = new MonsterManager();
-SkillManager *skillManager = new SkillManager();
 EmoteManager *emoteManager = new EmoteManager();
 
 SettingsManager *settingsManager = new SettingsManager(DEFAULT_SETTINGS_FILE);

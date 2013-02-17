@@ -67,7 +67,6 @@ class MonsterClass
             mGender(GENDER_UNSPECIFIED),
             mSpeed(1),
             mSize(16),
-            mExp(-1),
             mMutation(0),
             mOptimalLevel(0)
         {}
@@ -118,18 +117,6 @@ class MonsterClass
         /** Returns collision circle radius. */
         int getSize() const { return mSize; }
 
-        /** Sets experience reward for killing the monster. */
-        void setExp(int exp) { mExp = exp; }
-
-        /** Returns experience reward for killing the monster. */
-        int getExp() const { return mExp; }
-
-        /** Gets maximum skill level after which exp reward is reduced */
-        void setOptimalLevel(int level) { mOptimalLevel = level; }
-
-        /** Sets maximum skill level after which exp reward is reduced. */
-        int getOptimalLevel() const { return mOptimalLevel; }
-
         /** Sets mutation factor in percent. */
         void setMutation(unsigned factor) { mMutation = factor; }
 
@@ -155,7 +142,6 @@ class MonsterClass
         std::set<AbilityManager::AbilityInfo *> mAbilities;
         float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
-        int mExp;
 
         int mMutation;
         int mOptimalLevel;

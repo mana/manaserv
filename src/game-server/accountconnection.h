@@ -141,16 +141,6 @@ class AccountConnection : public Connection
                               double mod);
 
         /**
-         * Write a modification message about character skills to the sync
-         * buffer.
-         *
-         * @param charId      ID of the character
-         * @param skillId     ID of the skill
-         * @param skillValue  new skill points
-         */
-        void updateExperience(int charId, int skillId, int skillValue);
-
-        /**
          * Update the status of a character to online (true) or offline
          * (false).
          *

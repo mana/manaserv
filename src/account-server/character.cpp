@@ -32,7 +32,6 @@ CharacterData::CharacterData(const std::string &name, int id):
     mGender(0),
     mHairStyle(0),
     mHairColor(0),
-    mLevel(0),
     mCharacterPoints(0),
     mCorrectionPoints(0),
     mAccountLevel(0)
