@@ -117,9 +117,6 @@ Monster::Monster(MonsterClass *specy):
     {
         addAttack(*it);
     }
-
-    // Load default script
-    loadScript(specy->getScript());
 }
 
 Monster::~Monster()
@@ -285,25 +282,6 @@ void Monster::processAttack(Attack &attack)
         script->push(mTarget);
         script->push(hit);
         script->execute();
-    }
-}
-
-void Monster::loadScript(const std::string &scriptName)
-{
-    if (scriptName.length() == 0)
-        return;
-
-    std::stringstream filename;
-    filename << "scripts/monster/" << scriptName;
-    if (ResourceManager::exists(filename.str()))
-    {
-        LOG_INFO("Loading monster script: " << filename.str());
-        ScriptManager::currentState()->loadFile(filename.str());
-    }
-    else
-    {
-        LOG_WARN("Could not find script file \""
-                 << filename.str() << "\" for monster");
     }
 }
 

@@ -202,12 +202,6 @@ class MonsterClass
 
         double getVulnerability(Element element) const;
 
-        /** sets the script file for the monster */
-        void setScript(const std::string &filename) { mScript = filename; }
-
-        /** Returns script filename */
-        const std::string &getScript() const { return mScript; }
-
         void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
 
@@ -239,7 +233,6 @@ class MonsterClass
         int mOptimalLevel;
         std::vector<AttackInfo *> mAttacks;
         Vulnerabilities mVulnerabilities;
-        std::string mScript;
 
         /**
          * A reference to the script function that is called each update.
@@ -301,11 +294,6 @@ class Monster : public Being
          * Performs an attack
          */
         virtual void processAttack(Attack &attack);
-
-        /**
-         * Loads a script file for this monster
-         */
-        void loadScript(const std::string &scriptName);
 
         /**
          * Kills the being.
