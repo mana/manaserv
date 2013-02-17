@@ -214,13 +214,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
                          << ": Attributes incomplete for monster Id:" << id
                          << ". Defaults values may have been applied!");
             }
-
-        }
-        else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
-        {
-            xmlChar *exp = subnode->xmlChildrenNode->content;
-            monster->setExp(atoi((const char*)exp));
-            monster->setOptimalLevel(XML::getProperty(subnode, "level", 0));
         }
         else if (xmlStrEqual(subnode->name, BAD_CAST "behavior"))
         {
@@ -295,13 +288,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
         LOG_WARN(filename
             << ": No behavior defined for monster Id:" << id
             << " (" << name << ")");
-    }
-    if (monster->getExp() == -1)
-    {
-        LOG_WARN(filename
-                << ": No experience defined for monster Id:" << id
-                << " (" << name << ")");
-        monster->setExp(0);
     }
 }
 

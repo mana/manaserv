@@ -82,7 +82,7 @@ public:
 
     /**
      * Gets the specials Id from a string formatted in this way:
-     * "setname_skillname"
+     * "setname_specialname"
      */
     unsigned getId(const std::string &specialName) const;
 
@@ -102,7 +102,7 @@ private:
      */
     void clear();
 
-    void readSpecialNode(xmlNodePtr skillNode,
+    void readSpecialNode(xmlNodePtr specialNode,
                          const std::string &setName);
 
     typedef std::map<unsigned, SpecialInfo*> SpecialsInfo;

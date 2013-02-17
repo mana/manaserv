@@ -26,7 +26,6 @@
 #include "common/resourcemanager.h"
 
 #include "game-server/attributemanager.h"
-#include "game-server/skillmanager.h"
 #include "game-server/specialmanager.h"
 #include "game-server/itemmanager.h"
 #include "game-server/monstermanager.h"
@@ -42,7 +41,6 @@ void SettingsManager::initialize()
 {
     // initialize all managers in correct order
     attributeManager->initialize();
-    skillManager->initialize();
     specialManager->initialize();
     itemManager->initialize();
     monsterManager->initialize();
@@ -62,7 +60,6 @@ void SettingsManager::initialize()
 void SettingsManager::reload()
 {
     attributeManager->reload();
-    skillManager->reload();
     specialManager->reload();
     itemManager->reload();
     monsterManager->reload();
@@ -130,11 +127,6 @@ void SettingsManager::loadFile(const std::string &filename)
             // attribute config
             attributeManager->readAttributeNode(childNode);
         }
-        else if (xmlStrEqual(childNode->name, BAD_CAST "skill-set"))
-        {
-            // skills config
-            skillManager->readSkillSetNode(childNode, filename);
-        }
         else if (xmlStrEqual(childNode->name, BAD_CAST "special-set"))
         {
             // special config
@@ -182,7 +174,6 @@ void SettingsManager::loadFile(const std::string &filename)
 void SettingsManager::checkStatus()
 {
     attributeManager->checkStatus();
-    skillManager->checkStatus();
     specialManager->checkStatus();
     itemManager->checkStatus();
     monsterManager->checkStatus();

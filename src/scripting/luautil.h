@@ -39,6 +39,7 @@ extern "C" {
 
 class CharacterComponent;
 class Entity;
+class HitInfo;
 class ItemClass;
 class MapComposite;
 class MapObject;
@@ -175,7 +176,6 @@ ItemClass *     checkItemClass(lua_State *s, int p);
 Entity *        checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
 Entity *        checkNpc(lua_State *s, int p);
-int             checkSkill(lua_State *s, int p);
 int             checkSpecial(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
@@ -204,6 +204,10 @@ inline void push(lua_State *s, double val)
 {
     lua_pushnumber(s, val);
 }
+
+void push(lua_State *s, AggressionInfo *val);
+
+void push(lua_State *s, HitInfo *val);
 
 inline void push(lua_State *s, AttackInfo *val)
 {

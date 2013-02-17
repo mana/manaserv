@@ -172,8 +172,6 @@
 		<Unit filename="src/game-server/postman.h" />
 		<Unit filename="src/game-server/quest.cpp" />
 		<Unit filename="src/game-server/quest.h" />
-		<Unit filename="src/game-server/skillmanager.cpp" />
-		<Unit filename="src/game-server/skillmanager.h" />
 		<Unit filename="src/game-server/spawnareacomponent.cpp" />
 		<Unit filename="src/game-server/spawnareacomponent.h" />
 		<Unit filename="src/game-server/specialmanager.cpp" />

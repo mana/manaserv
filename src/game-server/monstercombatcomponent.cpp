@@ -46,7 +46,6 @@ void MonsterCombatComponent::processAttack(Entity *source, Attack &attack)
     }
 
     Damage dmg = attack.getAttackInfo()->getDamage();
-    dmg.skill   = 0;
     dmg.base    *= mDamageMutation;
     dmg.delta   *= mDamageMutation;
 

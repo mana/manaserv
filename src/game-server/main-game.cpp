@@ -30,7 +30,6 @@
 #include "game-server/itemmanager.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
-#include "game-server/skillmanager.h"
 #include "game-server/specialmanager.h"
 #include "game-server/statusmanager.h"
 #include "game-server/postman.h"
@@ -81,7 +80,6 @@ utils::StringFilter *stringFilter; /**< Slang's Filter */
 AttributeManager *attributeManager = new AttributeManager();
 ItemManager *itemManager = new ItemManager();
 MonsterManager *monsterManager = new MonsterManager();
-SkillManager *skillManager = new SkillManager();
 SpecialManager *specialManager = new SpecialManager();
 EmoteManager *emoteManager = new EmoteManager();
 
@@ -190,7 +188,6 @@ static void deinitializeServer()
     // Destroy Managers
     delete stringFilter; stringFilter = 0;
     delete monsterManager; monsterManager = 0;
-    delete skillManager; skillManager = 0;
     delete itemManager; itemManager = 0;
     delete emoteManager; emoteManager = 0;
     delete settingsManager; settingsManager = 0;

@@ -33,7 +33,6 @@
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
-#include "game-server/skillmanager.h"
 #include "game-server/state.h"
 #include "game-server/trade.h"
 #include "scripting/scriptmanager.h"
@@ -47,12 +46,6 @@
 #include <cassert>
 #include <cmath>
 #include <limits.h>
-
-// Experience curve related values
-const float CharacterComponent::EXPCURVE_EXPONENT = 3.0f;
-const float CharacterComponent::EXPCURVE_FACTOR = 10.0f;
-const float CharacterComponent::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
-const float CharacterComponent::EXP_LEVEL_FLEXIBILITY = 1.0f;
 
 Script::Ref CharacterComponent::mDeathCallback;
 Script::Ref CharacterComponent::mDeathAcceptedCallback;
@@ -79,10 +72,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mDatabaseID(-1),
     mHairStyle(0),
     mHairColor(0),
-    mLevel(1),
-    mLevelProgress(0),
-    mUpdateLevelProgress(false),
-    mRecalculateLevel(true),
     mParty(0),
     mTransaction(TRANS_NONE),
     mTalkNpcId(0),
@@ -117,7 +106,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     int damageBase = beingComponent->getModifiedAttribute(ATTR_STR);
     int damageDelta = damageBase / 2;
     Damage knuckleDamage;
-    knuckleDamage.skill = skillManager->getDefaultSkillId();
     knuckleDamage.base = damageBase;
     knuckleDamage.delta = damageDelta;
     knuckleDamage.cth = 2;
@@ -150,13 +138,6 @@ CharacterComponent::~CharacterComponent()
 
 void CharacterComponent::update(Entity &entity)
 {
-    // Update character level if needed.
-    if (mRecalculateLevel)
-    {
-        mRecalculateLevel = false;
-        recalculateLevel(entity);
-    }
-
     // Dead character: don't regenerate anything else
     if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         return;
@@ -427,27 +408,6 @@ void CharacterComponent::sendStatus(Entity &entity)
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(mClient, attribMsg);
     mModifiedAttributes.clear();
-
-    MessageOut expMsg(GPMSG_PLAYER_EXP_CHANGE);
-    for (std::set<size_t>::const_iterator i = mModifiedExperience.begin(),
-         i_end = mModifiedExperience.end(); i != i_end; ++i)
-    {
-        int skill = *i;
-        expMsg.writeInt16(skill);
-        expMsg.writeInt32(getExpGot(skill));
-        expMsg.writeInt32(getExpNeeded(skill));
-        expMsg.writeInt16(levelForExp(getExperience(skill)));
-    }
-    if (expMsg.getLength() > 2) gameHandler->sendTo(mClient, expMsg);
-    mModifiedExperience.clear();
-
-    if (mUpdateLevelProgress)
-    {
-        mUpdateLevelProgress = false;
-        MessageOut progressMessage(GPMSG_LEVEL_PROGRESS);
-        progressMessage.writeInt8(mLevelProgress);
-        gameHandler->sendTo(mClient, progressMessage);
-    }
 }
 
 void CharacterComponent::modifiedAllAttributes(Entity &entity)
@@ -482,55 +442,6 @@ void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
     }
 }
 
-int CharacterComponent::expForLevel(int level)
-{
-    return int(pow(level, EXPCURVE_EXPONENT) * EXPCURVE_FACTOR);
-}
-
-int CharacterComponent::levelForExp(int exp)
-{
-    return int(pow(float(exp) / EXPCURVE_FACTOR, 1.0f / EXPCURVE_EXPONENT));
-}
-
-void CharacterComponent::receiveExperience(int skill, int experience, int optimalLevel)
-{
-    // reduce experience when skill is over optimal level
-    int levelOverOptimum = levelForExp(getExperience(skill)) - optimalLevel;
-    if (optimalLevel && levelOverOptimum > 0)
-    {
-        experience *= EXP_LEVEL_FLEXIBILITY
-                      / (levelOverOptimum + EXP_LEVEL_FLEXIBILITY);
-    }
-
-    // Add exp
-    int oldExp = mExperience[skill];
-    long int newExp = mExperience[skill] + experience;
-    if (newExp < 0)
-        newExp = 0; // Avoid integer underflow/negative exp.
-
-    // Check the skill cap
-    long int maxSkillCap = Configuration::getValue("game_maxSkillCap", INT_MAX);
-    assert(maxSkillCap <= INT_MAX);  // Avoid integer overflow.
-    if (newExp > maxSkillCap)
-    {
-        newExp = maxSkillCap;
-        if (oldExp != maxSkillCap)
-        {
-            LOG_INFO("Player hit the skill cap");
-            // TODO: Send a message to player letting them know they hit the cap
-            // or not?
-        }
-    }
-    mExperience[skill] = newExp;
-    mModifiedExperience.insert(skill);
-
-    // Inform account server
-    if (newExp != oldExp)
-        accountHandler->updateExperience(getDatabaseID(), skill, newExp);
-
-    mRecalculateLevel = true;
-}
-
 void CharacterComponent::incrementKillCount(int monsterType)
 {
     std::map<int, int>::iterator i = mKillCount.find(monsterType);
@@ -552,80 +463,6 @@ int CharacterComponent::getKillCount(int monsterType) const
     if (i != mKillCount.end())
         return i->second;
     return 0;
-}
-
-
-void CharacterComponent::recalculateLevel(Entity &entity)
-{
-    std::list<float> levels;
-    std::map<int, int>::const_iterator a;
-    for (a = getSkillBegin(); a != getSkillEnd(); a++)
-    {
-        // Only use the first 1000 skill levels in calculation
-        if (a->first < 1000)
-        {
-            float expGot = getExpGot(a->first);
-            float expNeed = getExpNeeded(a->first);
-            levels.push_back(levelForExp(a->first) + expGot / expNeed);
-        }
-    }
-    levels.sort();
-
-    std::list<float>::iterator i = levels.end();
-    float level = 0.0f;
-    float factor = 1.0f;
-    float factorSum = 0.0f;
-    while (i != levels.begin())
-    {
-        i--;
-        level += *i * factor;
-        factorSum += factor;
-        factor *= LEVEL_SKILL_PRECEDENCE_FACTOR;
-    }
-    level /= factorSum;
-    level += 1.0f; // + 1.0f because the lowest level is 1 and not 0
-
-    while (mLevel < level)
-    {
-        levelup(entity);
-    }
-
-    int levelProgress = int((level - floor(level)) * 100);
-    if (levelProgress != mLevelProgress)
-    {
-        mLevelProgress = levelProgress;
-        mUpdateLevelProgress = true;
-    }
-}
-
-int CharacterComponent::getExpNeeded(size_t skill) const
-{
-    int level = levelForExp(getExperience(skill));
-    return CharacterComponent::expForLevel(level + 1) - expForLevel(level);
-}
-
-int CharacterComponent::getExpGot(size_t skill) const
-{
-    int level = levelForExp(getExperience(skill));
-    return mExperience.at(skill) - CharacterComponent::expForLevel(level);
-}
-
-void CharacterComponent::levelup(Entity &entity)
-{
-    mLevel++;
-
-    mCharacterPoints += CHARPOINTS_PER_LEVELUP;
-    mCorrectionPoints += CORRECTIONPOINTS_PER_LEVELUP;
-    if (mCorrectionPoints > CORRECTIONPOINTS_MAX)
-        mCorrectionPoints = CORRECTIONPOINTS_MAX;
-
-    MessageOut levelupMsg(GPMSG_LEVELUP);
-    levelupMsg.writeInt16(mLevel);
-    levelupMsg.writeInt16(mCharacterPoints);
-    levelupMsg.writeInt16(mCorrectionPoints);
-    gameHandler->sendTo(mClient, levelupMsg);
-    LOG_INFO(entity.getComponent<BeingComponent>()->getName()
-             << " reached level " << mLevel);
 }
 
 AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,

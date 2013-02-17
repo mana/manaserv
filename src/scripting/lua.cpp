@@ -243,6 +243,36 @@ static int on_mapupdate(lua_State *s)
     return 0;
 }
 
+/** LUA on_monster_killed (callbacks)
+ * on_monster_killed(function ref)
+ **
+ * Will make sure that the fuction ''ref'' gets called with the monster which
+ * died and a table with all enemies that contributed to killing the monster.
+ *
+ * Attackers which died themselves or left the map are not passed.
+ * The table of attackers looks like this:
+ *
+ * <code lua>
+ * {
+ *   <beinghandle>={
+ *       {
+ *           damage=<dealt damage>,
+ *           element=<element of damage,
+ *           tick=<game tick when the attack happened>
+ *       },
+ *       [...]
+ *   },
+ *   [...]
+ * }
+ * </code>
+ */
+static int on_monster_killed(lua_State *s)
+{
+    luaL_checktype(s, 1, LUA_TFUNCTION);
+    MonsterComponent::setMonsterKilledCallback(getScript(s));
+    return 0;
+}
+
 
 /** LUA_CATEGORY Creation and removal of stuff (creation)
  */
@@ -1422,8 +1452,6 @@ static int entity_walk(lua_State *s)
  *               int type, int element, handle source)
  * entity:damage(int damage, int delta, int accuracy,
  *               int type, int element, handle source, int skill)
- * entity:damage(int damage, int delta, int accuracy,
- *               int type, int element, handle source, string skillname)
  **
  * Valid only for being entities.
  *
@@ -1435,14 +1463,9 @@ static int entity_walk(lua_State *s)
  *
  * If ''source'' is provided the attack is handled as if the ''source''
  * triggered the damage.
+ * ''type'' affects which kind of armor and character
+ * attributes reduce the damage. It can be one of the following values:
  *
- * If ''skill'' is given the ''owner'' can also recieve XP for the attack. The
- * ''skill'' should be defined in the [[skills.xml|skills.xml]]. If the skill
- * is provided as string (''skillname'') you have to use this format:
- * <setname>_<skillname>. So for example: "Weapons_Unarmed"
- *
- * ''type'' affects which kind of armor and character attributes reduce the
- * damage. It can be one of the following values:
  * | 0 | DAMAGE_PHYSICAL  |
  * | 1 | DAMAGE_MAGICAL  |
  * | 2 | DAMAGE_OTHER  |
@@ -1487,10 +1510,6 @@ static int entity_damage(lua_State *s)
             luaL_error(s, "damage called with source that cannot fight");
             return 0;
         }
-    }
-    if (lua_gettop(s) >= 8)
-    {
-        dmg.skill = checkSkill(s, 8);
     }
     being->getComponent<CombatComponent>()->damage(*being, source, dmg);
 
@@ -1954,95 +1973,6 @@ static int entity_set_gender(lua_State *s)
     return 0;
 }
 
-/** LUA entity:level (being)
- * entity:level()
- * entity:level(int skill_id)
- * entity:level(string skill_name)
- **
- * Valid only for character entities.
- *
- * **Return value:** Returns the level of the character. If a skill is passed
- * (either by name or id) the level of this skill is returned.
- *
- * **Note:** If the skill is provided as string (''skill_name'') you have to
- * use this format: <setname>_<skillname>. So for example: "Weapons_Unarmed".
- */
-static int entity_get_level(lua_State *s)
-{
-    Entity *ch = checkCharacter(s, 1);
-    auto *characterComponent = ch->getComponent<CharacterComponent>();
-    if (lua_gettop(s) > 1)
-    {
-        int skillId = checkSkill(s, 2);
-        lua_pushinteger(s, characterComponent->levelForExp(
-                characterComponent->getExperience(skillId)));
-    }
-    else
-    {
-        lua_pushinteger(s, characterComponent->getLevel());
-    }
-    return 1;
-}
-
-/** LUA entity:xp (being)
- * entity:xp(int skill_id)
- * entity:xp(string skill_name)
- **
- * Valid only for character entities.
- *
- * **Return value:** The total experience collected by the character in
- * ''skill''.
- *
- * If the skill is provided as string (''skillname'') you have to use this
- * format: <setname>_<skillname>. So for example: "Weapons_Unarmed".
- */
-static int entity_get_xp(lua_State *s)
-{
-    Entity *c = checkCharacter(s, 1);
-    int skill = checkSkill(s, 2);
-    const int exp = c->getComponent<CharacterComponent>()->getExperience(skill);
-
-    lua_pushinteger(s, exp);
-    return 1;
-}
-
-/** LUA entity:give_xp (being)
- * entity:give_xp(int skill, int amount [, int optimalLevel])
- * entity:give_xp(string skillname, int amount [, int optimalLevel])
- **
- * Valid only for character entities.
- *
- * Gives the character ''amount'' experience in skill ''skill''. When an
- * optimal level is set (over 0), the experience is reduced when the characters
- * skill level is beyond this. If the skill is provided as string
- * (''skillname'') you have to use this format: <setname>_<skillname>.
- * So for example: "Weapons_Unarmed".
- */
-static int entity_give_xp(lua_State *s)
-{
-    Entity *c = checkCharacter(s, 1);
-    int skill = checkSkill(s, 2);
-    const int exp = luaL_checkint(s, 3);
-    const int optimalLevel = luaL_optint(s, 4, 0);
-
-    c->getComponent<CharacterComponent>()->receiveExperience(skill, exp,
-                                                             optimalLevel);
-    return 0;
-}
-
-/** LUA xp_for_level (being)
- * xp_for_level(int level)
- **
- * **Return value:** Returns the total experience necessary (counted from
- * level 0) for reaching ''level'' in any skill.
- */
-static int xp_for_level(lua_State *s)
-{
-    const int level = luaL_checkint(s, 1);
-    lua_pushinteger(s, CharacterComponent::expForLevel(level));
-    return 1;
-}
-
 /** LUA entity:hair_color (being)
  * entity:hair_color()
  **
@@ -2417,7 +2347,7 @@ static int entity_get_monster_id(lua_State *s)
 }
 
 /** LUA entity:change_anger (monster)
- * entity:change_anger(handle being, int anger)
+ * entity:change_anger(handle being, int anger, int element)
  **
  * Valid only for monster entities.
  *
@@ -2429,7 +2359,8 @@ static int entity_change_anger(lua_State *s)
     Entity *monster = checkMonster(s, 1);
     Entity *being = checkBeing(s, 2);
     const int anger = luaL_checkint(s, 3);
-    monster->getComponent<MonsterComponent>()->changeAnger(being, anger);
+    const int element = luaL_checkint(s, 4);
+    monster->getComponent<MonsterComponent>()->changeAnger(being, (Element)element, anger);
     return 0;
 }
 
@@ -3253,19 +3184,6 @@ static int damage_get_id(lua_State *s)
     return 1;
 }
 
-/** LUA damage:skill (damageclass)
- * damage:skill()
- **
- * **Return value:** This function returns the skill id of the attack. If the
- * damage dealer is a character is a character this skill will recieve exp.
- */
-static int damage_get_skill(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->skill);
-    return 1;
-}
-
 /** LUA damage:base (damageclass)
  * damage:base()
  **
@@ -3652,6 +3570,7 @@ LuaScript::LuaScript():
         { "on_mapvar_changed",              on_mapvar_changed                 },
         { "on_worldvar_changed",            on_worldvar_changed               },
         { "on_mapupdate",                   on_mapupdate                      },
+        { "on_monster_killed",              on_monster_killed                 },
         { "get_item_class",                 get_item_class                    },
         { "get_monster_class",              get_monster_class                 },
         { "get_status_effect",              get_status_effect                 },
@@ -3673,7 +3592,6 @@ LuaScript::LuaScript():
         { "getvar_world",                   getvar_world                      },
         { "setvar_world",                   setvar_world                      },
         { "chr_get_post",                   chr_get_post                      },
-        { "xp_for_level",                   xp_for_level                      },
         { "monster_create",                 monster_create                    },
         { "trigger_create",                 trigger_create                    },
         { "get_beings_in_circle",           get_beings_in_circle              },
@@ -3714,7 +3632,6 @@ LuaScript::LuaScript():
 
     static luaL_Reg const members_Damage[] = {
         { "id",                             damage_get_id                     },
-        { "skill",                          damage_get_skill                  },
         { "base",                           damage_get_base                   },
         { "delta",                          damage_get_delta                  },
         { "cth",                            damage_get_cth                    },
@@ -3763,9 +3680,6 @@ LuaScript::LuaScript():
         { "remove_attribute_modifier",      entity_remove_attribute_modifier  },
         { "gender",                         entity_get_gender                 },
         { "set_gender",                     entity_set_gender                 },
-        { "level",                          entity_get_level                  },
-        { "xp",                             entity_get_xp                     },
-        { "give_xp",                        entity_give_xp                    },
         { "hair_color",                     entity_get_hair_color             },
         { "set_hair_color",                 entity_set_hair_color             },
         { "hair_style",                     entity_get_hair_style             },

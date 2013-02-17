@@ -35,7 +35,6 @@
 
 class CharacterComponent;
 class ItemClass;
-class Script;
 
 /**
  * Structure containing an item class and its probability to be dropped
@@ -79,7 +78,6 @@ class MonsterClass
             mGender(GENDER_UNSPECIFIED),
             mSpeed(1),
             mSize(16),
-            mExp(-1),
             mAggressive(false),
             mTrackRange(1),
             mStrollRange(0),
@@ -148,18 +146,6 @@ class MonsterClass
         /** Returns collision circle radius. */
         int getSize() const { return mSize; }
 
-        /** Sets experience reward for killing the monster. */
-        void setExp(int exp) { mExp = exp; }
-
-        /** Returns experience reward for killing the monster. */
-        int getExp() const { return mExp; }
-
-        /** Gets maximum skill level after which exp reward is reduced */
-        void setOptimalLevel(int level) { mOptimalLevel = level; }
-
-        /** Sets maximum skill level after which exp reward is reduced. */
-        int getOptimalLevel() const { return mOptimalLevel; }
-
         /** Sets if the monster attacks without being attacked first. */
         void setAggressive(bool aggressive) { mAggressive = aggressive; }
 
@@ -227,7 +213,6 @@ class MonsterClass
         std::map<int, double> mAttributes; /**< Base attributes of the monster. */
         float mSpeed; /**< The monster class speed in tiles per second */
         int mSize;
-        int mExp;
 
         bool mAggressive;
         int mTrackRange;
@@ -269,6 +254,45 @@ struct AttackPosition
     BeingDirection direction;
 };
 
+/** Info about single hits. */
+struct HitInfo
+{
+    HitInfo()
+        : damage(0)
+        , element(ELEMENT_NEUTRAL)
+        , tick(0)
+    {}
+
+    int damage;
+    Element element;
+    int tick;
+};
+
+/** Aggression towards other beings. */
+struct AggressionInfo
+{
+    AggressionInfo()
+        : anger(0)
+    {}
+
+    ~AggressionInfo()
+    {
+        std::vector<HitInfo *>::iterator hitInfoIt, hitInfoIt_end;
+        for (hitInfoIt = hits.begin(), hitInfoIt_end = hits.end();
+             hitInfoIt != hitInfoIt_end; ++hitInfoIt)
+        {
+            delete (*hitInfoIt);
+        }
+    }
+
+    /** Saves the hits by element against the monster */
+    std::vector<HitInfo *> hits;
+    /** Cached anger value to prevent recalculating it each time */
+    int anger;
+    sigc::connection removedConnection;
+    sigc::connection diedConnection;
+};
+
 /**
  * The component for a fightable monster with its own AI
  */
@@ -306,7 +330,7 @@ class MonsterComponent : public Component
         /**
          * Alters hate for the monster
          */
-        void changeAnger(Entity *target, int amount);
+        void changeAnger(Entity *target, Element element, int amount);
 
         std::map<Entity *, int> getAngerList() const;
 
@@ -314,6 +338,13 @@ class MonsterComponent : public Component
          * Removes a being from the anger list.
          */
         void forgetTarget(Entity *entity);
+
+        /**
+         * Registers a callback that will get called when the monster was
+         * killed by weapons / normal damage
+         */
+        static void setMonsterKilledCallback(Script *script)
+        { script->assignCallback(mMonsterKilledCallback); }
 
     private:
         static const int DECAY_TIME = 50;
@@ -324,31 +355,12 @@ class MonsterComponent : public Component
 
         MonsterClass *mSpecy;
 
-        /** Aggression towards other beings. */
-        struct AggressionInfo {
-            AggressionInfo()
-                : anger(0)
-            {}
-
-            int anger;
-            sigc::connection removedConnection;
-            sigc::connection diedConnection;
-        };
-        std::map<Entity *, AggressionInfo> mAnger;
+        std::map<Entity *, AggressionInfo *> mAnger;
 
         /**
          * Character who currently owns this monster (killsteal protection).
          */
         Entity *mOwner;
-
-        /** List of characters and their skills that attacked this monster. */
-        std::map<Entity *, std::set <size_t> > mExpReceivers;
-
-        /**
-         * List of characters who are entitled to receive exp (killsteal
-         * protection).
-         */
-        std::set<Entity *> mLegalExpReceivers;
 
         /**
          * Set positions relative to target from which the monster can attack.
@@ -361,6 +373,9 @@ class MonsterComponent : public Component
         Timeout mKillStealProtectedTimeout;
         /** Time until dead monster is removed */
         Timeout mDecayTimeout;
+
+        static Script::Ref mMonsterKilledCallback;
+
 };
 
 #endif // MONSTER_H

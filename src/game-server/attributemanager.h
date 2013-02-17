@@ -138,7 +138,6 @@ class AttributeManager
     private:
         void readModifierNode(xmlNodePtr modifierNode, int attributeId);
 
-        // Attribute id -> { modifiable, min, max, { stackable type, effect type }[] }
         typedef std::map<int, AttributeInfo> AttributeMap;
 
         /** Maps tag names to specific modifiers. */

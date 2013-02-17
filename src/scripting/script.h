@@ -33,6 +33,7 @@
 
 class MapComposite;
 class Entity;
+class AggressionInfo;
 
 /**
  * Abstract interface for calling functions written in an external language.
@@ -192,6 +193,12 @@ class Script : public sigc::trackable
          * Pushes a list of items with amounts to the script engine.
          */
         virtual void push(const std::list<InventoryItem> &itemList) = 0;
+
+        /**
+         * Pushes a list of characters who contributed to kill a monster
+         */
+        virtual void push(const std::map<Entity *, AggressionInfo *>
+                          &angerList) = 0;
 
         /**
          * Executes the function being prepared.
