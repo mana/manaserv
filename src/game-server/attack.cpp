@@ -25,25 +25,9 @@
 #include "common/defines.h"
 
 #include "game-server/character.h"
-#include "game-server/skillmanager.h"
 
 AttackInfo *AttackInfo::readAttackNode(xmlNodePtr node)
 {
-    std::string skill = XML::getProperty(node, "skill", std::string());
-
-    unsigned skillId;
-    if (utils::isNumeric(skill))
-        skillId = utils::stringToInt(skill);
-    else
-        skillId = skillManager->getId(skill);
-
-    if (!skill.empty() && !skillManager->exists(skillId))
-    {
-        LOG_WARN("Error parsing Attack node: Invalid skill " << skill
-                 << " taking default skill");
-        skillId = skillManager->getDefaultSkillId();
-    }
-
     unsigned id = XML::getProperty(node, "id", 0);
     unsigned priority = XML::getProperty(node, "priority", 0);
     unsigned warmupTime = XML::getProperty(node, "warmuptime", 0);
@@ -60,7 +44,6 @@ AttackInfo *AttackInfo::readAttackNode(xmlNodePtr node)
 
     Damage dmg;
     dmg.id = id;
-    dmg.skill = skillId;
     dmg.base = baseDamange;
     dmg.delta = deltaDamage;
     dmg.cth = chanceToHit;

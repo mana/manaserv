@@ -200,12 +200,6 @@ void MonsterManager::initialize()
                 }
 
             }
-            else if (xmlStrEqual(subnode->name, BAD_CAST "exp"))
-            {
-                xmlChar *exp = subnode->xmlChildrenNode->content;
-                monster->setExp(atoi((const char*)exp));
-                monster->setOptimalLevel(XML::getProperty(subnode, "level", 0));
-            }
             else if (xmlStrEqual(subnode->name, BAD_CAST "behavior"))
             {
                 behaviorSet = true;
@@ -279,13 +273,6 @@ void MonsterManager::initialize()
             LOG_WARN(mMonsterReferenceFile
                 << ": No behavior defined for monster Id:" << id
                 << " (" << name << ")");
-        }
-        if (monster->getExp() == -1)
-        {
-            LOG_WARN(mMonsterReferenceFile
-                    << ": No experience defined for monster Id:" << id
-                    << " (" << name << ")");
-            monster->setExp(0);
         }
         ++nbMonsters;
     }

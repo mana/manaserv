@@ -25,6 +25,8 @@
 #include "scripting/scriptmanager.h"
 
 #include "game-server/character.h"
+#include "game-server/monster.h"
+
 #include "utils/logger.h"
 
 #include <cassert>
@@ -109,9 +111,18 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
         std::map<std::string, int> item;
         item["id"] = i->itemId;
         item["amount"] = i->amount;
-        pushSTLContainer<std::string, int>(mCurrentState, item);
+        pushSTLContainer(mCurrentState, item);
         lua_rawseti(mCurrentState, itemTable, ++position);
     }
+    ++nbArgs;
+}
+
+void LuaScript::push(const std::map<Entity *, AggressionInfo *>
+                     &angerList)
+{
+    assert(nbArgs >= 0);
+
+    pushSTLContainer(mCurrentState, angerList);
     ++nbArgs;
 }
 

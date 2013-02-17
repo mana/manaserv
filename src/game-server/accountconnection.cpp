@@ -476,17 +476,6 @@ void AccountConnection::updateAttributes(int charId, int attrId, double base,
     syncChanges();
 }
 
-void AccountConnection::updateExperience(int charId, int skillId,
-                                         int skillValue)
-{
-    ++mSyncMessages;
-    mSyncBuffer->writeInt8(SYNC_CHARACTER_SKILL);
-    mSyncBuffer->writeInt32(charId);
-    mSyncBuffer->writeInt8(skillId);
-    mSyncBuffer->writeInt32(skillValue);
-    syncChanges();
-}
-
 void AccountConnection::updateOnlineStatus(int charId, bool online)
 {
     ++mSyncMessages;

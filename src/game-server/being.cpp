@@ -30,7 +30,6 @@
 #include "game-server/combatcomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
-#include "game-server/skillmanager.h"
 #include "game-server/statuseffect.h"
 #include "game-server/statusmanager.h"
 #include "utils/logger.h"

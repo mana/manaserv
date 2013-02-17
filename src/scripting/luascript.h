@@ -61,6 +61,9 @@ class LuaScript : public Script
 
         void push(const std::list<InventoryItem> &itemList);
 
+        virtual void push(const std::map<Entity *, AggressionInfo *>
+                          &angerList);
+
         int execute(const Context &context = Context());
 
         bool resume();

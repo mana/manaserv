@@ -72,3 +72,29 @@ end
 
 on_recalculate_base_attribute(recalculate_base_attribute)
 on_update_derived_attribute(update_derived_attributes)
+
+-- Handle giving xp
+
+local ATTR_EXP = 20
+-- Since the exp as required xml parameter does not make sense we hardcode this
+-- here until there is a nice way to provide properties
+local FIXED_EXP = 100
+
+on_monster_killed(function(monster, killers)
+    local total_damage = 0
+    local damage_by_player = {}
+    for killer, hits in pairs(killers) do
+        if being_type(killer) == TYPE_CHARACTER then
+            for _, hit in ipairs(hits) do
+                total_damage = total_damage + hit.damage
+                damage_by_player[killer] = (damage_by_player[killer] or 0) + hit.damage
+            end
+        end
+    end
+
+    for char, damage in pairs(damage_by_player) do
+        local exp_gain = damage / total_damage * FIXED_EXP
+        local new_exp = being_get_base_attribute(char, ATTR_EXP) + exp_gain
+        being_set_base_attribute(char, ATTR_EXP, new_exp)
+    end
+end)
