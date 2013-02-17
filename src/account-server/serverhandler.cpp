@@ -414,13 +414,6 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             storage->banCharacter(id, duration);
         } break;
 
-        case GAMSG_CHANGE_PLAYER_LEVEL:
-        {
-            int id = msg.readInt32();
-            int level = msg.readInt16();
-            storage->setPlayerLevel(id, level);
-        } break;
-
         case GAMSG_CHANGE_ACCOUNT_LEVEL:
         {
             int id = msg.readInt32();
@@ -691,15 +684,6 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
                 double base   = msg.readDouble();
                 double mod    = msg.readDouble();
                 storage->updateAttribute(charId, attrId, base, mod);
-            } break;
-
-            case SYNC_CHARACTER_SKILL:
-            {
-                LOG_DEBUG("received SYNC_CHARACTER_SKILL");
-                int charId = msg.readInt32();
-                int skillId = msg.readInt8();
-                int skillValue = msg.readInt32();
-                storage->updateExperience(charId, skillId, skillValue);
             } break;
 
             case SYNC_ONLINE_STATUS:

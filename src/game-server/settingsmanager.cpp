@@ -27,7 +27,6 @@
 
 #include "game-server/abilitymanager.h"
 #include "game-server/attributemanager.h"
-#include "game-server/skillmanager.h"
 #include "game-server/itemmanager.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
@@ -44,7 +43,6 @@ void SettingsManager::initialize()
     // initialize all managers in correct order
     MapManager::initialize();
     attributeManager->initialize();
-    skillManager->initialize();
     abilityManager->initialize();
     itemManager->initialize();
     monsterManager->initialize();
@@ -65,7 +63,6 @@ void SettingsManager::reload()
 {
     MapManager::reload();
     attributeManager->reload();
-    skillManager->reload();
     abilityManager->reload();
     itemManager->reload();
     monsterManager->reload();
@@ -138,11 +135,6 @@ void SettingsManager::loadFile(const std::string &filename)
             // attribute config
             attributeManager->readAttributeNode(childNode);
         }
-        else if (xmlStrEqual(childNode->name, BAD_CAST "skill-set"))
-        {
-            // skills config
-            skillManager->readSkillSetNode(childNode, filename);
-        }
         else if (xmlStrEqual(childNode->name, BAD_CAST "ability-category"))
         {
             // ability config
@@ -191,7 +183,6 @@ void SettingsManager::checkStatus()
 {
     MapManager::checkStatus();
     attributeManager->checkStatus();
-    skillManager->checkStatus();
     abilityManager->checkStatus();
     itemManager->checkStatus();
     monsterManager->checkStatus();

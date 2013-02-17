@@ -80,7 +80,6 @@ static void handleLogsay(Entity*, std::string&);
 static void handleKillMonsters(Entity*, std::string&);
 static void handleCraft(Entity*, std::string&);
 static void handleGetPos(Entity*, std::string&);
-static void handleSkills(Entity*, std::string&);
 static void handleEffect(Entity*, std::string&);
 static void handleGiveAbility(Entity*, std::string&);
 static void handleTakeAbility(Entity*, std::string&);
@@ -147,8 +146,6 @@ static CmdRef const cmdRef[] =
         "Crafts something.", &handleCraft},
     {"getpos", "<character>",
         "Gets the position of a character.", &handleGetPos},
-    {"skills", "<character>",
-        "Lists all skills and their values of a character", &handleSkills},
     {"effect", "<effectid> <x> <y> / <effectid> <being> / <effectid>",
         "Shows an effect at the given position or on the given being. "
         "The player's character is targeted if neither of them is provided.",
@@ -1514,52 +1511,6 @@ static void handleGetPos(Entity *player, std::string &args)
         << pos.y
         << "]";
     say(str.str(), player);
-}
-
-static void handleSkills(Entity *player, std::string &args)
-{
-    std::string character = getArgument(args);
-    if (character.empty())
-    {
-        say("Invalid amount of arguments given.", player);
-        say("Usage: @skills <character>", player);
-        return;
-    }
-    Entity *other;
-    if (character == "#")
-        other = player;
-    else
-        other = gameHandler->getCharacterByNameSlow(character);
-    if (!other)
-    {
-        say("Invalid character, or player is offline.", player);
-        return;
-    }
-
-
-    auto *characterComponent =
-            player->getComponent<CharacterComponent>();
-
-    say("List of skills of player '" +
-        other->getComponent<BeingComponent>()->getName() + "':", player);
-    std::map<int, int>::const_iterator it =
-            characterComponent->getSkillBegin();
-    std::map<int, int>::const_iterator it_end =
-            characterComponent->getSkillEnd();
-
-    if (it == it_end)
-    {
-        say("No skills available.", player);
-        return;
-    }
-
-    while (it != it_end)
-    {
-        std::stringstream str;
-        str << "Id: " << it->first << " value: " << it->second;
-        say(str.str(), player);
-        ++it;
-    }
 }
 
 static void handleEffect(Entity *player, std::string &args)

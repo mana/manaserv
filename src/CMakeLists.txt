@@ -259,8 +259,6 @@ SET(SRCS_MANASERVGAME
     game-server/quest.cpp
     game-server/settingsmanager.h
     game-server/settingsmanager.cpp
-    game-server/skillmanager.h
-    game-server/skillmanager.cpp
     game-server/spawnareacomponent.h
     game-server/spawnareacomponent.cpp
     game-server/state.h

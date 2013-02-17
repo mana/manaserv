@@ -38,7 +38,6 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     msg.writeInt8(data.getGender());
     msg.writeInt8(data.getHairStyle());
     msg.writeInt8(data.getHairColor());
-    msg.writeInt16(data.getLevel());
     msg.writeInt16(data.getCharacterPoints());
     msg.writeInt16(data.getCorrectionPoints());
 
@@ -50,16 +49,6 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeInt16(attributeIt.first);
         msg.writeDouble(attributeIt.second.getBase());
         msg.writeDouble(attributeIt.second.getModifiedAttribute());
-    }
-
-    // character skills
-    msg.writeInt16(data.getSkillSize());
-
-    std::map<int, int>::const_iterator skill_it;
-    for (skill_it = data.getSkillBegin(); skill_it != data.getSkillEnd() ; skill_it++)
-    {
-        msg.writeInt16(skill_it->first);
-        msg.writeInt32(skill_it->second);
     }
 
     // status effects currently affecting the character
@@ -126,7 +115,6 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setGender(ManaServ::getGender(msg.readInt8()));
     data.setHairStyle(msg.readInt8());
     data.setHairColor(msg.readInt8());
-    data.setLevel(msg.readInt16());
     data.setCharacterPoints(msg.readInt16());
     data.setCorrectionPoints(msg.readInt16());
 
@@ -139,16 +127,6 @@ void deserializeCharacterData(T &data, MessageIn &msg)
                mod  = msg.readDouble();
         data.setAttribute(id, base);
         data.setModAttribute(id, mod);
-    }
-
-    // character skills
-    int skillSize = msg.readInt16();
-
-    for (int i = 0; i < skillSize; ++i)
-    {
-        int skill = msg.readInt16();
-        int level = msg.readInt32();
-        data.setExperience(skill,level);
     }
 
     // status effects currently affecting the character
