@@ -57,7 +57,7 @@ typedef std::map<unsigned short, MapStatistics> ServerStatistics;
  */
 struct GameServer: NetComputer
 {
-    GameServer(ENetPeer *peer): NetComputer(peer), port(0) {}
+    GameServer(ENetPeer *peer): NetComputer(peer), server(0), port(0) {}
 
     std::string address;
     NetComputer *server;
@@ -185,7 +185,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             const std::string password = msg.readString();
 
             // checks the version of the remote item database with our local copy
-            unsigned int dbversion = msg.readInt32();
+            unsigned dbversion = msg.readInt32();
             LOG_INFO("Game server uses itemsdatabase with version " << dbversion);
 
             LOG_DEBUG("AGMSG_REGISTER_RESPONSE");
@@ -487,7 +487,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             // send the post if valid
             if (post)
             {
-                for (unsigned int i = 0; i < post->getNumberOfLetters(); ++i)
+                for (unsigned i = 0; i < post->getNumberOfLetters(); ++i)
                 {
                     // get each letter, send the sender's name,
                     // the contents and any attachments
@@ -495,7 +495,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
                     result.writeString(letter->getSender()->getName());
                     result.writeString(letter->getContents());
                     std::vector<InventoryItem> items = letter->getAttachments();
-                    for (unsigned int j = 0; j < items.size(); ++j)
+                    for (unsigned j = 0; j < items.size(); ++j)
                     {
                         result.writeInt16(items[j].itemId);
                         result.writeInt16(items[j].amount);
@@ -546,7 +546,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             LOG_DEBUG("Creating letter");
             Letter *letter = new Letter(0, sender, receiver);
             letter->addText(contents);
-            for (unsigned int i = 0; i < items.size(); ++i)
+            for (unsigned i = 0; i < items.size(); ++i)
             {
                 InventoryItem item;
                 item.itemId = items[i].first;
@@ -708,7 +708,7 @@ void GameServerHandler::syncDatabase(MessageIn &msg)
                 int charId = msg.readInt32();
                 bool online = (msg.readInt8() == 1);
                 storage->setOnlineStatus(charId, online);
-            }
+            } break;
         }
     }
 

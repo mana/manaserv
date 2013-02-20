@@ -256,7 +256,7 @@ static void ban(Character *from, Character *ch, const std::string &duration)
     switch (duration[duration.length() - 1])
     {
         case 'd': d = d * 24; // nobreak
-        case 'h': d = d * 60;
+        case 'h': d = d * 60; break;
     }
     accountHandler->banCharacter(ch, d);
 }

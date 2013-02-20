@@ -24,7 +24,7 @@
 					<Add library="sqlite3" />
 				</Linker>
 			</Target>
-                        <Target title="Windows (MySQL Support)">
+			<Target title="Windows (MySQL Support)">
 				<Option output="accountserver.exe" prefix_auto="0" extension_auto="0" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -43,7 +43,7 @@
 				</Linker>
 			</Target>
 			<Target title="Unix/Linux (Sqlite Support)">
-				<Option output="bin\accountserver" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/accountserver" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="bin" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -51,8 +51,9 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DSQLITE_SUPPORT" />
+					<Add option="-DHAS_SOCKLEN_T" />
 					<Add directory="src" />
-					<Add directory="\usr\local\include\libxml2" />
+					<Add directory="/usr/include/libxml2" />
 				</Compiler>
 				<Linker>
 					<Add library="pthread" />
@@ -60,20 +61,22 @@
 				</Linker>
 			</Target>
 			<Target title="Unix/Linux (MySQL Support)">
-				<Option output="bin\accountserver" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/accountserver" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="bin" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DSQLITE_SUPPORT" />
+					<Add option="-DMYSQL_SUPPORT" />
+					<Add option="-DHAS_SOCKLEN_T" />
 					<Add directory="src" />
-					<Add directory="\usr\local\include\libxml2" />
+					<Add directory="/usr/include/libxml2" />
 				</Compiler>
 				<Linker>
 					<Add library="pthread" />
-					<Add library="mysql" />
+					<Add library="mysqlclient" />
+					<Add directory="/usr/lib/mysql/" />
 				</Linker>
 			</Target>
 		</Build>
@@ -86,141 +89,159 @@
 			<Add option="-Wall" />
 			<Add option="-Wno-switch" />
 			<Add option="-Wno-unknown-pragmas" />
-			<Add directory="libs\enet\include" />
-			<Add directory="..\include" />
+			<Add directory="libs/enet/include" />
+			<Add directory="../include" />
 			<Add directory="include" />
-			<Add directory="..\include\libxml2" />
-			<Add directory="include\libxml2" />
+			<Add directory="../include/libxml2" />
+			<Add directory="include/libxml2" />
 		</Compiler>
 		<Linker>
 			<Add library="xml2" />
 			<Add library="physfs" />
 			<Add library="z" />
 			<Add library="crypto" />
-			<Add directory="..\lib" />
+			<Add directory="../lib" />
 			<Add directory="lib" />
 		</Linker>
-		<Unit filename="libs\enet\include\enet\callbacks.h" />
-		<Unit filename="libs\enet\callbacks.c" />
-		<Unit filename="libs\enet\compress.c" />
-		<Unit filename="libs\enet\include\enet\enet.h" />
-		<Unit filename="libs\enet\host.c" />
-		<Unit filename="libs\enet\include\enet\list.h" />
-		<Unit filename="libs\enet\list.c" />
-		<Unit filename="libs\enet\packet.c" />
-		<Unit filename="libs\enet\peer.c" />
-		<Unit filename="libs\enet\include\enet\protocol.h" />
-		<Unit filename="libs\enet\protocol.c" />
-		<Unit filename="libs\enet\include\enet\time.h" />
-		<Unit filename="libs\enet\include\enet\types.h" />
-		<Unit filename="libs\enet\include\enet\unix.h" />
-		<Unit filename="libs\enet\unix.c" />
-		<Unit filename="libs\enet\include\enet\utility.h" />
-		<Unit filename="libs\enet\include\enet\win32.h" />
-		<Unit filename="libs\enet\win32.c" />
-		<Unit filename="src\account-server\account.cpp" />
-		<Unit filename="src\account-server\account.h" />
-		<Unit filename="src\account-server\accountclient.cpp" />
-		<Unit filename="src\account-server\accountclient.h" />
-		<Unit filename="src\account-server\accounthandler.cpp" />
-		<Unit filename="src\account-server\accounthandler.h" />
-		<Unit filename="src\account-server\character.cpp" />
-		<Unit filename="src\account-server\character.h" />
-		<Unit filename="src\account-server\main-account.cpp" />
-		<Unit filename="src\account-server\serverhandler.cpp" />
-		<Unit filename="src\account-server\serverhandler.h" />
-		<Unit filename="src\account-server\storage.cpp" />
-		<Unit filename="src\account-server\storage.h" />
-		<Unit filename="src\chat-server\chatchannel.cpp" />
-		<Unit filename="src\chat-server\chatchannel.h" />
-		<Unit filename="src\chat-server\chatchannelmanager.cpp" />
-		<Unit filename="src\chat-server\chatchannelmanager.h" />
-		<Unit filename="src\chat-server\chatclient.h" />
-		<Unit filename="src\chat-server\chathandler.cpp" />
-		<Unit filename="src\chat-server\chathandler.h" />
-		<Unit filename="src\chat-server\guild.cpp" />
-		<Unit filename="src\chat-server\guild.h" />
-		<Unit filename="src\chat-server\guildhandler.cpp" />
-		<Unit filename="src\chat-server\guildmanager.cpp" />
-		<Unit filename="src\chat-server\guildmanager.h" />
-		<Unit filename="src\chat-server\party.cpp" />
-		<Unit filename="src\chat-server\party.h" />
-		<Unit filename="src\chat-server\partyhandler.cpp" />
-		<Unit filename="src\chat-server\post.cpp" />
-		<Unit filename="src\chat-server\post.h" />
-		<Unit filename="src\common\configuration.cpp" />
-		<Unit filename="src\common\configuration.h" />
-		<Unit filename="src\common\inventorydata.h" />
-		<Unit filename="src\common\resourcemanager.cpp" />
-		<Unit filename="src\common\resourcemanager.h" />
-		<Unit filename="src\common\transaction.h" />
-		<Unit filename="src\dal\dalexcept.h" />
-		<Unit filename="src\dal\dataprovider.cpp" />
-		<Unit filename="src\dal\dataprovider.h" />
-		<Unit filename="src\dal\dataproviderfactory.cpp" />
-		<Unit filename="src\dal\dataproviderfactory.h" />
-		<Unit filename="src\dal\recordset.cpp" />
-		<Unit filename="src\dal\recordset.h" />
-		<Unit filename="src\dal\mysqldataprovider.cpp">
+		<Unit filename="libs/enet/callbacks.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/compress.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/host.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/include/enet/callbacks.h" />
+		<Unit filename="libs/enet/include/enet/enet.h" />
+		<Unit filename="libs/enet/include/enet/list.h" />
+		<Unit filename="libs/enet/include/enet/protocol.h" />
+		<Unit filename="libs/enet/include/enet/time.h" />
+		<Unit filename="libs/enet/include/enet/types.h" />
+		<Unit filename="libs/enet/include/enet/unix.h" />
+		<Unit filename="libs/enet/include/enet/utility.h" />
+		<Unit filename="libs/enet/include/enet/win32.h" />
+		<Unit filename="libs/enet/list.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/packet.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/peer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/protocol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/unix.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="libs/enet/win32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/account-server/account.cpp" />
+		<Unit filename="src/account-server/account.h" />
+		<Unit filename="src/account-server/accountclient.cpp" />
+		<Unit filename="src/account-server/accountclient.h" />
+		<Unit filename="src/account-server/accounthandler.cpp" />
+		<Unit filename="src/account-server/accounthandler.h" />
+		<Unit filename="src/account-server/character.cpp" />
+		<Unit filename="src/account-server/character.h" />
+		<Unit filename="src/account-server/main-account.cpp" />
+		<Unit filename="src/account-server/serverhandler.cpp" />
+		<Unit filename="src/account-server/serverhandler.h" />
+		<Unit filename="src/account-server/storage.cpp" />
+		<Unit filename="src/account-server/storage.h" />
+		<Unit filename="src/chat-server/chatchannel.cpp" />
+		<Unit filename="src/chat-server/chatchannel.h" />
+		<Unit filename="src/chat-server/chatchannelmanager.cpp" />
+		<Unit filename="src/chat-server/chatchannelmanager.h" />
+		<Unit filename="src/chat-server/chatclient.h" />
+		<Unit filename="src/chat-server/chathandler.cpp" />
+		<Unit filename="src/chat-server/chathandler.h" />
+		<Unit filename="src/chat-server/guild.cpp" />
+		<Unit filename="src/chat-server/guild.h" />
+		<Unit filename="src/chat-server/guildhandler.cpp" />
+		<Unit filename="src/chat-server/guildmanager.cpp" />
+		<Unit filename="src/chat-server/guildmanager.h" />
+		<Unit filename="src/chat-server/party.cpp" />
+		<Unit filename="src/chat-server/party.h" />
+		<Unit filename="src/chat-server/partyhandler.cpp" />
+		<Unit filename="src/chat-server/post.cpp" />
+		<Unit filename="src/chat-server/post.h" />
+		<Unit filename="src/common/configuration.cpp" />
+		<Unit filename="src/common/configuration.h" />
+		<Unit filename="src/common/defines.h" />
+		<Unit filename="src/common/inventorydata.h" />
+		<Unit filename="src/common/manaserv_protocol.h" />
+		<Unit filename="src/common/resourcemanager.cpp" />
+		<Unit filename="src/common/resourcemanager.h" />
+		<Unit filename="src/common/transaction.h" />
+		<Unit filename="src/dal/dalexcept.h" />
+		<Unit filename="src/dal/dataprovider.cpp" />
+		<Unit filename="src/dal/dataprovider.h" />
+		<Unit filename="src/dal/dataproviderfactory.cpp" />
+		<Unit filename="src/dal/dataproviderfactory.h" />
+		<Unit filename="src/dal/mysqldataprovider.cpp">
 			<Option target="Windows (MySQL Support)" />
 			<Option target="Unix/Linux (MySQL Support)" />
 		</Unit>
-		<Unit filename="src\dal\mysqldataprovider.h">
+		<Unit filename="src/dal/mysqldataprovider.h">
 			<Option target="Windows (MySQL Support)" />
 			<Option target="Unix/Linux (MySQL Support)" />
 		</Unit>
-		<Unit filename="src\dal\sqlitedataprovider.cpp">
+		<Unit filename="src/dal/recordset.cpp" />
+		<Unit filename="src/dal/recordset.h" />
+		<Unit filename="src/dal/sqlitedataprovider.cpp">
 			<Option target="Unix/Linux (Sqlite Support)" />
 			<Option target="Windows (Sqlite Support)" />
 		</Unit>
-		<Unit filename="src\dal\sqlitedataprovider.h">
+		<Unit filename="src/dal/sqlitedataprovider.h">
 			<Option target="Unix/Linux (Sqlite Support)" />
 			<Option target="Windows (Sqlite Support)" />
 		</Unit>
-		<Unit filename="src\common\defines.h" />
-		<Unit filename="src\manaserv-account.rc">
+		<Unit filename="src/manaserv-account.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="src\net\bandwidth.cpp" />
-		<Unit filename="src\net\bandwidth.h" />
-		<Unit filename="src\net\connection.cpp" />
-		<Unit filename="src\net\connection.h" />
-		<Unit filename="src\net\connectionhandler.cpp" />
-		<Unit filename="src\net\connectionhandler.h" />
-		<Unit filename="src\net\messagein.cpp" />
-		<Unit filename="src\net\messagein.h" />
-		<Unit filename="src\net\messageout.cpp" />
-		<Unit filename="src\net\messageout.h" />
-		<Unit filename="src\net\netcomputer.cpp" />
-		<Unit filename="src\net\netcomputer.h" />
-		<Unit filename="src\common\manaserv_protocol.h" />
-		<Unit filename="src\serialize\characterdata.h" />
-		<Unit filename="src\utils\base64.cpp" />
-		<Unit filename="src\utils\base64.h" />
-		<Unit filename="src\utils\functors.h" />
-		<Unit filename="src\utils\logger.cpp" />
-		<Unit filename="src\utils\logger.h" />
-		<Unit filename="src\utils\mathutils.cpp" />
-		<Unit filename="src\utils\mathutils.h" />
-		<Unit filename="src\utils\point.h" />
-		<Unit filename="src\utils\processorutils.cpp" />
-		<Unit filename="src\utils\processorutils.h" />
-		<Unit filename="src\utils\sha256.cpp" />
-		<Unit filename="src\utils\sha256.h" />
-		<Unit filename="src\utils\string.cpp" />
-		<Unit filename="src\utils\string.h" />
-		<Unit filename="src\utils\stringfilter.cpp" />
-		<Unit filename="src\utils\stringfilter.h" />
-		<Unit filename="src\utils\timer.cpp" />
-		<Unit filename="src\utils\timer.h" />
-		<Unit filename="src\utils\tokencollector.cpp" />
-		<Unit filename="src\utils\tokencollector.h" />
-		<Unit filename="src\utils\tokendispenser.cpp" />
-		<Unit filename="src\utils\tokendispenser.h" />
-		<Unit filename="src\utils\xml.cpp" />
-		<Unit filename="src\utils\xml.h" />
-		<Unit filename="src\utils\zlib.cpp" />
-		<Unit filename="src\utils\zlib.h" />
+		<Unit filename="src/net/bandwidth.cpp" />
+		<Unit filename="src/net/bandwidth.h" />
+		<Unit filename="src/net/connection.cpp" />
+		<Unit filename="src/net/connection.h" />
+		<Unit filename="src/net/connectionhandler.cpp" />
+		<Unit filename="src/net/connectionhandler.h" />
+		<Unit filename="src/net/messagein.cpp" />
+		<Unit filename="src/net/messagein.h" />
+		<Unit filename="src/net/messageout.cpp" />
+		<Unit filename="src/net/messageout.h" />
+		<Unit filename="src/net/netcomputer.cpp" />
+		<Unit filename="src/net/netcomputer.h" />
+		<Unit filename="src/serialize/characterdata.h" />
+		<Unit filename="src/utils/base64.cpp" />
+		<Unit filename="src/utils/base64.h" />
+		<Unit filename="src/utils/functors.h" />
+		<Unit filename="src/utils/logger.cpp" />
+		<Unit filename="src/utils/logger.h" />
+		<Unit filename="src/utils/mathutils.cpp" />
+		<Unit filename="src/utils/mathutils.h" />
+		<Unit filename="src/utils/point.h" />
+		<Unit filename="src/utils/processorutils.cpp" />
+		<Unit filename="src/utils/processorutils.h" />
+		<Unit filename="src/utils/sha256.cpp" />
+		<Unit filename="src/utils/sha256.h" />
+		<Unit filename="src/utils/string.cpp" />
+		<Unit filename="src/utils/string.h" />
+		<Unit filename="src/utils/stringfilter.cpp" />
+		<Unit filename="src/utils/stringfilter.h" />
+		<Unit filename="src/utils/timer.cpp" />
+		<Unit filename="src/utils/timer.h" />
+		<Unit filename="src/utils/tokencollector.cpp" />
+		<Unit filename="src/utils/tokencollector.h" />
+		<Unit filename="src/utils/tokendispenser.cpp" />
+		<Unit filename="src/utils/tokendispenser.h" />
+		<Unit filename="src/utils/xml.cpp" />
+		<Unit filename="src/utils/xml.h" />
+		<Unit filename="src/utils/zlib.cpp" />
+		<Unit filename="src/utils/zlib.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

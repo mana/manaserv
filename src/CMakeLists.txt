@@ -1,6 +1,7 @@
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PhysFS REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
+FIND_PACKAGE(SigC++ REQUIRED)
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
     # Help getting compilation warnings
@@ -36,7 +37,7 @@ IF (MINGW)
       "<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -O coff -o <OBJECT> <SOURCE>")
 ENDIF()
 
-SET(FLAGS "-DPACKAGE_VERSION=\\\"${VERSION}\\\"")
+SET(FLAGS "${FLAGS} -DPACKAGE_VERSION=\\\"${VERSION}\\\"")
 SET(FLAGS "${FLAGS} -DPKG_DATADIR=\\\"${PKG_DATADIR}/\\\"")
 SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
 
@@ -93,6 +94,8 @@ INCLUDE_DIRECTORIES(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${PHYSFS_INCLUDE_DIR}
     ${LIBXML2_INCLUDE_DIR}
+    ${SIGC++_INCLUDE_DIR}
+    ${SIGC++Config_INCLUDE_DIR}
     )
 
 # Fix some stuff that gets not hidden by mainline modules
@@ -212,9 +215,10 @@ SET(SRCS_MANASERVGAME
     game-server/commandhandler.h
     game-server/effect.h
     game-server/effect.cpp
+    game-server/emotemanager.h
+    game-server/emotemanager.cpp
     game-server/entity.h
     game-server/entity.cpp
-    game-server/eventlistener.h
     game-server/gamehandler.h
     game-server/gamehandler.cpp
     game-server/inventory.h
@@ -315,6 +319,7 @@ FOREACH(program ${PROGRAMS})
         ${PHYSFS_LIBRARY}
         ${LIBXML2_LIBRARIES}
         ${ZLIB_LIBRARIES}
+        ${SIGC++_LIBRARIES}
         ${OPTIONAL_LIBRARIES}
         ${EXTRA_LIBRARIES})
     INSTALL(TARGETS ${program} RUNTIME DESTINATION ${PKG_BINDIR})

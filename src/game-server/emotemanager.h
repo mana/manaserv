@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2008-2010  The Mana World Development Team
+ *  Copyright (C) 2011-2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,49 +18,47 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PARTY_H
-#define PARTY_H
 
-#include <string>
+#ifndef EMOTEMANAGER_H
+#define EMOTEMANAGER_H
+
+#include "utils/string.h"
+#include "utils/xml.h"
+
 #include <vector>
 
-/**
- * A party that contains 1 or more characters to play together
- */
-class Party
+class EmoteManager
 {
 public:
-    typedef std::vector<std::string> PartyUsers;
 
-    Party();
+    EmoteManager(const std::string &emoteFile):
+        mEmoteFile(emoteFile)
+    { }
 
-    /**
-     * Add user to party
-     */
-    void addUser(const std::string &name,
-                 const std::string &inviter = std::string());
+    ~EmoteManager()
+    { clear(); }
 
     /**
-     * Remove user from party
+     * Loads emote reference file.
      */
-    void removeUser(const std::string &name);
+    void initialize();
 
     /**
-     * Return number of users in party
+     * Tells whether the given id is a valid emote one.
      */
-    unsigned userCount() const { return mUsers.size(); }
-
-    /**
-     * Return the party id
-     */
-    unsigned getId() const { return mId; }
-
-    const PartyUsers &getUsers() const { return mUsers; }
+    bool isIdAvailable(int id) const;
 
 private:
-    PartyUsers mUsers;
+    /**
+     * Clears up the emote list.
+     */
+    void clear()
+    { mEmoteIds.clear(); }
 
-    unsigned mId;
+    std::string mEmoteFile;
+    std::vector<int> mEmoteIds;
 };
 
-#endif
+extern EmoteManager *emoteManager;
+
+#endif // EMOTEMANAGER_H

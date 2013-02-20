@@ -84,11 +84,11 @@ static void serializeLooks(Character *ch, MessageOut &msg)
 
     // We'll use a set to check whether we already sent the update for the given
     // item instance.
-    std::set<unsigned int> itemInstances;
+    std::set<unsigned> itemInstances;
 
     // The map storing the info about the look changes to send
     //{ slot type id, item id }
-    std::map <unsigned int, unsigned int> lookChanges;
+    std::map <unsigned, unsigned> lookChanges;
 
     // Note that we can send several updates on the same slot type as different
     // items may have been equipped.
@@ -105,8 +105,8 @@ static void serializeLooks(Character *ch, MessageOut &msg)
             // we encounter the item, so we can send the look change.
             // We also send empty slots for unequipment handling.
             lookChanges.insert(
-                std::make_pair<unsigned int, unsigned int>(it->first,
-                                                           it->second.itemId));
+                std::make_pair<unsigned, unsigned>(it->first,
+                                                   it->second.itemId));
         }
     }
 
@@ -115,7 +115,7 @@ static void serializeLooks(Character *ch, MessageOut &msg)
         // Number of look changes to send
         msg.writeInt8(lookChanges.size());
 
-        for (std::map<unsigned int, unsigned int>::const_iterator it2 =
+        for (std::map<unsigned, unsigned>::const_iterator it2 =
              lookChanges.begin(), it2_end = lookChanges.end();
              it2 != it2_end; ++it2)
         {
@@ -191,6 +191,19 @@ static void informPlayer(MapComposite *map, Character *p)
                 LooksMsg.writeInt16(c->getHairColor());
                 LooksMsg.writeInt16(c->getGender());
                 gameHandler->sendTo(p, LooksMsg);
+            }
+
+            // Send emote messages.
+            if (oflags & UPDATEFLAG_EMOTE)
+            {
+                int emoteId = o->getLastEmote();
+                if (emoteId > -1)
+                {
+                    MessageOut EmoteMsg(GPMSG_BEING_EMOTE);
+                    EmoteMsg.writeInt16(oid);
+                    EmoteMsg.writeInt16(emoteId);
+                    gameHandler->sendTo(p, EmoteMsg);
+                }
             }
 
             // Send direction change messages.
@@ -271,6 +284,7 @@ static void informPlayer(MapComposite *map, Character *p)
 
                 default:
                     assert(false); // TODO
+                    break;
             }
             gameHandler->sendTo(p, enterMsg);
         }
@@ -500,7 +514,7 @@ bool GameState::insert(Entity *ptr)
     if (!ptr->isVisible())
     {
         map->insert(ptr);
-        ptr->inserted();
+        ptr->signal_inserted.emit(ptr);
         return true;
     }
 
@@ -525,7 +539,7 @@ bool GameState::insert(Entity *ptr)
         return false;
     }
 
-    obj->inserted();
+    obj->signal_inserted.emit(obj);
 
     // DEBUG INFO
     switch (obj->getType())
@@ -558,6 +572,7 @@ bool GameState::insert(Entity *ptr)
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Entity inserted: " << obj->getType());
+            break;
     }
 
     obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
@@ -598,7 +613,7 @@ void GameState::remove(Entity *ptr)
     MapComposite *map = ptr->getMap();
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
-    ptr->removed();
+    ptr->signal_removed.emit(ptr);
 
     // DEBUG INFO
     switch (ptr->getType())
@@ -631,6 +646,7 @@ void GameState::remove(Entity *ptr)
         case OBJECT_OTHER:
         default:
             LOG_DEBUG("Entity removed: " << ptr->getType());
+            break;
     }
 
     if (ptr->canMove())

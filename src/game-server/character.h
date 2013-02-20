@@ -45,22 +45,22 @@ class Trade;
 
 struct SpecialValue
 {
-    SpecialValue(unsigned int currentMana,
+    SpecialValue(unsigned currentMana,
                  const SpecialManager::SpecialInfo *specialInfo)
         : currentMana(currentMana)
         , rechargeSpeed(specialInfo->defaultRechargeSpeed)
         , specialInfo(specialInfo)
     {}
 
-    unsigned int currentMana;
-    unsigned int rechargeSpeed;
+    unsigned currentMana;
+    unsigned rechargeSpeed;
     const SpecialManager::SpecialInfo *specialInfo;
 };
 
 /**
  * Stores specials by their id.
  */
-typedef std::map<unsigned int, SpecialValue> SpecialMap;
+typedef std::map<unsigned, SpecialValue> SpecialMap;
 
 /**
  * The representation of a player's character in the game world.
@@ -251,18 +251,18 @@ class Character : public Being
         void modifiedAllAttribute();
 
         /**
-         * Recalculate the base value of an attribute and update derived
-         *     attributes if it has changed.
-         * @returns Whether it was changed.
-         */
-        bool recalculateBaseAttribute(unsigned int);
+          * Recalculate the base value of an attribute and update derived
+          *     attributes if it has changed.
+          */
+         void recalculateBaseAttribute(unsigned);
+
 
         /**
          * Attribute has changed, recalculate base value of dependant
          *     attributes (and handle other actions for the modified
          *     attribute)
          */
-        void updateDerivedAttributes(unsigned int);
+        void updateDerivedAttributes(unsigned);
 
         /**
          * Calls all the "disconnected" listener.
@@ -427,6 +427,8 @@ class Character : public Being
         virtual void addAttack(AttackInfo *attackInfo);
 
         virtual void removeAttack(AttackInfo *attackInfo);
+
+        sigc::signal<void, Character *> signal_disconnected;
 
     protected:
         /**

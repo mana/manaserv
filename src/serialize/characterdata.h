@@ -132,10 +132,10 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     data.setCorrectionPoints(msg.readInt16());
 
     // character attributes
-    unsigned int attrSize = msg.readInt16();
-    for (unsigned int i = 0; i < attrSize; ++i)
+    unsigned attrSize = msg.readInt16();
+    for (unsigned i = 0; i < attrSize; ++i)
     {
-        unsigned int id = msg.readInt16();
+        unsigned id = msg.readInt16();
         double base = msg.readDouble(),
                mod  = msg.readDouble();
         data.setAttribute(id, base);
@@ -193,7 +193,7 @@ void deserializeCharacterData(T &data, MessageIn &msg)
     Possessions &poss = data.getPossessions();
     EquipData equipData;
     int equipSlotsSize = msg.readInt16();
-    unsigned int eqSlot;
+    unsigned eqSlot;
     EquipmentItem equipItem;
     for (int j = 0; j < equipSlotsSize; ++j)
     {

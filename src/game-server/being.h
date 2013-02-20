@@ -36,7 +36,7 @@ class Being;
 class MapComposite;
 class StatusEffect;
 
-typedef std::map< unsigned int, Attribute > AttributeMap;
+typedef std::map< unsigned, Attribute > AttributeMap;
 
 struct Status
 {
@@ -49,7 +49,7 @@ typedef std::map< int, Status > StatusEffects;
 /**
  * Type definition for a list of hits
  */
-typedef std::vector<unsigned int> Hits;
+typedef std::vector<unsigned> Hits;
 
 /**
  * Generic being (living actor). Keeps direction, destination and a few other
@@ -192,31 +192,31 @@ class Being : public Actor
         /**
          * Sets an attribute.
          */
-        void setAttribute(unsigned int id, double value);
+        void setAttribute(unsigned id, double value);
 
         /**
          * Gets an attribute.
          */
-        double getAttribute(unsigned int id) const;
+        double getAttribute(unsigned id) const;
 
         /**
          * Gets an attribute after applying modifiers.
          */
-        double getModifiedAttribute(unsigned int id) const;
+        double getModifiedAttribute(unsigned id) const;
 
         /**
          * No-op to satisfy shared structure.
          * @note The game server calculates this manually, so nothing happens
          *       here.
          */
-        void setModAttribute(unsigned int, double);
+        void setModAttribute(unsigned, double);
 
         /**
          * Checks whether or not an attribute exists in this being.
          * @returns True if the attribute is present in the being, false otherwise.
          */
 
-        bool checkAttributeExists(unsigned int id) const
+        bool checkAttributeExists(unsigned id) const
         { return mAttributes.count(id); }
 
         /**
@@ -226,11 +226,11 @@ class Being : public Actor
          * @param lvl If non-zero, indicates that a temporary modifier can be
          *        dispelled prematuraly by a spell of given level.
          */
-        void applyModifier(unsigned int attr, double value, unsigned int layer,
-                           unsigned int duration = 0, unsigned int id = 0);
+        void applyModifier(unsigned attr, double value, unsigned layer,
+                           unsigned duration = 0, unsigned id = 0);
 
-        bool removeModifier(unsigned int attr, double value, unsigned int layer,
-                            unsigned int id = 0, bool fullcheck = false);
+        bool removeModifier(unsigned attr, double value, unsigned layer,
+                            unsigned id = 0, bool fullcheck = false);
 
         /**
          * Called when an attribute modifier is changed.
@@ -238,14 +238,14 @@ class Being : public Actor
          *     attributes if it has changed.
          * @returns Whether it was changed.
          */
-        virtual bool recalculateBaseAttribute(unsigned int);
+        virtual void recalculateBaseAttribute(unsigned);
 
         /**
          * Attribute has changed, recalculate base value of dependant
          *     attributes (and handle other actions for the modified
          *     attribute)
          */
-        virtual void updateDerivedAttributes(unsigned int);
+        virtual void updateDerivedAttributes(unsigned);
 
         /**
          * Sets a statuseffect on this being
@@ -297,10 +297,24 @@ class Being : public Actor
         void setTarget(Being *target)
         { mTarget = target; }
 
+        static void setUpdateDerivedAttributesCallback(Script *script)
+        { script->assignCallback(mRecalculateDerivedAttributesCallback); }
+
+        static void setRecalculateBaseAttributeCallback(Script *script)
+        { script->assignCallback(mRecalculateBaseAttributeCallback); }
+
+        sigc::signal<void, Being *> signal_died;
+
         /**
-         * Overridden in order to reset the old position upon insertion.
+         * Activate an emote flag on the being.
          */
-        virtual void inserted();
+        void triggerEmote(int id);
+
+        /**
+         * Tells the last emote used.
+         */
+        int getLastEmote() const
+        { return mEmoteId; }
 
     protected:
         /**
@@ -332,6 +346,11 @@ class Being : public Actor
         Being(const Being &rhs);
         Being &operator=(const Being &rhs);
 
+        /**
+         * Connected to signal_inserted to reset the old position.
+         */
+        void inserted(Entity *);
+
         Path mPath;
         BeingDirection mDirection;   /**< Facing direction. */
 
@@ -340,6 +359,15 @@ class Being : public Actor
 
         /** Time until hp is regenerated again */
         Timeout mHealthRegenerationTimeout;
+
+        /** The last being emote Id. Used when triggering a being emoticon. */
+        int mEmoteId;
+
+        /** Called when derived attributes need to get calculated */
+        static Script::Ref mRecalculateDerivedAttributesCallback;
+
+        /** Called when a base attribute needs to get calculated */
+        static Script::Ref mRecalculateBaseAttributeCallback;
 };
 
 #endif // BEING_H

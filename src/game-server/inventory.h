@@ -70,64 +70,64 @@ class Inventory
          * @returns whether all item id could be unequipped.
          * @note returns true when no item with given ids were equipped.
          */
-        bool unequipItem(unsigned int itemId);
+        bool unequipItem(unsigned itemId);
 
         /**
          * Unequips item from given equipment slot.
          * @param itemInstance The item instance id used to know what to unequip
          * @returns Whether it was unequipped.
          */
-        bool unequip(unsigned int itemInstance);
+        bool unequip(unsigned itemInstance);
 
         /**
          * Gets the item instance from the given equipment slot.
          * Return 0 if none.
          */
-        unsigned int getSlotItemInstance(unsigned int slot);
+        unsigned getSlotItemInstance(unsigned slot);
 
         /**
          * Inserts some items into the inventory.
          * @return number of items not inserted (to be dropped on floor?).
          */
-        unsigned int insert(unsigned int itemId, unsigned int amount);
+        unsigned insert(unsigned itemId, unsigned amount);
 
         /**
          * Removes some items from inventory.
          * @return number of items not removed.
          */
-        unsigned int remove(unsigned int itemId, unsigned int amount);
+        unsigned remove(unsigned itemId, unsigned amount);
 
         /**
          * Moves some items from the first slot to the second one.
          * @returns number of items not moved.
          */
-        unsigned int move(unsigned int slot1, unsigned int slot2,
-                          unsigned int amount);
+        unsigned move(unsigned slot1, unsigned slot2,
+                          unsigned amount);
 
         /**
          * Removes some items from inventory.
          * @return number of items not removed.
          */
-        unsigned int removeFromSlot(unsigned int slot, unsigned int amount);
+        unsigned removeFromSlot(unsigned slot, unsigned amount);
 
         /**
          * Counts number of items with given Id.
          * @param inInventory Search in player's inventory.
          * @param inEquipment Search in player's equipment.
          */
-        unsigned int count(unsigned int itemId, bool inInventory = true,
+        unsigned count(unsigned itemId, bool inInventory = true,
                            bool inEquipment = true) const;
 
         /**
          * Gets the ID of the items in a given slot.
          */
-        unsigned int getItem(unsigned int slot) const;
+        unsigned getItem(unsigned slot) const;
 
         /**
          * Returns the first inventory slot with the given item Id.
          * Returns -1 otherwise.
          */
-        int getFirstSlot(unsigned int itemId);
+        int getFirstSlot(unsigned itemId);
 
     private:
         /**
@@ -135,15 +135,15 @@ class Inventory
          * @param equipmentSlot the slot in equipement to check.
          * @param capacityRequested the capacity needed.
          */
-        bool checkEquipmentCapacity(unsigned int equipmentSlot,
-                                    unsigned int capacityRequested);
+        bool checkEquipmentCapacity(unsigned equipmentSlot,
+                                    unsigned capacityRequested);
 
         /**
          * Test whether the inventory has enough space to welcome
          * the willing-to-be equipment slot.
          * @todo
          */
-        bool hasInventoryEnoughSpace(unsigned int /* equipmentSlot */)
+        bool hasInventoryEnoughSpace(unsigned /* equipmentSlot */)
         { return true; }
 
         /**
@@ -151,14 +151,14 @@ class Inventory
          * This is especially useful for scripted equipment.
          * @todo
          */
-        bool testUnequipScriptRequirements(unsigned int /* equipementSlot */)
+        bool testUnequipScriptRequirements(unsigned /* equipementSlot */)
         { return true; }
 
         /**
          * Test the items equipment for scripted requirements.
          * @todo
          */
-        bool testEquipScriptRequirements(unsigned int /* itemId */)
+        bool testEquipScriptRequirements(unsigned /* itemId */)
         { return true; }
 
         /**
@@ -167,7 +167,7 @@ class Inventory
          * This is used to differenciate some items that can be equipped
          * multiple times, like one-handed weapons for instance.
          */
-        unsigned int getNewEquipItemInstance();
+        unsigned getNewEquipItemInstance();
 
         /**
          * Check the inventory is within the slot limit and capacity.
@@ -179,12 +179,12 @@ class Inventory
         /**
          * Check potential visible character sprite changes.
          */
-        void checkLookchanges(unsigned int slotTypeId);
+        void checkLookchanges(unsigned slotTypeId);
 
         /**
          * Apply equipment triggers.
          */
-        void updateEquipmentTrigger(unsigned int oldId, unsigned int itemId);
+        void updateEquipmentTrigger(unsigned oldId, unsigned itemId);
         void updateEquipmentTrigger(ItemClass *oldI, ItemClass *newI);
 
         Possessions *mPoss; /**< Pointer to the modified possessions. */

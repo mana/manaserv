@@ -25,18 +25,6 @@
 #include "game-server/state.h"
 #include "utils/logger.h"
 
-struct SpawnAreaEventDispatch : EventDispatch
-{
-    SpawnAreaEventDispatch()
-    {
-        typedef EventListenerFactory< SpawnArea, &SpawnArea::mSpawnedListener >
-            Factory;
-        removed = &Factory::create< Entity, &SpawnArea::decrease >::function;
-    }
-};
-
-static SpawnAreaEventDispatch spawnAreaEventDispatch;
-
 SpawnArea::SpawnArea(MapComposite *map,
                      MonsterClass *specy,
                      const Rectangle &zone,
@@ -44,7 +32,6 @@ SpawnArea::SpawnArea(MapComposite *map,
                      int spawnRate):
     Entity(OBJECT_OTHER, map),
     mSpecy(specy),
-    mSpawnedListener(&spawnAreaEventDispatch),
     mZone(zone),
     mMaxBeings(maxBeings),
     mSpawnRate(spawnRate),
@@ -102,7 +89,9 @@ void SpawnArea::update()
 
             if (c)
             {
-                being->addListener(&mSpawnedListener);
+                being->signal_removed.connect(
+                            sigc::mem_fun(this, &SpawnArea::decrease));
+
                 being->setMap(map);
                 being->setPosition(position);
                 being->clearDestination();
@@ -125,8 +114,7 @@ void SpawnArea::update()
     }
 }
 
-void SpawnArea::decrease(Entity *t)
+void SpawnArea::decrease(Entity *)
 {
     --mNumBeings;
-    t->removeListener(&mSpawnedListener);
 }

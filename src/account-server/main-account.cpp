@@ -23,6 +23,10 @@
 #include "../config.h"
 #endif
 
+#ifdef __MINGW32__
+#include "common/winver.h"
+#endif
+
 #include "account-server/accounthandler.h"
 #include "account-server/serverhandler.h"
 #include "account-server/storage.h"

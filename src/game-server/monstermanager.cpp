@@ -258,11 +258,12 @@ void MonsterManager::initialize()
                 }
 
             }
-            else if (xmlStrEqual(subnode->name, BAD_CAST "script"))
+            else if (xmlStrEqual(subnode->name, BAD_CAST "vulnerability"))
             {
-                xmlChar *filename = subnode->xmlChildrenNode->content;
-                std::string val = (char *)filename;
-                monster->setScript(val);
+                Element element = elementFromString(
+                        XML::getProperty(subnode, "element", std::string()));
+                double factor =  XML::getFloatProperty(subnode, "factor", 1.0);
+                monster->setVulnerability(element, factor);
             }
             else if (xmlStrEqual(subnode->name, BAD_CAST "vulnerability"))
             {

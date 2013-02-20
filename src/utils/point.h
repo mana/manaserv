@@ -25,7 +25,7 @@
 #include <ostream>
 
 /**
- * A point in positive space. Usually represents pixel coordinates on a map.
+ * A point. Usually represents pixel coordinates on a map.
  */
 class Point
 {
@@ -62,8 +62,7 @@ class Point
 };
 
 /**
- * A rectangle in positive space. Usually represents a pixel-based zone on a
- * map.
+ * A rectangle. Usually represents a pixel-based zone on a map.
  */
 class Rectangle
 {

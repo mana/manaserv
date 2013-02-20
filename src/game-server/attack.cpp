@@ -20,6 +20,8 @@
 
 #include "attack.h"
 
+#include <cassert>
+
 #include "common/defines.h"
 
 #include "game-server/character.h"
@@ -28,21 +30,20 @@
 AttackInfo *AttackInfo::readAttackNode(xmlNodePtr node)
 {
     std::string skill = XML::getProperty(node, "skill", std::string());
+
     unsigned skillId;
     if (utils::isNumeric(skill))
-    {
         skillId = utils::stringToInt(skill);
-    }
     else
-    {
         skillId = skillManager->getId(skill);
-        if (skillId == 0)
-        {
-            LOG_WARN("Error parsing Attack node: Invalid skill " << skill
-                     << " taking default skill");
-            skillId = skillManager->getDefaultSkillId();
-        }
+
+    if (!skill.empty() && !skillManager->exists(skillId))
+    {
+        LOG_WARN("Error parsing Attack node: Invalid skill " << skill
+                 << " taking default skill");
+        skillId = skillManager->getDefaultSkillId();
     }
+
     unsigned id = XML::getProperty(node, "id", 0);
     unsigned priority = XML::getProperty(node, "priority", 0);
     unsigned warmupTime = XML::getProperty(node, "warmuptime", 0);
@@ -118,17 +119,19 @@ void Attacks::startAttack(Attack *attack)
                      attack->getAttackInfo()->getCooldownTime());
 }
 
-void Attacks::tick(std::vector<Attack *> *ret)
+void Attacks::getUsuableAttacks(std::vector<Attack *> *ret)
 {
+    assert(ret != 0);
+
     // we have a current Attack
-    if (!mAttackTimer.expired() && mCurrentAttack)
+    if ((!mAttackTimer.expired() && mCurrentAttack))
         return;
     for (std::vector<Attack>::iterator it = mAttacks.begin();
          it != mAttacks.end(); ++it)
     {
         Attack &attack = *it;
 
-        if (ret && attack.isUsuable())
+        if (attack.isUsuable())
         {
             ret->push_back(&attack);
         }

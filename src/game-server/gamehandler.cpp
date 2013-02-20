@@ -28,6 +28,7 @@
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
 #include "game-server/commandhandler.h"
+#include "game-server/emotemanager.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
@@ -43,7 +44,7 @@
 #include "utils/logger.h"
 #include "utils/tokendispenser.h"
 
-const unsigned int TILES_TO_BE_NEAR = 7;
+const unsigned TILES_TO_BE_NEAR = 7;
 
 GameHandler::GameHandler():
     mTokenCollector(this)
@@ -302,6 +303,10 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
             handlePartyInvite(client, message);
             break;
 
+        case PGMSG_BEING_EMOTE:
+            handleTriggerEmoticon(client, message);
+            break;
+
         default:
             LOG_WARN("Invalid message type");
             client.send(MessageOut(XXMSG_INVALID));
@@ -464,6 +469,7 @@ void GameHandler::handleNpc(GameClient &client, MessageIn &message)
         case PGMSG_NPC_TALK_NEXT:
         default:
             npc->prompt(client.character, message.getId() == PGMSG_NPC_TALK);
+            break;
     }
 }
 
@@ -916,6 +922,13 @@ void GameHandler::handlePartyInvite(GameClient &client, MessageIn &message)
     MessageOut out(GPMSG_PARTY_INVITE_ERROR);
     out.writeString(invitee);
     client.send(out);
+}
+
+void GameHandler::handleTriggerEmoticon(GameClient &client, MessageIn &message)
+{
+    const int id = message.readInt16();
+    if (emoteManager->isIdAvailable(id))
+        client.character->triggerEmote(id);
 }
 
 void GameHandler::sendNpcError(GameClient &client, int id,

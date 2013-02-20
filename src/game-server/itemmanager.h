@@ -36,14 +36,14 @@ struct EquipSlotInfo
         slotId(0), slotCapacity(0), visibleSlot(false)
     {}
 
-    EquipSlotInfo(unsigned int id, const std::string &name,
-                  unsigned int capacity, bool visible):
+    EquipSlotInfo(unsigned id, const std::string &name,
+                  unsigned capacity, bool visible):
         slotId(id), slotName(name), slotCapacity(capacity), visibleSlot(visible)
     {}
 
-    unsigned int slotId;
+    unsigned slotId;
     std::string slotName;
-    unsigned int slotCapacity;
+    unsigned slotCapacity;
     bool visibleSlot;
 };
 
@@ -92,16 +92,16 @@ class ItemManager
         /**
          * Gets the version of the loaded item database.
          */
-        unsigned int getDatabaseVersion() const;
+        unsigned getDatabaseVersion() const;
 
-        unsigned int getEquipSlotIdFromName(const std::string &name) const;
+        unsigned getEquipSlotIdFromName(const std::string &name) const;
 
-        unsigned int getEquipSlotCapacity(unsigned int id) const;
+        unsigned getEquipSlotCapacity(unsigned id) const;
 
-        unsigned int getVisibleEquipSlotCount() const
+        unsigned getVisibleEquipSlotCount() const
         { return mVisibleEquipSlotCount; }
 
-        bool isEquipSlotVisible(unsigned int id) const;
+        bool isEquipSlotVisible(unsigned id) const;
 
     private:
         /** Loads the equip slots that a character has available to them. */
@@ -118,9 +118,9 @@ class ItemManager
         utils::NameMap<ItemClass*> mItemClassesByName;
 
         // Map an equip slot id with the equip slot info.
-        typedef std::map< unsigned int, EquipSlotInfo* > EquipSlotsInfo;
+        typedef std::map< unsigned, EquipSlotInfo* > EquipSlotsInfo;
         // Reference to the vector position of equipSlots
-        typedef std::vector< unsigned int > VisibleEquipSlots;
+        typedef std::vector< unsigned > VisibleEquipSlots;
 
         EquipSlotsInfo mEquipSlotsInfo;
         // Map a string (name of slot) with (str-id, max-per-equip-slot)
@@ -129,10 +129,10 @@ class ItemManager
 
         std::string mItemsFile;
         std::string mEquipSlotsFile;
-        unsigned int mVisibleEquipSlotCount; // Cache
+        unsigned mVisibleEquipSlotCount; // Cache
 
         /** Version of the loaded items database file.*/
-        unsigned int mItemDatabaseVersion;
+        unsigned mItemDatabaseVersion;
 };
 
 extern ItemManager *itemManager;

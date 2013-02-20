@@ -6,15 +6,16 @@ COMPILATION
 Before trying to compile, make sure all the dependencies are installed. For
 each dependency the Ubuntu package name is listed as well as the website.
 
- * libxml2  (libxml2-dev)        - http://xmlsoft.org/
- * Lua      (liblua5.1-0-dev)    - http://lua.org/
- * PhysFS   (libphysfs-dev)      - http://icculus.org/physfs/
- * SQLite 3 (libsqlite3-dev)     - http://sqlite.org/
- * zlib     (zlib1g-dev)         - http://zlib.net/
+ * libsigc++ 2.0 (libsigc++-2.0-dev)  - http://libsigc.sourceforge.net/
+ * libxml2       (libxml2-dev)        - http://xmlsoft.org/
+ * Lua           (liblua5.1-0-dev)    - http://lua.org/
+ * PhysFS        (libphysfs-dev)      - http://icculus.org/physfs/
+ * SQLite 3      (libsqlite3-dev)     - http://sqlite.org/
+ * zlib          (zlib1g-dev)         - http://zlib.net/
 
 Optional dependencies:
 
- * MySQL    (libmysqlclient-dev) - http://dev.mysql.com/
+ * MySQL         (libmysqlclient-dev) - http://dev.mysql.com/
    (replaces the SQLite 3 depency)
 
 

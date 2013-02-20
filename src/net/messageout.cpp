@@ -28,14 +28,15 @@
 #include <limits>
 #include <sstream>
 #endif
+#include <stdint.h>
 #include <string>
 #include <enet/enet.h>
 
 /** Initial amount of bytes allocated for the messageout data buffer. */
-const unsigned int INITIAL_DATA_CAPACITY = 16;
+const unsigned INITIAL_DATA_CAPACITY = 16;
 
 /** Factor by which the messageout data buffer is increased when too small. */
-const unsigned int CAPACITY_GROW_FACTOR = 2;
+const unsigned CAPACITY_GROW_FACTOR = 2;
 
 static bool debugModeEnabled = false;
 

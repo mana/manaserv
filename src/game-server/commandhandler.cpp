@@ -177,7 +177,7 @@ static void say(const std::string message, Character *player)
 }
 
 /*
-static bool checkPermission(Character *player, unsigned int permissions)
+static bool checkPermission(Character *player, unsigned permissions)
 {
     if (player->getAccountLevel() & permissions)
     {
@@ -196,7 +196,7 @@ static bool checkPermission(Character *player, unsigned int permissions)
 static std::string playerRights(Character *ch)
 {
     std::stringstream str;
-    str << (unsigned int)ch->getAccountLevel();
+    str << (unsigned)ch->getAccountLevel();
     str << " ( ";
     std::list<std::string> classes =
         PermissionManager::getClassList(ch);

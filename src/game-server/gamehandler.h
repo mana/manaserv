@@ -152,6 +152,8 @@ class GameHandler: public ConnectionHandler
 
         void handlePartyInvite(GameClient &client, MessageIn &message);
 
+        void handleTriggerEmoticon(GameClient &client, MessageIn &message);
+
         void sendNpcError(GameClient &client, int id,
                           const std::string &errorMsg);
 

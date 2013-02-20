@@ -25,6 +25,7 @@
 #include "game-server/accountconnection.h"
 #include "game-server/attributemanager.h"
 #include "game-server/gamehandler.h"
+#include "game-server/emotemanager.h"
 #include "game-server/itemmanager.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
@@ -53,6 +54,7 @@
 
 #ifdef __MINGW32__
 #include <windows.h>
+#include "common/winver.h"
 #define usleep(usec) (Sleep ((usec) / 1000), 0)
 #endif
 
@@ -74,6 +76,7 @@ using utils::Logger;
 #define DEFAULT_PERMISSION_FILE             "permissions.xml"
 #define DEFAULT_MAIN_SCRIPT_FILE            "scripts/main.lua"
 #define DEFAULT_SPECIALSDB_FILE             "specials.xml"
+#define DEFAULT_EMOTESDB_FILE               "emotes.xml"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
 
@@ -89,6 +92,7 @@ ItemManager *itemManager = new ItemManager(DEFAULT_ITEMSDB_FILE, DEFAULT_EQUIPDB
 MonsterManager *monsterManager = new MonsterManager(DEFAULT_MONSTERSDB_FILE);
 SkillManager *skillManager = new SkillManager(DEFAULT_SKILLSDB_FILE);
 SpecialManager *specialManager = new SpecialManager(DEFAULT_SPECIALSDB_FILE);
+EmoteManager *emoteManager = new EmoteManager(DEFAULT_EMOTESDB_FILE);
 
 /** Core game message handler */
 GameHandler *gameHandler;
@@ -141,6 +145,7 @@ static void initializeServer()
     specialManager->initialize();
     itemManager->initialize();
     monsterManager->initialize();
+    emoteManager->initialize();
     StatusManager::initialize(DEFAULT_STATUSDB_FILE);
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
 
@@ -196,6 +201,7 @@ static void deinitializeServer()
     delete monsterManager; monsterManager = 0;
     delete skillManager; skillManager = 0;
     delete itemManager; itemManager = 0;
+    delete emoteManager; emoteManager = 0;
     MapManager::deinitialize();
     StatusManager::deinitialize();
     ScriptManager::deinitialize();

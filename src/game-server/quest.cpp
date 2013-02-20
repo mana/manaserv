@@ -18,17 +18,18 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "game-server/quest.h"
+
+#include "game-server/accountconnection.h"
+#include "game-server/character.h"
+#include "utils/logger.h"
+
 #include <cassert>
 #include <list>
 #include <map>
 #include <string>
 
-#include "game-server/quest.h"
-
-#include "game-server/accountconnection.h"
-#include "game-server/character.h"
-#include "game-server/eventlistener.h"
-#include "utils/logger.h"
+#include <sigc++/connection.h>
 
 typedef std::list< QuestCallback * > QuestCallbacks;
 typedef std::map< std::string, QuestCallbacks > PendingVariables;
@@ -36,6 +37,8 @@ typedef std::map< std::string, QuestCallbacks > PendingVariables;
 struct PendingQuest
 {
     Character *character;
+    sigc::connection removedConnection;
+    sigc::connection disconnectedConnection;
     PendingVariables variables;
 };
 
@@ -72,22 +75,6 @@ void setQuestVar(Character *ch, const std::string &name,
     accountHandler->updateCharacterVar(ch, name, value);
 }
 
-/**
- * Listener for deleting related quests when a character disappears.
- */
-struct QuestDeathListener: EventDispatch
-{
-    static void partialRemove(const EventListener *, Entity *);
-
-    static void fullRemove(const EventListener *, Character *);
-
-    QuestDeathListener()
-    {
-        removed = &partialRemove;
-        disconnected = &fullRemove;
-    }
-};
-
 void QuestRefCallback::triggerCallback(Character *ch,
                                        const std::string &value) const
 {
@@ -103,10 +90,7 @@ void QuestRefCallback::triggerCallback(Character *ch,
     s->execute();
 }
 
-static QuestDeathListener questDeathDummy;
-static EventListener questDeathListener(&questDeathDummy);
-
-void QuestDeathListener::partialRemove(const EventListener *, Entity *t)
+static void partialRemove(Entity *t)
 {
     int id = static_cast< Character * >(t)->getDatabaseID();
     PendingVariables &variables = pendingQuests[id].variables;
@@ -119,11 +103,18 @@ void QuestDeathListener::partialRemove(const EventListener *, Entity *t)
     // The listener is kept in case a fullRemove is needed later.
 }
 
-void QuestDeathListener::fullRemove(const EventListener *, Character *ch)
+static void fullRemove(Character *ch)
 {
-    ch->removeListener(&questDeathListener);
+    int id = ch->getDatabaseID();
+
+    {
+        PendingQuest &pendingQuest = pendingQuests[id];
+        pendingQuest.removedConnection.disconnect();
+        pendingQuest.disconnectedConnection.disconnect();
+    }
+
     // Remove anything related to this character.
-    pendingQuests.erase(ch->getDatabaseID());
+    pendingQuests.erase(id);
 }
 
 void recoverQuestVar(Character *ch, const std::string &name,
@@ -134,11 +125,19 @@ void recoverQuestVar(Character *ch, const std::string &name,
     PendingQuests::iterator i = pendingQuests.lower_bound(id);
     if (i == pendingQuests.end() || i->first != id)
     {
-        i = pendingQuests.insert(i, std::make_pair(id, PendingQuest()));
-        i->second.character = ch;
-        /* Register a listener, because we cannot afford to get invalid
-           pointers, when we finally recover the variable. */
-        ch->addListener(&questDeathListener);
+        PendingQuest pendingQuest;
+        pendingQuest.character = ch;
+
+        /* Connect to removed and disconnected signals, because we cannot
+         * afford to get invalid pointers, when we finally recover the
+         * variable.
+         */
+        pendingQuest.removedConnection =
+                ch->signal_removed.connect(sigc::ptr_fun(partialRemove));
+        pendingQuest.disconnectedConnection =
+                ch->signal_disconnected.connect(sigc::ptr_fun(fullRemove));
+
+        i = pendingQuests.insert(i, std::make_pair(id, pendingQuest));
     }
     i->second.variables[name].push_back(f);
     accountHandler->requestCharacterVar(ch, name);
@@ -149,12 +148,14 @@ void recoveredQuestVar(int id,
                        const std::string &value)
 {
     PendingQuests::iterator i = pendingQuests.find(id);
-    if (i == pendingQuests.end()) return;
+    if (i == pendingQuests.end())
+        return;
 
-    Character *ch = i->second.character;
-    ch->removeListener(&questDeathListener);
+    PendingQuest &pendingQuest = i->second;
+    pendingQuest.removedConnection.disconnect();
+    pendingQuest.disconnectedConnection.disconnect();
 
-    PendingVariables &variables = i->second.variables;
+    PendingVariables &variables = pendingQuest.variables;
     PendingVariables::iterator j = variables.find(name);
     if (j == variables.end())
     {
@@ -162,6 +163,7 @@ void recoveredQuestVar(int id,
         return;
     }
 
+    Character *ch = pendingQuest.character;
     ch->questCache[name] = value;
 
     // Call the registered callbacks.

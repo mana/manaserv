@@ -94,7 +94,7 @@ class AttributeManager
                 minimum(std::numeric_limits<double>::min()),
                 maximum(std::numeric_limits<double>::max()),
                 modifiable(false)
-        {}
+            {}
 
             /** The minimum and maximum permitted attribute values. */
             double minimum;

@@ -49,18 +49,20 @@ class SkillManager
     /**
      * Gets the skill Id from a set and a skill string.
      */
-    unsigned int getId(const std::string &set, const std::string &name) const;
+    unsigned getId(const std::string &set, const std::string &name) const;
 
     /**
      * Gets the skill Id from a string formatted in this way:
      * "setname_skillname"
      */
-    unsigned int getId(const std::string &skillName) const;
+    unsigned getId(const std::string &skillName) const;
 
-    const std::string getSkillName(unsigned int id) const;
-    const std::string getSetName(unsigned int id) const;
+    const std::string getSkillName(unsigned id) const;
+    const std::string getSetName(unsigned id) const;
 
-    unsigned int getDefaultSkillId() const
+    bool exists(unsigned id) const;
+
+    unsigned getDefaultSkillId() const
     { return mDefaultSkillId; }
   private:
     struct SkillInfo {
@@ -68,7 +70,7 @@ class SkillManager
             id(0)
         {}
 
-        unsigned int id;
+        unsigned id;
         std::string setName;
         std::string skillName;
     };
@@ -86,13 +88,13 @@ class SkillManager
     std::string mSkillFile;
 
     // The skill map
-    typedef std::map<unsigned int, SkillInfo*> SkillsInfo;
+    typedef std::map<unsigned, SkillInfo*> SkillsInfo;
     SkillsInfo mSkillsInfo;
     // A map used to get skills per name.
     utils::NameMap<SkillInfo*> mNamedSkillsInfo;
 
     // The default skill id
-    unsigned int mDefaultSkillId;
+    unsigned mDefaultSkillId;
 };
 
 extern SkillManager *skillManager;

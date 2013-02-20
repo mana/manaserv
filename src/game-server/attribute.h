@@ -31,7 +31,7 @@ class AttributeModifierState
     public:
         AttributeModifierState(unsigned short duration,
                                double value,
-                               unsigned int id)
+                               unsigned id)
             : mDuration(duration)
             , mValue(value)
             , mId(id)
@@ -48,7 +48,7 @@ class AttributeModifierState
          * dispells or similar. Exact usage depends on the effect,
          * origin, etc.
          */
-        const unsigned int mId;
+        const unsigned mId;
         friend bool durationCompare(const AttributeModifierState*,
                                     const AttributeModifierState*);
         friend class AttributeModifiersEffect;
@@ -75,7 +75,7 @@ class AttributeModifiersEffect
         /**
          * remove() - as with Attribute::remove().
          */
-        bool remove(double value, unsigned int id, bool fullCheck);
+        bool remove(double value, unsigned id, bool fullCheck);
 
         /**
          * Performs the necessary modifications to mMod when the states change.
@@ -132,7 +132,11 @@ class AttributeModifiersEffect
 class Attribute
 {
     public:
-        Attribute() {throw;} // DEBUG; Find improper constructions
+        Attribute()
+            : mBase(0)
+            , mMinValue(0)
+            , mMaxValue(0)
+        {throw;} // DEBUG; Find improper constructions
 
         Attribute(const AttributeManager::AttributeInfo &info);
 
@@ -160,7 +164,7 @@ class Attribute
          * @param id Used to identify this effect.
          * @return Whether the modified attribute value was changed.
          */
-        bool add(unsigned short duration, double value, unsigned int layer, int id = 0);
+        bool add(unsigned short duration, double value, unsigned layer, int id = 0);
 
         /**
          * @param value The value of the modifier to be removed.
@@ -174,7 +178,7 @@ class Attribute
          *     or only those that are otherwise permanent (ie. duration of 0)
          * @returns Whether the modified attribute value was changed.
          */
-        bool remove(double value, unsigned int layer, int id, bool fullcheck);
+        bool remove(double value, unsigned layer, int id, bool fullcheck);
 
         /**
          * clearMods() removes *all* modifications present in this Attribute (!)

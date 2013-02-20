@@ -37,7 +37,7 @@ struct ItemEquipRequirement {
         capacityRequired(0)
     {}
 
-    unsigned int equipSlotId, capacityRequired;
+    unsigned equipSlotId, capacityRequired;
 };
 
 /**
@@ -73,7 +73,7 @@ enum ItemTriggerType
     ITT_NULL = 0,
     ITT_IN_INVY,    // Associated effects apply when the item is in the inventory
     ITT_ACTIVATE,   // Associated effects apply when the item is activated
-    ITT_EQUIP,      // Assosciated effects apply when the item is equipped
+    ITT_EQUIP,      // Associated effects apply when the item is equipped
     ITT_LEAVE_INVY, // Associated effects apply when the item leaves the inventory
     ITT_UNEQUIP,    // Associated effects apply when the item is unequipped
     ITT_EQUIPCHG    // When the item is still equipped, but in a different way
@@ -110,8 +110,8 @@ class ItemEffectInfo
 class ItemEffectAttrMod : public ItemEffectInfo
 {
     public:
-        ItemEffectAttrMod(unsigned int attrId, unsigned int layer, double value,
-                          unsigned int id, unsigned int duration = 0) :
+        ItemEffectAttrMod(unsigned attrId, unsigned layer, double value,
+                          unsigned id, unsigned duration = 0) :
                         mAttributeId(attrId), mAttributeLayer(layer),
                         mMod(value), mDuration(duration), mId(id)
         {}
@@ -120,11 +120,11 @@ class ItemEffectAttrMod : public ItemEffectInfo
         void dispell(Being *itemUser);
 
     private:
-        unsigned int mAttributeId;
-        unsigned int mAttributeLayer;
+        unsigned mAttributeId;
+        unsigned mAttributeLayer;
         double mMod;
-        unsigned int mDuration;
-        unsigned int mId;
+        unsigned mDuration;
+        unsigned mId;
 };
 
 class ItemEffectAttack : public ItemEffectInfo
@@ -178,7 +178,7 @@ class ItemEffectScript : public ItemEffectInfo
 class ItemClass
 {
     public:
-        ItemClass(int id, unsigned int maxperslot):
+        ItemClass(int id, unsigned maxperslot):
             mDatabaseID(id),
             mName("unnamed"),
             mSpriteID(0),
@@ -215,7 +215,7 @@ class ItemClass
         /**
          * Gets max item per slot.
          */
-        unsigned int getMaxPerSlot() const
+        unsigned getMaxPerSlot() const
         { return mMaxPerSlot; }
 
         bool hasTrigger(ItemTriggerType id)
@@ -273,7 +273,7 @@ class ItemClass
         unsigned short mSpriteID;
         unsigned short mCost;     /**< Unit cost the item. */
         /** Max item amount per slot in inventory. */
-        unsigned int mMaxPerSlot;
+        unsigned mMaxPerSlot;
 
         std::multimap< ItemTriggerType, ItemEffectInfo * > mEffects;
         std::multimap< ItemTriggerType, ItemEffectInfo * > mDispells;

@@ -92,6 +92,7 @@ void MapZone::insert(Actor *obj)
         default:
         {
             objects.push_back(obj);
+            break;
         }
     }
 }
@@ -117,6 +118,7 @@ void MapZone::remove(Actor *obj)
         {
             i = objects.begin() + nbMovingObjects;
             i_end = objects.end();
+            break;
         }
     }
     i = std::find(i, i_end, obj);
@@ -464,7 +466,8 @@ MapComposite::MapComposite(int id, const std::string &name):
     mMap(0),
     mContent(0),
     mName(name),
-    mID(id)
+    mID(id),
+    mPvPRules(PVP_NONE)
 {
 }
 

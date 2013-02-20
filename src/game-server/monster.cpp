@@ -35,18 +35,6 @@
 
 #include <cmath>
 
-struct MonsterTargetEventDispatch: EventDispatch
-{
-    MonsterTargetEventDispatch()
-    {
-        typedef EventListenerFactory<Monster, &Monster::mTargetListener> Factory;
-        removed = &Factory::create< Entity, &Monster::forgetTarget >::function;
-        died = &Factory::create<Entity, &Monster::forgetTarget, Being>::function;
-    }
-};
-
-static MonsterTargetEventDispatch monsterTargetEventDispatch;
-
 MonsterClass::~MonsterClass()
 {
     for (std::vector<AttackInfo *>::iterator it = mAttacks.begin(),
@@ -56,7 +44,7 @@ MonsterClass::~MonsterClass()
     }
 }
 
-float MonsterClass::getVulnerability(Element element) const
+double MonsterClass::getVulnerability(Element element) const
 {
     Vulnerabilities::const_iterator it = mVulnerabilities.find(element);
     if (it == mVulnerabilities.end())
@@ -67,7 +55,6 @@ float MonsterClass::getVulnerability(Element element) const
 Monster::Monster(MonsterClass *specy):
     Being(OBJECT_MONSTER),
     mSpecy(specy),
-    mTargetListener(&monsterTargetEventDispatch),
     mOwner(NULL)
 {
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
@@ -83,7 +70,7 @@ Monster::Monster(MonsterClass *specy):
     for (AttributeManager::AttributeScope::const_iterator it = mobAttr.begin(),
          it_end = mobAttr.end(); it != it_end; ++it)
     {
-        mAttributes.insert(std::pair< unsigned int, Attribute >
+        mAttributes.insert(std::pair< unsigned, Attribute >
                            (it->first, Attribute(*it->second)));
     }
 
@@ -105,13 +92,13 @@ Monster::Monster(MonsterClass *specy):
 
             setAttribute(it2->first,
                   mutation ?
-                  attr * (100 + (rand()%(mutation << 1)) - mutation) / 100.0 :
+                  attr * (100 + (rand() % (mutation * 2)) - mutation) / 100.0 :
                   attr);
         }
     }
 
     mDamageMutation = mutation ?
-                (100 + (rand()%(mutation << 1)) - mutation) / 100.0 : 1;
+                (100 + (rand() % (mutation * 2)) - mutation) / 100.0 : 1;
 
     setSize(specy->getSize());
     setGender(specy->getGender());
@@ -130,19 +117,10 @@ Monster::Monster(MonsterClass *specy):
     {
         addAttack(*it);
     }
-
-    // Load default script
-    loadScript(specy->getScript());
 }
 
 Monster::~Monster()
 {
-    // Remove death listeners.
-    for (std::map<Being *, int>::iterator i = mAnger.begin(),
-         i_end = mAnger.end(); i != i_end; ++i)
-    {
-        i->first->removeListener(&mTargetListener);
-    }
 }
 
 void Monster::update()
@@ -229,11 +207,11 @@ void Monster::refreshTarget()
 
         // Determine how much we hate the target
         int targetPriority = 0;
-        std::map<Being *, int, std::greater<Being *> >::iterator angerIterator;
-        angerIterator = mAnger.find(target);
+        std::map<Being *, AggressionInfo>::iterator angerIterator = mAnger.find(target);
         if (angerIterator != mAnger.end())
         {
-            targetPriority = angerIterator->second;
+            const AggressionInfo &aggressionInfo = angerIterator->second;
+            targetPriority = aggressionInfo.anger;
         }
         else if (mSpecy->isAggressive())
         {
@@ -307,25 +285,6 @@ void Monster::processAttack(Attack &attack)
     }
 }
 
-void Monster::loadScript(const std::string &scriptName)
-{
-    if (scriptName.length() == 0)
-        return;
-
-    std::stringstream filename;
-    filename << "scripts/monster/" << scriptName;
-    if (ResourceManager::exists(filename.str()))
-    {
-        LOG_INFO("Loading monster script: " << filename.str());
-        ScriptManager::currentState()->loadFile(filename.str());
-    }
-    else
-    {
-        LOG_WARN("Could not find script file \""
-                 << filename.str() << "\" for monster");
-    }
-}
-
 int Monster::calculatePositionPriority(Point position, int targetPriority)
 {
     Point thisPos = getPosition();
@@ -359,11 +318,15 @@ int Monster::calculatePositionPriority(Point position, int targetPriority)
     }
 }
 
-void Monster::forgetTarget(Entity *t)
+void Monster::forgetTarget(Entity *entity)
 {
-    Being *b = static_cast< Being * >(t);
+    Being *b = static_cast< Being * >(entity);
+    {
+        AggressionInfo &aggressionInfo = mAnger[b];
+        aggressionInfo.removedConnection.disconnect();
+        aggressionInfo.diedConnection.disconnect();
+    }
     mAnger.erase(b);
-    b->removeListener(&mTargetListener);
 
     if (b->getType() == OBJECT_CHARACTER)
     {
@@ -375,20 +338,42 @@ void Monster::forgetTarget(Entity *t)
 
 void Monster::changeAnger(Actor *target, int amount)
 {
-    if (target && (target->getType() == OBJECT_MONSTER
-        || target->getType() == OBJECT_CHARACTER))
+    const EntityType type = target->getType();
+    if (type != OBJECT_MONSTER && type != OBJECT_CHARACTER)
+        return;
+
+    Being *being = static_cast< Being * >(target);
+
+    if (mAnger.find(being) != mAnger.end())
     {
-        Being *t = static_cast< Being * >(target);
-        if (mAnger.find(t) != mAnger.end())
-        {
-            mAnger[t] += amount;
-        }
-        else
-        {
-            mAnger[t] = amount;
-            t->addListener(&mTargetListener);
-        }
+        mAnger[being].anger += amount;
     }
+    else
+    {
+        AggressionInfo &aggressionInfo = mAnger[being];
+        aggressionInfo.anger = amount;
+
+        // Forget target either when it's removed or died, whichever
+        // happens first.
+        aggressionInfo.removedConnection =
+                being->signal_removed.connect(sigc::mem_fun(this, &Monster::forgetTarget));
+        aggressionInfo.diedConnection =
+                being->signal_died.connect(sigc::mem_fun(this, &Monster::forgetTarget));
+    }
+}
+
+std::map<Being *, int> Monster::getAngerList() const
+{
+    std::map<Being *, int> result;
+    std::map<Being *, AggressionInfo>::const_iterator i, i_end;
+
+    for (i = mAnger.begin(), i_end = mAnger.end(); i != i_end; ++i)
+    {
+        const AggressionInfo &aggressionInfo = i->second;
+        result.insert(std::make_pair(i->first, aggressionInfo.anger));
+    }
+
+    return result;
 }
 
 int Monster::damage(Actor *source, const Damage &damage)
@@ -399,9 +384,7 @@ int Monster::damage(Actor *source, const Damage &damage)
     newDamage.delta = newDamage.delta * factor;
     int HPLoss = Being::damage(source, newDamage);
     if (source)
-    {
         changeAnger(source, HPLoss);
-    }
 
     if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
     {
@@ -466,14 +449,14 @@ void Monster::died()
              iChar++)
         {
             Character *character = (*iChar).first;
-            std::set<size_t> *skillSet = &(*iChar).second;
+            const std::set<size_t> &skillSet = (*iChar).second;
 
             if (mLegalExpReceivers.find(character) == mLegalExpReceivers.end()
-                || skillSet->size() < 1)
+                || skillSet.empty())
                 continue;
 
-            int expPerSkill = int(expPerChar / skillSet->size());
-            for (iSkill = skillSet->begin(); iSkill != skillSet->end();
+            int expPerSkill = int(expPerChar / skillSet.size());
+            for (iSkill = skillSet.begin(); iSkill != skillSet.end();
                  iSkill++)
             {
                 character->receiveExperience(*iSkill, expPerSkill,
@@ -482,45 +465,4 @@ void Monster::died()
             character->incrementKillCount(mSpecy->getId());
         }
     }
-}
-
-bool Monster::recalculateBaseAttribute(unsigned int attr)
-{
-    LOG_DEBUG("Monster: Received update attribute recalculation request for "
-              << attr << ".");
-    if (!mAttributes.count(attr))
-    {
-        LOG_DEBUG("Monster::recalculateBaseAttribute: "
-                  << attr << " not found!");
-        return false;
-    }
-    double newBase = getAttribute(attr);
-
-    switch (attr)
-    {
-      // Those a set only at load time.
-      case ATTR_MAX_HP:
-      case ATTR_DODGE:
-      case ATTR_MAGIC_DODGE:
-      case ATTR_ACCURACY:
-      case ATTR_DEFENSE:
-      case ATTR_MAGIC_DEFENSE:
-      case ATTR_HP_REGEN:
-      case ATTR_MOVE_SPEED_TPS:
-      case ATTR_INV_CAPACITY:
-          // nothing to do.
-          break;
-
-      // Only HP and Speed Raw updated for monsters
-      default:
-          Being::recalculateBaseAttribute(attr);
-          break;
-    }
-    if (newBase != getAttribute(attr))
-    {
-        setAttribute(attr, newBase);
-        return true;
-    }
-    LOG_DEBUG("Monster: No changes to sync for attribute '" << attr << "'.");
-    return false;
 }

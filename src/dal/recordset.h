@@ -67,14 +67,14 @@ class RecordSet
          *
          * @return the number of rows.
          */
-        unsigned int rows() const;
+        unsigned rows() const;
 
         /**
          * Get the number of columns.
          *
          * @return the number of columns.
          */
-        unsigned int cols() const;
+        unsigned cols() const;
 
         /**
          * Set the column headers.
@@ -115,8 +115,8 @@ class RecordSet
          * @exception std::invalid_argument if the recordset is empty.
          */
         const std::string&
-        operator()(const unsigned int row,
-                   const unsigned int col) const;
+        operator()(const unsigned row,
+                   const unsigned col) const;
 
 
         /**
@@ -134,7 +134,7 @@ class RecordSet
          *            the recordset is empty.
          */
         const std::string&
-        operator()(const unsigned int row,
+        operator()(const unsigned row,
                    const std::string &name) const;
 
 

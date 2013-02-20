@@ -82,7 +82,7 @@ void LuaScript::push(int v)
 void LuaScript::push(const std::string &v)
 {
     assert(nbArgs >= 0);
-    lua_pushstring(mCurrentState, v.c_str());
+    lua_pushlstring(mCurrentState, v.c_str(), v.length());
     ++nbArgs;
 }
 
@@ -151,7 +151,11 @@ bool LuaScript::resume()
     setMap(mCurrentThread->mMap);
     const int tmpNbArgs = nbArgs;
     nbArgs = -1;
+#if LUA_VERSION_NUM < 502
     int result = lua_resume(mCurrentState, tmpNbArgs);
+#else
+    int result = lua_resume(mCurrentState, NULL, tmpNbArgs);
+#endif
     setMap(0);
 
     if (result == 0)                // Thread is done
@@ -241,6 +245,7 @@ void LuaScript::processDeathEvent(Being *entity)
 {
     if (mDeathNotificationCallback.isValid())
     {
+        setMap(entity->getMap());
         prepare(mDeathNotificationCallback);
         push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
@@ -253,14 +258,13 @@ void LuaScript::processRemoveEvent(Entity *entity)
 {
     if (mRemoveNotificationCallback.isValid())
     {
+        setMap(entity->getMap());
         prepare(mRemoveNotificationCallback);
         push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
         //      being. This might be very interesting for scripting quests.
         execute();
     }
-
-    entity->removeListener(getScriptListener());
 }
 
 /**

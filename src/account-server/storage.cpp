@@ -174,8 +174,6 @@ Account *Storage::getAccountBySQL()
         if (accountInfo.isEmpty())
             return 0;
 
-        // Specialize the string_to functor to convert
-        // a string to an unsigned int.
         string_to< unsigned > toUint;
         unsigned id = toUint(accountInfo(0, 0));
 
@@ -265,8 +263,6 @@ void Storage::fixCharactersSlot(int accountId)
         if (charInfo.isEmpty())
             return;
 
-        // Specialize the string_to functor to convert
-        // a string to an unsigned int.
         string_to< unsigned > toUint;
         std::map<unsigned, unsigned> slotsToUpdate;
 
@@ -347,8 +343,6 @@ Character *Storage::getCharacterBySQL(Account *owner)
 {
     Character *character = 0;
 
-    // Specialize the string_to functor to convert
-    // a string to an unsigned int.
     string_to< unsigned > toUint;
     string_to< int > toInt;
 
@@ -361,8 +355,6 @@ Character *Storage::getCharacterBySQL(Account *owner)
         if (charInfo.isEmpty())
             return 0;
 
-        // Specialize the string_to functor to convert
-        // a string to an unsigned short.
         string_to< unsigned short > toUshort;
         string_to< double > toDouble;
 
@@ -417,10 +409,10 @@ Character *Storage::getCharacterBySQL(Account *owner)
         const dal::RecordSet &attrInfo = mDb->execSql(s.str());
         if (!attrInfo.isEmpty())
         {
-            const unsigned int nRows = attrInfo.rows();
-            for (unsigned int row = 0; row < nRows; ++row)
+            const unsigned nRows = attrInfo.rows();
+            for (unsigned row = 0; row < nRows; ++row)
             {
-                unsigned int id = toUint(attrInfo(row, 0));
+                unsigned id = toUint(attrInfo(row, 0));
                 character->setAttribute(id,    toDouble(attrInfo(row, 1)));
                 character->setModAttribute(id, toDouble(attrInfo(row, 2)));
             }
@@ -437,10 +429,10 @@ Character *Storage::getCharacterBySQL(Account *owner)
         const dal::RecordSet &skillInfo = mDb->execSql(s.str());
         if (!skillInfo.isEmpty())
         {
-            const unsigned int nRows = skillInfo.rows();
-            for (unsigned int row = 0; row < nRows; ++row)
+            const unsigned nRows = skillInfo.rows();
+            for (unsigned row = 0; row < nRows; ++row)
             {
-                unsigned int id = toUint(skillInfo(row, 0));
+                unsigned id = toUint(skillInfo(row, 0));
                 character->setExperience(id, toInt(skillInfo(row, 1)));
             }
         }
@@ -455,8 +447,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
         const dal::RecordSet &statusInfo = mDb->execSql(s.str());
         if (!statusInfo.isEmpty())
         {
-            const unsigned int nRows = statusInfo.rows();
-            for (unsigned int row = 0; row < nRows; row++)
+            const unsigned nRows = statusInfo.rows();
+            for (unsigned row = 0; row < nRows; row++)
             {
                 character->applyStatusEffect(
                     toUint(statusInfo(row, 0)), // Status Id
@@ -472,8 +464,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
         const dal::RecordSet &killsInfo = mDb->execSql(s.str());
         if (!killsInfo.isEmpty())
         {
-            const unsigned int nRows = killsInfo.rows();
-            for (unsigned int row = 0; row < nRows; row++)
+            const unsigned nRows = killsInfo.rows();
+            for (unsigned row = 0; row < nRows; row++)
             {
                 character->setKillCount(
                     toUint(killsInfo(row, 0)), // MonsterID
@@ -490,8 +482,8 @@ Character *Storage::getCharacterBySQL(Account *owner)
         const dal::RecordSet &specialsInfo = mDb->execSql(s.str());
         if (!specialsInfo.isEmpty())
         {
-            const unsigned int nRows = specialsInfo.rows();
-            for (unsigned int row = 0; row < nRows; row++)
+            const unsigned nRows = specialsInfo.rows();
+            for (unsigned row = 0; row < nRows; row++)
             {
                 character->giveSpecial(toUint(specialsInfo(row, 0)),
                                        toUint(specialsInfo(row, 1)));
@@ -523,7 +515,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
             {
                 equipItem.itemId = toUint(equipInfo(k, 1));
                 equipItem.itemInstance = toUint(equipInfo(k, 2));
-                equipData.insert(std::pair<unsigned int, EquipmentItem>(
+                equipData.insert(std::pair<unsigned, EquipmentItem>(
                                      toUint(equipInfo(k, 0)),
                                      equipItem));
             }
@@ -591,7 +583,7 @@ Character *Storage::getCharacter(const std::string &name)
     return 0;
 }
 
-unsigned int Storage::getCharacterId(const std::string &name)
+unsigned Storage::getCharacterId(const std::string &name)
 {
     std::ostringstream sql;
     sql << "SELECT id FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
@@ -629,7 +621,7 @@ bool Storage::doesUserNameExist(const std::string &name)
             const dal::RecordSet &accountInfo = mDb->processSql();
 
             std::istringstream ssStream(accountInfo(0, 0));
-            unsigned int iReturn = 1;
+            unsigned iReturn = 1;
             ssStream >> iReturn;
             return iReturn != 0;
         }
@@ -662,7 +654,7 @@ bool Storage::doesEmailAddressExist(const std::string &email)
             const dal::RecordSet &accountInfo = mDb->processSql();
 
             std::istringstream ssStream(accountInfo(0, 0));
-            unsigned int iReturn = 1;
+            unsigned iReturn = 1;
             ssStream >> iReturn;
             return iReturn != 0;
         }
@@ -884,8 +876,8 @@ bool Storage::updateCharacter(Character *character)
         {
             sql.str("");
             unsigned short slot = j->first;
-            unsigned int itemId = j->second.itemId;
-            unsigned int amount = j->second.amount;
+            unsigned itemId = j->second.itemId;
+            unsigned amount = j->second.amount;
             assert(itemId);
             sql << base << slot << ", " << itemId << ", " << amount << ");";
             mDb->execSql(sql.str());
@@ -933,14 +925,6 @@ bool Storage::updateCharacter(Character *character)
 
     transaction.commit();
     return true;
-}
-
-void Storage::flushSkill(const Character *character, int skillId)
-{
-    // Note: Deprecated, use DALStorage::updateExperience instead!!!
-    // TODO: Remove calls of flushSkill for updateExperience instead.
-    updateExperience(character->getDatabaseID(), skillId,
-        character->getExperience(skillId));
 }
 
 void Storage::addAccount(Account *account)
@@ -1084,8 +1068,6 @@ void Storage::flush(Account *account)
         // or updated in database.
         // Now, let's remove those who are no more in memory from database.
 
-        // Specialize the string_to functor to convert
-        // a string to an unsigned int.
         string_to<unsigned short> toUint;
 
         std::ostringstream sqlSelectNameIdCharactersTable;
@@ -1099,7 +1081,7 @@ void Storage::flush(Account *account)
         // We compare chars from memory and those existing in db,
         // and delete those not in mem but existing in db.
         bool charFound;
-        for (unsigned int i = 0; i < charInMemInfo.rows(); ++i) // In database
+        for (unsigned i = 0; i < charInMemInfo.rows(); ++i) // In database
         {
             charFound = false;
             for (Characters::const_iterator it = characters.begin(),
@@ -1118,7 +1100,7 @@ void Storage::flush(Account *account)
                 // We store the id of the char to delete,
                 // because as deleted, the RecordSet is also emptied,
                 // and that creates an error.
-                unsigned int charId = toUint(charInMemInfo(i, 1));
+                unsigned charId = toUint(charInMemInfo(i, 1));
                 delCharacter(charId);
             }
         }
@@ -1235,7 +1217,7 @@ void Storage::updateExperience(int charId, int skillId, int skillValue)
     }
 }
 
-void Storage::updateAttribute(int charId, unsigned int attrId,
+void Storage::updateAttribute(int charId, unsigned attrId,
                               double base, double mod)
 {
     try
@@ -1349,7 +1331,7 @@ void Storage::addGuild(Guild *guild)
             mDb->bindValue(1, guild->getName());
             const dal::RecordSet& guildInfo = mDb->processSql();
 
-            string_to<unsigned int> toUint;
+            string_to<unsigned> toUint;
             unsigned id = toUint(guildInfo(0, 0));
             guild->setId(id);
         }
@@ -1531,7 +1513,7 @@ std::map<int, Guild*> Storage::getGuildList()
             return guilds;
 
         // Loop through every row in the table and assign it to a guild
-        for (unsigned int i = 0; i < guildInfo.rows(); ++i)
+        for (unsigned i = 0; i < guildInfo.rows(); ++i)
         {
             Guild* guild = new Guild(guildInfo(i,1));
             guild->setId(toShort(guildInfo(i,0)));
@@ -1550,7 +1532,7 @@ std::map<int, Guild*> Storage::getGuildList()
             const dal::RecordSet& memberInfo = mDb->execSql(memberSql.str());
 
             std::list<std::pair<int, int> > members;
-            for (unsigned int j = 0; j < memberInfo.rows(); ++j)
+            for (unsigned j = 0; j < memberInfo.rows(); ++j)
             {
                 members.push_back(std::pair<int, int>(toUint(memberInfo(j, 0)),
                                                      toUint(memberInfo(j, 1))));
@@ -1677,7 +1659,7 @@ std::map<std::string, std::string> Storage::getAllWorldStateVars(int mapId)
                 mDb->bindValue(1, mapId);
             const dal::RecordSet &results = mDb->processSql();
 
-            for (unsigned int i = 0; i < results.rows(); ++i)
+            for (unsigned i = 0; i < results.rows(); ++i)
             {
                 variables[results(i, 0)] = results(i, 1);
             }
@@ -1998,8 +1980,6 @@ Post *Storage::getStoredPost(int playerId)
 {
     Post *p = new Post();
 
-    // Specialize the string_to functor to convert
-    // a string to an unsigned int.
     string_to< unsigned > toUint;
 
     try
@@ -2016,7 +1996,7 @@ Post *Storage::getStoredPost(int playerId)
             return p;
         }
 
-        for (unsigned int i = 0; i < post.rows(); i++ )
+        for (unsigned i = 0; i < post.rows(); i++ )
         {
             // Load sender and receiver
             Character *sender = getCharacter(toUint(post(i, 1)), 0);
@@ -2248,10 +2228,10 @@ void Storage::addTransaction(const Transaction &trans)
     }
 }
 
-std::vector<Transaction> Storage::getTransactions(unsigned int num)
+std::vector<Transaction> Storage::getTransactions(unsigned num)
 {
     std::vector<Transaction> transactions;
-    string_to<unsigned int> toUint;
+    string_to<unsigned> toUint;
 
     try
     {
@@ -2283,7 +2263,7 @@ std::vector<Transaction> Storage::getTransactions(unsigned int num)
 std::vector<Transaction> Storage::getTransactions(time_t date)
 {
     std::vector<Transaction> transactions;
-    string_to<unsigned int> toUint;
+    string_to<unsigned> toUint;
 
     try
     {
@@ -2292,7 +2272,7 @@ std::vector<Transaction> Storage::getTransactions(time_t date)
             << date;
         const dal::RecordSet &rec = mDb->execSql(sql.str());
 
-        for (unsigned int i = 0; i < rec.rows(); ++i)
+        for (unsigned i = 0; i < rec.rows(); ++i)
         {
             Transaction trans;
             trans.mCharacterId = toUint(rec(i, 1));

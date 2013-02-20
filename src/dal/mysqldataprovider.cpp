@@ -32,7 +32,7 @@ const std::string  MySqlDataProvider::CFGPARAM_MYSQL_USER ="mysql_username";
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD  ="mysql_password";
 
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_HOST_DEF = "localhost";
-const unsigned int MySqlDataProvider::CFGPARAM_MYSQL_PORT_DEF = 3306;
+const unsigned     MySqlDataProvider::CFGPARAM_MYSQL_PORT_DEF = 3306;
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_DB_DEF   = "mana";
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_USER_DEF = "mana";
 const std::string  MySqlDataProvider::CFGPARAM_MYSQL_PWD_DEF  = "mana";
@@ -84,7 +84,7 @@ void MySqlDataProvider::connect()
         = Configuration::getValue(CFGPARAM_MYSQL_USER, CFGPARAM_MYSQL_USER_DEF);
     const std::string password
         = Configuration::getValue(CFGPARAM_MYSQL_PWD, CFGPARAM_MYSQL_PWD_DEF);
-    const unsigned int tcpPort
+    const unsigned tcpPort
         = Configuration::getValue(CFGPARAM_MYSQL_PORT, CFGPARAM_MYSQL_PORT_DEF);
 
     // allocate and initialize a new MySQL object suitable
@@ -158,10 +158,10 @@ const RecordSet &MySqlDataProvider::execSql(const std::string& sql,
                 throw DbSqlQueryExecFailure(mysql_error(mDb));
 
             // set the field names.
-            unsigned int nFields = mysql_num_fields(res);
+            unsigned nFields = mysql_num_fields(res);
             MYSQL_FIELD* fields = mysql_fetch_fields(res);
             Row fieldNames;
-            for (unsigned int i = 0; i < nFields; ++i)
+            for (unsigned i = 0; i < nFields; ++i)
                 fieldNames.push_back(fields[i].name);
 
             mRecordSet.setColumnHeaders(fieldNames);
@@ -172,7 +172,7 @@ const RecordSet &MySqlDataProvider::execSql(const std::string& sql,
             {
                 Row r;
 
-                for (unsigned int i = 0; i < nFields; ++i)
+                for (unsigned i = 0; i < nFields; ++i)
                     r.push_back(static_cast<char *>(row[i]));
 
                 mRecordSet.add(r);
@@ -411,13 +411,13 @@ const RecordSet &MySqlDataProvider::processSql()
         res = mysql_stmt_result_metadata(mStmt);
 
         // set the field names.
-        unsigned int nFields = mysql_num_fields(res);
+        unsigned nFields = mysql_num_fields(res);
         MYSQL_FIELD* fields = mysql_fetch_fields(res);
         Row fieldNames;
 
         resultBind = new MYSQL_BIND[mysql_num_fields(res)];
 
-        unsigned int i = 0;
+        unsigned i = 0;
         for (i = 0; i < mysql_num_fields(res); ++i)
         {
             resultBind[i].buffer_type = MYSQL_TYPE_STRING;

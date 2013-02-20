@@ -76,7 +76,7 @@ class BuySell
         typedef std::vector< TradedItem > TradedItems;
 
         /** The attribute ID of the currency to use. Hardcoded for now (FIXME) */
-        unsigned int mCurrencyId;
+        unsigned mCurrencyId;
 
         Character *mChar;   /**< Character involved. */
         TradedItems mItems; /**< Traded items. */

@@ -175,15 +175,12 @@ class Attacks
             mCurrentAttack(0)
         {}
 
-        /**
-         * Whether the being has at least one auto attack that is ready.
-         */
         void add(AttackInfo *);
         void remove(AttackInfo *);
         void markAttackAsTriggered();
         Attack *getTriggerableAttack();
         void startAttack(Attack *attack);
-        void tick(std::vector<Attack *> *ret);
+        void getUsuableAttacks(std::vector<Attack *> *ret);
 
         /**
          * Tells the number of attacks available

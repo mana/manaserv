@@ -22,7 +22,6 @@
 #define MONSTER_H
 
 #include "game-server/being.h"
-#include "game-server/eventlistener.h"
 #include "common/defines.h"
 #include "scripting/script.h"
 #include "utils/string.h"
@@ -31,6 +30,9 @@
 #include <vector>
 #include <string>
 
+#include <sigc++/connection.h>
+
+class Character;
 class ItemClass;
 class Script;
 
@@ -62,7 +64,7 @@ struct MonsterAttack
     std::string scriptEvent;
 };
 
-typedef std::map<Element, float> Vulnerabilities;
+typedef std::map<Element, double> Vulnerabilities;
 
 /**
  * Class describing the characteristics of a generic monster.
@@ -195,16 +197,10 @@ class MonsterClass
         /** Returns all attacks of the monster. */
         std::vector<AttackInfo *> &getAttackInfos() { return mAttacks; }
 
-        void setVulnerability(Element element, float factor)
+        void setVulnerability(Element element, double factor)
         { mVulnerabilities[element] = factor; }
 
-        float getVulnerability(Element element) const;
-
-        /** sets the script file for the monster */
-        void setScript(const std::string &filename) { mScript = filename; }
-
-        /** Returns script filename */
-        const std::string &getScript() const { return mScript; }
+        double getVulnerability(Element element) const;
 
         void setUpdateCallback(Script *script)
         { script->assignCallback(mUpdateCallback); }
@@ -237,7 +233,6 @@ class MonsterClass
         int mOptimalLevel;
         std::vector<AttackInfo *> mAttacks;
         Vulnerabilities mVulnerabilities;
-        std::string mScript;
 
         /**
          * A reference to the script function that is called each update.
@@ -301,11 +296,6 @@ class Monster : public Being
         virtual void processAttack(Attack &attack);
 
         /**
-         * Loads a script file for this monster
-         */
-        void loadScript(const std::string &scriptName);
-
-        /**
          * Kills the being.
          */
         void died();
@@ -315,8 +305,7 @@ class Monster : public Being
          */
         void changeAnger(Actor *target, int amount);
 
-        const std::map<Being *, int> &getAngerList() const
-        { return mAnger; }
+        std::map<Being *, int> getAngerList() const;
 
         /**
          * Calls the damage function in Being and updates the aggro list
@@ -326,15 +315,7 @@ class Monster : public Being
         /**
          * Removes a being from the anger list.
          */
-        void forgetTarget(Entity *being);
-
-        /**
-         * Called when an attribute modifier is changed.
-         * Recalculate the base value of an attribute and update derived
-         *     attributes if it has changed.
-         * @returns Whether it was changed.
-         */
-        virtual bool recalculateBaseAttribute(unsigned int);
+        void forgetTarget(Entity *entity);
 
     protected:
         /**
@@ -351,10 +332,16 @@ class Monster : public Being
         MonsterClass *mSpecy;
 
         /** Aggression towards other beings. */
-        std::map<Being *, int> mAnger;
+        struct AggressionInfo {
+            AggressionInfo()
+                : anger(0)
+            {}
 
-        /** Listener for updating the anger list. */
-        EventListener mTargetListener;
+            int anger;
+            sigc::connection removedConnection;
+            sigc::connection diedConnection;
+        };
+        std::map<Being *, AggressionInfo> mAnger;
 
         /**
          * Character who currently owns this monster (killsteal protection).

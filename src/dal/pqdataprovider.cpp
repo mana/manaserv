@@ -100,22 +100,22 @@ const RecordSet &PqDataProvider::execSql(const std::string& sql,
         }
 
         // get field count
-        unsigned int nFields = PQnfields(res);
+        unsigned nFields = PQnfields(res);
 
         // fill column names
         Row fieldNames;
-        for (unsigned int i = 0; i < nFields; i++)
+        for (unsigned i = 0; i < nFields; i++)
         {
             fieldNames.push_back(PQfname(res, i));
         }
         mRecordSet.setColumnHeaders(fieldNames);
 
         // fill rows
-        for (unsigned int r = 0; r < PQntuples(res); r++)
+        for (unsigned r = 0; r < PQntuples(res); r++)
         {
             Row row;
 
-            for (unsigned int i = 0; i < nFields; i++)
+            for (unsigned i = 0; i < nFields; i++)
                 row.push_back(PQgetvalue(res, r, i));
 
             mRecordSet.add(row);

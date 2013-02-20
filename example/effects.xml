@@ -12,7 +12,6 @@
   <effect id="4" particle="graphics/particles/arrow-hail.xml" />
 
 <!-- Emotion effects -->
-  <effect id="10000" particle="graphics/particles/emotes/emote-disgust.particle.xml"/>
   <effect id="10001" particle="graphics/particles/emotes/emote-surprise.particle.xml"/>
   <effect id="10002" particle="graphics/particles/emotes/emote-happy.particle.xml"/>
   <effect id="10003" particle="graphics/particles/emotes/emote-sad.particle.xml"/>
@@ -26,4 +25,5 @@
   <effect id="10011" particle="graphics/particles/emotes/emote-perturbed.particle.xml"/>
   <effect id="10012" particle="graphics/particles/emotes/emote-speech.particle.xml"/>
   <effect id="10013" particle="graphics/particles/emotes/emote-blah.particle.xml"/>
+  <effect id="10014" particle="graphics/particles/emotes/emote-disgust.particle.xml"/>
 </effects>

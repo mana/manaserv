@@ -39,8 +39,8 @@ struct InventoryItem
         itemId(0), amount(0)
     {}
 
-    unsigned int itemId;
-    unsigned int amount;
+    unsigned itemId;
+    unsigned amount;
 };
 
 struct EquipmentItem
@@ -49,25 +49,25 @@ struct EquipmentItem
         itemId(0), itemInstance(0)
     {}
 
-    EquipmentItem(unsigned int itemId, unsigned int itemInstance)
+    EquipmentItem(unsigned itemId, unsigned itemInstance)
     {
         this->itemId = itemId;
         this->itemInstance = itemInstance;
     }
 
     // The item id taken from the item db.
-    unsigned int itemId;
+    unsigned itemId;
     // A unique instance number used to separate items when equipping the same
     // item id multiple times on possible multiple slots.
-    unsigned int itemInstance;
+    unsigned itemInstance;
 };
 
 // inventory slot id -> { item }
-typedef std::map< unsigned int, InventoryItem > InventoryData;
+typedef std::map< unsigned, InventoryItem > InventoryData;
 
 // equip slot id -> { item id, item instance }
 // Equipment taking up multiple equip slot ids will be referenced multiple times
-typedef std::multimap< unsigned int, EquipmentItem > EquipData;
+typedef std::multimap< unsigned, EquipmentItem > EquipData;
 
 /**
  * Structure storing the equipment and inventory of a Player.

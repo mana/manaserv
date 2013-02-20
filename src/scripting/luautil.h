@@ -102,8 +102,13 @@ public:
         mTypeName = typeName;
 
         luaL_newmetatable(s, mTypeName);        // metatable
-        lua_pushstring(s, "__index");           // metatable, "__index"
-        luaL_register(s, typeName, members);    // metatable, "__index", {}
+        lua_pushliteral(s, "__index");          // metatable, "__index"
+        lua_createtable(s, 0, 0);               // metatable, "__index", {}
+#if LUA_VERSION_NUM < 502
+        luaL_register(s, NULL, members);
+#else
+        luaL_setfuncs(s, members, 0);
+#endif
         lua_rawset(s, -3);                      // metatable
         lua_pop(s, 1);                          // -empty-
     }
@@ -125,8 +130,12 @@ public:
             void *userData = lua_newuserdata(s, sizeof(T*));
             * static_cast<T**>(userData) = object;
 
+#if LUA_VERSION_NUM < 502
             luaL_newmetatable(s, mTypeName);
             lua_setmetatable(s, -2);
+#else
+            luaL_setmetatable(s, mTypeName);
+#endif
 
             UserDataCache::insert(s, object);
         }
@@ -188,7 +197,7 @@ inline void push(lua_State *s, int val)
 
 inline void push(lua_State *s, const std::string &val)
 {
-    lua_pushstring(s, val.c_str());
+    lua_pushlstring(s, val.c_str(), val.length());
 }
 
 inline void push(lua_State *s, Entity *val)

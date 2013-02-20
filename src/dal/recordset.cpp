@@ -61,7 +61,7 @@ bool RecordSet::isEmpty() const
  *
  * @return the number of rows.
  */
-unsigned int RecordSet::rows() const
+unsigned RecordSet::rows() const
 {
     return mRows.size();
 }
@@ -71,7 +71,7 @@ unsigned int RecordSet::rows() const
  *
  * @return the number of columns.
  */
-unsigned int RecordSet::cols() const
+unsigned RecordSet::cols() const
 {
     return mHeaders.size();
 }
@@ -93,7 +93,7 @@ void RecordSet::setColumnHeaders(const Row &headers)
  */
 void RecordSet::add(const Row &row)
 {
-    const unsigned int nCols = mHeaders.size();
+    const unsigned nCols = mHeaders.size();
 
     if (nCols == 0) {
         throw RsColumnHeadersNotSet();
@@ -110,8 +110,8 @@ void RecordSet::add(const Row &row)
     mRows.push_back(row);
 }
 
-const std::string &RecordSet::operator()(const unsigned int row,
-                                         const unsigned int col) const
+const std::string &RecordSet::operator()(const unsigned row,
+                                         const unsigned col) const
 {
     if ((row >= mRows.size()) || (col >= mHeaders.size())) {
         std::ostringstream os;
@@ -125,7 +125,7 @@ const std::string &RecordSet::operator()(const unsigned int row,
     return mRows[row][col];
 }
 
-const std::string &RecordSet::operator()(const unsigned int row,
+const std::string &RecordSet::operator()(const unsigned row,
                                          const std::string& name) const
 {
     if (row >= mRows.size()) {
@@ -147,8 +147,8 @@ const std::string &RecordSet::operator()(const unsigned int row,
     }
 
     // find the field index.
-    const unsigned int nCols = mHeaders.size();
-    unsigned int i;
+    const unsigned nCols = mHeaders.size();
+    unsigned i;
     for (i = 0; i < nCols; ++i) {
         if (mHeaders[i] == name) {
             break;

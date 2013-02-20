@@ -27,7 +27,6 @@
 #include "game-server/attributemanager.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
-#include "game-server/eventlistener.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
 #include "game-server/skillmanager.h"
@@ -35,6 +34,11 @@
 #include "game-server/statusmanager.h"
 #include "utils/logger.h"
 #include "utils/speedconv.h"
+#include "scripting/scriptmanager.h"
+
+
+Script::Ref Being::mRecalculateDerivedAttributesCallback;
+Script::Ref Being::mRecalculateBaseAttributeCallback;
 
 Being::Being(EntityType type):
     Actor(type),
@@ -42,7 +46,8 @@ Being::Being(EntityType type):
     mTarget(NULL),
     mGender(GENDER_UNSPECIFIED),
     mCurrentAttack(0),
-    mDirection(DOWN)
+    mDirection(DOWN),
+    mEmoteId(0)
 {
     const AttributeManager::AttributeScope &attr = attributeManager->getAttributeScope(BeingScope);
     LOG_DEBUG("Being creation: initialisation of " << attr.size() << " attributes.");
@@ -58,6 +63,9 @@ Being::Being(EntityType type):
                                           Attribute(*it1->second)));
 
     }
+
+    signal_inserted.connect(sigc::mem_fun(this, &Being::inserted));
+
     // TODO: Way to define default base values?
     // Should this be handled by the virtual modifiedAttribute?
     // URGENT either way
@@ -69,6 +77,14 @@ Being::Being(EntityType type):
         mAttributes[i].setBase(100);
     }
 #endif
+}
+
+void Being::triggerEmote(int id)
+{
+    mEmoteId = id;
+
+    if (id > -1)
+        raiseUpdateFlags(UPDATEFLAG_EMOTE);
 }
 
 int Being::damage(Actor * /* source */, const Damage &damage)
@@ -111,6 +127,7 @@ int Being::damage(Actor * /* source */, const Damage &damage)
                       "implemented yet and should not be used!");
             HPloss = 0;
 #endif
+            break;
         case DAMAGE_DIRECT:
             break;
         default:
@@ -177,14 +194,7 @@ void Being::died()
     // reset target
     mTarget = NULL;
 
-    for (Listeners::iterator i = mListeners.begin(),
-         i_end = mListeners.end(); i != i_end;)
-    {
-        const EventListener &l = **i;
-        ++i; // In case the listener removes itself from the list on the fly.
-        if (l.dispatch->died)
-            l.dispatch->died(&l, this);
-    }
+    signal_died.emit(this);
 }
 
 void Being::processAttacks()
@@ -194,7 +204,7 @@ void Being::processAttacks()
 
     // Ticks attacks even when not attacking to permit cooldowns and warmups.
     std::vector<Attack *> attacksReady;
-    mAttacks.tick(&attacksReady);
+    mAttacks.getUsuableAttacks(&attacksReady);
 
     if (Attack *triggerableAttack = mAttacks.getTriggerableAttack())
     {
@@ -203,36 +213,36 @@ void Being::processAttacks()
     }
 
     // Deal with the ATTACK action.
-    if (!attacksReady.empty())
-    {
-        Attack *highestPriorityAttack = 0;
-        // Performs all ready attacks.
-        for (std::vector<Attack *>::iterator it = attacksReady.begin(),
-             it_end = attacksReady.end(); it != it_end; ++it)
-        {
-            // check if target is in range using the pythagorean theorem
-            int distx = this->getPosition().x - mTarget->getPosition().x;
-            int disty = this->getPosition().y - mTarget->getPosition().y;
-            int distSquare = (distx * distx + disty * disty);
-            AttackInfo *info = (*it)->getAttackInfo();
-            int maxDist = info->getDamage().range + getSize();
+    if (attacksReady.empty())
+        return;
 
-            if (distSquare <= maxDist * maxDist &&
-                    (!highestPriorityAttack ||
-                     info->getPriority()
-                     < info->getPriority()))
-            {
-                highestPriorityAttack = *it;
-            }
-        }
-        if (highestPriorityAttack)
+    Attack *highestPriorityAttack = 0;
+    // Performs all ready attacks.
+    for (std::vector<Attack *>::const_iterator it = attacksReady.begin(),
+         it_end = attacksReady.end(); it != it_end; ++it)
+    {
+        // check if target is in range using the pythagorean theorem
+        int distx = this->getPosition().x - mTarget->getPosition().x;
+        int disty = this->getPosition().y - mTarget->getPosition().y;
+        int distSquare = (distx * distx + disty * disty);
+        AttackInfo *info = (*it)->getAttackInfo();
+        int maxDist = info->getDamage().range + getSize();
+
+        if (distSquare <= maxDist * maxDist &&
+                (!highestPriorityAttack ||
+                 highestPriorityAttack->getAttackInfo()->getPriority()
+                 < info->getPriority()))
         {
-            mAttacks.startAttack(highestPriorityAttack);
-            mCurrentAttack = highestPriorityAttack;
-            setDestination(getPosition());
-            // TODO: Turn into direction of enemy
-            raiseUpdateFlags(UPDATEFLAG_ATTACK);
+            highestPriorityAttack = *it;
         }
+    }
+    if (highestPriorityAttack)
+    {
+        mAttacks.startAttack(highestPriorityAttack);
+        mCurrentAttack = highestPriorityAttack;
+        setDestination(getPosition());
+        // TODO: Turn into direction of enemy
+        raiseUpdateFlags(UPDATEFLAG_ATTACK);
     }
 }
 
@@ -497,22 +507,27 @@ void Being::setAction(BeingAction action)
     }
 }
 
-void Being::applyModifier(unsigned int attr, double value, unsigned int layer,
-                          unsigned int duration, unsigned int id)
+void Being::applyModifier(unsigned attr, double value, unsigned layer,
+                          unsigned duration, unsigned id)
 {
     mAttributes.at(attr).add(duration, value, layer, id);
     updateDerivedAttributes(attr);
 }
 
-bool Being::removeModifier(unsigned int attr, double value, unsigned int layer,
-                           unsigned int id, bool fullcheck)
+bool Being::removeModifier(unsigned attr, double value, unsigned layer,
+                           unsigned id, bool fullcheck)
 {
     bool ret = mAttributes.at(attr).remove(value, layer, id, fullcheck);
     updateDerivedAttributes(attr);
     return ret;
 }
 
-void Being::setAttribute(unsigned int id, double value)
+void Being::setGender(BeingGender gender)
+{
+    mGender = gender;
+}
+
+void Being::setAttribute(unsigned id, double value)
 {
     AttributeMap::iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -532,7 +547,7 @@ void Being::setAttribute(unsigned int id, double value)
     }
 }
 
-double Being::getAttribute(unsigned int id) const
+double Being::getAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -545,7 +560,7 @@ double Being::getAttribute(unsigned int id) const
 }
 
 
-double Being::getModifiedAttribute(unsigned int id) const
+double Being::getModifiedAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -557,82 +572,71 @@ double Being::getModifiedAttribute(unsigned int id) const
     return ret->second.getModifiedAttribute();
 }
 
-void Being::setModAttribute(unsigned int, double)
+void Being::setModAttribute(unsigned, double)
 {
     // No-op to satisfy shared structure.
     // The game-server calculates this manually.
     return;
 }
 
-bool Being::recalculateBaseAttribute(unsigned int attr)
+void Being::recalculateBaseAttribute(unsigned attr)
 {
     LOG_DEBUG("Being: Received update attribute recalculation request for "
               << attr << ".");
     if (!mAttributes.count(attr))
     {
         LOG_DEBUG("Being::recalculateBaseAttribute: " << attr << " not found!");
-        return false;
+        return;
     }
-    double newBase = getAttribute(attr);
 
-    switch (attr)
+    // Handle speed conversion inside the engine
+    if (attr == ATTR_MOVE_SPEED_RAW)
     {
-    case ATTR_HP_REGEN:
-        {
-            double hpPerSec = getModifiedAttribute(ATTR_VIT) * 0.05;
-            newBase = (hpPerSec * TICKS_PER_HP_REGENERATION / 10);
-        }
-        break;
-    case ATTR_HP:
-        double diff;
-        if ((diff = getModifiedAttribute(ATTR_HP)
-            - getModifiedAttribute(ATTR_MAX_HP)) > 0)
-            newBase -= diff;
-        break;
-    case ATTR_MAX_HP:
-        newBase = ((getModifiedAttribute(ATTR_VIT) + 3)
-                   * (getModifiedAttribute(ATTR_VIT) + 20)) * 0.125;
-        break;
-    case ATTR_MOVE_SPEED_TPS:
-        newBase = 3.0 + getModifiedAttribute(ATTR_AGI) * 0.08; // Provisional.
-        break;
-    case ATTR_MOVE_SPEED_RAW:
-        newBase = utils::tpsToRawSpeed(
-                      getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
-        break;
-    case ATTR_INV_CAPACITY:
-        // Provisional
-        newBase = 2000.0 + getModifiedAttribute(ATTR_STR) * 180.0;
-        break;
+        double newBase = utils::tpsToRawSpeed(
+                                    getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
+        if (newBase != getAttribute(attr))
+            setAttribute(attr, newBase);
+        return;
     }
-    if (newBase != getAttribute(attr))
-    {
-        setAttribute(attr, newBase);
-        return true;
-    }
-    LOG_DEBUG("Being: No changes to sync for attribute '" << attr << "'.");
-    return false;
+
+    if (!mRecalculateBaseAttributeCallback.isValid())
+        return;
+
+    Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+    script->prepare(mRecalculateBaseAttributeCallback);
+    script->push(this);
+    script->push(attr);
+    script->execute();
 }
 
-void Being::updateDerivedAttributes(unsigned int attr)
+void Being::updateDerivedAttributes(unsigned attr)
 {
     LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
+
+    // Handle default actions before handing over to the script engine
     switch (attr)
     {
     case ATTR_MAX_HP:
-        updateDerivedAttributes(ATTR_HP);
     case ATTR_HP:
         raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
         break;
     case ATTR_MOVE_SPEED_TPS:
-        if (getAttribute(attr) > 0.0f)
-            setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToRawSpeed(
-                         getModifiedAttribute(ATTR_MOVE_SPEED_TPS)));
-        break;
-    default:
-        // Do nothing
+        // Does not make a lot of sense to have in the scripts.
+        // So handle it here:
+        recalculateBaseAttribute(ATTR_MOVE_SPEED_RAW);
         break;
     }
+
+    if (!mRecalculateDerivedAttributesCallback.isValid())
+        return;
+
+    Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+    script->prepare(mRecalculateDerivedAttributesCallback);
+    script->push(this);
+    script->push(attr);
+    script->execute();
 }
 
 void Being::applyStatusEffect(int id, int timer)
@@ -743,18 +747,11 @@ void Being::update()
     processAttacks();
 }
 
-void Being::inserted()
+void Being::inserted(Entity *)
 {
-    Actor::inserted();
-
     // Reset the old position, since after insertion it is important that it is
     // in sync with the zone that we're currently present in.
     mOld = getPosition();
-}
-
-void Being::setGender(BeingGender gender)
-{
-    mGender = gender;
 }
 
 void Being::processAttack(Attack &attack)

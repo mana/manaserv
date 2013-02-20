@@ -33,7 +33,7 @@ void AttributeManager::reload()
 {
     mTagMap.clear();
     mAttributeMap.clear();
-    for (unsigned int i = 0; i < MaxScope; ++i)
+    for (unsigned i = 0; i < MaxScope; ++i)
         mAttributeScopes[i].clear();
 
     readAttributesFile();
@@ -43,11 +43,11 @@ void AttributeManager::reload()
               << ", NonStackableBonus is " << NonStackableBonus << ".");
     LOG_DEBUG("Additive is " << Additive << ", Multiplicative is " << Multiplicative << ".");
     const std::string *tag;
-    unsigned int count = 0;
+    unsigned count = 0;
     for (AttributeMap::const_iterator i = mAttributeMap.begin();
          i != mAttributeMap.end(); ++i)
     {
-        unsigned int lCount = 0;
+        unsigned lCount = 0;
         LOG_DEBUG("  "<<i->first<<" : ");
         for (std::vector<AttributeModifier>::const_iterator j =
             i->second.modifiers.begin();
@@ -144,13 +144,15 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         return;
     }
 
-    mAttributeMap[id].modifiers = std::vector<AttributeModifier>();
-    mAttributeMap[id].minimum = XML::getFloatProperty(attributeNode, "minimum",
-                                            std::numeric_limits<double>::min());
-    mAttributeMap[id].maximum = XML::getFloatProperty(attributeNode, "maximum",
-                                            std::numeric_limits<double>::max());
-    mAttributeMap[id].modifiable = XML::getBoolProperty(attributeNode, "modifiable",
-                                            false);
+    AttributeInfo &attribute = mAttributeMap[id];
+
+    attribute.modifiers = std::vector<AttributeModifier>();
+    attribute.minimum = XML::getFloatProperty(attributeNode, "minimum",
+                                           std::numeric_limits<double>::min());
+    attribute.maximum = XML::getFloatProperty(attributeNode, "maximum",
+                                           std::numeric_limits<double>::max());
+    attribute.modifiable = XML::getBoolProperty(attributeNode, "modifiable",
+                                                false);
 
     for_each_xml_child_node(subNode, attributeNode)
     {
@@ -171,22 +173,19 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
     }
     else if (scope == "CHARACTER")
     {
-        mAttributeScopes[CharacterScope][id] =
-            &mAttributeMap.at(id);
+        mAttributeScopes[CharacterScope][id] = &attribute;
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default character scope.");
     }
     else if (scope == "MONSTER")
     {
-        mAttributeScopes[MonsterScope][id] =
-            &mAttributeMap.at(id);
+        mAttributeScopes[MonsterScope][id] = &attribute;
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default monster scope.");
     }
     else if (scope == "BEING")
     {
-        mAttributeScopes[BeingScope][id] =
-            &mAttributeMap.at(id);
+        mAttributeScopes[BeingScope][id] = &attribute;
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' added to default being scope.");
     }
@@ -247,6 +246,15 @@ void AttributeManager::readModifierNode(xmlNodePtr modifierNode,
         LOG_WARN("Attribute manager: attribute '" << attributeId
                  << "' has unknown modification type '"
                  << effectTypeString << "', skipping modifier!");
+        return;
+    }
+
+    if (stackableType == NonStackable && effectType == Multiplicative)
+    {
+        LOG_WARN("Attribute manager: attribute '" << attributeId
+                 << "' has a non sense modifier. "
+                 << "Having NonStackable and Multiplicative makes no sense! "
+                 << "Skipping modifier!");
         return;
     }
 

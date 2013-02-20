@@ -55,22 +55,22 @@ struct SpecialValue
         : currentMana(0)
     {}
 
-    SpecialValue(unsigned int currentMana)
+    SpecialValue(unsigned currentMana)
         : currentMana(currentMana)
     {}
 
-    unsigned int currentMana;
+    unsigned currentMana;
 };
 
 /**
  * Stores attributes by their id.
  */
-typedef std::map<unsigned int, AttributeValue> AttributeMap;
+typedef std::map<unsigned, AttributeValue> AttributeMap;
 
 /**
  * Stores specials by their id.
  */
-typedef std::map<unsigned int, SpecialValue> SpecialMap;
+typedef std::map<unsigned, SpecialValue> SpecialMap;
 
 class Character
 {
@@ -87,10 +87,10 @@ class Character
         /**
          * Gets the slot of the character.
          */
-        unsigned int getCharacterSlot() const
+        unsigned getCharacterSlot() const
         { return mCharacterSlot; }
 
-        void setCharacterSlot(unsigned int slot)
+        void setCharacterSlot(unsigned slot)
         { mCharacterSlot = slot; }
 
         /** Gets the account the character belongs to. */
@@ -148,10 +148,10 @@ class Character
         void setLevel(int level) { mLevel = level; }
 
         /** Sets the value of a base attribute of the character. */
-        void setAttribute(unsigned int id, double value)
+        void setAttribute(unsigned id, double value)
         { mAttributes[id].base = value; }
 
-        void setModAttribute(unsigned int id, double value)
+        void setModAttribute(unsigned id, double value)
         { mAttributes[id].modified = value; }
 
         int getSkillSize() const
@@ -277,7 +277,7 @@ class Character
         Possessions mPossessions; //!< All the possesions of the character.
         std::string mName;        //!< Name of the character.
         int mDatabaseID;          //!< Character database ID.
-        unsigned int mCharacterSlot;  //!< Character slot.
+        unsigned mCharacterSlot;  //!< Character slot.
         int mAccountID;           //!< Account ID of the owner.
         Account *mAccount;        //!< Account owning the character.
         Point mPos;               //!< Position the being is at.
@@ -307,6 +307,6 @@ class Character
 /**
  * Type definition for a list of Characters.
  */
-typedef std::map<unsigned int, Character* > Characters;
+typedef std::map<unsigned, Character* > Characters;
 
 #endif

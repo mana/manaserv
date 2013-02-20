@@ -101,7 +101,7 @@ class Storage
          *
          * @return the id of the character
          */
-        unsigned int getCharacterId(const std::string &name);
+        unsigned getCharacterId(const std::string &name);
 
         /**
          * Add an account to the database.
@@ -152,7 +152,7 @@ class Storage
          * @param base      The base value of the attribute for this character
          * @param mod       The cached modified value for this character.
          */
-        void updateAttribute(int charId, unsigned int attrId,
+        void updateAttribute(int charId, unsigned attrId,
                              double base, double mod);
 
         /**
@@ -239,17 +239,6 @@ class Storage
          * @return true on success
          */
         bool updateCharacter(Character *ptr);
-
-        /**
-         * Save changes of a skill to the database permanently.
-         *
-         * @param character Character thats skill has changed.
-         * @param skill_id Identifier of the changed skill.
-         *
-         * @exception dbl::DbSqlQueryExecFailure.
-         * @deprecated Use DALStorage::updateExperience instead!!!
-         */
-        void flushSkill(const Character *character, int skillId);
 
         /**
          * Add a new guild.
@@ -427,7 +416,7 @@ class Storage
          *
          * @return the database version number.
          */
-        unsigned int getItemDatabaseVersion() const
+        unsigned getItemDatabaseVersion() const
         { return mItemDbVersion; }
 
         /**
@@ -450,7 +439,7 @@ class Storage
          *
          * @return a vector of transactions.
          */
-        std::vector<Transaction> getTransactions(unsigned int num);
+        std::vector<Transaction> getTransactions(unsigned num);
 
         /**
          * Retrieve all transactions since the given \a date.
@@ -508,7 +497,7 @@ class Storage
         void syncDatabase();
 
         dal::DataProvider *mDb;         /**< the data provider */
-        unsigned int mItemDbVersion;    /**< Version of the item database. */
+        unsigned mItemDbVersion;        /**< Version of the item database. */
 };
 
 extern Storage *storage;

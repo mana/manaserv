@@ -54,6 +54,8 @@ void NPC::update()
         return;
 
     Script *script = ScriptManager::currentState();
+    script->setMap(getMap());
+
     script->prepare(mUpdateCallback);
     script->push(this);
     script->execute();
