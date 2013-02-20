@@ -118,10 +118,12 @@ void LuaScript::push(const std::list<InventoryItem> &itemList)
     ++nbArgs;
 }
 
-int LuaScript::execute()
+int LuaScript::execute(const Context &context)
 {
     assert(nbArgs >= 0);
 
+    const Context *previousContext = mContext;
+    mContext = &context;
 
     const int tmpNbArgs = nbArgs;
     nbArgs = -1;
@@ -139,7 +141,7 @@ int LuaScript::execute()
     }
     res = lua_tointeger(mCurrentState, -1);
     lua_pop(mCurrentState, 1);
-    setMap(0);
+    mContext = previousContext;
     return res;
 }
 
@@ -148,7 +150,9 @@ bool LuaScript::resume()
     assert(nbArgs >= 0);
     assert(mCurrentThread);
 
-    setMap(mCurrentThread->mMap);
+    const Context *previousContext = mContext;
+    mContext = &mCurrentThread->getContext();
+
     const int tmpNbArgs = nbArgs;
     nbArgs = -1;
 #if LUA_VERSION_NUM < 502
@@ -156,7 +160,6 @@ bool LuaScript::resume()
 #else
     int result = lua_resume(mCurrentState, NULL, tmpNbArgs);
 #endif
-    setMap(0);
 
     if (result == 0)                // Thread is done
     {
@@ -181,6 +184,7 @@ bool LuaScript::resume()
     }
 
     lua_settop(mCurrentState, 0);
+    mContext = previousContext;
     const bool done = result != LUA_YIELD;
 
     if (done)
@@ -215,8 +219,11 @@ void LuaScript::unref(Ref &ref)
     }
 }
 
-void LuaScript::load(const char *prog, const char *name)
+void LuaScript::load(const char *prog, const char *name,
+                     const Context &context)
 {
+    const Context *previousContext = mContext;
+    mContext = &context;
     int res = luaL_loadbuffer(mRootState, prog, std::strlen(prog), name);
     if (res)
     {
@@ -238,19 +245,18 @@ void LuaScript::load(const char *prog, const char *name)
                   << lua_tostring(mRootState, -1));
         lua_pop(mRootState, 1);
     }
-    setMap(0);
+    mContext = previousContext;
 }
 
 void LuaScript::processDeathEvent(Being *entity)
 {
     if (mDeathNotificationCallback.isValid())
     {
-        setMap(entity->getMap());
         prepare(mDeathNotificationCallback);
         push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
         //      being. This might be very interesting for scripting quests.
-        execute();
+        Script::execute(entity->getMap());
     }
 }
 
@@ -258,12 +264,11 @@ void LuaScript::processRemoveEvent(Entity *entity)
 {
     if (mRemoveNotificationCallback.isValid())
     {
-        setMap(entity->getMap());
         prepare(mRemoveNotificationCallback);
         push(entity);
         //TODO: get and push a list of creatures who contributed to killing the
         //      being. This might be very interesting for scripting quests.
-        execute();
+        Script::execute(entity->getMap());
     }
 }
 

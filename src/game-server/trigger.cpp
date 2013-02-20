@@ -50,11 +50,10 @@ void ScriptAction::process(Actor *obj)
     LOG_DEBUG("Script trigger area activated: "
               << "(" << obj << ", " << mArg << ")");
 
-    mScript->setMap(obj->getMap());
     mScript->prepare(mCallback);
     mScript->push(obj);
     mScript->push(mArg);
-    mScript->execute();
+    mScript->execute(obj->getMap());
 }
 
 void TriggerArea::update()

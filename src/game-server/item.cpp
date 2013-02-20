@@ -71,11 +71,11 @@ bool ItemEffectScript::apply(Being *itemUser)
     if (function.isValid())
     {
         Script *script = ScriptManager::currentState();
-        script->setMap(itemUser->getMap());
         script->prepare(function);
         script->push(itemUser);
         script->push(mItemClass->getDatabaseID());
-        script->execute(); // TODO return depending on script execution success.
+        script->execute(itemUser->getMap());
+        // TODO return depending on script execution success.
         return true;
     }
     return false;
@@ -90,11 +90,10 @@ void ItemEffectScript::dispell(Being *itemUser)
     if (function.isValid())
     {
         Script *script = ScriptManager::currentState();
-        script->setMap(itemUser->getMap());
         script->prepare(function);
         script->push(itemUser);
         script->push(mItemClass->getDatabaseID());
-        script->execute();
+        script->execute(itemUser->getMap());
     }
 }
 

@@ -267,7 +267,7 @@ MapComposite *checkCurrentMap(lua_State *s, Script *script /* = 0 */)
     if (!script)
         script = getScript(s);
 
-    MapComposite *mapComposite = script->getMap();
+    MapComposite *mapComposite = script->getContext()->map;
     if (!mapComposite)
         luaL_error(s, "no current map");
 

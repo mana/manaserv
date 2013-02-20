@@ -44,7 +44,8 @@ class LuaScript : public Script
 
         ~LuaScript();
 
-        void load(const char *prog, const char *name);
+        void load(const char *prog, const char *name,
+                  const Context &context = Context());
 
         Thread *newThread();
 
@@ -60,7 +61,7 @@ class LuaScript : public Script
 
         void push(const std::list<InventoryItem> &itemList);
 
-        int execute();
+        int execute(const Context &context = Context());
 
         bool resume();
 
