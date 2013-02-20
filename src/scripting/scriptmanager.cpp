@@ -60,7 +60,7 @@ bool ScriptManager::performCraft(Being *crafter,
     _currentState->prepare(_craftCallback);
     _currentState->push(crafter);
     _currentState->push(recipe);
-    _currentState->execute();
+    _currentState->execute(crafter->getMap());
     return true;
 }
 

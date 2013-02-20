@@ -603,11 +603,10 @@ void Being::recalculateBaseAttribute(unsigned attr)
         return;
 
     Script *script = ScriptManager::currentState();
-    script->setMap(getMap());
     script->prepare(mRecalculateBaseAttributeCallback);
     script->push(this);
     script->push(attr);
-    script->execute();
+    script->execute(getMap());
 }
 
 void Being::updateDerivedAttributes(unsigned attr)
@@ -632,11 +631,10 @@ void Being::updateDerivedAttributes(unsigned attr)
         return;
 
     Script *script = ScriptManager::currentState();
-    script->setMap(getMap());
     script->prepare(mRecalculateDerivedAttributesCallback);
     script->push(this);
     script->push(attr);
-    script->execute();
+    script->execute(getMap());
 }
 
 void Being::applyStatusEffect(int id, int timer)

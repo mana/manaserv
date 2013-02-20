@@ -27,6 +27,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <stack>
 
 #include <sigc++/trackable.h>
 
@@ -40,6 +41,15 @@ class Entity;
 class Script : public sigc::trackable
 {
     public:
+        struct Context
+        {
+            MapComposite *map;
+
+            Context()
+                : map(0)
+            {}
+        };
+
         /**
          * Defines a function that creates a Script instance.
          */
@@ -87,9 +97,12 @@ class Script : public sigc::trackable
                 Thread(Script *script);
                 virtual ~Thread();
 
+                Context &getContext()
+                { return mContext; }
+
                 Script * const mScript;
                 ThreadState mState;
-                MapComposite *mMap;
+                Context mContext;
         };
 
         Script();
@@ -102,14 +115,18 @@ class Script : public sigc::trackable
          *
          * @param prog the program text to load
          * @param name the name of the text, used for error reporting
+         * @param context the context that is supposed to be used for loading
          */
-        virtual void load(const char *prog, const char *name) = 0;
+        virtual void load(const char *prog,
+                          const char *name,
+                          const Context &context = Context()) = 0;
 
         /**
          * Loads a text file into script context and executes its global
          * statements.
          */
-        virtual bool loadFile(const std::string &);
+        virtual bool loadFile(const std::string &,
+                              const Context &context = Context());
 
         /**
          * Loads a chunk of text and considers it as an NPC handler. This
@@ -119,7 +136,8 @@ class Script : public sigc::trackable
                              int id,
                              ManaServ::BeingGender gender,
                              int x, int y,
-                             const char *);
+                             const char *,
+                             MapComposite *map);
 
         /**
          * Called every tick for the script to manage its data.
@@ -174,9 +192,17 @@ class Script : public sigc::trackable
 
         /**
          * Executes the function being prepared.
+         * @param context the context that is supposed to be used for executing
          * @return the value returned by the script.
          */
-        virtual int execute() = 0;
+        virtual int execute(const Context &context = Context()) = 0;
+
+        /**
+         * Executes the function being prepared.
+         * @param the map which is set as context
+         * @return the value returned by the script.
+         */
+        int execute(MapComposite *map);
 
         /**
          * Starts or resumes the current thread. Deletes the thread when it is
@@ -207,16 +233,10 @@ class Script : public sigc::trackable
         { return mCurrentThread; }
 
         /**
-         * Sets associated map.
+         * Returns the current context.
          */
-        void setMap(MapComposite *m)
-        { mMap = m; }
-
-        /**
-         * Gets associated map.
-         */
-        MapComposite *getMap() const
-        { return mMap; }
+        const Context *getContext() const
+        { return mContext; }
 
         virtual void processDeathEvent(Being *entity) = 0;
 
@@ -231,9 +251,9 @@ class Script : public sigc::trackable
     protected:
         std::string mScriptFile;
         Thread *mCurrentThread;
+        const Context *mContext;
 
     private:
-        MapComposite *mMap;
         std::vector<Thread*> mThreads;
 
         static Ref mCreateNpcDelayedCallback;

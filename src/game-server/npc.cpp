@@ -54,11 +54,9 @@ void NPC::update()
         return;
 
     Script *script = ScriptManager::currentState();
-    script->setMap(getMap());
-
     script->prepare(mUpdateCallback);
     script->push(this);
-    script->execute();
+    script->execute(getMap());
 }
 
 void NPC::prompt(Character *ch, bool restart)
@@ -71,7 +69,7 @@ void NPC::prompt(Character *ch, bool restart)
     if (restart)
     {
         Script::Thread *thread = script->newThread();
-        thread->mMap = getMap();
+        thread->getContext().map = getMap();
         script->prepare(mTalkCallback);
         script->push(this);
         script->push(ch);

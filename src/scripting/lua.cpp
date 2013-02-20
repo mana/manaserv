@@ -1438,17 +1438,11 @@ static int chr_request_quest(lua_State *s)
         Script::Ref callback;
         script->assignCallback(callback);
 
-        // Backup the map since execute will reset it
-        MapComposite *map = script->getMap();
-
         script->prepare(callback);
         script->push(ch);
         script->push(name);
         script->push(value);
-        script->execute();
-
-        // Restore map
-        script->setMap(map);
+        script->execute(ch->getMap());
         return 0;
     }
 
@@ -2132,7 +2126,7 @@ static int get_map_id(lua_State *s)
 {
     Script *script = getScript(s);
 
-    if (MapComposite *mapComposite = script->getMap())
+    if (MapComposite *mapComposite = script->getContext()->map)
         lua_pushinteger(s, mapComposite->getID());
     else
         lua_pushnil(s);

@@ -142,10 +142,9 @@ void Monster::update()
     if (mSpecy->getUpdateCallback().isValid())
     {
         Script *script = ScriptManager::currentState();
-        script->setMap(getMap());
         script->prepare(mSpecy->getUpdateCallback());
         script->push(this);
-        script->execute();
+        script->execute(getMap());
     }
 
     refreshTarget();
@@ -276,12 +275,11 @@ void Monster::processAttack(Attack &attack)
     if (scriptCallback.isValid() && hit > -1)
     {
         Script *script = ScriptManager::currentState();
-        script->setMap(getMap());
         script->prepare(scriptCallback);
         script->push(this);
         script->push(mTarget);
         script->push(hit);
-        script->execute();
+        script->execute(getMap());
     }
 }
 
@@ -403,13 +401,12 @@ int Monster::damage(Actor *source, const Damage &damage)
     if (mSpecy->getDamageCallback().isValid())
     {
         Script *script = ScriptManager::currentState();
-        script->setMap(getMap());
         script->prepare(mSpecy->getDamageCallback());
         script->push(this);
         script->push(source);
         script->push(HPLoss);
         // TODO: add exact damage parameters as well
-        script->execute();
+        script->execute(getMap());
     }
 
     return HPLoss;

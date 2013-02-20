@@ -62,10 +62,9 @@ static bool executeCallback(Script::Ref function, Character *character)
         return false;
 
     Script *script = ScriptManager::currentState();
-    script->setMap(character->getMap());
     script->prepare(function);
     script->push(character);
-    script->execute();
+    script->execute(character->getMap());
     return true;
 }
 
@@ -161,7 +160,7 @@ void Character::update()
                 script->prepare(s.specialInfo->rechargedCallback);
                 script->push(this);
                 script->push(s.specialInfo->id);
-                script->execute();
+                script->execute(getMap());
             }
         }
     }
@@ -258,12 +257,11 @@ void Character::useSpecialOnBeing(int id, Being *b)
 
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
-    script->setMap(getMap());
     script->prepare(special.specialInfo->useCallback);
     script->push(this);
     script->push(b);
     script->push(special.specialInfo->id);
-    script->execute();
+    script->execute(getMap());
 }
 
 void Character::useSpecialOnPoint(int id, int x, int y)
@@ -278,13 +276,12 @@ void Character::useSpecialOnPoint(int id, int x, int y)
 
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
-    script->setMap(getMap());
     script->prepare(special.specialInfo->useCallback);
     script->push(this);
     script->push(x);
     script->push(y);
     script->push(special.specialInfo->id);
-    script->execute();
+    script->execute(getMap());
 }
 
 bool Character::giveSpecial(int id, int currentMana)
