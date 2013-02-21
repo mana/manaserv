@@ -512,9 +512,8 @@ bool MapComposite::activate()
     else
     {
         Script *s = ScriptManager::currentState();
-        s->setMap(this);
         s->prepare(mInitializeCallback);
-        s->execute();
+        s->execute(this);
     }
 
     return true;
@@ -628,10 +627,9 @@ void MapComposite::update()
     if (mUpdateCallback.isValid())
     {
         Script *s = ScriptManager::currentState();
-        s->setMap(this);
         s->prepare(mUpdateCallback);
         s->push(mID);
-        s->execute();
+        s->execute(this);
     }
 
     // Move objects around and update zones.
@@ -703,11 +701,10 @@ static void callVariableCallback(Script::Ref &function, const std::string &key,
     if (function.isValid())
     {
         Script *s = ScriptManager::currentState();
-        s->setMap(map);
         s->prepare(function);
         s->push(key);
         s->push(value);
-        s->execute();
+        s->execute(map);
     }
 }
 
@@ -854,11 +851,10 @@ void MapComposite::initializeContent()
             if (npcId && !scriptText.empty())
             {
                 Script *script = ScriptManager::currentState();
-                script->setMap(this);
                 script->loadNPC(object->getName(), npcId,
                                 ManaServ::getGender(gender),
                                 object->getX(), object->getY(),
-                                scriptText.c_str());
+                                scriptText.c_str(), this);
             }
             else
             {
@@ -871,16 +867,17 @@ void MapComposite::initializeContent()
             std::string scriptText = object->getProperty("TEXT");
 
             Script *script = ScriptManager::currentState();
-            script->setMap(this);
+            Script::Context context;
+            context.map = this;
 
             if (!scriptFilename.empty())
             {
-                script->loadFile(scriptFilename);
+                script->loadFile(scriptFilename, context);
             }
             else if (!scriptText.empty())
             {
                 std::string name = "'" + object->getName() + "'' in " + mName;
-                script->load(scriptText.c_str(), name.c_str());
+                script->load(scriptText.c_str(), name.c_str(), context);
             }
             else
             {

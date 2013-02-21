@@ -30,17 +30,8 @@ The compilation should produce two binaries:
 
 SERVER DATA
 
-The server depends on parts of the client data and also has its own data
-repository. These are the 'manadata' and 'manaserv-data' repositories.
-Currently, manaserv expects these to be merged into a single 'data' directory.
-
-1) Clone manadata and manaserv-data next to the manaserv repository
-2) Symlink a 'data' directory in manaserv to manaserv-data
-3) Symlink the following files from manaserv-data to manadata:
-
-  * data/items.xml - Item definitions
-  * data/monsters.xml - Monster definitions
-  * data/maps/*.tmx{.gz} - Maps
+The client and the server share a big part of the data. See the example/
+subfolder for an example world data.
 
 
 CONFIGURATION

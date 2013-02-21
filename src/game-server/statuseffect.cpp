@@ -37,10 +37,9 @@ void StatusEffect::tick(Being *target, int count)
     if (mTickCallback.isValid())
     {
         Script *s = ScriptManager::currentState();
-        s->setMap(target->getMap());
         s->prepare(mTickCallback);
         s->push(target);
         s->push(count);
-        s->execute();
+        s->execute(target->getMap());
     }
 }

@@ -40,7 +40,7 @@ Script::Ref Script::mUpdateCallback;
 
 Script::Script():
     mCurrentThread(0),
-    mMap(0)
+    mContext(0)
 {}
 
 Script::~Script()
@@ -95,14 +95,14 @@ static char *skipPotentialBom(char *text)
     return (strncmp(text, utf8Bom, bomLength) == 0) ? text + bomLength : text;
 }
 
-bool Script::loadFile(const std::string &name)
+bool Script::loadFile(const std::string &name, const Context &context)
 {
     int size;
     char *buffer = ResourceManager::loadFile(name, size);
     if (buffer)
     {
         mScriptFile = name;
-        load(skipPotentialBom(buffer), name.c_str());
+        load(skipPotentialBom(buffer), name.c_str(), context);
         free(buffer);
         return true;
     } else {
@@ -114,7 +114,8 @@ void Script::loadNPC(const std::string &name,
                      int id,
                      ManaServ::BeingGender gender,
                      int x, int y,
-                     const char *prog)
+                     const char *prog,
+                     MapComposite *map)
 {
     if (!mCreateNpcDelayedCallback.isValid())
     {
@@ -122,14 +123,23 @@ void Script::loadNPC(const std::string &name,
                   "Could not enabled NPC");
         return;
     }
-    load(prog, name.c_str());
+    Context context;
+    context.map = map;
+    load(prog, name.c_str(), context);
     prepare(mCreateNpcDelayedCallback);
     push(name);
     push(id);
     push(gender);
     push(x);
     push(y);
-    execute();
+    execute(context);
+}
+
+int Script::execute(MapComposite *map)
+{
+    Context context;
+    context.map = map;
+    return execute(context);
 }
 
 
@@ -153,8 +163,7 @@ static void fastRemoveOne(std::vector<T> &vector, T value)
 
 Script::Thread::Thread(Script *script) :
     mScript(script),
-    mState(ThreadPending),
-    mMap(0)
+    mState(ThreadPending)
 {
     script->mThreads.push_back(this);
 }

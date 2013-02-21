@@ -82,12 +82,11 @@ void QuestRefCallback::triggerCallback(Character *ch,
         return;
 
     Script *s = ScriptManager::currentState();
-    s->setMap(ch->getMap());
     s->prepare(mRef);
     s->push(ch);
     s->push(mQuestName);
     s->push(value);
-    s->execute();
+    s->execute(ch->getMap());
 }
 
 static void partialRemove(Entity *t)
