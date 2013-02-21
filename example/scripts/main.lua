@@ -13,3 +13,6 @@ require "scripts/attributes"
 
 require "scripts/items/candy"
 require "scripts/monster/testmonster"
+
+require "scripts/status/jump"
+require "scripts/status/plague"

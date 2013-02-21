@@ -4,14 +4,12 @@
                    icon="icons/icon-poison.xml"
                    persistent-particle-effect="true"
                    start-particle="graphics/particles/green-bubbles.particle.xml"
-                   script="plague.lua"
                    tick-function="tick_plague"
                  />
     <status-effect name="Jumping Status" id="2"
                    icon="icons/icon-feather.xml"
                    persistent-particle-effect="true"
                    start-particle="graphics/particles/magic.white.xml"
-                   script="jump.lua"
                    tick-function="tick_jump"
                  />
 </status-effects>
