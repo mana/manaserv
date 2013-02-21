@@ -71,6 +71,7 @@ end
 -- Global variable used to know whether Harmony talked to someone.
 harmony_have_talked_to_someone = false
 function Harmony(npc, ch, list)
+    being_apply_status(ch, 1, 99999)
     -- Say all the messages in the messages list.
     for i = 1, #list do
         npc_message(npc, ch, list[i])
