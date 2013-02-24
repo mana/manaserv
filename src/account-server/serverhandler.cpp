@@ -247,7 +247,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
 
                     // Map variables
                     outMsg.writeInt16(id);
-                    LOG_DEBUG("Issued server '" << server->name << "' "
+                    LOG_DEBUG("Issued server " << server->name << "("
+                              << server->address << ":" << server->port << ") "
                               << "to enable map " << id);
                     std::map<std::string, std::string> variables;
                     variables = storage->getAllWorldStateVars(id);
