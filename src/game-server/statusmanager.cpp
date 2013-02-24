@@ -22,8 +22,6 @@
 
 #include "common/resourcemanager.h"
 #include "game-server/statuseffect.h"
-#include "scripting/script.h"
-#include "scripting/scriptmanager.h"
 #include "utils/logger.h"
 #include "utils/xml.h"
 
@@ -86,7 +84,6 @@ void StatusManager::reload()
             }
         }
 
-        std::string scriptFile = XML::getProperty(node, "script", std::string());
         //TODO: Get these modifiers
 /*
         modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
@@ -100,20 +97,7 @@ void StatusManager::reload()
         modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE, XML::getProperty(node, "intelligence", 0));
         modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
 */
-        if (!scriptFile.empty())
-        {
-            std::stringstream filename;
-            filename << "scripts/status/" << scriptFile;
-            if (ResourceManager::exists(filename.str()))       // file exists!
-            {
-                LOG_INFO("Loading status script: " << filename.str());
-                Script *s = ScriptManager::currentState();
-                s->loadFile(filename.str());
-            } else {
-                LOG_WARN("Could not find script file \"" << filename.str()
-                         << "\" for status #"<<id);
-            }
-        }
+
         statusEffects[id] = statusEffect;
     }
 }

@@ -148,6 +148,8 @@
 		<Unit filename="src/account-server/character.cpp" />
 		<Unit filename="src/account-server/character.h" />
 		<Unit filename="src/account-server/main-account.cpp" />
+		<Unit filename="src/account-server/mapmanager.cpp" />
+		<Unit filename="src/account-server/mapmanager.h" />
 		<Unit filename="src/account-server/serverhandler.cpp" />
 		<Unit filename="src/account-server/serverhandler.h" />
 		<Unit filename="src/account-server/storage.cpp" />

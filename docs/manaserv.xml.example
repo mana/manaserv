@@ -65,7 +65,6 @@
  Set here the different paths used by both the server to find data.
 -->
  <!-- Paths to data files -->
- <option name="serverPath" value="." />
  <option name="worldDataPath" value="example" />
 
 <!-- end of paths configuration ******************************************* -->
@@ -162,6 +161,15 @@
  <!-- needed to set when hosting behind router or in situations
       where you cannot bind the server to the public url -->
  <!-- <option name="net_publicGameHost" value="mydomain.org"/> -->
+ 
+ <!--
+ Usually the first game server activates all maps. To prevent this you need to
+ set a name for the server and set this name in the maps.xml (see documentation
+ there).
+ -->
+ <!--
+ <option name="net_gameServerName" value="myServer" />
+ -->
 
  <!--
  Update host url: E.g.: "http://updates.manasource.org/"
