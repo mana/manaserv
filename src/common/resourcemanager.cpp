@@ -38,17 +38,21 @@
 
 #include <physfs.h>
 
+#ifndef PKG_DATADIR
+#define PKG_DATADIR "."
+#endif
+
 void ResourceManager::initialize()
 {
     PHYSFS_permitSymbolicLinks(1);
 
-    const std::string serverPath =
-            Configuration::getValue("serverPath", ".");
     const std::string worldDataPath =
             Configuration::getValue("worldDataPath", "example");
 
-    PHYSFS_addToSearchPath(serverPath.c_str(), 1);
+    // world first to allow overriding of server's libraries
     PHYSFS_addToSearchPath(worldDataPath.c_str(), 1);
+    PHYSFS_addToSearchPath(".", 1);
+    PHYSFS_addToSearchPath(PKG_DATADIR, 1);
 }
 
 /**

@@ -65,7 +65,6 @@
  Set here the different paths used by both the server to find data.
 -->
  <!-- Paths to data files -->
- <option name="serverPath" value="." />
  <option name="worldDataPath" value="example" />
 
 <!-- end of paths configuration ******************************************* -->
