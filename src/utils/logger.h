@@ -24,6 +24,7 @@
 
 #include <iosfwd>
 #include <sstream>
+#include <iostream>
 
 namespace utils
 {
@@ -192,6 +193,32 @@ class Logger
         static void switchLogs();
 };
 
+/**
+ * Class for temporarily debugging things that are actually not interesting
+ * to include in the log.
+ *
+ * It is used for automatically ending with a newline, putting spaces in
+ * between different parameters and quoting strings.
+ */
+class Debug
+{
+public:
+    ~Debug() { std::cout << std::endl; }
+
+    template <class T>
+    Debug &operator << (T t)
+    {
+        std::cout << t << " ";
+        return *this;
+    }
+};
+
+template <>
+inline Debug &Debug::operator << (const std::string &t)
+{
+    std::cout << "\"" << t << "\" ";
+    return *this;
+}
 
 } // namespace utils
 
@@ -209,5 +236,12 @@ class Logger
 #define LOG_WARN(msg)   LOG(Warn, msg)
 #define LOG_ERROR(msg)  LOG(Error, msg)
 #define LOG_FATAL(msg)  LOG(Fatal, msg)
+
+/**
+ * Returns an instance of the debug class for printing out a line.
+ *
+ * Usage: debug() << "testing" << a << b;
+ */
+inline ::utils::Debug debug() { return ::utils::Debug(); }
 
 #endif // LOGGER_H
