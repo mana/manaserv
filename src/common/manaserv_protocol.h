@@ -250,7 +250,7 @@ enum {
     PCMSG_KICK_USER                   = 0x0466, // W channel id, S name
 
     // Inter-server
-    GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision, { W map id }*
+    GAMSG_REGISTER              = 0x0500, // S address, W port, S password, D items db revision
     AGMSG_REGISTER_RESPONSE     = 0x0501, // W item version, W password response, { S globalvar_key, S globalvar_value }
     AGMSG_ACTIVE_MAP            = 0x0502, // W map id, W Number of mapvar_key mapvar_value sent, { S mapvar_key, S mapvar_value }, W Number of map items, { D item Id, W amount, W posX, W posY }
     AGMSG_PLAYER_ENTER          = 0x0510, // B*32 token, D id, S name, serialised character data
