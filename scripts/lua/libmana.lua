@@ -16,7 +16,21 @@
 
 require "scripts/lua/libmana-constants"
 
--- A table that provides access to persistent variables of the current map
+--- LUA map (variables)
+-- local value = map[string key]
+-- map[string key] = value
+---
+-- Sets or gets a persistent map variable. The scope of the variable is the
+-- map the script runs on. The value is stored in the database and thus will
+-- survive a server reboot.
+--
+-- **Example:**
+-- <code lua>
+-- local value = map["a key"]
+-- if value == "some value" then
+--     map["a key"] = "other value"
+-- end
+-- </code>
 map = setmetatable({}, {
     __index = function(_, key)
         return getvar_map(key)
@@ -26,7 +40,24 @@ map = setmetatable({}, {
     end,
 })
 
--- A table that provides access to persistent global world variables
+--- LUA world (variables)
+-- local value = world[string key]
+-- world[string key] = value
+---
+-- Sets or gets a persistent world variable. The value is stored in the
+-- database and thus will survive a server reboot.
+-- 
+-- **Important:** When you are using this function, be aware of race
+-- conditions: It is impossible to prevent that another map changes the value
+-- of a variable between you requesting to old value and setting a new value.
+--
+-- **Example:**
+-- <code lua>
+-- local value = world["a key"]
+-- if value == "some value" then
+--     world["a key"] = "other value"
+-- end
+-- </code>
 world = setmetatable({}, {
     __index = function(_, key)
         return getvar_world(key)
@@ -36,10 +67,40 @@ world = setmetatable({}, {
     end,
 })
 
--- Some convenient shortcuts for the different log levels
+--- LUA ERROR (logging)
+-- ERROR(string message)
+---
+-- Will log the ''message'' using the log level LOG_ERROR.
+-- 
+-- **Note:** When passing multiple arguments these arguments will get connected
+-- using a " ".
 function ERROR(...) log(LOG_ERROR, table.concat({...}, " ")) end
+
+--- LUA WARN (logging)
+-- WARN(string message)
+---
+-- Will log the ''message'' using the log level LOG_WARNING.
+--
+-- **Note:** When passing multiple arguments these arguments will get connected
+-- using a " ".
 function WARN(...)  log(LOG_WARN,  table.concat({...}, " ")) end
+
+--- LUA INFO (logging)
+-- INFO(string message)
+---
+-- Will log the ''message'' using the log level LOG_INFO.
+--
+-- **Note:** When passing multiple arguments these arguments will get connected
+-- using a " ".
 function INFO(...)  log(LOG_INFO,  table.concat({...}, " ")) end
+
+--- LUA DEBUG (logging)
+-- DEBUG(string message)
+---
+-- Will log the ''message'' using the log level LOG_DEBUG.
+--
+-- **Note:** When passing multiple arguments these arguments will get connected
+-- using a " ".
 function DEBUG(...) log(LOG_DEBUG, table.concat({...}, " ")) end
 
 -- Array containing the function registered by atinit.
@@ -87,7 +148,15 @@ local function mapupdate(mapid)
     check_schedule(mapid)
 end
 
--- Registers a function so that it is executed during map initialization.
+--- LUA_CATEGORY Scheduling (scheduling)
+
+--- LUA atinit (scheduling)
+-- atinit(function() [function body] end)
+---
+-- Adds a function which is executed when the gameserver loads the map this
+-- script belongs to. Usually used for placing NPCs or trigger areas and for
+-- setting up cronjobs with schedule_every. Any number of functions can be
+-- added this way.
 function atinit(f)
   local map_id = get_map_id()
   init_fun[map_id] = init_fun[map_id] or {}
@@ -124,7 +193,10 @@ local function job_cmp(job1, job2)
   return (job1[0] > job2[0])
 end
 
--- schedules a function call to be executed once in n seconds
+--- LUA schedule_in (scheduling)
+-- schedule_in(seconds, function() [function body] end)
+---
+-- Executes the ''function body'' in ''seconds'' seconds.
 function schedule_in(seconds, funct)
   local job = {}
   job[0] = os.time() + seconds
@@ -136,7 +208,10 @@ function schedule_in(seconds, funct)
   table.sort(scheduler_jobs[map_id], job_cmp)
 end
 
--- schedules a function call to be executed at regular intervals of n seconds
+--- LUA schedule_every (scheduling)
+-- schedule_every(seconds, function() [function body] end)
+---
+-- Executes the ''function body'' every ''seconds'' seconds from now on.
 function schedule_every(seconds, funct)
   local job = {}
   job[0] = os.time() + seconds
@@ -148,7 +223,10 @@ function schedule_every(seconds, funct)
   table.sort(scheduler_jobs[map_id], job_cmp)
 end
 
--- schedules a function call to be executed at a given date
+--- LUA schedule_per_date (scheduling)
+-- schedule_per_date(year, month, day, hour, minute, function() [function body] end)
+---
+-- Executes the ''function body'' at the given date and time.
 function schedule_per_date(my_year, my_month, my_day, my_hour, my_minute, funct)
   local job = {}
   job[0] = os.time{year = my_year, month = my_month, day = my_day,
@@ -182,6 +260,16 @@ local function on_worldvar_callback(key, value)
   end
 end
 
+--- LUA on_mapvar_changed (variables)
+-- on_mapvar_changed(string key, function func)
+---
+-- Registers a callback to the key. This callback will be called with the key
+-- and value of the changed variable.
+--
+-- **Example:**
+-- <code lua>on_mapvar_changed(key, function(key, value)
+--     log(LOG_DEBUG, "mapvar " .. key .. " has new value " .. value)
+-- end)</code>
 function on_mapvar_changed(key, funct)
   if not onmapvar_functs[key] then
     onmapvar_functs[key] = {}
@@ -190,6 +278,16 @@ function on_mapvar_changed(key, funct)
   onmapvar_functs[key][funct] = get_map_id()
 end
 
+--- LUA on_worldvar_changed (variables)
+-- on_worldvar_changed(string key, function func)
+---
+-- Registers a callback to the key. This callback will be called with the key
+-- and value of the changed variable.
+--
+-- **Example:**
+-- <code lua>on_worldvar_changed(key, function(key, value)
+--     log(LOG_DEBUG, "worldvar " .. key .. " has new value " .. value)
+-- end)</code>
 function on_worldvar_changed(key, funct)
   if not onworldvar_functs[key] then
     onworldvar_functs[key] = {}
@@ -198,10 +296,18 @@ function on_worldvar_changed(key, funct)
   onworldvar_functs[key][funct] = true
 end
 
+--- LUA remove_mapvar_listener (variables)
+-- remove_mapvar_listener(string key, function func)
+---
+-- Unassigns a function from getting notified from mapvar changes.
 function remove_mapvar_listener(key, funct)
   onmapvar_functs[key][funct] = nil
 end
 
+--- LUA remove_worldvar_listener (variables)
+-- remove_worldvar_listener(string key, function func)
+---
+-- Unassigns a function from getting notified from worldvar changes.
 function remove_worldvar_listener(key, funct)
   onworldvar_functs[key][funct] = nil
 end
@@ -210,8 +316,11 @@ end
 local ondeath_functs = {}
 local onremove_functs = {}
 
--- requests the gameserver to notify the script engine when the being
--- dies and adds a script function to be executed in this case.
+--- LUA on_death (scheduling)
+-- on_death(handle being, function() [function body] end)
+---
+-- Executes the ''function body'' when ''being'' is killed. Note that this
+-- doesn't happen anymore after the being left the map. 
 function on_death(being, funct)
   if ondeath_functs[being] == nil then
     ondeath_functs[being] = {}
@@ -220,8 +329,12 @@ function on_death(being, funct)
   being_register(being)
 end
 
--- requests the gameserver to notify the script engine when the being
--- dies and adds a script function to be executed in this case.
+--- LUA on_remove (scheduling)
+-- on_remove(handle being, function() [function body] end)
+---
+-- Executes the ''function body'' when ''being'' is no longer on the map for
+-- some reason (leaves the map voluntarily, is warped away, logs out, cleaned
+-- up after getting killed or whatever).
 function on_remove(being, funct)
   if onremove_functs[being] == nil then
     onremove_functs[being] = {}
@@ -253,6 +366,14 @@ end
 
 
 -- Below are some convenience methods added to the engine API
+
+--- LUA chr_money_change (inventory)
+-- chr_money_change(handle character, int amount)
+---
+-- Changes the money currently owned by ''character'' by ''amount''.
+--
+-- **Warning:** Before reducing the money make sure to check if the character
+-- owns enough money using chr_money.
 chr_money_change = function(ch, amount)
   being_set_base_attribute(
                             ch,
@@ -260,6 +381,13 @@ chr_money_change = function(ch, amount)
                             being_get_base_attribute(ch, ATTR_GP) + amount)
 end
 
+--- LUA chr_money (inventory)
+-- chr_money(handle character)
+---
+-- Changes the money currently owned by ''character'' by ''amount''.
+--
+-- **Warning:** Before reducing the money make sure to check if the character
+-- owns enough money using chr_money.
 chr_money = function(ch)
   return being_get_base_attribute(ch, ATTR_GP)
 end
