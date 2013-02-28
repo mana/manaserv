@@ -371,8 +371,6 @@ class Monster : public Being
         Timeout mKillStealProtectedTimeout;
         /** Time until dead monster is removed */
         Timeout mDecayTimeout;
-
-        friend struct MonsterTargetEventDispatch;
 };
 
 #endif // MONSTER_H
