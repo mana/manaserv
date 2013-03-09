@@ -29,7 +29,7 @@
 namespace ManaServ {
 
 enum {
-    PROTOCOL_VERSION = 3,
+    PROTOCOL_VERSION = 4,
     SUPPORTED_DB_VERSION = 21
 };
 
@@ -132,7 +132,7 @@ enum {
                                              // npc: W type id
     GPMSG_BEING_LEAVE              = 0x0201, // W being id
     GPMSG_ITEM_APPEAR              = 0x0202, // W item id, W*2 position
-    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // B sprite layers changed, { B slot type, W item id }*
+    GPMSG_BEING_LOOKS_CHANGE       = 0x0210, // B hairstyle, B haircolor, B sprite layers changed, { B slot type, W item id }*
     GPMSG_BEING_EMOTE              = 0x0211, // W being id, W emote id
     PGMSG_BEING_EMOTE              = 0x0212, // W emoticon id
     PGMSG_WALK                     = 0x0260, // W*2 destination

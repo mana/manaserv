@@ -81,8 +81,11 @@ static std::map< std::string, std::string > mScriptVariables;
  */
 static void serializeLooks(Entity *ch, MessageOut &msg)
 {
-    const EquipData &equipData = ch->getComponent<CharacterComponent>()
-            ->getPossessions().getEquipment();
+    auto *characterComponent = ch->getComponent<CharacterComponent>();
+    msg.writeInt8(characterComponent->getHairStyle());
+    msg.writeInt8(characterComponent->getHairColor());
+    const EquipData &equipData =
+            characterComponent->getPossessions().getEquipment();
 
     // We'll use a set to check whether we already sent the update for the given
     // item instance.
@@ -195,12 +198,6 @@ static void informPlayer(MapComposite *map, Entity *p)
                 MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
                 LooksMsg.writeInt16(oid);
                 serializeLooks(o, LooksMsg);
-                auto *characterComponent =
-                        o->getComponent<CharacterComponent>();
-                LooksMsg.writeInt16(characterComponent->getHairStyle());
-                LooksMsg.writeInt16(characterComponent->getHairColor());
-                LooksMsg.writeInt16(
-                        o->getComponent<BeingComponent>()->getGender());
                 gameHandler->sendTo(p, LooksMsg);
             }
 
@@ -278,8 +275,6 @@ static void informPlayer(MapComposite *map, Entity *p)
                             o->getComponent<CharacterComponent>();
                     enterMsg.writeString(
                             o->getComponent<BeingComponent>()->getName());
-                    enterMsg.writeInt8(characterComponent->getHairStyle());
-                    enterMsg.writeInt8(characterComponent->getHairColor());
                     serializeLooks(o, enterMsg);
                 } break;
 
