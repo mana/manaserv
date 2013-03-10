@@ -85,10 +85,8 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
     msg.writeInt8(characterComponent->getHairColor());
     const EquipData &equipData =
             characterComponent->getPossessions().getEquipment();
-
-    // We'll use a set to check whether we already sent the update for the given
-    // item instance.
-    std::set<unsigned> itemInstances;
+    const InventoryData &inventoryData =
+            characterComponent->getPossessions().getInventory();
 
     // The map storing the info about the look changes to send
     //{ slot type id, item id }
@@ -99,17 +97,14 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
     for (EquipData::const_iterator it = equipData.begin(),
          it_end = equipData.end(); it != it_end; ++it)
     {
-        if (!itemManager->isEquipSlotVisible(it->first))
+        InventoryData::const_iterator itemIt = inventoryData.find(*it);
+
+        if (!itemManager->isEquipSlotVisible(itemIt->second.equipmentSlot))
             continue;
 
-        if (!it->second.itemInstance
-            || itemInstances.insert(it->second.itemInstance).second)
-        {
-            // When the insertion succeeds, its the first time
-            // we encounter the item, so we can send the look change.
-            // We also send empty slots for unequipment handling.
-            lookChanges.insert(std::make_pair(it->first, it->second.itemId));
-        }
+        lookChanges.insert(std::make_pair(
+                itemIt->second.equipmentSlot,
+                itemIt->second.itemId));
     }
 
     if (!lookChanges.empty())
@@ -117,12 +112,12 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
         // Number of look changes to send
         msg.writeInt8(lookChanges.size());
 
-        for (std::map<unsigned, unsigned>::const_iterator it2 =
-             lookChanges.begin(), it2_end = lookChanges.end();
-             it2 != it2_end; ++it2)
+        for (std::map<unsigned, unsigned>::const_iterator it =
+             lookChanges.begin(), it_end = lookChanges.end();
+             it != it_end; ++it)
         {
-            msg.writeInt8(it2->first);
-            msg.writeInt16(it2->second);
+            msg.writeInt8(it->first);
+            msg.writeInt16(it->second);
         }
     }
 }
@@ -170,20 +165,20 @@ static void informPlayer(MapComposite *map, Entity *p)
             // Send action change messages.
             if ((oflags & UPDATEFLAG_ACTIONCHANGE))
             {
-                MessageOut ActionMsg(GPMSG_BEING_ACTION_CHANGE);
-                ActionMsg.writeInt16(oid);
-                ActionMsg.writeInt8(
+                MessageOut actionMsg(GPMSG_BEING_ACTION_CHANGE);
+                actionMsg.writeInt16(oid);
+                actionMsg.writeInt8(
                         o->getComponent<BeingComponent>()->getAction());
-                gameHandler->sendTo(p, ActionMsg);
+                gameHandler->sendTo(p, actionMsg);
             }
 
             // Send looks change messages.
             if (oflags & UPDATEFLAG_LOOKSCHANGE)
             {
-                MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
-                LooksMsg.writeInt16(oid);
-                serializeLooks(o, LooksMsg);
-                gameHandler->sendTo(p, LooksMsg);
+                MessageOut looksMsg(GPMSG_BEING_LOOKS_CHANGE);
+                looksMsg.writeInt16(oid);
+                serializeLooks(o, looksMsg);
+                gameHandler->sendTo(p, looksMsg);
             }
 
             // Send emote messages.
@@ -193,21 +188,21 @@ static void informPlayer(MapComposite *map, Entity *p)
                         o->getComponent<BeingComponent>()->getLastEmote();
                 if (emoteId > -1)
                 {
-                    MessageOut EmoteMsg(GPMSG_BEING_EMOTE);
-                    EmoteMsg.writeInt16(oid);
-                    EmoteMsg.writeInt16(emoteId);
-                    gameHandler->sendTo(p, EmoteMsg);
+                    MessageOut emoteMsg(GPMSG_BEING_EMOTE);
+                    emoteMsg.writeInt16(oid);
+                    emoteMsg.writeInt16(emoteId);
+                    gameHandler->sendTo(p, emoteMsg);
                 }
             }
 
             // Send direction change messages.
             if (oflags & UPDATEFLAG_DIRCHANGE)
             {
-                MessageOut DirMsg(GPMSG_BEING_DIR_CHANGE);
-                DirMsg.writeInt16(oid);
-                DirMsg.writeInt8(
+                MessageOut dirMsg(GPMSG_BEING_DIR_CHANGE);
+                dirMsg.writeInt16(oid);
+                dirMsg.writeInt8(
                         o->getComponent<BeingComponent>()->getDirection());
-                gameHandler->sendTo(p, DirMsg);
+                gameHandler->sendTo(p, dirMsg);
             }
 
             // Send ability uses
@@ -279,8 +274,6 @@ static void informPlayer(MapComposite *map, Entity *p)
             {
                 case OBJECT_CHARACTER:
                 {
-                    auto *characterComponent =
-                            o->getComponent<CharacterComponent>();
                     enterMsg.writeString(
                             o->getComponent<BeingComponent>()->getName());
                     serializeLooks(o, enterMsg);

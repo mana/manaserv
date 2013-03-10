@@ -901,10 +901,8 @@ static int trade(lua_State *s)
 }
 
 /** LUA entity:inv_count (inventory)
- * entity:inv_count(bool inInventory, bool inEquipment,
- *                  int id1, ..., int idN)
- * entity:inv_count(bool inInventory, bool inEquipment,
- *                  string name1, ..., string nameN)
+ * entity:inv_count(int id1, ..., int idN)
+ * entity:inv_count(string name1, ..., string nameN)
  **
  * Valid only for character entities.
  *
@@ -923,17 +921,14 @@ static int entity_inv_count(lua_State *s)
         return 0;
     }
 
-    bool inInventory = lua_toboolean(s, 2);
-    bool inEquipment = lua_toboolean(s, 3);
-
-    int nb_items = lua_gettop(s) - 3;
+    int nb_items = lua_gettop(s) - 1;
     Inventory inv(q);
 
     int nb = 0;
     for (int i = 4; i < nb_items + 4; ++i)
     {
         ItemClass *it = checkItemClass(s, i);
-        nb = inv.count(it->getDatabaseID(), inInventory, inEquipment);
+        nb = inv.count(it->getDatabaseID());
         lua_pushinteger(s, nb);
     }
     return nb_items;
@@ -1004,7 +999,7 @@ static int entity_inv_change(lua_State *s)
 }
 
 /** LUA entity:inventory (inventory)
- * entity:inventory(): table[]{slot, item id, name, amount}
+ * entity:inventory(): table[]{slot, item id, name, amount, equipped}
  **
  * Valid only for character entities.
  *
@@ -1064,6 +1059,10 @@ static int entity_get_inventory(lua_State *s)
         lua_pushinteger(s, it->second.amount);
         lua_settable(s, subTableStackPosition);
 
+        lua_pushliteral(s, "equipped");
+        lua_pushboolean(s, it->second.equipmentSlot != 0);
+        lua_settable(s, subTableStackPosition);
+
         // Add the sub-table as value of the main one.
         lua_rawseti(s, firstTableStackPosition, tableIndex);
         ++tableIndex;
@@ -1098,39 +1097,36 @@ static int entity_get_equipment(lua_State *s)
     Entity *q = checkCharacter(s, 1);
 
     // Create a lua table with the inventory ids.
-    const EquipData equipData = q->getComponent<CharacterComponent>()
-            ->getPossessions().getEquipment();
+    auto *characterComponent = q->getComponent<CharacterComponent>();
+    const InventoryData inventoryData =
+            characterComponent->getPossessions().getInventory();
+    const EquipData equipData =
+            characterComponent->getPossessions().getEquipment();
 
     lua_newtable(s);
     int firstTableStackPosition = lua_gettop(s);
     int tableIndex = 1;
 
-    std::set<unsigned> itemInstances;
-
     for (EquipData::const_iterator it = equipData.begin(),
         it_end = equipData.end(); it != it_end; ++it)
     {
-        if (!it->second.itemId || !it->second.itemInstance)
-            continue;
-
-        // Only count multi-slot items once.
-        if (!itemInstances.insert(it->second.itemInstance).second)
-            continue;
+        InventoryData::const_iterator itemIt = inventoryData.find(*it);
+        const InventoryItem &item = itemIt->second;
 
         // Create the sub-table (value of the main one)
         lua_createtable(s, 0, 3);
         int subTableStackPosition = lua_gettop(s);
         // Stores the item info in it.
         lua_pushliteral(s, "slot");
-        lua_pushinteger(s, it->first); // The slot id
+        lua_pushinteger(s, item.slot); // The slot id
         lua_settable(s, subTableStackPosition);
 
         lua_pushliteral(s, "id");
-        lua_pushinteger(s, it->second.itemId);
+        lua_pushinteger(s, item.itemId);
         lua_settable(s, subTableStackPosition);
 
         lua_pushliteral(s, "name");
-        push(s, itemManager->getItem(it->second.itemId)->getName());
+        push(s, itemManager->getItem(item.itemId)->getName());
         lua_settable(s, subTableStackPosition);
 
         // Add the sub-table as value of the main one.
@@ -1202,7 +1198,7 @@ static int entity_unequip_slot(lua_State *s)
 
     Inventory inv(ch);
 
-    lua_pushboolean(s, inv.unequip(inv.getSlotItemInstance(equipmentSlot)));
+    lua_pushboolean(s, inv.unequip(equipmentSlot));
     return 1;
 }
 
@@ -1223,7 +1219,7 @@ static int entity_unequip_item(lua_State *s)
     ItemClass *it = checkItemClass(s, 2);
 
     Inventory inv(ch);
-    lua_pushboolean(s, inv.unequipItem(it->getDatabaseID()));
+    lua_pushboolean(s, inv.unequipAll(it->getDatabaseID()));
     return 1;
 }
 

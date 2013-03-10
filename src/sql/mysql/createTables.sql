@@ -179,21 +179,6 @@ DEFAULT CHARSET=utf8
 AUTO_INCREMENT=1 ;
 
 --
--- table: `mana_char_equips`
---
-CREATE TABLE IF NOT EXISTS `mana_char_equips` (
-    `id`               int(10)    unsigned NOT NULL auto_increment,
-    `owner_id`         int(10)    unsigned NOT NULL,
-    `slot_type`        int(10)    unsigned NOT NULL,
-    `item_id`          int(10)    unsigned NOT NULL,
-    `item_instance`    int(10)    unsigned NOT NULL,
-    --
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`owner_id`) REFERENCES `mana_characters` (`id`)
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8;
-
---
 -- table: `mana_inventories`
 -- todo: remove class_id and amount and reference on mana_item_instances
 --
@@ -203,6 +188,7 @@ CREATE TABLE IF NOT EXISTS `mana_inventories` (
     `slot`         tinyint(3)   unsigned NOT NULL,
     `class_id`     int(10)      unsigned NOT NULL,
     `amount`       tinyint(3)   unsigned NOT NULL,
+    `equipped`     tinyint(3)   unsigned NOT NULL,
     --
     PRIMARY KEY (`id`),
     UNIQUE KEY `owner_id` (`owner_id`, `slot`),
@@ -420,7 +406,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', NOW());
-INSERT INTO mana_world_states VALUES('database_version',     -1,'24', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     -1,'25', NOW());
 
 -- all known transaction codes
 

@@ -65,26 +65,19 @@ class Inventory
         bool equip(int inventorySlot);
 
         /**
-         * Unequips all the items with the given item if
-         * from given equipment slot.
+         * Unequips all the items with the given item id
          * @param itemId The item Id to unequip.
          * @returns whether all item id could be unequipped.
          * @note returns true when no item with given ids were equipped.
          */
-        bool unequipItem(unsigned itemId);
+        bool unequipAll(unsigned itemId);
 
         /**
          * Unequips item from given equipment slot.
-         * @param itemInstance The item instance id used to know what to unequip
+         * @param itemSlot The item slot used to know what to unequip
          * @returns Whether it was unequipped.
          */
-        bool unequip(unsigned itemInstance);
-
-        /**
-         * Gets the item instance from the given equipment slot.
-         * Return 0 if none.
-         */
-        unsigned getSlotItemInstance(unsigned slot);
+        bool unequip(unsigned itemSlot);
 
         /**
          * Inserts some items into the inventory.
@@ -99,13 +92,6 @@ class Inventory
         unsigned remove(unsigned itemId, unsigned amount);
 
         /**
-         * Moves some items from the first slot to the second one.
-         * @returns number of items not moved.
-         */
-        unsigned move(unsigned slot1, unsigned slot2,
-                          unsigned amount);
-
-        /**
          * Removes some items from inventory.
          * @return number of items not removed.
          */
@@ -113,11 +99,9 @@ class Inventory
 
         /**
          * Counts number of items with given Id.
-         * @param inInventory Search in player's inventory.
-         * @param inEquipment Search in player's equipment.
+         * @param itemId The id to look for.
          */
-        unsigned count(unsigned itemId, bool inInventory = true,
-                           bool inEquipment = true) const;
+        unsigned count(unsigned itemId) const;
 
         /**
          * Gets the ID of the items in a given slot.
@@ -161,14 +145,6 @@ class Inventory
          */
         bool testEquipScriptRequirements(unsigned /* itemId */)
         { return true; }
-
-        /**
-         * Return an equip item instance id unique to the item used,
-         * per character.
-         * This is used to differenciate some items that can be equipped
-         * multiple times, like one-handed weapons for instance.
-         */
-        unsigned getNewEquipItemInstance();
 
         /**
          * Check the inventory is within the slot limit and capacity.

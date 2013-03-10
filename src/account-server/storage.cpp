@@ -78,7 +78,6 @@ static const char *CHAR_ATTR_TBL_NAME           =   "mana_char_attr";
 static const char *CHAR_STATUS_EFFECTS_TBL_NAME =   "mana_char_status_effects";
 static const char *CHAR_KILL_COUNT_TBL_NAME     =   "mana_char_kill_stats";
 static const char *CHAR_ABILITIES_TBL_NAME      =   "mana_char_abilities";
-static const char *CHAR_EQUIPS_TBL_NAME         =   "mana_char_equips";
 static const char *INVENTORIES_TBL_NAME         =   "mana_inventories";
 static const char *ITEMS_TBL_NAME               =   "mana_items";
 static const char *GUILDS_TBL_NAME              =   "mana_guilds";
@@ -480,41 +479,12 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
     try
     {
         std::ostringstream sql;
-        sql << " select slot_type, item_id, item_instance from "
-            << CHAR_EQUIPS_TBL_NAME
-            << " where owner_id = '"
-            << character->getDatabaseID() << "' order by slot_type desc;";
-
-        EquipData equipData;
-        const dal::RecordSet &equipInfo = mDb->execSql(sql.str());
-        if (!equipInfo.isEmpty())
-        {
-            EquipmentItem equipItem;
-            for (int k = 0, size = equipInfo.rows(); k < size; ++k)
-            {
-                equipItem.itemId = toUint(equipInfo(k, 1));
-                equipItem.itemInstance = toUint(equipInfo(k, 2));
-                equipData.insert(std::pair<unsigned, EquipmentItem>(
-                                     toUint(equipInfo(k, 0)),
-                                     equipItem));
-            }
-        }
-        poss.setEquipment(equipData);
-    }
-    catch (const dal::DbSqlQueryExecFailure &e)
-    {
-        utils::throwError("DALStorage::getCharacter #2) SQL query failure: ",
-                          e);
-    }
-
-    try
-    {
-        std::ostringstream sql;
-        sql << " select * from " << INVENTORIES_TBL_NAME
-            << " where owner_id = '"
+        sql << " select id, owner_id, slot, class_id, amount, equipped from "
+            << INVENTORIES_TBL_NAME << " where owner_id = '"
             << character->getDatabaseID() << "' order by slot asc;";
 
         InventoryData inventoryData;
+        EquipData equipmentData;
         const dal::RecordSet &itemInfo = mDb->execSql(sql.str());
         if (!itemInfo.isEmpty())
         {
@@ -525,9 +495,22 @@ CharacterData *Storage::getCharacterBySQL(Account *owner)
                 item.itemId   = toUint(itemInfo(k, 3));
                 item.amount   = toUint(itemInfo(k, 4));
                 inventoryData[slot] = item;
+
+                if (toUint(itemInfo(k, 5)) != 0)
+                {
+                    // The game server will set the right slot anyway,
+                    // but this speeds up checking if the item is equipped
+                    item.equipmentSlot = 1;
+                    equipmentData.insert(slot);
+                }
+                else
+                {
+                    item.equipmentSlot = 0;
+                }
             }
         }
         poss.setInventory(inventoryData);
+        poss.setEquipment(equipmentData);
     }
     catch (const dal::DbSqlQueryExecFailure &e)
     {
@@ -781,12 +764,6 @@ bool Storage::updateCharacter(CharacterData *character)
     // Delete the old inventory and equipment table first
     try
     {
-        std::ostringstream sqlDeleteCharacterEquipment;
-        sqlDeleteCharacterEquipment
-            << "delete from " << CHAR_EQUIPS_TBL_NAME
-            << " where owner_id = '" << character->getDatabaseID() << "';";
-        mDb->execSql(sqlDeleteCharacterEquipment.str());
-
         std::ostringstream sqlDeleteCharacterInventory;
         sqlDeleteCharacterInventory
             << "delete from " << INVENTORIES_TBL_NAME
@@ -804,39 +781,25 @@ bool Storage::updateCharacter(CharacterData *character)
     {
         std::ostringstream sql;
 
-        sql << "insert into " << CHAR_EQUIPS_TBL_NAME
-            << " (owner_id, slot_type, item_id, item_instance) values ("
+        sql << "insert into " << INVENTORIES_TBL_NAME
+            << " (owner_id, slot, class_id, amount, equipped) values ("
             << character->getDatabaseID() << ", ";
         std::string base = sql.str();
 
         const Possessions &poss = character->getPossessions();
-        const EquipData &equipData = poss.getEquipment();
-        for (EquipData::const_iterator it = equipData.begin(),
-             it_end = equipData.end(); it != it_end; ++it)
-        {
-                sql.str("");
-                sql << base << it->first << ", " << it->second.itemId
-                    << ", " << it->second.itemInstance << ");";
-                mDb->execSql(sql.str());
-        }
-
-        sql.str("");
-
-        sql << "insert into " << INVENTORIES_TBL_NAME
-            << " (owner_id, slot, class_id, amount) values ("
-            << character->getDatabaseID() << ", ";
-        base = sql.str();
-
         const InventoryData &inventoryData = poss.getInventory();
-        for (InventoryData::const_iterator j = inventoryData.begin(),
-             j_end = inventoryData.end(); j != j_end; ++j)
+        const EquipData &equipData = poss.getEquipment();
+        for (InventoryData::const_iterator itemIt = inventoryData.begin(),
+             j_end = inventoryData.end(); itemIt != j_end; ++itemIt)
         {
             sql.str("");
-            unsigned short slot = j->first;
-            unsigned itemId = j->second.itemId;
-            unsigned amount = j->second.amount;
+            unsigned short slot = itemIt->first;
+            unsigned itemId = itemIt->second.itemId;
+            unsigned amount = itemIt->second.amount;
+            bool equipped = itemIt->second.equipmentSlot != 0;
             assert(itemId);
-            sql << base << slot << ", " << itemId << ", " << amount << ");";
+            sql << base << slot << ", " << itemId << ", " << amount << ", "
+                << (equipped ? 1 : 0) << ");";
             mDb->execSql(sql.str());
         }
 

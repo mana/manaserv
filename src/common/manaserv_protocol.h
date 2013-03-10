@@ -113,10 +113,12 @@ enum {
     PGMSG_DROP                     = 0x0111, // W slot, W amount
     PGMSG_EQUIP                    = 0x0112, // W inventory slot
     PGMSG_UNEQUIP                  = 0x0113, // W item Instance id
-    PGMSG_MOVE_ITEM                = 0x0114, // W slot1, W slot2, W amount
     GPMSG_INVENTORY                = 0x0120, // { W slot, W item id [, W amount] (if item id is nonzero) }*
-    GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount }, { W equip slot, W item Id, W item Instance}*
-    GPMSG_EQUIP                    = 0x0122, // W item Id, W equip slot type count //{ W equip slot, W capacity used}*//<- When equipping, //{ W item instance, W 0}*//<- When unequipping
+    GPMSG_INVENTORY_FULL           = 0x0121, // W inventory slot count { W slot, W itemId, W amount, W equipmentSlot }
+    GPMSG_EQUIP                    = 0x0122, // W equipped inventory slot, W slot equipmentSlot
+    GPMSG_EQUIP_RESPONSE           = 0x0123, // B error, W slot
+    GPMSG_UNEQUIP                  = 0x0124, // W equipped inventory slot
+    GPMSG_UNEQUIP_RESPONE          = 0x0125, // B error, W slot
     GPMSG_PLAYER_ATTRIBUTE_CHANGE  = 0x0130, // { W attribute, D base value (in 1/256ths), D modified value (in 1/256ths)}*
     GPMSG_ATTRIBUTE_POINTS_STATUS  = 0x0140, // W character points, W correction points
     PGMSG_RAISE_ATTRIBUTE          = 0x0160, // W attribute

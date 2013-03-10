@@ -182,31 +182,23 @@ void CharacterComponent::deserialize(Entity &entity, MessageIn &msg)
 
 
     Possessions &poss = getPossessions();
-    EquipData equipData;
-    int equipSlotsSize = msg.readInt16();
-    unsigned eqSlot;
-    EquipmentItem equipItem;
-    for (int j = 0; j < equipSlotsSize; ++j)
-    {
-        eqSlot  = msg.readInt16();
-        equipItem.itemId = msg.readInt16();
-        equipItem.itemInstance = msg.readInt16();
-        equipData.insert(equipData.end(),
-                               std::make_pair(eqSlot, equipItem));
-    }
-    poss.setEquipment(equipData);
 
     // Loads inventory - must be last because size isn't transmitted
     InventoryData inventoryData;
+    EquipData equipmentData;
     while (msg.getUnreadLength())
     {
         InventoryItem i;
-        int slotId = msg.readInt16();
-        i.itemId   = msg.readInt16();
-        i.amount   = msg.readInt16();
-        inventoryData.insert(inventoryData.end(), std::make_pair(slotId, i));
+        i.slot          = msg.readInt16();
+        i.itemId        = msg.readInt16();
+        i.amount        = msg.readInt16();
+        bool isEquipped = msg.readInt8() != 0;
+        inventoryData.insert(std::make_pair(i.slot, i));
+        if (isEquipped)
+            equipmentData.insert(i.slot);
     }
     poss.setInventory(inventoryData);
+    poss.setEquipment(equipmentData);
 }
 
 void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
@@ -271,22 +263,18 @@ void CharacterComponent::serialize(Entity &entity, MessageOut &msg)
     // inventory - must be last because size isn't transmitted
     const Possessions &poss = getPossessions();
     const EquipData &equipData = poss.getEquipment();
-    msg.writeInt16(equipData.size()); // number of equipment
-    for (EquipData::const_iterator k = equipData.begin(),
-             k_end = equipData.end(); k != k_end; ++k)
-    {
-        msg.writeInt16(k->first);                 // Equip slot id
-        msg.writeInt16(k->second.itemId);         // ItemId
-        msg.writeInt16(k->second.itemInstance);   // Item Instance id
-    }
 
     const InventoryData &inventoryData = poss.getInventory();
-    for (InventoryData::const_iterator j = inventoryData.begin(),
-         j_end = inventoryData.end(); j != j_end; ++j)
+    for (InventoryData::const_iterator itemIt = inventoryData.begin(),
+         itemIt_end = inventoryData.end(); itemIt != itemIt_end; ++itemIt)
     {
-        msg.writeInt16(j->first);           // slot id
-        msg.writeInt16(j->second.itemId);   // item id
-        msg.writeInt16(j->second.amount);   // amount
+        msg.writeInt16(itemIt->first);           // slot id
+        msg.writeInt16(itemIt->second.itemId);   // item id
+        msg.writeInt16(itemIt->second.amount);   // amount
+        if (equipData.find(itemIt->first) != equipData.end())
+            msg.writeInt8(1); // equipped
+        else
+            msg.writeInt8(0); // not equipped
     }
 }
 
