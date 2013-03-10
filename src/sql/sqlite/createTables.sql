@@ -188,19 +188,6 @@ CREATE TABLE mana_floor_items
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE mana_char_equips
-(
-    id               INTEGER    PRIMARY KEY,
-    owner_id         INTEGER    NOT NULL,
-    slot_type        INTEGER    NOT NULL,
-    item_id          INTEGER    NOT NULL,
-    item_instance    INTEGER    NOT NULL,
-    --
-    FOREIGN KEY (owner_id) REFERENCES mana_characters(id)
-);
-
------------------------------------------------------------------------------
-
 -- todo: remove class_id and amount and reference on mana_item_instances
 CREATE TABLE mana_inventories
 (
@@ -209,6 +196,7 @@ CREATE TABLE mana_inventories
    slot         INTEGER     NOT NULL,
    class_id     INTEGER     NOT NULL,
    amount       INTEGER     NOT NULL,
+   equipped     INTEGER     NOT NULL,
    --
    FOREIGN KEY (owner_id) REFERENCES mana_characters(id)
 );
@@ -424,7 +412,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     -1,'21', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     -1,'22', strftime('%s','now'));
 
 -- all known transaction codes
 

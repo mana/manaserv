@@ -48,23 +48,14 @@ void Inventory::sendFull() const
     MessageOut m(GPMSG_INVENTORY_FULL);
 
     m.writeInt16(mPoss->inventory.size());
-    for (InventoryData::const_iterator l = mPoss->inventory.begin(),
-         l_end = mPoss->inventory.end(); l != l_end; ++l)
+    for (InventoryData::const_iterator it = mPoss->inventory.begin(),
+         l_end = mPoss->inventory.end(); it != l_end; ++it)
     {
-        assert(l->second.itemId);
-        m.writeInt16(l->first); // Slot id
-        m.writeInt16(l->second.itemId);
-        m.writeInt16(l->second.amount);
-    }
-
-    for (EquipData::const_iterator k = mPoss->equipSlots.begin(),
-         k_end = mPoss->equipSlots.end();
-         k != k_end;
-         ++k)
-    {
-        m.writeInt16(k->first);                 // Equip slot id
-        m.writeInt16(k->second.itemId);         // Item id
-        m.writeInt16(k->second.itemInstance);   // Item instance
+        assert(it->second.itemId);
+        m.writeInt16(it->first); // slot
+        m.writeInt16(it->second.itemId);
+        m.writeInt16(it->second.amount);
+        m.writeInt16(it->second.equipmentSlot);
     }
 
     gameHandler->sendTo(mCharacter, m);
@@ -73,73 +64,54 @@ void Inventory::sendFull() const
 void Inventory::initialize()
 {
     /*
+     * Set the equipment slots
+     */
+    for (EquipData::iterator it = mPoss->equipment.begin(),
+            it_end = mPoss->equipment.end(); it != it_end; ++it)
+    {
+        InventoryData::iterator itemIt = mPoss->inventory.find(*it);
+        const ItemEquipRequirement &equipReq = itemManager->getItem(
+                itemIt->second.itemId)->getItemEquipRequirement();
+        itemIt->second.equipmentSlot = equipReq.equipSlotId;
+    }
+
+    /*
      * Construct a set of item Ids to keep track of duplicate item Ids.
      */
     std::set<unsigned> itemIds;
+    std::set<unsigned> equipmentIds;
 
     /*
      * Construct a set of itemIds to keep track of duplicate itemIds.
      */
-    InventoryData::iterator it1;
-    for (it1 = mPoss->inventory.begin(); it1 != mPoss->inventory.end();)
+
+    for (InventoryData::iterator it = mPoss->inventory.begin(),
+         it_end = mPoss->inventory.end(); it != it_end;)
     {
-        ItemClass *item = itemManager->getItem(it1->second.itemId);
+        ItemClass *item = itemManager->getItem(it->second.itemId);
         if (item)
         {
             // If the insertion succeeded, it's the first time we're
             // adding the item in the inventory. Hence, we can trigger
             // item presence in inventory effect.
-            if (itemIds.insert(it1->second.itemId).second)
+            if (itemIds.insert(it->second.itemId).second)
                 item->useTrigger(mCharacter, ITT_IN_INVY);
-            ++it1;
-        }
-        else
-        {
-            LOG_WARN("Inventory: deleting unknown item type "
-                     << it1->second.itemId << " from the inventory of '"
-                     << mCharacter->getComponent<BeingComponent>()->getName()
-                     << "'!");
-            mPoss->inventory.erase(it1++);
-        }
-    }
 
-    itemIds.clear();
-
-    /*
-     * Equipment effects can be cumulative if more than one item instance
-     * is equipped, but we check to trigger the item presence in equipment
-     * effect only based on the first item instance insertion.
-     */
-    EquipData::iterator it2;
-    for (it2 = mPoss->equipSlots.begin(); it2 != mPoss->equipSlots.end();)
-    {
-        ItemClass *item = itemManager->getItem(it2->second.itemId);
-        if (item)
-        {
-            // TODO: Check equip conditions.
-            // If not all needed slots are there, put the item back
-            // in the inventory.
+            if (it->second.equipmentSlot != 0 &&
+                equipmentIds.insert(it->second.itemId).second)
+            {
+                item->useTrigger(mCharacter, ITT_EQUIP);
+            }
+            ++it;
         }
         else
         {
             LOG_WARN("Equipment: deleting unknown item id "
-                     << it2->second.itemId << " from the equipment of '"
+                     << it->second.itemId << " from the equipment of '"
                      << mCharacter->getComponent<BeingComponent>()->getName()
                      << "'!");
-            mPoss->equipSlots.erase(it2++);
-            continue;
+            mPoss->inventory.erase(it++);
         }
-
-        /*
-         * Apply all equip triggers at first item instance insertion
-         */
-        if (itemIds.insert(it2->second.itemInstance).second)
-        {
-            itemManager->getItem(it2->second.itemId)
-                ->useTrigger(mCharacter, ITT_EQUIP);
-        }
-
-        ++it2;
     }
 }
 
@@ -233,32 +205,14 @@ unsigned Inventory::insert(unsigned itemId, unsigned amount)
     return amount;
 }
 
-unsigned Inventory::count(unsigned itemId,
-                              bool inInventory, bool inEquipment) const
+unsigned Inventory::count(unsigned itemId) const
 {
     unsigned nb = 0;
-    if (inInventory)
+    for (InventoryData::iterator it = mPoss->inventory.begin(),
+        it_end = mPoss->inventory.end(); it != it_end; ++it)
     {
-        for (InventoryData::iterator it = mPoss->inventory.begin(),
-            it_end = mPoss->inventory.end(); it != it_end; ++it)
-            if (it->second.itemId == itemId)
-                nb += it->second.amount;
-    }
-
-    if (inEquipment)
-    {
-        std::set<unsigned> itemInstances;
-        for (EquipData::iterator it = mPoss->equipSlots.begin(),
-            it_end = mPoss->equipSlots.end(); it != it_end; ++it)
-        {
-            if (it->second.itemId != itemId || !it->second.itemInstance)
-                continue;
-
-            // If the insertion was successful, then it was the first time,
-            // and can be counted.
-            if ((itemInstances.insert(it->second.itemInstance)).second)
-                ++nb;
-        }
+        if (it->second.itemId == itemId)
+            nb += it->second.amount;
     }
 
     return nb;
@@ -329,131 +283,6 @@ unsigned Inventory::remove(unsigned itemId, unsigned amount)
 
     if (triggerLeaveInventory)
         itemManager->getItem(itemId)->useTrigger(mCharacter, ITT_LEAVE_INVY);
-
-    if (invMsg.getLength() > 2)
-        gameHandler->sendTo(mCharacter, invMsg);
-
-    return amount;
-}
-
-unsigned Inventory::move(unsigned slot1, unsigned slot2,
-                             unsigned amount)
-{
-    LOG_DEBUG(amount << " item(s) requested to move from: " << slot1 << " to "
-              << slot2 << " for character: '"
-              << mCharacter->getComponent<BeingComponent>()->getName() << "'.");
-
-    if (!amount || slot1 == slot2 || slot2 >= INVENTORY_SLOTS)
-        return amount;
-
-    InventoryData::iterator it1 = mPoss->inventory.find(slot1),
-                            it2 = mPoss->inventory.find(slot2),
-                            inv_end = mPoss->inventory.end();
-
-    if (it1 == inv_end)
-        return amount;
-
-    MessageOut invMsg(GPMSG_INVENTORY);
-
-    unsigned nb = std::min(amount, it1->second.amount);
-    if (it2 == inv_end)
-    {
-        // Slot2 does not yet exist.
-        mPoss->inventory[slot2].itemId = it1->second.itemId;
-        nb = std::min(itemManager->getItem(it1->second.itemId)->getMaxPerSlot(),
-                      nb);
-
-        mPoss->inventory[slot2].amount = nb;
-        it1->second.amount -= nb;
-        amount -= nb;
-
-        //Save the itemId in case of deletion of the iterator
-        unsigned itemId = it1->second.itemId;
-        invMsg.writeInt16(slot1);                  // Slot
-        if (it1->second.amount)
-        {
-            invMsg.writeInt16(it1->second.itemId); // Item Id
-            invMsg.writeInt16(it1->second.amount); // Amount
-            LOG_DEBUG("Left " << amount << " item(s) id:"
-                      << it1->second.itemId << " into slot: " << slot1);
-        }
-        else
-        {
-            invMsg.writeInt16(0);
-            mPoss->inventory.erase(it1);
-            LOG_DEBUG("Slot: " << slot1 << " is now empty.");
-        }
-        invMsg.writeInt16(slot2);                  // Slot
-        invMsg.writeInt16(itemId);     // Item Id (same as slot 1)
-        invMsg.writeInt16(nb);                     // Amount
-        LOG_DEBUG("Slot: " << slot2 << " has now " << nb << " of item id: "
-                  << itemId);
-    }
-    else
-    {
-        // Slot2 exists.
-        if (it2->second.itemId != it1->second.itemId)
-         {
-            // Swap items when they are of a different type
-            // and when all the amount of slot 1 is moving onto slot 2.
-            if (amount >= it1->second.amount)
-            {
-                unsigned itemId = it1->second.itemId;
-                unsigned amount = it1->second.amount;
-                it1->second.itemId = it2->second.itemId;
-                it1->second.amount = it2->second.amount;
-                it2->second.itemId = itemId;
-                it2->second.amount = amount;
-
-                // Sending swapped slots.
-                invMsg.writeInt16(slot1);
-                invMsg.writeInt16(it1->second.itemId);
-                invMsg.writeInt16(it1->second.amount);
-                invMsg.writeInt16(slot2);
-                invMsg.writeInt16(it2->second.itemId);
-                invMsg.writeInt16(it2->second.amount);
-                LOG_DEBUG("Swapping items in slots " << slot1
-                          << " and " << slot2);
-            }
-            else
-            {
-                // Cannot partially stack items of a different type.
-                LOG_DEBUG("Cannot move " << amount << " item(s) from slot "
-                          << slot1 << " to " << slot2);
-                return amount;
-            }
-        }
-        else // Same item type on slot 2.
-        {
-            // Number of items moving
-            nb = std::min(itemManager->getItem(
-                              it1->second.itemId)->getMaxPerSlot()
-                              - it2->second.amount, nb);
-
-            // If nothing can move, we can abort
-            if (!nb)
-                return amount;
-
-            it1->second.amount -= nb;
-            it2->second.amount += nb;
-            amount -= nb;
-
-            invMsg.writeInt16(slot1);                  // Slot
-            if (it1->second.amount)
-            {
-                invMsg.writeInt16(it1->second.itemId); // Item Id
-                invMsg.writeInt16(it1->second.amount); // Amount
-            }
-            else
-            {
-                invMsg.writeInt16(0);
-                mPoss->inventory.erase(it1);
-            }
-            invMsg.writeInt16(slot2);                  // Slot
-            invMsg.writeInt16(it2->second.itemId);     // Item Id
-            invMsg.writeInt16(it2->second.amount);     // Amount
-        }
-    }
 
     if (invMsg.getLength() > 2)
         gameHandler->sendTo(mCharacter, invMsg);
@@ -544,22 +373,6 @@ void Inventory::updateEquipmentTrigger(ItemClass *oldI, ItemClass *newI)
         newI->useTrigger(mCharacter, ITT_EQUIP);
 }
 
-unsigned Inventory::getNewEquipItemInstance()
-{
-    std::set<int> alreadyUsed;
-    for (EquipData::const_iterator it = mPoss->equipSlots.begin();
-        it != mPoss->equipSlots.end(); ++it)
-    {
-        alreadyUsed.insert(it->second.itemInstance);
-    }
-
-    unsigned itemInstance = 1;
-    while (alreadyUsed.count(itemInstance))
-        itemInstance++;
-
-    return itemInstance;
-}
-
 bool Inventory::checkEquipmentCapacity(unsigned equipmentSlot,
                                        unsigned capacityRequested)
 {
@@ -570,15 +383,15 @@ bool Inventory::checkEquipmentCapacity(unsigned equipmentSlot,
         return false;
 
     // Test whether the slot capacity requested is reached.
-    for (EquipData::const_iterator it = mPoss->equipSlots.begin(),
-        it_end = mPoss->equipSlots.end(); it != it_end; ++it)
+    for (EquipData::const_iterator it = mPoss->equipment.begin(),
+         it_end = mPoss->equipment.end(); it != it_end; ++it)
     {
-        if (it->first == equipmentSlot)
+        InventoryData::iterator itemIt = mPoss->inventory.find(*it);
+        if (itemIt->second.equipmentSlot == equipmentSlot)
         {
-            if (it->second.itemInstance != 0)
-            {
-                capacity--;
-            }
+            const ItemClass *item = itemManager->getItem(
+                                                        itemIt->second.itemId);
+            capacity -= item->getItemEquipRequirement().capacityRequired;
         }
     }
 
@@ -593,29 +406,35 @@ bool Inventory::checkEquipmentCapacity(unsigned equipmentSlot,
 bool Inventory::equip(int inventorySlot)
 {
     // Test inventory slot existence
-    InventoryData::iterator it;
-    if ((it = mPoss->inventory.find(inventorySlot)) == mPoss->inventory.end())
+    InventoryData::iterator itemIt;
+    if ((itemIt = mPoss->inventory.find(inventorySlot)) == mPoss->inventory.end())
     {
         LOG_DEBUG("No existing item in inventory at slot: " << inventorySlot);
         return false;
     }
 
+    InventoryItem &item = itemIt->second;
+
+    // Already equipped?
+    if (item.equipmentSlot != 0)
+        return false;
+
     // Test the equipment scripted requirements
-    if (!testEquipScriptRequirements(it->second.itemId))
+    if (!testEquipScriptRequirements(item.itemId))
         return false;
 
     // Test the equip requirements. If none, it's not an equipable item.
     const ItemEquipRequirement &equipReq =
-        itemManager->getItem(it->second.itemId)->getItemEquipRequirement();
+        itemManager->getItem(item.itemId)->getItemEquipRequirement();
     if (!equipReq.equipSlotId)
     {
-        LOG_DEBUG("No equip requirements for item id: " << it->second.itemId
+        LOG_DEBUG("No equip requirements for item id: " << item.itemId
             << " at slot: " << inventorySlot);
         return false;
     }
 
     // List of potential unique itemInstances to unequip first.
-    std::set<unsigned> equipInstancesToUnequipFirst;
+    std::set<unsigned> slotsToUnequipFirst;
 
     // We first check the equipment slots for:
     // - 1. whether enough total equip slot space is available.
@@ -642,14 +461,15 @@ bool Inventory::equip(int inventorySlot)
             && hasInventoryEnoughSpace(equipReq.equipSlotId))
         {
             // Then, we unequip each iteminstance of the equip slot
-            for (EquipData::iterator iter =
-                mPoss->equipSlots.begin();
-                iter != mPoss->equipSlots.end(); ++iter)
+            for (EquipData::iterator it = mPoss->equipment.begin(),
+                 it_end = mPoss->equipment.end(); it != it_end; ++it)
             {
-                if (iter->first == equipReq.equipSlotId
-                    && iter->second.itemInstance)
-                    equipInstancesToUnequipFirst.insert(
-                                                     iter->second.itemInstance);
+                const unsigned slot = *it;
+                InventoryData::iterator itemIt = mPoss->inventory.find(slot);
+                assert(itemIt != mPoss->inventory.end());
+                if (itemIt->second.equipmentSlot == equipReq.equipSlotId) {
+                    slotsToUnequipFirst.insert(itemIt->first);
+                }
             }
         }
         else
@@ -662,90 +482,33 @@ bool Inventory::equip(int inventorySlot)
     }
 
     // Potential Pre-unequipment process
-    for (std::set<unsigned>::const_iterator it3 =
-            equipInstancesToUnequipFirst.begin();
-            it3 != equipInstancesToUnequipFirst.end(); ++it3)
+    for (std::set<unsigned>::const_iterator itemsToUnequip =
+         slotsToUnequipFirst.begin(),
+         itemsToUnequip_end = slotsToUnequipFirst.end();
+         itemsToUnequip != itemsToUnequip_end; ++itemsToUnequip)
     {
-        if (!unequip(*it3))
+        if (!unequip(*itemsToUnequip))
         {
             // Something went wrong even when we tested the unequipment process.
             LOG_WARN("Unable to unequip even when unequip was tested. "
                      "Character : "
-                    << mCharacter->getComponent<BeingComponent>()->getName()
-                     << ", unequip slot: " << *it3);
+                     << mCharacter->getComponent<BeingComponent>()->getName()
+                     << ", unequip slot: " << *itemsToUnequip);
             return false;
         }
     }
 
     // Actually equip the item now that the requirements has met.
-    //W equip slot type count, W item id, { W equip slot, W capacity used}*
+    item.equipmentSlot = equipReq.equipSlotId;
+    mPoss->equipment.insert(inventorySlot);
+
     MessageOut equipMsg(GPMSG_EQUIP);
-    equipMsg.writeInt16(it->second.itemId); // Item Id
-    equipMsg.writeInt16(1); // Number of equip slot changed.
-
-    // Compute an unique equip item Instance id (unicity is per character only.)
-    int itemInstance = getNewEquipItemInstance();
-
-    unsigned capacityLeft = equipReq.capacityRequired;
-    unsigned capacityUsed = 0;
-    // Apply equipment changes
-    for (EquipData::iterator it4 = mPoss->equipSlots.begin(),
-         it4_end = mPoss->equipSlots.end(); it4 != it4_end; ++it4)
-    {
-        if (!capacityLeft)
-            break;
-
-        // We've found an existing equip slot
-        if (it4->first == equipReq.equipSlotId)
-        {
-            // We've found an empty slot
-            if (it4->second.itemInstance == 0)
-            {
-                it4->second.itemId = it->second.itemId;
-                it4->second.itemInstance = itemInstance;
-                --capacityLeft;
-            }
-            else // The slot is already in use.
-            {
-                ++capacityUsed;
-            }
-        }
-    }
-
-    // When there is still something to apply even when out of that loop,
-    // It means that the equip multimapis missing empty slots.
-    // Hence, we add them back
-    if(capacityLeft)
-    {
-        unsigned maxCapacity =
-            itemManager->getEquipSlotCapacity(equipReq.equipSlotId);
-
-        // A should never happen case
-        assert(maxCapacity >= capacityUsed + capacityLeft);
-
-        while (capacityLeft)
-        {
-            EquipmentItem equipItem(it->second.itemId, itemInstance);
-            mPoss->equipSlots.insert(
-                    std::make_pair(equipReq.equipSlotId, equipItem));
-            --capacityLeft;
-        }
-    }
-
-    // Equip slot
-    equipMsg.writeInt16(equipReq.equipSlotId);
-    // Capacity used
-    equipMsg.writeInt16(equipReq.capacityRequired);
-    // Item instance
-    equipMsg.writeInt16(itemInstance);
+    equipMsg.writeInt16(inventorySlot);
+    equipMsg.writeInt16(item.equipmentSlot);
+    gameHandler->sendTo(mCharacter, equipMsg);
 
     // New item trigger
-    updateEquipmentTrigger(0, it->second.itemId);
-
-    // Remove item from inventory
-    removeFromSlot(inventorySlot, 1);
-
-    gameHandler->sendTo(mCharacter, equipMsg);
+    updateEquipmentTrigger(0, item.itemId);
 
     // Update look when necessary
     checkLookchanges(equipReq.equipSlotId);
@@ -753,87 +516,51 @@ bool Inventory::equip(int inventorySlot)
     return true;
 }
 
-unsigned Inventory::getSlotItemInstance(unsigned slot)
-{
-    EquipData::iterator it = mPoss->equipSlots.find(slot);
-    if (it != mPoss->equipSlots.end())
-        return it->second.itemInstance;
-    return 0;
-}
-
 bool Inventory::unequipItem(unsigned itemId)
 {
-    std::set<unsigned> itemInstances;
-    for (EquipData::iterator it = mPoss->equipSlots.begin(),
-        it_end = mPoss->equipSlots.end(); it != it_end; ++it)
+    while (true)
     {
-        if (it->second.itemId == itemId)
-            itemInstances.insert(it->second.itemInstance);
-    }
+        const int slot = getFirstSlot(itemId);
+        // No item left
+        if (slot == -1)
+            return true;
 
-    // Nothing to do but it's a success
-    if (itemInstances.empty())
-        return true;
-
-    for (std::set<unsigned>::const_iterator it = itemInstances.begin(),
-        it_end = itemInstances.end(); it != it_end; ++it)
-    {
-        if (!unequip(*it))
+        if (!unequip(slot))
             return false;
     }
-    return true;
+
+    // silence compiler warnings
+    assert(false);
+    return false;
 }
 
-bool Inventory::unequip(unsigned itemInstance)
+bool Inventory::unequip(unsigned itemSlot)
 {
-    if (!itemInstance)
-        return false;
-
-    // The itemId to unequip
-    unsigned itemId = 0;
-    unsigned slotTypeId = 0;
-
-    bool addedToInventory = false;
-
-    // Empties all equip entries that point to the given equipment slot
-    // The equipment slots should NEVER be erased after initialization!
-    for (EquipData::iterator it = mPoss->equipSlots.begin(),
-            it_end = mPoss->equipSlots.end(); it != it_end; ++it)
+    InventoryData::iterator it = mPoss->inventory.find(itemSlot);
+    if (it == mPoss->inventory.end())
     {
-        if (it->second.itemInstance == itemInstance && it->second.itemId)
-        {
-            // Add the item to the inventory list if not already present there
-            itemId = it->second.itemId;
-
-            // Move the item back to inventory and return false when it failed.
-            if (!addedToInventory && insert(itemId, 1) > 0)
-                return false;
-            else
-                addedToInventory = true;
-
-            it->second.itemId = 0;
-            it->second.itemInstance = 0;
-
-            // We keep track of the slot type to be able to raise a potential
-            // change in the character sprite
-            slotTypeId = it->first;
-        }
+        LOG_WARN("Tried to unequip invalid item at slot " << itemSlot);
+        return false;
     }
 
-    // When there were no corresponding item id, it means no item was to
-    // be unequipped.
-    if (!itemId)
+    InventoryItem &item = it->second;
+
+    // Item was not equipped
+    if (item.equipmentSlot == 0)
         return false;
 
-    MessageOut equipMsg(GPMSG_EQUIP);
-    equipMsg.writeInt16(0); // Item Id, useless in case of unequip.
-    equipMsg.writeInt16(1); // Number of slot types touched.
-    equipMsg.writeInt16(itemInstance);
-    equipMsg.writeInt16(0); // Capacity used, set to 0 to unequip.
+    const unsigned slotTypeId = item.equipmentSlot;
+
+    // unequip
+    item.equipmentSlot = 0;
+    mPoss->equipment.erase(mPoss->equipment.find(itemSlot));
+
+    MessageOut equipMsg(GPMSG_UNEQUIP);
+    equipMsg.writeInt16(itemSlot);
     gameHandler->sendTo(mCharacter, equipMsg);
 
     // Apply unequip trigger
-    updateEquipmentTrigger(itemId, 0);
+    updateEquipmentTrigger(item.itemId, 0);
 
     checkLookchanges(slotTypeId);
 

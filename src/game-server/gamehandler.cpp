@@ -250,10 +250,6 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
             handleUnequip(client, message);
             break;
 
-        case PGMSG_MOVE_ITEM:
-            handleMoveItem(client, message);
-            break;
-
         case PGMSG_ATTACK:
             handleAttack(client, message);
             break;
@@ -633,42 +629,22 @@ void GameHandler::handleWalk(GameClient &client, MessageIn &message)
 void GameHandler::handleEquip(GameClient &client, MessageIn &message)
 {
     const int slot = message.readInt16();
-    if (!Inventory(client.character).equip(slot))
-    {
-        MessageOut msg(GPMSG_SAY);
-        msg.writeInt16(0); // From the server
-        msg.writeString("Unable to equip.");
-        client.send(msg);
-    }
+    MessageOut msg(GPMSG_EQUIP_RESPONSE);
+    if (Inventory(client.character).equip(slot))
+        msg.writeInt8(ERRMSG_OK);
+    else
+        msg.writeInt8(ERRMSG_FAILURE);
+    client.send(msg);
 }
 
 void GameHandler::handleUnequip(GameClient &client, MessageIn &message)
 {
     const int itemInstance = message.readInt16();
-    if (!Inventory(client.character).unequip(itemInstance))
-    {
-        MessageOut msg(GPMSG_SAY);
-        msg.writeInt16(0); // From the server
-        msg.writeString("Unable to unequip.");
-        client.send(msg);
-    }
-}
-
-void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
-{
-    const int slot1 = message.readInt16();
-    const int slot2 = message.readInt16();
-    const int amount = message.readInt16();
-
-    Inventory(client.character).move(slot1, slot2, amount);
-    // log transaction
-    std::stringstream str;
-    str << "User moved item "
-        << " from slot " << slot1 << " to slot " << slot2;
-    auto *characterComponent =
-            client.character->getComponent<CharacterComponent>();
-    accountHandler->sendTransaction(characterComponent->getDatabaseID(),
-                                    TRANS_ITEM_MOVE, str.str());
+    MessageOut msg(GPMSG_UNEQUIP_RESPONE);
+    if (Inventory(client.character).unequip(itemInstance))
+        msg.writeInt8(ERRMSG_OK);
+    else
+        msg.writeInt8(ERRMSG_FAILURE);
 }
 
 void GameHandler::handleAttack(GameClient &client, MessageIn &message)
