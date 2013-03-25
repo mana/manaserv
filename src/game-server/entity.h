@@ -48,76 +48,21 @@ class Entity : public sigc::trackable
 
         virtual ~Entity();
 
-        /**
-         * Gets type of this entity.
-         *
-         * @return the type of this entity.
-         */
-        EntityType getType() const
-        { return mType; }
+        EntityType getType() const;
 
-        /**
-         * Adds a component. Only one component of a given type can be added.
-         * Entity takes ownership of \a component.
-         */
-        template <class T>
-        void addComponent(T *component)
-        {
-            assert(!mComponents[T::type]);
-            mComponents[T::type] = component;
-        }
+        template <class T> void addComponent(T *component);
+        template <class T> T *getComponent() const;
 
-        /**
-         * Returns the component of the given type, or 0 when no such component
-         * was set.
-         */
-        Component *getComponent(ComponentType type) const
-        { return mComponents[type]; }
+        Component *getComponent(ComponentType type) const;
 
-        /**
-         * Get a component by its class. Avoids the need for doing a static-
-         * cast in the calling code.
-         */
-        template <class T>
-        T *getComponent() const
-        { return static_cast<T*>(getComponent(T::type)); }
+        bool isVisible() const;
+        bool canMove() const;
+        bool canFight() const;
 
-        /**
-         * Returns whether this entity is visible on the map or not. (Actor)
-         */
-        bool isVisible() const
-        { return mType != OBJECT_OTHER; }
-
-        /**
-         * Returns whether this entity can move on the map or not. (Actor)
-         */
-        bool canMove() const
-        { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER ||
-                 mType == OBJECT_NPC; }
-
-        /**
-         * Returns whether this entity can fight or not. (Being)
-         */
-        bool canFight() const
-        { return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER; }
-
-        /**
-         * Updates the internal status. By default, calls update on all its
-         * components.
-         */
         virtual void update();
 
-        /**
-         * Gets the map this entity is located on.
-         */
-        MapComposite *getMap() const
-        { return mMap; }
-
-        /**
-         * Sets the map this entity is located on.
-         */
-        virtual void setMap(MapComposite *map)
-        { mMap = map; }
+        MapComposite *getMap() const;
+        virtual void setMap(MapComposite *map);
 
         sigc::signal<void, Entity *> signal_inserted;
         sigc::signal<void, Entity *> signal_removed;
@@ -128,5 +73,86 @@ class Entity : public sigc::trackable
 
         Component *mComponents[ComponentTypeCount];
 };
+
+/**
+ * Gets type of this entity.
+ *
+ * @return the type of this entity.
+ */
+inline EntityType Entity::getType() const
+{
+    return mType;
+}
+
+/**
+ * Adds a component. Only one component of a given type can be added.
+ * Entity takes ownership of \a component.
+ */
+template <class T>
+inline void Entity::addComponent(T *component)
+{
+    assert(!mComponents[T::type]);
+    mComponents[T::type] = component;
+}
+
+/**
+ * Returns the component of the given type, or 0 when no such component
+ * was set.
+ */
+inline Component *Entity::getComponent(ComponentType type) const
+{
+    return mComponents[type];
+}
+
+/**
+ * Get a component by its class. Avoids the need for doing a static-
+ * cast in the calling code.
+ */
+template <class T>
+inline T *Entity::getComponent() const
+{
+    return static_cast<T*>(getComponent(T::type));
+}
+
+/**
+ * Returns whether this entity is visible on the map or not. (Actor)
+ */
+inline bool Entity::isVisible() const
+{
+    return mType != OBJECT_OTHER;
+}
+
+/**
+ * Returns whether this entity can move on the map or not. (Actor)
+ */
+inline bool Entity::canMove() const
+{
+    return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER ||
+           mType == OBJECT_NPC;
+}
+
+/**
+ * Returns whether this entity can fight or not. (Being)
+ */
+inline bool Entity::canFight() const
+{
+    return mType == OBJECT_CHARACTER || mType == OBJECT_MONSTER;
+}
+
+/**
+ * Gets the map this entity is located on.
+ */
+inline MapComposite *Entity::getMap() const
+{
+    return mMap;
+}
+
+/**
+ * Sets the map this entity is located on.
+ */
+inline void Entity::setMap(MapComposite *map)
+{
+    mMap = map;
+}
 
 #endif // ENTITY_H

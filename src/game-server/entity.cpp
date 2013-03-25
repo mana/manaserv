@@ -35,6 +35,9 @@ Entity::~Entity()
         delete mComponents[i];
 }
 
+/**
+ * Updates the internal status. By default, calls update on all its components.
+ */
 void Entity::update()
 {
     for (int i = 0; i < ComponentTypeCount; ++i)
