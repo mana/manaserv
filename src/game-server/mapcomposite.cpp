@@ -1,7 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2006-2010  The Mana World Development Team
- *  Copyright (C) 2010-2011  The Mana Development Team
+ *  Copyright (C) 2010-2012  The Mana Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -31,8 +31,8 @@
 #include "game-server/mapmanager.h"
 #include "game-server/mapreader.h"
 #include "game-server/monstermanager.h"
-#include "game-server/spawnarea.h"
-#include "game-server/trigger.h"
+#include "game-server/spawnareacomponent.h"
+#include "game-server/triggerareacomponent.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 #include "utils/logger.h"
@@ -800,9 +800,12 @@ void MapComposite::initializeContent()
 
             if (destMap && destX && destY)
             {
+                Entity *entity = new Entity(OBJECT_OTHER, this);
                 WarpAction *action = new WarpAction(destMap, destX, destY);
-                insert(new TriggerArea(this, object->getBounds(),
-                                       action, false));
+                entity->addComponent(
+                            new TriggerAreaComponent(object->getBounds(),
+                                                     action, false));
+                insert(entity);
             }
             else
             {
@@ -838,8 +841,13 @@ void MapComposite::initializeContent()
 
             if (monster && maxBeings && spawnRate)
             {
-                insert(new SpawnArea(this, monster, object->getBounds(),
-                                     maxBeings, spawnRate));
+                Entity *entity = new Entity(OBJECT_OTHER, this);
+                SpawnAreaComponent *spawnArea =
+                        new SpawnAreaComponent(monster, object->getBounds(),
+                                               maxBeings, spawnRate);
+
+                entity->addComponent(spawnArea);
+                insert(entity);
             }
         }
         else if (utils::compareStrI(type, "NPC") == 0)

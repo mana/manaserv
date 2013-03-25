@@ -169,8 +169,8 @@
 		<Unit filename="src/game-server/quest.h" />
 		<Unit filename="src/game-server/skillmanager.cpp" />
 		<Unit filename="src/game-server/skillmanager.h" />
-		<Unit filename="src/game-server/spawnarea.cpp" />
-		<Unit filename="src/game-server/spawnarea.h" />
+		<Unit filename="src/game-server/spawnareacomponent.cpp" />
+		<Unit filename="src/game-server/spawnareacomponent.h" />
 		<Unit filename="src/game-server/specialmanager.cpp" />
 		<Unit filename="src/game-server/specialmanager.h" />
 		<Unit filename="src/game-server/state.cpp" />
@@ -183,8 +183,8 @@
 		<Unit filename="src/game-server/timeout.h" />
 		<Unit filename="src/game-server/trade.cpp" />
 		<Unit filename="src/game-server/trade.h" />
-		<Unit filename="src/game-server/trigger.cpp" />
-		<Unit filename="src/game-server/trigger.h" />
+		<Unit filename="src/game-server/triggerareacomponent.cpp" />
+		<Unit filename="src/game-server/triggerareacomponent.h" />
 		<Unit filename="src/manaserv-game.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

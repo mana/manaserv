@@ -60,6 +60,7 @@ Monster::Monster(MonsterClass *specy):
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
 
     setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_CHARACTER);
+    setBlockType(BLOCKTYPE_MONSTER);
 
     /*
      * Initialise the attribute structures.
@@ -414,7 +415,8 @@ int Monster::damage(Actor *source, const Damage &damage)
 
 void Monster::died()
 {
-    if (mAction == DEAD) return;
+    if (mAction == DEAD)
+        return;
 
     Being::died();
     mDecayTimeout.set(DECAY_TIME);
@@ -426,11 +428,13 @@ void Monster::died()
         for (unsigned i = 0; i < size; i++)
         {
             const int p = rand() / (RAND_MAX / 10000);
-            if (p <= mSpecy->mDrops[i].probability)
+            const MonsterDrop &drop = mSpecy->mDrops[i];
+
+            if (p <= drop.probability)
             {
-                Item *item = new Item(mSpecy->mDrops[i].item, 1);
-                item->setMap(getMap());
-                item->setPosition(getPosition());
+                Actor *item = Item::create(getMap(),
+                                           getPosition(),
+                                           drop.item, 1);
                 GameState::enqueueInsert(item);
             }
         }

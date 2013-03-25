@@ -191,11 +191,12 @@ static void money(Character *, Character *q, int nb)
 }
 */
 
-static void drop(Character *from, ItemClass *it, int nb)
+static void drop(Character *from, ItemClass *itemClass, int amount)
 {
-    Item *item = new Item(it, nb);
-    item->setMap(from->getMap());
-    item->setPosition(from->getPosition());
+    Entity *item = Item::create(from->getMap(),
+                                from->getPosition(),
+                                itemClass, amount);
+
     GameState::insertOrDelete(item);
 }
 

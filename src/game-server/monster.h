@@ -27,8 +27,9 @@
 #include "utils/string.h"
 
 #include <map>
-#include <vector>
+#include <set>
 #include <string>
+#include <vector>
 
 #include <sigc++/connection.h>
 
@@ -316,13 +317,6 @@ class Monster : public Being
          * Removes a being from the anger list.
          */
         void forgetTarget(Entity *entity);
-
-    protected:
-        /**
-         * Returns the way the actor blocks pathfinding for other objects.
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_MONSTER; }
 
     private:
         static const int DECAY_TIME = 50;

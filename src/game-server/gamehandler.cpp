@@ -453,22 +453,25 @@ void GameHandler::handleNpc(GameClient &client, MessageIn &message)
         return;
     }
 
-    NPC *npc = static_cast<NPC *>(actor);
+    Being *npc = static_cast<Being*>(actor);
+
     switch (message.getId())
     {
         case PGMSG_NPC_SELECT:
-            npc->select(client.character, message.readInt8());
+            Npc::integerReceived(client.character, message.readInt8());
             break;
         case PGMSG_NPC_NUMBER:
-            npc->integerReceived(client.character, message.readInt32());
+            Npc::integerReceived(client.character, message.readInt32());
             break;
         case PGMSG_NPC_STRING:
-            npc->stringReceived(client.character, message.readString());
+            Npc::stringReceived(client.character, message.readString());
             break;
         case PGMSG_NPC_TALK:
+            Npc::start(npc, client.character);
+            break;
         case PGMSG_NPC_TALK_NEXT:
         default:
-            npc->prompt(client.character, message.getId() == PGMSG_NPC_TALK);
+            Npc::resume(client.character);
             break;
     }
 }
@@ -488,15 +491,17 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
         {
             Actor *o = *i;
             Point opos = o->getPosition();
+
             if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
             {
-                Item *item = static_cast< Item * >(o);
+                ItemComponent *item = o->getComponent<ItemComponent>();
                 ItemClass *ic = item->getItemClass();
                 int amount = item->getAmount();
+
                 if (!Inventory(client.character).insert(ic->getDatabaseID(),
-                                                       amount))
+                                                        amount))
                 {
-                    GameState::remove(item);
+                    GameState::remove(o);
 
                     // We only do this when items are to be kept in memory
                     // between two server restart.
@@ -504,8 +509,8 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
                     {
                         // Remove the floor item from map
                         accountHandler->removeFloorItems(map->getID(),
-                                                        ic->getDatabaseID(),
-                                                        amount, x, y);
+                                                         ic->getDatabaseID(),
+                                                         amount, x, y);
                     }
 
                     // log transaction
@@ -556,18 +561,17 @@ void GameHandler::handleDrop(GameClient &client, MessageIn &message)
     if (ItemClass *ic = itemManager->getItem(inv.getItem(slot)))
     {
         int nb = inv.removeFromSlot(slot, amount);
-        Item *item = new Item(ic, amount - nb);
-        item->setMap(client.character->getMap());
-        item->setPosition(client.character->getPosition());
-        if (!GameState::insert(item))
+        MapComposite *map = client.character->getMap();
+        Point pos = client.character->getPosition();
+
+        Entity *item = Item::create(map, pos, ic, amount - nb);
+
+        if (!GameState::insertOrDelete(item))
         {
             // The map is full. Put back into inventory.
             inv.insert(ic->getDatabaseID(), amount - nb);
-            delete item;
             return;
         }
-
-        Point pt = client.character->getPosition();
 
         // We store the item in database only when the floor items are meant
         // to be persistent between two server restarts.
@@ -575,14 +579,14 @@ void GameHandler::handleDrop(GameClient &client, MessageIn &message)
         {
             // Create the floor item on map
             accountHandler->createFloorItems(client.character->getMap()->getID(),
-                                            ic->getDatabaseID(),
-                                            amount, pt.x, pt.y);
+                                             ic->getDatabaseID(),
+                                             amount, pos.x, pos.y);
         }
 
         // log transaction
         std::stringstream str;
         str << "User dropped item " << ic->getDatabaseID()
-            << " at " << pt.x << "x" << pt.y;
+            << " at " << pos.x << "x" << pos.y;
         accountHandler->sendTransaction(client.character->getDatabaseID(),
                                         TRANS_ITEM_DROP, str.str());
     }

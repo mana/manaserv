@@ -743,6 +743,8 @@ void Being::update()
         died();
 
     processAttacks();
+
+    Actor::update();
 }
 
 void Being::inserted(Entity *)

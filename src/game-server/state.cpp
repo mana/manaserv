@@ -37,7 +37,6 @@
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 #include "utils/logger.h"
-#include "utils/point.h"
 #include "utils/speedconv.h"
 
 #include <cassert>
@@ -275,9 +274,9 @@ static void informPlayer(MapComposite *map, Character *p)
 
                 case OBJECT_NPC:
                 {
-                    NPC *q = static_cast< NPC * >(o);
-                    enterMsg.writeInt16(q->getNPC());
-                    enterMsg.writeString(q->getName());
+                    NpcComponent *npcComponent = o->getComponent<NpcComponent>();
+                    enterMsg.writeInt16(npcComponent->getNpcId());
+                    enterMsg.writeString(o->getName());
                 } break;
 
                 default:
@@ -356,10 +355,11 @@ static void informPlayer(MapComposite *map, Character *p)
     for (FixedActorIterator it(map->getAroundBeingIterator(p, visualRange));
          it; ++it)
     {
-        assert((*it)->getType() == OBJECT_ITEM ||
-               (*it)->getType() == OBJECT_EFFECT);
-
         Actor *o = *it;
+
+        assert(o->getType() == OBJECT_ITEM ||
+               o->getType() == OBJECT_EFFECT);
+
         Point opos = o->getPosition();
         int oflags = o->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, visualRange);
@@ -372,20 +372,22 @@ static void informPlayer(MapComposite *map, Character *p)
             {
                 case OBJECT_ITEM:
                 {
-                    Item *o = static_cast< Item * >(*it);
+                    ItemComponent *item = o->getComponent<ItemComponent>();
+                    ItemClass *itemClass = item->getItemClass();
+
                     if (oflags & UPDATEFLAG_NEW_ON_MAP)
                     {
                         /* Send a specific message to the client when an item appears
                            out of nowhere, so that a sound/animation can be performed. */
                         MessageOut appearMsg(GPMSG_ITEM_APPEAR);
-                        appearMsg.writeInt16(o->getItemClass()->getDatabaseID());
+                        appearMsg.writeInt16(itemClass->getDatabaseID());
                         appearMsg.writeInt16(opos.x);
                         appearMsg.writeInt16(opos.y);
                         gameHandler->sendTo(p, appearMsg);
                     }
                     else
                     {
-                        itemMsg.writeInt16(willBeInRange ? o->getItemClass()->getDatabaseID() : 0);
+                        itemMsg.writeInt16(willBeInRange ? itemClass->getDatabaseID() : 0);
                         itemMsg.writeInt16(opos.x);
                         itemMsg.writeInt16(opos.y);
                     }
@@ -393,21 +395,21 @@ static void informPlayer(MapComposite *map, Character *p)
                 break;
                 case OBJECT_EFFECT:
                 {
-                    Effect *o = static_cast< Effect * >(*it);
-                    o->show();
+                    EffectComponent *e = o->getComponent<EffectComponent>();
+                    e->setShown();
                     // Don't show old effects
                     if (!(oflags & UPDATEFLAG_NEW_ON_MAP))
                         break;
-                    Being *b = o->getBeing();
-                    if (b)
+
+                    if (Being *b = e->getBeing())
                     {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_BEING);
-                        effectMsg.writeInt16(o->getEffectId());
+                        effectMsg.writeInt16(e->getEffectId());
                         effectMsg.writeInt16(b->getPublicID());
                         gameHandler->sendTo(p, effectMsg);
                     } else {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_POS);
-                        effectMsg.writeInt16(o->getEffectId());
+                        effectMsg.writeInt16(e->getEffectId());
                         effectMsg.writeInt16(opos.x);
                         effectMsg.writeInt16(opos.y);
                         gameHandler->sendTo(p, effectMsg);
@@ -544,11 +546,11 @@ bool GameState::insert(Entity *ptr)
     {
         case OBJECT_ITEM:
             LOG_DEBUG("Item inserted: "
-                   << static_cast<Item*>(obj)->getItemClass()->getDatabaseID());
+                   << obj->getComponent<ItemComponent>()->getItemClass()->getDatabaseID());
             break;
 
         case OBJECT_NPC:
-            LOG_DEBUG("NPC inserted: " << static_cast<NPC*>(obj)->getNPC());
+            LOG_DEBUG("NPC inserted: " << obj->getComponent<NpcComponent>()->getNpcId());
             break;
 
         case OBJECT_CHARACTER:
@@ -558,7 +560,7 @@ bool GameState::insert(Entity *ptr)
 
         case OBJECT_EFFECT:
             LOG_DEBUG("Effect inserted: "
-                      << static_cast<Effect*>(obj)->getEffectId());
+                      << obj->getComponent<EffectComponent>()->getEffectId());
             break;
 
         case OBJECT_MONSTER:
@@ -618,11 +620,11 @@ void GameState::remove(Entity *ptr)
     {
         case OBJECT_ITEM:
             LOG_DEBUG("Item removed: "
-                   << static_cast<Item*>(ptr)->getItemClass()->getDatabaseID());
+                   << ptr->getComponent<ItemComponent>()->getItemClass()->getDatabaseID());
             break;
 
         case OBJECT_NPC:
-            LOG_DEBUG("NPC removed: " << static_cast<NPC*>(ptr)->getNPC());
+            LOG_DEBUG("NPC removed: " << ptr->getComponent<NpcComponent>()->getNpcId());
             break;
 
         case OBJECT_CHARACTER:
@@ -632,7 +634,7 @@ void GameState::remove(Entity *ptr)
 
         case OBJECT_EFFECT:
             LOG_DEBUG("Effect removed: "
-                      << static_cast<Effect*>(ptr)->getEffectId());
+                      << ptr->getComponent<EffectComponent>()->getEffectId());
             break;
 
         case OBJECT_MONSTER:
@@ -675,14 +677,14 @@ void GameState::remove(Entity *ptr)
     }
     else if (ptr->getType() == OBJECT_ITEM)
     {
-        Item *obj = static_cast< Item * >(ptr);
-        Point pos = obj->getPosition();
+        Actor *actor = static_cast<Actor*>(ptr);
+        Point pos = actor->getPosition();
         MessageOut msg(GPMSG_ITEMS);
         msg.writeInt16(0);
         msg.writeInt16(pos.x);
         msg.writeInt16(pos.y);
 
-        for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange)); p; ++p)
+        for (CharacterIterator p(map->getAroundActorIterator(actor, visualRange)); p; ++p)
         {
             if (pos.inRangeOf((*p)->getPosition(), visualRange))
             {

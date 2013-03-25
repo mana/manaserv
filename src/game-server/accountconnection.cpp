@@ -187,16 +187,15 @@ void AccountConnection::processMessage(MessageIn &msg)
 
                     if (ItemClass *ic = itemManager->getItem(itemId))
                     {
-                        Item *item = new Item(ic, amount);
-                        item->setMap(m);
-                        Point dst(posX, posY);
-                        item->setPosition(dst);
+                        Entity *item = Item::create(m,
+                                                    Point(posX, posY),
+                                                    ic, amount);
 
                         if (!GameState::insertOrDelete(item))
                         {
                             // The map is full.
                             LOG_WARN("Couldn't add floor item(s) " << itemId
-                                << " into map " << mapId);
+                                     << " into map " << mapId);
                             return;
                         }
                     }

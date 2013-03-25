@@ -188,14 +188,14 @@ MonsterClass *getMonsterClass(lua_State *s, int p)
     return monsterClass;
 }
 
-NPC *getNPC(lua_State *s, int p)
+Being *getNpc(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Entity *t = static_cast<Entity *>(lua_touserdata(s, p));
     if (t->getType() != OBJECT_NPC)
         return 0;
-    return static_cast<NPC *>(t);
+    return static_cast<Being*>(t);
 }
 
 
@@ -234,9 +234,9 @@ MonsterClass *checkMonsterClass(lua_State *s, int p)
     return monsterClass;
 }
 
-NPC *checkNPC(lua_State *s, int p)
+Being *checkNpc(lua_State *s, int p)
 {
-    NPC *npc = getNPC(s, p);
+    Being *npc = getNpc(s, p);
     luaL_argcheck(s, npc, p, "npc expected");
     return npc;
 }

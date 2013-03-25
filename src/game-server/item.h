@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -29,6 +30,7 @@
 
 class Being;
 class ItemClass;
+class MapComposite;
 
 // Indicates the equip slot "cost" to equip an item.
 struct ItemEquipRequirement {
@@ -294,12 +296,14 @@ class ItemClass
 };
 
 /**
- * Class for an item stack laying on the floor in the game world
+ * An item stack lying on the floor in the game world.
  */
-class Item : public Actor
+class ItemComponent : public Component
 {
     public:
-        Item(ItemClass *type, int amount);
+        static const ComponentType type = CT_Item;
+
+        ItemComponent(ItemClass *type, int amount);
 
         ItemClass *getItemClass() const
         { return mType; }
@@ -307,12 +311,31 @@ class Item : public Actor
         int getAmount() const
         { return mAmount; }
 
-        virtual void update();
+        void update(Entity &entity);
 
     private:
         ItemClass *mType;
         unsigned char mAmount;
         int mLifetime;
 };
+
+namespace Item {
+
+/**
+ * @brief Creates an item actor.
+ *
+ * The returned actor should be inserted into the game state, usually with
+ * either GameState::insertOrDelete or GameState::enqueueInsert.
+ *
+ * @param map       the map of the item
+ * @param pos       the position of the item
+ * @param itemClass the class of the item
+ * @param amount    the amount of items on the stack
+ *
+ * @return the created item
+ */
+Actor *create(MapComposite *map, Point pos, ItemClass *itemClass, int amount);
+
+} // namespace Item
 
 #endif // ITEM_H

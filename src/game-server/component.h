@@ -1,6 +1,5 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2007-2010  The Mana World Development Team
  *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
@@ -19,25 +18,35 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/entity.h"
+#ifndef COMPONENT_H
+#define COMPONENT_H
 
-Entity::Entity(EntityType type, MapComposite *map) :
-    mMap(map),
-    mType(type)
-{
-    for (int i = 0; i < ComponentTypeCount; ++i)
-        mComponents[i] = 0;
-}
+class Entity;
 
-Entity::~Entity()
+enum ComponentType
 {
-    for (int i = 0; i < ComponentTypeCount; ++i)
-        delete mComponents[i];
-}
+    CT_Effect,
+    CT_Item,
+    CT_Npc,
+    CT_SpawnArea,
+    CT_TriggerArea,
 
-void Entity::update()
+    ComponentTypeCount
+};
+
+/**
+ * A component of an entity.
+ */
+class Component
 {
-    for (int i = 0; i < ComponentTypeCount; ++i)
-        if (mComponents[i])
-            mComponents[i]->update(*this);
-}
+    public:
+        virtual ~Component() {}
+
+        /**
+         * Updates the internal status. The \a entity is the owner of this
+         * component.
+         */
+        virtual void update(Entity &entity) = 0;
+};
+
+#endif // COMPONENT_H

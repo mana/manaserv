@@ -27,7 +27,6 @@
 
 #include "../common/inventorydata.h"
 
-class Item;
 class Character;
 
 class Letter

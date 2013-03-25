@@ -33,6 +33,7 @@
 #include "utils/logger.h"
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -429,13 +430,6 @@ class Character : public Being
         virtual void removeAttack(AttackInfo *attackInfo);
 
         sigc::signal<void, Character *> signal_disconnected;
-
-    protected:
-        /**
-         * Gets the way the actor blocks pathfinding for other objects
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_CHARACTER; }
 
     private:
         bool specialUseCheck(SpecialMap::iterator it);

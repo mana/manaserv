@@ -1,7 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
- *  Copyright (C) 2010  The Mana Developers
+ *  Copyright (C) 2010-2013  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -49,7 +49,7 @@ extern "C" {
 #include "game-server/state.h"
 #include "game-server/statuseffect.h"
 #include "game-server/statusmanager.h"
-#include "game-server/trigger.h"
+#include "game-server/triggerareacomponent.h"
 #include "net/messageout.h"
 #include "scripting/luautil.h"
 #include "scripting/luascript.h"
@@ -280,25 +280,35 @@ static int npc_create(lua_State *s)
 
     MapComposite *m = checkCurrentMap(s);
 
-    NPC *q = new NPC(name, id);
-    q->setGender(getGender(gender));
-    q->setMap(m);
-    q->setPosition(Point(x, y));
+    NpcComponent *npcComponent = new NpcComponent(id);
+
+    Being *npc = new Being(OBJECT_NPC);
+    npc->addComponent(npcComponent);
+    // some health so it doesn't spawn dead
+    npc->setAttribute(ATTR_MAX_HP, 100);
+    npc->setAttribute(ATTR_HP, 100);
+    npc->setName(name);
+    npc->setGender(getGender(gender));
+
+    npc->setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER |
+                     Map::BLOCKMASK_CHARACTER);
+    npc->setMap(m);
+    npc->setPosition(Point(x, y));
 
     if (lua_isfunction(s, 6))
     {
         lua_pushvalue(s, 6);
-        q->setTalkCallback(luaL_ref(s, LUA_REGISTRYINDEX));
+        npcComponent->setTalkCallback(luaL_ref(s, LUA_REGISTRYINDEX));
     }
 
     if (lua_isfunction(s, 7))
     {
         lua_pushvalue(s, 7);
-        q->setUpdateCallback(luaL_ref(s, LUA_REGISTRYINDEX));
+        npcComponent->setUpdateCallback(luaL_ref(s, LUA_REGISTRYINDEX));
     }
 
-    GameState::enqueueInsert(q);
-    lua_pushlightuserdata(s, q);
+    GameState::enqueueInsert(npc);
+    lua_pushlightuserdata(s, npc);
     return 1;
 }
 
@@ -309,9 +319,9 @@ static int npc_create(lua_State *s)
  */
 static int npc_enable(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
-    p->setEnabled(true);
-    GameState::enqueueInsert(p);
+    Being *npc = checkNpc(s, 1);
+    npc->getComponent<NpcComponent>()->setEnabled(true);
+    GameState::enqueueInsert(npc);
     return 0;
 }
 
@@ -322,9 +332,9 @@ static int npc_enable(lua_State *s)
  */
 static int npc_disable(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
-    p->setEnabled(false);
-    GameState::remove(p);
+    Being *npc = checkNpc(s, 1);
+    npc->getComponent<NpcComponent>()->setEnabled(false);
+    GameState::remove(npc);
     return 0;
 }
 
@@ -407,14 +417,18 @@ static int trigger_create(lua_State *s)
     script->assignCallback(function);
     lua_pop(s, 1);
 
+    Entity *triggerEntity = new Entity(OBJECT_OTHER, m);
+
     ScriptAction *action = new ScriptAction(script, function, id);
     Rectangle r = { x, y, width, height };
-    TriggerArea *area = new TriggerArea(m, r, action, once);
+    TriggerAreaComponent *area = new TriggerAreaComponent(r, action, once);
+
+    triggerEntity->addComponent(area);
 
     LOG_INFO("Created script trigger at " << x << "," << y
              << " (" << width << "x" << height << ") id: " << id);
 
-    bool ret = GameState::insert(area);
+    bool ret = GameState::insertOrDelete(triggerEntity);
     lua_pushboolean(s, ret);
     return 1;
 }
@@ -439,7 +453,7 @@ static int effect_create(lua_State *s)
     {
         // being mode
         Being *b = checkBeing(s, 2);
-        Effects::show(id, b->getMap(), b);
+        Effects::show(id, b);
     }
     else
     {
@@ -467,12 +481,8 @@ static int item_drop(lua_State *s)
     const int number = luaL_optint(s, 4, 1);
     MapComposite *map = checkCurrentMap(s);
 
-    Item *i = new Item(ic, number);
-
-    i->setMap(map);
-    Point pos(x, y);
-    i->setPosition(pos);
-    GameState::enqueueInsert(i);
+    Actor *item = Item::create(map, Point(x, y), ic, number);
+    GameState::enqueueInsert(item);
     return 0;
 }
 
@@ -489,14 +499,14 @@ static int item_drop(lua_State *s)
  */
 static int npc_message(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
+    Being *npc = checkNpc(s, 1);
     Character *q = checkCharacter(s, 2);
     const char *m = luaL_checkstring(s, 3);
 
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_MESSAGE);
-    msg.writeInt16(p->getPublicID());
+    msg.writeInt16(npc->getPublicID());
     msg.writeString(m);
     gameHandler->sendTo(q, msg);
 
@@ -522,13 +532,13 @@ static int npc_message(lua_State *s)
  */
 static int npc_choice(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
+    Being *npc = checkNpc(s, 1);
     Character *q = checkCharacter(s, 2);
 
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_CHOICE);
-    msg.writeInt16(p->getPublicID());
+    msg.writeInt16(npc->getPublicID());
     for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
     {
         if (lua_isstring(s, i))
@@ -578,7 +588,7 @@ static int npc_choice(lua_State *s)
  */
 static int npc_ask_integer(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
+    Being *npc = checkNpc(s, 1);
     Character *q = checkCharacter(s, 2);
     int min = luaL_checkint(s, 3);
     int max = luaL_checkint(s, 4);
@@ -587,7 +597,7 @@ static int npc_ask_integer(lua_State *s)
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_NUMBER);
-    msg.writeInt16(p->getPublicID());
+    msg.writeInt16(npc->getPublicID());
     msg.writeInt32(min);
     msg.writeInt32(max);
     msg.writeInt32(defaultValue);
@@ -608,13 +618,13 @@ static int npc_ask_integer(lua_State *s)
  */
 static int npc_ask_string(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
+    Being *npc = checkNpc(s, 1);
     Character *q = checkCharacter(s, 2);
 
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_STRING);
-    msg.writeInt16(p->getPublicID());
+    msg.writeInt16(npc->getPublicID());
     gameHandler->sendTo(q, msg);
 
     thread->mState = Script::ThreadExpectingString;
@@ -628,11 +638,11 @@ static int npc_ask_string(lua_State *s)
  */
 static int npc_post(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
+    Being *npc = checkNpc(s, 1);
     Character *q = checkCharacter(s, 2);
 
     MessageOut msg(GPMSG_NPC_POST);
-    msg.writeInt16(p->getPublicID());
+    msg.writeInt16(npc->getPublicID());
     gameHandler->sendTo(q, msg);
 
     return 0;
@@ -755,7 +765,7 @@ static int announce(lua_State *s)
  */
 static int npc_trade(lua_State *s)
 {
-    NPC *p = checkNPC(s, 1);
+    Being *npc = checkNpc(s, 1);
     Character *q = checkCharacter(s, 2);
     if (!lua_isboolean(s, 3))
     {
@@ -778,7 +788,7 @@ static int npc_trade(lua_State *s)
                 return 1;
             }
 
-            if (t->start(p))
+            if (t->start(npc))
             {
                 lua_pushinteger(s, 0);
                 return 1;
@@ -856,7 +866,7 @@ static int npc_trade(lua_State *s)
         lua_pushinteger(s, 1);
         return 1;
     }
-    if (t->start(p))
+    if (t->start(npc))
     {
         lua_pushinteger(s, 0);
         return 1;
@@ -952,9 +962,9 @@ static int chr_inv_change(lua_State *s)
             nb = inv.insert(id, nb);
             if (nb)
             {
-                Item *item = new Item(ic, nb);
-                item->setMap(q->getMap());
-                item->setPosition(q->getPosition());
+                Actor *item = Item::create(q->getMap(),
+                                           q->getPosition(),
+                                           ic, nb);
                 GameState::enqueueInsert(item);
             }
         }

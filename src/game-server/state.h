@@ -18,16 +18,18 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SERVER_STATE_H
-#define SERVER_STATE_H
+#ifndef STATE_H
+#define STATE_H
+
+#include "utils/point.h"
 
 #include <string>
 
-class MapComposite;
-class Entity;
 class Actor;
 class Character;
-
+class Entity;
+class ItemClass;
+class MapComposite;
 
 namespace GameState
 {
@@ -107,21 +109,21 @@ namespace GameState
     void sayToAll(const std::string &text);
 
     /**
-     * Gets the cached value of a global script variable
+     * Gets the cached value of a global script variable.
      */
     std::string getVariable(const std::string &key);
 
     /**
      * Changes a global script variable and notifies the database server
-     * about the change
+     * about the change.
      */
-    void setVariable (const std::string &key, const std::string &value);
+    void setVariable(const std::string &key, const std::string &value);
 
     /**
      * Changes a global variable without notifying the database server
-     * about the change
+     * about the change.
      */
-    void setVariableFromDbserver (const std::string &key, const std::string &value);
+    void setVariableFromDbserver(const std::string &key, const std::string &value);
 
     /**
      * Informs all maps about the change of a variable so the maps can call
@@ -131,4 +133,4 @@ namespace GameState
                                const std::string &value);
 }
 
-#endif
+#endif // STATE_H

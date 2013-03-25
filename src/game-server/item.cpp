@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,10 +19,6 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <string>
-#include <map>
-
 #include "game-server/item.h"
 
 #include "common/configuration.h"
@@ -31,6 +28,9 @@
 #include "game-server/state.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
+
+#include <map>
+#include <string>
 
 bool ItemEffectAttrMod::apply(Being *itemUser)
 {
@@ -150,19 +150,37 @@ void ItemClass::addAttack(AttackInfo *attackInfo,
     addEffect(new ItemEffectAttack(attackInfo), applyTrigger, dispellTrigger);
 }
 
+const ComponentType ItemComponent::type;
 
-Item::Item(ItemClass *type, int amount)
-          : Actor(OBJECT_ITEM), mType(type), mAmount(amount)
+ItemComponent::ItemComponent(ItemClass *type, int amount) :
+    mType(type),
+    mAmount(amount)
 {
     mLifetime = Configuration::getValue("game_floorItemDecayTime", 0) * 10;
 }
 
-void Item::update()
+void ItemComponent::update(Entity &entity)
 {
     if (mLifetime)
     {
         mLifetime--;
         if (!mLifetime)
-            GameState::enqueueRemove(this);
+            GameState::enqueueRemove(static_cast<Actor*>(&entity));
     }
 }
+
+namespace Item {
+
+Actor *create(MapComposite *map,
+              Point pos,
+              ItemClass *itemClass,
+              int amount)
+{
+    Actor *itemActor = new Actor(OBJECT_ITEM);
+    itemActor->addComponent(new ItemComponent(itemClass, amount));
+    itemActor->setMap(map);
+    itemActor->setPosition(pos);
+    return itemActor;
+}
+
+} // namespace Item
