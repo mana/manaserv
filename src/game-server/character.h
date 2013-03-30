@@ -425,9 +425,9 @@ class Character : public Being
 
         void triggerLoginCallback();
 
-        virtual void addAttack(AttackInfo *attackInfo);
+        void attackAdded(Attack &attackInfo);
 
-        virtual void removeAttack(AttackInfo *attackInfo);
+        void attackRemoved(Attack &attackInfo);
 
         sigc::signal<void, Character *> signal_disconnected;
 

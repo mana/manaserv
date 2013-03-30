@@ -670,7 +670,7 @@ static void handleMoney(Character *player, std::string &args)
     value = utils::stringToInt(valuestr);
 
     // change how much money the player has
-    other->setAttribute(ATTR_GP , other->getAttribute(ATTR_GP) + value);
+    other->setAttribute(ATTR_GP , other->getAttributeBase(ATTR_GP) + value);
 
     // log transaction
     std::string msg = "User created " + valuestr + " money";

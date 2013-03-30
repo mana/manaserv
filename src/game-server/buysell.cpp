@@ -154,15 +154,15 @@ void BuySell::perform(int id, int amount)
         {
             amount -= inv.remove(id, amount);
             mChar->setAttribute(mCurrencyId,
-                                mChar->getAttribute(mCurrencyId) +
+                                mChar->getAttributeBase(mCurrencyId) +
                                 amount * i->cost);
         }
         else
         {
-            amount = std::min(amount, ((int) mChar->getAttribute(mCurrencyId)) / i->cost);
+            amount = std::min(amount, ((int) mChar->getAttributeBase(mCurrencyId)) / i->cost);
             amount -= inv.insert(id, amount);
             mChar->setAttribute(mCurrencyId,
-                                mChar->getAttribute(mCurrencyId) -
+                                mChar->getAttributeBase(mCurrencyId) -
                                 amount * i->cost);
         }
         if (i->amount)

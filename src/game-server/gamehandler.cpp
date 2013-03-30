@@ -27,6 +27,7 @@
 #include "common/transaction.h"
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/commandhandler.h"
 #include "game-server/emotemanager.h"
 #include "game-server/inventory.h"
@@ -649,7 +650,7 @@ void GameHandler::handleAttack(GameClient &client, MessageIn &message)
     Being *being = findBeingNear(client.character, id);
     if (being && being->getType() != OBJECT_NPC)
     {
-        client.character->setTarget(being);
+        client.character->getComponent<CombatComponent>()->setTarget(being);
         client.character->setAction(ATTACK);
     }
 }

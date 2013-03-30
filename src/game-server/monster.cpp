@@ -28,6 +28,7 @@
 #include "game-server/item.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
+#include "game-server/monstercombatcomponent.h"
 #include "game-server/state.h"
 #include "scripting/scriptmanager.h"
 #include "utils/logger.h"
@@ -98,9 +99,6 @@ Monster::Monster(MonsterClass *specy):
         }
     }
 
-    mDamageMutation = mutation ?
-                (100 + (rand() % (mutation * 2)) - mutation) / 100.0 : 1;
-
     setSize(specy->getSize());
     setGender(specy->getGender());
 
@@ -111,13 +109,16 @@ Monster::Monster(MonsterClass *specy):
     mAttackPositions.push_back(AttackPosition(0, -dist, DOWN));
     mAttackPositions.push_back(AttackPosition(0, dist, UP));
 
-    // Take attacks from specy
-    std::vector<AttackInfo *> &attacks = specy->getAttackInfos();
-    for (std::vector<AttackInfo *>::iterator it = attacks.begin(),
-         it_end = attacks.end(); it != it_end; ++it)
-    {
-        addAttack(*it);
-    }
+    MonsterCombatComponent *combatComponent =
+            new MonsterCombatComponent(*this);
+    addComponent(combatComponent);
+
+    double damageMutation = mutation ?
+                (100.0 + (rand() % (mutation * 2)) - mutation) / 100.0 : 1.0;
+    combatComponent->setDamageMutation(damageMutation);
+
+    combatComponent->signal_damaged.connect(
+            sigc::mem_fun(this, &Monster::receivedDamage));
 }
 
 Monster::~Monster()
@@ -151,7 +152,7 @@ void Monster::update()
     refreshTarget();
 
     // Cancel the rest when we have a target
-    if (mTarget)
+    if (getComponent<CombatComponent>()->getTarget())
         return;
 
     // We have no target - let's wander around
@@ -188,7 +189,7 @@ void Monster::refreshTarget()
     Point bestAttackPosition;
 
     // reset Target. We will find a new one if possible
-    mTarget = 0;
+    getComponent<CombatComponent>()->clearTarget();
 
     // Iterate through objects nearby
     int aroundArea = Configuration::getValue("game_visualRange", 448);
@@ -242,45 +243,16 @@ void Monster::refreshTarget()
     }
     if (bestTarget)
     {
-        mTarget = bestTarget;
+        getComponent<CombatComponent>()->setTarget(bestTarget);
         if (bestAttackPosition == getPosition())
         {
             mAction = ATTACK;
-            updateDirection(getPosition(), mTarget->getPosition());
+            updateDirection(getPosition(), bestTarget->getPosition());
         }
         else
         {
             setDestination(bestAttackPosition);
         }
-    }
-}
-
-void Monster::processAttack(Attack &attack)
-{
-    if (!mTarget)
-    {
-        setAction(STAND);
-        return;
-    }
-
-    Damage dmg = attack.getAttackInfo()->getDamage();
-    dmg.skill   = 0;
-    dmg.base    *= mDamageMutation;
-    dmg.delta   *= mDamageMutation;
-
-    int hit = performAttack(mTarget, attack.getAttackInfo()->getDamage());
-
-    const Script::Ref &scriptCallback =
-            attack.getAttackInfo()->getScriptCallback();
-
-    if (scriptCallback.isValid() && hit > -1)
-    {
-        Script *script = ScriptManager::currentState();
-        script->prepare(scriptCallback);
-        script->push(this);
-        script->push(mTarget);
-        script->push(hit);
-        script->execute(getMap());
     }
 }
 
@@ -375,44 +347,6 @@ std::map<Being *, int> Monster::getAngerList() const
     return result;
 }
 
-int Monster::damage(Actor *source, const Damage &damage)
-{
-    Damage newDamage = damage;
-    float factor = mSpecy->getVulnerability(newDamage.element);
-    newDamage.base = newDamage.base * factor;
-    newDamage.delta = newDamage.delta * factor;
-    int HPLoss = Being::damage(source, newDamage);
-    if (source)
-        changeAnger(source, HPLoss);
-
-    if (HPLoss && source && source->getType() == OBJECT_CHARACTER)
-    {
-        Character *s = static_cast< Character * >(source);
-
-        mExpReceivers[s].insert(damage.skill);
-        if (mKillStealProtectedTimeout.expired() || mOwner == s
-            || mOwner->getParty() == s->getParty())
-        {
-            mOwner = s;
-            mLegalExpReceivers.insert(s);
-            mKillStealProtectedTimeout.set(KILLSTEAL_PROTECTION_TIME);
-        }
-    }
-
-    if (mSpecy->getDamageCallback().isValid())
-    {
-        Script *script = ScriptManager::currentState();
-        script->prepare(mSpecy->getDamageCallback());
-        script->push(this);
-        script->push(source);
-        script->push(HPLoss);
-        // TODO: add exact damage parameters as well
-        script->execute(getMap());
-    }
-
-    return HPLoss;
-}
-
 void Monster::died()
 {
     if (mAction == DEAD)
@@ -464,6 +398,27 @@ void Monster::died()
                                              mSpecy->getOptimalLevel());
             }
             character->incrementKillCount(mSpecy->getId());
+        }
+    }
+}
+
+
+void Monster::receivedDamage(Being *source, const Damage &damage, int hpLoss)
+{
+    if (source)
+        changeAnger(source, hpLoss);
+
+    if (hpLoss && source && source->getType() == OBJECT_CHARACTER)
+    {
+        Character *s = static_cast< Character * >(source);
+
+        mExpReceivers[s].insert(damage.skill);
+        if (mKillStealProtectedTimeout.expired() || mOwner == s
+            || mOwner->getParty() == s->getParty())
+        {
+            mOwner = s;
+            mLegalExpReceivers.insert(s);
+            mKillStealProtectedTimeout.set(KILLSTEAL_PROTECTION_TIME);
         }
     }
 }

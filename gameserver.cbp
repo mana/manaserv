@@ -132,6 +132,8 @@
 		<Unit filename="src/game-server/character.h" />
 		<Unit filename="src/game-server/collisiondetection.cpp" />
 		<Unit filename="src/game-server/collisiondetection.h" />
+		<Unit filename="src/game-server/combatcomponent.cpp" />
+		<Unit filename="src/game-server/combatcomponent.h" />
 		<Unit filename="src/game-server/commandhandler.cpp" />
 		<Unit filename="src/game-server/commandhandler.h" />
 		<Unit filename="src/game-server/effect.cpp" />
@@ -160,6 +162,8 @@
 		<Unit filename="src/game-server/mapreader.h" />
 		<Unit filename="src/game-server/monster.cpp" />
 		<Unit filename="src/game-server/monster.h" />
+		<Unit filename="src/game-server/monstercombatcomponent.cpp" />
+		<Unit filename="src/game-server/monstercombatcomponent.h" />
 		<Unit filename="src/game-server/monstermanager.cpp" />
 		<Unit filename="src/game-server/monstermanager.h" />
 		<Unit filename="src/game-server/npc.cpp" />

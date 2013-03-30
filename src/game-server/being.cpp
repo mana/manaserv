@@ -27,6 +27,7 @@
 #include "game-server/attributemanager.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
 #include "game-server/skillmanager.h"
@@ -43,9 +44,7 @@ Script::Ref Being::mRecalculateBaseAttributeCallback;
 Being::Being(EntityType type):
     Actor(type),
     mAction(STAND),
-    mTarget(NULL),
     mGender(GENDER_UNSPECIFIED),
-    mCurrentAttack(0),
     mDirection(DOWN),
     mEmoteId(0)
 {
@@ -87,74 +86,7 @@ void Being::triggerEmote(int id)
         raiseUpdateFlags(UPDATEFLAG_EMOTE);
 }
 
-int Being::damage(Actor * /* source */, const Damage &damage)
-{
-    if (mAction == DEAD)
-        return 0;
 
-    int HPloss = damage.base;
-    if (damage.delta)
-        HPloss += rand() * (damage.delta + 1) / RAND_MAX;
-
-    // TODO magical attacks and associated elemental modifiers
-    switch (damage.type)
-    {
-        case DAMAGE_PHYSICAL:
-            if (!damage.trueStrike &&
-                rand()%((int) getModifiedAttribute(ATTR_DODGE) + 1) >
-                    rand()%(damage.cth + 1))
-            {
-                HPloss = 0;
-                // TODO Process triggers for a dodged physical attack here.
-                // If there is an attacker included, also process triggers for the attacker (failed physical strike)
-            }
-            else
-            {
-                HPloss = HPloss * (1.0 - (0.0159375f *
-                                          getModifiedAttribute(ATTR_DEFENSE)) /
-                                   (1.0 + 0.017 *
-                                    getModifiedAttribute(ATTR_DEFENSE))) +
-                         (rand()%((HPloss >> 4) + 1));
-                // TODO Process triggers for receiving damage here.
-                // If there is an attacker included, also process triggers for the attacker (successful physical strike)
-            }
-            break;
-        case DAMAGE_MAGICAL:
-#if 0
-            getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
-#else
-            LOG_WARN("Attempt to use magical type damage! This has not been"
-                      "implemented yet and should not be used!");
-            HPloss = 0;
-#endif
-            break;
-        case DAMAGE_DIRECT:
-            break;
-        default:
-            LOG_WARN("Unknown damage type '" << damage.type << "'!");
-            break;
-    }
-
-    if (HPloss > 0)
-    {
-        mHitsTaken.push_back(HPloss);
-        Attribute &HP = mAttributes.at(ATTR_HP);
-        LOG_DEBUG("Being " << getPublicID() << " suffered " << HPloss
-                  << " damage. HP: "
-                  << HP.getModifiedAttribute() << "/"
-                  << mAttributes.at(ATTR_MAX_HP).getModifiedAttribute());
-        setAttribute(ATTR_HP, HP.getBase() - HPloss);
-        // No HP regen after being hit if this is set.
-        mHealthRegenerationTimeout.setSoft(
-                    Configuration::getValue("game_hpRegenBreakAfterHit", 0));
-    }
-    else
-    {
-        HPloss = 0;
-    }
-
-    return HPloss;
-}
 
 void Being::heal()
 {
@@ -191,69 +123,7 @@ void Being::died()
     // dead beings stay where they are
     clearDestination();
 
-    // reset target
-    mTarget = NULL;
-
     signal_died.emit(this);
-}
-
-void Being::processAttacks()
-{
-    if (mAction != ATTACK || !mTarget)
-        return;
-
-    // Ticks attacks even when not attacking to permit cooldowns and warmups.
-    std::vector<Attack *> attacksReady;
-    mAttacks.getUsuableAttacks(&attacksReady);
-
-    if (Attack *triggerableAttack = mAttacks.getTriggerableAttack())
-    {
-        processAttack(*triggerableAttack);
-        mAttacks.markAttackAsTriggered();
-    }
-
-    // Deal with the ATTACK action.
-    if (attacksReady.empty())
-        return;
-
-    Attack *highestPriorityAttack = 0;
-    // Performs all ready attacks.
-    for (std::vector<Attack *>::const_iterator it = attacksReady.begin(),
-         it_end = attacksReady.end(); it != it_end; ++it)
-    {
-        // check if target is in range using the pythagorean theorem
-        int distx = this->getPosition().x - mTarget->getPosition().x;
-        int disty = this->getPosition().y - mTarget->getPosition().y;
-        int distSquare = (distx * distx + disty * disty);
-        AttackInfo *info = (*it)->getAttackInfo();
-        int maxDist = info->getDamage().range + getSize();
-
-        if (distSquare <= maxDist * maxDist &&
-                (!highestPriorityAttack ||
-                 highestPriorityAttack->getAttackInfo()->getPriority()
-                 < info->getPriority()))
-        {
-            highestPriorityAttack = *it;
-        }
-    }
-    if (highestPriorityAttack)
-    {
-        mAttacks.startAttack(highestPriorityAttack);
-        mCurrentAttack = highestPriorityAttack;
-        setDestination(getPosition());
-        // TODO: Turn into direction of enemy
-        raiseUpdateFlags(UPDATEFLAG_ATTACK);
-    }
-}
-
-void Being::addAttack(AttackInfo *attackInfo)
-{
-    mAttacks.add(attackInfo);
-}
-
-void Being::removeAttack(AttackInfo *attackInfo)
-{
-    mAttacks.remove(attackInfo);
 }
 
 void Being::setDestination(const Point &dst)
@@ -480,23 +350,6 @@ int Being::directionToAngle(int direction)
     }
 }
 
-int Being::performAttack(Being *target, const Damage &dmg)
-{
-    // check target legality
-    if (!target
-            || target == this
-            || target->getAction() == DEAD
-            || !target->canFight())
-        return -1;
-
-    if (getMap()->getPvP() == PVP_NONE
-            && target->getType() == OBJECT_CHARACTER
-            && getType() == OBJECT_CHARACTER)
-        return -1;
-
-    return target->damage(this, dmg);
-}
-
 void Being::setAction(BeingAction action)
 {
     mAction = action;
@@ -547,12 +400,24 @@ void Being::setAttribute(unsigned id, double value)
     }
 }
 
-double Being::getAttribute(unsigned id) const
+const Attribute *Being::getAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
     {
         LOG_DEBUG("Being::getAttribute: Attribute "
+                  << id << " not found! Returning 0.");
+        return 0;
+    }
+    return &ret->second;
+}
+
+double Being::getAttributeBase(unsigned id) const
+{
+    AttributeMap::const_iterator ret = mAttributes.find(id);
+    if (ret == mAttributes.end())
+    {
+        LOG_DEBUG("Being::getAttributeBase: Attribute "
                   << id << " not found! Returning 0.");
         return 0;
     }
@@ -594,7 +459,7 @@ void Being::recalculateBaseAttribute(unsigned attr)
     {
         double newBase = utils::tpsToRawSpeed(
                                     getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
-        if (newBase != getAttribute(attr))
+        if (newBase != getAttributeBase(attr))
             setAttribute(attr, newBase);
         return;
     }
@@ -742,8 +607,6 @@ void Being::update()
     if (getModifiedAttribute(ATTR_HP) <= 0 && mAction != DEAD)
         died();
 
-    processAttacks();
-
     Actor::update();
 }
 
@@ -754,7 +617,3 @@ void Being::inserted(Entity *)
     mOld = getPosition();
 }
 
-void Being::processAttack(Attack &attack)
-{
-    performAttack(mTarget, attack.getAttackInfo()->getDamage());
-}
