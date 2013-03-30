@@ -26,6 +26,7 @@
 #include "common/configuration.h"
 #include "common/resourcemanager.h"
 #include "game-server/character.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/map.h"
 #include "game-server/mapmanager.h"
@@ -591,9 +592,9 @@ void MapComposite::remove(Entity *ptr)
         if ((*i)->canFight())
         {
             Being *being = static_cast<Being*>(*i);
-            if (being->getTarget() == ptr)
+            if (being->getComponent<CombatComponent>()->getTarget() == ptr)
             {
-                being->setTarget(NULL);
+                being->getComponent<CombatComponent>()->clearTarget();
             }
         }
         if (*i == ptr)

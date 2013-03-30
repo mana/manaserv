@@ -292,14 +292,11 @@ class Monster : public Being
         void refreshTarget();
 
         /**
-         * Performs an attack
-         */
-        virtual void processAttack(Attack &attack);
-
-        /**
          * Kills the being.
          */
         void died();
+
+        void receivedDamage(Being *attacker, const Damage &damage, int hpLoss);
 
         /**
          * Alters hate for the monster
@@ -307,11 +304,6 @@ class Monster : public Being
         void changeAnger(Actor *target, int amount);
 
         std::map<Being *, int> getAngerList() const;
-
-        /**
-         * Calls the damage function in Being and updates the aggro list
-         */
-        virtual int damage(Actor *source, const Damage &damage);
 
         /**
          * Removes a being from the anger list.
@@ -341,9 +333,6 @@ class Monster : public Being
          * Character who currently owns this monster (killsteal protection).
          */
         Character *mOwner;
-
-        /** Factor for damage mutation */
-        unsigned mDamageMutation;
 
         /** List of characters and their skills that attacked this monster. */
         std::map<Character *, std::set <size_t> > mExpReceivers;

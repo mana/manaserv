@@ -22,8 +22,10 @@
 
 #include "common/configuration.h"
 #include "game-server/accountconnection.h"
+#include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/buysell.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
@@ -99,14 +101,13 @@ Character::Character(MessageIn &msg):
     setWalkMask(Map::BLOCKMASK_WALL);
     setBlockType(BLOCKTYPE_CHARACTER);
 
-    // Get character data.
-    mDatabaseID = msg.readInt32();
-    setName(msg.readString());
-    deserializeCharacterData(*this, msg);
-    mOld = getPosition();
-    Inventory(this).initialize();
-    modifiedAllAttribute();
-    setSize(16);
+
+    CombatComponent *combatcomponent = new CombatComponent(*this);
+    addComponent(combatcomponent);
+    combatcomponent->getAttacks().attack_added.connect(
+            sigc::mem_fun(this, &Character::attackAdded));
+    combatcomponent->getAttacks().attack_removed.connect(
+            sigc::mem_fun(this, &Character::attackRemoved));
 
     // Default knuckle attack
     int damageBase = this->getModifiedAttribute(ATTR_STR);
@@ -121,7 +122,16 @@ Character::Character(MessageIn &msg):
     knuckleDamage.range = DEFAULT_TILE_LENGTH;
 
     mKnuckleAttackInfo = new AttackInfo(0, knuckleDamage, 7, 3, 0);
-    addAttack(mKnuckleAttackInfo);
+    combatcomponent->addAttack(mKnuckleAttackInfo);
+
+    // Get character data.
+    mDatabaseID = msg.readInt32();
+    setName(msg.readString());
+    deserializeCharacterData(*this, msg);
+    mOld = getPosition();
+    Inventory(this).initialize();
+    modifiedAllAttribute();
+    setSize(16);
 }
 
 Character::~Character()
@@ -199,7 +209,7 @@ void Character::respawn()
     // Make it alive again
     setAction(STAND);
     // Reset target
-    mTarget = NULL;
+    getComponent<CombatComponent>()->clearTarget();
 
     // Execute respawn callback when set
     if (executeCallback(mDeathAcceptedCallback, this))
@@ -422,7 +432,7 @@ void Character::sendStatus()
     {
         int attr = *i;
         attribMsg.writeInt16(attr);
-        attribMsg.writeInt32(getAttribute(attr) * 256);
+        attribMsg.writeInt32(getAttributeBase(attr) * 256);
         attribMsg.writeInt32(getModifiedAttribute(attr) * 256);
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(this, attribMsg);
@@ -497,7 +507,7 @@ void Character::flagAttribute(int attr)
 {
     // Inform the client of this attribute modification.
     accountHandler->updateAttributes(getDatabaseID(), attr,
-                                     getAttribute(attr),
+                                     getAttributeBase(attr),
                                      getModifiedAttribute(attr));
     mModifiedAttributes.insert(attr);
 }
@@ -655,7 +665,7 @@ AttribmodResponseCode Character::useCharacterPoint(size_t attribute)
         return ATTRIBMOD_NO_POINTS_LEFT;
 
     --mCharacterPoints;
-    setAttribute(attribute, getAttribute(attribute) + 1);
+    setAttribute(attribute, getAttributeBase(attribute) + 1);
     updateDerivedAttributes(attribute);
     return ATTRIBMOD_OK;
 }
@@ -666,12 +676,12 @@ AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
         return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCorrectionPoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
-    if (getAttribute(attribute) <= 1)
+    if (getAttributeBase(attribute) <= 1)
         return ATTRIBMOD_DENIED;
 
     --mCorrectionPoints;
     ++mCharacterPoints;
-    setAttribute(attribute, getAttribute(attribute) - 1);
+    setAttribute(attribute, getAttributeBase(attribute) - 1);
     updateDerivedAttributes(attribute);
     return ATTRIBMOD_OK;
 }
@@ -704,19 +714,20 @@ void Character::resumeNpcThread()
     }
 }
 
-void Character::addAttack(AttackInfo *attackInfo)
+void Character::attackAdded(Attack &attack)
 {
     // Remove knuckle attack
-    Being::addAttack(attackInfo);
-    Being::removeAttack(mKnuckleAttackInfo);
+    if (attack.getAttackInfo() != mKnuckleAttackInfo)
+        getComponent<CombatComponent>()->removeAttack(mKnuckleAttackInfo);
 }
 
-void Character::removeAttack(AttackInfo *attackInfo)
+void Character::attackRemoved(Attack &attack)
 {
-    Being::removeAttack(attackInfo);
     // Add knuckle attack
-    if (mAttacks.getNumber() == 0)
-        Being::addAttack(mKnuckleAttackInfo);
+    CombatComponent *combatComponent = getComponent<CombatComponent>();
+    // 1 since the attack is not really removed yet.
+    if (combatComponent->getAttacks().getNumber() == 1)
+        combatComponent->addAttack(mKnuckleAttackInfo);
 }
 
 void Character::disconnected()

@@ -24,6 +24,9 @@
 #include <cstddef>
 #include <list>
 
+#include <sigc++/signal.h>
+#include <sigc++/trackable.h>
+
 #include "common/defines.h"
 
 #include "scripting/script.h"
@@ -168,7 +171,7 @@ class Attack
 /**
  * Helper class for storing multiple auto-attacks.
  */
-class Attacks
+class Attacks : public sigc::trackable
 {
     public:
         Attacks():
@@ -187,6 +190,9 @@ class Attacks
          */
         unsigned getNumber()
         { return mAttacks.size(); }
+
+        sigc::signal<void, Attack &> attack_added;
+        sigc::signal<void, Attack &> attack_removed;
 
     private:
         std::vector<Attack> mAttacks;

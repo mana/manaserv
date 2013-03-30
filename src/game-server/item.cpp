@@ -25,6 +25,7 @@
 #include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/being.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/state.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
@@ -49,13 +50,13 @@ void ItemEffectAttrMod::dispell(Being *itemUser)
 
 bool ItemEffectAttack::apply(Being *itemUser)
 {
-    itemUser->addAttack(mAttackInfo);
+    itemUser->getComponent<CombatComponent>()->addAttack(mAttackInfo);
     return false;
 }
 
 void ItemEffectAttack::dispell(Being *itemUser)
 {
-    itemUser->removeAttack(mAttackInfo);
+    itemUser->getComponent<CombatComponent>()->removeAttack(mAttackInfo);
 }
 
 ItemEffectScript::~ItemEffectScript()

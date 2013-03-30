@@ -212,6 +212,8 @@ SET(SRCS_MANASERVGAME
     game-server/character.cpp
     game-server/collisiondetection.h
     game-server/collisiondetection.cpp
+    game-server/combatcomponent.h
+    game-server/combatcomponent.cpp
     game-server/command.cpp
     game-server/commandhandler.cpp
     game-server/commandhandler.h
@@ -240,6 +242,8 @@ SET(SRCS_MANASERVGAME
     game-server/mapreader.cpp
     game-server/monster.h
     game-server/monster.cpp
+    game-server/monstercombatcomponent.h
+    game-server/monstercombatcomponent.cpp
     game-server/monstermanager.h
     game-server/monstermanager.cpp
     game-server/npc.h

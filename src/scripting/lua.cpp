@@ -33,6 +33,7 @@ extern "C" {
 #include "game-server/buysell.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/effect.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"
@@ -1417,7 +1418,7 @@ static int being_damage(lua_State *s)
     {
         dmg.skill = checkSkill(s, 8);
     }
-    being->damage(source, dmg);
+    being->getComponent<CombatComponent>()->damage(*being, source, dmg);
 
     return 0;
 }
@@ -1692,7 +1693,7 @@ static int being_get_base_attribute(lua_State *s)
     int attr = luaL_checkint(s, 2);
     luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
 
-    lua_pushinteger(s, being->getAttribute(attr));
+    lua_pushinteger(s, being->getAttributeBase(attr));
     return 1;
 }
 

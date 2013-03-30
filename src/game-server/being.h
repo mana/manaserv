@@ -47,11 +47,6 @@ struct Status
 typedef std::map< int, Status > StatusEffects;
 
 /**
- * Type definition for a list of hits
- */
-typedef std::vector<unsigned> Hits;
-
-/**
  * Generic being (living actor). Keeps direction, destination and a few other
  * relevant properties. Used for characters & monsters (all animated objects).
  */
@@ -68,13 +63,6 @@ class Being : public Actor
          */
         virtual void update();
 
-        /**
-         * Takes a damage structure, computes the real damage based on the
-         * stats, deducts the result from the hitpoints and adds the result to
-         * the HitsTaken list.
-         */
-        virtual int damage(Actor *source, const Damage &damage);
-
         /** Restores all hit points of the being */
         void heal();
 
@@ -85,21 +73,6 @@ class Being : public Actor
          * Changes status and calls all the "died" listeners.
          */
         virtual void died();
-
-        /**
-         * Process all available attacks
-         */
-        void processAttacks();
-
-        /**
-         * Adds an attack to the available attacks
-         */
-        void addAttack(AttackInfo *attack);
-
-        /**
-         * Removes an attack from the available attacks
-         */
-        void removeAttack(AttackInfo *attackInfo);
 
         /**
          * Gets the destination coordinates of the being.
@@ -133,25 +106,6 @@ class Being : public Actor
 
         BeingDirection getDirection() const
         { return mDirection; }
-
-        /**
-         * Gets the damage list.
-         */
-        const Hits &getHitsTaken() const
-        { return mHitsTaken; }
-
-        /**
-         * Clears the damage list.
-         */
-        void clearHitsTaken()
-        { mHitsTaken.clear(); }
-
-        /**
-         * Performs an attack.
-         * Return Value: damage inflicted or -1 when illegal target
-         */
-        int performAttack(Being *target, const Damage &dmg);
-
         /**
          * Sets the current action.
          */
@@ -162,15 +116,6 @@ class Being : public Actor
          */
         BeingAction getAction() const
         { return mAction; }
-
-        /**
-         * Gets the attack id the being is currently performing.
-         * For being, this is defaulted to the first one (1).
-         */
-        virtual int getAttackId() const
-        { return mCurrentAttack ?
-                mCurrentAttack->getAttackInfo()->getDamage().id : 0;
-        }
 
         /**
          * Moves the being toward its destination.
@@ -195,9 +140,14 @@ class Being : public Actor
         void setAttribute(unsigned id, double value);
 
         /**
-         * Gets an attribute.
+         * Gets an attribute or 0 if not existing.
          */
-        double getAttribute(unsigned id) const;
+        const Attribute *getAttribute(unsigned id) const;
+
+        /**
+         * Gets an attribute base.
+         */
+        double getAttributeBase(unsigned id) const;
 
         /**
          * Gets an attribute after applying modifiers.
@@ -285,18 +235,6 @@ class Being : public Actor
          */
         static int directionToAngle(int direction);
 
-        /**
-         * Get Target
-         */
-        Being *getTarget() const
-        { return mTarget; }
-
-        /**
-         * Set Target
-         */
-        void setTarget(Being *target)
-        { mTarget = target; }
-
         static void setUpdateDerivedAttributesCallback(Script *script)
         { script->assignCallback(mRecalculateDerivedAttributesCallback); }
 
@@ -318,11 +256,6 @@ class Being : public Actor
 
     protected:
         /**
-         * Performs an attack
-         */
-        virtual void processAttack(Attack &attack);
-
-        /**
          * Update the being direction when moving so avoid directions desyncs
          * with other clients.
          */
@@ -333,14 +266,10 @@ class Being : public Actor
 
         BeingAction mAction;
         AttributeMap mAttributes;
-        Attacks mAttacks;
         StatusEffects mStatus;
-        Being *mTarget;
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
         BeingGender mGender;        /**< Gender of the being. */
-        Attack *mCurrentAttack;     /**< Last used attack. */
-
 
     private:
         Being(const Being &rhs);
@@ -355,7 +284,6 @@ class Being : public Actor
         BeingDirection mDirection;   /**< Facing direction. */
 
         std::string mName;
-        Hits mHitsTaken; /**< List of punches taken since last update. */
 
         /** Time until hp is regenerated again */
         Timeout mHealthRegenerationTimeout;

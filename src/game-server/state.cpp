@@ -22,11 +22,12 @@
 
 #include "common/configuration.h"
 #include "game-server/accountconnection.h"
+#include "game-server/effect.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
-#include "game-server/effect.h"
 #include "game-server/map.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
@@ -166,7 +167,9 @@ static void informPlayer(MapComposite *map, Character *p)
                 MessageOut AttackMsg(GPMSG_BEING_ATTACK);
                 AttackMsg.writeInt16(oid);
                 AttackMsg.writeInt8(o->getDirection());
-                AttackMsg.writeInt8(static_cast< Being * >(o)->getAttackId());
+                CombatComponent *combatComponent =
+                        o->getComponent<CombatComponent>();
+                AttackMsg.writeInt8(combatComponent->getAttackId());
                 gameHandler->sendTo(p, AttackMsg);
             }
 
@@ -217,8 +220,9 @@ static void informPlayer(MapComposite *map, Character *p)
             // Send damage messages.
             if (o->canFight())
             {
-                Being *victim = static_cast< Being * >(o);
-                const Hits &hits = victim->getHitsTaken();
+                CombatComponent *combatComponent =
+                        o->getComponent<CombatComponent>();
+                const Hits &hits = combatComponent->getHitsTaken();
                 for (Hits::const_iterator j = hits.begin(),
                      j_end = hits.end(); j != j_end; ++j)
                 {
@@ -462,7 +466,7 @@ void GameState::update(int tick)
             a->clearUpdateFlags();
             if (a->canFight())
             {
-                static_cast< Being * >(a)->clearHitsTaken();
+                a->getComponent<CombatComponent>()->clearHitsTaken();
             }
         }
     }

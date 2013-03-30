@@ -75,6 +75,7 @@ AttackInfo *AttackInfo::readAttackNode(xmlNodePtr node)
 void Attacks::add(AttackInfo *attackInfo)
 {
     mAttacks.push_back(Attack(attackInfo));
+    attack_added.emit(*mAttacks.rbegin());
 }
 
 void Attacks::remove(AttackInfo *attackInfo)
@@ -86,6 +87,7 @@ void Attacks::remove(AttackInfo *attackInfo)
         {
             if (mCurrentAttack && mCurrentAttack->getAttackInfo() == attackInfo)
                 mCurrentAttack = 0;
+            attack_removed.emit(*it);
             mAttacks.erase(it);
             return;
         }
