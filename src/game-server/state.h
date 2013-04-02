@@ -71,7 +71,7 @@ namespace GameState
      * @note No update may be in progress.
      * @note The character is destroyed, if needed.
      */
-    void warp(Character *, MapComposite *, int x, int y);
+    void warp(Character *, MapComposite *, const Point &point);
 
     /**
      * Enqueues an insert event.
@@ -90,7 +90,7 @@ namespace GameState
      * Enqueues a warp event.
      * @note The event will be executed at end of update.
      */
-    void enqueueWarp(Character *, MapComposite *, int x, int y);
+    void enqueueWarp(Character *, MapComposite *, const Point &point);
 
     /**
      * Says something to an actor.

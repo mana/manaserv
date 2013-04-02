@@ -46,7 +46,7 @@ void BuySell::cancel()
     delete this;
 }
 
-bool BuySell::registerItem(int id, int amount, int cost)
+bool BuySell::registerItem(unsigned id, int amount, int cost)
 {
     if (mSell)
     {
@@ -57,8 +57,11 @@ bool BuySell::registerItem(int id, int amount, int cost)
             amount = nb;
     }
 
-    TradedItem it = { id, amount, cost };
-    mItems.push_back(it);
+    TradedItem item;
+    item.itemId = id;
+    item.amount = amount;
+    item.cost = cost;
+    mItems.push_back(item);
     return true;
 }
 
@@ -76,11 +79,11 @@ int BuySell::registerPlayerItems()
     for (InventoryData::const_iterator it = inventoryData.begin(),
         it_end = inventoryData.end(); it != it_end; ++it)
     {
-        unsigned nb = it->second.amount;
-        if (!nb)
+        unsigned amount = it->second.amount;
+        if (!amount)
             continue;
 
-        int id = it->second.itemId;
+        unsigned id = it->second.itemId;
         int cost = -1;
         if (itemManager->getItem(id))
         {
@@ -106,15 +109,18 @@ int BuySell::registerPlayerItems()
             if (i->itemId == id)
             {
                 itemAlreadyAdded = true;
-                i->amount += nb;
+                i->amount += amount;
                 break;
             }
         }
 
         if (!itemAlreadyAdded)
         {
-            TradedItem itTrade = { id, nb, cost };
-            mItems.push_back(itTrade);
+            TradedItem tradeItem;
+            tradeItem.itemId = id;
+            tradeItem.amount = amount;
+            tradeItem.cost = cost;
+            mItems.push_back(tradeItem);
             nbItemsToSell++;
         }
     }
@@ -142,7 +148,7 @@ bool BuySell::start(Actor *actor)
     return true;
 }
 
-void BuySell::perform(int id, int amount)
+void BuySell::perform(unsigned id, int amount)
 {
     Inventory inv(mChar);
     for (TradedItems::iterator i = mItems.begin(),

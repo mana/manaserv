@@ -40,14 +40,14 @@ class TriggerAction
 class WarpAction : public TriggerAction
 {
     public:
-        WarpAction(MapComposite *m, int x, int y)
-          : mMap(m), mX(x), mY(y) {}
+        WarpAction(MapComposite *m, const Point &point)
+          : mMap(m), mTargetPoint(point) {}
 
         virtual void process(Actor *obj);
 
     private:
         MapComposite *mMap;
-        unsigned short mX, mY;
+        Point mTargetPoint;
 };
 
 class ScriptAction : public TriggerAction

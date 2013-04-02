@@ -41,6 +41,8 @@ SET(FLAGS "${FLAGS} -DPACKAGE_VERSION=\\\"${VERSION}\\\"")
 SET(FLAGS "${FLAGS} -DPKG_DATADIR=\\\"${PKG_DATADIR}/\\\"")
 SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
 
+SET(FLAGS "${FLAGS} -std=c++0x")
+
 # If the Sqlite option is enabled...
 IF (WITH_SQLITE)
     FIND_PACKAGE(Sqlite3 REQUIRED)

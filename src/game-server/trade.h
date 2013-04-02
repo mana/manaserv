@@ -77,8 +77,9 @@ class Trade
 
         struct TradedItem
         {
-            unsigned short id;
-            unsigned char slot, amount;
+            unsigned id;
+            unsigned slot;
+            int amount;
         };
 
         typedef std::vector< TradedItem > TradedItems;

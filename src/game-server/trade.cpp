@@ -249,8 +249,11 @@ void Trade::addItem(Character *c, int slot, int amount)
        later on. At worst, the transaction will be canceled at the end if
        the client lied. */
 
-    TradedItem ti = { id, slot, amount };
-    items->push_back(ti);
+    TradedItem tradedItem;
+    tradedItem.id = id;
+    tradedItem.slot = slot;
+    tradedItem.amount = amount;
+    items->push_back(tradedItem);
 
     MessageOut msg(GPMSG_TRADE_ADD_ITEM);
     msg.writeInt16(id);

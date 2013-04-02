@@ -223,7 +223,8 @@ void Character::respawn()
     int spawnX = Configuration::getValue("char_respawnX", 1024);
     int spawnY = Configuration::getValue("char_respawnY", 1024);
 
-    GameState::enqueueWarp(this, MapManager::getMap(spawnMap), spawnX, spawnY);
+    GameState::enqueueWarp(this, MapManager::getMap(spawnMap),
+                           Point(spawnX, spawnY));
 }
 
 bool Character::specialUseCheck(SpecialMap::iterator it)

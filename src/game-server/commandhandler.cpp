@@ -377,7 +377,7 @@ static void handleWarp(Character *player, std::string &args)
     y = utils::stringToInt(ystr);
 
     // now warp the player
-    GameState::warp(player, map, x, y);
+    GameState::warp(player, map, Point(x, y));
 
     // log transaction
     std::stringstream ss;
@@ -479,7 +479,7 @@ static void handleCharWarp(Character *player, std::string &args)
     y = utils::stringToInt(ystr);
 
     // now warp the player
-    GameState::warp(other, map, x, y);
+    GameState::warp(other, map, Point(x, y));
 
     // log transaction
     std::stringstream ss;
@@ -774,7 +774,7 @@ static void handleGoto(Character *player, std::string &args)
     // move the player to where the other player is
     MapComposite *map = other->getMap();
     const Point &pos = other->getPosition();
-    GameState::warp(player, map, pos.x, pos.y);
+    GameState::warp(player, map, pos);
 
     // log transaction
     std::stringstream msg;
@@ -808,7 +808,7 @@ static void handleRecall(Character *player, std::string &args)
     // move the other player to where the player is
     MapComposite *map = player->getMap();
     const Point &pos = player->getPosition();
-    GameState::warp(other, map, pos.x, pos.y);
+    GameState::warp(other, map, pos);
 }
 
 static void handleReload(Character *, std::string &)

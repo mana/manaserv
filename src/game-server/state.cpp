@@ -54,7 +54,8 @@ enum
  */
 struct DelayedEvent
 {
-    unsigned short type, x, y;
+    unsigned short type;
+    Point point;
     MapComposite *map;
 };
 
@@ -104,9 +105,7 @@ static void serializeLooks(Character *ch, MessageOut &msg)
             // When the insertion succeeds, its the first time
             // we encounter the item, so we can send the look change.
             // We also send empty slots for unequipment handling.
-            lookChanges.insert(
-                std::make_pair<unsigned, unsigned>(it->first,
-                                                   it->second.itemId));
+            lookChanges.insert(std::make_pair(it->first, it->second.itemId));
         }
     }
 
@@ -500,7 +499,7 @@ void GameState::update(int tick)
 
             case EVENT_WARP:
                 assert(o->getType() == OBJECT_CHARACTER);
-                warp(static_cast< Character * >(o), e.map, e.x, e.y);
+                warp(static_cast< Character * >(o), e.map, e.point);
                 break;
         }
     }
@@ -700,11 +699,11 @@ void GameState::remove(Entity *ptr)
     map->remove(ptr);
 }
 
-void GameState::warp(Character *ptr, MapComposite *map, int x, int y)
+void GameState::warp(Character *ptr, MapComposite *map, const Point &point)
 {
     remove(ptr);
     ptr->setMap(map);
-    ptr->setPosition(Point(x, y));
+    ptr->setPosition(point);
     ptr->clearDestination();
     /* Force update of persistent data on map change, so that
        characters can respawn at the start of the map after a death or
@@ -750,28 +749,37 @@ static void enqueueEvent(Actor *ptr, const DelayedEvent &e)
 
 void GameState::enqueueInsert(Actor *ptr)
 {
-    DelayedEvent e = { EVENT_INSERT, 0, 0, 0 };
-    enqueueEvent(ptr, e);
+    DelayedEvent event;
+    event.type = EVENT_INSERT;
+    event.map = 0;
+    enqueueEvent(ptr, event);
 }
 
 void GameState::enqueueRemove(Actor *ptr)
 {
-    DelayedEvent e = { EVENT_REMOVE, 0, 0, 0 };
-    enqueueEvent(ptr, e);
+    DelayedEvent event;
+    event.type = EVENT_REMOVE;
+    event.map = 0;
+    enqueueEvent(ptr, event);
 }
 
-void GameState::enqueueWarp(Character *ptr, MapComposite *m, int x, int y)
+void GameState::enqueueWarp(Character *ptr,
+                            MapComposite *map,
+                            const Point &point)
 {
     // When the player has just disconnected, better not wait for the pointer
     // to become invalid.
     if (!ptr->isConnected())
     {
-        warp(ptr, m, x, y);
+        warp(ptr, map, point);
         return;
     }
 
-    DelayedEvent e = { EVENT_WARP, x, y, m };
-    enqueueEvent(ptr, e);
+    DelayedEvent event;
+    event.type = EVENT_WARP;
+    event.point = point;
+    event.map = map;
+    enqueueEvent(ptr, event);
 }
 
 void GameState::sayAround(Actor *obj, const std::string &text)
