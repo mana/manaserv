@@ -214,7 +214,6 @@ SET(SRCS_MANASERVGAME
     game-server/collisiondetection.cpp
     game-server/combatcomponent.h
     game-server/combatcomponent.cpp
-    game-server/command.cpp
     game-server/commandhandler.cpp
     game-server/commandhandler.h
     game-server/component.h
