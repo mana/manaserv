@@ -802,7 +802,8 @@ void MapComposite::initializeContent()
             if (destMap && destX && destY)
             {
                 Entity *entity = new Entity(OBJECT_OTHER, this);
-                WarpAction *action = new WarpAction(destMap, destX, destY);
+                const Point warpTarget(destX, destY);
+                WarpAction *action = new WarpAction(destMap, warpTarget);
                 entity->addComponent(
                             new TriggerAreaComponent(object->getBounds(),
                                                      action, false));

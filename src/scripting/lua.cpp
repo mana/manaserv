@@ -1650,7 +1650,7 @@ static int chr_warp(lua_State *s)
         x *= map->getTileWidth();
         y *= map->getTileHeight();
     }
-    GameState::enqueueWarp(q, m, x, y);
+    GameState::enqueueWarp(q, m, Point(x, y));
 
     return 0;
 }

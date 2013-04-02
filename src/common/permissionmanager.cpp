@@ -37,7 +37,7 @@ void addPermission(std::string permission, char mask)
     std::map<std::string, unsigned char>::iterator i = permissions.find(permission);
     if (i == permissions.end())
     {
-        permissions.insert(std::make_pair<std::string, unsigned char>(permission, mask));
+        permissions.insert(std::make_pair(permission, mask));
     } else {
         i->second |= mask;
     }

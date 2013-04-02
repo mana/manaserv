@@ -45,7 +45,7 @@ class BuySell
          * and how much it will cost.
          * @return true if at least one item was registered.
          */
-        bool registerItem(int id, int amount, int cost);
+        bool registerItem(unsigned id, int amount, int cost);
 
         /**
          * Registers every player's item at an average cost given by the ItemDB.
@@ -62,7 +62,7 @@ class BuySell
         /**
          * Performs the trade.
          */
-        void perform(int id, int amount);
+        void perform(unsigned id, int amount);
 
     private:
 
@@ -70,7 +70,9 @@ class BuySell
 
         struct TradedItem
         {
-            unsigned short itemId, amount, cost;
+            unsigned itemId;
+            int amount;
+            int cost;
         };
 
         typedef std::vector< TradedItem > TradedItems;

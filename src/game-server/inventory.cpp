@@ -715,8 +715,7 @@ bool Inventory::equip(int inventorySlot)
         {
             EquipmentItem equipItem(it->second.itemId, itemInstance);
             mPoss->equipSlots.insert(
-                std::make_pair<unsigned, EquipmentItem>
-                    (equipReq.equipSlotId, equipItem));
+                    std::make_pair(equipReq.equipSlotId, equipItem));
             --capacityLeft;
         }
     }
