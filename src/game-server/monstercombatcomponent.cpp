@@ -23,16 +23,14 @@
 #include "game-server/monster.h"
 #include "scripting/scriptmanager.h"
 
-MonsterCombatComponent::MonsterCombatComponent(Monster &monster):
+MonsterCombatComponent::MonsterCombatComponent(Being &monster,
+                                               MonsterClass *specy):
     CombatComponent(monster),
     mDamageMutation(0)
 {
-    // Take attacks from specy
-    std::vector<AttackInfo *> &attacks = monster.getSpecy()->getAttackInfos();
-    for (std::vector<AttackInfo *>::iterator it = attacks.begin(),
-         it_end = attacks.end(); it != it_end; ++it)
+    for (auto &attack : specy->getAttackInfos())
     {
-        addAttack(*it);
+        addAttack(attack);
     }
 }
 
@@ -72,13 +70,11 @@ void MonsterCombatComponent::processAttack(Being *source, Attack &attack)
  * Calls the damage function in Being and updates the aggro list
  */
 int MonsterCombatComponent::damage(Being &target,
-                                      Being *source,
-                                      const Damage &damage)
+                                   Being *source,
+                                   const Damage &damage)
 {
-    // Temporarily depend on monster as long as it does not exist as a component
-    Monster &monster = static_cast<Monster &>(target);
     Damage newDamage = damage;
-    MonsterClass *specy = monster.getSpecy();
+    MonsterClass *specy = target.getComponent<MonsterComponent>()->getSpecy();
     float factor = specy->getVulnerability(newDamage.element);
     newDamage.base = newDamage.base * factor;
     newDamage.delta = newDamage.delta * factor;
@@ -93,7 +89,7 @@ int MonsterCombatComponent::damage(Being &target,
         script->push(source);
         script->push(hpLoss);
         // TODO: add exact damage parameters as well
-        script->execute(monster.getMap());
+        script->execute(target.getMap());
     }
     return hpLoss;
 }

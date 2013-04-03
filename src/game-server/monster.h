@@ -139,6 +139,9 @@ class MonsterClass
         bool hasAttribute(int attribute) const
         { return (mAttributes.find(attribute) != mAttributes.end()); }
 
+        const std::map<int, double> &getAttributes() const
+        { return mAttributes; }
+
         /** Sets collision circle radius. */
         void setSize(int size) { mSize = size; }
 
@@ -246,7 +249,7 @@ class MonsterClass
         Script::Ref mDamageCallback;
 
         friend class MonsterManager;
-        friend class Monster;
+        friend class MonsterComponent;
 };
 
 /**
@@ -267,16 +270,18 @@ struct AttackPosition
 };
 
 /**
- * The class for a fightable monster with its own AI
+ * The component for a fightable monster with its own AI
  */
-class Monster : public Being
+class MonsterComponent : public Component
 {
     public:
+        static const ComponentType type = CT_Monster;
+
         /** Time in game ticks until ownership of a monster can change. */
         static const int KILLSTEAL_PROTECTION_TIME = 100;
 
-        Monster(MonsterClass *);
-        ~Monster();
+        MonsterComponent(Being &being, MonsterClass *);
+        ~MonsterComponent();
 
         /**
          * Returns monster specy.
@@ -287,14 +292,14 @@ class Monster : public Being
         /**
          * Performs one step of controller logic.
          */
-        void update();
+        void update(Entity &entity);
 
-        void refreshTarget();
+        void refreshTarget(Entity &entity);
 
         /**
-         * Kills the being.
+         * Signal handler
          */
-        void died();
+        void monsterDied(Being *monster);
 
         void receivedDamage(Being *attacker, const Damage &damage, int hpLoss);
 
@@ -313,7 +318,9 @@ class Monster : public Being
     private:
         static const int DECAY_TIME = 50;
 
-        int calculatePositionPriority(Point position, int targetPriority);
+        int calculatePositionPriority(Entity &entity,
+                                      Point position,
+                                      int targetPriority);
 
         MonsterClass *mSpecy;
 

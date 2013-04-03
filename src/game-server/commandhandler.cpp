@@ -732,7 +732,8 @@ static void handleSpawn(Character *player, std::string &args)
     // create the monsters and put them on the map
     for (int i = 0; i < value; ++i)
     {
-        Being *monster = new Monster(mc);
+        Being *monster = new Being(OBJECT_MONSTER);
+        monster->addComponent(new MonsterComponent(*monster, mc));
         monster->setMap(map);
         monster->setPosition(pos);
         monster->clearDestination();

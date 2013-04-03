@@ -400,6 +400,13 @@ void Being::setAttribute(unsigned id, double value)
     }
 }
 
+void Being::createAttribute(unsigned id, const AttributeManager::AttributeInfo
+                            &attributeInfo)
+{
+    mAttributes.insert(std::pair<unsigned, Attribute>
+                                            (id,Attribute(attributeInfo)));
+}
+
 const Attribute *Being::getAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);

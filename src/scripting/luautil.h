@@ -43,7 +43,6 @@ class Entity;
 class ItemClass;
 class MapComposite;
 class MapObject;
-class Monster;
 class MonsterClass;
 class StatusEffect;
 
@@ -169,14 +168,14 @@ Script *        getScript(lua_State *s);
 Being *         getBeing(lua_State *s, int p);
 Character *     getCharacter(lua_State *s, int p);
 ItemClass *     getItemClass(lua_State *s, int p);
-Monster *       getMonster(lua_State *s, int p);
+Being *         getMonster(lua_State *s, int p);
 MonsterClass *  getMonsterClass(lua_State *s, int p);
 Being *         getNpc(lua_State *s, int p);
 
 Being *         checkBeing(lua_State *s, int p);
 Character *     checkCharacter(lua_State *s, int p);
 ItemClass *     checkItemClass(lua_State *s, int p);
-Monster *       checkMonster(lua_State *s, int p);
+Being *         checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
 Being *         checkNpc(lua_State *s, int p);
 int             checkSkill(lua_State *s, int p);

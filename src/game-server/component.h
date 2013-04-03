@@ -28,6 +28,7 @@ enum ComponentType
     CT_Effect,
     CT_Fighting,
     CT_Item,
+    CT_Monster,
     CT_Npc,
     CT_SpawnArea,
     CT_TriggerArea,

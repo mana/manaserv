@@ -41,7 +41,7 @@ CombatComponent::~CombatComponent()
 
 void CombatComponent::update(Entity &entity)
 {
-    // Temponary for as long as Being is not split into Components
+    // Temporary for as long as Being is not split into Components
     // Prevents to implement all at once
     // TODO: remove this as soon as possible
     Being &being = static_cast<Being&>(entity);
