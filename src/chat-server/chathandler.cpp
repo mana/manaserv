@@ -83,7 +83,7 @@ void ChatHandler::tokenMatched(ChatClient *client, Pending *p)
     client->characterName = p->character;
     client->accountLevel = p->level;
 
-    Character *c = storage->getCharacter(p->character);
+    CharacterData *c = storage->getCharacter(p->character);
 
     if (!c)
     {

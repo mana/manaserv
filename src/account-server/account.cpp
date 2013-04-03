@@ -41,7 +41,7 @@ void Account::setCharacters(const Characters &characters)
     mCharacters = characters;
 }
 
-void Account::addCharacter(Character *character)
+void Account::addCharacter(CharacterData *character)
 {
     unsigned slot = (unsigned) character->getCharacterSlot();
     assert(isSlotEmpty(slot));

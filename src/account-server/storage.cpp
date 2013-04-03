@@ -223,7 +223,8 @@ Account *Storage::getAccountBySQL()
 
             for (int k = 0; k < size; ++k)
             {
-                if (Character *ptr = getCharacter(characterIDs[k], account))
+                if (CharacterData *ptr =
+                        getCharacter(characterIDs[k], account))
                 {
                     characters[ptr->getCharacterSlot()] = ptr;
                 }
@@ -339,9 +340,9 @@ Account *Storage::getAccount(int accountID)
     return 0;
 }
 
-Character *Storage::getCharacterBySQL(Account *owner)
+CharacterData *Storage::getCharacterBySQL(Account *owner)
 {
-    Character *character = 0;
+    CharacterData *character = 0;
 
     string_to< unsigned > toUint;
     string_to< int > toInt;
@@ -358,7 +359,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
         string_to< unsigned short > toUshort;
         string_to< double > toDouble;
 
-        character = new Character(charInfo(0, 2), toUint(charInfo(0, 0)));
+        character = new CharacterData(charInfo(0, 2), toUint(charInfo(0, 0)));
         character->setGender(toUshort(charInfo(0, 3)));
         character->setHairStyle(toUshort(charInfo(0, 4)));
         character->setHairColor(toUshort(charInfo(0, 5)));
@@ -559,7 +560,7 @@ Character *Storage::getCharacterBySQL(Account *owner)
     return character;
 }
 
-Character *Storage::getCharacter(int id, Account *owner)
+CharacterData *Storage::getCharacter(int id, Account *owner)
 {
     std::ostringstream sql;
     sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE id = ?";
@@ -571,7 +572,7 @@ Character *Storage::getCharacter(int id, Account *owner)
     return 0;
 }
 
-Character *Storage::getCharacter(const std::string &name)
+CharacterData *Storage::getCharacter(const std::string &name)
 {
     std::ostringstream sql;
     sql << "SELECT * FROM " << CHARACTERS_TBL_NAME << " WHERE name = ?";
@@ -708,7 +709,7 @@ bool Storage::doesCharacterNameExist(const std::string& name)
     return true;
 }
 
-bool Storage::updateCharacter(Character *character)
+bool Storage::updateCharacter(CharacterData *character)
 {
     dal::PerformTransaction transaction(mDb);
 
@@ -1007,7 +1008,7 @@ void Storage::flush(Account *account)
         for (Characters::const_iterator it = characters.begin(),
              it_end = characters.end(); it != it_end; ++it)
         {
-            Character *character = (*it).second;
+            CharacterData *character = (*it).second;
             if (character->getDatabaseID() >= 0)
             {
                 updateCharacter(character);
@@ -1541,7 +1542,7 @@ std::map<int, Guild*> Storage::getGuildList()
             std::list<std::pair<int, int> >::const_iterator i, i_end;
             for (i = members.begin(), i_end = members.end(); i != i_end; ++i)
             {
-                Character *character = getCharacter((*i).first, 0);
+                CharacterData *character = getCharacter((*i).first, 0);
                 if (character)
                 {
                     character->addGuild(it->second->getName());
@@ -1844,7 +1845,7 @@ void Storage::delCharacter(int charId) const
     }
 }
 
-void Storage::delCharacter(Character *character) const
+void Storage::delCharacter(CharacterData *character) const
 {
     delCharacter(character->getDatabaseID());
 }
@@ -1999,8 +2000,8 @@ Post *Storage::getStoredPost(int playerId)
         for (unsigned i = 0; i < post.rows(); i++ )
         {
             // Load sender and receiver
-            Character *sender = getCharacter(toUint(post(i, 1)), 0);
-            Character *receiver = getCharacter(toUint(post(i, 2)), 0);
+            CharacterData *sender = getCharacter(toUint(post(i, 1)), 0);
+            CharacterData *receiver = getCharacter(toUint(post(i, 2)), 0);
 
             Letter *letter = new Letter(toUint( post(0,3) ), sender, receiver);
 

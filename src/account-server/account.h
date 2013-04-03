@@ -151,7 +151,7 @@ class Account
          *
          * @param character the new character.
          */
-        void addCharacter(Character *character);
+        void addCharacter(CharacterData *character);
 
         /**
          * Removes a character from the account.

@@ -23,7 +23,7 @@
 #include "../account-server/character.h"
 #include "../common/configuration.h"
 
-Letter::Letter(unsigned type, Character *sender, Character *receiver)
+Letter::Letter(unsigned type, CharacterData *sender, CharacterData *receiver)
  : mId(0), mType(type), mSender(sender), mReceiver(receiver)
 {
 }
@@ -70,12 +70,12 @@ bool Letter::addAttachment(InventoryItem item)
     return true;
 }
 
-Character *Letter::getReceiver() const
+CharacterData *Letter::getReceiver() const
 {
     return mReceiver;
 }
 
-Character *Letter::getSender() const
+CharacterData *Letter::getSender() const
 {
     return mSender;
 }
@@ -127,7 +127,7 @@ unsigned Post::getNumberOfLetters() const
 
 void PostManager::addLetter(Letter *letter)
 {
-    std::map<Character*, Post*>::iterator itr =
+    std::map<CharacterData*, Post*>::iterator itr =
         mPostBox.find(letter->getReceiver());
     if (itr != mPostBox.end())
     {
@@ -138,20 +138,20 @@ void PostManager::addLetter(Letter *letter)
         Post *post = new Post();
         post->addLetter(letter);
         mPostBox.insert(
-            std::pair<Character*, Post*>(letter->getReceiver(), post)
+            std::pair<CharacterData*, Post*>(letter->getReceiver(), post)
             );
     }
 }
 
-Post *PostManager::getPost(Character *player) const
+Post *PostManager::getPost(CharacterData *player) const
 {
-    std::map<Character*, Post*>::const_iterator itr = mPostBox.find(player);
+    std::map<CharacterData*, Post*>::const_iterator itr = mPostBox.find(player);
     return (itr == mPostBox.end()) ? NULL : itr->second;
 }
 
-void PostManager::clearPost(Character *player)
+void PostManager::clearPost(CharacterData *player)
 {
-    std::map<Character*, Post*>::iterator itr =
+    std::map<CharacterData*, Post*>::iterator itr =
         mPostBox.find(player);
     if (itr != mPostBox.end())
     {

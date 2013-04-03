@@ -34,7 +34,7 @@ using namespace ManaServ;
 
 void updateInfo(ChatClient *client, int partyId)
 {
-    Character *character = storage->getCharacter(client->characterName);
+    CharacterData *character = storage->getCharacter(client->characterName);
     GameServerHandler::sendPartyChange(character, partyId);
 }
 

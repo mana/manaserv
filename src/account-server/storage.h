@@ -30,7 +30,7 @@
 #include "common/transaction.h"
 
 class Account;
-class Character;
+class CharacterData;
 class ChatChannel;
 class FloorItem;
 class Guild;
@@ -83,7 +83,7 @@ class Storage
          *
          * @return the character associated to the Id.
          */
-        Character *getCharacter(int id, Account *owner);
+        CharacterData *getCharacter(int id, Account *owner);
 
         /**
          * Gets a character by character name.
@@ -92,7 +92,7 @@ class Storage
          *
          * @return the character associated to the name
          */
-        Character *getCharacter(const std::string &name);
+        CharacterData *getCharacter(const std::string &name);
 
         /**
          * Gets the id of a character by its name.
@@ -194,7 +194,7 @@ class Storage
          *
          * @param character character object.
          */
-        void delCharacter(Character *character) const;
+        void delCharacter(CharacterData *character) const;
 
         /**
          * Removes expired bans from accounts
@@ -238,7 +238,7 @@ class Storage
          *
          * @return true on success
          */
-        bool updateCharacter(Character *ptr);
+        bool updateCharacter(CharacterData *ptr);
 
         /**
          * Add a new guild.
@@ -475,7 +475,7 @@ class Storage
          *
          * @return the character found by the query.
          */
-        Character *getCharacterBySQL(Account *owner);
+        CharacterData *getCharacterBySQL(Account *owner);
 
         /**
          * Fix improper character slots

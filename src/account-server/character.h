@@ -72,11 +72,11 @@ typedef std::map<unsigned, AttributeValue> AttributeMap;
  */
 typedef std::map<unsigned, SpecialValue> SpecialMap;
 
-class Character
+class CharacterData
 {
     public:
 
-        Character(const std::string &name, int id = -1);
+    CharacterData(const std::string &name, int id = -1);
 
         /**
          * Gets the database id of the character.
@@ -266,8 +266,8 @@ class Character
 
     private:
 
-        Character(const Character &);
-        Character &operator=(const Character &);
+        CharacterData(const CharacterData &);
+        CharacterData &operator=(const CharacterData &);
 
         double getAttrBase(AttributeMap::const_iterator &it) const
         { return it->second.base; }
@@ -307,6 +307,6 @@ class Character
 /**
  * Type definition for a list of Characters.
  */
-typedef std::map<unsigned, Character* > Characters;
+typedef std::map<unsigned, CharacterData* > Characters;
 
 #endif
