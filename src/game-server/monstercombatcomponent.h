@@ -26,12 +26,12 @@
 #include "game-server/attack.h"
 #include "game-server/being.h"
 
-class Monster;
+class MonsterClass;
 
 class MonsterCombatComponent: public CombatComponent
 {
 public:
-    MonsterCombatComponent(Monster &monster);
+    MonsterCombatComponent(Being &monster, MonsterClass *specy);
 
     void processAttack(Being *source, Attack &attack);
     int damage(Being &target, Being *source, const Damage &damage);

@@ -67,7 +67,8 @@ void SpawnAreaComponent::update(Entity &entity)
         const int width = mZone.w;
         const int height = mZone.h;
 
-        Being *being = new Monster(mSpecy);
+        Being *being = new Being(OBJECT_MONSTER);
+        being->addComponent(new MonsterComponent(*being, mSpecy));
 
         if (being->getModifiedAttribute(ATTR_MAX_HP) <= 0)
         {

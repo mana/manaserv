@@ -158,14 +158,14 @@ ItemClass *getItemClass(lua_State *s, int p)
     return itemClass;
 }
 
-Monster *getMonster(lua_State *s, int p)
+Being *getMonster(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Entity *t = static_cast<Entity *>(lua_touserdata(s, p));
     if (t->getType() != OBJECT_MONSTER)
         return 0;
-    return static_cast<Monster *>(t);
+    return static_cast<Being*>(t);
 }
 
 MonsterClass *getMonsterClass(lua_State *s, int p)
@@ -220,9 +220,9 @@ ItemClass *checkItemClass(lua_State *s, int p)
     return itemClass;
 }
 
-Monster *checkMonster(lua_State *s, int p)
+Being *checkMonster(lua_State *s, int p)
 {
-    Monster *monster = getMonster(s, p);
+    Being *monster = getMonster(s, p);
     luaL_argcheck(s, monster, p, "monster expected");
     return monster;
 }

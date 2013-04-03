@@ -140,6 +140,15 @@ class Being : public Actor
         void setAttribute(unsigned id, double value);
 
         /**
+         * Creates an Attribute that did not exist before
+         *
+         * @param id The id of the attribute
+         * @param attributeInfo The info that describes the attribute
+         */
+        void createAttribute(unsigned id, const AttributeManager::AttributeInfo
+                             &attributeInfo);
+
+        /**
          * Gets an attribute or 0 if not existing.
          */
         const Attribute *getAttribute(unsigned id) const;
@@ -254,7 +263,6 @@ class Being : public Actor
         int getLastEmote() const
         { return mEmoteId; }
 
-    protected:
         /**
          * Update the being direction when moving so avoid directions desyncs
          * with other clients.
@@ -262,8 +270,11 @@ class Being : public Actor
         void updateDirection(const Point &currentPos,
                              const Point &destPos);
 
+    protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
 
+        /** Delay until move to next tile in miliseconds. */
+        unsigned short mMoveTime;
         BeingAction mAction;
         AttributeMap mAttributes;
         StatusEffects mStatus;

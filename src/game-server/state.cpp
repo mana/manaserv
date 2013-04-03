@@ -270,9 +270,10 @@ static void informPlayer(MapComposite *map, Character *p)
 
                 case OBJECT_MONSTER:
                 {
-                    Monster *q = static_cast< Monster * >(o);
-                    enterMsg.writeInt16(q->getSpecy()->getId());
-                    enterMsg.writeString(q->getName());
+                    MonsterComponent *monsterComponent =
+                            o->getComponent<MonsterComponent>();
+                    enterMsg.writeInt16(monsterComponent->getSpecy()->getId());
+                    enterMsg.writeString(o->getName());
                 } break;
 
                 case OBJECT_NPC:
@@ -567,10 +568,13 @@ bool GameState::insert(Entity *ptr)
             break;
 
         case OBJECT_MONSTER:
+        {
+            MonsterComponent *monsterComponent =
+                    obj->getComponent<MonsterComponent>();
             LOG_DEBUG("Monster inserted: "
-                      << static_cast<Monster*>(obj)->getSpecy()->getId());
+                      << monsterComponent->getSpecy()->getId());
             break;
-
+        }
         case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:
@@ -641,10 +645,13 @@ void GameState::remove(Entity *ptr)
             break;
 
         case OBJECT_MONSTER:
+        {
+            MonsterComponent *monsterComponent =
+                    ptr->getComponent<MonsterComponent>();
             LOG_DEBUG("Monster removed: "
-                      << static_cast<Monster*>(ptr)->getSpecy()->getId());
+                      << monsterComponent->getSpecy()->getId());
             break;
-
+        }
         case OBJECT_ACTOR:
         case OBJECT_OTHER:
         default:

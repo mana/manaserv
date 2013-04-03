@@ -355,12 +355,13 @@ static int monster_create(lua_State *s)
     const int y = luaL_checkint(s, 3);
     MapComposite *m = checkCurrentMap(s);
 
-    Monster *q = new Monster(monsterClass);
-    q->setMap(m);
-    q->setPosition(Point(x, y));
-    GameState::enqueueInsert(q);
+    Being *monster = new Being(OBJECT_MONSTER);
+    monster->addComponent(new MonsterComponent(*monster, monsterClass));
+    monster->setMap(m);
+    monster->setPosition(Point(x, y));
+    GameState::enqueueInsert(monster);
 
-    lua_pushlightuserdata(s, q);
+    lua_pushlightuserdata(s, monster);
     return 1;
 }
 
@@ -374,7 +375,7 @@ static int monster_create(lua_State *s)
 static int monster_remove(lua_State *s)
 {
     bool monsterRemoved = false;
-    if (Monster *m = getMonster(s, 1))
+    if (Being *m = getMonster(s, 1))
     {
         GameState::remove(m);
         monsterRemoved = true;
@@ -2245,8 +2246,10 @@ static int chr_take_special(lua_State *s)
  */
 static int monster_get_id(lua_State *s)
 {
-    Monster *monster = checkMonster(s, 1);
-    lua_pushinteger(s, monster->getSpecy()->getId());
+    Being *monster = checkMonster(s, 1);
+    MonsterComponent *monsterComponent =
+            monster->getComponent<MonsterComponent>();
+    lua_pushinteger(s, monsterComponent->getSpecy()->getId());
     return 1;
 }
 
@@ -2258,10 +2261,10 @@ static int monster_get_id(lua_State *s)
  */
 static int monster_change_anger(lua_State *s)
 {
-    Monster *monster = checkMonster(s, 1);
+    Being *monster = checkMonster(s, 1);
     Being *being = checkBeing(s, 2);
     const int anger = luaL_checkint(s, 3);
-    monster->changeAnger(being, anger);
+    monster->getComponent<MonsterComponent>()->changeAnger(being, anger);
     return 0;
 }
 
@@ -2272,9 +2275,9 @@ static int monster_change_anger(lua_State *s)
  */
 static int monster_drop_anger(lua_State *s)
 {
-    Monster *monster = checkMonster(s, 1);
+    Being *monster = checkMonster(s, 1);
     Being *being = checkBeing(s, 2);
-    monster->forgetTarget(being);
+    monster->getComponent<MonsterComponent>()->forgetTarget(being);
     return 0;
 }
 
@@ -2286,8 +2289,10 @@ static int monster_drop_anger(lua_State *s)
  */
 static int monster_get_angerlist(lua_State *s)
 {
-    Monster *monster = checkMonster(s, 1);
-    pushSTLContainer(s, monster->getAngerList());
+    Being *monster = checkMonster(s, 1);
+    MonsterComponent *monsterComponent =
+            monster->getComponent<MonsterComponent>();
+    pushSTLContainer(s, monsterComponent->getAngerList());
     return 1;
 }
 
