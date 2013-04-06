@@ -102,11 +102,12 @@ bool AccountConnection::start(int gameServerPort)
     return true;
 }
 
-void AccountConnection::sendCharacterData(Character *p)
+void AccountConnection::sendCharacterData(Entity *p)
 {
     MessageOut msg(GAMSG_PLAYER_DATA);
-    msg.writeInt32(p->getDatabaseID());
-    serializeCharacterData(*p, msg);
+    auto *characterComponent = p->getComponent<CharacterComponent>();
+    msg.writeInt32(characterComponent->getDatabaseID());
+    serializeCharacterData(*characterComponent->getCharacterData(), msg);
     send(msg);
 }
 
@@ -154,8 +155,9 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_PLAYER_ENTER:
         {
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
-            Character *ptr = new Character(msg);
-            gameHandler->addPendingCharacter(token, ptr);
+            Being *character = new Being(OBJECT_CHARACTER);
+            character->addComponent(new CharacterComponent(*character, msg));
+            gameHandler->addPendingCharacter(token, character);
         } break;
 
         case AGMSG_ACTIVE_MAP:
@@ -241,7 +243,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case CGMSG_POST_RESPONSE:
         {
             // get the character
-            Character *character = postMan->getCharacter(msg.readInt32());
+            Being *character = postMan->getCharacter(msg.readInt32());
 
             // check character is still valid
             if (!character)
@@ -259,7 +261,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case CGMSG_STORE_POST_RESPONSE:
         {
             // get character
-            Character *character = postMan->getCharacter(msg.readInt32());
+            Being *character = postMan->getCharacter(msg.readInt32());
 
             // check character is valid
             if (!character)
@@ -288,21 +290,21 @@ void AccountConnection::playerReconnectAccount(int id,
     send(msg);
 }
 
-void AccountConnection::requestCharacterVar(Character *ch,
+void AccountConnection::requestCharacterVar(Entity *ch,
                                             const std::string &name)
 {
     MessageOut msg(GAMSG_GET_VAR_CHR);
-    msg.writeInt32(ch->getDatabaseID());
+    msg.writeInt32(ch->getComponent<CharacterComponent>()->getDatabaseID());
     msg.writeString(name);
     send(msg);
 }
 
-void AccountConnection::updateCharacterVar(Character *ch,
+void AccountConnection::updateCharacterVar(Entity *ch,
                                            const std::string &name,
                                            const std::string &value)
 {
     MessageOut msg(GAMSG_SET_VAR_CHR);
-    msg.writeInt32(ch->getDatabaseID());
+    msg.writeInt32(ch->getComponent<CharacterComponent>()->getDatabaseID());
     msg.writeString(name);
     msg.writeString(value);
     send(msg);
@@ -328,10 +330,10 @@ void AccountConnection::updateWorldVar(const std::string &name,
     send(msg);
 }
 
-void AccountConnection::banCharacter(Character *ch, int duration)
+void AccountConnection::banCharacter(Entity *ch, int duration)
 {
     MessageOut msg(GAMSG_BAN_PLAYER);
-    msg.writeInt32(ch->getDatabaseID());
+    msg.writeInt32(ch->getComponent<CharacterComponent>()->getDatabaseID());
     msg.writeInt32(duration);
     send(msg);
 }
@@ -357,9 +359,12 @@ void AccountConnection::sendStatistics()
             switch (t->getType())
             {
                 case OBJECT_CHARACTER:
-                    players.push_back
-                        (static_cast< Character * >(t)->getDatabaseID());
+                {
+                    auto *characterComponent =
+                            t->getComponent<CharacterComponent>();
+                    players.push_back(characterComponent->getDatabaseID());
                     break;
+                }
                 case OBJECT_MONSTER:
                     ++nbMonsters;
                     break;
@@ -379,13 +384,13 @@ void AccountConnection::sendStatistics()
     send(msg);
 }
 
-void AccountConnection::sendPost(Character *c, MessageIn &msg)
+void AccountConnection::sendPost(Entity *c, MessageIn &msg)
 {
     // send message to account server with id of sending player,
     // the id of receiving player, the letter receiver and contents, and attachments
     LOG_DEBUG("Sending GCMSG_STORE_POST.");
     MessageOut out(GCMSG_STORE_POST);
-    out.writeInt32(c->getDatabaseID());
+    out.writeInt32(c->getComponent<CharacterComponent>()->getDatabaseID());
     out.writeString(msg.readString()); // name of receiver
     out.writeString(msg.readString()); // content of letter
     while (msg.getUnreadLength()) // attachments
@@ -397,7 +402,7 @@ void AccountConnection::sendPost(Character *c, MessageIn &msg)
     send(out);
 }
 
-void AccountConnection::getPost(Character *c)
+void AccountConnection::getPost(Entity *c)
 {
     // let the postman know to expect some post for this character
     postMan->addCharacter(c);
@@ -405,14 +410,14 @@ void AccountConnection::getPost(Character *c)
     // send message to account server with id of retrieving player
     LOG_DEBUG("Sending GCMSG_REQUEST_POST");
     MessageOut out(GCMSG_REQUEST_POST);
-    out.writeInt32(c->getDatabaseID());
+    out.writeInt32(c->getComponent<CharacterComponent>()->getDatabaseID());
     send(out);
 }
 
-void AccountConnection::changeAccountLevel(Character *c, int level)
+void AccountConnection::changeAccountLevel(Entity *c, int level)
 {
     MessageOut msg(GAMSG_CHANGE_ACCOUNT_LEVEL);
-    msg.writeInt32(c->getDatabaseID());
+    msg.writeInt32(c->getComponent<CharacterComponent>()->getDatabaseID());
     msg.writeInt16(level);
     send(msg);
 }

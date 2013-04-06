@@ -31,7 +31,7 @@
 
 class Actor;
 class Being;
-class Character;
+class CharacterComponent;
 class Map;
 class MapComposite;
 class Point;
@@ -76,11 +76,11 @@ struct CharacterIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Character *current;
+    Being *current;
 
     CharacterIterator(const ZoneIterator &);
     void operator++();
-    Character *operator*() const { return current; }
+    Being *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 

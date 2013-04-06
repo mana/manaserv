@@ -25,7 +25,7 @@
 #include <map>
 #include <string>
 
-class Character;
+class Being;
 
 namespace PermissionManager
 {
@@ -48,7 +48,7 @@ namespace PermissionManager
     /**
      * Returns if the characters account has the given permission
      */
-    Result checkPermission(const Character* character, std::string permission);
+    Result checkPermission(const Being* character, std::string permission);
     Result checkPermission(unsigned char level, std::string permission);
 
     /**
@@ -59,12 +59,12 @@ namespace PermissionManager
     /**
      * Gets a list of all permissions the character is having
      */
-    std::list<std::string> getPermissionList(const Character* character);
+    std::list<std::string> getPermissionList(const Being* character);
 
     /**
      * Gets a list of all permissions classes the character is having
      */
-    std::list<std::string> getClassList(const Character* character);
+    std::list<std::string> getClassList(const Being* character);
 
 } // namespace PermissionManager
 

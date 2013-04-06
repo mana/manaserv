@@ -307,7 +307,7 @@ void MonsterComponent::forgetTarget(Entity *entity)
 
     if (b->getType() == OBJECT_CHARACTER)
     {
-        Character *c = static_cast< Character * >(b);
+        Being *c = static_cast< Being * >(b);
         mExpReceivers.erase(c);
         mLegalExpReceivers.erase(c);
     }
@@ -376,7 +376,7 @@ void MonsterComponent::monsterDied(Being *monster)
         }
 
         // Distribute exp reward.
-        std::map<Character *, std::set <size_t> > ::iterator iChar;
+        std::map<Being *, std::set <size_t> > ::iterator iChar;
         std::set<size_t>::iterator iSkill;
 
 
@@ -385,21 +385,24 @@ void MonsterComponent::monsterDied(Being *monster)
         for (iChar = mExpReceivers.begin(); iChar != mExpReceivers.end();
              iChar++)
         {
-            Character *character = (*iChar).first;
+            auto *character = (*iChar).first;
             const std::set<size_t> &skillSet = (*iChar).second;
 
             if (mLegalExpReceivers.find(character) == mLegalExpReceivers.end()
                 || skillSet.empty())
                 continue;
 
+            auto characterComponent =
+                    character->getComponent<CharacterComponent>();
+
             int expPerSkill = int(expPerChar / skillSet.size());
             for (iSkill = skillSet.begin(); iSkill != skillSet.end();
                  iSkill++)
             {
-                character->receiveExperience(*iSkill, expPerSkill,
-                                             mSpecy->getOptimalLevel());
+                characterComponent->receiveExperience(*iSkill, expPerSkill,
+                                                    mSpecy->getOptimalLevel());
             }
-            character->incrementKillCount(mSpecy->getId());
+            characterComponent->incrementKillCount(mSpecy->getId());
         }
     }
 }
@@ -412,14 +415,13 @@ void MonsterComponent::receivedDamage(Being *source, const Damage &damage, int h
 
     if (hpLoss && source && source->getType() == OBJECT_CHARACTER)
     {
-        Character *s = static_cast< Character * >(source);
-
-        mExpReceivers[s].insert(damage.skill);
-        if (mKillStealProtectedTimeout.expired() || mOwner == s
-            || mOwner->getParty() == s->getParty())
+        mExpReceivers[source].insert(damage.skill);
+        if (mKillStealProtectedTimeout.expired() || mOwner == source
+            || mOwner->getComponent<CharacterComponent>()->getParty() ==
+                    source->getComponent<CharacterComponent>()->getParty())
         {
-            mOwner = s;
-            mLegalExpReceivers.insert(s);
+            mOwner = source;
+            mLegalExpReceivers.insert(source);
             mKillStealProtectedTimeout.set(KILLSTEAL_PROTECTION_TIME);
         }
     }

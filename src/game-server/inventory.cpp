@@ -29,8 +29,15 @@
 #include "net/messageout.h"
 #include "utils/logger.h"
 
-Inventory::Inventory(Character *p):
-    mPoss(&p->getPossessions()), mCharacter(p)
+Inventory::Inventory(Being *p):
+    mPoss(&p->getComponent<CharacterComponent>()->getPossessions()),
+    mCharacter(p)
+{
+}
+
+Inventory::Inventory(Being *p, Possessions &possessions):
+    mPoss(&possessions),
+    mCharacter(p)
 {
 }
 

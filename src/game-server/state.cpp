@@ -79,9 +79,10 @@ static std::map< std::string, std::string > mScriptVariables;
 /**
  * Sets message fields describing character look.
  */
-static void serializeLooks(Character *ch, MessageOut &msg)
+static void serializeLooks(Being *ch, MessageOut &msg)
 {
-    const EquipData &equipData = ch->getPossessions().getEquipment();
+    const EquipData &equipData = ch->getComponent<CharacterComponent>()
+            ->getPossessions().getEquipment();
 
     // We'll use a set to check whether we already sent the update for the given
     // item instance.
@@ -127,7 +128,7 @@ static void serializeLooks(Character *ch, MessageOut &msg)
 /**
  * Informs a player of what happened around the character.
  */
-static void informPlayer(MapComposite *map, Character *p)
+static void informPlayer(MapComposite *map, Being *p)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
@@ -186,11 +187,12 @@ static void informPlayer(MapComposite *map, Character *p)
             {
                 MessageOut LooksMsg(GPMSG_BEING_LOOKS_CHANGE);
                 LooksMsg.writeInt16(oid);
-                Character * c = static_cast<Character * >(o);
-                serializeLooks(c, LooksMsg);
-                LooksMsg.writeInt16(c->getHairStyle());
-                LooksMsg.writeInt16(c->getHairColor());
-                LooksMsg.writeInt16(c->getGender());
+                serializeLooks(o, LooksMsg);
+                auto *characterComponent =
+                        o->getComponent<CharacterComponent>();
+                LooksMsg.writeInt16(characterComponent->getHairStyle());
+                LooksMsg.writeInt16(characterComponent->getHairColor());
+                LooksMsg.writeInt16(o->getGender());
                 gameHandler->sendTo(p, LooksMsg);
             }
 
@@ -261,11 +263,12 @@ static void informPlayer(MapComposite *map, Character *p)
             {
                 case OBJECT_CHARACTER:
                 {
-                    Character *q = static_cast< Character * >(o);
-                    enterMsg.writeString(q->getName());
-                    enterMsg.writeInt8(q->getHairStyle());
-                    enterMsg.writeInt8(q->getHairColor());
-                    serializeLooks(q, enterMsg);
+                    auto *characterComponent =
+                            o->getComponent<CharacterComponent>();
+                    enterMsg.writeString(o->getName());
+                    enterMsg.writeInt8(characterComponent->getHairStyle());
+                    enterMsg.writeInt8(characterComponent->getHairColor());
+                    serializeLooks(o, enterMsg);
                 } break;
 
                 case OBJECT_MONSTER:
@@ -328,19 +331,20 @@ static void informPlayer(MapComposite *map, Character *p)
         gameHandler->sendTo(p, damageMsg);
 
     // Inform client about status change.
-    p->sendStatus();
+    p->getComponent<CharacterComponent>()->sendStatus(*p);
 
     // Inform client about health change of party members
     for (CharacterIterator i(map->getWholeMapIterator()); i; ++i)
     {
-        Character *c = *i;
+        Being *c = *i;
 
         // Make sure its not the same character
         if (c == p)
             continue;
 
         // make sure they are in the same party
-        if (c->getParty() == p->getParty())
+        if (c->getComponent<CharacterComponent>()->getParty() ==
+                p->getComponent<CharacterComponent>()->getParty())
         {
             int cflags = c->getUpdateFlags();
             if (cflags & UPDATEFLAG_HEALTHCHANGE)
@@ -487,9 +491,8 @@ void GameState::update(int tick)
                 remove(o);
                 if (o->getType() == OBJECT_CHARACTER)
                 {
-                    Character *ch = static_cast< Character * >(o);
-                    ch->disconnected();
-                    gameHandler->kill(ch);
+                    o->getComponent<CharacterComponent>()->disconnected(*o);
+                    gameHandler->kill(o);
                 }
                 delete o;
                 break;
@@ -500,7 +503,7 @@ void GameState::update(int tick)
 
             case EVENT_WARP:
                 assert(o->getType() == OBJECT_CHARACTER);
-                warp(static_cast< Character * >(o), e.map, e.point);
+                warp(static_cast<Being *>(o), e.map, e.point);
                 break;
         }
     }
@@ -593,11 +596,11 @@ bool GameState::insert(Entity *ptr)
     mapChangeMessage.writeString(map->getName());
     mapChangeMessage.writeInt16(pos.x);
     mapChangeMessage.writeInt16(pos.y);
-    gameHandler->sendTo(static_cast< Character * >(obj), mapChangeMessage);
+    gameHandler->sendTo(ptr, mapChangeMessage);
 
     // update the online state of the character
-    accountHandler->updateOnlineStatus(
-        static_cast< Character * >(obj)->getDatabaseID(), true);
+    accountHandler->updateOnlineStatus(ptr->getComponent<CharacterComponent>()
+                                       ->getDatabaseID(), true);
 
     return true;
 }
@@ -663,11 +666,13 @@ void GameState::remove(Entity *ptr)
     {
         if (ptr->getType() == OBJECT_CHARACTER)
         {
-            static_cast< Character * >(ptr)->cancelTransaction();
+            auto *characterComponent =
+                    ptr->getComponent<CharacterComponent>();
+            characterComponent->cancelTransaction();
 
             // remove characters online status
             accountHandler->updateOnlineStatus(
-                static_cast< Character * >(ptr)->getDatabaseID(), false);
+                    characterComponent->getDatabaseID(), false);
         }
 
         Actor *obj = static_cast< Actor * >(ptr);
@@ -706,7 +711,7 @@ void GameState::remove(Entity *ptr)
     map->remove(ptr);
 }
 
-void GameState::warp(Character *ptr, MapComposite *map, const Point &point)
+void GameState::warp(Being *ptr, MapComposite *map, const Point &point)
 {
     remove(ptr);
     ptr->setMap(map);
@@ -717,16 +722,19 @@ void GameState::warp(Character *ptr, MapComposite *map, const Point &point)
        a disconnection. */
     accountHandler->sendCharacterData(ptr);
 
+    auto *characterComponent =
+            ptr->getComponent<CharacterComponent>();
+
     // If the player has just left, The character pointer is also about
     // to be deleted. So we don't have to do anything else.
-    if (!ptr->isConnected())
+    if (!characterComponent->isConnected())
         return;
 
     if (map->isActive())
     {
         if (!insert(ptr))
         {
-            ptr->disconnected();
+            characterComponent->disconnected(*ptr);
             gameHandler->kill(ptr);
             delete ptr;
         }
@@ -734,7 +742,7 @@ void GameState::warp(Character *ptr, MapComposite *map, const Point &point)
     else
     {
         MessageOut msg(GAMSG_REDIRECT);
-        msg.writeInt32(ptr->getDatabaseID());
+        msg.writeInt32(characterComponent->getDatabaseID());
         accountHandler->send(msg);
         gameHandler->prepareServerChange(ptr);
     }
@@ -770,13 +778,13 @@ void GameState::enqueueRemove(Actor *ptr)
     enqueueEvent(ptr, event);
 }
 
-void GameState::enqueueWarp(Character *ptr,
+void GameState::enqueueWarp(Being *ptr,
                             MapComposite *map,
                             const Point &point)
 {
     // When the player has just disconnected, better not wait for the pointer
     // to become invalid.
-    if (!ptr->isConnected())
+    if (!ptr->getComponent<CharacterComponent>()->isConnected())
     {
         warp(ptr, map, point);
         return;
@@ -823,7 +831,7 @@ void GameState::sayTo(Actor *destination, Actor *source, const std::string &text
     }
     msg.writeString(text);
 
-    gameHandler->sendTo(static_cast< Character * >(destination), msg);
+    gameHandler->sendTo(destination, msg);
 }
 
 void GameState::sayToAll(const std::string &text)

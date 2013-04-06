@@ -35,6 +35,8 @@
 
 #include "game-server/timeout.h"
 
+class CombatComponent;
+
 /**
  * Structure that describes the severity and nature of an attack a being can
  * be hit by.
@@ -68,7 +70,7 @@ struct Damage
  * Class that stores information about an auto-attack
  */
 
-class Character;
+class CharacterComponent;
 
 struct AttackInfo
 {
@@ -178,8 +180,8 @@ class Attacks : public sigc::trackable
             mCurrentAttack(0)
         {}
 
-        void add(AttackInfo *);
-        void remove(AttackInfo *);
+        void add(CombatComponent *combatComponent, AttackInfo *);
+        void remove(CombatComponent *combatComponent, AttackInfo *);
         void markAttackAsTriggered();
         Attack *getTriggerableAttack();
         void startAttack(Attack *attack);
@@ -191,8 +193,8 @@ class Attacks : public sigc::trackable
         unsigned getNumber()
         { return mAttacks.size(); }
 
-        sigc::signal<void, Attack &> attack_added;
-        sigc::signal<void, Attack &> attack_removed;
+        sigc::signal<void, CombatComponent *, Attack &> attack_added;
+        sigc::signal<void, CombatComponent *, Attack &> attack_removed;
 
     private:
         std::vector<Attack> mAttacks;

@@ -47,6 +47,12 @@ struct AttributeValue
 
     double base;     /**< Base value of the attribute. */
     double modified; /**< Value after various modifiers have been applied. */
+
+    double getBase() const
+    { return base; }
+
+    double getModifiedAttribute() const
+    { return modified; }
 };
 
 struct SpecialValue
@@ -60,6 +66,15 @@ struct SpecialValue
     {}
 
     unsigned currentMana;
+};
+
+struct Status
+{
+    Status()
+        : time(0)
+    {}
+
+    unsigned time;
 };
 
 /**
@@ -76,7 +91,7 @@ class CharacterData
 {
     public:
 
-    CharacterData(const std::string &name, int id = -1);
+        CharacterData(const std::string &name, int id = -1);
 
         /**
          * Gets the database id of the character.
@@ -154,6 +169,9 @@ class CharacterData
         void setModAttribute(unsigned id, double value)
         { mAttributes[id].modified = value; }
 
+        const AttributeMap &getAttributes() const
+        { return mAttributes; }
+
         int getSkillSize() const
         { return mExperience.size(); }
 
@@ -176,15 +194,15 @@ class CharacterData
          * Get / Set a status effects
          */
         void applyStatusEffect(int id, int time)
-        { mStatusEffects[id] = time; }
+        { mStatusEffects[id].time = time; }
 
         int getStatusEffectSize() const
         { return mStatusEffects.size(); }
 
-        const std::map<int, int>::const_iterator getStatusEffectBegin() const
+        const std::map<int, Status>::const_iterator getStatusEffectBegin() const
         { return mStatusEffects.begin(); }
 
-        const std::map<int, int>::const_iterator getStatusEffectEnd() const
+        const std::map<int, Status>::const_iterator getStatusEffectEnd() const
         { return mStatusEffects.end(); }
 
         /**
@@ -283,7 +301,7 @@ class CharacterData
         Point mPos;               //!< Position the being is at.
         AttributeMap mAttributes; //!< Attributes.
         std::map<int, int> mExperience; //!< Skill Experience.
-        std::map<int, int> mStatusEffects; //!< Status Effects
+        std::map<int, Status> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
         SpecialMap  mSpecials;
         unsigned short mMapId;    //!< Map the being is on.
@@ -299,9 +317,6 @@ class CharacterData
                                                  //!< belongs to.
         friend class AccountHandler;
         friend class Storage;
-        // Set as a friend, but still a lot of redundant accessors. FIXME.
-        template< class T >
-        friend void serializeCharacterData(const T &data, MessageOut &msg);
 };
 
 /**

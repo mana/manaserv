@@ -26,7 +26,7 @@
 #include <string>
 
 class Actor;
-class Character;
+class Being;
 class Entity;
 class ItemClass;
 class MapComposite;
@@ -71,7 +71,7 @@ namespace GameState
      * @note No update may be in progress.
      * @note The character is destroyed, if needed.
      */
-    void warp(Character *, MapComposite *, const Point &point);
+    void warp(Being *, MapComposite *, const Point &point);
 
     /**
      * Enqueues an insert event.
@@ -90,7 +90,7 @@ namespace GameState
      * Enqueues a warp event.
      * @note The event will be executed at end of update.
      */
-    void enqueueWarp(Character *, MapComposite *, const Point &point);
+    void enqueueWarp(Being *, MapComposite *, const Point &point);
 
     /**
      * Says something to an actor.

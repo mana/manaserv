@@ -180,7 +180,7 @@ void CombatComponent::processAttack(Being &source, Attack &attack)
  */
 void CombatComponent::addAttack(AttackInfo *attackInfo)
 {
-    mAttacks.add(attackInfo);
+    mAttacks.add(this, attackInfo);
 }
 
 /**
@@ -188,7 +188,7 @@ void CombatComponent::addAttack(AttackInfo *attackInfo)
  */
 void CombatComponent::removeAttack(AttackInfo *attackInfo)
 {
-    mAttacks.remove(attackInfo);
+    mAttacks.remove(this, attackInfo);
 }
 
 /**

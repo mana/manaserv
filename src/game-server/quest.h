@@ -25,7 +25,7 @@
 
 #include "scripting/scriptmanager.h"
 
-class Character;
+class Being;
 class Script;
 
 
@@ -35,14 +35,14 @@ class QuestCallback
         virtual ~QuestCallback()
         { }
 
-        virtual void triggerCallback(Character *ch,
+        virtual void triggerCallback(Being *ch,
                                      const std::string &value) const = 0;
 };
 
 class QuestThreadCallback : public QuestCallback
 {
     public:
-        typedef void (*Handler)(Character *,
+        typedef void (*Handler)(Being *,
                                 const std::string &value,
                                 Script *mScript);
 
@@ -52,7 +52,7 @@ class QuestThreadCallback : public QuestCallback
             mScript(script)
         { }
 
-        void triggerCallback(Character *ch, const std::string &value) const
+        void triggerCallback(Being *ch, const std::string &value) const
         { mHandler(ch, value, mScript); }
 
     private:
@@ -67,7 +67,7 @@ class QuestRefCallback : public QuestCallback
             mQuestName(questName)
         { script->assignCallback(mRef); }
 
-        void triggerCallback(Character *ch, const std::string &value) const;
+        void triggerCallback(Being *ch, const std::string &value) const;
 
     private:
         Script::Ref mRef;
@@ -78,19 +78,18 @@ class QuestRefCallback : public QuestCallback
  * Gets the value associated to a quest variable.
  * @return false if no value was in cache.
  */
-bool getQuestVar(Character *, const std::string &name, std::string &value);
+bool getQuestVar(Being *, const std::string &name, std::string &value);
 
 /**
  * Sets the value associated to a quest variable.
  */
-void setQuestVar(Character *, const std::string &name,
-                 const std::string &value);
+void setQuestVar(Being *, const std::string &name, const std::string &value);
 
 /**
  * Starts the recovery of a variable and returns immediatly. The callback will
  * be called once the value has been recovered.
  */
-void recoverQuestVar(Character *, const std::string &name, QuestCallback *);
+void recoverQuestVar(Being *, const std::string &name, QuestCallback *);
 
 /**
  * Called by the handler of the account server when a value is received.

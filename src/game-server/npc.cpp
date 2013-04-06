@@ -73,9 +73,10 @@ void NpcComponent::setUpdateCallback(Script::Ref function)
 
 
 
-static Script *prepareResume(Character *ch, Script::ThreadState expectedState)
+static Script *prepareResume(Being *ch, Script::ThreadState expectedState)
 {
-    Script::Thread *thread = ch->getNpcThread();
+    Script::Thread *thread =
+            ch->getComponent<CharacterComponent>()->getNpcThread();
     if (!thread || thread->mState != expectedState)
         return 0;
 
@@ -84,7 +85,7 @@ static Script *prepareResume(Character *ch, Script::ThreadState expectedState)
     return script;
 }
 
-void Npc::start(Being *npc, Character *ch)
+void Npc::start(Being *npc, Being *ch)
 {
     NpcComponent *npcComponent = npc->getComponent<NpcComponent>();
 
@@ -98,30 +99,31 @@ void Npc::start(Being *npc, Character *ch)
         script->prepare(talkCallback);
         script->push(npc);
         script->push(ch);
-        ch->startNpcThread(thread, npc->getPublicID());
+        ch->getComponent<CharacterComponent>()
+                ->startNpcThread(thread, npc->getPublicID());
     }
 }
 
-void Npc::resume(Character *ch)
+void Npc::resume(Being *ch)
 {
     if (prepareResume(ch, Script::ThreadPaused))
-        ch->resumeNpcThread();
+        ch->getComponent<CharacterComponent>()->resumeNpcThread();
 }
 
-void Npc::integerReceived(Character *ch, int value)
+void Npc::integerReceived(Being *ch, int value)
 {
     if (Script *script = prepareResume(ch, Script::ThreadExpectingNumber))
     {
         script->push(value);
-        ch->resumeNpcThread();
+        ch->getComponent<CharacterComponent>()->resumeNpcThread();
     }
 }
 
-void Npc::stringReceived(Character *ch, const std::string &value)
+void Npc::stringReceived(Being *ch, const std::string &value)
 {
     if (Script *script = prepareResume(ch, Script::ThreadExpectingString))
     {
         script->push(value);
-        ch->resumeNpcThread();
+        ch->getComponent<CharacterComponent>()->resumeNpcThread();
     }
 }

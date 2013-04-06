@@ -275,35 +275,37 @@ void LuaScript::processRemoveEvent(Entity *entity)
 /**
  * Called when the server has recovered the value of a quest variable.
  */
-void LuaScript::getQuestCallback(Character *q,
+void LuaScript::getQuestCallback(Being *q,
                                  const std::string &value,
                                  Script *script)
 {
-    Script::Thread *thread = q->getNpcThread();
+    auto *characterComponent = q->getComponent<CharacterComponent>();
+    Script::Thread *thread = characterComponent->getNpcThread();
     if (!thread || thread->mState != Script::ThreadExpectingString)
         return;
 
     script->prepareResume(thread);
     script->push(value);
-    q->resumeNpcThread();
+    characterComponent->resumeNpcThread();
 }
 
 /**
  * Called when the server has recovered the post for a user.
  */
-void LuaScript::getPostCallback(Character *q,
+void LuaScript::getPostCallback(Being *q,
                                 const std::string &sender,
                                 const std::string &letter,
                                 Script *script)
 {
-    Script::Thread *thread = q->getNpcThread();
+    auto *characterComponent = q->getComponent<CharacterComponent>();
+    Script::Thread *thread = characterComponent->getNpcThread();
     if (!thread || thread->mState != Script::ThreadExpectingTwoStrings)
         return;
 
     script->prepareResume(thread);
     script->push(sender);
     script->push(letter);
-    q->resumeNpcThread();
+    characterComponent->resumeNpcThread();
 }
 
 

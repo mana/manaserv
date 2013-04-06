@@ -483,6 +483,8 @@ void Being::recalculateBaseAttribute(unsigned attr)
 
 void Being::updateDerivedAttributes(unsigned attr)
 {
+    signal_attribute_changed.emit(this, attr);
+
     LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
 
     // Handle default actions before handing over to the script engine

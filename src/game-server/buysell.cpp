@@ -30,15 +30,15 @@
 
 #include <algorithm>
 
-BuySell::BuySell(Character *c, bool sell):
+BuySell::BuySell(Being *c, bool sell):
     mCurrencyId(ATTR_GP), mChar(c), mSell(sell)
 {
-    c->setBuySell(this);
+    c->getComponent<CharacterComponent>()->setBuySell(this);
 }
 
 BuySell::~BuySell()
 {
-    mChar->setBuySell(NULL);
+    mChar->getComponent<CharacterComponent>()->setBuySell(nullptr);
 }
 
 void BuySell::cancel()
@@ -75,7 +75,9 @@ int BuySell::registerPlayerItems()
 
     // We parse the player inventory and add all item
     // in a sell list.
-    const InventoryData &inventoryData = mChar->getPossessions().getInventory();
+    auto *component = mChar->getComponent<CharacterComponent>();
+    const InventoryData &inventoryData =
+            component->getPossessions().getInventory();
     for (InventoryData::const_iterator it = inventoryData.begin(),
         it_end = inventoryData.end(); it != it_end; ++it)
     {
@@ -144,7 +146,7 @@ bool BuySell::start(Actor *actor)
         msg.writeInt16(i->amount);
         msg.writeInt16(i->cost);
     }
-    mChar->getClient()->send(msg);
+    mChar->getComponent<CharacterComponent>()->getClient()->send(msg);
     return true;
 }
 

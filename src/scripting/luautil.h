@@ -38,7 +38,7 @@ extern "C" {
 #include "game-server/specialmanager.h"
 
 class Being;
-class Character;
+class CharacterComponent;
 class Entity;
 class ItemClass;
 class MapComposite;
@@ -166,14 +166,14 @@ typedef LuaUserData<SpecialManager::SpecialInfo> LuaSpecialInfo;
 Script *        getScript(lua_State *s);
 
 Being *         getBeing(lua_State *s, int p);
-Character *     getCharacter(lua_State *s, int p);
+Being *         getCharacter(lua_State *s, int p);
 ItemClass *     getItemClass(lua_State *s, int p);
 Being *         getMonster(lua_State *s, int p);
 MonsterClass *  getMonsterClass(lua_State *s, int p);
 Being *         getNpc(lua_State *s, int p);
 
 Being *         checkBeing(lua_State *s, int p);
-Character *     checkCharacter(lua_State *s, int p);
+Being *         checkCharacter(lua_State *s, int p);
 ItemClass *     checkItemClass(lua_State *s, int p);
 Being *         checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);

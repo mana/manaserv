@@ -153,6 +153,9 @@ class Being : public Actor
          */
         const Attribute *getAttribute(unsigned id) const;
 
+        const AttributeMap &getAttributes() const
+        { return mAttributes; }
+
         /**
          * Gets an attribute base.
          */
@@ -197,14 +200,14 @@ class Being : public Actor
          *     attributes if it has changed.
          * @returns Whether it was changed.
          */
-        virtual void recalculateBaseAttribute(unsigned);
+        void recalculateBaseAttribute(unsigned);
 
         /**
          * Attribute has changed, recalculate base value of dependant
          *     attributes (and handle other actions for the modified
          *     attribute)
          */
-        virtual void updateDerivedAttributes(unsigned);
+        void updateDerivedAttributes(unsigned);
 
         /**
          * Sets a statuseffect on this being
@@ -220,6 +223,9 @@ class Being : public Actor
          * Returns true if the being has a status effect
          */
         bool hasStatusEffect(int id) const;
+
+        const StatusEffects &getStatusEffects() const
+        { return mStatus; }
 
         /**
          * Returns the time of the status effect if in effect, or 0 if not
@@ -251,6 +257,7 @@ class Being : public Actor
         { script->assignCallback(mRecalculateBaseAttributeCallback); }
 
         sigc::signal<void, Being *> signal_died;
+        sigc::signal<void, Being *, unsigned> signal_attribute_changed;
 
         /**
          * Activate an emote flag on the being.

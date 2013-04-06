@@ -128,14 +128,14 @@ Being *getBeing(lua_State *s, int p)
     return static_cast<Being *>(lua_touserdata(s, p));
 }
 
-Character *getCharacter(lua_State *s, int p)
+Being *getCharacter(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Entity *t = static_cast<Entity *>(lua_touserdata(s, p));
     if (t->getType() != OBJECT_CHARACTER)
         return 0;
-    return static_cast<Character *>(t);
+    return static_cast<Being *>(t);
 }
 
 ItemClass *getItemClass(lua_State *s, int p)
@@ -206,9 +206,9 @@ Being *checkBeing(lua_State *s, int p)
     return being;
 }
 
-Character *checkCharacter(lua_State *s, int p)
+Being *checkCharacter(lua_State *s, int p)
 {
-    Character *character = getCharacter(s, p);
+    Being *character = getCharacter(s, p);
     luaL_argcheck(s, character, p, "character expected");
     return character;
 }

@@ -182,7 +182,7 @@ CharacterIterator::CharacterIterator(const ZoneIterator &it)
     while (iterator && (*iterator)->nbCharacters == 0) ++iterator;
     if (iterator)
     {
-        current = static_cast< Character * >((*iterator)->objects[pos]);
+        current = static_cast< Being * >((*iterator)->objects[pos]);
     }
 }
 
@@ -195,7 +195,7 @@ void CharacterIterator::operator++()
     }
     if (iterator)
     {
-        current = static_cast< Character * >((*iterator)->objects[pos]);
+        current = static_cast< Being * >((*iterator)->objects[pos]);
     }
 }
 

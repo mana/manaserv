@@ -38,7 +38,7 @@ struct GameClient: NetComputer
 {
     GameClient(ENetPeer *peer)
       : NetComputer(peer), character(NULL), status(CLIENT_LOGIN) {}
-    Character *character;
+    Being *character;
     int status;
 };
 
@@ -58,17 +58,18 @@ class GameHandler: public ConnectionHandler
         /**
          * Sends message to the given character.
          */
-        void sendTo(Character *, MessageOut &msg);
+        void sendTo(Entity *, MessageOut &msg);
+        void sendTo(GameClient *, MessageOut &msg);
 
         /**
          * Kills connection with given character.
          */
-        void kill(Character *);
+        void kill(Entity *);
 
         /**
          * Prepares a server change for given character.
          */
-        void prepareServerChange(Character *);
+        void prepareServerChange(Entity *);
 
         /**
          * Completes a server change for given character ID.
@@ -85,13 +86,13 @@ class GameHandler: public ConnectionHandler
          * Registers a character that should soon be claimed by a client.
          * @param token token used by the client when connecting.
          */
-        void addPendingCharacter(const std::string &token, Character *);
+        void addPendingCharacter(const std::string &token, Being *);
 
         /**
          * Combines a client with its character.
          * (Needed for TokenCollector)
          */
-        void tokenMatched(GameClient *computer, Character *character);
+        void tokenMatched(GameClient *computer, Being *character);
 
         /**
          * Deletes a pending client's data.
@@ -103,13 +104,13 @@ class GameHandler: public ConnectionHandler
          * Deletes a pending connection's data.
          * (Needed for TokenCollector)
          */
-        void deletePendingConnect(Character *character);
+        void deletePendingConnect(Being *character);
 
         /**
          * Gets the character associated to a character name. This method is
          * slow, so it should never be called for regular operations.
          */
-        Character *getCharacterByNameSlow(const std::string &) const;
+        Being *getCharacterByNameSlow(const std::string &) const;
 
     protected:
         NetComputer *computerConnected(ENetPeer *);
@@ -160,7 +161,7 @@ class GameHandler: public ConnectionHandler
         /**
          * Container for pending clients and pending connections.
          */
-        TokenCollector<GameHandler, GameClient *, Character *> mTokenCollector;
+        TokenCollector<GameHandler, GameClient *, Being *> mTokenCollector;
 };
 
 extern GameHandler *gameHandler;

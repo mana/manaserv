@@ -33,7 +33,7 @@
 
 #include <sigc++/connection.h>
 
-class Character;
+class CharacterComponent;
 class ItemClass;
 class Script;
 
@@ -275,7 +275,7 @@ struct AttackPosition
 class MonsterComponent : public Component
 {
     public:
-        static const ComponentType type = CT_Monster;
+    static const ComponentType type = CT_Monster;
 
         /** Time in game ticks until ownership of a monster can change. */
         static const int KILLSTEAL_PROTECTION_TIME = 100;
@@ -339,16 +339,16 @@ class MonsterComponent : public Component
         /**
          * Character who currently owns this monster (killsteal protection).
          */
-        Character *mOwner;
+        Being *mOwner;
 
         /** List of characters and their skills that attacked this monster. */
-        std::map<Character *, std::set <size_t> > mExpReceivers;
+        std::map<Being *, std::set <size_t> > mExpReceivers;
 
         /**
          * List of characters who are entitled to receive exp (killsteal
          * protection).
          */
-        std::set<Character *> mLegalExpReceivers;
+        std::set<Being *> mLegalExpReceivers;
 
         /**
          * Set positions relative to target from which the monster can attack.

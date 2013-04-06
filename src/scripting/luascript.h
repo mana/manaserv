@@ -28,7 +28,7 @@ extern "C" {
 
 #include "scripting/script.h"
 
-class Character;
+class CharacterComponent;
 
 /**
  * Implementation of the Script class for Lua.
@@ -69,11 +69,11 @@ class LuaScript : public Script
 
         void unref(Ref &ref);
 
-        static void getQuestCallback(Character *,
+        static void getQuestCallback(Being *,
                                      const std::string &value,
                                      Script *);
 
-        static void getPostCallback(Character *,
+        static void getPostCallback(Being *,
                                     const std::string &sender,
                                     const std::string &letter,
                                     Script *);

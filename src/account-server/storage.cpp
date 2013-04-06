@@ -910,12 +910,12 @@ bool Storage::updateCharacter(CharacterData *character)
     }
     try
     {
-        std::map<int, int>::const_iterator status_it;
+        std::map<int, Status>::const_iterator status_it;
         for (status_it = character->getStatusEffectBegin();
              status_it != character->getStatusEffectEnd(); status_it++)
         {
             insertStatusEffect(character->getDatabaseID(),
-                               status_it->first, status_it->second);
+                               status_it->first, status_it->second.time);
         }
     }
     catch (const dal::DbSqlQueryExecFailure& e)
