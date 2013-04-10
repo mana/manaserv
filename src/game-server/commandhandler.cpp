@@ -1239,7 +1239,7 @@ static void handleKill(Character *player, std::string &args)
     }
 
     // kill the player
-    player->setAttribute(ATTR_HP, 0);
+    other->setAttribute(ATTR_HP, 0);
 
     // feedback
     std::stringstream targetMsg;
