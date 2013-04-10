@@ -55,7 +55,7 @@ bool loadMainScript(const std::string &file);
  */
 Script *currentState();
 
-bool performCraft(Being *crafter, const std::list<InventoryItem> &recipe);
+bool performCraft(Entity *crafter, const std::list<InventoryItem> &recipe);
 
 void setCraftCallback(Script *script);
 void setSpecialCallback(Script *script);

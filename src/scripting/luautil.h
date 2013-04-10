@@ -37,7 +37,6 @@ extern "C" {
 #include "game-server/attack.h"
 #include "game-server/specialmanager.h"
 
-class Being;
 class CharacterComponent;
 class Entity;
 class ItemClass;
@@ -165,19 +164,19 @@ typedef LuaUserData<SpecialManager::SpecialInfo> LuaSpecialInfo;
 
 Script *        getScript(lua_State *s);
 
-Being *         getBeing(lua_State *s, int p);
-Being *         getCharacter(lua_State *s, int p);
+Entity *        getBeing(lua_State *s, int p);
+Entity *        getCharacter(lua_State *s, int p);
 ItemClass *     getItemClass(lua_State *s, int p);
-Being *         getMonster(lua_State *s, int p);
+Entity *        getMonster(lua_State *s, int p);
 MonsterClass *  getMonsterClass(lua_State *s, int p);
-Being *         getNpc(lua_State *s, int p);
+Entity *        getNpc(lua_State *s, int p);
 
-Being *         checkBeing(lua_State *s, int p);
-Being *         checkCharacter(lua_State *s, int p);
+Entity *        checkBeing(lua_State *s, int p);
+Entity *        checkCharacter(lua_State *s, int p);
 ItemClass *     checkItemClass(lua_State *s, int p);
-Being *         checkMonster(lua_State *s, int p);
+Entity *        checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
-Being *         checkNpc(lua_State *s, int p);
+Entity *        checkNpc(lua_State *s, int p);
 int             checkSkill(lua_State *s, int p);
 int             checkSpecial(lua_State *s, int p);
 

@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-BuySell::BuySell(Being *c, bool sell):
+BuySell::BuySell(Actor *c, bool sell):
     mCurrencyId(ATTR_GP), mChar(c), mSell(sell)
 {
     c->getComponent<CharacterComponent>()->setBuySell(this);
@@ -156,22 +156,28 @@ void BuySell::perform(unsigned id, int amount)
     for (TradedItems::iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {
-        if (i->itemId != id) continue;
-        if (i->amount && i->amount <= amount) amount = i->amount;
+        auto *beingComponent = mChar->getComponent<BeingComponent>();
+
+        if (i->itemId != id)
+            continue;
+        if (i->amount && i->amount <= amount)
+            amount = i->amount;
         if (mSell)
         {
             amount -= inv.remove(id, amount);
-            mChar->setAttribute(mCurrencyId,
-                                mChar->getAttributeBase(mCurrencyId) +
-                                amount * i->cost);
+            const double currentMoney =
+                    beingComponent->getAttributeBase(mCurrencyId);
+            beingComponent->setAttribute(*mChar, mCurrencyId,
+                                         currentMoney + amount * i->cost);
         }
         else
         {
-            amount = std::min(amount, ((int) mChar->getAttributeBase(mCurrencyId)) / i->cost);
+            const double currentMoney =
+                    beingComponent->getAttributeBase(mCurrencyId);
+            amount = std::min(amount, ((int)currentMoney) / i->cost);
             amount -= inv.insert(id, amount);
-            mChar->setAttribute(mCurrencyId,
-                                mChar->getAttributeBase(mCurrencyId) -
-                                amount * i->cost);
+            beingComponent->setAttribute(*mChar, mCurrencyId,
+                                         currentMoney - amount * i->cost);
         }
         if (i->amount)
         {

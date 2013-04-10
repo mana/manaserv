@@ -30,7 +30,6 @@
 #include "game-server/map.h"
 
 class Actor;
-class Being;
 class CharacterComponent;
 class Map;
 class MapComposite;
@@ -76,11 +75,11 @@ struct CharacterIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Being *current;
+    Actor *current;
 
     CharacterIterator(const ZoneIterator &);
     void operator++();
-    Being *operator*() const { return current; }
+    Actor *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -91,11 +90,11 @@ struct BeingIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Being *current;
+    Actor *current;
 
     BeingIterator(const ZoneIterator &);
     void operator++();
-    Being *operator*() const { return current; }
+    Actor *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -106,11 +105,11 @@ struct FixedActorIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Actor *current;
+    Entity *current;
 
     FixedActorIterator(const ZoneIterator &);
     void operator++();
-    Actor *operator*() const { return current; }
+    Entity *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -315,7 +314,7 @@ class MapComposite
          * Gets an iterator on the objects around the old and new positions of
          * a character (including the ones that were but are now elsewhere).
          */
-        ZoneIterator getAroundBeingIterator(Being *, int radius) const;
+        ZoneIterator getAroundBeingIterator(Actor *, int radius) const;
 
         /**
          * Gets everything related to the map.

@@ -69,7 +69,7 @@ typedef std::map<unsigned, SpecialValue> SpecialMap;
 class CharacterData
 {
 public:
-    CharacterData(Being *being, CharacterComponent *characterComponent);
+    CharacterData(Actor *actor, CharacterComponent *characterComponent);
 
     void setGender(BeingGender);
     BeingGender getGender() const;
@@ -123,7 +123,7 @@ public:
     Possessions &getPossessions() const;
 
 private:
-    Being *mBeing;
+    Actor *mActor;
     CharacterComponent *mCharacterComponent;
 };
 
@@ -154,7 +154,7 @@ class CharacterComponent : public Component
         /**
          * Executes the global die script
          */
-        virtual void characterDied(Being *);
+        virtual void characterDied(Entity *);
 
         /**
          * makes the character respawn
@@ -165,7 +165,7 @@ class CharacterComponent : public Component
          * makes the character perform a special action on a being
          * when it is allowed to do so
          */
-        void useSpecialOnBeing(Entity &user, int id, Being *b);
+        void useSpecialOnBeing(Entity &user, int id, Entity *b);
 
         /**
          * makes the character perform a special action on a map point
@@ -312,7 +312,7 @@ class CharacterComponent : public Component
          * @param being th being of which the attribute was changed
          * @param attributeId the changed id
          */
-        void attributeChanged(Being *being, unsigned attributeId);
+        void attributeChanged(Entity *being, unsigned attributeId);
 
         /**
          * Calls all the "disconnected" listener.
@@ -578,55 +578,55 @@ class CharacterComponent : public Component
 };
 
 
-inline CharacterData::CharacterData(Being *being,
+inline CharacterData::CharacterData(Actor *actor,
                                     CharacterComponent *characterComponent):
-        mBeing(being),
+        mActor(actor),
         mCharacterComponent(characterComponent)
 {}
 
 inline void CharacterData::setGender(BeingGender gender)
 {
-    mBeing->setGender(gender);
+    mActor->getComponent<BeingComponent>()->setGender(gender);
 }
 
 inline BeingGender CharacterData::getGender() const
 {
-    return mBeing->getGender();
+    return mActor->getComponent<BeingComponent>()->getGender();
 }
 
 inline void CharacterData::setMapId(int id)
 {
-    mBeing->setMap(MapManager::getMap(id));
+    mActor->setMap(MapManager::getMap(id));
 }
 
 inline int CharacterData::getMapId() const
 {
-    return mBeing->getMap()->getID();
+    return mActor->getMap()->getID();
 }
 
 inline void CharacterData::setPosition(Point &point)
 {
-    mBeing->setPosition(point);
+    mActor->setPosition(point);
 }
 
 inline const Point &CharacterData::getPosition() const
 {
-    return mBeing->getPosition();
+    return mActor->getPosition();
 }
 
 inline void CharacterData::setAttribute(int id, int base)
 {
-    mBeing->setAttribute(id, base);
+    mActor->getComponent<BeingComponent>()->setAttribute(*mActor, id, base);
 }
 
 inline void CharacterData::setModAttribute(int id, int mod)
 {
-    mBeing->setModAttribute(id, mod);
+    mActor->getComponent<BeingComponent>()->setModAttribute(id, mod);
 }
 
 inline const AttributeMap &CharacterData::getAttributes() const
 {
-    return mBeing->getAttributes();
+    return mActor->getComponent<BeingComponent>()->getAttributes();
 }
 
 inline void CharacterData::setCharacterPoints(int characterPoints)
@@ -711,22 +711,22 @@ inline const std::map<int, int>::const_iterator CharacterData::getSkillEnd() con
 
 inline void CharacterData::applyStatusEffect(int status, int time)
 {
-    mBeing->applyStatusEffect(status, time);
+    mActor->getComponent<BeingComponent>()->applyStatusEffect(status, time);
 }
 
 inline int CharacterData::getStatusEffectSize() const
 {
-    return mBeing->getStatusEffects().size();
+    return mActor->getComponent<BeingComponent>()->getStatusEffects().size();
 }
 
 inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectBegin() const
 {
-    return mBeing->getStatusEffects().begin();
+    return mActor->getComponent<BeingComponent>()->getStatusEffects().begin();
 }
 
 inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectEnd() const
 {
-    return mBeing->getStatusEffects().end();
+    return mActor->getComponent<BeingComponent>()->getStatusEffects().end();
 }
 
 inline int CharacterData::getKillCountSize() const

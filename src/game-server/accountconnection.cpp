@@ -155,7 +155,8 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_PLAYER_ENTER:
         {
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
-            Being *character = new Being(OBJECT_CHARACTER);
+            Entity *character = new Actor(OBJECT_CHARACTER);
+            character->addComponent(new BeingComponent(*character));
             character->addComponent(new CharacterComponent(*character, msg));
             gameHandler->addPendingCharacter(token, character);
         } break;
@@ -243,7 +244,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case CGMSG_POST_RESPONSE:
         {
             // get the character
-            Being *character = postMan->getCharacter(msg.readInt32());
+            Entity  *character = postMan->getCharacter(msg.readInt32());
 
             // check character is still valid
             if (!character)
@@ -261,7 +262,7 @@ void AccountConnection::processMessage(MessageIn &msg)
         case CGMSG_STORE_POST_RESPONSE:
         {
             // get character
-            Being *character = postMan->getCharacter(msg.readInt32());
+            Entity *character = postMan->getCharacter(msg.readInt32());
 
             // check character is valid
             if (!character)

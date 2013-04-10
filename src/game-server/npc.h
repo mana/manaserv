@@ -88,22 +88,22 @@ namespace Npc {
 /**
  * Starts a conversation with the NPC.
  */
-void start(Being *npc, Being *ch);
+void start(Entity *npc, Entity *ch);
 
 /**
  * Resumes an NPC conversation.
  */
-void resume(Being *ch);
+void resume(Entity *ch);
 
 /**
  * The player has made a choice or entered an integer.
  */
-void integerReceived(Being *ch, int value);
+void integerReceived(Entity *ch, int value);
 
 /**
  * The player has entered an string.
  */
-void stringReceived(Being *ch, const std::string &value);
+void stringReceived(Entity *ch, const std::string &value);
 
 } // namespace Npc
 

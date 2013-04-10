@@ -31,7 +31,6 @@
 
 #include <sigc++/trackable.h>
 
-class Being;
 class MapComposite;
 class Entity;
 
@@ -238,7 +237,7 @@ class Script : public sigc::trackable
         const Context *getContext() const
         { return mContext; }
 
-        virtual void processDeathEvent(Being *entity) = 0;
+        virtual void processDeathEvent(Entity *entity) = 0;
 
         virtual void processRemoveEvent(Entity *entity) = 0;
 

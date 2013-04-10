@@ -73,7 +73,7 @@ void NpcComponent::setUpdateCallback(Script::Ref function)
 
 
 
-static Script *prepareResume(Being *ch, Script::ThreadState expectedState)
+static Script *prepareResume(Entity *ch, Script::ThreadState expectedState)
 {
     Script::Thread *thread =
             ch->getComponent<CharacterComponent>()->getNpcThread();
@@ -85,7 +85,7 @@ static Script *prepareResume(Being *ch, Script::ThreadState expectedState)
     return script;
 }
 
-void Npc::start(Being *npc, Being *ch)
+void Npc::start(Entity *npc, Entity *ch)
 {
     NpcComponent *npcComponent = npc->getComponent<NpcComponent>();
 
@@ -100,17 +100,17 @@ void Npc::start(Being *npc, Being *ch)
         script->push(npc);
         script->push(ch);
         ch->getComponent<CharacterComponent>()
-                ->startNpcThread(thread, npc->getPublicID());
+                ->startNpcThread(thread, static_cast<Actor*>(npc)->getPublicID());
     }
 }
 
-void Npc::resume(Being *ch)
+void Npc::resume(Entity *ch)
 {
     if (prepareResume(ch, Script::ThreadPaused))
         ch->getComponent<CharacterComponent>()->resumeNpcThread();
 }
 
-void Npc::integerReceived(Being *ch, int value)
+void Npc::integerReceived(Entity *ch, int value)
 {
     if (Script *script = prepareResume(ch, Script::ThreadExpectingNumber))
     {
@@ -119,7 +119,7 @@ void Npc::integerReceived(Being *ch, int value)
     }
 }
 
-void Npc::stringReceived(Being *ch, const std::string &value)
+void Npc::stringReceived(Entity *ch, const std::string &value)
 {
     if (Script *script = prepareResume(ch, Script::ThreadExpectingString))
     {

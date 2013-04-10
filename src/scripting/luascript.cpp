@@ -248,7 +248,7 @@ void LuaScript::load(const char *prog, const char *name,
     mContext = previousContext;
 }
 
-void LuaScript::processDeathEvent(Being *entity)
+void LuaScript::processDeathEvent(Entity *entity)
 {
     if (mDeathNotificationCallback.isValid())
     {
@@ -275,7 +275,7 @@ void LuaScript::processRemoveEvent(Entity *entity)
 /**
  * Called when the server has recovered the value of a quest variable.
  */
-void LuaScript::getQuestCallback(Being *q,
+void LuaScript::getQuestCallback(Entity *q,
                                  const std::string &value,
                                  Script *script)
 {
@@ -292,7 +292,7 @@ void LuaScript::getQuestCallback(Being *q,
 /**
  * Called when the server has recovered the post for a user.
  */
-void LuaScript::getPostCallback(Being *q,
+void LuaScript::getPostCallback(Entity *q,
                                 const std::string &sender,
                                 const std::string &letter,
                                 Script *script)

@@ -24,7 +24,8 @@
 
 #include "game-server/component.h"
 
-class Being;
+class Actor;
+class Entity;
 class MapComposite;
 class Point;
 
@@ -42,7 +43,7 @@ class EffectComponent : public Component
         int getEffectId() const
         { return mEffectId; }
 
-        Being *getBeing() const
+        Entity *getBeing() const
         { return mBeing; }
 
         /**
@@ -56,13 +57,13 @@ class EffectComponent : public Component
         void setShown()
         { mHasBeenShown = true; }
 
-        void setBeing(Being *b)
+        void setBeing(Entity *b)
         { mBeing = b; }
 
     private:
         int mEffectId;
         bool mHasBeenShown;
-        Being *mBeing;
+        Entity *mBeing;
 };
 
 
@@ -72,7 +73,7 @@ namespace Effects
      * Convenience methods to show an effect.
      */
     void show(int id, MapComposite *map, const Point &pos);
-    void show(int id, Being *b);
+    void show(int id, Actor *b);
 
     // TODO: get this in sync with effects.xml
     enum {

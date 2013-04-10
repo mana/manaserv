@@ -153,7 +153,7 @@ static Actor *findActorNear(Actor *p, int id)
     return 0;
 }
 
-static Being *findBeingNear(Actor *p, int id)
+static Entity *findBeingNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
     const Point &ppos = p->getPosition();
@@ -161,7 +161,7 @@ static Being *findBeingNear(Actor *p, int id)
     const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
     for (BeingIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
     {
-        Being *b = *i;
+        Actor *b = static_cast<Actor *>(*i);
         if (b->getPublicID() != id)
             continue;
         return ppos.inRangeOf(b->getPosition(), pixelDist) ? b : 0;
@@ -169,7 +169,7 @@ static Being *findBeingNear(Actor *p, int id)
     return 0;
 }
 
-static Being *findCharacterNear(Actor *p, int id)
+static Entity *findCharacterNear(Actor *p, int id)
 {
     MapComposite *map = p->getMap();
     const Point &ppos = p->getPosition();
@@ -178,7 +178,7 @@ static Being *findCharacterNear(Actor *p, int id)
     for (CharacterIterator i(map->getAroundPointIterator(ppos,
                                                          pixelDist)); i; ++i)
     {
-        Being *c = *i;
+        Actor *c = static_cast<Actor *>(*i);
         if (c->getPublicID() != id)
             continue;
 
@@ -337,7 +337,7 @@ void GameHandler::sendTo(GameClient *client, MessageOut &msg)
     client->send(msg);
 }
 
-void GameHandler::addPendingCharacter(const std::string &token, Being *ch)
+void GameHandler::addPendingCharacter(const std::string &token, Entity *ch)
 {
     /* First, check if the character is already on the map. This may happen if
        a client just lost its connection, and logged to the account server
@@ -348,7 +348,7 @@ void GameHandler::addPendingCharacter(const std::string &token, Being *ch)
          i_end = clients.end(); i != i_end; ++i)
     {
         GameClient *c = static_cast< GameClient * >(*i);
-        Being *old_ch = c->character;
+        Entity *old_ch = c->character;
         const int oldId = old_ch->getComponent<CharacterComponent>()
                 ->getDatabaseID();
         if (old_ch && oldId == id)
@@ -377,7 +377,7 @@ void GameHandler::addPendingCharacter(const std::string &token, Being *ch)
     mTokenCollector.addPendingConnect(token, ch);
 }
 
-void GameHandler::tokenMatched(GameClient *computer, Being *character)
+void GameHandler::tokenMatched(GameClient *computer, Entity *character)
 {
     computer->character = character;
     computer->status = CLIENT_CONNECTED;
@@ -421,19 +421,19 @@ void GameHandler::deletePendingClient(GameClient *computer)
     computer->disconnect(msg);
 }
 
-void GameHandler::deletePendingConnect(Being *character)
+void GameHandler::deletePendingConnect(Entity *character)
 {
     delete character;
 }
 
-Being *GameHandler::getCharacterByNameSlow(const std::string &name) const
+Entity *GameHandler::getCharacterByNameSlow(const std::string &name) const
 {
     for (NetComputers::const_iterator i = clients.begin(),
          i_end = clients.end(); i != i_end; ++i)
     {
         GameClient *c = static_cast< GameClient * >(*i);
-        Being *ch = c->character;
-        if (ch && ch->getName() == name &&
+        Entity *ch = c->character;
+        if (ch && ch->getComponent<BeingComponent>()->getName() == name &&
                 c->status == CLIENT_CONNECTED)
         {
             return ch;
@@ -455,11 +455,11 @@ void GameHandler::handleSay(GameClient &client, MessageIn &message)
     }
     if (!client.character->getComponent<CharacterComponent>()->isMuted())
     {
-        GameState::sayAround(client.character, say);
+        GameState::sayAround(static_cast<Actor *>(client.character), say);
     }
     else
     {
-        GameState::sayTo(client.character, NULL,
+        GameState::sayTo(static_cast<Actor *>(client.character), nullptr,
                          "You are not allowed to talk right now.");
     }
 }
@@ -467,15 +467,12 @@ void GameHandler::handleSay(GameClient &client, MessageIn &message)
 void GameHandler::handleNpc(GameClient &client, MessageIn &message)
 {
     int id = message.readInt16();
-    Actor *actor = findActorNear(client.character, id);
+    Actor *actor = findActorNear(static_cast<Actor *>(client.character), id);
     if (!actor || actor->getType() != OBJECT_NPC)
     {
         sendNpcError(client, id, "Not close enough to NPC\n");
         return;
     }
-
-    Being *npc = static_cast<Being*>(actor);
-
     switch (message.getId())
     {
         case PGMSG_NPC_SELECT:
@@ -488,7 +485,7 @@ void GameHandler::handleNpc(GameClient &client, MessageIn &message)
             Npc::stringReceived(client.character, message.readString());
             break;
         case PGMSG_NPC_TALK:
-            Npc::start(npc, client.character);
+            Npc::start(actor, client.character);
             break;
         case PGMSG_NPC_TALK_NEXT:
         default:
@@ -501,7 +498,7 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
 {
     const int x = message.readInt16();
     const int y = message.readInt16();
-    const Point ppos = client.character->getPosition();
+    const Point ppos = static_cast<Actor *>(client.character)->getPosition();
 
     // TODO: use a less arbitrary value.
     if (std::abs(x - ppos.x) + std::abs(y - ppos.y) < 48)
@@ -510,8 +507,8 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
         Point ipos(x, y);
         for (FixedActorIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
         {
-            Actor *o = *i;
-            Point opos = o->getPosition();
+            Entity *o = *i;
+            Point opos = static_cast<Actor *>(o)->getPosition();
 
             if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
             {
@@ -553,7 +550,7 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
 
 void GameHandler::handleUseItem(GameClient &client, MessageIn &message)
 {
-    if (client.character->getAction() == DEAD)
+    if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
     const int slot = message.readInt16();
@@ -587,7 +584,7 @@ void GameHandler::handleDrop(GameClient &client, MessageIn &message)
     {
         int nb = inv.removeFromSlot(slot, amount);
         MapComposite *map = client.character->getMap();
-        Point pos = client.character->getPosition();
+        Point pos = static_cast<Actor *>(client.character)->getPosition();
 
         Entity *item = Item::create(map, pos, ic, amount - nb);
 
@@ -625,7 +622,8 @@ void GameHandler::handleWalk(GameClient &client, MessageIn &message)
     const int y = message.readInt16();
 
     Point dst(x, y);
-    client.character->setDestination(dst);
+    client.character->getComponent<BeingComponent>()->setDestination(
+            *client.character, dst);
 }
 
 void GameHandler::handleEquip(GameClient &client, MessageIn &message)
@@ -672,28 +670,32 @@ void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
 void GameHandler::handleAttack(GameClient &client, MessageIn &message)
 {
     int id = message.readInt16();
-    LOG_DEBUG("Character " << client.character->getPublicID()
+    Actor *actor = static_cast<Actor *>(client.character);
+    LOG_DEBUG("Character " << actor->getPublicID()
               << " attacked being " << id);
 
-    Being *being = findBeingNear(client.character, id);
+    Actor *being = static_cast<Actor *>(findBeingNear(actor, id));
     if (being && being->getType() != OBJECT_NPC)
     {
         client.character->getComponent<CombatComponent>()->setTarget(being);
-        client.character->setAction(ATTACK);
+        client.character->getComponent<BeingComponent>()->setAction(*actor,
+                                                                    ATTACK);
     }
 }
 
 void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message)
 {
-    if (client.character->getAction() == DEAD)
+    if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
+
+    Actor *actor = static_cast<Actor *>(client.character);
 
     const int specialID = message.readInt8();
     const int targetID = message.readInt16(); // 0 when no target is selected
-    Being *being = 0;
+    Entity *being = 0;
     if (targetID != 0)
-        being = findBeingNear(client.character, targetID);
-    LOG_DEBUG("Character " << client.character->getPublicID()
+        being = findBeingNear(actor, targetID);
+    LOG_DEBUG("Character " << actor->getPublicID()
               << " tries to use his special attack " << specialID);
     auto *characterComponent = client.character
             ->getComponent<CharacterComponent>();
@@ -702,14 +704,15 @@ void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message
 
 void GameHandler::handleUseSpecialOnPoint(GameClient &client, MessageIn &message)
 {
-    if (client.character->getAction() == DEAD)
+    if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
     const int specialID = message.readInt8();
     const int x = message.readInt16();
     const int y = message.readInt16();
 
-    LOG_DEBUG("Character " << client.character->getPublicID()
+    LOG_DEBUG("Character "
+              << static_cast<Actor *>(client.character)->getPublicID()
               << " tries to use his special attack " << specialID);
     auto *characterComponent = client.character
             ->getComponent<CharacterComponent>();
@@ -718,8 +721,10 @@ void GameHandler::handleUseSpecialOnPoint(GameClient &client, MessageIn &message
 
 void GameHandler::handleActionChange(GameClient &client, MessageIn &message)
 {
+    auto *beingComponent = client.character->getComponent<BeingComponent>();
+
     const BeingAction action = (BeingAction) message.readInt8();
-    const BeingAction current = (BeingAction) client.character->getAction();
+    const BeingAction current = (BeingAction) beingComponent->getAction();
     bool logActionChange = true;
 
     switch (action)
@@ -727,14 +732,14 @@ void GameHandler::handleActionChange(GameClient &client, MessageIn &message)
         case STAND:
             if (current == SIT)
             {
-                client.character->setAction(STAND);
+                beingComponent->setAction(*client.character, STAND);
                 logActionChange = false;
             }
             break;
         case SIT:
             if (current == STAND)
             {
-                client.character->setAction(SIT);
+                beingComponent->setAction(*client.character, SIT);
                 logActionChange = false;
             }
             break;
@@ -761,7 +766,8 @@ void GameHandler::handleActionChange(GameClient &client, MessageIn &message)
 void GameHandler::handleDirectionChange(GameClient &client, MessageIn &message)
 {
     const BeingDirection direction = (BeingDirection) message.readInt8();
-    client.character->setDirection(direction);
+    client.character->getComponent<BeingComponent>()
+            ->setDirection(*client.character, direction);
 }
 
 void GameHandler::handleDisconnect(GameClient &client, MessageIn &message)
@@ -804,7 +810,7 @@ void GameHandler::handleTradeRequest(GameClient &client, MessageIn &message)
         if (t->request(client.character, id))
             return;
 
-    Being *q = findCharacterNear(client.character, id);
+    Entity *q = findCharacterNear(static_cast<Actor *>(client.character), id);
     if (!q || characterComponent->isBusy())
     {
         client.send(MessageOut(GPMSG_TRADE_CANCEL));
@@ -815,7 +821,8 @@ void GameHandler::handleTradeRequest(GameClient &client, MessageIn &message)
 
     // log transaction
     std::string str;
-    str = "User requested trade with " + q->getName();
+    str = "User requested trade with " + q->getComponent<BeingComponent>()
+            ->getName();
     accountHandler->sendTransaction(characterComponent->getDatabaseID(),
                                     TRANS_TRADE_REQUEST, str);
 }
@@ -952,16 +959,18 @@ void GameHandler::handlePartyInvite(GameClient &client, MessageIn &message)
     const int visualRange = Configuration::getValue("game_visualRange", 448);
     std::string invitee = message.readString();
 
-    if (invitee == client.character->getName())
+    if (invitee == client.character->getComponent<BeingComponent>()->getName())
         return;
 
     for (CharacterIterator it(map->getWholeMapIterator()); it; ++it)
     {
-        if ((*it)->getName() == invitee)
+        if ((*it)->getComponent<BeingComponent>()->getName() == invitee)
         {
             // calculate if the invitee is within the visual range
-            const int xInviter = client.character->getPosition().x;
-            const int yInviter = client.character->getPosition().y;
+            const int xInviter =
+                    static_cast<Actor *>(client.character)->getPosition().x;
+            const int yInviter =
+                    static_cast<Actor *>(client.character)->getPosition().y;
             const int xInvitee = (*it)->getPosition().x;
             const int yInvitee = (*it)->getPosition().y;
             const int dx = std::abs(xInviter - xInvitee);
@@ -969,7 +978,8 @@ void GameHandler::handlePartyInvite(GameClient &client, MessageIn &message)
             if (visualRange > std::max(dx, dy))
             {
                 MessageOut out(GCMSG_PARTY_INVITE);
-                out.writeString(client.character->getName());
+                out.writeString(client.character
+                                ->getComponent<BeingComponent>()->getName());
                 out.writeString(invitee);
                 accountHandler->send(out);
                 return;
@@ -988,7 +998,8 @@ void GameHandler::handleTriggerEmoticon(GameClient &client, MessageIn &message)
 {
     const int id = message.readInt16();
     if (emoteManager->isIdAvailable(id))
-        client.character->triggerEmote(id);
+        client.character->getComponent<BeingComponent>()->triggerEmote(
+                *client.character, id);
 }
 
 void GameHandler::sendNpcError(GameClient &client, int id,

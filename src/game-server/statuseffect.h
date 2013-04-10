@@ -23,7 +23,7 @@
 
 #include "scripting/script.h"
 
-class Being;
+class Entity;
 
 class StatusEffect
 {
@@ -31,7 +31,7 @@ class StatusEffect
         StatusEffect(int id);
         ~StatusEffect();
 
-        void tick(Being *target, int count);
+        void tick(Entity &target, int count);
 
         int getId() const
         { return mId; }

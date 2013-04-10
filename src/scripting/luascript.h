@@ -69,16 +69,16 @@ class LuaScript : public Script
 
         void unref(Ref &ref);
 
-        static void getQuestCallback(Being *,
+        static void getQuestCallback(Entity *,
                                      const std::string &value,
                                      Script *);
 
-        static void getPostCallback(Being *,
+        static void getPostCallback(Entity *,
                                     const std::string &sender,
                                     const std::string &letter,
                                     Script *);
 
-        void processDeathEvent(Being *entity);
+        void processDeathEvent(Entity *entity);
 
         void processRemoveEvent(Entity *entity);
 

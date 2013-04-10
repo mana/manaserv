@@ -21,10 +21,11 @@
 #ifndef SERVER_GAMEHANDLER_H
 #define SERVER_GAMEHANDLER_H
 
-#include "game-server/character.h"
 #include "net/connectionhandler.h"
 #include "net/netcomputer.h"
 #include "utils/tokencollector.h"
+
+class Entity;
 
 enum
 {
@@ -37,8 +38,8 @@ enum
 struct GameClient: NetComputer
 {
     GameClient(ENetPeer *peer)
-      : NetComputer(peer), character(NULL), status(CLIENT_LOGIN) {}
-    Being *character;
+      : NetComputer(peer), character(nullptr), status(CLIENT_LOGIN) {}
+    Entity *character;
     int status;
 };
 
@@ -86,13 +87,13 @@ class GameHandler: public ConnectionHandler
          * Registers a character that should soon be claimed by a client.
          * @param token token used by the client when connecting.
          */
-        void addPendingCharacter(const std::string &token, Being *);
+        void addPendingCharacter(const std::string &token, Entity *);
 
         /**
          * Combines a client with its character.
          * (Needed for TokenCollector)
          */
-        void tokenMatched(GameClient *computer, Being *character);
+        void tokenMatched(GameClient *computer, Entity *character);
 
         /**
          * Deletes a pending client's data.
@@ -104,13 +105,13 @@ class GameHandler: public ConnectionHandler
          * Deletes a pending connection's data.
          * (Needed for TokenCollector)
          */
-        void deletePendingConnect(Being *character);
+        void deletePendingConnect(Entity *character);
 
         /**
          * Gets the character associated to a character name. This method is
          * slow, so it should never be called for regular operations.
          */
-        Being *getCharacterByNameSlow(const std::string &) const;
+        Entity *getCharacterByNameSlow(const std::string &) const;
 
     protected:
         NetComputer *computerConnected(ENetPeer *);
@@ -161,7 +162,7 @@ class GameHandler: public ConnectionHandler
         /**
          * Container for pending clients and pending connections.
          */
-        TokenCollector<GameHandler, GameClient *, Being *> mTokenCollector;
+        TokenCollector<GameHandler, GameClient *, Entity *> mTokenCollector;
 };
 
 extern GameHandler *gameHandler;

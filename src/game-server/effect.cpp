@@ -45,7 +45,7 @@ namespace Effects
         GameState::enqueueInsert(effect);
     }
 
-    void show(int id, Being *b)
+    void show(int id, Actor *b)
     {
         EffectComponent *effectComponent = new EffectComponent(id);
         effectComponent->setBeing(b);

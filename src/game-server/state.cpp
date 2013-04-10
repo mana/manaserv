@@ -79,7 +79,7 @@ static std::map< std::string, std::string > mScriptVariables;
 /**
  * Sets message fields describing character look.
  */
-static void serializeLooks(Being *ch, MessageOut &msg)
+static void serializeLooks(Entity *ch, MessageOut &msg)
 {
     const EquipData &equipData = ch->getComponent<CharacterComponent>()
             ->getPossessions().getEquipment();
@@ -128,11 +128,12 @@ static void serializeLooks(Being *ch, MessageOut &msg)
 /**
  * Informs a player of what happened around the character.
  */
-static void informPlayer(MapComposite *map, Being *p)
+static void informPlayer(MapComposite *map, Actor *p)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
-    const Point &pold = p->getOldPosition(), ppos = p->getPosition();
+    const Point &pold = p->getComponent<BeingComponent>()->getOldPosition();
+    const Point &ppos = p->getPosition();
     int pid = p->getPublicID(), pflags = p->getUpdateFlags();
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
@@ -140,9 +141,11 @@ static void informPlayer(MapComposite *map, Being *p)
     for (BeingIterator it(map->getAroundBeingIterator(p, visualRange));
          it; ++it)
     {
-        Being *o = *it;
+        Actor *o = *it;
 
-        const Point &oold = o->getOldPosition(), opos = o->getPosition();
+        const Point &oold =
+                o->getComponent<BeingComponent>()->getOldPosition();
+        const Point &opos = o->getPosition();
         int otype = o->getType();
         int oid = o->getPublicID(), oflags = o->getUpdateFlags();
         int flags = 0;
@@ -166,7 +169,8 @@ static void informPlayer(MapComposite *map, Being *p)
             {
                 MessageOut AttackMsg(GPMSG_BEING_ATTACK);
                 AttackMsg.writeInt16(oid);
-                AttackMsg.writeInt8(o->getDirection());
+                AttackMsg.writeInt8(
+                        o->getComponent<BeingComponent>()->getDirection());
                 CombatComponent *combatComponent =
                         o->getComponent<CombatComponent>();
                 AttackMsg.writeInt8(combatComponent->getAttackId());
@@ -178,7 +182,8 @@ static void informPlayer(MapComposite *map, Being *p)
             {
                 MessageOut ActionMsg(GPMSG_BEING_ACTION_CHANGE);
                 ActionMsg.writeInt16(oid);
-                ActionMsg.writeInt8(static_cast< Being * >(o)->getAction());
+                ActionMsg.writeInt8(
+                        o->getComponent<BeingComponent>()->getAction());
                 gameHandler->sendTo(p, ActionMsg);
             }
 
@@ -192,14 +197,16 @@ static void informPlayer(MapComposite *map, Being *p)
                         o->getComponent<CharacterComponent>();
                 LooksMsg.writeInt16(characterComponent->getHairStyle());
                 LooksMsg.writeInt16(characterComponent->getHairColor());
-                LooksMsg.writeInt16(o->getGender());
+                LooksMsg.writeInt16(
+                        o->getComponent<BeingComponent>()->getGender());
                 gameHandler->sendTo(p, LooksMsg);
             }
 
             // Send emote messages.
             if (oflags & UPDATEFLAG_EMOTE)
             {
-                int emoteId = o->getLastEmote();
+                int emoteId =
+                        o->getComponent<BeingComponent>()->getLastEmote();
                 if (emoteId > -1)
                 {
                     MessageOut EmoteMsg(GPMSG_BEING_EMOTE);
@@ -214,7 +221,8 @@ static void informPlayer(MapComposite *map, Being *p)
             {
                 MessageOut DirMsg(GPMSG_BEING_DIR_CHANGE);
                 DirMsg.writeInt16(oid);
-                DirMsg.writeInt8(o->getDirection());
+                DirMsg.writeInt8(
+                        o->getComponent<BeingComponent>()->getDirection());
                 gameHandler->sendTo(p, DirMsg);
             }
 
@@ -254,18 +262,20 @@ static void informPlayer(MapComposite *map, Being *p)
             MessageOut enterMsg(GPMSG_BEING_ENTER);
             enterMsg.writeInt8(otype);
             enterMsg.writeInt16(oid);
-            enterMsg.writeInt8(static_cast< Being *>(o)->getAction());
+            enterMsg.writeInt8(o->getComponent<BeingComponent>()->getAction());
             enterMsg.writeInt16(opos.x);
             enterMsg.writeInt16(opos.y);
-            enterMsg.writeInt8(o->getDirection());
-            enterMsg.writeInt8(o->getGender());
+            enterMsg.writeInt8(
+                    o->getComponent<BeingComponent>()->getDirection());
+            enterMsg.writeInt8(o->getComponent<BeingComponent>()->getGender());
             switch (otype)
             {
                 case OBJECT_CHARACTER:
                 {
                     auto *characterComponent =
                             o->getComponent<CharacterComponent>();
-                    enterMsg.writeString(o->getName());
+                    enterMsg.writeString(
+                            o->getComponent<BeingComponent>()->getName());
                     enterMsg.writeInt8(characterComponent->getHairStyle());
                     enterMsg.writeInt8(characterComponent->getHairColor());
                     serializeLooks(o, enterMsg);
@@ -276,14 +286,17 @@ static void informPlayer(MapComposite *map, Being *p)
                     MonsterComponent *monsterComponent =
                             o->getComponent<MonsterComponent>();
                     enterMsg.writeInt16(monsterComponent->getSpecy()->getId());
-                    enterMsg.writeString(o->getName());
+                    enterMsg.writeString(
+                            o->getComponent<BeingComponent>()->getName());
                 } break;
 
                 case OBJECT_NPC:
                 {
-                    NpcComponent *npcComponent = o->getComponent<NpcComponent>();
+                    NpcComponent *npcComponent =
+                            o->getComponent<NpcComponent>();
                     enterMsg.writeInt16(npcComponent->getNpcId());
-                    enterMsg.writeString(o->getName());
+                    enterMsg.writeString(
+                            o->getComponent<BeingComponent>()->getName());
                 } break;
 
                 default:
@@ -319,7 +332,8 @@ static void informPlayer(MapComposite *map, Being *p)
             // to get it within a byte with decimal precision.
             // For instance, a value of 4.5 will be sent as 45.
             moveMsg.writeInt8((unsigned short)
-                (o->getModifiedAttribute(ATTR_MOVE_SPEED_TPS) * 10));
+                (o->getComponent<BeingComponent>()
+                        ->getModifiedAttribute(ATTR_MOVE_SPEED_TPS) * 10));
         }
     }
 
@@ -336,7 +350,7 @@ static void informPlayer(MapComposite *map, Being *p)
     // Inform client about health change of party members
     for (CharacterIterator i(map->getWholeMapIterator()); i; ++i)
     {
-        Being *c = *i;
+        Actor *c = *i;
 
         // Make sure its not the same character
         if (c == p)
@@ -349,10 +363,14 @@ static void informPlayer(MapComposite *map, Being *p)
             int cflags = c->getUpdateFlags();
             if (cflags & UPDATEFLAG_HEALTHCHANGE)
             {
+                auto *beingComponent = c->getComponent<BeingComponent>();
+
                 MessageOut healthMsg(GPMSG_BEING_HEALTH_CHANGE);
                 healthMsg.writeInt16(c->getPublicID());
-                healthMsg.writeInt16(c->getModifiedAttribute(ATTR_HP));
-                healthMsg.writeInt16(c->getModifiedAttribute(ATTR_MAX_HP));
+                healthMsg.writeInt16(
+                        beingComponent->getModifiedAttribute(ATTR_HP));
+                healthMsg.writeInt16(
+                        beingComponent->getModifiedAttribute(ATTR_MAX_HP));
                 gameHandler->sendTo(p, healthMsg);
             }
         }
@@ -363,7 +381,7 @@ static void informPlayer(MapComposite *map, Being *p)
     for (FixedActorIterator it(map->getAroundBeingIterator(p, visualRange));
          it; ++it)
     {
-        Actor *o = *it;
+        Actor *o = static_cast<Actor *>(*it);
 
         assert(o->getType() == OBJECT_ITEM ||
                o->getType() == OBJECT_EFFECT);
@@ -409,11 +427,12 @@ static void informPlayer(MapComposite *map, Being *p)
                     if (!(oflags & UPDATEFLAG_NEW_ON_MAP))
                         break;
 
-                    if (Being *b = e->getBeing())
+                    if (Entity *b = e->getBeing())
                     {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_BEING);
                         effectMsg.writeInt16(e->getEffectId());
-                        effectMsg.writeInt16(b->getPublicID());
+                        effectMsg.writeInt16(static_cast<Actor*>(b)
+                                             ->getPublicID());
                         gameHandler->sendTo(p, effectMsg);
                     } else {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_POS);
@@ -503,7 +522,7 @@ void GameState::update(int tick)
 
             case EVENT_WARP:
                 assert(o->getType() == OBJECT_CHARACTER);
-                warp(static_cast<Being *>(o), e.map, e.point);
+                warp(o, e.map, e.point);
                 break;
         }
     }
@@ -562,7 +581,7 @@ bool GameState::insert(Entity *ptr)
 
         case OBJECT_CHARACTER:
             LOG_DEBUG("Player inserted: "
-                      << static_cast<Being*>(obj)->getName());
+                      << obj->getComponent<BeingComponent>()->getName());
             break;
 
         case OBJECT_EFFECT:
@@ -639,7 +658,7 @@ void GameState::remove(Entity *ptr)
 
         case OBJECT_CHARACTER:
             LOG_DEBUG("Player removed: "
-                      << static_cast<Being*>(ptr)->getName());
+                      << ptr->getComponent<BeingComponent>()->getName());
             break;
 
         case OBJECT_EFFECT:
@@ -711,12 +730,15 @@ void GameState::remove(Entity *ptr)
     map->remove(ptr);
 }
 
-void GameState::warp(Being *ptr, MapComposite *map, const Point &point)
+void GameState::warp(Entity *ptr, MapComposite *map, const Point &point)
 {
     remove(ptr);
+
+    Actor *actor = static_cast<Actor *>(ptr);
+
     ptr->setMap(map);
-    ptr->setPosition(point);
-    ptr->clearDestination();
+    actor->setPosition(point);
+    ptr->getComponent<BeingComponent>()->clearDestination(*ptr);
     /* Force update of persistent data on map change, so that
        characters can respawn at the start of the map after a death or
        a disconnection. */
@@ -778,7 +800,7 @@ void GameState::enqueueRemove(Actor *ptr)
     enqueueEvent(ptr, event);
 }
 
-void GameState::enqueueWarp(Being *ptr,
+void GameState::enqueueWarp(Entity *ptr,
                             MapComposite *map,
                             const Point &point)
 {
@@ -794,7 +816,7 @@ void GameState::enqueueWarp(Being *ptr,
     event.type = EVENT_WARP;
     event.point = point;
     event.map = map;
-    enqueueEvent(ptr, event);
+    enqueueEvent(static_cast<Actor *>(ptr), event);
 }
 
 void GameState::sayAround(Actor *obj, const std::string &text)

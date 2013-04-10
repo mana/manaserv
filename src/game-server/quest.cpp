@@ -36,7 +36,7 @@ typedef std::map< std::string, QuestCallbacks > PendingVariables;
 
 struct PendingQuest
 {
-    Being *character;
+    Entity *character;
     sigc::connection removedConnection;
     sigc::connection disconnectedConnection;
     PendingVariables variables;
@@ -46,7 +46,7 @@ typedef std::map< int, PendingQuest > PendingQuests;
 
 static PendingQuests pendingQuests;
 
-bool getQuestVar(Being *ch, const std::string &name, std::string &value)
+bool getQuestVar(Entity *ch, const std::string &name, std::string &value)
 {
     std::map< std::string, std::string >::iterator
         i = ch->getComponent<CharacterComponent>()->questCache.find(name);
@@ -56,7 +56,7 @@ bool getQuestVar(Being *ch, const std::string &name, std::string &value)
     return true;
 }
 
-void setQuestVar(Being *ch, const std::string &name,
+void setQuestVar(Entity *ch, const std::string &name,
                  const std::string &value)
 {
     auto *characterComponent =
@@ -79,7 +79,7 @@ void setQuestVar(Being *ch, const std::string &name,
     accountHandler->updateCharacterVar(ch, name, value);
 }
 
-void QuestRefCallback::triggerCallback(Being *ch,
+void QuestRefCallback::triggerCallback(Entity *ch,
                                        const std::string &value) const
 {
     if (!mRef.isValid())
@@ -120,7 +120,7 @@ static void fullRemove(Entity &ch)
     pendingQuests.erase(id);
 }
 
-void recoverQuestVar(Being *ch, const std::string &name,
+void recoverQuestVar(Entity *ch, const std::string &name,
                      QuestCallback *f)
 {
     auto *characterComponent =
@@ -171,7 +171,7 @@ void recoveredQuestVar(int id,
         return;
     }
 
-    Being *ch = pendingQuest.character;
+    Entity *ch = pendingQuest.character;
     auto *characterComponent = ch->getComponent<CharacterComponent>();
     characterComponent->questCache[name] = value;
 

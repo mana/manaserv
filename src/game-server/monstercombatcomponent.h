@@ -31,10 +31,10 @@ class MonsterClass;
 class MonsterCombatComponent: public CombatComponent
 {
 public:
-    MonsterCombatComponent(Being &monster, MonsterClass *specy);
+    MonsterCombatComponent(Entity &monster, MonsterClass *specy);
 
-    void processAttack(Being *source, Attack &attack);
-    int damage(Being &target, Being *source, const Damage &damage);
+    void processAttack(Entity *source, Attack &attack);
+    int damage(Entity &target, Entity *source, const Damage &damage);
 
     void setDamageMutation(double mutation);
 

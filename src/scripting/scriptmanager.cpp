@@ -49,7 +49,7 @@ Script *ScriptManager::currentState()
     return _currentState;
 }
 
-bool ScriptManager::performCraft(Being *crafter,
+bool ScriptManager::performCraft(Entity *crafter,
                                  const std::list<InventoryItem> &recipe)
 {
     if (!_craftCallback.isValid())

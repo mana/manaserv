@@ -121,21 +121,21 @@ Script *getScript(lua_State *s)
    valid in the map.
    TODO: do it. */
 
-Being *getBeing(lua_State *s, int p)
+Entity *getBeing(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
-    return static_cast<Being *>(lua_touserdata(s, p));
+    return static_cast<Entity *>(lua_touserdata(s, p));
 }
 
-Being *getCharacter(lua_State *s, int p)
+Entity *getCharacter(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Entity *t = static_cast<Entity *>(lua_touserdata(s, p));
     if (t->getType() != OBJECT_CHARACTER)
         return 0;
-    return static_cast<Being *>(t);
+    return static_cast<Entity *>(t);
 }
 
 ItemClass *getItemClass(lua_State *s, int p)
@@ -158,14 +158,14 @@ ItemClass *getItemClass(lua_State *s, int p)
     return itemClass;
 }
 
-Being *getMonster(lua_State *s, int p)
+Entity *getMonster(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Entity *t = static_cast<Entity *>(lua_touserdata(s, p));
     if (t->getType() != OBJECT_MONSTER)
         return 0;
-    return static_cast<Being*>(t);
+    return t;
 }
 
 MonsterClass *getMonsterClass(lua_State *s, int p)
@@ -188,27 +188,27 @@ MonsterClass *getMonsterClass(lua_State *s, int p)
     return monsterClass;
 }
 
-Being *getNpc(lua_State *s, int p)
+Entity *getNpc(lua_State *s, int p)
 {
     if (!lua_islightuserdata(s, p))
         return 0;
     Entity *t = static_cast<Entity *>(lua_touserdata(s, p));
     if (t->getType() != OBJECT_NPC)
         return 0;
-    return static_cast<Being*>(t);
+    return t;
 }
 
 
-Being *checkBeing(lua_State *s, int p)
+Entity *checkBeing(lua_State *s, int p)
 {
-    Being *being = getBeing(s, p);
+    Entity *being = getBeing(s, p);
     luaL_argcheck(s, being, p, "being expected");
     return being;
 }
 
-Being *checkCharacter(lua_State *s, int p)
+Entity *checkCharacter(lua_State *s, int p)
 {
-    Being *character = getCharacter(s, p);
+    Entity *character = getCharacter(s, p);
     luaL_argcheck(s, character, p, "character expected");
     return character;
 }
@@ -220,9 +220,9 @@ ItemClass *checkItemClass(lua_State *s, int p)
     return itemClass;
 }
 
-Being *checkMonster(lua_State *s, int p)
+Entity *checkMonster(lua_State *s, int p)
 {
-    Being *monster = getMonster(s, p);
+    Entity *monster = getMonster(s, p);
     luaL_argcheck(s, monster, p, "monster expected");
     return monster;
 }
@@ -234,9 +234,9 @@ MonsterClass *checkMonsterClass(lua_State *s, int p)
     return monsterClass;
 }
 
-Being *checkNpc(lua_State *s, int p)
+Entity *checkNpc(lua_State *s, int p)
 {
-    Being *npc = getNpc(s, p);
+    Entity *npc = getNpc(s, p);
     luaL_argcheck(s, npc, p, "npc expected");
     return npc;
 }

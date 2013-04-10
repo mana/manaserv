@@ -37,11 +37,11 @@
  * TRADE_AGREE_WAIT : One player has agreed, waiting for the other one
  */
 
-Trade::Trade(Being *c1, Being *c2):
+Trade::Trade(Entity *c1, Entity *c2):
     mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT), mCurrencyId(ATTR_GP)
 {
     MessageOut msg(GPMSG_TRADE_REQUEST);
-    msg.writeInt16(c1->getPublicID());
+    msg.writeInt16(static_cast<Actor *>(c1)->getPublicID());
     c2->getComponent<CharacterComponent>()->getClient()->send(msg);
     c1->getComponent<CharacterComponent>()->setTrading(this);
     c2->getComponent<CharacterComponent>()->setTrading(this);
@@ -61,10 +61,11 @@ void Trade::cancel()
     delete this;
 }
 
-bool Trade::request(Being *c, int id)
+bool Trade::request(Entity *c, int id)
 {
     //The trade isn't confirmed, the player which is request is the same.
-    if (mState != TRADE_INIT || c != mChar2 || mChar1->getPublicID() != id)
+    if (mState != TRADE_INIT || c != mChar2 ||
+        static_cast<Actor *>(mChar1)->getPublicID() != id)
     {
         /* This is not an ack for the current transaction. So assume
            a new one is about to start and cancel the current one. */
@@ -99,7 +100,7 @@ bool Trade::perform(TradedItems items, Inventory &inv1, Inventory &inv2)
     return true;
 }
 
-void Trade::agree(Being *c)
+void Trade::agree(Entity *c)
 {
     // No player agreed
     if (mState == TRADE_CONFIRMED)
@@ -131,15 +132,23 @@ void Trade::agree(Being *c)
     // Check if both player has the objects in their inventories
     // and enouth money, then swap them.
     Inventory v1(mChar1), v2(mChar2);
-    if (mChar1->getAttributeBase(mCurrencyId) >= mMoney1 - mMoney2 &&
-        mChar2->getAttributeBase(mCurrencyId) >= mMoney2 - mMoney1 &&
+
+    const double moneyChar1 = mChar1->getComponent<BeingComponent>()
+            ->getAttributeBase(mCurrencyId);
+    const double moneyChar2 = mChar2->getComponent<BeingComponent>()
+            ->getAttributeBase(mCurrencyId);
+
+    if (moneyChar1 >= mMoney1 - mMoney2 &&
+        moneyChar2 >= mMoney2 - mMoney1 &&
         perform(mItems1, v1, v2) &&
         perform(mItems2, v2, v1))
     {
-        mChar1->setAttribute(mCurrencyId, mChar1->getAttributeBase(mCurrencyId)
-                             - mMoney1 + mMoney2);
-        mChar2->setAttribute(mCurrencyId, mChar2->getAttributeBase(mCurrencyId)
-                             - mMoney2 + mMoney1);
+        mChar1->getComponent<BeingComponent>()
+                ->setAttribute(*mChar1, mCurrencyId,
+                               moneyChar1 - mMoney1 + mMoney2);
+        mChar2->getComponent<BeingComponent>()
+                ->setAttribute(*mChar2, mCurrencyId,
+                               moneyChar2 - mMoney2 + mMoney1);
     }
     else
     {
@@ -153,7 +162,7 @@ void Trade::agree(Being *c)
     delete this;
 }
 
-void Trade::confirm(Being *c)
+void Trade::confirm(Entity *c)
 {
     if (mState == TRADE_CONFIRMED || mState == TRADE_AGREE_WAIT)
         return;
@@ -189,7 +198,7 @@ void Trade::confirm(Being *c)
     mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
 }
 
-void Trade::setMoney(Being *c, int amount)
+void Trade::setMoney(Entity *c, int amount)
 {
     //If the player has already confirmed, exit.
     if ((mState != TRADE_RUN && (mState != TRADE_CONFIRM_WAIT || c != mChar1))
@@ -218,13 +227,13 @@ void Trade::setMoney(Being *c, int amount)
     mState = TRADE_RUN;
 }
 
-void Trade::addItem(Being *c, int slot, int amount)
+void Trade::addItem(Entity *c, int slot, int amount)
 {
     //If the player has already confirmed, exit.
     if ((mState != TRADE_RUN && (mState != TRADE_CONFIRM_WAIT || c != mChar1))
             || amount < 0) return;
 
-    Being *other;
+    Entity *other;
     TradedItems *items;
     if (c == mChar1)
     {

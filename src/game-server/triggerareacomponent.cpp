@@ -34,7 +34,7 @@ void WarpAction::process(Actor *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
     {
-        GameState::enqueueWarp(static_cast<Being *>(obj), mMap, mTargetPoint);
+        GameState::enqueueWarp(obj, mMap, mTargetPoint);
     }
 }
 

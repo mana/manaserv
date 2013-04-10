@@ -23,8 +23,8 @@
 
 #include <vector>
 
-class Being;
 class Actor;
+class Entity;
 
 class BuySell
 {
@@ -33,7 +33,7 @@ class BuySell
         /**
          * Sets up a trade between a character and an NPC.
          */
-        BuySell(Being *, bool sell);
+        BuySell(Actor *, bool sell);
 
         /**
          * Cancels the trade.
@@ -80,7 +80,7 @@ class BuySell
         /** The attribute ID of the currency to use. Hardcoded for now (FIXME) */
         unsigned mCurrencyId;
 
-        Being *mChar;       /**< Character involved. */
+        Actor *mChar;      /**< Character involved. */
         TradedItems mItems; /**< Traded items. */
         bool mSell;         /**< Are items sold? */
 };

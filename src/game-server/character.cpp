@@ -91,16 +91,19 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mBaseEntity(&entity)
 {
     // Temporary until all dependencies are in a component
-    Being &being = static_cast<Being &>(entity);
+    Actor &being = static_cast<Actor &>(entity);
 
     mCharacterData = new CharacterData(&being, this);
+
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
     const AttributeManager::AttributeScope &attributes =
                            attributeManager->getAttributeScope(CharacterScope);
     LOG_DEBUG("Character creation: initialisation of "
               << attributes.size() << " attributes.");
     for (auto attributeScope : attributes)
-        being.createAttribute(attributeScope.first, *attributeScope.second);
+        beingComponent->createAttribute(attributeScope.first,
+                                        *attributeScope.second);
 
 
     being.setWalkMask(Map::BLOCKMASK_WALL);
@@ -115,7 +118,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
             sigc::mem_fun(this, &CharacterComponent::attackRemoved));
 
     // Default knuckle attack
-    int damageBase = being.getModifiedAttribute(ATTR_STR);
+    int damageBase = beingComponent->getModifiedAttribute(ATTR_STR);
     int damageDelta = damageBase / 2;
     Damage knuckleDamage;
     knuckleDamage.skill = skillManager->getDefaultSkillId();
@@ -131,7 +134,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 
     // Get character data.
     mDatabaseID = msg.readInt32();
-    being.setName(msg.readString());
+    beingComponent->setName(msg.readString());
 
     deserializeCharacterData(*mCharacterData, msg);
 
@@ -139,7 +142,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     modifiedAllAttributes(entity);
     being.setSize(16);
 
-    being.signal_attribute_changed.connect(sigc::mem_fun(
+    beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
 }
 
@@ -151,9 +154,6 @@ CharacterComponent::~CharacterComponent()
 
 void CharacterComponent::update(Entity &entity)
 {
-    // Temporary until all dependencies are available as component
-    Being &being = static_cast<Being &>(entity);
-
     // Update character level if needed.
     if (mRecalculateLevel)
     {
@@ -162,7 +162,7 @@ void CharacterComponent::update(Entity &entity)
     }
 
     // Dead character: don't regenerate anything else
-    if (being.getAction() == DEAD)
+    if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
     // Update special recharge
@@ -192,25 +192,24 @@ void CharacterComponent::update(Entity &entity)
     }
 }
 
-void CharacterComponent::characterDied(Being *being)
+void CharacterComponent::characterDied(Entity *being)
 {
     executeCallback(mDeathCallback, *being);
 }
 
 void CharacterComponent::respawn(Entity &entity)
 {
-    // Temporary until all dependencies are available as component
-    Being &being = static_cast<Being &>(entity);
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    if (being.getAction() != DEAD)
+    if (beingComponent->getAction() != DEAD)
     {
-        LOG_WARN("Character \"" << being.getName()
+        LOG_WARN("Character \"" << beingComponent->getName()
                  << "\" tried to respawn without being dead");
         return;
     }
 
     // Make it alive again
-    being.setAction(STAND);
+    beingComponent->setAction(entity, STAND);
     // Reset target
     entity.getComponent<CombatComponent>()->clearTarget();
 
@@ -219,13 +218,14 @@ void CharacterComponent::respawn(Entity &entity)
         return;
 
     // No script respawn callback set - fall back to hardcoded logic
-    being.setAttribute(ATTR_HP, being.getModifiedAttribute(ATTR_MAX_HP));
+    const double maxHp = beingComponent->getModifiedAttribute(ATTR_MAX_HP);
+    beingComponent->setAttribute(entity, ATTR_HP, maxHp);
     // Warp back to spawn point.
     int spawnMap = Configuration::getValue("char_respawnMap", 1);
     int spawnX = Configuration::getValue("char_respawnX", 1024);
     int spawnY = Configuration::getValue("char_respawnY", 1024);
 
-    GameState::enqueueWarp(&being, MapManager::getMap(spawnMap),
+    GameState::enqueueWarp(&entity, MapManager::getMap(spawnMap),
                            Point(spawnX, spawnY));
 }
 
@@ -259,7 +259,7 @@ bool CharacterComponent::specialUseCheck(SpecialMap::iterator it)
     return true;
 }
 
-void CharacterComponent::useSpecialOnBeing(Entity &user, int id, Being *b)
+void CharacterComponent::useSpecialOnBeing(Entity &user, int id, Entity *b)
 {
     SpecialMap::iterator it = mSpecials.find(id);
     if (!specialUseCheck(it))
@@ -419,17 +419,15 @@ void CharacterComponent::setBuySell(BuySell *t)
 
 void CharacterComponent::sendStatus(Entity &entity)
 {
-    // Temporary until all dependencies are available as components
-    Being &being = static_cast<Being &>(entity);
-
+    auto *beingComponent = entity.getComponent<BeingComponent>();
     MessageOut attribMsg(GPMSG_PLAYER_ATTRIBUTE_CHANGE);
     for (std::set<size_t>::const_iterator i = mModifiedAttributes.begin(),
          i_end = mModifiedAttributes.end(); i != i_end; ++i)
     {
         int attr = *i;
         attribMsg.writeInt16(attr);
-        attribMsg.writeInt32(being.getAttributeBase(attr) * 256);
-        attribMsg.writeInt32(being.getModifiedAttribute(attr) * 256);
+        attribMsg.writeInt32(beingComponent->getAttributeBase(attr) * 256);
+        attribMsg.writeInt32(beingComponent->getModifiedAttribute(attr) * 256);
     }
     if (attribMsg.getLength() > 2) gameHandler->sendTo(mClient, attribMsg);
     mModifiedAttributes.clear();
@@ -458,23 +456,24 @@ void CharacterComponent::sendStatus(Entity &entity)
 
 void CharacterComponent::modifiedAllAttributes(Entity &entity)
 {
-    // Temporary until all dependencies are available as components
-    Being &being = static_cast<Being &>(entity);
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
     LOG_DEBUG("Marking all attributes as changed, requiring recalculation.");
-    for (auto attribute : being.getAttributes())
+    for (auto attribute : beingComponent->getAttributes())
     {
-        being.recalculateBaseAttribute(attribute.first);
+        beingComponent->recalculateBaseAttribute(entity, attribute.first);
         mModifiedAttributes.insert(attribute.first);
     }
 }
 
-void CharacterComponent::attributeChanged(Being *being, unsigned attr)
+void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
 {
+    auto *beingComponent = entity->getComponent<BeingComponent>();
+
     // Inform the client of this attribute modification.
     accountHandler->updateAttributes(getDatabaseID(), attr,
-                                     being->getAttributeBase(attr),
-                                     being->getModifiedAttribute(attr));
+                                   beingComponent->getAttributeBase(attr),
+                                   beingComponent->getModifiedAttribute(attr));
     mModifiedAttributes.insert(attr);
 
     // Update the knuckle Attack if required
@@ -482,7 +481,7 @@ void CharacterComponent::attributeChanged(Being *being, unsigned attr)
     {
         // TODO: dehardcode this
         Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
-        knuckleDamage.base = being->getModifiedAttribute(ATTR_STR);
+        knuckleDamage.base = beingComponent->getModifiedAttribute(ATTR_STR);
         knuckleDamage.delta = knuckleDamage.base / 2;
     }
 }
@@ -617,9 +616,6 @@ int CharacterComponent::getExpGot(size_t skill) const
 
 void CharacterComponent::levelup(Entity &entity)
 {
-    // Temporary until all dependencies are available as Component
-    Being &being = static_cast<Being &>(entity);
-
     mLevel++;
 
     mCharacterPoints += CHARPOINTS_PER_LEVELUP;
@@ -632,14 +628,14 @@ void CharacterComponent::levelup(Entity &entity)
     levelupMsg.writeInt16(mCharacterPoints);
     levelupMsg.writeInt16(mCorrectionPoints);
     gameHandler->sendTo(mClient, levelupMsg);
-    LOG_INFO(being.getName() << " reached level " << mLevel);
+    LOG_INFO(entity.getComponent<BeingComponent>()->getName()
+             << " reached level " << mLevel);
 }
 
 AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
                                                             size_t attribute)
 {
-    // Temporary until all dependencies are available as Component
-    Being &being = static_cast<Being &>(entity);
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
     if (!attributeManager->isAttributeDirectlyModifiable(attribute))
         return ATTRIBMOD_INVALID_ATTRIBUTE;
@@ -647,27 +643,30 @@ AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
         return ATTRIBMOD_NO_POINTS_LEFT;
 
     --mCharacterPoints;
-    being.setAttribute(attribute, being.getAttributeBase(attribute) + 1);
-    being.updateDerivedAttributes(attribute);
+
+    const double base = beingComponent->getAttributeBase(attribute);
+    beingComponent->setAttribute(entity, attribute, base + 1);
+    beingComponent->updateDerivedAttributes(entity, attribute);
     return ATTRIBMOD_OK;
 }
 
 AttribmodResponseCode CharacterComponent::useCorrectionPoint(Entity &entity,
                                                              size_t attribute)
 {
-    // Temporary until all dependencies are available as Component
-    Being &being = static_cast<Being &>(entity);
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
     if (!attributeManager->isAttributeDirectlyModifiable(attribute))
         return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCorrectionPoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
-    if (being.getAttributeBase(attribute) <= 1)
+    if (beingComponent->getAttributeBase(attribute) <= 1)
         return ATTRIBMOD_DENIED;
 
     --mCorrectionPoints;
     ++mCharacterPoints;
-    being.setAttribute(attribute, being.getAttributeBase(attribute) - 1);
+
+    const double base = beingComponent->getAttributeBase(attribute);
+    beingComponent->setAttribute(entity, attribute, base - 1);
     return ATTRIBMOD_OK;
 }
 
@@ -718,13 +717,10 @@ void CharacterComponent::attackRemoved(CombatComponent *combatComponent,
 
 void CharacterComponent::disconnected(Entity &entity)
 {
-    // Temporary until all dependencies are available as a Component
-    Being &being = static_cast<Being &>(entity);
-
     mConnected = false;
 
     // Make the dead characters respawn, even in case of disconnection.
-    if (being.getAction() == DEAD)
+    if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         respawn(entity);
     else
         GameState::remove(&entity);
