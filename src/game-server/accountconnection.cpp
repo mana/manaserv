@@ -155,7 +155,8 @@ void AccountConnection::processMessage(MessageIn &msg)
         case AGMSG_PLAYER_ENTER:
         {
             std::string token = msg.readString(MAGIC_TOKEN_LENGTH);
-            Entity *character = new Actor(OBJECT_CHARACTER);
+            Entity *character = new Entity(OBJECT_CHARACTER);
+            character->addComponent(new ActorComponent(*character));
             character->addComponent(new BeingComponent(*character));
             character->addComponent(new CharacterComponent(*character, msg));
             gameHandler->addPendingCharacter(token, character);

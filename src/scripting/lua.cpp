@@ -283,7 +283,9 @@ static int npc_create(lua_State *s)
 
     NpcComponent *npcComponent = new NpcComponent(id);
 
-    Actor *npc = new Actor(OBJECT_NPC);
+    Entity *npc = new Entity(OBJECT_NPC);
+    auto *actorComponent = new ActorComponent(*npc);
+    npc->addComponent(actorComponent);
     auto *beingComponent = new BeingComponent(*npc);
     npc->addComponent(beingComponent);
     npc->addComponent(npcComponent);
@@ -293,10 +295,10 @@ static int npc_create(lua_State *s)
     beingComponent->setName(name);
     beingComponent->setGender(getGender(gender));
 
-    npc->setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER |
-                     Map::BLOCKMASK_CHARACTER);
+    actorComponent->setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER |
+                                Map::BLOCKMASK_CHARACTER);
     npc->setMap(m);
-    npc->setPosition(Point(x, y));
+    actorComponent->setPosition(*npc, Point(x, y));
 
     if (lua_isfunction(s, 6))
     {
@@ -324,7 +326,7 @@ static int npc_enable(lua_State *s)
 {
     Entity *npc = checkNpc(s, 1);
     npc->getComponent<NpcComponent>()->setEnabled(true);
-    GameState::enqueueInsert(static_cast<Actor *>(npc));
+    GameState::enqueueInsert(npc);
     return 0;
 }
 
@@ -357,11 +359,13 @@ static int monster_create(lua_State *s)
     const int y = luaL_checkint(s, 3);
     MapComposite *m = checkCurrentMap(s);
 
-    Actor *monster = new Actor(OBJECT_MONSTER);
+    Entity *monster = new Entity(OBJECT_MONSTER);
+    auto *actorComponent = new ActorComponent(*monster);
+    monster->addComponent(actorComponent);
     monster->addComponent(new BeingComponent(*monster));
     monster->addComponent(new MonsterComponent(*monster, monsterClass));
     monster->setMap(m);
-    monster->setPosition(Point(x, y));
+    actorComponent->setPosition(*monster, Point(x, y));
     GameState::enqueueInsert(monster);
 
     lua_pushlightuserdata(s, monster);
@@ -458,7 +462,7 @@ static int effect_create(lua_State *s)
     {
         // being mode
         Entity *b = checkBeing(s, 2);
-        Effects::show(id, static_cast<Actor *>(b));
+        Effects::show(id, b);
     }
     else
     {
@@ -486,7 +490,7 @@ static int item_drop(lua_State *s)
     const int number = luaL_optint(s, 4, 1);
     MapComposite *map = checkCurrentMap(s);
 
-    Actor *item = Item::create(map, Point(x, y), ic, number);
+    Entity *item = Item::create(map, Point(x, y), ic, number);
     GameState::enqueueInsert(item);
     return 0;
 }
@@ -511,7 +515,7 @@ static int npc_message(lua_State *s)
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_MESSAGE);
-    msg.writeInt16(static_cast<Actor *>(npc)->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     msg.writeString(m);
     gameHandler->sendTo(q, msg);
 
@@ -543,7 +547,7 @@ static int npc_choice(lua_State *s)
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_CHOICE);
-    msg.writeInt16(static_cast<Actor *>(npc)->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
     {
         if (lua_isstring(s, i))
@@ -602,7 +606,7 @@ static int npc_ask_integer(lua_State *s)
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_NUMBER);
-    msg.writeInt16(static_cast<Actor *>(npc)->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     msg.writeInt32(min);
     msg.writeInt32(max);
     msg.writeInt32(defaultValue);
@@ -629,7 +633,7 @@ static int npc_ask_string(lua_State *s)
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_STRING);
-    msg.writeInt16(static_cast<Actor *>(npc)->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     gameHandler->sendTo(q, msg);
 
     thread->mState = Script::ThreadExpectingString;
@@ -647,7 +651,7 @@ static int npc_post(lua_State *s)
     Entity *q = checkCharacter(s, 2);
 
     MessageOut msg(GPMSG_NPC_POST);
-    msg.writeInt16(static_cast<Actor *>(npc)->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     gameHandler->sendTo(q, msg);
 
     return 0;
@@ -663,7 +667,7 @@ static int being_say(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
     const char *message = luaL_checkstring(s, 2);
-    GameState::sayAround(static_cast<Actor *>(being), message);
+    GameState::sayAround(being, message);
     return 0;
 }
 
@@ -678,7 +682,7 @@ static int chat_message(lua_State *s)
     Entity *being = checkBeing(s, 1);
     const char *message = luaL_checkstring(s, 2);
 
-    GameState::sayTo(static_cast<Actor *>(being), nullptr, message);
+    GameState::sayTo(being, nullptr, message);
     return 0;
 }
 
@@ -779,7 +783,7 @@ static int npc_trade(lua_State *s)
     }
 
     bool sellMode = lua_toboolean(s, 3);
-    BuySell *t = new BuySell(static_cast<Actor *>(q), sellMode);
+    BuySell *t = new BuySell(q, sellMode);
     if (!lua_istable(s, 4))
     {
         if (sellMode)
@@ -793,7 +797,7 @@ static int npc_trade(lua_State *s)
                 return 1;
             }
 
-            if (t->start(static_cast<Actor *>(npc)))
+            if (t->start(npc))
             {
                 lua_pushinteger(s, 0);
                 return 1;
@@ -871,7 +875,7 @@ static int npc_trade(lua_State *s)
         lua_pushinteger(s, 1);
         return 1;
     }
-    if (t->start(static_cast<Actor *>(npc)))
+    if (t->start(npc))
     {
         lua_pushinteger(s, 0);
         return 1;
@@ -969,9 +973,9 @@ static int chr_inv_change(lua_State *s)
             nb = inv.insert(id, nb);
             if (nb)
             {
-                Actor *item = Item::create(q->getMap(), static_cast<Actor *>(q)
-                                               ->getPosition(),
-                                           ic, nb);
+                const Point &position =
+                        q->getComponent<ActorComponent>()->getPosition();
+                Entity *item = Item::create(q->getMap(), position, ic, nb);
                 GameState::enqueueInsert(item);
             }
         }
@@ -1591,7 +1595,7 @@ static int being_set_walkmask(lua_State *s)
        mask |= Map::BLOCKMASK_CHARACTER;
    else if (strchr(stringMask, 'm'))
        mask |= Map::BLOCKMASK_MONSTER;
-   static_cast<Actor *>(being)->setWalkMask(mask);
+   being->getComponent<ActorComponent>()->setWalkMask(mask);
    return 0;
 }
 
@@ -1604,7 +1608,8 @@ static int being_set_walkmask(lua_State *s)
 static int being_get_walkmask(lua_State *s)
 {
    Entity *being = checkBeing(s, 1);
-   const unsigned char mask = static_cast<Actor *>(being)->getWalkMask();
+   const unsigned char mask =
+           being->getComponent<ActorComponent>()->getWalkMask();
    luaL_Buffer buffer;
    luaL_buffinit(s, &buffer);
    if (mask & Map::BLOCKMASK_WALL)
@@ -1683,7 +1688,7 @@ static int chr_warp(lua_State *s)
 static int posX(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    lua_pushinteger(s, static_cast<Actor *>(being)->getPosition().x);
+    lua_pushinteger(s, being->getComponent<ActorComponent>()->getPosition().x);
     return 1;
 }
 
@@ -1696,7 +1701,7 @@ static int posX(lua_State *s)
 static int posY(lua_State *s)
 {
     Entity *being = checkBeing(s, 1);
-    lua_pushinteger(s, static_cast<Actor *>(being)->getPosition().y);
+    lua_pushinteger(s, being->getComponent<ActorComponent>()->getPosition().y);
     return 1;
 }
 
@@ -1956,7 +1961,8 @@ static int chr_set_hair_color(lua_State *s)
     luaL_argcheck(s, color >= 0, 2, "invalid color id");
 
     c->getComponent<CharacterComponent>()->setHairColor(color);
-    static_cast<Actor *>(c)->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+    c->getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_LOOKSCHANGE);
 
     return 0;
 }
@@ -1986,7 +1992,8 @@ static int chr_set_hair_style(lua_State *s)
     luaL_argcheck(s, style >= 0, 2, "invalid style id");
 
     c->getComponent<CharacterComponent>()->setHairStyle(style);
-    static_cast<Actor *>(c)->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+    c->getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_LOOKSCHANGE);
     return 0;
 }
 
@@ -2686,7 +2693,7 @@ static int get_beings_in_circle(lua_State *s)
     if (lua_islightuserdata(s, 1))
     {
         Entity *b = checkBeing(s, 1);
-        const Point &pos = static_cast<Actor *>(b)->getPosition();
+        const Point &pos = b->getComponent<ActorComponent>()->getPosition();
         x = pos.x;
         y = pos.y;
         r = luaL_checkint(s, 2);
@@ -2710,9 +2717,9 @@ static int get_beings_in_circle(lua_State *s)
         char t = b->getType();
         if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
         {
-            Actor *actor = static_cast<Actor *>(b);
-            if (Collision::circleWithCircle(actor->getPosition(),
-                                            actor->getSize(),
+            auto *actorComponent = b->getComponent<ActorComponent>();
+            if (Collision::circleWithCircle(actorComponent->getPosition(),
+                                            actorComponent->getSize(),
                                             Point(x, y), r))
             {
                 lua_pushlightuserdata(s, b);
@@ -2750,7 +2757,7 @@ static int get_beings_in_rectangle(lua_State *s)
         Entity *b = *i;
         char t = b->getType();
         if ((t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER) &&
-            rect.contains(static_cast<Actor *>(b)->getPosition()))
+            rect.contains(b->getComponent<ActorComponent>()->getPosition()))
         {
             lua_pushlightuserdata(s, b);
             lua_rawseti(s, tableStackPosition, tableIndex);
@@ -2772,13 +2779,13 @@ static int get_distance(lua_State *s)
     int x1, y1, x2, y2;
     if (lua_gettop(s) == 2)
     {
-        Actor *being1 = static_cast<Actor *>(checkBeing(s, 1));
-        Actor *being2 = static_cast<Actor *>(checkBeing(s, 2));
+        Entity *being1 = checkBeing(s, 1);
+        Entity *being2 = checkBeing(s, 2);
 
-        x1 = being1->getPosition().x;
-        y1 = being1->getPosition().y;
-        x2 = being2->getPosition().x;
-        y2 = being2->getPosition().y;
+        x1 = being1->getComponent<ActorComponent>()->getPosition().x;
+        y1 = being1->getComponent<ActorComponent>()->getPosition().y;
+        x2 = being2->getComponent<ActorComponent>()->getPosition().x;
+        y2 = being2->getComponent<ActorComponent>()->getPosition().y;
     }
     else
     {

@@ -30,14 +30,13 @@
 #include "game-server/attack.h"
 
 class Entity;
-class Actor;
 
 /**
  * Type definition for a list of hits
  */
 typedef std::vector<unsigned> Hits;
 
-class CombatComponent: public Component, public sigc::trackable
+class CombatComponent: public Component
 {
 public:
     static const ComponentType type = CT_Fighting;
@@ -59,8 +58,8 @@ public:
 
     int getAttackId() const;
 
-    Actor *getTarget() const;
-    void setTarget(Actor *target);
+    Entity *getTarget() const;
+    void setTarget(Entity *target);
     void clearTarget();
 
     void diedOrRemoved(Entity *entity);
@@ -70,7 +69,7 @@ public:
 protected:
     virtual void processAttack(Entity &source, Attack &attack);
 
-    Actor *mTarget;
+    Entity *mTarget;
     Attacks mAttacks;
     Attack *mCurrentAttack;     // Last used attack
     Hits mHitsTaken;            //List of punches taken since last update.
@@ -111,7 +110,7 @@ inline int CombatComponent::getAttackId() const
 /**
  * Get Target
  */
-inline Actor *CombatComponent::getTarget() const
+inline Entity *CombatComponent::getTarget() const
 {
     return mTarget;
 }
@@ -119,7 +118,7 @@ inline Actor *CombatComponent::getTarget() const
 /**
  * Set Target
  */
-inline void CombatComponent::setTarget(Actor *target)
+inline void CombatComponent::setTarget(Entity *target)
 {
     mTarget = target;
 }

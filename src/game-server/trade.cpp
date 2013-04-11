@@ -41,7 +41,7 @@ Trade::Trade(Entity *c1, Entity *c2):
     mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT), mCurrencyId(ATTR_GP)
 {
     MessageOut msg(GPMSG_TRADE_REQUEST);
-    msg.writeInt16(static_cast<Actor *>(c1)->getPublicID());
+    msg.writeInt16(c1->getComponent<ActorComponent>()->getPublicID());
     c2->getComponent<CharacterComponent>()->getClient()->send(msg);
     c1->getComponent<CharacterComponent>()->setTrading(this);
     c2->getComponent<CharacterComponent>()->setTrading(this);
@@ -65,7 +65,7 @@ bool Trade::request(Entity *c, int id)
 {
     //The trade isn't confirmed, the player which is request is the same.
     if (mState != TRADE_INIT || c != mChar2 ||
-        static_cast<Actor *>(mChar1)->getPublicID() != id)
+        mChar1->getComponent<ActorComponent>()->getPublicID() != id)
     {
         /* This is not an ack for the current transaction. So assume
            a new one is about to start and cancel the current one. */

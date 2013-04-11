@@ -842,7 +842,7 @@ bool Inventory::unequip(unsigned itemInstance)
 
 void Inventory::checkLookchanges(unsigned slotTypeId)
 {
-    Actor *actor = static_cast<Actor*>(mCharacter);
     if (itemManager->isEquipSlotVisible(slotTypeId))
-        actor->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+        mCharacter->getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_LOOKSCHANGE);
 }

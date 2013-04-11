@@ -90,10 +90,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mKnuckleAttackInfo(0),
     mBaseEntity(&entity)
 {
-    // Temporary until all dependencies are in a component
-    Actor &being = static_cast<Actor &>(entity);
-
-    mCharacterData = new CharacterData(&being, this);
+    mCharacterData = new CharacterData(&entity, this);
 
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
@@ -105,12 +102,13 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
         beingComponent->createAttribute(attributeScope.first,
                                         *attributeScope.second);
 
+    auto *actorComponent = entity.getComponent<ActorComponent>();
+    actorComponent->setWalkMask(Map::BLOCKMASK_WALL);
+    actorComponent->setBlockType(BLOCKTYPE_CHARACTER);
+    actorComponent->setSize(16);
 
-    being.setWalkMask(Map::BLOCKMASK_WALL);
-    being.setBlockType(BLOCKTYPE_CHARACTER);
 
-
-    CombatComponent *combatcomponent = new CombatComponent(being);
+    CombatComponent *combatcomponent = new CombatComponent(entity);
     entity.addComponent(combatcomponent);
     combatcomponent->getAttacks().attack_added.connect(
             sigc::mem_fun(this, &CharacterComponent::attackAdded));
@@ -138,9 +136,8 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 
     deserializeCharacterData(*mCharacterData, msg);
 
-    Inventory(&being, mPossessions).initialize();
-    modifiedAllAttributes(entity);
-    being.setSize(16);
+    Inventory(&entity, mPossessions).initialize();
+    modifiedAllAttributes(entity);;
 
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));

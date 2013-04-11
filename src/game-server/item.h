@@ -334,7 +334,7 @@ namespace Item {
  *
  * @return the created item
  */
-Actor *create(MapComposite *map, Point pos, ItemClass *itemClass, int amount);
+Entity *create(MapComposite *map, Point pos, ItemClass *itemClass, int amount);
 
 } // namespace Item
 

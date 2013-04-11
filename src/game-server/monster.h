@@ -280,7 +280,7 @@ class MonsterComponent : public Component
         /** Time in game ticks until ownership of a monster can change. */
         static const int KILLSTEAL_PROTECTION_TIME = 100;
 
-        MonsterComponent(Actor &actor, MonsterClass *);
+        MonsterComponent(Entity &entity, MonsterClass *);
         ~MonsterComponent();
 
         /**

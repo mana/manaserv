@@ -50,7 +50,7 @@ typedef std::map< int, Status > StatusEffects;
  * Generic being (living actor). Keeps direction, destination and a few other
  * relevant properties. Used for characters & monsters (all animated objects).
  */
-class BeingComponent : public Component, public sigc::trackable
+class BeingComponent : public Component
 {
     public:
         static const ComponentType type = CT_Being;

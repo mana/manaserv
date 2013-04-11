@@ -29,13 +29,12 @@
 #include "scripting/script.h"
 #include "game-server/map.h"
 
-class Actor;
 class CharacterComponent;
+class Entity;
 class Map;
 class MapComposite;
 class Point;
 class Rectangle;
-class Entity;
 
 struct MapContent;
 struct MapZone;
@@ -75,11 +74,11 @@ struct CharacterIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Actor *current;
+    Entity *current;
 
     CharacterIterator(const ZoneIterator &);
     void operator++();
-    Actor *operator*() const { return current; }
+    Entity *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -90,11 +89,11 @@ struct BeingIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Actor *current;
+    Entity *current;
 
     BeingIterator(const ZoneIterator &);
     void operator++();
-    Actor *operator*() const { return current; }
+    Entity *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -120,11 +119,11 @@ struct ActorIterator
 {
     ZoneIterator iterator;
     unsigned short pos;
-    Actor *current;
+    Entity *current;
 
     ActorIterator(const ZoneIterator &);
     void operator++();
-    Actor *operator*() const { return current; }
+    Entity *operator*() const { return current; }
     operator bool() const { return iterator; }
 };
 
@@ -139,7 +138,7 @@ struct MapZone
      * Characters are stored first, then the remaining MovingObjects, then the
      * remaining Objects.
      */
-    std::vector< Actor * > objects;
+    std::vector< Entity * > objects;
 
     /**
      * Destinations of the objects that left this zone.
@@ -149,8 +148,8 @@ struct MapZone
     MapRegion destinations;
 
     MapZone(): nbCharacters(0), nbMovingObjects(0) {}
-    void insert(Actor *);
-    void remove(Actor *);
+    void insert(Entity *);
+    void remove(Entity *);
 };
 
 /**
@@ -164,7 +163,7 @@ struct ObjectBucket
     unsigned bitmap[256 / int_bitsize]; /**< Bitmap of free locations. */
     short free;                         /**< Number of empty places. */
     short next_object;                  /**< Next object to look at. */
-    Actor *objects[256];
+    Entity *objects[256];
 
     ObjectBucket();
     int allocate();
@@ -182,12 +181,12 @@ struct MapContent
     /**
      * Allocates a unique ID for an actor on this map.
      */
-    bool allocate(Actor *);
+    bool allocate(Entity *);
 
     /**
      * Deallocates an ID.
      */
-    void deallocate(Actor *);
+    void deallocate(Entity *);
 
     /**
      * Fills a region of zones within the range of a point.
@@ -308,13 +307,13 @@ class MapComposite
         /**
          * Gets an iterator on the objects around a given actor.
          */
-        ZoneIterator getAroundActorIterator(Actor *, int radius) const;
+        ZoneIterator getAroundActorIterator(Entity *, int radius) const;
 
         /**
          * Gets an iterator on the objects around the old and new positions of
          * a character (including the ones that were but are now elsewhere).
          */
-        ZoneIterator getAroundBeingIterator(Actor *, int radius) const;
+        ZoneIterator getAroundBeingIterator(Entity *, int radius) const;
 
         /**
          * Gets everything related to the map.

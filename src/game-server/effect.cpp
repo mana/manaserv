@@ -30,30 +30,35 @@ const ComponentType EffectComponent::type;
 void EffectComponent::update(Entity &entity)
 {
     if (mHasBeenShown)
-        GameState::enqueueRemove(static_cast<Actor*>(&entity));
+        GameState::enqueueRemove(&entity);
 }
 
 namespace Effects
 {
     void show(int id, MapComposite *map, const Point &pos)
     {
-        Actor *effect = new Actor(OBJECT_EFFECT);
+        Entity *effect = new Entity(OBJECT_EFFECT);
+        auto *actorComponent = new ActorComponent(*effect);
+        effect->addComponent(actorComponent);
         effect->addComponent(new EffectComponent(id));
         effect->setMap(map);
-        effect->setPosition(pos);
+        actorComponent->setPosition(*effect, pos);
 
         GameState::enqueueInsert(effect);
     }
 
-    void show(int id, Actor *b)
+    void show(int id, Entity *b)
     {
         EffectComponent *effectComponent = new EffectComponent(id);
         effectComponent->setBeing(b);
 
-        Actor *effect = new Actor(OBJECT_EFFECT);
+        Entity *effect = new Entity(OBJECT_EFFECT);
+        auto *actorComponent = new ActorComponent(*effect);
+        effect->addComponent(actorComponent);
         effect->addComponent(effectComponent);
         effect->setMap(b->getMap());
-        effect->setPosition(b->getPosition());
+        const Point &point = b->getComponent<ActorComponent>()->getPosition();
+        actorComponent->setPosition(*effect, point);
 
         GameState::enqueueInsert(effect);
     }

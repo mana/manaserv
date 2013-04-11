@@ -21,10 +21,13 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include <sigc++/trackable.h>
+
 class Entity;
 
 enum ComponentType
 {
+    CT_Actor,
     CT_Character,
     CT_Being,
     CT_Effect,
@@ -41,7 +44,7 @@ enum ComponentType
 /**
  * A component of an entity.
  */
-class Component
+class Component : public sigc::trackable
 {
     public:
         virtual ~Component() {}

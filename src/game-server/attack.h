@@ -21,6 +21,7 @@
 #ifndef ATTACK_H
 #define ATTACK_H
 
+#include <cassert>
 #include <cstddef>
 #include <list>
 
@@ -146,7 +147,7 @@ class Attack
     public:
         Attack(AttackInfo *info):
             mInfo(info)
-        {}
+        {assert(info);}
 
         AttackInfo *getAttackInfo()
         { return mInfo; }

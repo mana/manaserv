@@ -67,7 +67,9 @@ void SpawnAreaComponent::update(Entity &entity)
         const int width = mZone.w;
         const int height = mZone.h;
 
-        Actor *being = new Actor(OBJECT_MONSTER);
+        Entity *being = new Entity(OBJECT_MONSTER);
+        auto *actorComponent = new ActorComponent(*being);
+        being->addComponent(actorComponent);
         auto *beingComponent = new BeingComponent(*being);
         being->addComponent(beingComponent);
         being->addComponent(new MonsterComponent(*being, mSpecy));
@@ -88,7 +90,7 @@ void SpawnAreaComponent::update(Entity &entity)
             }
             while (!realMap->getWalk(position.x / realMap->getTileWidth(),
                                      position.y / realMap->getTileHeight(),
-                                     being->getWalkMask())
+                                     actorComponent->getWalkMask())
                    && triesLeft);
 
             if (triesLeft)
@@ -97,7 +99,7 @@ void SpawnAreaComponent::update(Entity &entity)
                             sigc::mem_fun(this, &SpawnAreaComponent::decrease));
 
                 being->setMap(map);
-                being->setPosition(position);
+                actorComponent->setPosition(*being, position);
                 beingComponent->clearDestination(*being);
                 GameState::enqueueInsert(being);
 

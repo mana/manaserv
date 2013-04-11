@@ -69,7 +69,7 @@ typedef std::map<unsigned, SpecialValue> SpecialMap;
 class CharacterData
 {
 public:
-    CharacterData(Actor *actor, CharacterComponent *characterComponent);
+    CharacterData(Entity *entity, CharacterComponent *characterComponent);
 
     void setGender(BeingGender);
     BeingGender getGender() const;
@@ -123,7 +123,7 @@ public:
     Possessions &getPossessions() const;
 
 private:
-    Actor *mActor;
+    Entity *mEntity;
     CharacterComponent *mCharacterComponent;
 };
 
@@ -578,55 +578,55 @@ class CharacterComponent : public Component
 };
 
 
-inline CharacterData::CharacterData(Actor *actor,
+inline CharacterData::CharacterData(Entity *entity,
                                     CharacterComponent *characterComponent):
-        mActor(actor),
+        mEntity(entity),
         mCharacterComponent(characterComponent)
 {}
 
 inline void CharacterData::setGender(BeingGender gender)
 {
-    mActor->getComponent<BeingComponent>()->setGender(gender);
+    mEntity->getComponent<BeingComponent>()->setGender(gender);
 }
 
 inline BeingGender CharacterData::getGender() const
 {
-    return mActor->getComponent<BeingComponent>()->getGender();
+    return mEntity->getComponent<BeingComponent>()->getGender();
 }
 
 inline void CharacterData::setMapId(int id)
 {
-    mActor->setMap(MapManager::getMap(id));
+    mEntity->setMap(MapManager::getMap(id));
 }
 
 inline int CharacterData::getMapId() const
 {
-    return mActor->getMap()->getID();
+    return mEntity->getMap()->getID();
 }
 
 inline void CharacterData::setPosition(Point &point)
 {
-    mActor->setPosition(point);
+    mEntity->getComponent<ActorComponent>()->setPosition(*mEntity, point);
 }
 
 inline const Point &CharacterData::getPosition() const
 {
-    return mActor->getPosition();
+    return mEntity->getComponent<ActorComponent>()->getPosition();
 }
 
 inline void CharacterData::setAttribute(int id, int base)
 {
-    mActor->getComponent<BeingComponent>()->setAttribute(*mActor, id, base);
+    mEntity->getComponent<BeingComponent>()->setAttribute(*mEntity, id, base);
 }
 
 inline void CharacterData::setModAttribute(int id, int mod)
 {
-    mActor->getComponent<BeingComponent>()->setModAttribute(id, mod);
+    mEntity->getComponent<BeingComponent>()->setModAttribute(id, mod);
 }
 
 inline const AttributeMap &CharacterData::getAttributes() const
 {
-    return mActor->getComponent<BeingComponent>()->getAttributes();
+    return mEntity->getComponent<BeingComponent>()->getAttributes();
 }
 
 inline void CharacterData::setCharacterPoints(int characterPoints)
@@ -711,22 +711,22 @@ inline const std::map<int, int>::const_iterator CharacterData::getSkillEnd() con
 
 inline void CharacterData::applyStatusEffect(int status, int time)
 {
-    mActor->getComponent<BeingComponent>()->applyStatusEffect(status, time);
+    mEntity->getComponent<BeingComponent>()->applyStatusEffect(status, time);
 }
 
 inline int CharacterData::getStatusEffectSize() const
 {
-    return mActor->getComponent<BeingComponent>()->getStatusEffects().size();
+    return mEntity->getComponent<BeingComponent>()->getStatusEffects().size();
 }
 
 inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectBegin() const
 {
-    return mActor->getComponent<BeingComponent>()->getStatusEffects().begin();
+    return mEntity->getComponent<BeingComponent>()->getStatusEffects().begin();
 }
 
 inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectEnd() const
 {
-    return mActor->getComponent<BeingComponent>()->getStatusEffects().end();
+    return mEntity->getComponent<BeingComponent>()->getStatusEffects().end();
 }
 
 inline int CharacterData::getKillCountSize() const

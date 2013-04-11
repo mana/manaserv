@@ -171,21 +171,23 @@ void ItemComponent::update(Entity &entity)
     {
         mLifetime--;
         if (!mLifetime)
-            GameState::enqueueRemove(static_cast<Actor*>(&entity));
+            GameState::enqueueRemove(&entity);
     }
 }
 
 namespace Item {
 
-Actor *create(MapComposite *map,
+Entity *create(MapComposite *map,
               Point pos,
               ItemClass *itemClass,
               int amount)
 {
-    Actor *itemActor = new Actor(OBJECT_ITEM);
+    Entity *itemActor = new Entity(OBJECT_ITEM);
+    ActorComponent *actorComponent = new ActorComponent(*itemActor);
+    itemActor->addComponent(actorComponent);
     itemActor->addComponent(new ItemComponent(itemClass, amount));
     itemActor->setMap(map);
-    itemActor->setPosition(pos);
+    actorComponent->setPosition(*itemActor, pos);
     return itemActor;
 }
 

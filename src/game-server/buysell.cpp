@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-BuySell::BuySell(Actor *c, bool sell):
+BuySell::BuySell(Entity *c, bool sell):
     mCurrencyId(ATTR_GP), mChar(c), mSell(sell)
 {
     c->getComponent<CharacterComponent>()->setBuySell(this);
@@ -94,7 +94,8 @@ int BuySell::registerPlayerItems()
         else
         {
             LOG_WARN("registerPlayersItems(): The character Id: "
-                << mChar->getPublicID() << " has unknown items (Id: " << id
+                << mChar->getComponent<ActorComponent>()->getPublicID()
+                << " has unknown items (Id: " << id
                 << "). They have been ignored.");
             continue;
         }
@@ -129,7 +130,7 @@ int BuySell::registerPlayerItems()
     return nbItemsToSell;
 }
 
-bool BuySell::start(Actor *actor)
+bool BuySell::start(Entity *actor)
 {
     if (mItems.empty())
     {
@@ -138,7 +139,7 @@ bool BuySell::start(Actor *actor)
     }
 
     MessageOut msg(mSell ? GPMSG_NPC_SELL : GPMSG_NPC_BUY);
-    msg.writeInt16(actor->getPublicID());
+    msg.writeInt16(actor->getComponent<ActorComponent>()->getPublicID());
     for (TradedItems::const_iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {

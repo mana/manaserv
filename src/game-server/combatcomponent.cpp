@@ -41,11 +41,6 @@ CombatComponent::~CombatComponent()
 
 void CombatComponent::update(Entity &entity)
 {
-    // Temporary for as long as Being is not split into Components
-    // Prevents to implement all at once
-    // TODO: remove this as soon as possible
-    Actor &actor = static_cast<Actor&>(entity);
-
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
     if (beingComponent->getAction() != ATTACK || !mTarget)
@@ -69,12 +64,18 @@ void CombatComponent::update(Entity &entity)
     for (std::vector<Attack *>::const_iterator it = attacksReady.begin(),
          it_end = attacksReady.end(); it != it_end; ++it)
     {
+        const Point &attackerPosition =
+                entity.getComponent<ActorComponent>()->getPosition();
+        const Point &targetPosition =
+                mTarget->getComponent<ActorComponent>()->getPosition();
+
         // check if target is in range using the pythagorean theorem
-        int distx = actor.getPosition().x - mTarget->getPosition().x;
-        int disty = actor.getPosition().y - mTarget->getPosition().y;
+        int distx = attackerPosition.x - targetPosition.x;
+        int disty = attackerPosition.y - targetPosition.y;
         int distSquare = (distx * distx + disty * disty);
         AttackInfo *info = (*it)->getAttackInfo();
-        int maxDist = info->getDamage().range + actor.getSize();
+        int maxDist = info->getDamage().range +
+                entity.getComponent<ActorComponent>()->getSize();
 
         if (distSquare <= maxDist * maxDist &&
                 (!highestPriorityAttack ||
@@ -88,9 +89,12 @@ void CombatComponent::update(Entity &entity)
     {
         mAttacks.startAttack(highestPriorityAttack);
         mCurrentAttack = highestPriorityAttack;
-        beingComponent->setDestination(entity, actor.getPosition());
+        const Point &point =
+                entity.getComponent<ActorComponent>()->getPosition();
+        beingComponent->setDestination(entity, point);
         // TODO: Turn into direction of enemy
-        actor.raiseUpdateFlags(UPDATEFLAG_ATTACK);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_ATTACK);
     }
 }
 
@@ -155,7 +159,8 @@ int CombatComponent::damage(Entity &target,
     {
         mHitsTaken.push_back(HPloss);
         const Attribute *HP = beingComponent->getAttribute(ATTR_HP);
-        LOG_DEBUG("Being " << static_cast<Actor &>(target).getPublicID()
+        LOG_DEBUG("Being "
+                  << target.getComponent<ActorComponent>()->getPublicID()
                   << " suffered " << HPloss
                   << " damage. HP: "
                   << HP->getModifiedAttribute() << "/"

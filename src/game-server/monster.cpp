@@ -53,16 +53,19 @@ double MonsterClass::getVulnerability(Element element) const
     return it->second;
 }
 
-MonsterComponent::MonsterComponent(Actor &actor, MonsterClass *specy):
+MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
     mSpecy(specy),
-    mOwner(NULL)
+    mOwner(nullptr)
 {
     LOG_DEBUG("Monster spawned! (id: " << mSpecy->getId() << ").");
 
-    auto *beingComponent = actor.getComponent<BeingComponent>();
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
-    actor.setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_CHARACTER);
-    actor.setBlockType(BLOCKTYPE_MONSTER);
+    auto *actorComponent = entity.getComponent<ActorComponent>();
+    actorComponent->setWalkMask(Map::BLOCKMASK_WALL |
+                                Map::BLOCKMASK_CHARACTER);
+    actorComponent->setBlockType(BLOCKTYPE_MONSTER);
+    actorComponent->setSize(specy->getSize());
 
     /*
      * Initialise the attribute structures.
@@ -88,10 +91,9 @@ MonsterComponent::MonsterComponent(Actor &actor, MonsterClass *specy):
             double factor = 100 + (rand() % (mutation * 2)) - mutation;
             attributeValue = attributeValue * factor / 100.0;
         }
-        beingComponent->setAttribute(actor, attribute.first, attributeValue);
+        beingComponent->setAttribute(entity, attribute.first, attributeValue);
     }
 
-    actor.setSize(specy->getSize());
     beingComponent->setGender(specy->getGender());
 
     beingComponent->signal_died.connect(sigc::mem_fun(this,
@@ -105,8 +107,8 @@ MonsterComponent::MonsterComponent(Actor &actor, MonsterClass *specy):
     mAttackPositions.push_back(AttackPosition(0, dist, UP));
 
     MonsterCombatComponent *combatComponent =
-            new MonsterCombatComponent(actor, specy);
-    actor.addComponent(combatComponent);
+            new MonsterCombatComponent(entity, specy);
+    entity.addComponent(combatComponent);
 
     double damageMutation = mutation ?
                 (100.0 + (rand() % (mutation * 2)) - mutation) / 100.0 : 1.0;
@@ -125,16 +127,13 @@ void MonsterComponent::update(Entity &entity)
     if (mKillStealProtectedTimeout.justFinished())
         mOwner = NULL;
 
-    // Temporary until all depedencies are available as component
-    Actor &being = static_cast<Actor &>(entity);
-
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
     // If dead, remove it
     if (beingComponent->getAction() == DEAD)
     {
         if (mDecayTimeout.expired())
-            GameState::enqueueRemove(static_cast<Actor*>(&entity));
+            GameState::enqueueRemove(&entity);
 
         return;
     }
@@ -153,19 +152,20 @@ void MonsterComponent::update(Entity &entity)
     if (entity.getComponent<CombatComponent>()->getTarget())
         return;
 
+    const Point &position =
+            entity.getComponent<ActorComponent>()->getPosition();
+
     // We have no target - let's wander around
     if (mStrollTimeout.expired() &&
-        being.getPosition() == beingComponent->getDestination())
+            position == beingComponent->getDestination())
     {
         if (mKillStealProtectedTimeout.expired())
         {
             unsigned range = mSpecy->getStrollRange();
             if (range)
             {
-                Point randomPos(rand() % (range * 2 + 1)
-                                - range + being.getPosition().x,
-                                rand() % (range * 2 + 1)
-                                - range + being.getPosition().y);
+                Point randomPos(rand() % (range * 2 + 1) - range + position.x,
+                                rand() % (range * 2 + 1) - range + position.y);
                 // Don't allow negative destinations, to avoid rounding
                 // problems when divided by tile size
                 if (randomPos.x >= 0 && randomPos.y >= 0)
@@ -178,8 +178,6 @@ void MonsterComponent::update(Entity &entity)
 
 void MonsterComponent::refreshTarget(Entity &entity)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
     // We are dead and sadly not possible to keep attacking :(
@@ -188,7 +186,7 @@ void MonsterComponent::refreshTarget(Entity &entity)
 
     // Check potential attack positions
     int bestTargetPriority = 0;
-    Actor *bestTarget = 0;
+    Entity *bestTarget = 0;
     Point bestAttackPosition;
 
     // reset Target. We will find a new one if possible
@@ -196,7 +194,7 @@ void MonsterComponent::refreshTarget(Entity &entity)
 
     // Iterate through objects nearby
     int aroundArea = Configuration::getValue("game_visualRange", 448);
-    for (BeingIterator i(entity.getMap()->getAroundBeingIterator(&actor,
+    for (BeingIterator i(entity.getMap()->getAroundBeingIterator(&entity,
                                                                  aroundArea));
          i; ++i)
     {
@@ -204,7 +202,7 @@ void MonsterComponent::refreshTarget(Entity &entity)
         if ((*i)->getType() != OBJECT_CHARACTER)
             continue;
 
-        Actor *target = *i;
+        Entity *target = *i;
 
         // Dead characters are ignored
         if (beingComponent->getAction() == DEAD)
@@ -232,7 +230,8 @@ void MonsterComponent::refreshTarget(Entity &entity)
         for (std::list<AttackPosition>::iterator j = mAttackPositions.begin();
              j != mAttackPositions.end(); j++)
         {
-            Point attackPosition = target->getPosition();
+            Point attackPosition =
+                    target->getComponent<ActorComponent>()->getPosition();
             attackPosition.x += j->x;
             attackPosition.y += j->y;
 
@@ -249,12 +248,17 @@ void MonsterComponent::refreshTarget(Entity &entity)
     }
     if (bestTarget)
     {
+        const Point &ownPosition =
+                entity.getComponent<ActorComponent>()->getPosition();
+        const Point &targetPosition =
+                bestTarget->getComponent<ActorComponent>()->getPosition();
+
         entity.getComponent<CombatComponent>()->setTarget(bestTarget);
-        if (bestAttackPosition == actor.getPosition())
+        if (bestAttackPosition == ownPosition)
         {
             beingComponent->setAction(entity, ATTACK);
-            beingComponent->updateDirection(actor, actor.getPosition(),
-                                            bestTarget->getPosition());
+            beingComponent->updateDirection(entity, ownPosition,
+                                            targetPosition);
         }
         else
         {
@@ -267,10 +271,7 @@ int MonsterComponent::calculatePositionPriority(Entity &entity,
                                                 Point position,
                                                 int targetPriority)
 {
-    // Temporary until all depedencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
-    Point thisPos = actor.getPosition();
+    Point thisPos = entity.getComponent<ActorComponent>()->getPosition();
 
     unsigned range = mSpecy->getTrackRange();
 
@@ -288,7 +289,7 @@ int MonsterComponent::calculatePositionPriority(Entity &entity,
     Path path;
     path = map->findPath(thisPos.x / tileWidth, thisPos.y / tileHeight,
                          position.x / tileWidth, position.y / tileHeight,
-                         actor.getWalkMask(),
+                         entity.getComponent<ActorComponent>()->getWalkMask(),
                          range);
 
     if (path.empty() || path.size() >= range)
@@ -303,19 +304,17 @@ int MonsterComponent::calculatePositionPriority(Entity &entity,
 
 void MonsterComponent::forgetTarget(Entity *entity)
 {
-    Entity *b = static_cast< Entity * >(entity);
     {
-        AggressionInfo &aggressionInfo = mAnger[b];
+        AggressionInfo &aggressionInfo = mAnger[entity];
         aggressionInfo.removedConnection.disconnect();
         aggressionInfo.diedConnection.disconnect();
     }
-    mAnger.erase(b);
+    mAnger.erase(entity);
 
-    if (b->getType() == OBJECT_CHARACTER)
+    if (entity->getType() == OBJECT_CHARACTER)
     {
-        Entity *c = static_cast< Entity * >(b);
-        mExpReceivers.erase(c);
-        mLegalExpReceivers.erase(c);
+        mExpReceivers.erase(entity);
+        mLegalExpReceivers.erase(entity);
     }
 }
 
@@ -360,9 +359,6 @@ std::map<Entity *, int> MonsterComponent::getAngerList() const
 
 void MonsterComponent::monsterDied(Entity *monster)
 {
-    // Temporary until all depdencies are available as component
-    Actor *actor = static_cast<Actor *>(monster);
-
     mDecayTimeout.set(DECAY_TIME);
 
     if (mExpReceivers.size() > 0)
@@ -376,9 +372,10 @@ void MonsterComponent::monsterDied(Entity *monster)
 
             if (p <= drop.probability)
             {
-                Actor *item = Item::create(monster->getMap(),
-                                           actor->getPosition(),
-                                           drop.item, 1);
+                const Point &position =
+                        monster->getComponent<ActorComponent>()->getPosition();
+                Entity *item = Item::create(monster->getMap(), position,
+                                            drop.item, 1);
                 GameState::enqueueInsert(item);
             }
         }

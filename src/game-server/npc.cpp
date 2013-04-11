@@ -99,8 +99,9 @@ void Npc::start(Entity *npc, Entity *ch)
         script->prepare(talkCallback);
         script->push(npc);
         script->push(ch);
-        ch->getComponent<CharacterComponent>()
-                ->startNpcThread(thread, static_cast<Actor*>(npc)->getPublicID());
+        auto *actorComponent = npc->getComponent<ActorComponent>();
+        ch->getComponent<CharacterComponent>()->startNpcThread(
+                thread, actorComponent->getPublicID());
     }
 }
 

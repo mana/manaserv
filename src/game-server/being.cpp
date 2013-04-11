@@ -81,13 +81,10 @@ BeingComponent::BeingComponent(Entity &entity):
 
 void BeingComponent::triggerEmote(Entity &entity, int id)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
     mEmoteId = id;
 
     if (id > -1)
-        actor.raiseUpdateFlags(UPDATEFLAG_EMOTE);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(UPDATEFLAG_EMOTE);
 }
 
 
@@ -119,13 +116,11 @@ void BeingComponent::heal(Entity &entity, int gain)
 
 void BeingComponent::died(Entity &entity)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
     if (mAction == DEAD)
         return;
 
-    LOG_DEBUG("Being " << actor.getPublicID() << " died.");
+    LOG_DEBUG("Being " << entity.getComponent<ActorComponent>()->getPublicID()
+              << " died.");
     setAction(entity, DEAD);
     // dead beings stay where they are
     clearDestination(entity);
@@ -135,43 +130,38 @@ void BeingComponent::died(Entity &entity)
 
 void BeingComponent::setDestination(Entity &entity, const Point &dst)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
     mDst = dst;
-    actor.raiseUpdateFlags(UPDATEFLAG_NEW_DESTINATION);
+    entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_NEW_DESTINATION);
     mPath.clear();
 }
 
 void BeingComponent::clearDestination(Entity &entity)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
-    setDestination(entity, actor.getPosition());
+    setDestination(entity,
+                   entity.getComponent<ActorComponent>()->getPosition());
 }
 
 void BeingComponent::setDirection(Entity &entity, BeingDirection direction)
 {
-    // Temponary until all dependencies are available as components
-    Actor &actor = static_cast<Actor &>(entity);
     mDirection = direction;
-    actor.raiseUpdateFlags(UPDATEFLAG_DIRCHANGE);
+    entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_DIRCHANGE);
 }
 
 Path BeingComponent::findPath(Entity &entity)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
+    auto *actorComponent = entity.getComponent<ActorComponent>();
 
     Map *map = entity.getMap()->getMap();
     int tileWidth = map->getTileWidth();
     int tileHeight = map->getTileHeight();
-    int startX = actor.getPosition().x / tileWidth;
-    int startY = actor.getPosition().y / tileHeight;
+    int startX = actorComponent->getPosition().x / tileWidth;
+    int startY = actorComponent->getPosition().y / tileHeight;
     int destX = mDst.x / tileWidth, destY = mDst.y / tileHeight;
 
-    return map->findPath(startX, startY, destX, destY, actor.getWalkMask());
+    return map->findPath(startX, startY, destX, destY,
+                         actorComponent->getWalkMask());
 }
 
 void BeingComponent::updateDirection(Entity &entity,
@@ -261,9 +251,6 @@ void BeingComponent::updateDirection(Entity &entity,
 
 void BeingComponent::move(Entity &entity)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
     // Immobile beings cannot move.
     if (!checkAttributeExists(ATTR_MOVE_SPEED_RAW)
         || !getModifiedAttribute(ATTR_MOVE_SPEED_RAW))
@@ -272,10 +259,10 @@ void BeingComponent::move(Entity &entity)
     // Remember the current position before moving. This is used by
     // MapComposite::update() to determine whether a being has moved from one
     // zone to another.
-    mOld = actor.getPosition();
+    mOld = entity.getComponent<ActorComponent>()->getPosition();
 
     // Ignore not moving beings
-    if (mAction == STAND && mDst == actor.getPosition())
+    if (mAction == STAND && mDst == mOld)
         return;
 
     if (mMoveTime > WORLD_TICK_MS)
@@ -288,8 +275,8 @@ void BeingComponent::move(Entity &entity)
     Map *map = entity.getMap()->getMap();
     int tileWidth = map->getTileWidth();
     int tileHeight = map->getTileHeight();
-    int tileSX = actor.getPosition().x / tileWidth;
-    int tileSY = actor.getPosition().y / tileHeight;
+    int tileSX = mOld.x / tileWidth;
+    int tileSY = mOld.y / tileHeight;
     int tileDX = mDst.x / tileWidth;
     int tileDY = mDst.y / tileHeight;
 
@@ -299,8 +286,8 @@ void BeingComponent::move(Entity &entity)
             setAction(entity, STAND);
         // Moving while staying on the same tile is free
         // We only update the direction in that case.
-        updateDirection(entity, actor.getPosition(), mDst);
-        actor.setPosition(mDst);
+        updateDirection(entity, mOld, mDst);
+        entity.getComponent<ActorComponent>()->setPosition(entity, mDst);
         mMoveTime = 0;
         return;
     }
@@ -315,8 +302,9 @@ void BeingComponent::move(Entity &entity)
     for (PathIterator pathIterator = mPath.begin();
             pathIterator != mPath.end(); pathIterator++)
     {
-        if (!map->getWalk(pathIterator->x, pathIterator->y,
-                          actor.getWalkMask()))
+        const unsigned char walkmask =
+                entity.getComponent<ActorComponent>()->getWalkMask();
+        if (!map->getWalk(pathIterator->x, pathIterator->y, walkmask))
         {
             mPath.clear();
             break;
@@ -365,7 +353,7 @@ void BeingComponent::move(Entity &entity)
         pos.y = next.y * tileHeight + (tileHeight / 2);
     }
     while (mMoveTime < WORLD_TICK_MS);
-    actor.setPosition(pos);
+    entity.getComponent<ActorComponent>()->setPosition(entity, pos);
 
     mMoveTime = mMoveTime > WORLD_TICK_MS ? mMoveTime - WORLD_TICK_MS : 0;
 
@@ -387,14 +375,12 @@ int BeingComponent::directionToAngle(int direction)
 
 void BeingComponent::setAction(Entity &entity, BeingAction action)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
     mAction = action;
     if (action != ATTACK && // The players are informed about these actions
         action != WALK)     // by other messages
     {
-        actor.raiseUpdateFlags(UPDATEFLAG_ACTIONCHANGE);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_ACTIONCHANGE);
     }
 }
 
@@ -523,9 +509,6 @@ void BeingComponent::recalculateBaseAttribute(Entity &entity, unsigned attr)
 
 void BeingComponent::updateDerivedAttributes(Entity &entity, unsigned attr)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
     signal_attribute_changed.emit(&entity, attr);
 
     LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
@@ -535,7 +518,8 @@ void BeingComponent::updateDerivedAttributes(Entity &entity, unsigned attr)
     {
     case ATTR_MAX_HP:
     case ATTR_HP:
-        actor.raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_HEALTHCHANGE);
         break;
     case ATTR_MOVE_SPEED_TPS:
         // Does not make a lot of sense to have in the scripts.
@@ -604,9 +588,6 @@ void BeingComponent::setStatusEffectTime(int id, int time)
 
 void BeingComponent::update(Entity &entity)
 {
-    // Temporary until all depdencies are available as component
-    Actor &actor = static_cast<Actor &>(entity);
-
     int oldHP = getModifiedAttribute(ATTR_HP);
     int newHP = oldHP;
     int maxHP = getModifiedAttribute(ATTR_MAX_HP);
@@ -626,7 +607,8 @@ void BeingComponent::update(Entity &entity)
     if (newHP != oldHP)
     {
         setAttribute(entity, ATTR_HP, newHP);
-        actor.raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_HEALTHCHANGE);
     }
 
     // Update lifetime of effects.
@@ -665,11 +647,8 @@ void BeingComponent::update(Entity &entity)
 
 void BeingComponent::inserted(Entity *entity)
 {
-    // Temporary until all depdencies are available as component
-    Actor *actor = static_cast<Actor *>(entity);
-
     // Reset the old position, since after insertion it is important that it is
     // in sync with the zone that we're currently present in.
-    mOld = actor->getPosition();
+    mOld = entity->getComponent<ActorComponent>()->getPosition();
 }
 

@@ -137,52 +137,55 @@ void GameHandler::updateCharacter(int charid, int partyid)
     }
 }
 
-static Actor *findActorNear(Actor *p, int id)
+static Entity *findActorNear(Entity *p, int id)
 {
     MapComposite *map = p->getMap();
-    const Point &ppos = p->getPosition();
+    const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
     // See map.h for tiles constants
     const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
     for (ActorIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
     {
-        Actor *a = *i;
-        if (a->getPublicID() != id)
+        Entity *a = *i;
+        if (a->getComponent<ActorComponent>()->getPublicID() != id)
             continue;
-        return ppos.inRangeOf(a->getPosition(), pixelDist) ? a : 0;
+        return ppos.inRangeOf(a->getComponent<ActorComponent>()->getPosition(),
+                              pixelDist) ? a : 0;
     }
     return 0;
 }
 
-static Entity *findBeingNear(Actor *p, int id)
+static Entity *findBeingNear(Entity *p, int id)
 {
     MapComposite *map = p->getMap();
-    const Point &ppos = p->getPosition();
+    const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
     // See map.h for tiles constants
     const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
     for (BeingIterator i(map->getAroundPointIterator(ppos, pixelDist)); i; ++i)
     {
-        Actor *b = static_cast<Actor *>(*i);
-        if (b->getPublicID() != id)
+        Entity *b = *i;
+        if (b->getComponent<ActorComponent>()->getPublicID() != id)
             continue;
-        return ppos.inRangeOf(b->getPosition(), pixelDist) ? b : 0;
+        return ppos.inRangeOf(b->getComponent<ActorComponent>()->getPosition(),
+                              pixelDist) ? b : 0;
     }
     return 0;
 }
 
-static Entity *findCharacterNear(Actor *p, int id)
+static Entity *findCharacterNear(Entity *p, int id)
 {
     MapComposite *map = p->getMap();
-    const Point &ppos = p->getPosition();
+    const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
     // See map.h for tiles constants
     const int pixelDist = DEFAULT_TILE_LENGTH * TILES_TO_BE_NEAR;
     for (CharacterIterator i(map->getAroundPointIterator(ppos,
                                                          pixelDist)); i; ++i)
     {
-        Actor *c = static_cast<Actor *>(*i);
-        if (c->getPublicID() != id)
+        Entity *c = *i;
+        if (c->getComponent<ActorComponent>()->getPublicID() != id)
             continue;
 
-        if (ppos.inRangeOf(c->getPosition(), pixelDist))
+        if (ppos.inRangeOf(c->getComponent<ActorComponent>()->getPosition(),
+                           pixelDist))
             return c;
 
         return  0;
@@ -455,11 +458,11 @@ void GameHandler::handleSay(GameClient &client, MessageIn &message)
     }
     if (!client.character->getComponent<CharacterComponent>()->isMuted())
     {
-        GameState::sayAround(static_cast<Actor *>(client.character), say);
+        GameState::sayAround(client.character, say);
     }
     else
     {
-        GameState::sayTo(static_cast<Actor *>(client.character), nullptr,
+        GameState::sayTo(client.character, nullptr,
                          "You are not allowed to talk right now.");
     }
 }
@@ -467,7 +470,7 @@ void GameHandler::handleSay(GameClient &client, MessageIn &message)
 void GameHandler::handleNpc(GameClient &client, MessageIn &message)
 {
     int id = message.readInt16();
-    Actor *actor = findActorNear(static_cast<Actor *>(client.character), id);
+    Entity *actor = findActorNear(client.character, id);
     if (!actor || actor->getType() != OBJECT_NPC)
     {
         sendNpcError(client, id, "Not close enough to NPC\n");
@@ -498,7 +501,8 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
 {
     const int x = message.readInt16();
     const int y = message.readInt16();
-    const Point ppos = static_cast<Actor *>(client.character)->getPosition();
+    const Point ppos =
+            client.character->getComponent<ActorComponent>()->getPosition();
 
     // TODO: use a less arbitrary value.
     if (std::abs(x - ppos.x) + std::abs(y - ppos.y) < 48)
@@ -508,7 +512,7 @@ void GameHandler::handlePickup(GameClient &client, MessageIn &message)
         for (FixedActorIterator i(map->getAroundPointIterator(ipos, 0)); i; ++i)
         {
             Entity *o = *i;
-            Point opos = static_cast<Actor *>(o)->getPosition();
+            Point opos = o->getComponent<ActorComponent>()->getPosition();
 
             if (o->getType() == OBJECT_ITEM && opos.x == x && opos.y == y)
             {
@@ -584,7 +588,8 @@ void GameHandler::handleDrop(GameClient &client, MessageIn &message)
     {
         int nb = inv.removeFromSlot(slot, amount);
         MapComposite *map = client.character->getMap();
-        Point pos = static_cast<Actor *>(client.character)->getPosition();
+        const Point &pos = client.character->getComponent<ActorComponent>()
+                ->getPosition();
 
         Entity *item = Item::create(map, pos, ic, amount - nb);
 
@@ -670,16 +675,16 @@ void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
 void GameHandler::handleAttack(GameClient &client, MessageIn &message)
 {
     int id = message.readInt16();
-    Actor *actor = static_cast<Actor *>(client.character);
-    LOG_DEBUG("Character " << actor->getPublicID()
-              << " attacked being " << id);
+    const int publicId =
+            client.character->getComponent<ActorComponent>()->getPublicID();
+    LOG_DEBUG("Character " << publicId << " attacked being " << id);
 
-    Actor *being = static_cast<Actor *>(findBeingNear(actor, id));
+    Entity *being = findBeingNear(client.character, id);
     if (being && being->getType() != OBJECT_NPC)
     {
         client.character->getComponent<CombatComponent>()->setTarget(being);
-        client.character->getComponent<BeingComponent>()->setAction(*actor,
-                                                                    ATTACK);
+        client.character->getComponent<BeingComponent>()->setAction(
+                *client.character, ATTACK);
     }
 }
 
@@ -688,14 +693,15 @@ void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message
     if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    Actor *actor = static_cast<Actor *>(client.character);
-
     const int specialID = message.readInt8();
     const int targetID = message.readInt16(); // 0 when no target is selected
     Entity *being = 0;
     if (targetID != 0)
-        being = findBeingNear(actor, targetID);
-    LOG_DEBUG("Character " << actor->getPublicID()
+        being = findBeingNear(client.character, targetID);
+
+    const int publicId =
+            client.character->getComponent<ActorComponent>()->getPublicID();
+    LOG_DEBUG("Character " << publicId
               << " tries to use his special attack " << specialID);
     auto *characterComponent = client.character
             ->getComponent<CharacterComponent>();
@@ -711,8 +717,9 @@ void GameHandler::handleUseSpecialOnPoint(GameClient &client, MessageIn &message
     const int x = message.readInt16();
     const int y = message.readInt16();
 
-    LOG_DEBUG("Character "
-              << static_cast<Actor *>(client.character)->getPublicID()
+    const int publicId =
+            client.character->getComponent<ActorComponent>()->getPublicID();
+    LOG_DEBUG("Character " << publicId
               << " tries to use his special attack " << specialID);
     auto *characterComponent = client.character
             ->getComponent<CharacterComponent>();
@@ -810,7 +817,7 @@ void GameHandler::handleTradeRequest(GameClient &client, MessageIn &message)
         if (t->request(client.character, id))
             return;
 
-    Entity *q = findCharacterNear(static_cast<Actor *>(client.character), id);
+    Entity *q = findCharacterNear(client.character, id);
     if (!q || characterComponent->isBusy())
     {
         client.send(MessageOut(GPMSG_TRADE_CANCEL));
@@ -967,14 +974,13 @@ void GameHandler::handlePartyInvite(GameClient &client, MessageIn &message)
         if ((*it)->getComponent<BeingComponent>()->getName() == invitee)
         {
             // calculate if the invitee is within the visual range
-            const int xInviter =
-                    static_cast<Actor *>(client.character)->getPosition().x;
-            const int yInviter =
-                    static_cast<Actor *>(client.character)->getPosition().y;
-            const int xInvitee = (*it)->getPosition().x;
-            const int yInvitee = (*it)->getPosition().y;
-            const int dx = std::abs(xInviter - xInvitee);
-            const int dy = std::abs(yInviter - yInvitee);
+            auto *inviterComponent =
+                    client.character->getComponent<ActorComponent>();
+            auto *inviteeComponent = (*it)->getComponent<ActorComponent>();
+            const Point &inviterPosition = inviterComponent->getPosition();
+            const Point &inviteePosition = inviteeComponent->getPosition();
+            const int dx = std::abs(inviterPosition.x - inviteePosition.x);
+            const int dy = std::abs(inviterPosition.y - inviteePosition.y);
             if (visualRange > std::max(dx, dy))
             {
                 MessageOut out(GCMSG_PARTY_INVITE);

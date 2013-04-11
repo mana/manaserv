@@ -173,7 +173,7 @@ static CmdRef const cmdRef[] =
 
 static void say(const std::string &message, Entity *player)
 {
-    GameState::sayTo(static_cast<Actor*>(player), nullptr, message);
+    GameState::sayTo(player, nullptr, message);
 }
 
 /*
@@ -619,9 +619,9 @@ static void handleDrop(Entity *player, std::string &args)
         return;
     }
 
-    Entity *item = Item::create(player->getMap(),
-                                static_cast<Actor*>(player)->getPosition(),
-                                ic, amount);
+    const Point &position =
+            player->getComponent<ActorComponent>()->getPosition();
+    Entity *item = Item::create(player->getMap(), position, ic, amount);
 
     GameState::insertOrDelete(item);
 
@@ -693,7 +693,7 @@ static void handleSpawn(Entity *player, std::string &args)
 {
     MonsterClass *mc;
     MapComposite *map = player->getMap();
-    const Point &pos = static_cast<Actor*>(player)->getPosition();
+    const Point &pos = player->getComponent<ActorComponent>()->getPosition();
     int value = 0;
 
     // get the arguments
@@ -744,8 +744,10 @@ static void handleSpawn(Entity *player, std::string &args)
     // create the monsters and put them on the map
     for (int i = 0; i < value; ++i)
     {
-        Actor *monster = new Actor(OBJECT_MONSTER);
-        monster->setPosition(pos);
+        Entity *monster = new Entity(OBJECT_MONSTER);
+        auto *actorComponent = new ActorComponent(*monster);
+        monster->addComponent(actorComponent);
+        actorComponent->setPosition(*monster, pos);
         monster->addComponent(new BeingComponent(*monster));
         monster->addComponent(new MonsterComponent(*monster, mc));
         monster->setMap(map);
@@ -789,7 +791,7 @@ static void handleGoto(Entity *player, std::string &args)
 
     // move the player to where the other player is
     MapComposite *map = other->getMap();
-    const Point &pos = static_cast<Actor*>(other)->getPosition();
+    const Point &pos = other->getComponent<ActorComponent>()->getPosition();
     GameState::warp(player, map, pos);
 
     // log transaction
@@ -826,7 +828,7 @@ static void handleRecall(Entity *player, std::string &args)
 
     // move the other player to where the player is
     MapComposite *map = player->getMap();
-    const Point &pos = static_cast<Actor*>(player)->getPosition();
+    const Point &pos = player->getComponent<ActorComponent>()->getPosition();
     GameState::warp(other, map, pos);
 }
 
@@ -1174,14 +1176,15 @@ static void handleAnnounce(Entity *player, std::string &args)
 
 static void handleWhere(Entity *player, std::string &)
 {
-    Actor *actor = static_cast<Actor*>(player);
+    const Point &position =
+            player->getComponent<ActorComponent>()->getPosition();
     std::stringstream str;
     str << "Your current location is map "
         << player->getMap()->getID()
         << " ["
-        << actor->getPosition().x
+        << position.x
         << ":"
-        << actor->getPosition().y
+        << position.y
         << "]";
     say (str.str(), player);
 }
@@ -1377,7 +1380,7 @@ static void handleLogsay(Entity *player, std::string &msg)
         return;
     }
 
-    GameState::sayAround(static_cast<Actor*>(player), msg);
+    GameState::sayAround(player, msg);
 
     // log transaction
     std::string logmsg = "[public] " + msg;
@@ -1504,7 +1507,7 @@ static void handleGetPos(Entity *player, std::string &args)
         say("Invalid character, or player is offline.", player);
         return;
     }
-    const Point &pos = static_cast<Actor*>(other)->getPosition();
+    const Point &pos = other->getComponent<ActorComponent>()->getPosition();
     std::stringstream str;
     str << "The current location of "
         << character
@@ -1576,7 +1579,7 @@ static void handleEffect(Entity *player, std::string &args)
     if (arguments.size() == 1)
     {
         int id = utils::stringToInt(arguments[0]);
-        Effects::show(id, static_cast<Actor*>(player));
+        Effects::show(id, player);
     }
     else if (arguments.size() == 2)
     {
@@ -1587,7 +1590,7 @@ static void handleEffect(Entity *player, std::string &args)
             say("Invalid target player.", player);
             return;
         }
-        Effects::show(id, static_cast<Actor*>(p));
+        Effects::show(id, p);
     }
     else if (arguments.size() == 3)
     {

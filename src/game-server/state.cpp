@@ -59,7 +59,7 @@ struct DelayedEvent
     MapComposite *map;
 };
 
-typedef std::map< Actor *, DelayedEvent > DelayedEvents;
+typedef std::map< Entity *, DelayedEvent > DelayedEvents;
 
 /**
  * The current world time in ticks since server start.
@@ -128,26 +128,28 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
 /**
  * Informs a player of what happened around the character.
  */
-static void informPlayer(MapComposite *map, Actor *p)
+static void informPlayer(MapComposite *map, Entity *p)
 {
     MessageOut moveMsg(GPMSG_BEINGS_MOVE);
     MessageOut damageMsg(GPMSG_BEINGS_DAMAGE);
     const Point &pold = p->getComponent<BeingComponent>()->getOldPosition();
-    const Point &ppos = p->getPosition();
-    int pid = p->getPublicID(), pflags = p->getUpdateFlags();
+    const Point &ppos = p->getComponent<ActorComponent>()->getPosition();
+    int pid = p->getComponent<ActorComponent>()->getPublicID();
+    int pflags = p->getComponent<ActorComponent>()->getUpdateFlags();
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
     // Inform client about activities of other beings near its character
     for (BeingIterator it(map->getAroundBeingIterator(p, visualRange));
          it; ++it)
     {
-        Actor *o = *it;
+        Entity *o = *it;
 
         const Point &oold =
                 o->getComponent<BeingComponent>()->getOldPosition();
-        const Point &opos = o->getPosition();
+        const Point &opos = o->getComponent<ActorComponent>()->getPosition();
         int otype = o->getType();
-        int oid = o->getPublicID(), oflags = o->getUpdateFlags();
+        int oid = o->getComponent<ActorComponent>()->getPublicID();
+        int oflags = o->getComponent<ActorComponent>()->getUpdateFlags();
         int flags = 0;
 
         // Check if the character p and the moving object o are around.
@@ -350,7 +352,7 @@ static void informPlayer(MapComposite *map, Actor *p)
     // Inform client about health change of party members
     for (CharacterIterator i(map->getWholeMapIterator()); i; ++i)
     {
-        Actor *c = *i;
+        Entity *c = *i;
 
         // Make sure its not the same character
         if (c == p)
@@ -360,13 +362,14 @@ static void informPlayer(MapComposite *map, Actor *p)
         if (c->getComponent<CharacterComponent>()->getParty() ==
                 p->getComponent<CharacterComponent>()->getParty())
         {
-            int cflags = c->getUpdateFlags();
+            int cflags = c->getComponent<ActorComponent>()->getUpdateFlags();
             if (cflags & UPDATEFLAG_HEALTHCHANGE)
             {
                 auto *beingComponent = c->getComponent<BeingComponent>();
 
                 MessageOut healthMsg(GPMSG_BEING_HEALTH_CHANGE);
-                healthMsg.writeInt16(c->getPublicID());
+                healthMsg.writeInt16(
+                        c->getComponent<ActorComponent>()->getPublicID());
                 healthMsg.writeInt16(
                         beingComponent->getModifiedAttribute(ATTR_HP));
                 healthMsg.writeInt16(
@@ -381,13 +384,13 @@ static void informPlayer(MapComposite *map, Actor *p)
     for (FixedActorIterator it(map->getAroundBeingIterator(p, visualRange));
          it; ++it)
     {
-        Actor *o = static_cast<Actor *>(*it);
+        Entity *o = *it;
 
         assert(o->getType() == OBJECT_ITEM ||
                o->getType() == OBJECT_EFFECT);
 
-        Point opos = o->getPosition();
-        int oflags = o->getUpdateFlags();
+        Point opos = o->getComponent<ActorComponent>()->getPosition();
+        int oflags = o->getComponent<ActorComponent>()->getUpdateFlags();
         bool willBeInRange = ppos.inRangeOf(opos, visualRange);
         bool wereInRange = pold.inRangeOf(opos, visualRange) &&
                            !((pflags | oflags) & UPDATEFLAG_NEW_ON_MAP);
@@ -429,10 +432,11 @@ static void informPlayer(MapComposite *map, Actor *p)
 
                     if (Entity *b = e->getBeing())
                     {
+                        auto *actorComponent =
+                                b->getComponent<ActorComponent>();
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_BEING);
                         effectMsg.writeInt16(e->getEffectId());
-                        effectMsg.writeInt16(static_cast<Actor*>(b)
-                                             ->getPublicID());
+                        effectMsg.writeInt16(actorComponent->getPublicID());
                         gameHandler->sendTo(p, effectMsg);
                     } else {
                         MessageOut effectMsg(GPMSG_CREATE_EFFECT_POS);
@@ -485,8 +489,8 @@ void GameState::update(int tick)
 
         for (ActorIterator it(map->getWholeMapIterator()); it; ++it)
         {
-            Actor *a = *it;
-            a->clearUpdateFlags();
+            Entity *a = *it;
+            a->getComponent<ActorComponent>()->clearUpdateFlags();
             if (a->canFight())
             {
                 a->getComponent<CombatComponent>()->clearHitsTaken();
@@ -503,7 +507,7 @@ void GameState::update(int tick)
          it_end = delayedEvents.end(); it != it_end; ++it)
     {
         const DelayedEvent &e = it->second;
-        Actor *o = it->first;
+        Entity *o = it->first;
         switch (e.type)
         {
             case EVENT_REMOVE:
@@ -545,9 +549,9 @@ bool GameState::insert(Entity *ptr)
     }
 
     // Check that coordinates are actually valid.
-    Actor *obj = static_cast< Actor * >(ptr);
+    Entity *obj = static_cast< Entity * >(ptr);
     Map *mp = map->getMap();
-    Point pos = obj->getPosition();
+    Point pos = obj->getComponent<ActorComponent>()->getPosition();
     if ((int)pos.x / mp->getTileWidth() >= mp->getWidth() ||
         (int)pos.y / mp->getTileHeight() >= mp->getHeight())
     {
@@ -555,7 +559,7 @@ bool GameState::insert(Entity *ptr)
                   << pos.y << " outside map " << map->getID() << '.');
         // Set an arbitrary small position.
         pos = Point(100, 100);
-        obj->setPosition(pos);
+        obj->getComponent<ActorComponent>()->setPosition(*ptr, pos);
     }
 
     if (!map->insert(obj))
@@ -604,7 +608,8 @@ bool GameState::insert(Entity *ptr)
             break;
     }
 
-    obj->raiseUpdateFlags(UPDATEFLAG_NEW_ON_MAP);
+    obj->getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_NEW_ON_MAP);
     if (obj->getType() != OBJECT_CHARACTER)
         return true;
 
@@ -694,15 +699,15 @@ void GameState::remove(Entity *ptr)
                     characterComponent->getDatabaseID(), false);
         }
 
-        Actor *obj = static_cast< Actor * >(ptr);
         MessageOut msg(GPMSG_BEING_LEAVE);
-        msg.writeInt16(obj->getPublicID());
-        Point objectPos = obj->getPosition();
+        msg.writeInt16(ptr->getComponent<ActorComponent>()->getPublicID());
+        Point objectPos = ptr->getComponent<ActorComponent>()->getPosition();
 
-        for (CharacterIterator p(map->getAroundActorIterator(obj, visualRange));
+        for (CharacterIterator p(map->getAroundActorIterator(ptr, visualRange));
              p; ++p)
         {
-            if (*p != obj && objectPos.inRangeOf((*p)->getPosition(),
+            if (*p != ptr && objectPos.inRangeOf(
+                    (*p)->getComponent<ActorComponent>()->getPosition(),
                 visualRange))
             {
                 gameHandler->sendTo(*p, msg);
@@ -711,16 +716,17 @@ void GameState::remove(Entity *ptr)
     }
     else if (ptr->getType() == OBJECT_ITEM)
     {
-        Actor *actor = static_cast<Actor*>(ptr);
-        Point pos = actor->getPosition();
+        Point pos = ptr->getComponent<ActorComponent>()->getPosition();
         MessageOut msg(GPMSG_ITEMS);
         msg.writeInt16(0);
         msg.writeInt16(pos.x);
         msg.writeInt16(pos.y);
 
-        for (CharacterIterator p(map->getAroundActorIterator(actor, visualRange)); p; ++p)
+        for (CharacterIterator p(map->getAroundActorIterator(ptr, visualRange)); p; ++p)
         {
-            if (pos.inRangeOf((*p)->getPosition(), visualRange))
+            const Point &point =
+                    (*p)->getComponent<ActorComponent>()->getPosition();
+            if (pos.inRangeOf(point, visualRange))
             {
                 gameHandler->sendTo(*p, msg);
             }
@@ -734,10 +740,8 @@ void GameState::warp(Entity *ptr, MapComposite *map, const Point &point)
 {
     remove(ptr);
 
-    Actor *actor = static_cast<Actor *>(ptr);
-
     ptr->setMap(map);
-    actor->setPosition(point);
+    ptr->getComponent<ActorComponent>()->setPosition(*ptr, point);
     ptr->getComponent<BeingComponent>()->clearDestination(*ptr);
     /* Force update of persistent data on map change, so that
        characters can respawn at the start of the map after a death or
@@ -773,7 +777,7 @@ void GameState::warp(Entity *ptr, MapComposite *map, const Point &point)
 /**
  * Enqueues an event. It will be executed at end of update.
  */
-static void enqueueEvent(Actor *ptr, const DelayedEvent &e)
+static void enqueueEvent(Entity *ptr, const DelayedEvent &e)
 {
     std::pair< DelayedEvents::iterator, bool > p =
         delayedEvents.insert(std::make_pair(ptr, e));
@@ -784,7 +788,7 @@ static void enqueueEvent(Actor *ptr, const DelayedEvent &e)
     }
 }
 
-void GameState::enqueueInsert(Actor *ptr)
+void GameState::enqueueInsert(Entity *ptr)
 {
     DelayedEvent event;
     event.type = EVENT_INSERT;
@@ -792,7 +796,7 @@ void GameState::enqueueInsert(Actor *ptr)
     enqueueEvent(ptr, event);
 }
 
-void GameState::enqueueRemove(Actor *ptr)
+void GameState::enqueueRemove(Entity *ptr)
 {
     DelayedEvent event;
     event.type = EVENT_REMOVE;
@@ -816,24 +820,26 @@ void GameState::enqueueWarp(Entity *ptr,
     event.type = EVENT_WARP;
     event.point = point;
     event.map = map;
-    enqueueEvent(static_cast<Actor *>(ptr), event);
+    enqueueEvent(ptr, event);
 }
 
-void GameState::sayAround(Actor *obj, const std::string &text)
+void GameState::sayAround(Entity *obj, const std::string &text)
 {
-    Point speakerPosition = obj->getPosition();
+    Point speakerPosition = obj->getComponent<ActorComponent>()->getPosition();
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
     for (CharacterIterator i(obj->getMap()->getAroundActorIterator(obj, visualRange)); i; ++i)
     {
-        if (speakerPosition.inRangeOf((*i)->getPosition(), visualRange))
+        const Point &point =
+                (*i)->getComponent<ActorComponent>()->getPosition();
+        if (speakerPosition.inRangeOf(point, visualRange))
         {
             sayTo(*i, obj, text);
         }
     }
 }
 
-void GameState::sayTo(Actor *destination, Actor *source, const std::string &text)
+void GameState::sayTo(Entity *destination, Entity *source, const std::string &text)
 {
     if (destination->getType() != OBJECT_CHARACTER)
         return; //only characters will read it anyway
@@ -849,7 +855,7 @@ void GameState::sayTo(Actor *destination, Actor *source, const std::string &text
     }
     else
     {
-        msg.writeInt16(static_cast< Actor * >(source)->getPublicID());
+        msg.writeInt16(source->getComponent<ActorComponent>()->getPublicID());
     }
     msg.writeString(text);
 

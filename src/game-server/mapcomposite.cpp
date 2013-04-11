@@ -53,7 +53,7 @@
    in dealing with zone changes. */
 static int const zoneDiam = 256;
 
-void MapZone::insert(Actor *obj)
+void MapZone::insert(Entity *obj)
 {
     int type = obj->getType();
     switch (type)
@@ -98,9 +98,9 @@ void MapZone::insert(Actor *obj)
     }
 }
 
-void MapZone::remove(Actor *obj)
+void MapZone::remove(Entity *obj)
 {
-    std::vector< Actor * >::iterator i_beg = objects.begin(), i, i_end;
+    std::vector< Entity * >::iterator i_beg = objects.begin(), i, i_end;
     int type = obj->getType();
     switch (type)
     {
@@ -195,7 +195,7 @@ void CharacterIterator::operator++()
     }
     if (iterator)
     {
-        current = static_cast< Actor * >((*iterator)->objects[pos]);
+        current = (*iterator)->objects[pos];
     }
 }
 
@@ -205,7 +205,7 @@ BeingIterator::BeingIterator(const ZoneIterator &it)
     while (iterator && (*iterator)->nbMovingObjects == 0) ++iterator;
     if (iterator)
     {
-        current = static_cast< Actor * >((*iterator)->objects[pos]);
+        current = (*iterator)->objects[pos];
     }
 }
 
@@ -218,7 +218,7 @@ void BeingIterator::operator++()
     }
     if (iterator)
     {
-        current = static_cast< Actor * >((*iterator)->objects[pos]);
+        current = (*iterator)->objects[pos];
     }
 }
 
@@ -372,15 +372,18 @@ MapContent::~MapContent()
     delete[] zones;
 }
 
-bool MapContent::allocate(Actor *obj)
+bool MapContent::allocate(Entity *obj)
 {
     // First, try allocating from the last used bucket.
     ObjectBucket *b = buckets[last_bucket];
+
+    auto *actorComponent = obj->getComponent<ActorComponent>();
+
     int i = b->allocate();
     if (i >= 0)
     {
         b->objects[i] = obj;
-        obj->setPublicID(last_bucket * 256 + i);
+        actorComponent->setPublicID(last_bucket * 256 + i);
         return true;
     }
 
@@ -403,7 +406,7 @@ bool MapContent::allocate(Actor *obj)
         {
             last_bucket = i;
             b->objects[j] = obj;
-            obj->setPublicID(last_bucket * 256 + j);
+            actorComponent->setPublicID(last_bucket * 256 + j);
             return true;
         }
     }
@@ -413,9 +416,9 @@ bool MapContent::allocate(Actor *obj)
     return false;
 }
 
-void MapContent::deallocate(Actor *obj)
+void MapContent::deallocate(Entity *obj)
 {
-    unsigned short id = obj->getPublicID();
+    unsigned short id = obj->getComponent<ActorComponent>()->getPublicID();
     buckets[id / 256]->deallocate(id % 256);
 }
 
@@ -527,10 +530,11 @@ ZoneIterator MapComposite::getAroundPointIterator(const Point &p, int radius) co
     return ZoneIterator(r, mContent);
 }
 
-ZoneIterator MapComposite::getAroundActorIterator(Actor *obj, int radius) const
+ZoneIterator MapComposite::getAroundActorIterator(Entity *obj, int radius) const
 {
     MapRegion r;
-    mContent->fillRegion(r, obj->getPosition(), radius);
+    mContent->fillRegion(r, obj->getComponent<ActorComponent>()->getPosition(),
+                         radius);
     return ZoneIterator(r, mContent);
 }
 
@@ -541,7 +545,7 @@ ZoneIterator MapComposite::getInsideRectangleIterator(const Rectangle &p) const
     return ZoneIterator(r, mContent);
 }
 
-ZoneIterator MapComposite::getAroundBeingIterator(Actor *obj, int radius) const
+ZoneIterator MapComposite::getAroundBeingIterator(Entity *obj, int radius) const
 {
     MapRegion r1;
     mContent->fillRegion(r1,
@@ -564,7 +568,9 @@ ZoneIterator MapComposite::getAroundBeingIterator(Actor *obj, int radius) const
             r2.swap(r3);
         }
     }
-    mContent->fillRegion(r2, obj->getPosition(), radius);
+    mContent->fillRegion(r2,
+                         obj->getComponent<ActorComponent>()->getPosition(),
+                         radius);
     return ZoneIterator(r2, mContent);
 }
 
@@ -572,13 +578,12 @@ bool MapComposite::insert(Entity *ptr)
 {
     if (ptr->isVisible())
     {
-        if (ptr->canMove() && !mContent->allocate(static_cast< Actor * >(ptr)))
-        {
+        if (ptr->canMove() && !mContent->allocate(ptr))
             return false;
-        }
 
-        Actor *obj = static_cast< Actor * >(ptr);
-        mContent->getZone(obj->getPosition()).insert(obj);
+        const Point &point =
+                ptr->getComponent<ActorComponent>()->getPosition();
+        mContent->getZone(point).insert(ptr);
     }
 
     ptr->setMap(this);
@@ -606,12 +611,13 @@ void MapComposite::remove(Entity *ptr)
 
     if (ptr->isVisible())
     {
-        Actor *obj = static_cast< Actor * >(ptr);
-        mContent->getZone(obj->getPosition()).remove(obj);
+        const Point &point =
+                ptr->getComponent<ActorComponent>()->getPosition();
+        mContent->getZone(point).remove(ptr);
 
         if (ptr->canMove())
         {
-            mContent->deallocate(obj);
+            mContent->deallocate(ptr);
         }
     }
 }
@@ -652,19 +658,18 @@ void MapComposite::update()
         if (!(*i)->canMove())
             continue;
 
-        Actor *actor = static_cast<Actor *>(*i);
-
         const Point &pos1 =
-                actor->getComponent<BeingComponent>()->getOldPosition();
-        const Point &pos2 = actor->getPosition();
+                (*i)->getComponent<BeingComponent>()->getOldPosition();
+        const Point &pos2 =
+                (*i)->getComponent<ActorComponent>()->getPosition();
 
         MapZone &src = mContent->getZone(pos1),
                 &dst = mContent->getZone(pos2);
         if (&src != &dst)
         {
             addZone(src.destinations, &dst - mContent->zones);
-            src.remove(actor);
-            dst.insert(actor);
+            src.remove(*i);
+            dst.insert(*i);
         }
     }
 }

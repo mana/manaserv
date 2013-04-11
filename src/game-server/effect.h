@@ -24,7 +24,6 @@
 
 #include "game-server/component.h"
 
-class Actor;
 class Entity;
 class MapComposite;
 class Point;
@@ -73,7 +72,7 @@ namespace Effects
      * Convenience methods to show an effect.
      */
     void show(int id, MapComposite *map, const Point &pos);
-    void show(int id, Actor *b);
+    void show(int id, Entity *b);
 
     // TODO: get this in sync with effects.xml
     enum {

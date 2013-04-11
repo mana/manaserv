@@ -25,7 +25,6 @@
 
 #include <string>
 
-class Actor;
 class Entity;
 class ItemClass;
 class MapComposite;
@@ -76,14 +75,14 @@ namespace GameState
      * Enqueues an insert event.
      * @note The event will be executed at end of update.
      */
-    void enqueueInsert(Actor *);
+    void enqueueInsert(Entity *);
 
     /**
      * Enqueues a remove event.
      * @note The event will be executed at end of update.
      * @note The entity will be destroyed at that time.
      */
-    void enqueueRemove(Actor *);
+    void enqueueRemove(Entity *);
 
     /**
      * Enqueues a warp event.
@@ -95,12 +94,12 @@ namespace GameState
      * Says something to an actor.
      * @note passing NULL as source generates a message from "Server:"
      */
-    void sayTo(Actor *destination, Actor *source, const std::string &text);
+    void sayTo(Entity *destination, Entity *source, const std::string &text);
 
     /**
      * Says something to everything around an actor.
      */
-    void sayAround(Actor *, const std::string &text);
+    void sayAround(Entity *, const std::string &text);
 
     /**
      * Says something to every player on the server.
