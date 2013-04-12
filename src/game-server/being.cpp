@@ -42,6 +42,7 @@ Script::Ref BeingComponent::mRecalculateDerivedAttributesCallback;
 Script::Ref BeingComponent::mRecalculateBaseAttributeCallback;
 
 BeingComponent::BeingComponent(Entity &entity):
+    mMoveTime(0),
     mAction(STAND),
     mGender(GENDER_UNSPECIFIED),
     mDirection(DOWN),
