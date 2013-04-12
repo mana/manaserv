@@ -248,7 +248,8 @@ static int on_mapupdate(lua_State *s)
  */
 
 /** LUA npc_create (creation)
- * npc_create(string name, int spriteID, int gender, int x, int y, function talkfunct, function updatefunct)
+ * npc_create(string name, int spriteID, int gender, int x, int y,
+ *            function talkfunct, function updatefunct)
  **
  * **Return value:** A handle to the created NPC.
  *
@@ -392,7 +393,8 @@ static int monster_remove(lua_State *s)
 }
 
 /** LUA trigger_create (creation)
- * trigger_create(int x, int y, int width, int height, function trigger_function, int arg, bool once)
+ * trigger_create(int x, int y, int width, int height,
+ *                function trigger_function, int arg, bool once)
  **
  * Creates a new trigger area with the given ''height'' and ''width'' in pixels
  * at the map position ''x'':''y'' in pixels. When a being steps into this area
@@ -722,12 +724,16 @@ static int announce(lua_State *s)
  *           {string itemNname, int itemNamount, int itemNcost})
  **
  * FIXME: Move into a seperate file
- * Opens a trade window for ''character'' while talking with ''npc''. ''mode'' is true for selling and false for buying. You have to set each items the NPC is buying/selling,    the cost and the maximum amount in {}.
+ * Opens a trade window for ''character'' while talking with ''npc''. ''mode''
+ * is true for selling and false for buying. You have to set each items the NPC
+ * is buying/selling,    the cost and the maximum amount in {}.
  *
- * **Note:** If the fourth parameters (table type) is omitted or invalid, and the mode set to sell (true),
+ * **Note:** If the fourth parameters (table type) is omitted or invalid, and
+ * the mode set to sell (true),
  * the whole player inventory is then sellable.
  *
- * **N.B.:** Be sure to put a ''value'' (item cost) parameter in your items.xml to permit the player to sell it when using this option.
+ * **N.B.:** Be sure to put a ''value'' (item cost) parameter in your items.xml
+ * to permit the player to sell it when using this option.
  *
  * **Return values:**
  *   * **0** when a trade has been started
@@ -737,38 +743,52 @@ static int announce(lua_State *s)
  * **Examples:**
  * <code lua npc_trade.lua>
  *     -- "A buy sample."
- *     local buycase = npc_trade(npc, ch, false, { {"Sword", 10, 20}, {"Bow", 10, 30}, {"Dagger", 10, 50} })
+ *     local buycase = npc_trade(npc, ch, false, {
+ *         {"Sword", 10, 20},
+ *         {"Bow", 10, 30},
+ *         {"Dagger", 10, 50}
+ *     })
  *     if buycase == 0 then
  *       npc_message(npc, ch, "What do you want to buy?")
  *     elseif buycase == 1 then
  *       npc_message(npc, ch, "I've got no items to sell.")
  *     else
- *       npc_message(npc, ch, "Hmm, something went wrong... Ask a scripter to fix the buying mode!")
+ *       npc_message(npc, ch, "Hmm, something went wrong... Ask a scripter to
+ *       fix the buying mode!")
  *     end
  *
  * -- ...
  *
  *    -- "Example: Let the player sell only pre-determined items."
- *    local sellcase = npc_trade(npc, ch, true, { {"Sword", 10, 20}, {"Bow", 10, 30},
- *                      {"Dagger", 10, 200}, {"Knife", 10, 300}, {"Arrow", 10, 500}, {"Cactus Drink", 10, 25} })
+ *    local sellcase = npc_trade(npc, ch, true, {
+ *                      {"Sword", 10, 20},
+ *                      {"Bow", 10, 30},
+ *                      {"Dagger", 10, 200},
+ *                      {"Knife", 10, 300},
+ *                      {"Arrow", 10, 500},
+ *                      {"Cactus Drink", 10, 25}
+ *     })
  *     if sellcase == 0 then
  *       npc_message(npc, ch, "Here we go:")
  *     elseif sellcase == 1 then
  *       npc_message(npc, ch, "I'm not interested by your items.")
  *     else
- *       npc_message(npc, ch, "Hmm, something went wrong... Ask a scripter to fix me!")
+ *       npc_message(npc, ch, "Hmm, something went wrong...")
+ *       npc_message(npc, ch, "Ask a scripter to fix me!")
  *     end
  *
  * -- ...
  *
- *     -- "Example: Let the player sell every item with a 'value' parameter in the server's items.xml file
+ *     -- "Example: Let the player sell every item with a 'value' parameter in
+ *     the server's items.xml file
  *     local sellcase = npc_trade(npc, ch, true)
  *     if sellcase == 0 then
  *       npc_message(npc, ch, "Ok, what do you want to sell:")
  *     elseif sellcase == 1 then
  *       npc_message(npc, ch, "I'm not interested by any of your items.")
  *     else
- *       npc_message(npc, ch, "Hmm, something went wrong... Ask a scripter to fix this!")
+ *       npc_message(npc, ch, "Hmm, something went wrong...")
+ *       npc_message(npc, ch, "Ask a scripter to fix me!")
  *     end
  * </code>
  */
@@ -888,8 +908,10 @@ static int npc_trade(lua_State *s)
 }
 
 /** LUA chr_inv_count (inventory)
- * chr_inv_count(handle character, bool inInventory, bool inEquipment, int id1, ..., int idN)
- * chr_inv_count(handle character, bool inInventory, bool inEquipment, string name1, ..., string nameN)
+ * chr_inv_count(handle character, bool inInventory, bool inEquipment,
+ *               int id1, ..., int idN)
+ * chr_inv_count(handle character, bool inInventory, bool inEquipment,
+ *               string name1, ..., string nameN)
  **
  * The boolean values ''inInventory'' and ''inEquipment'' make possible to
  * select whether equipped or carried items must be counted.
@@ -923,8 +945,10 @@ static int chr_inv_count(lua_State *s)
 }
 
 /** LUA chr_inv_change (inventory)
- * chr_inv_change(handle character, int id1, int number1, ..., int idN, numberN)
- * chr_inv_change(handle character, string name1, int number1, ..., string nameN, numberN)
+ * chr_inv_change(handle character,
+ *                int id1, int number1, ..., int idN, numberN)
+ * chr_inv_change(handle character,
+ *                string name1, int number1, ..., string nameN, numberN)
  **
  * **Return value:** Boolean true on success, boolean false on failure.
  *
@@ -988,11 +1012,12 @@ static int chr_inv_change(lua_State *s)
  * chr_get_inventory(character): table[]{slot, item id, name, amount}
  **
  * used to get a full view of a character's inventory.
- * This is not the preferred way to know whether an item is in the character's inventory:
+ * This is not the preferred way to know whether an item is in the character's
+ * inventory:
  * Use chr_inv_count for simple cases.
  *
- * **Return value:** A table containing all the info about the character's inventory.
- * Empty slots are not listed.
+ * **Return value:** A table containing all the info about the character's
+ * inventory. Empty slots are not listed.
  *
  * **Example of use:**
  * <code lua>
@@ -1057,8 +1082,8 @@ static int chr_get_inventory(lua_State *s)
  * This is not the preferred way to know whether an item is equipped:
  * Use chr_inv_count for simple cases.
  *
- * **Return value:** A table containing all the info about the character's equipment.
- * Empty slots are not listed.
+ * **Return value:** A table containing all the info about the character's
+ * equipment. Empty slots are not listed.
  *
  * **Example of use:**
  * <code lua>
