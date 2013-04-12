@@ -156,7 +156,7 @@ bool GameServerHandler::getGameServerFromMap(int mapId,
 }
 
 static void registerGameClient(GameServer *s, const std::string &token,
-                               Character *ptr)
+                               CharacterData *ptr)
 {
     MessageOut msg(AGMSG_PLAYER_ENTER);
     msg.writeString(token, MAGIC_TOKEN_LENGTH);
@@ -167,7 +167,7 @@ static void registerGameClient(GameServer *s, const std::string &token,
 }
 
 void GameServerHandler::registerClient(const std::string &token,
-                                       Character *ptr)
+                                       CharacterData *ptr)
 {
     GameServer *s = ::getGameServerFromMap(ptr->getMapId());
     assert(s);
@@ -292,7 +292,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
         {
             LOG_DEBUG("GAMSG_PLAYER_DATA");
             int id = msg.readInt32();
-            if (Character *ptr = storage->getCharacter(id, NULL))
+            if (CharacterData *ptr = storage->getCharacter(id, nullptr))
             {
                 deserializeCharacterData(*ptr, msg);
                 if (!storage->updateCharacter(ptr))
@@ -320,7 +320,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             LOG_DEBUG("GAMSG_REDIRECT");
             int id = msg.readInt32();
             std::string magic_token(utils::getMagicToken());
-            if (Character *ptr = storage->getCharacter(id, NULL))
+            if (CharacterData *ptr = storage->getCharacter(id, nullptr))
             {
                 int mapId = ptr->getMapId();
                 if (GameServer *s = getGameServerFromMap(mapId))
@@ -353,7 +353,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int id = msg.readInt32();
             std::string magic_token = msg.readString(MAGIC_TOKEN_LENGTH);
 
-            if (Character *ptr = storage->getCharacter(id, NULL))
+            if (CharacterData *ptr = storage->getCharacter(id, nullptr))
             {
                 int accountID = ptr->getAccountID();
                 AccountClientHandler::prepareReconnect(magic_token, accountID);
@@ -432,7 +432,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int level = msg.readInt16();
 
             // get the character so we can get the account id
-            Character *c = storage->getCharacter(id, NULL);
+            CharacterData *c = storage->getCharacter(id, NULL);
             if (c)
             {
                 storage->setAccountLevel(c->getAccountID(), level);
@@ -478,7 +478,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             result.writeInt32(characterId);
 
             // get the character based on the id
-            Character *ptr = storage->getCharacter(characterId, NULL);
+            CharacterData *ptr = storage->getCharacter(characterId, nullptr);
             if (!ptr)
             {
                 // Invalid character
@@ -528,8 +528,8 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             result.writeInt32(senderId);
 
             // get their characters
-            Character *sender = storage->getCharacter(senderId, NULL);
-            Character *receiver = storage->getCharacter(receiverName);
+            CharacterData *sender = storage->getCharacter(senderId, NULL);
+            CharacterData *receiver = storage->getCharacter(receiverName);
             if (!sender || !receiver)
             {
                 // Invalid character
@@ -657,7 +657,7 @@ void GameServerHandler::dumpStatistics(std::ostream &os)
     }
 }
 
-void GameServerHandler::sendPartyChange(Character *ptr, int partyId)
+void GameServerHandler::sendPartyChange(CharacterData *ptr, int partyId)
 {
     GameServer *s = ::getGameServerFromMap(ptr->getMapId());
     if (s)

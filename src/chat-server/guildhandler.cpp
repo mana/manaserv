@@ -127,7 +127,7 @@ void ChatHandler::sendGuildListUpdate(Guild *guild,
     for (std::list<GuildMember*>::const_iterator itr = members.begin();
          itr != members.end(); ++itr)
     {
-        Character *c = storage->getCharacter((*itr)->mId, NULL);
+        CharacterData *c = storage->getCharacter((*itr)->mId, nullptr);
         chr = mPlayerMap.find(c->getName());
         if (chr != mPlayerMap.end())
         {
@@ -293,7 +293,7 @@ void ChatHandler::handleGuildGetMembers(ChatClient &client, MessageIn &msg)
             for (std::list<GuildMember*>::iterator itr = memberList.begin();
                  itr != itr_end; ++itr)
             {
-                Character *c = storage->getCharacter((*itr)->mId, NULL);
+                CharacterData *c = storage->getCharacter((*itr)->mId, nullptr);
                 std::string memberName = c->getName();
                 reply.writeString(memberName);
                 reply.writeInt8(mPlayerMap.find(memberName) != mPlayerMap.end());
@@ -318,7 +318,7 @@ void ChatHandler::handleGuildMemberLevelChange(ChatClient &client,
     std::string user = msg.readString();
     short level = msg.readInt8();
     Guild *guild = guildManager->findById(guildId);
-    Character *c = storage->getCharacter(user);
+    CharacterData *c = storage->getCharacter(user);
 
     if (guild && c)
     {

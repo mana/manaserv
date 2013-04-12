@@ -30,15 +30,15 @@
 
 #include <algorithm>
 
-BuySell::BuySell(Character *c, bool sell):
+BuySell::BuySell(Entity *c, bool sell):
     mCurrencyId(ATTR_GP), mChar(c), mSell(sell)
 {
-    c->setBuySell(this);
+    c->getComponent<CharacterComponent>()->setBuySell(this);
 }
 
 BuySell::~BuySell()
 {
-    mChar->setBuySell(NULL);
+    mChar->getComponent<CharacterComponent>()->setBuySell(nullptr);
 }
 
 void BuySell::cancel()
@@ -75,7 +75,9 @@ int BuySell::registerPlayerItems()
 
     // We parse the player inventory and add all item
     // in a sell list.
-    const InventoryData &inventoryData = mChar->getPossessions().getInventory();
+    auto *component = mChar->getComponent<CharacterComponent>();
+    const InventoryData &inventoryData =
+            component->getPossessions().getInventory();
     for (InventoryData::const_iterator it = inventoryData.begin(),
         it_end = inventoryData.end(); it != it_end; ++it)
     {
@@ -92,7 +94,8 @@ int BuySell::registerPlayerItems()
         else
         {
             LOG_WARN("registerPlayersItems(): The character Id: "
-                << mChar->getPublicID() << " has unknown items (Id: " << id
+                << mChar->getComponent<ActorComponent>()->getPublicID()
+                << " has unknown items (Id: " << id
                 << "). They have been ignored.");
             continue;
         }
@@ -127,7 +130,7 @@ int BuySell::registerPlayerItems()
     return nbItemsToSell;
 }
 
-bool BuySell::start(Actor *actor)
+bool BuySell::start(Entity *actor)
 {
     if (mItems.empty())
     {
@@ -136,7 +139,7 @@ bool BuySell::start(Actor *actor)
     }
 
     MessageOut msg(mSell ? GPMSG_NPC_SELL : GPMSG_NPC_BUY);
-    msg.writeInt16(actor->getPublicID());
+    msg.writeInt16(actor->getComponent<ActorComponent>()->getPublicID());
     for (TradedItems::const_iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {
@@ -144,7 +147,7 @@ bool BuySell::start(Actor *actor)
         msg.writeInt16(i->amount);
         msg.writeInt16(i->cost);
     }
-    mChar->getClient()->send(msg);
+    mChar->getComponent<CharacterComponent>()->getClient()->send(msg);
     return true;
 }
 
@@ -154,22 +157,28 @@ void BuySell::perform(unsigned id, int amount)
     for (TradedItems::iterator i = mItems.begin(),
          i_end = mItems.end(); i != i_end; ++i)
     {
-        if (i->itemId != id) continue;
-        if (i->amount && i->amount <= amount) amount = i->amount;
+        auto *beingComponent = mChar->getComponent<BeingComponent>();
+
+        if (i->itemId != id)
+            continue;
+        if (i->amount && i->amount <= amount)
+            amount = i->amount;
         if (mSell)
         {
             amount -= inv.remove(id, amount);
-            mChar->setAttribute(mCurrencyId,
-                                mChar->getAttributeBase(mCurrencyId) +
-                                amount * i->cost);
+            const double currentMoney =
+                    beingComponent->getAttributeBase(mCurrencyId);
+            beingComponent->setAttribute(*mChar, mCurrencyId,
+                                         currentMoney + amount * i->cost);
         }
         else
         {
-            amount = std::min(amount, ((int) mChar->getAttributeBase(mCurrencyId)) / i->cost);
+            const double currentMoney =
+                    beingComponent->getAttributeBase(mCurrencyId);
+            amount = std::min(amount, ((int)currentMoney) / i->cost);
             amount -= inv.insert(id, amount);
-            mChar->setAttribute(mCurrencyId,
-                                mChar->getAttributeBase(mCurrencyId) -
-                                amount * i->cost);
+            beingComponent->setAttribute(*mChar, mCurrencyId,
+                                         currentMoney - amount * i->cost);
         }
         if (i->amount)
         {

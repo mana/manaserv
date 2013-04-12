@@ -29,20 +29,19 @@
 
 #include "game-server/attack.h"
 
-class Actor;
-class Being;
+class Entity;
 
 /**
  * Type definition for a list of hits
  */
 typedef std::vector<unsigned> Hits;
 
-class CombatComponent: public Component, public sigc::trackable
+class CombatComponent: public Component
 {
 public:
     static const ComponentType type = CT_Fighting;
 
-    CombatComponent(Being &being);
+    CombatComponent(Entity &being);
     virtual ~CombatComponent();
 
     void update(Entity &entity);
@@ -54,23 +53,23 @@ public:
     const Hits &getHitsTaken() const;
     void clearHitsTaken();
 
-    int performAttack(Being &source, const Damage &dmg);
-    virtual int damage(Being &target, Being *source, const Damage &damage);
+    int performAttack(Entity &source, const Damage &dmg);
+    virtual int damage(Entity &target, Entity *source, const Damage &damage);
 
     int getAttackId() const;
 
-    Being *getTarget() const;
-    void setTarget(Being *target);
+    Entity *getTarget() const;
+    void setTarget(Entity *target);
     void clearTarget();
 
     void diedOrRemoved(Entity *entity);
 
-    sigc::signal<void, Being *, const Damage &, int> signal_damaged;
+    sigc::signal<void, Entity *, const Damage &, int> signal_damaged;
 
 protected:
-    virtual void processAttack(Being &source, Attack &attack);
+    virtual void processAttack(Entity &source, Attack &attack);
 
-    Being *mTarget;
+    Entity *mTarget;
     Attacks mAttacks;
     Attack *mCurrentAttack;     // Last used attack
     Hits mHitsTaken;            //List of punches taken since last update.
@@ -111,7 +110,7 @@ inline int CombatComponent::getAttackId() const
 /**
  * Get Target
  */
-inline Being *CombatComponent::getTarget() const
+inline Entity *CombatComponent::getTarget() const
 {
     return mTarget;
 }
@@ -119,7 +118,7 @@ inline Being *CombatComponent::getTarget() const
 /**
  * Set Target
  */
-inline void CombatComponent::setTarget(Being *target)
+inline void CombatComponent::setTarget(Entity *target)
 {
     mTarget = target;
 }
@@ -129,7 +128,7 @@ inline void CombatComponent::setTarget(Being *target)
  */
 inline void CombatComponent::clearTarget()
 {
-    mTarget = 0;
+    mTarget = nullptr;
 }
 
 /**

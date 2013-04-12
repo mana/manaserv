@@ -36,7 +36,7 @@ typedef std::map< std::string, QuestCallbacks > PendingVariables;
 
 struct PendingQuest
 {
-    Character *character;
+    Entity *character;
     sigc::connection removedConnection;
     sigc::connection disconnectedConnection;
     PendingVariables variables;
@@ -46,23 +46,27 @@ typedef std::map< int, PendingQuest > PendingQuests;
 
 static PendingQuests pendingQuests;
 
-bool getQuestVar(Character *ch, const std::string &name, std::string &value)
+bool getQuestVar(Entity *ch, const std::string &name, std::string &value)
 {
     std::map< std::string, std::string >::iterator
-        i = ch->questCache.find(name);
-    if (i == ch->questCache.end()) return false;
+        i = ch->getComponent<CharacterComponent>()->questCache.find(name);
+    if (i == ch->getComponent<CharacterComponent>()->questCache.end())
+        return false;
     value = i->second;
     return true;
 }
 
-void setQuestVar(Character *ch, const std::string &name,
+void setQuestVar(Entity *ch, const std::string &name,
                  const std::string &value)
 {
+    auto *characterComponent =
+            ch->getComponent<CharacterComponent>();
+
     std::map< std::string, std::string >::iterator
-        i = ch->questCache.lower_bound(name);
-    if (i == ch->questCache.end() || i->first != name)
+        i = characterComponent->questCache.lower_bound(name);
+    if (i == characterComponent->questCache.end() || i->first != name)
     {
-        ch->questCache.insert(i, std::make_pair(name, value));
+        characterComponent->questCache.insert(i, std::make_pair(name, value));
     }
     else if (i->second == value)
     {
@@ -75,7 +79,7 @@ void setQuestVar(Character *ch, const std::string &name,
     accountHandler->updateCharacterVar(ch, name, value);
 }
 
-void QuestRefCallback::triggerCallback(Character *ch,
+void QuestRefCallback::triggerCallback(Entity *ch,
                                        const std::string &value) const
 {
     if (!mRef.isValid())
@@ -91,7 +95,7 @@ void QuestRefCallback::triggerCallback(Character *ch,
 
 static void partialRemove(Entity *t)
 {
-    int id = static_cast< Character * >(t)->getDatabaseID();
+    int id = t->getComponent<CharacterComponent>()->getDatabaseID();
     PendingVariables &variables = pendingQuests[id].variables;
     // Remove all the callbacks, but do not remove the variable names.
     for (PendingVariables::iterator i = variables.begin(),
@@ -102,9 +106,9 @@ static void partialRemove(Entity *t)
     // The listener is kept in case a fullRemove is needed later.
 }
 
-static void fullRemove(Character *ch)
+static void fullRemove(Entity &ch)
 {
-    int id = ch->getDatabaseID();
+    int id = ch.getComponent<CharacterComponent>()->getDatabaseID();
 
     {
         PendingQuest &pendingQuest = pendingQuests[id];
@@ -116,11 +120,15 @@ static void fullRemove(Character *ch)
     pendingQuests.erase(id);
 }
 
-void recoverQuestVar(Character *ch, const std::string &name,
+void recoverQuestVar(Entity *ch, const std::string &name,
                      QuestCallback *f)
 {
-    assert(ch->questCache.find(name) == ch->questCache.end());
-    int id = ch->getDatabaseID();
+    auto *characterComponent =
+            ch->getComponent<CharacterComponent>();
+
+    assert(characterComponent->questCache.find(name) ==
+           characterComponent->questCache.end());
+    int id = ch->getComponent<CharacterComponent>()->getDatabaseID();
     PendingQuests::iterator i = pendingQuests.lower_bound(id);
     if (i == pendingQuests.end() || i->first != id)
     {
@@ -134,7 +142,8 @@ void recoverQuestVar(Character *ch, const std::string &name,
         pendingQuest.removedConnection =
                 ch->signal_removed.connect(sigc::ptr_fun(partialRemove));
         pendingQuest.disconnectedConnection =
-                ch->signal_disconnected.connect(sigc::ptr_fun(fullRemove));
+                characterComponent->signal_disconnected.connect(
+                        sigc::ptr_fun(fullRemove));
 
         i = pendingQuests.insert(i, std::make_pair(id, pendingQuest));
     }
@@ -162,8 +171,9 @@ void recoveredQuestVar(int id,
         return;
     }
 
-    Character *ch = pendingQuest.character;
-    ch->questCache[name] = value;
+    Entity *ch = pendingQuest.character;
+    auto *characterComponent = ch->getComponent<CharacterComponent>();
+    characterComponent->questCache[name] = value;
 
     // Call the registered callbacks.
     for (QuestCallbacks::const_iterator k = j->second.begin(),

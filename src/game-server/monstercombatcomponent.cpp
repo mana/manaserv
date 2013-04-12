@@ -23,7 +23,7 @@
 #include "game-server/monster.h"
 #include "scripting/scriptmanager.h"
 
-MonsterCombatComponent::MonsterCombatComponent(Being &monster,
+MonsterCombatComponent::MonsterCombatComponent(Entity &monster,
                                                MonsterClass *specy):
     CombatComponent(monster),
     mDamageMutation(0)
@@ -37,11 +37,11 @@ MonsterCombatComponent::MonsterCombatComponent(Being &monster,
 /**
  * Performs an attack
  */
-void MonsterCombatComponent::processAttack(Being *source, Attack &attack)
+void MonsterCombatComponent::processAttack(Entity *source, Attack &attack)
 {
     if (!mTarget)
     {
-        source->setAction(STAND);
+        source->getComponent<BeingComponent>()->setAction(*source, STAND);
         return;
     }
 
@@ -69,8 +69,8 @@ void MonsterCombatComponent::processAttack(Being *source, Attack &attack)
 /**
  * Calls the damage function in Being and updates the aggro list
  */
-int MonsterCombatComponent::damage(Being &target,
-                                   Being *source,
+int MonsterCombatComponent::damage(Entity &target,
+                                   Entity *source,
                                    const Damage &damage)
 {
     Damage newDamage = damage;

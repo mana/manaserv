@@ -25,7 +25,7 @@
 #include "game-server/component.h"
 #include "scripting/script.h"
 
-class Character;
+class CharacterComponent;
 
 /**
  * Component describing a non-player character.
@@ -88,22 +88,22 @@ namespace Npc {
 /**
  * Starts a conversation with the NPC.
  */
-void start(Being *npc, Character *ch);
+void start(Entity *npc, Entity *ch);
 
 /**
  * Resumes an NPC conversation.
  */
-void resume(Character *ch);
+void resume(Entity *ch);
 
 /**
  * The player has made a choice or entered an integer.
  */
-void integerReceived(Character *ch, int value);
+void integerReceived(Entity *ch, int value);
 
 /**
  * The player has entered an string.
  */
-void stringReceived(Character *ch, const std::string &value);
+void stringReceived(Entity *ch, const std::string &value);
 
 } // namespace Npc
 

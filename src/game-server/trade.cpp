@@ -37,34 +37,35 @@
  * TRADE_AGREE_WAIT : One player has agreed, waiting for the other one
  */
 
-Trade::Trade(Character *c1, Character *c2):
+Trade::Trade(Entity *c1, Entity *c2):
     mChar1(c1), mChar2(c2), mMoney1(0), mMoney2(0), mState(TRADE_INIT), mCurrencyId(ATTR_GP)
 {
     MessageOut msg(GPMSG_TRADE_REQUEST);
-    msg.writeInt16(c1->getPublicID());
-    c2->getClient()->send(msg);
-    c1->setTrading(this);
-    c2->setTrading(this);
+    msg.writeInt16(c1->getComponent<ActorComponent>()->getPublicID());
+    c2->getComponent<CharacterComponent>()->getClient()->send(msg);
+    c1->getComponent<CharacterComponent>()->setTrading(this);
+    c2->getComponent<CharacterComponent>()->setTrading(this);
 }
 
 Trade::~Trade()
 {
-    mChar1->setTrading(NULL);
-    mChar2->setTrading(NULL);
+    mChar1->getComponent<CharacterComponent>()->setTrading(nullptr);
+    mChar2->getComponent<CharacterComponent>()->setTrading(nullptr);
 }
 
 void Trade::cancel()
 {
     MessageOut msg(GPMSG_TRADE_CANCEL);
-    mChar1->getClient()->send(msg);
-    mChar2->getClient()->send(msg);
+    mChar1->getComponent<CharacterComponent>()->getClient()->send(msg);
+    mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
     delete this;
 }
 
-bool Trade::request(Character *c, int id)
+bool Trade::request(Entity *c, int id)
 {
     //The trade isn't confirmed, the player which is request is the same.
-    if (mState != TRADE_INIT || c != mChar2 || mChar1->getPublicID() != id)
+    if (mState != TRADE_INIT || c != mChar2 ||
+        mChar1->getComponent<ActorComponent>()->getPublicID() != id)
     {
         /* This is not an ack for the current transaction. So assume
            a new one is about to start and cancel the current one. */
@@ -79,8 +80,8 @@ bool Trade::request(Character *c, int id)
 
     //Telling both player that the trade has started
     MessageOut msg(GPMSG_TRADE_START);
-    mChar1->getClient()->send(msg);
-    mChar2->getClient()->send(msg);
+    mChar1->getComponent<CharacterComponent>()->getClient()->send(msg);
+    mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
     return true;
 }
 
@@ -99,7 +100,7 @@ bool Trade::perform(TradedItems items, Inventory &inv1, Inventory &inv2)
     return true;
 }
 
-void Trade::agree(Character *c)
+void Trade::agree(Entity *c)
 {
     // No player agreed
     if (mState == TRADE_CONFIRMED)
@@ -116,7 +117,7 @@ void Trade::agree(Character *c)
 
         // Send the other player that the first player has confirmed
         MessageOut msg(GPMSG_TRADE_AGREED);
-        mChar2->getClient()->send(msg);
+        mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
         return;
     }
 
@@ -131,15 +132,23 @@ void Trade::agree(Character *c)
     // Check if both player has the objects in their inventories
     // and enouth money, then swap them.
     Inventory v1(mChar1), v2(mChar2);
-    if (mChar1->getAttributeBase(mCurrencyId) >= mMoney1 - mMoney2 &&
-        mChar2->getAttributeBase(mCurrencyId) >= mMoney2 - mMoney1 &&
+
+    const double moneyChar1 = mChar1->getComponent<BeingComponent>()
+            ->getAttributeBase(mCurrencyId);
+    const double moneyChar2 = mChar2->getComponent<BeingComponent>()
+            ->getAttributeBase(mCurrencyId);
+
+    if (moneyChar1 >= mMoney1 - mMoney2 &&
+        moneyChar2 >= mMoney2 - mMoney1 &&
         perform(mItems1, v1, v2) &&
         perform(mItems2, v2, v1))
     {
-        mChar1->setAttribute(mCurrencyId, mChar1->getAttributeBase(mCurrencyId)
-                             - mMoney1 + mMoney2);
-        mChar2->setAttribute(mCurrencyId, mChar2->getAttributeBase(mCurrencyId)
-                             - mMoney2 + mMoney1);
+        mChar1->getComponent<BeingComponent>()
+                ->setAttribute(*mChar1, mCurrencyId,
+                               moneyChar1 - mMoney1 + mMoney2);
+        mChar2->getComponent<BeingComponent>()
+                ->setAttribute(*mChar2, mCurrencyId,
+                               moneyChar2 - mMoney2 + mMoney1);
     }
     else
     {
@@ -148,12 +157,12 @@ void Trade::agree(Character *c)
     }
 
     MessageOut msg(GPMSG_TRADE_COMPLETE);
-    mChar1->getClient()->send(msg);
-    mChar2->getClient()->send(msg);
+    mChar1->getComponent<CharacterComponent>()->getClient()->send(msg);
+    mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
     delete this;
 }
 
-void Trade::confirm(Character *c)
+void Trade::confirm(Entity *c)
 {
     if (mState == TRADE_CONFIRMED || mState == TRADE_AGREE_WAIT)
         return;
@@ -173,7 +182,7 @@ void Trade::confirm(Character *c)
 
         //Send the other player that the first player has confirmed
         MessageOut msg(GPMSG_TRADE_CONFIRM);
-        mChar2->getClient()->send(msg);
+        mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
         return;
     }
 
@@ -185,11 +194,11 @@ void Trade::confirm(Character *c)
 
     mState = TRADE_CONFIRMED;
     MessageOut msg(GPMSG_TRADE_BOTH_CONFIRM);
-    mChar1->getClient()->send(msg);
-    mChar2->getClient()->send(msg);
+    mChar1->getComponent<CharacterComponent>()->getClient()->send(msg);
+    mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
 }
 
-void Trade::setMoney(Character *c, int amount)
+void Trade::setMoney(Entity *c, int amount)
 {
     //If the player has already confirmed, exit.
     if ((mState != TRADE_RUN && (mState != TRADE_CONFIRM_WAIT || c != mChar1))
@@ -205,26 +214,26 @@ void Trade::setMoney(Character *c, int amount)
     if (c == mChar1)
     {
         mMoney1 = amount;
-        mChar2->getClient()->send(msg);
+        mChar2->getComponent<CharacterComponent>()->getClient()->send(msg);
     }
     else
     {
         assert(c == mChar2);
         mMoney2 = amount;
-        mChar1->getClient()->send(msg);
+        mChar1->getComponent<CharacterComponent>()->getClient()->send(msg);
     }
 
     // Go back to normal run.
     mState = TRADE_RUN;
 }
 
-void Trade::addItem(Character *c, int slot, int amount)
+void Trade::addItem(Entity *c, int slot, int amount)
 {
     //If the player has already confirmed, exit.
     if ((mState != TRADE_RUN && (mState != TRADE_CONFIRM_WAIT || c != mChar1))
             || amount < 0) return;
 
-    Character *other;
+    Entity *other;
     TradedItems *items;
     if (c == mChar1)
     {
@@ -258,5 +267,5 @@ void Trade::addItem(Character *c, int slot, int amount)
     MessageOut msg(GPMSG_TRADE_ADD_ITEM);
     msg.writeInt16(id);
     msg.writeInt8(amount);
-    other->getClient()->send(msg);
+    other->getComponent<CharacterComponent>()->getClient()->send(msg);
 }

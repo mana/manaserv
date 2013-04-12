@@ -22,7 +22,7 @@
 
 #include "account-server/account.h"
 
-Character::Character(const std::string &name, int id):
+CharacterData::CharacterData(const std::string &name, int id):
     mName(name),
     mDatabaseID(id),
     mCharacterSlot(0),
@@ -39,14 +39,14 @@ Character::Character(const std::string &name, int id):
 {
 }
 
-void Character::setAccount(Account *acc)
+void CharacterData::setAccount(Account *acc)
 {
     mAccount = acc;
     mAccountID = acc->getID();
     mAccountLevel = acc->getLevel();
 }
 
-void Character::giveSpecial(int id, int currentMana)
+void CharacterData::giveSpecial(int id, int currentMana)
 {
     if (mSpecials.find(id) == mSpecials.end())
     {

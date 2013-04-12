@@ -24,7 +24,7 @@
 #include "net/messageout.h"
 #include "net/connection.h"
 
-class Character;
+class Entity;
 class MapComposite;
 
 /**
@@ -45,7 +45,7 @@ class AccountConnection : public Connection
         /**
          * Sends data of a given character.
          */
-        void sendCharacterData(Character *);
+        void sendCharacterData(Entity *);
 
         /**
          * Prepares the account server for a reconnecting player
@@ -55,19 +55,19 @@ class AccountConnection : public Connection
         /**
          * Requests the value of a character-bound variable from the database.
          */
-        void requestCharacterVar(Character *, const std::string &);
+        void requestCharacterVar(Entity *, const std::string &);
 
         /**
          * Pushes a new character-bound value to the database.
          */
-        void updateCharacterVar(Character *, const std::string &name,
-                            const std::string &value);
+        void updateCharacterVar(Entity *, const std::string &name,
+                                const std::string &value);
 
         /**
          * Pushes a new value of a map variable to the account server.
          */
         void updateMapVar(MapComposite *, const std::string &name,
-                            const std::string &value);
+                          const std::string &value);
 
         /**
          * Pushes a new value of a world variable to the account server.
@@ -78,7 +78,7 @@ class AccountConnection : public Connection
         /**
          * Sends ban message.
          */
-        void banCharacter(Character *, int);
+        void banCharacter(Entity *, int);
 
         /**
          * Gathers statistics and sends them.
@@ -88,17 +88,17 @@ class AccountConnection : public Connection
         /**
          * Send letter
          */
-        void sendPost(Character *, MessageIn &);
+        void sendPost(Entity *, MessageIn &);
 
         /**
          * Get post
          */
-        void getPost(Character *);
+        void getPost(Entity *);
 
         /**
          * Change Account Level
          */
-        void changeAccountLevel(Character *, int);
+        void changeAccountLevel(Entity *, int);
 
         /**
          * Sends all changed player data to the account server to minimize

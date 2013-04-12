@@ -33,7 +33,7 @@
 
 #include <sigc++/connection.h>
 
-class Character;
+class CharacterComponent;
 class ItemClass;
 class Script;
 
@@ -275,12 +275,12 @@ struct AttackPosition
 class MonsterComponent : public Component
 {
     public:
-        static const ComponentType type = CT_Monster;
+    static const ComponentType type = CT_Monster;
 
         /** Time in game ticks until ownership of a monster can change. */
         static const int KILLSTEAL_PROTECTION_TIME = 100;
 
-        MonsterComponent(Being &being, MonsterClass *);
+        MonsterComponent(Entity &entity, MonsterClass *);
         ~MonsterComponent();
 
         /**
@@ -299,16 +299,16 @@ class MonsterComponent : public Component
         /**
          * Signal handler
          */
-        void monsterDied(Being *monster);
+        void monsterDied(Entity *monster);
 
-        void receivedDamage(Being *attacker, const Damage &damage, int hpLoss);
+        void receivedDamage(Entity *attacker, const Damage &damage, int hpLoss);
 
         /**
          * Alters hate for the monster
          */
-        void changeAnger(Actor *target, int amount);
+        void changeAnger(Entity *target, int amount);
 
-        std::map<Being *, int> getAngerList() const;
+        std::map<Entity *, int> getAngerList() const;
 
         /**
          * Removes a being from the anger list.
@@ -334,21 +334,21 @@ class MonsterComponent : public Component
             sigc::connection removedConnection;
             sigc::connection diedConnection;
         };
-        std::map<Being *, AggressionInfo> mAnger;
+        std::map<Entity *, AggressionInfo> mAnger;
 
         /**
          * Character who currently owns this monster (killsteal protection).
          */
-        Character *mOwner;
+        Entity *mOwner;
 
         /** List of characters and their skills that attacked this monster. */
-        std::map<Character *, std::set <size_t> > mExpReceivers;
+        std::map<Entity *, std::set <size_t> > mExpReceivers;
 
         /**
          * List of characters who are entitled to receive exp (killsteal
          * protection).
          */
-        std::set<Character *> mLegalExpReceivers;
+        std::set<Entity *> mLegalExpReceivers;
 
         /**
          * Set positions relative to target from which the monster can attack.

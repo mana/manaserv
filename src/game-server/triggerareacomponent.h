@@ -28,13 +28,13 @@
 
 #include <set>
 
-class Actor;
+class Entity;
 
 class TriggerAction
 {
     public:
         virtual ~TriggerAction() {}
-        virtual void process(Actor *obj) = 0;
+        virtual void process(Entity *obj) = 0;
 };
 
 class WarpAction : public TriggerAction
@@ -43,7 +43,7 @@ class WarpAction : public TriggerAction
         WarpAction(MapComposite *m, const Point &point)
           : mMap(m), mTargetPoint(point) {}
 
-        virtual void process(Actor *obj);
+        virtual void process(Entity *obj);
 
     private:
         MapComposite *mMap;
@@ -55,7 +55,7 @@ class ScriptAction : public TriggerAction
     public:
         ScriptAction(Script *script, Script::Ref callback, int arg);
 
-        virtual void process(Actor *obj);
+        virtual void process(Entity *obj);
 
     private:
         Script *mScript;        // Script object to be called
@@ -85,7 +85,7 @@ class TriggerAreaComponent : public Component
         Rectangle mZone;
         TriggerAction *mAction;
         bool mOnce;
-        std::set<Actor *> mInside;
+        std::set<Entity *> mInside;
 };
 
 #endif // TRIGGERAREACOMPONENT_H

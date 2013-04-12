@@ -36,7 +36,8 @@ class Inventory
         /**
          * Creates a view on the possessions of a character.
          */
-        Inventory(Character *);
+        explicit Inventory(Entity *);
+        Inventory(Entity *, Possessions &possessions);
 
         /**
          * Commits delayed changes if applicable.
@@ -189,7 +190,7 @@ class Inventory
 
         Possessions *mPoss; /**< Pointer to the modified possessions. */
 
-        Character *mCharacter; /**< Character to notify. */
+        Entity *mCharacter; /**< Character to notify. */
 };
 
 #endif

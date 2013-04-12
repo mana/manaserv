@@ -25,12 +25,12 @@
 
 #include "utils/logger.h"
 
-CombatComponent::CombatComponent(Being &being):
-    mTarget(0),
-    mCurrentAttack(0)
+CombatComponent::CombatComponent(Entity &being):
+    mTarget(nullptr),
+    mCurrentAttack(nullptr)
 {
-    being.signal_died.connect(sigc::mem_fun(this,
-                               &CombatComponent::diedOrRemoved));
+    being.getComponent<BeingComponent>()->signal_died.connect(sigc::mem_fun(
+            this, &CombatComponent::diedOrRemoved));
     being.signal_removed.connect(sigc::mem_fun(this,
                                   &CombatComponent::diedOrRemoved));
 }
@@ -41,13 +41,9 @@ CombatComponent::~CombatComponent()
 
 void CombatComponent::update(Entity &entity)
 {
-    // Temporary for as long as Being is not split into Components
-    // Prevents to implement all at once
-    // TODO: remove this as soon as possible
-    Being &being = static_cast<Being&>(entity);
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
-
-    if (being.getAction() != ATTACK || !mTarget)
+    if (beingComponent->getAction() != ATTACK || !mTarget)
             return;
 
     std::vector<Attack *> attacksReady;
@@ -55,7 +51,7 @@ void CombatComponent::update(Entity &entity)
 
     if (Attack *triggerableAttack = mAttacks.getTriggerableAttack())
     {
-        processAttack(being, *triggerableAttack);
+        processAttack(entity, *triggerableAttack);
         mAttacks.markAttackAsTriggered();
     }
 
@@ -68,12 +64,18 @@ void CombatComponent::update(Entity &entity)
     for (std::vector<Attack *>::const_iterator it = attacksReady.begin(),
          it_end = attacksReady.end(); it != it_end; ++it)
     {
+        const Point &attackerPosition =
+                entity.getComponent<ActorComponent>()->getPosition();
+        const Point &targetPosition =
+                mTarget->getComponent<ActorComponent>()->getPosition();
+
         // check if target is in range using the pythagorean theorem
-        int distx = being.getPosition().x - mTarget->getPosition().x;
-        int disty = being.getPosition().y - mTarget->getPosition().y;
+        int distx = attackerPosition.x - targetPosition.x;
+        int disty = attackerPosition.y - targetPosition.y;
         int distSquare = (distx * distx + disty * disty);
         AttackInfo *info = (*it)->getAttackInfo();
-        int maxDist = info->getDamage().range + being.getSize();
+        int maxDist = info->getDamage().range +
+                entity.getComponent<ActorComponent>()->getSize();
 
         if (distSquare <= maxDist * maxDist &&
                 (!highestPriorityAttack ||
@@ -87,9 +89,12 @@ void CombatComponent::update(Entity &entity)
     {
         mAttacks.startAttack(highestPriorityAttack);
         mCurrentAttack = highestPriorityAttack;
-        being.setDestination(being.getPosition());
+        const Point &point =
+                entity.getComponent<ActorComponent>()->getPosition();
+        beingComponent->setDestination(entity, point);
         // TODO: Turn into direction of enemy
-        being.raiseUpdateFlags(UPDATEFLAG_ATTACK);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_ATTACK);
     }
 }
 
@@ -98,8 +103,12 @@ void CombatComponent::update(Entity &entity)
  * stats, deducts the result from the hitpoints and adds the result to
  * the HitsTaken list.
  */
-int CombatComponent::damage(Being &target, Being *source, const Damage &damage)
+int CombatComponent::damage(Entity &target,
+                            Entity *source,
+                            const Damage &damage)
 {
+    auto *beingComponent = target.getComponent<BeingComponent>();
+
     int HPloss = damage.base;
     if (damage.delta)
         HPloss += rand() * (damage.delta + 1) / RAND_MAX;
@@ -108,8 +117,10 @@ int CombatComponent::damage(Being &target, Being *source, const Damage &damage)
     switch (damage.type)
     {
         case DAMAGE_PHYSICAL:
-            if (!damage.trueStrike &&
-                rand()%((int) target.getModifiedAttribute(ATTR_DODGE) + 1) >
+        {
+            const double dodge =
+                    beingComponent->getModifiedAttribute(ATTR_DODGE);
+            if (!damage.trueStrike && rand()%((int)dodge + 1) >
                     rand()%(damage.cth + 1))
             {
                 HPloss = 0;
@@ -118,18 +129,19 @@ int CombatComponent::damage(Being &target, Being *source, const Damage &damage)
             }
             else
             {
-                HPloss = HPloss * (1.0 - (0.0159375f *
-                                  target.getModifiedAttribute(ATTR_DEFENSE)) /
-                                   (1.0 + 0.017 *
-                                 target.getModifiedAttribute(ATTR_DEFENSE))) +
-                         (rand()%((HPloss >> 4) + 1));
+                const double defense =
+                        beingComponent->getModifiedAttribute(ATTR_DEFENSE);
+                HPloss = HPloss * (1.0 - (0.0159375f * defense) /
+                        (1.0 + 0.017 * defense)) +
+                        (rand()%((HPloss / 16) + 1));
                 // TODO Process triggers for receiving damage here.
                 // If there is an attacker included, also process triggers for the attacker (successful physical strike)
             }
             break;
+        }
         case DAMAGE_MAGICAL:
 #if 0
-            target.getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
+            beingComponent.getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
 #else
             LOG_WARN("Attempt to use magical type damage! This has not been"
                       "implemented yet and should not be used!");
@@ -146,12 +158,14 @@ int CombatComponent::damage(Being &target, Being *source, const Damage &damage)
     if (HPloss > 0)
     {
         mHitsTaken.push_back(HPloss);
-        const Attribute *HP = target.getAttribute(ATTR_HP);
-        LOG_DEBUG("Being " << target.getPublicID() << " suffered " << HPloss
+        const Attribute *HP = beingComponent->getAttribute(ATTR_HP);
+        LOG_DEBUG("Being "
+                  << target.getComponent<ActorComponent>()->getPublicID()
+                  << " suffered " << HPloss
                   << " damage. HP: "
                   << HP->getModifiedAttribute() << "/"
-                  << target.getModifiedAttribute(ATTR_MAX_HP));
-        target.setAttribute(ATTR_HP, HP->getBase() - HPloss);
+                  << beingComponent->getModifiedAttribute(ATTR_MAX_HP));
+        beingComponent->setAttribute(target, ATTR_HP, HP->getBase() - HPloss);
         // No HP regen after being hit if this is set.
         // TODO: Reenable this once the attributes are available as a component
         // A bit too fuzzy to implement at the moment
@@ -170,7 +184,7 @@ int CombatComponent::damage(Being &target, Being *source, const Damage &damage)
 /**
  * Performs an attack
  */
-void CombatComponent::processAttack(Being &source, Attack &attack)
+void CombatComponent::processAttack(Entity &source, Attack &attack)
 {
     performAttack(source, attack.getAttackInfo()->getDamage());
 }
@@ -180,7 +194,7 @@ void CombatComponent::processAttack(Being &source, Attack &attack)
  */
 void CombatComponent::addAttack(AttackInfo *attackInfo)
 {
-    mAttacks.add(attackInfo);
+    mAttacks.add(this, attackInfo);
 }
 
 /**
@@ -188,18 +202,18 @@ void CombatComponent::addAttack(AttackInfo *attackInfo)
  */
 void CombatComponent::removeAttack(AttackInfo *attackInfo)
 {
-    mAttacks.remove(attackInfo);
+    mAttacks.remove(this, attackInfo);
 }
 
 /**
  * Performs an attack.
  */
-int CombatComponent::performAttack(Being &source, const Damage &dmg)
+int CombatComponent::performAttack(Entity &source, const Damage &dmg)
 {
     // check target legality
     if (!mTarget
             || mTarget == &source
-            || mTarget->getAction() == DEAD
+            || mTarget->getComponent<BeingComponent>()->getAction() == DEAD
             || !mTarget->canFight())
         return -1;
 

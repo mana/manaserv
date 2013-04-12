@@ -28,7 +28,7 @@
 #include "game-server/attack.h"
 #include "scripting/script.h"
 
-class Being;
+class Entity;
 class ItemClass;
 class MapComposite;
 
@@ -105,8 +105,8 @@ class ItemEffectInfo
     public:
         virtual ~ItemEffectInfo() {}
 
-        virtual bool apply(Being *itemUser) = 0;
-        virtual void dispell(Being *itemUser) = 0;
+        virtual bool apply(Entity *itemUser) = 0;
+        virtual void dispell(Entity *itemUser) = 0;
 };
 
 class ItemEffectAttrMod : public ItemEffectInfo
@@ -118,8 +118,8 @@ class ItemEffectAttrMod : public ItemEffectInfo
                         mMod(value), mDuration(duration), mId(id)
         {}
 
-        bool apply(Being *itemUser);
-        void dispell(Being *itemUser);
+        bool apply(Entity *itemUser);
+        void dispell(Entity *itemUser);
 
     private:
         unsigned mAttributeId;
@@ -136,8 +136,8 @@ class ItemEffectAttack : public ItemEffectInfo
             mAttackInfo(attackInfo)
         {}
 
-        bool apply(Being *itemUser);
-        void dispell(Being *itemUser);
+        bool apply(Entity *itemUser);
+        void dispell(Entity *itemUser);
     private:
         AttackInfo *mAttackInfo;
 };
@@ -145,9 +145,9 @@ class ItemEffectAttack : public ItemEffectInfo
 class ItemEffectConsumes : public ItemEffectInfo
 {
     public:
-        bool apply(Being *)
+        bool apply(Entity *)
         { return true; }
-        void dispell(Being *)
+        void dispell(Entity *)
         {}
 };
 
@@ -164,8 +164,8 @@ class ItemEffectScript : public ItemEffectInfo
 
         ~ItemEffectScript();
 
-        bool apply(Being *itemUser);
-        void dispell(Being *itemUser);
+        bool apply(Entity *itemUser);
+        void dispell(Entity *itemUser);
 
     private:
         ItemClass *mItemClass;
@@ -206,7 +206,7 @@ class ItemClass
          * Applies the modifiers of an item to a given user.
          * @return true if item should be removed.
          */
-        bool useTrigger(Being *itemUser, ItemTriggerType trigger);
+        bool useTrigger(Entity *itemUser, ItemTriggerType trigger);
 
         /**
          * Gets unit cost of these items.
@@ -334,7 +334,7 @@ namespace Item {
  *
  * @return the created item
  */
-Actor *create(MapComposite *map, Point pos, ItemClass *itemClass, int amount);
+Entity *create(MapComposite *map, Point pos, ItemClass *itemClass, int amount);
 
 } // namespace Item
 

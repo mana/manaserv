@@ -33,28 +33,33 @@
 #include <map>
 #include <string>
 
-bool ItemEffectAttrMod::apply(Being *itemUser)
+bool ItemEffectAttrMod::apply(Entity *itemUser)
 {
     LOG_DEBUG("Applying modifier.");
-    itemUser->applyModifier(mAttributeId, mMod, mAttributeLayer,
-                            mDuration, mId);
+    itemUser->getComponent<BeingComponent>()->applyModifier(*itemUser,
+                                                            mAttributeId, mMod,
+                                                            mAttributeLayer,
+                                                            mDuration, mId);
     return false;
 }
 
-void ItemEffectAttrMod::dispell(Being *itemUser)
+void ItemEffectAttrMod::dispell(Entity *itemUser)
 {
     LOG_DEBUG("Dispelling modifier.");
-    itemUser->removeModifier(mAttributeId, mMod, mAttributeLayer,
-                             mId, !mDuration);
+    itemUser->getComponent<BeingComponent>()->removeModifier(*itemUser,
+                                                             mAttributeId,
+                                                             mMod,
+                                                             mAttributeLayer,
+                                                             mId, !mDuration);
 }
 
-bool ItemEffectAttack::apply(Being *itemUser)
+bool ItemEffectAttack::apply(Entity *itemUser)
 {
     itemUser->getComponent<CombatComponent>()->addAttack(mAttackInfo);
     return false;
 }
 
-void ItemEffectAttack::dispell(Being *itemUser)
+void ItemEffectAttack::dispell(Entity *itemUser)
 {
     itemUser->getComponent<CombatComponent>()->removeAttack(mAttackInfo);
 }
@@ -63,7 +68,7 @@ ItemEffectScript::~ItemEffectScript()
 {
 }
 
-bool ItemEffectScript::apply(Being *itemUser)
+bool ItemEffectScript::apply(Entity *itemUser)
 {
     if (mActivateEventName.empty())
         return false;
@@ -82,7 +87,7 @@ bool ItemEffectScript::apply(Being *itemUser)
     return false;
 }
 
-void ItemEffectScript::dispell(Being *itemUser)
+void ItemEffectScript::dispell(Entity *itemUser)
 {
     if (mDispellEventName.empty())
         return;
@@ -123,7 +128,7 @@ void ItemClass::addEffect(ItemEffectInfo *effect,
         mDispells.insert(std::make_pair(dispell, effect));
 }
 
-bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
+bool ItemClass::useTrigger(Entity *itemUser, ItemTriggerType trigger)
 {
     if (!trigger)
         return false;
@@ -166,21 +171,23 @@ void ItemComponent::update(Entity &entity)
     {
         mLifetime--;
         if (!mLifetime)
-            GameState::enqueueRemove(static_cast<Actor*>(&entity));
+            GameState::enqueueRemove(&entity);
     }
 }
 
 namespace Item {
 
-Actor *create(MapComposite *map,
+Entity *create(MapComposite *map,
               Point pos,
               ItemClass *itemClass,
               int amount)
 {
-    Actor *itemActor = new Actor(OBJECT_ITEM);
+    Entity *itemActor = new Entity(OBJECT_ITEM);
+    ActorComponent *actorComponent = new ActorComponent(*itemActor);
+    itemActor->addComponent(actorComponent);
     itemActor->addComponent(new ItemComponent(itemClass, amount));
     itemActor->setMap(map);
-    itemActor->setPosition(pos);
+    actorComponent->setPosition(*itemActor, pos);
     return itemActor;
 }
 

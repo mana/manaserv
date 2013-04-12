@@ -32,14 +32,14 @@ StatusEffect::~StatusEffect()
 {
 }
 
-void StatusEffect::tick(Being *target, int count)
+void StatusEffect::tick(Entity &target, int count)
 {
     if (mTickCallback.isValid())
     {
         Script *s = ScriptManager::currentState();
         s->prepare(mTickCallback);
-        s->push(target);
+        s->push(&target);
         s->push(count);
-        s->execute(target->getMap());
+        s->execute(target.getMap());
     }
 }

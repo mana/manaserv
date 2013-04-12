@@ -49,30 +49,29 @@
 #include <limits.h>
 
 // Experience curve related values
-const float Character::EXPCURVE_EXPONENT = 3.0f;
-const float Character::EXPCURVE_FACTOR = 10.0f;
-const float Character::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
-const float Character::EXP_LEVEL_FLEXIBILITY = 1.0f;
+const float CharacterComponent::EXPCURVE_EXPONENT = 3.0f;
+const float CharacterComponent::EXPCURVE_FACTOR = 10.0f;
+const float CharacterComponent::LEVEL_SKILL_PRECEDENCE_FACTOR = 0.75f;
+const float CharacterComponent::EXP_LEVEL_FLEXIBILITY = 1.0f;
 
-Script::Ref Character::mDeathCallback;
-Script::Ref Character::mDeathAcceptedCallback;
-Script::Ref Character::mLoginCallback;
+Script::Ref CharacterComponent::mDeathCallback;
+Script::Ref CharacterComponent::mDeathAcceptedCallback;
+Script::Ref CharacterComponent::mLoginCallback;
 
-static bool executeCallback(Script::Ref function, Character *character)
+static bool executeCallback(Script::Ref function, Entity &entity)
 {
     if (!function.isValid())
         return false;
 
     Script *script = ScriptManager::currentState();
     script->prepare(function);
-    script->push(character);
-    script->execute(character->getMap());
+    script->push(&entity);
+    script->execute(entity.getMap());
     return true;
 }
 
 
-Character::Character(MessageIn &msg):
-    Being(OBJECT_CHARACTER),
+CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mClient(NULL),
     mConnected(true),
     mTransactionHandler(NULL),
@@ -88,29 +87,36 @@ Character::Character(MessageIn &msg):
     mTransaction(TRANS_NONE),
     mTalkNpcId(0),
     mNpcThread(0),
-    mKnuckleAttackInfo(0)
+    mKnuckleAttackInfo(0),
+    mBaseEntity(&entity)
 {
-    const AttributeManager::AttributeScope &attr =
+    mCharacterData = new CharacterData(&entity, this);
+
+    auto *beingComponent = entity.getComponent<BeingComponent>();
+
+    const AttributeManager::AttributeScope &attributes =
                            attributeManager->getAttributeScope(CharacterScope);
     LOG_DEBUG("Character creation: initialisation of "
-              << attr.size() << " attributes.");
-    for (AttributeManager::AttributeScope::const_iterator it1 = attr.begin(),
-         it1_end = attr.end(); it1 != it1_end; ++it1)
-        mAttributes.insert(std::make_pair(it1->first, Attribute(*it1->second)));
+              << attributes.size() << " attributes.");
+    for (auto attributeScope : attributes)
+        beingComponent->createAttribute(attributeScope.first,
+                                        *attributeScope.second);
 
-    setWalkMask(Map::BLOCKMASK_WALL);
-    setBlockType(BLOCKTYPE_CHARACTER);
+    auto *actorComponent = entity.getComponent<ActorComponent>();
+    actorComponent->setWalkMask(Map::BLOCKMASK_WALL);
+    actorComponent->setBlockType(BLOCKTYPE_CHARACTER);
+    actorComponent->setSize(16);
 
 
-    CombatComponent *combatcomponent = new CombatComponent(*this);
-    addComponent(combatcomponent);
+    CombatComponent *combatcomponent = new CombatComponent(entity);
+    entity.addComponent(combatcomponent);
     combatcomponent->getAttacks().attack_added.connect(
-            sigc::mem_fun(this, &Character::attackAdded));
+            sigc::mem_fun(this, &CharacterComponent::attackAdded));
     combatcomponent->getAttacks().attack_removed.connect(
-            sigc::mem_fun(this, &Character::attackRemoved));
+            sigc::mem_fun(this, &CharacterComponent::attackRemoved));
 
     // Default knuckle attack
-    int damageBase = this->getModifiedAttribute(ATTR_STR);
+    int damageBase = beingComponent->getModifiedAttribute(ATTR_STR);
     int damageDelta = damageBase / 2;
     Damage knuckleDamage;
     knuckleDamage.skill = skillManager->getDefaultSkillId();
@@ -126,34 +132,34 @@ Character::Character(MessageIn &msg):
 
     // Get character data.
     mDatabaseID = msg.readInt32();
-    setName(msg.readString());
-    deserializeCharacterData(*this, msg);
-    mOld = getPosition();
-    Inventory(this).initialize();
-    modifiedAllAttribute();
-    setSize(16);
+    beingComponent->setName(msg.readString());
+
+    deserializeCharacterData(*mCharacterData, msg);
+
+    Inventory(&entity, mPossessions).initialize();
+    modifiedAllAttributes(entity);;
+
+    beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
+            this, &CharacterComponent::attributeChanged));
 }
 
-Character::~Character()
+CharacterComponent::~CharacterComponent()
 {
     delete mNpcThread;
     delete mKnuckleAttackInfo;
 }
 
-void Character::update()
+void CharacterComponent::update(Entity &entity)
 {
-    // First, deal with being generic updates
-    Being::update();
-
     // Update character level if needed.
     if (mRecalculateLevel)
     {
         mRecalculateLevel = false;
-        recalculateLevel();
+        recalculateLevel(entity);
     }
 
     // Dead character: don't regenerate anything else
-    if (getAction() == DEAD)
+    if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
     // Update special recharge
@@ -169,9 +175,9 @@ void Character::update()
             {
                 Script *script = ScriptManager::currentState();
                 script->prepare(s.specialInfo->rechargedCallback);
-                script->push(this);
+                script->push(&entity);
                 script->push(s.specialInfo->id);
-                script->execute(getMap());
+                script->execute(entity.getMap());
             }
         }
     }
@@ -181,53 +187,46 @@ void Character::update()
         sendSpecialUpdate();
         mSpecialUpdateNeeded = false;
     }
-
-    mStatusEffects.clear();
-    StatusEffects::iterator it = mStatus.begin();
-    while (it != mStatus.end())
-    {
-        mStatusEffects[it->first] = it->second.time;
-        it++;
-    }
 }
 
-void Character::died()
+void CharacterComponent::characterDied(Entity *being)
 {
-    Being::died();
-    executeCallback(mDeathCallback, this);
+    executeCallback(mDeathCallback, *being);
 }
 
-void Character::respawn()
+void CharacterComponent::respawn(Entity &entity)
 {
-    if (mAction != DEAD)
+    auto *beingComponent = entity.getComponent<BeingComponent>();
+
+    if (beingComponent->getAction() != DEAD)
     {
-        LOG_WARN("Character \"" << getName()
+        LOG_WARN("Character \"" << beingComponent->getName()
                  << "\" tried to respawn without being dead");
         return;
     }
 
     // Make it alive again
-    setAction(STAND);
+    beingComponent->setAction(entity, STAND);
     // Reset target
-    getComponent<CombatComponent>()->clearTarget();
+    entity.getComponent<CombatComponent>()->clearTarget();
 
     // Execute respawn callback when set
-    if (executeCallback(mDeathAcceptedCallback, this))
+    if (executeCallback(mDeathAcceptedCallback, entity))
         return;
 
     // No script respawn callback set - fall back to hardcoded logic
-    mAttributes[ATTR_HP].setBase(mAttributes[ATTR_MAX_HP].getModifiedAttribute());
-    updateDerivedAttributes(ATTR_HP);
+    const double maxHp = beingComponent->getModifiedAttribute(ATTR_MAX_HP);
+    beingComponent->setAttribute(entity, ATTR_HP, maxHp);
     // Warp back to spawn point.
     int spawnMap = Configuration::getValue("char_respawnMap", 1);
     int spawnX = Configuration::getValue("char_respawnX", 1024);
     int spawnY = Configuration::getValue("char_respawnY", 1024);
 
-    GameState::enqueueWarp(this, MapManager::getMap(spawnMap),
+    GameState::enqueueWarp(&entity, MapManager::getMap(spawnMap),
                            Point(spawnX, spawnY));
 }
 
-bool Character::specialUseCheck(SpecialMap::iterator it)
+bool CharacterComponent::specialUseCheck(SpecialMap::iterator it)
 {
     if (it == mSpecials.end())
     {
@@ -257,7 +256,7 @@ bool Character::specialUseCheck(SpecialMap::iterator it)
     return true;
 }
 
-void Character::useSpecialOnBeing(int id, Being *b)
+void CharacterComponent::useSpecialOnBeing(Entity &user, int id, Entity *b)
 {
     SpecialMap::iterator it = mSpecials.find(id);
     if (!specialUseCheck(it))
@@ -270,13 +269,13 @@ void Character::useSpecialOnBeing(int id, Being *b)
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
     script->prepare(special.specialInfo->useCallback);
-    script->push(this);
+    script->push(&user);
     script->push(b);
     script->push(special.specialInfo->id);
-    script->execute(getMap());
+    script->execute(user.getMap());
 }
 
-void Character::useSpecialOnPoint(int id, int x, int y)
+void CharacterComponent::useSpecialOnPoint(Entity &user, int id, int x, int y)
 {
     SpecialMap::iterator it = mSpecials.find(id);
     if (!specialUseCheck(it))
@@ -289,14 +288,14 @@ void Character::useSpecialOnPoint(int id, int x, int y)
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
     script->prepare(special.specialInfo->useCallback);
-    script->push(this);
+    script->push(&user);
     script->push(x);
     script->push(y);
     script->push(special.specialInfo->id);
-    script->execute(getMap());
+    script->execute(user.getMap());
 }
 
-bool Character::giveSpecial(int id, int currentMana)
+bool CharacterComponent::giveSpecial(int id, int currentMana)
 {
     if (mSpecials.find(id) == mSpecials.end())
     {
@@ -315,7 +314,7 @@ bool Character::giveSpecial(int id, int currentMana)
     return false;
 }
 
-bool Character::setSpecialMana(int id, int mana)
+bool CharacterComponent::setSpecialMana(int id, int mana)
 {
     SpecialMap::iterator it = mSpecials.find(id);
     if (it != mSpecials.end())
@@ -327,7 +326,7 @@ bool Character::setSpecialMana(int id, int mana)
     return false;
 }
 
-bool Character::setSpecialRechargeSpeed(int id, int speed)
+bool CharacterComponent::setSpecialRechargeSpeed(int id, int speed)
 {
     SpecialMap::iterator it = mSpecials.find(id);
     if (it != mSpecials.end())
@@ -339,7 +338,7 @@ bool Character::setSpecialRechargeSpeed(int id, int speed)
     return false;
 }
 
-void Character::sendSpecialUpdate()
+void CharacterComponent::sendSpecialUpdate()
 {
     //GPMSG_SPECIAL_STATUS = 0x0293,
     // { B specialID, L current, L max, L recharge }
@@ -353,20 +352,10 @@ void Character::sendSpecialUpdate()
         msg.writeInt32(it->second.specialInfo->neededMana);
         msg.writeInt32(it->second.rechargeSpeed);
     }
-    gameHandler->sendTo(this, msg);
+    gameHandler->sendTo(mClient, msg);
 }
 
-int Character::getMapId() const
-{
-    return getMap()->getID();
-}
-
-void Character::setMapId(int id)
-{
-    setMap(MapManager::getMap(id));
-}
-
-void Character::cancelTransaction()
+void CharacterComponent::cancelTransaction()
 {
     TransactionType t = mTransaction;
     mTransaction = TRANS_NONE;
@@ -383,19 +372,19 @@ void Character::cancelTransaction()
     }
 }
 
-Trade *Character::getTrading() const
+Trade *CharacterComponent::getTrading() const
 {
     return mTransaction == TRANS_TRADE
         ? static_cast< Trade * >(mTransactionHandler) : NULL;
 }
 
-BuySell *Character::getBuySell() const
+BuySell *CharacterComponent::getBuySell() const
 {
     return mTransaction == TRANS_BUYSELL
         ? static_cast< BuySell * >(mTransactionHandler) : NULL;
 }
 
-void Character::setTrading(Trade *t)
+void CharacterComponent::setTrading(Trade *t)
 {
     if (t)
     {
@@ -410,7 +399,7 @@ void Character::setTrading(Trade *t)
     }
 }
 
-void Character::setBuySell(BuySell *t)
+void CharacterComponent::setBuySell(BuySell *t)
 {
     if (t)
     {
@@ -425,18 +414,19 @@ void Character::setBuySell(BuySell *t)
     }
 }
 
-void Character::sendStatus()
+void CharacterComponent::sendStatus(Entity &entity)
 {
+    auto *beingComponent = entity.getComponent<BeingComponent>();
     MessageOut attribMsg(GPMSG_PLAYER_ATTRIBUTE_CHANGE);
     for (std::set<size_t>::const_iterator i = mModifiedAttributes.begin(),
          i_end = mModifiedAttributes.end(); i != i_end; ++i)
     {
         int attr = *i;
         attribMsg.writeInt16(attr);
-        attribMsg.writeInt32(getAttributeBase(attr) * 256);
-        attribMsg.writeInt32(getModifiedAttribute(attr) * 256);
+        attribMsg.writeInt32(beingComponent->getAttributeBase(attr) * 256);
+        attribMsg.writeInt32(beingComponent->getModifiedAttribute(attr) * 256);
     }
-    if (attribMsg.getLength() > 2) gameHandler->sendTo(this, attribMsg);
+    if (attribMsg.getLength() > 2) gameHandler->sendTo(mClient, attribMsg);
     mModifiedAttributes.clear();
 
     MessageOut expMsg(GPMSG_PLAYER_EXP_CHANGE);
@@ -449,7 +439,7 @@ void Character::sendStatus()
         expMsg.writeInt32(getExpNeeded(skill));
         expMsg.writeInt16(levelForExp(getExperience(skill)));
     }
-    if (expMsg.getLength() > 2) gameHandler->sendTo(this, expMsg);
+    if (expMsg.getLength() > 2) gameHandler->sendTo(mClient, expMsg);
     mModifiedExperience.clear();
 
     if (mUpdateLevelProgress)
@@ -457,73 +447,53 @@ void Character::sendStatus()
         mUpdateLevelProgress = false;
         MessageOut progressMessage(GPMSG_LEVEL_PROGRESS);
         progressMessage.writeInt8(mLevelProgress);
-        gameHandler->sendTo(this, progressMessage);
+        gameHandler->sendTo(mClient, progressMessage);
     }
 }
 
-void Character::modifiedAllAttribute()
+void CharacterComponent::modifiedAllAttributes(Entity &entity)
 {
+    auto *beingComponent = entity.getComponent<BeingComponent>();
+
     LOG_DEBUG("Marking all attributes as changed, requiring recalculation.");
-    for (AttributeMap::iterator it = mAttributes.begin(),
-         it_end = mAttributes.end();
-        it != it_end; ++it)
+    for (auto attribute : beingComponent->getAttributes())
     {
-        recalculateBaseAttribute(it->first);
-        updateDerivedAttributes(it->first);
+        beingComponent->recalculateBaseAttribute(entity, attribute.first);
+        mModifiedAttributes.insert(attribute.first);
     }
 }
 
-void Character::recalculateBaseAttribute(unsigned attr)
+void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
 {
-    // `attr' may or may not have changed. Recalculate the base value.
-    LOG_DEBUG("Received update attribute recalculation request at Character "
-              "for " << attr << ".");
-    if (!mAttributes.count(attr))
-        return;
+    auto *beingComponent = entity->getComponent<BeingComponent>();
 
+    // Inform the client of this attribute modification.
+    accountHandler->updateAttributes(getDatabaseID(), attr,
+                                   beingComponent->getAttributeBase(attr),
+                                   beingComponent->getModifiedAttribute(attr));
+    mModifiedAttributes.insert(attr);
+
+    // Update the knuckle Attack if required
     if (attr == ATTR_STR && mKnuckleAttackInfo)
     {
         // TODO: dehardcode this
         Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
-        knuckleDamage.base = getModifiedAttribute(ATTR_STR);
+        knuckleDamage.base = beingComponent->getModifiedAttribute(ATTR_STR);
         knuckleDamage.delta = knuckleDamage.base / 2;
     }
-    Being::recalculateBaseAttribute(attr);
-
 }
 
-
-void Character::updateDerivedAttributes(unsigned attr)
-{
-    /*
-     * `attr' has changed, perform updates accordingly.
-     */
-    flagAttribute(attr);
-
-
-    Being::updateDerivedAttributes(attr);
-}
-
-void Character::flagAttribute(int attr)
-{
-    // Inform the client of this attribute modification.
-    accountHandler->updateAttributes(getDatabaseID(), attr,
-                                     getAttributeBase(attr),
-                                     getModifiedAttribute(attr));
-    mModifiedAttributes.insert(attr);
-}
-
-int Character::expForLevel(int level)
+int CharacterComponent::expForLevel(int level)
 {
     return int(pow(level, EXPCURVE_EXPONENT) * EXPCURVE_FACTOR);
 }
 
-int Character::levelForExp(int exp)
+int CharacterComponent::levelForExp(int exp)
 {
     return int(pow(float(exp) / EXPCURVE_FACTOR, 1.0f / EXPCURVE_EXPONENT));
 }
 
-void Character::receiveExperience(int skill, int experience, int optimalLevel)
+void CharacterComponent::receiveExperience(int skill, int experience, int optimalLevel)
 {
     // reduce experience when skill is over optimal level
     int levelOverOptimum = levelForExp(getExperience(skill)) - optimalLevel;
@@ -562,7 +532,7 @@ void Character::receiveExperience(int skill, int experience, int optimalLevel)
     mRecalculateLevel = true;
 }
 
-void Character::incrementKillCount(int monsterType)
+void CharacterComponent::incrementKillCount(int monsterType)
 {
     std::map<int, int>::iterator i = mKillCount.find(monsterType);
     if (i == mKillCount.end())
@@ -577,7 +547,7 @@ void Character::incrementKillCount(int monsterType)
     }
 }
 
-int Character::getKillCount(int monsterType) const
+int CharacterComponent::getKillCount(int monsterType) const
 {
     std::map<int, int>::const_iterator i = mKillCount.find(monsterType);
     if (i != mKillCount.end())
@@ -586,7 +556,7 @@ int Character::getKillCount(int monsterType) const
 }
 
 
-void Character::recalculateLevel()
+void CharacterComponent::recalculateLevel(Entity &entity)
 {
     std::list<float> levels;
     std::map<int, int>::const_iterator a;
@@ -618,7 +588,7 @@ void Character::recalculateLevel()
 
     while (mLevel < level)
     {
-        levelup();
+        levelup(entity);
     }
 
     int levelProgress = int((level - floor(level)) * 100);
@@ -629,19 +599,19 @@ void Character::recalculateLevel()
     }
 }
 
-int Character::getExpNeeded(size_t skill) const
+int CharacterComponent::getExpNeeded(size_t skill) const
 {
     int level = levelForExp(getExperience(skill));
-    return Character::expForLevel(level + 1) - expForLevel(level);
+    return CharacterComponent::expForLevel(level + 1) - expForLevel(level);
 }
 
-int Character::getExpGot(size_t skill) const
+int CharacterComponent::getExpGot(size_t skill) const
 {
     int level = levelForExp(getExperience(skill));
-    return mExperience.at(skill) - Character::expForLevel(level);
+    return mExperience.at(skill) - CharacterComponent::expForLevel(level);
 }
 
-void Character::levelup()
+void CharacterComponent::levelup(Entity &entity)
 {
     mLevel++;
 
@@ -654,40 +624,50 @@ void Character::levelup()
     levelupMsg.writeInt16(mLevel);
     levelupMsg.writeInt16(mCharacterPoints);
     levelupMsg.writeInt16(mCorrectionPoints);
-    gameHandler->sendTo(this, levelupMsg);
-    LOG_INFO(getName()<<" reached level "<<mLevel);
+    gameHandler->sendTo(mClient, levelupMsg);
+    LOG_INFO(entity.getComponent<BeingComponent>()->getName()
+             << " reached level " << mLevel);
 }
 
-AttribmodResponseCode Character::useCharacterPoint(size_t attribute)
+AttribmodResponseCode CharacterComponent::useCharacterPoint(Entity &entity,
+                                                            size_t attribute)
 {
+    auto *beingComponent = entity.getComponent<BeingComponent>();
+
     if (!attributeManager->isAttributeDirectlyModifiable(attribute))
         return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCharacterPoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
 
     --mCharacterPoints;
-    setAttribute(attribute, getAttributeBase(attribute) + 1);
-    updateDerivedAttributes(attribute);
+
+    const double base = beingComponent->getAttributeBase(attribute);
+    beingComponent->setAttribute(entity, attribute, base + 1);
+    beingComponent->updateDerivedAttributes(entity, attribute);
     return ATTRIBMOD_OK;
 }
 
-AttribmodResponseCode Character::useCorrectionPoint(size_t attribute)
+AttribmodResponseCode CharacterComponent::useCorrectionPoint(Entity &entity,
+                                                             size_t attribute)
 {
+    auto *beingComponent = entity.getComponent<BeingComponent>();
+
     if (!attributeManager->isAttributeDirectlyModifiable(attribute))
         return ATTRIBMOD_INVALID_ATTRIBUTE;
     if (!mCorrectionPoints)
         return ATTRIBMOD_NO_POINTS_LEFT;
-    if (getAttributeBase(attribute) <= 1)
+    if (beingComponent->getAttributeBase(attribute) <= 1)
         return ATTRIBMOD_DENIED;
 
     --mCorrectionPoints;
     ++mCharacterPoints;
-    setAttribute(attribute, getAttributeBase(attribute) - 1);
-    updateDerivedAttributes(attribute);
+
+    const double base = beingComponent->getAttributeBase(attribute);
+    beingComponent->setAttribute(entity, attribute, base - 1);
     return ATTRIBMOD_OK;
 }
 
-void Character::startNpcThread(Script::Thread *thread, int npcId)
+void CharacterComponent::startNpcThread(Script::Thread *thread, int npcId)
 {
     if (mNpcThread)
         delete mNpcThread;
@@ -698,7 +678,7 @@ void Character::startNpcThread(Script::Thread *thread, int npcId)
     resumeNpcThread();
 }
 
-void Character::resumeNpcThread()
+void CharacterComponent::resumeNpcThread()
 {
     Script *script = ScriptManager::currentState();
 
@@ -708,43 +688,44 @@ void Character::resumeNpcThread()
     {
         MessageOut msg(GPMSG_NPC_CLOSE);
         msg.writeInt16(mTalkNpcId);
-        gameHandler->sendTo(this, msg);
+        gameHandler->sendTo(mClient, msg);
 
         mTalkNpcId = 0;
         mNpcThread = 0;
     }
 }
 
-void Character::attackAdded(Attack &attack)
+void CharacterComponent::attackAdded(CombatComponent *combatComponent,
+                                     Attack &attack)
 {
     // Remove knuckle attack
     if (attack.getAttackInfo() != mKnuckleAttackInfo)
-        getComponent<CombatComponent>()->removeAttack(mKnuckleAttackInfo);
+        combatComponent->removeAttack(mKnuckleAttackInfo);
 }
 
-void Character::attackRemoved(Attack &attack)
+void CharacterComponent::attackRemoved(CombatComponent *combatComponent,
+                                       Attack &attack)
 {
     // Add knuckle attack
-    CombatComponent *combatComponent = getComponent<CombatComponent>();
     // 1 since the attack is not really removed yet.
     if (combatComponent->getAttacks().getNumber() == 1)
         combatComponent->addAttack(mKnuckleAttackInfo);
 }
 
-void Character::disconnected()
+void CharacterComponent::disconnected(Entity &entity)
 {
     mConnected = false;
 
     // Make the dead characters respawn, even in case of disconnection.
-    if (getAction() == DEAD)
-        respawn();
+    if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
+        respawn(entity);
     else
-        GameState::remove(this);
+        GameState::remove(&entity);
 
-    signal_disconnected.emit(this);
+    signal_disconnected.emit(entity);
 }
 
-bool Character::takeSpecial(int id)
+bool CharacterComponent::takeSpecial(int id)
 {
     SpecialMap::iterator i = mSpecials.find(id);
     if (i != mSpecials.end())
@@ -756,12 +737,12 @@ bool Character::takeSpecial(int id)
     return false;
 }
 
-void Character::clearSpecials()
+void CharacterComponent::clearSpecials()
 {
     mSpecials.clear();
 }
 
-void Character::triggerLoginCallback()
+void CharacterComponent::triggerLoginCallback(Entity &entity)
 {
-    executeCallback(mLoginCallback, this);
+    executeCallback(mLoginCallback, entity);
 }

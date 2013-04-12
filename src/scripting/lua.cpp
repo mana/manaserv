@@ -88,7 +88,7 @@ extern "C" {
 static int on_update_derived_attribute(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
-    Being::setUpdateDerivedAttributesCallback(getScript(s));
+    BeingComponent::setUpdateDerivedAttributesCallback(getScript(s));
     return 0;
 }
 
@@ -107,7 +107,7 @@ static int on_update_derived_attribute(lua_State *s)
 static int on_recalculate_base_attribute(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
-    Being::setRecalculateBaseAttributeCallback(getScript(s));
+    BeingComponent::setRecalculateBaseAttributeCallback(getScript(s));
     return 0;
 }
 
@@ -120,7 +120,7 @@ static int on_recalculate_base_attribute(lua_State *s)
 static int on_character_death(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
-    Character::setDeathCallback(getScript(s));
+    CharacterComponent::setDeathCallback(getScript(s));
     return 0;
 }
 
@@ -134,7 +134,7 @@ static int on_character_death(lua_State *s)
 static int on_character_death_accept(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
-    Character::setDeathAcceptedCallback(getScript(s));
+    CharacterComponent::setDeathAcceptedCallback(getScript(s));
     return 0;
 }
 
@@ -147,7 +147,7 @@ static int on_character_death_accept(lua_State *s)
 static int on_character_login(lua_State *s)
 {
     luaL_checktype(s, 1, LUA_TFUNCTION);
-    Character::setLoginCallback(getScript(s));
+    CharacterComponent::setLoginCallback(getScript(s));
     return 0;
 }
 
@@ -283,18 +283,22 @@ static int npc_create(lua_State *s)
 
     NpcComponent *npcComponent = new NpcComponent(id);
 
-    Being *npc = new Being(OBJECT_NPC);
+    Entity *npc = new Entity(OBJECT_NPC);
+    auto *actorComponent = new ActorComponent(*npc);
+    npc->addComponent(actorComponent);
+    auto *beingComponent = new BeingComponent(*npc);
+    npc->addComponent(beingComponent);
     npc->addComponent(npcComponent);
     // some health so it doesn't spawn dead
-    npc->setAttribute(ATTR_MAX_HP, 100);
-    npc->setAttribute(ATTR_HP, 100);
-    npc->setName(name);
-    npc->setGender(getGender(gender));
+    beingComponent->setAttribute(*npc, ATTR_MAX_HP, 100);
+    beingComponent->setAttribute(*npc, ATTR_HP, 100);
+    beingComponent->setName(name);
+    beingComponent->setGender(getGender(gender));
 
-    npc->setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER |
-                     Map::BLOCKMASK_CHARACTER);
+    actorComponent->setWalkMask(Map::BLOCKMASK_WALL | Map::BLOCKMASK_MONSTER |
+                                Map::BLOCKMASK_CHARACTER);
     npc->setMap(m);
-    npc->setPosition(Point(x, y));
+    actorComponent->setPosition(*npc, Point(x, y));
 
     if (lua_isfunction(s, 6))
     {
@@ -320,7 +324,7 @@ static int npc_create(lua_State *s)
  */
 static int npc_enable(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
+    Entity *npc = checkNpc(s, 1);
     npc->getComponent<NpcComponent>()->setEnabled(true);
     GameState::enqueueInsert(npc);
     return 0;
@@ -333,7 +337,7 @@ static int npc_enable(lua_State *s)
  */
 static int npc_disable(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
+    Entity *npc = checkNpc(s, 1);
     npc->getComponent<NpcComponent>()->setEnabled(false);
     GameState::remove(npc);
     return 0;
@@ -355,10 +359,13 @@ static int monster_create(lua_State *s)
     const int y = luaL_checkint(s, 3);
     MapComposite *m = checkCurrentMap(s);
 
-    Being *monster = new Being(OBJECT_MONSTER);
+    Entity *monster = new Entity(OBJECT_MONSTER);
+    auto *actorComponent = new ActorComponent(*monster);
+    monster->addComponent(actorComponent);
+    monster->addComponent(new BeingComponent(*monster));
     monster->addComponent(new MonsterComponent(*monster, monsterClass));
     monster->setMap(m);
-    monster->setPosition(Point(x, y));
+    actorComponent->setPosition(*monster, Point(x, y));
     GameState::enqueueInsert(monster);
 
     lua_pushlightuserdata(s, monster);
@@ -375,7 +382,7 @@ static int monster_create(lua_State *s)
 static int monster_remove(lua_State *s)
 {
     bool monsterRemoved = false;
-    if (Being *m = getMonster(s, 1))
+    if (Entity *m = getMonster(s, 1))
     {
         GameState::remove(m);
         monsterRemoved = true;
@@ -454,7 +461,7 @@ static int effect_create(lua_State *s)
     if (lua_isuserdata(s, 2))
     {
         // being mode
-        Being *b = checkBeing(s, 2);
+        Entity *b = checkBeing(s, 2);
         Effects::show(id, b);
     }
     else
@@ -483,7 +490,7 @@ static int item_drop(lua_State *s)
     const int number = luaL_optint(s, 4, 1);
     MapComposite *map = checkCurrentMap(s);
 
-    Actor *item = Item::create(map, Point(x, y), ic, number);
+    Entity *item = Item::create(map, Point(x, y), ic, number);
     GameState::enqueueInsert(item);
     return 0;
 }
@@ -501,14 +508,14 @@ static int item_drop(lua_State *s)
  */
 static int npc_message(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
-    Character *q = checkCharacter(s, 2);
+    Entity *npc = checkNpc(s, 1);
+    Entity *q = checkCharacter(s, 2);
     const char *m = luaL_checkstring(s, 3);
 
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_MESSAGE);
-    msg.writeInt16(npc->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     msg.writeString(m);
     gameHandler->sendTo(q, msg);
 
@@ -534,13 +541,13 @@ static int npc_message(lua_State *s)
  */
 static int npc_choice(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
-    Character *q = checkCharacter(s, 2);
+    Entity *npc = checkNpc(s, 1);
+    Entity *q = checkCharacter(s, 2);
 
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_CHOICE);
-    msg.writeInt16(npc->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
     {
         if (lua_isstring(s, i))
@@ -590,8 +597,8 @@ static int npc_choice(lua_State *s)
  */
 static int npc_ask_integer(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
-    Character *q = checkCharacter(s, 2);
+    Entity *npc = checkNpc(s, 1);
+    Entity *q = checkCharacter(s, 2);
     int min = luaL_checkint(s, 3);
     int max = luaL_checkint(s, 4);
     int defaultValue = luaL_optint(s, 5, min);
@@ -599,7 +606,7 @@ static int npc_ask_integer(lua_State *s)
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_NUMBER);
-    msg.writeInt16(npc->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     msg.writeInt32(min);
     msg.writeInt32(max);
     msg.writeInt32(defaultValue);
@@ -620,13 +627,13 @@ static int npc_ask_integer(lua_State *s)
  */
 static int npc_ask_string(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
-    Character *q = checkCharacter(s, 2);
+    Entity *npc = checkNpc(s, 1);
+    Entity *q = checkCharacter(s, 2);
 
     Script::Thread *thread = checkCurrentThread(s);
 
     MessageOut msg(GPMSG_NPC_STRING);
-    msg.writeInt16(npc->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     gameHandler->sendTo(q, msg);
 
     thread->mState = Script::ThreadExpectingString;
@@ -640,11 +647,11 @@ static int npc_ask_string(lua_State *s)
  */
 static int npc_post(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
-    Character *q = checkCharacter(s, 2);
+    Entity *npc = checkNpc(s, 1);
+    Entity *q = checkCharacter(s, 2);
 
     MessageOut msg(GPMSG_NPC_POST);
-    msg.writeInt16(npc->getPublicID());
+    msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     gameHandler->sendTo(q, msg);
 
     return 0;
@@ -658,7 +665,7 @@ static int npc_post(lua_State *s)
  */
 static int being_say(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const char *message = luaL_checkstring(s, 2);
     GameState::sayAround(being, message);
     return 0;
@@ -672,10 +679,10 @@ static int being_say(lua_State *s)
  */
 static int chat_message(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const char *message = luaL_checkstring(s, 2);
 
-    GameState::sayTo(being, NULL, message);
+    GameState::sayTo(being, nullptr, message);
     return 0;
 }
 
@@ -767,8 +774,8 @@ static int announce(lua_State *s)
  */
 static int npc_trade(lua_State *s)
 {
-    Being *npc = checkNpc(s, 1);
-    Character *q = checkCharacter(s, 2);
+    Entity *npc = checkNpc(s, 1);
+    Entity *q = checkCharacter(s, 2);
     if (!lua_isboolean(s, 3))
     {
         luaL_error(s, "npc_trade called with incorrect parameters.");
@@ -892,7 +899,7 @@ static int npc_trade(lua_State *s)
  */
 static int chr_inv_count(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
     if (!lua_isboolean(s, 2) || !lua_isboolean(s, 3))
     {
         luaL_error(s, "chr_inv_count called with incorrect parameters.");
@@ -933,7 +940,7 @@ static int chr_inv_count(lua_State *s)
  */
 static int chr_inv_change(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
     int nb_items = (lua_gettop(s) - 1) / 2;
     Inventory inv(q);
     for (int i = 0; i < nb_items; ++i)
@@ -956,7 +963,9 @@ static int chr_inv_change(lua_State *s)
             if (nb)
             {
                 LOG_WARN("chr_inv_change() removed more items than owned: "
-                     << "character: " << q->getName() << " item id: " << id);
+                     << "character: "
+                     << q->getComponent<BeingComponent>()->getName()
+                     << " item id: " << id);
             }
         }
         else
@@ -964,9 +973,9 @@ static int chr_inv_change(lua_State *s)
             nb = inv.insert(id, nb);
             if (nb)
             {
-                Actor *item = Item::create(q->getMap(),
-                                           q->getPosition(),
-                                           ic, nb);
+                const Point &position =
+                        q->getComponent<ActorComponent>()->getPosition();
+                Entity *item = Item::create(q->getMap(), position, ic, nb);
                 GameState::enqueueInsert(item);
             }
         }
@@ -997,10 +1006,11 @@ static int chr_inv_change(lua_State *s)
  */
 static int chr_get_inventory(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
 
     // Create a lua table with the inventory ids.
-    const InventoryData invData = q->getPossessions().getInventory();
+    const InventoryData invData = q->getComponent<CharacterComponent>()
+            ->getPossessions().getInventory();
 
     lua_newtable(s);
     int firstTableStackPosition = lua_gettop(s);
@@ -1061,10 +1071,11 @@ static int chr_get_inventory(lua_State *s)
  */
 static int chr_get_equipment(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
 
     // Create a lua table with the inventory ids.
-    const EquipData equipData = q->getPossessions().getEquipment();
+    const EquipData equipData = q->getComponent<CharacterComponent>()
+            ->getPossessions().getEquipment();
 
     lua_newtable(s);
     int firstTableStackPosition = lua_gettop(s);
@@ -1113,7 +1124,7 @@ static int chr_get_equipment(lua_State *s)
  */
 static int chr_equip_slot(lua_State *s)
 {
-    Character *ch = checkCharacter(s, 1);
+    Entity *ch = checkCharacter(s, 1);
     int inventorySlot = luaL_checkint(s, 2);
 
     Inventory inv(ch);
@@ -1132,7 +1143,7 @@ static int chr_equip_slot(lua_State *s)
  */
 static int chr_equip_item(lua_State *s)
 {
-    Character *ch = checkCharacter(s, 1);
+    Entity *ch = checkCharacter(s, 1);
     ItemClass *it = checkItemClass(s, 2);
 
     Inventory inv(ch);
@@ -1156,7 +1167,7 @@ static int chr_equip_item(lua_State *s)
  */
 static int chr_unequip_slot(lua_State *s)
 {
-    Character *ch = checkCharacter(s, 1);
+    Entity *ch = checkCharacter(s, 1);
     int equipmentSlot = luaL_checkint(s, 2);
 
     Inventory inv(ch);
@@ -1176,7 +1187,7 @@ static int chr_unequip_slot(lua_State *s)
  */
 static int chr_unequip_item(lua_State *s)
 {
-    Character *ch = checkCharacter(s, 1);
+    Entity *ch = checkCharacter(s, 1);
     ItemClass *it = checkItemClass(s, 2);
 
     Inventory inv(ch);
@@ -1197,7 +1208,7 @@ static int chr_unequip_item(lua_State *s)
  */
 static int chr_get_quest(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
     const char *name = luaL_checkstring(s, 2);
     luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
 
@@ -1226,7 +1237,7 @@ static int chr_get_quest(lua_State *s)
  */
 static int chr_set_quest(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
     const char *name = luaL_checkstring(s, 2);
     const char *value = luaL_checkstring(s, 3);
     luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
@@ -1246,11 +1257,12 @@ static int chr_set_quest(lua_State *s)
  */
 static int chr_set_special_recharge_speed(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int special = checkSpecial(s, 2);
     const int speed = luaL_checkint(s, 3);
 
-    if (!c->setSpecialRechargeSpeed(special, speed))
+    if (!c->getComponent<CharacterComponent>()
+            ->setSpecialRechargeSpeed(special, speed))
     {
         luaL_error(s,
                    "chr_set_special_recharge_speed called with special "
@@ -1271,12 +1283,14 @@ static int chr_set_special_recharge_speed(lua_State *s)
  */
 static int chr_get_special_recharge_speed(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int special = checkSpecial(s, 2);
 
-    SpecialMap::iterator it = c->findSpecial(special);
+    auto *characterComponent = c->getComponent<CharacterComponent>();
 
-    luaL_argcheck(s, it != c->getSpecialEnd(), 2,
+    SpecialMap::iterator it = characterComponent->findSpecial(special);
+
+    luaL_argcheck(s, it != characterComponent->getSpecialEnd(), 2,
                   "character does not have special");
 
     lua_pushinteger(s, it->second.rechargeSpeed);
@@ -1295,10 +1309,10 @@ static int chr_get_special_recharge_speed(lua_State *s)
  */
 static int chr_set_special_mana(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int special = checkSpecial(s, 2);
     const int mana = luaL_checkint(s, 3);
-    if (!c->setSpecialMana(special, mana))
+    if (!c->getComponent<CharacterComponent>()->setSpecialMana(special, mana))
     {
         luaL_error(s,
                    "chr_set_special_mana called with special "
@@ -1319,10 +1333,11 @@ static int chr_set_special_mana(lua_State *s)
  */
 static int chr_get_special_mana(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
+    auto *characterComponent = c->getComponent<CharacterComponent>();
     const int special = checkSpecial(s, 2);
-    SpecialMap::iterator it = c->findSpecial(special);
-    luaL_argcheck(s, it != c->getSpecialEnd(), 2,
+    SpecialMap::iterator it = characterComponent->findSpecial(special);
+    luaL_argcheck(s, it != characterComponent->getSpecialEnd(), 2,
                   "character does not have special");
     lua_pushinteger(s, it->second.currentMana);
     return 1;
@@ -1339,17 +1354,22 @@ static int chr_get_special_mana(lua_State *s)
  */
 static int being_walk(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
-    being->setDestination(Point(x, y));
+    auto *beingComponent = being->getComponent<BeingComponent>();
+
+    beingComponent->setDestination(*being, Point(x, y));
 
     if (lua_gettop(s) >= 4)
     {
-        being->setAttribute(ATTR_MOVE_SPEED_TPS, luaL_checknumber(s, 4));
-        being->setAttribute(ATTR_MOVE_SPEED_RAW, utils::tpsToRawSpeed(
-                being->getModifiedAttribute(ATTR_MOVE_SPEED_TPS)));
+        const double speedTps = luaL_checknumber(s, 4);
+        beingComponent->setAttribute(*being, ATTR_MOVE_SPEED_TPS, speedTps);
+        const double modifiedSpeedTps =
+                beingComponent->getModifiedAttribute(ATTR_MOVE_SPEED_TPS);
+        beingComponent->setAttribute(*being, ATTR_MOVE_SPEED_RAW,
+                                     utils::tpsToRawSpeed(modifiedSpeedTps));
     }
 
     return 0;
@@ -1390,7 +1410,7 @@ static int being_walk(lua_State *s)
  */
 static int being_damage(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
 
     if (!being->canFight())
     {
@@ -1404,7 +1424,7 @@ static int being_damage(lua_State *s)
     dmg.cth = luaL_checkint(s, 4);
     dmg.type = (DamageType)luaL_checkint(s, 5);
     dmg.element = (Element)luaL_checkint(s, 6);
-    Being *source = 0;
+    Entity *source = 0;
     if (lua_gettop(s) >= 7)
     {
         source = checkBeing(s, 7);
@@ -1435,15 +1455,16 @@ static int being_damage(lua_State *s)
  */
 static int being_heal(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
 
     if (lua_gettop(s) == 1) // when there is only one argument
     {
-        being->heal();
+        being->getComponent<BeingComponent>()->heal(*being);
     }
     else
     {
-        being->heal(luaL_checkint(s, 2));
+        being->getComponent<BeingComponent>()->heal(*being,
+                                                    luaL_checkint(s, 2));
     }
 
     return 0;
@@ -1456,8 +1477,8 @@ static int being_heal(lua_State *s)
  */
 static int being_get_name(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
-    push(s, being->getName());
+    Entity *being = checkBeing(s, 1);
+    push(s, being->getComponent<BeingComponent>()->getName());
     return 1;
 }
 
@@ -1477,7 +1498,7 @@ static int being_get_name(lua_State *s)
 */
 static int being_type(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     lua_pushinteger(s, being->getType());
     return 1;
 }
@@ -1497,8 +1518,8 @@ static int being_type(lua_State *s)
  */
 static int being_get_action(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
-    lua_pushinteger(s, being->getAction());
+    Entity *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getComponent<BeingComponent>()->getAction());
     return 1;
 }
 
@@ -1509,9 +1530,10 @@ static int being_get_action(lua_State *s)
  */
 static int being_set_action(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     int act = luaL_checkint(s, 2);
-    being->setAction((BeingAction) act);
+    being->getComponent<BeingComponent>()->setAction(*being,
+                                                     (BeingAction) act);
     return 0;
 }
 
@@ -1530,8 +1552,8 @@ static int being_set_action(lua_State *s)
  */
 static int being_get_direction(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
-    lua_pushinteger(s, being->getDirection());
+    Entity *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getComponent<BeingComponent>()->getDirection());
     return 1;
 }
 
@@ -1543,9 +1565,9 @@ static int being_get_direction(lua_State *s)
  */
 static int being_set_direction(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     BeingDirection dir = (BeingDirection) luaL_checkint(s, 2);
-    being->setDirection(dir);
+    being->getComponent<BeingComponent>()->setDirection(*being, dir);
     return 0;
 }
 
@@ -1564,7 +1586,7 @@ static int being_set_direction(lua_State *s)
  */
 static int being_set_walkmask(lua_State *s)
 {
-   Being *being = checkBeing(s, 1);
+   Entity *being = checkBeing(s, 1);
    const char *stringMask = luaL_checkstring(s, 2);
    unsigned char mask = 0x00;
    if (strchr(stringMask, 'w'))
@@ -1573,7 +1595,7 @@ static int being_set_walkmask(lua_State *s)
        mask |= Map::BLOCKMASK_CHARACTER;
    else if (strchr(stringMask, 'm'))
        mask |= Map::BLOCKMASK_MONSTER;
-   being->setWalkMask(mask);
+   being->getComponent<ActorComponent>()->setWalkMask(mask);
    return 0;
 }
 
@@ -1585,8 +1607,9 @@ static int being_set_walkmask(lua_State *s)
  */
 static int being_get_walkmask(lua_State *s)
 {
-   Being *being = checkBeing(s, 1);
-   const unsigned char mask = being->getWalkMask();
+   Entity *being = checkBeing(s, 1);
+   const unsigned char mask =
+           being->getComponent<ActorComponent>()->getWalkMask();
    luaL_Buffer buffer;
    luaL_buffinit(s, &buffer);
    if (mask & Map::BLOCKMASK_WALL)
@@ -1610,7 +1633,7 @@ static int being_get_walkmask(lua_State *s)
  */
 static int chr_warp(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
     int x = luaL_checkint(s, 3);
     int y = luaL_checkint(s, 4);
 
@@ -1664,8 +1687,8 @@ static int chr_warp(lua_State *s)
  */
 static int posX(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
-    lua_pushinteger(s, being->getPosition().x);
+    Entity *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getComponent<ActorComponent>()->getPosition().x);
     return 1;
 }
 
@@ -1677,8 +1700,8 @@ static int posX(lua_State *s)
  */
 static int posY(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
-    lua_pushinteger(s, being->getPosition().y);
+    Entity *being = checkBeing(s, 1);
+    lua_pushinteger(s, being->getComponent<ActorComponent>()->getPosition().y);
     return 1;
 }
 
@@ -1690,11 +1713,12 @@ static int posY(lua_State *s)
  */
 static int being_get_base_attribute(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     int attr = luaL_checkint(s, 2);
     luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
 
-    lua_pushinteger(s, being->getAttributeBase(attr));
+    lua_pushinteger(s, being->getComponent<BeingComponent>()
+                    ->getAttributeBase(attr));
     return 1;
 }
 
@@ -1705,11 +1729,11 @@ static int being_get_base_attribute(lua_State *s)
  */
 static int being_set_base_attribute(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     int attr = luaL_checkint(s, 2);
     double value = luaL_checknumber(s, 3);
 
-    being->setAttribute(attr, value);
+    being->getComponent<BeingComponent>()->setAttribute(*being, attr, value);
     return 0;
 }
 
@@ -1734,11 +1758,13 @@ static int being_set_base_attribute(lua_State *s)
  */
 static int being_get_modified_attribute(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     int attr = luaL_checkint(s, 2);
     luaL_argcheck(s, attr > 0, 2, "invalid attribute id");
 
-    lua_pushinteger(s, being->getModifiedAttribute(attr));
+    const double value =
+            being->getComponent<BeingComponent>()->getModifiedAttribute(attr);
+    lua_pushinteger(s, value);
     return 1;
 }
 
@@ -1760,14 +1786,16 @@ static int being_get_modified_attribute(lua_State *s)
  */
 static int being_apply_attribute_modifier(lua_State *s)
 {
-    Being *being    = checkBeing(s, 1);
+    Entity *being    = checkBeing(s, 1);
     int attr        = luaL_checkint(s,2);
     double value    = luaL_checknumber(s, 3);
     int layer       = luaL_checkint(s, 4);
     int duration    = luaL_optint(s, 5, 0);
     int effectId    = luaL_optint(s, 6, 0);
 
-    being->applyModifier(attr, value, layer, duration, effectId);
+    being->getComponent<BeingComponent>()->applyModifier(*being, attr, value,
+                                                         layer, duration,
+                                                         effectId);
     return 0;
 }
 
@@ -1779,13 +1807,14 @@ static int being_apply_attribute_modifier(lua_State *s)
  */
 static int being_remove_attribute_modifier(lua_State *s)
 {
-    Being *being    = checkBeing(s, 1);
+    Entity *being    = checkBeing(s, 1);
     int attr        = luaL_checkint(s, 2);
     double value    = luaL_checknumber(s, 3);
     int layer       = luaL_checkint(s, 4);
     int effectId    = luaL_optint(s, 5, 0);
 
-    being->removeModifier(attr, value, layer, effectId);
+    being->getComponent<BeingComponent>()->removeModifier(*being, attr, value,
+                                                          layer, effectId);
     return 0;
 }
 
@@ -1801,8 +1830,8 @@ static int being_remove_attribute_modifier(lua_State *s)
  */
 static int being_get_gender(lua_State *s)
 {
-    Being *b = checkBeing(s, 1);
-    lua_pushinteger(s, b->getGender());
+    Entity *b = checkBeing(s, 1);
+    lua_pushinteger(s, b->getComponent<BeingComponent>()->getGender());
     return 1;
 }
 
@@ -1819,9 +1848,9 @@ static int being_get_gender(lua_State *s)
  */
 static int being_set_gender(lua_State *s)
 {
-    Being *b = checkBeing(s, 1);
+    Entity *b = checkBeing(s, 1);
     const int gender = luaL_checkinteger(s, 2);
-    b->setGender(getGender(gender));
+    b->getComponent<BeingComponent>()->setGender(getGender(gender));
     return 0;
 }
 
@@ -1838,15 +1867,17 @@ static int being_set_gender(lua_State *s)
  */
 static int chr_get_level(lua_State *s)
 {
-    Character *ch = checkCharacter(s, 1);
+    Entity *ch = checkCharacter(s, 1);
+    auto *characterComponent = ch->getComponent<CharacterComponent>();
     if (lua_gettop(s) > 1)
     {
         int skillId = checkSkill(s, 2);
-        lua_pushinteger(s, ch->levelForExp(ch->getExperience(skillId)));
+        lua_pushinteger(s, characterComponent->levelForExp(
+                characterComponent->getExperience(skillId)));
     }
     else
     {
-        lua_pushinteger(s, ch->getLevel());
+        lua_pushinteger(s, characterComponent->getLevel());
     }
     return 1;
 }
@@ -1862,9 +1893,9 @@ static int chr_get_level(lua_State *s)
  */
 static int chr_get_exp(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     int skill = checkSkill(s, 2);
-    const int exp = c->getExperience(skill);
+    const int exp = c->getComponent<CharacterComponent>()->getExperience(skill);
 
     lua_pushinteger(s, exp);
     return 1;
@@ -1882,12 +1913,13 @@ static int chr_get_exp(lua_State *s)
  */
 static int chr_give_exp(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     int skill = checkSkill(s, 2);
     const int exp = luaL_checkint(s, 3);
     const int optimalLevel = luaL_optint(s, 4, 0);
 
-    c->receiveExperience(skill, exp, optimalLevel);
+    c->getComponent<CharacterComponent>()->receiveExperience(skill, exp,
+                                                             optimalLevel);
     return 0;
 }
 
@@ -1900,7 +1932,7 @@ static int chr_give_exp(lua_State *s)
 static int exp_for_level(lua_State *s)
 {
     const int level = luaL_checkint(s, 1);
-    lua_pushinteger(s, Character::expForLevel(level));
+    lua_pushinteger(s, CharacterComponent::expForLevel(level));
     return 1;
 }
 
@@ -1911,9 +1943,9 @@ static int exp_for_level(lua_State *s)
  */
 static int chr_get_hair_color(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
 
-    lua_pushinteger(s, c->getHairColor());
+    lua_pushinteger(s, c->getComponent<CharacterComponent>()->getHairColor());
     return 1;
 }
 
@@ -1924,12 +1956,13 @@ static int chr_get_hair_color(lua_State *s)
  */
 static int chr_set_hair_color(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int color = luaL_checkint(s, 2);
     luaL_argcheck(s, color >= 0, 2, "invalid color id");
 
-    c->setHairColor(color);
-    c->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+    c->getComponent<CharacterComponent>()->setHairColor(color);
+    c->getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_LOOKSCHANGE);
 
     return 0;
 }
@@ -1941,9 +1974,9 @@ static int chr_set_hair_color(lua_State *s)
  */
 static int chr_get_hair_style(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
 
-    lua_pushinteger(s, c->getHairStyle());
+    lua_pushinteger(s, c->getComponent<CharacterComponent>()->getHairStyle());
     return 1;
 }
 
@@ -1954,12 +1987,13 @@ static int chr_get_hair_style(lua_State *s)
  */
 static int chr_set_hair_style(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int style = luaL_checkint(s, 2);
     luaL_argcheck(s, style >= 0, 2, "invalid style id");
 
-    c->setHairStyle(style);
-    c->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+    c->getComponent<CharacterComponent>()->setHairStyle(style);
+    c->getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_LOOKSCHANGE);
     return 0;
 }
 
@@ -1974,10 +2008,10 @@ static int chr_set_hair_style(lua_State *s)
  */
 static int chr_get_kill_count(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     MonsterClass *monster = checkMonsterClass(s, 2);
 
-    lua_pushinteger(s, c->getKillCount(monster->getId()));
+    lua_pushinteger(s, c->getComponent<CharacterComponent>()->getKillCount(monster->getId()));
     return 1;
 }
 
@@ -1988,8 +2022,9 @@ static int chr_get_kill_count(lua_State *s)
  */
 static int chr_get_rights(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
-    lua_pushinteger(s, c->getAccountLevel());
+    Entity *c = checkCharacter(s, 1);
+    lua_pushinteger(s,
+                    c->getComponent<CharacterComponent>()->getAccountLevel());
     return 1;
 }
 
@@ -2000,10 +2035,10 @@ static int chr_get_rights(lua_State *s)
  */
 static int chr_kick(lua_State *s)
 {
-    Character *ch = checkCharacter(s, 1);
+    Entity *ch = checkCharacter(s, 1);
     MessageOut kickmsg(GPMSG_CONNECT_RESPONSE);
     kickmsg.writeInt8(ERRMSG_ADMINISTRATIVE_LOGOFF);
-    ch->getClient()->disconnect(kickmsg);
+    ch->getComponent<CharacterComponent>()->getClient()->disconnect(kickmsg);
     return 0;
 }
 
@@ -2015,7 +2050,7 @@ static int chr_kick(lua_State *s)
  */
 static int being_get_mapid(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     if (MapComposite *map = being->getMap())
         lua_pushinteger(s, map->getID());
     else
@@ -2033,7 +2068,7 @@ static int being_get_mapid(lua_State *s)
  */
 static int chr_request_quest(lua_State *s)
 {
-    Character *ch = checkCharacter(s, 1);
+    Entity *ch = checkCharacter(s, 1);
     const char *name = luaL_checkstring(s, 2);
     luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
     luaL_checktype(s, 3, LUA_TFUNCTION);
@@ -2072,7 +2107,7 @@ static int chr_request_quest(lua_State *s)
  */
 static int chr_try_get_quest(lua_State *s)
 {
-    Character *q = checkCharacter(s, 1);
+    Entity *q = checkCharacter(s, 1);
     const char *name = luaL_checkstring(s, 2);
     luaL_argcheck(s, name[0] != 0, 2, "empty variable name");
 
@@ -2096,7 +2131,7 @@ static int get_character_by_name(lua_State *s)
 {
     const char *name = luaL_checkstring(s, 1);
 
-    Character *ch = gameHandler->getCharacterByNameSlow(name);
+    Entity *ch = gameHandler->getCharacterByNameSlow(name);
     if (!ch)
         lua_pushnil(s);
     else
@@ -2112,7 +2147,7 @@ static int get_character_by_name(lua_State *s)
  */
 static int chr_get_post(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
 
     Script *script = getScript(s);
     Script::Thread *thread = checkCurrentThread(s, script);
@@ -2135,10 +2170,11 @@ static int chr_get_post(lua_State *s)
  */
 static int being_register(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     Script *script = getScript(s);
 
-    being->signal_died.connect(sigc::mem_fun(script, &Script::processDeathEvent));
+    being->getComponent<BeingComponent>()->signal_died.connect(
+            sigc::mem_fun(script, &Script::processDeathEvent));
     being->signal_removed.connect(sigc::mem_fun(script, &Script::processRemoveEvent));
 
     return 0;
@@ -2151,7 +2187,7 @@ static int being_register(lua_State *s)
  */
 static int chr_shake_screen(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int x = luaL_checkint(s, 2);
     const int y = luaL_checkint(s, 3);
 
@@ -2164,7 +2200,7 @@ static int chr_shake_screen(lua_State *s)
     if (lua_isnumber(s, 5))
         msg.writeInt16(lua_tointeger(s, 5));
 
-    c->getClient()->send(msg);
+    c->getComponent<CharacterComponent>()->getClient()->send(msg);
 
     return 0;
 }
@@ -2177,12 +2213,12 @@ static int chr_shake_screen(lua_State *s)
  */
 static int chr_create_text_particle(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const char *text = luaL_checkstring(s, 2);
 
     MessageOut msg(GPMSG_CREATE_TEXT_PARTICLE);
     msg.writeString(text);
-    c->getClient()->send(msg);
+    c->getComponent<CharacterComponent>()->getClient()->send(msg);
 
     return 0;
 }
@@ -2195,11 +2231,11 @@ static int chr_create_text_particle(lua_State *s)
 static int chr_give_special(lua_State *s)
 {
     // cost_type is ignored until we have more than one cost type
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int special = checkSpecial(s, 2);
     const int currentMana = luaL_optint(s, 3, 0);
 
-    c->giveSpecial(special, currentMana);
+    c->getComponent<CharacterComponent>()->giveSpecial(special, currentMana);
     return 0;
 }
 
@@ -2210,10 +2246,11 @@ static int chr_give_special(lua_State *s)
  */
 static int chr_has_special(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int special = luaL_checkint(s, 2);
 
-    lua_pushboolean(s, c->hasSpecial(special));
+    lua_pushboolean(s, c->getComponent<CharacterComponent>()->hasSpecial(
+            special));
     return 1;
 }
 
@@ -2227,11 +2264,12 @@ static int chr_has_special(lua_State *s)
  */
 static int chr_take_special(lua_State *s)
 {
-    Character *c = checkCharacter(s, 1);
+    Entity *c = checkCharacter(s, 1);
     const int special = luaL_checkint(s, 2);
 
-    lua_pushboolean(s, c->hasSpecial(special));
-    c->takeSpecial(special);
+    lua_pushboolean(s, c->getComponent<CharacterComponent>()->hasSpecial(
+            special));
+    c->getComponent<CharacterComponent>()->takeSpecial(special);
     return 1;
 }
 
@@ -2246,7 +2284,7 @@ static int chr_take_special(lua_State *s)
  */
 static int monster_get_id(lua_State *s)
 {
-    Being *monster = checkMonster(s, 1);
+    Entity *monster = checkMonster(s, 1);
     MonsterComponent *monsterComponent =
             monster->getComponent<MonsterComponent>();
     lua_pushinteger(s, monsterComponent->getSpecy()->getId());
@@ -2261,8 +2299,8 @@ static int monster_get_id(lua_State *s)
  */
 static int monster_change_anger(lua_State *s)
 {
-    Being *monster = checkMonster(s, 1);
-    Being *being = checkBeing(s, 2);
+    Entity *monster = checkMonster(s, 1);
+    Entity *being = checkBeing(s, 2);
     const int anger = luaL_checkint(s, 3);
     monster->getComponent<MonsterComponent>()->changeAnger(being, anger);
     return 0;
@@ -2275,8 +2313,8 @@ static int monster_change_anger(lua_State *s)
  */
 static int monster_drop_anger(lua_State *s)
 {
-    Being *monster = checkMonster(s, 1);
-    Being *being = checkBeing(s, 2);
+    Entity *monster = checkMonster(s, 1);
+    Entity *being = checkBeing(s, 2);
     monster->getComponent<MonsterComponent>()->forgetTarget(being);
     return 0;
 }
@@ -2289,7 +2327,7 @@ static int monster_drop_anger(lua_State *s)
  */
 static int monster_get_angerlist(lua_State *s)
 {
-    Being *monster = checkMonster(s, 1);
+    Entity *monster = checkMonster(s, 1);
     MonsterComponent *monsterComponent =
             monster->getComponent<MonsterComponent>();
     pushSTLContainer(s, monsterComponent->getAngerList());
@@ -2308,11 +2346,11 @@ static int monster_get_angerlist(lua_State *s)
  */
 static int being_apply_status(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
     const int time = luaL_checkint(s, 3);
 
-    being->applyStatusEffect(id, time);
+    being->getComponent<BeingComponent>()->applyStatusEffect(id, time);
     return 0;
 }
 
@@ -2323,10 +2361,10 @@ static int being_apply_status(lua_State *s)
  */
 static int being_remove_status(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
 
-    being->removeStatusEffect(id);
+    being->getComponent<BeingComponent>()->removeStatusEffect(id);
     return 0;
 }
 
@@ -2337,10 +2375,11 @@ static int being_remove_status(lua_State *s)
  */
 static int being_has_status(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
 
-    lua_pushboolean(s, being->hasStatusEffect(id));
+    lua_pushboolean(s, being->getComponent<BeingComponent>()
+                    ->hasStatusEffect(id));
     return 1;
 }
 
@@ -2351,10 +2390,11 @@ static int being_has_status(lua_State *s)
  */
 static int being_get_status_time(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
 
-    lua_pushinteger(s, being->getStatusEffectTime(id));
+    lua_pushinteger(s, being->getComponent<BeingComponent>()
+                    ->getStatusEffectTime(id));
     return 1;
 }
 
@@ -2365,11 +2405,11 @@ static int being_get_status_time(lua_State *s)
  */
 static int being_set_status_time(lua_State *s)
 {
-    Being *being = checkBeing(s, 1);
+    Entity *being = checkBeing(s, 1);
     const int id = luaL_checkint(s, 2);
     const int time = luaL_checkint(s, 3);
 
-    being->setStatusEffectTime(id, time);
+    being->getComponent<BeingComponent>()->setStatusEffectTime(id, time);
     return 0;
 }
 
@@ -2652,8 +2692,8 @@ static int get_beings_in_circle(lua_State *s)
     int x, y, r;
     if (lua_islightuserdata(s, 1))
     {
-        Being *b = checkBeing(s, 1);
-        const Point &pos = b->getPosition();
+        Entity *b = checkBeing(s, 1);
+        const Point &pos = b->getComponent<ActorComponent>()->getPosition();
         x = pos.x;
         y = pos.y;
         r = luaL_checkint(s, 2);
@@ -2673,11 +2713,13 @@ static int get_beings_in_circle(lua_State *s)
     int tableIndex = 1;
     for (BeingIterator i(m->getAroundPointIterator(Point(x, y), r)); i; ++i)
     {
-        Being *b = *i;
+        Entity *b = *i;
         char t = b->getType();
         if (t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER)
         {
-            if (Collision::circleWithCircle(b->getPosition(), b->getSize(),
+            auto *actorComponent = b->getComponent<ActorComponent>();
+            if (Collision::circleWithCircle(actorComponent->getPosition(),
+                                            actorComponent->getSize(),
                                             Point(x, y), r))
             {
                 lua_pushlightuserdata(s, b);
@@ -2712,10 +2754,10 @@ static int get_beings_in_rectangle(lua_State *s)
     Rectangle rect = {x, y ,w, h};
     for (BeingIterator i(m->getInsideRectangleIterator(rect)); i; ++i)
     {
-        Being *b = *i;
+        Entity *b = *i;
         char t = b->getType();
         if ((t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER) &&
-            rect.contains(b->getPosition()))
+            rect.contains(b->getComponent<ActorComponent>()->getPosition()))
         {
             lua_pushlightuserdata(s, b);
             lua_rawseti(s, tableStackPosition, tableIndex);
@@ -2737,13 +2779,13 @@ static int get_distance(lua_State *s)
     int x1, y1, x2, y2;
     if (lua_gettop(s) == 2)
     {
-        Being *being1 = checkBeing(s, 1);
-        Being *being2 = checkBeing(s, 2);
+        Entity *being1 = checkBeing(s, 1);
+        Entity *being2 = checkBeing(s, 2);
 
-        x1 = being1->getPosition().x;
-        y1 = being1->getPosition().y;
-        x2 = being2->getPosition().x;
-        y2 = being2->getPosition().y;
+        x1 = being1->getComponent<ActorComponent>()->getPosition().x;
+        y1 = being1->getComponent<ActorComponent>()->getPosition().y;
+        x2 = being2->getComponent<ActorComponent>()->getPosition().x;
+        y2 = being2->getComponent<ActorComponent>()->getPosition().y;
     }
     else
     {

@@ -67,10 +67,14 @@ void SpawnAreaComponent::update(Entity &entity)
         const int width = mZone.w;
         const int height = mZone.h;
 
-        Being *being = new Being(OBJECT_MONSTER);
+        Entity *being = new Entity(OBJECT_MONSTER);
+        auto *actorComponent = new ActorComponent(*being);
+        being->addComponent(actorComponent);
+        auto *beingComponent = new BeingComponent(*being);
+        being->addComponent(beingComponent);
         being->addComponent(new MonsterComponent(*being, mSpecy));
 
-        if (being->getModifiedAttribute(ATTR_MAX_HP) <= 0)
+        if (beingComponent->getModifiedAttribute(ATTR_MAX_HP) <= 0)
         {
             LOG_WARN("Refusing to spawn dead monster " << mSpecy->getId());
             delete being;
@@ -86,7 +90,7 @@ void SpawnAreaComponent::update(Entity &entity)
             }
             while (!realMap->getWalk(position.x / realMap->getTileWidth(),
                                      position.y / realMap->getTileHeight(),
-                                     being->getWalkMask())
+                                     actorComponent->getWalkMask())
                    && triesLeft);
 
             if (triesLeft)
@@ -95,8 +99,8 @@ void SpawnAreaComponent::update(Entity &entity)
                             sigc::mem_fun(this, &SpawnAreaComponent::decrease));
 
                 being->setMap(map);
-                being->setPosition(position);
-                being->clearDestination();
+                actorComponent->setPosition(*being, position);
+                beingComponent->clearDestination(*being);
                 GameState::enqueueInsert(being);
 
                 mNumBeings++;

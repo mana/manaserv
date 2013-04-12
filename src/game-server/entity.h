@@ -62,10 +62,11 @@ class Entity : public sigc::trackable
         virtual void update();
 
         MapComposite *getMap() const;
-        virtual void setMap(MapComposite *map);
+        void setMap(MapComposite *map);
 
         sigc::signal<void, Entity *> signal_inserted;
         sigc::signal<void, Entity *> signal_removed;
+        sigc::signal<void, Entity *> signal_map_changed;
 
     private:
         MapComposite *mMap;     /**< Map the entity is on */
@@ -91,7 +92,6 @@ inline EntityType Entity::getType() const
 template <class T>
 inline void Entity::addComponent(T *component)
 {
-    assert(!mComponents[T::type]);
     mComponents[T::type] = component;
 }
 
@@ -101,6 +101,7 @@ inline void Entity::addComponent(T *component)
  */
 inline Component *Entity::getComponent(ComponentType type) const
 {
+    assert(mComponents[type]);
     return mComponents[type];
 }
 
@@ -153,6 +154,7 @@ inline MapComposite *Entity::getMap() const
 inline void Entity::setMap(MapComposite *map)
 {
     mMap = map;
+    signal_map_changed.emit(this);
 }
 
 #endif // ENTITY_H

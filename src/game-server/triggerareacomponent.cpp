@@ -30,11 +30,11 @@
 
 #include <cassert>
 
-void WarpAction::process(Actor *obj)
+void WarpAction::process(Entity *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
     {
-        GameState::enqueueWarp(static_cast< Character * >(obj), mMap, mTargetPoint);
+        GameState::enqueueWarp(obj, mMap, mTargetPoint);
     }
 }
 
@@ -46,7 +46,7 @@ ScriptAction::ScriptAction(Script *script, Script::Ref callback, int arg) :
     assert(mCallback.isValid());
 }
 
-void ScriptAction::process(Actor *obj)
+void ScriptAction::process(Entity *obj)
 {
     LOG_DEBUG("Script trigger area activated: "
               << "(" << obj << ", " << mArg << ")");
@@ -62,19 +62,21 @@ const ComponentType TriggerAreaComponent::type;
 void TriggerAreaComponent::update(Entity &entity)
 {
     MapComposite *map = entity.getMap();
-    std::set<Actor*> insideNow;
+    std::set<Entity *> insideNow;
 
     for (BeingIterator i(map->getInsideRectangleIterator(mZone)); i; ++i)
     {
         // Don't deal with uninitialized actors
-        if (!(*i) || !(*i)->isPublicIdValid())
+        if (!(*i) || !(*i)->getComponent<ActorComponent>()->isPublicIdValid())
             continue;
 
         // The BeingIterator returns the mapZones in touch with the rectangle
         // area. On the other hand, the beings contained in the map zones
         // may not be within the rectangle area. Hence, this additional
         // contains() condition.
-        if (mZone.contains((*i)->getPosition()))
+        const Point &point =
+                (*i)->getComponent<ActorComponent>()->getPosition();
+        if (mZone.contains(point))
         {
             insideNow.insert(*i);
 
