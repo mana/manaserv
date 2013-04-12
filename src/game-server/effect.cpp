@@ -25,8 +25,6 @@
 #include "game-server/entity.h"
 #include "game-server/state.h"
 
-const ComponentType EffectComponent::type;
-
 void EffectComponent::update(Entity &entity)
 {
     if (mHasBeenShown)

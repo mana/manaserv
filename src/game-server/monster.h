@@ -275,7 +275,7 @@ struct AttackPosition
 class MonsterComponent : public Component
 {
     public:
-    static const ComponentType type = CT_Monster;
+        static const ComponentType type = CT_Monster;
 
         /** Time in game ticks until ownership of a monster can change. */
         static const int KILLSTEAL_PROTECTION_TIME = 100;

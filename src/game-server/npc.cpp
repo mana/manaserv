@@ -28,8 +28,6 @@
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 
-const ComponentType NpcComponent::type;
-
 NpcComponent::NpcComponent(int npcId):
     mNpcId(npcId),
     mEnabled(true)

@@ -25,8 +25,6 @@
 #include "game-server/state.h"
 #include "utils/logger.h"
 
-const ComponentType SpawnAreaComponent::type;
-
 SpawnAreaComponent::SpawnAreaComponent(MonsterClass *specy,
                                        const Rectangle &zone,
                                        int maxBeings,

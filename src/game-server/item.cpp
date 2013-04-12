@@ -156,8 +156,6 @@ void ItemClass::addAttack(AttackInfo *attackInfo,
     addEffect(new ItemEffectAttack(attackInfo), applyTrigger, dispellTrigger);
 }
 
-const ComponentType ItemComponent::type;
-
 ItemComponent::ItemComponent(ItemClass *type, int amount) :
     mType(type),
     mAmount(amount)

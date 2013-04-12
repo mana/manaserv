@@ -57,8 +57,6 @@ void ScriptAction::process(Entity *obj)
     mScript->execute(obj->getMap());
 }
 
-const ComponentType TriggerAreaComponent::type;
-
 void TriggerAreaComponent::update(Entity &entity)
 {
     MapComposite *map = entity.getMap();
