@@ -90,8 +90,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mKnuckleAttackInfo(0),
     mBaseEntity(&entity)
 {
-    mCharacterData = new CharacterData(&entity, this);
-
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
     const AttributeManager::AttributeScope &attributes =
@@ -134,7 +132,8 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mDatabaseID = msg.readInt32();
     beingComponent->setName(msg.readString());
 
-    deserializeCharacterData(*mCharacterData, msg);
+    CharacterData characterData(&entity, this);
+    deserializeCharacterData(characterData, msg);
 
     Inventory(&entity, mPossessions).initialize();
     modifiedAllAttributes(entity);;

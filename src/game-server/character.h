@@ -467,9 +467,6 @@ class CharacterComponent : public Component
         void attackAdded(CombatComponent *combatComponent, Attack &attackInfo);
         void attackRemoved(CombatComponent *combatComponent, Attack &attackInfo);
 
-        CharacterData *getCharacterData()
-        { return mCharacterData; }
-
         sigc::signal<void, Entity &> signal_disconnected;
 
     private:
@@ -569,8 +566,6 @@ class CharacterComponent : public Component
                                          argument there). DO NOT USE THIS IF IT
                                          IS AVOIDABLE in order to allow
                                          refactoring this easier later! */
-
-        CharacterData *mCharacterData;
 
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;

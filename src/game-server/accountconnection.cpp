@@ -107,7 +107,7 @@ void AccountConnection::sendCharacterData(Entity *p)
     MessageOut msg(GAMSG_PLAYER_DATA);
     auto *characterComponent = p->getComponent<CharacterComponent>();
     msg.writeInt32(characterComponent->getDatabaseID());
-    serializeCharacterData(*characterComponent->getCharacterData(), msg);
+    serializeCharacterData(CharacterData(p, characterComponent), msg);
     send(msg);
 }
 
