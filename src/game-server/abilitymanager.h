@@ -50,7 +50,7 @@ public:
 
         unsigned id;
         std::string name;
-        std::string setName;
+        std::string categoryName;
         bool rechargeable;
         int defaultRechargeSpeed;
         unsigned neededPoints;
@@ -76,23 +76,23 @@ public:
     void reload();
 
     /**
-     * Gets the abilities Id from a set and a ability string.
+     * Gets the abilities Id from a category and a ability string.
      */
-    unsigned getId(const std::string &set, const std::string &name) const;
+    unsigned getId(const std::string &category, const std::string &name) const;
 
     /**
      * Gets the abilities Id from a string formatted in this way:
-     * "setname_abilityname"
+     * "categoryname_skillname"
      */
     unsigned getId(const std::string &abilityName) const;
 
     const std::string getAbilityName(int id) const;
-    const std::string getSetName(int id) const;
+    const std::string getCategoryName(int id) const;
 
     AbilityInfo *getAbilityInfo(int id);
 
 
-    void readAbilitySetNode(xmlNodePtr node, const std::string &filename);
+    void readAbilityCategoryNode(xmlNodePtr node, const std::string &filename);
 
     void checkStatus();
 
@@ -103,7 +103,7 @@ private:
     void clear();
 
     void readAbilityNode(xmlNodePtr skillNode,
-                         const std::string &setName);
+                         const std::string &categoryName);
 
     typedef std::map<unsigned, AbilityInfo*> AbilitiesInfo;
     AbilitiesInfo mAbilitiesInfo;

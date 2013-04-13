@@ -41,26 +41,25 @@ static AbilityManager::TargetMode getTargetByString(const std::string &str)
  * Read a <special> element from settings.
  * Used by SettingsManager.
  */
-void AbilityManager::readAbilitySetNode(xmlNodePtr node,
-                                        const std::string &filename)
+void AbilityManager::readAbilityCategoryNode(xmlNodePtr node,
+                                             const std::string &filename)
 {
-    std::string setName = XML::getProperty(node, "name", std::string());
-    if (setName.empty())
+    std::string categoryName = XML::getProperty(node, "name", std::string());
+    if (categoryName.empty())
     {
         LOG_WARN("The " << filename << " file contains unamed "
-                 << "<ability-set> tags and will be ignored.");
+                 << "<ability-category> tags and will be ignored.");
         return;
     }
 
-    setName = utils::toLower(setName);
+    categoryName = utils::toLower(categoryName);
 
     for_each_xml_child_node(specialNode, node)
     {
         if (xmlStrEqual(specialNode->name, BAD_CAST "ability")) {
-            readAbilityNode(specialNode, setName);
+            readAbilityNode(specialNode, categoryName);
         }
     }
-
 }
 
 /**
@@ -73,7 +72,7 @@ void AbilityManager::checkStatus()
 
 
 void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
-                                     const std::string &setName)
+                                     const std::string &categoryName)
 {
     std::string name = utils::toLower(
                 XML::getProperty(abilityNode, "name", std::string()));
@@ -81,7 +80,8 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
 
     if (id <= 0 || name.empty())
     {
-        LOG_WARN("Invalid ability (empty name or id <= 0) in set: " << setName);
+        LOG_WARN("Invalid ability (empty name or id <= 0) in category: "
+                 << categoryName);
         return;
     }
 
@@ -104,14 +104,14 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
     if (rechargeable && neededMana <= 0)
     {
         LOG_WARN("Invalid ability '" << name
-                 << "' (rechargable but no needed attribute) in set: "
-                 << setName);
+                 << "' (rechargable but no needed attribute) in category: "
+                 << categoryName);
         return;
     }
 
 
     AbilityInfo *newInfo = new AbilityManager::AbilityInfo;
-    newInfo->setName = setName;
+    newInfo->categoryName = categoryName;
     newInfo->name = name;
     newInfo->id = id;
     newInfo->rechargeable = rechargeable;
@@ -123,7 +123,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
 
     mAbilitiesInfo[newInfo->id] = newInfo;
 
-    std::string keyName = setName + "_" + newInfo->name;
+    std::string keyName = categoryName + "_" + newInfo->name;
     mNamedAbilitiesInfo[keyName] = newInfo;
 }
 
@@ -148,10 +148,10 @@ void AbilityManager::clear()
     mNamedAbilitiesInfo.clear();
 }
 
-unsigned AbilityManager::getId(const std::string &set,
+unsigned AbilityManager::getId(const std::string &category,
                                const std::string &name) const
 {
-    std::string key = utils::toLower(set) + "_" + utils::toLower(name);
+    std::string key = utils::toLower(category) + "_" + utils::toLower(name);
     return getId(key);
 }
 
@@ -169,10 +169,10 @@ const std::string AbilityManager::getAbilityName(int id) const
     return it != mAbilitiesInfo.end() ? it->second->name : "";
 }
 
-const std::string AbilityManager::getSetName(int id) const
+const std::string AbilityManager::getCategoryName(int id) const
 {
     AbilitiesInfo::const_iterator it = mAbilitiesInfo.find(id);
-    return it != mAbilitiesInfo.end() ? it->second->setName : "";
+    return it != mAbilitiesInfo.end() ? it->second->categoryName : "";
 }
 
 AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(int id)

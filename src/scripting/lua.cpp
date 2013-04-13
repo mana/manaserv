@@ -3021,7 +3021,7 @@ static int abilityinfo_on_recharged(lua_State *s)
 static int abilitiyinfo_get_category(lua_State *s)
 {
     AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
-    push(s, info->setName);
+    push(s, info->categoryName);
     return 1;
 }
 
