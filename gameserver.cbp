@@ -49,6 +49,7 @@
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-O3" />
+			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
 			<Add option="-g" />
 			<Add option="-Wno-switch" />
