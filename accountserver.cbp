@@ -84,9 +84,10 @@
 			<Add alias="All" targets="Windows (Sqlite Support);" />
 		</VirtualTargets>
 		<Compiler>
-			<Add option="-g" />
 			<Add option="-O3" />
+			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
+			<Add option="-g" />
 			<Add option="-Wno-switch" />
 			<Add option="-Wno-unknown-pragmas" />
 			<Add directory="libs/enet/include" />
