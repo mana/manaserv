@@ -370,7 +370,7 @@ void GameHandler::addPendingCharacter(const std::string &token, Entity *ch)
                it available for a new connection. */
             delete ch;
             GameState::remove(old_ch);
-            kill(ch);
+            kill(old_ch);
             ch = old_ch;
             break;
         }
