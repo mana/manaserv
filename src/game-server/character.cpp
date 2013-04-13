@@ -249,7 +249,7 @@ bool CharacterComponent::abilityUseCheck(AbilityMap::iterator it)
     if (!ability.abilityInfo->useCallback.isValid())
     {
         LOG_WARN("No callback for use of ability "
-                 << ability.abilityInfo->setName << "/"
+                 << ability.abilityInfo->categoryName << "/"
                  << ability.abilityInfo->name << ". Ignoring ability.");
         return false;
     }

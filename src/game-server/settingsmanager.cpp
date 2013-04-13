@@ -143,10 +143,10 @@ void SettingsManager::loadFile(const std::string &filename)
             // skills config
             skillManager->readSkillSetNode(childNode, filename);
         }
-        else if (xmlStrEqual(childNode->name, BAD_CAST "ability-set"))
+        else if (xmlStrEqual(childNode->name, BAD_CAST "ability-category"))
         {
             // ability config
-            abilityManager->readAbilitySetNode(childNode, filename);
+            abilityManager->readAbilityCategoryNode(childNode, filename);
         }
         else if (xmlStrEqual(childNode->name, BAD_CAST "slot"))
         {
