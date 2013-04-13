@@ -120,16 +120,16 @@ CREATE INDEX mana_char_kill_stats_char on mana_char_kill_stats ( char_id );
 
 -----------------------------------------------------------------------------
 
-CREATE TABLE mana_char_specials
+CREATE TABLE mana_char_abilities
 (
-    char_id               INTEGER     NOT NULL,
-    special_id            INTEGER     NOT NULL,
-    special_current_mana  INTEGER     NOT NULL,
-	PRIMARY KEY (char_id, special_id),
+    char_id                 INTEGER     NOT NULL,
+    ability_id              INTEGER     NOT NULL,
+    ability_current_points  INTEGER     NOT NULL,
+	PRIMARY KEY (char_id, ability_id),
     FOREIGN KEY (char_id) REFERENCES mana_characters(id)
 );
 
-CREATE INDEX mana_char_specials_char on mana_char_specials ( char_id );
+CREATE INDEX mana_char_abilities_char on mana_char_abilities ( char_id );
 
 -----------------------------------------------------------------------------
 
@@ -424,7 +424,7 @@ AS
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', strftime('%s','now'));
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', strftime('%s','now'));
-INSERT INTO mana_world_states VALUES('database_version',     -1,'21', strftime('%s','now'));
+INSERT INTO mana_world_states VALUES('database_version',     -1,'22', strftime('%s','now'));
 
 -- all known transaction codes
 

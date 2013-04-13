@@ -86,13 +86,14 @@ void serializeCharacterData(const T &data, MessageOut &msg)
         msg.writeInt32(kills_it->second);
     }
 
-    // character specials
-    SpecialMap::const_iterator special_it;
-    msg.writeInt16(data.getSpecialSize());
-    for (special_it = data.getSpecialBegin(); special_it != data.getSpecialEnd() ; special_it++)
+    // character abilities
+    AbilityMap::const_iterator abilitiy_it;
+    msg.writeInt16(data.getAbilitySize());
+    for (abilitiy_it = data.getAbilityBegin();
+         abilitiy_it != data.getAbilityEnd(); abilitiy_it++)
     {
-        msg.writeInt32(special_it->first);
-        msg.writeInt32(special_it->second.currentMana);
+        msg.writeInt32(abilitiy_it->first);
+        msg.writeInt32(abilitiy_it->second.currentPoints);
     }
 
     // inventory - must be last because size isn't transmitted
@@ -177,14 +178,14 @@ void deserializeCharacterData(T &data, MessageIn &msg)
         data.setKillCount(monsterId, kills);
     }
 
-    // character specials
-    int specialSize = msg.readInt16();
-    data.clearSpecials();
-    for (int i = 0; i < specialSize; i++)
+    // character abilities
+    int abilitiesSize = msg.readInt16();
+    data.clearAbilities();
+    for (int i = 0; i < abilitiesSize; i++)
     {
         const int id = msg.readInt32();
         const int mana = msg.readInt32();
-        data.giveSpecial(id, mana);
+        data.giveAbility(id, mana);
     }
 
 

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<specials>
-    <special-set name="Magic">
-        <special
+<abilities>
+    <ability-set name="Magic">
+        <ability
             id="1"
             name="Test Spell 1"
             rechargeable="true"
             needed="100"
             rechargespeed="10"
         />
-        <special
+        <ability
             id="2"
             name="Test Spell 2"
             rechargeable="true"
@@ -16,7 +16,7 @@
             rechargespeed="10"
             target="being"
         />
-        <special
+        <ability
             id="3"
             name="Test Spell 3"
             rechargeable="true"
@@ -24,5 +24,5 @@
             rechargespeed="10"
             target="point"
         />
-    </special-set>
-</specials>
+    </ability-set>
+</abilities>

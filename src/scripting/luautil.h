@@ -35,7 +35,7 @@ extern "C" {
 #include <vector>
 
 #include "game-server/attack.h"
-#include "game-server/specialmanager.h"
+#include "game-server/abilitymanager.h"
 
 class CharacterComponent;
 class Entity;
@@ -166,7 +166,7 @@ typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
 typedef LuaUserData<StatusEffect> LuaStatusEffect;
-typedef LuaUserData<SpecialManager::SpecialInfo> LuaSpecialInfo;
+typedef LuaUserData<AbilityManager::AbilityInfo> LuaAbilityInfo;
 
 Script *        getScript(lua_State *s);
 
@@ -181,7 +181,7 @@ Entity *        checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
 Entity *        checkNpc(lua_State *s, int p);
 int             checkSkill(lua_State *s, int p);
-int             checkSpecial(lua_State *s, int p);
+int             checkAbility(lua_State *s, int p);
 
 MapComposite *  checkCurrentMap(lua_State *s, Script *script = 0);
 Script::Thread* checkCurrentThread(lua_State *s, Script *script = 0);
