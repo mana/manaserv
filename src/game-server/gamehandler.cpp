@@ -258,12 +258,12 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
             handleAttack(client, message);
             break;
 
-        case PGMSG_USE_SPECIAL_ON_BEING:
-            handleUseSpecialOnBeing(client, message);
+        case PGMSG_USE_ABILITY_ON_BEING:
+            handleUseAbilityOnBeing(client, message);
             break;
 
-        case PGMSG_USE_SPECIAL_ON_POINT:
-            handleUseSpecialOnPoint(client, message);
+        case PGMSG_USE_ABILITY_ON_POINT:
+            handleUseAbilityOnPoint(client, message);
             break;
 
         case PGMSG_ACTION_CHANGE:
@@ -687,12 +687,12 @@ void GameHandler::handleAttack(GameClient &client, MessageIn &message)
     }
 }
 
-void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message)
+void GameHandler::handleUseAbilityOnBeing(GameClient &client, MessageIn &message)
 {
     if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    const int specialID = message.readInt8();
+    const int abilityID = message.readInt8();
     const int targetID = message.readInt16(); // 0 when no target is selected
     Entity *being = 0;
     if (targetID != 0)
@@ -701,28 +701,28 @@ void GameHandler::handleUseSpecialOnBeing(GameClient &client, MessageIn &message
     const int publicId =
             client.character->getComponent<ActorComponent>()->getPublicID();
     LOG_DEBUG("Character " << publicId
-              << " tries to use his special attack " << specialID);
+              << " tries to use his ability " << abilityID);
     auto *characterComponent = client.character
             ->getComponent<CharacterComponent>();
-    characterComponent->useSpecialOnBeing(*client.character, specialID, being);
+    characterComponent->useAbilityOnBeing(*client.character, abilityID, being);
 }
 
-void GameHandler::handleUseSpecialOnPoint(GameClient &client, MessageIn &message)
+void GameHandler::handleUseAbilityOnPoint(GameClient &client, MessageIn &message)
 {
     if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    const int specialID = message.readInt8();
+    const int abilityID = message.readInt8();
     const int x = message.readInt16();
     const int y = message.readInt16();
 
     const int publicId =
             client.character->getComponent<ActorComponent>()->getPublicID();
     LOG_DEBUG("Character " << publicId
-              << " tries to use his special attack " << specialID);
+              << " tries to use his ability attack " << abilityID);
     auto *characterComponent = client.character
             ->getComponent<CharacterComponent>();
-    characterComponent->useSpecialOnPoint(*client.character, specialID, x, y);
+    characterComponent->useAbilityOnPoint(*client.character, abilityID, x, y);
 }
 
 void GameHandler::handleActionChange(GameClient &client, MessageIn &message)

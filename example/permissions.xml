@@ -25,10 +25,10 @@
     <allow>@killmonsters</allow>
     <allow>@getpos</allow>
     <allow>@effect</allow>
-    <allow>@givespecial</allow>
-    <allow>@takespecial</allow>
-    <allow>@rechargespecial</allow>
-    <allow>@listspecials</allow>
+    <allow>@giveability</allow>
+    <allow>@takeability</allow>
+    <allow>@rechargeability</allow>
+    <allow>@listabilities</allow>
   </class>
   <class level="4">
     <alias>gm</alias>

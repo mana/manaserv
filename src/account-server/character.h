@@ -55,17 +55,17 @@ struct AttributeValue
     { return modified; }
 };
 
-struct SpecialValue
+struct AbilityValue
 {
-    SpecialValue()
-        : currentMana(0)
+    AbilityValue()
+        : currentPoints(0)
     {}
 
-    SpecialValue(unsigned currentMana)
-        : currentMana(currentMana)
+    AbilityValue(unsigned currentPoints)
+        : currentPoints(currentPoints)
     {}
 
-    unsigned currentMana;
+    unsigned currentPoints;
 };
 
 struct Status
@@ -83,9 +83,9 @@ struct Status
 typedef std::map<unsigned, AttributeValue> AttributeMap;
 
 /**
- * Stores specials by their id.
+ * Stores abilitys by their id.
  */
-typedef std::map<unsigned, SpecialValue> SpecialMap;
+typedef std::map<unsigned, AbilityValue> AbilityMap;
 
 class CharacterData
 {
@@ -221,22 +221,22 @@ class CharacterData
         { mKillCount[monsterId] = kills; }
 
         /**
-         * Get / Set specials
+         * Get / Set abilitys
          */
-        int getSpecialSize() const
-        { return mSpecials.size(); }
+        int getAbilitySize() const
+        { return mAbilities.size(); }
 
-        SpecialMap::const_iterator getSpecialBegin() const
-        { return mSpecials.begin(); }
+        AbilityMap::const_iterator getAbilityBegin() const
+        { return mAbilities.begin(); }
 
-        SpecialMap::const_iterator getSpecialEnd() const
-        { return mSpecials.end(); }
+        AbilityMap::const_iterator getAbilityEnd() const
+        { return mAbilities.end(); }
 
 
-        void clearSpecials()
-        { mSpecials.clear(); }
+        void clearAbilities()
+        { mAbilities.clear(); }
 
-        void giveSpecial(int id, int currentMana);
+        void giveAbility(int id, int currentMana);
 
         /**
          * Gets the Id of the map that the character is on.
@@ -303,7 +303,7 @@ class CharacterData
         std::map<int, int> mExperience; //!< Skill Experience.
         std::map<int, Status> mStatusEffects; //!< Status Effects
         std::map<int, int> mKillCount; //!< Kill Count
-        SpecialMap  mSpecials;
+        AbilityMap  mAbilities;
         unsigned short mMapId;    //!< Map the being is on.
         unsigned char mGender;    //!< Gender of the being.
         unsigned char mHairStyle; //!< Hair style of the being.

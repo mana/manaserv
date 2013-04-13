@@ -223,13 +223,13 @@ int checkSkill(lua_State *s, int p)
     return id;
 }
 
-int checkSpecial(lua_State *s, int p)
+int checkAbility(lua_State *s, int p)
 {
     if (lua_isnumber(s, p))
         return luaL_checkint(s, p);
 
-    int id = specialManager->getId(luaL_checkstring(s, p));
-    luaL_argcheck(s, id != 0, p, "invalid special name");
+    int id = abilityManager->getId(luaL_checkstring(s, p));
+    luaL_argcheck(s, id != 0, p, "invalid ability name");
     return id;
 }
 

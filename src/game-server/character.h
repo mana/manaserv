@@ -28,7 +28,7 @@
 #include "game-server/being.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
-#include "game-server/specialmanager.h"
+#include "game-server/abilitymanager.h"
 
 #include "scripting/script.h"
 
@@ -46,24 +46,24 @@ class MessageOut;
 class Point;
 class Trade;
 
-struct SpecialValue
+struct AbilityValue
 {
-    SpecialValue(unsigned currentMana,
-                 const SpecialManager::SpecialInfo *specialInfo)
-        : currentMana(currentMana)
-        , rechargeSpeed(specialInfo->defaultRechargeSpeed)
-        , specialInfo(specialInfo)
+    AbilityValue(unsigned currentMana,
+                 const AbilityManager::AbilityInfo *abilityInfo)
+        : currentPoints(currentMana)
+        , rechargeSpeed(abilityInfo->defaultRechargeSpeed)
+        , abilityInfo(abilityInfo)
     {}
 
-    unsigned currentMana;
+    unsigned currentPoints;
     unsigned rechargeSpeed;
-    const SpecialManager::SpecialInfo *specialInfo;
+    const AbilityManager::AbilityInfo *abilityInfo;
 };
 
 /**
- * Stores specials by their id.
+ * Stores abilities by their id.
  */
-typedef std::map<unsigned, SpecialValue> SpecialMap;
+typedef std::map<unsigned, AbilityValue> AbilityMap;
 
 
 class CharacterData
@@ -114,11 +114,11 @@ public:
     const std::map<int, int>::const_iterator getKillCountEnd() const;
     void setKillCount(int monsterId, int kills);
 
-    void clearSpecials();
-    void giveSpecial(int id, int mana);
-    int getSpecialSize() const;
-    SpecialMap::const_iterator getSpecialBegin() const;
-    SpecialMap::const_iterator getSpecialEnd() const;
+    void clearAbilities();
+    void giveAbility(int id, int mana);
+    int getAbilitySize() const;
+    AbilityMap::const_iterator getAbilityBegin() const;
+    AbilityMap::const_iterator getAbilityEnd() const;
 
     Possessions &getPossessions() const;
 
@@ -162,52 +162,52 @@ class CharacterComponent : public Component
         void respawn(Entity &entity);
 
         /**
-         * makes the character perform a special action on a being
+         * makes the character perform a ability on a being
          * when it is allowed to do so
          */
-        void useSpecialOnBeing(Entity &user, int id, Entity *b);
+        void useAbilityOnBeing(Entity &user, int id, Entity *b);
 
         /**
-         * makes the character perform a special action on a map point
+         * makes the character perform a ability on a map point
          * when it is allowed to do so
          */
-        void useSpecialOnPoint(Entity &user, int id, int x, int y);
+        void useAbilityOnPoint(Entity &user, int id, int x, int y);
 
         /**
-         * Allows a character to perform a special action
+         * Allows a character to perform a ability
          */
-        bool giveSpecial(int id, int currentMana = 0);
+        bool giveAbility(int id, int currentMana = 0);
 
         /**
          * Sets new current mana + makes sure that the client will get informed.
          */
-        bool setSpecialMana(int id, int mana);
+        bool setAbilityMana(int id, int mana);
 
         /**
-         * Gets the special value by id
+         * Gets the ability value by id
          */
-        SpecialMap::iterator findSpecial(int id)
-        { return mSpecials.find(id); }
+        AbilityMap::iterator findAbility(int id)
+        { return mAbilities.find(id); }
 
         /**
-         * Sets recharge speed of a special
+         * Sets recharge speed of a ability
          */
-        bool setSpecialRechargeSpeed(int id, int speed);
+        bool setAbilityRechargeSpeed(int id, int speed);
 
         /**
-         * Removes all specials from character
+         * Removes all abilities from character
          */
-        void clearSpecials();
+        void clearAbilities();
 
         /**
-         * Checks if a character knows a special action
+         * Checks if a character knows a ability action
          */
-        bool hasSpecial(int id) { return mSpecials.find(id) != mSpecials.end(); }
+        bool hasAbility(int id) { return mAbilities.find(id) != mAbilities.end(); }
 
         /**
-         * Removes an available special action
+         * Removes an available ability action
          */
-        bool takeSpecial(int id);
+        bool takeAbility(int id);
 
         /**
          * Gets client computer.
@@ -356,16 +356,16 @@ class CharacterComponent : public Component
         { mKillCount[monsterId] = kills; }
 
         /**
-         * Used to serialize specials.
+         * Used to serialize abilities.
          */
-        int getSpecialSize() const
-        { return mSpecials.size(); }
+        int getAbilitiesSize() const
+        { return mAbilities.size(); }
 
-        const SpecialMap::const_iterator getSpecialBegin() const
-        { return mSpecials.begin(); }
+        const AbilityMap::const_iterator getAbilitiesBegin() const
+        { return mAbilities.begin(); }
 
-        const SpecialMap::const_iterator getSpecialEnd() const
-        { return mSpecials.end(); }
+        const AbilityMap::const_iterator getAbilitiesEnd() const
+        { return mAbilities.end(); }
 
         /**
          * Gets total accumulated exp for skill.
@@ -470,7 +470,7 @@ class CharacterComponent : public Component
         sigc::signal<void, Entity &> signal_disconnected;
 
     private:
-        bool specialUseCheck(SpecialMap::iterator it);
+        bool abilityUseCheck(AbilityMap::iterator it);
 
         double getAttrBase(AttributeMap::const_iterator it) const
         { return it->second.getBase(); }
@@ -509,9 +509,9 @@ class CharacterComponent : public Component
         void recalculateLevel(Entity &entity);
 
         /**
-         * Informs the client about his characters special charge status
+         * Informs the client about his characters abilities charge status
          */
-        void sendSpecialUpdate();
+        void sendAbilityUpdate();
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
@@ -535,8 +535,8 @@ class CharacterComponent : public Component
 
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
-        SpecialMap mSpecials;
-        bool mSpecialUpdateNeeded;
+        AbilityMap mAbilities;
+        bool mAbilitiesUpdateNeeded;
 
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
@@ -744,29 +744,29 @@ inline void CharacterData::setKillCount(int monsterId, int kills)
     mCharacterComponent->setKillCount(monsterId, kills);
 }
 
-inline void CharacterData::clearSpecials()
+inline void CharacterData::clearAbilities()
 {
-    mCharacterComponent->clearSpecials();
+    mCharacterComponent->clearAbilities();
 }
 
-inline void CharacterData::giveSpecial(int id, int mana)
+inline void CharacterData::giveAbility(int id, int mana)
 {
-    mCharacterComponent->giveSpecial(id, mana);
+    mCharacterComponent->giveAbility(id, mana);
 }
 
-inline int CharacterData::getSpecialSize() const
+inline int CharacterData::getAbilitySize() const
 {
-    return mCharacterComponent->getSpecialSize();
+    return mCharacterComponent->getAbilitiesSize();
 }
 
-inline SpecialMap::const_iterator CharacterData::getSpecialBegin() const
+inline AbilityMap::const_iterator CharacterData::getAbilityBegin() const
 {
-    return mCharacterComponent->getSpecialBegin();
+    return mCharacterComponent->getAbilitiesBegin();
 }
 
-inline SpecialMap::const_iterator CharacterData::getSpecialEnd() const
+inline AbilityMap::const_iterator CharacterData::getAbilityEnd() const
 {
-    return mCharacterComponent->getSpecialEnd();
+    return mCharacterComponent->getAbilitiesEnd();
 }
 
 inline Possessions &CharacterData::getPossessions() const

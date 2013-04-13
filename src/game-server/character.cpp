@@ -75,7 +75,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mClient(nullptr),
     mConnected(true),
     mTransactionHandler(nullptr),
-    mSpecialUpdateNeeded(false),
+    mAbilitiesUpdateNeeded(false),
     mDatabaseID(-1),
     mHairStyle(0),
     mHairColor(0),
@@ -161,30 +161,30 @@ void CharacterComponent::update(Entity &entity)
     if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         return;
 
-    // Update special recharge
-    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
-         it != it_end; it++)
+    // Update ability recharge
+    for (auto &it : mAbilities)
     {
-        SpecialValue &s = it->second;
-        if (s.specialInfo->rechargeable && s.currentMana < s.specialInfo->neededMana)
+        AbilityValue &s = it.second;
+        if (s.abilityInfo->rechargeable &&
+            s.currentPoints < s.abilityInfo->neededPoints)
         {
-            s.currentMana += s.rechargeSpeed;
-            if (s.currentMana >= s.specialInfo->neededMana &&
-                    s.specialInfo->rechargedCallback.isValid())
+            s.currentPoints += s.rechargeSpeed;
+            if (s.currentPoints >= s.abilityInfo->neededPoints &&
+                    s.abilityInfo->rechargedCallback.isValid())
             {
                 Script *script = ScriptManager::currentState();
-                script->prepare(s.specialInfo->rechargedCallback);
+                script->prepare(s.abilityInfo->rechargedCallback);
                 script->push(&entity);
-                script->push(s.specialInfo->id);
+                script->push(s.abilityInfo->id);
                 script->execute(entity.getMap());
             }
         }
     }
 
-    if (mSpecialUpdateNeeded)
+    if (mAbilitiesUpdateNeeded)
     {
-        sendSpecialUpdate();
-        mSpecialUpdateNeeded = false;
+        sendAbilityUpdate();
+        mAbilitiesUpdateNeeded = false;
     }
 }
 
@@ -225,130 +225,131 @@ void CharacterComponent::respawn(Entity &entity)
                            Point(spawnX, spawnY));
 }
 
-bool CharacterComponent::specialUseCheck(SpecialMap::iterator it)
+bool CharacterComponent::abilityUseCheck(AbilityMap::iterator it)
 {
-    if (it == mSpecials.end())
+    if (it == mAbilities.end())
     {
-        LOG_INFO("Character uses special " << it->first
+        LOG_INFO("Character uses ability " << it->first
                  << " without authorization.");
         return false;
     }
 
-    //check if the special is currently recharged
-    SpecialValue &special = it->second;
-    if (special.specialInfo->rechargeable &&
-            special.currentMana < special.specialInfo->neededMana)
+    //check if the ability is currently recharged
+    AbilityValue &ability = it->second;
+    if (ability.abilityInfo->rechargeable &&
+            ability.currentPoints < ability.abilityInfo->neededPoints)
     {
-        LOG_INFO("Character uses special " << it->first << " which is not recharged. ("
-                 << special.currentMana << "/"
-                 << special.specialInfo->neededMana << ")");
+        LOG_INFO("Character uses ability " << it->first
+                 << " which is not recharged. ("
+                 << ability.currentPoints << "/"
+                 << ability.abilityInfo->neededPoints << ")");
         return false;
     }
 
-    if (!special.specialInfo->useCallback.isValid())
+    if (!ability.abilityInfo->useCallback.isValid())
     {
-        LOG_WARN("No callback for use of special "
-                 << special.specialInfo->setName << "/"
-                 << special.specialInfo->name << ". Ignoring special.");
+        LOG_WARN("No callback for use of ability "
+                 << ability.abilityInfo->setName << "/"
+                 << ability.abilityInfo->name << ". Ignoring ability.");
         return false;
     }
     return true;
 }
 
-void CharacterComponent::useSpecialOnBeing(Entity &user, int id, Entity *b)
+void CharacterComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (!specialUseCheck(it))
+    AbilityMap::iterator it = mAbilities.find(id);
+    if (!abilityUseCheck(it))
             return;
-    SpecialValue &special = it->second;
+    AbilityValue &ability = it->second;
 
-    if (special.specialInfo->target != SpecialManager::TARGET_BEING)
+    if (ability.abilityInfo->target != AbilityManager::TARGET_BEING)
         return;
 
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
-    script->prepare(special.specialInfo->useCallback);
+    script->prepare(ability.abilityInfo->useCallback);
     script->push(&user);
     script->push(b);
-    script->push(special.specialInfo->id);
+    script->push(ability.abilityInfo->id);
     script->execute(user.getMap());
 }
 
-void CharacterComponent::useSpecialOnPoint(Entity &user, int id, int x, int y)
+void CharacterComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (!specialUseCheck(it))
+    AbilityMap::iterator it = mAbilities.find(id);
+    if (!abilityUseCheck(it))
             return;
-    SpecialValue &special = it->second;
+    AbilityValue &ability = it->second;
 
-    if (special.specialInfo->target != SpecialManager::TARGET_POINT)
+    if (ability.abilityInfo->target != AbilityManager::TARGET_POINT)
         return;
 
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
-    script->prepare(special.specialInfo->useCallback);
+    script->prepare(ability.abilityInfo->useCallback);
     script->push(&user);
     script->push(x);
     script->push(y);
-    script->push(special.specialInfo->id);
+    script->push(ability.abilityInfo->id);
     script->execute(user.getMap());
 }
 
-bool CharacterComponent::giveSpecial(int id, int currentMana)
+bool CharacterComponent::giveAbility(int id, int currentPoints)
 {
-    if (mSpecials.find(id) == mSpecials.end())
+    if (mAbilities.find(id) == mAbilities.end())
     {
-        const SpecialManager::SpecialInfo *specialInfo =
-                specialManager->getSpecialInfo(id);
-        if (!specialInfo)
+        const AbilityManager::AbilityInfo *abilityInfo =
+                abilityManager->getAbilityInfo(id);
+        if (!abilityInfo)
         {
-            LOG_ERROR("Tried to give not existing special id " << id << ".");
+            LOG_ERROR("Tried to give not existing ability id " << id << ".");
             return false;
         }
-        mSpecials.insert(std::pair<int, SpecialValue>(
-                             id, SpecialValue(currentMana, specialInfo)));
-        mSpecialUpdateNeeded = true;
+        mAbilities.insert(std::pair<int, AbilityValue>(
+                             id, AbilityValue(currentPoints, abilityInfo)));
+        mAbilitiesUpdateNeeded = true;
         return true;
     }
     return false;
 }
 
-bool CharacterComponent::setSpecialMana(int id, int mana)
+bool CharacterComponent::setAbilityMana(int id, int mana)
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (it != mSpecials.end())
+    AbilityMap::iterator it = mAbilities.find(id);
+    if (it != mAbilities.end())
     {
-        it->second.currentMana = mana;
-        mSpecialUpdateNeeded = true;
+        it->second.currentPoints = mana;
+        mAbilitiesUpdateNeeded = true;
         return true;
     }
     return false;
 }
 
-bool CharacterComponent::setSpecialRechargeSpeed(int id, int speed)
+bool CharacterComponent::setAbilityRechargeSpeed(int id, int speed)
 {
-    SpecialMap::iterator it = mSpecials.find(id);
-    if (it != mSpecials.end())
+    AbilityMap::iterator it = mAbilities.find(id);
+    if (it != mAbilities.end())
     {
         it->second.rechargeSpeed = speed;
-        mSpecialUpdateNeeded = true;
+        mAbilitiesUpdateNeeded = true;
         return true;
     }
     return false;
 }
 
-void CharacterComponent::sendSpecialUpdate()
+void CharacterComponent::sendAbilityUpdate()
 {
-    //GPMSG_SPECIAL_STATUS = 0x0293,
-    // { B specialID, L current, L max, L recharge }
+    //GPMSG_ABILITY_STATUS = 0x0293,
+    // { B abilityID, L current, L max, L recharge }
 
-    MessageOut msg(GPMSG_SPECIAL_STATUS);
-    for (SpecialMap::iterator it = mSpecials.begin(), it_end = mSpecials.end();
+    MessageOut msg(GPMSG_ABILITY_STATUS);
+    for (AbilityMap::iterator it = mAbilities.begin(), it_end = mAbilities.end();
          it != it_end; ++it)
     {
         msg.writeInt8(it->first);
-        msg.writeInt32(it->second.currentMana);
-        msg.writeInt32(it->second.specialInfo->neededMana);
+        msg.writeInt32(it->second.currentPoints);
+        msg.writeInt32(it->second.abilityInfo->neededPoints);
         msg.writeInt32(it->second.rechargeSpeed);
     }
     gameHandler->sendTo(mClient, msg);
@@ -724,21 +725,21 @@ void CharacterComponent::disconnected(Entity &entity)
     signal_disconnected.emit(entity);
 }
 
-bool CharacterComponent::takeSpecial(int id)
+bool CharacterComponent::takeAbility(int id)
 {
-    SpecialMap::iterator i = mSpecials.find(id);
-    if (i != mSpecials.end())
+    AbilityMap::iterator i = mAbilities.find(id);
+    if (i != mAbilities.end())
     {
-        mSpecials.erase(i);
-        mSpecialUpdateNeeded = true;
+        mAbilities.erase(i);
+        mAbilitiesUpdateNeeded = true;
         return true;
     }
     return false;
 }
 
-void CharacterComponent::clearSpecials()
+void CharacterComponent::clearAbilities()
 {
-    mSpecials.clear();
+    mAbilities.clear();
 }
 
 void CharacterComponent::triggerLoginCallback(Entity &entity)
