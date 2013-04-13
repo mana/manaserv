@@ -113,14 +113,14 @@ CREATE TABLE IF NOT EXISTS `mana_char_kill_stats`
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8;
 
--- Create table 'mana_char_specials'
+-- Create table 'mana_char_abilities'
 
-CREATE TABLE mana_char_specials
+CREATE TABLE mana_char_abilities
 (
-    `char_id`   	       int(10) unsigned NOT NULL,
-    `special_id` 	       int(10) unsigned NOT NULL,
-    `special_current_mana` int(10) unsigned NOT NULL,
-	PRIMARY KEY (`char_id`, `special_id`),
+    `char_id`                int(10) unsigned NOT NULL,
+    `ability_id`             int(10) unsigned NOT NULL,
+    `ability_current_points` int(10) unsigned NOT NULL,
+	PRIMARY KEY (`char_id`, `ability_id`),
     FOREIGN KEY (`char_id`)
         REFERENCES `mana_characters` (`id`)
         ON DELETE CASCADE
@@ -438,7 +438,7 @@ AUTO_INCREMENT=0 ;
 
 INSERT INTO mana_world_states VALUES('accountserver_startup',-1,'0', NOW());
 INSERT INTO mana_world_states VALUES('accountserver_version',-1,'0', NOW());
-INSERT INTO mana_world_states VALUES('database_version',     -1,'21', NOW());
+INSERT INTO mana_world_states VALUES('database_version',     -1,'22', NOW());
 
 -- all known transaction codes
 

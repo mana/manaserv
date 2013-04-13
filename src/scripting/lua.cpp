@@ -1278,106 +1278,106 @@ static int chr_set_quest(lua_State *s)
     return 0;
 }
 
-/** LUA entity:set_special_recharge_speed (being)
- * entity:set_special_recharge_speed(int specialid, int new_speed)
- * entity:set_special_recharge_speed(string specialname, int new_speed)
+/** LUA entity:set_ability_recharge_speed (being)
+ * entity:set_ability_recharge_speed(int abilityid, int new_speed)
+ * entity:set_ability_recharge_speed(string abilityname, int new_speed)
  **
  * Valid only for character entities.
  *
- * Sets the recharge speed of the special to a new value for the character.
+ * Sets the recharge speed of the ability to a new value for the character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int entity_set_special_recharge_speed(lua_State *s)
+static int entity_set_ability_recharge_speed(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
+    const int ability = checkAbility(s, 2);
     const int speed = luaL_checkint(s, 3);
 
     if (!c->getComponent<CharacterComponent>()
-            ->setSpecialRechargeSpeed(special, speed))
+            ->setAbilityRechargeSpeed(ability, speed))
     {
         luaL_error(s,
-                   "set_special_recharge_speed called with special "
+                   "set_ability_recharge_speed called with ability "
                    "that is not owned by character.");
     }
     return 0;
 }
 
-/** LUA entity:special_recharge_speed (being)
- * entity:special_recharge_speed(int specialid)
- * entity:special_recharge_speed(string specialname)
+/** LUA entity:ability_recharge_speed (being)
+ * entity:ability_recharge_speed(int abilityid)
+ * entity:ability_recharge_speed(string abilityname)
  **
  * Valid only for character entities.
  *
- * **Return value:** The current recharge speed of the special that is owned by
+ * **Return value:** The current recharge speed of the ability that is owned by
  * the character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int entity_get_special_recharge_speed(lua_State *s)
+static int entity_get_ability_recharge_speed(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
+    const int ability = checkAbility(s, 2);
 
     auto *characterComponent = c->getComponent<CharacterComponent>();
 
-    SpecialMap::iterator it = characterComponent->findSpecial(special);
+    AbilityMap::iterator it = characterComponent->findAbility(ability);
 
-    luaL_argcheck(s, it != characterComponent->getSpecialEnd(), 2,
-                  "character does not have special");
+    luaL_argcheck(s, it != characterComponent->getAbilitiesEnd(), 2,
+                  "character does not have ability");
 
     lua_pushinteger(s, it->second.rechargeSpeed);
     return 1;
 }
 
-/** LUA entity:set_special_mana (being)
- * entity:set_special_mana(int specialid, int new_mana)
- * entity:set_special_mana(string specialname, int new_mana)
+/** LUA entity:set_ability_mana (being)
+ * entity:set_ability_mana(int abilityid, int new_mana)
+ * entity:set_ability_mana(string abilityname, int new_mana)
  **
  * Valid only for character entities.
  *
- * Sets the mana (recharge status) of the special to a new value for the
+ * Sets the mana (recharge status) of the ability to a new value for the
  * character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int entity_set_special_mana(lua_State *s)
+static int entity_set_ability_mana(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
+    const int ability = checkAbility(s, 2);
     const int mana = luaL_checkint(s, 3);
-    if (!c->getComponent<CharacterComponent>()->setSpecialMana(special, mana))
+    if (!c->getComponent<CharacterComponent>()->setAbilityMana(ability, mana))
     {
         luaL_error(s,
-                   "set_special_mana called with special "
+                   "set_ability_mana called with ability "
                    "that is not owned by character.");
     }
     return 0;
 }
 
-/** LUA entity:special_mana (being)
- * entity:special_mana(int specialid)
- * entity:special_mana(string specialname)
+/** LUA entity:ability_mana (being)
+ * entity:ability_mana(int abilityid)
+ * entity:ability_mana(string abilityname)
  **
- * **Return value:** The mana (recharge status) of the special that is owned by
+ * **Return value:** The mana (recharge status) of the ability that is owned by
  * the character.
  *
- * **Note:** When passing the ''specialname'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int entity_get_special_mana(lua_State *s)
+static int entity_get_ability_mana(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
     auto *characterComponent = c->getComponent<CharacterComponent>();
-    const int special = checkSpecial(s, 2);
-    SpecialMap::iterator it = characterComponent->findSpecial(special);
-    luaL_argcheck(s, it != characterComponent->getSpecialEnd(), 2,
-                  "character does not have special");
-    lua_pushinteger(s, it->second.currentMana);
+    const int ability = checkAbility(s, 2);
+    AbilityMap::iterator it = characterComponent->findAbility(ability);
+    luaL_argcheck(s, it != characterComponent->getAbilitiesEnd(), 2,
+                  "character does not have ability");
+    lua_pushinteger(s, it->second.currentPoints);
     return 1;
 }
 
@@ -2342,58 +2342,58 @@ static int entity_show_text_particle(lua_State *s)
     return 0;
 }
 
-/** LUA entity:give_special (being)
- * entity:give_special(int special)
+/** LUA entity:give_ability (being)
+ * entity:give_ability(int ability)
  **
  * Valid only for character entities.
  *
- * Enables a special for a character.
+ * Enables a ability for a character.
  */
-static int entity_give_special(lua_State *s)
+static int entity_give_ability(lua_State *s)
 {
     // cost_type is ignored until we have more than one cost type
     Entity *c = checkCharacter(s, 1);
-    const int special = checkSpecial(s, 2);
+    const int ability = checkAbility(s, 2);
     const int currentMana = luaL_optint(s, 3, 0);
 
-    c->getComponent<CharacterComponent>()->giveSpecial(special, currentMana);
+    c->getComponent<CharacterComponent>()->giveAbility(ability, currentMana);
     return 0;
 }
 
-/** LUA entity:has_special (being)
- * entity:has_special(int special)
+/** LUA entity:has_ability (being)
+ * entity:has_ability(int ability)
  **
  * Valid only for character entities.
  *
- * **Return value:** True if the character has the special, false otherwise.
+ * **Return value:** True if the character has the ability, false otherwise.
  */
-static int entity_has_special(lua_State *s)
+static int entity_has_ability(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int special = luaL_checkint(s, 2);
+    const int ability = luaL_checkint(s, 2);
 
-    lua_pushboolean(s, c->getComponent<CharacterComponent>()->hasSpecial(special));
+    lua_pushboolean(s, c->getComponent<CharacterComponent>()->hasAbility(ability));
     return 1;
 }
 
-/** LUA entity:take_special (being)
- * entity:take_special(int special)
+/** LUA entity:take_ability (being)
+ * entity:take_ability(int ability)
  **
  * Valid only for character entities.
  *
- * Removes a special from a character.
+ * Removes a ability from a character.
  *
  * **Return value:** True if removal was successful, false otherwise (in case
- * the character did not have the special).
+ * the character did not have the ability).
  */
-static int entity_take_special(lua_State *s)
+static int entity_take_ability(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int special = luaL_checkint(s, 2);
+    const int ability = luaL_checkint(s, 2);
 
     CharacterComponent *cc = c->getComponent<CharacterComponent>();
-    lua_pushboolean(s, cc->hasSpecial(special));
-    cc->takeSpecial(special);
+    lua_pushboolean(s, cc->hasAbility(ability));
+    cc->takeAbility(ability);
     return 1;
 }
 
@@ -2902,124 +2902,125 @@ static int get_distance(lua_State *s)
 }
 
 
-/** LUA_CATEGORY Special info class (specialinfo)
- * See the [[specials.xml#A script example|specials Documentation]] for a
+/** LUA_CATEGORY Ability info class (abilityinfo)
+ * See the [[abilitys.xml#A script example|abilitys Documentation]] for a
  * script example
  */
 
-/** LUA get_special_info (specialinfo)
- * get_special_info(int specialId)
- * get_special_info(string specialName)
+/** LUA get_ability_info (abilityinfo)
+ * get_ability_info(int abilityId)
+ * get_ability_info(string abilityName)
  **
- * **Return value:** This function returns a object of the specialinfo class.
+ * **Return value:** This function returns a object of the abilityinfo class.
  * See below for usage of that object.
  *
- * **Note:** When passing the ''specialName'' as parameter make sure that it is
- * formatted in this way: <setname>_<specialname> (for eg. "Magic_Healingspell").
+ * **Note:** When passing the ''abilityName'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
  */
-static int get_special_info(lua_State *s)
+static int get_ability_info(lua_State *s)
 {
-    const int special = checkSpecial(s, 1);
-    SpecialManager::SpecialInfo *info = specialManager->getSpecialInfo(special);
-    luaL_argcheck(s, info, 1, "invalid special");
-    LuaSpecialInfo::push(s, info);
+    const int ability = checkAbility(s, 1);
+    AbilityManager::AbilityInfo *info =
+            abilityManager->getAbilityInfo(ability);
+    luaL_argcheck(s, info, 1, "invalid ability");
+    LuaAbilityInfo::push(s, info);
     return 1;
 }
 
-/** LUA specialinfo:name (specialinfo)
- * specialinfo:name()
+/** LUA abilityinfo:name (abilityinfo)
+ * abilityinfo:name()
  **
- * ** Return value:** The name of the specialinfo object.
+ * ** Return value:** The name of the abilityinfo object.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting a
- * specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting a
+ * abilityinfo object.
  */
-static int specialinfo_get_name(lua_State *s)
+static int abilityinfo_get_name(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
     push(s, info->name);
     return 1;
 }
 
-/** LUA specialinfo:needed_mana (specialinfo)
- * specialinfo:needed_mana()
+/** LUA abilityinfo:needed_mana (abilityinfo)
+ * abilityinfo:needed_mana()
  **
- * ** Return value:** The mana that is needed to use the special
+ * ** Return value:** The mana that is needed to use the ability
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting a
- * specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting a
+ * abilityinfo object.
  */
-static int specialinfo_get_needed_mana(lua_State *s)
+static int abilityinfo_get_needed_mana(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
-    lua_pushinteger(s, info->neededMana);
+    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
+    lua_pushinteger(s, info->neededPoints);
     return 1;
 }
 
-/** LUA specialinfo:rechargeable (specialinfo)
- * specialinfo:rechargeable()
+/** LUA abilityinfo:rechargeable (abilityinfo)
+ * abilityinfo:rechargeable()
  **
- * ** Return value:** A boolean value that indicates whether the special is
+ * ** Return value:** A boolean value that indicates whether the ability is
  * rechargeable or usuable without recharge.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_is_rechargeable(lua_State *s)
+static int abilityinfo_is_rechargeable(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
     lua_pushboolean(s, info->rechargeable);
     return 1;
 }
 
-/** LUA specialinfo:on_use (specialinfo)
- * specialinfo:on_use(function callback)
+/** LUA abilityinfo:on_use (abilityinfo)
+ * abilityinfo:on_use(function callback)
  **
  * Assigns the ''callback'' as callback for the use event. This function will
- * be called everytime a character uses a special.
+ * be called everytime a character uses a ability.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_on_use(lua_State *s)
+static int abilityinfo_on_use(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
     Script *script = getScript(s);
     luaL_checktype(s, 2, LUA_TFUNCTION);
     script->assignCallback(info->useCallback);
     return 0;
 }
 
-/** LUA specialinfo:on_recharged (specialinfo)
- * specialinfo:on_recharged(function callback)
+/** LUA abilityinfo:on_recharged (abilityinfo)
+ * abilityinfo:on_recharged(function callback)
  **
  * Assigns the ''callback'' as callback for the recharged event. This function
- * will be called everytime when the special is fully recharged.
+ * will be called everytime when the ability is fully recharged.
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_on_recharged(lua_State *s)
+static int abilityinfo_on_recharged(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
     Script *script = getScript(s);
     luaL_checktype(s, 2, LUA_TFUNCTION);
     script->assignCallback(info->rechargedCallback);
     return 0;
 }
 
-/** LUA specialinfo:category (specialinfo)
- * specialinfo:category(function callback)
+/** LUA abilityinfo:category (abilityinfo)
+ * abilityinfo:category(function callback)
  **
- * **Return value:** The set-name of the special as defined in the
- * [[specials.xml]]
+ * **Return value:** The set-name of the ability as defined in the
+ * [[abilities.xml]]
  *
- * **Note:** See [[scripting#get_special_info|get_special_info]] for getting
- * a specialinfo object.
+ * **Note:** See [[scripting#get_ability_info|get_ability_info]] for getting
+ * a abilityinfo object.
  */
-static int specialinfo_get_category(lua_State *s)
+static int abilitiyinfo_get_category(lua_State *s)
 {
-    SpecialManager::SpecialInfo *info = LuaSpecialInfo::check(s, 1);
+    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
     push(s, info->setName);
     return 1;
 }
@@ -3690,7 +3691,7 @@ LuaScript::LuaScript():
         { "get_distance",                   get_distance                      },
         { "map_get_objects",                map_get_objects                   },
         { "announce",                       announce                          },
-        { "get_special_info",               get_special_info                  },
+        { "get_ability_info",               get_ability_info                  },
         { nullptr, nullptr }
     };
 #if LUA_VERSION_NUM < 502
@@ -3737,10 +3738,10 @@ LuaScript::LuaScript():
         { "equip_item",                     entity_equip_item                 },
         { "unequip_slot",                   entity_unequip_slot               },
         { "unequip_item",                   entity_unequip_item               },
-        { "set_special_recharge_speed",     entity_set_special_recharge_speed },
-        { "special_recharge_speed",         entity_get_special_recharge_speed },
-        { "set_special_mana",               entity_set_special_mana           },
-        { "special_mana",                   entity_get_special_mana           },
+        { "set_ability_recharge_speed",     entity_set_ability_recharge_speed },
+        { "ability_recharge_speed",         entity_get_ability_recharge_speed },
+        { "set_ability_mana",               entity_set_ability_mana           },
+        { "ability_mana",                   entity_get_ability_mana           },
         { "walk",                           entity_walk                       },
         { "damage",                         entity_damage                     },
         { "heal",                           entity_heal                       },
@@ -3777,9 +3778,9 @@ LuaScript::LuaScript():
         { "register",                       entity_register                   },
         { "shake_screen",                   entity_shake_screen               },
         { "show_text_particle",             entity_show_text_particle         },
-        { "give_special",                   entity_give_special               },
-        { "has_special",                    entity_has_special                },
-        { "take_special",                   entity_take_special               },
+        { "give_ability",                   entity_give_ability               },
+        { "has_ability",                    entity_has_ability                },
+        { "take_ability",                   entity_take_ability               },
         { "monster_id",                     entity_get_monster_id             },
         { "change_anger",                   entity_change_anger               },
         { "drop_anger",                     entity_drop_anger                 },
@@ -3820,13 +3821,13 @@ LuaScript::LuaScript():
         { nullptr, nullptr }
     };
 
-    static luaL_Reg const members_SpecialInfo[] = {
-        { "name",                           specialinfo_get_name              },
-        { "needed_mana",                    specialinfo_get_needed_mana       },
-        { "rechargeable",                   specialinfo_is_rechargeable       },
-        { "on_use",                         specialinfo_on_use                },
-        { "on_recharged",                   specialinfo_on_recharged          },
-        { "category",                       specialinfo_get_category          },
+    static luaL_Reg const members_AbilityInfo[] = {
+        { "name",                           abilityinfo_get_name              },
+        { "needed_mana",                    abilityinfo_get_needed_mana       },
+        { "rechargeable",                   abilityinfo_is_rechargeable       },
+        { "on_use",                         abilityinfo_on_use                },
+        { "on_recharged",                   abilityinfo_on_recharged          },
+        { "category",                       abilitiyinfo_get_category         },
         { nullptr, nullptr}
     };
 
@@ -3837,7 +3838,7 @@ LuaScript::LuaScript():
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
     LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);
     LuaStatusEffect::registerType(mRootState, "StatusEffect", members_StatusEffect);
-    LuaSpecialInfo::registerType(mRootState, "SpecialInfo", members_SpecialInfo);
+    LuaAbilityInfo::registerType(mRootState, "AbilityInfo", members_AbilityInfo);
 
     // Make script object available to callback functions.
     lua_pushlightuserdata(mRootState, const_cast<char *>(&registryKey));

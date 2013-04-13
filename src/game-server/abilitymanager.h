@@ -19,8 +19,8 @@
  */
 
 
-#ifndef SPECIALMANAGER_H
-#define SPECIALMANAGER_H
+#ifndef ABILITYMANAGER_H
+#define ABILITYMANAGER_H
 
 #include "utils/string.h"
 #include "utils/xml.h"
@@ -29,7 +29,7 @@
 
 
 
-class SpecialManager
+class AbilityManager
 {
 public:
     enum TargetMode
@@ -38,13 +38,13 @@ public:
         TARGET_POINT
     };
 
-    struct SpecialInfo
+    struct AbilityInfo
     {
-        SpecialInfo() :
+        AbilityInfo() :
             id(0),
             rechargeable(false),
             defaultRechargeSpeed(0),
-            neededMana(0),
+            neededPoints(0),
             target(TARGET_BEING)
         {}
 
@@ -53,65 +53,65 @@ public:
         std::string setName;
         bool rechargeable;
         int defaultRechargeSpeed;
-        unsigned neededMana;
+        unsigned neededPoints;
         TargetMode target;
         Script::Ref rechargedCallback;
         Script::Ref useCallback;
     };
 
-    SpecialManager()
+    AbilityManager()
     { }
 
-    ~SpecialManager()
+    ~AbilityManager()
     { clear(); }
 
     /**
-     * Loads special reference file.
+     * Loads ability reference file.
      */
     void initialize();
 
     /**
-     * Reloads special reference file.
+     * Reloads ability reference file.
      */
     void reload();
 
     /**
-     * Gets the specials Id from a set and a special string.
+     * Gets the abilities Id from a set and a ability string.
      */
     unsigned getId(const std::string &set, const std::string &name) const;
 
     /**
-     * Gets the specials Id from a string formatted in this way:
-     * "setname_skillname"
+     * Gets the abilities Id from a string formatted in this way:
+     * "setname_abilityname"
      */
-    unsigned getId(const std::string &specialName) const;
+    unsigned getId(const std::string &abilityName) const;
 
-    const std::string getSpecialName(int id) const;
+    const std::string getAbilityName(int id) const;
     const std::string getSetName(int id) const;
 
-    SpecialInfo *getSpecialInfo(int id);
+    AbilityInfo *getAbilityInfo(int id);
 
 
-    void readSpecialSetNode(xmlNodePtr node, const std::string &filename);
+    void readAbilitySetNode(xmlNodePtr node, const std::string &filename);
 
     void checkStatus();
 
 private:
     /**
-     * Clears up the special maps.
+     * Clears up the ability maps.
      */
     void clear();
 
-    void readSpecialNode(xmlNodePtr skillNode,
+    void readAbilityNode(xmlNodePtr skillNode,
                          const std::string &setName);
 
-    typedef std::map<unsigned, SpecialInfo*> SpecialsInfo;
-    SpecialsInfo mSpecialsInfo;
-    typedef utils::NameMap<SpecialInfo*> NamedSpecialsInfo;
-    NamedSpecialsInfo mNamedSpecialsInfo;
+    typedef std::map<unsigned, AbilityInfo*> AbilitiesInfo;
+    AbilitiesInfo mAbilitiesInfo;
+    typedef utils::NameMap<AbilityInfo*> NamedAbilitiesInfo;
+    NamedAbilitiesInfo mNamedAbilitiesInfo;
 
 };
 
-extern SpecialManager *specialManager;
+extern AbilityManager *abilityManager;
 
-#endif // SPECIALMANAGER_H
+#endif // ABILITYMANAGER_H

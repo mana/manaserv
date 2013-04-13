@@ -115,6 +115,8 @@
 		<Unit filename="src/common/resourcemanager.cpp" />
 		<Unit filename="src/common/resourcemanager.h" />
 		<Unit filename="src/common/transaction.h" />
+		<Unit filename="src/game-server/abilitymanager.cpp" />
+		<Unit filename="src/game-server/abilitmanager.h" />
 		<Unit filename="src/game-server/accountconnection.cpp" />
 		<Unit filename="src/game-server/accountconnection.h" />
 		<Unit filename="src/game-server/actor.cpp" />
@@ -178,8 +180,6 @@
 		<Unit filename="src/game-server/skillmanager.h" />
 		<Unit filename="src/game-server/spawnareacomponent.cpp" />
 		<Unit filename="src/game-server/spawnareacomponent.h" />
-		<Unit filename="src/game-server/specialmanager.cpp" />
-		<Unit filename="src/game-server/specialmanager.h" />
 		<Unit filename="src/game-server/state.cpp" />
 		<Unit filename="src/game-server/state.h" />
 		<Unit filename="src/game-server/statuseffect.cpp" />

@@ -25,11 +25,11 @@
 
 #include "common/resourcemanager.h"
 
-#include "game-server/mapmanager.h"
+#include "game-server/abilitymanager.h"
 #include "game-server/attributemanager.h"
 #include "game-server/skillmanager.h"
-#include "game-server/specialmanager.h"
 #include "game-server/itemmanager.h"
+#include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
 #include "game-server/emotemanager.h"
 #include "game-server/statusmanager.h"
@@ -45,7 +45,7 @@ void SettingsManager::initialize()
     MapManager::initialize();
     attributeManager->initialize();
     skillManager->initialize();
-    specialManager->initialize();
+    abilityManager->initialize();
     itemManager->initialize();
     monsterManager->initialize();
     emoteManager->initialize();
@@ -66,7 +66,7 @@ void SettingsManager::reload()
     MapManager::reload();
     attributeManager->reload();
     skillManager->reload();
-    specialManager->reload();
+    abilityManager->reload();
     itemManager->reload();
     monsterManager->reload();
     emoteManager->reload();
@@ -143,10 +143,10 @@ void SettingsManager::loadFile(const std::string &filename)
             // skills config
             skillManager->readSkillSetNode(childNode, filename);
         }
-        else if (xmlStrEqual(childNode->name, BAD_CAST "special-set"))
+        else if (xmlStrEqual(childNode->name, BAD_CAST "ability-set"))
         {
-            // special config
-            specialManager->readSpecialSetNode(childNode, filename);
+            // ability config
+            abilityManager->readAbilitySetNode(childNode, filename);
         }
         else if (xmlStrEqual(childNode->name, BAD_CAST "slot"))
         {
@@ -192,7 +192,7 @@ void SettingsManager::checkStatus()
     MapManager::checkStatus();
     attributeManager->checkStatus();
     skillManager->checkStatus();
-    specialManager->checkStatus();
+    abilityManager->checkStatus();
     itemManager->checkStatus();
     monsterManager->checkStatus();
     emoteManager->checkStatus();

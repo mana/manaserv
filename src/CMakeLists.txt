@@ -197,6 +197,8 @@ SET(SRCS_MANASERVGAME
     game-server/main-game.cpp
     common/permissionmanager.h
     common/permissionmanager.cpp
+    game-server/abilitymanager.cpp
+    game-server/abilitymanager.h
     game-server/accountconnection.h
     game-server/accountconnection.cpp
     game-server/actor.h
@@ -259,8 +261,6 @@ SET(SRCS_MANASERVGAME
     game-server/skillmanager.cpp
     game-server/spawnareacomponent.h
     game-server/spawnareacomponent.cpp
-    game-server/specialmanager.cpp
-    game-server/specialmanager.h
     game-server/state.h
     game-server/state.cpp
     game-server/statuseffect.h

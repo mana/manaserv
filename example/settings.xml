@@ -1,8 +1,8 @@
 <settings>
+	<include file="abilities.xml" />
 	<include file="maps.xml" />
 	<include file="attributes.xml" />
 	<include file="skills.xml" />
-	<include file="specials.xml" />
 	<include file="equip.xml" />
 	<include file="items.xml" />
 	<include file="monsters.xml" />
