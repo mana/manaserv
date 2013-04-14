@@ -493,32 +493,34 @@ static int item_drop(lua_State *s)
  */
 
 /** LUA npc_message (input)
- * npc_message(handle npc, handle character, string message)
+ * npc_message(string message)
  **
  * **Warning:** May only be called from an NPC talk function.
  *
- * Shows an NPC dialog box on the screen of character ''ch'' displaying the
- * string ''msg''. Idles the current thread until the user click "OK".
+ * Shows an NPC dialog box on the screen of displaying the string ''msg''.
+ * Idles the current thread until the user click "OK".
  */
 static int npc_message(lua_State *s)
 {
-    Entity *npc = checkNpc(s, 1);
-    Entity *q = checkCharacter(s, 2);
-    const char *m = luaL_checkstring(s, 3);
+    const char *m = luaL_checkstring(s, 1);
 
     Script::Thread *thread = checkCurrentThread(s);
+    Entity *npc = thread->getContext().npc;
+    Entity *character = thread->getContext().character;
+    if (!(npc && character))
+        luaL_error(s, "not in npc conversation");
 
     MessageOut msg(GPMSG_NPC_MESSAGE);
     msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     msg.writeString(m);
-    gameHandler->sendTo(q, msg);
+    gameHandler->sendTo(character, msg);
 
     thread->mState = Script::ThreadPaused;
     return lua_yield(s, 0);
 }
 
 /** LUA npc_choice (input)
- * npc_choice(handle npc, handle character, item1, item2, ... itemN)
+ * npc_choice(item1, item2, ... itemN)
  **
  * **Return value:** Number of the option the player selected (starting with 1).
  *
@@ -526,23 +528,24 @@ static int npc_message(lua_State *s)
  *
  * Shows an NPC dialog box on the users screen with a number of dialog options
  * to choose from. Idles the current thread until the user selects one or
- * aborts the current   thread when the user clicks "cancel".
+ * aborts the current thread when the user clicks "cancel".
  *
  * Items are either strings or tables of strings (indices are ignored,
  * but presumed to be taken in order). So,
- * ''npc_choice(npc, ch, "A", {"B", "C", "D"}, "E")'' is the same as
- * ''npc_choice(npc, ch, "A", "B", "C", "D", "E")''.
+ * ''npc_choice("A", {"B", "C", "D"}, "E")'' is the same as
+ * ''npc_choice("A", "B", "C", "D", "E")''.
  */
 static int npc_choice(lua_State *s)
 {
-    Entity *npc = checkNpc(s, 1);
-    Entity *q = checkCharacter(s, 2);
-
     Script::Thread *thread = checkCurrentThread(s);
+    Entity *npc = thread->getContext().npc;
+    Entity *character = thread->getContext().character;
+    if (!(npc && character))
+        luaL_error(s, "not in npc conversation");
 
     MessageOut msg(GPMSG_NPC_CHOICE);
     msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
-    for (int i = 3, i_end = lua_gettop(s); i <= i_end; ++i)
+    for (int i = 1, i_end = lua_gettop(s); i <= i_end; ++i)
     {
         if (lua_isstring(s, i))
         {
@@ -572,14 +575,14 @@ static int npc_choice(lua_State *s)
             return 0;
         }
     }
-    gameHandler->sendTo(q, msg);
+    gameHandler->sendTo(character, msg);
 
     thread->mState = Script::ThreadExpectingNumber;
     return lua_yield(s, 0);
 }
 
 /** LUA npc_ask_integer (input)
- * npc_ask_integer(handle npc, handle character, min_num, max_num, [default_num])
+ * npc_ask_integer(min_num, max_num, [default_num])
  **
  * **Return value:** The number the player entered into the field.
  *
@@ -591,27 +594,29 @@ static int npc_choice(lua_State *s)
  */
 static int npc_ask_integer(lua_State *s)
 {
-    Entity *npc = checkNpc(s, 1);
-    Entity *q = checkCharacter(s, 2);
-    int min = luaL_checkint(s, 3);
-    int max = luaL_checkint(s, 4);
-    int defaultValue = luaL_optint(s, 5, min);
+    int min = luaL_checkint(s, 1);
+    int max = luaL_checkint(s, 2);
+    int defaultValue = luaL_optint(s, 3, min);
 
     Script::Thread *thread = checkCurrentThread(s);
+    Entity *npc = thread->getContext().npc;
+    Entity *character = thread->getContext().character;
+    if (!(npc && character))
+        luaL_error(s, "not in npc conversation");
 
     MessageOut msg(GPMSG_NPC_NUMBER);
     msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
     msg.writeInt32(min);
     msg.writeInt32(max);
     msg.writeInt32(defaultValue);
-    gameHandler->sendTo(q, msg);
+    gameHandler->sendTo(character, msg);
 
     thread->mState = Script::ThreadExpectingNumber;
     return lua_yield(s, 0);
 }
 
 /** LUA npc_ask_string (input)
- * npc_ask_string(handle npc, handle character)
+ * npc_ask_string()
  **
  * **Return value:** The string the player entered.
  *
@@ -621,32 +626,34 @@ static int npc_ask_integer(lua_State *s)
  */
 static int npc_ask_string(lua_State *s)
 {
-    Entity *npc = checkNpc(s, 1);
-    Entity *q = checkCharacter(s, 2);
-
     Script::Thread *thread = checkCurrentThread(s);
+    Entity *npc = thread->getContext().npc;
+    Entity *character = thread->getContext().character;
+    if (!(npc && character))
+        luaL_error(s, "not in npc conversation");
 
     MessageOut msg(GPMSG_NPC_STRING);
     msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
-    gameHandler->sendTo(q, msg);
+    gameHandler->sendTo(character, msg);
 
     thread->mState = Script::ThreadExpectingString;
     return lua_yield(s, 0);
 }
 
 /** LUA npc_post (input)
- * npc_post(handle npc, handle character)
+ * npc_post()
  **
  * Starts retrieving post. Better not try to use it so far.
  */
 static int npc_post(lua_State *s)
 {
-    Entity *npc = checkNpc(s, 1);
-    Entity *q = checkCharacter(s, 2);
+    const Script::Context *context = getScript(s)->getContext();
+    Entity *npc = context->npc;
+    Entity *character = context->character;
 
     MessageOut msg(GPMSG_NPC_POST);
     msg.writeInt16(npc->getComponent<ActorComponent>()->getPublicID());
-    gameHandler->sendTo(q, msg);
+    gameHandler->sendTo(character, msg);
 
     return 0;
 }
@@ -704,19 +711,15 @@ static int announce(lua_State *s)
  */
 
 /** LUA npc_trade (inventory)
- * npc_trade(handle npc,
- *           handle character,
- *           bool mode,
+ * npc_trade(bool mode,
  *           {int item1id, int item1amount, int item1cost}, ...,
  *           {int itemNid, int itemNamount, int itemNcost})
- * npc_trade(handle npc,
- *           handle character,
- *           bool mode,
+ * npc_trade(bool mode,
  *           {string item1name, int item1amount, int item1cost}, ...,
  *           {string itemNname, int itemNamount, int itemNcost})
  **
  * FIXME: Move into a seperate file
- * Opens a trade window for ''character'' while talking with ''npc''. ''mode''
+ * Opens a trade window from an NPC conversation. ''mode''
  * is true for selling and false for buying. You have to set each items the NPC
  * is buying/selling,    the cost and the maximum amount in {}.
  *
@@ -735,24 +738,24 @@ static int announce(lua_State *s)
  * **Examples:**
  * <code lua npc_trade.lua>
  *     -- "A buy sample."
- *     local buycase = npc_trade(npc, ch, false, {
+ *     local buycase = npc_trade(false, {
  *         {"Sword", 10, 20},
  *         {"Bow", 10, 30},
  *         {"Dagger", 10, 50}
  *     })
  *     if buycase == 0 then
- *       npc_message(npc, ch, "What do you want to buy?")
+ *       npc_message("What do you want to buy?")
  *     elseif buycase == 1 then
- *       npc_message(npc, ch, "I've got no items to sell.")
+ *       npc_message("I've got no items to sell.")
  *     else
- *       npc_message(npc, ch, "Hmm, something went wrong... Ask a scripter to
+ *       npc_message("Hmm, something went wrong... Ask a scripter to
  *       fix the buying mode!")
  *     end
  *
  * -- ...
  *
  *    -- "Example: Let the player sell only pre-determined items."
- *    local sellcase = npc_trade(npc, ch, true, {
+ *    local sellcase = npc_trade(true, {
  *                      {"Sword", 10, 20},
  *                      {"Bow", 10, 30},
  *                      {"Dagger", 10, 200},
@@ -761,42 +764,40 @@ static int announce(lua_State *s)
  *                      {"Cactus Drink", 10, 25}
  *     })
  *     if sellcase == 0 then
- *       npc_message(npc, ch, "Here we go:")
+ *       npc_message("Here we go:")
  *     elseif sellcase == 1 then
- *       npc_message(npc, ch, "I'm not interested by your items.")
+ *       npc_message("I'm not interested by your items.")
  *     else
- *       npc_message(npc, ch, "Hmm, something went wrong...")
- *       npc_message(npc, ch, "Ask a scripter to fix me!")
+ *       npc_message("Hmm, something went wrong...")
+ *       npc_message("Ask a scripter to fix me!")
  *     end
  *
  * -- ...
  *
  *     -- "Example: Let the player sell every item with a 'value' parameter in
  *     the server's items.xml file
- *     local sellcase = npc_trade(npc, ch, true)
+ *     local sellcase = npc_trade(true)
  *     if sellcase == 0 then
- *       npc_message(npc, ch, "Ok, what do you want to sell:")
+ *       npc_message("Ok, what do you want to sell:")
  *     elseif sellcase == 1 then
- *       npc_message(npc, ch, "I'm not interested by any of your items.")
+ *       npc_message("I'm not interested by any of your items.")
  *     else
- *       npc_message(npc, ch, "Hmm, something went wrong...")
- *       npc_message(npc, ch, "Ask a scripter to fix me!")
+ *       npc_message("Hmm, something went wrong...")
+ *       npc_message("Ask a scripter to fix me!")
  *     end
  * </code>
  */
 static int npc_trade(lua_State *s)
 {
-    Entity *npc = checkNpc(s, 1);
-    Entity *q = checkCharacter(s, 2);
-    if (!lua_isboolean(s, 3))
-    {
-        luaL_error(s, "npc_trade called with incorrect parameters.");
-        return 0;
-    }
+    const Script::Context *context = getScript(s)->getContext();
+    Entity *npc = context->npc;
+    Entity *character = context->character;
 
-    bool sellMode = lua_toboolean(s, 3);
-    BuySell *t = new BuySell(q, sellMode);
-    if (!lua_istable(s, 4))
+    luaL_argcheck(s, lua_isboolean(s, 1), 1, "boolean expected");
+    bool sellMode = lua_toboolean(s, 1);
+
+    BuySell *t = new BuySell(character, sellMode);
+    if (!lua_istable(s, 2))
     {
         if (sellMode)
         {
@@ -833,7 +834,7 @@ static int npc_trade(lua_State *s)
     int nbItems = 0;
 
     lua_pushnil(s);
-    while (lua_next(s, 4))
+    while (lua_next(s, 2))
     {
         if (!lua_istable(s, -1))
         {

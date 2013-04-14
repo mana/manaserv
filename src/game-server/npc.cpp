@@ -94,6 +94,8 @@ void Npc::start(Entity *npc, Entity *ch)
     {
         Script::Thread *thread = script->newThread();
         thread->getContext().map = npc->getMap();
+        thread->getContext().npc = npc;
+        thread->getContext().character = ch;
         script->prepare(talkCallback);
         script->push(npc);
         script->push(ch);

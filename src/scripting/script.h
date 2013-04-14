@@ -43,9 +43,13 @@ class Script : public sigc::trackable
         struct Context
         {
             MapComposite *map;
+            Entity *npc;
+            Entity *character;
 
             Context()
                 : map(0)
+                , npc(0)
+                , character(0)
             {}
         };
 

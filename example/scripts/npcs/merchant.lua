@@ -12,9 +12,7 @@
 
 function Merchant(npc, ch, buy_sell_table)
 
-    local function say(message)
-        npc_message(npc, ch, message)
-    end
+    local say = npc_message
 
     -- Important note: You can add two tables made of trinoms here when calling the
     -- merchant function. E.g.: Merchant(npc, ch, buy_table, sell_table)
@@ -56,7 +54,7 @@ function Merchant(npc, ch, buy_sell_table)
     table.insert (choice_table, "Tell me about the objects on this map")
     table.insert (choice_table, "Nevermind...")
 
-    local v = npc_choice(npc, ch, choice_table)
+    local v = npc_choice(choice_table)
 
     --Debug and learning purpose
     --for i,k in ipairs(choice_table) do print(i,k) end
@@ -67,7 +65,7 @@ function Merchant(npc, ch, buy_sell_table)
 
     if v == 1 then
     -- "To buy."
-    local buycase = npc_trade(npc, ch, false, buy_sell_table[1])
+    local buycase = npc_trade(false, buy_sell_table[1])
     if buycase == 0 then
         say "What do you want to buy?"
     elseif buycase == 1 then
@@ -80,7 +78,7 @@ function Merchant(npc, ch, buy_sell_table)
 
         if buy_sell_table[2] == nil then
             -- "To sell stuff..."
-            local sellcase = npc_trade(npc, ch, true)
+            local sellcase = npc_trade(true)
             if sellcase == 0 then
                 say "Ok, what do you want to sell?"
             elseif sellcase == 1 then
@@ -90,7 +88,7 @@ function Merchant(npc, ch, buy_sell_table)
             end
         else
             -- "Can you make me a price for what I have?"
-            local sellcase = npc_trade(npc, ch, true, buy_sell_table[2])
+            local sellcase = npc_trade(true, buy_sell_table[2])
             if sellcase == 0 then
                 say "Here we go:"
             elseif sellcase == 1 then
