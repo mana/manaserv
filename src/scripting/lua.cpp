@@ -314,7 +314,7 @@ static int npc_create(lua_State *s)
     }
 
     GameState::enqueueInsert(npc);
-    lua_pushlightuserdata(s, npc);
+    push(s, npc);
     return 1;
 }
 
@@ -369,27 +369,19 @@ static int monster_create(lua_State *s)
     actorComponent->setPosition(*monster, Point(x, y));
     GameState::enqueueInsert(monster);
 
-    lua_pushlightuserdata(s, monster);
+    push(s, monster);
     return 1;
 }
 
-/** LUA monster_remove (creation)
- * monster_remove(handle monster)
+/** LUA entity:remove (creation)
+ * entity:remove()
  **
- * **Return value:** True if removing the monster suceeded.
- *
- * Remove the monster ''monster'' from the current map.
+ * Removes the entity from its current map.
  */
-static int monster_remove(lua_State *s)
+static int entity_remove(lua_State *s)
 {
-    bool monsterRemoved = false;
-    if (Entity *m = getMonster(s, 1))
-    {
-        GameState::remove(m);
-        monsterRemoved = true;
-    }
-    lua_pushboolean(s, monsterRemoved);
-    return 1;
+    GameState::remove(LuaEntity::check(s, 1));
+    return 0;
 }
 
 /** LUA trigger_create (creation)
@@ -2157,10 +2149,7 @@ static int get_character_by_name(lua_State *s)
     const char *name = luaL_checkstring(s, 1);
 
     Entity *ch = gameHandler->getCharacterByNameSlow(name);
-    if (!ch)
-        lua_pushnil(s);
-    else
-        lua_pushlightuserdata(s, ch);
+    push(s, ch);
 
     return 1;
 }
@@ -2706,7 +2695,7 @@ static int log(lua_State *s)
 
 /** LUA get_beings_in_circle (area)
  * get_beings_in_circle(int x, int y, int radius)
- * get_beings_in_circle(handle being, int radius)
+ * get_beings_in_circle(handle actor, int radius)
  **
  * **Return value:** This function returns a lua table of all beings in a
  * circle of radius (in pixels) ''radius'' centered either at the pixel at
@@ -2715,9 +2704,9 @@ static int log(lua_State *s)
 static int get_beings_in_circle(lua_State *s)
 {
     int x, y, r;
-    if (lua_islightuserdata(s, 1))
+    if (lua_isuserdata(s, 1))
     {
-        Entity *b = checkBeing(s, 1);
+        Entity *b = checkActor(s, 1);
         const Point &pos = b->getComponent<ActorComponent>()->getPosition();
         x = pos.x;
         y = pos.y;
@@ -2747,7 +2736,7 @@ static int get_beings_in_circle(lua_State *s)
                                             actorComponent->getSize(),
                                             Point(x, y), r))
             {
-                lua_pushlightuserdata(s, b);
+                push(s, b);
                 lua_rawseti(s, tableStackPosition, tableIndex);
                 tableIndex++;
             }
@@ -2784,7 +2773,7 @@ static int get_beings_in_rectangle(lua_State *s)
         if ((t == OBJECT_NPC || t == OBJECT_CHARACTER || t == OBJECT_MONSTER) &&
             rect.contains(b->getComponent<ActorComponent>()->getPosition()))
         {
-            lua_pushlightuserdata(s, b);
+            push(s, b);
             lua_rawseti(s, tableStackPosition, tableIndex);
             tableIndex++;
         }
@@ -3453,7 +3442,6 @@ static int item_class_attacks(lua_State *s)
  */
 static int test_tableget(lua_State *s)
 {
-
     std::list<float> list;
     std::vector<std::string> svector;
     std::vector<int> ivector;
@@ -3480,9 +3468,8 @@ static int test_tableget(lua_State *s)
     LOG_INFO("Pushing Integer Vector");
     ivector.resize(10);
     for (int i = 1; i < 10; i++)
-    {
-        ivector[i-1] = i * i;
-    }
+        ivector[i - 1] = i * i;
+
     pushSTLContainer<int>(s, ivector);
 
     LOG_INFO("Pushing String/String Map");
@@ -3498,7 +3485,6 @@ static int test_tableget(lua_State *s)
     set.insert(14);
     set.insert(10);
     pushSTLContainer<int>(s, set);
-
 
     return 5;
 }
@@ -3609,7 +3595,6 @@ LuaScript::LuaScript():
         { "monster_change_anger",            &monster_change_anger            },
         { "monster_drop_anger",              &monster_drop_anger              },
         { "monster_get_angerlist",           &monster_get_angerlist           },
-        { "monster_remove",                  &monster_remove                  },
         { "being_apply_status",              &being_apply_status              },
         { "being_remove_status",             &being_remove_status             },
         { "being_has_status",                &being_has_status                },
@@ -3694,6 +3679,11 @@ LuaScript::LuaScript():
         { NULL, NULL }
     };
 
+    static luaL_Reg const members_Entity[] = {
+        { "remove",                          &entity_remove                   },
+        { NULL, NULL }
+    };
+
     static luaL_Reg const members_ItemClass[] = {
         { "on",                              &item_class_on                   },
         { "attacks",                         &item_class_attacks              },
@@ -3732,6 +3722,7 @@ LuaScript::LuaScript():
 
     LuaAttackInfo::registerType(mRootState, "Attack", members_AttackInfo);
     LuaDamage::registerType(mRootState, "Damage", members_Damage);
+    LuaEntity::registerType(mRootState, "Entity", members_Entity);
     LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
     LuaMonsterClass::registerType(mRootState, "MonsterClass", members_MonsterClass);

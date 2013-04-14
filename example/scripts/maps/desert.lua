@@ -126,7 +126,7 @@ function Tamer(npc, ch, list)
                                                     posY(npc) - 3 * TILESIZE,
                                                     6 * TILESIZE, 6 * TILESIZE)) do
         if being_type(b) == TYPE_MONSTER then
-            monster_remove(b)
+            b:remove()
         end
     end
 

@@ -44,7 +44,7 @@ class MapComposite;
 class Entity : public sigc::trackable
 {
     public:
-        Entity(EntityType type, MapComposite *map = 0);
+        Entity(EntityType type, MapComposite *map = nullptr);
 
         virtual ~Entity();
 
@@ -52,8 +52,7 @@ class Entity : public sigc::trackable
 
         template <class T> void addComponent(T *component);
         template <class T> T *getComponent() const;
-
-        Component *getComponent(ComponentType type) const;
+        template <class T> bool hasComponent() const;
 
         bool isVisible() const;
         bool canMove() const;
@@ -69,6 +68,8 @@ class Entity : public sigc::trackable
         sigc::signal<void, Entity *> signal_map_changed;
 
     private:
+        Component *getComponent(ComponentType type) const;
+
         MapComposite *mMap;     /**< Map the entity is on */
         EntityType mType;       /**< Type of this entity. */
 
@@ -101,7 +102,6 @@ inline void Entity::addComponent(T *component)
  */
 inline Component *Entity::getComponent(ComponentType type) const
 {
-    assert(mComponents[type]);
     return mComponents[type];
 }
 
@@ -112,7 +112,18 @@ inline Component *Entity::getComponent(ComponentType type) const
 template <class T>
 inline T *Entity::getComponent() const
 {
-    return static_cast<T*>(getComponent(T::type));
+    T *component = static_cast<T*>(getComponent(T::type));
+    assert(component);
+    return component;
+}
+
+/**
+ * Returns whether this class has a certain component.
+ */
+template <class T>
+inline bool Entity::hasComponent() const
+{
+    return getComponent(T::type) != nullptr;
 }
 
 /**

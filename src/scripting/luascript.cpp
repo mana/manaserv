@@ -75,24 +75,21 @@ void LuaScript::prepareResume(Thread *thread)
 void LuaScript::push(int v)
 {
     assert(nbArgs >= 0);
-    lua_pushinteger(mCurrentState, v);
+    ::push(mCurrentState, v);
     ++nbArgs;
 }
 
 void LuaScript::push(const std::string &v)
 {
     assert(nbArgs >= 0);
-    lua_pushlstring(mCurrentState, v.c_str(), v.length());
+    ::push(mCurrentState, v);
     ++nbArgs;
 }
 
 void LuaScript::push(Entity *v)
 {
     assert(nbArgs >= 0);
-    if (v)
-        lua_pushlightuserdata(mCurrentState, v);
-    else
-        lua_pushnil(mCurrentState);
+    ::push(mCurrentState, v);
     ++nbArgs;
 }
 
