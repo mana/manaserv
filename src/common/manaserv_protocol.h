@@ -148,6 +148,7 @@ enum {
     PGMSG_USE_ABILITY_ON_BEING     = 0x0292, // B abilityID, W being id
     GPMSG_ABILITY_STATUS           = 0x0293, // { B abilityID, D current, D max, D recharge }
     PGMSG_USE_ABILITY_ON_POINT     = 0x0294, // B abilityID, W*2 position
+    GPMSG_ABILITY_REMOVED          = 0x0295, // B abilityID
     PGMSG_SAY                      = 0x02A0, // S text
     GPMSG_SAY                      = 0x02A1, // W being id, S text
     GPMSG_NPC_CHOICE               = 0x02B0, // W being id, { S text }*
