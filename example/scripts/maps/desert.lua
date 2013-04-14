@@ -39,7 +39,7 @@ end)
 function Smith(npc, ch, list)
     local sword_count = chr_inv_count(ch, true, true, "Sword")
     if sword_count > 0 then
-        npc_message("Ah! I can see you already have a sword.")
+        say("Ah! I can see you already have a sword.")
     end
     Merchant(npc, ch, list)
 end
@@ -54,7 +54,7 @@ function possessions_table(npc, ch)
             ..inventory_table[i].id..", "..inventory_table[i].name..", "
             ..inventory_table[i].amount
     end
-    npc_message(item_message)
+    say(item_message)
 
     item_message = "Equipment:"..
                    "\nSlot id, item id, item name:"..
@@ -64,7 +64,7 @@ function possessions_table(npc, ch)
         item_message = item_message.."\n"..equipment_table[i].slot..", "
             ..equipment_table[i].id..", "..equipment_table[i].name
     end
-    npc_message(item_message)
+    say(item_message)
 
 end
 
@@ -74,21 +74,21 @@ function Harmony(npc, ch, list)
     being_apply_status(ch, 1, 99999)
     -- Say all the messages in the messages list.
     for i = 1, #list do
-        npc_message(list[i])
+        say(list[i])
     end
     --- Give the player 100 units of money the first time.
     if  harmony_have_talked_to_someone == false then
-        npc_message("Here is some money for you to find some toys to play with.\nEh Eh!")
+        say("Here is some money for you to find some toys to play with.\nEh Eh!")
         chr_money_change(ch, 100)
-        npc_message(string.format("You now have %d shiny coins!", chr_money(ch)))
+        say(string.format("You now have %d shiny coins!", chr_money(ch)))
         harmony_have_talked_to_someone = true
-        npc_message(string.format("Try to come back with a better level than %i.", chr_get_level(ch)))
+        say(string.format("Try to come back with a better level than %i.", chr_get_level(ch)))
     else
-        npc_message("Let me see what you've got so far... Don't be afraid!")
+        say("Let me see what you've got so far... Don't be afraid!")
         effect_create(EMOTE_WINK, npc)
         possessions_table(npc, ch)
     end
-    npc_message("Have fun!")
+    say("Have fun!")
     effect_create(EMOTE_HAPPY, npc)
     -- Make Harmony disappear for a while... with a small earthquake effect!
     local shakeX = posX(npc)

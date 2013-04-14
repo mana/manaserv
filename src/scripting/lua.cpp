@@ -492,15 +492,15 @@ static int item_drop(lua_State *s)
 /** LUA_CATEGORY Input and output (input)
  */
 
-/** LUA npc_message (input)
- * npc_message(string message)
+/** LUA say (input)
+ * say(string message)
  **
  * **Warning:** May only be called from an NPC talk function.
  *
- * Shows an NPC dialog box on the screen of displaying the string ''msg''.
+ * Shows an NPC dialog box on the screen of displaying the string ''message''.
  * Idles the current thread until the user click "OK".
  */
-static int npc_message(lua_State *s)
+static int say(lua_State *s)
 {
     const char *m = luaL_checkstring(s, 1);
 
@@ -519,8 +519,8 @@ static int npc_message(lua_State *s)
     return lua_yield(s, 0);
 }
 
-/** LUA npc_choice (input)
- * npc_choice(item1, item2, ... itemN)
+/** LUA ask (input)
+ * ask(item1, item2, ... itemN)
  **
  * **Return value:** Number of the option the player selected (starting with 1).
  *
@@ -532,10 +532,10 @@ static int npc_message(lua_State *s)
  *
  * Items are either strings or tables of strings (indices are ignored,
  * but presumed to be taken in order). So,
- * ''npc_choice("A", {"B", "C", "D"}, "E")'' is the same as
- * ''npc_choice("A", "B", "C", "D", "E")''.
+ * ''ask("A", {"B", "C", "D"}, "E")'' is the same as
+ * ''ask("A", "B", "C", "D", "E")''.
  */
-static int npc_choice(lua_State *s)
+static int ask(lua_State *s)
 {
     Script::Thread *thread = checkCurrentThread(s);
     Entity *npc = thread->getContext().npc;
@@ -562,8 +562,7 @@ static int npc_choice(lua_State *s)
                 }
                 else
                 {
-                    luaL_error(s, "npc_choice called "
-                               "with incorrect parameters.");
+                    luaL_error(s, "ask called with incorrect parameters.");
                     return 0;
                 }
                 lua_pop(s, 1);
@@ -571,7 +570,7 @@ static int npc_choice(lua_State *s)
         }
         else
         {
-            luaL_error(s, "npc_choice called with incorrect parameters.");
+            luaL_error(s, "ask called with incorrect parameters.");
             return 0;
         }
     }
@@ -581,8 +580,8 @@ static int npc_choice(lua_State *s)
     return lua_yield(s, 0);
 }
 
-/** LUA npc_ask_integer (input)
- * npc_ask_integer(min_num, max_num, [default_num])
+/** LUA ask_number (input)
+ * ask_number(min_num, max_num, [default_num])
  **
  * **Return value:** The number the player entered into the field.
  *
@@ -592,7 +591,7 @@ static int npc_choice(lua_State *s)
  * ''min_num'' and ''max_num''. If ''default_num'' is set this number will be
  * uses as default.  Otherwise ''min_num'' will be the default.
  */
-static int npc_ask_integer(lua_State *s)
+static int ask_number(lua_State *s)
 {
     int min = luaL_checkint(s, 1);
     int max = luaL_checkint(s, 2);
@@ -615,8 +614,8 @@ static int npc_ask_integer(lua_State *s)
     return lua_yield(s, 0);
 }
 
-/** LUA npc_ask_string (input)
- * npc_ask_string()
+/** LUA ask_string (input)
+ * ask_string()
  **
  * **Return value:** The string the player entered.
  *
@@ -624,7 +623,7 @@ static int npc_ask_integer(lua_State *s)
  *
  * Shows a dialog box to a user which allows him to enter a text.
  */
-static int npc_ask_string(lua_State *s)
+static int ask_string(lua_State *s)
 {
     Script::Thread *thread = checkCurrentThread(s);
     Entity *npc = thread->getContext().npc;
@@ -710,13 +709,13 @@ static int announce(lua_State *s)
 /** LUA_CATEGORY Inventory interaction (inventory)
  */
 
-/** LUA npc_trade (inventory)
- * npc_trade(bool mode,
- *           {int item1id, int item1amount, int item1cost}, ...,
- *           {int itemNid, int itemNamount, int itemNcost})
- * npc_trade(bool mode,
- *           {string item1name, int item1amount, int item1cost}, ...,
- *           {string itemNname, int itemNamount, int itemNcost})
+/** LUA trade (inventory)
+ * trade(bool mode,
+ *       { int item1id, int item1amount, int item1cost }, ...,
+ *       { int itemNid, int itemNamount, int itemNcost })
+ * trade(bool mode,
+ *       { string item1name, int item1amount, int item1cost }, ...,
+ *       { string itemNname, int itemNamount, int itemNcost })
  **
  * FIXME: Move into a seperate file
  * Opens a trade window from an NPC conversation. ''mode''
@@ -736,9 +735,9 @@ static int announce(lua_State *s)
  *   * **2** in case of errors.
  *
  * **Examples:**
- * <code lua npc_trade.lua>
+ * <code lua trade.lua>
  *     -- "A buy sample."
- *     local buycase = npc_trade(false, {
+ *     local buycase = trade(false, {
  *         {"Sword", 10, 20},
  *         {"Bow", 10, 30},
  *         {"Dagger", 10, 50}
@@ -755,7 +754,7 @@ static int announce(lua_State *s)
  * -- ...
  *
  *    -- "Example: Let the player sell only pre-determined items."
- *    local sellcase = npc_trade(true, {
+ *    local sellcase = trade(true, {
  *                      {"Sword", 10, 20},
  *                      {"Bow", 10, 30},
  *                      {"Dagger", 10, 200},
@@ -776,7 +775,7 @@ static int announce(lua_State *s)
  *
  *     -- "Example: Let the player sell every item with a 'value' parameter in
  *     the server's items.xml file
- *     local sellcase = npc_trade(true)
+ *     local sellcase = trade(true)
  *     if sellcase == 0 then
  *       npc_message("Ok, what do you want to sell:")
  *     elseif sellcase == 1 then
@@ -787,7 +786,7 @@ static int announce(lua_State *s)
  *     end
  * </code>
  */
-static int npc_trade(lua_State *s)
+static int trade(lua_State *s)
 {
     const Script::Context *context = getScript(s)->getContext();
     Entity *npc = context->npc;
@@ -823,7 +822,7 @@ static int npc_trade(lua_State *s)
         }
         else
         {
-            raiseWarning(s, "npc_trade[Buy] called with invalid "
+            raiseWarning(s, "trade[Buy] called with invalid "
                          "or empty items table parameter.");
             t->cancel();
             lua_pushinteger(s, 2);
@@ -838,7 +837,7 @@ static int npc_trade(lua_State *s)
     {
         if (!lua_istable(s, -1))
         {
-            raiseWarning(s, "npc_trade called with invalid "
+            raiseWarning(s, "trade called with invalid "
                          "or empty items table parameter.");
             t->cancel();
             lua_pushinteger(s, 2);
@@ -855,7 +854,7 @@ static int npc_trade(lua_State *s)
 
                 if (!it)
                 {
-                    raiseWarning(s, "npc_trade called with incorrect "
+                    raiseWarning(s, "trade called with incorrect "
                                  "item id or name.");
                     t->cancel();
                     lua_pushinteger(s, 2);
@@ -865,7 +864,7 @@ static int npc_trade(lua_State *s)
             }
             else if (!lua_isnumber(s, -1))
             {
-                raiseWarning(s, "npc_trade called with incorrect parameters "
+                raiseWarning(s, "trade called with incorrect parameters "
                              "in item table.");
                 t->cancel();
                 lua_pushinteger(s, 2);
@@ -3548,9 +3547,11 @@ LuaScript::LuaScript():
         { "get_monster_class",               &get_monster_class               },
         { "get_status_effect",               &get_status_effect               },
         { "npc_create",                      &npc_create                      },
-        { "npc_message",                     &npc_message                     },
-        { "npc_choice",                      &npc_choice                      },
-        { "npc_trade",                       &npc_trade                       },
+        { "say",                             &say                             },
+        { "ask",                             &ask                             },
+        { "ask_number",                      &ask_number                      },
+        { "ask_string",                      &ask_string                      },
+        { "trade",                           &trade                           },
         { "npc_post",                        &npc_post                        },
         { "npc_enable",                      &npc_enable                      },
         { "npc_disable",                     &npc_disable                     },
@@ -3639,8 +3640,6 @@ LuaScript::LuaScript():
         { "map_get_pvp",                     &map_get_pvp                     },
         { "item_drop",                       &item_drop                       },
         { "item_get_name",                   &item_get_name                   },
-        { "npc_ask_integer",                 &npc_ask_integer                 },
-        { "npc_ask_string",                  &npc_ask_string                  },
         { "log",                             &log                             },
         { "get_distance",                    &get_distance                    },
         { "map_get_objects",                 &map_get_objects                 },
