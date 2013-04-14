@@ -731,7 +731,9 @@ bool CharacterComponent::takeAbility(int id)
     if (i != mAbilities.end())
     {
         mAbilities.erase(i);
-        mAbilitiesUpdateNeeded = true;
+        MessageOut msg(GPMSG_ABILITY_REMOVED);
+        msg.writeInt8(id);
+        gameHandler->sendTo(mClient, msg);
         return true;
     }
     return false;
