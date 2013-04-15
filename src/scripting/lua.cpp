@@ -1660,7 +1660,7 @@ static int entity_set_walkmask(lua_State *s)
    return 0;
 }
 
-/** LUA being_entity:walkmask (being)
+/** LUA entity:walkmask (being)
  * entity:walkmask()
  **
  * Valid only for actor entities.
