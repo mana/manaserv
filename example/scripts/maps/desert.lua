@@ -37,9 +37,9 @@ atinit(function()
 end)
 
 function Smith(npc, ch, list)
-    local sword_count = chr_inv_count(ch, true, true, "Sword")
+    local sword_count = ch:inv_count(true, true, "Sword")
     if sword_count > 0 then
-        npc_message(npc, ch, "Ah! I can see you already have a sword.")
+        say("Ah! I can see you already have a sword.")
     end
     Merchant(npc, ch, list)
 end
@@ -48,51 +48,50 @@ function possessions_table(npc, ch)
     local item_message = "Inventory:"..
                          "\nSlot id, item id, item name, amount:"..
                          "\n----------------------"
-    local inventory_table = chr_get_inventory(ch)
+    local inventory_table = ch:inventory()
     for i = 1, #inventory_table do
         item_message = item_message.."\n"..inventory_table[i].slot..", "
             ..inventory_table[i].id..", "..inventory_table[i].name..", "
             ..inventory_table[i].amount
     end
-    npc_message(npc, ch, item_message)
+    say(item_message)
 
     item_message = "Equipment:"..
                    "\nSlot id, item id, item name:"..
                    "\n----------------------"
-    local equipment_table = chr_get_equipment(ch)
+    local equipment_table = ch:equipment()
     for i = 1, #equipment_table do
         item_message = item_message.."\n"..equipment_table[i].slot..", "
             ..equipment_table[i].id..", "..equipment_table[i].name
     end
-    npc_message(npc, ch, item_message)
+    say(item_message)
 
 end
 
 -- Global variable used to know whether Harmony talked to someone.
 harmony_have_talked_to_someone = false
 function Harmony(npc, ch, list)
-    being_apply_status(ch, 1, 99999)
+    ch:apply_status(1, 99999)
     -- Say all the messages in the messages list.
     for i = 1, #list do
-        npc_message(npc, ch, list[i])
+        say(list[i])
     end
     --- Give the player 100 units of money the first time.
     if  harmony_have_talked_to_someone == false then
-        npc_message(npc, ch, "Here is some money for you to find some toys to play with.\nEh Eh!")
+        say("Here is some money for you to find some toys to play with.\nEh Eh!")
         chr_money_change(ch, 100)
-        npc_message(npc, ch, string.format("You now have %d shiny coins!", chr_money(ch)))
+        say(string.format("You now have %d shiny coins!", chr_money(ch)))
         harmony_have_talked_to_someone = true
-        npc_message(npc, ch, string.format("Try to come back with a better level than %i.", chr_get_level(ch)))
+        say(string.format("Try to come back with a better level than %i.", ch:level()))
     else
-        npc_message(npc, ch, "Let me see what you've got so far... Don't be afraid!")
+        say("Let me see what you've got so far... Don't be afraid!")
         effect_create(EMOTE_WINK, npc)
         possessions_table(npc, ch)
     end
-    npc_message(npc, ch, "Have fun!")
+    say("Have fun!")
     effect_create(EMOTE_HAPPY, npc)
     -- Make Harmony disappear for a while... with a small earthquake effect!
-    local shakeX = posX(npc)
-    local shakeY = posY(npc)
+    local shakeX, shakeY = npc:position()
     npc_disable(npc)
     tremor(shakeX, shakeY, 300)
 
@@ -109,35 +108,35 @@ function Harmony_update(npc)
       harmony_tick_count = harmony_tick_count + 1
       if harmony_tick_count > 100 then
         harmony_tick_count = 0
-        being_say(npc, "Hey! You're new! Come here...")
+        npc:say("Hey! You're new! Come here...")
       end
     end
 end
 
 function Tamer(npc, ch, list)
-    being_say(npc, string.format("You have %s Sword(s).",
-                                 chr_inv_count(ch, true, true, "Sword")))
-    being_say(npc, string.format("You are %s pixel away.",
-                                 get_distance(npc, ch)))
-    being_say(npc, "I will now spawn a monster for your training session.")
+    npc:say(string.format("You have %s Sword(s).",
+                          ch:inv_count(true, true, "Sword")))
+    npc:say(string.format("You are %s pixel away.",
+                          get_distance(npc, ch)))
+    npc:say("I will now spawn a monster for your training session.")
 
     -- Remove monsters in the area
-    for i, b in ipairs(get_beings_in_rectangle(posX(npc) - 3 * TILESIZE,
-                                                    posY(npc) - 3 * TILESIZE,
-                                                    6 * TILESIZE, 6 * TILESIZE)) do
-        if being_type(b) == TYPE_MONSTER then
-            monster_remove(b)
+    for i, b in ipairs(get_beings_in_rectangle(npc:x() - 3 * TILESIZE,
+                                               npc:y() - 3 * TILESIZE,
+                                               6 * TILESIZE, 6 * TILESIZE)) do
+        if b:type() == TYPE_MONSTER then
+            b:remove()
         end
     end
 
-    local m1 = monster_create("Maggot", posX(ch), posY(ch))
-    monster_change_anger(m1, ch, 100)
+    local m1 = monster_create("Maggot", ch:position())
+    m1:change_anger(ch, 100)
 
     -- (The following is not safe, since the being might have been removed by
     --  the time this function gets executed (especially with the above code))
     --
     --schedule_in(0.5, function()
-    --            being_say(m1, "Roaaarrrr!!!")
-    --            monster_change_anger(m1, ch, 100)
+    --            m1:say("Roaaarrrr!!!")
+    --            m1:change_anger(ch, 100)
     --            end)
 end

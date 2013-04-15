@@ -99,7 +99,7 @@ namespace GameState
     /**
      * Says something to everything around an actor.
      */
-    void sayAround(Entity *, const std::string &text);
+    void sayAround(Entity *entity, const std::string &text);
 
     /**
      * Says something to every player on the server.

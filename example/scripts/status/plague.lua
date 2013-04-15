@@ -14,14 +14,14 @@
 
 local function tick(target, ticknumber)
     if (ticknumber % 10 == 0) then
-        being_say(target, "I have the plague! :( = " .. ticknumber)
+        target:say("I have the plague! :( = " .. ticknumber)
     end
-    local victims = get_beings_in_circle(posX(target), posY(target), 64)
+    local victims = get_beings_in_circle(target, 64)
     local i = 1
     while (victims[i]) do
-       if (being_has_status(victims[i], 1) == false) then
-           being_apply_status(victims[i], 1, 6000)
-           being_say(victims[i], "I don't feel so good")
+       if (victims[i]:has_status(1) == false) then
+           victims[i]:apply_status(1, 6000)
+           victims[i]:say("I don't feel so good")
        end
        i = i + 1
     end

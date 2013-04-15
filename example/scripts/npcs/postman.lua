@@ -11,17 +11,17 @@
 ----------------------------------------------------------------------------------
 
 function post_talk(npc, ch)
-  npc_message(npc, ch, "Hello " .. being_get_name(ch))
+  say("Hello " .. ch:name())
   local strength = being_get_attribute(ch, ATTR_STRENGTH)
-  npc_message(npc, ch, "You have " .. tostring(strength) .. " strength")
-  npc_message(npc, ch, "What would you like to do?")
-  local answer = npc_choice(npc, ch, "View Mail", "Send Mail", "Nothing")
+  say("You have " .. tostring(strength) .. " strength")
+  say("What would you like to do?")
+  local answer = ask("View Mail", "Send Mail", "Nothing")
   if answer == 1 then
     local sender, post = chr_get_post(ch)
     if sender == "" then
-      npc_message(npc, ch, "No Post right now, sorry")
+      say("No Post right now, sorry")
     else
-      npc_message(npc, ch, tostring(sender) .. " sent you " .. tostring(post))
+      say(tostring(sender) .. " sent you " .. tostring(post))
     end
   end
   if answer == 2 then

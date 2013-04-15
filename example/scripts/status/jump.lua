@@ -14,16 +14,16 @@
 
 local function tick(target, ticknumber)
     if (ticknumber % 10 == 0) then
-        being_say(target, "I have the jumping bug!")
+        target:say("I have the jumping bug!")
     end
     
-    if (being_get_status_time(target, 2) < 2000) then
-        being_set_status_time(target, 2, 6000)
+    if (target:status_time(2) < 2000) then
+        target:set_status_time(2, 6000)
     end
     
     if (ticknumber % 50 ~= 0) then return end
     
-    local victims = get_beings_in_circle(posX(target), posY(target), 64)
+    local victims = get_beings_in_circle(target, 64)
     local count = #victims
 
     if i == 0 then return end
@@ -40,16 +40,16 @@ local function tick(target, ticknumber)
             victim = nil
             i = -1
         else
-            i = being_type(victim)
+            i = victim:type()
         end
     until (i == TYPE_MONSTER or i == TYPE_CHARACTER or remaining == 0)
 
     if (victim == nil) then return end
     
-    being_remove_status(target, 2)
+    target:remove_status(2)
 
-    being_apply_status(victim, 2, 6000)
-    being_say(victim, "Now I have the jumping bug")
+    victim:apply_status(2, 6000)
+    victim:say("Now I have the jumping bug")
 end
 
 get_status_effect("jumping status"):on_tick(tick)

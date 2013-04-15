@@ -26,7 +26,7 @@ Entity::Entity(EntityType type, MapComposite *map) :
     mType(type)
 {
     for (int i = 0; i < ComponentTypeCount; ++i)
-        mComponents[i] = 0;
+        mComponents[i] = nullptr;
 }
 
 Entity::~Entity()

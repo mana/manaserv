@@ -156,6 +156,7 @@ template <typename T> const char * LuaUserData<T>::mTypeName;
 
 typedef LuaUserData<AttackInfo> LuaAttackInfo;
 typedef LuaUserData<Damage> LuaDamage;
+typedef LuaUserData<Entity> LuaEntity;
 typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
@@ -164,13 +165,10 @@ typedef LuaUserData<SpecialManager::SpecialInfo> LuaSpecialInfo;
 
 Script *        getScript(lua_State *s);
 
-Entity *        getBeing(lua_State *s, int p);
-Entity *        getCharacter(lua_State *s, int p);
 ItemClass *     getItemClass(lua_State *s, int p);
-Entity *        getMonster(lua_State *s, int p);
 MonsterClass *  getMonsterClass(lua_State *s, int p);
-Entity *        getNpc(lua_State *s, int p);
 
+Entity *        checkActor(lua_State *s, int p);
 Entity *        checkBeing(lua_State *s, int p);
 Entity *        checkCharacter(lua_State *s, int p);
 ItemClass *     checkItemClass(lua_State *s, int p);
@@ -199,7 +197,7 @@ inline void push(lua_State *s, const std::string &val)
 
 inline void push(lua_State *s, Entity *val)
 {
-    lua_pushlightuserdata(s, val);
+    LuaEntity::push(s, val);
 }
 
 inline void push(lua_State *s, double val)
