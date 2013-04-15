@@ -7,6 +7,7 @@
             rechargeable="true"
             needed="100"
             rechargespeed="10"
+            target="point"
         />
         <ability
             id="2"
