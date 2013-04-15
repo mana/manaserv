@@ -9,14 +9,13 @@ local function craft_strict(ch, recipe)
     if (recipe[1].id == 8 and recipe[1].amount == 2 and -- has two iron
         recipe[2].id == 9 and recipe[2].amount == 1)    -- and one wood
         then
-        chr_inv_change(ch,
-            8, -2, --take away the iron
-            9, -1, --take away the wood
-            5, 1 ) -- give a sword
-        chat_message(ch, "You've crafted a sword")
+        ch:inv_change(8, -2, --take away the iron
+                      9, -1, --take away the wood
+                      5, 1 ) -- give a sword
+        ch:message("You've crafted a sword")
         return
     end
-    chat_message(ch, "This wouldn't create anything useful")
+    ch:message("This wouldn't create anything useful")
 end
 
 -- this turns multiple occurences of the same item into one by adding up
@@ -56,14 +55,13 @@ local function craft_lax(ch, recipe)
     if (recipe[1].id == 8 and recipe[1].amount >= 2 and -- has at least two iron
         recipe[2].id == 9 and recipe[2].amount >= 1)    -- and at least one wood
         then
-        chr_inv_change(ch,
-            8, -2, -- take away the iron
-            9, -1, -- take away the wood
-            5, 1 ) -- give a sword
-        chat_message(ch, "You've crafted a sword")
+        ch:inv_change(8, -2, -- take away the iron
+                      9, -1, -- take away the wood
+                      5, 1 ) -- give a sword
+        ch:message("You've crafted a sword")
         return
     end
-    chat_message(ch, "This wouldn't create anything useful")
+    ch:message("This wouldn't create anything useful")
 end
 
 -- This function is registered with the game engine to use when a character
@@ -80,7 +78,7 @@ local function craft(ch, recipe)
     -- uncomment one (but not both!) of the following three lines to enable the
     -- example crafting systems
 
-    chat_message(ch, "There is no crafting in this game world.")
+    ch:message("There is no crafting in this game world.")
     --craft_strict(ch, recipe)
     --craft_lax(ch, recipe)
 end

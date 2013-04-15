@@ -32,7 +32,7 @@
 #include "game-server/attack.h"
 #include "game-server/timeout.h"
 
-class Being;
+class BeingComponent;
 class MapComposite;
 class StatusEffect;
 
@@ -47,59 +47,34 @@ struct Status
 typedef std::map< int, Status > StatusEffects;
 
 /**
- * Type definition for a list of hits
- */
-typedef std::vector<unsigned> Hits;
-
-/**
  * Generic being (living actor). Keeps direction, destination and a few other
  * relevant properties. Used for characters & monsters (all animated objects).
  */
-class Being : public Actor
+class BeingComponent : public Component
 {
     public:
+        static const ComponentType type = CT_Being;
+
         /**
          * Proxy constructor.
          */
-        Being(EntityType type);
+        BeingComponent(Entity &entity);
 
         /**
          * Update being state.
          */
-        virtual void update();
-
-        /**
-         * Takes a damage structure, computes the real damage based on the
-         * stats, deducts the result from the hitpoints and adds the result to
-         * the HitsTaken list.
-         */
-        virtual int damage(Actor *source, const Damage &damage);
+        virtual void update(Entity &entity);
 
         /** Restores all hit points of the being */
-        void heal();
+        void heal(Entity &entity);
 
         /** Restores a specific number of hit points of the being */
-        void heal(int hp);
+        void heal(Entity &entity, int hp);
 
         /**
          * Changes status and calls all the "died" listeners.
          */
-        virtual void died();
-
-        /**
-         * Process all available attacks
-         */
-        void processAttacks();
-
-        /**
-         * Adds an attack to the available attacks
-         */
-        void addAttack(AttackInfo *attack);
-
-        /**
-         * Removes an attack from the available attacks
-         */
-        void removeAttack(AttackInfo *attackInfo);
+        virtual void died(Entity &entity);
 
         /**
          * Gets the destination coordinates of the being.
@@ -110,14 +85,13 @@ class Being : public Actor
         /**
          * Sets the destination coordinates of the being.
          */
-        void setDestination(const Point &dst);
+        void setDestination(Entity &entity, const Point &dst);
 
         /**
          * Sets the destination coordinates of the being to the current
          * position.
          */
-        void clearDestination()
-        { setDestination(getPosition()); }
+        void clearDestination(Entity &entity);
 
         /**
          * Gets the old coordinates of the being.
@@ -128,34 +102,14 @@ class Being : public Actor
         /**
          * Sets the facing direction of the being.
          */
-        void setDirection(BeingDirection direction)
-        { mDirection = direction; raiseUpdateFlags(UPDATEFLAG_DIRCHANGE); }
+        void setDirection(Entity &entity, BeingDirection direction);
 
         BeingDirection getDirection() const
         { return mDirection; }
-
-        /**
-         * Gets the damage list.
-         */
-        const Hits &getHitsTaken() const
-        { return mHitsTaken; }
-
-        /**
-         * Clears the damage list.
-         */
-        void clearHitsTaken()
-        { mHitsTaken.clear(); }
-
-        /**
-         * Performs an attack.
-         * Return Value: damage inflicted or -1 when illegal target
-         */
-        int performAttack(Being *target, const Damage &dmg);
-
         /**
          * Sets the current action.
          */
-        void setAction(BeingAction action);
+        void setAction(Entity &entity, BeingAction action);
 
         /**
          * Sets the current action.
@@ -164,23 +118,14 @@ class Being : public Actor
         { return mAction; }
 
         /**
-         * Gets the attack id the being is currently performing.
-         * For being, this is defaulted to the first one (1).
-         */
-        virtual int getAttackId() const
-        { return mCurrentAttack ?
-                mCurrentAttack->getAttackInfo()->getDamage().id : 0;
-        }
-
-        /**
          * Moves the being toward its destination.
          */
-        void move();
+        void move(Entity &entity);
 
         /**
          * Returns the path to the being's current destination.
          */
-        virtual Path findPath();
+        virtual Path findPath(Entity &);
 
         /** Gets the gender of the being (male or female). */
         BeingGender getGender() const
@@ -192,12 +137,29 @@ class Being : public Actor
         /**
          * Sets an attribute.
          */
-        void setAttribute(unsigned id, double value);
+        void setAttribute(Entity &entity, unsigned id, double value);
 
         /**
-         * Gets an attribute.
+         * Creates an Attribute that did not exist before
+         *
+         * @param id The id of the attribute
+         * @param attributeInfo The info that describes the attribute
          */
-        double getAttribute(unsigned id) const;
+        void createAttribute(unsigned id, const AttributeManager::AttributeInfo
+                             &attributeInfo);
+
+        /**
+         * Gets an attribute or 0 if not existing.
+         */
+        const Attribute *getAttribute(unsigned id) const;
+
+        const AttributeMap &getAttributes() const
+        { return mAttributes; }
+
+        /**
+         * Gets an attribute base.
+         */
+        double getAttributeBase(unsigned id) const;
 
         /**
          * Gets an attribute after applying modifiers.
@@ -226,11 +188,13 @@ class Being : public Actor
          * @param lvl If non-zero, indicates that a temporary modifier can be
          *        dispelled prematuraly by a spell of given level.
          */
-        void applyModifier(unsigned attr, double value, unsigned layer,
-                           unsigned duration = 0, unsigned id = 0);
+        void applyModifier(Entity &entity, unsigned attr, double value,
+                           unsigned layer, unsigned duration = 0,
+                           unsigned id = 0);
 
-        bool removeModifier(unsigned attr, double value, unsigned layer,
-                            unsigned id = 0, bool fullcheck = false);
+        bool removeModifier(Entity &entity, unsigned attr, double value,
+                            unsigned layer, unsigned id = 0,
+                            bool fullcheck = false);
 
         /**
          * Called when an attribute modifier is changed.
@@ -238,14 +202,14 @@ class Being : public Actor
          *     attributes if it has changed.
          * @returns Whether it was changed.
          */
-        virtual void recalculateBaseAttribute(unsigned);
+        void recalculateBaseAttribute(Entity &, unsigned);
 
         /**
          * Attribute has changed, recalculate base value of dependant
          *     attributes (and handle other actions for the modified
          *     attribute)
          */
-        virtual void updateDerivedAttributes(unsigned);
+        void updateDerivedAttributes(Entity &entity, unsigned);
 
         /**
          * Sets a statuseffect on this being
@@ -261,6 +225,9 @@ class Being : public Actor
          * Returns true if the being has a status effect
          */
         bool hasStatusEffect(int id) const;
+
+        const StatusEffects &getStatusEffects() const
+        { return mStatus; }
 
         /**
          * Returns the time of the status effect if in effect, or 0 if not
@@ -285,30 +252,19 @@ class Being : public Actor
          */
         static int directionToAngle(int direction);
 
-        /**
-         * Get Target
-         */
-        Being *getTarget() const
-        { return mTarget; }
-
-        /**
-         * Set Target
-         */
-        void setTarget(Being *target)
-        { mTarget = target; }
-
         static void setUpdateDerivedAttributesCallback(Script *script)
         { script->assignCallback(mRecalculateDerivedAttributesCallback); }
 
         static void setRecalculateBaseAttributeCallback(Script *script)
         { script->assignCallback(mRecalculateBaseAttributeCallback); }
 
-        sigc::signal<void, Being *> signal_died;
+        sigc::signal<void, Entity *> signal_died;
+        sigc::signal<void, Entity *, unsigned> signal_attribute_changed;
 
         /**
          * Activate an emote flag on the being.
          */
-        void triggerEmote(int id);
+        void triggerEmote(Entity &entity, int id);
 
         /**
          * Tells the last emote used.
@@ -316,35 +272,29 @@ class Being : public Actor
         int getLastEmote() const
         { return mEmoteId; }
 
-    protected:
-        /**
-         * Performs an attack
-         */
-        virtual void processAttack(Attack &attack);
-
         /**
          * Update the being direction when moving so avoid directions desyncs
          * with other clients.
          */
-        void updateDirection(const Point &currentPos,
+        void updateDirection(Entity &entity,
+                             const Point &currentPos,
                              const Point &destPos);
 
+    protected:
         static const int TICKS_PER_HP_REGENERATION = 100;
 
+        /** Delay until move to next tile in miliseconds. */
+        unsigned short mMoveTime;
         BeingAction mAction;
         AttributeMap mAttributes;
-        Attacks mAttacks;
         StatusEffects mStatus;
-        Being *mTarget;
         Point mOld;                 /**< Old coordinates. */
         Point mDst;                 /**< Target coordinates. */
         BeingGender mGender;        /**< Gender of the being. */
-        Attack *mCurrentAttack;     /**< Last used attack. */
-
 
     private:
-        Being(const Being &rhs);
-        Being &operator=(const Being &rhs);
+        BeingComponent(const BeingComponent &rhs);
+        BeingComponent &operator=(const BeingComponent &rhs);
 
         /**
          * Connected to signal_inserted to reset the old position.
@@ -355,7 +305,6 @@ class Being : public Actor
         BeingDirection mDirection;   /**< Facing direction. */
 
         std::string mName;
-        Hits mHitsTaken; /**< List of punches taken since last update. */
 
         /** Time until hp is regenerated again */
         Timeout mHealthRegenerationTimeout;

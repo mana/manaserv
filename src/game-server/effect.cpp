@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -20,29 +21,43 @@
 
 #include "game-server/effect.h"
 
-#include "game-server/mapcomposite.h"
+#include "game-server/being.h"
+#include "game-server/entity.h"
 #include "game-server/state.h"
 
-void Effect::update()
+void EffectComponent::update(Entity &entity)
 {
     if (mHasBeenShown)
-        GameState::enqueueRemove(this);
+        GameState::enqueueRemove(&entity);
 }
 
 namespace Effects
 {
     void show(int id, MapComposite *map, const Point &pos)
     {
-        Effect *effect = new Effect(id);
+        Entity *effect = new Entity(OBJECT_EFFECT);
+        auto *actorComponent = new ActorComponent(*effect);
+        effect->addComponent(actorComponent);
+        effect->addComponent(new EffectComponent(id));
         effect->setMap(map);
-        effect->setPosition(pos);
+        actorComponent->setPosition(*effect, pos);
+
         GameState::enqueueInsert(effect);
     }
-    void show(int id, MapComposite *map, Being *b)
+
+    void show(int id, Entity *b)
     {
-        Effect *effect = new Effect(id);
-        effect->setMap(map);
-        if (effect->setBeing(b))
-            GameState::enqueueInsert(effect);
+        EffectComponent *effectComponent = new EffectComponent(id);
+        effectComponent->setBeing(b);
+
+        Entity *effect = new Entity(OBJECT_EFFECT);
+        auto *actorComponent = new ActorComponent(*effect);
+        effect->addComponent(actorComponent);
+        effect->addComponent(effectComponent);
+        effect->setMap(b->getMap());
+        const Point &point = b->getComponent<ActorComponent>()->getPosition();
+        actorComponent->setPosition(*effect, point);
+
+        GameState::enqueueInsert(effect);
     }
 }

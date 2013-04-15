@@ -48,44 +48,44 @@ struct CmdRef
     const char *cmd;
     const char *usage;
     const char *help;
-    void (*func)(Character*, std::string&) ;
+    void (*func)(Entity*, std::string&) ;
 };
 
-static void handleHelp(Character*, std::string&);
-static void handleReport(Character*, std::string&);
-static void handleWhere(Character*, std::string&);
-static void handleRights(Character*, std::string&);
-static void handleWarp(Character*, std::string&);
-static void handleCharWarp(Character*, std::string&);
-static void handleGoto(Character*, std::string&);
-static void handleRecall(Character*, std::string&);
-static void handleBan(Character*, std::string&);
-static void handleItem(Character*, std::string&);
-static void handleDrop(Character*, std::string&);
-static void handleMoney(Character*, std::string&);
-static void handleSpawn(Character*, std::string&);
-static void handleAttribute(Character*, std::string&);
-static void handleReload(Character*, std::string&);
-static void handlePermissions(Character*, std::string&);
-static void handleGivePermission(Character*, std::string&);
-static void handleTakePermission(Character*, std::string&);
-static void handleAnnounce(Character*, std::string&);
-static void handleHistory(Character*, std::string&);
-static void handleMute(Character*, std::string&);
-static void handleDie(Character*, std::string&);
-static void handleKill(Character*, std::string&);
-static void handleKick(Character*, std::string&);
-static void handleLog(Character*, std::string&);
-static void handleLogsay(Character*, std::string&);
-static void handleKillMonsters(Character*, std::string&);
-static void handleCraft(Character*, std::string&);
-static void handleGetPos(Character*, std::string&);
-static void handleSkills(Character*, std::string&);
-static void handleEffect(Character*, std::string&);
-static void handleGiveSpecial(Character*, std::string&);
-static void handleTakeSpecial(Character*, std::string&);
-static void handleRechargeSpecial(Character*, std::string&);
-static void handleListSpecials(Character*, std::string&);
+static void handleHelp(Entity*, std::string&);
+static void handleReport(Entity*, std::string&);
+static void handleWhere(Entity*, std::string&);
+static void handleRights(Entity*, std::string&);
+static void handleWarp(Entity*, std::string&);
+static void handleCharWarp(Entity*, std::string&);
+static void handleGoto(Entity*, std::string&);
+static void handleRecall(Entity*, std::string&);
+static void handleBan(Entity*, std::string&);
+static void handleItem(Entity*, std::string&);
+static void handleDrop(Entity*, std::string&);
+static void handleMoney(Entity*, std::string&);
+static void handleSpawn(Entity*, std::string&);
+static void handleAttribute(Entity*, std::string&);
+static void handleReload(Entity*, std::string&);
+static void handlePermissions(Entity*, std::string&);
+static void handleGivePermission(Entity*, std::string&);
+static void handleTakePermission(Entity*, std::string&);
+static void handleAnnounce(Entity*, std::string&);
+static void handleHistory(Entity*, std::string&);
+static void handleMute(Entity*, std::string&);
+static void handleDie(Entity*, std::string&);
+static void handleKill(Entity*, std::string&);
+static void handleKick(Entity*, std::string&);
+static void handleLog(Entity*, std::string&);
+static void handleLogsay(Entity*, std::string&);
+static void handleKillMonsters(Entity*, std::string&);
+static void handleCraft(Entity*, std::string&);
+static void handleGetPos(Entity*, std::string&);
+static void handleSkills(Entity*, std::string&);
+static void handleEffect(Entity*, std::string&);
+static void handleGiveSpecial(Entity*, std::string&);
+static void handleTakeSpecial(Entity*, std::string&);
+static void handleRechargeSpecial(Entity*, std::string&);
+static void handleListSpecials(Entity*, std::string&);
 
 static CmdRef const cmdRef[] =
 {
@@ -171,9 +171,9 @@ static CmdRef const cmdRef[] =
 
 };
 
-static void say(const std::string message, Character *player)
+static void say(const std::string &message, Entity *player)
 {
-    GameState::sayTo(player, NULL, message);
+    GameState::sayTo(player, nullptr, message);
 }
 
 /*
@@ -193,10 +193,10 @@ static bool checkPermission(Character *player, unsigned permissions)
  * Returns the next argument, and remove it from the given string.
  */
 
-static std::string playerRights(Character *ch)
+static std::string playerRights(Entity *ch)
 {
     std::stringstream str;
-    str << (unsigned)ch->getAccountLevel();
+    str << (unsigned)ch->getComponent<CharacterComponent>()->getAccountLevel();
     str << " ( ";
     std::list<std::string> classes =
         PermissionManager::getClassList(ch);
@@ -263,7 +263,7 @@ static std::string getArgument(std::string &args)
     return argument;
 }
 
-static void handleHelp(Character *player, std::string &args)
+static void handleHelp(Entity *player, std::string &args)
 {
     if (args.empty())
     {
@@ -302,7 +302,7 @@ static void handleHelp(Character *player, std::string &args)
     }
 }
 
-static void handleWarp(Character *player, std::string &args)
+static void handleWarp(Entity *player, std::string &args)
 {
     int x, y;
     MapComposite *map;
@@ -377,20 +377,22 @@ static void handleWarp(Character *player, std::string &args)
     y = utils::stringToInt(ystr);
 
     // now warp the player
-    GameState::warp(player, map, x, y);
+    GameState::warp(player, map, Point(x, y));
 
     // log transaction
     std::stringstream ss;
     ss << "User warped to " << map->getName() << " (" << x << ", " << y << ")";
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_WARP,
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_WARP,
                                     ss.str());
 }
 
-static void handleCharWarp(Character *player, std::string &args)
+static void handleCharWarp(Entity *player, std::string &args)
 {
     int x, y;
     MapComposite *map;
-    Character *other;
+    Entity *other;
 
     // get the arguments
     std::string character = getArgument(args);
@@ -479,19 +481,20 @@ static void handleCharWarp(Character *player, std::string &args)
     y = utils::stringToInt(ystr);
 
     // now warp the player
-    GameState::warp(other, map, x, y);
+    GameState::warp(other, map, Point(x, y));
 
     // log transaction
     std::stringstream ss;
-    ss << "User warped " << other->getName() << " to " << map->getName() <<
-            " (" << x << ", " << y << ")";
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_WARP,
-                                    ss.str());
+    ss << "User warped " << other->getComponent<BeingComponent>()->getName()
+            << " to " << map->getName() << " (" << x << ", " << y << ")";
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_WARP, ss.str());
 }
 
-static void handleItem(Character *player, std::string &args)
+static void handleItem(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
     ItemClass *ic;
     int value = 0;
 
@@ -562,17 +565,19 @@ static void handleItem(Character *player, std::string &args)
     // log transaction
     std::stringstream str;
     str << "User created item " << ic->getDatabaseID();
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_ITEM, str.str());
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_ITEM, str.str());
 }
 
-static void handleDrop(Character *player, std::string &args)
+static void handleDrop(Entity *player, std::string &args)
 {
     ItemClass *ic;
-    int value = 0;
+    int amount = 0;
 
     // get arguments
     std::string itemclass = getArgument(args);
-    std::string valuestr = getArgument(args);
+    std::string amountstr = getArgument(args);
 
     // check all arguments are there
     if (itemclass.empty())
@@ -598,37 +603,39 @@ static void handleDrop(Character *player, std::string &args)
         return;
     }
 
-    //identify the amount
-    if  (valuestr.empty())
+    // identify the amount
+    if (amountstr.empty())
     {
-        value = 1;
+        amount = 1;
     }
-    else if (utils::isNumeric(valuestr))
+    else if (utils::isNumeric(amountstr))
     {
-        value = utils::stringToInt(valuestr);
+        amount = utils::stringToInt(amountstr);
     }
     // check for valid amount
-    if (value <= 0)
+    if (amount <= 0)
     {
         say("Invalid number of items", player);
         return;
     }
 
-    // create the integer and put it on the map
-    Item *item = new Item(ic, value);
-    item->setMap(player->getMap());
-    item->setPosition(player->getPosition());
+    const Point &position =
+            player->getComponent<ActorComponent>()->getPosition();
+    Entity *item = Item::create(player->getMap(), position, ic, amount);
+
     GameState::insertOrDelete(item);
 
     // log transaction
     std::stringstream str;
     str << "User created item " << ic->getDatabaseID();
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_DROP, str.str());
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_DROP, str.str());
 }
 
-static void handleMoney(Character *player, std::string &args)
+static void handleMoney(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
     int value;
 
     // get arguments
@@ -669,19 +676,24 @@ static void handleMoney(Character *player, std::string &args)
     // change value into an integer
     value = utils::stringToInt(valuestr);
 
+    auto *beingComponent = other->getComponent<BeingComponent>();
+
     // change how much money the player has
-    other->setAttribute(ATTR_GP , other->getAttribute(ATTR_GP) + value);
+    const double previousMoney = beingComponent->getAttributeBase(ATTR_GP);
+    beingComponent->setAttribute(*player, ATTR_GP , previousMoney + value);
 
     // log transaction
     std::string msg = "User created " + valuestr + " money";
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_MONEY, msg);
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_MONEY, msg);
 }
 
-static void handleSpawn(Character *player, std::string &args)
+static void handleSpawn(Entity *player, std::string &args)
 {
     MonsterClass *mc;
     MapComposite *map = player->getMap();
-    const Point &pos = player->getPosition();
+    const Point &pos = player->getComponent<ActorComponent>()->getPosition();
     int value = 0;
 
     // get the arguments
@@ -732,10 +744,13 @@ static void handleSpawn(Character *player, std::string &args)
     // create the monsters and put them on the map
     for (int i = 0; i < value; ++i)
     {
-        Being *monster = new Monster(mc);
+        Entity *monster = new Entity(OBJECT_MONSTER);
+        auto *actorComponent = new ActorComponent(*monster);
+        monster->addComponent(actorComponent);
+        actorComponent->setPosition(*monster, pos);
+        monster->addComponent(new BeingComponent(*monster));
+        monster->addComponent(new MonsterComponent(*monster, mc));
         monster->setMap(map);
-        monster->setPosition(pos);
-        monster->clearDestination();
         if (!GameState::insertOrDelete(monster))
         {
             // The map is full. Break out.
@@ -743,14 +758,17 @@ static void handleSpawn(Character *player, std::string &args)
         }
 
         // log transaction
-        std::string msg = "User created monster " + monster->getName();
-        accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SPAWN, msg);
+        std::string msg = "User created monster " +
+                monster->getComponent<BeingComponent>()->getName();
+        int databaseId =
+                player->getComponent<CharacterComponent>()->getDatabaseID();
+        accountHandler->sendTransaction(databaseId, TRANS_CMD_SPAWN, msg);
     }
 }
 
-static void handleGoto(Character *player, std::string &args)
+static void handleGoto(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
 
     // get the arguments
     std::string character = getArgument(args);
@@ -773,18 +791,21 @@ static void handleGoto(Character *player, std::string &args)
 
     // move the player to where the other player is
     MapComposite *map = other->getMap();
-    const Point &pos = other->getPosition();
-    GameState::warp(player, map, pos.x, pos.y);
+    const Point &pos = other->getComponent<ActorComponent>()->getPosition();
+    GameState::warp(player, map, pos);
 
     // log transaction
     std::stringstream msg;
-    msg << "User warped own character to " << other->getName();
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_GOTO, msg.str());
+    msg << "User warped own character to "
+            << other->getComponent<BeingComponent>()->getName();
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_GOTO, msg.str());
 }
 
-static void handleRecall(Character *player, std::string &args)
+static void handleRecall(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
 
     // get the arguments
     std::string character = getArgument(args);
@@ -807,20 +828,20 @@ static void handleRecall(Character *player, std::string &args)
 
     // move the other player to where the player is
     MapComposite *map = player->getMap();
-    const Point &pos = player->getPosition();
-    GameState::warp(other, map, pos.x, pos.y);
+    const Point &pos = player->getComponent<ActorComponent>()->getPosition();
+    GameState::warp(other, map, pos);
 }
 
-static void handleReload(Character *, std::string &)
+static void handleReload(Entity *, std::string &)
 {
     // reload the items and monsters
     itemManager->reload();
     monsterManager->reload();
 }
 
-static void handleBan(Character *player, std::string &args)
+static void handleBan(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
     int length;
     int lengthMutiplier = 0;
 
@@ -876,22 +897,26 @@ static void handleBan(Character *player, std::string &args)
         return;
     }
 
+    auto *characterComponent = player->getComponent<CharacterComponent>();
+
     // ban the player
     accountHandler->banCharacter(other, length);
     // disconnect the player
     MessageOut kickmsg(GPMSG_CONNECT_RESPONSE);
     kickmsg.writeInt8(ERRMSG_ADMINISTRATIVE_LOGOFF);
-    other->getClient()->disconnect(kickmsg);
+    characterComponent->getClient()->disconnect(kickmsg);
 
     // feedback for command user
-    std::string msg = "You've banned " + other->getName() + " for " + utils::toString(length) + " minutes";
+    std::string otherName = other->getComponent<BeingComponent>()->getName();
+    std::string msg = "You've banned " + otherName + " for " + utils::toString(length) + " minutes";
     say(msg.c_str(), player);
     // log transaction
-    msg = "User banned " + other->getName() + " for " + utils::toString(length) + " minutes";
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_BAN, msg);
+    msg = "User banned " + otherName + " for " + utils::toString(length) + " minutes";
+    accountHandler->sendTransaction(characterComponent->getDatabaseID(),
+                                    TRANS_CMD_BAN, msg);
 }
 
-static void handlePermissions(Character *player, std::string &args)
+static void handlePermissions(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     if (character.empty())
@@ -901,20 +926,20 @@ static void handlePermissions(Character *player, std::string &args)
         return;
     }
 
-    Character *other = gameHandler->getCharacterByNameSlow(character);
+    Entity *other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character", player);
         return;
     }
 
-    say(other->getName() + " has the permissions: " +
+    say(other->getComponent<BeingComponent>()->getName() + " has the permissions: " +
         playerRights(other), player);
 }
 
-static void handleGivePermission(Character *player, std::string &args)
+static void handleGivePermission(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
 
     // get the arguments
     std::string character = getArgument(args);
@@ -952,30 +977,37 @@ static void handleGivePermission(Character *player, std::string &args)
         return;
     }
 
-    if (permission & other->getAccountLevel())
+    auto *characterComponent =
+            player->getComponent<CharacterComponent>();
+
+    if (permission & characterComponent->getAccountLevel())
     {
-        say(player->getName()+" already has the permission "+strPermission, player);
+        say(player->getComponent<BeingComponent>()->getName()
+            +" already has the permission "+strPermission, player);
     }
     else
     {
-        permission += other->getAccountLevel();
+        permission += characterComponent->getAccountLevel();
         // change the player's account level
-        other->setAccountLevel(permission);
+        characterComponent->setAccountLevel(permission);
         accountHandler->changeAccountLevel(other, permission);
 
         // log transaction
-        std::string msg = "User gave right " + strPermission + " to " + other->getName();
-        accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
-        say("You gave " + other->getName() +
+        std::string msg = "User gave right " + strPermission + " to " +
+                other->getComponent<BeingComponent>()->getName();
+        accountHandler->sendTransaction(characterComponent->getDatabaseID(),
+                                        TRANS_CMD_SETGROUP, msg);
+        say("You gave " + other->getComponent<BeingComponent>()->getName() +
             " the rights of a " + strPermission, player);
-        say("Congratulations, " + player->getName() +
+        say("Congratulations, " +
+            player->getComponent<BeingComponent>()->getName() +
             " gave you the rights of a " + strPermission, other);
     }
 }
 
-static void handleTakePermission(Character *player, std::string &args)
+static void handleTakePermission(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
 
     // get the arguments
     std::string character = getArgument(args);
@@ -1013,27 +1045,33 @@ static void handleTakePermission(Character *player, std::string &args)
         return;
     }
 
+    auto *characterComponent =
+            player->getComponent<CharacterComponent>();
 
-    if (!(permission & other->getAccountLevel()))
+    if (!(permission & characterComponent->getAccountLevel()))
     {
-        say(player->getName()+" hasn't got the permission "+strPermission, player);
+        say(player->getComponent<BeingComponent>()->getName()
+            +" hasn't got the permission "+strPermission, player);
     } else {
-        permission = other->getAccountLevel() - permission;
+        permission = characterComponent->getAccountLevel() - permission;
         // change the player's account level
-        other->setAccountLevel(permission);
+        characterComponent->setAccountLevel(permission);
         accountHandler->changeAccountLevel(other, permission);
 
         // log transaction
-        std::string msg = "User took right " + strPermission + " from " + other->getName();
-        accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_SETGROUP, msg);
-        say("Sorry, "+player->getName()+" revoked your rights of a "+strPermission, other);
+        std::string msg = "User took right " + strPermission + " from "
+                + other->getComponent<BeingComponent>()->getName();
+        accountHandler->sendTransaction(characterComponent->getDatabaseID(),
+                                        TRANS_CMD_SETGROUP, msg);
+        say("Sorry, "+player->getComponent<BeingComponent>()->getName()
+            +" revoked your rights of a "+strPermission, other);
     }
 }
 
 
-static void handleAttribute(Character *player, std::string &args)
+static void handleAttribute(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
     int attr, value;
 
     // get arguments
@@ -1090,17 +1128,22 @@ static void handleAttribute(Character *player, std::string &args)
         return;
     }
 
+    auto *beingComponent = other->getComponent<BeingComponent>();
+
     // change the player's attribute
-    other->setAttribute(attr, value);
+    beingComponent->setAttribute(*other, attr, value);
 
     // log transaction
     std::stringstream msg;
-    msg << "User changed attribute " << attr << " of player " << other->getName()
+    msg << "User changed attribute " << attr << " of player "
+        << beingComponent->getName()
         << " to " << value;
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_ATTRIBUTE, msg.str());
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_ATTRIBUTE, msg.str());
 }
 
-static void handleReport(Character *player, std::string &args)
+static void handleReport(Entity *player, std::string &args)
 {
     std::string bugReport = getArgument(args);
 
@@ -1114,7 +1157,7 @@ static void handleReport(Character *player, std::string &args)
     // TODO: Send the report to a developer or something
 }
 
-static void handleAnnounce(Character *player, std::string &args)
+static void handleAnnounce(Entity *player, std::string &args)
 {
     if (args.empty())
     {
@@ -1125,37 +1168,40 @@ static void handleAnnounce(Character *player, std::string &args)
 
     MessageOut msg(GAMSG_ANNOUNCE);
     msg.writeString(args);
-    msg.writeInt16(player->getDatabaseID());
-    msg.writeString(player->getName());
+    msg.writeInt16(player->getComponent<CharacterComponent>()
+                   ->getDatabaseID());
+    msg.writeString(player->getComponent<BeingComponent>()->getName());
     accountHandler->send(msg);
 }
 
-static void handleWhere(Character *player, std::string &)
+static void handleWhere(Entity *player, std::string &)
 {
+    const Point &position =
+            player->getComponent<ActorComponent>()->getPosition();
     std::stringstream str;
     str << "Your current location is map "
-        << player->getMapId()
+        << player->getMap()->getID()
         << " ["
-        << player->getPosition().x
+        << position.x
         << ":"
-        << player->getPosition().y
+        << position.y
         << "]";
     say (str.str(), player);
 }
 
-static void handleRights(Character *player, std::string &)
+static void handleRights(Entity *player, std::string &)
 {
     say("Your rights level is: " + playerRights(player), player);
 }
 
-static void handleHistory(Character *, std::string &)
+static void handleHistory(Entity *, std::string &)
 {
     // TODO: Get args number of transactions and show them to the player
 }
 
-static void handleMute(Character *player, std::string &args)
+static void handleMute(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
     int length;
 
     // Get arguments.
@@ -1184,23 +1230,28 @@ static void handleMute(Character *player, std::string &args)
     }
 
     // Mute the player.
-    other->mute(length);
+    other->getComponent<CharacterComponent>()->mute(length);
+
+    const std::string &playerName =
+            player->getComponent<BeingComponent>()->getName();
+    const std::string &otherName =
+            other->getComponent<BeingComponent>()->getName();
 
     // Feedback.
     std::stringstream targetMsg;
     std::stringstream userMsg;
     if (length > 0)
     {
-        targetMsg << player->getName() << " muted you for "
+        targetMsg << playerName << " muted you for "
         << length << " seconds.";
 
-        userMsg << "You muted " << other->getName()
+        userMsg << "You muted " << otherName
         << " for " << length << " seconds.";
     }
     else
     {
-        targetMsg << player->getName() << " unmuted you.";
-        userMsg << "You unmuted " << other->getName() << ".";
+        targetMsg << playerName << " unmuted you.";
+        userMsg << "You unmuted " << otherName << ".";
     }
     say(targetMsg.str(), other);
     say(userMsg.str(), player);
@@ -1209,22 +1260,24 @@ static void handleMute(Character *player, std::string &args)
     std::stringstream msg;
     if (length > 0)
     {
-        msg << "User muted " << other->getName() << " for " << length << " seconds.";
+        msg << "User muted " << otherName << " for " << length << " seconds.";
     } else {
-        msg << "User unmuted " << other->getName();
+        msg << "User unmuted " << otherName;
     }
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_MUTE, msg.str());
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_MUTE, msg.str());
 }
 
-static void handleDie(Character *player, std::string &)
+static void handleDie(Entity *player, std::string &)
 {
-    player->setAttribute(ATTR_HP, 0);
+    player->getComponent<BeingComponent>()->setAttribute(*player, ATTR_HP, 0);
     say("You've killed yourself.", player);
 }
 
-static void handleKill(Character *player, std::string &args)
+static void handleKill(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
 
     // get arguments
     std::string character = getArgument(args);
@@ -1238,25 +1291,30 @@ static void handleKill(Character *player, std::string &args)
     }
 
     // kill the player
-    player->setAttribute(ATTR_HP, 0);
+    other->getComponent<BeingComponent>()->setAttribute(*player, ATTR_HP, 0);
 
     // feedback
     std::stringstream targetMsg;
     std::stringstream userMsg;
-    targetMsg << "You were killed by server command from "<< player->getName() << ".";
-    userMsg << "You killed " << other->getName() << ".";
+    targetMsg << "You were killed by server command from "
+              << player->getComponent<BeingComponent>()->getName() << ".";
+    userMsg << "You killed "
+            << other->getComponent<BeingComponent>()->getName() << ".";
     say(targetMsg.str(), other);
     say(userMsg.str(), player);
 
     // log transaction
     std::stringstream logMsg;
-    logMsg << "User killed " << other->getName();
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_KILL, logMsg.str());
+    logMsg << "User killed "
+           << other->getComponent<BeingComponent>()->getName();
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_KILL, logMsg.str());
 }
 
-static void handleKick(Character *player, std::string &args)
+static void handleKick(Entity *player, std::string &args)
 {
-    Character *other;
+    Entity *other;
 
     // get arguments
     std::string character = getArgument(args);
@@ -1271,22 +1329,30 @@ static void handleKick(Character *player, std::string &args)
 
     // send feedback
     std::stringstream userMsg;
-    userMsg << "You kicked " << other->getName() << ".";
+    userMsg << "You kicked "
+            << other->getComponent<BeingComponent>()->getName() << ".";
     say(userMsg.str(), player);
+
+
+    auto *characterComponent =
+            player->getComponent<CharacterComponent>();
 
     // disconnect the client
     MessageOut msg(GPMSG_CONNECT_RESPONSE);
     msg.writeInt8(ERRMSG_ADMINISTRATIVE_LOGOFF);
-    other->getClient()->disconnect(msg);
+    characterComponent->getClient()->disconnect(msg);
 
     // log transaction
     std::stringstream logMsg;
-    logMsg << "User kicked " << other->getName();
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_KICK, logMsg.str());
+    logMsg << "User kicked "
+           << other->getComponent<BeingComponent>()->getName();
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_KICK, logMsg.str());
 }
 
 
-static void handleLog(Character *player, std::string &msg)
+static void handleLog(Entity *player, std::string &msg)
 {
     if (msg.empty())
     {
@@ -1297,13 +1363,15 @@ static void handleLog(Character *player, std::string &msg)
 
     // log transaction
     std::string logmsg = "[silent] " + msg;
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_LOG, logmsg);
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_LOG, logmsg);
 
     // send feedback
     say("Message logged", player);
 }
 
-static void handleLogsay(Character *player, std::string &msg)
+static void handleLogsay(Entity *player, std::string &msg)
 {
     if (msg.empty())
     {
@@ -1316,22 +1384,25 @@ static void handleLogsay(Character *player, std::string &msg)
 
     // log transaction
     std::string logmsg = "[public] " + msg;
-    accountHandler->sendTransaction(player->getDatabaseID(), TRANS_CMD_LOG, logmsg);
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_LOG, logmsg);
 
     // send feedback
     say("Message logged", player);
 }
 
-static void handleKillMonsters(Character *player, std::string &)
+static void handleKillMonsters(Entity *player, std::string &)
 {
     const MapComposite *map = player->getMap();
     int count = 0;
 
     for (BeingIterator it(map->getWholeMapIterator()); it; ++it)
     {
-        if ((*it)->getType() == OBJECT_MONSTER && (*it)->getAction() != DEAD)
+        if ((*it)->getType() == OBJECT_MONSTER &&
+            (*it)->getComponent<BeingComponent>()->getAction() != DEAD)
         {
-            (*it)->died();
+            (*it)->getComponent<BeingComponent>()->died(**it);
             count++;
         }
     }
@@ -1342,11 +1413,12 @@ static void handleKillMonsters(Character *player, std::string &)
 
     // log transaction
     std::string msg = "User killed all monsters on map " + map->getName();
-    accountHandler->sendTransaction(player->getDatabaseID(),
-                                    TRANS_CMD_KILLMONSTERS, msg);
+    int databaseId =
+            player->getComponent<CharacterComponent>()->getDatabaseID();
+    accountHandler->sendTransaction(databaseId, TRANS_CMD_KILLMONSTERS, msg);
 }
 
-static void handleCraft(Character *player, std::string &args)
+static void handleCraft(Entity *player, std::string &args)
 {
     std::stringstream errMsg;
     std::list<InventoryItem> recipe;
@@ -1419,7 +1491,7 @@ static void handleCraft(Character *player, std::string &args)
     }
 }
 
-static void handleGetPos(Character *player, std::string &args)
+static void handleGetPos(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     if (character.empty())
@@ -1428,19 +1500,19 @@ static void handleGetPos(Character *player, std::string &args)
         say("Usage: @getpos <character>", player);
         return;
     }
-    Character *other;
+    Entity *other;
     other = gameHandler->getCharacterByNameSlow(character);
     if (!other)
     {
         say("Invalid character, or player is offline.", player);
         return;
     }
-    const Point &pos = other->getPosition();
+    const Point &pos = other->getComponent<ActorComponent>()->getPosition();
     std::stringstream str;
     str << "The current location of "
         << character
         << " is map "
-        << other->getMapId()
+        << other->getMap()->getID()
         << " ["
         << pos.x
         << ":"
@@ -1449,7 +1521,7 @@ static void handleGetPos(Character *player, std::string &args)
     say(str.str(), player);
 }
 
-static void handleSkills(Character *player, std::string &args)
+static void handleSkills(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     if (character.empty())
@@ -1458,7 +1530,7 @@ static void handleSkills(Character *player, std::string &args)
         say("Usage: @skills <character>", player);
         return;
     }
-    Character *other;
+    Entity *other;
     if (character == "#")
         other = player;
     else
@@ -1469,9 +1541,16 @@ static void handleSkills(Character *player, std::string &args)
         return;
     }
 
-    say("List of skills of player '" + other->getName() + "':", player);
-    std::map<int, int>::const_iterator it = other->getSkillBegin();
-    std::map<int, int>::const_iterator it_end = other->getSkillEnd();
+
+    auto *characterComponent =
+            player->getComponent<CharacterComponent>();
+
+    say("List of skills of player '" +
+        other->getComponent<BeingComponent>()->getName() + "':", player);
+    std::map<int, int>::const_iterator it =
+            characterComponent->getSkillBegin();
+    std::map<int, int>::const_iterator it_end =
+            characterComponent->getSkillEnd();
 
     if (it == it_end)
     {
@@ -1488,7 +1567,7 @@ static void handleSkills(Character *player, std::string &args)
     }
 }
 
-static void handleEffect(Character *player, std::string &args)
+static void handleEffect(Entity *player, std::string &args)
 {
     std::vector<std::string> arguments;
     for (std::string arg = getArgument(args); !arg.empty();
@@ -1500,18 +1579,18 @@ static void handleEffect(Character *player, std::string &args)
     if (arguments.size() == 1)
     {
         int id = utils::stringToInt(arguments[0]);
-        Effects::show(id, player->getMap(), player);
+        Effects::show(id, player);
     }
     else if (arguments.size() == 2)
     {
         int id = utils::stringToInt(arguments[0]);
-        Character *p = gameHandler->getCharacterByNameSlow(arguments[1]);
+        Entity *p = gameHandler->getCharacterByNameSlow(arguments[1]);
         if (!p)
         {
             say("Invalid target player.", player);
             return;
         }
-        Effects::show(id, p->getMap(), p);
+        Effects::show(id, p);
     }
     else if (arguments.size() == 3)
     {
@@ -1528,7 +1607,7 @@ static void handleEffect(Character *player, std::string &args)
     }
 }
 
-static void handleGiveSpecial(Character *player, std::string &args)
+static void handleGiveSpecial(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     std::string special = getArgument(args);
@@ -1539,7 +1618,7 @@ static void handleGiveSpecial(Character *player, std::string &args)
         return;
     }
 
-    Character *other;
+    Entity *other;
     if (character == "#")
         other = player;
     else
@@ -1557,14 +1636,15 @@ static void handleGiveSpecial(Character *player, std::string &args)
     else
         specialId = specialManager->getId(special);
 
-    if (specialId <= 0 || !other->giveSpecial(specialId))
+    if (specialId <= 0 ||
+        !other->getComponent<CharacterComponent>()->giveSpecial(specialId))
     {
         say("Invalid special.", player);
         return;
     }
 }
 
-static void handleTakeSpecial(Character *player, std::string &args)
+static void handleTakeSpecial(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     std::string special = getArgument(args);
@@ -1575,7 +1655,7 @@ static void handleTakeSpecial(Character *player, std::string &args)
         return;
     }
 
-    Character *other;
+    Entity *other;
     if (character == "#")
         other = player;
     else
@@ -1598,14 +1678,14 @@ static void handleTakeSpecial(Character *player, std::string &args)
         say("Invalid special.", player);
         return;
     }
-    if (!other->takeSpecial(specialId))
+    if (!other->getComponent<CharacterComponent>()->takeSpecial(specialId))
     {
         say("Character does not have special.", player);
         return;
     }
 }
 
-static void handleRechargeSpecial(Character *player, std::string &args)
+static void handleRechargeSpecial(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     std::string special = getArgument(args);
@@ -1617,7 +1697,7 @@ static void handleRechargeSpecial(Character *player, std::string &args)
         return;
     }
 
-    Character *other;
+    Entity *other;
     if (character == "#")
         other = player;
     else
@@ -1657,14 +1737,15 @@ static void handleRechargeSpecial(Character *player, std::string &args)
         }
         mana = utils::stringToInt(newMana);
     }
-    if (!other->setSpecialMana(specialId, mana))
+    if (!other->getComponent<CharacterComponent>()
+            ->setSpecialMana(specialId, mana))
     {
         say("Character does not have special.", player);
         return;
     }
 }
 
-static void handleListSpecials(Character *player, std::string &args)
+static void handleListSpecials(Entity *player, std::string &args)
 {
     std::string character = getArgument(args);
     if (character.empty())
@@ -1674,7 +1755,7 @@ static void handleListSpecials(Character *player, std::string &args)
         return;
     }
 
-    Character *other;
+    Entity *other;
     if (character == "#")
         other = player;
     else
@@ -1686,9 +1767,13 @@ static void handleListSpecials(Character *player, std::string &args)
         return;
     }
 
-    say("Specials of character " + other->getName() + ":", player);
-    for (SpecialMap::const_iterator it = other->getSpecialBegin(),
-         it_end = other->getSpecialEnd(); it != it_end; ++it)
+    auto *characterComponent =
+            other->getComponent<CharacterComponent>();
+
+    say("Specials of character " +
+        other->getComponent<BeingComponent>()->getName() + ":", player);
+    for (SpecialMap::const_iterator it = characterComponent->getSpecialBegin(),
+         it_end = characterComponent->getSpecialEnd(); it != it_end; ++it)
     {
         const SpecialValue &info = it->second;
         std::stringstream str;
@@ -1698,7 +1783,7 @@ static void handleListSpecials(Character *player, std::string &args)
     }
 }
 
-void CommandHandler::handleCommand(Character *player,
+void CommandHandler::handleCommand(Entity *player,
                                    const std::string &command)
 {
     // get command type, and arguments

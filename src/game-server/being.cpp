@@ -27,6 +27,7 @@
 #include "game-server/attributemanager.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
 #include "game-server/skillmanager.h"
@@ -37,15 +38,13 @@
 #include "scripting/scriptmanager.h"
 
 
-Script::Ref Being::mRecalculateDerivedAttributesCallback;
-Script::Ref Being::mRecalculateBaseAttributeCallback;
+Script::Ref BeingComponent::mRecalculateDerivedAttributesCallback;
+Script::Ref BeingComponent::mRecalculateBaseAttributeCallback;
 
-Being::Being(EntityType type):
-    Actor(type),
+BeingComponent::BeingComponent(Entity &entity):
+    mMoveTime(0),
     mAction(STAND),
-    mTarget(NULL),
     mGender(GENDER_UNSPECIFIED),
-    mCurrentAttack(0),
     mDirection(DOWN),
     mEmoteId(0)
 {
@@ -61,10 +60,12 @@ Being::Being(EntityType type):
         LOG_DEBUG("Attempting to create attribute '" << it1->first << "'.");
         mAttributes.insert(std::make_pair(it1->first,
                                           Attribute(*it1->second)));
-
     }
 
-    signal_inserted.connect(sigc::mem_fun(this, &Being::inserted));
+    clearDestination(entity);
+
+    entity.signal_inserted.connect(sigc::mem_fun(this,
+                                                 &BeingComponent::inserted));
 
     // TODO: Way to define default base values?
     // Should this be handled by the virtual modifiedAttribute?
@@ -79,84 +80,17 @@ Being::Being(EntityType type):
 #endif
 }
 
-void Being::triggerEmote(int id)
+void BeingComponent::triggerEmote(Entity &entity, int id)
 {
     mEmoteId = id;
 
     if (id > -1)
-        raiseUpdateFlags(UPDATEFLAG_EMOTE);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(UPDATEFLAG_EMOTE);
 }
 
-int Being::damage(Actor * /* source */, const Damage &damage)
-{
-    if (mAction == DEAD)
-        return 0;
 
-    int HPloss = damage.base;
-    if (damage.delta)
-        HPloss += rand() * (damage.delta + 1) / RAND_MAX;
 
-    // TODO magical attacks and associated elemental modifiers
-    switch (damage.type)
-    {
-        case DAMAGE_PHYSICAL:
-            if (!damage.trueStrike &&
-                rand()%((int) getModifiedAttribute(ATTR_DODGE) + 1) >
-                    rand()%(damage.cth + 1))
-            {
-                HPloss = 0;
-                // TODO Process triggers for a dodged physical attack here.
-                // If there is an attacker included, also process triggers for the attacker (failed physical strike)
-            }
-            else
-            {
-                HPloss = HPloss * (1.0 - (0.0159375f *
-                                          getModifiedAttribute(ATTR_DEFENSE)) /
-                                   (1.0 + 0.017 *
-                                    getModifiedAttribute(ATTR_DEFENSE))) +
-                         (rand()%((HPloss >> 4) + 1));
-                // TODO Process triggers for receiving damage here.
-                // If there is an attacker included, also process triggers for the attacker (successful physical strike)
-            }
-            break;
-        case DAMAGE_MAGICAL:
-#if 0
-            getModifiedAttribute(BASE_ELEM_BEGIN + damage.element);
-#else
-            LOG_WARN("Attempt to use magical type damage! This has not been"
-                      "implemented yet and should not be used!");
-            HPloss = 0;
-#endif
-            break;
-        case DAMAGE_DIRECT:
-            break;
-        default:
-            LOG_WARN("Unknown damage type '" << damage.type << "'!");
-            break;
-    }
-
-    if (HPloss > 0)
-    {
-        mHitsTaken.push_back(HPloss);
-        Attribute &HP = mAttributes.at(ATTR_HP);
-        LOG_DEBUG("Being " << getPublicID() << " suffered " << HPloss
-                  << " damage. HP: "
-                  << HP.getModifiedAttribute() << "/"
-                  << mAttributes.at(ATTR_MAX_HP).getModifiedAttribute());
-        setAttribute(ATTR_HP, HP.getBase() - HPloss);
-        // No HP regen after being hit if this is set.
-        mHealthRegenerationTimeout.setSoft(
-                    Configuration::getValue("game_hpRegenBreakAfterHit", 0));
-    }
-    else
-    {
-        HPloss = 0;
-    }
-
-    return HPloss;
-}
-
-void Being::heal()
+void BeingComponent::heal(Entity &entity)
 {
     Attribute &hp = mAttributes.at(ATTR_HP);
     Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
@@ -165,10 +99,10 @@ void Being::heal()
 
     // Reset all modifications present in hp.
     hp.clearMods();
-    setAttribute(ATTR_HP, maxHp.getModifiedAttribute());
+    setAttribute(entity, ATTR_HP, maxHp.getModifiedAttribute());
 }
 
-void Being::heal(int gain)
+void BeingComponent::heal(Entity &entity, int gain)
 {
     Attribute &hp = mAttributes.at(ATTR_HP);
     Attribute &maxHp = mAttributes.at(ATTR_MAX_HP);
@@ -176,106 +110,64 @@ void Being::heal(int gain)
         return; // Full hp, do nothing.
 
     // Cannot go over maximum hitpoints.
-    setAttribute(ATTR_HP, hp.getBase() + gain);
+    setAttribute(entity, ATTR_HP, hp.getBase() + gain);
     if (hp.getModifiedAttribute() > maxHp.getModifiedAttribute())
-        setAttribute(ATTR_HP, maxHp.getModifiedAttribute());
+        setAttribute(entity, ATTR_HP, maxHp.getModifiedAttribute());
 }
 
-void Being::died()
+void BeingComponent::died(Entity &entity)
 {
     if (mAction == DEAD)
         return;
 
-    LOG_DEBUG("Being " << getPublicID() << " died.");
-    setAction(DEAD);
+    LOG_DEBUG("Being " << entity.getComponent<ActorComponent>()->getPublicID()
+              << " died.");
+    setAction(entity, DEAD);
     // dead beings stay where they are
-    clearDestination();
+    clearDestination(entity);
 
-    // reset target
-    mTarget = NULL;
-
-    signal_died.emit(this);
+    signal_died.emit(&entity);
 }
 
-void Being::processAttacks()
-{
-    if (mAction != ATTACK || !mTarget)
-        return;
-
-    // Ticks attacks even when not attacking to permit cooldowns and warmups.
-    std::vector<Attack *> attacksReady;
-    mAttacks.getUsuableAttacks(&attacksReady);
-
-    if (Attack *triggerableAttack = mAttacks.getTriggerableAttack())
-    {
-        processAttack(*triggerableAttack);
-        mAttacks.markAttackAsTriggered();
-    }
-
-    // Deal with the ATTACK action.
-    if (attacksReady.empty())
-        return;
-
-    Attack *highestPriorityAttack = 0;
-    // Performs all ready attacks.
-    for (std::vector<Attack *>::const_iterator it = attacksReady.begin(),
-         it_end = attacksReady.end(); it != it_end; ++it)
-    {
-        // check if target is in range using the pythagorean theorem
-        int distx = this->getPosition().x - mTarget->getPosition().x;
-        int disty = this->getPosition().y - mTarget->getPosition().y;
-        int distSquare = (distx * distx + disty * disty);
-        AttackInfo *info = (*it)->getAttackInfo();
-        int maxDist = info->getDamage().range + getSize();
-
-        if (distSquare <= maxDist * maxDist &&
-                (!highestPriorityAttack ||
-                 highestPriorityAttack->getAttackInfo()->getPriority()
-                 < info->getPriority()))
-        {
-            highestPriorityAttack = *it;
-        }
-    }
-    if (highestPriorityAttack)
-    {
-        mAttacks.startAttack(highestPriorityAttack);
-        mCurrentAttack = highestPriorityAttack;
-        setDestination(getPosition());
-        // TODO: Turn into direction of enemy
-        raiseUpdateFlags(UPDATEFLAG_ATTACK);
-    }
-}
-
-void Being::addAttack(AttackInfo *attackInfo)
-{
-    mAttacks.add(attackInfo);
-}
-
-void Being::removeAttack(AttackInfo *attackInfo)
-{
-    mAttacks.remove(attackInfo);
-}
-
-void Being::setDestination(const Point &dst)
+void BeingComponent::setDestination(Entity &entity, const Point &dst)
 {
     mDst = dst;
-    raiseUpdateFlags(UPDATEFLAG_NEW_DESTINATION);
+    entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_NEW_DESTINATION);
     mPath.clear();
 }
 
-Path Being::findPath()
+void BeingComponent::clearDestination(Entity &entity)
 {
-    Map *map = getMap()->getMap();
-    int tileWidth = map->getTileWidth();
-    int tileHeight = map->getTileHeight();
-    int startX = getPosition().x / tileWidth;
-    int startY = getPosition().y / tileHeight;
-    int destX = mDst.x / tileWidth, destY = mDst.y / tileHeight;
-
-    return map->findPath(startX, startY, destX, destY, getWalkMask());
+    setDestination(entity,
+                   entity.getComponent<ActorComponent>()->getPosition());
 }
 
-void Being::updateDirection(const Point &currentPos, const Point &destPos)
+void BeingComponent::setDirection(Entity &entity, BeingDirection direction)
+{
+    mDirection = direction;
+    entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_DIRCHANGE);
+}
+
+Path BeingComponent::findPath(Entity &entity)
+{
+    auto *actorComponent = entity.getComponent<ActorComponent>();
+
+    Map *map = entity.getMap()->getMap();
+    int tileWidth = map->getTileWidth();
+    int tileHeight = map->getTileHeight();
+    int startX = actorComponent->getPosition().x / tileWidth;
+    int startY = actorComponent->getPosition().y / tileHeight;
+    int destX = mDst.x / tileWidth, destY = mDst.y / tileHeight;
+
+    return map->findPath(startX, startY, destX, destY,
+                         actorComponent->getWalkMask());
+}
+
+void BeingComponent::updateDirection(Entity &entity,
+                                     const Point &currentPos,
+                                     const Point &destPos)
 {
     // We update the being direction on each tile to permit other beings
     // entering in range to always see the being with a direction value.
@@ -291,18 +183,18 @@ void Being::updateDirection(const Point &currentPos, const Point &destPos)
     if (currentPos.x == destPos.x)
     {
         if (currentPos.y > destPos.y)
-            setDirection(UP);
+            setDirection(entity, UP);
         else
-            setDirection(DOWN);
+            setDirection(entity, DOWN);
         return;
     }
 
     if (currentPos.y == destPos.y)
     {
         if (currentPos.x > destPos.x)
-            setDirection(LEFT);
+            setDirection(entity, LEFT);
         else
-            setDirection(RIGHT);
+            setDirection(entity, RIGHT);
         return;
     }
 
@@ -316,9 +208,9 @@ void Being::updateDirection(const Point &currentPos, const Point &destPos)
             // Compute tan of the angle
             if ((currentPos.y - destPos.y) / (destPos.x - currentPos.x) < 1)
                 // The angle is less than 45°, we look to the right
-                setDirection(RIGHT);
+                setDirection(entity, RIGHT);
             else
-                setDirection(UP);
+                setDirection(entity, UP);
             return;
         }
         else // Down-right
@@ -326,9 +218,9 @@ void Being::updateDirection(const Point &currentPos, const Point &destPos)
             // Compute tan of the angle
             if ((destPos.y - currentPos.y) / (destPos.x - currentPos.x) < 1)
                 // The angle is less than 45°, we look to the right
-                setDirection(RIGHT);
+                setDirection(entity, RIGHT);
             else
-                setDirection(DOWN);
+                setDirection(entity, DOWN);
             return;
         }
     }
@@ -340,9 +232,9 @@ void Being::updateDirection(const Point &currentPos, const Point &destPos)
             // Compute tan of the angle
             if ((currentPos.y - destPos.y) / (currentPos.x - destPos.x) < 1)
                 // The angle is less than 45°, we look to the left
-                setDirection(LEFT);
+                setDirection(entity, LEFT);
             else
-                setDirection(UP);
+                setDirection(entity, UP);
             return;
         }
         else // Down-left
@@ -350,15 +242,15 @@ void Being::updateDirection(const Point &currentPos, const Point &destPos)
             // Compute tan of the angle
             if ((destPos.y - currentPos.y) / (currentPos.x - destPos.x) < 1)
                 // The angle is less than 45°, we look to the left
-                setDirection(LEFT);
+                setDirection(entity, LEFT);
             else
-                setDirection(DOWN);
+                setDirection(entity, DOWN);
             return;
         }
     }
 }
 
-void Being::move()
+void BeingComponent::move(Entity &entity)
 {
     // Immobile beings cannot move.
     if (!checkAttributeExists(ATTR_MOVE_SPEED_RAW)
@@ -368,10 +260,10 @@ void Being::move()
     // Remember the current position before moving. This is used by
     // MapComposite::update() to determine whether a being has moved from one
     // zone to another.
-    mOld = getPosition();
+    mOld = entity.getComponent<ActorComponent>()->getPosition();
 
     // Ignore not moving beings
-    if (mAction == STAND && mDst == getPosition())
+    if (mAction == STAND && mDst == mOld)
         return;
 
     if (mMoveTime > WORLD_TICK_MS)
@@ -381,22 +273,22 @@ void Being::move()
         return;
     }
 
-    Map *map = getMap()->getMap();
+    Map *map = entity.getMap()->getMap();
     int tileWidth = map->getTileWidth();
     int tileHeight = map->getTileHeight();
-    int tileSX = getPosition().x / tileWidth;
-    int tileSY = getPosition().y / tileHeight;
+    int tileSX = mOld.x / tileWidth;
+    int tileSY = mOld.y / tileHeight;
     int tileDX = mDst.x / tileWidth;
     int tileDY = mDst.y / tileHeight;
 
     if (tileSX == tileDX && tileSY == tileDY)
     {
         if (mAction == WALK)
-            setAction(STAND);
+            setAction(entity, STAND);
         // Moving while staying on the same tile is free
         // We only update the direction in that case.
-        updateDirection(getPosition(), mDst);
-        setPosition(mDst);
+        updateDirection(entity, mOld, mDst);
+        entity.getComponent<ActorComponent>()->setPosition(entity, mDst);
         mMoveTime = 0;
         return;
     }
@@ -411,7 +303,9 @@ void Being::move()
     for (PathIterator pathIterator = mPath.begin();
             pathIterator != mPath.end(); pathIterator++)
     {
-        if (!map->getWalk(pathIterator->x, pathIterator->y, getWalkMask()))
+        const unsigned char walkmask =
+                entity.getComponent<ActorComponent>()->getWalkMask();
+        if (!map->getWalk(pathIterator->x, pathIterator->y, walkmask))
         {
             mPath.clear();
             break;
@@ -422,20 +316,20 @@ void Being::move()
     {
         // No path exists: the walkability of cached path has changed, the
         // destination has changed, or a path was never set.
-        mPath = findPath();
+        mPath = findPath(entity);
     }
 
     if (mPath.empty())
     {
         if (mAction == WALK)
-            setAction(STAND);
+            setAction(entity, STAND);
         // no path was found
         mDst = mOld;
         mMoveTime = 0;
         return;
     }
 
-    setAction(WALK);
+    setAction(entity, WALK);
 
     Point prev(tileSX, tileSY);
     Point pos;
@@ -460,15 +354,15 @@ void Being::move()
         pos.y = next.y * tileHeight + (tileHeight / 2);
     }
     while (mMoveTime < WORLD_TICK_MS);
-    setPosition(pos);
+    entity.getComponent<ActorComponent>()->setPosition(entity, pos);
 
     mMoveTime = mMoveTime > WORLD_TICK_MS ? mMoveTime - WORLD_TICK_MS : 0;
 
     // Update the being direction also
-    updateDirection(mOld, pos);
+    updateDirection(entity, mOld, pos);
 }
 
-int Being::directionToAngle(int direction)
+int BeingComponent::directionToAngle(int direction)
 {
     switch (direction)
     {
@@ -480,54 +374,40 @@ int Being::directionToAngle(int direction)
     }
 }
 
-int Being::performAttack(Being *target, const Damage &dmg)
-{
-    // check target legality
-    if (!target
-            || target == this
-            || target->getAction() == DEAD
-            || !target->canFight())
-        return -1;
-
-    if (getMap()->getPvP() == PVP_NONE
-            && target->getType() == OBJECT_CHARACTER
-            && getType() == OBJECT_CHARACTER)
-        return -1;
-
-    return target->damage(this, dmg);
-}
-
-void Being::setAction(BeingAction action)
+void BeingComponent::setAction(Entity &entity, BeingAction action)
 {
     mAction = action;
     if (action != ATTACK && // The players are informed about these actions
         action != WALK)     // by other messages
     {
-        raiseUpdateFlags(UPDATEFLAG_ACTIONCHANGE);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_ACTIONCHANGE);
     }
 }
 
-void Being::applyModifier(unsigned attr, double value, unsigned layer,
-                          unsigned duration, unsigned id)
+void BeingComponent::applyModifier(Entity &entity, unsigned attr, double value,
+                                   unsigned layer, unsigned duration,
+                                   unsigned id)
 {
     mAttributes.at(attr).add(duration, value, layer, id);
-    updateDerivedAttributes(attr);
+    updateDerivedAttributes(entity, attr);
 }
 
-bool Being::removeModifier(unsigned attr, double value, unsigned layer,
-                           unsigned id, bool fullcheck)
+bool BeingComponent::removeModifier(Entity &entity, unsigned attr,
+                                    double value, unsigned layer,
+                                    unsigned id, bool fullcheck)
 {
     bool ret = mAttributes.at(attr).remove(value, layer, id, fullcheck);
-    updateDerivedAttributes(attr);
+    updateDerivedAttributes(entity, attr);
     return ret;
 }
 
-void Being::setGender(BeingGender gender)
+void BeingComponent::setGender(BeingGender gender)
 {
     mGender = gender;
 }
 
-void Being::setAttribute(unsigned id, double value)
+void BeingComponent::setAttribute(Entity &entity, unsigned id, double value)
 {
     AttributeMap::iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
@@ -543,16 +423,35 @@ void Being::setAttribute(unsigned id, double value)
     else
     {
         ret->second.setBase(value);
-        updateDerivedAttributes(id);
+        updateDerivedAttributes(entity, id);
     }
 }
 
-double Being::getAttribute(unsigned id) const
+void BeingComponent::createAttribute(unsigned id, const AttributeManager::AttributeInfo
+                            &attributeInfo)
+{
+    mAttributes.insert(std::pair<unsigned, Attribute>
+                                            (id,Attribute(attributeInfo)));
+}
+
+const Attribute *BeingComponent::getAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
     {
-        LOG_DEBUG("Being::getAttribute: Attribute "
+        LOG_DEBUG("BeingComponent::getAttribute: Attribute "
+                  << id << " not found! Returning 0.");
+        return 0;
+    }
+    return &ret->second;
+}
+
+double BeingComponent::getAttributeBase(unsigned id) const
+{
+    AttributeMap::const_iterator ret = mAttributes.find(id);
+    if (ret == mAttributes.end())
+    {
+        LOG_DEBUG("BeingComponent::getAttributeBase: Attribute "
                   << id << " not found! Returning 0.");
         return 0;
     }
@@ -560,32 +459,32 @@ double Being::getAttribute(unsigned id) const
 }
 
 
-double Being::getModifiedAttribute(unsigned id) const
+double BeingComponent::getModifiedAttribute(unsigned id) const
 {
     AttributeMap::const_iterator ret = mAttributes.find(id);
     if (ret == mAttributes.end())
     {
-        LOG_DEBUG("Being::getModifiedAttribute: Attribute "
+        LOG_DEBUG("BeingComponent::getModifiedAttribute: Attribute "
                   << id << " not found! Returning 0.");
         return 0;
     }
     return ret->second.getModifiedAttribute();
 }
 
-void Being::setModAttribute(unsigned, double)
+void BeingComponent::setModAttribute(unsigned, double)
 {
     // No-op to satisfy shared structure.
     // The game-server calculates this manually.
     return;
 }
 
-void Being::recalculateBaseAttribute(unsigned attr)
+void BeingComponent::recalculateBaseAttribute(Entity &entity, unsigned attr)
 {
     LOG_DEBUG("Being: Received update attribute recalculation request for "
               << attr << ".");
     if (!mAttributes.count(attr))
     {
-        LOG_DEBUG("Being::recalculateBaseAttribute: " << attr << " not found!");
+        LOG_DEBUG("BeingComponent::recalculateBaseAttribute: " << attr << " not found!");
         return;
     }
 
@@ -594,8 +493,8 @@ void Being::recalculateBaseAttribute(unsigned attr)
     {
         double newBase = utils::tpsToRawSpeed(
                                     getModifiedAttribute(ATTR_MOVE_SPEED_TPS));
-        if (newBase != getAttribute(attr))
-            setAttribute(attr, newBase);
+        if (newBase != getAttributeBase(attr))
+            setAttribute(entity, attr, newBase);
         return;
     }
 
@@ -604,13 +503,15 @@ void Being::recalculateBaseAttribute(unsigned attr)
 
     Script *script = ScriptManager::currentState();
     script->prepare(mRecalculateBaseAttributeCallback);
-    script->push(this);
+    script->push(&entity);
     script->push(attr);
-    script->execute(getMap());
+    script->execute(entity.getMap());
 }
 
-void Being::updateDerivedAttributes(unsigned attr)
+void BeingComponent::updateDerivedAttributes(Entity &entity, unsigned attr)
 {
+    signal_attribute_changed.emit(&entity, attr);
+
     LOG_DEBUG("Being: Updating derived attribute(s) of: " << attr);
 
     // Handle default actions before handing over to the script engine
@@ -618,12 +519,13 @@ void Being::updateDerivedAttributes(unsigned attr)
     {
     case ATTR_MAX_HP:
     case ATTR_HP:
-        raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_HEALTHCHANGE);
         break;
     case ATTR_MOVE_SPEED_TPS:
         // Does not make a lot of sense to have in the scripts.
         // So handle it here:
-        recalculateBaseAttribute(ATTR_MOVE_SPEED_RAW);
+        recalculateBaseAttribute(entity, ATTR_MOVE_SPEED_RAW);
         break;
     }
 
@@ -632,12 +534,12 @@ void Being::updateDerivedAttributes(unsigned attr)
 
     Script *script = ScriptManager::currentState();
     script->prepare(mRecalculateDerivedAttributesCallback);
-    script->push(this);
+    script->push(&entity);
     script->push(attr);
-    script->execute(getMap());
+    script->execute(entity.getMap());
 }
 
-void Being::applyStatusEffect(int id, int timer)
+void BeingComponent::applyStatusEffect(int id, int timer)
 {
     if (mAction == DEAD)
         return;
@@ -655,12 +557,12 @@ void Being::applyStatusEffect(int id, int timer)
     }
 }
 
-void Being::removeStatusEffect(int id)
+void BeingComponent::removeStatusEffect(int id)
 {
     setStatusEffectTime(id, 0);
 }
 
-bool Being::hasStatusEffect(int id) const
+bool BeingComponent::hasStatusEffect(int id) const
 {
     StatusEffects::const_iterator it = mStatus.begin();
     while (it != mStatus.end())
@@ -672,20 +574,20 @@ bool Being::hasStatusEffect(int id) const
     return false;
 }
 
-unsigned Being::getStatusEffectTime(int id) const
+unsigned BeingComponent::getStatusEffectTime(int id) const
 {
     StatusEffects::const_iterator it = mStatus.find(id);
     if (it != mStatus.end()) return it->second.time;
     else return 0;
 }
 
-void Being::setStatusEffectTime(int id, int time)
+void BeingComponent::setStatusEffectTime(int id, int time)
 {
     StatusEffects::iterator it = mStatus.find(id);
     if (it != mStatus.end()) it->second.time = time;
 }
 
-void Being::update()
+void BeingComponent::update(Entity &entity)
 {
     int oldHP = getModifiedAttribute(ATTR_HP);
     int newHP = oldHP;
@@ -705,8 +607,9 @@ void Being::update()
     // Only update HP when it actually changed to avoid network noise
     if (newHP != oldHP)
     {
-        setAttribute(ATTR_HP, newHP);
-        raiseUpdateFlags(UPDATEFLAG_HEALTHCHANGE);
+        setAttribute(entity, ATTR_HP, newHP);
+        entity.getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_HEALTHCHANGE);
     }
 
     // Update lifetime of effects.
@@ -715,7 +618,7 @@ void Being::update()
          ++it)
     {
         if (it->second.tick())
-            updateDerivedAttributes(it->first);
+            updateDerivedAttributes(entity, it->first);
     }
 
     // Update and run status effects
@@ -724,7 +627,7 @@ void Being::update()
     {
         it->second.time--;
         if (it->second.time > 0 && mAction != DEAD)
-            it->second.status->tick(this, it->second.time);
+            it->second.status->tick(entity, it->second.time);
 
         if (it->second.time <= 0 || mAction == DEAD)
         {
@@ -740,19 +643,13 @@ void Being::update()
 
     // Check if being died
     if (getModifiedAttribute(ATTR_HP) <= 0 && mAction != DEAD)
-        died();
-
-    processAttacks();
+        died(entity);
 }
 
-void Being::inserted(Entity *)
+void BeingComponent::inserted(Entity *entity)
 {
     // Reset the old position, since after insertion it is important that it is
     // in sync with the zone that we're currently present in.
-    mOld = getPosition();
+    mOld = entity->getComponent<ActorComponent>()->getPosition();
 }
 
-void Being::processAttack(Attack &attack)
-{
-    performAttack(mTarget, attack.getAttackInfo()->getDamage());
-}

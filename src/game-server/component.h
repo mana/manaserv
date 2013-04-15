@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,30 +18,42 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STATUSEFFECT_H
-#define STATUSEFFECT_H
+#ifndef COMPONENT_H
+#define COMPONENT_H
 
-#include "scripting/script.h"
+#include <sigc++/trackable.h>
 
 class Entity;
 
-class StatusEffect
+enum ComponentType
 {
-    public:
-        StatusEffect(int id);
-        ~StatusEffect();
+    CT_Actor,
+    CT_Character,
+    CT_Being,
+    CT_Effect,
+    CT_Fighting,
+    CT_Item,
+    CT_Monster,
+    CT_Npc,
+    CT_SpawnArea,
+    CT_TriggerArea,
 
-        void tick(Entity &target, int count);
-
-        int getId() const
-        { return mId; }
-
-        void setTickCallback(Script *script)
-        { script->assignCallback(mTickCallback); }
-
-    private:
-        int mId;
-        Script::Ref mTickCallback;
+    ComponentTypeCount
 };
 
-#endif
+/**
+ * A component of an entity.
+ */
+class Component : public sigc::trackable
+{
+    public:
+        virtual ~Component() {}
+
+        /**
+         * Updates the internal status. The \a entity is the owner of this
+         * component.
+         */
+        virtual void update(Entity &entity) = 0;
+};
+
+#endif // COMPONENT_H

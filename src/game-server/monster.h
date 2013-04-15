@@ -27,12 +27,13 @@
 #include "utils/string.h"
 
 #include <map>
-#include <vector>
+#include <set>
 #include <string>
+#include <vector>
 
 #include <sigc++/connection.h>
 
-class Character;
+class CharacterComponent;
 class ItemClass;
 class Script;
 
@@ -137,6 +138,9 @@ class MonsterClass
          */
         bool hasAttribute(int attribute) const
         { return (mAttributes.find(attribute) != mAttributes.end()); }
+
+        const std::map<int, double> &getAttributes() const
+        { return mAttributes; }
 
         /** Sets collision circle radius. */
         void setSize(int size) { mSize = size; }
@@ -245,7 +249,7 @@ class MonsterClass
         Script::Ref mDamageCallback;
 
         friend class MonsterManager;
-        friend class Monster;
+        friend class MonsterComponent;
 };
 
 /**
@@ -266,16 +270,18 @@ struct AttackPosition
 };
 
 /**
- * The class for a fightable monster with its own AI
+ * The component for a fightable monster with its own AI
  */
-class Monster : public Being
+class MonsterComponent : public Component
 {
     public:
+        static const ComponentType type = CT_Monster;
+
         /** Time in game ticks until ownership of a monster can change. */
         static const int KILLSTEAL_PROTECTION_TIME = 100;
 
-        Monster(MonsterClass *);
-        ~Monster();
+        MonsterComponent(Entity &entity, MonsterClass *);
+        ~MonsterComponent();
 
         /**
          * Returns monster specy.
@@ -286,48 +292,35 @@ class Monster : public Being
         /**
          * Performs one step of controller logic.
          */
-        void update();
+        void update(Entity &entity);
 
-        void refreshTarget();
-
-        /**
-         * Performs an attack
-         */
-        virtual void processAttack(Attack &attack);
+        void refreshTarget(Entity &entity);
 
         /**
-         * Kills the being.
+         * Signal handler
          */
-        void died();
+        void monsterDied(Entity *monster);
+
+        void receivedDamage(Entity *attacker, const Damage &damage, int hpLoss);
 
         /**
          * Alters hate for the monster
          */
-        void changeAnger(Actor *target, int amount);
+        void changeAnger(Entity *target, int amount);
 
-        std::map<Being *, int> getAngerList() const;
-
-        /**
-         * Calls the damage function in Being and updates the aggro list
-         */
-        virtual int damage(Actor *source, const Damage &damage);
+        std::map<Entity *, int> getAngerList() const;
 
         /**
          * Removes a being from the anger list.
          */
         void forgetTarget(Entity *entity);
 
-    protected:
-        /**
-         * Returns the way the actor blocks pathfinding for other objects.
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_MONSTER; }
-
     private:
         static const int DECAY_TIME = 50;
 
-        int calculatePositionPriority(Point position, int targetPriority);
+        int calculatePositionPriority(Entity &entity,
+                                      Point position,
+                                      int targetPriority);
 
         MonsterClass *mSpecy;
 
@@ -341,24 +334,21 @@ class Monster : public Being
             sigc::connection removedConnection;
             sigc::connection diedConnection;
         };
-        std::map<Being *, AggressionInfo> mAnger;
+        std::map<Entity *, AggressionInfo> mAnger;
 
         /**
          * Character who currently owns this monster (killsteal protection).
          */
-        Character *mOwner;
-
-        /** Factor for damage mutation */
-        unsigned mDamageMutation;
+        Entity *mOwner;
 
         /** List of characters and their skills that attacked this monster. */
-        std::map<Character *, std::set <size_t> > mExpReceivers;
+        std::map<Entity *, std::set <size_t> > mExpReceivers;
 
         /**
          * List of characters who are entitled to receive exp (killsteal
          * protection).
          */
-        std::set<Character *> mLegalExpReceivers;
+        std::set<Entity *> mLegalExpReceivers;
 
         /**
          * Set positions relative to target from which the monster can attack.

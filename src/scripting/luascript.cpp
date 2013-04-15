@@ -75,24 +75,21 @@ void LuaScript::prepareResume(Thread *thread)
 void LuaScript::push(int v)
 {
     assert(nbArgs >= 0);
-    lua_pushinteger(mCurrentState, v);
+    ::push(mCurrentState, v);
     ++nbArgs;
 }
 
 void LuaScript::push(const std::string &v)
 {
     assert(nbArgs >= 0);
-    lua_pushlstring(mCurrentState, v.c_str(), v.length());
+    ::push(mCurrentState, v);
     ++nbArgs;
 }
 
 void LuaScript::push(Entity *v)
 {
     assert(nbArgs >= 0);
-    if (v)
-        lua_pushlightuserdata(mCurrentState, v);
-    else
-        lua_pushnil(mCurrentState);
+    ::push(mCurrentState, v);
     ++nbArgs;
 }
 
@@ -248,7 +245,7 @@ void LuaScript::load(const char *prog, const char *name,
     mContext = previousContext;
 }
 
-void LuaScript::processDeathEvent(Being *entity)
+void LuaScript::processDeathEvent(Entity *entity)
 {
     if (mDeathNotificationCallback.isValid())
     {
@@ -275,35 +272,37 @@ void LuaScript::processRemoveEvent(Entity *entity)
 /**
  * Called when the server has recovered the value of a quest variable.
  */
-void LuaScript::getQuestCallback(Character *q,
+void LuaScript::getQuestCallback(Entity *q,
                                  const std::string &value,
                                  Script *script)
 {
-    Script::Thread *thread = q->getNpcThread();
+    auto *characterComponent = q->getComponent<CharacterComponent>();
+    Script::Thread *thread = characterComponent->getNpcThread();
     if (!thread || thread->mState != Script::ThreadExpectingString)
         return;
 
     script->prepareResume(thread);
     script->push(value);
-    q->resumeNpcThread();
+    characterComponent->resumeNpcThread();
 }
 
 /**
  * Called when the server has recovered the post for a user.
  */
-void LuaScript::getPostCallback(Character *q,
+void LuaScript::getPostCallback(Entity *q,
                                 const std::string &sender,
                                 const std::string &letter,
                                 Script *script)
 {
-    Script::Thread *thread = q->getNpcThread();
+    auto *characterComponent = q->getComponent<CharacterComponent>();
+    Script::Thread *thread = characterComponent->getNpcThread();
     if (!thread || thread->mState != Script::ThreadExpectingTwoStrings)
         return;
 
     script->prepareResume(thread);
     script->push(sender);
     script->push(letter);
-    q->resumeNpcThread();
+    characterComponent->resumeNpcThread();
 }
 
 

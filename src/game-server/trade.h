@@ -23,7 +23,7 @@
 
 #include <vector>
 
-class Character;
+class Entity;
 class Inventory;
 
 class Trade
@@ -34,7 +34,7 @@ class Trade
          * Sets up a trade between two characters.
          * Asks for an acknowledgment from the second one.
          */
-        Trade(Character *, Character *);
+        Trade(Entity *, Entity *);
 
         /**
          * Cancels a trade by a given character (optional).
@@ -49,27 +49,27 @@ class Trade
          * otherwise.
          * @return true if the current trade keeps going.
          */
-        bool request(Character *, int);
+        bool request(Entity *, int);
 
         /**
          * Confirm the trade.
          */
-        void confirm(Character *);
+        void confirm(Entity *);
 
         /*
          * Agree to complete the trade
          */
-        void agree(Character *c);
+        void agree(Entity *c);
 
         /**
          * Adds some items to the trade.
          */
-        void addItem(Character *, int slot, int amount);
+        void addItem(Entity *, int slot, int amount);
 
         /**
          * Adds some money to the trade.
          */
-        void setMoney(Character *, int amount);
+        void setMoney(Entity *, int amount);
 
     private:
 
@@ -77,8 +77,9 @@ class Trade
 
         struct TradedItem
         {
-            unsigned short id;
-            unsigned char slot, amount;
+            unsigned id;
+            unsigned slot;
+            int amount;
         };
 
         typedef std::vector< TradedItem > TradedItems;
@@ -97,7 +98,7 @@ class Trade
 
         static bool perform(TradedItems items, Inventory &inv1, Inventory &inv2);
 
-        Character *mChar1, *mChar2;   /**< Characters involved. */
+        Entity *mChar1, *mChar2;       /**< Characters involved. */
         TradedItems mItems1, mItems2; /**< Traded items. */
         int mMoney1, mMoney2;         /**< Traded money. */
         TradeState mState;            /**< State of transaction. */

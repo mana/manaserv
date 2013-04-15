@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,51 +19,56 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include <string>
-#include <map>
-
 #include "game-server/item.h"
 
 #include "common/configuration.h"
 #include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/being.h"
+#include "game-server/combatcomponent.h"
 #include "game-server/state.h"
 #include "scripting/script.h"
 #include "scripting/scriptmanager.h"
 
-bool ItemEffectAttrMod::apply(Being *itemUser)
+#include <map>
+#include <string>
+
+bool ItemEffectAttrMod::apply(Entity *itemUser)
 {
     LOG_DEBUG("Applying modifier.");
-    itemUser->applyModifier(mAttributeId, mMod, mAttributeLayer,
-                            mDuration, mId);
+    itemUser->getComponent<BeingComponent>()->applyModifier(*itemUser,
+                                                            mAttributeId, mMod,
+                                                            mAttributeLayer,
+                                                            mDuration, mId);
     return false;
 }
 
-void ItemEffectAttrMod::dispell(Being *itemUser)
+void ItemEffectAttrMod::dispell(Entity *itemUser)
 {
     LOG_DEBUG("Dispelling modifier.");
-    itemUser->removeModifier(mAttributeId, mMod, mAttributeLayer,
-                             mId, !mDuration);
+    itemUser->getComponent<BeingComponent>()->removeModifier(*itemUser,
+                                                             mAttributeId,
+                                                             mMod,
+                                                             mAttributeLayer,
+                                                             mId, !mDuration);
 }
 
-bool ItemEffectAttack::apply(Being *itemUser)
+bool ItemEffectAttack::apply(Entity *itemUser)
 {
-    itemUser->addAttack(mAttackInfo);
+    itemUser->getComponent<CombatComponent>()->addAttack(mAttackInfo);
     return false;
 }
 
-void ItemEffectAttack::dispell(Being *itemUser)
+void ItemEffectAttack::dispell(Entity *itemUser)
 {
-    itemUser->removeAttack(mAttackInfo);
+    itemUser->getComponent<CombatComponent>()->removeAttack(mAttackInfo);
 }
 
 ItemEffectScript::~ItemEffectScript()
 {
 }
 
-bool ItemEffectScript::apply(Being *itemUser)
+bool ItemEffectScript::apply(Entity *itemUser)
 {
     if (mActivateEventName.empty())
         return false;
@@ -81,7 +87,7 @@ bool ItemEffectScript::apply(Being *itemUser)
     return false;
 }
 
-void ItemEffectScript::dispell(Being *itemUser)
+void ItemEffectScript::dispell(Entity *itemUser)
 {
     if (mDispellEventName.empty())
         return;
@@ -122,7 +128,7 @@ void ItemClass::addEffect(ItemEffectInfo *effect,
         mDispells.insert(std::make_pair(dispell, effect));
 }
 
-bool ItemClass::useTrigger(Being *itemUser, ItemTriggerType trigger)
+bool ItemClass::useTrigger(Entity *itemUser, ItemTriggerType trigger)
 {
     if (!trigger)
         return false;
@@ -150,19 +156,37 @@ void ItemClass::addAttack(AttackInfo *attackInfo,
     addEffect(new ItemEffectAttack(attackInfo), applyTrigger, dispellTrigger);
 }
 
-
-Item::Item(ItemClass *type, int amount)
-          : Actor(OBJECT_ITEM), mType(type), mAmount(amount)
+ItemComponent::ItemComponent(ItemClass *type, int amount) :
+    mType(type),
+    mAmount(amount)
 {
     mLifetime = Configuration::getValue("game_floorItemDecayTime", 0) * 10;
 }
 
-void Item::update()
+void ItemComponent::update(Entity &entity)
 {
     if (mLifetime)
     {
         mLifetime--;
         if (!mLifetime)
-            GameState::enqueueRemove(this);
+            GameState::enqueueRemove(&entity);
     }
 }
+
+namespace Item {
+
+Entity *create(MapComposite *map,
+              Point pos,
+              ItemClass *itemClass,
+              int amount)
+{
+    Entity *itemActor = new Entity(OBJECT_ITEM);
+    ActorComponent *actorComponent = new ActorComponent(*itemActor);
+    itemActor->addComponent(actorComponent);
+    itemActor->addComponent(new ItemComponent(itemClass, amount));
+    itemActor->setMap(map);
+    actorComponent->setPosition(*itemActor, pos);
+    return itemActor;
+}
+
+} // namespace Item

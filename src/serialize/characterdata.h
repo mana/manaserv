@@ -42,16 +42,14 @@ void serializeCharacterData(const T &data, MessageOut &msg)
     msg.writeInt16(data.getCharacterPoints());
     msg.writeInt16(data.getCorrectionPoints());
 
-    msg.writeInt16(data.mAttributes.size());
-    AttributeMap::const_iterator attr_it, attr_it_end;
-    for (attr_it = data.mAttributes.begin(),
-         attr_it_end = data.mAttributes.end();
-         attr_it != attr_it_end;
-         ++attr_it)
+
+    const AttributeMap &attributes = data.getAttributes();
+    msg.writeInt16(attributes.size());
+    for (auto attributeIt : attributes)
     {
-        msg.writeInt16(attr_it->first);
-        msg.writeDouble(data.getAttrBase(attr_it));
-        msg.writeDouble(data.getAttrMod(attr_it));
+        msg.writeInt16(attributeIt.first);
+        msg.writeDouble(attributeIt.second.getBase());
+        msg.writeDouble(attributeIt.second.getModifiedAttribute());
     }
 
     // character skills
@@ -66,11 +64,11 @@ void serializeCharacterData(const T &data, MessageOut &msg)
 
     // status effects currently affecting the character
     msg.writeInt16(data.getStatusEffectSize());
-    std::map<int, int>::const_iterator status_it;
+    std::map<int, Status>::const_iterator status_it;
     for (status_it = data.getStatusEffectBegin(); status_it != data.getStatusEffectEnd(); status_it++)
     {
         msg.writeInt16(status_it->first);
-        msg.writeInt16(status_it->second);
+        msg.writeInt16(status_it->second.time);
     }
 
     // location

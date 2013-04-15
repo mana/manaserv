@@ -76,7 +76,8 @@ public:
     /**
      * Send the character data to the client.
      */
-    static void sendCharacterData(AccountClient &client, const Character &ch);
+    static void sendCharacterData(AccountClient &client,
+                                  const CharacterData &ch);
 
 protected:
     /**
@@ -271,7 +272,7 @@ void AccountHandler::computerDisconnected(NetComputer *comp)
 }
 
 void AccountHandler::sendCharacterData(AccountClient &client,
-                              const Character &ch)
+                                       const CharacterData &ch)
 {
     MessageOut charInfo(APMSG_CHAR_INFO);
     charInfo.writeInt8(ch.getCharacterSlot());
@@ -760,7 +761,7 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
             attributes[i] = 5;
 
-        Character *newCharacter = new Character(name);
+        CharacterData *newCharacter = new CharacterData(name);
 
         // Set the initial attributes provided by the client
         for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
@@ -829,7 +830,7 @@ void AccountHandler::handleCharacterSelectMessage(AccountClient &client,
         return;
     }
 
-    Character *selectedChar = chars[slot];
+    CharacterData *selectedChar = chars[slot];
 
     std::string address;
     int port;

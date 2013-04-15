@@ -24,12 +24,14 @@
 #include <map>
 #include <string>
 
-class Character;
+#include "game-server/character.h"
+#include "game-server/entity.h"
+
 class Script;
 
 struct PostCallback
 {
-    void (*handler)(Character *,
+    void (*handler)(Entity *,
                     const std::string &sender,
                     const std::string &letter,
                     Script *);
@@ -40,32 +42,34 @@ struct PostCallback
 class PostMan
 {
 public:
-    Character *getCharacter(int id) const
+    Entity *getCharacter(int id) const
     {
-        std::map<int, Character*>::const_iterator itr = mCharacters.find(id);
+        std::map<int, Entity*>::const_iterator itr = mCharacters.find(id);
         if (itr != mCharacters.end())
             return itr->second;
         return 0;
     }
 
-    void addCharacter(Character *player)
+    void addCharacter(Entity *player)
     {
-        std::map<int, Character*>::iterator itr = mCharacters.find(player->getDatabaseID());
+        int dataBaseId = player->getComponent<CharacterComponent>()
+                ->getDatabaseID();
+        std::map<int, Entity*>::iterator itr = mCharacters.find(dataBaseId);
         if (itr == mCharacters.end())
         {
-            mCharacters.insert(std::pair<int, Character*>(player->getDatabaseID(), player));
+            mCharacters.insert(std::pair<int, Entity*>(dataBaseId, player));
         }
     }
 
-    void getPost(Character *player, PostCallback &f)
+    void getPost(Entity *player, PostCallback &f)
     {
-        mCallbacks.insert(std::pair<Character*, PostCallback>(player, f));
+        mCallbacks.insert(std::pair<Entity*, PostCallback>(player, f));
         accountHandler->getPost(player);
     }
 
-    void gotPost(Character *player, std::string sender, std::string letter)
+    void gotPost(Entity *player, std::string sender, std::string letter)
     {
-        std::map<Character*, PostCallback>::iterator itr = mCallbacks.find(player);
+        std::map<Entity*, PostCallback>::iterator itr = mCallbacks.find(player);
         if (itr != mCallbacks.end())
         {
             itr->second.handler(player, sender, letter, itr->second.script);
@@ -73,8 +77,8 @@ public:
     }
 
 private:
-    std::map<int, Character*> mCharacters;
-    std::map<Character*, PostCallback> mCallbacks;
+    std::map<int, Entity*> mCharacters;
+    std::map<Entity*, PostCallback> mCallbacks;
 };
 
 extern PostMan *postMan;

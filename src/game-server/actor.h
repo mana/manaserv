@@ -45,19 +45,17 @@ enum
  * Generic client-visible object. Keeps track of position, size and what to
  * update clients about.
  */
-class Actor : public Entity
+class ActorComponent : public Component
 {
     public:
-        Actor(EntityType type)
-          : Entity(type),
-            mMoveTime(0),
-            mUpdateFlags(0),
-            mPublicID(65535),
-            mSize(0),
-            mWalkMask(0)
+        static const ComponentType type = CT_Actor;
+
+        ActorComponent(Entity &entity);
+
+        void update(Entity &entity)
         {}
 
-        ~Actor();
+        void removed(Entity *entity);
 
         /**
          * Sets the coordinates. Also updates the walkmap of the map the actor
@@ -65,7 +63,7 @@ class Actor : public Entity
          *
          * @param p the coordinates.
          */
-        void setPosition(const Point &p);
+        void setPosition(Entity &entity, const Point &p);
 
         /**
          * Gets the coordinates.
@@ -126,16 +124,20 @@ class Actor : public Entity
         { return mWalkMask; }
 
         /**
-         * Overridden in order to update the walkmap.
-         */
-        virtual void setMap(MapComposite *map);
-
-    protected:
-        /**
          * Gets the way the actor blocks pathfinding for other actors.
          */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_NONE; }
+        BlockType getBlockType() const
+        { return mBlockType; }
+
+        void setBlockType(BlockType blockType)
+        { mBlockType = blockType; }
+
+        /**
+         * Overridden in order to update the walkmap.
+         */
+        virtual void mapChanged(Entity *entity);
+
+    protected:
 
         /** Delay until move to next tile in miliseconds. */
         unsigned short mMoveTime;
@@ -150,6 +152,7 @@ class Actor : public Entity
         unsigned char mSize;        /**< Radius of bounding circle. */
 
         unsigned char mWalkMask;
+        BlockType mBlockType;
 };
 
 #endif // ACTOR_H

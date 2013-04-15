@@ -41,6 +41,8 @@ SET(FLAGS "${FLAGS} -DPACKAGE_VERSION=\\\"${VERSION}\\\"")
 SET(FLAGS "${FLAGS} -DPKG_DATADIR=\\\"${PKG_DATADIR}/\\\"")
 SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
 
+SET(FLAGS "${FLAGS} -std=c++0x")
+
 # If the Sqlite option is enabled...
 IF (WITH_SQLITE)
     FIND_PACKAGE(Sqlite3 REQUIRED)
@@ -212,9 +214,11 @@ SET(SRCS_MANASERVGAME
     game-server/character.cpp
     game-server/collisiondetection.h
     game-server/collisiondetection.cpp
-    game-server/command.cpp
+    game-server/combatcomponent.h
+    game-server/combatcomponent.cpp
     game-server/commandhandler.cpp
     game-server/commandhandler.h
+    game-server/component.h
     game-server/effect.h
     game-server/effect.cpp
     game-server/emotemanager.h
@@ -239,6 +243,8 @@ SET(SRCS_MANASERVGAME
     game-server/mapreader.cpp
     game-server/monster.h
     game-server/monster.cpp
+    game-server/monstercombatcomponent.h
+    game-server/monstercombatcomponent.cpp
     game-server/monstermanager.h
     game-server/monstermanager.cpp
     game-server/npc.h
@@ -248,8 +254,8 @@ SET(SRCS_MANASERVGAME
     game-server/quest.cpp
     game-server/skillmanager.h
     game-server/skillmanager.cpp
-    game-server/spawnarea.h
-    game-server/spawnarea.cpp
+    game-server/spawnareacomponent.h
+    game-server/spawnareacomponent.cpp
     game-server/specialmanager.cpp
     game-server/specialmanager.h
     game-server/state.h
@@ -262,8 +268,8 @@ SET(SRCS_MANASERVGAME
     game-server/timeout.cpp
     game-server/trade.h
     game-server/trade.cpp
-    game-server/trigger.h
-    game-server/trigger.cpp
+    game-server/triggerareacomponent.h
+    game-server/triggerareacomponent.cpp
     scripting/script.h
     scripting/script.cpp
     scripting/scriptmanager.h

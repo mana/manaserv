@@ -26,6 +26,8 @@
 #include "common/manaserv_protocol.h"
 
 #include "game-server/being.h"
+#include "game-server/mapcomposite.h"
+#include "game-server/mapmanager.h"
 #include "game-server/specialmanager.h"
 
 #include "scripting/script.h"
@@ -33,6 +35,7 @@
 #include "utils/logger.h"
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -62,48 +65,113 @@ struct SpecialValue
  */
 typedef std::map<unsigned, SpecialValue> SpecialMap;
 
+
+class CharacterData
+{
+public:
+    CharacterData(Entity *entity, CharacterComponent *characterComponent);
+
+    void setGender(BeingGender);
+    BeingGender getGender() const;
+
+    void setMapId(int id);
+    int getMapId() const;
+    void setPosition(Point &point);
+    const Point &getPosition() const;
+
+    void setAttribute(int id, int base);
+    void setModAttribute(int id, int mod);
+    const AttributeMap &getAttributes() const;
+    void setCharacterPoints(int characterPoints);
+    int getCharacterPoints() const;
+    void setCorrectionPoints(int correctionPoints);
+    int getCorrectionPoints() const;
+
+    void setExperience(int skill, int level);
+    void setLevel(int level) const;
+    int getLevel() const;
+
+    int getAccountLevel() const;
+
+    void setHairStyle(int style);
+    int getHairStyle() const;
+    void setHairColor(int color);
+    int getHairColor() const;
+
+    void setAccountLevel(int level);
+
+    int getSkillSize() const;
+    const std::map<int, int>::const_iterator getSkillBegin() const;
+    const std::map<int, int>::const_iterator getSkillEnd() const;
+
+    void applyStatusEffect(int status, int time);
+    int getStatusEffectSize() const;
+    const std::map<int, Status>::const_iterator getStatusEffectBegin() const;
+    const std::map<int, Status>::const_iterator getStatusEffectEnd() const;
+
+    int getKillCountSize() const;
+    const std::map<int, int>::const_iterator getKillCountBegin() const;
+    const std::map<int, int>::const_iterator getKillCountEnd() const;
+    void setKillCount(int monsterId, int kills);
+
+    void clearSpecials();
+    void giveSpecial(int id, int mana);
+    int getSpecialSize() const;
+    SpecialMap::const_iterator getSpecialBegin() const;
+    SpecialMap::const_iterator getSpecialEnd() const;
+
+    Possessions &getPossessions() const;
+
+private:
+    Entity *mEntity;
+    CharacterComponent *mCharacterComponent;
+};
+
+
 /**
  * The representation of a player's character in the game world.
  */
-class Character : public Being
+class CharacterComponent : public Component
 {
     public:
+        static const ComponentType type = CT_Character;
+
         /**
          * Utility constructor for creating a Character from a received
          * characterdata message.
          */
-        Character(MessageIn &msg);
+        CharacterComponent(Entity &entity, MessageIn &msg);
 
-        ~Character();
+        ~CharacterComponent();
 
         /**
          * recalculates the level when necessary and calls Being::update
          */
-        void update();
+        void update(Entity &entity);
 
         void processAttacks();
 
         /**
-         * Executes the global die script and calls the base class function
+         * Executes the global die script
          */
-        virtual void died();
+        virtual void characterDied(Entity *);
 
         /**
          * makes the character respawn
          */
-        void respawn();
+        void respawn(Entity &entity);
 
         /**
          * makes the character perform a special action on a being
          * when it is allowed to do so
          */
-        void useSpecialOnBeing(int id, Being *b);
+        void useSpecialOnBeing(Entity &user, int id, Entity *b);
 
         /**
          * makes the character perform a special action on a map point
          * when it is allowed to do so
          */
-        void useSpecialOnPoint(int id, int x, int y);
+        void useSpecialOnPoint(Entity &user, int id, int x, int y);
 
         /**
          * Allows a character to perform a special action
@@ -231,43 +299,25 @@ class Character : public Being
          * Sends a message that informs the client about attribute
          * modified since last call.
          */
-        void sendStatus();
-
-        /**
-         * Gets the ID of the map that the character is on.
-         * For serialization purpose only.
-         */
-        int getMapId() const;
-
-        /**
-         * Sets the ID of the map that the character is on.
-         * For serialization purpose only.
-         */
-        void setMapId(int);
+        void sendStatus(Entity &entity);
 
         /**
          * Marks all attributes as being modified.
          */
-        void modifiedAllAttribute();
+        void modifiedAllAttributes(Entity &entity);
 
         /**
-          * Recalculate the base value of an attribute and update derived
-          *     attributes if it has changed.
-          */
-         void recalculateBaseAttribute(unsigned);
-
-
-        /**
-         * Attribute has changed, recalculate base value of dependant
-         *     attributes (and handle other actions for the modified
-         *     attribute)
+         * Signal handler for attribute changed event
+         * Flags the attribute as modified.
+         * @param being th being of which the attribute was changed
+         * @param attributeId the changed id
          */
-        void updateDerivedAttributes(unsigned);
+        void attributeChanged(Entity *being, unsigned attributeId);
 
         /**
          * Calls all the "disconnected" listener.
          */
-        void disconnected();
+        void disconnected(Entity &entity);
 
         /**
          * Associative array containing all the quest variables known by the
@@ -289,18 +339,6 @@ class Character : public Being
 
         const std::map<int, int>::const_iterator getSkillEnd() const
         { return mExperience.end(); }
-
-        /**
-         * Used to serialize status effects.
-         */
-        int getStatusEffectSize() const
-        { return mStatusEffects.size(); }
-
-        const std::map<int, int>::const_iterator getStatusEffectBegin() const
-        { return mStatusEffects.begin(); }
-
-        const std::map<int, int>::const_iterator getStatusEffectEnd() const
-        { return mStatusEffects.end(); }
 
         /**
          * Used to serialize kill count.
@@ -365,13 +403,15 @@ class Character : public Being
          * Tries to use a character point to increase a
          * basic attribute
          */
-        AttribmodResponseCode useCharacterPoint(size_t attribute);
+        AttribmodResponseCode useCharacterPoint(Entity &entity,
+                                                size_t attribute);
 
         /**
          * Tries to use a correction point to reduce a
          * basic attribute and regain a character point
          */
-        AttribmodResponseCode useCorrectionPoint(size_t attribute);
+        AttribmodResponseCode useCorrectionPoint(Entity &entity,
+                                                 size_t attribute);
 
         void setCharacterPoints(int points) { mCharacterPoints = points; }
         int getCharacterPoints() const { return mCharacterPoints; }
@@ -422,20 +462,12 @@ class Character : public Being
         static void setLoginCallback(Script *script)
         { script->assignCallback(mLoginCallback); }
 
-        void triggerLoginCallback();
+        void triggerLoginCallback(Entity &entity);
 
-        virtual void addAttack(AttackInfo *attackInfo);
+        void attackAdded(CombatComponent *combatComponent, Attack &attackInfo);
+        void attackRemoved(CombatComponent *combatComponent, Attack &attackInfo);
 
-        virtual void removeAttack(AttackInfo *attackInfo);
-
-        sigc::signal<void, Character *> signal_disconnected;
-
-    protected:
-        /**
-         * Gets the way the actor blocks pathfinding for other objects
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_CHARACTER; }
+        sigc::signal<void, Entity &> signal_disconnected;
 
 
     private:
@@ -446,8 +478,8 @@ class Character : public Being
         double getAttrMod(AttributeMap::const_iterator it) const
         { return it->second.getModifiedAttribute(); }
 
-        Character(const Character &);
-        Character &operator=(const Character &);
+        CharacterComponent(const CharacterComponent &);
+        CharacterComponent &operator=(const CharacterComponent &);
 
         static const float EXPCURVE_EXPONENT;
         static const float EXPCURVE_FACTOR;
@@ -460,12 +492,7 @@ class Character : public Being
         /**
          * Advances the character by one level;
          */
-        void levelup();
-
-        /**
-         * Marks attribute as recently modified.
-         */
-        void flagAttribute(int);
+        void levelup(Entity &entity);
 
         /**
          * Returns the exp needed for next skill levelup
@@ -480,7 +507,7 @@ class Character : public Being
         /**
          * Recalculates the character level
          */
-        void recalculateLevel();
+        void recalculateLevel(Entity &entity);
 
         /**
          * Informs the client about his characters special charge status
@@ -510,9 +537,6 @@ class Character : public Being
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
         SpecialMap mSpecials;
-        std::map<int, int> mStatusEffects; /**< only used by select functions
-                                                to make it easier to make the accountserver
-                                                do not modify or use anywhere else*/
         bool mSpecialUpdateNeeded;
 
         int mDatabaseID;             /**< Character's database ID. */
@@ -536,13 +560,219 @@ class Character : public Being
 
         AttackInfo *mKnuckleAttackInfo;
 
+        Entity *mBaseEntity;        /**< The entity this component is part of
+                                         this is ONLY required to allow using
+                                         the serialization routine without many
+                                         changes (we cannot pass the entity as
+                                         argument there). DO NOT USE THIS IF IT
+                                         IS AVOIDABLE in order to allow
+                                         refactoring this easier later! */
+
         static Script::Ref mDeathCallback;
         static Script::Ref mDeathAcceptedCallback;
         static Script::Ref mLoginCallback;
-
-        // Set as a friend, but still a lot of redundant accessors. FIXME.
-        template< class T >
-        friend void serializeCharacterData(const T &data, MessageOut &msg);
 };
+
+
+inline CharacterData::CharacterData(Entity *entity,
+                                    CharacterComponent *characterComponent):
+        mEntity(entity),
+        mCharacterComponent(characterComponent)
+{}
+
+inline void CharacterData::setGender(BeingGender gender)
+{
+    mEntity->getComponent<BeingComponent>()->setGender(gender);
+}
+
+inline BeingGender CharacterData::getGender() const
+{
+    return mEntity->getComponent<BeingComponent>()->getGender();
+}
+
+inline void CharacterData::setMapId(int id)
+{
+    mEntity->setMap(MapManager::getMap(id));
+}
+
+inline int CharacterData::getMapId() const
+{
+    return mEntity->getMap()->getID();
+}
+
+inline void CharacterData::setPosition(Point &point)
+{
+    mEntity->getComponent<ActorComponent>()->setPosition(*mEntity, point);
+}
+
+inline const Point &CharacterData::getPosition() const
+{
+    return mEntity->getComponent<ActorComponent>()->getPosition();
+}
+
+inline void CharacterData::setAttribute(int id, int base)
+{
+    mEntity->getComponent<BeingComponent>()->setAttribute(*mEntity, id, base);
+}
+
+inline void CharacterData::setModAttribute(int id, int mod)
+{
+    mEntity->getComponent<BeingComponent>()->setModAttribute(id, mod);
+}
+
+inline const AttributeMap &CharacterData::getAttributes() const
+{
+    return mEntity->getComponent<BeingComponent>()->getAttributes();
+}
+
+inline void CharacterData::setCharacterPoints(int characterPoints)
+{
+    mCharacterComponent->setCharacterPoints(characterPoints);
+}
+
+inline int CharacterData::getCharacterPoints() const
+{
+    return mCharacterComponent->getCharacterPoints();
+}
+
+inline void CharacterData::setCorrectionPoints(int correctionPoints)
+{
+    mCharacterComponent->setCorrectionPoints(correctionPoints);
+}
+
+inline int CharacterData::getCorrectionPoints() const
+{
+    return mCharacterComponent->getCorrectionPoints();
+}
+
+inline void CharacterData::setExperience(int skill, int level)
+{
+    mCharacterComponent->setExperience(skill, level);
+}
+
+inline void CharacterData::setLevel(int level) const
+{
+    mCharacterComponent->setLevel(level);
+}
+
+inline int CharacterData::getLevel() const
+{
+    return mCharacterComponent->getLevel();
+}
+
+inline int CharacterData::getAccountLevel() const
+{
+    return mCharacterComponent->getAccountLevel();
+}
+
+inline void CharacterData::setHairStyle(int style)
+{
+    mCharacterComponent->setHairStyle(style);
+}
+
+inline int CharacterData::getHairStyle() const
+{
+    return mCharacterComponent->getHairStyle();
+}
+
+inline void CharacterData::setHairColor(int color)
+{
+    mCharacterComponent->setHairColor(color);
+}
+
+inline int CharacterData::getHairColor() const
+{
+    return mCharacterComponent->getHairColor();
+}
+
+inline void CharacterData::setAccountLevel(int level)
+{
+    mCharacterComponent->setAccountLevel(level);
+}
+
+inline int CharacterData::getSkillSize() const
+{
+    return mCharacterComponent->getSkillSize();
+}
+
+inline const std::map<int, int>::const_iterator CharacterData::getSkillBegin() const
+{
+    return mCharacterComponent->getSkillBegin();
+}
+
+inline const std::map<int, int>::const_iterator CharacterData::getSkillEnd() const
+{
+    return mCharacterComponent->getSkillEnd();
+}
+
+inline void CharacterData::applyStatusEffect(int status, int time)
+{
+    mEntity->getComponent<BeingComponent>()->applyStatusEffect(status, time);
+}
+
+inline int CharacterData::getStatusEffectSize() const
+{
+    return mEntity->getComponent<BeingComponent>()->getStatusEffects().size();
+}
+
+inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectBegin() const
+{
+    return mEntity->getComponent<BeingComponent>()->getStatusEffects().begin();
+}
+
+inline const std::map<int, Status>::const_iterator CharacterData::getStatusEffectEnd() const
+{
+    return mEntity->getComponent<BeingComponent>()->getStatusEffects().end();
+}
+
+inline int CharacterData::getKillCountSize() const
+{
+    return mCharacterComponent->getKillCountSize();
+}
+
+inline const std::map<int, int>::const_iterator CharacterData::getKillCountBegin() const
+{
+    return mCharacterComponent->getKillCountBegin();
+}
+
+inline const std::map<int, int>::const_iterator CharacterData::getKillCountEnd() const
+{
+    return mCharacterComponent->getKillCountEnd();
+}
+
+inline void CharacterData::setKillCount(int monsterId, int kills)
+{
+    mCharacterComponent->setKillCount(monsterId, kills);
+}
+
+inline void CharacterData::clearSpecials()
+{
+    mCharacterComponent->clearSpecials();
+}
+
+inline void CharacterData::giveSpecial(int id, int mana)
+{
+    mCharacterComponent->giveSpecial(id, mana);
+}
+
+inline int CharacterData::getSpecialSize() const
+{
+    return mCharacterComponent->getSpecialSize();
+}
+
+inline SpecialMap::const_iterator CharacterData::getSpecialBegin() const
+{
+    return mCharacterComponent->getSpecialBegin();
+}
+
+inline SpecialMap::const_iterator CharacterData::getSpecialEnd() const
+{
+    return mCharacterComponent->getSpecialEnd();
+}
+
+inline Possessions &CharacterData::getPossessions() const
+{
+    return mCharacterComponent->getPossessions();
+}
 
 #endif // CHARACTER_H

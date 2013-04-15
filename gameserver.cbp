@@ -49,6 +49,7 @@
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-O3" />
+			<Add option="-std=c++0x" />
 			<Add option="-Wall" />
 			<Add option="-g" />
 			<Add option="-Wno-switch" />
@@ -132,6 +133,8 @@
 		<Unit filename="src/game-server/character.h" />
 		<Unit filename="src/game-server/collisiondetection.cpp" />
 		<Unit filename="src/game-server/collisiondetection.h" />
+		<Unit filename="src/game-server/combatcomponent.cpp" />
+		<Unit filename="src/game-server/combatcomponent.h" />
 		<Unit filename="src/game-server/commandhandler.cpp" />
 		<Unit filename="src/game-server/commandhandler.h" />
 		<Unit filename="src/game-server/effect.cpp" />
@@ -160,6 +163,8 @@
 		<Unit filename="src/game-server/mapreader.h" />
 		<Unit filename="src/game-server/monster.cpp" />
 		<Unit filename="src/game-server/monster.h" />
+		<Unit filename="src/game-server/monstercombatcomponent.cpp" />
+		<Unit filename="src/game-server/monstercombatcomponent.h" />
 		<Unit filename="src/game-server/monstermanager.cpp" />
 		<Unit filename="src/game-server/monstermanager.h" />
 		<Unit filename="src/game-server/npc.cpp" />
@@ -169,8 +174,8 @@
 		<Unit filename="src/game-server/quest.h" />
 		<Unit filename="src/game-server/skillmanager.cpp" />
 		<Unit filename="src/game-server/skillmanager.h" />
-		<Unit filename="src/game-server/spawnarea.cpp" />
-		<Unit filename="src/game-server/spawnarea.h" />
+		<Unit filename="src/game-server/spawnareacomponent.cpp" />
+		<Unit filename="src/game-server/spawnareacomponent.h" />
 		<Unit filename="src/game-server/specialmanager.cpp" />
 		<Unit filename="src/game-server/specialmanager.h" />
 		<Unit filename="src/game-server/state.cpp" />
@@ -183,8 +188,8 @@
 		<Unit filename="src/game-server/timeout.h" />
 		<Unit filename="src/game-server/trade.cpp" />
 		<Unit filename="src/game-server/trade.h" />
-		<Unit filename="src/game-server/trigger.cpp" />
-		<Unit filename="src/game-server/trigger.h" />
+		<Unit filename="src/game-server/triggerareacomponent.cpp" />
+		<Unit filename="src/game-server/triggerareacomponent.h" />
 		<Unit filename="src/manaserv-game.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2010-2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -27,8 +28,9 @@
 #include "game-server/attack.h"
 #include "scripting/script.h"
 
-class Being;
+class Entity;
 class ItemClass;
+class MapComposite;
 
 // Indicates the equip slot "cost" to equip an item.
 struct ItemEquipRequirement {
@@ -103,8 +105,8 @@ class ItemEffectInfo
     public:
         virtual ~ItemEffectInfo() {}
 
-        virtual bool apply(Being *itemUser) = 0;
-        virtual void dispell(Being *itemUser) = 0;
+        virtual bool apply(Entity *itemUser) = 0;
+        virtual void dispell(Entity *itemUser) = 0;
 };
 
 class ItemEffectAttrMod : public ItemEffectInfo
@@ -116,8 +118,8 @@ class ItemEffectAttrMod : public ItemEffectInfo
                         mMod(value), mDuration(duration), mId(id)
         {}
 
-        bool apply(Being *itemUser);
-        void dispell(Being *itemUser);
+        bool apply(Entity *itemUser);
+        void dispell(Entity *itemUser);
 
     private:
         unsigned mAttributeId;
@@ -134,8 +136,8 @@ class ItemEffectAttack : public ItemEffectInfo
             mAttackInfo(attackInfo)
         {}
 
-        bool apply(Being *itemUser);
-        void dispell(Being *itemUser);
+        bool apply(Entity *itemUser);
+        void dispell(Entity *itemUser);
     private:
         AttackInfo *mAttackInfo;
 };
@@ -143,9 +145,9 @@ class ItemEffectAttack : public ItemEffectInfo
 class ItemEffectConsumes : public ItemEffectInfo
 {
     public:
-        bool apply(Being *)
+        bool apply(Entity *)
         { return true; }
-        void dispell(Being *)
+        void dispell(Entity *)
         {}
 };
 
@@ -162,8 +164,8 @@ class ItemEffectScript : public ItemEffectInfo
 
         ~ItemEffectScript();
 
-        bool apply(Being *itemUser);
-        void dispell(Being *itemUser);
+        bool apply(Entity *itemUser);
+        void dispell(Entity *itemUser);
 
     private:
         ItemClass *mItemClass;
@@ -204,7 +206,7 @@ class ItemClass
          * Applies the modifiers of an item to a given user.
          * @return true if item should be removed.
          */
-        bool useTrigger(Being *itemUser, ItemTriggerType trigger);
+        bool useTrigger(Entity *itemUser, ItemTriggerType trigger);
 
         /**
          * Gets unit cost of these items.
@@ -294,12 +296,14 @@ class ItemClass
 };
 
 /**
- * Class for an item stack laying on the floor in the game world
+ * An item stack lying on the floor in the game world.
  */
-class Item : public Actor
+class ItemComponent : public Component
 {
     public:
-        Item(ItemClass *type, int amount);
+        static const ComponentType type = CT_Item;
+
+        ItemComponent(ItemClass *type, int amount);
 
         ItemClass *getItemClass() const
         { return mType; }
@@ -307,12 +311,31 @@ class Item : public Actor
         int getAmount() const
         { return mAmount; }
 
-        virtual void update();
+        void update(Entity &entity);
 
     private:
         ItemClass *mType;
         unsigned char mAmount;
         int mLifetime;
 };
+
+namespace Item {
+
+/**
+ * @brief Creates an item actor.
+ *
+ * The returned actor should be inserted into the game state, usually with
+ * either GameState::insertOrDelete or GameState::enqueueInsert.
+ *
+ * @param map       the map of the item
+ * @param pos       the position of the item
+ * @param itemClass the class of the item
+ * @param amount    the amount of items on the stack
+ *
+ * @return the created item
+ */
+Entity *create(MapComposite *map, Point pos, ItemClass *itemClass, int amount);
+
+} // namespace Item
 
 #endif // ITEM_H

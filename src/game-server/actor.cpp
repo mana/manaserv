@@ -25,10 +25,24 @@
 
 #include <cassert>
 
-Actor::~Actor()
+ActorComponent::ActorComponent(Entity &entity):
+    mMoveTime(0),
+    mUpdateFlags(0),
+    mPublicID(65535),
+    mSize(0),
+    mWalkMask(0),
+    mBlockType(BLOCKTYPE_NONE)
+{
+    entity.signal_removed.connect(
+            sigc::mem_fun(this, &ActorComponent::removed));
+    entity.signal_map_changed.connect(
+            sigc::mem_fun(this, &ActorComponent::mapChanged));
+}
+
+void ActorComponent::removed(Entity *entity)
 {
     // Free the map position
-    if (MapComposite *mapComposite = getMap())
+    if (MapComposite *mapComposite = entity->getMap())
     {
         Map *map = mapComposite->getMap();
         int tileWidth = map->getTileWidth();
@@ -38,10 +52,10 @@ Actor::~Actor()
     }
 }
 
-void Actor::setPosition(const Point &p)
+void ActorComponent::setPosition(Entity &entity, const Point &p)
 {
     // Update blockmap
-    if (MapComposite *mapComposite = getMap())
+    if (MapComposite *mapComposite = entity.getMap())
     {
         Map *map = mapComposite->getMap();
         int tileWidth = map->getTileWidth();
@@ -58,21 +72,11 @@ void Actor::setPosition(const Point &p)
     mPos = p;
 }
 
-void Actor::setMap(MapComposite *mapComposite)
+void ActorComponent::mapChanged(Entity *entity)
 {
-    assert(mapComposite);
     const Point p = getPosition();
 
-    if (MapComposite *oldMapComposite = getMap())
-    {
-        Map *oldMap = oldMapComposite->getMap();
-        int oldTileWidth = oldMap->getTileWidth();
-        int oldTileHeight = oldMap->getTileHeight();
-        oldMap->freeTile(p.x / oldTileWidth, p.y / oldTileHeight,
-                         getBlockType());
-    }
-    Entity::setMap(mapComposite);
-    Map *map = mapComposite->getMap();
+    Map *map = entity->getMap()->getMap();
     int tileWidth = map->getTileWidth();
     int tileHeight = map->getTileHeight();
     map->blockTile(p.x / tileWidth, p.y / tileHeight, getBlockType());

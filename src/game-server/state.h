@@ -18,16 +18,16 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SERVER_STATE_H
-#define SERVER_STATE_H
+#ifndef STATE_H
+#define STATE_H
+
+#include "utils/point.h"
 
 #include <string>
 
-class MapComposite;
 class Entity;
-class Actor;
-class Character;
-
+class ItemClass;
+class MapComposite;
 
 namespace GameState
 {
@@ -69,37 +69,37 @@ namespace GameState
      * @note No update may be in progress.
      * @note The character is destroyed, if needed.
      */
-    void warp(Character *, MapComposite *, int x, int y);
+    void warp(Entity *, MapComposite *, const Point &point);
 
     /**
      * Enqueues an insert event.
      * @note The event will be executed at end of update.
      */
-    void enqueueInsert(Actor *);
+    void enqueueInsert(Entity *);
 
     /**
      * Enqueues a remove event.
      * @note The event will be executed at end of update.
      * @note The entity will be destroyed at that time.
      */
-    void enqueueRemove(Actor *);
+    void enqueueRemove(Entity *);
 
     /**
      * Enqueues a warp event.
      * @note The event will be executed at end of update.
      */
-    void enqueueWarp(Character *, MapComposite *, int x, int y);
+    void enqueueWarp(Entity *, MapComposite *, const Point &point);
 
     /**
      * Says something to an actor.
      * @note passing NULL as source generates a message from "Server:"
      */
-    void sayTo(Actor *destination, Actor *source, const std::string &text);
+    void sayTo(Entity *destination, Entity *source, const std::string &text);
 
     /**
      * Says something to everything around an actor.
      */
-    void sayAround(Actor *, const std::string &text);
+    void sayAround(Entity *entity, const std::string &text);
 
     /**
      * Says something to every player on the server.
@@ -107,21 +107,21 @@ namespace GameState
     void sayToAll(const std::string &text);
 
     /**
-     * Gets the cached value of a global script variable
+     * Gets the cached value of a global script variable.
      */
     std::string getVariable(const std::string &key);
 
     /**
      * Changes a global script variable and notifies the database server
-     * about the change
+     * about the change.
      */
-    void setVariable (const std::string &key, const std::string &value);
+    void setVariable(const std::string &key, const std::string &value);
 
     /**
      * Changes a global variable without notifying the database server
-     * about the change
+     * about the change.
      */
-    void setVariableFromDbserver (const std::string &key, const std::string &value);
+    void setVariableFromDbserver(const std::string &key, const std::string &value);
 
     /**
      * Informs all maps about the change of a variable so the maps can call
@@ -131,4 +131,4 @@ namespace GameState
                                const std::string &value);
 }
 
-#endif
+#endif // STATE_H

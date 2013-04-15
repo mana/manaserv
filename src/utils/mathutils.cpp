@@ -25,6 +25,10 @@
 #include <string.h>
 #include <float.h>
 
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923
+#endif
+
 static const int MATH_UTILS_MAX_ANGLE = 360;
 
 static float sinList[MATH_UTILS_MAX_ANGLE];

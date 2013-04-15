@@ -159,8 +159,7 @@ void ItemManager::readEquipSlotsFile()
                 << ", capacity: " << capacity << ", visible? " << visible);
             EquipSlotInfo *equipSlotInfo =
                 new EquipSlotInfo(slotId, name, capacity, visible);
-            mEquipSlotsInfo.insert(
-                std::make_pair<unsigned, EquipSlotInfo*>(slotId, equipSlotInfo));
+            mEquipSlotsInfo.insert(std::make_pair(slotId, equipSlotInfo));
             mNamedEquipSlotsInfo.insert(name, equipSlotInfo);
 
             totalCapacity += capacity;

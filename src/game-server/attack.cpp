@@ -72,12 +72,13 @@ AttackInfo *AttackInfo::readAttackNode(xmlNodePtr node)
     return attack;
 }
 
-void Attacks::add(AttackInfo *attackInfo)
+void Attacks::add(CombatComponent *combatComponent, AttackInfo *attackInfo)
 {
     mAttacks.push_back(Attack(attackInfo));
+    attack_added.emit(combatComponent, *mAttacks.rbegin());
 }
 
-void Attacks::remove(AttackInfo *attackInfo)
+void Attacks::remove(CombatComponent *combatComponent, AttackInfo *attackInfo)
 {
     for (std::vector<Attack>::iterator it = mAttacks.begin(),
          it_end = mAttacks.end(); it != it_end; ++it)
@@ -86,6 +87,7 @@ void Attacks::remove(AttackInfo *attackInfo)
         {
             if (mCurrentAttack && mCurrentAttack->getAttackInfo() == attackInfo)
                 mCurrentAttack = 0;
+            attack_removed.emit(combatComponent, *it);
             mAttacks.erase(it);
             return;
         }

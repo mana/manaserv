@@ -12,21 +12,17 @@
 
 function Merchant(npc, ch, buy_sell_table)
 
-    local function say(message)
-        npc_message(npc, ch, message)
-    end
-
     -- Important note: You can add two tables made of trinoms here when calling the
     -- merchant function. E.g.: Merchant(npc, ch, buy_table, sell_table)
     -- Even though, the function here will see only one table:
     -- buy_sell_table[1] will corresponds to the first table (used to list
     -- boughtable items, and buy_sell_table[2] listing sellable items.
 
-    local rights = chr_get_rights(ch);
+    local rights = ch:rights()
 
     if (rights >= 128) then
-        announce(being_get_name(ch) .. " the big administrator was at my shop!",
-                 being_get_name(npc))
+        announce(ch:name() .. " the big administrator was at my shop!",
+                 npc:name())
         say "Oh mighty server administrator, how can I avoid your wrath?"
     elseif (rights >= 8) then
         say "How can I be of assistance, sir gamemaster?"
@@ -35,7 +31,7 @@ function Merchant(npc, ch, buy_sell_table)
     elseif (rights >= 2) then
         say "How can I assist you in your testing duties?"
     elseif (rights >= 1) then
-        if being_get_gender(ch) == GENDER_FEMALE then
+        if ch:gender() == GENDER_FEMALE then
             say "What do you want, Madam?"
         else
             say "What do you want, Sir?"
@@ -56,7 +52,7 @@ function Merchant(npc, ch, buy_sell_table)
     table.insert (choice_table, "Tell me about the objects on this map")
     table.insert (choice_table, "Nevermind...")
 
-    local v = npc_choice(npc, ch, choice_table)
+    local v = ask(choice_table)
 
     --Debug and learning purpose
     --for i,k in ipairs(choice_table) do print(i,k) end
@@ -67,7 +63,7 @@ function Merchant(npc, ch, buy_sell_table)
 
     if v == 1 then
     -- "To buy."
-    local buycase = npc_trade(npc, ch, false, buy_sell_table[1])
+    local buycase = trade(false, buy_sell_table[1])
     if buycase == 0 then
         say "What do you want to buy?"
     elseif buycase == 1 then
@@ -80,7 +76,7 @@ function Merchant(npc, ch, buy_sell_table)
 
         if buy_sell_table[2] == nil then
             -- "To sell stuff..."
-            local sellcase = npc_trade(npc, ch, true)
+            local sellcase = trade(true)
             if sellcase == 0 then
                 say "Ok, what do you want to sell?"
             elseif sellcase == 1 then
@@ -90,7 +86,7 @@ function Merchant(npc, ch, buy_sell_table)
             end
         else
             -- "Can you make me a price for what I have?"
-            local sellcase = npc_trade(npc, ch, true, buy_sell_table[2])
+            local sellcase = trade(true, buy_sell_table[2])
             if sellcase == 0 then
                 say "Here we go:"
             elseif sellcase == 1 then

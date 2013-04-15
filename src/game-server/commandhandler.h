@@ -23,14 +23,14 @@
 
 #include <string>
 
-class Character;
+class Entity;
 
 namespace CommandHandler
 {
     /**
      * Parse and handle the given command.
      */
-    void handleCommand(Character *player, const std::string &command);
+    void handleCommand(Entity *player, const std::string &command);
 }
 
 #endif //SERVER_COMMANDHANDLER_H

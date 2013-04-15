@@ -29,8 +29,15 @@
 #include "net/messageout.h"
 #include "utils/logger.h"
 
-Inventory::Inventory(Character *p):
-    mPoss(&p->getPossessions()), mCharacter(p)
+Inventory::Inventory(Entity *p):
+    mPoss(&p->getComponent<CharacterComponent>()->getPossessions()),
+    mCharacter(p)
+{
+}
+
+Inventory::Inventory(Entity *p, Possessions &possessions):
+    mPoss(&possessions),
+    mCharacter(p)
 {
 }
 
@@ -90,7 +97,7 @@ void Inventory::initialize()
         {
             LOG_WARN("Inventory: deleting unknown item type "
                      << it1->second.itemId << " from the inventory of '"
-                     << mCharacter->getName()
+                     << mCharacter->getComponent<BeingComponent>()->getName()
                      << "'!");
             mPoss->inventory.erase(it1++);
         }
@@ -117,7 +124,7 @@ void Inventory::initialize()
         {
             LOG_WARN("Equipment: deleting unknown item id "
                      << it2->second.itemId << " from the equipment of '"
-                     << mCharacter->getName()
+                     << mCharacter->getComponent<BeingComponent>()->getName()
                      << "'!");
             mPoss->equipSlots.erase(it2++);
             continue;
@@ -157,7 +164,8 @@ unsigned Inventory::insert(unsigned itemId, unsigned amount)
     unsigned maxPerSlot = item->getMaxPerSlot();
 
     LOG_DEBUG("Inventory: Inserting " << amount << " item(s) Id: " << itemId
-              << " for character '" << mCharacter->getName() << "'.");
+              << " for character '"
+              << mCharacter->getComponent<BeingComponent>()->getName() << "'.");
 
     InventoryData::iterator it, it_end = mPoss->inventory.end();
     // Add to slots with existing items of this type first.
@@ -278,7 +286,8 @@ unsigned Inventory::remove(unsigned itemId, unsigned amount)
         return amount;
 
     LOG_DEBUG("Inventory: Request remove of " << amount << " item(s) id: "
-              << itemId << " for character: '" << mCharacter->getName()
+              << itemId << " for character: '"
+              << mCharacter->getComponent<BeingComponent>()->getName()
               << "'.");
 
     MessageOut invMsg(GPMSG_INVENTORY);
@@ -338,7 +347,8 @@ unsigned Inventory::move(unsigned slot1, unsigned slot2,
                              unsigned amount)
 {
     LOG_DEBUG(amount << " item(s) requested to move from: " << slot1 << " to "
-              << slot2 << " for character: '" << mCharacter->getName() << "'.");
+              << slot2 << " for character: '"
+              << mCharacter->getComponent<BeingComponent>()->getName() << "'.");
 
     if (!amount || slot1 == slot2 || slot2 >= INVENTORY_SLOTS)
         return amount;
@@ -467,7 +477,8 @@ unsigned Inventory::removeFromSlot(unsigned slot, unsigned amount)
         return amount;
 
     LOG_DEBUG("Inventory: Request Removal of " << amount << " item(s) in slot: "
-              << slot << " for character: '" << mCharacter->getName() << "'.");
+              << slot << " for character: '"
+              << mCharacter->getComponent<BeingComponent>()->getName() << "'.");
 
     MessageOut invMsg(GPMSG_INVENTORY);
     // Check if an item of the same id exists elsewhere in the inventory
@@ -666,7 +677,8 @@ bool Inventory::equip(int inventorySlot)
         {
             // Something went wrong even when we tested the unequipment process.
             LOG_WARN("Unable to unequip even when unequip was tested. "
-                     "Character : " << mCharacter->getName()
+                     "Character : "
+                    << mCharacter->getComponent<BeingComponent>()->getName()
                      << ", unequip slot: " << *it3);
             return false;
         }
@@ -722,8 +734,7 @@ bool Inventory::equip(int inventorySlot)
         {
             EquipmentItem equipItem(it->second.itemId, itemInstance);
             mPoss->equipSlots.insert(
-                std::make_pair<unsigned, EquipmentItem>
-                    (equipReq.equipSlotId, equipItem));
+                    std::make_pair(equipReq.equipSlotId, equipItem));
             --capacityLeft;
         }
     }
@@ -839,5 +850,6 @@ bool Inventory::unequip(unsigned itemInstance)
 void Inventory::checkLookchanges(unsigned slotTypeId)
 {
     if (itemManager->isEquipSlotVisible(slotTypeId))
-        mCharacter->raiseUpdateFlags(UPDATEFLAG_LOOKSCHANGE);
+        mCharacter->getComponent<ActorComponent>()->raiseUpdateFlags(
+                UPDATEFLAG_LOOKSCHANGE);
 }

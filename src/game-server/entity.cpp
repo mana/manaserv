@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -19,3 +20,27 @@
  */
 
 #include "game-server/entity.h"
+
+Entity::Entity(EntityType type, MapComposite *map) :
+    mMap(map),
+    mType(type)
+{
+    for (int i = 0; i < ComponentTypeCount; ++i)
+        mComponents[i] = nullptr;
+}
+
+Entity::~Entity()
+{
+    for (int i = 0; i < ComponentTypeCount; ++i)
+        delete mComponents[i];
+}
+
+/**
+ * Updates the internal status. By default, calls update on all its components.
+ */
+void Entity::update()
+{
+    for (int i = 0; i < ComponentTypeCount; ++i)
+        if (mComponents[i])
+            mComponents[i]->update(*this);
+}

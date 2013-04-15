@@ -130,8 +130,7 @@ void SkillManager::readSkillNode(xmlNodePtr skillNode,
         mDefaultSkillId = skillInfo->id;
     }
 
-    mSkillsInfo.insert(
-        std::make_pair<unsigned, SkillInfo*>(skillInfo->id, skillInfo));
+    mSkillsInfo.insert(std::make_pair(skillInfo->id, skillInfo));
 
     std::string keyName = setName + "_" + skillInfo->skillName;
     mNamedSkillsInfo.insert(keyName, skillInfo);

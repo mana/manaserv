@@ -1,4 +1,4 @@
-BEGIN;
+START TRANSACTION;
 
 ALTER TABLE mana_char_specials ADD COLUMN special_current_mana int(10) unsigned NOT NULL;
 
@@ -8,4 +8,4 @@ UPDATE mana_world_states
         moddate = UNIX_TIMESTAMP()
     WHERE state_name = 'database_version';
 
-END;
+COMMIT;

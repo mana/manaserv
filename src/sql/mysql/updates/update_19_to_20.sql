@@ -1,4 +1,4 @@
-BEGIN;
+START TRANSACTION;
 
 -- Set existing world variables to the world map (0)
 UPDATE mana_world_states SET map_id = 0 WHERE map_id IS NULL;
@@ -22,4 +22,4 @@ UPDATE mana_world_states
         moddate = UNIX_TIMESTAMP()
     WHERE state_name = 'database_version';
 
-END;
+COMMIT;

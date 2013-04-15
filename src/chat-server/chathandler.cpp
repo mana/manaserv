@@ -83,7 +83,7 @@ void ChatHandler::tokenMatched(ChatClient *client, Pending *p)
     client->characterName = p->character;
     client->accountLevel = p->level;
 
-    Character *c = storage->getCharacter(p->character);
+    CharacterData *c = storage->getCharacter(p->character);
 
     if (!c)
     {
@@ -443,7 +443,7 @@ void ChatHandler::handleModeChangeMessage(ChatClient &client, MessageIn &msg)
     trans.mCharacterId = client.characterId;
     trans.mAction = TRANS_CHANNEL_MODE;
     trans.mMessage = "User mode ";
-    trans.mMessage.append(mode + " set on " + user);
+    trans.mMessage.append(utils::toString(mode) + " set on " + user);
     storage->addTransaction(trans);
 }
 

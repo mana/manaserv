@@ -27,8 +27,7 @@
 
 #include "../common/inventorydata.h"
 
-class Item;
-class Character;
+class CharacterData;
 
 class Letter
 {
@@ -42,7 +41,7 @@ public:
      * @param sender Pointer to character that sent the letter
      * @param receiver Pointer to character that will receive the letter
      */
-    Letter(unsigned type, Character *sender, Character *receiver);
+    Letter(unsigned type, CharacterData *sender, CharacterData *receiver);
 
     ~Letter();
 
@@ -99,13 +98,13 @@ public:
      * Get the character receiving the letter
      * @return Returns the Character who will receive the letter
      */
-    Character *getReceiver() const;
+    CharacterData *getReceiver() const;
 
     /**
      * Get the character who sent the letter
      * @return Returns the Character who sent the letter
      */
-    Character *getSender() const;
+    CharacterData *getSender() const;
 
     /**
      * Get the attachments
@@ -118,8 +117,8 @@ private:
     unsigned long mExpiry;
     std::string mContents;
     std::vector<InventoryItem> mAttachments;
-    Character *mSender;
-    Character *mReceiver;
+    CharacterData *mSender;
+    CharacterData *mReceiver;
 };
 
 class Post
@@ -163,15 +162,15 @@ public:
      * @param player Character that is getting post
      * @return Returns the post for that character
      */
-    Post *getPost(Character *player) const;
+    Post *getPost(CharacterData *player) const;
 
     /**
      * Remove the post for character
      */
-    void clearPost(Character *player);
+    void clearPost(CharacterData *player);
 
 private:
-    std::map<Character*, Post*> mPostBox;
+    std::map<CharacterData*, Post*> mPostBox;
 };
 
 extern PostManager *postalManager;

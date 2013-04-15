@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2007-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -21,25 +22,30 @@
 #ifndef GAMESERVER_NPC_H
 #define GAMESERVER_NPC_H
 
-#include "game-server/being.h"
+#include "game-server/component.h"
 #include "scripting/script.h"
 
-class Character;
+class CharacterComponent;
 
 /**
- * Class describing a non-player character.
+ * Component describing a non-player character.
  */
-class NPC : public Being
+class NpcComponent : public Component
 {
     public:
-        NPC(const std::string &name, int id);
+        static const ComponentType type = CT_Npc;
 
-        ~NPC();
+        NpcComponent(int npcId);
+
+        ~NpcComponent();
 
         /**
          * Sets the function that should be called when this NPC is talked to.
          */
         void setTalkCallback(Script::Ref function);
+
+        Script::Ref getTalkCallback() const
+        { return mTalkCallback; }
 
         /**
          * Sets the function that should be called each update.
@@ -49,52 +55,57 @@ class NPC : public Being
         /**
          * Calls the update callback, if any.
          */
-        void update();
+        void update(Entity &entity);
 
         /**
          * Sets whether the NPC is enabled.
+         *
+         * When disabling an NPC, it does currently not cancel already started
+         * conversations with this NPC!
          */
         void setEnabled(bool enabled);
 
-        /**
-         * Prompts NPC.
-         */
-        void prompt(Character *, bool restart);
-
-        /**
-         * Selects an NPC proposition.
-         */
-        void select(Character *, int index);
-
-        /**
-         * The player has choosen an integer.
-         */
-        void integerReceived(Character *ch, int value);
-
-        /**
-         * The player has entered an string.
-         */
-        void stringReceived(Character *ch, const std::string &value);
+        bool isEnabled() const
+        { return mEnabled; }
 
         /**
          * Gets NPC ID.
          */
-        int getNPC() const
-        { return mID; }
-
-    protected:
-        /**
-         * Gets the way a monster blocks pathfinding for other objects
-         */
-        virtual BlockType getBlockType() const
-        { return BLOCKTYPE_CHARACTER; } // blocks like a player character
+        int getNpcId() const
+        { return mNpcId; }
 
     private:
-        unsigned short mID; /**< ID of the NPC. */
-        bool mEnabled;      /**< Whether NPC is enabled */
+        int mNpcId;
+        bool mEnabled;
 
         Script::Ref mTalkCallback;
         Script::Ref mUpdateCallback;
 };
+
+
+namespace Npc {
+
+/**
+ * Starts a conversation with the NPC.
+ */
+void start(Entity *npc, Entity *ch);
+
+/**
+ * Resumes an NPC conversation.
+ */
+void resume(Entity *ch);
+
+/**
+ * The player has made a choice or entered an integer.
+ */
+void integerReceived(Entity *ch, int value);
+
+/**
+ * The player has entered an string.
+ */
+void stringReceived(Entity *ch, const std::string &value);
+
+} // namespace Npc
+
 
 #endif // GAMESERVER_NPC_H

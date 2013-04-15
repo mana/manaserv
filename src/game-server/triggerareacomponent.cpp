@@ -1,6 +1,7 @@
 /*
  *  The Mana Server
  *  Copyright (C) 2006-2010  The Mana World Development Team
+ *  Copyright (C) 2012  The Mana Developers
  *
  *  This file is part of The Mana Server.
  *
@@ -18,7 +19,7 @@
  *  along with The Mana Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "game-server/trigger.h"
+#include "game-server/triggerareacomponent.h"
 
 #include "game-server/character.h"
 #include "game-server/mapcomposite.h"
@@ -29,11 +30,11 @@
 
 #include <cassert>
 
-void WarpAction::process(Actor *obj)
+void WarpAction::process(Entity *obj)
 {
     if (obj->getType() == OBJECT_CHARACTER)
     {
-        GameState::enqueueWarp(static_cast< Character * >(obj), mMap, mX, mY);
+        GameState::enqueueWarp(obj, mMap, mTargetPoint);
     }
 }
 
@@ -45,7 +46,7 @@ ScriptAction::ScriptAction(Script *script, Script::Ref callback, int arg) :
     assert(mCallback.isValid());
 }
 
-void ScriptAction::process(Actor *obj)
+void ScriptAction::process(Entity *obj)
 {
     LOG_DEBUG("Script trigger area activated: "
               << "(" << obj << ", " << mArg << ")");
@@ -56,20 +57,24 @@ void ScriptAction::process(Actor *obj)
     mScript->execute(obj->getMap());
 }
 
-void TriggerArea::update()
+void TriggerAreaComponent::update(Entity &entity)
 {
-    std::set<Actor*> insideNow;
-    for (BeingIterator i(getMap()->getInsideRectangleIterator(mZone)); i; ++i)
+    MapComposite *map = entity.getMap();
+    std::set<Entity *> insideNow;
+
+    for (BeingIterator i(map->getInsideRectangleIterator(mZone)); i; ++i)
     {
-        // Don't deal with unitialized actors.
-        if (!(*i) || !(*i)->isPublicIdValid())
+        // Don't deal with uninitialized actors
+        if (!(*i) || !(*i)->getComponent<ActorComponent>()->isPublicIdValid())
             continue;
 
         // The BeingIterator returns the mapZones in touch with the rectangle
         // area. On the other hand, the beings contained in the map zones
         // may not be within the rectangle area. Hence, this additional
         // contains() condition.
-        if (mZone.contains((*i)->getPosition()))
+        const Point &point =
+                (*i)->getComponent<ActorComponent>()->getPosition();
+        if (mZone.contains(point))
         {
             insideNow.insert(*i);
 

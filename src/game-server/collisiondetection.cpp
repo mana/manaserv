@@ -27,6 +27,9 @@
 
 #define D_TO_R 0.0174532925    // PI / 180
 #define R_TO_D 57.2957795      // 180 / PI
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 // Tests to see if pos is between s1 degree and s2
 #define test_degrees(pos,s1,s2) (pos > s1 && pos < s2) || (s1 > s2 && !(pos < s1 && pos > s2))

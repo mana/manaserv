@@ -37,15 +37,12 @@ extern "C" {
 #include "game-server/attack.h"
 #include "game-server/specialmanager.h"
 
-class Being;
-class Character;
+class CharacterComponent;
 class Entity;
 class ItemClass;
 class MapComposite;
 class MapObject;
-class Monster;
 class MonsterClass;
-class NPC;
 class StatusEffect;
 
 void raiseWarning(lua_State *s, const char *format, ...);
@@ -159,6 +156,7 @@ template <typename T> const char * LuaUserData<T>::mTypeName;
 
 typedef LuaUserData<AttackInfo> LuaAttackInfo;
 typedef LuaUserData<Damage> LuaDamage;
+typedef LuaUserData<Entity> LuaEntity;
 typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
 typedef LuaUserData<MonsterClass> LuaMonsterClass;
@@ -167,19 +165,16 @@ typedef LuaUserData<SpecialManager::SpecialInfo> LuaSpecialInfo;
 
 Script *        getScript(lua_State *s);
 
-Being *         getBeing(lua_State *s, int p);
-Character *     getCharacter(lua_State *s, int p);
 ItemClass *     getItemClass(lua_State *s, int p);
-Monster *       getMonster(lua_State *s, int p);
 MonsterClass *  getMonsterClass(lua_State *s, int p);
-NPC *           getNPC(lua_State *s, int p);
 
-Being *         checkBeing(lua_State *s, int p);
-Character *     checkCharacter(lua_State *s, int p);
+Entity *        checkActor(lua_State *s, int p);
+Entity *        checkBeing(lua_State *s, int p);
+Entity *        checkCharacter(lua_State *s, int p);
 ItemClass *     checkItemClass(lua_State *s, int p);
-Monster *       checkMonster(lua_State *s, int p);
+Entity *        checkMonster(lua_State *s, int p);
 MonsterClass *  checkMonsterClass(lua_State *s, int p);
-NPC *           checkNPC(lua_State *s, int p);
+Entity *        checkNpc(lua_State *s, int p);
 int             checkSkill(lua_State *s, int p);
 int             checkSpecial(lua_State *s, int p);
 
@@ -202,7 +197,7 @@ inline void push(lua_State *s, const std::string &val)
 
 inline void push(lua_State *s, Entity *val)
 {
-    lua_pushlightuserdata(s, val);
+    LuaEntity::push(s, val);
 }
 
 inline void push(lua_State *s, double val)

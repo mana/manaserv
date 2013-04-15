@@ -37,7 +37,7 @@ void addPermission(std::string permission, char mask)
     std::map<std::string, unsigned char>::iterator i = permissions.find(permission);
     if (i == permissions.end())
     {
-        permissions.insert(std::make_pair<std::string, unsigned char>(permission, mask));
+        permissions.insert(std::make_pair(permission, mask));
     } else {
         i->second |= mask;
     }
@@ -105,9 +105,10 @@ void PermissionManager::reload()
 }
 
 
-PermissionManager::Result PermissionManager::checkPermission(const Character* character, std::string permission)
+PermissionManager::Result PermissionManager::checkPermission(const Entity* character, std::string permission)
 {
-    return checkPermission(character->getAccountLevel(), permission);
+    return checkPermission(character->getComponent<CharacterComponent>()
+                               ->getAccountLevel(), permission);
 }
 
 PermissionManager::Result PermissionManager::checkPermission(unsigned char level, std::string permission)
@@ -139,12 +140,13 @@ unsigned char PermissionManager::getMaskFromAlias(const std::string &alias)
     }
 }
 
-std::list<std::string> PermissionManager::getPermissionList(const Character* character)
+std::list<std::string> PermissionManager::getPermissionList(const Entity* character)
 {
     std::list<std::string> result;
     std::map<std::string, unsigned char>::iterator i;
 
-    unsigned char mask = character->getAccountLevel();
+    unsigned char mask = character->getComponent<CharacterComponent>()
+            ->getAccountLevel();
 
     for (i = permissions.begin(); i != permissions.end(); i++)
     {
@@ -157,12 +159,13 @@ std::list<std::string> PermissionManager::getPermissionList(const Character* cha
     return result;
 }
 
-std::list<std::string> PermissionManager::getClassList(const Character* character)
+std::list<std::string> PermissionManager::getClassList(const Entity* character)
 {
     std::list<std::string> result;
     std::map<std::string, unsigned char>::iterator i;
 
-    unsigned char mask = character->getAccountLevel();
+    unsigned char mask = character->getComponent<CharacterComponent>()
+            ->getAccountLevel();
 
     for (i = aliases.begin(); i != aliases.end(); i++)
     {

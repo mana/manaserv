@@ -11,5 +11,5 @@
 local candy = get_item_class("candy")
 
 candy:on("use", function(user)
-    being_say(user, "*munch*munch*munch*")
+    user:say("*munch*munch*munch*")
 end)

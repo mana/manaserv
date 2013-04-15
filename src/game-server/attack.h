@@ -21,8 +21,12 @@
 #ifndef ATTACK_H
 #define ATTACK_H
 
+#include <cassert>
 #include <cstddef>
 #include <list>
+
+#include <sigc++/signal.h>
+#include <sigc++/trackable.h>
 
 #include "common/defines.h"
 
@@ -31,6 +35,8 @@
 #include "utils/xml.h"
 
 #include "game-server/timeout.h"
+
+class CombatComponent;
 
 /**
  * Structure that describes the severity and nature of an attack a being can
@@ -65,7 +71,7 @@ struct Damage
  * Class that stores information about an auto-attack
  */
 
-class Character;
+class CharacterComponent;
 
 struct AttackInfo
 {
@@ -141,7 +147,7 @@ class Attack
     public:
         Attack(AttackInfo *info):
             mInfo(info)
-        {}
+        {assert(info);}
 
         AttackInfo *getAttackInfo()
         { return mInfo; }
@@ -168,15 +174,15 @@ class Attack
 /**
  * Helper class for storing multiple auto-attacks.
  */
-class Attacks
+class Attacks : public sigc::trackable
 {
     public:
         Attacks():
             mCurrentAttack(0)
         {}
 
-        void add(AttackInfo *);
-        void remove(AttackInfo *);
+        void add(CombatComponent *combatComponent, AttackInfo *);
+        void remove(CombatComponent *combatComponent, AttackInfo *);
         void markAttackAsTriggered();
         Attack *getTriggerableAttack();
         void startAttack(Attack *attack);
@@ -187,6 +193,9 @@ class Attacks
          */
         unsigned getNumber()
         { return mAttacks.size(); }
+
+        sigc::signal<void, CombatComponent *, Attack &> attack_added;
+        sigc::signal<void, CombatComponent *, Attack &> attack_removed;
 
     private:
         std::vector<Attack> mAttacks;
