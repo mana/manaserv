@@ -744,11 +744,11 @@ static int announce(lua_State *s)
  *         {"Dagger", 10, 50}
  *     })
  *     if buycase == 0 then
- *       npc_message("What do you want to buy?")
+ *       say("What do you want to buy?")
  *     elseif buycase == 1 then
- *       npc_message("I've got no items to sell.")
+ *       say("I've got no items to sell.")
  *     else
- *       npc_message("Hmm, something went wrong... Ask a scripter to
+ *       say("Hmm, something went wrong... Ask a scripter to
  *       fix the buying mode!")
  *     end
  *
@@ -764,12 +764,12 @@ static int announce(lua_State *s)
  *                      {"Cactus Drink", 10, 25}
  *     })
  *     if sellcase == 0 then
- *       npc_message("Here we go:")
+ *       say("Here we go:")
  *     elseif sellcase == 1 then
- *       npc_message("I'm not interested by your items.")
+ *       say("I'm not interested by your items.")
  *     else
- *       npc_message("Hmm, something went wrong...")
- *       npc_message("Ask a scripter to fix me!")
+ *       say("Hmm, something went wrong...")
+ *       say("Ask a scripter to fix me!")
  *     end
  *
  * -- ...
@@ -778,12 +778,12 @@ static int announce(lua_State *s)
  *     the server's items.xml file
  *     local sellcase = trade(true)
  *     if sellcase == 0 then
- *       npc_message("Ok, what do you want to sell:")
+ *       say("Ok, what do you want to sell:")
  *     elseif sellcase == 1 then
- *       npc_message("I'm not interested by any of your items.")
+ *       say("I'm not interested by any of your items.")
  *     else
- *       npc_message("Hmm, something went wrong...")
- *       npc_message("Ask a scripter to fix me!")
+ *       say("Hmm, something went wrong...")
+ *       say("Ask a scripter to fix me!")
  *     end
  * </code>
  */
