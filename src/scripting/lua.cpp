@@ -1353,7 +1353,7 @@ static int entity_set_special_mana(lua_State *s)
     if (!c->getComponent<CharacterComponent>()->setSpecialMana(special, mana))
     {
         luaL_error(s,
-                   "special_mana called with special "
+                   "set_special_mana called with special "
                    "that is not owned by character.");
     }
     return 0;
