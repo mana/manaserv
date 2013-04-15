@@ -823,18 +823,18 @@ void GameState::enqueueWarp(Entity *ptr,
     enqueueEvent(ptr, event);
 }
 
-void GameState::sayAround(Entity *obj, const std::string &text)
+void GameState::sayAround(Entity *entity, const std::string &text)
 {
-    Point speakerPosition = obj->getComponent<ActorComponent>()->getPosition();
+    Point speakerPosition = entity->getComponent<ActorComponent>()->getPosition();
     int visualRange = Configuration::getValue("game_visualRange", 448);
 
-    for (CharacterIterator i(obj->getMap()->getAroundActorIterator(obj, visualRange)); i; ++i)
+    for (CharacterIterator i(entity->getMap()->getAroundActorIterator(entity, visualRange)); i; ++i)
     {
         const Point &point =
                 (*i)->getComponent<ActorComponent>()->getPosition();
         if (speakerPosition.inRangeOf(point, visualRange))
         {
-            sayTo(*i, obj, text);
+            sayTo(*i, entity, text);
         }
     }
 }

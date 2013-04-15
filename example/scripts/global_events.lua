@@ -13,7 +13,7 @@
 -- Register the callback that is called when the hit points of a character
 -- reach zero.
 on_character_death(function(ch)
-    being_say(ch, "Noooooo!!!")
+    ch:say("Noooooo!!!")
 end)
 
 -- This function is called when the player clicks on the OK button after the
@@ -22,11 +22,11 @@ end)
 -- bring HP above zero in some way)
 on_character_death_accept(function(ch)
     -- restores to full hp
-    being_heal(ch)
+    ch:heal()
     -- restores 1 hp (in case you want to be less nice)
-    -- being_heal(ch, 1)
+    -- ch:heal(1)
     -- warp the character to the respawn location
-    chr_warp(ch, 1, 815, 100)
+    ch:warp(1, 815, 100)
 end)
 
 
@@ -51,14 +51,14 @@ end
 -- to the character and/or initialize a tutorial quest.
 local function on_chr_birth(ch)
     -- this message is shown on first login.
-    chat_message(0, ch, "And so your adventure begins...")
+    ch:message("And so your adventure begins...")
 end
 
 -- This function is called when a character logs into the game. This can,
 -- for example, be utilized for a message-of-the-day or for various
 -- handlings of offline processing mechanics.
 local function on_chr_login(ch)
-    chat_message(0, ch, "Welcome to Manasource")
+    ch:message("Welcome to Manasource")
 end
 
 
@@ -66,11 +66,11 @@ end
 -- be useful for various handling of offline processing mechanics.
 local function on_chr_logout(ch)
     -- notifies nearby players of logout
-    local around = get_beings_in_circle(posX(ch), posY(ch), 1000)
-    local msg = being_get_name(ch).." left the game."
+    local around = get_beings_in_circle(ch, 1000)
+    local msg = ch:name().." left the game."
     for b in pairs(around) do
-        if being_type(b) == TYPE_CHARACTER then
-            chat_message(0, b, msg)
+        if b:type() == TYPE_CHARACTER then
+            b:message(msg)
         end
     end
 end

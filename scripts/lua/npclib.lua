@@ -31,8 +31,7 @@ local wasmall_starty = {}
 function walkaround_small(npc)
   if not wasmall_timer[npc] then
     wasmall_timer[npc] = 1
-    wasmall_startx[npc] = posX(npc)
-    wasmall_starty[npc] = posY(npc)
+    wasmall_startx[npc], wasmall_starty[npc] = npc:position()
   end
 
   wasmall_timer[npc] = wasmall_timer[npc] + 1
@@ -41,7 +40,7 @@ function walkaround_small(npc)
     wasmall_timer[npc] = math.random(1, 10)
     local x = math.random(-32, 32) + wasmall_startx[npc]
     local y = math.random(-32, 32) + wasmall_starty[npc]
-    being_walk(npc, x, y, 2)
+    npc:walk(x, y, 2)
   end
 end
 
@@ -58,8 +57,7 @@ local wawide_starty = {}
 function walkaround_wide(npc)
   if not wawide_timer[npc] then
     wawide_timer[npc] = 1
-    wawide_startx[npc] = posX(npc)
-    wawide_starty[npc] = posY(npc)
+    wawide_startx[npc], wawide_starty[npc] = npc:position()
   end
 
   wawide_timer[npc] = wawide_timer[npc] + 1
@@ -68,7 +66,7 @@ function walkaround_wide(npc)
     wawide_timer[npc] = math.random(1, 10)
     local x = math.random(-128, 128) + wawide_startx[npc]
     local y = math.random(-128, 128) + wawide_starty[npc]
-    being_walk(npc, x, y, 2)
+    npc:walk(x, y, 2)
   end
 end
 
@@ -88,9 +86,9 @@ function walkaround_map(npc)
 
   if wam_timer[npc] == 50 then
     wam_timer[npc] = math.random(1, 10)
-    local x = math.random(-128, 128) + posX(npc)
-    local y = math.random(-128, 128) + posY(npc)
-    being_walk(npc, x, y, 2)
+    local x = math.random(-128, 128) + npc:x()
+    local y = math.random(-128, 128) + npc:y()
+    npc:walk(x, y, 2)
   end
 end
 

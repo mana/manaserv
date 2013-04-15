@@ -8,16 +8,16 @@
 --]]
 
 local function recalculate_base_attribute(being, attribute)
-    local old_base = being_get_base_attribute(being, attribute)
+    local old_base = being:base_attribute(attribute)
     local new_base = old_base
     if attribute == ATTR_ACCURACY then
         -- Provisional
-        new_base = being_get_modified_attribute(being, ATTR_DEX)
+        new_base = being:modified_attribute(ATTR_DEX)
     elseif attribute == ATTR_DEFENSE then
-        new_base = 0.3 * being_get_modified_attribute(being, ATTR_VIT)
+        new_base = 0.3 * being:modified_attribute(ATTR_VIT)
     elseif attribute == ATTR_DODGE then
         -- Provisional
-        new_base = being_get_modified_attribute(being, ATTR_AGI)
+        new_base = being:modified_attribute(ATTR_AGI)
     elseif attribute == ATTR_MAGIC_DODGE then
         -- TODO
         new_base = 1
@@ -28,28 +28,28 @@ local function recalculate_base_attribute(being, attribute)
         -- TODO
         new_base = 0
     elseif attribute == ATTR_HP_REGEN then
-        local hp_per_sec = being_get_modified_attribute(being, ATTR_VIT) * 0.05
+        local hp_per_sec = being:modified_attribute(ATTR_VIT) * 0.05
         new_base = hp_per_sec * TICKS_PER_HP_REGENERATION / 10
     elseif attribute == ATTR_HP then
-        local hp = being_get_modified_attribute(being, ATTR_HP)
-        local max_hp = being_get_modified_attribute(being, ATTR_MAX_HP)
+        local hp = being:modified_attribute(ATTR_HP)
+        local max_hp = being:modified_attribute(ATTR_MAX_HP)
 
         if hp > max_hp then
             new_base = new_base - hp - max_hp
         end
     elseif attribute == ATTR_MAX_HP then
-        local vit = being_get_modified_attribute(being, ATTR_VIT)
+        local vit = being:modified_attribute(ATTR_VIT)
         new_base = (vit + 3) * (vit + 20) * 0.125
     elseif attribute == ATTR_MOVE_SPEED_TPS then
         -- Provisional
-        new_base = 3.0 + being_get_modified_attribute(being, ATTR_AGI) * 0.08
+        new_base = 3.0 + being:modified_attribute(ATTR_AGI) * 0.08
     elseif attribute == ATTR_INV_CAPACITY then
         -- Provisional
-        new_base = 2000 + being_get_modified_attribute(being, ATTR_STR) * 180
+        new_base = 2000 + being:modified_attribute(ATTR_STR) * 180
     end
 
     if new_base ~= old_base then
-        being_set_base_attribute(being, attribute, new_base)
+        being:set_base_attribute(attribute, new_base)
     end
 
 end

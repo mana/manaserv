@@ -13,7 +13,7 @@
 function npc1_talk(npc, ch)
   on_remove(ch, function() print "Player has left the map." end);
   say("Hello! I am the testing NPC.")
-  local rights = chr_get_rights(ch);
+  local rights = ch:rights();
 
   if (rights >= 128) then
     say("Oh mighty server administrator, how can I avoid your wrath?")
@@ -38,14 +38,14 @@ function npc1_talk(npc, ch)
     say("Sorry, this is a heroic-fantasy game, I do not have any gun.")
 
   elseif v == 2 then
-    local n1, n2 = chr_inv_count(ch, 524, 511)
+    local n1, n2 = ch:inv_count(524, 511)
     if n1 == 0 or n2 ~= 0 then
       say("Yeah right...")
     else
       say("I can't help you with the party. But I see you have a fancy hat. I could change it into Santa's hat. Not much of a party, but it would get you going.")
       v = ask("Please do.", "No way! Fancy hats are classier.")
       if v == 1 then
-        chr_inv_change(ch, 524, -1, 511, 1)
+        ch:inv_change(524, -1, 511, 1)
       end
     end
 
@@ -62,17 +62,17 @@ function npc1_talk(npc, ch)
     end
 
   elseif v == 4 then
-    being_say(npc, "As you wish...")
-    schedule_in(2, function() being_say(npc, "One") end)
-    schedule_in(4, function() being_say(npc, "Two") end)
-    schedule_in(6, function() being_say(npc, "Three") end)
-    schedule_in(8, function() being_say(npc, "Four") end)
-    schedule_in(10, function() being_say(npc, "Five") end)
-    schedule_in(12, function() being_say(npc, "Six") end)
-    schedule_in(14, function() being_say(npc, "Seven") end)
-    schedule_in(16, function() being_say(npc, "Eight") end)
-    schedule_in(18, function() being_say(npc, "Nine") end)
-    schedule_in(20, function() being_say(npc, "Ten") end)
+    npc:say("As you wish...")
+    schedule_in(2, function() npc:say("One") end)
+    schedule_in(4, function() npc:say("Two") end)
+    schedule_in(6, function() npc:say("Three") end)
+    schedule_in(8, function() npc:say("Four") end)
+    schedule_in(10, function() npc:say("Five") end)
+    schedule_in(12, function() npc:say("Six") end)
+    schedule_in(14, function() npc:say("Seven") end)
+    schedule_in(16, function() npc:say("Eight") end)
+    schedule_in(18, function() npc:say("Nine") end)
+    schedule_in(20, function() npc:say("Ten") end)
 
   elseif v == 5 then
     function printTable (t)

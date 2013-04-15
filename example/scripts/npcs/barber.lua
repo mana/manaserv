@@ -104,10 +104,10 @@ function Barber(npc, ch, data)
             print("Style ==", result)
 
             if (result == 0) then
-                chr_set_hair_style(ch, 0)
+                ch:set_hair_style(0)
                 result = 1
             elseif (result <= #styles) then
-                chr_set_hair_style(ch, style_ids[result])
+                ch:set_hair_style(style_ids[result])
                 result = 1
             else --"Never mind"
                 result = 3
@@ -121,7 +121,7 @@ function Barber(npc, ch, data)
             end
 
             if (result <= #colors) then
-                chr_set_hair_color(ch, color_ids[result - 1])
+                ch:set_hair_color(color_ids[result - 1])
                 result = 2
             else --"Never mind"
                 result = 3

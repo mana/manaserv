@@ -326,7 +326,7 @@ function on_death(being, funct)
     ondeath_functs[being] = {}
   end
   table.insert(ondeath_functs[being], funct)
-  being_register(being)
+  being:register()
 end
 
 --- LUA on_remove (scheduling)
@@ -340,7 +340,7 @@ function on_remove(being, funct)
     onremove_functs[being] = {}
   end
   table.insert(onremove_functs[being], funct)
-  being_register(being)
+  being:register()
 end
 
 -- Registered as callback for when a registered being dies.
@@ -375,10 +375,8 @@ end
 -- **Warning:** Before reducing the money make sure to check if the character
 -- owns enough money using chr_money.
 chr_money_change = function(ch, amount)
-  being_set_base_attribute(
-                            ch,
-                            ATTR_GP,
-                            being_get_base_attribute(ch, ATTR_GP) + amount)
+  ch:set_base_attribute(ATTR_GP,
+                        ch:base_attribute(ATTR_GP) + amount)
 end
 
 --- LUA chr_money (inventory)
@@ -389,7 +387,7 @@ end
 -- **Warning:** Before reducing the money make sure to check if the character
 -- owns enough money using chr_money.
 chr_money = function(ch)
-  return being_get_base_attribute(ch, ATTR_GP)
+  return ch:base_attribute(ATTR_GP)
 end
 
 -- Register callbacks
@@ -400,4 +398,4 @@ on_create_npc_delayed(create_npc_delayed)
 on_map_initialize(map_initialize)
 
 on_being_death(death_notification)
-on_being_remove(remove_notification)
+on_entity_remove(remove_notification)

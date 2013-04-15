@@ -11,9 +11,9 @@
 ----------------------------------------------------------------------------------
 
 function Banker(npc, ch)
-    if being_get_gender(ch) == GENDER_MALE then
+    if ch:gender() == GENDER_MALE then
         say("Welcome to the bank, sir!")
-    elseif being_get_gender(ch) == GENDER_FEMALE then
+    elseif ch:gender() == GENDER_FEMALE then
         say("Welcome to the bank, madam!")
     else
         say("Welcome to the bank... uhm... person of unspecified gender!")

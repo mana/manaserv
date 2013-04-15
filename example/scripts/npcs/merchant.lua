@@ -18,11 +18,11 @@ function Merchant(npc, ch, buy_sell_table)
     -- buy_sell_table[1] will corresponds to the first table (used to list
     -- boughtable items, and buy_sell_table[2] listing sellable items.
 
-    local rights = chr_get_rights(ch);
+    local rights = ch:rights()
 
     if (rights >= 128) then
-        announce(being_get_name(ch) .. " the big administrator was at my shop!",
-                 being_get_name(npc))
+        announce(ch:name() .. " the big administrator was at my shop!",
+                 npc:name())
         say "Oh mighty server administrator, how can I avoid your wrath?"
     elseif (rights >= 8) then
         say "How can I be of assistance, sir gamemaster?"
@@ -31,7 +31,7 @@ function Merchant(npc, ch, buy_sell_table)
     elseif (rights >= 2) then
         say "How can I assist you in your testing duties?"
     elseif (rights >= 1) then
-        if being_get_gender(ch) == GENDER_FEMALE then
+        if ch:gender() == GENDER_FEMALE then
             say "What do you want, Madam?"
         else
             say "What do you want, Sir?"

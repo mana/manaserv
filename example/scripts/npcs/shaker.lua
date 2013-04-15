@@ -15,8 +15,7 @@ function shaker_update(npc)
   if shake_count > 20 then
     shake_count = 0
   
-    center_x = posX(npc)
-    center_y = posY(npc)
+    local center_x, center_y = npc:position()
     tremor(center_x, center_y, 300)
   end
 end
@@ -27,18 +26,17 @@ function square(x)
     return x * x
 end
 
-function tremor (center_x, center_y, intensity)
-    for dummy, object in ipairs(get_beings_in_circle(center_x, center_y, intensity)) do
-        if being_type(object) == TYPE_CHARACTER then
-            object_x = posX(object)
-            object_y = posY(object)
-            dist_x = object_x - center_x
-            dist_y = object_y - center_y
-            dist = math.sqrt(square(dist_x) + square(dist_y))
-            intensity_local = intensity - dist
-            intensity_x = (intensity - dist) * (dist_x / dist) / 5
-            intensity_y = (intensity - dist) * (dist_y / dist) / 5
-            chr_shake_screen(object, intensity_x, intensity_y)
+function tremor(center_x, center_y, intensity)
+    for dummy, being in ipairs(get_beings_in_circle(center_x, center_y, intensity)) do
+        if being:type() == TYPE_CHARACTER then
+            local being_x, being_y = being:position()
+            local dist_x = being_x - center_x
+            local dist_y = being_y - center_y
+            local dist = math.sqrt(square(dist_x) + square(dist_y))
+            local intensity = intensity - dist
+            local intensity_x = intensity * (dist_x / dist) / 5
+            local intensity_y = intensity * (dist_y / dist) / 5
+            being:shake_screen(intensity_x, intensity_y)
         end
     end
 end
