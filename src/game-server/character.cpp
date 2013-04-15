@@ -75,7 +75,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mClient(nullptr),
     mConnected(true),
     mTransactionHandler(nullptr),
-    mAbilitiesUpdateNeeded(false),
     mDatabaseID(-1),
     mHairStyle(0),
     mHairColor(0),
@@ -140,6 +139,9 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
+
+    for (auto &abilityIt : mAbilities)
+        mModifiedAbilities.insert(abilityIt.first);
 }
 
 CharacterComponent::~CharacterComponent()
@@ -181,11 +183,8 @@ void CharacterComponent::update(Entity &entity)
         }
     }
 
-    if (mAbilitiesUpdateNeeded)
-    {
+    if (!mModifiedAbilities.empty())
         sendAbilityUpdate();
-        mAbilitiesUpdateNeeded = false;
-    }
 }
 
 void CharacterComponent::characterDied(Entity *being)
@@ -308,7 +307,8 @@ bool CharacterComponent::giveAbility(int id, int currentPoints)
         }
         mAbilities.insert(std::pair<int, AbilityValue>(
                              id, AbilityValue(currentPoints, abilityInfo)));
-        mAbilitiesUpdateNeeded = true;
+
+        mModifiedAbilities.insert(id);
         return true;
     }
     return false;
@@ -320,7 +320,7 @@ bool CharacterComponent::setAbilityMana(int id, int mana)
     if (it != mAbilities.end())
     {
         it->second.currentPoints = mana;
-        mAbilitiesUpdateNeeded = true;
+        mModifiedAbilities.insert(id);
         return true;
     }
     return false;
@@ -332,7 +332,7 @@ bool CharacterComponent::setAbilityRechargeSpeed(int id, int speed)
     if (it != mAbilities.end())
     {
         it->second.rechargeSpeed = speed;
-        mAbilitiesUpdateNeeded = true;
+        mModifiedAbilities.insert(id);
         return true;
     }
     return false;
@@ -340,18 +340,20 @@ bool CharacterComponent::setAbilityRechargeSpeed(int id, int speed)
 
 void CharacterComponent::sendAbilityUpdate()
 {
-    //GPMSG_ABILITY_STATUS = 0x0293,
-    // { B abilityID, L current, L max, L recharge }
-
     MessageOut msg(GPMSG_ABILITY_STATUS);
-    for (AbilityMap::iterator it = mAbilities.begin(), it_end = mAbilities.end();
-         it != it_end; ++it)
+    for (unsigned id : mModifiedAbilities)
     {
-        msg.writeInt8(it->first);
+        auto it = mAbilities.find(id);
+        if (it == mAbilities.end())
+            continue; // got deleted
+
+        msg.writeInt8(id);
         msg.writeInt32(it->second.currentPoints);
         msg.writeInt32(it->second.abilityInfo->neededPoints);
         msg.writeInt32(it->second.rechargeSpeed);
     }
+
+    mModifiedAbilities.clear();
     gameHandler->sendTo(mClient, msg);
 }
 

@@ -536,7 +536,7 @@ class CharacterComponent : public Component
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
         AbilityMap mAbilities;
-        bool mAbilitiesUpdateNeeded;
+        std::set<unsigned> mModifiedAbilities;
 
         int mDatabaseID;             /**< Character's database ID. */
         unsigned char mHairStyle;    /**< Hair Style of the character. */
