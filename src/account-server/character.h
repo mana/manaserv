@@ -65,7 +65,7 @@ struct AbilityValue
         : currentPoints(currentPoints)
     {}
 
-    unsigned currentPoints;
+    int currentPoints;
 };
 
 struct Status
