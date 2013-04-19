@@ -1278,61 +1278,6 @@ static int chr_set_quest(lua_State *s)
     return 0;
 }
 
-/** LUA entity:set_ability_recharge_speed (being)
- * entity:set_ability_recharge_speed(int abilityid, int new_speed)
- * entity:set_ability_recharge_speed(string abilityname, int new_speed)
- **
- * Valid only for character entities.
- *
- * Sets the recharge speed of the ability to a new value for the character.
- *
- * **Note:** When passing the ''abilityname'' as parameter make sure that it is
- * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
- */
-static int entity_set_ability_recharge_speed(lua_State *s)
-{
-    Entity *c = checkCharacter(s, 1);
-    const int ability = checkAbility(s, 2);
-    const int speed = luaL_checkint(s, 3);
-
-    if (!c->getComponent<CharacterComponent>()
-            ->setAbilityRechargeSpeed(ability, speed))
-    {
-        luaL_error(s,
-                   "set_ability_recharge_speed called with ability "
-                   "that is not owned by character.");
-    }
-    return 0;
-}
-
-/** LUA entity:ability_recharge_speed (being)
- * entity:ability_recharge_speed(int abilityid)
- * entity:ability_recharge_speed(string abilityname)
- **
- * Valid only for character entities.
- *
- * **Return value:** The current recharge speed of the ability that is owned by
- * the character.
- *
- * **Note:** When passing the ''abilityname'' as parameter make sure that it is
- * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
- */
-static int entity_get_ability_recharge_speed(lua_State *s)
-{
-    Entity *c = checkCharacter(s, 1);
-    const int ability = checkAbility(s, 2);
-
-    auto *characterComponent = c->getComponent<CharacterComponent>();
-
-    AbilityMap::iterator it = characterComponent->findAbility(ability);
-
-    luaL_argcheck(s, it != characterComponent->getAbilitiesEnd(), 2,
-                  "character does not have ability");
-
-    lua_pushinteger(s, it->second.rechargeSpeed);
-    return 1;
-}
-
 /** LUA entity:set_ability_mana (being)
  * entity:set_ability_mana(int abilityid, int new_mana)
  * entity:set_ability_mana(string abilityname, int new_mana)
@@ -3738,8 +3683,6 @@ LuaScript::LuaScript():
         { "equip_item",                     entity_equip_item                 },
         { "unequip_slot",                   entity_unequip_slot               },
         { "unequip_item",                   entity_unequip_item               },
-        { "set_ability_recharge_speed",     entity_set_ability_recharge_speed },
-        { "ability_recharge_speed",         entity_get_ability_recharge_speed },
         { "set_ability_mana",               entity_set_ability_mana           },
         { "ability_mana",                   entity_get_ability_mana           },
         { "walk",                           entity_walk                       },

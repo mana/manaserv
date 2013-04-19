@@ -170,7 +170,10 @@ void CharacterComponent::update(Entity &entity)
         if (s.abilityInfo->rechargeable &&
             s.currentPoints < s.abilityInfo->neededPoints)
         {
-            s.currentPoints += s.rechargeSpeed;
+            auto *beingComponent = entity.getComponent<BeingComponent>();
+            const double rechargeSpeed = beingComponent->getModifiedAttribute(
+                    s.abilityInfo->rechargeAttribute);
+            s.currentPoints += (int)rechargeSpeed;
             if (s.currentPoints >= s.abilityInfo->neededPoints &&
                     s.abilityInfo->rechargedCallback.isValid())
             {
@@ -184,7 +187,7 @@ void CharacterComponent::update(Entity &entity)
     }
 
     if (!mModifiedAbilities.empty())
-        sendAbilityUpdate();
+        sendAbilityUpdate(entity);
 }
 
 void CharacterComponent::characterDied(Entity *being)
@@ -326,20 +329,10 @@ bool CharacterComponent::setAbilityMana(int id, int mana)
     return false;
 }
 
-bool CharacterComponent::setAbilityRechargeSpeed(int id, int speed)
+void CharacterComponent::sendAbilityUpdate(Entity &entity)
 {
-    AbilityMap::iterator it = mAbilities.find(id);
-    if (it != mAbilities.end())
-    {
-        it->second.rechargeSpeed = speed;
-        mModifiedAbilities.insert(id);
-        return true;
-    }
-    return false;
-}
+    auto *beingComponent = entity.getComponent<BeingComponent>();
 
-void CharacterComponent::sendAbilityUpdate()
-{
     MessageOut msg(GPMSG_ABILITY_STATUS);
     for (unsigned id : mModifiedAbilities)
     {
@@ -347,10 +340,13 @@ void CharacterComponent::sendAbilityUpdate()
         if (it == mAbilities.end())
             continue; // got deleted
 
+        const double rechargeSpeed = beingComponent->getModifiedAttribute(
+                            it->second.abilityInfo->rechargeAttribute);
+
         msg.writeInt8(id);
         msg.writeInt32(it->second.currentPoints);
         msg.writeInt32(it->second.abilityInfo->neededPoints);
-        msg.writeInt32(it->second.rechargeSpeed);
+        msg.writeInt32((int)rechargeSpeed);
     }
 
     mModifiedAbilities.clear();
@@ -482,6 +478,13 @@ void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
         Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
         knuckleDamage.base = beingComponent->getModifiedAttribute(ATTR_STR);
         knuckleDamage.delta = knuckleDamage.base / 2;
+    }
+
+    for (auto &abilityIt : mAbilities)
+    {
+        // Inform the client about rechargespeed changes
+        if (abilityIt.second.abilityInfo->rechargeAttribute == attr)
+            mModifiedAbilities.insert(abilityIt.first);
     }
 }
 

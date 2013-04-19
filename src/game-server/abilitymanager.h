@@ -43,7 +43,7 @@ public:
         AbilityInfo() :
             id(0),
             rechargeable(false),
-            defaultRechargeSpeed(0),
+            rechargeAttribute(0),
             neededPoints(0),
             target(TARGET_BEING)
         {}
@@ -52,7 +52,7 @@ public:
         std::string name;
         std::string categoryName;
         bool rechargeable;
-        int defaultRechargeSpeed;
+        unsigned rechargeAttribute;
         unsigned neededPoints;
         TargetMode target;
         Script::Ref rechargedCallback;
