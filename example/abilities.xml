@@ -6,7 +6,7 @@
             name="Test Spell 1"
             rechargeable="true"
             needed="100"
-            rechargespeed="10"
+            rechargeattribute="6"
             target="point"
         />
         <ability
@@ -14,7 +14,7 @@
             name="Test Spell 2"
             rechargeable="true"
             needed="1000"
-            rechargespeed="10"
+            rechargeattribute="6"
             target="being"
         />
         <ability
@@ -22,7 +22,7 @@
             name="Test Spell 3"
             rechargeable="true"
             needed="10000"
-            rechargespeed="10"
+            rechargeattribute="6"
             target="point"
         />
     </ability-category>

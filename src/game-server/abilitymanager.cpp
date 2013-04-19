@@ -98,8 +98,8 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
 
     bool rechargeable = XML::getBoolProperty(abilityNode, "rechargeable", true);
     int neededMana = XML::getProperty(abilityNode, "needed", 0);
-    int defaultRechargeSpeed = XML::getProperty(abilityNode,
-                                                "rechargespeed", 0);
+    int rechargeAttribute = XML::getProperty(abilityNode,
+                                             "rechargeattribute", 0);
 
     if (rechargeable && neededMana <= 0)
     {
@@ -116,7 +116,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
     newInfo->id = id;
     newInfo->rechargeable = rechargeable;
     newInfo->neededPoints = neededMana;
-    newInfo->defaultRechargeSpeed = defaultRechargeSpeed;
+    newInfo->rechargeAttribute = rechargeAttribute;
 
     newInfo->target = getTargetByString(XML::getProperty(abilityNode, "target",
                                                          std::string()));

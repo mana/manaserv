@@ -51,12 +51,10 @@ struct AbilityValue
     AbilityValue(unsigned currentMana,
                  const AbilityManager::AbilityInfo *abilityInfo)
         : currentPoints(currentMana)
-        , rechargeSpeed(abilityInfo->defaultRechargeSpeed)
         , abilityInfo(abilityInfo)
     {}
 
     unsigned currentPoints;
-    unsigned rechargeSpeed;
     const AbilityManager::AbilityInfo *abilityInfo;
 };
 
@@ -188,12 +186,6 @@ class CharacterComponent : public Component
          */
         AbilityMap::iterator findAbility(int id)
         { return mAbilities.find(id); }
-
-        /**
-         * Sets recharge speed of a ability
-         */
-        bool setAbilityRechargeSpeed(int id, int speed);
-
         /**
          * Removes all abilities from character
          */
@@ -511,7 +503,7 @@ class CharacterComponent : public Component
         /**
          * Informs the client about his characters abilities charge status
          */
-        void sendAbilityUpdate();
+        void sendAbilityUpdate(Entity &entity);
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
