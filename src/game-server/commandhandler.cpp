@@ -1632,7 +1632,7 @@ static void handleGiveAbility(Entity *player, std::string &args)
         abilityId = abilityManager->getId(ability);
 
     if (abilityId <= 0 ||
-        !other->getComponent<CharacterComponent>()->giveAbility(abilityId))
+        !other->getComponent<AbilityComponent>()->giveAbility(abilityId))
     {
         say("Invalid ability.", player);
         return;
@@ -1673,7 +1673,7 @@ static void handleTakeAbility(Entity *player, std::string &args)
         say("Invalid ability.", player);
         return;
     }
-    if (!other->getComponent<CharacterComponent>()->takeAbility(abilityId))
+    if (!other->getComponent<AbilityComponent>()->takeAbility(abilityId))
     {
         say("Character does not have ability.", player);
         return;
@@ -1732,8 +1732,7 @@ static void handleRechargeAbility(Entity *player, std::string &args)
         }
         mana = utils::stringToInt(newMana);
     }
-    if (!other->getComponent<CharacterComponent>()
-            ->setAbilityMana(abilityId, mana))
+    if (!other->getComponent<AbilityComponent>()->setAbilityMana(abilityId, mana))
     {
         say("Character does not have ability.", player);
         return;
@@ -1762,15 +1761,13 @@ static void handleListAbility(Entity *player, std::string &args)
         return;
     }
 
-    auto *characterComponent =
-            other->getComponent<CharacterComponent>();
+    auto *abilityComponent = other->getComponent<AbilityComponent>();
 
     say("Abilityies of character " +
         other->getComponent<BeingComponent>()->getName() + ":", player);
-    for (AbilityMap::const_iterator it = characterComponent->getAbilitiesBegin(),
-         it_end = characterComponent->getAbilitiesEnd(); it != it_end; ++it)
+    for (auto &abilityIt : abilityComponent->getAbilities())
     {
-        const AbilityValue &info = it->second;
+        const AbilityValue &info = abilityIt.second;
         std::stringstream str;
         str << info.abilityInfo->id << ": " << info.abilityInfo->categoryName << "/"
             << info.abilityInfo->name << " charge: " << info.currentPoints;

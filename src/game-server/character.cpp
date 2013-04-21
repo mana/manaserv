@@ -127,6 +127,11 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mKnuckleAttackInfo = new AttackInfo(0, knuckleDamage, 7, 3, 0);
     combatcomponent->addAttack(mKnuckleAttackInfo);
 
+    auto *abilityComponent = new AbilityComponent(entity);
+    entity.addComponent(abilityComponent);
+    abilityComponent->signal_ability_changed.connect(
+            sigc::mem_fun(this, &CharacterComponent::abilityStatusChanged));
+
     // Get character data.
     mDatabaseID = msg.readInt32();
     beingComponent->setName(msg.readString());
@@ -140,7 +145,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     beingComponent->signal_attribute_changed.connect(sigc::mem_fun(
             this, &CharacterComponent::attributeChanged));
 
-    for (auto &abilityIt : mAbilities)
+    for (auto &abilityIt : abilityComponent->getAbilities())
         mModifiedAbilities.insert(abilityIt.first);
 }
 
@@ -162,29 +167,6 @@ void CharacterComponent::update(Entity &entity)
     // Dead character: don't regenerate anything else
     if (entity.getComponent<BeingComponent>()->getAction() == DEAD)
         return;
-
-    // Update ability recharge
-    for (auto &it : mAbilities)
-    {
-        AbilityValue &s = it.second;
-        if (s.abilityInfo->rechargeable &&
-            s.currentPoints < s.abilityInfo->neededPoints)
-        {
-            auto *beingComponent = entity.getComponent<BeingComponent>();
-            const double rechargeSpeed = beingComponent->getModifiedAttribute(
-                    s.abilityInfo->rechargeAttribute);
-            s.currentPoints += (int)rechargeSpeed;
-            if (s.currentPoints >= s.abilityInfo->neededPoints &&
-                    s.abilityInfo->rechargedCallback.isValid())
-            {
-                Script *script = ScriptManager::currentState();
-                script->prepare(s.abilityInfo->rechargedCallback);
-                script->push(&entity);
-                script->push(s.abilityInfo->id);
-                script->execute(entity.getMap());
-            }
-        }
-    }
 
     if (!mModifiedAbilities.empty())
         sendAbilityUpdate(entity);
@@ -227,117 +209,22 @@ void CharacterComponent::respawn(Entity &entity)
                            Point(spawnX, spawnY));
 }
 
-bool CharacterComponent::abilityUseCheck(AbilityMap::iterator it)
+void CharacterComponent::abilityStatusChanged(int id)
 {
-    if (it == mAbilities.end())
-    {
-        LOG_INFO("Character uses ability " << it->first
-                 << " without authorization.");
-        return false;
-    }
-
-    //check if the ability is currently recharged
-    AbilityValue &ability = it->second;
-    if (ability.abilityInfo->rechargeable &&
-            ability.currentPoints < ability.abilityInfo->neededPoints)
-    {
-        LOG_INFO("Character uses ability " << it->first
-                 << " which is not recharged. ("
-                 << ability.currentPoints << "/"
-                 << ability.abilityInfo->neededPoints << ")");
-        return false;
-    }
-
-    if (!ability.abilityInfo->useCallback.isValid())
-    {
-        LOG_WARN("No callback for use of ability "
-                 << ability.abilityInfo->categoryName << "/"
-                 << ability.abilityInfo->name << ". Ignoring ability.");
-        return false;
-    }
-    return true;
-}
-
-void CharacterComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
-{
-    AbilityMap::iterator it = mAbilities.find(id);
-    if (!abilityUseCheck(it))
-            return;
-    AbilityValue &ability = it->second;
-
-    if (ability.abilityInfo->target != AbilityManager::TARGET_BEING)
-        return;
-
-    //tell script engine to cast the spell
-    Script *script = ScriptManager::currentState();
-    script->prepare(ability.abilityInfo->useCallback);
-    script->push(&user);
-    script->push(b);
-    script->push(ability.abilityInfo->id);
-    script->execute(user.getMap());
-}
-
-void CharacterComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
-{
-    AbilityMap::iterator it = mAbilities.find(id);
-    if (!abilityUseCheck(it))
-            return;
-    AbilityValue &ability = it->second;
-
-    if (ability.abilityInfo->target != AbilityManager::TARGET_POINT)
-        return;
-
-    //tell script engine to cast the spell
-    Script *script = ScriptManager::currentState();
-    script->prepare(ability.abilityInfo->useCallback);
-    script->push(&user);
-    script->push(x);
-    script->push(y);
-    script->push(ability.abilityInfo->id);
-    script->execute(user.getMap());
-}
-
-bool CharacterComponent::giveAbility(int id, int currentPoints)
-{
-    if (mAbilities.find(id) == mAbilities.end())
-    {
-        const AbilityManager::AbilityInfo *abilityInfo =
-                abilityManager->getAbilityInfo(id);
-        if (!abilityInfo)
-        {
-            LOG_ERROR("Tried to give not existing ability id " << id << ".");
-            return false;
-        }
-        mAbilities.insert(std::pair<int, AbilityValue>(
-                             id, AbilityValue(currentPoints, abilityInfo)));
-
-        mModifiedAbilities.insert(id);
-        return true;
-    }
-    return false;
-}
-
-bool CharacterComponent::setAbilityMana(int id, int mana)
-{
-    AbilityMap::iterator it = mAbilities.find(id);
-    if (it != mAbilities.end())
-    {
-        it->second.currentPoints = mana;
-        mModifiedAbilities.insert(id);
-        return true;
-    }
-    return false;
+    mModifiedAbilities.insert(id);
 }
 
 void CharacterComponent::sendAbilityUpdate(Entity &entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
 
+    auto &abilities = entity.getComponent<AbilityComponent>()->getAbilities();
+
     MessageOut msg(GPMSG_ABILITY_STATUS);
     for (unsigned id : mModifiedAbilities)
     {
-        auto it = mAbilities.find(id);
-        if (it == mAbilities.end())
+        auto it = abilities.find(id);
+        if (it == abilities.end())
             continue; // got deleted
 
         const double rechargeSpeed = beingComponent->getModifiedAttribute(
@@ -478,13 +365,6 @@ void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
         Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
         knuckleDamage.base = beingComponent->getModifiedAttribute(ATTR_STR);
         knuckleDamage.delta = knuckleDamage.base / 2;
-    }
-
-    for (auto &abilityIt : mAbilities)
-    {
-        // Inform the client about rechargespeed changes
-        if (abilityIt.second.abilityInfo->rechargeAttribute == attr)
-            mModifiedAbilities.insert(abilityIt.first);
     }
 }
 
@@ -729,26 +609,6 @@ void CharacterComponent::disconnected(Entity &entity)
 
     signal_disconnected.emit(entity);
 }
-
-bool CharacterComponent::takeAbility(int id)
-{
-    AbilityMap::iterator i = mAbilities.find(id);
-    if (i != mAbilities.end())
-    {
-        mAbilities.erase(i);
-        MessageOut msg(GPMSG_ABILITY_REMOVED);
-        msg.writeInt8(id);
-        gameHandler->sendTo(mClient, msg);
-        return true;
-    }
-    return false;
-}
-
-void CharacterComponent::clearAbilities()
-{
-    mAbilities.clear();
-}
-
 void CharacterComponent::triggerLoginCallback(Entity &entity)
 {
     executeCallback(mLoginCallback, entity);

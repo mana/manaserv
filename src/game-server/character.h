@@ -25,6 +25,7 @@
 #include "common/inventorydata.h"
 #include "common/manaserv_protocol.h"
 
+#include "game-server/abilitycomponent.h"
 #include "game-server/being.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/mapmanager.h"
@@ -45,23 +46,6 @@ class MessageIn;
 class MessageOut;
 class Point;
 class Trade;
-
-struct AbilityValue
-{
-    AbilityValue(unsigned currentMana,
-                 const AbilityManager::AbilityInfo *abilityInfo)
-        : currentPoints(currentMana)
-        , abilityInfo(abilityInfo)
-    {}
-
-    unsigned currentPoints;
-    const AbilityManager::AbilityInfo *abilityInfo;
-};
-
-/**
- * Stores abilities by their id.
- */
-typedef std::map<unsigned, AbilityValue> AbilityMap;
 
 
 class CharacterData
@@ -158,48 +142,6 @@ class CharacterComponent : public Component
          * makes the character respawn
          */
         void respawn(Entity &entity);
-
-        /**
-         * makes the character perform a ability on a being
-         * when it is allowed to do so
-         */
-        void useAbilityOnBeing(Entity &user, int id, Entity *b);
-
-        /**
-         * makes the character perform a ability on a map point
-         * when it is allowed to do so
-         */
-        void useAbilityOnPoint(Entity &user, int id, int x, int y);
-
-        /**
-         * Allows a character to perform a ability
-         */
-        bool giveAbility(int id, int currentMana = 0);
-
-        /**
-         * Sets new current mana + makes sure that the client will get informed.
-         */
-        bool setAbilityMana(int id, int mana);
-
-        /**
-         * Gets the ability value by id
-         */
-        AbilityMap::iterator findAbility(int id)
-        { return mAbilities.find(id); }
-        /**
-         * Removes all abilities from character
-         */
-        void clearAbilities();
-
-        /**
-         * Checks if a character knows a ability action
-         */
-        bool hasAbility(int id) { return mAbilities.find(id) != mAbilities.end(); }
-
-        /**
-         * Removes an available ability action
-         */
-        bool takeAbility(int id);
 
         /**
          * Gets client computer.
@@ -348,18 +290,6 @@ class CharacterComponent : public Component
         { mKillCount[monsterId] = kills; }
 
         /**
-         * Used to serialize abilities.
-         */
-        int getAbilitiesSize() const
-        { return mAbilities.size(); }
-
-        const AbilityMap::const_iterator getAbilitiesBegin() const
-        { return mAbilities.begin(); }
-
-        const AbilityMap::const_iterator getAbilitiesEnd() const
-        { return mAbilities.end(); }
-
-        /**
          * Gets total accumulated exp for skill.
          */
         int getExperience(int skill) const
@@ -462,8 +392,6 @@ class CharacterComponent : public Component
         sigc::signal<void, Entity &> signal_disconnected;
 
     private:
-        bool abilityUseCheck(AbilityMap::iterator it);
-
         double getAttrBase(AttributeMap::const_iterator it) const
         { return it->second.getBase(); }
         double getAttrMod(AttributeMap::const_iterator it) const
@@ -500,6 +428,8 @@ class CharacterComponent : public Component
          */
         void recalculateLevel(Entity &entity);
 
+        void abilityStatusChanged(int id);
+
         /**
          * Informs the client about his characters abilities charge status
          */
@@ -527,7 +457,6 @@ class CharacterComponent : public Component
 
         std::map<int, int> mExperience; /**< experience collected for each skill.*/
 
-        AbilityMap mAbilities;
         std::set<unsigned> mModifiedAbilities;
 
         int mDatabaseID;             /**< Character's database ID. */
@@ -738,27 +667,27 @@ inline void CharacterData::setKillCount(int monsterId, int kills)
 
 inline void CharacterData::clearAbilities()
 {
-    mCharacterComponent->clearAbilities();
+    mEntity->getComponent<AbilityComponent>()->clearAbilities();
 }
 
 inline void CharacterData::giveAbility(int id, int mana)
 {
-    mCharacterComponent->giveAbility(id, mana);
+    mEntity->getComponent<AbilityComponent>()->giveAbility(id, mana);
 }
 
 inline int CharacterData::getAbilitySize() const
 {
-    return mCharacterComponent->getAbilitiesSize();
+    return mEntity->getComponent<AbilityComponent>()->getAbilities().size();
 }
 
 inline AbilityMap::const_iterator CharacterData::getAbilityBegin() const
 {
-    return mCharacterComponent->getAbilitiesBegin();
+    return mEntity->getComponent<AbilityComponent>()->getAbilities().begin();
 }
 
 inline AbilityMap::const_iterator CharacterData::getAbilityEnd() const
 {
-    return mCharacterComponent->getAbilitiesEnd();
+    return mEntity->getComponent<AbilityComponent>()->getAbilities().end();
 }
 
 inline Possessions &CharacterData::getPossessions() const
