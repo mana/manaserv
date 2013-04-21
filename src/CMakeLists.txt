@@ -197,6 +197,8 @@ SET(SRCS_MANASERVGAME
     game-server/main-game.cpp
     common/permissionmanager.h
     common/permissionmanager.cpp
+    game-server/abilitycomponent.cpp
+    game-server/abilitycomponent.h
     game-server/abilitymanager.cpp
     game-server/abilitymanager.h
     game-server/accountconnection.h

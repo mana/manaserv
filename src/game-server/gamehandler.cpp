@@ -702,9 +702,9 @@ void GameHandler::handleUseAbilityOnBeing(GameClient &client, MessageIn &message
             client.character->getComponent<ActorComponent>()->getPublicID();
     LOG_DEBUG("Character " << publicId
               << " tries to use his ability " << abilityID);
-    auto *characterComponent = client.character
-            ->getComponent<CharacterComponent>();
-    characterComponent->useAbilityOnBeing(*client.character, abilityID, being);
+    auto *abilityComponent = client.character
+            ->getComponent<AbilityComponent>();
+    abilityComponent->useAbilityOnBeing(*client.character, abilityID, being);
 }
 
 void GameHandler::handleUseAbilityOnPoint(GameClient &client, MessageIn &message)
@@ -720,9 +720,9 @@ void GameHandler::handleUseAbilityOnPoint(GameClient &client, MessageIn &message
             client.character->getComponent<ActorComponent>()->getPublicID();
     LOG_DEBUG("Character " << publicId
               << " tries to use his ability attack " << abilityID);
-    auto *characterComponent = client.character
-            ->getComponent<CharacterComponent>();
-    characterComponent->useAbilityOnPoint(*client.character, abilityID, x, y);
+    auto *abilityComponent = client.character
+            ->getComponent<AbilityComponent>();
+    abilityComponent->useAbilityOnPoint(*client.character, abilityID, x, y);
 }
 
 void GameHandler::handleActionChange(GameClient &client, MessageIn &message)

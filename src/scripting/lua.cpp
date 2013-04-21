@@ -1295,7 +1295,7 @@ static int entity_set_ability_mana(lua_State *s)
     Entity *c = checkCharacter(s, 1);
     const int ability = checkAbility(s, 2);
     const int mana = luaL_checkint(s, 3);
-    if (!c->getComponent<CharacterComponent>()->setAbilityMana(ability, mana))
+    if (!c->getComponent<AbilityComponent>()->setAbilityMana(ability, mana))
     {
         luaL_error(s,
                    "set_ability_mana called with ability "
@@ -1317,10 +1317,10 @@ static int entity_set_ability_mana(lua_State *s)
 static int entity_get_ability_mana(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    auto *characterComponent = c->getComponent<CharacterComponent>();
+    auto *abilityComponent = c->getComponent<AbilityComponent>();
     const int ability = checkAbility(s, 2);
-    AbilityMap::iterator it = characterComponent->findAbility(ability);
-    luaL_argcheck(s, it != characterComponent->getAbilitiesEnd(), 2,
+    AbilityMap::iterator it = abilityComponent->findAbility(ability);
+    luaL_argcheck(s, it != abilityComponent->getAbilities().end(), 2,
                   "character does not have ability");
     lua_pushinteger(s, it->second.currentPoints);
     return 1;
@@ -2301,7 +2301,7 @@ static int entity_give_ability(lua_State *s)
     const int ability = checkAbility(s, 2);
     const int currentMana = luaL_optint(s, 3, 0);
 
-    c->getComponent<CharacterComponent>()->giveAbility(ability, currentMana);
+    c->getComponent<AbilityComponent>()->giveAbility(ability, currentMana);
     return 0;
 }
 
@@ -2317,7 +2317,7 @@ static int entity_has_ability(lua_State *s)
     Entity *c = checkCharacter(s, 1);
     const int ability = luaL_checkint(s, 2);
 
-    lua_pushboolean(s, c->getComponent<CharacterComponent>()->hasAbility(ability));
+    lua_pushboolean(s, c->getComponent<AbilityComponent>()->hasAbility(ability));
     return 1;
 }
 
@@ -2336,9 +2336,9 @@ static int entity_take_ability(lua_State *s)
     Entity *c = checkCharacter(s, 1);
     const int ability = luaL_checkint(s, 2);
 
-    CharacterComponent *cc = c->getComponent<CharacterComponent>();
-    lua_pushboolean(s, cc->hasAbility(ability));
-    cc->takeAbility(ability);
+    auto *abilityComponent = c->getComponent<AbilityComponent>();
+    lua_pushboolean(s, abilityComponent->hasAbility(ability));
+    abilityComponent->takeAbility(ability);
     return 1;
 }
 
