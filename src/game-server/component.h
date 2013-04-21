@@ -27,6 +27,7 @@ class Entity;
 
 enum ComponentType
 {
+    CT_Ability,
     CT_Actor,
     CT_Character,
     CT_Being,
