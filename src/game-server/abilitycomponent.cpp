@@ -120,6 +120,11 @@ void AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
     if (ability.abilityInfo->target != AbilityManager::TARGET_BEING)
         return;
 
+    if (ability.abilityInfo->autoconsume) {
+        ability.currentPoints = 0;
+        signal_ability_changed.emit(id);
+    }
+
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
     script->prepare(ability.abilityInfo->useCallback);
@@ -142,6 +147,11 @@ void AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
 
     if (ability.abilityInfo->target != AbilityManager::TARGET_POINT)
         return;
+
+    if (ability.abilityInfo->autoconsume) {
+        ability.currentPoints = 0;
+        signal_ability_changed.emit(id);
+    }
 
     //tell script engine to cast the spell
     Script *script = ScriptManager::currentState();
