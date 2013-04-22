@@ -45,6 +45,7 @@ public:
             rechargeable(false),
             rechargeAttribute(0),
             neededPoints(0),
+            autoconsume(true),
             target(TARGET_BEING)
         {}
 
@@ -54,6 +55,7 @@ public:
         bool rechargeable;
         unsigned rechargeAttribute;
         unsigned neededPoints;
+        bool autoconsume;
         TargetMode target;
         Script::Ref rechargedCallback;
         Script::Ref useCallback;

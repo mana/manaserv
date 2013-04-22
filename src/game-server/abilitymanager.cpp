@@ -100,6 +100,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
     int neededMana = XML::getProperty(abilityNode, "needed", 0);
     int rechargeAttribute = XML::getProperty(abilityNode,
                                              "rechargeattribute", 0);
+    bool autoconsume = XML::getBoolProperty(abilityNode, "autoconsume", true);
 
     if (rechargeable && neededMana <= 0)
     {
@@ -117,6 +118,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
     newInfo->rechargeable = rechargeable;
     newInfo->neededPoints = neededMana;
     newInfo->rechargeAttribute = rechargeAttribute;
+    newInfo->autoconsume = autoconsume;
 
     newInfo->target = getTargetByString(XML::getProperty(abilityNode, "target",
                                                          std::string()));
