@@ -23,6 +23,7 @@
 
 #include "game-server/abilitymanager.h"
 #include "game-server/component.h"
+#include "game-server/timeout.h"
 
 #include <sigc++/signal.h>
 
@@ -65,12 +66,18 @@ public:
 
     bool setAbilityMana(int id, int mana);
 
+    void startCooldown(Entity &entity,
+                       const AbilityManager::AbilityInfo *abilityInfo);
+    int remainingCooldown() const;
+
     sigc::signal<void, int> signal_ability_changed;
     sigc::signal<void, int> signal_ability_took;
-
+    sigc::signal<void> signal_cooldown_activated;
 private:
     bool abilityUseCheck(AbilityMap::iterator it);
     void attributeChanged(Entity *entity, unsigned attr);
+
+    Timeout mCooldown;
 
     AbilityMap mAbilities;
 };
@@ -103,6 +110,11 @@ inline bool AbilityComponent::hasAbility(int id) const
 inline const AbilityMap &AbilityComponent::getAbilities() const
 {
     return mAbilities;
+}
+
+inline int AbilityComponent::remainingCooldown() const
+{
+    return mCooldown.remaining();
 }
 
 #endif /* ABILITYCOMPONENT_H_ */

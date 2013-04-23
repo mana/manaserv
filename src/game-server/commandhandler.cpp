@@ -1710,7 +1710,7 @@ static void handleRechargeAbility(Entity *player, std::string &args)
     else
         abilityId = abilityManager->getId(ability);
 
-    AbilityManager::AbilityInfo *info =
+    const AbilityManager::AbilityInfo *info =
             abilityManager->getAbilityInfo(abilityId);
 
     if (!info)

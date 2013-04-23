@@ -77,6 +77,9 @@ bool AbilityComponent::takeAbility(int id)
 
 bool AbilityComponent::abilityUseCheck(AbilityMap::iterator it)
 {
+    if (!mCooldown.expired())
+        return false;
+
     if (it == mAbilities.end())
     {
         LOG_INFO("Character uses ability " << it->first
@@ -123,6 +126,7 @@ void AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
     if (ability.abilityInfo->autoconsume) {
         ability.currentPoints = 0;
         signal_ability_changed.emit(id);
+        startCooldown(user, ability.abilityInfo);
     }
 
     //tell script engine to cast the spell
@@ -151,6 +155,7 @@ void AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
     if (ability.abilityInfo->autoconsume) {
         ability.currentPoints = 0;
         signal_ability_changed.emit(id);
+        startCooldown(user, ability.abilityInfo);
     }
 
     //tell script engine to cast the spell
@@ -199,6 +204,15 @@ bool AbilityComponent::setAbilityMana(int id, int mana)
         return true;
     }
     return false;
+}
+
+void AbilityComponent::startCooldown(
+        Entity &entity, const AbilityManager::AbilityInfo *abilityInfo)
+{
+    unsigned cooldownAttribute = abilityInfo->cooldownAttribute;
+    auto *bc = entity.getComponent<BeingComponent>();
+    mCooldown.set((int)bc->getModifiedAttribute(cooldownAttribute));
+    signal_cooldown_activated.emit();
 }
 
 void AbilityComponent::attributeChanged(Entity *entity, unsigned attr)

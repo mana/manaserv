@@ -82,6 +82,7 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mLevelProgress(0),
     mUpdateLevelProgress(false),
     mRecalculateLevel(true),
+    mSendAbilityCooldown(false),
     mParty(0),
     mTransaction(TRANS_NONE),
     mTalkNpcId(0),
@@ -127,10 +128,14 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mKnuckleAttackInfo = new AttackInfo(0, knuckleDamage, 7, 3, 0);
     combatcomponent->addAttack(mKnuckleAttackInfo);
 
+
     auto *abilityComponent = new AbilityComponent(entity);
     entity.addComponent(abilityComponent);
     abilityComponent->signal_ability_changed.connect(
             sigc::mem_fun(this, &CharacterComponent::abilityStatusChanged));
+    abilityComponent->signal_cooldown_activated.connect(
+            sigc::mem_fun(this,
+                          &CharacterComponent::abilityCooldownActivated));
 
     // Get character data.
     mDatabaseID = msg.readInt32();
@@ -170,6 +175,9 @@ void CharacterComponent::update(Entity &entity)
 
     if (!mModifiedAbilities.empty())
         sendAbilityUpdate(entity);
+
+    if (mSendAbilityCooldown)
+        sendAbilityCooldownUpdate(entity);
 }
 
 void CharacterComponent::characterDied(Entity *being)
@@ -214,6 +222,11 @@ void CharacterComponent::abilityStatusChanged(int id)
     mModifiedAbilities.insert(id);
 }
 
+void CharacterComponent::abilityCooldownActivated()
+{
+    mSendAbilityCooldown = true;
+}
+
 void CharacterComponent::sendAbilityUpdate(Entity &entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
@@ -238,6 +251,15 @@ void CharacterComponent::sendAbilityUpdate(Entity &entity)
 
     mModifiedAbilities.clear();
     gameHandler->sendTo(mClient, msg);
+}
+
+void CharacterComponent::sendAbilityCooldownUpdate(Entity &entity)
+{
+    MessageOut msg(GPMSG_ABILITY_COOLDOWN);
+    auto *abilityComponent = entity.getComponent<AbilityComponent>();
+    msg.writeInt16(abilityComponent->remainingCooldown());
+    gameHandler->sendTo(mClient, msg);
+    mSendAbilityCooldown = false;
 }
 
 void CharacterComponent::cancelTransaction()

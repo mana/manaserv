@@ -46,6 +46,9 @@ local function recalculate_base_attribute(being, attribute)
     elseif attribute == ATTR_INV_CAPACITY then
         -- Provisional
         new_base = 2000 + being:modified_attribute(ATTR_STR) * 180
+    elseif attribute == ATTR_ABILITY_COOLDOWN then
+        -- Provisional
+        new_base = 100 - being:modified_attribute(ATTR_WIL)
     end
 
     if new_base ~= old_base then
@@ -66,7 +69,7 @@ local function update_derived_attributes(being, attribute)
     elseif attribute == ATTR_INT then
         -- unimplemented
     elseif attribute == ATTR_WIL then
-        -- unimplemented
+        recalculate_base_attribute(being, ATTR_ABILITY_COOLDOWN)
     end
 end
 

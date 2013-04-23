@@ -172,5 +172,11 @@
         player-info="max-weight" >
          <modifier stacktype="stackable" modtype="additive" tag="cap1" effect="Capacity %+.2f" />
     </attribute>
+    <attribute id="20" name="Global ability cooldown"
+        desc="The time in ticks until any ability can be used again after one was used"
+        modifiable="false"
+        scope="being"
+        minimum="0"
+        maximum="100" />
     <!-- End of core-attributes definition -->
 </attributes>
