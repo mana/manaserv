@@ -84,6 +84,8 @@ ATTR_MOVE_SPEED_RAW = 17;
 ATTR_GP = 18;
 ATTR_INV_CAPACITY = 19;
 
+ATTR_ABILITY_COOLDOWN = 20;
+
 
 -- Emotes - TODO: should be obtainable in a smarter way
 EMOTE_DISGUST = 10000;

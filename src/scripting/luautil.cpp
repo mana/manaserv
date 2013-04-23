@@ -223,14 +223,16 @@ int checkSkill(lua_State *s, int p)
     return id;
 }
 
-int checkAbility(lua_State *s, int p)
+AbilityManager::AbilityInfo *checkAbility(lua_State *s, int p)
 {
+    AbilityManager::AbilityInfo *abilityInfo;
     if (lua_isnumber(s, p))
-        return luaL_checkint(s, p);
+        abilityInfo = abilityManager->getAbilityInfo(luaL_checkint(s, p));
+    else
+        abilityInfo = abilityManager->getAbilityInfo(luaL_checkstring(s, p));
 
-    int id = abilityManager->getId(luaL_checkstring(s, p));
-    luaL_argcheck(s, id != 0, p, "invalid ability name");
-    return id;
+    luaL_argcheck(s, abilityInfo != nullptr, p, "invalid ability");
+    return abilityInfo;
 }
 
 

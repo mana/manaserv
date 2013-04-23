@@ -100,6 +100,8 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
     int neededMana = XML::getProperty(abilityNode, "needed", 0);
     int rechargeAttribute = XML::getProperty(abilityNode,
                                              "rechargeattribute", 0);
+    int cooldownAttribute = XML::getProperty(abilityNode,
+                                             "cooldownattribute", 0);
     bool autoconsume = XML::getBoolProperty(abilityNode, "autoconsume", true);
 
     if (rechargeable && neededMana <= 0)
@@ -118,6 +120,7 @@ void AbilityManager::readAbilityNode(xmlNodePtr abilityNode,
     newInfo->rechargeable = rechargeable;
     newInfo->neededPoints = neededMana;
     newInfo->rechargeAttribute = rechargeAttribute;
+    newInfo->cooldownAttribute = cooldownAttribute;
     newInfo->autoconsume = autoconsume;
 
     newInfo->target = getTargetByString(XML::getProperty(abilityNode, "target",
@@ -177,8 +180,25 @@ const std::string AbilityManager::getCategoryName(int id) const
     return it != mAbilitiesInfo.end() ? it->second->categoryName : "";
 }
 
-AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(int id)
+AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(int id) const
 {
     AbilitiesInfo::const_iterator it = mAbilitiesInfo.find(id);
     return it != mAbilitiesInfo.end() ? it->second : 0;
+}
+
+AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(
+        const std::string &category,
+        const std::string &name) const
+{
+    std::string key = utils::toLower(category) + "_" + utils::toLower(name);
+    return getAbilityInfo(key);
+}
+
+AbilityManager::AbilityInfo *AbilityManager::getAbilityInfo(
+        const std::string &abilityName) const
+{
+    if (mNamedAbilitiesInfo.contains(abilityName))
+        return mNamedAbilitiesInfo.value(abilityName);
+    else
+        return 0;
 }
