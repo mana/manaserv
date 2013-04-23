@@ -429,11 +429,14 @@ class CharacterComponent : public Component
         void recalculateLevel(Entity &entity);
 
         void abilityStatusChanged(int id);
+        void abilityCooldownActivated();
 
         /**
          * Informs the client about his characters abilities charge status
          */
         void sendAbilityUpdate(Entity &entity);
+
+        void sendAbilityCooldownUpdate(Entity &entity);
 
         enum TransactionType
         { TRANS_NONE, TRANS_TRADE, TRANS_BUYSELL };
@@ -468,6 +471,7 @@ class CharacterComponent : public Component
         int mCorrectionPoints;       /**< Unused attribute correction points */
         bool mUpdateLevelProgress;   /**< Flag raised when percent to next level changed */
         bool mRecalculateLevel;      /**< Flag raised when the character level might have increased */
+        bool mSendAbilityCooldown;
         unsigned char mAccountLevel; /**< Account level of the user. */
         int mParty;                  /**< Party id of the character */
         TransactionType mTransaction; /**< Trade/buy/sell action the character is involved in. */

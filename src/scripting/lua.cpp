@@ -1293,9 +1293,10 @@ static int chr_set_quest(lua_State *s)
 static int entity_set_ability_mana(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
-    const int ability = checkAbility(s, 2);
+    auto *abilityInfo = checkAbility(s, 2);
     const int mana = luaL_checkint(s, 3);
-    if (!c->getComponent<AbilityComponent>()->setAbilityMana(ability, mana))
+    if (!c->getComponent<AbilityComponent>()->setAbilityMana(abilityInfo->id,
+                                                             mana))
     {
         luaL_error(s,
                    "set_ability_mana called with ability "
@@ -1318,12 +1319,33 @@ static int entity_get_ability_mana(lua_State *s)
 {
     Entity *c = checkCharacter(s, 1);
     auto *abilityComponent = c->getComponent<AbilityComponent>();
-    const int ability = checkAbility(s, 2);
-    AbilityMap::iterator it = abilityComponent->findAbility(ability);
+    auto *abilityInfo = checkAbility(s, 2);
+    AbilityMap::iterator it = abilityComponent->findAbility(abilityInfo->id);
     luaL_argcheck(s, it != abilityComponent->getAbilities().end(), 2,
                   "character does not have ability");
     lua_pushinteger(s, it->second.currentPoints);
     return 1;
+}
+
+/** LUA entity:cooldown_ability (being)
+ * entity:cooldown_ability(int abilityid)
+ * entity:cooldown_ability(string abilityname)
+ **
+ * Starts the cooldown of the passed ability. No other ability will be useable
+ * in this time.
+ *
+ * You do not need to call this if the attribute is set to ''autoconsume''.
+ *
+ * **Note:** When passing the ''abilityname'' as parameter make sure that it is
+ * formatted in this way: <setname>_<abilityname> (for eg. "Magic_Healingspell").
+ */
+static int entity_cooldown_ability(lua_State *s)
+{
+    Entity *c = checkCharacter(s, 1);
+    auto *abilityComponent = c->getComponent<AbilityComponent>();
+    auto *abilityInfo = checkAbility(s, 2);
+    abilityComponent->startCooldown(*c, abilityInfo);
+    return 0;
 }
 
 /** LUA entity:walk (being)
@@ -2298,10 +2320,11 @@ static int entity_give_ability(lua_State *s)
 {
     // cost_type is ignored until we have more than one cost type
     Entity *c = checkCharacter(s, 1);
-    const int ability = checkAbility(s, 2);
+    auto *abilityInfo = checkAbility(s, 2);
     const int currentMana = luaL_optint(s, 3, 0);
 
-    c->getComponent<AbilityComponent>()->giveAbility(ability, currentMana);
+    c->getComponent<AbilityComponent>()->giveAbility(abilityInfo->id,
+                                                     currentMana);
     return 0;
 }
 
@@ -2864,11 +2887,8 @@ static int get_distance(lua_State *s)
  */
 static int get_ability_info(lua_State *s)
 {
-    const int ability = checkAbility(s, 1);
-    AbilityManager::AbilityInfo *info =
-            abilityManager->getAbilityInfo(ability);
-    luaL_argcheck(s, info, 1, "invalid ability");
-    LuaAbilityInfo::push(s, info);
+    auto *abilityInfo = checkAbility(s, 1);
+    LuaAbilityInfo::push(s, abilityInfo);
     return 1;
 }
 
@@ -2882,7 +2902,7 @@ static int get_ability_info(lua_State *s)
  */
 static int abilityinfo_get_name(lua_State *s)
 {
-    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     push(s, info->name);
     return 1;
 }
@@ -2897,7 +2917,7 @@ static int abilityinfo_get_name(lua_State *s)
  */
 static int abilityinfo_get_needed_mana(lua_State *s)
 {
-    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     lua_pushinteger(s, info->neededPoints);
     return 1;
 }
@@ -2913,7 +2933,7 @@ static int abilityinfo_get_needed_mana(lua_State *s)
  */
 static int abilityinfo_is_rechargeable(lua_State *s)
 {
-    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     lua_pushboolean(s, info->rechargeable);
     return 1;
 }
@@ -2929,7 +2949,7 @@ static int abilityinfo_is_rechargeable(lua_State *s)
  */
 static int abilityinfo_on_use(lua_State *s)
 {
-    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     Script *script = getScript(s);
     luaL_checktype(s, 2, LUA_TFUNCTION);
     script->assignCallback(info->useCallback);
@@ -2947,7 +2967,7 @@ static int abilityinfo_on_use(lua_State *s)
  */
 static int abilityinfo_on_recharged(lua_State *s)
 {
-    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     Script *script = getScript(s);
     luaL_checktype(s, 2, LUA_TFUNCTION);
     script->assignCallback(info->rechargedCallback);
@@ -2965,7 +2985,7 @@ static int abilityinfo_on_recharged(lua_State *s)
  */
 static int abilitiyinfo_get_category(lua_State *s)
 {
-    AbilityManager::AbilityInfo *info = LuaAbilityInfo::check(s, 1);
+    auto *info = LuaAbilityInfo::check(s, 1);
     push(s, info->categoryName);
     return 1;
 }
@@ -3685,6 +3705,7 @@ LuaScript::LuaScript():
         { "unequip_item",                   entity_unequip_item               },
         { "set_ability_mana",               entity_set_ability_mana           },
         { "ability_mana",                   entity_get_ability_mana           },
+        { "cooldown_ability",               entity_cooldown_ability           },
         { "walk",                           entity_walk                       },
         { "damage",                         entity_damage                     },
         { "heal",                           entity_heal                       },

@@ -44,6 +44,7 @@ public:
             id(0),
             rechargeable(false),
             rechargeAttribute(0),
+            cooldownAttribute(0),
             neededPoints(0),
             autoconsume(true),
             target(TARGET_BEING)
@@ -54,6 +55,7 @@ public:
         std::string categoryName;
         bool rechargeable;
         unsigned rechargeAttribute;
+        unsigned cooldownAttribute;
         unsigned neededPoints;
         bool autoconsume;
         TargetMode target;
@@ -91,7 +93,10 @@ public:
     const std::string getAbilityName(int id) const;
     const std::string getCategoryName(int id) const;
 
-    AbilityInfo *getAbilityInfo(int id);
+    AbilityInfo *getAbilityInfo(int id) const;
+    AbilityInfo *getAbilityInfo(const std::string &category,
+                                const std::string &name) const;
+    AbilityInfo *getAbilityInfo(const std::string &abilityName) const;
 
 
     void readAbilityCategoryNode(xmlNodePtr node, const std::string &filename);
