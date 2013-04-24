@@ -27,7 +27,9 @@
 
 #include "utils/logger.h"
 
-AbilityComponent::AbilityComponent(Entity &entity)
+AbilityComponent::AbilityComponent(Entity &entity):
+    mLastUsedAbilityId(0),
+    mLastTargetBeingId(0)
 {
     entity.getComponent<BeingComponent>()->signal_attribute_changed.connect(
             sigc::mem_fun(this, &AbilityComponent::attributeChanged));
@@ -136,6 +138,14 @@ void AbilityComponent::useAbilityOnBeing(Entity &user, int id, Entity *b)
     script->push(b);
     script->push(ability.abilityInfo->id);
     script->execute(user.getMap());
+
+    mLastUsedAbilityId = id;
+    if (b)
+        mLastTargetBeingId = b->getComponent<ActorComponent>()->getPublicID();
+    else
+        mLastTargetBeingId = 0;
+    user.getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_ABILITY_ON_BEING);
 }
 
 /**
@@ -166,6 +176,11 @@ void AbilityComponent::useAbilityOnPoint(Entity &user, int id, int x, int y)
     script->push(y);
     script->push(ability.abilityInfo->id);
     script->execute(user.getMap());
+
+    mLastUsedAbilityId = id;
+    mLastTargetPoint = Point(x, y);
+    user.getComponent<ActorComponent>()->raiseUpdateFlags(
+            UPDATEFLAG_ABILITY_ON_POINT);
 }
 
 /**
@@ -211,7 +226,10 @@ void AbilityComponent::startCooldown(
 {
     unsigned cooldownAttribute = abilityInfo->cooldownAttribute;
     auto *bc = entity.getComponent<BeingComponent>();
-    mCooldown.set((int)bc->getModifiedAttribute(cooldownAttribute));
+    int cooldown = (int)bc->getModifiedAttribute(cooldownAttribute);
+    // Enforce a minimum cooldown of 1 tick to prevent syncing issues
+    cooldown = std::max(cooldown, 1);
+    mCooldown.set(cooldown);
     signal_cooldown_activated.emit();
 }
 

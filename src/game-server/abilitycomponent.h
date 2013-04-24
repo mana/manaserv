@@ -25,6 +25,8 @@
 #include "game-server/component.h"
 #include "game-server/timeout.h"
 
+#include "utils/point.h"
+
 #include <sigc++/signal.h>
 
 struct AbilityValue
@@ -73,6 +75,11 @@ public:
     sigc::signal<void, int> signal_ability_changed;
     sigc::signal<void, int> signal_ability_took;
     sigc::signal<void> signal_cooldown_activated;
+
+    // For informing clients
+    int getLastUsedAbilityId() const;
+    const Point &getLastTargetPoint() const;
+    int getLastTargetBeingId() const;
 private:
     bool abilityUseCheck(AbilityMap::iterator it);
     void attributeChanged(Entity *entity, unsigned attr);
@@ -80,6 +87,11 @@ private:
     Timeout mCooldown;
 
     AbilityMap mAbilities;
+
+    // Variables required for informing clients
+    int mLastUsedAbilityId;
+    Point mLastTargetPoint;
+    int mLastTargetBeingId;
 };
 
 
@@ -115,6 +127,21 @@ inline const AbilityMap &AbilityComponent::getAbilities() const
 inline int AbilityComponent::remainingCooldown() const
 {
     return mCooldown.remaining();
+}
+
+inline int AbilityComponent::getLastUsedAbilityId() const
+{
+    return mLastUsedAbilityId;
+}
+
+inline const Point &AbilityComponent::getLastTargetPoint() const
+{
+    return mLastTargetPoint;
+}
+
+inline int AbilityComponent::getLastTargetBeingId() const
+{
+    return mLastTargetBeingId;
 }
 
 #endif /* ABILITYCOMPONENT_H_ */
