@@ -228,6 +228,30 @@ static void informPlayer(MapComposite *map, Entity *p)
                 gameHandler->sendTo(p, DirMsg);
             }
 
+            // Send ability uses
+            if (oflags & UPDATEFLAG_ABILITY_ON_POINT)
+            {
+                MessageOut abilityMsg(GPMSG_BEING_ABILITY_POINT);
+                abilityMsg.writeInt16(oid);
+                auto *abilityComponent = o->getComponent<AbilityComponent>();
+                const Point &point = abilityComponent->getLastTargetPoint();
+                abilityMsg.writeInt8(abilityComponent->getLastUsedAbilityId());
+                abilityMsg.writeInt16(point.x);
+                abilityMsg.writeInt16(point.y);
+                gameHandler->sendTo(p, abilityMsg);
+            }
+
+            if (oflags & UPDATEFLAG_ABILITY_ON_BEING)
+            {
+                MessageOut abilityMsg(GPMSG_BEING_ABILITY_BEING);
+                abilityMsg.writeInt16(oid);
+                auto *abilityComponent = o->getComponent<AbilityComponent>();
+                abilityMsg.writeInt8(abilityComponent->getLastUsedAbilityId());
+                abilityMsg.writeInt16(
+                        abilityComponent->getLastTargetBeingId());
+                gameHandler->sendTo(p, abilityMsg);
+            }
+
             // Send damage messages.
             if (o->canFight())
             {

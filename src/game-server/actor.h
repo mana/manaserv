@@ -38,7 +38,9 @@ enum
     UPDATEFLAG_LOOKSCHANGE = 16,
     UPDATEFLAG_DIRCHANGE = 32,
     UPDATEFLAG_HEALTHCHANGE = 64,
-    UPDATEFLAG_EMOTE = 128
+    UPDATEFLAG_EMOTE = 128,
+    UPDATEFLAG_ABILITY_ON_POINT = 256,
+    UPDATEFLAG_ABILITY_ON_BEING = 512
 };
 
 /**
@@ -143,7 +145,7 @@ class ActorComponent : public Component
         unsigned short mMoveTime;
 
     private:
-        char mUpdateFlags;          /**< Changes in actor status. */
+        int mUpdateFlags;           /**< Changes in actor status. */
 
         /** Actor ID sent to clients (unique with respect to the map). */
         unsigned short mPublicID;
