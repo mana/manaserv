@@ -9,6 +9,7 @@
             rechargeattribute="6"
             cooldownattribute="20"
             target="point"
+            useaction="attack"
         />
     </ability-category>
 </abilities>
