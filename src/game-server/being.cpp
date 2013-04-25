@@ -172,82 +172,16 @@ void BeingComponent::updateDirection(Entity &entity,
     // We update the being direction on each tile to permit other beings
     // entering in range to always see the being with a direction value.
 
-    // We first handle simple cases
-
-    // If the character has reached its destination,
-    // don't update the direction since it's only a matter of keeping
-    // the previous one.
     if (currentPos == destPos)
         return;
 
-    if (currentPos.x == destPos.x)
-    {
-        if (currentPos.y > destPos.y)
-            setDirection(entity, UP);
-        else
-            setDirection(entity, DOWN);
-        return;
-    }
+    const int dx = destPos.x - currentPos.x;
+    const int dy = destPos.y - currentPos.y;
 
-    if (currentPos.y == destPos.y)
-    {
-        if (currentPos.x > destPos.x)
-            setDirection(entity, LEFT);
-        else
-            setDirection(entity, RIGHT);
-        return;
-    }
-
-    // Now let's handle diagonal cases
-    // First, find the lower angle:
-    if (currentPos.x < destPos.x)
-    {
-        // Up-right direction
-        if (currentPos.y > destPos.y)
-        {
-            // Compute tan of the angle
-            if ((currentPos.y - destPos.y) / (destPos.x - currentPos.x) < 1)
-                // The angle is less than 45°, we look to the right
-                setDirection(entity, RIGHT);
-            else
-                setDirection(entity, UP);
-            return;
-        }
-        else // Down-right
-        {
-            // Compute tan of the angle
-            if ((destPos.y - currentPos.y) / (destPos.x - currentPos.x) < 1)
-                // The angle is less than 45°, we look to the right
-                setDirection(entity, RIGHT);
-            else
-                setDirection(entity, DOWN);
-            return;
-        }
-    }
+    if (std::abs(dx) > std::abs(dy))
+        setDirection(entity, (dx < 0) ? LEFT : RIGHT);
     else
-    {
-        // Up-left direction
-        if (currentPos.y > destPos.y)
-        {
-            // Compute tan of the angle
-            if ((currentPos.y - destPos.y) / (currentPos.x - destPos.x) < 1)
-                // The angle is less than 45°, we look to the left
-                setDirection(entity, LEFT);
-            else
-                setDirection(entity, UP);
-            return;
-        }
-        else // Down-left
-        {
-            // Compute tan of the angle
-            if ((destPos.y - currentPos.y) / (currentPos.x - destPos.x) < 1)
-                // The angle is less than 45°, we look to the left
-                setDirection(entity, LEFT);
-            else
-                setDirection(entity, DOWN);
-            return;
-        }
-    }
+        setDirection(entity, (dy < 0) ? UP : DOWN);
 }
 
 void BeingComponent::move(Entity &entity)
@@ -300,7 +234,7 @@ void BeingComponent::move(Entity &entity)
      * class has been used, because that seems to be the most logical
      * place extra functionality will be added.
      */
-    for (PathIterator pathIterator = mPath.begin();
+    for (Path::iterator pathIterator = mPath.begin();
             pathIterator != mPath.end(); pathIterator++)
     {
         const unsigned char walkmask =
@@ -652,4 +586,3 @@ void BeingComponent::inserted(Entity *entity)
     // in sync with the zone that we're currently present in.
     mOld = entity->getComponent<ActorComponent>()->getPosition();
 }
-
