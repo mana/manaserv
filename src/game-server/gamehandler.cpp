@@ -347,14 +347,13 @@ void GameHandler::addPendingCharacter(const std::string &token, Entity *ch)
        again, yet the game server has not yet detected the lost connection. */
 
     int id = ch->getComponent<CharacterComponent>()->getDatabaseID();
+
     for (NetComputers::const_iterator i = clients.begin(),
          i_end = clients.end(); i != i_end; ++i)
     {
         GameClient *c = static_cast< GameClient * >(*i);
         Entity *old_ch = c->character;
-        const int oldId = old_ch->getComponent<CharacterComponent>()
-                ->getDatabaseID();
-        if (old_ch && oldId == id)
+        if (old_ch && id == old_ch->getComponent<CharacterComponent>()->getDatabaseID())
         {
             if (c->status != CLIENT_CONNECTED)
             {
