@@ -346,12 +346,6 @@ void ItemManager::readEffectNode(xmlNodePtr effectNode, ItemClass *item)
                                                   duration),
                             triggerType.apply, triggerType.dispell);
         }
-        else if (xmlStrEqual(subNode->name, BAD_CAST "attack"))
-        {
-            AttackInfo *attackInfo = AttackInfo::readAttackNode(subNode);
-            item->addAttack(attackInfo, triggerType.apply, triggerType.dispell);
-
-        }
         // Having a dispell for the next three is nonsensical.
         else if (xmlStrEqual(subNode->name, BAD_CAST "cooldown"))
         {

@@ -33,7 +33,6 @@ extern "C" {
 #include "game-server/buysell.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/effect.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"
@@ -1382,88 +1381,6 @@ static int entity_walk(lua_State *s)
     return 0;
 }
 
-/** LUA entity:damage (being)
- * entity:damage(int damage, int delta,
- *               int accuracy, int type, int element)
- * entity:damage(int damage, int delta, int accuracy,
- *               int type, int element, handle source)
- * entity:damage(int damage, int delta, int accuracy,
- *               int type, int element, handle source, int skill)
- * entity:damage(int damage, int delta, int accuracy,
- *               int type, int element, handle source, string skillname)
- **
- * Valid only for being entities.
- *
- * Inflicts damage to the being. The severity of the attack is between
- * ''damage'' and (''damage'' + ''delta'') and is calculated using the normal
- * [[damage calculation]] rules. The being has a chance to
- * [[hitting and dodging|dodge the attack]] with its
- * [[attributes|agility attribute]]. The ''accuracy'' decides how hard this is.
- *
- * If ''source'' is provided the attack is handled as if the ''source''
- * triggered the damage.
- *
- * If ''skill'' is given the ''owner'' can also recieve XP for the attack. The
- * ''skill'' should be defined in the [[skills.xml|skills.xml]]. If the skill
- * is provided as string (''skillname'') you have to use this format:
- * <setname>_<skillname>. So for example: "Weapons_Unarmed"
- *
- * ''type'' affects which kind of armor and character attributes reduce the
- * damage. It can be one of the following values:
- * | 0 | DAMAGE_PHYSICAL  |
- * | 1 | DAMAGE_MAGICAL  |
- * | 2 | DAMAGE_OTHER  |
- *
- * ''element'' decides how the [[element system]] changes the damage. The
- * following values are possible:
- * | 0 | ELEMENT_NEUTRAL  |
- * | 1 | ELEMENT_FIRE  |
- * | 2 | ELEMENT_WATER  |
- * | 3 | ELEMENT_EARTH  |
- * | 4 | ELEMENT_AIR  |
- * | 5 | ELEMENT_LIGHTNING  |
- * | 6 | ELEMENT_METAL  |
- * | 7 | ELEMENT_WOOD  |
- * | 8 | ELEMENT_ICE  |
- *
- * **Return Value**: Actual HP reduction resulting from the attack.
- */
-static int entity_damage(lua_State *s)
-{
-    Entity *being = checkBeing(s, 1);
-
-    if (!being->canFight())
-    {
-        luaL_error(s, "damage called with victim that cannot fight");
-        return 0;
-    }
-
-    Damage dmg;
-    dmg.base = luaL_checkint(s, 2);
-    dmg.delta = luaL_checkint(s, 3);
-    dmg.cth = luaL_checkint(s, 4);
-    dmg.type = (DamageType)luaL_checkint(s, 5);
-    dmg.element = (Element)luaL_checkint(s, 6);
-    Entity *source = 0;
-    if (lua_gettop(s) >= 7)
-    {
-        source = checkBeing(s, 7);
-
-        if (!source->canFight())
-        {
-            luaL_error(s, "damage called with source that cannot fight");
-            return 0;
-        }
-    }
-    if (lua_gettop(s) >= 8)
-    {
-        dmg.skill = checkSkill(s, 8);
-    }
-    being->getComponent<CombatComponent>()->damage(*being, source, dmg);
-
-    return 0;
-}
-
 /** LUA entity:heal (being)
  * entity:heal([int value])
  **
@@ -1532,10 +1449,9 @@ static int entity_get_type(lua_State *s)
  *
  * | 0 | ACTION_STAND  |
  * | 1 | ACTION_WALK   |
- * | 2 | ACTION_ATTACK |
- * | 3 | ACTION_SIT    |
- * | 4 | ACTION_DEAD   |
- * | 5 | ACTION_HURT   |
+ * | 2 | ACTION_SIT    |
+ * | 3 | ACTION_DEAD   |
+ * | 4 | ACTION_HURT   |
  */
 static int entity_get_action(lua_State *s)
 {
@@ -2398,55 +2314,6 @@ static int entity_get_monster_id(lua_State *s)
     return 1;
 }
 
-/** LUA entity:change_anger (monster)
- * entity:change_anger(handle being, int anger)
- **
- * Valid only for monster entities.
- *
- * Makes the monster more angry about the ''being'' by adding ''anger'' to the
- * being.
- */
-static int entity_change_anger(lua_State *s)
-{
-    Entity *monster = checkMonster(s, 1);
-    Entity *being = checkBeing(s, 2);
-    const int anger = luaL_checkint(s, 3);
-    monster->getComponent<MonsterComponent>()->changeAnger(being, anger);
-    return 0;
-}
-
-/** LUA entity:drop_anger (monster)
- * entity:drop_anger(handle target)
- **
- * Valid only for monster entities.
- *
- * Will drop all anger against the ''target''.
- */
-static int entity_drop_anger(lua_State *s)
-{
-    Entity *monster = checkMonster(s, 1);
-    Entity *being = checkBeing(s, 2);
-    monster->getComponent<MonsterComponent>()->forgetTarget(being);
-    return 0;
-}
-
-/** LUA entity:get_angerlist (monster)
- * entity:get_angerlist()
- **
- * Valid only for monster entities.
- *
- * **Return value:** A table with the beings as key and the anger against them
- * as values.
- */
-static int entity_get_angerlist(lua_State *s)
-{
-    Entity *monster = checkMonster(s, 1);
-    MonsterComponent *monsterComponent =
-            monster->getComponent<MonsterComponent>();
-    pushSTLContainer(s, monsterComponent->getAngerList());
-    return 1;
-}
-
 
 /** LUA_CATEGORY Status effects (statuseffects)
  */
@@ -3071,36 +2938,6 @@ static int monster_class_on_update(lua_State *s)
     return 0;
 }
 
-/** LUA monsterclass:on_damage (monsterclass)
- * monsterclass:on_damage(function callback)
- **
- * Assigns the ''callback'' as callback for the monster damage event.
- * This callback will be called every time when a monster takes damage.
- * The damage can be either invoked from scripts or from other beings such
- * as players. The parameters of the callback are: the attacked monster,
- * the being dealing the damage and the hp loss
- *
- * **Note:** See [[scripting#get_monster_class|get_monster_class]] for getting
- * a monsterclass object.
- *
- * **Example:** <code lua>
- * local function damage(mob, aggressor, hploss)
- *     mob:say("I took damage -.- ".. hploss)
- *     if aggressor then
- *         mob:say("Curse you, ".. aggressor:name())
- *     end
- * end
- * local maggot = get_monster_class("maggot")
- * maggot:on_damage(damage)</code>
- */
-static int monster_class_on_damage(lua_State *s)
-{
-    MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
-    luaL_checktype(s, 2, LUA_TFUNCTION);
-    monsterClass->setDamageCallback(getScript(s));
-    return 0;
-}
-
 /** LUA monsterclass:name (monsterclass)
  * monsterclass:name()
  **
@@ -3110,234 +2947,6 @@ static int monster_class_get_name(lua_State *s)
 {
     MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
     push(s, monsterClass->getName());
-    return 1;
-}
-
-/** LUA monsterclass:attacks (monsterclass)
- * monsterclass:attacks()
- **
- * **Return value:** This function returns a table with all attacks of the
- * monster. See the [[scripting#AttackInfo class|Attack Info]] section.
- */
-static int monster_class_attacks(lua_State *s)
-{
-    MonsterClass *monsterClass = LuaMonsterClass::check(s, 1);
-    pushSTLContainer(s, monsterClass->getAttackInfos());
-    return 1;
-}
-
-
-/** LUA_CATEGORY AttackInfo class (attackinfoclass)
- * The AttackInfo class reveals info about attacks and provides functions to
- * register callbacks on attacks. See the
- * [[attackconfiguration|Attack Configuration]] for more info.
- * To get an AttackInfo use
- * [[scripting#monsterclass:attacks|monsterclass:attacks]] or
- * [[scripting#itemclass:attacks|itemclass:attacks]]
- */
-
-/** LUA attackinfo:priority (attackinfoclass)
- * attackinfo:priority()
- **
- * **Return value:** This function returns the priority of the attack.
- */
-static int attack_get_priority(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getPriority());
-    return 1;
-}
-
-/** LUA attackinfo:cooldowntime (attackinfoclass)
- * attackinfo:cooldowntime()
- **
- * **Return value:** This function returns the cooldowntime (time after dealing
- * damage after which a new attack can be used) of the attack.
- */
-static int attack_get_cooldowntime(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getCooldownTime());
-    return 1;
-}
-
-/** LUA attackinfo:warmuptime (attackinfoclass)
- * attackinfo:warmuptime()
- **
- * **Return value:** This function returns the warmuptime (time before a attack
- * triggers damage after being used) of the attack.
- */
-static int attack_get_warmuptime(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getWarmupTime());
-    return 1;
-}
-
-/** LUA attackinfo:reusetime (attackinfoclass)
- * attackinfo:reusetime()
- **
- * **Return value:** This function returns the reusetime (time after which the
- * same attack can be used again) of the attack.
- */
-static int attack_get_reusetime(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    lua_pushinteger(s, attack->getReuseTime());
-    return 1;
-}
-
-/** LUA attackinfo:damage (attackinfoclass)
- * attackinfo:damage()
- **
- * **Return value:** This function returns the damage info of the attack.
- *
- * **See also:** [[scripting#Damage Class|Damage Class]]
- */
-static int attack_get_damage(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    LuaDamage::push(s, &attack->getDamage());
-    return 1;
-}
-
-/** LUA attackinfo:on_attack (attackinfoclass)
- * attackinfo:on_attack(function callback)
- **
- * Assigns a callback to the attack that will be called as soon the attack is
- * used. The callback will get called with the following parameters:
- * being user, being target, int damage_dealt.
- */
-static int attack_on_attack(lua_State *s)
-{
-    AttackInfo *attack = LuaAttackInfo::check(s, 1);
-    luaL_checktype(s, 2, LUA_TFUNCTION);
-    attack->setCallback(getScript(s));
-    return 0;
-}
-
-
-/** LUA_CATEGORY Damage Class (damageclass)
- * The Damage class provides info about the kind of damage attack deals.
- */
-
-/** LUA damage:id (damageclass)
- * damage:id()
- **
- * **Return value:** This function returns the id of the attack.
- */
-static int damage_get_id(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->id);
-    return 1;
-}
-
-/** LUA damage:skill (damageclass)
- * damage:skill()
- **
- * **Return value:** This function returns the skill id of the attack. If the
- * damage dealer is a character is a character this skill will recieve exp.
- */
-static int damage_get_skill(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->skill);
-    return 1;
-}
-
-/** LUA damage:base (damageclass)
- * damage:base()
- **
- * **Return value:** This function returns the base damage of the attack.
- * It is the minimum of damage dealt.
- */
-static int damage_get_base(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->base);
-    return 1;
-}
-
-/** LUA damage:delta (damageclass)
- * damage:delta()
- **
- * **Return value:** This function returns the damage delta of the attack.
- * base damage + delta damage is the maximum of damage the attack can cause.
- * A number in between will be picked by random.
- */
-static int damage_get_delta(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->delta);
-    return 1;
-}
-
-/** LUA damage:cth (damageclass)
- * damage:cth()
- **
- * **Return value:** This function returns the chance to hit of the attack.
- * This number is not a percent value but some factor. Higher means a better
- * chance to hit. FIXME: Add info about the factor.
- */
-static int damage_get_cth(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->cth);
-    return 1;
-}
-
-/** LUA damage:element (damageclass)
- * damage:element()
- **
- * **Return value:** This function returns the element of the attack.
- *
- * **See:** [[scripting#entitydamage|entity:damage]] for possible values.
- */
-static int damage_get_element(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->element);
-    return 1;
-}
-
-/** LUA damage:type (damageclass)
- * damage:type()
- **
- * **Return value:** This function returns the type of the attack.
- *
- * **See:** [[scripting#entitydamage|entity:damage]] for possible values.
- */
-static int damage_get_type(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->type);
-    return 1;
-}
-
-/** LUA damage:is_truestrike (damageclass)
- * damage:is_truestrike()
- **
- * **Return value:** This function returns whether the attack is a true strike.
- * A true strike is not effected by chance of hit or anything that could
- * prevent the hit.
- */
-static int damage_is_truestrike(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushboolean(s, damage->trueStrike);
-    return 1;
-}
-
-/** LUA damage:range (damageclass)
- * damage:range()
- **
- * **Return value:** This function returns the range of the attack in pixels.
- */
-static int damage_get_range(lua_State *s)
-{
-    Damage *damage = LuaDamage::check(s, 1);
-    lua_pushinteger(s, damage->range);
     return 1;
 }
 
@@ -3507,23 +3116,6 @@ static int item_class_get_name(lua_State *s)
     return 1;
 }
 
-/** LUA itemclass:attacks (itemclass)
- * itemclass:attacks()
- **
- * **Return value:** Returns a list of all attacks the item offers.
- *
- * **See:** the [[scripting#AttackInfo Class|AttackInfo class]] for more info
- * about how to use the values in the list.
- */
-static int item_class_attacks(lua_State *s)
-{
-    ItemClass *itemClass = LuaItemClass::check(s, 1);
-    std::vector<AttackInfo *> attacks = itemClass->getAttackInfos();
-    pushSTLContainer<AttackInfo *>(s, attacks);
-    return 1;
-}
-
-
 /**
  * Returns four useless tables for testing the STL container push wrappers.
  * This function can be removed when there are more useful functions which use
@@ -3682,29 +3274,6 @@ LuaScript::LuaScript():
 #endif
     lua_pop(mRootState, 1);                     // pop the globals table
 
-    static luaL_Reg const members_AttackInfo[] = {
-        { "priority",                       attack_get_priority               },
-        { "cooldowntime",                   attack_get_cooldowntime           },
-        { "warmuptime",                     attack_get_warmuptime             },
-        { "reusetime",                      attack_get_reusetime              },
-        { "damage",                         attack_get_damage                 },
-        { "on_attack",                      attack_on_attack                  },
-        { nullptr, nullptr }
-    };
-
-    static luaL_Reg const members_Damage[] = {
-        { "id",                             damage_get_id                     },
-        { "skill",                          damage_get_skill                  },
-        { "base",                           damage_get_base                   },
-        { "delta",                          damage_get_delta                  },
-        { "cth",                            damage_get_cth                    },
-        { "element",                        damage_get_element                },
-        { "type",                           damage_get_type                   },
-        { "is_truestrike",                  damage_is_truestrike              },
-        { "range",                          damage_get_range                  },
-        { nullptr, nullptr }
-    };
-
     static luaL_Reg const members_Entity[] = {
         { "remove",                         entity_remove                     },
         { "say",                            entity_say                        },
@@ -3721,7 +3290,6 @@ LuaScript::LuaScript():
         { "ability_mana",                   entity_get_ability_mana           },
         { "cooldown_ability",               entity_cooldown_ability           },
         { "walk",                           entity_walk                       },
-        { "damage",                         entity_damage                     },
         { "heal",                           entity_heal                       },
         { "name",                           entity_get_name                   },
         { "type",                           entity_get_type                   },
@@ -3760,9 +3328,6 @@ LuaScript::LuaScript():
         { "has_ability",                    entity_has_ability                },
         { "take_ability",                   entity_take_ability               },
         { "monster_id",                     entity_get_monster_id             },
-        { "change_anger",                   entity_change_anger               },
-        { "drop_anger",                     entity_drop_anger                 },
-        { "angerlist",                      entity_get_angerlist              },
         { "apply_status",                   entity_apply_status               },
         { "remove_status",                  entity_remove_status              },
         { "has_status",                     entity_has_status                 },
@@ -3775,7 +3340,6 @@ LuaScript::LuaScript():
     static luaL_Reg const members_ItemClass[] = {
         { "on",                             item_class_on                     },
         { "name",                           item_class_get_name               },
-        { "attacks",                        item_class_attacks                },
         { nullptr, nullptr }
     };
 
@@ -3789,9 +3353,7 @@ LuaScript::LuaScript():
 
     static luaL_Reg const members_MonsterClass[] = {
         { "on_update",                      monster_class_on_update           },
-        { "on_damage",                      monster_class_on_damage           },
         { "name",                           monster_class_get_name            },
-        { "attacks",                        monster_class_attacks             },
         { nullptr, nullptr }
     };
 
@@ -3810,8 +3372,6 @@ LuaScript::LuaScript():
         { nullptr, nullptr}
     };
 
-    LuaAttackInfo::registerType(mRootState, "Attack", members_AttackInfo);
-    LuaDamage::registerType(mRootState, "Damage", members_Damage);
     LuaEntity::registerType(mRootState, "Entity", members_Entity);
     LuaItemClass::registerType(mRootState, "ItemClass", members_ItemClass);
     LuaMapObject::registerType(mRootState, "MapObject", members_MapObject);
