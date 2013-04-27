@@ -14,19 +14,5 @@ local function update(mob)
     end
 end
 
-local function strike(mob, victim, hit)
-    if hit > 0 then
-        mob:say("Take this! "..hit.." damage!")
-        victim:say("Oh Noez!")
-    else
-        mob:say("Oh no, my attack missed!")
-        victim:say("Whew...")
-    end
-end
-
 local maggot = get_monster_class("maggot")
 maggot:on_update(update)
-local attacks = maggot:attacks();
-for i, attack in ipairs(attacks) do
-    attack:on_attack(strike)
-end

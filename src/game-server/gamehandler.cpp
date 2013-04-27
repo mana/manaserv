@@ -27,7 +27,6 @@
 #include "common/transaction.h"
 #include "game-server/accountconnection.h"
 #include "game-server/buysell.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/commandhandler.h"
 #include "game-server/emotemanager.h"
 #include "game-server/inventory.h"
@@ -252,10 +251,6 @@ void GameHandler::processMessage(NetComputer *computer, MessageIn &message)
 
         case PGMSG_MOVE_ITEM:
             handleMoveItem(client, message);
-            break;
-
-        case PGMSG_ATTACK:
-            handleAttack(client, message);
             break;
 
         case PGMSG_USE_ABILITY_ON_BEING:
@@ -671,22 +666,6 @@ void GameHandler::handleMoveItem(GameClient &client, MessageIn &message)
                                     TRANS_ITEM_MOVE, str.str());
 }
 
-void GameHandler::handleAttack(GameClient &client, MessageIn &message)
-{
-    int id = message.readInt16();
-    const int publicId =
-            client.character->getComponent<ActorComponent>()->getPublicID();
-    LOG_DEBUG("Character " << publicId << " attacked being " << id);
-
-    Entity *being = findBeingNear(client.character, id);
-    if (being && being->getType() != OBJECT_NPC)
-    {
-        client.character->getComponent<CombatComponent>()->setTarget(being);
-        client.character->getComponent<BeingComponent>()->setAction(
-                *client.character, ATTACK);
-    }
-}
-
 void GameHandler::handleUseAbilityOnBeing(GameClient &client, MessageIn &message)
 {
     if (client.character->getComponent<BeingComponent>()->getAction() == DEAD)
@@ -719,7 +698,7 @@ void GameHandler::handleUseAbilityOnPoint(GameClient &client, MessageIn &message
     const int publicId =
             client.character->getComponent<ActorComponent>()->getPublicID();
     LOG_DEBUG("Character " << publicId
-              << " tries to use his ability attack " << abilityID);
+              << " tries to use his ability " << abilityID);
     auto *abilityComponent = client.character
             ->getComponent<AbilityComponent>();
     abilityComponent->useAbilityOnPoint(*client.character, abilityID, x, y);

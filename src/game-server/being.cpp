@@ -27,7 +27,6 @@
 #include "game-server/attributemanager.h"
 #include "game-server/character.h"
 #include "game-server/collisiondetection.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/mapcomposite.h"
 #include "game-server/effect.h"
 #include "game-server/skillmanager.h"
@@ -310,8 +309,8 @@ int BeingComponent::directionToAngle(int direction)
 void BeingComponent::setAction(Entity &entity, BeingAction action)
 {
     mAction = action;
-    if (action != ATTACK && // The players are informed about these actions
-        action != WALK)     // by other messages
+    // The players are informed about these actions by other messages
+    if (action != WALK)
     {
         entity.getComponent<ActorComponent>()->raiseUpdateFlags(
                 UPDATEFLAG_ACTIONCHANGE);

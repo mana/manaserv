@@ -22,10 +22,8 @@
 
 #include "common/configuration.h"
 #include "game-server/accountconnection.h"
-#include "game-server/attack.h"
 #include "game-server/attributemanager.h"
 #include "game-server/buysell.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
 #include "game-server/itemmanager.h"
@@ -87,7 +85,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     mTransaction(TRANS_NONE),
     mTalkNpcId(0),
     mNpcThread(0),
-    mKnuckleAttackInfo(0),
     mBaseEntity(&entity)
 {
     auto *beingComponent = entity.getComponent<BeingComponent>();
@@ -104,29 +101,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
     actorComponent->setWalkMask(Map::BLOCKMASK_WALL);
     actorComponent->setBlockType(BLOCKTYPE_CHARACTER);
     actorComponent->setSize(16);
-
-
-    CombatComponent *combatcomponent = new CombatComponent(entity);
-    entity.addComponent(combatcomponent);
-    combatcomponent->getAttacks().attack_added.connect(
-            sigc::mem_fun(this, &CharacterComponent::attackAdded));
-    combatcomponent->getAttacks().attack_removed.connect(
-            sigc::mem_fun(this, &CharacterComponent::attackRemoved));
-
-    // Default knuckle attack
-    int damageBase = beingComponent->getModifiedAttribute(ATTR_STR);
-    int damageDelta = damageBase / 2;
-    Damage knuckleDamage;
-    knuckleDamage.skill = skillManager->getDefaultSkillId();
-    knuckleDamage.base = damageBase;
-    knuckleDamage.delta = damageDelta;
-    knuckleDamage.cth = 2;
-    knuckleDamage.element = ELEMENT_NEUTRAL;
-    knuckleDamage.type = DAMAGE_PHYSICAL;
-    knuckleDamage.range = DEFAULT_TILE_LENGTH;
-
-    mKnuckleAttackInfo = new AttackInfo(0, knuckleDamage, 7, 3, 0);
-    combatcomponent->addAttack(mKnuckleAttackInfo);
 
 
     auto *abilityComponent = new AbilityComponent(entity);
@@ -157,7 +131,6 @@ CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
 CharacterComponent::~CharacterComponent()
 {
     delete mNpcThread;
-    delete mKnuckleAttackInfo;
 }
 
 void CharacterComponent::update(Entity &entity)
@@ -198,8 +171,6 @@ void CharacterComponent::respawn(Entity &entity)
 
     // Make it alive again
     beingComponent->setAction(entity, STAND);
-    // Reset target
-    entity.getComponent<CombatComponent>()->clearTarget();
 
     // Execute respawn callback when set
     if (executeCallback(mDeathAcceptedCallback, entity))
@@ -379,15 +350,6 @@ void CharacterComponent::attributeChanged(Entity *entity, unsigned attr)
                                    beingComponent->getAttributeBase(attr),
                                    beingComponent->getModifiedAttribute(attr));
     mModifiedAttributes.insert(attr);
-
-    // Update the knuckle Attack if required
-    if (attr == ATTR_STR && mKnuckleAttackInfo)
-    {
-        // TODO: dehardcode this
-        Damage &knuckleDamage = mKnuckleAttackInfo->getDamage();
-        knuckleDamage.base = beingComponent->getModifiedAttribute(ATTR_STR);
-        knuckleDamage.delta = knuckleDamage.base / 2;
-    }
 }
 
 int CharacterComponent::expForLevel(int level)
@@ -600,23 +562,6 @@ void CharacterComponent::resumeNpcThread()
         mTalkNpcId = 0;
         mNpcThread = 0;
     }
-}
-
-void CharacterComponent::attackAdded(CombatComponent *combatComponent,
-                                     Attack &attack)
-{
-    // Remove knuckle attack
-    if (attack.getAttackInfo() != mKnuckleAttackInfo)
-        combatComponent->removeAttack(mKnuckleAttackInfo);
-}
-
-void CharacterComponent::attackRemoved(CombatComponent *combatComponent,
-                                       Attack &attack)
-{
-    // Add knuckle attack
-    // 1 since the attack is not really removed yet.
-    if (combatComponent->getAttacks().getNumber() == 1)
-        combatComponent->addAttack(mKnuckleAttackInfo);
 }
 
 void CharacterComponent::disconnected(Entity &entity)
