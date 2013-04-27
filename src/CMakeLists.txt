@@ -5,7 +5,7 @@ FIND_PACKAGE(SigC++ REQUIRED)
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
     # Help getting compilation warnings
-    SET(CMAKE_CXX_FLAGS "-Wall")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
     IF (WIN32)
         # This includes enough debug information to get something useful
         # from Dr. Mingw while keeping binary size down. Almost useless
@@ -42,6 +42,7 @@ SET(FLAGS "${FLAGS} -DPKG_DATADIR=\\\"${PKG_DATADIR}/\\\"")
 SET(FLAGS "${FLAGS} -DLOCALEDIR=\\\"${LOCALEDIR}/\\\"")
 
 SET(FLAGS "${FLAGS} -std=c++0x")
+SET(FLAGS "${FLAGS} -Woverloaded-virtual")
 
 # If the Sqlite option is enabled...
 IF (WITH_SQLITE)
