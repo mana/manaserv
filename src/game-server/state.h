@@ -92,7 +92,7 @@ namespace GameState
 
     /**
      * Says something to an actor.
-     * @note passing NULL as source generates a message from "Server:"
+     * @note passing nullptr as source generates a message from "Server:"
      */
     void sayTo(Entity *destination, Entity *source, const std::string &text);
 

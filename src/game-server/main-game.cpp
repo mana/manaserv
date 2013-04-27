@@ -165,7 +165,7 @@ static void initializeServer()
     utils::processor::init();
 
     // Seed the random number generator
-    std::srand( time(NULL) );
+    std::srand( time(nullptr) );
 }
 
 
@@ -257,7 +257,7 @@ static void parseOptions(int argc, char *argv[], CommandLineOptions &options)
 
     while (optind < argc)
     {
-        int result = getopt_long(argc, argv, optString, longOptions, NULL);
+        int result = getopt_long(argc, argv, optString, longOptions, nullptr);
 
         if (result == -1)
             break;

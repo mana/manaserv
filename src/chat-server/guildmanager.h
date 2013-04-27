@@ -63,14 +63,14 @@ class GuildManager
         /**
          * Returns the guild with the given id. O(n)
          *
-         * @return the guild with the given id, or NULL if it doesn't exist
+         * @return the guild with the given id, or nullptr if it doesn't exist
          */
         Guild *findById(short id) const;
 
         /**
          * Returns the guild with the given name. O(n)
          *
-         * @return the guild with the given name, or NULL if it doesn't exist
+         * @return the guild with the given name, or nullptr if it doesn't exist
          */
         Guild *findByName(const std::string &name) const;
 

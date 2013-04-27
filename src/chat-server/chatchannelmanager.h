@@ -76,14 +76,14 @@ class ChatChannelManager
         /**
          * Returns the chat channel with the given channel ID.
          *
-         * @return The chat channel, or NULL when it doesn't exist.
+         * @return The chat channel, or nullptr when it doesn't exist.
          */
         ChatChannel *getChannel(int channelId);
 
         /**
          * Returns the chat channel with the given channel name.
          *
-         * @return The chat channel, or NULL when it doesn't exist.
+         * @return The chat channel, or nullptr when it doesn't exist.
          */
         ChatChannel *getChannel(const std::string &name);
 

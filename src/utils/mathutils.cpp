@@ -50,7 +50,8 @@ namespace math {
  */
 float fastInvSqrt(float x)
 {
-    typedef char float_must_be_32_bits[(sizeof(float) == 4) * 2 - 1];
+    static_assert(sizeof(float) == 4, "float must be 32 bits");
+
     float xhalf = 0.5f * x;
     uint32_t i;
     memcpy(&i, &x, 4);

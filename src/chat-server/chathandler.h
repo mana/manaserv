@@ -61,7 +61,7 @@ class ChatHandler : public ConnectionHandler
                 , mInvitee(inviteeName)
             {
                 const int validTimeframe = 60;
-                mExpireTime = time(NULL) + validTimeframe;
+                mExpireTime = time(nullptr) + validTimeframe;
             }
 
             std::string mInviter;
@@ -84,7 +84,7 @@ class ChatHandler : public ConnectionHandler
         /**
          * Tell a list of users about an event in a chatchannel.
          *
-         * @param channel the channel to send the message in, must not be NULL
+         * @param channel the channel to send the message in, must not be nullptr
          * @param info information pertaining to the event
          */
         void warnUsersAboutPlayerEventInChat(ChatChannel *channel,
@@ -219,7 +219,7 @@ class ChatHandler : public ConnectionHandler
         /**
          * Sends a message to every client in a registered channel.
          *
-         * @param channel the channel to send the message in, must not be NULL
+         * @param channel the channel to send the message in, must not be nullptr
          * @param msg     the message to be sent
          */
         void sendInChannel(ChatChannel *channel, MessageOut &msg);

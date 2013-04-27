@@ -48,3 +48,15 @@ GTAGS
 # files created by Codeblocks
 .objs
 *.layout
+
+# git merge backups
+*.orig
+
+# eclipse files
+.cproject
+.externalToolBuilders
+.project
+.settings
+
+# sqlite dbs
+*.db

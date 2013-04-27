@@ -43,13 +43,13 @@ bool Connection::start(const std::string &address, int port)
     enetAddress.port = port;
 
 #if defined(ENET_VERSION) && ENET_VERSION >= ENET_CUTOFF
-    mLocal = enet_host_create(NULL /* create a client host */,
+    mLocal = enet_host_create(nullptr /* create a client host */,
                               1 /* allow one outgoing connection */,
                               0           /* unlimited channel count */,
                               0 /* assume any amount of incoming bandwidth */,
                               0 /* assume any amount of outgoing bandwidth */);
 #else
-    mLocal = enet_host_create(NULL /* create a client host */,
+    mLocal = enet_host_create(nullptr /* create a client host */,
                               1 /* allow one outgoing connection */,
                               0 /* assume any amount of incoming bandwidth */,
                               0 /* assume any amount of outgoing bandwidth */);

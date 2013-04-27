@@ -102,7 +102,7 @@ public:
         lua_pushliteral(s, "__index");          // metatable, "__index"
         lua_createtable(s, 0, 0);               // metatable, "__index", {}
 #if LUA_VERSION_NUM < 502
-        luaL_register(s, NULL, members);
+        luaL_register(s, nullptr, members);
 #else
         luaL_setfuncs(s, members, 0);
 #endif

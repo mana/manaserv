@@ -167,7 +167,7 @@ static CmdRef const cmdRef[] =
         "<setname>_<specialname>", &handleRechargeSpecial},
     {"listspecials", "<character>",
         "Lists the specials of the character.", &handleListSpecials},
-    {NULL, NULL, NULL, NULL}
+    {nullptr, nullptr, nullptr, nullptr}
 
 };
 
@@ -284,7 +284,7 @@ static void handleHelp(Entity *player, std::string &args)
             return;
         }
         // detailed description of single command
-        for (size_t j = 0; cmdRef[j].cmd != NULL; j++)
+        for (size_t j = 0; cmdRef[j].cmd != nullptr; j++)
         {
             if (cmdRef[j].cmd == args)
             {
@@ -1803,7 +1803,7 @@ void CommandHandler::handleCommand(Entity *player,
         break;
     case PermissionManager::PMR_ALLOWED:
         // handle the command
-        for (size_t i = 0; cmdRef[i].cmd != NULL; i++)
+        for (size_t i = 0; cmdRef[i].cmd != nullptr; i++)
         {
             if (cmdRef[i].cmd == type)
             {

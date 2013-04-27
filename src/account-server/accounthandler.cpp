@@ -346,7 +346,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     // Check whether the last login attempt for this IP is still too fresh
     const int address = client.getIP();
-    const time_t now = time(NULL);
+    const time_t now = time(nullptr);
     IPsToTime::const_iterator it = mLastLoginAttemptForIP.find(address);
     if (it != mLastLoginAttemptForIP.end())
     {

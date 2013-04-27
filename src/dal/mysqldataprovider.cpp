@@ -89,7 +89,7 @@ void MySqlDataProvider::connect()
 
     // allocate and initialize a new MySQL object suitable
     // for mysql_real_connect().
-    mDb = mysql_init(NULL);
+    mDb = mysql_init(nullptr);
 
     if (!mDb)
     {
@@ -108,7 +108,7 @@ void MySqlDataProvider::connect()
                             password.c_str(),   // password
                             dbName.c_str(),     // database name
                             tcpPort,            // tcp port
-                            NULL,               // socket, currently not used
+                            nullptr,               // socket, currently not used
                             CLIENT_FOUND_ROWS)) // client flags
     {
         std::string msg(mysql_error(mDb));

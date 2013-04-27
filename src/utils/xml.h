@@ -55,7 +55,7 @@ namespace XML
             ~Document();
 
             /**
-             * Returns the root node of the document (or NULL if there was a
+             * Returns the root node of the document (or nullptr if there was a
              * load error).
              */
             xmlNodePtr rootNode();

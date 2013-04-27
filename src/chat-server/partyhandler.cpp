@@ -40,7 +40,7 @@ void updateInfo(ChatClient *client, int partyId)
 
 void ChatHandler::removeExpiredPartyInvites()
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     while (!mInvitations.empty() && mInvitations.front().mExpireTime < now)
     {
         std::map<std::string, int>::iterator itr;

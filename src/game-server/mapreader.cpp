@@ -56,7 +56,7 @@ Map *MapReader::readMap(xmlNodePtr node)
     int tileH = XML::getProperty(node, "tileheight", DEFAULT_TILE_LENGTH);
     Map *map = new Map(w, h, tileW, tileH);
 
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for (node = node->xmlChildrenNode; node != nullptr; node = node->next)
     {
         if (xmlStrEqual(node->name, BAD_CAST "tileset"))
         {

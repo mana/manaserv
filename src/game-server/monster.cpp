@@ -125,7 +125,7 @@ MonsterComponent::~MonsterComponent()
 void MonsterComponent::update(Entity &entity)
 {
     if (mKillStealProtectedTimeout.justFinished())
-        mOwner = NULL;
+        mOwner = nullptr;
 
     auto *beingComponent = entity.getComponent<BeingComponent>();
 

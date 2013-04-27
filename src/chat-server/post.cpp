@@ -115,7 +115,7 @@ Letter* Post::getLetter(int letter) const
 {
     if (letter < 0 || (size_t) letter > mLetters.size())
     {
-        return NULL;
+        return nullptr;
     }
     return mLetters[letter];
 }
@@ -146,7 +146,7 @@ void PostManager::addLetter(Letter *letter)
 Post *PostManager::getPost(CharacterData *player) const
 {
     std::map<CharacterData*, Post*>::const_iterator itr = mPostBox.find(player);
-    return (itr == mPostBox.end()) ? NULL : itr->second;
+    return (itr == mPostBox.end()) ? nullptr : itr->second;
 }
 
 void PostManager::clearPost(CharacterData *player)

@@ -89,8 +89,8 @@ unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_
     }
 
     result = (unsigned char *)malloc(length + 1);
-    if (result == NULL) {
-        return NULL;
+    if (result == nullptr) {
+        return nullptr;
     }
 
     /* run through the whole string, converting as we go */
@@ -135,7 +135,7 @@ unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_
             case 0:
             case 1:
                 free(result);
-                return NULL;
+                return nullptr;
             case 2:
                 k++;
             case 3:

@@ -45,7 +45,7 @@ namespace MapManager
     /**
      * Returns the requested map.
      *
-     * @return the requested map, or NULL if no map with the given ID exists.
+     * @return the requested map, or nullptr if no map with the given ID exists.
      */
     MapComposite *getMap(int mapId);
 

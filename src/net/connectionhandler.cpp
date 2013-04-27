@@ -145,7 +145,7 @@ void ConnectionHandler::process(enet_uint32 timeout)
                 // Reset the peer's client information.
                 computerDisconnected(comp);
                 clients.erase(std::find(clients.begin(), clients.end(), comp));
-                event.peer->data = NULL;
+                event.peer->data = nullptr;
             } break;
 
             default: break;

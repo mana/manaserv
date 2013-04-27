@@ -84,9 +84,6 @@ ATTR_MOVE_SPEED_RAW = 17;
 ATTR_GP = 18;
 ATTR_INV_CAPACITY = 19;
 
-MOB_ATTR_PHY_ATK_MIN = 20;
-MOB_ATTR_PHY_ATK_DELTA = 21;
-MOB_ATTR_MAG_ATK = 22;
 
 -- Emotes - TODO: should be obtainable in a smarter way
 EMOTE_DISGUST = 10000;

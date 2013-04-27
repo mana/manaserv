@@ -57,7 +57,7 @@ static bool readFile(const std::string &fileName)
         return false;
     }
 
-    for (node = node->xmlChildrenNode; node != NULL; node = node->next)
+    for (node = node->xmlChildrenNode; node != nullptr; node = node->next)
     {
         if (xmlStrEqual(node->name, BAD_CAST "include"))
         {

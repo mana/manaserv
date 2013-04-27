@@ -744,11 +744,11 @@ static int announce(lua_State *s)
  *         {"Dagger", 10, 50}
  *     })
  *     if buycase == 0 then
- *       npc_message("What do you want to buy?")
+ *       say("What do you want to buy?")
  *     elseif buycase == 1 then
- *       npc_message("I've got no items to sell.")
+ *       say("I've got no items to sell.")
  *     else
- *       npc_message("Hmm, something went wrong... Ask a scripter to
+ *       say("Hmm, something went wrong... Ask a scripter to
  *       fix the buying mode!")
  *     end
  *
@@ -764,12 +764,12 @@ static int announce(lua_State *s)
  *                      {"Cactus Drink", 10, 25}
  *     })
  *     if sellcase == 0 then
- *       npc_message("Here we go:")
+ *       say("Here we go:")
  *     elseif sellcase == 1 then
- *       npc_message("I'm not interested by your items.")
+ *       say("I'm not interested by your items.")
  *     else
- *       npc_message("Hmm, something went wrong...")
- *       npc_message("Ask a scripter to fix me!")
+ *       say("Hmm, something went wrong...")
+ *       say("Ask a scripter to fix me!")
  *     end
  *
  * -- ...
@@ -778,12 +778,12 @@ static int announce(lua_State *s)
  *     the server's items.xml file
  *     local sellcase = trade(true)
  *     if sellcase == 0 then
- *       npc_message("Ok, what do you want to sell:")
+ *       say("Ok, what do you want to sell:")
  *     elseif sellcase == 1 then
- *       npc_message("I'm not interested by any of your items.")
+ *       say("I'm not interested by any of your items.")
  *     else
- *       npc_message("Hmm, something went wrong...")
- *       npc_message("Ask a scripter to fix me!")
+ *       say("Hmm, something went wrong...")
+ *       say("Ask a scripter to fix me!")
  *     end
  * </code>
  */
@@ -1353,7 +1353,7 @@ static int entity_set_special_mana(lua_State *s)
     if (!c->getComponent<CharacterComponent>()->setSpecialMana(special, mana))
     {
         luaL_error(s,
-                   "special_mana called with special "
+                   "set_special_mana called with special "
                    "that is not owned by character.");
     }
     return 0;
@@ -1660,7 +1660,7 @@ static int entity_set_walkmask(lua_State *s)
    return 0;
 }
 
-/** LUA being_entity:walkmask (being)
+/** LUA entity:walkmask (being)
  * entity:walkmask()
  **
  * Valid only for actor entities.
@@ -3208,7 +3208,7 @@ static int attack_get_reusetime(lua_State *s)
 }
 
 /** LUA attackinfo:damage (attackinfoclass)
- * >attackinfo:damage()
+ * attackinfo:damage()
  **
  * **Return value:** This function returns the damage info of the attack.
  *
@@ -3691,11 +3691,11 @@ LuaScript::LuaScript():
         { "map_get_objects",                map_get_objects                   },
         { "announce",                       announce                          },
         { "get_special_info",               get_special_info                  },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 #if LUA_VERSION_NUM < 502
     lua_pushvalue(mRootState, LUA_GLOBALSINDEX);
-    luaL_register(mRootState, NULL, callbacks);
+    luaL_register(mRootState, nullptr, callbacks);
 #else
     lua_pushglobaltable(mRootState);
     luaL_setfuncs(mRootState, callbacks, 0);
@@ -3709,7 +3709,7 @@ LuaScript::LuaScript():
         { "reusetime",                      attack_get_reusetime              },
         { "damage",                         attack_get_damage                 },
         { "on_attack",                      attack_on_attack                  },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     static luaL_Reg const members_Damage[] = {
@@ -3722,7 +3722,7 @@ LuaScript::LuaScript():
         { "type",                           damage_get_type                   },
         { "is_truestrike",                  damage_is_truestrike              },
         { "range",                          damage_get_range                  },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     static luaL_Reg const members_Entity[] = {
@@ -3789,14 +3789,14 @@ LuaScript::LuaScript():
         { "has_status",                     entity_has_status                 },
         { "status_time",                    entity_get_status_time            },
         { "set_status_time",                entity_set_status_time            },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     static luaL_Reg const members_ItemClass[] = {
         { "on",                             item_class_on                     },
         { "name",                           item_class_get_name               },
         { "attacks",                        item_class_attacks                },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     static luaL_Reg const members_MapObject[] = {
@@ -3804,7 +3804,7 @@ LuaScript::LuaScript():
         { "bounds",                         map_object_get_bounds             },
         { "name",                           map_object_get_name               },
         { "type",                           map_object_get_type               },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     static luaL_Reg const members_MonsterClass[] = {
@@ -3812,12 +3812,12 @@ LuaScript::LuaScript():
         { "on_damage",                      monster_class_on_damage           },
         { "name",                           monster_class_get_name            },
         { "attacks",                        monster_class_attacks             },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     static luaL_Reg const members_StatusEffect[] = {
         { "on_tick",                        status_effect_on_tick             },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     static luaL_Reg const members_SpecialInfo[] = {
@@ -3827,7 +3827,7 @@ LuaScript::LuaScript():
         { "on_use",                         specialinfo_on_use                },
         { "on_recharged",                   specialinfo_on_recharged          },
         { "category",                       specialinfo_get_category          },
-        { NULL, NULL}
+        { nullptr, nullptr}
     };
 
     LuaAttackInfo::registerType(mRootState, "Attack", members_AttackInfo);

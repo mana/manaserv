@@ -139,7 +139,7 @@ static GameServer *getGameServerFromMap(int mapId)
         if (it == server->maps.end()) continue;
         return server;
     }
-    return NULL;
+    return nullptr;
 }
 
 bool GameServerHandler::getGameServerFromMap(int mapId,
@@ -432,7 +432,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             int level = msg.readInt16();
 
             // get the character so we can get the account id
-            CharacterData *c = storage->getCharacter(id, NULL);
+            CharacterData *c = storage->getCharacter(id, nullptr);
             if (c)
             {
                 storage->setAccountLevel(c->getAccountID(), level);
@@ -528,7 +528,7 @@ void ServerHandler::processMessage(NetComputer *comp, MessageIn &msg)
             result.writeInt32(senderId);
 
             // get their characters
-            CharacterData *sender = storage->getCharacter(senderId, NULL);
+            CharacterData *sender = storage->getCharacter(senderId, nullptr);
             CharacterData *receiver = storage->getCharacter(receiverName);
             if (!sender || !receiver)
             {

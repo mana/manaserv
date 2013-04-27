@@ -27,7 +27,7 @@ CharacterData::CharacterData(const std::string &name, int id):
     mDatabaseID(id),
     mCharacterSlot(0),
     mAccountID(-1),
-    mAccount(NULL),
+    mAccount(nullptr),
     mMapId(0),
     mGender(0),
     mHairStyle(0),

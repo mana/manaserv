@@ -72,9 +72,9 @@ static bool executeCallback(Script::Ref function, Entity &entity)
 
 
 CharacterComponent::CharacterComponent(Entity &entity, MessageIn &msg):
-    mClient(NULL),
+    mClient(nullptr),
     mConnected(true),
-    mTransactionHandler(NULL),
+    mTransactionHandler(nullptr),
     mSpecialUpdateNeeded(false),
     mDatabaseID(-1),
     mHairStyle(0),
@@ -374,13 +374,13 @@ void CharacterComponent::cancelTransaction()
 Trade *CharacterComponent::getTrading() const
 {
     return mTransaction == TRANS_TRADE
-        ? static_cast< Trade * >(mTransactionHandler) : NULL;
+        ? static_cast< Trade * >(mTransactionHandler) : nullptr;
 }
 
 BuySell *CharacterComponent::getBuySell() const
 {
     return mTransaction == TRANS_BUYSELL
-        ? static_cast< BuySell * >(mTransactionHandler) : NULL;
+        ? static_cast< BuySell * >(mTransactionHandler) : nullptr;
 }
 
 void CharacterComponent::setTrading(Trade *t)

@@ -31,7 +31,7 @@
 #include "utils/string.h"
 
 typedef std::list<Point> Path;
-typedef Path::iterator PathIterator;
+
 enum BlockType
 {
     BLOCKTYPE_NONE = -1,

@@ -56,7 +56,7 @@ static const char *DB_VERSION_PARAMETER = "database_version";
  * SQLite3 specificities:
  *     - any column (but only one for each table) with the exact type of
  *       'INTEGER PRIMARY KEY' is taken as auto-increment.
- *     - the supported data types are: NULL, INTEGER, REAL, TEXT and BLOB
+ *     - the supported data types are: nullptr, INTEGER, REAL, TEXT and BLOB
  *       (http://www.sqlite.org/datatype3.html)
  *     - the size of TEXT cannot be set, it is just ignored by the engine.
  *     - IMPORTANT: foreign key constraints are not yet supported
@@ -1912,7 +1912,7 @@ void Storage::storeLetter(Letter *letter)
         {
             // The letter was never saved before
             sql << "INSERT INTO " << POST_TBL_NAME << " VALUES ( "
-                << "NULL, "
+                << "nullptr, "
                 << letter->getSender()->getDatabaseID() << ", "
                 << letter->getReceiver()->getDatabaseID() << ", "
                 << letter->getExpiry() << ", "
@@ -2207,7 +2207,7 @@ void Storage::addTransaction(const Transaction &trans)
     {
         std::stringstream sql;
         sql << "INSERT INTO " << TRANSACTION_TBL_NAME
-            << " VALUES (NULL, " << trans.mCharacterId << ", "
+            << " VALUES (nullptr, " << trans.mCharacterId << ", "
             << trans.mAction << ", "
             << "?, "
             << time(0) << ")";

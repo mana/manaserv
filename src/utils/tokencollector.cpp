@@ -40,7 +40,7 @@ void TokenCollectorBase::insertClient(const std::string &token, intptr_t data)
         }
     }
 
-    time_t current = time(NULL);
+    time_t current = time(nullptr);
 
     Item item;
     item.token = token;
@@ -64,7 +64,7 @@ void TokenCollectorBase::insertConnect(const std::string &token, intptr_t data)
         }
     }
 
-    time_t current = time(NULL);
+    time_t current = time(nullptr);
 
     Item item;
     item.token = token;
@@ -114,7 +114,7 @@ void TokenCollectorBase::removeOutdated(time_t current)
 }
 
 TokenCollectorBase::TokenCollectorBase():
-    mLastCheck(time(NULL))
+    mLastCheck(time(nullptr))
 {
 }
 
