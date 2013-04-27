@@ -83,7 +83,7 @@ void PermissionManager::reload()
 
 
         xmlNodePtr perNode;
-        for (perNode = node->xmlChildrenNode; perNode != NULL; perNode = perNode->next)
+        for (perNode = node->xmlChildrenNode; perNode != nullptr; perNode = perNode->next)
         {
             if (xmlStrEqual(perNode->name, BAD_CAST "allow"))
             {

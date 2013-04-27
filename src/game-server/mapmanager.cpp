@@ -118,7 +118,7 @@ void MapManager::deinitialize()
 MapComposite *MapManager::getMap(int mapId)
 {
     Maps::const_iterator i = maps.find(mapId);
-    return (i != maps.end()) ? i->second : NULL;
+    return (i != maps.end()) ? i->second : nullptr;
 }
 
 MapComposite *MapManager::getMap(const std::string &mapName)
@@ -127,7 +127,7 @@ MapComposite *MapManager::getMap(const std::string &mapName)
         if (i->second->getName() == mapName)
             return i->second;
 
-    return NULL;
+    return nullptr;
 }
 
 bool MapManager::activateMap(int mapId)

@@ -344,7 +344,7 @@ void ChatHandler::handleEnterChannelMessage(ChatClient &client, MessageIn &msg)
 
     std::string channelName = msg.readString();
     std::string givenPassword = msg.readString();
-    ChatChannel *channel = NULL;
+    ChatChannel *channel = nullptr;
     if (chatChannelManager->channelExists(channelName) ||
         chatChannelManager->tryNewPublicChannel(channelName))
     {

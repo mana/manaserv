@@ -23,7 +23,7 @@
 AccountClient::AccountClient(ENetPeer *peer):
     NetComputer(peer),
     status(CLIENT_LOGIN),
-    mAccount(NULL)
+    mAccount(nullptr)
 {
 }
 
@@ -41,5 +41,5 @@ void AccountClient::setAccount(Account *acc)
 void AccountClient::unsetAccount()
 {
     delete mAccount;
-    mAccount = NULL;
+    mAccount = nullptr;
 }

@@ -116,7 +116,7 @@ void GameHandler::completeServerChange(int id, const std::string &token,
             c->character->getComponent<CharacterComponent>()->disconnected(
                     *c->character);
             delete c->character;
-            c->character = NULL;
+            c->character = nullptr;
             c->status = CLIENT_LOGIN;
             return;
         }

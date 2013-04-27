@@ -56,7 +56,7 @@ namespace ResourceManager
      * @param fileSize The size of the file that was loaded.
      *
      * @return An allocated byte array containing the data that was loaded,
-     *         or <code>NULL</code> on failure.
+     *         or <code>nullptr</code> on failure.
      * @note The array contains an extra \0 character at position fileSize.
      */
     char *loadFile(const std::string &fileName, int &fileSize);

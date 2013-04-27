@@ -33,7 +33,7 @@
 
 typedef std::map< std::string, Script::Factory > Engines;
 
-static Engines *engines = NULL;
+static Engines *engines = nullptr;
 
 Script::Ref Script::mCreateNpcDelayedCallback;
 Script::Ref Script::mUpdateCallback;
@@ -73,7 +73,7 @@ Script *Script::create(const std::string &engine)
         }
     }
     LOG_ERROR("No scripting engine named " << engine);
-    return NULL;
+    return nullptr;
 }
 
 void Script::update()

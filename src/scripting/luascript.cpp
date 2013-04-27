@@ -155,7 +155,7 @@ bool LuaScript::resume()
 #if LUA_VERSION_NUM < 502
     int result = lua_resume(mCurrentState, tmpNbArgs);
 #else
-    int result = lua_resume(mCurrentState, NULL, tmpNbArgs);
+    int result = lua_resume(mCurrentState, nullptr, tmpNbArgs);
 #endif
 
     if (result == 0)                // Thread is done

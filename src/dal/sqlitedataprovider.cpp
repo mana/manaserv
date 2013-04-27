@@ -361,7 +361,7 @@ bool SqLiteDataProvider::prepareSql(const std::string &sql)
     mRecordSet.clear();
 
     if (sqlite3_prepare_v2(mDb, sql.c_str(), sql.size(),
-            &mStmt, NULL) != SQLITE_OK)
+            &mStmt, nullptr) != SQLITE_OK)
         return false;
 
     return true;

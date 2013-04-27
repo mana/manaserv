@@ -138,7 +138,7 @@ namespace XML
             if (xmlStrEqual(child->name, BAD_CAST name))
                 return child;
 
-        return NULL;
+        return nullptr;
     }
 
 } // namespace XML

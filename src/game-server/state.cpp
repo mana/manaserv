@@ -845,7 +845,7 @@ void GameState::sayTo(Entity *destination, Entity *source, const std::string &te
         return; //only characters will read it anyway
 
     MessageOut msg(GPMSG_SAY);
-    if (source == NULL)
+    if (source == nullptr)
     {
         msg.writeInt16(0);
     }
