@@ -117,12 +117,6 @@
         </equip>
         <effect trigger="equip">
             <modifier attribute="acc1" value="1.0" />
-            <attack skill="102" warmuptime="1" cooldowntime="5" reusetime="1"
-                basedamage="1" deltadamage="10" chancetohit="200" range="320"
-                element="fire" type="physical" />
-            <attack skill="102" priority="2" warmuptime="100" cooldowntime="10" reusetime="100"
-                basedamage="50" deltadamage="10" chancetohit="200" range="320"
-                element="neutral" type="physical" />
         </effect>
         <effect trigger="in-inventory">
             <modifier attribute="vit" value="100" />
@@ -137,9 +131,6 @@
             <slot type="hand" required="2" />
         </equip>
         <effect trigger="equip">
-            <attack skill="106" warmuptime="10" cooldowntime="166"
-                basedamage="50" deltadamage="10" chancetohit="2" range="160"
-                element="neutral" type="physical" />
             <modifier attribute="acc1" value="1.5" />
         </effect>
         <effect trigger="in-inventory">
@@ -155,9 +146,6 @@
             <slot type="hand" required="1" />
         </equip>
         <effect trigger="equip">
-            <attack skill="100" warmuptime="10" cooldowntime="10" reusetime="20"
-                basedamage="50" deltadamage="10" chancetohit="2" range="32"
-                element="neutral" type="physical" />
             <modifier attribute="acc1" value="1.5" />
         </effect>
         <effect trigger="in-inventory">

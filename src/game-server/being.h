@@ -29,8 +29,9 @@
 
 #include "game-server/actor.h"
 #include "game-server/attribute.h"
-#include "game-server/attack.h"
 #include "game-server/timeout.h"
+
+#include "scripting/script.h"
 
 class BeingComponent;
 class MapComposite;

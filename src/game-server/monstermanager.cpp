@@ -235,45 +235,6 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filenam
             monster->setAttackDistance(
                            XML::getProperty(subnode, "attack-distance", 0));
         }
-        else if (xmlStrEqual(subnode->name, BAD_CAST "attack"))
-        {
-            AttackInfo *att = AttackInfo::readAttackNode(subnode);
-            bool validMonsterAttack = true;
-
-            if (att->getDamage().id < 1)
-            {
-                LOG_WARN(filename
-                         << ": Attack without ID for monster Id:"
-                         << id << " (" << name << ") - attack ignored");
-                validMonsterAttack = false;
-            }
-            else if (att->getDamage().element == ELEMENT_ILLEGAL)
-            {
-                LOG_WARN(filename
-                         << ": Attack with unknown element for monster Id:"
-                         << id << " (" << name << ") - attack ignored");
-                validMonsterAttack = false;
-            }
-            else if (att->getDamage().type == DAMAGE_OTHER)
-            {
-                LOG_WARN(filename
-                         << ": Attack with unknown damage type "
-                         << "for monster Id:" << id
-                         << " (" << name << ")");
-                validMonsterAttack = false;
-            }
-
-            if (validMonsterAttack)
-            {
-                monster->addAttack(att);
-            }
-            else
-            {
-                delete att;
-                att = 0;
-            }
-
-        }
         else if (xmlStrEqual(subnode->name, BAD_CAST "vulnerability"))
         {
             Element element = elementFromString(

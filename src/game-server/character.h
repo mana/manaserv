@@ -131,8 +131,6 @@ class CharacterComponent : public Component
          */
         void update(Entity &entity);
 
-        void processAttacks();
-
         /**
          * Executes the global die script
          */
@@ -386,9 +384,6 @@ class CharacterComponent : public Component
 
         void triggerLoginCallback(Entity &entity);
 
-        void attackAdded(CombatComponent *combatComponent, Attack &attackInfo);
-        void attackRemoved(CombatComponent *combatComponent, Attack &attackInfo);
-
         sigc::signal<void, Entity &> signal_disconnected;
 
     private:
@@ -481,8 +476,6 @@ class CharacterComponent : public Component
         Script::Thread *mNpcThread;  /**< Script thread executing NPC interaction, if any */
 
         Timeout mMuteTimeout;        /**< Time until the character is no longer muted  */
-
-        AttackInfo *mKnuckleAttackInfo;
 
         Entity *mBaseEntity;        /**< The entity this component is part of
                                          this is ONLY required to allow using

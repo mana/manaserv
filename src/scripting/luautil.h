@@ -34,7 +34,6 @@ extern "C" {
 #include <set>
 #include <vector>
 
-#include "game-server/attack.h"
 #include "game-server/abilitymanager.h"
 
 class CharacterComponent;
@@ -159,8 +158,6 @@ private:
 
 template <typename T> const char * LuaUserData<T>::mTypeName;
 
-typedef LuaUserData<AttackInfo> LuaAttackInfo;
-typedef LuaUserData<Damage> LuaDamage;
 typedef LuaUserData<Entity> LuaEntity;
 typedef LuaUserData<ItemClass> LuaItemClass;
 typedef LuaUserData<MapObject> LuaMapObject;
@@ -208,11 +205,6 @@ inline void push(lua_State *s, Entity *val)
 inline void push(lua_State *s, double val)
 {
     lua_pushnumber(s, val);
-}
-
-inline void push(lua_State *s, AttackInfo *val)
-{
-    LuaAttackInfo::push(s, val);
 }
 
 inline void push(lua_State *s, MapObject *val)

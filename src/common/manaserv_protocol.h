@@ -145,8 +145,6 @@ enum {
     GPMSG_ITEMS                    = 0x0281, // { W item id, W*2 position }*
     GPMSG_BEING_ABILITY_POINT      = 0x0282, // W being id, B abilityId, W*2 point
     GPMSG_BEING_ABILITY_BEING      = 0x0283, // W being id, B abilityId, W target being id
-    PGMSG_ATTACK                   = 0x0290, // W being id
-    GPMSG_BEING_ATTACK             = 0x0291, // W being id, B direction, B attack Id
     PGMSG_USE_ABILITY_ON_BEING     = 0x0292, // B abilityID, W being id
     GPMSG_ABILITY_STATUS           = 0x0293, // { B abilityID, D current, D max, D recharge }
     PGMSG_USE_ABILITY_ON_POINT     = 0x0294, // B abilityID, W*2 position
@@ -425,24 +423,9 @@ enum BeingAction
 {
     STAND,
     WALK,
-    ATTACK,
     SIT,
     DEAD,
     HURT
-};
-
-/**
-  * Moves enum for beings and actors for others players attack types.
-  * WARNING: Has to be in sync with the same enum in the Being class
-  * of the client!
-  */
-enum AttackType
-{
-    HIT = 0x00,
-    CRITICAL = 0x0a,
-    MULTI = 0x08,
-    REFLECT = 0x04,
-    FLEE = 0x0b
 };
 
 /**

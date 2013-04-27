@@ -63,32 +63,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             stroll-range="32"
             attack-distance="32"
             />
-        <attack id="1"
-            priority="1"
-            type="physical"
-            warmuptime="10"
-            cooldowntime="10"
-            reusetime="10"
-            basedamage="10"
-            deltadamage="1"
-            chancetohit="1000"
-            element="neutral"
-            range="32"
-            animation="attack"
-            />
-        <attack id="2"
-            priority="2"
-            type="physical"
-            warmuptime="0"
-            cooldowntime="100"
-            reusetime="100"
-            basedamage="100"
-            deltadamage="1"
-            chancetohit="1000"
-            element="neutral"
-            range="32"
-            animation="attack"
-            />
     </monster>
 
     <monster id="2" name="Scorpion">
@@ -120,34 +94,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             track-range="2"
             stroll-range="64"
             attack-distance="64"
-            />
-        <!-- slow, strong, long-range tail attack-->
-        <attack id="1"
-            priority="1"
-            type="physical"
-            warmuptime="10"
-            cooldowntime="100"
-            reusetime="100"
-            basedamage="20"
-            deltadamage="1"
-            chancetohit="1000"
-            element="neutral"
-            range="32"
-            animation="attack"
-            />
-        <!-- fast, weak, short-range scissor attack -->
-        <attack id="2"
-            priority="2"
-            type="physical"
-            warmuptime="0"
-            cooldowntime="5"
-            reusetime="1"
-            basedamage="5"
-            deltadamage="1"
-            chancetohit="1000"
-            element="neutral"
-            range="32"
-            animation="attack"
             />
     </monster>
 
@@ -184,19 +130,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             stroll-range="32"
             attack-distance="64"
             />
-        <attack id="1"
-            priority="1"
-            type="physical"
-            warmuptime="0"
-            cooldowntime="100"
-            reusetime="100"
-            basedamage="100"
-            deltadamage="1"
-            chancetohit="1000"
-            element="neutral"
-            range="32"
-            animation="attack"
-            />
     </monster>
 
     <monster id="4" name="Green Slime">
@@ -219,19 +152,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             magical-evade="10"
             physical-defence="0"
             magical-defence="0"
-            />
-        <attack id="1"
-            priority="1"
-            type="physical"
-            warmuptime="0"
-            cooldowntime="100"
-            reusetime="100"
-            basedamage="100"
-            deltadamage="1"
-            chancetohit="1000"
-            element="neutral"
-            range="32"
-            animation="attack"
             />
         <!-- Is fulfilling some unknown purpose that requires it to move around
         a lot and leaves no time for pursing attackers -->

@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "game-server/actor.h"
-#include "game-server/attack.h"
 #include "scripting/script.h"
 
 class Entity;
@@ -86,7 +85,6 @@ enum ItemEffectType
     // Effects that are removed automatically when the trigger ends
     // (ie. item no longer exists in invy, unequipped)
     IET_ATTR_MOD = 0, // Modify a given attribute with a given value
-    IET_ATTACK,       // Give the associated being an attack
     // Effects that do not need any automatic removal
     IET_COOLDOWN,     // Set a cooldown to this item, preventing activation for n ticks
     IET_G_COOLDOWN,   // Set a cooldown to all items of this type for this being
@@ -127,19 +125,6 @@ class ItemEffectAttrMod : public ItemEffectInfo
         double mMod;
         unsigned mDuration;
         unsigned mId;
-};
-
-class ItemEffectAttack : public ItemEffectInfo
-{
-    public:
-        ItemEffectAttack(AttackInfo *attackInfo) :
-            mAttackInfo(attackInfo)
-        {}
-
-        bool apply(Entity *itemUser);
-        void dispell(Entity *itemUser);
-    private:
-        AttackInfo *mAttackInfo;
 };
 
 class ItemEffectConsumes : public ItemEffectInfo
@@ -250,12 +235,6 @@ class ItemClass
         Script::Ref getEventCallback(const std::string &event) const
         { return mEventCallbacks.value(event); }
 
-        void addAttack(AttackInfo *attackInfo, ItemTriggerType applyTrigger,
-                       ItemTriggerType dispellTrigger);
-
-        std::vector<AttackInfo *> &getAttackInfos()
-        { return mAttackInfos; }
-
     private:
         /**
          * Add an effect to a trigger
@@ -289,8 +268,6 @@ class ItemClass
          * Named event callbacks. Can be used in custom item effects.
          */
         utils::NameMap<Script::Ref> mEventCallbacks;
-
-        std::vector<AttackInfo *> mAttackInfos;
 
         friend class ItemManager;
 };

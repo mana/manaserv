@@ -23,7 +23,6 @@
 #include "common/configuration.h"
 #include "game-server/accountconnection.h"
 #include "game-server/effect.h"
-#include "game-server/combatcomponent.h"
 #include "game-server/gamehandler.h"
 #include "game-server/inventory.h"
 #include "game-server/item.h"
@@ -166,19 +165,6 @@ static void informPlayer(MapComposite *map, Entity *p)
 
         if (wereInRange && willBeInRange)
         {
-            // Send attack messages.
-            if ((oflags & UPDATEFLAG_ATTACK) && oid != pid)
-            {
-                MessageOut AttackMsg(GPMSG_BEING_ATTACK);
-                AttackMsg.writeInt16(oid);
-                AttackMsg.writeInt8(
-                        o->getComponent<BeingComponent>()->getDirection());
-                CombatComponent *combatComponent =
-                        o->getComponent<CombatComponent>();
-                AttackMsg.writeInt8(combatComponent->getAttackId());
-                gameHandler->sendTo(p, AttackMsg);
-            }
-
             // Send action change messages.
             if ((oflags & UPDATEFLAG_ACTIONCHANGE))
             {

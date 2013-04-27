@@ -49,22 +49,6 @@ struct MonsterDrop
 
 typedef std::vector< MonsterDrop > MonsterDrops;
 
-/**
- * Structure containing different attack types of a monster type
- */
-struct MonsterAttack
-{
-    unsigned id;
-    int priority;
-    float damageFactor;
-    Element element;
-    DamageType type;
-    int preDelay;
-    int aftDelay;
-    int range;
-    std::string scriptEvent;
-};
-
 typedef std::map<Element, double> Vulnerabilities;
 
 /**
@@ -87,8 +71,6 @@ class MonsterClass
             mAttackDistance(0),
             mOptimalLevel(0)
         {}
-
-        ~MonsterClass();
 
         /**
          * Returns monster type. This is the Id of the monster class.
@@ -195,12 +177,6 @@ class MonsterClass
         /** Returns preferred combat distance in pixels. */
         unsigned getAttackDistance() const { return mAttackDistance; }
 
-        /** Adds an attack to the monsters repertoire. */
-        void addAttack(AttackInfo *info) { mAttacks.push_back(info); }
-
-        /** Returns all attacks of the monster. */
-        std::vector<AttackInfo *> &getAttackInfos() { return mAttacks; }
-
         void setVulnerability(Element element, double factor)
         { mVulnerabilities[element] = factor; }
 
@@ -235,7 +211,6 @@ class MonsterClass
         int mMutation;
         int mAttackDistance;
         int mOptimalLevel;
-        std::vector<AttackInfo *> mAttacks;
         Vulnerabilities mVulnerabilities;
 
         /**
@@ -250,23 +225,6 @@ class MonsterClass
 
         friend class MonsterManager;
         friend class MonsterComponent;
-};
-
-/**
- * Structure holding possible positions relative to the target from which
- * the monster can attack
- */
-struct AttackPosition
-{
-    AttackPosition(int posX, int posY, BeingDirection dir):
-        x(posX),
-        y(posY),
-        direction(dir)
-    {}
-
-    int x;
-    int y;
-    BeingDirection direction;
 };
 
 /**
@@ -294,14 +252,10 @@ class MonsterComponent : public Component
          */
         void update(Entity &entity);
 
-        void refreshTarget(Entity &entity);
-
         /**
          * Signal handler
          */
         void monsterDied(Entity *monster);
-
-        void receivedDamage(Entity *attacker, const Damage &damage, int hpLoss);
 
         /**
          * Alters hate for the monster
@@ -334,26 +288,17 @@ class MonsterComponent : public Component
             sigc::connection removedConnection;
             sigc::connection diedConnection;
         };
-        std::map<Entity *, AggressionInfo> mAnger;
 
         /**
          * Character who currently owns this monster (killsteal protection).
          */
         Entity *mOwner;
 
-        /** List of characters and their skills that attacked this monster. */
-        std::map<Entity *, std::set <size_t> > mExpReceivers;
-
         /**
          * List of characters who are entitled to receive exp (killsteal
          * protection).
          */
         std::set<Entity *> mLegalExpReceivers;
-
-        /**
-         * Set positions relative to target from which the monster can attack.
-         */
-        std::list<AttackPosition> mAttackPositions;
 
         /** Time until monster strolls to new location */
         Timeout mStrollTimeout;
