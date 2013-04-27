@@ -28,6 +28,10 @@ spell1:on_use(function(user, x, y, abilityId)
             local old_hp = being:base_attribute(ATTR_HP)
             local new_hp = math.max(old_hp - 5, 0)
             being:set_base_attribute(ATTR_HP, new_hp)
+            local diff = old_hp - new_hp
+            if diff > 0 then
+                being:add_hit_taken(diff)
+            end
         end
     end
 end)

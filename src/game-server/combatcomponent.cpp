@@ -157,7 +157,6 @@ int CombatComponent::damage(Entity &target,
 
     if (HPloss > 0)
     {
-        mHitsTaken.push_back(HPloss);
         const Attribute *HP = beingComponent->getAttribute(ATTR_HP);
         LOG_DEBUG("Being "
                   << target.getComponent<ActorComponent>()->getPublicID()
