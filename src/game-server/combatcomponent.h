@@ -31,11 +31,6 @@
 
 class Entity;
 
-/**
- * Type definition for a list of hits
- */
-typedef std::vector<unsigned> Hits;
-
 class CombatComponent: public Component
 {
 public:
@@ -49,9 +44,6 @@ public:
     void addAttack(AttackInfo *attack);
     void removeAttack(AttackInfo *attackInfo);
     Attacks &getAttacks();
-
-    const Hits &getHitsTaken() const;
-    void clearHitsTaken();
 
     int performAttack(Entity &source, const Damage &dmg);
     virtual int damage(Entity &target, Entity *source, const Damage &damage);
@@ -72,29 +64,12 @@ protected:
     Entity *mTarget;
     Attacks mAttacks;
     Attack *mCurrentAttack;     // Last used attack
-    Hits mHitsTaken;            //List of punches taken since last update.
 
 };
 
 inline Attacks &CombatComponent::getAttacks()
 {
     return mAttacks;
-}
-
-/**
- * Gets the damage list.
- */
-inline const Hits &CombatComponent::getHitsTaken() const
-{
-    return mHitsTaken;
-}
-
-/**
- * Clears the damage list.
- */
-inline void CombatComponent::clearHitsTaken()
-{
-    mHitsTaken.clear();
 }
 
 /**
