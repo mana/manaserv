@@ -3208,7 +3208,7 @@ static int attack_get_reusetime(lua_State *s)
 }
 
 /** LUA attackinfo:damage (attackinfoclass)
- * >attackinfo:damage()
+ * attackinfo:damage()
  **
  * **Return value:** This function returns the damage info of the attack.
  *
