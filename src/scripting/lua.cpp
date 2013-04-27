@@ -2010,6 +2010,20 @@ static int xp_for_level(lua_State *s)
     return 1;
 }
 
+/** LUA entity:add_hit_taken (being)
+ * add_hit_taken(int damage)
+ **
+ * Adds a damage value to the taken hits of a being. This list will be send to
+ * all clients in the view range in order to allow to display the hit particles.
+ */
+static int entity_add_hit_taken(lua_State *s)
+{
+    Entity *c = checkBeing(s, 1);
+    const int damage = luaL_checkinteger(s, 2);
+    c->getComponent<BeingComponent>()->addHitTaken(damage);
+    return 0;
+}
+
 /** LUA entity:hair_color (being)
  * entity:hair_color()
  **
@@ -3754,6 +3768,7 @@ LuaScript::LuaScript():
         { "has_status",                     entity_has_status                 },
         { "status_time",                    entity_get_status_time            },
         { "set_status_time",                entity_set_status_time            },
+        { "add_hit_taken",                  entity_add_hit_taken              },
         { nullptr, nullptr }
     };
 

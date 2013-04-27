@@ -255,9 +255,8 @@ static void informPlayer(MapComposite *map, Entity *p)
             // Send damage messages.
             if (o->canFight())
             {
-                CombatComponent *combatComponent =
-                        o->getComponent<CombatComponent>();
-                const Hits &hits = combatComponent->getHitsTaken();
+                auto *beingComponent = o->getComponent<BeingComponent>();
+                const Hits &hits = beingComponent->getHitsTaken();
                 for (Hits::const_iterator j = hits.begin(),
                      j_end = hits.end(); j != j_end; ++j)
                 {
@@ -517,7 +516,7 @@ void GameState::update(int tick)
             a->getComponent<ActorComponent>()->clearUpdateFlags();
             if (a->canFight())
             {
-                a->getComponent<CombatComponent>()->clearHitsTaken();
+                a->getComponent<BeingComponent>()->clearHitsTaken();
             }
         }
     }
