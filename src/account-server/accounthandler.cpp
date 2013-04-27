@@ -346,7 +346,7 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     // Check whether the last login attempt for this IP is still too fresh
     const int address = client.getIP();
-    const time_t now = time(nullptr);
+    const time_t now = time(NULL);
     IPsToTime::const_iterator it = mLastLoginAttemptForIP.find(address);
     if (it != mLastLoginAttemptForIP.end())
     {
@@ -693,7 +693,8 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
 
     // Avoid creation of character from old clients.
     int slot = -1;
-    slot = msg.readInt8();
+    if (msg.getUnreadLength() > 7)
+        slot = msg.readInt8();
 
     MessageOut reply(APMSG_CHAR_CREATE_RESPONSE);
 
@@ -759,48 +760,76 @@ void AccountHandler::handleCharacterCreateMessage(AccountClient &client,
         // Customization of character's attributes...
         std::vector<int> attributes = std::vector<int>(mModifiableAttributes.size(), 0);
         for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
-            attributes[i] = 5;
+            attributes[i] = msg.readInt16();
 
-        CharacterData *newCharacter = new CharacterData(name);
-
-        // Set the initial attributes provided by the client
+        int totalAttributes = 0;
         for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
         {
-            newCharacter->mAttributes.insert(
-                        std::make_pair(mModifiableAttributes.at(i), attributes[i]));
+            // For good total attributes check.
+            totalAttributes += attributes.at(i);
+
+            // For checking if all stats are >= min and <= max.
+            if (attributes.at(i) < mAttributeMinimum
+                || attributes.at(i) > mAttributeMaximum)
+            {
+                reply.writeInt8(CREATE_ATTRIBUTES_OUT_OF_RANGE);
+                client.send(reply);
+                return;
+            }
         }
 
-        newCharacter->mAttributes.insert(mDefaultAttributes.begin(),
-                                         mDefaultAttributes.end());
-        newCharacter->setAccount(acc);
-        newCharacter->setCharacterSlot(slot);
-        newCharacter->setGender(gender);
-        newCharacter->setHairStyle(hairStyle);
-        newCharacter->setHairColor(hairColor);
-        newCharacter->setMapId(Configuration::getValue("char_startMap", 1));
-        Point startingPos(Configuration::getValue("char_startX", 1024),
-                          Configuration::getValue("char_startY", 1024));
-        newCharacter->setPosition(startingPos);
-        acc->addCharacter(newCharacter);
+        if (totalAttributes > mStartingPoints)
+        {
+            reply.writeInt8(CREATE_ATTRIBUTES_TOO_HIGH);
+        }
+        else if (totalAttributes < mStartingPoints)
+        {
+            reply.writeInt8(CREATE_ATTRIBUTES_TOO_LOW);
+        }
+        else
+        {
+            CharacterData *newCharacter = new CharacterData(name);
 
-        LOG_INFO("Character " << name << " was created for "
-                 << acc->getName() << "'s account.");
+            // Set the initial attributes provided by the client
+            for (unsigned i = 0; i < mModifiableAttributes.size(); ++i)
+            {
+                newCharacter->mAttributes.insert(
+                            std::make_pair(mModifiableAttributes.at(i), attributes[i]));
+            }
 
-        storage->flush(acc); // flush changes
+            newCharacter->mAttributes.insert(mDefaultAttributes.begin(),
+                                             mDefaultAttributes.end());
+            newCharacter->setAccount(acc);
+            newCharacter->setCharacterSlot(slot);
+            newCharacter->setGender(gender);
+            newCharacter->setHairStyle(hairStyle);
+            newCharacter->setHairColor(hairColor);
+            newCharacter->setMapId(Configuration::getValue("char_startMap", 1));
+            Point startingPos(Configuration::getValue("char_startX", 1024),
+                              Configuration::getValue("char_startY", 1024));
+            newCharacter->setPosition(startingPos);
+            acc->addCharacter(newCharacter);
 
-        // log transaction
-        Transaction trans;
-        trans.mCharacterId = newCharacter->getDatabaseID();
-        trans.mAction = TRANS_CHAR_CREATE;
-        trans.mMessage = acc->getName() + " created character ";
-        trans.mMessage.append("called " + name);
-        storage->addTransaction(trans);
+            LOG_INFO("Character " << name << " was created for "
+                     << acc->getName() << "'s account.");
 
-        reply.writeInt8(ERRMSG_OK);
-        client.send(reply);
+            storage->flush(acc); // flush changes
 
-        // Send new characters infos back to client
-        sendCharacterData(client, *chars[slot]);
+            // log transaction
+            Transaction trans;
+            trans.mCharacterId = newCharacter->getDatabaseID();
+            trans.mAction = TRANS_CHAR_CREATE;
+            trans.mMessage = acc->getName() + " created character ";
+            trans.mMessage.append("called " + name);
+            storage->addTransaction(trans);
+
+            reply.writeInt8(ERRMSG_OK);
+            client.send(reply);
+
+            // Send new characters infos back to client
+            sendCharacterData(client, *chars[slot]);
+            return;
+        }
     }
 
     client.send(reply);
