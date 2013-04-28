@@ -138,19 +138,14 @@ ResourceManager::splittedPath ResourceManager::splitFileNameAndPath(
 std::string ResourceManager::pathJoin(const std::string& path1, const std::string& path2)
 {
     if (path2.empty())
-    {
         return path1;
-    }
-    else if (path1.empty())
-    {
-        return path2;
-    }
 
-    if (path2[0] == '/' || path2[0] == '\\')
-    {
-        // path2 is an absolute path, it cannot be joined
+    if (path1.empty())
         return path2;
-    }
+
+    // check if path2 is an absolute path that cannot be joined
+    if (path2[0] == '/' || path2[0] == '\\')
+        return path2;
 
     char p1end = path1[path1.size()-1];
     if (p1end == '/' || p1end == '\\')
@@ -163,7 +158,7 @@ std::string ResourceManager::pathJoin(const std::string& path1, const std::strin
     }
 }
 
-std::string ResourceManager::absolutePath(const std::string& path)
+std::string ResourceManager::cleanPath(const std::string& path)
 {
     size_t prev, cur;
     std::string part, result;

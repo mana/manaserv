@@ -84,11 +84,9 @@ namespace ResourceManager
      std::string pathJoin(const std::string& path1, const std::string& path2);
 
      /**
-      * Convert relative path to absolute.
-      *
-      * Handles ./ and ../ elements withing the path.
+      * Removes relative elements from the path.
       */
-     std::string absolutePath(const std::string& path);
+     std::string cleanPath(const std::string& path);
 }
 
 #endif
