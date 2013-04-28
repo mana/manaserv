@@ -67,6 +67,10 @@ namespace ResourceManager
      *                       and the file name alone.
      */
      splittedPath splitFileNameAndPath(const std::string &fullFilePath);
+
+     std::string joinPaths(const std::string& path1, const std::string& path2);
+
+     std::string cleanPath(const std::string& path);
 }
 
 #endif

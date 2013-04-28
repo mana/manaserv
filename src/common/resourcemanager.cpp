@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 #ifdef _WIN32
 #include <io.h>
@@ -132,4 +133,110 @@ ResourceManager::splittedPath ResourceManager::splitFileNameAndPath(
     splittedFilePath.file = fullFilePath.substr(slashPos + 1);
 
     return splittedFilePath;
+}
+
+/**
+ * Join two path elements into one.
+ *
+ * This function helps build relative paths.
+ *
+ * Examples:
+ *
+ *     /foo + bar = /foo/bar
+ *     /foo/ + bar = /foo/bar
+ *     /foo + /bar = /bar
+ *
+ * This will work for PhysFS paths. Windows style paths (prefixed with drive letters) won't work.
+ *
+ * @return Joined paths or path2 if path2 was an absolute path.
+ */
+std::string ResourceManager::joinPaths(const std::string& path1, const std::string& path2)
+{
+    if (path2.empty())
+        return path1;
+
+    if (path1.empty())
+        return path2;
+
+    // check if path2 is an absolute path that cannot be joined
+    if (path2[0] == '/' || path2[0] == '\\')
+        return path2;
+
+    char p1end = path1[path1.size()-1];
+    if (p1end == '/' || p1end == '\\')
+    {
+        return path1 + path2;
+    }
+    else
+    {
+        return path1 + "/" + path2;
+    }
+}
+
+/**
+ * Removes relative elements from the path.
+ */
+std::string ResourceManager::cleanPath(const std::string& path)
+{
+    size_t prev, cur;
+    std::string part, result;
+    std::vector<std::string> pathStack;
+
+    prev = 0;
+    while (true)
+    {
+        cur = path.find_first_of("/\\", prev);
+        if (cur == std::string::npos)
+        {
+            // FIXME add everything from prev to the end
+            pathStack.push_back(path.substr(prev));
+            break;
+        }
+
+        part = path.substr(prev, cur - prev);
+        if (part == "..")
+        {
+            // go back one level
+            if (!pathStack.empty())
+            {
+                pathStack.pop_back();
+            }
+        }
+        else if (part == ".")
+        {
+            // do nothing
+        }
+        else if (part == "")
+        {
+            if (pathStack.empty() && cur == 0)
+            {
+                // handle first empty match before the root slash
+                pathStack.push_back(std::string());
+            }
+            else
+            {
+                // empty match in the middle of the path should be ignored
+            }
+        }
+        else
+        {
+            // normal path element
+            pathStack.push_back(part);
+        }
+
+        cur++;
+        prev = cur;
+    }
+
+    // join the pathStack into a normal path
+    unsigned int i = 0;
+    for (i = 0; i < pathStack.size(); i++)
+    {
+        result += pathStack[i];
+        if (i < pathStack.size() - 1) {
+            result += "/";
+        }
+    }
+
+    return result;
 }

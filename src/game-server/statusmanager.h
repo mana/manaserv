@@ -22,6 +22,7 @@
 #define STATUSMANAGER_H
 
 #include <string>
+#include "utils/xml.h"
 
 class StatusEffect;
 
@@ -30,7 +31,7 @@ namespace StatusManager
     /**
      * Loads status reference file.
      */
-    void initialize(const std::string &);
+    void initialize();
 
     /**
      * Reloads status reference file.
@@ -51,6 +52,10 @@ namespace StatusManager
      * Gets the status having the given name.
      */
     StatusEffect *getStatusByName(const std::string &name);
+
+    void readStatusNode(xmlNodePtr node, const std::string &filename);
+
+    void checkStatus();
 }
 
 #endif // STATUSMANAGER_H

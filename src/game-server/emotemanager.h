@@ -31,8 +31,7 @@ class EmoteManager
 {
 public:
 
-    EmoteManager(const std::string &emoteFile):
-        mEmoteFile(emoteFile)
+    EmoteManager()
     { }
 
     ~EmoteManager()
@@ -43,10 +42,16 @@ public:
      */
     void initialize();
 
+    void reload();
+
     /**
      * Tells whether the given id is a valid emote one.
      */
     bool isIdAvailable(int id) const;
+
+    void readEmoteNode(xmlNodePtr node, const std::string &filename);
+
+    void checkStatus();
 
 private:
     /**
@@ -55,7 +60,6 @@ private:
     void clear()
     { mEmoteIds.clear(); }
 
-    std::string mEmoteFile;
     std::vector<int> mEmoteIds;
 };
 

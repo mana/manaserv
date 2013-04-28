@@ -34,44 +34,48 @@ void SkillManager::clear()
 
     mSkillsInfo.clear();
     mNamedSkillsInfo.clear();
+    mDefaultSkillId = 0;
 }
 
 void SkillManager::initialize()
 {
     clear();
+}
 
-    XML::Document doc(mSkillFile);
-    xmlNodePtr rootNode = doc.rootNode();
+void SkillManager::reload()
+{
+    initialize();
+}
 
-    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "skills"))
+/**
+ * Read a <skill-set> element from settings.
+ * Used by SettingsManager.
+ */
+void SkillManager::readSkillSetNode(xmlNodePtr node, const std::string& filename)
+{
+    std::string setName = XML::getProperty(node, "name", std::string());
+    if (setName.empty())
     {
-        LOG_ERROR("Skill Manager: " << mSkillFile
-                  << " is not a valid database file!");
+        LOG_WARN("The " << filename << " file is containing unamed <skill-set> "
+                 "tags and will be ignored.");
         return;
     }
 
-    LOG_INFO("Loading skill reference: " << mSkillFile);
+    setName = utils::toLower(setName);
 
-    for_each_xml_child_node(setNode, rootNode)
+    for_each_xml_child_node(skillNode, node)
     {
-        // The server will prefix the core name with the set, so we need one.
-        if (!xmlStrEqual(setNode->name, BAD_CAST "set"))
-            continue;
-
-        std::string setName = XML::getProperty(setNode, "name", std::string());
-        if (setName.empty())
-        {
-            LOG_WARN("The " << mSkillFile << " file is containing unamed <set> "
-                     "tags and will be ignored.");
-            continue;
-        }
-
-        setName = utils::toLower(setName);
-
-        for_each_xml_child_node(skillNode, setNode)
+        if (xmlStrEqual(skillNode->name, BAD_CAST "skill")) {
             readSkillNode(skillNode, setName);
+        }
     }
+}
 
+/**
+ * Check the status of recently loaded configuration.
+ */
+void SkillManager::checkStatus()
+{
     printDebugSkillTable();
 
     if (!mDefaultSkillId)
@@ -79,8 +83,7 @@ void SkillManager::initialize()
                  "Skill map loading. "
                  "Players won't be able to earn XP when unarmed.");
 
-    LOG_INFO("Loaded " << mSkillsInfo.size() << " skills from "
-             << mSkillFile);
+    LOG_INFO("Loaded " << mSkillsInfo.size() << " skills");
 }
 
 void SkillManager::readSkillNode(xmlNodePtr skillNode,
@@ -141,7 +144,7 @@ void SkillManager::printDebugSkillTable()
     if (::utils::Logger::mVerbosity >= ::utils::Logger::Debug)
     {
         std::string lastSet;
-        LOG_DEBUG("Skill map in " << mSkillFile << ":"
+        LOG_DEBUG("Skill map:"
                   << std::endl << "-----");
         for (SkillsInfo::iterator it = mSkillsInfo.begin();
             it != mSkillsInfo.end(); ++it)

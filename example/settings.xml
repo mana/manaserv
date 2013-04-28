@@ -1,0 +1,10 @@
+<settings>
+	<include file="attributes.xml" />
+	<include file="skills.xml" />
+	<include file="specials.xml" />
+	<include file="equip.xml" />
+	<include file="items.xml" />
+	<include file="monsters.xml" />
+	<include file="emotes.xml" />
+	<include file="status-effects.xml" />
+</settings>
