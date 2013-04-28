@@ -38,10 +38,11 @@ class Party;
 class ChatClient : public NetComputer
 {
     public:
-        ChatClient(ENetPeer *peer):
-            NetComputer(peer),
-            party(0),
-            accountLevel(0)
+        ChatClient(ENetPeer *peer)
+            : NetComputer(peer)
+            , characterId(0)
+            , party(0)
+            , accountLevel(0)
         {
         }
 

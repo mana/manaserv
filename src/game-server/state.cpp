@@ -110,7 +110,7 @@ static void serializeLooks(Entity *ch, MessageOut &msg)
         }
     }
 
-    if (lookChanges.size() > 0)
+    if (!lookChanges.empty())
     {
         // Number of look changes to send
         msg.writeInt8(lookChanges.size());

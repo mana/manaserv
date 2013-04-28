@@ -24,7 +24,7 @@
 #include "../common/configuration.h"
 
 Letter::Letter(unsigned type, CharacterData *sender, CharacterData *receiver)
- : mId(0), mType(type), mSender(sender), mReceiver(receiver)
+ : mId(0), mType(type), mExpiry(0), mSender(sender), mReceiver(receiver)
 {
 }
 

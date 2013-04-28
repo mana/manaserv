@@ -198,13 +198,11 @@ static std::string playerRights(Entity *ch)
     std::stringstream str;
     str << (unsigned)ch->getComponent<CharacterComponent>()->getAccountLevel();
     str << " ( ";
-    std::list<std::string> classes =
-        PermissionManager::getClassList(ch);
-    for (std::list<std::string>::iterator i = classes.begin();
-         i != classes.end();
-         i++)
+    std::list<std::string> classes = PermissionManager::getClassList(ch);
+
+    for (std::string &permission : classes)
     {
-        str << (*i) << " ";
+        str << permission << " ";
     }
     str << ")";
     return str.str();
@@ -257,7 +255,7 @@ static std::string getArgument(std::string &args)
     }
     else
     {
-        argument = args.substr(0);
+        argument = args;
         args = std::string();
     }
     return argument;
@@ -269,12 +267,10 @@ static void handleHelp(Entity *player, std::string &args)
     {
         // short list of all commands
         say("=Available Commands=", player);
-        std::list<std::string> commands = PermissionManager::getPermissionList(player);
-        for (std::list<std::string>::iterator i = commands.begin();
-             i != commands.end();
-             i++)
+        for (std::string &command :
+                PermissionManager::getPermissionList(player))
         {
-            say((*i), player);
+            say(command, player);
         }
     } else {
         // don't show help for commands the player may not use
@@ -909,7 +905,7 @@ static void handleBan(Entity *player, std::string &args)
     // feedback for command user
     std::string otherName = other->getComponent<BeingComponent>()->getName();
     std::string msg = "You've banned " + otherName + " for " + utils::toString(length) + " minutes";
-    say(msg.c_str(), player);
+    say(msg, player);
     // log transaction
     msg = "User banned " + otherName + " for " + utils::toString(length) + " minutes";
     accountHandler->sendTransaction(characterComponent->getDatabaseID(),
@@ -1423,7 +1419,6 @@ static void handleCraft(Entity *player, std::string &args)
     std::stringstream errMsg;
     std::list<InventoryItem> recipe;
     Inventory playerInventory(player);
-    std::map<int, int> totalAmountOfItem;
 
     while (true)
     {

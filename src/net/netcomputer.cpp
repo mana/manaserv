@@ -34,7 +34,7 @@ NetComputer::NetComputer(ENetPeer *peer):
 {
 }
 
-bool NetComputer::isConnected()
+bool NetComputer::isConnected() const
 {
     return (mPeer->state == ENET_PEER_STATE_CONNECTED);
 }

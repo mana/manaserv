@@ -382,10 +382,9 @@ void AccountHandler::handleLoginMessage(AccountClient &client, MessageIn &msg)
 
     // Check if the account exists
     Account *acc = 0;
-    std::list<Account*>::iterator ita;
-    for ( ita = mPendingAccounts.begin() ; ita != mPendingAccounts.end(); ita++ )
-        if ((*ita)->getName() == username)
-            acc = *ita;
+    for (Account *account : mPendingAccounts)
+        if (account->getName() == username)
+            acc = account;
     mPendingAccounts.remove(acc);
 
     if (!acc || sha256(acc->getPassword() + acc->getRandomSalt()) != password)

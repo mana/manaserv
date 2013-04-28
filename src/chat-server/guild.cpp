@@ -26,8 +26,9 @@
 
 #include <algorithm>
 
-Guild::Guild(const std::string &name) :
-    mName(name)
+Guild::Guild(const std::string &name)
+    : mId(0)
+    , mName(name)
 {
 }
 

@@ -143,16 +143,15 @@ unsigned char PermissionManager::getMaskFromAlias(const std::string &alias)
 std::list<std::string> PermissionManager::getPermissionList(const Entity* character)
 {
     std::list<std::string> result;
-    std::map<std::string, unsigned char>::iterator i;
 
     unsigned char mask = character->getComponent<CharacterComponent>()
             ->getAccountLevel();
 
-    for (i = permissions.begin(); i != permissions.end(); i++)
+    for (auto &permissionIt : permissions)
     {
-        if (i->second & mask)
+        if (permissionIt.second & mask)
         {
-            result.push_back(i->first);
+            result.push_back(permissionIt.first);
         }
     }
 
@@ -162,17 +161,14 @@ std::list<std::string> PermissionManager::getPermissionList(const Entity* charac
 std::list<std::string> PermissionManager::getClassList(const Entity* character)
 {
     std::list<std::string> result;
-    std::map<std::string, unsigned char>::iterator i;
 
     unsigned char mask = character->getComponent<CharacterComponent>()
             ->getAccountLevel();
 
-    for (i = aliases.begin(); i != aliases.end(); i++)
+    for (auto &aliasIt : aliases)
     {
-        if (i->second & mask)
-        {
-            result.push_back(i->first);
-        }
+        if (aliasIt.second & mask)
+            result.push_back(aliasIt.first);
     }
 
     return result;
