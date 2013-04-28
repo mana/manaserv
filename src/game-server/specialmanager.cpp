@@ -36,6 +36,32 @@ static SpecialManager::TargetMode getTargetByString(const std::string &str)
     return SpecialManager::TARGET_BEING;
 }
 
+
+void SpecialManager::readSpecialSetNode(xmlNodePtr node, const std::string& filename)
+{
+    std::string setName = XML::getProperty(node, "name", std::string());
+    if (setName.empty())
+    {
+        LOG_WARN("The " << filename << " file contains unamed <set> tags and will be ignored.");
+        return;
+    }
+
+    setName = utils::toLower(setName);
+
+    for_each_xml_child_node(specialNode, node)
+    {
+        if (xmlStrEqual(specialNode->name, BAD_CAST "special")) {
+            readSpecialNode(specialNode, setName);
+        }
+    }
+
+}
+
+void SpecialManager::checkStatus()
+{
+    LOG_INFO("Loaded " << mSpecialsInfo.size() << " specials");
+}
+
 void SpecialManager::readSpecialNode(xmlNodePtr specialNode,
                                      const std::string &setName)
 {
@@ -94,42 +120,11 @@ void SpecialManager::readSpecialNode(xmlNodePtr specialNode,
 void SpecialManager::initialize()
 {
     clear();
+}
 
-    XML::Document doc(mSpecialFile);
-    xmlNodePtr rootNode = doc.rootNode();
-
-    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "specials"))
-    {
-        LOG_ERROR("Special Manager: " << mSpecialFile
-                  << " is not a valid database file!");
-        return;
-    }
-
-    LOG_INFO("Loading special reference: " << mSpecialFile);
-
-    for_each_xml_child_node(setNode, rootNode)
-    {
-        // The server will prefix the core name with the set, so we need one.
-        if (!xmlStrEqual(setNode->name, BAD_CAST "set"))
-            continue;
-
-        std::string setName = XML::getProperty(setNode, "name", std::string());
-        if (setName.empty())
-        {
-            LOG_WARN("The " << mSpecialFile << " file is containing unamed <set> "
-                     "tags and will be ignored.");
-            continue;
-        }
-
-        setName = utils::toLower(setName);
-
-        for_each_xml_child_node(specialNode, setNode)
-        {
-            if (!xmlStrEqual(specialNode->name, BAD_CAST "special"))
-                continue;
-            readSpecialNode(specialNode, setName);
-        }
-    }
+void SpecialManager::reload()
+{
+    clear();
 }
 
 void SpecialManager::clear()

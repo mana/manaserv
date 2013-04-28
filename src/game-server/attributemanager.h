@@ -105,8 +105,7 @@ class AttributeManager
             std::vector<struct AttributeModifier> modifiers;
         };
 
-        AttributeManager(const std::string &file) :
-            mAttributeReferenceFile(file)
+        AttributeManager()
         {}
 
         /**
@@ -132,9 +131,18 @@ class AttributeManager
 
         const std::string *getTag(const ModifierLocation &location) const;
 
-    private:
-        void readAttributesFile();
+        /**
+         * Read a <attribute> element from settings.
+         * Used by SettingsManager.
+         */
         void readAttributeNode(xmlNodePtr attributeNode);
+
+        /**
+         * Check the status of recently loaded configuration.
+         */
+        void checkStatus();
+
+    private:
         void readModifierNode(xmlNodePtr modifierNode, int attributeId);
 
         // Attribute id -> { modifiable, min, max, { stackable type, effect type }[] }
@@ -146,8 +154,6 @@ class AttributeManager
         AttributeScope mAttributeScopes[MaxScope];
         AttributeMap mAttributeMap;
         TagMap mTagMap;
-
-        const std::string mAttributeReferenceFile;
 };
 
 extern AttributeManager *attributeManager;

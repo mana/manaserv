@@ -28,8 +28,7 @@
 class SkillManager
 {
   public:
-    SkillManager(const std::string & skillFile):
-        mSkillFile(skillFile),
+    SkillManager():
         mDefaultSkillId(0)
     {}
 
@@ -64,6 +63,18 @@ class SkillManager
 
     unsigned getDefaultSkillId() const
     { return mDefaultSkillId; }
+
+    /**
+     * Read a <skill-set> element from settings.
+     * Used by SettingsManager.
+     */
+    void readSkillSetNode(xmlNodePtr node, const std::string& filename);
+
+    /**
+     * Check the status of recently loaded configuration.
+     */
+    void checkStatus();
+
   private:
     struct SkillInfo {
         SkillInfo():
@@ -80,12 +91,9 @@ class SkillManager
      */
     void clear();
 
-    void readSkillNode(xmlNodePtr skillNode, const std::string& setName);
-
     void printDebugSkillTable();
 
-    // The skill file (skills.xml)
-    std::string mSkillFile;
+    void readSkillNode(xmlNodePtr skillNode, const std::string& setName);
 
     // The skill map
     typedef std::map<unsigned, SkillInfo*> SkillsInfo;

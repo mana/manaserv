@@ -35,43 +35,6 @@ void AttributeManager::reload()
     mAttributeMap.clear();
     for (unsigned i = 0; i < MaxScope; ++i)
         mAttributeScopes[i].clear();
-
-    readAttributesFile();
-
-    LOG_DEBUG("attribute map:");
-    LOG_DEBUG("Stackable is " << Stackable << ", NonStackable is " << NonStackable
-              << ", NonStackableBonus is " << NonStackableBonus << ".");
-    LOG_DEBUG("Additive is " << Additive << ", Multiplicative is " << Multiplicative << ".");
-    const std::string *tag;
-    unsigned count = 0;
-    for (AttributeMap::const_iterator i = mAttributeMap.begin();
-         i != mAttributeMap.end(); ++i)
-    {
-        unsigned lCount = 0;
-        LOG_DEBUG("  "<<i->first<<" : ");
-        for (std::vector<AttributeModifier>::const_iterator j =
-            i->second.modifiers.begin();
-            j != i->second.modifiers.end(); ++j)
-        {
-            tag = getTag(ModifierLocation(i->first, lCount));
-            std::string end = tag ? "tag of '" + (*tag) + "'." : "no tag.";
-            LOG_DEBUG("    stackableType: " << j->stackableType
-                      << ", effectType: " << j->effectType << ", and " << end);
-            ++lCount;
-            ++count;
-        }
-    }
-    LOG_INFO("Loaded '" << mAttributeMap.size() << "' attributes with '"
-             << count << "' modifier layers.");
-
-    for (TagMap::const_iterator i = mTagMap.begin(), i_end = mTagMap.end();
-         i != i_end; ++i)
-    {
-        LOG_DEBUG("Tag '" << i->first << "': '" << i->second.attributeId
-                  << "', '" << i->second.layer << "'.");
-    }
-
-    LOG_INFO("Loaded '" << mTagMap.size() << "' modifier tags.");
 }
 
 const std::vector<AttributeModifier> *AttributeManager::getAttributeInfo(int id) const
@@ -110,27 +73,6 @@ const std::string *AttributeManager::getTag(const ModifierLocation &location) co
         if (it->second == location)
             return &it->first;
     return 0;
-}
-
-void AttributeManager::readAttributesFile()
-{
-    XML::Document doc(mAttributeReferenceFile);
-    xmlNodePtr node = doc.rootNode();
-
-    if (!node || !xmlStrEqual(node->name, BAD_CAST "attributes"))
-    {
-        LOG_FATAL("Attribute Manager: " << mAttributeReferenceFile
-                  << " is not a valid database file!");
-        exit(EXIT_XML_BAD_PARAMETER);
-    }
-
-    LOG_INFO("Loading attribute reference...");
-
-    for_each_xml_child_node(childNode, node)
-    {
-        if (xmlStrEqual(childNode->name, BAD_CAST "attribute"))
-            readAttributeNode(childNode);
-    }
 }
 
 void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
@@ -194,6 +136,44 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
         LOG_DEBUG("Attribute manager: attribute '" << id
                   << "' set to have no default scope.");
     }
+}
+
+void AttributeManager::checkStatus()
+{
+    LOG_DEBUG("attribute map:");
+    LOG_DEBUG("Stackable is " << Stackable << ", NonStackable is " << NonStackable
+              << ", NonStackableBonus is " << NonStackableBonus << ".");
+    LOG_DEBUG("Additive is " << Additive << ", Multiplicative is " << Multiplicative << ".");
+    const std::string *tag;
+    unsigned count = 0;
+    for (AttributeMap::const_iterator i = mAttributeMap.begin();
+         i != mAttributeMap.end(); ++i)
+    {
+        unsigned lCount = 0;
+        LOG_DEBUG("  "<<i->first<<" : ");
+        for (std::vector<AttributeModifier>::const_iterator j =
+            i->second.modifiers.begin();
+            j != i->second.modifiers.end(); ++j)
+        {
+            tag = getTag(ModifierLocation(i->first, lCount));
+            std::string end = tag ? "tag of '" + (*tag) + "'." : "no tag.";
+            LOG_DEBUG("    stackableType: " << j->stackableType
+                      << ", effectType: " << j->effectType << ", and " << end);
+            ++lCount;
+            ++count;
+        }
+    }
+    LOG_INFO("Loaded '" << mAttributeMap.size() << "' attributes with '"
+             << count << "' modifier layers.");
+
+    for (TagMap::const_iterator i = mTagMap.begin(), i_end = mTagMap.end();
+         i != i_end; ++i)
+    {
+        LOG_DEBUG("Tag '" << i->first << "': '" << i->second.attributeId
+                  << "', '" << i->second.layer << "'.");
+    }
+
+    LOG_INFO("Loaded '" << mTagMap.size() << "' modifier tags.");
 }
 
 void AttributeManager::readModifierNode(xmlNodePtr modifierNode,

@@ -59,8 +59,7 @@ public:
         Script::Ref useCallback;
     };
 
-    SpecialManager(const std::string &specialFile):
-        mSpecialFile(specialFile)
+    SpecialManager()
     { }
 
     ~SpecialManager()
@@ -92,6 +91,18 @@ public:
 
     SpecialInfo *getSpecialInfo(int id);
 
+
+    /**
+     * Read a <special> element from settings.
+     * Used by SettingsManager.
+     */
+    void readSpecialSetNode(xmlNodePtr node, const std::string& filename);
+
+    /**
+     * Check the status of recently loaded configuration.
+     */
+    void checkStatus();
+
 private:
     /**
      * Clears up the special maps.
@@ -101,7 +112,6 @@ private:
     void readSpecialNode(xmlNodePtr skillNode,
                          const std::string &setName);
 
-    std::string mSpecialFile;
     typedef std::map<unsigned, SpecialInfo*> SpecialsInfo;
     SpecialsInfo mSpecialsInfo;
     typedef utils::NameMap<SpecialInfo*> NamedSpecialsInfo;

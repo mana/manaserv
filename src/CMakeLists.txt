@@ -253,6 +253,8 @@ SET(SRCS_MANASERVGAME
     game-server/postman.h
     game-server/quest.h
     game-server/quest.cpp
+    game-server/settingsmanager.h
+    game-server/settingsmanager.cpp
     game-server/skillmanager.h
     game-server/skillmanager.cpp
     game-server/spawnareacomponent.h

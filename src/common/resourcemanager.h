@@ -67,6 +67,28 @@ namespace ResourceManager
      *                       and the file name alone.
      */
      splittedPath splitFileNameAndPath(const std::string &fullFilePath);
+
+     /**
+      * Join two path elements into one.
+      *
+      * This function helps build relative paths.
+      *
+      * Examples:
+      *
+      *     /foo + bar = /foo/bar
+      *     /foo/ + bar = /foo/bar
+      *     /foo + /bar = /bar
+      *
+      * @return Joined paths or path2 if path2 was an absolute path.
+      */
+     std::string pathJoin(const std::string& path1, const std::string& path2);
+
+     /**
+      * Convert relative path to absolute.
+      *
+      * Handles ./ and ../ elements withing the path.
+      */
+     std::string absolutePath(const std::string& path);
 }
 
 #endif

@@ -35,6 +35,7 @@
 #include "game-server/statusmanager.h"
 #include "game-server/postman.h"
 #include "game-server/state.h"
+#include "game-server/settingsmanager.h"
 #include "net/bandwidth.h"
 #include "net/connectionhandler.h"
 #include "net/messageout.h"
@@ -77,12 +78,14 @@ static bool running = true;     /**< Whether the server keeps running */
 
 utils::StringFilter *stringFilter; /**< Slang's Filter */
 
-AttributeManager *attributeManager = new AttributeManager(DEFAULT_ATTRIBUTEDB_FILE);
-ItemManager *itemManager = new ItemManager(DEFAULT_ITEMSDB_FILE, DEFAULT_EQUIPDB_FILE);
-MonsterManager *monsterManager = new MonsterManager(DEFAULT_MONSTERSDB_FILE);
-SkillManager *skillManager = new SkillManager(DEFAULT_SKILLSDB_FILE);
-SpecialManager *specialManager = new SpecialManager(DEFAULT_SPECIALSDB_FILE);
-EmoteManager *emoteManager = new EmoteManager(DEFAULT_EMOTESDB_FILE);
+AttributeManager *attributeManager = new AttributeManager();
+ItemManager *itemManager = new ItemManager();
+MonsterManager *monsterManager = new MonsterManager();
+SkillManager *skillManager = new SkillManager();
+SpecialManager *specialManager = new SpecialManager();
+EmoteManager *emoteManager = new EmoteManager();
+
+SettingsManager *settingsManager = new SettingsManager(DEFAULT_SETTINGS_FILE);
 
 /** Core game message handler */
 GameHandler *gameHandler;
@@ -130,14 +133,19 @@ static void initializeServer()
         LOG_FATAL("The Game Server can't find any valid/available maps.");
         exit(EXIT_MAP_FILE_NOT_FOUND);
     }
-    attributeManager->initialize();
-    skillManager->initialize();
-    specialManager->initialize();
-    itemManager->initialize();
-    monsterManager->initialize();
-    emoteManager->initialize();
-    StatusManager::initialize(DEFAULT_STATUSDB_FILE);
+
+    // load game settings files
+    settingsManager->initialize();
+
+    //    attributeManager->initialize();
+//    skillManager->initialize();
+//    specialManager->initialize();
+//    itemManager->initialize();
+//    monsterManager->initialize();
+//    emoteManager->initialize();
+//    StatusManager::initialize();
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
+
 
     std::string mainScript = Configuration::getValue("script_mainFile",
                                                      DEFAULT_MAIN_SCRIPT_FILE);
@@ -192,6 +200,7 @@ static void deinitializeServer()
     delete skillManager; skillManager = 0;
     delete itemManager; itemManager = 0;
     delete emoteManager; emoteManager = 0;
+    delete settingsManager; settingsManager = 0;
     MapManager::deinitialize();
     StatusManager::deinitialize();
     ScriptManager::deinitialize();

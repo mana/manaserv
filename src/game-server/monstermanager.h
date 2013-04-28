@@ -24,14 +24,15 @@
 #include <string>
 #include <map>
 #include "utils/string.h"
+#include "utils/xml.h"
+
 
 class MonsterClass;
 
 class MonsterManager
 {
     public:
-        MonsterManager(const std::string &file):
-            mMonsterReferenceFile(file)
+        MonsterManager()
         {}
 
         ~MonsterManager()
@@ -65,13 +66,22 @@ class MonsterManager
          */
         MonsterClass *getMonsterByName(const std::string &name) const;
 
+        /**
+         * Read a <monster> element from settings.
+         * Used by SettingsManager.
+         */
+        void readMonsterNode(xmlNodePtr node, const std::string& filename);
+
+        /**
+         * Check the status of recently loaded configuration.
+         */
+        void checkStatus();
+
     private:
 
         typedef std::map< int, MonsterClass * > MonsterClasses;
         MonsterClasses mMonsterClasses; /**< Monster reference */
         utils::NameMap<MonsterClass*> mMonsterClassesByName;
-
-        std::string mMonsterReferenceFile;
 };
 
 extern MonsterManager *monsterManager;

@@ -26,36 +26,31 @@
 void EmoteManager::initialize()
 {
     clear();
+}
 
-    XML::Document doc(mEmoteFile);
-    xmlNodePtr rootNode = doc.rootNode();
+void EmoteManager::reload()
+{
+    clear();
+}
 
-    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "emotes"))
+void EmoteManager::readEmoteNode(xmlNodePtr node, const std::string& filename)
+{
+    int id = XML::getProperty(node, "id", -1);
+    if (id < 0)
     {
-        LOG_ERROR("Emote Manager: " << mEmoteFile
-                  << " is not a valid emote file!");
+        LOG_WARN("The " << filename << " file is containing an invalid id"
+                 "(" << id << ") and will be ignored.");
         return;
     }
 
-    LOG_INFO("Loading emote reference: " << mEmoteFile);
+    mEmoteIds.push_back(id);
+}
 
-    for_each_xml_child_node(emoteNode, rootNode)
-    {
-        if (!xmlStrEqual(emoteNode->name, BAD_CAST "emote"))
-            continue;
-
-        int id = XML::getProperty(emoteNode, "id", -1);
-        if (id < 0)
-        {
-            LOG_WARN("The " << mEmoteFile << " file is containing an invalid id"
-                     "(" << id << ") and will be ignored.");
-            continue;
-        }
-
-        mEmoteIds.push_back(id);
-    }
+void EmoteManager::checkStatus()
+{
     LOG_INFO(mEmoteIds.size() << " emotes available.");
 }
+
 
 bool EmoteManager::isIdAvailable(int id) const
 {

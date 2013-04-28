@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <cstdlib>
 #include <cstring>
+#include <list>
 
 #ifdef _WIN32
 #include <io.h>
@@ -132,4 +133,99 @@ ResourceManager::splittedPath ResourceManager::splitFileNameAndPath(
     splittedFilePath.file = fullFilePath.substr(slashPos + 1);
 
     return splittedFilePath;
+}
+
+std::string ResourceManager::pathJoin(const std::string& path1, const std::string& path2)
+{
+    if (path2.empty())
+    {
+        return path1;
+    }
+    else if (path1.empty())
+    {
+        return path2;
+    }
+
+    if (path2[0] == '/' || path2[0] == '\\')
+    {
+        // path2 is an absolute path, it cannot be joined
+        return path2;
+    }
+
+    char p1end = path1[path1.size()-1];
+    if (p1end == '/' || p1end == '\\')
+    {
+        return path1 + path2;
+    }
+    else
+    {
+        return path1 + "/" + path2;
+    }
+}
+
+std::string ResourceManager::absolutePath(const std::string& path)
+{
+    size_t prev, cur;
+    std::string part, result;
+    std::list<std::string> pathStack;
+
+    prev = 0;
+    while (1)
+    {
+        cur = path.find_first_of("/\\", prev);
+        if (cur == std::string::npos)
+        {
+            // FIXME add everything from prev to the end
+            pathStack.push_back(path.substr(prev));
+            break;
+        }
+
+        part = path.substr(prev, cur - prev);
+//        LOG_INFO("split [" << part << "]");
+        if (part == "..")
+        {
+            // go back one level
+            if (!pathStack.empty())
+            {
+                pathStack.pop_back();
+            }
+        }
+        else if (part == ".")
+        {
+            // do nothing
+        }
+        else if (part == "")
+        {
+            if (pathStack.empty() && cur == 0)
+            {
+                // handle first empty match before the root slash
+                pathStack.push_back(std::string());
+            }
+            else
+            {
+                // empty match in the middle of the path should be ignored
+            }
+        }
+        else
+        {
+            // normal path element
+            pathStack.push_back(part);
+        }
+
+        cur++;
+        prev = cur;
+    }
+
+    // join the pathStack into a normal path
+    std::list<std::string>::iterator i = pathStack.begin();
+    while (i != pathStack.end())
+    {
+        result += *i;
+        i++;
+        if (i != pathStack.end()) {
+            result += "/";
+        }
+    }
+
+    return result;
 }

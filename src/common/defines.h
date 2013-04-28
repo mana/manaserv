@@ -30,16 +30,17 @@
 #define WORLD_TICK_MS 100
 
 // Files
+#define DEFAULT_SETTINGS_FILE				"settings.xml"
 #define DEFAULT_MAPSDB_FILE                 "maps.xml"
 #define DEFAULT_ITEMSDB_FILE                "items.xml"
-#define DEFAULT_EQUIPDB_FILE                "equip.xml"
-#define DEFAULT_SKILLSDB_FILE               "skills.xml"
+//#define DEFAULT_EQUIPDB_FILE                "equip.xml"
+//#define DEFAULT_SKILLSDB_FILE               "skills.xml"
 #define DEFAULT_ATTRIBUTEDB_FILE            "attributes.xml"
-#define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
+//#define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
 #define DEFAULT_STATUSDB_FILE               "status-effects.xml"
 #define DEFAULT_PERMISSION_FILE             "permissions.xml"
-#define DEFAULT_SPECIALSDB_FILE             "specials.xml"
-#define DEFAULT_EMOTESDB_FILE               "emotes.xml"
+//#define DEFAULT_SPECIALSDB_FILE             "specials.xml"
+//#define DEFAULT_EMOTESDB_FILE               "emotes.xml"
 
 /**
  * Exit value codes are thrown back at servers exit to reflect their exit state.
