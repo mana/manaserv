@@ -230,7 +230,7 @@ void pushSTLContainer(lua_State *s, const std::list<T> &container)
     {
         push(s, *i);
         lua_rawseti(s, table, key);
-        i++;
+        ++i;
     }
 }
 
@@ -264,7 +264,7 @@ void pushSTLContainer(lua_State *s, const std::map<Tkey, Tval> &container)
         push(s, i->first);
         push(s, i->second);
         lua_settable(s, table);
-        i++;
+        ++i;
     }
 }
 
@@ -282,7 +282,7 @@ void pushSTLContainer(lua_State *s, const std::set<T> &container)
     {
         push(s, *i);
         lua_rawseti(s, table, key);
-        i++;
+        ++i;
     }
 }
 

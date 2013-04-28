@@ -195,7 +195,7 @@ class Attribute
          * Checks the min and max permitted values for the given base value
          * and return the adjusted value.
          */
-        double checkBounds(double baseValue);
+        double checkBounds(double baseValue) const;
 
         double mBase; // The attribute base value
         double mMinValue; // The min authorized base and derived attribute value

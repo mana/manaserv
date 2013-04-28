@@ -288,7 +288,7 @@ void Storage::fixCharactersSlot(int accountId)
             }
         }
 
-        if (slotsToUpdate.size() > 0)
+        if (!slotsToUpdate.empty())
         {
             dal::PerformTransaction transaction(mDb);
 
@@ -776,7 +776,7 @@ bool Storage::updateCharacter(CharacterData *character)
     {
         std::map<int, int>::const_iterator kill_it;
         for (kill_it = character->getKillCountBegin();
-             kill_it != character->getKillCountEnd(); kill_it++)
+             kill_it != character->getKillCountEnd(); ++kill_it)
         {
             updateKillCount(character->getDatabaseID(),
                             kill_it->first, kill_it->second);
@@ -912,7 +912,7 @@ bool Storage::updateCharacter(CharacterData *character)
     {
         std::map<int, Status>::const_iterator status_it;
         for (status_it = character->getStatusEffectBegin();
-             status_it != character->getStatusEffectEnd(); status_it++)
+             status_it != character->getStatusEffectEnd(); ++status_it)
         {
             insertStatusEffect(character->getDatabaseID(),
                                status_it->first, status_it->second.time);

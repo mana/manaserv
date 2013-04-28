@@ -394,7 +394,7 @@ void AttributeModifiersEffect::clearMods(double baseValue)
     mMod = mEffectType == Additive ? 0 : 1;
 }
 
-double Attribute::checkBounds(double baseValue)
+double Attribute::checkBounds(double baseValue) const
 {
     LOG_DEBUG("Checking bounds for value: " << baseValue);
     if (baseValue > mMaxValue)
