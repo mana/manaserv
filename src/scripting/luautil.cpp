@@ -26,7 +26,6 @@
 #include "game-server/monster.h"
 #include "game-server/monstermanager.h"
 #include "game-server/npc.h"
-#include "game-server/skillmanager.h"
 
 #include "utils/logger.h"
 
@@ -213,16 +212,6 @@ Entity *checkNpc(lua_State *s, int p)
     return entity;
 }
 
-int checkSkill(lua_State *s, int p)
-{
-    if (lua_isnumber(s, p))
-        return luaL_checkint(s, p);
-
-    int id = skillManager->getId(luaL_checkstring(s, p));
-    luaL_argcheck(s, id != 0, p, "invalid skill name");
-    return id;
-}
-
 int checkSpecial(lua_State *s, int p)
 {
     if (lua_isnumber(s, p))
@@ -256,4 +245,19 @@ Script::Thread *checkCurrentThread(lua_State *s, Script *script /* = 0 */)
         luaL_error(s, "function requires threaded execution");
 
     return thread;
+}
+
+
+void push(lua_State *s, AggressionInfo *val)
+{
+    pushSTLContainer<HitInfo *>(s, val->hits);
+}
+
+void push(lua_State *s, HitInfo *val)
+{
+    std::map<std::string, int> hitInfo;
+    hitInfo["damage"] = val->damage;
+    hitInfo["element"] = val->element;
+    hitInfo["tick"] = val->tick;
+    pushSTLContainer<std::string, int>(s, hitInfo);
 }

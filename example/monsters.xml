@@ -26,7 +26,6 @@ attributes <TAG>:  Tells all the monsters attribute. These attribute, as for ite
 vulnerability<TAG>:       Tells the monster specific vulnerability to an element.
   element[string]:        Tells to which element the weakness is. ('fire', 'earth', 'ice', 'metal' are some examples.)
   factor[float]:          Tells the defense against an element is reduced in percent. (A value of 0.7 indicates that the defense is lowered by 30%).
-exp<TAG>:                 Tells how much experience point a monster is giving upon victory.
 -->
 
 <monsters>
@@ -54,7 +53,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
             />
         <vulnerability element="fire" factor="10"/>
         <vulnerability element="earth" factor="0.7"/>
-        <exp>10</exp>
         <!-- average stroll- and track range-->
         <behavior
             aggressive="false"
@@ -102,7 +100,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="2" percent="1"/>
         <drop item="5" percent="0.5"/>
         <drop item="9" percent="7"/>
-        <exp>20</exp>
         <attributes
             hp="20"
             size="8"
@@ -163,7 +160,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="4" percent="5"/>
         <drop item="6" percent="0.1"/>
         <drop item="9" percent="5.4"/>
-        <exp>50</exp>
         <attributes
             hp="20"
             size="8"
@@ -209,7 +205,6 @@ exp<TAG>:                 Tells how much experience point a monster is giving up
         <drop item="7" percent="1.9"/>
         <drop item="8" percent="0.1"/>
         <drop item="9" percent="7.5"/>
-        <exp>60</exp>
         <attributes
             hp="200"
             size="4"

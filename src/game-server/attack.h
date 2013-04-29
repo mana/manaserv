@@ -45,7 +45,6 @@ class CombatComponent;
 struct Damage
 {
     unsigned id;          /**< Id of the attack (needed for displaying animation clientside */
-    unsigned skill;       /**< Skill used by source (needed for exp calculation) */
     unsigned short base;  /**< Base amount of damage. */
     unsigned short delta; /**< Additional damage when lucky. */
     unsigned short cth;   /**< Chance to hit. Opposes the evade attribute. */
@@ -56,7 +55,6 @@ struct Damage
 
     Damage():
         id(0),
-        skill(0),
         base(0),
         delta(0),
         cth(0),

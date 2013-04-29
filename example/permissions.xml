@@ -20,7 +20,6 @@
     <allow>@money</allow>
     <allow>@spawn</allow>
     <allow>@attribute</allow>
-    <allow>@skills</allow>
     <allow>@charwarp</allow>
     <allow>@killmonsters</allow>
     <allow>@getpos</allow>

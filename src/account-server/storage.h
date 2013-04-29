@@ -135,15 +135,6 @@ class Storage
                                    int charPoints, int corrPoints);
 
         /**
-         * Write a modification message about character skills to the database.
-         *
-         * @param CharId      ID of the character
-         * @param SkillId     ID of the skill
-         * @param SkillValue  new skill points
-         */
-        void updateExperience(int charId, int skillId, int skillValue);
-
-        /**
          * Write a modification message about character attributes
          * to the database.
          *
@@ -156,7 +147,7 @@ class Storage
                              double base, double mod);
 
         /**
-         * Write a modification message about character skills to the database.
+         * Write a modification message about kill counts to the database.
          *
          * @param CharId      ID of the character
          * @param monsterId   ID of the monster type
@@ -382,14 +373,6 @@ class Storage
          * @param level The level to set for the account
          */
         void setAccountLevel(int id, int level);
-
-        /**
-         * Set the level on a character.
-         *
-         * @param id The id of the character
-         * @param level The level to set for the character
-         */
-        void setPlayerLevel(int id, int level);
 
         /**
          * Store letter.

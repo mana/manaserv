@@ -30,7 +30,6 @@
 #include "game-server/itemmanager.h"
 #include "game-server/mapmanager.h"
 #include "game-server/monstermanager.h"
-#include "game-server/skillmanager.h"
 #include "game-server/specialmanager.h"
 #include "game-server/statusmanager.h"
 #include "game-server/postman.h"
@@ -66,6 +65,13 @@
 using utils::Logger;
 
 #define DEFAULT_LOG_FILE                    "manaserv-game.log"
+#define DEFAULT_ITEMSDB_FILE                "items.xml"
+#define DEFAULT_EQUIPDB_FILE                "equip.xml"
+#define DEFAULT_ATTRIBUTEDB_FILE            "attributes.xml"
+#define DEFAULT_MAPSDB_FILE                 "maps.xml"
+#define DEFAULT_MONSTERSDB_FILE             "monsters.xml"
+#define DEFAULT_STATUSDB_FILE               "status-effects.xml"
+#define DEFAULT_PERMISSION_FILE             "permissions.xml"
 #define DEFAULT_MAIN_SCRIPT_FILE            "scripts/main.lua"
 
 static int const WORLD_TICK_SKIP = 2; /** tolerance for lagging behind in world calculation) **/
@@ -80,7 +86,6 @@ utils::StringFilter *stringFilter; /**< Slang's Filter */
 AttributeManager *attributeManager = new AttributeManager(DEFAULT_ATTRIBUTEDB_FILE);
 ItemManager *itemManager = new ItemManager(DEFAULT_ITEMSDB_FILE, DEFAULT_EQUIPDB_FILE);
 MonsterManager *monsterManager = new MonsterManager(DEFAULT_MONSTERSDB_FILE);
-SkillManager *skillManager = new SkillManager(DEFAULT_SKILLSDB_FILE);
 SpecialManager *specialManager = new SpecialManager(DEFAULT_SPECIALSDB_FILE);
 EmoteManager *emoteManager = new EmoteManager(DEFAULT_EMOTESDB_FILE);
 
@@ -131,7 +136,6 @@ static void initializeServer()
         exit(EXIT_MAP_FILE_NOT_FOUND);
     }
     attributeManager->initialize();
-    skillManager->initialize();
     specialManager->initialize();
     itemManager->initialize();
     monsterManager->initialize();
@@ -189,7 +193,6 @@ static void deinitializeServer()
     // Destroy Managers
     delete stringFilter; stringFilter = 0;
     delete monsterManager; monsterManager = 0;
-    delete skillManager; skillManager = 0;
     delete itemManager; itemManager = 0;
     delete emoteManager; emoteManager = 0;
     MapManager::deinitialize();

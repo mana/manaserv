@@ -36,6 +36,8 @@
 
 #include <cmath>
 
+Script::Ref MonsterComponent::mMonsterKilledCallback;
+
 MonsterClass::~MonsterClass()
 {
     for (std::vector<AttackInfo *>::iterator it = mAttacks.begin(),
@@ -120,6 +122,11 @@ MonsterComponent::MonsterComponent(Entity &entity, MonsterClass *specy):
 
 MonsterComponent::~MonsterComponent()
 {
+    // Delete all anger elements
+    for (auto angerIt : mAnger)
+    {
+        delete angerIt.second;
+    }
 }
 
 void MonsterComponent::update(Entity &entity)
@@ -210,12 +217,12 @@ void MonsterComponent::refreshTarget(Entity &entity)
 
         // Determine how much we hate the target
         int targetPriority = 0;
-        std::map<Entity *, AggressionInfo>::iterator angerIterator =
+        std::map<Entity *, AggressionInfo *>::iterator angerIterator =
                 mAnger.find(target);
         if (angerIterator != mAnger.end())
         {
-            const AggressionInfo &aggressionInfo = angerIterator->second;
-            targetPriority = aggressionInfo.anger;
+            const AggressionInfo *aggressionInfo = angerIterator->second;
+            targetPriority = aggressionInfo->anger;
         }
         else if (mSpecy->isAggressive())
         {
@@ -305,53 +312,64 @@ int MonsterComponent::calculatePositionPriority(Entity &entity,
 void MonsterComponent::forgetTarget(Entity *entity)
 {
     {
-        AggressionInfo &aggressionInfo = mAnger[entity];
-        aggressionInfo.removedConnection.disconnect();
-        aggressionInfo.diedConnection.disconnect();
+        std::map<Entity *, AggressionInfo *>::iterator it = mAnger.find(entity);
+        if (it == mAnger.end())
+            return;
+
+        AggressionInfo *aggressionInfo = it->second;
+        aggressionInfo->removedConnection.disconnect();
+        aggressionInfo->diedConnection.disconnect();
     }
     mAnger.erase(entity);
-
-    if (entity->getType() == OBJECT_CHARACTER)
-    {
-        mExpReceivers.erase(entity);
-        mLegalExpReceivers.erase(entity);
-    }
 }
 
-void MonsterComponent::changeAnger(Entity *target, int amount)
+void MonsterComponent::changeAnger(Entity *target, Element element, int amount)
 {
     const EntityType type = target->getType();
     if (type != OBJECT_MONSTER && type != OBJECT_CHARACTER)
         return;
 
-    if (mAnger.find(target) != mAnger.end())
+    auto angerIt = mAnger.find(target);
+
+    AggressionInfo *aggressionInfo = 0;
+
+    if (angerIt != mAnger.end())
     {
-        mAnger[target].anger += amount;
+        aggressionInfo = angerIt->second;
+        angerIt->second->anger += amount;
     }
     else
     {
-        AggressionInfo &aggressionInfo = mAnger[target];
-        aggressionInfo.anger = amount;
+        aggressionInfo = new AggressionInfo;
+        aggressionInfo->anger = amount;
 
-        // Forget target either when it's removed or died, whichever
+
+        // Forget target either when it is removed or died, whichever
         // happens first.
-        aggressionInfo.removedConnection =
-                target->signal_removed.connect(sigc::mem_fun(this, &MonsterComponent::forgetTarget));
-        aggressionInfo.diedConnection = target->getComponent<BeingComponent>()
-                ->signal_died.connect(
+        aggressionInfo->removedConnection =
+                target->signal_removed.connect(
                         sigc::mem_fun(this, &MonsterComponent::forgetTarget));
+        aggressionInfo->diedConnection =
+                target->getComponent<BeingComponent>()->signal_died.connect(
+                        sigc::mem_fun(this, &MonsterComponent::forgetTarget));
+
+        mAnger[target] = aggressionInfo;
     }
+    HitInfo *newInfo = new HitInfo();
+    newInfo->damage = amount;
+    newInfo->element = element;
+    newInfo->tick = GameState::getCurrentTick();
+    aggressionInfo->hits.push_back(newInfo);
 }
 
 std::map<Entity *, int> MonsterComponent::getAngerList() const
 {
     std::map<Entity *, int> result;
-    std::map<Entity *, AggressionInfo>::const_iterator i, i_end;
-
-    for (i = mAnger.begin(), i_end = mAnger.end(); i != i_end; ++i)
+    std::map<Entity *, AggressionInfo *>::const_iterator i, i_end;
+    for (auto aggressionIt : mAnger)
     {
-        const AggressionInfo &aggressionInfo = i->second;
-        result.insert(std::make_pair(i->first, aggressionInfo.anger));
+        const AggressionInfo *aggressionInfo = aggressionIt.second;
+        result.insert(std::make_pair(i->first, aggressionInfo->anger));
     }
 
     return result;
@@ -361,7 +379,7 @@ void MonsterComponent::monsterDied(Entity *monster)
 {
     mDecayTimeout.set(DECAY_TIME);
 
-    if (mExpReceivers.size() > 0)
+    if (mAnger.size() > 0)
     {
         // If the monster was killed by players, randomly drop items.
         const unsigned size = mSpecy->mDrops.size();
@@ -380,34 +398,13 @@ void MonsterComponent::monsterDied(Entity *monster)
             }
         }
 
-        // Distribute exp reward.
-        std::map<Entity *, std::set <size_t> > ::iterator iChar;
-        std::set<size_t>::iterator iSkill;
-
-
-        float expPerChar = (float)mSpecy->getExp() / mExpReceivers.size();
-
-        for (iChar = mExpReceivers.begin(); iChar != mExpReceivers.end();
-             iChar++)
+        if (mMonsterKilledCallback.isValid())
         {
-            auto *character = (*iChar).first;
-            const std::set<size_t> &skillSet = (*iChar).second;
-
-            if (mLegalExpReceivers.find(character) == mLegalExpReceivers.end()
-                || skillSet.empty())
-                continue;
-
-            auto characterComponent =
-                    character->getComponent<CharacterComponent>();
-
-            int expPerSkill = int(expPerChar / skillSet.size());
-            for (iSkill = skillSet.begin(); iSkill != skillSet.end();
-                 iSkill++)
-            {
-                characterComponent->receiveExperience(*iSkill, expPerSkill,
-                                                    mSpecy->getOptimalLevel());
-            }
-            characterComponent->incrementKillCount(mSpecy->getId());
+            Script *script = ScriptManager::currentState();
+            script->prepare(mMonsterKilledCallback);
+            script->push(monster);
+            script->push(mAnger);
+            script->execute(monster->getMap());
         }
     }
 }
@@ -416,18 +413,5 @@ void MonsterComponent::monsterDied(Entity *monster)
 void MonsterComponent::receivedDamage(Entity *source, const Damage &damage, int hpLoss)
 {
     if (source)
-        changeAnger(source, hpLoss);
-
-    if (hpLoss && source && source->getType() == OBJECT_CHARACTER)
-    {
-        mExpReceivers[source].insert(damage.skill);
-        if (mKillStealProtectedTimeout.expired() || mOwner == source
-            || mOwner->getComponent<CharacterComponent>()->getParty() ==
-                    source->getComponent<CharacterComponent>()->getParty())
-        {
-            mOwner = source;
-            mLegalExpReceivers.insert(source);
-            mKillStealProtectedTimeout.set(KILLSTEAL_PROTECTION_TIME);
-        }
-    }
+        changeAnger(source, damage.element, hpLoss);
 }
