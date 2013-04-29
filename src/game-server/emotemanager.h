@@ -49,15 +49,8 @@ public:
      */
     bool isIdAvailable(int id) const;
 
-    /**
-     * Read a <emote> element from settings.
-     * Used by SettingsManager.
-     */
     void readEmoteNode(xmlNodePtr node, const std::string& filename);
 
-    /**
-     * Check the status of recently loaded configuration.
-     */
     void checkStatus();
 
 private:

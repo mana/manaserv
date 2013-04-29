@@ -64,6 +64,10 @@ MonsterClass *MonsterManager::getMonster(int id) const
     return i != mMonsterClasses.end() ? i->second : 0;
 }
 
+/**
+ * Read a <monster> element from settings.
+ * Used by SettingsManager.
+ */
 void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string& filename)
 {
     if (!xmlStrEqual(node->name, BAD_CAST "monster"))
@@ -301,6 +305,9 @@ void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string& filenam
     }
 }
 
+/**
+ * Check the status of recently loaded configuration.
+ */
 void MonsterManager::checkStatus()
 {
     LOG_INFO("Loaded " << mMonsterClasses.size() << " monsters");

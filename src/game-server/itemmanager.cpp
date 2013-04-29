@@ -42,8 +42,6 @@ void ItemManager::reload()
 void ItemManager::initialize()
 {
     mVisibleEquipSlotCount = 0;
-//    readEquipSlotsFile();
-//    readItemsFile();
 }
 
 void ItemManager::deinitialize()
@@ -100,12 +98,19 @@ bool ItemManager::isEquipSlotVisible(unsigned id) const
 }
 
 
+/**
+ * Check the status of recently loaded configuration.
+ */
 void ItemManager::checkStatus()
 {
     LOG_INFO("Loaded " << mItemClasses.size() << " items");
     LOG_INFO("Loaded " << mEquipSlotsInfo.size() << " slot types");
 }
 
+/**
+ * Read a <slot> element from settings.
+ * Used by SettingsManager.
+ */
 void ItemManager::readEquipSlotNode(xmlNodePtr node)
 {
     const int slotId = XML::getProperty(node, "id", 0);
@@ -150,6 +155,10 @@ void ItemManager::readEquipSlotNode(xmlNodePtr node)
     mNamedEquipSlotsInfo.insert(name, equipSlotInfo);
 }
 
+/**
+ * Read an <item> element from settings.
+ * Used by SettingsManager.
+ */
 void ItemManager::readItemNode(xmlNodePtr itemNode, const std::string& filename)
 {
     const int id = XML::getProperty(itemNode, "id", 0);

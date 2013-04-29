@@ -33,6 +33,10 @@ void EmoteManager::reload()
     clear();
 }
 
+/**
+ * Read a <emote> element from settings.
+ * Used by SettingsManager.
+ */
 void EmoteManager::readEmoteNode(xmlNodePtr node, const std::string& filename)
 {
     int id = XML::getProperty(node, "id", -1);
@@ -46,6 +50,9 @@ void EmoteManager::readEmoteNode(xmlNodePtr node, const std::string& filename)
     mEmoteIds.push_back(id);
 }
 
+/**
+ * Check the status of recently loaded configuration.
+ */
 void EmoteManager::checkStatus()
 {
     LOG_INFO(mEmoteIds.size() << " emotes available.");

@@ -92,15 +92,8 @@ public:
     SpecialInfo *getSpecialInfo(int id);
 
 
-    /**
-     * Read a <special> element from settings.
-     * Used by SettingsManager.
-     */
     void readSpecialSetNode(xmlNodePtr node, const std::string& filename);
 
-    /**
-     * Check the status of recently loaded configuration.
-     */
     void checkStatus();
 
 private:

@@ -131,15 +131,8 @@ class AttributeManager
 
         const std::string *getTag(const ModifierLocation &location) const;
 
-        /**
-         * Read a <attribute> element from settings.
-         * Used by SettingsManager.
-         */
         void readAttributeNode(xmlNodePtr attributeNode);
 
-        /**
-         * Check the status of recently loaded configuration.
-         */
         void checkStatus();
 
     private:

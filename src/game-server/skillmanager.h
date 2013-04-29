@@ -64,15 +64,8 @@ class SkillManager
     unsigned getDefaultSkillId() const
     { return mDefaultSkillId; }
 
-    /**
-     * Read a <skill-set> element from settings.
-     * Used by SettingsManager.
-     */
     void readSkillSetNode(xmlNodePtr node, const std::string& filename);
 
-    /**
-     * Check the status of recently loaded configuration.
-     */
     void checkStatus();
 
   private:

@@ -27,7 +27,7 @@
 #include <sys/stat.h>
 #include <cstdlib>
 #include <cstring>
-#include <list>
+#include <vector>
 
 #ifdef _WIN32
 #include <io.h>
@@ -162,10 +162,10 @@ std::string ResourceManager::cleanPath(const std::string& path)
 {
     size_t prev, cur;
     std::string part, result;
-    std::list<std::string> pathStack;
+    std::vector<std::string> pathStack;
 
     prev = 0;
-    while (1)
+    while (true)
     {
         cur = path.find_first_of("/\\", prev);
         if (cur == std::string::npos)
@@ -176,7 +176,6 @@ std::string ResourceManager::cleanPath(const std::string& path)
         }
 
         part = path.substr(prev, cur - prev);
-//        LOG_INFO("split [" << part << "]");
         if (part == "..")
         {
             // go back one level
@@ -212,12 +211,11 @@ std::string ResourceManager::cleanPath(const std::string& path)
     }
 
     // join the pathStack into a normal path
-    std::list<std::string>::iterator i = pathStack.begin();
-    while (i != pathStack.end())
+    unsigned int i = 0;
+    for (i = 0; i < pathStack.size(); i++)
     {
-        result += *i;
-        i++;
-        if (i != pathStack.end()) {
+        result += pathStack[i];
+        if (i < pathStack.size() - 1) {
             result += "/";
         }
     }

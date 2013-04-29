@@ -65,6 +65,10 @@ StatusEffect *StatusManager::getStatusByName(const std::string &name)
     return statusEffectsByName.value(name);
 }
 
+/**
+ * Read a <attribute> element from settings.
+ * Used by SettingsManager.
+ */
 void StatusManager::readStatusNode(xmlNodePtr node, const std::string& filename)
 {
     const int id = XML::getProperty(node, "id", 0);
@@ -111,6 +115,9 @@ void StatusManager::readStatusNode(xmlNodePtr node, const std::string& filename)
 
 }
 
+/**
+ * Check the status of recently loaded configuration.
+ */
 void StatusManager::checkStatus()
 {
     LOG_INFO("Loaded " << statusEffects.size() << " status effects");

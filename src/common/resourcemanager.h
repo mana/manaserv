@@ -79,6 +79,8 @@ namespace ResourceManager
       *     /foo/ + bar = /foo/bar
       *     /foo + /bar = /bar
       *
+      * This will work for PhysFS paths. Windows style paths (prefixed with drive letters) won't work.
+      *
       * @return Joined paths or path2 if path2 was an absolute path.
       */
      std::string pathJoin(const std::string& path1, const std::string& path2);

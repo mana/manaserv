@@ -75,6 +75,10 @@ const std::string *AttributeManager::getTag(const ModifierLocation &location) co
     return 0;
 }
 
+/**
+ * Read a <attribute> element from settings.
+ * Used by SettingsManager.
+ */
 void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
 {
     int id = XML::getProperty(attributeNode, "id", 0);
@@ -138,6 +142,9 @@ void AttributeManager::readAttributeNode(xmlNodePtr attributeNode)
     }
 }
 
+/**
+ * Check the status of recently loaded configuration.
+ */
 void AttributeManager::checkStatus()
 {
     LOG_DEBUG("attribute map:");

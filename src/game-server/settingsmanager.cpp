@@ -1,6 +1,6 @@
 /*
  *  The Mana Server
- *  Copyright (C) 2004-2010  The Mana World Development Team
+ *  Copyright (C) 2013  The Mana World Development Team
  *
  *  This file is part of The Mana Server.
  *
@@ -33,8 +33,14 @@
 #include "game-server/emotemanager.h"
 #include "game-server/statusmanager.h"
 
+/**
+ * Initialize all managers and load configuration into them.
+ *
+ * Fatal errors will call exit()
+ */
 void SettingsManager::initialize()
 {
+    // initialize all managers in correct order
     attributeManager->initialize();
     skillManager->initialize();
     specialManager->initialize();
@@ -47,6 +53,12 @@ void SettingsManager::initialize()
     checkStatus();
 }
 
+/**
+ * Reload managers with new configuration.
+ *
+ * @note This code is untested, some of the managers didn't even have empty implementations
+ *       of reload().
+ */
 void SettingsManager::reload()
 {
     attributeManager->reload();
@@ -61,6 +73,9 @@ void SettingsManager::reload()
     checkStatus();
 }
 
+/**
+ * Load a configuration file.
+ */
 void SettingsManager::loadFile(const std::string& filename)
 {
     LOG_INFO("Loading game settings from " << filename);
@@ -82,10 +97,10 @@ void SettingsManager::loadFile(const std::string& filename)
     // go through every node
     for_each_xml_child_node(childNode, node)
     {
-        if (childNode->type != XML_ELEMENT_NODE) {
+        if (childNode->type != XML_ELEMENT_NODE)
             continue;
-        }
-        else if (xmlStrEqual(childNode->name, BAD_CAST "include"))
+
+        if (xmlStrEqual(childNode->name, BAD_CAST "include"))
         {
             // include an other file
             const std::string includeFile = XML::getProperty(childNode, "file", std::string());
@@ -95,7 +110,8 @@ void SettingsManager::loadFile(const std::string& filename)
             {
                 // build absolute path path
                 const ResourceManager::splittedPath splittedPath = ResourceManager::splitFileNameAndPath(filename);
-                const std::string realIncludeFile = ResourceManager::cleanPath(ResourceManager::pathJoin(splittedPath.path, includeFile));
+                const std::string realIncludeFile = ResourceManager::cleanPath(
+                        ResourceManager::pathJoin(splittedPath.path, includeFile));
 
                 // check if we're not entering a loop
                 if (mIncludedFiles.find(realIncludeFile) != mIncludedFiles.end())
@@ -160,6 +176,9 @@ void SettingsManager::loadFile(const std::string& filename)
     mIncludedFiles.erase(filename);
 }
 
+/**
+ * Finalize the configuration loading and check if all managers are happy with it.
+ */
 void SettingsManager::checkStatus()
 {
     attributeManager->checkStatus();

@@ -53,15 +53,8 @@ namespace StatusManager
      */
     StatusEffect *getStatusByName(const std::string &name);
 
-    /**
-     * Read a <attribute> element from settings.
-     * Used by SettingsManager.
-     */
     void readStatusNode(xmlNodePtr node, const std::string& filename);
 
-    /**
-     * Check the status of recently loaded configuration.
-     */
     void checkStatus();
 }
 

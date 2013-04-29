@@ -47,6 +47,10 @@ void SkillManager::reload()
     initialize();
 }
 
+/**
+ * Read a <skill-set> element from settings.
+ * Used by SettingsManager.
+ */
 void SkillManager::readSkillSetNode(xmlNodePtr node, const std::string& filename)
 {
     std::string setName = XML::getProperty(node, "name", std::string());
@@ -67,6 +71,9 @@ void SkillManager::readSkillSetNode(xmlNodePtr node, const std::string& filename
     }
 }
 
+/**
+ * Check the status of recently loaded configuration.
+ */
 void SkillManager::checkStatus()
 {
     printDebugSkillTable();

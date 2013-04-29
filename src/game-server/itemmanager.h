@@ -101,21 +101,10 @@ class ItemManager
 
         bool isEquipSlotVisible(unsigned id) const;
 
-        /**
-         * Read an <item> element from settings.
-         * Used by SettingsManager.
-         */
         void readItemNode(xmlNodePtr itemNode, const std::string& filename);
 
-        /**
-         * Read a <slot> element from settings.
-         * Used by SettingsManager.
-         */
         void readEquipSlotNode(xmlNodePtr node);
 
-        /**
-         * Check the status of recently loaded configuration.
-         */
         void checkStatus();
 
     private:

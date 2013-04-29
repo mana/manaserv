@@ -137,13 +137,6 @@ static void initializeServer()
     // load game settings files
     settingsManager->initialize();
 
-    //    attributeManager->initialize();
-//    skillManager->initialize();
-//    specialManager->initialize();
-//    itemManager->initialize();
-//    monsterManager->initialize();
-//    emoteManager->initialize();
-//    StatusManager::initialize();
     PermissionManager::initialize(DEFAULT_PERMISSION_FILE);
 
 

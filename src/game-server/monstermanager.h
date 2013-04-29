@@ -66,15 +66,8 @@ class MonsterManager
          */
         MonsterClass *getMonsterByName(const std::string &name) const;
 
-        /**
-         * Read a <monster> element from settings.
-         * Used by SettingsManager.
-         */
         void readMonsterNode(xmlNodePtr node, const std::string& filename);
 
-        /**
-         * Check the status of recently loaded configuration.
-         */
         void checkStatus();
 
     private:
