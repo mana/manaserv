@@ -49,7 +49,7 @@ public:
      */
     bool isIdAvailable(int id) const;
 
-    void readEmoteNode(xmlNodePtr node, const std::string& filename);
+    void readEmoteNode(xmlNodePtr node, const std::string &filename);
 
     void checkStatus();
 

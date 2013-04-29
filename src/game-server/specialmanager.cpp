@@ -41,7 +41,7 @@ static SpecialManager::TargetMode getTargetByString(const std::string &str)
  * Read a <special> element from settings.
  * Used by SettingsManager.
  */
-void SpecialManager::readSpecialSetNode(xmlNodePtr node, const std::string& filename)
+void SpecialManager::readSpecialSetNode(xmlNodePtr node, const std::string &filename)
 {
     std::string setName = XML::getProperty(node, "name", std::string());
     if (setName.empty())

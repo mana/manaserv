@@ -37,7 +37,7 @@ void EmoteManager::reload()
  * Read a <emote> element from settings.
  * Used by SettingsManager.
  */
-void EmoteManager::readEmoteNode(xmlNodePtr node, const std::string& filename)
+void EmoteManager::readEmoteNode(xmlNodePtr node, const std::string &filename)
 {
     int id = XML::getProperty(node, "id", -1);
     if (id < 0)

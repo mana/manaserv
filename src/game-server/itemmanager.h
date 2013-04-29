@@ -101,7 +101,7 @@ class ItemManager
 
         bool isEquipSlotVisible(unsigned id) const;
 
-        void readItemNode(xmlNodePtr itemNode, const std::string& filename);
+        void readItemNode(xmlNodePtr itemNode, const std::string &filename);
 
         void readEquipSlotNode(xmlNodePtr node);
 

@@ -76,7 +76,7 @@ void SettingsManager::reload()
 /**
  * Load a configuration file.
  */
-void SettingsManager::loadFile(const std::string& filename)
+void SettingsManager::loadFile(const std::string &filename)
 {
     LOG_INFO("Loading game settings from " << filename);
 
@@ -111,7 +111,7 @@ void SettingsManager::loadFile(const std::string& filename)
                 // build absolute path path
                 const ResourceManager::splittedPath splittedPath = ResourceManager::splitFileNameAndPath(filename);
                 const std::string realIncludeFile = ResourceManager::cleanPath(
-                        ResourceManager::pathJoin(splittedPath.path, includeFile));
+                        ResourceManager::joinPaths(splittedPath.path, includeFile));
 
                 // check if we're not entering a loop
                 if (mIncludedFiles.find(realIncludeFile) != mIncludedFiles.end())

@@ -28,7 +28,7 @@
 class SettingsManager
 {
     public:
-        SettingsManager(const std::string& settingsFile):
+        SettingsManager(const std::string &settingsFile):
 			mSettingsFile(settingsFile)
 		{}
 
@@ -40,7 +40,7 @@ class SettingsManager
 		std::string mSettingsFile;
 		std::set<std::string> mIncludedFiles;
 
-		void loadFile(const std::string& filename);
+		void loadFile(const std::string &filename);
 
 		void checkStatus();
 };

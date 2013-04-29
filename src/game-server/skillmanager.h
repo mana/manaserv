@@ -64,7 +64,7 @@ class SkillManager
     unsigned getDefaultSkillId() const
     { return mDefaultSkillId; }
 
-    void readSkillSetNode(xmlNodePtr node, const std::string& filename);
+    void readSkillSetNode(xmlNodePtr node, const std::string &filename);
 
     void checkStatus();
 

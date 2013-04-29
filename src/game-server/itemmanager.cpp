@@ -159,7 +159,7 @@ void ItemManager::readEquipSlotNode(xmlNodePtr node)
  * Read an <item> element from settings.
  * Used by SettingsManager.
  */
-void ItemManager::readItemNode(xmlNodePtr itemNode, const std::string& filename)
+void ItemManager::readItemNode(xmlNodePtr itemNode, const std::string &filename)
 {
     const int id = XML::getProperty(itemNode, "id", 0);
     if (id < 1)

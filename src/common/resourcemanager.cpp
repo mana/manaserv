@@ -150,7 +150,7 @@ ResourceManager::splittedPath ResourceManager::splitFileNameAndPath(
  *
  * @return Joined paths or path2 if path2 was an absolute path.
  */
-std::string ResourceManager::pathJoin(const std::string& path1, const std::string& path2)
+std::string ResourceManager::joinPaths(const std::string& path1, const std::string& path2)
 {
     if (path2.empty())
         return path1;

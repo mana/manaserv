@@ -92,7 +92,7 @@ public:
     SpecialInfo *getSpecialInfo(int id);
 
 
-    void readSpecialSetNode(xmlNodePtr node, const std::string& filename);
+    void readSpecialSetNode(xmlNodePtr node, const std::string &filename);
 
     void checkStatus();
 

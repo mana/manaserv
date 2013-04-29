@@ -66,7 +66,7 @@ class MonsterManager
          */
         MonsterClass *getMonsterByName(const std::string &name) const;
 
-        void readMonsterNode(xmlNodePtr node, const std::string& filename);
+        void readMonsterNode(xmlNodePtr node, const std::string &filename);
 
         void checkStatus();
 

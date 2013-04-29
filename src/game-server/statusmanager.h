@@ -53,7 +53,7 @@ namespace StatusManager
      */
     StatusEffect *getStatusByName(const std::string &name);
 
-    void readStatusNode(xmlNodePtr node, const std::string& filename);
+    void readStatusNode(xmlNodePtr node, const std::string &filename);
 
     void checkStatus();
 }

@@ -68,7 +68,7 @@ MonsterClass *MonsterManager::getMonster(int id) const
  * Read a <monster> element from settings.
  * Used by SettingsManager.
  */
-void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string& filename)
+void MonsterManager::readMonsterNode(xmlNodePtr node, const std::string &filename)
 {
     if (!xmlStrEqual(node->name, BAD_CAST "monster"))
         return;
