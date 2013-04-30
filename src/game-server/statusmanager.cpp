@@ -32,74 +32,15 @@
 typedef std::map< int, StatusEffect * > StatusEffectsMap;
 static StatusEffectsMap statusEffects;
 static utils::NameMap<StatusEffect*> statusEffectsByName;
-static std::string statusReferenceFile;
 
-void StatusManager::initialize(const std::string &file)
+void StatusManager::initialize()
 {
-    statusReferenceFile = file;
-    reload();
+
 }
 
 void StatusManager::reload()
 {
-    XML::Document doc(statusReferenceFile);
-    xmlNodePtr rootNode = doc.rootNode();
-
-    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "status-effects"))
-    {
-        LOG_ERROR("Status Manager: Error while parsing status database ("
-                  << statusReferenceFile << ")!");
-        return;
-    }
-
-    LOG_INFO("Loading status reference: " << statusReferenceFile);
-    for_each_xml_child_node(node, rootNode)
-    {
-        if (!xmlStrEqual(node->name, BAD_CAST "status-effect"))
-            continue;
-
-        const int id = XML::getProperty(node, "id", 0);
-        if (id < 1)
-        {
-            LOG_WARN("Status Manager: The status ID: " << id << " in "
-                     << statusReferenceFile
-                     << " is invalid and will be ignored.");
-            continue;
-        }
-
-        StatusEffect *statusEffect = new StatusEffect(id);
-
-        const std::string name = XML::getProperty(node, "name",
-                                                  std::string());
-        if (!name.empty())
-        {
-            if (statusEffectsByName.contains(name))
-            {
-                LOG_WARN("StatusManager: name not unique for status effect "
-                         << id);
-            }
-            else
-            {
-                statusEffectsByName.insert(name, statusEffect);
-            }
-        }
-
-        //TODO: Get these modifiers
-/*
-        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
-        modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_DELTA,      XML::getProperty(node, "attack-delta",      0));
-        modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
-        modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defense", 0));
-        modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,     XML::getProperty(node, "strength",     0));
-        modifiers.setAttributeValue(CHAR_ATTR_AGILITY,      XML::getProperty(node, "agility",      0));
-        modifiers.setAttributeValue(CHAR_ATTR_DEXTERITY,    XML::getProperty(node, "dexterity",    0));
-        modifiers.setAttributeValue(CHAR_ATTR_VITALITY,     XML::getProperty(node, "vitality",     0));
-        modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE, XML::getProperty(node, "intelligence", 0));
-        modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
-*/
-
-        statusEffects[id] = statusEffect;
-    }
+    deinitialize();
 }
 
 void StatusManager::deinitialize()
@@ -123,3 +64,62 @@ StatusEffect *StatusManager::getStatusByName(const std::string &name)
 {
     return statusEffectsByName.value(name);
 }
+
+/**
+ * Read a <attribute> element from settings.
+ * Used by SettingsManager.
+ */
+void StatusManager::readStatusNode(xmlNodePtr node, const std::string &filename)
+{
+    const int id = XML::getProperty(node, "id", 0);
+    if (id < 1)
+    {
+        LOG_WARN("Status Manager: The status ID: " << id << " in "
+                 << filename
+                 << " is invalid and will be ignored.");
+        return;
+    }
+
+    StatusEffect *statusEffect = new StatusEffect(id);
+
+    const std::string name = XML::getProperty(node, "name",
+                                              std::string());
+    if (!name.empty())
+    {
+        if (statusEffectsByName.contains(name))
+        {
+            LOG_WARN("StatusManager: name not unique for status effect "
+                     << id);
+        }
+        else
+        {
+            statusEffectsByName.insert(name, statusEffect);
+        }
+    }
+
+    //TODO: Get these modifiers
+/*
+    modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_MIN,      XML::getProperty(node, "attack-min",      0));
+    modifiers.setAttributeValue(BASE_ATTR_PHY_ATK_DELTA,      XML::getProperty(node, "attack-delta",      0));
+    modifiers.setAttributeValue(BASE_ATTR_HP,      XML::getProperty(node, "hp",      0));
+    modifiers.setAttributeValue(BASE_ATTR_PHY_RES, XML::getProperty(node, "defense", 0));
+    modifiers.setAttributeValue(CHAR_ATTR_STRENGTH,     XML::getProperty(node, "strength",     0));
+    modifiers.setAttributeValue(CHAR_ATTR_AGILITY,      XML::getProperty(node, "agility",      0));
+    modifiers.setAttributeValue(CHAR_ATTR_DEXTERITY,    XML::getProperty(node, "dexterity",    0));
+    modifiers.setAttributeValue(CHAR_ATTR_VITALITY,     XML::getProperty(node, "vitality",     0));
+    modifiers.setAttributeValue(CHAR_ATTR_INTELLIGENCE, XML::getProperty(node, "intelligence", 0));
+    modifiers.setAttributeValue(CHAR_ATTR_WILLPOWER,    XML::getProperty(node, "willpower",    0));
+*/
+
+    statusEffects[id] = statusEffect;
+
+}
+
+/**
+ * Check the status of recently loaded configuration.
+ */
+void StatusManager::checkStatus()
+{
+    LOG_INFO("Loaded " << statusEffects.size() << " status effects");
+}
+

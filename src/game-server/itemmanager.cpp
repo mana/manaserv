@@ -42,8 +42,6 @@ void ItemManager::reload()
 void ItemManager::initialize()
 {
     mVisibleEquipSlotCount = 0;
-    readEquipSlotsFile();
-    readItemsFile();
 }
 
 void ItemManager::deinitialize()
@@ -99,111 +97,75 @@ bool ItemManager::isEquipSlotVisible(unsigned id) const
     return i != mEquipSlotsInfo.end() ? i->second->visibleSlot : false;
 }
 
-void ItemManager::readEquipSlotsFile()
-{
-    XML::Document doc(mEquipSlotsFile);
-    xmlNodePtr rootNode = doc.rootNode();
 
-    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "equip-slots"))
+/**
+ * Check the status of recently loaded configuration.
+ */
+void ItemManager::checkStatus()
+{
+    LOG_INFO("Loaded " << mItemClasses.size() << " items");
+    LOG_INFO("Loaded " << mEquipSlotsInfo.size() << " slot types");
+}
+
+/**
+ * Read a <slot> element from settings.
+ * Used by SettingsManager.
+ */
+void ItemManager::readEquipSlotNode(xmlNodePtr node)
+{
+    const int slotId = XML::getProperty(node, "id", 0);
+    const std::string name = XML::getProperty(node, "name",
+                                              std::string());
+    const int capacity = XML::getProperty(node, "capacity", 0);
+
+    if (slotId <= 0 || name.empty() || capacity <= 0)
     {
-        LOG_ERROR("Item Manager: Error while parsing equip slots database ("
-                  << mEquipSlotsFile << ")!");
+        LOG_WARN("Item Manager: equip slot " << slotId
+            << ": (" << name << ") has no name or zero count. "
+            "The slot has been ignored.");
         return;
     }
 
-    LOG_INFO("Loading equip slots: " << mEquipSlotsFile);
-
-    unsigned totalCapacity = 0;
-    unsigned slotCount = 0;
-    mVisibleEquipSlotCount = 0;
-
-    for_each_xml_child_node(node, rootNode)
+    if (slotId > 255)
     {
-        if (xmlStrEqual(node->name, BAD_CAST "slot"))
-        {
-            const int slotId = XML::getProperty(node, "id", 0);
-            const std::string name = XML::getProperty(node, "name",
-                                                      std::string());
-            const int capacity = XML::getProperty(node, "capacity", 0);
-
-            if (slotId <= 0 || name.empty() || capacity <= 0)
-            {
-                LOG_WARN("Item Manager: equip slot " << slotId
-                    << ": (" << name << ") has no name or zero count. "
-                    "The slot has been ignored.");
-                continue;
-            }
-
-            if (slotId > 255)
-            {
-                LOG_WARN("Item Manager: equip slot " << slotId
-                    << ": (" << name << ") is superior to 255 "
-                    "and has been ignored.");
-                continue;
-            }
-
-            bool visible = XML::getBoolProperty(node, "visible", false);
-            if (visible)
-                ++mVisibleEquipSlotCount;
-
-            EquipSlotsInfo::iterator i = mEquipSlotsInfo.find(slotId);
-
-            if (i != mEquipSlotsInfo.end())
-            {
-                LOG_WARN("Item Manager: Ignoring duplicate definition "
-                         "of equip slot '" << slotId << "'!");
-                continue;
-            }
-
-            LOG_DEBUG("Adding equip slot, id: " << slotId << ", name: " << name
-                << ", capacity: " << capacity << ", visible? " << visible);
-            EquipSlotInfo *equipSlotInfo =
-                new EquipSlotInfo(slotId, name, capacity, visible);
-            mEquipSlotsInfo.insert(std::make_pair(slotId, equipSlotInfo));
-            mNamedEquipSlotsInfo.insert(name, equipSlotInfo);
-
-            totalCapacity += capacity;
-            ++slotCount;
-        }
-    }
-
-    LOG_INFO("Loaded '" << slotCount << "' slot types with '"
-             << totalCapacity << "' slots.");
-}
-
-void ItemManager::readItemsFile()
-{
-    XML::Document doc2(mItemsFile);
-    xmlNodePtr rootNode = doc2.rootNode();
-
-    if (!rootNode || !xmlStrEqual(rootNode->name, BAD_CAST "items"))
-    {
-        LOG_ERROR("Item Manager: Error while parsing item database ("
-                  << mItemsFile << ")!");
+        LOG_WARN("Item Manager: equip slot " << slotId
+            << ": (" << name << ") is superior to 255 "
+            "and has been ignored.");
         return;
     }
 
-    LOG_INFO("Loading item reference: " << mItemsFile);
+    bool visible = XML::getBoolProperty(node, "visible", false);
+    if (visible)
+        ++mVisibleEquipSlotCount;
 
-    for_each_xml_child_node(node, rootNode)
+    EquipSlotsInfo::iterator i = mEquipSlotsInfo.find(slotId);
+
+    if (i != mEquipSlotsInfo.end())
     {
-        if (xmlStrEqual(node->name, BAD_CAST "item"))
-        {
-            readItemNode(node);
-        }
+        LOG_WARN("Item Manager: Ignoring duplicate definition "
+                 "of equip slot '" << slotId << "'!");
+        return;
     }
 
-    LOG_INFO("Loaded " << mItemClasses.size() << " items from "
-             << mItemsFile << ".");
+    LOG_DEBUG("Adding equip slot, id: " << slotId << ", name: " << name
+        << ", capacity: " << capacity << ", visible? " << visible);
+    EquipSlotInfo *equipSlotInfo =
+        new EquipSlotInfo(slotId, name, capacity, visible);
+    mEquipSlotsInfo.insert(std::make_pair(slotId, equipSlotInfo));
+    mNamedEquipSlotsInfo.insert(name, equipSlotInfo);
 }
 
-void ItemManager::readItemNode(xmlNodePtr itemNode)
+/**
+ * Read an <item> element from settings.
+ * Used by SettingsManager.
+ */
+void ItemManager::readItemNode(xmlNodePtr itemNode, const std::string &filename)
 {
     const int id = XML::getProperty(itemNode, "id", 0);
     if (id < 1)
     {
         LOG_WARN("Item Manager: Item ID: " << id << " is invalid in "
-                 << mItemsFile << ", and will be ignored.");
+                 << filename << ", and will be ignored.");
         return;
     }
 
@@ -225,7 +187,7 @@ void ItemManager::readItemNode(xmlNodePtr itemNode)
     if (!maxPerSlot)
     {
         LOG_WARN("Item Manager: Missing max-per-slot property for "
-                 "item " << id << " in " << mItemsFile << '.');
+                 "item " << id << " in " << filename << '.');
         maxPerSlot = 1;
     }
 

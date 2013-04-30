@@ -51,9 +51,7 @@ struct EquipSlotInfo
 class ItemManager
 {
     public:
-        ItemManager(const std::string &itemFile, const std::string &equipFile) :
-            mItemsFile(itemFile),
-            mEquipSlotsFile(equipFile),
+        ItemManager() :
             mVisibleEquipSlotCount(0),
             mItemDatabaseVersion(0)
         {}
@@ -103,13 +101,13 @@ class ItemManager
 
         bool isEquipSlotVisible(unsigned id) const;
 
-    private:
-        /** Loads the equip slots that a character has available to them. */
-        void readEquipSlotsFile();
+        void readItemNode(xmlNodePtr itemNode, const std::string &filename);
 
-        /** Loads the main item database. */
-        void readItemsFile();
-        void readItemNode(xmlNodePtr itemNode);
+        void readEquipSlotNode(xmlNodePtr node);
+
+        void checkStatus();
+
+    private:
         void readEquipNode(xmlNodePtr equipNode, ItemClass *item);
         void readEffectNode(xmlNodePtr effectNode, ItemClass *item);
 
@@ -127,8 +125,6 @@ class ItemManager
         // We only keep a pointer to it: The id map will take care of deletion.
         utils::NameMap<EquipSlotInfo* > mNamedEquipSlotsInfo;
 
-        std::string mItemsFile;
-        std::string mEquipSlotsFile;
         unsigned mVisibleEquipSlotCount; // Cache
 
         /** Version of the loaded items database file.*/

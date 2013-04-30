@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <specials>
-    <set name="Magic">
+    <special-set name="Magic">
         <special
             id="1"
             name="Test Spell 1"
@@ -24,5 +24,5 @@
             rechargespeed="10"
             target="point"
         />
-    </set>
+    </special-set>
 </specials>
